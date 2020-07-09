@@ -1,0 +1,26 @@
+name: isar_generator
+version: 0.0.1
+repository: https://github.com/isar/isar-dart
+homepage: https://isar.dev
+
+environment:
+  sdk: '>=2.8.1 <3.0.0'
+
+dependencies:
+  build: ^1.3.0
+  source_gen: ^0.9.5
+  analyzer: ">=0.35.0 <0.100.0"
+  glob: ^1.1.0
+  path: ^1.6.0
+  dart_style: ^1.3.0
+  json_annotation: ^3.0.0
+  dartx: any
+  isar: any
+
+dev_dependencies:
+  json_serializable: ^3.3.0
+  build_runner: ^1.10.0
+
+dependency_overrides:
+  isar:
+    path: ../isar/

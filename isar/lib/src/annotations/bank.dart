@@ -1,0 +1,3 @@
+class Bank {
+  const Bank();
+}

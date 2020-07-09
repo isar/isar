@@ -1,0 +1,3 @@
+class Ignore {
+  const Ignore();
+}

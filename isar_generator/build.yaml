@@ -1,0 +1,25 @@
+targets:
+  $default:
+    builders:
+      isar_generator|analyzer:
+        enabled: true
+      isar_generator|generator:
+        enabled: true
+
+builders:
+  resolver:
+    import: "package:isar_generator/isar_generator.dart"
+    builder_factories: ["getIsarAnalyzer"]
+    build_extensions: {'.dart': ['.isarobject.json']}
+    auto_apply: dependents
+    build_to: cache
+
+  generator:
+    import: "package:isar_generator/isar_generator.dart"
+    builder_factories: ["getIsarCodeGenerator"]
+    build_extensions:
+      "$lib$": ["isar.g.dart"]
+      "$test": ["isar.g.dart"]
+    required_inputs: ['.isarobject.json']
+    auto_apply: dependents
+    build_to: source
