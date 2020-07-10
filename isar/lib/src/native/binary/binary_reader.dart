@@ -28,7 +28,7 @@ class BinaryReader {
     return value;
   }
 
-  int readIntOrNull() {
+  int? readIntOrNull() {
     var value = readInt();
     if (value == nullInt) {
       return null;
@@ -43,7 +43,7 @@ class BinaryReader {
     return value;
   }
 
-  double readDoubleOrNull() {
+  double? readDoubleOrNull() {
     var value = readDouble();
     if (value.isNaN) {
       return null;
@@ -56,7 +56,7 @@ class BinaryReader {
     return _buffer[_offset++] == 1;
   }
 
-  bool readBoolOrNull() {
+  bool? readBoolOrNull() {
     var value = _buffer[_offset++];
     if (value == 0) {
       return null;
@@ -69,10 +69,10 @@ class BinaryReader {
 
   String readString() {
     var value = readStringOrNull();
-    return value ?? "";
+    return value ?? '';
   }
 
-  String readStringOrNull() {
+  String? readStringOrNull() {
     var offset = _buffer.readUint32(_offset);
     if (offset == 0) {
       _offset += 8;

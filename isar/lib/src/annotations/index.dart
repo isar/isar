@@ -1,12 +1,12 @@
 class Index {
-  final List<String> compound;
+  final List<String> composite;
 
   final bool unique;
 
-  final bool hashValue;
+  final bool? hashValue;
 
   const Index({
-    this.compound = const [],
+    this.composite = const [],
     this.unique = false,
     this.hashValue,
   });

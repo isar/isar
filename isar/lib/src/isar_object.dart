@@ -3,18 +3,18 @@ import 'dart:async';
 import 'package:isar/src/isar_bank.dart';
 
 class IsarObject {
-  int _id;
-  IsarBank _bank;
+  int? _id;
+  IsarBank? _bank;
 
-  int get id => _id;
+  int? get id => _id;
 
-  IsarBank get bank => _bank;
+  IsarBank? get bank => _bank;
 
-  DateTime _createdAt;
+  DateTime? _createdAt;
 
-  DateTime get createdAt {
-    if (_createdAt == null) {
-      var secondsSinceEpoch = (id >> 16) & 0xFFFFFFFF;
+  DateTime? get createdAt {
+    if (_createdAt == null && _id != null) {
+      var secondsSinceEpoch = (_id! >> 16) & 0xFFFFFFFF;
       _createdAt =
           DateTime.fromMillisecondsSinceEpoch(secondsSinceEpoch * 1000);
     }
@@ -22,16 +22,16 @@ class IsarObject {
   }
 
   FutureOr<void> save() {
-    return bank.put(this);
+    return bank!.put(this);
   }
 
   FutureOr<void> delete() {
-    return bank.delete(this);
+    return bank!.delete(this);
   }
 }
 
 extension ObjectInternal on IsarObject {
-  void init(int id, IsarBank bank) {
+  void init(int? id, IsarBank? bank) {
     _id = id;
     _bank = bank;
   }

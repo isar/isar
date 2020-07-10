@@ -13,20 +13,20 @@ bool hasIgnoreAnn(Element element) {
 Name getNameAnn(Element element) {
   var ann = _nameChecker.firstAnnotationOfExact(element);
   if (ann == null) return null;
-  return Name(ann.getField("name").toStringValue());
+  return Name(ann.getField('name').toStringValue());
 }
 
 List<Index> getIndexAnns(Element element) {
   return _indexChecker.annotationsOfExact(element).map((ann) {
-    var rawCompound = ann.getField("compound").toListValue();
-    List<String> compound;
-    if (rawCompound != null) {
-      compound = rawCompound.map((e) => e.toStringValue()).toList();
+    var rawComposite = ann.getField('composite').toListValue();
+    List<String> composite;
+    if (rawComposite != null) {
+      composite = rawComposite.map((e) => e.toStringValue()).toList();
     }
     return Index(
-      compound: compound,
-      unique: ann.getField("unique").toBoolValue(),
-      hashValue: ann.getField("hashValue").toBoolValue(),
+      composite: composite ?? [],
+      unique: ann.getField('unique').toBoolValue(),
+      hashValue: ann.getField('hashValue').toBoolValue(),
     );
   }).toList();
 }

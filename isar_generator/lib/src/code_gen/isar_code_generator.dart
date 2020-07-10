@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:build/build.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:glob/glob.dart';
-import 'package:isar_generator/src/object_adapter_generator.dart';
+import 'package:isar_generator/src/code_gen/object_adapter_generator.dart';
+import 'package:isar_generator/src/code_gen/util.dart';
+import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
-import 'package:isar_generator/src/query_filter_generator.dart';
-import 'package:isar_generator/src/query_where_generator.dart';
+import 'package:isar_generator/src/code_gen/query_filter_generator.dart';
+import 'package:isar_generator/src/code_gen/query_where_generator.dart';
 import 'package:path/path.dart' as path;
 import 'package:dartx/dartx.dart';
-
-import 'helper.dart';
 
 class IsarCodeGenerator extends Builder {
   @override
@@ -22,11 +22,11 @@ class IsarCodeGenerator extends Builder {
   String dir(BuildStep buildStep) => path.dirname(buildStep.inputId.path);
 
   static const imports = [
-    "dart:ffi",
-    "dart:convert",
-    "dart:typed_data",
-    "package:isar/internal.dart",
-    "package:ffi/ffi.dart"
+    'dart:ffi',
+    'dart:convert',
+    'dart:typed_data',
+    'package:isar/internal.dart',
+    'package:ffi/ffi.dart'
   ];
 
   @override
@@ -47,38 +47,41 @@ class IsarCodeGenerator extends Builder {
 
     var imports = [IsarCodeGenerator.imports, fileImports]
         .flatten()
-        .map((im) => "import '$im';")
-        .join("\n");
+        .map((im) => 'import "$im";')
+        .join('\n');
 
     var objects = files.values.flatten().toList();
 
     for (var m in objects) {
       for (var m2 in objects) {
-        if (m != m2 && m.name == m2.name) {
-          err("There are two objects with the same name: '${m.name}'");
+        if (m != m2 && m.dbName == m2.dbName) {
+          err('There are two objects with the same name: "${m.dbName}"');
         }
       }
     }
 
     var schemaJson =
         JsonEncoder().convert(objects.map((o) => o.toJson()).toList());
-
+    var bankVars = objects
+        .map((o) => 'IsarBank<${o.type}> ${getBankVar(o.type)};')
+        .join('\n');
     var objectAdapters =
-        objects.map((o) => generateObjectAdapter(o)).join("\n");
+        objects.map((o) => generateObjectAdapter(o)).join('\n');
     var getBankExtensions =
-        objects.mapIndexed((i, o) => generateGetBankExtension(o, i)).join("\n");
+        objects.mapIndexed((i, o) => generateGetBankExtension(o, i)).join('\n');
     var queryWhereExtensions =
-        objects.map((o) => generateQueryWhere(o)).join("\n");
+        objects.map((o) => generateQueryWhere(o)).join('\n');
     var queryFilterExtensions =
-        objects.map((o) => generateQueryFilter(o)).join("\n");
+        objects.map((o) => generateQueryFilter(o)).join('\n');
 
-    var code = """
+    var code = '''
     $imports
 
     export 'package:isar/isar.dart';
 
     const utf8Encoder = Utf8Encoder();
 
+    $bankVars
     ${generateIsarOpen(objects)}
     $getBankExtensions
     $queryWhereExtensions
@@ -87,17 +90,24 @@ class IsarCodeGenerator extends Builder {
     $objectAdapters
 
     const _schema = '$schemaJson';
-    """;
+    ''';
 
     code = DartFormatter().format(code);
 
     final codeId =
-        AssetId(buildStep.inputId.package, "${dir(buildStep)}/isar.g.dart");
+        AssetId(buildStep.inputId.package, '${dir(buildStep)}/isar.g.dart');
     await buildStep.writeAsString(codeId, code);
   }
 
   String generateIsarOpen(Iterable<ObjectInfo> objects) {
-    return """
+    var initializeBankVars = objects.mapIndexed((i, o) {
+      return '''
+      nativeCall(isarBindings.getBank(isar, bankPtr, $i));
+      ${getBankVar(o.type)} = IsarBankImpl(this, _${o.type}Adapter(), bankPtr.value);
+      ''';
+    }).join('\n');
+
+    return '''
     Isar open(String path) {
       var pathPtr = Utf8.toUtf8(path);
       var schemaPtr = Utf8.toUtf8(_schema);
@@ -106,34 +116,30 @@ class IsarCodeGenerator extends Builder {
       free(pathPtr);
       free(schemaPtr);
 
-      return IsarImpl(isarPtr.value);
+      var isar = isarPtr.value;
+      var bankPtr = IsarBindings.ptr;
+      $initializeBankVars
+
+      return IsarImpl(isar);
     }
-    """;
+    ''';
   }
 
   String generateGetBankExtension(ObjectInfo object, int objectIndex) {
-    var bankVar = "_${object.name}Bank";
-    return """
-    IsarBank<${object.name}> $bankVar;
-    extension Get${object.name}Bank on Isar {
-      IsarBank<${object.name}> get ${object.name.decapitalize()}s {
-        if ($bankVar == null) {
-          var bankPtr = IsarBindings.ptr;
-          var isarPtr = (this as IsarImpl).isarPtr;
-          nativeCall(isarBindings.getBank(isarPtr, bankPtr, $objectIndex));
-          $bankVar = IsarBankImpl(this, _${object.name}Adapter(), bankPtr.value);
-        }
-        return $bankVar;
+    return '''
+    extension Get${object.type}Bank on Isar {
+      IsarBank<${object.type}> get ${object.type.decapitalize()}s {
+        return ${getBankVar(object.type)};
       }
     }
-    """;
+    ''';
   }
 
   String boolToU8(bool value) {
     if (value) {
-      return "1";
+      return '1';
     } else {
-      return "0";
+      return '0';
     }
   }
 }

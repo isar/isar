@@ -2,10 +2,10 @@ import 'dart:ffi';
 
 class RawObject extends Struct {
   @Uint64()
-  int oid;
+  late int oid;
 
-  Pointer<Uint8> data;
+  late Pointer<Uint8> data;
 
   @Uint32()
-  int length;
+  late int length;
 }

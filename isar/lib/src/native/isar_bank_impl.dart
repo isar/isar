@@ -72,7 +72,7 @@ class IsarBankImpl<T extends IsarObject> extends IsarBank<T> {
     return isar.optionalTxn(true, (txn) {
       var rawObjPtr = IsarBindings.obj;
       var rawObj = rawObjPtr.ref;
-      rawObj.oid = object.id;
+      rawObj.oid = object.id!;
 
       nativeCall(isarBindings.deleteObject(_bank, txn, rawObjPtr));
       object.init(null, null);

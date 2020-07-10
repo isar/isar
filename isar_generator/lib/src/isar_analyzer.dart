@@ -1,10 +1,10 @@
-import "dart:async";
-import "dart:convert";
-import "package:analyzer/dart/element/element.dart";
+import 'dart:async';
+import 'dart:convert';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
-import "package:source_gen/source_gen.dart";
+import 'package:source_gen/source_gen.dart';
 import 'package:isar/isar.dart' as isar;
 import 'package:dartx/dartx.dart';
 
@@ -31,29 +31,29 @@ class IsarAnalyzer extends Builder {
 
   ObjectInfo generateObjectInfo(Element element) {
     if (element is! ClassElement) {
-      err("Only classes may be annotated with @IsarBank.", element);
+      err('Only classes may be annotated with @IsarBank.', element);
     }
 
     var modelClass = element as ClassElement;
 
     if (modelClass.isAbstract) {
-      err("Object class must not be abstract.", element);
+      err('Object class must not be abstract.', element);
     }
 
     if (!modelClass.isPublic) {
-      err("Object class must be public.", element);
+      err('Object class must be public.', element);
     }
 
     var hasZeroArgConstructor = modelClass.constructors
         .any((c) => c.isPublic && !c.parameters.any((p) => !p.isOptional));
 
     if (!hasZeroArgConstructor) {
-      err("Object class needs to have a public zero-arg constructor.");
+      err('Object class needs to have a public zero-arg constructor.');
     }
 
     var dbName = getNameAnn(modelClass)?.name ?? modelClass.displayName;
     if (dbName.isEmpty) {
-      err("Empty model names are not allowed.", modelClass);
+      err('Empty model names are not allowed.', modelClass);
     }
 
     var modelInfo = ObjectInfo(modelClass.displayName, dbName);
@@ -85,13 +85,13 @@ class IsarAnalyzer extends Builder {
 
     var type = DataTypeX.fromTypeName(field.type.toString());
     if (type == null) {
-      err("Field has unsupported type. Use @IsarIgnore to ignore the field.",
+      err('Field has unsupported type. Use @IsarIgnore to ignore the field.',
           field);
     }
 
     var dbName = getNameAnn(field)?.name ?? field.displayName;
     if (dbName.isEmpty) {
-      err("Empty field names are not allowed.", field);
+      err('Empty field names are not allowed.', field);
     }
 
     return ObjectField(field.displayName, dbName, type, true);
@@ -101,12 +101,13 @@ class IsarAnalyzer extends Builder {
       ObjectField field, FieldElement element) {
     return getIndexAnns(element).map((index) {
       var fields = [field.name];
-      fields.addAll(index.compound);
+      fields.addAll(index.composite);
 
-      return ObjectIndex()
-        ..fields = fields
-        ..unique = index.unique
-        ..hashValue = index.hashValue;
+      var hashValue = index.hashValue;
+      if (field.type == DataType.String && hashValue == null) {
+        hashValue = false;
+      }
+      return ObjectIndex(fields, index.unique, hashValue);
     });
   }
 
@@ -115,25 +116,22 @@ class IsarAnalyzer extends Builder {
       for (var index2 in model.indices) {
         if (index == index2) continue;
         if (index.fields == index2.fields) {
-          err("There is a duplicate index for the fields '${index.fields.join(", ")}'");
+          err('There is a duplicate index for the fields "${index.fields.join(', ')}"');
         }
       }
 
       var hasStringField = index.fields
           .map((name) => model.fields.firstWhere((f) => f.name == name))
-          .any((f) =>
-              f.type == DataType.String || f.type == DataType.StringList);
+          .any((f) => f.type == DataType.String);
 
       if (index.hashValue != null) {
         if (index.fields.length > 1 && !index.hashValue) {
-          err("String fields in compound indices need to be stored as hash.");
+          err('String fields in composite indices need to be stored as hash.');
         }
 
         if (!hasStringField) {
-          err("Only String and List<String> fields support the 'hashValue' parameter.");
+          err('Only String and List<String> fields support the "hashValue" parameter.');
         }
-      } else if (hasStringField) {
-        index.hashValue = true;
       }
     }
   }

@@ -7,7 +7,7 @@ import 'package:isar/src/native/util/native_call.dart';
 class IsarImpl extends Isar {
   final Pointer isarPtr;
 
-  Pointer _currentTxn;
+  Pointer? _currentTxn = null;
   bool _currentTxnWrite = false;
 
   IsarImpl(this.isarPtr);
@@ -15,7 +15,7 @@ class IsarImpl extends Isar {
   @override
   Future<T> txn<T>(bool write, Future<T> Function(Isar isar) callback) async {
     if (_currentTxn != null) {
-      throw "Nested transactions are not supported yet.";
+      throw 'Nested transactions are not supported yet.';
     }
     var txnPtr = IsarBindings.ptr;
     nativeCall(isarBindings.beginTxn(isarPtr, txnPtr, nBool(write)));
@@ -41,11 +41,11 @@ class IsarImpl extends Isar {
   Future<T> optionalTxn<T>(bool write, T Function(Pointer txn) callback) {
     if (_currentTxn != null) {
       if (write && !_currentTxnWrite) {
-        throw "Operation cannot be performed within a read transaction.";
+        throw 'Operation cannot be performed within a read transaction.';
       }
-      return Future.value(callback(_currentTxn));
+      return Future.value(callback(_currentTxn!));
     } else {
-      return txn(write, (_) => Future.value(callback(_currentTxn)));
+      return txn(write, (_) => Future.value(callback(_currentTxn!)));
     }
   }
 }

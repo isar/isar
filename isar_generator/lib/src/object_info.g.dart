@@ -21,7 +21,7 @@ ObjectInfo _$ObjectInfoFromJson(Map<String, dynamic> json) {
 
 Map<String, dynamic> _$ObjectInfoToJson(ObjectInfo instance) =>
     <String, dynamic>{
-      'localName': instance.name,
+      'localName': instance.type,
       'name': instance.dbName,
       'fields': instance.fields.map((e) => e.toJson()).toList(),
       'indices': instance.indices.map((e) => e.toJson()).toList(),
@@ -79,10 +79,8 @@ const _$DataTypeEnumMap = {
 };
 
 ObjectIndex _$ObjectIndexFromJson(Map<String, dynamic> json) {
-  return ObjectIndex()
-    ..fields = (json['fields'] as List).map((e) => e as String).toList()
-    ..unique = json['unique'] as bool
-    ..hashValue = json['hashValue'] as bool;
+  return ObjectIndex((json['fields'] as List).map((e) => e as String).toList(),
+      json['unique'] as bool, json['hashValue'] as bool);
 }
 
 Map<String, dynamic> _$ObjectIndexToJson(ObjectIndex instance) =>

@@ -108,22 +108,26 @@ typedef NWCAddInt = Void Function(
   Pointer whereClause,
   Uint8 lower,
   Int64 value,
+  Uint8 include,
 );
 typedef IWCAddInt = void Function(
   Pointer whereClause,
   int lower,
   int value,
+  int include,
 );
 
 typedef NWCAddDouble = Void Function(
   Pointer whereClause,
   Uint8 lower,
   Double value,
+  Uint8 include,
 );
 typedef IWCAddDouble = void Function(
   Pointer whereClause,
   int lower,
   double value,
+  int include,
 );
 
 typedef NWCAddBool = Void Function(
@@ -139,12 +143,10 @@ typedef IWCAddBool = void Function(
 
 typedef NWCAddStringHash = Void Function(
   Pointer whereClause,
-  Uint8 lower,
   Pointer<Uint8> value,
 );
 typedef IWCAddStringHash = void Function(
   Pointer whereClause,
-  int lower,
   Pointer<Uint8> value,
 );
 
@@ -152,9 +154,11 @@ typedef NWCAddStringValue = Void Function(
   Pointer whereClause,
   Uint8 lower,
   Pointer<Uint8> value,
+  Uint8 include,
 );
 typedef IWCAddStringValue = void Function(
   Pointer whereClause,
   int lower,
   Pointer<Uint8> value,
+  int include,
 );

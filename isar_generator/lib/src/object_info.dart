@@ -5,15 +5,15 @@ part 'object_info.g.dart';
 
 @JsonSerializable(nullable: false, explicitToJson: true)
 class ObjectInfo {
-  @JsonKey(name: "localName")
-  final String name;
-  @JsonKey(name: "name")
+  @JsonKey(name: 'localName')
+  final String type;
+  @JsonKey(name: 'name')
   final String dbName;
 
   List<ObjectField> fields = [];
   List<ObjectIndex> indices = [];
 
-  ObjectInfo(this.name, this.dbName);
+  ObjectInfo(this.type, this.dbName);
 
   static ObjectInfo fromJson(Map<String, dynamic> json) {
     return _$ObjectInfoFromJson(json);
@@ -40,9 +40,9 @@ class ObjectInfo {
 
 @JsonSerializable(nullable: false, explicitToJson: true)
 class ObjectField {
-  @JsonKey(name: "localName")
+  @JsonKey(name: 'localName')
   final String name;
-  @JsonKey(name: "name")
+  @JsonKey(name: 'name')
   final String dbName;
   final DataType type;
   final bool nullable;
@@ -63,6 +63,8 @@ class ObjectIndex {
   List<String> fields;
   bool unique;
   bool hashValue;
+
+  ObjectIndex(this.fields, this.unique, this.hashValue);
 
   static ObjectIndex fromJson(Map<String, dynamic> json) {
     return _$ObjectIndexFromJson(json);
@@ -110,6 +112,14 @@ extension DataTypeX on DataType {
     return this.index >= DataType.String.index;
   }
 
+  int staticSize() {
+    if (this == DataType.Bool) {
+      return 1;
+    } else {
+      return 8;
+    }
+  }
+
   String toTypeName() {
     for (var key in _typeMap.keys) {
       if (_typeMap[key] == this) return key;
@@ -123,14 +133,14 @@ extension DataTypeX on DataType {
 }
 
 const _typeMap = {
-  "int": DataType.Int,
-  "double": DataType.Double,
-  "bool": DataType.Bool,
-  "String": DataType.String,
-  "Uint8List": DataType.Bytes,
-  "List<int>": DataType.IntList,
-  "List<double>": DataType.Double,
-  "List<bool>": DataType.Bool,
-  "List<String>": DataType.String,
-  "List<Uint8List>": DataType.BytesList
+  'int': DataType.Int,
+  'double': DataType.Double,
+  'bool': DataType.Bool,
+  'String': DataType.String,
+  'Uint8List': DataType.Bytes,
+  'List<int>': DataType.IntList,
+  'List<double>': DataType.Double,
+  'List<bool>': DataType.Bool,
+  'List<String>': DataType.String,
+  'List<Uint8List>': DataType.BytesList
 };

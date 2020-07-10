@@ -2,7 +2,7 @@ import 'package:isar/isar.dart';
 
 class QueryBuilder<T extends IsarObject, BANK extends IsarBank<T>, WHERE,
     FILTER, SORT, EXECUTE> {
-  IsarBank _bank;
+  late IsarBank _bank;
 }
 
 typedef NoWhere = Function();
@@ -46,7 +46,7 @@ extension FilterAndOrExtension<T extends IsarObject, B extends IsarBank<T>>
   }
 }
 
-extension SortExtension<T extends IsarObject, B extends IsarBank<T>>
+/*extension SortExtension<T extends IsarObject, B extends IsarBank<T>>
     on QueryBuilder<T, B, dynamic, Filter, dynamic, dynamic> {
   Future<T> and() {}
 
@@ -72,7 +72,7 @@ extension TestWhereField<T extends IsarObject, B extends IsarBank<T>>
   }
 }
 
-/*class EqualTo<T> {
+class EqualTo<T> {
   final int property;
   final T value;
 
@@ -124,10 +124,10 @@ class Q {
 
   Q and() {
     if (pending != null) {
-      throw ".and() must not follow .and() or .or()";
+      throw '.and() must not follow .and() or .or()';
     }
     if (group.conditions.isEmpty) {
-      throw "Invalid .and() at the beginning of a group";
+      throw 'Invalid .and() at the beginning of a group';
     }
     pending = AndOr.And;
     return this;
@@ -135,10 +135,10 @@ class Q {
 
   Q or() {
     if (pending != null) {
-      throw ".or() must not follow .and() or .or()";
+      throw '.or() must not follow .and() or .or()';
     }
     if (group.conditions.isEmpty) {
-      throw "Invalid .or() at the beginning of a group";
+      throw 'Invalid .or() at the beginning of a group';
     }
     pending = AndOr.Or;
     return this;
@@ -166,7 +166,7 @@ class Q {
 
   Q begin() {
     if (pending != null) {
-      throw ".begin() must not follow .and() or .or()";
+      throw '.begin() must not follow .and() or .or()';
     }
     var newGroup = Group(group, false, null);
     group.conditions.add(newGroup);
@@ -178,7 +178,7 @@ class Q {
 
   Q end() {
     if (pending != null) {
-      throw ".end() must not follow .and() or .or()";
+      throw '.end() must not follow .and() or .or()';
     }
     while (group.implicit) {
       group = group.parent;
@@ -195,11 +195,11 @@ class Q {
 
   Q finish() {
     if (pending != null) {
-      throw "Query must not end with .and() or .or()";
+      throw 'Query must not end with .and() or .or()';
     }
     while (group.parent != null) {
       if (!group.implicit) {
-        throw "Please close all open groups";
+        throw 'Please close all open groups';
       }
       group = group.parent;
     }

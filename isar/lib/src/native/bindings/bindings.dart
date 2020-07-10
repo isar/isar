@@ -11,53 +11,51 @@ class IsarBindings {
 
   static final obj = allocate<RawObject>();
 
-  ICreateInstance createInstance;
-  IGetBank getBank;
+  late ICreateInstance createInstance;
+  late IGetBank getBank;
 
-  ITxnBegin beginTxn;
-  ITxnCommit commitTxn;
-  ITxnAbort abortTxn;
+  late ITxnBegin beginTxn;
+  late ITxnCommit commitTxn;
+  late ITxnAbort abortTxn;
 
-  IGet getObject;
-  IPut putObject;
-  IPut putObjects;
-  IDelete deleteObject;
+  late IGet getObject;
+  late IPut putObject;
+  late IPut putObjects;
+  late IDelete deleteObject;
 
-  ICreateWC createWc;
-  IWCAddInt wcAddInt;
-  IWCAddDouble wcAddDouble;
-  IWCAddBool wcAddBool;
-  IWCAddStringHash wcAddStringHash;
-  IWCAddStringValue wcAddStringValue;
-
-  int Function() isar_test;
+  late ICreateWC createWc;
+  late IWCAddInt wcAddInt;
+  late IWCAddDouble wcAddDouble;
+  late IWCAddBool wcAddBool;
+  late IWCAddStringHash wcAddStringHash;
+  late IWCAddStringValue wcAddStringValue;
 
   IsarBindings() {
     final dylib = DynamicLibrary.open(
-        "/home/simon/Desktop/isar/target/debug/libisar_core.so");
+        '/home/simon/Desktop/isar/target/debug/libisar_core.so');
 
     Pointer<NativeFunction<T>> lookup<T extends Function>(String symbolName) {
-      return dylib.lookup<NativeFunction<T>>("isar_" + symbolName);
+      return dylib.lookup<NativeFunction<T>>('isar_' + symbolName);
     }
 
-    createInstance = lookup<NICreateInstance>("create_instance").asFunction();
-    getBank = lookup<NIGetBank>("get_bank").asFunction();
+    createInstance = lookup<NICreateInstance>('create_instance').asFunction();
+    getBank = lookup<NIGetBank>('get_bank').asFunction();
 
-    beginTxn = lookup<NITxnBegin>("txn_begin").asFunction();
-    commitTxn = lookup<NITxnCommit>("txn_commit").asFunction();
-    abortTxn = lookup<NITxnAbort>("txn_abort").asFunction();
+    beginTxn = lookup<NITxnBegin>('txn_begin').asFunction();
+    commitTxn = lookup<NITxnCommit>('txn_commit').asFunction();
+    abortTxn = lookup<NITxnAbort>('txn_abort').asFunction();
 
-    getObject = lookup<NIGet>("get").asFunction();
-    putObject = lookup<NIPut>("put").asFunction();
-    deleteObject = lookup<NIDelete>("delete").asFunction();
+    getObject = lookup<NIGet>('get').asFunction();
+    putObject = lookup<NIPut>('put').asFunction();
+    deleteObject = lookup<NIDelete>('delete').asFunction();
 
-    createWc = lookup<NCreateWC>("wc_create").asFunction();
-    wcAddInt = lookup<NWCAddInt>("wc_add_int").asFunction();
-    wcAddDouble = lookup<NWCAddDouble>("wc_add_double").asFunction();
-    wcAddBool = lookup<NWCAddBool>("wc_add_bool").asFunction();
+    createWc = lookup<NCreateWC>('wc_create').asFunction();
+    wcAddInt = lookup<NWCAddInt>('wc_add_int').asFunction();
+    wcAddDouble = lookup<NWCAddDouble>('wc_add_double').asFunction();
+    wcAddBool = lookup<NWCAddBool>('wc_add_bool').asFunction();
     wcAddStringHash =
-        lookup<NWCAddStringHash>("wc_add_string_hash").asFunction();
+        lookup<NWCAddStringHash>('wc_add_string_hash').asFunction();
     wcAddStringValue =
-        lookup<NWCAddStringValue>("wc_add_string_value").asFunction();
+        lookup<NWCAddStringValue>('wc_add_string_value').asFunction();
   }
 }

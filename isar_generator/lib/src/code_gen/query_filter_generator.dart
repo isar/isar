@@ -2,19 +2,19 @@ import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
 
 String generateQueryFilter(ObjectInfo object) {
-  var code = """
-  extension ${object.name}QueryFilter on QueryBuilder<${object.name}, 
-    IsarBank<${object.name}>, dynamic, FilterT, dynamic, dynamic> {
-  """;
+  var code = '''
+  extension ${object.type}QueryFilter on QueryBuilder<${object.type}, 
+    IsarBank<${object.type}>, dynamic, FilterT, dynamic, dynamic> {
+  ''';
   for (var field in object.fields) {
     if (field.type != DataType.Double) {
-      code += generateEqualTo(object.name, field);
-      code += generateNotEqualTo(object.name, field);
+      code += generateEqualTo(object.type, field);
+      code += generateNotEqualTo(object.type, field);
     }
   }
-  return """
+  return '''
     $code
-  }""";
+  }''';
 }
 
 String fieldName(ObjectField field) {
@@ -22,23 +22,23 @@ String fieldName(ObjectField field) {
 }
 
 String fieldParam(ObjectField field) {
-  return "${field.type.toTypeName()} ${field.name}";
+  return '${field.type.toTypeName()} ${field.name}';
 }
 
 String generateEqualTo(String type, ObjectField field) {
-  return """
+  return '''
   QueryBuilder<$type, IsarBank<$type>, dynamic, FilterAndOrT, CanSort, CanExecute> 
     ${fieldName(field)}EqualTo(${fieldParam(field)}) {
     return QueryBuilder();
   }
-  """;
+  ''';
 }
 
 String generateNotEqualTo(String type, ObjectField field) {
-  return """
+  return '''
   QueryBuilder<$type, IsarBank<$type>, dynamic, FilterAndOrT, CanSort, CanExecute> 
     ${fieldName(field)}NotEqualTo(${fieldParam(field)}) {
     return QueryBuilder();
   }
-  """;
+  ''';
 }

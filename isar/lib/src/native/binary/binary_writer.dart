@@ -19,19 +19,19 @@ class BinaryWriter {
         _buffer = buffer,
         _byteData = ByteData.view(buffer.buffer);
 
-  void writeInt(int value) {
+  void writeInt(int? value) {
     value ??= BinaryReader.nullInt;
     _buffer.writeUint64(_offset, value);
     _offset += 8;
   }
 
-  void writeDouble(double value) {
+  void writeDouble(double? value) {
     value ??= double.nan;
     _byteData.setFloat64(_offset, value, Endian.little);
     _offset += 8;
   }
 
-  void writeBool(bool value) {
+  void writeBool(bool? value) {
     if (value == null) {
       _buffer[_offset++] = 0;
     } else {
@@ -39,7 +39,7 @@ class BinaryWriter {
     }
   }
 
-  void writeBytes(Uint8List value) {
+  void writeBytes(Uint8List? value) {
     if (value == null) {
       _buffer.writeUint64(_offset, 0);
     } else {
@@ -53,7 +53,7 @@ class BinaryWriter {
     _offset += 8;
   }
 
-  void writeIntList(List<int> values) {
+  void writeIntList(List<int>? values) {
     if (values == null) {
       _buffer.writeUint64(_offset, 0);
     } else {
@@ -68,7 +68,7 @@ class BinaryWriter {
     _offset += 8;
   }
 
-  void writeDoubleList(List<int> values) {
+  void writeDoubleList(List<double?>? values) {
     if (values == null) {
       _buffer.writeUint64(_offset, 0);
     } else {
@@ -83,7 +83,7 @@ class BinaryWriter {
     _offset += 8;
   }
 
-  void writeBoolList(List<bool> values) {
+  void writeBoolList(List<bool?>? values) {
     if (values == null) {
       _buffer.writeUint64(_offset, 0);
     } else {
@@ -97,7 +97,7 @@ class BinaryWriter {
     _offset += 8;
   }
 
-  void writeBytesList(List<Uint8List> values) {
+  void writeBytesList(List<Uint8List?>? values) {
     if (values == null) {
       _buffer.writeUint64(_offset, 0);
     } else {
