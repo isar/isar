@@ -11,24 +11,24 @@ class IsarBindings {
 
   static final obj = allocate<RawObject>();
 
-  late ICreateInstance createInstance;
-  late IGetBank getBank;
+  ICreateInstance createInstance;
+  IGetCollection getCollection;
 
-  late ITxnBegin beginTxn;
-  late ITxnCommit commitTxn;
-  late ITxnAbort abortTxn;
+  ITxnBegin beginTxn;
+  ITxnCommit commitTxn;
+  ITxnAbort abortTxn;
 
-  late IGet getObject;
-  late IPut putObject;
-  late IPut putObjects;
-  late IDelete deleteObject;
+  IGet getObject;
+  IPut putObject;
+  IPut putObjects;
+  IDelete deleteObject;
 
-  late ICreateWC createWc;
-  late IWCAddInt wcAddInt;
-  late IWCAddDouble wcAddDouble;
-  late IWCAddBool wcAddBool;
-  late IWCAddStringHash wcAddStringHash;
-  late IWCAddStringValue wcAddStringValue;
+  ICreateWC createWc;
+  IWCAddInt wcAddInt;
+  IWCAddDouble wcAddDouble;
+  IWCAddBool wcAddBool;
+  IWCAddStringHash wcAddStringHash;
+  IWCAddStringValue wcAddStringValue;
 
   IsarBindings() {
     final dylib = DynamicLibrary.open(
@@ -39,7 +39,7 @@ class IsarBindings {
     }
 
     createInstance = lookup<NICreateInstance>('create_instance').asFunction();
-    getBank = lookup<NIGetBank>('get_bank').asFunction();
+    getCollection = lookup<NIGetCollection>('get_collection').asFunction();
 
     beginTxn = lookup<NITxnBegin>('txn_begin').asFunction();
     commitTxn = lookup<NITxnCommit>('txn_commit').asFunction();

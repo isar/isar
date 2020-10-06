@@ -11,21 +11,21 @@ String generateObjectAdapter(ObjectInfo object) {
 
 String _generateSerialize(ObjectInfo object) {
   var code = 'void serialize(${object.type} object, RawObject raw) {';
-  var hasDynamicFields = object.fields.any((it) => it.type.isDynamic());
-  if (hasDynamicFields) {
+  var hasDynamicProperties = object.properties.any((it) => it.type.isDynamic());
+  if (hasDynamicProperties) {
     code += 'var dynamicSize = 0;';
-    for (var field in object.fields.where((it) => it.type.isDynamic())) {
-      if (field.type == DataType.String) {
+    for (var property in object.properties.where((it) => it.type.isDynamic())) {
+      if (property.type == DataType.String) {
         code += '''
-          var ${field.name}Bytes = utf8Encoder.convert(object.${field.name});
-          dynamicSize += ${field.name}Bytes.length;
+          var ${property.name}Bytes = utf8Encoder.convert(object.${property.name});
+          dynamicSize += ${property.name}Bytes.length;
           ''';
-      } else if (field.type == DataType.Bytes ||
-          field.type == DataType.BoolList) {
-        code += 'dynamicSize += object.${field.name}.length;';
-      } else if (field.type == DataType.IntList ||
-          field.type == DataType.DoubleList) {
-        code += 'dynamicSize += object.${field.name}.length * 8;';
+      } else if (property.type == DataType.Bytes ||
+          property.type == DataType.BoolList) {
+        code += 'dynamicSize += object.${property.name}.length;';
+      } else if (property.type == DataType.IntList ||
+          property.type == DataType.DoubleList) {
+        code += 'dynamicSize += object.${property.name}.length * 8;';
       }
     }
   }
@@ -36,27 +36,27 @@ String _generateSerialize(ObjectInfo object) {
     var buffer = ptr.asTypedList(bufferSize);
     var writer = BinaryWriter(buffer, $staticSize);
     ''';
-  for (var field in object.fields) {
-    var accessor = 'object.${field.name}';
-    if (field.type == DataType.Int) {
+  for (var property in object.properties) {
+    var accessor = 'object.${property.name}';
+    if (property.type == DataType.Int) {
       code += 'writer.writeInt($accessor);';
-    } else if (field.type == DataType.Double) {
+    } else if (property.type == DataType.Double) {
       code += 'writer.writeDouble($accessor);';
-    } else if (field.type == DataType.Bool) {
+    } else if (property.type == DataType.Bool) {
       code += 'writer.writeBool($accessor);';
-    } else if (field.type == DataType.String) {
-      code += 'writer.writeBytes(${field.name}Bytes);';
-    } else if (field.type == DataType.Bytes) {
+    } else if (property.type == DataType.String) {
+      code += 'writer.writeBytes(${property.name}Bytes);';
+    } else if (property.type == DataType.Bytes) {
       code += 'writer.writeBytes($accessor);';
-    } else if (field.type == DataType.IntList) {
+    } else if (property.type == DataType.IntList) {
       code += 'writer.writeIntList($accessor);';
-    } else if (field.type == DataType.DoubleList) {
+    } else if (property.type == DataType.DoubleList) {
       code += 'writer.writeDoubleList($accessor);';
-    } else if (field.type == DataType.BoolList) {
+    } else if (property.type == DataType.BoolList) {
       code += 'writer.writeBoolList($accessor);';
-    } else if (field.type == DataType.StringList) {
+    } else if (property.type == DataType.StringList) {
       code += 'writer.writeBytesList($accessor);';
-    } else if (field.type == DataType.BytesList) {
+    } else if (property.type == DataType.BytesList) {
       code += 'writer.writeBytesList($accessor);';
     }
   }
@@ -82,28 +82,28 @@ String _generateDeserialize(ObjectInfo object) {
       var reader = BinaryReader(buffer);
       var object = ${object.type}();
     ''';
-  for (var field in object.fields) {
-    var accessor = 'object.${field.name}';
-    var orNull = field.nullable ? 'OrNull' : '';
-    if (field.type == DataType.Int) {
+  for (var property in object.properties) {
+    var accessor = 'object.${property.name}';
+    var orNull = property.nullable ? 'OrNull' : '';
+    if (property.type == DataType.Int) {
       code += '$accessor = reader.readInt$orNull();';
-    } else if (field.type == DataType.Double) {
+    } else if (property.type == DataType.Double) {
       code += '$accessor = reader.readDouble$orNull();';
-    } else if (field.type == DataType.Bool) {
+    } else if (property.type == DataType.Bool) {
       code += '$accessor = reader.readBool$orNull();';
-    } else if (field.type == DataType.String) {
+    } else if (property.type == DataType.String) {
       code += '$accessor = reader.readString$orNull();';
-    } else if (field.type == DataType.Bytes) {
+    } else if (property.type == DataType.Bytes) {
       code += '$accessor = reader.readBytes$orNull();';
-    } else if (field.type == DataType.IntList) {
+    } else if (property.type == DataType.IntList) {
       code += '$accessor = reader.readIntList$orNull();';
-    } else if (field.type == DataType.DoubleList) {
+    } else if (property.type == DataType.DoubleList) {
       code += '$accessor = reader.readDoubleList$orNull();';
-    } else if (field.type == DataType.BoolList) {
+    } else if (property.type == DataType.BoolList) {
       code += '$accessor = reader.readBoolList$orNull();';
-    } else if (field.type == DataType.StringList) {
+    } else if (property.type == DataType.StringList) {
       code += '$accessor = reader.readStringList$orNull();';
-    } else if (field.type == DataType.BytesList) {
+    } else if (property.type == DataType.BytesList) {
       code += '$accessor = reader.readBytesList$orNull();';
     }
   }

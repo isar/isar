@@ -10,7 +10,7 @@ class ObjectInfo {
   @JsonKey(name: 'name')
   final String dbName;
 
-  List<ObjectField> fields = [];
+  List<ObjectProperty> properties = [];
   List<ObjectIndex> indices = [];
 
   ObjectInfo(this.type, this.dbName);
@@ -24,7 +24,7 @@ class ObjectInfo {
   }
 
   int getStaticSize() {
-    return fields.sumBy((f) {
+    return properties.sumBy((f) {
       if (f.type == DataType.Bool) {
         return 1;
       } else {
@@ -33,38 +33,40 @@ class ObjectInfo {
     }).toInt();
   }
 
-  ObjectField getField(String name) {
-    return fields.filter((it) => it.name == name).first;
+  ObjectProperty getProperty(String name) {
+    return properties.filter((it) => it.name == name).first;
   }
 }
 
 @JsonSerializable(nullable: false, explicitToJson: true)
-class ObjectField {
+class ObjectProperty {
   @JsonKey(name: 'localName')
   final String name;
   @JsonKey(name: 'name')
   final String dbName;
   final DataType type;
   final bool nullable;
+  final bool elementNullable;
 
-  ObjectField(this.name, this.dbName, this.type, this.nullable);
+  ObjectProperty(
+      this.name, this.dbName, this.type, this.nullable, this.elementNullable);
 
-  static ObjectField fromJson(Map<String, dynamic> json) {
-    return _$ObjectFieldFromJson(json);
+  static ObjectProperty fromJson(Map<String, dynamic> json) {
+    return _$ObjectPropertyFromJson(json);
   }
 
   Map<String, dynamic> toJson() {
-    return _$ObjectFieldToJson(this);
+    return _$ObjectPropertyToJson(this);
   }
 }
 
 @JsonSerializable(nullable: false, explicitToJson: true)
 class ObjectIndex {
-  List<String> fields;
+  List<String> properties;
   bool unique;
   bool hashValue;
 
-  ObjectIndex(this.fields, this.unique, this.hashValue);
+  ObjectIndex(this.properties, this.unique, this.hashValue);
 
   static ObjectIndex fromJson(Map<String, dynamic> json) {
     return _$ObjectIndexFromJson(json);
@@ -80,36 +82,48 @@ enum DataType {
   Int,
 
   @JsonValue(1)
-  Double,
+  Long,
 
   @JsonValue(2)
-  Bool,
+  Float,
 
   @JsonValue(3)
-  String,
+  Double,
 
   @JsonValue(4)
-  Bytes,
+  Bool,
 
   @JsonValue(5)
-  IntList,
+  String,
 
   @JsonValue(6)
-  DoubleList,
+  Bytes,
 
   @JsonValue(7)
-  BoolList,
+  IntList,
 
   @JsonValue(8)
-  StringList,
+  LongList,
 
   @JsonValue(9)
+  FloatList,
+
+  @JsonValue(10)
+  DoubleList,
+
+  @JsonValue(11)
+  BoolList,
+
+  @JsonValue(12)
+  StringList,
+
+  @JsonValue(13)
   BytesList,
 }
 
 extension DataTypeX on DataType {
   bool isDynamic() {
-    return this.index >= DataType.String.index;
+    return index >= DataType.String.index;
   }
 
   int staticSize() {
@@ -122,25 +136,25 @@ extension DataTypeX on DataType {
 
   String toTypeName() {
     for (var key in _typeMap.keys) {
-      if (_typeMap[key] == this) return key;
+      if (_typeMap[key].contains(this)) return key;
     }
     return null;
   }
 
   static DataType fromTypeName(String name) {
-    return _typeMap[name];
+    return _typeMap[name][0];
   }
 }
 
 const _typeMap = {
-  'int': DataType.Int,
-  'double': DataType.Double,
-  'bool': DataType.Bool,
-  'String': DataType.String,
-  'Uint8List': DataType.Bytes,
-  'List<int>': DataType.IntList,
-  'List<double>': DataType.Double,
-  'List<bool>': DataType.Bool,
-  'List<String>': DataType.String,
-  'List<Uint8List>': DataType.BytesList
+  'int': [DataType.Int, DataType.Long],
+  'double': [DataType.Float, DataType.Double],
+  'bool': [DataType.Bool],
+  'String': [DataType.String],
+  'Uint8List': [DataType.Bytes],
+  'List<int>': [DataType.IntList, DataType.LongList],
+  'List<double>': [DataType.FloatList, DataType.DoubleList],
+  'List<bool>': [DataType.Bool],
+  'List<String>': [DataType.String],
+  'List<Uint8List>': [DataType.BytesList]
 };

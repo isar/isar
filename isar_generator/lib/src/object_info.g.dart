@@ -11,8 +11,8 @@ ObjectInfo _$ObjectInfoFromJson(Map<String, dynamic> json) {
     json['localName'] as String,
     json['name'] as String,
   )
-    ..fields = (json['fields'] as List)
-        .map((e) => ObjectField.fromJson(e as Map<String, dynamic>))
+    ..properties = (json['properties'] as List)
+        .map((e) => ObjectProperty.fromJson(e as Map<String, dynamic>))
         .toList()
     ..indices = (json['indices'] as List)
         .map((e) => ObjectIndex.fromJson(e as Map<String, dynamic>))
@@ -23,12 +23,12 @@ Map<String, dynamic> _$ObjectInfoToJson(ObjectInfo instance) =>
     <String, dynamic>{
       'localName': instance.type,
       'name': instance.dbName,
-      'fields': instance.fields.map((e) => e.toJson()).toList(),
+      'properties': instance.properties.map((e) => e.toJson()).toList(),
       'indices': instance.indices.map((e) => e.toJson()).toList(),
     };
 
-ObjectField _$ObjectFieldFromJson(Map<String, dynamic> json) {
-  return ObjectField(
+ObjectProperty _$ObjectPropertyFromJson(Map<String, dynamic> json) {
+  return ObjectProperty(
     json['localName'] as String,
     json['name'] as String,
     _$enumDecode(_$DataTypeEnumMap, json['type']),
@@ -36,7 +36,7 @@ ObjectField _$ObjectFieldFromJson(Map<String, dynamic> json) {
   );
 }
 
-Map<String, dynamic> _$ObjectFieldToJson(ObjectField instance) =>
+Map<String, dynamic> _$ObjectPropertyToJson(ObjectProperty instance) =>
     <String, dynamic>{
       'localName': instance.name,
       'name': instance.dbName,
@@ -79,13 +79,15 @@ const _$DataTypeEnumMap = {
 };
 
 ObjectIndex _$ObjectIndexFromJson(Map<String, dynamic> json) {
-  return ObjectIndex((json['fields'] as List).map((e) => e as String).toList(),
-      json['unique'] as bool, json['hashValue'] as bool);
+  return ObjectIndex(
+      (json['properties'] as List).map((e) => e as String).toList(),
+      json['unique'] as bool,
+      json['hashValue'] as bool);
 }
 
 Map<String, dynamic> _$ObjectIndexToJson(ObjectIndex instance) =>
     <String, dynamic>{
-      'fields': instance.fields,
+      'properties': instance.properties,
       'unique': instance.unique,
       'hashValue': instance.hashValue,
     };

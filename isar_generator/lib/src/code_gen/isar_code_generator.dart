@@ -62,13 +62,14 @@ class IsarCodeGenerator extends Builder {
 
     var schemaJson =
         JsonEncoder().convert(objects.map((o) => o.toJson()).toList());
-    var bankVars = objects
-        .map((o) => 'IsarBank<${o.type}> ${getBankVar(o.type)};')
+    var collectionVars = objects
+        .map((o) => 'IsarCollection<${o.type}> ${getCollectionVar(o.type)};')
         .join('\n');
     var objectAdapters =
         objects.map((o) => generateObjectAdapter(o)).join('\n');
-    var getBankExtensions =
-        objects.mapIndexed((i, o) => generateGetBankExtension(o, i)).join('\n');
+    var getCollectionExtensions = objects
+        .mapIndexed((i, o) => generateGetCollectionExtension(o, i))
+        .join('\n');
     var queryWhereExtensions =
         objects.map((o) => generateQueryWhere(o)).join('\n');
     var queryFilterExtensions =
@@ -81,9 +82,9 @@ class IsarCodeGenerator extends Builder {
 
     const utf8Encoder = Utf8Encoder();
 
-    $bankVars
+    $collectionVars
     ${generateIsarOpen(objects)}
-    $getBankExtensions
+    $getCollectionExtensions
     $queryWhereExtensions
     $queryFilterExtensions      
 
@@ -100,10 +101,10 @@ class IsarCodeGenerator extends Builder {
   }
 
   String generateIsarOpen(Iterable<ObjectInfo> objects) {
-    var initializeBankVars = objects.mapIndexed((i, o) {
+    var initializeCollectionVars = objects.mapIndexed((i, o) {
       return '''
-      nativeCall(isarBindings.getBank(isar, bankPtr, $i));
-      ${getBankVar(o.type)} = IsarBankImpl(this, _${o.type}Adapter(), bankPtr.value);
+      nativeCall(isarBindings.getCollection(isar, collectionPtr, $i));
+      ${getCollectionVar(o.type)} = IsarCollectionImpl(this, _${o.type}Adapter(), collectionPtr.value);
       ''';
     }).join('\n');
 
@@ -117,19 +118,19 @@ class IsarCodeGenerator extends Builder {
       free(schemaPtr);
 
       var isar = isarPtr.value;
-      var bankPtr = IsarBindings.ptr;
-      $initializeBankVars
+      var collectionPtr = IsarBindings.ptr;
+      $initializeCollectionVars
 
       return IsarImpl(isar);
     }
     ''';
   }
 
-  String generateGetBankExtension(ObjectInfo object, int objectIndex) {
+  String generateGetCollectionExtension(ObjectInfo object, int objectIndex) {
     return '''
-    extension Get${object.type}Bank on Isar {
-      IsarBank<${object.type}> get ${object.type.decapitalize()}s {
-        return ${getBankVar(object.type)};
+    extension Get${object.type}Collection on Isar {
+      IsarCollection<${object.type}> get ${object.type.decapitalize()}s {
+        return ${getCollectionVar(object.type)};
       }
     }
     ''';

@@ -2,19 +2,19 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/internal.dart';
-import 'package:isar/src/isar_bank.dart';
+import 'package:isar/src/isar_collection.dart';
 import 'package:isar/src/isar_object.dart';
 import 'package:isar/src/native/bindings/bindings.dart';
 import 'package:isar/src/native/isar_impl.dart';
 import 'package:isar/src/native/type_adapter.dart';
 import 'package:isar/src/native/util/native_call.dart';
 
-class IsarBankImpl<T extends IsarObject> extends IsarBank<T> {
+class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
   final IsarImpl isar;
   final TypeAdapter _adapter;
-  final Pointer _bank;
+  final Pointer _collection;
 
-  IsarBankImpl(this.isar, this._adapter, this._bank);
+  IsarCollectionImpl(this.isar, this._adapter, this._collection);
 
   @override
   Future<T> get(int id) {
@@ -23,7 +23,7 @@ class IsarBankImpl<T extends IsarObject> extends IsarBank<T> {
       var rawObj = rawObjPtr.ref;
       rawObj.oid = id;
 
-      nativeCall(isarBindings.getObject(_bank, txn, rawObjPtr));
+      nativeCall(isarBindings.getObject(_collection, txn, rawObjPtr));
 
       T object = _adapter.deserialize(rawObj);
       object.init(rawObj.oid, this);
@@ -38,7 +38,7 @@ class IsarBankImpl<T extends IsarObject> extends IsarBank<T> {
       var rawObj = rawObjPtr.ref;
       _adapter.serialize(object, rawObj);
 
-      nativeCall(isarBindings.putObject(_bank, txn, rawObjPtr));
+      nativeCall(isarBindings.putObject(_collection, txn, rawObjPtr));
 
       object.init(rawObj.oid, this);
 
@@ -55,7 +55,7 @@ class IsarBankImpl<T extends IsarObject> extends IsarBank<T> {
         _adapter.serialize(objects[i], rawObj);
       }
 
-      nativeCall(isarBindings.putObjects(_bank, txn, rawObjsPtr));
+      nativeCall(isarBindings.putObjects(_collection, txn, rawObjsPtr));
 
       for (var i = 0; i < objects.length; i++) {
         var rawObj = rawObjsPtr.elementAt(i).ref;
@@ -72,9 +72,9 @@ class IsarBankImpl<T extends IsarObject> extends IsarBank<T> {
     return isar.optionalTxn(true, (txn) {
       var rawObjPtr = IsarBindings.obj;
       var rawObj = rawObjPtr.ref;
-      rawObj.oid = object.id!;
+      rawObj.oid = object.id;
 
-      nativeCall(isarBindings.deleteObject(_bank, txn, rawObjPtr));
+      nativeCall(isarBindings.deleteObject(_collection, txn, rawObjPtr));
       object.init(null, null);
     });
   }

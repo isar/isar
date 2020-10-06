@@ -1,12 +1,12 @@
 import 'package:isar/isar.dart';
 
-class QueryBuilder<T extends IsarObject, BANK extends IsarBank<T>, WHERE,
+/*class QueryBuilder<T extends IsarObject, BANK extends IsarCollection<T>, WHERE,
     FILTER, SORT, EXECUTE> {
-  late IsarBank _bank;
+  late IsarCollection _collection;
 }
 
 typedef NoWhere = Function();
-typedef WhereField = Function(bool);
+typedef WhereProperty = Function(bool);
 
 typedef CanFilter = Function();
 typedef Filter = Function(bool);
@@ -21,21 +21,21 @@ typedef Sorting = Function(bool);
 
 typedef CanExecute = Function();
 
-extension WhereOrExtension<T extends IsarObject, B extends IsarBank<T>>
-    on QueryBuilder<T, B, WhereField, dynamic, dynamic, dynamic> {
+extension WhereOrExtension<T extends IsarObject, B extends IsarCollection<T>>
+    on QueryBuilder<T, B, WhereProperty, dynamic, dynamic, dynamic> {
   QueryBuilder<T, B, NoWhere, dynamic, dynamic, dynamic> or() {
     return QueryBuilder();
   }
 }
 
-extension WhereFilterExtension<T extends IsarObject, B extends IsarBank<T>>
+extension WhereFilterExtension<T extends IsarObject, B extends IsarCollection<T>>
     on QueryBuilder<T, B, dynamic, CanFilter, dynamic, dynamic> {
   QueryBuilder<T, B, dynamic, FilterT, dynamic, dynamic> filter() {
     return QueryBuilder();
   }
 }
 
-extension FilterAndOrExtension<T extends IsarObject, B extends IsarBank<T>>
+extension FilterAndOrExtension<T extends IsarObject, B extends IsarCollection<T>>
     on QueryBuilder<T, B, dynamic, FilterAndOrT, dynamic, dynamic> {
   QueryBuilder<T, B, dynamic, FilterT, dynamic, dynamic> and() {
     return QueryBuilder();
@@ -45,8 +45,8 @@ extension FilterAndOrExtension<T extends IsarObject, B extends IsarBank<T>>
     return QueryBuilder();
   }
 }
-
-/*extension SortExtension<T extends IsarObject, B extends IsarBank<T>>
+*/
+/*extension SortExtension<T extends IsarObject, B extends IsarCollection<T>>
     on QueryBuilder<T, B, dynamic, Filter, dynamic, dynamic> {
   Future<T> and() {}
 
@@ -55,7 +55,7 @@ extension FilterAndOrExtension<T extends IsarObject, B extends IsarBank<T>>
   Future<int> count() {}
 }
 
-extension ExecuteExtension<T extends IsarObject, B extends IsarBank<T>>
+extension ExecuteExtension<T extends IsarObject, B extends IsarCollection<T>>
     on QueryBuilder<T, B, dynamic, dynamic, dynamic, CanExecute> {
   Future<T> findFirst() {}
 
@@ -64,9 +64,9 @@ extension ExecuteExtension<T extends IsarObject, B extends IsarBank<T>>
   Future<int> count() {}
 }
 
-extension TestWhereField<T extends IsarObject, B extends IsarBank<T>>
+extension TestWhereProperty<T extends IsarObject, B extends IsarCollection<T>>
     on QueryBuilder<T, B, NoWhere, dynamic, dynamic, dynamic> {
-  QueryBuilder<T, B, WhereField, CanFilter, CanSort, CanExecute> nameEqualTo(
+  QueryBuilder<T, B, WhereProperty, CanFilter, CanSort, CanExecute> nameEqualTo(
       String name) {
     return QueryBuilder();
   }

@@ -7,7 +7,7 @@ import 'package:isar/src/native/util/native_call.dart';
 class IsarImpl extends Isar {
   final Pointer isarPtr;
 
-  Pointer? _currentTxn = null;
+  Pointer _currentTxn = null;
   bool _currentTxnWrite = false;
 
   IsarImpl(this.isarPtr);
@@ -43,9 +43,9 @@ class IsarImpl extends Isar {
       if (write && !_currentTxnWrite) {
         throw 'Operation cannot be performed within a read transaction.';
       }
-      return Future.value(callback(_currentTxn!));
+      return Future.value(callback(_currentTxn));
     } else {
-      return txn(write, (_) => Future.value(callback(_currentTxn!)));
+      return txn(write, (_) => Future.value(callback(_currentTxn)));
     }
   }
 }

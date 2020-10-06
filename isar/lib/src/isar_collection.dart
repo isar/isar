@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:isar/internal.dart';
 import 'package:isar/src/isar_object.dart';
+import 'package:isar/src/query.dart';
 
-abstract class IsarBank<T extends IsarObject> {
+abstract class IsarCollection<T extends IsarObject> {
   Future<T> get(int id);
 
   Future<void> put(T object);
@@ -12,8 +13,8 @@ abstract class IsarBank<T extends IsarObject> {
 
   Future<void> delete(T object);
 
-  QueryBuilder<T, IsarBank<T>, NoWhere, CanFilter, CanSort, CanExecute>
-      where() {
-    return QueryBuilder();
+  Query<T, IsarCollection<T>, QNoWhere, QCanFilter, dynamic, QCanSort,
+      QCanExecute> where() {
+    return Query();
   }
 }

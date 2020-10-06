@@ -3,13 +3,13 @@ import 'package:dartx/dartx.dart';
 
 String generateQueryFilter(ObjectInfo object) {
   var code = '''
-  extension ${object.type}QueryFilter on QueryBuilder<${object.type}, 
-    IsarBank<${object.type}>, dynamic, FilterT, dynamic, dynamic> {
+  extension ${object.type}QueryFilter<F> on Query<${object.type}, 
+    IsarCollection<${object.type}>, dynamic, QFilter, F, dynamic, dynamic> {
   ''';
-  for (var field in object.fields) {
-    if (field.type != DataType.Double) {
-      code += generateEqualTo(object.type, field);
-      code += generateNotEqualTo(object.type, field);
+  for (var property in object.properties) {
+    if (property.type != DataType.Double) {
+      code += generateEqualTo(object.type, property);
+      code += generateNotEqualTo(object.type, property);
     }
   }
   return '''
@@ -17,28 +17,28 @@ String generateQueryFilter(ObjectInfo object) {
   }''';
 }
 
-String fieldName(ObjectField field) {
-  return field.name.decapitalize();
+String propertyName(ObjectProperty property) {
+  return property.name.decapitalize();
 }
 
-String fieldParam(ObjectField field) {
-  return '${field.type.toTypeName()} ${field.name}';
+String propertyParam(ObjectProperty property) {
+  return '${property.type.toTypeName()} ${property.name}';
 }
 
-String generateEqualTo(String type, ObjectField field) {
+String generateEqualTo(String type, ObjectProperty property) {
   return '''
-  QueryBuilder<$type, IsarBank<$type>, dynamic, FilterAndOrT, CanSort, CanExecute> 
-    ${fieldName(field)}EqualTo(${fieldParam(field)}) {
-    return QueryBuilder();
+  Query<$type, IsarCollection<$type>, dynamic, QFilterAfterCond, F, QCanSort, QCanExecute> 
+    ${propertyName(property)}EqualTo(${propertyParam(property)}) {
+    return copy();
   }
   ''';
 }
 
-String generateNotEqualTo(String type, ObjectField field) {
+String generateNotEqualTo(String type, ObjectProperty property) {
   return '''
-  QueryBuilder<$type, IsarBank<$type>, dynamic, FilterAndOrT, CanSort, CanExecute> 
-    ${fieldName(field)}NotEqualTo(${fieldParam(field)}) {
-    return QueryBuilder();
+  Query<$type, IsarCollection<$type>, dynamic, QFilterAfterCond, F, QCanSort, QCanExecute> 
+    ${propertyName(property)}NotEqualTo(${propertyParam(property)}) {
+    return copy();
   }
   ''';
 }

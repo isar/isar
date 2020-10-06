@@ -4,7 +4,8 @@ import 'package:isar/src/native/util/extensions.dart';
 
 class BinaryReader {
   static const utf8Decoder = Utf8Decoder();
-  static const nullInt = 1 << 64;
+  static const nullInt = 1 << 32;
+  static const nullLong = 1 << 64;
 
   final Uint8List _buffer;
   final ByteData _byteData;
@@ -18,6 +19,25 @@ class BinaryReader {
     var value = _buffer[_offset] |
         _buffer[_offset + 1] << 8 |
         _buffer[_offset + 2] << 16 |
+        _buffer[_offset + 3] << 24;
+
+    _offset += 4;
+    return value;
+  }
+
+  int readIntOrNull() {
+    var value = readInt();
+    if (value == nullInt) {
+      return null;
+    } else {
+      return value;
+    }
+  }
+
+  int readLong() {
+    var value = _buffer[_offset] |
+        _buffer[_offset + 1] << 8 |
+        _buffer[_offset + 2] << 16 |
         _buffer[_offset + 3] << 24 |
         _buffer[_offset + 4] << 32 |
         _buffer[_offset + 5] << 40 |
@@ -28,9 +48,24 @@ class BinaryReader {
     return value;
   }
 
-  int? readIntOrNull() {
-    var value = readInt();
-    if (value == nullInt) {
+  int readLongOrNull() {
+    var value = readLong();
+    if (value == nullLong) {
+      return null;
+    } else {
+      return value;
+    }
+  }
+
+  double readFloat() {
+    var value = _byteData.getFloat32(_offset, Endian.little);
+    _offset += 4;
+    return value;
+  }
+
+  double readFloatOrNull() {
+    var value = readFloat();
+    if (value.isNaN) {
       return null;
     } else {
       return value;
@@ -43,7 +78,7 @@ class BinaryReader {
     return value;
   }
 
-  double? readDoubleOrNull() {
+  double readDoubleOrNull() {
     var value = readDouble();
     if (value.isNaN) {
       return null;
@@ -56,7 +91,7 @@ class BinaryReader {
     return _buffer[_offset++] == 1;
   }
 
-  bool? readBoolOrNull() {
+  bool readBoolOrNull() {
     var value = _buffer[_offset++];
     if (value == 0) {
       return null;
@@ -72,7 +107,7 @@ class BinaryReader {
     return value ?? '';
   }
 
-  String? readStringOrNull() {
+  String readStringOrNull() {
     var offset = _buffer.readUint32(_offset);
     if (offset == 0) {
       _offset += 8;

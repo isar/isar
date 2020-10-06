@@ -3,11 +3,11 @@ class Index {
 
   final bool unique;
 
-  final bool? hashValue;
+  final bool hashValue;
 
   const Index({
     this.composite = const [],
-    this.unique = false,
+    this.unique = true,
     this.hashValue,
   });
 }

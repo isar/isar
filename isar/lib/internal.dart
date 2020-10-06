@@ -9,7 +9,7 @@ export 'package:isar/src/native/bindings/structs.dart';
 export 'package:isar/src/native/util/native_call.dart';
 
 export 'package:isar/src/native/isar_impl.dart';
-export 'package:isar/src/native/isar_bank_impl.dart';
+export 'package:isar/src/native/isar_collection_impl.dart';
 export 'package:isar/src/native/type_adapter.dart';
 
-export 'package:isar/src/query_builder.dart';
+export 'package:isar/src/query.dart';

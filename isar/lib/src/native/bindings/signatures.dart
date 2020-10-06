@@ -17,15 +17,15 @@ typedef ICreateInstance = int Function(
   Pointer<Utf8> schema,
 );
 
-typedef NIGetBank = Uint8 Function(
+typedef NIGetCollection = Uint8 Function(
   Pointer isar,
-  Pointer<Pointer> bankPtr,
-  Uint32 bankIndex,
+  Pointer<Pointer> collectionPtr,
+  Uint32 collectionIndex,
 );
-typedef IGetBank = int Function(
+typedef IGetCollection = int Function(
   Pointer isar,
-  Pointer<Pointer> bankPtr,
-  int bankIndex,
+  Pointer<Pointer> collectionPtr,
+  int collectionIndex,
 );
 
 //TXN
@@ -58,47 +58,47 @@ typedef ITxnAbort = int Function(
 //CRUD
 
 typedef NIGet = Uint8 Function(
-  Pointer bank,
+  Pointer collection,
   Pointer txn,
   Pointer<RawObject> objectId,
 );
 typedef IGet = int Function(
-  Pointer bank,
+  Pointer collection,
   Pointer txn,
   Pointer<RawObject> objectId,
 );
 
 typedef NIPut = Uint8 Function(
-  Pointer bank,
+  Pointer collection,
   Pointer txn,
   Pointer<RawObject> obj,
 );
 typedef IPut = int Function(
-  Pointer bank,
+  Pointer collection,
   Pointer txn,
   Pointer<RawObject> obj,
 );
 
 typedef NIDelete = Uint8 Function(
-  Pointer bank,
+  Pointer collection,
   Pointer txn,
   Pointer<RawObject> objectId,
 );
 typedef IDelete = int Function(
-  Pointer bank,
+  Pointer collection,
   Pointer txn,
   Pointer<RawObject> objectId,
 );
 
 // QUERY
 typedef NCreateWC = Pointer Function(
-  Pointer bank,
+  Pointer collection,
   Uint32 index,
   Uint32 upperKeySize,
   Uint32 lowerKeySize,
 );
 typedef ICreateWC = Pointer Function(
-  Pointer bank,
+  Pointer collection,
   int index,
   int upperKeySize,
   int lowerKeySize,
