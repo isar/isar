@@ -1,0 +1,11 @@
+name: isar_annotation
+description: Isar database annotations
+version: 0.0.0
+
+repository: https://github.com/isar/isar
+
+environment:
+  sdk: '>=2.10.0 <3.0.0'
+
+dev_dependencies:
+  pedantic: ^1.9.0
