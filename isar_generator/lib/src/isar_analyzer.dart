@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:build/build.dart';
 import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:isar/isar.dart' as isar;
+import 'package:isar_annotation/isar_annotation.dart' as isar;
 import 'package:dartx/dartx.dart';
+
+const OBJECT_ID_SIZE = 14;
 
 class IsarAnalyzer extends Builder {
   final _annotationChecker = const TypeChecker.fromRuntime(isar.Collection);
@@ -34,7 +37,7 @@ class IsarAnalyzer extends Builder {
       err('Only classes may be annotated with @IsarCollection.', element);
     }
 
-    var modelClass = element as ClassElement;
+    final modelClass = element as ClassElement;
 
     if (modelClass.isAbstract) {
       err('Object class must not be abstract.', element);
@@ -44,38 +47,43 @@ class IsarAnalyzer extends Builder {
       err('Object class must be public.', element);
     }
 
-    var hasZeroArgConstructor = modelClass.constructors
+    final hasZeroArgConstructor = modelClass.constructors
         .any((c) => c.isPublic && !c.parameters.any((p) => !p.isOptional));
 
     if (!hasZeroArgConstructor) {
       err('Object class needs to have a public zero-arg constructor.');
     }
 
-    var dbName = getNameAnn(modelClass)?.name ?? modelClass.displayName;
+    final dbName = getNameAnn(modelClass)?.name ?? modelClass.displayName;
     if (dbName.isEmpty) {
       err('Empty model names are not allowed.', modelClass);
     }
 
-    var modelInfo = ObjectInfo(modelClass.displayName, dbName);
+    var properties = <ObjectProperty>[];
+    final indices = <ObjectIndex>[];
 
-    for (var property in modelClass.properties) {
+    for (var property in modelClass.fields) {
       var modelProperty = generateObjectProperty(property);
       if (modelProperty == null) continue;
-      modelInfo.properties.add(modelProperty);
+      properties.add(modelProperty);
 
-      modelInfo.indices.addAll(generateObjectIndices(modelProperty, property));
+      indices.addAll(generateObjectIndices(modelProperty, property));
     }
 
-    modelInfo.properties = modelInfo.properties
-        .sortedBy((f) => f.type.index)
-        .thenBy((f) => f.name);
+    properties = sortAndOffsetProperties(properties);
 
+    final modelInfo = ObjectInfo(
+      type: modelClass.displayName,
+      dbName: dbName,
+      properties: properties,
+      indices: indices,
+    );
     validateIndices(modelInfo);
 
     return modelInfo;
   }
 
-  ObjectProperty generateObjectProperty(PropertyElement property) {
+  ObjectProperty generateObjectProperty(FieldElement property) {
     if (!property.isPublic ||
         property.isFinal ||
         property.isConst ||
@@ -87,22 +95,33 @@ class IsarAnalyzer extends Builder {
       return null;
     }
 
-    var type = DataTypeX.fromTypeName(property.type.toString());
+    var type = DataTypeX.fromTypeName(
+      property.type.getDisplayString(withNullability: false),
+    );
     if (type == null) {
       err('Property has unsupported type. Use @IsarIgnore to ignore the property.',
           property);
     }
+
+    final nullable = property.type.nullabilitySuffix == NullabilitySuffix.none;
+    final elementNullable = true;
 
     var dbName = getNameAnn(property)?.name ?? property.displayName;
     if (dbName.isEmpty) {
       err('Empty property names are not allowed.', property);
     }
 
-    return ObjectProperty(property.displayName, dbName, type, true);
+    return ObjectProperty(
+      name: property.displayName,
+      dbName: dbName,
+      type: type,
+      nullable: nullable,
+      elementNullable: elementNullable,
+    );
   }
 
   Iterable<ObjectIndex> generateObjectIndices(
-      ObjectProperty property, PropertyElement element) {
+      ObjectProperty property, FieldElement element) {
     return getIndexAnns(element).map((index) {
       var properties = [property.name];
       properties.addAll(index.composite);
@@ -111,8 +130,26 @@ class IsarAnalyzer extends Builder {
       if (property.type == DataType.String && hashValue == null) {
         hashValue = false;
       }
-      return ObjectIndex(properties, index.unique, hashValue);
+      return ObjectIndex(
+        properties: properties,
+        unique: index.unique,
+        hashValue: hashValue,
+      );
     });
+  }
+
+  List<ObjectProperty> sortAndOffsetProperties(
+      List<ObjectProperty> properties) {
+    var offset = OBJECT_ID_SIZE;
+    return properties
+        .sortedBy((f) => f.type.index)
+        .thenBy((f) => f.name)
+        .mapIndexed((index, p) {
+      final size = p.type.staticSize;
+      final padding = -offset % size;
+      offset += padding + size;
+      return p.copyWith(staticPadding: padding);
+    }).toList();
   }
 
   void validateIndices(ObjectInfo model) {

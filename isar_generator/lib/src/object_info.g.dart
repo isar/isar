@@ -6,42 +6,52 @@ part of 'object_info.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ObjectInfo _$ObjectInfoFromJson(Map<String, dynamic> json) {
-  return ObjectInfo(
-    json['localName'] as String,
-    json['name'] as String,
-  )
-    ..properties = (json['properties'] as List)
-        .map((e) => ObjectProperty.fromJson(e as Map<String, dynamic>))
-        .toList()
-    ..indices = (json['indices'] as List)
-        .map((e) => ObjectIndex.fromJson(e as Map<String, dynamic>))
-        .toList();
-}
-
-Map<String, dynamic> _$ObjectInfoToJson(ObjectInfo instance) =>
-    <String, dynamic>{
-      'localName': instance.type,
-      'name': instance.dbName,
-      'properties': instance.properties.map((e) => e.toJson()).toList(),
-      'indices': instance.indices.map((e) => e.toJson()).toList(),
-    };
-
-ObjectProperty _$ObjectPropertyFromJson(Map<String, dynamic> json) {
-  return ObjectProperty(
-    json['localName'] as String,
-    json['name'] as String,
-    _$enumDecode(_$DataTypeEnumMap, json['type']),
-    json['nullable'] as bool,
+_$_ObjectInfo _$_$_ObjectInfoFromJson(Map<String, dynamic> json) {
+  return _$_ObjectInfo(
+    type: json['localName'] as String,
+    dbName: json['name'] as String,
+    properties: (json['properties'] as List)
+            ?.map((e) => e == null
+                ? null
+                : ObjectProperty.fromJson(e as Map<String, dynamic>))
+            ?.toList() ??
+        [],
+    indices: (json['indices'] as List)
+            ?.map((e) => e == null
+                ? null
+                : ObjectIndex.fromJson(e as Map<String, dynamic>))
+            ?.toList() ??
+        [],
   );
 }
 
-Map<String, dynamic> _$ObjectPropertyToJson(ObjectProperty instance) =>
+Map<String, dynamic> _$_$_ObjectInfoToJson(_$_ObjectInfo instance) =>
+    <String, dynamic>{
+      'localName': instance.type,
+      'name': instance.dbName,
+      'properties': instance.properties,
+      'indices': instance.indices,
+    };
+
+_$_ObjectProperty _$_$_ObjectPropertyFromJson(Map<String, dynamic> json) {
+  return _$_ObjectProperty(
+    name: json['localName'] as String,
+    dbName: json['name'] as String,
+    type: _$enumDecodeNullable(_$DataTypeEnumMap, json['type']),
+    staticPadding: json['staticPadding'] as int,
+    nullable: json['nullable'] as bool,
+    elementNullable: json['elementNullable'] as bool,
+  );
+}
+
+Map<String, dynamic> _$_$_ObjectPropertyToJson(_$_ObjectProperty instance) =>
     <String, dynamic>{
       'localName': instance.name,
       'name': instance.dbName,
       'type': _$DataTypeEnumMap[instance.type],
+      'staticPadding': instance.staticPadding,
       'nullable': instance.nullable,
+      'elementNullable': instance.elementNullable,
     };
 
 T _$enumDecode<T>(
@@ -65,27 +75,43 @@ T _$enumDecode<T>(
   return value ?? unknownValue;
 }
 
+T _$enumDecodeNullable<T>(
+  Map<T, dynamic> enumValues,
+  dynamic source, {
+  T unknownValue,
+}) {
+  if (source == null) {
+    return null;
+  }
+  return _$enumDecode<T>(enumValues, source, unknownValue: unknownValue);
+}
+
 const _$DataTypeEnumMap = {
-  DataType.Int: 0,
-  DataType.Double: 1,
-  DataType.Bool: 2,
-  DataType.String: 3,
-  DataType.Bytes: 4,
-  DataType.IntList: 5,
-  DataType.DoubleList: 6,
+  DataType.Bool: 0,
+  DataType.Int: 1,
+  DataType.Float: 2,
+  DataType.Long: 3,
+  DataType.Double: 4,
+  DataType.String: 5,
+  DataType.Bytes: 6,
   DataType.BoolList: 7,
   DataType.StringList: 8,
   DataType.BytesList: 9,
+  DataType.IntList: 10,
+  DataType.FloatList: 11,
+  DataType.LongList: 12,
+  DataType.DoubleList: 13,
 };
 
-ObjectIndex _$ObjectIndexFromJson(Map<String, dynamic> json) {
-  return ObjectIndex(
-      (json['properties'] as List).map((e) => e as String).toList(),
-      json['unique'] as bool,
-      json['hashValue'] as bool);
+_$_ObjectIndex _$_$_ObjectIndexFromJson(Map<String, dynamic> json) {
+  return _$_ObjectIndex(
+    properties: (json['properties'] as List)?.map((e) => e as String)?.toList(),
+    unique: json['unique'] as bool,
+    hashValue: json['hashValue'] as bool,
+  );
 }
 
-Map<String, dynamic> _$ObjectIndexToJson(ObjectIndex instance) =>
+Map<String, dynamic> _$_$_ObjectIndexToJson(_$_ObjectIndex instance) =>
     <String, dynamic>{
       'properties': instance.properties,
       'unique': instance.unique,

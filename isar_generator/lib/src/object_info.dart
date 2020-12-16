@@ -1,97 +1,75 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:dartx/dartx.dart';
 
 part 'object_info.g.dart';
+part 'object_info.freezed.dart';
 
-@JsonSerializable(nullable: false, explicitToJson: true)
-class ObjectInfo {
-  @JsonKey(name: 'localName')
-  final String type;
-  @JsonKey(name: 'name')
-  final String dbName;
+@freezed
+abstract class ObjectInfo with _$ObjectInfo {
+  const factory ObjectInfo({
+    @JsonKey(name: 'localName') String type,
+    @JsonKey(name: 'name') String dbName,
+    @Default([]) List<ObjectProperty> properties,
+    @Default([]) List<ObjectIndex> indices,
+  }) = _ObjectInfo;
 
-  List<ObjectProperty> properties = [];
-  List<ObjectIndex> indices = [];
+  factory ObjectInfo.fromJson(Map<String, dynamic> json) =>
+      _$ObjectInfoFromJson(json);
+}
 
-  ObjectInfo(this.type, this.dbName);
-
-  static ObjectInfo fromJson(Map<String, dynamic> json) {
-    return _$ObjectInfoFromJson(json);
-  }
-
-  Map<String, dynamic> toJson() {
-    return _$ObjectInfoToJson(this);
-  }
-
-  int getStaticSize() {
-    return properties.sumBy((f) {
-      if (f.type == DataType.Bool) {
-        return 1;
-      } else {
-        return 8;
-      }
-    }).toInt();
-  }
-
+extension ObjectPropertyX on ObjectInfo {
   ObjectProperty getProperty(String name) {
     return properties.filter((it) => it.name == name).first;
   }
-}
 
-@JsonSerializable(nullable: false, explicitToJson: true)
-class ObjectProperty {
-  @JsonKey(name: 'localName')
-  final String name;
-  @JsonKey(name: 'name')
-  final String dbName;
-  final DataType type;
-  final bool nullable;
-  final bool elementNullable;
-
-  ObjectProperty(
-      this.name, this.dbName, this.type, this.nullable, this.elementNullable);
-
-  static ObjectProperty fromJson(Map<String, dynamic> json) {
-    return _$ObjectPropertyFromJson(json);
-  }
-
-  Map<String, dynamic> toJson() {
-    return _$ObjectPropertyToJson(this);
+  int getStaticSize() {
+    return properties.sumBy((p) => p.type.staticSize + p.staticPadding).toInt();
   }
 }
 
-@JsonSerializable(nullable: false, explicitToJson: true)
-class ObjectIndex {
-  List<String> properties;
-  bool unique;
-  bool hashValue;
+@freezed
+abstract class ObjectProperty with _$ObjectProperty {
+  const factory ObjectProperty({
+    @JsonKey(name: 'localName') String name,
+    @JsonKey(name: 'name') String dbName,
+    DataType type,
+    int staticPadding,
+    bool nullable,
+    bool elementNullable,
+  }) = _ObjectProperty;
 
-  ObjectIndex(this.properties, this.unique, this.hashValue);
+  factory ObjectProperty.fromJson(Map<String, dynamic> json) =>
+      _$ObjectPropertyFromJson(json);
+}
 
-  static ObjectIndex fromJson(Map<String, dynamic> json) {
-    return _$ObjectIndexFromJson(json);
-  }
+@freezed
+abstract class ObjectIndex with _$ObjectIndex {
+  const factory ObjectIndex({
+    List<String> properties,
+    bool unique,
+    bool hashValue,
+  }) = _ObjectIndex;
 
-  Map<String, dynamic> toJson() {
-    return _$ObjectIndexToJson(this);
-  }
+  factory ObjectIndex.fromJson(Map<String, dynamic> json) =>
+      _$ObjectIndexFromJson(json);
 }
 
 enum DataType {
   @JsonValue(0)
-  Int,
+  Bool,
 
   @JsonValue(1)
-  Long,
+  Int,
 
   @JsonValue(2)
   Float,
 
   @JsonValue(3)
-  Double,
+  Long,
 
   @JsonValue(4)
-  Bool,
+  Double,
 
   @JsonValue(5)
   String,
@@ -100,37 +78,58 @@ enum DataType {
   Bytes,
 
   @JsonValue(7)
-  IntList,
-
-  @JsonValue(8)
-  LongList,
-
-  @JsonValue(9)
-  FloatList,
-
-  @JsonValue(10)
-  DoubleList,
-
-  @JsonValue(11)
   BoolList,
 
-  @JsonValue(12)
+  @JsonValue(8)
   StringList,
 
-  @JsonValue(13)
+  @JsonValue(9)
   BytesList,
+
+  @JsonValue(10)
+  IntList,
+
+  @JsonValue(11)
+  FloatList,
+
+  @JsonValue(12)
+  LongList,
+
+  @JsonValue(13)
+  DoubleList,
 }
 
 extension DataTypeX on DataType {
-  bool isDynamic() {
+  bool get isDynamic {
     return index >= DataType.String.index;
   }
 
-  int staticSize() {
+  int get staticSize {
     if (this == DataType.Bool) {
       return 1;
+    } else if (this == DataType.Int || this == DataType.Float) {
+      return 4;
     } else {
       return 8;
+    }
+  }
+
+  int get elementAlignment {
+    switch (this) {
+      case DataType.String:
+      case DataType.Bytes:
+      case DataType.BoolList:
+      case DataType.StringList:
+      case DataType.BytesList:
+        return 1;
+      case DataType.IntList:
+      case DataType.FloatList:
+        return 4;
+      case DataType.LongList:
+      case DataType.DoubleList:
+        return 8;
+      default:
+        return null;
     }
   }
 
@@ -142,6 +141,7 @@ extension DataTypeX on DataType {
   }
 
   static DataType fromTypeName(String name) {
+    print(name);
     return _typeMap[name][0];
   }
 }
@@ -154,7 +154,7 @@ const _typeMap = {
   'Uint8List': [DataType.Bytes],
   'List<int>': [DataType.IntList, DataType.LongList],
   'List<double>': [DataType.FloatList, DataType.DoubleList],
-  'List<bool>': [DataType.Bool],
-  'List<String>': [DataType.String],
+  'List<bool>': [DataType.BoolList],
+  'List<String>': [DataType.StringList],
   'List<Uint8List>': [DataType.BytesList]
 };

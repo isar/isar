@@ -1,6 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_annotation/isar_annotation.dart';
 
 final _ignoreChecker = const TypeChecker.fromRuntime(Ignore);
 final _nameChecker = const TypeChecker.fromRuntime(Name);

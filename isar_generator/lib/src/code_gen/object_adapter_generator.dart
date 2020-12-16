@@ -11,53 +11,120 @@ String generateObjectAdapter(ObjectInfo object) {
 
 String _generateSerialize(ObjectInfo object) {
   var code = 'void serialize(${object.type} object, RawObject raw) {';
-  var hasDynamicProperties = object.properties.any((it) => it.type.isDynamic());
-  if (hasDynamicProperties) {
+  var staticSize = object.getStaticSize();
+  code += 'final staticSize = $staticSize;';
+  var dynamicProperties =
+      object.properties.where((it) => it.type.isDynamic).toList();
+  if (dynamicProperties.isNotEmpty) {
     code += 'var dynamicSize = 0;';
-    for (var property in object.properties.where((it) => it.type.isDynamic())) {
-      if (property.type == DataType.String) {
+    for (var property in dynamicProperties) {
+      if (property.type.elementAlignment != 1) {
         code += '''
-          var ${property.name}Bytes = utf8Encoder.convert(object.${property.name});
+        final ${property.name}Padding = -(staticSize + dynamicSize) % ${property.type.elementAlignment};
+        dynamicSize += ${property.name}Padding;
+        ''';
+      }
+      switch (property.type) {
+        case DataType.String:
+          code += '''
+          final ${property.name}Bytes = utf8Encoder.convert(object.${property.name});
           dynamicSize += ${property.name}Bytes.length;
           ''';
-      } else if (property.type == DataType.Bytes ||
-          property.type == DataType.BoolList) {
-        code += 'dynamicSize += object.${property.name}.length;';
-      } else if (property.type == DataType.IntList ||
-          property.type == DataType.DoubleList) {
-        code += 'dynamicSize += object.${property.name}.length * 8;';
+          break;
+        case DataType.Bytes:
+        case DataType.BoolList:
+          code += 'dynamicSize += object.${property.name}.length;';
+          break;
+        case DataType.StringList:
+          code += '''
+          dynamicSize += object.${property.name}.length * 8;
+          final ${property.name}Bytes = <Uint8List>[];
+          for (var str in object.${property.name}) {
+            final bytes = utf8Encoder.convert(str);
+            ${property.name}Bytes.add(bytes);
+            dynamicSize += bytes.length;
+          }
+          ''';
+          break;
+        case DataType.BytesList:
+          code += '''
+          dynamicSize += object.${property.name}.length * 8;
+          for (var bytes in object.${property.name}) {
+            dynamicSize += bytes.length;
+          }
+          ''';
+          break;
+        case DataType.IntList:
+        case DataType.FloatList:
+          code += 'dynamicSize += object.${property.name}.length * 4;';
+          break;
+        case DataType.LongList:
+        case DataType.DoubleList:
+          code += 'dynamicSize += object.${property.name}.length * 8;';
+          break;
+        default:
+          break;
       }
     }
   }
-  var staticSize = object.getStaticSize();
+
   code += '''
-    var bufferSize = $staticSize + dynamicSize;
-    var ptr = allocate<Uint8>(count: bufferSize);
-    var buffer = ptr.asTypedList(bufferSize);
-    var writer = BinaryWriter(buffer, $staticSize);
+    final bufferSize = staticSize + dynamicSize;
+    final ptr = allocate<Uint8>(count: bufferSize);
+    final buffer = ptr.asTypedList(bufferSize);
+    final writer = BinaryWriter(buffer, staticSize);
     ''';
   for (var property in object.properties) {
+    if (property.staticPadding != 0) {
+      code += 'writer.skip(${property.staticPadding});';
+    }
+    if (property.type.isDynamic && property.type.elementAlignment != 1) {
+      code += 'writer.skipDynamic(${property.name}Padding);';
+    }
     var accessor = 'object.${property.name}';
-    if (property.type == DataType.Int) {
-      code += 'writer.writeInt($accessor);';
-    } else if (property.type == DataType.Double) {
-      code += 'writer.writeDouble($accessor);';
-    } else if (property.type == DataType.Bool) {
-      code += 'writer.writeBool($accessor);';
-    } else if (property.type == DataType.String) {
-      code += 'writer.writeBytes(${property.name}Bytes);';
-    } else if (property.type == DataType.Bytes) {
-      code += 'writer.writeBytes($accessor);';
-    } else if (property.type == DataType.IntList) {
-      code += 'writer.writeIntList($accessor);';
-    } else if (property.type == DataType.DoubleList) {
-      code += 'writer.writeDoubleList($accessor);';
-    } else if (property.type == DataType.BoolList) {
-      code += 'writer.writeBoolList($accessor);';
-    } else if (property.type == DataType.StringList) {
-      code += 'writer.writeBytesList($accessor);';
-    } else if (property.type == DataType.BytesList) {
-      code += 'writer.writeBytesList($accessor);';
+    switch (property.type) {
+      case DataType.Bool:
+        code += 'writer.writeBool($accessor);';
+        break;
+      case DataType.Int:
+        code += 'writer.writeInt($accessor);';
+        break;
+      case DataType.Float:
+        code += 'writer.writeFloat($accessor);';
+        break;
+      case DataType.Long:
+        code += 'writer.writeLong($accessor);';
+        break;
+      case DataType.Double:
+        code += 'writer.writeDouble($accessor);';
+        break;
+      case DataType.String:
+        code += 'writer.writeBytes(${property.name}Bytes);';
+        break;
+      case DataType.Bytes:
+        code += 'writer.writeBytes($accessor);';
+        break;
+      case DataType.BoolList:
+        code += 'writer.writeBoolList($accessor);';
+        break;
+      case DataType.StringList:
+        code += 'writer.writeBytesList($accessor);';
+        break;
+      case DataType.BytesList:
+        code += 'writer.writeBytesList(${property.name}Bytes);';
+        break;
+      case DataType.IntList:
+        code += 'writer.writeIntList($accessor);';
+        break;
+      case DataType.LongList:
+        code += 'writer.writeLongList($accessor);';
+        break;
+      case DataType.FloatList:
+        code += 'writer.writeFloatList($accessor);';
+        break;
+      case DataType.DoubleList:
+        code += 'writer.writeDoubleList($accessor);';
+        break;
     }
   }
 
@@ -83,28 +150,54 @@ String _generateDeserialize(ObjectInfo object) {
       var object = ${object.type}();
     ''';
   for (var property in object.properties) {
+    if (property.staticPadding != 0) {
+      code += 'reader.skip(${property.staticPadding});';
+    }
     var accessor = 'object.${property.name}';
     var orNull = property.nullable ? 'OrNull' : '';
-    if (property.type == DataType.Int) {
-      code += '$accessor = reader.readInt$orNull();';
-    } else if (property.type == DataType.Double) {
-      code += '$accessor = reader.readDouble$orNull();';
-    } else if (property.type == DataType.Bool) {
-      code += '$accessor = reader.readBool$orNull();';
-    } else if (property.type == DataType.String) {
-      code += '$accessor = reader.readString$orNull();';
-    } else if (property.type == DataType.Bytes) {
-      code += '$accessor = reader.readBytes$orNull();';
-    } else if (property.type == DataType.IntList) {
-      code += '$accessor = reader.readIntList$orNull();';
-    } else if (property.type == DataType.DoubleList) {
-      code += '$accessor = reader.readDoubleList$orNull();';
-    } else if (property.type == DataType.BoolList) {
-      code += '$accessor = reader.readBoolList$orNull();';
-    } else if (property.type == DataType.StringList) {
-      code += '$accessor = reader.readStringList$orNull();';
-    } else if (property.type == DataType.BytesList) {
-      code += '$accessor = reader.readBytesList$orNull();';
+    switch (property.type) {
+      case DataType.Bool:
+        code += '$accessor = reader.readBool$orNull();';
+        break;
+      case DataType.Int:
+        code += '$accessor = reader.readInt$orNull();';
+        break;
+      case DataType.Float:
+        code += '$accessor = reader.readFloat$orNull();';
+        break;
+      case DataType.Long:
+        code += '$accessor = reader.readlong$orNull();';
+        break;
+      case DataType.Double:
+        code += '$accessor = reader.readDouble$orNull();';
+        break;
+      case DataType.String:
+        code += '$accessor = reader.readString$orNull();';
+        break;
+      case DataType.Bytes:
+        code += '$accessor = reader.readBytes$orNull();';
+        break;
+      case DataType.BoolList:
+        code += '$accessor = reader.readBoolList$orNull();';
+        break;
+      case DataType.StringList:
+        code += '$accessor = reader.readStringList$orNull();';
+        break;
+      case DataType.BytesList:
+        code += '$accessor = reader.readBytesList$orNull();';
+        break;
+      case DataType.IntList:
+        code += '$accessor = reader.readIntList$orNull();';
+        break;
+      case DataType.FloatList:
+        code += '$accessor = reader.readFloatList$orNull();';
+        break;
+      case DataType.LongList:
+        code += '$accessor = reader.readLongList$orNull();';
+        break;
+      case DataType.DoubleList:
+        code += '$accessor = reader.readDoubleList$orNull();';
+        break;
     }
   }
 

@@ -31,7 +31,7 @@ class IsarCodeGenerator extends Builder {
 
   @override
   FutureOr<void> build(BuildStep buildStep) async {
-    final files = Map<String, Iterable<ObjectInfo>>();
+    final files = <String, Iterable<ObjectInfo>>{};
     final glob = Glob(dir(buildStep) + '/**.isarobject.json');
     await for (final input in buildStep.findAssets(glob)) {
       var json = JsonDecoder().convert(await buildStep.readAsString(input));
@@ -84,15 +84,18 @@ class IsarCodeGenerator extends Builder {
 
     $collectionVars
     ${generateIsarOpen(objects)}
-    $getCollectionExtensions
-    $queryWhereExtensions
-    $queryFilterExtensions      
+        
 
     $objectAdapters
 
     const _schema = '$schemaJson';
     ''';
 
+    //$getCollectionExtensions
+    //$queryWhereExtensions
+    //$queryFilterExtensions
+
+    print(code);
     code = DartFormatter().format(code);
 
     final codeId =
