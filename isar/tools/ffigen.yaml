@@ -1,0 +1,19 @@
+name: IsarCoreBindings
+output: 'lib/src/native/bindings.dart'
+headers:
+  entry-points:
+    - 'isar-dart.h'
+
+functions:
+  include:
+    - isar_.*
+
+macros:
+  include:
+    - ISAR_.*
+
+structs:
+  include:
+    - RawObject
+    - RawOid
+    

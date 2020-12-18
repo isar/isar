@@ -1,4 +1,4 @@
-import 'package:isar/src/native/bindings/structs.dart';
+import 'package:isar/src/native/bindings.dart';
 
 abstract class TypeAdapter<T> {
   void serialize(T object, RawObject rawObject);

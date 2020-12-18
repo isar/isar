@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:isar/src/native/binary/binary_reader.dart';
 import 'package:isar/src/native/util/extensions.dart';
 
+const _maxInt = 4294967295;
+
 class BinaryWriter {
   static const utf8Encoder = Utf8Encoder();
 
@@ -19,31 +21,40 @@ class BinaryWriter {
         _buffer = buffer,
         _byteData = ByteData.view(buffer.buffer);
 
-  void writeInt(int value) {
+  void skip(int bytes) {
+    _offset += bytes;
+  }
+
+  void skipDynamic(int bytes) {
+    _dynamicOffset += bytes;
+  }
+
+  void writeInt(int? value) {
     value ??= BinaryReader.nullInt;
-    _buffer.writeUint32(_offset, value);
+    assert(value <= _maxInt, 'Illegal value for @Size32 field.');
+    _buffer.writeInt32(_offset, value);
     _offset += 4;
   }
 
-  void writeLong(int value) {
+  void writeLong(int? value) {
     value ??= BinaryReader.nullInt;
-    _buffer.writeUint64(_offset, value);
+    _buffer.writeInt64(_offset, value);
     _offset += 8;
   }
 
-  void writeFloat(double value) {
+  void writeFloat(double? value) {
     value ??= double.nan;
     _byteData.setFloat32(_offset, value, Endian.little);
     _offset += 4;
   }
 
-  void writeDouble(double value) {
+  void writeDouble(double? value) {
     value ??= double.nan;
     _byteData.setFloat64(_offset, value, Endian.little);
     _offset += 8;
   }
 
-  void writeBool(bool value) {
+  void writeBool(bool? value) {
     if (value == null) {
       _buffer[_offset++] = 0;
     } else {
@@ -51,13 +62,13 @@ class BinaryWriter {
     }
   }
 
-  void writeBytes(Uint8List value) {
+  void writeBytes(Uint8List? value) {
     if (value == null) {
-      _buffer.writeUint64(_offset, 0);
+      _buffer.writeInt64(_offset, 0);
     } else {
       var bytesLen = value.length;
-      _buffer.writeUint32(_offset, _dynamicOffset);
-      _buffer.writeUint32(_offset + 4, bytesLen);
+      _buffer.writeInt32(_offset, _dynamicOffset);
+      _buffer.writeInt32(_offset + 4, bytesLen);
       _buffer.setRange(_dynamicOffset, _dynamicOffset + bytesLen, value);
       _dynamicOffset += bytesLen;
     }
@@ -65,42 +76,45 @@ class BinaryWriter {
     _offset += 8;
   }
 
-  void writeIntList(List<int> values) {
+  void writeBoolList(List<bool?>? values) {
     if (values == null) {
-      _buffer.writeUint64(_offset, 0);
+      _buffer.writeInt64(_offset, 0);
     } else {
-      _buffer.writeUint32(_offset, _dynamicOffset);
-      _buffer.writeUint32(_offset + 4, values.length);
+      _buffer.writeInt32(_offset, _dynamicOffset);
+      _buffer.writeInt32(_offset + 4, values.length);
 
       for (var value in values) {
-        _buffer.writeUint32(_dynamicOffset, value ?? BinaryReader.nullInt);
+        _buffer[_dynamicOffset++] = value == null
+            ? BinaryReader.nullBool
+            : value
+                ? BinaryReader.trueBool
+                : BinaryReader.falseBool;
+      }
+    }
+    _offset += 8;
+  }
+
+  void writeIntList(List<int?>? values) {
+    if (values == null) {
+      _buffer.writeInt64(_offset, 0);
+    } else {
+      _buffer.writeInt32(_offset, _dynamicOffset);
+      _buffer.writeInt32(_offset + 4, values.length);
+
+      for (var value in values) {
+        _buffer.writeInt32(_dynamicOffset, value ?? BinaryReader.nullInt);
         _dynamicOffset += 4;
       }
     }
     _offset += 8;
   }
 
-  void writeLongList(List<int> values) {
+  void writeFloatList(List<double?>? values) {
     if (values == null) {
-      _buffer.writeUint64(_offset, 0);
+      _buffer.writeInt64(_offset, 0);
     } else {
-      _buffer.writeUint32(_offset, _dynamicOffset);
-      _buffer.writeUint32(_offset + 4, values.length);
-
-      for (var value in values) {
-        _buffer.writeUint64(_dynamicOffset, value ?? BinaryReader.nullInt);
-        _dynamicOffset += 8;
-      }
-    }
-    _offset += 8;
-  }
-
-  void writeFloatList(List<double> values) {
-    if (values == null) {
-      _buffer.writeUint64(_offset, 0);
-    } else {
-      _buffer.writeUint32(_offset, _dynamicOffset);
-      _buffer.writeUint32(_offset + 4, values.length);
+      _buffer.writeInt32(_offset, _dynamicOffset);
+      _buffer.writeInt32(_offset + 4, values.length);
 
       for (var value in values) {
         _byteData.setFloat32(_dynamicOffset, value ?? double.nan);
@@ -110,12 +124,27 @@ class BinaryWriter {
     _offset += 8;
   }
 
-  void writeDoubleList(List<double> values) {
+  void writeLongList(List<int?>? values) {
     if (values == null) {
-      _buffer.writeUint64(_offset, 0);
+      _buffer.writeInt64(_offset, 0);
     } else {
-      _buffer.writeUint32(_offset, _dynamicOffset);
-      _buffer.writeUint32(_offset + 4, values.length);
+      _buffer.writeInt32(_offset, _dynamicOffset);
+      _buffer.writeInt32(_offset + 4, values.length);
+
+      for (var value in values) {
+        _buffer.writeInt64(_dynamicOffset, value ?? BinaryReader.nullInt);
+        _dynamicOffset += 8;
+      }
+    }
+    _offset += 8;
+  }
+
+  void writeDoubleList(List<double?>? values) {
+    if (values == null) {
+      _buffer.writeInt64(_offset, 0);
+    } else {
+      _buffer.writeInt32(_offset, _dynamicOffset);
+      _buffer.writeInt32(_offset + 4, values.length);
 
       for (var value in values) {
         _byteData.setFloat64(_dynamicOffset, value ?? double.nan);
@@ -125,30 +154,12 @@ class BinaryWriter {
     _offset += 8;
   }
 
-  void writeBoolList(List<bool> values) {
+  void writeBytesList(List<Uint8List?>? values) {
     if (values == null) {
-      _buffer.writeUint64(_offset, 0);
+      _buffer.writeInt64(_offset, 0);
     } else {
-      _buffer.writeUint32(_offset, _dynamicOffset);
-      _buffer.writeUint32(_offset + 4, values.length);
-
-      for (var value in values) {
-        _buffer[_dynamicOffset++] = value == null
-            ? 0
-            : value
-                ? 1
-                : 2;
-      }
-    }
-    _offset += 8;
-  }
-
-  void writeBytesList(List<Uint8List> values) {
-    if (values == null) {
-      _buffer.writeUint64(_offset, 0);
-    } else {
-      _buffer.writeUint32(_offset, _dynamicOffset);
-      _buffer.writeUint32(_offset + 4, values.length);
+      _buffer.writeInt32(_offset, _dynamicOffset);
+      _buffer.writeInt32(_offset + 4, values.length);
       // TODO
     }
 

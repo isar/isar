@@ -3,9 +3,8 @@ export 'package:isar/isar.dart';
 export 'package:isar/src/native/binary/binary_reader.dart';
 export 'package:isar/src/native/binary/binary_writer.dart';
 
-export 'package:isar/src/native/bindings/bindings.dart';
-export 'package:isar/src/native/bindings/structs.dart';
-
+export 'package:isar/src/native/bindings.dart';
+export 'package:isar/src/native/isar_core.dart';
 export 'package:isar/src/native/util/native_call.dart';
 
 export 'package:isar/src/native/isar_impl.dart';

@@ -81,6 +81,7 @@ class IsarCodeGenerator extends Builder {
     export 'package:isar/isar.dart';
 
     const utf8Encoder = Utf8Encoder();
+    const utf8Decoder = Utf8Decoder();
 
     $collectionVars
     ${generateIsarOpen(objects)}

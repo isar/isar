@@ -1,3 +1,0 @@
-class Collection {
-  const Collection();
-}

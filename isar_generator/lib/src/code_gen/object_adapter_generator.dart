@@ -108,10 +108,10 @@ String _generateSerialize(ObjectInfo object) {
         code += 'writer.writeBoolList($accessor);';
         break;
       case DataType.StringList:
-        code += 'writer.writeBytesList($accessor);';
+        code += 'writer.writeBytesList(${property.name}Bytes);';
         break;
       case DataType.BytesList:
-        code += 'writer.writeBytesList(${property.name}Bytes);';
+        code += 'writer.writeBytesList($accessor);';
         break;
       case DataType.IntList:
         code += 'writer.writeIntList($accessor);';
@@ -131,13 +131,10 @@ String _generateSerialize(ObjectInfo object) {
   return '''
       $code
       
-      if (object.id != null) {
-        raw.oid = object.id;
-      } else {
-        raw.oid = 0;
-      }
+      raw.oid = object.id;
+      
       raw.data = ptr;
-      raw.length = bufferSize;
+      raw.data_length = bufferSize;
     }
     ''';
 }

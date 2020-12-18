@@ -1,38 +1,51 @@
 import 'dart:async';
 
 import 'package:isar/src/isar_collection.dart';
+import 'package:isar/src/object_id.dart';
 
 class IsarObject {
-  int _id;
-  IsarCollection _collection;
+  ObjectId? _id;
+  IsarCollection? _collection;
 
-  int get id => _id;
+  ObjectId? get id => _id;
 
-  IsarCollection get collection => _collection;
+  IsarCollection? get collection => _collection;
 
-  DateTime _createdAt;
+  DateTime? _createdAt;
 
-  DateTime get createdAt {
+  DateTime? get createdAt {
     if (_createdAt == null && _id != null) {
-      var secondsSinceEpoch = (_id >> 16) & 0xFFFFFFFF;
-      _createdAt =
-          DateTime.fromMillisecondsSinceEpoch(secondsSinceEpoch * 1000);
+      var millisSinceEpoch = _id!.time! * 1000;
+      _createdAt = DateTime.fromMillisecondsSinceEpoch(millisSinceEpoch);
     }
     return _createdAt;
   }
 
-  FutureOr<void> save() {
-    return collection.put(this);
+  Future<void> save() {
+    return collection!.put(this);
   }
 
-  FutureOr<void> delete() {
-    return collection.delete(this);
+  void saveSync() {
+    return collection!.putSync(this);
+  }
+
+  Future<void> delete() {
+    return collection!.delete(this);
+  }
+
+  void deleteSync() {
+    return collection!.deleteSync(this);
   }
 }
 
 extension ObjectInternal on IsarObject {
-  void init(int id, IsarCollection collection) {
+  void init(ObjectId id, IsarCollection collection) {
     _id = id;
     _collection = collection;
+  }
+
+  void uninit() {
+    _id = null;
+    _collection = null;
   }
 }

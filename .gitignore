@@ -40,6 +40,7 @@ version
 .dart_tool/
 .flutter-plugins
 .packages
+.metadata
 .pub-cache/
 .pub/
 build/
