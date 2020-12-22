@@ -91,10 +91,12 @@ class IsarCodeGenerator extends Builder {
     $getCollectionExtensions
 
     $objectAdapters
+
+    $queryWhereExtensions
     ''';
 
     //
-    //$queryWhereExtensions
+    //
     //$queryFilterExtensions
 
     print(code);

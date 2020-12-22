@@ -6,9 +6,9 @@ import 'package:isar/src/object_id.dart';
 import 'package:isar/src/query.dart';
 
 abstract class IsarCollection<T extends IsarObject> {
-  Future<T> get(ObjectId id);
+  Future<T?> get(ObjectId id);
 
-  T getSync(ObjectId id);
+  T? getSync(ObjectId id);
 
   Future<void> put(T object);
 

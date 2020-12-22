@@ -13,8 +13,12 @@ class IsarCoreUtils {
 late IsarCoreBindings IsarCore;
 
 extension RawObjectX on RawObject {
-  ObjectId get oid {
-    return ObjectIdImpl(oid_time, oid_rand_counter);
+  ObjectId? get oid {
+    if (oid_time != 0) {
+      return ObjectIdImpl(oid_time, oid_rand_counter);
+    } else {
+      return null;
+    }
   }
 
   set oid(ObjectId? oid) {

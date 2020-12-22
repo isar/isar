@@ -6,7 +6,7 @@ String generateQueryWhere(ObjectInfo object) {
     var properties =
         index.properties.map((f) => object.getProperty(f)).toList();
     return generateSortedBy(i, object.type, properties);
-  });
+  }).join('\n');
 
   var where = object.indices.mapIndexed((i, index) {
     var code = '';
@@ -34,10 +34,10 @@ String generateQueryWhere(ObjectInfo object) {
       }
     }
     return code;
-  });
+  }).join('\n');
 
   return '''
-  extension ${object.type}QueryWhere on Query<${object.type}, 
+  extension ${object.type}QueryWhereSort on Query<${object.type}, 
     IsarCollection<${object.type}>, QNoWhere, dynamic, dynamic, dynamic, dynamic> {
     $whereSort
   }

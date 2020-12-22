@@ -59,7 +59,6 @@ enum ConditionType {
   Gt,
   Lt,
   StartsWith,
-  EndsWith,
   Contains,
   Between,
 }
@@ -184,17 +183,45 @@ extension QueryFilterTwoGroupsEnd<T extends IsarObject,
   }
 }
 
-/*extension QueryExecute<T extends IsarObject, B extends IsarCollection<T>>
+extension QueryExecute<T extends IsarObject, B extends IsarCollection<T>>
     on Query<T, B, dynamic, dynamic, QNoGroups, dynamic, QCanExecute> {
-  Future<T> findFirst() {}
+  Future<T> findFirst() {
+    throw UnimplementedError();
+  }
 
-  T findFirstSync() {}
+  T findFirstSync() {
+    throw UnimplementedError();
+  }
 
-  Future<List<T>> findAll() {}
+  Future<List<T>> findAll() {
+    throw UnimplementedError();
+  }
 
-  List<T> findAllSync() {}
+  List<T> findAllSync() {
+    throw UnimplementedError();
+  }
 
-  Future<int> count() {}
+  Future<int> count() {
+    throw UnimplementedError();
+  }
 
-  int countSync() {}
-}*/
+  int countSync() {
+    throw UnimplementedError();
+  }
+
+  Future<bool> deleteFirst() {
+    throw UnimplementedError();
+  }
+
+  T deleteFirstSync() {
+    throw UnimplementedError();
+  }
+
+  Future<int> deleteAll() {
+    throw UnimplementedError();
+  }
+
+  int deleteAllSync() {
+    throw UnimplementedError();
+  }
+}

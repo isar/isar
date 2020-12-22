@@ -17,7 +17,7 @@ class IsarImpl extends Isar {
   IsarImpl(this.isarPtr);
 
   @override
-  Future<T> txn<T>(bool write, Future<T> Function(Isar isar) callback) async {
+  Future<T> txn<T>(Future<T> Function(Isar isar) callback) async {
     if (Zone.current[zoneTxn] != null) {
       throw 'Nested transactions are not supported yet.';
     }
@@ -25,7 +25,14 @@ class IsarImpl extends Isar {
   }
 
   @override
-  T txnSync<T>(bool write, T Function(Isar isar) callback) {
+  Future<T> writeTxn<T>(Future<T> Function(Isar isar) callback) async {
+    if (Zone.current[zoneTxn] != null) {
+      throw 'Nested transactions are not supported yet.';
+    }
+    throw '';
+  }
+
+  T _txnSync<T>(bool write, T Function(Isar isar) callback) {
     if (_currentTxnSync != null || Zone.current[zoneTxn] != null) {
       throw 'Nested transactions are not supported.';
     }
@@ -48,6 +55,16 @@ class IsarImpl extends Isar {
     nativeCall(IsarCore.isar_txn_commit(txn));
 
     return result;
+  }
+
+  @override
+  T txnSync<T>(T Function(Isar isar) callback) {
+    return _txnSync(false, callback);
+  }
+
+  @override
+  T writeTxnSync<T>(T Function(Isar isar) callback) {
+    return _txnSync(true, callback);
   }
 
   Future<T> optionalTxn<T>(bool write, T Function(Pointer txn) callback) {

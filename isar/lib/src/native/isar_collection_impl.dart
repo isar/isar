@@ -23,17 +23,17 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
     final buffer = rawObj.data.asTypedList(rawObj.data_length);
     final reader = BinaryReader(buffer);
     final object = _adapter.deserialize(reader);
-    object.init(rawObj.oid, this);
+    object.init(rawObj.oid!, this);
     return object;
   }
 
   @override
-  Future<T> get(ObjectId id) {
+  Future<T?> get(ObjectId id) {
     throw UnimplementedError();
   }
 
   @override
-  T getSync(ObjectId id) {
+  T? getSync(ObjectId id) {
     final txn = isar.getTxnSync(false);
 
     final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
@@ -41,7 +41,12 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
     rawObj.oid = id;
 
     nativeCall(IsarCore.isar_get(_collection, txn!, rawObjPtr));
-    return deserializeObject(rawObj);
+
+    if (rawObj.oid != null) {
+      return deserializeObject(rawObj);
+    } else {
+      return null;
+    }
   }
 
   Pointer<RawObject> serializeObject(T object) {
@@ -69,7 +74,7 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
     final rawObj = rawObjPtr.ref;
     nativeCall(IsarCore.isar_put(_collection, txn!, rawObjPtr));
 
-    object.init(rawObj.oid, this);
+    object.init(rawObj.oid!, this);
 
     IsarCore.isar_free_raw_obj(rawObjPtr);
   }
