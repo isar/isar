@@ -138,7 +138,7 @@ class BinaryReader {
     return list;
   }
 
-  List<bool?> readBoolNullList() {
+  List<bool?> readBoolOrNullList() {
     var offset = _buffer.readInt32(_offset);
     var length = _buffer.readInt32(_offset + 4);
     _offset += 8;
@@ -155,6 +155,21 @@ class BinaryReader {
     return list;
   }
 
+  List<Uint8List> readBytesList() {
+    var offset = _buffer.readInt32(_offset);
+    var length = _buffer.readInt32(_offset + 4);
+    _offset += 8;
+
+    final list = <Uint8List>[];
+    for (var i = 0; i < length; i++) {
+      var elementOffset = _buffer.readInt32(offset + i * 8);
+      var elementLength = _buffer.readInt32(_offset + i * 8 + 4);
+      final bytes = _buffer.view(elementOffset, elementLength);
+      list[i] = bytes.sublist(0);
+    }
+    return list;
+  }
+
   List<int> readIntList() {
     var offset = _buffer.readInt32(_offset);
     var length = _buffer.readInt32(_offset + 4);
@@ -167,7 +182,7 @@ class BinaryReader {
     return list;
   }
 
-  List<int?> readIntNullList() {
+  List<int?> readIntOrNullList() {
     var offset = _buffer.readInt32(_offset);
     var length = _buffer.readInt32(_offset + 4);
     _offset += 8;
@@ -194,7 +209,7 @@ class BinaryReader {
     return list;
   }
 
-  List<double?> readFloatNullList() {
+  List<double?> readFloatOrNullList() {
     var offset = _buffer.readInt32(_offset);
     var length = _buffer.readInt32(_offset + 4);
     _offset += 8;
@@ -221,7 +236,7 @@ class BinaryReader {
     return list;
   }
 
-  List<int?> readLongNullList() {
+  List<int?> readLongOrNullList() {
     var offset = _buffer.readInt32(_offset);
     var length = _buffer.readInt32(_offset + 4);
     _offset += 8;
@@ -248,7 +263,7 @@ class BinaryReader {
     return list;
   }
 
-  List<double?> readDoubleNullList() {
+  List<double?> readDoubleOrNullList() {
     var offset = _buffer.readInt32(_offset);
     var length = _buffer.readInt32(_offset + 4);
     _offset += 8;

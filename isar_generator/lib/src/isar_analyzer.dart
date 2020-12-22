@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
@@ -103,8 +104,15 @@ class IsarAnalyzer extends Builder {
           property);
     }
 
-    final nullable = property.type.nullabilitySuffix == NullabilitySuffix.none;
-    final elementNullable = true;
+    final nullable = property.type.nullabilitySuffix != NullabilitySuffix.none;
+    var elementNullable = false;
+    if (property.type is ParameterizedType) {
+      final typeArguments = (property.type as ParameterizedType).typeArguments;
+      if (typeArguments != null && typeArguments.isNotEmpty) {
+        final listType = typeArguments[0];
+        elementNullable = listType.nullabilitySuffix != NullabilitySuffix.none;
+      }
+    }
 
     var dbName = getNameAnn(property)?.name ?? property.displayName;
     if (dbName.isEmpty) {
@@ -175,14 +183,11 @@ class IsarAnalyzer extends Builder {
           .map((name) => model.properties.firstWhere((f) => f.name == name))
           .any((f) => f.type == DataType.String);
 
-      if (index.hashValue != null) {
-        if (index.properties.length > 1 && !index.hashValue) {
-          err('String properties in composite indices need to be stored as hash.');
-        }
-
-        if (!hasStringProperty) {
-          err('Only String and List<String> properties support the "hashValue" parameter.');
-        }
+      if (index.hashValue && !hasStringProperty) {
+        err('Only String and List<String> properties support the "hashValue" parameter.');
+      }
+      if (index.properties.length > 1 && !index.hashValue) {
+        err('String properties in composite indices need to be stored as hash.');
       }
     }
   }

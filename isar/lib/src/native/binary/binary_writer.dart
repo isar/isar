@@ -21,11 +21,11 @@ class BinaryWriter {
         _buffer = buffer,
         _byteData = ByteData.view(buffer.buffer);
 
-  void skip(int bytes) {
+  void pad(int bytes) {
     _offset += bytes;
   }
 
-  void skipDynamic(int bytes) {
+  void padDynamic(int bytes) {
     _dynamicOffset += bytes;
   }
 

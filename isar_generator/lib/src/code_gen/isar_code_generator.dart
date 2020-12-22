@@ -12,6 +12,8 @@ import 'package:isar_generator/src/code_gen/query_where_generator.dart';
 import 'package:path/path.dart' as path;
 import 'package:dartx/dartx.dart';
 
+const IC = 'IsarCore.isar';
+
 class IsarCodeGenerator extends Builder {
   @override
   final buildExtensions = {
@@ -26,6 +28,8 @@ class IsarCodeGenerator extends Builder {
     'dart:convert',
     'dart:typed_data',
     'package:isar/internal.dart',
+    'package:isar/internal_native.dart',
+    'package:isar/src/native/bindings.dart',
     'package:ffi/ffi.dart'
   ];
 
@@ -60,10 +64,9 @@ class IsarCodeGenerator extends Builder {
       }
     }
 
-    var schemaJson =
-        JsonEncoder().convert(objects.map((o) => o.toJson()).toList());
     var collectionVars = objects
-        .map((o) => 'IsarCollection<${o.type}> ${getCollectionVar(o.type)};')
+        .map((o) =>
+            'late final IsarCollection<${o.type}> ${getCollectionVar(o.type)};')
         .join('\n');
     var objectAdapters =
         objects.map((o) => generateObjectAdapter(o)).join('\n');
@@ -81,18 +84,16 @@ class IsarCodeGenerator extends Builder {
     export 'package:isar/isar.dart';
 
     const utf8Encoder = Utf8Encoder();
-    const utf8Decoder = Utf8Decoder();
 
     $collectionVars
     ${generateIsarOpen(objects)}
-        
+    
+    $getCollectionExtensions
 
     $objectAdapters
-
-    const _schema = '$schemaJson';
     ''';
 
-    //$getCollectionExtensions
+    //
     //$queryWhereExtensions
     //$queryFilterExtensions
 
@@ -105,29 +106,89 @@ class IsarCodeGenerator extends Builder {
   }
 
   String generateIsarOpen(Iterable<ObjectInfo> objects) {
-    var initializeCollectionVars = objects.mapIndexed((i, o) {
-      return '''
-      nativeCall(isarBindings.getCollection(isar, collectionPtr, $i));
-      ${getCollectionVar(o.type)} = IsarCollectionImpl(this, _${o.type}Adapter(), collectionPtr.value);
-      ''';
-    }).join('\n');
-
-    return '''
+    var code = '''
     Isar open(String path) {
-      var pathPtr = Utf8.toUtf8(path);
-      var schemaPtr = Utf8.toUtf8(_schema);
-      var isarPtr = IsarBindings.ptr;
-      nativeCall(isarBindings.createInstance(isarPtr, pathPtr, 1000000, schemaPtr));
+      final schemaPtr = ${IC}_schema_create();
+      final collectionPtrPtr = allocate<Pointer>();
+    ''';
+
+    for (var info in objects) {
+      code += '''
+      {
+        final namePtr = Utf8.toUtf8("${info.dbName}");
+        nativeCall(${IC}_schema_create_collection(collectionPtrPtr, namePtr.cast()));
+        final collectionPtr = collectionPtrPtr.value;
+        free(namePtr);
+      ''';
+      for (var property in info.properties) {
+        code += '''
+        {
+          final pNamePtr = Utf8.toUtf8("${property.dbName}");
+          nativeCall(${IC}_schema_add_property(collectionPtr, pNamePtr.cast(), ${property.type.index}));
+          free(pNamePtr);
+        }
+        ''';
+      }
+      for (var index in info.indices) {
+        code += '''
+        {
+          final propertiesPtrPtr = allocate<Pointer<Int8>>(count: ${index.properties.length});
+        ''';
+        for (var i = 0; i < index.properties.length; i++) {
+          code +=
+              'propertiesPtrPtr[$i] = Utf8.toUtf8("${index.properties[i]}").cast();';
+        }
+
+        code += '''
+        nativeCall(${IC}_schema_add_index(
+          collectionPtr,
+          propertiesPtrPtr,
+          ${index.properties.length},
+          ${index.unique},
+          ${index.hashValue}
+        ));''';
+        for (var i = 0; i < index.properties.length; i++) {
+          code += 'free(propertiesPtrPtr[$i]);';
+        }
+        code += '''
+          free(propertiesPtrPtr);
+        }
+        ''';
+      }
+      code += '''
+        nativeCall(${IC}_schema_add_collection(schemaPtr, collectionPtrPtr.value));
+      }
+      
+      ''';
+    }
+
+    code += '''
+      final pathPtr = Utf8.toUtf8(path);
+      final isarPtrPtr = allocate<Pointer>();
+      nativeCall(${IC}_create_instance(isarPtrPtr, pathPtr.cast(), 1000000, schemaPtr));
       free(pathPtr);
-      free(schemaPtr);
+      
+      final isarPtr = isarPtrPtr.value;
+      final isar = IsarImpl(isarPtr);
+      free(isarPtrPtr);
+    ''';
 
-      var isar = isarPtr.value;
-      var collectionPtr = IsarBindings.ptr;
-      $initializeCollectionVars
+    var i = 0;
+    for (var info in objects) {
+      code += '''
+      nativeCall(${IC}_get_collection(isarPtr, collectionPtrPtr, $i));
+      ${getCollectionVar(info.type)} = IsarCollectionImpl(isar, _${info.type}Adapter(), collectionPtrPtr.value);
+      ''';
+      i++;
+    }
 
-      return IsarImpl(isar);
+    code += '''
+      free(collectionPtrPtr);
+      return isar;
     }
     ''';
+
+    return code;
   }
 
   String generateGetCollectionExtension(ObjectInfo object, int objectIndex) {

@@ -1,7 +1,11 @@
-import 'package:isar/src/native/bindings.dart';
+import 'package:isar/internal_native.dart';
 
 abstract class TypeAdapter<T> {
-  void serialize(T object, RawObject rawObject);
+  int get staticSize;
 
-  T deserialize(RawObject rawObject);
+  int prepareSerialize(T object, Map<String, dynamic> cache);
+
+  void serialize(T object, Map<String, dynamic> cache, BinaryWriter writer);
+
+  T deserialize(BinaryReader reader);
 }

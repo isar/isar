@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
@@ -11,14 +10,7 @@ class IsarCoreUtils {
   static final syncRawObjPtr = allocate<RawObject>();
 }
 
-IsarCoreBindings? _bindings;
-IsarCoreBindings get IsarCore {
-  if (_bindings == null) {
-    final dylib = DynamicLibrary.open('libisar.so');
-    _bindings = IsarCoreBindings(dylib);
-  }
-  return _bindings!;
-}
+late IsarCoreBindings IsarCore;
 
 extension RawObjectX on RawObject {
   ObjectId get oid {

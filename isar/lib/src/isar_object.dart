@@ -26,7 +26,7 @@ class IsarObject {
   }
 
   void saveSync() {
-    return collection!.putSync(this);
+    collection!.putSync(this);
   }
 
   Future<void> delete() {

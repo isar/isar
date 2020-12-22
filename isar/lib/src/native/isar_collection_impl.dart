@@ -2,6 +2,7 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/internal.dart';
+import 'package:isar/internal_native.dart';
 import 'package:isar/src/isar_collection.dart';
 import 'package:isar/src/isar_object.dart';
 import 'package:isar/src/native/bindings.dart';
@@ -13,10 +14,18 @@ import 'package:isar/src/object_id.dart';
 
 class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
   final IsarImpl isar;
-  final TypeAdapter _adapter;
+  final TypeAdapter<T> _adapter;
   final Pointer _collection;
 
   IsarCollectionImpl(this.isar, this._adapter, this._collection);
+
+  T deserializeObject(RawObject rawObj) {
+    final buffer = rawObj.data.asTypedList(rawObj.data_length);
+    final reader = BinaryReader(buffer);
+    final object = _adapter.deserialize(reader);
+    object.init(rawObj.oid, this);
+    return object;
+  }
 
   @override
   Future<T> get(ObjectId id) {
@@ -32,9 +41,19 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
     rawObj.oid = id;
 
     nativeCall(IsarCore.isar_get(_collection, txn!, rawObjPtr));
-    T object = _adapter.deserialize(rawObj);
-    object.init(rawObj.oid, this);
-    return object;
+    return deserializeObject(rawObj);
+  }
+
+  Pointer<RawObject> serializeObject(T object) {
+    final cache = <String, dynamic>{};
+    final size = _adapter.prepareSerialize(object, cache);
+    final rawObjPtr = IsarCore.isar_alloc_raw_obj(size);
+    final rawObj = rawObjPtr.ref;
+    rawObj.oid = object.id;
+    final buffer = rawObj.data.asTypedList(rawObj.data_length);
+    final writer = BinaryWriter(buffer, _adapter.staticSize);
+    _adapter.serialize(object, cache, writer);
+    return rawObjPtr;
   }
 
   @override
@@ -46,15 +65,13 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
   void putSync(T object) {
     final txn = isar.getTxnSync(true);
 
-    final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
+    final rawObjPtr = serializeObject(object);
     final rawObj = rawObjPtr.ref;
-    _adapter.serialize(object, rawObj);
-
     nativeCall(IsarCore.isar_put(_collection, txn!, rawObjPtr));
 
     object.init(rawObj.oid, this);
 
-    free(rawObj.data);
+    IsarCore.isar_free_raw_obj(rawObjPtr);
   }
 
   @override
@@ -64,7 +81,7 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
 
   @override
   void putAllSync(List<T> objects) {
-    final rawObjsPtr = allocate<RawObject>(count: objects.length);
+    /*final rawObjsPtr = allocate<RawObject>(count: objects.length);
     for (var i = 0; i < objects.length; i++) {
       final rawObj = rawObjsPtr.elementAt(i).ref;
       _adapter.serialize(objects[i], rawObj);
@@ -77,7 +94,7 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
       objects[i].init(rawObj.oid, this);
     }
 
-    free(rawObjsPtr);
+    free(rawObjsPtr);*/
   }
 
   @override
