@@ -1,7 +1,6 @@
 #!/bin/sh
 
-script=$(readlink -f "$0")
-script_dir=$(dirname "$script")
+script_dir=$(cd "$(dirname "$0")"; pwd -P)
 
 tmp_dir=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
 core_version=`cat ../CORE_VERSION`
