@@ -19,6 +19,8 @@ cbindgen --config $script_dir/cbindgen.toml --crate isar-core-dart-ffi --output 
 
 cd $script_dir/../
 
+echo "$(cat isar-dart.h)"
+
 dart pub get
 dart pub run ffigen --config tools/ffigen.yaml
 rm isar-dart.h
