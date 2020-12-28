@@ -29,7 +29,7 @@ jobs:
         bash tools/generate_bindings.sh
     - name: Commit changes
       run: |
-        git add lib/src/native/bindings.dart
+        git add isar/lib/src/native/bindings.dart
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git commit -m "Generated bindings"
