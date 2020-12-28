@@ -2,7 +2,8 @@ name: Generate Bindings
 
 on:
   push:
-    branches: [main]
+    paths:
+      - 'CORE_VERSION'
 
 env:
   CARGO_TERM_COLOR: always
@@ -14,7 +15,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        path: 'isar'
+        persist-credentials: false
+        fetch-depth: 0
     - name: Install Dart
       uses: cedx/setup-dart@v2
       with:
@@ -23,19 +25,10 @@ jobs:
       run: sudo apt-get install libclang-dev
     - name: Generate bindings
       run: |
-        cd isar/isar
+        cd isar
         bash tools/generate_bindings.sh
-    - uses: actions/checkout@v2
-      with:
-        path: isar_bindings
-        persist-credentials: false
-        fetch-depth: 0
-        ref: bindings
-    - name: Prepare Push
+    - name: Commit changes
       run: |
-        cd isar_bindings
-        mv -f ../isar/isar/lib/src/native/bindings.dart bindings.dart
-        git add bindings.dart
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git commit -m "Generated bindings"
@@ -43,6 +36,4 @@ jobs:
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        directory: isar_bindings
-        branch: bindings
-        force: true
+        branch: ${{ github.ref }}
