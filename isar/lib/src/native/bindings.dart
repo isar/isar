@@ -26,41 +26,21 @@ class IsarCoreBindings {
 
   _dart_isar_get _isar_get;
 
-  int isar_prepare_put(
+  int isar_put(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     ffi.Pointer<RawObject> object,
-    ffi.Pointer<ffi.Pointer<ffi.NativeType>> pending_put,
   ) {
-    _isar_prepare_put ??=
-        _dylib.lookupFunction<_c_isar_prepare_put, _dart_isar_prepare_put>(
-            'isar_prepare_put');
-    return _isar_prepare_put(
+    _isar_put ??=
+        _dylib.lookupFunction<_c_isar_put, _dart_isar_put>('isar_put');
+    return _isar_put(
       collection,
       txn,
       object,
-      pending_put,
     );
   }
 
-  _dart_isar_prepare_put _isar_prepare_put;
-
-  int isar_finish_put(
-    ffi.Pointer<ffi.NativeType> collection,
-    ffi.Pointer<ffi.NativeType> txn,
-    ffi.Pointer<ffi.NativeType> pending_put,
-  ) {
-    _isar_finish_put ??=
-        _dylib.lookupFunction<_c_isar_finish_put, _dart_isar_finish_put>(
-            'isar_finish_put');
-    return _isar_finish_put(
-      collection,
-      txn,
-      pending_put,
-    );
-  }
-
-  _dart_isar_finish_put _isar_finish_put;
+  _dart_isar_put _isar_put;
 
   int isar_delete(
     ffi.Pointer<ffi.NativeType> collection,
@@ -666,30 +646,16 @@ typedef _dart_isar_get = int Function(
   ffi.Pointer<RawObject> object,
 );
 
-typedef _c_isar_prepare_put = ffi.Uint8 Function(
+typedef _c_isar_put = ffi.Uint8 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<RawObject> object,
-  ffi.Pointer<ffi.Pointer<ffi.NativeType>> pending_put,
 );
 
-typedef _dart_isar_prepare_put = int Function(
+typedef _dart_isar_put = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<RawObject> object,
-  ffi.Pointer<ffi.Pointer<ffi.NativeType>> pending_put,
-);
-
-typedef _c_isar_finish_put = ffi.Uint8 Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<ffi.NativeType> pending_put,
-);
-
-typedef _dart_isar_finish_put = int Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<ffi.NativeType> pending_put,
 );
 
 typedef _c_isar_delete = ffi.Uint8 Function(
