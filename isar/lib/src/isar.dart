@@ -1,6 +1,10 @@
-import 'dart:async';
+part of isar;
 
 abstract class Isar {
+  final String path;
+
+  Isar(this.path);
+
   Future<T> txn<T>(Future<T> Function(Isar isar) callback);
 
   Future<T> writeTxn<T>(Future<T> Function(Isar isar) callback);

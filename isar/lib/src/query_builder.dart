@@ -1,209 +1,336 @@
-import 'package:isar/isar.dart';
+part of isar;
 
-/*class QueryBuilder<T extends IsarObject, BANK extends IsarCollection<T>, WHERE,
-    FILTER, SORT, EXECUTE> {
-  late IsarCollection _collection;
-}
+class QueryBuilder<T extends IsarObjectMixin, WHERE, FILTER, GROUPS, GROUPBY,
+    OFFSET_LIMIT, SORT, EXECUTE> {
+  IsarCollection<T> _collection;
+  List<WhereClause> _whereClauses;
+  late FilterGroup _filter;
 
-typedef NoWhere = Function();
-typedef WhereProperty = Function(bool);
+  QueryBuilder._(
+    this._collection, [
+    this._whereClauses = const [],
+    FilterGroup? filter,
+  ]) {
+    _filter = filter ?? FilterGroup(parent: null, andOr: null, implicit: false);
+  }
 
-typedef CanFilter = Function();
-typedef Filter = Function(bool);
-typedef FilterNoAndOr = Function(bool, bool);
+  QueryBuilder<T, dynamic, QFilter, GROUPS, dynamic, dynamic, dynamic, dynamic>
+      _andOr(FilterAndOr andOr) {
+    final cloned =
+        clone<dynamic, QFilter, GROUPS, dynamic, dynamic, dynamic, dynamic>();
+    if (_filter.andOr == null || _filter.andOr == andOr) {
+      cloned._filter.andOr = andOr;
+    } else {
+      var newFilter =
+          FilterGroup(parent: cloned._filter, andOr: andOr, implicit: true);
+      var last = cloned._filter.conditions.removeLast();
+      newFilter.conditions.add(last);
+      cloned._filter = newFilter;
+    }
 
-class FilterT {}
+    return cloned;
+  }
 
-class FilterAndOrT extends FilterT {}
+  QueryBuilder<T, dynamic, QFilter, G, dynamic, dynamic, dynamic, dynamic>
+      _beginGroup<G>() {
+    final cloned =
+        clone<dynamic, QFilter, G, dynamic, dynamic, dynamic, dynamic>();
+    var newFilter =
+        FilterGroup(parent: cloned._filter, andOr: null, implicit: false);
+    cloned._filter.conditions.add(newFilter);
+    cloned._filter = newFilter;
+    return cloned;
+  }
 
-typedef CanSort = Function();
-typedef Sorting = Function(bool);
-
-typedef CanExecute = Function();
-
-extension WhereOrExtension<T extends IsarObject, B extends IsarCollection<T>>
-    on QueryBuilder<T, B, WhereProperty, dynamic, dynamic, dynamic> {
-  QueryBuilder<T, B, NoWhere, dynamic, dynamic, dynamic> or() {
-    return QueryBuilder();
+  QueryBuilder<T, dynamic, QFilterAfterCond, G, QCanGroupBy, QCanOffsetLimit,
+      QCanSort, QCanExecute> _endGroup<G>() {
+    final cloned = clone<dynamic, QFilterAfterCond, G, QCanGroupBy,
+        QCanOffsetLimit, QCanSort, QCanExecute>();
+    while (cloned._filter.implicit) {
+      cloned._filter = cloned._filter.parent!;
+    }
+    if (cloned._filter.conditions.isEmpty) {
+      cloned._filter.parent!.conditions.removeLast();
+    }
+    cloned._filter = cloned._filter.parent!;
+    return cloned;
   }
 }
 
-extension WhereFilterExtension<T extends IsarObject, B extends IsarCollection<T>>
-    on QueryBuilder<T, B, dynamic, CanFilter, dynamic, dynamic> {
-  QueryBuilder<T, B, dynamic, FilterT, dynamic, dynamic> filter() {
-    return QueryBuilder();
+QueryBuilder<T, QNoWhere, QCanFilter, QNoGroups, QCanGroupBy, QCanOffsetLimit,
+    QCanSort, QCanExecute> newQueryInternal<
+        T extends IsarObjectMixin, COLLECTION extends IsarCollection<T>>(
+    COLLECTION collection) {
+  return QueryBuilder._(collection);
+}
+
+extension QueryBuilderX<T extends IsarObjectMixin> on QueryBuilder<T, dynamic,
+    dynamic, dynamic, dynamic, dynamic, dynamic, dynamic> {
+  QueryBuilder<T, B, C, D, E, F, G, H> clone<B, C, D, E, F, G, H>() {
+    final newWhereClauses = <WhereClause>[];
+    for (var cond in _whereClauses) {
+      newWhereClauses.add(cond.clone());
+    }
+    return QueryBuilder._(
+      _collection,
+      newWhereClauses,
+      _filter.clone(),
+    );
   }
 }
 
-extension FilterAndOrExtension<T extends IsarObject, B extends IsarCollection<T>>
-    on QueryBuilder<T, B, dynamic, FilterAndOrT, dynamic, dynamic> {
-  QueryBuilder<T, B, dynamic, FilterT, dynamic, dynamic> and() {
-    return QueryBuilder();
-  }
+class WhereClause {
+  final int? index;
+  final List<String> types;
+  final List? lower;
+  final bool? includeLower;
+  final List? upper;
+  final bool? includeUpper;
 
-  QueryBuilder<T, B, dynamic, FilterT, dynamic, dynamic> or() {
-    return QueryBuilder();
-  }
-}
-*/
-/*extension SortExtension<T extends IsarObject, B extends IsarCollection<T>>
-    on QueryBuilder<T, B, dynamic, Filter, dynamic, dynamic> {
-  Future<T> and() {}
+  const WhereClause(this.index, this.types,
+      {this.lower, this.includeLower, this.upper, this.includeUpper});
 
-  Future<List<T>> or() {}
-
-  Future<int> count() {}
-}
-
-extension ExecuteExtension<T extends IsarObject, B extends IsarCollection<T>>
-    on QueryBuilder<T, B, dynamic, dynamic, dynamic, CanExecute> {
-  Future<T> findFirst() {}
-
-  Future<List<T>> findAll() {}
-
-  Future<int> count() {}
-}
-
-extension TestWhereProperty<T extends IsarObject, B extends IsarCollection<T>>
-    on QueryBuilder<T, B, NoWhere, dynamic, dynamic, dynamic> {
-  QueryBuilder<T, B, WhereProperty, CanFilter, CanSort, CanExecute> nameEqualTo(
-      String name) {
-    return QueryBuilder();
+  WhereClause clone() {
+    return WhereClause(
+      index,
+      types,
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
+    );
   }
 }
 
-class EqualTo<T> {
-  final int property;
-  final T value;
+abstract class QueryOperation {
+  const QueryOperation();
 
-  const EqualTo(this.property, this.value);
+  QueryOperation clone();
 }
 
-class LessThan<T> {
-  final int property;
-  final T value;
+class QueryCondition extends QueryOperation {
+  final ConditionType type;
+  final int? index;
+  final List? value;
+  final List? value2;
 
-  const LessThan(this.property, this.value);
+  const QueryCondition(this.type, this.index, this.value, [this.value2]);
+
+  @override
+  QueryCondition clone() {
+    return QueryCondition(type, index, value, value2);
+  }
 }
 
-class GreaterThan<T> {
-  final int property;
-  final T value;
-
-  const GreaterThan(this.property, this.value);
+enum ConditionType {
+  IsNull,
+  IsNotNull,
+  Eq,
+  NEq,
+  Gt,
+  Lt,
+  StartsWith,
+  Contains,
+  Between,
 }
 
-class Cond {
-  const Cond();
-}
-
-class Eq<T> extends Cond {
-  final int property;
-  final T value;
-
-  const Eq(this.property, this.value);
-}
-
-enum AndOr {
+enum FilterAndOr {
   And,
   Or,
 }
 
-class Group extends Cond {
-  final Group parent;
-  final List<Cond> conditions = [];
-  final bool implicit;
-  AndOr andOr;
+class FilterGroup extends QueryOperation {
+  FilterGroup? parent;
+  List<QueryOperation> conditions = [];
+  FilterAndOr? andOr;
+  bool implicit;
 
-  Group(this.parent, this.implicit, this.andOr);
+  FilterGroup({this.parent, this.andOr, required this.implicit});
+
+  List<FilterGroup?> _clone(FilterGroup caller, FilterGroup? newParent) {
+    if (parent != null && newParent == null) {
+      return parent!._clone(caller, null);
+    } else {
+      final cloned = FilterGroup(andOr: andOr, implicit: implicit);
+      FilterGroup? newCaller;
+      for (var condition in conditions) {
+        if (condition is FilterGroup) {
+          final result = condition._clone(caller, cloned);
+          cloned.conditions.add(result[0]!);
+          if (condition == caller) {
+            newCaller = result[0];
+          } else if (result[1] != null) {
+            newCaller = result[1];
+          }
+        } else {
+          cloned.conditions.add(condition.clone());
+        }
+      }
+      if (caller == this) {
+        newCaller = cloned;
+      }
+      return [cloned, newCaller];
+    }
+  }
+
+  @override
+  FilterGroup clone() {
+    final result = _clone(this, null);
+    return result[1]!;
+  }
 }
 
-class Q {
-  var group = Group(null, false, null);
-  AndOr pending;
+// When where is in progress. Only property conditions are allowed.
+class QWhere {}
 
-  Q and() {
-    if (pending != null) {
-      throw '.and() must not follow .and() or .or()';
-    }
-    if (group.conditions.isEmpty) {
-      throw 'Invalid .and() at the beginning of a group';
-    }
-    pending = AndOr.And;
-    return this;
-  }
+// Before where is started
+class QNoWhere extends QWhere {}
 
-  Q or() {
-    if (pending != null) {
-      throw '.or() must not follow .and() or .or()';
-    }
-    if (group.conditions.isEmpty) {
-      throw 'Invalid .or() at the beginning of a group';
-    }
-    pending = AndOr.Or;
-    return this;
-  }
+// Directly after a where property condition.
+typedef QWhereProperty = Function();
 
-  void execAndOr() {
-    if (pending == null) {
-      if (group.conditions.isEmpty) {
-        return;
-      } else {
-        pending = AndOr.And;
-      }
-    }
-    if (group.andOr == null) {
-      group.andOr = pending;
-    } else if (group.andOr != pending) {
-      var last = group.conditions.removeLast();
-      var newGroup = Group(group, true, pending);
-      group.conditions.add(newGroup);
-      newGroup.conditions.add(last);
-      group = newGroup;
-    }
-    pending = null;
-  }
+typedef QCanFilter = Function();
 
-  Q begin() {
-    if (pending != null) {
-      throw '.begin() must not follow .and() or .or()';
-    }
-    var newGroup = Group(group, false, null);
-    group.conditions.add(newGroup);
-    group = newGroup;
-    return this;
-  }
+class QFilter {}
 
-  Q newGroup(void Function(Q q)) {}
+class QFilterAfterCond extends QFilter {}
 
-  Q end() {
-    if (pending != null) {
-      throw '.end() must not follow .and() or .or()';
-    }
-    while (group.implicit) {
-      group = group.parent;
-    }
-    group = group.parent;
-    return this;
-  }
+typedef QNoGroups = Function();
+typedef QOneGroups = Function(bool);
+typedef QTwoGroups = Function(bool, bool);
 
-  Q eq<T>(int property, T value) {
-    execAndOr();
-    group.conditions.add(Eq(property, value));
-    return this;
-  }
+typedef QCanGroupBy = Function();
 
-  Q finish() {
-    if (pending != null) {
-      throw 'Query must not end with .and() or .or()';
-    }
-    while (group.parent != null) {
-      if (!group.implicit) {
-        throw 'Please close all open groups';
-      }
-      group = group.parent;
-    }
-    return this;
+typedef QCanOffsetLimit = Function();
+typedef QHasOffset = Function(bool);
+typedef QHasLimit = Function(bool, bool);
+
+typedef QCanSort = Function();
+typedef QSorting = Function(bool);
+
+typedef QCanExecute = Function();
+
+extension QueryWhereOr<T extends IsarObjectMixin> on QueryBuilder<T,
+    QWhereProperty, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic> {
+  QueryBuilder<T, QNoWhere, dynamic, dynamic, dynamic, dynamic, dynamic,
+      dynamic> or() {
+    return clone();
   }
 }
-*/
+
+extension QueryFilter<T extends IsarObjectMixin> on QueryBuilder<T, dynamic,
+    QCanFilter, dynamic, dynamic, dynamic, dynamic, dynamic> {
+  QueryBuilder<T, dynamic, QFilter, QNoGroups, dynamic, dynamic, dynamic,
+      dynamic> filter() {
+    return clone();
+  }
+}
+
+extension QueryFilterAddCondition<T extends IsarObjectMixin> on QueryBuilder<T,
+    dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic> {
+  QueryBuilder<T, B, C, D, E, F, G, H> addFilterCondition<B, C, D, E, F, G, H>(
+      QueryCondition cond) {
+    final cloned = clone<B, C, D, E, F, G, H>();
+    cloned._filter.conditions.add(cond);
+    return cloned;
+  }
+
+  QueryBuilder<T, B, C, D, E, F, G, H> addWhereClause<B, C, D, E, F, G, H>(
+      WhereClause where) {
+    final cloned = clone<B, C, D, E, F, G, H>();
+    cloned._whereClauses.add(where);
+    return cloned;
+  }
+}
+
+extension QueryFilterAndOr<T extends IsarObjectMixin, GROUPS> on QueryBuilder<T,
+    dynamic, QFilterAfterCond, GROUPS, dynamic, dynamic, dynamic, dynamic> {
+  QueryBuilder<T, dynamic, QFilter, GROUPS, dynamic, dynamic, dynamic, dynamic>
+      and() {
+    return _andOr(FilterAndOr.And);
+  }
+
+  QueryBuilder<T, dynamic, QFilter, GROUPS, dynamic, dynamic, dynamic, dynamic>
+      or() {
+    return _andOr(FilterAndOr.Or);
+  }
+}
+
+extension QueryFilterNoGroups<T extends IsarObjectMixin> on QueryBuilder<T,
+    dynamic, QFilter, QNoGroups, dynamic, dynamic, dynamic, dynamic> {
+  QueryBuilder<T, dynamic, QFilter, QOneGroups, dynamic, dynamic, dynamic,
+      dynamic> beginGroup() {
+    return _beginGroup();
+  }
+}
+
+extension QueryFilterOneGroups<T extends IsarObjectMixin> on QueryBuilder<T,
+    dynamic, QFilter, QOneGroups, dynamic, dynamic, dynamic, dynamic> {
+  QueryBuilder<T, dynamic, QFilter, QTwoGroups, dynamic, dynamic, dynamic,
+      dynamic> beginGroup() {
+    return _beginGroup();
+  }
+}
+
+extension QueryFilterOneGroupsEnd<T extends IsarObjectMixin> on QueryBuilder<T,
+    dynamic, QFilterAfterCond, QOneGroups, dynamic, dynamic, dynamic, dynamic> {
+  QueryBuilder<T, dynamic, QFilterAfterCond, QNoGroups, QCanGroupBy,
+      QCanOffsetLimit, QCanSort, QCanExecute> endGroup() {
+    return _endGroup();
+  }
+}
+
+extension QueryFilterTwoGroupsEnd<T extends IsarObjectMixin> on QueryBuilder<T,
+    dynamic, QFilterAfterCond, QTwoGroups, dynamic, dynamic, dynamic, dynamic> {
+  QueryBuilder<T, dynamic, QFilterAfterCond, QOneGroups, dynamic, dynamic,
+      dynamic, dynamic> endGroup() {
+    return _endGroup();
+  }
+}
+
+extension QueryExecute<T extends IsarObjectMixin> on QueryBuilder<T, dynamic,
+    dynamic, QNoGroups, dynamic, dynamic, dynamic, QCanExecute> {
+  Query<T> build() {
+    return buildQuery(_collection, _whereClauses, _filter);
+  }
+
+  Future<T?> findFirst() {
+    return build().findFirst();
+  }
+
+  T? findFirstSync() {
+    return build().findFirstSync();
+  }
+
+  Future<List<T>> findAll() {
+    return build().findAll();
+  }
+
+  List<T> findAllSync() {
+    return build().findAllSync();
+  }
+
+  Future<int> count() {
+    return build().count();
+  }
+
+  int countSync() {
+    return build().countSync();
+  }
+
+  Future<bool> deleteFirst() {
+    return build().deleteFirst();
+  }
+
+  T deleteFirstSync() {
+    return build().deleteFirstSync();
+  }
+
+  Future<int> deleteAll() {
+    return build().deleteAll();
+  }
+
+  int deleteAllSync() {
+    return build().deleteAllSync();
+  }
+}

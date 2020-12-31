@@ -27,8 +27,8 @@ class IsarCodeGenerator extends Builder {
     'dart:ffi',
     'dart:convert',
     'dart:typed_data',
-    'package:isar/internal.dart',
-    'package:isar/internal_native.dart',
+    'package:isar/isar.dart',
+    'package:isar/isar_native.dart',
     'package:isar/src/native/bindings.dart',
     'package:ffi/ffi.dart'
   ];
@@ -47,6 +47,7 @@ class IsarCodeGenerator extends Builder {
     var fileImports = files.keys.map((path) => path
         .replaceAll('\\', '/')
         .replaceFirst('lib/', '')
+        .replaceFirst('test/', '')
         .replaceAll('.isarobject.json', '.dart'));
 
     var imports = [IsarCodeGenerator.imports, fileImports]
@@ -66,7 +67,7 @@ class IsarCodeGenerator extends Builder {
 
     var collectionVars = objects
         .map((o) =>
-            'late final IsarCollection<${o.type}> ${getCollectionVar(o.type)};')
+            'final ${getCollectionVar(o.type)} = <String, IsarCollection<${o.type}>>{};')
         .join('\n');
     var objectAdapters =
         objects.map((o) => generateObjectAdapter(o)).join('\n');
@@ -85,6 +86,8 @@ class IsarCodeGenerator extends Builder {
 
     const utf8Encoder = Utf8Encoder();
 
+    final _isar = <String, Isar>{};
+
     $collectionVars
     ${generateIsarOpen(objects)}
     
@@ -93,6 +96,7 @@ class IsarCodeGenerator extends Builder {
     $objectAdapters
 
     $queryWhereExtensions
+    
     ''';
 
     //
@@ -109,7 +113,10 @@ class IsarCodeGenerator extends Builder {
 
   String generateIsarOpen(Iterable<ObjectInfo> objects) {
     var code = '''
-    Isar open(String path) {
+    Isar openIsar(String path) {
+      if (_isar[path] != null) {
+        throw 'Instance already open';
+      }
       final schemaPtr = ${IC}_schema_create();
       final collectionPtrPtr = allocate<Pointer>();
     ''';
@@ -171,7 +178,8 @@ class IsarCodeGenerator extends Builder {
       free(pathPtr);
       
       final isarPtr = isarPtrPtr.value;
-      final isar = IsarImpl(isarPtr);
+      final isar = IsarImpl(path, isarPtr);
+      _isar[path] = isar;
       free(isarPtrPtr);
     ''';
 
@@ -179,7 +187,7 @@ class IsarCodeGenerator extends Builder {
     for (var info in objects) {
       code += '''
       nativeCall(${IC}_get_collection(isarPtr, collectionPtrPtr, $i));
-      ${getCollectionVar(info.type)} = IsarCollectionImpl(isar, _${info.type}Adapter(), collectionPtrPtr.value);
+      ${getCollectionVar(info.type)}[path] = IsarCollectionImpl(isar, _${info.type}Adapter(), collectionPtrPtr.value);
       ''';
       i++;
     }
@@ -197,7 +205,7 @@ class IsarCodeGenerator extends Builder {
     return '''
     extension Get${object.type}Collection on Isar {
       IsarCollection<${object.type}> get ${object.type.decapitalize()}s {
-        return ${getCollectionVar(object.type)};
+        return ${getCollectionVar(object.type)}[path]!;
       }
     }
     ''';

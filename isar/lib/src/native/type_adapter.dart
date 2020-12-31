@@ -1,4 +1,4 @@
-import 'package:isar/internal_native.dart';
+part of isar_native;
 
 abstract class TypeAdapter<T> {
   int get staticSize;

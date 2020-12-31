@@ -1,23 +1,11 @@
-import 'dart:ffi';
+part of isar_native;
 
-import 'package:ffi/ffi.dart';
-import 'package:isar/internal.dart';
-import 'package:isar/internal_native.dart';
-import 'package:isar/src/isar_collection.dart';
-import 'package:isar/src/isar_object.dart';
-import 'package:isar/src/native/bindings.dart';
-import 'package:isar/src/native/isar_core.dart';
-import 'package:isar/src/native/isar_impl.dart';
-import 'package:isar/src/native/type_adapter.dart';
-import 'package:isar/src/native/util/native_call.dart';
-import 'package:isar/src/object_id.dart';
-
-class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
+class IsarCollectionImpl<T extends IsarObjectMixin> extends IsarCollection<T> {
   final IsarImpl isar;
   final TypeAdapter<T> _adapter;
-  final Pointer _collection;
+  final Pointer collectionPtr;
 
-  IsarCollectionImpl(this.isar, this._adapter, this._collection);
+  IsarCollectionImpl(this.isar, this._adapter, this.collectionPtr);
 
   T deserializeObject(RawObject rawObj) {
     final buffer = rawObj.data.asTypedList(rawObj.data_length);
@@ -27,6 +15,16 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
     return object;
   }
 
+  List<T> deserializeObjects(RawObjectSet objectSet) {
+    final objects = <T>[];
+    for (var i = 0; i < objectSet.length; i++) {
+      final rawObjPtr = objectSet.objects.elementAt(i);
+      final object = deserializeObject(rawObjPtr.ref);
+      objects.add(object);
+    }
+    return objects;
+  }
+
   @override
   Future<T?> get(ObjectId id) {
     throw UnimplementedError();
@@ -34,19 +32,19 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
 
   @override
   T? getSync(ObjectId id) {
-    final txn = isar.getTxnSync(false);
+    return isar.getTxnSync(false, (txnPtr) {
+      final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
+      final rawObj = rawObjPtr.ref;
+      rawObj.oid = id;
 
-    final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
-    final rawObj = rawObjPtr.ref;
-    rawObj.oid = id;
+      nativeCall(IsarCore.isar_get(collectionPtr, txnPtr, rawObjPtr));
 
-    nativeCall(IsarCore.isar_get(_collection, txn!, rawObjPtr));
-
-    if (rawObj.oid != null) {
-      return deserializeObject(rawObj);
-    } else {
-      return null;
-    }
+      if (rawObj.oid != null) {
+        return deserializeObject(rawObj);
+      } else {
+        return null;
+      }
+    });
   }
 
   Pointer<RawObject> serializeObject(T object) {
@@ -68,15 +66,15 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
 
   @override
   void putSync(T object) {
-    final txn = isar.getTxnSync(true);
+    return isar.getTxnSync(true, (txnPtr) {
+      final rawObjPtr = serializeObject(object);
+      final rawObj = rawObjPtr.ref;
+      nativeCall(IsarCore.isar_put(collectionPtr, txnPtr, rawObjPtr));
 
-    final rawObjPtr = serializeObject(object);
-    final rawObj = rawObjPtr.ref;
-    nativeCall(IsarCore.isar_put(_collection, txn!, rawObjPtr));
+      object.init(rawObj.oid!, this);
 
-    object.init(rawObj.oid!, this);
-
-    IsarCore.isar_free_raw_obj(rawObjPtr);
+      IsarCore.isar_free_raw_obj(rawObjPtr);
+    });
   }
 
   @override
@@ -103,7 +101,7 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
   }
 
   @override
-  Future<void> delete(T object) {
+  Future<void> delete(ObjectId id) {
     throw UnimplementedError();
     /*return isar.optionalTxn(true, (txn) {
       var rawObjPtr = IsarCoreUtils.obj;
@@ -116,14 +114,13 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
   }
 
   @override
-  void deleteSync(T object) {
-    final txn = isar.getTxnSync(true);
+  void deleteSync(ObjectId id) {
+    return isar.getTxnSync(true, (txnPtr) {
+      final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
+      final rawObj = rawObjPtr.ref;
+      rawObj.oid = id;
 
-    final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
-    final rawObj = rawObjPtr.ref;
-    rawObj.oid = object.id;
-
-    nativeCall(IsarCore.isar_delete(_collection, txn!, rawObjPtr));
-    object.uninit();
+      nativeCall(IsarCore.isar_delete(collectionPtr, txnPtr, rawObjPtr));
+    });
   }
 }

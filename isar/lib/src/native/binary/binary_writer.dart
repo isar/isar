@@ -1,7 +1,4 @@
-import 'dart:convert';
-import 'dart:typed_data';
-import 'package:isar/src/native/binary/binary_reader.dart';
-import 'package:isar/src/native/util/extensions.dart';
+part of isar_native;
 
 const _maxInt = 4294967295;
 
@@ -30,14 +27,14 @@ class BinaryWriter {
   }
 
   void writeInt(int? value) {
-    value ??= BinaryReader.nullInt;
+    value ??= nullInt;
     assert(value <= _maxInt, 'Illegal value for @Size32 field.');
     _buffer.writeInt32(_offset, value);
     _offset += 4;
   }
 
   void writeLong(int? value) {
-    value ??= BinaryReader.nullInt;
+    value ??= nullInt;
     _buffer.writeInt64(_offset, value);
     _offset += 8;
   }
@@ -85,10 +82,10 @@ class BinaryWriter {
 
       for (var value in values) {
         _buffer[_dynamicOffset++] = value == null
-            ? BinaryReader.nullBool
+            ? nullBool
             : value
-                ? BinaryReader.trueBool
-                : BinaryReader.falseBool;
+                ? trueBool
+                : falseBool;
       }
     }
     _offset += 8;
@@ -102,7 +99,7 @@ class BinaryWriter {
       _buffer.writeInt32(_offset + 4, values.length);
 
       for (var value in values) {
-        _buffer.writeInt32(_dynamicOffset, value ?? BinaryReader.nullInt);
+        _buffer.writeInt32(_dynamicOffset, value ?? nullInt);
         _dynamicOffset += 4;
       }
     }
@@ -132,7 +129,7 @@ class BinaryWriter {
       _buffer.writeInt32(_offset + 4, values.length);
 
       for (var value in values) {
-        _buffer.writeInt64(_dynamicOffset, value ?? BinaryReader.nullInt);
+        _buffer.writeInt64(_dynamicOffset, value ?? nullInt);
         _dynamicOffset += 8;
       }
     }

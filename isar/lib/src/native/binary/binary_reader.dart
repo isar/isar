@@ -1,14 +1,7 @@
-import 'dart:convert';
-import 'dart:typed_data';
-import 'package:isar/src/native/util/extensions.dart';
+part of isar_native;
 
 class BinaryReader {
   static const utf8Decoder = Utf8Decoder();
-  static const nullInt = 1 << 32;
-  static const nullLong = 1 << 64;
-  static const nullBool = 0;
-  static const trueBool = 1;
-  static const falseBool = 2;
 
   final Uint8List _buffer;
   final ByteData _byteData;

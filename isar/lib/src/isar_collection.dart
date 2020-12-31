@@ -1,11 +1,6 @@
-import 'dart:async';
+part of isar;
 
-import 'package:isar/internal.dart';
-import 'package:isar/src/isar_object.dart';
-import 'package:isar/src/object_id.dart';
-import 'package:isar/src/query.dart';
-
-abstract class IsarCollection<T extends IsarObject> {
+abstract class IsarCollection<T extends IsarObjectMixin> {
   Future<T?> get(ObjectId id);
 
   T? getSync(ObjectId id);
@@ -18,12 +13,12 @@ abstract class IsarCollection<T extends IsarObject> {
 
   void putAllSync(List<T> objects);
 
-  Future<void> delete(T object);
+  Future<void> delete(ObjectId id);
 
-  void deleteSync(T object);
+  void deleteSync(ObjectId id);
 
-  Query<T, IsarCollection<T>, QNoWhere, QCanFilter, dynamic, QCanSort,
-      QCanExecute> where() {
-    return Query();
+  QueryBuilder<T, QNoWhere, QCanFilter, QNoGroups, QCanGroupBy, QCanOffsetLimit,
+      QCanSort, QCanExecute> where() {
+    return newQueryInternal(this);
   }
 }

@@ -1,9 +1,6 @@
-import 'dart:async';
+part of isar;
 
-import 'package:isar/src/isar_collection.dart';
-import 'package:isar/src/object_id.dart';
-
-class IsarObject {
+mixin IsarObjectMixin {
   ObjectId? _id;
   IsarCollection? _collection;
 
@@ -30,15 +27,15 @@ class IsarObject {
   }
 
   Future<void> delete() {
-    return collection!.delete(this);
+    return collection!.delete(id!);
   }
 
   void deleteSync() {
-    return collection!.deleteSync(this);
+    return collection!.deleteSync(id!);
   }
 }
 
-extension ObjectInternal on IsarObject {
+extension ObjectInternal on IsarObjectMixin {
   void init(ObjectId id, IsarCollection collection) {
     _id = id;
     _collection = collection;

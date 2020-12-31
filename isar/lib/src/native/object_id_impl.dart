@@ -1,4 +1,4 @@
-import 'package:isar/src/object_id.dart';
+part of isar_native;
 
 class ObjectIdImpl extends ObjectId {
   @override
