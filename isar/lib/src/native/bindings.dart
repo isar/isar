@@ -72,16 +72,34 @@ class IsarCoreBindings {
 
   _dart_isar_clear _isar_clear;
 
-  int isar_query_filter_is_null(
+  int isar_filter_and_or(
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    bool and,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> conditions,
+    int length,
+  ) {
+    _isar_filter_and_or ??=
+        _dylib.lookupFunction<_c_isar_filter_and_or, _dart_isar_filter_and_or>(
+            'isar_filter_and_or');
+    return _isar_filter_and_or(
+      filter,
+      and ? 1 : 0,
+      conditions,
+      length,
+    );
+  }
+
+  _dart_isar_filter_and_or _isar_filter_and_or;
+
+  int isar_filter_is_null(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     bool is_null,
     int property_index,
   ) {
-    _isar_query_filter_is_null ??= _dylib.lookupFunction<
-        _c_isar_query_filter_is_null,
-        _dart_isar_query_filter_is_null>('isar_query_filter_is_null');
-    return _isar_query_filter_is_null(
+    _isar_filter_is_null ??= _dylib.lookupFunction<_c_isar_filter_is_null,
+        _dart_isar_filter_is_null>('isar_filter_is_null');
+    return _isar_filter_is_null(
       collection,
       filter,
       is_null ? 1 : 0,
@@ -89,7 +107,7 @@ class IsarCoreBindings {
     );
   }
 
-  _dart_isar_query_filter_is_null _isar_query_filter_is_null;
+  _dart_isar_filter_is_null _isar_filter_is_null;
 
   int isar_create_instance(
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
@@ -568,14 +586,28 @@ typedef _dart_isar_clear = int Function(
   ffi.Pointer<ffi.NativeType> txn,
 );
 
-typedef _c_isar_query_filter_is_null = ffi.Uint8 Function(
+typedef _c_isar_filter_and_or = ffi.Uint8 Function(
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Uint8 and,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> conditions,
+  ffi.Uint32 length,
+);
+
+typedef _dart_isar_filter_and_or = int Function(
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  int and,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> conditions,
+  int length,
+);
+
+typedef _c_isar_filter_is_null = ffi.Uint8 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Uint8 is_null,
   ffi.Uint32 property_index,
 );
 
-typedef _dart_isar_query_filter_is_null = int Function(
+typedef _dart_isar_filter_is_null = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   int is_null,
