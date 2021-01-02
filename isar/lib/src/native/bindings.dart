@@ -143,6 +143,8 @@ class IsarCoreBindings {
   void isar_qb_add_where_clause(
     ffi.Pointer<ffi.NativeType> builder,
     ffi.Pointer<ffi.NativeType> where_clause,
+    bool include_lower,
+    bool include_upper,
   ) {
     _isar_qb_add_where_clause ??= _dylib.lookupFunction<
         _c_isar_qb_add_where_clause,
@@ -150,6 +152,8 @@ class IsarCoreBindings {
     return _isar_qb_add_where_clause(
       builder,
       where_clause,
+      include_lower ? 1 : 0,
+      include_upper ? 1 : 0,
     );
   }
 
@@ -414,12 +418,10 @@ class IsarCoreBindings {
 
   _dart_isar_wc_add_int _isar_wc_add_int;
 
-  int isar_wc_add_float(
+  void isar_wc_add_float(
     ffi.Pointer<ffi.NativeType> where_clause,
     double lower,
-    bool include_lower,
     double upper,
-    bool include_upper,
   ) {
     _isar_wc_add_float ??=
         _dylib.lookupFunction<_c_isar_wc_add_float, _dart_isar_wc_add_float>(
@@ -427,9 +429,7 @@ class IsarCoreBindings {
     return _isar_wc_add_float(
       where_clause,
       lower,
-      include_lower ? 1 : 0,
       upper,
-      include_upper ? 1 : 0,
     );
   }
 
@@ -452,12 +452,10 @@ class IsarCoreBindings {
 
   _dart_isar_wc_add_long _isar_wc_add_long;
 
-  int isar_wc_add_double(
+  void isar_wc_add_double(
     ffi.Pointer<ffi.NativeType> where_clause,
     double lower,
-    bool include_lower,
     double upper,
-    bool include_upper,
   ) {
     _isar_wc_add_double ??=
         _dylib.lookupFunction<_c_isar_wc_add_double, _dart_isar_wc_add_double>(
@@ -465,9 +463,7 @@ class IsarCoreBindings {
     return _isar_wc_add_double(
       where_clause,
       lower,
-      include_lower ? 1 : 0,
       upper,
-      include_upper ? 1 : 0,
     );
   }
 
@@ -488,24 +484,22 @@ class IsarCoreBindings {
 
   _dart_isar_wc_add_string_hash _isar_wc_add_string_hash;
 
-  void isar_wc_add_lower_string_value(
+  void isar_wc_add_string_value(
     ffi.Pointer<ffi.NativeType> where_clause,
     ffi.Pointer<ffi.Int8> lower,
     ffi.Pointer<ffi.Int8> upper,
-    bool include,
   ) {
-    _isar_wc_add_lower_string_value ??= _dylib.lookupFunction<
-        _c_isar_wc_add_lower_string_value,
-        _dart_isar_wc_add_lower_string_value>('isar_wc_add_lower_string_value');
-    return _isar_wc_add_lower_string_value(
+    _isar_wc_add_string_value ??= _dylib.lookupFunction<
+        _c_isar_wc_add_string_value,
+        _dart_isar_wc_add_string_value>('isar_wc_add_string_value');
+    return _isar_wc_add_string_value(
       where_clause,
       lower,
       upper,
-      include ? 1 : 0,
     );
   }
 
-  _dart_isar_wc_add_lower_string_value _isar_wc_add_lower_string_value;
+  _dart_isar_wc_add_string_value _isar_wc_add_string_value;
 }
 
 abstract class RawObject extends ffi.Struct {
@@ -627,11 +621,15 @@ typedef _dart_isar_qb_create = ffi.Pointer<ffi.NativeType> Function(
 typedef _c_isar_qb_add_where_clause = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> builder,
   ffi.Pointer<ffi.NativeType> where_clause,
+  ffi.Uint8 include_lower,
+  ffi.Uint8 include_upper,
 );
 
 typedef _dart_isar_qb_add_where_clause = void Function(
   ffi.Pointer<ffi.NativeType> builder,
   ffi.Pointer<ffi.NativeType> where_clause,
+  int include_lower,
+  int include_upper,
 );
 
 typedef _c_isar_qb_build = ffi.Pointer<ffi.NativeType> Function(
@@ -812,20 +810,16 @@ typedef _dart_isar_wc_add_int = void Function(
   int upper,
 );
 
-typedef _c_isar_wc_add_float = ffi.Uint8 Function(
+typedef _c_isar_wc_add_float = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Float lower,
-  ffi.Uint8 include_lower,
   ffi.Float upper,
-  ffi.Uint8 include_upper,
 );
 
-typedef _dart_isar_wc_add_float = int Function(
+typedef _dart_isar_wc_add_float = void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   double lower,
-  int include_lower,
   double upper,
-  int include_upper,
 );
 
 typedef _c_isar_wc_add_long = ffi.Void Function(
@@ -840,20 +834,16 @@ typedef _dart_isar_wc_add_long = void Function(
   int upper,
 );
 
-typedef _c_isar_wc_add_double = ffi.Uint8 Function(
+typedef _c_isar_wc_add_double = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Double lower,
-  ffi.Uint8 include_lower,
   ffi.Double upper,
-  ffi.Uint8 include_upper,
 );
 
-typedef _dart_isar_wc_add_double = int Function(
+typedef _dart_isar_wc_add_double = void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   double lower,
-  int include_lower,
   double upper,
-  int include_upper,
 );
 
 typedef _c_isar_wc_add_string_hash = ffi.Void Function(
@@ -866,16 +856,14 @@ typedef _dart_isar_wc_add_string_hash = void Function(
   ffi.Pointer<ffi.Int8> value,
 );
 
-typedef _c_isar_wc_add_lower_string_value = ffi.Void Function(
+typedef _c_isar_wc_add_string_value = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
-  ffi.Uint8 include,
 );
 
-typedef _dart_isar_wc_add_lower_string_value = void Function(
+typedef _dart_isar_wc_add_string_value = void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
-  int include,
 );
