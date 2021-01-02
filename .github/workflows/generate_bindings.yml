@@ -25,6 +25,7 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: nightly
+        default: true
     - name: Setup dependencies
       run: sudo apt-get install libclang-dev
     - name: Generate bindings
