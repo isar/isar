@@ -302,6 +302,21 @@ class IsarCoreBindings {
 
   _dart_isar_qb_add_where_clause _isar_qb_add_where_clause;
 
+  void isar_qb_set_filter(
+    ffi.Pointer<ffi.NativeType> builder,
+    ffi.Pointer<ffi.NativeType> filter,
+  ) {
+    _isar_qb_set_filter ??=
+        _dylib.lookupFunction<_c_isar_qb_set_filter, _dart_isar_qb_set_filter>(
+            'isar_qb_set_filter');
+    return _isar_qb_set_filter(
+      builder,
+      filter,
+    );
+  }
+
+  _dart_isar_qb_set_filter _isar_qb_set_filter;
+
   ffi.Pointer<ffi.NativeType> isar_qb_build(
     ffi.Pointer<ffi.NativeType> builder,
   ) {
@@ -887,6 +902,16 @@ typedef _dart_isar_qb_add_where_clause = void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   int include_lower,
   int include_upper,
+);
+
+typedef _c_isar_qb_set_filter = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> builder,
+  ffi.Pointer<ffi.NativeType> filter,
+);
+
+typedef _dart_isar_qb_set_filter = void Function(
+  ffi.Pointer<ffi.NativeType> builder,
+  ffi.Pointer<ffi.NativeType> filter,
 );
 
 typedef _c_isar_qb_build = ffi.Pointer<ffi.NativeType> Function(
