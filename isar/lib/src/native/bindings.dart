@@ -109,7 +109,7 @@ class IsarCoreBindings {
 
   _dart_isar_filter_is_null _isar_filter_is_null;
 
-  int isar_filter_byte(
+  int isar_filter_byte_between(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     int lower,
@@ -118,10 +118,10 @@ class IsarCoreBindings {
     bool include_upper,
     int property_index,
   ) {
-    _isar_filter_byte ??=
-        _dylib.lookupFunction<_c_isar_filter_byte, _dart_isar_filter_byte>(
-            'isar_filter_byte');
-    return _isar_filter_byte(
+    _isar_filter_byte_between ??= _dylib.lookupFunction<
+        _c_isar_filter_byte_between,
+        _dart_isar_filter_byte_between>('isar_filter_byte_between');
+    return _isar_filter_byte_between(
       collection,
       filter,
       lower,
@@ -132,9 +132,9 @@ class IsarCoreBindings {
     );
   }
 
-  _dart_isar_filter_byte _isar_filter_byte;
+  _dart_isar_filter_byte_between _isar_filter_byte_between;
 
-  int isar_filter_int(
+  int isar_filter_int_between(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     int lower,
@@ -143,10 +143,10 @@ class IsarCoreBindings {
     bool include_upper,
     int property_index,
   ) {
-    _isar_filter_int ??=
-        _dylib.lookupFunction<_c_isar_filter_int, _dart_isar_filter_int>(
-            'isar_filter_int');
-    return _isar_filter_int(
+    _isar_filter_int_between ??= _dylib.lookupFunction<
+        _c_isar_filter_int_between,
+        _dart_isar_filter_int_between>('isar_filter_int_between');
+    return _isar_filter_int_between(
       collection,
       filter,
       lower,
@@ -157,9 +157,9 @@ class IsarCoreBindings {
     );
   }
 
-  _dart_isar_filter_int _isar_filter_int;
+  _dart_isar_filter_int_between _isar_filter_int_between;
 
-  int isar_filter_float(
+  int isar_filter_float_between(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     double lower,
@@ -168,10 +168,10 @@ class IsarCoreBindings {
     bool include_upper,
     int property_index,
   ) {
-    _isar_filter_float ??=
-        _dylib.lookupFunction<_c_isar_filter_float, _dart_isar_filter_float>(
-            'isar_filter_float');
-    return _isar_filter_float(
+    _isar_filter_float_between ??= _dylib.lookupFunction<
+        _c_isar_filter_float_between,
+        _dart_isar_filter_float_between>('isar_filter_float_between');
+    return _isar_filter_float_between(
       collection,
       filter,
       lower,
@@ -182,9 +182,9 @@ class IsarCoreBindings {
     );
   }
 
-  _dart_isar_filter_float _isar_filter_float;
+  _dart_isar_filter_float_between _isar_filter_float_between;
 
-  int isar_filter_long(
+  int isar_filter_long_between(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     int lower,
@@ -193,10 +193,10 @@ class IsarCoreBindings {
     bool include_upper,
     int property_index,
   ) {
-    _isar_filter_long ??=
-        _dylib.lookupFunction<_c_isar_filter_long, _dart_isar_filter_long>(
-            'isar_filter_long');
-    return _isar_filter_long(
+    _isar_filter_long_between ??= _dylib.lookupFunction<
+        _c_isar_filter_long_between,
+        _dart_isar_filter_long_between>('isar_filter_long_between');
+    return _isar_filter_long_between(
       collection,
       filter,
       lower,
@@ -207,9 +207,9 @@ class IsarCoreBindings {
     );
   }
 
-  _dart_isar_filter_long _isar_filter_long;
+  _dart_isar_filter_long_between _isar_filter_long_between;
 
-  int isar_filter_double(
+  int isar_filter_double_between(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     double lower,
@@ -218,10 +218,10 @@ class IsarCoreBindings {
     bool include_upper,
     int property_index,
   ) {
-    _isar_filter_double ??=
-        _dylib.lookupFunction<_c_isar_filter_double, _dart_isar_filter_double>(
-            'isar_filter_double');
-    return _isar_filter_double(
+    _isar_filter_double_between ??= _dylib.lookupFunction<
+        _c_isar_filter_double_between,
+        _dart_isar_filter_double_between>('isar_filter_double_between');
+    return _isar_filter_double_between(
       collection,
       filter,
       lower,
@@ -232,7 +232,102 @@ class IsarCoreBindings {
     );
   }
 
-  _dart_isar_filter_double _isar_filter_double;
+  _dart_isar_filter_double_between _isar_filter_double_between;
+
+  int isar_filter_byte_not_equal(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    int value,
+    int property_index,
+  ) {
+    _isar_filter_byte_not_equal ??= _dylib.lookupFunction<
+        _c_isar_filter_byte_not_equal,
+        _dart_isar_filter_byte_not_equal>('isar_filter_byte_not_equal');
+    return _isar_filter_byte_not_equal(
+      collection,
+      filter,
+      value,
+      property_index,
+    );
+  }
+
+  _dart_isar_filter_byte_not_equal _isar_filter_byte_not_equal;
+
+  int isar_filter_int_not_equal(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    int value,
+    int property_index,
+  ) {
+    _isar_filter_int_not_equal ??= _dylib.lookupFunction<
+        _c_isar_filter_int_not_equal,
+        _dart_isar_filter_int_not_equal>('isar_filter_int_not_equal');
+    return _isar_filter_int_not_equal(
+      collection,
+      filter,
+      value,
+      property_index,
+    );
+  }
+
+  _dart_isar_filter_int_not_equal _isar_filter_int_not_equal;
+
+  int isar_filter_float_not_equal(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    double value,
+    int property_index,
+  ) {
+    _isar_filter_float_not_equal ??= _dylib.lookupFunction<
+        _c_isar_filter_float_not_equal,
+        _dart_isar_filter_float_not_equal>('isar_filter_float_not_equal');
+    return _isar_filter_float_not_equal(
+      collection,
+      filter,
+      value,
+      property_index,
+    );
+  }
+
+  _dart_isar_filter_float_not_equal _isar_filter_float_not_equal;
+
+  int isar_filter_long_not_equal(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    int value,
+    int property_index,
+  ) {
+    _isar_filter_long_not_equal ??= _dylib.lookupFunction<
+        _c_isar_filter_long_not_equal,
+        _dart_isar_filter_long_not_equal>('isar_filter_long_not_equal');
+    return _isar_filter_long_not_equal(
+      collection,
+      filter,
+      value,
+      property_index,
+    );
+  }
+
+  _dart_isar_filter_long_not_equal _isar_filter_long_not_equal;
+
+  int isar_filter_double_not_equal(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    double value,
+    int property_index,
+  ) {
+    _isar_filter_double_not_equal ??= _dylib.lookupFunction<
+        _c_isar_filter_double_not_equal,
+        _dart_isar_filter_double_not_equal>('isar_filter_double_not_equal');
+    return _isar_filter_double_not_equal(
+      collection,
+      filter,
+      value,
+      property_index,
+    );
+  }
+
+  _dart_isar_filter_double_not_equal _isar_filter_double_not_equal;
 
   int isar_create_instance(
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
@@ -754,7 +849,7 @@ typedef _dart_isar_filter_is_null = int Function(
   int property_index,
 );
 
-typedef _c_isar_filter_byte = ffi.Uint8 Function(
+typedef _c_isar_filter_byte_between = ffi.Uint8 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Uint8 lower,
@@ -764,7 +859,7 @@ typedef _c_isar_filter_byte = ffi.Uint8 Function(
   ffi.Uint32 property_index,
 );
 
-typedef _dart_isar_filter_byte = int Function(
+typedef _dart_isar_filter_byte_between = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   int lower,
@@ -774,7 +869,7 @@ typedef _dart_isar_filter_byte = int Function(
   int property_index,
 );
 
-typedef _c_isar_filter_int = ffi.Uint8 Function(
+typedef _c_isar_filter_int_between = ffi.Uint8 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Int32 lower,
@@ -784,7 +879,7 @@ typedef _c_isar_filter_int = ffi.Uint8 Function(
   ffi.Uint32 property_index,
 );
 
-typedef _dart_isar_filter_int = int Function(
+typedef _dart_isar_filter_int_between = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   int lower,
@@ -794,7 +889,7 @@ typedef _dart_isar_filter_int = int Function(
   int property_index,
 );
 
-typedef _c_isar_filter_float = ffi.Uint8 Function(
+typedef _c_isar_filter_float_between = ffi.Uint8 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Float lower,
@@ -804,7 +899,7 @@ typedef _c_isar_filter_float = ffi.Uint8 Function(
   ffi.Uint32 property_index,
 );
 
-typedef _dart_isar_filter_float = int Function(
+typedef _dart_isar_filter_float_between = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   double lower,
@@ -814,7 +909,7 @@ typedef _dart_isar_filter_float = int Function(
   int property_index,
 );
 
-typedef _c_isar_filter_long = ffi.Uint8 Function(
+typedef _c_isar_filter_long_between = ffi.Uint8 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Int64 lower,
@@ -824,7 +919,7 @@ typedef _c_isar_filter_long = ffi.Uint8 Function(
   ffi.Uint32 property_index,
 );
 
-typedef _dart_isar_filter_long = int Function(
+typedef _dart_isar_filter_long_between = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   int lower,
@@ -834,7 +929,7 @@ typedef _dart_isar_filter_long = int Function(
   int property_index,
 );
 
-typedef _c_isar_filter_double = ffi.Uint8 Function(
+typedef _c_isar_filter_double_between = ffi.Uint8 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Double lower,
@@ -844,13 +939,83 @@ typedef _c_isar_filter_double = ffi.Uint8 Function(
   ffi.Uint32 property_index,
 );
 
-typedef _dart_isar_filter_double = int Function(
+typedef _dart_isar_filter_double_between = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   double lower,
   int include_lower,
   double upper,
   int include_upper,
+  int property_index,
+);
+
+typedef _c_isar_filter_byte_not_equal = ffi.Uint8 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Uint8 value,
+  ffi.Uint32 property_index,
+);
+
+typedef _dart_isar_filter_byte_not_equal = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  int value,
+  int property_index,
+);
+
+typedef _c_isar_filter_int_not_equal = ffi.Uint8 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Int32 value,
+  ffi.Uint32 property_index,
+);
+
+typedef _dart_isar_filter_int_not_equal = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  int value,
+  int property_index,
+);
+
+typedef _c_isar_filter_float_not_equal = ffi.Uint8 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Float value,
+  ffi.Uint32 property_index,
+);
+
+typedef _dart_isar_filter_float_not_equal = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  double value,
+  int property_index,
+);
+
+typedef _c_isar_filter_long_not_equal = ffi.Uint8 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Int64 value,
+  ffi.Uint32 property_index,
+);
+
+typedef _dart_isar_filter_long_not_equal = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  int value,
+  int property_index,
+);
+
+typedef _c_isar_filter_double_not_equal = ffi.Uint8 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Double value,
+  ffi.Uint32 property_index,
+);
+
+typedef _dart_isar_filter_double_not_equal = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  double value,
   int property_index,
 );
 
