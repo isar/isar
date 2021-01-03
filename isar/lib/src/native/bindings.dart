@@ -560,6 +560,24 @@ class IsarCoreBindings {
 
   _dart_isar_txn_begin _isar_txn_begin;
 
+  void isar_txn_begin_async(
+    ffi.Pointer<ffi.NativeType> isar,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> txn,
+    bool write,
+    int handle,
+  ) {
+    _isar_txn_begin_async ??= _dylib.lookupFunction<_c_isar_txn_begin_async,
+        _dart_isar_txn_begin_async>('isar_txn_begin_async');
+    return _isar_txn_begin_async(
+      isar,
+      txn,
+      write ? 1 : 0,
+      handle,
+    );
+  }
+
+  _dart_isar_txn_begin_async _isar_txn_begin_async;
+
   int isar_txn_commit(
     ffi.Pointer<ffi.NativeType> txn,
   ) {
@@ -573,6 +591,18 @@ class IsarCoreBindings {
 
   _dart_isar_txn_commit _isar_txn_commit;
 
+  void isar_txn_commit_async(
+    ffi.Pointer<ffi.NativeType> txn,
+  ) {
+    _isar_txn_commit_async ??= _dylib.lookupFunction<_c_isar_txn_commit_async,
+        _dart_isar_txn_commit_async>('isar_txn_commit_async');
+    return _isar_txn_commit_async(
+      txn,
+    );
+  }
+
+  _dart_isar_txn_commit_async _isar_txn_commit_async;
+
   int isar_txn_abort(
     ffi.Pointer<ffi.NativeType> txn,
   ) {
@@ -585,6 +615,18 @@ class IsarCoreBindings {
   }
 
   _dart_isar_txn_abort _isar_txn_abort;
+
+  void isar_txn_abort_async(
+    ffi.Pointer<ffi.NativeType> txn,
+  ) {
+    _isar_txn_abort_async ??= _dylib.lookupFunction<_c_isar_txn_abort_async,
+        _dart_isar_txn_abort_async>('isar_txn_abort_async');
+    return _isar_txn_abort_async(
+      txn,
+    );
+  }
+
+  _dart_isar_txn_abort_async _isar_txn_abort_async;
 
   int isar_wc_create(
     ffi.Pointer<ffi.NativeType> collection,
@@ -766,6 +808,10 @@ abstract class RawObject extends ffi.Struct {
 
   @ffi.Uint32()
   int data_length;
+}
+
+class RawObjectSend extends ffi.Struct {
+  ffi.Pointer<RawObject> _0;
 }
 
 class RawObjectSet extends ffi.Struct {
@@ -1179,6 +1225,20 @@ typedef _dart_isar_txn_begin = int Function(
   int write,
 );
 
+typedef _c_isar_txn_begin_async = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> isar,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> txn,
+  ffi.Uint8 write,
+  ffi.Int64 handle,
+);
+
+typedef _dart_isar_txn_begin_async = void Function(
+  ffi.Pointer<ffi.NativeType> isar,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> txn,
+  int write,
+  int handle,
+);
+
 typedef _c_isar_txn_commit = ffi.Uint8 Function(
   ffi.Pointer<ffi.NativeType> txn,
 );
@@ -1187,11 +1247,27 @@ typedef _dart_isar_txn_commit = int Function(
   ffi.Pointer<ffi.NativeType> txn,
 );
 
+typedef _c_isar_txn_commit_async = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> txn,
+);
+
+typedef _dart_isar_txn_commit_async = void Function(
+  ffi.Pointer<ffi.NativeType> txn,
+);
+
 typedef _c_isar_txn_abort = ffi.Uint8 Function(
   ffi.Pointer<ffi.NativeType> txn,
 );
 
 typedef _dart_isar_txn_abort = int Function(
+  ffi.Pointer<ffi.NativeType> txn,
+);
+
+typedef _c_isar_txn_abort_async = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> txn,
+);
+
+typedef _dart_isar_txn_abort_async = void Function(
   ffi.Pointer<ffi.NativeType> txn,
 );
 
