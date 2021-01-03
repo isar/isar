@@ -26,6 +26,23 @@ class IsarCoreBindings {
 
   _dart_isar_get _isar_get;
 
+  void isar_get_async(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    ffi.Pointer<RawObject> object,
+  ) {
+    _isar_get_async ??=
+        _dylib.lookupFunction<_c_isar_get_async, _dart_isar_get_async>(
+            'isar_get_async');
+    return _isar_get_async(
+      collection,
+      txn,
+      object,
+    );
+  }
+
+  _dart_isar_get_async _isar_get_async;
+
   int isar_put(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
@@ -41,6 +58,23 @@ class IsarCoreBindings {
   }
 
   _dart_isar_put _isar_put;
+
+  void isar_put_async(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    ffi.Pointer<RawObject> object,
+  ) {
+    _isar_put_async ??=
+        _dylib.lookupFunction<_c_isar_put_async, _dart_isar_put_async>(
+            'isar_put_async');
+    return _isar_put_async(
+      collection,
+      txn,
+      object,
+    );
+  }
+
+  _dart_isar_put_async _isar_put_async;
 
   int isar_delete(
     ffi.Pointer<ffi.NativeType> collection,
@@ -810,10 +844,6 @@ abstract class RawObject extends ffi.Struct {
   int data_length;
 }
 
-class RawObjectSend extends ffi.Struct {
-  ffi.Pointer<RawObject> _0;
-}
-
 class RawObjectSet extends ffi.Struct {
   ffi.Pointer<RawObject> objects;
 
@@ -833,6 +863,18 @@ typedef _dart_isar_get = int Function(
   ffi.Pointer<RawObject> object,
 );
 
+typedef _c_isar_get_async = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObject> object,
+);
+
+typedef _dart_isar_get_async = void Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObject> object,
+);
+
 typedef _c_isar_put = ffi.Uint8 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
@@ -840,6 +882,18 @@ typedef _c_isar_put = ffi.Uint8 Function(
 );
 
 typedef _dart_isar_put = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObject> object,
+);
+
+typedef _c_isar_put_async = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObject> object,
+);
+
+typedef _dart_isar_put_async = void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<RawObject> object,
