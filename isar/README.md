@@ -19,6 +19,5 @@
   <a href="">Documentation</a> •
   <a href="">Examples</a> •
   <a href="https://github.com/isar/isar/discussions">Support & Ideas</a> •
-  <a href="https://pub.dev/packages/isar">Pub.dev</a> •
-  <a href="https://pub.dev/documentation/isar/latest/">API Reference</a> •
+  <a href="https://pub.dev/packages/isar">Pub.dev</a>
 </p>
