@@ -31,7 +31,7 @@ class BinaryReader {
   }
 
   int readInt() {
-    final value = _buffer.readInt32(_offset);
+    final value = _byteData.getInt32(_offset, Endian.little);
     _offset += 4;
     return value;
   }
@@ -61,7 +61,7 @@ class BinaryReader {
   }
 
   int readLong() {
-    var value = _buffer.readInt64(_offset);
+    var value = _byteData.getInt64(_offset, Endian.little);
     _offset += 8;
     return value;
   }

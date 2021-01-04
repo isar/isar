@@ -83,12 +83,18 @@ class WhereClause {
   final int? index;
   final List<String> types;
   final List? lower;
-  final bool? includeLower;
+  final bool includeLower;
   final List? upper;
-  final bool? includeUpper;
+  final bool includeUpper;
 
-  const WhereClause(this.index, this.types,
-      {this.lower, this.includeLower, this.upper, this.includeUpper});
+  const WhereClause(
+    this.index,
+    this.types, {
+    this.lower,
+    this.includeLower = true,
+    this.upper,
+    this.includeUpper = true,
+  });
 
   WhereClause clone() {
     return WhereClause(
@@ -109,16 +115,35 @@ abstract class QueryOperation {
 }
 
 class QueryCondition extends QueryOperation {
-  final ConditionType type;
-  final int? index;
-  final List? value;
-  final List? value2;
+  final ConditionType conditionType;
+  final int propertyIndex;
+  final String propertyType;
+  final dynamic? value;
+  final bool includeValue;
+  final dynamic? value2;
+  final bool includeValue2;
 
-  const QueryCondition(this.type, this.index, this.value, [this.value2]);
+  const QueryCondition(
+    this.conditionType,
+    this.propertyIndex,
+    this.propertyType,
+    this.value, {
+    this.includeValue = true,
+    this.value2,
+    this.includeValue2 = true,
+  });
 
   @override
   QueryCondition clone() {
-    return QueryCondition(type, index, value, value2);
+    return QueryCondition(
+      conditionType,
+      propertyIndex,
+      propertyType,
+      value,
+      includeValue: includeValue,
+      value2: value2,
+      includeValue2: includeValue2,
+    );
   }
 }
 

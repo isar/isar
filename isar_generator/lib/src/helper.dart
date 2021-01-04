@@ -5,9 +5,14 @@ import 'package:isar_annotation/isar_annotation.dart';
 final _ignoreChecker = const TypeChecker.fromRuntime(Ignore);
 final _nameChecker = const TypeChecker.fromRuntime(Name);
 final _indexChecker = const TypeChecker.fromRuntime(Index);
+final _size32Checker = const TypeChecker.fromRuntime(Size32);
 
 bool hasIgnoreAnn(Element element) {
   return _ignoreChecker.hasAnnotationOfExact(element);
+}
+
+bool hasSize32Ann(Element element) {
+  return _size32Checker.hasAnnotationOfExact(element);
 }
 
 Name getNameAnn(Element element) {

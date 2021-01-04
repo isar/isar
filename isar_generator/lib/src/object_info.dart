@@ -18,7 +18,7 @@ abstract class ObjectInfo with _$ObjectInfo {
       _$ObjectInfoFromJson(json);
 }
 
-extension ObjectPropertyX on ObjectInfo {
+extension ObjectInfoX on ObjectInfo {
   ObjectProperty getProperty(String name) {
     return properties.filter((it) => it.name == name).first;
   }
@@ -55,48 +55,59 @@ abstract class ObjectIndex with _$ObjectIndex {
       _$ObjectIndexFromJson(json);
 }
 
+extension ObjectPropertyX on ObjectProperty {
+  String get dartTypeNotNull {
+    switch (type) {
+      case DataType.Bool:
+        return 'bool';
+      case DataType.Int:
+      case DataType.Long:
+        return 'int';
+      case DataType.Float:
+      case DataType.Double:
+        return 'double';
+      case DataType.String:
+        return 'String';
+      case DataType.Bytes:
+        return 'Uint8List';
+      case DataType.BoolList:
+        return 'List<bool>';
+      case DataType.IntList:
+      case DataType.LongList:
+        return 'List<int>';
+      case DataType.FloatList:
+      case DataType.DoubleList:
+        return 'List<double>';
+      case DataType.StringList:
+        return 'List<String>';
+    }
+    throw 'unreachable';
+  }
+
+  String get dartType {
+    final typeName = dartTypeNotNull;
+    if (this.nullable) {
+      return typeName + '?';
+    } else {
+      return typeName;
+    }
+  }
+}
+
 enum DataType {
-  @JsonValue(0)
   Bool,
-
-  @JsonValue(1)
   Int,
-
-  @JsonValue(2)
   Float,
-
-  @JsonValue(3)
   Long,
-
-  @JsonValue(4)
   Double,
-
-  @JsonValue(5)
   String,
-
-  @JsonValue(6)
   Bytes,
-
-  @JsonValue(7)
   BoolList,
-
-  @JsonValue(8)
-  StringList,
-
-  @JsonValue(9)
-  BytesList,
-
-  @JsonValue(10)
   IntList,
-
-  @JsonValue(11)
   FloatList,
-
-  @JsonValue(12)
   LongList,
-
-  @JsonValue(13)
   DoubleList,
+  StringList,
 }
 
 extension DataTypeX on DataType {
@@ -120,7 +131,6 @@ extension DataTypeX on DataType {
       case DataType.Bytes:
       case DataType.BoolList:
       case DataType.StringList:
-      case DataType.BytesList:
         return 1;
       case DataType.IntList:
       case DataType.FloatList:
@@ -133,28 +143,38 @@ extension DataTypeX on DataType {
     }
   }
 
-  String toTypeName() {
-    for (var key in _typeMap.keys) {
-      if (_typeMap[key].contains(this)) return key;
+  int get typeId {
+    switch (this) {
+      case DataType.Bool:
+        return 0;
+      case DataType.Int:
+        return 1;
+      case DataType.Float:
+        return 2;
+      case DataType.Long:
+        return 3;
+      case DataType.Double:
+        return 4;
+      case DataType.String:
+        return 5;
+      case DataType.Bytes:
+      case DataType.BoolList:
+        return 6;
+      case DataType.IntList:
+        return 7;
+      case DataType.FloatList:
+        return 8;
+      case DataType.LongList:
+        return 9;
+      case DataType.DoubleList:
+        return 10;
+      case DataType.StringList:
+        return 11;
     }
-    return null;
+    return -1;
   }
 
-  static DataType fromTypeName(String name) {
-    print(name);
-    return _typeMap[name][0];
+  String get name {
+    return toString().substring(9);
   }
 }
-
-const _typeMap = {
-  'int': [DataType.Int, DataType.Long],
-  'double': [DataType.Float, DataType.Double],
-  'bool': [DataType.Bool],
-  'String': [DataType.String],
-  'Uint8List': [DataType.Bytes],
-  'List<int>': [DataType.IntList, DataType.LongList],
-  'List<double>': [DataType.FloatList, DataType.DoubleList],
-  'List<bool>': [DataType.BoolList],
-  'List<String>': [DataType.StringList],
-  'List<Uint8List>': [DataType.BytesList]
-};

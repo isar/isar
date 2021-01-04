@@ -2,12 +2,11 @@ import '../isar.g.dart';
 import 'package:isar_annotation/isar_annotation.dart';
 
 @Collection()
-class IntIndex with IsarObjectMixin {
+class BoolIndex with IsarObjectMixin {
   @Index()
-  @Size32()
-  int? field = 0;
+  bool? field = false;
 
-  IntIndex();
+  BoolIndex();
 
   @override
   String toString() {
@@ -16,6 +15,6 @@ class IntIndex with IsarObjectMixin {
 
   @override
   bool operator ==(other) {
-    return (other as IntIndex).field == field;
+    return (other as BoolIndex).field == field;
   }
 }

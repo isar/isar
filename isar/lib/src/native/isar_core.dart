@@ -1,5 +1,7 @@
 part of isar_native;
 
+const minBool = nullBool;
+const maxBool = trueBool;
 const minInt = -2147483648;
 const maxInt = 2147483647;
 const minLong = -9223372036854775808;
@@ -10,17 +12,19 @@ const minDouble = -1.7976931348623157e+308;
 const maxDouble = 1.7976931348623157e+308;
 
 const nullInt = minInt;
+const nullFloat = double.nan;
 const nullLong = minLong;
+const nullDouble = double.nan;
 const nullBool = 0;
-const trueBool = 1;
-const falseBool = 2;
+const falseBool = 1;
+const trueBool = 2;
 
 class IsarCoreUtils {
   static final syncTxnPtr = allocate<Pointer>();
   static final syncRawObjPtr = allocate<RawObject>();
 }
 
-late IsarCoreBindings IsarCore;
+late IsarCoreBindings IC;
 
 extension RawObjectX on RawObject {
   ObjectId? get oid {

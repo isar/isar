@@ -87,20 +87,19 @@ T _$enumDecodeNullable<T>(
 }
 
 const _$DataTypeEnumMap = {
-  DataType.Bool: 0,
-  DataType.Int: 1,
-  DataType.Float: 2,
-  DataType.Long: 3,
-  DataType.Double: 4,
-  DataType.String: 5,
-  DataType.Bytes: 6,
-  DataType.BoolList: 7,
-  DataType.StringList: 8,
-  DataType.BytesList: 9,
-  DataType.IntList: 10,
-  DataType.FloatList: 11,
-  DataType.LongList: 12,
-  DataType.DoubleList: 13,
+  DataType.Bool: 'Bool',
+  DataType.Int: 'Int',
+  DataType.Float: 'Float',
+  DataType.Long: 'Long',
+  DataType.Double: 'Double',
+  DataType.String: 'String',
+  DataType.Bytes: 'Bytes',
+  DataType.BoolList: 'BoolList',
+  DataType.IntList: 'IntList',
+  DataType.FloatList: 'FloatList',
+  DataType.LongList: 'LongList',
+  DataType.DoubleList: 'DoubleList',
+  DataType.StringList: 'StringList',
 };
 
 _$_ObjectIndex _$_$_ObjectIndexFromJson(Map<String, dynamic> json) {

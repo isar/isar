@@ -12,8 +12,6 @@ import 'package:isar_generator/src/code_gen/query_where_generator.dart';
 import 'package:path/path.dart' as path;
 import 'package:dartx/dartx.dart';
 
-const IC = 'IsarCore.isar';
-
 class IsarCodeGenerator extends Builder {
   @override
   final buildExtensions = {
@@ -26,10 +24,8 @@ class IsarCodeGenerator extends Builder {
   static const imports = [
     'dart:ffi',
     'dart:convert',
-    'dart:typed_data',
     'package:isar/isar.dart',
     'package:isar/isar_native.dart',
-    'package:isar/src/native/bindings.dart',
     'package:ffi/ffi.dart'
   ];
 
@@ -52,7 +48,7 @@ class IsarCodeGenerator extends Builder {
 
     var imports = [IsarCodeGenerator.imports, fileImports]
         .flatten()
-        .map((im) => 'import "$im";')
+        .map((im) => "import '$im';")
         .join('\n');
 
     var objects = files.values.flatten().toList();
@@ -96,12 +92,8 @@ class IsarCodeGenerator extends Builder {
     $objectAdapters
 
     $queryWhereExtensions
-    
+    $queryFilterExtensions
     ''';
-
-    //
-    //
-    //$queryFilterExtensions
 
     print(code);
     code = DartFormatter().format(code);
@@ -117,23 +109,23 @@ class IsarCodeGenerator extends Builder {
       if (_isar[path] != null) {
         throw 'Instance already open';
       }
-      final schemaPtr = ${IC}_schema_create();
+      final schemaPtr = IC.isar_schema_create();
       final collectionPtrPtr = allocate<Pointer>();
     ''';
 
     for (var info in objects) {
       code += '''
       {
-        final namePtr = Utf8.toUtf8("${info.dbName}");
-        nativeCall(${IC}_schema_create_collection(collectionPtrPtr, namePtr.cast()));
+        final namePtr = Utf8.toUtf8('${info.dbName}');
+        nCall(IC.isar_schema_create_collection(collectionPtrPtr, namePtr.cast()));
         final collectionPtr = collectionPtrPtr.value;
         free(namePtr);
       ''';
       for (var property in info.properties) {
         code += '''
         {
-          final pNamePtr = Utf8.toUtf8("${property.dbName}");
-          nativeCall(${IC}_schema_add_property(collectionPtr, pNamePtr.cast(), ${property.type.index}));
+          final pNamePtr = Utf8.toUtf8('${property.dbName}');
+          nCall(IC.isar_schema_add_property(collectionPtr, pNamePtr.cast(), ${property.type.index}));
           free(pNamePtr);
         }
         ''';
@@ -145,11 +137,11 @@ class IsarCodeGenerator extends Builder {
         ''';
         for (var i = 0; i < index.properties.length; i++) {
           code +=
-              'propertiesPtrPtr[$i] = Utf8.toUtf8("${index.properties[i]}").cast();';
+              "propertiesPtrPtr[$i] = Utf8.toUtf8('${index.properties[i]}').cast();";
         }
 
         code += '''
-        nativeCall(${IC}_schema_add_index(
+        nCall(IC.isar_schema_add_index(
           collectionPtr,
           propertiesPtrPtr,
           ${index.properties.length},
@@ -165,7 +157,7 @@ class IsarCodeGenerator extends Builder {
         ''';
       }
       code += '''
-        nativeCall(${IC}_schema_add_collection(schemaPtr, collectionPtrPtr.value));
+        nCall(IC.isar_schema_add_collection(schemaPtr, collectionPtrPtr.value));
       }
       
       ''';
@@ -174,7 +166,7 @@ class IsarCodeGenerator extends Builder {
     code += '''
       final pathPtr = Utf8.toUtf8(path);
       final isarPtrPtr = allocate<Pointer>();
-      nativeCall(${IC}_create_instance(isarPtrPtr, pathPtr.cast(), 1000000, schemaPtr));
+      nCall(IC.isar_create_instance(isarPtrPtr, pathPtr.cast(), 1000000, schemaPtr));
       free(pathPtr);
       
       final isarPtr = isarPtrPtr.value;
@@ -186,7 +178,7 @@ class IsarCodeGenerator extends Builder {
     var i = 0;
     for (var info in objects) {
       code += '''
-      nativeCall(${IC}_get_collection(isarPtr, collectionPtrPtr, $i));
+      nCall(IC.isar_get_collection(isarPtr, collectionPtrPtr, $i));
       ${getCollectionVar(info.type)}[path] = IsarCollectionImpl(isar, _${info.type}Adapter(), collectionPtrPtr.value);
       ''';
       i++;

@@ -2,6 +2,7 @@ part of isar_native;
 
 const zoneTxn = #zoneTxn;
 const zoneTxnWrite = #zoneTxnWrite;
+const zoneTxnStream = #zoneTxnStream;
 
 class IsarImpl extends Isar {
   final Pointer isarPtr;
@@ -17,23 +18,95 @@ class IsarImpl extends Isar {
     }
   }
 
-  @override
-  Future<T> txn<T>(Future<T> Function(Isar isar) callback) async {
+  Future<T> _txn<T>(bool write, Future<T> Function(Isar isar) callback) async {
     requireNoTxnActive();
-    throw '';
+
+    final portStreamController = StreamController<Null>.broadcast();
+    final portStream = portStreamController.stream;
+
+    final port = ReceivePort();
+    port.listen(
+      (event) {
+        print('EVENT: $event');
+        if (event == 0) {
+          portStreamController.add(null);
+        } else {
+          portStreamController.addError('err');
+        }
+      },
+      onDone: () {
+        portStreamController.close();
+      },
+    );
+
+    final txnPtrPtr = allocate<Pointer<NativeType>>();
+    IC.isar_txn_begin_async(
+        isarPtr, txnPtrPtr, write, port.sendPort.nativePort);
+
+    Pointer<NativeType> txnPtr;
+    try {
+      await portStream.first;
+      txnPtr = txnPtrPtr.value;
+    } finally {
+      free(txnPtrPtr);
+    }
+
+    final zone = Zone.current.fork(zoneValues: {
+      zoneTxn: txnPtr,
+      zoneTxnWrite: write,
+      zoneTxnStream: portStream,
+    });
+
+    T result;
+    try {
+      result = await zone.run(() => callback(this));
+      await portStream.first;
+    } catch (e) {
+      IC.isar_txn_abort_async(txnPtr);
+      port.close();
+      rethrow;
+    }
+
+    IC.isar_txn_commit_async(txnPtr);
+    await portStream.first;
+
+    port.close();
+
+    return result;
   }
 
   @override
-  Future<T> writeTxn<T>(Future<T> Function(Isar isar) callback) async {
-    requireNoTxnActive();
-    throw '';
+  Future<T> txn<T>(Future<T> Function(Isar isar) callback) {
+    return _txn(false, callback);
+  }
+
+  @override
+  Future<T> writeTxn<T>(Future<T> Function(Isar isar) callback) {
+    return _txn(true, callback);
+  }
+
+  Future<T> getTxn<T>(bool write,
+      Future<T> Function(Pointer txn, Stream<Null> stream) callback) {
+    final currentTxn = Zone.current[zoneTxn];
+    if (currentTxn != null) {
+      if (write && !Zone.current[zoneTxnWrite]) {
+        throw 'Operation cannot be performed within a read transaction.';
+      }
+      return callback(currentTxn, Zone.current[zoneTxnStream]);
+    } else if (!write) {
+      return _txn(write, (isar) {
+        return callback(Zone.current[zoneTxn], Zone.current[zoneTxnStream]);
+      });
+    } else {
+      throw 'Write operations require an explicit transaction.';
+    }
   }
 
   T _txnSync<T>(bool write, T Function(Isar isar) callback) {
     requireNoTxnActive();
 
     var txnPtr = IsarCoreUtils.syncTxnPtr;
-    nativeCall(IsarCore.isar_txn_begin(isarPtr, txnPtr, write));
+    nCall(IC.isar_txn_begin(isarPtr, txnPtr, write));
     var txn = txnPtr.value;
     _currentTxnSync = txn;
     _currentTxnSyncWrite = write;
@@ -43,12 +116,12 @@ class IsarImpl extends Isar {
       result = callback(this);
     } catch (e) {
       _currentTxnSync = null;
-      IsarCore.isar_txn_abort(txn);
+      IC.isar_txn_abort(txn);
       rethrow;
     }
 
     _currentTxnSync = null;
-    nativeCall(IsarCore.isar_txn_commit(txn));
+    nCall(IC.isar_txn_commit(txn));
 
     return result;
   }

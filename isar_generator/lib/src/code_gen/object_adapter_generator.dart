@@ -4,6 +4,7 @@ import 'package:isar_generator/src/object_info.dart';
 String generateObjectAdapter(ObjectInfo object) {
   return '''
     class _${object.type}Adapter extends TypeAdapter<${object.type}> {
+      @override
       final staticSize = ${object.getStaticSize()};
 
       ${_generatePrepareSerialize(object)}
@@ -14,8 +15,9 @@ String generateObjectAdapter(ObjectInfo object) {
 }
 
 String _generatePrepareSerialize(ObjectInfo object) {
-  var code =
-      'int prepareSerialize(${object.type} object, Map<String, dynamic> cache) {';
+  var code = '''
+  @override  
+  int prepareSerialize(${object.type} object, Map<String, dynamic> cache) {''';
   final staticSize = object.getStaticSize();
   final dynamicProperties =
       object.properties.where((it) => it.type.isDynamic).toList();
@@ -26,7 +28,7 @@ String _generatePrepareSerialize(ObjectInfo object) {
         code += '''
         {
           final padding = -(dynamicSize + $staticSize) % ${property.type.elementAlignment};
-          cache["${property.name}Padding"] = padding;
+          cache['${property.name}Padding'] = padding;
           dynamicSize += padding;
         }
         ''';
@@ -36,7 +38,7 @@ String _generatePrepareSerialize(ObjectInfo object) {
           code += '''
           {
             final bytes = utf8Encoder.convert(object.${property.name});
-            cache["${property.name}Bytes"] = bytes;
+            cache['${property.name}Bytes'] = bytes;
             dynamicSize += bytes.length;
           }
           ''';
@@ -55,15 +57,7 @@ String _generatePrepareSerialize(ObjectInfo object) {
               bytesList.add(bytes);
               dynamicSize += bytes.length;
             }
-            cache["${property.name}BytesList"] = bytesList;
-          }
-          ''';
-          break;
-        case DataType.BytesList:
-          code += '''
-          dynamicSize += object.${property.name}.length * 8;
-          for (var bytes in object.${property.name}) {
-            dynamicSize += bytes.length;
+            cache['${property.name}BytesList'] = bytesList;
           }
           ''';
           break;
@@ -92,14 +86,15 @@ String _generatePrepareSerialize(ObjectInfo object) {
 }
 
 String _generateSerialize(ObjectInfo object) {
-  var code =
-      'void serialize(${object.type} object, Map<String, dynamic> cache, BinaryWriter writer) {';
+  var code = '''
+  @override  
+  void serialize(${object.type} object, Map<String, dynamic> cache, BinaryWriter writer) {''';
   for (var property in object.properties) {
     if (property.staticPadding != 0) {
       code += 'writer.pad(${property.staticPadding});';
     }
     if (property.type.isDynamic && property.type.elementAlignment != 1) {
-      code += 'writer.padDynamic(cache["${property.name}Padding"] as int);';
+      code += "writer.padDynamic(cache['${property.name}Padding'] as int);";
     }
     var accessor = 'object.${property.name}';
     switch (property.type) {
@@ -120,7 +115,7 @@ String _generateSerialize(ObjectInfo object) {
         break;
       case DataType.String:
         code +=
-            'writer.writeBytes(cache["${property.name}Bytes"] as Uint8List);';
+            "writer.writeBytes(cache['${property.name}Bytes'] as Uint8List);";
         break;
       case DataType.Bytes:
         code += 'writer.writeBytes($accessor);';
@@ -130,10 +125,7 @@ String _generateSerialize(ObjectInfo object) {
         break;
       case DataType.StringList:
         code +=
-            'writer.writeBytesList((cache["${property.name}Bytes"] as List).cast());';
-        break;
-      case DataType.BytesList:
-        code += 'writer.writeBytesList($accessor);';
+            "writer.writeBytesList((cache['${property.name}Bytes'] as List).cast());";
         break;
       case DataType.IntList:
         code += 'writer.writeIntList($accessor);';
@@ -155,9 +147,9 @@ String _generateSerialize(ObjectInfo object) {
 
 String _generateDeserialize(ObjectInfo object) {
   var code = '''
-    ${object.type} deserialize(BinaryReader reader) {
-      final object = ${object.type}();
-    ''';
+  @override
+  ${object.type} deserialize(BinaryReader reader) {
+    final object = ${object.type}();''';
   for (var property in object.properties) {
     if (property.staticPadding != 0) {
       code += 'reader.skip(${property.staticPadding});';
@@ -186,7 +178,7 @@ String _generateDeserialize(ObjectInfo object) {
         code += '$accessor = reader.readFloat$orNull();';
         break;
       case DataType.Long:
-        code += '$accessor = reader.readlong$orNull();';
+        code += '$accessor = reader.readLong$orNull();';
         break;
       case DataType.Double:
         code += '$accessor = reader.readDouble$orNull();';
@@ -202,9 +194,6 @@ String _generateDeserialize(ObjectInfo object) {
         break;
       case DataType.StringList:
         skipNullList('$accessor = reader.readString${orElNull}List();');
-        break;
-      case DataType.BytesList:
-        skipNullList('$accessor = reader.readBytes${orElNull}List();');
         break;
       case DataType.IntList:
         skipNullList('$accessor = reader.readInt${orElNull}List();');

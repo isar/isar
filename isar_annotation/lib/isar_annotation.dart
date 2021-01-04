@@ -15,7 +15,7 @@ class Index {
 
   const Index({
     this.composite = const [],
-    this.unique = true,
+    this.unique = false,
     this.hashValue = false,
   });
 }

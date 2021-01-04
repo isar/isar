@@ -18,10 +18,11 @@ void main() {
       col = isar.intIndexs;
 
       isar.writeTxnSync((isar) {
-        for (var i = 0; i < 10; i++) {
+        for (var i = 0; i < 5; i++) {
           final obj = IntIndex()..field = i;
           col.putSync(obj);
         }
+        col.putSync(IntIndex()..field = null);
       });
     });
 
@@ -32,7 +33,12 @@ void main() {
       );
 
       expect(
-        col.where().fieldEqualTo(10).findAllSync(),
+        col.where().fieldEqualTo(null).findAllSync(),
+        [IntIndex()..field = null],
+      );
+
+      expect(
+        col.where().fieldEqualTo(5).findAllSync(),
         [],
       );
     });
@@ -41,32 +47,28 @@ void main() {
       expect(
         col.where().fieldNotEqualTo(3).findAllSync(),
         [
+          IntIndex()..field = null,
           IntIndex()..field = 0,
           IntIndex()..field = 1,
           IntIndex()..field = 2,
           IntIndex()..field = 4,
-          IntIndex()..field = 5,
-          IntIndex()..field = 6,
-          IntIndex()..field = 7,
-          IntIndex()..field = 8,
-          IntIndex()..field = 9,
         ],
       );
     });
 
     test('where greaterThan()', () {
       expect(
-        col.where().fieldGreaterThan(8).findAllSync(),
-        [IntIndex()..field = 9],
+        col.where().fieldGreaterThan(3).findAllSync(),
+        [IntIndex()..field = 4],
       );
 
       expect(
-        col.where().fieldGreaterThan(8, include: true).findAllSync(),
-        [IntIndex()..field = 8, IntIndex()..field = 9],
+        col.where().fieldGreaterThan(3, include: true).findAllSync(),
+        [IntIndex()..field = 3, IntIndex()..field = 4],
       );
 
       expect(
-        col.where().fieldGreaterThan(9).findAllSync(),
+        col.where().fieldGreaterThan(4).findAllSync(),
         [],
       );
     });
@@ -74,17 +76,16 @@ void main() {
     test('where lowerThan()', () {
       expect(
         col.where().fieldLowerThan(1).findAllSync(),
-        [IntIndex()..field = 0],
+        [IntIndex()..field = null, IntIndex()..field = 0],
       );
 
       expect(
         col.where().fieldLowerThan(1, include: true).findAllSync(),
-        [IntIndex()..field = 0, IntIndex()..field = 1],
-      );
-
-      expect(
-        col.where().fieldLowerThan(0).findAllSync(),
-        [],
+        [
+          IntIndex()..field = null,
+          IntIndex()..field = 0,
+          IntIndex()..field = 1
+        ],
       );
     });
 
@@ -92,6 +93,11 @@ void main() {
       expect(
         col.where().fieldBetween(1, 3).findAllSync(),
         [IntIndex()..field = 1, IntIndex()..field = 2, IntIndex()..field = 3],
+      );
+
+      expect(
+        col.where().fieldBetween(null, 0).findAllSync(),
+        [IntIndex()..field = null, IntIndex()..field = 0],
       );
 
       expect(
@@ -113,8 +119,28 @@ void main() {
       );
 
       expect(
-        col.where().fieldBetween(10, 11).findAllSync(),
+        col.where().fieldBetween(5, 6).findAllSync(),
         [],
+      );
+    });
+
+    test('where isNull()', () {
+      expect(
+        col.where().fieldIsNull().findAllSync(),
+        [IntIndex()..field = null],
+      );
+    });
+
+    test('where isNotNull()', () {
+      expect(
+        col.where().fieldIsNotNull().findAllSync(),
+        [
+          IntIndex()..field = 0,
+          IntIndex()..field = 1,
+          IntIndex()..field = 2,
+          IntIndex()..field = 3,
+          IntIndex()..field = 4,
+        ],
       );
     });
   });

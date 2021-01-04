@@ -1,7 +1,5 @@
 part of isar_native;
 
-const _maxInt = 4294967295;
-
 class BinaryWriter {
   static const utf8Encoder = Utf8Encoder();
 
@@ -28,14 +26,13 @@ class BinaryWriter {
 
   void writeInt(int? value) {
     value ??= nullInt;
-    assert(value <= _maxInt, 'Illegal value for @Size32 field.');
-    _buffer.writeInt32(_offset, value);
+    _byteData.setInt32(_offset, value, Endian.little);
     _offset += 4;
   }
 
   void writeLong(int? value) {
-    value ??= nullInt;
-    _buffer.writeInt64(_offset, value);
+    value ??= nullLong;
+    _byteData.setInt64(_offset, value, Endian.little);
     _offset += 8;
   }
 
@@ -53,9 +50,9 @@ class BinaryWriter {
 
   void writeBool(bool? value) {
     if (value == null) {
-      _buffer[_offset++] = 0;
+      _buffer[_offset++] = nullBool;
     } else {
-      _buffer[_offset++] = value ? 1 : 2;
+      _buffer[_offset++] = value ? trueBool : falseBool;
     }
   }
 
@@ -114,7 +111,7 @@ class BinaryWriter {
       _buffer.writeInt32(_offset + 4, values.length);
 
       for (var value in values) {
-        _byteData.setFloat32(_dynamicOffset, value ?? double.nan);
+        _byteData.setFloat32(_dynamicOffset, value ?? nullFloat);
         _dynamicOffset += 4;
       }
     }
@@ -129,7 +126,7 @@ class BinaryWriter {
       _buffer.writeInt32(_offset + 4, values.length);
 
       for (var value in values) {
-        _buffer.writeInt64(_dynamicOffset, value ?? nullInt);
+        _buffer.writeInt64(_dynamicOffset, value ?? nullLong);
         _dynamicOffset += 8;
       }
     }
@@ -144,7 +141,7 @@ class BinaryWriter {
       _buffer.writeInt32(_offset + 4, values.length);
 
       for (var value in values) {
-        _byteData.setFloat64(_dynamicOffset, value ?? double.nan);
+        _byteData.setFloat64(_dynamicOffset, value ?? nullDouble);
         _dynamicOffset += 8;
       }
     }

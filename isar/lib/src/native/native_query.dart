@@ -8,30 +8,56 @@ class NativeQuery<T extends IsarObjectMixin> extends Query<T> {
 
   @override
   Future<List<T>> findAll() {
-    // TODO: implement findAll
-    throw UnimplementedError();
+    return col.isar.getTxn(false, (txnPtr, stream) async {
+      final resultsPtr = allocate<RawObjectSet>();
+      try {
+        IC.isar_q_find_all_async(queryPtr, txnPtr, resultsPtr);
+        await stream.first;
+        return col.deserializeObjects(resultsPtr.ref);
+      } finally {
+        free(resultsPtr);
+      }
+    });
   }
 
   @override
   List<T> findAllSync() {
     return col.isar.getTxnSync(false, (txnPtr) {
       final resultsPtr = allocate<RawObjectSet>();
-      nativeCall(IsarCore.isar_q_find_all(queryPtr, txnPtr, resultsPtr));
-      final objects = col.deserializeObjects(resultsPtr.ref);
-      return objects;
+      try {
+        nCall(IC.isar_q_find_all(queryPtr, txnPtr, resultsPtr));
+        return col.deserializeObjects(resultsPtr.ref);
+      } finally {
+        free(resultsPtr);
+      }
     });
   }
 
   @override
   Future<int> count() {
-    // TODO: implement count
-    throw UnimplementedError();
+    return col.isar.getTxn(false, (txnPtr, stream) async {
+      final countPtr = allocate<Int64>();
+      try {
+        //IC.isar_q_count_async(queryPtr, txnPtr, countPtr);
+        await stream.first;
+        return countPtr.value;
+      } finally {
+        free(countPtr);
+      }
+    });
   }
 
   @override
   int countSync() {
-    // TODO: implement countSync
-    throw UnimplementedError();
+    return col.isar.getTxnSync(false, (txnPtr) {
+      final countPtr = allocate<Int64>();
+      try {
+        //nCall(IC.isar_q_count(queryPtr, txnPtr, countPtr));
+        return countPtr.value;
+      } finally {
+        free(countPtr);
+      }
+    });
   }
 
   @override

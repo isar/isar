@@ -27,7 +27,20 @@ class IsarCollectionImpl<T extends IsarObjectMixin> extends IsarCollection<T> {
 
   @override
   Future<T?> get(ObjectId id) {
-    throw UnimplementedError();
+    return isar.getTxn(false, (txnPtr, stream) async {
+      final rawObjPtr = allocate<RawObject>();
+      final rawObj = rawObjPtr.ref;
+      rawObj.oid = id;
+
+      IC.isar_get_async(collectionPtr, txnPtr, rawObjPtr);
+      await stream.first;
+
+      if (rawObj.oid != null) {
+        return deserializeObject(rawObj);
+      } else {
+        return null;
+      }
+    });
   }
 
   @override
@@ -37,7 +50,7 @@ class IsarCollectionImpl<T extends IsarObjectMixin> extends IsarCollection<T> {
       final rawObj = rawObjPtr.ref;
       rawObj.oid = id;
 
-      nativeCall(IsarCore.isar_get(collectionPtr, txnPtr, rawObjPtr));
+      nCall(IC.isar_get(collectionPtr, txnPtr, rawObjPtr));
 
       if (rawObj.oid != null) {
         return deserializeObject(rawObj);
@@ -50,7 +63,7 @@ class IsarCollectionImpl<T extends IsarObjectMixin> extends IsarCollection<T> {
   Pointer<RawObject> serializeObject(T object) {
     final cache = <String, dynamic>{};
     final size = _adapter.prepareSerialize(object, cache);
-    final rawObjPtr = IsarCore.isar_alloc_raw_obj(size);
+    final rawObjPtr = IC.isar_alloc_raw_obj(size);
     final rawObj = rawObjPtr.ref;
     rawObj.oid = object.id;
     final buffer = rawObj.data.asTypedList(rawObj.data_length);
@@ -61,7 +74,18 @@ class IsarCollectionImpl<T extends IsarObjectMixin> extends IsarCollection<T> {
 
   @override
   Future<void> put(T object) {
-    throw UnimplementedError();
+    return isar.getTxn(true, (txnPtr, stream) async {
+      final rawObjPtr = serializeObject(object);
+      final rawObj = rawObjPtr.ref;
+      IC.isar_put_async(collectionPtr, txnPtr, rawObjPtr);
+
+      try {
+        await stream.first;
+        object.init(rawObj.oid!, this);
+      } finally {
+        IC.isar_free_raw_obj(rawObjPtr);
+      }
+    });
   }
 
   @override
@@ -69,11 +93,13 @@ class IsarCollectionImpl<T extends IsarObjectMixin> extends IsarCollection<T> {
     return isar.getTxnSync(true, (txnPtr) {
       final rawObjPtr = serializeObject(object);
       final rawObj = rawObjPtr.ref;
-      nativeCall(IsarCore.isar_put(collectionPtr, txnPtr, rawObjPtr));
 
-      object.init(rawObj.oid!, this);
-
-      IsarCore.isar_free_raw_obj(rawObjPtr);
+      try {
+        nCall(IC.isar_put(collectionPtr, txnPtr, rawObjPtr));
+        object.init(rawObj.oid!, this);
+      } finally {
+        IC.isar_free_raw_obj(rawObjPtr);
+      }
     });
   }
 
@@ -90,7 +116,7 @@ class IsarCollectionImpl<T extends IsarObjectMixin> extends IsarCollection<T> {
       _adapter.serialize(objects[i], rawObj);
     }
 
-    //nativeCall(IsarCore.isar_put_all(_collection, txn, rawObjsPtr));
+    //nCall(IC.isar_put_all(_collection, txn, rawObjsPtr));
 
     for (var i = 0; i < objects.length; i++) {
       final rawObj = rawObjsPtr.elementAt(i).ref;
@@ -102,15 +128,18 @@ class IsarCollectionImpl<T extends IsarObjectMixin> extends IsarCollection<T> {
 
   @override
   Future<void> delete(ObjectId id) {
-    throw UnimplementedError();
-    /*return isar.optionalTxn(true, (txn) {
-      var rawObjPtr = IsarCoreUtils.obj;
-      var rawObj = rawObjPtr.ref;
-      rawObj.oid = object.id;
+    return isar.getTxn(false, (txnPtr, stream) async {
+      final rawObjPtr = allocate<RawObject>();
+      final rawObj = rawObjPtr.ref;
+      rawObj.oid = id;
+      IC.isar_delete_async(collectionPtr, txnPtr, rawObjPtr);
 
-      nativeCall(IsarCore.isar_delete(_collection, txn, rawObjPtr));
-      object.uninit();
-    });*/
+      try {
+        await stream.first;
+      } finally {
+        free(rawObjPtr);
+      }
+    });
   }
 
   @override
@@ -120,7 +149,7 @@ class IsarCollectionImpl<T extends IsarObjectMixin> extends IsarCollection<T> {
       final rawObj = rawObjPtr.ref;
       rawObj.oid = id;
 
-      nativeCall(IsarCore.isar_delete(collectionPtr, txnPtr, rawObjPtr));
+      nCall(IC.isar_delete(collectionPtr, txnPtr, rawObjPtr));
     });
   }
 }

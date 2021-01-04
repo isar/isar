@@ -96,14 +96,6 @@ class IsarAnalyzer extends Builder {
       return null;
     }
 
-    var type = DataTypeX.fromTypeName(
-      property.type.getDisplayString(withNullability: false),
-    );
-    if (type == null) {
-      err('Property has unsupported type. Use @IsarIgnore to ignore the property.',
-          property);
-    }
-
     final nullable = property.type.nullabilitySuffix != NullabilitySuffix.none;
     var elementNullable = false;
     if (property.type is ParameterizedType) {
@@ -122,10 +114,56 @@ class IsarAnalyzer extends Builder {
     return ObjectProperty(
       name: property.displayName,
       dbName: dbName,
-      type: type,
+      type: getDataType(property),
       nullable: nullable,
       elementNullable: elementNullable,
     );
+  }
+
+  DataType getDataType(FieldElement property) {
+    if (property.type.isDartCoreBool) {
+      return DataType.Bool;
+    } else if (property.type.isDartCoreInt) {
+      if (hasSize32Ann(property)) {
+        return DataType.Int;
+      } else {
+        return DataType.Long;
+      }
+    } else if (property.type.isDartCoreDouble) {
+      if (hasSize32Ann(property)) {
+        return DataType.Float;
+      } else {
+        return DataType.Double;
+      }
+    } else if (property.type.isDartCoreString) {
+      return DataType.String;
+    } else if (property.type.isDartCoreList) {
+      final parameterizedType = property.type as ParameterizedType;
+      final typeArguments = parameterizedType.typeArguments;
+      if (typeArguments != null && typeArguments.isNotEmpty) {
+        final listType = typeArguments[0];
+        if (listType.isDartCoreBool) {
+          return DataType.BoolList;
+        } else if (listType.isDartCoreInt) {
+          if (hasSize32Ann(property)) {
+            return DataType.IntList;
+          } else {
+            return DataType.LongList;
+          }
+        } else if (listType.isDartCoreDouble) {
+          if (hasSize32Ann(property)) {
+            return DataType.FloatList;
+          } else {
+            return DataType.DoubleList;
+          }
+        } else if (listType.isDartCoreString) {
+          return DataType.StringList;
+        }
+      }
+    }
+    err('Property has unsupported type. Use @IsarIgnore to ignore the property.',
+        property);
+    throw 'unreachable';
   }
 
   Iterable<ObjectIndex> generateObjectIndices(

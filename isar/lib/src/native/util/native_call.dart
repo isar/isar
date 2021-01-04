@@ -1,6 +1,6 @@
 part of isar_native;
 
-void nativeCall(int result) {
+void nCall(int result) {
   if (result != 0) {
     throw 'ERROR: $result';
   }
