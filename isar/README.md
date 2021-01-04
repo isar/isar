@@ -1,10 +1,9 @@
-<h1 align="center">
-  <br>
-  <a href="https://isar.dev"><img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/isar.svg?sanitize=true" alt="Isar" width="150px"></a>
-  <br>
-  Isar Database
-  <br>
-</h1>
+<p align="center">
+  <a href="https://isar.dev">
+    <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/isar.svg?sanitize=true" height="128">
+  </a>
+  <h1 align="center">Isar Database</h1>
+</p>
 
 <h4 align="center">Super Fast Cross Platform Database for Flutter & Web Apps.</h4>
 
