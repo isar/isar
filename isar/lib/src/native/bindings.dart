@@ -92,19 +92,51 @@ class IsarCoreBindings {
 
   _dart_isar_delete _isar_delete;
 
-  int isar_clear(
+  void isar_delete_async(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    ffi.Pointer<RawObject> object,
+  ) {
+    _isar_delete_async ??=
+        _dylib.lookupFunction<_c_isar_delete_async, _dart_isar_delete_async>(
+            'isar_delete_async');
+    return _isar_delete_async(
+      collection,
+      txn,
+      object,
+    );
+  }
+
+  _dart_isar_delete_async _isar_delete_async;
+
+  int isar_clear_collection(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
   ) {
-    _isar_clear ??=
-        _dylib.lookupFunction<_c_isar_clear, _dart_isar_clear>('isar_clear');
-    return _isar_clear(
+    _isar_clear_collection ??= _dylib.lookupFunction<_c_isar_clear_collection,
+        _dart_isar_clear_collection>('isar_clear_collection');
+    return _isar_clear_collection(
       collection,
       txn,
     );
   }
 
-  _dart_isar_clear _isar_clear;
+  _dart_isar_clear_collection _isar_clear_collection;
+
+  void isar_clear_collection_async(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+  ) {
+    _isar_clear_collection_async ??= _dylib.lookupFunction<
+        _c_isar_clear_collection_async,
+        _dart_isar_clear_collection_async>('isar_clear_collection_async');
+    return _isar_clear_collection_async(
+      collection,
+      txn,
+    );
+  }
+
+  _dart_isar_clear_collection_async _isar_clear_collection_async;
 
   int isar_filter_and_or(
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
@@ -475,6 +507,22 @@ class IsarCoreBindings {
 
   _dart_isar_q_find_all _isar_q_find_all;
 
+  void isar_q_find_all_async(
+    ffi.Pointer<ffi.NativeType> query,
+    ffi.Pointer<ffi.NativeType> txn,
+    ffi.Pointer<RawObjectSet> result,
+  ) {
+    _isar_q_find_all_async ??= _dylib.lookupFunction<_c_isar_q_find_all_async,
+        _dart_isar_q_find_all_async>('isar_q_find_all_async');
+    return _isar_q_find_all_async(
+      query,
+      txn,
+      result,
+    );
+  }
+
+  _dart_isar_q_find_all_async _isar_q_find_all_async;
+
   ffi.Pointer<RawObject> isar_alloc_raw_obj(
     int size,
   ) {
@@ -598,7 +646,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> isar,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> txn,
     bool write,
-    int handle,
+    int port,
   ) {
     _isar_txn_begin_async ??= _dylib.lookupFunction<_c_isar_txn_begin_async,
         _dart_isar_txn_begin_async>('isar_txn_begin_async');
@@ -606,7 +654,7 @@ class IsarCoreBindings {
       isar,
       txn,
       write ? 1 : 0,
-      handle,
+      port,
     );
   }
 
@@ -911,12 +959,34 @@ typedef _dart_isar_delete = int Function(
   ffi.Pointer<RawObject> object,
 );
 
-typedef _c_isar_clear = ffi.Uint8 Function(
+typedef _c_isar_delete_async = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObject> object,
+);
+
+typedef _dart_isar_delete_async = void Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObject> object,
+);
+
+typedef _c_isar_clear_collection = ffi.Uint8 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
 );
 
-typedef _dart_isar_clear = int Function(
+typedef _dart_isar_clear_collection = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+);
+
+typedef _c_isar_clear_collection_async = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+);
+
+typedef _dart_isar_clear_collection_async = void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
 );
@@ -1199,6 +1269,18 @@ typedef _dart_isar_q_find_all = int Function(
   ffi.Pointer<RawObjectSet> result,
 );
 
+typedef _c_isar_q_find_all_async = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> query,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObjectSet> result,
+);
+
+typedef _dart_isar_q_find_all_async = void Function(
+  ffi.Pointer<ffi.NativeType> query,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObjectSet> result,
+);
+
 typedef _c_isar_alloc_raw_obj = ffi.Pointer<RawObject> Function(
   ffi.Uint32 size,
 );
@@ -1283,14 +1365,14 @@ typedef _c_isar_txn_begin_async = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> isar,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> txn,
   ffi.Uint8 write,
-  ffi.Int64 handle,
+  ffi.Int64 port,
 );
 
 typedef _dart_isar_txn_begin_async = void Function(
   ffi.Pointer<ffi.NativeType> isar,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> txn,
   int write,
-  int handle,
+  int port,
 );
 
 typedef _c_isar_txn_commit = ffi.Uint8 Function(
