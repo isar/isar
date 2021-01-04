@@ -5,8 +5,6 @@
   <h1 align="center">Isar Database</h1>
 </p>
 
-<h4 align="center">Super Fast Cross Platform Database for Flutter & Web Apps.</h4>
-
 <p align="center">
   <a href="https://pub.dev/packages/isar">
     <img src="https://img.shields.io/pub/v/isar?label=pub.dev&labelColor=333940&logo=dart">
