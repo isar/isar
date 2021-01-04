@@ -21,3 +21,5 @@
   <a href="https://github.com/isar/isar/discussions">Support & Ideas</a> •
   <a href="https://pub.dev/packages/isar">Pub.dev</a>
 </p>
+
+<p align="center">⚠️ Very unstable and not ready for serious usage ⚠<p>
