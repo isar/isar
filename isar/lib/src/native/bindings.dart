@@ -764,21 +764,22 @@ class IsarCoreBindings {
 
   _dart_isar_wc_create _isar_wc_create;
 
-  int isar_wc_oid(
+  int isar_wc_add_oid(
     ffi.Pointer<ffi.NativeType> where_clause,
     int time,
     int rand_counter,
   ) {
-    _isar_wc_oid ??=
-        _dylib.lookupFunction<_c_isar_wc_oid, _dart_isar_wc_oid>('isar_wc_oid');
-    return _isar_wc_oid(
+    _isar_wc_add_oid ??=
+        _dylib.lookupFunction<_c_isar_wc_add_oid, _dart_isar_wc_add_oid>(
+            'isar_wc_add_oid');
+    return _isar_wc_add_oid(
       where_clause,
       time,
       rand_counter,
     );
   }
 
-  _dart_isar_wc_oid _isar_wc_oid;
+  _dart_isar_wc_add_oid _isar_wc_add_oid;
 
   void isar_wc_add_oid_time(
     ffi.Pointer<ffi.NativeType> where_clause,
@@ -1482,13 +1483,13 @@ typedef _dart_isar_wc_create = int Function(
   int index_index,
 );
 
-typedef _c_isar_wc_oid = ffi.Uint8 Function(
+typedef _c_isar_wc_add_oid = ffi.Uint8 Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Uint32 time,
   ffi.Uint64 rand_counter,
 );
 
-typedef _dart_isar_wc_oid = int Function(
+typedef _dart_isar_wc_add_oid = int Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   int time,
   int rand_counter,
