@@ -23,3 +23,29 @@
 </p>
 
 <p align="center">⚠️ Very unstable and not ready for serious usage ⚠<p>
+
+### Schema definition
+```dart
+@Collection()
+class Person with IsarObjectMixin {
+
+  @Index(unique: true)
+  String name;
+  
+  int age;
+}
+```
+
+### Query
+```dart
+final isar = await openIsar();
+final result = isar.users.where()
+  .sortedByName() // use index
+  .ageGreaterThan(20)
+  .beginGroup()
+    .nameEqualTo("Paul")
+    .or()
+    .nameEqualTo("Lisa")
+  .endGroup()
+  .findAll()
+```
