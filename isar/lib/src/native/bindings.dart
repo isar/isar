@@ -138,6 +138,18 @@ class IsarCoreBindings {
 
   _dart_isar_delete_all_async _isar_delete_all_async;
 
+  void isar_connect_dart_api(
+    ffi.Pointer<ffi.NativeFunction<DartPostCObjectFnType>> ptr,
+  ) {
+    _isar_connect_dart_api ??= _dylib.lookupFunction<_c_isar_connect_dart_api,
+        _dart_isar_connect_dart_api>('isar_connect_dart_api');
+    return _isar_connect_dart_api(
+      ptr,
+    );
+  }
+
+  _dart_isar_connect_dart_api _isar_connect_dart_api;
+
   int isar_filter_and_or(
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     bool and,
@@ -1025,6 +1037,19 @@ typedef _c_isar_delete_all_async = ffi.Void Function(
 typedef _dart_isar_delete_all_async = void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
+);
+
+typedef DartPostCObjectFnType = ffi.Uint8 Function(
+  ffi.Int64,
+  ffi.Pointer<ffi.NativeType>,
+);
+
+typedef _c_isar_connect_dart_api = ffi.Void Function(
+  ffi.Pointer<ffi.NativeFunction<DartPostCObjectFnType>> ptr,
+);
+
+typedef _dart_isar_connect_dart_api = void Function(
+  ffi.Pointer<ffi.NativeFunction<DartPostCObjectFnType>> ptr,
 );
 
 typedef _c_isar_filter_and_or = ffi.Uint8 Function(
