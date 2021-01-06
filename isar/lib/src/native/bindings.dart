@@ -940,6 +940,8 @@ abstract class RawObject extends ffi.Struct {
   int data_length;
 }
 
+class Dart_CObject extends ffi.Struct {}
+
 class RawObjectSet extends ffi.Struct {
   ffi.Pointer<RawObject> objects;
 
@@ -1039,9 +1041,9 @@ typedef _dart_isar_delete_all_async = void Function(
   ffi.Pointer<ffi.NativeType> txn,
 );
 
-typedef DartPostCObjectFnType = ffi.Uint8 Function(
+typedef DartPostCObjectFnType = ffi.Int8 Function(
   ffi.Int64,
-  ffi.Pointer<ffi.NativeType>,
+  ffi.Pointer<Dart_CObject>,
 );
 
 typedef _c_isar_connect_dart_api = ffi.Void Function(
