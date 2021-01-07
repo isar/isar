@@ -27,7 +27,7 @@
 ### Schema definition
 ```dart
 @Collection()
-class Person with IsarObjectMixin {
+class Person with IsarObject {
 
   @Index(unique: true)
   String name;
@@ -39,8 +39,10 @@ class Person with IsarObjectMixin {
 ### Query
 ```dart
 final isar = await openIsar();
+
 final result = isar.users.where()
   .sortedByName() // use index
+  .filter()
   .ageGreaterThan(20)
   .beginGroup()
     .nameEqualTo("Paul")

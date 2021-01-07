@@ -1,6 +1,6 @@
 part of isar;
 
-class QueryBuilder<T extends IsarObjectMixin, WHERE, FILTER, GROUPS, GROUPBY,
+class QueryBuilder<T extends IsarObject, WHERE, FILTER, GROUPS, GROUPBY,
     OFFSET_LIMIT, SORT, EXECUTE> {
   IsarCollection<T> _collection;
   List<WhereClause> _whereClauses;
@@ -59,12 +59,12 @@ class QueryBuilder<T extends IsarObjectMixin, WHERE, FILTER, GROUPS, GROUPBY,
 
 QueryBuilder<T, QNoWhere, QCanFilter, QNoGroups, QCanGroupBy, QCanOffsetLimit,
     QCanSort, QCanExecute> newQueryInternal<
-        T extends IsarObjectMixin, COLLECTION extends IsarCollection<T>>(
+        T extends IsarObject, COLLECTION extends IsarCollection<T>>(
     COLLECTION collection) {
   return QueryBuilder._(collection);
 }
 
-extension QueryBuilderX<T extends IsarObjectMixin> on QueryBuilder<T, dynamic,
+extension QueryBuilderX<T extends IsarObject> on QueryBuilder<T, dynamic,
     dynamic, dynamic, dynamic, dynamic, dynamic, dynamic> {
   QueryBuilder<T, B, C, D, E, F, G, H> clone<B, C, D, E, F, G, H>() {
     final newWhereClauses = <WhereClause>[];
@@ -235,15 +235,15 @@ typedef QSorting = Function(bool);
 
 typedef QCanExecute = Function();
 
-extension QueryWhereOr<T extends IsarObjectMixin> on QueryBuilder<T,
-    QWhereProperty, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic> {
+extension QueryWhereOr<T extends IsarObject> on QueryBuilder<T, QWhereProperty,
+    dynamic, dynamic, dynamic, dynamic, dynamic, dynamic> {
   QueryBuilder<T, QNoWhere, dynamic, dynamic, dynamic, dynamic, dynamic,
       dynamic> or() {
     return clone();
   }
 }
 
-extension QueryFilter<T extends IsarObjectMixin> on QueryBuilder<T, dynamic,
+extension QueryFilter<T extends IsarObject> on QueryBuilder<T, dynamic,
     QCanFilter, dynamic, dynamic, dynamic, dynamic, dynamic> {
   QueryBuilder<T, dynamic, QFilter, QNoGroups, dynamic, dynamic, dynamic,
       dynamic> filter() {
@@ -251,7 +251,7 @@ extension QueryFilter<T extends IsarObjectMixin> on QueryBuilder<T, dynamic,
   }
 }
 
-extension QueryFilterAddCondition<T extends IsarObjectMixin> on QueryBuilder<T,
+extension QueryFilterAddCondition<T extends IsarObject> on QueryBuilder<T,
     dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic> {
   QueryBuilder<T, B, C, D, E, F, G, H> addFilterCondition<B, C, D, E, F, G, H>(
       QueryCondition cond) {
@@ -268,7 +268,7 @@ extension QueryFilterAddCondition<T extends IsarObjectMixin> on QueryBuilder<T,
   }
 }
 
-extension QueryFilterAndOr<T extends IsarObjectMixin, GROUPS> on QueryBuilder<T,
+extension QueryFilterAndOr<T extends IsarObject, GROUPS> on QueryBuilder<T,
     dynamic, QFilterAfterCond, GROUPS, dynamic, dynamic, dynamic, dynamic> {
   QueryBuilder<T, dynamic, QFilter, GROUPS, dynamic, dynamic, dynamic, dynamic>
       and() {
@@ -281,23 +281,23 @@ extension QueryFilterAndOr<T extends IsarObjectMixin, GROUPS> on QueryBuilder<T,
   }
 }
 
-extension QueryFilterNoGroups<T extends IsarObjectMixin> on QueryBuilder<T,
-    dynamic, QFilter, QNoGroups, dynamic, dynamic, dynamic, dynamic> {
+extension QueryFilterNoGroups<T extends IsarObject> on QueryBuilder<T, dynamic,
+    QFilter, QNoGroups, dynamic, dynamic, dynamic, dynamic> {
   QueryBuilder<T, dynamic, QFilter, QOneGroups, dynamic, dynamic, dynamic,
       dynamic> beginGroup() {
     return _beginGroup();
   }
 }
 
-extension QueryFilterOneGroups<T extends IsarObjectMixin> on QueryBuilder<T,
-    dynamic, QFilter, QOneGroups, dynamic, dynamic, dynamic, dynamic> {
+extension QueryFilterOneGroups<T extends IsarObject> on QueryBuilder<T, dynamic,
+    QFilter, QOneGroups, dynamic, dynamic, dynamic, dynamic> {
   QueryBuilder<T, dynamic, QFilter, QTwoGroups, dynamic, dynamic, dynamic,
       dynamic> beginGroup() {
     return _beginGroup();
   }
 }
 
-extension QueryFilterOneGroupsEnd<T extends IsarObjectMixin> on QueryBuilder<T,
+extension QueryFilterOneGroupsEnd<T extends IsarObject> on QueryBuilder<T,
     dynamic, QFilterAfterCond, QOneGroups, dynamic, dynamic, dynamic, dynamic> {
   QueryBuilder<T, dynamic, QFilterAfterCond, QNoGroups, QCanGroupBy,
       QCanOffsetLimit, QCanSort, QCanExecute> endGroup() {
@@ -305,7 +305,7 @@ extension QueryFilterOneGroupsEnd<T extends IsarObjectMixin> on QueryBuilder<T,
   }
 }
 
-extension QueryFilterTwoGroupsEnd<T extends IsarObjectMixin> on QueryBuilder<T,
+extension QueryFilterTwoGroupsEnd<T extends IsarObject> on QueryBuilder<T,
     dynamic, QFilterAfterCond, QTwoGroups, dynamic, dynamic, dynamic, dynamic> {
   QueryBuilder<T, dynamic, QFilterAfterCond, QOneGroups, dynamic, dynamic,
       dynamic, dynamic> endGroup() {
@@ -313,7 +313,7 @@ extension QueryFilterTwoGroupsEnd<T extends IsarObjectMixin> on QueryBuilder<T,
   }
 }
 
-extension QueryExecute<T extends IsarObjectMixin> on QueryBuilder<T, dynamic,
+extension QueryExecute<T extends IsarObject> on QueryBuilder<T, dynamic,
     dynamic, QNoGroups, dynamic, dynamic, dynamic, QCanExecute> {
   Query<T> build() {
     return buildQuery(_collection, _whereClauses, _filter);

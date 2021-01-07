@@ -1,6 +1,6 @@
 part of isar_native;
 
-class NativeQuery<T extends IsarObjectMixin> extends Query<T> {
+class NativeQuery<T extends IsarObject> extends Query<T> {
   final IsarCollectionImpl<T> col;
   final Pointer<NativeType> queryPtr;
 

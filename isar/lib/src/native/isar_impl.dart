@@ -27,7 +27,6 @@ class IsarImpl extends Isar {
     final port = ReceivePort();
     port.listen(
       (event) {
-        print('EVENT: $event');
         if (event == 0) {
           portStreamController.add(null);
         } else {
@@ -60,7 +59,6 @@ class IsarImpl extends Isar {
     T result;
     try {
       result = await zone.run(() => callback(this));
-      await portStream.first;
     } catch (e) {
       IC.isar_txn_abort_async(txnPtr);
       port.close();

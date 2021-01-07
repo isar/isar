@@ -24,7 +24,33 @@ class IsarCoreUtils {
   static final syncRawObjPtr = allocate<RawObject>();
 }
 
-late IsarCoreBindings IC;
+IsarCoreBindings? _IC;
+IsarCoreBindings get IC => _IC!;
+
+void initializeIsarCore({Map<String, String> dylibs = const {}}) {
+  if (_IC != null) {
+    return;
+  }
+  late String dylib;
+  if (Platform.isAndroid) {
+    dylib = dylibs['android'] ?? 'libisar.so';
+  } else if (Platform.isIOS) {
+    dylib = dylibs['ios'] ?? 'libisar.dylib';
+  } else if (Platform.isMacOS) {
+    dylib = dylibs['macos'] ?? 'libisar.dylib';
+  } else if (Platform.isWindows) {
+    dylib = dylibs['windows'] ?? 'libisar.dll';
+  } else if (Platform.isLinux) {
+    dylib = dylibs['linux'] ?? 'libisar.so';
+  }
+  try {
+    _IC ??= IsarCoreBindings(DynamicLibrary.open(dylib));
+  } catch (e) {
+    throw IsarError(
+        'Could not initialize IsarCore library. If you create a Flutter app, '
+        'make sure to add isar_flutter to your dependencies.');
+  }
+}
 
 extension RawObjectX on RawObject {
   ObjectId? get oid {

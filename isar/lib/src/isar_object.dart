@@ -1,6 +1,6 @@
 part of isar;
 
-mixin IsarObjectMixin {
+mixin IsarObject {
   ObjectId? _id;
   IsarCollection? _collection;
 
@@ -35,7 +35,7 @@ mixin IsarObjectMixin {
   }
 }
 
-extension ObjectInternal on IsarObjectMixin {
+extension ObjectInternal on IsarObject {
   void init(ObjectId id, IsarCollection collection) {
     _id = id;
     _collection = collection;

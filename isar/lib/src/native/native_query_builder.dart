@@ -1,9 +1,7 @@
 part of isar_native;
 
-NativeQuery<T> buildQuery<T extends IsarObjectMixin>(
-    IsarCollection<T> collection,
-    List<WhereClause> whereClauses,
-    FilterGroup filter) {
+NativeQuery<T> buildQuery<T extends IsarObject>(IsarCollection<T> collection,
+    List<WhereClause> whereClauses, FilterGroup filter) {
   final col = collection as IsarCollectionImpl<T>;
   final colPtr = col.collectionPtr;
   final qbPtr = IC.isar_qb_create(col.isar.isarPtr, colPtr);
@@ -11,7 +9,10 @@ NativeQuery<T> buildQuery<T extends IsarObjectMixin>(
     _addWhereClause(colPtr, qbPtr, whereClause);
   }
   final filterPtr = _buildFilter(colPtr, filter);
-  IC.isar_qb_set_filter(qbPtr, filterPtr);
+  if (filterPtr != null) {
+    IC.isar_qb_set_filter(qbPtr, filterPtr);
+  }
+
   final queryPtr = IC.isar_qb_build(qbPtr);
   return NativeQuery(col, queryPtr);
 }
@@ -180,17 +181,29 @@ void addWhereValue({
   }
 }
 
-Pointer<NativeType> _buildFilter(Pointer colPtr, FilterGroup filter) {
-  final conditionsPtrPtr =
-      allocate<Pointer<NativeType>>(count: filter.conditions.length);
-  for (var i = 0; i < filter.conditions.length; i++) {
-    final op = filter.conditions[i];
-    if (op is FilterGroup) {
-      conditionsPtrPtr[i] = _buildFilter(colPtr, op);
-    } else if (op is QueryCondition) {
-      conditionsPtrPtr[i] = _buildCondition(colPtr, op);
-    }
+Pointer<NativeType>? _buildFilter(Pointer colPtr, FilterGroup filter) {
+  final builtConditions = filter.conditions
+      .map((op) {
+        if (op is FilterGroup) {
+          return _buildFilter(colPtr, op);
+        } else if (op is QueryCondition) {
+          return _buildCondition(colPtr, op);
+        }
+      })
+      .where((it) => it != null)
+      .toList();
+
+  if (builtConditions.isEmpty) {
+    return null;
   }
+
+  final conditionsPtrPtr =
+      allocate<Pointer<NativeType>>(count: builtConditions.length);
+
+  for (var i = 0; i < builtConditions.length; i++) {
+    conditionsPtrPtr[i] = builtConditions[i]!;
+  }
+
   final filterPtrPtr = allocate<Pointer<NativeType>>();
   nCall(IC.isar_filter_and_or(
     filterPtrPtr,

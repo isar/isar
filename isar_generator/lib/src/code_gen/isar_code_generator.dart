@@ -24,6 +24,8 @@ class IsarCodeGenerator extends Builder {
   static const imports = [
     'dart:ffi',
     'dart:convert',
+    'dart:isolate',
+    'dart:typed_data',
     'package:isar/isar.dart',
     'package:isar/isar_native.dart',
     'package:ffi/ffi.dart'
@@ -105,10 +107,12 @@ class IsarCodeGenerator extends Builder {
 
   String generateIsarOpen(Iterable<ObjectInfo> objects) {
     var code = '''
-    Isar openIsar(String path) {
+    Future<Isar> openIsar(String path) async {
       if (_isar[path] != null) {
-        throw 'Instance already open';
+        return _isar[path]!;
       }
+      initializeIsarCore();
+      IC.isar_connect_dart_api(NativeApi.postCObject);
       final schemaPtr = IC.isar_schema_create();
       final collectionPtrPtr = allocate<Pointer>();
     ''';
@@ -166,7 +170,10 @@ class IsarCodeGenerator extends Builder {
     code += '''
       final pathPtr = Utf8.toUtf8(path);
       final isarPtrPtr = allocate<Pointer>();
-      nCall(IC.isar_create_instance(isarPtrPtr, pathPtr.cast(), 1000000, schemaPtr));
+      final receivePort = ReceivePort();
+      final nativePort = receivePort.sendPort.nativePort;
+      IC.isar_create_instance(isarPtrPtr, pathPtr.cast(), 1000000, schemaPtr, nativePort);
+      await receivePort.first;
       free(pathPtr);
       
       final isarPtr = isarPtrPtr.value;

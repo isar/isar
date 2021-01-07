@@ -1,6 +1,6 @@
 part of isar;
 
-abstract class IsarCollection<T extends IsarObjectMixin> {
+abstract class IsarCollection<T extends IsarObject> {
   Future<T?> get(ObjectId id);
 
   T? getSync(ObjectId id);

@@ -1,6 +1,6 @@
 part of isar_native;
 
-class IsarCollectionImpl<T extends IsarObjectMixin> extends IsarCollection<T> {
+class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
   final IsarImpl isar;
   final TypeAdapter<T> _adapter;
   final Pointer collectionPtr;
