@@ -2,8 +2,8 @@ part of isar;
 
 class QueryBuilder<T extends IsarObject, WHERE, FILTER, GROUPS, GROUPBY,
     OFFSET_LIMIT, SORT, EXECUTE> {
-  IsarCollection<T> _collection;
-  List<WhereClause> _whereClauses;
+  final IsarCollection<T> _collection;
+  final List<WhereClause> _whereClauses;
   late FilterGroup _filter;
 
   QueryBuilder._(

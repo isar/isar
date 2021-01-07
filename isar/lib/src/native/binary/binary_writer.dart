@@ -154,7 +154,6 @@ class BinaryWriter {
     } else {
       _buffer.writeInt32(_offset, _dynamicOffset);
       _buffer.writeInt32(_offset + 4, values.length);
-      // TODO
     }
 
     _offset += 8;
