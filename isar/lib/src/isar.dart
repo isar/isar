@@ -3,7 +3,7 @@ part of isar;
 abstract class Isar {
   final String path;
 
-  Isar(this.path);
+  const Isar(this.path);
 
   Future<T> txn<T>(Future<T> Function(Isar isar) callback);
 
