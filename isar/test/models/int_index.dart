@@ -2,7 +2,7 @@ import '../isar.g.dart';
 import 'package:isar_annotation/isar_annotation.dart';
 
 @Collection()
-class IntIndex with IsarObjectMixin {
+class IntIndex with IsarObject {
   @Index()
   @Size32()
   int? field = 0;

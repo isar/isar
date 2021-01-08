@@ -2,7 +2,7 @@ import '../isar.g.dart';
 import 'package:isar_annotation/isar_annotation.dart';
 
 @Collection()
-class LongIndex with IsarObjectMixin {
+class LongIndex with IsarObject {
   @Index()
   int? field = 0;
 

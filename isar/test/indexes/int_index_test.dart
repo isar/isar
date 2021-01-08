@@ -14,38 +14,39 @@ void main() {
       setupIsar();
 
       final dir = await getTempDir();
-      isar = openIsar(dir.path);
+      isar = await openIsar(dir.path);
       col = isar.intIndexs;
 
-      isar.writeTxnSync((isar) {
+      var obj;
+      await isar.writeTxn((isar) async {
         for (var i = 0; i < 5; i++) {
-          final obj = IntIndex()..field = i;
-          col.putSync(obj);
+          obj = IntIndex()..field = i;
+          await col.put(obj);
         }
-        col.putSync(IntIndex()..field = null);
+        await col.put(IntIndex()..field = null);
       });
     });
 
-    test('where equalTo()', () {
+    test('where equalTo()', () async {
       expect(
-        col.where().fieldEqualTo(2).findAllSync(),
+        await col.where().fieldEqualTo(2).findAll(),
         [IntIndex()..field = 2],
       );
 
       expect(
-        col.where().fieldEqualTo(null).findAllSync(),
+        await col.where().fieldEqualTo(null).findAll(),
         [IntIndex()..field = null],
       );
 
       expect(
-        col.where().fieldEqualTo(5).findAllSync(),
+        await col.where().fieldEqualTo(5).findAll(),
         [],
       );
     });
 
-    test('where notEqualTo()', () {
+    test('where notEqualTo()', () async {
       expect(
-        col.where().fieldNotEqualTo(3).findAllSync(),
+        await col.where().fieldNotEqualTo(3).findAll(),
         [
           IntIndex()..field = null,
           IntIndex()..field = 0,
@@ -56,31 +57,31 @@ void main() {
       );
     });
 
-    test('where greaterThan()', () {
+    test('where greaterThan()', () async {
       expect(
-        col.where().fieldGreaterThan(3).findAllSync(),
+        await col.where().fieldGreaterThan(3).findAll(),
         [IntIndex()..field = 4],
       );
 
       expect(
-        col.where().fieldGreaterThan(3, include: true).findAllSync(),
+        await col.where().fieldGreaterThan(3, include: true).findAll(),
         [IntIndex()..field = 3, IntIndex()..field = 4],
       );
 
       expect(
-        col.where().fieldGreaterThan(4).findAllSync(),
+        await col.where().fieldGreaterThan(4).findAll(),
         [],
       );
     });
 
-    test('where lowerThan()', () {
+    test('where lowerThan()', () async {
       expect(
-        col.where().fieldLowerThan(1).findAllSync(),
+        await col.where().fieldLowerThan(1).findAll(),
         [IntIndex()..field = null, IntIndex()..field = 0],
       );
 
       expect(
-        col.where().fieldLowerThan(1, include: true).findAllSync(),
+        await col.where().fieldLowerThan(1, include: true).findAll(),
         [
           IntIndex()..field = null,
           IntIndex()..field = 0,
@@ -89,51 +90,51 @@ void main() {
       );
     });
 
-    test('where between()', () {
+    test('where between()', () async {
       expect(
-        col.where().fieldBetween(1, 3).findAllSync(),
+        await col.where().fieldBetween(1, 3).findAll(),
         [IntIndex()..field = 1, IntIndex()..field = 2, IntIndex()..field = 3],
       );
 
       expect(
-        col.where().fieldBetween(null, 0).findAllSync(),
+        await col.where().fieldBetween(null, 0).findAll(),
         [IntIndex()..field = null, IntIndex()..field = 0],
       );
 
       expect(
-        col.where().fieldBetween(1, 3, includeLower: false).findAllSync(),
+        await col.where().fieldBetween(1, 3, includeLower: false).findAll(),
         [IntIndex()..field = 2, IntIndex()..field = 3],
       );
 
       expect(
-        col.where().fieldBetween(1, 3, includeUpper: false).findAllSync(),
+        await col.where().fieldBetween(1, 3, includeUpper: false).findAll(),
         [IntIndex()..field = 1, IntIndex()..field = 2],
       );
 
       expect(
-        col
+        await col
             .where()
             .fieldBetween(1, 3, includeLower: false, includeUpper: false)
-            .findAllSync(),
+            .findAll(),
         [IntIndex()..field = 2],
       );
 
       expect(
-        col.where().fieldBetween(5, 6).findAllSync(),
+        await col.where().fieldBetween(5, 6).findAll(),
         [],
       );
     });
 
-    test('where isNull()', () {
+    test('where isNull()', () async {
       expect(
-        col.where().fieldIsNull().findAllSync(),
+        await col.where().fieldIsNull().findAll(),
         [IntIndex()..field = null],
       );
     });
 
-    test('where isNotNull()', () {
+    test('where isNotNull()', () async {
       expect(
-        col.where().fieldIsNotNull().findAllSync(),
+        await col.where().fieldIsNotNull().findAll(),
         [
           IntIndex()..field = 0,
           IntIndex()..field = 1,

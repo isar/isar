@@ -13,6 +13,10 @@ import 'package:path/path.dart' as path;
 import 'package:dartx/dartx.dart';
 
 class IsarCodeGenerator extends Builder {
+  final bool isFlutter;
+
+  IsarCodeGenerator(this.isFlutter);
+
   @override
   final buildExtensions = {
     r'$lib$': ['isar.g.dart'],
@@ -28,7 +32,8 @@ class IsarCodeGenerator extends Builder {
     'dart:typed_data',
     'package:isar/isar.dart',
     'package:isar/isar_native.dart',
-    'package:ffi/ffi.dart'
+    'package:ffi/ffi.dart',
+    "import 'package:path/path.dart' as p",
   ];
 
   @override
@@ -48,9 +53,17 @@ class IsarCodeGenerator extends Builder {
         .replaceFirst('test/', '')
         .replaceAll('.isarobject.json', '.dart'));
 
-    var imports = [IsarCodeGenerator.imports, fileImports]
+    var imports = [
+      IsarCodeGenerator.imports,
+      fileImports,
+      if (isFlutter)
+        [
+          'package:path_provider/path_provider.dart',
+          'package:flutter/widgets.dart'
+        ],
+    ]
         .flatten()
-        .map((im) => "import '$im';")
+        .map((im) => im.startsWith('import') ? '$im;' : "import '$im';")
         .join('\n');
 
     var objects = files.values.flatten().toList();
@@ -88,7 +101,8 @@ class IsarCodeGenerator extends Builder {
 
     $collectionVars
     ${generateIsarOpen(objects)}
-    
+    ${generatePreparePath()}
+
     $getCollectionExtensions
 
     $objectAdapters
@@ -107,10 +121,12 @@ class IsarCodeGenerator extends Builder {
 
   String generateIsarOpen(Iterable<ObjectInfo> objects) {
     var code = '''
-    Future<Isar> openIsar(String path) async {
+    Future<Isar> openIsar({String? dbFolder}) async {
+      final path = await _preparePath(dbFolder);
       if (_isar[path] != null) {
         return _isar[path]!;
       }
+      await Directory(path).create(recursive: true);
       initializeIsarCore();
       IC.isar_connect_dart_api(NativeApi.postCObject);
       final schemaPtr = IC.isar_schema_create();
@@ -197,6 +213,27 @@ class IsarCodeGenerator extends Builder {
     }
     ''';
 
+    return code;
+  }
+
+  String generatePreparePath() {
+    var code = '''
+    Future<String> _preparePath(String? path) async {
+      if (path == null || p.isRelative(path)) {''';
+    if (isFlutter) {
+      code += '''
+        WidgetsFlutterBinding.ensureInitialized();
+        final dir = await getApplicationDocumentsDirectory();
+        return p.join(dir.path, path ?? 'isar');
+        ''';
+    } else {
+      code += "return p.absolute(path ?? '');";
+    }
+    code += ''' 
+      } else {
+        return path;
+      }
+    }''';
     return code;
   }
 

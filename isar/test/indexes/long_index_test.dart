@@ -14,7 +14,7 @@ void main() {
       setupIsar();
 
       final dir = await getTempDir();
-      isar = openIsar(dir.path);
+      isar = await openIsar(dir.path);
       col = isar.longIndexs;
 
       isar.writeTxnSync((isar) {
