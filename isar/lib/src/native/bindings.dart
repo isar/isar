@@ -10,6 +10,32 @@ class IsarCoreBindings {
   /// The symbols are looked up in [dynamicLibrary].
   IsarCoreBindings(ffi.DynamicLibrary dynamicLibrary) : _dylib = dynamicLibrary;
 
+  ffi.Pointer<ffi.Int8> isar_get_error(
+    int err_code,
+  ) {
+    _isar_get_error ??=
+        _dylib.lookupFunction<_c_isar_get_error, _dart_isar_get_error>(
+            'isar_get_error');
+    return _isar_get_error(
+      err_code,
+    );
+  }
+
+  _dart_isar_get_error _isar_get_error;
+
+  void isar_free_error(
+    ffi.Pointer<ffi.Int8> error,
+  ) {
+    _isar_free_error ??=
+        _dylib.lookupFunction<_c_isar_free_error, _dart_isar_free_error>(
+            'isar_free_error');
+    return _isar_free_error(
+      error,
+    );
+  }
+
+  _dart_isar_free_error _isar_free_error;
+
   int isar_get(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
@@ -160,7 +186,7 @@ class IsarCoreBindings {
   void isar_export_json_async(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
-    ffi.Pointer<ffi.Pointer<ffi.Int8>> json,
+    ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
     ffi.Pointer<ffi.Uint32> json_length,
   ) {
     _isar_export_json_async ??= _dylib.lookupFunction<_c_isar_export_json_async,
@@ -168,7 +194,7 @@ class IsarCoreBindings {
     return _isar_export_json_async(
       collection,
       txn,
-      json,
+      json_bytes,
       json_length,
     );
   }
@@ -176,13 +202,15 @@ class IsarCoreBindings {
   _dart_isar_export_json_async _isar_export_json_async;
 
   void isar_free_json(
-    ffi.Pointer<ffi.Int8> json,
+    ffi.Pointer<ffi.Uint8> json_bytes,
+    int json_length,
   ) {
     _isar_free_json ??=
         _dylib.lookupFunction<_c_isar_free_json, _dart_isar_free_json>(
             'isar_free_json');
     return _isar_free_json(
-      json,
+      json_bytes,
+      json_length,
     );
   }
 
@@ -959,6 +987,22 @@ class RawObjectSet extends ffi.Struct {
   int length;
 }
 
+typedef _c_isar_get_error = ffi.Pointer<ffi.Int8> Function(
+  ffi.Int32 err_code,
+);
+
+typedef _dart_isar_get_error = ffi.Pointer<ffi.Int8> Function(
+  int err_code,
+);
+
+typedef _c_isar_free_error = ffi.Void Function(
+  ffi.Pointer<ffi.Int8> error,
+);
+
+typedef _dart_isar_free_error = void Function(
+  ffi.Pointer<ffi.Int8> error,
+);
+
 typedef _c_isar_get = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
@@ -1068,23 +1112,25 @@ typedef _dart_isar_export_json = int Function(
 typedef _c_isar_export_json_async = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<ffi.Pointer<ffi.Int8>> json,
+  ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
   ffi.Pointer<ffi.Uint32> json_length,
 );
 
 typedef _dart_isar_export_json_async = void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<ffi.Pointer<ffi.Int8>> json,
+  ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
   ffi.Pointer<ffi.Uint32> json_length,
 );
 
 typedef _c_isar_free_json = ffi.Void Function(
-  ffi.Pointer<ffi.Int8> json,
+  ffi.Pointer<ffi.Uint8> json_bytes,
+  ffi.Uint32 json_length,
 );
 
 typedef _dart_isar_free_json = void Function(
-  ffi.Pointer<ffi.Int8> json,
+  ffi.Pointer<ffi.Uint8> json_bytes,
+  int json_length,
 );
 
 typedef DartPostCObjectFnType = ffi.Int8 Function(
