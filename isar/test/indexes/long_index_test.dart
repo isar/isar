@@ -3,147 +3,147 @@ import 'package:test/test.dart';
 
 import '../common.dart';
 import '../isar.g.dart';
-import '../models/long_index.dart';
+import '../models/long_model.dart';
 
 void main() {
   group('Long index', () {
     Isar isar;
-    IsarCollection<LongIndex> col;
+    IsarCollection<LongModel> col;
 
     setUp(() async {
       setupIsar();
 
       final dir = await getTempDir();
-      isar = await openIsar(dir.path);
-      col = isar.longIndexs;
+      isar = await openIsar(directory: dir.path);
+      col = isar.longModels;
 
-      isar.writeTxnSync((isar) {
+      await isar.writeTxn((isar) async {
         for (var i = 0; i < 5; i++) {
-          final obj = LongIndex()..field = i;
-          col.putSync(obj);
+          final obj = LongModel()..field = i;
+          await col.put(obj);
         }
-        col.putSync(LongIndex()..field = null);
+        await col.put(LongModel()..field = null);
       });
     });
 
-    test('where equalTo()', () {
-      expect(
-        col.where().fieldEqualTo(2).findAllSync(),
-        [LongIndex()..field = 2],
+    test('where equalTo()', () async {
+      await qEqual(
+        col.where().fieldEqualTo(2).findAll(),
+        [LongModel()..field = 2],
       );
 
-      expect(
-        col.where().fieldEqualTo(null).findAllSync(),
-        [LongIndex()..field = null],
+      await qEqual(
+        col.where().fieldEqualTo(null).findAll(),
+        [LongModel()..field = null],
       );
 
-      expect(
-        col.where().fieldEqualTo(5).findAllSync(),
+      await qEqual(
+        col.where().fieldEqualTo(5).findAll(),
         [],
       );
     });
 
-    test('where notEqualTo()', () {
-      expect(
-        col.where().fieldNotEqualTo(3).findAllSync(),
+    test('where notEqualTo()', () async {
+      await qEqualSet(
+        col.where().fieldNotEqualTo(3).findAll(),
         [
-          LongIndex()..field = null,
-          LongIndex()..field = 0,
-          LongIndex()..field = 1,
-          LongIndex()..field = 2,
-          LongIndex()..field = 4,
+          LongModel()..field = null,
+          LongModel()..field = 0,
+          LongModel()..field = 1,
+          LongModel()..field = 2,
+          LongModel()..field = 4,
         ],
       );
     });
 
-    test('where greaterThan()', () {
-      expect(
-        col.where().fieldGreaterThan(3).findAllSync(),
-        [LongIndex()..field = 4],
+    test('where greaterThan()', () async {
+      await qEqual(
+        col.where().fieldGreaterThan(3).findAll(),
+        [LongModel()..field = 4],
       );
 
-      expect(
-        col.where().fieldGreaterThan(3, include: true).findAllSync(),
-        [LongIndex()..field = 3, LongIndex()..field = 4],
+      await qEqual(
+        col.where().fieldGreaterThan(3, include: true).findAll(),
+        [LongModel()..field = 3, LongModel()..field = 4],
       );
 
-      expect(
-        col.where().fieldGreaterThan(4).findAllSync(),
+      await qEqual(
+        col.where().fieldGreaterThan(4).findAll(),
         [],
       );
     });
 
-    test('where lowerThan()', () {
-      expect(
-        col.where().fieldLowerThan(1).findAllSync(),
-        [LongIndex()..field = null, LongIndex()..field = 0],
+    test('where lowerThan()', () async {
+      await qEqual(
+        col.where().fieldLowerThan(1).findAll(),
+        [LongModel()..field = null, LongModel()..field = 0],
       );
 
-      expect(
-        col.where().fieldLowerThan(1, include: true).findAllSync(),
+      await qEqual(
+        col.where().fieldLowerThan(1, include: true).findAll(),
         [
-          LongIndex()..field = null,
-          LongIndex()..field = 0,
-          LongIndex()..field = 1
+          LongModel()..field = null,
+          LongModel()..field = 0,
+          LongModel()..field = 1
         ],
       );
     });
 
-    test('where between()', () {
-      expect(
-        col.where().fieldBetween(1, 3).findAllSync(),
+    test('where between()', () async {
+      await qEqual(
+        col.where().fieldBetween(1, 3).findAll(),
         [
-          LongIndex()..field = 1,
-          LongIndex()..field = 2,
-          LongIndex()..field = 3
+          LongModel()..field = 1,
+          LongModel()..field = 2,
+          LongModel()..field = 3
         ],
       );
 
-      expect(
-        col.where().fieldBetween(null, 0).findAllSync(),
-        [LongIndex()..field = null, LongIndex()..field = 0],
+      await qEqual(
+        col.where().fieldBetween(null, 0).findAll(),
+        [LongModel()..field = null, LongModel()..field = 0],
       );
 
-      expect(
-        col.where().fieldBetween(1, 3, includeLower: false).findAllSync(),
-        [LongIndex()..field = 2, LongIndex()..field = 3],
+      await qEqual(
+        col.where().fieldBetween(1, 3, includeLower: false).findAll(),
+        [LongModel()..field = 2, LongModel()..field = 3],
       );
 
-      expect(
-        col.where().fieldBetween(1, 3, includeUpper: false).findAllSync(),
-        [LongIndex()..field = 1, LongIndex()..field = 2],
+      await qEqual(
+        col.where().fieldBetween(1, 3, includeUpper: false).findAll(),
+        [LongModel()..field = 1, LongModel()..field = 2],
       );
 
-      expect(
+      await qEqual(
         col
             .where()
             .fieldBetween(1, 3, includeLower: false, includeUpper: false)
-            .findAllSync(),
-        [LongIndex()..field = 2],
+            .findAll(),
+        [LongModel()..field = 2],
       );
 
-      expect(
-        col.where().fieldBetween(5, 6).findAllSync(),
+      await qEqual(
+        col.where().fieldBetween(5, 6).findAll(),
         [],
       );
     });
 
-    test('where isNull()', () {
-      expect(
-        col.where().fieldIsNull().findAllSync(),
-        [LongIndex()..field = null],
+    test('where isNull()', () async {
+      await qEqual(
+        col.where().fieldIsNull().findAll(),
+        [LongModel()..field = null],
       );
     });
 
-    test('where isNotNull()', () {
-      expect(
-        col.where().fieldIsNotNull().findAllSync(),
+    test('where isNotNull()', () async {
+      await qEqualSet(
+        col.where().fieldIsNotNull().findAll(),
         [
-          LongIndex()..field = 0,
-          LongIndex()..field = 1,
-          LongIndex()..field = 2,
-          LongIndex()..field = 3,
-          LongIndex()..field = 4,
+          LongModel()..field = 0,
+          LongModel()..field = 1,
+          LongModel()..field = 2,
+          LongModel()..field = 3,
+          LongModel()..field = 4,
         ],
       );
     });

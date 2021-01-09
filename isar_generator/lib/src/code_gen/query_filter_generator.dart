@@ -8,7 +8,7 @@ String generateQueryFilter(ObjectInfo object) {
   ''';
   for (var i = 0; i < object.properties.length; i++) {
     final property = object.properties[i];
-    if (property.type != DataType.Double) {
+    if (!property.isFloatDouble) {
       code += generateEqualTo(object.type, property, i);
       code += generateNotEqualTo(object.type, property, i);
     }

@@ -90,23 +90,26 @@ class BinaryReader {
     }
   }
 
+  String? _readStringOrNullAt(int stringOffset) {
+    var offset = _buffer.readInt32(stringOffset);
+    if (offset == 0) {
+      return null;
+    }
+    var length = _buffer.readInt32(stringOffset + 4);
+    var view = _buffer.view(offset, length);
+    return utf8Decoder.convert(view);
+  }
+
   String readString() {
-    var value = readStringOrNull();
+    var value = _readStringOrNullAt(_offset);
+    _offset += 8;
     return value ?? '';
   }
 
   String? readStringOrNull() {
-    var offset = _buffer.readInt32(_offset);
-    if (offset == 0) {
-      _offset += 8;
-      return null;
-    }
-
-    var length = _buffer.readInt32(_offset + 4);
+    var value = _readStringOrNullAt(_offset);
     _offset += 8;
-
-    var view = _buffer.view(offset, length);
-    return utf8Decoder.convert(view);
+    return value;
   }
 
   bool skipListIfNull() {
@@ -144,21 +147,6 @@ class BinaryReader {
       } else if (value == falseBool) {
         list[i] = false;
       }
-    }
-    return list;
-  }
-
-  List<Uint8List> readBytesList() {
-    var offset = _buffer.readInt32(_offset);
-    var length = _buffer.readInt32(_offset + 4);
-    _offset += 8;
-
-    final list = <Uint8List>[];
-    for (var i = 0; i < length; i++) {
-      var elementOffset = _buffer.readInt32(offset + i * 8);
-      var elementLength = _buffer.readInt32(_offset + i * 8 + 4);
-      final bytes = _buffer.view(elementOffset, elementLength);
-      list[i] = bytes.sublist(0);
     }
     return list;
   }
@@ -267,6 +255,30 @@ class BinaryReader {
       if (!value.isNaN) {
         list[i] = value;
       }
+    }
+    return list;
+  }
+
+  List<String?> readStringOrNullList() {
+    var offset = _buffer.readInt32(_offset);
+    var length = _buffer.readInt32(_offset + 4);
+    _offset += 8;
+
+    final list = <String?>[];
+    for (var i = 0; i < length; i++) {
+      list[i] = _readStringOrNullAt(offset + i * 8);
+    }
+    return list;
+  }
+
+  List<String> readStringList() {
+    var offset = _buffer.readInt32(_offset);
+    var length = _buffer.readInt32(_offset + 4);
+    _offset += 8;
+
+    final list = <String>[];
+    for (var i = 0; i < length; i++) {
+      list[i] = _readStringOrNullAt(offset + i * 8) ?? '';
     }
     return list;
   }

@@ -56,18 +56,21 @@ class BinaryWriter {
     }
   }
 
-  void writeBytes(Uint8List? value) {
+  void _writeBytes(Uint8List? value, int offset, int dynamicOffset) {
     if (value == null) {
-      _buffer.writeInt64(_offset, 0);
+      _buffer.writeInt64(offset, 0);
     } else {
       var bytesLen = value.length;
-      _buffer.writeInt32(_offset, _dynamicOffset);
-      _buffer.writeInt32(_offset + 4, bytesLen);
-      _buffer.setRange(_dynamicOffset, _dynamicOffset + bytesLen, value);
-      _dynamicOffset += bytesLen;
+      _buffer.writeInt32(offset, dynamicOffset);
+      _buffer.writeInt32(offset + 4, bytesLen);
+      _buffer.setRange(dynamicOffset, dynamicOffset + bytesLen, value);
     }
+  }
 
+  void writeBytes(Uint8List? value) {
+    _writeBytes(value, _offset, _dynamicOffset);
     _offset += 8;
+    _dynamicOffset += value?.length ?? 0;
   }
 
   void writeBoolList(List<bool?>? values) {
@@ -154,6 +157,15 @@ class BinaryWriter {
     } else {
       _buffer.writeInt32(_offset, _dynamicOffset);
       _buffer.writeInt32(_offset + 4, values.length);
+      _dynamicOffset += 8;
+
+      final offsetListOffset = _dynamicOffset;
+      _dynamicOffset += values.length * 8;
+      for (var i = 0; i < values.length; i++) {
+        final value = values[i];
+        _writeBytes(value, offsetListOffset + i * 8, _dynamicOffset);
+        _dynamicOffset += value?.length ?? 0;
+      }
     }
 
     _offset += 8;

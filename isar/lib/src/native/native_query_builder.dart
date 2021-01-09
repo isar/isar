@@ -262,19 +262,9 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
           nCall(IC.isar_filter_int_not_equal(
               colPtr, filterPtrPtr, value, pIndex));
           break;
-        case 'Float':
-          final value = condition.value ?? nullFloat;
-          nCall(IC.isar_filter_float_not_equal(
-              colPtr, filterPtrPtr, value, pIndex));
-          break;
         case 'Long':
           final value = condition.value ?? nullLong;
           nCall(IC.isar_filter_long_not_equal(
-              colPtr, filterPtrPtr, value, pIndex));
-          break;
-        case 'Double':
-          final value = condition.value ?? nullDouble;
-          nCall(IC.isar_filter_double_not_equal(
               colPtr, filterPtrPtr, value, pIndex));
           break;
         default:

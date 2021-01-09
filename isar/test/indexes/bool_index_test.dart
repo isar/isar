@@ -3,101 +3,77 @@ import 'package:test/test.dart';
 
 import '../common.dart';
 import '../isar.g.dart';
-import '../models/bool_index.dart';
+import '../models/bool_model.dart';
 
 void main() {
-  test('description', () async {
-    Isar isar;
-    IsarCollection<BoolIndex> col;
-
-    setupIsar();
-
-    final dir = await getTempDir();
-    isar = await openIsar(dir.path);
-    col = isar.boolIndexs;
-
-    final t1 = BoolIndex()..field = true;
-    isar.writeTxnSync((isar) {
-      col.putSync(BoolIndex()..field = false);
-      col.putSync(t1);
-      col.putSync(BoolIndex()..field = false);
-      col.putSync(BoolIndex()..field = null);
-    });
-
-    print(t1.id);
-
-    final t2 = await col.get(t1.id);
-    print(t2);
-  });
-
   group('Bool index', () {
     Isar isar;
-    IsarCollection<BoolIndex> col;
+    IsarCollection<BoolModel> col;
 
     setUp(() async {
       setupIsar();
 
       final dir = await getTempDir();
-      isar = await openIsar(dir.path);
-      col = isar.boolIndexs;
+      isar = await openIsar(directory: dir.path);
+      col = isar.boolModels;
 
-      isar.writeTxnSync((isar) {
-        col.putSync(BoolIndex()..field = false);
-        col.putSync(BoolIndex()..field = true);
-        col.putSync(BoolIndex()..field = false);
-        col.putSync(BoolIndex()..field = null);
+      await isar.writeTxn((isar) async {
+        await col.put(BoolModel()..field = false);
+        await col.put(BoolModel()..field = true);
+        await col.put(BoolModel()..field = false);
+        await col.put(BoolModel()..field = null);
       });
     });
 
-    test('where equalTo()', () {
-      expect(
-        col.where().fieldEqualTo(true).findAllSync(),
-        [BoolIndex()..field = true],
+    test('where equalTo()', () async {
+      await qEqual(
+        col.where().fieldEqualTo(true).findAll(),
+        [BoolModel()..field = true],
       );
 
-      expect(
-        col.where().fieldEqualTo(null).findAllSync(),
-        [BoolIndex()..field = null],
+      await qEqual(
+        col.where().fieldEqualTo(null).findAll(),
+        [BoolModel()..field = null],
       );
     });
 
-    test('where notEqualTo()', () {
-      expect(
-        col.where().fieldNotEqualTo(null).findAllSync(),
+    test('where notEqualTo()', () async {
+      await qEqualSet(
+        col.where().fieldNotEqualTo(null).findAll(),
         [
-          BoolIndex()..field = false,
-          BoolIndex()..field = false,
-          BoolIndex()..field = true
+          BoolModel()..field = false,
+          BoolModel()..field = false,
+          BoolModel()..field = true
         ],
       );
-      expect(
-        col.where().fieldNotEqualTo(false).findAllSync(),
-        [BoolIndex()..field = null, BoolIndex()..field = true],
+      await qEqualSet(
+        col.where().fieldNotEqualTo(false).findAll(),
+        [BoolModel()..field = null, BoolModel()..field = true],
       );
-      expect(
-        col.where().fieldNotEqualTo(true).findAllSync(),
+      await qEqualSet(
+        col.where().fieldNotEqualTo(true).findAll(),
         [
-          BoolIndex()..field = null,
-          BoolIndex()..field = false,
-          BoolIndex()..field = false,
+          BoolModel()..field = null,
+          BoolModel()..field = false,
+          BoolModel()..field = false,
         ],
       );
     });
 
-    test('where isNull()', () {
-      expect(
-        col.where().fieldIsNull().findAllSync(),
-        [BoolIndex()..field = null],
+    test('where isNull()', () async {
+      await qEqual(
+        col.where().fieldIsNull().findAll(),
+        [BoolModel()..field = null],
       );
     });
 
-    test('where isNotNull()', () {
-      expect(
-        col.where().fieldIsNotNull().findAllSync(),
+    test('where isNotNull()', () async {
+      await qEqualSet(
+        col.where().fieldIsNotNull().findAll(),
         [
-          BoolIndex()..field = false,
-          BoolIndex()..field = false,
-          BoolIndex()..field = true,
+          BoolModel()..field = false,
+          BoolModel()..field = false,
+          BoolModel()..field = true,
         ],
       );
     });

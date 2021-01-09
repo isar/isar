@@ -2,11 +2,11 @@ import '../isar.g.dart';
 import 'package:isar_annotation/isar_annotation.dart';
 
 @Collection()
-class LongIndex with IsarObject {
+class LongModel with IsarObject {
   @Index()
   int? field = 0;
 
-  LongIndex();
+  LongModel();
 
   @override
   String toString() {
@@ -15,6 +15,6 @@ class LongIndex with IsarObject {
 
   @override
   bool operator ==(other) {
-    return (other as LongIndex).field == field;
+    return (other as LongModel).field == field;
   }
 }

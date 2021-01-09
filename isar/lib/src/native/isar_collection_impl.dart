@@ -110,20 +110,7 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
 
   @override
   void putAllSync(List<T> objects) {
-    /*final rawObjsPtr = allocate<RawObject>(count: objects.length);
-    for (var i = 0; i < objects.length; i++) {
-      final rawObj = rawObjsPtr.elementAt(i).ref;
-      _adapter.serialize(objects[i], rawObj);
-    }
-
-    //nCall(IC.isar_put_all(_collection, txn, rawObjsPtr));
-
-    for (var i = 0; i < objects.length; i++) {
-      final rawObj = rawObjsPtr.elementAt(i).ref;
-      objects[i].init(rawObj.oid, this);
-    }
-
-    free(rawObjsPtr);*/
+    throw UnimplementedError();
   }
 
   @override
@@ -151,5 +138,31 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
 
       nCall(IC.isar_delete(collectionPtr, txnPtr, rawObjPtr));
     });
+  }
+
+  @override
+  Future<void> exportJson(bool primitiveNull, Function(Uint8List) callback) {
+    return isar.getTxn(false, (txnPtr, stream) async {
+      final bytesPtrPtr = allocate<Pointer<Uint8>>();
+      final lengthPtr = allocate<Uint32>();
+      IC.isar_export_json_async(
+          collectionPtr, txnPtr, primitiveNull, bytesPtrPtr, lengthPtr);
+
+      try {
+        await stream.first;
+        final bytes = bytesPtrPtr.value.asTypedList(lengthPtr.value);
+        callback(bytes);
+      } finally {
+        IC.isar_free_json(bytesPtrPtr.value, lengthPtr.value);
+        free(bytesPtrPtr);
+        free(lengthPtr);
+      }
+    });
+  }
+
+  @override
+  void exportJsonSync(bool primitiveNull, Function(Uint8List) callback) {
+    // TODO: implement exportJsonSync
+    throw UnimplementedError();
   }
 }

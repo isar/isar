@@ -4,38 +4,38 @@ import 'package:test/test.dart';
 
 import '../common.dart';
 import '../isar.g.dart';
-import '../models/int_index.dart';
+import '../models/int_model.dart';
 
 void main() {
   group('Filter bool', () {
     Isar isar;
-    IsarCollection<IntIndex> col;
+    IsarCollection<IntModel> col;
 
     setUp(() async {
       setupIsar();
 
       final dir = await getTempDir();
-      isar = await openIsar(dir.path);
-      col = isar.intIndexs;
+      isar = await openIsar(directory: dir.path);
+      col = isar.intModels;
 
       isar.writeTxnSync((isar) {
         for (var i = 0; i < 5; i++) {
-          final obj = IntIndex()..field = i;
+          final obj = IntModel()..field = i;
           col.putSync(obj);
         }
-        col.putSync(IntIndex()..field = null);
+        col.putSync(IntModel()..field = null);
       });
     });
 
     test('where equalTo()', () {
       expect(
         col.where().filter().fieldEqualTo(2).findAllSync(),
-        [IntIndex()..field = 2],
+        [IntModel()..field = 2],
       );
 
       expect(
         col.where().filter().fieldEqualTo(null).findAllSync(),
-        [IntIndex()..field = null],
+        [IntModel()..field = null],
       );
 
       expect(
@@ -48,11 +48,11 @@ void main() {
       expect(
         col.where().filter().fieldNotEqualTo(3).findAllSync(),
         [
-          IntIndex()..field = null,
-          IntIndex()..field = 0,
-          IntIndex()..field = 1,
-          IntIndex()..field = 2,
-          IntIndex()..field = 4,
+          IntModel()..field = null,
+          IntModel()..field = 0,
+          IntModel()..field = 1,
+          IntModel()..field = 2,
+          IntModel()..field = 4,
         ],
       );
     });
@@ -60,12 +60,12 @@ void main() {
     test('where greaterThan()', () {
       expect(
         col.where().filter().fieldGreaterThan(3).findAllSync(),
-        [IntIndex()..field = 4],
+        [IntModel()..field = 4],
       );
 
       expect(
         col.where().filter().fieldGreaterThan(3, include: true).findAllSync(),
-        {IntIndex()..field = 3, IntIndex()..field = 4},
+        {IntModel()..field = 3, IntModel()..field = 4},
       );
 
       expect(
@@ -77,7 +77,7 @@ void main() {
     test('where lowerThan()', () {
       expect(
         col.where().filter().fieldLowerThan(1).findAllSync().toSet(),
-        {IntIndex()..field = null, IntIndex()..field = 0},
+        {IntModel()..field = null, IntModel()..field = 0},
       );
 
       expect(
@@ -88,9 +88,9 @@ void main() {
             .findAllSync()
             .toSet(),
         {
-          IntIndex()..field = null,
-          IntIndex()..field = 0,
-          IntIndex()..field = 1
+          IntModel()..field = null,
+          IntModel()..field = 0,
+          IntModel()..field = 1
         },
       );
     });
@@ -98,12 +98,12 @@ void main() {
     test('where between()', () {
       expect(
         col.where().filter().fieldBetween(1, 3).findAllSync().toSet(),
-        {IntIndex()..field = 1, IntIndex()..field = 2, IntIndex()..field = 3},
+        {IntModel()..field = 1, IntModel()..field = 2, IntModel()..field = 3},
       );
 
       expect(
         col.where().filter().fieldBetween(null, 0).findAllSync().toSet(),
-        {IntIndex()..field = null, IntIndex()..field = 0},
+        {IntModel()..field = null, IntModel()..field = 0},
       );
 
       expect(
@@ -113,7 +113,7 @@ void main() {
             .fieldBetween(1, 3, includeLower: false)
             .findAllSync()
             .toSet(),
-        {IntIndex()..field = 2, IntIndex()..field = 3},
+        {IntModel()..field = 2, IntModel()..field = 3},
       );
 
       expect(
@@ -123,7 +123,7 @@ void main() {
             .fieldBetween(1, 3, includeUpper: false)
             .findAllSync()
             .toSet(),
-        {IntIndex()..field = 1, IntIndex()..field = 2},
+        {IntModel()..field = 1, IntModel()..field = 2},
       );
 
       expect(
@@ -132,7 +132,7 @@ void main() {
             .filter()
             .fieldBetween(1, 3, includeLower: false, includeUpper: false)
             .findAllSync(),
-        [IntIndex()..field = 2],
+        [IntModel()..field = 2],
       );
 
       expect(
@@ -144,7 +144,7 @@ void main() {
     test('where isNull()', () {
       expect(
         col.where().filter().fieldIsNull().findAllSync(),
-        [IntIndex()..field = null],
+        [IntModel()..field = null],
       );
     });
 
@@ -152,11 +152,11 @@ void main() {
       expect(
         col.where().filter().fieldIsNotNull().findAllSync().toSet(),
         {
-          IntIndex()..field = 0,
-          IntIndex()..field = 1,
-          IntIndex()..field = 2,
-          IntIndex()..field = 3,
-          IntIndex()..field = 4,
+          IntModel()..field = 0,
+          IntModel()..field = 1,
+          IntModel()..field = 2,
+          IntModel()..field = 3,
+          IntModel()..field = 4,
         },
       );
     });

@@ -30,6 +30,7 @@ class IsarCodeGenerator extends Builder {
     'dart:convert',
     'dart:isolate',
     'dart:typed_data',
+    'dart:io',
     'package:isar/isar.dart',
     'package:isar/isar_native.dart',
     'package:ffi/ffi.dart',
@@ -121,8 +122,8 @@ class IsarCodeGenerator extends Builder {
 
   String generateIsarOpen(Iterable<ObjectInfo> objects) {
     var code = '''
-    Future<Isar> openIsar({String? dbFolder}) async {
-      final path = await _preparePath(dbFolder);
+    Future<Isar> openIsar({String? directory}) async {
+      final path = await _preparePath(directory);
       if (_isar[path] != null) {
         return _isar[path]!;
       }

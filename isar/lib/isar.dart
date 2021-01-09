@@ -1,5 +1,7 @@
 library isar;
 
+import 'dart:typed_data';
+
 import 'isar_native.dart';
 export 'package:isar_annotation/isar_annotation.dart';
 

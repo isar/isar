@@ -92,6 +92,10 @@ extension ObjectPropertyX on ObjectProperty {
       return typeName;
     }
   }
+
+  bool get isFloatDouble {
+    return type == DataType.Float || type == DataType.Double;
+  }
 }
 
 enum DataType {

@@ -16,7 +16,7 @@ String generateQueryWhere(ObjectInfo object) {
           .map((f) => object.getProperty(f))
           .toList();
 
-      if (properties.all((it) => it.type != DataType.Double)) {
+      if (properties.all((it) => !it.isFloatDouble)) {
         code += generateWhereEqualTo(indexIndex, object.type, properties);
         code += generateWhereNotEqualTo(indexIndex, object.type, properties);
       }
@@ -28,14 +28,13 @@ String generateQueryWhere(ObjectInfo object) {
           code += generateWhereBetween(indexIndex, object.type, property);
         }
 
-        if (property.type != DataType.Double) {
+        if (!property.isFloatDouble) {
           code += generateWhereAnyOf(object.type, property);
         }
 
         if (property.type == DataType.Int ||
             property.type == DataType.Long ||
-            property.type == DataType.Float ||
-            property.type == DataType.Double) {
+            property.isFloatDouble) {
           code += generateWhereLowerThan(indexIndex, object.type, property);
           code += generateWhereGreaterThan(indexIndex, object.type, property);
         }
@@ -45,8 +44,8 @@ String generateQueryWhere(ObjectInfo object) {
         }
 
         if (property.nullable) {
-          code += generateWhereIsNull(object.type, property);
-          code += generateWhereIsNotNull(object.type, property);
+          code += generateWhereIsNull(indexIndex, object.type, property);
+          code += generateWhereIsNotNull(indexIndex, object.type, property);
         }
       }
     }
@@ -199,20 +198,40 @@ String generateWhereBetween(int index, String type, ObjectProperty property) {
   ''';
 }
 
-String generateWhereIsNull(String type, ObjectProperty property) {
+String generateWhereIsNull(int index, String type, ObjectProperty property) {
   final propertiesName = joinPropertiesToName([property]);
+  final propertyTypes = joinPropertiesToTypes([property]);
   return '''
   ${whereReturn(type, 'QWhereProperty')} ${propertiesName}IsNull() {
-    return ${propertiesName}EqualTo(null);
+    return addWhereClause(WhereClause(
+      $index,
+      $propertyTypes,
+      upper: [null],
+      includeUpper: true,
+      lower: [null],
+      includeLower: true,
+    ));
   }
   ''';
 }
 
-String generateWhereIsNotNull(String type, ObjectProperty property) {
+String generateWhereIsNotNull(int index, String type, ObjectProperty property) {
   final propertiesName = joinPropertiesToName([property]);
+  final propertyTypes = joinPropertiesToTypes([property]);
   return '''
   ${whereReturn(type, 'QWhereProperty')} ${propertiesName}IsNotNull() {
-    return ${propertiesName}NotEqualTo(null);
+    final cloned = addWhereClause(WhereClause(
+      $index,
+      $propertyTypes,
+      upper: [null],
+      includeUpper: false,
+    ));
+    return cloned.addWhereClause(WhereClause(
+      $index,
+      $propertyTypes,
+      lower: [null],
+      includeLower: false,
+    ));
   }
   ''';
 }
