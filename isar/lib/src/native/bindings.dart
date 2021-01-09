@@ -167,6 +167,7 @@ class IsarCoreBindings {
   int isar_export_json(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
+    bool primitive_null,
     ffi.Pointer<ffi.Pointer<ffi.Int8>> json,
     ffi.Pointer<ffi.Uint32> json_length,
   ) {
@@ -176,6 +177,7 @@ class IsarCoreBindings {
     return _isar_export_json(
       collection,
       txn,
+      primitive_null ? 1 : 0,
       json,
       json_length,
     );
@@ -186,6 +188,7 @@ class IsarCoreBindings {
   void isar_export_json_async(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
+    bool primitive_null,
     ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
     ffi.Pointer<ffi.Uint32> json_length,
   ) {
@@ -194,6 +197,7 @@ class IsarCoreBindings {
     return _isar_export_json_async(
       collection,
       txn,
+      primitive_null ? 1 : 0,
       json_bytes,
       json_length,
     );
@@ -1098,6 +1102,7 @@ typedef _dart_isar_delete_all_async = void Function(
 typedef _c_isar_export_json = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
+  ffi.Uint8 primitive_null,
   ffi.Pointer<ffi.Pointer<ffi.Int8>> json,
   ffi.Pointer<ffi.Uint32> json_length,
 );
@@ -1105,6 +1110,7 @@ typedef _c_isar_export_json = ffi.Int32 Function(
 typedef _dart_isar_export_json = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
+  int primitive_null,
   ffi.Pointer<ffi.Pointer<ffi.Int8>> json,
   ffi.Pointer<ffi.Uint32> json_length,
 );
@@ -1112,6 +1118,7 @@ typedef _dart_isar_export_json = int Function(
 typedef _c_isar_export_json_async = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
+  ffi.Uint8 primitive_null,
   ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
   ffi.Pointer<ffi.Uint32> json_length,
 );
@@ -1119,6 +1126,7 @@ typedef _c_isar_export_json_async = ffi.Void Function(
 typedef _dart_isar_export_json_async = void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
+  int primitive_null,
   ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
   ffi.Pointer<ffi.Uint32> json_length,
 );
