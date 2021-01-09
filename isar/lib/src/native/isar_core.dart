@@ -1,5 +1,7 @@
 part of isar_native;
 
+const falseBool = 1;
+const trueBool = 2;
 const minBool = nullBool;
 const maxBool = trueBool;
 const minInt = -2147483648;
@@ -16,8 +18,6 @@ const nullFloat = double.nan;
 const nullLong = minLong;
 const nullDouble = double.nan;
 const nullBool = 0;
-const falseBool = 1;
-const trueBool = 2;
 
 class IsarCoreUtils {
   static final syncTxnPtr = allocate<Pointer>();
