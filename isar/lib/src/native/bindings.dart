@@ -1135,7 +1135,7 @@ typedef _dart_isar_free_json = void Function(
 
 typedef DartPostCObjectFnType = ffi.Int8 Function(
   ffi.Int64,
-  ffi.Pointer<ffi.NativeType>,
+  ffi.Pointer<ffi.Dart_CObject>,
 );
 
 typedef _c_isar_connect_dart_api = ffi.Void Function(
