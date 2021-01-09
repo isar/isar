@@ -15,5 +15,6 @@ void main() {
     RegExp(r'class (?!(IsarCoreBindings|RawObject))[^}]+}'),
     '',
   );
+  contents = '// @dart=2.8\n$contents';
   file.writeAsStringSync(contents);
 }
