@@ -15,8 +15,8 @@
 </p>
 
 <p align="center">
-  <a href="https://isar.dev">Getting Started</a> •
-  <a href="https://isar.dev">Documentation</a> •
+  <a href="https://isar.dev">Quickstart</a> •
+  <a href="https://isar.dev/schema">Documentation</a> •
   <a href="https://isar.dev">Examples</a> •
   <a href="https://github.com/isar/isar/discussions">Support & Ideas</a> •
   <a href="https://pub.dev/packages/isar">Pub.dev</a>
@@ -29,6 +29,7 @@
 - ⚡️ **Launch your app instantly** no matter how much data you have
 - 📈 **Highly scalable** from hundreds to tens of thousands of records
 - 😎 **Lazy loaded**. Only load data when you need it
+- 🧪 **Full ACID semantics**. Rely on consistency
 - 📱 **Multiplatform**. iOS, Android, and the web (soon™)
 - 💙 **Made for Flutter.** Easily use it in your Flutter app
 - ⏱ **Fast.** So fast that you just don't have to think about it
