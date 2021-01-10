@@ -162,7 +162,20 @@ class IsarCollectionImpl<T extends IsarObject> extends IsarCollection<T> {
 
   @override
   void exportJsonSync(bool primitiveNull, Function(Uint8List) callback) {
-    // TODO: implement exportJsonSync
-    throw UnimplementedError();
+    return isar.getTxnSync(false, (txnPtr) {
+      final bytesPtrPtr = allocate<Pointer<Uint8>>();
+      final lengthPtr = allocate<Uint32>();
+
+      try {
+        nCall(IC.isar_export_json(
+            collectionPtr, txnPtr, primitiveNull, bytesPtrPtr, lengthPtr));
+        final bytes = bytesPtrPtr.value.asTypedList(lengthPtr.value);
+        callback(bytes);
+      } finally {
+        IC.isar_free_json(bytesPtrPtr.value, lengthPtr.value);
+        free(bytesPtrPtr);
+        free(lengthPtr);
+      }
+    });
   }
 }
