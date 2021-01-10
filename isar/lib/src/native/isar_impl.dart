@@ -30,7 +30,7 @@ class IsarImpl extends Isar {
         if (event == 0) {
           portStreamController.add(null);
         } else {
-          portStreamController.addError('err');
+          portStreamController.addError(isarErrorFromResult(event)!);
         }
       },
       onDone: () {

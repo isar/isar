@@ -1,6 +1,6 @@
 name: isar_annotation
-description: Isar database annotations
-version: 0.0.1-nullsafety.0
+description: Isar Database annotations
+version: 0.0.2
 
 repository: https://github.com/isar/isar
 

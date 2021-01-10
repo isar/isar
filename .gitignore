@@ -10,9 +10,6 @@
 .history
 .svn/
 *.mdb
-*.so
-*.dylib
-*.dll
 
 # IntelliJ related
 *.iml

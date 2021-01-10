@@ -4,15 +4,10 @@ import 'package:example/isar.g.dart';
 import 'package:example/user.dart';
 import 'package:flutter/material.dart';
 
+Isar isar;
+
 void main() async {
-  final isar = await openIsar();
-  await isar.writeTxn((isar) async {
-    final user = User()
-      ..name = "Hello"
-      ..age = 5;
-    await isar.users.put(user);
-    print(user.createdAt);
-  });
+  isar = await openIsar();
   runApp(MyApp());
 }
 
@@ -25,7 +20,30 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Center(child: Text('Flutter Demo Home Page')),
+      home: Material(
+        child: Center(
+            child: InkWell(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Flutter Demo Home Page'),
+              CircularProgressIndicator(),
+            ],
+          ),
+          onTap: () async {
+            final t = Stopwatch()..start();
+            isar.writeTxnSync((isar) {
+              for (var i = 0; i < 1000; i++) {
+                final user = User()
+                  ..name = "User"
+                  ..age = 5;
+                isar.users.putSync(user);
+              }
+            });
+            print('TIME:' + t.elapsedMilliseconds.toString());
+          },
+        )),
+      ),
     );
   }
 }

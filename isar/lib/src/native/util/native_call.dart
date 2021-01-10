@@ -1,6 +1,6 @@
 part of isar_native;
 
-void nCall(int result) {
+IsarError? isarErrorFromResult(int result) {
   if (result != 0) {
     final error = IC.isar_get_error(result);
     if (error.address == 0) {
@@ -9,10 +9,17 @@ void nCall(int result) {
     }
     try {
       final message = Utf8.fromUtf8(error.cast());
-      throw IsarError(message);
+      return IsarError(message);
     } finally {
       IC.isar_free_error(error);
     }
+  }
+}
+
+void nCall(int result) {
+  final error = isarErrorFromResult(result);
+  if (error != null) {
+    throw error;
   }
 }
 

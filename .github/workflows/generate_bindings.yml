@@ -31,7 +31,7 @@ jobs:
     - name: Generate bindings
       run: |
         cd isar
-        bash tools/generate_bindings.sh
+        bash tool/generate_bindings.sh
     - name: Commit changes
       run: |
         git add isar/lib/src/native/bindings.dart

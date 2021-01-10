@@ -1,8 +1,8 @@
 name: isar_flutter
-description: A new flutter plugin project.
-version: 0.0.1
-author: Simon Leier <simonleier@gmail.com>
-homepage:
+description: Flutter binaries and helpful widgets for the Isar Database
+version: 0.0.2
+repository: https://github.com/isar/isar
+homepage: https://isar.dev
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -12,16 +12,10 @@ dependencies:
   flutter:
     sdk: flutter
   path_provider: ^1.6.24
-  isar: any
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-dependency_overrides:
-  isar:
-    path: ../isar
-  ffi: 0.2.0-nullsafety.1
 
 flutter:
   plugin:
