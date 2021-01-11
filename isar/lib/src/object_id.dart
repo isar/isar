@@ -1,7 +1,9 @@
 part of isar;
 
-abstract class ObjectId {
-  const ObjectId();
+class ObjectId {
+  final int time;
+  final int counter;
+  final int rand;
 
-  int? get time;
+  const ObjectId(this.time, this.counter, this.rand);
 }

@@ -12,7 +12,7 @@ mixin IsarObject {
 
   DateTime? get createdAt {
     if (_createdAt == null && _id != null) {
-      var millisSinceEpoch = _id!.time! * 1000;
+      var millisSinceEpoch = _id!.time * 1000;
       _createdAt = DateTime.fromMillisecondsSinceEpoch(millisSinceEpoch);
     }
     return _createdAt;

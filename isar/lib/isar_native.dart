@@ -23,5 +23,4 @@ part 'package:isar/src/native/isar_core.dart';
 part 'package:isar/src/native/isar_impl.dart';
 part 'package:isar/src/native/native_query_builder.dart';
 part 'package:isar/src/native/native_query.dart';
-part 'package:isar/src/native/object_id_impl.dart';
 part 'package:isar/src/native/type_adapter.dart';

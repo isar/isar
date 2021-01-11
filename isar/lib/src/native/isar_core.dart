@@ -58,20 +58,15 @@ void initializeIsarCore({Map<String, String> dylibs = const {}}) {
 extension RawObjectX on RawObject {
   ObjectId? get oid {
     if (oid_time != 0) {
-      return ObjectIdImpl(oid_time, oid_rand_counter);
+      return ObjectId(oid_time, oid_counter, oid_rand);
     } else {
       return null;
     }
   }
 
   set oid(ObjectId? oid) {
-    if (oid != null) {
-      final oidImpl = oid as ObjectIdImpl;
-      oid_time = oidImpl.time;
-      oid_rand_counter = oidImpl.randCounter;
-    } else {
-      oid_time = 0;
-      oid_rand_counter = 0;
-    }
+    oid_time = oid?.time ?? 0;
+    oid_counter = oid?.counter ?? 0;
+    oid_rand = oid?.rand ?? 0;
   }
 }
