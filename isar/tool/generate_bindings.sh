@@ -22,7 +22,7 @@ cd $script_dir/../
 echo "$(cat isar-dart.h)"
 
 dart pub get
-dart pub run ffigen --config tools/ffigen.yaml
+dart --no-sound-null-safety run ffigen --config tools/ffigen.yaml
 rm isar-dart.h
 
 dart tools/fix_bindings.dart
