@@ -32,7 +32,7 @@
 - 🧪 **Full ACID semantics**. Rely on consistency
 - 📱 **Multiplatform**. iOS, Android, and the web (soon™)
 - 💙 **Made for Flutter.** Easily use it in your Flutter app
-- ⏱ **Fast.** So fast that you just don't have to think about it
+- ⏱ **Asynchronous.** Parallel query operations & multi-isolate support
 - ⚠️ **Static typing** with compile time checked and autocompleted queries
 
 ### Schema definition
