@@ -14,6 +14,8 @@
   </a>
 </p>
 
+<p align="center">🚧 Very unstable and not ready for serious usage 🚧</p>
+
 <p align="center">
   <a href="https://isar.dev">Quickstart</a> •
   <a href="https://isar.dev/schema">Documentation</a> •
@@ -22,9 +24,13 @@
   <a href="https://pub.dev/packages/isar">Pub.dev</a>
 </p>
 
-<p align="center">🚧 Very unstable and not ready for serious usage 🚧<p>
 
-> Isar is a fast and easy to use database for Flutter apps that offers a powerful query language.
+> #### Isar [ee-zahr]:
+> 1. River in Bavaria, Germany.
+> 2. Database that will make your life easier.
+
+
+### Features
 
 - ⚡️ **Launch your app instantly** no matter how much data you have
 - 📈 **Highly scalable** from hundreds to tens of thousands of records
