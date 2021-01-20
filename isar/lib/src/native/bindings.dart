@@ -862,6 +862,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> wc,
     bool primary,
     int index_index,
+    bool skip_duplicates,
   ) {
     return (_isar_wc_create ??=
         _dylib.lookupFunction<_c_isar_wc_create, _dart_isar_wc_create>(
@@ -870,6 +871,7 @@ class IsarCoreBindings {
       wc,
       primary ? 1 : 0,
       index_index,
+      skip_duplicates ? 1 : 0,
     );
   }
 
@@ -1689,6 +1691,7 @@ typedef _c_isar_wc_create = ffi.Int32 Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> wc,
   ffi.Uint8 primary,
   ffi.Uint32 index_index,
+  ffi.Uint8 skip_duplicates,
 );
 
 typedef _dart_isar_wc_create = int Function(
@@ -1696,6 +1699,7 @@ typedef _dart_isar_wc_create = int Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> wc,
   int primary,
   int index_index,
+  int skip_duplicates,
 );
 
 typedef _c_isar_wc_add_oid = ffi.Void Function(
