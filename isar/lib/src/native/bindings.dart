@@ -764,17 +764,31 @@ class IsarCoreBindings {
 
   _dart_isar_free_raw_obj_buffer? _isar_free_raw_obj_buffer;
 
-  void isar_clear_raw_obj_set(
+  void isar_alloc_raw_obj_list(
+    ffi.Pointer<RawObjectSet> ros,
+    int size,
+  ) {
+    return (_isar_alloc_raw_obj_list ??= _dylib.lookupFunction<
+        _c_isar_alloc_raw_obj_list,
+        _dart_isar_alloc_raw_obj_list>('isar_alloc_raw_obj_list'))(
+      ros,
+      size,
+    );
+  }
+
+  _dart_isar_alloc_raw_obj_list? _isar_alloc_raw_obj_list;
+
+  void isar_free_raw_obj_list(
     ffi.Pointer<RawObjectSet> ros,
   ) {
-    return (_isar_clear_raw_obj_set ??= _dylib.lookupFunction<
-        _c_isar_clear_raw_obj_set,
-        _dart_isar_clear_raw_obj_set>('isar_clear_raw_obj_set'))(
+    return (_isar_free_raw_obj_list ??= _dylib.lookupFunction<
+        _c_isar_free_raw_obj_list,
+        _dart_isar_free_raw_obj_list>('isar_free_raw_obj_list'))(
       ros,
     );
   }
 
-  _dart_isar_clear_raw_obj_set? _isar_clear_raw_obj_set;
+  _dart_isar_free_raw_obj_list? _isar_free_raw_obj_list;
 
   ffi.Pointer<ffi.NativeType> isar_schema_create() {
     return (_isar_schema_create ??=
@@ -1770,11 +1784,21 @@ typedef _dart_isar_free_raw_obj_buffer = void Function(
   ffi.Pointer<RawObject> object,
 );
 
-typedef _c_isar_clear_raw_obj_set = ffi.Void Function(
+typedef _c_isar_alloc_raw_obj_list = ffi.Void Function(
+  ffi.Pointer<RawObjectSet> ros,
+  ffi.Uint32 size,
+);
+
+typedef _dart_isar_alloc_raw_obj_list = void Function(
+  ffi.Pointer<RawObjectSet> ros,
+  int size,
+);
+
+typedef _c_isar_free_raw_obj_list = ffi.Void Function(
   ffi.Pointer<RawObjectSet> ros,
 );
 
-typedef _dart_isar_clear_raw_obj_set = void Function(
+typedef _dart_isar_free_raw_obj_list = void Function(
   ffi.Pointer<RawObjectSet> ros,
 );
 
