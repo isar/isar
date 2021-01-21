@@ -96,6 +96,37 @@ class IsarCoreBindings {
 
   _dart_isar_put_async? _isar_put_async;
 
+  int isar_put_all(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    ffi.Pointer<RawObjectSet> objects,
+  ) {
+    return (_isar_put_all ??= _dylib
+        .lookupFunction<_c_isar_put_all, _dart_isar_put_all>('isar_put_all'))(
+      collection,
+      txn,
+      objects,
+    );
+  }
+
+  _dart_isar_put_all? _isar_put_all;
+
+  void isar_put_all_async(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    ffi.Pointer<RawObjectSet> objects,
+  ) {
+    return (_isar_put_all_async ??=
+        _dylib.lookupFunction<_c_isar_put_all_async, _dart_isar_put_all_async>(
+            'isar_put_all_async'))(
+      collection,
+      txn,
+      objects,
+    );
+  }
+
+  _dart_isar_put_all_async? _isar_put_all_async;
+
   int isar_delete(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
@@ -707,49 +738,53 @@ class IsarCoreBindings {
 
   _dart_isar_q_delete_all_async? _isar_q_delete_all_async;
 
-  ffi.Pointer<RawObject> isar_alloc_raw_obj(
+  ffi.Pointer<RawObject> isar_alloc_raw_obj_buffer(
     int size,
   ) {
-    return (_isar_alloc_raw_obj ??=
-        _dylib.lookupFunction<_c_isar_alloc_raw_obj, _dart_isar_alloc_raw_obj>(
-            'isar_alloc_raw_obj'))(
+    return (_isar_alloc_raw_obj_buffer ??= _dylib.lookupFunction<
+        _c_isar_alloc_raw_obj_buffer,
+        _dart_isar_alloc_raw_obj_buffer>('isar_alloc_raw_obj_buffer'))(
       size,
     );
   }
 
-  _dart_isar_alloc_raw_obj? _isar_alloc_raw_obj;
+  _dart_isar_alloc_raw_obj_buffer? _isar_alloc_raw_obj_buffer;
 
-  void isar_free_raw_obj(
+  void isar_free_raw_obj_buffer(
     ffi.Pointer<RawObject> object,
   ) {
-    return (_isar_free_raw_obj ??=
-        _dylib.lookupFunction<_c_isar_free_raw_obj, _dart_isar_free_raw_obj>(
-            'isar_free_raw_obj'))(
+    return (_isar_free_raw_obj_buffer ??= _dylib.lookupFunction<
+        _c_isar_free_raw_obj_buffer,
+        _dart_isar_free_raw_obj_buffer>('isar_free_raw_obj_buffer'))(
       object,
     );
   }
 
-  _dart_isar_free_raw_obj? _isar_free_raw_obj;
+  _dart_isar_free_raw_obj_buffer? _isar_free_raw_obj_buffer;
 
-  ffi.Pointer<RawObjectSet> isar_alloc_raw_obj_set() {
+  ffi.Pointer<RawObjectSet> isar_alloc_raw_obj_set(
+    int length,
+  ) {
     return (_isar_alloc_raw_obj_set ??= _dylib.lookupFunction<
         _c_isar_alloc_raw_obj_set,
-        _dart_isar_alloc_raw_obj_set>('isar_alloc_raw_obj_set'))();
+        _dart_isar_alloc_raw_obj_set>('isar_alloc_raw_obj_set'))(
+      length,
+    );
   }
 
   _dart_isar_alloc_raw_obj_set? _isar_alloc_raw_obj_set;
 
-  void isar_free_raw_obj_set(
+  void isar_clear_raw_obj_set(
     ffi.Pointer<RawObjectSet> ros,
   ) {
-    return (_isar_free_raw_obj_set ??= _dylib.lookupFunction<
-        _c_isar_free_raw_obj_set,
-        _dart_isar_free_raw_obj_set>('isar_free_raw_obj_set'))(
+    return (_isar_clear_raw_obj_set ??= _dylib.lookupFunction<
+        _c_isar_clear_raw_obj_set,
+        _dart_isar_clear_raw_obj_set>('isar_clear_raw_obj_set'))(
       ros,
     );
   }
 
-  _dart_isar_free_raw_obj_set? _isar_free_raw_obj_set;
+  _dart_isar_clear_raw_obj_set? _isar_clear_raw_obj_set;
 
   ffi.Pointer<ffi.NativeType> isar_schema_create() {
     return (_isar_schema_create ??=
@@ -1148,6 +1183,9 @@ abstract class RawObject extends ffi.Struct {
 
   @ffi.Uint32()
   external int data_length;
+
+  @ffi.Uint32()
+  external int data_capacity;
 }
 
 class RawObjectSet extends ffi.Struct {
@@ -1219,6 +1257,30 @@ typedef _dart_isar_put_async = void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<RawObject> object,
+);
+
+typedef _c_isar_put_all = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObjectSet> objects,
+);
+
+typedef _dart_isar_put_all = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObjectSet> objects,
+);
+
+typedef _c_isar_put_all_async = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObjectSet> objects,
+);
+
+typedef _dart_isar_put_all_async = void Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObjectSet> objects,
 );
 
 typedef _c_isar_delete = ffi.Int32 Function(
@@ -1700,31 +1762,35 @@ typedef _dart_isar_q_delete_all_async = void Function(
   ffi.Pointer<ffi.Int64> count,
 );
 
-typedef _c_isar_alloc_raw_obj = ffi.Pointer<RawObject> Function(
+typedef _c_isar_alloc_raw_obj_buffer = ffi.Pointer<RawObject> Function(
   ffi.Uint32 size,
 );
 
-typedef _dart_isar_alloc_raw_obj = ffi.Pointer<RawObject> Function(
+typedef _dart_isar_alloc_raw_obj_buffer = ffi.Pointer<RawObject> Function(
   int size,
 );
 
-typedef _c_isar_free_raw_obj = ffi.Void Function(
+typedef _c_isar_free_raw_obj_buffer = ffi.Void Function(
   ffi.Pointer<RawObject> object,
 );
 
-typedef _dart_isar_free_raw_obj = void Function(
+typedef _dart_isar_free_raw_obj_buffer = void Function(
   ffi.Pointer<RawObject> object,
 );
 
-typedef _c_isar_alloc_raw_obj_set = ffi.Pointer<RawObjectSet> Function();
+typedef _c_isar_alloc_raw_obj_set = ffi.Pointer<RawObjectSet> Function(
+  ffi.Uint32 length,
+);
 
-typedef _dart_isar_alloc_raw_obj_set = ffi.Pointer<RawObjectSet> Function();
+typedef _dart_isar_alloc_raw_obj_set = ffi.Pointer<RawObjectSet> Function(
+  int length,
+);
 
-typedef _c_isar_free_raw_obj_set = ffi.Void Function(
+typedef _c_isar_clear_raw_obj_set = ffi.Void Function(
   ffi.Pointer<RawObjectSet> ros,
 );
 
-typedef _dart_isar_free_raw_obj_set = void Function(
+typedef _dart_isar_clear_raw_obj_set = void Function(
   ffi.Pointer<RawObjectSet> ros,
 );
 
