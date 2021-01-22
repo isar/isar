@@ -1,5 +1,3 @@
-// @dart=2.8
-import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../common.dart';
@@ -7,9 +5,9 @@ import '../isar.g.dart';
 import '../models/int_model.dart';
 
 void main() {
-  group('Filter bool', () {
+  group('Int filter', () {
     Isar isar;
-    IsarCollection<IntModel> col;
+    late IsarCollection<IntModel> col;
 
     setUp(() async {
       setupIsar();
@@ -18,75 +16,117 @@ void main() {
       isar = await openIsar(directory: dir.path);
       col = isar.intModels;
 
-      isar.writeTxnSync((isar) {
+      var obj;
+      await isar.writeTxn((isar) async {
         for (var i = 0; i < 5; i++) {
-          final obj = IntModel()..field = i;
-          col.putSync(obj);
+          obj = IntModel()..field = i;
+          await col.put(obj);
         }
-        col.putSync(IntModel()..field = null);
+        await col.put(IntModel()..field = null);
       });
     });
 
-    test('where equalTo()', () {
-      expect(
-        col.where().filter().fieldEqualTo(2).findAllSync(),
+    test('equalTo()', () async {
+      await qEqual(
+        col.where().fieldEqualTo(2).findAll(),
+        [IntModel()..field = 2],
+      );
+      await qEqual(
+        col.where().filter().fieldEqualTo(2).findAll(),
         [IntModel()..field = 2],
       );
 
-      expect(
-        col.where().filter().fieldEqualTo(null).findAllSync(),
+      await qEqual(
+        col.where().fieldEqualTo(null).findAll(),
+        [IntModel()..field = null],
+      );
+      await qEqual(
+        col.where().filter().fieldEqualTo(null).findAll(),
         [IntModel()..field = null],
       );
 
-      expect(
-        col.where().filter().fieldEqualTo(5).findAllSync(),
+      await qEqual(
+        col.where().fieldEqualTo(5).findAll(),
+        [],
+      );
+      await qEqual(
+        col.where().filter().fieldEqualTo(5).findAll(),
         [],
       );
     });
 
-    test('where notEqualTo()', () {
-      expect(
-        col.where().filter().fieldNotEqualTo(3).findAllSync(),
-        [
+    test('notEqualTo()', () async {
+      await qEqualSet(
+        col.where().fieldNotEqualTo(3).findAll(),
+        {
           IntModel()..field = null,
           IntModel()..field = 0,
           IntModel()..field = 1,
           IntModel()..field = 2,
           IntModel()..field = 4,
-        ],
+        },
+      );
+      await qEqualSet(
+        col.where().filter().fieldNotEqualTo(3).findAll(),
+        {
+          IntModel()..field = null,
+          IntModel()..field = 0,
+          IntModel()..field = 1,
+          IntModel()..field = 2,
+          IntModel()..field = 4,
+        },
       );
     });
 
-    test('where greaterThan()', () {
-      expect(
-        col.where().filter().fieldGreaterThan(3).findAllSync(),
+    test('greaterThan()', () async {
+      await qEqual(
+        col.where().fieldGreaterThan(3).findAll(),
+        [IntModel()..field = 4],
+      );
+      await qEqual(
+        col.where().filter().fieldGreaterThan(3).findAll(),
         [IntModel()..field = 4],
       );
 
-      expect(
-        col.where().filter().fieldGreaterThan(3, include: true).findAllSync(),
+      await qEqual(
+        col.where().fieldGreaterThan(3, include: true).findAll(),
+        [IntModel()..field = 3, IntModel()..field = 4],
+      );
+      await qEqualSet(
+        col.where().filter().fieldGreaterThan(3, include: true).findAll(),
         {IntModel()..field = 3, IntModel()..field = 4},
       );
 
-      expect(
-        col.where().filter().fieldGreaterThan(4).findAllSync(),
+      await qEqual(
+        col.where().fieldGreaterThan(4).findAll(),
+        [],
+      );
+      await qEqual(
+        col.where().filter().fieldGreaterThan(4).findAll(),
         [],
       );
     });
 
-    test('where lowerThan()', () {
-      expect(
-        col.where().filter().fieldLowerThan(1).findAllSync().toSet(),
+    test('lowerThan()', () async {
+      await qEqual(
+        col.where().fieldLowerThan(1).findAll(),
+        [IntModel()..field = null, IntModel()..field = 0],
+      );
+      await qEqualSet(
+        col.where().filter().fieldLowerThan(1).findAll(),
         {IntModel()..field = null, IntModel()..field = 0},
       );
 
-      expect(
-        col
-            .where()
-            .filter()
-            .fieldLowerThan(1, include: true)
-            .findAllSync()
-            .toSet(),
+      await qEqual(
+        col.where().fieldLowerThan(1, include: true).findAll(),
+        [
+          IntModel()..field = null,
+          IntModel()..field = 0,
+          IntModel()..field = 1
+        ],
+      );
+      await qEqualSet(
+        col.where().filter().fieldLowerThan(1, include: true).findAll(),
         {
           IntModel()..field = null,
           IntModel()..field = 0,
@@ -95,62 +135,96 @@ void main() {
       );
     });
 
-    test('where between()', () {
-      expect(
-        col.where().filter().fieldBetween(1, 3).findAllSync().toSet(),
+    test('between()', () async {
+      await qEqual(
+        col.where().fieldBetween(1, 3).findAll(),
+        [IntModel()..field = 1, IntModel()..field = 2, IntModel()..field = 3],
+      );
+      await qEqualSet(
+        col.where().filter().fieldBetween(1, 3).findAll(),
         {IntModel()..field = 1, IntModel()..field = 2, IntModel()..field = 3},
       );
 
-      expect(
-        col.where().filter().fieldBetween(null, 0).findAllSync().toSet(),
+      await qEqual(
+        col.where().fieldBetween(null, 0).findAll(),
+        [IntModel()..field = null, IntModel()..field = 0],
+      );
+      await qEqualSet(
+        col.where().filter().fieldBetween(null, 0).findAll(),
         {IntModel()..field = null, IntModel()..field = 0},
       );
 
-      expect(
-        col
-            .where()
-            .filter()
-            .fieldBetween(1, 3, includeLower: false)
-            .findAllSync()
-            .toSet(),
-        {IntModel()..field = 2, IntModel()..field = 3},
+      await qEqual(
+        col.where().fieldBetween(1, 3, includeLower: false).findAll(),
+        [IntModel()..field = 2, IntModel()..field = 3],
       );
+      await qEqualSet(
+          col
+              .where()
+              .filter()
+              .fieldBetween(1, 3, includeLower: false)
+              .findAll(),
+          {IntModel()..field = 2, IntModel()..field = 3});
 
-      expect(
-        col
-            .where()
-            .filter()
-            .fieldBetween(1, 3, includeUpper: false)
-            .findAllSync()
-            .toSet(),
+      await qEqual(
+        col.where().fieldBetween(1, 3, includeUpper: false).findAll(),
+        [IntModel()..field = 1, IntModel()..field = 2],
+      );
+      await qEqualSet(
+        col.where().filter().fieldBetween(1, 3, includeUpper: false).findAll(),
         {IntModel()..field = 1, IntModel()..field = 2},
       );
 
-      expect(
+      await qEqual(
+        col
+            .where()
+            .fieldBetween(1, 3, includeLower: false, includeUpper: false)
+            .findAll(),
+        [IntModel()..field = 2],
+      );
+      await qEqual(
         col
             .where()
             .filter()
             .fieldBetween(1, 3, includeLower: false, includeUpper: false)
-            .findAllSync(),
+            .findAll(),
         [IntModel()..field = 2],
       );
 
-      expect(
-        col.where().filter().fieldBetween(5, 6).findAllSync(),
+      await qEqual(
+        col.where().fieldBetween(5, 6).findAll(),
+        [],
+      );
+      await qEqual(
+        col.where().filter().fieldBetween(5, 6).findAll(),
         [],
       );
     });
 
-    test('where isNull()', () {
-      expect(
-        col.where().filter().fieldIsNull().findAllSync(),
+    test('isNull()', () async {
+      await qEqual(
+        col.where().fieldIsNull().findAll(),
+        [IntModel()..field = null],
+      );
+      await qEqual(
+        col.where().filter().fieldIsNull().findAll(),
         [IntModel()..field = null],
       );
     });
 
-    test('where isNotNull()', () {
-      expect(
-        col.where().filter().fieldIsNotNull().findAllSync().toSet(),
+    test('where isNotNull()', () async {
+      await qEqualSet(
+        col.where().fieldIsNotNull().findAll(),
+        {
+          IntModel()..field = 0,
+          IntModel()..field = 1,
+          IntModel()..field = 2,
+          IntModel()..field = 3,
+          IntModel()..field = 4,
+        },
+      );
+      await qEqualSet(
+        col.where().filter().fieldIsNotNull().findAll(),
         {
           IntModel()..field = 0,
           IntModel()..field = 1,

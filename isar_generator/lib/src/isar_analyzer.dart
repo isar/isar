@@ -29,6 +29,7 @@ class IsarAnalyzer extends Builder {
     if (models.isEmpty) return;
 
     var json = JsonEncoder().convert(models);
+    print(json);
     await buildStep.writeAsString(
         buildStep.inputId.changeExtension('.isarobject.json'), json);
   }
@@ -48,6 +49,12 @@ class IsarAnalyzer extends Builder {
       err('Object class must be public.', element);
     }
 
+    final isIsarObject = modelClass.allSupertypes
+        .any((element) => element.element.name == 'IsarObject');
+    if (!isIsarObject) {
+      err('Object class has to extend or mixin IsarObject.', element);
+    }
+
     final hasZeroArgConstructor = modelClass.constructors
         .any((c) => c.isPublic && !c.parameters.any((p) => !p.isOptional));
 
@@ -55,16 +62,23 @@ class IsarAnalyzer extends Builder {
       err('Object class needs to have a public zero-arg constructor.');
     }
 
-    final dbName = getNameAnn(modelClass)?.name ?? modelClass.displayName;
-    if (dbName.isEmpty) {
+    final isarName = getNameAnn(modelClass)?.name ?? modelClass.displayName;
+    if (isarName.isEmpty) {
       err('Empty model names are not allowed.', modelClass);
     }
 
     var properties = <ObjectProperty>[];
     final indices = <ObjectIndex>[];
+    final converterImports = <String>{};
 
     for (var property in modelClass.fields) {
-      var modelProperty = generateObjectProperty(property);
+      final converter = findTypeConverter(property);
+      if (converter != null) {
+        final pathComponents = converter.location.components[0].split('/');
+        converterImports.add(pathComponents.sublist(2).join('/'));
+      }
+
+      var modelProperty = generateObjectProperty(property, converter);
       if (modelProperty == null) continue;
       properties.add(modelProperty);
 
@@ -74,17 +88,34 @@ class IsarAnalyzer extends Builder {
     properties = sortAndOffsetProperties(properties);
 
     final modelInfo = ObjectInfo(
-      type: modelClass.displayName,
-      dbName: dbName,
+      dartName: modelClass.displayName,
+      isarName: isarName,
       properties: properties,
       indices: indices,
+      converterImports: converterImports.toList(),
     );
     validateIndices(modelInfo);
 
     return modelInfo;
   }
 
-  ObjectProperty generateObjectProperty(FieldElement property) {
+  ClassElement findTypeConverter(FieldElement property) {
+    final annotations = getTypeConverterAnns(property);
+    annotations.addAll(getTypeConverterAnns(property.enclosingElement));
+
+    for (var annotation in annotations) {
+      final cls = annotation.type.element as ClassElement;
+      final dartType = cls.supertype.typeArguments[0];
+      if (dartType == property.type) {
+        return cls;
+      }
+    }
+
+    return null;
+  }
+
+  ObjectProperty generateObjectProperty(
+      FieldElement property, ClassElement converter) {
     if (!property.isPublic ||
         property.isFinal ||
         property.isConst ||
@@ -106,74 +137,89 @@ class IsarAnalyzer extends Builder {
       }
     }
 
-    var dbName = getNameAnn(property)?.name ?? property.displayName;
-    if (dbName.isEmpty) {
+    final nameAnn = getNameAnn(property);
+    if (nameAnn != null && nameAnn.name.isEmpty) {
       err('Empty property names are not allowed.', property);
+    }
+    var isarName = nameAnn?.name ?? property.displayName;
+
+    IsarType isarType;
+    if (converter == null) {
+      final size32 = hasSize32Ann(property);
+      isarType = getIsarType(property.type, size32, property);
+    } else {
+      final isarDartType = converter.supertype.typeArguments[1];
+      final size32 = hasSize32Ann(converter);
+      isarType = getIsarType(isarDartType, size32, converter);
     }
 
     return ObjectProperty(
-      name: property.displayName,
-      dbName: dbName,
-      type: getDataType(property),
+      dartName: property.displayName,
+      isarName: isarName,
+      dartType: property.type.getDisplayString(withNullability: true),
+      isarType: isarType,
+      converter: converter?.name,
       nullable: nullable,
       elementNullable: elementNullable,
     );
   }
 
-  DataType getDataType(FieldElement property) {
-    if (property.type.isDartCoreBool) {
-      return DataType.Bool;
-    } else if (property.type.isDartCoreInt) {
-      if (hasSize32Ann(property)) {
-        return DataType.Int;
+  IsarType getIsarType(DartType type, bool size32, Element element) {
+    if (type.isDartCoreBool) {
+      return IsarType.Bool;
+    } else if (type.isDartCoreInt) {
+      if (size32) {
+        return IsarType.Int;
       } else {
-        return DataType.Long;
+        return IsarType.Long;
       }
-    } else if (property.type.isDartCoreDouble) {
-      if (hasSize32Ann(property)) {
-        return DataType.Float;
+    } else if (type.isDartCoreDouble) {
+      if (size32) {
+        return IsarType.Float;
       } else {
-        return DataType.Double;
+        return IsarType.Double;
       }
-    } else if (property.type.isDartCoreString) {
-      return DataType.String;
-    } else if (property.type.isDartCoreList) {
-      final parameterizedType = property.type as ParameterizedType;
+    } else if (type.isDartCoreString) {
+      return IsarType.String;
+    } else if (type.isDartCoreList) {
+      final parameterizedType = type as ParameterizedType;
       final typeArguments = parameterizedType.typeArguments;
       if (typeArguments != null && typeArguments.isNotEmpty) {
         final listType = typeArguments[0];
         if (listType.isDartCoreBool) {
-          return DataType.BoolList;
+          return IsarType.BoolList;
         } else if (listType.isDartCoreInt) {
-          if (hasSize32Ann(property)) {
-            return DataType.IntList;
+          if (size32) {
+            return IsarType.IntList;
           } else {
-            return DataType.LongList;
+            return IsarType.LongList;
           }
         } else if (listType.isDartCoreDouble) {
-          if (hasSize32Ann(property)) {
-            return DataType.FloatList;
+          if (size32) {
+            return IsarType.FloatList;
           } else {
-            return DataType.DoubleList;
+            return IsarType.DoubleList;
           }
         } else if (listType.isDartCoreString) {
-          return DataType.StringList;
+          return IsarType.StringList;
         }
       }
+    } else if (type.element.name == 'Uint8List') {
+      return IsarType.Bytes;
     }
     err('Property has unsupported type. Use @IsarIgnore to ignore the property.',
-        property);
+        element);
     throw 'unreachable';
   }
 
   Iterable<ObjectIndex> generateObjectIndices(
       ObjectProperty property, FieldElement element) {
     return getIndexAnns(element).map((index) {
-      var properties = [property.name];
+      var properties = [property.isarName];
       properties.addAll(index.composite);
 
       var hashValue = index.hashValue;
-      if (property.type == DataType.String && hashValue == null) {
+      if (property.isarType == IsarType.String && hashValue == null) {
         hashValue = false;
       }
       return ObjectIndex(
@@ -188,10 +234,10 @@ class IsarAnalyzer extends Builder {
       List<ObjectProperty> properties) {
     var offset = OBJECT_ID_SIZE;
     return properties
-        .sortedBy((f) => f.type.index)
-        .thenBy((f) => f.name)
+        .sortedBy((f) => f.isarType.typeId)
+        .thenBy((f) => f.isarName)
         .mapIndexed((index, p) {
-      final size = p.type.staticSize;
+      final size = p.isarType.staticSize;
       final padding = -offset % size;
       offset += padding + size;
       return p.copyWith(staticPadding: padding);
@@ -218,8 +264,8 @@ class IsarAnalyzer extends Builder {
       }
 
       var hasStringProperty = index.properties
-          .map((name) => model.properties.firstWhere((f) => f.name == name))
-          .any((f) => f.type == DataType.String);
+          .map((name) => model.properties.firstWhere((f) => f.isarName == name))
+          .any((f) => f.isarType == IsarType.String);
 
       if (index.hashValue && !hasStringProperty) {
         err('Only String and List<String> properties support the "hashValue" parameter.');

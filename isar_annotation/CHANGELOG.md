@@ -1,3 +1,6 @@
+## 0.0.3
+TypeConverter annotation
+
 ## 0.0.2
 Alpha release of the Isar Database.
 

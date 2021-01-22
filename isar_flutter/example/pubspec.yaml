@@ -25,6 +25,7 @@ dependency_overrides:
     path: ../
   isar_generator:
     path: ../../isar_generator
+  isar_annotation: 0.0.3
   ffi: 0.2.0-nullsafety.1
 
 

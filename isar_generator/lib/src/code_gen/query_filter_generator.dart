@@ -1,25 +1,26 @@
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
+import 'package:isar_generator/src/code_gen/util.dart';
 
-String generateQueryFilter(ObjectInfo object) {
+String generateQueryFilter(ObjectInfo oi) {
   var code = '''
-  extension ${object.type}QueryFilter<GROUPS> on QueryBuilder<${object.type}, 
+  extension ${oi.dartName}QueryFilter<GROUPS> on QueryBuilder<${oi.dartName}, 
   dynamic, QFilter, GROUPS, dynamic, dynamic, dynamic, dynamic> {
   ''';
-  for (var i = 0; i < object.properties.length; i++) {
-    final property = object.properties[i];
+  for (var i = 0; i < oi.properties.length; i++) {
+    final property = oi.properties[i];
     if (!property.isFloatDouble) {
-      code += generateEqualTo(object.type, property, i);
-      code += generateNotEqualTo(object.type, property, i);
+      code += generateEqualTo(oi, property, i);
+      code += generateNotEqualTo(oi, property, i);
     }
     if (property.nullable) {
-      code += generateIsNull(object.type, property, i);
-      code += generateIsNotNull(object.type, property, i);
+      code += generateIsNull(oi, property, i);
+      code += generateIsNotNull(oi, property, i);
     }
-    if (property.type != DataType.Bool) {
-      code += generateLowerThan(object.type, property, i);
-      code += generateGreaterThan(object.type, property, i);
-      code += generateBetween(object.type, property, i);
+    if (property.isarType != IsarType.Bool) {
+      code += generateLowerThan(oi, property, i);
+      code += generateGreaterThan(oi, property, i);
+      code += generateBetween(oi, property, i);
     }
   }
   return '''
@@ -27,113 +28,100 @@ String generateQueryFilter(ObjectInfo object) {
   }''';
 }
 
-String propertyName(ObjectProperty property) {
-  return property.name.decapitalize();
-}
-
-final filterReturnParams =
-    'dynamic, QFilterAfterCond, GROUPS, QCanGroupBy, QCanOffsetLimit, QCanSort, QCanExecute';
-
 String filterReturn(String type) {
-  return 'QueryBuilder<$type, $filterReturnParams>';
+  return 'QueryBuilder<$type, dynamic, QFilterAfterCond, GROUPS, QCanGroupBy, QCanOffsetLimit, QCanSort, QCanExecute>';
 }
 
-String generateEqualTo(
-    String type, ObjectProperty property, int propertyIndex) {
+String generateEqualTo(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(type)} ${propertyName(property)}EqualTo(${property.dartType} value) {
+  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}EqualTo(${p.dartType} value) {
     return addFilterCondition(QueryCondition(
       ConditionType.Eq,
-      $propertyIndex,
-      '${property.type.name}',
-      value,
+      $pIndex,
+      '${p.isarType.name}',
+      ${p.toIsar('value', oi)},
     ));
   }
   ''';
 }
 
-String generateNotEqualTo(
-    String type, ObjectProperty property, int propertyIndex) {
+String generateNotEqualTo(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(type)} ${propertyName(property)}NotEqualTo(${property.dartType} value) {
+  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}NotEqualTo(${p.dartType} value) {
     return addFilterCondition(QueryCondition(
       ConditionType.NEq,
-      $propertyIndex,
-      '${property.type.name}',
-      value,
+      $pIndex,
+      '${p.isarType.name}',
+      ${p.toIsar('value', oi)},
     ));
   }
   ''';
 }
 
-String generateGreaterThan(
-    String type, ObjectProperty property, int propertyIndex) {
+String generateGreaterThan(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(type)} ${propertyName(property)}GreaterThan(${property.dartType} value, {bool include = false}) {
+  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}GreaterThan(${p.dartType} value, {bool include = false}) {
     return addFilterCondition(QueryCondition(
       ConditionType.Gt,
-      $propertyIndex,
-      '${property.type.name}',
-      value,
+      $pIndex,
+      '${p.isarType.name}',
+      ${p.toIsar('value', oi)},
       includeValue: include,
     ));
   }
   ''';
 }
 
-String generateLowerThan(
-    String type, ObjectProperty property, int propertyIndex) {
+String generateLowerThan(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(type)} ${propertyName(property)}LowerThan(${property.dartType} value, {bool include = false}) {
+  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}LowerThan(${p.dartType} value, {bool include = false}) {
     return addFilterCondition(QueryCondition(
       ConditionType.Lt,
-      $propertyIndex,
-      '${property.type.name}',
-      value,
+      $pIndex,
+      '${p.isarType.name}',
+      ${p.toIsar('value', oi)},
       includeValue: include,
     ));
   }
   ''';
 }
 
-String generateBetween(
-    String type, ObjectProperty property, int propertyIndex) {
+String generateBetween(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(type)} ${propertyName(property)}Between(${property.dartType} lower, ${property.dartType} upper, {bool includeLower = true, bool includeUpper = true}) {
+  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}Between(${p.dartType} lower, ${p.dartType} upper, {bool includeLower = true, bool includeUpper = true}) {
     return addFilterCondition(QueryCondition(
       ConditionType.Between,
-      $propertyIndex,
-      '${property.type.name}',
-      lower,
+      $pIndex,
+      '${p.isarType.name}',
+      ${p.toIsar('lower', oi)},
       includeValue: includeLower,
-      value2: upper,
+      value2: ${p.toIsar('upper', oi)},
       includeValue2: includeUpper,
     ));
   }
   ''';
 }
 
-String generateIsNull(String type, ObjectProperty property, int propertyIndex) {
+String generateIsNull(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(type)} ${propertyName(property)}IsNull() {
+  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}IsNull() {
     return addFilterCondition(QueryCondition(
       ConditionType.IsNull,
-      $propertyIndex,
-      '${property.type.name}',
+      $pIndex,
+      '${p.isarType.name}',
       null,
     ));
   }
   ''';
 }
 
-String generateIsNotNull(
-    String type, ObjectProperty property, int propertyIndex) {
+String generateIsNotNull(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(type)} ${propertyName(property)}IsNotNull() {
+  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}IsNotNull() {
     return addFilterCondition(QueryCondition(
       ConditionType.IsNotNull,
-      $propertyIndex,
-      '${property.type.name}',
+      $pIndex,
+      '${p.isarType.name}',
       null
     ));
   }

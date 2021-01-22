@@ -1,9 +1,14 @@
 import 'package:isar_generator/src/isar_analyzer.dart';
 import 'package:isar_generator/src/object_info.dart';
+import 'package:isar_generator/src/code_gen/util.dart';
+import 'package:dartx/dartx.dart';
 
 String generateObjectAdapter(ObjectInfo object) {
   return '''
-    class _${object.type}Adapter extends TypeAdapter<${object.type}> {
+    class _${object.dartName}Adapter extends TypeAdapter<${object.dartName}> {
+
+      ${generateConverterFields(object)}
+
       @override
       final staticSize = ${object.getStaticSize()};
 
@@ -14,64 +19,82 @@ String generateObjectAdapter(ObjectInfo object) {
     ''';
 }
 
+String generateConverterFields(ObjectInfo object) {
+  return object.properties
+      .mapNotNull((it) => it.converter)
+      .toSet()
+      .map((it) => 'static const _$it = $it();')
+      .join('\n');
+}
+
 String _generatePrepareSerialize(ObjectInfo object) {
   var code = '''
   @override  
-  int prepareSerialize(${object.type} object, Map<String, dynamic> cache) {''';
+  int prepareSerialize(${object.dartName} object, Map<String, dynamic> cache) {''';
   final staticSize = object.getStaticSize();
-  final dynamicProperties =
-      object.properties.where((it) => it.type.isDynamic).toList();
-  if (dynamicProperties.isNotEmpty) {
+  final dynamicConvertedProperties = object.properties
+      .where((it) => it.isarType.isDynamic || it.converter != null)
+      .toList();
+  if (dynamicConvertedProperties.isNotEmpty) {
     code += 'var dynamicSize = 0;';
-    for (var property in dynamicProperties) {
-      if (property.type.elementAlignment != 1) {
+    for (var property in dynamicConvertedProperties) {
+      if (property.isarType.isDynamic &&
+          property.isarType.elementAlignment != 1) {
         code += '''
         {
-          final padding = -(dynamicSize + $staticSize) % ${property.type.elementAlignment};
-          cache['${property.name}Padding'] = padding;
+          final padding = -(dynamicSize + $staticSize) % ${property.isarType.elementAlignment};
+          cache['${property.isarName}Padding'] = padding;
           dynamicSize += padding;
         }
         ''';
       }
-      switch (property.type) {
-        case DataType.String:
+      code += '{';
+      var accessor = 'object.${property.dartName}';
+      if (property.converter != null) {
+        accessor = property.toIsar(accessor, object);
+      }
+      code += 'final value = $accessor;';
+      switch (property.isarType) {
+        case IsarType.String:
           code += '''
-          {
-            final bytes = utf8Encoder.convert(object.${property.name});
-            cache['${property.name}Bytes'] = bytes;
+          final bytes = utf8Encoder.convert(value);
+          cache['${property.isarName}'] = bytes;
+          dynamicSize += bytes.length;
+          ''';
+          break;
+        case IsarType.Bytes:
+        case IsarType.BoolList:
+          code += 'dynamicSize += value.length;';
+          break;
+        case IsarType.StringList:
+          code += '''
+          dynamicSize += value.length * 8;
+          final bytesList = <Uint8List>[];
+          for (var str in value) {
+            final bytes = utf8Encoder.convert(str);
+            bytesList.add(bytes);
             dynamicSize += bytes.length;
           }
+          cache['${property.isarName}'] = bytesList;
           ''';
           break;
-        case DataType.Bytes:
-        case DataType.BoolList:
-          code += 'dynamicSize += object.${property.name}.length;';
+        case IsarType.IntList:
+        case IsarType.FloatList:
+          code += 'dynamicSize += value.length * 4;';
           break;
-        case DataType.StringList:
-          code += '''
-          {
-            dynamicSize += object.${property.name}.length * 8;
-            final bytesList = <Uint8List>[];
-            for (var str in object.${property.name}) {
-              final bytes = utf8Encoder.convert(str);
-              bytesList.add(bytes);
-              dynamicSize += bytes.length;
-            }
-            cache['${property.name}BytesList'] = bytesList;
-          }
-          ''';
-          break;
-        case DataType.IntList:
-        case DataType.FloatList:
-          code += 'dynamicSize += object.${property.name}.length * 4;';
-          break;
-        case DataType.LongList:
-        case DataType.DoubleList:
-          code += 'dynamicSize += object.${property.name}.length * 8;';
+        case IsarType.LongList:
+        case IsarType.DoubleList:
+          code += 'dynamicSize += value.length * 8;';
           break;
         default:
           break;
       }
+      if (property.converter != null &&
+          property.isarType != IsarType.String &&
+          property.isarType != IsarType.StringList) {
+        code += "cache['${property.isarName}'] = value;";
+      }
+      code += '}';
     }
     code += '''
     final size = dynamicSize + $staticSize;
@@ -88,55 +111,55 @@ String _generatePrepareSerialize(ObjectInfo object) {
 String _generateSerialize(ObjectInfo object) {
   var code = '''
   @override  
-  void serialize(${object.type} object, Map<String, dynamic> cache, BinaryWriter writer) {''';
+  void serialize(${object.dartName} object, Map<String, dynamic> cache, BinaryWriter writer) {''';
   for (var property in object.properties) {
     if (property.staticPadding != 0) {
       code += 'writer.pad(${property.staticPadding});';
     }
-    if (property.type.isDynamic && property.type.elementAlignment != 1) {
-      code += "writer.padDynamic(cache['${property.name}Padding'] as int);";
+    if (property.isarType.isDynamic &&
+        property.isarType.elementAlignment != 1) {
+      code += "writer.padDynamic(cache['${property.isarName}Padding'] as int);";
     }
-    var accessor = 'object.${property.name}';
-    switch (property.type) {
-      case DataType.Bool:
+
+    final accessor = _getSerializeAccessor(property);
+    switch (property.isarType) {
+      case IsarType.Bool:
         code += 'writer.writeBool($accessor);';
         break;
-      case DataType.Int:
+      case IsarType.Int:
         code += 'writer.writeInt($accessor);';
         break;
-      case DataType.Float:
+      case IsarType.Float:
         code += 'writer.writeFloat($accessor);';
         break;
-      case DataType.Long:
+      case IsarType.Long:
         code += 'writer.writeLong($accessor);';
         break;
-      case DataType.Double:
+      case IsarType.Double:
         code += 'writer.writeDouble($accessor);';
         break;
-      case DataType.String:
-        code +=
-            "writer.writeBytes(cache['${property.name}Bytes'] as Uint8List);";
-        break;
-      case DataType.Bytes:
+      case IsarType.String:
         code += 'writer.writeBytes($accessor);';
         break;
-      case DataType.BoolList:
+      case IsarType.Bytes:
+        code += 'writer.writeBytes($accessor);';
+        break;
+      case IsarType.BoolList:
         code += 'writer.writeBoolList($accessor);';
         break;
-      case DataType.StringList:
-        code +=
-            "writer.writeBytesList((cache['${property.name}Bytes'] as List).cast());";
+      case IsarType.StringList:
+        code += 'writer.writeBytesList($accessor);';
         break;
-      case DataType.IntList:
+      case IsarType.IntList:
         code += 'writer.writeIntList($accessor);';
         break;
-      case DataType.LongList:
+      case IsarType.LongList:
         code += 'writer.writeLongList($accessor);';
         break;
-      case DataType.FloatList:
+      case IsarType.FloatList:
         code += 'writer.writeFloatList($accessor);';
         break;
-      case DataType.DoubleList:
+      case IsarType.DoubleList:
         code += 'writer.writeDoubleList($accessor);';
         break;
     }
@@ -145,69 +168,102 @@ String _generateSerialize(ObjectInfo object) {
   return code + '}';
 }
 
+String _getSerializeAccessor(ObjectProperty property) {
+  if (property.isarType == IsarType.String ||
+      property.isarType == IsarType.StringList ||
+      property.converter != null) {
+    var accessor = "cache['${property.isarName}']";
+    final nullModifier = property.nullable ? '?' : '';
+    switch (property.isarType) {
+      case IsarType.Bool:
+        accessor += ' as bool$nullModifier';
+        break;
+      case IsarType.Int:
+      case IsarType.Long:
+        accessor += ' as int$nullModifier';
+        break;
+      case IsarType.Float:
+      case IsarType.Double:
+        accessor += ' as double$nullModifier';
+        break;
+      case IsarType.String:
+      case IsarType.Bytes:
+        accessor += ' as Uint8List$nullModifier';
+        break;
+      default:
+        accessor = '($accessor as List$nullModifier)$nullModifier.cast()';
+        break;
+    }
+    return accessor;
+  } else {
+    return 'object.${property.dartName}';
+  }
+}
+
 String _generateDeserialize(ObjectInfo object) {
   var code = '''
   @override
-  ${object.type} deserialize(BinaryReader reader) {
-    final object = ${object.type}();''';
+  ${object.dartName} deserialize(BinaryReader reader) {
+    final object = ${object.dartName}();''';
   for (var property in object.properties) {
     if (property.staticPadding != 0) {
       code += 'reader.skip(${property.staticPadding});';
     }
-    final accessor = 'object.${property.name}';
+    final accessor = 'object.${property.isarName}';
     final orNull = property.nullable ? 'OrNull' : '';
     final orElNull = property.elementNullable ? 'OrNull' : '';
 
     final skipNullList = property.nullable
         ? (String listCode) {
-            code += 'if (!reader.skipListIfNull()) {';
-            code += listCode;
-            code += '}';
+            return '!reader.skipListIfNull() ? $listCode : null';
           }
         : (String listCode) {
-            code += listCode;
+            return listCode;
           };
-    switch (property.type) {
-      case DataType.Bool:
-        code += '$accessor = reader.readBool$orNull();';
+
+    String deser;
+    switch (property.isarType) {
+      case IsarType.Bool:
+        deser = 'reader.readBool$orNull()';
         break;
-      case DataType.Int:
-        code += '$accessor = reader.readInt$orNull();';
+      case IsarType.Int:
+        deser = 'reader.readInt$orNull()';
         break;
-      case DataType.Float:
-        code += '$accessor = reader.readFloat$orNull();';
+      case IsarType.Float:
+        deser = 'reader.readFloat$orNull()';
         break;
-      case DataType.Long:
-        code += '$accessor = reader.readLong$orNull();';
+      case IsarType.Long:
+        deser = 'reader.readLong$orNull()';
         break;
-      case DataType.Double:
-        code += '$accessor = reader.readDouble$orNull();';
+      case IsarType.Double:
+        deser = 'reader.readDouble$orNull()';
         break;
-      case DataType.String:
-        code += '$accessor = reader.readString$orNull();';
+      case IsarType.String:
+        deser = 'reader.readString$orNull()';
         break;
-      case DataType.Bytes:
-        code += '$accessor = reader.readBytes$orNull();';
+      case IsarType.Bytes:
+        deser = 'reader.readBytes$orNull()';
         break;
-      case DataType.BoolList:
-        skipNullList('$accessor = reader.readBool${orElNull}List();');
+      case IsarType.BoolList:
+        deser = skipNullList('reader.readBool${orElNull}List()');
         break;
-      case DataType.StringList:
-        skipNullList('$accessor = reader.readString${orElNull}List();');
+      case IsarType.StringList:
+        deser = skipNullList('reader.readString${orElNull}List()');
         break;
-      case DataType.IntList:
-        skipNullList('$accessor = reader.readInt${orElNull}List();');
+      case IsarType.IntList:
+        deser = skipNullList('reader.readInt${orElNull}List()');
         break;
-      case DataType.FloatList:
-        skipNullList('$accessor = reader.readFloat${orElNull}List();');
+      case IsarType.FloatList:
+        deser = skipNullList('reader.readFloat${orElNull}List();');
         break;
-      case DataType.LongList:
-        skipNullList('$accessor = reader.readLong${orElNull}List();');
+      case IsarType.LongList:
+        deser = skipNullList('reader.readLong${orElNull}List()');
         break;
-      case DataType.DoubleList:
-        skipNullList('$accessor = reader.readDouble${orElNull}List();');
+      case IsarType.DoubleList:
+        deser = skipNullList('reader.readDouble${orElNull}List()');
         break;
     }
+    code += '$accessor = ${property.fromIsar(deser, object)};';
   }
 
   return '''

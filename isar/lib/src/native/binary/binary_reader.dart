@@ -20,7 +20,7 @@ class BinaryReader {
   }
 
   bool? readBoolOrNull() {
-    var value = _buffer[_offset++];
+    final value = _buffer[_offset++];
     if (value == nullBool) {
       return null;
     } else if (value == trueBool) {
@@ -61,13 +61,13 @@ class BinaryReader {
   }
 
   int readLong() {
-    var value = _byteData.getInt64(_offset, Endian.little);
+    final value = _byteData.getInt64(_offset, Endian.little);
     _offset += 8;
     return value;
   }
 
   int? readLongOrNull() {
-    var value = readLong();
+    final value = readLong();
     if (value == nullLong) {
       return null;
     } else {
@@ -76,13 +76,13 @@ class BinaryReader {
   }
 
   double readDouble() {
-    var value = _byteData.getFloat64(_offset, Endian.little);
+    final value = _byteData.getFloat64(_offset, Endian.little);
     _offset += 8;
     return value;
   }
 
   double? readDoubleOrNull() {
-    var value = readDouble();
+    final value = readDouble();
     if (value.isNaN) {
       return null;
     } else {
@@ -90,30 +90,48 @@ class BinaryReader {
     }
   }
 
-  String? _readStringOrNullAt(int stringOffset) {
-    var offset = _buffer.readInt32(stringOffset);
+  Uint8List? _readBytesOrNullAt(int bytesOffset) {
+    final offset = _buffer.readInt32(bytesOffset);
     if (offset == 0) {
       return null;
     }
-    var length = _buffer.readInt32(stringOffset + 4);
-    var view = _buffer.view(offset, length);
-    return utf8Decoder.convert(view);
+    final length = _buffer.readInt32(bytesOffset + 4);
+    return _buffer.view(offset, length);
+  }
+
+  String? _readStringOrNullAt(int stringOffset) {
+    final bytes = _readBytesOrNullAt(stringOffset);
+    if (bytes != null) {
+      return utf8Decoder.convert(bytes);
+    }
   }
 
   String readString() {
-    var value = _readStringOrNullAt(_offset);
+    final value = _readStringOrNullAt(_offset);
     _offset += 8;
     return value ?? '';
   }
 
   String? readStringOrNull() {
-    var value = _readStringOrNullAt(_offset);
+    final value = _readStringOrNullAt(_offset);
+    _offset += 8;
+    return value;
+  }
+
+  Uint8List readBytes() {
+    final value = _readBytesOrNullAt(_offset);
+    _offset += 8;
+    return value!;
+  }
+
+  Uint8List? readBytesOrNull() {
+    final value = _readBytesOrNullAt(_offset);
     _offset += 8;
     return value;
   }
 
   bool skipListIfNull() {
-    var offset = _buffer.readInt32(_offset);
+    final offset = _buffer.readInt32(_offset);
     if (offset == 0) {
       _offset += 8;
       return true;
@@ -123,8 +141,8 @@ class BinaryReader {
   }
 
   List<bool> readBoolList() {
-    var offset = _buffer.readInt32(_offset);
-    var length = _buffer.readInt32(_offset + 4);
+    final offset = _buffer.readInt32(_offset);
+    final length = _buffer.readInt32(_offset + 4);
     _offset += 8;
 
     final list = <bool>[];
@@ -135,8 +153,8 @@ class BinaryReader {
   }
 
   List<bool?> readBoolOrNullList() {
-    var offset = _buffer.readInt32(_offset);
-    var length = _buffer.readInt32(_offset + 4);
+    final offset = _buffer.readInt32(_offset);
+    final length = _buffer.readInt32(_offset + 4);
     _offset += 8;
 
     final list = <bool?>[];
@@ -152,8 +170,8 @@ class BinaryReader {
   }
 
   List<int> readIntList() {
-    var offset = _buffer.readInt32(_offset);
-    var length = _buffer.readInt32(_offset + 4);
+    final offset = _buffer.readInt32(_offset);
+    final length = _buffer.readInt32(_offset + 4);
     _offset += 8;
 
     final list = <int>[];
@@ -164,8 +182,8 @@ class BinaryReader {
   }
 
   List<int?> readIntOrNullList() {
-    var offset = _buffer.readInt32(_offset);
-    var length = _buffer.readInt32(_offset + 4);
+    final offset = _buffer.readInt32(_offset);
+    final length = _buffer.readInt32(_offset + 4);
     _offset += 8;
 
     final list = <int?>[];
@@ -179,8 +197,8 @@ class BinaryReader {
   }
 
   List<double> readFloatList() {
-    var offset = _buffer.readInt32(_offset);
-    var length = _buffer.readInt32(_offset + 4);
+    final offset = _buffer.readInt32(_offset);
+    final length = _buffer.readInt32(_offset + 4);
     _offset += 8;
 
     final list = <double>[];
@@ -191,8 +209,8 @@ class BinaryReader {
   }
 
   List<double?> readFloatOrNullList() {
-    var offset = _buffer.readInt32(_offset);
-    var length = _buffer.readInt32(_offset + 4);
+    final offset = _buffer.readInt32(_offset);
+    final length = _buffer.readInt32(_offset + 4);
     _offset += 8;
 
     final list = <double?>[];
@@ -206,8 +224,8 @@ class BinaryReader {
   }
 
   List<int> readLongList() {
-    var offset = _buffer.readInt32(_offset);
-    var length = _buffer.readInt32(_offset + 4);
+    final offset = _buffer.readInt32(_offset);
+    final length = _buffer.readInt32(_offset + 4);
     _offset += 8;
 
     final list = <int>[];
@@ -218,8 +236,8 @@ class BinaryReader {
   }
 
   List<int?> readLongOrNullList() {
-    var offset = _buffer.readInt32(_offset);
-    var length = _buffer.readInt32(_offset + 4);
+    final offset = _buffer.readInt32(_offset);
+    final length = _buffer.readInt32(_offset + 4);
     _offset += 8;
 
     final list = <int?>[];
@@ -233,8 +251,8 @@ class BinaryReader {
   }
 
   List<double> readDoubleList() {
-    var offset = _buffer.readInt32(_offset);
-    var length = _buffer.readInt32(_offset + 4);
+    final offset = _buffer.readInt32(_offset);
+    final length = _buffer.readInt32(_offset + 4);
     _offset += 8;
 
     final list = <double>[];
@@ -245,8 +263,8 @@ class BinaryReader {
   }
 
   List<double?> readDoubleOrNullList() {
-    var offset = _buffer.readInt32(_offset);
-    var length = _buffer.readInt32(_offset + 4);
+    final offset = _buffer.readInt32(_offset);
+    final length = _buffer.readInt32(_offset + 4);
     _offset += 8;
 
     final list = <double?>[];
@@ -260,8 +278,8 @@ class BinaryReader {
   }
 
   List<String?> readStringOrNullList() {
-    var offset = _buffer.readInt32(_offset);
-    var length = _buffer.readInt32(_offset + 4);
+    final offset = _buffer.readInt32(_offset);
+    final length = _buffer.readInt32(_offset + 4);
     _offset += 8;
 
     final list = <String?>[];

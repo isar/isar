@@ -54,32 +54,31 @@ class IsarCodeGenerator extends Builder {
         .replaceFirst('test/', '')
         .replaceAll('.isarobject.json', '.dart'));
 
-    var imports = [
-      IsarCodeGenerator.imports,
-      fileImports,
-      if (isFlutter)
-        [
-          'package:path_provider/path_provider.dart',
-          'package:flutter/widgets.dart'
-        ],
-    ]
-        .flatten()
-        .map((im) => im.startsWith('import') ? '$im;' : "import '$im';")
-        .join('\n');
-
     var objects = files.values.flatten().toList();
 
     for (var m in objects) {
       for (var m2 in objects) {
-        if (m != m2 && m.dbName == m2.dbName) {
-          err('There are two objects with the same name: "${m.dbName}"');
+        if (m != m2 && m.isarName == m2.isarName) {
+          err('There are two objects with the same name: "${m.isarName}"');
         }
       }
     }
 
+    var imports = {
+      ...IsarCodeGenerator.imports,
+      ...fileImports,
+      if (isFlutter) ...{
+        'package:path_provider/path_provider.dart',
+        'package:flutter/widgets.dart'
+      },
+      for (var object in objects) ...object.converterImports,
+    }
+        .map((im) => im.startsWith('import') ? '$im;' : "import '$im';")
+        .join('\n');
+
     var collectionVars = objects
         .map((o) =>
-            'final ${getCollectionVar(o.type)} = <String, IsarCollection<${o.type}>>{};')
+            'final ${getCollectionVar(o.dartName)} = <String, IsarCollection<${o.dartName}>>{};')
         .join('\n');
     var objectAdapters =
         objects.map((o) => generateObjectAdapter(o)).join('\n');
@@ -112,7 +111,6 @@ class IsarCodeGenerator extends Builder {
     $queryFilterExtensions
     ''';
 
-    print(code);
     code = DartFormatter().format(code);
 
     final codeId =
@@ -122,7 +120,7 @@ class IsarCodeGenerator extends Builder {
 
   String generateIsarOpen(Iterable<ObjectInfo> objects) {
     var code = '''
-    Future<Isar> openIsar({String? directory}) async {
+    Future<Isar> openIsar({String? directory, int maxSize = 1000000000}) async {
       final path = await _preparePath(directory);
       if (_isar[path] != null) {
         return _isar[path]!;
@@ -137,7 +135,7 @@ class IsarCodeGenerator extends Builder {
     for (var info in objects) {
       code += '''
       {
-        final namePtr = Utf8.toUtf8('${info.dbName}');
+        final namePtr = Utf8.toUtf8('${info.isarName}');
         nCall(IC.isar_schema_create_collection(collectionPtrPtr, namePtr.cast()));
         final collectionPtr = collectionPtrPtr.value;
         free(namePtr);
@@ -145,8 +143,8 @@ class IsarCodeGenerator extends Builder {
       for (var property in info.properties) {
         code += '''
         {
-          final pNamePtr = Utf8.toUtf8('${property.dbName}');
-          nCall(IC.isar_schema_add_property(collectionPtr, pNamePtr.cast(), ${property.type.index}));
+          final pNamePtr = Utf8.toUtf8('${property.isarName}');
+          nCall(IC.isar_schema_add_property(collectionPtr, pNamePtr.cast(), ${property.isarType.index}));
           free(pNamePtr);
         }
         ''';
@@ -189,7 +187,7 @@ class IsarCodeGenerator extends Builder {
       final isarPtrPtr = allocate<Pointer>();
       final receivePort = ReceivePort();
       final nativePort = receivePort.sendPort.nativePort;
-      IC.isar_create_instance(isarPtrPtr, pathPtr.cast(), 1000000, schemaPtr, nativePort);
+      IC.isar_create_instance(isarPtrPtr, pathPtr.cast(), maxSize, schemaPtr, nativePort);
       await receivePort.first;
       free(pathPtr);
       
@@ -203,7 +201,7 @@ class IsarCodeGenerator extends Builder {
     for (var info in objects) {
       code += '''
       nCall(IC.isar_get_collection(isarPtr, collectionPtrPtr, $i));
-      ${getCollectionVar(info.type)}[path] = IsarCollectionImpl(isar, _${info.type}Adapter(), collectionPtrPtr.value);
+      ${getCollectionVar(info.dartName)}[path] = IsarCollectionImpl(isar, _${info.dartName}Adapter(), collectionPtrPtr.value);
       ''';
       i++;
     }
@@ -240,19 +238,11 @@ class IsarCodeGenerator extends Builder {
 
   String generateGetCollectionExtension(ObjectInfo object, int objectIndex) {
     return '''
-    extension Get${object.type}Collection on Isar {
-      IsarCollection<${object.type}> get ${object.type.decapitalize()}s {
-        return ${getCollectionVar(object.type)}[path]!;
+    extension Get${object.dartName}Collection on Isar {
+      IsarCollection<${object.dartName}> get ${object.dartName.decapitalize()}s {
+        return ${getCollectionVar(object.dartName)}[path]!;
       }
     }
     ''';
-  }
-
-  String boolToU8(bool value) {
-    if (value) {
-      return '1';
-    } else {
-      return '0';
-    }
   }
 }

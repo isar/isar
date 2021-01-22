@@ -86,6 +86,7 @@ class WhereClause {
   final bool includeLower;
   final List? upper;
   final bool includeUpper;
+  final bool skipDuplicates;
 
   const WhereClause(
     this.index,
@@ -94,6 +95,7 @@ class WhereClause {
     this.includeLower = true,
     this.upper,
     this.includeUpper = true,
+    this.skipDuplicates = false,
   });
 
   WhereClause clone() {
@@ -347,7 +349,7 @@ extension QueryExecute<T extends IsarObject> on QueryBuilder<T, dynamic,
     return build().deleteFirst();
   }
 
-  T deleteFirstSync() {
+  bool deleteFirstSync() {
     return build().deleteFirstSync();
   }
 

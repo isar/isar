@@ -15,6 +15,7 @@ class NativeQuery<T extends IsarObject> extends Query<T> {
         await stream.first;
         return col.deserializeObjects(resultsPtr.ref);
       } finally {
+        IC.isar_free_raw_obj_list(resultsPtr);
         free(resultsPtr);
       }
     });
@@ -38,7 +39,7 @@ class NativeQuery<T extends IsarObject> extends Query<T> {
     return col.isar.getTxn(false, (txnPtr, stream) async {
       final countPtr = allocate<Int64>();
       try {
-        //IC.isar_q_count_async(queryPtr, txnPtr, countPtr);
+        IC.isar_q_count_async(queryPtr, txnPtr, countPtr);
         await stream.first;
         return countPtr.value;
       } finally {
@@ -52,7 +53,7 @@ class NativeQuery<T extends IsarObject> extends Query<T> {
     return col.isar.getTxnSync(false, (txnPtr) {
       final countPtr = allocate<Int64>();
       try {
-        //nCall(IC.isar_q_count(queryPtr, txnPtr, countPtr));
+        nCall(IC.isar_q_count(queryPtr, txnPtr, countPtr));
         return countPtr.value;
       } finally {
         free(countPtr);
@@ -61,26 +62,70 @@ class NativeQuery<T extends IsarObject> extends Query<T> {
   }
 
   @override
+  Future<bool> deleteFirst() {
+    return col.isar.getTxn(false, (txnPtr, stream) async {
+      final deletedPtr = allocate<Uint8>();
+      try {
+        IC.isar_q_delete_first_async(
+            queryPtr, col.collectionPtr, txnPtr, deletedPtr);
+        await stream.first;
+        return deletedPtr.value != 0;
+      } finally {
+        free(deletedPtr);
+      }
+    });
+  }
+
+  @override
+  bool deleteFirstSync() {
+    return col.isar.getTxnSync(false, (txnPtr) {
+      final deletedPtr = allocate<Uint8>();
+      try {
+        nCall(IC.isar_q_delete_first(
+            queryPtr, col.collectionPtr, txnPtr, deletedPtr));
+        return deletedPtr.value != 0;
+      } finally {
+        free(deletedPtr);
+      }
+    });
+  }
+
+  @override
   Future<int> deleteAll() {
-    // TODO: implement deleteAll
-    throw UnimplementedError();
+    return col.isar.getTxn(false, (txnPtr, stream) async {
+      final countPtr = allocate<Int64>();
+      try {
+        IC.isar_q_delete_all_async(
+            queryPtr, col.collectionPtr, txnPtr, countPtr);
+        await stream.first;
+        return countPtr.value;
+      } finally {
+        free(countPtr);
+      }
+    });
   }
 
   @override
   int deleteAllSync() {
-    // TODO: implement deleteAllSync
+    return col.isar.getTxnSync(false, (txnPtr) {
+      final countPtr = allocate<Int64>();
+      try {
+        nCall(IC.isar_q_delete_all(
+            queryPtr, col.collectionPtr, txnPtr, countPtr));
+        return countPtr.value;
+      } finally {
+        free(countPtr);
+      }
+    });
+  }
+
+  @override
+  Stream<void> watchChanges() {
     throw UnimplementedError();
   }
 
   @override
-  Future<bool> deleteFirst() {
-    // TODO: implement deleteFirst
-    throw UnimplementedError();
-  }
-
-  @override
-  T deleteFirstSync() {
-    // TODO: implement deleteFirstSync
+  Stream<List<T>> watch() {
     throw UnimplementedError();
   }
 }

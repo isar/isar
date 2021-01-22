@@ -1,6 +1,6 @@
 part of isar;
 
-mixin IsarObject {
+class IsarObject {
   ObjectId? _id;
   IsarCollection? _collection;
 
@@ -26,13 +26,19 @@ mixin IsarObject {
     collection!.putSync(this);
   }
 
-  Future<void> delete() {
+  Future<bool> delete() {
     return collection!.delete(id!);
   }
 
-  void deleteSync() {
+  bool deleteSync() {
     return collection!.deleteSync(id!);
   }
+}
+
+extension WatchObject<T extends IsarObject> on T {
+  Stream<void> watchChanges() async* {}
+
+  Stream<T> watch() async* {}
 }
 
 extension ObjectInternal on IsarObject {

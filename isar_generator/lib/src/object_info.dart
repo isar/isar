@@ -8,10 +8,11 @@ part 'object_info.freezed.dart';
 @freezed
 abstract class ObjectInfo with _$ObjectInfo {
   const factory ObjectInfo({
-    @JsonKey(name: 'localName') String type,
-    @JsonKey(name: 'name') String dbName,
+    String dartName,
+    String isarName,
     @Default([]) List<ObjectProperty> properties,
     @Default([]) List<ObjectIndex> indices,
+    @Default([]) List<String> converterImports,
   }) = _ObjectInfo;
 
   factory ObjectInfo.fromJson(Map<String, dynamic> json) =>
@@ -19,21 +20,27 @@ abstract class ObjectInfo with _$ObjectInfo {
 }
 
 extension ObjectInfoX on ObjectInfo {
-  ObjectProperty getProperty(String name) {
-    return properties.filter((it) => it.name == name).first;
+  ObjectProperty getProperty(String isarName) {
+    return properties.filter((it) => it.isarName == isarName).first;
   }
 
+  String get adapterName => '_${dartName}Adapter';
+
   int getStaticSize() {
-    return properties.sumBy((p) => p.type.staticSize + p.staticPadding).toInt();
+    return properties
+        .sumBy((p) => p.isarType.staticSize + p.staticPadding)
+        .toInt();
   }
 }
 
 @freezed
 abstract class ObjectProperty with _$ObjectProperty {
   const factory ObjectProperty({
-    @JsonKey(name: 'localName') String name,
-    @JsonKey(name: 'name') String dbName,
-    DataType type,
+    String dartName,
+    String isarName,
+    String dartType,
+    IsarType isarType,
+    String converter,
     int staticPadding,
     bool nullable,
     bool elementNullable,
@@ -56,49 +63,57 @@ abstract class ObjectIndex with _$ObjectIndex {
 }
 
 extension ObjectPropertyX on ObjectProperty {
-  String get dartTypeNotNull {
-    switch (type) {
-      case DataType.Bool:
-        return 'bool';
-      case DataType.Int:
-      case DataType.Long:
-        return 'int';
-      case DataType.Float:
-      case DataType.Double:
-        return 'double';
-      case DataType.String:
-        return 'String';
-      case DataType.Bytes:
-        return 'Uint8List';
-      case DataType.BoolList:
-        return 'List<bool>';
-      case DataType.IntList:
-      case DataType.LongList:
-        return 'List<int>';
-      case DataType.FloatList:
-      case DataType.DoubleList:
-        return 'List<double>';
-      case DataType.StringList:
-        return 'List<String>';
-    }
-    throw 'unreachable';
-  }
+  String get isarDartType {
+    final elementNullModifier = elementNullable ? '?' : '';
 
-  String get dartType {
-    final typeName = dartTypeNotNull;
-    if (this.nullable) {
-      return typeName + '?';
-    } else {
-      return typeName;
+    String type;
+    switch (isarType) {
+      case IsarType.Bool:
+        type = 'bool';
+        break;
+      case IsarType.Int:
+      case IsarType.Long:
+        type = 'int';
+        break;
+      case IsarType.Float:
+      case IsarType.Double:
+        type = 'double';
+        break;
+      case IsarType.String:
+        type = 'String';
+        break;
+      case IsarType.Bytes:
+        type = 'Uint8List';
+        break;
+      case IsarType.BoolList:
+        type = 'List<bool$elementNullModifier>';
+        break;
+      case IsarType.IntList:
+      case IsarType.LongList:
+        type = 'List<int$elementNullModifier>';
+        break;
+      case IsarType.FloatList:
+      case IsarType.DoubleList:
+        type = 'List<double$elementNullModifier>';
+        break;
+      case IsarType.StringList:
+        type = 'List<String$elementNullModifier>';
+        break;
     }
+
+    if (this.nullable) {
+      type += '?';
+    }
+
+    return type;
   }
 
   bool get isFloatDouble {
-    return type == DataType.Float || type == DataType.Double;
+    return isarType == IsarType.Float || isarType == IsarType.Double;
   }
 }
 
-enum DataType {
+enum IsarType {
   Bool,
   Int,
   Float,
@@ -114,15 +129,15 @@ enum DataType {
   StringList,
 }
 
-extension DataTypeX on DataType {
+extension IsarTypeX on IsarType {
   bool get isDynamic {
-    return index >= DataType.String.index;
+    return index >= IsarType.String.index;
   }
 
   int get staticSize {
-    if (this == DataType.Bool) {
+    if (this == IsarType.Bool) {
       return 1;
-    } else if (this == DataType.Int || this == DataType.Float) {
+    } else if (this == IsarType.Int || this == IsarType.Float) {
       return 4;
     } else {
       return 8;
@@ -131,16 +146,15 @@ extension DataTypeX on DataType {
 
   int get elementAlignment {
     switch (this) {
-      case DataType.String:
-      case DataType.Bytes:
-      case DataType.BoolList:
-      case DataType.StringList:
+      case IsarType.String:
+      case IsarType.Bytes:
+      case IsarType.StringList:
         return 1;
-      case DataType.IntList:
-      case DataType.FloatList:
+      case IsarType.IntList:
+      case IsarType.FloatList:
         return 4;
-      case DataType.LongList:
-      case DataType.DoubleList:
+      case IsarType.LongList:
+      case IsarType.DoubleList:
         return 8;
       default:
         return null;
@@ -149,30 +163,30 @@ extension DataTypeX on DataType {
 
   int get typeId {
     switch (this) {
-      case DataType.Bool:
+      case IsarType.Bool:
         return 0;
-      case DataType.Int:
+      case IsarType.Int:
         return 1;
-      case DataType.Float:
+      case IsarType.Float:
         return 2;
-      case DataType.Long:
+      case IsarType.Long:
         return 3;
-      case DataType.Double:
+      case IsarType.Double:
         return 4;
-      case DataType.String:
+      case IsarType.String:
         return 5;
-      case DataType.Bytes:
-      case DataType.BoolList:
+      case IsarType.Bytes:
+      case IsarType.BoolList:
         return 6;
-      case DataType.IntList:
+      case IsarType.IntList:
         return 7;
-      case DataType.FloatList:
+      case IsarType.FloatList:
         return 8;
-      case DataType.LongList:
+      case IsarType.LongList:
         return 9;
-      case DataType.DoubleList:
+      case IsarType.DoubleList:
         return 10;
-      case DataType.StringList:
+      case IsarType.StringList:
         return 11;
     }
     return -1;

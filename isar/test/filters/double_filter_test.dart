@@ -1,4 +1,3 @@
-// @dart=2.8
 import 'package:test/test.dart';
 
 import '../common.dart';
@@ -6,9 +5,9 @@ import '../isar.g.dart';
 import '../models/double_model.dart';
 
 void main() {
-  group('Double index', () {
+  group('Double filter', () {
     Isar isar;
-    IsarCollection<DoubleModel> col;
+    late IsarCollection<DoubleModel> col;
 
     setUp(() async {
       setupIsar();
@@ -26,9 +25,13 @@ void main() {
       });
     });
 
-    test('where greaterThan()', () async {
+    test('greaterThan()', () async {
       await qEqual(
         col.where().fieldGreaterThan(3.3).findAll(),
+        [DoubleModel()..field = 4.4],
+      );
+      await qEqual(
+        col.where().filter().fieldGreaterThan(3.3).findAll(),
         [DoubleModel()..field = 4.4],
       );
 
@@ -36,21 +39,41 @@ void main() {
         col.where().fieldGreaterThan(3.3, include: true).findAll(),
         [DoubleModel()..field = 3.3, DoubleModel()..field = 4.4],
       );
+      await qEqualSet(
+        col.where().filter().fieldGreaterThan(3.3, include: true).findAll(),
+        {DoubleModel()..field = 3.3, DoubleModel()..field = 4.4},
+      );
 
       await qEqual(
         col.where().fieldGreaterThan(4.4).findAll(),
         [],
       );
+      await qEqual(
+        col.where().filter().fieldGreaterThan(4.4).findAll(),
+        [],
+      );
     });
 
-    test('where lowerThan()', () async {
+    test('lowerThan()', () async {
       await qEqual(
         col.where().fieldLowerThan(1.1).findAll(),
         [DoubleModel()..field = null, DoubleModel()..field = 0],
       );
+      await qEqualSet(
+        col.where().filter().fieldLowerThan(1.1).findAll(),
+        {DoubleModel()..field = null, DoubleModel()..field = 0},
+      );
 
       await qEqual(
         col.where().fieldLowerThan(1.1, include: true).findAll(),
+        [
+          DoubleModel()..field = null,
+          DoubleModel()..field = 0,
+          DoubleModel()..field = 1.1
+        ],
+      );
+      await qEqualSet(
+        col.where().filter().fieldLowerThan(1.1, include: true).findAll(),
         [
           DoubleModel()..field = null,
           DoubleModel()..field = 0,
@@ -62,11 +85,23 @@ void main() {
         col.where().fieldLowerThan(null).findAll(),
         [],
       );
+      await qEqual(
+        col.where().filter().fieldLowerThan(null).findAll(),
+        [],
+      );
     });
 
-    test('where between()', () async {
+    test('between()', () async {
       await qEqual(
         col.where().fieldBetween(1.1, 3.3).findAll(),
+        [
+          DoubleModel()..field = 1.1,
+          DoubleModel()..field = 2.2,
+          DoubleModel()..field = 3.3
+        ],
+      );
+      await qEqualSet(
+        col.where().filter().fieldBetween(1.1, 3.3).findAll(),
         [
           DoubleModel()..field = 1.1,
           DoubleModel()..field = 2.2,
@@ -83,28 +118,60 @@ void main() {
           DoubleModel()..field = 2.2,
         ],
       );
+      await qEqual(
+        col
+            .where()
+            .filter()
+            .fieldBetween(1.1, 3.3, includeLower: false, includeUpper: false)
+            .findAll(),
+        [
+          DoubleModel()..field = 2.2,
+        ],
+      );
 
       await qEqual(
         col.where().fieldBetween(null, 0).findAll(),
         [DoubleModel()..field = null, DoubleModel()..field = 0],
+      );
+      await qEqualSet(
+        col.where().filter().fieldBetween(null, 0).findAll(),
+        {DoubleModel()..field = null, DoubleModel()..field = 0},
       );
 
       await qEqual(
         col.where().fieldBetween(5, 6).findAll(),
         [],
       );
+      await qEqual(
+        col.where().filter().fieldBetween(5, 6).findAll(),
+        [],
+      );
     });
 
-    test('where isNull()', () async {
+    test('isNull()', () async {
       await qEqual(
         col.where().fieldIsNull().findAll(),
         [DoubleModel()..field = null],
       );
+      await qEqual(
+        col.where().filter().fieldIsNull().findAll(),
+        [DoubleModel()..field = null],
+      );
     });
 
-    test('where isNotNull()', () async {
+    test('isNotNull()', () async {
       await qEqualSet(
         col.where().fieldIsNotNull().findAll(),
+        [
+          DoubleModel()..field = 0,
+          DoubleModel()..field = 1.1,
+          DoubleModel()..field = 2.2,
+          DoubleModel()..field = 3.3,
+          DoubleModel()..field = 4.4,
+        ],
+      );
+      await qEqualSet(
+        col.where().filter().fieldIsNotNull().findAll(),
         [
           DoubleModel()..field = 0,
           DoubleModel()..field = 1.1,

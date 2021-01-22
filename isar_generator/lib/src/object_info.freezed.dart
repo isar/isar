@@ -18,15 +18,17 @@ class _$ObjectInfoTearOff {
 
 // ignore: unused_element
   _ObjectInfo call(
-      {@JsonKey(name: 'localName') String type,
-      @JsonKey(name: 'name') String dbName,
+      {String dartName,
+      String isarName,
       List<ObjectProperty> properties = const [],
-      List<ObjectIndex> indices = const []}) {
+      List<ObjectIndex> indices = const [],
+      List<String> converterImports = const []}) {
     return _ObjectInfo(
-      type: type,
-      dbName: dbName,
+      dartName: dartName,
+      isarName: isarName,
       properties: properties,
       indices: indices,
+      converterImports: converterImports,
     );
   }
 
@@ -42,12 +44,11 @@ const $ObjectInfo = _$ObjectInfoTearOff();
 
 /// @nodoc
 mixin _$ObjectInfo {
-  @JsonKey(name: 'localName')
-  String get type;
-  @JsonKey(name: 'name')
-  String get dbName;
+  String get dartName;
+  String get isarName;
   List<ObjectProperty> get properties;
   List<ObjectIndex> get indices;
+  List<String> get converterImports;
 
   Map<String, dynamic> toJson();
   $ObjectInfoCopyWith<ObjectInfo> get copyWith;
@@ -59,10 +60,11 @@ abstract class $ObjectInfoCopyWith<$Res> {
           ObjectInfo value, $Res Function(ObjectInfo) then) =
       _$ObjectInfoCopyWithImpl<$Res>;
   $Res call(
-      {@JsonKey(name: 'localName') String type,
-      @JsonKey(name: 'name') String dbName,
+      {String dartName,
+      String isarName,
       List<ObjectProperty> properties,
-      List<ObjectIndex> indices});
+      List<ObjectIndex> indices,
+      List<String> converterImports});
 }
 
 /// @nodoc
@@ -75,19 +77,23 @@ class _$ObjectInfoCopyWithImpl<$Res> implements $ObjectInfoCopyWith<$Res> {
 
   @override
   $Res call({
-    Object type = freezed,
-    Object dbName = freezed,
+    Object dartName = freezed,
+    Object isarName = freezed,
     Object properties = freezed,
     Object indices = freezed,
+    Object converterImports = freezed,
   }) {
     return _then(_value.copyWith(
-      type: type == freezed ? _value.type : type as String,
-      dbName: dbName == freezed ? _value.dbName : dbName as String,
+      dartName: dartName == freezed ? _value.dartName : dartName as String,
+      isarName: isarName == freezed ? _value.isarName : isarName as String,
       properties: properties == freezed
           ? _value.properties
           : properties as List<ObjectProperty>,
       indices:
           indices == freezed ? _value.indices : indices as List<ObjectIndex>,
+      converterImports: converterImports == freezed
+          ? _value.converterImports
+          : converterImports as List<String>,
     ));
   }
 }
@@ -99,10 +105,11 @@ abstract class _$ObjectInfoCopyWith<$Res> implements $ObjectInfoCopyWith<$Res> {
       __$ObjectInfoCopyWithImpl<$Res>;
   @override
   $Res call(
-      {@JsonKey(name: 'localName') String type,
-      @JsonKey(name: 'name') String dbName,
+      {String dartName,
+      String isarName,
       List<ObjectProperty> properties,
-      List<ObjectIndex> indices});
+      List<ObjectIndex> indices,
+      List<String> converterImports});
 }
 
 /// @nodoc
@@ -117,19 +124,23 @@ class __$ObjectInfoCopyWithImpl<$Res> extends _$ObjectInfoCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object type = freezed,
-    Object dbName = freezed,
+    Object dartName = freezed,
+    Object isarName = freezed,
     Object properties = freezed,
     Object indices = freezed,
+    Object converterImports = freezed,
   }) {
     return _then(_ObjectInfo(
-      type: type == freezed ? _value.type : type as String,
-      dbName: dbName == freezed ? _value.dbName : dbName as String,
+      dartName: dartName == freezed ? _value.dartName : dartName as String,
+      isarName: isarName == freezed ? _value.isarName : isarName as String,
       properties: properties == freezed
           ? _value.properties
           : properties as List<ObjectProperty>,
       indices:
           indices == freezed ? _value.indices : indices as List<ObjectIndex>,
+      converterImports: converterImports == freezed
+          ? _value.converterImports
+          : converterImports as List<String>,
     ));
   }
 }
@@ -139,56 +150,66 @@ class __$ObjectInfoCopyWithImpl<$Res> extends _$ObjectInfoCopyWithImpl<$Res>
 /// @nodoc
 class _$_ObjectInfo implements _ObjectInfo {
   const _$_ObjectInfo(
-      {@JsonKey(name: 'localName') this.type,
-      @JsonKey(name: 'name') this.dbName,
+      {this.dartName,
+      this.isarName,
       this.properties = const [],
-      this.indices = const []})
+      this.indices = const [],
+      this.converterImports = const []})
       : assert(properties != null),
-        assert(indices != null);
+        assert(indices != null),
+        assert(converterImports != null);
 
   factory _$_ObjectInfo.fromJson(Map<String, dynamic> json) =>
       _$_$_ObjectInfoFromJson(json);
 
   @override
-  @JsonKey(name: 'localName')
-  final String type;
+  final String dartName;
   @override
-  @JsonKey(name: 'name')
-  final String dbName;
+  final String isarName;
   @JsonKey(defaultValue: const [])
   @override
   final List<ObjectProperty> properties;
   @JsonKey(defaultValue: const [])
   @override
   final List<ObjectIndex> indices;
+  @JsonKey(defaultValue: const [])
+  @override
+  final List<String> converterImports;
 
   @override
   String toString() {
-    return 'ObjectInfo(type: $type, dbName: $dbName, properties: $properties, indices: $indices)';
+    return 'ObjectInfo(dartName: $dartName, isarName: $isarName, properties: $properties, indices: $indices, converterImports: $converterImports)';
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other is _ObjectInfo &&
-            (identical(other.type, type) ||
-                const DeepCollectionEquality().equals(other.type, type)) &&
-            (identical(other.dbName, dbName) ||
-                const DeepCollectionEquality().equals(other.dbName, dbName)) &&
+            (identical(other.dartName, dartName) ||
+                const DeepCollectionEquality()
+                    .equals(other.dartName, dartName)) &&
+            (identical(other.isarName, isarName) ||
+                const DeepCollectionEquality()
+                    .equals(other.isarName, isarName)) &&
             (identical(other.properties, properties) ||
                 const DeepCollectionEquality()
                     .equals(other.properties, properties)) &&
             (identical(other.indices, indices) ||
-                const DeepCollectionEquality().equals(other.indices, indices)));
+                const DeepCollectionEquality()
+                    .equals(other.indices, indices)) &&
+            (identical(other.converterImports, converterImports) ||
+                const DeepCollectionEquality()
+                    .equals(other.converterImports, converterImports)));
   }
 
   @override
   int get hashCode =>
       runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(type) ^
-      const DeepCollectionEquality().hash(dbName) ^
+      const DeepCollectionEquality().hash(dartName) ^
+      const DeepCollectionEquality().hash(isarName) ^
       const DeepCollectionEquality().hash(properties) ^
-      const DeepCollectionEquality().hash(indices);
+      const DeepCollectionEquality().hash(indices) ^
+      const DeepCollectionEquality().hash(converterImports);
 
   @override
   _$ObjectInfoCopyWith<_ObjectInfo> get copyWith =>
@@ -202,24 +223,25 @@ class _$_ObjectInfo implements _ObjectInfo {
 
 abstract class _ObjectInfo implements ObjectInfo {
   const factory _ObjectInfo(
-      {@JsonKey(name: 'localName') String type,
-      @JsonKey(name: 'name') String dbName,
+      {String dartName,
+      String isarName,
       List<ObjectProperty> properties,
-      List<ObjectIndex> indices}) = _$_ObjectInfo;
+      List<ObjectIndex> indices,
+      List<String> converterImports}) = _$_ObjectInfo;
 
   factory _ObjectInfo.fromJson(Map<String, dynamic> json) =
       _$_ObjectInfo.fromJson;
 
   @override
-  @JsonKey(name: 'localName')
-  String get type;
+  String get dartName;
   @override
-  @JsonKey(name: 'name')
-  String get dbName;
+  String get isarName;
   @override
   List<ObjectProperty> get properties;
   @override
   List<ObjectIndex> get indices;
+  @override
+  List<String> get converterImports;
   @override
   _$ObjectInfoCopyWith<_ObjectInfo> get copyWith;
 }
@@ -234,16 +256,20 @@ class _$ObjectPropertyTearOff {
 
 // ignore: unused_element
   _ObjectProperty call(
-      {@JsonKey(name: 'localName') String name,
-      @JsonKey(name: 'name') String dbName,
-      DataType type,
+      {String dartName,
+      String isarName,
+      String dartType,
+      IsarType isarType,
+      String converter,
       int staticPadding,
       bool nullable,
       bool elementNullable}) {
     return _ObjectProperty(
-      name: name,
-      dbName: dbName,
-      type: type,
+      dartName: dartName,
+      isarName: isarName,
+      dartType: dartType,
+      isarType: isarType,
+      converter: converter,
       staticPadding: staticPadding,
       nullable: nullable,
       elementNullable: elementNullable,
@@ -262,11 +288,11 @@ const $ObjectProperty = _$ObjectPropertyTearOff();
 
 /// @nodoc
 mixin _$ObjectProperty {
-  @JsonKey(name: 'localName')
-  String get name;
-  @JsonKey(name: 'name')
-  String get dbName;
-  DataType get type;
+  String get dartName;
+  String get isarName;
+  String get dartType;
+  IsarType get isarType;
+  String get converter;
   int get staticPadding;
   bool get nullable;
   bool get elementNullable;
@@ -281,9 +307,11 @@ abstract class $ObjectPropertyCopyWith<$Res> {
           ObjectProperty value, $Res Function(ObjectProperty) then) =
       _$ObjectPropertyCopyWithImpl<$Res>;
   $Res call(
-      {@JsonKey(name: 'localName') String name,
-      @JsonKey(name: 'name') String dbName,
-      DataType type,
+      {String dartName,
+      String isarName,
+      String dartType,
+      IsarType isarType,
+      String converter,
       int staticPadding,
       bool nullable,
       bool elementNullable});
@@ -300,17 +328,21 @@ class _$ObjectPropertyCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object name = freezed,
-    Object dbName = freezed,
-    Object type = freezed,
+    Object dartName = freezed,
+    Object isarName = freezed,
+    Object dartType = freezed,
+    Object isarType = freezed,
+    Object converter = freezed,
     Object staticPadding = freezed,
     Object nullable = freezed,
     Object elementNullable = freezed,
   }) {
     return _then(_value.copyWith(
-      name: name == freezed ? _value.name : name as String,
-      dbName: dbName == freezed ? _value.dbName : dbName as String,
-      type: type == freezed ? _value.type : type as DataType,
+      dartName: dartName == freezed ? _value.dartName : dartName as String,
+      isarName: isarName == freezed ? _value.isarName : isarName as String,
+      dartType: dartType == freezed ? _value.dartType : dartType as String,
+      isarType: isarType == freezed ? _value.isarType : isarType as IsarType,
+      converter: converter == freezed ? _value.converter : converter as String,
       staticPadding: staticPadding == freezed
           ? _value.staticPadding
           : staticPadding as int,
@@ -330,9 +362,11 @@ abstract class _$ObjectPropertyCopyWith<$Res>
       __$ObjectPropertyCopyWithImpl<$Res>;
   @override
   $Res call(
-      {@JsonKey(name: 'localName') String name,
-      @JsonKey(name: 'name') String dbName,
-      DataType type,
+      {String dartName,
+      String isarName,
+      String dartType,
+      IsarType isarType,
+      String converter,
       int staticPadding,
       bool nullable,
       bool elementNullable});
@@ -351,17 +385,21 @@ class __$ObjectPropertyCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object name = freezed,
-    Object dbName = freezed,
-    Object type = freezed,
+    Object dartName = freezed,
+    Object isarName = freezed,
+    Object dartType = freezed,
+    Object isarType = freezed,
+    Object converter = freezed,
     Object staticPadding = freezed,
     Object nullable = freezed,
     Object elementNullable = freezed,
   }) {
     return _then(_ObjectProperty(
-      name: name == freezed ? _value.name : name as String,
-      dbName: dbName == freezed ? _value.dbName : dbName as String,
-      type: type == freezed ? _value.type : type as DataType,
+      dartName: dartName == freezed ? _value.dartName : dartName as String,
+      isarName: isarName == freezed ? _value.isarName : isarName as String,
+      dartType: dartType == freezed ? _value.dartType : dartType as String,
+      isarType: isarType == freezed ? _value.isarType : isarType as IsarType,
+      converter: converter == freezed ? _value.converter : converter as String,
       staticPadding: staticPadding == freezed
           ? _value.staticPadding
           : staticPadding as int,
@@ -378,9 +416,11 @@ class __$ObjectPropertyCopyWithImpl<$Res>
 /// @nodoc
 class _$_ObjectProperty implements _ObjectProperty {
   const _$_ObjectProperty(
-      {@JsonKey(name: 'localName') this.name,
-      @JsonKey(name: 'name') this.dbName,
-      this.type,
+      {this.dartName,
+      this.isarName,
+      this.dartType,
+      this.isarType,
+      this.converter,
       this.staticPadding,
       this.nullable,
       this.elementNullable});
@@ -389,13 +429,15 @@ class _$_ObjectProperty implements _ObjectProperty {
       _$_$_ObjectPropertyFromJson(json);
 
   @override
-  @JsonKey(name: 'localName')
-  final String name;
+  final String dartName;
   @override
-  @JsonKey(name: 'name')
-  final String dbName;
+  final String isarName;
   @override
-  final DataType type;
+  final String dartType;
+  @override
+  final IsarType isarType;
+  @override
+  final String converter;
   @override
   final int staticPadding;
   @override
@@ -405,19 +447,28 @@ class _$_ObjectProperty implements _ObjectProperty {
 
   @override
   String toString() {
-    return 'ObjectProperty(name: $name, dbName: $dbName, type: $type, staticPadding: $staticPadding, nullable: $nullable, elementNullable: $elementNullable)';
+    return 'ObjectProperty(dartName: $dartName, isarName: $isarName, dartType: $dartType, isarType: $isarType, converter: $converter, staticPadding: $staticPadding, nullable: $nullable, elementNullable: $elementNullable)';
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other is _ObjectProperty &&
-            (identical(other.name, name) ||
-                const DeepCollectionEquality().equals(other.name, name)) &&
-            (identical(other.dbName, dbName) ||
-                const DeepCollectionEquality().equals(other.dbName, dbName)) &&
-            (identical(other.type, type) ||
-                const DeepCollectionEquality().equals(other.type, type)) &&
+            (identical(other.dartName, dartName) ||
+                const DeepCollectionEquality()
+                    .equals(other.dartName, dartName)) &&
+            (identical(other.isarName, isarName) ||
+                const DeepCollectionEquality()
+                    .equals(other.isarName, isarName)) &&
+            (identical(other.dartType, dartType) ||
+                const DeepCollectionEquality()
+                    .equals(other.dartType, dartType)) &&
+            (identical(other.isarType, isarType) ||
+                const DeepCollectionEquality()
+                    .equals(other.isarType, isarType)) &&
+            (identical(other.converter, converter) ||
+                const DeepCollectionEquality()
+                    .equals(other.converter, converter)) &&
             (identical(other.staticPadding, staticPadding) ||
                 const DeepCollectionEquality()
                     .equals(other.staticPadding, staticPadding)) &&
@@ -432,9 +483,11 @@ class _$_ObjectProperty implements _ObjectProperty {
   @override
   int get hashCode =>
       runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(name) ^
-      const DeepCollectionEquality().hash(dbName) ^
-      const DeepCollectionEquality().hash(type) ^
+      const DeepCollectionEquality().hash(dartName) ^
+      const DeepCollectionEquality().hash(isarName) ^
+      const DeepCollectionEquality().hash(dartType) ^
+      const DeepCollectionEquality().hash(isarType) ^
+      const DeepCollectionEquality().hash(converter) ^
       const DeepCollectionEquality().hash(staticPadding) ^
       const DeepCollectionEquality().hash(nullable) ^
       const DeepCollectionEquality().hash(elementNullable);
@@ -451,9 +504,11 @@ class _$_ObjectProperty implements _ObjectProperty {
 
 abstract class _ObjectProperty implements ObjectProperty {
   const factory _ObjectProperty(
-      {@JsonKey(name: 'localName') String name,
-      @JsonKey(name: 'name') String dbName,
-      DataType type,
+      {String dartName,
+      String isarName,
+      String dartType,
+      IsarType isarType,
+      String converter,
       int staticPadding,
       bool nullable,
       bool elementNullable}) = _$_ObjectProperty;
@@ -462,13 +517,15 @@ abstract class _ObjectProperty implements ObjectProperty {
       _$_ObjectProperty.fromJson;
 
   @override
-  @JsonKey(name: 'localName')
-  String get name;
+  String get dartName;
   @override
-  @JsonKey(name: 'name')
-  String get dbName;
+  String get isarName;
   @override
-  DataType get type;
+  String get dartType;
+  @override
+  IsarType get isarType;
+  @override
+  String get converter;
   @override
   int get staticPadding;
   @override

@@ -8,8 +8,8 @@ part of 'object_info.dart';
 
 _$_ObjectInfo _$_$_ObjectInfoFromJson(Map<String, dynamic> json) {
   return _$_ObjectInfo(
-    type: json['localName'] as String,
-    dbName: json['name'] as String,
+    dartName: json['dartName'] as String,
+    isarName: json['isarName'] as String,
     properties: (json['properties'] as List)
             ?.map((e) => e == null
                 ? null
@@ -22,22 +22,28 @@ _$_ObjectInfo _$_$_ObjectInfoFromJson(Map<String, dynamic> json) {
                 : ObjectIndex.fromJson(e as Map<String, dynamic>))
             ?.toList() ??
         [],
+    converterImports:
+        (json['converterImports'] as List)?.map((e) => e as String)?.toList() ??
+            [],
   );
 }
 
 Map<String, dynamic> _$_$_ObjectInfoToJson(_$_ObjectInfo instance) =>
     <String, dynamic>{
-      'localName': instance.type,
-      'name': instance.dbName,
+      'dartName': instance.dartName,
+      'isarName': instance.isarName,
       'properties': instance.properties,
       'indices': instance.indices,
+      'converterImports': instance.converterImports,
     };
 
 _$_ObjectProperty _$_$_ObjectPropertyFromJson(Map<String, dynamic> json) {
   return _$_ObjectProperty(
-    name: json['localName'] as String,
-    dbName: json['name'] as String,
-    type: _$enumDecodeNullable(_$DataTypeEnumMap, json['type']),
+    dartName: json['dartName'] as String,
+    isarName: json['isarName'] as String,
+    dartType: json['dartType'] as String,
+    isarType: _$enumDecodeNullable(_$IsarTypeEnumMap, json['isarType']),
+    converter: json['converter'] as String,
     staticPadding: json['staticPadding'] as int,
     nullable: json['nullable'] as bool,
     elementNullable: json['elementNullable'] as bool,
@@ -46,9 +52,11 @@ _$_ObjectProperty _$_$_ObjectPropertyFromJson(Map<String, dynamic> json) {
 
 Map<String, dynamic> _$_$_ObjectPropertyToJson(_$_ObjectProperty instance) =>
     <String, dynamic>{
-      'localName': instance.name,
-      'name': instance.dbName,
-      'type': _$DataTypeEnumMap[instance.type],
+      'dartName': instance.dartName,
+      'isarName': instance.isarName,
+      'dartType': instance.dartType,
+      'isarType': _$IsarTypeEnumMap[instance.isarType],
+      'converter': instance.converter,
       'staticPadding': instance.staticPadding,
       'nullable': instance.nullable,
       'elementNullable': instance.elementNullable,
@@ -86,20 +94,20 @@ T _$enumDecodeNullable<T>(
   return _$enumDecode<T>(enumValues, source, unknownValue: unknownValue);
 }
 
-const _$DataTypeEnumMap = {
-  DataType.Bool: 'Bool',
-  DataType.Int: 'Int',
-  DataType.Float: 'Float',
-  DataType.Long: 'Long',
-  DataType.Double: 'Double',
-  DataType.String: 'String',
-  DataType.Bytes: 'Bytes',
-  DataType.BoolList: 'BoolList',
-  DataType.IntList: 'IntList',
-  DataType.FloatList: 'FloatList',
-  DataType.LongList: 'LongList',
-  DataType.DoubleList: 'DoubleList',
-  DataType.StringList: 'StringList',
+const _$IsarTypeEnumMap = {
+  IsarType.Bool: 'Bool',
+  IsarType.Int: 'Int',
+  IsarType.Float: 'Float',
+  IsarType.Long: 'Long',
+  IsarType.Double: 'Double',
+  IsarType.String: 'String',
+  IsarType.Bytes: 'Bytes',
+  IsarType.BoolList: 'BoolList',
+  IsarType.IntList: 'IntList',
+  IsarType.FloatList: 'FloatList',
+  IsarType.LongList: 'LongList',
+  IsarType.DoubleList: 'DoubleList',
+  IsarType.StringList: 'StringList',
 };
 
 _$_ObjectIndex _$_$_ObjectIndexFromJson(Map<String, dynamic> json) {

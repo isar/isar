@@ -13,16 +13,18 @@ abstract class IsarCollection<T extends IsarObject> {
 
   void putAllSync(List<T> objects);
 
-  Future<void> delete(ObjectId id);
+  Future<bool> delete(ObjectId id);
 
-  void deleteSync(ObjectId id);
+  bool deleteSync(ObjectId id);
+
+  Future<void> importJson(Uint8List jsonBytes);
 
   Future<void> exportJson(bool primitiveNull, Function(Uint8List) callback);
-
-  void exportJsonSync(bool primitiveNull, Function(Uint8List) callback);
 
   QueryBuilder<T, QNoWhere, QCanFilter, QNoGroups, QCanGroupBy, QCanOffsetLimit,
       QCanSort, QCanExecute> where() {
     return newQueryInternal(this);
   }
+
+  Stream<void> watchChanges();
 }

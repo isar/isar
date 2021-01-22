@@ -31,9 +31,13 @@ abstract class Query<T> {
 
   Future<bool> deleteFirst();
 
-  T deleteFirstSync();
+  bool deleteFirstSync();
 
   Future<int> deleteAll();
 
   int deleteAllSync();
+
+  Stream<void> watchChanges();
+
+  Stream<List<T>> watch();
 }

@@ -4,7 +4,7 @@ NativeQuery<T> buildQuery<T extends IsarObject>(IsarCollection<T> collection,
     List<WhereClause> whereClauses, FilterGroup filter) {
   final col = collection as IsarCollectionImpl<T>;
   final colPtr = col.collectionPtr;
-  final qbPtr = IC.isar_qb_create(col.isar.isarPtr, colPtr);
+  final qbPtr = IC.isar_qb_create(colPtr);
   for (var whereClause in whereClauses) {
     _addWhereClause(colPtr, qbPtr, whereClause);
   }
@@ -19,7 +19,13 @@ NativeQuery<T> buildQuery<T extends IsarObject>(IsarCollection<T> collection,
 
 void _addWhereClause(Pointer colPtr, Pointer qbPtr, WhereClause wc) {
   final wcPtrPtr = allocate<Pointer<NativeType>>();
-  nCall(IC.isar_wc_create(colPtr, wcPtrPtr, wc.index == null, wc.index ?? 999));
+  nCall(IC.isar_wc_create(
+    colPtr,
+    wcPtrPtr,
+    wc.index == null,
+    wc.index ?? 999,
+    wc.skipDuplicates,
+  ));
   final wcPtr = wcPtrPtr.value;
 
   final resolvedWc = resolveWhereClause(wc);
@@ -32,12 +38,12 @@ void _addWhereClause(Pointer colPtr, Pointer qbPtr, WhereClause wc) {
     );
   }
 
-  IC.isar_qb_add_where_clause(
+  nCall(IC.isar_qb_add_where_clause(
     qbPtr,
     wcPtrPtr.value,
     wc.includeLower,
     wc.includeUpper,
-  );
+  ));
   free(wcPtrPtr);
 }
 
@@ -213,6 +219,7 @@ Pointer<NativeType>? _buildFilter(Pointer colPtr, FilterGroup filter) {
   ));
 
   final filterPtr = filterPtrPtr.value;
+  free(conditionsPtrPtr);
   free(filterPtrPtr);
   return filterPtr;
 }

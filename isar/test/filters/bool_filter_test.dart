@@ -1,4 +1,3 @@
-// @dart=2.8
 import 'package:test/test.dart';
 
 import '../common.dart';
@@ -6,9 +5,9 @@ import '../isar.g.dart';
 import '../models/bool_model.dart';
 
 void main() {
-  group('Bool index', () {
+  group('Bool filter', () {
     Isar isar;
-    IsarCollection<BoolModel> col;
+    late IsarCollection<BoolModel> col;
 
     setUp(() async {
       setupIsar();
@@ -25,9 +24,13 @@ void main() {
       });
     });
 
-    test('where equalTo()', () async {
+    test('equalTo()', () async {
       await qEqual(
         col.where().fieldEqualTo(true).findAll(),
+        [BoolModel()..field = true],
+      );
+      await qEqual(
+        col.where().filter().fieldEqualTo(true).findAll(),
         [BoolModel()..field = true],
       );
 
@@ -35,9 +38,13 @@ void main() {
         col.where().fieldEqualTo(null).findAll(),
         [BoolModel()..field = null],
       );
+      await qEqual(
+        col.where().filter().fieldEqualTo(null).findAll(),
+        [BoolModel()..field = null],
+      );
     });
 
-    test('where notEqualTo()', () async {
+    test('notEqualTo()', () async {
       await qEqualSet(
         col.where().fieldNotEqualTo(null).findAll(),
         [
@@ -47,11 +54,33 @@ void main() {
         ],
       );
       await qEqualSet(
+        col.where().filter().fieldNotEqualTo(null).findAll(),
+        [
+          BoolModel()..field = false,
+          BoolModel()..field = false,
+          BoolModel()..field = true
+        ],
+      );
+
+      await qEqualSet(
         col.where().fieldNotEqualTo(false).findAll(),
         [BoolModel()..field = null, BoolModel()..field = true],
       );
       await qEqualSet(
+        col.where().filter().fieldNotEqualTo(false).findAll(),
+        [BoolModel()..field = null, BoolModel()..field = true],
+      );
+
+      await qEqualSet(
         col.where().fieldNotEqualTo(true).findAll(),
+        [
+          BoolModel()..field = null,
+          BoolModel()..field = false,
+          BoolModel()..field = false,
+        ],
+      );
+      await qEqualSet(
+        col.where().filter().fieldNotEqualTo(true).findAll(),
         [
           BoolModel()..field = null,
           BoolModel()..field = false,
@@ -65,11 +94,23 @@ void main() {
         col.where().fieldIsNull().findAll(),
         [BoolModel()..field = null],
       );
+      await qEqual(
+        col.where().filter().fieldIsNull().findAll(),
+        [BoolModel()..field = null],
+      );
     });
 
     test('where isNotNull()', () async {
       await qEqualSet(
         col.where().fieldIsNotNull().findAll(),
+        [
+          BoolModel()..field = false,
+          BoolModel()..field = false,
+          BoolModel()..field = true,
+        ],
+      );
+      await qEqualSet(
+        col.where().filter().fieldIsNotNull().findAll(),
         [
           BoolModel()..field = false,
           BoolModel()..field = false,

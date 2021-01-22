@@ -1,4 +1,3 @@
-// @dart=2.8
 import 'package:test/test.dart';
 
 import '../common.dart';
@@ -6,9 +5,9 @@ import '../isar.g.dart';
 import '../models/float_model.dart';
 
 void main() {
-  group('Float index', () {
+  group('Float filter', () {
     Isar isar;
-    IsarCollection<FloatModel> col;
+    late IsarCollection<FloatModel> col;
 
     setUp(() async {
       setupIsar();
@@ -26,9 +25,13 @@ void main() {
       });
     });
 
-    test('where greaterThan()', () async {
+    test('greaterThan()', () async {
       await qEqual(
         col.where().fieldGreaterThan(3.3).findAll(),
+        [FloatModel()..field = 4.4],
+      );
+      await qEqual(
+        col.where().filter().fieldGreaterThan(3.3).findAll(),
         [FloatModel()..field = 4.4],
       );
 
@@ -36,17 +39,29 @@ void main() {
         col.where().fieldGreaterThan(3.3, include: true).findAll(),
         [FloatModel()..field = 3.3, FloatModel()..field = 4.4],
       );
+      await qEqualSet(
+        col.where().filter().fieldGreaterThan(3.3, include: true).findAll(),
+        {FloatModel()..field = 3.3, FloatModel()..field = 4.4},
+      );
 
       await qEqual(
         col.where().fieldGreaterThan(4.4).findAll(),
         [],
       );
+      await qEqual(
+        col.where().filter().fieldGreaterThan(4.4).findAll(),
+        [],
+      );
     });
 
-    test('where lowerThan()', () async {
+    test('lowerThan()', () async {
       await qEqual(
         col.where().fieldLowerThan(1.1).findAll(),
         [FloatModel()..field = null, FloatModel()..field = 0],
+      );
+      await qEqualSet(
+        col.where().filter().fieldLowerThan(1.1).findAll(),
+        {FloatModel()..field = null, FloatModel()..field = 0},
       );
 
       await qEqual(
@@ -57,14 +72,26 @@ void main() {
           FloatModel()..field = 1.1
         ],
       );
+      await qEqualSet(
+        col.where().filter().fieldLowerThan(1.1, include: true).findAll(),
+        {
+          FloatModel()..field = null,
+          FloatModel()..field = 0,
+          FloatModel()..field = 1.1
+        },
+      );
 
       await qEqual(
         col.where().fieldLowerThan(null).findAll(),
         [],
       );
+      await qEqual(
+        col.where().filter().fieldLowerThan(null).findAll(),
+        [],
+      );
     });
 
-    test('where between()', () async {
+    test('between()', () async {
       await qEqual(
         col.where().fieldBetween(1.1, 3.3).findAll(),
         [
@@ -72,6 +99,14 @@ void main() {
           FloatModel()..field = 2.2,
           FloatModel()..field = 3.3
         ],
+      );
+      await qEqualSet(
+        col.where().fieldBetween(1.1, 3.3).findAll(),
+        {
+          FloatModel()..field = 1.1,
+          FloatModel()..field = 2.2,
+          FloatModel()..field = 3.3
+        },
       );
 
       await qEqual(
@@ -83,21 +118,43 @@ void main() {
           FloatModel()..field = 2.2,
         ],
       );
+      await qEqualSet(
+        col
+            .where()
+            .filter()
+            .fieldBetween(1.1, 3.3, includeLower: false, includeUpper: false)
+            .findAll(),
+        {
+          FloatModel()..field = 2.2,
+        },
+      );
 
       await qEqual(
         col.where().fieldBetween(null, 0).findAll(),
         [FloatModel()..field = null, FloatModel()..field = 0],
+      );
+      await qEqualSet(
+        col.where().filter().fieldBetween(null, 0).findAll(),
+        {FloatModel()..field = null, FloatModel()..field = 0},
       );
 
       await qEqual(
         col.where().fieldBetween(5, 6).findAll(),
         [],
       );
+      await qEqual(
+        col.where().filter().fieldBetween(5, 6).findAll(),
+        [],
+      );
     });
 
-    test('where isNull()', () async {
+    test('isNull()', () async {
       await qEqual(
         col.where().fieldIsNull().findAll(),
+        [FloatModel()..field = null],
+      );
+      await qEqual(
+        col.where().filter().fieldIsNull().findAll(),
         [FloatModel()..field = null],
       );
     });
@@ -105,6 +162,16 @@ void main() {
     test('where isNotNull()', () async {
       await qEqualSet(
         col.where().fieldIsNotNull().findAll(),
+        [
+          FloatModel()..field = 0,
+          FloatModel()..field = 1.1,
+          FloatModel()..field = 2.2,
+          FloatModel()..field = 3.3,
+          FloatModel()..field = 4.4,
+        ],
+      );
+      await qEqualSet(
+        col.where().filter().fieldIsNotNull().findAll(),
         [
           FloatModel()..field = 0,
           FloatModel()..field = 1.1,

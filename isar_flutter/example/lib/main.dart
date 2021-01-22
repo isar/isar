@@ -1,7 +1,6 @@
 //@dart=2.8
 
 import 'package:example/isar.g.dart';
-import 'package:example/user.dart';
 import 'package:flutter/material.dart';
 
 Isar isar;

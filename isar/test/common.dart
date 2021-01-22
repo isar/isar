@@ -1,7 +1,5 @@
-import 'dart:ffi';
 import 'dart:io';
 import 'package:isar/isar_native.dart';
-import 'package:isar/src/native/bindings.dart';
 import 'package:path/path.dart' as path;
 
 import 'dart:math';

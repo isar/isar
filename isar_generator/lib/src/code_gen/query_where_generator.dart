@@ -1,51 +1,51 @@
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
+import 'package:isar_generator/src/code_gen/util.dart';
 
-String generateQueryWhere(ObjectInfo object) {
-  var whereSort = object.indices.mapIndexed((indexIndex, index) {
-    var properties =
-        index.properties.map((f) => object.getProperty(f)).toList();
-    return generateSortedBy(indexIndex, object.type, properties);
+String generateQueryWhere(ObjectInfo oi) {
+  var whereSort = oi.indices.mapIndexed((indexIndex, index) {
+    var properties = index.properties.map((f) => oi.getProperty(f)).toList();
+    return generateSortedBy(indexIndex, oi.dartName, properties);
   }).join('\n');
 
-  var where = object.indices.mapIndexed((indexIndex, index) {
+  var where = oi.indices.mapIndexed((indexIndex, index) {
     var code = '';
     for (var n = 0; n < index.properties.length; n++) {
       var properties = index.properties
           .sublist(0, n + 1)
-          .map((f) => object.getProperty(f))
+          .map((f) => oi.getProperty(f))
           .toList();
 
       if (properties.all((it) => !it.isFloatDouble)) {
-        code += generateWhereEqualTo(indexIndex, object.type, properties);
-        code += generateWhereNotEqualTo(indexIndex, object.type, properties);
+        code += generateWhereEqualTo(indexIndex, oi.dartName, properties);
+        code += generateWhereNotEqualTo(indexIndex, oi.dartName, properties);
       }
 
       if (properties.length == 1) {
         var property = properties.first;
 
-        if (property.type != DataType.Bool) {
-          code += generateWhereBetween(indexIndex, object.type, property);
+        if (property.isarType != IsarType.Bool) {
+          code += generateWhereBetween(indexIndex, oi, property);
         }
 
         if (!property.isFloatDouble) {
-          code += generateWhereAnyOf(object.type, property);
+          code += generateWhereAnyOf(oi, property);
         }
 
-        if (property.type == DataType.Int ||
-            property.type == DataType.Long ||
+        if (property.isarType == IsarType.Int ||
+            property.isarType == IsarType.Long ||
             property.isFloatDouble) {
-          code += generateWhereLowerThan(indexIndex, object.type, property);
-          code += generateWhereGreaterThan(indexIndex, object.type, property);
+          code += generateWhereLowerThan(indexIndex, oi, property);
+          code += generateWhereGreaterThan(indexIndex, oi, property);
         }
 
-        if (property.type == DataType.String && !index.hashValue) {
-          code += generateWhereStartsWith(indexIndex, object.type, property);
+        if (property.isarType == IsarType.String && !index.hashValue) {
+          //code += generateWhereStartsWith(indexIndex, oi, property);
         }
 
         if (property.nullable) {
-          code += generateWhereIsNull(indexIndex, object.type, property);
-          code += generateWhereIsNotNull(indexIndex, object.type, property);
+          code += generateWhereIsNull(indexIndex, oi, property);
+          code += generateWhereIsNotNull(indexIndex, oi, property);
         }
       }
     }
@@ -53,12 +53,12 @@ String generateQueryWhere(ObjectInfo object) {
   }).join('\n');
 
   return '''
-  extension ${object.type}QueryWhereSort on QueryBuilder<${object.type}, 
+  extension ${oi.dartName}QueryWhereSort on QueryBuilder<${oi.dartName}, 
     QNoWhere, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic> {
     $whereSort
   }
   
-  extension ${object.type}QueryWhere on QueryBuilder<${object.type}, 
+  extension ${oi.dartName}QueryWhere on QueryBuilder<${oi.dartName}, 
     QWhere, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic> {
     $where
   }
@@ -67,25 +67,27 @@ String generateQueryWhere(ObjectInfo object) {
 
 String joinPropertiesToName(List<ObjectProperty> properties) {
   return properties
-      .mapIndexed(
-          (i, f) => i == 0 ? f.name.decapitalize() : f.name.capitalize())
+      .mapIndexed((i, f) =>
+          i == 0 ? f.dartName.decapitalize() : f.dartName.capitalize())
       .join('');
 }
 
 String joinPropertiesToParams(List<ObjectProperty> properties,
     {String suffix = ''}) {
-  return properties.map((it) => '${it.dartType} ${it.name}$suffix').join(',');
+  return properties
+      .map((it) => '${it.dartType} ${it.dartName}$suffix')
+      .join(',');
 }
 
 String joinPropertiesToList(List<ObjectProperty> properties,
     [String suffix = '']) {
-  return '[' + properties.map((it) => it.name + suffix).join(', ') + ']';
+  return '[' + properties.map((it) => it.dartName + suffix).join(', ') + ']';
 }
 
 String joinPropertiesToTypes(List<ObjectProperty> properties) {
   return '[' +
       properties
-          .map((it) => "'" + it.type.toString().substring(9) + "'")
+          .map((it) => "'" + it.isarType.toString().substring(9) + "'")
           .join(', ') +
       ']';
 }
@@ -102,8 +104,8 @@ String generateSortedBy(
     int index, String type, List<ObjectProperty> properties) {
   final propertiesName = joinPropertiesToName(properties);
   return '''
-  ${whereReturn(type, 'dynamic')} sortedBy${propertiesName.capitalize()}(/*[bool distinct = false]*/) {
-    return addWhereClause(WhereClause($index, []));
+  ${whereReturn(type, 'dynamic')} sortedBy${propertiesName.capitalize()}({bool distinct = false}) {
+    return addWhereClause(WhereClause($index, [], skipDuplicates: distinct));
   }
   ''';
 }
@@ -150,62 +152,56 @@ String generateWhereNotEqualTo(
   ''';
 }
 
-String generateWhereLowerThan(int index, String type, ObjectProperty property) {
-  final propertiesName = joinPropertiesToName([property]);
-  final propertyTypes = joinPropertiesToTypes([property]);
+String generateWhereLowerThan(int index, ObjectInfo oi, ObjectProperty p) {
   return '''
-  ${whereReturn(type, 'QWhereProperty')} ${propertiesName}LowerThan(${property.dartType} value, {bool include = false}) {
+  ${whereReturn(oi.dartName, 'QWhereProperty')} ${p.dartName.decapitalize()}LowerThan(${p.dartType} value, {bool include = false, bool distinct = false}) {
     return addWhereClause(WhereClause(
       $index,
-      $propertyTypes,
-      upper: [value],
-      includeUpper: include
+      ['${p.isarType.name}'],
+      upper: [${p.toIsar('value', oi)}],
+      includeUpper: include,
+      skipDuplicates: distinct,
     ));
   }
   ''';
 }
 
-String generateWhereGreaterThan(
-    int index, String type, ObjectProperty property) {
-  final propertiesName = joinPropertiesToName([property]);
-  final propertyTypes = joinPropertiesToTypes([property]);
+String generateWhereGreaterThan(int index, ObjectInfo oi, ObjectProperty p) {
   return '''
-  ${whereReturn(type, 'QWhereProperty')} ${propertiesName}GreaterThan(${property.dartType} value, {bool include = false}) {
+  ${whereReturn(oi.dartName, 'QWhereProperty')} ${p.dartName.decapitalize()}GreaterThan(${p.dartType} value, {bool include = false, bool distinct = false}) {
     return addWhereClause(WhereClause(
       $index,
-      $propertyTypes,
-      lower: [value],
-      includeLower: include
+      ['${p.isarType.name}'],
+      lower: [${p.toIsar('value', oi)}],
+      includeLower: include,
+      skipDuplicates: distinct,
     ));
   }
   ''';
 }
 
-String generateWhereBetween(int index, String type, ObjectProperty property) {
-  final propertiesName = joinPropertiesToName([property]);
-  final propertyTypes = joinPropertiesToTypes([property]);
+String generateWhereBetween(int index, ObjectInfo oi, ObjectProperty p) {
   return '''
-  ${whereReturn(type, 'QWhereProperty')} ${propertiesName}Between(${property.dartType} lower, ${property.dartType} upper, {bool includeLower = true, bool includeUpper = true}) {
+  ${whereReturn(oi.dartName, 'QWhereProperty')} ${p.dartName.decapitalize()}Between(${p.dartType} lower, ${p.dartType} upper, {bool includeLower = true, bool includeUpper = true, bool distinct = false,}) {
     return addWhereClause(WhereClause(
       $index,
-      $propertyTypes,
-      upper: [upper],
+      ['${p.isarType.name}'],
+      upper: [${p.toIsar('upper', oi)}],
       includeUpper: includeUpper,
-      lower: [lower],
-      includeLower: includeLower
+      lower: [${p.toIsar('lower', oi)}],
+      includeLower: includeLower,
+      skipDuplicates: distinct,
     ));
   }
   ''';
 }
 
-String generateWhereIsNull(int index, String type, ObjectProperty property) {
-  final propertiesName = joinPropertiesToName([property]);
-  final propertyTypes = joinPropertiesToTypes([property]);
+String generateWhereIsNull(int index, ObjectInfo oi, ObjectProperty p) {
   return '''
-  ${whereReturn(type, 'QWhereProperty')} ${propertiesName}IsNull() {
+  ${whereReturn(oi.dartName, 'QWhereProperty')} ${p.dartName.decapitalize()}IsNull() {
     return addWhereClause(WhereClause(
       $index,
-      $propertyTypes,
+      ['${p.isarType.name}'],
       upper: [null],
       includeUpper: true,
       lower: [null],
@@ -215,20 +211,18 @@ String generateWhereIsNull(int index, String type, ObjectProperty property) {
   ''';
 }
 
-String generateWhereIsNotNull(int index, String type, ObjectProperty property) {
-  final propertiesName = joinPropertiesToName([property]);
-  final propertyTypes = joinPropertiesToTypes([property]);
+String generateWhereIsNotNull(int index, ObjectInfo oi, ObjectProperty p) {
   return '''
-  ${whereReturn(type, 'QWhereProperty')} ${propertiesName}IsNotNull() {
+  ${whereReturn(oi.dartName, 'QWhereProperty')} ${p.dartName.decapitalize()}IsNotNull() {
     final cloned = addWhereClause(WhereClause(
       $index,
-      $propertyTypes,
+      ['${p.isarType.name}'],
       upper: [null],
       includeUpper: false,
     ));
     return cloned.addWhereClause(WhereClause(
       $index,
-      $propertyTypes,
+      ['${p.isarType.name}'],
       lower: [null],
       includeLower: false,
     ));
@@ -236,16 +230,15 @@ String generateWhereIsNotNull(int index, String type, ObjectProperty property) {
   ''';
 }
 
-String generateWhereAnyOf(String type, ObjectProperty property) {
-  final propertiesName = joinPropertiesToName([property]);
+String generateWhereAnyOf(ObjectInfo oi, ObjectProperty p) {
   return '''
-  ${whereReturn(type, 'QWhereProperty')} ${propertiesName}AnyOf(List<${property.dartType}> values) {
+  ${whereReturn(oi.dartName, 'QWhereProperty')} ${p.dartName.decapitalize()}AnyOf(List<${p.dartType}> values) {
     var q = this;
     for (var i = 0; i < values.length; i++) {
       if (i == values.length - 1) {
-        return q.${propertiesName}EqualTo(values[i]);
+        return q.${p.dartName.decapitalize()}EqualTo(values[i]);
       } else {
-        q = q.${propertiesName}EqualTo(values[i]).or();
+        q = q.${p.dartName.decapitalize()}EqualTo(values[i]).or();
       }
     }
     throw UnimplementedError();
@@ -253,7 +246,7 @@ String generateWhereAnyOf(String type, ObjectProperty property) {
   ''';
 }
 
-String generateWhereStartsWith(
+/*String generateWhereStartsWith(
     int index, String type, ObjectProperty property) {
   final propertiesName = joinPropertiesToName([property]);
   return '''
@@ -262,3 +255,4 @@ String generateWhereStartsWith(
   }
   ''';
 }
+*/
