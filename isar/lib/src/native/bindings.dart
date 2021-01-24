@@ -548,6 +548,24 @@ class IsarCoreBindings {
 
   _dart_isar_qb_set_filter? _isar_qb_set_filter;
 
+  int isar_add_sort_by(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> builder,
+    int property_index,
+    bool asc,
+  ) {
+    return (_isar_add_sort_by ??=
+        _dylib.lookupFunction<_c_isar_add_sort_by, _dart_isar_add_sort_by>(
+            'isar_add_sort_by'))(
+      collection,
+      builder,
+      property_index,
+      asc ? 1 : 0,
+    );
+  }
+
+  _dart_isar_add_sort_by? _isar_add_sort_by;
+
   ffi.Pointer<ffi.NativeType> isar_qb_build(
     ffi.Pointer<ffi.NativeType> builder,
   ) {
@@ -1620,6 +1638,20 @@ typedef _c_isar_qb_set_filter = ffi.Void Function(
 typedef _dart_isar_qb_set_filter = void Function(
   ffi.Pointer<ffi.NativeType> builder,
   ffi.Pointer<ffi.NativeType> filter,
+);
+
+typedef _c_isar_add_sort_by = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> builder,
+  ffi.Uint32 property_index,
+  ffi.Uint8 asc,
+);
+
+typedef _dart_isar_add_sort_by = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> builder,
+  int property_index,
+  int asc,
 );
 
 typedef _c_isar_qb_build = ffi.Pointer<ffi.NativeType> Function(
