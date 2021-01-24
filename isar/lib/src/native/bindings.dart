@@ -566,6 +566,40 @@ class IsarCoreBindings {
 
   _dart_isar_add_sort_by? _isar_add_sort_by;
 
+  int isar_set_distinct(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> builder,
+    ffi.Pointer<ffi.Uint32> distinct_property_indices,
+    int distinct_property_indices_length,
+  ) {
+    return (_isar_set_distinct ??=
+        _dylib.lookupFunction<_c_isar_set_distinct, _dart_isar_set_distinct>(
+            'isar_set_distinct'))(
+      collection,
+      builder,
+      distinct_property_indices,
+      distinct_property_indices_length,
+    );
+  }
+
+  _dart_isar_set_distinct? _isar_set_distinct;
+
+  int isar_set_offset_limit(
+    ffi.Pointer<ffi.NativeType> builder,
+    int offset,
+    int limit,
+  ) {
+    return (_isar_set_offset_limit ??= _dylib.lookupFunction<
+        _c_isar_set_offset_limit,
+        _dart_isar_set_offset_limit>('isar_set_offset_limit'))(
+      builder,
+      offset,
+      limit,
+    );
+  }
+
+  _dart_isar_set_offset_limit? _isar_set_offset_limit;
+
   ffi.Pointer<ffi.NativeType> isar_qb_build(
     ffi.Pointer<ffi.NativeType> builder,
   ) {
@@ -1652,6 +1686,32 @@ typedef _dart_isar_add_sort_by = int Function(
   ffi.Pointer<ffi.NativeType> builder,
   int property_index,
   int asc,
+);
+
+typedef _c_isar_set_distinct = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> builder,
+  ffi.Pointer<ffi.Uint32> distinct_property_indices,
+  ffi.Uint32 distinct_property_indices_length,
+);
+
+typedef _dart_isar_set_distinct = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> builder,
+  ffi.Pointer<ffi.Uint32> distinct_property_indices,
+  int distinct_property_indices_length,
+);
+
+typedef _c_isar_set_offset_limit = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> builder,
+  ffi.Uint32 offset,
+  ffi.Uint32 limit,
+);
+
+typedef _dart_isar_set_offset_limit = int Function(
+  ffi.Pointer<ffi.NativeType> builder,
+  int offset,
+  int limit,
 );
 
 typedef _c_isar_qb_build = ffi.Pointer<ffi.NativeType> Function(
