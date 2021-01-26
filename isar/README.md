@@ -35,9 +35,10 @@
 - ⚡️ **Launch your app instantly** no matter how much data you have
 - 📈 **Highly scalable** from hundreds to tens of thousands of records
 - 😎 **Lazy loaded**. Only load data when you need it
-- 🧪 **Full ACID semantics**. Rely on consistency
-- 📱 **Multiplatform**. iOS, Android, and the web (soon™)
+- 🔎 **Full text search**. Make searching fast and fun
+- 📱 **Multiplatform**. iOS, Android, Desktop and the web (soon™)
 - 💙 **Made for Flutter.** Easily use it in your Flutter app
+- 🧪 **ACID semantics**. Rely on consistency
 - ⏱ **Asynchronous.** Parallel query operations & multi-isolate support
 - ⚠️ **Static typing** with compile time checked and autocompleted queries
 
