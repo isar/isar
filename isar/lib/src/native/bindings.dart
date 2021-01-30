@@ -468,6 +468,164 @@ class IsarCoreBindings {
 
   _dart_isar_filter_long_not_equal? _isar_filter_long_not_equal;
 
+  int isar_filter_byte_list_contains(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    int value,
+    int property_index,
+  ) {
+    return (_isar_filter_byte_list_contains ??= _dylib.lookupFunction<
+            _c_isar_filter_byte_list_contains,
+            _dart_isar_filter_byte_list_contains>(
+        'isar_filter_byte_list_contains'))(
+      collection,
+      filter,
+      value,
+      property_index,
+    );
+  }
+
+  _dart_isar_filter_byte_list_contains? _isar_filter_byte_list_contains;
+
+  int isar_filter_int_list_contains(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    int value,
+    int property_index,
+  ) {
+    return (_isar_filter_int_list_contains ??= _dylib.lookupFunction<
+        _c_isar_filter_int_list_contains,
+        _dart_isar_filter_int_list_contains>('isar_filter_int_list_contains'))(
+      collection,
+      filter,
+      value,
+      property_index,
+    );
+  }
+
+  _dart_isar_filter_int_list_contains? _isar_filter_int_list_contains;
+
+  int isar_filter_long_list_contains(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    int value,
+    int property_index,
+  ) {
+    return (_isar_filter_long_list_contains ??= _dylib.lookupFunction<
+            _c_isar_filter_long_list_contains,
+            _dart_isar_filter_long_list_contains>(
+        'isar_filter_long_list_contains'))(
+      collection,
+      filter,
+      value,
+      property_index,
+    );
+  }
+
+  _dart_isar_filter_long_list_contains? _isar_filter_long_list_contains;
+
+  int isar_filter_string_equal(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    ffi.Pointer<ffi.Int8> value,
+    bool ignore_case,
+    int property_index,
+  ) {
+    return (_isar_filter_string_equal ??= _dylib.lookupFunction<
+        _c_isar_filter_string_equal,
+        _dart_isar_filter_string_equal>('isar_filter_string_equal'))(
+      collection,
+      filter,
+      value,
+      ignore_case ? 1 : 0,
+      property_index,
+    );
+  }
+
+  _dart_isar_filter_string_equal? _isar_filter_string_equal;
+
+  int isar_filter_string_starts_with(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    ffi.Pointer<ffi.Int8> value,
+    bool ignore_case,
+    int property_index,
+  ) {
+    return (_isar_filter_string_starts_with ??= _dylib.lookupFunction<
+            _c_isar_filter_string_starts_with,
+            _dart_isar_filter_string_starts_with>(
+        'isar_filter_string_starts_with'))(
+      collection,
+      filter,
+      value,
+      ignore_case ? 1 : 0,
+      property_index,
+    );
+  }
+
+  _dart_isar_filter_string_starts_with? _isar_filter_string_starts_with;
+
+  int isar_filter_string_ends_with(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    ffi.Pointer<ffi.Int8> value,
+    bool ignore_case,
+    int property_index,
+  ) {
+    return (_isar_filter_string_ends_with ??= _dylib.lookupFunction<
+        _c_isar_filter_string_ends_with,
+        _dart_isar_filter_string_ends_with>('isar_filter_string_ends_with'))(
+      collection,
+      filter,
+      value,
+      ignore_case ? 1 : 0,
+      property_index,
+    );
+  }
+
+  _dart_isar_filter_string_ends_with? _isar_filter_string_ends_with;
+
+  int isar_filter_string_contains(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    ffi.Pointer<ffi.Int8> value,
+    bool ignore_case,
+    int property_index,
+  ) {
+    return (_isar_filter_string_contains ??= _dylib.lookupFunction<
+        _c_isar_filter_string_contains,
+        _dart_isar_filter_string_contains>('isar_filter_string_contains'))(
+      collection,
+      filter,
+      value,
+      ignore_case ? 1 : 0,
+      property_index,
+    );
+  }
+
+  _dart_isar_filter_string_contains? _isar_filter_string_contains;
+
+  int isar_filter_string_list_contains(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    ffi.Pointer<ffi.Int8> value,
+    bool ignore_case,
+    int property_index,
+  ) {
+    return (_isar_filter_string_list_contains ??= _dylib.lookupFunction<
+            _c_isar_filter_string_list_contains,
+            _dart_isar_filter_string_list_contains>(
+        'isar_filter_string_list_contains'))(
+      collection,
+      filter,
+      value,
+      ignore_case ? 1 : 0,
+      property_index,
+    );
+  }
+
+  _dart_isar_filter_string_list_contains? _isar_filter_string_list_contains;
+
   void isar_create_instance(
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
     ffi.Pointer<ffi.Int8> path,
@@ -790,32 +948,6 @@ class IsarCoreBindings {
 
   _dart_isar_q_delete_all_async? _isar_q_delete_all_async;
 
-  void isar_alloc_raw_obj_buffer(
-    ffi.Pointer<RawObject> object,
-    int size,
-  ) {
-    return (_isar_alloc_raw_obj_buffer ??= _dylib.lookupFunction<
-        _c_isar_alloc_raw_obj_buffer,
-        _dart_isar_alloc_raw_obj_buffer>('isar_alloc_raw_obj_buffer'))(
-      object,
-      size,
-    );
-  }
-
-  _dart_isar_alloc_raw_obj_buffer? _isar_alloc_raw_obj_buffer;
-
-  void isar_free_raw_obj_buffer(
-    ffi.Pointer<RawObject> object,
-  ) {
-    return (_isar_free_raw_obj_buffer ??= _dylib.lookupFunction<
-        _c_isar_free_raw_obj_buffer,
-        _dart_isar_free_raw_obj_buffer>('isar_free_raw_obj_buffer'))(
-      object,
-    );
-  }
-
-  _dart_isar_free_raw_obj_buffer? _isar_free_raw_obj_buffer;
-
   void isar_alloc_raw_obj_list(
     ffi.Pointer<RawObjectSet> ros,
     int size,
@@ -853,12 +985,16 @@ class IsarCoreBindings {
   int isar_schema_create_collection(
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> collection_schema,
     ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Int8> oid_name,
+    int oid_type,
   ) {
     return (_isar_schema_create_collection ??= _dylib.lookupFunction<
         _c_isar_schema_create_collection,
         _dart_isar_schema_create_collection>('isar_schema_create_collection'))(
       collection_schema,
       name,
+      oid_name,
+      oid_type,
     );
   }
 
@@ -897,18 +1033,20 @@ class IsarCoreBindings {
   int isar_schema_add_index(
     ffi.Pointer<ffi.NativeType> collection_schema,
     ffi.Pointer<ffi.Pointer<ffi.Int8>> property_names,
-    int property_names_length,
+    ffi.Pointer<ffi.Uint8> string_types,
+    ffi.Pointer<ffi.Uint8> strings_lower_case,
+    int properties_length,
     bool unique,
-    bool hash_value,
   ) {
     return (_isar_schema_add_index ??= _dylib.lookupFunction<
         _c_isar_schema_add_index,
         _dart_isar_schema_add_index>('isar_schema_add_index'))(
       collection_schema,
       property_names,
-      property_names_length,
+      string_types,
+      strings_lower_case,
+      properties_length,
       unique ? 1 : 0,
-      hash_value ? 1 : 0,
     );
   }
 
@@ -1080,40 +1218,6 @@ class IsarCoreBindings {
 
   _dart_isar_wc_create? _isar_wc_create;
 
-  void isar_wc_add_oid(
-    ffi.Pointer<ffi.NativeType> where_clause,
-    int time,
-    int counter,
-    int rand,
-  ) {
-    return (_isar_wc_add_oid ??=
-        _dylib.lookupFunction<_c_isar_wc_add_oid, _dart_isar_wc_add_oid>(
-            'isar_wc_add_oid'))(
-      where_clause,
-      time,
-      counter,
-      rand,
-    );
-  }
-
-  _dart_isar_wc_add_oid? _isar_wc_add_oid;
-
-  void isar_wc_add_oid_time(
-    ffi.Pointer<ffi.NativeType> where_clause,
-    int lower,
-    int upper,
-  ) {
-    return (_isar_wc_add_oid_time ??= _dylib.lookupFunction<
-        _c_isar_wc_add_oid_time,
-        _dart_isar_wc_add_oid_time>('isar_wc_add_oid_time'))(
-      where_clause,
-      lower,
-      upper,
-    );
-  }
-
-  _dart_isar_wc_add_oid_time? _isar_wc_add_oid_time;
-
   void isar_wc_add_byte(
     ffi.Pointer<ffi.NativeType> where_clause,
     int lower,
@@ -1223,25 +1327,43 @@ class IsarCoreBindings {
   }
 
   _dart_isar_wc_add_string_value? _isar_wc_add_string_value;
+
+  void isar_wc_add_oid_string(
+    ffi.Pointer<ffi.NativeType> where_clause,
+    ffi.Pointer<ffi.Int8> lower,
+    ffi.Pointer<ffi.Int8> upper,
+  ) {
+    return (_isar_wc_add_oid_string ??= _dylib.lookupFunction<
+        _c_isar_wc_add_oid_string,
+        _dart_isar_wc_add_oid_string>('isar_wc_add_oid_string'))(
+      where_clause,
+      lower,
+      upper,
+    );
+  }
+
+  _dart_isar_wc_add_oid_string? _isar_wc_add_oid_string;
 }
 
 abstract class RawObject extends ffi.Struct {
-  @ffi.Uint32()
-  external int oid_time;
+  @ffi.Uint8()
+  external int oid_type;
+
+  external ffi.Pointer<ffi.Uint8> oid_str;
 
   @ffi.Uint32()
-  external int oid_counter;
+  external int oid_str_len;
 
-  @ffi.Uint32()
-  external int oid_rand;
+  @ffi.Int32()
+  external int oid_int;
+
+  @ffi.Int64()
+  external int oid_long;
 
   external ffi.Pointer<ffi.Uint8> data;
 
   @ffi.Uint32()
   external int data_length;
-
-  @ffi.Uint32()
-  external int data_capacity;
 }
 
 class RawObjectSet extends ffi.Struct {
@@ -1614,6 +1736,128 @@ typedef _dart_isar_filter_long_not_equal = int Function(
   int property_index,
 );
 
+typedef _c_isar_filter_byte_list_contains = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Uint8 value,
+  ffi.Uint32 property_index,
+);
+
+typedef _dart_isar_filter_byte_list_contains = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  int value,
+  int property_index,
+);
+
+typedef _c_isar_filter_int_list_contains = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Int32 value,
+  ffi.Uint32 property_index,
+);
+
+typedef _dart_isar_filter_int_list_contains = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  int value,
+  int property_index,
+);
+
+typedef _c_isar_filter_long_list_contains = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Int64 value,
+  ffi.Uint32 property_index,
+);
+
+typedef _dart_isar_filter_long_list_contains = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  int value,
+  int property_index,
+);
+
+typedef _c_isar_filter_string_equal = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Pointer<ffi.Int8> value,
+  ffi.Uint8 ignore_case,
+  ffi.Uint32 property_index,
+);
+
+typedef _dart_isar_filter_string_equal = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Pointer<ffi.Int8> value,
+  int ignore_case,
+  int property_index,
+);
+
+typedef _c_isar_filter_string_starts_with = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Pointer<ffi.Int8> value,
+  ffi.Uint8 ignore_case,
+  ffi.Uint32 property_index,
+);
+
+typedef _dart_isar_filter_string_starts_with = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Pointer<ffi.Int8> value,
+  int ignore_case,
+  int property_index,
+);
+
+typedef _c_isar_filter_string_ends_with = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Pointer<ffi.Int8> value,
+  ffi.Uint8 ignore_case,
+  ffi.Uint32 property_index,
+);
+
+typedef _dart_isar_filter_string_ends_with = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Pointer<ffi.Int8> value,
+  int ignore_case,
+  int property_index,
+);
+
+typedef _c_isar_filter_string_contains = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Pointer<ffi.Int8> value,
+  ffi.Uint8 ignore_case,
+  ffi.Uint32 property_index,
+);
+
+typedef _dart_isar_filter_string_contains = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Pointer<ffi.Int8> value,
+  int ignore_case,
+  int property_index,
+);
+
+typedef _c_isar_filter_string_list_contains = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Pointer<ffi.Int8> value,
+  ffi.Uint8 ignore_case,
+  ffi.Uint32 property_index,
+);
+
+typedef _dart_isar_filter_string_list_contains = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Pointer<ffi.Int8> value,
+  int ignore_case,
+  int property_index,
+);
+
 typedef _c_isar_create_instance = ffi.Void Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
   ffi.Pointer<ffi.Int8> path,
@@ -1858,24 +2102,6 @@ typedef _dart_isar_q_delete_all_async = void Function(
   ffi.Pointer<ffi.Int64> count,
 );
 
-typedef _c_isar_alloc_raw_obj_buffer = ffi.Void Function(
-  ffi.Pointer<RawObject> object,
-  ffi.Uint32 size,
-);
-
-typedef _dart_isar_alloc_raw_obj_buffer = void Function(
-  ffi.Pointer<RawObject> object,
-  int size,
-);
-
-typedef _c_isar_free_raw_obj_buffer = ffi.Void Function(
-  ffi.Pointer<RawObject> object,
-);
-
-typedef _dart_isar_free_raw_obj_buffer = void Function(
-  ffi.Pointer<RawObject> object,
-);
-
 typedef _c_isar_alloc_raw_obj_list = ffi.Void Function(
   ffi.Pointer<RawObjectSet> ros,
   ffi.Uint32 size,
@@ -1901,11 +2127,15 @@ typedef _dart_isar_schema_create = ffi.Pointer<ffi.NativeType> Function();
 typedef _c_isar_schema_create_collection = ffi.Int32 Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> collection_schema,
   ffi.Pointer<ffi.Int8> name,
+  ffi.Pointer<ffi.Int8> oid_name,
+  ffi.Uint8 oid_type,
 );
 
 typedef _dart_isar_schema_create_collection = int Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> collection_schema,
   ffi.Pointer<ffi.Int8> name,
+  ffi.Pointer<ffi.Int8> oid_name,
+  int oid_type,
 );
 
 typedef _c_isar_schema_add_collection = ffi.Int32 Function(
@@ -1933,17 +2163,19 @@ typedef _dart_isar_schema_add_property = int Function(
 typedef _c_isar_schema_add_index = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection_schema,
   ffi.Pointer<ffi.Pointer<ffi.Int8>> property_names,
-  ffi.Uint32 property_names_length,
+  ffi.Pointer<ffi.Uint8> string_types,
+  ffi.Pointer<ffi.Uint8> strings_lower_case,
+  ffi.Uint32 properties_length,
   ffi.Uint8 unique,
-  ffi.Uint8 hash_value,
 );
 
 typedef _dart_isar_schema_add_index = int Function(
   ffi.Pointer<ffi.NativeType> collection_schema,
   ffi.Pointer<ffi.Pointer<ffi.Int8>> property_names,
-  int property_names_length,
+  ffi.Pointer<ffi.Uint8> string_types,
+  ffi.Pointer<ffi.Uint8> strings_lower_case,
+  int properties_length,
   int unique,
-  int hash_value,
 );
 
 typedef _c_isar_txn_begin = ffi.Int32 Function(
@@ -2068,32 +2300,6 @@ typedef _dart_isar_wc_create = int Function(
   int skip_duplicates,
 );
 
-typedef _c_isar_wc_add_oid = ffi.Void Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Uint32 time,
-  ffi.Uint32 counter,
-  ffi.Uint32 rand,
-);
-
-typedef _dart_isar_wc_add_oid = void Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  int time,
-  int counter,
-  int rand,
-);
-
-typedef _c_isar_wc_add_oid_time = ffi.Void Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Uint32 lower,
-  ffi.Uint32 upper,
-);
-
-typedef _dart_isar_wc_add_oid_time = void Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  int lower,
-  int upper,
-);
-
 typedef _c_isar_wc_add_byte = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Uint8 lower,
@@ -2171,6 +2377,18 @@ typedef _c_isar_wc_add_string_value = ffi.Void Function(
 );
 
 typedef _dart_isar_wc_add_string_value = void Function(
+  ffi.Pointer<ffi.NativeType> where_clause,
+  ffi.Pointer<ffi.Int8> lower,
+  ffi.Pointer<ffi.Int8> upper,
+);
+
+typedef _c_isar_wc_add_oid_string = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> where_clause,
+  ffi.Pointer<ffi.Int8> lower,
+  ffi.Pointer<ffi.Int8> upper,
+);
+
+typedef _dart_isar_wc_add_oid_string = void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
