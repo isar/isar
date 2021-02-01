@@ -992,7 +992,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection_schema,
     ffi.Pointer<ffi.Pointer<ffi.Int8>> property_names,
     ffi.Pointer<ffi.Uint8> string_types,
-    ffi.Pointer<ffi.Uint8> strings_lower_case,
+    ffi.Pointer<ffi.Uint8> strings_case_sensitive,
     int properties_length,
     bool unique,
   ) {
@@ -1002,7 +1002,7 @@ class IsarCoreBindings {
       collection_schema,
       property_names,
       string_types,
-      strings_lower_case,
+      strings_case_sensitive,
       properties_length,
       unique ? 1 : 0,
     );
@@ -1259,12 +1259,14 @@ class IsarCoreBindings {
   void isar_wc_add_string_hash(
     ffi.Pointer<ffi.NativeType> where_clause,
     ffi.Pointer<ffi.Int8> value,
+    bool case_sensitive,
   ) {
     return (_isar_wc_add_string_hash ??= _dylib.lookupFunction<
         _c_isar_wc_add_string_hash,
         _dart_isar_wc_add_string_hash>('isar_wc_add_string_hash'))(
       where_clause,
       value,
+      case_sensitive ? 1 : 0,
     );
   }
 
@@ -1274,6 +1276,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> where_clause,
     ffi.Pointer<ffi.Int8> lower,
     ffi.Pointer<ffi.Int8> upper,
+    bool case_sensitive,
   ) {
     return (_isar_wc_add_string_value ??= _dylib.lookupFunction<
         _c_isar_wc_add_string_value,
@@ -1281,10 +1284,29 @@ class IsarCoreBindings {
       where_clause,
       lower,
       upper,
+      case_sensitive ? 1 : 0,
     );
   }
 
   _dart_isar_wc_add_string_value? _isar_wc_add_string_value;
+
+  void isar_wc_add_string_word(
+    ffi.Pointer<ffi.NativeType> where_clause,
+    ffi.Pointer<ffi.Int8> lower,
+    ffi.Pointer<ffi.Int8> upper,
+    bool case_sensitive,
+  ) {
+    return (_isar_wc_add_string_word ??= _dylib.lookupFunction<
+        _c_isar_wc_add_string_word,
+        _dart_isar_wc_add_string_word>('isar_wc_add_string_word'))(
+      where_clause,
+      lower,
+      upper,
+      case_sensitive ? 1 : 0,
+    );
+  }
+
+  _dart_isar_wc_add_string_word? _isar_wc_add_string_word;
 
   void isar_wc_add_oid_string(
     ffi.Pointer<ffi.NativeType> where_clause,
@@ -2082,7 +2104,7 @@ typedef _c_isar_schema_add_index = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection_schema,
   ffi.Pointer<ffi.Pointer<ffi.Int8>> property_names,
   ffi.Pointer<ffi.Uint8> string_types,
-  ffi.Pointer<ffi.Uint8> strings_lower_case,
+  ffi.Pointer<ffi.Uint8> strings_case_sensitive,
   ffi.Uint32 properties_length,
   ffi.Uint8 unique,
 );
@@ -2091,7 +2113,7 @@ typedef _dart_isar_schema_add_index = int Function(
   ffi.Pointer<ffi.NativeType> collection_schema,
   ffi.Pointer<ffi.Pointer<ffi.Int8>> property_names,
   ffi.Pointer<ffi.Uint8> string_types,
-  ffi.Pointer<ffi.Uint8> strings_lower_case,
+  ffi.Pointer<ffi.Uint8> strings_case_sensitive,
   int properties_length,
   int unique,
 );
@@ -2281,23 +2303,41 @@ typedef _dart_isar_wc_add_double = void Function(
 typedef _c_isar_wc_add_string_hash = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> value,
+  ffi.Uint8 case_sensitive,
 );
 
 typedef _dart_isar_wc_add_string_hash = void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> value,
+  int case_sensitive,
 );
 
 typedef _c_isar_wc_add_string_value = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
+  ffi.Uint8 case_sensitive,
 );
 
 typedef _dart_isar_wc_add_string_value = void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
+  int case_sensitive,
+);
+
+typedef _c_isar_wc_add_string_word = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> where_clause,
+  ffi.Pointer<ffi.Int8> lower,
+  ffi.Pointer<ffi.Int8> upper,
+  ffi.Uint8 case_sensitive,
+);
+
+typedef _dart_isar_wc_add_string_word = void Function(
+  ffi.Pointer<ffi.NativeType> where_clause,
+  ffi.Pointer<ffi.Int8> lower,
+  ffi.Pointer<ffi.Int8> upper,
+  int case_sensitive,
 );
 
 typedef _c_isar_wc_add_oid_string = ffi.Void Function(
