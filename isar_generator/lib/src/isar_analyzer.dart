@@ -10,7 +10,7 @@ import 'package:source_gen/source_gen.dart';
 import 'package:isar_annotation/isar_annotation.dart' as isar;
 import 'package:dartx/dartx.dart';
 
-const OBJECT_ID_SIZE = 14;
+const primaryKeyTypes = [IsarType.String, IsarType.Int, IsarType.Long];
 
 class IsarAnalyzer extends Builder {
   final _annotationChecker = const TypeChecker.fromRuntime(isar.Collection);
@@ -29,7 +29,6 @@ class IsarAnalyzer extends Builder {
     if (models.isEmpty) return;
 
     var json = JsonEncoder().convert(models);
-    print(json);
     await buildStep.writeAsString(
         buildStep.inputId.changeExtension('.isarobject.json'), json);
   }
@@ -49,12 +48,6 @@ class IsarAnalyzer extends Builder {
       err('Object class must be public.', element);
     }
 
-    final isIsarObject = modelClass.allSupertypes
-        .any((element) => element.element.name == 'IsarObject');
-    if (!isIsarObject) {
-      err('Object class has to extend or mixin IsarObject.', element);
-    }
-
     final hasZeroArgConstructor = modelClass.constructors
         .any((c) => c.isPublic && !c.parameters.any((p) => !p.isOptional));
 
@@ -67,6 +60,7 @@ class IsarAnalyzer extends Builder {
       err('Empty model names are not allowed.', modelClass);
     }
 
+    ObjectProperty oidProperty;
     var properties = <ObjectProperty>[];
     final indices = <ObjectIndex>[];
     final converterImports = <String>{};
@@ -80,21 +74,50 @@ class IsarAnalyzer extends Builder {
 
       var modelProperty = generateObjectProperty(property, converter);
       if (modelProperty == null) continue;
-      properties.add(modelProperty);
 
-      indices.addAll(generateObjectIndices(modelProperty, property));
+      final hasOidAnn = hasObjectIdAnn(property);
+      if (hasOidAnn) {
+        if (converter != null) {
+          err('Converters are not allowed for ids.', property);
+        } else if (!primaryKeyTypes.contains(modelProperty.isarType)) {
+          err('Illegal ObjectId type. Allowed: String, Int, Long', property);
+        } else if (oidProperty != null) {
+          err('More than one properties are annotated with @ObjectId().',
+              element);
+        }
+        oidProperty = modelProperty;
+      } else {
+        properties.add(modelProperty);
+
+        indices.addAll(generateObjectIndices(modelProperty, property));
+      }
     }
 
-    properties = sortAndOffsetProperties(properties);
+    if (oidProperty == null) {
+      for (var i = 0; i < properties.length; i++) {
+        final property = properties[i];
+        if (property.isarName == 'id' &&
+            property.converter == null &&
+            primaryKeyTypes.contains(property.dartType)) {
+          oidProperty = properties[i];
+          properties.removeAt(i);
+          break;
+        }
+      }
+      if (oidProperty == null) {
+        err('No property annotated with @ObjectId().', element);
+      }
+    }
 
     final modelInfo = ObjectInfo(
       dartName: modelClass.displayName,
       isarName: isarName,
+      oidProperty: oidProperty,
       properties: properties,
       indices: indices,
       converterImports: converterImports.toList(),
     );
-    validateIndices(modelInfo);
+    validateIndices(element, modelInfo);
 
     return modelInfo;
   }
@@ -215,63 +238,65 @@ class IsarAnalyzer extends Builder {
   Iterable<ObjectIndex> generateObjectIndices(
       ObjectProperty property, FieldElement element) {
     return getIndexAnns(element).map((index) {
-      var properties = [property.isarName];
-      properties.addAll(index.composite);
-
-      var hashValue = index.hashValue;
-      if (property.isarType == IsarType.String && hashValue == null) {
-        hashValue = false;
+      final properties = <ObjectIndexProperty>[];
+      properties.add(ObjectIndexProperty(
+        isarName: property.isarName,
+        stringType: index.stringType,
+        caseSensitive: index.caseSensitive,
+      ));
+      for (var c in index.composite) {
+        properties.add(ObjectIndexProperty(
+          isarName: c.property,
+          stringType: c.stringType,
+          caseSensitive: c.caseSensitive,
+        ));
       }
       return ObjectIndex(
         properties: properties,
         unique: index.unique,
-        hashValue: hashValue,
       );
     });
   }
 
-  List<ObjectProperty> sortAndOffsetProperties(
-      List<ObjectProperty> properties) {
-    var offset = OBJECT_ID_SIZE;
-    return properties
-        .sortedBy((f) => f.isarType.typeId)
-        .thenBy((f) => f.isarName)
-        .mapIndexed((index, p) {
-      final size = p.isarType.staticSize;
-      final padding = -offset % size;
-      offset += padding + size;
-      return p.copyWith(staticPadding: padding);
-    }).toList();
-  }
-
-  void validateIndices(ObjectInfo model) {
+  void validateIndices(Element element, ObjectInfo model) {
     for (var index in model.indices) {
       for (var index2 in model.indices) {
         if (index == index2) continue;
         if (index.properties.length <= index2.properties.length) {
-          if (index2.properties
+          final indexProperties = index.properties.map((it) => it.isarName);
+          final index2Properties = index2.properties
               .take(index.properties.length)
-              .contentEquals(index.properties)) {
-            err('There are multiple indexes with the prefix "${index.properties.join(', ')}"');
+              .map((it) => it.isarName);
+          if (indexProperties.contentEquals(index2Properties)) {
+            err('There are multiple indexes with the prefix "${indexProperties.join(', ')}"',
+                element);
           }
         }
       }
 
-      for (var property in index.properties) {
-        if (index.properties.count((e) => e == property) != 1) {
-          err('There is a duplicate property in an index: "$property".');
+      if (index.properties.map((it) => it.isarName).distinct().length !=
+          index.properties.length) {
+        err('Composite index contains duplicate properties.', element);
+      }
+
+      for (var i = 0; i < index.properties.length; i++) {
+        final indexProperty = index.properties[i];
+        final property = model.properties
+            .firstOrNullWhere((it) => it.isarName == indexProperty.isarName);
+        if (property == null) {
+          err('Property does not exist: "${indexProperty.isarName}".', element);
         }
-      }
-
-      var hasStringProperty = index.properties
-          .map((name) => model.properties.firstWhere((f) => f.isarName == name))
-          .any((f) => f.isarType == IsarType.String);
-
-      if (index.hashValue && !hasStringProperty) {
-        err('Only String and List<String> properties support the "hashValue" parameter.');
-      }
-      if (index.properties.length > 1 && !index.hashValue) {
-        err('String properties in composite indices need to be stored as hash.');
+        if (property.isarType == IsarType.String) {
+          if (indexProperty.stringType == isar.StringIndexType.value &&
+              i != index.properties.lastIndex) {
+            err('Only the last property of a composite index may use StringIndexType.value.',
+                element);
+          } else if (indexProperty.stringType == isar.StringIndexType.words &&
+              index.properties.length != 1) {
+            err('StringIndexType.words is not allowed for composite indexes.',
+                element);
+          }
+        }
       }
     }
   }

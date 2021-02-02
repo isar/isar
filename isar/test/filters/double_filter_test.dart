@@ -7,7 +7,7 @@ import '../models/double_model.dart';
 void main() {
   group('Double filter', () {
     Isar isar;
-    late IsarCollection<DoubleModel> col;
+    late IsarCollection<int, DoubleModel> col;
 
     setUp(() async {
       setupIsar();
@@ -162,16 +162,6 @@ void main() {
     test('isNotNull()', () async {
       await qEqualSet(
         col.where().fieldIsNotNull().findAll(),
-        [
-          DoubleModel()..field = 0,
-          DoubleModel()..field = 1.1,
-          DoubleModel()..field = 2.2,
-          DoubleModel()..field = 3.3,
-          DoubleModel()..field = 4.4,
-        ],
-      );
-      await qEqualSet(
-        col.where().filter().fieldIsNotNull().findAll(),
         [
           DoubleModel()..field = 0,
           DoubleModel()..field = 1.1,

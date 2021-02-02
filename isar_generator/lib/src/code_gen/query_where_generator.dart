@@ -4,7 +4,8 @@ import 'package:isar_generator/src/code_gen/util.dart';
 
 String generateQueryWhere(ObjectInfo oi) {
   var whereSort = oi.indices.mapIndexed((indexIndex, index) {
-    var properties = index.properties.map((f) => oi.getProperty(f)).toList();
+    var properties =
+        index.properties.map((it) => oi.getProperty(it.isarName)).toList();
     return generateSortedBy(indexIndex, oi.dartName, properties);
   }).join('\n');
 
@@ -13,10 +14,10 @@ String generateQueryWhere(ObjectInfo oi) {
     for (var n = 0; n < index.properties.length; n++) {
       var properties = index.properties
           .sublist(0, n + 1)
-          .map((f) => oi.getProperty(f))
+          .map((it) => oi.getProperty(it.isarName))
           .toList();
 
-      if (properties.all((it) => !it.isFloatDouble)) {
+      if (properties.all((it) => !it.isarType.isFloatDouble)) {
         code += generateWhereEqualTo(indexIndex, oi.dartName, properties);
         code += generateWhereNotEqualTo(indexIndex, oi.dartName, properties);
       }
@@ -28,20 +29,20 @@ String generateQueryWhere(ObjectInfo oi) {
           code += generateWhereBetween(indexIndex, oi, property);
         }
 
-        if (!property.isFloatDouble) {
+        if (!property.isarType.isFloatDouble) {
           code += generateWhereAnyOf(oi, property);
         }
 
         if (property.isarType == IsarType.Int ||
             property.isarType == IsarType.Long ||
-            property.isFloatDouble) {
+            property.isarType.isFloatDouble) {
           code += generateWhereLowerThan(indexIndex, oi, property);
           code += generateWhereGreaterThan(indexIndex, oi, property);
         }
 
-        if (property.isarType == IsarType.String && !index.hashValue) {
-          //code += generateWhereStartsWith(indexIndex, oi, property);
-        }
+        //if (property.isarType == IsarType.String && !index.hashValue) {
+        //code += generateWhereStartsWith(indexIndex, oi, property);
+        //}
 
         if (property.nullable) {
           code += generateWhereIsNull(indexIndex, oi, property);
@@ -54,12 +55,12 @@ String generateQueryWhere(ObjectInfo oi) {
 
   return '''
   extension ${oi.dartName}QueryWhereSort on QueryBuilder<${oi.dartName}, 
-    QNoWhere, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic> {
+    QNoWhere, dynamic, dynamic, dynamic, dynamic, dynamic> {
     $whereSort
   }
   
   extension ${oi.dartName}QueryWhere on QueryBuilder<${oi.dartName}, 
-    QWhere, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic> {
+    QWhere, dynamic, dynamic, dynamic, dynamic, dynamic> {
     $where
   }
   ''';
@@ -93,7 +94,7 @@ String joinPropertiesToTypes(List<ObjectProperty> properties) {
 }
 
 String whereReturnParams(String whereType) {
-  return '$whereType, QCanFilter, QNoGroups, QCanGroupBy, QCanOffsetLimit, QCanSort, QCanExecute';
+  return '$whereType, QCanFilter, QCanGroupBy, QCanOffsetLimit, QCanSort, QCanExecute';
 }
 
 String whereReturn(String type, String whereType) {

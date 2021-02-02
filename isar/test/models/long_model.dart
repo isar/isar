@@ -4,7 +4,10 @@ import '../isar.g.dart';
 import 'package:isar_annotation/isar_annotation.dart';
 
 @Collection()
-class LongModel with IsarObject {
+class LongModel {
+  @ObjectId()
+  int? id;
+
   @Index()
   int? field = 0;
 

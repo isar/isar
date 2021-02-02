@@ -4,7 +4,10 @@ import '../isar.g.dart';
 import 'package:isar_annotation/isar_annotation.dart';
 
 @Collection()
-class FloatModel with IsarObject {
+class FloatModel {
+  @ObjectId()
+  int? id;
+
   @Index()
   @Size32()
   double? field = 0;

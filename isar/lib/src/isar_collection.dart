@@ -1,27 +1,27 @@
 part of isar;
 
-abstract class IsarCollection<T extends IsarObject> {
-  Future<T?> get(ObjectId id);
+abstract class IsarCollection<ID, OBJECT> {
+  Future<OBJECT?> get(ID id);
 
-  T? getSync(ObjectId id);
+  OBJECT? getSync(ID id);
 
-  Future<void> put(T object);
+  Future<void> put(OBJECT object);
 
-  void putSync(T object);
+  void putSync(OBJECT object);
 
-  Future<void> putAll(List<T> objects);
+  Future<void> putAll(List<OBJECT> objects);
 
-  void putAllSync(List<T> objects);
+  void putAllSync(List<OBJECT> objects);
 
-  Future<bool> delete(ObjectId id);
+  Future<bool> delete(ID id);
 
-  bool deleteSync(ObjectId id);
+  bool deleteSync(ID id);
 
   Future<void> importJson(Uint8List jsonBytes);
 
-  Future<void> exportJson(bool primitiveNull, Function(Uint8List) callback);
+  Future<R> exportJson<R>(bool primitiveNull, R Function(Uint8List) callback);
 
-  QueryBuilder<T, QNoWhere, QCanFilter, QNoGroups, QCanGroupBy, QCanOffsetLimit,
+  QueryBuilder<OBJECT, QNoWhere, QCanFilter, QCanGroupBy, QCanOffsetLimit,
       QCanSort, QCanExecute> where() {
     return newQueryInternal(this);
   }

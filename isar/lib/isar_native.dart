@@ -12,6 +12,8 @@ import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 import 'package:isar/src/native/bindings.dart';
 
+export 'package:isar/src/native/bindings.dart';
+
 part 'package:isar/src/native/binary/binary_reader.dart';
 part 'package:isar/src/native/binary/binary_writer.dart';
 

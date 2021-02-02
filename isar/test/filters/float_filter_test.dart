@@ -7,7 +7,7 @@ import '../models/float_model.dart';
 void main() {
   group('Float filter', () {
     Isar isar;
-    late IsarCollection<FloatModel> col;
+    late IsarCollection<int, FloatModel> col;
 
     setUp(() async {
       setupIsar();
@@ -162,16 +162,6 @@ void main() {
     test('where isNotNull()', () async {
       await qEqualSet(
         col.where().fieldIsNotNull().findAll(),
-        [
-          FloatModel()..field = 0,
-          FloatModel()..field = 1.1,
-          FloatModel()..field = 2.2,
-          FloatModel()..field = 3.3,
-          FloatModel()..field = 4.4,
-        ],
-      );
-      await qEqualSet(
-        col.where().filter().fieldIsNotNull().findAll(),
         [
           FloatModel()..field = 0,
           FloatModel()..field = 1.1,

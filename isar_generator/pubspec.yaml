@@ -23,3 +23,7 @@ dev_dependencies:
   json_serializable: ^3.3.0
   build_runner: ^1.10.0
   freezed: ^0.12.6
+
+dependency_overrides:
+  isar_annotation:
+    path: ../isar_annotation

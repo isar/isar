@@ -5,22 +5,20 @@ class BinaryReader {
 
   final Uint8List _buffer;
   final ByteData _byteData;
-
-  int _offset = 0;
+  late int _staticSize;
 
   BinaryReader(this._buffer)
-      : _byteData = ByteData.view(_buffer.buffer, _buffer.offsetInBytes);
-
-  void skip(int bytes) {
-    _offset += bytes;
+      : _byteData = ByteData.view(_buffer.buffer, _buffer.offsetInBytes) {
+    _staticSize = _byteData.getUint16(0, Endian.little);
   }
 
-  bool readBool() {
-    return _buffer[_offset++] == trueBool;
+  bool readBool(int offset, {bool staticOffset = true}) {
+    return readBoolOrNull(offset, staticOffset: staticOffset) ?? false;
   }
 
-  bool? readBoolOrNull() {
-    final value = _buffer[_offset++];
+  bool? readBoolOrNull(int offset, {bool staticOffset = true}) {
+    if (staticOffset && offset >= _staticSize) return null;
+    final value = _buffer[offset];
     if (value == nullBool) {
       return null;
     } else if (value == trueBool) {
@@ -30,14 +28,13 @@ class BinaryReader {
     }
   }
 
-  int readInt() {
-    final value = _byteData.getInt32(_offset, Endian.little);
-    _offset += 4;
-    return value;
+  int readInt(int offset, {bool staticOffset = true}) {
+    return readIntOrNull(offset, staticOffset: staticOffset) ?? nullInt;
   }
 
-  int? readIntOrNull() {
-    final value = readInt();
+  int? readIntOrNull(int offset, {bool staticOffset = true}) {
+    if (staticOffset && offset >= _staticSize) return null;
+    final value = _byteData.getInt32(offset, Endian.little);
     if (value == nullInt) {
       return null;
     } else {
@@ -45,14 +42,13 @@ class BinaryReader {
     }
   }
 
-  double readFloat() {
-    var value = _byteData.getFloat32(_offset, Endian.little);
-    _offset += 4;
-    return value;
+  double readFloat(int offset, {bool staticOffset = true}) {
+    return readFloatOrNull(offset, staticOffset: staticOffset) ?? nullFloat;
   }
 
-  double? readFloatOrNull() {
-    var value = readFloat();
+  double? readFloatOrNull(int offset, {bool staticOffset = true}) {
+    if (staticOffset && offset >= _staticSize) return null;
+    var value = _byteData.getFloat32(offset, Endian.little);
     if (value.isNaN) {
       return null;
     } else {
@@ -60,14 +56,13 @@ class BinaryReader {
     }
   }
 
-  int readLong() {
-    final value = _byteData.getInt64(_offset, Endian.little);
-    _offset += 8;
-    return value;
+  int readLong(int offset, {bool staticOffset = true}) {
+    return readLongOrNull(offset, staticOffset: staticOffset) ?? nullLong;
   }
 
-  int? readLongOrNull() {
-    final value = readLong();
+  int? readLongOrNull(int offset, {bool staticOffset = true}) {
+    if (staticOffset && offset >= _staticSize) return null;
+    final value = _byteData.getInt64(offset, Endian.little);
     if (value == nullLong) {
       return null;
     } else {
@@ -75,14 +70,13 @@ class BinaryReader {
     }
   }
 
-  double readDouble() {
-    final value = _byteData.getFloat64(_offset, Endian.little);
-    _offset += 8;
-    return value;
+  double readDouble(int offset, {bool staticOffset = true}) {
+    return readDoubleOrNull(offset, staticOffset: staticOffset) ?? nullDouble;
   }
 
-  double? readDoubleOrNull() {
-    final value = readDouble();
+  double? readDoubleOrNull(int offset, {bool staticOffset = true}) {
+    if (staticOffset && offset >= _staticSize) return null;
+    final value = _byteData.getFloat64(offset, Endian.little);
     if (value.isNaN) {
       return null;
     } else {
@@ -90,213 +84,196 @@ class BinaryReader {
     }
   }
 
-  Uint8List? _readBytesOrNullAt(int bytesOffset) {
-    final offset = _buffer.readInt32(bytesOffset);
-    if (offset == 0) {
-      return null;
-    }
-    final length = _buffer.readInt32(bytesOffset + 4);
-    return _buffer.view(offset, length);
+  String readString(int offset, {bool staticOffset = true}) {
+    return readStringOrNull(offset, staticOffset: staticOffset) ?? '';
   }
 
-  String? _readStringOrNullAt(int stringOffset) {
-    final bytes = _readBytesOrNullAt(stringOffset);
+  String? readStringOrNull(int offset, {bool staticOffset = true}) {
+    final bytes = readBytesOrNull(offset, staticOffset: staticOffset);
     if (bytes != null) {
       return utf8Decoder.convert(bytes);
     }
   }
 
-  String readString() {
-    final value = _readStringOrNullAt(_offset);
-    _offset += 8;
-    return value ?? '';
+  Uint8List readBytes(int offset, {bool staticOffset = true}) {
+    return readBytesOrNull(offset, staticOffset: staticOffset) ??
+        Uint8List.fromList([]);
   }
 
-  String? readStringOrNull() {
-    final value = _readStringOrNullAt(_offset);
-    _offset += 8;
-    return value;
-  }
-
-  Uint8List readBytes() {
-    final value = _readBytesOrNullAt(_offset);
-    _offset += 8;
-    return value!;
-  }
-
-  Uint8List? readBytesOrNull() {
-    final value = _readBytesOrNullAt(_offset);
-    _offset += 8;
-    return value;
-  }
-
-  bool skipListIfNull() {
-    final offset = _buffer.readInt32(_offset);
-    if (offset == 0) {
-      _offset += 8;
-      return true;
-    } else {
-      return false;
+  Uint8List? readBytesOrNull(int offset, {bool staticOffset = true}) {
+    if (staticOffset && offset >= _staticSize) return null;
+    final bytesOffset = _buffer.readInt32(offset);
+    if (bytesOffset == 0) {
+      return null;
     }
+    final length = _buffer.readInt32(offset + 4);
+    return _buffer.view(bytesOffset, length);
   }
 
-  List<bool> readBoolList() {
-    final offset = _buffer.readInt32(_offset);
-    final length = _buffer.readInt32(_offset + 4);
-    _offset += 8;
+  List<bool>? readBoolList(int offset) {
+    if (offset >= _staticSize) return [];
+
+    final listOffset = _buffer.readInt32(offset);
+    final length = _buffer.readInt32(offset + 4);
+    if (listOffset == 0) return null;
 
     final list = <bool>[];
     for (var i = 0; i < length; i++) {
-      list[i] = _buffer[offset + i] == trueBool;
+      list[i] = readBool(listOffset + i, staticOffset: false);
     }
     return list;
   }
 
-  List<bool?> readBoolOrNullList() {
-    final offset = _buffer.readInt32(_offset);
-    final length = _buffer.readInt32(_offset + 4);
-    _offset += 8;
+  List<bool?>? readBoolOrNullList(int offset) {
+    if (offset >= _staticSize) return [];
+
+    final listOffset = _buffer.readInt32(offset);
+    final length = _buffer.readInt32(offset + 4);
+    if (listOffset == 0) return null;
 
     final list = <bool?>[];
     for (var i = 0; i < length; i++) {
-      final value = _buffer[offset + i];
-      if (value == trueBool) {
-        list[i] = true;
-      } else if (value == falseBool) {
-        list[i] = false;
-      }
+      list[i] = readBool(listOffset + i, staticOffset: false);
     }
     return list;
   }
 
-  List<int> readIntList() {
-    final offset = _buffer.readInt32(_offset);
-    final length = _buffer.readInt32(_offset + 4);
-    _offset += 8;
+  List<int>? readIntList(int offset) {
+    if (offset >= _staticSize) return [];
+
+    final listOffset = _buffer.readInt32(offset);
+    final length = _buffer.readInt32(offset + 4);
+    if (listOffset == 0) return null;
 
     final list = <int>[];
     for (var i = 0; i < length; i++) {
-      list[i] = _buffer.readInt32(offset + i * 4);
+      list[i] = _buffer.readInt32(listOffset + i * 4);
     }
     return list;
   }
 
-  List<int?> readIntOrNullList() {
-    final offset = _buffer.readInt32(_offset);
-    final length = _buffer.readInt32(_offset + 4);
-    _offset += 8;
+  List<int?>? readIntOrNullList(int offset) {
+    if (offset >= _staticSize) return [];
+
+    final listOffset = _buffer.readInt32(offset);
+    final length = _buffer.readInt32(offset + 4);
+    if (listOffset == 0) return null;
 
     final list = <int?>[];
     for (var i = 0; i < length; i++) {
-      final value = _buffer.readInt32(offset + i * 4);
-      if (value != nullInt) {
-        list[i] = value;
-      }
+      list[i] = readIntOrNull(listOffset + i * 4, staticOffset: false);
     }
     return list;
   }
 
-  List<double> readFloatList() {
-    final offset = _buffer.readInt32(_offset);
-    final length = _buffer.readInt32(_offset + 4);
-    _offset += 8;
+  List<double>? readFloatList(int offset) {
+    if (offset >= _staticSize) return [];
+
+    final listOffset = _buffer.readInt32(offset);
+    final length = _buffer.readInt32(offset + 4);
+    if (listOffset == 0) return null;
 
     final list = <double>[];
     for (var i = 0; i < length; i++) {
-      list[i] = _byteData.getFloat32(offset + i * 4, Endian.little);
+      list[i] = _byteData.getFloat32(listOffset + i * 4, Endian.little);
     }
     return list;
   }
 
-  List<double?> readFloatOrNullList() {
-    final offset = _buffer.readInt32(_offset);
-    final length = _buffer.readInt32(_offset + 4);
-    _offset += 8;
+  List<double?>? readFloatOrNullList(int offset) {
+    if (offset >= _staticSize) return [];
+
+    final listOffset = _buffer.readInt32(offset);
+    final length = _buffer.readInt32(offset + 4);
+    if (listOffset == 0) return null;
 
     final list = <double?>[];
     for (var i = 0; i < length; i++) {
-      final value = _byteData.getFloat32(offset + i * 4, Endian.little);
-      if (!value.isNaN) {
-        list[i] = value;
-      }
+      list[i] = readFloatOrNull(listOffset + i * 4, staticOffset: false);
     }
     return list;
   }
 
-  List<int> readLongList() {
-    final offset = _buffer.readInt32(_offset);
-    final length = _buffer.readInt32(_offset + 4);
-    _offset += 8;
+  List<int>? readLongList(int offset) {
+    if (offset >= _staticSize) return [];
+
+    final listOffset = _buffer.readInt32(offset);
+    final length = _buffer.readInt32(offset + 4);
+    if (listOffset == 0) return null;
 
     final list = <int>[];
     for (var i = 0; i < length; i++) {
-      list[i] = _buffer.readInt64(offset + i * 8);
+      list[i] = _buffer.readInt64(listOffset + i * 8);
     }
     return list;
   }
 
-  List<int?> readLongOrNullList() {
-    final offset = _buffer.readInt32(_offset);
-    final length = _buffer.readInt32(_offset + 4);
-    _offset += 8;
+  List<int?>? readLongOrNullList(int offset) {
+    if (offset >= _staticSize) return [];
+
+    final listOffset = _buffer.readInt32(offset);
+    final length = _buffer.readInt32(offset + 4);
+    if (listOffset == 0) return null;
 
     final list = <int?>[];
     for (var i = 0; i < length; i++) {
-      final value = _buffer.readInt64(offset + i * 8);
-      if (value != nullLong) {
-        list[i] = value;
-      }
+      list[i] = readLongOrNull(listOffset + i * 8, staticOffset: false);
     }
     return list;
   }
 
-  List<double> readDoubleList() {
-    final offset = _buffer.readInt32(_offset);
-    final length = _buffer.readInt32(_offset + 4);
-    _offset += 8;
+  List<double>? readDoubleList(int offset) {
+    if (offset >= _staticSize) return [];
+
+    final listOffset = _buffer.readInt32(offset);
+    final length = _buffer.readInt32(offset + 4);
+    if (listOffset == 0) return null;
 
     final list = <double>[];
     for (var i = 0; i < length; i++) {
-      list[i] = _byteData.getFloat64(offset + i * 8, Endian.little);
+      list[i] = _byteData.getFloat64(listOffset + i * 8, Endian.little);
     }
     return list;
   }
 
-  List<double?> readDoubleOrNullList() {
-    final offset = _buffer.readInt32(_offset);
-    final length = _buffer.readInt32(_offset + 4);
-    _offset += 8;
+  List<double?>? readDoubleOrNullList(int offset) {
+    if (offset >= _staticSize) return [];
+
+    final listOffset = _buffer.readInt32(offset);
+    final length = _buffer.readInt32(offset + 4);
+    if (listOffset == 0) return null;
 
     final list = <double?>[];
     for (var i = 0; i < length; i++) {
-      final value = _byteData.getFloat64(offset + i * 8, Endian.little);
-      if (!value.isNaN) {
-        list[i] = value;
-      }
+      list[i] = readDoubleOrNull(listOffset + i * 8, staticOffset: false);
     }
     return list;
   }
 
-  List<String?> readStringOrNullList() {
-    final offset = _buffer.readInt32(_offset);
-    final length = _buffer.readInt32(_offset + 4);
-    _offset += 8;
+  List<String>? readStringList(int offset) {
+    if (offset >= _staticSize) return [];
 
-    final list = <String?>[];
-    for (var i = 0; i < length; i++) {
-      list[i] = _readStringOrNullAt(offset + i * 8);
-    }
-    return list;
-  }
-
-  List<String> readStringList() {
-    var offset = _buffer.readInt32(_offset);
-    var length = _buffer.readInt32(_offset + 4);
-    _offset += 8;
+    var listOffset = _buffer.readInt32(offset);
+    var length = _buffer.readInt32(offset + 4);
+    if (listOffset == 0) return null;
 
     final list = <String>[];
     for (var i = 0; i < length; i++) {
-      list[i] = _readStringOrNullAt(offset + i * 8) ?? '';
+      list.add(readString(listOffset + i * 8, staticOffset: false));
+    }
+    return list;
+  }
+
+  List<String?>? readStringOrNullList(int offset) {
+    if (offset >= _staticSize) return [];
+
+    var listOffset = _buffer.readInt32(offset);
+    var length = _buffer.readInt32(offset + 4);
+    if (listOffset == 0) return null;
+
+    final list = <String?>[];
+    for (var i = 0; i < length; i++) {
+      list.add(readStringOrNull(listOffset + i * 8, staticOffset: false));
     }
     return list;
   }

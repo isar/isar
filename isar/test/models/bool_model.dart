@@ -4,7 +4,10 @@ import '../isar.g.dart';
 import 'package:isar_annotation/isar_annotation.dart';
 
 @Collection()
-class BoolModel with IsarObject {
+class BoolModel {
+  @ObjectId()
+  int? id;
+
   @Index()
   bool? field = false;
 

@@ -7,7 +7,7 @@ import '../models/int_model.dart';
 void main() {
   group('Int filter', () {
     Isar isar;
-    late IsarCollection<IntModel> col;
+    late IsarCollection<int, IntModel> col;
 
     setUp(() async {
       setupIsar();
@@ -52,29 +52,6 @@ void main() {
       await qEqual(
         col.where().filter().fieldEqualTo(5).findAll(),
         [],
-      );
-    });
-
-    test('notEqualTo()', () async {
-      await qEqualSet(
-        col.where().fieldNotEqualTo(3).findAll(),
-        {
-          IntModel()..field = null,
-          IntModel()..field = 0,
-          IntModel()..field = 1,
-          IntModel()..field = 2,
-          IntModel()..field = 4,
-        },
-      );
-      await qEqualSet(
-        col.where().filter().fieldNotEqualTo(3).findAll(),
-        {
-          IntModel()..field = null,
-          IntModel()..field = 0,
-          IntModel()..field = 1,
-          IntModel()..field = 2,
-          IntModel()..field = 4,
-        },
       );
     });
 
@@ -215,16 +192,6 @@ void main() {
     test('where isNotNull()', () async {
       await qEqualSet(
         col.where().fieldIsNotNull().findAll(),
-        {
-          IntModel()..field = 0,
-          IntModel()..field = 1,
-          IntModel()..field = 2,
-          IntModel()..field = 3,
-          IntModel()..field = 4,
-        },
-      );
-      await qEqualSet(
-        col.where().filter().fieldIsNotNull().findAll(),
         {
           IntModel()..field = 0,
           IntModel()..field = 1,

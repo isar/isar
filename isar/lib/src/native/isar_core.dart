@@ -21,8 +21,8 @@ const nullFloat = minFloat;
 const nullDouble = minDouble;
 
 class IsarCoreUtils {
-  static final syncTxnPtr = allocate<Pointer>();
-  static final syncRawObjPtr = allocate<RawObject>();
+  static final syncTxnPtr = calloc<Pointer>();
+  static final syncRawObjPtr = calloc<RawObject>();
 }
 
 IsarCoreBindings? _IC;
@@ -56,18 +56,51 @@ void initializeIsarCore({Map<String, String> dylibs = const {}}) {
   }
 }
 
+const _encoder = Utf8Encoder();
+const _decoder = Utf8Decoder();
+
 extension RawObjectX on RawObject {
-  ObjectId? get oid {
-    if (oid_time != 0) {
-      return ObjectId(oid_time, oid_counter, oid_rand);
+  dynamic? get id {
+    if (oid_str_len > 0) {
+      if (oid_num != 0) {
+        return null;
+      } else {
+        return _decoder.convert(oid_str.asTypedList(oid_str_len));
+      }
     } else {
-      return null;
+      return oid_num;
     }
   }
 
-  set oid(ObjectId? oid) {
-    oid_time = oid?.time ?? 0;
-    oid_counter = oid?.counter ?? 0;
-    oid_rand = oid?.rand ?? 0;
+  set id(dynamic? id) {
+    if (id != null) {
+      if (id is String) {
+        final bytes = _encoder.convert(id);
+        final ptr = calloc<Uint8>(bytes.length);
+        final ptrBytes = ptr.asTypedList(bytes.length);
+        ptrBytes.setAll(0, bytes);
+        oid_str = ptr;
+        oid_str_len = bytes.length;
+      } else if (id is int) {
+        oid_num = id;
+      } else {
+        throw UnimplementedError();
+      }
+    } else {
+      oid_num = 1;
+      oid_str_len = 1;
+    }
+  }
+
+  void freeId() {
+    if (oid_str.address != 0) {
+      calloc.free(oid_str);
+    }
+  }
+
+  void freeData() {
+    if (data.address != 0) {
+      calloc.free(data);
+    }
   }
 }

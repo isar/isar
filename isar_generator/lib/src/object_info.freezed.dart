@@ -20,12 +20,14 @@ class _$ObjectInfoTearOff {
   _ObjectInfo call(
       {String dartName,
       String isarName,
+      ObjectProperty oidProperty,
       List<ObjectProperty> properties = const [],
       List<ObjectIndex> indices = const [],
       List<String> converterImports = const []}) {
     return _ObjectInfo(
       dartName: dartName,
       isarName: isarName,
+      oidProperty: oidProperty,
       properties: properties,
       indices: indices,
       converterImports: converterImports,
@@ -46,6 +48,7 @@ const $ObjectInfo = _$ObjectInfoTearOff();
 mixin _$ObjectInfo {
   String get dartName;
   String get isarName;
+  ObjectProperty get oidProperty;
   List<ObjectProperty> get properties;
   List<ObjectIndex> get indices;
   List<String> get converterImports;
@@ -62,9 +65,12 @@ abstract class $ObjectInfoCopyWith<$Res> {
   $Res call(
       {String dartName,
       String isarName,
+      ObjectProperty oidProperty,
       List<ObjectProperty> properties,
       List<ObjectIndex> indices,
       List<String> converterImports});
+
+  $ObjectPropertyCopyWith<$Res> get oidProperty;
 }
 
 /// @nodoc
@@ -79,6 +85,7 @@ class _$ObjectInfoCopyWithImpl<$Res> implements $ObjectInfoCopyWith<$Res> {
   $Res call({
     Object dartName = freezed,
     Object isarName = freezed,
+    Object oidProperty = freezed,
     Object properties = freezed,
     Object indices = freezed,
     Object converterImports = freezed,
@@ -86,6 +93,9 @@ class _$ObjectInfoCopyWithImpl<$Res> implements $ObjectInfoCopyWith<$Res> {
     return _then(_value.copyWith(
       dartName: dartName == freezed ? _value.dartName : dartName as String,
       isarName: isarName == freezed ? _value.isarName : isarName as String,
+      oidProperty: oidProperty == freezed
+          ? _value.oidProperty
+          : oidProperty as ObjectProperty,
       properties: properties == freezed
           ? _value.properties
           : properties as List<ObjectProperty>,
@@ -95,6 +105,16 @@ class _$ObjectInfoCopyWithImpl<$Res> implements $ObjectInfoCopyWith<$Res> {
           ? _value.converterImports
           : converterImports as List<String>,
     ));
+  }
+
+  @override
+  $ObjectPropertyCopyWith<$Res> get oidProperty {
+    if (_value.oidProperty == null) {
+      return null;
+    }
+    return $ObjectPropertyCopyWith<$Res>(_value.oidProperty, (value) {
+      return _then(_value.copyWith(oidProperty: value));
+    });
   }
 }
 
@@ -107,9 +127,13 @@ abstract class _$ObjectInfoCopyWith<$Res> implements $ObjectInfoCopyWith<$Res> {
   $Res call(
       {String dartName,
       String isarName,
+      ObjectProperty oidProperty,
       List<ObjectProperty> properties,
       List<ObjectIndex> indices,
       List<String> converterImports});
+
+  @override
+  $ObjectPropertyCopyWith<$Res> get oidProperty;
 }
 
 /// @nodoc
@@ -126,6 +150,7 @@ class __$ObjectInfoCopyWithImpl<$Res> extends _$ObjectInfoCopyWithImpl<$Res>
   $Res call({
     Object dartName = freezed,
     Object isarName = freezed,
+    Object oidProperty = freezed,
     Object properties = freezed,
     Object indices = freezed,
     Object converterImports = freezed,
@@ -133,6 +158,9 @@ class __$ObjectInfoCopyWithImpl<$Res> extends _$ObjectInfoCopyWithImpl<$Res>
     return _then(_ObjectInfo(
       dartName: dartName == freezed ? _value.dartName : dartName as String,
       isarName: isarName == freezed ? _value.isarName : isarName as String,
+      oidProperty: oidProperty == freezed
+          ? _value.oidProperty
+          : oidProperty as ObjectProperty,
       properties: properties == freezed
           ? _value.properties
           : properties as List<ObjectProperty>,
@@ -152,6 +180,7 @@ class _$_ObjectInfo implements _ObjectInfo {
   const _$_ObjectInfo(
       {this.dartName,
       this.isarName,
+      this.oidProperty,
       this.properties = const [],
       this.indices = const [],
       this.converterImports = const []})
@@ -166,6 +195,8 @@ class _$_ObjectInfo implements _ObjectInfo {
   final String dartName;
   @override
   final String isarName;
+  @override
+  final ObjectProperty oidProperty;
   @JsonKey(defaultValue: const [])
   @override
   final List<ObjectProperty> properties;
@@ -178,7 +209,7 @@ class _$_ObjectInfo implements _ObjectInfo {
 
   @override
   String toString() {
-    return 'ObjectInfo(dartName: $dartName, isarName: $isarName, properties: $properties, indices: $indices, converterImports: $converterImports)';
+    return 'ObjectInfo(dartName: $dartName, isarName: $isarName, oidProperty: $oidProperty, properties: $properties, indices: $indices, converterImports: $converterImports)';
   }
 
   @override
@@ -191,6 +222,9 @@ class _$_ObjectInfo implements _ObjectInfo {
             (identical(other.isarName, isarName) ||
                 const DeepCollectionEquality()
                     .equals(other.isarName, isarName)) &&
+            (identical(other.oidProperty, oidProperty) ||
+                const DeepCollectionEquality()
+                    .equals(other.oidProperty, oidProperty)) &&
             (identical(other.properties, properties) ||
                 const DeepCollectionEquality()
                     .equals(other.properties, properties)) &&
@@ -207,6 +241,7 @@ class _$_ObjectInfo implements _ObjectInfo {
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(dartName) ^
       const DeepCollectionEquality().hash(isarName) ^
+      const DeepCollectionEquality().hash(oidProperty) ^
       const DeepCollectionEquality().hash(properties) ^
       const DeepCollectionEquality().hash(indices) ^
       const DeepCollectionEquality().hash(converterImports);
@@ -225,6 +260,7 @@ abstract class _ObjectInfo implements ObjectInfo {
   const factory _ObjectInfo(
       {String dartName,
       String isarName,
+      ObjectProperty oidProperty,
       List<ObjectProperty> properties,
       List<ObjectIndex> indices,
       List<String> converterImports}) = _$_ObjectInfo;
@@ -236,6 +272,8 @@ abstract class _ObjectInfo implements ObjectInfo {
   String get dartName;
   @override
   String get isarName;
+  @override
+  ObjectProperty get oidProperty;
   @override
   List<ObjectProperty> get properties;
   @override
@@ -261,7 +299,6 @@ class _$ObjectPropertyTearOff {
       String dartType,
       IsarType isarType,
       String converter,
-      int staticPadding,
       bool nullable,
       bool elementNullable}) {
     return _ObjectProperty(
@@ -270,7 +307,6 @@ class _$ObjectPropertyTearOff {
       dartType: dartType,
       isarType: isarType,
       converter: converter,
-      staticPadding: staticPadding,
       nullable: nullable,
       elementNullable: elementNullable,
     );
@@ -293,7 +329,6 @@ mixin _$ObjectProperty {
   String get dartType;
   IsarType get isarType;
   String get converter;
-  int get staticPadding;
   bool get nullable;
   bool get elementNullable;
 
@@ -312,7 +347,6 @@ abstract class $ObjectPropertyCopyWith<$Res> {
       String dartType,
       IsarType isarType,
       String converter,
-      int staticPadding,
       bool nullable,
       bool elementNullable});
 }
@@ -333,7 +367,6 @@ class _$ObjectPropertyCopyWithImpl<$Res>
     Object dartType = freezed,
     Object isarType = freezed,
     Object converter = freezed,
-    Object staticPadding = freezed,
     Object nullable = freezed,
     Object elementNullable = freezed,
   }) {
@@ -343,9 +376,6 @@ class _$ObjectPropertyCopyWithImpl<$Res>
       dartType: dartType == freezed ? _value.dartType : dartType as String,
       isarType: isarType == freezed ? _value.isarType : isarType as IsarType,
       converter: converter == freezed ? _value.converter : converter as String,
-      staticPadding: staticPadding == freezed
-          ? _value.staticPadding
-          : staticPadding as int,
       nullable: nullable == freezed ? _value.nullable : nullable as bool,
       elementNullable: elementNullable == freezed
           ? _value.elementNullable
@@ -367,7 +397,6 @@ abstract class _$ObjectPropertyCopyWith<$Res>
       String dartType,
       IsarType isarType,
       String converter,
-      int staticPadding,
       bool nullable,
       bool elementNullable});
 }
@@ -390,7 +419,6 @@ class __$ObjectPropertyCopyWithImpl<$Res>
     Object dartType = freezed,
     Object isarType = freezed,
     Object converter = freezed,
-    Object staticPadding = freezed,
     Object nullable = freezed,
     Object elementNullable = freezed,
   }) {
@@ -400,9 +428,6 @@ class __$ObjectPropertyCopyWithImpl<$Res>
       dartType: dartType == freezed ? _value.dartType : dartType as String,
       isarType: isarType == freezed ? _value.isarType : isarType as IsarType,
       converter: converter == freezed ? _value.converter : converter as String,
-      staticPadding: staticPadding == freezed
-          ? _value.staticPadding
-          : staticPadding as int,
       nullable: nullable == freezed ? _value.nullable : nullable as bool,
       elementNullable: elementNullable == freezed
           ? _value.elementNullable
@@ -421,7 +446,6 @@ class _$_ObjectProperty implements _ObjectProperty {
       this.dartType,
       this.isarType,
       this.converter,
-      this.staticPadding,
       this.nullable,
       this.elementNullable});
 
@@ -439,15 +463,13 @@ class _$_ObjectProperty implements _ObjectProperty {
   @override
   final String converter;
   @override
-  final int staticPadding;
-  @override
   final bool nullable;
   @override
   final bool elementNullable;
 
   @override
   String toString() {
-    return 'ObjectProperty(dartName: $dartName, isarName: $isarName, dartType: $dartType, isarType: $isarType, converter: $converter, staticPadding: $staticPadding, nullable: $nullable, elementNullable: $elementNullable)';
+    return 'ObjectProperty(dartName: $dartName, isarName: $isarName, dartType: $dartType, isarType: $isarType, converter: $converter, nullable: $nullable, elementNullable: $elementNullable)';
   }
 
   @override
@@ -469,9 +491,6 @@ class _$_ObjectProperty implements _ObjectProperty {
             (identical(other.converter, converter) ||
                 const DeepCollectionEquality()
                     .equals(other.converter, converter)) &&
-            (identical(other.staticPadding, staticPadding) ||
-                const DeepCollectionEquality()
-                    .equals(other.staticPadding, staticPadding)) &&
             (identical(other.nullable, nullable) ||
                 const DeepCollectionEquality()
                     .equals(other.nullable, nullable)) &&
@@ -488,7 +507,6 @@ class _$_ObjectProperty implements _ObjectProperty {
       const DeepCollectionEquality().hash(dartType) ^
       const DeepCollectionEquality().hash(isarType) ^
       const DeepCollectionEquality().hash(converter) ^
-      const DeepCollectionEquality().hash(staticPadding) ^
       const DeepCollectionEquality().hash(nullable) ^
       const DeepCollectionEquality().hash(elementNullable);
 
@@ -509,7 +527,6 @@ abstract class _ObjectProperty implements ObjectProperty {
       String dartType,
       IsarType isarType,
       String converter,
-      int staticPadding,
       bool nullable,
       bool elementNullable}) = _$_ObjectProperty;
 
@@ -527,13 +544,197 @@ abstract class _ObjectProperty implements ObjectProperty {
   @override
   String get converter;
   @override
-  int get staticPadding;
-  @override
   bool get nullable;
   @override
   bool get elementNullable;
   @override
   _$ObjectPropertyCopyWith<_ObjectProperty> get copyWith;
+}
+
+ObjectIndexProperty _$ObjectIndexPropertyFromJson(Map<String, dynamic> json) {
+  return _ObjectIndexProperty.fromJson(json);
+}
+
+/// @nodoc
+class _$ObjectIndexPropertyTearOff {
+  const _$ObjectIndexPropertyTearOff();
+
+// ignore: unused_element
+  _ObjectIndexProperty call(
+      {String isarName, StringIndexType stringType, bool caseSensitive}) {
+    return _ObjectIndexProperty(
+      isarName: isarName,
+      stringType: stringType,
+      caseSensitive: caseSensitive,
+    );
+  }
+
+// ignore: unused_element
+  ObjectIndexProperty fromJson(Map<String, Object> json) {
+    return ObjectIndexProperty.fromJson(json);
+  }
+}
+
+/// @nodoc
+// ignore: unused_element
+const $ObjectIndexProperty = _$ObjectIndexPropertyTearOff();
+
+/// @nodoc
+mixin _$ObjectIndexProperty {
+  String get isarName;
+  StringIndexType get stringType;
+  bool get caseSensitive;
+
+  Map<String, dynamic> toJson();
+  $ObjectIndexPropertyCopyWith<ObjectIndexProperty> get copyWith;
+}
+
+/// @nodoc
+abstract class $ObjectIndexPropertyCopyWith<$Res> {
+  factory $ObjectIndexPropertyCopyWith(
+          ObjectIndexProperty value, $Res Function(ObjectIndexProperty) then) =
+      _$ObjectIndexPropertyCopyWithImpl<$Res>;
+  $Res call({String isarName, StringIndexType stringType, bool caseSensitive});
+}
+
+/// @nodoc
+class _$ObjectIndexPropertyCopyWithImpl<$Res>
+    implements $ObjectIndexPropertyCopyWith<$Res> {
+  _$ObjectIndexPropertyCopyWithImpl(this._value, this._then);
+
+  final ObjectIndexProperty _value;
+  // ignore: unused_field
+  final $Res Function(ObjectIndexProperty) _then;
+
+  @override
+  $Res call({
+    Object isarName = freezed,
+    Object stringType = freezed,
+    Object caseSensitive = freezed,
+  }) {
+    return _then(_value.copyWith(
+      isarName: isarName == freezed ? _value.isarName : isarName as String,
+      stringType: stringType == freezed
+          ? _value.stringType
+          : stringType as StringIndexType,
+      caseSensitive: caseSensitive == freezed
+          ? _value.caseSensitive
+          : caseSensitive as bool,
+    ));
+  }
+}
+
+/// @nodoc
+abstract class _$ObjectIndexPropertyCopyWith<$Res>
+    implements $ObjectIndexPropertyCopyWith<$Res> {
+  factory _$ObjectIndexPropertyCopyWith(_ObjectIndexProperty value,
+          $Res Function(_ObjectIndexProperty) then) =
+      __$ObjectIndexPropertyCopyWithImpl<$Res>;
+  @override
+  $Res call({String isarName, StringIndexType stringType, bool caseSensitive});
+}
+
+/// @nodoc
+class __$ObjectIndexPropertyCopyWithImpl<$Res>
+    extends _$ObjectIndexPropertyCopyWithImpl<$Res>
+    implements _$ObjectIndexPropertyCopyWith<$Res> {
+  __$ObjectIndexPropertyCopyWithImpl(
+      _ObjectIndexProperty _value, $Res Function(_ObjectIndexProperty) _then)
+      : super(_value, (v) => _then(v as _ObjectIndexProperty));
+
+  @override
+  _ObjectIndexProperty get _value => super._value as _ObjectIndexProperty;
+
+  @override
+  $Res call({
+    Object isarName = freezed,
+    Object stringType = freezed,
+    Object caseSensitive = freezed,
+  }) {
+    return _then(_ObjectIndexProperty(
+      isarName: isarName == freezed ? _value.isarName : isarName as String,
+      stringType: stringType == freezed
+          ? _value.stringType
+          : stringType as StringIndexType,
+      caseSensitive: caseSensitive == freezed
+          ? _value.caseSensitive
+          : caseSensitive as bool,
+    ));
+  }
+}
+
+@JsonSerializable()
+
+/// @nodoc
+class _$_ObjectIndexProperty implements _ObjectIndexProperty {
+  const _$_ObjectIndexProperty(
+      {this.isarName, this.stringType, this.caseSensitive});
+
+  factory _$_ObjectIndexProperty.fromJson(Map<String, dynamic> json) =>
+      _$_$_ObjectIndexPropertyFromJson(json);
+
+  @override
+  final String isarName;
+  @override
+  final StringIndexType stringType;
+  @override
+  final bool caseSensitive;
+
+  @override
+  String toString() {
+    return 'ObjectIndexProperty(isarName: $isarName, stringType: $stringType, caseSensitive: $caseSensitive)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _ObjectIndexProperty &&
+            (identical(other.isarName, isarName) ||
+                const DeepCollectionEquality()
+                    .equals(other.isarName, isarName)) &&
+            (identical(other.stringType, stringType) ||
+                const DeepCollectionEquality()
+                    .equals(other.stringType, stringType)) &&
+            (identical(other.caseSensitive, caseSensitive) ||
+                const DeepCollectionEquality()
+                    .equals(other.caseSensitive, caseSensitive)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(isarName) ^
+      const DeepCollectionEquality().hash(stringType) ^
+      const DeepCollectionEquality().hash(caseSensitive);
+
+  @override
+  _$ObjectIndexPropertyCopyWith<_ObjectIndexProperty> get copyWith =>
+      __$ObjectIndexPropertyCopyWithImpl<_ObjectIndexProperty>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$_$_ObjectIndexPropertyToJson(this);
+  }
+}
+
+abstract class _ObjectIndexProperty implements ObjectIndexProperty {
+  const factory _ObjectIndexProperty(
+      {String isarName,
+      StringIndexType stringType,
+      bool caseSensitive}) = _$_ObjectIndexProperty;
+
+  factory _ObjectIndexProperty.fromJson(Map<String, dynamic> json) =
+      _$_ObjectIndexProperty.fromJson;
+
+  @override
+  String get isarName;
+  @override
+  StringIndexType get stringType;
+  @override
+  bool get caseSensitive;
+  @override
+  _$ObjectIndexPropertyCopyWith<_ObjectIndexProperty> get copyWith;
 }
 
 ObjectIndex _$ObjectIndexFromJson(Map<String, dynamic> json) {
@@ -545,11 +746,10 @@ class _$ObjectIndexTearOff {
   const _$ObjectIndexTearOff();
 
 // ignore: unused_element
-  _ObjectIndex call({List<String> properties, bool unique, bool hashValue}) {
+  _ObjectIndex call({List<ObjectIndexProperty> properties, bool unique}) {
     return _ObjectIndex(
       properties: properties,
       unique: unique,
-      hashValue: hashValue,
     );
   }
 
@@ -565,9 +765,8 @@ const $ObjectIndex = _$ObjectIndexTearOff();
 
 /// @nodoc
 mixin _$ObjectIndex {
-  List<String> get properties;
+  List<ObjectIndexProperty> get properties;
   bool get unique;
-  bool get hashValue;
 
   Map<String, dynamic> toJson();
   $ObjectIndexCopyWith<ObjectIndex> get copyWith;
@@ -578,7 +777,7 @@ abstract class $ObjectIndexCopyWith<$Res> {
   factory $ObjectIndexCopyWith(
           ObjectIndex value, $Res Function(ObjectIndex) then) =
       _$ObjectIndexCopyWithImpl<$Res>;
-  $Res call({List<String> properties, bool unique, bool hashValue});
+  $Res call({List<ObjectIndexProperty> properties, bool unique});
 }
 
 /// @nodoc
@@ -593,14 +792,12 @@ class _$ObjectIndexCopyWithImpl<$Res> implements $ObjectIndexCopyWith<$Res> {
   $Res call({
     Object properties = freezed,
     Object unique = freezed,
-    Object hashValue = freezed,
   }) {
     return _then(_value.copyWith(
       properties: properties == freezed
           ? _value.properties
-          : properties as List<String>,
+          : properties as List<ObjectIndexProperty>,
       unique: unique == freezed ? _value.unique : unique as bool,
-      hashValue: hashValue == freezed ? _value.hashValue : hashValue as bool,
     ));
   }
 }
@@ -612,7 +809,7 @@ abstract class _$ObjectIndexCopyWith<$Res>
           _ObjectIndex value, $Res Function(_ObjectIndex) then) =
       __$ObjectIndexCopyWithImpl<$Res>;
   @override
-  $Res call({List<String> properties, bool unique, bool hashValue});
+  $Res call({List<ObjectIndexProperty> properties, bool unique});
 }
 
 /// @nodoc
@@ -629,14 +826,12 @@ class __$ObjectIndexCopyWithImpl<$Res> extends _$ObjectIndexCopyWithImpl<$Res>
   $Res call({
     Object properties = freezed,
     Object unique = freezed,
-    Object hashValue = freezed,
   }) {
     return _then(_ObjectIndex(
       properties: properties == freezed
           ? _value.properties
-          : properties as List<String>,
+          : properties as List<ObjectIndexProperty>,
       unique: unique == freezed ? _value.unique : unique as bool,
-      hashValue: hashValue == freezed ? _value.hashValue : hashValue as bool,
     ));
   }
 }
@@ -645,21 +840,19 @@ class __$ObjectIndexCopyWithImpl<$Res> extends _$ObjectIndexCopyWithImpl<$Res>
 
 /// @nodoc
 class _$_ObjectIndex implements _ObjectIndex {
-  const _$_ObjectIndex({this.properties, this.unique, this.hashValue});
+  const _$_ObjectIndex({this.properties, this.unique});
 
   factory _$_ObjectIndex.fromJson(Map<String, dynamic> json) =>
       _$_$_ObjectIndexFromJson(json);
 
   @override
-  final List<String> properties;
+  final List<ObjectIndexProperty> properties;
   @override
   final bool unique;
-  @override
-  final bool hashValue;
 
   @override
   String toString() {
-    return 'ObjectIndex(properties: $properties, unique: $unique, hashValue: $hashValue)';
+    return 'ObjectIndex(properties: $properties, unique: $unique)';
   }
 
   @override
@@ -670,18 +863,14 @@ class _$_ObjectIndex implements _ObjectIndex {
                 const DeepCollectionEquality()
                     .equals(other.properties, properties)) &&
             (identical(other.unique, unique) ||
-                const DeepCollectionEquality().equals(other.unique, unique)) &&
-            (identical(other.hashValue, hashValue) ||
-                const DeepCollectionEquality()
-                    .equals(other.hashValue, hashValue)));
+                const DeepCollectionEquality().equals(other.unique, unique)));
   }
 
   @override
   int get hashCode =>
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(properties) ^
-      const DeepCollectionEquality().hash(unique) ^
-      const DeepCollectionEquality().hash(hashValue);
+      const DeepCollectionEquality().hash(unique);
 
   @override
   _$ObjectIndexCopyWith<_ObjectIndex> get copyWith =>
@@ -695,17 +884,15 @@ class _$_ObjectIndex implements _ObjectIndex {
 
 abstract class _ObjectIndex implements ObjectIndex {
   const factory _ObjectIndex(
-      {List<String> properties, bool unique, bool hashValue}) = _$_ObjectIndex;
+      {List<ObjectIndexProperty> properties, bool unique}) = _$_ObjectIndex;
 
   factory _ObjectIndex.fromJson(Map<String, dynamic> json) =
       _$_ObjectIndex.fromJson;
 
   @override
-  List<String> get properties;
+  List<ObjectIndexProperty> get properties;
   @override
   bool get unique;
-  @override
-  bool get hashValue;
   @override
   _$ObjectIndexCopyWith<_ObjectIndex> get copyWith;
 }

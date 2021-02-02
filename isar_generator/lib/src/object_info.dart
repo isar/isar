@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:dartx/dartx.dart';
+import 'package:isar_annotation/isar_annotation.dart';
 
 part 'object_info.g.dart';
 part 'object_info.freezed.dart';
@@ -10,6 +11,7 @@ abstract class ObjectInfo with _$ObjectInfo {
   const factory ObjectInfo({
     String dartName,
     String isarName,
+    ObjectProperty oidProperty,
     @Default([]) List<ObjectProperty> properties,
     @Default([]) List<ObjectIndex> indices,
     @Default([]) List<String> converterImports,
@@ -27,9 +29,7 @@ extension ObjectInfoX on ObjectInfo {
   String get adapterName => '_${dartName}Adapter';
 
   int getStaticSize() {
-    return properties
-        .sumBy((p) => p.isarType.staticSize + p.staticPadding)
-        .toInt();
+    return properties.sumBy((p) => p.isarType.staticSize).toInt() + 2;
   }
 }
 
@@ -41,7 +41,6 @@ abstract class ObjectProperty with _$ObjectProperty {
     String dartType,
     IsarType isarType,
     String converter,
-    int staticPadding,
     bool nullable,
     bool elementNullable,
   }) = _ObjectProperty;
@@ -51,11 +50,22 @@ abstract class ObjectProperty with _$ObjectProperty {
 }
 
 @freezed
+abstract class ObjectIndexProperty with _$ObjectIndexProperty {
+  const factory ObjectIndexProperty({
+    String isarName,
+    StringIndexType stringType,
+    bool caseSensitive,
+  }) = _ObjectIndexProperty;
+
+  factory ObjectIndexProperty.fromJson(Map<String, dynamic> json) =>
+      _$ObjectIndexPropertyFromJson(json);
+}
+
+@freezed
 abstract class ObjectIndex with _$ObjectIndex {
   const factory ObjectIndex({
-    List<String> properties,
+    List<ObjectIndexProperty> properties,
     bool unique,
-    bool hashValue,
   }) = _ObjectIndex;
 
   factory ObjectIndex.fromJson(Map<String, dynamic> json) =>
@@ -108,8 +118,8 @@ extension ObjectPropertyX on ObjectProperty {
     return type;
   }
 
-  bool get isFloatDouble {
-    return isarType == IsarType.Float || isarType == IsarType.Double;
+  String get dartTypeNotNull {
+    return dartType.removeSuffix('?');
   }
 }
 
@@ -130,8 +140,16 @@ enum IsarType {
 }
 
 extension IsarTypeX on IsarType {
+  bool get isFloatDouble {
+    return this == IsarType.Float || this == IsarType.Double;
+  }
+
   bool get isDynamic {
     return index >= IsarType.String.index;
+  }
+
+  bool get isList {
+    return index > IsarType.String.index;
   }
 
   int get staticSize {
@@ -141,23 +159,6 @@ extension IsarTypeX on IsarType {
       return 4;
     } else {
       return 8;
-    }
-  }
-
-  int get elementAlignment {
-    switch (this) {
-      case IsarType.String:
-      case IsarType.Bytes:
-      case IsarType.StringList:
-        return 1;
-      case IsarType.IntList:
-      case IsarType.FloatList:
-        return 4;
-      case IsarType.LongList:
-      case IsarType.DoubleList:
-        return 8;
-      default:
-        return null;
     }
   }
 

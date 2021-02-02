@@ -3,7 +3,10 @@ import 'package:isar/isar.dart';
 import 'package:isar_annotation/isar_annotation.dart';
 
 @Collection()
-class ConverterModel extends IsarObject {
+class ConverterModel {
+  @ObjectId()
+  int? id;
+
   @BoolConverter()
   late bool boolValue;
 
@@ -23,6 +26,20 @@ class ConverterModel extends IsarObject {
 
   @StringConverter()
   late String stringValue;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is ConverterModel) {
+      return boolValue == other.boolValue &&
+          intValue == other.intValue &&
+          longValue == other.longValue &&
+          floatValue == other.floatValue &&
+          doubleValue == other.doubleValue &&
+          stringValue == other.stringValue;
+    } else {
+      return false;
+    }
+  }
 }
 
 class BoolConverter extends TypeConverter<bool, String> {

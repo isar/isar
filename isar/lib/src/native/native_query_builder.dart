@@ -1,8 +1,10 @@
 part of isar_native;
 
-NativeQuery<T> buildQuery<T extends IsarObject>(IsarCollection<T> collection,
-    List<WhereClause> whereClauses, FilterGroup filter) {
-  final col = collection as IsarCollectionImpl<T>;
+NativeQuery<OBJECT> buildQuery<OBJECT>(
+    IsarCollection<dynamic, OBJECT> collection,
+    List<WhereClause> whereClauses,
+    FilterGroup filter) {
+  final col = collection as IsarCollectionImpl<dynamic, OBJECT>;
   final colPtr = col.collectionPtr;
   final qbPtr = IC.isar_qb_create(colPtr);
   for (var whereClause in whereClauses) {
@@ -18,7 +20,7 @@ NativeQuery<T> buildQuery<T extends IsarObject>(IsarCollection<T> collection,
 }
 
 void _addWhereClause(Pointer colPtr, Pointer qbPtr, WhereClause wc) {
-  final wcPtrPtr = allocate<Pointer<NativeType>>();
+  final wcPtrPtr = calloc<Pointer<NativeType>>();
   nCall(IC.isar_wc_create(
     colPtr,
     wcPtrPtr,
@@ -44,7 +46,7 @@ void _addWhereClause(Pointer colPtr, Pointer qbPtr, WhereClause wc) {
     wc.includeLower,
     wc.includeUpper,
   ));
-  free(wcPtrPtr);
+  calloc.free(wcPtrPtr);
 }
 
 WhereClause resolveWhereClause(WhereClause wc) {
@@ -178,10 +180,10 @@ void addWhereValue({
       }
       //IC.isar_wc_add_string_value(wcPtr, lowerPtr, upperPtr);
       if (lower != null) {
-        free(lowerPtr);
+        calloc.free(lowerPtr);
       }
       if (upper != null) {
-        free(upperPtr);
+        calloc.free(upperPtr);
       }
       return;
   }
@@ -203,76 +205,65 @@ Pointer<NativeType>? _buildFilter(Pointer colPtr, FilterGroup filter) {
     return null;
   }
 
-  final conditionsPtrPtr =
-      allocate<Pointer<NativeType>>(count: builtConditions.length);
+  final conditionsPtrPtr = calloc<Pointer<NativeType>>(builtConditions.length);
 
   for (var i = 0; i < builtConditions.length; i++) {
     conditionsPtrPtr[i] = builtConditions[i]!;
   }
 
-  final filterPtrPtr = allocate<Pointer<NativeType>>();
-  nCall(IC.isar_filter_and_or(
-    filterPtrPtr,
-    filter.andOr == FilterAndOr.And,
-    conditionsPtrPtr,
-    filter.conditions.length,
-  ));
+  final filterPtrPtr = calloc<Pointer<NativeType>>();
+  if (filter.groupType == FilterGroupType.Not) {
+    nCall(IC.isar_filter_not(
+      filterPtrPtr,
+      conditionsPtrPtr.elementAt(0),
+    ));
+  } else {
+    nCall(IC.isar_filter_and_or(
+      filterPtrPtr,
+      filter.groupType == FilterGroupType.And,
+      conditionsPtrPtr,
+      filter.conditions.length,
+    ));
+  }
 
   final filterPtr = filterPtrPtr.value;
-  free(conditionsPtrPtr);
-  free(filterPtrPtr);
+  calloc.free(conditionsPtrPtr);
+  calloc.free(filterPtrPtr);
   return filterPtr;
 }
 
 Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
-  final filterPtrPtr = allocate<Pointer<Pointer<NativeType>>>();
+  final filterPtrPtr = calloc<Pointer<Pointer<NativeType>>>();
   final pIndex = condition.propertyIndex;
   final include = condition.includeValue;
   final include2 = condition.includeValue2;
   switch (condition.conditionType) {
-    case ConditionType.IsNull:
-      nCall(IC.isar_filter_is_null(colPtr, filterPtrPtr, true, pIndex));
-      break;
-    case ConditionType.IsNotNull:
-      nCall(IC.isar_filter_is_null(colPtr, filterPtrPtr, false, pIndex));
-      break;
     case ConditionType.Eq:
+      if (condition.value == null) {
+        nCall(IC.isar_filter_is_null(colPtr, filterPtrPtr, pIndex));
+        break;
+      }
       switch (condition.propertyType) {
         case 'Bool':
-          final value = boolToByte(condition.value);
+          final value = boolToByte(condition.value!);
           nCall(IC.isar_filter_byte_between(
               colPtr, filterPtrPtr, value, true, value, true, pIndex));
           break;
         case 'Int':
-          final value = condition.value ?? nullInt;
+          final value = condition.value!;
           nCall(IC.isar_filter_int_between(
               colPtr, filterPtrPtr, value, true, value, true, pIndex));
           break;
         case 'Long':
-          final value = condition.value ?? nullLong;
+          final value = condition.value!;
           nCall(IC.isar_filter_long_between(
               colPtr, filterPtrPtr, value, true, value, true, pIndex));
           break;
-        default:
-          throw UnimplementedError();
-      }
-      break;
-    case ConditionType.NEq:
-      switch (condition.propertyType) {
-        case 'Bool':
-          final value = boolToByte(condition.value);
-          nCall(IC.isar_filter_byte_not_equal(
-              colPtr, filterPtrPtr, value, pIndex));
-          break;
-        case 'Int':
-          final value = condition.value ?? nullInt;
-          nCall(IC.isar_filter_int_not_equal(
-              colPtr, filterPtrPtr, value, pIndex));
-          break;
-        case 'Long':
-          final value = condition.value ?? nullLong;
-          nCall(IC.isar_filter_long_not_equal(
-              colPtr, filterPtrPtr, value, pIndex));
+        case 'String':
+          final strPtr = Utf8.toUtf8(condition.value!);
+          nCall(IC.isar_filter_string_equal(colPtr, filterPtrPtr, strPtr.cast(),
+              condition.caseSensitive, pIndex));
+          calloc.free(strPtr);
           break;
         default:
           throw UnimplementedError();
@@ -377,6 +368,11 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
       }
       break;
     case ConditionType.StartsWith:
+      if (condition.propertyType == 'String') {
+        //IC.isar_filter_string_starts_with(collection, filter, value, ignore_case, property_index)
+      }
+      break;
+    case ConditionType.EndsWith:
       // TODO: Handle this case.
       break;
     case ConditionType.Contains:
@@ -384,6 +380,6 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
       break;
   }
   final filterPtr = filterPtrPtr.value;
-  free(filterPtrPtr);
+  calloc.free(filterPtrPtr);
   return filterPtr;
 }

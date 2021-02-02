@@ -1,11 +1,7 @@
 part of isar_native;
 
 abstract class TypeAdapter<T> {
-  int get staticSize;
+  void serialize(RawObject rawObj, T object, List<int> offsets);
 
-  int prepareSerialize(T object, Map<String, dynamic> cache);
-
-  void serialize(T object, Map<String, dynamic> cache, BinaryWriter writer);
-
-  T deserialize(BinaryReader reader);
+  T deserialize(BinaryReader reader, List<int> offsets);
 }

@@ -7,6 +7,7 @@ final _ignoreChecker = const TypeChecker.fromRuntime(Ignore);
 final _nameChecker = const TypeChecker.fromRuntime(Name);
 final _indexChecker = const TypeChecker.fromRuntime(Index);
 final _size32Checker = const TypeChecker.fromRuntime(Size32);
+final _oidKeyChecker = const TypeChecker.fromRuntime(ObjectId);
 final _typeConverterChecker = const TypeChecker.fromRuntime(TypeConverter);
 
 bool hasIgnoreAnn(Element element) {
@@ -15,6 +16,10 @@ bool hasIgnoreAnn(Element element) {
 
 bool hasSize32Ann(Element element) {
   return _size32Checker.hasAnnotationOfExact(element);
+}
+
+bool hasObjectIdAnn(Element element) {
+  return _oidKeyChecker.hasAnnotationOfExact(element);
 }
 
 Name getNameAnn(Element element) {
@@ -46,14 +51,18 @@ bool hasZeroArgsConstructor(ClassElement element) {
 List<Index> getIndexAnns(Element element) {
   return _indexChecker.annotationsOfExact(element).map((ann) {
     var rawComposite = ann.getField('composite').toListValue();
-    List<String> composite;
+    final composite = <CompositeIndex>[];
     if (rawComposite != null) {
-      composite = rawComposite.map((e) => e.toStringValue()).toList();
+      for (var c in rawComposite) {
+        final property = c.getField('property').toStringValue();
+        final caseSensitive = c.getField('caseSensitive').toBoolValue();
+        //final stringType = c.getField('stringType').
+        composite.add(CompositeIndex(property, caseSensitive: caseSensitive));
+      }
     }
     return Index(
-      composite: composite ?? [],
+      composite: composite,
       unique: ann.getField('unique').toBoolValue(),
-      hashValue: ann.getField('hashValue').toBoolValue(),
     );
   }).toList();
 }

@@ -76,18 +76,18 @@ class IsarCodeGenerator extends Builder {
         .map((im) => im.startsWith('import') ? '$im;' : "import '$im';")
         .join('\n');
 
-    var collectionVars = objects
+    final collectionVars = objects
         .map((o) =>
-            'final ${getCollectionVar(o.dartName)} = <String, IsarCollection<${o.dartName}>>{};')
+            'final ${getCollectionVar(o.dartName)} = <String, IsarCollection<${o.oidProperty.dartTypeNotNull}, ${o.dartName}>>{};')
         .join('\n');
-    var objectAdapters =
+    final objectAdapters =
         objects.map((o) => generateObjectAdapter(o)).join('\n');
-    var getCollectionExtensions = objects
+    final getCollectionExtensions = objects
         .mapIndexed((i, o) => generateGetCollectionExtension(o, i))
         .join('\n');
-    var queryWhereExtensions =
+    final queryWhereExtensions =
         objects.map((o) => generateQueryWhere(o)).join('\n');
-    var queryFilterExtensions =
+    final queryFilterExtensions =
         objects.map((o) => generateQueryFilter(o)).join('\n');
 
     var code = '''
@@ -95,9 +95,8 @@ class IsarCodeGenerator extends Builder {
 
     export 'package:isar/isar.dart';
 
-    const utf8Encoder = Utf8Encoder();
-
     final _isar = <String, Isar>{};
+    const _utf8Encoder = Utf8Encoder();
 
     $collectionVars
     ${generateIsarOpen(objects)}
@@ -118,7 +117,7 @@ class IsarCodeGenerator extends Builder {
     await buildStep.writeAsString(codeId, code);
   }
 
-  String generateIsarOpen(Iterable<ObjectInfo> objects) {
+  String generateIsarOpen(List<ObjectInfo> objects) {
     var code = '''
     Future<Isar> openIsar({String? directory, int maxSize = 1000000000}) async {
       final path = await _preparePath(directory);
@@ -129,49 +128,65 @@ class IsarCodeGenerator extends Builder {
       initializeIsarCore();
       IC.isar_connect_dart_api(NativeApi.postCObject);
       final schemaPtr = IC.isar_schema_create();
-      final collectionPtrPtr = allocate<Pointer>();
+      final collectionPtrPtr = calloc<Pointer>();
     ''';
 
     for (var info in objects) {
       code += '''
       {
         final namePtr = Utf8.toUtf8('${info.isarName}');
-        nCall(IC.isar_schema_create_collection(collectionPtrPtr, namePtr.cast()));
+        final idNamePtr = Utf8.toUtf8('${info.oidProperty.isarName}');
+        nCall(IC.isar_schema_create_collection(
+          collectionPtrPtr,
+          namePtr.cast(),
+          idNamePtr.cast(),
+          ${info.oidProperty.isarType.typeId},
+        ));
         final collectionPtr = collectionPtrPtr.value;
-        free(namePtr);
+        calloc.free(namePtr);
+        calloc.free(idNamePtr);
       ''';
       for (var property in info.properties) {
         code += '''
         {
           final pNamePtr = Utf8.toUtf8('${property.isarName}');
-          nCall(IC.isar_schema_add_property(collectionPtr, pNamePtr.cast(), ${property.isarType.index}));
-          free(pNamePtr);
+          nCall(IC.isar_schema_add_property(collectionPtr, pNamePtr.cast(), ${property.isarType.typeId}));
+          calloc.free(pNamePtr);
         }
         ''';
       }
       for (var index in info.indices) {
         code += '''
         {
-          final propertiesPtrPtr = allocate<Pointer<Int8>>(count: ${index.properties.length});
+          final propertiesPtrPtr = calloc<Pointer<Int8>>(${index.properties.length});
+          final stringTypesPtr = calloc<Uint8>(${index.properties.length});
+          final stringsCaseSensitivePtr = calloc<Uint8>(${index.properties.length});
         ''';
         for (var i = 0; i < index.properties.length; i++) {
-          code +=
-              "propertiesPtrPtr[$i] = Utf8.toUtf8('${index.properties[i]}').cast();";
+          final indexProperty = index.properties[i];
+          code += '''
+            propertiesPtrPtr[$i] = Utf8.toUtf8('${indexProperty.isarName}').cast();
+            stringTypesPtr[$i] = ${indexProperty.stringType?.index ?? 255};
+            stringsCaseSensitivePtr[$i] = ${indexProperty.caseSensitive ? 1 : 0};
+          ''';
         }
 
         code += '''
         nCall(IC.isar_schema_add_index(
           collectionPtr,
           propertiesPtrPtr,
+          stringTypesPtr,
+          stringsCaseSensitivePtr,
           ${index.properties.length},
           ${index.unique},
-          ${index.hashValue}
         ));''';
         for (var i = 0; i < index.properties.length; i++) {
-          code += 'free(propertiesPtrPtr[$i]);';
+          code += 'calloc.free(propertiesPtrPtr[$i]);';
         }
         code += '''
-          free(propertiesPtrPtr);
+          calloc.free(propertiesPtrPtr);
+          calloc.free(stringTypesPtr);
+          calloc.free(stringsCaseSensitivePtr);
         }
         ''';
       }
@@ -184,30 +199,45 @@ class IsarCodeGenerator extends Builder {
 
     code += '''
       final pathPtr = Utf8.toUtf8(path);
-      final isarPtrPtr = allocate<Pointer>();
+      final isarPtrPtr = calloc<Pointer>();
       final receivePort = ReceivePort();
       final nativePort = receivePort.sendPort.nativePort;
       IC.isar_create_instance(isarPtrPtr, pathPtr.cast(), maxSize, schemaPtr, nativePort);
       await receivePort.first;
-      free(pathPtr);
+      calloc.free(pathPtr);
       
       final isarPtr = isarPtrPtr.value;
       final isar = IsarImpl(path, isarPtr);
       _isar[path] = isar;
-      free(isarPtrPtr);
+      calloc.free(isarPtrPtr);
     ''';
 
-    var i = 0;
-    for (var info in objects) {
+    for (var i = 0; i < objects.length; i++) {
+      final info = objects[i];
       code += '''
-      nCall(IC.isar_get_collection(isarPtr, collectionPtrPtr, $i));
-      ${getCollectionVar(info.dartName)}[path] = IsarCollectionImpl(isar, _${info.dartName}Adapter(), collectionPtrPtr.value);
+      {
+        nCall(IC.isar_get_collection(isarPtr, collectionPtrPtr, $i));
+        final propertyOffsets = <int>[];
       ''';
-      i++;
+      for (var p = 0; p < info.properties.length; p++) {
+        code +=
+            'propertyOffsets.add(IC.isar_get_property_offset(collectionPtrPtr.value, $p));';
+      }
+      code += '''
+        ${getCollectionVar(info.dartName)}[path] = IsarCollectionImpl(
+          isar,
+          _${info.dartName}Adapter(),
+          collectionPtrPtr.value,
+          propertyOffsets,
+          (obj) => obj.${info.oidProperty.dartName},
+          (id, obj) => obj.${info.oidProperty.dartName} = id,
+        );
+      }
+      ''';
     }
 
     code += '''
-      free(collectionPtrPtr);
+      calloc.free(collectionPtrPtr);
       return isar;
     }
     ''';
@@ -239,7 +269,7 @@ class IsarCodeGenerator extends Builder {
   String generateGetCollectionExtension(ObjectInfo object, int objectIndex) {
     return '''
     extension Get${object.dartName}Collection on Isar {
-      IsarCollection<${object.dartName}> get ${object.dartName.decapitalize()}s {
+      IsarCollection<${object.oidProperty.dartTypeNotNull}, ${object.dartName}> get ${object.dartName.decapitalize()}s {
         return ${getCollectionVar(object.dartName)}[path]!;
       }
     }

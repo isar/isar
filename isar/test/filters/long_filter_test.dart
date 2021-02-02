@@ -7,7 +7,7 @@ import '../models/long_model.dart';
 void main() {
   group('Long filter', () {
     Isar isar;
-    late IsarCollection<LongModel> col;
+    late IsarCollection<int, LongModel> col;
 
     setUp(() async {
       setupIsar();
@@ -51,29 +51,6 @@ void main() {
       await qEqual(
         col.where().filter().fieldEqualTo(5).findAll(),
         [],
-      );
-    });
-
-    test('notEqualTo()', () async {
-      await qEqualSet(
-        col.where().fieldNotEqualTo(3).findAll(),
-        {
-          LongModel()..field = null,
-          LongModel()..field = 0,
-          LongModel()..field = 1,
-          LongModel()..field = 2,
-          LongModel()..field = 4,
-        },
-      );
-      await qEqualSet(
-        col.where().filter().fieldNotEqualTo(3).findAll(),
-        {
-          LongModel()..field = null,
-          LongModel()..field = 0,
-          LongModel()..field = 1,
-          LongModel()..field = 2,
-          LongModel()..field = 4,
-        },
       );
     });
 
@@ -219,16 +196,6 @@ void main() {
     test('isNotNull()', () async {
       await qEqualSet(
         col.where().fieldIsNotNull().findAll(),
-        {
-          LongModel()..field = 0,
-          LongModel()..field = 1,
-          LongModel()..field = 2,
-          LongModel()..field = 3,
-          LongModel()..field = 4,
-        },
-      );
-      await qEqualSet(
-        col.where().filter().fieldIsNotNull().findAll(),
         {
           LongModel()..field = 0,
           LongModel()..field = 1,
