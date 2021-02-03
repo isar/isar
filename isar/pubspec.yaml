@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   isar_annotation: ^0.0.2
-  ffi:
+  ffi: 0.2.0-nullsafety.1
   path: ^1.8.0-nullsafety.3
   build_runner: 
 
@@ -20,8 +20,7 @@ dev_dependencies:
   ffigen: 2.0.0-nullsafety.1
 
 dependency_overrides:
-  ffi: ^0.3.0-nullsafety.0
-  yaml: ^2.1.2
+  yaml: ^3.0.0-nullsafety.0
   isar_annotation:
     path: ../isar_annotation
   isar_generator:
