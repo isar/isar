@@ -37,7 +37,7 @@ jobs:
         git add isar/lib/src/native/bindings.dart
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git commit -m "Generated bindings" || echo "No changes to commit"
+        git commit -m "Generated bindings"
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
