@@ -29,6 +29,7 @@ class IsarAnalyzer extends Builder {
     if (models.isEmpty) return;
 
     var json = JsonEncoder().convert(models);
+    print(json);
     await buildStep.writeAsString(
         buildStep.inputId.changeExtension('.isarobject.json'), json);
   }
@@ -88,8 +89,10 @@ class IsarAnalyzer extends Builder {
         oidProperty = modelProperty;
       } else {
         properties.add(modelProperty);
-
-        indices.addAll(generateObjectIndices(modelProperty, property));
+        final index = generateObjectIndices(modelProperty, property);
+        if (index != null) {
+          indices.add(index);
+        }
       }
     }
 
@@ -98,7 +101,7 @@ class IsarAnalyzer extends Builder {
         final property = properties[i];
         if (property.isarName == 'id' &&
             property.converter == null &&
-            primaryKeyTypes.contains(property.dartType)) {
+            primaryKeyTypes.contains(property.isarType)) {
           oidProperty = properties[i];
           properties.removeAt(i);
           break;
@@ -176,10 +179,14 @@ class IsarAnalyzer extends Builder {
       isarType = getIsarType(isarDartType, size32, converter);
     }
 
+    var type = property.type.getDisplayString(withNullability: true);
+    if (type.endsWith('*')) {
+      type = type.removeSuffix('*') + '?';
+    }
     return ObjectProperty(
       dartName: property.displayName,
       isarName: isarName,
-      dartType: property.type.getDisplayString(withNullability: true),
+      dartType: type,
       isarType: isarType,
       converter: converter?.name,
       nullable: nullable,
@@ -235,27 +242,34 @@ class IsarAnalyzer extends Builder {
     throw 'unreachable';
   }
 
-  Iterable<ObjectIndex> generateObjectIndices(
+  ObjectIndex generateObjectIndices(
       ObjectProperty property, FieldElement element) {
-    return getIndexAnns(element).map((index) {
-      final properties = <ObjectIndexProperty>[];
-      properties.add(ObjectIndexProperty(
-        isarName: property.isarName,
-        stringType: index.stringType,
-        caseSensitive: index.caseSensitive,
+    final indexAnns = getIndexAnns(element).toList();
+    if (indexAnns.isEmpty) {
+      return null;
+    } else if (indexAnns.length > 1) {
+      err('Property must not have more than one @Index annotations.', element);
+    }
+
+    final index = indexAnns[0];
+    final indexProperties = <ObjectIndexProperty>[];
+
+    indexProperties.add(ObjectIndexProperty(
+      isarName: property.isarName,
+      stringType: index.stringType,
+      caseSensitive: index.caseSensitive ?? true,
+    ));
+    for (var c in index.composite) {
+      indexProperties.add(ObjectIndexProperty(
+        isarName: c.property,
+        stringType: c.stringType,
+        caseSensitive: c.caseSensitive ?? true,
       ));
-      for (var c in index.composite) {
-        properties.add(ObjectIndexProperty(
-          isarName: c.property,
-          stringType: c.stringType,
-          caseSensitive: c.caseSensitive,
-        ));
-      }
-      return ObjectIndex(
-        properties: properties,
-        unique: index.unique,
-      );
-    });
+    }
+    return ObjectIndex(
+      properties: indexProperties,
+      unique: index.unique,
+    );
   }
 
   void validateIndices(Element element, ObjectInfo model) {
@@ -296,6 +310,8 @@ class IsarAnalyzer extends Builder {
             err('StringIndexType.words is not allowed for composite indexes.',
                 element);
           }
+        } else if (indexProperty.stringType != null) {
+          err('Only String indices may have a StringIndexType.', element);
         }
       }
     }

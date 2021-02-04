@@ -9,14 +9,14 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   @override
   Future<List<OBJECT>> findAll() {
     return col.isar.getTxn(false, (txnPtr, stream) async {
-      final resultsPtr = calloc<RawObjectSet>();
+      final resultsPtr = allocate<RawObjectSet>();
       try {
         IC.isar_q_find_all_async(queryPtr, txnPtr, resultsPtr);
         await stream.first;
         return col.deserializeObjects(resultsPtr.ref);
       } finally {
         IC.isar_free_raw_obj_list(resultsPtr);
-        calloc.free(resultsPtr);
+        free(resultsPtr);
       }
     });
   }
@@ -24,12 +24,12 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   @override
   List<OBJECT> findAllSync() {
     return col.isar.getTxnSync(false, (txnPtr) {
-      final resultsPtr = calloc<RawObjectSet>();
+      final resultsPtr = allocate<RawObjectSet>();
       try {
         nCall(IC.isar_q_find_all(queryPtr, txnPtr, resultsPtr));
         return col.deserializeObjects(resultsPtr.ref);
       } finally {
-        calloc.free(resultsPtr);
+        free(resultsPtr);
       }
     });
   }
@@ -37,13 +37,13 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   @override
   Future<int> count() {
     return col.isar.getTxn(false, (txnPtr, stream) async {
-      final countPtr = calloc<Int64>();
+      final countPtr = allocate<Int64>();
       try {
         IC.isar_q_count_async(queryPtr, txnPtr, countPtr);
         await stream.first;
         return countPtr.value;
       } finally {
-        calloc.free(countPtr);
+        free(countPtr);
       }
     });
   }
@@ -51,12 +51,12 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   @override
   int countSync() {
     return col.isar.getTxnSync(false, (txnPtr) {
-      final countPtr = calloc<Int64>();
+      final countPtr = allocate<Int64>();
       try {
         nCall(IC.isar_q_count(queryPtr, txnPtr, countPtr));
         return countPtr.value;
       } finally {
-        calloc.free(countPtr);
+        free(countPtr);
       }
     });
   }
@@ -64,14 +64,14 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   @override
   Future<bool> deleteFirst() {
     return col.isar.getTxn(false, (txnPtr, stream) async {
-      final deletedPtr = calloc<Uint8>();
+      final deletedPtr = allocate<Uint8>();
       try {
         IC.isar_q_delete_first_async(
             queryPtr, col.collectionPtr, txnPtr, deletedPtr);
         await stream.first;
         return deletedPtr.value != 0;
       } finally {
-        calloc.free(deletedPtr);
+        free(deletedPtr);
       }
     });
   }
@@ -79,13 +79,13 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   @override
   bool deleteFirstSync() {
     return col.isar.getTxnSync(false, (txnPtr) {
-      final deletedPtr = calloc<Uint8>();
+      final deletedPtr = allocate<Uint8>();
       try {
         nCall(IC.isar_q_delete_first(
             queryPtr, col.collectionPtr, txnPtr, deletedPtr));
         return deletedPtr.value != 0;
       } finally {
-        calloc.free(deletedPtr);
+        free(deletedPtr);
       }
     });
   }
@@ -93,14 +93,14 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   @override
   Future<int> deleteAll() {
     return col.isar.getTxn(false, (txnPtr, stream) async {
-      final countPtr = calloc<Int64>();
+      final countPtr = allocate<Int64>();
       try {
         IC.isar_q_delete_all_async(
             queryPtr, col.collectionPtr, txnPtr, countPtr);
         await stream.first;
         return countPtr.value;
       } finally {
-        calloc.free(countPtr);
+        free(countPtr);
       }
     });
   }
@@ -108,13 +108,13 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   @override
   int deleteAllSync() {
     return col.isar.getTxnSync(false, (txnPtr) {
-      final countPtr = calloc<Int64>();
+      final countPtr = allocate<Int64>();
       try {
         nCall(IC.isar_q_delete_all(
             queryPtr, col.collectionPtr, txnPtr, countPtr));
         return countPtr.value;
       } finally {
-        calloc.free(countPtr);
+        free(countPtr);
       }
     });
   }

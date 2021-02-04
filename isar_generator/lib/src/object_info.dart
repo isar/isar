@@ -162,6 +162,22 @@ extension IsarTypeX on IsarType {
     }
   }
 
+  int get elementSize {
+    switch (this) {
+      case IsarType.Bytes:
+      case IsarType.BoolList:
+        return 1;
+      case IsarType.IntList:
+      case IsarType.FloatList:
+        return 4;
+      case IsarType.LongList:
+      case IsarType.DoubleList:
+        return 8;
+      default:
+        return 0;
+    }
+  }
+
   int get typeId {
     switch (this) {
       case IsarType.Bool:

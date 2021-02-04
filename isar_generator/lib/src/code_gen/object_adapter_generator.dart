@@ -50,10 +50,6 @@ String _generatePrepareSerialize(ObjectInfo object) {
         }
         code += 'dynamicSize += $accessor$nOp.length $nLen;';
         break;
-      case IsarType.Bytes:
-      case IsarType.BoolList:
-        code += 'dynamicSize += value$i$nOp.length $nLen;';
-        break;
       case IsarType.StringList:
         code += '''
           dynamicSize += (value$i$nOp.length $nLen) * 8;
@@ -84,13 +80,14 @@ String _generatePrepareSerialize(ObjectInfo object) {
         }
         final $accessor = bytesList$i;''';
         break;
+      case IsarType.Bytes:
+      case IsarType.BoolList:
       case IsarType.IntList:
       case IsarType.FloatList:
-        code += 'dynamicSize += (value$i$nOp.length $nLen) * 4;';
-        break;
       case IsarType.LongList:
       case IsarType.DoubleList:
-        code += 'dynamicSize += (value$i$nOp.length $nLen) * 8;';
+        code +=
+            'dynamicSize += (value$i$nOp.length $nLen) * ${property.isarType.elementSize};';
         break;
       default:
         break;
@@ -110,12 +107,23 @@ String _generatePrepareSerialize(ObjectInfo object) {
 String _generateSerialize(ObjectInfo object) {
   var code = '''
   @override  
-  void serialize(RawObject rawObj, ${object.dartName} object, List<int> offsets) {
+  int serialize(RawObject rawObj, ${object.dartName} object, List<int> offsets, [int? existingBufferSize]) {
     ${_generatePrepareSerialize(object)}
-    final ptr = calloc<Uint8>(size);
-    rawObj.data = ptr;
-    rawObj.data_length = size;
-    final buffer = ptr.asTypedList(size);
+    late int bufferSize;
+    if (existingBufferSize != null) {
+      if (existingBufferSize < size) {
+        free(rawObj.buffer);
+        rawObj.buffer = allocate(count: size);
+        bufferSize = size;
+      } else {
+        bufferSize = existingBufferSize;
+      }
+    } else {
+      rawObj.buffer = allocate(count: size);
+      bufferSize = size;
+    }
+    rawObj.buffer_length = size;
+    final buffer = rawObj.buffer.asTypedList(size);
     final writer = BinaryWriter(buffer, ${object.getStaticSize()});
   ''';
   for (var i = 0; i < object.properties.length; i++) {
@@ -164,7 +172,10 @@ String _generateSerialize(ObjectInfo object) {
     }
   }
 
-  return '$code}';
+  return '''
+    $code
+    return bufferSize;
+  }''';
 }
 
 String _generateDeserialize(ObjectInfo object) {

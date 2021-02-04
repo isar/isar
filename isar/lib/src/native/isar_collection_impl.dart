@@ -5,51 +5,23 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
   final TypeAdapter<OBJECT> _adapter;
   final Pointer collectionPtr;
   final List<int> propertyOffsets;
-  final ID? Function(OBJECT) idGetter;
-  final void Function(ID, OBJECT) idSetter;
+  final ID? Function(OBJECT) getId;
+  final void Function(OBJECT, ID) setId;
 
   IsarCollectionImpl(
     this.isar,
     this._adapter,
     this.collectionPtr,
     this.propertyOffsets,
-    this.idGetter,
-    this.idSetter,
+    this.getId,
+    this.setId,
   );
 
-  List<Pointer> serializeObject(Pointer<RawObject> rawObjPtr, OBJECT object) {
-    final rawObj = rawObjPtr.ref;
-    _adapter.serialize(rawObj, object, propertyOffsets);
-    rawObj.id = idGetter(object);
-    if (rawObj.oid_str.address != 0) {
-      return [rawObj.oid_str, rawObj.data];
-    } else {
-      return [rawObj.data];
-    }
-  }
-
-  List<Pointer> serializeObjects(
-      Pointer<RawObjectSet> rawObjSetPtr, List<OBJECT> objects) {
-    final pointers = <Pointer>[];
-    final rawObjSet = rawObjSetPtr.ref;
-
-    final objectsPtr = calloc<RawObject>(objects.length);
-    rawObjSet.objects = objectsPtr;
-    rawObjSet.length = objects.length;
-    pointers.add(objectsPtr);
-
-    for (var i = 0; i < objects.length; i++) {
-      final rawObjPtr = rawObjSet.objects.elementAt(i);
-      pointers.addAll(serializeObject(rawObjPtr, objects[i]));
-    }
-    return pointers;
-  }
-
   OBJECT deserializeObject(RawObject rawObj) {
-    final buffer = rawObj.data.asTypedList(rawObj.data_length);
+    final buffer = rawObj.buffer.asTypedList(rawObj.buffer_length);
     final reader = BinaryReader(buffer);
     final object = _adapter.deserialize(reader, propertyOffsets);
-    idSetter(rawObj.id, object);
+    setId(object, rawObj.id);
     return object;
   }
 
@@ -63,10 +35,33 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
     return objects;
   }
 
+  Pointer<RawObjectSet> allocRawObjSet(int length) {
+    final rawObjSetPtr = allocate<RawObjectSet>();
+    final rawObjSet = rawObjSetPtr.ref;
+    final objectsPtr = allocate<RawObject>(count: length);
+    rawObjSet.objects = objectsPtr;
+    rawObjSet.length = length;
+    return rawObjSetPtr;
+  }
+
+  void setRawObjSetIds(Pointer<RawObject> objectsPtr, List<ID> ids) {
+    for (var i = 0; i < ids.length; i++) {
+      objectsPtr.elementAt(i).ref.id = ids[i];
+    }
+  }
+
+  void freeRawObjSetIds(Pointer<RawObject> objectsPtr, int length) {
+    if (ID is String) {
+      for (var i = 0; i < length; i++) {
+        objectsPtr.elementAt(i).ref.freeId();
+      }
+    }
+  }
+
   @override
   Future<OBJECT?> get(ID id) {
     return isar.getTxn(false, (txnPtr, stream) async {
-      final rawObjPtr = calloc<RawObject>();
+      final rawObjPtr = allocate<RawObject>();
       final rawObj = rawObjPtr.ref;
       rawObj.id = id;
 
@@ -74,14 +69,12 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
       try {
         await stream.first;
 
-        if (rawObj.id != null) {
+        if (!rawObj.buffer.isNull) {
           return deserializeObject(rawObj);
-        } else {
-          return null;
         }
       } finally {
         rawObj.freeId();
-        calloc.free(rawObjPtr);
+        free(rawObjPtr);
       }
     });
   }
@@ -96,14 +89,64 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
       try {
         nCall(IC.isar_get(collectionPtr, txnPtr, rawObjPtr));
 
-        if (rawObj.id != null) {
+        if (!rawObj.buffer.isNull) {
           return deserializeObject(rawObj);
-        } else {
-          return null;
         }
       } finally {
         rawObj.freeId();
-        calloc.free(rawObjPtr);
+      }
+    });
+  }
+
+  @override
+  Future<List<OBJECT?>> getAll(List<ID> ids) {
+    return isar.getTxn(false, (txnPtr, stream) async {
+      final rawObjSetPtr = allocRawObjSet(ids.length);
+      final objectsPtr = rawObjSetPtr.ref.objects;
+      setRawObjSetIds(objectsPtr, ids);
+
+      IC.isar_get_all_async(collectionPtr, txnPtr, rawObjSetPtr);
+      try {
+        await stream.first;
+        final objects = <OBJECT?>[];
+        for (var i = 0; i < ids.length; i++) {
+          final rawObj = objectsPtr.elementAt(i).ref;
+          if (!rawObj.buffer.isNull) {
+            objects.add(deserializeObject(rawObj));
+          } else {
+            objects.add(null);
+          }
+        }
+        return objects;
+      } finally {
+        freeRawObjSetIds(objectsPtr, ids.length);
+        free(objectsPtr);
+        free(rawObjSetPtr);
+      }
+    });
+  }
+
+  @override
+  List<OBJECT?> getAllSync(List<ID> ids) {
+    return isar.getTxnSync(false, (txnPtr) {
+      final rawObjPtr = allocate<RawObject>();
+      final rawObj = rawObjPtr.ref;
+
+      try {
+        final objects = <OBJECT?>[];
+        for (var id in ids) {
+          rawObj.id = id;
+          nCall(IC.isar_get(collectionPtr, txnPtr, rawObjPtr));
+          if (!rawObj.buffer.isNull) {
+            objects.add(deserializeObject(rawObj));
+          } else {
+            objects.add(null);
+          }
+          rawObj.freeId();
+        }
+        return objects;
+      } finally {
+        free(rawObjPtr);
       }
     });
   }
@@ -111,18 +154,19 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
   @override
   Future<void> put(OBJECT object) {
     return isar.getTxn(true, (txnPtr, stream) async {
-      final rawObjPtr = calloc<RawObject>();
-      final pointers = serializeObject(rawObjPtr, object);
+      final rawObjPtr = allocate<RawObject>();
+      final rawObj = rawObjPtr.ref;
+      _adapter.serialize(rawObj, object, propertyOffsets);
+      rawObj.id = getId(object);
       IC.isar_put_async(collectionPtr, txnPtr, rawObjPtr);
 
       try {
         await stream.first;
-        idSetter(rawObjPtr.ref.id, object);
+        setId(object, rawObj.id);
       } finally {
-        for (var p in pointers) {
-          calloc.free(p);
-        }
-        calloc.free(rawObjPtr);
+        rawObj.freeId();
+        rawObj.freeData();
+        free(rawObjPtr);
       }
     });
   }
@@ -130,62 +174,76 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
   @override
   void putSync(OBJECT object) {
     return isar.getTxnSync(true, (txnPtr) {
-      final rawObjPtr = calloc<RawObject>();
-      final pointers = serializeObject(rawObjPtr, object);
+      final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
+      final rawObj = rawObjPtr.ref;
+      _adapter.serialize(rawObj, object, propertyOffsets);
+      rawObj.id = getId(object);
 
       try {
         nCall(IC.isar_put(collectionPtr, txnPtr, rawObjPtr));
-        idSetter(rawObjPtr.ref.id, object);
+        setId(object, rawObjPtr.ref.id);
       } finally {
-        for (var p in pointers) {
-          calloc.free(p);
-        }
-        calloc.free(rawObjPtr);
+        rawObj.freeId();
+        rawObj.freeData();
       }
     });
-  }
-
-  void updateObjectIds(RawObjectSet rawObjSet, List<OBJECT> objects) {
-    for (var i = 0; i < objects.length; i++) {
-      final rawObjPtr = rawObjSet.objects.elementAt(i);
-      idSetter(rawObjPtr.ref.id!, objects[i]);
-    }
   }
 
   @override
   Future<void> putAll(List<OBJECT> objects) {
     return isar.getTxn(true, (txnPtr, stream) async {
-      final rawObjSetPtr = calloc<RawObjectSet>();
-      final pointers = serializeObjects(rawObjSetPtr, objects);
+      final rawObjSetPtr = allocRawObjSet(objects.length);
+      final objectsPtr = rawObjSetPtr.ref.objects;
+
+      for (var i = 0; i < objects.length; i++) {
+        final rawObj = objectsPtr.elementAt(i).ref;
+        final object = objects[i];
+        _adapter.serialize(rawObj, object, propertyOffsets);
+        rawObj.id = getId(object);
+      }
       IC.isar_put_all_async(collectionPtr, txnPtr, rawObjSetPtr);
 
       try {
         await stream.first;
-        updateObjectIds(rawObjSetPtr.ref, objects);
-      } finally {
-        for (var p in pointers) {
-          calloc.free(p);
+        final rawObjectSet = rawObjSetPtr.ref;
+        for (var i = 0; i < objects.length; i++) {
+          final rawObjPtr = rawObjectSet.objects.elementAt(i);
+          setId(objects[i], rawObjPtr.ref.id!);
         }
-        calloc.free(rawObjSetPtr);
+      } finally {
+        for (var i = 0; i < objects.length; i++) {
+          final rawObjPtr = objectsPtr.elementAt(i);
+          final rawObj = rawObjPtr.ref;
+          rawObj.freeId();
+          rawObj.freeData();
+        }
+        free(objectsPtr);
+        free(rawObjSetPtr);
       }
     });
   }
 
   @override
   void putAllSync(List<OBJECT> objects) {
+    if (objects.isEmpty) return;
     return isar.getTxnSync(true, (txnPtr) {
-      final rawObjSetPtr = calloc<RawObjectSet>();
-      final pointers = serializeObjects(rawObjSetPtr, objects);
-      IC.isar_put_all_async(collectionPtr, txnPtr, rawObjSetPtr);
-
+      final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
+      final rawObj = rawObjPtr.ref;
+      int? bufferSize;
       try {
-        nCall(IC.isar_put_all(collectionPtr, txnPtr, rawObjSetPtr));
-        updateObjectIds(rawObjSetPtr.ref, objects);
-      } finally {
-        for (var p in pointers) {
-          calloc.free(p);
+        for (var object in objects) {
+          bufferSize =
+              _adapter.serialize(rawObj, object, propertyOffsets, bufferSize);
+          rawObj.id = getId(object);
+          nCall(IC.isar_put(collectionPtr, txnPtr, rawObjPtr));
+          setId(object, rawObj.id);
+          rawObj.freeId();
         }
-        calloc.free(rawObjSetPtr);
+      } catch (e) {
+        rawObj.freeId();
+        rethrow;
+      } finally {
+        rawObj.freeData();
       }
     });
   }
@@ -193,8 +251,8 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
   @override
   Future<bool> delete(ID id) {
     return isar.getTxn(false, (txnPtr, stream) async {
-      final deletedPtr = calloc<Uint8>();
-      final rawObjPtr = calloc<RawObject>();
+      final deletedPtr = allocate<Uint8>();
+      final rawObjPtr = allocate<RawObject>();
       final rawObj = rawObjPtr.ref;
       rawObj.id = id;
       IC.isar_delete_async(collectionPtr, txnPtr, rawObjPtr, deletedPtr);
@@ -204,8 +262,8 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
         return deletedPtr.value != 0;
       } finally {
         rawObj.freeId();
-        calloc.free(rawObjPtr);
-        calloc.free(deletedPtr);
+        free(rawObjPtr);
+        free(deletedPtr);
       }
     });
   }
@@ -213,7 +271,7 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
   @override
   bool deleteSync(ID id) {
     return isar.getTxnSync(true, (txnPtr) {
-      final deletedPtr = calloc<Uint8>();
+      final deletedPtr = allocate<Uint8>();
       final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
       final rawObj = rawObjPtr.ref;
       rawObj.id = id;
@@ -223,7 +281,47 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
         return deletedPtr.value != 0;
       } finally {
         rawObj.freeId();
-        calloc.free(deletedPtr);
+        free(deletedPtr);
+      }
+    });
+  }
+
+  @override
+  Future<int> deleteAll(List<ID> ids) {
+    return isar.getTxn(true, (txnPtr, stream) async {
+      final countPtr = allocate<Int64>();
+      final rawObjSetPtr = allocRawObjSet(ids.length);
+      final objectsPtr = rawObjSetPtr.ref.objects;
+      setRawObjSetIds(objectsPtr, ids);
+
+      IC.isar_delete_all_async(collectionPtr, txnPtr, rawObjSetPtr, countPtr);
+      try {
+        await stream.first;
+        return countPtr.value;
+      } finally {
+        freeRawObjSetIds(objectsPtr, ids.length);
+        free(objectsPtr);
+        free(rawObjSetPtr);
+      }
+    });
+  }
+
+  @override
+  int deleteAllSync(List<ID> ids) {
+    return isar.getTxnSync(true, (txnPtr) {
+      final countPtr = allocate<Int64>();
+      final rawObjSetPtr = allocRawObjSet(ids.length);
+      final objectsPtr = rawObjSetPtr.ref.objects;
+      setRawObjSetIds(objectsPtr, ids);
+
+      try {
+        nCall(
+            IC.isar_delete_all(collectionPtr, txnPtr, rawObjSetPtr, countPtr));
+        return countPtr.value;
+      } finally {
+        freeRawObjSetIds(objectsPtr, ids.length);
+        free(objectsPtr);
+        free(rawObjSetPtr);
       }
     });
   }
@@ -231,7 +329,7 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
   @override
   Future<void> importJson(Uint8List jsonBytes) {
     return isar.getTxn(true, (txnPtr, stream) async {
-      final bytesPtr = calloc<Uint8>(jsonBytes.length);
+      final bytesPtr = allocate<Uint8>(count: jsonBytes.length);
       bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
       IC.isar_json_import_async(
           collectionPtr, txnPtr, bytesPtr, jsonBytes.length);
@@ -239,7 +337,7 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
       try {
         await stream.first;
       } finally {
-        calloc.free(bytesPtr);
+        free(bytesPtr);
       }
     });
   }
@@ -247,8 +345,8 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
   @override
   Future<R> exportJson<R>(bool primitiveNull, R Function(Uint8List) callback) {
     return isar.getTxn(false, (txnPtr, stream) async {
-      final bytesPtrPtr = calloc<Pointer<Uint8>>();
-      final lengthPtr = calloc<Uint32>();
+      final bytesPtrPtr = allocate<Pointer<Uint8>>();
+      final lengthPtr = allocate<Uint32>();
       IC.isar_json_export_async(
           collectionPtr, txnPtr, primitiveNull, bytesPtrPtr, lengthPtr);
 
@@ -258,8 +356,8 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
         return callback(bytes);
       } finally {
         IC.isar_free_json(bytesPtrPtr.value, lengthPtr.value);
-        calloc.free(bytesPtrPtr);
-        calloc.free(lengthPtr);
+        free(bytesPtrPtr);
+        free(lengthPtr);
       }
     });
   }
@@ -277,9 +375,9 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
   }
 
   Stream<void> watchObjectChanges(OBJECT object) {
-    final rawObjPtr = calloc<RawObject>();
+    final rawObjPtr = allocate<RawObject>();
     final rawObj = rawObjPtr.ref;
-    rawObj.id = idGetter(object);
+    rawObj.id = getId(object);
 
     final port = ReceivePort();
     final handle = IC.isar_watch_object(
@@ -287,7 +385,7 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
     final controller = StreamController(onCancel: () {
       IC.isar_stop_watching(handle);
       rawObj.freeId();
-      calloc.free(rawObjPtr);
+      free(rawObjPtr);
     });
     controller.addStream(port);
     return controller.stream;

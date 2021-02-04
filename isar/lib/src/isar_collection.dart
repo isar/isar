@@ -5,6 +5,10 @@ abstract class IsarCollection<ID, OBJECT> {
 
   OBJECT? getSync(ID id);
 
+  Future<List<OBJECT?>> getAll(List<ID> ids);
+
+  List<OBJECT?> getAllSync(List<ID> ids);
+
   Future<void> put(OBJECT object);
 
   void putSync(OBJECT object);
@@ -16,6 +20,10 @@ abstract class IsarCollection<ID, OBJECT> {
   Future<bool> delete(ID id);
 
   bool deleteSync(ID id);
+
+  Future<int> deleteAll(List<ID> ids);
+
+  int deleteAllSync(List<ID> ids);
 
   Future<void> importJson(Uint8List jsonBytes);
 

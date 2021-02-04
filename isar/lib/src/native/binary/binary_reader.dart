@@ -89,10 +89,14 @@ class BinaryReader {
   }
 
   String? readStringOrNull(int offset, {bool staticOffset = true}) {
-    final bytes = readBytesOrNull(offset, staticOffset: staticOffset);
-    if (bytes != null) {
-      return utf8Decoder.convert(bytes);
+    if (staticOffset && offset >= _staticSize) return null;
+    final bytesOffset = _buffer.readInt32(offset);
+    if (bytesOffset == 0) {
+      return null;
     }
+    final length = _buffer.readInt32(offset + 4);
+
+    return utf8Decoder.convert(_buffer, bytesOffset, bytesOffset + length);
   }
 
   Uint8List readBytes(int offset, {bool staticOffset = true}) {

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:build/build.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:glob/glob.dart';
+import 'package:isar_annotation/isar_annotation.dart';
 import 'package:isar_generator/src/code_gen/object_adapter_generator.dart';
 import 'package:isar_generator/src/code_gen/util.dart';
 import 'package:isar_generator/src/helper.dart';
@@ -128,7 +129,7 @@ class IsarCodeGenerator extends Builder {
       initializeIsarCore();
       IC.isar_connect_dart_api(NativeApi.postCObject);
       final schemaPtr = IC.isar_schema_create();
-      final collectionPtrPtr = calloc<Pointer>();
+      final collectionPtrPtr = allocate<Pointer>();
     ''';
 
     for (var info in objects) {
@@ -143,30 +144,34 @@ class IsarCodeGenerator extends Builder {
           ${info.oidProperty.isarType.typeId},
         ));
         final collectionPtr = collectionPtrPtr.value;
-        calloc.free(namePtr);
-        calloc.free(idNamePtr);
+        free(namePtr);
+        free(idNamePtr);
       ''';
       for (var property in info.properties) {
         code += '''
         {
           final pNamePtr = Utf8.toUtf8('${property.isarName}');
           nCall(IC.isar_schema_add_property(collectionPtr, pNamePtr.cast(), ${property.isarType.typeId}));
-          calloc.free(pNamePtr);
+          free(pNamePtr);
         }
         ''';
       }
       for (var index in info.indices) {
         code += '''
         {
-          final propertiesPtrPtr = calloc<Pointer<Int8>>(${index.properties.length});
-          final stringTypesPtr = calloc<Uint8>(${index.properties.length});
-          final stringsCaseSensitivePtr = calloc<Uint8>(${index.properties.length});
+          final propertiesPtrPtr = allocate<Pointer<Int8>>(count: ${index.properties.length});
+          final stringTypesPtr = allocate<Uint8>(count: ${index.properties.length});
+          final stringsCaseSensitivePtr = allocate<Uint8>(count: ${index.properties.length});
         ''';
         for (var i = 0; i < index.properties.length; i++) {
           final indexProperty = index.properties[i];
+          final property = info.getProperty(indexProperty.isarName);
+          final defaultStringType = property.isarType == IsarType.String
+              ? StringIndexType.hash.index
+              : 255;
           code += '''
             propertiesPtrPtr[$i] = Utf8.toUtf8('${indexProperty.isarName}').cast();
-            stringTypesPtr[$i] = ${indexProperty.stringType?.index ?? 255};
+            stringTypesPtr[$i] = ${indexProperty.stringType?.index ?? defaultStringType};
             stringsCaseSensitivePtr[$i] = ${indexProperty.caseSensitive ? 1 : 0};
           ''';
         }
@@ -181,12 +186,12 @@ class IsarCodeGenerator extends Builder {
           ${index.unique},
         ));''';
         for (var i = 0; i < index.properties.length; i++) {
-          code += 'calloc.free(propertiesPtrPtr[$i]);';
+          code += 'free(propertiesPtrPtr[$i]);';
         }
         code += '''
-          calloc.free(propertiesPtrPtr);
-          calloc.free(stringTypesPtr);
-          calloc.free(stringsCaseSensitivePtr);
+          free(propertiesPtrPtr);
+          free(stringTypesPtr);
+          free(stringsCaseSensitivePtr);
         }
         ''';
       }
@@ -199,17 +204,17 @@ class IsarCodeGenerator extends Builder {
 
     code += '''
       final pathPtr = Utf8.toUtf8(path);
-      final isarPtrPtr = calloc<Pointer>();
+      final isarPtrPtr = allocate<Pointer>();
       final receivePort = ReceivePort();
       final nativePort = receivePort.sendPort.nativePort;
       IC.isar_create_instance(isarPtrPtr, pathPtr.cast(), maxSize, schemaPtr, nativePort);
       await receivePort.first;
-      calloc.free(pathPtr);
+      free(pathPtr);
       
       final isarPtr = isarPtrPtr.value;
       final isar = IsarImpl(path, isarPtr);
       _isar[path] = isar;
-      calloc.free(isarPtrPtr);
+      free(isarPtrPtr);
     ''';
 
     for (var i = 0; i < objects.length; i++) {
@@ -230,14 +235,14 @@ class IsarCodeGenerator extends Builder {
           collectionPtrPtr.value,
           propertyOffsets,
           (obj) => obj.${info.oidProperty.dartName},
-          (id, obj) => obj.${info.oidProperty.dartName} = id,
+          (obj, id) => obj.${info.oidProperty.dartName} = id,
         );
       }
       ''';
     }
 
     code += '''
-      calloc.free(collectionPtrPtr);
+      free(collectionPtrPtr);
       return isar;
     }
     ''';
