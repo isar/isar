@@ -34,6 +34,7 @@ class IsarCodeGenerator extends Builder {
     'dart:io',
     'package:isar/isar.dart',
     'package:isar/isar_native.dart',
+    'package:isar/src/query_builder.dart',
     'package:ffi/ffi.dart',
     "import 'package:path/path.dart' as p",
   ];

@@ -10,6 +10,7 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
+import 'package:isar/src/query_builder.dart';
 import 'package:isar/src/native/bindings.dart';
 
 export 'package:isar/src/native/bindings.dart';
