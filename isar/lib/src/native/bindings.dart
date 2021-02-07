@@ -732,23 +732,21 @@ class IsarCoreBindings {
 
   _dart_isar_add_sort_by? _isar_add_sort_by;
 
-  int isar_set_distinct(
+  int isar_add_distinct_by(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> builder,
-    ffi.Pointer<ffi.Uint32> distinct_property_indices,
-    int distinct_property_indices_length,
+    int property_index,
   ) {
-    return (_isar_set_distinct ??=
-        _dylib.lookupFunction<_c_isar_set_distinct, _dart_isar_set_distinct>(
-            'isar_set_distinct'))(
+    return (_isar_add_distinct_by ??= _dylib.lookupFunction<
+        _c_isar_add_distinct_by,
+        _dart_isar_add_distinct_by>('isar_add_distinct_by'))(
       collection,
       builder,
-      distinct_property_indices,
-      distinct_property_indices_length,
+      property_index,
     );
   }
 
-  _dart_isar_set_distinct? _isar_set_distinct;
+  _dart_isar_add_distinct_by? _isar_add_distinct_by;
 
   int isar_set_offset_limit(
     ffi.Pointer<ffi.NativeType> builder,
@@ -1946,18 +1944,16 @@ typedef _dart_isar_add_sort_by = int Function(
   int asc,
 );
 
-typedef _c_isar_set_distinct = ffi.Int32 Function(
+typedef _c_isar_add_distinct_by = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> builder,
-  ffi.Pointer<ffi.Uint32> distinct_property_indices,
-  ffi.Uint32 distinct_property_indices_length,
+  ffi.Uint32 property_index,
 );
 
-typedef _dart_isar_set_distinct = int Function(
+typedef _dart_isar_add_distinct_by = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> builder,
-  ffi.Pointer<ffi.Uint32> distinct_property_indices,
-  int distinct_property_indices_length,
+  int property_index,
 );
 
 typedef _c_isar_set_offset_limit = ffi.Int32 Function(
