@@ -363,11 +363,7 @@ extension QueryExecute<OBJECT> on QueryBuilder<OBJECT, dynamic, dynamic,
     return build().deleteAllSync();
   }
 
-  Stream<void> watchChanges() {
-    return build().watchChanges();
-  }
-
-  Stream<List<OBJECT>> watch() {
-    return build().watch();
+  Stream<List<OBJECT>?> watch({bool lazy = true}) {
+    return build().watch(lazy: lazy);
   }
 }

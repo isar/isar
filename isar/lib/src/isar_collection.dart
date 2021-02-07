@@ -34,5 +34,5 @@ abstract class IsarCollection<ID, OBJECT> {
     return newQueryInternal(this);
   }
 
-  Stream<void> watchChanges();
+  Stream<OBJECT?> watch({ID? id, bool lazy = true});
 }

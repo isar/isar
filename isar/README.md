@@ -45,27 +45,73 @@
 ### Schema definition
 ```dart
 @Collection()
-class Person with IsarObject {
+class Post with IsarObject {
 
-  @Index(unique: true)
-  String name;
-  
-  int age;
+  @ObjectId() // implicit unique index
+  String uuid;
+
+  @Index(stringType: StringIndexType.words, caseSensitive: false) // Search index
+  String title;
+
+  List<String> comments
 }
 ```
 
+### CRUD operations
+
+All basic crud operations are available via the IsarCollection.
+
+```dart
+final newPost = Post()
+  ..id = uuid()
+  ..title = 'Amazing new database'
+  ..comments = ['First'];
+
+await isar.writeTxn((isar) {
+  await isar.posts.put(newPost); // insert
+});
+
+final existingPost = await isar.get(newPost.id); // get
+
+await isar.writeTxn((isar) {
+  await isar.posts.delete(existingPost.id); // delete
+});
+```
+
 ### Query
+
+Isar has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()` and `or()` groups and sort the results. 
+
 ```dart
 final isar = await openIsar();
 
-final result = isar.users.where()
-  .sortedByName() // use index
-  .filter()
-  .ageGreaterThan(20)
-  .beginGroup()
-    .nameEqualTo("Paul")
-    .or()
-    .nameEqualTo("Lisa")
-  .endGroup()
+final databasePosts = isar.posts
+  .where()
+  .titleWordBeginsWith('dAtAb') // use search index
+  .limit(10)
   .findAll()
+
+final postsWithFirstCommentOrTitle = isar.posts
+  .where()
+  .sortedById() // use implicit ObjectId index
+  .filter()
+  .commentsAnyEqualTo('first', caseSensitive: false)
+  .or()
+  .titleEqualTo('first')
+  .findAll();
+```
+
+### Watch
+
+With Isar you can watch Collections, Objects or Queries. A watcher is notified after a transactions commits succesfully and the target actually changes.
+Watchers can be lazy and not reload the data or they can be non-lazy and fetch the new results in background.
+
+```dart
+Stream<void> collectionStream = isar.posts.watch(lazy: true);
+
+Stream<List<Post>> queryStream = databasePosts.watch(lazy: false);
+
+queryStream.listen((newResult) {
+  // do UI updates
+})
 ```

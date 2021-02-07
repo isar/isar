@@ -37,7 +37,5 @@ abstract class Query<T> {
 
   int deleteAllSync();
 
-  Stream<void> watchChanges();
-
-  Stream<List<T>> watch();
+  Stream<List<T>?> watch({bool lazy = true});
 }

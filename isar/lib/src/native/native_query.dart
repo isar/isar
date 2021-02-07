@@ -120,12 +120,21 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   }
 
   @override
-  Stream<void> watchChanges() {
-    throw UnimplementedError();
-  }
+  Stream<List<OBJECT>?> watch({bool lazy = true}) {
+    final port = ReceivePort();
+    final handle = IC.isar_watch_query(col.isar.isarPtr, col.collectionPtr,
+        queryPtr, port.sendPort.nativePort);
 
-  @override
-  Stream<List<OBJECT>> watch() {
-    throw UnimplementedError();
+    final controller = StreamController(onCancel: () {
+      IC.isar_stop_watching(handle);
+    });
+
+    controller.addStream(port);
+
+    if (lazy) {
+      return controller.stream.map((event) => null);
+    } else {
+      return controller.stream.asyncMap((event) => findAll());
+    }
   }
 }
