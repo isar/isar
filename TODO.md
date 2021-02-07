@@ -48,6 +48,10 @@
 - [ ] Offset, Limit
 - [ ] Sorted by
 
+## Fixes
+
+- [ ] Port [pluralize](https://github.com/plurals/pluralize) to Dart and use it to generate collection accessors
+
 ## Unit tests
 
 - [ ] Download binaries automatically for tests
