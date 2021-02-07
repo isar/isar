@@ -1,6 +1,6 @@
 name: isar_annotation
-description: Isar Database annotations to automatically generate schema.
-version: 0.0.3
+description: Isar Database annotations to automatically generate schema. No need to include manually.
+version: 0.0.4
 
 repository: https://github.com/isar/isar
 

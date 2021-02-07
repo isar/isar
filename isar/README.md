@@ -42,7 +42,20 @@
 - ⏱ **Asynchronous.** Parallel query operations & multi-isolate support
 - ⚠️ **Static typing** with compile time checked and autocompleted queries
 
-### Schema definition
+### Add to pubspec.yaml
+
+```yaml
+dependencies:
+  isar: any
+  isar_flutter: any # contains the binaries
+
+dev_dependencies:
+  isar_generator: any
+  build_runnder: any
+```
+
+
+## Schema definition
 ```dart
 @Collection()
 class Post with IsarObject {
@@ -57,7 +70,7 @@ class Post with IsarObject {
 }
 ```
 
-### CRUD operations
+## CRUD operations
 
 All basic crud operations are available via the IsarCollection.
 
@@ -78,7 +91,7 @@ await isar.writeTxn((isar) {
 });
 ```
 
-### Query
+## Queries
 
 Isar has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()` and `or()` groups and sort the results. 
 
@@ -101,7 +114,7 @@ final postsWithFirstCommentOrTitle = isar.posts
   .findAll();
 ```
 
-### Watch
+## Watchers
 
 With Isar you can watch Collections, Objects or Queries. A watcher is notified after a transactions commits succesfully and the target actually changes.
 Watchers can be lazy and not reload the data or they can be non-lazy and fetch the new results in background.
@@ -114,4 +127,22 @@ Stream<List<Post>> queryStream = databasePosts.watch(lazy: false);
 queryStream.listen((newResult) {
   // do UI updates
 })
+```
+
+### Licence
+
+```
+Copyright 2021 Simon Leier
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 ```

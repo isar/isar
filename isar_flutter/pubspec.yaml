@@ -1,21 +1,18 @@
 name: isar_flutter
-description: Flutter binaries and helpful widgets for the Isar Database
-version: 0.0.2
+description: Flutter binaries and helpful widgets for the Isar Database. Needs to be included for Flutter apps.
+version: 0.0.4
 repository: https://github.com/isar/isar
 homepage: https://isar.dev
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.12.0-0 <3.0.0"
   flutter: ">=1.20.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  path_provider: ^1.6.24
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
+  isar: 0.0.4
+  path_provider: ^2.0.0-nullsafety
 
 flutter:
   plugin:

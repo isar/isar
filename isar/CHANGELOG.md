@@ -1,3 +1,6 @@
+## 0.0.4
+- Bugfixes and many improvements
+
 ## 0.0.2
 Fix dependency issue
 

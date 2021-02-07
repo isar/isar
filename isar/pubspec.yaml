@@ -1,6 +1,6 @@
 name: isar
-description: Super Fast Cross Platform Database for Flutter & Web Apps
-version: 0.0.2
+description: Fast Cross Platform Database for Flutter & Web Apps. Supports indexes, FTS, queries etc.
+version: 0.0.4
 repository: https://github.com/isar/isar
 homepage: https://isar.dev
 
@@ -8,19 +8,18 @@ environment:
   sdk: '>=2.12.0-0 <3.0.0'
 
 dependencies:
-  isar_annotation: ^0.0.2
-  ffi: 0.2.0-nullsafety.1
+  isar_annotation: 0.0.4
+  ffi: ^0.2.0-nullsafety.1
   path: ^1.8.0-nullsafety.3
-  #build_runner: 
 
 dev_dependencies:
   pedantic: ^1.9.0
-  #isar_generator: ^0.0.1
+  isar_generator: 0.0.4
   test: 1.16.0-nullsafety.13
   ffigen: 2.0.0-nullsafety.1
 
 dependency_overrides:
-  isar_annotation:
-    path: ../isar_annotation
+  #isar_annotation:
+  #  path: ../isar_annotation
   #isar_generator:
   #  path: ../isar_generator
