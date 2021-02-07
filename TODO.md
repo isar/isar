@@ -1,4 +1,5 @@
-# Roadmap and TODOs
+<h1 align="center"> Roadmap and TODOs</p>
+
 
 # Documentation
 
@@ -14,9 +15,10 @@
 ## Queries
 
 - [ ] Filter groups
+- [ ] Boolean operators `and()`, `or()`, `not()`
 - [ ] Offset, limit
 - [ ] Distinct where clauses
-- [ ] Different filter operations
+- [ ] Different filter operations (`equalTo`, `beginsWith()` etc.)
 
 ## Indexes
 
@@ -48,6 +50,8 @@
 
 ## Unit tests
 
+- [ ] Download binaries automatically for tests
+
 ### Queries
 
 - [ ] Restructure query tests to make them less verbose
@@ -55,3 +59,26 @@
 - [ ] Where clauses with string indexes (value, hash, words, case-sensitive)
 - [ ] Distinct where clauses
 - [ ] String filter operations
+
+
+----
+
+
+# Isar Core
+
+## Features (low priority)
+
+- [ ] Draft Synchronization
+- [ ] Relationships
+
+## Unit tests
+
+- [ ] Make lmdb unit tests bulletproof
+- [ ] Migration tests
+- [ ] QueryBuilder
+- [ ] WhereClause
+- [ ] WhereExecutor
+- [ ] CollectionMigrator
+- [ ] Watchers
+
+
