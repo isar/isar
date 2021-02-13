@@ -556,7 +556,8 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
     ffi.Pointer<ffi.Int8> path,
     int max_size,
-    ffi.Pointer<ffi.NativeType> schema,
+    ffi.Pointer<ffi.Uint8> schema_json,
+    int schema_json_length,
     int port,
   ) {
     return (_isar_create_instance ??= _dylib.lookupFunction<
@@ -565,7 +566,8 @@ class IsarCoreBindings {
       isar,
       path,
       max_size,
-      schema,
+      schema_json,
+      schema_json_length,
       port,
     );
   }
@@ -836,82 +838,6 @@ class IsarCoreBindings {
   }
 
   _dart_isar_free_raw_obj_list? _isar_free_raw_obj_list;
-
-  ffi.Pointer<ffi.NativeType> isar_schema_create() {
-    return (_isar_schema_create ??=
-        _dylib.lookupFunction<_c_isar_schema_create, _dart_isar_schema_create>(
-            'isar_schema_create'))();
-  }
-
-  _dart_isar_schema_create? _isar_schema_create;
-
-  int isar_schema_create_collection(
-    ffi.Pointer<ffi.Pointer<ffi.NativeType>> collection_schema,
-    ffi.Pointer<ffi.Int8> name,
-  ) {
-    return (_isar_schema_create_collection ??= _dylib.lookupFunction<
-        _c_isar_schema_create_collection,
-        _dart_isar_schema_create_collection>('isar_schema_create_collection'))(
-      collection_schema,
-      name,
-    );
-  }
-
-  _dart_isar_schema_create_collection? _isar_schema_create_collection;
-
-  int isar_schema_add_collection(
-    ffi.Pointer<ffi.NativeType> schema,
-    ffi.Pointer<ffi.NativeType> collection_schema,
-  ) {
-    return (_isar_schema_add_collection ??= _dylib.lookupFunction<
-        _c_isar_schema_add_collection,
-        _dart_isar_schema_add_collection>('isar_schema_add_collection'))(
-      schema,
-      collection_schema,
-    );
-  }
-
-  _dart_isar_schema_add_collection? _isar_schema_add_collection;
-
-  int isar_schema_add_property(
-    ffi.Pointer<ffi.NativeType> collection_schema,
-    ffi.Pointer<ffi.Int8> name,
-    int data_type,
-    bool is_oid,
-  ) {
-    return (_isar_schema_add_property ??= _dylib.lookupFunction<
-        _c_isar_schema_add_property,
-        _dart_isar_schema_add_property>('isar_schema_add_property'))(
-      collection_schema,
-      name,
-      data_type,
-      is_oid ? 1 : 0,
-    );
-  }
-
-  _dart_isar_schema_add_property? _isar_schema_add_property;
-
-  int isar_schema_add_index(
-    ffi.Pointer<ffi.NativeType> collection_schema,
-    ffi.Pointer<ffi.Pointer<ffi.Int8>> property_names,
-    ffi.Pointer<ffi.Uint8> string_types,
-    ffi.Pointer<ffi.Uint8> strings_case_sensitive,
-    int properties_length,
-    bool unique,
-  ) {
-    return (_isar_schema_add_index ??= _dylib.lookupFunction<
-        _c_isar_schema_add_index,
-        _dart_isar_schema_add_index>('isar_schema_add_index'))(
-      collection_schema,
-      property_names,
-      string_types,
-      strings_case_sensitive,
-      properties_length,
-      unique ? 1 : 0,
-    );
-  }
-
-  _dart_isar_schema_add_index? _isar_schema_add_index;
 
   int isar_txn_begin(
     ffi.Pointer<ffi.NativeType> isar,
@@ -1681,7 +1607,8 @@ typedef _c_isar_create_instance = ffi.Void Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
   ffi.Pointer<ffi.Int8> path,
   ffi.Int64 max_size,
-  ffi.Pointer<ffi.NativeType> schema,
+  ffi.Pointer<ffi.Uint8> schema_json,
+  ffi.Uint32 schema_json_length,
   ffi.Int64 port,
 );
 
@@ -1689,7 +1616,8 @@ typedef _dart_isar_create_instance = void Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
   ffi.Pointer<ffi.Int8> path,
   int max_size,
-  ffi.Pointer<ffi.NativeType> schema,
+  ffi.Pointer<ffi.Uint8> schema_json,
+  int schema_json_length,
   int port,
 );
 
@@ -1891,62 +1819,6 @@ typedef _c_isar_free_raw_obj_list = ffi.Void Function(
 
 typedef _dart_isar_free_raw_obj_list = void Function(
   ffi.Pointer<RawObjectSet> ros,
-);
-
-typedef _c_isar_schema_create = ffi.Pointer<ffi.NativeType> Function();
-
-typedef _dart_isar_schema_create = ffi.Pointer<ffi.NativeType> Function();
-
-typedef _c_isar_schema_create_collection = ffi.Int32 Function(
-  ffi.Pointer<ffi.Pointer<ffi.NativeType>> collection_schema,
-  ffi.Pointer<ffi.Int8> name,
-);
-
-typedef _dart_isar_schema_create_collection = int Function(
-  ffi.Pointer<ffi.Pointer<ffi.NativeType>> collection_schema,
-  ffi.Pointer<ffi.Int8> name,
-);
-
-typedef _c_isar_schema_add_collection = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> schema,
-  ffi.Pointer<ffi.NativeType> collection_schema,
-);
-
-typedef _dart_isar_schema_add_collection = int Function(
-  ffi.Pointer<ffi.NativeType> schema,
-  ffi.Pointer<ffi.NativeType> collection_schema,
-);
-
-typedef _c_isar_schema_add_property = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> collection_schema,
-  ffi.Pointer<ffi.Int8> name,
-  ffi.Uint8 data_type,
-  ffi.Uint8 is_oid,
-);
-
-typedef _dart_isar_schema_add_property = int Function(
-  ffi.Pointer<ffi.NativeType> collection_schema,
-  ffi.Pointer<ffi.Int8> name,
-  int data_type,
-  int is_oid,
-);
-
-typedef _c_isar_schema_add_index = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> collection_schema,
-  ffi.Pointer<ffi.Pointer<ffi.Int8>> property_names,
-  ffi.Pointer<ffi.Uint8> string_types,
-  ffi.Pointer<ffi.Uint8> strings_case_sensitive,
-  ffi.Uint32 properties_length,
-  ffi.Uint8 unique,
-);
-
-typedef _dart_isar_schema_add_index = int Function(
-  ffi.Pointer<ffi.NativeType> collection_schema,
-  ffi.Pointer<ffi.Pointer<ffi.Int8>> property_names,
-  ffi.Pointer<ffi.Uint8> string_types,
-  ffi.Pointer<ffi.Uint8> strings_case_sensitive,
-  int properties_length,
-  int unique,
 );
 
 typedef _c_isar_txn_begin = ffi.Int32 Function(
