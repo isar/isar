@@ -556,8 +556,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
     ffi.Pointer<ffi.Int8> path,
     int max_size,
-    ffi.Pointer<ffi.Uint8> schema_json,
-    int schema_json_length,
+    ffi.Pointer<ffi.Int8> schema_json,
     int port,
   ) {
     return (_isar_create_instance ??= _dylib.lookupFunction<
@@ -567,12 +566,25 @@ class IsarCoreBindings {
       path,
       max_size,
       schema_json,
-      schema_json_length,
       port,
     );
   }
 
   _dart_isar_create_instance? _isar_create_instance;
+
+  void isar_get_instance(
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
+    ffi.Pointer<ffi.Int8> path,
+  ) {
+    return (_isar_get_instance ??=
+        _dylib.lookupFunction<_c_isar_get_instance, _dart_isar_get_instance>(
+            'isar_get_instance'))(
+      isar,
+      path,
+    );
+  }
+
+  _dart_isar_get_instance? _isar_get_instance;
 
   int isar_get_collection(
     ffi.Pointer<ffi.NativeType> isar,
@@ -1607,8 +1619,7 @@ typedef _c_isar_create_instance = ffi.Void Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
   ffi.Pointer<ffi.Int8> path,
   ffi.Int64 max_size,
-  ffi.Pointer<ffi.Uint8> schema_json,
-  ffi.Uint32 schema_json_length,
+  ffi.Pointer<ffi.Int8> schema_json,
   ffi.Int64 port,
 );
 
@@ -1616,9 +1627,18 @@ typedef _dart_isar_create_instance = void Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
   ffi.Pointer<ffi.Int8> path,
   int max_size,
-  ffi.Pointer<ffi.Uint8> schema_json,
-  int schema_json_length,
+  ffi.Pointer<ffi.Int8> schema_json,
   int port,
+);
+
+typedef _c_isar_get_instance = ffi.Void Function(
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
+  ffi.Pointer<ffi.Int8> path,
+);
+
+typedef _dart_isar_get_instance = void Function(
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
+  ffi.Pointer<ffi.Int8> path,
 );
 
 typedef _c_isar_get_collection = ffi.Int32 Function(
