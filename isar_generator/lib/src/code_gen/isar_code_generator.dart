@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:build/build.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:glob/glob.dart';
-import 'package:isar_annotation/isar_annotation.dart';
 import 'package:isar_generator/src/code_gen/object_adapter_generator.dart';
-import 'package:isar_generator/src/code_gen/util.dart';
+import 'package:isar_generator/src/code_gen/query_distinct_by_generator.dart';
+import 'package:isar_generator/src/code_gen/query_sort_by_generator.dart';
 import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:isar_generator/src/code_gen/query_filter_generator.dart';
@@ -79,8 +79,8 @@ class IsarCodeGenerator extends Builder {
         .join('\n');
 
     final collectionVars = objects
-        .map((o) =>
-            'final ${getCollectionVar(o.dartName)} = <String, IsarCollection<${o.oidProperty.dartTypeNotNull}, ${o.dartName}>>{};')
+        .map((oi) =>
+            'final ${oi.collectionVar} = <String, IsarCollection<${oi.oidProperty.dartTypeNotNull}, ${oi.dartName}>>{};')
         .join('\n');
     final objectAdapters =
         objects.map((o) => generateObjectAdapter(o)).join('\n');
@@ -91,6 +91,10 @@ class IsarCodeGenerator extends Builder {
         objects.map((o) => generateQueryWhere(o)).join('\n');
     final queryFilterExtensions =
         objects.map((o) => generateQueryFilter(o)).join('\n');
+    final querySortByExtensions =
+        objects.map((o) => generateSortBy(o)).join('\n');
+    final queryDistinctByExtensions =
+        objects.map((o) => generateDistinctBy(o)).join('\n');
 
     var code = '''
     $imports
@@ -100,8 +104,12 @@ class IsarCodeGenerator extends Builder {
     final _isar = <String, Isar>{};
     const _utf8Encoder = Utf8Encoder();
 
+    ${generateIsarSchema(objects)}
+
     $collectionVars
+
     ${generateIsarOpen(objects)}
+
     ${generatePreparePath()}
 
     $getCollectionExtensions
@@ -110,6 +118,8 @@ class IsarCodeGenerator extends Builder {
 
     $queryWhereExtensions
     $queryFilterExtensions
+    $querySortByExtensions
+    $queryDistinctByExtensions
     ''';
 
     code = DartFormatter().format(code);
@@ -129,93 +139,28 @@ class IsarCodeGenerator extends Builder {
       await Directory(path).create(recursive: true);
       initializeIsarCore();
       IC.isar_connect_dart_api(NativeApi.postCObject);
-      final schemaPtr = IC.isar_schema_create();
-      final collectionPtrPtr = allocate<Pointer>();
-    ''';
 
-    for (var info in objects) {
-      code += '''
-      {
-        final namePtr = Utf8.toUtf8('${info.isarName}');
-        final idNamePtr = Utf8.toUtf8('${info.oidProperty.isarName}');
-        nCall(IC.isar_schema_create_collection(
-          collectionPtrPtr,
-          namePtr.cast(),
-          idNamePtr.cast(),
-          ${info.oidProperty.isarType.typeId},
-        ));
-        final collectionPtr = collectionPtrPtr.value;
-        free(namePtr);
-        free(idNamePtr);
-      ''';
-      for (var property in info.properties) {
-        code += '''
-        {
-          final pNamePtr = Utf8.toUtf8('${property.isarName}');
-          nCall(IC.isar_schema_add_property(collectionPtr, pNamePtr.cast(), ${property.isarType.typeId}));
-          free(pNamePtr);
-        }
-        ''';
-      }
-      for (var index in info.indices) {
-        code += '''
-        {
-          final propertiesPtrPtr = allocate<Pointer<Int8>>(count: ${index.properties.length});
-          final stringTypesPtr = allocate<Uint8>(count: ${index.properties.length});
-          final stringsCaseSensitivePtr = allocate<Uint8>(count: ${index.properties.length});
-        ''';
-        for (var i = 0; i < index.properties.length; i++) {
-          final indexProperty = index.properties[i];
-          final property = info.getProperty(indexProperty.isarName);
-          final defaultStringType = property.isarType == IsarType.String
-              ? StringIndexType.hash.index
-              : 255;
-          code += '''
-            propertiesPtrPtr[$i] = Utf8.toUtf8('${indexProperty.isarName}').cast();
-            stringTypesPtr[$i] = ${indexProperty.stringType?.index ?? defaultStringType};
-            stringsCaseSensitivePtr[$i] = ${indexProperty.caseSensitive ? 1 : 0};
-          ''';
-        }
-
-        code += '''
-        nCall(IC.isar_schema_add_index(
-          collectionPtr,
-          propertiesPtrPtr,
-          stringTypesPtr,
-          stringsCaseSensitivePtr,
-          ${index.properties.length},
-          ${index.unique},
-        ));''';
-        for (var i = 0; i < index.properties.length; i++) {
-          code += 'free(propertiesPtrPtr[$i]);';
-        }
-        code += '''
-          free(propertiesPtrPtr);
-          free(stringTypesPtr);
-          free(stringsCaseSensitivePtr);
-        }
-        ''';
-      }
-      code += '''
-        nCall(IC.isar_schema_add_collection(schemaPtr, collectionPtrPtr.value));
-      }
-      
-      ''';
-    }
-
-    code += '''
-      final pathPtr = Utf8.toUtf8(path);
       final isarPtrPtr = allocate<Pointer>();
-      final receivePort = ReceivePort();
-      final nativePort = receivePort.sendPort.nativePort;
-      IC.isar_create_instance(isarPtrPtr, pathPtr.cast(), maxSize, schemaPtr, nativePort);
-      await receivePort.first;
+      final pathPtr = Utf8.toUtf8(path);
+      IC.isar_get_instance(isarPtrPtr, pathPtr.cast());
+      if (isarPtrPtr.value.address == 0) {
+        final schemaPtr = Utf8.toUtf8(_schema);
+        final receivePort = ReceivePort();
+        final nativePort = receivePort.sendPort.nativePort;
+        final stream = wrapIsarPort(receivePort);
+        IC.isar_create_instance(isarPtrPtr, pathPtr.cast(), maxSize, schemaPtr.cast(), nativePort);
+        await stream.first;
+        free(schemaPtr);
+      }
       free(pathPtr);
       
       final isarPtr = isarPtrPtr.value;
+      free(isarPtrPtr);
+
       final isar = IsarImpl(path, isarPtr);
       _isar[path] = isar;
-      free(isarPtrPtr);
+      
+      final collectionPtrPtr = allocate<Pointer>();
     ''';
 
     for (var i = 0; i < objects.length; i++) {
@@ -230,7 +175,7 @@ class IsarCodeGenerator extends Builder {
             'propertyOffsets.add(IC.isar_get_property_offset(collectionPtrPtr.value, $p));';
       }
       code += '''
-        ${getCollectionVar(info.dartName)}[path] = IsarCollectionImpl(
+        ${info.collectionVar}[path] = IsarCollectionImpl(
           isar,
           _${info.dartName}Adapter(),
           collectionPtrPtr.value,
@@ -259,7 +204,7 @@ class IsarCodeGenerator extends Builder {
       code += '''
         WidgetsFlutterBinding.ensureInitialized();
         final dir = await getApplicationDocumentsDirectory();
-        return p.join(dir.path, path ?? 'isar');
+        return p.join(dir!.path, path ?? 'isar');
         ''';
     } else {
       code += "return p.absolute(path ?? '');";
@@ -276,9 +221,42 @@ class IsarCodeGenerator extends Builder {
     return '''
     extension Get${object.dartName}Collection on Isar {
       IsarCollection<${object.oidProperty.dartTypeNotNull}, ${object.dartName}> get ${object.dartName.decapitalize()}s {
-        return ${getCollectionVar(object.dartName)}[path]!;
+        return ${object.collectionVar}[path]!;
       }
     }
     ''';
+  }
+
+  String generateIsarSchema(List<ObjectInfo> ois) {
+    final jsonMap = [
+      for (var oi in ois)
+        {
+          'name': oi.isarName,
+          'properties': [
+            for (var property in oi.properties)
+              {
+                'name': property.isarName,
+                'type': property.isarType.typeId,
+                'isObjectId': property.isObjectId,
+              },
+          ],
+          'indexes': [
+            for (var index in oi.indexes)
+              {
+                'unique': index.unique,
+                'properties': [
+                  for (var indexProperty in index.properties)
+                    {
+                      'name': indexProperty.property.isarName,
+                      'indexType': indexProperty.indexType.index,
+                      'caseSensitive': indexProperty.caseSensitive,
+                    }
+                ]
+              }
+          ]
+        },
+    ];
+    final json = jsonEncode(jsonMap);
+    return "final _schema = '$json';";
   }
 }

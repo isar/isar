@@ -1,5 +1,4 @@
 import 'package:isar_generator/src/object_info.dart';
-import 'package:isar_generator/src/code_gen/util.dart';
 import 'package:dartx/dartx.dart';
 
 String generateObjectAdapter(ObjectInfo object) {
@@ -23,7 +22,7 @@ String generateConverterFields(ObjectInfo object) {
 }
 
 String _generatePrepareSerialize(ObjectInfo object) {
-  final staticSize = object.getStaticSize();
+  final staticSize = object.staticSize;
   var code = 'var dynamicSize = 0;';
   for (var i = 0; i < object.properties.length; i++) {
     final property = object.properties[i];
@@ -86,6 +85,7 @@ String _generatePrepareSerialize(ObjectInfo object) {
       case IsarType.FloatList:
       case IsarType.LongList:
       case IsarType.DoubleList:
+      case IsarType.DateTimeList:
         code +=
             'dynamicSize += (value$i$nOp.length $nLen) * ${property.isarType.elementSize};';
         break;
@@ -124,7 +124,7 @@ String _generateSerialize(ObjectInfo object) {
     }
     rawObj.buffer_length = size;
     final buffer = rawObj.buffer.asTypedList(size);
-    final writer = BinaryWriter(buffer, ${object.getStaticSize()});
+    final writer = BinaryWriter(buffer, ${object.staticSize});
   ''';
   for (var i = 0; i < object.properties.length; i++) {
     final property = object.properties[i];
@@ -144,6 +144,9 @@ String _generateSerialize(ObjectInfo object) {
         break;
       case IsarType.Double:
         code += 'writer.writeDouble(offsets[$i], $accessor);';
+        break;
+      case IsarType.DateTime:
+        code += 'writer.writeDateTime(offsets[$i], $accessor);';
         break;
       case IsarType.String:
         code += 'writer.writeBytes(offsets[$i], $accessor);';
@@ -168,6 +171,9 @@ String _generateSerialize(ObjectInfo object) {
         break;
       case IsarType.DoubleList:
         code += 'writer.writeDoubleList(offsets[$i], $accessor);';
+        break;
+      case IsarType.DateTimeList:
+        code += 'writer.writeDateTimeList(offsets[$i], $accessor);';
         break;
     }
   }
@@ -207,6 +213,9 @@ String _generateDeserialize(ObjectInfo object) {
       case IsarType.Double:
         deser = 'reader.readDouble$orNull(offsets[$i])';
         break;
+      case IsarType.DateTime:
+        deser = 'reader.readDateTime$orNull(offsets[$i])';
+        break;
       case IsarType.String:
         deser = 'reader.readString$orNull(offsets[$i])';
         break;
@@ -230,6 +239,9 @@ String _generateDeserialize(ObjectInfo object) {
         break;
       case IsarType.DoubleList:
         deser = 'reader.readDouble${orElNull}List(offsets[$i]) $orNullList';
+        break;
+      case IsarType.DateTimeList:
+        deser = 'reader.readDateTime${orElNull}List(offsets[$i]) $orNullList';
         break;
     }
     code += '$accessor = ${property.fromIsar(deser, object)};';

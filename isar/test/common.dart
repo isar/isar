@@ -20,11 +20,13 @@ Future<Directory> getTempDir() async {
 }
 
 var _setUp = false;
-void setupIsar() {
+Future setupIsar() async {
   if (!_setUp) {
+    final dartToolDir = path.join(Directory.current.path, '.dart_tool');
     initializeIsarCore(dylibs: {
-      'macos':
-          '/Users/simon/Documents/GitHub/isar-core/dart-ffi/target/x86_64-apple-darwin/release/libisar_core_dart_ffi.dylib'
+      'windows': path.join(dartToolDir, 'isar_windows_x64.dll'),
+      'macos': path.join(dartToolDir, 'libisar_macos_x64.dylib'),
+      'linux': path.join(dartToolDir, 'libisar_linux_x64.so'),
     });
     _setUp = true;
   }

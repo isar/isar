@@ -11,9 +11,8 @@ abstract class ObjectInfo with _$ObjectInfo {
   const factory ObjectInfo({
     String dartName,
     String isarName,
-    ObjectProperty oidProperty,
     @Default([]) List<ObjectProperty> properties,
-    @Default([]) List<ObjectIndex> indices,
+    @Default([]) List<ObjectIndex> indexes,
     @Default([]) List<String> converterImports,
   }) = _ObjectInfo;
 
@@ -26,11 +25,16 @@ extension ObjectInfoX on ObjectInfo {
     return properties.filter((it) => it.isarName == isarName).first;
   }
 
-  String get adapterName => '_${dartName}Adapter';
+  ObjectProperty get oidProperty =>
+      properties.firstWhere((it) => it.isObjectId);
 
-  int getStaticSize() {
+  int get staticSize {
     return properties.sumBy((p) => p.isarType.staticSize).toInt() + 2;
   }
+
+  String get adapterName => '_${dartName}Adapter';
+
+  String get collectionVar => '_${dartName.decapitalize()}Collection';
 }
 
 @freezed
@@ -40,6 +44,7 @@ abstract class ObjectProperty with _$ObjectProperty {
     String isarName,
     String dartType,
     IsarType isarType,
+    bool isObjectId,
     String converter,
     bool nullable,
     bool elementNullable,
@@ -49,11 +54,33 @@ abstract class ObjectProperty with _$ObjectProperty {
       _$ObjectPropertyFromJson(json);
 }
 
+extension ObjectPropertyX on ObjectProperty {
+  String get dartTypeNotNull {
+    return dartType.removeSuffix('?');
+  }
+
+  String toIsar(String input, ObjectInfo oi) {
+    if (converter != null) {
+      return '${oi.adapterName}._${converter}.toIsar($input)';
+    } else {
+      return input;
+    }
+  }
+
+  String fromIsar(String input, ObjectInfo oi) {
+    if (converter != null) {
+      return '${oi.adapterName}._${converter}.fromIsar($input)';
+    } else {
+      return input;
+    }
+  }
+}
+
 @freezed
 abstract class ObjectIndexProperty with _$ObjectIndexProperty {
   const factory ObjectIndexProperty({
-    String isarName,
-    StringIndexType stringType,
+    ObjectProperty property,
+    IndexType indexType,
     bool caseSensitive,
   }) = _ObjectIndexProperty;
 
@@ -72,63 +99,13 @@ abstract class ObjectIndex with _$ObjectIndex {
       _$ObjectIndexFromJson(json);
 }
 
-extension ObjectPropertyX on ObjectProperty {
-  String get isarDartType {
-    final elementNullModifier = elementNullable ? '?' : '';
-
-    String type;
-    switch (isarType) {
-      case IsarType.Bool:
-        type = 'bool';
-        break;
-      case IsarType.Int:
-      case IsarType.Long:
-        type = 'int';
-        break;
-      case IsarType.Float:
-      case IsarType.Double:
-        type = 'double';
-        break;
-      case IsarType.String:
-        type = 'String';
-        break;
-      case IsarType.Bytes:
-        type = 'Uint8List';
-        break;
-      case IsarType.BoolList:
-        type = 'List<bool$elementNullModifier>';
-        break;
-      case IsarType.IntList:
-      case IsarType.LongList:
-        type = 'List<int$elementNullModifier>';
-        break;
-      case IsarType.FloatList:
-      case IsarType.DoubleList:
-        type = 'List<double$elementNullModifier>';
-        break;
-      case IsarType.StringList:
-        type = 'List<String$elementNullModifier>';
-        break;
-    }
-
-    if (this.nullable) {
-      type += '?';
-    }
-
-    return type;
-  }
-
-  String get dartTypeNotNull {
-    return dartType.removeSuffix('?');
-  }
-}
-
 enum IsarType {
   Bool,
   Int,
   Float,
   Long,
   Double,
+  DateTime,
   String,
   Bytes,
   BoolList,
@@ -136,6 +113,7 @@ enum IsarType {
   FloatList,
   LongList,
   DoubleList,
+  DateTimeList,
   StringList,
 }
 
@@ -172,6 +150,7 @@ extension IsarTypeX on IsarType {
         return 4;
       case IsarType.LongList:
       case IsarType.DoubleList:
+      case IsarType.DateTimeList:
         return 8;
       default:
         return 0;
@@ -187,6 +166,7 @@ extension IsarTypeX on IsarType {
       case IsarType.Float:
         return 2;
       case IsarType.Long:
+      case IsarType.DateTime:
         return 3;
       case IsarType.Double:
         return 4;
@@ -200,6 +180,7 @@ extension IsarTypeX on IsarType {
       case IsarType.FloatList:
         return 8;
       case IsarType.LongList:
+      case IsarType.DateTimeList:
         return 9;
       case IsarType.DoubleList:
         return 10;

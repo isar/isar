@@ -1,6 +1,6 @@
 part of isar_annotation;
 
-enum StringIndexType {
+enum IndexType {
   value,
   hash,
   words,
@@ -11,28 +11,28 @@ class Index {
 
   final bool unique;
 
-  final bool caseSensitive;
+  final IndexType? indexType;
 
-  final StringIndexType? stringType;
+  final bool? caseSensitive;
 
   const Index({
     this.composite = const [],
     this.unique = false,
-    this.caseSensitive = true,
-    this.stringType,
+    this.indexType,
+    this.caseSensitive,
   });
 }
 
 class CompositeIndex {
   final String property;
 
-  final bool caseSensitive;
+  final IndexType? indexType;
 
-  final StringIndexType? stringType;
+  final bool? caseSensitive;
 
   const CompositeIndex(
     this.property, {
-    this.caseSensitive = false,
-    this.stringType,
+    this.indexType,
+    this.caseSensitive,
   });
 }

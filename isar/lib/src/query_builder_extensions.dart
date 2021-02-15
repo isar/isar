@@ -47,9 +47,38 @@ extension QueryFilterNoGroups<OBJECT> on QueryBuilder<OBJECT, dynamic, QFilter,
 
 extension QueryFilterOneGroupsEnd<OBJECT> on QueryBuilder<OBJECT, dynamic,
     QFilterAfterCond, dynamic, dynamic, dynamic, dynamic> {
-  QueryBuilder<OBJECT, dynamic, QFilterAfterCond, QCanGroupBy, QCanOffsetLimit,
-      QCanSort, QCanExecute> endGroup() {
+  QueryBuilder<OBJECT, dynamic, QFilterAfterCond, QCanDistinctBy,
+      QCanOffsetLimit, QCanSort, QCanExecute> endGroup() {
     return endGroupInternal();
+  }
+}
+
+extension QueryOffsetLimit<OBJECT, A, B> on QueryBuilder<OBJECT, dynamic,
+    dynamic, A, QCanOffsetLimit, B, QCanExecute> {
+  QueryBuilder<OBJECT, dynamic, dynamic, A, QCanLimit, B, QCanExecute> offset(
+      int offset) {
+    return offsetInternal(offset);
+  }
+
+  QueryBuilder<OBJECT, dynamic, dynamic, A, QCanOffset, B, QCanExecute> limit(
+      int limit) {
+    return limitInternal(limit);
+  }
+}
+
+extension QueryOffset<OBJECT, A, B>
+    on QueryBuilder<OBJECT, dynamic, dynamic, A, QCanOffset, B, QCanExecute> {
+  QueryBuilder<OBJECT, dynamic, dynamic, A, dynamic, B, QCanExecute> offset(
+      int offset) {
+    return offsetInternal(offset);
+  }
+}
+
+extension QueryLimit<OBJECT, A, B>
+    on QueryBuilder<OBJECT, dynamic, dynamic, A, QCanOffset, B, QCanExecute> {
+  QueryBuilder<OBJECT, dynamic, dynamic, A, dynamic, B, QCanExecute> limit(
+      int limit) {
+    return limitInternal(limit);
   }
 }
 

@@ -17,9 +17,10 @@ dev_dependencies:
   isar_generator: 0.0.4
   test: 1.16.0-nullsafety.13
   ffigen: 2.0.0-nullsafety.1
+  build_runner:
 
 dependency_overrides:
-  #isar_annotation:
-  #  path: ../isar_annotation
-  #isar_generator:
-  #  path: ../isar_generator
+  isar_annotation:
+    path: ../isar_annotation
+  isar_generator:
+    path: ../isar_generator

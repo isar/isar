@@ -1,25 +1,9 @@
 part of isar;
 
 abstract class Query<T> {
-  Future<T?> findFirst() async {
-    /*final results = await findAll(limit: 1);
-    if (results.isNotEmpty) {
-      return results.first;
-    } else {
-      return null;
-    }*/
-    throw UnimplementedError();
-  }
+  Future<T?> findFirst();
 
-  T? findFirstSync() {
-    /*final results = findAllSync(limit: 1);
-    if (results.isNotEmpty) {
-      return results.first;
-    } else {
-      return null;
-    }*/
-    throw UnimplementedError();
-  }
+  T? findFirstSync();
 
   Future<List<T>> findAll();
 
@@ -37,5 +21,5 @@ abstract class Query<T> {
 
   int deleteAllSync();
 
-  Stream<List<T>?> watch({bool lazy = true});
+  Stream<List<T>?> watch({bool lazy = true, bool initialReturn = false});
 }

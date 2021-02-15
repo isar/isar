@@ -23,10 +23,19 @@ void nCall(int result) {
   }
 }
 
-int nBool(bool value) {
-  if (value) {
-    return 1;
-  } else {
-    return 0;
-  }
+Stream<void> wrapIsarPort(ReceivePort port) {
+  final portStreamController = StreamController<Null>.broadcast();
+  port.listen(
+    (event) {
+      if (event == 0) {
+        portStreamController.add(null);
+      } else {
+        portStreamController.addError(isarErrorFromResult(event)!);
+      }
+    },
+    onDone: () {
+      portStreamController.close();
+    },
+  );
+  return portStreamController.stream;
 }

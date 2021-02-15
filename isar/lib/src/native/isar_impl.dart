@@ -21,22 +21,8 @@ class IsarImpl extends Isar {
   Future<T> _txn<T>(bool write, Future<T> Function(Isar isar) callback) async {
     requireNoTxnActive();
 
-    final portStreamController = StreamController<Null>.broadcast();
-    final portStream = portStreamController.stream;
-
     final port = ReceivePort();
-    port.listen(
-      (event) {
-        if (event == 0) {
-          portStreamController.add(null);
-        } else {
-          portStreamController.addError(isarErrorFromResult(event)!);
-        }
-      },
-      onDone: () {
-        portStreamController.close();
-      },
-    );
+    final portStream = wrapIsarPort(port);
 
     final txnPtrPtr = allocate<Pointer<NativeType>>();
     IC.isar_txn_begin_async(

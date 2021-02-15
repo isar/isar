@@ -19,16 +19,19 @@ class BinaryWriter {
     _byteData.setUint16(0, staticSize, Endian.little);
   }
 
+  void writeBool(int offset, bool? value, {bool staticOffset = true}) {
+    assert(!staticOffset || offset < _staticSize);
+    if (value == null) {
+      _buffer[offset] = nullBool;
+    } else {
+      _buffer[offset] = value ? trueBool : falseBool;
+    }
+  }
+
   void writeInt(int offset, int? value) {
     assert(offset < _staticSize);
     value ??= nullInt;
     _byteData.setInt32(offset, value, Endian.little);
-  }
-
-  void writeLong(int offset, int? value) {
-    assert(offset < _staticSize);
-    value ??= nullLong;
-    _byteData.setInt64(offset, value, Endian.little);
   }
 
   void writeFloat(int offset, double? value) {
@@ -37,19 +40,20 @@ class BinaryWriter {
     _byteData.setFloat32(offset, value, Endian.little);
   }
 
+  void writeLong(int offset, int? value) {
+    assert(offset < _staticSize);
+    value ??= nullLong;
+    _byteData.setInt64(offset, value, Endian.little);
+  }
+
   void writeDouble(int offset, double? value) {
     assert(offset < _staticSize);
     value ??= double.nan;
     _byteData.setFloat64(offset, value, Endian.little);
   }
 
-  void writeBool(int offset, bool? value, {bool staticOffset = true}) {
-    assert(!staticOffset || offset < _staticSize);
-    if (value == null) {
-      _buffer[offset] = nullBool;
-    } else {
-      _buffer[offset] = value ? trueBool : falseBool;
-    }
+  void writeDateTime(int offset, DateTime? value) {
+    writeLong(offset, value?.toUtc().microsecondsSinceEpoch);
   }
 
   void _writeBytes(Uint8List? value, int offsetOffset, int dataOffset) {
@@ -141,6 +145,12 @@ class BinaryWriter {
         _dynamicOffset += 8;
       }
     }
+  }
+
+  void writeDateTimeList(int offset, List<DateTime?>? values) {
+    final longList =
+        values?.map((e) => e?.toUtc().microsecondsSinceEpoch).toList();
+    writeLongList(offset, longList);
   }
 
   void writeStringList(int offset, List<Uint8List?>? values) {

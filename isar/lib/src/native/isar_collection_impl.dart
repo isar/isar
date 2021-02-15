@@ -20,9 +20,7 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
   OBJECT deserializeObject(RawObject rawObj) {
     final buffer = rawObj.buffer.asTypedList(rawObj.buffer_length);
     final reader = BinaryReader(buffer);
-    final object = _adapter.deserialize(reader, propertyOffsets);
-    setId(object, rawObj.id);
-    return object;
+    return _adapter.deserialize(reader, propertyOffsets);
   }
 
   List<OBJECT> deserializeObjects(RawObjectSet objectSet) {
@@ -56,46 +54,6 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
         objectsPtr.elementAt(i).ref.freeId();
       }
     }
-  }
-
-  @override
-  Future<OBJECT?> get(ID id) {
-    return isar.getTxn(false, (txnPtr, stream) async {
-      final rawObjPtr = allocate<RawObject>();
-      final rawObj = rawObjPtr.ref;
-      rawObj.id = id;
-
-      IC.isar_get_async(collectionPtr, txnPtr, rawObjPtr);
-      try {
-        await stream.first;
-
-        if (!rawObj.buffer.isNull) {
-          return deserializeObject(rawObj);
-        }
-      } finally {
-        rawObj.freeId();
-        free(rawObjPtr);
-      }
-    });
-  }
-
-  @override
-  OBJECT? getSync(ID id) {
-    return isar.getTxnSync(false, (txnPtr) {
-      final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
-      final rawObj = rawObjPtr.ref;
-      rawObj.id = id;
-
-      try {
-        nCall(IC.isar_get(collectionPtr, txnPtr, rawObjPtr));
-
-        if (!rawObj.buffer.isNull) {
-          return deserializeObject(rawObj);
-        }
-      } finally {
-        rawObj.freeId();
-      }
-    });
   }
 
   @override
@@ -152,44 +110,6 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
   }
 
   @override
-  Future<void> put(OBJECT object) {
-    return isar.getTxn(true, (txnPtr, stream) async {
-      final rawObjPtr = allocate<RawObject>();
-      final rawObj = rawObjPtr.ref;
-      _adapter.serialize(rawObj, object, propertyOffsets);
-      rawObj.id = getId(object);
-      IC.isar_put_async(collectionPtr, txnPtr, rawObjPtr);
-
-      try {
-        await stream.first;
-        setId(object, rawObj.id);
-      } finally {
-        rawObj.freeId();
-        rawObj.freeData();
-        free(rawObjPtr);
-      }
-    });
-  }
-
-  @override
-  void putSync(OBJECT object) {
-    return isar.getTxnSync(true, (txnPtr) {
-      final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
-      final rawObj = rawObjPtr.ref;
-      _adapter.serialize(rawObj, object, propertyOffsets);
-      rawObj.id = getId(object);
-
-      try {
-        nCall(IC.isar_put(collectionPtr, txnPtr, rawObjPtr));
-        setId(object, rawObjPtr.ref.id);
-      } finally {
-        rawObj.freeId();
-        rawObj.freeData();
-      }
-    });
-  }
-
-  @override
   Future<void> putAll(List<OBJECT> objects) {
     return isar.getTxn(true, (txnPtr, stream) async {
       final rawObjSetPtr = allocRawObjSet(objects.length);
@@ -199,7 +119,6 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
         final rawObj = objectsPtr.elementAt(i).ref;
         final object = objects[i];
         _adapter.serialize(rawObj, object, propertyOffsets);
-        rawObj.id = getId(object);
       }
       IC.isar_put_all_async(collectionPtr, txnPtr, rawObjSetPtr);
 
@@ -208,13 +127,14 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
         final rawObjectSet = rawObjSetPtr.ref;
         for (var i = 0; i < objects.length; i++) {
           final rawObjPtr = rawObjectSet.objects.elementAt(i);
-          setId(objects[i], rawObjPtr.ref.id!);
+          if (ID == int) {
+            setId(objects[i], rawObjPtr.ref.oid_num as ID);
+          }
         }
       } finally {
         for (var i = 0; i < objects.length; i++) {
           final rawObjPtr = objectsPtr.elementAt(i);
           final rawObj = rawObjPtr.ref;
-          rawObj.freeId();
           rawObj.freeData();
         }
         free(objectsPtr);
@@ -234,14 +154,11 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
         for (var object in objects) {
           bufferSize =
               _adapter.serialize(rawObj, object, propertyOffsets, bufferSize);
-          rawObj.id = getId(object);
           nCall(IC.isar_put(collectionPtr, txnPtr, rawObjPtr));
-          setId(object, rawObj.id);
-          rawObj.freeId();
+          if (ID == int) {
+            setId(object, rawObj.oid_num as ID);
+          }
         }
-      } catch (e) {
-        rawObj.freeId();
-        rethrow;
       } finally {
         rawObj.freeData();
       }
@@ -249,47 +166,9 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
   }
 
   @override
-  Future<bool> delete(ID id) {
-    return isar.getTxn(false, (txnPtr, stream) async {
-      final deletedPtr = allocate<Uint8>();
-      final rawObjPtr = allocate<RawObject>();
-      final rawObj = rawObjPtr.ref;
-      rawObj.id = id;
-      IC.isar_delete_async(collectionPtr, txnPtr, rawObjPtr, deletedPtr);
-
-      try {
-        await stream.first;
-        return deletedPtr.value != 0;
-      } finally {
-        rawObj.freeId();
-        free(rawObjPtr);
-        free(deletedPtr);
-      }
-    });
-  }
-
-  @override
-  bool deleteSync(ID id) {
-    return isar.getTxnSync(true, (txnPtr) {
-      final deletedPtr = allocate<Uint8>();
-      final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
-      final rawObj = rawObjPtr.ref;
-      rawObj.id = id;
-
-      try {
-        nCall(IC.isar_delete(collectionPtr, txnPtr, rawObjPtr, deletedPtr));
-        return deletedPtr.value != 0;
-      } finally {
-        rawObj.freeId();
-        free(deletedPtr);
-      }
-    });
-  }
-
-  @override
   Future<int> deleteAll(List<ID> ids) {
     return isar.getTxn(true, (txnPtr, stream) async {
-      final countPtr = allocate<Int64>();
+      final countPtr = allocate<Uint32>();
       final rawObjSetPtr = allocRawObjSet(ids.length);
       final objectsPtr = rawObjSetPtr.ref.objects;
       setRawObjSetIds(objectsPtr, ids);
@@ -309,19 +188,23 @@ class IsarCollectionImpl<ID, OBJECT> extends IsarCollection<ID, OBJECT> {
   @override
   int deleteAllSync(List<ID> ids) {
     return isar.getTxnSync(true, (txnPtr) {
-      final countPtr = allocate<Int64>();
-      final rawObjSetPtr = allocRawObjSet(ids.length);
-      final objectsPtr = rawObjSetPtr.ref.objects;
-      setRawObjSetIds(objectsPtr, ids);
+      final deletedPtr = allocate<Uint8>();
+      final rawObjPtr = allocate<RawObject>();
+      final rawObj = rawObjPtr.ref;
 
       try {
-        nCall(
-            IC.isar_delete_all(collectionPtr, txnPtr, rawObjSetPtr, countPtr));
-        return countPtr.value;
+        var counter = 0;
+        for (var id in ids) {
+          rawObj.id = id;
+          nCall(IC.isar_delete(collectionPtr, txnPtr, rawObjPtr, deletedPtr));
+          if (deletedPtr.value == 1) {
+            counter++;
+          }
+        }
+        return counter;
       } finally {
-        freeRawObjSetIds(objectsPtr, ids.length);
-        free(objectsPtr);
-        free(rawObjSetPtr);
+        free(rawObjPtr);
+        free(deletedPtr);
       }
     });
   }

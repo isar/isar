@@ -14,6 +14,7 @@ void main() {
     ..floatValue = 17.17
     ..longValue = 123123
     ..doubleValue = 123.123
+    ..dateValue = DateTime.fromMillisecondsSinceEpoch(123123)
     ..stringValue = 'five';
 
   final _converterObjectJson = {
@@ -23,6 +24,7 @@ void main() {
     'floatValue': '17.17',
     'longValue': '123123',
     'doubleValue': '123.123',
+    'dateValue': '123123000',
     'stringValue': 5,
   };
 

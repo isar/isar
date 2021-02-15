@@ -19,11 +19,9 @@ class BinaryReader {
   bool? readBoolOrNull(int offset, {bool staticOffset = true}) {
     if (staticOffset && offset >= _staticSize) return null;
     final value = _buffer[offset];
-    if (value == nullBool) {
-      return null;
-    } else if (value == trueBool) {
+    if (value == trueBool) {
       return true;
-    } else {
+    } else if (value == falseBool) {
       return false;
     }
   }
@@ -35,9 +33,7 @@ class BinaryReader {
   int? readIntOrNull(int offset, {bool staticOffset = true}) {
     if (staticOffset && offset >= _staticSize) return null;
     final value = _byteData.getInt32(offset, Endian.little);
-    if (value == nullInt) {
-      return null;
-    } else {
+    if (value != nullInt) {
       return value;
     }
   }
@@ -49,9 +45,7 @@ class BinaryReader {
   double? readFloatOrNull(int offset, {bool staticOffset = true}) {
     if (staticOffset && offset >= _staticSize) return null;
     var value = _byteData.getFloat32(offset, Endian.little);
-    if (value.isNaN) {
-      return null;
-    } else {
+    if (!value.isNaN) {
       return value;
     }
   }
@@ -63,9 +57,7 @@ class BinaryReader {
   int? readLongOrNull(int offset, {bool staticOffset = true}) {
     if (staticOffset && offset >= _staticSize) return null;
     final value = _byteData.getInt64(offset, Endian.little);
-    if (value == nullLong) {
-      return null;
-    } else {
+    if (value != nullLong) {
       return value;
     }
   }
@@ -77,10 +69,19 @@ class BinaryReader {
   double? readDoubleOrNull(int offset, {bool staticOffset = true}) {
     if (staticOffset && offset >= _staticSize) return null;
     final value = _byteData.getFloat64(offset, Endian.little);
-    if (value.isNaN) {
-      return null;
-    } else {
+    if (!value.isNaN) {
       return value;
+    }
+  }
+
+  DateTime readDateTime(int offset, {bool staticOffset = true}) {
+    return readDateTimeOrNull(offset, staticOffset: staticOffset) ?? nullDate;
+  }
+
+  DateTime? readDateTimeOrNull(int offset, {bool staticOffset = true}) {
+    final time = readLongOrNull(offset, staticOffset: staticOffset);
+    if (time != null) {
+      return DateTime.fromMicrosecondsSinceEpoch(time, isUtc: true).toLocal();
     }
   }
 
@@ -252,6 +253,24 @@ class BinaryReader {
       list[i] = readDoubleOrNull(listOffset + i * 8, staticOffset: false);
     }
     return list;
+  }
+
+  List<DateTime>? readDateTimeList(int offset) {
+    return readLongOrNullList(offset)?.map((e) {
+      if (e != null) {
+        return DateTime.fromMicrosecondsSinceEpoch(e, isUtc: true).toLocal();
+      } else {
+        return nullDate;
+      }
+    }).toList();
+  }
+
+  List<DateTime?>? readDateTimeOrNullList(int offset) {
+    return readLongOrNullList(offset)?.map((e) {
+      if (e != null) {
+        return DateTime.fromMicrosecondsSinceEpoch(e, isUtc: true).toLocal();
+      }
+    }).toList();
   }
 
   List<String>? readStringList(int offset) {

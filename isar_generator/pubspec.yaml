@@ -25,5 +25,5 @@ dev_dependencies:
   freezed: ^0.12.6
 
 dependency_overrides:
-  #isar_annotation:
-  #  path: ../isar_annotation
+  isar_annotation:
+    path: ../isar_annotation

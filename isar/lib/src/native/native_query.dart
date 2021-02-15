@@ -1,17 +1,24 @@
 part of isar_native;
 
 class NativeQuery<OBJECT> extends Query<OBJECT> {
+  static const MAX_LIMIT = 4294967295;
   final IsarCollectionImpl<dynamic, OBJECT> col;
   final Pointer<NativeType> queryPtr;
 
   NativeQuery(this.col, this.queryPtr);
 
   @override
-  Future<List<OBJECT>> findAll() {
+  Future<OBJECT?> findFirst() =>
+      findInternal(MAX_LIMIT).then((value) => value[0]);
+
+  @override
+  Future<List<OBJECT>> findAll() => findInternal(MAX_LIMIT);
+
+  Future<List<OBJECT>> findInternal(int limit) {
     return col.isar.getTxn(false, (txnPtr, stream) async {
       final resultsPtr = allocate<RawObjectSet>();
       try {
-        IC.isar_q_find_all_async(queryPtr, txnPtr, resultsPtr);
+        IC.isar_q_find_async(queryPtr, txnPtr, resultsPtr, limit);
         await stream.first;
         return col.deserializeObjects(resultsPtr.ref);
       } finally {
@@ -22,11 +29,16 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   }
 
   @override
-  List<OBJECT> findAllSync() {
+  OBJECT? findFirstSync() => findSyncInternal(1)[0];
+
+  @override
+  List<OBJECT> findAllSync() => findSyncInternal(MAX_LIMIT);
+
+  List<OBJECT> findSyncInternal(int limit) {
     return col.isar.getTxnSync(false, (txnPtr) {
       final resultsPtr = allocate<RawObjectSet>();
       try {
-        nCall(IC.isar_q_find_all(queryPtr, txnPtr, resultsPtr));
+        nCall(IC.isar_q_find(queryPtr, txnPtr, resultsPtr, limit));
         return col.deserializeObjects(resultsPtr.ref);
       } finally {
         free(resultsPtr);
@@ -37,7 +49,7 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   @override
   Future<int> count() {
     return col.isar.getTxn(false, (txnPtr, stream) async {
-      final countPtr = allocate<Int64>();
+      final countPtr = allocate<Uint32>();
       try {
         IC.isar_q_count_async(queryPtr, txnPtr, countPtr);
         await stream.first;
@@ -51,7 +63,7 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   @override
   int countSync() {
     return col.isar.getTxnSync(false, (txnPtr) {
-      final countPtr = allocate<Int64>();
+      final countPtr = allocate<Uint32>();
       try {
         nCall(IC.isar_q_count(queryPtr, txnPtr, countPtr));
         return countPtr.value;
@@ -62,41 +74,22 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   }
 
   @override
-  Future<bool> deleteFirst() {
-    return col.isar.getTxn(false, (txnPtr, stream) async {
-      final deletedPtr = allocate<Uint8>();
-      try {
-        IC.isar_q_delete_first_async(
-            queryPtr, col.collectionPtr, txnPtr, deletedPtr);
-        await stream.first;
-        return deletedPtr.value != 0;
-      } finally {
-        free(deletedPtr);
-      }
-    });
-  }
+  Future<bool> deleteFirst() => deleteInternal(1).then((count) => count == 1);
 
   @override
-  bool deleteFirstSync() {
-    return col.isar.getTxnSync(false, (txnPtr) {
-      final deletedPtr = allocate<Uint8>();
-      try {
-        nCall(IC.isar_q_delete_first(
-            queryPtr, col.collectionPtr, txnPtr, deletedPtr));
-        return deletedPtr.value != 0;
-      } finally {
-        free(deletedPtr);
-      }
-    });
-  }
+  Future<int> deleteAll() => deleteInternal(MAX_LIMIT);
 
-  @override
-  Future<int> deleteAll() {
+  Future<int> deleteInternal(int limit) {
     return col.isar.getTxn(false, (txnPtr, stream) async {
-      final countPtr = allocate<Int64>();
+      final countPtr = allocate<Uint32>();
       try {
-        IC.isar_q_delete_all_async(
-            queryPtr, col.collectionPtr, txnPtr, countPtr);
+        IC.isar_q_delete_async(
+          queryPtr,
+          col.collectionPtr,
+          txnPtr,
+          limit,
+          countPtr,
+        );
         await stream.first;
         return countPtr.value;
       } finally {
@@ -106,12 +99,22 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   }
 
   @override
-  int deleteAllSync() {
+  bool deleteFirstSync() => deleteSyncInternal(1) == 1;
+
+  @override
+  int deleteAllSync() => deleteSyncInternal(MAX_LIMIT);
+
+  int deleteSyncInternal(int limit) {
     return col.isar.getTxnSync(false, (txnPtr) {
-      final countPtr = allocate<Int64>();
+      final countPtr = allocate<Uint32>();
       try {
-        nCall(IC.isar_q_delete_all(
-            queryPtr, col.collectionPtr, txnPtr, countPtr));
+        nCall(IC.isar_q_delete(
+          queryPtr,
+          col.collectionPtr,
+          txnPtr,
+          limit,
+          countPtr,
+        ));
         return countPtr.value;
       } finally {
         free(countPtr);
@@ -120,7 +123,7 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   }
 
   @override
-  Stream<List<OBJECT>?> watch({bool lazy = true}) {
+  Stream<List<OBJECT>?> watch({bool lazy = true, bool initialReturn = false}) {
     final port = ReceivePort();
     final handle = IC.isar_watch_query(col.isar.isarPtr, col.collectionPtr,
         queryPtr, port.sendPort.nativePort);
@@ -128,6 +131,10 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
     final controller = StreamController(onCancel: () {
       IC.isar_stop_watching(handle);
     });
+
+    if (initialReturn) {
+      controller.add(findAll());
+    }
 
     controller.addStream(port);
 

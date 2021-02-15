@@ -1,9 +1,13 @@
 part of isar_native;
 
-NativeQuery<OBJECT> buildQuery<OBJECT>(
-    IsarCollection<dynamic, OBJECT> collection,
-    List<WhereClause> whereClauses,
-    FilterGroup filter) {
+Query<OBJECT> buildQuery<OBJECT>(
+  IsarCollection<dynamic, OBJECT> collection,
+  List<WhereClause> whereClauses,
+  FilterGroup filter,
+  List<int> distinctByPropertyIndices,
+  int? offset,
+  int? limit,
+) {
   final col = collection as IsarCollectionImpl<dynamic, OBJECT>;
   final colPtr = col.collectionPtr;
   final qbPtr = IC.isar_qb_create(colPtr);
@@ -13,6 +17,11 @@ NativeQuery<OBJECT> buildQuery<OBJECT>(
   final filterPtr = _buildFilter(colPtr, filter);
   if (filterPtr != null) {
     IC.isar_qb_set_filter(qbPtr, filterPtr);
+  }
+
+  IC.isar_qb_set_offset_limit(qbPtr, offset ?? -1, limit ?? -1);
+  for (var index in distinctByPropertyIndices) {
+    IC.isar_qb_add_distinct_by(colPtr, qbPtr, index);
   }
 
   final queryPtr = IC.isar_qb_build(qbPtr);
@@ -103,6 +112,7 @@ WhereClause resolveWhereClause(WhereClause wc) {
         break;
 
       case 'String':
+        print('L: $lowerValue U: $upperValue');
         break;
     }
 
@@ -169,21 +179,46 @@ void addWhereValue({
     case 'Double':
       IC.isar_wc_add_double(wcPtr, lower, upper);
       return;
-    case 'String':
-      var lowerPtr = Pointer<Int8>.fromAddress(0);
-      var upperPtr = Pointer<Int8>.fromAddress(0);
-      if (lower != null) {
-        lowerPtr = Utf8.toUtf8(lower).cast();
-      }
-      if (upper != null) {
-        upperPtr = Utf8.toUtf8(upper).cast();
-      }
-      //IC.isar_wc_add_string_value(wcPtr, lowerPtr, upperPtr);
-      if (lower != null) {
-        free(lowerPtr);
-      }
-      if (upper != null) {
-        free(upperPtr);
+    default:
+      if (type.startsWith('String')) {
+        var lowerPtr = Pointer<Int8>.fromAddress(0);
+        var upperPtr = Pointer<Int8>.fromAddress(0);
+        if (lower != null) {
+          lowerPtr = Utf8.toUtf8(lower).cast();
+        }
+        if (upper != null) {
+          upperPtr = Utf8.toUtf8(upper).cast();
+        }
+        final caseSensitive = !type.endsWith('LC');
+        switch (type) {
+          case 'StringValue':
+          case 'StringValueLC':
+            IC.isar_wc_add_string_value(
+                wcPtr, lowerPtr, upperPtr, caseSensitive);
+            break;
+          case 'StringHash':
+          case 'StringHashLC':
+            IC.isar_wc_add_string_hash(wcPtr, lowerPtr, caseSensitive);
+            break;
+          case 'StringWord':
+          case 'StringWordLC':
+            IC.isar_wc_add_string_word(
+                wcPtr, lowerPtr, upperPtr, caseSensitive);
+            break;
+          case 'StringObjectId':
+          case 'StringObjectIdLC':
+            //IC.isar_wc_add_string_word(wcPtr, lowerPtr,upperPtr,caseSensitive);
+            break;
+          default:
+            throw UnimplementedError();
+        }
+
+        if (lower != null) {
+          free(lowerPtr);
+        }
+        if (upper != null) {
+          free(upperPtr);
+        }
       }
       return;
   }
@@ -272,11 +307,6 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
       break;
     case ConditionType.Gt:
       switch (condition.propertyType) {
-        case 'Bool':
-          final value = boolToByte(condition.value);
-          nCall(IC.isar_filter_byte_between(
-              colPtr, filterPtrPtr, value, include, maxBool, true, pIndex));
-          break;
         case 'Int':
           final value = condition.value ?? nullInt;
           nCall(IC.isar_filter_int_between(
@@ -303,11 +333,6 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
       break;
     case ConditionType.Lt:
       switch (condition.propertyType) {
-        case 'Bool':
-          final value = boolToByte(condition.value);
-          IC.isar_filter_byte_between(
-              colPtr, filterPtrPtr, minBool, true, value, include, pIndex);
-          break;
         case 'Int':
           final value = condition.value ?? nullInt;
           IC.isar_filter_int_between(
@@ -334,12 +359,6 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
       break;
     case ConditionType.Between:
       switch (condition.propertyType) {
-        case 'Bool':
-          final lower = boolToByte(condition.value);
-          final upper = boolToByte(condition.value2);
-          IC.isar_filter_byte_between(
-              colPtr, filterPtrPtr, lower, include, upper, include2, pIndex);
-          break;
         case 'Int':
           final lower = condition.value ?? nullInt;
           final upper = condition.value2 ?? nullInt;
@@ -370,14 +389,50 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
       break;
     case ConditionType.StartsWith:
       if (condition.propertyType == 'String') {
-        //IC.isar_filter_string_starts_with(collection, filter, value, ignore_case, property_index)
+        final strPtr = Utf8.toUtf8(condition.value!);
+        nCall(IC.isar_filter_string_starts_with(colPtr, filterPtrPtr,
+            strPtr.cast(), condition.caseSensitive, pIndex));
+        free(strPtr);
+      } else {
+        throw UnimplementedError();
       }
       break;
     case ConditionType.EndsWith:
-      // TODO: Handle this case.
+      if (condition.propertyType == 'String') {
+        final strPtr = Utf8.toUtf8(condition.value!);
+        nCall(IC.isar_filter_string_ends_with(colPtr, filterPtrPtr,
+            strPtr.cast(), condition.caseSensitive, pIndex));
+        free(strPtr);
+      } else {
+        throw UnimplementedError();
+      }
       break;
     case ConditionType.Contains:
-      // TODO: Handle this case.
+      switch (condition.propertyType) {
+        case 'String':
+          final strPtr = Utf8.toUtf8(condition.value!);
+          nCall(IC.isar_filter_string_contains(colPtr, filterPtrPtr,
+              strPtr.cast(), condition.caseSensitive, pIndex));
+          free(strPtr);
+          break;
+        case 'IntList':
+          final value = condition.value ?? nullInt;
+          IC.isar_filter_int_list_contains(colPtr, filterPtrPtr, value, pIndex);
+          break;
+        case 'LongList':
+          final value = condition.value ?? nullLong;
+          IC.isar_filter_long_list_contains(
+              colPtr, filterPtrPtr, value, pIndex);
+          break;
+        case 'StringList':
+          final strPtr = Utf8.toUtf8(condition.value!);
+          nCall(IC.isar_filter_string_list_contains(colPtr, filterPtrPtr,
+              strPtr.cast(), condition.caseSensitive, pIndex));
+          free(strPtr);
+          break;
+        default:
+          throw UnimplementedError();
+      }
       break;
   }
   final filterPtr = filterPtrPtr.value;

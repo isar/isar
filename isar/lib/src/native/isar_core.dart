@@ -14,11 +14,14 @@ const minFloat = double.nan;
 const maxFloat = double.infinity;
 const minDouble = double.nan;
 const maxDouble = double.infinity;
+final minDate = DateTime.fromMillisecondsSinceEpoch(minLong);
+final maxDate = DateTime.fromMillisecondsSinceEpoch(maxLong);
 
 const nullInt = minInt;
 const nullLong = minLong;
 const nullFloat = minFloat;
 const nullDouble = minDouble;
+final nullDate = minDate;
 
 class IsarCoreUtils {
   static final syncTxnPtr = allocate<Pointer>();
@@ -57,42 +60,23 @@ void initializeIsarCore({Map<String, String> dylibs = const {}}) {
 }
 
 const _encoder = Utf8Encoder();
-const _decoder = Utf8Decoder();
 
 extension RawObjectX on RawObject {
-  dynamic? get id {
-    if (oid_str_length > 0) {
-      if (oid_num != 0) {
-        return null;
-      } else {
-        return _decoder.convert(oid_str.asTypedList(oid_str_length));
-      }
-    } else {
-      return oid_num;
-    }
-  }
-
-  set id(dynamic? id) {
-    if (id != null) {
-      if (id is String) {
-        final bytes = _encoder.convert(id);
-        final ptr = allocate<Uint8>(count: bytes.length);
-        final ptrBytes = ptr.asTypedList(bytes.length);
-        ptrBytes.setAll(0, bytes);
-        oid_str = ptr;
-        oid_str_length = bytes.length;
-        oid_num = 0;
-      } else if (id is int) {
-        oid_num = id;
-        oid_str = Pointer.fromAddress(0);
-        oid_str_length = 0;
-      } else {
-        throw UnimplementedError();
-      }
-    } else {
+  set id(dynamic id) {
+    if (id is String) {
+      final bytes = _encoder.convert(id);
+      final ptr = allocate<Uint8>(count: bytes.length);
+      final ptrBytes = ptr.asTypedList(bytes.length);
+      ptrBytes.setAll(0, bytes);
+      oid_str = ptr;
+      oid_str_length = bytes.length;
       oid_num = 0;
-      oid_str_length = 0;
+    } else if (id is int) {
+      oid_num = id;
       oid_str = Pointer.fromAddress(0);
+      oid_str_length = 0;
+    } else {
+      throw UnimplementedError();
     }
   }
 
