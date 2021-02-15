@@ -6,6 +6,9 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/hivedb/hive/actions">
+    <img src="https://img.shields.io/github/workflow/status/isar/isar/Dart%20CI/main?label=tests&labelColor=333940&logo=github">
+  </a>
   <a href="https://pub.dev/packages/isar">
     <img src="https://img.shields.io/pub/v/isar?label=pub.dev&labelColor=333940&logo=dart">
   </a>
@@ -58,10 +61,10 @@ dev_dependencies:
 ## Schema definition
 ```dart
 @Collection()
-class Post with IsarObject {
+class Post {
 
   @ObjectId() // implicit unique index
-  String uuid;
+  String id;
 
   @Index(stringType: StringIndexType.words, caseSensitive: false) // Search index
   String title;
@@ -76,7 +79,7 @@ All basic crud operations are available via the IsarCollection.
 
 ```dart
 final newPost = Post()
-  ..id = uuid()
+  ..id = uuid.v4()
   ..title = 'Amazing new database'
   ..comments = ['First'];
 
