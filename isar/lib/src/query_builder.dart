@@ -221,6 +221,7 @@ enum ConditionType {
   EndsWith,
   Contains,
   Between,
+  Matches
 }
 
 enum FilterGroupType {

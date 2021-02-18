@@ -511,16 +511,16 @@ class IsarCoreBindings {
 
   _dart_isar_filter_string_ends_with? _isar_filter_string_ends_with;
 
-  int isar_filter_string_contains(
+  int isar_filter_string_matches(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     ffi.Pointer<ffi.Int8> value,
     bool case_sensitive,
     int property_index,
   ) {
-    return (_isar_filter_string_contains ??= _dylib.lookupFunction<
-        _c_isar_filter_string_contains,
-        _dart_isar_filter_string_contains>('isar_filter_string_contains'))(
+    return (_isar_filter_string_matches ??= _dylib.lookupFunction<
+        _c_isar_filter_string_matches,
+        _dart_isar_filter_string_matches>('isar_filter_string_matches'))(
       collection,
       filter,
       value,
@@ -529,7 +529,7 @@ class IsarCoreBindings {
     );
   }
 
-  _dart_isar_filter_string_contains? _isar_filter_string_contains;
+  _dart_isar_filter_string_matches? _isar_filter_string_matches;
 
   int isar_filter_string_list_contains(
     ffi.Pointer<ffi.NativeType> collection,
@@ -1583,7 +1583,7 @@ typedef _dart_isar_filter_string_ends_with = int Function(
   int property_index,
 );
 
-typedef _c_isar_filter_string_contains = ffi.Int32 Function(
+typedef _c_isar_filter_string_matches = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Pointer<ffi.Int8> value,
@@ -1591,7 +1591,7 @@ typedef _c_isar_filter_string_contains = ffi.Int32 Function(
   ffi.Uint32 property_index,
 );
 
-typedef _dart_isar_filter_string_contains = int Function(
+typedef _dart_isar_filter_string_matches = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Pointer<ffi.Int8> value,

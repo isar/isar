@@ -410,8 +410,8 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
     case ConditionType.Contains:
       switch (condition.propertyType) {
         case 'String':
-          final strPtr = Utf8.toUtf8(condition.value!);
-          nCall(IC.isar_filter_string_contains(colPtr, filterPtrPtr,
+          final strPtr = Utf8.toUtf8('*${condition.value}*');
+          nCall(IC.isar_filter_string_matches(colPtr, filterPtrPtr,
               strPtr.cast(), condition.caseSensitive, pIndex));
           free(strPtr);
           break;
@@ -427,6 +427,18 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
         case 'StringList':
           final strPtr = Utf8.toUtf8(condition.value!);
           nCall(IC.isar_filter_string_list_contains(colPtr, filterPtrPtr,
+              strPtr.cast(), condition.caseSensitive, pIndex));
+          free(strPtr);
+          break;
+        default:
+          throw UnimplementedError();
+      }
+      break;
+    case ConditionType.Matches:
+      switch (condition.propertyType) {
+        case 'String':
+          final strPtr = Utf8.toUtf8(condition.value!);
+          nCall(IC.isar_filter_string_matches(colPtr, filterPtrPtr,
               strPtr.cast(), condition.caseSensitive, pIndex));
           free(strPtr);
           break;
