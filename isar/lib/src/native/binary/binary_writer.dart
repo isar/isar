@@ -31,6 +31,7 @@ class BinaryWriter {
   void writeInt(int offset, int? value) {
     assert(offset < _staticSize);
     value ??= nullInt;
+    assert(value >= minInt && value <= maxInt);
     _byteData.setInt32(offset, value, Endian.little);
   }
 
@@ -96,7 +97,9 @@ class BinaryWriter {
       _buffer.writeInt32(offset + 4, values.length);
 
       for (var value in values) {
-        _buffer.writeInt32(_dynamicOffset, value ?? nullInt);
+        value ??= nullInt;
+        assert(value >= minInt && value <= maxInt);
+        _buffer.writeInt32(_dynamicOffset, value);
         _dynamicOffset += 4;
       }
     }
