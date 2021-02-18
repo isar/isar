@@ -8,18 +8,34 @@ class StringModel {
   @ObjectId()
   int? id;
 
-  @Index()
-  String? field = '';
+  @Index(indexType: IndexType.hash)
+  String? hashField = '';
 
-  StringModel();
+  @Index(indexType: IndexType.value)
+  String? valueField = '';
+
+  @Index(indexType: IndexType.words)
+  String? wordsField = '';
 
   @override
   String toString() {
-    return '{field: $field}';
+    return '{field: $valueField, field: $hashField, field: $wordsField}';
   }
+
+  StringModel();
+
+  StringModel.init(String? value)
+      : hashField = value,
+        valueField = value,
+        wordsField = value;
 
   @override
   bool operator ==(other) {
-    return (other as StringModel).field == field;
+    if (other is StringModel) {
+      return hashField == other.hashField &&
+          valueField == other.valueField &&
+          wordsField == other.wordsField;
+    }
+    return false;
   }
 }

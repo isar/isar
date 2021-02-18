@@ -36,13 +36,16 @@ String generateQueryWhere(ObjectInfo oi) {
 
       if (!properties.any((it) => it.property.isarType.isFloatDouble)) {
         code += generateWhereEqualTo(indexId, oi, properties);
-        code += generateWhereNotEqualTo(indexId, oi, properties);
+        if (!properties.any((it) => it.indexType == IndexType.words)) {
+          code += generateWhereNotEqualTo(indexId, oi, properties);
+        }
       }
 
       if (properties.length == 1) {
         var property = properties.first;
 
-        if (property.property.isarType != IsarType.Bool) {
+        if (property.property.isarType != IsarType.Bool &&
+            property.indexType == IndexType.value) {
           code += generateWhereBetween(indexId, oi, property);
         }
 
@@ -53,15 +56,17 @@ String generateQueryWhere(ObjectInfo oi) {
         if (property.property.isarType == IsarType.Int ||
             property.property.isarType == IsarType.Long ||
             property.property.isarType.isFloatDouble) {
-          code += generateWhereLowerThan(indexId, oi, property);
           code += generateWhereGreaterThan(indexId, oi, property);
+          code += generateWhereLessThan(indexId, oi, property);
         }
 
-        //if (property.isarType == IsarType.String && !index.hashValue) {
-        //code += generateWhereStartsWith(indexIndex, oi, property);
-        //}
+        if (property.property.isarType == IsarType.String &&
+            property.indexType != IndexType.hash) {
+          code += generateWhereStartsWith(indexId, oi, property);
+        }
 
-        if (property.property.nullable) {
+        if (property.property.nullable &&
+            property.indexType != IndexType.words) {
           code += generateWhereIsNull(indexId, oi, property);
           code += generateWhereIsNotNull(indexId, oi, property);
         }
@@ -73,11 +78,13 @@ String generateQueryWhere(ObjectInfo oi) {
 }
 
 String joinPropertiesToName(List<ObjectIndexProperty> properties) {
-  return properties.mapIndexed((i, f) {
+  return properties.mapIndexed((i, p) {
+    final name =
+        p.property.dartName + (p.indexType == IndexType.words ? 'Word' : '');
     if (i == 0) {
-      return f.property.dartName.decapitalize();
+      return name.decapitalize();
     } else {
-      return f.property.dartName.capitalize();
+      return name.capitalize();
     }
   }).join('');
 }
@@ -180,29 +187,13 @@ String generateWhereNotEqualTo(
   ''';
 }
 
-String generateWhereLowerThan(
-    int indexId, ObjectInfo oi, ObjectIndexProperty indexProperty) {
-  final p = indexProperty.property;
-  final types = joinPropertiesToTypes([indexProperty]);
-  return '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${p.dartName.decapitalize()}LowerThan(${p.dartType} value, {bool include = false, bool distinct = false}) {
-    return addWhereClause(WhereClause(
-      $indexId,
-      $types,
-      upper: [${p.toIsar('value', oi)}],
-      includeUpper: include,
-      skipDuplicates: distinct,
-    ));
-  }
-  ''';
-}
-
 String generateWhereGreaterThan(
     int indexId, ObjectInfo oi, ObjectIndexProperty indexProperty) {
   final p = indexProperty.property;
   final types = joinPropertiesToTypes([indexProperty]);
+  final name = joinPropertiesToName([indexProperty]);
   return '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${p.dartName.decapitalize()}GreaterThan(${p.dartType} value, {bool include = false, bool distinct = false}) {
+  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}GreaterThan(${p.dartType} value, {bool include = false, bool distinct = false}) {
     return addWhereClause(WhereClause(
       $indexId,
       $types,
@@ -214,12 +205,31 @@ String generateWhereGreaterThan(
   ''';
 }
 
+String generateWhereLessThan(
+    int indexId, ObjectInfo oi, ObjectIndexProperty indexProperty) {
+  final p = indexProperty.property;
+  final types = joinPropertiesToTypes([indexProperty]);
+  final name = joinPropertiesToName([indexProperty]);
+  return '''
+  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}LessThan(${p.dartType} value, {bool include = false, bool distinct = false}) {
+    return addWhereClause(WhereClause(
+      $indexId,
+      $types,
+      upper: [${p.toIsar('value', oi)}],
+      includeUpper: include,
+      skipDuplicates: distinct,
+    ));
+  }
+  ''';
+}
+
 String generateWhereBetween(
     int indexId, ObjectInfo oi, ObjectIndexProperty indexProperty) {
   final p = indexProperty.property;
   final types = joinPropertiesToTypes([indexProperty]);
+  final name = joinPropertiesToName([indexProperty]);
   return '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${p.dartName.decapitalize()}Between(${p.dartType} lower, ${p.dartType} upper, {bool includeLower = true, bool includeUpper = true, bool distinct = false}) {
+  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}Between(${p.dartType} lower, ${p.dartType} upper, {bool includeLower = true, bool includeUpper = true, bool distinct = false}) {
     return addWhereClause(WhereClause(
       $indexId,
       $types,
@@ -235,10 +245,10 @@ String generateWhereBetween(
 
 String generateWhereIsNull(
     int indexId, ObjectInfo oi, ObjectIndexProperty indexProperty) {
-  final p = indexProperty.property;
   final types = joinPropertiesToTypes([indexProperty]);
+  final name = joinPropertiesToName([indexProperty]);
   return '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${p.dartName.decapitalize()}IsNull() {
+  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}IsNull() {
     return addWhereClause(WhereClause(
       $indexId,
       $types,
@@ -253,10 +263,10 @@ String generateWhereIsNull(
 
 String generateWhereIsNotNull(
     int indexId, ObjectInfo oi, ObjectIndexProperty indexProperty) {
-  final p = indexProperty.property;
+  final name = joinPropertiesToName([indexProperty]);
   final types = joinPropertiesToTypes([indexProperty]);
   return '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${p.dartName.decapitalize()}IsNotNull() {
+  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}IsNotNull() {
     final cloned = addWhereClause(WhereClause(
       $indexId,
       $types,
@@ -275,14 +285,15 @@ String generateWhereIsNotNull(
 
 String generateWhereAnyOf(ObjectInfo oi, ObjectIndexProperty indexProperty) {
   final p = indexProperty.property;
+  final name = joinPropertiesToName([indexProperty]);
   return '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${p.dartName.decapitalize()}AnyOf(List<${p.dartType}> values) {
+  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}AnyOf(List<${p.dartType}> values) {
     var q = this;
     for (var i = 0; i < values.length; i++) {
       if (i == values.length - 1) {
-        return q.${p.dartName.decapitalize()}EqualTo(values[i]);
+        return q.${name}EqualTo(values[i]);
       } else {
-        q = q.${p.dartName.decapitalize()}EqualTo(values[i]).or();
+        q = q.${name}EqualTo(values[i]).or();
       }
     }
     throw UnimplementedError();
@@ -290,13 +301,30 @@ String generateWhereAnyOf(ObjectInfo oi, ObjectIndexProperty indexProperty) {
   ''';
 }
 
-/*String generateWhereStartsWith(
-    int index, String type, ObjectProperty property) {
-  final propertiesName = joinPropertiesToName([property]);
-  return '''
-  ${whereReturn(type, 'QWhereProperty')} ${propertiesName}StartsWith(String prefix) {
-    return addWhereCondition(QueryCondition(ConditionType.StartsWith, $index, [prefix]));
+String generateWhereStartsWith(
+    int indexId, ObjectInfo oi, ObjectIndexProperty indexProperty) {
+  final p = indexProperty.property;
+  final types = joinPropertiesToTypes([indexProperty]);
+  final name = joinPropertiesToName([indexProperty]);
+  final maxChar = '\\u{FFFFF}';
+  var code = '''
+  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}StartsWith(${p.dartType} value, {bool distinct = false}) {
+    final convertedValue = ${p.toIsar('value', oi)};
+  ''';
+  if (indexProperty.property.nullable) {
+    code += "assert(convertedValue != null, 'Null values are not allowed');";
+  }
+  code += '''
+    return addWhereClause(WhereClause(
+      $indexId,
+      $types,
+      lower: [convertedValue],
+      upper: ['\${convertedValue}$maxChar'],
+      includeLower: true,
+      includeUpper: true,
+      skipDuplicates: distinct,
+    ));
   }
   ''';
+  return code;
 }
-*/

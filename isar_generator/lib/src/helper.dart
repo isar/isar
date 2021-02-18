@@ -56,13 +56,30 @@ List<Index> getIndexAnns(Element element) {
       for (var c in rawComposite) {
         final property = c.getField('property').toStringValue();
         final caseSensitive = c.getField('caseSensitive').toBoolValue();
-        //final stringType = c.getField('stringType').
-        composite.add(CompositeIndex(property, caseSensitive: caseSensitive));
+        final indexTypeField = c.getField('indexType');
+        IndexType indexType;
+        if (!indexTypeField.isNull) {
+          final indexTypeIndex = indexTypeField.getField('index').toIntValue();
+          indexType = IndexType.values[indexTypeIndex];
+        }
+        composite.add(CompositeIndex(
+          property,
+          indexType: indexType,
+          caseSensitive: caseSensitive,
+        ));
       }
+    }
+    final indexTypeField = ann.getField('indexType');
+    IndexType indexType;
+    if (!indexTypeField.isNull) {
+      final indexTypeIndex = indexTypeField.getField('index').toIntValue();
+      indexType = IndexType.values[indexTypeIndex];
     }
     return Index(
       composite: composite,
       unique: ann.getField('unique').toBoolValue(),
+      indexType: indexType,
+      caseSensitive: ann.getField('caseSensitive').toBoolValue(),
     );
   }).toList();
 }

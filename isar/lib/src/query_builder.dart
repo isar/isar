@@ -284,21 +284,24 @@ class QWhere {}
 class QNoWhere extends QWhere {}
 
 // Directly after a where property condition.
-typedef QWhereProperty = Function();
+class QWhereProperty {}
 
-typedef QCanFilter = Function();
+class QCanFilter {}
 
 class QFilter {}
 
 class QFilterAfterCond extends QFilter {}
 
-typedef QCanDistinctBy = Function();
+class QCanDistinctBy {}
 
-typedef QCanOffsetLimit = Function();
-typedef QCanOffset = Function(bool);
-typedef QCanLimit = Function(bool, bool);
+class QCanOffsetLimit {}
 
-typedef QCanSort = Function();
-typedef QSorting = Function(bool);
+class QCanOffset {}
 
-typedef QCanExecute = Function();
+class QCanLimit {}
+
+class QCanSort {}
+
+class QSorting {}
+
+class QCanExecute {}
