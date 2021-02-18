@@ -1097,57 +1097,25 @@ class IsarCoreBindings {
 
   _dart_isar_wc_add_double? _isar_wc_add_double;
 
-  void isar_wc_add_string_hash(
-    ffi.Pointer<ffi.NativeType> where_clause,
-    ffi.Pointer<ffi.Int8> value,
-    bool case_sensitive,
-  ) {
-    return (_isar_wc_add_string_hash ??= _dylib.lookupFunction<
-        _c_isar_wc_add_string_hash,
-        _dart_isar_wc_add_string_hash>('isar_wc_add_string_hash'))(
-      where_clause,
-      value,
-      case_sensitive ? 1 : 0,
-    );
-  }
-
-  _dart_isar_wc_add_string_hash? _isar_wc_add_string_hash;
-
-  void isar_wc_add_string_value(
+  void isar_wc_add_string(
     ffi.Pointer<ffi.NativeType> where_clause,
     ffi.Pointer<ffi.Int8> lower,
     ffi.Pointer<ffi.Int8> upper,
     bool case_sensitive,
+    int index_type,
   ) {
-    return (_isar_wc_add_string_value ??= _dylib.lookupFunction<
-        _c_isar_wc_add_string_value,
-        _dart_isar_wc_add_string_value>('isar_wc_add_string_value'))(
+    return (_isar_wc_add_string ??=
+        _dylib.lookupFunction<_c_isar_wc_add_string, _dart_isar_wc_add_string>(
+            'isar_wc_add_string'))(
       where_clause,
       lower,
       upper,
       case_sensitive ? 1 : 0,
+      index_type,
     );
   }
 
-  _dart_isar_wc_add_string_value? _isar_wc_add_string_value;
-
-  void isar_wc_add_string_word(
-    ffi.Pointer<ffi.NativeType> where_clause,
-    ffi.Pointer<ffi.Int8> lower,
-    ffi.Pointer<ffi.Int8> upper,
-    bool case_sensitive,
-  ) {
-    return (_isar_wc_add_string_word ??= _dylib.lookupFunction<
-        _c_isar_wc_add_string_word,
-        _dart_isar_wc_add_string_word>('isar_wc_add_string_word'))(
-      where_clause,
-      lower,
-      upper,
-      case_sensitive ? 1 : 0,
-    );
-  }
-
-  _dart_isar_wc_add_string_word? _isar_wc_add_string_word;
+  _dart_isar_wc_add_string? _isar_wc_add_string;
 
   void isar_wc_add_oid_string(
     ffi.Pointer<ffi.NativeType> where_clause,
@@ -2023,44 +1991,20 @@ typedef _dart_isar_wc_add_double = void Function(
   double upper,
 );
 
-typedef _c_isar_wc_add_string_hash = ffi.Void Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Pointer<ffi.Int8> value,
-  ffi.Uint8 case_sensitive,
-);
-
-typedef _dart_isar_wc_add_string_hash = void Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Pointer<ffi.Int8> value,
-  int case_sensitive,
-);
-
-typedef _c_isar_wc_add_string_value = ffi.Void Function(
+typedef _c_isar_wc_add_string = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
   ffi.Uint8 case_sensitive,
+  ffi.Uint8 index_type,
 );
 
-typedef _dart_isar_wc_add_string_value = void Function(
+typedef _dart_isar_wc_add_string = void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
   int case_sensitive,
-);
-
-typedef _c_isar_wc_add_string_word = ffi.Void Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Pointer<ffi.Int8> lower,
-  ffi.Pointer<ffi.Int8> upper,
-  ffi.Uint8 case_sensitive,
-);
-
-typedef _dart_isar_wc_add_string_word = void Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Pointer<ffi.Int8> lower,
-  ffi.Pointer<ffi.Int8> upper,
-  int case_sensitive,
+  int index_type,
 );
 
 typedef _c_isar_wc_add_oid_string = ffi.Void Function(
