@@ -27,6 +27,7 @@ String generateQueryFilter(ObjectInfo oi) {
         code += generateStringStartsWith(oi, property, i);
         code += generateStringEndsWith(oi, property, i);
         code += generateStringContains(oi, property, i);
+        code += generateStringMatches(oi, property, i);
       }
     }
   }
@@ -156,6 +157,20 @@ String generateStringContains(ObjectInfo oi, ObjectProperty p, int pIndex) {
   ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}Contains(${p.dartType} value, {bool caseSensitive = true}) {
     return addFilterCondition(QueryCondition(
       ConditionType.Contains,
+      $pIndex,
+      'String',
+      value,
+      caseSensitive: caseSensitive,
+    ));
+  }
+  ''';
+}
+
+String generateStringMatches(ObjectInfo oi, ObjectProperty p, int pIndex) {
+  return '''
+  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}Matches(${p.dartType} value, {bool caseSensitive = true}) {
+    return addFilterCondition(QueryCondition(
+      ConditionType.Matches,
       $pIndex,
       'String',
       value,
