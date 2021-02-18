@@ -84,18 +84,18 @@ void main() {
       );
     });
 
-    test('lowerThan()', () async {
+    test('lessThan()', () async {
       await qEqual(
-        col.where().fieldLowerThan(1).findAll(),
+        col.where().fieldLessThan(1).findAll(),
         [IntModel()..field = null, IntModel()..field = 0],
       );
       await qEqualSet(
-        col.where().filter().fieldLowerThan(1).findAll(),
+        col.where().filter().fieldLessThan(1).findAll(),
         {IntModel()..field = null, IntModel()..field = 0},
       );
 
       await qEqual(
-        col.where().fieldLowerThan(1, include: true).findAll(),
+        col.where().fieldLessThan(1, include: true).findAll(),
         [
           IntModel()..field = null,
           IntModel()..field = 0,
@@ -103,7 +103,7 @@ void main() {
         ],
       );
       await qEqualSet(
-        col.where().filter().fieldLowerThan(1, include: true).findAll(),
+        col.where().filter().fieldLessThan(1, include: true).findAll(),
         {
           IntModel()..field = null,
           IntModel()..field = 0,

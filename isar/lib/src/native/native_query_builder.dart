@@ -110,9 +110,15 @@ WhereClause resolveWhereClause(WhereClause wc) {
           upperValue ??= nullDouble;
         }
         break;
-
-      case 'String':
-        print('L: $lowerValue U: $upperValue');
+      case 'StringValue':
+      case 'StringValueLC':
+      case 'StringHash':
+      case 'StringHashLC':
+      case 'StringWords':
+      case 'StringWordsLC':
+        if (wc.upper == null) {
+          upperValue = '\u{ffff}';
+        }
         break;
     }
 
@@ -200,8 +206,14 @@ void addWhereValue({
           case 'StringHashLC':
             IC.isar_wc_add_string_hash(wcPtr, lowerPtr, caseSensitive);
             break;
-          case 'StringWord':
-          case 'StringWordLC':
+          case 'StringWords':
+          case 'StringWordsLC':
+            assert(
+                upper != null &&
+                    upper.isNotEmpty &&
+                    lower != null &&
+                    lower.isNotEmpty,
+                'Null or empty words are unsupported');
             IC.isar_wc_add_string_word(
                 wcPtr, lowerPtr, upperPtr, caseSensitive);
             break;

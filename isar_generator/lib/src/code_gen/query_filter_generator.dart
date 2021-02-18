@@ -18,8 +18,8 @@ String generateQueryFilter(ObjectInfo oi) {
         code += generateIsNull(oi, property, i);
       }
       if (property.isarType != IsarType.Bool) {
-        code += generateLowerThan(oi, property, i);
         code += generateGreaterThan(oi, property, i);
+        code += generateLessThan(oi, property, i);
         code += generateBetween(oi, property, i);
       }
       if (property.isarType == IsarType.String) {
@@ -67,9 +67,9 @@ String generateGreaterThan(ObjectInfo oi, ObjectProperty p, int pIndex) {
   ''';
 }
 
-String generateLowerThan(ObjectInfo oi, ObjectProperty p, int pIndex) {
+String generateLessThan(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}LowerThan(${p.dartType} value, {bool include = false}) {
+  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}LessThan(${p.dartType} value, {bool include = false}) {
     return addFilterCondition(QueryCondition(
       ConditionType.Lt,
       $pIndex,
