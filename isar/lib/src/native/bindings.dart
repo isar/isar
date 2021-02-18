@@ -1101,6 +1101,8 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> where_clause,
     ffi.Pointer<ffi.Int8> lower,
     ffi.Pointer<ffi.Int8> upper,
+    bool lower_unbound,
+    bool upper_unbound,
     bool case_sensitive,
     int index_type,
   ) {
@@ -1110,6 +1112,8 @@ class IsarCoreBindings {
       where_clause,
       lower,
       upper,
+      lower_unbound ? 1 : 0,
+      upper_unbound ? 1 : 0,
       case_sensitive ? 1 : 0,
       index_type,
     );
@@ -1995,6 +1999,8 @@ typedef _c_isar_wc_add_string = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
+  ffi.Uint8 lower_unbound,
+  ffi.Uint8 upper_unbound,
   ffi.Uint8 case_sensitive,
   ffi.Uint8 index_type,
 );
@@ -2003,6 +2009,8 @@ typedef _dart_isar_wc_add_string = void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
+  int lower_unbound,
+  int upper_unbound,
   int case_sensitive,
   int index_type,
 );
