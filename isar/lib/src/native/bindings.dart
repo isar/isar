@@ -1000,18 +1000,18 @@ class IsarCoreBindings {
   int isar_wc_create(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> wc,
-    bool primary,
     int index_index,
     bool skip_duplicates,
+    bool ascending,
   ) {
     return (_isar_wc_create ??=
         _dylib.lookupFunction<_c_isar_wc_create, _dart_isar_wc_create>(
             'isar_wc_create'))(
       collection,
       wc,
-      primary ? 1 : 0,
       index_index,
       skip_duplicates ? 1 : 0,
+      ascending ? 1 : 0,
     );
   }
 
@@ -1101,8 +1101,8 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> where_clause,
     ffi.Pointer<ffi.Int8> lower,
     ffi.Pointer<ffi.Int8> upper,
-    bool lower_unbound,
-    bool upper_unbound,
+    bool lower_unbounded,
+    bool upper_unbounded,
     bool case_sensitive,
     int index_type,
   ) {
@@ -1112,8 +1112,8 @@ class IsarCoreBindings {
       where_clause,
       lower,
       upper,
-      lower_unbound ? 1 : 0,
-      upper_unbound ? 1 : 0,
+      lower_unbounded ? 1 : 0,
+      upper_unbounded ? 1 : 0,
       case_sensitive ? 1 : 0,
       index_type,
     );
@@ -1922,17 +1922,17 @@ typedef _dart_isar_stop_watching = void Function(
 typedef _c_isar_wc_create = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> wc,
-  ffi.Uint8 primary,
-  ffi.Uint32 index_index,
+  ffi.Int32 index_index,
   ffi.Uint8 skip_duplicates,
+  ffi.Uint8 ascending,
 );
 
 typedef _dart_isar_wc_create = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> wc,
-  int primary,
   int index_index,
   int skip_duplicates,
+  int ascending,
 );
 
 typedef _c_isar_wc_add_byte = ffi.Void Function(
@@ -1999,8 +1999,8 @@ typedef _c_isar_wc_add_string = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
-  ffi.Uint8 lower_unbound,
-  ffi.Uint8 upper_unbound,
+  ffi.Uint8 lower_unbounded,
+  ffi.Uint8 upper_unbounded,
   ffi.Uint8 case_sensitive,
   ffi.Uint8 index_type,
 );
@@ -2009,8 +2009,8 @@ typedef _dart_isar_wc_add_string = void Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
-  int lower_unbound,
-  int upper_unbound,
+  int lower_unbounded,
+  int upper_unbounded,
   int case_sensitive,
   int index_type,
 );
