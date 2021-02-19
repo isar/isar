@@ -602,19 +602,19 @@ class IsarCoreBindings {
 
   _dart_isar_get_collection? _isar_get_collection;
 
-  int isar_get_property_offset(
+  void isar_get_property_offsets(
     ffi.Pointer<ffi.NativeType> collection,
-    int property_index,
+    ffi.Pointer<ffi.Uint32> offsets,
   ) {
-    return (_isar_get_property_offset ??= _dylib.lookupFunction<
-        _c_isar_get_property_offset,
-        _dart_isar_get_property_offset>('isar_get_property_offset'))(
+    return (_isar_get_property_offsets ??= _dylib.lookupFunction<
+        _c_isar_get_property_offsets,
+        _dart_isar_get_property_offsets>('isar_get_property_offsets'))(
       collection,
-      property_index,
+      offsets,
     );
   }
 
-  _dart_isar_get_property_offset? _isar_get_property_offset;
+  _dart_isar_get_property_offsets? _isar_get_property_offsets;
 
   ffi.Pointer<ffi.NativeType> isar_qb_create(
     ffi.Pointer<ffi.NativeType> collection,
@@ -1625,14 +1625,14 @@ typedef _dart_isar_get_collection = int Function(
   int index,
 );
 
-typedef _c_isar_get_property_offset = ffi.Int32 Function(
+typedef _c_isar_get_property_offsets = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> collection,
-  ffi.Uint32 property_index,
+  ffi.Pointer<ffi.Uint32> offsets,
 );
 
-typedef _dart_isar_get_property_offset = int Function(
+typedef _dart_isar_get_property_offsets = void Function(
   ffi.Pointer<ffi.NativeType> collection,
-  int property_index,
+  ffi.Pointer<ffi.Uint32> offsets,
 );
 
 typedef _c_isar_qb_create = ffi.Pointer<ffi.NativeType> Function(
