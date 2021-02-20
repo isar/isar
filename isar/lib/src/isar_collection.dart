@@ -30,8 +30,8 @@ abstract class IsarCollection<ID, OBJECT> {
   Future<R> exportJson<R>(bool primitiveNull, R Function(Uint8List) callback);
 
   QueryBuilder<OBJECT, QNoWhere, QCanFilter, QCanDistinctBy, QCanOffsetLimit,
-      QCanSort, QCanExecute> where() {
-    return QueryBuilder(this);
+      QCanSort, QCanExecute> where({bool? distinct, bool? ascending}) {
+    return QueryBuilder(this, distinct, ascending);
   }
 
   Stream<OBJECT?> watch({ID? id, bool lazy = true});

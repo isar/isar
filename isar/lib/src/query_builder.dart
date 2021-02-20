@@ -5,33 +5,45 @@ class QueryBuilder<OBJECT, WHERE, FILTER, DISTINCT_BY, OFFSET_LIMIT, SORT,
     EXECUTE> {
   final IsarCollection<dynamic, OBJECT> _collection;
   final List<WhereClause> _whereClauses;
-  late FilterGroup _filter;
+  final bool? _whereDistinct;
+  final bool? _whereAscending;
+  final FilterGroup _filter;
+  final List<FilterGroup> _parentFilters;
   final List<int> _distinctByPropertyIndices;
   final List<SortProperty> _sortByProperties;
-  int? _offset;
-  int? _limit;
+  final int? _offset;
+  final int? _limit;
 
-  QueryBuilder(this._collection)
+  QueryBuilder(this._collection, this._whereDistinct, this._whereAscending)
       : _whereClauses = const [],
         _distinctByPropertyIndices = const [],
-        _sortByProperties = const [] {
-    _filter = FilterGroup(parent: null, groupType: null, implicit: false);
-  }
+        _sortByProperties = const [],
+        _filter = FilterGroup(groupType: FilterGroupType.And, implicit: false),
+        _parentFilters = [],
+        _offset = null,
+        _limit = null;
 
   QueryBuilder._(
     this._collection,
-    this._filter, [
+    this._filter,
+    this._parentFilters, [
     this._whereClauses = const [],
+    this._whereDistinct,
+    this._whereAscending,
     this._distinctByPropertyIndices = const [],
     this._sortByProperties = const [],
     this._offset,
     this._limit,
   ]);
+}
 
+extension QueryBuilderInternal<OBJECT> on QueryBuilder<OBJECT, dynamic, dynamic,
+    dynamic, dynamic, dynamic, dynamic> {
   QueryBuilder<OBJECT, B, C, D, E, F, G> addFilterCondition<B, C, D, E, F, G>(
       QueryCondition cond) {
-    var cloned = clone<B, C, D, E, F, G>();
-    cloned._filter.conditions.add(cond);
+    var cloned = copyWith<B, C, D, E, F, G>(
+      filter: _filter.copyWith(conditions: [..._filter.conditions, cond]),
+    );
     if (cloned._filter.groupType == FilterGroupType.Not) {
       cloned = cloned.endGroupInternal();
     }
@@ -40,104 +52,104 @@ class QueryBuilder<OBJECT, WHERE, FILTER, DISTINCT_BY, OFFSET_LIMIT, SORT,
 
   QueryBuilder<OBJECT, B, C, D, E, F, G> addWhereClause<B, C, D, E, F, G, H>(
       WhereClause where) {
-    final cloned = clone<B, C, D, E, F, G>();
-    cloned._whereClauses.add(where);
-    return cloned;
+    return copyWith(whereClauses: [..._whereClauses, where]);
   }
 
   QueryBuilder<OBJECT, dynamic, QFilter, dynamic, dynamic, dynamic, dynamic>
       andOrInternal(FilterGroupType andOr) {
-    final cloned =
-        clone<dynamic, QFilter, dynamic, dynamic, dynamic, dynamic>();
     if (_filter.groupType == null || _filter.groupType == andOr) {
-      cloned._filter.groupType = andOr;
+      return copyWith(filter: _filter.copyWith(groupType: andOr));
     } else {
-      var newFilter =
-          FilterGroup(parent: cloned._filter, groupType: andOr, implicit: true);
-      var last = cloned._filter.conditions.removeLast();
-      newFilter.conditions.add(last);
-      cloned._filter = newFilter;
+      return copyWith(
+        parentFilters: [..._parentFilters, _filter],
+        filter: FilterGroup(implicit: true, groupType: andOr),
+      );
     }
-
-    return cloned;
   }
 
   QueryBuilder<OBJECT, dynamic, QFilter, dynamic, dynamic, dynamic, dynamic>
       notInternal() {
-    final cloned = clone<dynamic, QFilter, QCanDistinctBy, QCanOffsetLimit,
-        QCanSort, QCanExecute>();
-    var newFilter = FilterGroup(
-        parent: cloned._filter, groupType: FilterGroupType.Not, implicit: true);
-    cloned._filter.conditions.add(newFilter);
-    cloned._filter = newFilter;
-    return cloned;
+    return copyWith(
+      parentFilters: [..._parentFilters, _filter],
+      filter: FilterGroup(groupType: FilterGroupType.Not, implicit: true),
+    );
   }
 
   QueryBuilder<OBJECT, dynamic, QFilter, QCanDistinctBy, QCanOffsetLimit,
       QCanSort, QCanExecute> beginGroupInternal<G>() {
-    final cloned = clone<dynamic, QFilter, QCanDistinctBy, QCanOffsetLimit,
-        QCanSort, QCanExecute>();
-    var newFilter =
-        FilterGroup(parent: cloned._filter, groupType: null, implicit: false);
-    cloned._filter.conditions.add(newFilter);
-    cloned._filter = newFilter;
-    return cloned;
+    return copyWith(
+      parentFilters: [..._parentFilters, _filter],
+      filter: FilterGroup(implicit: false),
+    );
   }
 
   QueryBuilder<OBJECT, B, C, D, E, F, G> endGroupInternal<B, C, D, E, F, G>() {
-    final cloned = clone<B, C, D, E, F, G>();
-    while (cloned._filter.implicit) {
-      cloned._filter = cloned._filter.parent!;
+    QueryBuilder<OBJECT, B, C, D, E, F, G> endGroup(QueryBuilder builder) {
+      return copyWith(
+        parentFilters: _parentFilters.sublist(0, _parentFilters.length - 1),
+        filter: _parentFilters.last.copyWith(conditions: [
+          ..._parentFilters.last.conditions,
+          if (_filter.conditions.isNotEmpty) _filter,
+        ]),
+      );
     }
-    if (cloned._filter.conditions.isEmpty) {
-      cloned._filter.parent!.conditions.removeLast();
+
+    var builder = this;
+    while (builder._filter.implicit) {
+      builder = endGroup(builder);
     }
-    cloned._filter = cloned._filter.parent!;
-    return cloned;
+    return endGroup(builder);
   }
 
   QueryBuilder<OBJECT, B, C, D, E, F, G>
       addDistinctByInternal<B, C, D, E, F, G>(int propertyIndex) {
-    final cloned = clone<B, C, D, E, F, G>();
-    cloned._distinctByPropertyIndices.add(propertyIndex);
-    return cloned;
+    return copyWith(distinctByPropertyIndices: [
+      ..._distinctByPropertyIndices,
+      propertyIndex,
+    ]);
   }
 
-  QueryBuilder<OBJECT, B, C, D, E, F, G> offsetInternal<B, C, D, E, F, G>(
-      int offset) {
-    assert(offset >= 0);
-    if (offset == 0) return clone();
-
-    final cloned = clone<B, C, D, E, F, G>();
-    cloned._offset = offset;
-    return cloned;
-  }
-
-  QueryBuilder<OBJECT, B, C, D, E, F, G> limitInternal<B, C, D, E, F, G>(
-      int limit) {
-    assert(limit > 0);
-    final cloned = clone<B, C, D, E, F, G>();
-    cloned._limit = limit;
-    return cloned;
-  }
-
-  QueryBuilder<OBJECT, B, C, D, E, F, G> clone<B, C, D, E, F, G>() {
-    final newWhereClauses = <WhereClause>[];
-    for (var cond in _whereClauses) {
-      newWhereClauses.add(cond.clone());
-    }
+  QueryBuilder<OBJECT, B, C, D, E, F, G> copyWith<B, C, D, E, F, G>({
+    List<WhereClause>? whereClauses,
+    FilterGroup? filter,
+    List<FilterGroup>? parentFilters,
+    List<int>? distinctByPropertyIndices,
+    List<SortProperty>? sortByProperties,
+    int? offset,
+    int? limit,
+  }) {
+    assert(offset == null || offset >= 0);
+    assert(limit == null || limit > 0);
     return QueryBuilder._(
       _collection,
-      _filter.clone(),
-      newWhereClauses,
-      _distinctByPropertyIndices,
-      _sortByProperties,
+      filter ?? _filter,
+      parentFilters ?? _parentFilters,
+      whereClauses ?? List.unmodifiable(_whereClauses),
+      _whereDistinct,
+      _whereAscending,
+      distinctByPropertyIndices ??
+          List.unmodifiable(_distinctByPropertyIndices),
+      sortByProperties ?? List.unmodifiable(_sortByProperties),
+      offset ?? _offset,
+      limit ?? _limit,
     );
   }
 
   Query<OBJECT> buildInternal() {
-    return buildQuery(_collection, _whereClauses, _filter,
-        _distinctByPropertyIndices, _offset, _limit);
+    var builder = this;
+    while (builder._parentFilters.isNotEmpty) {
+      builder = builder.endGroupInternal();
+    }
+    return buildQuery(
+      _collection,
+      _whereClauses,
+      _whereDistinct,
+      _whereAscending,
+      builder._filter,
+      _distinctByPropertyIndices,
+      _offset,
+      _limit,
+    );
   }
 }
 
@@ -148,7 +160,6 @@ class WhereClause {
   final bool includeLower;
   final List? upper;
   final bool includeUpper;
-  final bool skipDuplicates;
 
   const WhereClause(
     this.index,
@@ -157,7 +168,6 @@ class WhereClause {
     this.includeLower = true,
     this.upper,
     this.includeUpper = true,
-    this.skipDuplicates = false,
   });
 
   WhereClause clone() {
@@ -231,43 +241,32 @@ enum FilterGroupType {
 }
 
 class FilterGroup extends QueryOperation {
-  FilterGroup? parent;
-  List<QueryOperation> conditions = [];
-  FilterGroupType? groupType;
-  bool implicit;
+  final List<QueryOperation> conditions;
+  final FilterGroupType? groupType;
+  final bool implicit;
 
-  FilterGroup({this.parent, this.groupType, required this.implicit});
-
-  List<FilterGroup?> _clone(FilterGroup caller, FilterGroup? newParent) {
-    if (parent != null && newParent == null) {
-      return parent!._clone(caller, null);
-    } else {
-      final cloned = FilterGroup(groupType: groupType, implicit: implicit);
-      FilterGroup? newCaller;
-      for (var condition in conditions) {
-        if (condition is FilterGroup) {
-          final result = condition._clone(caller, cloned);
-          cloned.conditions.add(result[0]!);
-          if (condition == caller) {
-            newCaller = result[0];
-          } else if (result[1] != null) {
-            newCaller = result[1];
-          }
-        } else {
-          cloned.conditions.add(condition.clone());
-        }
-      }
-      if (caller == this) {
-        newCaller = cloned;
-      }
-      return [cloned, newCaller];
-    }
-  }
+  const FilterGroup({
+    this.conditions = const [],
+    this.groupType,
+    required this.implicit,
+  });
 
   @override
   FilterGroup clone() {
-    final result = _clone(this, null);
-    return result[1]!;
+    return FilterGroup(
+      conditions: conditions.map((e) => e.clone()).toList(),
+      groupType: groupType,
+      implicit: implicit,
+    );
+  }
+
+  FilterGroup copyWith(
+      {List<QueryOperation>? conditions, FilterGroupType? groupType}) {
+    return FilterGroup(
+      conditions: conditions ?? this.conditions.map((e) => e.clone()).toList(),
+      groupType: groupType ?? this.groupType,
+      implicit: implicit,
+    );
   }
 }
 

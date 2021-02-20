@@ -3,6 +3,8 @@ part of isar_native;
 Query<OBJECT> buildQuery<OBJECT>(
   IsarCollection<dynamic, OBJECT> collection,
   List<WhereClause> whereClauses,
+  bool? whereDistinct,
+  bool? whereAscending,
   FilterGroup filter,
   List<int> distinctByPropertyIndices,
   int? offset,
@@ -11,8 +13,14 @@ Query<OBJECT> buildQuery<OBJECT>(
   final col = collection as IsarCollectionImpl<dynamic, OBJECT>;
   final colPtr = col.collectionPtr;
   final qbPtr = IC.isar_qb_create(colPtr);
+
+  if ((whereDistinct != null || whereAscending != null) &&
+      whereClauses.length > 1) {
+    throw IsarError('You can only use a single index for sorting or distinct.');
+  }
+
   for (var whereClause in whereClauses) {
-    _addWhereClause(colPtr, qbPtr, whereClause);
+    _addWhereClause(colPtr, qbPtr, whereClause, whereDistinct, whereAscending);
   }
   final filterPtr = _buildFilter(colPtr, filter);
   if (filterPtr != null) {
@@ -28,24 +36,26 @@ Query<OBJECT> buildQuery<OBJECT>(
   return NativeQuery(col, queryPtr);
 }
 
-void _addWhereClause(Pointer colPtr, Pointer qbPtr, WhereClause wc) {
+void _addWhereClause(Pointer colPtr, Pointer qbPtr, WhereClause wc,
+    bool? distinct, bool? ascending) {
   final wcPtrPtr = allocate<Pointer<NativeType>>();
   nCall(IC.isar_wc_create(
     colPtr,
     wcPtrPtr,
-    wc.index == null,
-    wc.index ?? 999,
-    wc.skipDuplicates,
+    wc.index ?? -1,
+    distinct ?? false,
+    ascending ?? true,
   ));
   final wcPtr = wcPtrPtr.value;
 
-  final resolvedWc = resolveWhereClause(wc);
   for (var i = 0; i < wc.types.length; i++) {
     addWhereValue(
       wcPtr: wcPtr,
-      type: resolvedWc.types[i],
-      lower: resolvedWc.lower![i],
-      upper: resolvedWc.upper![i],
+      type: wc.types[i],
+      lower: wc.lower?[i],
+      upper: wc.upper?[i],
+      lowerUnbound: wc.lower == null,
+      upperUnbound: wc.upper == null,
     );
   }
 
@@ -56,88 +66,6 @@ void _addWhereClause(Pointer colPtr, Pointer qbPtr, WhereClause wc) {
     wc.includeUpper,
   ));
   free(wcPtrPtr);
-}
-
-WhereClause resolveWhereClause(WhereClause wc) {
-  final lower = [];
-  final upper = [];
-
-  for (var i = 0; i < wc.types.length; i++) {
-    var lowerValue = wc.lower?[i];
-    var upperValue = wc.upper?[i];
-    switch (wc.types[i]) {
-      case 'Bool':
-        lowerValue = boolToByte(lowerValue);
-        if (wc.upper == null) {
-          upperValue = maxBool;
-        } else {
-          upperValue = boolToByte(upperValue);
-        }
-        break;
-
-      case 'Int':
-        lowerValue ??= nullInt;
-        if (wc.upper == null) {
-          upperValue = maxInt;
-        } else {
-          upperValue ??= nullInt;
-        }
-        break;
-
-      case 'Float':
-        lowerValue ??= nullFloat;
-        if (wc.upper == null) {
-          upperValue = maxFloat;
-        } else {
-          upperValue ??= nullFloat;
-        }
-        break;
-
-      case 'Long':
-        lowerValue ??= nullLong;
-        if (wc.upper == null) {
-          upperValue = maxLong;
-        } else {
-          upperValue ??= nullLong;
-        }
-        break;
-
-      case 'Double':
-        lowerValue ??= nullDouble;
-        if (wc.upper == null) {
-          upperValue = maxDouble;
-        } else {
-          upperValue ??= nullDouble;
-        }
-        break;
-      case 'StringValue':
-      case 'StringValueLC':
-      case 'StringHash':
-      case 'StringHashLC':
-      case 'StringWords':
-      case 'StringWordsLC':
-        if (wc.upper == null) {
-          upperValue = '\u{ffff}';
-        }
-        break;
-    }
-
-    if (i != wc.types.length - 1) {
-      requireEqual(lowerValue, upperValue);
-    }
-
-    lower.add(lowerValue);
-    upper.add(upperValue);
-  }
-
-  return WhereClause(
-    wc.index,
-    wc.types,
-    lower: lower,
-    includeLower: wc.includeLower,
-    upper: upper,
-    includeUpper: wc.includeUpper,
-  );
 }
 
 void requireEqual(dynamic v1, dynamic v2) {
@@ -167,22 +95,54 @@ void addWhereValue({
   required Pointer wcPtr,
   required String type,
   required dynamic lower,
+  required bool lowerUnbound,
   required dynamic upper,
+  required bool upperUnbound,
 }) {
   switch (type) {
     case 'Bool':
+      lower = boolToByte(lower);
+      if (upperUnbound) {
+        upper = maxBool;
+      } else {
+        upper = boolToByte(upper);
+      }
       IC.isar_wc_add_byte(wcPtr, lower, upper);
       return;
     case 'Int':
+      lower ??= nullInt;
+      if (upperUnbound) {
+        upper = maxInt;
+      } else {
+        upper ??= nullInt;
+      }
       IC.isar_wc_add_int(wcPtr, lower, upper);
       return;
     case 'Float':
+      lower ??= nullFloat;
+      if (upperUnbound) {
+        upper = maxFloat;
+      } else {
+        upper ??= nullFloat;
+      }
       IC.isar_wc_add_float(wcPtr, lower, upper);
       return;
     case 'Long':
+      lower ??= nullLong;
+      if (upperUnbound) {
+        upper = maxLong;
+      } else {
+        upper ??= nullLong;
+      }
       IC.isar_wc_add_long(wcPtr, lower, upper);
       return;
     case 'Double':
+      lower ??= nullDouble;
+      if (upperUnbound) {
+        upper = maxDouble;
+      } else {
+        upper ??= nullDouble;
+      }
       IC.isar_wc_add_double(wcPtr, lower, upper);
       return;
     default:
@@ -196,15 +156,15 @@ void addWhereValue({
           upperPtr = Utf8.toUtf8(upper).cast();
         }
         final caseSensitive = !type.endsWith('LC');
+        late int indexType;
         switch (type) {
           case 'StringValue':
           case 'StringValueLC':
-            IC.isar_wc_add_string_value(
-                wcPtr, lowerPtr, upperPtr, caseSensitive);
+            indexType = IndexType.value.index;
             break;
           case 'StringHash':
           case 'StringHashLC':
-            IC.isar_wc_add_string_hash(wcPtr, lowerPtr, caseSensitive);
+            indexType = IndexType.hash.index;
             break;
           case 'StringWords':
           case 'StringWordsLC':
@@ -214,8 +174,7 @@ void addWhereValue({
                     lower != null &&
                     lower.isNotEmpty,
                 'Null or empty words are unsupported');
-            IC.isar_wc_add_string_word(
-                wcPtr, lowerPtr, upperPtr, caseSensitive);
+            indexType = IndexType.words.index;
             break;
           case 'StringObjectId':
           case 'StringObjectIdLC':
@@ -224,6 +183,9 @@ void addWhereValue({
           default:
             throw UnimplementedError();
         }
+
+        IC.isar_wc_add_string(wcPtr, lowerPtr, upperPtr, lowerUnbound,
+            upperUnbound, caseSensitive, indexType);
 
         if (lower != null) {
           free(lowerPtr);

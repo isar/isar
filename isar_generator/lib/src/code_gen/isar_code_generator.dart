@@ -168,13 +168,10 @@ class IsarCodeGenerator extends Builder {
       code += '''
       {
         nCall(IC.isar_get_collection(isarPtr, collectionPtrPtr, $i));
-        final propertyOffsets = <int>[];
-      ''';
-      for (var p = 0; p < info.properties.length; p++) {
-        code +=
-            'propertyOffsets.add(IC.isar_get_property_offset(collectionPtrPtr.value, $p));';
-      }
-      code += '''
+        final propertyOffsetsPtr = allocate<Uint32>(count: ${info.properties.length});
+        IC.isar_get_property_offsets(collectionPtrPtr.value, propertyOffsetsPtr);
+        final propertyOffsets = propertyOffsetsPtr.asTypedList(${info.properties.length}).toList();
+        free(propertyOffsetsPtr);
         ${info.collectionVar}[path] = IsarCollectionImpl(
           isar,
           _${info.dartName}Adapter(),

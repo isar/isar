@@ -4,7 +4,7 @@ extension QueryWhereOr<OBJECT> on QueryBuilder<OBJECT, QWhereProperty, dynamic,
     dynamic, dynamic, dynamic, dynamic> {
   QueryBuilder<OBJECT, QNoWhere, dynamic, dynamic, dynamic, dynamic, dynamic>
       or() {
-    return clone();
+    return copyWith();
   }
 }
 
@@ -12,7 +12,7 @@ extension QueryFilter<OBJECT> on QueryBuilder<OBJECT, dynamic, QCanFilter,
     dynamic, dynamic, dynamic, dynamic> {
   QueryBuilder<OBJECT, dynamic, QFilter, dynamic, dynamic, dynamic, dynamic>
       filter() {
-    return clone();
+    return copyWith();
   }
 }
 
@@ -57,12 +57,12 @@ extension QueryOffsetLimit<OBJECT, A, B> on QueryBuilder<OBJECT, dynamic,
     dynamic, A, QCanOffsetLimit, B, QCanExecute> {
   QueryBuilder<OBJECT, dynamic, dynamic, A, QCanLimit, B, QCanExecute> offset(
       int offset) {
-    return offsetInternal(offset);
+    return copyWith(offset: offset);
   }
 
   QueryBuilder<OBJECT, dynamic, dynamic, A, QCanOffset, B, QCanExecute> limit(
       int limit) {
-    return limitInternal(limit);
+    return copyWith(limit: limit);
   }
 }
 
@@ -70,7 +70,7 @@ extension QueryOffset<OBJECT, A, B>
     on QueryBuilder<OBJECT, dynamic, dynamic, A, QCanOffset, B, QCanExecute> {
   QueryBuilder<OBJECT, dynamic, dynamic, A, dynamic, B, QCanExecute> offset(
       int offset) {
-    return offsetInternal(offset);
+    return copyWith(offset: offset);
   }
 }
 
@@ -78,7 +78,7 @@ extension QueryLimit<OBJECT, A, B>
     on QueryBuilder<OBJECT, dynamic, dynamic, A, QCanOffset, B, QCanExecute> {
   QueryBuilder<OBJECT, dynamic, dynamic, A, dynamic, B, QCanExecute> limit(
       int limit) {
-    return limitInternal(limit);
+    return copyWith(limit: limit);
   }
 }
 

@@ -24,7 +24,7 @@ void main() {
       });
     });
 
-    test('equalTo()', () async {
+    test('.equalTo()', () async {
       await qEqual(
         col.where().fieldEqualTo(true).findAll(),
         [BoolModel()..field = true],
@@ -44,7 +44,39 @@ void main() {
       );
     });
 
-    test('where isNotNull()', () async {
+    test('.notEqualTo()', () async {
+      await qEqual(
+        col.where().fieldNotEqualTo(true).findAll(),
+        [
+          BoolModel()..field = null,
+          BoolModel()..field = false,
+          BoolModel()..field = false
+        ],
+      );
+
+      await qEqual(
+        col.where().fieldNotEqualTo(null).findAll(),
+        [
+          BoolModel()..field = false,
+          BoolModel()..field = false,
+          BoolModel()..field = true
+        ],
+      );
+    });
+
+    test('.isNull()', () async {
+      await qEqualSet(
+        col.where().fieldIsNull().findAll(),
+        [BoolModel()..field = null],
+      );
+
+      await qEqualSet(
+        col.where().filter().fieldIsNull().findAll(),
+        [BoolModel()..field = null],
+      );
+    });
+
+    test('.isNotNull()', () async {
       await qEqualSet(
         col.where().fieldIsNotNull().findAll(),
         [

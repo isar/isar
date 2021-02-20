@@ -182,6 +182,28 @@ void main() {
       );
     });
 
+    test('.in()', () async {
+      await qEqual(
+        col.where().fieldIn([null, 2, 3]).findAll(),
+        [
+          LongModel()..field = null,
+          LongModel()..field = 2,
+          LongModel()..field = 3,
+        ],
+      );
+      await qEqual(
+        col.where().filter().fieldIn([null, 2, 3]).findAll(),
+        [
+          LongModel()..field = 2,
+          LongModel()..field = 3,
+          LongModel()..field = null,
+        ],
+      );
+
+      expect(() => col.where().fieldIn([]), throwsA(anything));
+      expect(() => col.where().filter().fieldIn([]), throwsA(anything));
+    });
+
     test('isNull()', () async {
       await qEqual(
         col.where().fieldIsNull().findAll(),

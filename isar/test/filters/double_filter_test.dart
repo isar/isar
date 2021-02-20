@@ -25,7 +25,7 @@ void main() {
       });
     });
 
-    test('greaterThan()', () async {
+    test('.greaterThan()', () async {
       await qEqual(
         col.where().fieldGreaterThan(3.3).findAll(),
         [DoubleModel()..field = 4.4],
@@ -54,7 +54,7 @@ void main() {
       );
     });
 
-    test('lessThan()', () async {
+    test('.lessThan()', () async {
       await qEqual(
         col.where().fieldLessThan(1.1).findAll(),
         [DoubleModel()..field = null, DoubleModel()..field = 0],
@@ -91,7 +91,7 @@ void main() {
       );
     });
 
-    test('between()', () async {
+    test('.between()', () async {
       await qEqual(
         col.where().fieldBetween(1.1, 3.3).findAll(),
         [
@@ -148,7 +148,7 @@ void main() {
       );
     });
 
-    test('isNull()', () async {
+    test('.isNull()', () async {
       await qEqual(
         col.where().fieldIsNull().findAll(),
         [DoubleModel()..field = null],
@@ -159,7 +159,7 @@ void main() {
       );
     });
 
-    test('isNotNull()', () async {
+    test('.isNotNull()', () async {
       await qEqualSet(
         col.where().fieldIsNotNull().findAll(),
         [

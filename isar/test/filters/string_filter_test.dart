@@ -10,7 +10,7 @@ void main() {
     late IsarCollection<int, StringModel> col;
 
     setUp(() async {
-      await setupIsar();
+      setupIsar();
 
       final dir = await getTempDir();
       isar = await openIsar(directory: dir.path);
@@ -56,7 +56,9 @@ void main() {
       try {
         await col.where().wordsFieldWordEqualTo(null).findAll();
         fail('Should fail');
-      } catch (e) {}
+      } catch (e) {
+        // do nothing
+      }
       await qEqual(
         col.where().filter().hashFieldEqualTo(null).findAll(),
         [StringModel.init(null)],
@@ -91,7 +93,9 @@ void main() {
       try {
         await col.where().wordsFieldWordEqualTo('').findAll();
         fail('Should fail');
-      } catch (e) {}
+      } catch (e) {
+        // do nothing
+      }
 
       await qEqual(
         col.where().filter().hashFieldEqualTo('').findAll(),
@@ -116,6 +120,19 @@ void main() {
     });
 
     test('isNotNull()', () async {
+      await qEqualSet(
+        col.where().hashFieldIsNotNull().findAll(),
+        {
+          StringModel.init(''),
+          StringModel.init('string 0'),
+          StringModel.init('string 1'),
+          StringModel.init('string 2'),
+          StringModel.init('string 3'),
+          StringModel.init('string 4'),
+          StringModel.init('string 4'),
+        },
+      );
+
       await qEqual(
         col.where().valueFieldIsNotNull().findAll(),
         [
@@ -130,62 +147,239 @@ void main() {
       );
     });
 
-    /*test('isNotEqualTo()', () async {
+    test('isNotEqualTo()', () async {
       await qEqualSet(
-        col.where().filter().not().fieldEqualTo('string_4').findAll(),
+        col.where().hashFieldNotEqualTo('string 4').findAll(),
         {
-          StringModel.init('string_0',
-          StringModel.init('string_1',
-          StringModel.init('string_2',
-          StringModel.init('string_3',
-          StringModel.init('',
+          StringModel.init(null),
+          StringModel.init(''),
+          StringModel.init('string 0'),
+          StringModel.init('string 1'),
+          StringModel.init('string 2'),
+          StringModel.init('string 3'),
         },
+      );
+      await qEqualSet(
+        col.where().valueFieldNotEqualTo('string 4').findAll(),
+        [
+          StringModel.init(null),
+          StringModel.init(''),
+          StringModel.init('string 0'),
+          StringModel.init('string 1'),
+          StringModel.init('string 2'),
+          StringModel.init('string 3'),
+        ],
       );
     });
 
-    test('anyOf()', () async {
+    test('in()', () async {
       await qEqualSet(
-        col.where().fieldAnyOf(['string_4', 'string_0']).findAll(),
+        col.where().hashFieldIn(['string 4', 'string 0']).findAll(),
         {
-          StringModel.init('string_0',
-          StringModel.init('string_4',
-          StringModel.init('string_4',
+          StringModel.init('string 0'),
+          StringModel.init('string 4'),
+          StringModel.init('string 4'),
+        },
+      );
+      await qEqualSet(
+        col.where().valueFieldIn(['string 4', 'string 0']).findAll(),
+        {
+          StringModel.init('string 0'),
+          StringModel.init('string 4'),
+          StringModel.init('string 4'),
+        },
+      );
+      await qEqualSet(
+        col.where().wordsFieldWordIn(['4', '0']).findAll(),
+        {
+          StringModel.init('string 0'),
+          StringModel.init('string 4'),
+          StringModel.init('string 4'),
+        },
+      );
+      await qEqualSet(
+        col.where().filter().valueFieldIn(['string 4', 'string 0']).findAll(),
+        {
+          StringModel.init('string 0'),
+          StringModel.init('string 4'),
+          StringModel.init('string 4'),
         },
       );
 
       await qEqualSet(
-        col.where().fieldAnyOf(['', null, 'string_999']).findAll(),
+        col.where().hashFieldIn(['', null, 'String 0']).findAll(),
         {
-          StringModel.init('',
-          StringModel.init(null,
+          StringModel.init(''),
+          StringModel.init(null),
+        },
+      );
+      await qEqualSet(
+        col.where().valueFieldIn(['', null, 'String 0']).findAll(),
+        {
+          StringModel.init(''),
+          StringModel.init(null),
+        },
+      );
+      await qEqualSet(
+        col.where().filter().valueFieldIn([null, '', 'String 0']).findAll(),
+        {
+          StringModel.init(''),
+          StringModel.init(null),
         },
       );
 
-      await qEqual(
-        col.where().fieldAnyOf([]).findAll(),
-        [],
-      );
+      expect(() => col.where().hashFieldIn([]), throwsA(anything));
+      expect(() => col.where().valueFieldIn([]), throwsA(anything));
+      expect(() => col.where().wordsFieldWordIn([]), throwsA(anything));
+      expect(() => col.where().filter().hashFieldIn([]), throwsA(anything));
     });
 
-    test('between()', () async {
+    test('.startsWith()', () async {
+      await qEqual(
+        col.where().valueFieldStartsWith('string').findAll(),
+        [
+          StringModel.init('string 0'),
+          StringModel.init('string 1'),
+          StringModel.init('string 2'),
+          StringModel.init('string 3'),
+          StringModel.init('string 4'),
+          StringModel.init('string 4'),
+        ],
+      );
       await qEqualSet(
-        col.where().fieldBetween('string_0', 'string_2').findAll(),
+        col.where().filter().valueFieldStartsWith('string').findAll(),
         {
-          StringModel.init('string_0',
-          StringModel.init('string_1',
-          StringModel.init('string_2',
+          StringModel.init('string 0'),
+          StringModel.init('string 1'),
+          StringModel.init('string 2'),
+          StringModel.init('string 3'),
+          StringModel.init('string 4'),
+          StringModel.init('string 4'),
         },
       );
 
       await qEqual(
-        col.where().fieldBetween('string_0', null).findAll(),
-        [],
+        col.where().valueFieldStartsWith('').findAll(),
+        [
+          StringModel.init(''),
+          StringModel.init('string 0'),
+          StringModel.init('string 1'),
+          StringModel.init('string 2'),
+          StringModel.init('string 3'),
+          StringModel.init('string 4'),
+          StringModel.init('string 4'),
+        ],
+      );
+      await qEqualSet(
+        col.where().filter().valueFieldStartsWith('').findAll(),
+        {
+          StringModel.init(''),
+          StringModel.init('string 0'),
+          StringModel.init('string 1'),
+          StringModel.init('string 2'),
+          StringModel.init('string 3'),
+          StringModel.init('string 4'),
+          StringModel.init('string 4'),
+        },
       );
 
-      await qEqual(
-        col.where().fieldBetween('string_2', 'string_0').findAll(),
-        [],
+      await qEqual(col.where().valueFieldStartsWith('S').findAll(), []);
+      await qEqualSet(
+          col.where().filter().valueFieldStartsWith('S').findAll(), {});
+
+      expect(() => col.where().valueFieldStartsWith(null), throwsA(anything));
+      expect(() => col.where().filter().valueFieldStartsWith(null),
+          throwsA(anything));
+    });
+
+    test('.endsWith()', () async {
+      await qEqualSet(
+        col.where().filter().valueFieldEndsWith('4').findAll(),
+        {
+          StringModel.init('string 4'),
+          StringModel.init('string 4'),
+        },
       );
-    });*/
+
+      await qEqualSet(
+        col.where().filter().valueFieldEndsWith('').findAll(),
+        {
+          StringModel.init(''),
+          StringModel.init('string 0'),
+          StringModel.init('string 1'),
+          StringModel.init('string 2'),
+          StringModel.init('string 3'),
+          StringModel.init('string 4'),
+          StringModel.init('string 4'),
+        },
+      );
+
+      await qEqualSet(
+          col.where().filter().valueFieldEndsWith('8').findAll(), {});
+
+      expect(() => col.where().filter().valueFieldEndsWith(null),
+          throwsA(anything));
+    });
+
+    test('.contains()', () async {
+      await qEqualSet(
+          col.where().filter().valueFieldContains('ing').findAll(), {
+        StringModel.init('string 0'),
+        StringModel.init('string 1'),
+        StringModel.init('string 2'),
+        StringModel.init('string 3'),
+        StringModel.init('string 4'),
+        StringModel.init('string 4'),
+      });
+
+      await qEqualSet(
+        col.where().filter().valueFieldContains('').findAll(),
+        {
+          StringModel.init(''),
+          StringModel.init('string 0'),
+          StringModel.init('string 1'),
+          StringModel.init('string 2'),
+          StringModel.init('string 3'),
+          StringModel.init('string 4'),
+          StringModel.init('string 4'),
+        },
+      );
+
+      await qEqualSet(
+          col.where().filter().valueFieldContains('x').findAll(), {});
+
+      expect(() => col.where().filter().valueFieldContains(null),
+          throwsA(anything));
+    });
+
+    test('.matches()', () async {
+      await qEqualSet(
+        col.where().filter().valueFieldMatches('*ng 4').findAll(),
+        {
+          StringModel.init('string 4'),
+          StringModel.init('string 4'),
+        },
+      );
+
+      await qEqualSet(
+        col.where().filter().valueFieldMatches('????????').findAll(),
+        {
+          StringModel.init('string 0'),
+          StringModel.init('string 1'),
+          StringModel.init('string 2'),
+          StringModel.init('string 3'),
+          StringModel.init('string 4'),
+          StringModel.init('string 4'),
+        },
+      );
+
+      await qEqualSet(
+        col.where().filter().valueFieldMatches('').findAll(),
+        {StringModel.init('')},
+      );
+
+      await qEqualSet(
+          col.where().filter().valueFieldMatches('*4?').findAll(), {});
+    });
   });
 }

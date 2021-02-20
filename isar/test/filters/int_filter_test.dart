@@ -26,7 +26,7 @@ void main() {
       });
     });
 
-    test('equalTo()', () async {
+    test('.equalTo()', () async {
       await qEqual(
         col.where().fieldEqualTo(2).findAll(),
         [IntModel()..field = 2],
@@ -55,7 +55,7 @@ void main() {
       );
     });
 
-    test('greaterThan()', () async {
+    test('.greaterThan()', () async {
       await qEqual(
         col.where().fieldGreaterThan(3).findAll(),
         [IntModel()..field = 4],
@@ -75,6 +75,27 @@ void main() {
       );
 
       await qEqual(
+        col.where().fieldGreaterThan(null).findAll(),
+        [
+          IntModel()..field = 0,
+          IntModel()..field = 1,
+          IntModel()..field = 2,
+          IntModel()..field = 3,
+          IntModel()..field = 4,
+        ],
+      );
+      await qEqual(
+        col.where().filter().fieldGreaterThan(null).findAll(),
+        [
+          IntModel()..field = 0,
+          IntModel()..field = 1,
+          IntModel()..field = 2,
+          IntModel()..field = 3,
+          IntModel()..field = 4,
+        ],
+      );
+
+      await qEqual(
         col.where().fieldGreaterThan(4).findAll(),
         [],
       );
@@ -84,7 +105,7 @@ void main() {
       );
     });
 
-    test('lessThan()', () async {
+    test('.lessThan()', () async {
       await qEqual(
         col.where().fieldLessThan(1).findAll(),
         [IntModel()..field = null, IntModel()..field = 0],
@@ -112,7 +133,7 @@ void main() {
       );
     });
 
-    test('between()', () async {
+    test('.between()', () async {
       await qEqual(
         col.where().fieldBetween(1, 3).findAll(),
         [IntModel()..field = 1, IntModel()..field = 2, IntModel()..field = 3],
@@ -178,7 +199,29 @@ void main() {
       );
     });
 
-    test('isNull()', () async {
+    test('.in()', () async {
+      await qEqual(
+        col.where().fieldIn([null, 2, 3]).findAll(),
+        [
+          IntModel()..field = null,
+          IntModel()..field = 2,
+          IntModel()..field = 3,
+        ],
+      );
+      await qEqual(
+        col.where().filter().fieldIn([null, 2, 3]).findAll(),
+        [
+          IntModel()..field = 2,
+          IntModel()..field = 3,
+          IntModel()..field = null,
+        ],
+      );
+
+      expect(() => col.where().fieldIn([]), throwsA(anything));
+      expect(() => col.where().filter().fieldIn([]), throwsA(anything));
+    });
+
+    test('.isNull()', () async {
       await qEqual(
         col.where().fieldIsNull().findAll(),
         [IntModel()..field = null],
@@ -189,7 +232,7 @@ void main() {
       );
     });
 
-    test('where isNotNull()', () async {
+    test('.isNotNull()', () async {
       await qEqualSet(
         col.where().fieldIsNotNull().findAll(),
         {
