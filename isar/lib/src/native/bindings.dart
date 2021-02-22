@@ -99,14 +99,14 @@ class IsarCoreBindings {
   int isar_delete(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
-    ffi.Pointer<RawObject> object,
+    int oid,
     ffi.Pointer<ffi.Uint8> deleted,
   ) {
     return (_isar_delete ??= _dylib
         .lookupFunction<_c_isar_delete, _dart_isar_delete>('isar_delete'))(
       collection,
       txn,
-      object,
+      oid,
       deleted,
     );
   }
@@ -116,7 +116,8 @@ class IsarCoreBindings {
   void isar_delete_all_async(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
-    ffi.Pointer<RawObjectSet> objects,
+    ffi.Pointer<ffi.Int64> oids,
+    int oids_length,
     ffi.Pointer<ffi.Uint32> count,
   ) {
     return (_isar_delete_all_async ??= _dylib.lookupFunction<
@@ -124,7 +125,8 @@ class IsarCoreBindings {
         _dart_isar_delete_all_async>('isar_delete_all_async'))(
       collection,
       txn,
-      objects,
+      oids,
+      oids_length,
       count,
     );
   }
@@ -628,6 +630,27 @@ class IsarCoreBindings {
 
   _dart_isar_qb_create? _isar_qb_create;
 
+  int isar_qb_add_primary_where_clause(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> builder,
+    int lower_oid,
+    int upper_oid,
+    bool ascending,
+  ) {
+    return (_isar_qb_add_primary_where_clause ??= _dylib.lookupFunction<
+            _c_isar_qb_add_primary_where_clause,
+            _dart_isar_qb_add_primary_where_clause>(
+        'isar_qb_add_primary_where_clause'))(
+      collection,
+      builder,
+      lower_oid,
+      upper_oid,
+      ascending ? 1 : 0,
+    );
+  }
+
+  _dart_isar_qb_add_primary_where_clause? _isar_qb_add_primary_where_clause;
+
   int isar_qb_add_where_clause(
     ffi.Pointer<ffi.NativeType> builder,
     ffi.Pointer<ffi.NativeType> where_clause,
@@ -855,6 +878,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> isar,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> txn,
     bool write,
+    bool silent,
   ) {
     return (_isar_txn_begin ??=
         _dylib.lookupFunction<_c_isar_txn_begin, _dart_isar_txn_begin>(
@@ -862,6 +886,7 @@ class IsarCoreBindings {
       isar,
       txn,
       write ? 1 : 0,
+      silent ? 1 : 0,
     );
   }
 
@@ -871,6 +896,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> isar,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> txn,
     bool write,
+    bool silent,
     int port,
   ) {
     return (_isar_txn_begin_async ??= _dylib.lookupFunction<
@@ -879,6 +905,7 @@ class IsarCoreBindings {
       isar,
       txn,
       write ? 1 : 0,
+      silent ? 1 : 0,
       port,
     );
   }
@@ -952,7 +979,7 @@ class IsarCoreBindings {
   ffi.Pointer<ffi.NativeType> isar_watch_object(
     ffi.Pointer<ffi.NativeType> isar,
     ffi.Pointer<ffi.NativeType> collection,
-    ffi.Pointer<RawObject> oid,
+    int oid,
     int port,
   ) {
     return (_isar_watch_object ??=
@@ -1120,32 +1147,11 @@ class IsarCoreBindings {
   }
 
   _dart_isar_wc_add_string? _isar_wc_add_string;
-
-  void isar_wc_add_oid_string(
-    ffi.Pointer<ffi.NativeType> where_clause,
-    ffi.Pointer<ffi.Int8> lower,
-    ffi.Pointer<ffi.Int8> upper,
-  ) {
-    return (_isar_wc_add_oid_string ??= _dylib.lookupFunction<
-        _c_isar_wc_add_oid_string,
-        _dart_isar_wc_add_oid_string>('isar_wc_add_oid_string'))(
-      where_clause,
-      lower,
-      upper,
-    );
-  }
-
-  _dart_isar_wc_add_oid_string? _isar_wc_add_oid_string;
 }
 
 abstract class RawObject extends ffi.Struct {
-  external ffi.Pointer<ffi.Uint8> oid_str;
-
-  @ffi.Uint32()
-  external int oid_str_length;
-
   @ffi.Int64()
-  external int oid_num;
+  external int oid;
 
   external ffi.Pointer<ffi.Uint8> buffer;
 
@@ -1227,28 +1233,30 @@ typedef _dart_isar_put_all_async = void Function(
 typedef _c_isar_delete = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<RawObject> object,
+  ffi.Int64 oid,
   ffi.Pointer<ffi.Uint8> deleted,
 );
 
 typedef _dart_isar_delete = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<RawObject> object,
+  int oid,
   ffi.Pointer<ffi.Uint8> deleted,
 );
 
 typedef _c_isar_delete_all_async = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<RawObjectSet> objects,
+  ffi.Pointer<ffi.Int64> oids,
+  ffi.Uint32 oids_length,
   ffi.Pointer<ffi.Uint32> count,
 );
 
 typedef _dart_isar_delete_all_async = void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<RawObjectSet> objects,
+  ffi.Pointer<ffi.Int64> oids,
+  int oids_length,
   ffi.Pointer<ffi.Uint32> count,
 );
 
@@ -1643,6 +1651,22 @@ typedef _dart_isar_qb_create = ffi.Pointer<ffi.NativeType> Function(
   ffi.Pointer<ffi.NativeType> collection,
 );
 
+typedef _c_isar_qb_add_primary_where_clause = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> builder,
+  ffi.Int64 lower_oid,
+  ffi.Int64 upper_oid,
+  ffi.Uint8 ascending,
+);
+
+typedef _dart_isar_qb_add_primary_where_clause = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> builder,
+  int lower_oid,
+  int upper_oid,
+  int ascending,
+);
+
 typedef _c_isar_qb_add_where_clause = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> builder,
   ffi.Pointer<ffi.NativeType> where_clause,
@@ -1817,18 +1841,21 @@ typedef _c_isar_txn_begin = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> isar,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> txn,
   ffi.Uint8 write,
+  ffi.Uint8 silent,
 );
 
 typedef _dart_isar_txn_begin = int Function(
   ffi.Pointer<ffi.NativeType> isar,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> txn,
   int write,
+  int silent,
 );
 
 typedef _c_isar_txn_begin_async = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> isar,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> txn,
   ffi.Uint8 write,
+  ffi.Uint8 silent,
   ffi.Int64 port,
 );
 
@@ -1836,6 +1863,7 @@ typedef _dart_isar_txn_begin_async = void Function(
   ffi.Pointer<ffi.NativeType> isar,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> txn,
   int write,
+  int silent,
   int port,
 );
 
@@ -1886,14 +1914,14 @@ typedef _dart_isar_watch_collection = ffi.Pointer<ffi.NativeType> Function(
 typedef _c_isar_watch_object = ffi.Pointer<ffi.NativeType> Function(
   ffi.Pointer<ffi.NativeType> isar,
   ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<RawObject> oid,
+  ffi.Int64 oid,
   ffi.Int64 port,
 );
 
 typedef _dart_isar_watch_object = ffi.Pointer<ffi.NativeType> Function(
   ffi.Pointer<ffi.NativeType> isar,
   ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<RawObject> oid,
+  int oid,
   int port,
 );
 
@@ -2013,16 +2041,4 @@ typedef _dart_isar_wc_add_string = void Function(
   int upper_unbounded,
   int case_sensitive,
   int index_type,
-);
-
-typedef _c_isar_wc_add_oid_string = ffi.Void Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Pointer<ffi.Int8> lower,
-  ffi.Pointer<ffi.Int8> upper,
-);
-
-typedef _dart_isar_wc_add_oid_string = void Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Pointer<ffi.Int8> lower,
-  ffi.Pointer<ffi.Int8> upper,
 );
