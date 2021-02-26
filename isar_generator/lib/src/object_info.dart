@@ -93,6 +93,7 @@ abstract class ObjectIndex with _$ObjectIndex {
   const factory ObjectIndex({
     List<ObjectIndexProperty> properties,
     bool unique,
+    bool replace,
   }) = _ObjectIndex;
 
   factory ObjectIndex.fromJson(Map<String, dynamic> json) =>

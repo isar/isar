@@ -78,6 +78,7 @@ List<Index> getIndexAnns(Element element) {
     return Index(
       composite: composite,
       unique: ann.getField('unique').toBoolValue(),
+      replace: ann.getField('replace').toBoolValue(),
       indexType: indexType,
       caseSensitive: ann.getField('caseSensitive').toBoolValue(),
     );

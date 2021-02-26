@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:test/test.dart';
 
 import '../common.dart';
@@ -7,7 +9,7 @@ import '../models/int_model.dart';
 void main() {
   group('Int filter', () {
     Isar isar;
-    late IsarCollection<int, IntModel> col;
+    late IsarCollection<IntModel> col;
 
     setUp(() async {
       setupIsar();
@@ -200,14 +202,15 @@ void main() {
     });
 
     test('.in()', () async {
-      await qEqual(
+      col.exportJson(true, (b) => print(Utf8Decoder().convert(b)));
+      /*await qEqual(
         col.where().fieldIn([null, 2, 3]).findAll(),
         [
           IntModel()..field = null,
           IntModel()..field = 2,
           IntModel()..field = 3,
         ],
-      );
+      );*/
       await qEqual(
         col.where().filter().fieldIn([null, 2, 3]).findAll(),
         [

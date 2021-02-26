@@ -7,7 +7,7 @@ import '../models/float_model.dart';
 void main() {
   group('Float filter', () {
     Isar isar;
-    late IsarCollection<int, FloatModel> col;
+    late IsarCollection<FloatModel> col;
 
     setUp(() async {
       setupIsar();

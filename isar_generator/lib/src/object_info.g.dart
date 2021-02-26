@@ -145,6 +145,7 @@ _$_ObjectIndex _$_$_ObjectIndexFromJson(Map<String, dynamic> json) {
             : ObjectIndexProperty.fromJson(e as Map<String, dynamic>))
         ?.toList(),
     unique: json['unique'] as bool,
+    replace: json['replace'] as bool,
   );
 }
 
@@ -152,4 +153,5 @@ Map<String, dynamic> _$_$_ObjectIndexToJson(_$_ObjectIndex instance) =>
     <String, dynamic>{
       'properties': instance.properties,
       'unique': instance.unique,
+      'replace': instance.replace,
     };

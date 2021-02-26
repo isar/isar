@@ -7,7 +7,7 @@ import 'models/message_model.dart';
 
 void main() {
   late Isar isar;
-  late IsarCollection<int, Message> col;
+  late IsarCollection<Message> col;
   late List<Message> messages;
 
   group('Watcher', () {

@@ -90,7 +90,7 @@ class IsarAnalyzer extends Builder {
         final property = properties[i];
         if (property.isarName == 'id' &&
             property.converter == null &&
-            primaryKeyTypes.contains(property.isarType)) {
+            property.isarType == IsarType.Long) {
           oidProperty = properties[i].copyWith(isObjectId: true);
           properties[i] = oidProperty;
           break;
@@ -174,7 +174,7 @@ class IsarAnalyzer extends Builder {
     if (hasOidAnn) {
       if (converter != null) {
         err('Converters are not allowed for ids.', property);
-      } else if (!primaryKeyTypes.contains(isarType)) {
+      } else if (isarType != IsarType.Long) {
         err('Illegal ObjectId type. Allowed: String, Int, Long', property);
       }
     }
@@ -259,6 +259,11 @@ class IsarAnalyzer extends Builder {
     }
 
     final index = indexAnns[0];
+
+    if (!index.unique && index.replace) {
+      err('Only unique indexes may replace existing entries', element);
+    }
+
     final indexProperties = <ObjectIndexProperty>[];
     final defaultIndexType = property.isarType == IsarType.String
         ? isar.IndexType.hash
@@ -310,6 +315,7 @@ class IsarAnalyzer extends Builder {
     return ObjectIndex(
       properties: indexProperties,
       unique: index.unique,
+      replace: index.replace,
     );
   }
 

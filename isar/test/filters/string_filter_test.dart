@@ -7,7 +7,7 @@ import '../models/string_model.dart';
 void main() {
   group('String filter', () {
     Isar isar;
-    late IsarCollection<int, StringModel> col;
+    late IsarCollection<StringModel> col;
 
     setUp(() async {
       setupIsar();

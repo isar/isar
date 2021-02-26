@@ -4,20 +4,17 @@ import 'package:test/test.dart';
 import 'common.dart';
 import 'isar.g.dart';
 import 'models/message_model.dart';
-import 'models/user_model.dart';
 
 void main() {
   group('CRUD', () {
     late Isar isar;
-    late IsarCollection<String, UserModel> users;
-    late IsarCollection<int, Message> messages;
+    late IsarCollection<Message> messages;
 
     setUp(() async {
       setupIsar();
 
       final dir = await getTempDir();
       isar = await openIsar(directory: dir.path);
-      users = isar.userModels;
       messages = isar.messages;
     });
 
@@ -32,7 +29,7 @@ void main() {
       expect(message, newMessage);
     });
 
-    test('get() / put() with int oid', () async {
+    test('get() / put() with oid', () async {
       final message = Message()
         ..id = 5
         ..message = 'This is a new message';
@@ -48,27 +45,6 @@ void main() {
       expect(noMessage, null);
     });
 
-    test('get() / put() with String oid', () async {
-      final user = UserModel()
-        ..name = 'Some User'
-        ..age = 24
-        ..friends = ['Friend1', null, 'Friend2'];
-
-      await isar.writeTxn((isar) async {
-        await users.put(user);
-      });
-
-      final newUser = await users.get(user.name);
-      expect(newUser, user);
-
-      user.age = 25;
-      await isar.writeTxn((isar) async {
-        await users.put(user);
-      });
-      final newUser2 = await users.get(user.name);
-      expect(newUser2, user);
-    });
-
     test('getSync() / putSync() without int oid', () {
       final message = Message()..message = 'This is a new message';
 
@@ -80,7 +56,7 @@ void main() {
       expect(message, newMessage);
     });
 
-    test('getSync() / putSync() with int oid', () async {
+    test('getSync() / putSync() with oid', () async {
       final message = Message()
         ..id = 5
         ..message = 'This is a new message';
@@ -96,28 +72,7 @@ void main() {
       expect(noMessage, null);
     });
 
-    test('getSync() / putSync() with oid', () {
-      final user = UserModel()
-        ..name = 'Some User'
-        ..age = 24
-        ..friends = ['Friend1', null, 'Friend2'];
-
-      isar.writeTxnSync((isar) {
-        users.putSync(user);
-      });
-
-      final newUser = users.getSync(user.name);
-      expect(newUser, user);
-
-      user.age = 25;
-      isar.writeTxnSync((isar) {
-        users.putSync(user);
-      });
-      final newUser2 = users.getSync(user.name);
-      expect(newUser2, user);
-    });
-
-    test('get() / put() null', () async {
+    /*test('get() / put() null', () async {
       final user = await users.get('Nonexisting User');
       expect(user, null);
     });
@@ -125,7 +80,7 @@ void main() {
     test('getSync() null', () {
       final user = users.getSync('Nonexisting User');
       expect(user, null);
-    });
+    });*/
 
     test('getAll() / putAll()', () async {
       final message1 = Message()..message = 'Message one';
@@ -157,7 +112,7 @@ void main() {
       expect(newMessage3, message3);
     });
 
-    test('delete()', () async {
+    /*test('delete()', () async {
       final user = UserModel()
         ..name = 'Some User'
         ..age = 24;
@@ -195,6 +150,6 @@ void main() {
         users.deleteSync(user.name);
       });
       expect(users.getSync(user.name), null);
-    });
+    });*/
   });
 }
