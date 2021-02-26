@@ -618,6 +618,124 @@ class IsarCoreBindings {
 
   _dart_isar_get_property_offsets? _isar_get_property_offsets;
 
+  int isar_link(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    int link_index,
+    int oid,
+    int target_oid,
+  ) {
+    return (_isar_link ??=
+        _dylib.lookupFunction<_c_isar_link, _dart_isar_link>('isar_link'))(
+      collection,
+      txn,
+      link_index,
+      oid,
+      target_oid,
+    );
+  }
+
+  _dart_isar_link? _isar_link;
+
+  void isar_link_all_async(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    int link_index,
+    ffi.Pointer<ffi.Int64> ids,
+    int ids_length,
+  ) {
+    return (_isar_link_all_async ??= _dylib.lookupFunction<
+        _c_isar_link_all_async,
+        _dart_isar_link_all_async>('isar_link_all_async'))(
+      collection,
+      txn,
+      link_index,
+      ids,
+      ids_length,
+    );
+  }
+
+  _dart_isar_link_all_async? _isar_link_all_async;
+
+  int isar_unlink(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    int link_index,
+    int oid,
+    int target_oid,
+  ) {
+    return (_isar_unlink ??= _dylib
+        .lookupFunction<_c_isar_unlink, _dart_isar_unlink>('isar_unlink'))(
+      collection,
+      txn,
+      link_index,
+      oid,
+      target_oid,
+    );
+  }
+
+  _dart_isar_unlink? _isar_unlink;
+
+  void isar_unlink_all_async(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    int link_index,
+    ffi.Pointer<ffi.Int64> ids,
+    int ids_length,
+  ) {
+    return (_isar_unlink_all_async ??= _dylib.lookupFunction<
+        _c_isar_unlink_all_async,
+        _dart_isar_unlink_all_async>('isar_unlink_all_async'))(
+      collection,
+      txn,
+      link_index,
+      ids,
+      ids_length,
+    );
+  }
+
+  _dart_isar_unlink_all_async? _isar_unlink_all_async;
+
+  int isar_link_get_objects(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    int link_index,
+    int oid,
+    ffi.Pointer<RawObjectSet> result,
+  ) {
+    return (_isar_link_get_objects ??= _dylib.lookupFunction<
+        _c_isar_link_get_objects,
+        _dart_isar_link_get_objects>('isar_link_get_objects'))(
+      collection,
+      txn,
+      link_index,
+      oid,
+      result,
+    );
+  }
+
+  _dart_isar_link_get_objects? _isar_link_get_objects;
+
+  void isar_link_get_objects_async(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    int link_index,
+    int oid,
+    ffi.Pointer<RawObjectSet> result,
+  ) {
+    return (_isar_link_get_objects_async ??= _dylib.lookupFunction<
+        _c_isar_link_get_objects_async,
+        _dart_isar_link_get_objects_async>('isar_link_get_objects_async'))(
+      collection,
+      txn,
+      link_index,
+      oid,
+      result,
+    );
+  }
+
+  _dart_isar_link_get_objects_async? _isar_link_get_objects_async;
+
   ffi.Pointer<ffi.NativeType> isar_qb_create(
     ffi.Pointer<ffi.NativeType> collection,
   ) {
@@ -1641,6 +1759,102 @@ typedef _c_isar_get_property_offsets = ffi.Void Function(
 typedef _dart_isar_get_property_offsets = void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Uint32> offsets,
+);
+
+typedef _c_isar_link = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Uint64 link_index,
+  ffi.Int64 oid,
+  ffi.Int64 target_oid,
+);
+
+typedef _dart_isar_link = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  int link_index,
+  int oid,
+  int target_oid,
+);
+
+typedef _c_isar_link_all_async = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Uint64 link_index,
+  ffi.Pointer<ffi.Int64> ids,
+  ffi.Uint32 ids_length,
+);
+
+typedef _dart_isar_link_all_async = void Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  int link_index,
+  ffi.Pointer<ffi.Int64> ids,
+  int ids_length,
+);
+
+typedef _c_isar_unlink = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Uint64 link_index,
+  ffi.Int64 oid,
+  ffi.Int64 target_oid,
+);
+
+typedef _dart_isar_unlink = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  int link_index,
+  int oid,
+  int target_oid,
+);
+
+typedef _c_isar_unlink_all_async = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Uint64 link_index,
+  ffi.Pointer<ffi.Int64> ids,
+  ffi.Uint32 ids_length,
+);
+
+typedef _dart_isar_unlink_all_async = void Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  int link_index,
+  ffi.Pointer<ffi.Int64> ids,
+  int ids_length,
+);
+
+typedef _c_isar_link_get_objects = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Uint64 link_index,
+  ffi.Int64 oid,
+  ffi.Pointer<RawObjectSet> result,
+);
+
+typedef _dart_isar_link_get_objects = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  int link_index,
+  int oid,
+  ffi.Pointer<RawObjectSet> result,
+);
+
+typedef _c_isar_link_get_objects_async = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Uint64 link_index,
+  ffi.Int64 oid,
+  ffi.Pointer<RawObjectSet> result,
+);
+
+typedef _dart_isar_link_get_objects_async = void Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  int link_index,
+  int oid,
+  ffi.Pointer<RawObjectSet> result,
 );
 
 typedef _c_isar_qb_create = ffi.Pointer<ffi.NativeType> Function(
