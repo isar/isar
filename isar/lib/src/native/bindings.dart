@@ -260,6 +260,26 @@ class IsarCoreBindings {
 
   _dart_isar_filter_not? _isar_filter_not;
 
+  int isar_filter_link(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> target_collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    ffi.Pointer<ffi.NativeType> condition,
+    int link_index,
+  ) {
+    return (_isar_filter_link ??=
+        _dylib.lookupFunction<_c_isar_filter_link, _dart_isar_filter_link>(
+            'isar_filter_link'))(
+      collection,
+      target_collection,
+      filter,
+      condition,
+      link_index,
+    );
+  }
+
+  _dart_isar_filter_link? _isar_filter_link;
+
   int isar_filter_is_null(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
@@ -637,26 +657,6 @@ class IsarCoreBindings {
 
   _dart_isar_link? _isar_link;
 
-  void isar_link_all_async(
-    ffi.Pointer<ffi.NativeType> collection,
-    ffi.Pointer<ffi.NativeType> txn,
-    int link_index,
-    ffi.Pointer<ffi.Int64> ids,
-    int ids_length,
-  ) {
-    return (_isar_link_all_async ??= _dylib.lookupFunction<
-        _c_isar_link_all_async,
-        _dart_isar_link_all_async>('isar_link_all_async'))(
-      collection,
-      txn,
-      link_index,
-      ids,
-      ids_length,
-    );
-  }
-
-  _dart_isar_link_all_async? _isar_link_all_async;
-
   int isar_link_unlink(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
@@ -677,25 +677,27 @@ class IsarCoreBindings {
 
   _dart_isar_link_unlink? _isar_link_unlink;
 
-  void isar_link_unlink_all_async(
+  void isar_link_update_all_async(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     int link_index,
     ffi.Pointer<ffi.Int64> ids,
-    int ids_length,
+    int link_count,
+    int unlink_count,
   ) {
-    return (_isar_link_unlink_all_async ??= _dylib.lookupFunction<
-        _c_isar_link_unlink_all_async,
-        _dart_isar_link_unlink_all_async>('isar_link_unlink_all_async'))(
+    return (_isar_link_update_all_async ??= _dylib.lookupFunction<
+        _c_isar_link_update_all_async,
+        _dart_isar_link_update_all_async>('isar_link_update_all_async'))(
       collection,
       txn,
       link_index,
       ids,
-      ids_length,
+      link_count,
+      unlink_count,
     );
   }
 
-  _dart_isar_link_unlink_all_async? _isar_link_unlink_all_async;
+  _dart_isar_link_update_all_async? _isar_link_update_all_async;
 
   int isar_link_replace(
     ffi.Pointer<ffi.NativeType> collection,
@@ -1560,6 +1562,22 @@ typedef _dart_isar_filter_not = int Function(
   ffi.Pointer<ffi.NativeType> condition,
 );
 
+typedef _c_isar_filter_link = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> target_collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Pointer<ffi.NativeType> condition,
+  ffi.Uint32 link_index,
+);
+
+typedef _dart_isar_filter_link = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> target_collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Pointer<ffi.NativeType> condition,
+  int link_index,
+);
+
 typedef _c_isar_filter_is_null = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
@@ -1858,22 +1876,6 @@ typedef _dart_isar_link = int Function(
   int target_oid,
 );
 
-typedef _c_isar_link_all_async = ffi.Void Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> txn,
-  ffi.Uint64 link_index,
-  ffi.Pointer<ffi.Int64> ids,
-  ffi.Uint32 ids_length,
-);
-
-typedef _dart_isar_link_all_async = void Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> txn,
-  int link_index,
-  ffi.Pointer<ffi.Int64> ids,
-  int ids_length,
-);
-
 typedef _c_isar_link_unlink = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
@@ -1890,20 +1892,22 @@ typedef _dart_isar_link_unlink = int Function(
   int target_oid,
 );
 
-typedef _c_isar_link_unlink_all_async = ffi.Void Function(
+typedef _c_isar_link_update_all_async = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Uint64 link_index,
   ffi.Pointer<ffi.Int64> ids,
-  ffi.Uint32 ids_length,
+  ffi.Uint32 link_count,
+  ffi.Uint32 unlink_count,
 );
 
-typedef _dart_isar_link_unlink_all_async = void Function(
+typedef _dart_isar_link_update_all_async = void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   int link_index,
   ffi.Pointer<ffi.Int64> ids,
-  int ids_length,
+  int link_count,
+  int unlink_count,
 );
 
 typedef _c_isar_link_replace = ffi.Int32 Function(
