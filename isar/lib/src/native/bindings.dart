@@ -266,6 +266,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     ffi.Pointer<ffi.NativeType> condition,
     int link_index,
+    bool backlink,
   ) {
     return (_isar_filter_link ??=
         _dylib.lookupFunction<_c_isar_filter_link, _dart_isar_filter_link>(
@@ -275,6 +276,7 @@ class IsarCoreBindings {
       filter,
       condition,
       link_index,
+      backlink ? 1 : 0,
     );
   }
 
@@ -642,6 +644,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     int link_index,
+    bool backlink,
     int oid,
     int target_oid,
   ) {
@@ -650,6 +653,7 @@ class IsarCoreBindings {
       collection,
       txn,
       link_index,
+      backlink ? 1 : 0,
       oid,
       target_oid,
     );
@@ -661,6 +665,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     int link_index,
+    bool backlink,
     int oid,
     int target_oid,
   ) {
@@ -670,6 +675,7 @@ class IsarCoreBindings {
       collection,
       txn,
       link_index,
+      backlink ? 1 : 0,
       oid,
       target_oid,
     );
@@ -681,6 +687,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     int link_index,
+    bool backlink,
     int oid,
     ffi.Pointer<ffi.Int64> ids,
     int link_count,
@@ -692,6 +699,7 @@ class IsarCoreBindings {
       collection,
       txn,
       link_index,
+      backlink ? 1 : 0,
       oid,
       ids,
       link_count,
@@ -705,6 +713,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     int link_index,
+    bool backlink,
     int oid,
     int target_oid,
   ) {
@@ -714,6 +723,7 @@ class IsarCoreBindings {
       collection,
       txn,
       link_index,
+      backlink ? 1 : 0,
       oid,
       target_oid,
     );
@@ -725,6 +735,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     int link_index,
+    bool backlink,
     int oid,
     int target_oid,
   ) {
@@ -734,6 +745,7 @@ class IsarCoreBindings {
       collection,
       txn,
       link_index,
+      backlink ? 1 : 0,
       oid,
       target_oid,
     );
@@ -745,6 +757,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     int link_index,
+    bool backlink,
     int oid,
     ffi.Pointer<RawObject> object,
   ) {
@@ -754,6 +767,7 @@ class IsarCoreBindings {
       collection,
       txn,
       link_index,
+      backlink ? 1 : 0,
       oid,
       object,
     );
@@ -765,6 +779,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     int link_index,
+    bool backlink,
     int oid,
     ffi.Pointer<RawObject> object,
   ) {
@@ -774,6 +789,7 @@ class IsarCoreBindings {
       collection,
       txn,
       link_index,
+      backlink ? 1 : 0,
       oid,
       object,
     );
@@ -785,6 +801,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     int link_index,
+    bool backlink,
     int oid,
     ffi.Pointer<RawObjectSet> result,
   ) {
@@ -794,6 +811,7 @@ class IsarCoreBindings {
       collection,
       txn,
       link_index,
+      backlink ? 1 : 0,
       oid,
       result,
     );
@@ -805,6 +823,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     int link_index,
+    bool backlink,
     int oid,
     ffi.Pointer<RawObjectSet> result,
   ) {
@@ -814,6 +833,7 @@ class IsarCoreBindings {
       collection,
       txn,
       link_index,
+      backlink ? 1 : 0,
       oid,
       result,
     );
@@ -1570,6 +1590,7 @@ typedef _c_isar_filter_link = ffi.Int32 Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Pointer<ffi.NativeType> condition,
   ffi.Uint32 link_index,
+  ffi.Uint8 backlink,
 );
 
 typedef _dart_isar_filter_link = int Function(
@@ -1578,6 +1599,7 @@ typedef _dart_isar_filter_link = int Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Pointer<ffi.NativeType> condition,
   int link_index,
+  int backlink,
 );
 
 typedef _c_isar_filter_is_null = ffi.Int32 Function(
@@ -1866,6 +1888,7 @@ typedef _c_isar_link = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Uint64 link_index,
+  ffi.Uint8 backlink,
   ffi.Int64 oid,
   ffi.Int64 target_oid,
 );
@@ -1874,6 +1897,7 @@ typedef _dart_isar_link = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   int link_index,
+  int backlink,
   int oid,
   int target_oid,
 );
@@ -1882,6 +1906,7 @@ typedef _c_isar_link_unlink = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Uint64 link_index,
+  ffi.Uint8 backlink,
   ffi.Int64 oid,
   ffi.Int64 target_oid,
 );
@@ -1890,6 +1915,7 @@ typedef _dart_isar_link_unlink = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   int link_index,
+  int backlink,
   int oid,
   int target_oid,
 );
@@ -1898,6 +1924,7 @@ typedef _c_isar_link_update_all_async = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Uint64 link_index,
+  ffi.Uint8 backlink,
   ffi.Int64 oid,
   ffi.Pointer<ffi.Int64> ids,
   ffi.Uint32 link_count,
@@ -1908,6 +1935,7 @@ typedef _dart_isar_link_update_all_async = void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   int link_index,
+  int backlink,
   int oid,
   ffi.Pointer<ffi.Int64> ids,
   int link_count,
@@ -1918,6 +1946,7 @@ typedef _c_isar_link_replace = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Uint64 link_index,
+  ffi.Uint8 backlink,
   ffi.Int64 oid,
   ffi.Int64 target_oid,
 );
@@ -1926,6 +1955,7 @@ typedef _dart_isar_link_replace = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   int link_index,
+  int backlink,
   int oid,
   int target_oid,
 );
@@ -1934,6 +1964,7 @@ typedef _c_isar_link_replace_async = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Uint64 link_index,
+  ffi.Uint8 backlink,
   ffi.Int64 oid,
   ffi.Int64 target_oid,
 );
@@ -1942,6 +1973,7 @@ typedef _dart_isar_link_replace_async = void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   int link_index,
+  int backlink,
   int oid,
   int target_oid,
 );
@@ -1950,6 +1982,7 @@ typedef _c_isar_link_get_first = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Uint64 link_index,
+  ffi.Uint8 backlink,
   ffi.Int64 oid,
   ffi.Pointer<RawObject> object,
 );
@@ -1958,6 +1991,7 @@ typedef _dart_isar_link_get_first = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   int link_index,
+  int backlink,
   int oid,
   ffi.Pointer<RawObject> object,
 );
@@ -1966,6 +2000,7 @@ typedef _c_isar_link_get_first_async = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Uint64 link_index,
+  ffi.Uint8 backlink,
   ffi.Int64 oid,
   ffi.Pointer<RawObject> object,
 );
@@ -1974,6 +2009,7 @@ typedef _dart_isar_link_get_first_async = void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   int link_index,
+  int backlink,
   int oid,
   ffi.Pointer<RawObject> object,
 );
@@ -1982,6 +2018,7 @@ typedef _c_isar_link_get_all = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Uint64 link_index,
+  ffi.Uint8 backlink,
   ffi.Int64 oid,
   ffi.Pointer<RawObjectSet> result,
 );
@@ -1990,6 +2027,7 @@ typedef _dart_isar_link_get_all = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   int link_index,
+  int backlink,
   int oid,
   ffi.Pointer<RawObjectSet> result,
 );
@@ -1998,6 +2036,7 @@ typedef _c_isar_link_get_all_async = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Uint64 link_index,
+  ffi.Uint8 backlink,
   ffi.Int64 oid,
   ffi.Pointer<RawObjectSet> result,
 );
@@ -2006,6 +2045,7 @@ typedef _dart_isar_link_get_all_async = void Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   int link_index,
+  int backlink,
   int oid,
   ffi.Pointer<RawObjectSet> result,
 );
