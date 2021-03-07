@@ -855,17 +855,16 @@ class IsarCoreBindings {
 
   _dart_isar_qb_create? _isar_qb_create;
 
-  int isar_qb_add_primary_where_clause(
+  int isar_qb_add_id_where_clause(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> builder,
     int lower_oid,
     int upper_oid,
     bool ascending,
   ) {
-    return (_isar_qb_add_primary_where_clause ??= _dylib.lookupFunction<
-            _c_isar_qb_add_primary_where_clause,
-            _dart_isar_qb_add_primary_where_clause>(
-        'isar_qb_add_primary_where_clause'))(
+    return (_isar_qb_add_id_where_clause ??= _dylib.lookupFunction<
+        _c_isar_qb_add_id_where_clause,
+        _dart_isar_qb_add_id_where_clause>('isar_qb_add_id_where_clause'))(
       collection,
       builder,
       lower_oid,
@@ -874,17 +873,18 @@ class IsarCoreBindings {
     );
   }
 
-  _dart_isar_qb_add_primary_where_clause? _isar_qb_add_primary_where_clause;
+  _dart_isar_qb_add_id_where_clause? _isar_qb_add_id_where_clause;
 
-  int isar_qb_add_where_clause(
+  int isar_qb_add_index_where_clause(
     ffi.Pointer<ffi.NativeType> builder,
     ffi.Pointer<ffi.NativeType> where_clause,
     bool include_lower,
     bool include_upper,
   ) {
-    return (_isar_qb_add_where_clause ??= _dylib.lookupFunction<
-        _c_isar_qb_add_where_clause,
-        _dart_isar_qb_add_where_clause>('isar_qb_add_where_clause'))(
+    return (_isar_qb_add_index_where_clause ??= _dylib.lookupFunction<
+            _c_isar_qb_add_index_where_clause,
+            _dart_isar_qb_add_index_where_clause>(
+        'isar_qb_add_index_where_clause'))(
       builder,
       where_clause,
       include_lower ? 1 : 0,
@@ -892,7 +892,7 @@ class IsarCoreBindings {
     );
   }
 
-  _dart_isar_qb_add_where_clause? _isar_qb_add_where_clause;
+  _dart_isar_qb_add_index_where_clause? _isar_qb_add_index_where_clause;
 
   void isar_qb_set_filter(
     ffi.Pointer<ffi.NativeType> builder,
@@ -2062,7 +2062,7 @@ typedef _dart_isar_qb_create = ffi.Pointer<ffi.NativeType> Function(
   ffi.Pointer<ffi.NativeType> collection,
 );
 
-typedef _c_isar_qb_add_primary_where_clause = ffi.Int32 Function(
+typedef _c_isar_qb_add_id_where_clause = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> builder,
   ffi.Int64 lower_oid,
@@ -2070,7 +2070,7 @@ typedef _c_isar_qb_add_primary_where_clause = ffi.Int32 Function(
   ffi.Uint8 ascending,
 );
 
-typedef _dart_isar_qb_add_primary_where_clause = int Function(
+typedef _dart_isar_qb_add_id_where_clause = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> builder,
   int lower_oid,
@@ -2078,14 +2078,14 @@ typedef _dart_isar_qb_add_primary_where_clause = int Function(
   int ascending,
 );
 
-typedef _c_isar_qb_add_where_clause = ffi.Int32 Function(
+typedef _c_isar_qb_add_index_where_clause = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> builder,
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Uint8 include_lower,
   ffi.Uint8 include_upper,
 );
 
-typedef _dart_isar_qb_add_where_clause = int Function(
+typedef _dart_isar_qb_add_index_where_clause = int Function(
   ffi.Pointer<ffi.NativeType> builder,
   ffi.Pointer<ffi.NativeType> where_clause,
   int include_lower,
