@@ -85,7 +85,7 @@ class NativeQuery<OBJ> extends Query<OBJ> {
       try {
         IC.isar_q_delete_async(
           queryPtr,
-          col.collectionPtr,
+          col.ptr,
           txnPtr,
           limit,
           countPtr,
@@ -110,7 +110,7 @@ class NativeQuery<OBJ> extends Query<OBJ> {
       try {
         nCall(IC.isar_q_delete(
           queryPtr,
-          col.collectionPtr,
+          col.ptr,
           txnPtr,
           limit,
           countPtr,
@@ -125,8 +125,8 @@ class NativeQuery<OBJ> extends Query<OBJ> {
   @override
   Stream<List<OBJ>?> watch({bool lazy = true, bool initialReturn = false}) {
     final port = ReceivePort();
-    final handle = IC.isar_watch_query(col.isar.isarPtr, col.collectionPtr,
-        queryPtr, port.sendPort.nativePort);
+    final handle = IC.isar_watch_query(
+        col.isar.isarPtr, col.ptr, queryPtr, port.sendPort.nativePort);
 
     final controller = StreamController(onCancel: () {
       IC.isar_stop_watching(handle);

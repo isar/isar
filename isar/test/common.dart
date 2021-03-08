@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:isar/isar_native.dart';
 import 'package:path/path.dart' as path;
@@ -5,6 +6,8 @@ import 'package:path/path.dart' as path;
 import 'dart:math';
 
 import 'package:test/test.dart';
+
+import 'isar.g.dart';
 
 final random = Random();
 final tempPath = path.join(Directory.current.path, '.dart_tool', 'test', 'tmp');
@@ -39,4 +42,13 @@ Future qEqualSet<T>(Future<Iterable<T>> actual, Iterable<T> target) async {
 
 Future qEqual<T>(Future<Iterable<T>> actual, List<T> target) async {
   expect((await actual).toList(), target);
+}
+
+extension IsarJson on IsarCollection {
+  Future<List<Map<String, dynamic>>> jsonMap() {
+    return exportJson((bytes) {
+      return jsonDecode(Utf8Decoder().convert(bytes))
+          .cast<Map<String, dynamic>>();
+    }, includeLinks: true);
+  }
 }

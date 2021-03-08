@@ -83,7 +83,7 @@ class IsarCodeGenerator extends Builder {
             'final ${oi.collectionVar} = <String, IsarCollection<${oi.dartName}>>{};')
         .join('\n');
     final objectAdapters =
-        objects.map((o) => generateObjectAdapter(o)).join('\n');
+        objects.map((o) => generateObjectAdapter(o, objects)).join('\n');
     final getCollectionExtensions = objects
         .mapIndexed((i, o) => generateGetCollectionExtension(o, i))
         .join('\n');
@@ -229,12 +229,12 @@ class IsarCodeGenerator extends Builder {
       for (var oi in ois)
         {
           'name': oi.isarName,
+          'idProperty': oi.properties.firstWhere((it) => it.isId).isarName,
           'properties': [
             for (var property in oi.properties)
               {
                 'name': property.isarName,
                 'type': property.isarType.typeId,
-                'objectId': property.isObjectId,
               },
           ],
           'indexes': [
@@ -251,6 +251,18 @@ class IsarCodeGenerator extends Builder {
                     }
                 ]
               }
+          ],
+          'links': [
+            for (var link in oi.links) ...[
+              if (!link.backlink)
+                {
+                  'name': link.isarName,
+                  'collection': ois
+                      .firstWhere(
+                          (it) => it.dartName == link.targetCollectionDartName)
+                      .isarName,
+                }
+            ]
           ]
         },
     ];

@@ -22,6 +22,12 @@ _$_ObjectInfo _$_$_ObjectInfoFromJson(Map<String, dynamic> json) {
                 : ObjectIndex.fromJson(e as Map<String, dynamic>))
             ?.toList() ??
         [],
+    links: (json['links'] as List)
+            ?.map((e) => e == null
+                ? null
+                : ObjectLink.fromJson(e as Map<String, dynamic>))
+            ?.toList() ??
+        [],
     converterImports:
         (json['converterImports'] as List)?.map((e) => e as String)?.toList() ??
             [],
@@ -34,6 +40,7 @@ Map<String, dynamic> _$_$_ObjectInfoToJson(_$_ObjectInfo instance) =>
       'isarName': instance.isarName,
       'properties': instance.properties,
       'indexes': instance.indexes,
+      'links': instance.links,
       'converterImports': instance.converterImports,
     };
 
@@ -43,7 +50,7 @@ _$_ObjectProperty _$_$_ObjectPropertyFromJson(Map<String, dynamic> json) {
     isarName: json['isarName'] as String,
     dartType: json['dartType'] as String,
     isarType: _$enumDecodeNullable(_$IsarTypeEnumMap, json['isarType']),
-    isObjectId: json['isObjectId'] as bool,
+    isId: json['isId'] as bool,
     converter: json['converter'] as String,
     nullable: json['nullable'] as bool,
     elementNullable: json['elementNullable'] as bool,
@@ -56,7 +63,7 @@ Map<String, dynamic> _$_$_ObjectPropertyToJson(_$_ObjectProperty instance) =>
       'isarName': instance.isarName,
       'dartType': instance.dartType,
       'isarType': _$IsarTypeEnumMap[instance.isarType],
-      'isObjectId': instance.isObjectId,
+      'isId': instance.isId,
       'converter': instance.converter,
       'nullable': instance.nullable,
       'elementNullable': instance.elementNullable,
@@ -154,4 +161,25 @@ Map<String, dynamic> _$_$_ObjectIndexToJson(_$_ObjectIndex instance) =>
       'properties': instance.properties,
       'unique': instance.unique,
       'replace': instance.replace,
+    };
+
+_$_ObjectLink _$_$_ObjectLinkFromJson(Map<String, dynamic> json) {
+  return _$_ObjectLink(
+    dartName: json['dartName'] as String,
+    isarName: json['isarName'] as String,
+    targetDartName: json['targetDartName'] as String,
+    targetCollectionDartName: json['targetCollectionDartName'] as String,
+    links: json['links'] as bool,
+    backlink: json['backlink'] as bool,
+  );
+}
+
+Map<String, dynamic> _$_$_ObjectLinkToJson(_$_ObjectLink instance) =>
+    <String, dynamic>{
+      'dartName': instance.dartName,
+      'isarName': instance.isarName,
+      'targetDartName': instance.targetDartName,
+      'targetCollectionDartName': instance.targetCollectionDartName,
+      'links': instance.links,
+      'backlink': instance.backlink,
     };

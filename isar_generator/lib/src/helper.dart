@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
@@ -7,8 +9,11 @@ final _ignoreChecker = const TypeChecker.fromRuntime(Ignore);
 final _nameChecker = const TypeChecker.fromRuntime(Name);
 final _indexChecker = const TypeChecker.fromRuntime(Index);
 final _size32Checker = const TypeChecker.fromRuntime(Size32);
-final _oidKeyChecker = const TypeChecker.fromRuntime(ObjectId);
+final _oidKeyChecker = const TypeChecker.fromRuntime(Id);
+final _backlinkChecker = const TypeChecker.fromRuntime(Backlink);
 final _typeConverterChecker = const TypeChecker.fromRuntime(TypeConverter);
+final _dateTimeChecker = const TypeChecker.fromRuntime(DateTime);
+final _uint8ListChecker = const TypeChecker.fromRuntime(Uint8List);
 
 bool hasIgnoreAnn(Element element) {
   return _ignoreChecker.hasAnnotationOfExact(element);
@@ -18,7 +23,7 @@ bool hasSize32Ann(Element element) {
   return _size32Checker.hasAnnotationOfExact(element);
 }
 
-bool hasObjectIdAnn(Element element) {
+bool hasIdAnn(Element element) {
   return _oidKeyChecker.hasAnnotationOfExact(element);
 }
 
@@ -83,6 +88,16 @@ List<Index> getIndexAnns(Element element) {
       caseSensitive: ann.getField('caseSensitive').toBoolValue(),
     );
   }).toList();
+}
+
+bool isDateTime(Element element) => _dateTimeChecker.isExactly(element);
+
+bool isUint8List(Element element) => _uint8ListChecker.isExactly(element);
+
+Backlink getBacklinkAnn(Element element) {
+  var ann = _backlinkChecker.firstAnnotationOfExact(element);
+  if (ann == null) return null;
+  return Backlink(to: ann.getField('to').toStringValue());
 }
 
 void err(String msg, [Element element]) {

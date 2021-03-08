@@ -22,12 +22,14 @@ class _$ObjectInfoTearOff {
       String isarName,
       List<ObjectProperty> properties = const [],
       List<ObjectIndex> indexes = const [],
+      List<ObjectLink> links = const [],
       List<String> converterImports = const []}) {
     return _ObjectInfo(
       dartName: dartName,
       isarName: isarName,
       properties: properties,
       indexes: indexes,
+      links: links,
       converterImports: converterImports,
     );
   }
@@ -48,6 +50,7 @@ mixin _$ObjectInfo {
   String get isarName;
   List<ObjectProperty> get properties;
   List<ObjectIndex> get indexes;
+  List<ObjectLink> get links;
   List<String> get converterImports;
 
   Map<String, dynamic> toJson();
@@ -65,6 +68,7 @@ abstract class $ObjectInfoCopyWith<$Res> {
       String isarName,
       List<ObjectProperty> properties,
       List<ObjectIndex> indexes,
+      List<ObjectLink> links,
       List<String> converterImports});
 }
 
@@ -82,6 +86,7 @@ class _$ObjectInfoCopyWithImpl<$Res> implements $ObjectInfoCopyWith<$Res> {
     Object isarName = freezed,
     Object properties = freezed,
     Object indexes = freezed,
+    Object links = freezed,
     Object converterImports = freezed,
   }) {
     return _then(_value.copyWith(
@@ -92,6 +97,7 @@ class _$ObjectInfoCopyWithImpl<$Res> implements $ObjectInfoCopyWith<$Res> {
           : properties as List<ObjectProperty>,
       indexes:
           indexes == freezed ? _value.indexes : indexes as List<ObjectIndex>,
+      links: links == freezed ? _value.links : links as List<ObjectLink>,
       converterImports: converterImports == freezed
           ? _value.converterImports
           : converterImports as List<String>,
@@ -110,6 +116,7 @@ abstract class _$ObjectInfoCopyWith<$Res> implements $ObjectInfoCopyWith<$Res> {
       String isarName,
       List<ObjectProperty> properties,
       List<ObjectIndex> indexes,
+      List<ObjectLink> links,
       List<String> converterImports});
 }
 
@@ -129,6 +136,7 @@ class __$ObjectInfoCopyWithImpl<$Res> extends _$ObjectInfoCopyWithImpl<$Res>
     Object isarName = freezed,
     Object properties = freezed,
     Object indexes = freezed,
+    Object links = freezed,
     Object converterImports = freezed,
   }) {
     return _then(_ObjectInfo(
@@ -139,6 +147,7 @@ class __$ObjectInfoCopyWithImpl<$Res> extends _$ObjectInfoCopyWithImpl<$Res>
           : properties as List<ObjectProperty>,
       indexes:
           indexes == freezed ? _value.indexes : indexes as List<ObjectIndex>,
+      links: links == freezed ? _value.links : links as List<ObjectLink>,
       converterImports: converterImports == freezed
           ? _value.converterImports
           : converterImports as List<String>,
@@ -155,9 +164,11 @@ class _$_ObjectInfo implements _ObjectInfo {
       this.isarName,
       this.properties = const [],
       this.indexes = const [],
+      this.links = const [],
       this.converterImports = const []})
       : assert(properties != null),
         assert(indexes != null),
+        assert(links != null),
         assert(converterImports != null);
 
   factory _$_ObjectInfo.fromJson(Map<String, dynamic> json) =>
@@ -175,11 +186,14 @@ class _$_ObjectInfo implements _ObjectInfo {
   final List<ObjectIndex> indexes;
   @JsonKey(defaultValue: const [])
   @override
+  final List<ObjectLink> links;
+  @JsonKey(defaultValue: const [])
+  @override
   final List<String> converterImports;
 
   @override
   String toString() {
-    return 'ObjectInfo(dartName: $dartName, isarName: $isarName, properties: $properties, indexes: $indexes, converterImports: $converterImports)';
+    return 'ObjectInfo(dartName: $dartName, isarName: $isarName, properties: $properties, indexes: $indexes, links: $links, converterImports: $converterImports)';
   }
 
   @override
@@ -198,6 +212,8 @@ class _$_ObjectInfo implements _ObjectInfo {
             (identical(other.indexes, indexes) ||
                 const DeepCollectionEquality()
                     .equals(other.indexes, indexes)) &&
+            (identical(other.links, links) ||
+                const DeepCollectionEquality().equals(other.links, links)) &&
             (identical(other.converterImports, converterImports) ||
                 const DeepCollectionEquality()
                     .equals(other.converterImports, converterImports)));
@@ -210,6 +226,7 @@ class _$_ObjectInfo implements _ObjectInfo {
       const DeepCollectionEquality().hash(isarName) ^
       const DeepCollectionEquality().hash(properties) ^
       const DeepCollectionEquality().hash(indexes) ^
+      const DeepCollectionEquality().hash(links) ^
       const DeepCollectionEquality().hash(converterImports);
 
   @JsonKey(ignore: true)
@@ -229,6 +246,7 @@ abstract class _ObjectInfo implements ObjectInfo {
       String isarName,
       List<ObjectProperty> properties,
       List<ObjectIndex> indexes,
+      List<ObjectLink> links,
       List<String> converterImports}) = _$_ObjectInfo;
 
   factory _ObjectInfo.fromJson(Map<String, dynamic> json) =
@@ -242,6 +260,8 @@ abstract class _ObjectInfo implements ObjectInfo {
   List<ObjectProperty> get properties;
   @override
   List<ObjectIndex> get indexes;
+  @override
+  List<ObjectLink> get links;
   @override
   List<String> get converterImports;
   @override
@@ -263,7 +283,7 @@ class _$ObjectPropertyTearOff {
       String isarName,
       String dartType,
       IsarType isarType,
-      bool isObjectId,
+      bool isId,
       String converter,
       bool nullable,
       bool elementNullable}) {
@@ -272,7 +292,7 @@ class _$ObjectPropertyTearOff {
       isarName: isarName,
       dartType: dartType,
       isarType: isarType,
-      isObjectId: isObjectId,
+      isId: isId,
       converter: converter,
       nullable: nullable,
       elementNullable: elementNullable,
@@ -295,7 +315,7 @@ mixin _$ObjectProperty {
   String get isarName;
   String get dartType;
   IsarType get isarType;
-  bool get isObjectId;
+  bool get isId;
   String get converter;
   bool get nullable;
   bool get elementNullable;
@@ -315,7 +335,7 @@ abstract class $ObjectPropertyCopyWith<$Res> {
       String isarName,
       String dartType,
       IsarType isarType,
-      bool isObjectId,
+      bool isId,
       String converter,
       bool nullable,
       bool elementNullable});
@@ -336,7 +356,7 @@ class _$ObjectPropertyCopyWithImpl<$Res>
     Object isarName = freezed,
     Object dartType = freezed,
     Object isarType = freezed,
-    Object isObjectId = freezed,
+    Object isId = freezed,
     Object converter = freezed,
     Object nullable = freezed,
     Object elementNullable = freezed,
@@ -346,8 +366,7 @@ class _$ObjectPropertyCopyWithImpl<$Res>
       isarName: isarName == freezed ? _value.isarName : isarName as String,
       dartType: dartType == freezed ? _value.dartType : dartType as String,
       isarType: isarType == freezed ? _value.isarType : isarType as IsarType,
-      isObjectId:
-          isObjectId == freezed ? _value.isObjectId : isObjectId as bool,
+      isId: isId == freezed ? _value.isId : isId as bool,
       converter: converter == freezed ? _value.converter : converter as String,
       nullable: nullable == freezed ? _value.nullable : nullable as bool,
       elementNullable: elementNullable == freezed
@@ -369,7 +388,7 @@ abstract class _$ObjectPropertyCopyWith<$Res>
       String isarName,
       String dartType,
       IsarType isarType,
-      bool isObjectId,
+      bool isId,
       String converter,
       bool nullable,
       bool elementNullable});
@@ -392,7 +411,7 @@ class __$ObjectPropertyCopyWithImpl<$Res>
     Object isarName = freezed,
     Object dartType = freezed,
     Object isarType = freezed,
-    Object isObjectId = freezed,
+    Object isId = freezed,
     Object converter = freezed,
     Object nullable = freezed,
     Object elementNullable = freezed,
@@ -402,8 +421,7 @@ class __$ObjectPropertyCopyWithImpl<$Res>
       isarName: isarName == freezed ? _value.isarName : isarName as String,
       dartType: dartType == freezed ? _value.dartType : dartType as String,
       isarType: isarType == freezed ? _value.isarType : isarType as IsarType,
-      isObjectId:
-          isObjectId == freezed ? _value.isObjectId : isObjectId as bool,
+      isId: isId == freezed ? _value.isId : isId as bool,
       converter: converter == freezed ? _value.converter : converter as String,
       nullable: nullable == freezed ? _value.nullable : nullable as bool,
       elementNullable: elementNullable == freezed
@@ -422,7 +440,7 @@ class _$_ObjectProperty implements _ObjectProperty {
       this.isarName,
       this.dartType,
       this.isarType,
-      this.isObjectId,
+      this.isId,
       this.converter,
       this.nullable,
       this.elementNullable});
@@ -439,7 +457,7 @@ class _$_ObjectProperty implements _ObjectProperty {
   @override
   final IsarType isarType;
   @override
-  final bool isObjectId;
+  final bool isId;
   @override
   final String converter;
   @override
@@ -449,7 +467,7 @@ class _$_ObjectProperty implements _ObjectProperty {
 
   @override
   String toString() {
-    return 'ObjectProperty(dartName: $dartName, isarName: $isarName, dartType: $dartType, isarType: $isarType, isObjectId: $isObjectId, converter: $converter, nullable: $nullable, elementNullable: $elementNullable)';
+    return 'ObjectProperty(dartName: $dartName, isarName: $isarName, dartType: $dartType, isarType: $isarType, isId: $isId, converter: $converter, nullable: $nullable, elementNullable: $elementNullable)';
   }
 
   @override
@@ -468,9 +486,8 @@ class _$_ObjectProperty implements _ObjectProperty {
             (identical(other.isarType, isarType) ||
                 const DeepCollectionEquality()
                     .equals(other.isarType, isarType)) &&
-            (identical(other.isObjectId, isObjectId) ||
-                const DeepCollectionEquality()
-                    .equals(other.isObjectId, isObjectId)) &&
+            (identical(other.isId, isId) ||
+                const DeepCollectionEquality().equals(other.isId, isId)) &&
             (identical(other.converter, converter) ||
                 const DeepCollectionEquality()
                     .equals(other.converter, converter)) &&
@@ -489,7 +506,7 @@ class _$_ObjectProperty implements _ObjectProperty {
       const DeepCollectionEquality().hash(isarName) ^
       const DeepCollectionEquality().hash(dartType) ^
       const DeepCollectionEquality().hash(isarType) ^
-      const DeepCollectionEquality().hash(isObjectId) ^
+      const DeepCollectionEquality().hash(isId) ^
       const DeepCollectionEquality().hash(converter) ^
       const DeepCollectionEquality().hash(nullable) ^
       const DeepCollectionEquality().hash(elementNullable);
@@ -511,7 +528,7 @@ abstract class _ObjectProperty implements ObjectProperty {
       String isarName,
       String dartType,
       IsarType isarType,
-      bool isObjectId,
+      bool isId,
       String converter,
       bool nullable,
       bool elementNullable}) = _$_ObjectProperty;
@@ -528,7 +545,7 @@ abstract class _ObjectProperty implements ObjectProperty {
   @override
   IsarType get isarType;
   @override
-  bool get isObjectId;
+  bool get isId;
   @override
   String get converter;
   @override
@@ -921,4 +938,257 @@ abstract class _ObjectIndex implements ObjectIndex {
   @override
   @JsonKey(ignore: true)
   _$ObjectIndexCopyWith<_ObjectIndex> get copyWith;
+}
+
+ObjectLink _$ObjectLinkFromJson(Map<String, dynamic> json) {
+  return _ObjectLink.fromJson(json);
+}
+
+/// @nodoc
+class _$ObjectLinkTearOff {
+  const _$ObjectLinkTearOff();
+
+// ignore: unused_element
+  _ObjectLink call(
+      {String dartName,
+      String isarName,
+      String targetDartName,
+      String targetCollectionDartName,
+      bool links,
+      bool backlink}) {
+    return _ObjectLink(
+      dartName: dartName,
+      isarName: isarName,
+      targetDartName: targetDartName,
+      targetCollectionDartName: targetCollectionDartName,
+      links: links,
+      backlink: backlink,
+    );
+  }
+
+// ignore: unused_element
+  ObjectLink fromJson(Map<String, Object> json) {
+    return ObjectLink.fromJson(json);
+  }
+}
+
+/// @nodoc
+// ignore: unused_element
+const $ObjectLink = _$ObjectLinkTearOff();
+
+/// @nodoc
+mixin _$ObjectLink {
+  String get dartName;
+  String get isarName;
+  String get targetDartName;
+  String get targetCollectionDartName;
+  bool get links;
+  bool get backlink;
+
+  Map<String, dynamic> toJson();
+  @JsonKey(ignore: true)
+  $ObjectLinkCopyWith<ObjectLink> get copyWith;
+}
+
+/// @nodoc
+abstract class $ObjectLinkCopyWith<$Res> {
+  factory $ObjectLinkCopyWith(
+          ObjectLink value, $Res Function(ObjectLink) then) =
+      _$ObjectLinkCopyWithImpl<$Res>;
+  $Res call(
+      {String dartName,
+      String isarName,
+      String targetDartName,
+      String targetCollectionDartName,
+      bool links,
+      bool backlink});
+}
+
+/// @nodoc
+class _$ObjectLinkCopyWithImpl<$Res> implements $ObjectLinkCopyWith<$Res> {
+  _$ObjectLinkCopyWithImpl(this._value, this._then);
+
+  final ObjectLink _value;
+  // ignore: unused_field
+  final $Res Function(ObjectLink) _then;
+
+  @override
+  $Res call({
+    Object dartName = freezed,
+    Object isarName = freezed,
+    Object targetDartName = freezed,
+    Object targetCollectionDartName = freezed,
+    Object links = freezed,
+    Object backlink = freezed,
+  }) {
+    return _then(_value.copyWith(
+      dartName: dartName == freezed ? _value.dartName : dartName as String,
+      isarName: isarName == freezed ? _value.isarName : isarName as String,
+      targetDartName: targetDartName == freezed
+          ? _value.targetDartName
+          : targetDartName as String,
+      targetCollectionDartName: targetCollectionDartName == freezed
+          ? _value.targetCollectionDartName
+          : targetCollectionDartName as String,
+      links: links == freezed ? _value.links : links as bool,
+      backlink: backlink == freezed ? _value.backlink : backlink as bool,
+    ));
+  }
+}
+
+/// @nodoc
+abstract class _$ObjectLinkCopyWith<$Res> implements $ObjectLinkCopyWith<$Res> {
+  factory _$ObjectLinkCopyWith(
+          _ObjectLink value, $Res Function(_ObjectLink) then) =
+      __$ObjectLinkCopyWithImpl<$Res>;
+  @override
+  $Res call(
+      {String dartName,
+      String isarName,
+      String targetDartName,
+      String targetCollectionDartName,
+      bool links,
+      bool backlink});
+}
+
+/// @nodoc
+class __$ObjectLinkCopyWithImpl<$Res> extends _$ObjectLinkCopyWithImpl<$Res>
+    implements _$ObjectLinkCopyWith<$Res> {
+  __$ObjectLinkCopyWithImpl(
+      _ObjectLink _value, $Res Function(_ObjectLink) _then)
+      : super(_value, (v) => _then(v as _ObjectLink));
+
+  @override
+  _ObjectLink get _value => super._value as _ObjectLink;
+
+  @override
+  $Res call({
+    Object dartName = freezed,
+    Object isarName = freezed,
+    Object targetDartName = freezed,
+    Object targetCollectionDartName = freezed,
+    Object links = freezed,
+    Object backlink = freezed,
+  }) {
+    return _then(_ObjectLink(
+      dartName: dartName == freezed ? _value.dartName : dartName as String,
+      isarName: isarName == freezed ? _value.isarName : isarName as String,
+      targetDartName: targetDartName == freezed
+          ? _value.targetDartName
+          : targetDartName as String,
+      targetCollectionDartName: targetCollectionDartName == freezed
+          ? _value.targetCollectionDartName
+          : targetCollectionDartName as String,
+      links: links == freezed ? _value.links : links as bool,
+      backlink: backlink == freezed ? _value.backlink : backlink as bool,
+    ));
+  }
+}
+
+@JsonSerializable()
+
+/// @nodoc
+class _$_ObjectLink implements _ObjectLink {
+  const _$_ObjectLink(
+      {this.dartName,
+      this.isarName,
+      this.targetDartName,
+      this.targetCollectionDartName,
+      this.links,
+      this.backlink});
+
+  factory _$_ObjectLink.fromJson(Map<String, dynamic> json) =>
+      _$_$_ObjectLinkFromJson(json);
+
+  @override
+  final String dartName;
+  @override
+  final String isarName;
+  @override
+  final String targetDartName;
+  @override
+  final String targetCollectionDartName;
+  @override
+  final bool links;
+  @override
+  final bool backlink;
+
+  @override
+  String toString() {
+    return 'ObjectLink(dartName: $dartName, isarName: $isarName, targetDartName: $targetDartName, targetCollectionDartName: $targetCollectionDartName, links: $links, backlink: $backlink)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other is _ObjectLink &&
+            (identical(other.dartName, dartName) ||
+                const DeepCollectionEquality()
+                    .equals(other.dartName, dartName)) &&
+            (identical(other.isarName, isarName) ||
+                const DeepCollectionEquality()
+                    .equals(other.isarName, isarName)) &&
+            (identical(other.targetDartName, targetDartName) ||
+                const DeepCollectionEquality()
+                    .equals(other.targetDartName, targetDartName)) &&
+            (identical(
+                    other.targetCollectionDartName, targetCollectionDartName) ||
+                const DeepCollectionEquality().equals(
+                    other.targetCollectionDartName,
+                    targetCollectionDartName)) &&
+            (identical(other.links, links) ||
+                const DeepCollectionEquality().equals(other.links, links)) &&
+            (identical(other.backlink, backlink) ||
+                const DeepCollectionEquality()
+                    .equals(other.backlink, backlink)));
+  }
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(dartName) ^
+      const DeepCollectionEquality().hash(isarName) ^
+      const DeepCollectionEquality().hash(targetDartName) ^
+      const DeepCollectionEquality().hash(targetCollectionDartName) ^
+      const DeepCollectionEquality().hash(links) ^
+      const DeepCollectionEquality().hash(backlink);
+
+  @JsonKey(ignore: true)
+  @override
+  _$ObjectLinkCopyWith<_ObjectLink> get copyWith =>
+      __$ObjectLinkCopyWithImpl<_ObjectLink>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$_$_ObjectLinkToJson(this);
+  }
+}
+
+abstract class _ObjectLink implements ObjectLink {
+  const factory _ObjectLink(
+      {String dartName,
+      String isarName,
+      String targetDartName,
+      String targetCollectionDartName,
+      bool links,
+      bool backlink}) = _$_ObjectLink;
+
+  factory _ObjectLink.fromJson(Map<String, dynamic> json) =
+      _$_ObjectLink.fromJson;
+
+  @override
+  String get dartName;
+  @override
+  String get isarName;
+  @override
+  String get targetDartName;
+  @override
+  String get targetCollectionDartName;
+  @override
+  bool get links;
+  @override
+  bool get backlink;
+  @override
+  @JsonKey(ignore: true)
+  _$ObjectLinkCopyWith<_ObjectLink> get copyWith;
 }

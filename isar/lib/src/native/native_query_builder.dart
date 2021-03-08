@@ -14,8 +14,7 @@ Query<OBJ> buildQuery<OBJ>(
   int? limit,
 ) {
   final col = collection as IsarCollectionImpl<OBJ>;
-  final colPtr = col.collectionPtr;
-  final qbPtr = IC.isar_qb_create(colPtr);
+  final qbPtr = IC.isar_qb_create(col.ptr);
 
   if ((whereDistinct != null || whereAscending != null) &&
       whereClauses.length > 1) {
@@ -23,16 +22,16 @@ Query<OBJ> buildQuery<OBJ>(
   }
 
   for (var whereClause in whereClauses) {
-    _addWhereClause(colPtr, qbPtr, whereClause, whereDistinct, whereAscending);
+    _addWhereClause(col.ptr, qbPtr, whereClause, whereDistinct, whereAscending);
   }
-  final filterPtr = _buildFilter(colPtr, filter);
+  final filterPtr = _buildFilter(col.ptr, filter);
   if (filterPtr != null) {
     IC.isar_qb_set_filter(qbPtr, filterPtr);
   }
 
   IC.isar_qb_set_offset_limit(qbPtr, offset ?? -1, limit ?? -1);
   for (var index in distinctByPropertyIndices) {
-    IC.isar_qb_add_distinct_by(colPtr, qbPtr, index);
+    IC.isar_qb_add_distinct_by(col.ptr, qbPtr, index);
   }
 
   final queryPtr = IC.isar_qb_build(qbPtr);
@@ -42,7 +41,7 @@ Query<OBJ> buildQuery<OBJ>(
 void _addWhereClause(Pointer colPtr, Pointer qbPtr, WhereClause wc,
     bool? distinct, bool? ascending) {
   if (wc.index == null) {
-    nCall(IC.isar_qb_add_primary_where_clause(
+    nCall(IC.isar_qb_add_id_where_clause(
       colPtr,
       qbPtr,
       wc.lower?[0] ?? MIN_OID,
@@ -71,7 +70,7 @@ void _addWhereClause(Pointer colPtr, Pointer qbPtr, WhereClause wc,
       );
     }
 
-    nCall(IC.isar_qb_add_where_clause(
+    nCall(IC.isar_qb_add_index_where_clause(
       qbPtr,
       wcPtrPtr.value,
       wc.includeLower,

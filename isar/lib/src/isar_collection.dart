@@ -27,7 +27,8 @@ abstract class IsarCollection<OBJ> {
 
   Future<void> importJson(Uint8List jsonBytes);
 
-  Future<R> exportJson<R>(bool primitiveNull, R Function(Uint8List) callback);
+  Future<R> exportJson<R>(R Function(Uint8List) callback,
+      {bool primitiveNull = true, bool includeLinks = false});
 
   QueryBuilder<OBJ, QWhere> where({bool? distinct, bool? ascending}) {
     return QueryBuilder(this, distinct, ascending);

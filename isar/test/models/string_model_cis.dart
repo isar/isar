@@ -5,7 +5,7 @@ import 'package:isar_annotation/isar_annotation.dart';
 
 @Collection()
 class StringModelCIS {
-  @ObjectId()
+  @Id()
   int? id;
 
   @Index(indexType: IndexType.hash, caseSensitive: false)

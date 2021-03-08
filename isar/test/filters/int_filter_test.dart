@@ -202,7 +202,6 @@ void main() {
     });
 
     test('.in()', () async {
-      col.exportJson(true, (b) => print(Utf8Decoder().convert(b)));
       /*await qEqual(
         col.where().fieldIn([null, 2, 3]).findAll(),
         [

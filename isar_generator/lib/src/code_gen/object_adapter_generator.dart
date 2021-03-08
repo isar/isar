@@ -1,14 +1,14 @@
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
 
-String generateObjectAdapter(ObjectInfo object) {
+String generateObjectAdapter(ObjectInfo object, List<ObjectInfo> objects) {
   return '''
     class _${object.dartName}Adapter extends TypeAdapter<${object.dartName}> {
 
       ${generateConverterFields(object)}
 
-      ${_generateSerialize(object)}
-      ${_generateDeserialize(object)}
+      ${_generateSerialize(object, objects)}
+      ${_generateDeserialize(object, objects)}
     }
     ''';
 }
@@ -104,10 +104,10 @@ String _generatePrepareSerialize(ObjectInfo object) {
   return code;
 }
 
-String _generateSerialize(ObjectInfo object) {
+String _generateSerialize(ObjectInfo object, List<ObjectInfo> objects) {
   var code = '''
   @override  
-  int serialize(RawObject rawObj, ${object.dartName} object, List<int> offsets, [int? existingBufferSize]) {
+  int serialize(IsarCollectionImpl<${object.dartName}> collection, RawObject rawObj, ${object.dartName} object, List<int> offsets, [int? existingBufferSize]) {
     ${_generatePrepareSerialize(object)}
     late int bufferSize;
     if (existingBufferSize != null) {
@@ -178,16 +178,18 @@ String _generateSerialize(ObjectInfo object) {
     }
   }
 
+  code += _generateAttachLinks(object, objects, false);
+
   return '''
     $code
     return bufferSize;
   }''';
 }
 
-String _generateDeserialize(ObjectInfo object) {
+String _generateDeserialize(ObjectInfo object, List<ObjectInfo> objects) {
   var code = '''
   @override
-  ${object.dartName} deserialize(BinaryReader reader, List<int> offsets) {
+  ${object.dartName} deserialize(IsarCollectionImpl<${object.dartName}> collection, BinaryReader reader, List<int> offsets) {
     final object = ${object.dartName}();''';
   for (var i = 0; i < object.properties.length; i++) {
     final property = object.properties[i];
@@ -247,9 +249,62 @@ String _generateDeserialize(ObjectInfo object) {
     code += '$accessor = ${property.fromIsar(deser, object)};';
   }
 
+  code += _generateAttachLinks(object, objects, true);
+
   return '''
       $code
       return object;
     }
     ''';
+}
+
+String _generateAttachLinks(
+    ObjectInfo object, List<ObjectInfo> objects, bool assignNew) {
+  var code = '';
+  var linkIndex = 0;
+  for (var link in object.links) {
+    String targetColGetter;
+    if (link.targetCollectionDartName != object.dartName) {
+      targetColGetter =
+          'collection.isar.${link.targetCollectionDartName.decapitalize()}s as IsarCollectionImpl<${link.targetCollectionDartName}>';
+    } else {
+      targetColGetter = 'collection';
+    }
+    final type = 'IsarLink${link.links ? 's' : ''}Impl';
+    if (assignNew) {
+      code += 'object.${link.dartName} = $type().';
+    } else {
+      code += '''if (!(object.${link.dartName} as $type).attached) {
+        (object.${link.dartName} as $type)''';
+    }
+    var index = 0;
+    if (link.backlink) {
+      final targetCol = objects
+          .where((it) => it.dartName == link.targetCollectionDartName)
+          .first;
+      var targetIndex = 0;
+      for (var targetLink in targetCol.links) {
+        if (link.targetDartName == targetLink.dartName) {
+          index = targetIndex;
+          break;
+        } else if (!targetLink.backlink) {
+          targetIndex++;
+        }
+      }
+    } else {
+      index = linkIndex++;
+    }
+    code += '''.attach(
+      collection,
+      $targetColGetter,
+      object,
+      $index,
+      ${link.backlink},
+    );
+    ''';
+    if (!assignNew) {
+      code += '}';
+    }
+  }
+  return code;
 }
