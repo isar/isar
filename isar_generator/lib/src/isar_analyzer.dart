@@ -61,48 +61,59 @@ class IsarAnalyzer extends Builder {
     }
 
     final properties = <ObjectProperty>[];
-
+    final links = <ObjectLink>[];
     final converterImports = <String>{};
-
     for (var propertyElement in modelClass.fields) {
+      if (hasIgnoreAnn(propertyElement)) {
+        return null;
+      }
+
       final converter = findTypeConverter(propertyElement);
       if (converter != null) {
         final pathComponents = converter.location.components[0].split('/');
         converterImports.add(pathComponents.sublist(2).join('/'));
       }
 
-      final property = analyzeObjectProperty(propertyElement, converter);
-      if (property == null) continue;
-      properties.add(property);
+      if (propertyElement.type.element.name == 'IsarLink' ||
+          propertyElement.type.element.name == 'IsarLinks') {
+        final link = analyzeObjectLink(propertyElement, converter);
+        if (link == null) continue;
+        links.add(link);
+      } else {
+        final property = analyzeObjectProperty(propertyElement, converter);
+        if (property == null) continue;
+        properties.add(property);
+      }
     }
 
     final indexes = <ObjectIndex>[];
     for (var propertyElement in modelClass.fields) {
+      if (links.any((it) => it.dartName == propertyElement.name)) continue;
       final index = analyzeObjectIndex(properties, propertyElement);
       if (index == null) continue;
       indexes.add(index);
     }
     checkDuplicateIndexes(element, indexes);
 
-    var oidProperty = properties.firstOrNullWhere((it) => it.isObjectId);
+    var oidProperty = properties.firstOrNullWhere((it) => it.isId);
     if (oidProperty == null) {
       for (var i = 0; i < properties.length; i++) {
         final property = properties[i];
         if (property.isarName == 'id' &&
             property.converter == null &&
-            primaryKeyTypes.contains(property.isarType)) {
-          oidProperty = properties[i].copyWith(isObjectId: true);
+            property.isarType == IsarType.Long) {
+          oidProperty = properties[i].copyWith(isId: true);
           properties[i] = oidProperty;
           break;
         }
       }
       if (oidProperty == null) {
-        err('More than one property annotated with @ObjectId().', element);
+        err('More than one property annotated with @Id().', element);
       }
     }
 
     if (oidProperty == null) {
-      err('No property annotated with @ObjectId().', element);
+      err('No property annotated with @Id().', element);
     }
 
     final modelInfo = ObjectInfo(
@@ -110,6 +121,7 @@ class IsarAnalyzer extends Builder {
       isarName: isarName,
       properties: properties,
       indexes: indexes,
+      links: links,
       converterImports: converterImports.toList(),
     );
 
@@ -140,10 +152,6 @@ class IsarAnalyzer extends Builder {
       return null;
     }
 
-    if (hasIgnoreAnn(property)) {
-      return null;
-    }
-
     final nullable = property.type.nullabilitySuffix != NullabilitySuffix.none;
     var elementNullable = false;
     if (property.type is ParameterizedType) {
@@ -170,12 +178,12 @@ class IsarAnalyzer extends Builder {
       isarType = getIsarType(isarDartType, size32, converter);
     }
 
-    final hasOidAnn = hasObjectIdAnn(property);
-    if (hasOidAnn) {
+    final isId = hasIdAnn(property);
+    if (isId) {
       if (converter != null) {
         err('Converters are not allowed for ids.', property);
-      } else if (!primaryKeyTypes.contains(isarType)) {
-        err('Illegal ObjectId type. Allowed: String, Int, Long', property);
+      } else if (isarType != IsarType.Long) {
+        err('Illegal id type. Allowed: String, Int, Long', property);
       }
     }
 
@@ -188,7 +196,7 @@ class IsarAnalyzer extends Builder {
       isarName: isarName,
       dartType: type,
       isarType: isarType,
-      isObjectId: hasOidAnn,
+      isId: isId,
       converter: converter?.name,
       nullable: nullable,
       elementNullable: elementNullable,
@@ -233,18 +241,55 @@ class IsarAnalyzer extends Builder {
           }
         } else if (listType.isDartCoreString) {
           return IsarType.StringList;
-        } else if (listType.element.name == 'DateTime') {
+        } else if (isDateTime(listType.element)) {
           return IsarType.DateTimeList;
         }
       }
-    } else if (type.element.name == 'DateTime') {
+    } else if (isDateTime(type.element)) {
       return IsarType.DateTime;
-    } else if (type.element.name == 'Uint8List') {
+    } else if (isUint8List(type.element)) {
       return IsarType.Bytes;
     }
     err('Property has unsupported type. Use @IsarIgnore to ignore the property.',
         element);
     throw 'unreachable';
+  }
+
+  ObjectLink analyzeObjectLink(FieldElement property, ClassElement converter) {
+    if (!property.isPublic || property.isStatic || hasIgnoreAnn(property)) {
+      return null;
+    }
+
+    if (converter != null) {
+      err('Converters are not supported for links.', property);
+    }
+
+    final isLinks = property.type.element.name == 'IsarLinks';
+
+    final type = property.type as ParameterizedType;
+    if (type.typeArguments == null || type.typeArguments.length != 1) {
+      err('Illegal type arguments for link.', property);
+    }
+    final linkType = type.typeArguments[0];
+    if (linkType.nullabilitySuffix != NullabilitySuffix.none) {
+      err('Links type must not be nullable.', property);
+    }
+
+    final nameAnn = getNameAnn(property);
+    if (nameAnn != null && nameAnn.name.isEmpty) {
+      err('Empty link names are not allowed.', property);
+    }
+    var isarName = nameAnn?.name ?? property.displayName;
+
+    final backlinkAnn = getBacklinkAnn(property);
+    return ObjectLink(
+      dartName: property.displayName,
+      isarName: isarName,
+      targetDartName: backlinkAnn?.to,
+      targetCollectionDartName: linkType.element.name,
+      links: isLinks,
+      backlink: backlinkAnn != null,
+    );
   }
 
   ObjectIndex analyzeObjectIndex(
@@ -259,6 +304,11 @@ class IsarAnalyzer extends Builder {
     }
 
     final index = indexAnns[0];
+
+    if (!index.unique && index.replace) {
+      err('Only unique indexes may replace existing entries', element);
+    }
+
     final indexProperties = <ObjectIndexProperty>[];
     final defaultIndexType = property.isarType == IsarType.String
         ? isar.IndexType.hash
@@ -310,6 +360,7 @@ class IsarAnalyzer extends Builder {
     return ObjectIndex(
       properties: indexProperties,
       unique: index.unique,
+      replace: index.replace,
     );
   }
 

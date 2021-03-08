@@ -5,7 +5,7 @@ import 'package:isar_annotation/isar_annotation.dart';
 
 @Collection()
 class StringModel {
-  @ObjectId()
+  @Id()
   int? id;
 
   @Index(indexType: IndexType.hash)

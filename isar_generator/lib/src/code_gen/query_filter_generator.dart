@@ -2,10 +2,8 @@ import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
 
 String generateQueryFilter(ObjectInfo oi) {
-  var code = '''
-  extension ${oi.dartName}QueryFilter on QueryBuilder<${oi.dartName}, 
-  dynamic, QFilter, dynamic, dynamic, dynamic, dynamic> {
-  ''';
+  var code =
+      'extension ${oi.dartName}QueryFilter on QueryBuilder<${oi.dartName}, QFilterCondition> {';
   for (var i = 0; i < oi.properties.length; i++) {
     final property = oi.properties[i];
     if (property.isarType.isList) {
@@ -21,19 +19,16 @@ String generateQueryFilter(ObjectInfo oi) {
         code += generateStringEndsWith(oi, property, i);
         code += generateStringContains(oi, property, i);
         code += generateStringMatches(oi, property, i);
+      } else if (property.isarType == IsarType.Bool) {
+        code += generateEqualTo(oi, property, i);
       } else {
         if (!property.isarType.isFloatDouble) {
           code += generateEqualTo(oi, property, i);
-          if (property.isarType != IsarType.Bool) {
-            code += generateIn(oi, property, i);
-          }
+          code += generateIn(oi, property, i);
         }
-
-        if (property.isarType != IsarType.Bool) {
-          code += generateGreaterThan(oi, property, i);
-          code += generateLessThan(oi, property, i);
-          code += generateBetween(oi, property, i);
-        }
+        code += generateGreaterThan(oi, property, i);
+        code += generateLessThan(oi, property, i);
+        code += generateBetween(oi, property, i);
       }
     }
   }
@@ -42,13 +37,9 @@ String generateQueryFilter(ObjectInfo oi) {
   }''';
 }
 
-String filterReturn(String type) {
-  return 'QueryBuilder<$type, dynamic, QFilterAfterCond, QCanDistinctBy, QCanOffsetLimit, QCanSort, QCanExecute>';
-}
-
 String generateEqualTo(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}EqualTo(${p.dartType} value) {
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}EqualTo(${p.dartType} value) {
     return addFilterCondition(QueryCondition(
       ConditionType.Eq,
       $pIndex,
@@ -60,22 +51,23 @@ String generateEqualTo(ObjectInfo oi, ObjectProperty p, int pIndex) {
 
 String generateIn(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}In(List<${p.dartType}> values) {
-    var q = beginGroup();
-    for (var i = 0; i < values.length; i++) {
-      if (i == values.length - 1) {
-        return q.${p.dartName.decapitalize()}EqualTo(values[i]).endGroup();
-      } else {
-        q = q.${p.dartName.decapitalize()}EqualTo(values[i]).or();
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}In(List<${p.dartType}> values) {
+    return group((q) {
+      for (var i = 0; i < values.length; i++) {
+        if (i == values.length - 1) {
+          return q.${p.dartName.decapitalize()}EqualTo(values[i]);
+        } else {
+          q = q.${p.dartName.decapitalize()}EqualTo(values[i]).or();
+        }
       }
-    }
-    throw 'Empty values is unsupported.';
+      throw 'Empty values is unsupported.';
+    });
   }''';
 }
 
 String generateGreaterThan(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}GreaterThan(${p.dartType} value, {bool include = false}) {
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}GreaterThan(${p.dartType} value, {bool include = false}) {
     return addFilterCondition(QueryCondition(
       ConditionType.Gt,
       $pIndex,
@@ -88,7 +80,7 @@ String generateGreaterThan(ObjectInfo oi, ObjectProperty p, int pIndex) {
 
 String generateLessThan(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}LessThan(${p.dartType} value, {bool include = false}) {
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}LessThan(${p.dartType} value, {bool include = false}) {
     return addFilterCondition(QueryCondition(
       ConditionType.Lt,
       $pIndex,
@@ -101,7 +93,7 @@ String generateLessThan(ObjectInfo oi, ObjectProperty p, int pIndex) {
 
 String generateBetween(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}Between(${p.dartType} lower, ${p.dartType} upper, {bool includeLower = true, bool includeUpper = true}) {
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}Between(${p.dartType} lower, ${p.dartType} upper, {bool includeLower = true, bool includeUpper = true}) {
     return addFilterCondition(QueryCondition(
       ConditionType.Between,
       $pIndex,
@@ -116,7 +108,7 @@ String generateBetween(ObjectInfo oi, ObjectProperty p, int pIndex) {
 
 String generateIsNull(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}IsNull() {
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}IsNull() {
     return addFilterCondition(QueryCondition(
       ConditionType.Eq,
       $pIndex,
@@ -128,7 +120,7 @@ String generateIsNull(ObjectInfo oi, ObjectProperty p, int pIndex) {
 
 String generateStringEqualTo(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}EqualTo(${p.dartType} value, {bool caseSensitive = true}) {
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}EqualTo(${p.dartType} value, {bool caseSensitive = true}) {
     return addFilterCondition(QueryCondition(
       ConditionType.Eq,
       $pIndex,
@@ -141,22 +133,23 @@ String generateStringEqualTo(ObjectInfo oi, ObjectProperty p, int pIndex) {
 
 String generateStringIn(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}In(List<${p.dartType}> values, {bool caseSensitive = true}) {
-    var q = beginGroup();
-    for (var i = 0; i < values.length; i++) {
-      if (i == values.length - 1) {
-        return q.${p.dartName.decapitalize()}EqualTo(values[i], caseSensitive: caseSensitive).endGroup();
-      } else {
-        q = q.${p.dartName.decapitalize()}EqualTo(values[i], caseSensitive: caseSensitive).or();
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}In(List<${p.dartType}> values, {bool caseSensitive = true}) {
+    return group((q) {
+      for (var i = 0; i < values.length; i++) {
+        if (i == values.length - 1) {
+          return q.${p.dartName.decapitalize()}EqualTo(values[i], caseSensitive: caseSensitive);
+        } else {
+          q = q.${p.dartName.decapitalize()}EqualTo(values[i], caseSensitive: caseSensitive).or();
+        }
       }
-    }
-    throw 'Empty values is unsupported.';
+      throw 'Empty values is unsupported.';
+    });
   }''';
 }
 
 String generateStringStartsWith(ObjectInfo oi, ObjectProperty p, int pIndex) {
   var code = '''
-  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}StartsWith(${p.dartType} value, {bool caseSensitive = true}) {
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}StartsWith(${p.dartType} value, {bool caseSensitive = true}) {
     final convertedValue = ${p.toIsar('value', oi)};''';
   if (p.nullable) {
     code += "assert(convertedValue != null, 'Null values are not allowed');";
@@ -175,7 +168,7 @@ String generateStringStartsWith(ObjectInfo oi, ObjectProperty p, int pIndex) {
 
 String generateStringEndsWith(ObjectInfo oi, ObjectProperty p, int pIndex) {
   var code = '''
-  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}EndsWith(${p.dartType} value, {bool caseSensitive = true}) {
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}EndsWith(${p.dartType} value, {bool caseSensitive = true}) {
     final convertedValue = ${p.toIsar('value', oi)};''';
   if (p.nullable) {
     code += "assert(convertedValue != null, 'Null values are not allowed');";
@@ -194,7 +187,7 @@ String generateStringEndsWith(ObjectInfo oi, ObjectProperty p, int pIndex) {
 
 String generateStringContains(ObjectInfo oi, ObjectProperty p, int pIndex) {
   var code = '''
-  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}Contains(${p.dartType} value, {bool caseSensitive = true}) {
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}Contains(${p.dartType} value, {bool caseSensitive = true}) {
     final convertedValue = ${p.toIsar('value', oi)};''';
   if (p.nullable) {
     code += "assert(convertedValue != null, 'Null values are not allowed');";
@@ -213,7 +206,7 @@ String generateStringContains(ObjectInfo oi, ObjectProperty p, int pIndex) {
 
 String generateStringMatches(ObjectInfo oi, ObjectProperty p, int pIndex) {
   return '''
-  ${filterReturn(oi.dartName)} ${p.dartName.decapitalize()}Matches(String pattern, {bool caseSensitive = true}) {
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}Matches(String pattern, {bool caseSensitive = true}) {
     return addFilterCondition(QueryCondition(
       ConditionType.Matches,
       $pIndex,

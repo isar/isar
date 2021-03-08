@@ -1,38 +1,38 @@
 part of isar;
 
-abstract class IsarCollection<ID, OBJECT> {
-  Future<OBJECT?> get(ID id) => getAll([id]).then((objects) => objects[0]);
+abstract class IsarCollection<OBJ> {
+  Future<OBJ?> get(int id) => getAll([id]).then((objects) => objects[0]);
 
-  OBJECT? getSync(ID id) => getAllSync([id])[0];
+  OBJ? getSync(int id) => getAllSync([id])[0];
 
-  Future<List<OBJECT?>> getAll(List<ID> ids);
+  Future<List<OBJ?>> getAll(List<int> ids);
 
-  List<OBJECT?> getAllSync(List<ID> ids);
+  List<OBJ?> getAllSync(List<int> ids);
 
-  Future<void> put(OBJECT object) => putAll([object]);
+  Future<void> put(OBJ object) => putAll([object]);
 
-  void putSync(OBJECT object) => putAllSync([object]);
+  void putSync(OBJ object) => putAllSync([object]);
 
-  Future<void> putAll(List<OBJECT> objects);
+  Future<void> putAll(List<OBJ> objects);
 
-  void putAllSync(List<OBJECT> objects);
+  void putAllSync(List<OBJ> objects);
 
-  Future<bool> delete(ID id) => deleteAll([id]).then((count) => count == 1);
+  Future<bool> delete(int id) => deleteAll([id]).then((count) => count == 1);
 
-  bool deleteSync(ID id) => deleteAllSync([id]) == 1;
+  bool deleteSync(int id) => deleteAllSync([id]) == 1;
 
-  Future<int> deleteAll(List<ID> ids);
+  Future<int> deleteAll(List<int> ids);
 
-  int deleteAllSync(List<ID> ids);
+  int deleteAllSync(List<int> ids);
 
   Future<void> importJson(Uint8List jsonBytes);
 
-  Future<R> exportJson<R>(bool primitiveNull, R Function(Uint8List) callback);
+  Future<R> exportJson<R>(R Function(Uint8List) callback,
+      {bool primitiveNull = true, bool includeLinks = false});
 
-  QueryBuilder<OBJECT, QNoWhere, QCanFilter, QCanDistinctBy, QCanOffsetLimit,
-      QCanSort, QCanExecute> where({bool? distinct, bool? ascending}) {
+  QueryBuilder<OBJ, QWhere> where({bool? distinct, bool? ascending}) {
     return QueryBuilder(this, distinct, ascending);
   }
 
-  Stream<OBJECT?> watch({ID? id, bool lazy = true});
+  Stream<OBJ?> watch({int? id, bool lazy = true});
 }

@@ -59,33 +59,7 @@ void initializeIsarCore({Map<String, String> dylibs = const {}}) {
   }
 }
 
-const _encoder = Utf8Encoder();
-
 extension RawObjectX on RawObject {
-  set id(dynamic id) {
-    if (id is String) {
-      final bytes = _encoder.convert(id);
-      final ptr = allocate<Uint8>(count: bytes.length);
-      final ptrBytes = ptr.asTypedList(bytes.length);
-      ptrBytes.setAll(0, bytes);
-      oid_str = ptr;
-      oid_str_length = bytes.length;
-      oid_num = 0;
-    } else if (id is int) {
-      oid_num = id;
-      oid_str = Pointer.fromAddress(0);
-      oid_str_length = 0;
-    } else {
-      throw UnimplementedError();
-    }
-  }
-
-  void freeId() {
-    if (oid_str.address != 0) {
-      free(oid_str);
-    }
-  }
-
   void freeData() {
     if (buffer.address != 0) {
       free(buffer);

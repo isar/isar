@@ -39,11 +39,7 @@ void main() {
         await isar.converterModels.put(_converterObject);
       });
 
-      final json = await isar.converterModels.exportJson(false, (bytes) {
-        final str = Utf8Decoder().convert(bytes);
-        return jsonDecode(str);
-      });
-
+      final json = await isar.converterModels.jsonMap();
       expect(json[0], _converterObjectJson);
     });
 

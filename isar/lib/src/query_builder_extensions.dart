@@ -1,106 +1,69 @@
 part of isar;
 
-extension QueryWhereOr<OBJECT> on QueryBuilder<OBJECT, QWhereProperty, dynamic,
-    dynamic, dynamic, dynamic, dynamic> {
-  QueryBuilder<OBJECT, QNoWhere, dynamic, dynamic, dynamic, dynamic, dynamic>
-      or() {
+extension QueryWhereOr<OBJ> on QueryBuilder<OBJ, QWhereOr> {
+  QueryBuilder<OBJ, QWhereClause> or() {
     return copyWith();
   }
 }
 
-extension QueryFilter<OBJECT> on QueryBuilder<OBJECT, dynamic, QCanFilter,
-    dynamic, dynamic, dynamic, dynamic> {
-  QueryBuilder<OBJECT, dynamic, QFilter, dynamic, dynamic, dynamic, dynamic>
-      filter() {
+extension QueryFilter<OBJ> on QueryBuilder<OBJ, QFilter> {
+  QueryBuilder<OBJ, QFilterCondition> filter() {
     return copyWith();
   }
 }
 
-extension QueryFilterAndOr<OBJECT, GROUPS> on QueryBuilder<OBJECT, dynamic,
-    QFilterAfterCond, GROUPS, dynamic, dynamic, dynamic> {
-  QueryBuilder<OBJECT, dynamic, QFilter, dynamic, dynamic, dynamic, dynamic>
-      and() {
+extension QueryFilterAndOr<OBJ> on QueryBuilder<OBJ, QFilterOperator> {
+  QueryBuilder<OBJ, QFilterCondition> and() {
     return andOrInternal(FilterGroupType.And);
   }
 
-  QueryBuilder<OBJECT, dynamic, QFilter, dynamic, dynamic, dynamic, dynamic>
-      or() {
+  QueryBuilder<OBJ, QFilterCondition> or() {
     return andOrInternal(FilterGroupType.Or);
   }
 }
 
-extension QueryFilterNot<OBJECT> on QueryBuilder<OBJECT, dynamic, QFilter,
-    dynamic, dynamic, dynamic, dynamic> {
-  QueryBuilder<OBJECT, dynamic, QFilter, dynamic, dynamic, dynamic, dynamic>
-      not() {
+extension QueryFilterNot<OBJ> on QueryBuilder<OBJ, QFilterCondition> {
+  QueryBuilder<OBJ, QFilterCondition> not() {
     return notInternal();
   }
 }
 
-extension QueryFilterNoGroups<OBJECT> on QueryBuilder<OBJECT, dynamic, QFilter,
-    dynamic, dynamic, dynamic, dynamic> {
-  QueryBuilder<OBJECT, dynamic, QFilter, dynamic, dynamic, dynamic, dynamic>
-      beginGroup() {
-    return beginGroupInternal();
+extension QueryFilterNoGroups<OBJ> on QueryBuilder<OBJ, QFilterCondition> {
+  QueryBuilder<OBJ, QAfterFilterCondition> group(FilterQuery<OBJ> q) {
+    return groupInternal(q);
   }
 }
 
-extension QueryFilterOneGroupsEnd<OBJECT> on QueryBuilder<OBJECT, dynamic,
-    QFilterAfterCond, dynamic, dynamic, dynamic, dynamic> {
-  QueryBuilder<OBJECT, dynamic, QFilterAfterCond, QCanDistinctBy,
-      QCanOffsetLimit, QCanSort, QCanExecute> endGroup() {
-    return endGroupInternal();
-  }
-}
-
-extension QueryOffsetLimit<OBJECT, A, B> on QueryBuilder<OBJECT, dynamic,
-    dynamic, A, QCanOffsetLimit, B, QCanExecute> {
-  QueryBuilder<OBJECT, dynamic, dynamic, A, QCanLimit, B, QCanExecute> offset(
-      int offset) {
-    return copyWith(offset: offset);
-  }
-
-  QueryBuilder<OBJECT, dynamic, dynamic, A, QCanOffset, B, QCanExecute> limit(
-      int limit) {
-    return copyWith(limit: limit);
-  }
-}
-
-extension QueryOffset<OBJECT, A, B>
-    on QueryBuilder<OBJECT, dynamic, dynamic, A, QCanOffset, B, QCanExecute> {
-  QueryBuilder<OBJECT, dynamic, dynamic, A, dynamic, B, QCanExecute> offset(
-      int offset) {
+extension QueryOffset<OBJ> on QueryBuilder<OBJ, QOffset> {
+  QueryBuilder<OBJ, QAfterOffset> offset(int offset) {
     return copyWith(offset: offset);
   }
 }
 
-extension QueryLimit<OBJECT, A, B>
-    on QueryBuilder<OBJECT, dynamic, dynamic, A, QCanOffset, B, QCanExecute> {
-  QueryBuilder<OBJECT, dynamic, dynamic, A, dynamic, B, QCanExecute> limit(
-      int limit) {
+extension QueryLimit<OBJ> on QueryBuilder<OBJ, QLimit> {
+  QueryBuilder<OBJ, QAfterLimit> limit(int limit) {
     return copyWith(limit: limit);
   }
 }
 
-extension QueryExecute<OBJECT> on QueryBuilder<OBJECT, dynamic, dynamic,
-    dynamic, dynamic, dynamic, QCanExecute> {
-  Query<OBJECT> build() {
+extension QueryExecute<OBJ> on QueryBuilder<OBJ, QQueryOperations> {
+  Query<OBJ> build() {
     return buildInternal();
   }
 
-  Future<OBJECT?> findFirst() {
+  Future<OBJ?> findFirst() {
     return build().findFirst();
   }
 
-  OBJECT? findFirstSync() {
+  OBJ? findFirstSync() {
     return build().findFirstSync();
   }
 
-  Future<List<OBJECT>> findAll() {
+  Future<List<OBJ>> findAll() {
     return build().findAll();
   }
 
-  List<OBJECT> findAllSync() {
+  List<OBJ> findAllSync() {
     return build().findAllSync();
   }
 
@@ -128,7 +91,7 @@ extension QueryExecute<OBJECT> on QueryBuilder<OBJECT, dynamic, dynamic,
     return build().deleteAllSync();
   }
 
-  Stream<List<OBJECT>?> watch({bool lazy = true}) {
+  Stream<List<OBJ>?> watch({bool lazy = true}) {
     return build().watch(lazy: lazy);
   }
 }

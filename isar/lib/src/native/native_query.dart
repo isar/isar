@@ -1,20 +1,20 @@
 part of isar_native;
 
-class NativeQuery<OBJECT> extends Query<OBJECT> {
+class NativeQuery<OBJ> extends Query<OBJ> {
   static const MAX_LIMIT = 4294967295;
-  final IsarCollectionImpl<dynamic, OBJECT> col;
+
+  final IsarCollectionImpl<OBJ> col;
   final Pointer<NativeType> queryPtr;
 
   NativeQuery(this.col, this.queryPtr);
 
   @override
-  Future<OBJECT?> findFirst() =>
-      findInternal(MAX_LIMIT).then((value) => value[0]);
+  Future<OBJ?> findFirst() => findInternal(MAX_LIMIT).then((value) => value[0]);
 
   @override
-  Future<List<OBJECT>> findAll() => findInternal(MAX_LIMIT);
+  Future<List<OBJ>> findAll() => findInternal(MAX_LIMIT);
 
-  Future<List<OBJECT>> findInternal(int limit) {
+  Future<List<OBJ>> findInternal(int limit) {
     return col.isar.getTxn(false, (txnPtr, stream) async {
       final resultsPtr = allocate<RawObjectSet>();
       try {
@@ -29,12 +29,12 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   }
 
   @override
-  OBJECT? findFirstSync() => findSyncInternal(1)[0];
+  OBJ? findFirstSync() => findSyncInternal(1)[0];
 
   @override
-  List<OBJECT> findAllSync() => findSyncInternal(MAX_LIMIT);
+  List<OBJ> findAllSync() => findSyncInternal(MAX_LIMIT);
 
-  List<OBJECT> findSyncInternal(int limit) {
+  List<OBJ> findSyncInternal(int limit) {
     return col.isar.getTxnSync(false, (txnPtr) {
       final resultsPtr = allocate<RawObjectSet>();
       try {
@@ -85,7 +85,7 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
       try {
         IC.isar_q_delete_async(
           queryPtr,
-          col.collectionPtr,
+          col.ptr,
           txnPtr,
           limit,
           countPtr,
@@ -110,7 +110,7 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
       try {
         nCall(IC.isar_q_delete(
           queryPtr,
-          col.collectionPtr,
+          col.ptr,
           txnPtr,
           limit,
           countPtr,
@@ -123,10 +123,10 @@ class NativeQuery<OBJECT> extends Query<OBJECT> {
   }
 
   @override
-  Stream<List<OBJECT>?> watch({bool lazy = true, bool initialReturn = false}) {
+  Stream<List<OBJ>?> watch({bool lazy = true, bool initialReturn = false}) {
     final port = ReceivePort();
-    final handle = IC.isar_watch_query(col.isar.isarPtr, col.collectionPtr,
-        queryPtr, port.sendPort.nativePort);
+    final handle = IC.isar_watch_query(
+        col.isar.isarPtr, col.ptr, queryPtr, port.sendPort.nativePort);
 
     final controller = StreamController(onCancel: () {
       IC.isar_stop_watching(handle);

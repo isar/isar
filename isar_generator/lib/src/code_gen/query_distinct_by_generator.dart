@@ -3,13 +3,11 @@ import 'package:dartx/dartx.dart';
 
 String generateDistinctBy(ObjectInfo oi) {
   var code = '''
-  extension ${oi.dartName}QueryWhereDistinct<A, B> on QueryBuilder<${oi.dartName}, 
-    dynamic, dynamic, A, B, QCanSort, dynamic> {''';
+  extension ${oi.dartName}QueryWhereDistinct on QueryBuilder<${oi.dartName}, QDistinct> {''';
   for (var index = 0; index < oi.properties.length; index++) {
     final property = oi.properties[index];
     code += '''
-        QueryBuilder<${oi.dartName}, dynamic, dynamic, QCanDistinctBy, A, B,
-          QCanExecute>distinctBy${property.dartName.capitalize()}() {
+        QueryBuilder<${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}() {
             return addDistinctByInternal($index);
         }''';
   }

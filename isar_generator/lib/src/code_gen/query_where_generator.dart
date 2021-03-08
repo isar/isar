@@ -14,9 +14,8 @@ String generateQueryWhere(ObjectInfo oi) {
     ],
   );
 
-  var code = '''
-  extension ${oi.dartName}QueryWhereSort on QueryBuilder<${oi.dartName}, 
-    QNoWhere, dynamic, dynamic, dynamic, dynamic, dynamic> {''';
+  var code =
+      'extension ${oi.dartName}QueryWhereSort on QueryBuilder<${oi.dartName}, QWhere> {';
 
   for (var i = -1; i < oi.indexes.length; i++) {
     final index = i == -1 ? primaryIndex : oi.indexes[i];
@@ -27,8 +26,8 @@ String generateQueryWhere(ObjectInfo oi) {
 
   code += '''
   }
-  extension ${oi.dartName}QueryWhere on QueryBuilder<${oi.dartName}, 
-    QWhere, dynamic, dynamic, dynamic, dynamic, dynamic> {
+
+  extension ${oi.dartName}QueryWhere on QueryBuilder<${oi.dartName}, QWhereClause> {
   ''';
 
   for (var indexId = -1; indexId < oi.indexes.length; indexId++) {
@@ -132,15 +131,10 @@ String joinPropertiesToTypes(List<ObjectIndexProperty> indexProperties) {
   return '[$types]';
 }
 
-String whereReturn(String type, String whereType) {
-  return 'QueryBuilder<$type, $whereType, QCanFilter, QCanDistinctBy,'
-      'QCanOffsetLimit, QCanSort, QCanExecute>';
-}
-
 String generateAny(int indexId, ObjectIndex index, ObjectInfo oi) {
   final propertiesName = joinPropertiesToName(index.properties);
   return '''
-  ${whereReturn(oi.dartName, 'dynamic')} any${propertiesName.capitalize()}() {
+  QueryBuilder<${oi.dartName}, QAfterWhere> any${propertiesName.capitalize()}() {
     return addWhereClause(WhereClause($indexId, []));
   }
   ''';
@@ -153,7 +147,7 @@ String generateWhereEqualTo(
   final values = joinPropertiesToValues(oi, indexProperties);
   final params = joinPropertiesToParams(indexProperties);
   return '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}EqualTo($params) {
+  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}EqualTo($params) {
     return addWhereClause(WhereClause(
       $indexId,
       $types,
@@ -173,7 +167,7 @@ String generateWhereNotEqualTo(
   final values = joinPropertiesToValues(oi, indexProperties);
   final params = joinPropertiesToParams(indexProperties);
   return '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}NotEqualTo($params) {
+  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}NotEqualTo($params) {
     final cloned = addWhereClause(WhereClause(
       $indexId,
       $types,
@@ -196,7 +190,7 @@ String generateWhereGreaterThan(
   final types = joinPropertiesToTypes([indexProperty]);
   final name = joinPropertiesToName([indexProperty]);
   return '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}GreaterThan(${p.dartType} value, {bool include = false}) {
+  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}GreaterThan(${p.dartType} value, {bool include = false}) {
     return addWhereClause(WhereClause(
       $indexId,
       $types,
@@ -213,7 +207,7 @@ String generateWhereLessThan(
   final types = joinPropertiesToTypes([indexProperty]);
   final name = joinPropertiesToName([indexProperty]);
   return '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}LessThan(${p.dartType} value, {bool include = false}) {
+  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}LessThan(${p.dartType} value, {bool include = false}) {
     return addWhereClause(WhereClause(
       $indexId,
       $types,
@@ -230,7 +224,7 @@ String generateWhereBetween(
   final types = joinPropertiesToTypes([indexProperty]);
   final name = joinPropertiesToName([indexProperty]);
   return '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}Between(${p.dartType} lower, ${p.dartType} upper, {bool includeLower = true, bool includeUpper = true}) {
+  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}Between(${p.dartType} lower, ${p.dartType} upper, {bool includeLower = true, bool includeUpper = true}) {
     return addWhereClause(WhereClause(
       $indexId,
       $types,
@@ -248,7 +242,7 @@ String generateWhereIsNull(
   final types = joinPropertiesToTypes([indexProperty]);
   final name = joinPropertiesToName([indexProperty]);
   return '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}IsNull() {
+  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}IsNull() {
     return addWhereClause(WhereClause(
       $indexId,
       $types,
@@ -266,7 +260,7 @@ String generateWhereIsNotNull(
   final name = joinPropertiesToName([indexProperty]);
   final types = joinPropertiesToTypes([indexProperty]);
   return '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}IsNotNull() {
+  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}IsNotNull() {
     return addWhereClause(WhereClause(
       $indexId,
       $types,
@@ -281,7 +275,7 @@ String generateWhereIn(ObjectInfo oi, ObjectIndexProperty indexProperty) {
   final p = indexProperty.property;
   final name = joinPropertiesToName([indexProperty]);
   return '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}In(List<${p.dartType}> values) {
+  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}In(List<${p.dartType}> values) {
     var q = this;
     for (var i = 0; i < values.length; i++) {
       if (i == values.length - 1) {
@@ -302,7 +296,7 @@ String generateWhereStartsWith(
   final name = joinPropertiesToName([indexProperty]);
   final maxChar = '\\u{FFFFF}';
   var code = '''
-  ${whereReturn(oi.dartName, 'QWhereProperty')} ${name}StartsWith(${p.dartType} value) {
+  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}StartsWith(${p.dartType} value) {
     final convertedValue = ${p.toIsar('value', oi)};
   ''';
   if (indexProperty.property.nullable) {

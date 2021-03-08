@@ -7,7 +7,7 @@ import '../models/long_model.dart';
 void main() {
   group('Long filter', () {
     Isar isar;
-    late IsarCollection<int, LongModel> col;
+    late IsarCollection<LongModel> col;
 
     setUp(() async {
       setupIsar();

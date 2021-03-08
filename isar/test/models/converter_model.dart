@@ -4,7 +4,7 @@ import 'package:isar_annotation/isar_annotation.dart';
 
 @Collection()
 class ConverterModel {
-  @ObjectId()
+  @Id()
   int? id;
 
   @BoolConverter()

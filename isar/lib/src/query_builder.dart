@@ -1,14 +1,19 @@
 import 'package:isar/isar.dart';
 import 'package:isar/isar_native.dart';
 
-class QueryBuilder<OBJECT, WHERE, FILTER, DISTINCT_BY, OFFSET_LIMIT, SORT,
-    EXECUTE> {
-  final IsarCollection<dynamic, OBJECT> _collection;
+typedef FilterQuery<OBJ> = QueryBuilder<OBJ, QAfterFilterCondition> Function(
+    QueryBuilder<OBJ, QFilterCondition> q);
+
+const _NullFilterGroup = FilterGroup();
+
+class QueryBuilder<OBJ, S> {
+  final IsarCollection<OBJ> _collection;
   final List<WhereClause> _whereClauses;
   final bool? _whereDistinct;
   final bool? _whereAscending;
-  final FilterGroup _filter;
-  final List<FilterGroup> _parentFilters;
+  final FilterGroup _filterOr;
+  final FilterGroup? _filterAnd;
+  final bool _filterNot;
   final List<int> _distinctByPropertyIndices;
   final List<SortProperty> _sortByProperties;
   final int? _offset;
@@ -18,15 +23,17 @@ class QueryBuilder<OBJECT, WHERE, FILTER, DISTINCT_BY, OFFSET_LIMIT, SORT,
       : _whereClauses = const [],
         _distinctByPropertyIndices = const [],
         _sortByProperties = const [],
-        _filter = FilterGroup(groupType: FilterGroupType.And, implicit: false),
-        _parentFilters = [],
+        _filterOr = FilterGroup(groupType: FilterGroupType.Or),
+        _filterAnd = null,
+        _filterNot = false,
         _offset = null,
         _limit = null;
 
   QueryBuilder._(
     this._collection,
-    this._filter,
-    this._parentFilters, [
+    this._filterOr,
+    this._filterAnd,
+    this._filterNot, [
     this._whereClauses = const [],
     this._whereDistinct,
     this._whereAscending,
@@ -37,81 +44,86 @@ class QueryBuilder<OBJECT, WHERE, FILTER, DISTINCT_BY, OFFSET_LIMIT, SORT,
   ]);
 }
 
-extension QueryBuilderInternal<OBJECT> on QueryBuilder<OBJECT, dynamic, dynamic,
-    dynamic, dynamic, dynamic, dynamic> {
-  QueryBuilder<OBJECT, B, C, D, E, F, G> addFilterCondition<B, C, D, E, F, G>(
-      QueryCondition cond) {
-    var cloned = copyWith<B, C, D, E, F, G>(
-      filter: _filter.copyWith(conditions: [..._filter.conditions, cond]),
-    );
-    if (cloned._filter.groupType == FilterGroupType.Not) {
-      cloned = cloned.endGroupInternal();
+extension QueryBuilderInternal<OBJ> on QueryBuilder<OBJ, dynamic> {
+  QueryBuilder<OBJ, S> addFilterCondition<S>(QueryOperation cond) {
+    if (_filterNot) {
+      cond = FilterGroup(groupType: FilterGroupType.Not, conditions: [cond]);
     }
-    return cloned;
+
+    if (_filterAnd != null) {
+      return copyWith<S>(
+        filterAnd:
+            _filterAnd!.copyWith(conditions: [..._filterAnd!.conditions, cond]),
+        filterNot: false,
+      );
+    } else {
+      return copyWith<S>(
+        filterOr:
+            _filterOr.copyWith(conditions: [..._filterOr.conditions, cond]),
+        filterNot: false,
+      );
+    }
   }
 
-  QueryBuilder<OBJECT, B, C, D, E, F, G> addWhereClause<B, C, D, E, F, G, H>(
-      WhereClause where) {
+  QueryBuilder<OBJ, S> addWhereClause<S>(WhereClause where) {
     return copyWith(whereClauses: [..._whereClauses, where]);
   }
 
-  QueryBuilder<OBJECT, dynamic, QFilter, dynamic, dynamic, dynamic, dynamic>
-      andOrInternal(FilterGroupType andOr) {
-    if (_filter.groupType == null || _filter.groupType == andOr) {
-      return copyWith(filter: _filter.copyWith(groupType: andOr));
+  QueryBuilder<OBJ, QAfterFilterOperator> andOrInternal(FilterGroupType andOr) {
+    if (andOr == FilterGroupType.And) {
+      if (_filterAnd == null) {
+        return copyWith(
+          filterOr: _filterOr.copyWith(
+            conditions: _filterOr.conditions
+                .sublist(0, _filterOr.conditions.length - 1),
+          ),
+          filterAnd: FilterGroup(
+            groupType: FilterGroupType.And,
+            conditions: [_filterOr.conditions.last],
+          ),
+        );
+      }
+    } else if (_filterAnd != null) {
+      return copyWith(
+        filterOr: _filterOr
+            .copyWith(conditions: [..._filterOr.conditions, _filterAnd!]),
+        filterAnd: null,
+      );
+    }
+    return copyWith();
+  }
+
+  QueryBuilder<OBJ, S> notInternal<S>() {
+    return copyWith(
+      filterNot: !_filterNot,
+    );
+  }
+
+  QueryBuilder<OBJ, QAfterFilterCondition> groupInternal(FilterQuery<OBJ> q) {
+    final qb = q(QueryBuilder(_collection, _whereDistinct, _whereAscending));
+    final qbFinished = qb.andOrInternal(FilterGroupType.Or);
+
+    if (qbFinished._filterOr.conditions.isEmpty) {
+      return copyWith();
+    } else if (qbFinished._filterOr.conditions.length == 1) {
+      return addFilterCondition(qbFinished._filterOr.conditions.first);
     } else {
-      return copyWith(
-        parentFilters: [..._parentFilters, _filter],
-        filter: FilterGroup(implicit: true, groupType: andOr),
-      );
+      return addFilterCondition(qbFinished._filterOr);
     }
   }
 
-  QueryBuilder<OBJECT, dynamic, QFilter, dynamic, dynamic, dynamic, dynamic>
-      notInternal() {
-    return copyWith(
-      parentFilters: [..._parentFilters, _filter],
-      filter: FilterGroup(groupType: FilterGroupType.Not, implicit: true),
-    );
-  }
-
-  QueryBuilder<OBJECT, dynamic, QFilter, QCanDistinctBy, QCanOffsetLimit,
-      QCanSort, QCanExecute> beginGroupInternal<G>() {
-    return copyWith(
-      parentFilters: [..._parentFilters, _filter],
-      filter: FilterGroup(implicit: false),
-    );
-  }
-
-  QueryBuilder<OBJECT, B, C, D, E, F, G> endGroupInternal<B, C, D, E, F, G>() {
-    QueryBuilder<OBJECT, B, C, D, E, F, G> endGroup(QueryBuilder builder) {
-      return copyWith(
-        parentFilters: _parentFilters.sublist(0, _parentFilters.length - 1),
-        filter: _parentFilters.last.copyWith(conditions: [
-          ..._parentFilters.last.conditions,
-          if (_filter.conditions.isNotEmpty) _filter,
-        ]),
-      );
-    }
-
-    var builder = this;
-    while (builder._filter.implicit) {
-      builder = endGroup(builder);
-    }
-    return endGroup(builder);
-  }
-
-  QueryBuilder<OBJECT, B, C, D, E, F, G>
-      addDistinctByInternal<B, C, D, E, F, G>(int propertyIndex) {
+  QueryBuilder<OBJ, QDistinct> addDistinctByInternal(int propertyIndex) {
     return copyWith(distinctByPropertyIndices: [
       ..._distinctByPropertyIndices,
       propertyIndex,
     ]);
   }
 
-  QueryBuilder<OBJECT, B, C, D, E, F, G> copyWith<B, C, D, E, F, G>({
+  QueryBuilder<OBJ, S> copyWith<S>({
     List<WhereClause>? whereClauses,
-    FilterGroup? filter,
+    FilterGroup? filterOr,
+    FilterGroup? filterAnd = _NullFilterGroup,
+    bool? filterNot,
     List<FilterGroup>? parentFilters,
     List<int>? distinctByPropertyIndices,
     List<SortProperty>? sortByProperties,
@@ -122,8 +134,9 @@ extension QueryBuilderInternal<OBJECT> on QueryBuilder<OBJECT, dynamic, dynamic,
     assert(limit == null || limit > 0);
     return QueryBuilder._(
       _collection,
-      filter ?? _filter,
-      parentFilters ?? _parentFilters,
+      filterOr ?? _filterOr,
+      identical(filterAnd, _NullFilterGroup) ? _filterAnd : filterAnd,
+      filterNot ?? _filterNot,
       whereClauses ?? List.unmodifiable(_whereClauses),
       _whereDistinct,
       _whereAscending,
@@ -135,17 +148,22 @@ extension QueryBuilderInternal<OBJECT> on QueryBuilder<OBJECT, dynamic, dynamic,
     );
   }
 
-  Query<OBJECT> buildInternal() {
-    var builder = this;
-    while (builder._parentFilters.isNotEmpty) {
-      builder = builder.endGroupInternal();
+  Query<OBJ> buildInternal() {
+    final builder = andOrInternal(FilterGroupType.Or);
+    FilterGroup? filter;
+    if (builder._filterOr.conditions.length == 1) {
+      final group = builder._filterOr.conditions.first;
+      if (group is FilterGroup) {
+        filter = group;
+      }
     }
+    filter ??= builder._filterOr;
     return buildQuery(
       _collection,
       _whereClauses,
       _whereDistinct,
       _whereAscending,
-      builder._filter,
+      filter,
       _distinctByPropertyIndices,
       _offset,
       _limit,
@@ -243,12 +261,10 @@ enum FilterGroupType {
 class FilterGroup extends QueryOperation {
   final List<QueryOperation> conditions;
   final FilterGroupType? groupType;
-  final bool implicit;
 
   const FilterGroup({
     this.conditions = const [],
     this.groupType,
-    required this.implicit,
   });
 
   @override
@@ -256,7 +272,6 @@ class FilterGroup extends QueryOperation {
     return FilterGroup(
       conditions: conditions.map((e) => e.clone()).toList(),
       groupType: groupType,
-      implicit: implicit,
     );
   }
 
@@ -265,7 +280,6 @@ class FilterGroup extends QueryOperation {
     return FilterGroup(
       conditions: conditions ?? this.conditions.map((e) => e.clone()).toList(),
       groupType: groupType ?? this.groupType,
-      implicit: implicit,
     );
   }
 }
@@ -277,31 +291,68 @@ class SortProperty {
   const SortProperty(this.propertyIndex, this.ascending);
 }
 
-// When where is in progress. Only property conditions are allowed.
-class QWhere {}
+// Right after query starts
+class QWhere
+    implements
+        QWhereClause,
+        QFilter,
+        QSortBy,
+        QDistinct,
+        QOffset,
+        QLimit,
+        QQueryOperations {}
 
-// Before where is started
-class QNoWhere extends QWhere {}
+// No more where conditions are allowed
+class QAfterWhere
+    implements QFilter, QSortBy, QDistinct, QOffset, QLimit, QQueryOperations {}
 
-// Directly after a where property condition.
-class QWhereProperty {}
+class QWhereClause {}
 
-class QCanFilter {}
+class QAfterWhereClause
+    implements
+        QWhereOr,
+        QFilter,
+        QSortBy,
+        QDistinct,
+        QOffset,
+        QLimit,
+        QQueryOperations {}
+
+class QWhereOr {}
 
 class QFilter {}
 
-class QFilterAfterCond extends QFilter {}
+class QFilterCondition {}
 
-class QCanDistinctBy {}
+class QAfterFilterCondition
+    implements
+        QFilterCondition,
+        QFilterOperator,
+        QSortBy,
+        QDistinct,
+        QOffset,
+        QLimit,
+        QQueryOperations {}
 
-class QCanOffsetLimit {}
+class QFilterOperator {}
 
-class QCanOffset {}
+class QAfterFilterOperator implements QFilterCondition {}
 
-class QCanLimit {}
+class QSortBy {}
 
-class QCanSort {}
+class QAfterSortBy
+    implements QSortThenBy, QDistinct, QOffset, QLimit, QQueryOperations {}
 
-class QSorting {}
+class QSortThenBy {}
 
-class QCanExecute {}
+class QDistinct implements QOffset, QLimit, QQueryOperations {}
+
+class QOffset {}
+
+class QAfterOffset implements QLimit, QQueryOperations {}
+
+class QLimit {}
+
+class QAfterLimit implements QQueryOperations {}
+
+class QQueryOperations {}

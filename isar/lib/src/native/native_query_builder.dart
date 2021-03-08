@@ -1,7 +1,10 @@
 part of isar_native;
 
-Query<OBJECT> buildQuery<OBJECT>(
-  IsarCollection<dynamic, OBJECT> collection,
+const MIN_OID = -140737488355328;
+const MAX_OID = 140737488355327;
+
+Query<OBJ> buildQuery<OBJ>(
+  IsarCollection<OBJ> collection,
   List<WhereClause> whereClauses,
   bool? whereDistinct,
   bool? whereAscending,
@@ -10,9 +13,8 @@ Query<OBJECT> buildQuery<OBJECT>(
   int? offset,
   int? limit,
 ) {
-  final col = collection as IsarCollectionImpl<dynamic, OBJECT>;
-  final colPtr = col.collectionPtr;
-  final qbPtr = IC.isar_qb_create(colPtr);
+  final col = collection as IsarCollectionImpl<OBJ>;
+  final qbPtr = IC.isar_qb_create(col.ptr);
 
   if ((whereDistinct != null || whereAscending != null) &&
       whereClauses.length > 1) {
@@ -20,16 +22,16 @@ Query<OBJECT> buildQuery<OBJECT>(
   }
 
   for (var whereClause in whereClauses) {
-    _addWhereClause(colPtr, qbPtr, whereClause, whereDistinct, whereAscending);
+    _addWhereClause(col.ptr, qbPtr, whereClause, whereDistinct, whereAscending);
   }
-  final filterPtr = _buildFilter(colPtr, filter);
+  final filterPtr = _buildFilter(col.ptr, filter);
   if (filterPtr != null) {
     IC.isar_qb_set_filter(qbPtr, filterPtr);
   }
 
   IC.isar_qb_set_offset_limit(qbPtr, offset ?? -1, limit ?? -1);
   for (var index in distinctByPropertyIndices) {
-    IC.isar_qb_add_distinct_by(colPtr, qbPtr, index);
+    IC.isar_qb_add_distinct_by(col.ptr, qbPtr, index);
   }
 
   final queryPtr = IC.isar_qb_build(qbPtr);
@@ -38,34 +40,44 @@ Query<OBJECT> buildQuery<OBJECT>(
 
 void _addWhereClause(Pointer colPtr, Pointer qbPtr, WhereClause wc,
     bool? distinct, bool? ascending) {
-  final wcPtrPtr = allocate<Pointer<NativeType>>();
-  nCall(IC.isar_wc_create(
-    colPtr,
-    wcPtrPtr,
-    wc.index ?? -1,
-    distinct ?? false,
-    ascending ?? true,
-  ));
-  final wcPtr = wcPtrPtr.value;
+  if (wc.index == null) {
+    nCall(IC.isar_qb_add_id_where_clause(
+      colPtr,
+      qbPtr,
+      wc.lower?[0] ?? MIN_OID,
+      wc.upper?[0] ?? MAX_OID,
+      ascending ?? true,
+    ));
+  } else {
+    final wcPtrPtr = allocate<Pointer<NativeType>>();
+    nCall(IC.isar_wc_create(
+      colPtr,
+      wcPtrPtr,
+      wc.index!,
+      distinct ?? false,
+      ascending ?? true,
+    ));
+    final wcPtr = wcPtrPtr.value;
 
-  for (var i = 0; i < wc.types.length; i++) {
-    addWhereValue(
-      wcPtr: wcPtr,
-      type: wc.types[i],
-      lower: wc.lower?[i],
-      upper: wc.upper?[i],
-      lowerUnbound: wc.lower == null,
-      upperUnbound: wc.upper == null,
-    );
+    for (var i = 0; i < wc.types.length; i++) {
+      addWhereValue(
+        wcPtr: wcPtr,
+        type: wc.types[i],
+        lower: wc.lower?[i],
+        upper: wc.upper?[i],
+        lowerUnbound: wc.lower == null,
+        upperUnbound: wc.upper == null,
+      );
+    }
+
+    nCall(IC.isar_qb_add_index_where_clause(
+      qbPtr,
+      wcPtrPtr.value,
+      wc.includeLower,
+      wc.includeUpper,
+    ));
+    free(wcPtrPtr);
   }
-
-  nCall(IC.isar_qb_add_where_clause(
-    qbPtr,
-    wcPtrPtr.value,
-    wc.includeLower,
-    wc.includeUpper,
-  ));
-  free(wcPtrPtr);
 }
 
 void requireEqual(dynamic v1, dynamic v2) {
@@ -247,6 +259,7 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
   final pIndex = condition.propertyIndex;
   final include = condition.includeValue;
   final include2 = condition.includeValue2;
+  print('COND: ${condition.value}');
   switch (condition.conditionType) {
     case ConditionType.Eq:
       if (condition.value == null) {

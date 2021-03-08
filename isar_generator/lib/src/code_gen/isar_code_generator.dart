@@ -80,10 +80,10 @@ class IsarCodeGenerator extends Builder {
 
     final collectionVars = objects
         .map((oi) =>
-            'final ${oi.collectionVar} = <String, IsarCollection<${oi.oidProperty.dartTypeNotNull}, ${oi.dartName}>>{};')
+            'final ${oi.collectionVar} = <String, IsarCollection<${oi.dartName}>>{};')
         .join('\n');
     final objectAdapters =
-        objects.map((o) => generateObjectAdapter(o)).join('\n');
+        objects.map((o) => generateObjectAdapter(o, objects)).join('\n');
     final getCollectionExtensions = objects
         .mapIndexed((i, o) => generateGetCollectionExtension(o, i))
         .join('\n');
@@ -217,7 +217,7 @@ class IsarCodeGenerator extends Builder {
   String generateGetCollectionExtension(ObjectInfo object, int objectIndex) {
     return '''
     extension Get${object.dartName}Collection on Isar {
-      IsarCollection<${object.oidProperty.dartTypeNotNull}, ${object.dartName}> get ${object.dartName.decapitalize()}s {
+      IsarCollection<${object.dartName}> get ${object.dartName.decapitalize()}s {
         return ${object.collectionVar}[path]!;
       }
     }
@@ -229,18 +229,19 @@ class IsarCodeGenerator extends Builder {
       for (var oi in ois)
         {
           'name': oi.isarName,
+          'idProperty': oi.properties.firstWhere((it) => it.isId).isarName,
           'properties': [
             for (var property in oi.properties)
               {
                 'name': property.isarName,
                 'type': property.isarType.typeId,
-                'isObjectId': property.isObjectId,
               },
           ],
           'indexes': [
             for (var index in oi.indexes)
               {
                 'unique': index.unique,
+                'replace': index.replace,
                 'properties': [
                   for (var indexProperty in index.properties)
                     {
@@ -250,6 +251,18 @@ class IsarCodeGenerator extends Builder {
                     }
                 ]
               }
+          ],
+          'links': [
+            for (var link in oi.links) ...[
+              if (!link.backlink)
+                {
+                  'name': link.isarName,
+                  'collection': ois
+                      .firstWhere(
+                          (it) => it.dartName == link.targetCollectionDartName)
+                      .isarName,
+                }
+            ]
           ]
         },
     ];

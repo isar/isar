@@ -7,7 +7,7 @@ import '../models/bool_model.dart';
 void main() {
   group('Bool filter', () {
     Isar isar;
-    late IsarCollection<int, BoolModel> col;
+    late IsarCollection<BoolModel> col;
 
     setUp(() async {
       setupIsar();

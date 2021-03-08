@@ -5,7 +5,7 @@ import 'package:isar_annotation/isar_annotation.dart';
 
 @Collection()
 class DateTimeModel {
-  @ObjectId()
+  @Id()
   int? id;
 
   @Index()

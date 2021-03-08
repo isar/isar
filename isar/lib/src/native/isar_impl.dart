@@ -18,7 +18,8 @@ class IsarImpl extends Isar {
     }
   }
 
-  Future<T> _txn<T>(bool write, Future<T> Function(Isar isar) callback) async {
+  Future<T> _txn<T>(
+      bool write, bool silent, Future<T> Function(Isar isar) callback) async {
     requireNoTxnActive();
 
     final port = ReceivePort();
@@ -26,7 +27,7 @@ class IsarImpl extends Isar {
 
     final txnPtrPtr = allocate<Pointer<NativeType>>();
     IC.isar_txn_begin_async(
-        isarPtr, txnPtrPtr, write, port.sendPort.nativePort);
+        isarPtr, txnPtrPtr, write, silent, port.sendPort.nativePort);
 
     Pointer<NativeType> txnPtr;
     try {
@@ -61,12 +62,13 @@ class IsarImpl extends Isar {
 
   @override
   Future<T> txn<T>(Future<T> Function(Isar isar) callback) {
-    return _txn(false, callback);
+    return _txn(false, false, callback);
   }
 
   @override
-  Future<T> writeTxn<T>(Future<T> Function(Isar isar) callback) {
-    return _txn(true, callback);
+  Future<T> writeTxn<T>(Future<T> Function(Isar isar) callback,
+      {bool silent = false}) {
+    return _txn(true, silent, callback);
   }
 
   Future<T> getTxn<T>(bool write,
@@ -78,7 +80,7 @@ class IsarImpl extends Isar {
       }
       return callback(currentTxn, Zone.current[zoneTxnStream]);
     } else if (!write) {
-      return _txn(write, (isar) {
+      return _txn(false, false, (isar) {
         return callback(Zone.current[zoneTxn], Zone.current[zoneTxnStream]);
       });
     } else {
@@ -86,11 +88,11 @@ class IsarImpl extends Isar {
     }
   }
 
-  T _txnSync<T>(bool write, T Function(Isar isar) callback) {
+  T _txnSync<T>(bool write, bool silent, T Function(Isar isar) callback) {
     requireNoTxnActive();
 
     var txnPtr = IsarCoreUtils.syncTxnPtr;
-    nCall(IC.isar_txn_begin(isarPtr, txnPtr, write));
+    nCall(IC.isar_txn_begin(isarPtr, txnPtr, write, silent));
     var txn = txnPtr.value;
     _currentTxnSync = txn;
     _currentTxnSyncWrite = write;
@@ -112,12 +114,12 @@ class IsarImpl extends Isar {
 
   @override
   T txnSync<T>(T Function(Isar isar) callback) {
-    return _txnSync(false, callback);
+    return _txnSync(false, false, callback);
   }
 
   @override
-  T writeTxnSync<T>(T Function(Isar isar) callback) {
-    return _txnSync(true, callback);
+  T writeTxnSync<T>(T Function(Isar isar) callback, {bool silent = false}) {
+    return _txnSync(true, silent, callback);
   }
 
   T getTxnSync<T>(bool write, T Function(Pointer txn) callback) {
@@ -127,7 +129,7 @@ class IsarImpl extends Isar {
       }
       return callback(_currentTxnSync!);
     } else if (!write) {
-      return _txnSync(write, (isar) => callback(_currentTxnSync!));
+      return _txnSync(false, false, (isar) => callback(_currentTxnSync!));
     } else {
       throw 'Write operations require an explicit transaction.';
     }

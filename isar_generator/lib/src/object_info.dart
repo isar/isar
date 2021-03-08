@@ -13,6 +13,7 @@ abstract class ObjectInfo with _$ObjectInfo {
     String isarName,
     @Default([]) List<ObjectProperty> properties,
     @Default([]) List<ObjectIndex> indexes,
+    @Default([]) List<ObjectLink> links,
     @Default([]) List<String> converterImports,
   }) = _ObjectInfo;
 
@@ -25,8 +26,7 @@ extension ObjectInfoX on ObjectInfo {
     return properties.filter((it) => it.isarName == isarName).first;
   }
 
-  ObjectProperty get oidProperty =>
-      properties.firstWhere((it) => it.isObjectId);
+  ObjectProperty get oidProperty => properties.firstWhere((it) => it.isId);
 
   int get staticSize {
     return properties.sumBy((p) => p.isarType.staticSize).toInt() + 2;
@@ -44,7 +44,7 @@ abstract class ObjectProperty with _$ObjectProperty {
     String isarName,
     String dartType,
     IsarType isarType,
-    bool isObjectId,
+    bool isId,
     String converter,
     bool nullable,
     bool elementNullable,
@@ -93,10 +93,26 @@ abstract class ObjectIndex with _$ObjectIndex {
   const factory ObjectIndex({
     List<ObjectIndexProperty> properties,
     bool unique,
+    bool replace,
   }) = _ObjectIndex;
 
   factory ObjectIndex.fromJson(Map<String, dynamic> json) =>
       _$ObjectIndexFromJson(json);
+}
+
+@freezed
+abstract class ObjectLink with _$ObjectLink {
+  const factory ObjectLink({
+    String dartName,
+    String isarName,
+    String targetDartName,
+    String targetCollectionDartName,
+    bool links,
+    bool backlink,
+  }) = _ObjectLink;
+
+  factory ObjectLink.fromJson(Map<String, dynamic> json) =>
+      _$ObjectLinkFromJson(json);
 }
 
 enum IsarType {

@@ -11,6 +11,8 @@ class Index {
 
   final bool unique;
 
+  final bool replace;
+
   final IndexType? indexType;
 
   final bool? caseSensitive;
@@ -18,6 +20,7 @@ class Index {
   const Index({
     this.composite = const [],
     this.unique = false,
+    this.replace = false,
     this.indexType,
     this.caseSensitive,
   });

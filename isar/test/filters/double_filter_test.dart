@@ -7,7 +7,7 @@ import '../models/double_model.dart';
 void main() {
   group('Double filter', () {
     Isar isar;
-    late IsarCollection<int, DoubleModel> col;
+    late IsarCollection<DoubleModel> col;
 
     setUp(() async {
       setupIsar();

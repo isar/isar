@@ -62,11 +62,9 @@ dev_dependencies:
 ```dart
 @Collection()
 class Post {
+  int? id; // auto increment id
 
-  @ObjectId() // implicit unique index
-  String id;
-
-  @Index(stringType: StringIndexType.words, caseSensitive: false) // Search index
+  @Index(indexType: IndexType.words, caseSensitive: false) // Search index
   String title;
 
   List<String> comments
@@ -103,13 +101,12 @@ final isar = await openIsar();
 
 final databasePosts = isar.posts
   .where()
-  .titleWordBeginsWith('dAtAb') // use search index
+  .titleWordBeginsWith('DaTAb') // use case insensitive search index
   .limit(10)
   .findAll()
 
 final postsWithFirstCommentOrTitle = isar.posts
   .where()
-  .sortedById() // use implicit ObjectId index
   .filter()
   .commentsAnyEqualTo('first', caseSensitive: false)
   .or()
