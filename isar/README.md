@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/hivedb/hive/actions">
+  <a href="https://github.com/isar/isar/actions/workflows/test.yml">
     <img src="https://img.shields.io/github/workflow/status/isar/isar/Dart%20CI/main?label=tests&labelColor=333940&logo=github">
   </a>
   <a href="https://pub.dev/packages/isar">
@@ -38,12 +38,12 @@
 - ⚡️ **Launch your app instantly** no matter how much data you have
 - 📈 **Highly scalable** from hundreds to tens of thousands of records
 - 😎 **Lazy loaded**. Only load data when you need it
-- 🔎 **Full text search**. Make searching fast and fun
+- 🔎 **Full-text search**. Make searching fast and fun
 - 📱 **Multiplatform**. iOS, Android, Desktop and the web (soon™)
 - 💙 **Made for Flutter.** Easily use it in your Flutter app
 - 🧪 **ACID semantics**. Rely on consistency
 - ⏱ **Asynchronous.** Parallel query operations & multi-isolate support
-- ⚠️ **Static typing** with compile time checked and autocompleted queries
+- ⚠️ **Static typing** with compile-time checked and autocompleted queries
 
 ### Add to pubspec.yaml
 
@@ -94,7 +94,7 @@ await isar.writeTxn((isar) {
 
 ## Queries
 
-Isar has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()` and `or()` groups and sort the results. 
+Isar has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()` and `or()` groups and sort the results.
 
 ```dart
 final isar = await openIsar();
@@ -116,8 +116,8 @@ final postsWithFirstCommentOrTitle = isar.posts
 
 ## Watchers
 
-With Isar you can watch Collections, Objects or Queries. A watcher is notified after a transactions commits succesfully and the target actually changes.
-Watchers can be lazy and not reload the data or they can be non-lazy and fetch the new results in background.
+With Isar, you can watch Collections, Objects, or Queries. A watcher is notified after a transaction commits successfully and the target actually changes.
+Watchers can be lazy and not reload the data or they can be non-lazy and fetch new results in the background.
 
 ```dart
 Stream<void> collectionStream = isar.posts.watch(lazy: true);
@@ -129,7 +129,7 @@ queryStream.listen((newResult) {
 })
 ```
 
-### Licence
+### License
 
 ```
 Copyright 2021 Simon Leier
