@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/hivedb/hive/actions">
+  <a href="https://github.com/isar/isar/actions/workflows/test.yml">
     <img src="https://img.shields.io/github/workflow/status/isar/isar/Dart%20CI/main?label=tests&labelColor=333940&logo=github">
   </a>
   <a href="https://pub.dev/packages/isar">
