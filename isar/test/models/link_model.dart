@@ -1,63 +1,63 @@
 import 'package:isar/isar.dart';
 
 @Collection()
-class LinkModel {
+class LinkModelA {
   int? id;
 
   late String name;
 
-  var selfLink = IsarLink<LinkModel>();
+  var selfLink = IsarLink<LinkModelA>();
 
-  var otherLink = IsarLink<LinkModel2>();
+  var otherLink = IsarLink<LinkModelB>();
 
-  var selfLinks = IsarLinks<LinkModel>();
+  var selfLinks = IsarLinks<LinkModelA>();
 
-  var otherLinks = IsarLinks<LinkModel2>();
+  var otherLinks = IsarLinks<LinkModelB>();
 
   @Backlink(to: 'selfLink')
-  var selfLinkBacklink = IsarLinks<LinkModel>();
+  var selfLinkBacklink = IsarLinks<LinkModelA>();
 
   @Backlink(to: 'selfLinks')
-  var selfLinksBacklink = IsarLinks<LinkModel>();
+  var selfLinksBacklink = IsarLinks<LinkModelA>();
 
-  LinkModel();
+  LinkModelA();
 
-  LinkModel.name(this.name);
+  LinkModelA.name(this.name);
 
   @override
   String toString() {
-    return 'LinkModel($name)';
+    return 'LinkModelA($name)';
   }
 
   @override
   operator ==(Object other) {
-    return other is LinkModel && other.name == name;
+    return other is LinkModelA && other.name == name;
   }
 }
 
 @Collection()
-class LinkModel2 {
+class LinkModelB {
   int? id;
 
   late String name;
 
   @Backlink(to: 'otherLink')
-  var linkBacklinks = IsarLinks<LinkModel>();
+  var linkBacklinks = IsarLinks<LinkModelA>();
 
   @Backlink(to: 'otherLinks')
-  var linksBacklinks = IsarLinks<LinkModel>();
+  var linksBacklinks = IsarLinks<LinkModelA>();
 
-  LinkModel2();
+  LinkModelB();
 
-  LinkModel2.name(this.name);
+  LinkModelB.name(this.name);
 
   @override
   String toString() {
-    return 'LinkModel2($name)';
+    return 'LinkModelB($name)';
   }
 
   @override
   operator ==(Object other) {
-    return other is LinkModel2 && other.name == name;
+    return other is LinkModelB && other.name == name;
   }
 }

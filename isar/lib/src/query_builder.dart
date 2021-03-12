@@ -112,6 +112,33 @@ extension QueryBuilderInternal<OBJ> on QueryBuilder<OBJ, dynamic> {
     }
   }
 
+  QueryBuilder<OBJ, QAfterFilterCondition> linkInternal<T>(
+      IsarCollection<T> targetCollection,
+      FilterQuery<T> q,
+      int linkIndex,
+      bool backlink) {
+    final qb = q(QueryBuilder(targetCollection, false, true));
+    final qbFinished = qb.andOrInternal(FilterGroupType.Or);
+
+    final conditions = qbFinished._filterOr.conditions;
+    if (conditions.isEmpty) {
+      return copyWith();
+    }
+
+    QueryOperation filter;
+    if (conditions.length == 1) {
+      filter = conditions[0];
+    } else {
+      filter = qbFinished._filterOr;
+    }
+    return addFilterCondition(LinkOperation(
+      targetCollection,
+      filter,
+      linkIndex,
+      backlink,
+    ));
+  }
+
   QueryBuilder<OBJ, QDistinct> addDistinctByInternal(int propertyIndex) {
     return copyWith(distinctByPropertyIndices: [
       ..._distinctByPropertyIndices,
@@ -169,6 +196,8 @@ extension QueryBuilderInternal<OBJ> on QueryBuilder<OBJ, dynamic> {
       _limit,
     );
   }
+
+  Isar get isar => _collection.isar;
 }
 
 class WhereClause {
@@ -289,6 +318,21 @@ class SortProperty {
   final bool ascending;
 
   const SortProperty(this.propertyIndex, this.ascending);
+}
+
+class LinkOperation extends QueryOperation {
+  final IsarCollection targetCollection;
+  final QueryOperation filter;
+  final int linkIndex;
+  final bool backlink;
+
+  const LinkOperation(
+      this.targetCollection, this.filter, this.linkIndex, this.backlink);
+
+  @override
+  QueryOperation clone() {
+    return LinkOperation(targetCollection, filter, linkIndex, backlink);
+  }
 }
 
 // Right after query starts

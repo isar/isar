@@ -6,114 +6,114 @@ import 'isar.g.dart';
 import 'models/link_model.dart';
 
 void main() {
-  group('CRUD', () {
+  group('Links', () {
     late Isar isar;
-    late IsarCollection<LinkModel> linkModels;
-    late IsarCollection<LinkModel2> linkModel2s;
+    late IsarCollection<LinkModelA> linksA;
+    late IsarCollection<LinkModelB> linksB;
 
     setUp(() async {
       setupIsar();
 
       final dir = await getTempDir();
       isar = await openIsar(directory: dir.path);
-      linkModels = isar.linkModels;
-      linkModel2s = isar.linkModel2s;
+      linksA = isar.linkModelAs;
+      linksB = isar.linkModelBs;
     });
 
     test('add self link', () async {
-      final linkedModel = LinkModel.name('linked');
+      final linkedModel = LinkModelA.name('linked');
       await isar.writeTxn((isar) async {
-        await linkModels.put(linkedModel);
+        await linksA.put(linkedModel);
       });
 
-      final model = LinkModel.name('model');
+      final model = LinkModelA.name('model');
       model.selfLink.value = linkedModel;
       await isar.writeTxn((isar) async {
-        await linkModels.put(model);
+        await linksA.put(model);
         await model.selfLink.save();
       });
 
       model.selfLink.value = null;
       await model.selfLink.load();
-      expect(model.selfLink.value, LinkModel.name('linked'));
+      expect(model.selfLink.value, LinkModelA.name('linked'));
 
       await linkedModel.selfLinkBacklink.load();
-      expect(linkedModel.selfLinkBacklink, {LinkModel.name('model')});
+      expect(linkedModel.selfLinkBacklink, {LinkModelA.name('model')});
     });
 
     test('add other link', () async {
-      final linkedModel = LinkModel2.name('linked');
+      final linkedModel = LinkModelB.name('linked');
       await isar.writeTxn((isar) async {
-        await linkModel2s.put(linkedModel);
+        await linksB.put(linkedModel);
       });
 
-      final model = LinkModel.name('model');
+      final model = LinkModelA.name('model');
       model.otherLink.value = linkedModel;
       await isar.writeTxn((isar) async {
-        await linkModels.put(model);
+        await linksA.put(model);
         await model.otherLink.save();
       });
 
       model.otherLink.value = null;
       await model.otherLink.load();
-      expect(model.otherLink.value, LinkModel2.name('linked'));
+      expect(model.otherLink.value, LinkModelB.name('linked'));
 
       await linkedModel.linkBacklinks.load();
-      expect(linkedModel.linkBacklinks, {LinkModel.name('model')});
+      expect(linkedModel.linkBacklinks, {LinkModelA.name('model')});
     });
 
     test('add self links', () async {
-      final linkedModel1 = LinkModel.name('linked1');
-      final linkedModel2 = LinkModel.name('linked2');
+      final linkedModel1 = LinkModelA.name('linked1');
+      final linkedModel2 = LinkModelA.name('linked2');
       await isar.writeTxn((isar) async {
-        await linkModels.put(linkedModel1);
-        await linkModels.put(linkedModel2);
+        await linksA.put(linkedModel1);
+        await linksA.put(linkedModel2);
       });
 
-      final model = LinkModel.name('model');
+      final model = LinkModelA.name('model');
       model.selfLinks.add(linkedModel1);
       model.selfLinks.add(linkedModel2);
       await isar.writeTxn((isar) async {
-        await linkModels.put(model);
+        await linksA.put(model);
         await model.selfLinks.saveChanges();
       });
 
       model.selfLinks.clear();
       await model.selfLinks.load();
       expect(model.selfLinks,
-          {LinkModel.name('linked1'), LinkModel.name('linked2')});
+          {LinkModelA.name('linked1'), LinkModelA.name('linked2')});
 
       await linkedModel1.selfLinksBacklink.load();
-      expect(linkedModel1.selfLinksBacklink, {LinkModel.name('model')});
+      expect(linkedModel1.selfLinksBacklink, {LinkModelA.name('model')});
       await linkedModel2.selfLinksBacklink.load();
-      expect(linkedModel2.selfLinksBacklink, {LinkModel.name('model')});
+      expect(linkedModel2.selfLinksBacklink, {LinkModelA.name('model')});
     });
 
     test('add other links', () async {
-      final linkedModel1 = LinkModel2.name('linked1');
-      final linkedModel2 = LinkModel2.name('linked2');
+      final linkedModel1 = LinkModelB.name('linked1');
+      final linkedModel2 = LinkModelB.name('linked2');
       await isar.writeTxn((isar) async {
-        await linkModel2s.put(linkedModel1);
-        await linkModel2s.put(linkedModel2);
+        await linksB.put(linkedModel1);
+        await linksB.put(linkedModel2);
       });
 
-      final model = LinkModel.name('model');
+      final model = LinkModelA.name('model');
       model.otherLinks.add(linkedModel1);
       model.otherLinks.add(linkedModel2);
       await isar.writeTxn((isar) async {
-        await linkModels.put(model);
+        await linksA.put(model);
         await model.otherLinks.saveChanges();
       });
 
       model.otherLinks.clear();
       await model.otherLinks.load();
       expect(model.otherLinks,
-          {LinkModel2.name('linked1'), LinkModel2.name('linked2')});
+          {LinkModelB.name('linked1'), LinkModelB.name('linked2')});
 
       await linkedModel1.linksBacklinks.load();
-      expect(linkedModel1.linksBacklinks, {LinkModel.name('model')});
+      expect(linkedModel1.linksBacklinks, {LinkModelA.name('model')});
       await linkedModel2.linksBacklinks.load();
-      expect(linkedModel2.linksBacklinks, {LinkModel.name('model')});
+      expect(linkedModel2.linksBacklinks, {LinkModelA.name('model')});
     });
   });
 }

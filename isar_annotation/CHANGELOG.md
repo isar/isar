@@ -1,3 +1,7 @@
+## 0.1.0
+- Rename `@ObjectId` to `@Id`
+- `@Backlink` annotation
+
 ## 0.0.4
 - String index type
 - `CompositeIndex`

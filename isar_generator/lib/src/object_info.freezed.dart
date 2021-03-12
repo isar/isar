@@ -955,7 +955,8 @@ class _$ObjectLinkTearOff {
       String targetDartName,
       String targetCollectionDartName,
       bool links,
-      bool backlink}) {
+      bool backlink,
+      int linkIndex}) {
     return _ObjectLink(
       dartName: dartName,
       isarName: isarName,
@@ -963,6 +964,7 @@ class _$ObjectLinkTearOff {
       targetCollectionDartName: targetCollectionDartName,
       links: links,
       backlink: backlink,
+      linkIndex: linkIndex,
     );
   }
 
@@ -984,6 +986,7 @@ mixin _$ObjectLink {
   String get targetCollectionDartName;
   bool get links;
   bool get backlink;
+  int get linkIndex;
 
   Map<String, dynamic> toJson();
   @JsonKey(ignore: true)
@@ -1001,7 +1004,8 @@ abstract class $ObjectLinkCopyWith<$Res> {
       String targetDartName,
       String targetCollectionDartName,
       bool links,
-      bool backlink});
+      bool backlink,
+      int linkIndex});
 }
 
 /// @nodoc
@@ -1020,6 +1024,7 @@ class _$ObjectLinkCopyWithImpl<$Res> implements $ObjectLinkCopyWith<$Res> {
     Object targetCollectionDartName = freezed,
     Object links = freezed,
     Object backlink = freezed,
+    Object linkIndex = freezed,
   }) {
     return _then(_value.copyWith(
       dartName: dartName == freezed ? _value.dartName : dartName as String,
@@ -1032,6 +1037,7 @@ class _$ObjectLinkCopyWithImpl<$Res> implements $ObjectLinkCopyWith<$Res> {
           : targetCollectionDartName as String,
       links: links == freezed ? _value.links : links as bool,
       backlink: backlink == freezed ? _value.backlink : backlink as bool,
+      linkIndex: linkIndex == freezed ? _value.linkIndex : linkIndex as int,
     ));
   }
 }
@@ -1048,7 +1054,8 @@ abstract class _$ObjectLinkCopyWith<$Res> implements $ObjectLinkCopyWith<$Res> {
       String targetDartName,
       String targetCollectionDartName,
       bool links,
-      bool backlink});
+      bool backlink,
+      int linkIndex});
 }
 
 /// @nodoc
@@ -1069,6 +1076,7 @@ class __$ObjectLinkCopyWithImpl<$Res> extends _$ObjectLinkCopyWithImpl<$Res>
     Object targetCollectionDartName = freezed,
     Object links = freezed,
     Object backlink = freezed,
+    Object linkIndex = freezed,
   }) {
     return _then(_ObjectLink(
       dartName: dartName == freezed ? _value.dartName : dartName as String,
@@ -1081,6 +1089,7 @@ class __$ObjectLinkCopyWithImpl<$Res> extends _$ObjectLinkCopyWithImpl<$Res>
           : targetCollectionDartName as String,
       links: links == freezed ? _value.links : links as bool,
       backlink: backlink == freezed ? _value.backlink : backlink as bool,
+      linkIndex: linkIndex == freezed ? _value.linkIndex : linkIndex as int,
     ));
   }
 }
@@ -1095,7 +1104,8 @@ class _$_ObjectLink implements _ObjectLink {
       this.targetDartName,
       this.targetCollectionDartName,
       this.links,
-      this.backlink});
+      this.backlink,
+      this.linkIndex});
 
   factory _$_ObjectLink.fromJson(Map<String, dynamic> json) =>
       _$_$_ObjectLinkFromJson(json);
@@ -1112,10 +1122,12 @@ class _$_ObjectLink implements _ObjectLink {
   final bool links;
   @override
   final bool backlink;
+  @override
+  final int linkIndex;
 
   @override
   String toString() {
-    return 'ObjectLink(dartName: $dartName, isarName: $isarName, targetDartName: $targetDartName, targetCollectionDartName: $targetCollectionDartName, links: $links, backlink: $backlink)';
+    return 'ObjectLink(dartName: $dartName, isarName: $isarName, targetDartName: $targetDartName, targetCollectionDartName: $targetCollectionDartName, links: $links, backlink: $backlink, linkIndex: $linkIndex)';
   }
 
   @override
@@ -1140,7 +1152,10 @@ class _$_ObjectLink implements _ObjectLink {
                 const DeepCollectionEquality().equals(other.links, links)) &&
             (identical(other.backlink, backlink) ||
                 const DeepCollectionEquality()
-                    .equals(other.backlink, backlink)));
+                    .equals(other.backlink, backlink)) &&
+            (identical(other.linkIndex, linkIndex) ||
+                const DeepCollectionEquality()
+                    .equals(other.linkIndex, linkIndex)));
   }
 
   @override
@@ -1151,7 +1166,8 @@ class _$_ObjectLink implements _ObjectLink {
       const DeepCollectionEquality().hash(targetDartName) ^
       const DeepCollectionEquality().hash(targetCollectionDartName) ^
       const DeepCollectionEquality().hash(links) ^
-      const DeepCollectionEquality().hash(backlink);
+      const DeepCollectionEquality().hash(backlink) ^
+      const DeepCollectionEquality().hash(linkIndex);
 
   @JsonKey(ignore: true)
   @override
@@ -1171,7 +1187,8 @@ abstract class _ObjectLink implements ObjectLink {
       String targetDartName,
       String targetCollectionDartName,
       bool links,
-      bool backlink}) = _$_ObjectLink;
+      bool backlink,
+      int linkIndex}) = _$_ObjectLink;
 
   factory _ObjectLink.fromJson(Map<String, dynamic> json) =
       _$_ObjectLink.fromJson;
@@ -1188,6 +1205,8 @@ abstract class _ObjectLink implements ObjectLink {
   bool get links;
   @override
   bool get backlink;
+  @override
+  int get linkIndex;
   @override
   @JsonKey(ignore: true)
   _$ObjectLinkCopyWith<_ObjectLink> get copyWith;

@@ -5,6 +5,7 @@ import 'package:dart_style/dart_style.dart';
 import 'package:glob/glob.dart';
 import 'package:isar_generator/src/code_gen/object_adapter_generator.dart';
 import 'package:isar_generator/src/code_gen/query_distinct_by_generator.dart';
+import 'package:isar_generator/src/code_gen/query_link_generator.dart';
 import 'package:isar_generator/src/code_gen/query_sort_by_generator.dart';
 import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
@@ -56,15 +57,41 @@ class IsarCodeGenerator extends Builder {
         .replaceFirst('test/', '')
         .replaceAll('.isarobject.json', '.dart'));
 
-    var objects = files.values.flatten().toList();
+    var rawObjects = files.values.flatten().toList();
 
-    for (var m in objects) {
-      for (var m2 in objects) {
+    for (var m in rawObjects) {
+      for (var m2 in rawObjects) {
         if (m != m2 && m.isarName == m2.isarName) {
           err('There are two objects with the same name: "${m.isarName}"');
         }
       }
     }
+
+    final objects = rawObjects.map((object) {
+      final links = <ObjectLink>[];
+      var linkIndex = 0;
+      for (var link in object.links) {
+        var index = 0;
+        if (link.backlink) {
+          final targetCol = rawObjects
+              .where((it) => it.dartName == link.targetCollectionDartName)
+              .first;
+          var targetIndex = 0;
+          for (var targetLink in targetCol.links) {
+            if (link.targetDartName == targetLink.dartName) {
+              index = targetIndex;
+              break;
+            } else if (!targetLink.backlink) {
+              targetIndex++;
+            }
+          }
+        } else {
+          index = linkIndex++;
+        }
+        links.add(link.copyWith(linkIndex: index));
+      }
+      return object.copyWith(links: links);
+    }).toList();
 
     var imports = {
       ...IsarCodeGenerator.imports,
@@ -83,7 +110,7 @@ class IsarCodeGenerator extends Builder {
             'final ${oi.collectionVar} = <String, IsarCollection<${oi.dartName}>>{};')
         .join('\n');
     final objectAdapters =
-        objects.map((o) => generateObjectAdapter(o, objects)).join('\n');
+        objects.map((o) => generateObjectAdapter(o)).join('\n');
     final getCollectionExtensions = objects
         .mapIndexed((i, o) => generateGetCollectionExtension(o, i))
         .join('\n');
@@ -91,6 +118,8 @@ class IsarCodeGenerator extends Builder {
         objects.map((o) => generateQueryWhere(o)).join('\n');
     final queryFilterExtensions =
         objects.map((o) => generateQueryFilter(o)).join('\n');
+    final queryLinkExtensions =
+        objects.map((o) => generateQueryLinks(o, objects)).join('\n');
     final querySortByExtensions =
         objects.map((o) => generateSortBy(o)).join('\n');
     final queryDistinctByExtensions =
@@ -118,6 +147,7 @@ class IsarCodeGenerator extends Builder {
 
     $queryWhereExtensions
     $queryFilterExtensions
+    $queryLinkExtensions
     $querySortByExtensions
     $queryDistinctByExtensions
     ''';

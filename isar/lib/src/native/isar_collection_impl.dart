@@ -1,7 +1,9 @@
 part of isar_native;
 
 class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
+  @override
   final IsarImpl isar;
+
   final TypeAdapter<OBJ> _adapter;
   final Pointer ptr;
   final List<int> propertyOffsets;

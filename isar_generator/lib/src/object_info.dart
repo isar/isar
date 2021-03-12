@@ -35,6 +35,8 @@ extension ObjectInfoX on ObjectInfo {
   String get adapterName => '_${dartName}Adapter';
 
   String get collectionVar => '_${dartName.decapitalize()}Collection';
+
+  String get collectionAccessor => '${dartName.decapitalize()}s';
 }
 
 @freezed
@@ -109,6 +111,7 @@ abstract class ObjectLink with _$ObjectLink {
     String targetCollectionDartName,
     bool links,
     bool backlink,
+    int linkIndex,
   }) = _ObjectLink;
 
   factory ObjectLink.fromJson(Map<String, dynamic> json) =>

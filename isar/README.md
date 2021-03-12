@@ -50,7 +50,7 @@
 ```yaml
 dependencies:
   isar: any
-  isar_flutter: any # contains the binaries
+  isar_flutter_libs: any # contains the binaries
 
 dev_dependencies:
   isar_generator: any
@@ -112,6 +112,20 @@ final postsWithFirstCommentOrTitle = isar.posts
   .or()
   .titleEqualTo('first')
   .findAll();
+```
+
+## Links
+
+You can easily define relationships between objects. In Isar they are called links and backlinks:
+
+```dart
+class Person {
+  String name;
+
+  IsarLink<Person> mother;
+
+  IsarLinks<Pet> pets;
+}
 ```
 
 ## Watchers

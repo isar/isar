@@ -1,14 +1,14 @@
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
 
-String generateObjectAdapter(ObjectInfo object, List<ObjectInfo> objects) {
+String generateObjectAdapter(ObjectInfo object) {
   return '''
     class _${object.dartName}Adapter extends TypeAdapter<${object.dartName}> {
 
       ${generateConverterFields(object)}
 
-      ${_generateSerialize(object, objects)}
-      ${_generateDeserialize(object, objects)}
+      ${_generateSerialize(object)}
+      ${_generateDeserialize(object)}
     }
     ''';
 }
@@ -104,7 +104,7 @@ String _generatePrepareSerialize(ObjectInfo object) {
   return code;
 }
 
-String _generateSerialize(ObjectInfo object, List<ObjectInfo> objects) {
+String _generateSerialize(ObjectInfo object) {
   var code = '''
   @override  
   int serialize(IsarCollectionImpl<${object.dartName}> collection, RawObject rawObj, ${object.dartName} object, List<int> offsets, [int? existingBufferSize]) {
@@ -178,7 +178,7 @@ String _generateSerialize(ObjectInfo object, List<ObjectInfo> objects) {
     }
   }
 
-  code += _generateAttachLinks(object, objects, false);
+  code += _generateAttachLinks(object, false);
 
   return '''
     $code
@@ -186,7 +186,7 @@ String _generateSerialize(ObjectInfo object, List<ObjectInfo> objects) {
   }''';
 }
 
-String _generateDeserialize(ObjectInfo object, List<ObjectInfo> objects) {
+String _generateDeserialize(ObjectInfo object) {
   var code = '''
   @override
   ${object.dartName} deserialize(IsarCollectionImpl<${object.dartName}> collection, BinaryReader reader, List<int> offsets) {
@@ -249,7 +249,7 @@ String _generateDeserialize(ObjectInfo object, List<ObjectInfo> objects) {
     code += '$accessor = ${property.fromIsar(deser, object)};';
   }
 
-  code += _generateAttachLinks(object, objects, true);
+  code += _generateAttachLinks(object, true);
 
   return '''
       $code
@@ -258,10 +258,8 @@ String _generateDeserialize(ObjectInfo object, List<ObjectInfo> objects) {
     ''';
 }
 
-String _generateAttachLinks(
-    ObjectInfo object, List<ObjectInfo> objects, bool assignNew) {
+String _generateAttachLinks(ObjectInfo object, bool assignNew) {
   var code = '';
-  var linkIndex = 0;
   for (var link in object.links) {
     String targetColGetter;
     if (link.targetCollectionDartName != object.dartName) {
@@ -277,28 +275,11 @@ String _generateAttachLinks(
       code += '''if (!(object.${link.dartName} as $type).attached) {
         (object.${link.dartName} as $type)''';
     }
-    var index = 0;
-    if (link.backlink) {
-      final targetCol = objects
-          .where((it) => it.dartName == link.targetCollectionDartName)
-          .first;
-      var targetIndex = 0;
-      for (var targetLink in targetCol.links) {
-        if (link.targetDartName == targetLink.dartName) {
-          index = targetIndex;
-          break;
-        } else if (!targetLink.backlink) {
-          targetIndex++;
-        }
-      }
-    } else {
-      index = linkIndex++;
-    }
     code += '''.attach(
       collection,
       $targetColGetter,
       object,
-      $index,
+      ${link.linkIndex},
       ${link.backlink},
     );
     ''';

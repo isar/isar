@@ -171,6 +171,7 @@ _$_ObjectLink _$_$_ObjectLinkFromJson(Map<String, dynamic> json) {
     targetCollectionDartName: json['targetCollectionDartName'] as String,
     links: json['links'] as bool,
     backlink: json['backlink'] as bool,
+    linkIndex: json['linkIndex'] as int,
   );
 }
 
@@ -182,4 +183,5 @@ Map<String, dynamic> _$_$_ObjectLinkToJson(_$_ObjectLink instance) =>
       'targetCollectionDartName': instance.targetCollectionDartName,
       'links': instance.links,
       'backlink': instance.backlink,
+      'linkIndex': instance.linkIndex,
     };

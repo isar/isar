@@ -210,15 +210,19 @@ void addWhereValue({
   }
 }
 
-Pointer<NativeType>? _buildFilter(Pointer colPtr, FilterGroup filter) {
-  final builtConditions = filter.conditions
-      .map((op) {
-        if (op is FilterGroup) {
-          return _buildFilter(colPtr, op);
-        } else if (op is QueryCondition) {
-          return _buildCondition(colPtr, op);
-        }
-      })
+Pointer<NativeType>? _buildFilter(Pointer colPtr, QueryOperation filter) {
+  if (filter is FilterGroup) {
+    return _buildFilterGroup(colPtr, filter);
+  } else if (filter is LinkOperation) {
+    return _buildLink(colPtr, filter);
+  } else {
+    return _buildCondition(colPtr, filter as QueryCondition);
+  }
+}
+
+Pointer<NativeType>? _buildFilterGroup(Pointer colPtr, FilterGroup group) {
+  final builtConditions = group.conditions
+      .map((op) => _buildFilter(colPtr, op))
       .where((it) => it != null)
       .toList();
 
@@ -234,7 +238,7 @@ Pointer<NativeType>? _buildFilter(Pointer colPtr, FilterGroup filter) {
   }
 
   final filterPtrPtr = allocate<Pointer<NativeType>>();
-  if (filter.groupType == FilterGroupType.Not) {
+  if (group.groupType == FilterGroupType.Not) {
     nCall(IC.isar_filter_not(
       filterPtrPtr,
       conditionsPtrPtr.elementAt(0),
@@ -242,9 +246,9 @@ Pointer<NativeType>? _buildFilter(Pointer colPtr, FilterGroup filter) {
   } else {
     nCall(IC.isar_filter_and_or(
       filterPtrPtr,
-      filter.groupType == FilterGroupType.And,
+      group.groupType == FilterGroupType.And,
       conditionsPtrPtr,
-      filter.conditions.length,
+      group.conditions.length,
     ));
   }
 
@@ -254,12 +258,43 @@ Pointer<NativeType>? _buildFilter(Pointer colPtr, FilterGroup filter) {
   return filterPtr;
 }
 
+Pointer<NativeType>? _buildLink(Pointer colPtr, LinkOperation link) {
+  final condition = _buildFilter(colPtr, link.filter);
+  if (condition == null) return null;
+
+  final targetCol = link.targetCollection as IsarCollectionImpl;
+  final filterPtrPtr = allocate<Pointer<NativeType>>();
+
+  if (link.backlink) {
+    nCall(IC.isar_filter_link(
+      targetCol.ptr,
+      colPtr,
+      filterPtrPtr,
+      condition,
+      link.linkIndex,
+      true,
+    ));
+  } else {
+    nCall(IC.isar_filter_link(
+      colPtr,
+      targetCol.ptr,
+      filterPtrPtr,
+      condition,
+      link.linkIndex,
+      false,
+    ));
+  }
+
+  final filterPtr = filterPtrPtr.value;
+  free(filterPtrPtr);
+  return filterPtr;
+}
+
 Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
   final filterPtrPtr = allocate<Pointer<Pointer<NativeType>>>();
   final pIndex = condition.propertyIndex;
   final include = condition.includeValue;
   final include2 = condition.includeValue2;
-  print('COND: ${condition.value}');
   switch (condition.conditionType) {
     case ConditionType.Eq:
       if (condition.value == null) {

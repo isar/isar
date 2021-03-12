@@ -21,14 +21,14 @@ class IsarAnalyzer extends Builder {
     if (!await resolver.isLibrary(buildStep.inputId)) return;
     final libReader = LibraryReader(await buildStep.inputLibrary);
 
-    var models = libReader
+    final objectsJson = libReader
         .annotatedWith(_annotationChecker)
         .map((e) => generateObjectInfo(e.element).toJson())
         .toList();
 
-    if (models.isEmpty) return;
+    if (objectsJson.isEmpty) return;
 
-    var json = JsonEncoder().convert(models);
+    final json = JsonEncoder().convert(objectsJson);
     await buildStep.writeAsString(
         buildStep.inputId.changeExtension('.isarobject.json'), json);
   }

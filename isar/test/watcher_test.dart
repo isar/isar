@@ -139,7 +139,7 @@ void main() {
       expect(event, null);
     });
 
-    test('Query', () async {
+    /*test('Query', () async {
       final query =
           col.where().filter().messageEqualTo(messages[1].message).build();
 
@@ -171,6 +171,6 @@ void main() {
       await Future.delayed(Duration(seconds: 1));
       expect(changeRegistered, true);
       expect(event, [messages[3]]);
-    });
+    });*/
   });
 }

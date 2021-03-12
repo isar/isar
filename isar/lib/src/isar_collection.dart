@@ -1,6 +1,8 @@
 part of isar;
 
 abstract class IsarCollection<OBJ> {
+  Isar get isar;
+
   Future<OBJ?> get(int id) => getAll([id]).then((objects) => objects[0]);
 
   OBJ? getSync(int id) => getAllSync([id])[0];

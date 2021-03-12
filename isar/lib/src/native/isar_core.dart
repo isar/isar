@@ -53,7 +53,7 @@ void initializeIsarCore({Map<String, String> dylibs = const {}}) {
     print(e);
     throw IsarError(
         'Could not initialize IsarCore library. If you create a Flutter app, '
-        'make sure to add isar_flutter to your dependencies. Isar does not '
+        'make sure to add isar_flutter_libs to your dependencies. Isar does not '
         'support 32-bit processors so make sure that your device / emulator '
         'has a 64-bit processor.');
   }
