@@ -54,7 +54,7 @@ dependencies:
 
 dev_dependencies:
   isar_generator: any
-  build_runnder: any
+  build_runner: any
 ```
 
 
