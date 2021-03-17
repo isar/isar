@@ -70,8 +70,7 @@ class IsarAnalyzer extends Builder {
 
       final converter = findTypeConverter(propertyElement);
       if (converter != null) {
-        final pathComponents = converter.location.components[0].split('/');
-        converterImports.add(pathComponents.sublist(2).join('/'));
+        converterImports.add(converter.location.components[0]);
       }
 
       if (propertyElement.type.element.name == 'IsarLink' ||
