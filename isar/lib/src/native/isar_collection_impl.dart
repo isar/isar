@@ -36,9 +36,9 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   Pointer<RawObjectSet> allocRawObjSet(int length) {
-    final rawObjSetPtr = allocate<RawObjectSet>();
+    final rawObjSetPtr = malloc<RawObjectSet>();
     final rawObjSet = rawObjSetPtr.ref;
-    final objectsPtr = allocate<RawObject>(count: length);
+    final objectsPtr = malloc<RawObject>(length);
     rawObjSet.objects = objectsPtr;
     rawObjSet.length = length;
     return rawObjSetPtr;
@@ -67,8 +67,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         }
         return objects;
       } finally {
-        free(objectsPtr);
-        free(rawObjSetPtr);
+        malloc.free(objectsPtr);
+        malloc.free(rawObjSetPtr);
       }
     });
   }
@@ -76,7 +76,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   List<OBJ?> getAllSync(List<int> ids) {
     return isar.getTxnSync(false, (txnPtr) {
-      final rawObjPtr = allocate<RawObject>();
+      final rawObjPtr = malloc<RawObject>();
       final rawObj = rawObjPtr.ref;
 
       try {
@@ -92,7 +92,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         }
         return objects;
       } finally {
-        free(rawObjPtr);
+        malloc.free(rawObjPtr);
       }
     });
   }
@@ -123,8 +123,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
           final rawObj = rawObjPtr.ref;
           rawObj.freeData();
         }
-        free(objectsPtr);
-        free(rawObjSetPtr);
+        malloc.free(objectsPtr);
+        malloc.free(rawObjSetPtr);
       }
     });
   }
@@ -152,16 +152,16 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<int> deleteAll(List<int> ids) {
     return isar.getTxn(true, (txnPtr, stream) async {
-      final countPtr = allocate<Uint32>();
-      final idsPtr = allocate<Int64>(count: ids.length);
+      final countPtr = malloc<Uint32>();
+      final idsPtr = malloc<Int64>(ids.length);
       idsPtr.asTypedList(ids.length).setAll(0, ids);
       IC.isar_delete_all_async(ptr, txnPtr, idsPtr, ids.length, countPtr);
       try {
         await stream.first;
         return countPtr.value;
       } finally {
-        free(countPtr);
-        free(idsPtr);
+        malloc.free(countPtr);
+        malloc.free(idsPtr);
       }
     });
   }
@@ -169,7 +169,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   int deleteAllSync(List<int> ids) {
     return isar.getTxnSync(true, (txnPtr) {
-      final deletedPtr = allocate<Uint8>();
+      final deletedPtr = malloc<Uint8>();
       try {
         var counter = 0;
         for (var id in ids) {
@@ -180,7 +180,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         }
         return counter;
       } finally {
-        free(deletedPtr);
+        malloc.free(deletedPtr);
       }
     });
   }
@@ -188,14 +188,14 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<void> importJson(Uint8List jsonBytes) {
     return isar.getTxn(true, (txnPtr, stream) async {
-      final bytesPtr = allocate<Uint8>(count: jsonBytes.length);
+      final bytesPtr = malloc<Uint8>(jsonBytes.length);
       bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
       IC.isar_json_import_async(ptr, txnPtr, bytesPtr, jsonBytes.length);
 
       try {
         await stream.first;
       } finally {
-        free(bytesPtr);
+        malloc.free(bytesPtr);
       }
     });
   }
@@ -204,8 +204,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   Future<R> exportJson<R>(R Function(Uint8List) callback,
       {bool primitiveNull = true, bool includeLinks = false}) {
     return isar.getTxn(false, (txnPtr, stream) async {
-      final bytesPtrPtr = allocate<Pointer<Uint8>>();
-      final lengthPtr = allocate<Uint32>();
+      final bytesPtrPtr = malloc<Pointer<Uint8>>();
+      final lengthPtr = malloc<Uint32>();
       IC.isar_json_export_async(
           ptr, txnPtr, primitiveNull, includeLinks, bytesPtrPtr, lengthPtr);
 
@@ -215,8 +215,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         return callback(bytes);
       } finally {
         IC.isar_free_json(bytesPtrPtr.value, lengthPtr.value);
-        free(bytesPtrPtr);
-        free(lengthPtr);
+        malloc.free(bytesPtrPtr);
+        malloc.free(lengthPtr);
       }
     });
   }
@@ -243,12 +243,12 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   Stream<OBJ?> _watchObject(int id, {bool lazy = true}) {
-    final rawObjPtr = allocate<RawObject>();
+    final rawObjPtr = malloc<RawObject>();
 
     final port = ReceivePort();
     final handle =
         IC.isar_watch_object(isar.isarPtr, ptr, id, port.sendPort.nativePort);
-    free(rawObjPtr);
+    malloc.free(rawObjPtr);
 
     final controller = StreamController(onCancel: () {
       IC.isar_stop_watching(handle);

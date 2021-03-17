@@ -24,8 +24,8 @@ const nullDouble = minDouble;
 final nullDate = minDate;
 
 class IsarCoreUtils {
-  static final syncTxnPtr = allocate<Pointer>();
-  static final syncRawObjPtr = allocate<RawObject>();
+  static final syncTxnPtr = malloc<Pointer>();
+  static final syncRawObjPtr = malloc<RawObject>();
 }
 
 IsarCoreBindings? _IC;
@@ -38,8 +38,6 @@ void initializeIsarCore({Map<String, String> dylibs = const {}}) {
   late String dylib;
   if (Platform.isAndroid) {
     dylib = dylibs['android'] ?? 'libisar.so';
-  } else if (Platform.isIOS) {
-    dylib = dylibs['ios'] ?? 'libisar.dylib';
   } else if (Platform.isMacOS) {
     dylib = dylibs['macos'] ?? 'libisar.dylib';
   } else if (Platform.isWindows) {
@@ -48,7 +46,11 @@ void initializeIsarCore({Map<String, String> dylibs = const {}}) {
     dylib = dylibs['linux'] ?? 'libisar.so';
   }
   try {
-    _IC ??= IsarCoreBindings(DynamicLibrary.open(dylib));
+    if (Platform.isIOS) {
+      _IC = IsarCoreBindings(DynamicLibrary.process());
+    } else {
+      _IC ??= IsarCoreBindings(DynamicLibrary.open(dylib));
+    }
   } catch (e) {
     print(e);
     throw IsarError(
@@ -62,7 +64,7 @@ void initializeIsarCore({Map<String, String> dylibs = const {}}) {
 extension RawObjectX on RawObject {
   void freeData() {
     if (buffer.address != 0) {
-      free(buffer);
+      malloc.free(buffer);
     }
   }
 }

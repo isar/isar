@@ -25,7 +25,7 @@ class IsarImpl extends Isar {
     final port = ReceivePort();
     final portStream = wrapIsarPort(port);
 
-    final txnPtrPtr = allocate<Pointer<NativeType>>();
+    final txnPtrPtr = malloc<Pointer<NativeType>>();
     IC.isar_txn_begin_async(
         isarPtr, txnPtrPtr, write, silent, port.sendPort.nativePort);
 
@@ -34,7 +34,7 @@ class IsarImpl extends Isar {
       await portStream.first;
       txnPtr = txnPtrPtr.value;
     } finally {
-      free(txnPtrPtr);
+      malloc.free(txnPtrPtr);
     }
 
     final zone = Zone.current.fork(zoneValues: {

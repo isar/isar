@@ -126,6 +126,8 @@ class IsarCodeGenerator extends Builder {
         objects.map((o) => generateDistinctBy(o)).join('\n');
 
     var code = '''
+    // ignore_for_file: unused_import, implementation_imports
+
     $imports
 
     export 'package:isar/isar.dart';
@@ -170,27 +172,27 @@ class IsarCodeGenerator extends Builder {
       initializeIsarCore();
       IC.isar_connect_dart_api(NativeApi.postCObject);
 
-      final isarPtrPtr = allocate<Pointer>();
-      final pathPtr = Utf8.toUtf8(path);
+      final isarPtrPtr = malloc<Pointer>();
+      final pathPtr = path.toNativeUtf8();
       IC.isar_get_instance(isarPtrPtr, pathPtr.cast());
       if (isarPtrPtr.value.address == 0) {
-        final schemaPtr = Utf8.toUtf8(_schema);
+        final schemaPtr = _schema.toNativeUtf8();
         final receivePort = ReceivePort();
         final nativePort = receivePort.sendPort.nativePort;
         final stream = wrapIsarPort(receivePort);
         IC.isar_create_instance(isarPtrPtr, pathPtr.cast(), maxSize, schemaPtr.cast(), nativePort);
         await stream.first;
-        free(schemaPtr);
+        malloc.free(schemaPtr);
       }
-      free(pathPtr);
+      malloc.free(pathPtr);
       
       final isarPtr = isarPtrPtr.value;
-      free(isarPtrPtr);
+      malloc.free(isarPtrPtr);
 
       final isar = IsarImpl(path, isarPtr);
       _isar[path] = isar;
       
-      final collectionPtrPtr = allocate<Pointer>();
+      final collectionPtrPtr = malloc<Pointer>();
     ''';
 
     for (var i = 0; i < objects.length; i++) {
@@ -198,10 +200,10 @@ class IsarCodeGenerator extends Builder {
       code += '''
       {
         nCall(IC.isar_get_collection(isarPtr, collectionPtrPtr, $i));
-        final propertyOffsetsPtr = allocate<Uint32>(count: ${info.properties.length});
+        final propertyOffsetsPtr = malloc<Uint32>(${info.properties.length});
         IC.isar_get_property_offsets(collectionPtrPtr.value, propertyOffsetsPtr);
         final propertyOffsets = propertyOffsetsPtr.asTypedList(${info.properties.length}).toList();
-        free(propertyOffsetsPtr);
+        malloc.free(propertyOffsetsPtr);
         ${info.collectionVar}[path] = IsarCollectionImpl(
           isar,
           _${info.dartName}Adapter(),
@@ -215,7 +217,7 @@ class IsarCodeGenerator extends Builder {
     }
 
     code += '''
-      free(collectionPtrPtr);
+      malloc.free(collectionPtrPtr);
       return isar;
     }
     ''';
@@ -231,7 +233,7 @@ class IsarCodeGenerator extends Builder {
       code += '''
         WidgetsFlutterBinding.ensureInitialized();
         final dir = await getApplicationDocumentsDirectory();
-        return p.join(dir!.path, path ?? 'isar');
+        return p.join(dir.path, path ?? 'isar');
         ''';
     } else {
       code += "return p.absolute(path ?? '');";

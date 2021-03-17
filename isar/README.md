@@ -119,12 +119,23 @@ final postsWithFirstCommentOrTitle = isar.posts
 You can easily define relationships between objects. In Isar they are called links and backlinks:
 
 ```dart
-class Person {
-  String name;
+@IsarCollection()
+class Teacher {
+    int id;
 
-  IsarLink<Person> mother;
+    String subject;
 
-  IsarLinks<Pet> pets;
+    @Backlink(to: 'teacher')
+    final students = IsarLinks<Student>();
+}
+
+@IsarCollection()
+class Student {
+    int id;
+
+    String name;
+
+    final teacher = IsarLink<Teacher>();
 }
 ```
 

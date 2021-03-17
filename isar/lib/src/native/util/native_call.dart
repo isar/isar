@@ -8,7 +8,7 @@ IsarError? isarErrorFromResult(int result) {
           'There was an error but it could not be loaded from IsarCore.');
     }
     try {
-      final message = Utf8.fromUtf8(error.cast());
+      final message = error.cast<Utf8>().toDartString();
       return IsarError(message);
     } finally {
       IC.isar_free_error(error);

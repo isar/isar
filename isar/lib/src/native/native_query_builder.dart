@@ -49,7 +49,7 @@ void _addWhereClause(Pointer colPtr, Pointer qbPtr, WhereClause wc,
       ascending ?? true,
     ));
   } else {
-    final wcPtrPtr = allocate<Pointer<NativeType>>();
+    final wcPtrPtr = malloc<Pointer<NativeType>>();
     nCall(IC.isar_wc_create(
       colPtr,
       wcPtrPtr,
@@ -76,7 +76,7 @@ void _addWhereClause(Pointer colPtr, Pointer qbPtr, WhereClause wc,
       wc.includeLower,
       wc.includeUpper,
     ));
-    free(wcPtrPtr);
+    malloc.free(wcPtrPtr);
   }
 }
 
@@ -162,10 +162,10 @@ void addWhereValue({
         var lowerPtr = Pointer<Int8>.fromAddress(0);
         var upperPtr = Pointer<Int8>.fromAddress(0);
         if (lower != null) {
-          lowerPtr = Utf8.toUtf8(lower).cast();
+          lowerPtr = (lower as String).toNativeUtf8().cast();
         }
         if (upper != null) {
-          upperPtr = Utf8.toUtf8(upper).cast();
+          upperPtr = (upper as String).toNativeUtf8().cast();
         }
         final caseSensitive = !type.endsWith('LC');
         late int indexType;
@@ -200,10 +200,10 @@ void addWhereValue({
             upperUnbound, caseSensitive, indexType);
 
         if (lower != null) {
-          free(lowerPtr);
+          malloc.free(lowerPtr);
         }
         if (upper != null) {
-          free(upperPtr);
+          malloc.free(upperPtr);
         }
       }
       return;
@@ -230,14 +230,13 @@ Pointer<NativeType>? _buildFilterGroup(Pointer colPtr, FilterGroup group) {
     return null;
   }
 
-  final conditionsPtrPtr =
-      allocate<Pointer<NativeType>>(count: builtConditions.length);
+  final conditionsPtrPtr = malloc<Pointer<NativeType>>(builtConditions.length);
 
   for (var i = 0; i < builtConditions.length; i++) {
     conditionsPtrPtr[i] = builtConditions[i]!;
   }
 
-  final filterPtrPtr = allocate<Pointer<NativeType>>();
+  final filterPtrPtr = malloc<Pointer<NativeType>>();
   if (group.groupType == FilterGroupType.Not) {
     nCall(IC.isar_filter_not(
       filterPtrPtr,
@@ -253,8 +252,8 @@ Pointer<NativeType>? _buildFilterGroup(Pointer colPtr, FilterGroup group) {
   }
 
   final filterPtr = filterPtrPtr.value;
-  free(conditionsPtrPtr);
-  free(filterPtrPtr);
+  malloc.free(conditionsPtrPtr);
+  malloc.free(filterPtrPtr);
   return filterPtr;
 }
 
@@ -263,7 +262,7 @@ Pointer<NativeType>? _buildLink(Pointer colPtr, LinkOperation link) {
   if (condition == null) return null;
 
   final targetCol = link.targetCollection as IsarCollectionImpl;
-  final filterPtrPtr = allocate<Pointer<NativeType>>();
+  final filterPtrPtr = malloc<Pointer<NativeType>>();
 
   if (link.backlink) {
     nCall(IC.isar_filter_link(
@@ -286,12 +285,12 @@ Pointer<NativeType>? _buildLink(Pointer colPtr, LinkOperation link) {
   }
 
   final filterPtr = filterPtrPtr.value;
-  free(filterPtrPtr);
+  malloc.free(filterPtrPtr);
   return filterPtr;
 }
 
 Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
-  final filterPtrPtr = allocate<Pointer<Pointer<NativeType>>>();
+  final filterPtrPtr = malloc<Pointer<Pointer<NativeType>>>();
   final pIndex = condition.propertyIndex;
   final include = condition.includeValue;
   final include2 = condition.includeValue2;
@@ -318,10 +317,10 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
               colPtr, filterPtrPtr, value, true, value, true, pIndex));
           break;
         case 'String':
-          final strPtr = Utf8.toUtf8(condition.value!);
+          final strPtr = (condition.value as String).toNativeUtf8();
           nCall(IC.isar_filter_string_equal(colPtr, filterPtrPtr, strPtr.cast(),
               condition.caseSensitive, pIndex));
-          free(strPtr);
+          malloc.free(strPtr);
           break;
         default:
           throw UnimplementedError();
@@ -411,20 +410,20 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
       break;
     case ConditionType.StartsWith:
       if (condition.propertyType == 'String') {
-        final strPtr = Utf8.toUtf8(condition.value!);
+        final strPtr = (condition.value as String).toNativeUtf8();
         nCall(IC.isar_filter_string_starts_with(colPtr, filterPtrPtr,
             strPtr.cast(), condition.caseSensitive, pIndex));
-        free(strPtr);
+        malloc.free(strPtr);
       } else {
         throw UnimplementedError();
       }
       break;
     case ConditionType.EndsWith:
       if (condition.propertyType == 'String') {
-        final strPtr = Utf8.toUtf8(condition.value!);
+        final strPtr = (condition.value as String).toNativeUtf8();
         nCall(IC.isar_filter_string_ends_with(colPtr, filterPtrPtr,
             strPtr.cast(), condition.caseSensitive, pIndex));
-        free(strPtr);
+        malloc.free(strPtr);
       } else {
         throw UnimplementedError();
       }
@@ -432,10 +431,10 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
     case ConditionType.Contains:
       switch (condition.propertyType) {
         case 'String':
-          final strPtr = Utf8.toUtf8('*${condition.value}*');
+          final strPtr = '*${condition.value}*'.toNativeUtf8();
           nCall(IC.isar_filter_string_matches(colPtr, filterPtrPtr,
               strPtr.cast(), condition.caseSensitive, pIndex));
-          free(strPtr);
+          malloc.free(strPtr);
           break;
         case 'IntList':
           final value = condition.value ?? nullInt;
@@ -447,10 +446,10 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
               colPtr, filterPtrPtr, value, pIndex);
           break;
         case 'StringList':
-          final strPtr = Utf8.toUtf8(condition.value!);
+          final strPtr = (condition.value as String).toNativeUtf8();
           nCall(IC.isar_filter_string_list_contains(colPtr, filterPtrPtr,
               strPtr.cast(), condition.caseSensitive, pIndex));
-          free(strPtr);
+          malloc.free(strPtr);
           break;
         default:
           throw UnimplementedError();
@@ -459,10 +458,10 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
     case ConditionType.Matches:
       switch (condition.propertyType) {
         case 'String':
-          final strPtr = Utf8.toUtf8(condition.value!);
+          final strPtr = (condition.value as String).toNativeUtf8();
           nCall(IC.isar_filter_string_matches(colPtr, filterPtrPtr,
               strPtr.cast(), condition.caseSensitive, pIndex));
-          free(strPtr);
+          malloc.free(strPtr);
           break;
         default:
           throw UnimplementedError();
@@ -470,6 +469,6 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
       break;
   }
   final filterPtr = filterPtrPtr.value;
-  free(filterPtrPtr);
+  malloc.free(filterPtrPtr);
   return filterPtr;
 }
