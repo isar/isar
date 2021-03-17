@@ -27,9 +27,6 @@ jobs:
         run: bash tool/setup_tests.sh
         working-directory: isar_test
       
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-      
       - name: Run tests
         run: flutter test
         working-directory: isar_test
