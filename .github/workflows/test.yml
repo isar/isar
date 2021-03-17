@@ -28,5 +28,5 @@ jobs:
         working-directory: isar_test
         
       - name: Run tests
-        run: dart test
+        run: flutter test
         working-directory: isar_test
