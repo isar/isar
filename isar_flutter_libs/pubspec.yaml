@@ -22,3 +22,5 @@ flutter:
         pluginClass: IsarFlutterPlugin
       ios:
         pluginClass: IsarFlutterPlugin
+      macos:
+        pluginClass: IsarFlutterPlugin

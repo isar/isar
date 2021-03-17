@@ -67,7 +67,7 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
   Future<void> load() {
     requireAttached();
     return col.isar.getTxn(false, (txnPtr, stream) async {
-      final rawObjPtr = allocate<RawObject>();
+      final rawObjPtr = malloc<RawObject>();
       IC.isar_link_get_first_async(
           linkColPtr, txnPtr, linkIndex, backlink, containingOid, rawObjPtr);
       try {
@@ -75,7 +75,7 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
         _value = targetCol.deserializeObject(rawObjPtr.ref);
         changed = false;
       } finally {
-        free(rawObjPtr);
+        malloc.free(rawObjPtr);
       }
     });
   }
@@ -84,14 +84,14 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
   void loadSync() {
     requireAttached();
     col.isar.getTxnSync(true, (txnPtr) {
-      final rawObjPtr = allocate<RawObject>();
+      final rawObjPtr = malloc<RawObject>();
       try {
         nCall(IC.isar_link_get_first(
             linkColPtr, txnPtr, linkIndex, backlink, containingOid, rawObjPtr));
         _value = targetCol.deserializeObject(rawObjPtr.ref);
         changed = false;
       } finally {
-        free(rawObjPtr);
+        malloc.free(rawObjPtr);
       }
     });
   }
@@ -113,14 +113,14 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
           targetOid = id;
         }
       }
-      final rawObjPtr = allocate<RawObject>();
+      final rawObjPtr = malloc<RawObject>();
       IC.isar_link_replace_async(
           linkColPtr, txnPtr, linkIndex, backlink, containingOid, targetOid);
       try {
         await stream.first;
         changed = false;
       } finally {
-        free(rawObjPtr);
+        malloc.free(rawObjPtr);
       }
     });
   }
@@ -142,13 +142,13 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
           targetOid = id;
         }
       }
-      final rawObjPtr = allocate<RawObject>();
+      final rawObjPtr = malloc<RawObject>();
       try {
         nCall(IC.isar_link_replace(
             linkColPtr, txnPtr, linkIndex, backlink, containingOid, targetOid));
         changed = false;
       } finally {
-        free(rawObjPtr);
+        malloc.free(rawObjPtr);
       }
     });
   }
@@ -172,7 +172,7 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
       _removedObjects.clear();
     }
     final objects = await col.isar.getTxn(false, (txnPtr, stream) async {
-      final resultsPtr = allocate<RawObjectSet>();
+      final resultsPtr = malloc<RawObjectSet>();
       try {
         IC.isar_link_get_all_async(
             linkColPtr, txnPtr, linkIndex, backlink, containingOid, resultsPtr);
@@ -180,7 +180,7 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
         return targetCol.deserializeObjects(resultsPtr.ref);
       } finally {
         IC.isar_free_raw_obj_list(resultsPtr);
-        free(resultsPtr);
+        malloc.free(resultsPtr);
       }
     });
     _objects.clear();
@@ -195,13 +195,13 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
       _removedObjects.clear();
     }
     final objects = col.isar.getTxnSync(false, (txnPtr) {
-      final resultsPtr = allocate<RawObjectSet>();
+      final resultsPtr = malloc<RawObjectSet>();
       try {
         nCall(IC.isar_link_get_all(linkColPtr, txnPtr, linkIndex, backlink,
             containingOid, resultsPtr));
         return targetCol.deserializeObjects(resultsPtr.ref);
       } finally {
-        free(resultsPtr);
+        malloc.free(resultsPtr);
       }
     });
     _objects.clear();
@@ -226,7 +226,7 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
       }
 
       final count = _addedObjects.length + _removedObjects.length;
-      final idsPtr = allocate<Int64>(count: count);
+      final idsPtr = malloc<Int64>(count);
       final ids = idsPtr.asTypedList(count);
       var i = 0;
       for (var added in _addedObjects) {
@@ -241,7 +241,7 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
       try {
         await stream.first;
       } finally {
-        free(idsPtr);
+        malloc.free(idsPtr);
       }
     });
   }

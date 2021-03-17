@@ -5,6 +5,8 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    runs-on: macos-latest
+    runs-on: windows-latest
 
     container:
       image:  google/dart:latest
@@ -14,16 +16,16 @@ jobs:
       
       - name: Install dependencies
         run: dart pub get
-        working-directory: isar
+        working-directory: isar_test
 
       - name: Run isar_generator
         run: dart run build_runner build
-        working-directory: isar
+        working-directory: isar_test
         
       - name: Download binaries
         run: bash tool/setup_tests.sh
-        working-directory: isar
+        working-directory: isar_test
         
       - name: Run tests
         run: dart test
-        working-directory: isar
+        working-directory: isar_test

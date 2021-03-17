@@ -112,14 +112,14 @@ String _generateSerialize(ObjectInfo object) {
     late int bufferSize;
     if (existingBufferSize != null) {
       if (existingBufferSize < size) {
-        free(rawObj.buffer);
-        rawObj.buffer = allocate(count: size);
+        malloc.free(rawObj.buffer);
+        rawObj.buffer = malloc(size);
         bufferSize = size;
       } else {
         bufferSize = existingBufferSize;
       }
     } else {
-      rawObj.buffer = allocate(count: size);
+      rawObj.buffer = malloc(size);
       bufferSize = size;
     }
     rawObj.buffer_length = size;
