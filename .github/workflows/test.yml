@@ -4,10 +4,7 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: 
-      - ubuntu-latest
-      - macos-latest
-      - windows-latest
+    runs-on: [ubuntu-latest, macos-latest, windows-latest]
 
     container:
       image:  google/dart:latest
