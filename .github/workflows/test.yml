@@ -11,10 +11,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
       
       - name: Install dependencies
-        run: dart pub get
+        run: flutter pub get
         working-directory: isar_test
 
       - name: Run isar_generator
