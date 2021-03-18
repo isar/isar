@@ -51,5 +51,4 @@ jobs:
           target: ${{ matrix.target }}
           arch: x86_64
           profile: Nexus 6
-          script: flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart
-        working-directory: isar_test
+          script: cd isar_test; flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart
