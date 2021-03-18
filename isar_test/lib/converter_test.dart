@@ -39,6 +39,8 @@ void run(IsarTestContext context) {
 
       final json = await isar.converterModels.jsonMap();
       expect(json[0], _converterObjectJson);
+
+      await isar.close();
     });
 
     context.test('fromIsar()', () async {
@@ -53,6 +55,8 @@ void run(IsarTestContext context) {
         await isar.converterModels.get(123),
         _converterObject,
       );
+
+      await isar.close();
     });
   });
 }

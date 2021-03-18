@@ -6,11 +6,11 @@ import 'isar.g.dart';
 import 'models/message_model.dart';
 
 void run(IsarTestContext context) {
-  late Isar isar;
-  late IsarCollection<Message> col;
-  late List<Message> messages;
-
   group('Watcher', () {
+    late Isar isar;
+    late IsarCollection<Message> col;
+    late List<Message> messages;
+
     setUp(() async {
       isar = await context.openIsar();
       col = isar.messages;
@@ -24,6 +24,10 @@ void run(IsarTestContext context) {
       await isar.writeTxn((isar) async {
         await col.putAll(messages);
       });
+    });
+
+    tearDown(() async {
+      await isar.close();
     });
 
     context.test('Collection', () async {

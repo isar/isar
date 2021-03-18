@@ -7,7 +7,7 @@ import '../models/int_model.dart';
 
 void run(IsarTestContext context) {
   group('Int filter', () {
-    Isar isar;
+    late Isar isar;
     late IsarCollection<IntModel> col;
 
     setUp(() async {
@@ -22,6 +22,10 @@ void run(IsarTestContext context) {
         }
         await col.put(IntModel()..field = null);
       });
+    });
+
+    tearDown(() async {
+      await isar.close();
     });
 
     context.test('.equalTo()', () async {

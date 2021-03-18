@@ -18,6 +18,10 @@ void run(IsarTestContext context) {
       linksB = isar.linkModelBs;
     });
 
+    tearDown(() async {
+      await isar.close();
+    });
+
     Future<List<LinkModelA>> getModels() async {
       final models = [
         LinkModelA.name('modelA_1'),

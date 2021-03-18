@@ -26,6 +26,10 @@ void run(IsarTestContext context) {
       });
     });
 
+    tearDown(() async {
+      await isar.close();
+    });
+
     context.test('Simple or', () async {
       await qEqualSet(
         users.where().filter().ageEqualTo(20).or().ageEqualTo(30).findAll(),

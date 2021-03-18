@@ -7,7 +7,7 @@ import '../models/string_model.dart';
 
 void run(IsarTestContext context) {
   group('String filter', () {
-    Isar isar;
+    late Isar isar;
     late IsarCollection<StringModel> col;
 
     setUp(() async {
@@ -23,6 +23,10 @@ void run(IsarTestContext context) {
         await col.put(StringModel.init(''));
         await col.put(StringModel.init('string 4'));
       });
+    });
+
+    tearDown(() async {
+      await isar.close();
     });
 
     context.test('equalTo()', () async {

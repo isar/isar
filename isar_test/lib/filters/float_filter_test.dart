@@ -7,7 +7,7 @@ import '../models/float_model.dart';
 
 void run(IsarTestContext context) {
   group('Float filter', () {
-    Isar isar;
+    late Isar isar;
     late IsarCollection<FloatModel> col;
 
     setUp(() async {
@@ -21,6 +21,10 @@ void run(IsarTestContext context) {
         }
         await col.put(FloatModel()..field = null);
       });
+    });
+
+    tearDown(() async {
+      await isar.close();
     });
 
     context.test('.greaterThan()', () async {

@@ -13,4 +13,6 @@ abstract class Isar {
   T txnSync<T>(T Function(Isar isar) callback);
 
   T writeTxnSync<T>(T Function(Isar isar) callback, {bool silent = false});
+
+  Future close();
 }

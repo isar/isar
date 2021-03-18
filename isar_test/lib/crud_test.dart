@@ -15,6 +15,10 @@ void run(IsarTestContext context) {
       messages = isar.messages;
     });
 
+    tearDown(() async {
+      await isar.close();
+    });
+
     context.test('get() / put() without oid', () async {
       final message = Message()..message = 'This is a new message';
 

@@ -26,7 +26,6 @@ abstract class IsarTestContext {
 
   Future<Isar> openIsar() async {
     final tempPath = await getTempPath();
-    print(tempPath);
     var name = Random().nextInt(pow(2, 32) as int);
     var dir = Directory(path.join(tempPath, '${name}_tmp'));
     if (await dir.exists()) {

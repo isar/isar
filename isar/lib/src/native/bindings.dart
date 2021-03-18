@@ -5,8 +5,8 @@ import 'dart:ffi' as ffi;
 
 class IsarCoreBindings {
   /// Holds the symbol lookup function.
-  final ffi.Pointer<ffi.NativeType> Function<T extends ffi.NativeType>(
-      String symbolName) _lookup;
+  final ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
+      _lookup;
 
   /// The symbols are looked up in [dynamicLibrary].
   IsarCoreBindings(ffi.DynamicLibrary dynamicLibrary)
@@ -14,8 +14,7 @@ class IsarCoreBindings {
 
   /// The symbols are looked up with [lookup].
   IsarCoreBindings.fromLookup(
-      ffi.Pointer<ffi.NativeType> Function<T extends ffi.NativeType>(
-              String symbolName)
+      ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
           lookup)
       : _lookup = lookup;
 

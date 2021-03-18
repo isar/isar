@@ -134,4 +134,10 @@ class IsarImpl extends Isar {
       throw 'Write operations require an explicit transaction.';
     }
   }
+
+  @override
+  Future close() {
+    IC.isar_close_instance(isarPtr);
+    return Future.value();
+  }
 }

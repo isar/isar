@@ -17,6 +17,10 @@ void run(IsarTestContext context) {
       linksB = isar.linkModelBs;
     });
 
+    tearDown(() async {
+      await isar.close();
+    });
+
     context.test('add self link', () async {
       final linkedModel = LinkModelA.name('linked');
       await isar.writeTxn((isar) async {

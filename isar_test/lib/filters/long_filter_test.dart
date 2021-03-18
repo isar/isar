@@ -7,7 +7,7 @@ import '../models/long_model.dart';
 
 void run(IsarTestContext context) {
   group('Long filter', () {
-    Isar isar;
+    late Isar isar;
     late IsarCollection<LongModel> col;
 
     setUp(() async {
@@ -21,6 +21,10 @@ void run(IsarTestContext context) {
         }
         await col.put(LongModel()..field = null);
       });
+    });
+
+    tearDown(() async {
+      await isar.close();
     });
 
     context.test('equalTo()', () async {

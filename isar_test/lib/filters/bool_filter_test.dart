@@ -7,7 +7,7 @@ import '../models/bool_model.dart';
 
 void run(IsarTestContext context) {
   group('Bool filter', () {
-    Isar isar;
+    late Isar isar;
     late IsarCollection<BoolModel> col;
 
     setUp(() async {
@@ -20,6 +20,10 @@ void run(IsarTestContext context) {
         await col.put(BoolModel()..field = false);
         await col.put(BoolModel()..field = null);
       });
+    });
+
+    tearDown(() async {
+      await isar.close();
     });
 
     context.test('.equalTo()', () async {
