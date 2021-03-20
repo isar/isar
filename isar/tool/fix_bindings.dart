@@ -8,7 +8,7 @@ void main() {
     'ffi.Pointer<ffi.Dart_CObject>',
   );
   contents = contents.replaceAll(
-    RegExp(r'ffi\.Pointer<(?!(ffi|IsarCoreBindings|RawObject))[^>]+>'),
+    RegExp(r'ffi\.Pointer<(?!(ffi|IsarCoreBindings|RawObject|T))[^>]+>'),
     'ffi.Pointer<ffi.NativeType>',
   );
   contents = contents.replaceAll(
