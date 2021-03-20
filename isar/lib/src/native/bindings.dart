@@ -5,8 +5,8 @@ import 'dart:ffi' as ffi;
 
 class IsarCoreBindings {
   /// Holds the symbol lookup function.
-  final ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
-      _lookup;
+  final ffi.Pointer<ffi.NativeType> Function<T extends ffi.NativeType>(
+      String symbolName) _lookup;
 
   /// The symbols are looked up in [dynamicLibrary].
   IsarCoreBindings(ffi.DynamicLibrary dynamicLibrary)
@@ -14,7 +14,8 @@ class IsarCoreBindings {
 
   /// The symbols are looked up with [lookup].
   IsarCoreBindings.fromLookup(
-      ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
+      ffi.Pointer<ffi.NativeType> Function<T extends ffi.NativeType>(
+              String symbolName)
           lookup)
       : _lookup = lookup;
 
@@ -649,16 +650,20 @@ class IsarCoreBindings {
 
   void isar_create_instance(
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
-    ffi.Pointer<ffi.Int8> path,
+    ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Int8> dir,
     int max_size,
     ffi.Pointer<ffi.Int8> schema_json,
+    ffi.Pointer<ffi.Uint8> encryption_key,
     int port,
   ) {
     return _isar_create_instance(
       isar,
-      path,
+      name,
+      dir,
       max_size,
       schema_json,
+      encryption_key,
       port,
     );
   }
@@ -1999,17 +2004,21 @@ typedef _dart_isar_filter_string_list_contains = int Function(
 
 typedef _c_isar_create_instance = ffi.Void Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
-  ffi.Pointer<ffi.Int8> path,
+  ffi.Pointer<ffi.Int8> name,
+  ffi.Pointer<ffi.Int8> dir,
   ffi.Int64 max_size,
   ffi.Pointer<ffi.Int8> schema_json,
+  ffi.Pointer<ffi.Uint8> encryption_key,
   ffi.Int64 port,
 );
 
 typedef _dart_isar_create_instance = void Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
-  ffi.Pointer<ffi.Int8> path,
+  ffi.Pointer<ffi.Int8> name,
+  ffi.Pointer<ffi.Int8> dir,
   int max_size,
   ffi.Pointer<ffi.Int8> schema_json,
+  ffi.Pointer<ffi.Uint8> encryption_key,
   int port,
 );
 
