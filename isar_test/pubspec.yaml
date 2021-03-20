@@ -28,6 +28,5 @@ dependency_overrides:
     path: ../isar_flutter_libs
   isar_generator:
     path: ../isar_generator
-  build: ^2.0.0
   crypto: ^3.0.0
   convert: ^3.0.0

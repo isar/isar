@@ -38,10 +38,11 @@ void run(IsarTestContext context) {
         col.where().valueFieldEqualTo('string 2').findAll(),
         [StringModel.init('string 2')],
       );
-      await qEqual(
+
+      /*await qEqual(
         col.where().wordsFieldWordEqualTo('2').findAll(),
         [StringModel.init('string 2')],
-      );
+      );*/
       await qEqual(
         col.where().filter().hashFieldEqualTo('string 2').findAll(),
         [StringModel.init('string 2')],
@@ -55,12 +56,12 @@ void run(IsarTestContext context) {
         col.where().valueFieldEqualTo(null).findAll(),
         [StringModel.init(null)],
       );
-      try {
+      /*try {
         await col.where().wordsFieldWordEqualTo(null).findAll();
         fail('Should fail');
       } catch (e) {
         // do nothing
-      }
+      }*/
       await qEqual(
         col.where().filter().hashFieldEqualTo(null).findAll(),
         [StringModel.init(null)],
@@ -74,10 +75,10 @@ void run(IsarTestContext context) {
         col.where().valueFieldEqualTo('string 5').findAll(),
         [],
       );
-      await qEqual(
+      /*await qEqual(
         col.where().wordsFieldWordEqualTo('5').findAll(),
         [],
-      );
+      );*/
       await qEqual(
         col.where().filter().hashFieldEqualTo('string 5').findAll(),
         [],
@@ -92,12 +93,12 @@ void run(IsarTestContext context) {
         [StringModel.init('')],
       );
 
-      try {
+      /*try {
         await col.where().wordsFieldWordEqualTo('').findAll();
         fail('Should fail');
       } catch (e) {
         // do nothing
-      }
+      }*/
 
       await qEqual(
         col.where().filter().hashFieldEqualTo('').findAll(),

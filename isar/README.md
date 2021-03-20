@@ -40,10 +40,11 @@
 - 😎 **Lazy loaded**. Only load data when you need it
 - 🔎 **Full-text search**. Make searching fast and fun
 - 📱 **Multiplatform**. iOS, Android, Desktop and the web (soon™)
-- 💙 **Made for Flutter.** Easily use it in your Flutter app
+- 💙 **Made for Flutter**. Easily use it in your Flutter app
 - 🧪 **ACID semantics**. Rely on consistency
-- ⏱ **Asynchronous.** Parallel query operations & multi-isolate support
-- ⚠️ **Static typing** with compile-time checked and autocompleted queries
+- ⏱ **Asynchronous**. Parallel query operations & multi-isolate support
+- ⚠️ **Static typing**. Compile-time checked and autocompleted queries
+- 🔒 **Strong encryption**. Optional authenticated AES-256 GCM encryption
 
 ### Add to pubspec.yaml
 

@@ -19,7 +19,7 @@ class StringModel {
 
   @override
   String toString() {
-    return '{field: $valueField, field: $hashField, field: $wordsField}';
+    return '{valueField: $valueField, hashField: $hashField, wordsField: $wordsField}';
   }
 
   StringModel();

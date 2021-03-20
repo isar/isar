@@ -6,11 +6,16 @@ import 'package:path/path.dart' as path;
 import 'package:isar_test/all_test.dart' as tests;
 
 void main() {
-  final context = TestContext();
+  final context = TestContext(false);
   tests.run(context);
+
+  final encryptionContext = TestContext(true);
+  tests.run(encryptionContext);
 }
 
 class TestContext extends IsarTestContext {
+  TestContext(bool encryption) : super(encryption);
+
   var _setUp = false;
   void setupIsar() {
     if (!_setUp) {

@@ -1,5 +1,6 @@
 library isar;
 
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:isar/src/query_builder.dart';

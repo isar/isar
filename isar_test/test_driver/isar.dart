@@ -12,12 +12,17 @@ void main() {
   final completer = Completer<String>();
   enableFlutterDriverExtension(handler: (_) => completer.future);
 
-  final context = IntegrationContext();
+  final context = IntegrationContext(false);
+  final encryptionContext = IntegrationContext(true);
 
-  tearDownAll(() => completer.complete(context.success.toString()));
+  tearDownAll(() {
+    final result = context.success && encryptionContext.success;
+    completer.complete(result.toString());
+  });
 
   group('driver', () {
     tests.run(context);
+    tests.run(encryptionContext);
   });
 
   runApp(
@@ -32,6 +37,8 @@ void main() {
 }
 
 class IntegrationContext extends IsarTestContext {
+  IntegrationContext(bool encryption) : super(encryption);
+
   @override
   Future<String> getTempPath() async {
     final dir = await getTemporaryDirectory();
