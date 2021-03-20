@@ -307,7 +307,7 @@ String generateWhereStartsWith(
       $indexId,
       $types,
       lower: [convertedValue],
-      upper: ['\${convertedValue}$maxChar'],
+      upper: ['\$convertedValue$maxChar'],
       includeLower: true,
       includeUpper: true,
     ));

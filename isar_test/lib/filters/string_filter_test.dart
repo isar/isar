@@ -38,6 +38,7 @@ void run(IsarTestContext context) {
         col.where().valueFieldEqualTo('string 2').findAll(),
         [StringModel.init('string 2')],
       );
+
       await qEqual(
         col.where().wordsFieldWordEqualTo('2').findAll(),
         [StringModel.init('string 2')],

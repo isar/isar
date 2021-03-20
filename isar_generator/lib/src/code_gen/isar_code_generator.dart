@@ -163,34 +163,48 @@ class IsarCodeGenerator extends Builder {
 
   String generateIsarOpen(List<ObjectInfo> objects) {
     var code = '''
-    Future<Isar> openIsar({String? directory, int maxSize = 1000000000}) async {
+    Future<Isar> openIsar({String name = 'isar', String? directory, int maxSize = 1000000000, Uint8List? encryptionKey}) async {
+      assert(name.isNotEmpty);
       final path = await _preparePath(directory);
-      if (_isar[path] != null) {
-        return _isar[path]!;
+      if (_isar[name] != null) {
+        return _isar[name]!;
       }
       await Directory(path).create(recursive: true);
       initializeIsarCore();
       IC.isar_connect_dart_api(NativeApi.postCObject);
 
       final isarPtrPtr = malloc<Pointer>();
+      final namePtr = name.toNativeUtf8();
       final pathPtr = path.toNativeUtf8();
-      IC.isar_get_instance(isarPtrPtr, pathPtr.cast());
+      IC.isar_get_instance(isarPtrPtr, namePtr.cast());
       if (isarPtrPtr.value.address == 0) {
         final schemaPtr = _schema.toNativeUtf8();
+        Pointer<Uint8> encKeyPtr = Pointer.fromAddress(0);
+        if (encryptionKey != null) {
+          assert(encryptionKey.length == 32,
+              'Encryption keys need to contain 32 byte (256bit).');
+          encKeyPtr = malloc(32);
+          encKeyPtr.asTypedList(32).setAll(0, encryptionKey);
+        }
         final receivePort = ReceivePort();
         final nativePort = receivePort.sendPort.nativePort;
         final stream = wrapIsarPort(receivePort);
-        IC.isar_create_instance(isarPtrPtr, pathPtr.cast(), maxSize, schemaPtr.cast(), nativePort);
+        IC.isar_create_instance(isarPtrPtr, namePtr.cast(), pathPtr.cast(), maxSize,
+            schemaPtr.cast(), encKeyPtr, nativePort);
         await stream.first;
         malloc.free(schemaPtr);
+        if (encryptionKey != null) {
+          malloc.free(encKeyPtr);
+        }
       }
+      malloc.free(namePtr);
       malloc.free(pathPtr);
       
       final isarPtr = isarPtrPtr.value;
       malloc.free(isarPtrPtr);
 
       final isar = IsarImpl(path, isarPtr);
-      _isar[path] = isar;
+      _isar[name] = isar;
       
       final collectionPtrPtr = malloc<Pointer>();
     ''';
@@ -204,7 +218,7 @@ class IsarCodeGenerator extends Builder {
         IC.isar_get_property_offsets(collectionPtrPtr.value, propertyOffsetsPtr);
         final propertyOffsets = propertyOffsetsPtr.asTypedList(${info.properties.length}).toList();
         malloc.free(propertyOffsetsPtr);
-        ${info.collectionVar}[path] = IsarCollectionImpl(
+        ${info.collectionVar}[name] = IsarCollectionImpl(
           isar,
           _${info.dartName}Adapter(),
           collectionPtrPtr.value,
@@ -250,7 +264,7 @@ class IsarCodeGenerator extends Builder {
     return '''
     extension Get${object.dartName}Collection on Isar {
       IsarCollection<${object.dartName}> get ${object.dartName.decapitalize()}s {
-        return ${object.collectionVar}[path]!;
+        return ${object.collectionVar}[name]!;
       }
     }
     ''';

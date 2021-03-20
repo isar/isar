@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
 import 'package:path/path.dart' as path;
@@ -7,7 +8,10 @@ import 'isar.g.dart' as gen;
 import 'package:test/test.dart' as dartTest;
 
 abstract class IsarTestContext {
+  final bool encryption;
   var _success = true;
+
+  IsarTestContext(this.encryption);
 
   bool get success => _success;
 
@@ -33,6 +37,15 @@ abstract class IsarTestContext {
     }
     await dir.create(recursive: true);
 
-    return gen.openIsar(directory: dir.path);
+    Uint8List? encryptionKey;
+    if (encryption) {
+      encryptionKey = Isar.generateSecureKey();
+    }
+
+    return gen.openIsar(
+      name: dir.path,
+      directory: dir.path,
+      encryptionKey: encryptionKey,
+    );
   }
 }
