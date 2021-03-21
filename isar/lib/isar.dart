@@ -4,7 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:isar/src/query_builder.dart';
-import 'isar_native.dart';
+import 'package:isar/src/isar_platform.dart';
 export 'package:isar_annotation/isar_annotation.dart';
 
 part 'package:isar/src/isar_collection.dart';

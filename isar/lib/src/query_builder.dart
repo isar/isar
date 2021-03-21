@@ -1,5 +1,5 @@
 import 'package:isar/isar.dart';
-import 'package:isar/isar_native.dart';
+import 'package:isar/src/isar_platform.dart';
 
 typedef FilterQuery<OBJ> = QueryBuilder<OBJ, QAfterFilterCondition> Function(
     QueryBuilder<OBJ, QFilterCondition> q);
