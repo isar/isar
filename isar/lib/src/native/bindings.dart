@@ -1065,7 +1065,7 @@ class IsarCoreBindings {
   late final _dart_isar_qb_add_distinct_by _isar_qb_add_distinct_by =
       _isar_qb_add_distinct_by_ptr.asFunction<_dart_isar_qb_add_distinct_by>();
 
-  int isar_qb_set_offset_limit(
+  void isar_qb_set_offset_limit(
     ffi.Pointer<ffi.NativeType> builder,
     int offset,
     int limit,
@@ -2301,13 +2301,13 @@ typedef _dart_isar_qb_add_distinct_by = int Function(
   int property_index,
 );
 
-typedef _c_isar_qb_set_offset_limit = ffi.Int32 Function(
+typedef _c_isar_qb_set_offset_limit = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> builder,
-  ffi.Int64 offset,
-  ffi.Int64 limit,
+  ffi.Uint32 offset,
+  ffi.Uint32 limit,
 );
 
-typedef _dart_isar_qb_set_offset_limit = int Function(
+typedef _dart_isar_qb_set_offset_limit = void Function(
   ffi.Pointer<ffi.NativeType> builder,
   int offset,
   int limit,
