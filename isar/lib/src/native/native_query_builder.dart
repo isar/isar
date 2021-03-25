@@ -9,6 +9,7 @@ Query<OBJ> buildQuery<OBJ>(
   bool? whereDistinct,
   bool? whereAscending,
   FilterGroup filter,
+  List<SortProperty> sortProperties,
   List<int> distinctByPropertyIndices,
   int? offset,
   int? limit,
@@ -29,9 +30,14 @@ Query<OBJ> buildQuery<OBJ>(
     IC.isar_qb_set_filter(qbPtr, filterPtr);
   }
 
-  IC.isar_qb_set_offset_limit(qbPtr, offset ?? -1, limit ?? -1);
+  for (var sortProperty in sortProperties) {
+    nCall(IC.isar_qb_add_sort_by(
+        col.ptr, qbPtr, sortProperty.propertyIndex, sortProperty.ascending));
+  }
+
+  IC.isar_qb_set_offset_limit(qbPtr, offset ?? 0, limit ?? 99999);
   for (var index in distinctByPropertyIndices) {
-    IC.isar_qb_add_distinct_by(col.ptr, qbPtr, index);
+    nCall(IC.isar_qb_add_distinct_by(col.ptr, qbPtr, index));
   }
 
   final queryPtr = IC.isar_qb_build(qbPtr);
@@ -292,32 +298,32 @@ Pointer<NativeType>? _buildLink(Pointer colPtr, LinkOperation link) {
 Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
   final filterPtrPtr = malloc<Pointer<Pointer<NativeType>>>();
   final pIndex = condition.propertyIndex;
-  final include = condition.includeValue;
-  final include2 = condition.includeValue2;
+  final lower = condition.lower;
+  final upper = condition.upper;
+  final includeLower = condition.includeLower;
+  final includeUpper = condition.includeUpper;
   switch (condition.conditionType) {
     case ConditionType.Eq:
-      if (condition.value == null) {
+      if (lower == null) {
         nCall(IC.isar_filter_is_null(colPtr, filterPtrPtr, pIndex));
         break;
       }
       switch (condition.propertyType) {
         case 'Bool':
-          final value = boolToByte(condition.value!);
+          final value = boolToByte(lower!);
           nCall(IC.isar_filter_byte_between(
               colPtr, filterPtrPtr, value, true, value, true, pIndex));
           break;
         case 'Int':
-          final value = condition.value!;
           nCall(IC.isar_filter_int_between(
-              colPtr, filterPtrPtr, value, true, value, true, pIndex));
+              colPtr, filterPtrPtr, lower!, true, lower, true, pIndex));
           break;
         case 'Long':
-          final value = condition.value!;
           nCall(IC.isar_filter_long_between(
-              colPtr, filterPtrPtr, value, true, value, true, pIndex));
+              colPtr, filterPtrPtr, lower!, true, lower, true, pIndex));
           break;
         case 'String':
-          final strPtr = (condition.value as String).toNativeUtf8();
+          final strPtr = (lower as String).toNativeUtf8();
           nCall(IC.isar_filter_string_equal(colPtr, filterPtrPtr, strPtr.cast(),
               condition.caseSensitive, pIndex));
           malloc.free(strPtr);
@@ -329,24 +335,20 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
     case ConditionType.Gt:
       switch (condition.propertyType) {
         case 'Int':
-          final value = condition.value ?? nullInt;
-          nCall(IC.isar_filter_int_between(
-              colPtr, filterPtrPtr, value, include, maxInt, true, pIndex));
+          nCall(IC.isar_filter_int_between(colPtr, filterPtrPtr,
+              lower ?? nullInt, includeLower, maxInt, true, pIndex));
           break;
         case 'Float':
-          final value = condition.value ?? nullFloat;
-          nCall(IC.isar_filter_float_between(
-              colPtr, filterPtrPtr, value, include, maxFloat, true, pIndex));
+          nCall(IC.isar_filter_float_between(colPtr, filterPtrPtr,
+              lower ?? nullFloat, includeLower, maxFloat, true, pIndex));
           break;
         case 'Long':
-          final value = condition.value ?? nullLong;
-          nCall(IC.isar_filter_long_between(
-              colPtr, filterPtrPtr, value, include, maxLong, true, pIndex));
+          nCall(IC.isar_filter_long_between(colPtr, filterPtrPtr,
+              lower ?? nullLong, includeLower, maxLong, true, pIndex));
           break;
         case 'Double':
-          final value = condition.value ?? nullDouble;
-          nCall(IC.isar_filter_double_between(
-              colPtr, filterPtrPtr, value, include, maxDouble, true, pIndex));
+          nCall(IC.isar_filter_double_between(colPtr, filterPtrPtr,
+              lower ?? nullDouble, includeLower, maxDouble, true, pIndex));
           break;
         default:
           throw UnimplementedError();
@@ -355,24 +357,20 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
     case ConditionType.Lt:
       switch (condition.propertyType) {
         case 'Int':
-          final value = condition.value ?? nullInt;
-          IC.isar_filter_int_between(
-              colPtr, filterPtrPtr, minInt, true, value, include, pIndex);
+          IC.isar_filter_int_between(colPtr, filterPtrPtr, minInt, true,
+              upper ?? nullInt, includeUpper, pIndex);
           break;
         case 'Float':
-          final value = condition.value ?? nullFloat;
-          IC.isar_filter_float_between(
-              colPtr, filterPtrPtr, minFloat, true, value, include, pIndex);
+          IC.isar_filter_float_between(colPtr, filterPtrPtr, minFloat, true,
+              upper ?? nullFloat, includeUpper, pIndex);
           break;
         case 'Long':
-          final value = condition.value ?? nullLong;
-          IC.isar_filter_long_between(
-              colPtr, filterPtrPtr, minLong, true, value, include, pIndex);
+          IC.isar_filter_long_between(colPtr, filterPtrPtr, minLong, true,
+              upper ?? nullLong, includeUpper, pIndex);
           break;
         case 'Double':
-          final value = condition.value ?? nullDouble;
-          IC.isar_filter_double_between(
-              colPtr, filterPtrPtr, minDouble, true, value, include, pIndex);
+          IC.isar_filter_double_between(colPtr, filterPtrPtr, minDouble, true,
+              upper ?? nullDouble, includeUpper, pIndex);
           break;
         default:
           throw UnimplementedError();
@@ -381,28 +379,26 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
     case ConditionType.Between:
       switch (condition.propertyType) {
         case 'Int':
-          final lower = condition.value ?? nullInt;
-          final upper = condition.value2 ?? nullInt;
-          IC.isar_filter_int_between(
-              colPtr, filterPtrPtr, lower, include, upper, include2, pIndex);
+          IC.isar_filter_int_between(colPtr, filterPtrPtr, lower ?? nullInt,
+              includeLower, upper ?? nullInt, includeUpper, pIndex);
           break;
         case 'Float':
-          final lower = condition.value ?? nullFloat;
-          final upper = condition.value2 ?? nullFloat;
-          IC.isar_filter_float_between(
-              colPtr, filterPtrPtr, lower, include, upper, include2, pIndex);
+          IC.isar_filter_float_between(colPtr, filterPtrPtr, lower ?? nullFloat,
+              includeLower, upper ?? nullFloat, includeUpper, pIndex);
           break;
         case 'Long':
-          final lower = condition.value ?? nullLong;
-          final upper = condition.value2 ?? nullLong;
-          IC.isar_filter_long_between(
-              colPtr, filterPtrPtr, lower, include, upper, include2, pIndex);
+          IC.isar_filter_long_between(colPtr, filterPtrPtr, lower ?? nullLong,
+              includeLower, upper ?? nullLong, includeUpper, pIndex);
           break;
         case 'Double':
-          final lower = condition.value ?? nullDouble;
-          final upper = condition.value2 ?? nullDouble;
           IC.isar_filter_double_between(
-              colPtr, filterPtrPtr, lower, include, upper, include2, pIndex);
+              colPtr,
+              filterPtrPtr,
+              lower ?? nullDouble,
+              includeLower,
+              upper ?? nullDouble,
+              includeUpper,
+              pIndex);
           break;
         default:
           throw UnimplementedError();
@@ -410,7 +406,7 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
       break;
     case ConditionType.StartsWith:
       if (condition.propertyType == 'String') {
-        final strPtr = (condition.value as String).toNativeUtf8();
+        final strPtr = (lower as String).toNativeUtf8();
         nCall(IC.isar_filter_string_starts_with(colPtr, filterPtrPtr,
             strPtr.cast(), condition.caseSensitive, pIndex));
         malloc.free(strPtr);
@@ -420,7 +416,7 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
       break;
     case ConditionType.EndsWith:
       if (condition.propertyType == 'String') {
-        final strPtr = (condition.value as String).toNativeUtf8();
+        final strPtr = (lower as String).toNativeUtf8();
         nCall(IC.isar_filter_string_ends_with(colPtr, filterPtrPtr,
             strPtr.cast(), condition.caseSensitive, pIndex));
         malloc.free(strPtr);
@@ -431,22 +427,21 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
     case ConditionType.Contains:
       switch (condition.propertyType) {
         case 'String':
-          final strPtr = '*${condition.value}*'.toNativeUtf8();
+          final strPtr = '*$lower*'.toNativeUtf8();
           nCall(IC.isar_filter_string_matches(colPtr, filterPtrPtr,
               strPtr.cast(), condition.caseSensitive, pIndex));
           malloc.free(strPtr);
           break;
         case 'IntList':
-          final value = condition.value ?? nullInt;
-          IC.isar_filter_int_list_contains(colPtr, filterPtrPtr, value, pIndex);
+          IC.isar_filter_int_list_contains(
+              colPtr, filterPtrPtr, lower ?? nullInt, pIndex);
           break;
         case 'LongList':
-          final value = condition.value ?? nullLong;
           IC.isar_filter_long_list_contains(
-              colPtr, filterPtrPtr, value, pIndex);
+              colPtr, filterPtrPtr, lower ?? nullLong, pIndex);
           break;
         case 'StringList':
-          final strPtr = (condition.value as String).toNativeUtf8();
+          final strPtr = (lower as String).toNativeUtf8();
           nCall(IC.isar_filter_string_list_contains(colPtr, filterPtrPtr,
               strPtr.cast(), condition.caseSensitive, pIndex));
           malloc.free(strPtr);
@@ -458,7 +453,7 @@ Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
     case ConditionType.Matches:
       switch (condition.propertyType) {
         case 'String':
-          final strPtr = (condition.value as String).toNativeUtf8();
+          final strPtr = (lower as String).toNativeUtf8();
           nCall(IC.isar_filter_string_matches(colPtr, filterPtrPtr,
               strPtr.cast(), condition.caseSensitive, pIndex));
           malloc.free(strPtr);

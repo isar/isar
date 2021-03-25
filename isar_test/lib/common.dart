@@ -1,6 +1,7 @@
+// ignore_for_file: implementation_imports
 import 'dart:convert';
 import 'dart:io';
-import 'package:isar/isar_native.dart';
+import 'package:isar/src/isar_native.dart';
 import 'package:path/path.dart' as path;
 
 import 'dart:math';

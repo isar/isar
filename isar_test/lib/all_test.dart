@@ -8,6 +8,7 @@ import 'filters/link_filter_test.dart' as link_filter;
 import 'filters/long_filter_test.dart' as long_filter;
 import 'filters/string_filter_test.dart' as string_filter;
 
+import 'offset_limit_test.dart' as offset_limit_test;
 import 'converter_test.dart' as converter_test;
 import 'crud_test.dart' as crud_test;
 import 'group_test.dart' as group_test;
@@ -23,6 +24,7 @@ void run(IsarTestContext context) {
   long_filter.run(context);
   string_filter.run(context);
 
+  offset_limit_test.run(context);
   converter_test.run(context);
   crud_test.run(context);
   group_test.run(context);

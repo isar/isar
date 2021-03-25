@@ -158,7 +158,7 @@ extension QueryBuilderInternal<OBJ> on QueryBuilder<OBJ, dynamic> {
     int? limit,
   }) {
     assert(offset == null || offset >= 0);
-    assert(limit == null || limit > 0);
+    assert(limit == null || limit >= 0);
     return QueryBuilder._(
       _collection,
       filterOr ?? _filterOr,
@@ -191,6 +191,7 @@ extension QueryBuilderInternal<OBJ> on QueryBuilder<OBJ, dynamic> {
       _whereDistinct,
       _whereAscending,
       filter,
+      _sortByProperties,
       _distinctByPropertyIndices,
       _offset,
       _limit,
@@ -239,20 +240,20 @@ class QueryCondition extends QueryOperation {
   final ConditionType conditionType;
   final int propertyIndex;
   final String propertyType;
-  final dynamic? value;
-  final bool includeValue;
-  final dynamic? value2;
-  final bool includeValue2;
+  final dynamic? lower;
+  final bool includeLower;
+  final dynamic? upper;
+  final bool includeUpper;
   final bool caseSensitive;
 
   const QueryCondition(
     this.conditionType,
     this.propertyIndex,
-    this.propertyType,
-    this.value, {
-    this.includeValue = true,
-    this.value2,
-    this.includeValue2 = true,
+    this.propertyType, {
+    this.lower,
+    this.includeLower = true,
+    this.upper,
+    this.includeUpper = true,
     this.caseSensitive = true,
   });
 
@@ -262,10 +263,10 @@ class QueryCondition extends QueryOperation {
       conditionType,
       propertyIndex,
       propertyType,
-      value,
-      includeValue: includeValue,
-      value2: value2,
-      includeValue2: includeValue2,
+      lower: lower,
+      includeLower: includeLower,
+      upper: upper,
+      includeUpper: includeUpper,
     );
   }
 }

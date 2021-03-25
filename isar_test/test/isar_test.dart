@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:isar/isar_native.dart';
+import 'package:isar/src/isar_native.dart';
 import 'package:isar_test/isar_test_context.dart';
 import 'package:path/path.dart' as path;
 import 'package:isar_test/all_test.dart' as tests;

@@ -137,6 +137,7 @@ class IsarImpl extends Isar {
 
   @override
   Future close() {
+    super.close();
     IC.isar_close_instance(isarPtr);
     return Future.value();
   }

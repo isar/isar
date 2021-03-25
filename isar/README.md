@@ -50,14 +50,21 @@
 
 ```yaml
 dependencies:
-  isar: any
-  isar_flutter_libs: any # contains the binaries
+  isar: <current_version>
+  isar_flutter_libs: <current_version> # contains the binaries
+  isar_connect: <current_version> # if you want to use the Isar Inspector
 
 dev_dependencies:
-  isar_generator: any
+  isar_generator: <current_version>
   build_runner: any
 ```
 
+
+## Isar Inspector
+
+The [Isar Inspector](https://github.com/isar/isar-inspector) allows you to inspect the Isar instances & collections of your app in real time. You can execute queries, switch between instances and sort the data.
+
+<img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/isar_inspector.png?sanitize=true">
 
 ## Schema definition
 ```dart
