@@ -23,7 +23,7 @@ class IsarAnalyzer extends Builder {
 
     final objectsJson = libReader
         .annotatedWith(_annotationChecker)
-        .map((e) => generateObjectInfo(e.element).toJson())
+        .map((e) => generateObjectInfo(e.element)!.toJson())
         .toList();
 
     if (objectsJson.isEmpty) return;
@@ -33,7 +33,7 @@ class IsarAnalyzer extends Builder {
         buildStep.inputId.changeExtension('.isarobject.json'), json);
   }
 
-  ObjectInfo generateObjectInfo(Element element) {
+  ObjectInfo? generateObjectInfo(Element element) {
     if (element is! ClassElement) {
       err('Only classes may be annotated with @IsarCollection.', element);
     }
@@ -70,11 +70,11 @@ class IsarAnalyzer extends Builder {
 
       final converter = findTypeConverter(propertyElement);
       if (converter != null) {
-        converterImports.add(converter.location.components[0]);
+        converterImports.add(converter.location!.components[0]);
       }
 
-      if (propertyElement.type.element.name == 'IsarLink' ||
-          propertyElement.type.element.name == 'IsarLinks') {
+      if (propertyElement.type.element!.name == 'IsarLink' ||
+          propertyElement.type.element!.name == 'IsarLinks') {
         final link = analyzeObjectLink(propertyElement, converter);
         if (link == null) continue;
         links.add(link);
@@ -127,13 +127,13 @@ class IsarAnalyzer extends Builder {
     return modelInfo;
   }
 
-  ClassElement findTypeConverter(FieldElement property) {
+  ClassElement? findTypeConverter(FieldElement property) {
     final annotations = getTypeConverterAnns(property);
     annotations.addAll(getTypeConverterAnns(property.enclosingElement));
 
     for (var annotation in annotations) {
-      final cls = annotation.type.element as ClassElement;
-      final dartType = cls.supertype.typeArguments[0];
+      final cls = annotation.type!.element as ClassElement;
+      final dartType = cls.supertype!.typeArguments[0];
       if (dartType == property.type) {
         return cls;
       }
@@ -142,8 +142,8 @@ class IsarAnalyzer extends Builder {
     return null;
   }
 
-  ObjectProperty analyzeObjectProperty(
-      FieldElement property, ClassElement converter) {
+  ObjectProperty? analyzeObjectProperty(
+      FieldElement property, ClassElement? converter) {
     if (!property.isPublic ||
         property.isFinal ||
         property.isConst ||
@@ -155,7 +155,7 @@ class IsarAnalyzer extends Builder {
     var elementNullable = false;
     if (property.type is ParameterizedType) {
       final typeArguments = (property.type as ParameterizedType).typeArguments;
-      if (typeArguments != null && typeArguments.isNotEmpty) {
+      if (typeArguments.isNotEmpty) {
         final listType = typeArguments[0];
         elementNullable = listType.nullabilitySuffix != NullabilitySuffix.none;
       }
@@ -172,7 +172,7 @@ class IsarAnalyzer extends Builder {
       final size32 = hasSize32Ann(property);
       isarType = getIsarType(property.type, size32, property);
     } else {
-      final isarDartType = converter.supertype.typeArguments[1];
+      final isarDartType = converter.supertype!.typeArguments[1];
       final size32 = hasSize32Ann(converter);
       isarType = getIsarType(isarDartType, size32, converter);
     }
@@ -222,7 +222,7 @@ class IsarAnalyzer extends Builder {
     } else if (type.isDartCoreList) {
       final parameterizedType = type as ParameterizedType;
       final typeArguments = parameterizedType.typeArguments;
-      if (typeArguments != null && typeArguments.isNotEmpty) {
+      if (typeArguments.isNotEmpty) {
         final listType = typeArguments[0];
         if (listType.isDartCoreBool) {
           return IsarType.BoolList;
@@ -240,13 +240,13 @@ class IsarAnalyzer extends Builder {
           }
         } else if (listType.isDartCoreString) {
           return IsarType.StringList;
-        } else if (isDateTime(listType.element)) {
+        } else if (isDateTime(listType.element!)) {
           return IsarType.DateTimeList;
         }
       }
-    } else if (isDateTime(type.element)) {
+    } else if (isDateTime(type.element!)) {
       return IsarType.DateTime;
-    } else if (isUint8List(type.element)) {
+    } else if (isUint8List(type.element!)) {
       return IsarType.Bytes;
     }
     err('Property has unsupported type. Use @IsarIgnore to ignore the property.',
@@ -254,7 +254,8 @@ class IsarAnalyzer extends Builder {
     throw 'unreachable';
   }
 
-  ObjectLink analyzeObjectLink(FieldElement property, ClassElement converter) {
+  ObjectLink? analyzeObjectLink(
+      FieldElement property, ClassElement? converter) {
     if (!property.isPublic || property.isStatic || hasIgnoreAnn(property)) {
       return null;
     }
@@ -263,10 +264,10 @@ class IsarAnalyzer extends Builder {
       err('Converters are not supported for links.', property);
     }
 
-    final isLinks = property.type.element.name == 'IsarLinks';
+    final isLinks = property.type.element!.name == 'IsarLinks';
 
     final type = property.type as ParameterizedType;
-    if (type.typeArguments == null || type.typeArguments.length != 1) {
+    if (type.typeArguments.length != 1) {
       err('Illegal type arguments for link.', property);
     }
     final linkType = type.typeArguments[0];
@@ -285,13 +286,13 @@ class IsarAnalyzer extends Builder {
       dartName: property.displayName,
       isarName: isarName,
       targetDartName: backlinkAnn?.to,
-      targetCollectionDartName: linkType.element.name,
+      targetCollectionDartName: linkType.element!.name!,
       links: isLinks,
       backlink: backlinkAnn != null,
     );
   }
 
-  ObjectIndex analyzeObjectIndex(
+  ObjectIndex? analyzeObjectIndex(
       List<ObjectProperty> properties, FieldElement element) {
     final property = properties.firstWhere((it) => it.dartName == element.name);
 
@@ -324,12 +325,13 @@ class IsarAnalyzer extends Builder {
           properties.firstOrNullWhere((it) => it.isarName == c.property);
       if (compositeProperty == null) {
         err('Property does not exist: "${c.property}".', element);
+      } else {
+        indexProperties.add(ObjectIndexProperty(
+          property: compositeProperty,
+          indexType: c.indexType ?? defaultIndexType,
+          caseSensitive: c.caseSensitive ?? defaultCaseSensitive,
+        ));
       }
-      indexProperties.add(ObjectIndexProperty(
-        property: compositeProperty,
-        indexType: c.indexType ?? defaultIndexType,
-        caseSensitive: c.caseSensitive ?? defaultCaseSensitive,
-      ));
     }
 
     if (indexProperties.map((it) => it.property.isarName).distinct().length !=
@@ -367,11 +369,11 @@ class IsarAnalyzer extends Builder {
     for (var index in indexes) {
       for (var index2 in indexes) {
         if (identical(index, index2)) continue;
-        if (index.properties.length <= index2.properties.length) {
+        if (index.properties!.length <= index2.properties!.length) {
           final indexPropertyNames =
-              index.properties.map((it) => it.property.isarName);
-          final index2PropertyNames = index2.properties
-              .take(index.properties.length)
+              index.properties!.map((it) => it.property.isarName);
+          final index2PropertyNames = index2.properties!
+              .take(index.properties!.length)
               .map((it) => it.property.isarName);
           if (indexPropertyNames.contentEquals(index2PropertyNames)) {
             err('There are multiple indexes with the prefix "${indexPropertyNames.join(', ')}"',

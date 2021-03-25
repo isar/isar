@@ -198,7 +198,7 @@ String _generateDeserialize(ObjectInfo object) {
     final orNullList = property.nullable ? '' : '?? []';
     final orElNull = property.elementNullable ? 'OrNull' : '';
 
-    String deser;
+    String? deser;
     switch (property.isarType) {
       case IsarType.Bool:
         deser = 'reader.readBool$orNull(offsets[$i])';

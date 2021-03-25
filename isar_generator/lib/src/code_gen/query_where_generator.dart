@@ -5,6 +5,7 @@ import 'package:dartx/dartx.dart';
 String generateQueryWhere(ObjectInfo oi) {
   final primaryIndex = ObjectIndex(
     unique: true,
+    replace: true,
     properties: [
       ObjectIndexProperty(
         property: oi.oidProperty,
@@ -19,7 +20,7 @@ String generateQueryWhere(ObjectInfo oi) {
 
   for (var i = -1; i < oi.indexes.length; i++) {
     final index = i == -1 ? primaryIndex : oi.indexes[i];
-    if (index.properties.all((p) => p.indexType == IndexType.value)) {
+    if (index.properties!.all((p) => p.indexType == IndexType.value)) {
       code += generateAny(i, index, oi);
     }
   }
@@ -32,8 +33,8 @@ String generateQueryWhere(ObjectInfo oi) {
 
   for (var indexId = -1; indexId < oi.indexes.length; indexId++) {
     final index = indexId == -1 ? primaryIndex : oi.indexes[indexId];
-    for (var n = 0; n < index.properties.length; n++) {
-      var properties = index.properties.sublist(0, n + 1);
+    for (var n = 0; n < index.properties!.length; n++) {
+      var properties = index.properties!.sublist(0, n + 1);
 
       if (!properties.any((it) => it.property.isarType.isFloatDouble)) {
         code += generateWhereEqualTo(indexId, oi, properties);
@@ -109,9 +110,9 @@ String joinPropertiesToValues(
 
 String joinPropertiesToTypes(List<ObjectIndexProperty> indexProperties) {
   var types = indexProperties.map((indexProperty) {
-    String type;
+    String? type;
     if (indexProperty.property.isarType == IsarType.String) {
-      final lc = indexProperty.caseSensitive ? '' : 'LC';
+      final lc = indexProperty.caseSensitive! ? '' : 'LC';
       switch (indexProperty.indexType) {
         case IndexType.value:
           type = 'StringValue$lc';
@@ -132,7 +133,7 @@ String joinPropertiesToTypes(List<ObjectIndexProperty> indexProperties) {
 }
 
 String generateAny(int indexId, ObjectIndex index, ObjectInfo oi) {
-  final propertiesName = joinPropertiesToName(index.properties);
+  final propertiesName = joinPropertiesToName(index.properties!);
   return '''
   QueryBuilder<${oi.dartName}, QAfterWhere> any${propertiesName.capitalize()}() {
     return addWhereClause(WhereClause($indexId, []));

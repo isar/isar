@@ -27,10 +27,10 @@ bool hasIdAnn(Element element) {
   return _oidKeyChecker.hasAnnotationOfExact(element);
 }
 
-Name getNameAnn(Element element) {
+Name? getNameAnn(Element element) {
   var ann = _nameChecker.firstAnnotationOfExact(element);
   if (ann == null) return null;
-  return Name(ann.getField('name').toStringValue());
+  return Name(ann.getField('name')!.toStringValue()!);
 }
 
 List<DartObject> getTypeConverterAnns(Element element) {
@@ -41,7 +41,7 @@ List<DartObject> getTypeConverterAnns(Element element) {
         reviver.positionalArguments.isNotEmpty) {
       err(
         'TypeConverters with constructor arguments are not supported.',
-        ann.type.element,
+        ann.type!.element,
       );
     }
   }
@@ -55,16 +55,16 @@ bool hasZeroArgsConstructor(ClassElement element) {
 
 List<Index> getIndexAnns(Element element) {
   return _indexChecker.annotationsOfExact(element).map((ann) {
-    var rawComposite = ann.getField('composite').toListValue();
+    var rawComposite = ann.getField('composite')!.toListValue();
     final composite = <CompositeIndex>[];
     if (rawComposite != null) {
       for (var c in rawComposite) {
-        final property = c.getField('property').toStringValue();
-        final caseSensitive = c.getField('caseSensitive').toBoolValue();
-        final indexTypeField = c.getField('indexType');
-        IndexType indexType;
+        final property = c.getField('property')!.toStringValue()!;
+        final caseSensitive = c.getField('caseSensitive')!.toBoolValue();
+        final indexTypeField = c.getField('indexType')!;
+        IndexType? indexType;
         if (!indexTypeField.isNull) {
-          final indexTypeIndex = indexTypeField.getField('index').toIntValue();
+          final indexTypeIndex = indexTypeField.getField('index')!.toIntValue()!;
           indexType = IndexType.values[indexTypeIndex];
         }
         composite.add(CompositeIndex(
@@ -74,18 +74,18 @@ List<Index> getIndexAnns(Element element) {
         ));
       }
     }
-    final indexTypeField = ann.getField('indexType');
-    IndexType indexType;
+    final indexTypeField = ann.getField('indexType')!;
+    IndexType? indexType;
     if (!indexTypeField.isNull) {
-      final indexTypeIndex = indexTypeField.getField('index').toIntValue();
+      final indexTypeIndex = indexTypeField.getField('index')!.toIntValue()!;
       indexType = IndexType.values[indexTypeIndex];
     }
     return Index(
       composite: composite,
-      unique: ann.getField('unique').toBoolValue(),
-      replace: ann.getField('replace').toBoolValue(),
+      unique: ann.getField('unique')!.toBoolValue()!,
+      replace: ann.getField('replace')!.toBoolValue()!,
       indexType: indexType,
-      caseSensitive: ann.getField('caseSensitive').toBoolValue(),
+      caseSensitive: ann.getField('caseSensitive')!.toBoolValue(),
     );
   }).toList();
 }
@@ -94,12 +94,12 @@ bool isDateTime(Element element) => _dateTimeChecker.isExactly(element);
 
 bool isUint8List(Element element) => _uint8ListChecker.isExactly(element);
 
-Backlink getBacklinkAnn(Element element) {
+Backlink? getBacklinkAnn(Element element) {
   var ann = _backlinkChecker.firstAnnotationOfExact(element);
   if (ann == null) return null;
-  return Backlink(to: ann.getField('to').toStringValue());
+  return Backlink(to: ann.getField('to')!.toStringValue()!);
 }
 
-void err(String msg, [Element element]) {
+void err(String msg, [Element? element]) {
   throw InvalidGenerationSourceError(msg, element: element);
 }

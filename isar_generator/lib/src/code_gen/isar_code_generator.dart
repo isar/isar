@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:build/build.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:glob/glob.dart';
+import 'package:isar_generator/src/code_gen/isar_interface_generator.dart';
 import 'package:isar_generator/src/code_gen/object_adapter_generator.dart';
 import 'package:isar_generator/src/code_gen/query_distinct_by_generator.dart';
 import 'package:isar_generator/src/code_gen/query_link_generator.dart';
@@ -34,7 +35,8 @@ class IsarCodeGenerator extends Builder {
     'dart:typed_data',
     'dart:io',
     'package:isar/isar.dart',
-    'package:isar/isar_native.dart',
+    'package:isar/src/isar_native.dart',
+    'package:isar/src/isar_interface.dart',
     'package:isar/src/query_builder.dart',
     'package:ffi/ffi.dart',
     "import 'package:path/path.dart' as p",
@@ -152,6 +154,8 @@ class IsarCodeGenerator extends Builder {
     $queryLinkExtensions
     $querySortByExtensions
     $queryDistinctByExtensions
+
+    ${generateIsarInterface(objects)}
     ''';
 
     code = DartFormatter().format(code);
@@ -169,7 +173,7 @@ class IsarCodeGenerator extends Builder {
       if (_isar[name] != null) {
         return _isar[name]!;
       }
-      await Directory(path).create(recursive: true);
+      await Directory(p.join(path, name)).create(recursive: true);
       initializeIsarCore();
       IC.isar_connect_dart_api(NativeApi.postCObject);
 
@@ -179,7 +183,7 @@ class IsarCodeGenerator extends Builder {
       IC.isar_get_instance(isarPtrPtr, namePtr.cast());
       if (isarPtrPtr.value.address == 0) {
         final schemaPtr = _schema.toNativeUtf8();
-        Pointer<Uint8> encKeyPtr = Pointer.fromAddress(0);
+        var encKeyPtr = Pointer<Uint8>.fromAddress(0);
         if (encryptionKey != null) {
           assert(encryptionKey.length == 32,
               'Encryption keys need to contain 32 byte (256bit).');
@@ -203,7 +207,7 @@ class IsarCodeGenerator extends Builder {
       final isarPtr = isarPtrPtr.value;
       malloc.free(isarPtrPtr);
 
-      final isar = IsarImpl(path, isarPtr);
+      final isar = IsarImpl(name, isarPtr);
       _isar[name] = isar;
       
       final collectionPtrPtr = malloc<Pointer>();
@@ -232,7 +236,15 @@ class IsarCodeGenerator extends Builder {
 
     code += '''
       malloc.free(collectionPtrPtr);
+
+      IsarInterface.initialize(_GeneratedIsarInterface());
+      Isar.addCloseListener(_onClose);
+
       return isar;
+    }
+
+    void _onClose(String name) {
+      _isar.remove(name);
     }
     ''';
 
@@ -289,7 +301,7 @@ class IsarCodeGenerator extends Builder {
                 'unique': index.unique,
                 'replace': index.replace,
                 'properties': [
-                  for (var indexProperty in index.properties)
+                  for (var indexProperty in index.properties!)
                     {
                       'name': indexProperty.property.isarName,
                       'indexType': indexProperty.indexType.index,

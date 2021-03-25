@@ -7,10 +7,10 @@ part 'object_info.g.dart';
 part 'object_info.freezed.dart';
 
 @freezed
-abstract class ObjectInfo with _$ObjectInfo {
+class ObjectInfo with _$ObjectInfo {
   const factory ObjectInfo({
-    String dartName,
-    String isarName,
+    required String dartName,
+    required String isarName,
     @Default([]) List<ObjectProperty> properties,
     @Default([]) List<ObjectIndex> indexes,
     @Default([]) List<ObjectLink> links,
@@ -23,7 +23,7 @@ abstract class ObjectInfo with _$ObjectInfo {
 
 extension ObjectInfoX on ObjectInfo {
   ObjectProperty getProperty(String isarName) {
-    return properties.filter((it) => it.isarName == isarName).first;
+    return properties.filter(((it) => it.isarName == isarName)).first;
   }
 
   ObjectProperty get oidProperty => properties.firstWhere((it) => it.isId);
@@ -40,16 +40,16 @@ extension ObjectInfoX on ObjectInfo {
 }
 
 @freezed
-abstract class ObjectProperty with _$ObjectProperty {
+class ObjectProperty with _$ObjectProperty {
   const factory ObjectProperty({
-    String dartName,
-    String isarName,
-    String dartType,
-    IsarType isarType,
-    bool isId,
-    String converter,
-    bool nullable,
-    bool elementNullable,
+    required String dartName,
+    required String isarName,
+    required String dartType,
+    required IsarType isarType,
+    required bool isId,
+    String? converter,
+    required bool nullable,
+    required bool elementNullable,
   }) = _ObjectProperty;
 
   factory ObjectProperty.fromJson(Map<String, dynamic> json) =>
@@ -63,15 +63,15 @@ extension ObjectPropertyX on ObjectProperty {
 
   String toIsar(String input, ObjectInfo oi) {
     if (converter != null) {
-      return '${oi.adapterName}._${converter}.toIsar($input)';
+      return '${oi.adapterName}._$converter.toIsar($input)';
     } else {
       return input;
     }
   }
 
-  String fromIsar(String input, ObjectInfo oi) {
+  String? fromIsar(String? input, ObjectInfo oi) {
     if (converter != null) {
-      return '${oi.adapterName}._${converter}.fromIsar($input)';
+      return '${oi.adapterName}._$converter.fromIsar($input)';
     } else {
       return input;
     }
@@ -79,11 +79,11 @@ extension ObjectPropertyX on ObjectProperty {
 }
 
 @freezed
-abstract class ObjectIndexProperty with _$ObjectIndexProperty {
+class ObjectIndexProperty with _$ObjectIndexProperty {
   const factory ObjectIndexProperty({
-    ObjectProperty property,
-    IndexType indexType,
-    bool caseSensitive,
+    required ObjectProperty property,
+    required IndexType indexType,
+    required bool? caseSensitive,
   }) = _ObjectIndexProperty;
 
   factory ObjectIndexProperty.fromJson(Map<String, dynamic> json) =>
@@ -91,11 +91,11 @@ abstract class ObjectIndexProperty with _$ObjectIndexProperty {
 }
 
 @freezed
-abstract class ObjectIndex with _$ObjectIndex {
+class ObjectIndex with _$ObjectIndex {
   const factory ObjectIndex({
-    List<ObjectIndexProperty> properties,
-    bool unique,
-    bool replace,
+    required List<ObjectIndexProperty>? properties,
+    required bool? unique,
+    required bool? replace,
   }) = _ObjectIndex;
 
   factory ObjectIndex.fromJson(Map<String, dynamic> json) =>
@@ -103,15 +103,15 @@ abstract class ObjectIndex with _$ObjectIndex {
 }
 
 @freezed
-abstract class ObjectLink with _$ObjectLink {
+class ObjectLink with _$ObjectLink {
   const factory ObjectLink({
-    String dartName,
-    String isarName,
-    String targetDartName,
-    String targetCollectionDartName,
-    bool links,
-    bool backlink,
-    int linkIndex,
+    required String dartName,
+    required String isarName,
+    required String? targetDartName,
+    required String targetCollectionDartName,
+    required bool links,
+    required bool backlink,
+    @Default(-1) int linkIndex,
   }) = _ObjectLink;
 
   factory ObjectLink.fromJson(Map<String, dynamic> json) =>
@@ -206,7 +206,6 @@ extension IsarTypeX on IsarType {
       case IsarType.StringList:
         return 11;
     }
-    return -1;
   }
 
   String get name {

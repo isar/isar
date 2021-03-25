@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides
 
 part of 'object_info.dart';
 
@@ -8,6 +8,10 @@ part of 'object_info.dart';
 // **************************************************************************
 
 T _$identity<T>(T value) => value;
+
+final _privateConstructorUsedError = UnsupportedError(
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more informations: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
+
 ObjectInfo _$ObjectInfoFromJson(Map<String, dynamic> json) {
   return _ObjectInfo.fromJson(json);
 }
@@ -16,10 +20,9 @@ ObjectInfo _$ObjectInfoFromJson(Map<String, dynamic> json) {
 class _$ObjectInfoTearOff {
   const _$ObjectInfoTearOff();
 
-// ignore: unused_element
   _ObjectInfo call(
-      {String dartName,
-      String isarName,
+      {required String dartName,
+      required String isarName,
       List<ObjectProperty> properties = const [],
       List<ObjectIndex> indexes = const [],
       List<ObjectLink> links = const [],
@@ -34,28 +37,27 @@ class _$ObjectInfoTearOff {
     );
   }
 
-// ignore: unused_element
   ObjectInfo fromJson(Map<String, Object> json) {
     return ObjectInfo.fromJson(json);
   }
 }
 
 /// @nodoc
-// ignore: unused_element
 const $ObjectInfo = _$ObjectInfoTearOff();
 
 /// @nodoc
 mixin _$ObjectInfo {
-  String get dartName;
-  String get isarName;
-  List<ObjectProperty> get properties;
-  List<ObjectIndex> get indexes;
-  List<ObjectLink> get links;
-  List<String> get converterImports;
+  String get dartName => throw _privateConstructorUsedError;
+  String get isarName => throw _privateConstructorUsedError;
+  List<ObjectProperty> get properties => throw _privateConstructorUsedError;
+  List<ObjectIndex> get indexes => throw _privateConstructorUsedError;
+  List<ObjectLink> get links => throw _privateConstructorUsedError;
+  List<String> get converterImports => throw _privateConstructorUsedError;
 
-  Map<String, dynamic> toJson();
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $ObjectInfoCopyWith<ObjectInfo> get copyWith;
+  $ObjectInfoCopyWith<ObjectInfo> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -82,25 +84,38 @@ class _$ObjectInfoCopyWithImpl<$Res> implements $ObjectInfoCopyWith<$Res> {
 
   @override
   $Res call({
-    Object dartName = freezed,
-    Object isarName = freezed,
-    Object properties = freezed,
-    Object indexes = freezed,
-    Object links = freezed,
-    Object converterImports = freezed,
+    Object? dartName = freezed,
+    Object? isarName = freezed,
+    Object? properties = freezed,
+    Object? indexes = freezed,
+    Object? links = freezed,
+    Object? converterImports = freezed,
   }) {
     return _then(_value.copyWith(
-      dartName: dartName == freezed ? _value.dartName : dartName as String,
-      isarName: isarName == freezed ? _value.isarName : isarName as String,
+      dartName: dartName == freezed
+          ? _value.dartName
+          : dartName // ignore: cast_nullable_to_non_nullable
+              as String,
+      isarName: isarName == freezed
+          ? _value.isarName
+          : isarName // ignore: cast_nullable_to_non_nullable
+              as String,
       properties: properties == freezed
           ? _value.properties
-          : properties as List<ObjectProperty>,
-      indexes:
-          indexes == freezed ? _value.indexes : indexes as List<ObjectIndex>,
-      links: links == freezed ? _value.links : links as List<ObjectLink>,
+          : properties // ignore: cast_nullable_to_non_nullable
+              as List<ObjectProperty>,
+      indexes: indexes == freezed
+          ? _value.indexes
+          : indexes // ignore: cast_nullable_to_non_nullable
+              as List<ObjectIndex>,
+      links: links == freezed
+          ? _value.links
+          : links // ignore: cast_nullable_to_non_nullable
+              as List<ObjectLink>,
       converterImports: converterImports == freezed
           ? _value.converterImports
-          : converterImports as List<String>,
+          : converterImports // ignore: cast_nullable_to_non_nullable
+              as List<String>,
     ));
   }
 }
@@ -132,25 +147,38 @@ class __$ObjectInfoCopyWithImpl<$Res> extends _$ObjectInfoCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object dartName = freezed,
-    Object isarName = freezed,
-    Object properties = freezed,
-    Object indexes = freezed,
-    Object links = freezed,
-    Object converterImports = freezed,
+    Object? dartName = freezed,
+    Object? isarName = freezed,
+    Object? properties = freezed,
+    Object? indexes = freezed,
+    Object? links = freezed,
+    Object? converterImports = freezed,
   }) {
     return _then(_ObjectInfo(
-      dartName: dartName == freezed ? _value.dartName : dartName as String,
-      isarName: isarName == freezed ? _value.isarName : isarName as String,
+      dartName: dartName == freezed
+          ? _value.dartName
+          : dartName // ignore: cast_nullable_to_non_nullable
+              as String,
+      isarName: isarName == freezed
+          ? _value.isarName
+          : isarName // ignore: cast_nullable_to_non_nullable
+              as String,
       properties: properties == freezed
           ? _value.properties
-          : properties as List<ObjectProperty>,
-      indexes:
-          indexes == freezed ? _value.indexes : indexes as List<ObjectIndex>,
-      links: links == freezed ? _value.links : links as List<ObjectLink>,
+          : properties // ignore: cast_nullable_to_non_nullable
+              as List<ObjectProperty>,
+      indexes: indexes == freezed
+          ? _value.indexes
+          : indexes // ignore: cast_nullable_to_non_nullable
+              as List<ObjectIndex>,
+      links: links == freezed
+          ? _value.links
+          : links // ignore: cast_nullable_to_non_nullable
+              as List<ObjectLink>,
       converterImports: converterImports == freezed
           ? _value.converterImports
-          : converterImports as List<String>,
+          : converterImports // ignore: cast_nullable_to_non_nullable
+              as List<String>,
     ));
   }
 }
@@ -160,16 +188,12 @@ class __$ObjectInfoCopyWithImpl<$Res> extends _$ObjectInfoCopyWithImpl<$Res>
 /// @nodoc
 class _$_ObjectInfo implements _ObjectInfo {
   const _$_ObjectInfo(
-      {this.dartName,
-      this.isarName,
+      {required this.dartName,
+      required this.isarName,
       this.properties = const [],
       this.indexes = const [],
       this.links = const [],
-      this.converterImports = const []})
-      : assert(properties != null),
-        assert(indexes != null),
-        assert(links != null),
-        assert(converterImports != null);
+      this.converterImports = const []});
 
   factory _$_ObjectInfo.fromJson(Map<String, dynamic> json) =>
       _$_$_ObjectInfoFromJson(json);
@@ -242,8 +266,8 @@ class _$_ObjectInfo implements _ObjectInfo {
 
 abstract class _ObjectInfo implements ObjectInfo {
   const factory _ObjectInfo(
-      {String dartName,
-      String isarName,
+      {required String dartName,
+      required String isarName,
       List<ObjectProperty> properties,
       List<ObjectIndex> indexes,
       List<ObjectLink> links,
@@ -253,20 +277,21 @@ abstract class _ObjectInfo implements ObjectInfo {
       _$_ObjectInfo.fromJson;
 
   @override
-  String get dartName;
+  String get dartName => throw _privateConstructorUsedError;
   @override
-  String get isarName;
+  String get isarName => throw _privateConstructorUsedError;
   @override
-  List<ObjectProperty> get properties;
+  List<ObjectProperty> get properties => throw _privateConstructorUsedError;
   @override
-  List<ObjectIndex> get indexes;
+  List<ObjectIndex> get indexes => throw _privateConstructorUsedError;
   @override
-  List<ObjectLink> get links;
+  List<ObjectLink> get links => throw _privateConstructorUsedError;
   @override
-  List<String> get converterImports;
+  List<String> get converterImports => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
-  _$ObjectInfoCopyWith<_ObjectInfo> get copyWith;
+  _$ObjectInfoCopyWith<_ObjectInfo> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 ObjectProperty _$ObjectPropertyFromJson(Map<String, dynamic> json) {
@@ -277,16 +302,15 @@ ObjectProperty _$ObjectPropertyFromJson(Map<String, dynamic> json) {
 class _$ObjectPropertyTearOff {
   const _$ObjectPropertyTearOff();
 
-// ignore: unused_element
   _ObjectProperty call(
-      {String dartName,
-      String isarName,
-      String dartType,
-      IsarType isarType,
-      bool isId,
-      String converter,
-      bool nullable,
-      bool elementNullable}) {
+      {required String dartName,
+      required String isarName,
+      required String dartType,
+      required IsarType isarType,
+      required bool isId,
+      String? converter,
+      required bool nullable,
+      required bool elementNullable}) {
     return _ObjectProperty(
       dartName: dartName,
       isarName: isarName,
@@ -299,30 +323,29 @@ class _$ObjectPropertyTearOff {
     );
   }
 
-// ignore: unused_element
   ObjectProperty fromJson(Map<String, Object> json) {
     return ObjectProperty.fromJson(json);
   }
 }
 
 /// @nodoc
-// ignore: unused_element
 const $ObjectProperty = _$ObjectPropertyTearOff();
 
 /// @nodoc
 mixin _$ObjectProperty {
-  String get dartName;
-  String get isarName;
-  String get dartType;
-  IsarType get isarType;
-  bool get isId;
-  String get converter;
-  bool get nullable;
-  bool get elementNullable;
+  String get dartName => throw _privateConstructorUsedError;
+  String get isarName => throw _privateConstructorUsedError;
+  String get dartType => throw _privateConstructorUsedError;
+  IsarType get isarType => throw _privateConstructorUsedError;
+  bool get isId => throw _privateConstructorUsedError;
+  String? get converter => throw _privateConstructorUsedError;
+  bool get nullable => throw _privateConstructorUsedError;
+  bool get elementNullable => throw _privateConstructorUsedError;
 
-  Map<String, dynamic> toJson();
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $ObjectPropertyCopyWith<ObjectProperty> get copyWith;
+  $ObjectPropertyCopyWith<ObjectProperty> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -336,7 +359,7 @@ abstract class $ObjectPropertyCopyWith<$Res> {
       String dartType,
       IsarType isarType,
       bool isId,
-      String converter,
+      String? converter,
       bool nullable,
       bool elementNullable});
 }
@@ -352,26 +375,48 @@ class _$ObjectPropertyCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object dartName = freezed,
-    Object isarName = freezed,
-    Object dartType = freezed,
-    Object isarType = freezed,
-    Object isId = freezed,
-    Object converter = freezed,
-    Object nullable = freezed,
-    Object elementNullable = freezed,
+    Object? dartName = freezed,
+    Object? isarName = freezed,
+    Object? dartType = freezed,
+    Object? isarType = freezed,
+    Object? isId = freezed,
+    Object? converter = freezed,
+    Object? nullable = freezed,
+    Object? elementNullable = freezed,
   }) {
     return _then(_value.copyWith(
-      dartName: dartName == freezed ? _value.dartName : dartName as String,
-      isarName: isarName == freezed ? _value.isarName : isarName as String,
-      dartType: dartType == freezed ? _value.dartType : dartType as String,
-      isarType: isarType == freezed ? _value.isarType : isarType as IsarType,
-      isId: isId == freezed ? _value.isId : isId as bool,
-      converter: converter == freezed ? _value.converter : converter as String,
-      nullable: nullable == freezed ? _value.nullable : nullable as bool,
+      dartName: dartName == freezed
+          ? _value.dartName
+          : dartName // ignore: cast_nullable_to_non_nullable
+              as String,
+      isarName: isarName == freezed
+          ? _value.isarName
+          : isarName // ignore: cast_nullable_to_non_nullable
+              as String,
+      dartType: dartType == freezed
+          ? _value.dartType
+          : dartType // ignore: cast_nullable_to_non_nullable
+              as String,
+      isarType: isarType == freezed
+          ? _value.isarType
+          : isarType // ignore: cast_nullable_to_non_nullable
+              as IsarType,
+      isId: isId == freezed
+          ? _value.isId
+          : isId // ignore: cast_nullable_to_non_nullable
+              as bool,
+      converter: converter == freezed
+          ? _value.converter
+          : converter // ignore: cast_nullable_to_non_nullable
+              as String?,
+      nullable: nullable == freezed
+          ? _value.nullable
+          : nullable // ignore: cast_nullable_to_non_nullable
+              as bool,
       elementNullable: elementNullable == freezed
           ? _value.elementNullable
-          : elementNullable as bool,
+          : elementNullable // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -389,7 +434,7 @@ abstract class _$ObjectPropertyCopyWith<$Res>
       String dartType,
       IsarType isarType,
       bool isId,
-      String converter,
+      String? converter,
       bool nullable,
       bool elementNullable});
 }
@@ -407,26 +452,48 @@ class __$ObjectPropertyCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object dartName = freezed,
-    Object isarName = freezed,
-    Object dartType = freezed,
-    Object isarType = freezed,
-    Object isId = freezed,
-    Object converter = freezed,
-    Object nullable = freezed,
-    Object elementNullable = freezed,
+    Object? dartName = freezed,
+    Object? isarName = freezed,
+    Object? dartType = freezed,
+    Object? isarType = freezed,
+    Object? isId = freezed,
+    Object? converter = freezed,
+    Object? nullable = freezed,
+    Object? elementNullable = freezed,
   }) {
     return _then(_ObjectProperty(
-      dartName: dartName == freezed ? _value.dartName : dartName as String,
-      isarName: isarName == freezed ? _value.isarName : isarName as String,
-      dartType: dartType == freezed ? _value.dartType : dartType as String,
-      isarType: isarType == freezed ? _value.isarType : isarType as IsarType,
-      isId: isId == freezed ? _value.isId : isId as bool,
-      converter: converter == freezed ? _value.converter : converter as String,
-      nullable: nullable == freezed ? _value.nullable : nullable as bool,
+      dartName: dartName == freezed
+          ? _value.dartName
+          : dartName // ignore: cast_nullable_to_non_nullable
+              as String,
+      isarName: isarName == freezed
+          ? _value.isarName
+          : isarName // ignore: cast_nullable_to_non_nullable
+              as String,
+      dartType: dartType == freezed
+          ? _value.dartType
+          : dartType // ignore: cast_nullable_to_non_nullable
+              as String,
+      isarType: isarType == freezed
+          ? _value.isarType
+          : isarType // ignore: cast_nullable_to_non_nullable
+              as IsarType,
+      isId: isId == freezed
+          ? _value.isId
+          : isId // ignore: cast_nullable_to_non_nullable
+              as bool,
+      converter: converter == freezed
+          ? _value.converter
+          : converter // ignore: cast_nullable_to_non_nullable
+              as String?,
+      nullable: nullable == freezed
+          ? _value.nullable
+          : nullable // ignore: cast_nullable_to_non_nullable
+              as bool,
       elementNullable: elementNullable == freezed
           ? _value.elementNullable
-          : elementNullable as bool,
+          : elementNullable // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -436,14 +503,14 @@ class __$ObjectPropertyCopyWithImpl<$Res>
 /// @nodoc
 class _$_ObjectProperty implements _ObjectProperty {
   const _$_ObjectProperty(
-      {this.dartName,
-      this.isarName,
-      this.dartType,
-      this.isarType,
-      this.isId,
+      {required this.dartName,
+      required this.isarName,
+      required this.dartType,
+      required this.isarType,
+      required this.isId,
       this.converter,
-      this.nullable,
-      this.elementNullable});
+      required this.nullable,
+      required this.elementNullable});
 
   factory _$_ObjectProperty.fromJson(Map<String, dynamic> json) =>
       _$_$_ObjectPropertyFromJson(json);
@@ -459,7 +526,7 @@ class _$_ObjectProperty implements _ObjectProperty {
   @override
   final bool isId;
   @override
-  final String converter;
+  final String? converter;
   @override
   final bool nullable;
   @override
@@ -524,37 +591,38 @@ class _$_ObjectProperty implements _ObjectProperty {
 
 abstract class _ObjectProperty implements ObjectProperty {
   const factory _ObjectProperty(
-      {String dartName,
-      String isarName,
-      String dartType,
-      IsarType isarType,
-      bool isId,
-      String converter,
-      bool nullable,
-      bool elementNullable}) = _$_ObjectProperty;
+      {required String dartName,
+      required String isarName,
+      required String dartType,
+      required IsarType isarType,
+      required bool isId,
+      String? converter,
+      required bool nullable,
+      required bool elementNullable}) = _$_ObjectProperty;
 
   factory _ObjectProperty.fromJson(Map<String, dynamic> json) =
       _$_ObjectProperty.fromJson;
 
   @override
-  String get dartName;
+  String get dartName => throw _privateConstructorUsedError;
   @override
-  String get isarName;
+  String get isarName => throw _privateConstructorUsedError;
   @override
-  String get dartType;
+  String get dartType => throw _privateConstructorUsedError;
   @override
-  IsarType get isarType;
+  IsarType get isarType => throw _privateConstructorUsedError;
   @override
-  bool get isId;
+  bool get isId => throw _privateConstructorUsedError;
   @override
-  String get converter;
+  String? get converter => throw _privateConstructorUsedError;
   @override
-  bool get nullable;
+  bool get nullable => throw _privateConstructorUsedError;
   @override
-  bool get elementNullable;
+  bool get elementNullable => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
-  _$ObjectPropertyCopyWith<_ObjectProperty> get copyWith;
+  _$ObjectPropertyCopyWith<_ObjectProperty> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 ObjectIndexProperty _$ObjectIndexPropertyFromJson(Map<String, dynamic> json) {
@@ -565,9 +633,10 @@ ObjectIndexProperty _$ObjectIndexPropertyFromJson(Map<String, dynamic> json) {
 class _$ObjectIndexPropertyTearOff {
   const _$ObjectIndexPropertyTearOff();
 
-// ignore: unused_element
   _ObjectIndexProperty call(
-      {ObjectProperty property, IndexType indexType, bool caseSensitive}) {
+      {required ObjectProperty property,
+      required IndexType indexType,
+      required bool? caseSensitive}) {
     return _ObjectIndexProperty(
       property: property,
       indexType: indexType,
@@ -575,25 +644,24 @@ class _$ObjectIndexPropertyTearOff {
     );
   }
 
-// ignore: unused_element
   ObjectIndexProperty fromJson(Map<String, Object> json) {
     return ObjectIndexProperty.fromJson(json);
   }
 }
 
 /// @nodoc
-// ignore: unused_element
 const $ObjectIndexProperty = _$ObjectIndexPropertyTearOff();
 
 /// @nodoc
 mixin _$ObjectIndexProperty {
-  ObjectProperty get property;
-  IndexType get indexType;
-  bool get caseSensitive;
+  ObjectProperty get property => throw _privateConstructorUsedError;
+  IndexType get indexType => throw _privateConstructorUsedError;
+  bool? get caseSensitive => throw _privateConstructorUsedError;
 
-  Map<String, dynamic> toJson();
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $ObjectIndexPropertyCopyWith<ObjectIndexProperty> get copyWith;
+  $ObjectIndexPropertyCopyWith<ObjectIndexProperty> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -601,7 +669,8 @@ abstract class $ObjectIndexPropertyCopyWith<$Res> {
   factory $ObjectIndexPropertyCopyWith(
           ObjectIndexProperty value, $Res Function(ObjectIndexProperty) then) =
       _$ObjectIndexPropertyCopyWithImpl<$Res>;
-  $Res call({ObjectProperty property, IndexType indexType, bool caseSensitive});
+  $Res call(
+      {ObjectProperty property, IndexType indexType, bool? caseSensitive});
 
   $ObjectPropertyCopyWith<$Res> get property;
 }
@@ -617,26 +686,28 @@ class _$ObjectIndexPropertyCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object property = freezed,
-    Object indexType = freezed,
-    Object caseSensitive = freezed,
+    Object? property = freezed,
+    Object? indexType = freezed,
+    Object? caseSensitive = freezed,
   }) {
     return _then(_value.copyWith(
-      property:
-          property == freezed ? _value.property : property as ObjectProperty,
-      indexType:
-          indexType == freezed ? _value.indexType : indexType as IndexType,
+      property: property == freezed
+          ? _value.property
+          : property // ignore: cast_nullable_to_non_nullable
+              as ObjectProperty,
+      indexType: indexType == freezed
+          ? _value.indexType
+          : indexType // ignore: cast_nullable_to_non_nullable
+              as IndexType,
       caseSensitive: caseSensitive == freezed
           ? _value.caseSensitive
-          : caseSensitive as bool,
+          : caseSensitive // ignore: cast_nullable_to_non_nullable
+              as bool?,
     ));
   }
 
   @override
   $ObjectPropertyCopyWith<$Res> get property {
-    if (_value.property == null) {
-      return null;
-    }
     return $ObjectPropertyCopyWith<$Res>(_value.property, (value) {
       return _then(_value.copyWith(property: value));
     });
@@ -650,7 +721,8 @@ abstract class _$ObjectIndexPropertyCopyWith<$Res>
           $Res Function(_ObjectIndexProperty) then) =
       __$ObjectIndexPropertyCopyWithImpl<$Res>;
   @override
-  $Res call({ObjectProperty property, IndexType indexType, bool caseSensitive});
+  $Res call(
+      {ObjectProperty property, IndexType indexType, bool? caseSensitive});
 
   @override
   $ObjectPropertyCopyWith<$Res> get property;
@@ -669,18 +741,23 @@ class __$ObjectIndexPropertyCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object property = freezed,
-    Object indexType = freezed,
-    Object caseSensitive = freezed,
+    Object? property = freezed,
+    Object? indexType = freezed,
+    Object? caseSensitive = freezed,
   }) {
     return _then(_ObjectIndexProperty(
-      property:
-          property == freezed ? _value.property : property as ObjectProperty,
-      indexType:
-          indexType == freezed ? _value.indexType : indexType as IndexType,
+      property: property == freezed
+          ? _value.property
+          : property // ignore: cast_nullable_to_non_nullable
+              as ObjectProperty,
+      indexType: indexType == freezed
+          ? _value.indexType
+          : indexType // ignore: cast_nullable_to_non_nullable
+              as IndexType,
       caseSensitive: caseSensitive == freezed
           ? _value.caseSensitive
-          : caseSensitive as bool,
+          : caseSensitive // ignore: cast_nullable_to_non_nullable
+              as bool?,
     ));
   }
 }
@@ -690,7 +767,9 @@ class __$ObjectIndexPropertyCopyWithImpl<$Res>
 /// @nodoc
 class _$_ObjectIndexProperty implements _ObjectIndexProperty {
   const _$_ObjectIndexProperty(
-      {this.property, this.indexType, this.caseSensitive});
+      {required this.property,
+      required this.indexType,
+      required this.caseSensitive});
 
   factory _$_ObjectIndexProperty.fromJson(Map<String, dynamic> json) =>
       _$_$_ObjectIndexPropertyFromJson(json);
@@ -700,7 +779,7 @@ class _$_ObjectIndexProperty implements _ObjectIndexProperty {
   @override
   final IndexType indexType;
   @override
-  final bool caseSensitive;
+  final bool? caseSensitive;
 
   @override
   String toString() {
@@ -743,22 +822,23 @@ class _$_ObjectIndexProperty implements _ObjectIndexProperty {
 
 abstract class _ObjectIndexProperty implements ObjectIndexProperty {
   const factory _ObjectIndexProperty(
-      {ObjectProperty property,
-      IndexType indexType,
-      bool caseSensitive}) = _$_ObjectIndexProperty;
+      {required ObjectProperty property,
+      required IndexType indexType,
+      required bool? caseSensitive}) = _$_ObjectIndexProperty;
 
   factory _ObjectIndexProperty.fromJson(Map<String, dynamic> json) =
       _$_ObjectIndexProperty.fromJson;
 
   @override
-  ObjectProperty get property;
+  ObjectProperty get property => throw _privateConstructorUsedError;
   @override
-  IndexType get indexType;
+  IndexType get indexType => throw _privateConstructorUsedError;
   @override
-  bool get caseSensitive;
+  bool? get caseSensitive => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
-  _$ObjectIndexPropertyCopyWith<_ObjectIndexProperty> get copyWith;
+  _$ObjectIndexPropertyCopyWith<_ObjectIndexProperty> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 ObjectIndex _$ObjectIndexFromJson(Map<String, dynamic> json) {
@@ -769,9 +849,10 @@ ObjectIndex _$ObjectIndexFromJson(Map<String, dynamic> json) {
 class _$ObjectIndexTearOff {
   const _$ObjectIndexTearOff();
 
-// ignore: unused_element
   _ObjectIndex call(
-      {List<ObjectIndexProperty> properties, bool unique, bool replace}) {
+      {required List<ObjectIndexProperty>? properties,
+      required bool? unique,
+      required bool? replace}) {
     return _ObjectIndex(
       properties: properties,
       unique: unique,
@@ -779,25 +860,25 @@ class _$ObjectIndexTearOff {
     );
   }
 
-// ignore: unused_element
   ObjectIndex fromJson(Map<String, Object> json) {
     return ObjectIndex.fromJson(json);
   }
 }
 
 /// @nodoc
-// ignore: unused_element
 const $ObjectIndex = _$ObjectIndexTearOff();
 
 /// @nodoc
 mixin _$ObjectIndex {
-  List<ObjectIndexProperty> get properties;
-  bool get unique;
-  bool get replace;
+  List<ObjectIndexProperty>? get properties =>
+      throw _privateConstructorUsedError;
+  bool? get unique => throw _privateConstructorUsedError;
+  bool? get replace => throw _privateConstructorUsedError;
 
-  Map<String, dynamic> toJson();
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $ObjectIndexCopyWith<ObjectIndex> get copyWith;
+  $ObjectIndexCopyWith<ObjectIndex> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -805,7 +886,8 @@ abstract class $ObjectIndexCopyWith<$Res> {
   factory $ObjectIndexCopyWith(
           ObjectIndex value, $Res Function(ObjectIndex) then) =
       _$ObjectIndexCopyWithImpl<$Res>;
-  $Res call({List<ObjectIndexProperty> properties, bool unique, bool replace});
+  $Res call(
+      {List<ObjectIndexProperty>? properties, bool? unique, bool? replace});
 }
 
 /// @nodoc
@@ -818,16 +900,23 @@ class _$ObjectIndexCopyWithImpl<$Res> implements $ObjectIndexCopyWith<$Res> {
 
   @override
   $Res call({
-    Object properties = freezed,
-    Object unique = freezed,
-    Object replace = freezed,
+    Object? properties = freezed,
+    Object? unique = freezed,
+    Object? replace = freezed,
   }) {
     return _then(_value.copyWith(
       properties: properties == freezed
           ? _value.properties
-          : properties as List<ObjectIndexProperty>,
-      unique: unique == freezed ? _value.unique : unique as bool,
-      replace: replace == freezed ? _value.replace : replace as bool,
+          : properties // ignore: cast_nullable_to_non_nullable
+              as List<ObjectIndexProperty>?,
+      unique: unique == freezed
+          ? _value.unique
+          : unique // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      replace: replace == freezed
+          ? _value.replace
+          : replace // ignore: cast_nullable_to_non_nullable
+              as bool?,
     ));
   }
 }
@@ -839,7 +928,8 @@ abstract class _$ObjectIndexCopyWith<$Res>
           _ObjectIndex value, $Res Function(_ObjectIndex) then) =
       __$ObjectIndexCopyWithImpl<$Res>;
   @override
-  $Res call({List<ObjectIndexProperty> properties, bool unique, bool replace});
+  $Res call(
+      {List<ObjectIndexProperty>? properties, bool? unique, bool? replace});
 }
 
 /// @nodoc
@@ -854,16 +944,23 @@ class __$ObjectIndexCopyWithImpl<$Res> extends _$ObjectIndexCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object properties = freezed,
-    Object unique = freezed,
-    Object replace = freezed,
+    Object? properties = freezed,
+    Object? unique = freezed,
+    Object? replace = freezed,
   }) {
     return _then(_ObjectIndex(
       properties: properties == freezed
           ? _value.properties
-          : properties as List<ObjectIndexProperty>,
-      unique: unique == freezed ? _value.unique : unique as bool,
-      replace: replace == freezed ? _value.replace : replace as bool,
+          : properties // ignore: cast_nullable_to_non_nullable
+              as List<ObjectIndexProperty>?,
+      unique: unique == freezed
+          ? _value.unique
+          : unique // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      replace: replace == freezed
+          ? _value.replace
+          : replace // ignore: cast_nullable_to_non_nullable
+              as bool?,
     ));
   }
 }
@@ -872,17 +969,18 @@ class __$ObjectIndexCopyWithImpl<$Res> extends _$ObjectIndexCopyWithImpl<$Res>
 
 /// @nodoc
 class _$_ObjectIndex implements _ObjectIndex {
-  const _$_ObjectIndex({this.properties, this.unique, this.replace});
+  const _$_ObjectIndex(
+      {required this.properties, required this.unique, required this.replace});
 
   factory _$_ObjectIndex.fromJson(Map<String, dynamic> json) =>
       _$_$_ObjectIndexFromJson(json);
 
   @override
-  final List<ObjectIndexProperty> properties;
+  final List<ObjectIndexProperty>? properties;
   @override
-  final bool unique;
+  final bool? unique;
   @override
-  final bool replace;
+  final bool? replace;
 
   @override
   String toString() {
@@ -922,22 +1020,24 @@ class _$_ObjectIndex implements _ObjectIndex {
 
 abstract class _ObjectIndex implements ObjectIndex {
   const factory _ObjectIndex(
-      {List<ObjectIndexProperty> properties,
-      bool unique,
-      bool replace}) = _$_ObjectIndex;
+      {required List<ObjectIndexProperty>? properties,
+      required bool? unique,
+      required bool? replace}) = _$_ObjectIndex;
 
   factory _ObjectIndex.fromJson(Map<String, dynamic> json) =
       _$_ObjectIndex.fromJson;
 
   @override
-  List<ObjectIndexProperty> get properties;
+  List<ObjectIndexProperty>? get properties =>
+      throw _privateConstructorUsedError;
   @override
-  bool get unique;
+  bool? get unique => throw _privateConstructorUsedError;
   @override
-  bool get replace;
+  bool? get replace => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
-  _$ObjectIndexCopyWith<_ObjectIndex> get copyWith;
+  _$ObjectIndexCopyWith<_ObjectIndex> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 ObjectLink _$ObjectLinkFromJson(Map<String, dynamic> json) {
@@ -948,15 +1048,14 @@ ObjectLink _$ObjectLinkFromJson(Map<String, dynamic> json) {
 class _$ObjectLinkTearOff {
   const _$ObjectLinkTearOff();
 
-// ignore: unused_element
   _ObjectLink call(
-      {String dartName,
-      String isarName,
-      String targetDartName,
-      String targetCollectionDartName,
-      bool links,
-      bool backlink,
-      int linkIndex}) {
+      {required String dartName,
+      required String isarName,
+      required String? targetDartName,
+      required String targetCollectionDartName,
+      required bool links,
+      required bool backlink,
+      int linkIndex = -1}) {
     return _ObjectLink(
       dartName: dartName,
       isarName: isarName,
@@ -968,29 +1067,28 @@ class _$ObjectLinkTearOff {
     );
   }
 
-// ignore: unused_element
   ObjectLink fromJson(Map<String, Object> json) {
     return ObjectLink.fromJson(json);
   }
 }
 
 /// @nodoc
-// ignore: unused_element
 const $ObjectLink = _$ObjectLinkTearOff();
 
 /// @nodoc
 mixin _$ObjectLink {
-  String get dartName;
-  String get isarName;
-  String get targetDartName;
-  String get targetCollectionDartName;
-  bool get links;
-  bool get backlink;
-  int get linkIndex;
+  String get dartName => throw _privateConstructorUsedError;
+  String get isarName => throw _privateConstructorUsedError;
+  String? get targetDartName => throw _privateConstructorUsedError;
+  String get targetCollectionDartName => throw _privateConstructorUsedError;
+  bool get links => throw _privateConstructorUsedError;
+  bool get backlink => throw _privateConstructorUsedError;
+  int get linkIndex => throw _privateConstructorUsedError;
 
-  Map<String, dynamic> toJson();
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $ObjectLinkCopyWith<ObjectLink> get copyWith;
+  $ObjectLinkCopyWith<ObjectLink> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -1001,7 +1099,7 @@ abstract class $ObjectLinkCopyWith<$Res> {
   $Res call(
       {String dartName,
       String isarName,
-      String targetDartName,
+      String? targetDartName,
       String targetCollectionDartName,
       bool links,
       bool backlink,
@@ -1018,26 +1116,43 @@ class _$ObjectLinkCopyWithImpl<$Res> implements $ObjectLinkCopyWith<$Res> {
 
   @override
   $Res call({
-    Object dartName = freezed,
-    Object isarName = freezed,
-    Object targetDartName = freezed,
-    Object targetCollectionDartName = freezed,
-    Object links = freezed,
-    Object backlink = freezed,
-    Object linkIndex = freezed,
+    Object? dartName = freezed,
+    Object? isarName = freezed,
+    Object? targetDartName = freezed,
+    Object? targetCollectionDartName = freezed,
+    Object? links = freezed,
+    Object? backlink = freezed,
+    Object? linkIndex = freezed,
   }) {
     return _then(_value.copyWith(
-      dartName: dartName == freezed ? _value.dartName : dartName as String,
-      isarName: isarName == freezed ? _value.isarName : isarName as String,
+      dartName: dartName == freezed
+          ? _value.dartName
+          : dartName // ignore: cast_nullable_to_non_nullable
+              as String,
+      isarName: isarName == freezed
+          ? _value.isarName
+          : isarName // ignore: cast_nullable_to_non_nullable
+              as String,
       targetDartName: targetDartName == freezed
           ? _value.targetDartName
-          : targetDartName as String,
+          : targetDartName // ignore: cast_nullable_to_non_nullable
+              as String?,
       targetCollectionDartName: targetCollectionDartName == freezed
           ? _value.targetCollectionDartName
-          : targetCollectionDartName as String,
-      links: links == freezed ? _value.links : links as bool,
-      backlink: backlink == freezed ? _value.backlink : backlink as bool,
-      linkIndex: linkIndex == freezed ? _value.linkIndex : linkIndex as int,
+          : targetCollectionDartName // ignore: cast_nullable_to_non_nullable
+              as String,
+      links: links == freezed
+          ? _value.links
+          : links // ignore: cast_nullable_to_non_nullable
+              as bool,
+      backlink: backlink == freezed
+          ? _value.backlink
+          : backlink // ignore: cast_nullable_to_non_nullable
+              as bool,
+      linkIndex: linkIndex == freezed
+          ? _value.linkIndex
+          : linkIndex // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -1051,7 +1166,7 @@ abstract class _$ObjectLinkCopyWith<$Res> implements $ObjectLinkCopyWith<$Res> {
   $Res call(
       {String dartName,
       String isarName,
-      String targetDartName,
+      String? targetDartName,
       String targetCollectionDartName,
       bool links,
       bool backlink,
@@ -1070,26 +1185,43 @@ class __$ObjectLinkCopyWithImpl<$Res> extends _$ObjectLinkCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object dartName = freezed,
-    Object isarName = freezed,
-    Object targetDartName = freezed,
-    Object targetCollectionDartName = freezed,
-    Object links = freezed,
-    Object backlink = freezed,
-    Object linkIndex = freezed,
+    Object? dartName = freezed,
+    Object? isarName = freezed,
+    Object? targetDartName = freezed,
+    Object? targetCollectionDartName = freezed,
+    Object? links = freezed,
+    Object? backlink = freezed,
+    Object? linkIndex = freezed,
   }) {
     return _then(_ObjectLink(
-      dartName: dartName == freezed ? _value.dartName : dartName as String,
-      isarName: isarName == freezed ? _value.isarName : isarName as String,
+      dartName: dartName == freezed
+          ? _value.dartName
+          : dartName // ignore: cast_nullable_to_non_nullable
+              as String,
+      isarName: isarName == freezed
+          ? _value.isarName
+          : isarName // ignore: cast_nullable_to_non_nullable
+              as String,
       targetDartName: targetDartName == freezed
           ? _value.targetDartName
-          : targetDartName as String,
+          : targetDartName // ignore: cast_nullable_to_non_nullable
+              as String?,
       targetCollectionDartName: targetCollectionDartName == freezed
           ? _value.targetCollectionDartName
-          : targetCollectionDartName as String,
-      links: links == freezed ? _value.links : links as bool,
-      backlink: backlink == freezed ? _value.backlink : backlink as bool,
-      linkIndex: linkIndex == freezed ? _value.linkIndex : linkIndex as int,
+          : targetCollectionDartName // ignore: cast_nullable_to_non_nullable
+              as String,
+      links: links == freezed
+          ? _value.links
+          : links // ignore: cast_nullable_to_non_nullable
+              as bool,
+      backlink: backlink == freezed
+          ? _value.backlink
+          : backlink // ignore: cast_nullable_to_non_nullable
+              as bool,
+      linkIndex: linkIndex == freezed
+          ? _value.linkIndex
+          : linkIndex // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -1099,13 +1231,13 @@ class __$ObjectLinkCopyWithImpl<$Res> extends _$ObjectLinkCopyWithImpl<$Res>
 /// @nodoc
 class _$_ObjectLink implements _ObjectLink {
   const _$_ObjectLink(
-      {this.dartName,
-      this.isarName,
-      this.targetDartName,
-      this.targetCollectionDartName,
-      this.links,
-      this.backlink,
-      this.linkIndex});
+      {required this.dartName,
+      required this.isarName,
+      required this.targetDartName,
+      required this.targetCollectionDartName,
+      required this.links,
+      required this.backlink,
+      this.linkIndex = -1});
 
   factory _$_ObjectLink.fromJson(Map<String, dynamic> json) =>
       _$_$_ObjectLinkFromJson(json);
@@ -1115,13 +1247,14 @@ class _$_ObjectLink implements _ObjectLink {
   @override
   final String isarName;
   @override
-  final String targetDartName;
+  final String? targetDartName;
   @override
   final String targetCollectionDartName;
   @override
   final bool links;
   @override
   final bool backlink;
+  @JsonKey(defaultValue: -1)
   @override
   final int linkIndex;
 
@@ -1182,32 +1315,33 @@ class _$_ObjectLink implements _ObjectLink {
 
 abstract class _ObjectLink implements ObjectLink {
   const factory _ObjectLink(
-      {String dartName,
-      String isarName,
-      String targetDartName,
-      String targetCollectionDartName,
-      bool links,
-      bool backlink,
+      {required String dartName,
+      required String isarName,
+      required String? targetDartName,
+      required String targetCollectionDartName,
+      required bool links,
+      required bool backlink,
       int linkIndex}) = _$_ObjectLink;
 
   factory _ObjectLink.fromJson(Map<String, dynamic> json) =
       _$_ObjectLink.fromJson;
 
   @override
-  String get dartName;
+  String get dartName => throw _privateConstructorUsedError;
   @override
-  String get isarName;
+  String get isarName => throw _privateConstructorUsedError;
   @override
-  String get targetDartName;
+  String? get targetDartName => throw _privateConstructorUsedError;
   @override
-  String get targetCollectionDartName;
+  String get targetCollectionDartName => throw _privateConstructorUsedError;
   @override
-  bool get links;
+  bool get links => throw _privateConstructorUsedError;
   @override
-  bool get backlink;
+  bool get backlink => throw _privateConstructorUsedError;
   @override
-  int get linkIndex;
+  int get linkIndex => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
-  _$ObjectLinkCopyWith<_ObjectLink> get copyWith;
+  _$ObjectLinkCopyWith<_ObjectLink> get copyWith =>
+      throw _privateConstructorUsedError;
 }

@@ -44,7 +44,8 @@ String generateEqualTo(ObjectInfo oi, ObjectProperty p, int pIndex) {
       ConditionType.Eq,
       $pIndex,
       '${p.isarType.name}',
-      ${p.toIsar('value', oi)},
+      lower: ${p.toIsar('value', oi)},
+      upper: ${p.toIsar('value', oi)},
     ));
   }''';
 }
@@ -72,8 +73,8 @@ String generateGreaterThan(ObjectInfo oi, ObjectProperty p, int pIndex) {
       ConditionType.Gt,
       $pIndex,
       '${p.isarType.name}',
-      ${p.toIsar('value', oi)},
-      includeValue: include,
+      lower: ${p.toIsar('value', oi)},
+      includeLower: include,
     ));
   }''';
 }
@@ -85,8 +86,8 @@ String generateLessThan(ObjectInfo oi, ObjectProperty p, int pIndex) {
       ConditionType.Lt,
       $pIndex,
       '${p.isarType.name}',
-      ${p.toIsar('value', oi)},
-      includeValue: include,
+      upper: ${p.toIsar('value', oi)},
+      includeUpper: include,
     ));
   }''';
 }
@@ -98,10 +99,10 @@ String generateBetween(ObjectInfo oi, ObjectProperty p, int pIndex) {
       ConditionType.Between,
       $pIndex,
       '${p.isarType.name}',
-      ${p.toIsar('lower', oi)},
-      includeValue: includeLower,
-      value2: ${p.toIsar('upper', oi)},
-      includeValue2: includeUpper,
+      lower: ${p.toIsar('lower', oi)},
+      includeLower: includeLower,
+      upper: ${p.toIsar('upper', oi)},
+      includeUpper: includeUpper,
     ));
   }''';
 }
@@ -113,7 +114,8 @@ String generateIsNull(ObjectInfo oi, ObjectProperty p, int pIndex) {
       ConditionType.Eq,
       $pIndex,
       '${p.isarType.name}',
-      null,
+      lower: null,
+      upper: null,
     ));
   }''';
 }
@@ -125,7 +127,8 @@ String generateStringEqualTo(ObjectInfo oi, ObjectProperty p, int pIndex) {
       ConditionType.Eq,
       $pIndex,
       '${p.isarType.name}',
-      ${p.toIsar('value', oi)},
+      lower: ${p.toIsar('value', oi)},
+      upper: ${p.toIsar('value', oi)},
       caseSensitive: caseSensitive,
     ));
   }''';
@@ -160,7 +163,7 @@ String generateStringStartsWith(ObjectInfo oi, ObjectProperty p, int pIndex) {
       ConditionType.StartsWith,
       $pIndex,
       'String',
-      convertedValue,
+      lower: convertedValue,
       caseSensitive: caseSensitive,
     ));
   }''';
@@ -179,7 +182,7 @@ String generateStringEndsWith(ObjectInfo oi, ObjectProperty p, int pIndex) {
       ConditionType.EndsWith,
       $pIndex,
       'String',
-      convertedValue,
+      lower: convertedValue,
       caseSensitive: caseSensitive,
     ));
   }''';
@@ -198,7 +201,7 @@ String generateStringContains(ObjectInfo oi, ObjectProperty p, int pIndex) {
       ConditionType.Contains,
       $pIndex,
       'String',
-      convertedValue,
+      lower: convertedValue,
       caseSensitive: caseSensitive,
     ));
   }''';
@@ -211,7 +214,7 @@ String generateStringMatches(ObjectInfo oi, ObjectProperty p, int pIndex) {
       ConditionType.Matches,
       $pIndex,
       'String',
-      pattern,
+      lower: pattern,
       caseSensitive: caseSensitive,
     ));
   }''';

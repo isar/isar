@@ -10,27 +10,22 @@ _$_ObjectInfo _$_$_ObjectInfoFromJson(Map<String, dynamic> json) {
   return _$_ObjectInfo(
     dartName: json['dartName'] as String,
     isarName: json['isarName'] as String,
-    properties: (json['properties'] as List)
-            ?.map((e) => e == null
-                ? null
-                : ObjectProperty.fromJson(e as Map<String, dynamic>))
-            ?.toList() ??
+    properties: (json['properties'] as List<dynamic>?)
+            ?.map((e) => ObjectProperty.fromJson(e as Map<String, dynamic>))
+            .toList() ??
         [],
-    indexes: (json['indexes'] as List)
-            ?.map((e) => e == null
-                ? null
-                : ObjectIndex.fromJson(e as Map<String, dynamic>))
-            ?.toList() ??
+    indexes: (json['indexes'] as List<dynamic>?)
+            ?.map((e) => ObjectIndex.fromJson(e as Map<String, dynamic>))
+            .toList() ??
         [],
-    links: (json['links'] as List)
-            ?.map((e) => e == null
-                ? null
-                : ObjectLink.fromJson(e as Map<String, dynamic>))
-            ?.toList() ??
+    links: (json['links'] as List<dynamic>?)
+            ?.map((e) => ObjectLink.fromJson(e as Map<String, dynamic>))
+            .toList() ??
         [],
-    converterImports:
-        (json['converterImports'] as List)?.map((e) => e as String)?.toList() ??
-            [],
+    converterImports: (json['converterImports'] as List<dynamic>?)
+            ?.map((e) => e as String)
+            .toList() ??
+        [],
   );
 }
 
@@ -49,9 +44,9 @@ _$_ObjectProperty _$_$_ObjectPropertyFromJson(Map<String, dynamic> json) {
     dartName: json['dartName'] as String,
     isarName: json['isarName'] as String,
     dartType: json['dartType'] as String,
-    isarType: _$enumDecodeNullable(_$IsarTypeEnumMap, json['isarType']),
+    isarType: _$enumDecode(_$IsarTypeEnumMap, json['isarType']),
     isId: json['isId'] as bool,
-    converter: json['converter'] as String,
+    converter: json['converter'] as String?,
     nullable: json['nullable'] as bool,
     elementNullable: json['elementNullable'] as bool,
   );
@@ -69,36 +64,30 @@ Map<String, dynamic> _$_$_ObjectPropertyToJson(_$_ObjectProperty instance) =>
       'elementNullable': instance.elementNullable,
     };
 
-T _$enumDecode<T>(
-  Map<T, dynamic> enumValues,
-  dynamic source, {
-  T unknownValue,
+K _$enumDecode<K, V>(
+  Map<K, V> enumValues,
+  Object? source, {
+  K? unknownValue,
 }) {
   if (source == null) {
-    throw ArgumentError('A value must be provided. Supported values: '
-        '${enumValues.values.join(', ')}');
+    throw ArgumentError(
+      'A value must be provided. Supported values: '
+      '${enumValues.values.join(', ')}',
+    );
   }
 
-  final value = enumValues.entries
-      .singleWhere((e) => e.value == source, orElse: () => null)
-      ?.key;
-
-  if (value == null && unknownValue == null) {
-    throw ArgumentError('`$source` is not one of the supported values: '
-        '${enumValues.values.join(', ')}');
-  }
-  return value ?? unknownValue;
-}
-
-T _$enumDecodeNullable<T>(
-  Map<T, dynamic> enumValues,
-  dynamic source, {
-  T unknownValue,
-}) {
-  if (source == null) {
-    return null;
-  }
-  return _$enumDecode<T>(enumValues, source, unknownValue: unknownValue);
+  return enumValues.entries.singleWhere(
+    (e) => e.value == source,
+    orElse: () {
+      if (unknownValue == null) {
+        throw ArgumentError(
+          '`$source` is not one of the supported values: '
+          '${enumValues.values.join(', ')}',
+        );
+      }
+      return MapEntry(unknownValue, enumValues.values.first);
+    },
+  ).key;
 }
 
 const _$IsarTypeEnumMap = {
@@ -122,11 +111,9 @@ const _$IsarTypeEnumMap = {
 _$_ObjectIndexProperty _$_$_ObjectIndexPropertyFromJson(
     Map<String, dynamic> json) {
   return _$_ObjectIndexProperty(
-    property: json['property'] == null
-        ? null
-        : ObjectProperty.fromJson(json['property'] as Map<String, dynamic>),
-    indexType: _$enumDecodeNullable(_$IndexTypeEnumMap, json['indexType']),
-    caseSensitive: json['caseSensitive'] as bool,
+    property: ObjectProperty.fromJson(json['property'] as Map<String, dynamic>),
+    indexType: _$enumDecode(_$IndexTypeEnumMap, json['indexType']),
+    caseSensitive: json['caseSensitive'] as bool?,
   );
 }
 
@@ -146,13 +133,11 @@ const _$IndexTypeEnumMap = {
 
 _$_ObjectIndex _$_$_ObjectIndexFromJson(Map<String, dynamic> json) {
   return _$_ObjectIndex(
-    properties: (json['properties'] as List)
-        ?.map((e) => e == null
-            ? null
-            : ObjectIndexProperty.fromJson(e as Map<String, dynamic>))
-        ?.toList(),
-    unique: json['unique'] as bool,
-    replace: json['replace'] as bool,
+    properties: (json['properties'] as List<dynamic>?)
+        ?.map((e) => ObjectIndexProperty.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    unique: json['unique'] as bool?,
+    replace: json['replace'] as bool?,
   );
 }
 
@@ -167,11 +152,11 @@ _$_ObjectLink _$_$_ObjectLinkFromJson(Map<String, dynamic> json) {
   return _$_ObjectLink(
     dartName: json['dartName'] as String,
     isarName: json['isarName'] as String,
-    targetDartName: json['targetDartName'] as String,
+    targetDartName: json['targetDartName'] as String?,
     targetCollectionDartName: json['targetCollectionDartName'] as String,
     links: json['links'] as bool,
     backlink: json['backlink'] as bool,
-    linkIndex: json['linkIndex'] as int,
+    linkIndex: json['linkIndex'] as int? ?? -1,
   );
 }
 
