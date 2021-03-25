@@ -64,7 +64,7 @@ dev_dependencies:
 
 The [Isar Inspector](https://github.com/isar/isar-inspector) allows you to inspect the Isar instances & collections of your app in real time. You can execute queries, switch between instances and sort the data.
 
-<img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/isar_inspector.png?sanitize=true">
+<img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/isar-inspector.png?sanitize=true">
 
 ## Schema definition
 ```dart
