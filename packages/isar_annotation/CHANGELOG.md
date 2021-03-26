@@ -1,3 +1,6 @@
+## 0.2.0
+- Backlink support
+
 ## 0.1.0
 - Rename `@ObjectId` to `@Id`
 - `@Backlink` annotation

@@ -50,19 +50,19 @@
 
 ```yaml
 dependencies:
-  isar: <current_version>
-  isar_flutter_libs: <current_version> # contains the binaries
-  isar_connect: <current_version> # if you want to use the Isar Inspector
+  isar: 0.2.0
+  isar_flutter_libs: 0.2.0 # contains the binaries
+  isar_connect: 0.2.0 # if you want to use the Isar Inspector
 
 dev_dependencies:
-  isar_generator: <current_version>
+  isar_generator: 0.2.0
   build_runner: any
 ```
 
 
 ## Isar Inspector
 
-The [Isar Inspector](https://github.com/isar/isar-inspector) allows you to inspect the Isar instances & collections of your app in real time. You can execute queries, switch between instances and sort the data.
+The Isar Inspector allows you to inspect the Isar instances & collections of your app in real time. You can execute queries, switch between instances and sort the data.
 
 <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/isar-inspector.png?sanitize=true">
 
@@ -85,7 +85,6 @@ All basic crud operations are available via the IsarCollection.
 
 ```dart
 final newPost = Post()
-  ..id = uuid.v4()
   ..title = 'Amazing new database'
   ..comments = ['First'];
 
@@ -93,10 +92,10 @@ await isar.writeTxn((isar) {
   await isar.posts.put(newPost); // insert
 });
 
-final existingPost = await isar.get(newPost.id); // get
+final existingPost = await isar.get(newPost.id!); // get
 
 await isar.writeTxn((isar) {
-  await isar.posts.delete(existingPost.id); // delete
+  await isar.posts.delete(existingPost.id!); // delete
 });
 ```
 
@@ -129,7 +128,7 @@ You can easily define relationships between objects. In Isar they are called lin
 ```dart
 @IsarCollection()
 class Teacher {
-    int id;
+    int? id;
 
     String subject;
 
@@ -139,7 +138,7 @@ class Teacher {
 
 @IsarCollection()
 class Student {
-    int id;
+    int? id;
 
     String name;
 

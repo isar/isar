@@ -1,3 +1,7 @@
+## 0.2.0
+- Link support
+- Many improvements and fixes
+
 ## 0.1.0
 - Support for links and backlinks
 

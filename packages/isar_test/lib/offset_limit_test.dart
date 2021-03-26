@@ -74,7 +74,7 @@ void run(IsarTestContext context) {
 
     context.test('big offset and big limit', () async {
       final result = col.where().offset(300).limit(5).findAll();
-      await qEqual(result, users.sublist(3));
+      await qEqual(result, []);
     });
   });
 }
