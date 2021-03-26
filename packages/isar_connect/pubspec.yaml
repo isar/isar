@@ -1,0 +1,13 @@
+name: isar_connect
+description: Use this package to connect your app to the Isar Inspector.
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dependencies:
+  isar: any
+  pedantic: ^1.9.0
+
+dependency_overrides:
+  isar: 
+    path: ../isar
