@@ -62,7 +62,7 @@ dev_dependencies:
 
 ## Isar Inspector
 
-The Isar Inspector allows you to inspect the Isar instances & collections of your app in real time. You can execute queries, switch between instances and sort the data.
+The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to inspect the Isar instances & collections of your app in real time. You can execute queries, switch between instances and sort the data.
 
 <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/isar-inspector.png?sanitize=true">
 
