@@ -44,7 +44,7 @@
 - 💃 **Static typing**. Compile-time checked and autocompleted queries
 - 🔒 **Strong encryption**. Optional authenticated AES-256 GCM encryption
 
-### Add to pubspec.yaml
+### 1. Add to pubspec.yaml
 
 ```yaml
 dependencies:
@@ -57,6 +57,24 @@ dev_dependencies:
   build_runner: any
 ```
 
+### 2. Define a Collection
+```dart
+@Collection()
+class Post {
+  int? id; // auto increment id
+
+  @Index(indexType: IndexType.words) // Search index
+  String title;
+
+  Links<Comment> comments; // Link to other collection
+}
+```
+
+### 3. Open an instance
+```dart
+final isar = await openIsar();
+```
+
 
 ## Isar Inspector
 
@@ -64,18 +82,7 @@ The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to
 
 <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/isar-inspector.png?sanitize=true">
 
-## Schema definition
-```dart
-@Collection()
-class Post {
-  int? id; // auto increment id
 
-  @Index(indexType: IndexType.words, caseSensitive: false) // Search index
-  String title;
-
-  List<String> comments
-}
-```
 
 ## CRUD operations
 
