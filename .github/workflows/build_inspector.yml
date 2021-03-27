@@ -1,0 +1,29 @@
+name: Build Inspector
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build_and_upload:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: subosito/flutter-action@v1
+      with:
+        channel: 'stable'
+    - name: Build
+      working-directory: packages/isar_inspector
+      run: flutter build macos
+    - name: Compress
+      working-directory: packages/isar_inspector/build/macos/Build/Products/Release/
+      run: zip -r -y inspector.zip "Isar Inspector.app"
+    - name: Upload binary
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: packages/isar_inspector/build/macos/Build/Products/Release/inspector.zip
+        asset_name: Isar Inspector.zip
+        tag: ${{ github.ref }}
