@@ -16,7 +16,9 @@ jobs:
         channel: 'stable'
     - name: Build
       working-directory: packages/isar_inspector
-      run: flutter build macos
+      run: |
+        flutter config --enable-macos-desktop
+        flutter build macos
     - name: Compress
       working-directory: packages/isar_inspector/build/macos/Build/Products/Release/
       run: zip -r -y inspector.zip "Isar Inspector.app"
