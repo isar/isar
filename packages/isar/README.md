@@ -17,7 +17,7 @@
   </a>
 </p>
 
-<p align="center">🚧 Very unstable and not ready for serious usage 🚧</p>
+<p align="center">🚧 Alpha version - Use with care. 🚧</p>
 
 <p align="center">
   <a href="https://isar.dev">Quickstart</a> •
@@ -35,15 +35,13 @@
 
 ### Features
 
-- ⚡️ **Launch your app instantly** no matter how much data you have
-- 📈 **Highly scalable** from hundreds to tens of thousands of records
-- 😎 **Lazy loaded**. Only load data when you need it
+- 💙 **Made for Flutter**. Easy to use and zero configuration
+- 🏎️ **Highly scalable** from hundreds to hundreds of thousands of records
 - 🔎 **Full-text search**. Make searching fast and fun
 - 📱 **Multiplatform**. iOS, Android, Desktop and the web (soon™)
-- 💙 **Made for Flutter**. Easily use it in your Flutter app
 - 🧪 **ACID semantics**. Rely on consistency
 - ⏱ **Asynchronous**. Parallel query operations & multi-isolate support
-- ⚠️ **Static typing**. Compile-time checked and autocompleted queries
+- 💃 **Static typing**. Compile-time checked and autocompleted queries
 - 🔒 **Strong encryption**. Optional authenticated AES-256 GCM encryption
 
 ### Add to pubspec.yaml
