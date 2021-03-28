@@ -1,7 +1,5 @@
 import 'package:isar/isar.dart';
 
-import 'package:isar_annotation/isar_annotation.dart';
-
 @Collection()
 class ConverterModel {
   @Id()

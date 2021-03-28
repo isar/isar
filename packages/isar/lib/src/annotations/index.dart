@@ -1,4 +1,4 @@
-part of isar_annotation;
+part of isar;
 
 enum IndexType {
   value,

@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   isar: 0.2.0
+  path: ^1.8.0
   path_provider: ^2.0.1
 
 flutter:

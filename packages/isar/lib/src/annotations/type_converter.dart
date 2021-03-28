@@ -1,4 +1,4 @@
-part of isar_annotation;
+part of isar;
 
 abstract class TypeConverter<T, I> {
   const TypeConverter();

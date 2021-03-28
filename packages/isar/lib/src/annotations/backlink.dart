@@ -1,4 +1,4 @@
-part of isar_annotation;
+part of isar;
 
 class Backlink {
   final String to;

@@ -5,7 +5,15 @@ import 'dart:typed_data';
 
 import 'package:isar/src/query_builder.dart';
 import 'package:isar/src/isar_platform.dart';
-export 'package:isar_annotation/isar_annotation.dart';
+
+part 'package:isar/src/annotations/backlink.dart';
+part 'package:isar/src/annotations/collection.dart';
+part 'package:isar/src/annotations/id.dart';
+part 'package:isar/src/annotations/ignore.dart';
+part 'package:isar/src/annotations/index.dart';
+part 'package:isar/src/annotations/name.dart';
+part 'package:isar/src/annotations/size32.dart';
+part 'package:isar/src/annotations/type_converter.dart';
 
 part 'package:isar/src/isar_collection.dart';
 part 'package:isar/src/isar_error.dart';
