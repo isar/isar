@@ -15,12 +15,13 @@ jobs:
         with:
           channel: 'stable'
       
-      - name: Install dependencies
-        run: flutter pub get
-        working-directory: packages/isar_test
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
       - name: Run isar_generator
-        run: flutter pub run build_runner build --verbose
+        run: |
+          flutter pub get
+          flutter pub run build_runner build --verbose
         working-directory: packages/isar_test
         
       - name: Download binaries
