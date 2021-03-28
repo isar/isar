@@ -91,7 +91,7 @@ extension QueryExecute<OBJ> on QueryBuilder<OBJ, QQueryOperations> {
     return build().deleteAllSync();
   }
 
-  Stream<List<OBJ>?> watch({bool lazy = true}) {
-    return build().watch(lazy: lazy);
+  Stream<List<OBJ>?> watch({bool lazy = true, bool initialReturn = false}) {
+    return build().watch(lazy: lazy, initialReturn: initialReturn);
   }
 }
