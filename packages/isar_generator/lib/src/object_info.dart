@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:isar/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:dartx/dartx.dart';
-import 'package:isar_annotation/isar_annotation.dart';
 
 part 'object_info.g.dart';
 part 'object_info.freezed.dart';

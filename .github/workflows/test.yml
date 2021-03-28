@@ -14,9 +14,6 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
-      
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
 
       - name: Run isar_generator
         run: |

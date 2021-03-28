@@ -9,7 +9,6 @@ environment:
 
 dependencies:
   isar: 0.2.0
-  isar_annotation: 0.2.0
   build: ^2.0.0
   source_gen: ^1.0.0
   analyzer: ^1.0.0
@@ -24,3 +23,7 @@ dev_dependencies:
   json_serializable: ^4.0.0
   build_runner: ^1.12.1
   freezed: ^0.14.1
+
+dependency_overrides:
+  isar:
+    path: ../isar
