@@ -20,7 +20,7 @@ jobs:
         working-directory: packages/isar_test
 
       - name: Run isar_generator
-        run: flutter pub run build_runner build
+        run: flutter pub run build_runner build --verbose
         working-directory: packages/isar_test
         
       - name: Download binaries
