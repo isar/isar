@@ -26,14 +26,11 @@ class IsarAnalyzer extends Builder {
         .map((e) => generateObjectInfo(e.element)!.toJson())
         .toList();
 
-    print('analyzed');
-
     if (objectsJson.isEmpty) return;
 
     final json = JsonEncoder().convert(objectsJson);
     await buildStep.writeAsString(
         buildStep.inputId.changeExtension('.isarobject.json'), json);
-    print('saved');
   }
 
   ObjectInfo? generateObjectInfo(Element element) {

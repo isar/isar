@@ -18,7 +18,7 @@ jobs:
       - name: Run isar_generator
         run: |
           flutter pub get
-          flutter pub run build_runner build --verbose
+          flutter pub run build_runner build
         working-directory: packages/isar_test
         
       - name: Download binaries

@@ -14,11 +14,13 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
+
       - name: Run isar_generator
         run: |
           flutter pub get
-          flutter pub run build_runner build --verbose
+          flutter pub run build_runner build
         working-directory: packages/isar_test
+
       - name: Run Flutter Driver tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
