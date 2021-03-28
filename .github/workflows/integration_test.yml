@@ -3,35 +3,6 @@ name: Integration test
 on: [push, pull_request]
 
 jobs:
-  drive_ios:
-    strategy:
-      matrix:
-        device:
-        - "iPhone 8 (13.7)"
-        - "iPhone 11 Pro Max (13.7)"
-      fail-fast: false
-    runs-on: macOS-latest
-    steps:
-      - name: List all simulators
-        run: xcrun instruments -s
-      - name: Start Simulator
-        run: |
-          UDID=$(
-            xcrun instruments -s |
-            awk \
-              -F ' *[][]' \
-              -v 'device=${{ matrix.device }}' \
-              '$1 == device { print $2 }'
-          )
-          xcrun simctl boot "${UDID:?No Simulator with this name found}"
-      - uses: actions/checkout@v1
-      - uses: subosito/flutter-action@v1
-        with:
-          channel: 'stable'
-      - name: Run Flutter Driver tests
-        run: flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart
-        working-directory: isar_test
-
   drive_android:
     runs-on: macos-latest
     strategy:
@@ -50,4 +21,5 @@ jobs:
           target: ${{ matrix.target }}
           arch: x86_64
           profile: Nexus 6
-          script: cd isar_test; flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart
+          working-directory: packages/isar_test
+          script: flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart

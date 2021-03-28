@@ -13,13 +13,14 @@ dependencies:
   isar: any
   isar_flutter_libs: any
   path_provider: any
+  integration_test: any
 
 dev_dependencies:
   build_runner: any
   isar_generator: any
-  flutter_driver:
-    sdk: flutter
   test: any
+  flutter_test:
+    sdk: flutter
 
 dependency_overrides:
   isar:

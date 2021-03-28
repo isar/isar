@@ -2,38 +2,37 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_driver/driver_extension.dart';
+import 'package:integration_test/integration_test.dart';
 import 'package:isar_test/isar_test_context.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:isar_test/all_test.dart' as tests;
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  final completer = Completer<String>();
-  enableFlutterDriverExtension(handler: (_) => completer.future);
+void main() async {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
+  final completer = Completer<bool>();
+  executeTests(completer);
+
+  testWidgets('Isar', (WidgetTester tester) async {
+    final result = await completer.future;
+    expect(result, true);
+  });
+}
+
+void executeTests(Completer<bool> completer) {
   final context = IntegrationContext(false);
   final encryptionContext = IntegrationContext(true);
 
-  tearDownAll(() {
-    final result = context.success && encryptionContext.success;
-    completer.complete(result.toString());
-  });
+  group('Integration test', () {
+    tearDownAll(() {
+      final result = context.success && encryptionContext.success;
+      completer.complete(result);
+    });
 
-  group('driver', () {
     tests.run(context);
     tests.run(encryptionContext);
   });
-
-  runApp(
-    MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Running Isar tests'),
-        ),
-      ),
-    ),
-  );
 }
 
 class IntegrationContext extends IsarTestContext {
