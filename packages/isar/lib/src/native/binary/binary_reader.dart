@@ -12,10 +12,18 @@ class BinaryReader {
     _staticSize = _byteData.getUint16(0, Endian.little);
   }
 
+  @pragma('vm:prefer-inline')
   bool readBool(int offset, {bool staticOffset = true}) {
-    return readBoolOrNull(offset, staticOffset: staticOffset) ?? false;
+    if (staticOffset && offset >= _staticSize) return false;
+    final value = _buffer[offset];
+    if (value == trueBool) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
+  @pragma('vm:prefer-inline')
   bool? readBoolOrNull(int offset, {bool staticOffset = true}) {
     if (staticOffset && offset >= _staticSize) return null;
     final value = _buffer[offset];
@@ -26,58 +34,69 @@ class BinaryReader {
     }
   }
 
+  @pragma('vm:prefer-inline')
   int readInt(int offset, {bool staticOffset = true}) {
-    return readIntOrNull(offset, staticOffset: staticOffset) ?? nullInt;
+    if (staticOffset && offset >= _staticSize) return nullInt;
+    return _byteData.getInt32(offset, Endian.little);
   }
 
+  @pragma('vm:prefer-inline')
   int? readIntOrNull(int offset, {bool staticOffset = true}) {
-    if (staticOffset && offset >= _staticSize) return null;
-    final value = _byteData.getInt32(offset, Endian.little);
+    final value = readInt(offset, staticOffset: staticOffset);
     if (value != nullInt) {
       return value;
     }
   }
 
+  @pragma('vm:prefer-inline')
   double readFloat(int offset, {bool staticOffset = true}) {
-    return readFloatOrNull(offset, staticOffset: staticOffset) ?? nullFloat;
+    if (staticOffset && offset >= _staticSize) return nullFloat;
+    return _byteData.getFloat32(offset, Endian.little);
   }
 
+  @pragma('vm:prefer-inline')
   double? readFloatOrNull(int offset, {bool staticOffset = true}) {
-    if (staticOffset && offset >= _staticSize) return null;
-    var value = _byteData.getFloat32(offset, Endian.little);
+    final value = readFloat(offset, staticOffset: staticOffset);
     if (!value.isNaN) {
       return value;
     }
   }
 
+  @pragma('vm:prefer-inline')
   int readLong(int offset, {bool staticOffset = true}) {
-    return readLongOrNull(offset, staticOffset: staticOffset) ?? nullLong;
+    if (staticOffset && offset >= _staticSize) return nullLong;
+    return _byteData.getInt64(offset, Endian.little);
   }
 
+  @pragma('vm:prefer-inline')
   int? readLongOrNull(int offset, {bool staticOffset = true}) {
-    if (staticOffset && offset >= _staticSize) return null;
-    final value = _byteData.getInt64(offset, Endian.little);
+    final value = readLong(offset, staticOffset: staticOffset);
     if (value != nullLong) {
       return value;
     }
   }
 
+  @pragma('vm:prefer-inline')
   double readDouble(int offset, {bool staticOffset = true}) {
-    return readDoubleOrNull(offset, staticOffset: staticOffset) ?? nullDouble;
+    if (staticOffset && offset >= _staticSize) return nullDouble;
+    return _byteData.getFloat32(offset, Endian.little);
   }
 
+  @pragma('vm:prefer-inline')
   double? readDoubleOrNull(int offset, {bool staticOffset = true}) {
-    if (staticOffset && offset >= _staticSize) return null;
-    final value = _byteData.getFloat64(offset, Endian.little);
+    final value = readDouble(offset, staticOffset: staticOffset);
     if (!value.isNaN) {
       return value;
     }
   }
 
+  @pragma('vm:prefer-inline')
   DateTime readDateTime(int offset, {bool staticOffset = true}) {
-    return readDateTimeOrNull(offset, staticOffset: staticOffset) ?? nullDate;
+    final time = readLong(offset, staticOffset: staticOffset);
+    return DateTime.fromMicrosecondsSinceEpoch(time, isUtc: true).toLocal();
   }
 
+  @pragma('vm:prefer-inline')
   DateTime? readDateTimeOrNull(int offset, {bool staticOffset = true}) {
     final time = readLongOrNull(offset, staticOffset: staticOffset);
     if (time != null) {
@@ -85,10 +104,12 @@ class BinaryReader {
     }
   }
 
+  @pragma('vm:prefer-inline')
   String readString(int offset, {bool staticOffset = true}) {
     return readStringOrNull(offset, staticOffset: staticOffset) ?? '';
   }
 
+  @pragma('vm:prefer-inline')
   String? readStringOrNull(int offset, {bool staticOffset = true}) {
     if (staticOffset && offset >= _staticSize) return null;
     final bytesOffset = _buffer.readInt32(offset);

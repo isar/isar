@@ -37,20 +37,17 @@ class BinaryWriter {
 
   void writeFloat(int offset, double? value) {
     assert(offset < _staticSize);
-    value ??= double.nan;
-    _byteData.setFloat32(offset, value, Endian.little);
+    _byteData.setFloat32(offset, value ?? double.nan, Endian.little);
   }
 
   void writeLong(int offset, int? value) {
     assert(offset < _staticSize);
-    value ??= nullLong;
-    _byteData.setInt64(offset, value, Endian.little);
+    _byteData.setInt64(offset, value ?? nullLong, Endian.little);
   }
 
   void writeDouble(int offset, double? value) {
     assert(offset < _staticSize);
-    value ??= double.nan;
-    _byteData.setFloat64(offset, value, Endian.little);
+    _byteData.setFloat64(offset, value ?? double.nan, Endian.little);
   }
 
   void writeDateTime(int offset, DateTime? value) {
