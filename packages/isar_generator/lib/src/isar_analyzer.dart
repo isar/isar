@@ -7,13 +7,13 @@ import 'package:build/build.dart';
 import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:isar_annotation/isar_annotation.dart' as isar;
+import 'package:isar/isar.dart';
 import 'package:dartx/dartx.dart';
 
 const primaryKeyTypes = [IsarType.String, IsarType.Int, IsarType.Long];
 
 class IsarAnalyzer extends Builder {
-  final _annotationChecker = const TypeChecker.fromRuntime(isar.Collection);
+  final _annotationChecker = const TypeChecker.fromRuntime(Collection);
 
   @override
   FutureOr<void> build(BuildStep buildStep) async {
@@ -310,9 +310,8 @@ class IsarAnalyzer extends Builder {
     }
 
     final indexProperties = <ObjectIndexProperty>[];
-    final defaultIndexType = property.isarType == IsarType.String
-        ? isar.IndexType.hash
-        : isar.IndexType.value;
+    final defaultIndexType =
+        property.isarType == IsarType.String ? IndexType.hash : IndexType.value;
     final defaultCaseSensitive =
         property.isarType == IsarType.String ? true : null;
     indexProperties.add(ObjectIndexProperty(
@@ -346,13 +345,13 @@ class IsarAnalyzer extends Builder {
         err('This type does not support indexes.', element);
       }
       if (property.isarType == IsarType.String) {
-        if ((indexProperty.indexType == isar.IndexType.value ||
-                indexProperty.indexType == isar.IndexType.words) &&
+        if ((indexProperty.indexType == IndexType.value ||
+                indexProperty.indexType == IndexType.words) &&
             i != indexProperties.lastIndex) {
           err('Only the last property of a composite index may use IndexType.value or IndexType.words.',
               element);
         }
-      } else if (indexProperty.indexType != isar.IndexType.value) {
+      } else if (indexProperty.indexType != IndexType.value) {
         err('Only String indices may have a IndexType other than IndexType.value ${indexProperty.indexType}.',
             element);
       }

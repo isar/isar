@@ -3,7 +3,7 @@
 script_dir=$(cd "$(dirname "$0")"; pwd -P)
 
 tmp_dir=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
-core_version=`cat ../CORE_VERSION`
+core_version=`cat ../../CORE_VERSION`
 
 cd $tmp_dir
 

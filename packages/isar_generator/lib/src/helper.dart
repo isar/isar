@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:isar_annotation/isar_annotation.dart';
+import 'package:isar/isar.dart';
 
 final _ignoreChecker = const TypeChecker.fromRuntime(Ignore);
 final _nameChecker = const TypeChecker.fromRuntime(Name);
@@ -64,7 +64,8 @@ List<Index> getIndexAnns(Element element) {
         final indexTypeField = c.getField('indexType')!;
         IndexType? indexType;
         if (!indexTypeField.isNull) {
-          final indexTypeIndex = indexTypeField.getField('index')!.toIntValue()!;
+          final indexTypeIndex =
+              indexTypeField.getField('index')!.toIntValue()!;
           indexType = IndexType.values[indexTypeIndex];
         }
         composite.add(CompositeIndex(
