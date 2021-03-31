@@ -63,8 +63,8 @@ extension QueryOptional<OBJ, T> on QueryBuilder<OBJ, T> {
 typedef QueryRepeatModifier<OBJ, T, R, E> = QueryBuilder<OBJ, R> Function(
     QueryBuilder<OBJ, T> q, E element);
 
-extension QueryRepeat<OBJ, T, E> on QueryBuilder<OBJ, T> {
-  QueryBuilder<OBJ, R> repeat<R>(
+extension QueryRepeat<OBJ, T> on QueryBuilder<OBJ, T> {
+  QueryBuilder<OBJ, R> repeat<E, R>(
       Iterable<E> items, QueryRepeatModifier<OBJ, T, R, E> modifier) {
     QueryBuilder<OBJ, R>? q;
     for (var e in items) {
@@ -119,7 +119,11 @@ extension QueryExecute<OBJ> on QueryBuilder<OBJ, QQueryOperations> {
     return build().deleteAllSync();
   }
 
-  Stream<List<OBJ>?> watch({bool lazy = true}) {
-    return build().watch(lazy: lazy);
+  Stream<List<OBJ>> watch({bool initialReturn = false}) {
+    return build().watch(initialReturn: initialReturn);
+  }
+
+  Stream<void> watchLazy() {
+    return build().watchLazy();
   }
 }

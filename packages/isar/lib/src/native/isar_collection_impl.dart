@@ -222,16 +222,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Stream<OBJ?> watch({int? id, bool lazy = true}) {
-    if (id == null) {
-      assert(lazy);
-      return _watchCollection().map((event) => null);
-    } else {
-      return _watchObject(id, lazy: lazy);
-    }
-  }
-
-  Stream<void> _watchCollection() {
+  Stream<void> watchLazy() {
     final port = ReceivePort();
     final handle =
         IC.isar_watch_collection(isar.isarPtr, ptr, port.sendPort.nativePort);
@@ -242,7 +233,14 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return controller.stream;
   }
 
-  Stream<OBJ?> _watchObject(int id, {bool lazy = true}) {
+  @override
+  Stream<OBJ?> watchObject(int id, {bool initialReturn = false}) {
+    return watchObjectLazy(id, initialReturn: initialReturn)
+        .asyncMap((event) => get(id));
+  }
+
+  @override
+  Stream<void> watchObjectLazy(int id, {bool initialReturn = false}) {
     final rawObjPtr = malloc<RawObject>();
 
     final port = ReceivePort();
@@ -254,12 +252,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       IC.isar_stop_watching(handle);
     });
 
-    controller.addStream(port);
-
-    if (lazy) {
-      return controller.stream.map((event) => null);
-    } else {
-      return controller.stream.asyncMap((event) => get(id));
+    if (initialReturn) {
+      controller.add(true);
     }
+
+    controller.addStream(port);
+    return controller.stream;
   }
 }
