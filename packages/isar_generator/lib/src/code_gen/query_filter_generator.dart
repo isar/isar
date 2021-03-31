@@ -14,7 +14,6 @@ String generateQueryFilter(ObjectInfo oi) {
 
       if (property.isarType == IsarType.String) {
         code += generateStringEqualTo(oi, property, i);
-        code += generateStringIn(oi, property, i);
         code += generateStringStartsWith(oi, property, i);
         code += generateStringEndsWith(oi, property, i);
         code += generateStringContains(oi, property, i);
@@ -24,7 +23,6 @@ String generateQueryFilter(ObjectInfo oi) {
       } else {
         if (!property.isarType.isFloatDouble) {
           code += generateEqualTo(oi, property, i);
-          code += generateIn(oi, property, i);
         }
         code += generateGreaterThan(oi, property, i);
         code += generateLessThan(oi, property, i);
@@ -47,22 +45,6 @@ String generateEqualTo(ObjectInfo oi, ObjectProperty p, int pIndex) {
       lower: ${p.toIsar('value', oi)},
       upper: ${p.toIsar('value', oi)},
     ));
-  }''';
-}
-
-String generateIn(ObjectInfo oi, ObjectProperty p, int pIndex) {
-  return '''
-  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}In(List<${p.dartType}> values) {
-    return group((q) {
-      for (var i = 0; i < values.length; i++) {
-        if (i == values.length - 1) {
-          return q.${p.dartName.decapitalize()}EqualTo(values[i]);
-        } else {
-          q = q.${p.dartName.decapitalize()}EqualTo(values[i]).or();
-        }
-      }
-      throw 'Empty values is unsupported.';
-    });
   }''';
 }
 
@@ -131,22 +113,6 @@ String generateStringEqualTo(ObjectInfo oi, ObjectProperty p, int pIndex) {
       upper: ${p.toIsar('value', oi)},
       caseSensitive: caseSensitive,
     ));
-  }''';
-}
-
-String generateStringIn(ObjectInfo oi, ObjectProperty p, int pIndex) {
-  return '''
-  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}In(List<${p.dartType}> values, {bool caseSensitive = true}) {
-    return group((q) {
-      for (var i = 0; i < values.length; i++) {
-        if (i == values.length - 1) {
-          return q.${p.dartName.decapitalize()}EqualTo(values[i], caseSensitive: caseSensitive);
-        } else {
-          q = q.${p.dartName.decapitalize()}EqualTo(values[i], caseSensitive: caseSensitive).or();
-        }
-      }
-      throw 'Empty values is unsupported.';
-    });
   }''';
 }
 

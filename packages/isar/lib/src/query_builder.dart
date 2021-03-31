@@ -175,6 +175,22 @@ extension QueryBuilderInternal<OBJ> on QueryBuilder<OBJ, dynamic> {
     );
   }
 
+  QueryBuilder<OBJ, S> cast<S>() {
+    return QueryBuilder._(
+      _collection,
+      _filterOr,
+      _filterAnd,
+      _filterNot,
+      _whereClauses,
+      _whereDistinct,
+      _whereAscending,
+      _distinctByPropertyIndices,
+      _sortByProperties,
+      _offset,
+      _limit,
+    );
+  }
+
   Query<OBJ> buildInternal() {
     final builder = andOrInternal(FilterGroupType.Or);
     FilterGroup? filter;

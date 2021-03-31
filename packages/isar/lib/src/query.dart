@@ -21,5 +21,7 @@ abstract class Query<T> {
 
   int deleteAllSync();
 
-  Stream<List<T>?> watch({bool lazy = true, bool initialReturn = false});
+  Stream<List<T>> watch({bool initialReturn = false});
+
+  Stream<void> watchLazy();
 }

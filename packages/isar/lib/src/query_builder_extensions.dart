@@ -46,6 +46,34 @@ extension QueryLimit<OBJ> on QueryBuilder<OBJ, QLimit> {
   }
 }
 
+typedef QueryOption<OBJ, T, R> = QueryBuilder<OBJ, R> Function(
+    QueryBuilder<OBJ, T> q);
+
+extension QueryOptional<OBJ, T> on QueryBuilder<OBJ, T> {
+  QueryBuilder<OBJ, R> optional<R>(
+      bool enabled, QueryOption<OBJ, T, R> option) {
+    if (enabled) {
+      return option(this);
+    } else {
+      return cast();
+    }
+  }
+}
+
+typedef QueryRepeatModifier<OBJ, T, R, E> = QueryBuilder<OBJ, R> Function(
+    QueryBuilder<OBJ, T> q, E element);
+
+extension QueryRepeat<OBJ, T> on QueryBuilder<OBJ, T> {
+  QueryBuilder<OBJ, R> repeat<E, R>(
+      Iterable<E> items, QueryRepeatModifier<OBJ, T, R, E> modifier) {
+    QueryBuilder<OBJ, R>? q;
+    for (var e in items) {
+      q = modifier((q ?? this).cast(), e);
+    }
+    return q ?? cast();
+  }
+}
+
 extension QueryExecute<OBJ> on QueryBuilder<OBJ, QQueryOperations> {
   Query<OBJ> build() {
     return buildInternal();
@@ -91,7 +119,11 @@ extension QueryExecute<OBJ> on QueryBuilder<OBJ, QQueryOperations> {
     return build().deleteAllSync();
   }
 
-  Stream<List<OBJ>?> watch({bool lazy = true, bool initialReturn = false}) {
-    return build().watch(lazy: lazy, initialReturn: initialReturn);
+  Stream<List<OBJ>> watch({bool initialReturn = false}) {
+    return build().watch(initialReturn: initialReturn);
+  }
+
+  Stream<void> watchLazy() {
+    return build().watchLazy();
   }
 }

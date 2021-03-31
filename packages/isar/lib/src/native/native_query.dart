@@ -123,7 +123,13 @@ class NativeQuery<OBJ> extends Query<OBJ> {
   }
 
   @override
-  Stream<List<OBJ>?> watch({bool lazy = true, bool initialReturn = false}) {
+  Stream<List<OBJ>> watch({bool initialReturn = false}) {
+    return watchLazy(initialReturn: initialReturn)
+        .asyncMap((event) => findAll());
+  }
+
+  @override
+  Stream<void> watchLazy({bool initialReturn = false}) {
     final port = ReceivePort();
     final handle = IC.isar_watch_query(
         col.isar.isarPtr, col.ptr, queryPtr, port.sendPort.nativePort);
@@ -133,15 +139,10 @@ class NativeQuery<OBJ> extends Query<OBJ> {
     });
 
     if (initialReturn) {
-      controller.add(findAll());
+      controller.add(true);
     }
 
     controller.addStream(port);
-
-    if (lazy) {
-      return controller.stream.map((event) => null);
-    } else {
-      return controller.stream.asyncMap((event) => findAll());
-    }
+    return controller.stream;
   }
 }

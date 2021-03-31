@@ -36,5 +36,9 @@ abstract class IsarCollection<OBJ> {
     return QueryBuilder(this, distinct, ascending);
   }
 
-  Stream<OBJ?> watch({int? id, bool lazy = true});
+  Stream<void> watchLazy();
+
+  Stream<OBJ?> watchObject(int id, {bool initialReturn = false});
+
+  Stream<void> watchObjectLazy(int id);
 }

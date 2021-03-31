@@ -51,11 +51,6 @@ String generateQueryWhere(ObjectInfo oi) {
           code += generateWhereBetween(indexId, oi, property);
         }
 
-        if (!property.property.isarType.isFloatDouble &&
-            property.property.isarType != IsarType.Bool) {
-          code += generateWhereIn(oi, property);
-        }
-
         if (property.property.isarType == IsarType.Int ||
             property.property.isarType == IsarType.Long ||
             property.property.isarType.isFloatDouble) {
@@ -268,24 +263,6 @@ String generateWhereIsNotNull(
       lower: [null],
       includeLower: false,
     ));
-  }
-  ''';
-}
-
-String generateWhereIn(ObjectInfo oi, ObjectIndexProperty indexProperty) {
-  final p = indexProperty.property;
-  final name = joinPropertiesToName([indexProperty]);
-  return '''
-  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}In(List<${p.dartType}> values) {
-    var q = this;
-    for (var i = 0; i < values.length; i++) {
-      if (i == values.length - 1) {
-        return q.${name}EqualTo(values[i]);
-      } else {
-        q = q.${name}EqualTo(values[i]).or();
-      }
-    }
-    throw 'Empty values is unsupported.';
   }
   ''';
 }
