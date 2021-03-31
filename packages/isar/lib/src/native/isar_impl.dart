@@ -26,8 +26,8 @@ class IsarImpl extends Isar {
     final portStream = wrapIsarPort(port);
 
     final txnPtrPtr = malloc<Pointer<NativeType>>();
-    IC.isar_txn_begin_async(
-        isarPtr, txnPtrPtr, write, silent, port.sendPort.nativePort);
+    IC.isar_txn_begin(
+        isarPtr, txnPtrPtr, false, write, silent, port.sendPort.nativePort);
 
     Pointer<NativeType> txnPtr;
     try {
@@ -47,12 +47,12 @@ class IsarImpl extends Isar {
     try {
       result = await zone.run(() => callback(this));
     } catch (e) {
-      IC.isar_txn_abort_async(txnPtr);
+      IC.isar_txn_finish(txnPtr, false);
       port.close();
       rethrow;
     }
 
-    IC.isar_txn_commit_async(txnPtr);
+    IC.isar_txn_finish(txnPtr, true);
     await portStream.first;
 
     port.close();
@@ -92,7 +92,7 @@ class IsarImpl extends Isar {
     requireNoTxnActive();
 
     var txnPtr = IsarCoreUtils.syncTxnPtr;
-    nCall(IC.isar_txn_begin(isarPtr, txnPtr, write, silent));
+    nCall(IC.isar_txn_begin(isarPtr, txnPtr, true, write, silent, 0));
     var txn = txnPtr.value;
     _currentTxnSync = txn;
     _currentTxnSyncWrite = write;
@@ -102,12 +102,12 @@ class IsarImpl extends Isar {
       result = callback(this);
     } catch (e) {
       _currentTxnSync = null;
-      IC.isar_txn_abort(txn);
+      IC.isar_txn_finish(txn, false);
       rethrow;
     }
 
     _currentTxnSync = null;
-    nCall(IC.isar_txn_commit(txn));
+    nCall(IC.isar_txn_finish(txn, true));
 
     return result;
   }

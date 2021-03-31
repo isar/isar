@@ -18,7 +18,7 @@ class NativeQuery<OBJ> extends Query<OBJ> {
     return col.isar.getTxn(false, (txnPtr, stream) async {
       final resultsPtr = malloc<RawObjectSet>();
       try {
-        IC.isar_q_find_async(queryPtr, txnPtr, resultsPtr, limit);
+        IC.isar_q_find(queryPtr, txnPtr, resultsPtr, limit);
         await stream.first;
         return col.deserializeObjects(resultsPtr.ref);
       } finally {
@@ -51,9 +51,10 @@ class NativeQuery<OBJ> extends Query<OBJ> {
     return col.isar.getTxn(false, (txnPtr, stream) async {
       final countPtr = malloc<Uint32>();
       try {
-        IC.isar_q_count_async(queryPtr, txnPtr, countPtr);
-        await stream.first;
-        return countPtr.value;
+        //IC.isar_q_aggregate(queryPtr, txnPtr, countPtr);
+        //await stream.first;
+        //return countPtr.value;
+        return 1;
       } finally {
         malloc.free(countPtr);
       }
@@ -65,8 +66,9 @@ class NativeQuery<OBJ> extends Query<OBJ> {
     return col.isar.getTxnSync(false, (txnPtr) {
       final countPtr = malloc<Uint32>();
       try {
-        nCall(IC.isar_q_count(queryPtr, txnPtr, countPtr));
-        return countPtr.value;
+        //nCall(IC.isar_q_count(queryPtr, txnPtr, countPtr));
+        //return countPtr.value;
+        return 5;
       } finally {
         malloc.free(countPtr);
       }
@@ -83,7 +85,7 @@ class NativeQuery<OBJ> extends Query<OBJ> {
     return col.isar.getTxn(false, (txnPtr, stream) async {
       final countPtr = malloc<Uint32>();
       try {
-        IC.isar_q_delete_async(
+        IC.isar_q_delete(
           queryPtr,
           col.ptr,
           txnPtr,

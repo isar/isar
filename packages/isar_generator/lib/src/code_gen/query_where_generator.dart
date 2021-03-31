@@ -280,6 +280,8 @@ String generateWhereStartsWith(
   if (indexProperty.property.nullable) {
     code += "assert(convertedValue != null, 'Null values are not allowed');";
   }
+  code +=
+      "assert(convertedValue.isNotEmpty, 'Empty string prefixes are not allowed');";
   code += '''
     return addWhereClause(WhereClause(
       $indexId,

@@ -68,7 +68,7 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
     requireAttached();
     return col.isar.getTxn(false, (txnPtr, stream) async {
       final rawObjPtr = malloc<RawObject>();
-      IC.isar_link_get_first_async(
+      IC.isar_link_get_first(
           linkColPtr, txnPtr, linkIndex, backlink, containingOid, rawObjPtr);
       try {
         await stream.first;
@@ -114,7 +114,7 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
         }
       }
       final rawObjPtr = malloc<RawObject>();
-      IC.isar_link_replace_async(
+      IC.isar_link_replace(
           linkColPtr, txnPtr, linkIndex, backlink, containingOid, targetOid);
       try {
         await stream.first;
@@ -174,7 +174,7 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
     final objects = await col.isar.getTxn(false, (txnPtr, stream) async {
       final resultsPtr = malloc<RawObjectSet>();
       try {
-        IC.isar_link_get_all_async(
+        IC.isar_link_get_all(
             linkColPtr, txnPtr, linkIndex, backlink, containingOid, resultsPtr);
         await stream.first;
         return targetCol.deserializeObjects(resultsPtr.ref);
@@ -235,7 +235,7 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
       for (var removed in _removedObjects) {
         ids[i++] = targetCol.getId(removed)!;
       }
-      IC.isar_link_update_all_async(linkColPtr, txnPtr, linkIndex, backlink,
+      IC.isar_link_update_all(linkColPtr, txnPtr, linkIndex, backlink,
           containingOid, idsPtr, _addedObjects.length, _removedObjects.length);
 
       try {
