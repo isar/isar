@@ -957,11 +957,13 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> builder,
     int property_index,
+    bool case_sensitive,
   ) {
     return _isar_qb_add_distinct_by(
       collection,
       builder,
       property_index,
+      case_sensitive ? 1 : 0,
     );
   }
 
@@ -1078,6 +1080,36 @@ class IsarCoreBindings {
       _lookup<ffi.NativeFunction<_c_isar_q_aggregate>>('isar_q_aggregate');
   late final _dart_isar_q_aggregate _isar_q_aggregate =
       _isar_q_aggregate_ptr.asFunction<_dart_isar_q_aggregate>();
+
+  int isar_q_aggregate_long_result(
+    ffi.Pointer<ffi.NativeType> result,
+  ) {
+    return _isar_q_aggregate_long_result(
+      result,
+    );
+  }
+
+  late final _isar_q_aggregate_long_result_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_q_aggregate_long_result>>(
+          'isar_q_aggregate_long_result');
+  late final _dart_isar_q_aggregate_long_result _isar_q_aggregate_long_result =
+      _isar_q_aggregate_long_result_ptr
+          .asFunction<_dart_isar_q_aggregate_long_result>();
+
+  double isar_q_aggregate_double_result(
+    ffi.Pointer<ffi.NativeType> result,
+  ) {
+    return _isar_q_aggregate_double_result(
+      result,
+    );
+  }
+
+  late final _isar_q_aggregate_double_result_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_q_aggregate_double_result>>(
+          'isar_q_aggregate_double_result');
+  late final _dart_isar_q_aggregate_double_result
+      _isar_q_aggregate_double_result = _isar_q_aggregate_double_result_ptr
+          .asFunction<_dart_isar_q_aggregate_double_result>();
 
   void isar_free_raw_obj_list(
     ffi.Pointer<RawObjectSet> ros,
@@ -2024,12 +2056,14 @@ typedef _c_isar_qb_add_distinct_by = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> builder,
   ffi.Uint32 property_index,
+  ffi.Uint8 case_sensitive,
 );
 
 typedef _dart_isar_qb_add_distinct_by = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> builder,
   int property_index,
+  int case_sensitive,
 );
 
 typedef _c_isar_qb_set_offset_limit = ffi.Void Function(
@@ -2106,6 +2140,22 @@ typedef _dart_isar_q_aggregate = int Function(
   int operation,
   int property_index,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> result,
+);
+
+typedef _c_isar_q_aggregate_long_result = ffi.Int64 Function(
+  ffi.Pointer<ffi.NativeType> result,
+);
+
+typedef _dart_isar_q_aggregate_long_result = int Function(
+  ffi.Pointer<ffi.NativeType> result,
+);
+
+typedef _c_isar_q_aggregate_double_result = ffi.Double Function(
+  ffi.Pointer<ffi.NativeType> result,
+);
+
+typedef _dart_isar_q_aggregate_double_result = double Function(
+  ffi.Pointer<ffi.NativeType> result,
 );
 
 typedef _c_isar_free_raw_obj_list = ffi.Void Function(
