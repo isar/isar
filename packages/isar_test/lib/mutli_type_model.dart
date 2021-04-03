@@ -6,37 +6,71 @@ import 'package:isar/isar.dart';
 class MultiTypeModel {
   int? id;
 
-  bool? boolValue;
+  bool? boolValueN;
+
+  bool boolValue = false;
 
   @Size32()
-  int? intValue;
+  int? intValueN;
 
   @Size32()
-  double? floatValue;
-
-  int? longValue;
-
-  double? doubleValue;
-
-  DateTime? dateTimeValue;
-
-  String? stringValue;
-
-  Uint8List? bytesValue;
-
-  List<bool>? boolList;
+  int intValue = 0;
 
   @Size32()
-  List<int>? intList;
+  double? floatValueN;
 
   @Size32()
-  List<double>? floatList;
+  double floatValue = 0.0;
 
-  List<int>? longList;
+  int? longValueN;
 
-  List<double>? doubleList;
+  int longValue = 0;
 
-  List<DateTime>? dateTimeListValue;
+  double? doubleValueN;
 
-  List<String>? stringList;
+  double doubleValue = 0.0;
+
+  DateTime? dateTimeValueN;
+
+  DateTime dateTimeValue = DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
+
+  String? stringValueN;
+
+  String stringValue = '';
+
+  Uint8List? bytesValueN;
+
+  Uint8List bytesValue = Uint8List(0);
+
+  List<bool>? boolListN;
+
+  List<bool> boolList = [];
+
+  @Size32()
+  List<int>? intListN;
+
+  @Size32()
+  List<int> intList = [];
+
+  @Size32()
+  List<double>? floatListN;
+
+  @Size32()
+  List<double> floatList = [];
+
+  List<int>? longListN;
+
+  List<int> longList = [];
+
+  List<double>? doubleListN;
+
+  List<double> doubleList = [];
+
+  List<DateTime>? dateTimeListN;
+
+  List<DateTime> dateTimeList = [];
+
+  List<String>? stringListN;
+
+  List<String> stringList = [];
 }

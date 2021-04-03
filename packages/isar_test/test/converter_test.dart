@@ -36,7 +36,7 @@ void main() {
         await isar.converterModels.put(_converterObject);
       });
 
-      final json = await isar.converterModels.jsonMap();
+      final json = await isar.converterModels.exportJson();
       expect(json[0], _converterObjectJson);
 
       await isar.close();
@@ -46,8 +46,7 @@ void main() {
       final isar = await openTempIsar();
 
       await isar.writeTxn((isar) async {
-        final bytes = Utf8Encoder().convert(jsonEncode([_converterObjectJson]));
-        await isar.converterModels.importJson(bytes);
+        await isar.converterModels.importJson([_converterObjectJson]);
       });
 
       expect(

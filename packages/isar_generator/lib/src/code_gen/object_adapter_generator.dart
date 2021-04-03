@@ -258,7 +258,7 @@ String _deserializeProperty(
       deser = 'reader.readString$orNull($propertyOffset)';
       break;
     case IsarType.Bytes:
-      deser = 'reader.readBytes$orNull($propertyOffset) $orNullList';
+      deser = 'reader.readBytes$orNull($propertyOffset)';
       break;
     case IsarType.BoolList:
       deser = 'reader.readBool${orElNull}List($propertyOffset) $orNullList';

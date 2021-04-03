@@ -203,7 +203,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<void> importJson(Uint8List jsonBytes) {
+  Future<void> importJsonRaw(Uint8List jsonBytes) {
     return isar.getTxn(true, (txnPtr, stream) async {
       final bytesPtr = malloc<Uint8>(jsonBytes.length);
       bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
@@ -218,7 +218,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<R> exportJson<R>(R Function(Uint8List) callback,
+  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
       {bool primitiveNull = true, bool includeLinks = false}) {
     return isar.getTxn(false, (txnPtr, stream) async {
       final bytesPtrPtr = malloc<Pointer<Uint8>>();

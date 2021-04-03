@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:integration_test/integration_test.dart';
 import '../test/common.dart';
 import 'package:path_provider/path_provider.dart';
-import 'all_test.dart' as tests;
+import 'all_tests.dart' as tests;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() async {

@@ -28,15 +28,6 @@ Future qEqual<T>(Future<Iterable<T>> actual, List<T> target) async {
   }
 }
 
-extension IsarJson on IsarCollection {
-  Future<List<Map<String, dynamic>>> jsonMap() {
-    return exportJson((bytes) {
-      return jsonDecode(Utf8Decoder().convert(bytes))
-          .cast<Map<String, dynamic>>();
-    }, includeLinks: true);
-  }
-}
-
 var allTestsSuccessful = true;
 
 @isTest

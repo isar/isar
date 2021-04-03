@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
@@ -9,7 +10,7 @@ import 'common.dart';
 
 //import 'package:isar_test/isar.g.dart';
 
-void main() {
+void main() async {
   group('Query property', () {
     late Isar isar;
 
@@ -88,14 +89,14 @@ void main() {
 
     isarTest('String property', () async {
       await isar.writeTxn((isar) => isar.multiTypeModels.putAll([
-            MultiTypeModel()..stringValue = "Just",
-            MultiTypeModel()..stringValue = "a",
-            MultiTypeModel()..stringValue = "test",
+            MultiTypeModel()..stringValue = 'Just',
+            MultiTypeModel()..stringValue = 'a',
+            MultiTypeModel()..stringValue = 'test',
           ]));
 
       await qEqual(
         isar.multiTypeModels.where().stringValueProperty().findAll(),
-        ["Just", "a", "test"],
+        ['Just', 'a', 'test'],
       );
     });
 
@@ -138,7 +139,7 @@ void main() {
           ]));
 
       await qEqual(isar.multiTypeModels.where().intListProperty().findAll(), [
-        [-5, 70, 9999],
+        [-5, 70, 999],
         [],
         [0]
       ]);
@@ -146,54 +147,64 @@ void main() {
 
     isarTest('float list property', () async {
       await isar.writeTxn((isar) => isar.multiTypeModels.putAll([
-            MultiTypeModel()..floatValue = -5.5,
-            MultiTypeModel()..floatValue = 70.7,
-            MultiTypeModel()..floatValue = 999.999,
+            MultiTypeModel()..floatList = [-5.5, 70.7, 999.999],
+            MultiTypeModel()..floatList = [],
+            MultiTypeModel()..floatList = [0.0],
           ]));
+      print(await isar.multiTypeModels.exportJson());
 
-      await qEqual(
-        isar.multiTypeModels.where().floatValueProperty().findAll(),
+      await qEqual(isar.multiTypeModels.where().floatListProperty().findAll(), [
         [-5.5, 70.7, 999.999],
-      );
+        [],
+        [0.0]
+      ]);
     });
 
     isarTest('long list property', () async {
       await isar.writeTxn((isar) => isar.multiTypeModels.putAll([
-            MultiTypeModel()..longValue = -5,
-            MultiTypeModel()..longValue = 70,
-            MultiTypeModel()..longValue = 9999,
+            MultiTypeModel()..longList = [-5, 70, 999],
+            MultiTypeModel()..longList = [],
+            MultiTypeModel()..longList = [0],
           ]));
+      print(await isar.multiTypeModels.exportJson());
 
-      await qEqual(
-        isar.multiTypeModels.where().longValueProperty().findAll(),
-        [-5, 70, 9999],
-      );
+      await qEqual(isar.multiTypeModels.where().longListProperty().findAll(), [
+        [-5, 70, 999],
+        [],
+        [0]
+      ]);
     });
 
     isarTest('double list property', () async {
       await isar.writeTxn((isar) => isar.multiTypeModels.putAll([
-            MultiTypeModel()..doubleValue = -5.5,
-            MultiTypeModel()..doubleValue = 70.7,
-            MultiTypeModel()..doubleValue = 999.999,
+            MultiTypeModel()..doubleList = [-5.5, 70.7, 999.999],
+            MultiTypeModel()..doubleList = [],
+            MultiTypeModel()..doubleList = [0.0],
           ]));
 
       await qEqual(
-        isar.multiTypeModels.where().doubleValueProperty().findAll(),
+          isar.multiTypeModels.where().doubleListProperty().findAll(), [
         [-5.5, 70.7, 999.999],
-      );
+        [],
+        [0.0]
+      ]);
     });
 
     isarTest('String list property', () async {
       await isar.writeTxn((isar) => isar.multiTypeModels.putAll([
-            MultiTypeModel()..stringValue = "Just",
-            MultiTypeModel()..stringValue = "a",
-            MultiTypeModel()..stringValue = "test",
+            MultiTypeModel()..stringList = ['Just', 'a', 'test'],
+            MultiTypeModel()..stringList = [],
+            MultiTypeModel()..stringList = [],
           ]));
 
+      print(await isar.multiTypeModels.exportJson());
+
       await qEqual(
-        isar.multiTypeModels.where().stringValueProperty().findAll(),
-        ["Just", "a", "test"],
-      );
+          isar.multiTypeModels.where().stringValueProperty().findAll(), [
+        ['Just', 'a', 'test'],
+        [],
+        ['']
+      ]);
     });
   });
 }
