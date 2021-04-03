@@ -1,5 +1,4 @@
 // ignore_for_file: implementation_imports
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:isar/isar.dart';
@@ -18,13 +17,21 @@ Future qEqualSet<T>(Future<Iterable<T>> actual, Iterable<T> target) async {
 
 Future qEqual<T>(Future<Iterable<T>> actual, List<T> target) async {
   final results = (await actual).toList();
-  if (results is List<double?>) {
-    for (var i = 0; i < results.length; i++) {
-      final result = (results[i] as double) - (target[i] as double);
+  qEqualSync(results, target);
+}
+
+Future qEqualSync<T>(List<T> actual, List<T> target) async {
+  if (actual is List<double?>) {
+    for (var i = 0; i < actual.length; i++) {
+      final result = (actual[i] as double) - (target[i] as double);
       expect(result.abs() < 0.01, true);
     }
+  } else if (actual is List<List<double?>?>) {
+    for (var i = 0; i < actual.length; i++) {
+      qEqualSync((actual[i] as List), (target[i] as List));
+    }
   } else {
-    expect(results, target);
+    expect(actual, target);
   }
 }
 

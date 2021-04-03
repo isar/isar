@@ -30,5 +30,5 @@ void run() {
   link_test.main();
   qroperty_query_test.main();
   qroperty_query_test.main();
-  watcher_test.main();
+  //watcher_test.main();
 }

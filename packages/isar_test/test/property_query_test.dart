@@ -151,7 +151,6 @@ void main() async {
             MultiTypeModel()..floatList = [],
             MultiTypeModel()..floatList = [0.0],
           ]));
-      print(await isar.multiTypeModels.exportJson());
 
       await qEqual(isar.multiTypeModels.where().floatListProperty().findAll(), [
         [-5.5, 70.7, 999.999],
@@ -166,7 +165,6 @@ void main() async {
             MultiTypeModel()..longList = [],
             MultiTypeModel()..longList = [0],
           ]));
-      print(await isar.multiTypeModels.exportJson());
 
       await qEqual(isar.multiTypeModels.where().longListProperty().findAll(), [
         [-5, 70, 999],
@@ -194,13 +192,11 @@ void main() async {
       await isar.writeTxn((isar) => isar.multiTypeModels.putAll([
             MultiTypeModel()..stringList = ['Just', 'a', 'test'],
             MultiTypeModel()..stringList = [],
-            MultiTypeModel()..stringList = [],
+            MultiTypeModel()..stringList = [''],
           ]));
 
-      print(await isar.multiTypeModels.exportJson());
-
       await qEqual(
-          isar.multiTypeModels.where().stringValueProperty().findAll(), [
+          isar.multiTypeModels.where().stringListProperty().findAll(), [
         ['Just', 'a', 'test'],
         [],
         ['']

@@ -122,7 +122,7 @@ class BinaryWriter {
       _buffer.writeUint32(offset + 4, values.length);
 
       for (var value in values) {
-        _byteData.setFloat32(_dynamicOffset, value ?? nullFloat);
+        _byteData.setFloat32(_dynamicOffset, value ?? nullFloat, Endian.little);
         _dynamicOffset += 4;
       }
     }
@@ -138,7 +138,7 @@ class BinaryWriter {
       _buffer.writeUint32(offset + 4, values.length);
 
       for (var value in values) {
-        _byteData.setInt64(_dynamicOffset, value ?? nullLong);
+        _byteData.setInt64(_dynamicOffset, value ?? nullLong, Endian.little);
         _dynamicOffset += 8;
       }
     }
@@ -154,7 +154,8 @@ class BinaryWriter {
       _buffer.writeUint32(offset + 4, values.length);
 
       for (var value in values) {
-        _byteData.setFloat64(_dynamicOffset, value ?? nullDouble);
+        _byteData.setFloat64(
+            _dynamicOffset, value ?? nullDouble, Endian.little);
         _dynamicOffset += 8;
       }
     }

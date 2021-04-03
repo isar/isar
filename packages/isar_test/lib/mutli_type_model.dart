@@ -42,35 +42,67 @@ class MultiTypeModel {
 
   Uint8List bytesValue = Uint8List(0);
 
-  List<bool>? boolListN;
-
   List<bool> boolList = [];
 
-  @Size32()
-  List<int>? intListN;
+  List<bool?> boolNList = [];
+
+  List<bool>? boolListN;
+
+  List<bool?>? boolNListN;
 
   @Size32()
   List<int> intList = [];
 
   @Size32()
-  List<double>? floatListN;
+  List<int?> intNList = [];
+
+  @Size32()
+  List<int>? intListN;
+
+  @Size32()
+  List<int?>? intNListN;
 
   @Size32()
   List<double> floatList = [];
 
-  List<int>? longListN;
+  @Size32()
+  List<double?> floatNList = [];
+
+  @Size32()
+  List<double>? floatListN;
+
+  @Size32()
+  List<double?>? floatNListN;
 
   List<int> longList = [];
 
-  List<double>? doubleListN;
+  List<int?> longNList = [];
+
+  List<int>? longListN;
+
+  List<int?>? longNListN;
 
   List<double> doubleList = [];
 
-  List<DateTime>? dateTimeListN;
+  List<double?> doubleNList = [];
+
+  List<double>? doubleListN;
+
+  List<double?>? doubleNListN;
 
   List<DateTime> dateTimeList = [];
 
-  List<String>? stringListN;
+  List<DateTime?> dateTimeNList = [];
+
+  List<DateTime>? dateTimeListN;
+
+  List<DateTime?>? dateTimeNListN;
 
   List<String> stringList = [];
+
+  List<String?> stringNList = [];
+
+  List<String>? stringListN;
+
+  List<String?>? stringNListN;
 }

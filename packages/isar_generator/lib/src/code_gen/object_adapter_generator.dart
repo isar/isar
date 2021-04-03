@@ -34,6 +34,7 @@ String _generatePrepareSerialize(ObjectInfo object) {
     code += 'final value$i = $propertyValue;';
 
     final nOp = property.nullable ? '?' : '';
+    final elNOp = property.elementNullable ? '?' : '';
     final nLen = property.nullable ? '?? 0' : '';
     final accessor = '_${property.isarName}';
     switch (property.isarType) {
@@ -51,13 +52,14 @@ String _generatePrepareSerialize(ObjectInfo object) {
         code += 'dynamicSize += $accessor$nOp.length $nLen;';
         break;
       case IsarType.StringList:
-        code += '''
-          dynamicSize += (value$i$nOp.length $nLen) * 8;
-          List<Uint8List?>? bytesList$i;''';
+        code += 'dynamicSize += (value$i$nOp.length $nLen) * 8;';
         if (property.nullable) {
           code += '''
+          List<Uint8List?>? bytesList$i;
           if (value$i != null) {
             bytesList$i = [];''';
+        } else {
+          code += 'final bytesList$i = <Uint8List$elNOp>[];';
         }
         code += 'for (var str in value$i) {';
         if (property.elementNullable) {
