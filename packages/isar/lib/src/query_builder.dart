@@ -1,23 +1,24 @@
 import 'package:isar/isar.dart';
 import 'package:isar/src/isar_platform.dart';
 
-typedef FilterQuery<OBJ> = QueryBuilder<OBJ, QAfterFilterCondition> Function(
-    QueryBuilder<OBJ, QFilterCondition> q);
+typedef FilterQuery<T> = QueryBuilder<T, QAfterFilterCondition> Function(
+    QueryBuilder<T, QFilterCondition> q);
 
 const _NullFilterGroup = FilterGroup();
 
-class QueryBuilder<OBJ, S> {
-  final IsarCollection<OBJ> _collection;
+class QueryBuilder<T, S> {
+  final IsarCollection _collection;
   final List<WhereClause> _whereClauses;
   final bool? _whereDistinct;
   final bool? _whereAscending;
   final FilterGroup _filterOr;
   final FilterGroup? _filterAnd;
   final bool _filterNot;
-  final List<int> _distinctByPropertyIndices;
+  final List<DistinctProperty> _distinctByPropertyIndices;
   final List<SortProperty> _sortByProperties;
   final int? _offset;
   final int? _limit;
+  final int? _propertyIndex;
 
   QueryBuilder(this._collection, this._whereDistinct, this._whereAscending)
       : _whereClauses = const [],
@@ -27,7 +28,8 @@ class QueryBuilder<OBJ, S> {
         _filterAnd = null,
         _filterNot = false,
         _offset = null,
-        _limit = null;
+        _limit = null,
+        _propertyIndex = null;
 
   QueryBuilder._(
     this._collection,
@@ -41,35 +43,38 @@ class QueryBuilder<OBJ, S> {
     this._sortByProperties = const [],
     this._offset,
     this._limit,
+    this._propertyIndex,
   ]);
 }
 
-extension QueryBuilderInternal<OBJ> on QueryBuilder<OBJ, dynamic> {
-  QueryBuilder<OBJ, S> addFilterCondition<S>(QueryOperation cond) {
+extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
+  QueryBuilder<T, S> addFilterCondition<S>(QueryOperation cond) {
     if (_filterNot) {
       cond = FilterGroup(groupType: FilterGroupType.Not, conditions: [cond]);
     }
 
     if (_filterAnd != null) {
-      return copyWith<S>(
-        filterAnd:
-            _filterAnd!.copyWith(conditions: [..._filterAnd!.conditions, cond]),
+      return copyWith(
+        filterAnd: _filterAnd!.copyWith(
+          conditions: [..._filterAnd!.conditions, cond],
+        ),
         filterNot: false,
       );
     } else {
-      return copyWith<S>(
-        filterOr:
-            _filterOr.copyWith(conditions: [..._filterOr.conditions, cond]),
+      return copyWith(
+        filterOr: _filterOr.copyWith(
+          conditions: [..._filterOr.conditions, cond],
+        ),
         filterNot: false,
       );
     }
   }
 
-  QueryBuilder<OBJ, S> addWhereClause<S>(WhereClause where) {
+  QueryBuilder<T, S> addWhereClause<S>(WhereClause where) {
     return copyWith(whereClauses: [..._whereClauses, where]);
   }
 
-  QueryBuilder<OBJ, QAfterFilterOperator> andOrInternal(FilterGroupType andOr) {
+  QueryBuilder<T, QAfterFilterOperator> andOrInternal(FilterGroupType andOr) {
     if (andOr == FilterGroupType.And) {
       if (_filterAnd == null) {
         return copyWith(
@@ -93,13 +98,13 @@ extension QueryBuilderInternal<OBJ> on QueryBuilder<OBJ, dynamic> {
     return copyWith();
   }
 
-  QueryBuilder<OBJ, S> notInternal<S>() {
+  QueryBuilder<T, S> notInternal<S>() {
     return copyWith(
       filterNot: !_filterNot,
     );
   }
 
-  QueryBuilder<OBJ, QAfterFilterCondition> groupInternal(FilterQuery<OBJ> q) {
+  QueryBuilder<T, QAfterFilterCondition> groupInternal(FilterQuery<T> q) {
     final qb = q(QueryBuilder(_collection, _whereDistinct, _whereAscending));
     final qbFinished = qb.andOrInternal(FilterGroupType.Or);
 
@@ -112,9 +117,9 @@ extension QueryBuilderInternal<OBJ> on QueryBuilder<OBJ, dynamic> {
     }
   }
 
-  QueryBuilder<OBJ, QAfterFilterCondition> linkInternal<T>(
-      IsarCollection<T> targetCollection,
-      FilterQuery<T> q,
+  QueryBuilder<T, QAfterFilterCondition> linkInternal<E>(
+      IsarCollection<E> targetCollection,
+      FilterQuery<E> q,
       int linkIndex,
       bool backlink) {
     final qb = q(QueryBuilder(targetCollection, false, true));
@@ -139,23 +144,29 @@ extension QueryBuilderInternal<OBJ> on QueryBuilder<OBJ, dynamic> {
     ));
   }
 
-  QueryBuilder<OBJ, QDistinct> addDistinctByInternal(int propertyIndex) {
+  QueryBuilder<T, QDistinct> addDistinctByInternal(int propertyIndex,
+      {bool? caseSensitive}) {
     return copyWith(distinctByPropertyIndices: [
       ..._distinctByPropertyIndices,
-      propertyIndex,
+      DistinctProperty(propertyIndex, caseSensitive),
     ]);
   }
 
-  QueryBuilder<OBJ, S> copyWith<S>({
+  QueryBuilder<E, QQueryOperations> addPropertyIndex<E>(int propertyIndex) {
+    return copyWith(propertyIndex: propertyIndex);
+  }
+
+  QueryBuilder<E, S> copyWith<E, S>({
     List<WhereClause>? whereClauses,
     FilterGroup? filterOr,
     FilterGroup? filterAnd = _NullFilterGroup,
     bool? filterNot,
     List<FilterGroup>? parentFilters,
-    List<int>? distinctByPropertyIndices,
+    List<DistinctProperty>? distinctByPropertyIndices,
     List<SortProperty>? sortByProperties,
     int? offset,
     int? limit,
+    int? propertyIndex,
   }) {
     assert(offset == null || offset >= 0);
     assert(limit == null || limit >= 0);
@@ -172,10 +183,11 @@ extension QueryBuilderInternal<OBJ> on QueryBuilder<OBJ, dynamic> {
       sortByProperties ?? List.unmodifiable(_sortByProperties),
       offset ?? _offset,
       limit ?? _limit,
+      propertyIndex ?? _propertyIndex,
     );
   }
 
-  QueryBuilder<OBJ, S> cast<S>() {
+  QueryBuilder<T, S> cast<S>() {
     return QueryBuilder._(
       _collection,
       _filterOr,
@@ -188,10 +200,11 @@ extension QueryBuilderInternal<OBJ> on QueryBuilder<OBJ, dynamic> {
       _sortByProperties,
       _offset,
       _limit,
+      _propertyIndex,
     );
   }
 
-  Query<OBJ> buildInternal() {
+  Query<T> buildInternal() {
     final builder = andOrInternal(FilterGroupType.Or);
     FilterGroup? filter;
     if (builder._filterOr.conditions.length == 1) {
@@ -211,6 +224,7 @@ extension QueryBuilderInternal<OBJ> on QueryBuilder<OBJ, dynamic> {
       _distinctByPropertyIndices,
       _offset,
       _limit,
+      _propertyIndex,
     );
   }
 
@@ -337,6 +351,13 @@ class SortProperty {
   const SortProperty(this.propertyIndex, this.ascending);
 }
 
+class DistinctProperty {
+  final int propertyIndex;
+  final bool? caseSensitive;
+
+  const DistinctProperty(this.propertyIndex, this.caseSensitive);
+}
+
 class LinkOperation extends QueryOperation {
   final IsarCollection targetCollection;
   final QueryOperation filter;
@@ -361,11 +382,11 @@ class QWhere
         QDistinct,
         QOffset,
         QLimit,
-        QQueryOperations {}
+        QQueryProperty {}
 
 // No more where conditions are allowed
 class QAfterWhere
-    implements QFilter, QSortBy, QDistinct, QOffset, QLimit, QQueryOperations {}
+    implements QFilter, QSortBy, QDistinct, QOffset, QLimit, QQueryProperty {}
 
 class QWhereClause {}
 
@@ -377,7 +398,7 @@ class QAfterWhereClause
         QDistinct,
         QOffset,
         QLimit,
-        QQueryOperations {}
+        QQueryProperty {}
 
 class QWhereOr {}
 
@@ -393,7 +414,7 @@ class QAfterFilterCondition
         QDistinct,
         QOffset,
         QLimit,
-        QQueryOperations {}
+        QQueryProperty {}
 
 class QFilterOperator {}
 
@@ -402,18 +423,28 @@ class QAfterFilterOperator implements QFilterCondition {}
 class QSortBy {}
 
 class QAfterSortBy
-    implements QSortThenBy, QDistinct, QOffset, QLimit, QQueryOperations {}
+    implements QSortThenBy, QDistinct, QOffset, QLimit, QQueryProperty {}
 
 class QSortThenBy {}
 
-class QDistinct implements QOffset, QLimit, QQueryOperations {}
+class QDistinct implements QOffset, QLimit, QQueryProperty {}
 
 class QOffset {}
 
-class QAfterOffset implements QLimit, QQueryOperations {}
+class QAfterOffset implements QLimit, QQueryProperty {}
 
 class QLimit {}
 
-class QAfterLimit implements QQueryOperations {}
+class QAfterLimit implements QQueryProperty {}
+
+class QQueryProperty implements QQueryOperations {}
 
 class QQueryOperations {}
+
+enum AggregationOp {
+  Min,
+  Max,
+  Sum,
+  Average,
+  Count,
+}

@@ -3,18 +3,19 @@ part of isar_native;
 const MIN_OID = -140737488355328;
 const MAX_OID = 140737488355327;
 
-Query<OBJ> buildQuery<OBJ>(
-  IsarCollection<OBJ> collection,
+Query<T> buildQuery<T>(
+  IsarCollection collection,
   List<WhereClause> whereClauses,
   bool? whereDistinct,
   bool? whereAscending,
   FilterGroup filter,
   List<SortProperty> sortProperties,
-  List<int> distinctByPropertyIndices,
+  List<DistinctProperty> distinctByProperties,
   int? offset,
   int? limit,
+  int? propertyIndex,
 ) {
-  final col = collection as IsarCollectionImpl<OBJ>;
+  final col = collection as IsarCollectionImpl;
   final qbPtr = IC.isar_qb_create(col.ptr);
 
   if ((whereDistinct != null || whereAscending != null) &&
@@ -32,16 +33,34 @@ Query<OBJ> buildQuery<OBJ>(
 
   for (var sortProperty in sortProperties) {
     nCall(IC.isar_qb_add_sort_by(
-        col.ptr, qbPtr, sortProperty.propertyIndex, sortProperty.ascending));
+      col.ptr,
+      qbPtr,
+      sortProperty.propertyIndex,
+      sortProperty.ascending,
+    ));
   }
 
   IC.isar_qb_set_offset_limit(qbPtr, offset ?? 0, limit ?? 99999);
-  for (var index in distinctByPropertyIndices) {
-    nCall(IC.isar_qb_add_distinct_by(col.ptr, qbPtr, index));
+  for (var distinctByProperty in distinctByProperties) {
+    nCall(IC.isar_qb_add_distinct_by(
+      col.ptr,
+      qbPtr,
+      distinctByProperty.propertyIndex,
+      distinctByProperty.caseSensitive ?? true,
+    ));
+  }
+
+  QueryDeserialize<T> deserialize;
+  if (propertyIndex == null) {
+    deserialize = (col as IsarCollectionImpl<T>).deserializeObjects
+        as QueryDeserialize<T>;
+  } else {
+    deserialize =
+        (rawObjSet) => collection.deserializeProperty(rawObjSet, propertyIndex);
   }
 
   final queryPtr = IC.isar_qb_build(qbPtr);
-  return NativeQuery(col, queryPtr);
+  return NativeQuery(col.isar, col.ptr, queryPtr, deserialize, propertyIndex);
 }
 
 void _addWhereClause(Pointer colPtr, Pointer qbPtr, WhereClause wc,

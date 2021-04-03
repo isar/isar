@@ -7,4 +7,6 @@ abstract class TypeAdapter<T> {
 
   T deserialize(
       IsarCollectionImpl<T> collection, BinaryReader reader, List<int> offsets);
+
+  P deserializeProperty<P>(BinaryReader reader, int propertyIndex, int offset);
 }

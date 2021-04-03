@@ -30,11 +30,11 @@ jobs:
       run: sudo apt-get install libclang-dev
     - name: Generate bindings
       run: |
-        cd isar
+        cd packages/isar
         bash tool/generate_bindings.sh
     - name: Commit changes
       run: |
-        git add isar/lib/src/native/bindings.dart
+        git add packages/isar/lib/src/native/bindings.dart
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git commit -m "Generated bindings" || echo "No changes to commit"
