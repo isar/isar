@@ -14,6 +14,7 @@ dependencies:
   isar_flutter_libs: any
   path_provider: any
   integration_test: any
+  meta: any
 
 dev_dependencies:
   build_runner: any

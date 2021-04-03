@@ -19,6 +19,7 @@ class BinaryWriter {
     _byteData.setUint16(0, staticSize, Endian.little);
   }
 
+  @pragma('vm:prefer-inline')
   void writeBool(int offset, bool? value, {bool staticOffset = true}) {
     assert(!staticOffset || offset < _staticSize);
     if (value == null) {
@@ -28,6 +29,7 @@ class BinaryWriter {
     }
   }
 
+  @pragma('vm:prefer-inline')
   void writeInt(int offset, int? value) {
     assert(offset < _staticSize);
     value ??= nullInt;
@@ -35,21 +37,25 @@ class BinaryWriter {
     _byteData.setInt32(offset, value, Endian.little);
   }
 
+  @pragma('vm:prefer-inline')
   void writeFloat(int offset, double? value) {
     assert(offset < _staticSize);
     _byteData.setFloat32(offset, value ?? double.nan, Endian.little);
   }
 
+  @pragma('vm:prefer-inline')
   void writeLong(int offset, int? value) {
     assert(offset < _staticSize);
     _byteData.setInt64(offset, value ?? nullLong, Endian.little);
   }
 
+  @pragma('vm:prefer-inline')
   void writeDouble(int offset, double? value) {
     assert(offset < _staticSize);
     _byteData.setFloat64(offset, value ?? double.nan, Endian.little);
   }
 
+  @pragma('vm:prefer-inline')
   void writeDateTime(int offset, DateTime? value) {
     writeLong(offset, value?.toUtc().microsecondsSinceEpoch);
   }
@@ -65,6 +71,7 @@ class BinaryWriter {
     }
   }
 
+  @pragma('vm:prefer-inline')
   void writeBytes(int offset, Uint8List? value) {
     assert(offset < _staticSize);
     _writeBytes(value, offset, _dynamicOffset);

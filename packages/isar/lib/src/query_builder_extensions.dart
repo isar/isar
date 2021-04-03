@@ -1,57 +1,56 @@
 part of isar;
 
-extension QueryWhereOr<OBJ> on QueryBuilder<OBJ, QWhereOr> {
-  QueryBuilder<OBJ, QWhereClause> or() {
+extension QueryWhereOr<OBJ, T> on QueryBuilder<T, QWhereOr> {
+  QueryBuilder<T, QWhereClause> or() {
     return copyWith();
   }
 }
 
-extension QueryFilter<OBJ> on QueryBuilder<OBJ, QFilter> {
-  QueryBuilder<OBJ, QFilterCondition> filter() {
+extension QueryFilter<OBJ, T> on QueryBuilder<T, QFilter> {
+  QueryBuilder<T, QFilterCondition> filter() {
     return copyWith();
   }
 }
 
-extension QueryFilterAndOr<OBJ> on QueryBuilder<OBJ, QFilterOperator> {
-  QueryBuilder<OBJ, QFilterCondition> and() {
+extension QueryFilterAndOr<OBJ, T> on QueryBuilder<T, QFilterOperator> {
+  QueryBuilder<T, QFilterCondition> and() {
     return andOrInternal(FilterGroupType.And);
   }
 
-  QueryBuilder<OBJ, QFilterCondition> or() {
+  QueryBuilder<T, QFilterCondition> or() {
     return andOrInternal(FilterGroupType.Or);
   }
 }
 
-extension QueryFilterNot<OBJ> on QueryBuilder<OBJ, QFilterCondition> {
-  QueryBuilder<OBJ, QFilterCondition> not() {
+extension QueryFilterNot<OBJ, T> on QueryBuilder<T, QFilterCondition> {
+  QueryBuilder<T, QFilterCondition> not() {
     return notInternal();
   }
 }
 
-extension QueryFilterNoGroups<OBJ> on QueryBuilder<OBJ, QFilterCondition> {
-  QueryBuilder<OBJ, QAfterFilterCondition> group(FilterQuery<OBJ> q) {
+extension QueryFilterNoGroups<OBJ, T> on QueryBuilder<T, QFilterCondition> {
+  QueryBuilder<T, QAfterFilterCondition> group(FilterQuery<T> q) {
     return groupInternal(q);
   }
 }
 
-extension QueryOffset<OBJ> on QueryBuilder<OBJ, QOffset> {
-  QueryBuilder<OBJ, QAfterOffset> offset(int offset) {
+extension QueryOffset<OBJ, T> on QueryBuilder<T, QOffset> {
+  QueryBuilder<T, QAfterOffset> offset(int offset) {
     return copyWith(offset: offset);
   }
 }
 
-extension QueryLimit<OBJ> on QueryBuilder<OBJ, QLimit> {
-  QueryBuilder<OBJ, QAfterLimit> limit(int limit) {
+extension QueryLimit<OBJ, T> on QueryBuilder<T, QLimit> {
+  QueryBuilder<T, QAfterLimit> limit(int limit) {
     return copyWith(limit: limit);
   }
 }
 
-typedef QueryOption<OBJ, T, R> = QueryBuilder<OBJ, R> Function(
-    QueryBuilder<OBJ, T> q);
+typedef QueryOption<T, S, R> = QueryBuilder<T, R> Function(
+    QueryBuilder<T, S> q);
 
-extension QueryOptional<OBJ, T> on QueryBuilder<OBJ, T> {
-  QueryBuilder<OBJ, R> optional<R>(
-      bool enabled, QueryOption<OBJ, T, R> option) {
+extension QueryOptional<T, S> on QueryBuilder<T, S> {
+  QueryBuilder<T, R> optional<R>(bool enabled, QueryOption<T, S, R> option) {
     if (enabled) {
       return option(this);
     } else {
@@ -74,56 +73,50 @@ extension QueryRepeat<OBJ, T> on QueryBuilder<OBJ, T> {
   }
 }
 
-extension QueryExecute<OBJ> on QueryBuilder<OBJ, QQueryOperations> {
-  Query<OBJ> build() {
-    return buildInternal();
-  }
+extension QueryExecute<T> on QueryBuilder<T, QQueryOperations> {
+  Query<T> build() => buildInternal();
 
-  Future<OBJ?> findFirst() {
-    return build().findFirst();
-  }
+  Future<T?> findFirst() => build().findFirst();
 
-  OBJ? findFirstSync() {
-    return build().findFirstSync();
-  }
+  T? findFirstSync() => build().findFirstSync();
 
-  Future<List<OBJ>> findAll() {
-    return build().findAll();
-  }
+  Future<List<T>> findAll() => build().findAll();
 
-  List<OBJ> findAllSync() {
-    return build().findAllSync();
-  }
+  List<T> findAllSync() => build().findAllSync();
 
-  Future<int> count() {
-    return build().count();
-  }
+  Future<int> count() => build().count();
 
-  int countSync() {
-    return build().countSync();
-  }
+  int countSync() => build().countSync();
 
-  Future<bool> deleteFirst() {
-    return build().deleteFirst();
-  }
+  Future<bool> deleteFirst() => build().deleteFirst();
 
-  bool deleteFirstSync() {
-    return build().deleteFirstSync();
-  }
+  bool deleteFirstSync() => build().deleteFirstSync();
 
-  Future<int> deleteAll() {
-    return build().deleteAll();
-  }
+  Future<int> deleteAll() => build().deleteAll();
 
-  int deleteAllSync() {
-    return build().deleteAllSync();
-  }
+  int deleteAllSync() => build().deleteAllSync();
 
-  Stream<List<OBJ>> watch({bool initialReturn = false}) {
-    return build().watch(initialReturn: initialReturn);
-  }
+  Stream<List<T>> watch({bool initialReturn = false}) =>
+      build().watch(initialReturn: initialReturn);
 
-  Stream<void> watchLazy() {
-    return build().watchLazy();
-  }
+  Stream<void> watchLazy() => build().watchLazy();
+}
+
+extension QueryExecuteAggregation<T extends num?>
+    on QueryBuilder<T, QQueryOperations> {
+  Future<T> min() => build().min();
+
+  T minSync() => build().minSync();
+
+  Future<T> max() => build().max();
+
+  T maxSync() => build().maxSync();
+
+  Future<T> average() => build().average();
+
+  T averageSync() => build().averageSync();
+
+  Future<T> sum() => build().sum();
+
+  T sumSync() => build().sumSync();
 }

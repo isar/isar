@@ -7,20 +7,24 @@ const zoneTxnStream = #zoneTxnStream;
 class IsarImpl extends Isar {
   final Pointer isarPtr;
 
+  final List<Future> _activeAsyncTxns = [];
   Pointer? _currentTxnSync;
   bool _currentTxnSyncWrite = false;
 
   IsarImpl(String path, this.isarPtr) : super(path);
 
-  void requireNoTxnActive() {
+  void requireNotInTxn() {
     if (_currentTxnSync != null || Zone.current[zoneTxn] != null) {
-      throw 'Nested transactions are not supported yet.';
+      throw 'Cannot perform this operation from within an active transaction.';
     }
   }
 
   Future<T> _txn<T>(
       bool write, bool silent, Future<T> Function(Isar isar) callback) async {
-    requireNoTxnActive();
+    requireNotInTxn();
+
+    final completer = Completer();
+    _activeAsyncTxns.add(completer.future);
 
     final port = ReceivePort();
     final portStream = wrapIsarPort(port);
@@ -49,6 +53,8 @@ class IsarImpl extends Isar {
     } catch (e) {
       IC.isar_txn_finish(txnPtr, false);
       port.close();
+      completer.complete();
+      _activeAsyncTxns.remove(completer.future);
       rethrow;
     }
 
@@ -56,6 +62,8 @@ class IsarImpl extends Isar {
     await portStream.first;
 
     port.close();
+    completer.complete();
+    _activeAsyncTxns.remove(completer.future);
 
     return result;
   }
@@ -89,7 +97,7 @@ class IsarImpl extends Isar {
   }
 
   T _txnSync<T>(bool write, bool silent, T Function(Isar isar) callback) {
-    requireNoTxnActive();
+    requireNotInTxn();
 
     var txnPtr = IsarCoreUtils.syncTxnPtr;
     nCall(IC.isar_txn_begin(isarPtr, txnPtr, true, write, silent, 0));
@@ -136,9 +144,10 @@ class IsarImpl extends Isar {
   }
 
   @override
-  Future close() {
-    super.close();
+  Future close() async {
+    requireNotInTxn();
+    await Future.wait(_activeAsyncTxns);
+    await super.close();
     IC.isar_close_instance(isarPtr);
-    return Future.value();
   }
 }

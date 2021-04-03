@@ -35,6 +35,23 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return objects;
   }
 
+  List<T> deserializeProperty<T>(RawObjectSet objectSet, int propertyIndex) {
+    final values = <T>[];
+    final propertyOffset = propertyOffsets[propertyIndex];
+    for (var i = 0; i < objectSet.length; i++) {
+      final rawObjPtr = objectSet.objects.elementAt(i);
+      final rawObj = rawObjPtr.ref;
+      final buffer = rawObj.buffer.asTypedList(rawObj.buffer_length);
+      final reader = BinaryReader(buffer);
+      values.add(_adapter.deserializeProperty(
+        reader,
+        propertyIndex,
+        propertyOffset,
+      ));
+    }
+    return values;
+  }
+
   Pointer<RawObjectSet> allocRawObjSet(int length) {
     final rawObjSetPtr = malloc<RawObjectSet>();
     final rawObjSet = rawObjSetPtr.ref;
