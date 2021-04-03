@@ -22,18 +22,13 @@ void main() async {
 }
 
 void executeTests(Completer<bool> completer) {
-  //final context = IntegrationContext(false);
-  //final encryptionContext = IntegrationContext(true);
-
   group('Integration test', () {
     setUpAll(() async {
       final dir = await getTemporaryDirectory();
       testTempPath = dir.path;
     });
     tearDownAll(() {
-      final result = allTestsSuccessful;
-      //context.success && encryptionContext.success;
-      completer.complete(result);
+      completer.complete(allTestsSuccessful);
     });
 
     group('unencrypted', () {
