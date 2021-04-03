@@ -3,12 +3,56 @@ name: Integration test
 on: [push, pull_request]
 
 jobs:
+  drive_ios:
+    strategy:
+      matrix:
+        device:
+          - "iPhone 8 (14.4)"
+          - "iPhone 11 Pro Max (14.4)"
+      fail-fast: false
+
+    runs-on: macos-latest
+    steps:
+      - name: "List all simulators"
+        run: "xcrun instruments -s"
+      - name: "Start Simulator"
+        run: |
+          UDID=$(
+            xcrun instruments -s |
+            awk \
+              -F ' *[][]' \
+              -v 'device=${{ matrix.device }}' \
+              '$1 == device { print $2 }'
+          )
+          xcrun simctl boot "${UDID:?No Simulator with this name found}"
+
+      - uses: actions/checkout@v1
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+
+      - name: Run isar_generator
+        run: |
+          flutter pub get
+          flutter pub run build_runner build
+        working-directory: packages/isar_test
+
+      - name: Download binaries
+        run: bash tool/download_binaries.sh
+        working-directory: packages/isar_flutter_libs
+
+      - name: "Run Flutter Driver tests"
+        run: "flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart"
+        working-directory: packages/isar_test
+        
   drive_android:
     runs-on: macos-latest
     strategy:
       matrix:
         api-level: [21, 29]
         target: [default]
+    fail-fast: false
+
     steps:
       - uses: actions/checkout@v1
       - uses: subosito/flutter-action@v1
@@ -25,7 +69,7 @@ jobs:
         run: bash tool/download_binaries.sh
         working-directory: packages/isar_flutter_libs
 
-      - name: Run Flutter Driver tests
+      - name: "Run Flutter Driver tests"
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
@@ -33,4 +77,4 @@ jobs:
           arch: x86_64
           profile: Nexus 6
           working-directory: packages/isar_test
-          script: flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart
+          script: "flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart"
