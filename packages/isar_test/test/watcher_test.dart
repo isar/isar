@@ -8,7 +8,7 @@ import 'package:isar_test/message_model.dart';
 import 'common.dart';
 
 void main() {
-  group('Watcher', () {
+  /*group('Watcher', () {
     late Isar isar;
     late IsarCollection<Message> col;
     late List<Message> messages;
@@ -169,5 +169,5 @@ void main() {
       expect(changeRegistered, true);
       expect(event, [messages[3]]);
     });*/
-  });
+  });*/
 }
