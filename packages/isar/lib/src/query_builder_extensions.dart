@@ -102,21 +102,32 @@ extension QueryExecute<T> on QueryBuilder<T, QQueryOperations> {
   Stream<void> watchLazy() => build().watchLazy();
 }
 
-extension QueryExecuteAggregation<T extends num?>
-    on QueryBuilder<T, QQueryOperations> {
-  Future<T> min() => build().min();
+extension QueryExecuteAggregation<T extends num>
+    on QueryBuilder<T?, QQueryOperations> {
+  Future<T?> min() => build().min();
 
-  T minSync() => build().minSync();
+  T? minSync() => build().minSync();
 
-  Future<T> max() => build().max();
+  Future<T?> max() => build().max();
 
-  T maxSync() => build().maxSync();
+  T? maxSync() => build().maxSync();
 
-  Future<T> average() => build().average();
+  Future<double> average() => build().average();
 
-  T averageSync() => build().averageSync();
+  double averageSync() => build().averageSync();
 
   Future<T> sum() => build().sum();
 
   T sumSync() => build().sumSync();
+}
+
+extension QueryExecuteDateAggregation
+    on QueryBuilder<DateTime?, QQueryOperations> {
+  Future<DateTime?> min() => build().min();
+
+  DateTime? minSync() => build().minSync();
+
+  Future<DateTime?> max() => build().max();
+
+  DateTime? maxSync() => build().maxSync();
 }

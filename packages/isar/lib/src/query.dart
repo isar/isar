@@ -9,7 +9,8 @@ abstract class Query<T> {
 
   List<T> findAllSync();
 
-  Future<int> count() => aggregateQuery(this, AggregationOp.Count);
+  Future<int> count() =>
+      aggregateQuery<int>(this, AggregationOp.Count).then((value) => value!);
 
   int countSync() => aggregateQuerySync(this, AggregationOp.Count);
 
@@ -26,20 +27,34 @@ abstract class Query<T> {
   Stream<void> watchLazy();
 }
 
-extension QueryAggregation<T extends num?> on Query<T> {
-  Future<T> min() => aggregateQuery(this, AggregationOp.Min);
+extension QueryAggregation<T extends num> on Query<T?> {
+  Future<T?> min() => aggregateQuery(this, AggregationOp.Min);
 
-  T minSync() => aggregateQuerySync(this, AggregationOp.Min);
+  T? minSync() => aggregateQuerySync(this, AggregationOp.Min);
 
-  Future<T> max() => aggregateQuery(this, AggregationOp.Max);
+  Future<T?> max() => aggregateQuery(this, AggregationOp.Max);
 
-  T maxSync() => aggregateQuerySync(this, AggregationOp.Max);
+  T? maxSync() => aggregateQuerySync(this, AggregationOp.Max);
 
-  Future<T> average() => aggregateQuery(this, AggregationOp.Average);
+  Future<double> average() =>
+      aggregateQuery<double>(this, AggregationOp.Average)
+          .then((value) => value!);
 
-  T averageSync() => aggregateQuerySync(this, AggregationOp.Average);
+  double averageSync() =>
+      aggregateQuerySync<double>(this, AggregationOp.Average)!;
 
-  Future<T> sum() => aggregateQuery(this, AggregationOp.Sum);
+  Future<T> sum() =>
+      aggregateQuery<T>(this, AggregationOp.Sum).then((value) => value!);
 
-  T sumSync() => aggregateQuerySync(this, AggregationOp.Sum);
+  T sumSync() => aggregateQuerySync<T>(this, AggregationOp.Sum)!;
+}
+
+extension QueryDateAggregation<T extends DateTime?> on Query<T> {
+  Future<DateTime?> min() => aggregateQuery(this, AggregationOp.Min);
+
+  DateTime? minSync() => aggregateQuerySync(this, AggregationOp.Min);
+
+  Future<DateTime?> max() => aggregateQuery(this, AggregationOp.Max);
+
+  DateTime? maxSync() => aggregateQuerySync(this, AggregationOp.Max);
 }

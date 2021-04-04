@@ -137,27 +137,24 @@ class NativeQuery<T> extends Query<T> {
   }
 }
 
-Future<T> aggregateQuery<T>(Query query, AggregationOp op) async {
+Future<T?> aggregateQuery<T>(Query query, AggregationOp op) async {
   query as NativeQuery;
   return query.isar.getTxn(false, (txnPtr, stream) async {
     final resultPtrPtr = malloc<Pointer>();
+
     IC.isar_q_aggregate(query.colPtr, query.queryPtr, txnPtr, op.index,
         query.propertyIndex ?? 0, resultPtrPtr);
 
     try {
       await stream.first;
-      if (T == int) {
-        return IC.isar_q_aggregate_long_result(resultPtrPtr.value) as T;
-      } else {
-        return IC.isar_q_aggregate_double_result(resultPtrPtr.value) as T;
-      }
+      return _convertAggregatedResult<T>(resultPtrPtr.value, op);
     } finally {
       malloc.free(resultPtrPtr);
     }
   });
 }
 
-T aggregateQuerySync<T>(Query query, AggregationOp op) {
+T? aggregateQuerySync<T>(Query query, AggregationOp op) {
   query as NativeQuery;
   return query.isar.getTxnSync(false, (txnPtr) {
     final resultPtrPtr = malloc<Pointer>();
@@ -165,13 +162,32 @@ T aggregateQuerySync<T>(Query query, AggregationOp op) {
     try {
       nCall(IC.isar_q_aggregate(query.colPtr, query.queryPtr, txnPtr, op.index,
           query.propertyIndex ?? 0, resultPtrPtr));
-      if (T == int) {
-        return IC.isar_q_aggregate_long_result(resultPtrPtr.value) as T;
-      } else {
-        return IC.isar_q_aggregate_double_result(resultPtrPtr.value) as T;
-      }
+      return _convertAggregatedResult(resultPtrPtr.value, op);
     } finally {
       malloc.free(resultPtrPtr);
     }
   });
+}
+
+T? _convertAggregatedResult<T>(Pointer resultPtr, AggregationOp op) {
+  final nullable = op == AggregationOp.Min || op == AggregationOp.Max;
+  if (T == int || T == DateTime) {
+    final value = IC.isar_q_aggregate_long_result(resultPtr);
+    if (nullable && value == nullLong) {
+      return null;
+    }
+    if (T == int) {
+      return value as T;
+    } else {
+      return DateTime.fromMicrosecondsSinceEpoch(value, isUtc: true).toLocal()
+          as T;
+    }
+  } else {
+    final value = IC.isar_q_aggregate_double_result(resultPtr);
+    if (nullable && value.isNaN) {
+      return null;
+    } else {
+      return value as T;
+    }
+  }
 }
