@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:build/build.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:glob/glob.dart';
@@ -7,6 +8,7 @@ import 'package:isar_generator/src/code_gen/isar_interface_generator.dart';
 import 'package:isar_generator/src/code_gen/object_adapter_generator.dart';
 import 'package:isar_generator/src/code_gen/query_distinct_by_generator.dart';
 import 'package:isar_generator/src/code_gen/query_link_generator.dart';
+import 'package:isar_generator/src/code_gen/query_property_generator.dart';
 import 'package:isar_generator/src/code_gen/query_sort_by_generator.dart';
 import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
@@ -113,9 +115,7 @@ class IsarCodeGenerator extends Builder {
         .join('\n');
     final objectAdapters =
         objects.map((o) => generateObjectAdapter(o)).join('\n');
-    final getCollectionExtensions = objects
-        .mapIndexed((i, o) => generateGetCollectionExtension(o, i))
-        .join('\n');
+    final getCollectionsExtensions = generateGetCollectionsExtension(objects);
     final queryWhereExtensions =
         objects.map((o) => generateQueryWhere(o)).join('\n');
     final queryFilterExtensions =
@@ -126,13 +126,13 @@ class IsarCodeGenerator extends Builder {
         objects.map((o) => generateSortBy(o)).join('\n');
     final queryDistinctByExtensions =
         objects.map((o) => generateDistinctBy(o)).join('\n');
+    final propertyQueries =
+        objects.map((o) => generatePropertyQuery(o)).join('\n');
 
     var code = '''
     // ignore_for_file: unused_import, implementation_imports
 
     $imports
-
-    export 'package:isar/isar.dart';
 
     final _isar = <String, Isar>{};
     const _utf8Encoder = Utf8Encoder();
@@ -145,7 +145,7 @@ class IsarCodeGenerator extends Builder {
 
     ${generatePreparePath()}
 
-    $getCollectionExtensions
+    $getCollectionsExtensions
 
     $objectAdapters
 
@@ -154,6 +154,7 @@ class IsarCodeGenerator extends Builder {
     $queryLinkExtensions
     $querySortByExtensions
     $queryDistinctByExtensions
+    $propertyQueries
 
     ${generateIsarInterface(objects)}
     ''';
@@ -213,28 +214,30 @@ class IsarCodeGenerator extends Builder {
       final collectionPtrPtr = malloc<Pointer>();
     ''';
 
+    final maxProperties =
+        objects.maxBy((e) => e.properties.length)?.properties.length ?? 0;
+    code += '''
+    final propertyOffsetsPtr = malloc<Uint32>($maxProperties);
+    final propertyOffsets = propertyOffsetsPtr.asTypedList($maxProperties);
+    ''';
+
     for (var i = 0; i < objects.length; i++) {
       final info = objects[i];
       code += '''
-      {
-        nCall(IC.isar_get_collection(isarPtr, collectionPtrPtr, $i));
-        final propertyOffsetsPtr = malloc<Uint32>(${info.properties.length});
-        IC.isar_get_property_offsets(collectionPtrPtr.value, propertyOffsetsPtr);
-        final propertyOffsets = propertyOffsetsPtr.asTypedList(${info.properties.length}).toList();
-        malloc.free(propertyOffsetsPtr);
-        ${info.collectionVar}[name] = IsarCollectionImpl(
-          isar,
-          _${info.dartName}Adapter(),
-          collectionPtrPtr.value,
-          propertyOffsets,
-          (obj) => obj.${info.oidProperty.dartName},
-          (obj, id) => obj.${info.oidProperty.dartName} = id,
-        );
-      }
-      ''';
+      nCall(IC.isar_get_collection(isarPtr, collectionPtrPtr, $i));
+      IC.isar_get_property_offsets(collectionPtrPtr.value, propertyOffsetsPtr);
+      ${info.collectionVar}[name] = IsarCollectionImpl(
+        isar,
+        _${info.dartName}Adapter(),
+        collectionPtrPtr.value,
+        propertyOffsets.sublist(0, ${info.properties.length}),
+        (obj) => obj.${info.oidProperty.dartName},
+        (obj, id) => obj.${info.oidProperty.dartName} = id,
+      );''';
     }
 
     code += '''
+      malloc.free(propertyOffsetsPtr);
       malloc.free(collectionPtrPtr);
 
       IsarInterface.initialize(_GeneratedIsarInterface());
@@ -272,14 +275,17 @@ class IsarCodeGenerator extends Builder {
     return code;
   }
 
-  String generateGetCollectionExtension(ObjectInfo object, int objectIndex) {
-    return '''
-    extension Get${object.dartName}Collection on Isar {
+  String generateGetCollectionsExtension(List<ObjectInfo> objects) {
+    var code = 'extension GetCollection on Isar {';
+    for (var i = 0; i < objects.length; i++) {
+      final object = objects[i];
+      code += '''
       IsarCollection<${object.dartName}> get ${object.dartName.decapitalize()}s {
         return ${object.collectionVar}[name]!;
       }
+      ''';
     }
-    ''';
+    return '$code}';
   }
 
   String generateIsarSchema(List<ObjectInfo> ois) {

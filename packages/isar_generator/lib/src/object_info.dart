@@ -69,7 +69,7 @@ extension ObjectPropertyX on ObjectProperty {
     }
   }
 
-  String? fromIsar(String? input, ObjectInfo oi) {
+  String fromIsar(String input, ObjectInfo oi) {
     if (converter != null) {
       return '${oi.adapterName}._$converter.fromIsar($input)';
     } else {

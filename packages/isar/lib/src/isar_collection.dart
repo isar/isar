@@ -27,10 +27,27 @@ abstract class IsarCollection<OBJ> {
 
   int deleteAllSync(List<int> ids);
 
-  Future<void> importJson(Uint8List jsonBytes);
+  Future<void> importJsonRaw(Uint8List jsonBytes);
 
-  Future<R> exportJson<R>(R Function(Uint8List) callback,
+  Future<void> importJson(List<Map<String, dynamic>> json) {
+    final bytes = Utf8Encoder().convert(jsonEncode(json));
+    return importJsonRaw(bytes);
+  }
+
+  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
       {bool primitiveNull = true, bool includeLinks = false});
+
+  Future<List<Map<String, dynamic>>> exportJson(
+      {bool primitiveNull = true, bool includeLinks = false}) {
+    return exportJsonRaw(
+      (bytes) {
+        final json = jsonDecode(Utf8Decoder().convert(bytes)) as List;
+        return json.cast<Map<String, dynamic>>();
+      },
+      primitiveNull: primitiveNull,
+      includeLinks: includeLinks,
+    );
+  }
 
   QueryBuilder<OBJ, QWhere> where({bool? distinct, bool? ascending}) {
     return QueryBuilder(this, distinct, ascending);

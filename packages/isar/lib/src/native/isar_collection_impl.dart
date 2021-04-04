@@ -35,6 +35,23 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return objects;
   }
 
+  List<T> deserializeProperty<T>(RawObjectSet objectSet, int propertyIndex) {
+    final values = <T>[];
+    final propertyOffset = propertyOffsets[propertyIndex];
+    for (var i = 0; i < objectSet.length; i++) {
+      final rawObjPtr = objectSet.objects.elementAt(i);
+      final rawObj = rawObjPtr.ref;
+      final buffer = rawObj.buffer.asTypedList(rawObj.buffer_length);
+      final reader = BinaryReader(buffer);
+      values.add(_adapter.deserializeProperty(
+        reader,
+        propertyIndex,
+        propertyOffset,
+      ));
+    }
+    return values;
+  }
+
   Pointer<RawObjectSet> allocRawObjSet(int length) {
     final rawObjSetPtr = malloc<RawObjectSet>();
     final rawObjSet = rawObjSetPtr.ref;
@@ -53,7 +70,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         objectsPtr.elementAt(i).ref.oid = ids[i];
       }
 
-      IC.isar_get_all_async(ptr, txnPtr, rawObjSetPtr);
+      IC.isar_get_all(ptr, txnPtr, rawObjSetPtr);
       try {
         await stream.first;
         final objects = <OBJ?>[];
@@ -108,7 +125,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         final object = objects[i];
         _adapter.serialize(this, rawObj, object, propertyOffsets);
       }
-      IC.isar_put_all_async(ptr, txnPtr, rawObjSetPtr);
+      IC.isar_put_all(ptr, txnPtr, rawObjSetPtr);
 
       try {
         await stream.first;
@@ -155,7 +172,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       final countPtr = malloc<Uint32>();
       final idsPtr = malloc<Int64>(ids.length);
       idsPtr.asTypedList(ids.length).setAll(0, ids);
-      IC.isar_delete_all_async(ptr, txnPtr, idsPtr, ids.length, countPtr);
+      IC.isar_delete_all(ptr, txnPtr, idsPtr, ids.length, countPtr);
       try {
         await stream.first;
         return countPtr.value;
@@ -186,11 +203,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<void> importJson(Uint8List jsonBytes) {
+  Future<void> importJsonRaw(Uint8List jsonBytes) {
     return isar.getTxn(true, (txnPtr, stream) async {
       final bytesPtr = malloc<Uint8>(jsonBytes.length);
       bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
-      IC.isar_json_import_async(ptr, txnPtr, bytesPtr, jsonBytes.length);
+      IC.isar_json_import(ptr, txnPtr, bytesPtr, jsonBytes.length);
 
       try {
         await stream.first;
@@ -201,12 +218,12 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<R> exportJson<R>(R Function(Uint8List) callback,
+  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
       {bool primitiveNull = true, bool includeLinks = false}) {
     return isar.getTxn(false, (txnPtr, stream) async {
       final bytesPtrPtr = malloc<Pointer<Uint8>>();
       final lengthPtr = malloc<Uint32>();
-      IC.isar_json_export_async(
+      IC.isar_json_export(
           ptr, txnPtr, primitiveNull, includeLinks, bytesPtrPtr, lengthPtr);
 
       try {

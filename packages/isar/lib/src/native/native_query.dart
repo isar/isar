@@ -1,26 +1,38 @@
 part of isar_native;
 
-class NativeQuery<OBJ> extends Query<OBJ> {
+typedef QueryDeserialize<T> = List<T> Function(RawObjectSet);
+
+class NativeQuery<T> extends Query<T> {
   static const MAX_LIMIT = 4294967295;
 
-  final IsarCollectionImpl<OBJ> col;
+  final IsarImpl isar;
+  final Pointer<NativeType> colPtr;
   final Pointer<NativeType> queryPtr;
+  final QueryDeserialize<T> deserialize;
+  final int? propertyIndex;
 
-  NativeQuery(this.col, this.queryPtr);
+  NativeQuery(this.isar, this.colPtr, this.queryPtr, this.deserialize,
+      this.propertyIndex);
 
   @override
-  Future<OBJ?> findFirst() => findInternal(MAX_LIMIT).then((value) => value[0]);
+  Future<T?> findFirst() {
+    return findInternal(MAX_LIMIT).then((result) {
+      if (result.isNotEmpty) {
+        return result[0];
+      }
+    });
+  }
 
   @override
-  Future<List<OBJ>> findAll() => findInternal(MAX_LIMIT);
+  Future<List<T>> findAll() => findInternal(MAX_LIMIT);
 
-  Future<List<OBJ>> findInternal(int limit) {
-    return col.isar.getTxn(false, (txnPtr, stream) async {
+  Future<List<T>> findInternal(int limit) {
+    return isar.getTxn(false, (txnPtr, stream) async {
       final resultsPtr = malloc<RawObjectSet>();
       try {
-        IC.isar_q_find_async(queryPtr, txnPtr, resultsPtr, limit);
+        IC.isar_q_find(queryPtr, txnPtr, resultsPtr, limit);
         await stream.first;
-        return col.deserializeObjects(resultsPtr.ref);
+        return deserialize(resultsPtr.ref).cast();
       } finally {
         IC.isar_free_raw_obj_list(resultsPtr);
         malloc.free(resultsPtr);
@@ -29,46 +41,24 @@ class NativeQuery<OBJ> extends Query<OBJ> {
   }
 
   @override
-  OBJ? findFirstSync() => findSyncInternal(1)[0];
+  T? findFirstSync() {
+    final results = findSyncInternal(1);
+    if (results.isNotEmpty) {
+      return results[0];
+    }
+  }
 
   @override
-  List<OBJ> findAllSync() => findSyncInternal(MAX_LIMIT);
+  List<T> findAllSync() => findSyncInternal(MAX_LIMIT);
 
-  List<OBJ> findSyncInternal(int limit) {
-    return col.isar.getTxnSync(false, (txnPtr) {
+  List<T> findSyncInternal(int limit) {
+    return isar.getTxnSync(false, (txnPtr) {
       final resultsPtr = malloc<RawObjectSet>();
       try {
         nCall(IC.isar_q_find(queryPtr, txnPtr, resultsPtr, limit));
-        return col.deserializeObjects(resultsPtr.ref);
+        return deserialize(resultsPtr.ref).cast();
       } finally {
         malloc.free(resultsPtr);
-      }
-    });
-  }
-
-  @override
-  Future<int> count() {
-    return col.isar.getTxn(false, (txnPtr, stream) async {
-      final countPtr = malloc<Uint32>();
-      try {
-        IC.isar_q_count_async(queryPtr, txnPtr, countPtr);
-        await stream.first;
-        return countPtr.value;
-      } finally {
-        malloc.free(countPtr);
-      }
-    });
-  }
-
-  @override
-  int countSync() {
-    return col.isar.getTxnSync(false, (txnPtr) {
-      final countPtr = malloc<Uint32>();
-      try {
-        nCall(IC.isar_q_count(queryPtr, txnPtr, countPtr));
-        return countPtr.value;
-      } finally {
-        malloc.free(countPtr);
       }
     });
   }
@@ -80,12 +70,12 @@ class NativeQuery<OBJ> extends Query<OBJ> {
   Future<int> deleteAll() => deleteInternal(MAX_LIMIT);
 
   Future<int> deleteInternal(int limit) {
-    return col.isar.getTxn(false, (txnPtr, stream) async {
+    return isar.getTxn(false, (txnPtr, stream) async {
       final countPtr = malloc<Uint32>();
       try {
-        IC.isar_q_delete_async(
+        IC.isar_q_delete(
           queryPtr,
-          col.ptr,
+          colPtr,
           txnPtr,
           limit,
           countPtr,
@@ -105,12 +95,12 @@ class NativeQuery<OBJ> extends Query<OBJ> {
   int deleteAllSync() => deleteSyncInternal(MAX_LIMIT);
 
   int deleteSyncInternal(int limit) {
-    return col.isar.getTxnSync(false, (txnPtr) {
+    return isar.getTxnSync(false, (txnPtr) {
       final countPtr = malloc<Uint32>();
       try {
         nCall(IC.isar_q_delete(
           queryPtr,
-          col.ptr,
+          colPtr,
           txnPtr,
           limit,
           countPtr,
@@ -123,7 +113,7 @@ class NativeQuery<OBJ> extends Query<OBJ> {
   }
 
   @override
-  Stream<List<OBJ>> watch({bool initialReturn = false}) {
+  Stream<List<T>> watch({bool initialReturn = false}) {
     return watchLazy(initialReturn: initialReturn)
         .asyncMap((event) => findAll());
   }
@@ -132,7 +122,7 @@ class NativeQuery<OBJ> extends Query<OBJ> {
   Stream<void> watchLazy({bool initialReturn = false}) {
     final port = ReceivePort();
     final handle = IC.isar_watch_query(
-        col.isar.isarPtr, col.ptr, queryPtr, port.sendPort.nativePort);
+        isar.isarPtr, colPtr, queryPtr, port.sendPort.nativePort);
 
     final controller = StreamController(onCancel: () {
       IC.isar_stop_watching(handle);
@@ -145,4 +135,43 @@ class NativeQuery<OBJ> extends Query<OBJ> {
     controller.addStream(port);
     return controller.stream;
   }
+}
+
+Future<T> aggregateQuery<T>(Query query, AggregationOp op) async {
+  query as NativeQuery;
+  return query.isar.getTxn(false, (txnPtr, stream) async {
+    final resultPtrPtr = malloc<Pointer>();
+    IC.isar_q_aggregate(query.colPtr, query.queryPtr, txnPtr, op.index,
+        query.propertyIndex ?? 0, resultPtrPtr);
+
+    try {
+      await stream.first;
+      if (T == int) {
+        return IC.isar_q_aggregate_long_result(resultPtrPtr.value) as T;
+      } else {
+        return IC.isar_q_aggregate_double_result(resultPtrPtr.value) as T;
+      }
+    } finally {
+      malloc.free(resultPtrPtr);
+    }
+  });
+}
+
+T aggregateQuerySync<T>(Query query, AggregationOp op) {
+  query as NativeQuery;
+  return query.isar.getTxnSync(false, (txnPtr) {
+    final resultPtrPtr = malloc<Pointer>();
+
+    try {
+      nCall(IC.isar_q_aggregate(query.colPtr, query.queryPtr, txnPtr, op.index,
+          query.propertyIndex ?? 0, resultPtrPtr));
+      if (T == int) {
+        return IC.isar_q_aggregate_long_result(resultPtrPtr.value) as T;
+      } else {
+        return IC.isar_q_aggregate_double_result(resultPtrPtr.value) as T;
+      }
+    } finally {
+      malloc.free(resultPtrPtr);
+    }
+  });
 }
