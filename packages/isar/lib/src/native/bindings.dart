@@ -1064,7 +1064,6 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> txn,
     int operation,
     int property_index,
-    bool nullable,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> result,
   ) {
     return _isar_q_aggregate(
@@ -1073,7 +1072,6 @@ class IsarCoreBindings {
       txn,
       operation,
       property_index,
-      nullable ? 1 : 0,
       result,
     );
   }
@@ -2132,7 +2130,6 @@ typedef _c_isar_q_aggregate = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Uint8 operation,
   ffi.Uint32 property_index,
-  ffi.Uint8 nullable,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> result,
 );
 
@@ -2142,7 +2139,6 @@ typedef _dart_isar_q_aggregate = int Function(
   ffi.Pointer<ffi.NativeType> txn,
   int operation,
   int property_index,
-  int nullable,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> result,
 );
 
