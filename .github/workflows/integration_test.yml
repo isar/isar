@@ -49,7 +49,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        api-level: [21, 29]
+        api-level: [29] #[21, 29]
         target: [default]
       fail-fast: false
 
