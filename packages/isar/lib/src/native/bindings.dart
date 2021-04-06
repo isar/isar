@@ -319,18 +319,14 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     int lower,
-    bool include_lower,
     int upper,
-    bool include_upper,
     int property_index,
   ) {
     return _isar_filter_byte_between(
       collection,
       filter,
       lower,
-      include_lower ? 1 : 0,
       upper,
-      include_upper ? 1 : 0,
       property_index,
     );
   }
@@ -342,75 +338,18 @@ class IsarCoreBindings {
       _isar_filter_byte_between_ptr
           .asFunction<_dart_isar_filter_byte_between>();
 
-  int isar_filter_int_between(
-    ffi.Pointer<ffi.NativeType> collection,
-    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
-    int lower,
-    bool include_lower,
-    int upper,
-    bool include_upper,
-    int property_index,
-  ) {
-    return _isar_filter_int_between(
-      collection,
-      filter,
-      lower,
-      include_lower ? 1 : 0,
-      upper,
-      include_upper ? 1 : 0,
-      property_index,
-    );
-  }
-
-  late final _isar_filter_int_between_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_filter_int_between>>(
-          'isar_filter_int_between');
-  late final _dart_isar_filter_int_between _isar_filter_int_between =
-      _isar_filter_int_between_ptr.asFunction<_dart_isar_filter_int_between>();
-
-  int isar_filter_float_between(
-    ffi.Pointer<ffi.NativeType> collection,
-    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
-    double lower,
-    bool include_lower,
-    double upper,
-    bool include_upper,
-    int property_index,
-  ) {
-    return _isar_filter_float_between(
-      collection,
-      filter,
-      lower,
-      include_lower ? 1 : 0,
-      upper,
-      include_upper ? 1 : 0,
-      property_index,
-    );
-  }
-
-  late final _isar_filter_float_between_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_filter_float_between>>(
-          'isar_filter_float_between');
-  late final _dart_isar_filter_float_between _isar_filter_float_between =
-      _isar_filter_float_between_ptr
-          .asFunction<_dart_isar_filter_float_between>();
-
   int isar_filter_long_between(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     int lower,
-    bool include_lower,
     int upper,
-    bool include_upper,
     int property_index,
   ) {
     return _isar_filter_long_between(
       collection,
       filter,
       lower,
-      include_lower ? 1 : 0,
       upper,
-      include_upper ? 1 : 0,
       property_index,
     );
   }
@@ -426,18 +365,14 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     double lower,
-    bool include_lower,
     double upper,
-    bool include_upper,
     int property_index,
   ) {
     return _isar_filter_double_between(
       collection,
       filter,
       lower,
-      include_lower ? 1 : 0,
       upper,
-      include_upper ? 1 : 0,
       property_index,
     );
   }
@@ -469,27 +404,6 @@ class IsarCoreBindings {
   late final _dart_isar_filter_byte_list_contains
       _isar_filter_byte_list_contains = _isar_filter_byte_list_contains_ptr
           .asFunction<_dart_isar_filter_byte_list_contains>();
-
-  int isar_filter_int_list_contains(
-    ffi.Pointer<ffi.NativeType> collection,
-    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
-    int value,
-    int property_index,
-  ) {
-    return _isar_filter_int_list_contains(
-      collection,
-      filter,
-      value,
-      property_index,
-    );
-  }
-
-  late final _isar_filter_int_list_contains_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_filter_int_list_contains>>(
-          'isar_filter_int_list_contains');
-  late final _dart_isar_filter_int_list_contains
-      _isar_filter_int_list_contains = _isar_filter_int_list_contains_ptr
-          .asFunction<_dart_isar_filter_int_list_contains>();
 
   int isar_filter_long_list_contains(
     ffi.Pointer<ffi.NativeType> collection,
@@ -1253,7 +1167,7 @@ class IsarCoreBindings {
   late final _dart_isar_wc_create _isar_wc_create =
       _isar_wc_create_ptr.asFunction<_dart_isar_wc_create>();
 
-  void isar_wc_add_byte(
+  int isar_wc_add_byte(
     ffi.Pointer<ffi.NativeType> where_clause,
     int lower,
     int upper,
@@ -1270,41 +1184,7 @@ class IsarCoreBindings {
   late final _dart_isar_wc_add_byte _isar_wc_add_byte =
       _isar_wc_add_byte_ptr.asFunction<_dart_isar_wc_add_byte>();
 
-  void isar_wc_add_int(
-    ffi.Pointer<ffi.NativeType> where_clause,
-    int lower,
-    int upper,
-  ) {
-    return _isar_wc_add_int(
-      where_clause,
-      lower,
-      upper,
-    );
-  }
-
-  late final _isar_wc_add_int_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_wc_add_int>>('isar_wc_add_int');
-  late final _dart_isar_wc_add_int _isar_wc_add_int =
-      _isar_wc_add_int_ptr.asFunction<_dart_isar_wc_add_int>();
-
-  void isar_wc_add_float(
-    ffi.Pointer<ffi.NativeType> where_clause,
-    double lower,
-    double upper,
-  ) {
-    return _isar_wc_add_float(
-      where_clause,
-      lower,
-      upper,
-    );
-  }
-
-  late final _isar_wc_add_float_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_wc_add_float>>('isar_wc_add_float');
-  late final _dart_isar_wc_add_float _isar_wc_add_float =
-      _isar_wc_add_float_ptr.asFunction<_dart_isar_wc_add_float>();
-
-  void isar_wc_add_long(
+  int isar_wc_add_long(
     ffi.Pointer<ffi.NativeType> where_clause,
     int lower,
     int upper,
@@ -1321,7 +1201,7 @@ class IsarCoreBindings {
   late final _dart_isar_wc_add_long _isar_wc_add_long =
       _isar_wc_add_long_ptr.asFunction<_dart_isar_wc_add_long>();
 
-  void isar_wc_add_double(
+  int isar_wc_add_double(
     ffi.Pointer<ffi.NativeType> where_clause,
     double lower,
     double upper,
@@ -1338,14 +1218,12 @@ class IsarCoreBindings {
   late final _dart_isar_wc_add_double _isar_wc_add_double =
       _isar_wc_add_double_ptr.asFunction<_dart_isar_wc_add_double>();
 
-  void isar_wc_add_string(
+  int isar_wc_add_string(
     ffi.Pointer<ffi.NativeType> where_clause,
     ffi.Pointer<ffi.Int8> lower,
     ffi.Pointer<ffi.Int8> upper,
     bool lower_unbounded,
     bool upper_unbounded,
-    bool case_sensitive,
-    int index_type,
   ) {
     return _isar_wc_add_string(
       where_clause,
@@ -1353,8 +1231,6 @@ class IsarCoreBindings {
       upper,
       lower_unbounded ? 1 : 0,
       upper_unbounded ? 1 : 0,
-      case_sensitive ? 1 : 0,
-      index_type,
     );
   }
 
@@ -1600,9 +1476,7 @@ typedef _c_isar_filter_byte_between = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Uint8 lower,
-  ffi.Uint8 include_lower,
   ffi.Uint8 upper,
-  ffi.Uint8 include_upper,
   ffi.Uint32 property_index,
 );
 
@@ -1610,49 +1484,7 @@ typedef _dart_isar_filter_byte_between = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   int lower,
-  int include_lower,
   int upper,
-  int include_upper,
-  int property_index,
-);
-
-typedef _c_isar_filter_int_between = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
-  ffi.Int32 lower,
-  ffi.Uint8 include_lower,
-  ffi.Int32 upper,
-  ffi.Uint8 include_upper,
-  ffi.Uint32 property_index,
-);
-
-typedef _dart_isar_filter_int_between = int Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
-  int lower,
-  int include_lower,
-  int upper,
-  int include_upper,
-  int property_index,
-);
-
-typedef _c_isar_filter_float_between = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
-  ffi.Float lower,
-  ffi.Uint8 include_lower,
-  ffi.Float upper,
-  ffi.Uint8 include_upper,
-  ffi.Uint32 property_index,
-);
-
-typedef _dart_isar_filter_float_between = int Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
-  double lower,
-  int include_lower,
-  double upper,
-  int include_upper,
   int property_index,
 );
 
@@ -1660,9 +1492,7 @@ typedef _c_isar_filter_long_between = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Int64 lower,
-  ffi.Uint8 include_lower,
   ffi.Int64 upper,
-  ffi.Uint8 include_upper,
   ffi.Uint32 property_index,
 );
 
@@ -1670,9 +1500,7 @@ typedef _dart_isar_filter_long_between = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   int lower,
-  int include_lower,
   int upper,
-  int include_upper,
   int property_index,
 );
 
@@ -1680,9 +1508,7 @@ typedef _c_isar_filter_double_between = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Double lower,
-  ffi.Uint8 include_lower,
   ffi.Double upper,
-  ffi.Uint8 include_upper,
   ffi.Uint32 property_index,
 );
 
@@ -1690,9 +1516,7 @@ typedef _dart_isar_filter_double_between = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   double lower,
-  int include_lower,
   double upper,
-  int include_upper,
   int property_index,
 );
 
@@ -1704,20 +1528,6 @@ typedef _c_isar_filter_byte_list_contains = ffi.Int32 Function(
 );
 
 typedef _dart_isar_filter_byte_list_contains = int Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
-  int value,
-  int property_index,
-);
-
-typedef _c_isar_filter_int_list_contains = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
-  ffi.Int32 value,
-  ffi.Uint32 property_index,
-);
-
-typedef _dart_isar_filter_int_list_contains = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   int value,
@@ -2258,82 +2068,54 @@ typedef _dart_isar_wc_create = int Function(
   int ascending,
 );
 
-typedef _c_isar_wc_add_byte = ffi.Void Function(
+typedef _c_isar_wc_add_byte = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Uint8 lower,
   ffi.Uint8 upper,
 );
 
-typedef _dart_isar_wc_add_byte = void Function(
+typedef _dart_isar_wc_add_byte = int Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   int lower,
   int upper,
 );
 
-typedef _c_isar_wc_add_int = ffi.Void Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Int32 lower,
-  ffi.Int32 upper,
-);
-
-typedef _dart_isar_wc_add_int = void Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  int lower,
-  int upper,
-);
-
-typedef _c_isar_wc_add_float = ffi.Void Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Float lower,
-  ffi.Float upper,
-);
-
-typedef _dart_isar_wc_add_float = void Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  double lower,
-  double upper,
-);
-
-typedef _c_isar_wc_add_long = ffi.Void Function(
+typedef _c_isar_wc_add_long = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Int64 lower,
   ffi.Int64 upper,
 );
 
-typedef _dart_isar_wc_add_long = void Function(
+typedef _dart_isar_wc_add_long = int Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   int lower,
   int upper,
 );
 
-typedef _c_isar_wc_add_double = ffi.Void Function(
+typedef _c_isar_wc_add_double = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Double lower,
   ffi.Double upper,
 );
 
-typedef _dart_isar_wc_add_double = void Function(
+typedef _dart_isar_wc_add_double = int Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   double lower,
   double upper,
 );
 
-typedef _c_isar_wc_add_string = ffi.Void Function(
+typedef _c_isar_wc_add_string = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
   ffi.Uint8 lower_unbounded,
   ffi.Uint8 upper_unbounded,
-  ffi.Uint8 case_sensitive,
-  ffi.Uint8 index_type,
 );
 
-typedef _dart_isar_wc_add_string = void Function(
+typedef _dart_isar_wc_add_string = int Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
   int lower_unbounded,
   int upper_unbounded,
-  int case_sensitive,
-  int index_type,
 );
