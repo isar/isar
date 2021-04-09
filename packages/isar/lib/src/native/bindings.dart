@@ -1167,6 +1167,19 @@ class IsarCoreBindings {
   late final _dart_isar_wc_create _isar_wc_create =
       _isar_wc_create_ptr.asFunction<_dart_isar_wc_create>();
 
+  int isar_wc_add_null(
+    ffi.Pointer<ffi.NativeType> where_clause,
+  ) {
+    return _isar_wc_add_null(
+      where_clause,
+    );
+  }
+
+  late final _isar_wc_add_null_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_wc_add_null>>('isar_wc_add_null');
+  late final _dart_isar_wc_add_null _isar_wc_add_null =
+      _isar_wc_add_null_ptr.asFunction<_dart_isar_wc_add_null>();
+
   int isar_wc_add_byte(
     ffi.Pointer<ffi.NativeType> where_clause,
     int lower,
@@ -2066,6 +2079,14 @@ typedef _dart_isar_wc_create = int Function(
   int index_index,
   int skip_duplicates,
   int ascending,
+);
+
+typedef _c_isar_wc_add_null = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> where_clause,
+);
+
+typedef _dart_isar_wc_add_null = int Function(
+  ffi.Pointer<ffi.NativeType> where_clause,
 );
 
 typedef _c_isar_wc_add_byte = ffi.Int32 Function(
