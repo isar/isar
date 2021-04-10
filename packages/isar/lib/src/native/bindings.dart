@@ -1169,9 +1169,13 @@ class IsarCoreBindings {
 
   int isar_wc_add_null(
     ffi.Pointer<ffi.NativeType> where_clause,
+    bool lower_unbounded,
+    bool upper_unbounded,
   ) {
     return _isar_wc_add_null(
       where_clause,
+      lower_unbounded ? 1 : 0,
+      upper_unbounded ? 1 : 0,
     );
   }
 
@@ -2083,10 +2087,14 @@ typedef _dart_isar_wc_create = int Function(
 
 typedef _c_isar_wc_add_null = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> where_clause,
+  ffi.Uint8 lower_unbounded,
+  ffi.Uint8 upper_unbounded,
 );
 
 typedef _dart_isar_wc_add_null = int Function(
   ffi.Pointer<ffi.NativeType> where_clause,
+  int lower_unbounded,
+  int upper_unbounded,
 );
 
 typedef _c_isar_wc_add_byte = ffi.Int32 Function(
