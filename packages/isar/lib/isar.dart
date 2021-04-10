@@ -6,9 +6,11 @@ import 'dart:typed_data';
 
 import 'package:isar/src/query_builder.dart';
 import 'package:isar/src/isar_platform.dart';
+import 'package:meta/meta.dart';
 
 part 'package:isar/src/annotations/backlink.dart';
 part 'package:isar/src/annotations/collection.dart';
+part 'package:isar/src/annotations/external_collection.dart';
 part 'package:isar/src/annotations/id.dart';
 part 'package:isar/src/annotations/ignore.dart';
 part 'package:isar/src/annotations/index.dart';
@@ -21,4 +23,5 @@ part 'package:isar/src/isar_error.dart';
 part 'package:isar/src/isar_link.dart';
 part 'package:isar/src/isar.dart';
 part 'package:isar/src/query_builder_extensions.dart';
+part 'package:isar/src/query_components.dart';
 part 'package:isar/src/query.dart';

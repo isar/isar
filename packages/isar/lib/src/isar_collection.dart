@@ -49,9 +49,22 @@ abstract class IsarCollection<OBJ> {
     );
   }
 
-  QueryBuilder<OBJ, QWhere> where({bool? distinct, bool? ascending}) {
-    return QueryBuilder(this, distinct, ascending);
+  QueryBuilder<OBJ, QWhere> where(
+      {bool distinct = false, Sort sort = Sort.Asc}) {
+    return QueryBuilder(this, distinct, sort);
   }
+
+  Query<T> buildQuery<T>({
+    List<WhereClause> whereClauses = const [],
+    bool whereDistinct = false,
+    Sort whereSort = Sort.Asc,
+    FilterGroup? filter,
+    List<SortProperty> sortBy = const [],
+    List<DistinctProperty> distinctBy = const [],
+    int? offset,
+    int? limit,
+    String? property,
+  });
 
   Stream<void> watchLazy();
 

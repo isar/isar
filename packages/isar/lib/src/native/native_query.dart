@@ -9,10 +9,10 @@ class NativeQuery<T> extends Query<T> {
   final Pointer<NativeType> colPtr;
   final Pointer<NativeType> queryPtr;
   final QueryDeserialize<T> deserialize;
-  final int? propertyIndex;
+  final int? propertyId;
 
-  NativeQuery(this.isar, this.colPtr, this.queryPtr, this.deserialize,
-      this.propertyIndex);
+  NativeQuery(
+      this.isar, this.colPtr, this.queryPtr, this.deserialize, this.propertyId);
 
   @override
   Future<T?> findFirst() {
@@ -122,7 +122,7 @@ class NativeQuery<T> extends Query<T> {
   Stream<void> watchLazy({bool initialReturn = false}) {
     final port = ReceivePort();
     final handle = IC.isar_watch_query(
-        isar.isarPtr, colPtr, queryPtr, port.sendPort.nativePort);
+        isar.ptr, colPtr, queryPtr, port.sendPort.nativePort);
 
     final controller = StreamController(onCancel: () {
       IC.isar_stop_watching(handle);
@@ -143,7 +143,7 @@ Future<T?> aggregateQuery<T>(Query query, AggregationOp op) async {
     final resultPtrPtr = malloc<Pointer>();
 
     IC.isar_q_aggregate(query.colPtr, query.queryPtr, txnPtr, op.index,
-        query.propertyIndex ?? 0, resultPtrPtr);
+        query.propertyId ?? 0, resultPtrPtr);
 
     try {
       await stream.first;
@@ -161,7 +161,7 @@ T? aggregateQuerySync<T>(Query query, AggregationOp op) {
 
     try {
       nCall(IC.isar_q_aggregate(query.colPtr, query.queryPtr, txnPtr, op.index,
-          query.propertyIndex ?? 0, resultPtrPtr));
+          query.propertyId ?? 0, resultPtrPtr));
       return _convertAggregatedResult(resultPtrPtr.value, op);
     } finally {
       malloc.free(resultPtrPtr);

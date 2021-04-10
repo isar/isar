@@ -6,10 +6,10 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate';
-
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:path/path.dart' as p;
 import 'package:isar/isar.dart';
 import 'package:isar/src/query_builder.dart';
 import 'package:isar/src/native/bindings.dart';
@@ -28,4 +28,5 @@ part 'package:isar/src/native/isar_impl.dart';
 part 'package:isar/src/native/isar_link_impl.dart';
 part 'package:isar/src/native/native_query_builder.dart';
 part 'package:isar/src/native/native_query.dart';
+part 'package:isar/src/native/open.dart';
 part 'package:isar/src/native/type_adapter.dart';

@@ -12,8 +12,7 @@ String generateQueryLinks(ObjectInfo oi, List<ObjectInfo?> objects) {
         return linkInternal(
           isar.${targetOi.collectionAccessor},
           q,
-          ${link.linkIndex},
-          ${link.backlink},
+          '${link.dartName}',
         );
       }''';
   }

@@ -58,7 +58,8 @@ Future<Isar> openTempIsar() async {
     testTempPath = path.join(dartToolDir, 'test', 'tmp');
     initializeIsarCore(dylibs: {
       'windows': path.join(dartToolDir, 'isar_windows_x64.dll'),
-      'macos': path.join(dartToolDir, 'libisar_macos_x64.dylib'),
+      'macos': path.join(dartToolDir,
+          '/Users/simon/Documents/GitHub/isar-core/dart-ffi/target/x86_64-apple-darwin/debug/libisar_core_dart_ffi.dylib'),
       'linux': path.join(dartToolDir, 'libisar_linux_x64.so'),
     });
   }

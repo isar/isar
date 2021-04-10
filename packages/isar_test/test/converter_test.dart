@@ -1,8 +1,6 @@
-import 'dart:convert';
-
+import 'package:isar_test/common.dart';
 import 'package:test/test.dart';
 
-import 'common.dart';
 import 'package:isar_test/isar.g.dart';
 import 'package:isar_test/converter_model.dart';
 

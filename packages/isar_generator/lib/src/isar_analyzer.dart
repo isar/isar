@@ -10,10 +10,10 @@ import 'package:source_gen/source_gen.dart';
 import 'package:isar/isar.dart';
 import 'package:dartx/dartx.dart';
 
-const primaryKeyTypes = [IsarType.String, IsarType.Int, IsarType.Long];
-
 class IsarAnalyzer extends Builder {
-  final _annotationChecker = const TypeChecker.fromRuntime(Collection);
+  final _collectionAnnChecker = const TypeChecker.fromRuntime(Collection);
+  final _extcollectionAnnChecker =
+      const TypeChecker.fromRuntime(ExternalCollection);
 
   @override
   FutureOr<void> build(BuildStep buildStep) async {
@@ -21,13 +21,35 @@ class IsarAnalyzer extends Builder {
     if (!await resolver.isLibrary(buildStep.inputId)) return;
     final libReader = LibraryReader(await buildStep.inputLibrary);
 
-    final objectsJson = libReader
-        .annotatedWith(_annotationChecker)
-        .map((e) => generateObjectInfo(e.element)!.toJson())
+    final objects = libReader
+        .annotatedWith(_collectionAnnChecker)
+        .map((e) => generateObjectInfo(e.element))
+        .whereNotNull()
         .toList();
 
-    if (objectsJson.isEmpty) return;
+    final externalObjects = libReader
+        .annotatedWith(_extcollectionAnnChecker)
+        .map((e) sync* {
+          final annotations = _extcollectionAnnChecker.annotationsOf(e.element);
+          for (var annotation in annotations) {
+            final col = annotation.getField('collection')!.toTypeValue()!;
+            var oi = generateObjectInfo(col.element!);
+            if (oi != null) {
+              final cls = col.element as ClassElement;
+              yield oi.copyWith(
+                imports: [...oi.imports, cls.location!.components[0]],
+              );
+            }
+          }
+        })
+        .flatten()
+        .whereNotNull();
 
+    objects.addAll(externalObjects);
+
+    if (objects.isEmpty) return;
+
+    final objectsJson = objects.map((e) => e.toJson()).toList();
     final json = JsonEncoder().convert(objectsJson);
     await buildStep.writeAsString(
         buildStep.inputId.changeExtension('.isarobject.json'), json);
@@ -35,24 +57,24 @@ class IsarAnalyzer extends Builder {
 
   ObjectInfo? generateObjectInfo(Element element) {
     if (element is! ClassElement) {
-      err('Only classes may be annotated with @IsarCollection.', element);
+      err('Only classes may be annotated with @Collection.', element);
     }
 
     final modelClass = element as ClassElement;
 
     if (modelClass.isAbstract) {
-      err('Object class must not be abstract.', element);
+      err('Class must not be abstract.', element);
     }
 
     if (!modelClass.isPublic) {
-      err('Object class must be public.', element);
+      err('Class must be public.', element);
     }
 
     final hasZeroArgConstructor = modelClass.constructors
         .any((c) => c.isPublic && !c.parameters.any((p) => !p.isOptional));
 
     if (!hasZeroArgConstructor) {
-      err('Object class needs to have a public zero-arg constructor.');
+      err('Class needs to have a public zero-arg constructor.');
     }
 
     final isarName = getNameAnn(modelClass)?.name ?? modelClass.displayName;
@@ -121,7 +143,7 @@ class IsarAnalyzer extends Builder {
       properties: properties,
       indexes: indexes,
       links: links,
-      converterImports: converterImports.toList(),
+      imports: converterImports.toList(),
     );
 
     return modelInfo;
@@ -368,11 +390,11 @@ class IsarAnalyzer extends Builder {
     for (var index in indexes) {
       for (var index2 in indexes) {
         if (identical(index, index2)) continue;
-        if (index.properties!.length <= index2.properties!.length) {
+        if (index.properties.length <= index2.properties.length) {
           final indexPropertyNames =
-              index.properties!.map((it) => it.property.isarName);
-          final index2PropertyNames = index2.properties!
-              .take(index.properties!.length)
+              index.properties.map((it) => it.property.isarName);
+          final index2PropertyNames = index2.properties
+              .take(index.properties.length)
               .map((it) => it.property.isarName);
           if (indexPropertyNames.contentEquals(index2PropertyNames)) {
             err('There are multiple indexes with the prefix "${indexPropertyNames.join(', ')}"',

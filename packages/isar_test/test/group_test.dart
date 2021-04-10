@@ -1,10 +1,8 @@
 import 'package:isar/isar.dart';
-
-import 'package:test/test.dart';
-
-import 'common.dart';
+import 'package:isar_test/common.dart';
 import 'package:isar_test/isar.g.dart';
 import 'package:isar_test/user_model.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('Groups', () {

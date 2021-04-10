@@ -26,14 +26,14 @@ class _$ObjectInfoTearOff {
       List<ObjectProperty> properties = const [],
       List<ObjectIndex> indexes = const [],
       List<ObjectLink> links = const [],
-      List<String> converterImports = const []}) {
+      List<String> imports = const []}) {
     return _ObjectInfo(
       dartName: dartName,
       isarName: isarName,
       properties: properties,
       indexes: indexes,
       links: links,
-      converterImports: converterImports,
+      imports: imports,
     );
   }
 
@@ -52,7 +52,7 @@ mixin _$ObjectInfo {
   List<ObjectProperty> get properties => throw _privateConstructorUsedError;
   List<ObjectIndex> get indexes => throw _privateConstructorUsedError;
   List<ObjectLink> get links => throw _privateConstructorUsedError;
-  List<String> get converterImports => throw _privateConstructorUsedError;
+  List<String> get imports => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -71,7 +71,7 @@ abstract class $ObjectInfoCopyWith<$Res> {
       List<ObjectProperty> properties,
       List<ObjectIndex> indexes,
       List<ObjectLink> links,
-      List<String> converterImports});
+      List<String> imports});
 }
 
 /// @nodoc
@@ -89,7 +89,7 @@ class _$ObjectInfoCopyWithImpl<$Res> implements $ObjectInfoCopyWith<$Res> {
     Object? properties = freezed,
     Object? indexes = freezed,
     Object? links = freezed,
-    Object? converterImports = freezed,
+    Object? imports = freezed,
   }) {
     return _then(_value.copyWith(
       dartName: dartName == freezed
@@ -112,9 +112,9 @@ class _$ObjectInfoCopyWithImpl<$Res> implements $ObjectInfoCopyWith<$Res> {
           ? _value.links
           : links // ignore: cast_nullable_to_non_nullable
               as List<ObjectLink>,
-      converterImports: converterImports == freezed
-          ? _value.converterImports
-          : converterImports // ignore: cast_nullable_to_non_nullable
+      imports: imports == freezed
+          ? _value.imports
+          : imports // ignore: cast_nullable_to_non_nullable
               as List<String>,
     ));
   }
@@ -132,7 +132,7 @@ abstract class _$ObjectInfoCopyWith<$Res> implements $ObjectInfoCopyWith<$Res> {
       List<ObjectProperty> properties,
       List<ObjectIndex> indexes,
       List<ObjectLink> links,
-      List<String> converterImports});
+      List<String> imports});
 }
 
 /// @nodoc
@@ -152,7 +152,7 @@ class __$ObjectInfoCopyWithImpl<$Res> extends _$ObjectInfoCopyWithImpl<$Res>
     Object? properties = freezed,
     Object? indexes = freezed,
     Object? links = freezed,
-    Object? converterImports = freezed,
+    Object? imports = freezed,
   }) {
     return _then(_ObjectInfo(
       dartName: dartName == freezed
@@ -175,9 +175,9 @@ class __$ObjectInfoCopyWithImpl<$Res> extends _$ObjectInfoCopyWithImpl<$Res>
           ? _value.links
           : links // ignore: cast_nullable_to_non_nullable
               as List<ObjectLink>,
-      converterImports: converterImports == freezed
-          ? _value.converterImports
-          : converterImports // ignore: cast_nullable_to_non_nullable
+      imports: imports == freezed
+          ? _value.imports
+          : imports // ignore: cast_nullable_to_non_nullable
               as List<String>,
     ));
   }
@@ -193,7 +193,7 @@ class _$_ObjectInfo implements _ObjectInfo {
       this.properties = const [],
       this.indexes = const [],
       this.links = const [],
-      this.converterImports = const []});
+      this.imports = const []});
 
   factory _$_ObjectInfo.fromJson(Map<String, dynamic> json) =>
       _$_$_ObjectInfoFromJson(json);
@@ -213,11 +213,11 @@ class _$_ObjectInfo implements _ObjectInfo {
   final List<ObjectLink> links;
   @JsonKey(defaultValue: const [])
   @override
-  final List<String> converterImports;
+  final List<String> imports;
 
   @override
   String toString() {
-    return 'ObjectInfo(dartName: $dartName, isarName: $isarName, properties: $properties, indexes: $indexes, links: $links, converterImports: $converterImports)';
+    return 'ObjectInfo(dartName: $dartName, isarName: $isarName, properties: $properties, indexes: $indexes, links: $links, imports: $imports)';
   }
 
   @override
@@ -238,9 +238,8 @@ class _$_ObjectInfo implements _ObjectInfo {
                     .equals(other.indexes, indexes)) &&
             (identical(other.links, links) ||
                 const DeepCollectionEquality().equals(other.links, links)) &&
-            (identical(other.converterImports, converterImports) ||
-                const DeepCollectionEquality()
-                    .equals(other.converterImports, converterImports)));
+            (identical(other.imports, imports) ||
+                const DeepCollectionEquality().equals(other.imports, imports)));
   }
 
   @override
@@ -251,7 +250,7 @@ class _$_ObjectInfo implements _ObjectInfo {
       const DeepCollectionEquality().hash(properties) ^
       const DeepCollectionEquality().hash(indexes) ^
       const DeepCollectionEquality().hash(links) ^
-      const DeepCollectionEquality().hash(converterImports);
+      const DeepCollectionEquality().hash(imports);
 
   @JsonKey(ignore: true)
   @override
@@ -271,7 +270,7 @@ abstract class _ObjectInfo implements ObjectInfo {
       List<ObjectProperty> properties,
       List<ObjectIndex> indexes,
       List<ObjectLink> links,
-      List<String> converterImports}) = _$_ObjectInfo;
+      List<String> imports}) = _$_ObjectInfo;
 
   factory _ObjectInfo.fromJson(Map<String, dynamic> json) =
       _$_ObjectInfo.fromJson;
@@ -287,7 +286,7 @@ abstract class _ObjectInfo implements ObjectInfo {
   @override
   List<ObjectLink> get links => throw _privateConstructorUsedError;
   @override
-  List<String> get converterImports => throw _privateConstructorUsedError;
+  List<String> get imports => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
   _$ObjectInfoCopyWith<_ObjectInfo> get copyWith =>
@@ -850,9 +849,9 @@ class _$ObjectIndexTearOff {
   const _$ObjectIndexTearOff();
 
   _ObjectIndex call(
-      {required List<ObjectIndexProperty>? properties,
-      required bool? unique,
-      required bool? replace}) {
+      {required List<ObjectIndexProperty> properties,
+      required bool unique,
+      required bool replace}) {
     return _ObjectIndex(
       properties: properties,
       unique: unique,
@@ -870,10 +869,10 @@ const $ObjectIndex = _$ObjectIndexTearOff();
 
 /// @nodoc
 mixin _$ObjectIndex {
-  List<ObjectIndexProperty>? get properties =>
+  List<ObjectIndexProperty> get properties =>
       throw _privateConstructorUsedError;
-  bool? get unique => throw _privateConstructorUsedError;
-  bool? get replace => throw _privateConstructorUsedError;
+  bool get unique => throw _privateConstructorUsedError;
+  bool get replace => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -886,8 +885,7 @@ abstract class $ObjectIndexCopyWith<$Res> {
   factory $ObjectIndexCopyWith(
           ObjectIndex value, $Res Function(ObjectIndex) then) =
       _$ObjectIndexCopyWithImpl<$Res>;
-  $Res call(
-      {List<ObjectIndexProperty>? properties, bool? unique, bool? replace});
+  $Res call({List<ObjectIndexProperty> properties, bool unique, bool replace});
 }
 
 /// @nodoc
@@ -908,15 +906,15 @@ class _$ObjectIndexCopyWithImpl<$Res> implements $ObjectIndexCopyWith<$Res> {
       properties: properties == freezed
           ? _value.properties
           : properties // ignore: cast_nullable_to_non_nullable
-              as List<ObjectIndexProperty>?,
+              as List<ObjectIndexProperty>,
       unique: unique == freezed
           ? _value.unique
           : unique // ignore: cast_nullable_to_non_nullable
-              as bool?,
+              as bool,
       replace: replace == freezed
           ? _value.replace
           : replace // ignore: cast_nullable_to_non_nullable
-              as bool?,
+              as bool,
     ));
   }
 }
@@ -928,8 +926,7 @@ abstract class _$ObjectIndexCopyWith<$Res>
           _ObjectIndex value, $Res Function(_ObjectIndex) then) =
       __$ObjectIndexCopyWithImpl<$Res>;
   @override
-  $Res call(
-      {List<ObjectIndexProperty>? properties, bool? unique, bool? replace});
+  $Res call({List<ObjectIndexProperty> properties, bool unique, bool replace});
 }
 
 /// @nodoc
@@ -952,15 +949,15 @@ class __$ObjectIndexCopyWithImpl<$Res> extends _$ObjectIndexCopyWithImpl<$Res>
       properties: properties == freezed
           ? _value.properties
           : properties // ignore: cast_nullable_to_non_nullable
-              as List<ObjectIndexProperty>?,
+              as List<ObjectIndexProperty>,
       unique: unique == freezed
           ? _value.unique
           : unique // ignore: cast_nullable_to_non_nullable
-              as bool?,
+              as bool,
       replace: replace == freezed
           ? _value.replace
           : replace // ignore: cast_nullable_to_non_nullable
-              as bool?,
+              as bool,
     ));
   }
 }
@@ -976,11 +973,11 @@ class _$_ObjectIndex implements _ObjectIndex {
       _$_$_ObjectIndexFromJson(json);
 
   @override
-  final List<ObjectIndexProperty>? properties;
+  final List<ObjectIndexProperty> properties;
   @override
-  final bool? unique;
+  final bool unique;
   @override
-  final bool? replace;
+  final bool replace;
 
   @override
   String toString() {
@@ -1020,20 +1017,20 @@ class _$_ObjectIndex implements _ObjectIndex {
 
 abstract class _ObjectIndex implements ObjectIndex {
   const factory _ObjectIndex(
-      {required List<ObjectIndexProperty>? properties,
-      required bool? unique,
-      required bool? replace}) = _$_ObjectIndex;
+      {required List<ObjectIndexProperty> properties,
+      required bool unique,
+      required bool replace}) = _$_ObjectIndex;
 
   factory _ObjectIndex.fromJson(Map<String, dynamic> json) =
       _$_ObjectIndex.fromJson;
 
   @override
-  List<ObjectIndexProperty>? get properties =>
+  List<ObjectIndexProperty> get properties =>
       throw _privateConstructorUsedError;
   @override
-  bool? get unique => throw _privateConstructorUsedError;
+  bool get unique => throw _privateConstructorUsedError;
   @override
-  bool? get replace => throw _privateConstructorUsedError;
+  bool get replace => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
   _$ObjectIndexCopyWith<_ObjectIndex> get copyWith =>

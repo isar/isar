@@ -22,10 +22,9 @@ _$_ObjectInfo _$_$_ObjectInfoFromJson(Map<String, dynamic> json) {
             ?.map((e) => ObjectLink.fromJson(e as Map<String, dynamic>))
             .toList() ??
         [],
-    converterImports: (json['converterImports'] as List<dynamic>?)
-            ?.map((e) => e as String)
-            .toList() ??
-        [],
+    imports:
+        (json['imports'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+            [],
   );
 }
 
@@ -36,7 +35,7 @@ Map<String, dynamic> _$_$_ObjectInfoToJson(_$_ObjectInfo instance) =>
       'properties': instance.properties,
       'indexes': instance.indexes,
       'links': instance.links,
-      'converterImports': instance.converterImports,
+      'imports': instance.imports,
     };
 
 _$_ObjectProperty _$_$_ObjectPropertyFromJson(Map<String, dynamic> json) {
@@ -133,11 +132,11 @@ const _$IndexTypeEnumMap = {
 
 _$_ObjectIndex _$_$_ObjectIndexFromJson(Map<String, dynamic> json) {
   return _$_ObjectIndex(
-    properties: (json['properties'] as List<dynamic>?)
-        ?.map((e) => ObjectIndexProperty.fromJson(e as Map<String, dynamic>))
+    properties: (json['properties'] as List<dynamic>)
+        .map((e) => ObjectIndexProperty.fromJson(e as Map<String, dynamic>))
         .toList(),
-    unique: json['unique'] as bool?,
-    replace: json['replace'] as bool?,
+    unique: json['unique'] as bool,
+    replace: json['replace'] as bool,
   );
 }
 
