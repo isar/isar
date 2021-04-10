@@ -297,23 +297,26 @@ class IsarCoreBindings {
   late final _dart_isar_filter_link _isar_filter_link =
       _isar_filter_link_ptr.asFunction<_dart_isar_filter_link>();
 
-  int isar_filter_is_null(
+  int isar_filter_null_between(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    bool upper_unbounded,
     int property_index,
   ) {
-    return _isar_filter_is_null(
+    return _isar_filter_null_between(
       collection,
       filter,
+      upper_unbounded ? 1 : 0,
       property_index,
     );
   }
 
-  late final _isar_filter_is_null_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_filter_is_null>>(
-          'isar_filter_is_null');
-  late final _dart_isar_filter_is_null _isar_filter_is_null =
-      _isar_filter_is_null_ptr.asFunction<_dart_isar_filter_is_null>();
+  late final _isar_filter_null_between_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_filter_null_between>>(
+          'isar_filter_null_between');
+  late final _dart_isar_filter_null_between _isar_filter_null_between =
+      _isar_filter_null_between_ptr
+          .asFunction<_dart_isar_filter_null_between>();
 
   int isar_filter_byte_between(
     ffi.Pointer<ffi.NativeType> collection,
@@ -1169,12 +1172,10 @@ class IsarCoreBindings {
 
   int isar_wc_add_null(
     ffi.Pointer<ffi.NativeType> where_clause,
-    bool lower_unbounded,
     bool upper_unbounded,
   ) {
     return _isar_wc_add_null(
       where_clause,
-      lower_unbounded ? 1 : 0,
       upper_unbounded ? 1 : 0,
     );
   }
@@ -1239,14 +1240,12 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> where_clause,
     ffi.Pointer<ffi.Int8> lower,
     ffi.Pointer<ffi.Int8> upper,
-    bool lower_unbounded,
     bool upper_unbounded,
   ) {
     return _isar_wc_add_string(
       where_clause,
       lower,
       upper,
-      lower_unbounded ? 1 : 0,
       upper_unbounded ? 1 : 0,
     );
   }
@@ -1477,15 +1476,17 @@ typedef _dart_isar_filter_link = int Function(
   int backlink,
 );
 
-typedef _c_isar_filter_is_null = ffi.Int32 Function(
+typedef _c_isar_filter_null_between = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Uint8 upper_unbounded,
   ffi.Uint32 property_index,
 );
 
-typedef _dart_isar_filter_is_null = int Function(
+typedef _dart_isar_filter_null_between = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  int upper_unbounded,
   int property_index,
 );
 
@@ -2087,13 +2088,11 @@ typedef _dart_isar_wc_create = int Function(
 
 typedef _c_isar_wc_add_null = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Uint8 lower_unbounded,
   ffi.Uint8 upper_unbounded,
 );
 
 typedef _dart_isar_wc_add_null = int Function(
   ffi.Pointer<ffi.NativeType> where_clause,
-  int lower_unbounded,
   int upper_unbounded,
 );
 
@@ -2137,7 +2136,6 @@ typedef _c_isar_wc_add_string = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
-  ffi.Uint8 lower_unbounded,
   ffi.Uint8 upper_unbounded,
 );
 
@@ -2145,6 +2143,5 @@ typedef _dart_isar_wc_add_string = int Function(
   ffi.Pointer<ffi.NativeType> where_clause,
   ffi.Pointer<ffi.Int8> lower,
   ffi.Pointer<ffi.Int8> upper,
-  int lower_unbounded,
   int upper_unbounded,
 );
