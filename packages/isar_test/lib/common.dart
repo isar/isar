@@ -52,23 +52,25 @@ void isarTest(String name, dynamic Function() body) {
 var testEncryption = false;
 String? testTempPath;
 
-Future<Isar> openTempIsar() async {
+void registerBinaries() {
   if (testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
     testTempPath = path.join(dartToolDir, 'test', 'tmp');
     initializeIsarCore(dylibs: {
       'windows': path.join(dartToolDir, 'isar_windows_x64.dll'),
-      'macos': path.join(dartToolDir,
-          '/Users/simon/Documents/GitHub/isar-core/dart-ffi/target/x86_64-apple-darwin/debug/libisar_core_dart_ffi.dylib'),
+      'macos': path.join(dartToolDir, 'libisar_macos_x64.dylib'),
       'linux': path.join(dartToolDir, 'libisar_linux_x64.so'),
     });
   }
-  var name = Random().nextInt(pow(2, 32) as int);
-  var dir = Directory(path.join(testTempPath!, '${name}_tmp'));
-  if (await dir.exists()) {
-    await dir.delete(recursive: true);
-  }
-  await dir.create(recursive: true);
+}
+
+String getRandomName() {
+  var random = Random().nextInt(pow(2, 32) as int);
+  return '${random}_tmp';
+}
+
+Future<Isar> openTempIsar() async {
+  registerBinaries();
 
   Uint8List? encryptionKey;
   if (testEncryption) {
@@ -76,8 +78,8 @@ Future<Isar> openTempIsar() async {
   }
 
   return gen.openIsar(
-    name: dir.path,
-    directory: dir.path,
+    name: getRandomName(),
+    directory: testTempPath,
     encryptionKey: encryptionKey,
   );
 }
