@@ -1,14 +1,9 @@
 // ignore_for_file: implementation_imports
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:isar/isar.dart';
 import 'package:isar/src/isar_native.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:isar_test/isar.g.dart' as gen;
-
 import 'dart:math';
-
 import 'package:test/test.dart';
 
 Future qEqualSet<T>(Future<Iterable<T>> actual, Iterable<T> target) async {
@@ -67,19 +62,4 @@ void registerBinaries() {
 String getRandomName() {
   var random = Random().nextInt(pow(2, 32) as int);
   return '${random}_tmp';
-}
-
-Future<Isar> openTempIsar() async {
-  registerBinaries();
-
-  Uint8List? encryptionKey;
-  if (testEncryption) {
-    encryptionKey = Isar.generateSecureKey();
-  }
-
-  return gen.openIsar(
-    name: getRandomName(),
-    directory: testTempPath,
-    encryptionKey: encryptionKey,
-  );
 }

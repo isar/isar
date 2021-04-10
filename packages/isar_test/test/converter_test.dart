@@ -1,4 +1,5 @@
-import 'package:isar_test/common.dart';
+import 'package:isar_test/utils/common.dart';
+import 'package:isar_test/utils/open.dart';
 import 'package:test/test.dart';
 
 import 'package:isar_test/isar.g.dart';
