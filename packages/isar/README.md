@@ -22,7 +22,7 @@
 <p align="center">
   <a href="https://isar.dev">Quickstart</a> •
   <a href="https://isar.dev/schema">Documentation</a> •
-  <a href="https://isar.dev">Examples</a> •
+  <a href="https://isar.dev">Sample Apps</a> •
   <a href="https://github.com/isar/isar/discussions">Support & Ideas</a> •
   <a href="https://pub.dev/packages/isar">Pub.dev</a>
 </p>
@@ -35,8 +35,8 @@
 
 ### Features
 
-- 💙 **Made for Flutter**. Easy to use and zero configuration
-- 🏎️ **Highly scalable** from hundreds to hundreds of thousands of records
+- 💙 **Made for Flutter**. Easy to use - zero configuration
+- 🚀 **Highly scalable** from hundreds to hundreds of thousands of records
 - 🔎 **Full-text search**. Make searching fast and fun
 - 📱 **Multiplatform**. iOS, Android, Desktop and the web (soon™)
 - 🧪 **ACID semantics**. Rely on consistency
@@ -157,9 +157,9 @@ With Isar, you can watch Collections, Objects, or Queries. A watcher is notified
 Watchers can be lazy and not reload the data or they can be non-lazy and fetch new results in the background.
 
 ```dart
-Stream<void> collectionStream = isar.posts.watch(lazy: true);
+Stream<void> collectionStream = isar.posts.watchLazy;
 
-Stream<List<Post>> queryStream = databasePosts.watch(lazy: false);
+Stream<List<Post>> queryStream = databasePosts.watch();
 
 queryStream.listen((newResult) {
   // do UI updates
