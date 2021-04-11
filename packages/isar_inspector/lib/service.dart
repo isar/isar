@@ -2,9 +2,9 @@
 
 import 'dart:convert';
 
+import 'package:isar/isar.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
-import 'package:isar/src/query_builder.dart';
 
 class Service {
   static const kNormalTimeout = Duration(seconds: 4);
@@ -55,7 +55,7 @@ class Service {
   Future<List<Map<String, dynamic>>> executeQuery(
       String instance,
       String collection,
-      QueryOperation filter,
+      FilterOperation filter,
       int offset,
       int limit,
       int? sortPropertyIndex,
@@ -71,7 +71,7 @@ class Service {
   }
 
   Future watchQuery(
-      String instance, String collection, QueryOperation filter) async {
+      String instance, String collection, FilterOperation filter) async {
     final args =
         serializeQuery(instance, collection, filter, null, null, null, true);
     await _call(
@@ -84,7 +84,7 @@ class Service {
   Map<String, dynamic> serializeQuery(
       String instance,
       String collection,
-      QueryOperation filter,
+      FilterOperation filter,
       int? offset,
       int? limit,
       int? sortPropertyIndex,
@@ -102,24 +102,31 @@ class Service {
     };
   }
 
-  Map<String, dynamic> serializeFilter(QueryOperation filter) {
-    if (filter is QueryCondition) {
-      return {
-        'type': 'QueryCondition',
-        'conditionType': filter.conditionType.index,
-        'propertyIndex': filter.propertyIndex,
-        'propertyType': filter.propertyType,
-        'lower': filter.lower,
-        'includeLower': filter.includeLower,
-        'upper': filter.upper,
-        'includeUpper': filter.includeUpper,
-        'caseSensitive': filter.caseSensitive,
-      };
+  Map<String, dynamic> serializeFilter(FilterOperation filter) {
+    if (filter is FilterCondition) {
+      if (filter.type == ConditionType.Between) {
+        return {
+          'filterType': 'FilterCondition',
+          'type': filter.type.index,
+          'property': filter.property,
+          'lower': filter.lower,
+          'upper': filter.upper,
+          'caseSensitive': filter.caseSensitive,
+        };
+      } else {
+        return {
+          'filterType': 'FilterCondition',
+          'type': filter.type.index,
+          'property': filter.property,
+          'value': filter.lower,
+          'caseSensitive': filter.caseSensitive,
+        };
+      }
     } else if (filter is FilterGroup) {
       return {
-        'type': 'FilterGroup',
-        'conditions': filter.conditions.map((e) => serializeFilter(e)).toList(),
-        'groupType': filter.groupType!.index,
+        'filterType': 'FilterGroup',
+        'filters': filter.filters.map((e) => serializeFilter(e)).toList(),
+        'type': filter.type.index,
       };
     }
     throw 'unreachable';

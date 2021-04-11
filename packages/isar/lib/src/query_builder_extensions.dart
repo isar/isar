@@ -100,6 +100,13 @@ extension QueryExecute<T> on QueryBuilder<T, QQueryOperations> {
       build().watch(initialReturn: initialReturn);
 
   Stream<void> watchLazy() => build().watchLazy();
+
+  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
+          {bool primitiveNull = true}) =>
+      build().exportJsonRaw(callback, primitiveNull: primitiveNull);
+
+  Future<List<Map<String, dynamic>>> exportJson({bool primitiveNull = true}) =>
+      build().exportJson(primitiveNull: primitiveNull);
 }
 
 extension QueryExecuteAggregation<T extends num>

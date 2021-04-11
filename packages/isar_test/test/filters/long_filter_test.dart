@@ -1,9 +1,9 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/utils/common.dart';
+import 'package:isar_test/utils/open.dart';
 import 'package:isar_test/isar.g.dart';
 import 'package:isar_test/long_model.dart';
 import 'package:test/test.dart';
-
-import '../common.dart';
 
 void main() async {
   group('Long filter', () {
@@ -66,10 +66,6 @@ void main() async {
         col.where().fieldGreaterThan(3, include: true).findAll(),
         [LongModel()..field = 3, LongModel()..field = 4],
       );
-      await qEqualSet(
-        col.where().filter().fieldGreaterThan(3, include: true).findAll(),
-        {LongModel()..field = 3, LongModel()..field = 4},
-      );
 
       await qEqual(
         col.where().fieldGreaterThan(4).findAll(),
@@ -98,14 +94,6 @@ void main() async {
           LongModel()..field = 0,
           LongModel()..field = 1
         ],
-      );
-      await qEqualSet(
-        col.where().filter().fieldLessThan(1, include: true).findAll(),
-        {
-          LongModel()..field = null,
-          LongModel()..field = 0,
-          LongModel()..field = 1
-        },
       );
     });
 
@@ -140,31 +128,13 @@ void main() async {
         col.where().fieldBetween(1, 3, includeLower: false).findAll(),
         [LongModel()..field = 2, LongModel()..field = 3],
       );
-      await qEqualSet(
-        col.where().filter().fieldBetween(1, 3, includeLower: false).findAll(),
-        {LongModel()..field = 2, LongModel()..field = 3},
-      );
-
       await qEqual(
         col.where().fieldBetween(1, 3, includeUpper: false).findAll(),
         [LongModel()..field = 1, LongModel()..field = 2],
       );
-      await qEqualSet(
-        col.where().filter().fieldBetween(1, 3, includeUpper: false).findAll(),
-        {LongModel()..field = 1, LongModel()..field = 2},
-      );
-
       await qEqual(
         col
             .where()
-            .fieldBetween(1, 3, includeLower: false, includeUpper: false)
-            .findAll(),
-        [LongModel()..field = 2],
-      );
-      await qEqual(
-        col
-            .where()
-            .filter()
             .fieldBetween(1, 3, includeLower: false, includeUpper: false)
             .findAll(),
         [LongModel()..field = 2],

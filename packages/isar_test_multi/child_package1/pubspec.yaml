@@ -1,0 +1,17 @@
+name: child_package1
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dependencies:
+  isar: any
+
+dev_dependencies:
+  isar_generator: any
+  build_runner: any
+
+dependency_overrides:
+  isar:
+    path: ../../isar
+  isar_generator:
+    path: ../../isar_generator

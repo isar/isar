@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:build/build.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:glob/glob.dart';
-import 'package:isar_generator/src/code_gen/isar_interface_generator.dart';
 import 'package:isar_generator/src/code_gen/object_adapter_generator.dart';
 import 'package:isar_generator/src/code_gen/query_distinct_by_generator.dart';
 import 'package:isar_generator/src/code_gen/query_link_generator.dart';
@@ -18,9 +16,15 @@ import 'package:path/path.dart' as path;
 import 'package:dartx/dartx.dart';
 
 class IsarCodeGenerator extends Builder {
-  final bool isFlutter;
+  final bool flutter;
+  final bool package;
+  final bool extensions;
 
-  IsarCodeGenerator(this.isFlutter);
+  IsarCodeGenerator({
+    required this.flutter,
+    required this.package,
+    required this.extensions,
+  });
 
   @override
   final buildExtensions = {
@@ -38,7 +42,6 @@ class IsarCodeGenerator extends Builder {
     'dart:io',
     'package:isar/isar.dart',
     'package:isar/src/isar_native.dart',
-    'package:isar/src/isar_interface.dart',
     'package:isar/src/query_builder.dart',
     'package:ffi/ffi.dart',
     "import 'package:path/path.dart' as p",
@@ -100,64 +103,61 @@ class IsarCodeGenerator extends Builder {
     var imports = {
       ...IsarCodeGenerator.imports,
       ...fileImports,
-      if (isFlutter) ...{
+      if (flutter) ...{
         'package:path_provider/path_provider.dart',
         'package:flutter/widgets.dart'
       },
-      for (var object in objects) ...object.converterImports,
+      for (var object in objects) ...object.imports,
     }
         .map((im) => im.startsWith('import') ? '$im;' : "import '$im';")
         .join('\n');
-
-    final collectionVars = objects
-        .map((oi) =>
-            'final ${oi.collectionVar} = <String, IsarCollection<${oi.dartName}>>{};')
-        .join('\n');
-    final objectAdapters =
-        objects.map((o) => generateObjectAdapter(o)).join('\n');
-    final getCollectionsExtensions = generateGetCollectionsExtension(objects);
-    final queryWhereExtensions =
-        objects.map((o) => generateQueryWhere(o)).join('\n');
-    final queryFilterExtensions =
-        objects.map((o) => generateQueryFilter(o)).join('\n');
-    final queryLinkExtensions =
-        objects.map((o) => generateQueryLinks(o, objects)).join('\n');
-    final querySortByExtensions =
-        objects.map((o) => generateSortBy(o)).join('\n');
-    final queryDistinctByExtensions =
-        objects.map((o) => generateDistinctBy(o)).join('\n');
-    final propertyQueries =
-        objects.map((o) => generatePropertyQuery(o)).join('\n');
 
     var code = '''
     // ignore_for_file: unused_import, implementation_imports
 
     $imports
-
-    final _isar = <String, Isar>{};
-    const _utf8Encoder = Utf8Encoder();
-
-    ${generateIsarSchema(objects)}
-
-    $collectionVars
-
-    ${generateIsarOpen(objects)}
-
-    ${generatePreparePath()}
-
-    $getCollectionsExtensions
-
-    $objectAdapters
-
-    $queryWhereExtensions
-    $queryFilterExtensions
-    $queryLinkExtensions
-    $querySortByExtensions
-    $queryDistinctByExtensions
-    $propertyQueries
-
-    ${generateIsarInterface(objects)}
     ''';
+
+    if (!package) {
+      final objectAdapters =
+          objects.map((o) => generateObjectAdapter(o)).join('\n');
+
+      code += '''
+        const _utf8Encoder = Utf8Encoder();
+
+        ${generateIsarSchema(objects)}
+
+        ${generateIsarOpen(objects)}
+
+        ${generatePreparePath()}
+
+        $objectAdapters''';
+    }
+
+    if (extensions) {
+      final getCollectionsExtensions = generateGetCollectionsExtension(objects);
+      final queryWhereExtensions =
+          objects.map((o) => generateQueryWhere(o)).join('\n');
+      final queryFilterExtensions =
+          objects.map((o) => generateQueryFilter(o)).join('\n');
+      final queryLinkExtensions =
+          objects.map((o) => generateQueryLinks(o, objects)).join('\n');
+      final querySortByExtensions =
+          objects.map((o) => generateSortBy(o)).join('\n');
+      final queryDistinctByExtensions =
+          objects.map((o) => generateDistinctBy(o)).join('\n');
+      final propertyQueries =
+          objects.map((o) => generatePropertyQuery(o)).join('\n');
+
+      code += '''
+        $getCollectionsExtensions
+        $queryWhereExtensions
+        $queryFilterExtensions
+        $queryLinkExtensions
+        $querySortByExtensions
+        $queryDistinctByExtensions
+        $propertyQueries''';
+    }
 
     code = DartFormatter().format(code);
 
@@ -169,70 +169,55 @@ class IsarCodeGenerator extends Builder {
   String generateIsarOpen(List<ObjectInfo> objects) {
     var code = '''
     Future<Isar> openIsar({String name = 'isar', String? directory, int maxSize = 1000000000, Uint8List? encryptionKey}) async {
-      assert(name.isNotEmpty);
       final path = await _preparePath(directory);
-      if (_isar[name] != null) {
-        return _isar[name]!;
-      }
-      await Directory(p.join(path, name)).create(recursive: true);
-      initializeIsarCore();
-      IC.isar_connect_dart_api(NativeApi.postCObject);
-
-      final isarPtrPtr = malloc<Pointer>();
-      final namePtr = name.toNativeUtf8();
-      final pathPtr = path.toNativeUtf8();
-      IC.isar_get_instance(isarPtrPtr, namePtr.cast());
-      if (isarPtrPtr.value.address == 0) {
-        final schemaPtr = _schema.toNativeUtf8();
-        var encKeyPtr = Pointer<Uint8>.fromAddress(0);
-        if (encryptionKey != null) {
-          assert(encryptionKey.length == 32,
-              'Encryption keys need to contain 32 byte (256bit).');
-          encKeyPtr = malloc(32);
-          encKeyPtr.asTypedList(32).setAll(0, encryptionKey);
-        }
-        final receivePort = ReceivePort();
-        final nativePort = receivePort.sendPort.nativePort;
-        final stream = wrapIsarPort(receivePort);
-        IC.isar_create_instance(isarPtrPtr, namePtr.cast(), pathPtr.cast(), maxSize,
-            schemaPtr.cast(), encKeyPtr, nativePort);
-        await stream.first;
-        malloc.free(schemaPtr);
-        if (encryptionKey != null) {
-          malloc.free(encKeyPtr);
-        }
-      }
-      malloc.free(namePtr);
-      malloc.free(pathPtr);
-      
-      final isarPtr = isarPtrPtr.value;
-      malloc.free(isarPtrPtr);
-
-      final isar = IsarImpl(name, isarPtr);
-      _isar[name] = isar;
-      
-      final collectionPtrPtr = malloc<Pointer>();
-    ''';
+      return openIsarInternal(
+        name: name,
+        directory: path,
+        maxSize: maxSize,
+        encryptionKey: encryptionKey,
+        schema: _schema,
+        getCollections: (isar) {''';
 
     final maxProperties =
         objects.maxBy((e) => e.properties.length)?.properties.length ?? 0;
     code += '''
+    final collectionPtrPtr = malloc<Pointer>();
     final propertyOffsetsPtr = malloc<Uint32>($maxProperties);
     final propertyOffsets = propertyOffsetsPtr.asTypedList($maxProperties);
+    final collections = <String, IsarCollection>{};
     ''';
 
     for (var i = 0; i < objects.length; i++) {
       final info = objects[i];
+      final propertyIds = info.properties
+          .mapIndexed((index, p) => "'${p.dartName}': $index")
+          .join(',');
+      final indexIds = info.indexes
+          .mapIndexed(
+              (index, i) => "'${i.properties.first.property.dartName}': $index")
+          .join(',');
+      final linkIds = info.links
+          .where((l) => !l.backlink)
+          .map((link) => "'${link.dartName}': ${link.linkIndex}")
+          .join(',');
+      final backlinkIds = info.links
+          .where((l) => l.backlink)
+          .map((link) => "'${link.dartName}': ${link.linkIndex}")
+          .join(',');
       code += '''
-      nCall(IC.isar_get_collection(isarPtr, collectionPtrPtr, $i));
+      nCall(IC.isar_get_collection(isar.ptr, collectionPtrPtr, $i));
       IC.isar_get_property_offsets(collectionPtrPtr.value, propertyOffsetsPtr);
-      ${info.collectionVar}[name] = IsarCollectionImpl(
-        isar,
-        _${info.dartName}Adapter(),
-        collectionPtrPtr.value,
-        propertyOffsets.sublist(0, ${info.properties.length}),
-        (obj) => obj.${info.oidProperty.dartName},
-        (obj, id) => obj.${info.oidProperty.dartName} = id,
+      collections['${info.dartName}'] = IsarCollectionImpl<${info.dartName}>(
+        isar: isar,
+        adapter: _${info.dartName}Adapter(),
+        ptr: collectionPtrPtr.value,
+        propertyOffsets: propertyOffsets.sublist(0, ${info.properties.length}),
+        propertyIds: {$propertyIds},
+        indexIds: {$indexIds},
+        linkIds: {$linkIds},
+        backlinkIds: {$backlinkIds},
+        getId: (obj) => obj.${info.oidProperty.dartName},
+        setId: (obj, id) => obj.${info.oidProperty.dartName} = id,
       );''';
     }
 
@@ -240,14 +225,8 @@ class IsarCodeGenerator extends Builder {
       malloc.free(propertyOffsetsPtr);
       malloc.free(collectionPtrPtr);
 
-      IsarInterface.initialize(_GeneratedIsarInterface());
-      Isar.addCloseListener(_onClose);
-
-      return isar;
-    }
-
-    void _onClose(String name) {
-      _isar.remove(name);
+      return collections;
+    });
     }
     ''';
 
@@ -258,7 +237,7 @@ class IsarCodeGenerator extends Builder {
     var code = '''
     Future<String> _preparePath(String? path) async {
       if (path == null || p.isRelative(path)) {''';
-    if (isFlutter) {
+    if (flutter) {
       code += '''
         WidgetsFlutterBinding.ensureInitialized();
         final dir = await getApplicationDocumentsDirectory();
@@ -281,7 +260,7 @@ class IsarCodeGenerator extends Builder {
       final object = objects[i];
       code += '''
       IsarCollection<${object.dartName}> get ${object.dartName.decapitalize()}s {
-        return ${object.collectionVar}[name]!;
+        return getCollection('${object.dartName}');
       }
       ''';
     }
@@ -307,7 +286,7 @@ class IsarCodeGenerator extends Builder {
                 'unique': index.unique,
                 'replace': index.replace,
                 'properties': [
-                  for (var indexProperty in index.properties!)
+                  for (var indexProperty in index.properties)
                     {
                       'name': indexProperty.property.isarName,
                       'indexType': indexProperty.indexType.index,

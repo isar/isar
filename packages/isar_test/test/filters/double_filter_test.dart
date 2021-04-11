@@ -1,9 +1,9 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/utils/common.dart';
+import 'package:isar_test/utils/open.dart';
 import 'package:isar_test/double_model.dart';
 import 'package:test/test.dart';
 import 'package:isar_test/isar.g.dart';
-
-import '../common.dart';
 
 void main() {
   group('Double filter', () {
@@ -41,10 +41,6 @@ void main() {
         col.where().fieldGreaterThan(3.3, include: true).findAll(),
         [DoubleModel()..field = 3.3, DoubleModel()..field = 4.4],
       );
-      await qEqualSet(
-        col.where().filter().fieldGreaterThan(3.3, include: true).findAll(),
-        {DoubleModel()..field = 3.3, DoubleModel()..field = 4.4},
-      );
 
       await qEqual(
         col.where().fieldGreaterThan(4.4).findAll(),
@@ -68,14 +64,6 @@ void main() {
 
       await qEqual(
         col.where().fieldLessThan(1.1, include: true).findAll(),
-        [
-          DoubleModel()..field = null,
-          DoubleModel()..field = 0,
-          DoubleModel()..field = 1.1
-        ],
-      );
-      await qEqualSet(
-        col.where().filter().fieldLessThan(1.1, include: true).findAll(),
         [
           DoubleModel()..field = null,
           DoubleModel()..field = 0,
@@ -114,16 +102,6 @@ void main() {
       await qEqual(
         col
             .where()
-            .fieldBetween(1.1, 3.3, includeLower: false, includeUpper: false)
-            .findAll(),
-        [
-          DoubleModel()..field = 2.2,
-        ],
-      );
-      await qEqual(
-        col
-            .where()
-            .filter()
             .fieldBetween(1.1, 3.3, includeLower: false, includeUpper: false)
             .findAll(),
         [

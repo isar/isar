@@ -5,36 +5,35 @@ String generateSortBy(ObjectInfo oi) {
   var code = '''
   extension ${oi.dartName}QueryWhereSortBy on QueryBuilder<${oi.dartName}, QSortBy> {''';
 
-  for (var index = 0; index < oi.properties.length; index++) {
-    final property = oi.properties[index];
+  for (var property in oi.properties) {
     if (property.isarType.isList) continue;
 
-    /*code += '''
-      QueryBuilder<${oi.dartName}, QSortThenBy>sortBy${property.dartName.capitalize()}() {
-          return addDistinctByInternal($index);
-      }
-      
-      QueryBuilder<${oi.dartName}, QSortThenBy>sortBy${property.dartName.capitalize()}Desc() {
-          return addDistinctByInternal($index);
-      }''';*/
+    code += '''
+    QueryBuilder<${oi.dartName}, QAfterSortBy>sortBy${property.dartName.capitalize()}() {
+      return addSortByInternal('${property.dartName}', Sort.Asc);
+    }
+    
+    QueryBuilder<${oi.dartName}, QAfterSortBy>sortBy${property.dartName.capitalize()}Desc() {
+      return addSortByInternal('${property.dartName}', Sort.Desc);
+    }''';
   }
-  code += '}';
 
   code += '''
+  }
+
   extension ${oi.dartName}QueryWhereSortThenBy on QueryBuilder<${oi.dartName}, QSortThenBy> {''';
 
-  for (var index = 0; index < oi.properties.length; index++) {
-    final property = oi.properties[index];
+  for (var property in oi.properties) {
     if (property.isarType.isList) continue;
 
-    /*code += '''
-      QueryBuilder<${oi.dartName}, QSortThenBy>thenBy${property.dartName.capitalize()}() {
-          return addDistinctByInternal($index);
-      }
-      
-      QueryBuilder<${oi.dartName}, QSortThenBy>thenBy${property.dartName.capitalize()}Desc() {
-          return addDistinctByInternal($index);
-      }''';*/
+    code += '''
+    QueryBuilder<${oi.dartName}, QAfterSortBy>thenBy${property.dartName.capitalize()}() {
+      return addSortByInternal('${property.dartName}', Sort.Asc);
+    }
+    
+    QueryBuilder<${oi.dartName}, QAfterSortBy>thenBy${property.dartName.capitalize()}Desc() {
+      return addSortByInternal('${property.dartName}', Sort.Desc);
+    }''';
   }
   code += '}';
 

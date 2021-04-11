@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:dartx/dartx.dart';
+import 'package:isar/isar.dart' hide Collection;
 import 'package:isar_inspector/schema.dart';
-import 'package:isar/src/query_builder.dart';
 import 'package:isar_inspector/service.dart';
 
 class AppState extends ChangeNotifier {
@@ -64,7 +64,7 @@ class AppState extends ChangeNotifier {
     _error = null;
     _hasMore = false;
     _subscriptionHandle++;
-    _filter = FilterGroup(groupType: FilterGroupType.Or, conditions: []);
+    _filter = FilterGroup(type: FilterGroupType.Or, filters: []);
     _objects = null;
     _sortProperty = null;
     _ascending = true;
@@ -87,10 +87,9 @@ class AppState extends ChangeNotifier {
   List<Map<String, dynamic>>? _objects;
   List<Map<String, dynamic>>? get objects => _objects;
 
-  QueryOperation _filter =
-      FilterGroup(groupType: FilterGroupType.Or, conditions: []);
-  QueryOperation get filter => _filter;
-  set filter(QueryOperation filter) {
+  FilterOperation _filter = FilterGroup(type: FilterGroupType.Or, filters: []);
+  FilterOperation get filter => _filter;
+  set filter(FilterOperation filter) {
     if (_filter != filter) {
       _filter = filter;
       _offset = 0;

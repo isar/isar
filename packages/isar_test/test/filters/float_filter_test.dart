@@ -1,9 +1,9 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/utils/common.dart';
+import 'package:isar_test/utils/open.dart';
 import 'package:isar_test/float_model.dart';
 import 'package:isar_test/isar.g.dart';
 import 'package:test/test.dart';
-
-import '../common.dart';
 
 void main() {
   group('Float filter', () {
@@ -41,10 +41,6 @@ void main() {
         col.where().fieldGreaterThan(3.3, include: true).findAll(),
         [FloatModel()..field = 3.3, FloatModel()..field = 4.4],
       );
-      await qEqualSet(
-        col.where().filter().fieldGreaterThan(3.3, include: true).findAll(),
-        {FloatModel()..field = 3.3, FloatModel()..field = 4.4},
-      );
 
       await qEqual(
         col.where().fieldGreaterThan(4.4).findAll(),
@@ -73,14 +69,6 @@ void main() {
           FloatModel()..field = 0,
           FloatModel()..field = 1.1
         ],
-      );
-      await qEqualSet(
-        col.where().filter().fieldLessThan(1.1, include: true).findAll(),
-        {
-          FloatModel()..field = null,
-          FloatModel()..field = 0,
-          FloatModel()..field = 1.1
-        },
       );
 
       await qEqual(
@@ -119,16 +107,6 @@ void main() {
         [
           FloatModel()..field = 2.2,
         ],
-      );
-      await qEqualSet(
-        col
-            .where()
-            .filter()
-            .fieldBetween(1.1, 3.3, includeLower: false, includeUpper: false)
-            .findAll(),
-        {
-          FloatModel()..field = 2.2,
-        },
       );
 
       await qEqual(

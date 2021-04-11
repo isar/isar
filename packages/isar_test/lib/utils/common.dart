@@ -1,14 +1,9 @@
 // ignore_for_file: implementation_imports
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:isar/isar.dart';
 import 'package:isar/src/isar_native.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:isar_test/isar.g.dart' as gen;
-
 import 'dart:math';
-
 import 'package:test/test.dart';
 
 Future qEqualSet<T>(Future<Iterable<T>> actual, Iterable<T> target) async {
@@ -52,7 +47,7 @@ void isarTest(String name, dynamic Function() body) {
 var testEncryption = false;
 String? testTempPath;
 
-Future<Isar> openTempIsar() async {
+void registerBinaries() {
   if (testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
     testTempPath = path.join(dartToolDir, 'test', 'tmp');
@@ -62,21 +57,9 @@ Future<Isar> openTempIsar() async {
       'linux': path.join(dartToolDir, 'libisar_linux_x64.so'),
     });
   }
-  var name = Random().nextInt(pow(2, 32) as int);
-  var dir = Directory(path.join(testTempPath!, '${name}_tmp'));
-  if (await dir.exists()) {
-    await dir.delete(recursive: true);
-  }
-  await dir.create(recursive: true);
+}
 
-  Uint8List? encryptionKey;
-  if (testEncryption) {
-    encryptionKey = Isar.generateSecureKey();
-  }
-
-  return gen.openIsar(
-    name: dir.path,
-    directory: dir.path,
-    encryptionKey: encryptionKey,
-  );
+String getRandomName() {
+  var random = Random().nextInt(pow(2, 32) as int);
+  return '${random}_tmp';
 }

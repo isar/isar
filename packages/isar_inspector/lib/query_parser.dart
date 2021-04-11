@@ -1,6 +1,6 @@
+import 'package:isar/isar.dart';
 import 'package:isar_inspector/schema.dart';
 import 'package:petitparser/petitparser.dart';
-import 'package:isar/src/query_builder.dart';
 import 'package:dartx/dartx.dart';
 
 class QueryParser {
@@ -25,16 +25,16 @@ class QueryParser {
     builder.group().left(
           string('&&').trim(),
           (l, _, r) => FilterGroup(
-            conditions: [l as QueryOperation, r as QueryOperation],
-            groupType: FilterGroupType.And,
+            filters: [l as FilterOperation, r as FilterOperation],
+            type: FilterGroupType.And,
           ),
         );
 
     builder.group().left(
           string('||').trim(),
           (l, _, r) => FilterGroup(
-            conditions: [l as QueryOperation, r as QueryOperation],
-            groupType: FilterGroupType.Or,
+            filters: [l as FilterOperation, r as FilterOperation],
+            type: FilterGroupType.Or,
           ),
         );
 
@@ -42,91 +42,88 @@ class QueryParser {
   }
 
   FilterGroup flatten(FilterGroup group) {
-    if (group.groupType == FilterGroupType.Not) return group;
-    final newConditions = <QueryOperation>[];
-    for (var condition in group.conditions) {
-      if (condition is FilterGroup) {
-        final flatCondition = flatten(condition);
-        if (condition.groupType == flatCondition.groupType &&
-            condition.groupType != FilterGroupType.Not) {
-          newConditions.addAll(flatCondition.conditions);
+    final newFilters = <FilterOperation>[];
+    for (var filter in group.filters) {
+      if (filter is FilterGroup) {
+        final flatCondition = flatten(filter);
+        if (filter.type == flatCondition.type) {
+          newFilters.addAll(flatCondition.filters);
         } else {
-          newConditions.add(flatCondition);
+          newFilters.add(flatCondition);
         }
       } else {
-        newConditions.add(condition);
+        newFilters.add(filter);
       }
     }
     return FilterGroup(
-      conditions: newConditions,
-      groupType: group.groupType,
+      filters: newFilters,
+      type: group.type,
     );
   }
 
-  QueryOperation createQueryCondition(
+  FilterOperation createQueryCondition(
       String propertyName, String cmp, dynamic value) {
     final property =
         properties.where((p) => p.name == propertyName).firstOrNull;
 
     if (property == null) throw 'Unknown property "$propertyName"';
 
-    final propertyIndex = properties.indexOf(property);
     switch (cmp) {
       case '!=':
       case '==':
-        final condition = QueryCondition(
-          ConditionType.Eq,
-          propertyIndex,
-          property.typeName,
-          lower: value,
-          includeLower: true,
-          upper: value,
-          includeUpper: true,
+        final filter = FilterCondition(
+          type: ConditionType.Eq,
+          property: propertyName,
+          value: value,
         );
         if (cmp == '!=') {
-          return FilterGroup(
-            conditions: [condition],
-            groupType: FilterGroupType.Not,
+          return FilterNot(
+            filter: filter,
           );
         } else {
-          return condition;
+          return filter;
         }
       case '>':
       case '>=':
-        return QueryCondition(
-          ConditionType.Gt,
-          propertyIndex,
-          property.typeName,
-          lower: value,
-          includeLower: cmp == '>=',
-        );
       case '<':
       case '<=':
-        return QueryCondition(
-          ConditionType.Lt,
-          propertyIndex,
-          property.typeName,
-          upper: value,
-          includeUpper: cmp == '<=',
+        final filter = FilterCondition(
+          type: cmp == '>=' || cmp == '>' ? ConditionType.Gt : ConditionType.Lt,
+          property: propertyName,
+          value: value,
         );
+        if (cmp == '>=' || cmp == '<=') {
+          return FilterGroup(
+            filters: [
+              filter,
+              FilterCondition(
+                type: ConditionType.Eq,
+                property: propertyName,
+                value: value,
+              ),
+            ],
+            type: FilterGroupType.Or,
+          );
+        } else {
+          return filter;
+        }
       case 'matches':
-        return QueryCondition(
-          ConditionType.Matches,
-          propertyIndex,
-          property.typeName,
-          lower: value,
+        return FilterCondition(
+          type: ConditionType.Matches,
+          property: propertyName,
+          value: value,
         );
       default:
         throw 'unreachable';
     }
   }
 
-  QueryOperation parse(String filter) {
+  FilterOperation parse(String filter) {
     final result = _parser.parse(filter);
     if (result.isFailure) {
       throw result.message;
     }
-    return result.value as QueryOperation;
+    return result.value as FilterOperation;
   }
 }
 

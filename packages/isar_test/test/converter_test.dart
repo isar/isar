@@ -1,8 +1,8 @@
-import 'dart:convert';
-
+import 'package:isar_test/utils/common.dart';
+import 'package:isar_test/utils/open.dart';
 import 'package:test/test.dart';
+import 'package:isar/isar.dart';
 
-import 'common.dart';
 import 'package:isar_test/isar.g.dart';
 import 'package:isar_test/converter_model.dart';
 
@@ -36,7 +36,7 @@ void main() {
         await isar.converterModels.put(_converterObject);
       });
 
-      final json = await isar.converterModels.exportJson();
+      final json = await isar.converterModels.where().exportJson();
       expect(json[0], _converterObjectJson);
 
       await isar.close();

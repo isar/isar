@@ -14,7 +14,7 @@ class ObjectInfo with _$ObjectInfo {
     @Default([]) List<ObjectProperty> properties,
     @Default([]) List<ObjectIndex> indexes,
     @Default([]) List<ObjectLink> links,
-    @Default([]) List<String> converterImports,
+    @Default([]) List<String> imports,
   }) = _ObjectInfo;
 
   factory ObjectInfo.fromJson(Map<String, dynamic> json) =>
@@ -93,9 +93,9 @@ class ObjectIndexProperty with _$ObjectIndexProperty {
 @freezed
 class ObjectIndex with _$ObjectIndex {
   const factory ObjectIndex({
-    required List<ObjectIndexProperty>? properties,
-    required bool? unique,
-    required bool? replace,
+    required List<ObjectIndexProperty> properties,
+    required bool unique,
+    required bool replace,
   }) = _ObjectIndex;
 
   factory ObjectIndex.fromJson(Map<String, dynamic> json) =>

@@ -9,10 +9,10 @@ class NativeQuery<T> extends Query<T> {
   final Pointer<NativeType> colPtr;
   final Pointer<NativeType> queryPtr;
   final QueryDeserialize<T> deserialize;
-  final int? propertyIndex;
+  final int? propertyId;
 
-  NativeQuery(this.isar, this.colPtr, this.queryPtr, this.deserialize,
-      this.propertyIndex);
+  NativeQuery(
+      this.isar, this.colPtr, this.queryPtr, this.deserialize, this.propertyId);
 
   @override
   Future<T?> findFirst() {
@@ -122,7 +122,7 @@ class NativeQuery<T> extends Query<T> {
   Stream<void> watchLazy({bool initialReturn = false}) {
     final port = ReceivePort();
     final handle = IC.isar_watch_query(
-        isar.isarPtr, colPtr, queryPtr, port.sendPort.nativePort);
+        isar.ptr, colPtr, queryPtr, port.sendPort.nativePort);
 
     final controller = StreamController(onCancel: () {
       IC.isar_stop_watching(handle);
@@ -135,6 +135,27 @@ class NativeQuery<T> extends Query<T> {
     controller.addStream(port);
     return controller.stream;
   }
+
+  @override
+  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
+      {bool primitiveNull = true}) {
+    return isar.getTxn(false, (txnPtr, stream) async {
+      final bytesPtrPtr = malloc<Pointer<Uint8>>();
+      final lengthPtr = malloc<Uint32>();
+      IC.isar_q_export_json(
+          queryPtr, colPtr, txnPtr, primitiveNull, bytesPtrPtr, lengthPtr);
+
+      try {
+        await stream.first;
+        final bytes = bytesPtrPtr.value.asTypedList(lengthPtr.value);
+        return callback(bytes);
+      } finally {
+        IC.isar_free_json(bytesPtrPtr.value, lengthPtr.value);
+        malloc.free(bytesPtrPtr);
+        malloc.free(lengthPtr);
+      }
+    });
+  }
 }
 
 Future<T?> aggregateQuery<T>(Query query, AggregationOp op) async {
@@ -143,7 +164,7 @@ Future<T?> aggregateQuery<T>(Query query, AggregationOp op) async {
     final resultPtrPtr = malloc<Pointer>();
 
     IC.isar_q_aggregate(query.colPtr, query.queryPtr, txnPtr, op.index,
-        query.propertyIndex ?? 0, resultPtrPtr);
+        query.propertyId ?? 0, resultPtrPtr);
 
     try {
       await stream.first;
@@ -161,7 +182,7 @@ T? aggregateQuerySync<T>(Query query, AggregationOp op) {
 
     try {
       nCall(IC.isar_q_aggregate(query.colPtr, query.queryPtr, txnPtr, op.index,
-          query.propertyIndex ?? 0, resultPtrPtr));
+          query.propertyId ?? 0, resultPtrPtr));
       return _convertAggregatedResult(resultPtrPtr.value, op);
     } finally {
       malloc.free(resultPtrPtr);

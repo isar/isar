@@ -1,35 +1,37 @@
 import 'package:isar/isar.dart';
-import 'package:isar/src/isar_platform.dart';
 
 typedef FilterQuery<T> = QueryBuilder<T, QAfterFilterCondition> Function(
     QueryBuilder<T, QFilterCondition> q);
 
-const _NullFilterGroup = FilterGroup();
+const _NullFilterGroup = FilterGroup(
+  type: FilterGroupType.And,
+  filters: [],
+);
 
 class QueryBuilder<T, S> {
   final IsarCollection _collection;
   final List<WhereClause> _whereClauses;
-  final bool? _whereDistinct;
-  final bool? _whereAscending;
+  final bool _whereDistinct;
+  final Sort _whereSort;
   final FilterGroup _filterOr;
   final FilterGroup? _filterAnd;
   final bool _filterNot;
-  final List<DistinctProperty> _distinctByPropertyIndices;
+  final List<DistinctProperty> _distinctByProperties;
   final List<SortProperty> _sortByProperties;
   final int? _offset;
   final int? _limit;
-  final int? _propertyIndex;
+  final String? _propertyName;
 
-  QueryBuilder(this._collection, this._whereDistinct, this._whereAscending)
+  QueryBuilder(this._collection, this._whereDistinct, this._whereSort)
       : _whereClauses = const [],
-        _distinctByPropertyIndices = const [],
+        _distinctByProperties = const [],
         _sortByProperties = const [],
-        _filterOr = FilterGroup(groupType: FilterGroupType.Or),
+        _filterOr = FilterGroup(filters: [], type: FilterGroupType.Or),
         _filterAnd = null,
         _filterNot = false,
         _offset = null,
         _limit = null,
-        _propertyIndex = null;
+        _propertyName = null;
 
   QueryBuilder._(
     this._collection,
@@ -37,33 +39,35 @@ class QueryBuilder<T, S> {
     this._filterAnd,
     this._filterNot, [
     this._whereClauses = const [],
-    this._whereDistinct,
-    this._whereAscending,
-    this._distinctByPropertyIndices = const [],
+    this._whereDistinct = false,
+    this._whereSort = Sort.Asc,
+    this._distinctByProperties = const [],
     this._sortByProperties = const [],
     this._offset,
     this._limit,
-    this._propertyIndex,
+    this._propertyName,
   ]);
 }
 
 extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
-  QueryBuilder<T, S> addFilterCondition<S>(QueryOperation cond) {
+  QueryBuilder<T, S> addFilterCondition<S>(FilterOperation cond) {
     if (_filterNot) {
-      cond = FilterGroup(groupType: FilterGroupType.Not, conditions: [cond]);
+      cond = FilterNot(filter: cond);
     }
 
     if (_filterAnd != null) {
       return copyWith(
-        filterAnd: _filterAnd!.copyWith(
-          conditions: [..._filterAnd!.conditions, cond],
+        filterAnd: FilterGroup(
+          filters: [..._filterAnd!.filters, cond],
+          type: FilterGroupType.And,
         ),
         filterNot: false,
       );
     } else {
       return copyWith(
-        filterOr: _filterOr.copyWith(
-          conditions: [..._filterOr.conditions, cond],
+        filterOr: FilterGroup(
+          filters: [..._filterOr.filters, cond],
+          type: FilterGroupType.Or,
         ),
         filterNot: false,
       );
@@ -78,20 +82,22 @@ extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
     if (andOr == FilterGroupType.And) {
       if (_filterAnd == null) {
         return copyWith(
-          filterOr: _filterOr.copyWith(
-            conditions: _filterOr.conditions
-                .sublist(0, _filterOr.conditions.length - 1),
+          filterOr: FilterGroup(
+            type: FilterGroupType.Or,
+            filters: _filterOr.filters.sublist(0, _filterOr.filters.length - 1),
           ),
           filterAnd: FilterGroup(
-            groupType: FilterGroupType.And,
-            conditions: [_filterOr.conditions.last],
+            type: FilterGroupType.And,
+            filters: [_filterOr.filters.last],
           ),
         );
       }
     } else if (_filterAnd != null) {
       return copyWith(
-        filterOr: _filterOr
-            .copyWith(conditions: [..._filterOr.conditions, _filterAnd!]),
+        filterOr: FilterGroup(
+          filters: [..._filterOr.filters, _filterAnd!],
+          type: FilterGroupType.Or,
+        ),
         filterAnd: null,
       );
     }
@@ -105,55 +111,61 @@ extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
   }
 
   QueryBuilder<T, QAfterFilterCondition> groupInternal(FilterQuery<T> q) {
-    final qb = q(QueryBuilder(_collection, _whereDistinct, _whereAscending));
+    final qb = q(QueryBuilder(_collection, _whereDistinct, _whereSort));
     final qbFinished = qb.andOrInternal(FilterGroupType.Or);
 
-    if (qbFinished._filterOr.conditions.isEmpty) {
+    if (qbFinished._filterOr.filters.isEmpty) {
       return copyWith();
-    } else if (qbFinished._filterOr.conditions.length == 1) {
-      return addFilterCondition(qbFinished._filterOr.conditions.first);
+    } else if (qbFinished._filterOr.filters.length == 1) {
+      return addFilterCondition(qbFinished._filterOr.filters.first);
     } else {
       return addFilterCondition(qbFinished._filterOr);
     }
   }
 
   QueryBuilder<T, QAfterFilterCondition> linkInternal<E>(
-      IsarCollection<E> targetCollection,
-      FilterQuery<E> q,
-      int linkIndex,
-      bool backlink) {
-    final qb = q(QueryBuilder(targetCollection, false, true));
+    IsarCollection<E> targetCollection,
+    FilterQuery<E> q,
+    String linkName,
+  ) {
+    final qb = q(QueryBuilder(targetCollection, false, _whereSort));
     final qbFinished = qb.andOrInternal(FilterGroupType.Or);
 
-    final conditions = qbFinished._filterOr.conditions;
+    final conditions = qbFinished._filterOr.filters;
     if (conditions.isEmpty) {
       return copyWith();
     }
 
-    QueryOperation filter;
+    FilterOperation filter;
     if (conditions.length == 1) {
       filter = conditions[0];
     } else {
       filter = qbFinished._filterOr;
     }
-    return addFilterCondition(LinkOperation(
-      targetCollection,
-      filter,
-      linkIndex,
-      backlink,
+    return addFilterCondition(LinkFilter(
+      targetCollection: targetCollection,
+      filter: filter,
+      linkName: linkName,
     ));
   }
 
-  QueryBuilder<T, QDistinct> addDistinctByInternal(int propertyIndex,
-      {bool? caseSensitive}) {
-    return copyWith(distinctByPropertyIndices: [
-      ..._distinctByPropertyIndices,
-      DistinctProperty(propertyIndex, caseSensitive),
+  QueryBuilder<T, S> addSortByInternal<S>(String propertyName, Sort sort) {
+    return copyWith(sortByProperties: [
+      ..._sortByProperties,
+      SortProperty(property: propertyName, sort: sort),
     ]);
   }
 
-  QueryBuilder<E, QQueryOperations> addPropertyIndex<E>(int propertyIndex) {
-    return copyWith(propertyIndex: propertyIndex);
+  QueryBuilder<T, QDistinct> addDistinctByInternal(String propertyName,
+      {bool? caseSensitive}) {
+    return copyWith(distinctByProperties: [
+      ..._distinctByProperties,
+      DistinctProperty(property: propertyName, caseSensitive: caseSensitive),
+    ]);
+  }
+
+  QueryBuilder<E, QQueryOperations> addPropertyName<E>(String propertyName) {
+    return copyWith(propertyName: propertyName);
   }
 
   QueryBuilder<E, S> copyWith<E, S>({
@@ -162,11 +174,11 @@ extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
     FilterGroup? filterAnd = _NullFilterGroup,
     bool? filterNot,
     List<FilterGroup>? parentFilters,
-    List<DistinctProperty>? distinctByPropertyIndices,
+    List<DistinctProperty>? distinctByProperties,
     List<SortProperty>? sortByProperties,
     int? offset,
     int? limit,
-    int? propertyIndex,
+    String? propertyName,
   }) {
     assert(offset == null || offset >= 0);
     assert(limit == null || limit >= 0);
@@ -177,13 +189,12 @@ extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
       filterNot ?? _filterNot,
       whereClauses ?? List.unmodifiable(_whereClauses),
       _whereDistinct,
-      _whereAscending,
-      distinctByPropertyIndices ??
-          List.unmodifiable(_distinctByPropertyIndices),
+      _whereSort,
+      distinctByProperties ?? List.unmodifiable(_distinctByProperties),
       sortByProperties ?? List.unmodifiable(_sortByProperties),
       offset ?? _offset,
       limit ?? _limit,
-      propertyIndex ?? _propertyIndex,
+      propertyName ?? _propertyName,
     );
   }
 
@@ -195,182 +206,40 @@ extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
       _filterNot,
       _whereClauses,
       _whereDistinct,
-      _whereAscending,
-      _distinctByPropertyIndices,
+      _whereSort,
+      _distinctByProperties,
       _sortByProperties,
       _offset,
       _limit,
-      _propertyIndex,
+      _propertyName,
     );
   }
 
   Query<T> buildInternal() {
     final builder = andOrInternal(FilterGroupType.Or);
     FilterGroup? filter;
-    if (builder._filterOr.conditions.length == 1) {
-      final group = builder._filterOr.conditions.first;
+    if (builder._filterOr.filters.length == 1) {
+      final group = builder._filterOr.filters.first;
       if (group is FilterGroup) {
         filter = group;
       }
     }
     filter ??= builder._filterOr;
-    return buildQuery(
-      _collection,
-      _whereClauses,
-      _whereDistinct,
-      _whereAscending,
-      filter,
-      _sortByProperties,
-      _distinctByPropertyIndices,
-      _offset,
-      _limit,
-      _propertyIndex,
+
+    return _collection.buildQuery(
+      whereDistinct: _whereDistinct,
+      whereSort: _whereSort,
+      whereClauses: _whereClauses,
+      filter: filter,
+      sortBy: _sortByProperties,
+      distinctBy: _distinctByProperties,
+      offset: _offset,
+      limit: _limit,
+      property: _propertyName,
     );
   }
 
   Isar get isar => _collection.isar;
-}
-
-class WhereClause {
-  final int? index;
-  final List<String> types;
-  final List? lower;
-  final bool includeLower;
-  final List? upper;
-  final bool includeUpper;
-
-  const WhereClause(
-    this.index,
-    this.types, {
-    this.lower,
-    this.includeLower = true,
-    this.upper,
-    this.includeUpper = true,
-  });
-
-  WhereClause clone() {
-    return WhereClause(
-      index,
-      types,
-      lower: lower,
-      includeLower: includeLower,
-      upper: upper,
-      includeUpper: includeUpper,
-    );
-  }
-}
-
-abstract class QueryOperation {
-  const QueryOperation();
-
-  QueryOperation clone();
-}
-
-class QueryCondition extends QueryOperation {
-  final ConditionType conditionType;
-  final int propertyIndex;
-  final String propertyType;
-  final dynamic? lower;
-  final bool includeLower;
-  final dynamic? upper;
-  final bool includeUpper;
-  final bool caseSensitive;
-
-  const QueryCondition(
-    this.conditionType,
-    this.propertyIndex,
-    this.propertyType, {
-    this.lower,
-    this.includeLower = true,
-    this.upper,
-    this.includeUpper = true,
-    this.caseSensitive = true,
-  });
-
-  @override
-  QueryCondition clone() {
-    return QueryCondition(
-      conditionType,
-      propertyIndex,
-      propertyType,
-      lower: lower,
-      includeLower: includeLower,
-      upper: upper,
-      includeUpper: includeUpper,
-    );
-  }
-}
-
-enum ConditionType {
-  Eq,
-  Gt,
-  Lt,
-  StartsWith,
-  EndsWith,
-  Contains,
-  Between,
-  Matches
-}
-
-enum FilterGroupType {
-  And,
-  Or,
-  Not,
-}
-
-class FilterGroup extends QueryOperation {
-  final List<QueryOperation> conditions;
-  final FilterGroupType? groupType;
-
-  const FilterGroup({
-    this.conditions = const [],
-    this.groupType,
-  });
-
-  @override
-  FilterGroup clone() {
-    return FilterGroup(
-      conditions: conditions.map((e) => e.clone()).toList(),
-      groupType: groupType,
-    );
-  }
-
-  FilterGroup copyWith(
-      {List<QueryOperation>? conditions, FilterGroupType? groupType}) {
-    return FilterGroup(
-      conditions: conditions ?? this.conditions.map((e) => e.clone()).toList(),
-      groupType: groupType ?? this.groupType,
-    );
-  }
-}
-
-class SortProperty {
-  final int propertyIndex;
-  final bool ascending;
-
-  const SortProperty(this.propertyIndex, this.ascending);
-}
-
-class DistinctProperty {
-  final int propertyIndex;
-  final bool? caseSensitive;
-
-  const DistinctProperty(this.propertyIndex, this.caseSensitive);
-}
-
-class LinkOperation extends QueryOperation {
-  final IsarCollection targetCollection;
-  final QueryOperation filter;
-  final int linkIndex;
-  final bool backlink;
-
-  const LinkOperation(
-      this.targetCollection, this.filter, this.linkIndex, this.backlink);
-
-  @override
-  QueryOperation clone() {
-    return LinkOperation(targetCollection, filter, linkIndex, backlink);
-  }
 }
 
 // Right after query starts

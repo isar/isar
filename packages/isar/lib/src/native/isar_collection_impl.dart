@@ -4,25 +4,35 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   final IsarImpl isar;
 
-  final TypeAdapter<OBJ> _adapter;
+  final TypeAdapter<OBJ> adapter;
   final Pointer ptr;
+
   final List<int> propertyOffsets;
+  final Map<String, int> propertyIds;
+  final Map<String, int> indexIds;
+  final Map<String, int> linkIds;
+  final Map<String, int> backlinkIds;
   final int? Function(OBJ) getId;
+
   final void Function(OBJ, int) setId;
 
-  IsarCollectionImpl(
-    this.isar,
-    this._adapter,
-    this.ptr,
-    this.propertyOffsets,
-    this.getId,
-    this.setId,
-  );
+  IsarCollectionImpl({
+    required this.isar,
+    required this.adapter,
+    required this.ptr,
+    required this.propertyOffsets,
+    required this.propertyIds,
+    required this.indexIds,
+    required this.linkIds,
+    required this.backlinkIds,
+    required this.getId,
+    required this.setId,
+  });
 
   OBJ deserializeObject(RawObject rawObj) {
     final buffer = rawObj.buffer.asTypedList(rawObj.buffer_length);
     final reader = BinaryReader(buffer);
-    return _adapter.deserialize(this, reader, propertyOffsets);
+    return adapter.deserialize(this, reader, propertyOffsets);
   }
 
   List<OBJ> deserializeObjects(RawObjectSet objectSet) {
@@ -43,7 +53,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       final rawObj = rawObjPtr.ref;
       final buffer = rawObj.buffer.asTypedList(rawObj.buffer_length);
       final reader = BinaryReader(buffer);
-      values.add(_adapter.deserializeProperty(
+      values.add(adapter.deserializeProperty(
         reader,
         propertyIndex,
         propertyOffset,
@@ -123,7 +133,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       for (var i = 0; i < objects.length; i++) {
         final rawObj = objectsPtr.elementAt(i).ref;
         final object = objects[i];
-        _adapter.serialize(this, rawObj, object, propertyOffsets);
+        adapter.serialize(this, rawObj, object, propertyOffsets);
       }
       IC.isar_put_all(ptr, txnPtr, rawObjSetPtr);
 
@@ -155,7 +165,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       int? bufferSize;
       try {
         for (var object in objects) {
-          bufferSize = _adapter.serialize(
+          bufferSize = adapter.serialize(
               this, rawObj, object, propertyOffsets, bufferSize);
           nCall(IC.isar_put(ptr, txnPtr, rawObjPtr));
           setId(object, rawObj.oid);
@@ -218,31 +228,10 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
-      {bool primitiveNull = true, bool includeLinks = false}) {
-    return isar.getTxn(false, (txnPtr, stream) async {
-      final bytesPtrPtr = malloc<Pointer<Uint8>>();
-      final lengthPtr = malloc<Uint32>();
-      IC.isar_json_export(
-          ptr, txnPtr, primitiveNull, includeLinks, bytesPtrPtr, lengthPtr);
-
-      try {
-        await stream.first;
-        final bytes = bytesPtrPtr.value.asTypedList(lengthPtr.value);
-        return callback(bytes);
-      } finally {
-        IC.isar_free_json(bytesPtrPtr.value, lengthPtr.value);
-        malloc.free(bytesPtrPtr);
-        malloc.free(lengthPtr);
-      }
-    });
-  }
-
-  @override
   Stream<void> watchLazy() {
     final port = ReceivePort();
     final handle =
-        IC.isar_watch_collection(isar.isarPtr, ptr, port.sendPort.nativePort);
+        IC.isar_watch_collection(isar.ptr, ptr, port.sendPort.nativePort);
     final controller = StreamController(onCancel: () {
       IC.isar_stop_watching(handle);
     });
@@ -262,7 +251,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
     final port = ReceivePort();
     final handle =
-        IC.isar_watch_object(isar.isarPtr, ptr, id, port.sendPort.nativePort);
+        IC.isar_watch_object(isar.ptr, ptr, id, port.sendPort.nativePort);
     malloc.free(rawObjPtr);
 
     final controller = StreamController(onCancel: () {
@@ -275,5 +264,31 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
     controller.addStream(port);
     return controller.stream;
+  }
+
+  @override
+  Query<T> buildQuery<T>({
+    List<WhereClause> whereClauses = const [],
+    bool whereDistinct = false,
+    Sort whereSort = Sort.Asc,
+    FilterGroup? filter,
+    List<SortProperty> sortBy = const [],
+    List<DistinctProperty> distinctBy = const [],
+    int? offset,
+    int? limit,
+    String? property,
+  }) {
+    return buildNativeQuery(
+      this,
+      whereClauses,
+      whereDistinct,
+      whereSort,
+      filter,
+      sortBy,
+      distinctBy,
+      offset,
+      limit,
+      property,
+    );
   }
 }

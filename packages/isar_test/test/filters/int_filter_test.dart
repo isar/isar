@@ -1,9 +1,9 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/utils/common.dart';
+import 'package:isar_test/utils/open.dart';
 import 'package:isar_test/int_model.dart';
 import 'package:isar_test/isar.g.dart';
 import 'package:test/test.dart';
-
-import '../common.dart';
 
 void main() {
   group('Int filter', () {
@@ -71,10 +71,6 @@ void main() {
         col.where().fieldGreaterThan(3, include: true).findAll(),
         [IntModel()..field = 3, IntModel()..field = 4],
       );
-      await qEqualSet(
-        col.where().filter().fieldGreaterThan(3, include: true).findAll(),
-        {IntModel()..field = 3, IntModel()..field = 4},
-      );
 
       await qEqual(
         col.where().fieldGreaterThan(null).findAll(),
@@ -125,14 +121,6 @@ void main() {
           IntModel()..field = 1
         ],
       );
-      await qEqualSet(
-        col.where().filter().fieldLessThan(1, include: true).findAll(),
-        {
-          IntModel()..field = null,
-          IntModel()..field = 0,
-          IntModel()..field = 1
-        },
-      );
     });
 
     isarTest('.between()', () async {
@@ -158,34 +146,13 @@ void main() {
         col.where().fieldBetween(1, 3, includeLower: false).findAll(),
         [IntModel()..field = 2, IntModel()..field = 3],
       );
-      await qEqualSet(
-          col
-              .where()
-              .filter()
-              .fieldBetween(1, 3, includeLower: false)
-              .findAll(),
-          {IntModel()..field = 2, IntModel()..field = 3});
-
       await qEqual(
         col.where().fieldBetween(1, 3, includeUpper: false).findAll(),
         [IntModel()..field = 1, IntModel()..field = 2],
       );
-      await qEqualSet(
-        col.where().filter().fieldBetween(1, 3, includeUpper: false).findAll(),
-        {IntModel()..field = 1, IntModel()..field = 2},
-      );
-
       await qEqual(
         col
             .where()
-            .fieldBetween(1, 3, includeLower: false, includeUpper: false)
-            .findAll(),
-        [IntModel()..field = 2],
-      );
-      await qEqual(
-        col
-            .where()
-            .filter()
             .fieldBetween(1, 3, includeLower: false, includeUpper: false)
             .findAll(),
         [IntModel()..field = 2],

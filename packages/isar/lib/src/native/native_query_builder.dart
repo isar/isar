@@ -3,94 +3,117 @@ part of isar_native;
 const MIN_OID = -140737488355328;
 const MAX_OID = 140737488355327;
 
-Query<T> buildQuery<T>(
-  IsarCollection collection,
+Query<T> buildNativeQuery<T>(
+  IsarCollectionImpl col,
   List<WhereClause> whereClauses,
   bool? whereDistinct,
-  bool? whereAscending,
-  FilterGroup filter,
-  List<SortProperty> sortProperties,
-  List<DistinctProperty> distinctByProperties,
+  Sort? whereSort,
+  FilterGroup? filter,
+  List<SortProperty> sortBy,
+  List<DistinctProperty> distinctBy,
   int? offset,
   int? limit,
-  int? propertyIndex,
+  String? property,
 ) {
-  final col = collection as IsarCollectionImpl;
   final qbPtr = IC.isar_qb_create(col.ptr);
 
-  if ((whereDistinct != null || whereAscending != null) &&
-      whereClauses.length > 1) {
-    throw IsarError('You can only use a single index for sorting or distinct.');
-  }
-
   for (var whereClause in whereClauses) {
-    _addWhereClause(col.ptr, qbPtr, whereClause, whereDistinct, whereAscending);
-  }
-  final filterPtr = _buildFilter(col.ptr, filter);
-  if (filterPtr != null) {
-    IC.isar_qb_set_filter(qbPtr, filterPtr);
+    _addWhereClause(col, qbPtr, whereClause, whereDistinct, whereSort);
   }
 
-  for (var sortProperty in sortProperties) {
-    nCall(IC.isar_qb_add_sort_by(
-      col.ptr,
-      qbPtr,
-      sortProperty.propertyIndex,
-      sortProperty.ascending,
-    ));
+  if (filter != null) {
+    final filterPtr = _buildFilter(col, filter);
+    if (filterPtr != null) {
+      IC.isar_qb_set_filter(qbPtr, filterPtr);
+    }
+  }
+
+  for (var sortProperty in sortBy) {
+    final propertyId = col.propertyIds[sortProperty.property];
+    if (propertyId != null) {
+      nCall(IC.isar_qb_add_sort_by(
+        col.ptr,
+        qbPtr,
+        propertyId,
+        sortProperty.sort == Sort.Asc,
+      ));
+    } else {
+      throw 'Unknown property "${sortProperty.property}"';
+    }
   }
 
   IC.isar_qb_set_offset_limit(qbPtr, offset ?? 0, limit ?? 99999);
-  for (var distinctByProperty in distinctByProperties) {
-    nCall(IC.isar_qb_add_distinct_by(
-      col.ptr,
-      qbPtr,
-      distinctByProperty.propertyIndex,
-      distinctByProperty.caseSensitive ?? true,
-    ));
+  for (var distinctByProperty in distinctBy) {
+    final propertyId = col.propertyIds[distinctByProperty.property];
+    if (propertyId != null) {
+      nCall(IC.isar_qb_add_distinct_by(
+        col.ptr,
+        qbPtr,
+        propertyId,
+        distinctByProperty.caseSensitive ?? true,
+      ));
+    } else {
+      throw 'Unknown property "${distinctByProperty.property}"';
+    }
   }
 
   QueryDeserialize<T> deserialize;
-  if (propertyIndex == null) {
-    deserialize = (col as IsarCollectionImpl<T>).deserializeObjects
-        as QueryDeserialize<T>;
+  int? propertyId;
+  if (property == null) {
+    deserialize = col.deserializeObjects as QueryDeserialize<T>;
   } else {
-    deserialize =
-        (rawObjSet) => collection.deserializeProperty(rawObjSet, propertyIndex);
+    propertyId = col.propertyIds[property];
+    if (propertyId != null) {
+      deserialize =
+          (rawObjSet) => col.deserializeProperty(rawObjSet, propertyId!);
+    } else {
+      throw 'Unknown property "$property"';
+    }
   }
 
   final queryPtr = IC.isar_qb_build(qbPtr);
-  return NativeQuery(col.isar, col.ptr, queryPtr, deserialize, propertyIndex);
+  return NativeQuery(col.isar, col.ptr, queryPtr, deserialize, propertyId);
 }
 
-void _addWhereClause(Pointer colPtr, Pointer qbPtr, WhereClause wc,
-    bool? distinct, bool? ascending) {
-  if (wc.index == null) {
+void _addWhereClause(IsarCollectionImpl col, Pointer qbPtr, WhereClause wc,
+    bool? distinct, Sort? sort) {
+  if (wc.indexName == null) {
+    if (wc.lower != null && wc.lower!.length != 1 || wc.lower![0] is! int?) {
+      throw 'Invalid WhereClause';
+    }
+    if (wc.upper != null && wc.upper!.length != 1 || wc.upper![0] is! int?) {
+      throw 'Invalid WhereClause';
+    }
     nCall(IC.isar_qb_add_id_where_clause(
-      colPtr,
+      col.ptr,
       qbPtr,
       wc.lower?[0] ?? MIN_OID,
       wc.upper?[0] ?? MAX_OID,
-      ascending ?? true,
+      sort != Sort.Desc,
     ));
   } else {
     final wcPtrPtr = malloc<Pointer<NativeType>>();
-    nCall(IC.isar_wc_create(
-      colPtr,
-      wcPtrPtr,
-      wc.index!,
-      distinct ?? false,
-      ascending ?? true,
-    ));
+    final indexId = col.indexIds[wc.indexName!];
+    if (indexId != null) {
+      nCall(IC.isar_wc_create(
+        col.ptr,
+        wcPtrPtr,
+        indexId,
+        distinct ?? false,
+        sort == Sort.Asc,
+      ));
+    } else {
+      throw 'Unknown index "${wc.indexName}"';
+    }
+
     final wcPtr = wcPtrPtr.value;
 
-    for (var i = 0; i < wc.types.length; i++) {
+    final wcLen = (wc.lower ?? wc.upper)?.length ?? 0;
+    for (var i = 0; i < wcLen; i++) {
       addWhereValue(
         wcPtr: wcPtr,
-        type: wc.types[i],
         lower: wc.lower?[i],
         upper: wc.upper?[i],
-        lowerUnbound: wc.lower == null,
         upperUnbound: wc.upper == null,
       );
     }
@@ -130,124 +153,77 @@ int boolToByte(bool? value) {
 
 void addWhereValue({
   required Pointer wcPtr,
-  required String type,
   required dynamic lower,
-  required bool lowerUnbound,
   required dynamic upper,
   required bool upperUnbound,
 }) {
-  switch (type) {
-    case 'Bool':
-      lower = boolToByte(lower);
-      if (upperUnbound) {
-        upper = maxBool;
-      } else {
-        upper = boolToByte(upper);
-      }
-      IC.isar_wc_add_byte(wcPtr, lower, upper);
-      return;
-    case 'Int':
-      lower ??= nullInt;
-      if (upperUnbound) {
-        upper = maxInt;
-      } else {
-        upper ??= nullInt;
-      }
-      IC.isar_wc_add_int(wcPtr, lower, upper);
-      return;
-    case 'Float':
-      lower ??= nullFloat;
-      if (upperUnbound) {
-        upper = maxFloat;
-      } else {
-        upper ??= nullFloat;
-      }
-      IC.isar_wc_add_float(wcPtr, lower, upper);
-      return;
-    case 'Long':
-      lower ??= nullLong;
-      if (upperUnbound) {
-        upper = maxLong;
-      } else {
-        upper ??= nullLong;
-      }
-      IC.isar_wc_add_long(wcPtr, lower, upper);
-      return;
-    case 'Double':
-      lower ??= nullDouble;
-      if (upperUnbound) {
-        upper = maxDouble;
-      } else {
-        upper ??= nullDouble;
-      }
-      IC.isar_wc_add_double(wcPtr, lower, upper);
-      return;
-    default:
-      if (type.startsWith('String')) {
-        var lowerPtr = Pointer<Int8>.fromAddress(0);
-        var upperPtr = Pointer<Int8>.fromAddress(0);
-        if (lower != null) {
-          lowerPtr = (lower as String).toNativeUtf8().cast();
-        }
-        if (upper != null) {
-          upperPtr = (upper as String).toNativeUtf8().cast();
-        }
-        final caseSensitive = !type.endsWith('LC');
-        late int indexType;
-        switch (type) {
-          case 'StringValue':
-          case 'StringValueLC':
-            indexType = IndexType.value.index;
-            break;
-          case 'StringHash':
-          case 'StringHashLC':
-            indexType = IndexType.hash.index;
-            break;
-          case 'StringWords':
-          case 'StringWordsLC':
-            assert(
-                upper != null &&
-                    upper.isNotEmpty &&
-                    lower != null &&
-                    lower.isNotEmpty,
-                'Null or empty words are unsupported');
-            indexType = IndexType.words.index;
-            break;
-          case 'StringObjectId':
-          case 'StringObjectIdLC':
-            //IC.isar_wc_add_string_word(wcPtr, lowerPtr,upperPtr,caseSensitive);
-            break;
-          default:
-            throw UnimplementedError();
-        }
+  final val = lower ?? upper;
+  if (val == null) {
+    nCall(IC.isar_wc_add_null(wcPtr, upperUnbound));
+  } else if (val is bool) {
+    lower = boolToByte(lower);
+    if (upperUnbound) {
+      upper = maxBool;
+    } else {
+      upper = boolToByte(upper);
+    }
+    nCall(IC.isar_wc_add_byte(wcPtr, lower, upper));
+  } else if (val is int) {
+    lower ??= nullLong;
+    if (upperUnbound) {
+      upper = maxLong;
+    } else {
+      upper ??= nullLong;
+    }
+    nCall(IC.isar_wc_add_long(wcPtr, lower, upper));
+  } else if (val is double) {
+    lower ??= nullDouble;
+    if (upperUnbound) {
+      upper = maxDouble;
+    } else {
+      upper ??= nullDouble;
+    }
+    nCall(IC.isar_wc_add_double(wcPtr, lower, upper));
+  } else if (val is String) {
+    var lowerPtr = Pointer<Int8>.fromAddress(0);
+    var upperPtr = Pointer<Int8>.fromAddress(0);
+    if (lower is String) {
+      lowerPtr = lower.toNativeUtf8().cast();
+    }
+    if (upper is String) {
+      upperPtr = upper.toNativeUtf8().cast();
+    }
 
-        IC.isar_wc_add_string(wcPtr, lowerPtr, upperPtr, lowerUnbound,
-            upperUnbound, caseSensitive, indexType);
+    nCall(IC.isar_wc_add_string(wcPtr, lowerPtr, upperPtr, upperUnbound));
 
-        if (lower != null) {
-          malloc.free(lowerPtr);
-        }
-        if (upper != null) {
-          malloc.free(upperPtr);
-        }
-      }
-      return;
-  }
-}
-
-Pointer<NativeType>? _buildFilter(Pointer colPtr, QueryOperation filter) {
-  if (filter is FilterGroup) {
-    return _buildFilterGroup(colPtr, filter);
-  } else if (filter is LinkOperation) {
-    return _buildLink(colPtr, filter);
+    if (lower != null) {
+      malloc.free(lowerPtr);
+    }
+    if (upper != null) {
+      malloc.free(upperPtr);
+    }
   } else {
-    return _buildCondition(colPtr, filter as QueryCondition);
+    throw 'MIST!';
   }
 }
 
-Pointer<NativeType>? _buildFilterGroup(Pointer colPtr, FilterGroup group) {
-  final builtConditions = group.conditions
-      .map((op) => _buildFilter(colPtr, op))
+Pointer<NativeType>? _buildFilter(
+    IsarCollectionImpl col, FilterOperation filter) {
+  if (filter is FilterGroup) {
+    return _buildFilterGroup(col, filter);
+  } else if (filter is FilterNot) {
+    return _buildFilterNot(col, filter);
+  } else if (filter is LinkFilter) {
+    return _buildLink(col, filter);
+  } else if (filter is FilterCondition) {
+    return _buildCondition(col, filter);
+  }
+}
+
+Pointer<NativeType>? _buildFilterGroup(
+    IsarCollectionImpl col, FilterGroup group) {
+  final builtConditions = group.filters
+      .map((op) => _buildFilter(col, op))
       .where((it) => it != null)
       .toList();
 
@@ -262,19 +238,12 @@ Pointer<NativeType>? _buildFilterGroup(Pointer colPtr, FilterGroup group) {
   }
 
   final filterPtrPtr = malloc<Pointer<NativeType>>();
-  if (group.groupType == FilterGroupType.Not) {
-    nCall(IC.isar_filter_not(
-      filterPtrPtr,
-      conditionsPtrPtr.elementAt(0),
-    ));
-  } else {
-    nCall(IC.isar_filter_and_or(
-      filterPtrPtr,
-      group.groupType == FilterGroupType.And,
-      conditionsPtrPtr,
-      group.conditions.length,
-    ));
-  }
+  nCall(IC.isar_filter_and_or(
+    filterPtrPtr,
+    group.type == FilterGroupType.And,
+    conditionsPtrPtr,
+    group.filters.length,
+  ));
 
   final filterPtr = filterPtrPtr.value;
   malloc.free(conditionsPtrPtr);
@@ -282,29 +251,59 @@ Pointer<NativeType>? _buildFilterGroup(Pointer colPtr, FilterGroup group) {
   return filterPtr;
 }
 
-Pointer<NativeType>? _buildLink(Pointer colPtr, LinkOperation link) {
-  final condition = _buildFilter(colPtr, link.filter);
+Pointer<NativeType>? _buildFilterNot(IsarCollectionImpl col, FilterNot not) {
+  final filter = _buildFilter(col, not.filter);
+
+  if (filter == null) {
+    return null;
+  }
+
+  final filterPtrPtr = malloc<Pointer<NativeType>>();
+  nCall(IC.isar_filter_not(
+    filterPtrPtr,
+    filter,
+  ));
+
+  final filterPtr = filterPtrPtr.value;
+  malloc.free(filterPtrPtr);
+  return filterPtr;
+}
+
+Pointer<NativeType>? _buildLink(IsarCollectionImpl col, LinkFilter link) {
+  final targetCol = link.targetCollection as IsarCollectionImpl;
+
+  var backlink = false;
+  var linkId = col.linkIds[link.linkName];
+  if (linkId == null) {
+    linkId = col.backlinkIds[link.linkName];
+    backlink = true;
+
+    if (linkId == null) {
+      throw 'Unknown link property "${link.linkName}"';
+    }
+  }
+
+  final condition = _buildFilter(targetCol, link.filter);
   if (condition == null) return null;
 
-  final targetCol = link.targetCollection as IsarCollectionImpl;
   final filterPtrPtr = malloc<Pointer<NativeType>>();
 
-  if (link.backlink) {
+  if (backlink) {
     nCall(IC.isar_filter_link(
       targetCol.ptr,
-      colPtr,
+      col.ptr,
       filterPtrPtr,
       condition,
-      link.linkIndex,
+      linkId,
       true,
     ));
   } else {
     nCall(IC.isar_filter_link(
-      colPtr,
+      col.ptr,
       targetCol.ptr,
       filterPtrPtr,
       condition,
-      link.linkIndex,
+      linkId,
       false,
     ));
   }
@@ -314,40 +313,37 @@ Pointer<NativeType>? _buildLink(Pointer colPtr, LinkOperation link) {
   return filterPtr;
 }
 
-Pointer<NativeType> _buildCondition(Pointer colPtr, QueryCondition condition) {
-  final propertyType =
-      condition.propertyType == 'DateTime' ? 'Long' : condition.propertyType;
+Pointer<NativeType> _buildCondition(
+    IsarCollectionImpl col, FilterCondition condition) {
+  final lowerRaw = condition.lower;
+  final lower =
+      lowerRaw is DateTime ? lowerRaw.toUtc().microsecondsSinceEpoch : lowerRaw;
 
-  final lower = condition.propertyType == 'DateTime'
-      ? (condition.lower as DateTime?)?.toUtc().microsecondsSinceEpoch
-      : condition.lower;
+  final upperRaw = condition.upper;
+  final upper =
+      upperRaw is DateTime ? upperRaw.toUtc().microsecondsSinceEpoch : upperRaw;
 
-  final upper = condition.propertyType == 'DateTime'
-      ? (condition.upper as DateTime?)?.toUtc().microsecondsSinceEpoch
-      : condition.upper;
-
-  return _buildConditionInternal(
-    colPtr: colPtr,
-    conditionType: condition.conditionType,
-    pIndex: condition.propertyIndex,
-    propertyType: propertyType,
-    lower: lower,
-    includeLower: condition.includeLower,
-    upper: upper,
-    includeUpper: condition.includeUpper,
-    caseSensitive: condition.caseSensitive,
-  );
+  final propertyId = col.propertyIds[condition.property];
+  if (propertyId != null) {
+    return _buildConditionInternal(
+      col: col,
+      conditionType: condition.type,
+      propertyId: propertyId,
+      lower: lower,
+      upper: upper,
+      caseSensitive: condition.caseSensitive,
+    );
+  } else {
+    throw 'Unknown property "${condition.property}"';
+  }
 }
 
 Pointer<NativeType> _buildConditionInternal({
-  required Pointer colPtr,
+  required IsarCollectionImpl col,
   required ConditionType conditionType,
-  required int pIndex,
-  required String propertyType,
+  required int propertyId,
   required dynamic? lower,
-  required bool includeLower,
   required dynamic? upper,
-  required bool includeUpper,
   required bool caseSensitive,
 }) {
   final filterPtrPtr = malloc<Pointer<Pointer<NativeType>>>();
@@ -355,163 +351,112 @@ Pointer<NativeType> _buildConditionInternal({
   switch (conditionType) {
     case ConditionType.Eq:
       if (lower == null) {
-        nCall(IC.isar_filter_is_null(colPtr, filterPtrPtr, pIndex));
-        break;
-      }
-      switch (propertyType) {
-        case 'Bool':
-          final value = boolToByte(lower!);
-          nCall(IC.isar_filter_byte_between(
-              colPtr, filterPtrPtr, value, true, value, true, pIndex));
-          break;
-        case 'Int':
-          nCall(IC.isar_filter_int_between(
-              colPtr, filterPtrPtr, lower!, true, lower, true, pIndex));
-          break;
-        case 'Long':
-          nCall(IC.isar_filter_long_between(
-              colPtr, filterPtrPtr, lower!, true, lower, true, pIndex));
-          break;
-        case 'String':
-          final strPtr = (lower as String).toNativeUtf8();
-          nCall(IC.isar_filter_string_equal(
-              colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, pIndex));
-          malloc.free(strPtr);
-          break;
-        default:
-          throw UnimplementedError();
-      }
-      break;
-    case ConditionType.Gt:
-      switch (propertyType) {
-        case 'Int':
-          nCall(IC.isar_filter_int_between(colPtr, filterPtrPtr,
-              lower ?? nullInt, includeLower, maxInt, true, pIndex));
-          break;
-        case 'Float':
-          nCall(IC.isar_filter_float_between(colPtr, filterPtrPtr,
-              lower ?? nullFloat, includeLower, maxFloat, true, pIndex));
-          break;
-        case 'Long':
-          nCall(IC.isar_filter_long_between(colPtr, filterPtrPtr,
-              lower ?? nullLong, includeLower, maxLong, true, pIndex));
-          break;
-        case 'Double':
-          nCall(IC.isar_filter_double_between(colPtr, filterPtrPtr,
-              lower ?? nullDouble, includeLower, maxDouble, true, pIndex));
-          break;
-        default:
-          throw UnimplementedError();
-      }
-      break;
-    case ConditionType.Lt:
-      switch (propertyType) {
-        case 'Int':
-          IC.isar_filter_int_between(colPtr, filterPtrPtr, minInt, true,
-              upper ?? nullInt, includeUpper, pIndex);
-          break;
-        case 'Float':
-          IC.isar_filter_float_between(colPtr, filterPtrPtr, minFloat, true,
-              upper ?? nullFloat, includeUpper, pIndex);
-          break;
-        case 'Long':
-          IC.isar_filter_long_between(colPtr, filterPtrPtr, minLong, true,
-              upper ?? nullLong, includeUpper, pIndex);
-          break;
-        case 'Double':
-          IC.isar_filter_double_between(colPtr, filterPtrPtr, minDouble, true,
-              upper ?? nullDouble, includeUpper, pIndex);
-          break;
-        default:
-          throw UnimplementedError();
+        nCall(IC.isar_filter_null_between(
+            col.ptr, filterPtrPtr, false, propertyId));
+      } else if (lower is bool) {
+        final value = boolToByte(lower);
+        nCall(IC.isar_filter_byte_between(
+            col.ptr, filterPtrPtr, value, value, propertyId));
+      } else if (lower is int) {
+        nCall(IC.isar_filter_long_between(
+            col.ptr, filterPtrPtr, lower, lower, propertyId));
+      } else if (lower is String) {
+        final strPtr = lower.toNativeUtf8();
+        nCall(IC.isar_filter_string_equal(
+            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId));
+        malloc.free(strPtr);
+      } else {
+        throw 'Unsupported type for condition';
       }
       break;
     case ConditionType.Between:
-      switch (propertyType) {
-        case 'Int':
-          IC.isar_filter_int_between(colPtr, filterPtrPtr, lower ?? nullInt,
-              includeLower, upper ?? nullInt, includeUpper, pIndex);
-          break;
-        case 'Float':
-          IC.isar_filter_float_between(colPtr, filterPtrPtr, lower ?? nullFloat,
-              includeLower, upper ?? nullFloat, includeUpper, pIndex);
-          break;
-        case 'Long':
-          IC.isar_filter_long_between(colPtr, filterPtrPtr, lower ?? nullLong,
-              includeLower, upper ?? nullLong, includeUpper, pIndex);
-          break;
-        case 'Double':
-          IC.isar_filter_double_between(
-              colPtr,
-              filterPtrPtr,
-              lower ?? nullDouble,
-              includeLower,
-              upper ?? nullDouble,
-              includeUpper,
-              pIndex);
-          break;
-        default:
-          throw UnimplementedError();
+      final val = lower ?? upper;
+      if (val == null) {
+        nCall(IC.isar_filter_null_between(
+            col.ptr, filterPtrPtr, false, propertyId));
+      } else if (val is int) {
+        nCall(IC.isar_filter_long_between(col.ptr, filterPtrPtr,
+            lower ?? nullLong, upper ?? nullLong, propertyId));
+      } else if (val is double) {
+        nCall(IC.isar_filter_double_between(col.ptr, filterPtrPtr,
+            lower ?? nullDouble, upper ?? nullDouble, propertyId));
+      } else {
+        throw 'Unsupported type for condition';
       }
       break;
+    case ConditionType.Lt:
+      if (lower == null) {
+        nCall(IC.isar_filter_null_between(
+            col.ptr, filterPtrPtr, true, propertyId));
+      } else if (lower is int) {
+        nCall(IC.isar_filter_long_between(
+            col.ptr, filterPtrPtr, lower, maxLong, propertyId));
+      } else if (lower is double) {
+        nCall(IC.isar_filter_double_between(
+            col.ptr, filterPtrPtr, lower, maxDouble, propertyId));
+      } else {
+        throw 'Unsupported type for condition';
+      }
+      nCall(IC.isar_filter_not(filterPtrPtr, filterPtrPtr.value));
+      break;
+    case ConditionType.Gt:
+      if (lower == null) {
+        nCall(IC.isar_filter_null_between(
+            col.ptr, filterPtrPtr, false, propertyId));
+      } else if (lower is int) {
+        nCall(IC.isar_filter_long_between(
+            col.ptr, filterPtrPtr, minLong, lower, propertyId));
+      } else if (lower is double) {
+        nCall(IC.isar_filter_double_between(
+            col.ptr, filterPtrPtr, minDouble, lower, propertyId));
+      } else {
+        throw 'Unsupported type for condition';
+      }
+      nCall(IC.isar_filter_not(filterPtrPtr, filterPtrPtr.value));
+      break;
     case ConditionType.StartsWith:
-      if (propertyType == 'String') {
-        final strPtr = (lower as String).toNativeUtf8();
+      if (lower is String) {
+        final strPtr = lower.toNativeUtf8();
         nCall(IC.isar_filter_string_starts_with(
-            colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, pIndex));
+            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId));
         malloc.free(strPtr);
       } else {
-        throw UnimplementedError();
+        throw 'Unsupported type for condition';
       }
       break;
     case ConditionType.EndsWith:
-      if (propertyType == 'String') {
-        final strPtr = (lower as String).toNativeUtf8();
+      if (lower is String) {
+        final strPtr = lower.toNativeUtf8();
         nCall(IC.isar_filter_string_ends_with(
-            colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, pIndex));
+            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId));
         malloc.free(strPtr);
       } else {
-        throw UnimplementedError();
-      }
-      break;
-    case ConditionType.Contains:
-      switch (propertyType) {
-        case 'String':
-          final strPtr = '*$lower*'.toNativeUtf8();
-          nCall(IC.isar_filter_string_matches(
-              colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, pIndex));
-          malloc.free(strPtr);
-          break;
-        case 'IntList':
-          IC.isar_filter_int_list_contains(
-              colPtr, filterPtrPtr, lower ?? nullInt, pIndex);
-          break;
-        case 'LongList':
-          IC.isar_filter_long_list_contains(
-              colPtr, filterPtrPtr, lower ?? nullLong, pIndex);
-          break;
-        case 'StringList':
-          final strPtr = (lower as String).toNativeUtf8();
-          nCall(IC.isar_filter_string_list_contains(
-              colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, pIndex));
-          malloc.free(strPtr);
-          break;
-        default:
-          throw UnimplementedError();
+        throw 'Unsupported type for condition';
       }
       break;
     case ConditionType.Matches:
-      switch (propertyType) {
-        case 'String':
-          final strPtr = (lower as String).toNativeUtf8();
-          nCall(IC.isar_filter_string_matches(
-              colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, pIndex));
-          malloc.free(strPtr);
-          break;
-        default:
-          throw UnimplementedError();
+      if (lower is String) {
+        final strPtr = lower.toNativeUtf8();
+        nCall(IC.isar_filter_string_matches(
+            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId));
+        malloc.free(strPtr);
+      } else {
+        throw 'Unsupported type for condition';
       }
       break;
+    case ConditionType.ListContains:
+      if (lower is int?) {
+        nCall(IC.isar_filter_long_list_contains(
+            col.ptr, filterPtrPtr, lower ?? nullLong, propertyId));
+      } else if (lower is String) {
+        final strPtr = lower.toNativeUtf8();
+        nCall(IC.isar_filter_string_list_contains(
+            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId));
+        malloc.free(strPtr);
+      }
+      break;
+    default:
+      throw 'Unreachable';
   }
   final filterPtr = filterPtrPtr.value;
   malloc.free(filterPtrPtr);
