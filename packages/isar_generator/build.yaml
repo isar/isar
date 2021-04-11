@@ -5,8 +5,6 @@ targets:
         enabled: true
       isar_generator|generator:
         enabled: true
-      isar_generator|query_generator:
-        enabled: true
 
 builders:
   analyzer:

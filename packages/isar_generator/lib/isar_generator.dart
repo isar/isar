@@ -4,5 +4,8 @@ import 'src/isar_analyzer.dart';
 
 Builder getIsarAnalyzer(BuilderOptions options) => IsarAnalyzer();
 
-Builder getIsarGenerator(BuilderOptions options) =>
-    IsarCodeGenerator(options.config['flutter'] ?? true);
+Builder getIsarGenerator(BuilderOptions options) => IsarCodeGenerator(
+      flutter: options.config['flutter'] ?? true,
+      package: options.config['package'] ?? false,
+      extensions: options.config['extensions'] ?? true,
+    );

@@ -13,6 +13,9 @@ abstract class Isar {
   late final Map<String, IsarCollection> _collections;
 
   Isar(this.name, String schema) {
+    if (_schema != null && _schema != schema) {
+      throw 'Cannot open multiple Isar instances with different schema.';
+    }
     _schema = schema;
     _instances[name] = this;
     for (var callback in _openCallbacks) {

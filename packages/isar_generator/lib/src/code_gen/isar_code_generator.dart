@@ -16,9 +16,15 @@ import 'package:path/path.dart' as path;
 import 'package:dartx/dartx.dart';
 
 class IsarCodeGenerator extends Builder {
-  final bool isFlutter;
+  final bool flutter;
+  final bool package;
+  final bool extensions;
 
-  IsarCodeGenerator(this.isFlutter);
+  IsarCodeGenerator({
+    required this.flutter,
+    required this.package,
+    required this.extensions,
+  });
 
   @override
   final buildExtensions = {
@@ -97,7 +103,7 @@ class IsarCodeGenerator extends Builder {
     var imports = {
       ...IsarCodeGenerator.imports,
       ...fileImports,
-      if (isFlutter) ...{
+      if (flutter) ...{
         'package:path_provider/path_provider.dart',
         'package:flutter/widgets.dart'
       },
@@ -106,46 +112,52 @@ class IsarCodeGenerator extends Builder {
         .map((im) => im.startsWith('import') ? '$im;' : "import '$im';")
         .join('\n');
 
-    final objectAdapters =
-        objects.map((o) => generateObjectAdapter(o)).join('\n');
-    final getCollectionsExtensions = generateGetCollectionsExtension(objects);
-    final queryWhereExtensions =
-        objects.map((o) => generateQueryWhere(o)).join('\n');
-    final queryFilterExtensions =
-        objects.map((o) => generateQueryFilter(o)).join('\n');
-    final queryLinkExtensions =
-        objects.map((o) => generateQueryLinks(o, objects)).join('\n');
-    final querySortByExtensions =
-        objects.map((o) => generateSortBy(o)).join('\n');
-    final queryDistinctByExtensions =
-        objects.map((o) => generateDistinctBy(o)).join('\n');
-    final propertyQueries =
-        objects.map((o) => generatePropertyQuery(o)).join('\n');
-
     var code = '''
     // ignore_for_file: unused_import, implementation_imports
 
     $imports
-
-    const _utf8Encoder = Utf8Encoder();
-
-    ${generateIsarSchema(objects)}
-
-    ${generateIsarOpen(objects)}
-
-    ${generatePreparePath()}
-
-    $getCollectionsExtensions
-
-    $objectAdapters
-
-    $queryWhereExtensions
-    $queryFilterExtensions
-    $queryLinkExtensions
-    $querySortByExtensions
-    $queryDistinctByExtensions
-    $propertyQueries
     ''';
+
+    if (!package) {
+      final objectAdapters =
+          objects.map((o) => generateObjectAdapter(o)).join('\n');
+
+      code += '''
+        const _utf8Encoder = Utf8Encoder();
+
+        ${generateIsarSchema(objects)}
+
+        ${generateIsarOpen(objects)}
+
+        ${generatePreparePath()}
+
+        $objectAdapters''';
+    }
+
+    if (extensions) {
+      final getCollectionsExtensions = generateGetCollectionsExtension(objects);
+      final queryWhereExtensions =
+          objects.map((o) => generateQueryWhere(o)).join('\n');
+      final queryFilterExtensions =
+          objects.map((o) => generateQueryFilter(o)).join('\n');
+      final queryLinkExtensions =
+          objects.map((o) => generateQueryLinks(o, objects)).join('\n');
+      final querySortByExtensions =
+          objects.map((o) => generateSortBy(o)).join('\n');
+      final queryDistinctByExtensions =
+          objects.map((o) => generateDistinctBy(o)).join('\n');
+      final propertyQueries =
+          objects.map((o) => generatePropertyQuery(o)).join('\n');
+
+      code += '''
+        $getCollectionsExtensions
+        $queryWhereExtensions
+        $queryFilterExtensions
+        $queryLinkExtensions
+        $querySortByExtensions
+        $queryDistinctByExtensions
+        $propertyQueries''';
+    }
 
     code = DartFormatter().format(code);
 
@@ -225,7 +237,7 @@ class IsarCodeGenerator extends Builder {
     var code = '''
     Future<String> _preparePath(String? path) async {
       if (path == null || p.isRelative(path)) {''';
-    if (isFlutter) {
+    if (flutter) {
       code += '''
         WidgetsFlutterBinding.ensureInitialized();
         final dir = await getApplicationDocumentsDirectory();
