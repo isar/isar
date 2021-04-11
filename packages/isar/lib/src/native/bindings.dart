@@ -188,44 +188,6 @@ class IsarCoreBindings {
   late final _dart_isar_json_import _isar_json_import =
       _isar_json_import_ptr.asFunction<_dart_isar_json_import>();
 
-  int isar_json_export(
-    ffi.Pointer<ffi.NativeType> collection,
-    ffi.Pointer<ffi.NativeType> txn,
-    bool primitive_null,
-    bool include_links,
-    ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
-    ffi.Pointer<ffi.Uint32> json_length,
-  ) {
-    return _isar_json_export(
-      collection,
-      txn,
-      primitive_null ? 1 : 0,
-      include_links ? 1 : 0,
-      json_bytes,
-      json_length,
-    );
-  }
-
-  late final _isar_json_export_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_json_export>>('isar_json_export');
-  late final _dart_isar_json_export _isar_json_export =
-      _isar_json_export_ptr.asFunction<_dart_isar_json_export>();
-
-  void isar_free_json(
-    ffi.Pointer<ffi.Uint8> json_bytes,
-    int json_length,
-  ) {
-    return _isar_free_json(
-      json_bytes,
-      json_length,
-    );
-  }
-
-  late final _isar_free_json_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_free_json>>('isar_free_json');
-  late final _dart_isar_free_json _isar_free_json =
-      _isar_free_json_ptr.asFunction<_dart_isar_free_json>();
-
   void isar_connect_dart_api(
     ffi.Pointer<ffi.NativeFunction<DartPostCObjectFnType>> ptr,
   ) {
@@ -975,6 +937,44 @@ class IsarCoreBindings {
   late final _dart_isar_q_delete _isar_q_delete =
       _isar_q_delete_ptr.asFunction<_dart_isar_q_delete>();
 
+  int isar_q_export_json(
+    ffi.Pointer<ffi.NativeType> query,
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    bool primitive_null,
+    ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
+    ffi.Pointer<ffi.Uint32> json_length,
+  ) {
+    return _isar_q_export_json(
+      query,
+      collection,
+      txn,
+      primitive_null ? 1 : 0,
+      json_bytes,
+      json_length,
+    );
+  }
+
+  late final _isar_q_export_json_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_q_export_json>>('isar_q_export_json');
+  late final _dart_isar_q_export_json _isar_q_export_json =
+      _isar_q_export_json_ptr.asFunction<_dart_isar_q_export_json>();
+
+  void isar_free_json(
+    ffi.Pointer<ffi.Uint8> json_bytes,
+    int json_length,
+  ) {
+    return _isar_free_json(
+      json_bytes,
+      json_length,
+    );
+  }
+
+  late final _isar_free_json_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_free_json>>('isar_free_json');
+  late final _dart_isar_free_json _isar_free_json =
+      _isar_free_json_ptr.asFunction<_dart_isar_free_json>();
+
   int isar_q_aggregate(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> query,
@@ -1389,34 +1389,6 @@ typedef _c_isar_json_import = ffi.Int32 Function(
 typedef _dart_isar_json_import = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<ffi.Uint8> json_bytes,
-  int json_length,
-);
-
-typedef _c_isar_json_export = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> txn,
-  ffi.Uint8 primitive_null,
-  ffi.Uint8 include_links,
-  ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
-  ffi.Pointer<ffi.Uint32> json_length,
-);
-
-typedef _dart_isar_json_export = int Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> txn,
-  int primitive_null,
-  int include_links,
-  ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
-  ffi.Pointer<ffi.Uint32> json_length,
-);
-
-typedef _c_isar_free_json = ffi.Void Function(
-  ffi.Pointer<ffi.Uint8> json_bytes,
-  ffi.Uint32 json_length,
-);
-
-typedef _dart_isar_free_json = void Function(
   ffi.Pointer<ffi.Uint8> json_bytes,
   int json_length,
 );
@@ -1950,6 +1922,34 @@ typedef _dart_isar_q_delete = int Function(
   ffi.Pointer<ffi.NativeType> txn,
   int limit,
   ffi.Pointer<ffi.Uint32> count,
+);
+
+typedef _c_isar_q_export_json = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> query,
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Uint8 primitive_null,
+  ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
+  ffi.Pointer<ffi.Uint32> json_length,
+);
+
+typedef _dart_isar_q_export_json = int Function(
+  ffi.Pointer<ffi.NativeType> query,
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  int primitive_null,
+  ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
+  ffi.Pointer<ffi.Uint32> json_length,
+);
+
+typedef _c_isar_free_json = ffi.Void Function(
+  ffi.Pointer<ffi.Uint8> json_bytes,
+  ffi.Uint32 json_length,
+);
+
+typedef _dart_isar_free_json = void Function(
+  ffi.Pointer<ffi.Uint8> json_bytes,
+  int json_length,
 );
 
 typedef _c_isar_q_aggregate = ffi.Int32 Function(
