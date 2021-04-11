@@ -22,7 +22,7 @@
 <p align="center">
   <a href="https://isar.dev">Quickstart</a> •
   <a href="https://isar.dev/schema">Documentation</a> •
-  <a href="https://isar.dev">Sample Apps</a> •
+  <a href="https://github.com/isar/samples">Sample Apps</a> •
   <a href="https://github.com/isar/isar/discussions">Support & Ideas</a> •
   <a href="https://pub.dev/packages/isar">Pub.dev</a>
 </p>
