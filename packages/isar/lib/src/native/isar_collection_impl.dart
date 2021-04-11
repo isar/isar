@@ -228,27 +228,6 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
-      {bool primitiveNull = true, bool includeLinks = false}) {
-    return isar.getTxn(false, (txnPtr, stream) async {
-      final bytesPtrPtr = malloc<Pointer<Uint8>>();
-      final lengthPtr = malloc<Uint32>();
-      IC.isar_json_export(
-          ptr, txnPtr, primitiveNull, includeLinks, bytesPtrPtr, lengthPtr);
-
-      try {
-        await stream.first;
-        final bytes = bytesPtrPtr.value.asTypedList(lengthPtr.value);
-        return callback(bytes);
-      } finally {
-        IC.isar_free_json(bytesPtrPtr.value, lengthPtr.value);
-        malloc.free(bytesPtrPtr);
-        malloc.free(lengthPtr);
-      }
-    });
-  }
-
-  @override
   Stream<void> watchLazy() {
     final port = ReceivePort();
     final handle =

@@ -135,6 +135,27 @@ class NativeQuery<T> extends Query<T> {
     controller.addStream(port);
     return controller.stream;
   }
+
+  @override
+  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
+      {bool primitiveNull = true}) {
+    return isar.getTxn(false, (txnPtr, stream) async {
+      final bytesPtrPtr = malloc<Pointer<Uint8>>();
+      final lengthPtr = malloc<Uint32>();
+      IC.isar_q_export_json(
+          queryPtr, colPtr, txnPtr, primitiveNull, bytesPtrPtr, lengthPtr);
+
+      try {
+        await stream.first;
+        final bytes = bytesPtrPtr.value.asTypedList(lengthPtr.value);
+        return callback(bytes);
+      } finally {
+        IC.isar_free_json(bytesPtrPtr.value, lengthPtr.value);
+        malloc.free(bytesPtrPtr);
+        malloc.free(lengthPtr);
+      }
+    });
+  }
 }
 
 Future<T?> aggregateQuery<T>(Query query, AggregationOp op) async {

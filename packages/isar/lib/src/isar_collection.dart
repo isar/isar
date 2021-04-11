@@ -34,21 +34,6 @@ abstract class IsarCollection<OBJ> {
     return importJsonRaw(bytes);
   }
 
-  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
-      {bool primitiveNull = true, bool includeLinks = false});
-
-  Future<List<Map<String, dynamic>>> exportJson(
-      {bool primitiveNull = true, bool includeLinks = false}) {
-    return exportJsonRaw(
-      (bytes) {
-        final json = jsonDecode(Utf8Decoder().convert(bytes)) as List;
-        return json.cast<Map<String, dynamic>>();
-      },
-      primitiveNull: primitiveNull,
-      includeLinks: includeLinks,
-    );
-  }
-
   QueryBuilder<OBJ, QWhere> where(
       {bool distinct = false, Sort sort = Sort.Asc}) {
     return QueryBuilder(this, distinct, sort);

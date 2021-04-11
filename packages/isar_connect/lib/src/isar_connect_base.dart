@@ -65,11 +65,9 @@ Future<dynamic> listInstances(Map<String, String> _) async {
   return Isar.instanceNames;
 }
 
-Future<List<Map<String, dynamic>>> executeQuery(
-    Map<String, String> params) async {
+Future<List<Map<String, dynamic>>> executeQuery(Map<String, String> params) {
   final query = getQuery(params);
-  final results = await query.findAll();
-  return results.map((e) => IsarInterface.instance!.objectToJson(e)).toList();
+  return query.exportJson();
 }
 
 StreamSubscription? watchSubscription;
