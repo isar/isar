@@ -48,12 +48,12 @@
 
 ```yaml
 dependencies:
-  isar: 0.2.0
-  isar_flutter_libs: 0.2.0 # contains the binaries
-  isar_connect: 0.2.0 # if you want to use the Isar Inspector
+  isar: 0.4.0
+  isar_flutter_libs: 0.4.0 # contains the binaries
+  isar_connect: 0.4.0 # if you want to use the Isar Inspector
 
 dev_dependencies:
-  isar_generator: 0.2.0
+  isar_generator: 0.4.0
   build_runner: any
 ```
 

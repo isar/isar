@@ -1,3 +1,8 @@
+## 0.4.0
+- Support multi-package projects
+- Use dynamic queries
+- More config options
+
 ## 0.2.0
 - Fixes
 

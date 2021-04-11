@@ -20,6 +20,7 @@ builders:
     build_extensions:
       "$lib$": ["isar.g.dart"]
       "$test": ["isar.g.dart"]
+      "$bin": ["isar.g.dart"]
     required_inputs: ['.isarobject.json']
     auto_apply: dependents
     build_to: source
