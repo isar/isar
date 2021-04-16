@@ -68,11 +68,6 @@ void main() {
       );
 
       await qEqual(
-        col.where().fieldGreaterThan(3, include: true).findAll(),
-        [IntModel()..field = 3, IntModel()..field = 4],
-      );
-
-      await qEqual(
         col.where().fieldGreaterThan(null).findAll(),
         [
           IntModel()..field = 0,
@@ -112,15 +107,6 @@ void main() {
         col.where().filter().fieldLessThan(1).findAll(),
         {IntModel()..field = null, IntModel()..field = 0},
       );
-
-      await qEqual(
-        col.where().fieldLessThan(1, include: true).findAll(),
-        [
-          IntModel()..field = null,
-          IntModel()..field = 0,
-          IntModel()..field = 1
-        ],
-      );
     });
 
     isarTest('.between()', () async {
@@ -140,22 +126,6 @@ void main() {
       await qEqualSet(
         col.where().filter().fieldBetween(null, 0).findAll(),
         {IntModel()..field = null, IntModel()..field = 0},
-      );
-
-      await qEqual(
-        col.where().fieldBetween(1, 3, includeLower: false).findAll(),
-        [IntModel()..field = 2, IntModel()..field = 3],
-      );
-      await qEqual(
-        col.where().fieldBetween(1, 3, includeUpper: false).findAll(),
-        [IntModel()..field = 1, IntModel()..field = 2],
-      );
-      await qEqual(
-        col
-            .where()
-            .fieldBetween(1, 3, includeLower: false, includeUpper: false)
-            .findAll(),
-        [IntModel()..field = 2],
       );
 
       await qEqual(

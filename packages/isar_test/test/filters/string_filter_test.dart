@@ -227,10 +227,6 @@ void main() {
       await qEqual(col.where().valueFieldStartsWith('S').findAll(), []);
       await qEqualSet(
           col.where().filter().valueFieldStartsWith('S').findAll(), {});
-
-      expect(() => col.where().valueFieldStartsWith(null), throwsA(anything));
-      expect(() => col.where().filter().valueFieldStartsWith(null),
-          throwsA(anything));
     });
 
     isarTest('.endsWith()', () async {

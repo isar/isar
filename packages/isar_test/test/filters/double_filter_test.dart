@@ -38,11 +38,6 @@ void main() {
       );
 
       await qEqual(
-        col.where().fieldGreaterThan(3.3, include: true).findAll(),
-        [DoubleModel()..field = 3.3, DoubleModel()..field = 4.4],
-      );
-
-      await qEqual(
         col.where().fieldGreaterThan(4.4).findAll(),
         [],
       );
@@ -60,15 +55,6 @@ void main() {
       await qEqualSet(
         col.where().filter().fieldLessThan(1.1).findAll(),
         {DoubleModel()..field = null, DoubleModel()..field = 0},
-      );
-
-      await qEqual(
-        col.where().fieldLessThan(1.1, include: true).findAll(),
-        [
-          DoubleModel()..field = null,
-          DoubleModel()..field = 0,
-          DoubleModel()..field = 1.1
-        ],
       );
 
       await qEqual(
@@ -96,16 +82,6 @@ void main() {
           DoubleModel()..field = 1.1,
           DoubleModel()..field = 2.2,
           DoubleModel()..field = 3.3
-        ],
-      );
-
-      await qEqual(
-        col
-            .where()
-            .fieldBetween(1.1, 3.3, includeLower: false, includeUpper: false)
-            .findAll(),
-        [
-          DoubleModel()..field = 2.2,
         ],
       );
 

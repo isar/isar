@@ -63,11 +63,6 @@ void main() async {
       );
 
       await qEqual(
-        col.where().fieldGreaterThan(3, include: true).findAll(),
-        [LongModel()..field = 3, LongModel()..field = 4],
-      );
-
-      await qEqual(
         col.where().fieldGreaterThan(4).findAll(),
         [],
       );
@@ -85,15 +80,6 @@ void main() async {
       await qEqualSet(
         col.where().filter().fieldLessThan(1).findAll(),
         {LongModel()..field = null, LongModel()..field = 0},
-      );
-
-      await qEqual(
-        col.where().fieldLessThan(1, include: true).findAll(),
-        [
-          LongModel()..field = null,
-          LongModel()..field = 0,
-          LongModel()..field = 1
-        ],
       );
     });
 
@@ -122,22 +108,6 @@ void main() async {
       await qEqualSet(
         col.where().filter().fieldBetween(null, 0).findAll(),
         {LongModel()..field = null, LongModel()..field = 0},
-      );
-
-      await qEqual(
-        col.where().fieldBetween(1, 3, includeLower: false).findAll(),
-        [LongModel()..field = 2, LongModel()..field = 3],
-      );
-      await qEqual(
-        col.where().fieldBetween(1, 3, includeUpper: false).findAll(),
-        [LongModel()..field = 1, LongModel()..field = 2],
-      );
-      await qEqual(
-        col
-            .where()
-            .fieldBetween(1, 3, includeLower: false, includeUpper: false)
-            .findAll(),
-        [LongModel()..field = 2],
       );
 
       await qEqual(
