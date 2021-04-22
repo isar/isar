@@ -391,28 +391,30 @@ class IsarCoreBindings {
       _isar_filter_long_list_contains = _isar_filter_long_list_contains_ptr
           .asFunction<_dart_isar_filter_long_list_contains>();
 
-  int isar_filter_string_equal(
+  int isar_filter_string_between(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
-    ffi.Pointer<ffi.Int8> value,
+    ffi.Pointer<ffi.Int8> lower,
+    ffi.Pointer<ffi.Int8> upper,
     bool case_sensitive,
     int property_index,
   ) {
-    return _isar_filter_string_equal(
+    return _isar_filter_string_between(
       collection,
       filter,
-      value,
+      lower,
+      upper,
       case_sensitive ? 1 : 0,
       property_index,
     );
   }
 
-  late final _isar_filter_string_equal_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_filter_string_equal>>(
-          'isar_filter_string_equal');
-  late final _dart_isar_filter_string_equal _isar_filter_string_equal =
-      _isar_filter_string_equal_ptr
-          .asFunction<_dart_isar_filter_string_equal>();
+  late final _isar_filter_string_between_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_filter_string_between>>(
+          'isar_filter_string_between');
+  late final _dart_isar_filter_string_between _isar_filter_string_between =
+      _isar_filter_string_between_ptr
+          .asFunction<_dart_isar_filter_string_between>();
 
   int isar_filter_string_starts_with(
     ffi.Pointer<ffi.NativeType> collection,
@@ -1538,18 +1540,20 @@ typedef _dart_isar_filter_long_list_contains = int Function(
   int property_index,
 );
 
-typedef _c_isar_filter_string_equal = ffi.Int32 Function(
+typedef _c_isar_filter_string_between = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
-  ffi.Pointer<ffi.Int8> value,
+  ffi.Pointer<ffi.Int8> lower,
+  ffi.Pointer<ffi.Int8> upper,
   ffi.Uint8 case_sensitive,
   ffi.Uint32 property_index,
 );
 
-typedef _dart_isar_filter_string_equal = int Function(
+typedef _dart_isar_filter_string_between = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
-  ffi.Pointer<ffi.Int8> value,
+  ffi.Pointer<ffi.Int8> lower,
+  ffi.Pointer<ffi.Int8> upper,
   int case_sensitive,
   int property_index,
 );
