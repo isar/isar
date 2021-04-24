@@ -78,6 +78,45 @@ class IsarCoreBindings {
   late final _dart_isar_get_all _isar_get_all =
       _isar_get_all_ptr.asFunction<_dart_isar_get_all>();
 
+  int isar_get_by_index(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    ffi.Pointer<RawObject> object,
+    ffi.Pointer<ffi.NativeType> key,
+  ) {
+    return _isar_get_by_index(
+      collection,
+      txn,
+      object,
+      key,
+    );
+  }
+
+  late final _isar_get_by_index_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_get_by_index>>('isar_get_by_index');
+  late final _dart_isar_get_by_index _isar_get_by_index =
+      _isar_get_by_index_ptr.asFunction<_dart_isar_get_by_index>();
+
+  int isar_get_all_by_index(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    ffi.Pointer<RawObjectSet> objects,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> keys,
+  ) {
+    return _isar_get_all_by_index(
+      collection,
+      txn,
+      objects,
+      keys,
+    );
+  }
+
+  late final _isar_get_all_by_index_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_get_all_by_index>>(
+          'isar_get_all_by_index');
+  late final _dart_isar_get_all_by_index _isar_get_all_by_index =
+      _isar_get_all_by_index_ptr.asFunction<_dart_isar_get_all_by_index>();
+
   int isar_put(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
@@ -151,6 +190,49 @@ class IsarCoreBindings {
       _lookup<ffi.NativeFunction<_c_isar_delete_all>>('isar_delete_all');
   late final _dart_isar_delete_all _isar_delete_all =
       _isar_delete_all_ptr.asFunction<_dart_isar_delete_all>();
+
+  int isar_delete_by_index(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    ffi.Pointer<ffi.NativeType> key,
+    ffi.Pointer<ffi.Uint8> deleted,
+  ) {
+    return _isar_delete_by_index(
+      collection,
+      txn,
+      key,
+      deleted,
+    );
+  }
+
+  late final _isar_delete_by_index_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_delete_by_index>>(
+          'isar_delete_by_index');
+  late final _dart_isar_delete_by_index _isar_delete_by_index =
+      _isar_delete_by_index_ptr.asFunction<_dart_isar_delete_by_index>();
+
+  int isar_delete_all_by_index(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    ffi.Pointer<ffi.NativeType> keys,
+    int keys_length,
+    ffi.Pointer<ffi.Uint32> count,
+  ) {
+    return _isar_delete_all_by_index(
+      collection,
+      txn,
+      keys,
+      keys_length,
+      count,
+    );
+  }
+
+  late final _isar_delete_all_by_index_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_delete_all_by_index>>(
+          'isar_delete_all_by_index');
+  late final _dart_isar_delete_all_by_index _isar_delete_all_by_index =
+      _isar_delete_all_by_index_ptr
+          .asFunction<_dart_isar_delete_all_by_index>();
 
   int isar_clear(
     ffi.Pointer<ffi.NativeType> collection,
@@ -508,6 +590,156 @@ class IsarCoreBindings {
       _isar_filter_string_list_contains = _isar_filter_string_list_contains_ptr
           .asFunction<_dart_isar_filter_string_list_contains>();
 
+  int isar_key_create(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> key,
+    int index_index,
+  ) {
+    return _isar_key_create(
+      collection,
+      key,
+      index_index,
+    );
+  }
+
+  late final _isar_key_create_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_key_create>>('isar_key_create');
+  late final _dart_isar_key_create _isar_key_create =
+      _isar_key_create_ptr.asFunction<_dart_isar_key_create>();
+
+  void isar_key_add_byte(
+    ffi.Pointer<ffi.NativeType> key,
+    int value,
+  ) {
+    return _isar_key_add_byte(
+      key,
+      value,
+    );
+  }
+
+  late final _isar_key_add_byte_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_key_add_byte>>('isar_key_add_byte');
+  late final _dart_isar_key_add_byte _isar_key_add_byte =
+      _isar_key_add_byte_ptr.asFunction<_dart_isar_key_add_byte>();
+
+  void isar_key_add_int(
+    ffi.Pointer<ffi.NativeType> key,
+    int value,
+  ) {
+    return _isar_key_add_int(
+      key,
+      value,
+    );
+  }
+
+  late final _isar_key_add_int_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_key_add_int>>('isar_key_add_int');
+  late final _dart_isar_key_add_int _isar_key_add_int =
+      _isar_key_add_int_ptr.asFunction<_dart_isar_key_add_int>();
+
+  void isar_key_add_long(
+    ffi.Pointer<ffi.NativeType> key,
+    int value,
+  ) {
+    return _isar_key_add_long(
+      key,
+      value,
+    );
+  }
+
+  late final _isar_key_add_long_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_key_add_long>>('isar_key_add_long');
+  late final _dart_isar_key_add_long _isar_key_add_long =
+      _isar_key_add_long_ptr.asFunction<_dart_isar_key_add_long>();
+
+  void isar_key_add_float(
+    ffi.Pointer<ffi.NativeType> key,
+    double value,
+  ) {
+    return _isar_key_add_float(
+      key,
+      value,
+    );
+  }
+
+  late final _isar_key_add_float_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_key_add_float>>('isar_key_add_float');
+  late final _dart_isar_key_add_float _isar_key_add_float =
+      _isar_key_add_float_ptr.asFunction<_dart_isar_key_add_float>();
+
+  void isar_key_add_double(
+    ffi.Pointer<ffi.NativeType> key,
+    double value,
+  ) {
+    return _isar_key_add_double(
+      key,
+      value,
+    );
+  }
+
+  late final _isar_key_add_double_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_key_add_double>>(
+          'isar_key_add_double');
+  late final _dart_isar_key_add_double _isar_key_add_double =
+      _isar_key_add_double_ptr.asFunction<_dart_isar_key_add_double>();
+
+  void isar_key_add_string_value(
+    ffi.Pointer<ffi.NativeType> key,
+    ffi.Pointer<ffi.Int8> value,
+    bool case_sensitive,
+  ) {
+    return _isar_key_add_string_value(
+      key,
+      value,
+      case_sensitive ? 1 : 0,
+    );
+  }
+
+  late final _isar_key_add_string_value_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_key_add_string_value>>(
+          'isar_key_add_string_value');
+  late final _dart_isar_key_add_string_value _isar_key_add_string_value =
+      _isar_key_add_string_value_ptr
+          .asFunction<_dart_isar_key_add_string_value>();
+
+  void isar_key_add_string_hash(
+    ffi.Pointer<ffi.NativeType> key,
+    ffi.Pointer<ffi.Int8> value,
+    bool case_sensitive,
+  ) {
+    return _isar_key_add_string_hash(
+      key,
+      value,
+      case_sensitive ? 1 : 0,
+    );
+  }
+
+  late final _isar_key_add_string_hash_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_key_add_string_hash>>(
+          'isar_key_add_string_hash');
+  late final _dart_isar_key_add_string_hash _isar_key_add_string_hash =
+      _isar_key_add_string_hash_ptr
+          .asFunction<_dart_isar_key_add_string_hash>();
+
+  void isar_key_add_string_word(
+    ffi.Pointer<ffi.NativeType> key,
+    ffi.Pointer<ffi.Int8> value,
+    bool case_sensitive,
+  ) {
+    return _isar_key_add_string_word(
+      key,
+      value,
+      case_sensitive ? 1 : 0,
+    );
+  }
+
+  late final _isar_key_add_string_word_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_key_add_string_word>>(
+          'isar_key_add_string_word');
+  late final _dart_isar_key_add_string_word _isar_key_add_string_word =
+      _isar_key_add_string_word_ptr
+          .asFunction<_dart_isar_key_add_string_word>();
+
   void isar_create_instance(
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
     ffi.Pointer<ffi.Int8> name,
@@ -756,14 +988,12 @@ class IsarCoreBindings {
       _isar_qb_create_ptr.asFunction<_dart_isar_qb_create>();
 
   int isar_qb_add_id_where_clause(
-    ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> builder,
     int lower_oid,
     int upper_oid,
     bool ascending,
   ) {
     return _isar_qb_add_id_where_clause(
-      collection,
       builder,
       lower_oid,
       upper_oid,
@@ -780,15 +1010,21 @@ class IsarCoreBindings {
 
   int isar_qb_add_index_where_clause(
     ffi.Pointer<ffi.NativeType> builder,
-    ffi.Pointer<ffi.NativeType> where_clause,
+    ffi.Pointer<ffi.NativeType> lower_key,
     bool include_lower,
+    ffi.Pointer<ffi.NativeType> upper_key,
     bool include_upper,
+    bool skip_duplicates,
+    bool ascending,
   ) {
     return _isar_qb_add_index_where_clause(
       builder,
-      where_clause,
+      lower_key,
       include_lower ? 1 : 0,
+      upper_key,
       include_upper ? 1 : 0,
+      skip_duplicates ? 1 : 0,
+      ascending ? 1 : 0,
     );
   }
 
@@ -1150,112 +1386,6 @@ class IsarCoreBindings {
       _lookup<ffi.NativeFunction<_c_isar_stop_watching>>('isar_stop_watching');
   late final _dart_isar_stop_watching _isar_stop_watching =
       _isar_stop_watching_ptr.asFunction<_dart_isar_stop_watching>();
-
-  int isar_wc_create(
-    ffi.Pointer<ffi.NativeType> collection,
-    ffi.Pointer<ffi.Pointer<ffi.NativeType>> wc,
-    int index_index,
-    bool skip_duplicates,
-    bool ascending,
-  ) {
-    return _isar_wc_create(
-      collection,
-      wc,
-      index_index,
-      skip_duplicates ? 1 : 0,
-      ascending ? 1 : 0,
-    );
-  }
-
-  late final _isar_wc_create_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_wc_create>>('isar_wc_create');
-  late final _dart_isar_wc_create _isar_wc_create =
-      _isar_wc_create_ptr.asFunction<_dart_isar_wc_create>();
-
-  int isar_wc_add_null(
-    ffi.Pointer<ffi.NativeType> where_clause,
-    bool upper_unbounded,
-  ) {
-    return _isar_wc_add_null(
-      where_clause,
-      upper_unbounded ? 1 : 0,
-    );
-  }
-
-  late final _isar_wc_add_null_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_wc_add_null>>('isar_wc_add_null');
-  late final _dart_isar_wc_add_null _isar_wc_add_null =
-      _isar_wc_add_null_ptr.asFunction<_dart_isar_wc_add_null>();
-
-  int isar_wc_add_byte(
-    ffi.Pointer<ffi.NativeType> where_clause,
-    int lower,
-    int upper,
-  ) {
-    return _isar_wc_add_byte(
-      where_clause,
-      lower,
-      upper,
-    );
-  }
-
-  late final _isar_wc_add_byte_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_wc_add_byte>>('isar_wc_add_byte');
-  late final _dart_isar_wc_add_byte _isar_wc_add_byte =
-      _isar_wc_add_byte_ptr.asFunction<_dart_isar_wc_add_byte>();
-
-  int isar_wc_add_long(
-    ffi.Pointer<ffi.NativeType> where_clause,
-    int lower,
-    int upper,
-  ) {
-    return _isar_wc_add_long(
-      where_clause,
-      lower,
-      upper,
-    );
-  }
-
-  late final _isar_wc_add_long_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_wc_add_long>>('isar_wc_add_long');
-  late final _dart_isar_wc_add_long _isar_wc_add_long =
-      _isar_wc_add_long_ptr.asFunction<_dart_isar_wc_add_long>();
-
-  int isar_wc_add_double(
-    ffi.Pointer<ffi.NativeType> where_clause,
-    double lower,
-    double upper,
-  ) {
-    return _isar_wc_add_double(
-      where_clause,
-      lower,
-      upper,
-    );
-  }
-
-  late final _isar_wc_add_double_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_wc_add_double>>('isar_wc_add_double');
-  late final _dart_isar_wc_add_double _isar_wc_add_double =
-      _isar_wc_add_double_ptr.asFunction<_dart_isar_wc_add_double>();
-
-  int isar_wc_add_string(
-    ffi.Pointer<ffi.NativeType> where_clause,
-    ffi.Pointer<ffi.Int8> lower,
-    ffi.Pointer<ffi.Int8> upper,
-    bool upper_unbounded,
-  ) {
-    return _isar_wc_add_string(
-      where_clause,
-      lower,
-      upper,
-      upper_unbounded ? 1 : 0,
-    );
-  }
-
-  late final _isar_wc_add_string_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_wc_add_string>>('isar_wc_add_string');
-  late final _dart_isar_wc_add_string _isar_wc_add_string =
-      _isar_wc_add_string_ptr.asFunction<_dart_isar_wc_add_string>();
 }
 
 abstract class RawObject extends ffi.Struct {
@@ -1315,6 +1445,34 @@ typedef _dart_isar_get_all = int Function(
   ffi.Pointer<RawObjectSet> objects,
 );
 
+typedef _c_isar_get_by_index = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObject> object,
+  ffi.Pointer<ffi.NativeType> key,
+);
+
+typedef _dart_isar_get_by_index = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObject> object,
+  ffi.Pointer<ffi.NativeType> key,
+);
+
+typedef _c_isar_get_all_by_index = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObjectSet> objects,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> keys,
+);
+
+typedef _dart_isar_get_all_by_index = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<RawObjectSet> objects,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> keys,
+);
+
 typedef _c_isar_put = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
@@ -1366,6 +1524,36 @@ typedef _dart_isar_delete_all = int Function(
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<ffi.Int64> oids,
   int oids_length,
+  ffi.Pointer<ffi.Uint32> count,
+);
+
+typedef _c_isar_delete_by_index = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<ffi.NativeType> key,
+  ffi.Pointer<ffi.Uint8> deleted,
+);
+
+typedef _dart_isar_delete_by_index = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<ffi.NativeType> key,
+  ffi.Pointer<ffi.Uint8> deleted,
+);
+
+typedef _c_isar_delete_all_by_index = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<ffi.NativeType> keys,
+  ffi.Uint32 keys_length,
+  ffi.Pointer<ffi.Uint32> count,
+);
+
+typedef _dart_isar_delete_all_by_index = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Pointer<ffi.NativeType> keys,
+  int keys_length,
   ffi.Pointer<ffi.Uint32> count,
 );
 
@@ -1622,6 +1810,104 @@ typedef _dart_isar_filter_string_list_contains = int Function(
   int property_index,
 );
 
+typedef _c_isar_key_create = ffi.Int32 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> key,
+  ffi.Int32 index_index,
+);
+
+typedef _dart_isar_key_create = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> key,
+  int index_index,
+);
+
+typedef _c_isar_key_add_byte = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  ffi.Uint8 value,
+);
+
+typedef _dart_isar_key_add_byte = void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  int value,
+);
+
+typedef _c_isar_key_add_int = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  ffi.Int32 value,
+);
+
+typedef _dart_isar_key_add_int = void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  int value,
+);
+
+typedef _c_isar_key_add_long = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  ffi.Int64 value,
+);
+
+typedef _dart_isar_key_add_long = void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  int value,
+);
+
+typedef _c_isar_key_add_float = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  ffi.Float value,
+);
+
+typedef _dart_isar_key_add_float = void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  double value,
+);
+
+typedef _c_isar_key_add_double = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  ffi.Double value,
+);
+
+typedef _dart_isar_key_add_double = void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  double value,
+);
+
+typedef _c_isar_key_add_string_value = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  ffi.Pointer<ffi.Int8> value,
+  ffi.Uint8 case_sensitive,
+);
+
+typedef _dart_isar_key_add_string_value = void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  ffi.Pointer<ffi.Int8> value,
+  int case_sensitive,
+);
+
+typedef _c_isar_key_add_string_hash = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  ffi.Pointer<ffi.Int8> value,
+  ffi.Uint8 case_sensitive,
+);
+
+typedef _dart_isar_key_add_string_hash = void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  ffi.Pointer<ffi.Int8> value,
+  int case_sensitive,
+);
+
+typedef _c_isar_key_add_string_word = ffi.Void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  ffi.Pointer<ffi.Int8> value,
+  ffi.Uint8 case_sensitive,
+);
+
+typedef _dart_isar_key_add_string_word = void Function(
+  ffi.Pointer<ffi.NativeType> key,
+  ffi.Pointer<ffi.Int8> value,
+  int case_sensitive,
+);
+
 typedef _c_isar_create_instance = ffi.Void Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
   ffi.Pointer<ffi.Int8> name,
@@ -1803,7 +2089,6 @@ typedef _dart_isar_qb_create = ffi.Pointer<ffi.NativeType> Function(
 );
 
 typedef _c_isar_qb_add_id_where_clause = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> builder,
   ffi.Int64 lower_oid,
   ffi.Int64 upper_oid,
@@ -1811,7 +2096,6 @@ typedef _c_isar_qb_add_id_where_clause = ffi.Int32 Function(
 );
 
 typedef _dart_isar_qb_add_id_where_clause = int Function(
-  ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> builder,
   int lower_oid,
   int upper_oid,
@@ -1820,16 +2104,22 @@ typedef _dart_isar_qb_add_id_where_clause = int Function(
 
 typedef _c_isar_qb_add_index_where_clause = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> builder,
-  ffi.Pointer<ffi.NativeType> where_clause,
+  ffi.Pointer<ffi.NativeType> lower_key,
   ffi.Uint8 include_lower,
+  ffi.Pointer<ffi.NativeType> upper_key,
   ffi.Uint8 include_upper,
+  ffi.Uint8 skip_duplicates,
+  ffi.Uint8 ascending,
 );
 
 typedef _dart_isar_qb_add_index_where_clause = int Function(
   ffi.Pointer<ffi.NativeType> builder,
-  ffi.Pointer<ffi.NativeType> where_clause,
+  ffi.Pointer<ffi.NativeType> lower_key,
   int include_lower,
+  ffi.Pointer<ffi.NativeType> upper_key,
   int include_upper,
+  int skip_duplicates,
+  int ascending,
 );
 
 typedef _c_isar_qb_set_filter = ffi.Void Function(
@@ -2072,80 +2362,4 @@ typedef _c_isar_stop_watching = ffi.Void Function(
 
 typedef _dart_isar_stop_watching = void Function(
   ffi.Pointer<ffi.NativeType> handle,
-);
-
-typedef _c_isar_wc_create = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.Pointer<ffi.NativeType>> wc,
-  ffi.Int32 index_index,
-  ffi.Uint8 skip_duplicates,
-  ffi.Uint8 ascending,
-);
-
-typedef _dart_isar_wc_create = int Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.Pointer<ffi.NativeType>> wc,
-  int index_index,
-  int skip_duplicates,
-  int ascending,
-);
-
-typedef _c_isar_wc_add_null = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Uint8 upper_unbounded,
-);
-
-typedef _dart_isar_wc_add_null = int Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  int upper_unbounded,
-);
-
-typedef _c_isar_wc_add_byte = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Uint8 lower,
-  ffi.Uint8 upper,
-);
-
-typedef _dart_isar_wc_add_byte = int Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  int lower,
-  int upper,
-);
-
-typedef _c_isar_wc_add_long = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Int64 lower,
-  ffi.Int64 upper,
-);
-
-typedef _dart_isar_wc_add_long = int Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  int lower,
-  int upper,
-);
-
-typedef _c_isar_wc_add_double = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Double lower,
-  ffi.Double upper,
-);
-
-typedef _dart_isar_wc_add_double = int Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  double lower,
-  double upper,
-);
-
-typedef _c_isar_wc_add_string = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Pointer<ffi.Int8> lower,
-  ffi.Pointer<ffi.Int8> upper,
-  ffi.Uint8 upper_unbounded,
-);
-
-typedef _dart_isar_wc_add_string = int Function(
-  ffi.Pointer<ffi.NativeType> where_clause,
-  ffi.Pointer<ffi.Int8> lower,
-  ffi.Pointer<ffi.Int8> upper,
-  int upper_unbounded,
 );
