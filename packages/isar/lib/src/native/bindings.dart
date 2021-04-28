@@ -48,11 +48,13 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     ffi.Pointer<RawObject> object,
+    ffi.Pointer<ffi.NativeType> key,
   ) {
     return _isar_get(
       collection,
       txn,
       object,
+      key,
     );
   }
 
@@ -65,45 +67,9 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     ffi.Pointer<RawObjectSet> objects,
-  ) {
-    return _isar_get_all(
-      collection,
-      txn,
-      objects,
-    );
-  }
-
-  late final _isar_get_all_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_get_all>>('isar_get_all');
-  late final _dart_isar_get_all _isar_get_all =
-      _isar_get_all_ptr.asFunction<_dart_isar_get_all>();
-
-  int isar_get_by_index(
-    ffi.Pointer<ffi.NativeType> collection,
-    ffi.Pointer<ffi.NativeType> txn,
-    ffi.Pointer<RawObject> object,
-    ffi.Pointer<ffi.NativeType> key,
-  ) {
-    return _isar_get_by_index(
-      collection,
-      txn,
-      object,
-      key,
-    );
-  }
-
-  late final _isar_get_by_index_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_get_by_index>>('isar_get_by_index');
-  late final _dart_isar_get_by_index _isar_get_by_index =
-      _isar_get_by_index_ptr.asFunction<_dart_isar_get_by_index>();
-
-  int isar_get_all_by_index(
-    ffi.Pointer<ffi.NativeType> collection,
-    ffi.Pointer<ffi.NativeType> txn,
-    ffi.Pointer<RawObjectSet> objects,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> keys,
   ) {
-    return _isar_get_all_by_index(
+    return _isar_get_all(
       collection,
       txn,
       objects,
@@ -111,11 +77,10 @@ class IsarCoreBindings {
     );
   }
 
-  late final _isar_get_all_by_index_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_get_all_by_index>>(
-          'isar_get_all_by_index');
-  late final _dart_isar_get_all_by_index _isar_get_all_by_index =
-      _isar_get_all_by_index_ptr.asFunction<_dart_isar_get_all_by_index>();
+  late final _isar_get_all_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_get_all>>('isar_get_all');
+  late final _dart_isar_get_all _isar_get_all =
+      _isar_get_all_ptr.asFunction<_dart_isar_get_all>();
 
   int isar_put(
     ffi.Pointer<ffi.NativeType> collection,
@@ -1425,48 +1390,24 @@ typedef _c_isar_get = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<RawObject> object,
+  ffi.Pointer<ffi.NativeType> key,
 );
 
 typedef _dart_isar_get = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<RawObject> object,
+  ffi.Pointer<ffi.NativeType> key,
 );
 
 typedef _c_isar_get_all = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<RawObjectSet> objects,
-);
-
-typedef _dart_isar_get_all = int Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<RawObjectSet> objects,
-);
-
-typedef _c_isar_get_by_index = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<RawObject> object,
-  ffi.Pointer<ffi.NativeType> key,
-);
-
-typedef _dart_isar_get_by_index = int Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<RawObject> object,
-  ffi.Pointer<ffi.NativeType> key,
-);
-
-typedef _c_isar_get_all_by_index = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<RawObjectSet> objects,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> keys,
 );
 
-typedef _dart_isar_get_all_by_index = int Function(
+typedef _dart_isar_get_all = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<RawObjectSet> objects,
