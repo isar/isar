@@ -120,12 +120,14 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     int oid,
+    ffi.Pointer<ffi.NativeType> key,
     ffi.Pointer<ffi.Uint8> deleted,
   ) {
     return _isar_delete(
       collection,
       txn,
       oid,
+      key,
       deleted,
     );
   }
@@ -139,6 +141,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     ffi.Pointer<ffi.Int64> oids,
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> keys,
     int oids_length,
     ffi.Pointer<ffi.Uint32> count,
   ) {
@@ -146,6 +149,7 @@ class IsarCoreBindings {
       collection,
       txn,
       oids,
+      keys,
       oids_length,
       count,
     );
@@ -155,49 +159,6 @@ class IsarCoreBindings {
       _lookup<ffi.NativeFunction<_c_isar_delete_all>>('isar_delete_all');
   late final _dart_isar_delete_all _isar_delete_all =
       _isar_delete_all_ptr.asFunction<_dart_isar_delete_all>();
-
-  int isar_delete_by_index(
-    ffi.Pointer<ffi.NativeType> collection,
-    ffi.Pointer<ffi.NativeType> txn,
-    ffi.Pointer<ffi.NativeType> key,
-    ffi.Pointer<ffi.Uint8> deleted,
-  ) {
-    return _isar_delete_by_index(
-      collection,
-      txn,
-      key,
-      deleted,
-    );
-  }
-
-  late final _isar_delete_by_index_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_delete_by_index>>(
-          'isar_delete_by_index');
-  late final _dart_isar_delete_by_index _isar_delete_by_index =
-      _isar_delete_by_index_ptr.asFunction<_dart_isar_delete_by_index>();
-
-  int isar_delete_all_by_index(
-    ffi.Pointer<ffi.NativeType> collection,
-    ffi.Pointer<ffi.NativeType> txn,
-    ffi.Pointer<ffi.NativeType> keys,
-    int keys_length,
-    ffi.Pointer<ffi.Uint32> count,
-  ) {
-    return _isar_delete_all_by_index(
-      collection,
-      txn,
-      keys,
-      keys_length,
-      count,
-    );
-  }
-
-  late final _isar_delete_all_by_index_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_delete_all_by_index>>(
-          'isar_delete_all_by_index');
-  late final _dart_isar_delete_all_by_index _isar_delete_all_by_index =
-      _isar_delete_all_by_index_ptr
-          .asFunction<_dart_isar_delete_all_by_index>();
 
   int isar_clear(
     ffi.Pointer<ffi.NativeType> collection,
@@ -1442,6 +1403,7 @@ typedef _c_isar_delete = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Int64 oid,
+  ffi.Pointer<ffi.NativeType> key,
   ffi.Pointer<ffi.Uint8> deleted,
 );
 
@@ -1449,6 +1411,7 @@ typedef _dart_isar_delete = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   int oid,
+  ffi.Pointer<ffi.NativeType> key,
   ffi.Pointer<ffi.Uint8> deleted,
 );
 
@@ -1456,6 +1419,7 @@ typedef _c_isar_delete_all = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<ffi.Int64> oids,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> keys,
   ffi.Uint32 oids_length,
   ffi.Pointer<ffi.Uint32> count,
 );
@@ -1464,37 +1428,8 @@ typedef _dart_isar_delete_all = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<ffi.Int64> oids,
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> keys,
   int oids_length,
-  ffi.Pointer<ffi.Uint32> count,
-);
-
-typedef _c_isar_delete_by_index = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<ffi.NativeType> key,
-  ffi.Pointer<ffi.Uint8> deleted,
-);
-
-typedef _dart_isar_delete_by_index = int Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<ffi.NativeType> key,
-  ffi.Pointer<ffi.Uint8> deleted,
-);
-
-typedef _c_isar_delete_all_by_index = ffi.Int32 Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<ffi.NativeType> keys,
-  ffi.Uint32 keys_length,
-  ffi.Pointer<ffi.Uint32> count,
-);
-
-typedef _dart_isar_delete_all_by_index = int Function(
-  ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> txn,
-  ffi.Pointer<ffi.NativeType> keys,
-  int keys_length,
   ffi.Pointer<ffi.Uint32> count,
 );
 
