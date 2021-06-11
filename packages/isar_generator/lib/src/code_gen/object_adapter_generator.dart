@@ -196,7 +196,7 @@ String _generateDeserialize(ObjectInfo object) {
     final object = ${object.dartName}();''';
   for (var i = 0; i < object.properties.length; i++) {
     final property = object.properties[i];
-    final accessor = 'object.${property.isarName}';
+    final accessor = 'object.${property.dartName}';
     final deser = _deserializeProperty(object, property, 'offsets[$i]');
     code += '$accessor = $deser;';
   }
