@@ -246,7 +246,6 @@ class IsarCoreBindings {
 
   int isar_filter_link(
     ffi.Pointer<ffi.NativeType> collection,
-    ffi.Pointer<ffi.NativeType> target_collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     ffi.Pointer<ffi.NativeType> condition,
     int link_index,
@@ -254,7 +253,6 @@ class IsarCoreBindings {
   ) {
     return _isar_filter_link(
       collection,
-      target_collection,
       filter,
       condition,
       link_index,
@@ -1498,7 +1496,6 @@ typedef _dart_isar_filter_not = int Function(
 
 typedef _c_isar_filter_link = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> target_collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Pointer<ffi.NativeType> condition,
   ffi.Uint32 link_index,
@@ -1507,7 +1504,6 @@ typedef _c_isar_filter_link = ffi.Int32 Function(
 
 typedef _dart_isar_filter_link = int Function(
   ffi.Pointer<ffi.NativeType> collection,
-  ffi.Pointer<ffi.NativeType> target_collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Pointer<ffi.NativeType> condition,
   int link_index,
