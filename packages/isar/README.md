@@ -72,6 +72,8 @@ class Post {
 
 ### 3. Open an instance
 ```dart
+import 'isar.g.dart';
+
 final isar = await openIsar();
 ```
 
