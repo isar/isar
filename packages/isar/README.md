@@ -18,6 +18,7 @@
 </p>
 
 <p align="center">🚧 Alpha version - Use with care. 🚧</p>
+<p align="center">🚧 Isar only supports 64 bit. 32 bit (armeabi-v7a) may be added in the future. 🚧</p>
 
 <p align="center">
   <a href="https://isar.dev">Quickstart</a> •
