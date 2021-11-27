@@ -119,7 +119,6 @@ class IsarAnalyzer extends Builder {
       if (links.any((it) => it.dartName == propertyElement.name)) continue;
       final index = analyzeObjectIndex(properties, propertyElement);
       if (index == null) continue;
-
       indexes.add(index);
     }
     checkDuplicateIndexes(element, indexes);
@@ -157,7 +156,7 @@ class IsarAnalyzer extends Builder {
     return modelInfo;
   }
 
-  /// Get the fields defined in the annoted class and the inherited fields,
+  /// Get the fields defined in the annotated class and the inherited fields,
   /// while ignoring static, private, getter and setter fields.
   List<FieldElement> getFields(ClassElement modelClass) {
     final fields = modelClass.fields.asMap().map(
@@ -172,11 +171,11 @@ class IsarAnalyzer extends Builder {
         );
       }
     });
-    return fields.values.where((checkField)).toList();
+    return fields.values.where(checkField).toList();
   }
 
   bool checkField(FieldElement element) {
-    // Skip static fields
+    // Skip static and private fields
     if (element.isStatic || element.isPrivate) {
       return false;
     }
