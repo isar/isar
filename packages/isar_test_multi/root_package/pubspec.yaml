@@ -13,16 +13,19 @@ dependencies:
     path: ../child_package2
 
 dev_dependencies:
-  test: any
-  isar_generator: any
   build_runner: any
-  isar_test:
-    path: ../../isar_test
+  isar_generator: any
+  freezed: any
+  test: 1.17.10
+  flutter_test:
+    sdk: flutter
 
 dependency_overrides:
   isar:
     path: ../../isar
+  isar_flutter_libs:
+    path: ../../isar_flutter_libs
   isar_generator:
     path: ../../isar_generator
-  crypto: ^3.0.0
-  convert: ^3.0.0
+  test_api: 0.4.2
+  meta: 1.7.0

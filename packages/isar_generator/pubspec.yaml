@@ -9,21 +9,21 @@ environment:
 
 dependencies:
   isar: 0.4.0
-  build: ^2.0.0
-  source_gen: ^1.0.0
-  analyzer: ^1.0.0
-  glob: ^2.0.0
-  path: ^1.6.0
-  dart_style: ^2.0.0
-  json_annotation: ^4.0.0
+  build: ^2.1.0
+  source_gen: ^1.0.5
+  analyzer: ^2.0.0
+  glob: ^2.0.1
+  path: ^1.8.0
+  dart_style: ^2.0.3
+  json_annotation: ^4.1.0
   dartx: ^0.7.0
-  freezed_annotation: ^0.14.1
+  freezed_annotation: ^0.14.3
 
 dev_dependencies:
-  json_serializable: ^4.0.0
-  build_runner: ^1.12.1
-  freezed: ^0.14.1
+  json_serializable: ^5.0.0
+  build_runner: ^2.1.1
+  freezed: ^0.14.5
 
-#dependency_overrides:
-#  isar:
-#    path: ../isar
+dependency_overrides:
+  isar:
+    path: ../isar

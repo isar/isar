@@ -9,7 +9,6 @@ part of 'schema.dart';
 _$_Collection _$_$_CollectionFromJson(Map<String, dynamic> json) {
   return _$_Collection(
     json['name'] as String,
-    json['idProperty'] as String,
     (json['properties'] as List<dynamic>)
         .map((e) => Property.fromJson(e as Map<String, dynamic>))
         .toList(),
@@ -25,7 +24,6 @@ _$_Collection _$_$_CollectionFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$_$_CollectionToJson(_$_Collection instance) =>
     <String, dynamic>{
       'name': instance.name,
-      'idProperty': instance.idProperty,
       'properties': instance.properties,
       'indexes': instance.indexes,
       'links': instance.links,

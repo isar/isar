@@ -8,6 +8,8 @@ part 'object_info.freezed.dart';
 
 @freezed
 class ObjectInfo with _$ObjectInfo {
+  const ObjectInfo._();
+
   const factory ObjectInfo({
     required String dartName,
     required String isarName,
@@ -19,14 +21,12 @@ class ObjectInfo with _$ObjectInfo {
 
   factory ObjectInfo.fromJson(Map<String, dynamic> json) =>
       _$ObjectInfoFromJson(json);
-}
 
-extension ObjectInfoX on ObjectInfo {
   ObjectProperty getProperty(String isarName) {
     return properties.filter(((it) => it.isarName == isarName)).first;
   }
 
-  ObjectProperty get oidProperty => properties.firstWhere((it) => it.isId);
+  ObjectProperty get idProperty => properties.firstWhere((it) => it.isId);
 
   int get staticSize {
     return properties.sumBy((p) => p.isarType.staticSize).toInt() + 2;
@@ -39,8 +39,17 @@ extension ObjectInfoX on ObjectInfo {
   String get collectionAccessor => '${dartName.decapitalize()}s';
 }
 
+enum PropertyDeser {
+  None,
+  Assign,
+  PositionalParam,
+  NamedParam,
+}
+
 @freezed
 class ObjectProperty with _$ObjectProperty {
+  const ObjectProperty._();
+
   const factory ObjectProperty({
     required String dartName,
     required String isarName,
@@ -50,13 +59,13 @@ class ObjectProperty with _$ObjectProperty {
     String? converter,
     required bool nullable,
     required bool elementNullable,
+    required PropertyDeser deserialize,
+    int? constructorPosition,
   }) = _ObjectProperty;
 
   factory ObjectProperty.fromJson(Map<String, dynamic> json) =>
       _$ObjectPropertyFromJson(json);
-}
 
-extension ObjectPropertyX on ObjectProperty {
   String get dartTypeNotNull {
     return dartType.removeSuffix('?');
   }
@@ -80,6 +89,8 @@ extension ObjectPropertyX on ObjectProperty {
 
 @freezed
 class ObjectIndexProperty with _$ObjectIndexProperty {
+  const ObjectIndexProperty._();
+
   const factory ObjectIndexProperty({
     required ObjectProperty property,
     required IndexType indexType,
@@ -88,10 +99,52 @@ class ObjectIndexProperty with _$ObjectIndexProperty {
 
   factory ObjectIndexProperty.fromJson(Map<String, dynamic> json) =>
       _$ObjectIndexPropertyFromJson(json);
+
+  String get indexTypeEnum {
+    switch (property.isarType) {
+      case IsarType.Bool:
+        return 'NativeIndexType.Bool';
+      case IsarType.Int:
+        return 'NativeIndexType.Int';
+      case IsarType.Float:
+        return 'NativeIndexType.Float';
+      case IsarType.Long:
+        return 'NativeIndexType.Long';
+      case IsarType.Double:
+        return 'NativeIndexType.Double';
+      case IsarType.DateTime:
+        return 'NativeIndexType.Long';
+      case IsarType.String:
+        switch (indexType) {
+          case IndexType.value:
+            if (caseSensitive ?? true) {
+              return 'NativeIndexType.StringValue';
+            } else {
+              return 'NativeIndexType.StringValueCIS';
+            }
+          case IndexType.hash:
+            if (caseSensitive ?? true) {
+              return 'NativeIndexType.StringHash';
+            } else {
+              return 'NativeIndexType.StringHashCIS';
+            }
+          case IndexType.words:
+            if (caseSensitive ?? true) {
+              return 'NativeIndexType.StringWords';
+            } else {
+              return 'NativeIndexType.StringWordsCIS';
+            }
+        }
+      default:
+        throw 'unreachable';
+    }
+  }
 }
 
 @freezed
 class ObjectIndex with _$ObjectIndex {
+  const ObjectIndex._();
+
   const factory ObjectIndex({
     required List<ObjectIndexProperty> properties,
     required bool unique,
@@ -100,6 +153,9 @@ class ObjectIndex with _$ObjectIndex {
 
   factory ObjectIndex.fromJson(Map<String, dynamic> json) =>
       _$ObjectIndexFromJson(json);
+
+  String get name =>
+      properties.map((e) => e.property.dartName.capitalize()).join();
 }
 
 @freezed

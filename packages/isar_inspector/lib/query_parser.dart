@@ -166,7 +166,7 @@ class QueryGrammar {
           }[v.group(0)!.substring(1)]!);
 
   static Parser<String> get escapedChar =>
-      (char(r'\') & anyOf("nrtbfv\"'")).pick(1);
+      (char(r'\') & anyOf("nrtbfv\"'")).pick(1).cast();
 
   static Parser<String> get sqStringToken => (char("'") &
           (anyOf(r"'\").neg() | escapedChar).star().flatten() &

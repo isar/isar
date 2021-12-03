@@ -59,7 +59,7 @@ class _InstanceSelectorState extends State<InstanceSelector>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(height: 15),
-                      for (var instance in state.instances!
+                      for (var instance in state.instances
                           .where((e) => e != state.selectedInstance))
                         _buildInstanceButton(theme, instance),
                       SizedBox(height: 80),
@@ -68,7 +68,9 @@ class _InstanceSelectorState extends State<InstanceSelector>
                 ),
               ),
             ),
-            _buildSelectedInstanceButton(state.selectedInstance!),
+            if (state.selectedInstance != null)
+              _buildSelectedInstanceButton(
+                  state.selectedInstance!, state.instances.length > 1),
           ],
         ),
       ],
@@ -102,22 +104,25 @@ class _InstanceSelectorState extends State<InstanceSelector>
     );
   }
 
-  Widget _buildSelectedInstanceButton(String selectedInstance) {
+  Widget _buildSelectedInstanceButton(
+      String selectedInstance, bool hasMultiple) {
     return SizedBox(
       height: 65,
       child: IsarCard(
         color:
             _animation.status != AnimationStatus.dismissed ? Colors.blue : null,
         radius: BorderRadius.circular(15),
-        onTap: () {
-          if (context.read<AppState>().instances!.length > 1) {
-            if (_controller.status == AnimationStatus.completed) {
-              _controller.reverse();
-            } else {
-              _controller.forward();
-            }
-          }
-        },
+        onTap: hasMultiple
+            ? () {
+                if (context.read<AppState>().instances.length > 1) {
+                  if (_controller.status == AnimationStatus.completed) {
+                    _controller.reverse();
+                  } else {
+                    _controller.forward();
+                  }
+                }
+              }
+            : null,
         child: Center(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
@@ -143,19 +148,20 @@ class _InstanceSelectorState extends State<InstanceSelector>
                   ],
                 ),
                 Spacer(),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      FontAwesomeIcons.chevronUp,
-                      size: 12,
-                    ),
-                    Icon(
-                      FontAwesomeIcons.chevronDown,
-                      size: 12,
-                    ),
-                  ],
-                ),
+                if (hasMultiple)
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        FontAwesomeIcons.chevronUp,
+                        size: 12,
+                      ),
+                      Icon(
+                        FontAwesomeIcons.chevronDown,
+                        size: 12,
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),

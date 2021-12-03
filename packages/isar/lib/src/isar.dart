@@ -8,10 +8,14 @@ typedef IsarCloseCallback = void Function(String);
 
 /// An instance of the Isar Database.
 abstract class Isar {
+  static const minId = -140737488355328;
+  static const maxId = 140737488355327;
+
   static final _instances = <String, Isar>{};
   static final _openCallbacks = <IsarOpenCallback>{};
   static final _closeCallbacks = <IsarCloseCallback>{};
   static String? _schema;
+  var _isOpen = true;
 
   final String name;
   late final Map<String, IsarCollection> _collections;
@@ -26,6 +30,8 @@ abstract class Isar {
       callback(this);
     }
   }
+
+  bool get isOpen => _isOpen;
 
   /// Executes an asynchronous read-only transaction.
   Future<T> txn<T>(Future<T> Function(Isar isar) callback);
@@ -62,6 +68,7 @@ abstract class Isar {
   /// If this is the only isolate that holds a reference to this instance, the
   /// Isar instance will be closed.
   Future close() {
+    _isOpen = false;
     if (identical(_instances[name], this)) {
       _instances.remove(name);
     }

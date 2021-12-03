@@ -5,6 +5,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:isar/isar.dart';
 
+final _collectionChecker = const TypeChecker.fromRuntime(Collection);
 final _ignoreChecker = const TypeChecker.fromRuntime(Ignore);
 final _nameChecker = const TypeChecker.fromRuntime(Name);
 final _indexChecker = const TypeChecker.fromRuntime(Index);
@@ -25,6 +26,12 @@ bool hasSize32Ann(Element element) {
 
 bool hasIdAnn(Element element) {
   return _oidKeyChecker.hasAnnotationOfExact(element);
+}
+
+Collection? getCollectionAnn(Element element) {
+  var ann = _collectionChecker.firstAnnotationOfExact(element);
+  if (ann == null) return null;
+  return Collection(inheritance: ann.getField('inheritance')!.toBoolValue()!);
 }
 
 Name? getNameAnn(Element element) {

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:build/build.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:glob/glob.dart';
+import 'package:isar_generator/src/code_gen/by_index_generator.dart';
 import 'package:isar_generator/src/code_gen/object_adapter_generator.dart';
 import 'package:isar_generator/src/code_gen/query_distinct_by_generator.dart';
 import 'package:isar_generator/src/code_gen/query_link_generator.dart';
@@ -125,17 +126,19 @@ class IsarCodeGenerator extends Builder {
       code += '''
         const _utf8Encoder = Utf8Encoder();
 
-        ${generateIsarSchema(objects)}
-
         ${generateIsarOpen(objects)}
 
         ${generatePreparePath()}
 
-        $objectAdapters''';
+        $objectAdapters
+        
+        ${generateIsarSchema(objects)}''';
     }
 
     if (extensions) {
       final getCollectionsExtensions = generateGetCollectionsExtension(objects);
+      final byIndexExtensions =
+          objects.map((o) => generateByIndexExtension(o)).join('\n');
       final queryWhereExtensions =
           objects.map((o) => generateQueryWhere(o)).join('\n');
       final queryFilterExtensions =
@@ -151,6 +154,7 @@ class IsarCodeGenerator extends Builder {
 
       code += '''
         $getCollectionsExtensions
+        $byIndexExtensions
         $queryWhereExtensions
         $queryFilterExtensions
         $queryLinkExtensions
@@ -168,7 +172,7 @@ class IsarCodeGenerator extends Builder {
 
   String generateIsarOpen(List<ObjectInfo> objects) {
     var code = '''
-    Future<Isar> openIsar({String name = 'isar', String? directory, int maxSize = 1000000000, Uint8List? encryptionKey}) async {
+    Future<Isar> openIsar({String name = 'isar', String? directory, int maxSize = 1000000000, Uint8List? encryptionKey,}) async {
       final path = await _preparePath(directory);
       return openIsarInternal(
         name: name,
@@ -196,6 +200,10 @@ class IsarCodeGenerator extends Builder {
           .mapIndexed(
               (index, i) => "'${i.properties.first.property.dartName}': $index")
           .join(',');
+      final indexTypes = info.indexes
+          .map((i) =>
+              "'${i.properties.first.property.dartName}': [${i.properties.map((e) => e.indexTypeEnum).join(',')},]")
+          .join(',');
       final linkIds = info.links
           .where((l) => !l.backlink)
           .map((link) => "'${link.dartName}': ${link.linkIndex}")
@@ -211,13 +219,13 @@ class IsarCodeGenerator extends Builder {
         isar: isar,
         adapter: _${info.dartName}Adapter(),
         ptr: collectionPtrPtr.value,
-        propertyOffsets: propertyOffsets.sublist(0, ${info.properties.length}),
+        propertyOffsets: propertyOffsets.toList(),
         propertyIds: {$propertyIds},
         indexIds: {$indexIds},
+        indexTypes: {$indexTypes},
         linkIds: {$linkIds},
         backlinkIds: {$backlinkIds},
-        getId: (obj) => obj.${info.oidProperty.dartName},
-        setId: (obj, id) => obj.${info.oidProperty.dartName} = id,
+        getId: (obj) => obj.${info.idProperty.dartName},
       );''';
     }
 
@@ -272,7 +280,6 @@ class IsarCodeGenerator extends Builder {
       for (var oi in ois)
         {
           'name': oi.isarName,
-          'idProperty': oi.properties.firstWhere((it) => it.isId).isarName,
           'properties': [
             for (var property in oi.properties)
               {

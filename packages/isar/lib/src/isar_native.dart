@@ -22,6 +22,7 @@ part 'package:isar/src/native/binary/binary_writer.dart';
 part 'package:isar/src/native/util/extensions.dart';
 part 'package:isar/src/native/util/native_call.dart';
 
+part 'package:isar/src/native/index_key.dart';
 part 'package:isar/src/native/isar_collection_impl.dart';
 part 'package:isar/src/native/isar_core.dart';
 part 'package:isar/src/native/isar_impl.dart';

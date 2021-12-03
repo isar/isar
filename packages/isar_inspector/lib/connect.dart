@@ -71,7 +71,7 @@ class _ConnectPageState extends State<ConnectPage> {
                   controller: _uriController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: 'ws://127.0.0.1:41000/auth-code/ws=',
+                    hintText: 'ws://127.0.0.1:41000/auth-code/',
                   ),
                 ),
                 SizedBox(height: 15),

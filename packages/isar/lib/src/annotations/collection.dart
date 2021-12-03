@@ -1,5 +1,7 @@
 part of isar;
 
 class Collection {
-  const Collection();
+  final bool inheritance;
+
+  const Collection({this.inheritance = true});
 }

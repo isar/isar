@@ -11,21 +11,21 @@ String generateQueryFilter(ObjectInfo oi) {
         code += generateIsNull(oi, property);
       }
 
+      if (!property.isarType.isFloatDouble) {
+        code += generateEqualTo(oi, property);
+      }
+
+      if (property.isarType != IsarType.Bool) {
+        code += generateGreaterThan(oi, property);
+        code += generateLessThan(oi, property);
+        code += generateBetween(oi, property);
+      }
+
       if (property.isarType == IsarType.String) {
-        code += generateStringEqualTo(oi, property);
         code += generateStringStartsWith(oi, property);
         code += generateStringEndsWith(oi, property);
         code += generateStringContains(oi, property);
         code += generateStringMatches(oi, property);
-      } else if (property.isarType == IsarType.Bool) {
-        code += generateEqualTo(oi, property);
-      } else {
-        if (!property.isarType.isFloatDouble) {
-          code += generateEqualTo(oi, property);
-        }
-        code += generateGreaterThan(oi, property);
-        code += generateLessThan(oi, property);
-        code += generateBetween(oi, property);
       }
     }
   }
@@ -34,46 +34,66 @@ String generateQueryFilter(ObjectInfo oi) {
   }''';
 }
 
+String caseSensitiveProperty(ObjectProperty p) {
+  if (p.isarType == IsarType.String) {
+    return '{bool caseSensitive = true,}';
+  } else {
+    return '';
+  }
+}
+
+String caseSensitiveValue(ObjectProperty p) {
+  if (p.isarType == IsarType.String) {
+    return 'caseSensitive: caseSensitive,';
+  } else {
+    return '';
+  }
+}
+
 String generateEqualTo(ObjectInfo oi, ObjectProperty p) {
   return '''
-  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}EqualTo(${p.dartType} value) {
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}EqualTo(${p.dartType} value, ${caseSensitiveProperty(p)}) {
     return addFilterCondition(FilterCondition(
       type: ConditionType.Eq,
       property: '${p.dartName}',
       value: ${p.toIsar('value', oi)},
+      ${caseSensitiveValue(p)}
     ));
   }''';
 }
 
 String generateGreaterThan(ObjectInfo oi, ObjectProperty p) {
   return '''
-  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}GreaterThan(${p.dartType} value) {
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}GreaterThan(${p.dartType} value, ${caseSensitiveProperty(p)}) {
     return addFilterCondition(FilterCondition(
       type: ConditionType.Gt,
       property: '${p.dartName}',
       value: ${p.toIsar('value', oi)},
+      ${caseSensitiveValue(p)}
     ));
   }''';
 }
 
 String generateLessThan(ObjectInfo oi, ObjectProperty p) {
   return '''
-  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}LessThan(${p.dartType} value) {
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}LessThan(${p.dartType} value, ${caseSensitiveProperty(p)}) {
     return addFilterCondition(FilterCondition(
       type: ConditionType.Lt,
       property: '${p.dartName}',
       value: ${p.toIsar('value', oi)},
+      ${caseSensitiveValue(p)}
     ));
   }''';
 }
 
 String generateBetween(ObjectInfo oi, ObjectProperty p) {
   return '''
-  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}Between(${p.dartType} lower, ${p.dartType} upper) {
+  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}Between(${p.dartType} lower, ${p.dartType} upper, ${caseSensitiveProperty(p)}) {
     return addFilterCondition(FilterCondition.between(
       property: '${p.dartName}',
       lower: ${p.toIsar('lower', oi)},
       upper: ${p.toIsar('upper', oi)},
+      ${caseSensitiveValue(p)}
     ));
   }''';
 }
@@ -85,18 +105,6 @@ String generateIsNull(ObjectInfo oi, ObjectProperty p) {
       type: ConditionType.Eq,
       property: '${p.dartName}',
       value: null,
-    ));
-  }''';
-}
-
-String generateStringEqualTo(ObjectInfo oi, ObjectProperty p) {
-  return '''
-  QueryBuilder<${oi.dartName}, QAfterFilterCondition> ${p.dartName.decapitalize()}EqualTo(${p.dartType} value, {bool caseSensitive = true}) {
-    return addFilterCondition(FilterCondition(
-      type: ConditionType.Eq,
-      property: '${p.dartName}',
-      value: ${p.toIsar('value', oi)},
-      caseSensitive: caseSensitive,
     ));
   }''';
 }

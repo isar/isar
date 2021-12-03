@@ -1,3 +1,25 @@
+## 0.5.0
+
+### Breaking
+The internal database format has been changed to improve performance. Old databases may not work anymore. Breaking changes may happen until Isar is stable.
+
+### Fixes
+- Fix issue with links being removed after object update
+- Fix String index problems
+
+### Enhancements
+- Support `greaterThan`, `lessThan` and `between` queries for String values
+- Support for inheritance (enabled by default)
+- Support for `final` properties and getters
+- Support for `freezed` and other code generators
+- Support getting / deleting objects by a key `col.deleteByName('Anne')`
+- Unsupported properties are now ignored automatically
+- Returns the assigned ids after `.put()` operations (objects are no longer mutated)
+
+### Internal
+- Improve generated code
+- Many new unit tests
+
 ## 0.4.0
 
 ### Breaking

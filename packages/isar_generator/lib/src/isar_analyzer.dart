@@ -61,6 +61,7 @@ class IsarAnalyzer extends Builder {
     }
 
     final modelClass = element as ClassElement;
+    final collectionAnn = getCollectionAnn(element)!;
 
     if (modelClass.isAbstract) {
       err('Class must not be abstract.', element);
@@ -70,11 +71,11 @@ class IsarAnalyzer extends Builder {
       err('Class must be public.', element);
     }
 
-    final hasZeroArgConstructor = modelClass.constructors
-        .any((c) => c.isPublic && !c.parameters.any((p) => !p.isOptional));
+    final constructor =
+        modelClass.constructors.firstOrNullWhere((c) => c.periodOffset == null);
 
-    if (!hasZeroArgConstructor) {
-      err('Class needs to have a public zero-arg constructor.');
+    if (constructor == null) {
+      err('Class needs an unnamed constructor.');
     }
 
     final isarName = getNameAnn(modelClass)?.name ?? modelClass.displayName;
@@ -85,7 +86,15 @@ class IsarAnalyzer extends Builder {
     final properties = <ObjectProperty>[];
     final links = <ObjectLink>[];
     final converterImports = <String>{};
-    for (var propertyElement in modelClass.fields) {
+    final allAccessors = {
+      ...modelClass.accessors.mapNotNull((e) => e.variable),
+      if (collectionAnn.inheritance)
+        for (var supertype in modelClass.allSupertypes) ...[
+          if (!supertype.isDartCoreObject)
+            ...supertype.accessors.mapNotNull((e) => e.variable)
+        ]
+    };
+    for (var propertyElement in allAccessors) {
       if (hasIgnoreAnn(propertyElement)) {
         return null;
       }
@@ -101,7 +110,11 @@ class IsarAnalyzer extends Builder {
         if (link == null) continue;
         links.add(link);
       } else {
-        final property = analyzeObjectProperty(propertyElement, converter);
+        final property = analyzeObjectProperty(
+          propertyElement,
+          converter,
+          constructor!,
+        );
         if (property == null) continue;
         properties.add(property);
       }
@@ -137,10 +150,27 @@ class IsarAnalyzer extends Builder {
       err('No property annotated with @Id().', element);
     }
 
+    final sortedProperties = properties.sortedBy((p) {
+      if (p.isId) {
+        return -1; // Sort first
+      }
+      final index =
+          constructor!.parameters.indexWhere((e) => e.name == p.dartName);
+      return index == -1 ? 999999 : index;
+    });
+
+    final unknownConstructorParameter = constructor!.parameters
+        .firstOrNullWhere((p) =>
+            p.isNotOptional && properties.none((e) => e.dartName == p.name));
+    if (unknownConstructorParameter != null) {
+      err('Constructor parameter does not match a property.',
+          unknownConstructorParameter);
+    }
+
     final modelInfo = ObjectInfo(
       dartName: modelClass.displayName,
       isarName: isarName,
-      properties: properties,
+      properties: sortedProperties,
       indexes: indexes,
       links: links,
       imports: converterImports.toList(),
@@ -149,9 +179,9 @@ class IsarAnalyzer extends Builder {
     return modelInfo;
   }
 
-  ClassElement? findTypeConverter(FieldElement property) {
+  ClassElement? findTypeConverter(PropertyInducingElement property) {
     final annotations = getTypeConverterAnns(property);
-    annotations.addAll(getTypeConverterAnns(property.enclosingElement));
+    annotations.addAll(getTypeConverterAnns(property.enclosingElement!));
 
     for (var annotation in annotations) {
       final cls = annotation.type!.element as ClassElement;
@@ -164,12 +194,9 @@ class IsarAnalyzer extends Builder {
     return null;
   }
 
-  ObjectProperty? analyzeObjectProperty(
-      FieldElement property, ClassElement? converter) {
-    if (!property.isPublic ||
-        property.isFinal ||
-        property.isConst ||
-        property.isStatic) {
+  ObjectProperty? analyzeObjectProperty(PropertyInducingElement property,
+      ClassElement? converter, ConstructorElement constructor) {
+    if (!property.isPublic || property.isStatic) {
       return null;
     }
 
@@ -189,7 +216,7 @@ class IsarAnalyzer extends Builder {
     }
     var isarName = nameAnn?.name ?? property.displayName;
 
-    IsarType isarType;
+    IsarType? isarType;
     if (converter == null) {
       final size32 = hasSize32Ann(property);
       isarType = getIsarType(property.type, size32, property);
@@ -199,18 +226,41 @@ class IsarAnalyzer extends Builder {
       isarType = getIsarType(isarDartType, size32, converter);
     }
 
+    if (isarType == null) {
+      return null;
+    }
+
     final isId = hasIdAnn(property);
     if (isId) {
       if (converter != null) {
         err('Converters are not allowed for ids.', property);
       } else if (isarType != IsarType.Long) {
-        err('Illegal id type. Allowed: String, Int, Long', property);
+        err('Only int ids are allowed', property);
       }
     }
 
     var type = property.type.getDisplayString(withNullability: true);
     if (type.endsWith('*')) {
       type = type.removeSuffix('*') + '?';
+    }
+
+    final constructorParameter =
+        constructor.parameters.firstOrNullWhere((p) => p.name == property.name);
+    int? constructorPosition;
+    late PropertyDeser deserialize;
+    if (constructorParameter != null) {
+      if (constructorParameter.type != property.type) {
+        err('Constructor parameter type does not match property type',
+            constructorParameter);
+      }
+      deserialize = constructorParameter.isNamed
+          ? PropertyDeser.NamedParam
+          : PropertyDeser.PositionalParam;
+      constructorPosition =
+          constructor.parameters.indexOf(constructorParameter);
+    } else {
+      deserialize =
+          property.setter == null ? PropertyDeser.None : PropertyDeser.Assign;
     }
     return ObjectProperty(
       dartName: property.displayName,
@@ -221,10 +271,12 @@ class IsarAnalyzer extends Builder {
       converter: converter?.name,
       nullable: nullable,
       elementNullable: elementNullable,
+      deserialize: deserialize,
+      constructorPosition: constructorPosition,
     );
   }
 
-  IsarType getIsarType(DartType type, bool size32, Element element) {
+  IsarType? getIsarType(DartType type, bool size32, Element element) {
     if (type.isDartCoreBool) {
       return IsarType.Bool;
     } else if (type.isDartCoreInt) {
@@ -271,13 +323,10 @@ class IsarAnalyzer extends Builder {
     } else if (isUint8List(type.element!)) {
       return IsarType.Bytes;
     }
-    err('Property has unsupported type. Use @IsarIgnore to ignore the property.',
-        element);
-    throw 'unreachable';
   }
 
   ObjectLink? analyzeObjectLink(
-      FieldElement property, ClassElement? converter) {
+      PropertyInducingElement property, ClassElement? converter) {
     if (!property.isPublic || property.isStatic || hasIgnoreAnn(property)) {
       return null;
     }
@@ -343,7 +392,7 @@ class IsarAnalyzer extends Builder {
     ));
     for (var c in index.composite) {
       final compositeProperty =
-          properties.firstOrNullWhere((it) => it.isarName == c.property);
+          properties.firstOrNullWhere((it) => it.dartName == c.property);
       if (compositeProperty == null) {
         err('Property does not exist: "${c.property}".', element);
       } else {

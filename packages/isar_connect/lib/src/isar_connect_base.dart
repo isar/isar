@@ -51,6 +51,27 @@ void _connectInternal() {
       }
     });
   }
+
+  Service.getInfo().then((info) {
+    final serviceUri = info.serverUri;
+    if (serviceUri == null) {
+      print('╔════════════════════════════════════════╗');
+      print('║      ERROR STARTING ISAR CONNECT       ║');
+      print('╟────────────────────────────────────────╢');
+      print('║ No Dart Service seems to be connected  ║');
+      print('╚════════════════════════════════════════╝');
+      return;
+    }
+    final uri = serviceUri.replace(scheme: 'ws');
+    print('╔════════════════════════════════════════╗');
+    print('║          ISAR CONNECT STARTED          ║');
+    print('╟────────────────────────────────────────╢');
+    print('║ Open the Isar Inspector and enter the  ║');
+    print('║ following URL to connect:              ║');
+    print('╟────────────────────────────────────────╢');
+    print('║   $uri   ║');
+    print('╚════════════════════════════════════════╝');
+  });
 }
 
 Future<dynamic> getVersion(Map<String, String> _) async {
@@ -130,8 +151,8 @@ FilterOperation parseFilter(Map<String, dynamic> json) {
 
     case 'FilterGroup':
       final filters = <FilterOperation>[];
-      for (var conditionJson in json['conditions']) {
-        filters.add(parseFilter(conditionJson));
+      for (var filterJson in json['filters']) {
+        filters.add(parseFilter(filterJson));
       }
       return FilterGroup(
         filters: filters,

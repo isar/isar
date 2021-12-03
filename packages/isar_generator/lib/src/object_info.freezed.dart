@@ -1,5 +1,6 @@
+// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
 
 part of 'object_info.dart';
 
@@ -183,20 +184,20 @@ class __$ObjectInfoCopyWithImpl<$Res> extends _$ObjectInfoCopyWithImpl<$Res>
   }
 }
 
-@JsonSerializable()
-
 /// @nodoc
-class _$_ObjectInfo implements _ObjectInfo {
+@JsonSerializable()
+class _$_ObjectInfo extends _ObjectInfo {
   const _$_ObjectInfo(
       {required this.dartName,
       required this.isarName,
       this.properties = const [],
       this.indexes = const [],
       this.links = const [],
-      this.imports = const []});
+      this.imports = const []})
+      : super._();
 
   factory _$_ObjectInfo.fromJson(Map<String, dynamic> json) =>
-      _$_$_ObjectInfoFromJson(json);
+      _$$_ObjectInfoFromJson(json);
 
   @override
   final String dartName;
@@ -259,11 +260,11 @@ class _$_ObjectInfo implements _ObjectInfo {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$_ObjectInfoToJson(this);
+    return _$$_ObjectInfoToJson(this);
   }
 }
 
-abstract class _ObjectInfo implements ObjectInfo {
+abstract class _ObjectInfo extends ObjectInfo {
   const factory _ObjectInfo(
       {required String dartName,
       required String isarName,
@@ -271,6 +272,7 @@ abstract class _ObjectInfo implements ObjectInfo {
       List<ObjectIndex> indexes,
       List<ObjectLink> links,
       List<String> imports}) = _$_ObjectInfo;
+  const _ObjectInfo._() : super._();
 
   factory _ObjectInfo.fromJson(Map<String, dynamic> json) =
       _$_ObjectInfo.fromJson;
@@ -309,7 +311,9 @@ class _$ObjectPropertyTearOff {
       required bool isId,
       String? converter,
       required bool nullable,
-      required bool elementNullable}) {
+      required bool elementNullable,
+      required PropertyDeser deserialize,
+      int? constructorPosition}) {
     return _ObjectProperty(
       dartName: dartName,
       isarName: isarName,
@@ -319,6 +323,8 @@ class _$ObjectPropertyTearOff {
       converter: converter,
       nullable: nullable,
       elementNullable: elementNullable,
+      deserialize: deserialize,
+      constructorPosition: constructorPosition,
     );
   }
 
@@ -340,6 +346,8 @@ mixin _$ObjectProperty {
   String? get converter => throw _privateConstructorUsedError;
   bool get nullable => throw _privateConstructorUsedError;
   bool get elementNullable => throw _privateConstructorUsedError;
+  PropertyDeser get deserialize => throw _privateConstructorUsedError;
+  int? get constructorPosition => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -360,7 +368,9 @@ abstract class $ObjectPropertyCopyWith<$Res> {
       bool isId,
       String? converter,
       bool nullable,
-      bool elementNullable});
+      bool elementNullable,
+      PropertyDeser deserialize,
+      int? constructorPosition});
 }
 
 /// @nodoc
@@ -382,6 +392,8 @@ class _$ObjectPropertyCopyWithImpl<$Res>
     Object? converter = freezed,
     Object? nullable = freezed,
     Object? elementNullable = freezed,
+    Object? deserialize = freezed,
+    Object? constructorPosition = freezed,
   }) {
     return _then(_value.copyWith(
       dartName: dartName == freezed
@@ -416,6 +428,14 @@ class _$ObjectPropertyCopyWithImpl<$Res>
           ? _value.elementNullable
           : elementNullable // ignore: cast_nullable_to_non_nullable
               as bool,
+      deserialize: deserialize == freezed
+          ? _value.deserialize
+          : deserialize // ignore: cast_nullable_to_non_nullable
+              as PropertyDeser,
+      constructorPosition: constructorPosition == freezed
+          ? _value.constructorPosition
+          : constructorPosition // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -435,7 +455,9 @@ abstract class _$ObjectPropertyCopyWith<$Res>
       bool isId,
       String? converter,
       bool nullable,
-      bool elementNullable});
+      bool elementNullable,
+      PropertyDeser deserialize,
+      int? constructorPosition});
 }
 
 /// @nodoc
@@ -459,6 +481,8 @@ class __$ObjectPropertyCopyWithImpl<$Res>
     Object? converter = freezed,
     Object? nullable = freezed,
     Object? elementNullable = freezed,
+    Object? deserialize = freezed,
+    Object? constructorPosition = freezed,
   }) {
     return _then(_ObjectProperty(
       dartName: dartName == freezed
@@ -493,14 +517,21 @@ class __$ObjectPropertyCopyWithImpl<$Res>
           ? _value.elementNullable
           : elementNullable // ignore: cast_nullable_to_non_nullable
               as bool,
+      deserialize: deserialize == freezed
+          ? _value.deserialize
+          : deserialize // ignore: cast_nullable_to_non_nullable
+              as PropertyDeser,
+      constructorPosition: constructorPosition == freezed
+          ? _value.constructorPosition
+          : constructorPosition // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
 
-@JsonSerializable()
-
 /// @nodoc
-class _$_ObjectProperty implements _ObjectProperty {
+@JsonSerializable()
+class _$_ObjectProperty extends _ObjectProperty {
   const _$_ObjectProperty(
       {required this.dartName,
       required this.isarName,
@@ -509,10 +540,13 @@ class _$_ObjectProperty implements _ObjectProperty {
       required this.isId,
       this.converter,
       required this.nullable,
-      required this.elementNullable});
+      required this.elementNullable,
+      required this.deserialize,
+      this.constructorPosition})
+      : super._();
 
   factory _$_ObjectProperty.fromJson(Map<String, dynamic> json) =>
-      _$_$_ObjectPropertyFromJson(json);
+      _$$_ObjectPropertyFromJson(json);
 
   @override
   final String dartName;
@@ -530,10 +564,14 @@ class _$_ObjectProperty implements _ObjectProperty {
   final bool nullable;
   @override
   final bool elementNullable;
+  @override
+  final PropertyDeser deserialize;
+  @override
+  final int? constructorPosition;
 
   @override
   String toString() {
-    return 'ObjectProperty(dartName: $dartName, isarName: $isarName, dartType: $dartType, isarType: $isarType, isId: $isId, converter: $converter, nullable: $nullable, elementNullable: $elementNullable)';
+    return 'ObjectProperty(dartName: $dartName, isarName: $isarName, dartType: $dartType, isarType: $isarType, isId: $isId, converter: $converter, nullable: $nullable, elementNullable: $elementNullable, deserialize: $deserialize, constructorPosition: $constructorPosition)';
   }
 
   @override
@@ -562,7 +600,13 @@ class _$_ObjectProperty implements _ObjectProperty {
                     .equals(other.nullable, nullable)) &&
             (identical(other.elementNullable, elementNullable) ||
                 const DeepCollectionEquality()
-                    .equals(other.elementNullable, elementNullable)));
+                    .equals(other.elementNullable, elementNullable)) &&
+            (identical(other.deserialize, deserialize) ||
+                const DeepCollectionEquality()
+                    .equals(other.deserialize, deserialize)) &&
+            (identical(other.constructorPosition, constructorPosition) ||
+                const DeepCollectionEquality()
+                    .equals(other.constructorPosition, constructorPosition)));
   }
 
   @override
@@ -575,7 +619,9 @@ class _$_ObjectProperty implements _ObjectProperty {
       const DeepCollectionEquality().hash(isId) ^
       const DeepCollectionEquality().hash(converter) ^
       const DeepCollectionEquality().hash(nullable) ^
-      const DeepCollectionEquality().hash(elementNullable);
+      const DeepCollectionEquality().hash(elementNullable) ^
+      const DeepCollectionEquality().hash(deserialize) ^
+      const DeepCollectionEquality().hash(constructorPosition);
 
   @JsonKey(ignore: true)
   @override
@@ -584,11 +630,11 @@ class _$_ObjectProperty implements _ObjectProperty {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$_ObjectPropertyToJson(this);
+    return _$$_ObjectPropertyToJson(this);
   }
 }
 
-abstract class _ObjectProperty implements ObjectProperty {
+abstract class _ObjectProperty extends ObjectProperty {
   const factory _ObjectProperty(
       {required String dartName,
       required String isarName,
@@ -597,7 +643,10 @@ abstract class _ObjectProperty implements ObjectProperty {
       required bool isId,
       String? converter,
       required bool nullable,
-      required bool elementNullable}) = _$_ObjectProperty;
+      required bool elementNullable,
+      required PropertyDeser deserialize,
+      int? constructorPosition}) = _$_ObjectProperty;
+  const _ObjectProperty._() : super._();
 
   factory _ObjectProperty.fromJson(Map<String, dynamic> json) =
       _$_ObjectProperty.fromJson;
@@ -618,6 +667,10 @@ abstract class _ObjectProperty implements ObjectProperty {
   bool get nullable => throw _privateConstructorUsedError;
   @override
   bool get elementNullable => throw _privateConstructorUsedError;
+  @override
+  PropertyDeser get deserialize => throw _privateConstructorUsedError;
+  @override
+  int? get constructorPosition => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
   _$ObjectPropertyCopyWith<_ObjectProperty> get copyWith =>
@@ -761,17 +814,17 @@ class __$ObjectIndexPropertyCopyWithImpl<$Res>
   }
 }
 
-@JsonSerializable()
-
 /// @nodoc
-class _$_ObjectIndexProperty implements _ObjectIndexProperty {
+@JsonSerializable()
+class _$_ObjectIndexProperty extends _ObjectIndexProperty {
   const _$_ObjectIndexProperty(
       {required this.property,
       required this.indexType,
-      required this.caseSensitive});
+      required this.caseSensitive})
+      : super._();
 
   factory _$_ObjectIndexProperty.fromJson(Map<String, dynamic> json) =>
-      _$_$_ObjectIndexPropertyFromJson(json);
+      _$$_ObjectIndexPropertyFromJson(json);
 
   @override
   final ObjectProperty property;
@@ -815,15 +868,16 @@ class _$_ObjectIndexProperty implements _ObjectIndexProperty {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$_ObjectIndexPropertyToJson(this);
+    return _$$_ObjectIndexPropertyToJson(this);
   }
 }
 
-abstract class _ObjectIndexProperty implements ObjectIndexProperty {
+abstract class _ObjectIndexProperty extends ObjectIndexProperty {
   const factory _ObjectIndexProperty(
       {required ObjectProperty property,
       required IndexType indexType,
       required bool? caseSensitive}) = _$_ObjectIndexProperty;
+  const _ObjectIndexProperty._() : super._();
 
   factory _ObjectIndexProperty.fromJson(Map<String, dynamic> json) =
       _$_ObjectIndexProperty.fromJson;
@@ -962,15 +1016,15 @@ class __$ObjectIndexCopyWithImpl<$Res> extends _$ObjectIndexCopyWithImpl<$Res>
   }
 }
 
-@JsonSerializable()
-
 /// @nodoc
-class _$_ObjectIndex implements _ObjectIndex {
+@JsonSerializable()
+class _$_ObjectIndex extends _ObjectIndex {
   const _$_ObjectIndex(
-      {required this.properties, required this.unique, required this.replace});
+      {required this.properties, required this.unique, required this.replace})
+      : super._();
 
   factory _$_ObjectIndex.fromJson(Map<String, dynamic> json) =>
-      _$_$_ObjectIndexFromJson(json);
+      _$$_ObjectIndexFromJson(json);
 
   @override
   final List<ObjectIndexProperty> properties;
@@ -1011,15 +1065,16 @@ class _$_ObjectIndex implements _ObjectIndex {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$_ObjectIndexToJson(this);
+    return _$$_ObjectIndexToJson(this);
   }
 }
 
-abstract class _ObjectIndex implements ObjectIndex {
+abstract class _ObjectIndex extends ObjectIndex {
   const factory _ObjectIndex(
       {required List<ObjectIndexProperty> properties,
       required bool unique,
       required bool replace}) = _$_ObjectIndex;
+  const _ObjectIndex._() : super._();
 
   factory _ObjectIndex.fromJson(Map<String, dynamic> json) =
       _$_ObjectIndex.fromJson;
@@ -1223,9 +1278,8 @@ class __$ObjectLinkCopyWithImpl<$Res> extends _$ObjectLinkCopyWithImpl<$Res>
   }
 }
 
-@JsonSerializable()
-
 /// @nodoc
+@JsonSerializable()
 class _$_ObjectLink implements _ObjectLink {
   const _$_ObjectLink(
       {required this.dartName,
@@ -1237,7 +1291,7 @@ class _$_ObjectLink implements _ObjectLink {
       this.linkIndex = -1});
 
   factory _$_ObjectLink.fromJson(Map<String, dynamic> json) =>
-      _$_$_ObjectLinkFromJson(json);
+      _$$_ObjectLinkFromJson(json);
 
   @override
   final String dartName;
@@ -1306,7 +1360,7 @@ class _$_ObjectLink implements _ObjectLink {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$_$_ObjectLinkToJson(this);
+    return _$$_ObjectLinkToJson(this);
   }
 }
 

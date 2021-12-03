@@ -63,7 +63,7 @@ void main() {
         // do nothing
       }
       await qEqual(
-        col.where().filter().hashFieldEqualTo(null).findAll(),
+        col.where().filter().wordsFieldEqualTo(null).findAll(),
         [StringModel.init(null)],
       );
 

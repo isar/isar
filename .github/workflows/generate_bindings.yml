@@ -17,10 +17,7 @@ jobs:
       with:
         persist-credentials: false
         fetch-depth: 0
-    - name: Install Dart
-      uses: cedx/setup-dart@v2
-      with:
-        release-channel: beta
+    - uses: dart-lang/setup-dart@v1
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:

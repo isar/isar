@@ -193,12 +193,30 @@ String _generateDeserialize(ObjectInfo object) {
   var code = '''
   @override
   ${object.dartName} deserialize(IsarCollectionImpl<${object.dartName}> collection, BinaryReader reader, List<int> offsets) {
-    final object = ${object.dartName}();''';
-  for (var i = 0; i < object.properties.length; i++) {
-    final property = object.properties[i];
-    final accessor = 'object.${property.isarName}';
-    final deser = _deserializeProperty(object, property, 'offsets[$i]');
-    code += '$accessor = $deser;';
+    final object = ${object.dartName}(''';
+  final propertiesByMode = object.properties.groupBy((p) => p.deserialize);
+  final positional = propertiesByMode[PropertyDeser.PositionalParam] ?? [];
+  final sortedPositional = positional.sortedBy((p) => p.constructorPosition!);
+  for (var p in sortedPositional) {
+    final index = object.properties.indexOf(p);
+    final deser = _deserializeProperty(object, p, 'offsets[$index]');
+    code += '$deser,';
+  }
+
+  final named = propertiesByMode[PropertyDeser.NamedParam] ?? [];
+  for (var p in named) {
+    final index = object.properties.indexOf(p);
+    final deser = _deserializeProperty(object, p, 'offsets[$index]');
+    code += '${p.dartName}: $deser,';
+  }
+
+  code += ');';
+
+  final assign = propertiesByMode[PropertyDeser.Assign] ?? [];
+  for (var p in assign) {
+    final index = object.properties.indexOf(p);
+    final deser = _deserializeProperty(object, p, 'offsets[$index]');
+    code += 'object.${p.dartName} = $deser;';
   }
 
   code += _generateAttachLinks(object, 'collection', true);
