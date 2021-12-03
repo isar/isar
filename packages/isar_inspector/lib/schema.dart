@@ -7,7 +7,6 @@ part 'schema.g.dart';
 class Collection with _$Collection {
   const factory Collection(
     String name,
-    String idProperty,
     List<Property> properties,
     List<Index> indexes,
     List<Link> links,

@@ -1,7 +1,7 @@
 part of isar_native;
 
-const MIN_OID = -140737488355328;
-const MAX_OID = 140737488355327;
+final MIN_STR = Pointer<Int8>.fromAddress(0);
+final MAX_STR = '\u{FFFFF}'.toNativeUtf8().cast<Int8>();
 
 Query<T> buildNativeQuery<T>(
   IsarCollectionImpl col,
@@ -85,60 +85,38 @@ void _addWhereClause(IsarCollectionImpl col, Pointer qbPtr, WhereClause wc,
       throw 'Invalid WhereClause';
     }
     nCall(IC.isar_qb_add_id_where_clause(
-      col.ptr,
       qbPtr,
-      wc.lower?[0] ?? MIN_OID,
-      wc.upper?[0] ?? MAX_OID,
-      sort != Sort.Desc,
+      sort == Sort.Asc
+          ? (wc.lower?[0] ?? Isar.minId)
+          : (wc.upper?[0] ?? Isar.maxId),
+      sort == Sort.Asc
+          ? (wc.upper?[0] ?? Isar.maxId)
+          : (wc.lower?[0] ?? Isar.minId),
     ));
   } else {
-    final wcPtrPtr = malloc<Pointer<NativeType>>();
-    final indexId = col.indexIds[wc.indexName!];
-    if (indexId != null) {
-      nCall(IC.isar_wc_create(
-        col.ptr,
-        wcPtrPtr,
-        indexId,
-        distinct ?? false,
-        sort == Sort.Asc,
-      ));
+    late Pointer<NativeType> lowerPtr;
+    if (wc.lower != null) {
+      lowerPtr = buildIndexKey(col, wc.indexName!, wc.lower!);
     } else {
-      throw 'Unknown index "${wc.indexName}"';
+      lowerPtr = buildLowerUnboundedIndexKey(col, wc.indexName!);
     }
 
-    final wcPtr = wcPtrPtr.value;
-
-    final wcLen = (wc.lower ?? wc.upper)?.length ?? 0;
-    for (var i = 0; i < wcLen; i++) {
-      addWhereValue(
-        wcPtr: wcPtr,
-        lower: wc.lower?[i],
-        upper: wc.upper?[i],
-        upperUnbound: wc.upper == null,
-      );
+    late Pointer<NativeType> upperPtr;
+    if (wc.upper != null) {
+      upperPtr = buildIndexKey(col, wc.indexName!, wc.upper!);
+    } else {
+      upperPtr = buildUpperUnboundedIndexKey(col, wc.indexName!);
     }
 
     nCall(IC.isar_qb_add_index_where_clause(
       qbPtr,
-      wcPtrPtr.value,
-      wc.includeLower,
-      wc.includeUpper,
+      sort == Sort.Asc ? lowerPtr : upperPtr,
+      sort == Sort.Asc ? wc.includeLower : wc.includeUpper,
+      sort == Sort.Asc ? upperPtr : lowerPtr,
+      sort == Sort.Asc ? wc.includeUpper : wc.includeLower,
+      distinct ?? false,
     ));
-    malloc.free(wcPtrPtr);
   }
-}
-
-void requireEqual(dynamic v1, dynamic v2) {
-  if (v1 is num && v2 is num) {
-    if (v1.compareTo(v2) == 0) {
-      return;
-    }
-  }
-  if (v1 == v2) {
-    return;
-  }
-
-  throw 'Only the last part of a composite index comparison may be a range.';
 }
 
 int boolToByte(bool? value) {
@@ -148,62 +126,6 @@ int boolToByte(bool? value) {
     return trueBool;
   } else {
     return falseBool;
-  }
-}
-
-void addWhereValue({
-  required Pointer wcPtr,
-  required dynamic lower,
-  required dynamic upper,
-  required bool upperUnbound,
-}) {
-  final val = lower ?? upper;
-  if (val == null) {
-    nCall(IC.isar_wc_add_null(wcPtr, upperUnbound));
-  } else if (val is bool) {
-    lower = boolToByte(lower);
-    if (upperUnbound) {
-      upper = maxBool;
-    } else {
-      upper = boolToByte(upper);
-    }
-    nCall(IC.isar_wc_add_byte(wcPtr, lower, upper));
-  } else if (val is int) {
-    lower ??= nullLong;
-    if (upperUnbound) {
-      upper = maxLong;
-    } else {
-      upper ??= nullLong;
-    }
-    nCall(IC.isar_wc_add_long(wcPtr, lower, upper));
-  } else if (val is double) {
-    lower ??= nullDouble;
-    if (upperUnbound) {
-      upper = maxDouble;
-    } else {
-      upper ??= nullDouble;
-    }
-    nCall(IC.isar_wc_add_double(wcPtr, lower, upper));
-  } else if (val is String) {
-    var lowerPtr = Pointer<Int8>.fromAddress(0);
-    var upperPtr = Pointer<Int8>.fromAddress(0);
-    if (lower is String) {
-      lowerPtr = lower.toNativeUtf8().cast();
-    }
-    if (upper is String) {
-      upperPtr = upper.toNativeUtf8().cast();
-    }
-
-    nCall(IC.isar_wc_add_string(wcPtr, lowerPtr, upperPtr, upperUnbound));
-
-    if (lower != null) {
-      malloc.free(lowerPtr);
-    }
-    if (upper != null) {
-      malloc.free(upperPtr);
-    }
-  } else {
-    throw 'MIST!';
   }
 }
 
@@ -291,7 +213,6 @@ Pointer<NativeType>? _buildLink(IsarCollectionImpl col, LinkFilter link) {
   if (backlink) {
     nCall(IC.isar_filter_link(
       targetCol.ptr,
-      col.ptr,
       filterPtrPtr,
       condition,
       linkId,
@@ -300,7 +221,6 @@ Pointer<NativeType>? _buildLink(IsarCollectionImpl col, LinkFilter link) {
   } else {
     nCall(IC.isar_filter_link(
       col.ptr,
-      targetCol.ptr,
       filterPtrPtr,
       condition,
       linkId,
@@ -342,8 +262,8 @@ Pointer<NativeType> _buildConditionInternal({
   required IsarCollectionImpl col,
   required ConditionType conditionType,
   required int propertyId,
-  required dynamic? lower,
-  required dynamic? upper,
+  required dynamic lower,
+  required dynamic upper,
   required bool caseSensitive,
 }) {
   final filterPtrPtr = malloc<Pointer<Pointer<NativeType>>>();
@@ -351,19 +271,18 @@ Pointer<NativeType> _buildConditionInternal({
   switch (conditionType) {
     case ConditionType.Eq:
       if (lower == null) {
-        nCall(IC.isar_filter_null_between(
-            col.ptr, filterPtrPtr, false, propertyId));
+        nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, false, propertyId));
       } else if (lower is bool) {
         final value = boolToByte(lower);
-        nCall(IC.isar_filter_byte_between(
+        nCall(IC.isar_filter_byte(
             col.ptr, filterPtrPtr, value, value, propertyId));
       } else if (lower is int) {
-        nCall(IC.isar_filter_long_between(
+        nCall(IC.isar_filter_long(
             col.ptr, filterPtrPtr, lower, lower, propertyId));
       } else if (lower is String) {
         final strPtr = lower.toNativeUtf8();
-        nCall(IC.isar_filter_string_equal(
-            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId));
+        nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, strPtr.cast(),
+            strPtr.cast(), caseSensitive, propertyId));
         malloc.free(strPtr);
       } else {
         throw 'Unsupported type for condition';
@@ -372,28 +291,52 @@ Pointer<NativeType> _buildConditionInternal({
     case ConditionType.Between:
       final val = lower ?? upper;
       if (val == null) {
-        nCall(IC.isar_filter_null_between(
-            col.ptr, filterPtrPtr, false, propertyId));
+        nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, false, propertyId));
       } else if (val is int) {
-        nCall(IC.isar_filter_long_between(col.ptr, filterPtrPtr,
-            lower ?? nullLong, upper ?? nullLong, propertyId));
+        nCall(IC.isar_filter_long(col.ptr, filterPtrPtr, lower ?? nullLong,
+            upper ?? nullLong, propertyId));
       } else if (val is double) {
-        nCall(IC.isar_filter_double_between(col.ptr, filterPtrPtr,
-            lower ?? nullDouble, upper ?? nullDouble, propertyId));
+        nCall(IC.isar_filter_double(col.ptr, filterPtrPtr, lower ?? nullDouble,
+            upper ?? nullDouble, propertyId));
+      } else if (val is String) {
+        late Pointer<Int8> lowerPtr;
+        late Pointer<Int8> upperPtr;
+        if (lower is String) {
+          lowerPtr = lower.toNativeUtf8().cast();
+        } else {
+          lowerPtr = MIN_STR;
+        }
+        if (upper is String) {
+          upperPtr = upper.toNativeUtf8().cast();
+        } else {
+          upperPtr = MIN_STR;
+        }
+        nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, lowerPtr, upperPtr,
+            caseSensitive, propertyId));
+        if (!lowerPtr.isNull) {
+          malloc.free(lowerPtr);
+        }
+        if (!upperPtr.isNull) {
+          malloc.free(upperPtr);
+        }
       } else {
         throw 'Unsupported type for condition';
       }
       break;
     case ConditionType.Lt:
       if (lower == null) {
-        nCall(IC.isar_filter_null_between(
-            col.ptr, filterPtrPtr, true, propertyId));
+        nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, true, propertyId));
       } else if (lower is int) {
-        nCall(IC.isar_filter_long_between(
+        nCall(IC.isar_filter_long(
             col.ptr, filterPtrPtr, lower, maxLong, propertyId));
       } else if (lower is double) {
-        nCall(IC.isar_filter_double_between(
+        nCall(IC.isar_filter_double(
             col.ptr, filterPtrPtr, lower, maxDouble, propertyId));
+      } else if (lower is String) {
+        final value = lower.toNativeUtf8();
+        nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, value.cast(),
+            MAX_STR, caseSensitive, propertyId));
+        malloc.free(value);
       } else {
         throw 'Unsupported type for condition';
       }
@@ -401,14 +344,18 @@ Pointer<NativeType> _buildConditionInternal({
       break;
     case ConditionType.Gt:
       if (lower == null) {
-        nCall(IC.isar_filter_null_between(
-            col.ptr, filterPtrPtr, false, propertyId));
+        nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, false, propertyId));
       } else if (lower is int) {
-        nCall(IC.isar_filter_long_between(
+        nCall(IC.isar_filter_long(
             col.ptr, filterPtrPtr, minLong, lower, propertyId));
       } else if (lower is double) {
-        nCall(IC.isar_filter_double_between(
+        nCall(IC.isar_filter_double(
             col.ptr, filterPtrPtr, minDouble, lower, propertyId));
+      } else if (lower is String) {
+        final value = lower.toNativeUtf8();
+        nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, MIN_STR,
+            value.cast(), caseSensitive, propertyId));
+        malloc.free(value);
       } else {
         throw 'Unsupported type for condition';
       }
@@ -442,17 +389,6 @@ Pointer<NativeType> _buildConditionInternal({
         malloc.free(strPtr);
       } else {
         throw 'Unsupported type for condition';
-      }
-      break;
-    case ConditionType.ListContains:
-      if (lower is int?) {
-        nCall(IC.isar_filter_long_list_contains(
-            col.ptr, filterPtrPtr, lower ?? nullLong, propertyId));
-      } else if (lower is String) {
-        final strPtr = lower.toNativeUtf8();
-        nCall(IC.isar_filter_string_list_contains(
-            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId));
-        malloc.free(strPtr);
       }
       break;
     default:

@@ -22,13 +22,14 @@ class Service {
     final service = Service._(vmService, isolateId);
     final version = await service.getVersion();
     await service._service.streamListen(EventStreams.kExtension);
-    service._service.onExtensionEvent.listen((event) {
-      print('HELLO');
-    });
     if (version != 1) {
       throw 'Wrong version';
     }
     return service;
+  }
+
+  void disconnect() {
+    _service.dispose();
   }
 
   Future<T> _call<T>(String method,
@@ -106,8 +107,8 @@ class Service {
     if (filter is FilterCondition) {
       if (filter.type == ConditionType.Between) {
         return {
-          'filterType': 'FilterCondition',
-          'type': filter.type.index,
+          'type': 'FilterCondition',
+          'conditionType': filter.type.index,
           'property': filter.property,
           'lower': filter.lower,
           'upper': filter.upper,
@@ -115,8 +116,8 @@ class Service {
         };
       } else {
         return {
-          'filterType': 'FilterCondition',
-          'type': filter.type.index,
+          'type': 'FilterCondition',
+          'conditionType': filter.type.index,
           'property': filter.property,
           'value': filter.lower,
           'caseSensitive': filter.caseSensitive,
@@ -124,9 +125,9 @@ class Service {
       }
     } else if (filter is FilterGroup) {
       return {
-        'filterType': 'FilterGroup',
+        'type': 'FilterGroup',
         'filters': filter.filters.map((e) => serializeFilter(e)).toList(),
-        'type': filter.type.index,
+        'groupType': filter.type.index,
       };
     }
     throw 'unreachable';

@@ -20,11 +20,10 @@ Collection _$CollectionFromJson(Map<String, dynamic> json) {
 class _$CollectionTearOff {
   const _$CollectionTearOff();
 
-  _Collection call(String name, String idProperty, List<Property> properties,
-      List<Index> indexes, List<Link> links) {
+  _Collection call(String name, List<Property> properties, List<Index> indexes,
+      List<Link> links) {
     return _Collection(
       name,
-      idProperty,
       properties,
       indexes,
       links,
@@ -42,7 +41,6 @@ const $Collection = _$CollectionTearOff();
 /// @nodoc
 mixin _$Collection {
   String get name => throw _privateConstructorUsedError;
-  String get idProperty => throw _privateConstructorUsedError;
   List<Property> get properties => throw _privateConstructorUsedError;
   List<Index> get indexes => throw _privateConstructorUsedError;
   List<Link> get links => throw _privateConstructorUsedError;
@@ -60,7 +58,6 @@ abstract class $CollectionCopyWith<$Res> {
       _$CollectionCopyWithImpl<$Res>;
   $Res call(
       {String name,
-      String idProperty,
       List<Property> properties,
       List<Index> indexes,
       List<Link> links});
@@ -77,7 +74,6 @@ class _$CollectionCopyWithImpl<$Res> implements $CollectionCopyWith<$Res> {
   @override
   $Res call({
     Object? name = freezed,
-    Object? idProperty = freezed,
     Object? properties = freezed,
     Object? indexes = freezed,
     Object? links = freezed,
@@ -86,10 +82,6 @@ class _$CollectionCopyWithImpl<$Res> implements $CollectionCopyWith<$Res> {
       name: name == freezed
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      idProperty: idProperty == freezed
-          ? _value.idProperty
-          : idProperty // ignore: cast_nullable_to_non_nullable
               as String,
       properties: properties == freezed
           ? _value.properties
@@ -115,7 +107,6 @@ abstract class _$CollectionCopyWith<$Res> implements $CollectionCopyWith<$Res> {
   @override
   $Res call(
       {String name,
-      String idProperty,
       List<Property> properties,
       List<Index> indexes,
       List<Link> links});
@@ -134,7 +125,6 @@ class __$CollectionCopyWithImpl<$Res> extends _$CollectionCopyWithImpl<$Res>
   @override
   $Res call({
     Object? name = freezed,
-    Object? idProperty = freezed,
     Object? properties = freezed,
     Object? indexes = freezed,
     Object? links = freezed,
@@ -143,10 +133,6 @@ class __$CollectionCopyWithImpl<$Res> extends _$CollectionCopyWithImpl<$Res>
       name == freezed
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      idProperty == freezed
-          ? _value.idProperty
-          : idProperty // ignore: cast_nullable_to_non_nullable
               as String,
       properties == freezed
           ? _value.properties
@@ -168,16 +154,13 @@ class __$CollectionCopyWithImpl<$Res> extends _$CollectionCopyWithImpl<$Res>
 
 /// @nodoc
 class _$_Collection implements _Collection {
-  const _$_Collection(
-      this.name, this.idProperty, this.properties, this.indexes, this.links);
+  const _$_Collection(this.name, this.properties, this.indexes, this.links);
 
   factory _$_Collection.fromJson(Map<String, dynamic> json) =>
       _$_$_CollectionFromJson(json);
 
   @override
   final String name;
-  @override
-  final String idProperty;
   @override
   final List<Property> properties;
   @override
@@ -187,7 +170,7 @@ class _$_Collection implements _Collection {
 
   @override
   String toString() {
-    return 'Collection(name: $name, idProperty: $idProperty, properties: $properties, indexes: $indexes, links: $links)';
+    return 'Collection(name: $name, properties: $properties, indexes: $indexes, links: $links)';
   }
 
   @override
@@ -196,9 +179,6 @@ class _$_Collection implements _Collection {
         (other is _Collection &&
             (identical(other.name, name) ||
                 const DeepCollectionEquality().equals(other.name, name)) &&
-            (identical(other.idProperty, idProperty) ||
-                const DeepCollectionEquality()
-                    .equals(other.idProperty, idProperty)) &&
             (identical(other.properties, properties) ||
                 const DeepCollectionEquality()
                     .equals(other.properties, properties)) &&
@@ -213,7 +193,6 @@ class _$_Collection implements _Collection {
   int get hashCode =>
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(name) ^
-      const DeepCollectionEquality().hash(idProperty) ^
       const DeepCollectionEquality().hash(properties) ^
       const DeepCollectionEquality().hash(indexes) ^
       const DeepCollectionEquality().hash(links);
@@ -230,20 +209,14 @@ class _$_Collection implements _Collection {
 }
 
 abstract class _Collection implements Collection {
-  const factory _Collection(
-      String name,
-      String idProperty,
-      List<Property> properties,
-      List<Index> indexes,
-      List<Link> links) = _$_Collection;
+  const factory _Collection(String name, List<Property> properties,
+      List<Index> indexes, List<Link> links) = _$_Collection;
 
   factory _Collection.fromJson(Map<String, dynamic> json) =
       _$_Collection.fromJson;
 
   @override
   String get name => throw _privateConstructorUsedError;
-  @override
-  String get idProperty => throw _privateConstructorUsedError;
   @override
   List<Property> get properties => throw _privateConstructorUsedError;
   @override

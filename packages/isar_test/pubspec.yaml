@@ -22,7 +22,7 @@ dev_dependencies:
   build_runner: any
   isar_generator: any
   freezed: any
-  test: any
+  test: 1.17.10
   flutter_test:
     sdk: flutter
 
@@ -33,5 +33,5 @@ dependency_overrides:
     path: ../isar_flutter_libs
   isar_generator:
     path: ../isar_generator
-  crypto: ^3.0.0
-  convert: ^3.0.0
+  test_api: 0.4.2
+  meta: 1.7.0

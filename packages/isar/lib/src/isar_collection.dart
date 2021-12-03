@@ -18,17 +18,29 @@ abstract class IsarCollection<OBJ> {
   /// exist.
   List<OBJ?> getAllSync(List<int> ids);
 
-  /// Insert or update an [object].
-  Future<void> put(OBJ object) => putAll([object]);
+  /// Get a list of objects by the [indexProperty] index or `null` if an object
+  /// does not exist. Don't use this method directly.
+  @protected
+  Future<List<OBJ?>> getAllByIndex(
+      String indexProperty, List<List<dynamic>> values);
 
-  /// Insert or update an [object].
-  void putSync(OBJ object) => putAllSync([object]);
+  /// Get a list of objects by the [indexProperty] index or `null` if an object
+  /// does not exist. Don't use this method directly.
+  @protected
+  List<OBJ?> getAllByIndexSync(
+      String indexProperty, List<List<dynamic>> values);
 
-  /// Insert or update a list of [objects].
-  Future<void> putAll(List<OBJ> objects);
+  /// Insert or update an [object] and returns the assigned id.
+  Future<int> put(OBJ object) => putAll([object]).then((ids) => ids[0]);
 
-  /// Insert or update a list of [objects].
-  void putAllSync(List<OBJ> objects);
+  /// Insert or update an [object] and returns the assigned id.
+  int putSync(OBJ object) => putAllSync([object])[0];
+
+  /// Insert or update a list of [objects] and returns the list of assigned ids.
+  Future<List<int>> putAll(List<OBJ> objects);
+
+  /// Insert or update a list of [objects] and returns the list of assigned ids.
+  List<int> putAllSync(List<OBJ> objects);
 
   /// Delete a single object by its [id]. Returns whether the object has been
   /// deleted.
@@ -45,6 +57,17 @@ abstract class IsarCollection<OBJ> {
   /// Delete a list of objecs by their [ids]. Returns the number of objects that
   /// have been deleted.
   int deleteAllSync(List<int> ids);
+
+  /// Delete a list of objecs by the [indexProperty] index. Returns the number
+  /// of objects that have been deleted. Don't use this method directly.
+  @protected
+  Future<int> deleteAllByIndex(
+      String indexProperty, List<List<dynamic>> values);
+
+  /// Delete a list of objecs by the [indexProperty] index. Returns the number
+  /// of objects that have been deleted. Don't use this method directly.
+  @protected
+  int deleteAllByIndexSync(String indexProperty, List<List<dynamic>> values);
 
   /// Import a list of json objects.
   Future<void> importJsonRaw(Uint8List jsonBytes);

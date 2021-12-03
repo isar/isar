@@ -16,7 +16,7 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool get connected => _service != null && (_instances?.isNotEmpty ?? false);
+  bool get connected => _service != null && _instances.isNotEmpty;
 
   bool _sidebarExpanded = false;
   bool get sidebarExpanded => _sidebarExpanded;
@@ -25,9 +25,8 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<String>? _instances;
-  List<String>? get instances =>
-      _instances != null ? List.unmodifiable(_instances!) : null;
+  var _instances = <String>[];
+  List<String> get instances => List.unmodifiable(_instances);
   set instances(List<String>? instances) {
     _instances = instances!;
     if ((_selectedInstance == null || !instances.contains(_selectedInstance))) {

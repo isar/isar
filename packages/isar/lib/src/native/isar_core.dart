@@ -24,6 +24,7 @@ const nullDouble = minDouble;
 final nullDate = minDate;
 
 class IsarCoreUtils {
+  static final nullPtr = Pointer.fromAddress(0);
   static final syncTxnPtr = malloc<Pointer>();
   static final syncRawObjPtr = malloc<RawObject>();
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:isar_inspector/app_state.dart';
 import 'package:isar_inspector/collections.dart';
@@ -112,6 +111,9 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
               });
             }
           : null,
+      onLongPress: () {
+        Provider.of<AppState>(context, listen: false).service?.disconnect();
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Row(

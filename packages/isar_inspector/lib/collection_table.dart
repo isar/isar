@@ -43,14 +43,24 @@ class _CollectionTableState extends State<CollectionTable> {
     final state = Provider.of<AppState>(context);
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildHeader(theme, state),
         Expanded(
-          child: state.objects != null
-              ? _buildTable(theme, state)
-              : Center(
-                  child: CircularProgressIndicator(),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Column(
+              children: [
+                _buildHeader(theme, state),
+                Expanded(
+                  child: state.objects != null
+                      ? _buildTable(theme, state)
+                      : Center(
+                          child: CircularProgressIndicator(),
+                        ),
                 ),
+              ],
+            ),
+          ),
         ),
         SizedBox(height: 20),
         PrevNext(),

@@ -10,7 +10,7 @@ class Message {
   @override
   bool operator ==(dynamic other) {
     if (other is Message) {
-      return other.id == id && other.message == message;
+      return other.message == message;
     } else {
       return false;
     }

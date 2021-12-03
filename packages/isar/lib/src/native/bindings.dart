@@ -1235,7 +1235,7 @@ class IsarCoreBindings {
 
 abstract class RawObject extends ffi.Struct {
   @ffi.Int64()
-  external int oid;
+  external int id;
 
   external ffi.Pointer<ffi.Uint8> buffer;
 

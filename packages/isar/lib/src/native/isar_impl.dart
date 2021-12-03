@@ -19,8 +19,15 @@ class IsarImpl extends Isar {
     }
   }
 
+  void requireOpen() {
+    if (!isOpen) {
+      throw 'Isar instance has already been closed';
+    }
+  }
+
   Future<T> _txn<T>(
       bool write, bool silent, Future<T> Function(Isar isar) callback) async {
+    requireOpen();
     requireNotInTxn();
 
     final completer = Completer();
@@ -97,6 +104,7 @@ class IsarImpl extends Isar {
   }
 
   T _txnSync<T>(bool write, bool silent, T Function(Isar isar) callback) {
+    requireOpen();
     requireNotInTxn();
 
     var txnPtr = IsarCoreUtils.syncTxnPtr;
@@ -145,6 +153,7 @@ class IsarImpl extends Isar {
 
   @override
   Future close() async {
+    requireOpen();
     requireNotInTxn();
     await Future.wait(_activeAsyncTxns);
     await super.close();

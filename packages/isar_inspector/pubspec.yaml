@@ -11,14 +11,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  vm_service: ^6.1.0
+  vm_service: ^7.2.0
   provider: ^5.0.0
   dartx: ^0.7.1
   freezed_annotation: any
   json_annotation: ^4.0.0
   petitparser: ^4.0.2
   isar: any
-  linked_scroll_controller: 0.2.0-nullsafety.0
+  linked_scroll_controller: ^0.2.0
   flutter_svg: any
   font_awesome_flutter: any
   google_fonts: ^2.0.0

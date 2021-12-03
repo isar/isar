@@ -8,9 +8,9 @@ String generateQueryWhere(ObjectInfo oi) {
     replace: true,
     properties: [
       ObjectIndexProperty(
-        property: oi.oidProperty,
+        property: oi.idProperty,
         indexType: IndexType.value,
-        caseSensitive: true,
+        caseSensitive: null,
       ),
     ],
   );
@@ -35,8 +35,8 @@ String generateQueryWhere(ObjectInfo oi) {
     for (var n = 0; n < index.properties.length; n++) {
       var properties = index.properties.sublist(0, n + 1);
 
-      final firstProperties = index.properties.sublist(0, n);
-      final lastProperty = index.properties.last;
+      final firstProperties = properties.sublist(0, n);
+      final lastProperty = properties.last;
       if (!firstProperties.any((it) => it.property.isarType.isFloatDouble)) {
         code += generateWhereEqualTo(oi, properties);
         if (!properties.any((it) => it.indexType == IndexType.words)) {
@@ -56,8 +56,7 @@ String generateQueryWhere(ObjectInfo oi) {
         code += generateWhereStartsWith(oi, properties);
       }
 
-      if (lastProperty.property.isarType != IsarType.Bool &&
-          lastProperty.property.isarType != IsarType.String) {
+      if (lastProperty.property.isarType != IsarType.Bool) {
         code += generateWhereBetween(oi, properties);
       }
 
@@ -225,7 +224,6 @@ String generateWhereBetween(
       includeLower: true,
       upper: [$values $upperName],
       includeUpper: true,
-      
     ));
   }
   ''';
