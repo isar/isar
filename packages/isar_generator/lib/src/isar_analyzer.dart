@@ -455,6 +455,11 @@ class IsarAnalyzer extends Builder {
   }
 
   bool checkField(PropertyInducingElement element) {
+    // Skip static fields
+    if (element.isStatic) {
+      return false;
+    }
+
     // Check if the element is a pure getter (no setter defined)
     if (element.setter == null) {
       return false;
