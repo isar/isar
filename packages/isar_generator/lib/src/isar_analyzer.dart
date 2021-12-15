@@ -94,9 +94,9 @@ class IsarAnalyzer extends Builder {
             ...supertype.accessors.mapNotNull((e) => e.variable)
         ]
     };
-    for (var propertyElement in allAccessors) {
+    for (var propertyElement in allAccessors.where(checkField)) {
       if (hasIgnoreAnn(propertyElement)) {
-        return null;
+        continue;
       }
 
       final converter = findTypeConverter(propertyElement);
@@ -121,7 +121,7 @@ class IsarAnalyzer extends Builder {
     }
 
     final indexes = <ObjectIndex>[];
-    for (var propertyElement in modelClass.fields) {
+    for (var propertyElement in modelClass.fields.where(checkField)) {
       if (links.any((it) => it.dartName == propertyElement.name)) continue;
       final index = analyzeObjectIndex(properties, propertyElement);
       if (index == null) continue;
@@ -452,6 +452,23 @@ class IsarAnalyzer extends Builder {
         }
       }
     }
+  }
+
+  bool checkField(PropertyInducingElement element) {
+    // Check if the element is a pure getter (no setter defined)
+    if (element.setter == null) {
+      return false;
+    }
+
+    // Check if the element's getter and setter are not synthetic (the element is not a field).
+    // This means that the getter and the setter are explicitly defined in the code.
+    if (element.getter?.isSynthetic == false &&
+        element.setter?.isSynthetic == false) {
+      return false;
+    }
+
+    // This is surely a field.
+    return true;
   }
 
   @override
