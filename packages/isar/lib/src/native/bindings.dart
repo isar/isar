@@ -292,6 +292,21 @@ class IsarCoreBindings {
   late final _dart_isar_connect_dart_api _isar_connect_dart_api =
       _isar_connect_dart_api_ptr.asFunction<_dart_isar_connect_dart_api>();
 
+  int isar_filter_static(
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    bool value,
+  ) {
+    return _isar_filter_static(
+      filter,
+      value ? 1 : 0,
+    );
+  }
+
+  late final _isar_filter_static_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_filter_static>>('isar_filter_static');
+  late final _dart_isar_filter_static _isar_filter_static =
+      _isar_filter_static_ptr.asFunction<_dart_isar_filter_static>();
+
   int isar_filter_and_or(
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     bool and,
@@ -1619,6 +1634,16 @@ typedef _c_isar_connect_dart_api = ffi.Void Function(
 
 typedef _dart_isar_connect_dart_api = void Function(
   ffi.Pointer<ffi.NativeFunction<DartPostCObjectFnType>> ptr,
+);
+
+typedef _c_isar_filter_static = ffi.Uint8 Function(
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Uint8 value,
+);
+
+typedef _dart_isar_filter_static = int Function(
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  int value,
 );
 
 typedef _c_isar_filter_and_or = ffi.Uint8 Function(
