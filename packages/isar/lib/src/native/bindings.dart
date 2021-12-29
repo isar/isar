@@ -366,11 +366,13 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     int property_index,
+    bool any_null,
   ) {
     return _isar_filter_null(
       collection,
       filter,
       property_index,
+      any_null ? 1 : 0,
     );
   }
 
@@ -1690,12 +1692,14 @@ typedef _c_isar_filter_null = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Uint32 property_index,
+  ffi.Uint8 any_null,
 );
 
 typedef _dart_isar_filter_null = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   int property_index,
+  int any_null,
 );
 
 typedef _c_isar_filter_byte = ffi.Int32 Function(
