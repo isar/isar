@@ -1,5 +1,7 @@
 import 'package:isar/isar.dart';
 
+part 'root_model1.g.dart';
+
 @Collection()
 class RootModel1 {
   int? id;

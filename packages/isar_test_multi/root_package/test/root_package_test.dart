@@ -1,27 +1,26 @@
 import 'package:child_package1/child_package1.dart';
 import 'package:child_package2/child_package2.dart';
 import 'package:isar/isar.dart';
-import 'package:isar_test/utils/common.dart';
-import 'package:root_package/isar.g.dart';
+import 'package:isar_test/common.dart';
 import 'package:root_package/root_model1.dart';
 import 'package:root_package/root_model2.dart';
 import 'package:test/test.dart';
-
-Future<Isar> open() {
-  registerBinaries();
-
-  return openIsar(
-    name: getRandomName(),
-    directory: testTempPath,
-  );
-}
 
 void main() {
   group('Test multi', () {
     late Isar isar;
 
     setUp(() async {
-      isar = await open();
+      registerBinaries();
+
+      isar = await openTempIsar([
+        ChildModel1Schema,
+        ChildModel2Schema,
+        ChildModel3Schema,
+        ChildModel4Schema,
+        RootModel1Schema,
+        RootModel2Schema
+      ]);
     });
 
     tearDown(() async {

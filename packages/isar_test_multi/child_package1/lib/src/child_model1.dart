@@ -1,5 +1,7 @@
 import 'package:isar/isar.dart';
 
+part 'child_model1.g.dart';
+
 @Collection()
 class ChildModel1 {
   int? id;

@@ -1,5 +1,6 @@
 // ignore_for_file: implementation_imports
 import 'dart:io';
+import 'package:isar/isar.dart';
 import 'package:isar/src/native/isar_core.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -61,4 +62,14 @@ void registerBinaries() {
 String getRandomName() {
   var random = Random().nextInt(pow(2, 32) as int);
   return '${random}_tmp';
+}
+
+Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> collections) async {
+  registerBinaries();
+
+  return Isar.open(
+    collections: collections,
+    name: getRandomName(),
+    directory: testTempPath!,
+  );
 }

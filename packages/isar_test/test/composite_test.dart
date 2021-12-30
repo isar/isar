@@ -1,6 +1,6 @@
 import 'package:isar/isar.dart';
 import 'package:isar_test/name_model.dart';
-import 'package:isar_test/utils/open.dart';
+import 'package:isar_test/common.dart';
 import 'package:test/test.dart';
 
 void main() {

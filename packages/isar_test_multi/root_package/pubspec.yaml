@@ -7,6 +7,8 @@ dependencies:
   flutter:
     sdk: flutter
   isar: any
+  isar_test:
+    path: ../../isar_test
   child_package1:
     path: ../child_package1
   child_package2:
