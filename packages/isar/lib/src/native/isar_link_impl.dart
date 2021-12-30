@@ -1,4 +1,11 @@
-part of isar_native;
+import 'dart:collection';
+
+import 'package:isar/isar.dart';
+
+import 'bindings.dart';
+import 'isar_collection_impl.dart';
+import 'isar_core.dart';
+import 'util/native_call.dart';
 
 IsarLink<OBJ> newIsarLink<OBJ>() {
   return IsarLinkImpl();
@@ -17,28 +24,35 @@ class _IsarLinkBase<OBJ> {
   bool attached = false;
   bool changed = false;
 
-  void attach(IsarCollectionImpl col, IsarCollectionImpl<OBJ> targetCol,
-      dynamic containingObject, int linkIndex, bool backlink) {
-    assert(identical(col.isar, targetCol.isar),
-        'Collections need to have the same Isar instance.');
-    this.col = col;
-    this.targetCol = targetCol;
+  void attach(IsarCollection col, IsarCollection<OBJ> targetCol,
+      dynamic containingObject, String linkName, bool backlink) {
+    if (!identical(col.isar, targetCol.isar)) {
+      throw IsarError('Collections need to have the same Isar instance.');
+    }
+    this.col = col as IsarCollectionImpl;
+    this.targetCol = targetCol as IsarCollectionImpl<OBJ>;
     this.containingObject = containingObject;
-    this.linkIndex = linkIndex;
+    final index = backlink ? col.backlinkIds[linkName] : col.linkIds[linkName];
+    if (index == null) {
+      throw IsarError('Unknown link "$linkName".');
+    }
+    linkIndex = index;
     this.backlink = backlink;
     attached = true;
   }
 
-  void requireAttached() {
+  int requireAttached() {
     if (!attached) {
       throw IsarError(
           'Containing object needs to be managed by Isar to use this method.');
     }
+
+    final id = (col as dynamic).getId(containingObject);
+    if (id == null) {
+      throw IsarError('Containing object has no id.');
+    }
+    return id;
   }
-
-  int get containingOid => (col as dynamic).getId(containingObject)!;
-
-  Pointer get linkColPtr => backlink ? targetCol.ptr : col.ptr;
 }
 
 class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
@@ -65,11 +79,11 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
 
   @override
   Future<void> load() {
-    requireAttached();
+    final containingId = requireAttached();
     return col.isar.getTxn(false, (txnPtr, stream) async {
       final rawObjPtr = malloc<RawObject>();
       IC.isar_link_get_first(
-          linkColPtr, txnPtr, linkIndex, backlink, containingOid, rawObjPtr);
+          col.ptr, txnPtr, linkIndex, backlink, containingId, rawObjPtr);
       try {
         await stream.first;
         _value = targetCol.deserializeObject(rawObjPtr.ref);
@@ -82,12 +96,12 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
 
   @override
   void loadSync() {
-    requireAttached();
+    final containingId = requireAttached();
     col.isar.getTxnSync(true, (txnPtr) {
       final rawObjPtr = malloc<RawObject>();
       try {
         nCall(IC.isar_link_get_first(
-            linkColPtr, txnPtr, linkIndex, backlink, containingOid, rawObjPtr));
+            col.ptr, txnPtr, linkIndex, backlink, containingId, rawObjPtr));
         _value = targetCol.deserializeObject(rawObjPtr.ref);
         changed = false;
       } finally {
@@ -98,7 +112,7 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
 
   @override
   Future<void> save() {
-    requireAttached();
+    final containingId = requireAttached();
     if (!changed) {
       return Future.value();
     }
@@ -107,15 +121,14 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
       if (_value != null) {
         final id = targetCol.getId(_value!);
         if (id == null) {
-          await targetCol.put(_value!);
-          targetOid = targetCol.getId(_value!)!;
+          targetOid = await targetCol.put(_value!);
         } else {
           targetOid = id;
         }
       }
       final rawObjPtr = malloc<RawObject>();
       IC.isar_link_replace(
-          linkColPtr, txnPtr, linkIndex, backlink, containingOid, targetOid);
+          col.ptr, txnPtr, linkIndex, backlink, containingId, targetOid);
       try {
         await stream.first;
         changed = false;
@@ -127,7 +140,7 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
 
   @override
   void saveSync() {
-    requireAttached();
+    final containingId = requireAttached();
     if (!changed) {
       return;
     }
@@ -145,7 +158,7 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
       final rawObjPtr = malloc<RawObject>();
       try {
         nCall(IC.isar_link_replace(
-            linkColPtr, txnPtr, linkIndex, backlink, containingOid, targetOid));
+            col.ptr, txnPtr, linkIndex, backlink, containingId, targetOid));
         changed = false;
       } finally {
         malloc.free(rawObjPtr);
@@ -166,7 +179,7 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
 
   @override
   Future<void> load({bool overrideChanges = false}) async {
-    requireAttached();
+    final containingId = requireAttached();
     if (overrideChanges) {
       _addedObjects.clear();
       _removedObjects.clear();
@@ -175,7 +188,7 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
       final resultsPtr = malloc<RawObjectSet>();
       try {
         IC.isar_link_get_all(
-            linkColPtr, txnPtr, linkIndex, backlink, containingOid, resultsPtr);
+            col.ptr, txnPtr, linkIndex, backlink, containingId, resultsPtr);
         await stream.first;
         return targetCol.deserializeObjects(resultsPtr.ref);
       } finally {
@@ -189,7 +202,7 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
 
   @override
   void loadSync({bool overrideChanges = false}) {
-    requireAttached();
+    final containingId = requireAttached();
     if (overrideChanges) {
       _addedObjects.clear();
       _removedObjects.clear();
@@ -197,8 +210,8 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
     final objects = col.isar.getTxnSync(false, (txnPtr) {
       final resultsPtr = malloc<RawObjectSet>();
       try {
-        nCall(IC.isar_link_get_all(linkColPtr, txnPtr, linkIndex, backlink,
-            containingOid, resultsPtr));
+        nCall(IC.isar_link_get_all(
+            col.ptr, txnPtr, linkIndex, backlink, containingId, resultsPtr));
         return targetCol.deserializeObjects(resultsPtr.ref);
       } finally {
         malloc.free(resultsPtr);
@@ -210,7 +223,7 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
 
   @override
   Future<void> saveChanges() {
-    requireAttached();
+    final containingId = requireAttached();
     if (!changed) {
       return Future.value();
     }
@@ -235,8 +248,8 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
       for (var removed in _removedObjects) {
         ids[i++] = targetCol.getId(removed)!;
       }
-      IC.isar_link_update_all(linkColPtr, txnPtr, linkIndex, backlink,
-          containingOid, idsPtr, _addedObjects.length, _removedObjects.length);
+      IC.isar_link_update_all(col.ptr, txnPtr, linkIndex, backlink,
+          containingId, idsPtr, _addedObjects.length, _removedObjects.length);
 
       try {
         await stream.first;
@@ -248,11 +261,10 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
 
   @override
   void saveChangesSync() {
-    requireAttached();
+    final containingId = requireAttached();
     if (!changed) {
       return;
     }
-    final oid = containingOid;
     col.isar.getTxnSync(true, (txnPtr) {
       for (var added in _addedObjects) {
         var id = targetCol.getId(added);
@@ -260,12 +272,13 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
           targetCol.putSync(added);
           id = targetCol.getId(added)!;
         }
-        nCall(IC.isar_link(linkColPtr, txnPtr, linkIndex, backlink, oid, id));
+        nCall(IC.isar_link(
+            col.ptr, txnPtr, linkIndex, backlink, containingId, id));
       }
       for (var removed in _removedObjects) {
         final removedId = targetCol.getId(removed)!;
         nCall(IC.isar_link_unlink(
-            linkColPtr, txnPtr, linkIndex, backlink, oid, removedId));
+            col.ptr, txnPtr, linkIndex, backlink, containingId, removedId));
       }
     });
   }

@@ -1,5 +1,7 @@
 import 'package:isar/isar.dart';
 
+part 'constructor_model.g.dart';
+
 @Collection()
 class EmptyConstructorModel {
   int? id;

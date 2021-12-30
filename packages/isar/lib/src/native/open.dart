@@ -1,55 +1,76 @@
-part of isar_native;
+import 'dart:io';
+import 'dart:isolate';
+import 'dart:math';
 
-Future<Isar> openIsarInternal({
-  String name = 'isar',
+import 'package:isar/isar.dart';
+import 'package:path/path.dart' as p;
+
+import 'isar_core.dart';
+import 'isar_impl.dart';
+import 'util/native_call.dart';
+
+Future<Isar> openIsarNative({
+  required List<CollectionSchema> collections,
   required String directory,
-  required String schema,
-  required Map<String, IsarCollection> Function(IsarImpl) getCollections,
-  int maxSize = 1000000000,
-  Uint8List? encryptionKey,
+  String name = 'isar',
+  bool relaxedDurability = true,
 }) async {
   assert(name.isNotEmpty);
   final existingInstance = Isar.getInstance(name);
   if (existingInstance != null) {
     return existingInstance;
   }
-  await Directory(p.join(directory, name)).create(recursive: true);
+
+  final path = p.join(directory, name);
+  await Directory(path).create(recursive: true);
   initializeIsarCore();
   IC.isar_connect_dart_api(NativeApi.postCObject);
 
+  final schema = '[' + collections.map((e) => e.schema).join(',') + ']';
+
   final isarPtrPtr = malloc<Pointer>();
-  final namePtr = name.toNativeUtf8();
-  final pathPtr = directory.toNativeUtf8();
-  IC.isar_get_instance(isarPtrPtr, namePtr.cast());
+  final pathPtr = path.toNativeUtf8();
+  IC.isar_get_instance(isarPtrPtr, pathPtr.cast());
   if (isarPtrPtr.value.address == 0) {
     final schemaPtr = schema.toNativeUtf8();
-    var encKeyPtr = Pointer<Uint8>.fromAddress(0);
-    if (encryptionKey != null) {
-      assert(encryptionKey.length == 32,
-          'Encryption keys need to contain 32 byte (256bit).');
-      encKeyPtr = malloc(32);
-      encKeyPtr.asTypedList(32).setAll(0, encryptionKey);
-    }
     final receivePort = ReceivePort();
     final nativePort = receivePort.sendPort.nativePort;
     final stream = wrapIsarPort(receivePort);
-    IC.isar_create_instance(isarPtrPtr, namePtr.cast(), pathPtr.cast(), maxSize,
-        schemaPtr.cast(), encKeyPtr, nativePort);
+    IC.isar_create_instance(isarPtrPtr, pathPtr.cast(), relaxedDurability,
+        schemaPtr.cast(), nativePort);
     await stream.first;
     malloc.free(schemaPtr);
-    if (encryptionKey != null) {
-      malloc.free(encKeyPtr);
-    }
   }
-  malloc.free(namePtr);
   malloc.free(pathPtr);
 
   final isarPtr = isarPtrPtr.value;
   malloc.free(isarPtrPtr);
 
   final isar = IsarImpl(name, schema, isarPtr);
-  final collections = getCollections(isar);
-  //ignore: invalid_use_of_protected_member
-  isar.attachCollections(collections);
+
+  final maxProperties = collections
+      .map((e) => e.propertyIds.length)
+      .reduce((value, element) => max(value, element));
+  final collectionPtrPtr = malloc<Pointer>();
+  final propertyOffsetsPtr = malloc<Uint32>(maxProperties);
+
+  final cols = <String, IsarCollection>{};
+  for (var i = 0; i < collections.length; i++) {
+    final schema = collections[i];
+    nCall(IC.isar_get_collection(isar.ptr, collectionPtrPtr, i));
+    IC.isar_get_property_offsets(collectionPtrPtr.value, propertyOffsetsPtr);
+    cols[schema.name] = schema.toNativeCollection(
+      isar: isar,
+      ptr: collectionPtrPtr.value,
+      propertyOffsets:
+          propertyOffsetsPtr.asTypedList(schema.propertyIds.length).toList(),
+    );
+  }
+
+  malloc.free(propertyOffsetsPtr);
+  malloc.free(collectionPtrPtr);
+
+  // ignore: invalid_use_of_protected_member
+  isar.attachCollections(cols);
   return isar;
 }

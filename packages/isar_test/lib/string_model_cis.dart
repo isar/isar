@@ -1,37 +1,50 @@
 import 'package:isar/isar.dart';
+import 'package:dartx/dartx.dart';
+
+part 'string_model_cis.g.dart';
 
 @Collection()
 class StringModelCIS {
   @Id()
   int? id;
 
-  @Index(indexType: IndexType.hash, caseSensitive: false)
+  @Index(type: IndexType.value, caseSensitive: false)
+  String? field = '';
+
+  @Index(type: IndexType.hash, caseSensitive: false)
   String? hashField = '';
 
-  @Index(indexType: IndexType.value, caseSensitive: false)
-  String? valueField = '';
+  @Index(type: IndexType.value, caseSensitive: false)
+  List<String>? list;
 
-  @Index(indexType: IndexType.words, caseSensitive: false)
-  String? wordsField = '';
+  @Index(type: IndexType.hash, caseSensitive: false)
+  List<String>? hashList;
+
+  @Index(type: IndexType.hashElements, caseSensitive: false)
+  List<String>? hashElementList;
 
   @override
   String toString() {
-    return '{field: $valueField, field: $hashField, field: $wordsField}';
+    return '{field: $field, hashField: $hashField, list: $list, hashList: $hashList, hashElementList: $hashElementList}';
   }
 
   StringModelCIS();
 
   StringModelCIS.init(String? value)
-      : hashField = value,
-        valueField = value,
-        wordsField = value;
+      : field = value,
+        hashField = value;
 
   @override
   bool operator ==(other) {
     if (other is StringModelCIS) {
-      return hashField?.toLowerCase() == other.hashField?.toLowerCase() &&
-          valueField?.toLowerCase() == other.valueField?.toLowerCase() &&
-          wordsField?.toLowerCase() == other.wordsField?.toLowerCase();
+      return field == other.field &&
+          hashField == other.hashField &&
+          list?.length == other.list?.length &&
+          (list?.contentEquals(other.list!) ?? true) &&
+          hashList?.length == other.hashList?.length &&
+          (hashList?.contentEquals(other.hashList!) ?? true) &&
+          hashElementList?.length == other.hashElementList?.length &&
+          (hashElementList?.contentEquals(other.hashElementList!) ?? true);
     }
     return false;
   }

@@ -1,7 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:isar/isar.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:dartx/dartx.dart';
+import 'package:isar/isar.dart';
 
 part 'object_info.g.dart';
 part 'object_info.freezed.dart';
@@ -28,13 +27,14 @@ class ObjectInfo with _$ObjectInfo {
 
   ObjectProperty get idProperty => properties.firstWhere((it) => it.isId);
 
+  List<ObjectProperty> get objectProperties =>
+      properties.where((p) => !p.isId).toList();
+
   int get staticSize {
     return properties.sumBy((p) => p.isarType.staticSize).toInt() + 2;
   }
 
   String get adapterName => '_${dartName}Adapter';
-
-  String get collectionVar => '_${dartName.decapitalize()}Collection';
 
   String get collectionAccessor => '${dartName.decapitalize()}s';
 }
@@ -66,10 +66,6 @@ class ObjectProperty with _$ObjectProperty {
   factory ObjectProperty.fromJson(Map<String, dynamic> json) =>
       _$ObjectPropertyFromJson(json);
 
-  String get dartTypeNotNull {
-    return dartType.removeSuffix('?');
-  }
-
   String toIsar(String input, ObjectInfo oi) {
     if (converter != null) {
       return '${oi.adapterName}._$converter.toIsar($input)';
@@ -93,12 +89,16 @@ class ObjectIndexProperty with _$ObjectIndexProperty {
 
   const factory ObjectIndexProperty({
     required ObjectProperty property,
-    required IndexType indexType,
-    required bool? caseSensitive,
+    required IndexType type,
+    required bool caseSensitive,
   }) = _ObjectIndexProperty;
 
   factory ObjectIndexProperty.fromJson(Map<String, dynamic> json) =>
       _$ObjectIndexPropertyFromJson(json);
+
+  IsarType get isarType => property.isarType;
+
+  IsarType get scalarType => property.isarType.scalarType;
 
   String get indexTypeEnum {
     switch (property.isarType) {
@@ -109,34 +109,72 @@ class ObjectIndexProperty with _$ObjectIndexProperty {
       case IsarType.Float:
         return 'NativeIndexType.Float';
       case IsarType.Long:
+      case IsarType.DateTime:
         return 'NativeIndexType.Long';
       case IsarType.Double:
         return 'NativeIndexType.Double';
-      case IsarType.DateTime:
-        return 'NativeIndexType.Long';
       case IsarType.String:
-        switch (indexType) {
-          case IndexType.value:
-            if (caseSensitive ?? true) {
-              return 'NativeIndexType.StringValue';
-            } else {
-              return 'NativeIndexType.StringValueCIS';
-            }
-          case IndexType.hash:
-            if (caseSensitive ?? true) {
-              return 'NativeIndexType.StringHash';
-            } else {
-              return 'NativeIndexType.StringHashCIS';
-            }
-          case IndexType.words:
-            if (caseSensitive ?? true) {
-              return 'NativeIndexType.StringWords';
-            } else {
-              return 'NativeIndexType.StringWordsCIS';
-            }
+        if (caseSensitive) {
+          return type == IndexType.hash
+              ? 'NativeIndexType.StringHash'
+              : 'NativeIndexType.String';
+        } else {
+          return type == IndexType.hash
+              ? 'NativeIndexType.StringHashCIS'
+              : 'NativeIndexType.StringCIS';
         }
-      default:
-        throw 'unreachable';
+      case IsarType.Bytes:
+        assert(type == IndexType.hash);
+        return 'NativeIndexType.BytesHash';
+      case IsarType.BoolList:
+        if (type == IndexType.hash) {
+          return 'NativeIndexType.BoolListHash';
+        } else {
+          return 'NativeIndexType.Bool';
+        }
+      case IsarType.IntList:
+        if (type == IndexType.hash) {
+          return 'NativeIndexType.IntListHash';
+        } else {
+          return 'NativeIndexType.Int';
+        }
+      case IsarType.FloatList:
+        if (type == IndexType.hash) {
+          return 'NativeIndexType.FloatListHash';
+        } else {
+          return 'NativeIndexType.Float';
+        }
+      case IsarType.LongList:
+      case IsarType.DateTimeList:
+        if (type == IndexType.hash) {
+          return 'NativeIndexType.LongListHash';
+        } else {
+          return 'NativeIndexType.Long';
+        }
+      case IsarType.DoubleList:
+        if (type == IndexType.hash) {
+          return 'NativeIndexType.DoubleListHash';
+        } else {
+          return 'NativeIndexType.Double';
+        }
+      case IsarType.StringList:
+        if (caseSensitive) {
+          if (type == IndexType.hash) {
+            return 'NativeIndexType.StringListHash';
+          } else if (type == IndexType.hashElements) {
+            return 'NativeIndexType.StringHash';
+          } else {
+            return 'NativeIndexType.String';
+          }
+        } else {
+          if (type == IndexType.hash) {
+            return 'NativeIndexType.StringListHashCIS';
+          } else if (type == IndexType.hashElements) {
+            return 'NativeIndexType.StringHashCIS';
+          } else {
+            return 'NativeIndexType.StringCIS';
+          }
+        }
     }
   }
 }
@@ -146,6 +184,7 @@ class ObjectIndex with _$ObjectIndex {
   const ObjectIndex._();
 
   const factory ObjectIndex({
+    required String name,
     required List<ObjectIndexProperty> properties,
     required bool unique,
     required bool replace,
@@ -165,9 +204,9 @@ class ObjectLink with _$ObjectLink {
     required String isarName,
     required String? targetDartName,
     required String targetCollectionDartName,
+    required String targetCollectionIsarName,
     required bool links,
     required bool backlink,
-    @Default(-1) int linkIndex,
   }) = _ObjectLink;
 
   factory ObjectLink.fromJson(Map<String, dynamic> json) =>
@@ -204,6 +243,9 @@ extension IsarTypeX on IsarType {
   bool get isList {
     return index > IsarType.String.index;
   }
+
+  bool get containsString =>
+      index == IsarType.String.index || index == IsarType.StringList.index;
 
   int get staticSize {
     if (this == IsarType.Bool) {
@@ -264,7 +306,57 @@ extension IsarTypeX on IsarType {
     }
   }
 
-  String get name {
-    return toString().substring(9);
+  IsarType get scalarType {
+    switch (this) {
+      case IsarType.BoolList:
+        return IsarType.Bool;
+      case IsarType.IntList:
+        return IsarType.Int;
+      case IsarType.FloatList:
+        return IsarType.Float;
+      case IsarType.LongList:
+        return IsarType.Long;
+      case IsarType.DoubleList:
+        return IsarType.Double;
+      case IsarType.DateTimeList:
+        return IsarType.DateTime;
+      case IsarType.StringList:
+        return IsarType.String;
+      default:
+        return this;
+    }
+  }
+
+  String dartType(bool nullable, bool elementNullable) {
+    final nQ = nullable ? '?' : '';
+    final nEQ = elementNullable ? '?' : '';
+    switch (this) {
+      case IsarType.Bool:
+        return 'bool$nQ';
+      case IsarType.Int:
+      case IsarType.Long:
+        return 'int$nQ';
+      case IsarType.Double:
+      case IsarType.Float:
+        return 'double$nQ';
+      case IsarType.DateTime:
+        return 'DateTime$nQ';
+      case IsarType.String:
+        return 'String$nQ';
+      case IsarType.Bytes:
+        return 'Uint8List$nQ';
+      case IsarType.BoolList:
+        return 'List<bool$nEQ>$nQ';
+      case IsarType.IntList:
+      case IsarType.LongList:
+        return 'List<int$nEQ>$nQ';
+      case IsarType.FloatList:
+      case IsarType.DoubleList:
+        return 'List<double$nEQ>$nQ';
+      case IsarType.DateTimeList:
+        return 'List<DateTime$nEQ>$nQ';
+      case IsarType.StringList:
+        return 'List<String$nEQ>$nQ';
+    }
   }
 }

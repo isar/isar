@@ -3,7 +3,6 @@ import 'package:isar_test/utils/common.dart';
 import 'package:isar_test/utils/open.dart';
 import 'package:isar_test/double_model.dart';
 import 'package:test/test.dart';
-import 'package:isar_test/isar.g.dart';
 
 void main() {
   group('Double filter', () {
@@ -11,7 +10,7 @@ void main() {
     late IsarCollection<DoubleModel> col;
 
     setUp(() async {
-      isar = await openTempIsar();
+      isar = await openTempIsar([DoubleModelSchema]);
       col = isar.doubleModels;
 
       await isar.writeTxn((isar) async {

@@ -1,5 +1,7 @@
 import 'package:isar/isar.dart';
 
+part 'link_model.g.dart';
+
 @Collection()
 class LinkModelA {
   int? id;

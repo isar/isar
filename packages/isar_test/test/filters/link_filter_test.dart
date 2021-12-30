@@ -1,18 +1,17 @@
 import 'package:isar/isar.dart';
 import 'package:isar_test/utils/common.dart';
 import 'package:isar_test/utils/open.dart';
-import 'package:isar_test/isar.g.dart';
 import 'package:isar_test/link_model.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('Groups', () {
+  /*group('Groups', () {
     late Isar isar;
     late IsarCollection<LinkModelA> linksA;
     late IsarCollection<LinkModelB> linksB;
 
     setUp(() async {
-      isar = await openTempIsar();
+      isar = await openTempIsar([LinkModelASchema, LinkModelBSchema]);
       linksA = isar.linkModelAs;
       linksB = isar.linkModelBs;
     });
@@ -199,5 +198,5 @@ void main() {
         {LinkModelB.name('modelB_1'), LinkModelB.name('modelB_2')},
       );
     });
-  });
+  });*/
 }

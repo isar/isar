@@ -2,7 +2,6 @@ import 'package:isar/isar.dart';
 import 'package:isar_test/utils/common.dart';
 import 'package:isar_test/utils/open.dart';
 import 'package:isar_test/int_model.dart';
-import 'package:isar_test/isar.g.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -11,7 +10,7 @@ void main() {
     late IsarCollection<IntModel> col;
 
     setUp(() async {
-      isar = await openTempIsar();
+      isar = await openTempIsar([IntModelSchema]);
       col = isar.intModels;
 
       var obj;

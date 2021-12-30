@@ -3,7 +3,9 @@ import 'package:dartx/dartx.dart';
 
 String generateObjectAdapter(ObjectInfo object) {
   return '''
-    class _${object.dartName}Adapter extends TypeAdapter<${object.dartName}> {
+    class ${object.adapterName} extends IsarTypeAdapter<${object.dartName}> {
+
+      const ${object.adapterName}();
 
       ${generateConverterFields(object)}
 
@@ -25,8 +27,8 @@ String generateConverterFields(ObjectInfo object) {
 String _generatePrepareSerialize(ObjectInfo object) {
   final staticSize = object.staticSize;
   var code = 'var dynamicSize = 0;';
-  for (var i = 0; i < object.properties.length; i++) {
-    final property = object.properties[i];
+  for (var i = 0; i < object.objectProperties.length; i++) {
+    final property = object.objectProperties[i];
     var propertyValue = 'object.${property.dartName}';
     if (property.converter != null) {
       propertyValue = property.toIsar(propertyValue, object);
@@ -43,11 +45,12 @@ String _generatePrepareSerialize(ObjectInfo object) {
           code += '''
           Uint8List? $accessor;
           if (value$i != null) {
-            $accessor = _utf8Encoder.convert(value$i);
+            $accessor = BinaryWriter.utf8Encoder.convert(value$i);
           }
           ''';
         } else {
-          code += 'final $accessor = _utf8Encoder.convert(value$i);';
+          code +=
+              'final $accessor = BinaryWriter.utf8Encoder.convert(value$i);';
         }
         code += 'dynamicSize += $accessor$nOp.length $nLen;';
         break;
@@ -66,7 +69,7 @@ String _generatePrepareSerialize(ObjectInfo object) {
           code += 'if (str != null) {';
         }
         code += '''
-          final bytes = _utf8Encoder.convert(str);
+          final bytes = BinaryWriter.utf8Encoder.convert(str);
           bytesList$i.add(bytes);
           dynamicSize += bytes.length;''';
         if (property.elementNullable) {
@@ -110,7 +113,8 @@ String _generatePrepareSerialize(ObjectInfo object) {
 String _generateSerialize(ObjectInfo object) {
   var code = '''
   @override  
-  int serialize(IsarCollectionImpl<${object.dartName}> collection, RawObject rawObj, ${object.dartName} object, List<int> offsets, [int? existingBufferSize]) {
+  int serialize(IsarCollection<${object.dartName}> collection, RawObject rawObj, ${object.dartName} object, List<int> offsets, [int? existingBufferSize]) {
+    rawObj.id = object.${object.idProperty.dartName} ${object.idProperty.nullable ? '?? Isar.minId' : ''};
     ${_generatePrepareSerialize(object)}
     late int bufferSize;
     if (existingBufferSize != null) {
@@ -129,8 +133,8 @@ String _generateSerialize(ObjectInfo object) {
     final buffer = rawObj.buffer.asTypedList(size);
     final writer = BinaryWriter(buffer, ${object.staticSize});
   ''';
-  for (var i = 0; i < object.properties.length; i++) {
-    final property = object.properties[i];
+  for (var i = 0; i < object.objectProperties.length; i++) {
+    final property = object.objectProperties[i];
     final accessor = '_${property.isarName}';
     switch (property.isarType) {
       case IsarType.Bool:
@@ -192,20 +196,20 @@ String _generateSerialize(ObjectInfo object) {
 String _generateDeserialize(ObjectInfo object) {
   var code = '''
   @override
-  ${object.dartName} deserialize(IsarCollectionImpl<${object.dartName}> collection, BinaryReader reader, List<int> offsets) {
+  ${object.dartName} deserialize(IsarCollection<${object.dartName}> collection, int id, BinaryReader reader, List<int> offsets) {
     final object = ${object.dartName}(''';
   final propertiesByMode = object.properties.groupBy((p) => p.deserialize);
   final positional = propertiesByMode[PropertyDeser.PositionalParam] ?? [];
   final sortedPositional = positional.sortedBy((p) => p.constructorPosition!);
   for (var p in sortedPositional) {
-    final index = object.properties.indexOf(p);
+    final index = object.objectProperties.indexOf(p);
     final deser = _deserializeProperty(object, p, 'offsets[$index]');
     code += '$deser,';
   }
 
   final named = propertiesByMode[PropertyDeser.NamedParam] ?? [];
   for (var p in named) {
-    final index = object.properties.indexOf(p);
+    final index = object.objectProperties.indexOf(p);
     final deser = _deserializeProperty(object, p, 'offsets[$index]');
     code += '${p.dartName}: $deser,';
   }
@@ -214,7 +218,7 @@ String _generateDeserialize(ObjectInfo object) {
 
   final assign = propertiesByMode[PropertyDeser.Assign] ?? [];
   for (var p in assign) {
-    final index = object.properties.indexOf(p);
+    final index = object.objectProperties.indexOf(p);
     final deser = _deserializeProperty(object, p, 'offsets[$index]');
     code += 'object.${p.dartName} = $deser;';
   }
@@ -231,11 +235,13 @@ String _generateDeserialize(ObjectInfo object) {
 String _generateDeserializeProperty(ObjectInfo object) {
   var code = '''
   @override
-  P deserializeProperty<P>(BinaryReader reader, int propertyIndex, int offset) {
-    switch (propertyIndex) {''';
+  P deserializeProperty<P>(int id, BinaryReader reader, int propertyIndex, int offset) {
+    switch (propertyIndex) {
+      case -1:
+        return id as P;''';
 
-  for (var i = 0; i < object.properties.length; i++) {
-    final property = object.properties[i];
+  for (var i = 0; i < object.objectProperties.length; i++) {
+    final property = object.objectProperties[i];
     final deser = _deserializeProperty(object, property, 'offset');
     code += 'case $i: return ($deser) as P;';
   }
@@ -254,6 +260,10 @@ String _deserializeProperty(
   final orNull = property.nullable ? 'OrNull' : '';
   final orNullList = property.nullable ? '' : '?? []';
   final orElNull = property.elementNullable ? 'OrNull' : '';
+
+  if (property.isId) {
+    return 'id';
+  }
 
   String? deser;
   switch (property.isarType) {
@@ -313,22 +323,21 @@ String _generateAttachLinks(
     String targetColGetter;
     if (link.targetCollectionDartName != object.dartName) {
       targetColGetter =
-          '$collection.isar.${link.targetCollectionDartName.decapitalize()}s as IsarCollectionImpl<${link.targetCollectionDartName}>';
+          '$collection.isar.${link.targetCollectionDartName.decapitalize()}s';
     } else {
       targetColGetter = '$collection';
     }
-    final type = 'IsarLink${link.links ? 's' : ''}Impl';
     if (assignNew) {
-      code += 'object.${link.dartName} = $type().';
+      code += 'object.${link.dartName} = IsarLink${link.links ? 's' : ''}().';
     } else {
-      code += '''if (!(object.${link.dartName} as $type).attached) {
-        (object.${link.dartName} as $type)''';
+      code += '''if (!object.${link.dartName}.attached) {
+        object.${link.dartName}''';
     }
     code += '''.attach(
       $collection,
       $targetColGetter,
       object,
-      ${link.linkIndex},
+      "${link.dartName}",
       ${link.backlink},
     );
     ''';

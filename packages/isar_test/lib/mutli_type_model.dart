@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
 
+part 'mutli_type_model.g.dart';
+
 @Collection()
 class MultiTypeModel {
   int? id;

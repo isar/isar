@@ -1,11 +1,13 @@
 import 'package:isar/isar.dart';
 
+part 'unique_index_model.g.dart';
+
 @Collection()
 class UniqueIndexModel {
   @Id()
   int? id;
 
-  @Index(indexType: IndexType.hash, unique: true)
+  @Index(type: IndexType.hash, unique: true)
   String? str = '';
 
   @Index(unique: true)

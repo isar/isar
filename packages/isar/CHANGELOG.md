@@ -1,5 +1,7 @@
 ## 0.5.0
 
+Switched from liblmdb to libmdbx for better performance, more stability and many internal improvements.
+
 ### Breaking
 The internal database format has been changed to improve performance. Old databases may not work anymore. Breaking changes may happen until Isar is stable.
 
@@ -13,6 +15,8 @@ The internal database format has been changed to improve performance. Old databa
 - Support for `final` properties and getters
 - Support for `freezed` and other code generators
 - Support getting / deleting objects by a key `col.deleteByName('Anne')`
+- Support for list indexes (hash an element based)
+- Generator now creates individual files instead of one big file
 - Unsupported properties are now ignored automatically
 - Returns the assigned ids after `.put()` operations (objects are no longer mutated)
 

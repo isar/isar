@@ -79,13 +79,13 @@ abstract class IsarCollection<OBJ> {
   }
 
   /// Start building a query using the [QueryBuilder].
-  QueryBuilder<OBJ, QWhere> where(
+  QueryBuilder<OBJ, OBJ, QWhere> where(
       {bool distinct = false, Sort sort = Sort.Asc}) {
     return QueryBuilder(this, distinct, sort);
   }
 
   /// Build a query dynamically. Can be used to build a custom query language.
-  Query<T> buildQuery<T>({
+  Query<R> buildQuery<R>({
     List<WhereClause> whereClauses = const [],
     bool whereDistinct = false,
     Sort whereSort = Sort.Asc,

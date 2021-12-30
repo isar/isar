@@ -1,56 +1,58 @@
 part of isar;
 
-extension QueryWhereOr<OBJ, T> on QueryBuilder<T, QWhereOr> {
-  QueryBuilder<T, QWhereClause> or() {
+extension QueryWhereOr<OBJ, R> on QueryBuilder<OBJ, R, QWhereOr> {
+  QueryBuilder<OBJ, R, QWhereClause> or() {
     return copyWith();
   }
 }
 
-extension QueryFilter<OBJ, T> on QueryBuilder<T, QFilter> {
-  QueryBuilder<T, QFilterCondition> filter() {
+extension QueryFilter<OBJ, R> on QueryBuilder<OBJ, R, QFilter> {
+  QueryBuilder<OBJ, R, QFilterCondition> filter() {
     return copyWith();
   }
 }
 
-extension QueryFilterAndOr<OBJ, T> on QueryBuilder<T, QFilterOperator> {
-  QueryBuilder<T, QFilterCondition> and() {
+extension QueryFilterAndOr<OBJ, R> on QueryBuilder<OBJ, R, QFilterOperator> {
+  QueryBuilder<OBJ, R, QFilterCondition> and() {
     return andOrInternal(FilterGroupType.And);
   }
 
-  QueryBuilder<T, QFilterCondition> or() {
+  QueryBuilder<OBJ, R, QFilterCondition> or() {
     return andOrInternal(FilterGroupType.Or);
   }
 }
 
-extension QueryFilterNot<OBJ, T> on QueryBuilder<T, QFilterCondition> {
-  QueryBuilder<T, QFilterCondition> not() {
+extension QueryFilterNot<OBJ, R> on QueryBuilder<OBJ, R, QFilterCondition> {
+  QueryBuilder<OBJ, R, QFilterCondition> not() {
     return notInternal();
   }
 }
 
-extension QueryFilterNoGroups<OBJ, T> on QueryBuilder<T, QFilterCondition> {
-  QueryBuilder<T, QAfterFilterCondition> group(FilterQuery<T> q) {
+extension QueryFilterNoGroups<OBJ, R>
+    on QueryBuilder<OBJ, R, QFilterCondition> {
+  QueryBuilder<OBJ, R, QAfterFilterCondition> group(FilterQuery<OBJ> q) {
     return groupInternal(q);
   }
 }
 
-extension QueryOffset<OBJ, T> on QueryBuilder<T, QOffset> {
-  QueryBuilder<T, QAfterOffset> offset(int offset) {
+extension QueryOffset<OBJ, R> on QueryBuilder<OBJ, R, QOffset> {
+  QueryBuilder<OBJ, R, QAfterOffset> offset(int offset) {
     return copyWith(offset: offset);
   }
 }
 
-extension QueryLimit<OBJ, T> on QueryBuilder<T, QLimit> {
-  QueryBuilder<T, QAfterLimit> limit(int limit) {
+extension QueryLimit<OBJ, R> on QueryBuilder<OBJ, R, QLimit> {
+  QueryBuilder<OBJ, R, QAfterLimit> limit(int limit) {
     return copyWith(limit: limit);
   }
 }
 
-typedef QueryOption<T, S, R> = QueryBuilder<T, R> Function(
-    QueryBuilder<T, S> q);
+typedef QueryOption<OBJ, S, RS> = QueryBuilder<OBJ, OBJ, RS> Function(
+    QueryBuilder<OBJ, OBJ, S> q);
 
-extension QueryOptional<T, S> on QueryBuilder<T, S> {
-  QueryBuilder<T, R> optional<R>(bool enabled, QueryOption<T, S, R> option) {
+extension QueryOptional<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
+  QueryBuilder<OBJ, OBJ, RS> optional<RS>(
+      bool enabled, QueryOption<OBJ, S, RS> option) {
     if (enabled) {
       return option(this);
     } else {
@@ -59,13 +61,13 @@ extension QueryOptional<T, S> on QueryBuilder<T, S> {
   }
 }
 
-typedef QueryRepeatModifier<OBJ, T, R, E> = QueryBuilder<OBJ, R> Function(
-    QueryBuilder<OBJ, T> q, E element);
+typedef QueryRepeatModifier<OBJ, S, RS, E> = QueryBuilder<OBJ, OBJ, RS>
+    Function(QueryBuilder<OBJ, OBJ, S> q, E element);
 
-extension QueryRepeat<OBJ, T> on QueryBuilder<OBJ, T> {
-  QueryBuilder<OBJ, R> repeat<E, R>(
-      Iterable<E> items, QueryRepeatModifier<OBJ, T, R, E> modifier) {
-    QueryBuilder<OBJ, R>? q;
+extension QueryRepeat<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
+  QueryBuilder<OBJ, OBJ, RS> repeat<E, RS>(
+      Iterable<E> items, QueryRepeatModifier<OBJ, S, RS, E> modifier) {
+    QueryBuilder<OBJ, OBJ, RS>? q;
     for (var e in items) {
       q = modifier((q ?? this).cast(), e);
     }
@@ -73,20 +75,20 @@ extension QueryRepeat<OBJ, T> on QueryBuilder<OBJ, T> {
   }
 }
 
-extension QueryExecute<T> on QueryBuilder<T, QQueryOperations> {
-  Query<T> build() => buildInternal();
+extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
+  Query<R> build() => buildInternal();
 
-  Future<T?> findFirst() => build().findFirst();
+  Future<R?> findFirst() => build().findFirst();
 
-  T? findFirstSync() => build().findFirstSync();
+  R? findFirstSync() => build().findFirstSync();
 
-  Future<List<T>> findAll() => build().findAll();
+  Future<List<R>> findAll() => build().findAll();
 
-  List<T> findAllSync() => build().findAllSync();
+  List<R> findAllSync() => build().findAllSync();
 
   Future<int> count() => build().count();
 
-  int countSync() => build().countSync();
+  int? countSync() => build().countSync();
 
   Future<bool> deleteFirst() => build().deleteFirst();
 
@@ -96,7 +98,7 @@ extension QueryExecute<T> on QueryBuilder<T, QQueryOperations> {
 
   int deleteAllSync() => build().deleteAllSync();
 
-  Stream<List<T>> watch({bool initialReturn = false}) =>
+  Stream<List<R>> watch({bool initialReturn = false}) =>
       build().watch(initialReturn: initialReturn);
 
   Stream<void> watchLazy() => build().watchLazy();
@@ -109,8 +111,8 @@ extension QueryExecute<T> on QueryBuilder<T, QQueryOperations> {
       build().exportJson(primitiveNull: primitiveNull);
 }
 
-extension QueryExecuteAggregation<T extends num>
-    on QueryBuilder<T?, QQueryOperations> {
+extension QueryExecuteAggregation<OBJ, T extends num>
+    on QueryBuilder<OBJ, T?, QQueryOperations> {
   Future<T?> min() => build().min();
 
   T? minSync() => build().minSync();
@@ -128,8 +130,8 @@ extension QueryExecuteAggregation<T extends num>
   T sumSync() => build().sumSync();
 }
 
-extension QueryExecuteDateAggregation
-    on QueryBuilder<DateTime?, QQueryOperations> {
+extension QueryExecuteDateAggregation<OBJ>
+    on QueryBuilder<OBJ, DateTime?, QQueryOperations> {
   Future<DateTime?> min() => build().min();
 
   DateTime? minSync() => build().minSync();

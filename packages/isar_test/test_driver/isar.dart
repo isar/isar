@@ -31,18 +31,6 @@ void executeTests(Completer<bool> completer) {
       completer.complete(allTestsSuccessful);
     });
 
-    group('unencrypted', () {
-      setUpAll(() async {
-        testEncryption = false;
-      });
-      tests.run();
-    });
-
-    group('encrypted', () {
-      setUpAll(() async {
-        testEncryption = true;
-      });
-      tests.run();
-    });
+    tests.run();
   });
 }

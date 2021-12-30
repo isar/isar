@@ -1,7 +1,6 @@
 import 'package:isar/isar.dart';
 import 'package:isar_test/utils/common.dart';
 import 'package:isar_test/utils/open.dart';
-import 'package:isar_test/isar.g.dart';
 import 'package:isar_test/long_model.dart';
 import 'package:test/test.dart';
 
@@ -11,7 +10,7 @@ void main() async {
     late IsarCollection<LongModel> col;
 
     setUp(() async {
-      isar = await openTempIsar();
+      isar = await openTempIsar([LongModelSchema]);
       col = isar.longModels;
 
       await isar.writeTxn((isar) async {

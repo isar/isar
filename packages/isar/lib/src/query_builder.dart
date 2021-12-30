@@ -1,15 +1,15 @@
-import 'package:isar/isar.dart';
+part of isar;
 
-typedef FilterQuery<T> = QueryBuilder<T, QAfterFilterCondition> Function(
-    QueryBuilder<T, QFilterCondition> q);
+typedef FilterQuery<OBJ> = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>
+    Function(QueryBuilder<OBJ, OBJ, QFilterCondition> q);
 
 const _NullFilterGroup = FilterGroup(
   type: FilterGroupType.And,
   filters: [],
 );
 
-class QueryBuilder<T, S> {
-  final IsarCollection _collection;
+class QueryBuilder<OBJ, R, S> {
+  final IsarCollection<OBJ> _collection;
   final List<WhereClause> _whereClauses;
   final bool _whereDistinct;
   final Sort _whereSort;
@@ -47,10 +47,8 @@ class QueryBuilder<T, S> {
     this._limit,
     this._propertyName,
   ]);
-}
 
-extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
-  QueryBuilder<T, S> addFilterCondition<S>(FilterOperation cond) {
+  QueryBuilder<OBJ, R, NS> addFilterCondition<NS>(FilterOperation cond) {
     if (_filterNot) {
       cond = FilterNot(filter: cond);
     }
@@ -74,11 +72,12 @@ extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
     }
   }
 
-  QueryBuilder<T, S> addWhereClause<S>(WhereClause where) {
+  QueryBuilder<OBJ, R, NS> addWhereClause<NS>(WhereClause where) {
     return copyWith(whereClauses: [..._whereClauses, where]);
   }
 
-  QueryBuilder<T, QAfterFilterOperator> andOrInternal(FilterGroupType andOr) {
+  QueryBuilder<OBJ, R, QAfterFilterOperator> andOrInternal(
+      FilterGroupType andOr) {
     if (andOr == FilterGroupType.And) {
       if (_filterAnd == null) {
         return copyWith(
@@ -104,13 +103,14 @@ extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
     return copyWith();
   }
 
-  QueryBuilder<T, S> notInternal<S>() {
+  QueryBuilder<OBJ, R, NS> notInternal<NS>() {
     return copyWith(
       filterNot: !_filterNot,
     );
   }
 
-  QueryBuilder<T, QAfterFilterCondition> groupInternal(FilterQuery<T> q) {
+  QueryBuilder<OBJ, R, QAfterFilterCondition> groupInternal(
+      FilterQuery<OBJ> q) {
     final qb = q(QueryBuilder(_collection, _whereDistinct, _whereSort));
     final qbFinished = qb.andOrInternal(FilterGroupType.Or);
 
@@ -123,7 +123,7 @@ extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
     }
   }
 
-  QueryBuilder<T, QAfterFilterCondition> linkInternal<E>(
+  QueryBuilder<OBJ, R, QAfterFilterCondition> linkInternal<E>(
     IsarCollection<E> targetCollection,
     FilterQuery<E> q,
     String linkName,
@@ -149,14 +149,15 @@ extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
     ));
   }
 
-  QueryBuilder<T, S> addSortByInternal<S>(String propertyName, Sort sort) {
+  QueryBuilder<OBJ, R, NS> addSortByInternal<NS>(
+      String propertyName, Sort sort) {
     return copyWith(sortByProperties: [
       ..._sortByProperties,
       SortProperty(property: propertyName, sort: sort),
     ]);
   }
 
-  QueryBuilder<T, QDistinct> addDistinctByInternal(String propertyName,
+  QueryBuilder<OBJ, R, QDistinct> addDistinctByInternal(String propertyName,
       {bool? caseSensitive}) {
     return copyWith(distinctByProperties: [
       ..._distinctByProperties,
@@ -164,11 +165,12 @@ extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
     ]);
   }
 
-  QueryBuilder<E, QQueryOperations> addPropertyName<E>(String propertyName) {
-    return copyWith(propertyName: propertyName);
+  QueryBuilder<OBJ, E, QQueryOperations> addPropertyName<E>(
+      String propertyName) {
+    return copyWith(propertyName: propertyName).cast();
   }
 
-  QueryBuilder<E, S> copyWith<E, S>({
+  QueryBuilder<OBJ, R, NS> copyWith<NS>({
     List<WhereClause>? whereClauses,
     FilterGroup? filterOr,
     FilterGroup? filterAnd = _NullFilterGroup,
@@ -198,7 +200,7 @@ extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
     );
   }
 
-  QueryBuilder<T, S> cast<S>() {
+  QueryBuilder<OBJ, R, NS> cast<R, NS>() {
     return QueryBuilder._(
       _collection,
       _filterOr,
@@ -215,7 +217,7 @@ extension QueryBuilderInternal<T> on QueryBuilder<T, dynamic> {
     );
   }
 
-  Query<T> buildInternal() {
+  Query<R> buildInternal() {
     final builder = andOrInternal(FilterGroupType.Or);
     FilterGroup? filter;
     if (builder._filterOr.filters.length == 1) {

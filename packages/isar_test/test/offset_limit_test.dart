@@ -5,8 +5,6 @@ import 'package:isar_test/utils/open.dart';
 import 'package:isar_test/user_model.dart';
 import 'package:test/test.dart';
 
-import 'package:isar_test/isar.g.dart';
-
 void main() {
   group('OffsetLimit', () {
     late Isar isar;
@@ -14,7 +12,7 @@ void main() {
     late List<UserModel> users;
 
     setUp(() async {
-      isar = await openTempIsar();
+      isar = await openTempIsar([UserModelSchema]);
       col = isar.userModels;
 
       users = [

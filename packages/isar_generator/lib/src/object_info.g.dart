@@ -122,26 +122,27 @@ _$_ObjectIndexProperty _$$_ObjectIndexPropertyFromJson(
     _$_ObjectIndexProperty(
       property:
           ObjectProperty.fromJson(json['property'] as Map<String, dynamic>),
-      indexType: _$enumDecode(_$IndexTypeEnumMap, json['indexType']),
-      caseSensitive: json['caseSensitive'] as bool?,
+      type: _$enumDecode(_$IndexTypeEnumMap, json['type']),
+      caseSensitive: json['caseSensitive'] as bool,
     );
 
 Map<String, dynamic> _$$_ObjectIndexPropertyToJson(
         _$_ObjectIndexProperty instance) =>
     <String, dynamic>{
       'property': instance.property,
-      'indexType': _$IndexTypeEnumMap[instance.indexType],
+      'type': _$IndexTypeEnumMap[instance.type],
       'caseSensitive': instance.caseSensitive,
     };
 
 const _$IndexTypeEnumMap = {
-  IndexType.value: 'value',
-  IndexType.hash: 'hash',
-  IndexType.words: 'words',
+  IndexType.value: 'Value',
+  IndexType.hash: 'Hash',
+  IndexType.hashElements: 'HashElements',
 };
 
 _$_ObjectIndex _$$_ObjectIndexFromJson(Map<String, dynamic> json) =>
     _$_ObjectIndex(
+      name: json['name'] as String,
       properties: (json['properties'] as List<dynamic>)
           .map((e) => ObjectIndexProperty.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -151,6 +152,7 @@ _$_ObjectIndex _$$_ObjectIndexFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$_ObjectIndexToJson(_$_ObjectIndex instance) =>
     <String, dynamic>{
+      'name': instance.name,
       'properties': instance.properties,
       'unique': instance.unique,
       'replace': instance.replace,
@@ -162,9 +164,9 @@ _$_ObjectLink _$$_ObjectLinkFromJson(Map<String, dynamic> json) =>
       isarName: json['isarName'] as String,
       targetDartName: json['targetDartName'] as String?,
       targetCollectionDartName: json['targetCollectionDartName'] as String,
+      targetCollectionIsarName: json['targetCollectionIsarName'] as String,
       links: json['links'] as bool,
       backlink: json['backlink'] as bool,
-      linkIndex: json['linkIndex'] as int? ?? -1,
     );
 
 Map<String, dynamic> _$$_ObjectLinkToJson(_$_ObjectLink instance) =>
@@ -173,7 +175,7 @@ Map<String, dynamic> _$$_ObjectLinkToJson(_$_ObjectLink instance) =>
       'isarName': instance.isarName,
       'targetDartName': instance.targetDartName,
       'targetCollectionDartName': instance.targetCollectionDartName,
+      'targetCollectionIsarName': instance.targetCollectionIsarName,
       'links': instance.links,
       'backlink': instance.backlink,
-      'linkIndex': instance.linkIndex,
     };

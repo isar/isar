@@ -1,5 +1,7 @@
 import 'package:isar/isar.dart';
 
+part 'ignore_model.g.dart';
+
 @Collection()
 class IgnoreModel {
   int? id;

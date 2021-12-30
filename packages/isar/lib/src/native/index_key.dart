@@ -1,4 +1,8 @@
-part of isar_native;
+import 'package:isar/isar.dart';
+
+import 'isar_core.dart';
+import 'isar_collection_impl.dart';
+import 'native_query_builder.dart';
 
 final _keyPtrPtr = malloc<Pointer>();
 
@@ -14,7 +18,7 @@ Pointer<NativeType> buildIndexKey(
     throw 'Invalid values for index $indexProperty';
   }
 
-  nCall(IC.isar_key_create(col.ptr, _keyPtrPtr, indexId));
+  IC.isar_key_create(_keyPtrPtr);
   final keyPtr = _keyPtrPtr.value;
 
   for (var i = 0; i < values.length; i++) {
@@ -30,7 +34,7 @@ Pointer<NativeType> buildLowerUnboundedIndexKey(
   if (indexId == null) {
     throw 'Unknown index property $indexProperty';
   }
-  nCall(IC.isar_key_create(col.ptr, _keyPtrPtr, indexId));
+  IC.isar_key_create(_keyPtrPtr);
   return _keyPtrPtr.value;
 }
 
@@ -40,7 +44,7 @@ Pointer<NativeType> buildUpperUnboundedIndexKey(
   if (indexId == null) {
     throw 'Unknown index property $indexProperty';
   }
-  nCall(IC.isar_key_create(col.ptr, _keyPtrPtr, indexId));
+  IC.isar_key_create(_keyPtrPtr);
   final keyPtr = _keyPtrPtr.value;
   IC.isar_key_add_byte(keyPtr, 255);
 
@@ -80,37 +84,103 @@ void _addKeyValue(
         return;
       }
       break;
+    case NativeIndexType.String:
+    case NativeIndexType.StringCIS:
+      final strPtr = _strToNative(value);
+      IC.isar_key_add_string(keyPtr, strPtr, type == NativeIndexType.String);
+      _freeStr(strPtr);
+      break;
     case NativeIndexType.StringHash:
     case NativeIndexType.StringHashCIS:
-      if (value is String?) {
-        final strPtr = _strToNative(value);
-        IC.isar_key_add_string_hash(
-            keyPtr, strPtr, type == NativeIndexType.StringHash);
-        _freeStr(strPtr);
-        return;
+      final strPtr = _strToNative(value);
+      IC.isar_key_add_string_hash(
+          keyPtr, strPtr, type == NativeIndexType.StringHash);
+      _freeStr(strPtr);
+      break;
+    case NativeIndexType.BytesHash:
+      if (value is Uint8List) {
+        final bytesPtr = malloc<Uint8>(value.length);
+        bytesPtr.asTypedList(value.length).insertAll(0, value);
+        IC.isar_key_add_byte_list_hash(keyPtr, bytesPtr, value.length);
+        malloc.free(bytesPtr);
+      } else {
+        IC.isar_key_add_byte_list_hash(keyPtr, nullptr, 0);
       }
       break;
-    case NativeIndexType.StringValue:
-    case NativeIndexType.StringValueCIS:
-      if (value is String?) {
-        final strPtr = _strToNative(value);
-        IC.isar_key_add_string_value(
-            keyPtr, strPtr, type == NativeIndexType.StringValue);
-        _freeStr(strPtr);
-        return;
+    case NativeIndexType.BoolListHash:
+      if (value is List<bool?>) {
+        final boolListPtr = malloc<Uint8>(value.length);
+        boolListPtr
+            .asTypedList(value.length)
+            .insertAll(0, value.map(boolToByte));
+        IC.isar_key_add_byte_list_hash(keyPtr, boolListPtr, value.length);
+        malloc.free(boolListPtr);
+      } else {
+        IC.isar_key_add_byte_list_hash(keyPtr, nullptr, 0);
       }
       break;
-    case NativeIndexType.StringWords:
-    case NativeIndexType.StringWordsCIS:
-      if (value is String?) {
-        if (value == null) {
-          throw 'Null words are unsupported';
+    case NativeIndexType.IntListHash:
+      if (value is List<int?>) {
+        final intListPtr = malloc<Int32>(value.length);
+        intListPtr
+            .asTypedList(value.length)
+            .insertAll(0, value.map((e) => e ?? nullInt));
+        IC.isar_key_add_int_list_hash(keyPtr, intListPtr, value.length);
+        malloc.free(intListPtr);
+      } else {
+        IC.isar_key_add_int_list_hash(keyPtr, nullptr, 0);
+      }
+      break;
+    case NativeIndexType.FloatListHash:
+      if (value is List<double?>) {
+        final floatListPtr = malloc<Float>(value.length);
+        floatListPtr
+            .asTypedList(value.length)
+            .insertAll(0, value.map((e) => e ?? nullFloat));
+        IC.isar_key_add_float_list_hash(keyPtr, floatListPtr, value.length);
+        malloc.free(floatListPtr);
+      } else {
+        IC.isar_key_add_float_list_hash(keyPtr, nullptr, 0);
+      }
+      break;
+    case NativeIndexType.LongListHash:
+      if (value is List<int?>) {
+        final longListPtr = malloc<Int64>(value.length);
+        longListPtr
+            .asTypedList(value.length)
+            .insertAll(0, value.map((e) => e ?? nullLong));
+        IC.isar_key_add_long_list_hash(keyPtr, longListPtr, value.length);
+        malloc.free(longListPtr);
+      } else {
+        IC.isar_key_add_long_list_hash(keyPtr, nullptr, 0);
+      }
+      break;
+    case NativeIndexType.DoubleListHash:
+      if (value is List<double?>) {
+        final doubleListPtr = malloc<Double>(value.length);
+        doubleListPtr
+            .asTypedList(value.length)
+            .insertAll(0, value.map((e) => e ?? nullDouble));
+        IC.isar_key_add_double_list_hash(keyPtr, doubleListPtr, value.length);
+        malloc.free(doubleListPtr);
+      } else {
+        IC.isar_key_add_double_list_hash(keyPtr, nullptr, 0);
+      }
+      break;
+    case NativeIndexType.StringListHash:
+    case NativeIndexType.StringListHashCIS:
+      if (value is List<String?>) {
+        final stringListPtr = malloc<Pointer<Int8>>(value.length);
+        for (var i = 0; i < value.length; i++) {
+          stringListPtr[i] = _strToNative(value[i]);
         }
-        final strPtr = _strToNative(value);
-        IC.isar_key_add_string_word(
-            keyPtr, strPtr, type == NativeIndexType.StringWords);
-        _freeStr(strPtr);
-        return;
+        IC.isar_key_add_string_list_hash(keyPtr, stringListPtr, value.length,
+            type == NativeIndexType.StringListHash);
+        for (var i = 0; i < value.length; i++) {
+          _freeStr(stringListPtr[i]);
+        }
+      } else {
+        IC.isar_key_add_string_list_hash(keyPtr, nullptr, 0, false);
       }
       break;
   }

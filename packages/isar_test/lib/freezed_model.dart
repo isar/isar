@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:isar/isar.dart';
 
 part 'freezed_model.freezed.dart';
+part 'freezed_model.g.dart';
 
 @freezed
 @Collection()

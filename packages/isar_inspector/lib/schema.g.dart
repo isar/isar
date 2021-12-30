@@ -47,7 +47,7 @@ _$_Index _$_$_IndexFromJson(Map<String, dynamic> json) {
     json['unique'] as bool,
     json['replace'] as bool,
     (json['properties'] as List<dynamic>)
-        .map((e) => IndexProperty.fromJson(e as Map<String, dynamic>))
+        .map((e) => ObjectIndexProperty.fromJson(e as Map<String, dynamic>))
         .toList(),
   );
 }

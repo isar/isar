@@ -1,61 +1,13 @@
-import 'dart:async';
-import 'dart:convert';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:build/build.dart';
+import 'package:isar/isar.dart';
 import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
-import 'package:source_gen/source_gen.dart';
-import 'package:isar/isar.dart';
 import 'package:dartx/dartx.dart';
 
-class IsarAnalyzer extends Builder {
-  final _collectionAnnChecker = const TypeChecker.fromRuntime(Collection);
-  final _extcollectionAnnChecker =
-      const TypeChecker.fromRuntime(ExternalCollection);
-
-  @override
-  FutureOr<void> build(BuildStep buildStep) async {
-    final resolver = buildStep.resolver;
-    if (!await resolver.isLibrary(buildStep.inputId)) return;
-    final libReader = LibraryReader(await buildStep.inputLibrary);
-
-    final objects = libReader
-        .annotatedWith(_collectionAnnChecker)
-        .map((e) => generateObjectInfo(e.element))
-        .whereNotNull()
-        .toList();
-
-    final externalObjects = libReader
-        .annotatedWith(_extcollectionAnnChecker)
-        .map((e) sync* {
-          final annotations = _extcollectionAnnChecker.annotationsOf(e.element);
-          for (var annotation in annotations) {
-            final col = annotation.getField('collection')!.toTypeValue()!;
-            var oi = generateObjectInfo(col.element!);
-            if (oi != null) {
-              final cls = col.element as ClassElement;
-              yield oi.copyWith(
-                imports: [...oi.imports, cls.location!.components[0]],
-              );
-            }
-          }
-        })
-        .flatten()
-        .whereNotNull();
-
-    objects.addAll(externalObjects);
-
-    if (objects.isEmpty) return;
-
-    final objectsJson = objects.map((e) => e.toJson()).toList();
-    final json = JsonEncoder().convert(objectsJson);
-    await buildStep.writeAsString(
-        buildStep.inputId.changeExtension('.isarobject.json'), json);
-  }
-
-  ObjectInfo? generateObjectInfo(Element element) {
+class IsarAnalyzer {
+  ObjectInfo analyze(Element element) {
     if (element is! ClassElement) {
       err('Only classes may be annotated with @Collection.', element);
     }
@@ -79,9 +31,7 @@ class IsarAnalyzer extends Builder {
     }
 
     final isarName = getNameAnn(modelClass)?.name ?? modelClass.displayName;
-    if (isarName.isEmpty) {
-      err('Empty model names are not allowed.', modelClass);
-    }
+    _checkName(isarName, element);
 
     final properties = <ObjectProperty>[];
     final links = <ObjectLink>[];
@@ -96,7 +46,7 @@ class IsarAnalyzer extends Builder {
     };
     for (var propertyElement in allAccessors) {
       if (hasIgnoreAnn(propertyElement)) {
-        return null;
+        continue;
       }
 
       final converter = findTypeConverter(propertyElement);
@@ -123,11 +73,11 @@ class IsarAnalyzer extends Builder {
     final indexes = <ObjectIndex>[];
     for (var propertyElement in modelClass.fields) {
       if (links.any((it) => it.dartName == propertyElement.name)) continue;
-      final index = analyzeObjectIndex(properties, propertyElement);
-      if (index == null) continue;
-      indexes.add(index);
+      indexes.addAll(analyzeObjectIndex(properties, propertyElement));
     }
-    checkDuplicateIndexes(element, indexes);
+    if (indexes.map((e) => e.name).distinct().length != indexes.length) {
+      err('Two or more indexes have the same name.', element);
+    }
 
     var oidProperty = properties.firstOrNullWhere((it) => it.isId);
     if (oidProperty == null) {
@@ -215,6 +165,7 @@ class IsarAnalyzer extends Builder {
       err('Empty property names are not allowed.', property);
     }
     var isarName = nameAnn?.name ?? property.displayName;
+    _checkName(isarName, property);
 
     IsarType? isarType;
     if (converter == null) {
@@ -351,6 +302,9 @@ class IsarAnalyzer extends Builder {
       err('Empty link names are not allowed.', property);
     }
     var isarName = nameAnn?.name ?? property.displayName;
+    _checkName(isarName, property);
+
+    final targetColNameAnn = getNameAnn(linkType.element!);
 
     final backlinkAnn = getBacklinkAnn(property);
     return ObjectLink(
@@ -358,104 +312,100 @@ class IsarAnalyzer extends Builder {
       isarName: isarName,
       targetDartName: backlinkAnn?.to,
       targetCollectionDartName: linkType.element!.name!,
+      targetCollectionIsarName:
+          targetColNameAnn?.name ?? linkType.element!.name!,
       links: isLinks,
       backlink: backlinkAnn != null,
     );
   }
 
-  ObjectIndex? analyzeObjectIndex(
-      List<ObjectProperty> properties, FieldElement element) {
-    final property = properties.firstWhere((it) => it.dartName == element.name);
+  Iterable<ObjectIndex> analyzeObjectIndex(
+      List<ObjectProperty> properties, FieldElement element) sync* {
+    final property =
+        properties.firstOrNullWhere((it) => it.dartName == element.name);
+    if (property == null) return;
 
     final indexAnns = getIndexAnns(element).toList();
-    if (indexAnns.isEmpty) {
-      return null;
-    } else if (indexAnns.length > 1) {
-      err('Property must not have more than one @Index annotations.', element);
-    }
-
-    final index = indexAnns[0];
-
-    if (!index.unique && index.replace) {
-      err('Only unique indexes may replace existing entries', element);
-    }
-
-    final indexProperties = <ObjectIndexProperty>[];
-    final defaultIndexType =
-        property.isarType == IsarType.String ? IndexType.hash : IndexType.value;
-    final defaultCaseSensitive =
-        property.isarType == IsarType.String ? true : null;
-    indexProperties.add(ObjectIndexProperty(
-      property: property,
-      indexType: index.indexType ?? defaultIndexType,
-      caseSensitive: index.caseSensitive ?? defaultCaseSensitive,
-    ));
-    for (var c in index.composite) {
-      final compositeProperty =
-          properties.firstOrNullWhere((it) => it.dartName == c.property);
-      if (compositeProperty == null) {
-        err('Property does not exist: "${c.property}".', element);
-      } else {
-        indexProperties.add(ObjectIndexProperty(
-          property: compositeProperty,
-          indexType: c.indexType ?? defaultIndexType,
-          caseSensitive: c.caseSensitive ?? defaultCaseSensitive,
-        ));
+    for (var index in indexAnns) {
+      if (!index.unique && index.replace) {
+        err('Only unique indexes may replace existing entries', element);
       }
-    }
 
-    if (indexProperties.map((it) => it.property.isarName).distinct().length !=
-        indexProperties.length) {
-      err('Composite index contains duplicate properties.', element);
-    }
+      final indexProperties = <ObjectIndexProperty>[];
 
-    for (var i = 0; i < indexProperties.length; i++) {
-      final indexProperty = indexProperties[i];
-      if (indexProperty.property.isarType.isDynamic &&
-          indexProperty.property.isarType != IsarType.String) {
-        err('This type does not support indexes.', element);
-      }
-      if (property.isarType == IsarType.String) {
-        if ((indexProperty.indexType == IndexType.value ||
-                indexProperty.indexType == IndexType.words) &&
-            i != indexProperties.lastIndex) {
-          err('Only the last property of a composite index may use IndexType.value or IndexType.words.',
-              element);
+      indexProperties.add(ObjectIndexProperty(
+        property: property,
+        type: index.type ??
+            (property.isarType.isDynamic ? IndexType.hash : IndexType.value),
+        caseSensitive: index.caseSensitive ?? property.isarType.containsString,
+      ));
+      for (var c in index.composite) {
+        final compositeProperty =
+            properties.firstOrNullWhere((it) => it.dartName == c.property);
+        if (compositeProperty == null) {
+          err('Property does not exist: "${c.property}".', element);
+        } else {
+          indexProperties.add(ObjectIndexProperty(
+            property: compositeProperty,
+            type: c.type ??
+                (compositeProperty.isarType.isDynamic
+                    ? IndexType.hash
+                    : IndexType.value),
+            caseSensitive:
+                c.caseSensitive ?? compositeProperty.isarType.containsString,
+          ));
         }
-      } else if (indexProperty.indexType != IndexType.value) {
-        err('Only String indices may have a IndexType other than IndexType.value ${indexProperty.indexType}.',
-            element);
       }
-    }
 
-    return ObjectIndex(
-      properties: indexProperties,
-      unique: index.unique,
-      replace: index.replace,
-    );
-  }
+      if (indexProperties.map((it) => it.property.isarName).distinct().length !=
+          indexProperties.length) {
+        err('Composite index contains duplicate properties.', element);
+      }
 
-  void checkDuplicateIndexes(Element element, List<ObjectIndex> indexes) {
-    for (var index in indexes) {
-      for (var index2 in indexes) {
-        if (identical(index, index2)) continue;
-        if (index.properties.length <= index2.properties.length) {
-          final indexPropertyNames =
-              index.properties.map((it) => it.property.isarName);
-          final index2PropertyNames = index2.properties
-              .take(index.properties.length)
-              .map((it) => it.property.isarName);
-          if (indexPropertyNames.contentEquals(index2PropertyNames)) {
-            err('There are multiple indexes with the prefix "${indexPropertyNames.join(', ')}"',
+      for (var i = 0; i < indexProperties.length; i++) {
+        final indexProperty = indexProperties[i];
+        if (indexProperty.property.isarType.isList &&
+            indexProperty.type != IndexType.hash &&
+            indexProperties.length > 1) {
+          err('Composite indexes do not support non-hashed lists.', element);
+        }
+        if (property.isarType == IsarType.String) {
+          if (indexProperty.type != IndexType.hash &&
+              i != indexProperties.lastIndex) {
+            err('Only the last property of a composite index may be a non-hashed String.',
                 element);
           }
         }
+        if (!indexProperty.property.isarType.isDynamic &&
+            indexProperty.type != IndexType.value) {
+          err('Only Strings and Lists may be hashed.', element);
+        }
+        if (indexProperty.property.isarType != IsarType.StringList &&
+            indexProperty.type == IndexType.hashElements) {
+          err('Only String lists may have hashed elements.', element);
+        }
+        if (indexProperty.property.isarType == IsarType.Bytes &&
+            indexProperty.type != IndexType.hash) {
+          err('Bytes indexes need to be hashed.', element);
+        }
       }
+
+      final name = index.name ??
+          indexProperties.map((e) => e.property.isarName).join('_');
+      _checkName(name, element);
+
+      yield ObjectIndex(
+        name: name,
+        properties: indexProperties,
+        unique: index.unique,
+        replace: index.replace,
+      );
     }
   }
 
-  @override
-  final buildExtensions = {
-    '.dart': ['.isarobject.json']
-  };
+  void _checkName(String name, Element element) {
+    if (name.isBlank || name.startsWith('_')) {
+      err('Names must not be blank or start with "_".', element);
+    }
+  }
 }

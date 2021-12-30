@@ -1,6 +1,6 @@
 targets:
   $default:
     builders:
-      isar_generator|generator:
+      isar_generator:
         options:
           flutter: false

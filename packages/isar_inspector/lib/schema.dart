@@ -35,20 +35,20 @@ extension PropertyX on Property {
 @freezed
 class Index with _$Index {
   const factory Index(
-      bool unique, bool replace, List<IndexProperty> properties) = _Index;
+      bool unique, bool replace, List<ObjectIndexProperty> properties) = _Index;
 
   factory Index.fromJson(Map<String, dynamic> json) => _$IndexFromJson(json);
 }
 
 @freezed
-class IndexProperty with _$IndexProperty {
-  const factory IndexProperty(
+class ObjectIndexProperty with _$ObjectIndexProperty {
+  const factory ObjectIndexProperty(
     String name,
     int indexType,
     bool caseSensitive,
   ) = _IndexProperty;
 
-  factory IndexProperty.fromJson(Map<String, dynamic> json) =>
+  factory ObjectIndexProperty.fromJson(Map<String, dynamic> json) =>
       _$IndexPropertyFromJson(json);
 }
 

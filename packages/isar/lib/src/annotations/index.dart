@@ -1,24 +1,25 @@
 part of isar;
 
-/// There are multiple different type for indexes
 enum IndexType {
-  /// This is the default type and also the only allowed type for all properties
-  /// that don't hold Strings. Property values are used to build the index.
+  // Store the value directly in the index
   value,
 
-  /// Strings are hashed to reduce the storage required by the index. The
-  /// disadvantage of hash indexes is that they can't be used for prefix scans
-  /// (`startsWith()` where clauses).
+  /// Strings or Lists can be hashed to reduce the storage required by the
+  /// index. The disadvantage of hash indexes is that they can't be used for
+  /// prefix scans (`startsWith()` where clauses). String and list indexes are
+  /// hashed by default.
   hash,
 
-  /// Strings are splitted on Grapheme Clusters or word boundaries, according to
-  /// the Unicode Standard Annex #29 rules and stored individually. Can be used
-  /// for full-text search.
-  words,
+  // `List<String>` can hash its elements.
+  hashElements,
 }
 
 /// Annotate properties to build an index for the annotated property.
 class Index {
+  /// Name of the index. By default, the names of the properties are
+  /// concatenated using "_"
+  final String? name;
+
   ///
   final List<CompositeIndex> composite;
 
@@ -31,15 +32,18 @@ class Index {
   /// objects with the same value.
   final bool replace;
 
-  final IndexType? indexType;
+  final IndexType? type;
 
+  // String or `List<String>` indexes can be case sensitive (default) or case
+  // insensitive.
   final bool? caseSensitive;
 
   const Index({
+    this.name,
     this.composite = const [],
     this.unique = false,
     this.replace = false,
-    this.indexType,
+    this.type,
     this.caseSensitive,
   });
 }
@@ -47,13 +51,13 @@ class Index {
 class CompositeIndex {
   final String property;
 
-  final IndexType? indexType;
+  final IndexType? type;
 
   final bool? caseSensitive;
 
   const CompositeIndex(
     this.property, {
-    this.indexType,
+    this.type,
     this.caseSensitive,
   });
 }

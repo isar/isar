@@ -2,7 +2,6 @@ import 'package:isar/isar.dart';
 import 'package:isar_test/utils/common.dart';
 import 'package:isar_test/utils/open.dart';
 import 'package:isar_test/user_model.dart';
-import 'package:isar_test/isar.g.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -11,7 +10,7 @@ void main() {
     late IsarCollection<UserModel> users;
 
     setUp(() async {
-      isar = await openTempIsar();
+      isar = await openTempIsar([UserModelSchema]);
       users = isar.userModels;
 
       await isar.writeTxn(

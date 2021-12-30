@@ -1,4 +1,12 @@
-part of isar_native;
+import 'dart:async';
+import 'dart:ffi';
+import 'dart:isolate';
+
+import 'package:ffi/ffi.dart';
+import 'package:isar/isar.dart';
+
+import 'isar_core.dart';
+import 'util/native_call.dart';
 
 const _zoneTxn = #zoneTxn;
 const _zoneTxnWrite = #zoneTxnWrite;

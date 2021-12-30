@@ -687,11 +687,11 @@ class _$ObjectIndexPropertyTearOff {
 
   _ObjectIndexProperty call(
       {required ObjectProperty property,
-      required IndexType indexType,
-      required bool? caseSensitive}) {
+      required IndexType type,
+      required bool caseSensitive}) {
     return _ObjectIndexProperty(
       property: property,
-      indexType: indexType,
+      type: type,
       caseSensitive: caseSensitive,
     );
   }
@@ -707,8 +707,8 @@ const $ObjectIndexProperty = _$ObjectIndexPropertyTearOff();
 /// @nodoc
 mixin _$ObjectIndexProperty {
   ObjectProperty get property => throw _privateConstructorUsedError;
-  IndexType get indexType => throw _privateConstructorUsedError;
-  bool? get caseSensitive => throw _privateConstructorUsedError;
+  IndexType get type => throw _privateConstructorUsedError;
+  bool get caseSensitive => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -721,8 +721,7 @@ abstract class $ObjectIndexPropertyCopyWith<$Res> {
   factory $ObjectIndexPropertyCopyWith(
           ObjectIndexProperty value, $Res Function(ObjectIndexProperty) then) =
       _$ObjectIndexPropertyCopyWithImpl<$Res>;
-  $Res call(
-      {ObjectProperty property, IndexType indexType, bool? caseSensitive});
+  $Res call({ObjectProperty property, IndexType type, bool caseSensitive});
 
   $ObjectPropertyCopyWith<$Res> get property;
 }
@@ -739,7 +738,7 @@ class _$ObjectIndexPropertyCopyWithImpl<$Res>
   @override
   $Res call({
     Object? property = freezed,
-    Object? indexType = freezed,
+    Object? type = freezed,
     Object? caseSensitive = freezed,
   }) {
     return _then(_value.copyWith(
@@ -747,14 +746,14 @@ class _$ObjectIndexPropertyCopyWithImpl<$Res>
           ? _value.property
           : property // ignore: cast_nullable_to_non_nullable
               as ObjectProperty,
-      indexType: indexType == freezed
-          ? _value.indexType
-          : indexType // ignore: cast_nullable_to_non_nullable
+      type: type == freezed
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
               as IndexType,
       caseSensitive: caseSensitive == freezed
           ? _value.caseSensitive
           : caseSensitive // ignore: cast_nullable_to_non_nullable
-              as bool?,
+              as bool,
     ));
   }
 
@@ -773,8 +772,7 @@ abstract class _$ObjectIndexPropertyCopyWith<$Res>
           $Res Function(_ObjectIndexProperty) then) =
       __$ObjectIndexPropertyCopyWithImpl<$Res>;
   @override
-  $Res call(
-      {ObjectProperty property, IndexType indexType, bool? caseSensitive});
+  $Res call({ObjectProperty property, IndexType type, bool caseSensitive});
 
   @override
   $ObjectPropertyCopyWith<$Res> get property;
@@ -794,7 +792,7 @@ class __$ObjectIndexPropertyCopyWithImpl<$Res>
   @override
   $Res call({
     Object? property = freezed,
-    Object? indexType = freezed,
+    Object? type = freezed,
     Object? caseSensitive = freezed,
   }) {
     return _then(_ObjectIndexProperty(
@@ -802,14 +800,14 @@ class __$ObjectIndexPropertyCopyWithImpl<$Res>
           ? _value.property
           : property // ignore: cast_nullable_to_non_nullable
               as ObjectProperty,
-      indexType: indexType == freezed
-          ? _value.indexType
-          : indexType // ignore: cast_nullable_to_non_nullable
+      type: type == freezed
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
               as IndexType,
       caseSensitive: caseSensitive == freezed
           ? _value.caseSensitive
           : caseSensitive // ignore: cast_nullable_to_non_nullable
-              as bool?,
+              as bool,
     ));
   }
 }
@@ -818,9 +816,7 @@ class __$ObjectIndexPropertyCopyWithImpl<$Res>
 @JsonSerializable()
 class _$_ObjectIndexProperty extends _ObjectIndexProperty {
   const _$_ObjectIndexProperty(
-      {required this.property,
-      required this.indexType,
-      required this.caseSensitive})
+      {required this.property, required this.type, required this.caseSensitive})
       : super._();
 
   factory _$_ObjectIndexProperty.fromJson(Map<String, dynamic> json) =>
@@ -829,13 +825,13 @@ class _$_ObjectIndexProperty extends _ObjectIndexProperty {
   @override
   final ObjectProperty property;
   @override
-  final IndexType indexType;
+  final IndexType type;
   @override
-  final bool? caseSensitive;
+  final bool caseSensitive;
 
   @override
   String toString() {
-    return 'ObjectIndexProperty(property: $property, indexType: $indexType, caseSensitive: $caseSensitive)';
+    return 'ObjectIndexProperty(property: $property, type: $type, caseSensitive: $caseSensitive)';
   }
 
   @override
@@ -845,9 +841,8 @@ class _$_ObjectIndexProperty extends _ObjectIndexProperty {
             (identical(other.property, property) ||
                 const DeepCollectionEquality()
                     .equals(other.property, property)) &&
-            (identical(other.indexType, indexType) ||
-                const DeepCollectionEquality()
-                    .equals(other.indexType, indexType)) &&
+            (identical(other.type, type) ||
+                const DeepCollectionEquality().equals(other.type, type)) &&
             (identical(other.caseSensitive, caseSensitive) ||
                 const DeepCollectionEquality()
                     .equals(other.caseSensitive, caseSensitive)));
@@ -857,7 +852,7 @@ class _$_ObjectIndexProperty extends _ObjectIndexProperty {
   int get hashCode =>
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(property) ^
-      const DeepCollectionEquality().hash(indexType) ^
+      const DeepCollectionEquality().hash(type) ^
       const DeepCollectionEquality().hash(caseSensitive);
 
   @JsonKey(ignore: true)
@@ -875,8 +870,8 @@ class _$_ObjectIndexProperty extends _ObjectIndexProperty {
 abstract class _ObjectIndexProperty extends ObjectIndexProperty {
   const factory _ObjectIndexProperty(
       {required ObjectProperty property,
-      required IndexType indexType,
-      required bool? caseSensitive}) = _$_ObjectIndexProperty;
+      required IndexType type,
+      required bool caseSensitive}) = _$_ObjectIndexProperty;
   const _ObjectIndexProperty._() : super._();
 
   factory _ObjectIndexProperty.fromJson(Map<String, dynamic> json) =
@@ -885,9 +880,9 @@ abstract class _ObjectIndexProperty extends ObjectIndexProperty {
   @override
   ObjectProperty get property => throw _privateConstructorUsedError;
   @override
-  IndexType get indexType => throw _privateConstructorUsedError;
+  IndexType get type => throw _privateConstructorUsedError;
   @override
-  bool? get caseSensitive => throw _privateConstructorUsedError;
+  bool get caseSensitive => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
   _$ObjectIndexPropertyCopyWith<_ObjectIndexProperty> get copyWith =>
@@ -903,10 +898,12 @@ class _$ObjectIndexTearOff {
   const _$ObjectIndexTearOff();
 
   _ObjectIndex call(
-      {required List<ObjectIndexProperty> properties,
+      {required String name,
+      required List<ObjectIndexProperty> properties,
       required bool unique,
       required bool replace}) {
     return _ObjectIndex(
+      name: name,
       properties: properties,
       unique: unique,
       replace: replace,
@@ -923,6 +920,7 @@ const $ObjectIndex = _$ObjectIndexTearOff();
 
 /// @nodoc
 mixin _$ObjectIndex {
+  String get name => throw _privateConstructorUsedError;
   List<ObjectIndexProperty> get properties =>
       throw _privateConstructorUsedError;
   bool get unique => throw _privateConstructorUsedError;
@@ -939,7 +937,11 @@ abstract class $ObjectIndexCopyWith<$Res> {
   factory $ObjectIndexCopyWith(
           ObjectIndex value, $Res Function(ObjectIndex) then) =
       _$ObjectIndexCopyWithImpl<$Res>;
-  $Res call({List<ObjectIndexProperty> properties, bool unique, bool replace});
+  $Res call(
+      {String name,
+      List<ObjectIndexProperty> properties,
+      bool unique,
+      bool replace});
 }
 
 /// @nodoc
@@ -952,11 +954,16 @@ class _$ObjectIndexCopyWithImpl<$Res> implements $ObjectIndexCopyWith<$Res> {
 
   @override
   $Res call({
+    Object? name = freezed,
     Object? properties = freezed,
     Object? unique = freezed,
     Object? replace = freezed,
   }) {
     return _then(_value.copyWith(
+      name: name == freezed
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
       properties: properties == freezed
           ? _value.properties
           : properties // ignore: cast_nullable_to_non_nullable
@@ -980,7 +987,11 @@ abstract class _$ObjectIndexCopyWith<$Res>
           _ObjectIndex value, $Res Function(_ObjectIndex) then) =
       __$ObjectIndexCopyWithImpl<$Res>;
   @override
-  $Res call({List<ObjectIndexProperty> properties, bool unique, bool replace});
+  $Res call(
+      {String name,
+      List<ObjectIndexProperty> properties,
+      bool unique,
+      bool replace});
 }
 
 /// @nodoc
@@ -995,11 +1006,16 @@ class __$ObjectIndexCopyWithImpl<$Res> extends _$ObjectIndexCopyWithImpl<$Res>
 
   @override
   $Res call({
+    Object? name = freezed,
     Object? properties = freezed,
     Object? unique = freezed,
     Object? replace = freezed,
   }) {
     return _then(_ObjectIndex(
+      name: name == freezed
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
       properties: properties == freezed
           ? _value.properties
           : properties // ignore: cast_nullable_to_non_nullable
@@ -1020,12 +1036,17 @@ class __$ObjectIndexCopyWithImpl<$Res> extends _$ObjectIndexCopyWithImpl<$Res>
 @JsonSerializable()
 class _$_ObjectIndex extends _ObjectIndex {
   const _$_ObjectIndex(
-      {required this.properties, required this.unique, required this.replace})
+      {required this.name,
+      required this.properties,
+      required this.unique,
+      required this.replace})
       : super._();
 
   factory _$_ObjectIndex.fromJson(Map<String, dynamic> json) =>
       _$$_ObjectIndexFromJson(json);
 
+  @override
+  final String name;
   @override
   final List<ObjectIndexProperty> properties;
   @override
@@ -1035,13 +1056,15 @@ class _$_ObjectIndex extends _ObjectIndex {
 
   @override
   String toString() {
-    return 'ObjectIndex(properties: $properties, unique: $unique, replace: $replace)';
+    return 'ObjectIndex(name: $name, properties: $properties, unique: $unique, replace: $replace)';
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other is _ObjectIndex &&
+            (identical(other.name, name) ||
+                const DeepCollectionEquality().equals(other.name, name)) &&
             (identical(other.properties, properties) ||
                 const DeepCollectionEquality()
                     .equals(other.properties, properties)) &&
@@ -1054,6 +1077,7 @@ class _$_ObjectIndex extends _ObjectIndex {
   @override
   int get hashCode =>
       runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(name) ^
       const DeepCollectionEquality().hash(properties) ^
       const DeepCollectionEquality().hash(unique) ^
       const DeepCollectionEquality().hash(replace);
@@ -1071,7 +1095,8 @@ class _$_ObjectIndex extends _ObjectIndex {
 
 abstract class _ObjectIndex extends ObjectIndex {
   const factory _ObjectIndex(
-      {required List<ObjectIndexProperty> properties,
+      {required String name,
+      required List<ObjectIndexProperty> properties,
       required bool unique,
       required bool replace}) = _$_ObjectIndex;
   const _ObjectIndex._() : super._();
@@ -1079,6 +1104,8 @@ abstract class _ObjectIndex extends ObjectIndex {
   factory _ObjectIndex.fromJson(Map<String, dynamic> json) =
       _$_ObjectIndex.fromJson;
 
+  @override
+  String get name => throw _privateConstructorUsedError;
   @override
   List<ObjectIndexProperty> get properties =>
       throw _privateConstructorUsedError;
@@ -1105,17 +1132,17 @@ class _$ObjectLinkTearOff {
       required String isarName,
       required String? targetDartName,
       required String targetCollectionDartName,
+      required String targetCollectionIsarName,
       required bool links,
-      required bool backlink,
-      int linkIndex = -1}) {
+      required bool backlink}) {
     return _ObjectLink(
       dartName: dartName,
       isarName: isarName,
       targetDartName: targetDartName,
       targetCollectionDartName: targetCollectionDartName,
+      targetCollectionIsarName: targetCollectionIsarName,
       links: links,
       backlink: backlink,
-      linkIndex: linkIndex,
     );
   }
 
@@ -1133,9 +1160,9 @@ mixin _$ObjectLink {
   String get isarName => throw _privateConstructorUsedError;
   String? get targetDartName => throw _privateConstructorUsedError;
   String get targetCollectionDartName => throw _privateConstructorUsedError;
+  String get targetCollectionIsarName => throw _privateConstructorUsedError;
   bool get links => throw _privateConstructorUsedError;
   bool get backlink => throw _privateConstructorUsedError;
-  int get linkIndex => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -1153,9 +1180,9 @@ abstract class $ObjectLinkCopyWith<$Res> {
       String isarName,
       String? targetDartName,
       String targetCollectionDartName,
+      String targetCollectionIsarName,
       bool links,
-      bool backlink,
-      int linkIndex});
+      bool backlink});
 }
 
 /// @nodoc
@@ -1172,9 +1199,9 @@ class _$ObjectLinkCopyWithImpl<$Res> implements $ObjectLinkCopyWith<$Res> {
     Object? isarName = freezed,
     Object? targetDartName = freezed,
     Object? targetCollectionDartName = freezed,
+    Object? targetCollectionIsarName = freezed,
     Object? links = freezed,
     Object? backlink = freezed,
-    Object? linkIndex = freezed,
   }) {
     return _then(_value.copyWith(
       dartName: dartName == freezed
@@ -1193,6 +1220,10 @@ class _$ObjectLinkCopyWithImpl<$Res> implements $ObjectLinkCopyWith<$Res> {
           ? _value.targetCollectionDartName
           : targetCollectionDartName // ignore: cast_nullable_to_non_nullable
               as String,
+      targetCollectionIsarName: targetCollectionIsarName == freezed
+          ? _value.targetCollectionIsarName
+          : targetCollectionIsarName // ignore: cast_nullable_to_non_nullable
+              as String,
       links: links == freezed
           ? _value.links
           : links // ignore: cast_nullable_to_non_nullable
@@ -1201,10 +1232,6 @@ class _$ObjectLinkCopyWithImpl<$Res> implements $ObjectLinkCopyWith<$Res> {
           ? _value.backlink
           : backlink // ignore: cast_nullable_to_non_nullable
               as bool,
-      linkIndex: linkIndex == freezed
-          ? _value.linkIndex
-          : linkIndex // ignore: cast_nullable_to_non_nullable
-              as int,
     ));
   }
 }
@@ -1220,9 +1247,9 @@ abstract class _$ObjectLinkCopyWith<$Res> implements $ObjectLinkCopyWith<$Res> {
       String isarName,
       String? targetDartName,
       String targetCollectionDartName,
+      String targetCollectionIsarName,
       bool links,
-      bool backlink,
-      int linkIndex});
+      bool backlink});
 }
 
 /// @nodoc
@@ -1241,9 +1268,9 @@ class __$ObjectLinkCopyWithImpl<$Res> extends _$ObjectLinkCopyWithImpl<$Res>
     Object? isarName = freezed,
     Object? targetDartName = freezed,
     Object? targetCollectionDartName = freezed,
+    Object? targetCollectionIsarName = freezed,
     Object? links = freezed,
     Object? backlink = freezed,
-    Object? linkIndex = freezed,
   }) {
     return _then(_ObjectLink(
       dartName: dartName == freezed
@@ -1262,6 +1289,10 @@ class __$ObjectLinkCopyWithImpl<$Res> extends _$ObjectLinkCopyWithImpl<$Res>
           ? _value.targetCollectionDartName
           : targetCollectionDartName // ignore: cast_nullable_to_non_nullable
               as String,
+      targetCollectionIsarName: targetCollectionIsarName == freezed
+          ? _value.targetCollectionIsarName
+          : targetCollectionIsarName // ignore: cast_nullable_to_non_nullable
+              as String,
       links: links == freezed
           ? _value.links
           : links // ignore: cast_nullable_to_non_nullable
@@ -1270,10 +1301,6 @@ class __$ObjectLinkCopyWithImpl<$Res> extends _$ObjectLinkCopyWithImpl<$Res>
           ? _value.backlink
           : backlink // ignore: cast_nullable_to_non_nullable
               as bool,
-      linkIndex: linkIndex == freezed
-          ? _value.linkIndex
-          : linkIndex // ignore: cast_nullable_to_non_nullable
-              as int,
     ));
   }
 }
@@ -1286,9 +1313,9 @@ class _$_ObjectLink implements _ObjectLink {
       required this.isarName,
       required this.targetDartName,
       required this.targetCollectionDartName,
+      required this.targetCollectionIsarName,
       required this.links,
-      required this.backlink,
-      this.linkIndex = -1});
+      required this.backlink});
 
   factory _$_ObjectLink.fromJson(Map<String, dynamic> json) =>
       _$$_ObjectLinkFromJson(json);
@@ -1302,16 +1329,15 @@ class _$_ObjectLink implements _ObjectLink {
   @override
   final String targetCollectionDartName;
   @override
+  final String targetCollectionIsarName;
+  @override
   final bool links;
   @override
   final bool backlink;
-  @JsonKey(defaultValue: -1)
-  @override
-  final int linkIndex;
 
   @override
   String toString() {
-    return 'ObjectLink(dartName: $dartName, isarName: $isarName, targetDartName: $targetDartName, targetCollectionDartName: $targetCollectionDartName, links: $links, backlink: $backlink, linkIndex: $linkIndex)';
+    return 'ObjectLink(dartName: $dartName, isarName: $isarName, targetDartName: $targetDartName, targetCollectionDartName: $targetCollectionDartName, targetCollectionIsarName: $targetCollectionIsarName, links: $links, backlink: $backlink)';
   }
 
   @override
@@ -1332,14 +1358,16 @@ class _$_ObjectLink implements _ObjectLink {
                 const DeepCollectionEquality().equals(
                     other.targetCollectionDartName,
                     targetCollectionDartName)) &&
+            (identical(
+                    other.targetCollectionIsarName, targetCollectionIsarName) ||
+                const DeepCollectionEquality().equals(
+                    other.targetCollectionIsarName,
+                    targetCollectionIsarName)) &&
             (identical(other.links, links) ||
                 const DeepCollectionEquality().equals(other.links, links)) &&
             (identical(other.backlink, backlink) ||
                 const DeepCollectionEquality()
-                    .equals(other.backlink, backlink)) &&
-            (identical(other.linkIndex, linkIndex) ||
-                const DeepCollectionEquality()
-                    .equals(other.linkIndex, linkIndex)));
+                    .equals(other.backlink, backlink)));
   }
 
   @override
@@ -1349,9 +1377,9 @@ class _$_ObjectLink implements _ObjectLink {
       const DeepCollectionEquality().hash(isarName) ^
       const DeepCollectionEquality().hash(targetDartName) ^
       const DeepCollectionEquality().hash(targetCollectionDartName) ^
+      const DeepCollectionEquality().hash(targetCollectionIsarName) ^
       const DeepCollectionEquality().hash(links) ^
-      const DeepCollectionEquality().hash(backlink) ^
-      const DeepCollectionEquality().hash(linkIndex);
+      const DeepCollectionEquality().hash(backlink);
 
   @JsonKey(ignore: true)
   @override
@@ -1370,9 +1398,9 @@ abstract class _ObjectLink implements ObjectLink {
       required String isarName,
       required String? targetDartName,
       required String targetCollectionDartName,
+      required String targetCollectionIsarName,
       required bool links,
-      required bool backlink,
-      int linkIndex}) = _$_ObjectLink;
+      required bool backlink}) = _$_ObjectLink;
 
   factory _ObjectLink.fromJson(Map<String, dynamic> json) =
       _$_ObjectLink.fromJson;
@@ -1386,11 +1414,11 @@ abstract class _ObjectLink implements ObjectLink {
   @override
   String get targetCollectionDartName => throw _privateConstructorUsedError;
   @override
+  String get targetCollectionIsarName => throw _privateConstructorUsedError;
+  @override
   bool get links => throw _privateConstructorUsedError;
   @override
   bool get backlink => throw _privateConstructorUsedError;
-  @override
-  int get linkIndex => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
   _$ObjectLinkCopyWith<_ObjectLink> get copyWith =>

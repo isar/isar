@@ -21,7 +21,7 @@ void run() {
   double_filter.main();
   float_filter.main();
   int_filter.main();
-  link_filter.main();
+  //link_filter.main();
   long_filter.main();
   string_filter.main();
 

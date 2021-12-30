@@ -1,5 +1,7 @@
 import 'package:isar/isar.dart';
 
+part 'message_model.g.dart';
+
 @Collection()
 class Message {
   int? id;

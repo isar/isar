@@ -1,4 +1,8 @@
-part of isar_native;
+import 'dart:io';
+
+import 'package:isar/isar.dart';
+
+import 'bindings.dart';
 
 const nullBool = 0;
 const falseBool = 1;
@@ -56,9 +60,7 @@ void initializeIsarCore({Map<String, String> dylibs = const {}}) {
     print(e);
     throw IsarError(
         'Could not initialize IsarCore library. If you create a Flutter app, '
-        'make sure to add isar_flutter_libs to your dependencies. Isar does not '
-        'support 32-bit processors so make sure that your device / emulator '
-        'has a 64-bit processor.');
+        'make sure to add isar_flutter_libs to your dependencies.');
   }
 }
 

@@ -18,6 +18,11 @@ abstract class IsarLink<OBJ> {
   Future<void> save();
 
   void saveSync();
+
+  bool get attached;
+
+  void attach(IsarCollection col, IsarCollection<OBJ> targetCol,
+      dynamic containingObject, String linkName, bool backlink);
 }
 
 abstract class IsarLinks<OBJ> implements Set<OBJ> {
@@ -34,4 +39,9 @@ abstract class IsarLinks<OBJ> implements Set<OBJ> {
   Future<void> saveChanges();
 
   void saveChangesSync();
+
+  bool get attached;
+
+  void attach(IsarCollection col, IsarCollection<OBJ> targetCol,
+      dynamic containingObject, String linkName, bool backlink);
 }

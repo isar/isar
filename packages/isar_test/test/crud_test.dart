@@ -5,8 +5,6 @@ import 'package:isar_test/utils/open.dart';
 import 'package:isar_test/message_model.dart';
 import 'package:test/test.dart';
 
-import 'package:isar_test/isar.g.dart';
-
 void main() {
   group('CRUD', () {
     late Isar isar;
@@ -14,7 +12,7 @@ void main() {
     late IsarCollection<UserModel> users;
 
     setUp(() async {
-      isar = await openTempIsar();
+      isar = await openTempIsar([MessageSchema, UserModelSchema]);
       messages = isar.messages;
       users = isar.userModels;
     });
@@ -32,11 +30,11 @@ void main() {
         message2.id = await messages.put(message2);
       });
 
-      expect(message1.id, -140737488355327);
+      expect(message1.id, Isar.minId + 1);
       final newMessage1 = await messages.get(message1.id!);
       expect(message1, newMessage1);
 
-      expect(message2.id, -140737488355326);
+      expect(message2.id, Isar.minId + 2);
       final newMessage2 = await messages.get(message2.id!);
       expect(message2, newMessage2);
     });
@@ -102,7 +100,7 @@ void main() {
         ids = await messages.putAll([message1, message2, message3]);
       });
 
-      expect(ids, [-140737488355327, -10, -9]);
+      expect(ids, [Isar.minId + 1, -10, -9]);
       final newMessages = await messages.getAll(ids);
       expect(newMessages, [message1, message2, message3]);
     });
@@ -119,7 +117,7 @@ void main() {
         ids = messages.putAllSync([message1, message2, message3]);
       });
 
-      expect(ids, [-140737488355327, -10, -9]);
+      expect(ids, [Isar.minId + 1, -10, -9]);
       final newMessages = messages.getAllSync(ids);
       expect(newMessages, [message1, message2, message3]);
     });

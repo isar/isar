@@ -1,6 +1,5 @@
 import 'package:isar/isar.dart';
 import 'package:isar_test/bool_model.dart';
-import 'package:isar_test/isar.g.dart';
 import 'package:isar_test/utils/common.dart';
 import 'package:isar_test/utils/open.dart';
 import 'package:test/test.dart';
@@ -11,7 +10,7 @@ void main() {
     late IsarCollection<BoolModel> col;
 
     setUp(() async {
-      isar = await openTempIsar();
+      isar = await openTempIsar([BoolModelSchema]);
       col = isar.boolModels;
 
       await isar.writeTxn((isar) async {

@@ -1,4 +1,8 @@
-part of isar_native;
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:isar/src/native/isar_core.dart';
+import 'package:isar/src/native/util/extensions.dart';
 
 class BinaryReader {
   static const utf8Decoder = Utf8Decoder();

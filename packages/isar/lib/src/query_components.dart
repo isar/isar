@@ -23,8 +23,8 @@ abstract class FilterOperation {
 class FilterCondition<T> extends FilterOperation {
   final ConditionType type;
   final String property;
-  final T? lower;
-  final T? upper;
+  final T? value1;
+  final T? value2;
   final bool caseSensitive;
 
   const FilterCondition({
@@ -32,27 +32,32 @@ class FilterCondition<T> extends FilterOperation {
     required this.property,
     T? value,
     this.caseSensitive = true,
-  })  : lower = value,
-        upper = null,
+  })  : value1 = value,
+        value2 = null,
         assert(type != ConditionType.Between);
 
   const FilterCondition.between({
     required this.property,
-    this.lower,
-    this.upper,
+    T? lower,
+    T? upper,
     this.caseSensitive = true,
-  }) : type = ConditionType.Between;
+  })  : value1 = lower,
+        value2 = upper,
+        type = ConditionType.Between;
 }
 
 enum ConditionType {
   Eq,
   Gt,
+  Gte,
   Lt,
+  Lte,
   Between,
   StartsWith,
   EndsWith,
+  Contains,
   Matches,
-  ListContains,
+  IsNull,
 }
 
 enum FilterGroupType {

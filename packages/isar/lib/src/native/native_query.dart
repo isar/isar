@@ -1,18 +1,24 @@
-part of isar_native;
+import 'dart:async';
+import 'dart:isolate';
+
+import 'package:isar/isar.dart';
+
+import 'bindings.dart';
+import 'isar_collection_impl.dart';
+import 'util/native_call.dart';
+import 'isar_core.dart';
 
 typedef QueryDeserialize<T> = List<T> Function(RawObjectSet);
 
 class NativeQuery<T> extends Query<T> {
   static const MAX_LIMIT = 4294967295;
 
-  final IsarImpl isar;
-  final Pointer<NativeType> colPtr;
+  final IsarCollectionImpl col;
   final Pointer<NativeType> queryPtr;
   final QueryDeserialize<T> deserialize;
   final int? propertyId;
 
-  NativeQuery(
-      this.isar, this.colPtr, this.queryPtr, this.deserialize, this.propertyId);
+  NativeQuery(this.col, this.queryPtr, this.deserialize, this.propertyId);
 
   @override
   Future<T?> findFirst() {
@@ -27,7 +33,7 @@ class NativeQuery<T> extends Query<T> {
   Future<List<T>> findAll() => findInternal(MAX_LIMIT);
 
   Future<List<T>> findInternal(int limit) {
-    return isar.getTxn(false, (txnPtr, stream) async {
+    return col.isar.getTxn(false, (txnPtr, stream) async {
       final resultsPtr = malloc<RawObjectSet>();
       try {
         IC.isar_q_find(queryPtr, txnPtr, resultsPtr, limit);
@@ -52,7 +58,7 @@ class NativeQuery<T> extends Query<T> {
   List<T> findAllSync() => findSyncInternal(MAX_LIMIT);
 
   List<T> findSyncInternal(int limit) {
-    return isar.getTxnSync(false, (txnPtr) {
+    return col.isar.getTxnSync(false, (txnPtr) {
       final resultsPtr = malloc<RawObjectSet>();
       try {
         nCall(IC.isar_q_find(queryPtr, txnPtr, resultsPtr, limit));
@@ -70,12 +76,12 @@ class NativeQuery<T> extends Query<T> {
   Future<int> deleteAll() => deleteInternal(MAX_LIMIT);
 
   Future<int> deleteInternal(int limit) {
-    return isar.getTxn(false, (txnPtr, stream) async {
+    return col.isar.getTxn(false, (txnPtr, stream) async {
       final countPtr = malloc<Uint32>();
       try {
         IC.isar_q_delete(
           queryPtr,
-          colPtr,
+          col.ptr,
           txnPtr,
           limit,
           countPtr,
@@ -95,12 +101,12 @@ class NativeQuery<T> extends Query<T> {
   int deleteAllSync() => deleteSyncInternal(MAX_LIMIT);
 
   int deleteSyncInternal(int limit) {
-    return isar.getTxnSync(false, (txnPtr) {
+    return col.isar.getTxnSync(false, (txnPtr) {
       final countPtr = malloc<Uint32>();
       try {
         nCall(IC.isar_q_delete(
           queryPtr,
-          colPtr,
+          col.ptr,
           txnPtr,
           limit,
           countPtr,
@@ -122,7 +128,7 @@ class NativeQuery<T> extends Query<T> {
   Stream<void> watchLazy({bool initialReturn = false}) {
     final port = ReceivePort();
     final handle = IC.isar_watch_query(
-        isar.ptr, colPtr, queryPtr, port.sendPort.nativePort);
+        col.isar.ptr, col.ptr, queryPtr, port.sendPort.nativePort);
 
     final controller = StreamController(onCancel: () {
       IC.isar_stop_watching(handle);
@@ -139,11 +145,12 @@ class NativeQuery<T> extends Query<T> {
   @override
   Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
       {bool primitiveNull = true}) {
-    return isar.getTxn(false, (txnPtr, stream) async {
+    return col.isar.getTxn(false, (txnPtr, stream) async {
       final bytesPtrPtr = malloc<Pointer<Uint8>>();
       final lengthPtr = malloc<Uint32>();
-      IC.isar_q_export_json(
-          queryPtr, colPtr, txnPtr, primitiveNull, bytesPtrPtr, lengthPtr);
+      final idNamePtr = col.idName.toNativeUtf8();
+      IC.isar_q_export_json(queryPtr, col.ptr, txnPtr, idNamePtr.cast(),
+          primitiveNull, bytesPtrPtr, lengthPtr);
 
       try {
         await stream.first;
@@ -153,62 +160,63 @@ class NativeQuery<T> extends Query<T> {
         IC.isar_free_json(bytesPtrPtr.value, lengthPtr.value);
         malloc.free(bytesPtrPtr);
         malloc.free(lengthPtr);
+        malloc.free(idNamePtr);
       }
     });
   }
-}
 
-Future<T?> aggregateQuery<T>(Query query, AggregationOp op) async {
-  query as NativeQuery;
-  return query.isar.getTxn(false, (txnPtr, stream) async {
-    final resultPtrPtr = malloc<Pointer>();
+  @override
+  Future<R?> aggregate<R>(AggregationOp op) async {
+    return col.isar.getTxn(false, (txnPtr, stream) async {
+      final resultPtrPtr = malloc<Pointer>();
 
-    IC.isar_q_aggregate(query.colPtr, query.queryPtr, txnPtr, op.index,
-        query.propertyId ?? 0, resultPtrPtr);
+      IC.isar_q_aggregate(
+          col.ptr, queryPtr, txnPtr, op.index, propertyId ?? 0, resultPtrPtr);
 
-    try {
-      await stream.first;
-      return _convertAggregatedResult<T>(resultPtrPtr.value, op);
-    } finally {
-      malloc.free(resultPtrPtr);
-    }
-  });
-}
+      try {
+        await stream.first;
+        return _convertAggregatedResult<R>(resultPtrPtr.value, op);
+      } finally {
+        malloc.free(resultPtrPtr);
+      }
+    });
+  }
 
-T? aggregateQuerySync<T>(Query query, AggregationOp op) {
-  query as NativeQuery;
-  return query.isar.getTxnSync(false, (txnPtr) {
-    final resultPtrPtr = malloc<Pointer>();
+  @override
+  R? aggregateSync<R>(AggregationOp op) {
+    return col.isar.getTxnSync(false, (txnPtr) {
+      final resultPtrPtr = malloc<Pointer>();
 
-    try {
-      nCall(IC.isar_q_aggregate(query.colPtr, query.queryPtr, txnPtr, op.index,
-          query.propertyId ?? 0, resultPtrPtr));
-      return _convertAggregatedResult(resultPtrPtr.value, op);
-    } finally {
-      malloc.free(resultPtrPtr);
-    }
-  });
-}
+      try {
+        nCall(IC.isar_q_aggregate(col.ptr, queryPtr, txnPtr, op.index,
+            propertyId ?? 0, resultPtrPtr));
+        return _convertAggregatedResult(resultPtrPtr.value, op);
+      } finally {
+        malloc.free(resultPtrPtr);
+      }
+    });
+  }
 
-T? _convertAggregatedResult<T>(Pointer resultPtr, AggregationOp op) {
-  final nullable = op == AggregationOp.Min || op == AggregationOp.Max;
-  if (T == int || T == DateTime) {
-    final value = IC.isar_q_aggregate_long_result(resultPtr);
-    if (nullable && value == nullLong) {
-      return null;
-    }
-    if (T == int) {
-      return value as T;
+  R? _convertAggregatedResult<R>(Pointer resultPtr, AggregationOp op) {
+    final nullable = op == AggregationOp.Min || op == AggregationOp.Max;
+    if (R == int || R == DateTime) {
+      final value = IC.isar_q_aggregate_long_result(resultPtr);
+      if (nullable && value == nullLong) {
+        return null;
+      }
+      if (R == int) {
+        return value as R;
+      } else {
+        return DateTime.fromMicrosecondsSinceEpoch(value, isUtc: true).toLocal()
+            as R;
+      }
     } else {
-      return DateTime.fromMicrosecondsSinceEpoch(value, isUtc: true).toLocal()
-          as T;
-    }
-  } else {
-    final value = IC.isar_q_aggregate_double_result(resultPtr);
-    if (nullable && value.isNaN) {
-      return null;
-    } else {
-      return value as T;
+      final value = IC.isar_q_aggregate_double_result(resultPtr);
+      if (nullable && value.isNaN) {
+        return null;
+      } else {
+        return value as R;
+      }
     }
   }
 }

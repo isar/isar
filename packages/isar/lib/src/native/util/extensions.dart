@@ -1,4 +1,4 @@
-part of isar_native;
+import 'dart:typed_data';
 
 extension Uint8ListX on Uint8List {
   @pragma('vm:prefer-inline')

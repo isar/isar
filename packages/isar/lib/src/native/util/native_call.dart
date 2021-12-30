@@ -1,4 +1,8 @@
-part of isar_native;
+import 'dart:async';
+import 'dart:isolate';
+
+import 'package:isar/isar.dart';
+import 'package:isar/src/native/isar_core.dart';
 
 IsarError? isarErrorFromResult(int result) {
   if (result != 0) {

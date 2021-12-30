@@ -1,5 +1,7 @@
 import 'package:isar/isar.dart';
 
+part 'date_time_model.g.dart';
+
 @Collection()
 class DateTimeModel {
   @Id()

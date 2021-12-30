@@ -400,7 +400,7 @@ Index _$IndexFromJson(Map<String, dynamic> json) {
 class _$IndexTearOff {
   const _$IndexTearOff();
 
-  _Index call(bool unique, bool replace, List<IndexProperty> properties) {
+  _Index call(bool unique, bool replace, List<ObjectIndexProperty> properties) {
     return _Index(
       unique,
       replace,
@@ -420,7 +420,8 @@ const $Index = _$IndexTearOff();
 mixin _$Index {
   bool get unique => throw _privateConstructorUsedError;
   bool get replace => throw _privateConstructorUsedError;
-  List<IndexProperty> get properties => throw _privateConstructorUsedError;
+  List<ObjectIndexProperty> get properties =>
+      throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -431,7 +432,7 @@ mixin _$Index {
 abstract class $IndexCopyWith<$Res> {
   factory $IndexCopyWith(Index value, $Res Function(Index) then) =
       _$IndexCopyWithImpl<$Res>;
-  $Res call({bool unique, bool replace, List<IndexProperty> properties});
+  $Res call({bool unique, bool replace, List<ObjectIndexProperty> properties});
 }
 
 /// @nodoc
@@ -460,7 +461,7 @@ class _$IndexCopyWithImpl<$Res> implements $IndexCopyWith<$Res> {
       properties: properties == freezed
           ? _value.properties
           : properties // ignore: cast_nullable_to_non_nullable
-              as List<IndexProperty>,
+              as List<ObjectIndexProperty>,
     ));
   }
 }
@@ -470,7 +471,7 @@ abstract class _$IndexCopyWith<$Res> implements $IndexCopyWith<$Res> {
   factory _$IndexCopyWith(_Index value, $Res Function(_Index) then) =
       __$IndexCopyWithImpl<$Res>;
   @override
-  $Res call({bool unique, bool replace, List<IndexProperty> properties});
+  $Res call({bool unique, bool replace, List<ObjectIndexProperty> properties});
 }
 
 /// @nodoc
@@ -500,7 +501,7 @@ class __$IndexCopyWithImpl<$Res> extends _$IndexCopyWithImpl<$Res>
       properties == freezed
           ? _value.properties
           : properties // ignore: cast_nullable_to_non_nullable
-              as List<IndexProperty>,
+              as List<ObjectIndexProperty>,
     ));
   }
 }
@@ -519,7 +520,7 @@ class _$_Index implements _Index {
   @override
   final bool replace;
   @override
-  final List<IndexProperty> properties;
+  final List<ObjectIndexProperty> properties;
 
   @override
   String toString() {
@@ -560,7 +561,8 @@ class _$_Index implements _Index {
 
 abstract class _Index implements Index {
   const factory _Index(
-      bool unique, bool replace, List<IndexProperty> properties) = _$_Index;
+          bool unique, bool replace, List<ObjectIndexProperty> properties) =
+      _$_Index;
 
   factory _Index.fromJson(Map<String, dynamic> json) = _$_Index.fromJson;
 
@@ -569,13 +571,14 @@ abstract class _Index implements Index {
   @override
   bool get replace => throw _privateConstructorUsedError;
   @override
-  List<IndexProperty> get properties => throw _privateConstructorUsedError;
+  List<ObjectIndexProperty> get properties =>
+      throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
   _$IndexCopyWith<_Index> get copyWith => throw _privateConstructorUsedError;
 }
 
-IndexProperty _$IndexPropertyFromJson(Map<String, dynamic> json) {
+ObjectIndexProperty _$IndexPropertyFromJson(Map<String, dynamic> json) {
   return _IndexProperty.fromJson(json);
 }
 
@@ -591,30 +594,30 @@ class _$IndexPropertyTearOff {
     );
   }
 
-  IndexProperty fromJson(Map<String, Object> json) {
-    return IndexProperty.fromJson(json);
+  ObjectIndexProperty fromJson(Map<String, Object> json) {
+    return ObjectIndexProperty.fromJson(json);
   }
 }
 
 /// @nodoc
-const $IndexProperty = _$IndexPropertyTearOff();
+const $ObjectIndexProperty = _$IndexPropertyTearOff();
 
 /// @nodoc
-mixin _$IndexProperty {
+mixin _$ObjectIndexProperty {
   String get name => throw _privateConstructorUsedError;
   int get indexType => throw _privateConstructorUsedError;
   bool get caseSensitive => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
-  $IndexPropertyCopyWith<IndexProperty> get copyWith =>
+  $IndexPropertyCopyWith<ObjectIndexProperty> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 abstract class $IndexPropertyCopyWith<$Res> {
   factory $IndexPropertyCopyWith(
-          IndexProperty value, $Res Function(IndexProperty) then) =
+          ObjectIndexProperty value, $Res Function(ObjectIndexProperty) then) =
       _$IndexPropertyCopyWithImpl<$Res>;
   $Res call({String name, int indexType, bool caseSensitive});
 }
@@ -624,9 +627,9 @@ class _$IndexPropertyCopyWithImpl<$Res>
     implements $IndexPropertyCopyWith<$Res> {
   _$IndexPropertyCopyWithImpl(this._value, this._then);
 
-  final IndexProperty _value;
+  final ObjectIndexProperty _value;
   // ignore: unused_field
-  final $Res Function(IndexProperty) _then;
+  final $Res Function(ObjectIndexProperty) _then;
 
   @override
   $Res call({
@@ -713,7 +716,7 @@ class _$_IndexProperty implements _IndexProperty {
 
   @override
   String toString() {
-    return 'IndexProperty(name: $name, indexType: $indexType, caseSensitive: $caseSensitive)';
+    return 'ObjectIndexProperty(name: $name, indexType: $indexType, caseSensitive: $caseSensitive)';
   }
 
   @override
@@ -748,7 +751,7 @@ class _$_IndexProperty implements _IndexProperty {
   }
 }
 
-abstract class _IndexProperty implements IndexProperty {
+abstract class _IndexProperty implements ObjectIndexProperty {
   const factory _IndexProperty(String name, int indexType, bool caseSensitive) =
       _$_IndexProperty;
 

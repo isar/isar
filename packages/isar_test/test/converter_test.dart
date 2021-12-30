@@ -3,7 +3,6 @@ import 'package:isar_test/utils/open.dart';
 import 'package:test/test.dart';
 import 'package:isar/isar.dart';
 
-import 'package:isar_test/isar.g.dart';
 import 'package:isar_test/converter_model.dart';
 
 void main() {
@@ -30,7 +29,7 @@ void main() {
 
   group('Converter', () {
     isarTest('toIsar()', () async {
-      final isar = await openTempIsar();
+      final isar = await openTempIsar([ConverterModelSchema]);
 
       await isar.writeTxn((isar) async {
         await isar.converterModels.put(_converterObject);
@@ -43,7 +42,7 @@ void main() {
     });
 
     isarTest('fromIsar()', () async {
-      final isar = await openTempIsar();
+      final isar = await openTempIsar([ConverterModelSchema]);
 
       await isar.writeTxn((isar) async {
         await isar.converterModels.importJson([_converterObjectJson]);

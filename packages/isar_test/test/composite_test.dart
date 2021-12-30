@@ -2,14 +2,13 @@ import 'package:isar/isar.dart';
 import 'package:isar_test/name_model.dart';
 import 'package:isar_test/utils/open.dart';
 import 'package:test/test.dart';
-import 'package:isar_test/isar.g.dart';
 
 void main() {
   group('Composite', () {
     late Isar isar;
 
     setUp(() async {
-      isar = await openTempIsar();
+      isar = await openTempIsar([NameModelSchema]);
     });
 
     tearDown(() async {
@@ -25,7 +24,7 @@ void main() {
 
       expect(await isar.nameModels.where().exportJson(), [
         {
-          'idN': Isar.minId,
+          'idN': Isar.minId + 1,
           'valueN': 'test',
           'otherValueN': 'test2',
         },

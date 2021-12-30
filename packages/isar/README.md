@@ -42,7 +42,8 @@
 - 🧪 **ACID semantics**. Rely on consistency
 - ⏱ **Asynchronous**. Parallel query operations & multi-isolate support
 - 💃 **Static typing**. Compile-time checked and autocompleted queries
-- 🔒 **Strong encryption**. Optional authenticated AES-256 GCM encryption
+- 🍭 **Feature rich**. Composite & multi indexes, query modifiers, JSON support and more
+- 🤗 **Easy to use**. No configuration, no schema files, no boilerplate
 
 ### 1. Add to pubspec.yaml
 

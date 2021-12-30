@@ -3,16 +3,16 @@ import 'package:dartx/dartx.dart';
 
 String generateDistinctBy(ObjectInfo oi) {
   var code = '''
-  extension ${oi.dartName}QueryWhereDistinct on QueryBuilder<${oi.dartName}, QDistinct> {''';
+  extension ${oi.dartName}QueryWhereDistinct on QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct> {''';
   for (var property in oi.properties) {
     if (property.isarType == IsarType.String) {
       code += '''
-        QueryBuilder<${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}({bool caseSensitive = true}) {
+        QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}({bool caseSensitive = true}) {
             return addDistinctByInternal('${property.dartName}', caseSensitive: caseSensitive);
         }''';
     } else if (property.isarType.index < IsarType.String.index) {
       code += '''
-        QueryBuilder<${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}() {
+        QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}() {
             return addDistinctByInternal('${property.dartName}');
         }''';
     }

@@ -1,9 +1,6 @@
-import 'dart:typed_data';
-
 import 'package:isar/isar.dart';
 import 'package:isar_test/utils/common.dart';
 import 'package:isar_test/utils/open.dart';
-import 'package:isar_test/isar.g.dart';
 import 'package:isar_test/mutli_type_model.dart';
 import 'package:test/test.dart';
 
@@ -14,7 +11,7 @@ void main() async {
     late Isar isar;
 
     setUp(() async {
-      isar = await openTempIsar();
+      isar = await openTempIsar([MultiTypeModelSchema]);
     });
 
     tearDown(() async {

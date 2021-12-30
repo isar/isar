@@ -9,10 +9,16 @@ abstract class Query<T> {
 
   List<T> findAllSync();
 
-  Future<int> count() =>
-      aggregateQuery<int>(this, AggregationOp.Count).then((value) => value!);
+  @protected
+  Future<R?> aggregate<R>(AggregationOp op);
 
-  int countSync() => aggregateQuerySync(this, AggregationOp.Count);
+  @protected
+  R? aggregateSync<R>(AggregationOp op);
+
+  Future<int> count() =>
+      aggregate<int>(AggregationOp.Count).then((value) => value!);
+
+  int? countSync() => aggregateSync<int>(AggregationOp.Count);
 
   Future<bool> deleteFirst();
 
@@ -41,33 +47,30 @@ abstract class Query<T> {
 }
 
 extension QueryAggregation<T extends num> on Query<T?> {
-  Future<T?> min() => aggregateQuery(this, AggregationOp.Min);
+  Future<T?> min() => aggregate<T>(AggregationOp.Min);
 
-  T? minSync() => aggregateQuerySync(this, AggregationOp.Min);
+  T? minSync() => aggregateSync<T>(AggregationOp.Min);
 
-  Future<T?> max() => aggregateQuery(this, AggregationOp.Max);
+  Future<T?> max() => aggregate<T>(AggregationOp.Max);
 
-  T? maxSync() => aggregateQuerySync(this, AggregationOp.Max);
+  T? maxSync() => aggregateSync<T>(AggregationOp.Max);
 
   Future<double> average() =>
-      aggregateQuery<double>(this, AggregationOp.Average)
-          .then((value) => value!);
+      aggregate<double>(AggregationOp.Average).then((value) => value!);
 
-  double averageSync() =>
-      aggregateQuerySync<double>(this, AggregationOp.Average)!;
+  double averageSync() => aggregateSync<double>(AggregationOp.Average)!;
 
-  Future<T> sum() =>
-      aggregateQuery<T>(this, AggregationOp.Sum).then((value) => value!);
+  Future<T> sum() => aggregate<T>(AggregationOp.Sum).then((value) => value!);
 
-  T sumSync() => aggregateQuerySync<T>(this, AggregationOp.Sum)!;
+  T sumSync() => aggregateSync<T>(AggregationOp.Sum)!;
 }
 
 extension QueryDateAggregation<T extends DateTime?> on Query<T> {
-  Future<DateTime?> min() => aggregateQuery(this, AggregationOp.Min);
+  Future<DateTime?> min() => aggregate<DateTime>(AggregationOp.Min);
 
-  DateTime? minSync() => aggregateQuerySync(this, AggregationOp.Min);
+  DateTime? minSync() => aggregateSync<DateTime>(AggregationOp.Min);
 
-  Future<DateTime?> max() => aggregateQuery(this, AggregationOp.Max);
+  Future<DateTime?> max() => aggregate<DateTime>(AggregationOp.Max);
 
-  DateTime? maxSync() => aggregateQuerySync(this, AggregationOp.Max);
+  DateTime? maxSync() => aggregateSync<DateTime>(AggregationOp.Max);
 }

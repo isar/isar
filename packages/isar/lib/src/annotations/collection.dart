@@ -3,5 +3,7 @@ part of isar;
 class Collection {
   final bool inheritance;
 
-  const Collection({this.inheritance = true});
+  final String? accessor;
+
+  const Collection({this.inheritance = true, this.accessor});
 }

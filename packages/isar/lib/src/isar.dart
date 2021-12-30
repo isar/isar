@@ -8,8 +8,8 @@ typedef IsarCloseCallback = void Function(String);
 
 /// An instance of the Isar Database.
 abstract class Isar {
-  static const minId = -140737488355328;
-  static const maxId = 140737488355327;
+  static const minId = kIsWeb ? -9007199254740991 : -9223372036854775808;
+  static const maxId = kIsWeb ? 9007199254740991 : 9223372036854775807;
 
   static final _instances = <String, Isar>{};
   static final _openCallbacks = <IsarOpenCallback>{};
@@ -28,6 +28,35 @@ abstract class Isar {
     _instances[name] = this;
     for (var callback in _openCallbacks) {
       callback(this);
+    }
+  }
+
+  static Future<Isar> open({
+    required List<CollectionSchema> collections,
+    required String directory,
+    String name = 'isar',
+    bool relaxedDurability = true,
+  }) {
+    if (collections.isEmpty) {
+      throw IsarError('At least one collection needs to be opened.');
+    }
+    for (var col in collections) {
+      for (var linkedCol in col.linkedCollections) {
+        if (!collections.any((e) => e.name == linkedCol)) {
+          throw IsarError(
+              'Linked collection "$linkedCol" is not part of the schema.');
+        }
+      }
+    }
+    if (kIsWeb) {
+      throw UnimplementedError();
+    } else {
+      return openIsarNative(
+        collections: collections,
+        directory: directory,
+        name: name,
+        relaxedDurability: relaxedDurability,
+      );
     }
   }
 
@@ -59,7 +88,7 @@ abstract class Isar {
     if (collection is IsarCollection<T>) {
       return collection;
     } else {
-      throw 'Unknown collection or invalid type';
+      throw 'Unknown collection or invalid type. Make sure that you opened the collection.';
     }
   }
 
@@ -107,15 +136,5 @@ abstract class Isar {
   /// Removes a previously registered `IsarOpenCallback`.
   static void removeCloseListener(IsarCloseCallback callback) {
     _closeCallbacks.remove(callback);
-  }
-
-  /// Generates a secure 32 byte (256bit) key.
-  static Uint8List generateSecureKey() {
-    final random = Random.secure();
-    final buffer = Uint8List(32);
-    for (var i = 0; i < 32; i++) {
-      buffer[i] = random.nextInt(0xFF + 1);
-    }
-    return buffer;
   }
 }

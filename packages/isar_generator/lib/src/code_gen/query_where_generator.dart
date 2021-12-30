@@ -2,136 +2,141 @@ import 'package:isar/isar.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
 
-String generateQueryWhere(ObjectInfo oi) {
-  final primaryIndex = ObjectIndex(
-    unique: true,
-    replace: true,
-    properties: [
-      ObjectIndexProperty(
-        property: oi.idProperty,
-        indexType: IndexType.value,
-        caseSensitive: null,
-      ),
-    ],
-  );
+class WhereGenerator {
+  final ObjectInfo object;
+  final String objName;
+  final existing = <String>{};
 
-  var code =
-      'extension ${oi.dartName}QueryWhereSort on QueryBuilder<${oi.dartName}, QWhere> {';
+  WhereGenerator(this.object) : objName = object.dartName;
 
-  for (var i = -1; i < oi.indexes.length; i++) {
-    final index = i == -1 ? primaryIndex : oi.indexes[i];
-    if (index.properties.all((p) => p.indexType == IndexType.value)) {
-      code += generateAny(oi, index.properties);
+  String generate() {
+    final primaryIndex = ObjectIndex(
+      name: '_id',
+      unique: true,
+      replace: true,
+      properties: [
+        ObjectIndexProperty(
+          property: object.idProperty,
+          type: IndexType.hash,
+          caseSensitive: false,
+        ),
+      ],
+    );
+
+    var code =
+        'extension ${objName}QueryWhereSort on QueryBuilder<$objName, $objName, QWhere> {';
+
+    for (var i = -1; i < object.indexes.length; i++) {
+      final index = i == -1 ? primaryIndex : object.indexes[i];
+      code += generateAny(index.name, index.properties);
     }
+
+    code += '''
   }
 
-  code += '''
-  }
-
-  extension ${oi.dartName}QueryWhere on QueryBuilder<${oi.dartName}, QWhereClause> {
+  extension ${objName}QueryWhere on QueryBuilder<$objName, $objName, QWhereClause> {
   ''';
 
-  for (var index in oi.indexes) {
-    for (var n = 0; n < index.properties.length; n++) {
-      var properties = index.properties.sublist(0, n + 1);
+    for (var index in object.indexes) {
+      for (var n = 0; n < index.properties.length; n++) {
+        var properties = index.properties.sublist(0, n + 1);
 
-      final firstProperties = properties.sublist(0, n);
-      final lastProperty = properties.last;
-      if (!firstProperties.any((it) => it.property.isarType.isFloatDouble)) {
-        code += generateWhereEqualTo(oi, properties);
-        if (!properties.any((it) => it.indexType == IndexType.words)) {
-          code += generateWhereNotEqualTo(oi, properties);
+        final firstProperties = properties.sublist(0, n);
+        final lastProperty = properties.last;
+        if (!firstProperties.any((it) => it.isarType.isFloatDouble)) {
+          code += generateWhereEqualTo(index.name, properties);
+          code += generateWhereNotEqualTo(index.name, properties);
+        }
+
+        if (lastProperty.scalarType == IsarType.Int ||
+            lastProperty.scalarType == IsarType.Long ||
+            lastProperty.scalarType.isFloatDouble) {
+          code += generateWhereGreaterThan(index.name, properties);
+          code += generateWhereLessThan(index.name, properties);
+        }
+
+        if (lastProperty.scalarType == IsarType.String &&
+            lastProperty.type != IndexType.hash) {
+          code += generateWhereStartsWith(index.name, properties);
+        }
+
+        if (lastProperty.scalarType != IsarType.Bool) {
+          code += generateWhereBetween(index.name, properties);
+        }
+
+        if (index.properties.length == 1 && lastProperty.property.nullable) {
+          code += generateWhereIsNull(index.name, lastProperty);
+          code += generateWhereIsNotNull(index.name, lastProperty);
         }
       }
+    }
 
-      if (lastProperty.property.isarType == IsarType.Int ||
-          lastProperty.property.isarType == IsarType.Long ||
-          lastProperty.property.isarType.isFloatDouble) {
-        code += generateWhereGreaterThan(oi, properties);
-        code += generateWhereLessThan(oi, properties);
-      }
+    return '$code}';
+  }
 
-      if (lastProperty.property.isarType == IsarType.String &&
-          lastProperty.indexType != IndexType.hash) {
-        code += generateWhereStartsWith(oi, properties);
-      }
-
-      if (lastProperty.property.isarType != IsarType.Bool) {
-        code += generateWhereBetween(oi, properties);
-      }
-
-      if (index.properties.length == 1 &&
-          lastProperty.property.nullable &&
-          lastProperty.indexType != IndexType.words) {
-        code += generateWhereIsNull(oi, lastProperty);
-        code += generateWhereIsNotNull(oi, lastProperty);
+  String joinToName(List<ObjectIndexProperty> properties, bool firstEqualTo) {
+    String propertyName(ObjectIndexProperty p, int i) {
+      if (i == 0) {
+        return p.property.dartName.decapitalize();
+      } else {
+        return p.property.dartName.capitalize();
       }
     }
-  }
 
-  return '$code}';
-}
+    var firstPropertiesName = properties
+        .sublist(0, properties.length - 1)
+        .mapIndexed((i, p) => propertyName(p, i))
+        .join('');
 
-String joinPropertiesToName(
-    List<ObjectIndexProperty> properties, bool firstEqualTo) {
-  String propertyName(ObjectIndexProperty p, int i) {
-    final name =
-        p.property.dartName + (p.indexType == IndexType.words ? 'Word' : '');
-    if (i == 0) {
-      return name.decapitalize();
-    } else {
-      return name.capitalize();
+    if (firstPropertiesName.isNotEmpty && firstEqualTo) {
+      firstPropertiesName += 'EqualTo';
     }
+
+    firstPropertiesName += propertyName(properties.last, properties.lastIndex);
+
+    return firstPropertiesName;
   }
 
-  var firstPropertiesName = properties
-      .sublist(0, properties.length - 1)
-      .mapIndexed((i, p) => propertyName(p, i))
-      .join('');
-
-  if (firstPropertiesName.isNotEmpty && firstEqualTo) {
-    firstPropertiesName += 'EqualTo';
+  String joinToParams(List<ObjectIndexProperty> properties) {
+    return properties.map((it) {
+      if (it.property.isarType.isList && it.type != IndexType.hash) {
+        return '${it.property.dartType} ${it.property.dartName}Element';
+      } else {
+        return '${it.property.dartType} ${it.property.dartName}';
+      }
+    }).join(',');
   }
 
-  firstPropertiesName += propertyName(properties.last, properties.lastIndex);
+  String joinToValues(List<ObjectIndexProperty> properties) {
+    final values = properties.map((it) {
+      if (it.property.isarType.isList && it.type != IndexType.hash) {
+        return '${it.property.dartName}Element';
+      } else {
+        return it.property.toIsar(it.property.dartName, object);
+      }
+    }).join(', ');
+    return values;
+  }
 
-  return firstPropertiesName;
-}
-
-String joinPropertiesToParams(List<ObjectIndexProperty> indexProperties,
-    {String suffix = ''}) {
-  return indexProperties
-      .map((it) => '${it.property.dartType} ${it.property.dartName}$suffix')
-      .join(',');
-}
-
-String joinPropertiesToValues(
-    ObjectInfo oi, List<ObjectIndexProperty> indexProperties,
-    [String suffix = '']) {
-  final values = indexProperties.map((it) {
-    return it.property.toIsar('${it.property.dartName}$suffix', oi);
-  }).join(', ');
-  return values;
-}
-
-String generateAny(ObjectInfo oi, List<ObjectIndexProperty> indexProperties) {
-  final name = joinPropertiesToName(indexProperties, false);
-  final indexName = indexProperties.first.property.dartName;
-  return '''
-  QueryBuilder<${oi.dartName}, QAfterWhere> any${name.capitalize()}() {
+  String generateAny(String indexName, List<ObjectIndexProperty> properties) {
+    final name = 'any' + joinToName(properties, false).capitalize();
+    if (!existing.add(name)) return '';
+    return '''
+  QueryBuilder<$objName, $objName, QAfterWhere> $name() {
     return addWhereClause(WhereClause(indexName: '$indexName'));
   }
   ''';
-}
+  }
 
-String generateWhereEqualTo(
-    ObjectInfo oi, List<ObjectIndexProperty> indexProperties) {
-  final name = joinPropertiesToName(indexProperties, false);
-  final indexName = indexProperties.first.property.dartName;
-  final values = joinPropertiesToValues(oi, indexProperties);
-  final params = joinPropertiesToParams(indexProperties);
-  return '''
-  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}EqualTo($params) {
+  String generateWhereEqualTo(
+      String indexName, List<ObjectIndexProperty> properties) {
+    final name = joinToName(properties, false) + 'EqualTo';
+    if (!existing.add(name)) return '';
+
+    final values = joinToValues(properties);
+    final params = joinToParams(properties);
+    return '''
+  QueryBuilder<$objName, $objName, QAfterWhereClause> $name($params) {
     return addWhereClause(WhereClause(
       indexName: '$indexName',
       lower: [$values],
@@ -141,16 +146,17 @@ String generateWhereEqualTo(
     ));
   }
   ''';
-}
+  }
 
-String generateWhereNotEqualTo(
-    ObjectInfo oi, List<ObjectIndexProperty> indexProperties) {
-  final name = joinPropertiesToName(indexProperties, false);
-  final indexName = indexProperties.first.property.dartName;
-  final values = joinPropertiesToValues(oi, indexProperties);
-  final params = joinPropertiesToParams(indexProperties);
-  return '''
-  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}NotEqualTo($params) {
+  String generateWhereNotEqualTo(
+      String indexName, List<ObjectIndexProperty> properties) {
+    final name = joinToName(properties, false) + 'NotEqualTo';
+    if (!existing.add(name)) return '';
+
+    final values = joinToValues(properties);
+    final params = joinToParams(properties);
+    return '''
+  QueryBuilder<$objName, $objName, QAfterWhereClause> $name($params) {
     return addWhereClause(WhereClause(
       indexName: '$indexName',
       upper: [$values],
@@ -162,16 +168,17 @@ String generateWhereNotEqualTo(
     ));
   }
   ''';
-}
+  }
 
-String generateWhereGreaterThan(
-    ObjectInfo oi, List<ObjectIndexProperty> indexProperties) {
-  final name = joinPropertiesToName(indexProperties, true);
-  final indexName = indexProperties.first.property.dartName;
-  final values = joinPropertiesToValues(oi, indexProperties);
-  final params = joinPropertiesToParams(indexProperties);
-  return '''
-  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}GreaterThan($params) {
+  String generateWhereGreaterThan(
+      String indexName, List<ObjectIndexProperty> properties) {
+    final name = joinToName(properties, true) + 'GreaterThan';
+    if (!existing.add(name)) return '';
+
+    final values = joinToValues(properties);
+    final params = joinToParams(properties);
+    return '''
+  QueryBuilder<$objName, $objName, QAfterWhereClause> $name($params) {
     return addWhereClause(WhereClause(
       indexName: '$indexName',
       lower: [$values],
@@ -179,16 +186,17 @@ String generateWhereGreaterThan(
     ));
   }
   ''';
-}
+  }
 
-String generateWhereLessThan(
-    ObjectInfo oi, List<ObjectIndexProperty> indexProperties) {
-  final name = joinPropertiesToName(indexProperties, true);
-  final indexName = indexProperties.first.property.dartName;
-  final params = joinPropertiesToParams(indexProperties);
-  final values = joinPropertiesToValues(oi, indexProperties);
-  return '''
-  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}LessThan($params) {
+  String generateWhereLessThan(
+      String indexName, List<ObjectIndexProperty> properties) {
+    final name = joinToName(properties, true) + 'LessThan';
+    if (!existing.add(name)) return '';
+
+    final params = joinToParams(properties);
+    final values = joinToValues(properties);
+    return '''
+  QueryBuilder<$objName, $objName, QAfterWhereClause> $name($params) {
     return addWhereClause(WhereClause(
       indexName: '$indexName',
       upper: [$values],
@@ -196,28 +204,28 @@ String generateWhereLessThan(
     ));
   }
   ''';
-}
-
-String generateWhereBetween(
-    ObjectInfo oi, List<ObjectIndexProperty> indexProperties) {
-  final firstPs = indexProperties.sublist(0, indexProperties.length - 1);
-  final lastP = indexProperties.last.property;
-  final lowerName = 'lower${lastP.dartName.capitalize()}';
-  final upperName = 'upper${lastP.dartName.capitalize()}';
-
-  final name = joinPropertiesToName(indexProperties, true);
-  final indexName = indexProperties.first.property.dartName;
-  var params = joinPropertiesToParams(firstPs);
-  if (params.isNotEmpty) {
-    params += ',';
   }
-  params += '${lastP.dartType} $lowerName, ${lastP.dartType} $upperName';
-  var values = joinPropertiesToValues(oi, firstPs);
-  if (values.isNotEmpty) {
-    values += ',';
-  }
-  return '''
-  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}Between($params) {
+
+  String generateWhereBetween(
+      String indexName, List<ObjectIndexProperty> properties) {
+    final firstPs = properties.sublist(0, properties.length - 1);
+    final lastP = properties.last.property;
+    final lowerName = 'lower${lastP.dartName.capitalize()}';
+    final upperName = 'upper${lastP.dartName.capitalize()}';
+    final name = joinToName(properties, true) + 'Between';
+    if (!existing.add(name)) return '';
+
+    var params = joinToParams(firstPs);
+    if (params.isNotEmpty) {
+      params += ',';
+    }
+    params += '${lastP.dartType} $lowerName, ${lastP.dartType} $upperName';
+    var values = joinToValues(firstPs);
+    if (values.isNotEmpty) {
+      values += ',';
+    }
+    return '''
+  QueryBuilder<$objName, $objName, QAfterWhereClause> $name($params) {
     return addWhereClause(WhereClause(
       indexName: '$indexName',
       lower: [$values $lowerName],
@@ -227,13 +235,15 @@ String generateWhereBetween(
     ));
   }
   ''';
-}
+  }
 
-String generateWhereIsNull(ObjectInfo oi, ObjectIndexProperty indexProperty) {
-  final name = joinPropertiesToName([indexProperty], false);
-  final indexName = indexProperty.property.dartName;
-  return '''
-  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}IsNull() {
+  String generateWhereIsNull(
+      String indexName, ObjectIndexProperty indexProperty) {
+    final name = joinToName([indexProperty], false) + 'IsNull';
+    if (!existing.add(name)) return '';
+
+    return '''
+  QueryBuilder<$objName, $objName, QAfterWhereClause> $name() {
     return addWhereClause(WhereClause(
       indexName: '$indexName',
       upper: [null],
@@ -243,14 +253,15 @@ String generateWhereIsNull(ObjectInfo oi, ObjectIndexProperty indexProperty) {
     ));
   }
   ''';
-}
+  }
 
-String generateWhereIsNotNull(
-    ObjectInfo oi, ObjectIndexProperty indexProperty) {
-  final name = joinPropertiesToName([indexProperty], false);
-  final indexName = indexProperty.property.dartName;
-  return '''
-  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}IsNotNull() {
+  String generateWhereIsNotNull(
+      String indexName, ObjectIndexProperty indexProperty) {
+    final name = joinToName([indexProperty], false) + 'IsNotNull';
+    if (!existing.add(name)) return '';
+
+    return '''
+  QueryBuilder<$objName, $objName, QAfterWhereClause> $name() {
     return addWhereClause(WhereClause(
       indexName: '$indexName',
       lower: [null],
@@ -258,27 +269,29 @@ String generateWhereIsNotNull(
     ));
   }
   ''';
-}
-
-String generateWhereStartsWith(
-    ObjectInfo oi, List<ObjectIndexProperty> indexProperties) {
-  final firsPs = indexProperties.sublist(0, indexProperties.length - 1);
-  final lastP = indexProperties.last.property;
-  final name = joinPropertiesToName(indexProperties, true);
-  final indexName = indexProperties.first.property.dartName;
-  var params = joinPropertiesToParams(firsPs);
-  if (params.isNotEmpty) {
-    params += ',';
-  }
-  final lastName = '${lastP.dartName}Prefix';
-  params += '${lastP.converter == null ? 'String' : lastP.dartType} $lastName';
-  var values = joinPropertiesToValues(oi, firsPs);
-  if (values.isNotEmpty) {
-    values += ',';
   }
 
-  return '''
-  QueryBuilder<${oi.dartName}, QAfterWhereClause> ${name}StartsWith($params) {
+  String generateWhereStartsWith(
+      String indexName, List<ObjectIndexProperty> properties) {
+    final firsPs = properties.sublist(0, properties.length - 1);
+    final lastP = properties.last.property;
+    final name = joinToName(properties, true) + 'StartsWith';
+    if (!existing.add(name)) return '';
+
+    var params = joinToParams(firsPs);
+    if (params.isNotEmpty) {
+      params += ',';
+    }
+    final lastName = '${lastP.dartName}Prefix';
+    params +=
+        '${lastP.converter == null ? 'String' : lastP.dartType} $lastName';
+    var values = joinToValues(firsPs);
+    if (values.isNotEmpty) {
+      values += ',';
+    }
+
+    return '''
+  QueryBuilder<$objName, $objName, QAfterWhereClause> $name($params) {
     return addWhereClause(WhereClause(
       indexName: '$indexName',
       lower: [$values '\$$lastName'],
@@ -288,4 +301,5 @@ String generateWhereStartsWith(
     ));
   }
   ''';
+  }
 }

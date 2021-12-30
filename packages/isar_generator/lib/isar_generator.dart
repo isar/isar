@@ -1,11 +1,7 @@
 import 'package:build/build.dart';
-import 'package:isar_generator/src/code_gen/isar_code_generator.dart';
-import 'src/isar_analyzer.dart';
+import 'package:source_gen/source_gen.dart';
 
-Builder getIsarAnalyzer(BuilderOptions options) => IsarAnalyzer();
+import 'src/collection_generator.dart';
 
-Builder getIsarGenerator(BuilderOptions options) => IsarCodeGenerator(
-      flutter: options.config['flutter'] ?? true,
-      package: options.config['package'] ?? false,
-      extensions: options.config['extensions'] ?? true,
-    );
+Builder getIsarGenerator(BuilderOptions options) =>
+    SharedPartBuilder([IsarCollectionGenerator()], 'isar_generator');

@@ -1,5 +1,7 @@
 import 'package:isar/isar.dart';
 
+part 'name_model.g.dart';
+
 @Collection()
 @Name('NameModelN')
 class NameModel {
