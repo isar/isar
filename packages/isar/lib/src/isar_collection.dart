@@ -18,17 +18,16 @@ abstract class IsarCollection<OBJ> {
   /// exist.
   List<OBJ?> getAllSync(List<int> ids);
 
-  /// Get a list of objects by the [indexProperty] index or `null` if an object
+  /// Get a list of objects by the [indexName] index or `null` if an object
   /// does not exist. Don't use this method directly.
   @protected
   Future<List<OBJ?>> getAllByIndex(
-      String indexProperty, List<List<dynamic>> values);
+      String indexName, List<List<dynamic>> values);
 
-  /// Get a list of objects by the [indexProperty] index or `null` if an object
+  /// Get a list of objects by the [indexName] index or `null` if an object
   /// does not exist. Don't use this method directly.
   @protected
-  List<OBJ?> getAllByIndexSync(
-      String indexProperty, List<List<dynamic>> values);
+  List<OBJ?> getAllByIndexSync(String indexName, List<List<dynamic>> values);
 
   /// Insert or update an [object] and returns the assigned id.
   Future<int> put(OBJ object) => putAll([object]).then((ids) => ids[0]);
@@ -58,16 +57,15 @@ abstract class IsarCollection<OBJ> {
   /// have been deleted.
   int deleteAllSync(List<int> ids);
 
-  /// Delete a list of objecs by the [indexProperty] index. Returns the number
+  /// Delete a list of objecs by the [indexName] index. Returns the number
   /// of objects that have been deleted. Don't use this method directly.
   @protected
-  Future<int> deleteAllByIndex(
-      String indexProperty, List<List<dynamic>> values);
+  Future<int> deleteAllByIndex(String indexName, List<List<dynamic>> values);
 
-  /// Delete a list of objecs by the [indexProperty] index. Returns the number
+  /// Delete a list of objecs by the [indexName] index. Returns the number
   /// of objects that have been deleted. Don't use this method directly.
   @protected
-  int deleteAllByIndexSync(String indexProperty, List<List<dynamic>> values);
+  int deleteAllByIndexSync(String indexName, List<List<dynamic>> values);
 
   /// Import a list of json objects.
   Future<void> importJsonRaw(Uint8List jsonBytes);

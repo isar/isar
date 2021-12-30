@@ -7,15 +7,10 @@ import 'native_query_builder.dart';
 final _keyPtrPtr = malloc<Pointer>();
 
 Pointer<NativeType> buildIndexKey(
-    IsarCollectionImpl col, String indexProperty, List<dynamic> values) {
-  final indexId = col.indexIds[indexProperty];
-  if (indexId == null) {
-    throw 'Unknown index property $indexProperty';
-  }
-
-  final types = col.indexTypes[indexProperty]!;
+    IsarCollectionImpl col, String indexName, List<dynamic> values) {
+  final types = col.indexTypes[indexName]!;
   if (values.length > types.length) {
-    throw 'Invalid values for index $indexProperty';
+    throw 'Invalid values for index $indexName';
   }
 
   IC.isar_key_create(_keyPtrPtr);
@@ -28,22 +23,12 @@ Pointer<NativeType> buildIndexKey(
   return keyPtr;
 }
 
-Pointer<NativeType> buildLowerUnboundedIndexKey(
-    IsarCollectionImpl col, String indexProperty) {
-  final indexId = col.indexIds[indexProperty];
-  if (indexId == null) {
-    throw 'Unknown index property $indexProperty';
-  }
+Pointer<NativeType> buildLowerUnboundedIndexKey(IsarCollectionImpl col) {
   IC.isar_key_create(_keyPtrPtr);
   return _keyPtrPtr.value;
 }
 
-Pointer<NativeType> buildUpperUnboundedIndexKey(
-    IsarCollectionImpl col, String indexProperty) {
-  final indexId = col.indexIds[indexProperty];
-  if (indexId == null) {
-    throw 'Unknown index property $indexProperty';
-  }
+Pointer<NativeType> buildUpperUnboundedIndexKey(IsarCollectionImpl col) {
   IC.isar_key_create(_keyPtrPtr);
   final keyPtr = _keyPtrPtr.value;
   IC.isar_key_add_byte(keyPtr, 255);

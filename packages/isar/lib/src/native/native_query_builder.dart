@@ -100,14 +100,14 @@ void _addWhereClause(IsarCollectionImpl col, Pointer qbPtr, WhereClause wc,
     if (wc.lower != null) {
       lowerPtr = buildIndexKey(col, wc.indexName!, wc.lower!);
     } else {
-      lowerPtr = buildLowerUnboundedIndexKey(col, wc.indexName!);
+      lowerPtr = buildLowerUnboundedIndexKey(col);
     }
 
     late Pointer<NativeType> upperPtr;
     if (wc.upper != null) {
       upperPtr = buildIndexKey(col, wc.indexName!, wc.upper!);
     } else {
-      upperPtr = buildUpperUnboundedIndexKey(col, wc.indexName!);
+      upperPtr = buildUpperUnboundedIndexKey(col);
     }
 
     nCall(IC.isar_qb_add_index_where_clause(

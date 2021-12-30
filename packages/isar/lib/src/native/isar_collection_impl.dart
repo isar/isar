@@ -88,10 +88,10 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   Pointer<Pointer<NativeType>> _getKeysPtr(
-      String indexProperty, List<List<dynamic>> values) {
+      String indexName, List<List<dynamic>> values) {
     final keysPtrPtr = malloc<Pointer>(values.length);
     for (var i = 0; i < values.length; i++) {
-      keysPtrPtr[i] = buildIndexKey(this, indexProperty, values[i]);
+      keysPtrPtr[i] = buildIndexKey(this, indexName, values[i]);
     }
     return keysPtrPtr;
   }
@@ -312,13 +312,13 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  int deleteAllByIndexSync(String indexProperty, List<List> values) {
+  int deleteAllByIndexSync(String indexName, List<List> values) {
     return isar.getTxnSync(true, (txnPtr) {
       final countPtr = malloc<Uint32>();
-      final keysPtrPtr = _getKeysPtr(indexProperty, values);
+      final keysPtrPtr = _getKeysPtr(indexName, values);
       try {
-        nCall(IC.isar_delete_all_by_index(
-            ptr, txnPtr, 0, keysPtrPtr, values.length, countPtr));
+        nCall(IC.isar_delete_all_by_index(ptr, txnPtr, indexIdOrErr(indexName),
+            keysPtrPtr, values.length, countPtr));
         return countPtr.value;
       } finally {
         malloc.free(countPtr);

@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Start simulator
-      - uses: futureware-tech/simulator-action@v1
+        uses: futureware-tech/simulator-action@v1
         with:
           model: ${{ matrix.device }}
       - uses: subosito/flutter-action@v1

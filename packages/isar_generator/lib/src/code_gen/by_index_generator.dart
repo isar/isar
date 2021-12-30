@@ -47,26 +47,25 @@ String generateSingleByIndex(ObjectInfo oi, ObjectIndex index) {
 }
 
 String generateAllByIndex(ObjectInfo oi, ObjectIndex index) {
-  final indexProperty = index.properties.first.property.dartName;
   return '''
     Future<List<${oi.dartName}?>> getAllBy${index.name}(List<List<dynamic>> values) {
       // ignore: invalid_use_of_protected_member
-      return getAllByIndex('$indexProperty', values);
+      return getAllByIndex('${index.name}', values);
     }
 
     List<${oi.dartName}?> getAllBy${index.name}Sync(List<List<dynamic>> values) {
       // ignore: invalid_use_of_protected_member
-      return getAllByIndexSync('$indexProperty', values);
+      return getAllByIndexSync('${index.name}', values);
     }
 
     Future<int> deleteAllBy${index.name}(List<List<dynamic>> values) {
       // ignore: invalid_use_of_protected_member
-      return deleteAllByIndex('$indexProperty', values);
+      return deleteAllByIndex('${index.name}', values);
     }
 
     int deleteAllBy${index.name}Sync(List<List<dynamic>> values) {
       // ignore: invalid_use_of_protected_member
-      return deleteAllByIndexSync('$indexProperty', values);
+      return deleteAllByIndexSync('${index.name}', values);
     }
   ''';
 }
