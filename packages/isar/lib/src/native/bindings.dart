@@ -18,6 +18,40 @@ class IsarCoreBindings {
           lookup)
       : _lookup = lookup;
 
+  ffi.Pointer<ffi.Uint32> isar_find_word_boundaries(
+    ffi.Pointer<ffi.Int8> input,
+    ffi.Pointer<ffi.Uint32> length,
+  ) {
+    return _isar_find_word_boundaries(
+      input,
+      length,
+    );
+  }
+
+  late final _isar_find_word_boundaries_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_find_word_boundaries>>(
+          'isar_find_word_boundaries');
+  late final _dart_isar_find_word_boundaries _isar_find_word_boundaries =
+      _isar_find_word_boundaries_ptr
+          .asFunction<_dart_isar_find_word_boundaries>();
+
+  void isar_free_word_boundaries(
+    ffi.Pointer<ffi.Uint32> boundaries,
+    int length,
+  ) {
+    return _isar_free_word_boundaries(
+      boundaries,
+      length,
+    );
+  }
+
+  late final _isar_free_word_boundaries_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_free_word_boundaries>>(
+          'isar_free_word_boundaries');
+  late final _dart_isar_free_word_boundaries _isar_free_word_boundaries =
+      _isar_free_word_boundaries_ptr
+          .asFunction<_dart_isar_free_word_boundaries>();
+
   ffi.Pointer<ffi.Int8> isar_get_error(
     int err_code,
   ) {
@@ -1461,6 +1495,26 @@ class RawObjectSet extends ffi.Struct {
   @ffi.Uint32()
   external int length;
 }
+
+typedef _c_isar_find_word_boundaries = ffi.Pointer<ffi.Uint32> Function(
+  ffi.Pointer<ffi.Int8> input,
+  ffi.Pointer<ffi.Uint32> length,
+);
+
+typedef _dart_isar_find_word_boundaries = ffi.Pointer<ffi.Uint32> Function(
+  ffi.Pointer<ffi.Int8> input,
+  ffi.Pointer<ffi.Uint32> length,
+);
+
+typedef _c_isar_free_word_boundaries = ffi.Void Function(
+  ffi.Pointer<ffi.Uint32> boundaries,
+  ffi.Uint32 length,
+);
+
+typedef _dart_isar_free_word_boundaries = void Function(
+  ffi.Pointer<ffi.Uint32> boundaries,
+  int length,
+);
 
 typedef _c_isar_get_error = ffi.Pointer<ffi.Int8> Function(
   ffi.Int32 err_code,
