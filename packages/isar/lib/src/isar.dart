@@ -100,6 +100,9 @@ abstract class Isar {
     _isOpen = false;
     if (identical(_instances[name], this)) {
       _instances.remove(name);
+      if (_instances.isEmpty) {
+        _schema = null;
+      }
     }
     for (var callback in _closeCallbacks) {
       callback(name);
