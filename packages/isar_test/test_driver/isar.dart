@@ -3,7 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:isar_test/utils/common.dart';
+import 'package:isar_test/common.dart';
 import 'package:path_provider/path_provider.dart';
 import 'all_tests.dart' as tests;
 import 'package:flutter_test/flutter_test.dart';
