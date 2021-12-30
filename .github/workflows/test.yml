@@ -8,94 +8,70 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
-
       - name: Run isar_generator
         run: |
           flutter pub get
           flutter pub run build_runner build
         working-directory: packages/isar_test
-        
       - name: Download binaries
         run: bash tool/setup_tests.sh
         working-directory: packages/isar_test
-      
       - name: Run tests
         run: flutter test
         working-directory: packages/isar_test
-
 
   test_multi:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
-
       - name: Run isar_generator
         run: |
           flutter pub get
           flutter pub run build_runner build
         working-directory: packages/isar_test_multi/root_package
-        
       - name: Download binaries
         run: bash tool/setup_tests.sh
         working-directory: packages/isar_test_multi/root_package
-      
       - name: Run tests
         run: flutter test
         working-directory: packages/isar_test_multi/root_package
-  
 
   drive_ios:
     strategy:
       matrix:
         device:
-          - "iPhone 8 (14.4)"
-          - "iPhone 11 Pro Max (14.4)"
+          - "iPhone 8"
+          - "iPhone 11 Pro Max"
       fail-fast: false
-
     runs-on: macos-latest
     steps:
-      - name: "List all simulators"
-        run: "xcrun instruments -s"
-      - name: "Start Simulator"
-        run: |
-          UDID=$(
-            xcrun instruments -s |
-            awk \
-              -F ' *[][]' \
-              -v 'device=${{ matrix.device }}' \
-              '$1 == device { print $2 }'
-          )
-          xcrun simctl boot "${UDID:?No Simulator with this name found}"
-
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+      - name: Start simulator
+      - uses: futureware-tech/simulator-action@v1
+        with:
+          model: ${{ matrix.device }}
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
-
       - name: Run isar_generator
         run: |
           flutter pub get
           flutter pub run build_runner build
         working-directory: packages/isar_test
-
       - name: Download binaries
         run: bash tool/download_binaries.sh
         working-directory: packages/isar_flutter_libs
-
       - name: "Run Flutter Driver tests"
         run: "flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart"
         working-directory: packages/isar_test
-        
         
   drive_android:
     runs-on: macos-latest
@@ -104,23 +80,19 @@ jobs:
         api-level: [29] #[21, 29]
         target: [default]
       fail-fast: false
-
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
-
       - name: Run isar_generator
         run: |
           flutter pub get
           flutter pub run build_runner build
         working-directory: packages/isar_test
-
       - name: Download binaries
         run: bash tool/download_binaries.sh
         working-directory: packages/isar_flutter_libs
-
       - name: "Run Flutter Driver tests"
         uses: reactivecircus/android-emulator-runner@v2
         with:
