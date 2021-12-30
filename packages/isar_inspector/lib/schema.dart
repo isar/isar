@@ -63,16 +63,16 @@ class Link with _$Link {
 }
 
 enum IsarType {
-  Bool,
-  Int,
-  Float,
-  Long,
-  Double,
-  String,
-  Bytes,
-  IntList,
-  FloatList,
-  LongList,
-  DoubleList,
-  StringList,
+  bool,
+  int,
+  float,
+  long,
+  double,
+  string,
+  bytes,
+  intList,
+  floatList,
+  longList,
+  doubleList,
+  stringList,
 }

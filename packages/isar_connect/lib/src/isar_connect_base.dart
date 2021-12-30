@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:isar/isar.dart';
-import 'package:pedantic/pedantic.dart';
 
 const handlers = {
   'getVersion': getVersion,
@@ -79,6 +78,7 @@ Future<dynamic> getVersion(Map<String, String> _) async {
 }
 
 Future<dynamic> getSchema(Map<String, String> _) async {
+  // ignore: invalid_use_of_protected_member
   return jsonDecode(Isar.schema!);
 }
 
@@ -119,7 +119,7 @@ Query getQuery(Map<String, String> params) {
   final filterJson = jsonDecode(params['filter']!);
   final filter = parseFilter(filterJson);
   return collection.buildQuery(
-      filter: FilterGroup(filters: [filter], type: FilterGroupType.Or),
+      filter: FilterGroup(filters: [filter], type: FilterGroupType.or),
       offset: offset,
       limit: limit,
       sortBy: [
@@ -133,7 +133,7 @@ FilterOperation parseFilter(Map<String, dynamic> json) {
   switch (type) {
     case 'FilterCondition':
       final type = ConditionType.values[json['conditionType']];
-      if (type != ConditionType.Between) {
+      if (type != ConditionType.between) {
         return FilterCondition(
           type: type,
           property: json['property'],

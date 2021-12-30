@@ -8,12 +8,14 @@ class IsarCard extends StatelessWidget {
   final BorderRadius radius;
 
   IsarCard(
-      {required this.child,
+      {Key? key,
+      required this.child,
       this.color,
       this.onTap,
       this.onLongPress,
       BorderRadius? radius})
-      : radius = radius ?? BorderRadius.circular(20);
+      : radius = radius ?? BorderRadius.circular(20),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -40,7 +40,7 @@ String _generatePrepareSerialize(ObjectInfo object) {
     final nLen = property.nullable ? '?? 0' : '';
     final accessor = '_${property.isarName}';
     switch (property.isarType) {
-      case IsarType.String:
+      case IsarType.string:
         if (property.nullable) {
           code += '''
           Uint8List? $accessor;
@@ -54,7 +54,7 @@ String _generatePrepareSerialize(ObjectInfo object) {
         }
         code += 'dynamicSize += $accessor$nOp.length $nLen;';
         break;
-      case IsarType.StringList:
+      case IsarType.stringList:
         code += 'dynamicSize += (value$i$nOp.length $nLen) * 8;';
         if (property.nullable) {
           code += '''
@@ -85,21 +85,21 @@ String _generatePrepareSerialize(ObjectInfo object) {
         }
         final $accessor = bytesList$i;''';
         break;
-      case IsarType.Bytes:
-      case IsarType.BoolList:
-      case IsarType.IntList:
-      case IsarType.FloatList:
-      case IsarType.LongList:
-      case IsarType.DoubleList:
-      case IsarType.DateTimeList:
+      case IsarType.bytes:
+      case IsarType.boolList:
+      case IsarType.intList:
+      case IsarType.floatList:
+      case IsarType.longList:
+      case IsarType.doubleList:
+      case IsarType.dateTimeList:
         code +=
             'dynamicSize += (value$i$nOp.length $nLen) * ${property.isarType.elementSize};';
         break;
       default:
         break;
     }
-    if (property.isarType != IsarType.String &&
-        property.isarType != IsarType.StringList) {
+    if (property.isarType != IsarType.string &&
+        property.isarType != IsarType.stringList) {
       code += 'final $accessor = value$i;';
     }
   }
@@ -137,49 +137,49 @@ String _generateSerialize(ObjectInfo object) {
     final property = object.objectProperties[i];
     final accessor = '_${property.isarName}';
     switch (property.isarType) {
-      case IsarType.Bool:
+      case IsarType.bool:
         code += 'writer.writeBool(offsets[$i], $accessor);';
         break;
-      case IsarType.Int:
+      case IsarType.int:
         code += 'writer.writeInt(offsets[$i], $accessor);';
         break;
-      case IsarType.Float:
+      case IsarType.float:
         code += 'writer.writeFloat(offsets[$i], $accessor);';
         break;
-      case IsarType.Long:
+      case IsarType.long:
         code += 'writer.writeLong(offsets[$i], $accessor);';
         break;
-      case IsarType.Double:
+      case IsarType.double:
         code += 'writer.writeDouble(offsets[$i], $accessor);';
         break;
-      case IsarType.DateTime:
+      case IsarType.dateTime:
         code += 'writer.writeDateTime(offsets[$i], $accessor);';
         break;
-      case IsarType.String:
+      case IsarType.string:
         code += 'writer.writeBytes(offsets[$i], $accessor);';
         break;
-      case IsarType.Bytes:
+      case IsarType.bytes:
         code += 'writer.writeBytes(offsets[$i], $accessor);';
         break;
-      case IsarType.BoolList:
+      case IsarType.boolList:
         code += 'writer.writeBoolList(offsets[$i], $accessor);';
         break;
-      case IsarType.StringList:
+      case IsarType.stringList:
         code += 'writer.writeStringList(offsets[$i], $accessor);';
         break;
-      case IsarType.IntList:
+      case IsarType.intList:
         code += 'writer.writeIntList(offsets[$i], $accessor);';
         break;
-      case IsarType.LongList:
+      case IsarType.longList:
         code += 'writer.writeLongList(offsets[$i], $accessor);';
         break;
-      case IsarType.FloatList:
+      case IsarType.floatList:
         code += 'writer.writeFloatList(offsets[$i], $accessor);';
         break;
-      case IsarType.DoubleList:
+      case IsarType.doubleList:
         code += 'writer.writeDoubleList(offsets[$i], $accessor);';
         break;
-      case IsarType.DateTimeList:
+      case IsarType.dateTimeList:
         code += 'writer.writeDateTimeList(offsets[$i], $accessor);';
         break;
     }
@@ -199,7 +199,7 @@ String _generateDeserialize(ObjectInfo object) {
   ${object.dartName} deserialize(IsarCollection<${object.dartName}> collection, int id, BinaryReader reader, List<int> offsets) {
     final object = ${object.dartName}(''';
   final propertiesByMode = object.properties.groupBy((p) => p.deserialize);
-  final positional = propertiesByMode[PropertyDeser.PositionalParam] ?? [];
+  final positional = propertiesByMode[PropertyDeser.positionalParam] ?? [];
   final sortedPositional = positional.sortedBy((p) => p.constructorPosition!);
   for (var p in sortedPositional) {
     final index = object.objectProperties.indexOf(p);
@@ -207,7 +207,7 @@ String _generateDeserialize(ObjectInfo object) {
     code += '$deser,';
   }
 
-  final named = propertiesByMode[PropertyDeser.NamedParam] ?? [];
+  final named = propertiesByMode[PropertyDeser.namedParam] ?? [];
   for (var p in named) {
     final index = object.objectProperties.indexOf(p);
     final deser = _deserializeProperty(object, p, 'offsets[$index]');
@@ -216,7 +216,7 @@ String _generateDeserialize(ObjectInfo object) {
 
   code += ');';
 
-  final assign = propertiesByMode[PropertyDeser.Assign] ?? [];
+  final assign = propertiesByMode[PropertyDeser.assign] ?? [];
   for (var p in assign) {
     final index = object.objectProperties.indexOf(p);
     final deser = _deserializeProperty(object, p, 'offsets[$index]');
@@ -267,48 +267,48 @@ String _deserializeProperty(
 
   String? deser;
   switch (property.isarType) {
-    case IsarType.Bool:
+    case IsarType.bool:
       return 'reader.readBool$orNull($propertyOffset)';
-    case IsarType.Int:
+    case IsarType.int:
       deser = 'reader.readInt$orNull($propertyOffset)';
       break;
-    case IsarType.Float:
+    case IsarType.float:
       deser = 'reader.readFloat$orNull($propertyOffset)';
       break;
-    case IsarType.Long:
+    case IsarType.long:
       deser = 'reader.readLong$orNull($propertyOffset)';
       break;
-    case IsarType.Double:
+    case IsarType.double:
       deser = 'reader.readDouble$orNull($propertyOffset)';
       break;
-    case IsarType.DateTime:
+    case IsarType.dateTime:
       deser = 'reader.readDateTime$orNull($propertyOffset)';
       break;
-    case IsarType.String:
+    case IsarType.string:
       deser = 'reader.readString$orNull($propertyOffset)';
       break;
-    case IsarType.Bytes:
+    case IsarType.bytes:
       deser = 'reader.readBytes$orNull($propertyOffset)';
       break;
-    case IsarType.BoolList:
+    case IsarType.boolList:
       deser = 'reader.readBool${orElNull}List($propertyOffset) $orNullList';
       break;
-    case IsarType.StringList:
+    case IsarType.stringList:
       deser = 'reader.readString${orElNull}List($propertyOffset) $orNullList';
       break;
-    case IsarType.IntList:
+    case IsarType.intList:
       deser = 'reader.readInt${orElNull}List($propertyOffset) $orNullList';
       break;
-    case IsarType.FloatList:
+    case IsarType.floatList:
       deser = 'reader.readFloat${orElNull}List($propertyOffset) $orNullList';
       break;
-    case IsarType.LongList:
+    case IsarType.longList:
       deser = 'reader.readLong${orElNull}List($propertyOffset) $orNullList';
       break;
-    case IsarType.DoubleList:
+    case IsarType.doubleList:
       deser = 'reader.readDouble${orElNull}List($propertyOffset) $orNullList';
       break;
-    case IsarType.DateTimeList:
+    case IsarType.dateTimeList:
       deser = 'reader.readDateTime${orElNull}List($propertyOffset) $orNullList';
       break;
   }
@@ -325,7 +325,7 @@ String _generateAttachLinks(
       targetColGetter =
           '$collection.isar.${link.targetCollectionDartName.decapitalize()}s';
     } else {
-      targetColGetter = '$collection';
+      targetColGetter = collection;
     }
     if (assignNew) {
       code += 'object.${link.dartName} = IsarLink${link.links ? 's' : ''}().';

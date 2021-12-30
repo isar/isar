@@ -5,6 +5,8 @@ import 'package:isar_inspector/common.dart';
 import 'package:provider/provider.dart';
 
 class InstanceSelector extends StatefulWidget {
+  const InstanceSelector({Key? key}) : super(key: key);
+
   @override
   _InstanceSelectorState createState() => _InstanceSelectorState();
 }
@@ -48,7 +50,7 @@ class _InstanceSelectorState extends State<InstanceSelector>
             Padding(
               padding: const EdgeInsets.all(1),
               child: IsarCard(
-                color: Color(0xff31343f),
+                color: const Color(0xff31343f),
                 radius: BorderRadius.circular(15),
                 child: SizeTransition(
                   sizeFactor: _animation,
@@ -58,11 +60,11 @@ class _InstanceSelectorState extends State<InstanceSelector>
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      SizedBox(height: 15),
+                      const SizedBox(height: 15),
                       for (var instance in state.instances
                           .where((e) => e != state.selectedInstance))
                         _buildInstanceButton(theme, instance),
-                      SizedBox(height: 80),
+                      const SizedBox(height: 80),
                     ],
                   ),
                 ),
@@ -79,7 +81,7 @@ class _InstanceSelectorState extends State<InstanceSelector>
 
   Widget _buildInstanceButton(ThemeData theme, String instance) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: IsarCard(
         color: Colors.transparent,
         onTap: () {
@@ -87,12 +89,12 @@ class _InstanceSelectorState extends State<InstanceSelector>
           _controller.reverse();
         },
         child: Padding(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Center(
             child: Text(
               instance,
               textAlign: TextAlign.start,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -125,38 +127,38 @@ class _InstanceSelectorState extends State<InstanceSelector>
             : null,
         child: Center(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   FontAwesomeIcons.database,
                   size: 25,
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       selectedInstance,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
-                    Text('Isar Instance')
+                    const Text('Isar Instance')
                   ],
                 ),
-                Spacer(),
+                const Spacer(),
                 if (hasMultiple)
                   Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
+                    children: const [
+                       Icon(
                         FontAwesomeIcons.chevronUp,
                         size: 12,
                       ),
-                      Icon(
+                       Icon(
                         FontAwesomeIcons.chevronDown,
                         size: 12,
                       ),

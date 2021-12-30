@@ -48,19 +48,19 @@ class WhereGenerator {
           code += generateWhereNotEqualTo(index.name, properties);
         }
 
-        if (lastProperty.scalarType == IsarType.Int ||
-            lastProperty.scalarType == IsarType.Long ||
+        if (lastProperty.scalarType == IsarType.int ||
+            lastProperty.scalarType == IsarType.long ||
             lastProperty.scalarType.isFloatDouble) {
           code += generateWhereGreaterThan(index.name, properties);
           code += generateWhereLessThan(index.name, properties);
         }
 
-        if (lastProperty.scalarType == IsarType.String &&
+        if (lastProperty.scalarType == IsarType.string &&
             lastProperty.type != IndexType.hash) {
           code += generateWhereStartsWith(index.name, properties);
         }
 
-        if (lastProperty.scalarType != IsarType.Bool) {
+        if (lastProperty.scalarType != IsarType.bool) {
           code += generateWhereBetween(index.name, properties);
         }
 

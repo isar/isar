@@ -23,6 +23,7 @@ dev_dependencies:
   json_serializable: ^5.0.0
   build_runner: ^2.1.1
   freezed: ^0.14.5
+  lints: ^1.0.1
 
 dependency_overrides:
   isar:

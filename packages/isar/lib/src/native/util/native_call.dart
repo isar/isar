@@ -28,7 +28,7 @@ void nCall(int result) {
 }
 
 Stream<void> wrapIsarPort(ReceivePort port) {
-  final portStreamController = StreamController<Null>.broadcast();
+  final portStreamController = StreamController<void>.broadcast();
   port.listen(
     (event) {
       if (event == 0) {

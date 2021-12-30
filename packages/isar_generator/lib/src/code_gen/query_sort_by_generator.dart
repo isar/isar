@@ -10,11 +10,11 @@ String generateSortBy(ObjectInfo oi) {
 
     code += '''
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>sortBy${property.dartName.capitalize()}() {
-      return addSortByInternal('${property.dartName}', Sort.Asc);
+      return addSortByInternal('${property.dartName}', Sort.asc);
     }
     
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>sortBy${property.dartName.capitalize()}Desc() {
-      return addSortByInternal('${property.dartName}', Sort.Desc);
+      return addSortByInternal('${property.dartName}', Sort.desc);
     }''';
   }
 
@@ -28,11 +28,11 @@ String generateSortBy(ObjectInfo oi) {
 
     code += '''
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>thenBy${property.dartName.capitalize()}() {
-      return addSortByInternal('${property.dartName}', Sort.Asc);
+      return addSortByInternal('${property.dartName}', Sort.asc);
     }
     
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>thenBy${property.dartName.capitalize()}Desc() {
-      return addSortByInternal('${property.dartName}', Sort.Desc);
+      return addSortByInternal('${property.dartName}', Sort.desc);
     }''';
   }
   code += '}';

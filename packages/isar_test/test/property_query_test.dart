@@ -1,6 +1,5 @@
 import 'package:isar/isar.dart';
 import 'package:isar_test/common.dart';
-import 'package:isar_test/common.dart';
 import 'package:isar_test/mutli_type_model.dart';
 import 'package:test/test.dart';
 
@@ -27,8 +26,6 @@ void main() async {
         ]),
       );
 
-      final c = await isar.multiTypeModels.where().count();
-      final result = await isar.multiTypeModels.where().findAll();
       await qEqual(
         isar.multiTypeModels.where().boolValueProperty().findAll(),
         [true, false, true],
@@ -219,8 +216,6 @@ void main() async {
         ]),
       );
 
-      final result =
-          await isar.multiTypeModels.where().stringListProperty().findAll();
       await qEqual(
         isar.multiTypeModels.where().stringListProperty().findAll(),
         [

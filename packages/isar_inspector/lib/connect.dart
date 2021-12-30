@@ -8,12 +8,15 @@ import 'package:isar_inspector/app_state.dart';
 import 'package:provider/provider.dart';
 
 class ConnectPage extends StatefulWidget {
+  const ConnectPage({Key? key}) : super(key: key);
+
   @override
   _ConnectPageState createState() => _ConnectPageState();
 }
 
 class _ConnectPageState extends State<ConnectPage> {
   final _uriController = TextEditingController();
+  // ignore: unused_field
   String _message = '';
 
   Future<void> _connect() async {
@@ -43,7 +46,7 @@ class _ConnectPageState extends State<ConnectPage> {
       setState(() {
         _message = "Can't connect to this VMService: $e";
       });
-      return null;
+      return;
     }
   }
 
@@ -60,24 +63,24 @@ class _ConnectPageState extends State<ConnectPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text(
+                const Text(
                   'Connect to Isar',
                   style: TextStyle(fontSize: 20),
                 ),
-                SizedBox(height: 12),
-                Text('Paste the URL to the Isar instance.'),
-                SizedBox(height: 15),
+                const SizedBox(height: 12),
+                const Text('Paste the URL to the Isar instance.'),
+                const SizedBox(height: 15),
                 TextField(
                   controller: _uriController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: 'ws://127.0.0.1:41000/auth-code/',
                   ),
                 ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
                 ElevatedButton(
                   onPressed: _connect,
-                  child: Text('Connect'),
+                  child: const Text('Connect'),
                 ),
               ],
             ),

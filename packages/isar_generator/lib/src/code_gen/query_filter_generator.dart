@@ -15,18 +15,18 @@ class FilterGenerator {
         code += generateIsNull(property);
       }
 
-      if (property.isarType != IsarType.Bytes) {
+      if (property.isarType != IsarType.bytes) {
         if (!property.isarType.scalarType.isFloatDouble) {
           code += generateEqualTo(property);
         }
 
-        if (property.isarType.scalarType != IsarType.Bool) {
+        if (property.isarType.scalarType != IsarType.bool) {
           code += generateGreaterThan(property);
           code += generateLessThan(property);
           code += generateBetween(property);
         }
 
-        if (property.isarType.scalarType == IsarType.String) {
+        if (property.isarType.scalarType == IsarType.string) {
           code += generateStringStartsWith(property);
           code += generateStringEndsWith(property);
           code += generateStringContains(property);
@@ -40,7 +40,7 @@ class FilterGenerator {
   }
 
   String caseSensitiveProperty(ObjectProperty p) {
-    if (p.isarType == IsarType.String) {
+    if (p.isarType == IsarType.string) {
       return '{bool caseSensitive = true,}';
     } else {
       return '';
@@ -48,7 +48,7 @@ class FilterGenerator {
   }
 
   String caseSensitiveValue(ObjectProperty p) {
-    if (p.isarType == IsarType.String) {
+    if (p.isarType == IsarType.string) {
       return 'caseSensitive: caseSensitive,';
     } else {
       return '';
@@ -67,7 +67,7 @@ class FilterGenerator {
 
   String mPrefix(ObjectProperty p, [bool listAny = true]) {
     final any = listAny && p.isarType.isList ? 'Any' : '';
-    return 'QueryBuilder<$objName, $objName, QAfterFilterCondition> ${p.dartName.decapitalize()}${any}';
+    return 'QueryBuilder<$objName, $objName, QAfterFilterCondition> ${p.dartName.decapitalize()}$any';
   }
 
   String toIsar(ObjectProperty p, String name) {
@@ -82,7 +82,7 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}EqualTo(${vType(p)} value, ${caseSensitiveProperty(p)}) {
       return addFilterCondition(FilterCondition(
-        type: ConditionType.Eq,
+        type: ConditionType.eq,
         property: '${p.dartName}',
         value: ${toIsar(p, 'value')},
         ${caseSensitiveValue(p)}
@@ -94,7 +94,7 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}GreaterThan(${vType(p)} value, ${caseSensitiveProperty(p)}) {
       return addFilterCondition(FilterCondition(
-        type: ConditionType.Gt,
+        type: ConditionType.gt,
         property: '${p.dartName}',
         value: ${toIsar(p, 'value')},
         ${caseSensitiveValue(p)}
@@ -106,7 +106,7 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}LessThan(${vType(p)} value, ${caseSensitiveProperty(p)}) {
       return addFilterCondition(FilterCondition(
-        type: ConditionType.Lt,
+        type: ConditionType.lt,
         property: '${p.dartName}',
         value: ${toIsar(p, 'value')},
         ${caseSensitiveValue(p)}
@@ -130,16 +130,16 @@ class FilterGenerator {
     var code = '''
     ${mPrefix(p, false)}IsNull() {
       return addFilterCondition(FilterCondition(
-        type: ConditionType.IsNull,
+        type: ConditionType.isNull,
         property: '${p.dartName}',
         value: null,
       ));
     }''';
-    if (p.isarType.isList && p.isarType != IsarType.Bytes) {
+    if (p.isarType.isList && p.isarType != IsarType.bytes) {
       code += '''
       ${mPrefix(p)}AnyIsNull() {
         return addFilterCondition(FilterCondition(
-          type: ConditionType.Eq,
+          type: ConditionType.eq,
           property: '${p.dartName}',
           value: null,
         ));
@@ -152,7 +152,7 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}StartsWith(${vType(p, false)} value, {bool caseSensitive = true}) {
       return addFilterCondition(FilterCondition(
-        type: ConditionType.StartsWith,
+        type: ConditionType.startsWith,
         property: '${p.dartName}',
         value: ${toIsar(p, 'value')},
         caseSensitive: caseSensitive,
@@ -164,7 +164,7 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}EndsWith(${vType(p, false)} value, {bool caseSensitive = true}) {
       return addFilterCondition(FilterCondition(
-        type: ConditionType.EndsWith,
+        type: ConditionType.endsWith,
         property: '${p.dartName}',
         value: ${toIsar(p, 'value')},
         caseSensitive: caseSensitive,
@@ -176,7 +176,7 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}Contains(${vType(p, false)} value, {bool caseSensitive = true}) {
       return addFilterCondition(FilterCondition(
-        type: ConditionType.Contains,
+        type: ConditionType.contains,
         property: '${p.dartName}',
         value: ${toIsar(p, 'value')},
         caseSensitive: caseSensitive,
@@ -188,7 +188,7 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}Matches(String pattern, {bool caseSensitive = true}) {
       return addFilterCondition(FilterCondition(
-        type: ConditionType.Matches,
+        type: ConditionType.matches,
         property: '${p.dartName}',
         value: pattern,
         caseSensitive: caseSensitive,

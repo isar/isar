@@ -39,50 +39,50 @@ Pointer<NativeType> buildUpperUnboundedIndexKey(IsarCollectionImpl col) {
 void _addKeyValue(
     Pointer<NativeType> keyPtr, dynamic value, NativeIndexType type) {
   switch (type) {
-    case NativeIndexType.Bool:
+    case NativeIndexType.bool:
       if (value is bool?) {
         IC.isar_key_add_byte(keyPtr, boolToByte(value));
         return;
       }
       break;
-    case NativeIndexType.Int:
+    case NativeIndexType.int:
       if (value is int?) {
         IC.isar_key_add_int(keyPtr, value ?? nullInt);
         return;
       }
       break;
-    case NativeIndexType.Float:
+    case NativeIndexType.float:
       if (value is double?) {
         IC.isar_key_add_float(keyPtr, value ?? nullFloat);
         return;
       }
       break;
-    case NativeIndexType.Long:
+    case NativeIndexType.long:
       if (value is int?) {
         IC.isar_key_add_long(keyPtr, value ?? nullLong);
         return;
       }
       break;
-    case NativeIndexType.Double:
+    case NativeIndexType.double:
       if (value is double?) {
         IC.isar_key_add_double(keyPtr, value ?? nullDouble);
         return;
       }
       break;
-    case NativeIndexType.String:
-    case NativeIndexType.StringCIS:
+    case NativeIndexType.string:
+    case NativeIndexType.stringCIS:
       final strPtr = _strToNative(value);
-      IC.isar_key_add_string(keyPtr, strPtr, type == NativeIndexType.String);
+      IC.isar_key_add_string(keyPtr, strPtr, type == NativeIndexType.string);
       _freeStr(strPtr);
       break;
-    case NativeIndexType.StringHash:
-    case NativeIndexType.StringHashCIS:
+    case NativeIndexType.stringHash:
+    case NativeIndexType.stringHashCIS:
       final strPtr = _strToNative(value);
       IC.isar_key_add_string_hash(
-          keyPtr, strPtr, type == NativeIndexType.StringHash);
+          keyPtr, strPtr, type == NativeIndexType.stringHash);
       _freeStr(strPtr);
       break;
-    case NativeIndexType.BytesHash:
+    case NativeIndexType.bytesHash:
       if (value is Uint8List) {
         final bytesPtr = malloc<Uint8>(value.length);
         bytesPtr.asTypedList(value.length).insertAll(0, value);
@@ -92,7 +92,7 @@ void _addKeyValue(
         IC.isar_key_add_byte_list_hash(keyPtr, nullptr, 0);
       }
       break;
-    case NativeIndexType.BoolListHash:
+    case NativeIndexType.boolListHash:
       if (value is List<bool?>) {
         final boolListPtr = malloc<Uint8>(value.length);
         boolListPtr
@@ -104,7 +104,7 @@ void _addKeyValue(
         IC.isar_key_add_byte_list_hash(keyPtr, nullptr, 0);
       }
       break;
-    case NativeIndexType.IntListHash:
+    case NativeIndexType.intListHash:
       if (value is List<int?>) {
         final intListPtr = malloc<Int32>(value.length);
         intListPtr
@@ -116,7 +116,7 @@ void _addKeyValue(
         IC.isar_key_add_int_list_hash(keyPtr, nullptr, 0);
       }
       break;
-    case NativeIndexType.FloatListHash:
+    case NativeIndexType.floatListHash:
       if (value is List<double?>) {
         final floatListPtr = malloc<Float>(value.length);
         floatListPtr
@@ -128,7 +128,7 @@ void _addKeyValue(
         IC.isar_key_add_float_list_hash(keyPtr, nullptr, 0);
       }
       break;
-    case NativeIndexType.LongListHash:
+    case NativeIndexType.longListHash:
       if (value is List<int?>) {
         final longListPtr = malloc<Int64>(value.length);
         longListPtr
@@ -140,7 +140,7 @@ void _addKeyValue(
         IC.isar_key_add_long_list_hash(keyPtr, nullptr, 0);
       }
       break;
-    case NativeIndexType.DoubleListHash:
+    case NativeIndexType.doubleListHash:
       if (value is List<double?>) {
         final doubleListPtr = malloc<Double>(value.length);
         doubleListPtr
@@ -152,15 +152,15 @@ void _addKeyValue(
         IC.isar_key_add_double_list_hash(keyPtr, nullptr, 0);
       }
       break;
-    case NativeIndexType.StringListHash:
-    case NativeIndexType.StringListHashCIS:
+    case NativeIndexType.stringListHash:
+    case NativeIndexType.stringListHashCIS:
       if (value is List<String?>) {
         final stringListPtr = malloc<Pointer<Int8>>(value.length);
         for (var i = 0; i < value.length; i++) {
           stringListPtr[i] = _strToNative(value[i]);
         }
         IC.isar_key_add_string_list_hash(keyPtr, stringListPtr, value.length,
-            type == NativeIndexType.StringListHash);
+            type == NativeIndexType.stringListHash);
         for (var i = 0; i < value.length; i++) {
           _freeStr(stringListPtr[i]);
         }

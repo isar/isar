@@ -5,6 +5,8 @@ import 'package:isar_inspector/query_parser.dart';
 import 'package:provider/provider.dart';
 
 class FilterField extends StatefulWidget {
+  const FilterField({Key? key}) : super(key: key);
+
   @override
   _FilterFieldState createState() => _FilterFieldState();
 }
@@ -25,12 +27,12 @@ class _FilterFieldState extends State<FilterField> {
                 borderRadius: BorderRadius.circular(20),
                 borderSide: BorderSide(color: theme.dividerColor),
               ),
-              contentPadding: EdgeInsets.all(20),
+              contentPadding: const EdgeInsets.all(20),
             ),
             style: GoogleFonts.sourceCodePro(),
           ),
         ),
-        SizedBox(width: 20),
+        const SizedBox(width: 20),
         ElevatedButton(
           onPressed: () {
             final appState = context.read<AppState>();
@@ -42,7 +44,7 @@ class _FilterFieldState extends State<FilterField> {
               print(e);
             }
           },
-          child: Text('Run'),
+          child: const Text('Run'),
         )
       ],
     );

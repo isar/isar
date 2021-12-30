@@ -34,7 +34,7 @@ class FilterCondition<T> extends FilterOperation {
     this.caseSensitive = true,
   })  : value1 = value,
         value2 = null,
-        assert(type != ConditionType.Between);
+        assert(type != ConditionType.between);
 
   const FilterCondition.between({
     required this.property,
@@ -43,26 +43,26 @@ class FilterCondition<T> extends FilterOperation {
     this.caseSensitive = true,
   })  : value1 = lower,
         value2 = upper,
-        type = ConditionType.Between;
+        type = ConditionType.between;
 }
 
 enum ConditionType {
-  Eq,
-  Gt,
-  Gte,
-  Lt,
-  Lte,
-  Between,
-  StartsWith,
-  EndsWith,
-  Contains,
-  Matches,
-  IsNull,
+  eq,
+  gt,
+  gte,
+  lt,
+  lte,
+  between,
+  startsWith,
+  endsWith,
+  contains,
+  matches,
+  isNull,
 }
 
 enum FilterGroupType {
-  And,
-  Or,
+  and,
+  or,
 }
 
 class FilterGroup extends FilterOperation {
@@ -84,8 +84,8 @@ class FilterNot extends FilterOperation {
 }
 
 enum Sort {
-  Asc,
-  Desc,
+  asc,
+  desc,
 }
 
 class SortProperty {

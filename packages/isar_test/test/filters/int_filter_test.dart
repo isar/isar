@@ -1,6 +1,5 @@
 import 'package:isar/isar.dart';
 import 'package:isar_test/common.dart';
-import 'package:isar_test/common.dart';
 import 'package:isar_test/int_model.dart';
 import 'package:test/test.dart';
 
@@ -13,10 +12,9 @@ void main() {
       isar = await openTempIsar([IntModelSchema]);
       col = isar.intModels;
 
-      var obj;
       await isar.writeTxn((isar) async {
         for (var i = 0; i < 5; i++) {
-          obj = IntModel()..field = i;
+          var obj = IntModel()..field = i;
           await col.put(obj);
         }
         await col.put(IntModel()..field = null);

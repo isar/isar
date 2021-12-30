@@ -1,6 +1,5 @@
 import 'package:isar/isar.dart';
 import 'package:isar_test/common.dart';
-import 'package:isar_test/common.dart';
 import 'package:isar_test/long_model.dart';
 import 'package:test/test.dart';
 

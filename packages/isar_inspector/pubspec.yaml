@@ -29,6 +29,7 @@ dev_dependencies:
   freezed: any
   json_serializable: ^4.0.0
   build_runner: any
+  flutter_lints: ^1.0.4
 
 dependency_overrides:
   isar: 

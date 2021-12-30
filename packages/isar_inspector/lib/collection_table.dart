@@ -16,6 +16,8 @@ const _colWidths = {
 };
 
 class CollectionTable extends StatefulWidget {
+  const CollectionTable({Key? key}) : super(key: key);
+
   @override
   _CollectionTableState createState() => _CollectionTableState();
 }
@@ -54,7 +56,7 @@ class _CollectionTableState extends State<CollectionTable> {
                 Expanded(
                   child: state.objects != null
                       ? _buildTable(theme, state)
-                      : Center(
+                      : const Center(
                           child: CircularProgressIndicator(),
                         ),
                 ),
@@ -62,8 +64,8 @@ class _CollectionTableState extends State<CollectionTable> {
             ),
           ),
         ),
-        SizedBox(height: 20),
-        PrevNext(),
+        const SizedBox(height: 20),
+        const PrevNext(),
       ],
     );
   }
@@ -104,12 +106,12 @@ class _CollectionTableState extends State<CollectionTable> {
                   children: [
                     Text(
                       property.name,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Text(
                       property.typeName,
                       style: TextStyle(
@@ -151,7 +153,7 @@ class _CollectionTableState extends State<CollectionTable> {
             else
               Colors.purple,
           ],
-          stops: [0.0, 0.05, 0.95, 1.0],
+          stops: const [0.0, 0.05, 0.95, 1.0],
         ).createShader(rect);
       },
       blendMode: BlendMode.dstOut,

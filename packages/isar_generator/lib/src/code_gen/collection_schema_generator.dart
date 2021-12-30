@@ -104,32 +104,32 @@ extension on IndexType {
 extension on IsarType {
   String get name {
     switch (this) {
-      case IsarType.Bool:
+      case IsarType.bool:
         return "Byte";
-      case IsarType.Int:
+      case IsarType.int:
         return "Int";
-      case IsarType.Float:
+      case IsarType.float:
         return "Float";
-      case IsarType.Long:
-      case IsarType.DateTime:
+      case IsarType.long:
+      case IsarType.dateTime:
         return "Long";
-      case IsarType.Double:
+      case IsarType.double:
         return "Double";
-      case IsarType.String:
+      case IsarType.string:
         return "String";
-      case IsarType.Bytes:
-      case IsarType.BoolList:
+      case IsarType.bytes:
+      case IsarType.boolList:
         return "ByteList";
-      case IsarType.IntList:
+      case IsarType.intList:
         return "IntList";
-      case IsarType.FloatList:
+      case IsarType.floatList:
         return "FloatList";
-      case IsarType.LongList:
-      case IsarType.DateTimeList:
+      case IsarType.longList:
+      case IsarType.dateTimeList:
         return "LongList";
-      case IsarType.DoubleList:
+      case IsarType.doubleList:
         return "DoubleList";
-      case IsarType.StringList:
+      case IsarType.stringList:
         return "StringList";
     }
   }

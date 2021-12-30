@@ -14,11 +14,11 @@ extension QueryFilter<OBJ, R> on QueryBuilder<OBJ, R, QFilter> {
 
 extension QueryFilterAndOr<OBJ, R> on QueryBuilder<OBJ, R, QFilterOperator> {
   QueryBuilder<OBJ, R, QFilterCondition> and() {
-    return andOrInternal(FilterGroupType.And);
+    return andOrInternal(FilterGroupType.and);
   }
 
   QueryBuilder<OBJ, R, QFilterCondition> or() {
-    return andOrInternal(FilterGroupType.Or);
+    return andOrInternal(FilterGroupType.or);
   }
 }
 
@@ -103,7 +103,7 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
 
   Stream<void> watchLazy() => build().watchLazy();
 
-  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
+  Future<T> exportJsonRaw<T>(T Function(Uint8List) callback,
           {bool primitiveNull = true}) =>
       build().exportJsonRaw(callback, primitiveNull: primitiveNull);
 

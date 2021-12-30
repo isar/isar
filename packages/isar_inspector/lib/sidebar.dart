@@ -7,6 +7,8 @@ import 'package:isar_inspector/instance_selector.dart';
 import 'package:provider/provider.dart';
 
 class Sidebar extends StatefulWidget {
+  const Sidebar({Key? key}) : super(key: key);
+
   @override
   _SidebarState createState() => _SidebarState();
 }
@@ -76,7 +78,7 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
                         child: SizedBox(
                           height: constraints.maxHeight - 80,
                           child: Column(
-                            children: [
+                            children: const [
                               SizedBox(height: 20),
                               CollectionsList(),
                               Spacer(),
@@ -88,7 +90,7 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
                     ],
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
               ],
             );
           },
@@ -122,11 +124,11 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
               'assets/logo.svg',
               width: 40,
             ),
-            SizedBox(width: 15),
+            const SizedBox(width: 15),
             Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: const [
                 Text(
                   'Isar',
                   style: TextStyle(fontWeight: FontWeight.bold),

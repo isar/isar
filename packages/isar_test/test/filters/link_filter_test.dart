@@ -1,9 +1,3 @@
-import 'package:isar/isar.dart';
-import 'package:isar_test/common.dart';
-import 'package:isar_test/common.dart';
-import 'package:isar_test/link_model.dart';
-import 'package:test/test.dart';
-
 void main() {
   /*group('Groups', () {
     late Isar isar;

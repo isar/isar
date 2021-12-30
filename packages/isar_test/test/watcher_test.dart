@@ -1,9 +1,3 @@
-import 'package:isar/isar.dart';
-
-import 'package:test/test.dart';
-
-import 'package:isar_test/message_model.dart';
-
 void main() {
   /*group('Watcher', () {
     late Isar isar;

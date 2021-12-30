@@ -33,7 +33,9 @@ class IsarCoreUtils {
   static final syncRawObjPtr = malloc<RawObject>();
 }
 
+// ignore: non_constant_identifier_names
 IsarCoreBindings? _IC;
+// ignore: non_constant_identifier_names
 IsarCoreBindings get IC => _IC!;
 
 void initializeIsarCore({Map<String, String> dylibs = const {}}) {

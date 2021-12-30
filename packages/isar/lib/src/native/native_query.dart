@@ -11,7 +11,7 @@ import 'isar_core.dart';
 typedef QueryDeserialize<T> = List<T> Function(RawObjectSet);
 
 class NativeQuery<T> extends Query<T> {
-  static const MAX_LIMIT = 4294967295;
+  static const maxLimit = 4294967295;
 
   final IsarCollectionImpl col;
   final Pointer<NativeType> queryPtr;
@@ -22,7 +22,7 @@ class NativeQuery<T> extends Query<T> {
 
   @override
   Future<T?> findFirst() {
-    return findInternal(MAX_LIMIT).then((result) {
+    return findInternal(maxLimit).then((result) {
       if (result.isNotEmpty) {
         return result[0];
       }
@@ -30,7 +30,7 @@ class NativeQuery<T> extends Query<T> {
   }
 
   @override
-  Future<List<T>> findAll() => findInternal(MAX_LIMIT);
+  Future<List<T>> findAll() => findInternal(maxLimit);
 
   Future<List<T>> findInternal(int limit) {
     return col.isar.getTxn(false, (txnPtr, stream) async {
@@ -55,7 +55,7 @@ class NativeQuery<T> extends Query<T> {
   }
 
   @override
-  List<T> findAllSync() => findSyncInternal(MAX_LIMIT);
+  List<T> findAllSync() => findSyncInternal(maxLimit);
 
   List<T> findSyncInternal(int limit) {
     return col.isar.getTxnSync(false, (txnPtr) {
@@ -73,7 +73,7 @@ class NativeQuery<T> extends Query<T> {
   Future<bool> deleteFirst() => deleteInternal(1).then((count) => count == 1);
 
   @override
-  Future<int> deleteAll() => deleteInternal(MAX_LIMIT);
+  Future<int> deleteAll() => deleteInternal(maxLimit);
 
   Future<int> deleteInternal(int limit) {
     return col.isar.getTxn(false, (txnPtr, stream) async {
@@ -98,7 +98,7 @@ class NativeQuery<T> extends Query<T> {
   bool deleteFirstSync() => deleteSyncInternal(1) == 1;
 
   @override
-  int deleteAllSync() => deleteSyncInternal(MAX_LIMIT);
+  int deleteAllSync() => deleteSyncInternal(maxLimit);
 
   int deleteSyncInternal(int limit) {
     return col.isar.getTxnSync(false, (txnPtr) {
@@ -198,7 +198,7 @@ class NativeQuery<T> extends Query<T> {
   }
 
   R? _convertAggregatedResult<R>(Pointer resultPtr, AggregationOp op) {
-    final nullable = op == AggregationOp.Min || op == AggregationOp.Max;
+    final nullable = op == AggregationOp.min || op == AggregationOp.max;
     if (R == int || R == DateTime) {
       final value = IC.isar_q_aggregate_long_result(resultPtr);
       if (nullable && value == nullLong) {

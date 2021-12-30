@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:isar_inspector/app_state.dart';
 import 'package:isar_inspector/collection_table.dart';
 import 'package:isar_inspector/filter_field.dart';
-import 'package:isar_inspector/prev_next.dart';
 import 'package:isar_inspector/sidebar.dart';
 import 'package:provider/provider.dart';
 import 'package:isar_inspector/error.dart';
@@ -13,11 +12,13 @@ void main() async {
   print('Connecting…');
   runApp(ChangeNotifierProvider(
     create: (_) => AppState(),
-    child: IsarInspector(),
+    child: const IsarInspector(),
   ));
 }
 
 class IsarInspector extends StatelessWidget {
+  const IsarInspector({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final state = Provider.of<AppState>(context);
@@ -27,9 +28,8 @@ class IsarInspector extends StatelessWidget {
         brightness: Brightness.dark,
         scaffoldBackgroundColor: Colors.transparent,
         primaryColor: Colors.blue,
-        accentColor: Colors.blue,
-        cardColor: Color(0xff1f2128), // Color.fromARGB(255, 40, 41, 46),
-        dividerColor: Color.fromARGB(255, 40, 41, 46),
+        cardColor: const Color(0xff1f2128), // Color.fromARGB(255, 40, 41, 46),
+        dividerColor: const Color.fromARGB(255, 40, 41, 46),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
             shape: MaterialStateProperty.all(
@@ -37,13 +37,14 @@ class IsarInspector extends StatelessWidget {
                 borderRadius: BorderRadius.circular(25),
               ),
             ),
-            minimumSize: MaterialStateProperty.all(Size(100, 50)),
+            minimumSize: MaterialStateProperty.all(const Size(100, 50)),
           ),
         ),
+        colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.blue),
       ),
       home: Container(
         decoration: BoxDecoration(
-          color: Color(0xff111216), //Color.fromARGB(255, 34, 36, 41),
+          color: const Color(0xff111216), //Color.fromARGB(255, 34, 36, 41),
           borderRadius: BorderRadius.circular(20),
         ),
         child: GestureDetector(
@@ -61,15 +62,15 @@ class IsarInspector extends StatelessWidget {
 
   Widget _buildApp(AppState state) {
     return Padding(
-      padding: EdgeInsets.only(top: 35, left: 20, bottom: 20, right: 20),
+      padding: const EdgeInsets.only(top: 35, left: 20, bottom: 20, right: 20),
       child: Container(
-        constraints: BoxConstraints.expand(),
+        constraints: const BoxConstraints.expand(),
         child: Stack(
           children: [
             if (!state.connected)
-              ConnectPage()
+              const ConnectPage()
             else ...[
-              Positioned(
+              const Positioned(
                 top: 0,
                 left: 250,
                 right: 0,
@@ -84,7 +85,7 @@ class IsarInspector extends StatelessWidget {
                 child: _buildTable(state),
               ),
             ],
-            SizedBox(
+            const SizedBox(
               width: 230,
               child: Sidebar(),
             ),
@@ -96,13 +97,13 @@ class IsarInspector extends StatelessWidget {
 
   Widget _buildTable(AppState state) {
     if (state.selectedCollection == null) {
-      return Center(
+      return const Center(
         child: Text('No collection selected'),
       );
     } else if (state.error != null) {
-      return Error();
+      return const Error();
     } else {
-      return CollectionTable();
+      return const CollectionTable();
     }
   }
 }

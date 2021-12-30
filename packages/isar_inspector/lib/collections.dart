@@ -5,6 +5,8 @@ import 'package:isar_inspector/schema.dart';
 import 'package:provider/provider.dart';
 
 class CollectionsList extends StatelessWidget {
+  const CollectionsList({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(
@@ -17,7 +19,7 @@ class CollectionsList extends StatelessWidget {
                 collection,
                 state.selectedCollection == collection,
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
             ],
           ],
         );
@@ -40,7 +42,7 @@ class CollectionsList extends StatelessWidget {
         child: Center(
           child: Text(
             collection.name,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ),
       ),

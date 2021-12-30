@@ -7,7 +7,7 @@ import 'package:isar_inspector/schema.dart';
 import 'package:isar_inspector/service.dart';
 
 class AppState extends ChangeNotifier {
-  static const PAGE_SIZE = 50;
+  static const pageSize = 50;
 
   Service? _service;
   Service? get service => _service;
@@ -63,7 +63,7 @@ class AppState extends ChangeNotifier {
     _error = null;
     _hasMore = false;
     _subscriptionHandle++;
-    _filter = FilterGroup(type: FilterGroupType.Or, filters: []);
+    _filter = const FilterGroup(type: FilterGroupType.or, filters: []);
     _objects = null;
     _sortProperty = null;
     _ascending = true;
@@ -86,7 +86,8 @@ class AppState extends ChangeNotifier {
   List<Map<String, dynamic>>? _objects;
   List<Map<String, dynamic>>? get objects => _objects;
 
-  FilterOperation _filter = FilterGroup(type: FilterGroupType.Or, filters: []);
+  FilterOperation _filter =
+      const FilterGroup(type: FilterGroupType.or, filters: []);
   FilterOperation get filter => _filter;
   set filter(FilterOperation filter) {
     if (_filter != filter) {
@@ -118,15 +119,15 @@ class AppState extends ChangeNotifier {
   int get offset => _offset;
   void nextPage() {
     if (_hasMore) {
-      _offset += PAGE_SIZE;
+      _offset += pageSize;
       _objects = null;
       _updateInternal(_subscriptionHandle);
     }
   }
 
   void prevPage() {
-    if (_offset >= PAGE_SIZE) {
-      _offset -= PAGE_SIZE;
+    if (_offset >= pageSize) {
+      _offset -= pageSize;
       _objects = null;
       _updateInternal(_subscriptionHandle);
     }
@@ -158,16 +159,15 @@ class AppState extends ChangeNotifier {
         _selectedCollection!.name,
         _filter,
         _offset,
-        PAGE_SIZE + 1,
+        pageSize + 1,
         sortPropertyIndex,
         _ascending,
       );
       if (handle != _subscriptionHandle) return;
-      _objects = objects.take(PAGE_SIZE).toList();
-      _hasMore = objects.length > PAGE_SIZE;
+      _objects = objects.take(pageSize).toList();
+      _hasMore = objects.length > pageSize;
       _error = null;
     } catch (e) {
-      print(e);
       _hasMore = false;
       _error = e.toString();
     }

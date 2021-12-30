@@ -1,7 +1,6 @@
 import 'package:isar/isar.dart';
 import 'package:isar_test/bool_model.dart';
 import 'package:isar_test/common.dart';
-import 'package:isar_test/common.dart';
 import 'package:test/test.dart';
 
 void main() {

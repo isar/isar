@@ -105,13 +105,13 @@ class Service {
 
   Map<String, dynamic> serializeFilter(FilterOperation filter) {
     if (filter is FilterCondition) {
-      if (filter.type == ConditionType.Between) {
+      if (filter.type == ConditionType.between) {
         return {
           'type': 'FilterCondition',
           'conditionType': filter.type.index,
           'property': filter.property,
-          'lower': filter.lower,
-          'upper': filter.upper,
+          'lower': filter.value1,
+          'upper': filter.value2,
           'caseSensitive': filter.caseSensitive,
         };
       } else {
@@ -119,7 +119,7 @@ class Service {
           'type': 'FilterCondition',
           'conditionType': filter.type.index,
           'property': filter.property,
-          'value': filter.lower,
+          'value': filter.value1,
           'caseSensitive': filter.caseSensitive,
         };
       }

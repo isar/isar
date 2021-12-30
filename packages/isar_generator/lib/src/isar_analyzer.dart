@@ -85,7 +85,7 @@ class IsarAnalyzer {
         final property = properties[i];
         if (property.isarName == 'id' &&
             property.converter == null &&
-            property.isarType == IsarType.Long) {
+            property.isarType == IsarType.long) {
           oidProperty = properties[i].copyWith(isId: true);
           properties[i] = oidProperty;
           break;
@@ -185,7 +185,7 @@ class IsarAnalyzer {
     if (isId) {
       if (converter != null) {
         err('Converters are not allowed for ids.', property);
-      } else if (isarType != IsarType.Long) {
+      } else if (isarType != IsarType.long) {
         err('Only int ids are allowed', property);
       }
     }
@@ -205,13 +205,13 @@ class IsarAnalyzer {
             constructorParameter);
       }
       deserialize = constructorParameter.isNamed
-          ? PropertyDeser.NamedParam
-          : PropertyDeser.PositionalParam;
+          ? PropertyDeser.namedParam
+          : PropertyDeser.positionalParam;
       constructorPosition =
           constructor.parameters.indexOf(constructorParameter);
     } else {
       deserialize =
-          property.setter == null ? PropertyDeser.None : PropertyDeser.Assign;
+          property.setter == null ? PropertyDeser.none : PropertyDeser.assign;
     }
     return ObjectProperty(
       dartName: property.displayName,
@@ -229,50 +229,50 @@ class IsarAnalyzer {
 
   IsarType? getIsarType(DartType type, bool size32, Element element) {
     if (type.isDartCoreBool) {
-      return IsarType.Bool;
+      return IsarType.bool;
     } else if (type.isDartCoreInt) {
       if (size32) {
-        return IsarType.Int;
+        return IsarType.int;
       } else {
-        return IsarType.Long;
+        return IsarType.long;
       }
     } else if (type.isDartCoreDouble) {
       if (size32) {
-        return IsarType.Float;
+        return IsarType.float;
       } else {
-        return IsarType.Double;
+        return IsarType.double;
       }
     } else if (type.isDartCoreString) {
-      return IsarType.String;
+      return IsarType.string;
     } else if (type.isDartCoreList) {
       final parameterizedType = type as ParameterizedType;
       final typeArguments = parameterizedType.typeArguments;
       if (typeArguments.isNotEmpty) {
         final listType = typeArguments[0];
         if (listType.isDartCoreBool) {
-          return IsarType.BoolList;
+          return IsarType.boolList;
         } else if (listType.isDartCoreInt) {
           if (size32) {
-            return IsarType.IntList;
+            return IsarType.intList;
           } else {
-            return IsarType.LongList;
+            return IsarType.longList;
           }
         } else if (listType.isDartCoreDouble) {
           if (size32) {
-            return IsarType.FloatList;
+            return IsarType.floatList;
           } else {
-            return IsarType.DoubleList;
+            return IsarType.doubleList;
           }
         } else if (listType.isDartCoreString) {
-          return IsarType.StringList;
+          return IsarType.stringList;
         } else if (isDateTime(listType.element!)) {
-          return IsarType.DateTimeList;
+          return IsarType.dateTimeList;
         }
       }
     } else if (isDateTime(type.element!)) {
-      return IsarType.DateTime;
+      return IsarType.dateTime;
     } else if (isUint8List(type.element!)) {
-      return IsarType.Bytes;
+      return IsarType.bytes;
     }
   }
 
@@ -369,7 +369,7 @@ class IsarAnalyzer {
             indexProperties.length > 1) {
           err('Composite indexes do not support non-hashed lists.', element);
         }
-        if (property.isarType == IsarType.String) {
+        if (property.isarType == IsarType.string) {
           if (indexProperty.type != IndexType.hash &&
               i != indexProperties.lastIndex) {
             err('Only the last property of a composite index may be a non-hashed String.',
@@ -380,11 +380,11 @@ class IsarAnalyzer {
             indexProperty.type != IndexType.value) {
           err('Only Strings and Lists may be hashed.', element);
         }
-        if (indexProperty.property.isarType != IsarType.StringList &&
+        if (indexProperty.property.isarType != IsarType.stringList &&
             indexProperty.type == IndexType.hashElements) {
           err('Only String lists may have hashed elements.', element);
         }
-        if (indexProperty.property.isarType == IsarType.Bytes &&
+        if (indexProperty.property.isarType == IsarType.bytes &&
             indexProperty.type != IndexType.hash) {
           err('Bytes indexes need to be hashed.', element);
         }

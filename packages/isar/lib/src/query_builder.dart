@@ -3,8 +3,8 @@ part of isar;
 typedef FilterQuery<OBJ> = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>
     Function(QueryBuilder<OBJ, OBJ, QFilterCondition> q);
 
-const _NullFilterGroup = FilterGroup(
-  type: FilterGroupType.And,
+const _nullFilterGroup = FilterGroup(
+  type: FilterGroupType.and,
   filters: [],
 );
 
@@ -26,7 +26,7 @@ class QueryBuilder<OBJ, R, S> {
       : _whereClauses = const [],
         _distinctByProperties = const [],
         _sortByProperties = const [],
-        _filterOr = FilterGroup(filters: [], type: FilterGroupType.Or),
+        _filterOr = FilterGroup(filters: [], type: FilterGroupType.or),
         _filterAnd = null,
         _filterNot = false,
         _offset = null,
@@ -40,7 +40,7 @@ class QueryBuilder<OBJ, R, S> {
     this._filterNot, [
     this._whereClauses = const [],
     this._whereDistinct = false,
-    this._whereSort = Sort.Asc,
+    this._whereSort = Sort.asc,
     this._distinctByProperties = const [],
     this._sortByProperties = const [],
     this._offset,
@@ -57,7 +57,7 @@ class QueryBuilder<OBJ, R, S> {
       return copyWith(
         filterAnd: FilterGroup(
           filters: [..._filterAnd!.filters, cond],
-          type: FilterGroupType.And,
+          type: FilterGroupType.and,
         ),
         filterNot: false,
       );
@@ -65,7 +65,7 @@ class QueryBuilder<OBJ, R, S> {
       return copyWith(
         filterOr: FilterGroup(
           filters: [..._filterOr.filters, cond],
-          type: FilterGroupType.Or,
+          type: FilterGroupType.or,
         ),
         filterNot: false,
       );
@@ -78,15 +78,15 @@ class QueryBuilder<OBJ, R, S> {
 
   QueryBuilder<OBJ, R, QAfterFilterOperator> andOrInternal(
       FilterGroupType andOr) {
-    if (andOr == FilterGroupType.And) {
+    if (andOr == FilterGroupType.and) {
       if (_filterAnd == null) {
         return copyWith(
           filterOr: FilterGroup(
-            type: FilterGroupType.Or,
+            type: FilterGroupType.or,
             filters: _filterOr.filters.sublist(0, _filterOr.filters.length - 1),
           ),
           filterAnd: FilterGroup(
-            type: FilterGroupType.And,
+            type: FilterGroupType.and,
             filters: [_filterOr.filters.last],
           ),
         );
@@ -95,7 +95,7 @@ class QueryBuilder<OBJ, R, S> {
       return copyWith(
         filterOr: FilterGroup(
           filters: [..._filterOr.filters, _filterAnd!],
-          type: FilterGroupType.Or,
+          type: FilterGroupType.or,
         ),
         filterAnd: null,
       );
@@ -112,7 +112,7 @@ class QueryBuilder<OBJ, R, S> {
   QueryBuilder<OBJ, R, QAfterFilterCondition> groupInternal(
       FilterQuery<OBJ> q) {
     final qb = q(QueryBuilder(_collection, _whereDistinct, _whereSort));
-    final qbFinished = qb.andOrInternal(FilterGroupType.Or);
+    final qbFinished = qb.andOrInternal(FilterGroupType.or);
 
     if (qbFinished._filterOr.filters.isEmpty) {
       return copyWith();
@@ -129,7 +129,7 @@ class QueryBuilder<OBJ, R, S> {
     String linkName,
   ) {
     final qb = q(QueryBuilder(targetCollection, false, _whereSort));
-    final qbFinished = qb.andOrInternal(FilterGroupType.Or);
+    final qbFinished = qb.andOrInternal(FilterGroupType.or);
 
     final conditions = qbFinished._filterOr.filters;
     if (conditions.isEmpty) {
@@ -173,7 +173,7 @@ class QueryBuilder<OBJ, R, S> {
   QueryBuilder<OBJ, R, NS> copyWith<NS>({
     List<WhereClause>? whereClauses,
     FilterGroup? filterOr,
-    FilterGroup? filterAnd = _NullFilterGroup,
+    FilterGroup? filterAnd = _nullFilterGroup,
     bool? filterNot,
     List<FilterGroup>? parentFilters,
     List<DistinctProperty>? distinctByProperties,
@@ -187,7 +187,7 @@ class QueryBuilder<OBJ, R, S> {
     return QueryBuilder._(
       _collection,
       filterOr ?? _filterOr,
-      identical(filterAnd, _NullFilterGroup) ? _filterAnd : filterAnd,
+      identical(filterAnd, _nullFilterGroup) ? _filterAnd : filterAnd,
       filterNot ?? _filterNot,
       whereClauses ?? List.unmodifiable(_whereClauses),
       _whereDistinct,
@@ -200,7 +200,7 @@ class QueryBuilder<OBJ, R, S> {
     );
   }
 
-  QueryBuilder<OBJ, R, NS> cast<R, NS>() {
+  QueryBuilder<OBJ, NR, NS> cast<NR, NS>() {
     return QueryBuilder._(
       _collection,
       _filterOr,
@@ -218,7 +218,7 @@ class QueryBuilder<OBJ, R, S> {
   }
 
   Query<R> buildInternal() {
-    final builder = andOrInternal(FilterGroupType.Or);
+    final builder = andOrInternal(FilterGroupType.or);
     FilterGroup? filter;
     if (builder._filterOr.filters.length == 1) {
       final group = builder._filterOr.filters.first;
@@ -313,9 +313,9 @@ class QQueryProperty implements QQueryOperations {}
 class QQueryOperations {}
 
 enum AggregationOp {
-  Min,
-  Max,
-  Sum,
-  Average,
-  Count,
+  min,
+  max,
+  sum,
+  average,
+  count,
 }

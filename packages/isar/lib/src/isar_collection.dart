@@ -78,7 +78,7 @@ abstract class IsarCollection<OBJ> {
 
   /// Start building a query using the [QueryBuilder].
   QueryBuilder<OBJ, OBJ, QWhere> where(
-      {bool distinct = false, Sort sort = Sort.Asc}) {
+      {bool distinct = false, Sort sort = Sort.asc}) {
     return QueryBuilder(this, distinct, sort);
   }
 
@@ -86,7 +86,7 @@ abstract class IsarCollection<OBJ> {
   Query<R> buildQuery<R>({
     List<WhereClause> whereClauses = const [],
     bool whereDistinct = false,
-    Sort whereSort = Sort.Asc,
+    Sort whereSort = Sort.asc,
     FilterGroup? filter,
     List<SortProperty> sortBy = const [],
     List<DistinctProperty> distinctBy = const [],

@@ -6,8 +6,8 @@ import 'util/native_call.dart';
 import 'index_key.dart';
 import 'native_query.dart';
 
-final MIN_STR = Pointer<Int8>.fromAddress(0);
-final MAX_STR = '\u{FFFFF}'.toNativeUtf8().cast<Int8>();
+final minStr = Pointer<Int8>.fromAddress(0);
+final maxStr = '\u{FFFFF}'.toNativeUtf8().cast<Int8>();
 
 Query<T> buildNativeQuery<T>(
   IsarCollectionImpl col,
@@ -41,7 +41,7 @@ Query<T> buildNativeQuery<T>(
         col.ptr,
         qbPtr,
         propertyId,
-        sortProperty.sort == Sort.Asc,
+        sortProperty.sort == Sort.asc,
       ));
     } else {
       throw 'Unknown property "${sortProperty.property}"';
@@ -92,8 +92,8 @@ void _addWhereClause(IsarCollectionImpl col, Pointer qbPtr, WhereClause wc,
     }
     nCall(IC.isar_qb_add_id_where_clause(
       qbPtr,
-      sort == Sort.Asc ? (wc.lower?[0] ?? minLong) : (wc.upper?[0] ?? maxLong),
-      sort == Sort.Asc ? (wc.upper?[0] ?? maxLong) : (wc.lower?[0] ?? minLong),
+      sort == Sort.asc ? (wc.lower?[0] ?? minLong) : (wc.upper?[0] ?? maxLong),
+      sort == Sort.asc ? (wc.upper?[0] ?? maxLong) : (wc.lower?[0] ?? minLong),
     ));
   } else {
     late Pointer<NativeType> lowerPtr;
@@ -113,10 +113,10 @@ void _addWhereClause(IsarCollectionImpl col, Pointer qbPtr, WhereClause wc,
     nCall(IC.isar_qb_add_index_where_clause(
       qbPtr,
       col.indexIdOrErr(wc.indexName!),
-      sort == Sort.Asc ? lowerPtr : upperPtr,
-      sort == Sort.Asc ? wc.includeLower : wc.includeUpper,
-      sort == Sort.Asc ? upperPtr : lowerPtr,
-      sort == Sort.Asc ? wc.includeUpper : wc.includeLower,
+      sort == Sort.asc ? lowerPtr : upperPtr,
+      sort == Sort.asc ? wc.includeLower : wc.includeUpper,
+      sort == Sort.asc ? upperPtr : lowerPtr,
+      sort == Sort.asc ? wc.includeUpper : wc.includeLower,
       distinct ?? false,
     ));
   }
@@ -165,7 +165,7 @@ Pointer<NativeType>? _buildFilterGroup(
   final filterPtrPtr = malloc<Pointer<NativeType>>();
   nCall(IC.isar_filter_and_or(
     filterPtrPtr,
-    group.type == FilterGroupType.And,
+    group.type == FilterGroupType.and,
     conditionsPtrPtr,
     group.filters.length,
   ));
@@ -272,7 +272,7 @@ Pointer<NativeType> _buildConditionInternal({
   final filterPtrPtr = malloc<Pointer<Pointer<NativeType>>>();
 
   switch (conditionType) {
-    case ConditionType.Eq:
+    case ConditionType.eq:
       if (val1 == null) {
         nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId, true));
       } else if (val1 is bool) {
@@ -291,7 +291,7 @@ Pointer<NativeType> _buildConditionInternal({
         throw 'Unsupported type for condition';
       }
       break;
-    case ConditionType.Between:
+    case ConditionType.between:
       final val = val1 ?? val2;
       if (val == null) {
         nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId, true));
@@ -307,12 +307,12 @@ Pointer<NativeType> _buildConditionInternal({
         if (val1 is String) {
           lowerPtr = val1.toNativeUtf8().cast();
         } else {
-          lowerPtr = MIN_STR;
+          lowerPtr = minStr;
         }
         if (val2 is String) {
           upperPtr = val2.toNativeUtf8().cast();
         } else {
-          upperPtr = MIN_STR;
+          upperPtr = minStr;
         }
         nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, lowerPtr, upperPtr,
             caseSensitive, propertyId));
@@ -326,7 +326,7 @@ Pointer<NativeType> _buildConditionInternal({
         throw 'Unsupported type for condition';
       }
       break;
-    case ConditionType.Lt:
+    case ConditionType.lt:
       if (val1 == null) {
         nCall(IC.isar_filter_static(filterPtrPtr, false));
       } else {
@@ -339,7 +339,7 @@ Pointer<NativeType> _buildConditionInternal({
         } else if (val1 is String) {
           final value = val1.toNativeUtf8();
           nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, value.cast(),
-              MAX_STR, caseSensitive, propertyId));
+              maxStr, caseSensitive, propertyId));
           malloc.free(value);
         } else {
           throw 'Unsupported type for condition';
@@ -347,7 +347,7 @@ Pointer<NativeType> _buildConditionInternal({
         nCall(IC.isar_filter_not(filterPtrPtr, filterPtrPtr.value));
       }
       break;
-    case ConditionType.Lte:
+    case ConditionType.lte:
       if (val1 == null) {
         nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId, true));
       } else if (val1 is int) {
@@ -358,14 +358,14 @@ Pointer<NativeType> _buildConditionInternal({
             col.ptr, filterPtrPtr, minDouble, val1, propertyId));
       } else if (val1 is String) {
         final value = val1.toNativeUtf8();
-        nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, MIN_STR,
-            value.cast(), caseSensitive, propertyId));
+        nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, minStr, value.cast(),
+            caseSensitive, propertyId));
         malloc.free(value);
       } else {
         throw 'Unsupported type for condition';
       }
       break;
-    case ConditionType.Gt:
+    case ConditionType.gt:
       if (val1 == null) {
         nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId, true));
       } else if (val1 is int) {
@@ -376,15 +376,15 @@ Pointer<NativeType> _buildConditionInternal({
             col.ptr, filterPtrPtr, minDouble, val1, propertyId));
       } else if (val1 is String) {
         final value = val1.toNativeUtf8();
-        nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, MIN_STR,
-            value.cast(), caseSensitive, propertyId));
+        nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, minStr, value.cast(),
+            caseSensitive, propertyId));
         malloc.free(value);
       } else {
         throw 'Unsupported type for condition';
       }
       nCall(IC.isar_filter_not(filterPtrPtr, filterPtrPtr.value));
       break;
-    case ConditionType.Gte:
+    case ConditionType.gte:
       if (val1 == null) {
         nCall(IC.isar_filter_static(filterPtrPtr, true));
       } else if (val1 is int) {
@@ -395,14 +395,14 @@ Pointer<NativeType> _buildConditionInternal({
             col.ptr, filterPtrPtr, minDouble, val1, propertyId));
       } else if (val1 is String) {
         final value = val1.toNativeUtf8();
-        nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, MIN_STR,
-            value.cast(), caseSensitive, propertyId));
+        nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, minStr, value.cast(),
+            caseSensitive, propertyId));
         malloc.free(value);
       } else {
         throw 'Unsupported type for condition';
       }
       break;
-    case ConditionType.StartsWith:
+    case ConditionType.startsWith:
       if (val1 is String) {
         final strPtr = val1.toNativeUtf8();
         nCall(IC.isar_filter_string_starts_with(
@@ -412,7 +412,7 @@ Pointer<NativeType> _buildConditionInternal({
         throw 'Unsupported type for condition';
       }
       break;
-    case ConditionType.EndsWith:
+    case ConditionType.endsWith:
       if (val1 is String) {
         final strPtr = val1.toNativeUtf8();
         nCall(IC.isar_filter_string_ends_with(
@@ -422,7 +422,7 @@ Pointer<NativeType> _buildConditionInternal({
         throw 'Unsupported type for condition';
       }
       break;
-    case ConditionType.Contains:
+    case ConditionType.contains:
       if (val1 is String) {
         final strPtr = val1.toNativeUtf8();
         nCall(IC.isar_filter_string_contains(
@@ -432,7 +432,7 @@ Pointer<NativeType> _buildConditionInternal({
         throw 'Unsupported type for condition';
       }
       break;
-    case ConditionType.Matches:
+    case ConditionType.matches:
       if (val1 is String) {
         final strPtr = val1.toNativeUtf8();
         nCall(IC.isar_filter_string_matches(
@@ -442,7 +442,7 @@ Pointer<NativeType> _buildConditionInternal({
         throw 'Unsupported type for condition';
       }
       break;
-    case ConditionType.IsNull:
+    case ConditionType.isNull:
       nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId, false));
       break;
   }

@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:isolate';
 
-import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
 import 'isar_core.dart';
@@ -95,7 +93,7 @@ class IsarImpl extends Isar {
   }
 
   Future<T> getTxn<T>(bool write,
-      Future<T> Function(Pointer txn, Stream<Null> stream) callback) {
+      Future<T> Function(Pointer txn, Stream<void> stream) callback) {
     final currentTxn = Zone.current[_zoneTxn];
     if (currentTxn != null) {
       if (write && !Zone.current[_zoneTxnWrite]) {

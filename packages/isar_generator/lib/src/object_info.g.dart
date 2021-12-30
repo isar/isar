@@ -93,28 +93,28 @@ K _$enumDecode<K, V>(
 }
 
 const _$IsarTypeEnumMap = {
-  IsarType.Bool: 'Bool',
-  IsarType.Int: 'Int',
-  IsarType.Float: 'Float',
-  IsarType.Long: 'Long',
-  IsarType.Double: 'Double',
-  IsarType.DateTime: 'DateTime',
-  IsarType.String: 'String',
-  IsarType.Bytes: 'Bytes',
-  IsarType.BoolList: 'BoolList',
-  IsarType.IntList: 'IntList',
-  IsarType.FloatList: 'FloatList',
-  IsarType.LongList: 'LongList',
-  IsarType.DoubleList: 'DoubleList',
-  IsarType.DateTimeList: 'DateTimeList',
-  IsarType.StringList: 'StringList',
+  IsarType.bool: 'Bool',
+  IsarType.int: 'Int',
+  IsarType.float: 'Float',
+  IsarType.long: 'Long',
+  IsarType.double: 'Double',
+  IsarType.dateTime: 'DateTime',
+  IsarType.string: 'String',
+  IsarType.bytes: 'Bytes',
+  IsarType.boolList: 'BoolList',
+  IsarType.intList: 'IntList',
+  IsarType.floatList: 'FloatList',
+  IsarType.longList: 'LongList',
+  IsarType.doubleList: 'DoubleList',
+  IsarType.dateTimeList: 'DateTimeList',
+  IsarType.stringList: 'StringList',
 };
 
 const _$PropertyDeserEnumMap = {
-  PropertyDeser.None: 'None',
-  PropertyDeser.Assign: 'Assign',
-  PropertyDeser.PositionalParam: 'PositionalParam',
-  PropertyDeser.NamedParam: 'NamedParam',
+  PropertyDeser.none: 'None',
+  PropertyDeser.assign: 'Assign',
+  PropertyDeser.positionalParam: 'PositionalParam',
+  PropertyDeser.namedParam: 'NamedParam',
 };
 
 _$_ObjectIndexProperty _$$_ObjectIndexPropertyFromJson(

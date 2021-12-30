@@ -5,12 +5,12 @@ String generateDistinctBy(ObjectInfo oi) {
   var code = '''
   extension ${oi.dartName}QueryWhereDistinct on QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct> {''';
   for (var property in oi.properties) {
-    if (property.isarType == IsarType.String) {
+    if (property.isarType == IsarType.string) {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}({bool caseSensitive = true}) {
             return addDistinctByInternal('${property.dartName}', caseSensitive: caseSensitive);
         }''';
-    } else if (property.isarType.index < IsarType.String.index) {
+    } else if (property.isarType.index < IsarType.string.index) {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}() {
             return addDistinctByInternal('${property.dartName}');

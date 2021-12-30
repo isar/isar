@@ -390,7 +390,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   Query<T> buildQuery<T>({
     List<WhereClause> whereClauses = const [],
     bool whereDistinct = false,
-    Sort whereSort = Sort.Asc,
+    Sort whereSort = Sort.asc,
     FilterGroup? filter,
     List<SortProperty> sortBy = const [],
     List<DistinctProperty> distinctBy = const [],

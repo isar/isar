@@ -26,7 +26,7 @@ class QueryParser {
           string('&&').trim(),
           (l, _, r) => FilterGroup(
             filters: [l as FilterOperation, r as FilterOperation],
-            type: FilterGroupType.And,
+            type: FilterGroupType.and,
           ),
         );
 
@@ -34,7 +34,7 @@ class QueryParser {
           string('||').trim(),
           (l, _, r) => FilterGroup(
             filters: [l as FilterOperation, r as FilterOperation],
-            type: FilterGroupType.Or,
+            type: FilterGroupType.or,
           ),
         );
 
@@ -72,7 +72,7 @@ class QueryParser {
       case '!=':
       case '==':
         final filter = FilterCondition(
-          type: ConditionType.Eq,
+          type: ConditionType.eq,
           property: propertyName,
           value: value,
         );
@@ -88,7 +88,7 @@ class QueryParser {
       case '<':
       case '<=':
         final filter = FilterCondition(
-          type: cmp == '>=' || cmp == '>' ? ConditionType.Gt : ConditionType.Lt,
+          type: cmp == '>=' || cmp == '>' ? ConditionType.gt : ConditionType.lt,
           property: propertyName,
           value: value,
         );
@@ -97,19 +97,19 @@ class QueryParser {
             filters: [
               filter,
               FilterCondition(
-                type: ConditionType.Eq,
+                type: ConditionType.eq,
                 property: propertyName,
                 value: value,
               ),
             ],
-            type: FilterGroupType.Or,
+            type: FilterGroupType.or,
           );
         } else {
           return filter;
         }
       case 'matches':
         return FilterCondition(
-          type: ConditionType.Matches,
+          type: ConditionType.matches,
           property: propertyName,
           value: value,
         );

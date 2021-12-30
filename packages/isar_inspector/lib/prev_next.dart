@@ -4,13 +4,15 @@ import 'package:isar_inspector/common.dart';
 import 'package:provider/provider.dart';
 
 class PrevNext extends StatelessWidget {
+  const PrevNext({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _button(context, false),
-        SizedBox(width: 20),
+        const SizedBox(width: 20),
         _button(context, true),
       ],
     );

@@ -40,10 +40,10 @@ class ObjectInfo with _$ObjectInfo {
 }
 
 enum PropertyDeser {
-  None,
-  Assign,
-  PositionalParam,
-  NamedParam,
+  none,
+  assign,
+  positionalParam,
+  namedParam,
 }
 
 @freezed
@@ -102,77 +102,77 @@ class ObjectIndexProperty with _$ObjectIndexProperty {
 
   String get indexTypeEnum {
     switch (property.isarType) {
-      case IsarType.Bool:
-        return 'NativeIndexType.Bool';
-      case IsarType.Int:
-        return 'NativeIndexType.Int';
-      case IsarType.Float:
-        return 'NativeIndexType.Float';
-      case IsarType.Long:
-      case IsarType.DateTime:
-        return 'NativeIndexType.Long';
-      case IsarType.Double:
-        return 'NativeIndexType.Double';
-      case IsarType.String:
+      case IsarType.bool:
+        return 'NativeIndexType.bool';
+      case IsarType.int:
+        return 'NativeIndexType.int';
+      case IsarType.float:
+        return 'NativeIndexType.float';
+      case IsarType.long:
+      case IsarType.dateTime:
+        return 'NativeIndexType.long';
+      case IsarType.double:
+        return 'NativeIndexType.double';
+      case IsarType.string:
         if (caseSensitive) {
           return type == IndexType.hash
-              ? 'NativeIndexType.StringHash'
-              : 'NativeIndexType.String';
+              ? 'NativeIndexType.stringHash'
+              : 'NativeIndexType.string';
         } else {
           return type == IndexType.hash
-              ? 'NativeIndexType.StringHashCIS'
-              : 'NativeIndexType.StringCIS';
+              ? 'NativeIndexType.stringHashCIS'
+              : 'NativeIndexType.stringCIS';
         }
-      case IsarType.Bytes:
+      case IsarType.bytes:
         assert(type == IndexType.hash);
-        return 'NativeIndexType.BytesHash';
-      case IsarType.BoolList:
+        return 'NativeIndexType.bytesHash';
+      case IsarType.boolList:
         if (type == IndexType.hash) {
-          return 'NativeIndexType.BoolListHash';
+          return 'NativeIndexType.boolListHash';
         } else {
-          return 'NativeIndexType.Bool';
+          return 'NativeIndexType.bool';
         }
-      case IsarType.IntList:
+      case IsarType.intList:
         if (type == IndexType.hash) {
-          return 'NativeIndexType.IntListHash';
+          return 'NativeIndexType.intListHash';
         } else {
-          return 'NativeIndexType.Int';
+          return 'NativeIndexType.int';
         }
-      case IsarType.FloatList:
+      case IsarType.floatList:
         if (type == IndexType.hash) {
-          return 'NativeIndexType.FloatListHash';
+          return 'NativeIndexType.floatListHash';
         } else {
-          return 'NativeIndexType.Float';
+          return 'NativeIndexType.float';
         }
-      case IsarType.LongList:
-      case IsarType.DateTimeList:
+      case IsarType.longList:
+      case IsarType.dateTimeList:
         if (type == IndexType.hash) {
-          return 'NativeIndexType.LongListHash';
+          return 'NativeIndexType.longListHash';
         } else {
-          return 'NativeIndexType.Long';
+          return 'NativeIndexType.long';
         }
-      case IsarType.DoubleList:
+      case IsarType.doubleList:
         if (type == IndexType.hash) {
-          return 'NativeIndexType.DoubleListHash';
+          return 'NativeIndexType.doubleListHash';
         } else {
-          return 'NativeIndexType.Double';
+          return 'NativeIndexType.double';
         }
-      case IsarType.StringList:
+      case IsarType.stringList:
         if (caseSensitive) {
           if (type == IndexType.hash) {
-            return 'NativeIndexType.StringListHash';
+            return 'NativeIndexType.stringListHash';
           } else if (type == IndexType.hashElements) {
-            return 'NativeIndexType.StringHash';
+            return 'NativeIndexType.stringHash';
           } else {
-            return 'NativeIndexType.String';
+            return 'NativeIndexType.string';
           }
         } else {
           if (type == IndexType.hash) {
-            return 'NativeIndexType.StringListHashCIS';
+            return 'NativeIndexType.stringListHashCIS';
           } else if (type == IndexType.hashElements) {
-            return 'NativeIndexType.StringHashCIS';
+            return 'NativeIndexType.stringHashCIS';
           } else {
-            return 'NativeIndexType.StringCIS';
+            return 'NativeIndexType.stringCIS';
           }
         }
     }
@@ -192,9 +192,6 @@ class ObjectIndex with _$ObjectIndex {
 
   factory ObjectIndex.fromJson(Map<String, dynamic> json) =>
       _$ObjectIndexFromJson(json);
-
-  String get name =>
-      properties.map((e) => e.property.dartName.capitalize()).join();
 }
 
 @freezed
@@ -214,43 +211,43 @@ class ObjectLink with _$ObjectLink {
 }
 
 enum IsarType {
-  Bool,
-  Int,
-  Float,
-  Long,
-  Double,
-  DateTime,
-  String,
-  Bytes,
-  BoolList,
-  IntList,
-  FloatList,
-  LongList,
-  DoubleList,
-  DateTimeList,
-  StringList,
+  bool,
+  int,
+  float,
+  long,
+  double,
+  dateTime,
+  string,
+  bytes,
+  boolList,
+  intList,
+  floatList,
+  longList,
+  doubleList,
+  dateTimeList,
+  stringList,
 }
 
 extension IsarTypeX on IsarType {
   bool get isFloatDouble {
-    return this == IsarType.Float || this == IsarType.Double;
+    return this == IsarType.float || this == IsarType.double;
   }
 
   bool get isDynamic {
-    return index >= IsarType.String.index;
+    return index >= IsarType.string.index;
   }
 
   bool get isList {
-    return index > IsarType.String.index;
+    return index > IsarType.string.index;
   }
 
   bool get containsString =>
-      index == IsarType.String.index || index == IsarType.StringList.index;
+      index == IsarType.string.index || index == IsarType.stringList.index;
 
   int get staticSize {
-    if (this == IsarType.Bool) {
+    if (this == IsarType.bool) {
       return 1;
-    } else if (this == IsarType.Int || this == IsarType.Float) {
+    } else if (this == IsarType.int || this == IsarType.float) {
       return 4;
     } else {
       return 8;
@@ -259,15 +256,15 @@ extension IsarTypeX on IsarType {
 
   int get elementSize {
     switch (this) {
-      case IsarType.Bytes:
-      case IsarType.BoolList:
+      case IsarType.bytes:
+      case IsarType.boolList:
         return 1;
-      case IsarType.IntList:
-      case IsarType.FloatList:
+      case IsarType.intList:
+      case IsarType.floatList:
         return 4;
-      case IsarType.LongList:
-      case IsarType.DoubleList:
-      case IsarType.DateTimeList:
+      case IsarType.longList:
+      case IsarType.doubleList:
+      case IsarType.dateTimeList:
         return 8;
       default:
         return 0;
@@ -276,52 +273,52 @@ extension IsarTypeX on IsarType {
 
   int get typeId {
     switch (this) {
-      case IsarType.Bool:
+      case IsarType.bool:
         return 0;
-      case IsarType.Int:
+      case IsarType.int:
         return 1;
-      case IsarType.Float:
+      case IsarType.float:
         return 2;
-      case IsarType.Long:
-      case IsarType.DateTime:
+      case IsarType.long:
+      case IsarType.dateTime:
         return 3;
-      case IsarType.Double:
+      case IsarType.double:
         return 4;
-      case IsarType.String:
+      case IsarType.string:
         return 5;
-      case IsarType.Bytes:
-      case IsarType.BoolList:
+      case IsarType.bytes:
+      case IsarType.boolList:
         return 6;
-      case IsarType.IntList:
+      case IsarType.intList:
         return 7;
-      case IsarType.FloatList:
+      case IsarType.floatList:
         return 8;
-      case IsarType.LongList:
-      case IsarType.DateTimeList:
+      case IsarType.longList:
+      case IsarType.dateTimeList:
         return 9;
-      case IsarType.DoubleList:
+      case IsarType.doubleList:
         return 10;
-      case IsarType.StringList:
+      case IsarType.stringList:
         return 11;
     }
   }
 
   IsarType get scalarType {
     switch (this) {
-      case IsarType.BoolList:
-        return IsarType.Bool;
-      case IsarType.IntList:
-        return IsarType.Int;
-      case IsarType.FloatList:
-        return IsarType.Float;
-      case IsarType.LongList:
-        return IsarType.Long;
-      case IsarType.DoubleList:
-        return IsarType.Double;
-      case IsarType.DateTimeList:
-        return IsarType.DateTime;
-      case IsarType.StringList:
-        return IsarType.String;
+      case IsarType.boolList:
+        return IsarType.bool;
+      case IsarType.intList:
+        return IsarType.int;
+      case IsarType.floatList:
+        return IsarType.float;
+      case IsarType.longList:
+        return IsarType.long;
+      case IsarType.doubleList:
+        return IsarType.double;
+      case IsarType.dateTimeList:
+        return IsarType.dateTime;
+      case IsarType.stringList:
+        return IsarType.string;
       default:
         return this;
     }
@@ -331,31 +328,31 @@ extension IsarTypeX on IsarType {
     final nQ = nullable ? '?' : '';
     final nEQ = elementNullable ? '?' : '';
     switch (this) {
-      case IsarType.Bool:
+      case IsarType.bool:
         return 'bool$nQ';
-      case IsarType.Int:
-      case IsarType.Long:
+      case IsarType.int:
+      case IsarType.long:
         return 'int$nQ';
-      case IsarType.Double:
-      case IsarType.Float:
+      case IsarType.double:
+      case IsarType.float:
         return 'double$nQ';
-      case IsarType.DateTime:
+      case IsarType.dateTime:
         return 'DateTime$nQ';
-      case IsarType.String:
+      case IsarType.string:
         return 'String$nQ';
-      case IsarType.Bytes:
+      case IsarType.bytes:
         return 'Uint8List$nQ';
-      case IsarType.BoolList:
+      case IsarType.boolList:
         return 'List<bool$nEQ>$nQ';
-      case IsarType.IntList:
-      case IsarType.LongList:
+      case IsarType.intList:
+      case IsarType.longList:
         return 'List<int$nEQ>$nQ';
-      case IsarType.FloatList:
-      case IsarType.DoubleList:
+      case IsarType.floatList:
+      case IsarType.doubleList:
         return 'List<double$nEQ>$nQ';
-      case IsarType.DateTimeList:
+      case IsarType.dateTimeList:
         return 'List<DateTime$nEQ>$nQ';
-      case IsarType.StringList:
+      case IsarType.stringList:
         return 'List<String$nEQ>$nQ';
     }
   }
