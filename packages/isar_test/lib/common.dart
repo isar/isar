@@ -64,11 +64,11 @@ String getRandomName() {
   return '${random}_tmp';
 }
 
-Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> collections) async {
+Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> schemas) async {
   registerBinaries();
 
   return Isar.open(
-    collections: collections,
+    schemas: schemas,
     name: getRandomName(),
     directory: testTempPath!,
   );

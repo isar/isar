@@ -32,17 +32,17 @@ abstract class Isar {
   }
 
   static Future<Isar> open({
-    required List<CollectionSchema> collections,
+    required List<CollectionSchema> schemas,
     required String directory,
     String name = 'isar',
     bool relaxedDurability = true,
   }) {
-    if (collections.isEmpty) {
+    if (schemas.isEmpty) {
       throw IsarError('At least one collection needs to be opened.');
     }
-    for (var col in collections) {
-      for (var linkedCol in col.linkedCollections) {
-        if (!collections.any((e) => e.name == linkedCol)) {
+    for (var schema in schemas) {
+      for (var linkedCol in schema.linkedCollections) {
+        if (!schemas.any((e) => e.name == linkedCol)) {
           throw IsarError(
               'Linked collection "$linkedCol" is not part of the schema.');
         }
@@ -52,7 +52,7 @@ abstract class Isar {
       throw UnimplementedError();
     } else {
       return openIsarNative(
-        collections: collections,
+        schemas: schemas,
         directory: directory,
         name: name,
         relaxedDurability: relaxedDurability,

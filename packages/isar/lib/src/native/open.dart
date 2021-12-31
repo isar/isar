@@ -10,7 +10,7 @@ import 'isar_impl.dart';
 import 'util/native_call.dart';
 
 Future<Isar> openIsarNative({
-  required List<CollectionSchema> collections,
+  required List<CollectionSchema> schemas,
   required String directory,
   String name = 'isar',
   bool relaxedDurability = true,
@@ -26,7 +26,7 @@ Future<Isar> openIsarNative({
   initializeIsarCore();
   IC.isar_connect_dart_api(NativeApi.postCObject);
 
-  final schema = '[' + collections.map((e) => e.schema).join(',') + ']';
+  final schema = '[' + schemas.map((e) => e.schema).join(',') + ']';
 
   final isarPtrPtr = malloc<Pointer>();
   final pathPtr = path.toNativeUtf8();
@@ -48,15 +48,15 @@ Future<Isar> openIsarNative({
 
   final isar = IsarImpl(name, schema, isarPtr);
 
-  final maxProperties = collections
+  final maxProperties = schemas
       .map((e) => e.propertyIds.length)
       .reduce((value, element) => max(value, element));
   final collectionPtrPtr = malloc<Pointer>();
   final propertyOffsetsPtr = malloc<Uint32>(maxProperties);
 
   final cols = <String, IsarCollection>{};
-  for (var i = 0; i < collections.length; i++) {
-    final schema = collections[i];
+  for (var i = 0; i < schemas.length; i++) {
+    final schema = schemas[i];
     nCall(IC.isar_get_collection(isar.ptr, collectionPtrPtr, i));
     IC.isar_get_property_offsets(collectionPtrPtr.value, propertyOffsetsPtr);
     cols[schema.name] = schema.toNativeCollection(
