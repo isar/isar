@@ -1,5 +1,5 @@
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
-import 'package:dartx/dartx.dart';
 
 part 'int_model.g.dart';
 
@@ -24,15 +24,13 @@ class IntModel {
 
   @override
   String toString() {
-    return '{field: $field, list: $list}';
+    return '{id: $id, field: $field, list: $list}';
   }
 
   @override
   bool operator ==(other) {
     return (other as IntModel).field == field &&
-        list?.length == other.list?.length &&
-        (list?.contentEquals(other.list!) ?? true) &&
-        hashList?.length == other.hashList?.length &&
-        (hashList?.contentEquals(other.hashList!) ?? true);
+        listEquals(list, other.list) &&
+        listEquals(hashList, other.hashList);
   }
 }

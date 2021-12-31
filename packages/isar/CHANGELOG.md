@@ -19,6 +19,7 @@ The internal database format has been changed to improve performance. Old databa
 - Generator now creates individual files instead of one big file
 - Unsupported properties are now ignored automatically
 - Returns the assigned ids after `.put()` operations (objects are no longer mutated)
+- Introduces `replaceOnConflict` option for `.put()` (instead of specifying it for index)
 
 ### Internal
 - Improve generated code

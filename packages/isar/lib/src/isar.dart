@@ -140,4 +140,12 @@ abstract class Isar {
   static void removeCloseListener(IsarCloseCallback callback) {
     _closeCallbacks.remove(callback);
   }
+
+  static List<String> splitWords(String input) {
+    if (kIsWeb) {
+      throw UnimplementedError();
+    } else {
+      return splitWordsNative(input);
+    }
+  }
 }

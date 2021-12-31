@@ -327,10 +327,6 @@ class IsarAnalyzer {
 
     final indexAnns = getIndexAnns(element).toList();
     for (var index in indexAnns) {
-      if (!index.unique && index.replace) {
-        err('Only unique indexes may replace existing entries', element);
-      }
-
       final indexProperties = <ObjectIndexProperty>[];
 
       indexProperties.add(ObjectIndexProperty(
@@ -398,7 +394,6 @@ class IsarAnalyzer {
         name: name,
         properties: indexProperties,
         unique: index.unique,
-        replace: index.replace,
       );
     }
   }

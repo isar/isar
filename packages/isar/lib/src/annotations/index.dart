@@ -28,10 +28,6 @@ class Index {
   /// duplicate will result in an error.
   final bool unique;
 
-  /// Rather than throwing an exception the replace index will replace existing
-  /// objects with the same value.
-  final bool replace;
-
   final IndexType? type;
 
   // String or `List<String>` indexes can be case sensitive (default) or case
@@ -42,7 +38,6 @@ class Index {
     this.name,
     this.composite = const [],
     this.unique = false,
-    this.replace = false,
     this.type,
     this.caseSensitive,
   });

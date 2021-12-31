@@ -13,7 +13,6 @@ class WhereGenerator {
     final primaryIndex = ObjectIndex(
       name: '_id',
       unique: true,
-      replace: true,
       properties: [
         ObjectIndexProperty(
           property: object.idProperty,
@@ -41,32 +40,32 @@ class WhereGenerator {
       for (var n = 0; n < index.properties.length; n++) {
         var properties = index.properties.sublist(0, n + 1);
 
-        final firstProperties = properties.sublist(0, n);
         final lastProperty = properties.last;
-        if (!firstProperties.any((it) => it.isarType.isFloatDouble)) {
+        if (!properties.any((it) => it.scalarType.isFloatDouble)) {
           code += generateWhereEqualTo(index.name, properties);
           code += generateWhereNotEqualTo(index.name, properties);
-        }
-
-        if (lastProperty.scalarType == IsarType.int ||
-            lastProperty.scalarType == IsarType.long ||
-            lastProperty.scalarType.isFloatDouble) {
-          code += generateWhereGreaterThan(index.name, properties);
-          code += generateWhereLessThan(index.name, properties);
-        }
-
-        if (lastProperty.scalarType == IsarType.string &&
-            lastProperty.type != IndexType.hash) {
-          code += generateWhereStartsWith(index.name, properties);
-        }
-
-        if (lastProperty.scalarType != IsarType.bool) {
-          code += generateWhereBetween(index.name, properties);
         }
 
         if (index.properties.length == 1 && lastProperty.property.nullable) {
           code += generateWhereIsNull(index.name, lastProperty);
           code += generateWhereIsNotNull(index.name, lastProperty);
+        }
+
+        if (lastProperty.type != IndexType.hash) {
+          if (lastProperty.scalarType == IsarType.int ||
+              lastProperty.scalarType == IsarType.long ||
+              lastProperty.scalarType.isFloatDouble) {
+            code += generateWhereGreaterThan(index.name, properties);
+            code += generateWhereLessThan(index.name, properties);
+          }
+
+          if (lastProperty.scalarType == IsarType.string) {
+            code += generateWhereStartsWith(index.name, properties);
+          }
+
+          if (lastProperty.scalarType != IsarType.bool) {
+            code += generateWhereBetween(index.name, properties);
+          }
         }
       }
     }
@@ -93,6 +92,10 @@ class WhereGenerator {
     }
 
     firstPropertiesName += propertyName(properties.last, properties.lastIndex);
+    if (properties.last.isarType.isList &&
+        properties.last.type != IndexType.hash) {
+      firstPropertiesName += 'Any';
+    }
 
     return firstPropertiesName;
   }
@@ -100,7 +103,7 @@ class WhereGenerator {
   String joinToParams(List<ObjectIndexProperty> properties) {
     return properties.map((it) {
       if (it.property.isarType.isList && it.type != IndexType.hash) {
-        return '${it.property.dartType} ${it.property.dartName}Element';
+        return '${it.property.isarType.scalarType.dartType(it.property.nullable, false)} ${it.property.dartName}Element';
       } else {
         return '${it.property.dartType} ${it.property.dartName}';
       }
@@ -122,11 +125,13 @@ class WhereGenerator {
     final name = 'any' + joinToName(properties, false).capitalize();
     if (!existing.add(name)) return '';
     return '''
-  QueryBuilder<$objName, $objName, QAfterWhere> $name() {
-    return addWhereClause(WhereClause(indexName: '$indexName'));
+    QueryBuilder<$objName, $objName, QAfterWhere> $name() {
+      return addWhereClause(WhereClause(indexName: '$indexName'));
+    }
+    ''';
   }
-  ''';
-  }
+
+  String get mPrefix => 'QueryBuilder<$objName, $objName, QAfterWhereClause>';
 
   String generateWhereEqualTo(
       String indexName, List<ObjectIndexProperty> properties) {
@@ -136,16 +141,16 @@ class WhereGenerator {
     final values = joinToValues(properties);
     final params = joinToParams(properties);
     return '''
-  QueryBuilder<$objName, $objName, QAfterWhereClause> $name($params) {
-    return addWhereClause(WhereClause(
-      indexName: '$indexName',
-      lower: [$values],
-      includeLower: true,
-      upper: [$values],
-      includeUpper: true,
-    ));
-  }
-  ''';
+    $mPrefix $name($params) {
+      return addWhereClause(WhereClause(
+        indexName: '$indexName',
+        lower: [$values],
+        includeLower: true,
+        upper: [$values],
+        includeUpper: true,
+      ));
+    }
+    ''';
   }
 
   String generateWhereNotEqualTo(
@@ -156,18 +161,30 @@ class WhereGenerator {
     final values = joinToValues(properties);
     final params = joinToParams(properties);
     return '''
-  QueryBuilder<$objName, $objName, QAfterWhereClause> $name($params) {
-    return addWhereClause(WhereClause(
-      indexName: '$indexName',
-      upper: [$values],
-      includeUpper: false,
-    )).addWhereClause(WhereClause(
-      indexName: '$indexName',
-      lower: [$values],
-      includeLower: false,
-    ));
-  }
-  ''';
+    $mPrefix $name($params) {
+      if (whereSortInternal == Sort.asc) {
+        return addWhereClause(WhereClause(
+          indexName: '$indexName',
+          upper: [$values],
+          includeUpper: false,
+        )).addWhereClause(WhereClause(
+          indexName: '$indexName',
+          lower: [$values],
+          includeLower: false,
+        ));
+      } else {
+        return addWhereClause(WhereClause(
+          indexName: '$indexName',
+          lower: [$values],
+          includeLower: false,
+        )).addWhereClause(WhereClause(
+          indexName: '$indexName',
+          upper: [$values],
+          includeUpper: false,
+        ));
+      }
+    }
+    ''';
   }
 
   String generateWhereGreaterThan(
@@ -178,14 +195,14 @@ class WhereGenerator {
     final values = joinToValues(properties);
     final params = joinToParams(properties);
     return '''
-  QueryBuilder<$objName, $objName, QAfterWhereClause> $name($params) {
-    return addWhereClause(WhereClause(
-      indexName: '$indexName',
-      lower: [$values],
-      includeLower: false,
-    ));
-  }
-  ''';
+    $mPrefix $name($params) {
+      return addWhereClause(WhereClause(
+        indexName: '$indexName',
+        lower: [$values],
+        includeLower: false,
+      ));
+    }
+    ''';
   }
 
   String generateWhereLessThan(
@@ -196,14 +213,14 @@ class WhereGenerator {
     final params = joinToParams(properties);
     final values = joinToValues(properties);
     return '''
-  QueryBuilder<$objName, $objName, QAfterWhereClause> $name($params) {
-    return addWhereClause(WhereClause(
-      indexName: '$indexName',
-      upper: [$values],
-      includeUpper: false,
-    ));
-  }
-  ''';
+    $mPrefix $name($params) {
+      return addWhereClause(WhereClause(
+        indexName: '$indexName',
+        upper: [$values],
+        includeUpper: false,
+      ));
+    }
+    ''';
   }
 
   String generateWhereBetween(
@@ -225,15 +242,15 @@ class WhereGenerator {
       values += ',';
     }
     return '''
-  QueryBuilder<$objName, $objName, QAfterWhereClause> $name($params) {
-    return addWhereClause(WhereClause(
-      indexName: '$indexName',
-      lower: [$values $lowerName],
-      includeLower: true,
-      upper: [$values $upperName],
-      includeUpper: true,
-    ));
-  }
+    $mPrefix $name($params) {
+      return addWhereClause(WhereClause(
+        indexName: '$indexName',
+        lower: [$values $lowerName],
+        includeLower: true,
+        upper: [$values $upperName],
+        includeUpper: true,
+      ));
+    }
   ''';
   }
 
@@ -243,16 +260,16 @@ class WhereGenerator {
     if (!existing.add(name)) return '';
 
     return '''
-  QueryBuilder<$objName, $objName, QAfterWhereClause> $name() {
-    return addWhereClause(WhereClause(
-      indexName: '$indexName',
-      upper: [null],
-      includeUpper: true,
-      lower: [null],
-      includeLower: true,
-    ));
-  }
-  ''';
+    $mPrefix $name() {
+      return addWhereClause(WhereClause(
+        indexName: '$indexName',
+        upper: [null],
+        includeUpper: true,
+        lower: [null],
+        includeLower: true,
+      ));
+    }
+    ''';
   }
 
   String generateWhereIsNotNull(
@@ -261,14 +278,14 @@ class WhereGenerator {
     if (!existing.add(name)) return '';
 
     return '''
-  QueryBuilder<$objName, $objName, QAfterWhereClause> $name() {
-    return addWhereClause(WhereClause(
-      indexName: '$indexName',
-      lower: [null],
-      includeLower: false,
-    ));
-  }
-  ''';
+    $mPrefix $name() {
+      return addWhereClause(WhereClause(
+        indexName: '$indexName',
+        lower: [null],
+        includeLower: false,
+      ));
+    }
+    ''';
   }
 
   String generateWhereStartsWith(
@@ -291,15 +308,15 @@ class WhereGenerator {
     }
 
     return '''
-  QueryBuilder<$objName, $objName, QAfterWhereClause> $name($params) {
-    return addWhereClause(WhereClause(
-      indexName: '$indexName',
-      lower: [$values '\$$lastName'],
-      includeLower: true,
-      upper: [$values '\$$lastName\\u{FFFFF}'],
-      includeUpper: true,
-    ));
-  }
-  ''';
+    $mPrefix $name($params) {
+      return addWhereClause(WhereClause(
+        indexName: '$indexName',
+        lower: [$values '\$$lastName'],
+        includeLower: true,
+        upper: [$values '\$$lastName\\u{FFFFF}'],
+        includeUpper: true,
+      ));
+    }
+    ''';
   }
 }

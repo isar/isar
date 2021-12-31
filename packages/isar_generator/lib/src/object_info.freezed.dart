@@ -900,13 +900,11 @@ class _$ObjectIndexTearOff {
   _ObjectIndex call(
       {required String name,
       required List<ObjectIndexProperty> properties,
-      required bool unique,
-      required bool replace}) {
+      required bool unique}) {
     return _ObjectIndex(
       name: name,
       properties: properties,
       unique: unique,
-      replace: replace,
     );
   }
 
@@ -924,7 +922,6 @@ mixin _$ObjectIndex {
   List<ObjectIndexProperty> get properties =>
       throw _privateConstructorUsedError;
   bool get unique => throw _privateConstructorUsedError;
-  bool get replace => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -937,11 +934,7 @@ abstract class $ObjectIndexCopyWith<$Res> {
   factory $ObjectIndexCopyWith(
           ObjectIndex value, $Res Function(ObjectIndex) then) =
       _$ObjectIndexCopyWithImpl<$Res>;
-  $Res call(
-      {String name,
-      List<ObjectIndexProperty> properties,
-      bool unique,
-      bool replace});
+  $Res call({String name, List<ObjectIndexProperty> properties, bool unique});
 }
 
 /// @nodoc
@@ -957,7 +950,6 @@ class _$ObjectIndexCopyWithImpl<$Res> implements $ObjectIndexCopyWith<$Res> {
     Object? name = freezed,
     Object? properties = freezed,
     Object? unique = freezed,
-    Object? replace = freezed,
   }) {
     return _then(_value.copyWith(
       name: name == freezed
@@ -972,10 +964,6 @@ class _$ObjectIndexCopyWithImpl<$Res> implements $ObjectIndexCopyWith<$Res> {
           ? _value.unique
           : unique // ignore: cast_nullable_to_non_nullable
               as bool,
-      replace: replace == freezed
-          ? _value.replace
-          : replace // ignore: cast_nullable_to_non_nullable
-              as bool,
     ));
   }
 }
@@ -987,11 +975,7 @@ abstract class _$ObjectIndexCopyWith<$Res>
           _ObjectIndex value, $Res Function(_ObjectIndex) then) =
       __$ObjectIndexCopyWithImpl<$Res>;
   @override
-  $Res call(
-      {String name,
-      List<ObjectIndexProperty> properties,
-      bool unique,
-      bool replace});
+  $Res call({String name, List<ObjectIndexProperty> properties, bool unique});
 }
 
 /// @nodoc
@@ -1009,7 +993,6 @@ class __$ObjectIndexCopyWithImpl<$Res> extends _$ObjectIndexCopyWithImpl<$Res>
     Object? name = freezed,
     Object? properties = freezed,
     Object? unique = freezed,
-    Object? replace = freezed,
   }) {
     return _then(_ObjectIndex(
       name: name == freezed
@@ -1024,10 +1007,6 @@ class __$ObjectIndexCopyWithImpl<$Res> extends _$ObjectIndexCopyWithImpl<$Res>
           ? _value.unique
           : unique // ignore: cast_nullable_to_non_nullable
               as bool,
-      replace: replace == freezed
-          ? _value.replace
-          : replace // ignore: cast_nullable_to_non_nullable
-              as bool,
     ));
   }
 }
@@ -1036,10 +1015,7 @@ class __$ObjectIndexCopyWithImpl<$Res> extends _$ObjectIndexCopyWithImpl<$Res>
 @JsonSerializable()
 class _$_ObjectIndex extends _ObjectIndex {
   const _$_ObjectIndex(
-      {required this.name,
-      required this.properties,
-      required this.unique,
-      required this.replace})
+      {required this.name, required this.properties, required this.unique})
       : super._();
 
   factory _$_ObjectIndex.fromJson(Map<String, dynamic> json) =>
@@ -1051,12 +1027,10 @@ class _$_ObjectIndex extends _ObjectIndex {
   final List<ObjectIndexProperty> properties;
   @override
   final bool unique;
-  @override
-  final bool replace;
 
   @override
   String toString() {
-    return 'ObjectIndex(name: $name, properties: $properties, unique: $unique, replace: $replace)';
+    return 'ObjectIndex(name: $name, properties: $properties, unique: $unique)';
   }
 
   @override
@@ -1069,9 +1043,7 @@ class _$_ObjectIndex extends _ObjectIndex {
                 const DeepCollectionEquality()
                     .equals(other.properties, properties)) &&
             (identical(other.unique, unique) ||
-                const DeepCollectionEquality().equals(other.unique, unique)) &&
-            (identical(other.replace, replace) ||
-                const DeepCollectionEquality().equals(other.replace, replace)));
+                const DeepCollectionEquality().equals(other.unique, unique)));
   }
 
   @override
@@ -1079,8 +1051,7 @@ class _$_ObjectIndex extends _ObjectIndex {
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(name) ^
       const DeepCollectionEquality().hash(properties) ^
-      const DeepCollectionEquality().hash(unique) ^
-      const DeepCollectionEquality().hash(replace);
+      const DeepCollectionEquality().hash(unique);
 
   @JsonKey(ignore: true)
   @override
@@ -1097,8 +1068,7 @@ abstract class _ObjectIndex extends ObjectIndex {
   const factory _ObjectIndex(
       {required String name,
       required List<ObjectIndexProperty> properties,
-      required bool unique,
-      required bool replace}) = _$_ObjectIndex;
+      required bool unique}) = _$_ObjectIndex;
   const _ObjectIndex._() : super._();
 
   factory _ObjectIndex.fromJson(Map<String, dynamic> json) =
@@ -1111,8 +1081,6 @@ abstract class _ObjectIndex extends ObjectIndex {
       throw _privateConstructorUsedError;
   @override
   bool get unique => throw _privateConstructorUsedError;
-  @override
-  bool get replace => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
   _$ObjectIndexCopyWith<_ObjectIndex> get copyWith =>

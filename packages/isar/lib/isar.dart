@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:isar/src/native/isar_collection_impl.dart';
 import 'package:isar/src/native/isar_impl.dart';
+import 'package:isar/src/native/split_words.dart';
 import 'package:meta/meta.dart';
 import 'src/native/open.dart';
 import 'src/native/isar_link_impl.dart';

@@ -147,15 +147,15 @@ void main() {
     });
 
     isarTest('.isNotNull()', () async {
-      await qEqualSet(
+      await qEqual(
         col.where().fieldIsNotNull().findAll(),
-        {
+        [
           IntModel()..field = 0,
           IntModel()..field = 1,
           IntModel()..field = 2,
           IntModel()..field = 3,
           IntModel()..field = 4,
-        },
+        ],
       );
     });
   });

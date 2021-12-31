@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 
 part 'date_time_model.g.dart';
@@ -28,10 +29,11 @@ class DateTimeModel {
     if (other is DateTimeModel) {
       return other.date == date &&
           other.dateNullable == dateNullable &&
-          other.list == list &&
-          other.listNullable == listNullable &&
-          other.listElementNullable == listElementNullable &&
-          other.listNullableElementNullable == listNullableElementNullable;
+          listEquals(list, other.list) &&
+          listEquals(listNullable, other.listNullable) &&
+          listEquals(listElementNullable, other.listElementNullable) &&
+          listEquals(
+              listNullableElementNullable, other.listNullableElementNullable);
     }
     return false;
   }

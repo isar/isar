@@ -242,6 +242,9 @@ class QueryBuilder<OBJ, R, S> {
   }
 
   Isar get isar => _collection.isar;
+
+  @protected
+  Sort get whereSortInternal => _whereSort;
 }
 
 // Right after query starts

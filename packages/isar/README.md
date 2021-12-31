@@ -64,8 +64,10 @@ dev_dependencies:
 class Post {
   int? id; // auto increment id
 
-  @Index(indexType: IndexType.words) // Search index
   String title;
+
+  @Index(type: IndexType.value) // Search index
+  List<String> get titleWords => Isar.splitWords(title);
 
   Links<Comment> comments; // Link to other collection
 }

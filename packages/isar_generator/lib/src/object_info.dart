@@ -187,7 +187,6 @@ class ObjectIndex with _$ObjectIndex {
     required String name,
     required List<ObjectIndexProperty> properties,
     required bool unique,
-    required bool replace,
   }) = _ObjectIndex;
 
   factory ObjectIndex.fromJson(Map<String, dynamic> json) =>

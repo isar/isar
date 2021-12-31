@@ -30,16 +30,18 @@ abstract class IsarCollection<OBJ> {
   List<OBJ?> getAllByIndexSync(String indexName, List<List<dynamic>> values);
 
   /// Insert or update an [object] and returns the assigned id.
-  Future<int> put(OBJ object) => putAll([object]).then((ids) => ids[0]);
+  Future<int> put(OBJ object, {bool replaceOnConflict = false}) =>
+      putAll([object]).then((ids) => ids[0]);
 
   /// Insert or update an [object] and returns the assigned id.
-  int putSync(OBJ object) => putAllSync([object])[0];
+  int putSync(OBJ object, {bool replaceOnConflict = false}) =>
+      putAllSync([object])[0];
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  Future<List<int>> putAll(List<OBJ> objects);
+  Future<List<int>> putAll(List<OBJ> objects, {bool replaceOnConflict = false});
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  List<int> putAllSync(List<OBJ> objects);
+  List<int> putAllSync(List<OBJ> objects, {bool replaceOnConflict = false});
 
   /// Delete a single object by its [id]. Returns whether the object has been
   /// deleted.
@@ -68,12 +70,14 @@ abstract class IsarCollection<OBJ> {
   int deleteAllByIndexSync(String indexName, List<List<dynamic>> values);
 
   /// Import a list of json objects.
-  Future<void> importJsonRaw(Uint8List jsonBytes);
+  Future<void> importJsonRaw(Uint8List jsonBytes,
+      {bool replaceOnConflict = false});
 
   /// Import a list of json objects.
-  Future<void> importJson(List<Map<String, dynamic>> json) {
+  Future<void> importJson(List<Map<String, dynamic>> json,
+      {bool replaceOnConflict = false}) {
     final bytes = Utf8Encoder().convert(jsonEncode(json));
-    return importJsonRaw(bytes);
+    return importJsonRaw(bytes, replaceOnConflict: replaceOnConflict);
   }
 
   /// Start building a query using the [QueryBuilder].

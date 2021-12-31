@@ -204,7 +204,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<List<int>> putAll(List<OBJ> objects) {
+  Future<List<int>> putAll(List<OBJ> objects,
+      {bool replaceOnConflict = false}) {
     return isar.getTxn(true, (txnPtr, stream) async {
       final rawObjSetPtr = allocRawObjSet(objects.length);
       final objectsPtr = rawObjSetPtr.ref.objects;
@@ -214,7 +215,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         final object = objects[i];
         adapter.serialize(this, rawObj, object, propertyOffsets);
       }
-      IC.isar_put_all(ptr, txnPtr, rawObjSetPtr);
+      IC.isar_put_all(ptr, txnPtr, rawObjSetPtr, replaceOnConflict);
 
       try {
         await stream.first;
@@ -238,7 +239,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  List<int> putAllSync(List<OBJ> objects) {
+  List<int> putAllSync(List<OBJ> objects, {bool replaceOnConflict = false}) {
     return isar.getTxnSync(true, (txnPtr) {
       final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
       final rawObj = rawObjPtr.ref;
@@ -248,7 +249,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         for (var object in objects) {
           bufferSize = adapter.serialize(
               this, rawObj, object, propertyOffsets, bufferSize);
-          nCall(IC.isar_put(ptr, txnPtr, rawObjPtr));
+          nCall(IC.isar_put(ptr, txnPtr, rawObjPtr, replaceOnConflict));
           ids.add(rawObj.id);
         }
         return ids;
@@ -328,13 +329,14 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<void> importJsonRaw(Uint8List jsonBytes) {
+  Future<void> importJsonRaw(Uint8List jsonBytes,
+      {bool replaceOnConflict = false}) {
     return isar.getTxn(true, (txnPtr, stream) async {
       final bytesPtr = malloc<Uint8>(jsonBytes.length);
       bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
       final idNamePtr = idName.toNativeUtf8();
-      IC.isar_json_import(
-          ptr, txnPtr, idNamePtr.cast(), bytesPtr, jsonBytes.length);
+      IC.isar_json_import(ptr, txnPtr, idNamePtr.cast(), bytesPtr,
+          jsonBytes.length, replaceOnConflict);
 
       try {
         await stream.first;

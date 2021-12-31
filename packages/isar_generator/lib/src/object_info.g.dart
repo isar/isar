@@ -93,28 +93,28 @@ K _$enumDecode<K, V>(
 }
 
 const _$IsarTypeEnumMap = {
-  IsarType.bool: 'Bool',
-  IsarType.int: 'Int',
-  IsarType.float: 'Float',
-  IsarType.long: 'Long',
-  IsarType.double: 'Double',
-  IsarType.dateTime: 'DateTime',
-  IsarType.string: 'String',
-  IsarType.bytes: 'Bytes',
-  IsarType.boolList: 'BoolList',
-  IsarType.intList: 'IntList',
-  IsarType.floatList: 'FloatList',
-  IsarType.longList: 'LongList',
-  IsarType.doubleList: 'DoubleList',
-  IsarType.dateTimeList: 'DateTimeList',
-  IsarType.stringList: 'StringList',
+  IsarType.bool: 'bool',
+  IsarType.int: 'int',
+  IsarType.float: 'float',
+  IsarType.long: 'long',
+  IsarType.double: 'double',
+  IsarType.dateTime: 'dateTime',
+  IsarType.string: 'string',
+  IsarType.bytes: 'bytes',
+  IsarType.boolList: 'boolList',
+  IsarType.intList: 'intList',
+  IsarType.floatList: 'floatList',
+  IsarType.longList: 'longList',
+  IsarType.doubleList: 'doubleList',
+  IsarType.dateTimeList: 'dateTimeList',
+  IsarType.stringList: 'stringList',
 };
 
 const _$PropertyDeserEnumMap = {
-  PropertyDeser.none: 'None',
-  PropertyDeser.assign: 'Assign',
-  PropertyDeser.positionalParam: 'PositionalParam',
-  PropertyDeser.namedParam: 'NamedParam',
+  PropertyDeser.none: 'none',
+  PropertyDeser.assign: 'assign',
+  PropertyDeser.positionalParam: 'positionalParam',
+  PropertyDeser.namedParam: 'namedParam',
 };
 
 _$_ObjectIndexProperty _$$_ObjectIndexPropertyFromJson(
@@ -135,9 +135,9 @@ Map<String, dynamic> _$$_ObjectIndexPropertyToJson(
     };
 
 const _$IndexTypeEnumMap = {
-  IndexType.value: 'Value',
-  IndexType.hash: 'Hash',
-  IndexType.hashElements: 'HashElements',
+  IndexType.value: 'value',
+  IndexType.hash: 'hash',
+  IndexType.hashElements: 'hashElements',
 };
 
 _$_ObjectIndex _$$_ObjectIndexFromJson(Map<String, dynamic> json) =>
@@ -147,7 +147,6 @@ _$_ObjectIndex _$$_ObjectIndexFromJson(Map<String, dynamic> json) =>
           .map((e) => ObjectIndexProperty.fromJson(e as Map<String, dynamic>))
           .toList(),
       unique: json['unique'] as bool,
-      replace: json['replace'] as bool,
     );
 
 Map<String, dynamic> _$$_ObjectIndexToJson(_$_ObjectIndex instance) =>
@@ -155,7 +154,6 @@ Map<String, dynamic> _$$_ObjectIndexToJson(_$_ObjectIndex instance) =>
       'name': instance.name,
       'properties': instance.properties,
       'unique': instance.unique,
-      'replace': instance.replace,
     };
 
 _$_ObjectLink _$$_ObjectLinkFromJson(Map<String, dynamic> json) =>
