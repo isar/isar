@@ -1,3 +1,6 @@
+## 1.0.0
+- Stable release and countless improvements
+
 ## 0.4.0
 - Support multi-package projects
 - Use dynamic queries

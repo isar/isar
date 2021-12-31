@@ -1,3 +1,6 @@
+## 1.0.0
+- Stable release
+
 ## 0.4.0
 - Support newest Isar version
 

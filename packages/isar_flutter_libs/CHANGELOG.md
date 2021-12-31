@@ -1,3 +1,6 @@
+## 1.0.0
+- Update binaries to CORE/1.0.0
+
 ## 0.4.0
 - Update binaries to CORE/0.4.0
 
