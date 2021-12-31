@@ -14,7 +14,7 @@ const handlers = {
 
 var _initialized = false;
 
-void connectToInspector() {
+void initializeIsarConnect() {
   assert(() {
     _connectInternal();
     return true;
@@ -158,6 +158,12 @@ FilterOperation parseFilter(Map<String, dynamic> json) {
         filters: filters,
         type: FilterGroupType.values[json['groupType']],
       );
+
+    case 'FilterNot':
+      return FilterNot(
+        filter: parseFilter(json['filter']),
+      );
+
     default:
       throw 'Could not deserialize filter';
   }

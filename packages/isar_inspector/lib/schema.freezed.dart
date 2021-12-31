@@ -20,12 +20,10 @@ Collection _$CollectionFromJson(Map<String, dynamic> json) {
 class _$CollectionTearOff {
   const _$CollectionTearOff();
 
-  _Collection call(String name, List<Property> properties, List<Index> indexes,
-      List<Link> links) {
+  _Collection call(String name, List<Property> properties, List<Link> links) {
     return _Collection(
       name,
       properties,
-      indexes,
       links,
     );
   }
@@ -42,7 +40,6 @@ const $Collection = _$CollectionTearOff();
 mixin _$Collection {
   String get name => throw _privateConstructorUsedError;
   List<Property> get properties => throw _privateConstructorUsedError;
-  List<Index> get indexes => throw _privateConstructorUsedError;
   List<Link> get links => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -56,11 +53,7 @@ abstract class $CollectionCopyWith<$Res> {
   factory $CollectionCopyWith(
           Collection value, $Res Function(Collection) then) =
       _$CollectionCopyWithImpl<$Res>;
-  $Res call(
-      {String name,
-      List<Property> properties,
-      List<Index> indexes,
-      List<Link> links});
+  $Res call({String name, List<Property> properties, List<Link> links});
 }
 
 /// @nodoc
@@ -75,7 +68,6 @@ class _$CollectionCopyWithImpl<$Res> implements $CollectionCopyWith<$Res> {
   $Res call({
     Object? name = freezed,
     Object? properties = freezed,
-    Object? indexes = freezed,
     Object? links = freezed,
   }) {
     return _then(_value.copyWith(
@@ -87,10 +79,6 @@ class _$CollectionCopyWithImpl<$Res> implements $CollectionCopyWith<$Res> {
           ? _value.properties
           : properties // ignore: cast_nullable_to_non_nullable
               as List<Property>,
-      indexes: indexes == freezed
-          ? _value.indexes
-          : indexes // ignore: cast_nullable_to_non_nullable
-              as List<Index>,
       links: links == freezed
           ? _value.links
           : links // ignore: cast_nullable_to_non_nullable
@@ -105,11 +93,7 @@ abstract class _$CollectionCopyWith<$Res> implements $CollectionCopyWith<$Res> {
           _Collection value, $Res Function(_Collection) then) =
       __$CollectionCopyWithImpl<$Res>;
   @override
-  $Res call(
-      {String name,
-      List<Property> properties,
-      List<Index> indexes,
-      List<Link> links});
+  $Res call({String name, List<Property> properties, List<Link> links});
 }
 
 /// @nodoc
@@ -126,7 +110,6 @@ class __$CollectionCopyWithImpl<$Res> extends _$CollectionCopyWithImpl<$Res>
   $Res call({
     Object? name = freezed,
     Object? properties = freezed,
-    Object? indexes = freezed,
     Object? links = freezed,
   }) {
     return _then(_Collection(
@@ -138,10 +121,6 @@ class __$CollectionCopyWithImpl<$Res> extends _$CollectionCopyWithImpl<$Res>
           ? _value.properties
           : properties // ignore: cast_nullable_to_non_nullable
               as List<Property>,
-      indexes == freezed
-          ? _value.indexes
-          : indexes // ignore: cast_nullable_to_non_nullable
-              as List<Index>,
       links == freezed
           ? _value.links
           : links // ignore: cast_nullable_to_non_nullable
@@ -150,11 +129,10 @@ class __$CollectionCopyWithImpl<$Res> extends _$CollectionCopyWithImpl<$Res>
   }
 }
 
-@JsonSerializable()
-
 /// @nodoc
+@JsonSerializable()
 class _$_Collection implements _Collection {
-  const _$_Collection(this.name, this.properties, this.indexes, this.links);
+  const _$_Collection(this.name, this.properties, this.links);
 
   factory _$_Collection.fromJson(Map<String, dynamic> json) =>
       _$_$_CollectionFromJson(json);
@@ -164,13 +142,11 @@ class _$_Collection implements _Collection {
   @override
   final List<Property> properties;
   @override
-  final List<Index> indexes;
-  @override
   final List<Link> links;
 
   @override
   String toString() {
-    return 'Collection(name: $name, properties: $properties, indexes: $indexes, links: $links)';
+    return 'Collection(name: $name, properties: $properties, links: $links)';
   }
 
   @override
@@ -182,9 +158,6 @@ class _$_Collection implements _Collection {
             (identical(other.properties, properties) ||
                 const DeepCollectionEquality()
                     .equals(other.properties, properties)) &&
-            (identical(other.indexes, indexes) ||
-                const DeepCollectionEquality()
-                    .equals(other.indexes, indexes)) &&
             (identical(other.links, links) ||
                 const DeepCollectionEquality().equals(other.links, links)));
   }
@@ -194,7 +167,6 @@ class _$_Collection implements _Collection {
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(name) ^
       const DeepCollectionEquality().hash(properties) ^
-      const DeepCollectionEquality().hash(indexes) ^
       const DeepCollectionEquality().hash(links);
 
   @JsonKey(ignore: true)
@@ -209,8 +181,8 @@ class _$_Collection implements _Collection {
 }
 
 abstract class _Collection implements Collection {
-  const factory _Collection(String name, List<Property> properties,
-      List<Index> indexes, List<Link> links) = _$_Collection;
+  const factory _Collection(
+      String name, List<Property> properties, List<Link> links) = _$_Collection;
 
   factory _Collection.fromJson(Map<String, dynamic> json) =
       _$_Collection.fromJson;
@@ -219,8 +191,6 @@ abstract class _Collection implements Collection {
   String get name => throw _privateConstructorUsedError;
   @override
   List<Property> get properties => throw _privateConstructorUsedError;
-  @override
-  List<Index> get indexes => throw _privateConstructorUsedError;
   @override
   List<Link> get links => throw _privateConstructorUsedError;
   @override
@@ -237,7 +207,7 @@ Property _$PropertyFromJson(Map<String, dynamic> json) {
 class _$PropertyTearOff {
   const _$PropertyTearOff();
 
-  _Property call(String name, int type) {
+  _Property call(String name, String type) {
     return _Property(
       name,
       type,
@@ -255,7 +225,7 @@ const $Property = _$PropertyTearOff();
 /// @nodoc
 mixin _$Property {
   String get name => throw _privateConstructorUsedError;
-  int get type => throw _privateConstructorUsedError;
+  String get type => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -267,7 +237,7 @@ mixin _$Property {
 abstract class $PropertyCopyWith<$Res> {
   factory $PropertyCopyWith(Property value, $Res Function(Property) then) =
       _$PropertyCopyWithImpl<$Res>;
-  $Res call({String name, int type});
+  $Res call({String name, String type});
 }
 
 /// @nodoc
@@ -291,7 +261,7 @@ class _$PropertyCopyWithImpl<$Res> implements $PropertyCopyWith<$Res> {
       type: type == freezed
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
-              as int,
+              as String,
     ));
   }
 }
@@ -301,7 +271,7 @@ abstract class _$PropertyCopyWith<$Res> implements $PropertyCopyWith<$Res> {
   factory _$PropertyCopyWith(_Property value, $Res Function(_Property) then) =
       __$PropertyCopyWithImpl<$Res>;
   @override
-  $Res call({String name, int type});
+  $Res call({String name, String type});
 }
 
 /// @nodoc
@@ -326,14 +296,13 @@ class __$PropertyCopyWithImpl<$Res> extends _$PropertyCopyWithImpl<$Res>
       type == freezed
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
-              as int,
+              as String,
     ));
   }
 }
 
-@JsonSerializable()
-
 /// @nodoc
+@JsonSerializable()
 class _$_Property implements _Property {
   const _$_Property(this.name, this.type);
 
@@ -343,7 +312,7 @@ class _$_Property implements _Property {
   @override
   final String name;
   @override
-  final int type;
+  final String type;
 
   @override
   String toString() {
@@ -378,395 +347,17 @@ class _$_Property implements _Property {
 }
 
 abstract class _Property implements Property {
-  const factory _Property(String name, int type) = _$_Property;
+  const factory _Property(String name, String type) = _$_Property;
 
   factory _Property.fromJson(Map<String, dynamic> json) = _$_Property.fromJson;
 
   @override
   String get name => throw _privateConstructorUsedError;
   @override
-  int get type => throw _privateConstructorUsedError;
+  String get type => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
   _$PropertyCopyWith<_Property> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-Index _$IndexFromJson(Map<String, dynamic> json) {
-  return _Index.fromJson(json);
-}
-
-/// @nodoc
-class _$IndexTearOff {
-  const _$IndexTearOff();
-
-  _Index call(bool unique, bool replace, List<ObjectIndexProperty> properties) {
-    return _Index(
-      unique,
-      replace,
-      properties,
-    );
-  }
-
-  Index fromJson(Map<String, Object> json) {
-    return Index.fromJson(json);
-  }
-}
-
-/// @nodoc
-const $Index = _$IndexTearOff();
-
-/// @nodoc
-mixin _$Index {
-  bool get unique => throw _privateConstructorUsedError;
-  bool get replace => throw _privateConstructorUsedError;
-  List<ObjectIndexProperty> get properties =>
-      throw _privateConstructorUsedError;
-
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
-  $IndexCopyWith<Index> get copyWith => throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $IndexCopyWith<$Res> {
-  factory $IndexCopyWith(Index value, $Res Function(Index) then) =
-      _$IndexCopyWithImpl<$Res>;
-  $Res call({bool unique, bool replace, List<ObjectIndexProperty> properties});
-}
-
-/// @nodoc
-class _$IndexCopyWithImpl<$Res> implements $IndexCopyWith<$Res> {
-  _$IndexCopyWithImpl(this._value, this._then);
-
-  final Index _value;
-  // ignore: unused_field
-  final $Res Function(Index) _then;
-
-  @override
-  $Res call({
-    Object? unique = freezed,
-    Object? replace = freezed,
-    Object? properties = freezed,
-  }) {
-    return _then(_value.copyWith(
-      unique: unique == freezed
-          ? _value.unique
-          : unique // ignore: cast_nullable_to_non_nullable
-              as bool,
-      replace: replace == freezed
-          ? _value.replace
-          : replace // ignore: cast_nullable_to_non_nullable
-              as bool,
-      properties: properties == freezed
-          ? _value.properties
-          : properties // ignore: cast_nullable_to_non_nullable
-              as List<ObjectIndexProperty>,
-    ));
-  }
-}
-
-/// @nodoc
-abstract class _$IndexCopyWith<$Res> implements $IndexCopyWith<$Res> {
-  factory _$IndexCopyWith(_Index value, $Res Function(_Index) then) =
-      __$IndexCopyWithImpl<$Res>;
-  @override
-  $Res call({bool unique, bool replace, List<ObjectIndexProperty> properties});
-}
-
-/// @nodoc
-class __$IndexCopyWithImpl<$Res> extends _$IndexCopyWithImpl<$Res>
-    implements _$IndexCopyWith<$Res> {
-  __$IndexCopyWithImpl(_Index _value, $Res Function(_Index) _then)
-      : super(_value, (v) => _then(v as _Index));
-
-  @override
-  _Index get _value => super._value as _Index;
-
-  @override
-  $Res call({
-    Object? unique = freezed,
-    Object? replace = freezed,
-    Object? properties = freezed,
-  }) {
-    return _then(_Index(
-      unique == freezed
-          ? _value.unique
-          : unique // ignore: cast_nullable_to_non_nullable
-              as bool,
-      replace == freezed
-          ? _value.replace
-          : replace // ignore: cast_nullable_to_non_nullable
-              as bool,
-      properties == freezed
-          ? _value.properties
-          : properties // ignore: cast_nullable_to_non_nullable
-              as List<ObjectIndexProperty>,
-    ));
-  }
-}
-
-@JsonSerializable()
-
-/// @nodoc
-class _$_Index implements _Index {
-  const _$_Index(this.unique, this.replace, this.properties);
-
-  factory _$_Index.fromJson(Map<String, dynamic> json) =>
-      _$_$_IndexFromJson(json);
-
-  @override
-  final bool unique;
-  @override
-  final bool replace;
-  @override
-  final List<ObjectIndexProperty> properties;
-
-  @override
-  String toString() {
-    return 'Index(unique: $unique, replace: $replace, properties: $properties)';
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    return identical(this, other) ||
-        (other is _Index &&
-            (identical(other.unique, unique) ||
-                const DeepCollectionEquality().equals(other.unique, unique)) &&
-            (identical(other.replace, replace) ||
-                const DeepCollectionEquality()
-                    .equals(other.replace, replace)) &&
-            (identical(other.properties, properties) ||
-                const DeepCollectionEquality()
-                    .equals(other.properties, properties)));
-  }
-
-  @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(unique) ^
-      const DeepCollectionEquality().hash(replace) ^
-      const DeepCollectionEquality().hash(properties);
-
-  @JsonKey(ignore: true)
-  @override
-  _$IndexCopyWith<_Index> get copyWith =>
-      __$IndexCopyWithImpl<_Index>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$_$_IndexToJson(this);
-  }
-}
-
-abstract class _Index implements Index {
-  const factory _Index(
-          bool unique, bool replace, List<ObjectIndexProperty> properties) =
-      _$_Index;
-
-  factory _Index.fromJson(Map<String, dynamic> json) = _$_Index.fromJson;
-
-  @override
-  bool get unique => throw _privateConstructorUsedError;
-  @override
-  bool get replace => throw _privateConstructorUsedError;
-  @override
-  List<ObjectIndexProperty> get properties =>
-      throw _privateConstructorUsedError;
-  @override
-  @JsonKey(ignore: true)
-  _$IndexCopyWith<_Index> get copyWith => throw _privateConstructorUsedError;
-}
-
-ObjectIndexProperty _$IndexPropertyFromJson(Map<String, dynamic> json) {
-  return _IndexProperty.fromJson(json);
-}
-
-/// @nodoc
-class _$IndexPropertyTearOff {
-  const _$IndexPropertyTearOff();
-
-  _IndexProperty call(String name, int indexType, bool caseSensitive) {
-    return _IndexProperty(
-      name,
-      indexType,
-      caseSensitive,
-    );
-  }
-
-  ObjectIndexProperty fromJson(Map<String, Object> json) {
-    return ObjectIndexProperty.fromJson(json);
-  }
-}
-
-/// @nodoc
-const $ObjectIndexProperty = _$IndexPropertyTearOff();
-
-/// @nodoc
-mixin _$ObjectIndexProperty {
-  String get name => throw _privateConstructorUsedError;
-  int get indexType => throw _privateConstructorUsedError;
-  bool get caseSensitive => throw _privateConstructorUsedError;
-
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
-  $IndexPropertyCopyWith<ObjectIndexProperty> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $IndexPropertyCopyWith<$Res> {
-  factory $IndexPropertyCopyWith(
-          ObjectIndexProperty value, $Res Function(ObjectIndexProperty) then) =
-      _$IndexPropertyCopyWithImpl<$Res>;
-  $Res call({String name, int indexType, bool caseSensitive});
-}
-
-/// @nodoc
-class _$IndexPropertyCopyWithImpl<$Res>
-    implements $IndexPropertyCopyWith<$Res> {
-  _$IndexPropertyCopyWithImpl(this._value, this._then);
-
-  final ObjectIndexProperty _value;
-  // ignore: unused_field
-  final $Res Function(ObjectIndexProperty) _then;
-
-  @override
-  $Res call({
-    Object? name = freezed,
-    Object? indexType = freezed,
-    Object? caseSensitive = freezed,
-  }) {
-    return _then(_value.copyWith(
-      name: name == freezed
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      indexType: indexType == freezed
-          ? _value.indexType
-          : indexType // ignore: cast_nullable_to_non_nullable
-              as int,
-      caseSensitive: caseSensitive == freezed
-          ? _value.caseSensitive
-          : caseSensitive // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
-  }
-}
-
-/// @nodoc
-abstract class _$IndexPropertyCopyWith<$Res>
-    implements $IndexPropertyCopyWith<$Res> {
-  factory _$IndexPropertyCopyWith(
-          _IndexProperty value, $Res Function(_IndexProperty) then) =
-      __$IndexPropertyCopyWithImpl<$Res>;
-  @override
-  $Res call({String name, int indexType, bool caseSensitive});
-}
-
-/// @nodoc
-class __$IndexPropertyCopyWithImpl<$Res>
-    extends _$IndexPropertyCopyWithImpl<$Res>
-    implements _$IndexPropertyCopyWith<$Res> {
-  __$IndexPropertyCopyWithImpl(
-      _IndexProperty _value, $Res Function(_IndexProperty) _then)
-      : super(_value, (v) => _then(v as _IndexProperty));
-
-  @override
-  _IndexProperty get _value => super._value as _IndexProperty;
-
-  @override
-  $Res call({
-    Object? name = freezed,
-    Object? indexType = freezed,
-    Object? caseSensitive = freezed,
-  }) {
-    return _then(_IndexProperty(
-      name == freezed
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      indexType == freezed
-          ? _value.indexType
-          : indexType // ignore: cast_nullable_to_non_nullable
-              as int,
-      caseSensitive == freezed
-          ? _value.caseSensitive
-          : caseSensitive // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
-  }
-}
-
-@JsonSerializable()
-
-/// @nodoc
-class _$_IndexProperty implements _IndexProperty {
-  const _$_IndexProperty(this.name, this.indexType, this.caseSensitive);
-
-  factory _$_IndexProperty.fromJson(Map<String, dynamic> json) =>
-      _$_$_IndexPropertyFromJson(json);
-
-  @override
-  final String name;
-  @override
-  final int indexType;
-  @override
-  final bool caseSensitive;
-
-  @override
-  String toString() {
-    return 'ObjectIndexProperty(name: $name, indexType: $indexType, caseSensitive: $caseSensitive)';
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    return identical(this, other) ||
-        (other is _IndexProperty &&
-            (identical(other.name, name) ||
-                const DeepCollectionEquality().equals(other.name, name)) &&
-            (identical(other.indexType, indexType) ||
-                const DeepCollectionEquality()
-                    .equals(other.indexType, indexType)) &&
-            (identical(other.caseSensitive, caseSensitive) ||
-                const DeepCollectionEquality()
-                    .equals(other.caseSensitive, caseSensitive)));
-  }
-
-  @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(name) ^
-      const DeepCollectionEquality().hash(indexType) ^
-      const DeepCollectionEquality().hash(caseSensitive);
-
-  @JsonKey(ignore: true)
-  @override
-  _$IndexPropertyCopyWith<_IndexProperty> get copyWith =>
-      __$IndexPropertyCopyWithImpl<_IndexProperty>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$_$_IndexPropertyToJson(this);
-  }
-}
-
-abstract class _IndexProperty implements ObjectIndexProperty {
-  const factory _IndexProperty(String name, int indexType, bool caseSensitive) =
-      _$_IndexProperty;
-
-  factory _IndexProperty.fromJson(Map<String, dynamic> json) =
-      _$_IndexProperty.fromJson;
-
-  @override
-  String get name => throw _privateConstructorUsedError;
-  @override
-  int get indexType => throw _privateConstructorUsedError;
-  @override
-  bool get caseSensitive => throw _privateConstructorUsedError;
-  @override
-  @JsonKey(ignore: true)
-  _$IndexPropertyCopyWith<_IndexProperty> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -871,9 +462,8 @@ class __$LinkCopyWithImpl<$Res> extends _$LinkCopyWithImpl<$Res>
   }
 }
 
-@JsonSerializable()
-
 /// @nodoc
+@JsonSerializable()
 class _$_Link implements _Link {
   const _$_Link(this.name, this.collection);
 

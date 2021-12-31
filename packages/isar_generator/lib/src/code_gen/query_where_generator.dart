@@ -22,11 +22,12 @@ class WhereGenerator {
       ],
     );
 
+    final indexes = [primaryIndex, ...object.indexes];
+
     var code =
         'extension ${objName}QueryWhereSort on QueryBuilder<$objName, $objName, QWhere> {';
 
-    for (var i = -1; i < object.indexes.length; i++) {
-      final index = i == -1 ? primaryIndex : object.indexes[i];
+    for (var index in indexes) {
       code += generateAny(index.name, index.properties);
     }
 
@@ -36,7 +37,7 @@ class WhereGenerator {
   extension ${objName}QueryWhere on QueryBuilder<$objName, $objName, QWhereClause> {
   ''';
 
-    for (var index in object.indexes) {
+    for (var index in indexes) {
       for (var n = 0; n < index.properties.length; n++) {
         var properties = index.properties.sublist(0, n + 1);
 
@@ -52,19 +53,14 @@ class WhereGenerator {
         }
 
         if (lastProperty.type != IndexType.hash) {
-          if (lastProperty.scalarType == IsarType.int ||
-              lastProperty.scalarType == IsarType.long ||
-              lastProperty.scalarType.isFloatDouble) {
+          if (lastProperty.scalarType != IsarType.bool) {
             code += generateWhereGreaterThan(index.name, properties);
             code += generateWhereLessThan(index.name, properties);
+            code += generateWhereBetween(index.name, properties);
           }
 
           if (lastProperty.scalarType == IsarType.string) {
             code += generateWhereStartsWith(index.name, properties);
-          }
-
-          if (lastProperty.scalarType != IsarType.bool) {
-            code += generateWhereBetween(index.name, properties);
           }
         }
       }

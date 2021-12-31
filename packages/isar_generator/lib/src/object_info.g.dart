@@ -10,32 +10,26 @@ _$_ObjectInfo _$$_ObjectInfoFromJson(Map<String, dynamic> json) =>
     _$_ObjectInfo(
       dartName: json['dartName'] as String,
       isarName: json['isarName'] as String,
-      properties: (json['properties'] as List<dynamic>?)
-              ?.map((e) => ObjectProperty.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      indexes: (json['indexes'] as List<dynamic>?)
-              ?.map((e) => ObjectIndex.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      links: (json['links'] as List<dynamic>?)
-              ?.map((e) => ObjectLink.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      imports: (json['imports'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          [],
+      accessor: json['accessor'] as String,
+      properties: (json['properties'] as List<dynamic>)
+          .map((e) => ObjectProperty.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      indexes: (json['indexes'] as List<dynamic>)
+          .map((e) => ObjectIndex.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      links: (json['links'] as List<dynamic>)
+          .map((e) => ObjectLink.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$$_ObjectInfoToJson(_$_ObjectInfo instance) =>
     <String, dynamic>{
       'dartName': instance.dartName,
       'isarName': instance.isarName,
+      'accessor': instance.accessor,
       'properties': instance.properties,
       'indexes': instance.indexes,
       'links': instance.links,
-      'imports': instance.imports,
     };
 
 _$_ObjectProperty _$$_ObjectPropertyFromJson(Map<String, dynamic> json) =>

@@ -10,7 +10,7 @@ String generateQueryLinks(ObjectInfo oi, List<ObjectInfo?> objects) {
     code += '''
       QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterFilterCondition> ${link.dartName.decapitalize()}(FilterQuery<${link.targetCollectionDartName}> q) {
         return linkInternal(
-          isar.${targetOi.collectionAccessor},
+          isar.${targetOi.accessor},
           q,
           '${link.dartName}',
         );

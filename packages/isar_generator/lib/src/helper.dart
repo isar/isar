@@ -15,31 +15,34 @@ final _dateTimeChecker = const TypeChecker.fromRuntime(DateTime);
 final _uint8ListChecker = const TypeChecker.fromRuntime(Uint8List);
 
 bool hasIgnoreAnn(Element element) {
-  return _ignoreChecker.hasAnnotationOfExact(element);
+  return _ignoreChecker.hasAnnotationOfExact(element.nonSynthetic);
 }
 
 bool hasSize32Ann(Element element) {
-  return _size32Checker.hasAnnotationOfExact(element);
+  return _size32Checker.hasAnnotationOfExact(element.nonSynthetic);
 }
 
 bool hasIdAnn(Element element) {
-  return _oidKeyChecker.hasAnnotationOfExact(element);
+  return _oidKeyChecker.hasAnnotationOfExact(element.nonSynthetic);
 }
 
 Collection? getCollectionAnn(Element element) {
-  var ann = _collectionChecker.firstAnnotationOfExact(element);
+  var ann = _collectionChecker.firstAnnotationOfExact(element.nonSynthetic);
   if (ann == null) return null;
-  return Collection(inheritance: ann.getField('inheritance')!.toBoolValue()!);
+  return Collection(
+    inheritance: ann.getField('inheritance')!.toBoolValue()!,
+    accessor: ann.getField('accessor')!.toStringValue(),
+  );
 }
 
 Name? getNameAnn(Element element) {
-  var ann = _nameChecker.firstAnnotationOfExact(element);
+  var ann = _nameChecker.firstAnnotationOfExact(element.nonSynthetic);
   if (ann == null) return null;
   return Name(ann.getField('name')!.toStringValue()!);
 }
 
 List<DartObject> getTypeConverterAnns(Element element) {
-  final anns = _typeConverterChecker.annotationsOf(element);
+  final anns = _typeConverterChecker.annotationsOf(element.nonSynthetic);
   for (var ann in anns) {
     final reviver = ConstantReader(ann).revive();
     if (reviver.namedArguments.isNotEmpty ||
@@ -59,7 +62,7 @@ bool hasZeroArgsConstructor(ClassElement element) {
 }
 
 List<Index> getIndexAnns(Element element) {
-  return _indexChecker.annotationsOfExact(element).map((ann) {
+  return _indexChecker.annotationsOfExact(element.nonSynthetic).map((ann) {
     var rawComposite = ann.getField('composite')!.toListValue();
     final composite = <CompositeIndex>[];
     if (rawComposite != null) {
@@ -98,7 +101,7 @@ bool isDateTime(Element element) => _dateTimeChecker.isExactly(element);
 bool isUint8List(Element element) => _uint8ListChecker.isExactly(element);
 
 Backlink? getBacklinkAnn(Element element) {
-  var ann = _backlinkChecker.firstAnnotationOfExact(element);
+  var ann = _backlinkChecker.firstAnnotationOfExact(element.nonSynthetic);
   if (ann == null) return null;
   return Backlink(to: ann.getField('to')!.toStringValue()!);
 }

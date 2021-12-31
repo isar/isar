@@ -24,17 +24,17 @@ class _$ObjectInfoTearOff {
   _ObjectInfo call(
       {required String dartName,
       required String isarName,
-      List<ObjectProperty> properties = const [],
-      List<ObjectIndex> indexes = const [],
-      List<ObjectLink> links = const [],
-      List<String> imports = const []}) {
+      required String accessor,
+      required List<ObjectProperty> properties,
+      required List<ObjectIndex> indexes,
+      required List<ObjectLink> links}) {
     return _ObjectInfo(
       dartName: dartName,
       isarName: isarName,
+      accessor: accessor,
       properties: properties,
       indexes: indexes,
       links: links,
-      imports: imports,
     );
   }
 
@@ -50,10 +50,10 @@ const $ObjectInfo = _$ObjectInfoTearOff();
 mixin _$ObjectInfo {
   String get dartName => throw _privateConstructorUsedError;
   String get isarName => throw _privateConstructorUsedError;
+  String get accessor => throw _privateConstructorUsedError;
   List<ObjectProperty> get properties => throw _privateConstructorUsedError;
   List<ObjectIndex> get indexes => throw _privateConstructorUsedError;
   List<ObjectLink> get links => throw _privateConstructorUsedError;
-  List<String> get imports => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -69,10 +69,10 @@ abstract class $ObjectInfoCopyWith<$Res> {
   $Res call(
       {String dartName,
       String isarName,
+      String accessor,
       List<ObjectProperty> properties,
       List<ObjectIndex> indexes,
-      List<ObjectLink> links,
-      List<String> imports});
+      List<ObjectLink> links});
 }
 
 /// @nodoc
@@ -87,10 +87,10 @@ class _$ObjectInfoCopyWithImpl<$Res> implements $ObjectInfoCopyWith<$Res> {
   $Res call({
     Object? dartName = freezed,
     Object? isarName = freezed,
+    Object? accessor = freezed,
     Object? properties = freezed,
     Object? indexes = freezed,
     Object? links = freezed,
-    Object? imports = freezed,
   }) {
     return _then(_value.copyWith(
       dartName: dartName == freezed
@@ -100,6 +100,10 @@ class _$ObjectInfoCopyWithImpl<$Res> implements $ObjectInfoCopyWith<$Res> {
       isarName: isarName == freezed
           ? _value.isarName
           : isarName // ignore: cast_nullable_to_non_nullable
+              as String,
+      accessor: accessor == freezed
+          ? _value.accessor
+          : accessor // ignore: cast_nullable_to_non_nullable
               as String,
       properties: properties == freezed
           ? _value.properties
@@ -113,10 +117,6 @@ class _$ObjectInfoCopyWithImpl<$Res> implements $ObjectInfoCopyWith<$Res> {
           ? _value.links
           : links // ignore: cast_nullable_to_non_nullable
               as List<ObjectLink>,
-      imports: imports == freezed
-          ? _value.imports
-          : imports // ignore: cast_nullable_to_non_nullable
-              as List<String>,
     ));
   }
 }
@@ -130,10 +130,10 @@ abstract class _$ObjectInfoCopyWith<$Res> implements $ObjectInfoCopyWith<$Res> {
   $Res call(
       {String dartName,
       String isarName,
+      String accessor,
       List<ObjectProperty> properties,
       List<ObjectIndex> indexes,
-      List<ObjectLink> links,
-      List<String> imports});
+      List<ObjectLink> links});
 }
 
 /// @nodoc
@@ -150,10 +150,10 @@ class __$ObjectInfoCopyWithImpl<$Res> extends _$ObjectInfoCopyWithImpl<$Res>
   $Res call({
     Object? dartName = freezed,
     Object? isarName = freezed,
+    Object? accessor = freezed,
     Object? properties = freezed,
     Object? indexes = freezed,
     Object? links = freezed,
-    Object? imports = freezed,
   }) {
     return _then(_ObjectInfo(
       dartName: dartName == freezed
@@ -163,6 +163,10 @@ class __$ObjectInfoCopyWithImpl<$Res> extends _$ObjectInfoCopyWithImpl<$Res>
       isarName: isarName == freezed
           ? _value.isarName
           : isarName // ignore: cast_nullable_to_non_nullable
+              as String,
+      accessor: accessor == freezed
+          ? _value.accessor
+          : accessor // ignore: cast_nullable_to_non_nullable
               as String,
       properties: properties == freezed
           ? _value.properties
@@ -176,10 +180,6 @@ class __$ObjectInfoCopyWithImpl<$Res> extends _$ObjectInfoCopyWithImpl<$Res>
           ? _value.links
           : links // ignore: cast_nullable_to_non_nullable
               as List<ObjectLink>,
-      imports: imports == freezed
-          ? _value.imports
-          : imports // ignore: cast_nullable_to_non_nullable
-              as List<String>,
     ));
   }
 }
@@ -190,10 +190,10 @@ class _$_ObjectInfo extends _ObjectInfo {
   const _$_ObjectInfo(
       {required this.dartName,
       required this.isarName,
-      this.properties = const [],
-      this.indexes = const [],
-      this.links = const [],
-      this.imports = const []})
+      required this.accessor,
+      required this.properties,
+      required this.indexes,
+      required this.links})
       : super._();
 
   factory _$_ObjectInfo.fromJson(Map<String, dynamic> json) =>
@@ -203,22 +203,18 @@ class _$_ObjectInfo extends _ObjectInfo {
   final String dartName;
   @override
   final String isarName;
-  @JsonKey(defaultValue: const [])
+  @override
+  final String accessor;
   @override
   final List<ObjectProperty> properties;
-  @JsonKey(defaultValue: const [])
   @override
   final List<ObjectIndex> indexes;
-  @JsonKey(defaultValue: const [])
   @override
   final List<ObjectLink> links;
-  @JsonKey(defaultValue: const [])
-  @override
-  final List<String> imports;
 
   @override
   String toString() {
-    return 'ObjectInfo(dartName: $dartName, isarName: $isarName, properties: $properties, indexes: $indexes, links: $links, imports: $imports)';
+    return 'ObjectInfo(dartName: $dartName, isarName: $isarName, accessor: $accessor, properties: $properties, indexes: $indexes, links: $links)';
   }
 
   @override
@@ -231,6 +227,9 @@ class _$_ObjectInfo extends _ObjectInfo {
             (identical(other.isarName, isarName) ||
                 const DeepCollectionEquality()
                     .equals(other.isarName, isarName)) &&
+            (identical(other.accessor, accessor) ||
+                const DeepCollectionEquality()
+                    .equals(other.accessor, accessor)) &&
             (identical(other.properties, properties) ||
                 const DeepCollectionEquality()
                     .equals(other.properties, properties)) &&
@@ -238,9 +237,7 @@ class _$_ObjectInfo extends _ObjectInfo {
                 const DeepCollectionEquality()
                     .equals(other.indexes, indexes)) &&
             (identical(other.links, links) ||
-                const DeepCollectionEquality().equals(other.links, links)) &&
-            (identical(other.imports, imports) ||
-                const DeepCollectionEquality().equals(other.imports, imports)));
+                const DeepCollectionEquality().equals(other.links, links)));
   }
 
   @override
@@ -248,10 +245,10 @@ class _$_ObjectInfo extends _ObjectInfo {
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(dartName) ^
       const DeepCollectionEquality().hash(isarName) ^
+      const DeepCollectionEquality().hash(accessor) ^
       const DeepCollectionEquality().hash(properties) ^
       const DeepCollectionEquality().hash(indexes) ^
-      const DeepCollectionEquality().hash(links) ^
-      const DeepCollectionEquality().hash(imports);
+      const DeepCollectionEquality().hash(links);
 
   @JsonKey(ignore: true)
   @override
@@ -268,10 +265,10 @@ abstract class _ObjectInfo extends ObjectInfo {
   const factory _ObjectInfo(
       {required String dartName,
       required String isarName,
-      List<ObjectProperty> properties,
-      List<ObjectIndex> indexes,
-      List<ObjectLink> links,
-      List<String> imports}) = _$_ObjectInfo;
+      required String accessor,
+      required List<ObjectProperty> properties,
+      required List<ObjectIndex> indexes,
+      required List<ObjectLink> links}) = _$_ObjectInfo;
   const _ObjectInfo._() : super._();
 
   factory _ObjectInfo.fromJson(Map<String, dynamic> json) =
@@ -282,13 +279,13 @@ abstract class _ObjectInfo extends ObjectInfo {
   @override
   String get isarName => throw _privateConstructorUsedError;
   @override
+  String get accessor => throw _privateConstructorUsedError;
+  @override
   List<ObjectProperty> get properties => throw _privateConstructorUsedError;
   @override
   List<ObjectIndex> get indexes => throw _privateConstructorUsedError;
   @override
   List<ObjectLink> get links => throw _privateConstructorUsedError;
-  @override
-  List<String> get imports => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
   _$ObjectInfoCopyWith<_ObjectInfo> get copyWith =>

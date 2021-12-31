@@ -54,13 +54,14 @@ class Service {
   }
 
   Future<List<Map<String, dynamic>>> executeQuery(
-      String instance,
-      String collection,
-      FilterOperation filter,
-      int offset,
-      int limit,
-      int? sortPropertyIndex,
-      bool ascending) async {
+    String instance,
+    String collection,
+    FilterOperation filter,
+    int offset,
+    int limit,
+    int? sortPropertyIndex,
+    bool ascending,
+  ) async {
     final args = serializeQuery(instance, collection, filter, offset, limit,
         sortPropertyIndex, ascending);
     final objects = await _call(
@@ -83,13 +84,14 @@ class Service {
   }
 
   Map<String, dynamic> serializeQuery(
-      String instance,
-      String collection,
-      FilterOperation filter,
-      int? offset,
-      int? limit,
-      int? sortPropertyIndex,
-      bool ascending) {
+    String instance,
+    String collection,
+    FilterOperation filter,
+    int? offset,
+    int? limit,
+    int? sortPropertyIndex,
+    bool ascending,
+  ) {
     return {
       'instance': instance,
       'collection': collection,
@@ -123,6 +125,11 @@ class Service {
           'caseSensitive': filter.caseSensitive,
         };
       }
+    } else if (filter is FilterNot) {
+      return {
+        'type': 'FilterNot',
+        'filter': serializeFilter(filter.filter),
+      };
     } else if (filter is FilterGroup) {
       return {
         'type': 'FilterGroup',

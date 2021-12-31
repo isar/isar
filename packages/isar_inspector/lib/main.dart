@@ -25,7 +25,6 @@ class IsarInspector extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        brightness: Brightness.dark,
         scaffoldBackgroundColor: Colors.transparent,
         primaryColor: Colors.blue,
         cardColor: const Color(0xff1f2128), // Color.fromARGB(255, 40, 41, 46),
@@ -40,7 +39,10 @@ class IsarInspector extends StatelessWidget {
             minimumSize: MaterialStateProperty.all(const Size(100, 50)),
           ),
         ),
-        colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.blue),
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          secondary: Colors.blue,
+          brightness: Brightness.dark,
+        ),
       ),
       home: Container(
         decoration: BoxDecoration(

@@ -35,34 +35,29 @@ class IsarAnalyzer {
 
     final properties = <ObjectProperty>[];
     final links = <ObjectLink>[];
-    final converterImports = <String>{};
-    final allAccessors = {
+    final allAccessors = [
       ...modelClass.accessors.mapNotNull((e) => e.variable),
       if (collectionAnn.inheritance)
         for (var supertype in modelClass.allSupertypes) ...[
           if (!supertype.isDartCoreObject)
             ...supertype.accessors.mapNotNull((e) => e.variable)
         ]
-    };
+    ].distinctBy((e) => e.name);
+
     for (var propertyElement in allAccessors) {
       if (hasIgnoreAnn(propertyElement)) {
         continue;
       }
 
-      final converter = findTypeConverter(propertyElement);
-      if (converter != null) {
-        converterImports.add(converter.location!.components[0]);
-      }
-
       if (propertyElement.type.element!.name == 'IsarLink' ||
           propertyElement.type.element!.name == 'IsarLinks') {
-        final link = analyzeObjectLink(propertyElement, converter);
+        final link = analyzeObjectLink(propertyElement);
         if (link == null) continue;
         links.add(link);
       } else {
         final property = analyzeObjectProperty(
           propertyElement,
-          converter,
+          findTypeConverter(propertyElement),
           constructor!,
         );
         if (property == null) continue;
@@ -71,43 +66,31 @@ class IsarAnalyzer {
     }
 
     final indexes = <ObjectIndex>[];
-    for (var propertyElement in modelClass.fields) {
-      if (links.any((it) => it.dartName == propertyElement.name)) continue;
+    for (var propertyElement in allAccessors) {
       indexes.addAll(analyzeObjectIndex(properties, propertyElement));
     }
     if (indexes.map((e) => e.name).distinct().length != indexes.length) {
       err('Two or more indexes have the same name.', element);
     }
+    print(indexes);
 
-    var oidProperty = properties.firstOrNullWhere((it) => it.isId);
-    if (oidProperty == null) {
+    var idProperty = properties.firstOrNullWhere((it) => it.isId);
+    if (idProperty == null) {
       for (var i = 0; i < properties.length; i++) {
         final property = properties[i];
         if (property.isarName == 'id' &&
             property.converter == null &&
             property.isarType == IsarType.long) {
-          oidProperty = properties[i].copyWith(isId: true);
-          properties[i] = oidProperty;
+          idProperty = properties[i].copyWith(isId: true);
+          properties[i] = idProperty;
           break;
         }
       }
-      if (oidProperty == null) {
-        err('More than one property annotated with @Id().', element);
-      }
     }
 
-    if (oidProperty == null) {
+    if (idProperty == null) {
       err('No property annotated with @Id().', element);
     }
-
-    final sortedProperties = properties.sortedBy((p) {
-      if (p.isId) {
-        return -1; // Sort first
-      }
-      final index =
-          constructor!.parameters.indexWhere((e) => e.name == p.dartName);
-      return index == -1 ? 999999 : index;
-    });
 
     final unknownConstructorParameter = constructor!.parameters
         .firstOrNullWhere((p) =>
@@ -120,10 +103,10 @@ class IsarAnalyzer {
     final modelInfo = ObjectInfo(
       dartName: modelClass.displayName,
       isarName: isarName,
-      properties: sortedProperties,
+      accessor: collectionAnn.accessor ?? isarName.decapitalize(),
+      properties: properties,
       indexes: indexes,
       links: links,
-      imports: converterImports.toList(),
     );
 
     return modelInfo;
@@ -276,14 +259,9 @@ class IsarAnalyzer {
     }
   }
 
-  ObjectLink? analyzeObjectLink(
-      PropertyInducingElement property, ClassElement? converter) {
+  ObjectLink? analyzeObjectLink(PropertyInducingElement property) {
     if (!property.isPublic || property.isStatic || hasIgnoreAnn(property)) {
       return null;
-    }
-
-    if (converter != null) {
-      err('Converters are not supported for links.', property);
     }
 
     final isLinks = property.type.element!.name == 'IsarLinks';
@@ -320,7 +298,7 @@ class IsarAnalyzer {
   }
 
   Iterable<ObjectIndex> analyzeObjectIndex(
-      List<ObjectProperty> properties, FieldElement element) sync* {
+      List<ObjectProperty> properties, PropertyInducingElement element) sync* {
     final property =
         properties.firstOrNullWhere((it) => it.dartName == element.name);
     if (property == null) return;

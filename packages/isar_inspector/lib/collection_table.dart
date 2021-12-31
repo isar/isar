@@ -13,6 +13,13 @@ const _colWidths = {
   'Long': 80.0,
   'Double': 80.0,
   'String': 200.0,
+  'Bytes': 200.0,
+  'BoolList': 200.0,
+  'IntList': 200.0,
+  'FloatList': 200.0,
+  'LongList': 200.0,
+  'DoubleList': 200.0,
+  'StringList': 200.0,
 };
 
 class CollectionTable extends StatefulWidget {
@@ -96,7 +103,7 @@ class _CollectionTableState extends State<CollectionTable> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
         child: SizedBox(
-          width: _colWidths[property.typeName]!,
+          width: _colWidths[property.type]!,
           child: Row(
             children: [
               Expanded(
@@ -113,7 +120,7 @@ class _CollectionTableState extends State<CollectionTable> {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      property.typeName,
+                      property.type,
                       style: TextStyle(
                         color: theme.primaryColor,
                         fontSize: 12,
@@ -182,7 +189,7 @@ class _CollectionTableState extends State<CollectionTable> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
               child: SizedBox(
-                width: _colWidths[property.typeName]!,
+                width: _colWidths[property.type]!,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,

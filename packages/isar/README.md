@@ -13,11 +13,9 @@
     <img src="https://img.shields.io/pub/v/isar?label=pub.dev&labelColor=333940&logo=dart">
   </a>
   <a href="https://github.com/isar/isar/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/hivedb/hive?color=%23007A88&labelColor=333940&logo=apache">
+    <img src="https://img.shields.io/github/license/isar/isar?color=%23007A88&labelColor=333940&logo=apache">
   </a>
 </p>
-
-<p align="center">🚧 Alpha version - Use with care. 🚧</p>
 
 <p align="center">
   <a href="https://isar.dev">Quickstart</a> •
@@ -35,26 +33,25 @@
 
 ### Features
 
-- 💙 **Made for Flutter**. Easy to use - zero configuration
+- 💙 **Made for Flutter**. Easy to use, no config, no boilerplate
 - 🚀 **Highly scalable** from hundreds to hundreds of thousands of records
+- 🍭 **Feature rich**. Composite & multi indexes, query modifiers, JSON support and more
 - 🔎 **Full-text search**. Make searching fast and fun
 - 📱 **Multiplatform**. iOS, Android, Desktop and the web (soon™)
 - 🧪 **ACID semantics**. Rely on consistency
 - ⏱ **Asynchronous**. Parallel query operations & multi-isolate support
 - 💃 **Static typing**. Compile-time checked and autocompleted queries
-- 🍭 **Feature rich**. Composite & multi indexes, query modifiers, JSON support and more
-- 🤗 **Easy to use**. No configuration, no schema files, no boilerplate
 
 ### 1. Add to pubspec.yaml
 
 ```yaml
 dependencies:
-  isar: 0.4.0
-  isar_flutter_libs: 0.4.0 # contains the binaries
-  isar_connect: 0.4.0 # if you want to use the Isar Inspector
+  isar: 1.0.0
+  isar_flutter_libs: 1.0.0 # contains the binaries
+  isar_connect: 1.0.0 # if you want to use the Isar Inspector
 
 dev_dependencies:
-  isar_generator: 0.4.0
+  isar_generator: 1.0.0
   build_runner: any
 ```
 
@@ -68,14 +65,17 @@ class Post {
 
   @Index(type: IndexType.value) // Search index
   List<String> get titleWords => Isar.splitWords(title);
-
-  Links<Comment> comments; // Link to other collection
 }
 ```
 
 ### 3. Open an instance
 ```dart
-final isar = await openIsar();
+initializeIsarConnect(); // if you want to use the Isar Inspector
+
+final isar = await Isar.open(
+  schemas: [PostSchema],
+  path: await getDocuments,
+);
 ```
 
 
@@ -86,18 +86,15 @@ The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to
 <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/isar-inspector.png?sanitize=true">
 
 
-
 ## CRUD operations
 
 All basic crud operations are available via the IsarCollection.
 
 ```dart
-final newPost = Post()
-  ..title = 'Amazing new database'
-  ..comments = ['First'];
+final newPost = Post()..title = 'Amazing new database';
 
 await isar.writeTxn((isar) {
-  await isar.posts.put(newPost); // insert
+  newPost.id = await isar.posts.put(newPost); // insert
 });
 
 final existingPost = await isar.get(newPost.id!); // get
@@ -114,19 +111,18 @@ Isar has a powerful query language that allows you to make use of your indexes, 
 ```dart
 final isar = await openIsar();
 
-final databasePosts = isar.posts
+final ftsPosts = isar.posts
   .where()
-  .titleWordBeginsWith('DaTAb') // use case insensitive search index
+  .titleWordsAnyStartsWith('amaz') // use case insensitive search index
   .limit(10)
   .findAll()
 
-final postsWithFirstCommentOrTitle = isar.posts
+final matchingPosts = isar.posts
   .where()
+  .anyTitle() // use index to sort by title
   .filter()
-  .commentsAnyEqualTo('first', caseSensitive: false)
-  .or()
-  .titleEqualTo('first')
-  .findAll();
+  .titleMatches('*new*') // titles containing 'new'
+  .findAll()
 ```
 
 ## Links
@@ -134,7 +130,7 @@ final postsWithFirstCommentOrTitle = isar.posts
 You can easily define relationships between objects. In Isar they are called links and backlinks:
 
 ```dart
-@IsarCollection()
+@Collection()
 class Teacher {
     int? id;
 
@@ -144,7 +140,7 @@ class Teacher {
     final students = IsarLinks<Student>();
 }
 
-@IsarCollection()
+@Collection()
 class Student {
     int? id;
 
@@ -172,7 +168,7 @@ queryStream.listen((newResult) {
 ### License
 
 ```
-Copyright 2021 Simon Leier
+Copyright 2022 Simon Leier
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

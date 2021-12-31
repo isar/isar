@@ -12,10 +12,10 @@ class ObjectInfo with _$ObjectInfo {
   const factory ObjectInfo({
     required String dartName,
     required String isarName,
-    @Default([]) List<ObjectProperty> properties,
-    @Default([]) List<ObjectIndex> indexes,
-    @Default([]) List<ObjectLink> links,
-    @Default([]) List<String> imports,
+    required String accessor,
+    required List<ObjectProperty> properties,
+    required List<ObjectIndex> indexes,
+    required List<ObjectLink> links,
   }) = _ObjectInfo;
 
   factory ObjectInfo.fromJson(Map<String, dynamic> json) =>
@@ -35,8 +35,6 @@ class ObjectInfo with _$ObjectInfo {
   }
 
   String get adapterName => '_${dartName}Adapter';
-
-  String get collectionAccessor => '${dartName.decapitalize()}s';
 }
 
 enum PropertyDeser {
