@@ -39,11 +39,11 @@ class IsarCoreBindings {
 
   void isar_free_word_boundaries(
     ffi.Pointer<ffi.Uint32> boundaries,
-    int length,
+    int word_count,
   ) {
     return _isar_free_word_boundaries(
       boundaries,
-      length,
+      word_count,
     );
   }
 
@@ -161,11 +161,13 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     ffi.Pointer<RawObject> object,
+    bool replace_on_conflict,
   ) {
     return _isar_put(
       collection,
       txn,
       object,
+      replace_on_conflict ? 1 : 0,
     );
   }
 
@@ -178,11 +180,13 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     ffi.Pointer<RawObjectSet> objects,
+    bool replace_on_conflict,
   ) {
     return _isar_put_all(
       collection,
       txn,
       objects,
+      replace_on_conflict ? 1 : 0,
     );
   }
 
@@ -299,6 +303,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.Int8> id_name,
     ffi.Pointer<ffi.Uint8> json_bytes,
     int json_length,
+    bool replace_on_conflict,
   ) {
     return _isar_json_import(
       collection,
@@ -306,6 +311,7 @@ class IsarCoreBindings {
       id_name,
       json_bytes,
       json_length,
+      replace_on_conflict ? 1 : 0,
     );
   }
 
@@ -1512,12 +1518,12 @@ typedef _dart_isar_find_word_boundaries = ffi.Pointer<ffi.Uint32> Function(
 
 typedef _c_isar_free_word_boundaries = ffi.Void Function(
   ffi.Pointer<ffi.Uint32> boundaries,
-  ffi.Uint32 length,
+  ffi.Uint32 word_count,
 );
 
 typedef _dart_isar_free_word_boundaries = void Function(
   ffi.Pointer<ffi.Uint32> boundaries,
-  int length,
+  int word_count,
 );
 
 typedef _c_isar_get_error = ffi.Pointer<ffi.Int8> Function(
@@ -1596,24 +1602,28 @@ typedef _c_isar_put = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<RawObject> object,
+  ffi.Uint8 replace_on_conflict,
 );
 
 typedef _dart_isar_put = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<RawObject> object,
+  int replace_on_conflict,
 );
 
 typedef _c_isar_put_all = ffi.Int32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<RawObjectSet> objects,
+  ffi.Uint8 replace_on_conflict,
 );
 
 typedef _dart_isar_put_all = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<RawObjectSet> objects,
+  int replace_on_conflict,
 );
 
 typedef _c_isar_delete = ffi.Int32 Function(
@@ -1696,6 +1706,7 @@ typedef _c_isar_json_import = ffi.Int32 Function(
   ffi.Pointer<ffi.Int8> id_name,
   ffi.Pointer<ffi.Uint8> json_bytes,
   ffi.Uint32 json_length,
+  ffi.Uint8 replace_on_conflict,
 );
 
 typedef _dart_isar_json_import = int Function(
@@ -1704,6 +1715,7 @@ typedef _dart_isar_json_import = int Function(
   ffi.Pointer<ffi.Int8> id_name,
   ffi.Pointer<ffi.Uint8> json_bytes,
   int json_length,
+  int replace_on_conflict,
 );
 
 typedef DartPostCObjectFnType = ffi.Int8 Function(
