@@ -1,4 +1,4 @@
-## 1.0.0
+## 1.0.0+1
 
 Switched from liblmdb to libmdbx for better performance, more stability and many internal improvements.
 

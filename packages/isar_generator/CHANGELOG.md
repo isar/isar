@@ -1,4 +1,4 @@
-## 1.0.0
+## 1.0.0+1
 - Stable release and countless improvements
 
 ## 0.4.0
