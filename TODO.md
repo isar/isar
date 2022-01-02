@@ -3,38 +3,49 @@
 
 # Documentation
 
+## API Docs
+
+- [ ] Document all public APIs
+
 ## Schema
 
-- [ ] Update schema migration instructions
+- [x] Update schema migration instructions
+- [ ] Document all annotation options
 
 ## CRUD
 
 - [ ] Document sync operations
-- [ ] `getAll()`, `putAll`, `deleteAll()`
+- [x] `getAll()`, `putAll`, `deleteAll()`
+- [ ] `getBy...()`, `deleteBy...()`
 
 ## Queries
 
-- [ ] Filter groups
-- [ ] Boolean operators `and()`, `or()`, `not()`
-- [ ] Offset, limit
-- [ ] Distinct where clauses
-- [ ] Different filter operations (`equalTo`, `beginsWith()` etc.)
+- [x] Filter groups
+- [x] Boolean operators `and()`, `or()`, `not()`
+- [x] Offset, limit
+- [x] Distinct where clauses
+- [x] Different filter operations (`equalTo`, `beginsWith()` etc.)
+- [ ] Better explanation for distinct and sorted where clauses
+- [ ] Watching queries
 
 ## Indexes
 
 - [ ] Intro
-- [ ] What are they
+- [x] What are they
 - [ ] Why use them
-- [ ] How to in isar?
+- [x] How to in isar?
 
 ## Examples
 
 - [ ] Create minimal example
 - [ ] Create complex example with indexes, filter groups etc.
+- [ ] More Sample Apps
 
 ## Tutorials
 
 - [ ] How to write fast queries
+- [ ] Build a simple offline first app
+- [ ] Advanced queries
 
 
 ----
@@ -44,25 +55,25 @@
 
 ## Features
 
-- [ ] Distinct by
-- [ ] Offset, Limit
-- [ ] Sorted by
+- [x] Distinct by
+- [x] Offset, Limit
+- [x] Sorted by
 
 ## Fixes
 
-- [ ] Port [pluralize](https://github.com/plurals/pluralize) to Dart and use it to generate collection accessors
+- [x] Provide an option to change collection accessor names
 
 ## Unit tests
 
-- [ ] Download binaries automatically for tests
+- [x] Download binaries automatically for tests
 
 ### Queries
 
-- [ ] Restructure query tests to make them less verbose
-- [ ] Define models that can be reused across tests
-- [ ] Where clauses with string indexes (value, hash, words, case-sensitive)
-- [ ] Distinct where clauses
-- [ ] String filter operations
+- [x] Restructure query tests to make them less verbose
+- [x] Define models that can be reused across tests
+- [x] Where clauses with string indexes (value, hash, words, case-sensitive)
+- [x] Distinct where clauses
+- [x] String filter operations
 
 
 ----
@@ -73,16 +84,27 @@
 ## Features (low priority)
 
 - [ ] Draft Synchronization
-- [ ] Relationships
+- [x] Relationships
 
 ## Unit tests
 
-- [ ] Make lmdb unit tests bulletproof
-- [ ] Migration tests
+- [ ] Make mdbx unit tests bulletproof
+- [x] Migration tests
+- [x] Binary format
+- [x] CRUD
+- [x] Links
 - [ ] QueryBuilder
 - [ ] WhereClause
 - [ ] WhereExecutor
-- [ ] CollectionMigrator
+- [x] CollectionMigrator
 - [ ] Watchers
+
+
+----
+
+
+# Isar Web
+
+- [ ] MVP
 
 
