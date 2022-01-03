@@ -14,6 +14,7 @@ Pod::Spec.new do |s|
   s.platform = :osx, '10.11'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
-  s.vendored_libraries  = 'libisar.dylib'
+  s.resources  = [ 'libisar.dylib' ]
+  s.xcconfig = { 'LD_RUNPATH_SEARCH_PATHS' => '@loader_path/../Frameworks/isar_flutter_libs.framework/Resources' }
   s.swift_version = '5.0'
 end
