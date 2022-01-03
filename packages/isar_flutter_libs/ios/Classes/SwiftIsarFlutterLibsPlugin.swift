@@ -1,8 +1,8 @@
 import Flutter
 import UIKit
 
-public class SwiftIsarFlutterPlugin: NSObject, FlutterPlugin {
-    public static func register(with registrar: FlutterPluginRegistrar) {
+public class SwiftIsarFlutterLibsPlugin: NSObject, FlutterPlugin {
+  public static func register(with registrar: FlutterPluginRegistrar) {
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

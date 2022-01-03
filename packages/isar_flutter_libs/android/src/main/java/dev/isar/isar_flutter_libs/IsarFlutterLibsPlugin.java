@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 
-public class IsarFlutterPlugin implements FlutterPlugin { 
+public class IsarFlutterLibsPlugin implements FlutterPlugin { 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) { }
 
