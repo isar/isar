@@ -15,7 +15,7 @@ git submodule update --init
 cd dart-ffi
 
 cargo install cbindgen
-cbindgen --config $script_dir/cbindgen.toml --crate isar-core-dart-ffi --output $script_dir/../isar-dart.h
+cbindgen --config $script_dir/cbindgen.toml --crate isar --output $script_dir/../isar-dart.h
 
 cd $script_dir/../
 
