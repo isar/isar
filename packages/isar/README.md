@@ -111,7 +111,7 @@ Isar has a powerful query language that allows you to make use of your indexes, 
 ```dart
 final isar = await Isar.open(
   schemas: [PostSchema],
-  path: await getDocuments,
+  path: await getDocuments(),
 );
 
 final ftsPosts = isar.posts
