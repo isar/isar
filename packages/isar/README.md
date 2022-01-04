@@ -46,12 +46,12 @@
 
 ```yaml
 dependencies:
-  isar: 1.0.0
-  isar_flutter_libs: 1.0.0 # contains the binaries
-  isar_connect: 1.0.0 # if you want to use the Isar Inspector
+  isar: 1.0.0+1
+  isar_flutter_libs: 1.0.0+1 # contains the binaries
+  isar_connect: 1.0.0+1 # if you want to use the Isar Inspector
 
 dev_dependencies:
-  isar_generator: 1.0.0
+  isar_generator: 1.0.0+1
   build_runner: any
 ```
 
@@ -59,9 +59,9 @@ dev_dependencies:
 ```dart
 @Collection()
 class Post {
-  int? id; // auto increment id
+  late int? id; // auto increment id
 
-  String title;
+  late String title;
 
   @Index(type: IndexType.value) // Search index
   List<String> get titleWords => Isar.splitWords(title);
@@ -109,7 +109,10 @@ await isar.writeTxn((isar) {
 Isar has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()` and `or()` groups and sort the results.
 
 ```dart
-final isar = await openIsar();
+final isar = await Isar.open(
+  schemas: [PostSchema],
+  path: await getDocuments(),
+);
 
 final ftsPosts = isar.posts
   .where()
@@ -132,12 +135,12 @@ You can easily define relationships between objects. In Isar they are called lin
 ```dart
 @Collection()
 class Teacher {
-    int? id;
+    late int? id;
 
-    String subject;
+    late String subject;
 
     @Backlink(to: 'teacher')
-    final students = IsarLinks<Student>();
+    var students = IsarLinks<Student>();
 }
 
 @Collection()
@@ -146,7 +149,7 @@ class Student {
 
     String name;
 
-    final teacher = IsarLink<Teacher>();
+    var teacher = IsarLink<Teacher>();
 }
 ```
 
