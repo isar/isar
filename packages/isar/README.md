@@ -46,14 +46,16 @@
 
 ```yaml
 dependencies:
-  isar: 1.0.0+1
-  isar_flutter_libs: 1.0.0+1 # contains the binaries
-  isar_connect: 1.0.0+1 # if you want to use the Isar Inspector
+  isar: $latest
+  isar_flutter_libs: $latest # contains the binaries
+  isar_connect: $latest # if you want to use the Isar Inspector
 
 dev_dependencies:
-  isar_generator: 1.0.0+1
+  isar_generator: $latest
   build_runner: any
 ```
+
+Replace `$latest` with the latest Isar version.
 
 ### 2. Define a Collection
 ```dart
