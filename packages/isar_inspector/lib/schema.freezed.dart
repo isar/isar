@@ -369,10 +369,10 @@ Link _$LinkFromJson(Map<String, dynamic> json) {
 class _$LinkTearOff {
   const _$LinkTearOff();
 
-  _Link call(String name, String collection) {
+  _Link call(String name, String target) {
     return _Link(
       name,
-      collection,
+      target,
     );
   }
 
@@ -387,7 +387,7 @@ const $Link = _$LinkTearOff();
 /// @nodoc
 mixin _$Link {
   String get name => throw _privateConstructorUsedError;
-  String get collection => throw _privateConstructorUsedError;
+  String get target => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -398,7 +398,7 @@ mixin _$Link {
 abstract class $LinkCopyWith<$Res> {
   factory $LinkCopyWith(Link value, $Res Function(Link) then) =
       _$LinkCopyWithImpl<$Res>;
-  $Res call({String name, String collection});
+  $Res call({String name, String target});
 }
 
 /// @nodoc
@@ -412,16 +412,16 @@ class _$LinkCopyWithImpl<$Res> implements $LinkCopyWith<$Res> {
   @override
   $Res call({
     Object? name = freezed,
-    Object? collection = freezed,
+    Object? target = freezed,
   }) {
     return _then(_value.copyWith(
       name: name == freezed
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      collection: collection == freezed
-          ? _value.collection
-          : collection // ignore: cast_nullable_to_non_nullable
+      target: target == freezed
+          ? _value.target
+          : target // ignore: cast_nullable_to_non_nullable
               as String,
     ));
   }
@@ -432,7 +432,7 @@ abstract class _$LinkCopyWith<$Res> implements $LinkCopyWith<$Res> {
   factory _$LinkCopyWith(_Link value, $Res Function(_Link) then) =
       __$LinkCopyWithImpl<$Res>;
   @override
-  $Res call({String name, String collection});
+  $Res call({String name, String target});
 }
 
 /// @nodoc
@@ -447,16 +447,16 @@ class __$LinkCopyWithImpl<$Res> extends _$LinkCopyWithImpl<$Res>
   @override
   $Res call({
     Object? name = freezed,
-    Object? collection = freezed,
+    Object? target = freezed,
   }) {
     return _then(_Link(
       name == freezed
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      collection == freezed
-          ? _value.collection
-          : collection // ignore: cast_nullable_to_non_nullable
+      target == freezed
+          ? _value.target
+          : target // ignore: cast_nullable_to_non_nullable
               as String,
     ));
   }
@@ -465,7 +465,7 @@ class __$LinkCopyWithImpl<$Res> extends _$LinkCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$_Link implements _Link {
-  const _$_Link(this.name, this.collection);
+  const _$_Link(this.name, this.target);
 
   factory _$_Link.fromJson(Map<String, dynamic> json) =>
       _$_$_LinkFromJson(json);
@@ -473,11 +473,11 @@ class _$_Link implements _Link {
   @override
   final String name;
   @override
-  final String collection;
+  final String target;
 
   @override
   String toString() {
-    return 'Link(name: $name, collection: $collection)';
+    return 'Link(name: $name, target: $target)';
   }
 
   @override
@@ -486,16 +486,15 @@ class _$_Link implements _Link {
         (other is _Link &&
             (identical(other.name, name) ||
                 const DeepCollectionEquality().equals(other.name, name)) &&
-            (identical(other.collection, collection) ||
-                const DeepCollectionEquality()
-                    .equals(other.collection, collection)));
+            (identical(other.target, target) ||
+                const DeepCollectionEquality().equals(other.target, target)));
   }
 
   @override
   int get hashCode =>
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(name) ^
-      const DeepCollectionEquality().hash(collection);
+      const DeepCollectionEquality().hash(target);
 
   @JsonKey(ignore: true)
   @override
@@ -509,14 +508,14 @@ class _$_Link implements _Link {
 }
 
 abstract class _Link implements Link {
-  const factory _Link(String name, String collection) = _$_Link;
+  const factory _Link(String name, String target) = _$_Link;
 
   factory _Link.fromJson(Map<String, dynamic> json) = _$_Link.fromJson;
 
   @override
   String get name => throw _privateConstructorUsedError;
   @override
-  String get collection => throw _privateConstructorUsedError;
+  String get target => throw _privateConstructorUsedError;
   @override
   @JsonKey(ignore: true)
   _$LinkCopyWith<_Link> get copyWith => throw _privateConstructorUsedError;

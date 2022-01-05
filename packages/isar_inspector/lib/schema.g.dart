@@ -41,11 +41,11 @@ Map<String, dynamic> _$_$_PropertyToJson(_$_Property instance) =>
 _$_Link _$_$_LinkFromJson(Map<String, dynamic> json) {
   return _$_Link(
     json['name'] as String,
-    json['collection'] as String,
+    json['target'] as String,
   );
 }
 
 Map<String, dynamic> _$_$_LinkToJson(_$_Link instance) => <String, dynamic>{
       'name': instance.name,
-      'collection': instance.collection,
+      'target': instance.target,
     };
