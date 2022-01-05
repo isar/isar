@@ -1,4 +1,19 @@
+## 1.0.5
+
+### Enhancements
+- Updated dependencies
+
+### Fixes:
+- Included desktop binaries
+- Fixed "Cannot allocate memory" error on older iOS devices
+- Fixed stripped binaries for iOS release builds
+- Fixed IsarInspector issues (thanks to [RubenBez](https://github.com/RubenBez) and [rizzi37](https://github.com/rizzi37))
+
 ## 1.0.0+1
+
+Added missing binaries
+
+## 1.0.0
 
 Switched from liblmdb to libmdbx for better performance, more stability and many internal improvements.
 

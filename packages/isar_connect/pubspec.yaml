@@ -1,6 +1,6 @@
 name: isar_connect
 description: Use this package to connect your app to the Isar Inspector.
-version: 1.0.0+1
+version: 1.0.5
 repository: https://github.com/isar/isar
 homepage: https://isar.dev
 
