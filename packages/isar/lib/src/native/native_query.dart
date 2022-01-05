@@ -5,7 +5,6 @@ import 'package:isar/isar.dart';
 
 import 'bindings.dart';
 import 'isar_collection_impl.dart';
-import 'util/native_call.dart';
 import 'isar_core.dart';
 
 typedef QueryDeserialize<T> = List<T> Function(RawObjectSet);

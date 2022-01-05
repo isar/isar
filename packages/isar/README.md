@@ -59,7 +59,7 @@ dev_dependencies:
 ```dart
 @Collection()
 class Post {
-  late int? id; // auto increment id
+  int? id; // auto increment id
 
   late String title;
 
@@ -72,9 +72,10 @@ class Post {
 ```dart
 initializeIsarConnect(); // if you want to use the Isar Inspector
 
+final dir = await getApplicationSupportDirectory(); // path_provider package
 final isar = await Isar.open(
   schemas: [PostSchema],
-  path: await getDocuments,
+  path: dir.path,
 );
 ```
 
@@ -109,22 +110,21 @@ await isar.writeTxn((isar) {
 Isar has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()` and `or()` groups and sort the results.
 
 ```dart
-final isar = await Isar.open(
-  schemas: [PostSchema],
-  path: await getDocuments(),
-);
-
-final ftsPosts = isar.posts
+final usersWithPrefix = isar.users
   .where()
-  .titleWordsAnyStartsWith('amaz') // use case insensitive search index
+  .nameStartsWith('dan') // use index
   .limit(10)
   .findAll()
 
-final matchingPosts = isar.posts
-  .where()
-  .anyTitle() // use index to sort by title
+final usersLivingInMunich = isar.users
   .filter()
-  .titleMatches('*new*') // titles containing 'new'
+  .ageGreaterThan(32)
+  .or()
+  .addressMatches('*Munich*', caseSensitive: false) // address containing 'munich' (case insensitive)
+  .optional(
+    shouldSort, // only apply if shouldSort == true
+    (q) => q.sortedByAge(), 
+  )
   .findAll()
 ```
 
@@ -135,7 +135,7 @@ You can easily define relationships between objects. In Isar they are called lin
 ```dart
 @Collection()
 class Teacher {
-    late int? id;
+    int? id;
 
     late String subject;
 
@@ -147,7 +147,7 @@ class Teacher {
 class Student {
     int? id;
 
-    String name;
+    late String name;
 
     var teacher = IsarLink<Teacher>();
 }

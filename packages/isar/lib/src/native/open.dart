@@ -7,7 +7,6 @@ import 'package:path/path.dart' as p;
 
 import 'isar_core.dart';
 import 'isar_impl.dart';
-import 'util/native_call.dart';
 
 Future<Isar> openIsarNative({
   required List<CollectionSchema> schemas,

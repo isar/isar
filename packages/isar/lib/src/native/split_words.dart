@@ -1,6 +1,9 @@
 import 'package:isar/isar.dart';
 import 'package:isar/src/native/isar_core.dart';
 
+import 'binary_reader.dart';
+import 'binary_writer.dart';
+
 List<String> splitWordsNative(String input) {
   initializeIsarCore();
 

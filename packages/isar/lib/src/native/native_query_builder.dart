@@ -2,7 +2,6 @@ import 'package:isar/isar.dart';
 
 import 'isar_collection_impl.dart';
 import 'isar_core.dart';
-import 'util/native_call.dart';
 import 'index_key.dart';
 import 'native_query.dart';
 

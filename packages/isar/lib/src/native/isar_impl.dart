@@ -4,7 +4,6 @@ import 'dart:isolate';
 import 'package:isar/isar.dart';
 
 import 'isar_core.dart';
-import 'util/native_call.dart';
 
 const _zoneTxn = #zoneTxn;
 const _zoneTxnWrite = #zoneTxnWrite;

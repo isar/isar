@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:isar/src/native/isar_core.dart';
-import 'package:isar/src/native/util/extensions.dart';
 
 class BinaryReader {
   static const utf8Decoder = Utf8Decoder();
@@ -116,11 +115,11 @@ class BinaryReader {
   @pragma('vm:prefer-inline')
   String? readStringOrNull(int offset, {bool staticOffset = true}) {
     if (staticOffset && offset >= _staticSize) return null;
-    final bytesOffset = _buffer.readUint32(offset);
+    final bytesOffset = _byteData.getUint32(offset, Endian.little);
     if (bytesOffset == 0) {
       return null;
     }
-    final length = _buffer.readUint32(offset + 4);
+    final length = _byteData.getUint32(offset + 4, Endian.little);
 
     return utf8Decoder.convert(_buffer, bytesOffset, bytesOffset + length);
   }
@@ -132,19 +131,20 @@ class BinaryReader {
 
   Uint8List? readBytesOrNull(int offset, {bool staticOffset = true}) {
     if (staticOffset && offset >= _staticSize) return null;
-    final bytesOffset = _buffer.readUint32(offset);
+    final bytesOffset = _byteData.getUint32(offset, Endian.little);
     if (bytesOffset == 0) {
       return null;
     }
-    final length = _buffer.readUint32(offset + 4);
-    return _buffer.view(bytesOffset, length);
+    final length = _byteData.getUint32(offset + 4, Endian.little);
+    return Uint8List.view(
+        _buffer.buffer, _buffer.offsetInBytes + bytesOffset, length);
   }
 
   List<bool>? readBoolList(int offset) {
     if (offset >= _staticSize) return [];
 
-    final listOffset = _buffer.readUint32(offset);
-    final length = _buffer.readUint32(offset + 4);
+    final listOffset = _byteData.getUint32(offset, Endian.little);
+    final length = _byteData.getUint32(offset + 4, Endian.little);
     if (listOffset == 0) return null;
 
     final list = <bool>[];
@@ -157,8 +157,8 @@ class BinaryReader {
   List<bool?>? readBoolOrNullList(int offset) {
     if (offset >= _staticSize) return [];
 
-    final listOffset = _buffer.readUint32(offset);
-    final length = _buffer.readUint32(offset + 4);
+    final listOffset = _byteData.getUint32(offset, Endian.little);
+    final length = _byteData.getUint32(offset + 4, Endian.little);
     if (listOffset == 0) return null;
 
     final list = <bool?>[];
@@ -171,8 +171,8 @@ class BinaryReader {
   List<int>? readIntList(int offset) {
     if (offset >= _staticSize) return [];
 
-    final listOffset = _buffer.readUint32(offset);
-    final length = _buffer.readUint32(offset + 4);
+    final listOffset = _byteData.getUint32(offset, Endian.little);
+    final length = _byteData.getUint32(offset + 4, Endian.little);
     if (listOffset == 0) return null;
 
     final list = <int>[];
@@ -185,8 +185,8 @@ class BinaryReader {
   List<int?>? readIntOrNullList(int offset) {
     if (offset >= _staticSize) return [];
 
-    final listOffset = _buffer.readUint32(offset);
-    final length = _buffer.readUint32(offset + 4);
+    final listOffset = _byteData.getUint32(offset, Endian.little);
+    final length = _byteData.getUint32(offset + 4, Endian.little);
     if (listOffset == 0) return null;
 
     final list = <int?>[];
@@ -199,8 +199,8 @@ class BinaryReader {
   List<double>? readFloatList(int offset) {
     if (offset >= _staticSize) return [];
 
-    final listOffset = _buffer.readUint32(offset);
-    final length = _buffer.readUint32(offset + 4);
+    final listOffset = _byteData.getUint32(offset, Endian.little);
+    final length = _byteData.getUint32(offset + 4, Endian.little);
     if (listOffset == 0) return null;
 
     final list = <double>[];
@@ -213,8 +213,8 @@ class BinaryReader {
   List<double?>? readFloatOrNullList(int offset) {
     if (offset >= _staticSize) return [];
 
-    final listOffset = _buffer.readUint32(offset);
-    final length = _buffer.readUint32(offset + 4);
+    final listOffset = _byteData.getUint32(offset, Endian.little);
+    final length = _byteData.getUint32(offset + 4, Endian.little);
     if (listOffset == 0) return null;
 
     final list = <double?>[];
@@ -227,8 +227,8 @@ class BinaryReader {
   List<int>? readLongList(int offset) {
     if (offset >= _staticSize) return [];
 
-    final listOffset = _buffer.readUint32(offset);
-    final length = _buffer.readUint32(offset + 4);
+    final listOffset = _byteData.getUint32(offset, Endian.little);
+    final length = _byteData.getUint32(offset + 4, Endian.little);
     if (listOffset == 0) return null;
 
     final list = <int>[];
@@ -241,8 +241,8 @@ class BinaryReader {
   List<int?>? readLongOrNullList(int offset) {
     if (offset >= _staticSize) return [];
 
-    final listOffset = _buffer.readUint32(offset);
-    final length = _buffer.readUint32(offset + 4);
+    final listOffset = _byteData.getUint32(offset, Endian.little);
+    final length = _byteData.getUint32(offset + 4, Endian.little);
     if (listOffset == 0) return null;
 
     final list = <int?>[];
@@ -255,8 +255,8 @@ class BinaryReader {
   List<double>? readDoubleList(int offset) {
     if (offset >= _staticSize) return [];
 
-    final listOffset = _buffer.readUint32(offset);
-    final length = _buffer.readUint32(offset + 4);
+    final listOffset = _byteData.getUint32(offset, Endian.little);
+    final length = _byteData.getUint32(offset + 4, Endian.little);
     if (listOffset == 0) return null;
 
     final list = <double>[];
@@ -269,8 +269,8 @@ class BinaryReader {
   List<double?>? readDoubleOrNullList(int offset) {
     if (offset >= _staticSize) return [];
 
-    final listOffset = _buffer.readUint32(offset);
-    final length = _buffer.readUint32(offset + 4);
+    final listOffset = _byteData.getUint32(offset, Endian.little);
+    final length = _byteData.getUint32(offset + 4, Endian.little);
     if (listOffset == 0) return null;
 
     final list = <double?>[];
@@ -301,8 +301,8 @@ class BinaryReader {
   List<String>? readStringList(int offset) {
     if (offset >= _staticSize) return [];
 
-    var listOffset = _buffer.readUint32(offset);
-    var length = _buffer.readUint32(offset + 4);
+    var listOffset = _byteData.getUint32(offset, Endian.little);
+    var length = _byteData.getUint32(offset + 4, Endian.little);
     if (listOffset == 0) return null;
 
     final list = <String>[];
@@ -315,8 +315,8 @@ class BinaryReader {
   List<String?>? readStringOrNullList(int offset) {
     if (offset >= _staticSize) return [];
 
-    var listOffset = _buffer.readUint32(offset);
-    var length = _buffer.readUint32(offset + 4);
+    var listOffset = _byteData.getUint32(offset, Endian.little);
+    var length = _byteData.getUint32(offset + 4, Endian.little);
     if (listOffset == 0) return null;
 
     final list = <String?>[];

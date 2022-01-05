@@ -1,5 +1,7 @@
 import 'package:isar/isar.dart';
 
+import 'binary_reader.dart';
+
 abstract class IsarTypeAdapter<T> {
   const IsarTypeAdapter();
 

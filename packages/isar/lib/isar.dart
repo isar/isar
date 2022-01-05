@@ -17,8 +17,8 @@ export 'dart:typed_data';
 export 'package:ffi/ffi.dart';
 export 'src/native/isar_type_adapter.dart';
 export 'src/native/bindings.dart' show RawObject;
-export 'src/native/binary/binary_reader.dart';
-export 'src/native/binary/binary_writer.dart';
+export 'src/native/binary_reader.dart';
+export 'src/native/binary_writer.dart';
 
 part 'package:isar/src/annotations/backlink.dart';
 part 'package:isar/src/annotations/collection.dart';

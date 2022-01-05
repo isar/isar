@@ -5,7 +5,6 @@ import 'package:isar/isar.dart';
 import 'bindings.dart';
 import 'isar_collection_impl.dart';
 import 'isar_core.dart';
-import 'util/native_call.dart';
 
 IsarLink<OBJ> newIsarLink<OBJ>() {
   return IsarLinkImpl();

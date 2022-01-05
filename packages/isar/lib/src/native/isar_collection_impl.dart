@@ -4,9 +4,9 @@ import 'dart:isolate';
 import 'package:isar/isar.dart';
 import 'package:isar/src/native/isar_core.dart';
 
+import 'binary_reader.dart';
 import 'bindings.dart';
 import 'index_key.dart';
-import 'util/native_call.dart';
 import 'isar_impl.dart';
 import 'native_query_builder.dart';
 
