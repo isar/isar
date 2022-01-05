@@ -19,6 +19,6 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 
 # List of absolute paths to libraries that should be bundled with the plugin
 set(isar_flutter_libs_bundled_libraries
-  "${CMAKE_CURRENT_SOURCE_DIR}/libisar.dll"
+  "${CMAKE_CURRENT_SOURCE_DIR}/isar.dll"
   PARENT_SCOPE
 )

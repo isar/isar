@@ -48,7 +48,7 @@ void initializeIsarCore({Map<String, String> dylibs = const {}}) {
   } else if (Platform.isMacOS) {
     dylib = dylibs['macos'] ?? 'libisar.dylib';
   } else if (Platform.isWindows) {
-    dylib = dylibs['windows'] ?? 'libisar.dll';
+    dylib = dylibs['windows'] ?? 'isar.dll';
   } else if (Platform.isLinux) {
     dylib = dylibs['linux'] ?? 'libisar.so';
   }
