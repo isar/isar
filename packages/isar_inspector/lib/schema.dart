@@ -30,7 +30,7 @@ class Property with _$Property {
 class Link with _$Link {
   const factory Link(
     String name,
-    String collection,
+    String target,
   ) = _Link;
 
   factory Link.fromJson(Map<String, dynamic> json) => _$LinkFromJson(json);
