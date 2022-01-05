@@ -13,6 +13,7 @@ const _colWidths = {
   'Long': 80.0,
   'Double': 80.0,
   'String': 200.0,
+  'Byte': 200.0,
   'Bytes': 200.0,
   'BoolList': 200.0,
   'IntList': 200.0,
