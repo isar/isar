@@ -2,7 +2,7 @@ language = "C"
 
 [parse]
 parse_deps = true
-include = ["isar-core", "isar-core-dart-ffi"]
+include = ["isar-core", "isar"]
 
 [parse.expand]
-crates = ["isar-core-dart-ffi"]
+crates = ["isar"]

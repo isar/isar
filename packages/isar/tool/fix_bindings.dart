@@ -4,7 +4,7 @@ void main() {
   final file = File('lib/src/native/bindings.dart');
   var contents = file.readAsStringSync();
   contents = contents.replaceAll(
-    'ffi.Pointer<Dart_CObject>',
+    'ffi.Pointer<DartCObject>',
     'ffi.Pointer<ffi.Dart_CObject>',
   );
   contents = contents.replaceAll(

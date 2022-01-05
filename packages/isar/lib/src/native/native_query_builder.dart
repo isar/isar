@@ -163,12 +163,12 @@ Pointer<NativeType>? _buildFilterGroup(
   }
 
   final filterPtrPtr = malloc<Pointer<NativeType>>();
-  nCall(IC.isar_filter_and_or(
+  IC.isar_filter_and_or(
     filterPtrPtr,
     group.type == FilterGroupType.and,
     conditionsPtrPtr,
     group.filters.length,
-  ));
+  );
 
   final filterPtr = filterPtrPtr.value;
   malloc.free(conditionsPtrPtr);
@@ -184,10 +184,10 @@ Pointer<NativeType>? _buildFilterNot(IsarCollectionImpl col, FilterNot not) {
   }
 
   final filterPtrPtr = malloc<Pointer<NativeType>>();
-  nCall(IC.isar_filter_not(
+  IC.isar_filter_not(
     filterPtrPtr,
     filter,
-  ));
+  );
 
   final filterPtr = filterPtrPtr.value;
   malloc.free(filterPtrPtr);
@@ -328,7 +328,7 @@ Pointer<NativeType> _buildConditionInternal({
       break;
     case ConditionType.lt:
       if (val1 == null) {
-        nCall(IC.isar_filter_static(filterPtrPtr, false));
+        IC.isar_filter_static(filterPtrPtr, false);
       } else {
         if (val1 is int) {
           nCall(IC.isar_filter_long(
@@ -344,7 +344,7 @@ Pointer<NativeType> _buildConditionInternal({
         } else {
           throw 'Unsupported type for condition';
         }
-        nCall(IC.isar_filter_not(filterPtrPtr, filterPtrPtr.value));
+        IC.isar_filter_not(filterPtrPtr, filterPtrPtr.value);
       }
       break;
     case ConditionType.lte:
@@ -382,11 +382,11 @@ Pointer<NativeType> _buildConditionInternal({
       } else {
         throw 'Unsupported type for condition';
       }
-      nCall(IC.isar_filter_not(filterPtrPtr, filterPtrPtr.value));
+      IC.isar_filter_not(filterPtrPtr, filterPtrPtr.value);
       break;
     case ConditionType.gte:
       if (val1 == null) {
-        nCall(IC.isar_filter_static(filterPtrPtr, true));
+        IC.isar_filter_static(filterPtrPtr, true);
       } else if (val1 is int) {
         nCall(IC.isar_filter_long(
             col.ptr, filterPtrPtr, minLong, val1, propertyId));
