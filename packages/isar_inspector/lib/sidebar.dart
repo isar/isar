@@ -80,8 +80,8 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
                           child: Column(
                             children: const [
                               SizedBox(height: 20),
-                              CollectionsList(),
-                              Spacer(),
+                              Expanded(child: CollectionsList()),
+                              SizedBox(height: 12),
                               InstanceSelector(),
                             ],
                           ),
