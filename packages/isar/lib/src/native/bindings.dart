@@ -896,12 +896,13 @@ class IsarCoreBindings {
   late final _dart_isar_get_instance _isar_get_instance =
       _isar_get_instance_ptr.asFunction<_dart_isar_get_instance>();
 
-  void isar_close_instance(
+  bool isar_close_instance(
     ffi.Pointer<ffi.NativeType> isar,
   ) {
     return _isar_close_instance(
-      isar,
-    );
+          isar,
+        ) !=
+        0;
   }
 
   late final _isar_close_instance_ptr =
@@ -2139,11 +2140,11 @@ typedef _dart_isar_get_instance = void Function(
   ffi.Pointer<ffi.Int8> name,
 );
 
-typedef _c_isar_close_instance = ffi.Void Function(
+typedef _c_isar_close_instance = ffi.Uint8 Function(
   ffi.Pointer<ffi.NativeType> isar,
 );
 
-typedef _dart_isar_close_instance = void Function(
+typedef _dart_isar_close_instance = int Function(
   ffi.Pointer<ffi.NativeType> isar,
 );
 
