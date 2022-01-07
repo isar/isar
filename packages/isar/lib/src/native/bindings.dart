@@ -502,7 +502,9 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     ffi.Pointer<ffi.Int8> lower,
+    bool include_lower,
     ffi.Pointer<ffi.Int8> upper,
+    bool include_upper,
     bool case_sensitive,
     int property_index,
   ) {
@@ -510,7 +512,9 @@ class IsarCoreBindings {
       collection,
       filter,
       lower,
+      include_lower ? 1 : 0,
       upper,
+      include_upper ? 1 : 0,
       case_sensitive ? 1 : 0,
       property_index,
     );
@@ -1871,7 +1875,9 @@ typedef _c_isar_filter_string = ffi.Int64 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Pointer<ffi.Int8> lower,
+  ffi.Uint8 include_lower,
   ffi.Pointer<ffi.Int8> upper,
+  ffi.Uint8 include_upper,
   ffi.Uint8 case_sensitive,
   ffi.Uint32 property_index,
 );
@@ -1880,7 +1886,9 @@ typedef _dart_isar_filter_string = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Pointer<ffi.Int8> lower,
+  int include_lower,
   ffi.Pointer<ffi.Int8> upper,
+  int include_upper,
   int case_sensitive,
   int property_index,
 );
