@@ -477,18 +477,14 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
     double lower,
-    bool include_lower,
     double upper,
-    bool include_upper,
     int property_index,
   ) {
     return _isar_filter_double(
       collection,
       filter,
       lower,
-      include_lower ? 1 : 0,
       upper,
-      include_upper ? 1 : 0,
       property_index,
     );
   }
@@ -802,25 +798,6 @@ class IsarCoreBindings {
       _isar_key_add_int_list_hash_ptr
           .asFunction<_dart_isar_key_add_int_list_hash>();
 
-  void isar_key_add_float_list_hash(
-    ffi.Pointer<ffi.NativeType> key,
-    ffi.Pointer<ffi.Float> value,
-    int length,
-  ) {
-    return _isar_key_add_float_list_hash(
-      key,
-      value,
-      length,
-    );
-  }
-
-  late final _isar_key_add_float_list_hash_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_key_add_float_list_hash>>(
-          'isar_key_add_float_list_hash');
-  late final _dart_isar_key_add_float_list_hash _isar_key_add_float_list_hash =
-      _isar_key_add_float_list_hash_ptr
-          .asFunction<_dart_isar_key_add_float_list_hash>();
-
   void isar_key_add_long_list_hash(
     ffi.Pointer<ffi.NativeType> key,
     ffi.Pointer<ffi.Int64> value,
@@ -839,25 +816,6 @@ class IsarCoreBindings {
   late final _dart_isar_key_add_long_list_hash _isar_key_add_long_list_hash =
       _isar_key_add_long_list_hash_ptr
           .asFunction<_dart_isar_key_add_long_list_hash>();
-
-  void isar_key_add_double_list_hash(
-    ffi.Pointer<ffi.NativeType> key,
-    ffi.Pointer<ffi.Double> value,
-    int length,
-  ) {
-    return _isar_key_add_double_list_hash(
-      key,
-      value,
-      length,
-    );
-  }
-
-  late final _isar_key_add_double_list_hash_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_key_add_double_list_hash>>(
-          'isar_key_add_double_list_hash');
-  late final _dart_isar_key_add_double_list_hash
-      _isar_key_add_double_list_hash = _isar_key_add_double_list_hash_ptr
-          .asFunction<_dart_isar_key_add_double_list_hash>();
 
   void isar_create_instance(
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
@@ -1856,9 +1814,7 @@ typedef _c_isar_filter_double = ffi.Int64 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   ffi.Double lower,
-  ffi.Uint8 include_lower,
   ffi.Double upper,
-  ffi.Uint8 include_upper,
   ffi.Uint32 property_index,
 );
 
@@ -1866,9 +1822,7 @@ typedef _dart_isar_filter_double = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   double lower,
-  int include_lower,
   double upper,
-  int include_upper,
   int property_index,
 );
 
@@ -2078,18 +2032,6 @@ typedef _dart_isar_key_add_int_list_hash = void Function(
   int length,
 );
 
-typedef _c_isar_key_add_float_list_hash = ffi.Void Function(
-  ffi.Pointer<ffi.NativeType> key,
-  ffi.Pointer<ffi.Float> value,
-  ffi.Uint32 length,
-);
-
-typedef _dart_isar_key_add_float_list_hash = void Function(
-  ffi.Pointer<ffi.NativeType> key,
-  ffi.Pointer<ffi.Float> value,
-  int length,
-);
-
 typedef _c_isar_key_add_long_list_hash = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> key,
   ffi.Pointer<ffi.Int64> value,
@@ -2099,18 +2041,6 @@ typedef _c_isar_key_add_long_list_hash = ffi.Void Function(
 typedef _dart_isar_key_add_long_list_hash = void Function(
   ffi.Pointer<ffi.NativeType> key,
   ffi.Pointer<ffi.Int64> value,
-  int length,
-);
-
-typedef _c_isar_key_add_double_list_hash = ffi.Void Function(
-  ffi.Pointer<ffi.NativeType> key,
-  ffi.Pointer<ffi.Double> value,
-  ffi.Uint32 length,
-);
-
-typedef _dart_isar_key_add_double_list_hash = void Function(
-  ffi.Pointer<ffi.NativeType> key,
-  ffi.Pointer<ffi.Double> value,
   int length,
 );
 
