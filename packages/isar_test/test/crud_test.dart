@@ -29,11 +29,11 @@ void main() {
         message2.id = await messages.put(message2);
       });
 
-      expect(message1.id, Isar.minId + 1);
+      expect(message1.id, Isar.minId);
       final newMessage1 = await messages.get(message1.id!);
       expect(message1, newMessage1);
 
-      expect(message2.id, Isar.minId + 2);
+      expect(message2.id, Isar.minId + 1);
       final newMessage2 = await messages.get(message2.id!);
       expect(message2, newMessage2);
     });
@@ -99,7 +99,7 @@ void main() {
         ids = await messages.putAll([message1, message2, message3]);
       });
 
-      expect(ids, [Isar.minId + 1, -10, -9]);
+      expect(ids, [Isar.minId, -10, -9]);
       final newMessages = await messages.getAll(ids);
       expect(newMessages, [message1, message2, message3]);
     });
@@ -116,7 +116,7 @@ void main() {
         ids = messages.putAllSync([message1, message2, message3]);
       });
 
-      expect(ids, [Isar.minId + 1, -10, -9]);
+      expect(ids, [Isar.minId, -10, -9]);
       final newMessages = messages.getAllSync(ids);
       expect(newMessages, [message1, message2, message3]);
     });

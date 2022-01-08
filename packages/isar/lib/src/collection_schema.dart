@@ -14,6 +14,7 @@ class CollectionSchema<OBJ> {
   final Map<String, int> backlinkIds;
   final List<String> linkedCollections;
   final int? Function(OBJ) getId;
+  final void Function(OBJ, int)? setId;
   final int version;
 
   const CollectionSchema({
@@ -28,6 +29,7 @@ class CollectionSchema<OBJ> {
     required this.backlinkIds,
     required this.linkedCollections,
     required this.getId,
+    required this.setId,
     required this.version,
   }) : assert(generatorVersion == version,
             'Incompatible generated code. Please rerun code generation using the latest generator.');
@@ -48,6 +50,7 @@ class CollectionSchema<OBJ> {
       linkIds: linkIds,
       backlinkIds: backlinkIds,
       getId: getId,
+      setId: setId,
     );
   }
 }
@@ -65,9 +68,7 @@ enum NativeIndexType {
   bytesHash,
   boolListHash,
   intListHash,
-  floatListHash,
   longListHash,
-  doubleListHash,
   stringListHash,
   stringListHashCIS,
 }

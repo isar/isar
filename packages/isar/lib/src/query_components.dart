@@ -24,34 +24,41 @@ class FilterCondition<T> extends FilterOperation {
   final ConditionType type;
   final String property;
   final T? value1;
+  final bool include1;
   final T? value2;
+  final bool include2;
   final bool caseSensitive;
 
   const FilterCondition({
     required this.type,
     required this.property,
     T? value,
+    bool include = false,
     this.caseSensitive = true,
   })  : value1 = value,
+        include1 = include,
         value2 = null,
+        include2 = false,
         assert(type != ConditionType.between);
 
   const FilterCondition.between({
     required this.property,
     T? lower,
+    bool includeLower = true,
     T? upper,
+    bool includeUpper = true,
     this.caseSensitive = true,
   })  : value1 = lower,
+        include1 = includeLower,
         value2 = upper,
+        include2 = includeUpper,
         type = ConditionType.between;
 }
 
 enum ConditionType {
   eq,
   gt,
-  gte,
   lt,
-  lte,
   between,
   startsWith,
   endsWith,

@@ -7,20 +7,19 @@ import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
 
 class IsarAnalyzer {
-  ObjectInfo analyze(Element element) {
-    if (element is! ClassElement) {
-      err('Only classes may be annotated with @Collection.', element);
+  ObjectInfo analyze(Element modelClass) {
+    if (modelClass is! ClassElement) {
+      err('Only classes may be annotated with @Collection.', modelClass);
     }
 
-    final modelClass = element as ClassElement;
-    final collectionAnn = getCollectionAnn(element)!;
+    final collectionAnn = getCollectionAnn(modelClass)!;
 
     if (modelClass.isAbstract) {
-      err('Class must not be abstract.', element);
+      err('Class must not be abstract.', modelClass);
     }
 
     if (!modelClass.isPublic) {
-      err('Class must be public.', element);
+      err('Class must be public.', modelClass);
     }
 
     final constructor =
@@ -31,7 +30,7 @@ class IsarAnalyzer {
     }
 
     final isarName = getNameAnn(modelClass)?.name ?? modelClass.displayName;
-    _checkName(isarName, element);
+    _checkName(isarName, modelClass);
 
     final properties = <ObjectProperty>[];
     final links = <ObjectLink>[];
@@ -58,7 +57,7 @@ class IsarAnalyzer {
         final property = analyzeObjectProperty(
           propertyElement,
           findTypeConverter(propertyElement),
-          constructor!,
+          constructor,
         );
         if (property == null) continue;
         properties.add(property);
@@ -70,9 +69,8 @@ class IsarAnalyzer {
       indexes.addAll(analyzeObjectIndex(properties, propertyElement));
     }
     if (indexes.map((e) => e.name).distinct().length != indexes.length) {
-      err('Two or more indexes have the same name.', element);
+      err('Two or more indexes have the same name.', modelClass);
     }
-    print(indexes);
 
     var idProperty = properties.firstOrNullWhere((it) => it.isId);
     if (idProperty == null) {
@@ -89,12 +87,11 @@ class IsarAnalyzer {
     }
 
     if (idProperty == null) {
-      err('No property annotated with @Id().', element);
+      err('No property annotated with @Id().', modelClass);
     }
 
-    final unknownConstructorParameter = constructor!.parameters
-        .firstOrNullWhere((p) =>
-            p.isNotOptional && properties.none((e) => e.dartName == p.name));
+    final unknownConstructorParameter = constructor.parameters.firstOrNullWhere(
+        (p) => p.isNotOptional && properties.none((e) => e.dartName == p.name));
     if (unknownConstructorParameter != null) {
       err('Constructor parameter does not match a property.',
           unknownConstructorParameter);
@@ -310,7 +307,11 @@ class IsarAnalyzer {
       indexProperties.add(ObjectIndexProperty(
         property: property,
         type: index.type ??
-            (property.isarType.isDynamic ? IndexType.hash : IndexType.value),
+            (property.isarType == IsarType.string
+                ? IndexType.hash
+                : property.isarType == IsarType.stringList
+                    ? IndexType.hashElements
+                    : IndexType.value),
         caseSensitive: index.caseSensitive ?? property.isarType.containsString,
       ));
       for (var c in index.composite) {
@@ -322,7 +323,7 @@ class IsarAnalyzer {
           indexProperties.add(ObjectIndexProperty(
             property: compositeProperty,
             type: c.type ??
-                (compositeProperty.isarType.isDynamic
+                (compositeProperty.isarType == IsarType.string
                     ? IndexType.hash
                     : IndexType.value),
             caseSensitive:
@@ -338,10 +339,14 @@ class IsarAnalyzer {
 
       for (var i = 0; i < indexProperties.length; i++) {
         final indexProperty = indexProperties[i];
-        if (indexProperty.property.isarType.isList &&
+        if (indexProperty.isarType.isList &&
             indexProperty.type != IndexType.hash &&
             indexProperties.length > 1) {
           err('Composite indexes do not support non-hashed lists.', element);
+        }
+        if (property.isarType.containsFloat && i != indexProperties.lastIndex) {
+          err('Only the last property of a composite index may be a double value.',
+              element);
         }
         if (property.isarType == IsarType.string) {
           if (indexProperty.type != IndexType.hash &&
@@ -350,15 +355,18 @@ class IsarAnalyzer {
                 element);
           }
         }
-        if (!indexProperty.property.isarType.isDynamic &&
-            indexProperty.type != IndexType.value) {
-          err('Only Strings and Lists may be hashed.', element);
+        if (indexProperty.type != IndexType.value) {
+          if (!indexProperty.isarType.isDynamic) {
+            err('Only Strings and Lists may be hashed.', element);
+          } else if (indexProperty.isarType.containsFloat) {
+            err('List<double> may must not be hashed.', element);
+          }
         }
-        if (indexProperty.property.isarType != IsarType.stringList &&
+        if (indexProperty.isarType != IsarType.stringList &&
             indexProperty.type == IndexType.hashElements) {
           err('Only String lists may have hashed elements.', element);
         }
-        if (indexProperty.property.isarType == IsarType.bytes &&
+        if (indexProperty.isarType == IsarType.bytes &&
             indexProperty.type != IndexType.hash) {
           err('Bytes indexes need to be hashed.', element);
         }

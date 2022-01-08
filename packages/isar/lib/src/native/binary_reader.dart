@@ -163,7 +163,7 @@ class BinaryReader {
 
     final list = <bool?>[];
     for (var i = 0; i < length; i++) {
-      list.add(readBool(listOffset + i, staticOffset: false));
+      list.add(readBoolOrNull(listOffset + i, staticOffset: false));
     }
     return list;
   }

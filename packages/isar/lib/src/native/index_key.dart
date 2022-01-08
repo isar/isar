@@ -31,7 +31,7 @@ Pointer<NativeType> buildLowerUnboundedIndexKey(IsarCollectionImpl col) {
 Pointer<NativeType> buildUpperUnboundedIndexKey(IsarCollectionImpl col) {
   IC.isar_key_create(_keyPtrPtr);
   final keyPtr = _keyPtrPtr.value;
-  IC.isar_key_add_byte(keyPtr, 255);
+  IC.isar_key_add_long(keyPtr, maxLong);
 
   return keyPtr;
 }
@@ -85,7 +85,7 @@ void _addKeyValue(
     case NativeIndexType.bytesHash:
       if (value is Uint8List) {
         final bytesPtr = malloc<Uint8>(value.length);
-        bytesPtr.asTypedList(value.length).insertAll(0, value);
+        bytesPtr.asTypedList(value.length).setAll(0, value);
         IC.isar_key_add_byte_list_hash(keyPtr, bytesPtr, value.length);
         malloc.free(bytesPtr);
       } else {
@@ -95,9 +95,7 @@ void _addKeyValue(
     case NativeIndexType.boolListHash:
       if (value is List<bool?>) {
         final boolListPtr = malloc<Uint8>(value.length);
-        boolListPtr
-            .asTypedList(value.length)
-            .insertAll(0, value.map(boolToByte));
+        boolListPtr.asTypedList(value.length).setAll(0, value.map(boolToByte));
         IC.isar_key_add_byte_list_hash(keyPtr, boolListPtr, value.length);
         malloc.free(boolListPtr);
       } else {
@@ -109,23 +107,11 @@ void _addKeyValue(
         final intListPtr = malloc<Int32>(value.length);
         intListPtr
             .asTypedList(value.length)
-            .insertAll(0, value.map((e) => e ?? nullInt));
+            .setAll(0, value.map((e) => e ?? nullInt));
         IC.isar_key_add_int_list_hash(keyPtr, intListPtr, value.length);
         malloc.free(intListPtr);
       } else {
         IC.isar_key_add_int_list_hash(keyPtr, nullptr, 0);
-      }
-      break;
-    case NativeIndexType.floatListHash:
-      if (value is List<double?>) {
-        final floatListPtr = malloc<Float>(value.length);
-        floatListPtr
-            .asTypedList(value.length)
-            .insertAll(0, value.map((e) => e ?? nullFloat));
-        IC.isar_key_add_float_list_hash(keyPtr, floatListPtr, value.length);
-        malloc.free(floatListPtr);
-      } else {
-        IC.isar_key_add_float_list_hash(keyPtr, nullptr, 0);
       }
       break;
     case NativeIndexType.longListHash:
@@ -133,23 +119,11 @@ void _addKeyValue(
         final longListPtr = malloc<Int64>(value.length);
         longListPtr
             .asTypedList(value.length)
-            .insertAll(0, value.map((e) => e ?? nullLong));
+            .setAll(0, value.map((e) => e ?? nullLong));
         IC.isar_key_add_long_list_hash(keyPtr, longListPtr, value.length);
         malloc.free(longListPtr);
       } else {
         IC.isar_key_add_long_list_hash(keyPtr, nullptr, 0);
-      }
-      break;
-    case NativeIndexType.doubleListHash:
-      if (value is List<double?>) {
-        final doubleListPtr = malloc<Double>(value.length);
-        doubleListPtr
-            .asTypedList(value.length)
-            .insertAll(0, value.map((e) => e ?? nullDouble));
-        IC.isar_key_add_double_list_hash(keyPtr, doubleListPtr, value.length);
-        malloc.free(doubleListPtr);
-      } else {
-        IC.isar_key_add_double_list_hash(keyPtr, nullptr, 0);
       }
       break;
     case NativeIndexType.stringListHash:

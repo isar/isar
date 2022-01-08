@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/common.dart';
 
 part 'double_model.g.dart';
 
@@ -11,16 +12,13 @@ class DoubleModel {
   double? field = 0;
 
   @Index(type: IndexType.value)
-  List<double>? list;
-
-  @Index(type: IndexType.hash)
-  List<double>? hashList;
+  List<double?>? list;
 
   DoubleModel();
 
   @override
   String toString() {
-    return '{field: $field, list: $list, hashList: $hashList}';
+    return '{id: $id, field: $field, list: $list}';
   }
 
   @override
@@ -30,26 +28,8 @@ class DoubleModel {
       return false;
     } else if (field != null && (otherModel.field! - field!).abs() > 0.001) {
       return false;
-    } else if (other.list?.length != list?.length) {
+    } else if (!doubleListEquals(list, other.list)) {
       return false;
-    } else if (other.hashList?.length != hashList?.length) {
-      return false;
-    }
-
-    if (list != null) {
-      for (var i = 0; i < list!.length; i++) {
-        if ((otherModel.list![i] - list![i]).abs() > 0.001) {
-          return false;
-        }
-      }
-    }
-
-    if (hashList != null) {
-      for (var i = 0; i < hashList!.length; i++) {
-        if ((otherModel.hashList![i] - hashList![i]).abs() > 0.001) {
-          return false;
-        }
-      }
     }
 
     return true;

@@ -69,6 +69,12 @@ abstract class IsarCollection<OBJ> {
   @protected
   int deleteAllByIndexSync(String indexName, List<List<dynamic>> values);
 
+  /// Remove all data in this collection.
+  Future<void> clear();
+
+  /// Remove all data in this collection.
+  void clearSync();
+
   /// Import a list of json objects.
   Future<void> importJsonRaw(Uint8List jsonBytes,
       {bool replaceOnConflict = false});
@@ -85,6 +91,11 @@ abstract class IsarCollection<OBJ> {
       {bool distinct = false, Sort sort = Sort.asc}) {
     return QueryBuilder(this, distinct, sort);
   }
+
+  /// Start building a query using the [QueryBuilder].
+  ///
+  /// Shortcut if you don't want to use indexes
+  QueryBuilder<OBJ, OBJ, QFilterCondition> filter() => where().filter();
 
   /// Build a query dynamically. Can be used to build a custom query language.
   Query<R> buildQuery<R>({

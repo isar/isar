@@ -1,3 +1,30 @@
+## Unreleased
+
+### Breaking
+- The id for non-final objects is now assigned automatically after `.put()` and `.putSync()`
+- `double` and `List<double>` indexes can no longer be at the beginning of a composite index
+- `List<double>` indexes can no longer be hashed
+- `.greaterThan()`, `.lessThan()` and `.between()` filters and are now excluding for `double` values (`>=` -> `>`)
+- Changed the default index type for lists to `IndexType.value`
+
+### Enhancements
+- Added `isar.clear()`, `isar.clearSync()`, `col.clear()` and `col.clearSync()`
+- Added `col.filter()` as shortcut for `col.where().filter()`
+- Added `include` parameter to `.greaterThan()` and `.lessThan()` filters and where clauses
+- Added `includeLower` and `includeUpper` parameters to `.between()` filters and where clauses
+- Added `Isar.autoIncrement` to allow non-nullable auto-incrementing ids
+- `Isar.close()` now returns whether it was successful
+- Improved generated code
+- Minor performance improvements
+- Automatic XCode configuration
+- Updated analyzer to `3.0.0`
+- More tests
+
+### Fixed
+- Fixed multi-entry index queries returning items multiple times in some cases
+- Fixed `.anyLessThan()` and `.anyGreaterThan()` issues
+- Fixed issues with backlinks
+
 ## 1.0.5
 
 ### Enhancements

@@ -12,6 +12,7 @@ String generateObjectAdapter(ObjectInfo object) {
       ${_generateSerialize(object)}
       ${_generateDeserialize(object)}
       ${_generateDeserializeProperty(object)}
+      ${_generateAttachLinks(object)}
     }
     ''';
 }
@@ -114,7 +115,7 @@ String _generateSerialize(ObjectInfo object) {
   var code = '''
   @override  
   int serialize(IsarCollection<${object.dartName}> collection, RawObject rawObj, ${object.dartName} object, List<int> offsets, [int? existingBufferSize]) {
-    rawObj.id = object.${object.idProperty.dartName} ${object.idProperty.nullable ? '?? Isar.minId' : ''};
+    rawObj.id = object.${object.idProperty.dartName} ${object.idProperty.nullable ? '?? Isar.autoIncrement' : ''};
     ${_generatePrepareSerialize(object)}
     late int bufferSize;
     if (existingBufferSize != null) {
@@ -185,7 +186,9 @@ String _generateSerialize(ObjectInfo object) {
     }
   }
 
-  code += _generateAttachLinks(object, 'collection', false);
+  if (object.links.isNotEmpty) {
+    code += 'attachLinks(collection.isar, object);';
+  }
 
   return '''
     $code
@@ -223,13 +226,15 @@ String _generateDeserialize(ObjectInfo object) {
     code += 'object.${p.dartName} = $deser;';
   }
 
-  code += _generateAttachLinks(object, 'collection', true);
+  if (object.links.isNotEmpty) {
+    code += 'attachLinks(collection.isar, object);';
+  }
 
   return '''
-      $code
-      return object;
-    }
-    ''';
+    $code
+    return object;
+  }
+  ''';
 }
 
 String _generateDeserializeProperty(ObjectInfo object) {
@@ -316,34 +321,22 @@ String _deserializeProperty(
   return property.fromIsar(deser, object);
 }
 
-String _generateAttachLinks(
-    ObjectInfo object, String collection, bool assignNew) {
-  var code = '';
+String _generateAttachLinks(ObjectInfo object) {
+  if (object.links.isEmpty) {
+    return '';
+  }
+
+  var code = 'void attachLinks(Isar isar, ${object.dartName} object) {';
+
   for (var link in object.links) {
-    String targetColGetter;
-    if (link.targetCollectionDartName != object.dartName) {
-      targetColGetter =
-          '$collection.isar.${link.targetCollectionDartName.decapitalize()}s';
-    } else {
-      targetColGetter = collection;
-    }
-    if (assignNew) {
-      code += 'object.${link.dartName} = IsarLink${link.links ? 's' : ''}().';
-    } else {
-      code += '''if (!object.${link.dartName}.attached) {
-        object.${link.dartName}''';
-    }
-    code += '''.attach(
-      $collection,
-      $targetColGetter,
+    code += '''object.${link.dartName}.attach(
+      isar.${object.accessor},
+      isar.getCollection<${link.targetCollectionDartName}>("${link.targetCollectionDartName}"),
       object,
       "${link.dartName}",
       ${link.backlink},
     );
     ''';
-    if (!assignNew) {
-      code += '}';
-    }
   }
-  return code;
+  return code + '}';
 }

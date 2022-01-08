@@ -106,6 +106,6 @@ Backlink? getBacklinkAnn(Element element) {
   return Backlink(to: ann.getField('to')!.toStringValue()!);
 }
 
-void err(String msg, [Element? element]) {
+Never err(String msg, [Element? element]) {
   throw InvalidGenerationSourceError(msg, element: element);
 }

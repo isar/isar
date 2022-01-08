@@ -137,11 +137,8 @@ class ObjectIndexProperty with _$ObjectIndexProperty {
           return 'NativeIndexType.int';
         }
       case IsarType.floatList:
-        if (type == IndexType.hash) {
-          return 'NativeIndexType.floatListHash';
-        } else {
-          return 'NativeIndexType.float';
-        }
+        assert(type == IndexType.value);
+        return 'NativeIndexType.float';
       case IsarType.longList:
       case IsarType.dateTimeList:
         if (type == IndexType.hash) {
@@ -150,11 +147,8 @@ class ObjectIndexProperty with _$ObjectIndexProperty {
           return 'NativeIndexType.long';
         }
       case IsarType.doubleList:
-        if (type == IndexType.hash) {
-          return 'NativeIndexType.doubleListHash';
-        } else {
-          return 'NativeIndexType.double';
-        }
+        assert(type == IndexType.value);
+        return 'NativeIndexType.double';
       case IsarType.stringList:
         if (caseSensitive) {
           if (type == IndexType.hash) {
@@ -226,16 +220,19 @@ enum IsarType {
 }
 
 extension IsarTypeX on IsarType {
-  bool get isFloatDouble {
-    return this == IsarType.float || this == IsarType.double;
-  }
-
   bool get isDynamic {
     return index >= IsarType.string.index;
   }
 
   bool get isList {
     return index > IsarType.string.index;
+  }
+
+  bool get containsFloat {
+    return this == IsarType.float ||
+        this == IsarType.double ||
+        this == IsarType.floatList ||
+        this == IsarType.doubleList;
   }
 
   bool get containsString =>

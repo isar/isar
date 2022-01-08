@@ -32,6 +32,7 @@ String generateCollectionSchema(ObjectInfo object) {
       .distinct()
       .join(',');
 
+  final setId = '(obj, id) => obj.${object.idProperty.dartName} = id';
   return '''
     final ${object.dartName.capitalize()}Schema = CollectionSchema(
       name: '${object.dartName}',
@@ -45,6 +46,7 @@ String generateCollectionSchema(ObjectInfo object) {
       backlinkIds: {$backlinkIds},
       linkedCollections: [$linkedCollections],
       getId: (obj) => obj.${object.idProperty.dartName},
+      setId: ${object.idProperty.deserialize == PropertyDeser.assign ? setId : 'null'},
       version: ${CollectionSchema.generatorVersion},
     );''';
 }
