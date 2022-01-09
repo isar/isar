@@ -24,41 +24,19 @@ class QueryParser {
 
     builder.group().left(
           string('&&').trim(),
-          (l, _, r) => FilterGroup(
-            filters: [l as FilterOperation, r as FilterOperation],
-            type: FilterGroupType.and,
+          (l, _, r) => FilterGroup.and(
+            [l as FilterOperation, r as FilterOperation],
           ),
         );
 
     builder.group().left(
           string('||').trim(),
-          (l, _, r) => FilterGroup(
-            filters: [l as FilterOperation, r as FilterOperation],
-            type: FilterGroupType.or,
+          (l, _, r) => FilterGroup.or(
+            [l as FilterOperation, r as FilterOperation],
           ),
         );
 
     _parser = builder.build();
-  }
-
-  FilterGroup flatten(FilterGroup group) {
-    final newFilters = <FilterOperation>[];
-    for (var filter in group.filters) {
-      if (filter is FilterGroup) {
-        final flatCondition = flatten(filter);
-        if (filter.type == flatCondition.type) {
-          newFilters.addAll(flatCondition.filters);
-        } else {
-          newFilters.add(flatCondition);
-        }
-      } else {
-        newFilters.add(filter);
-      }
-    }
-    return FilterGroup(
-      filters: newFilters,
-      type: group.type,
-    );
   }
 
   FilterOperation createQueryCondition(
@@ -77,9 +55,7 @@ class QueryParser {
           value: value,
         );
         if (cmp == '!=') {
-          return FilterNot(
-            filter: filter,
-          );
+          return FilterGroup.not(filter);
         } else {
           return filter;
         }
@@ -93,17 +69,14 @@ class QueryParser {
           value: value,
         );
         if (cmp == '>=' || cmp == '<=') {
-          return FilterGroup(
-            filters: [
-              filter,
-              FilterCondition(
-                type: ConditionType.eq,
-                property: propertyName,
-                value: value,
-              ),
-            ],
-            type: FilterGroupType.or,
-          );
+          return FilterGroup.or([
+            filter,
+            FilterCondition(
+              type: ConditionType.eq,
+              property: propertyName,
+              value: value,
+            ),
+          ]);
         } else {
           return filter;
         }

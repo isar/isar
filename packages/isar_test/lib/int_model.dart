@@ -14,7 +14,7 @@ class IntModel {
 
   @Index(type: IndexType.value)
   @Size32()
-  List<int>? list;
+  List<int?>? list;
 
   @Index(type: IndexType.hash)
   @Size32()

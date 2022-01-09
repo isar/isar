@@ -26,6 +26,8 @@ class DoubleModel {
     final otherModel = other as DoubleModel;
     if ((other.field == null) != (field == null)) {
       return false;
+    } else if (id != other.id) {
+      return false;
     } else if (field != null && (otherModel.field! - field!).abs() > 0.001) {
       return false;
     } else if (!doubleListEquals(list, other.list)) {

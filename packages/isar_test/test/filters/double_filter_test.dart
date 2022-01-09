@@ -1,3 +1,6 @@
+// DO NOT EDIT. Copy of float_filter.dart
+// Float -> Double, float -> double
+
 import 'package:isar/isar.dart';
 import 'package:isar_test/common.dart';
 import 'package:isar_test/double_model.dart';
@@ -126,19 +129,38 @@ void main() {
 
     isarTest('.anyGreaterThan() / .anyLessThan()', () async {
       // where clauses
-      /*await qEqualSet(col.where().listAnyGreaterThan(1.1).findAll(), [obj1]);
+      await qEqualSet(col.where().listAnyGreaterThan(1.1).findAll(), [obj1]);
       await qEqualSet(col.where().listAnyGreaterThan(4).findAll(), []);
       await qEqualSet(col.where().listAnyLessThan(1.1).findAll(), [obj2, obj3]);
-      await qEqualSet(col.where().listAnyLessThan(null).findAll(), []);*/
+      await qEqualSet(col.where().listAnyLessThan(null).findAll(), []);
 
       // filters
-      //await qEqualSet(col.filter().listAnyGreaterThan(1.1).findAll(), [obj1]);
-      //await qEqualSet(col.filter().listAnyGreaterThan(4).findAll(), []);
+      await qEqualSet(col.filter().listAnyGreaterThan(1.1).findAll(), [obj1]);
+      await qEqualSet(col.filter().listAnyGreaterThan(4).findAll(), []);
       await qEqualSet(
         col.filter().listAnyLessThan(1.1).findAll(),
         [obj2, obj3],
       );
       await qEqualSet(col.filter().listAnyLessThan(null).findAll(), []);
+    });
+
+    isarTest('.anyBetween()', () async {
+      // where clauses
+      await qEqualSet(col.where().listAnyBetween(1, 5).findAll(), [obj1]);
+      await qEqualSet(col.where().listAnyBetween(5.0, 10.0).findAll(), []);
+
+      // filters
+      await qEqualSet(col.filter().listAnyBetween(1, 5).findAll(), [obj1]);
+      await qEqualSet(col.filter().listAnyBetween(5.0, 10.0).findAll(), []);
+    });
+
+    isarTest('.anyIsNull() / .anyIsNotNull()', () async {
+      // where clauses
+      await qEqualSet(col.where().listAnyIsNull().findAll(), [obj2, obj3]);
+      await qEqualSet(col.where().listAnyIsNotNull().findAll(), [obj1, obj3]);
+
+      // filters
+      await qEqualSet(col.filter().listAnyIsNull().findAll(), [obj2, obj3]);
     });
   });
 }

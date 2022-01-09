@@ -70,24 +70,20 @@ enum ConditionType {
 enum FilterGroupType {
   and,
   or,
+  not,
 }
 
 class FilterGroup extends FilterOperation {
   final List<FilterOperation> filters;
   final FilterGroupType type;
 
-  const FilterGroup({
-    required this.filters,
-    required this.type,
-  });
-}
+  const FilterGroup.and(this.filters) : type = FilterGroupType.and;
 
-class FilterNot extends FilterOperation {
-  final FilterOperation filter;
+  const FilterGroup.or(this.filters) : type = FilterGroupType.or;
 
-  const FilterNot({
-    required this.filter,
-  });
+  FilterGroup.not(FilterOperation filter)
+      : filters = [filter],
+        type = FilterGroupType.or;
 }
 
 enum Sort {

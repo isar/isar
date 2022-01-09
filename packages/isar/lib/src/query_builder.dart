@@ -3,10 +3,7 @@ part of isar;
 typedef FilterQuery<OBJ> = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>
     Function(QueryBuilder<OBJ, OBJ, QFilterCondition> q);
 
-const _nullFilterGroup = FilterGroup(
-  type: FilterGroupType.and,
-  filters: [],
-);
+const _nullFilterGroup = FilterGroup.and([]);
 
 class QueryBuilder<OBJ, R, S> {
   final IsarCollection<OBJ> _collection;
@@ -26,7 +23,7 @@ class QueryBuilder<OBJ, R, S> {
       : _whereClauses = const [],
         _distinctByProperties = const [],
         _sortByProperties = const [],
-        _filterOr = FilterGroup(filters: [], type: FilterGroupType.or),
+        _filterOr = FilterGroup.or([]),
         _filterAnd = null,
         _filterNot = false,
         _offset = null,
@@ -50,23 +47,17 @@ class QueryBuilder<OBJ, R, S> {
 
   QueryBuilder<OBJ, R, NS> addFilterCondition<NS>(FilterOperation cond) {
     if (_filterNot) {
-      cond = FilterNot(filter: cond);
+      cond = FilterGroup.not(cond);
     }
 
     if (_filterAnd != null) {
       return copyWith(
-        filterAnd: FilterGroup(
-          filters: [..._filterAnd!.filters, cond],
-          type: FilterGroupType.and,
-        ),
+        filterAnd: FilterGroup.and([..._filterAnd!.filters, cond]),
         filterNot: false,
       );
     } else {
       return copyWith(
-        filterOr: FilterGroup(
-          filters: [..._filterOr.filters, cond],
-          type: FilterGroupType.or,
-        ),
+        filterOr: FilterGroup.or([..._filterOr.filters, cond]),
         filterNot: false,
       );
     }
@@ -81,22 +72,15 @@ class QueryBuilder<OBJ, R, S> {
     if (andOr == FilterGroupType.and) {
       if (_filterAnd == null) {
         return copyWith(
-          filterOr: FilterGroup(
-            type: FilterGroupType.or,
-            filters: _filterOr.filters.sublist(0, _filterOr.filters.length - 1),
+          filterOr: FilterGroup.or(
+            _filterOr.filters.sublist(0, _filterOr.filters.length - 1),
           ),
-          filterAnd: FilterGroup(
-            type: FilterGroupType.and,
-            filters: [_filterOr.filters.last],
-          ),
+          filterAnd: FilterGroup.and([_filterOr.filters.last]),
         );
       }
     } else if (_filterAnd != null) {
       return copyWith(
-        filterOr: FilterGroup(
-          filters: [..._filterOr.filters, _filterAnd!],
-          type: FilterGroupType.or,
-        ),
+        filterOr: FilterGroup.or([..._filterOr.filters, _filterAnd!]),
         filterAnd: null,
       );
     }

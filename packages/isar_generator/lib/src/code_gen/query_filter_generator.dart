@@ -150,7 +150,7 @@ class FilterGenerator {
     }''';
     if (p.isarType.isList && p.isarType != IsarType.bytes) {
       code += '''
-      ${mPrefix(p)}AnyIsNull() {
+      ${mPrefix(p)}IsNull() {
         return addFilterCondition(FilterCondition(
           type: ConditionType.eq,
           property: '${p.dartName}',

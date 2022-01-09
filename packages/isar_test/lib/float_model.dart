@@ -14,19 +14,21 @@ class FloatModel {
 
   @Index(type: IndexType.value)
   @Size32()
-  List<double>? list;
+  List<double?>? list;
 
   FloatModel();
 
   @override
   String toString() {
-    return '{field: $field, list: $list}';
+    return '{id: $id, field: $field, list: $list}';
   }
 
   @override
   bool operator ==(other) {
     final otherModel = other as FloatModel;
     if ((other.field == null) != (field == null)) {
+      return false;
+    } else if (id != other.id) {
       return false;
     } else if (field != null && (otherModel.field! - field!).abs() > 0.001) {
       return false;

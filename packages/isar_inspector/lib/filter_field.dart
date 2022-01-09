@@ -50,8 +50,7 @@ class _FilterFieldState extends State<FilterField> {
             final parser = QueryParser(appState.selectedCollection!.properties);
             try {
               if (controller.text.isEmpty) {
-                appState.filter =
-                    const FilterGroup(type: FilterGroupType.or, filters: []);
+                appState.filter = const FilterGroup.or([]);
               } else {
                 final filter = parser.parse(controller.text);
                 appState.filter = filter;

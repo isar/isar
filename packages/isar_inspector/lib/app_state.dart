@@ -63,7 +63,7 @@ class AppState extends ChangeNotifier {
     _error = null;
     _hasMore = false;
     _subscriptionHandle++;
-    _filter = const FilterGroup(type: FilterGroupType.or, filters: []);
+    _filter = const FilterGroup.or([]);
     _objects = null;
     _sortProperty = null;
     _ascending = true;
@@ -86,8 +86,7 @@ class AppState extends ChangeNotifier {
   List<Map<String, dynamic>>? _objects;
   List<Map<String, dynamic>>? get objects => _objects;
 
-  FilterOperation _filter =
-      const FilterGroup(type: FilterGroupType.or, filters: []);
+  FilterOperation _filter = const FilterGroup.or([]);
   FilterOperation get filter => _filter;
   set filter(FilterOperation filter) {
     if (_filter != filter) {

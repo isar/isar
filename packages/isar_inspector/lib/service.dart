@@ -125,11 +125,6 @@ class Service {
           'caseSensitive': filter.caseSensitive,
         };
       }
-    } else if (filter is FilterNot) {
-      return {
-        'type': 'FilterNot',
-        'filter': serializeFilter(filter.filter),
-      };
     } else if (filter is FilterGroup) {
       return {
         'type': 'FilterGroup',

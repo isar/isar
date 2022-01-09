@@ -135,8 +135,6 @@ Pointer<NativeType>? _buildFilter(
     IsarCollectionImpl col, FilterOperation filter) {
   if (filter is FilterGroup) {
     return _buildFilterGroup(col, filter);
-  } else if (filter is FilterNot) {
-    return _buildFilterNot(col, filter);
   } else if (filter is LinkFilter) {
     return _buildLink(col, filter);
   } else if (filter is FilterCondition) {
@@ -162,33 +160,22 @@ Pointer<NativeType>? _buildFilterGroup(
   }
 
   final filterPtrPtr = malloc<Pointer<NativeType>>();
-  IC.isar_filter_and_or(
-    filterPtrPtr,
-    group.type == FilterGroupType.and,
-    conditionsPtrPtr,
-    group.filters.length,
-  );
+  if (group.type == FilterGroupType.not) {
+    IC.isar_filter_not(
+      filterPtrPtr,
+      builtConditions.first!,
+    );
+  } else {
+    IC.isar_filter_and_or(
+      filterPtrPtr,
+      group.type == FilterGroupType.and,
+      conditionsPtrPtr,
+      group.filters.length,
+    );
+  }
 
   final filterPtr = filterPtrPtr.value;
   malloc.free(conditionsPtrPtr);
-  malloc.free(filterPtrPtr);
-  return filterPtr;
-}
-
-Pointer<NativeType>? _buildFilterNot(IsarCollectionImpl col, FilterNot not) {
-  final filter = _buildFilter(col, not.filter);
-
-  if (filter == null) {
-    return null;
-  }
-
-  final filterPtrPtr = malloc<Pointer<NativeType>>();
-  IC.isar_filter_not(
-    filterPtrPtr,
-    filter,
-  );
-
-  final filterPtr = filterPtrPtr.value;
   malloc.free(filterPtrPtr);
   return filterPtr;
 }
