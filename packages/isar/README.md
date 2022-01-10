@@ -15,6 +15,9 @@
   <a href="https://github.com/isar/isar/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/isar/isar?color=%23007A88&labelColor=333940&logo=apache">
   </a>
+  <a href="https://twitter.com/simonleier">
+    <img src="https://img.shields.io/twitter/follow/simonleier?label=Follow&style=social">
+  </a>
 </p>
 
 <p align="center">
