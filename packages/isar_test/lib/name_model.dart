@@ -20,7 +20,7 @@ class NameModel {
   @Name('linkN')
   var link = IsarLinks<NameModel>();
 
-  @Backlink(to: 'linkN')
+  @Backlink(to: 'link')
   @Name('backlink')
   var backlink = IsarLinks<NameModel>();
 }

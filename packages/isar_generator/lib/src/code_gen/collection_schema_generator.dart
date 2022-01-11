@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:isar/isar.dart';
+import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
 
@@ -24,7 +25,7 @@ String generateCollectionSchema(ObjectInfo object) {
   final backlinkIds = object.links
       .where((l) => l.backlink)
       .sortedBy((e) => e.targetCollectionIsarName)
-      .thenBy((e) => e.isarName)
+      .thenBy((e) => e.targetIsarName!)
       .mapIndexed((i, link) => "'${link.dartName}': $i")
       .join(',');
   final linkedCollections = object.links

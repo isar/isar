@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
 

@@ -6,13 +6,13 @@ import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
 
+import 'isar_type.dart';
+
 class IsarAnalyzer {
   ObjectInfo analyze(Element modelClass) {
     if (modelClass is! ClassElement) {
       err('Only classes may be annotated with @Collection.', modelClass);
     }
-
-    final collectionAnn = getCollectionAnn(modelClass)!;
 
     if (modelClass.isAbstract) {
       err('Class must not be abstract.', modelClass);
@@ -29,34 +29,15 @@ class IsarAnalyzer {
       err('Class needs an unnamed constructor.');
     }
 
-    final isarName = getNameAnn(modelClass)?.name ?? modelClass.displayName;
-    _checkName(isarName, modelClass);
-
     final properties = <ObjectProperty>[];
     final links = <ObjectLink>[];
-    final allAccessors = [
-      ...modelClass.accessors.mapNotNull((e) => e.variable),
-      if (collectionAnn.inheritance)
-        for (var supertype in modelClass.allSupertypes) ...[
-          if (!supertype.isDartCoreObject)
-            ...supertype.accessors.mapNotNull((e) => e.variable)
-        ]
-    ].distinctBy((e) => e.name);
-
-    for (var propertyElement in allAccessors) {
-      if (hasIgnoreAnn(propertyElement)) {
-        continue;
-      }
-
-      if (propertyElement.type.element!.name == 'IsarLink' ||
-          propertyElement.type.element!.name == 'IsarLinks') {
-        final link = analyzeObjectLink(propertyElement);
-        if (link == null) continue;
+    for (var propertyElement in modelClass.allAccessors) {
+      final link = analyzeObjectLink(propertyElement);
+      if (link != null) {
         links.add(link);
       } else {
         final property = analyzeObjectProperty(
           propertyElement,
-          findTypeConverter(propertyElement),
           constructor,
         );
         if (property == null) continue;
@@ -65,7 +46,7 @@ class IsarAnalyzer {
     }
 
     final indexes = <ObjectIndex>[];
-    for (var propertyElement in allAccessors) {
+    for (var propertyElement in modelClass.allAccessors) {
       indexes.addAll(analyzeObjectIndex(properties, propertyElement));
     }
     if (indexes.map((e) => e.name).distinct().length != indexes.length) {
@@ -97,10 +78,12 @@ class IsarAnalyzer {
           unknownConstructorParameter);
     }
 
+    final accessor = modelClass.collectionAnnotation?.accessor ??
+        '${modelClass.displayName.decapitalize()}s';
     final modelInfo = ObjectInfo(
       dartName: modelClass.displayName,
-      isarName: isarName,
-      accessor: collectionAnn.accessor ?? isarName.decapitalize(),
+      isarName: modelClass.isarName,
+      accessor: accessor,
       properties: properties,
       indexes: indexes,
       links: links,
@@ -109,27 +92,8 @@ class IsarAnalyzer {
     return modelInfo;
   }
 
-  ClassElement? findTypeConverter(PropertyInducingElement property) {
-    final annotations = getTypeConverterAnns(property);
-    annotations.addAll(getTypeConverterAnns(property.enclosingElement!));
-
-    for (var annotation in annotations) {
-      final cls = annotation.type!.element as ClassElement;
-      final dartType = cls.supertype!.typeArguments[0];
-      if (dartType == property.type) {
-        return cls;
-      }
-    }
-
-    return null;
-  }
-
-  ObjectProperty? analyzeObjectProperty(PropertyInducingElement property,
-      ClassElement? converter, ConstructorElement constructor) {
-    if (!property.isPublic || property.isStatic) {
-      return null;
-    }
-
+  ObjectProperty? analyzeObjectProperty(
+      PropertyInducingElement property, ConstructorElement constructor) {
     final nullable = property.type.nullabilitySuffix != NullabilitySuffix.none;
     var elementNullable = false;
     if (property.type is ParameterizedType) {
@@ -140,28 +104,20 @@ class IsarAnalyzer {
       }
     }
 
-    final nameAnn = getNameAnn(property);
-    if (nameAnn != null && nameAnn.name.isEmpty) {
-      err('Empty property names are not allowed.', property);
-    }
-    var isarName = nameAnn?.name ?? property.displayName;
-    _checkName(isarName, property);
-
+    final converter = property.typeConverter;
     IsarType? isarType;
     if (converter == null) {
-      final size32 = hasSize32Ann(property);
-      isarType = getIsarType(property.type, size32, property);
+      isarType = getIsarType(property.type, property);
     } else {
       final isarDartType = converter.supertype!.typeArguments[1];
-      final size32 = hasSize32Ann(converter);
-      isarType = getIsarType(isarDartType, size32, converter);
+      isarType = getIsarType(isarDartType, converter);
     }
 
     if (isarType == null) {
       return null;
     }
 
-    final isId = hasIdAnn(property);
+    final isId = property.hasIdAnnotation;
     if (isId) {
       if (converter != null) {
         err('Converters are not allowed for ids.', property);
@@ -195,7 +151,7 @@ class IsarAnalyzer {
     }
     return ObjectProperty(
       dartName: property.displayName,
-      isarName: isarName,
+      isarName: property.isarName,
       dartType: type,
       isarType: isarType,
       isId: isId,
@@ -207,61 +163,11 @@ class IsarAnalyzer {
     );
   }
 
-  IsarType? getIsarType(DartType type, bool size32, Element element) {
-    if (type.isDartCoreBool) {
-      return IsarType.bool;
-    } else if (type.isDartCoreInt) {
-      if (size32) {
-        return IsarType.int;
-      } else {
-        return IsarType.long;
-      }
-    } else if (type.isDartCoreDouble) {
-      if (size32) {
-        return IsarType.float;
-      } else {
-        return IsarType.double;
-      }
-    } else if (type.isDartCoreString) {
-      return IsarType.string;
-    } else if (type.isDartCoreList) {
-      final parameterizedType = type as ParameterizedType;
-      final typeArguments = parameterizedType.typeArguments;
-      if (typeArguments.isNotEmpty) {
-        final listType = typeArguments[0];
-        if (listType.isDartCoreBool) {
-          return IsarType.boolList;
-        } else if (listType.isDartCoreInt) {
-          if (size32) {
-            return IsarType.intList;
-          } else {
-            return IsarType.longList;
-          }
-        } else if (listType.isDartCoreDouble) {
-          if (size32) {
-            return IsarType.floatList;
-          } else {
-            return IsarType.doubleList;
-          }
-        } else if (listType.isDartCoreString) {
-          return IsarType.stringList;
-        } else if (isDateTime(listType.element!)) {
-          return IsarType.dateTimeList;
-        }
-      }
-    } else if (isDateTime(type.element!)) {
-      return IsarType.dateTime;
-    } else if (isUint8List(type.element!)) {
-      return IsarType.bytes;
-    }
-  }
-
   ObjectLink? analyzeObjectLink(PropertyInducingElement property) {
-    if (!property.isPublic || property.isStatic || hasIgnoreAnn(property)) {
-      return null;
-    }
-
+    final isLink = property.type.element!.name == 'IsarLink';
     final isLinks = property.type.element!.name == 'IsarLinks';
+
+    if (!isLink && !isLinks) return null;
 
     final type = property.type as ParameterizedType;
     if (type.typeArguments.length != 1) {
@@ -272,23 +178,31 @@ class IsarAnalyzer {
       err('Links type must not be nullable.', property);
     }
 
-    final nameAnn = getNameAnn(property);
-    if (nameAnn != null && nameAnn.name.isEmpty) {
-      err('Empty link names are not allowed.', property);
+    final targetCol = linkType.element! as ClassElement;
+
+    final backlinkAnn = property.backlinkAnnotation;
+    String? targetIsarName;
+    if (backlinkAnn != null) {
+      final targetProperty = targetCol.allAccessors
+          .firstOrNullWhere((e) => e.displayName == backlinkAnn.to);
+      if (targetProperty == null) {
+        err('Target of Backlink does not exist', property);
+      } else if (targetProperty.backlinkAnnotation != null) {
+        err('Target of Backlink is also a backlink', property);
+      }
+      final targetLink = analyzeObjectLink(targetProperty);
+      if (targetLink == null) {
+        err('Target of backlink is not a link', property);
+      }
+      targetIsarName = targetLink.isarName;
     }
-    var isarName = nameAnn?.name ?? property.displayName;
-    _checkName(isarName, property);
 
-    final targetColNameAnn = getNameAnn(linkType.element!);
-
-    final backlinkAnn = getBacklinkAnn(property);
     return ObjectLink(
       dartName: property.displayName,
-      isarName: isarName,
-      targetDartName: backlinkAnn?.to,
+      isarName: property.isarName,
+      targetIsarName: targetIsarName,
       targetCollectionDartName: linkType.element!.name!,
-      targetCollectionIsarName:
-          targetColNameAnn?.name ?? linkType.element!.name!,
+      targetCollectionIsarName: targetCol.isarName,
       links: isLinks,
       backlink: backlinkAnn != null,
     );
@@ -300,8 +214,7 @@ class IsarAnalyzer {
         properties.firstOrNullWhere((it) => it.dartName == element.name);
     if (property == null) return;
 
-    final indexAnns = getIndexAnns(element).toList();
-    for (var index in indexAnns) {
+    for (var index in element.indexAnnotations) {
       final indexProperties = <ObjectIndexProperty>[];
 
       indexProperties.add(ObjectIndexProperty(
@@ -374,19 +287,13 @@ class IsarAnalyzer {
 
       final name = index.name ??
           indexProperties.map((e) => e.property.isarName).join('_');
-      _checkName(name, element);
+      checkIsarName(name, element);
 
       yield ObjectIndex(
         name: name,
         properties: indexProperties,
         unique: index.unique,
       );
-    }
-  }
-
-  void _checkName(String name, Element element) {
-    if (name.isBlank || name.startsWith('_')) {
-      err('Names must not be blank or start with "_".', element);
     }
   }
 }
