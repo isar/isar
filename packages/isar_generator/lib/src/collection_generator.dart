@@ -25,7 +25,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
     // ignore_for_file: non_constant_identifier_names, invalid_use_of_protected_member
 
     extension Get${object.dartName}Collection on Isar {
-      IsarCollection<${object.dartName}> get ${object.dartName.decapitalize()}s {
+      IsarCollection<${object.dartName}> get ${object.accessor} {
         return getCollection('${object.dartName}');
       }
     }''';

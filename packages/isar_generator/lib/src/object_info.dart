@@ -2,6 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 
+import 'isar_type.dart';
+
 part 'object_info.g.dart';
 part 'object_info.freezed.dart';
 
@@ -137,11 +139,8 @@ class ObjectIndexProperty with _$ObjectIndexProperty {
           return 'NativeIndexType.int';
         }
       case IsarType.floatList:
-        if (type == IndexType.hash) {
-          return 'NativeIndexType.floatListHash';
-        } else {
-          return 'NativeIndexType.float';
-        }
+        assert(type == IndexType.value);
+        return 'NativeIndexType.float';
       case IsarType.longList:
       case IsarType.dateTimeList:
         if (type == IndexType.hash) {
@@ -150,11 +149,8 @@ class ObjectIndexProperty with _$ObjectIndexProperty {
           return 'NativeIndexType.long';
         }
       case IsarType.doubleList:
-        if (type == IndexType.hash) {
-          return 'NativeIndexType.doubleListHash';
-        } else {
-          return 'NativeIndexType.double';
-        }
+        assert(type == IndexType.value);
+        return 'NativeIndexType.double';
       case IsarType.stringList:
         if (caseSensitive) {
           if (type == IndexType.hash) {
@@ -196,7 +192,7 @@ class ObjectLink with _$ObjectLink {
   const factory ObjectLink({
     required String dartName,
     required String isarName,
-    required String? targetDartName,
+    required String? targetIsarName,
     required String targetCollectionDartName,
     required String targetCollectionIsarName,
     required bool links,
@@ -205,152 +201,4 @@ class ObjectLink with _$ObjectLink {
 
   factory ObjectLink.fromJson(Map<String, dynamic> json) =>
       _$ObjectLinkFromJson(json);
-}
-
-enum IsarType {
-  bool,
-  int,
-  float,
-  long,
-  double,
-  dateTime,
-  string,
-  bytes,
-  boolList,
-  intList,
-  floatList,
-  longList,
-  doubleList,
-  dateTimeList,
-  stringList,
-}
-
-extension IsarTypeX on IsarType {
-  bool get isFloatDouble {
-    return this == IsarType.float || this == IsarType.double;
-  }
-
-  bool get isDynamic {
-    return index >= IsarType.string.index;
-  }
-
-  bool get isList {
-    return index > IsarType.string.index;
-  }
-
-  bool get containsString =>
-      index == IsarType.string.index || index == IsarType.stringList.index;
-
-  int get staticSize {
-    if (this == IsarType.bool) {
-      return 1;
-    } else if (this == IsarType.int || this == IsarType.float) {
-      return 4;
-    } else {
-      return 8;
-    }
-  }
-
-  int get elementSize {
-    switch (this) {
-      case IsarType.bytes:
-      case IsarType.boolList:
-        return 1;
-      case IsarType.intList:
-      case IsarType.floatList:
-        return 4;
-      case IsarType.longList:
-      case IsarType.doubleList:
-      case IsarType.dateTimeList:
-        return 8;
-      default:
-        return 0;
-    }
-  }
-
-  int get typeId {
-    switch (this) {
-      case IsarType.bool:
-        return 0;
-      case IsarType.int:
-        return 1;
-      case IsarType.float:
-        return 2;
-      case IsarType.long:
-      case IsarType.dateTime:
-        return 3;
-      case IsarType.double:
-        return 4;
-      case IsarType.string:
-        return 5;
-      case IsarType.bytes:
-      case IsarType.boolList:
-        return 6;
-      case IsarType.intList:
-        return 7;
-      case IsarType.floatList:
-        return 8;
-      case IsarType.longList:
-      case IsarType.dateTimeList:
-        return 9;
-      case IsarType.doubleList:
-        return 10;
-      case IsarType.stringList:
-        return 11;
-    }
-  }
-
-  IsarType get scalarType {
-    switch (this) {
-      case IsarType.boolList:
-        return IsarType.bool;
-      case IsarType.intList:
-        return IsarType.int;
-      case IsarType.floatList:
-        return IsarType.float;
-      case IsarType.longList:
-        return IsarType.long;
-      case IsarType.doubleList:
-        return IsarType.double;
-      case IsarType.dateTimeList:
-        return IsarType.dateTime;
-      case IsarType.stringList:
-        return IsarType.string;
-      default:
-        return this;
-    }
-  }
-
-  String dartType(bool nullable, bool elementNullable) {
-    final nQ = nullable ? '?' : '';
-    final nEQ = elementNullable ? '?' : '';
-    switch (this) {
-      case IsarType.bool:
-        return 'bool$nQ';
-      case IsarType.int:
-      case IsarType.long:
-        return 'int$nQ';
-      case IsarType.double:
-      case IsarType.float:
-        return 'double$nQ';
-      case IsarType.dateTime:
-        return 'DateTime$nQ';
-      case IsarType.string:
-        return 'String$nQ';
-      case IsarType.bytes:
-        return 'Uint8List$nQ';
-      case IsarType.boolList:
-        return 'List<bool$nEQ>$nQ';
-      case IsarType.intList:
-      case IsarType.longList:
-        return 'List<int$nEQ>$nQ';
-      case IsarType.floatList:
-      case IsarType.doubleList:
-        return 'List<double$nEQ>$nQ';
-      case IsarType.dateTimeList:
-        return 'List<DateTime$nEQ>$nQ';
-      case IsarType.stringList:
-        return 'List<String$nEQ>$nQ';
-    }
-  }
 }

@@ -37,12 +37,12 @@ _$_ObjectProperty _$$_ObjectPropertyFromJson(Map<String, dynamic> json) =>
       dartName: json['dartName'] as String,
       isarName: json['isarName'] as String,
       dartType: json['dartType'] as String,
-      isarType: _$enumDecode(_$IsarTypeEnumMap, json['isarType']),
+      isarType: $enumDecode(_$IsarTypeEnumMap, json['isarType']),
       isId: json['isId'] as bool,
       converter: json['converter'] as String?,
       nullable: json['nullable'] as bool,
       elementNullable: json['elementNullable'] as bool,
-      deserialize: _$enumDecode(_$PropertyDeserEnumMap, json['deserialize']),
+      deserialize: $enumDecode(_$PropertyDeserEnumMap, json['deserialize']),
       constructorPosition: json['constructorPosition'] as int?,
     );
 
@@ -59,32 +59,6 @@ Map<String, dynamic> _$$_ObjectPropertyToJson(_$_ObjectProperty instance) =>
       'deserialize': _$PropertyDeserEnumMap[instance.deserialize],
       'constructorPosition': instance.constructorPosition,
     };
-
-K _$enumDecode<K, V>(
-  Map<K, V> enumValues,
-  Object? source, {
-  K? unknownValue,
-}) {
-  if (source == null) {
-    throw ArgumentError(
-      'A value must be provided. Supported values: '
-      '${enumValues.values.join(', ')}',
-    );
-  }
-
-  return enumValues.entries.singleWhere(
-    (e) => e.value == source,
-    orElse: () {
-      if (unknownValue == null) {
-        throw ArgumentError(
-          '`$source` is not one of the supported values: '
-          '${enumValues.values.join(', ')}',
-        );
-      }
-      return MapEntry(unknownValue, enumValues.values.first);
-    },
-  ).key;
-}
 
 const _$IsarTypeEnumMap = {
   IsarType.bool: 'bool',
@@ -116,7 +90,7 @@ _$_ObjectIndexProperty _$$_ObjectIndexPropertyFromJson(
     _$_ObjectIndexProperty(
       property:
           ObjectProperty.fromJson(json['property'] as Map<String, dynamic>),
-      type: _$enumDecode(_$IndexTypeEnumMap, json['type']),
+      type: $enumDecode(_$IndexTypeEnumMap, json['type']),
       caseSensitive: json['caseSensitive'] as bool,
     );
 
@@ -154,7 +128,7 @@ _$_ObjectLink _$$_ObjectLinkFromJson(Map<String, dynamic> json) =>
     _$_ObjectLink(
       dartName: json['dartName'] as String,
       isarName: json['isarName'] as String,
-      targetDartName: json['targetDartName'] as String?,
+      targetIsarName: json['targetIsarName'] as String?,
       targetCollectionDartName: json['targetCollectionDartName'] as String,
       targetCollectionIsarName: json['targetCollectionIsarName'] as String,
       links: json['links'] as bool,
@@ -165,7 +139,7 @@ Map<String, dynamic> _$$_ObjectLinkToJson(_$_ObjectLink instance) =>
     <String, dynamic>{
       'dartName': instance.dartName,
       'isarName': instance.isarName,
-      'targetDartName': instance.targetDartName,
+      'targetIsarName': instance.targetIsarName,
       'targetCollectionDartName': instance.targetCollectionDartName,
       'targetCollectionIsarName': instance.targetCollectionIsarName,
       'links': instance.links,

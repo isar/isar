@@ -21,12 +21,13 @@ class BoolModel {
 
   @override
   String toString() {
-    return '{field: $field, list: $list, hashList: $hashList}';
+    return '{id: $id, field: $field, list: $list, hashList: $hashList}';
   }
 
   @override
   bool operator ==(other) {
-    return (other as BoolModel).field == field &&
+    return (other as BoolModel).id == id &&
+        other.field == field &&
         listEquals(list, other.list) &&
         listEquals(hashList, other.hashList);
   }

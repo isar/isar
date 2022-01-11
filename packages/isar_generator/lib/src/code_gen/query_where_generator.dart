@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
 
@@ -42,7 +43,7 @@ class WhereGenerator {
         var properties = index.properties.sublist(0, n + 1);
 
         final lastProperty = properties.last;
-        if (!properties.any((it) => it.scalarType.isFloatDouble)) {
+        if (!properties.containsFloat) {
           code += generateWhereEqualTo(index.name, properties);
           code += generateWhereNotEqualTo(index.name, properties);
         }
@@ -96,25 +97,36 @@ class WhereGenerator {
     return firstPropertiesName;
   }
 
+  String paramType(ObjectIndexProperty p) {
+    if (p.property.isarType.isList && p.type != IndexType.hash) {
+      return p.isarType.scalarType.dartType(p.property.nullable, false);
+    } else {
+      return p.property.dartType;
+    }
+  }
+
+  String paramName(ObjectIndexProperty p) {
+    if (p.property.isarType.isList && p.type != IndexType.hash) {
+      return '${p.property.dartName}Element';
+    } else {
+      return p.property.dartName;
+    }
+  }
+
   String joinToParams(List<ObjectIndexProperty> properties) {
-    return properties.map((it) {
-      if (it.property.isarType.isList && it.type != IndexType.hash) {
-        return '${it.property.isarType.scalarType.dartType(it.property.nullable, false)} ${it.property.dartName}Element';
-      } else {
-        return '${it.property.dartType} ${it.property.dartName}';
-      }
-    }).join(',');
+    return properties
+        .map((it) => '${paramType(it)} ${paramName(it)}')
+        .join(',');
   }
 
   String joinToValues(List<ObjectIndexProperty> properties) {
-    final values = properties.map((it) {
+    return properties.map((it) {
       if (it.property.isarType.isList && it.type != IndexType.hash) {
         return '${it.property.dartName}Element';
       } else {
         return it.property.toIsar(it.property.dartName, object);
       }
     }).join(', ');
-    return values;
   }
 
   String generateAny(String indexName, List<ObjectIndexProperty> properties) {
@@ -188,14 +200,14 @@ class WhereGenerator {
     final name = joinToName(properties, true) + 'GreaterThan';
     if (!existing.add(name)) return '';
 
-    final values = joinToValues(properties);
-    final params = joinToParams(properties);
+    final include =
+        !properties.containsFloat ? ', {bool include = false,}' : '';
     return '''
-    $mPrefix $name($params) {
+    $mPrefix $name(${joinToParams(properties)} $include) {
       return addWhereClause(WhereClause(
         indexName: '$indexName',
-        lower: [$values],
-        includeLower: false,
+        lower: [${joinToValues(properties)}],
+        includeLower: ${!properties.containsFloat ? 'include' : 'false'},
       ));
     }
     ''';
@@ -206,14 +218,14 @@ class WhereGenerator {
     final name = joinToName(properties, true) + 'LessThan';
     if (!existing.add(name)) return '';
 
-    final params = joinToParams(properties);
-    final values = joinToValues(properties);
+    final include =
+        !properties.containsFloat ? ', {bool include = false,}' : '';
     return '''
-    $mPrefix $name($params) {
+    $mPrefix $name(${joinToParams(properties)} $include) {
       return addWhereClause(WhereClause(
         indexName: '$indexName',
-        upper: [$values],
-        includeUpper: false,
+        upper: [${joinToValues(properties)}],
+        includeUpper: ${!properties.containsFloat ? 'include' : 'false'},
       ));
     }
     ''';
@@ -222,9 +234,7 @@ class WhereGenerator {
   String generateWhereBetween(
       String indexName, List<ObjectIndexProperty> properties) {
     final firstPs = properties.sublist(0, properties.length - 1);
-    final lastP = properties.last.property;
-    final lowerName = 'lower${lastP.dartName.capitalize()}';
-    final upperName = 'upper${lastP.dartName.capitalize()}';
+    final lastP = properties.last;
     final name = joinToName(properties, true) + 'Between';
     if (!existing.add(name)) return '';
 
@@ -232,19 +242,27 @@ class WhereGenerator {
     if (params.isNotEmpty) {
       params += ',';
     }
-    params += '${lastP.dartType} $lowerName, ${lastP.dartType} $upperName';
+
+    final lowerName = 'lower${paramName(lastP).capitalize()}';
+    final upperName = 'upper${paramName(lastP).capitalize()}';
+    params += '${paramType(lastP)} $lowerName, ${paramType(lastP)} $upperName';
+
     var values = joinToValues(firstPs);
     if (values.isNotEmpty) {
       values += ',';
     }
+
+    final include = !properties.containsFloat
+        ? ', {bool includeLower = true, bool includeUpper = true,}'
+        : '';
     return '''
-    $mPrefix $name($params) {
+    $mPrefix $name($params $include) {
       return addWhereClause(WhereClause(
         indexName: '$indexName',
         lower: [$values $lowerName],
-        includeLower: true,
+        includeLower: ${!properties.containsFloat ? 'includeLower' : 'false'},
         upper: [$values $upperName],
-        includeUpper: true,
+        includeUpper: ${!properties.containsFloat ? 'includeUpper' : 'false'},
       ));
     }
   ''';
@@ -287,7 +305,7 @@ class WhereGenerator {
   String generateWhereStartsWith(
       String indexName, List<ObjectIndexProperty> properties) {
     final firsPs = properties.sublist(0, properties.length - 1);
-    final lastP = properties.last.property;
+    final lastP = properties.last;
     final name = joinToName(properties, true) + 'StartsWith';
     if (!existing.add(name)) return '';
 
@@ -295,9 +313,8 @@ class WhereGenerator {
     if (params.isNotEmpty) {
       params += ',';
     }
-    final lastName = '${lastP.dartName}Prefix';
-    params +=
-        '${lastP.converter == null ? 'String' : lastP.dartType} $lastName';
+    final lastName = '${paramName(lastP).capitalize()}Prefix';
+    params += '${paramType(lastP)} $lastName';
     var values = joinToValues(firsPs);
     if (values.isNotEmpty) {
       values += ',';
@@ -315,4 +332,8 @@ class WhereGenerator {
     }
     ''';
   }
+}
+
+extension on List<ObjectIndexProperty> {
+  bool get containsFloat => last.isarType.containsFloat;
 }

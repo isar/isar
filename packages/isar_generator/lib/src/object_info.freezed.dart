@@ -38,7 +38,7 @@ class _$ObjectInfoTearOff {
     );
   }
 
-  ObjectInfo fromJson(Map<String, Object> json) {
+  ObjectInfo fromJson(Map<String, Object?> json) {
     return ObjectInfo.fromJson(json);
   }
 }
@@ -220,35 +220,26 @@ class _$_ObjectInfo extends _ObjectInfo {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is _ObjectInfo &&
-            (identical(other.dartName, dartName) ||
-                const DeepCollectionEquality()
-                    .equals(other.dartName, dartName)) &&
-            (identical(other.isarName, isarName) ||
-                const DeepCollectionEquality()
-                    .equals(other.isarName, isarName)) &&
-            (identical(other.accessor, accessor) ||
-                const DeepCollectionEquality()
-                    .equals(other.accessor, accessor)) &&
-            (identical(other.properties, properties) ||
-                const DeepCollectionEquality()
-                    .equals(other.properties, properties)) &&
-            (identical(other.indexes, indexes) ||
-                const DeepCollectionEquality()
-                    .equals(other.indexes, indexes)) &&
-            (identical(other.links, links) ||
-                const DeepCollectionEquality().equals(other.links, links)));
+        (other.runtimeType == runtimeType &&
+            other is _ObjectInfo &&
+            const DeepCollectionEquality().equals(other.dartName, dartName) &&
+            const DeepCollectionEquality().equals(other.isarName, isarName) &&
+            const DeepCollectionEquality().equals(other.accessor, accessor) &&
+            const DeepCollectionEquality()
+                .equals(other.properties, properties) &&
+            const DeepCollectionEquality().equals(other.indexes, indexes) &&
+            const DeepCollectionEquality().equals(other.links, links));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(dartName) ^
-      const DeepCollectionEquality().hash(isarName) ^
-      const DeepCollectionEquality().hash(accessor) ^
-      const DeepCollectionEquality().hash(properties) ^
-      const DeepCollectionEquality().hash(indexes) ^
-      const DeepCollectionEquality().hash(links);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(dartName),
+      const DeepCollectionEquality().hash(isarName),
+      const DeepCollectionEquality().hash(accessor),
+      const DeepCollectionEquality().hash(properties),
+      const DeepCollectionEquality().hash(indexes),
+      const DeepCollectionEquality().hash(links));
 
   @JsonKey(ignore: true)
   @override
@@ -275,17 +266,17 @@ abstract class _ObjectInfo extends ObjectInfo {
       _$_ObjectInfo.fromJson;
 
   @override
-  String get dartName => throw _privateConstructorUsedError;
+  String get dartName;
   @override
-  String get isarName => throw _privateConstructorUsedError;
+  String get isarName;
   @override
-  String get accessor => throw _privateConstructorUsedError;
+  String get accessor;
   @override
-  List<ObjectProperty> get properties => throw _privateConstructorUsedError;
+  List<ObjectProperty> get properties;
   @override
-  List<ObjectIndex> get indexes => throw _privateConstructorUsedError;
+  List<ObjectIndex> get indexes;
   @override
-  List<ObjectLink> get links => throw _privateConstructorUsedError;
+  List<ObjectLink> get links;
   @override
   @JsonKey(ignore: true)
   _$ObjectInfoCopyWith<_ObjectInfo> get copyWith =>
@@ -325,7 +316,7 @@ class _$ObjectPropertyTearOff {
     );
   }
 
-  ObjectProperty fromJson(Map<String, Object> json) {
+  ObjectProperty fromJson(Map<String, Object?> json) {
     return ObjectProperty.fromJson(json);
   }
 }
@@ -574,51 +565,36 @@ class _$_ObjectProperty extends _ObjectProperty {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is _ObjectProperty &&
-            (identical(other.dartName, dartName) ||
-                const DeepCollectionEquality()
-                    .equals(other.dartName, dartName)) &&
-            (identical(other.isarName, isarName) ||
-                const DeepCollectionEquality()
-                    .equals(other.isarName, isarName)) &&
-            (identical(other.dartType, dartType) ||
-                const DeepCollectionEquality()
-                    .equals(other.dartType, dartType)) &&
-            (identical(other.isarType, isarType) ||
-                const DeepCollectionEquality()
-                    .equals(other.isarType, isarType)) &&
-            (identical(other.isId, isId) ||
-                const DeepCollectionEquality().equals(other.isId, isId)) &&
-            (identical(other.converter, converter) ||
-                const DeepCollectionEquality()
-                    .equals(other.converter, converter)) &&
-            (identical(other.nullable, nullable) ||
-                const DeepCollectionEquality()
-                    .equals(other.nullable, nullable)) &&
-            (identical(other.elementNullable, elementNullable) ||
-                const DeepCollectionEquality()
-                    .equals(other.elementNullable, elementNullable)) &&
-            (identical(other.deserialize, deserialize) ||
-                const DeepCollectionEquality()
-                    .equals(other.deserialize, deserialize)) &&
-            (identical(other.constructorPosition, constructorPosition) ||
-                const DeepCollectionEquality()
-                    .equals(other.constructorPosition, constructorPosition)));
+        (other.runtimeType == runtimeType &&
+            other is _ObjectProperty &&
+            const DeepCollectionEquality().equals(other.dartName, dartName) &&
+            const DeepCollectionEquality().equals(other.isarName, isarName) &&
+            const DeepCollectionEquality().equals(other.dartType, dartType) &&
+            const DeepCollectionEquality().equals(other.isarType, isarType) &&
+            const DeepCollectionEquality().equals(other.isId, isId) &&
+            const DeepCollectionEquality().equals(other.converter, converter) &&
+            const DeepCollectionEquality().equals(other.nullable, nullable) &&
+            const DeepCollectionEquality()
+                .equals(other.elementNullable, elementNullable) &&
+            const DeepCollectionEquality()
+                .equals(other.deserialize, deserialize) &&
+            const DeepCollectionEquality()
+                .equals(other.constructorPosition, constructorPosition));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(dartName) ^
-      const DeepCollectionEquality().hash(isarName) ^
-      const DeepCollectionEquality().hash(dartType) ^
-      const DeepCollectionEquality().hash(isarType) ^
-      const DeepCollectionEquality().hash(isId) ^
-      const DeepCollectionEquality().hash(converter) ^
-      const DeepCollectionEquality().hash(nullable) ^
-      const DeepCollectionEquality().hash(elementNullable) ^
-      const DeepCollectionEquality().hash(deserialize) ^
-      const DeepCollectionEquality().hash(constructorPosition);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(dartName),
+      const DeepCollectionEquality().hash(isarName),
+      const DeepCollectionEquality().hash(dartType),
+      const DeepCollectionEquality().hash(isarType),
+      const DeepCollectionEquality().hash(isId),
+      const DeepCollectionEquality().hash(converter),
+      const DeepCollectionEquality().hash(nullable),
+      const DeepCollectionEquality().hash(elementNullable),
+      const DeepCollectionEquality().hash(deserialize),
+      const DeepCollectionEquality().hash(constructorPosition));
 
   @JsonKey(ignore: true)
   @override
@@ -649,25 +625,25 @@ abstract class _ObjectProperty extends ObjectProperty {
       _$_ObjectProperty.fromJson;
 
   @override
-  String get dartName => throw _privateConstructorUsedError;
+  String get dartName;
   @override
-  String get isarName => throw _privateConstructorUsedError;
+  String get isarName;
   @override
-  String get dartType => throw _privateConstructorUsedError;
+  String get dartType;
   @override
-  IsarType get isarType => throw _privateConstructorUsedError;
+  IsarType get isarType;
   @override
-  bool get isId => throw _privateConstructorUsedError;
+  bool get isId;
   @override
-  String? get converter => throw _privateConstructorUsedError;
+  String? get converter;
   @override
-  bool get nullable => throw _privateConstructorUsedError;
+  bool get nullable;
   @override
-  bool get elementNullable => throw _privateConstructorUsedError;
+  bool get elementNullable;
   @override
-  PropertyDeser get deserialize => throw _privateConstructorUsedError;
+  PropertyDeser get deserialize;
   @override
-  int? get constructorPosition => throw _privateConstructorUsedError;
+  int? get constructorPosition;
   @override
   @JsonKey(ignore: true)
   _$ObjectPropertyCopyWith<_ObjectProperty> get copyWith =>
@@ -693,7 +669,7 @@ class _$ObjectIndexPropertyTearOff {
     );
   }
 
-  ObjectIndexProperty fromJson(Map<String, Object> json) {
+  ObjectIndexProperty fromJson(Map<String, Object?> json) {
     return ObjectIndexProperty.fromJson(json);
   }
 }
@@ -834,23 +810,20 @@ class _$_ObjectIndexProperty extends _ObjectIndexProperty {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is _ObjectIndexProperty &&
-            (identical(other.property, property) ||
-                const DeepCollectionEquality()
-                    .equals(other.property, property)) &&
-            (identical(other.type, type) ||
-                const DeepCollectionEquality().equals(other.type, type)) &&
-            (identical(other.caseSensitive, caseSensitive) ||
-                const DeepCollectionEquality()
-                    .equals(other.caseSensitive, caseSensitive)));
+        (other.runtimeType == runtimeType &&
+            other is _ObjectIndexProperty &&
+            const DeepCollectionEquality().equals(other.property, property) &&
+            const DeepCollectionEquality().equals(other.type, type) &&
+            const DeepCollectionEquality()
+                .equals(other.caseSensitive, caseSensitive));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(property) ^
-      const DeepCollectionEquality().hash(type) ^
-      const DeepCollectionEquality().hash(caseSensitive);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(property),
+      const DeepCollectionEquality().hash(type),
+      const DeepCollectionEquality().hash(caseSensitive));
 
   @JsonKey(ignore: true)
   @override
@@ -875,11 +848,11 @@ abstract class _ObjectIndexProperty extends ObjectIndexProperty {
       _$_ObjectIndexProperty.fromJson;
 
   @override
-  ObjectProperty get property => throw _privateConstructorUsedError;
+  ObjectProperty get property;
   @override
-  IndexType get type => throw _privateConstructorUsedError;
+  IndexType get type;
   @override
-  bool get caseSensitive => throw _privateConstructorUsedError;
+  bool get caseSensitive;
   @override
   @JsonKey(ignore: true)
   _$ObjectIndexPropertyCopyWith<_ObjectIndexProperty> get copyWith =>
@@ -905,7 +878,7 @@ class _$ObjectIndexTearOff {
     );
   }
 
-  ObjectIndex fromJson(Map<String, Object> json) {
+  ObjectIndex fromJson(Map<String, Object?> json) {
     return ObjectIndex.fromJson(json);
   }
 }
@@ -1033,22 +1006,20 @@ class _$_ObjectIndex extends _ObjectIndex {
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is _ObjectIndex &&
-            (identical(other.name, name) ||
-                const DeepCollectionEquality().equals(other.name, name)) &&
-            (identical(other.properties, properties) ||
-                const DeepCollectionEquality()
-                    .equals(other.properties, properties)) &&
-            (identical(other.unique, unique) ||
-                const DeepCollectionEquality().equals(other.unique, unique)));
+        (other.runtimeType == runtimeType &&
+            other is _ObjectIndex &&
+            const DeepCollectionEquality().equals(other.name, name) &&
+            const DeepCollectionEquality()
+                .equals(other.properties, properties) &&
+            const DeepCollectionEquality().equals(other.unique, unique));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(name) ^
-      const DeepCollectionEquality().hash(properties) ^
-      const DeepCollectionEquality().hash(unique);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(name),
+      const DeepCollectionEquality().hash(properties),
+      const DeepCollectionEquality().hash(unique));
 
   @JsonKey(ignore: true)
   @override
@@ -1072,12 +1043,11 @@ abstract class _ObjectIndex extends ObjectIndex {
       _$_ObjectIndex.fromJson;
 
   @override
-  String get name => throw _privateConstructorUsedError;
+  String get name;
   @override
-  List<ObjectIndexProperty> get properties =>
-      throw _privateConstructorUsedError;
+  List<ObjectIndexProperty> get properties;
   @override
-  bool get unique => throw _privateConstructorUsedError;
+  bool get unique;
   @override
   @JsonKey(ignore: true)
   _$ObjectIndexCopyWith<_ObjectIndex> get copyWith =>
@@ -1095,7 +1065,7 @@ class _$ObjectLinkTearOff {
   _ObjectLink call(
       {required String dartName,
       required String isarName,
-      required String? targetDartName,
+      required String? targetIsarName,
       required String targetCollectionDartName,
       required String targetCollectionIsarName,
       required bool links,
@@ -1103,7 +1073,7 @@ class _$ObjectLinkTearOff {
     return _ObjectLink(
       dartName: dartName,
       isarName: isarName,
-      targetDartName: targetDartName,
+      targetIsarName: targetIsarName,
       targetCollectionDartName: targetCollectionDartName,
       targetCollectionIsarName: targetCollectionIsarName,
       links: links,
@@ -1111,7 +1081,7 @@ class _$ObjectLinkTearOff {
     );
   }
 
-  ObjectLink fromJson(Map<String, Object> json) {
+  ObjectLink fromJson(Map<String, Object?> json) {
     return ObjectLink.fromJson(json);
   }
 }
@@ -1123,7 +1093,7 @@ const $ObjectLink = _$ObjectLinkTearOff();
 mixin _$ObjectLink {
   String get dartName => throw _privateConstructorUsedError;
   String get isarName => throw _privateConstructorUsedError;
-  String? get targetDartName => throw _privateConstructorUsedError;
+  String? get targetIsarName => throw _privateConstructorUsedError;
   String get targetCollectionDartName => throw _privateConstructorUsedError;
   String get targetCollectionIsarName => throw _privateConstructorUsedError;
   bool get links => throw _privateConstructorUsedError;
@@ -1143,7 +1113,7 @@ abstract class $ObjectLinkCopyWith<$Res> {
   $Res call(
       {String dartName,
       String isarName,
-      String? targetDartName,
+      String? targetIsarName,
       String targetCollectionDartName,
       String targetCollectionIsarName,
       bool links,
@@ -1162,7 +1132,7 @@ class _$ObjectLinkCopyWithImpl<$Res> implements $ObjectLinkCopyWith<$Res> {
   $Res call({
     Object? dartName = freezed,
     Object? isarName = freezed,
-    Object? targetDartName = freezed,
+    Object? targetIsarName = freezed,
     Object? targetCollectionDartName = freezed,
     Object? targetCollectionIsarName = freezed,
     Object? links = freezed,
@@ -1177,9 +1147,9 @@ class _$ObjectLinkCopyWithImpl<$Res> implements $ObjectLinkCopyWith<$Res> {
           ? _value.isarName
           : isarName // ignore: cast_nullable_to_non_nullable
               as String,
-      targetDartName: targetDartName == freezed
-          ? _value.targetDartName
-          : targetDartName // ignore: cast_nullable_to_non_nullable
+      targetIsarName: targetIsarName == freezed
+          ? _value.targetIsarName
+          : targetIsarName // ignore: cast_nullable_to_non_nullable
               as String?,
       targetCollectionDartName: targetCollectionDartName == freezed
           ? _value.targetCollectionDartName
@@ -1210,7 +1180,7 @@ abstract class _$ObjectLinkCopyWith<$Res> implements $ObjectLinkCopyWith<$Res> {
   $Res call(
       {String dartName,
       String isarName,
-      String? targetDartName,
+      String? targetIsarName,
       String targetCollectionDartName,
       String targetCollectionIsarName,
       bool links,
@@ -1231,7 +1201,7 @@ class __$ObjectLinkCopyWithImpl<$Res> extends _$ObjectLinkCopyWithImpl<$Res>
   $Res call({
     Object? dartName = freezed,
     Object? isarName = freezed,
-    Object? targetDartName = freezed,
+    Object? targetIsarName = freezed,
     Object? targetCollectionDartName = freezed,
     Object? targetCollectionIsarName = freezed,
     Object? links = freezed,
@@ -1246,9 +1216,9 @@ class __$ObjectLinkCopyWithImpl<$Res> extends _$ObjectLinkCopyWithImpl<$Res>
           ? _value.isarName
           : isarName // ignore: cast_nullable_to_non_nullable
               as String,
-      targetDartName: targetDartName == freezed
-          ? _value.targetDartName
-          : targetDartName // ignore: cast_nullable_to_non_nullable
+      targetIsarName: targetIsarName == freezed
+          ? _value.targetIsarName
+          : targetIsarName // ignore: cast_nullable_to_non_nullable
               as String?,
       targetCollectionDartName: targetCollectionDartName == freezed
           ? _value.targetCollectionDartName
@@ -1276,7 +1246,7 @@ class _$_ObjectLink implements _ObjectLink {
   const _$_ObjectLink(
       {required this.dartName,
       required this.isarName,
-      required this.targetDartName,
+      required this.targetIsarName,
       required this.targetCollectionDartName,
       required this.targetCollectionIsarName,
       required this.links,
@@ -1290,7 +1260,7 @@ class _$_ObjectLink implements _ObjectLink {
   @override
   final String isarName;
   @override
-  final String? targetDartName;
+  final String? targetIsarName;
   @override
   final String targetCollectionDartName;
   @override
@@ -1302,49 +1272,36 @@ class _$_ObjectLink implements _ObjectLink {
 
   @override
   String toString() {
-    return 'ObjectLink(dartName: $dartName, isarName: $isarName, targetDartName: $targetDartName, targetCollectionDartName: $targetCollectionDartName, targetCollectionIsarName: $targetCollectionIsarName, links: $links, backlink: $backlink)';
+    return 'ObjectLink(dartName: $dartName, isarName: $isarName, targetIsarName: $targetIsarName, targetCollectionDartName: $targetCollectionDartName, targetCollectionIsarName: $targetCollectionIsarName, links: $links, backlink: $backlink)';
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other is _ObjectLink &&
-            (identical(other.dartName, dartName) ||
-                const DeepCollectionEquality()
-                    .equals(other.dartName, dartName)) &&
-            (identical(other.isarName, isarName) ||
-                const DeepCollectionEquality()
-                    .equals(other.isarName, isarName)) &&
-            (identical(other.targetDartName, targetDartName) ||
-                const DeepCollectionEquality()
-                    .equals(other.targetDartName, targetDartName)) &&
-            (identical(
-                    other.targetCollectionDartName, targetCollectionDartName) ||
-                const DeepCollectionEquality().equals(
-                    other.targetCollectionDartName,
-                    targetCollectionDartName)) &&
-            (identical(
-                    other.targetCollectionIsarName, targetCollectionIsarName) ||
-                const DeepCollectionEquality().equals(
-                    other.targetCollectionIsarName,
-                    targetCollectionIsarName)) &&
-            (identical(other.links, links) ||
-                const DeepCollectionEquality().equals(other.links, links)) &&
-            (identical(other.backlink, backlink) ||
-                const DeepCollectionEquality()
-                    .equals(other.backlink, backlink)));
+        (other.runtimeType == runtimeType &&
+            other is _ObjectLink &&
+            const DeepCollectionEquality().equals(other.dartName, dartName) &&
+            const DeepCollectionEquality().equals(other.isarName, isarName) &&
+            const DeepCollectionEquality()
+                .equals(other.targetIsarName, targetIsarName) &&
+            const DeepCollectionEquality().equals(
+                other.targetCollectionDartName, targetCollectionDartName) &&
+            const DeepCollectionEquality().equals(
+                other.targetCollectionIsarName, targetCollectionIsarName) &&
+            const DeepCollectionEquality().equals(other.links, links) &&
+            const DeepCollectionEquality().equals(other.backlink, backlink));
   }
 
   @override
-  int get hashCode =>
-      runtimeType.hashCode ^
-      const DeepCollectionEquality().hash(dartName) ^
-      const DeepCollectionEquality().hash(isarName) ^
-      const DeepCollectionEquality().hash(targetDartName) ^
-      const DeepCollectionEquality().hash(targetCollectionDartName) ^
-      const DeepCollectionEquality().hash(targetCollectionIsarName) ^
-      const DeepCollectionEquality().hash(links) ^
-      const DeepCollectionEquality().hash(backlink);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(dartName),
+      const DeepCollectionEquality().hash(isarName),
+      const DeepCollectionEquality().hash(targetIsarName),
+      const DeepCollectionEquality().hash(targetCollectionDartName),
+      const DeepCollectionEquality().hash(targetCollectionIsarName),
+      const DeepCollectionEquality().hash(links),
+      const DeepCollectionEquality().hash(backlink));
 
   @JsonKey(ignore: true)
   @override
@@ -1361,7 +1318,7 @@ abstract class _ObjectLink implements ObjectLink {
   const factory _ObjectLink(
       {required String dartName,
       required String isarName,
-      required String? targetDartName,
+      required String? targetIsarName,
       required String targetCollectionDartName,
       required String targetCollectionIsarName,
       required bool links,
@@ -1371,19 +1328,19 @@ abstract class _ObjectLink implements ObjectLink {
       _$_ObjectLink.fromJson;
 
   @override
-  String get dartName => throw _privateConstructorUsedError;
+  String get dartName;
   @override
-  String get isarName => throw _privateConstructorUsedError;
+  String get isarName;
   @override
-  String? get targetDartName => throw _privateConstructorUsedError;
+  String? get targetIsarName;
   @override
-  String get targetCollectionDartName => throw _privateConstructorUsedError;
+  String get targetCollectionDartName;
   @override
-  String get targetCollectionIsarName => throw _privateConstructorUsedError;
+  String get targetCollectionIsarName;
   @override
-  bool get links => throw _privateConstructorUsedError;
+  bool get links;
   @override
-  bool get backlink => throw _privateConstructorUsedError;
+  bool get backlink;
   @override
   @JsonKey(ignore: true)
   _$ObjectLinkCopyWith<_ObjectLink> get copyWith =>

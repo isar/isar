@@ -157,11 +157,11 @@ class IsarImpl extends Isar {
   }
 
   @override
-  Future close() async {
+  Future<bool> close() async {
     requireOpen();
     requireNotInTxn();
     await Future.wait(_activeAsyncTxns);
     await super.close();
-    IC.isar_close_instance(ptr);
+    return IC.isar_close_instance(ptr);
   }
 }

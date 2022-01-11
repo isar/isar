@@ -8,8 +8,14 @@ typedef IsarCloseCallback = void Function(String);
 
 /// An instance of the Isar Database.
 abstract class Isar {
-  static const minId = kIsWeb ? -9007199254740991 : -9223372036854775808;
+  /// Smallest id that can be used
+  static const minId = kIsWeb ? -9007199254740991 : -9223372036854775807;
+
+  /// Largest id that can be used
   static const maxId = kIsWeb ? 9007199254740991 : 9223372036854775807;
+
+  /// Placeholder for an auto-increment id
+  static const autoIncrement = -9223372036854775808;
 
   static final _instances = <String, Isar>{};
   static final _openCallbacks = <IsarOpenCallback>{};
@@ -17,9 +23,12 @@ abstract class Isar {
   static String? _schema;
   var _isOpen = true;
 
+  /// Name of the instance
   final String name;
+
   late final Map<String, IsarCollection> _collections;
 
+  @protected
   Isar(this.name, String schema) {
     if (_schema != null && _schema != schema) {
       throw 'Cannot open multiple Isar instances with different schema.';
@@ -31,6 +40,7 @@ abstract class Isar {
     }
   }
 
+  /// Open a new Isar instance.
   static Future<Isar> open({
     required List<CollectionSchema> schemas,
     required String directory,
@@ -60,6 +70,7 @@ abstract class Isar {
     }
   }
 
+  /// Is the instance open?
   bool get isOpen => _isOpen;
 
   /// Executes an asynchronous read-only transaction.
@@ -92,11 +103,27 @@ abstract class Isar {
     }
   }
 
+  /// Remove all data in this instance.
+  Future<void> clear() async {
+    for (var col in _collections.values) {
+      await col.clear();
+    }
+  }
+
+  /// Remove all data in this instance.
+  void clearSync() {
+    for (var col in _collections.values) {
+      col.clearSync();
+    }
+  }
+
   /// Releases an Isar instance.
   ///
   /// If this is the only isolate that holds a reference to this instance, the
   /// Isar instance will be closed.
-  Future close() {
+  ///
+  /// Returns whether the instance was actually closed.
+  Future<bool> close() {
     _isOpen = false;
     if (identical(_instances[name], this)) {
       _instances.remove(name);
@@ -107,16 +134,16 @@ abstract class Isar {
     for (var callback in _closeCallbacks) {
       callback(name);
     }
-    return Future.value();
+    return Future.value(false);
   }
 
   @protected
   static String? get schema => _schema;
 
-  /// A list of all opened Isar instances
+  /// A list of all Isar instances opened in the current isolate.
   static List<String> get instanceNames => _instances.keys.toList();
 
-  /// Returns an opened Isar instance by its name or `null`.
+  /// Returns an Isar instance opened in the current isolate by its name.
   static Isar? getInstance(String name) {
     return _instances[name];
   }
@@ -131,7 +158,8 @@ abstract class Isar {
     _openCallbacks.remove(callback);
   }
 
-  /// Registers a listener that is called whenever an Isar instance is released.
+  /// Registers a listener that is called whenever an Isar instance is
+  /// released.
   static void addCloseListener(IsarCloseCallback callback) {
     _closeCallbacks.add(callback);
   }
@@ -141,6 +169,8 @@ abstract class Isar {
     _closeCallbacks.remove(callback);
   }
 
+  /// Split a String into words according to Unicode Annex #29. Only words
+  /// containing at least one alphanumeric character will be included.
   static List<String> splitWords(String input) {
     if (kIsWeb) {
       throw UnimplementedError();

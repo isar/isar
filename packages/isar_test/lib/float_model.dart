@@ -1,5 +1,7 @@
 import 'package:isar/isar.dart';
 
+import 'common.dart';
+
 part 'float_model.g.dart';
 
 @Collection()
@@ -12,17 +14,13 @@ class FloatModel {
 
   @Index(type: IndexType.value)
   @Size32()
-  List<double>? list;
-
-  @Index(type: IndexType.hash)
-  @Size32()
-  List<double>? hashList;
+  List<double?>? list;
 
   FloatModel();
 
   @override
   String toString() {
-    return '{field: $field, list: $list, hashList: $hashList}';
+    return '{id: $id, field: $field, list: $list}';
   }
 
   @override
@@ -30,28 +28,12 @@ class FloatModel {
     final otherModel = other as FloatModel;
     if ((other.field == null) != (field == null)) {
       return false;
+    } else if (id != other.id) {
+      return false;
     } else if (field != null && (otherModel.field! - field!).abs() > 0.001) {
       return false;
-    } else if (other.list?.length != list?.length) {
+    } else if (!doubleListEquals(list, other.list)) {
       return false;
-    } else if (other.hashList?.length != hashList?.length) {
-      return false;
-    }
-
-    if (list != null) {
-      for (var i = 0; i < list!.length; i++) {
-        if ((otherModel.list![i] - list![i]).abs() > 0.001) {
-          return false;
-        }
-      }
-    }
-
-    if (hashList != null) {
-      for (var i = 0; i < hashList!.length; i++) {
-        if ((otherModel.hashList![i] - hashList![i]).abs() > 0.001) {
-          return false;
-        }
-      }
     }
 
     return true;

@@ -73,3 +73,23 @@ Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> schemas) async {
     directory: testTempPath!,
   );
 }
+
+bool doubleListEquals(List<double?>? l1, List<double?>? l2) {
+  if (l1?.length != l2?.length) {
+    return false;
+  }
+  if (l1 != null && l2 != null) {
+    for (var i = 0; i < l1.length; i++) {
+      final e1 = l1[i];
+      final e2 = l2[i];
+      if (e1 != null && e2 != null) {
+        if ((e1 - e2).abs() > 0.001) {
+          return false;
+        }
+      } else if (e1 != null || e2 != null) {
+        return false;
+      }
+    }
+  }
+  return true;
+}

@@ -20,8 +20,8 @@ const minFloat = double.nan;
 const maxFloat = double.infinity;
 const minDouble = double.nan;
 const maxDouble = double.infinity;
-final minDate = DateTime.fromMillisecondsSinceEpoch(minLong);
-final maxDate = DateTime.fromMillisecondsSinceEpoch(maxLong);
+final minDate = DateTime.fromMicrosecondsSinceEpoch(minLong, isUtc: true);
+final maxDate = DateTime.fromMicrosecondsSinceEpoch(maxLong, isUtc: true);
 
 const nullInt = minInt;
 const nullLong = minLong;
@@ -33,6 +33,7 @@ class IsarCoreUtils {
   static final nullPtr = Pointer.fromAddress(0);
   static final syncTxnPtr = malloc<Pointer>();
   static final syncRawObjPtr = malloc<RawObject>();
+  static int? syncRawObjBufferSize;
 }
 
 // ignore: non_constant_identifier_names
@@ -113,6 +114,20 @@ extension RawObjectX on RawObject {
     if (buffer.address != 0) {
       malloc.free(buffer);
     }
+  }
+}
+
+extension RawObjectSetPointerX on Pointer<RawObjectSet> {
+  void free({bool freeData = false}) {
+    final objectsPtr = ref.objects;
+    if (freeData) {
+      for (var i = 0; i < ref.length; i++) {
+        final rawObj = objectsPtr.elementAt(i).ref;
+        rawObj.freeData();
+      }
+    }
+    malloc.free(objectsPtr);
+    malloc.free(this);
   }
 }
 
