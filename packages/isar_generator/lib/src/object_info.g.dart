@@ -43,6 +43,7 @@ _$_ObjectProperty _$$_ObjectPropertyFromJson(Map<String, dynamic> json) =>
       nullable: json['nullable'] as bool,
       elementNullable: json['elementNullable'] as bool,
       deserialize: $enumDecode(_$PropertyDeserEnumMap, json['deserialize']),
+      assignable: json['assignable'] as bool,
       constructorPosition: json['constructorPosition'] as int?,
     );
 
@@ -57,6 +58,7 @@ Map<String, dynamic> _$$_ObjectPropertyToJson(_$_ObjectProperty instance) =>
       'nullable': instance.nullable,
       'elementNullable': instance.elementNullable,
       'deserialize': _$PropertyDeserEnumMap[instance.deserialize],
+      'assignable': instance.assignable,
       'constructorPosition': instance.constructorPosition,
     };
 

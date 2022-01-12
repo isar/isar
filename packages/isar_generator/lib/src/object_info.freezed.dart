@@ -301,6 +301,7 @@ class _$ObjectPropertyTearOff {
       required bool nullable,
       required bool elementNullable,
       required PropertyDeser deserialize,
+      required bool assignable,
       int? constructorPosition}) {
     return _ObjectProperty(
       dartName: dartName,
@@ -312,6 +313,7 @@ class _$ObjectPropertyTearOff {
       nullable: nullable,
       elementNullable: elementNullable,
       deserialize: deserialize,
+      assignable: assignable,
       constructorPosition: constructorPosition,
     );
   }
@@ -335,6 +337,7 @@ mixin _$ObjectProperty {
   bool get nullable => throw _privateConstructorUsedError;
   bool get elementNullable => throw _privateConstructorUsedError;
   PropertyDeser get deserialize => throw _privateConstructorUsedError;
+  bool get assignable => throw _privateConstructorUsedError;
   int? get constructorPosition => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -358,6 +361,7 @@ abstract class $ObjectPropertyCopyWith<$Res> {
       bool nullable,
       bool elementNullable,
       PropertyDeser deserialize,
+      bool assignable,
       int? constructorPosition});
 }
 
@@ -381,6 +385,7 @@ class _$ObjectPropertyCopyWithImpl<$Res>
     Object? nullable = freezed,
     Object? elementNullable = freezed,
     Object? deserialize = freezed,
+    Object? assignable = freezed,
     Object? constructorPosition = freezed,
   }) {
     return _then(_value.copyWith(
@@ -420,6 +425,10 @@ class _$ObjectPropertyCopyWithImpl<$Res>
           ? _value.deserialize
           : deserialize // ignore: cast_nullable_to_non_nullable
               as PropertyDeser,
+      assignable: assignable == freezed
+          ? _value.assignable
+          : assignable // ignore: cast_nullable_to_non_nullable
+              as bool,
       constructorPosition: constructorPosition == freezed
           ? _value.constructorPosition
           : constructorPosition // ignore: cast_nullable_to_non_nullable
@@ -445,6 +454,7 @@ abstract class _$ObjectPropertyCopyWith<$Res>
       bool nullable,
       bool elementNullable,
       PropertyDeser deserialize,
+      bool assignable,
       int? constructorPosition});
 }
 
@@ -470,6 +480,7 @@ class __$ObjectPropertyCopyWithImpl<$Res>
     Object? nullable = freezed,
     Object? elementNullable = freezed,
     Object? deserialize = freezed,
+    Object? assignable = freezed,
     Object? constructorPosition = freezed,
   }) {
     return _then(_ObjectProperty(
@@ -509,6 +520,10 @@ class __$ObjectPropertyCopyWithImpl<$Res>
           ? _value.deserialize
           : deserialize // ignore: cast_nullable_to_non_nullable
               as PropertyDeser,
+      assignable: assignable == freezed
+          ? _value.assignable
+          : assignable // ignore: cast_nullable_to_non_nullable
+              as bool,
       constructorPosition: constructorPosition == freezed
           ? _value.constructorPosition
           : constructorPosition // ignore: cast_nullable_to_non_nullable
@@ -530,6 +545,7 @@ class _$_ObjectProperty extends _ObjectProperty {
       required this.nullable,
       required this.elementNullable,
       required this.deserialize,
+      required this.assignable,
       this.constructorPosition})
       : super._();
 
@@ -555,11 +571,13 @@ class _$_ObjectProperty extends _ObjectProperty {
   @override
   final PropertyDeser deserialize;
   @override
+  final bool assignable;
+  @override
   final int? constructorPosition;
 
   @override
   String toString() {
-    return 'ObjectProperty(dartName: $dartName, isarName: $isarName, dartType: $dartType, isarType: $isarType, isId: $isId, converter: $converter, nullable: $nullable, elementNullable: $elementNullable, deserialize: $deserialize, constructorPosition: $constructorPosition)';
+    return 'ObjectProperty(dartName: $dartName, isarName: $isarName, dartType: $dartType, isarType: $isarType, isId: $isId, converter: $converter, nullable: $nullable, elementNullable: $elementNullable, deserialize: $deserialize, assignable: $assignable, constructorPosition: $constructorPosition)';
   }
 
   @override
@@ -579,6 +597,8 @@ class _$_ObjectProperty extends _ObjectProperty {
             const DeepCollectionEquality()
                 .equals(other.deserialize, deserialize) &&
             const DeepCollectionEquality()
+                .equals(other.assignable, assignable) &&
+            const DeepCollectionEquality()
                 .equals(other.constructorPosition, constructorPosition));
   }
 
@@ -594,6 +614,7 @@ class _$_ObjectProperty extends _ObjectProperty {
       const DeepCollectionEquality().hash(nullable),
       const DeepCollectionEquality().hash(elementNullable),
       const DeepCollectionEquality().hash(deserialize),
+      const DeepCollectionEquality().hash(assignable),
       const DeepCollectionEquality().hash(constructorPosition));
 
   @JsonKey(ignore: true)
@@ -618,6 +639,7 @@ abstract class _ObjectProperty extends ObjectProperty {
       required bool nullable,
       required bool elementNullable,
       required PropertyDeser deserialize,
+      required bool assignable,
       int? constructorPosition}) = _$_ObjectProperty;
   const _ObjectProperty._() : super._();
 
@@ -642,6 +664,8 @@ abstract class _ObjectProperty extends ObjectProperty {
   bool get elementNullable;
   @override
   PropertyDeser get deserialize;
+  @override
+  bool get assignable;
   @override
   int? get constructorPosition;
   @override

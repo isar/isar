@@ -60,6 +60,7 @@ class ObjectProperty with _$ObjectProperty {
     required bool nullable,
     required bool elementNullable,
     required PropertyDeser deserialize,
+    required bool assignable,
     int? constructorPosition,
   }) = _ObjectProperty;
 

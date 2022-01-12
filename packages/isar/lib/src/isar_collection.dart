@@ -22,7 +22,9 @@ abstract class IsarCollection<OBJ> {
   /// does not exist. Don't use this method directly.
   @protected
   Future<List<OBJ?>> getAllByIndex(
-      String indexName, List<List<dynamic>> values);
+    String indexName,
+    List<List<dynamic>> values,
+  );
 
   /// Get a list of objects by the [indexName] index or `null` if an object
   /// does not exist. Don't use this method directly.
@@ -30,12 +32,20 @@ abstract class IsarCollection<OBJ> {
   List<OBJ?> getAllByIndexSync(String indexName, List<List<dynamic>> values);
 
   /// Insert or update an [object] and returns the assigned id.
-  Future<int> put(OBJ object, {bool replaceOnConflict = false}) =>
-      putAll([object]).then((ids) => ids[0]);
+  Future<int> put(OBJ object, {bool replaceOnConflict = false}) {
+    return putAll(
+      [object],
+      replaceOnConflict: replaceOnConflict,
+    ).then((ids) => ids[0]);
+  }
 
   /// Insert or update an [object] and returns the assigned id.
-  int putSync(OBJ object, {bool replaceOnConflict = false}) =>
-      putAllSync([object])[0];
+  int putSync(OBJ object, {bool replaceOnConflict = false}) {
+    return putAllSync(
+      [object],
+      replaceOnConflict: replaceOnConflict,
+    )[0];
+  }
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
   Future<List<int>> putAll(List<OBJ> objects, {bool replaceOnConflict = false});

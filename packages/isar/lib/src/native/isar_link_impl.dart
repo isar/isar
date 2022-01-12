@@ -6,23 +6,25 @@ import 'bindings.dart';
 import 'isar_collection_impl.dart';
 import 'isar_core.dart';
 
-IsarLink<OBJ> newIsarLink<OBJ>() {
+IsarLink<OBJ> nativeIsarLink<OBJ>() {
   return IsarLinkImpl();
 }
 
-IsarLinks<OBJ> newIsarLinks<OBJ>() {
+IsarLinks<OBJ> nativeIsarLinks<OBJ>() {
   return IsarLinksImpl();
 }
 
-class _IsarLinkBase<OBJ> {
+abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
   late IsarCollectionImpl<dynamic> col;
   late IsarCollectionImpl<OBJ> targetCol;
   late dynamic containingObject;
   late int linkIndex;
   late bool backlink;
-  bool attached = false;
-  bool changed = false;
 
+  @override
+  bool isAttached = false;
+
+  @override
   void attach(IsarCollection col, IsarCollection<OBJ> targetCol,
       dynamic containingObject, String linkName, bool backlink) {
     if (!identical(col.isar, targetCol.isar)) {
@@ -37,11 +39,11 @@ class _IsarLinkBase<OBJ> {
     }
     linkIndex = index;
     this.backlink = backlink;
-    attached = true;
+    isAttached = true;
   }
 
   int requireAttached() {
-    if (!attached) {
+    if (!isAttached) {
       throw IsarError(
           'Containing object needs to be managed by Isar to use this method.');
     }
@@ -54,39 +56,40 @@ class _IsarLinkBase<OBJ> {
   }
 }
 
-class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
+class IsarLinkImpl<OBJ> extends IsarLinkBaseImpl<OBJ> implements IsarLink<OBJ> {
   OBJ? _value;
+
+  @override
+  bool isChanged = false;
 
   @override
   OBJ? get value => _value;
 
   @override
   set value(OBJ? value) {
-    if (value == null || _value == null) {
-      if (value != null || _value != null) {
-        _value = value;
-        changed = true;
-      }
-    } else {
+    int? oldId;
+    int? newId;
+    if (isAttached) {
+      oldId = _value != null ? targetCol.getId(_value!) : null;
+      newId = value != null ? targetCol.getId(value) : null;
+    }
+    if (oldId != newId || _value != value) {
       _value = value;
-      changed = true;
+      isChanged = true;
     }
   }
-
-  @override
-  bool get isChanged => changed;
 
   @override
   Future<void> load() {
     final containingId = requireAttached();
     return col.isar.getTxn(false, (txnPtr, stream) async {
       final rawObjPtr = malloc<RawObject>();
-      IC.isar_link_get_first(
-          col.ptr, txnPtr, linkIndex, backlink, containingId, rawObjPtr);
+      nCall(IC.isar_link_get_first(
+          col.ptr, txnPtr, linkIndex, backlink, containingId, rawObjPtr));
       try {
         await stream.first;
-        _value = targetCol.deserializeObject(rawObjPtr.ref);
-        changed = false;
+        _value = targetCol.deserializeObjectOrNull(rawObjPtr.ref);
+        isChanged = false;
       } finally {
         malloc.free(rawObjPtr);
       }
@@ -101,8 +104,8 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
       try {
         nCall(IC.isar_link_get_first(
             col.ptr, txnPtr, linkIndex, backlink, containingId, rawObjPtr));
-        _value = targetCol.deserializeObject(rawObjPtr.ref);
-        changed = false;
+        _value = targetCol.deserializeObjectOrNull(rawObjPtr.ref);
+        isChanged = false;
       } finally {
         malloc.free(rawObjPtr);
       }
@@ -112,9 +115,8 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
   @override
   Future<void> save() {
     final containingId = requireAttached();
-    if (!changed) {
-      return Future.value();
-    }
+    if (!isChanged) Future.value();
+
     return col.isar.getTxn(true, (txnPtr, stream) async {
       var targetOid = minLong;
       if (_value != null) {
@@ -130,7 +132,7 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
           col.ptr, txnPtr, linkIndex, backlink, containingId, targetOid);
       try {
         await stream.first;
-        changed = false;
+        isChanged = false;
       } finally {
         malloc.free(rawObjPtr);
       }
@@ -140,9 +142,8 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
   @override
   void saveSync() {
     final containingId = requireAttached();
-    if (!changed) {
-      return;
-    }
+    if (!isChanged) return;
+
     col.isar.getTxnSync(true, (txnPtr) {
       var targetOid = minLong;
       if (_value != null) {
@@ -158,7 +159,7 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
       try {
         nCall(IC.isar_link_replace(
             col.ptr, txnPtr, linkIndex, backlink, containingId, targetOid));
-        changed = false;
+        isChanged = false;
       } finally {
         malloc.free(rawObjPtr);
       }
@@ -166,15 +167,35 @@ class IsarLinkImpl<OBJ> extends _IsarLinkBase<OBJ> implements IsarLink<OBJ> {
   }
 }
 
-class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
+class IsarLinksImpl<OBJ> extends IsarLinkBaseImpl<OBJ>
     with SetMixin<OBJ>
     implements IsarLinks<OBJ> {
-  final _objects = <OBJ>{};
-  final _addedObjects = <OBJ>{};
-  final _removedObjects = <OBJ>{};
+  late final _objects = newLinkSet();
+  late final _addedObjects = newLinkSet();
+  late final _removedObjects = newLinkSet();
+
+  HashSet<OBJ> newLinkSet() {
+    return HashSet<OBJ>(
+      equals: (a, b) {
+        if (isAttached) {
+          final idA = targetCol.getId(a);
+          final idB = targetCol.getId(b);
+          if (idA != null || idB != null) return idA == idB;
+        }
+        return a == b;
+      },
+      hashCode: (obj) {
+        if (isAttached) {
+          final id = targetCol.getId(obj);
+          if (id != null) return id;
+        }
+        return obj.hashCode;
+      },
+    );
+  }
 
   @override
-  bool get hasChanges => changed;
+  bool get isChanged => _addedObjects.isNotEmpty || _removedObjects.isNotEmpty;
 
   @override
   Future<void> load({bool overrideChanges = false}) async {
@@ -195,8 +216,7 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
         malloc.free(resultsPtr);
       }
     });
-    _objects.clear();
-    _objects.addAll(objects);
+    applyLoaded(objects);
   }
 
   @override
@@ -216,34 +236,33 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
         malloc.free(resultsPtr);
       }
     });
+    applyLoaded(objects);
+  }
+
+  void applyLoaded(List<OBJ> objects) {
     _objects.clear();
     _objects.addAll(objects);
+    _objects.addAll(_addedObjects);
+    _objects.removeAll(_removedObjects);
   }
 
   @override
-  Future<void> saveChanges() {
+  Future<void> save() {
     final containingId = requireAttached();
-    if (!changed) {
-      return Future.value();
-    }
-    return col.isar.getTxn(true, (txnPtr, stream) async {
-      final newObjects = <OBJ>[];
-      for (var added in _addedObjects) {
-        if (targetCol.getId(added) == null) {
-          newObjects.add(added);
-        }
-      }
-      if (newObjects.isNotEmpty) {
-        await targetCol.putAll(newObjects);
-      }
+    if (!isChanged) return Future.value();
 
+    return col.isar.getTxn(true, (txnPtr, stream) async {
       final count = _addedObjects.length + _removedObjects.length;
       final idsPtr = malloc<Int64>(count);
       final ids = idsPtr.asTypedList(count);
+
       var i = 0;
-      for (var added in _addedObjects) {
-        ids[i++] = targetCol.getId(added)!;
+      for (var object in _addedObjects) {
+        var id = targetCol.getId(object);
+        id ??= await targetCol.put(object);
+        ids[i++] = id;
       }
+
       for (var removed in _removedObjects) {
         ids[i++] = targetCol.getId(removed)!;
       }
@@ -259,11 +278,10 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
   }
 
   @override
-  void saveChangesSync() {
+  void saveSync() {
     final containingId = requireAttached();
-    if (!changed) {
-      return;
-    }
+    if (!isChanged) return;
+
     col.isar.getTxnSync(true, (txnPtr) {
       for (var added in _addedObjects) {
         var id = targetCol.getId(added);
@@ -287,7 +305,6 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
     if (_objects.add(value)) {
       _addedObjects.add(value);
       _removedObjects.remove(value);
-      changed = true;
       return true;
     } else {
       return false;
@@ -308,14 +325,16 @@ class IsarLinksImpl<OBJ> extends _IsarLinkBase<OBJ>
 
   @override
   bool remove(Object? value) {
-    if (value is OBJ && _objects.remove(value)) {
-      _addedObjects.remove(value);
-      _removedObjects.add(value);
-      changed = true;
-      return true;
-    } else {
-      return false;
+    if (value is OBJ) {
+      var removed = false;
+      removed |= _objects.remove(value);
+      removed |= _addedObjects.remove(value);
+      if (targetCol.getId(value) != null) {
+        removed |= _removedObjects.add(value);
+      }
+      return removed;
     }
+    return false;
   }
 
   @override

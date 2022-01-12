@@ -24,14 +24,14 @@ String generateCollectionSchema(ObjectInfo object) {
       .join(',');
   final backlinkIds = object.links
       .where((l) => l.backlink)
-      .sortedBy((e) => e.targetCollectionIsarName)
-      .thenBy((e) => e.targetIsarName!)
       .mapIndexed((i, link) => "'${link.dartName}': $i")
       .join(',');
   final linkedCollections = object.links
       .map((e) => "'${e.targetCollectionDartName}'")
       .distinct()
       .join(',');
+  final getLinks =
+      '(obj) => [${object.links.map((e) => 'obj.${e.dartName}').join(',')}]';
 
   final setId = '(obj, id) => obj.${object.idProperty.dartName} = id';
   return '''
@@ -47,7 +47,8 @@ String generateCollectionSchema(ObjectInfo object) {
       backlinkIds: {$backlinkIds},
       linkedCollections: [$linkedCollections],
       getId: (obj) => obj.${object.idProperty.dartName},
-      setId: ${object.idProperty.deserialize == PropertyDeser.assign ? setId : 'null'},
+      setId: ${object.idProperty.assignable ? setId : 'null'},
+      getLinks: $getLinks,
       version: ${CollectionSchema.generatorVersion},
     );''';
 }

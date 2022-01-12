@@ -50,24 +50,23 @@ Future<Isar> openIsarNative({
   final maxProperties = schemas
       .map((e) => e.propertyIds.length)
       .reduce((value, element) => max(value, element));
-  final collectionPtrPtr = malloc<Pointer>();
-  final propertyOffsetsPtr = malloc<Uint32>(maxProperties);
+  final colPtrPtr = malloc<Pointer>();
+  final offsetsPtr = malloc<Uint32>(maxProperties);
 
   final cols = <String, IsarCollection>{};
   for (var i = 0; i < schemas.length; i++) {
     final schema = schemas[i];
-    nCall(IC.isar_get_collection(isar.ptr, collectionPtrPtr, i));
-    IC.isar_get_property_offsets(collectionPtrPtr.value, propertyOffsetsPtr);
+    nCall(IC.isar_get_collection(isar.ptr, colPtrPtr, i));
+    IC.isar_get_property_offsets(colPtrPtr.value, offsetsPtr);
     cols[schema.name] = schema.toNativeCollection(
       isar: isar,
-      ptr: collectionPtrPtr.value,
-      propertyOffsets:
-          propertyOffsetsPtr.asTypedList(schema.propertyIds.length).toList(),
+      ptr: colPtrPtr.value,
+      offsets: offsetsPtr.asTypedList(schema.propertyIds.length).toList(),
     );
   }
 
-  malloc.free(propertyOffsetsPtr);
-  malloc.free(collectionPtrPtr);
+  malloc.free(offsetsPtr);
+  malloc.free(colPtrPtr);
 
   // ignore: invalid_use_of_protected_member
   isar.attachCollections(cols);

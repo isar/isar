@@ -17,7 +17,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   final Pointer ptr;
 
   final String idName;
-  final List<int> propertyOffsets;
+  final List<int> offsets;
   final Map<String, int> propertyIds;
   final Map<String, int> indexIds;
   final Map<String, List<NativeIndexType>> indexTypes;
@@ -25,13 +25,14 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   final Map<String, int> backlinkIds;
   final int? Function(OBJ) getId;
   final void Function(OBJ, int)? setId;
+  final List<IsarLinkBase> Function(OBJ)? getLinks;
 
   IsarCollectionImpl({
     required this.isar,
     required this.adapter,
     required this.ptr,
     required this.idName,
-    required this.propertyOffsets,
+    required this.offsets,
     required this.propertyIds,
     required this.indexIds,
     required this.indexTypes,
@@ -39,6 +40,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     required this.backlinkIds,
     required this.getId,
     required this.setId,
+    required this.getLinks,
   });
 
   @pragma('vm:prefer-inline')
@@ -55,7 +57,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   OBJ deserializeObject(RawObject rawObj) {
     final buffer = rawObj.buffer.asTypedList(rawObj.buffer_length);
     final reader = BinaryReader(buffer);
-    return adapter.deserialize(this, rawObj.id, reader, propertyOffsets);
+    return adapter.deserialize(this, rawObj.id, reader, offsets);
   }
 
   @pragma('vm:prefer-inline')
@@ -104,7 +106,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   List<T> deserializeProperty<T>(RawObjectSet objectSet, int propertyIndex) {
     final values = <T>[];
-    final propertyOffset = propertyOffsets[propertyIndex];
+    final propertyOffset = offsets[propertyIndex];
     for (var i = 0; i < objectSet.length; i++) {
       final rawObj = objectSet.objects.elementAt(i).ref;
       final buffer = rawObj.buffer.asTypedList(rawObj.buffer_length);
@@ -204,15 +206,17 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<List<int>> putAll(List<OBJ> objects,
-      {bool replaceOnConflict = false}) {
+  Future<List<int>> putAll(
+    List<OBJ> objects, {
+    bool replaceOnConflict = false,
+  }) {
     return isar.getTxn(true, (txnPtr, stream) async {
       final rawObjSetPtr = allocRawObjSet(objects.length);
       final objectsPtr = rawObjSetPtr.ref.objects;
 
       for (var i = 0; i < objects.length; i++) {
         final rawObj = objectsPtr.elementAt(i).ref;
-        adapter.serialize(this, rawObj, objects[i], propertyOffsets);
+        adapter.serialize(this, rawObj, objects[i], offsets);
       }
       IC.isar_put_all(ptr, txnPtr, rawObjSetPtr, replaceOnConflict);
 
@@ -220,11 +224,25 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         await stream.first;
         final rawObjectSet = rawObjSetPtr.ref;
         final ids = <int>[];
+        final linkFutures = <Future>[];
         for (var i = 0; i < objects.length; i++) {
           final rawObjPtr = rawObjectSet.objects.elementAt(i);
           final id = rawObjPtr.ref.id;
-          setId?.call(objects[i], id);
           ids.add(id);
+
+          final object = objects[i];
+          setId?.call(object, id);
+
+          if (getLinks != null) {
+            for (var link in getLinks!(object)) {
+              if (link.isChanged) {
+                linkFutures.add(link.save());
+              }
+            }
+          }
+        }
+        if (linkFutures.isNotEmpty) {
+          await Future.wait(linkFutures);
         }
         return ids;
       } finally {
@@ -234,7 +252,10 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  List<int> putAllSync(List<OBJ> objects, {bool replaceOnConflict = false}) {
+  List<int> putAllSync(
+    List<OBJ> objects, {
+    bool replaceOnConflict = false,
+  }) {
     return isar.getTxnSync(true, (txnPtr) {
       final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
       final rawObj = rawObjPtr.ref;
@@ -242,16 +263,20 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       try {
         final ids = <int>[];
         for (var object in objects) {
-          bufferSize = adapter.serialize(
-            this,
-            rawObj,
-            object,
-            propertyOffsets,
-            bufferSize,
-          );
+          bufferSize =
+              adapter.serialize(this, rawObj, object, offsets, bufferSize);
           nCall(IC.isar_put(ptr, txnPtr, rawObjPtr, replaceOnConflict));
-          setId?.call(object, rawObj.id);
           ids.add(rawObj.id);
+
+          setId?.call(object, rawObj.id);
+
+          if (getLinks != null) {
+            for (var link in getLinks!(object)) {
+              if (link.isChanged) {
+                link.saveSync();
+              }
+            }
+          }
         }
         return ids;
       } finally {

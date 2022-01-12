@@ -15,6 +15,7 @@ class CollectionSchema<OBJ> {
   final List<String> linkedCollections;
   final int? Function(OBJ) getId;
   final void Function(OBJ, int)? setId;
+  final List<IsarLinkBase> Function(OBJ) getLinks;
   final int version;
 
   const CollectionSchema({
@@ -28,6 +29,7 @@ class CollectionSchema<OBJ> {
     required this.linkIds,
     required this.backlinkIds,
     required this.linkedCollections,
+    required this.getLinks,
     required this.getId,
     required this.setId,
     required this.version,
@@ -37,18 +39,19 @@ class CollectionSchema<OBJ> {
   IsarCollection<OBJ> toNativeCollection(
       {required IsarImpl isar,
       required Pointer<NativeType> ptr,
-      required List<int> propertyOffsets}) {
+      required List<int> offsets}) {
     return IsarCollectionImpl(
       isar: isar,
       adapter: adapter,
       ptr: ptr,
       idName: idName,
-      propertyOffsets: propertyOffsets,
+      offsets: offsets,
       propertyIds: propertyIds,
       indexIds: indexIds,
       indexTypes: indexTypes,
       linkIds: linkIds,
       backlinkIds: backlinkIds,
+      getLinks: getLinks,
       getId: getId,
       setId: setId,
     );

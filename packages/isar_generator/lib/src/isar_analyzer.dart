@@ -84,9 +84,11 @@ class IsarAnalyzer {
       dartName: modelClass.displayName,
       isarName: modelClass.isarName,
       accessor: accessor,
-      properties: properties,
-      indexes: indexes,
-      links: links,
+      properties: properties.sortedBy((e) => e.isarName),
+      indexes: indexes.sortedBy((e) => e.name),
+      links: links
+          .sortedBy((e) => e.targetCollectionIsarName)
+          .thenBy((e) => e.targetIsarName ?? ''),
     );
 
     return modelInfo;
@@ -159,6 +161,7 @@ class IsarAnalyzer {
       nullable: nullable,
       elementNullable: elementNullable,
       deserialize: deserialize,
+      assignable: property.setter != null,
       constructorPosition: constructorPosition,
     );
   }

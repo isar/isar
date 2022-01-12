@@ -1,14 +1,7 @@
 part of isar;
 
-abstract class IsarLink<OBJ> {
-  factory IsarLink() {
-    return newIsarLink();
-  }
-
-  OBJ? get value;
-
-  set value(OBJ? obj);
-
+abstract class IsarLinkBase<OBJ> {
+  bool get isAttached;
   bool get isChanged;
 
   Future<void> load();
@@ -19,29 +12,35 @@ abstract class IsarLink<OBJ> {
 
   void saveSync();
 
-  bool get attached;
-
   void attach(IsarCollection col, IsarCollection<OBJ> targetCol,
       dynamic containingObject, String linkName, bool backlink);
 }
 
-abstract class IsarLinks<OBJ> implements Set<OBJ> {
-  factory IsarLinks() {
-    return newIsarLinks();
+abstract class IsarLink<OBJ> extends IsarLinkBase<OBJ> {
+  factory IsarLink() {
+    if (kIsWeb) {
+      throw UnimplementedError();
+    } else {
+      return nativeIsarLink();
+    }
   }
 
-  bool get hasChanges;
+  OBJ? get value;
 
+  set value(OBJ? obj);
+}
+
+abstract class IsarLinks<OBJ> extends IsarLinkBase<OBJ> implements Set<OBJ> {
+  factory IsarLinks() {
+    if (kIsWeb) {
+      throw UnimplementedError();
+    } else {}
+    return nativeIsarLinks();
+  }
+
+  @override
   Future<void> load({bool overrideChanges = false});
 
+  @override
   void loadSync({bool overrideChanges = false});
-
-  Future<void> saveChanges();
-
-  void saveChangesSync();
-
-  bool get attached;
-
-  void attach(IsarCollection col, IsarCollection<OBJ> targetCol,
-      dynamic containingObject, String linkName, bool backlink);
 }

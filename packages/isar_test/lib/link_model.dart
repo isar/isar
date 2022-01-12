@@ -8,19 +8,19 @@ class LinkModelA {
 
   late String name;
 
-  var selfLink = IsarLink<LinkModelA>();
+  final selfLink = IsarLink<LinkModelA>();
 
-  var otherLink = IsarLink<LinkModelB>();
+  final otherLink = IsarLink<LinkModelB>();
 
   var selfLinks = IsarLinks<LinkModelA>();
 
-  var otherLinks = IsarLinks<LinkModelB>();
+  final otherLinks = IsarLinks<LinkModelB>();
 
   @Backlink(to: 'selfLink')
-  var selfLinkBacklink = IsarLinks<LinkModelA>();
+  final selfLinkBacklink = IsarLinks<LinkModelA>();
 
   @Backlink(to: 'selfLinks')
-  var selfLinksBacklink = IsarLinks<LinkModelA>();
+  final selfLinksBacklink = IsarLinks<LinkModelA>();
 
   LinkModelA();
 
@@ -28,12 +28,12 @@ class LinkModelA {
 
   @override
   String toString() {
-    return 'LinkModelA($name)';
+    return 'LinkModelA($id, $name)';
   }
 
   @override
   bool operator ==(Object other) {
-    return other is LinkModelA && other.name == name;
+    return other is LinkModelA && id == other.id && other.name == name;
   }
 }
 
@@ -44,7 +44,7 @@ class LinkModelB {
   late String name;
 
   @Backlink(to: 'otherLink')
-  var linkBacklinks = IsarLinks<LinkModelA>();
+  final linkBacklinks = IsarLinks<LinkModelA>();
 
   @Backlink(to: 'otherLinks')
   var linksBacklinks = IsarLinks<LinkModelA>();
@@ -55,11 +55,11 @@ class LinkModelB {
 
   @override
   String toString() {
-    return 'LinkModelB($name)';
+    return 'LinkModelB($id, $name)';
   }
 
   @override
   bool operator ==(Object other) {
-    return other is LinkModelB && other.name == name;
+    return other is LinkModelB && id == other.id && other.name == name;
   }
 }
