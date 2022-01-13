@@ -2292,8 +2292,8 @@ typedef _dart_isar_qb_add_distinct_by = int Function(
 
 typedef _c_isar_qb_set_offset_limit = ffi.Void Function(
   ffi.Pointer<ffi.NativeType> builder,
-  ffi.Uint32 offset,
-  ffi.Uint32 limit,
+  ffi.Int64 offset,
+  ffi.Int64 limit,
 );
 
 typedef _dart_isar_qb_set_offset_limit = void Function(
