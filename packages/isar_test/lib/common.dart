@@ -53,8 +53,7 @@ void registerBinaries() {
     testTempPath = path.join(dartToolDir, 'test', 'tmp');
     initializeIsarCore(dylibs: {
       'windows': path.join(dartToolDir, 'libisar_windows_x64.dll'),
-      'macos': path.join(dartToolDir,
-          '/Users/simon/Documents/GitHub/isar-core/dart-ffi/target/x86_64-apple-darwin/release/libisar.dylib'),
+      'macos': path.join(dartToolDir, 'libisar_macos_x64.dylib'),
       'linux': path.join(dartToolDir, 'libisar_linux_x64.so'),
     });
   }

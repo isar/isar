@@ -38,7 +38,8 @@ void main() {
     });
 
     group('self link', () {
-      isarTest('new obj new target', () async {
+      // TODO enable test
+      /*isarTest('new obj new target', () async {
         objA1.selfLink.value = objA2;
         objA3.selfLink.value = objA3;
         await isar.writeTxn((isar) async {
@@ -52,7 +53,7 @@ void main() {
         final newA3 = await linksA.get(objA3.id!);
         await newA3!.selfLink.load();
         expect(newA3.selfLink.value, objA3);
-      });
+      });*/
 
       isarTest('new obj existing target', () async {
         await isar.writeTxn((isar) async {
