@@ -7,7 +7,7 @@ import 'native_query_builder.dart';
 final _keyPtrPtr = malloc<Pointer>();
 
 Pointer<NativeType> buildIndexKey(
-    IsarCollectionImpl col, String indexName, List<dynamic> values) {
+    IsarCollectionImpl col, String indexName, List<Object?> values) {
   final types = col.indexTypes[indexName]!;
   if (values.length > types.length) {
     throw 'Invalid values for index $indexName';
@@ -37,7 +37,7 @@ Pointer<NativeType> buildUpperUnboundedIndexKey(IsarCollectionImpl col) {
 }
 
 void _addKeyValue(
-    Pointer<NativeType> keyPtr, dynamic value, NativeIndexType type) {
+    Pointer<NativeType> keyPtr, Object? value, NativeIndexType type) {
   switch (type) {
     case NativeIndexType.bool:
       if (value is bool?) {
@@ -71,13 +71,13 @@ void _addKeyValue(
       break;
     case NativeIndexType.string:
     case NativeIndexType.stringCIS:
-      final strPtr = _strToNative(value);
+      final strPtr = _strToNative(value as String?);
       IC.isar_key_add_string(keyPtr, strPtr, type == NativeIndexType.string);
       _freeStr(strPtr);
       break;
     case NativeIndexType.stringHash:
     case NativeIndexType.stringHashCIS:
-      final strPtr = _strToNative(value);
+      final strPtr = _strToNative(value as String?);
       IC.isar_key_add_string_hash(
           keyPtr, strPtr, type == NativeIndexType.stringHash);
       _freeStr(strPtr);

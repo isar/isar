@@ -148,8 +148,8 @@ class NativeQuery<T> extends Query<T> {
       final bytesPtrPtr = malloc<Pointer<Uint8>>();
       final lengthPtr = malloc<Uint32>();
       final idNamePtr = col.idName.toNativeUtf8();
-      IC.isar_q_export_json(queryPtr, col.ptr, txnPtr, idNamePtr.cast(),
-          primitiveNull, bytesPtrPtr, lengthPtr);
+      nCall(IC.isar_q_export_json(queryPtr, col.ptr, txnPtr, idNamePtr.cast(),
+          primitiveNull, bytesPtrPtr, lengthPtr));
 
       try {
         await stream.first;

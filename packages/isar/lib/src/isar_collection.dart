@@ -23,13 +23,13 @@ abstract class IsarCollection<OBJ> {
   @protected
   Future<List<OBJ?>> getAllByIndex(
     String indexName,
-    List<List<dynamic>> values,
+    List<List<Object?>> values,
   );
 
   /// Get a list of objects by the [indexName] index or `null` if an object
   /// does not exist. Don't use this method directly.
   @protected
-  List<OBJ?> getAllByIndexSync(String indexName, List<List<dynamic>> values);
+  List<OBJ?> getAllByIndexSync(String indexName, List<List<Object?>> values);
 
   /// Insert or update an [object] and returns the assigned id.
   Future<int> put(OBJ object, {bool replaceOnConflict = false}) {
@@ -72,12 +72,12 @@ abstract class IsarCollection<OBJ> {
   /// Delete a list of objecs by the [indexName] index. Returns the number
   /// of objects that have been deleted. Don't use this method directly.
   @protected
-  Future<int> deleteAllByIndex(String indexName, List<List<dynamic>> values);
+  Future<int> deleteAllByIndex(String indexName, List<List<Object?>> values);
 
   /// Delete a list of objecs by the [indexName] index. Returns the number
   /// of objects that have been deleted. Don't use this method directly.
   @protected
-  int deleteAllByIndexSync(String indexName, List<List<dynamic>> values);
+  int deleteAllByIndexSync(String indexName, List<List<Object?>> values);
 
   /// Remove all data in this collection.
   Future<void> clear();

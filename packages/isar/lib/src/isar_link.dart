@@ -13,7 +13,7 @@ abstract class IsarLinkBase<OBJ> {
   void saveSync();
 
   void attach(IsarCollection col, IsarCollection<OBJ> targetCol,
-      dynamic containingObject, String linkName, bool backlink);
+      Object containingObject, String linkName, bool backlink);
 }
 
 abstract class IsarLink<OBJ> extends IsarLinkBase<OBJ> {

@@ -96,7 +96,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @pragma('vm:prefer-inline')
   Pointer<Pointer<NativeType>> _getKeysPtr(
-      String indexName, List<List<dynamic>> values) {
+      String indexName, List<List<Object?>> values) {
     final keysPtrPtr = malloc<Pointer>(values.length);
     for (var i = 0; i < values.length; i++) {
       keysPtrPtr[i] = buildIndexKey(this, indexName, values[i]);

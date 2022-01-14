@@ -172,6 +172,12 @@ class IsarAnalyzer {
 
     if (!isLink && !isLinks) return null;
 
+    if (property.type.nullabilitySuffix != NullabilitySuffix.none) {
+      err('Link properties must not be nullable.', property);
+    } else if (property.isLate) {
+      err('Link properties must not be late.', property);
+    }
+
     final type = property.type as ParameterizedType;
     if (type.typeArguments.length != 1) {
       err('Illegal type arguments for link.', property);
@@ -215,7 +221,7 @@ class IsarAnalyzer {
       List<ObjectProperty> properties, PropertyInducingElement element) sync* {
     final property =
         properties.firstOrNullWhere((it) => it.dartName == element.name);
-    if (property == null) return;
+    if (property == null || property.isId) return;
 
     for (var index in element.indexAnnotations) {
       final indexProperties = <ObjectIndexProperty>[];
@@ -235,6 +241,8 @@ class IsarAnalyzer {
             properties.firstOrNullWhere((it) => it.dartName == c.property);
         if (compositeProperty == null) {
           err('Property does not exist: "${c.property}".', element);
+        } else if (compositeProperty.isId) {
+          err('The Id property cannot be part of composite indexes.', element);
         } else {
           indexProperties.add(ObjectIndexProperty(
             property: compositeProperty,

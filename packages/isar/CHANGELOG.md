@@ -1,4 +1,4 @@
-## Unreleased
+## 2.0.0-dev.0
 
 ### Breaking
 - The id for non-final objects is now assigned automatically after `.put()` and `.putSync()`
@@ -6,6 +6,7 @@
 - `List<double>` indexes can no longer be hashed
 - `.greaterThan()`, `.lessThan()` and `.between()` filters and are now excluding for `double` values (`>=` -> `>`)
 - Changed the default index type for lists to `IndexType.value`
+- `IsarLink` and `IsarLinks` will no longer initialized by Isar and must not be `nullable` or `late`.
 
 ### Enhancements
 - Added `isar.clear()`, `isar.clearSync()`, `col.clear()` and `col.clearSync()`
@@ -24,6 +25,9 @@
 - Fixed multi-entry index queries returning items multiple times in some cases
 - Fixed `.anyLessThan()` and `.anyGreaterThan()` issues
 - Fixed issues with backlinks
+- Fixed issue where query only returned the first `99999` results
+- Fixed issue with id where clauses
+- `IsarLink` and `IsarLinks` can now be final
 
 ## 1.0.5
 

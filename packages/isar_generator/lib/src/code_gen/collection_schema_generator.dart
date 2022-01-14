@@ -10,13 +10,11 @@ String generateCollectionSchema(ObjectInfo object) {
   final propertyIds = object.objectProperties
       .mapIndexed((index, p) => "'${p.dartName}': $index")
       .join(',');
-  final indexIds = object.indexes
-      .mapIndexed(
-          (index, i) => "'${i.properties.first.property.dartName}': $index")
-      .join(',');
+  final indexIds =
+      object.indexes.mapIndexed((index, i) => "'${i.name}': $index").join(',');
   final indexTypes = object.indexes
       .map((i) =>
-          "'${i.properties.first.property.dartName}': [${i.properties.map((e) => e.indexTypeEnum).join(',')},]")
+          "'${i.name}': [${i.properties.map((e) => e.indexTypeEnum).join(',')},]")
       .join(',');
   final linkIds = object.links
       .where((l) => !l.backlink)

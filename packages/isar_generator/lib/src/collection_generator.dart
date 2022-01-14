@@ -5,7 +5,6 @@ import 'package:isar_generator/src/code_gen/collection_schema_generator.dart';
 import 'package:isar_generator/src/isar_analyzer.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:isar/isar.dart';
-import 'package:dartx/dartx.dart';
 
 import 'code_gen/by_index_generator.dart';
 import 'code_gen/object_adapter_generator.dart';

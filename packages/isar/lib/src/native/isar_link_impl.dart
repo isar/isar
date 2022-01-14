@@ -338,5 +338,12 @@ class IsarLinksImpl<OBJ> extends IsarLinkBaseImpl<OBJ>
   }
 
   @override
+  void clear() {
+    _objects.clear();
+    _addedObjects.clear();
+    _removedObjects.clear();
+  }
+
+  @override
   Set<OBJ> toSet() => _objects.toSet();
 }

@@ -53,7 +53,7 @@ class Service {
     return (instances as List).cast();
   }
 
-  Future<List<Map<String, dynamic>>> executeQuery(
+  Future<List<Map<String, Object>>> executeQuery(
     String instance,
     String collection,
     FilterOperation filter,

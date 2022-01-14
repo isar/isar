@@ -178,7 +178,7 @@ class _CollectionTableState extends State<CollectionTable> {
   }
 
   Widget _buildRow(ThemeData theme, Collection collection,
-      Map<String, dynamic> object, int index) {
+      Map<String, Object> object, int index) {
     return IsarCard(
       color: index % 2 == 0 ? Colors.transparent : null,
       radius: BorderRadius.circular(15),

@@ -47,7 +47,10 @@ Query<T> buildNativeQuery<T>(
     }
   }
 
-  IC.isar_qb_set_offset_limit(qbPtr, offset ?? 0, limit ?? 99999);
+  if (offset != null || limit != null) {
+    IC.isar_qb_set_offset_limit(qbPtr, offset ?? -1, limit ?? -1);
+  }
+
   for (var distinctByProperty in distinctBy) {
     final propertyId = col.propertyIds[distinctByProperty.property];
     if (propertyId != null) {
@@ -83,10 +86,10 @@ Query<T> buildNativeQuery<T>(
 void _addWhereClause(IsarCollectionImpl col, Pointer qbPtr, WhereClause wc,
     bool? distinct, Sort? sort) {
   if (wc.indexName == null) {
-    if (wc.lower != null && wc.lower!.length != 1 || wc.lower![0] is! int?) {
+    if (wc.lower != null && wc.lower!.length != 1 || wc.lower?[0] is! int?) {
       throw 'Invalid WhereClause';
     }
-    if (wc.upper != null && wc.upper!.length != 1 || wc.upper![0] is! int?) {
+    if (wc.upper != null && wc.upper!.length != 1 || wc.upper?[0] is! int?) {
       throw 'Invalid WhereClause';
     }
     nCall(IC.isar_qb_add_id_where_clause(
@@ -253,9 +256,9 @@ Pointer<NativeType> _buildConditionInternal({
   required IsarCollectionImpl col,
   required ConditionType conditionType,
   required int propertyId,
-  required dynamic val1,
+  required Object? val1,
   required bool include1,
-  required dynamic val2,
+  required Object? val2,
   required bool include2,
   required bool caseSensitive,
 }) {
@@ -286,11 +289,21 @@ Pointer<NativeType> _buildConditionInternal({
       if (val == null) {
         nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId, true));
       } else if (val is int) {
-        nCall(IC.isar_filter_long(col.ptr, filterPtrPtr, val1 ?? nullLong,
-            include1, val2 ?? maxLong, include2, propertyId));
+        nCall(IC.isar_filter_long(
+            col.ptr,
+            filterPtrPtr,
+            val1 as int? ?? nullLong,
+            include1,
+            val2 as int? ?? maxLong,
+            include2,
+            propertyId));
       } else if (val is double) {
-        nCall(IC.isar_filter_double(col.ptr, filterPtrPtr, val1 ?? nullDouble,
-            val2 ?? maxDouble, propertyId));
+        nCall(IC.isar_filter_double(
+            col.ptr,
+            filterPtrPtr,
+            val1 as double? ?? nullDouble,
+            val2 as double? ?? maxDouble,
+            propertyId));
       } else if (val is String) {
         late Pointer<Int8> lowerPtr;
         late Pointer<Int8> upperPtr;
