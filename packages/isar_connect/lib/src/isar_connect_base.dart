@@ -150,20 +150,19 @@ FilterOperation parseFilter(Map<String, dynamic> json) {
       }
 
     case 'FilterGroup':
-      final type = FilterGroupType.values[json['groupType']];
-      if (type == FilterGroupType.and || type == FilterGroupType.or) {
-        final filters = <FilterOperation>[];
-        for (var filterJson in json['filters']) {
-          filters.add(parseFilter(filterJson));
-        }
-        return FilterGroup.andOr(
-          filters: filters,
-          type: FilterGroupType.values[json['groupType']],
-        );
-      } else if(type == FilterGroupType.not) {
-        final filter = parseFilter(json['filter']);
-        return FilterGroup.not(filter);
+      final filters = <FilterOperation>[];
+      for (var filterJson in json['filters']) {
+        filters.add(parseFilter(filterJson));
       }
+      return FilterGroup(
+        filters: filters,
+        type: FilterGroupType.values[json['groupType']],
+      );
+
+    case 'FilterNot':
+      return FilterNot(
+        filter: parseFilter(json['filter']),
+      );
 
     default:
       throw 'Could not deserialize filter';
