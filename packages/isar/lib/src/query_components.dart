@@ -77,6 +77,11 @@ class FilterGroup extends FilterOperation {
   final List<FilterOperation> filters;
   final FilterGroupType type;
 
+  FilterGroup.andOr({
+    required this.filters,
+    required this.type,
+  });
+
   const FilterGroup.and(this.filters) : type = FilterGroupType.and;
 
   const FilterGroup.or(this.filters) : type = FilterGroupType.or;
