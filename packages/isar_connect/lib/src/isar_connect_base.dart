@@ -92,6 +92,7 @@ Future<List<Map<String, dynamic>>> executeQuery(Map<String, String> params) {
 }
 
 StreamSubscription? watchSubscription;
+
 Future<String> watchQuery(Map<String, String> params) async {
   unawaited(watchSubscription?.cancel());
   watchSubscription = null;
@@ -110,8 +111,7 @@ Future<String> watchQuery(Map<String, String> params) async {
 Query getQuery(Map<String, String> params) {
   final instanceName = params['instance'] as String;
   final collectionName = params['collection'] as String;
-  final collection =
-      Isar.getInstance(instanceName)!.getCollection(collectionName);
+  final collection = Isar.getInstance(instanceName)!.getCollection(collectionName);
   final offset = int.tryParse(params['offset'] ?? '');
   final limit = int.tryParse(params['limit'] ?? '');
   final sortProperty = params['sortProperty'];
@@ -119,7 +119,7 @@ Query getQuery(Map<String, String> params) {
   final filterJson = jsonDecode(params['filter']!);
   final filter = parseFilter(filterJson);
   return collection.buildQuery(
-      filter: FilterGroup(filters: [filter], type: FilterGroupType.or),
+      filter: FilterGroup.or([filter]),
       offset: offset,
       limit: limit,
       sortBy: [
@@ -150,20 +150,21 @@ FilterOperation parseFilter(Map<String, dynamic> json) {
       }
 
     case 'FilterGroup':
-      final filters = <FilterOperation>[];
-      for (var filterJson in json['filters']) {
-        filters.add(parseFilter(filterJson));
+      final type = FilterGroupType.values[json['groupType']];
+      if (type == FilterGroupType.not) {
+        final filter = parseFilter(json['filter']!);
+        return FilterGroup.not(filter);
+      } else {
+        final filters = <FilterOperation>[];
+        for (var filterJson in json['filters']) {
+          filters.add(parseFilter(filterJson));
+        }
+
+        if (type == FilterGroupType.and) {
+          return FilterGroup.and(filters);
+        }
+        return FilterGroup.or(filters);
       }
-      return FilterGroup(
-        filters: filters,
-        type: FilterGroupType.values[json['groupType']],
-      );
-
-    case 'FilterNot':
-      return FilterNot(
-        filter: parseFilter(json['filter']),
-      );
-
     default:
       throw 'Could not deserialize filter';
   }
