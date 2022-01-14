@@ -1,3 +1,7 @@
+## 2.0.0-dev.1
+- Fix Isar connect issue (thanks @rizzi37)
+- Imorove Isar Core error messages
+
 ## 2.0.0-dev.0
 
 ### Breaking
