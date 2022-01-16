@@ -3,8 +3,6 @@ import 'package:isar_test/common.dart';
 import 'package:isar_test/mutli_type_model.dart';
 import 'package:test/test.dart';
 
-//import 'package:isar_test/isar.g.dart';
-
 void main() async {
   group('Query property', () {
     late Isar isar;
