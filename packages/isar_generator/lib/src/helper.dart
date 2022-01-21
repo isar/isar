@@ -39,7 +39,8 @@ extension ClassElementX on ClassElement {
           (e) =>
               e.isPublic &&
               !e.isStatic &&
-              !_ignoreChecker.hasAnnotationOfExact(nonSynthetic),
+              !_ignoreChecker.hasAnnotationOfExact(nonSynthetic) &&
+              !_ignoreChecker.hasAnnotationOfExact(this),
         )
         .distinctBy((e) => e.name)
         .toList();
@@ -110,6 +111,7 @@ extension PropertyElementX on PropertyInducingElement {
         indexType = IndexType.values[indexTypeIndex];
       }
       return Index(
+        name: ann.getField('name')!.toStringValue(),
         composite: composite,
         unique: ann.getField('unique')!.toBoolValue()!,
         type: indexType,

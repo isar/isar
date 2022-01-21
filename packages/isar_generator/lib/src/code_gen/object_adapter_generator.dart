@@ -20,9 +20,9 @@ String generateObjectAdapter(ObjectInfo object) {
 
 String generateConverterFields(ObjectInfo object) {
   return object.properties
-      .mapNotNull((it) => it.converter)
-      .toSet()
-      .map((it) => 'static const _$it = $it();')
+      .where((it) => it.converter != null)
+      .distinctBy((it) => it.converter)
+      .map((it) => 'static const ${it.converterName} = ${it.converter}();')
       .join('\n');
 }
 
@@ -45,7 +45,7 @@ String _generatePrepareSerialize(ObjectInfo object) {
       case IsarType.string:
         if (property.nullable) {
           code += '''
-          Uint8List? $accessor;
+          IsarUint8List? $accessor;
           if (value$i != null) {
             $accessor = BinaryWriter.utf8Encoder.convert(value$i);
           }
@@ -60,11 +60,11 @@ String _generatePrepareSerialize(ObjectInfo object) {
         code += 'dynamicSize += (value$i$nOp.length $nLen) * 8;';
         if (property.nullable) {
           code += '''
-          List<Uint8List?>? bytesList$i;
+          List<IsarUint8List?>? bytesList$i;
           if (value$i != null) {
             bytesList$i = [];''';
         } else {
-          code += 'final bytesList$i = <Uint8List$elNOp>[];';
+          code += 'final bytesList$i = <IsarUint8List$elNOp>[];';
         }
         code += 'for (var str in value$i) {';
         if (property.elementNullable) {
@@ -115,24 +115,24 @@ String _generatePrepareSerialize(ObjectInfo object) {
 String _generateSerialize(ObjectInfo object) {
   var code = '''
   @override  
-  int serialize(IsarCollection<${object.dartName}> collection, RawObject rawObj, ${object.dartName} object, List<int> offsets, [int? existingBufferSize]) {
+  int serialize(IsarCollection<${object.dartName}> collection, IsarRawObject rawObj, ${object.dartName} object, List<int> offsets, [int? existingBufferSize]) {
     rawObj.id = object.${object.idProperty.dartName} ${object.idProperty.nullable ? '?? Isar.autoIncrement' : ''};
     ${_generatePrepareSerialize(object)}
     late int bufferSize;
     if (existingBufferSize != null) {
       if (existingBufferSize < size) {
-        malloc.free(rawObj.buffer);
-        rawObj.buffer = malloc(size);
+        isarFree(rawObj.buffer);
+        rawObj.buffer = isarMalloc(size);
         bufferSize = size;
       } else {
         bufferSize = existingBufferSize;
       }
     } else {
-      rawObj.buffer = malloc(size);
+      rawObj.buffer = isarMalloc(size);
       bufferSize = size;
     }
     rawObj.buffer_length = size;
-    final buffer = rawObj.buffer.asTypedList(size);
+    final buffer = bufAsBytes(rawObj.buffer, size);
     final writer = BinaryWriter(buffer, ${object.staticSize});
   ''';
   for (var i = 0; i < object.objectProperties.length; i++) {

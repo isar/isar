@@ -21,7 +21,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
     final object = IsarAnalyzer().analyze(element);
 
     var code = '''
-    // ignore_for_file: non_constant_identifier_names, invalid_use_of_protected_member
+    // ignore_for_file: duplicate_ignore, non_constant_identifier_names, invalid_use_of_protected_member
 
     extension Get${object.dartName}Collection on Isar {
       IsarCollection<${object.dartName}> get ${object.accessor} {

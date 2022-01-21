@@ -136,7 +136,7 @@ class WhereGenerator {
     return '''
     QueryBuilder<$objName, $objName, QAfterWhere> $name() {
       return addWhereClause(
-        WhereClause(
+        const WhereClause(
           indexName: ${indexName == null ? null : "'$indexName'"}
         )
       );
@@ -280,7 +280,7 @@ class WhereGenerator {
 
     return '''
     $mPrefix $name() {
-      return addWhereClause(WhereClause(
+      return addWhereClause(const WhereClause(
         indexName: '$indexName',
         upper: [null],
         includeUpper: true,
@@ -298,7 +298,7 @@ class WhereGenerator {
 
     return '''
     $mPrefix $name() {
-      return addWhereClause(WhereClause(
+      return addWhereClause(const WhereClause(
         indexName: '$indexName',
         lower: [null],
         includeLower: false,
@@ -329,7 +329,7 @@ class WhereGenerator {
     $mPrefix $name($params) {
       return addWhereClause(WhereClause(
         indexName: '$indexName',
-        lower: [$values '\$$lastName'],
+        lower: [$values $lastName],
         includeLower: true,
         upper: [$values '\$$lastName\\u{FFFFF}'],
         includeUpper: true,

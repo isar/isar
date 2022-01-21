@@ -226,14 +226,18 @@ class IsarAnalyzer {
     for (var index in element.indexAnnotations) {
       final indexProperties = <ObjectIndexProperty>[];
 
+      late IndexType defaultType;
+      if (property.isarType == IsarType.string ||
+          property.isarType == IsarType.bytes) {
+        defaultType = IndexType.hash;
+      } else if (property.isarType == IsarType.stringList) {
+        defaultType = IndexType.hashElements;
+      } else {
+        defaultType = IndexType.value;
+      }
       indexProperties.add(ObjectIndexProperty(
         property: property,
-        type: index.type ??
-            (property.isarType == IsarType.string
-                ? IndexType.hash
-                : property.isarType == IsarType.stringList
-                    ? IndexType.hashElements
-                    : IndexType.value),
+        type: index.type ?? defaultType,
         caseSensitive: index.caseSensitive ?? property.isarType.containsString,
       ));
       for (var c in index.composite) {
@@ -247,7 +251,7 @@ class IsarAnalyzer {
           indexProperties.add(ObjectIndexProperty(
             property: compositeProperty,
             type: c.type ??
-                (compositeProperty.isarType == IsarType.string
+                (compositeProperty.isarType.isDynamic
                     ? IndexType.hash
                     : IndexType.value),
             caseSensitive:
@@ -272,7 +276,7 @@ class IsarAnalyzer {
           err('Only the last property of a composite index may be a double value.',
               element);
         }
-        if (property.isarType == IsarType.string) {
+        if (indexProperty.isarType == IsarType.string) {
           if (indexProperty.type != IndexType.hash &&
               i != indexProperties.lastIndex) {
             err('Only the last property of a composite index may be a non-hashed String.',

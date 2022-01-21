@@ -33,7 +33,9 @@ class ObjectInfo with _$ObjectInfo {
       properties.where((p) => !p.isId).toList();
 
   int get staticSize {
-    return properties.sumBy((p) => p.isarType.staticSize).toInt() + 2;
+    final propertiesSize =
+        objectProperties.sumBy((p) => p.isarType.staticSize).toInt();
+    return propertiesSize + 2;
   }
 
   String get adapterName => '_${dartName}Adapter';
@@ -67,9 +69,11 @@ class ObjectProperty with _$ObjectProperty {
   factory ObjectProperty.fromJson(Map<String, dynamic> json) =>
       _$ObjectPropertyFromJson(json);
 
+  String get converterName => '_${converter?.decapitalize()}';
+
   String toIsar(String input, ObjectInfo oi) {
     if (converter != null) {
-      return '${oi.adapterName}._$converter.toIsar($input)';
+      return '${oi.adapterName}.$converterName.toIsar($input)';
     } else {
       return input;
     }
@@ -77,7 +81,7 @@ class ObjectProperty with _$ObjectProperty {
 
   String fromIsar(String input, ObjectInfo oi) {
     if (converter != null) {
-      return '${oi.adapterName}._$converter.fromIsar($input)';
+      return '${oi.adapterName}.$converterName.fromIsar($input)';
     } else {
       return input;
     }
