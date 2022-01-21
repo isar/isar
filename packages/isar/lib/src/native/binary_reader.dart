@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:isar/src/native/isar_core.dart';
+import 'package:meta/meta.dart';
 
+/// @nodoc
+@protected
 class BinaryReader {
   static const utf8Decoder = Utf8Decoder();
 

@@ -4,19 +4,21 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:isar/src/native/isar_collection_impl.dart';
-import 'package:isar/src/native/isar_impl.dart';
-import 'package:isar/src/native/split_words.dart';
 import 'package:meta/meta.dart';
+import 'package:ffi/ffi.dart';
+import 'package:meta/meta_meta.dart';
+
+import 'src/native/isar_collection_impl.dart';
+import 'src/native/isar_impl.dart';
+import 'src/native/split_words.dart';
+import 'src/native/bindings.dart';
 import 'src/native/open.dart';
 import 'src/native/isar_link_impl.dart';
 import 'src/native/isar_type_adapter.dart';
+import 'src/util.dart';
 
-export 'dart:ffi';
-export 'dart:typed_data';
-export 'package:ffi/ffi.dart';
 export 'src/native/isar_type_adapter.dart';
-export 'src/native/bindings.dart' show RawObject;
+
 export 'src/native/binary_reader.dart';
 export 'src/native/binary_writer.dart';
 
@@ -39,4 +41,23 @@ part 'package:isar/src/query_builder_extensions.dart';
 part 'package:isar/src/query_components.dart';
 part 'package:isar/src/query.dart';
 
-const bool kIsWeb = identical(0, 0.0);
+/// @nodoc
+@protected
+typedef IsarRawObject = RawObject;
+
+/// @nodoc
+@protected
+typedef IsarUint8List = Uint8List;
+
+/// @nodoc
+@protected
+Pointer<Uint8> isarMalloc(int count) => malloc(count);
+
+/// @nodoc
+@protected
+void isarFree(Pointer<Uint8> pointer) => malloc.free(pointer);
+
+/// @nodoc
+@protected
+Uint8List bufAsBytes(Pointer<Uint8> pointer, int length) =>
+    pointer.asTypedList(length);

@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:isolate';
 
+import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
 import 'isar_core.dart';

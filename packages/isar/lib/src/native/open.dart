@@ -1,7 +1,9 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 
+import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 import 'package:path/path.dart' as p;
 

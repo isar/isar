@@ -5,7 +5,7 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.14.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -18,12 +18,12 @@ dependencies:
   meta: any
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   build_runner: any
   isar_generator: any
   freezed: any
   test: ^1.20.1
-  flutter_test:
-    sdk: flutter
   flutter_lints: ^1.0.4
 
 dependency_overrides:

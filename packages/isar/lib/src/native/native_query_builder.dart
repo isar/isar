@@ -1,3 +1,6 @@
+import 'dart:ffi';
+
+import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
 import 'isar_collection_impl.dart';

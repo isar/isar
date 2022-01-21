@@ -1,7 +1,8 @@
 part of isar;
 
+/// Specifies how an index is stored in Isar.
 enum IndexType {
-  // Store the value directly in the index
+  /// Stores the value as-is in the index.
   value,
 
   /// Strings or Lists can be hashed to reduce the storage required by the
@@ -10,17 +11,18 @@ enum IndexType {
   /// hashed by default.
   hash,
 
-  // `List<String>` can hash its elements.
+  /// `List<String>` can hash its elements.
   hashElements,
 }
 
-/// Annotate properties to build an index for the annotated property.
+/// Annotate properties to build an index.
+@Target({TargetKind.field, TargetKind.getter, TargetKind.setter})
 class Index {
   /// Name of the index. By default, the names of the properties are
   /// concatenated using "_"
   final String? name;
 
-  ///
+  /// Specify up to two other properties to build a composite index.
   final List<CompositeIndex> composite;
 
   /// A unique index ensures the index does not contain any duplicate values.
@@ -28,12 +30,19 @@ class Index {
   /// duplicate will result in an error.
   final bool unique;
 
+  /// Specifies how an index is stored in Isar.
+  ///
+  /// Defaults to:
+  /// - `IndexType.hash` for `String` and `Uint8List`
+  /// - `IndexType.hashElements` for `List<String>`
+  /// - `IndexType.value` for all other types
   final IndexType? type;
 
-  // String or `List<String>` indexes can be case sensitive (default) or case
-  // insensitive.
+  /// String or `List<String>` indexes can be case sensitive (default) or case
+  /// insensitive.
   final bool? caseSensitive;
 
+  /// Annotate properties to build an index.
   const Index({
     this.name,
     this.composite = const [],
@@ -43,13 +52,18 @@ class Index {
   });
 }
 
+/// Another property that is part of the composite index.
 class CompositeIndex {
+  /// Dart name of the property.
   final String property;
 
+  /// See [Index.type].
   final IndexType? type;
 
+  /// See [Index.caseSensitive].
   final bool? caseSensitive;
 
+  /// Another property that is part of the composite index.
   const CompositeIndex(
     this.property, {
     this.type,

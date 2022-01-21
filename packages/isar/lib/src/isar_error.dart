@@ -1,8 +1,11 @@
 part of isar;
 
-class IsarError extends Error {
+/// An error raised by Isar.
+class IsarError {
+  /// The message
   final String message;
 
+  @protected
   IsarError(this.message);
 
   @override

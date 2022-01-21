@@ -1,5 +1,7 @@
 part of isar;
 
+/// @nodoc
+@protected
 class CollectionSchema<OBJ> {
   static const generatorVersion = 0;
 
@@ -58,6 +60,8 @@ class CollectionSchema<OBJ> {
   }
 }
 
+/// @nodoc
+@protected
 enum NativeIndexType {
   bool,
   int,

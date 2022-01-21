@@ -1,5 +1,7 @@
 import 'dart:collection';
+import 'dart:ffi';
 
+import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
 import 'bindings.dart';

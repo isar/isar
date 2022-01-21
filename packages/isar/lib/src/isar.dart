@@ -8,13 +8,13 @@ typedef IsarCloseCallback = void Function(String);
 
 /// An instance of the Isar Database.
 abstract class Isar {
-  /// Smallest id that can be used
+  /// Smallest valid id.
   static const minId = kIsWeb ? -9007199254740991 : -9223372036854775807;
 
-  /// Largest id that can be used
+  /// Largest valid id.
   static const maxId = kIsWeb ? 9007199254740991 : 9223372036854775807;
 
-  /// Placeholder for an auto-increment id
+  /// Placeholder for an auto-increment id.
   static const autoIncrement = -9223372036854775808;
 
   static final _instances = <String, Isar>{};
@@ -23,7 +23,7 @@ abstract class Isar {
   static String? _schema;
   var _isOpen = true;
 
-  /// Name of the instance
+  /// Name of the instance.
   final String name;
 
   late final Map<String, IsarCollection> _collections;
@@ -86,6 +86,7 @@ abstract class Isar {
   /// Executes a synchronous read-write transaction.
   T writeTxnSync<T>(T Function(Isar isar) callback, {bool silent = false});
 
+  /// @nodoc
   @protected
   void attachCollections(Map<String, IsarCollection> collections) {
     _collections = collections;
@@ -137,6 +138,7 @@ abstract class Isar {
     return Future.value(false);
   }
 
+  /// Returns the schema of this Instance. You should avoid usint the schema directly.
   @protected
   static String? get schema => _schema;
 

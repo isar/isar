@@ -1,5 +1,6 @@
 part of isar;
 
+/// Collections are used to store and receive your objects from Isar.
 abstract class IsarCollection<OBJ> {
   /// The corresponding Isar instance.
   Isar get isar;

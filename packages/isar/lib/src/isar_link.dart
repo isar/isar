@@ -1,5 +1,7 @@
 part of isar;
 
+/// @nodoc
+@protected
 abstract class IsarLinkBase<OBJ> {
   bool get isAttached;
   bool get isChanged;

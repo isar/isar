@@ -3,7 +3,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:isar/src/native/isar_core.dart';
+import 'package:meta/meta.dart';
 
+/// @nodoc
+@protected
 class BinaryWriter {
   static const utf8Encoder = Utf8Encoder();
 

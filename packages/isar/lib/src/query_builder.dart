@@ -1,10 +1,16 @@
 part of isar;
 
+/// @nodoc
+@protected
 typedef FilterQuery<OBJ> = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>
     Function(QueryBuilder<OBJ, OBJ, QFilterCondition> q);
 
 const _nullFilterGroup = FilterGroup.and([]);
 
+/// Query builders are used to create queries in a safe way.
+///
+/// Aquire a `QueryBuilder` instance using `collection.where()` or
+/// `collection.filter()`.
 class QueryBuilder<OBJ, R, S> {
   final IsarCollection<OBJ> _collection;
   final List<WhereClause> _whereClauses;
@@ -19,6 +25,7 @@ class QueryBuilder<OBJ, R, S> {
   final int? _limit;
   final String? _propertyName;
 
+  @protected
   QueryBuilder(this._collection, this._whereDistinct, this._whereSort)
       : _whereClauses = const [],
         _distinctByProperties = const [],
@@ -30,6 +37,8 @@ class QueryBuilder<OBJ, R, S> {
         _limit = null,
         _propertyName = null;
 
+  /// @nodoc
+  @protected
   QueryBuilder._(
     this._collection,
     this._filterOr,
@@ -45,6 +54,8 @@ class QueryBuilder<OBJ, R, S> {
     this._propertyName,
   ]);
 
+  /// @nodoc
+  @protected
   QueryBuilder<OBJ, R, NS> addFilterCondition<NS>(FilterOperation cond) {
     if (_filterNot) {
       cond = FilterGroup.not(cond);
@@ -63,10 +74,14 @@ class QueryBuilder<OBJ, R, S> {
     }
   }
 
+  /// @nodoc
+  @protected
   QueryBuilder<OBJ, R, NS> addWhereClause<NS>(WhereClause where) {
     return copyWith(whereClauses: [..._whereClauses, where]);
   }
 
+  /// @nodoc
+  @protected
   QueryBuilder<OBJ, R, QAfterFilterOperator> andOrInternal(
       FilterGroupType andOr) {
     if (andOr == FilterGroupType.and) {
@@ -87,12 +102,16 @@ class QueryBuilder<OBJ, R, S> {
     return copyWith();
   }
 
+  /// @nodoc
+  @protected
   QueryBuilder<OBJ, R, NS> notInternal<NS>() {
     return copyWith(
       filterNot: !_filterNot,
     );
   }
 
+  /// @nodoc
+  @protected
   QueryBuilder<OBJ, R, QAfterFilterCondition> groupInternal(
       FilterQuery<OBJ> q) {
     final qb = q(QueryBuilder(_collection, _whereDistinct, _whereSort));
@@ -107,6 +126,8 @@ class QueryBuilder<OBJ, R, S> {
     }
   }
 
+  /// @nodoc
+  @protected
   QueryBuilder<OBJ, R, QAfterFilterCondition> linkInternal<E>(
     IsarCollection<E> targetCollection,
     FilterQuery<E> q,
@@ -133,6 +154,8 @@ class QueryBuilder<OBJ, R, S> {
     ));
   }
 
+  /// @nodoc
+  @protected
   QueryBuilder<OBJ, R, NS> addSortByInternal<NS>(
       String propertyName, Sort sort) {
     return copyWith(sortByProperties: [
@@ -141,6 +164,8 @@ class QueryBuilder<OBJ, R, S> {
     ]);
   }
 
+  /// @nodoc
+  @protected
   QueryBuilder<OBJ, R, QDistinct> addDistinctByInternal(String propertyName,
       {bool? caseSensitive}) {
     return copyWith(distinctByProperties: [
@@ -149,11 +174,15 @@ class QueryBuilder<OBJ, R, S> {
     ]);
   }
 
+  /// @nodoc
+  @protected
   QueryBuilder<OBJ, E, QQueryOperations> addPropertyName<E>(
       String propertyName) {
     return copyWith(propertyName: propertyName).cast();
   }
 
+  /// @nodoc
+  @protected
   QueryBuilder<OBJ, R, NS> copyWith<NS>({
     List<WhereClause>? whereClauses,
     FilterGroup? filterOr,
@@ -184,6 +213,8 @@ class QueryBuilder<OBJ, R, S> {
     );
   }
 
+  /// @nodoc
+  @protected
   QueryBuilder<OBJ, NR, NS> cast<NR, NS>() {
     return QueryBuilder._(
       _collection,
@@ -201,6 +232,8 @@ class QueryBuilder<OBJ, R, S> {
     );
   }
 
+  /// @nodoc
+  @protected
   Query<R> buildInternal() {
     final builder = andOrInternal(FilterGroupType.or);
     FilterGroup? filter;
@@ -225,13 +258,19 @@ class QueryBuilder<OBJ, R, S> {
     );
   }
 
+  /// @nodoc
+  @protected
   Isar get isar => _collection.isar;
 
+  /// @nodoc
   @protected
   Sort get whereSortInternal => _whereSort;
 }
 
-// Right after query starts
+/// @nodoc
+///
+/// Right after query starts
+@protected
 class QWhere
     implements
         QWhereClause,
@@ -242,12 +281,19 @@ class QWhere
         QLimit,
         QQueryProperty {}
 
-// No more where conditions are allowed
+/// @nodoc
+///
+/// No more where conditions are allowed
+@protected
 class QAfterWhere
     implements QFilter, QSortBy, QDistinct, QOffset, QLimit, QQueryProperty {}
 
+/// @nodoc
+@protected
 class QWhereClause {}
 
+/// @nodoc
+@protected
 class QAfterWhereClause
     implements
         QWhereOr,
@@ -258,12 +304,20 @@ class QAfterWhereClause
         QLimit,
         QQueryProperty {}
 
+/// @nodoc
+@protected
 class QWhereOr {}
 
+/// @nodoc
+@protected
 class QFilter {}
 
+/// @nodoc
+@protected
 class QFilterCondition {}
 
+/// @nodoc
+@protected
 class QAfterFilterCondition
     implements
         QFilterCondition,
@@ -274,35 +328,51 @@ class QAfterFilterCondition
         QLimit,
         QQueryProperty {}
 
+/// @nodoc
+@protected
 class QFilterOperator {}
 
+/// @nodoc
+@protected
 class QAfterFilterOperator implements QFilterCondition {}
 
+/// @nodoc
+@protected
 class QSortBy {}
 
+/// @nodoc
+@protected
 class QAfterSortBy
     implements QSortThenBy, QDistinct, QOffset, QLimit, QQueryProperty {}
 
+/// @nodoc
+@protected
 class QSortThenBy {}
 
+/// @nodoc
+@protected
 class QDistinct implements QOffset, QLimit, QQueryProperty {}
 
+/// @nodoc
+@protected
 class QOffset {}
 
+/// @nodoc
+@protected
 class QAfterOffset implements QLimit, QQueryProperty {}
 
+/// @nodoc
+@protected
 class QLimit {}
 
+/// @nodoc
+@protected
 class QAfterLimit implements QQueryProperty {}
 
+/// @nodoc
+@protected
 class QQueryProperty implements QQueryOperations {}
 
+/// @nodoc
+@protected
 class QQueryOperations {}
-
-enum AggregationOp {
-  min,
-  max,
-  sum,
-  average,
-  count,
-}
