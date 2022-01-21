@@ -1,8 +1,4 @@
-## 2.0.0-dev.1
-- Fix Isar connect issue (thanks @rizzi37)
-- Imorove Isar Core error messages
-
-## 2.0.0-dev.0
+## 2.0.0
 
 ### Breaking
 - The id for non-final objects is now assigned automatically after `.put()` and `.putSync()`
@@ -10,28 +6,39 @@
 - `List<double>` indexes can no longer be hashed
 - `.greaterThan()`, `.lessThan()` and `.between()` filters and are now excluding for `double` values (`>=` -> `>`)
 - Changed the default index type for lists to `IndexType.value`
-- `IsarLink` and `IsarLinks` will no longer initialized by Isar and must not be `nullable` or `late`.
+- `IsarLink` and `IsarLinks` will no longer be initialized by Isar and must not be `nullable` or `late`.
+- Dart `2.14` or higher is required
 
 ### Enhancements
+- Added API docs for all public methods
 - Added `isar.clear()`, `isar.clearSync()`, `col.clear()` and `col.clearSync()`
 - Added `col.filter()` as shortcut for `col.where().filter()`
 - Added `include` parameter to `.greaterThan()` and `.lessThan()` filters and where clauses
 - Added `includeLower` and `includeUpper` parameters to `.between()` filters and where clauses
 - Added `Isar.autoIncrement` to allow non-nullable auto-incrementing ids
-- `Isar.close()` now returns whether it was successful
+- `Isar.close()` now returns whether the last instance was closed
+- List values in composite indexes are now of type `IndexType.hash` automatically
+- Allowed multiple indexes on the same property
+- Removed exported packages from API docs
 - Improved generated code
+- Imoroved Isar Core error messages
 - Minor performance improvements
 - Automatic XCode configuration
 - Updated analyzer to `3.0.0`
 - More tests
 
 ### Fixed
+- `IsarLink` and `IsarLinks` can now be final
 - Fixed multi-entry index queries returning items multiple times in some cases
 - Fixed `.anyLessThan()` and `.anyGreaterThan()` issues
 - Fixed issues with backlinks
 - Fixed issue where query only returned the first `99999` results
 - Fixed issue with id where clauses
-- `IsarLink` and `IsarLinks` can now be final
+- Fixed default index type for lists and bytes
+- Fixed issue where renaming indexes was not possible
+- Fixed issue where wrong index name was used for `.getByX()` and `.deleteByX()`
+- Fixed issue where composite indexes did not allow non-hashed Strings as last value
+- Fixed issue where `@Ignore()` fields were not ignored
 
 ## 1.0.5
 
