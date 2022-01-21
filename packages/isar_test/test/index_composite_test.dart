@@ -1,34 +1,82 @@
 import 'package:isar/isar.dart';
-import 'package:isar_test/name_model.dart';
+import 'package:isar_test/composite_model.dart';
 import 'package:isar_test/common.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Composite', () {
     late Isar isar;
+    late IsarCollection<CompositeModel> col;
+
+    late CompositeModel obj1;
+    late CompositeModel obj2;
+    late CompositeModel obj3;
+    late CompositeModel obj4;
 
     setUp(() async {
-      isar = await openTempIsar([NameModelSchema]);
+      isar = await openTempIsar([CompositeModelSchema]);
+      col = isar.compositeModels;
+
+      obj1 = CompositeModel()
+        ..intValue = 1
+        ..stringValue = '1'
+        ..stringValue2 = 'a';
+      obj2 = CompositeModel()
+        ..intValue = 1
+        ..stringValue = '1'
+        ..stringValue2 = 'b';
+      obj3 = CompositeModel()
+        ..intValue = 2
+        ..stringValue = '2'
+        ..stringValue2 = 'a';
+      obj4 = CompositeModel()
+        ..intValue = 2
+        ..stringValue = '2'
+        ..stringValue2 = null;
+
+      isar.writeTxn((isar) async {
+        await col.putAll([obj2, obj1, obj4, obj3]);
+      });
     });
 
     tearDown(() async {
       await isar.close();
     });
 
-    test('json', () async {
-      await isar.writeTxn((isar) => isar.nameModels.put(
-            NameModel()
-              ..value = 'test'
-              ..otherValue = 'test2',
-          ));
+    isarTest('.put() duplicate index', () async {
+      final newObj = CompositeModel()
+        ..id = 5
+        ..intValue = 1
+        ..stringValue = 'a';
+      await isar.writeTxn((isar) async {
+        await isar.compositeModels.put(newObj);
+      });
 
-      expect(await isar.nameModels.where().exportJson(), [
-        {
-          'idN': Isar.minId,
-          'valueN': 'test',
-          'otherValueN': 'test2',
-        },
-      ]);
+      qEqualSet(isar.compositeModels.where().findAll(),
+          [obj1, obj2, obj3, obj4, newObj]);
+    });
+
+    isarTest('.put() duplicate unique index', () async {
+      final newObj = CompositeModel()
+        ..id = 5
+        ..stringValue = '1'
+        ..stringValue2 = 'b';
+
+      expect(
+        () => isar.writeTxn((isar) async {
+          await isar.compositeModels.put(newObj);
+        }),
+        throwsIsarError('unique'),
+      );
+
+      await isar.writeTxn((isar) async {
+        await isar.compositeModels.put(newObj, replaceOnConflict: true);
+      });
+
+      qEqualSet(
+        isar.compositeModels.where().findAll(),
+        [obj1, obj3, obj4, newObj],
+      );
     });
   });
 }

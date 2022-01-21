@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:isar/isar.dart';
 import 'package:isar_test/common.dart';
 import 'package:isar_test/mutli_type_model.dart';

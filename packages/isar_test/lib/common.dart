@@ -93,3 +93,17 @@ bool doubleListEquals(List<double?>? l1, List<double?>? l2) {
   }
   return true;
 }
+
+Matcher isIsarError([String? contains]) {
+  return allOf(
+      isA<IsarError>(),
+      predicate(
+        (IsarError e) =>
+            contains == null ||
+            e.toString().toLowerCase().contains(contains.toLowerCase()),
+      ));
+}
+
+Matcher throwsIsarError([String? contains]) {
+  return throwsA(isIsarError(contains));
+}
