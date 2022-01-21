@@ -28,7 +28,7 @@ void main() {
             ]));
       });
 
-      test('min', () async {
+      isarTest('min', () async {
         expect(await col.where().intValueProperty().min(), -5);
         expect(await col.where().intValueNProperty().min(), 10);
 
@@ -53,7 +53,7 @@ void main() {
         );
       });
 
-      test('max', () async {
+      isarTest('max', () async {
         expect(await col.where().intValueProperty().max(), 10);
         expect(await col.where().intValueNProperty().max(), 10);
 
@@ -78,7 +78,7 @@ void main() {
         );
       });
 
-      test('sum', () async {
+      isarTest('sum', () async {
         expect(await col.where().intValueProperty().sum(), 5);
         expect(await col.where().intValueNProperty().sum(), 10);
 
@@ -103,7 +103,7 @@ void main() {
         );
       });
 
-      test('average', () async {
+      isarTest('average', () async {
         expect(await col.where().intValueProperty().average(), 5 / 3);
         expect(await col.where().intValueNProperty().average(), 10);
 
@@ -129,7 +129,7 @@ void main() {
         );
       });
 
-      test('count', () async {
+      isarTest('count', () async {
         expect(await col.where().intValueProperty().count(), 3);
         expect(await col.where().intValueNProperty().count(), 3);
 
@@ -166,7 +166,7 @@ void main() {
             ]));
       });
 
-      test('min', () async {
+      isarTest('min', () async {
         expect(await col.where().floatValueProperty().min(), -5.0);
         expect(await col.where().floatValueNProperty().min(), 10.0);
 
@@ -191,7 +191,7 @@ void main() {
         );
       });
 
-      test('max', () async {
+      isarTest('max', () async {
         expect(await col.where().floatValueProperty().max(), 10.0);
         expect(await col.where().floatValueNProperty().max(), 10.0);
 
@@ -216,7 +216,7 @@ void main() {
         );
       });
 
-      test('sum', () async {
+      isarTest('sum', () async {
         expect(await col.where().floatValueProperty().sum(), 5.0);
         expect(await col.where().floatValueNProperty().sum(), 10.0);
 
@@ -241,7 +241,7 @@ void main() {
         );
       });
 
-      test('average', () async {
+      isarTest('average', () async {
         expect(await col.where().floatValueProperty().average(), 5 / 3);
         expect(await col.where().floatValueNProperty().average(), 10.0);
 
@@ -267,7 +267,7 @@ void main() {
         );
       });
 
-      test('count', () async {
+      isarTest('count', () async {
         expect(await col.where().floatValueProperty().count(), 3);
         expect(await col.where().floatValueNProperty().count(), 3);
 
@@ -304,7 +304,7 @@ void main() {
             ]));
       });
 
-      test('min', () async {
+      isarTest('min', () async {
         expect(await col.where().longValueProperty().min(), -5);
         expect(await col.where().longValueNProperty().min(), 10);
 
@@ -329,7 +329,7 @@ void main() {
         );
       });
 
-      test('max', () async {
+      isarTest('max', () async {
         expect(await col.where().longValueProperty().max(), 10);
         expect(await col.where().longValueNProperty().max(), 10);
 
@@ -354,7 +354,7 @@ void main() {
         );
       });
 
-      test('sum', () async {
+      isarTest('sum', () async {
         expect(await col.where().longValueProperty().sum(), 5);
         expect(await col.where().longValueNProperty().sum(), 10);
 
@@ -379,7 +379,7 @@ void main() {
         );
       });
 
-      test('average', () async {
+      isarTest('average', () async {
         expect(await col.where().longValueProperty().average(), 5 / 3);
         expect(await col.where().longValueNProperty().average(), 10);
 
@@ -405,7 +405,7 @@ void main() {
         );
       });
 
-      test('count', () async {
+      isarTest('count', () async {
         expect(await col.where().longValueProperty().count(), 3);
         expect(await col.where().longValueNProperty().count(), 3);
 
@@ -442,7 +442,7 @@ void main() {
             ]));
       });
 
-      test('min', () async {
+      isarTest('min', () async {
         expect(await col.where().doubleValueProperty().min(), -5.0);
         expect(await col.where().doubleValueNProperty().min(), 10.0);
 
@@ -467,7 +467,7 @@ void main() {
         );
       });
 
-      test('max', () async {
+      isarTest('max', () async {
         expect(await col.where().doubleValueProperty().max(), 10.0);
         expect(await col.where().doubleValueNProperty().max(), 10.0);
 
@@ -492,7 +492,7 @@ void main() {
         );
       });
 
-      test('sum', () async {
+      isarTest('sum', () async {
         expect(await col.where().doubleValueProperty().sum(), 5.0);
         expect(await col.where().doubleValueNProperty().sum(), 10.0);
 
@@ -517,7 +517,7 @@ void main() {
         );
       });
 
-      test('average', () async {
+      isarTest('average', () async {
         expect(await col.where().doubleValueProperty().average(), 5 / 3);
         expect(await col.where().doubleValueNProperty().average(), 10.0);
 
@@ -543,7 +543,7 @@ void main() {
         );
       });
 
-      test('count', () async {
+      isarTest('count', () async {
         expect(await col.where().doubleValueProperty().count(), 3);
         expect(await col.where().doubleValueNProperty().count(), 3);
 
@@ -583,7 +583,7 @@ void main() {
             ]));
       });
 
-      test('min', () async {
+      isarTest('min', () async {
         expect(await col.where().dateTimeValueProperty().min(), date(-5));
         expect(await col.where().dateTimeValueNProperty().min(), date(10));
 
@@ -608,7 +608,7 @@ void main() {
         );
       });
 
-      test('max', () async {
+      isarTest('max', () async {
         expect(await col.where().dateTimeValueProperty().max(), date(10));
         expect(await col.where().dateTimeValueNProperty().max(), date(10));
 
@@ -633,7 +633,7 @@ void main() {
         );
       });
 
-      test('count', () async {
+      isarTest('count', () async {
         expect(await col.where().dateTimeValueProperty().count(), 3);
         expect(await col.where().dateTimeValueNProperty().count(), 3);
 

@@ -8,7 +8,7 @@ void main() {
       registerBinaries();
     });
 
-    test('split words', () {
+    isarTest('split words', () {
       expect(Isar.splitWords(""), []);
       expect(Isar.splitWords("single"), ["single"]);
       expect(

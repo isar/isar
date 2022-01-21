@@ -28,7 +28,7 @@ void main() {
       await isar.close();
     });
 
-    test('.sortBy()', () async {
+    isarTest('.sortBy()', () async {
       await qEqual(
         users.where().sortByName().nameProperty().findAll(),
         ['a', 'a', 'b', 'b', 'c', 'c'],
@@ -50,7 +50,7 @@ void main() {
       );
     });
 
-    test('.sortByDesc()', () async {
+    isarTest('.sortByDesc()', () async {
       await qEqual(
         users.where().sortByNameDesc().nameProperty().findAll(),
         ['c', 'c', 'b', 'b', 'a', 'a'],
@@ -67,7 +67,7 @@ void main() {
       );
     });
 
-    test('.sortBy().thenBy()', () async {
+    isarTest('.sortBy().thenBy()', () async {
       await qEqual(
         users.where().sortByName().thenByAge().findAll(),
         [
