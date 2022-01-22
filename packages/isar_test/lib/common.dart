@@ -35,7 +35,7 @@ var allTestsSuccessful = true;
 
 @isTest
 void isarTest(String name, dynamic Function() body) {
-  isarTest(name, () async {
+  test(name, () async {
     try {
       await body();
     } catch (e) {

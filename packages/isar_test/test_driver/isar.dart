@@ -28,7 +28,7 @@ void executeTests(Completer<bool> completer) {
       testTempPath = dir.path;
     });
     tearDownAll(() {
-      completer.complete(allTestsSuccessful);
+      completer.complete(testCount != 0 && allTestsSuccessful);
     });
 
     tests.run();
