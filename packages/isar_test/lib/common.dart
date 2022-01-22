@@ -32,12 +32,14 @@ Future qEqualSync<T>(List<T> actual, List<T> target) async {
 }
 
 var allTestsSuccessful = true;
+var testCount = 0;
 
 @isTest
 void isarTest(String name, dynamic Function() body) {
   test(name, () async {
     try {
       await body();
+      testCount++;
     } catch (e) {
       allTestsSuccessful = false;
       rethrow;
