@@ -1,3 +1,9 @@
+## 2.1.0
+- Fixed issue where imported json required existing ids
+- Improved performance for queries
+- Added check for outdated generated files
+- Added `Isar.openSync()`
+
 ## 2.0.0
 
 ### Breaking

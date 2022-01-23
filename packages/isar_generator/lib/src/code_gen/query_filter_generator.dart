@@ -83,7 +83,7 @@ class FilterGenerator {
     final optional = caseSensitiveProperty(p);
     return '''
     ${mPrefix(p)}EqualTo(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
-      return addFilterCondition(FilterCondition(
+      return addFilterConditionInternal(FilterCondition(
         type: ConditionType.eq,
         property: '${p.dartName}',
         value: ${toIsar(p, 'value')},
@@ -97,7 +97,7 @@ class FilterGenerator {
     final optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}GreaterThan(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
-      return addFilterCondition(FilterCondition(
+      return addFilterConditionInternal(FilterCondition(
         type: ConditionType.gt,
         include: ${!p.isarType.containsFloat ? 'include' : 'false'},
         property: '${p.dartName}',
@@ -112,7 +112,7 @@ class FilterGenerator {
     final optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}LessThan(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
-      return addFilterCondition(FilterCondition(
+      return addFilterConditionInternal(FilterCondition(
         type: ConditionType.lt,
         include: ${!p.isarType.containsFloat ? 'include' : 'false'},
         property: '${p.dartName}',
@@ -129,7 +129,7 @@ class FilterGenerator {
     final optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}Between(${vType(p)} lower, ${vType(p)} upper ${optional.isNotBlank ? ', {$optional}' : ''}) {
-      return addFilterCondition(FilterCondition.between(
+      return addFilterConditionInternal(FilterCondition.between(
         property: '${p.dartName}',
         lower: ${toIsar(p, 'lower')},
         includeLower: ${!p.isarType.containsFloat ? 'includeLower' : 'false'},
@@ -143,7 +143,7 @@ class FilterGenerator {
   String generateIsNull(ObjectProperty p) {
     var code = '''
     ${mPrefix(p, false)}IsNull() {
-      return addFilterCondition(FilterCondition(
+      return addFilterConditionInternal(FilterCondition(
         type: ConditionType.isNull,
         property: '${p.dartName}',
         value: null,
@@ -152,7 +152,7 @@ class FilterGenerator {
     if (p.isarType.isList && p.isarType != IsarType.bytes) {
       code += '''
       ${mPrefix(p)}IsNull() {
-        return addFilterCondition(FilterCondition(
+        return addFilterConditionInternal(FilterCondition(
           type: ConditionType.eq,
           property: '${p.dartName}',
           value: null,
@@ -165,7 +165,7 @@ class FilterGenerator {
   String generateStringStartsWith(ObjectProperty p) {
     return '''
     ${mPrefix(p)}StartsWith(${vType(p, false)} value, {bool caseSensitive = true,}) {
-      return addFilterCondition(FilterCondition(
+      return addFilterConditionInternal(FilterCondition(
         type: ConditionType.startsWith,
         property: '${p.dartName}',
         value: ${toIsar(p, 'value')},
@@ -177,7 +177,7 @@ class FilterGenerator {
   String generateStringEndsWith(ObjectProperty p) {
     return '''
     ${mPrefix(p)}EndsWith(${vType(p, false)} value, {bool caseSensitive = true,}) {
-      return addFilterCondition(FilterCondition(
+      return addFilterConditionInternal(FilterCondition(
         type: ConditionType.endsWith,
         property: '${p.dartName}',
         value: ${toIsar(p, 'value')},
@@ -189,7 +189,7 @@ class FilterGenerator {
   String generateStringContains(ObjectProperty p) {
     return '''
     ${mPrefix(p)}Contains(${vType(p, false)} value, {bool caseSensitive = true}) {
-      return addFilterCondition(FilterCondition(
+      return addFilterConditionInternal(FilterCondition(
         type: ConditionType.contains,
         property: '${p.dartName}',
         value: ${toIsar(p, 'value')},
@@ -201,7 +201,7 @@ class FilterGenerator {
   String generateStringMatches(ObjectProperty p) {
     return '''
     ${mPrefix(p)}Matches(String pattern, {bool caseSensitive = true}) {
-      return addFilterCondition(FilterCondition(
+      return addFilterConditionInternal(FilterCondition(
         type: ConditionType.matches,
         property: '${p.dartName}',
         value: pattern,

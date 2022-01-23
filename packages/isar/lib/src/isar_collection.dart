@@ -80,10 +80,10 @@ abstract class IsarCollection<OBJ> {
   @protected
   int deleteAllByIndexSync(String indexName, List<List<Object?>> values);
 
-  /// Remove all data in this collection.
+  /// Remove all data in this collection and reset the auto increment value.
   Future<void> clear();
 
-  /// Remove all data in this collection.
+  /// Remove all data in this collection and reset the auto increment value.
   void clearSync();
 
   /// Import a list of json objects.
@@ -113,7 +113,7 @@ abstract class IsarCollection<OBJ> {
     List<WhereClause> whereClauses = const [],
     bool whereDistinct = false,
     Sort whereSort = Sort.asc,
-    FilterGroup? filter,
+    FilterOperation? filter,
     List<SortProperty> sortBy = const [],
     List<DistinctProperty> distinctBy = const [],
     int? offset,

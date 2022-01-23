@@ -102,15 +102,11 @@ class IsarLinkImpl<OBJ> extends IsarLinkBaseImpl<OBJ> implements IsarLink<OBJ> {
   void loadSync() {
     final containingId = requireAttached();
     col.isar.getTxnSync(true, (txnPtr) {
-      final rawObjPtr = malloc<RawObject>();
-      try {
-        nCall(IC.isar_link_get_first(
-            col.ptr, txnPtr, linkIndex, backlink, containingId, rawObjPtr));
-        _value = targetCol.deserializeObjectOrNull(rawObjPtr.ref);
-        isChanged = false;
-      } finally {
-        malloc.free(rawObjPtr);
-      }
+      final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
+      nCall(IC.isar_link_get_first(
+          col.ptr, txnPtr, linkIndex, backlink, containingId, rawObjPtr));
+      _value = targetCol.deserializeObjectOrNull(rawObjPtr.ref);
+      isChanged = false;
     });
   }
 
@@ -129,15 +125,10 @@ class IsarLinkImpl<OBJ> extends IsarLinkBaseImpl<OBJ> implements IsarLink<OBJ> {
           targetOid = id;
         }
       }
-      final rawObjPtr = malloc<RawObject>();
       IC.isar_link_replace(
           col.ptr, txnPtr, linkIndex, backlink, containingId, targetOid);
-      try {
-        await stream.first;
-        isChanged = false;
-      } finally {
-        malloc.free(rawObjPtr);
-      }
+      await stream.first;
+      isChanged = false;
     });
   }
 
@@ -157,14 +148,9 @@ class IsarLinkImpl<OBJ> extends IsarLinkBaseImpl<OBJ> implements IsarLink<OBJ> {
           targetOid = id;
         }
       }
-      final rawObjPtr = malloc<RawObject>();
-      try {
-        nCall(IC.isar_link_replace(
-            col.ptr, txnPtr, linkIndex, backlink, containingId, targetOid));
-        isChanged = false;
-      } finally {
-        malloc.free(rawObjPtr);
-      }
+      nCall(IC.isar_link_replace(
+          col.ptr, txnPtr, linkIndex, backlink, containingId, targetOid));
+      isChanged = false;
     });
   }
 }
@@ -229,13 +215,13 @@ class IsarLinksImpl<OBJ> extends IsarLinkBaseImpl<OBJ>
       _removedObjects.clear();
     }
     final objects = col.isar.getTxnSync(false, (txnPtr) {
-      final resultsPtr = malloc<RawObjectSet>();
+      final resultsPtr = IsarCoreUtils.syncRawObjSetPtr;
       try {
         nCall(IC.isar_link_get_all(
             col.ptr, txnPtr, linkIndex, backlink, containingId, resultsPtr));
         return targetCol.deserializeObjects(resultsPtr.ref);
       } finally {
-        malloc.free(resultsPtr);
+        IC.isar_free_raw_obj_list(resultsPtr);
       }
     });
     applyLoaded(objects);

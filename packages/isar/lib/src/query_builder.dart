@@ -56,18 +56,19 @@ class QueryBuilder<OBJ, R, S> {
 
   /// @nodoc
   @protected
-  QueryBuilder<OBJ, R, NS> addFilterCondition<NS>(FilterOperation cond) {
+  QueryBuilder<OBJ, R, NS> addFilterConditionInternal<NS>(
+      FilterOperation cond) {
     if (_filterNot) {
       cond = FilterGroup.not(cond);
     }
 
     if (_filterAnd != null) {
-      return copyWith(
+      return copyWithInternal(
         filterAnd: FilterGroup.and([..._filterAnd!.filters, cond]),
         filterNot: false,
       );
     } else {
-      return copyWith(
+      return copyWithInternal(
         filterOr: FilterGroup.or([..._filterOr.filters, cond]),
         filterNot: false,
       );
@@ -76,8 +77,8 @@ class QueryBuilder<OBJ, R, S> {
 
   /// @nodoc
   @protected
-  QueryBuilder<OBJ, R, NS> addWhereClause<NS>(WhereClause where) {
-    return copyWith(whereClauses: [..._whereClauses, where]);
+  QueryBuilder<OBJ, R, NS> addWhereClauseInternal<NS>(WhereClause where) {
+    return copyWithInternal(whereClauses: [..._whereClauses, where]);
   }
 
   /// @nodoc
@@ -86,7 +87,7 @@ class QueryBuilder<OBJ, R, S> {
       FilterGroupType andOr) {
     if (andOr == FilterGroupType.and) {
       if (_filterAnd == null) {
-        return copyWith(
+        return copyWithInternal(
           filterOr: FilterGroup.or(
             _filterOr.filters.sublist(0, _filterOr.filters.length - 1),
           ),
@@ -94,18 +95,18 @@ class QueryBuilder<OBJ, R, S> {
         );
       }
     } else if (_filterAnd != null) {
-      return copyWith(
+      return copyWithInternal(
         filterOr: FilterGroup.or([..._filterOr.filters, _filterAnd!]),
         filterAnd: null,
       );
     }
-    return copyWith();
+    return copyWithInternal();
   }
 
   /// @nodoc
   @protected
   QueryBuilder<OBJ, R, NS> notInternal<NS>() {
-    return copyWith(
+    return copyWithInternal(
       filterNot: !_filterNot,
     );
   }
@@ -118,11 +119,11 @@ class QueryBuilder<OBJ, R, S> {
     final qbFinished = qb.andOrInternal(FilterGroupType.or);
 
     if (qbFinished._filterOr.filters.isEmpty) {
-      return copyWith();
+      return copyWithInternal();
     } else if (qbFinished._filterOr.filters.length == 1) {
-      return addFilterCondition(qbFinished._filterOr.filters.first);
+      return addFilterConditionInternal(qbFinished._filterOr.filters.first);
     } else {
-      return addFilterCondition(qbFinished._filterOr);
+      return addFilterConditionInternal(qbFinished._filterOr);
     }
   }
 
@@ -138,7 +139,7 @@ class QueryBuilder<OBJ, R, S> {
 
     final conditions = qbFinished._filterOr.filters;
     if (conditions.isEmpty) {
-      return copyWith();
+      return copyWithInternal();
     }
 
     FilterOperation filter;
@@ -147,7 +148,7 @@ class QueryBuilder<OBJ, R, S> {
     } else {
       filter = qbFinished._filterOr;
     }
-    return addFilterCondition(LinkFilter(
+    return addFilterConditionInternal(LinkFilter(
       targetCollection: targetCollection,
       filter: filter,
       linkName: linkName,
@@ -158,7 +159,7 @@ class QueryBuilder<OBJ, R, S> {
   @protected
   QueryBuilder<OBJ, R, NS> addSortByInternal<NS>(
       String propertyName, Sort sort) {
-    return copyWith(sortByProperties: [
+    return copyWithInternal(sortByProperties: [
       ..._sortByProperties,
       SortProperty(property: propertyName, sort: sort),
     ]);
@@ -168,7 +169,7 @@ class QueryBuilder<OBJ, R, S> {
   @protected
   QueryBuilder<OBJ, R, QDistinct> addDistinctByInternal(String propertyName,
       {bool? caseSensitive}) {
-    return copyWith(distinctByProperties: [
+    return copyWithInternal(distinctByProperties: [
       ..._distinctByProperties,
       DistinctProperty(property: propertyName, caseSensitive: caseSensitive),
     ]);
@@ -176,14 +177,14 @@ class QueryBuilder<OBJ, R, S> {
 
   /// @nodoc
   @protected
-  QueryBuilder<OBJ, E, QQueryOperations> addPropertyName<E>(
+  QueryBuilder<OBJ, E, QQueryOperations> addPropertyNameInternal<E>(
       String propertyName) {
-    return copyWith(propertyName: propertyName).cast();
+    return copyWithInternal(propertyName: propertyName).castInternal();
   }
 
   /// @nodoc
   @protected
-  QueryBuilder<OBJ, R, NS> copyWith<NS>({
+  QueryBuilder<OBJ, R, NS> copyWithInternal<NS>({
     List<WhereClause>? whereClauses,
     FilterGroup? filterOr,
     FilterGroup? filterAnd = _nullFilterGroup,
@@ -215,7 +216,7 @@ class QueryBuilder<OBJ, R, S> {
 
   /// @nodoc
   @protected
-  QueryBuilder<OBJ, NR, NS> cast<NR, NS>() {
+  QueryBuilder<OBJ, NR, NS> castInternal<NR, NS>() {
     return QueryBuilder._(
       _collection,
       _filterOr,
@@ -236,14 +237,17 @@ class QueryBuilder<OBJ, R, S> {
   @protected
   Query<R> buildInternal() {
     final builder = andOrInternal(FilterGroupType.or);
-    FilterGroup? filter;
-    if (builder._filterOr.filters.length == 1) {
-      final group = builder._filterOr.filters.first;
-      if (group is FilterGroup) {
-        filter = group;
+    FilterOperation? filter = builder._filterOr;
+    while (filter is FilterGroup) {
+      if (filter.filters.isEmpty) {
+        filter = null;
+      } else if (filter.filters.length == 1 &&
+          filter.type != FilterGroupType.not) {
+        filter = filter.filters.first;
+      } else {
+        break;
       }
     }
-    filter ??= builder._filterOr;
 
     return _collection.buildQuery(
       whereDistinct: _whereDistinct,

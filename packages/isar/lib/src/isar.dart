@@ -40,13 +40,10 @@ abstract class Isar {
     }
   }
 
-  /// Open a new Isar instance.
-  static Future<Isar> open({
-    required List<CollectionSchema> schemas,
-    required String directory,
-    String name = 'isar',
-    bool relaxedDurability = true,
-  }) {
+  static void _checkOpen(String name, List<CollectionSchema> schemas) {
+    if (name.isEmpty || name.startsWith('_')) {
+      throw IsarError('Instance names must not be empty or start with "_".');
+    }
     if (schemas.isEmpty) {
       throw IsarError('At least one collection needs to be opened.');
     }
@@ -58,10 +55,41 @@ abstract class Isar {
         }
       }
     }
+    schemas.sort((a, b) => a.name.compareTo(b.name));
+  }
+
+  /// Open a new Isar instance.
+  static Future<Isar> open({
+    required List<CollectionSchema> schemas,
+    required String directory,
+    String name = 'isar',
+    bool relaxedDurability = true,
+  }) {
+    _checkOpen(name, schemas);
     if (kIsWeb) {
       throw UnimplementedError();
     } else {
       return openIsarNative(
+        schemas: schemas,
+        directory: directory,
+        name: name,
+        relaxedDurability: relaxedDurability,
+      );
+    }
+  }
+
+  /// Open a new Isar instance.
+  static Isar openSync({
+    required List<CollectionSchema> schemas,
+    required String directory,
+    String name = 'isar',
+    bool relaxedDurability = true,
+  }) {
+    _checkOpen(name, schemas);
+    if (kIsWeb) {
+      throw UnimplementedError();
+    } else {
+      return openIsarNativeSync(
         schemas: schemas,
         directory: directory,
         name: name,
@@ -104,14 +132,14 @@ abstract class Isar {
     }
   }
 
-  /// Remove all data in this instance.
+  /// Remove all data in this instance and reset the auto increment values.
   Future<void> clear() async {
     for (var col in _collections.values) {
       await col.clear();
     }
   }
 
-  /// Remove all data in this instance.
+  /// Remove all data in this instance and reset the auto increment values.
   void clearSync() {
     for (var col in _collections.values) {
       col.clearSync();

@@ -85,13 +85,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @pragma('vm:prefer-inline')
   List<OBJ?> deserializeObjectsOrNull(RawObjectSet objectSet) {
-    final objects = <OBJ?>[];
+    final objects = List<OBJ?>.filled(objectSet.length, null);
     for (var i = 0; i < objectSet.length; i++) {
       final rawObj = objectSet.objects.elementAt(i).ref;
       if (!rawObj.buffer.isNull) {
-        objects.add(deserializeObject(rawObj));
-      } else {
-        objects.add(null);
+        objects[i] = deserializeObject(rawObj);
       }
     }
     return objects;
@@ -168,43 +166,35 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   List<OBJ?> getAllSync(List<int> ids) {
     return isar.getTxnSync(false, (txnPtr) {
-      final rawObjPtr = malloc<RawObject>();
+      final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
       final rawObj = rawObjPtr.ref;
 
-      try {
-        final objects = <OBJ?>[];
-        for (var id in ids) {
-          rawObj.id = id;
-          nCall(IC.isar_get(ptr, txnPtr, rawObjPtr));
-          objects.add(deserializeObjectOrNull(rawObj));
-        }
-
-        return objects;
-      } finally {
-        malloc.free(rawObjPtr);
+      final objects = List<OBJ?>.filled(ids.length, null);
+      for (var i = 0; i < ids.length; i++) {
+        rawObj.id = ids[i];
+        nCall(IC.isar_get(ptr, txnPtr, rawObjPtr));
+        objects[i] = deserializeObjectOrNull(rawObj);
       }
+
+      return objects;
     });
   }
 
   @override
   List<OBJ?> getAllByIndexSync(String indexName, List values) {
     return isar.getTxnSync(false, (txnPtr) {
-      final rawObjPtr = malloc<RawObject>();
+      final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
       final rawObj = rawObjPtr.ref;
       final indexId = indexIdOrErr(indexName);
 
-      try {
-        final objects = <OBJ?>[];
-        for (var value in values) {
-          final keyPtr = buildIndexKey(this, indexName, value);
-          nCall(IC.isar_get_by_index(ptr, txnPtr, indexId, keyPtr, rawObjPtr));
-          objects.add(deserializeObjectOrNull(rawObj));
-        }
-
-        return objects;
-      } finally {
-        malloc.free(rawObjPtr);
+      final objects = List<OBJ?>.filled(values.length, null);
+      for (var value in values) {
+        final keyPtr = buildIndexKey(this, indexName, value);
+        nCall(IC.isar_get_by_index(ptr, txnPtr, indexId, keyPtr, rawObjPtr));
+        objects.add(deserializeObjectOrNull(rawObj));
       }
+
+      return objects;
     });
   }
 
@@ -226,12 +216,12 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       try {
         await stream.first;
         final rawObjectSet = rawObjSetPtr.ref;
-        final ids = <int>[];
+        final ids = List<int>.filled(objects.length, 0);
         final linkFutures = <Future>[];
         for (var i = 0; i < objects.length; i++) {
           final rawObjPtr = rawObjectSet.objects.elementAt(i);
           final id = rawObjPtr.ref.id;
-          ids.add(id);
+          ids[i] = id;
 
           final object = objects[i];
           setId?.call(object, id);
@@ -262,14 +252,15 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return isar.getTxnSync(true, (txnPtr) {
       final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
       final rawObj = rawObjPtr.ref;
-      var bufferSize = IsarCoreUtils.syncRawObjBufferSize;
+      int? bufferSize;
       try {
-        final ids = <int>[];
-        for (var object in objects) {
+        final ids = List<int>.filled(objects.length, 0);
+        for (var i = 0; i < objects.length; i++) {
+          final object = objects[i];
           bufferSize =
               adapter.serialize(this, rawObj, object, offsets, bufferSize);
           nCall(IC.isar_put(ptr, txnPtr, rawObjPtr, replaceOnConflict));
-          ids.add(rawObj.id);
+          ids[i] = rawObj.id;
 
           setId?.call(object, rawObj.id);
 
@@ -437,7 +428,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     List<WhereClause> whereClauses = const [],
     bool whereDistinct = false,
     Sort whereSort = Sort.asc,
-    FilterGroup? filter,
+    FilterOperation? filter,
     List<SortProperty> sortBy = const [],
     List<DistinctProperty> distinctBy = const [],
     int? offset,
