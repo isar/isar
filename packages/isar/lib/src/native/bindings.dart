@@ -817,19 +817,19 @@ class IsarCoreBindings {
       _isar_key_add_long_list_hash_ptr
           .asFunction<_dart_isar_key_add_long_list_hash>();
 
-  void isar_create_instance(
+  int isar_create_instance(
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
+    ffi.Pointer<ffi.Int8> name,
     ffi.Pointer<ffi.Int8> path,
     bool relaxed_durability,
     ffi.Pointer<ffi.Int8> schema_json,
-    int port,
   ) {
     return _isar_create_instance(
       isar,
+      name,
       path,
       relaxed_durability ? 1 : 0,
       schema_json,
-      port,
     );
   }
 
@@ -838,6 +838,31 @@ class IsarCoreBindings {
           'isar_create_instance');
   late final _dart_isar_create_instance _isar_create_instance =
       _isar_create_instance_ptr.asFunction<_dart_isar_create_instance>();
+
+  void isar_create_instance_async(
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
+    ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Int8> path,
+    bool relaxed_durability,
+    ffi.Pointer<ffi.Int8> schema_json,
+    int port,
+  ) {
+    return _isar_create_instance_async(
+      isar,
+      name,
+      path,
+      relaxed_durability ? 1 : 0,
+      schema_json,
+      port,
+    );
+  }
+
+  late final _isar_create_instance_async_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_create_instance_async>>(
+          'isar_create_instance_async');
+  late final _dart_isar_create_instance_async _isar_create_instance_async =
+      _isar_create_instance_async_ptr
+          .asFunction<_dart_isar_create_instance_async>();
 
   void isar_get_instance(
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
@@ -2044,16 +2069,34 @@ typedef _dart_isar_key_add_long_list_hash = void Function(
   int length,
 );
 
-typedef _c_isar_create_instance = ffi.Void Function(
+typedef _c_isar_create_instance = ffi.Int64 Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
+  ffi.Pointer<ffi.Int8> name,
+  ffi.Pointer<ffi.Int8> path,
+  ffi.Uint8 relaxed_durability,
+  ffi.Pointer<ffi.Int8> schema_json,
+);
+
+typedef _dart_isar_create_instance = int Function(
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
+  ffi.Pointer<ffi.Int8> name,
+  ffi.Pointer<ffi.Int8> path,
+  int relaxed_durability,
+  ffi.Pointer<ffi.Int8> schema_json,
+);
+
+typedef _c_isar_create_instance_async = ffi.Void Function(
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
+  ffi.Pointer<ffi.Int8> name,
   ffi.Pointer<ffi.Int8> path,
   ffi.Uint8 relaxed_durability,
   ffi.Pointer<ffi.Int8> schema_json,
   ffi.Int64 port,
 );
 
-typedef _dart_isar_create_instance = void Function(
+typedef _dart_isar_create_instance_async = void Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
+  ffi.Pointer<ffi.Int8> name,
   ffi.Pointer<ffi.Int8> path,
   int relaxed_durability,
   ffi.Pointer<ffi.Int8> schema_json,
