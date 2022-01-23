@@ -181,17 +181,17 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  List<OBJ?> getAllByIndexSync(String indexName, List values) {
+  List<OBJ?> getAllByIndexSync(String indexName, List<List> values) {
     return isar.getTxnSync(false, (txnPtr) {
       final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
       final rawObj = rawObjPtr.ref;
       final indexId = indexIdOrErr(indexName);
 
       final objects = List<OBJ?>.filled(values.length, null);
-      for (var value in values) {
-        final keyPtr = buildIndexKey(this, indexName, value);
+      for (var i = 0; i < values.length; i++) {
+        final keyPtr = buildIndexKey(this, indexName, values[i]);
         nCall(IC.isar_get_by_index(ptr, txnPtr, indexId, keyPtr, rawObjPtr));
-        objects.add(deserializeObjectOrNull(rawObj));
+        objects[i] = deserializeObjectOrNull(rawObj);
       }
 
       return objects;
