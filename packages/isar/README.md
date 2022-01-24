@@ -34,7 +34,7 @@
 > 2. Database that will make your life easier.
 
 
-### Features
+## Features
 
 - 💙 **Made for Flutter**. Easy to use, no config, no boilerplate
 - 🚀 **Highly scalable** The sky is the limit (pun intended)
@@ -42,7 +42,7 @@
 - ⏱ **Asynchronous**. Parallel query operations & multi-isolate support by default
 - 🦄 **Open source**. Everything is open source and free forever!
 
-Isar can do much more and we are just getting started.
+Isar can do much more (and we are just getting started)
 - 🕵️ **Full-text search**. Make searching fast and fun
 - 📱 **Multiplatform**. iOS, Android, Desktop and the web (soon™)
 - 🧪 **ACID semantics**. Rely on consistency
@@ -51,6 +51,10 @@ Isar can do much more and we are just getting started.
 
 
 If you want to say thank you, star us on GitHub and like us on pub.dev 🙌💙
+
+## Quickstart
+
+Holy smokes you're here! Let's get started...
 
 ### 1. Add to pubspec.yaml
 
@@ -67,16 +71,15 @@ dev_dependencies:
 
 Replace `$latest` with the latest Isar version.
 
-### 2. Define a Collection
+### 2. Annotate a Collection
 ```dart
 @Collection()
 class Post {
-  int? id; // auto increment id
+  int id = Isar.autoIncrement;
 
   late String title;
 
-  @Index(type: IndexType.value) // Search index
-  List<String> get titleWords => Isar.splitWords(title);
+  late DateTime date;
 }
 ```
 
@@ -91,6 +94,14 @@ final isar = await Isar.open(
 );
 ```
 
+### 4. Query the database
+```dart
+final posts = await isar.posts.filter()
+  .titleContains('awesome', caseSensitive: false)
+  .sortByDateDesc()
+  .limit(10)
+  .findAll();
+```
 
 ## Isar Inspector
 
@@ -119,7 +130,7 @@ await isar.writeTxn((isar) {
 
 ## Queries
 
-Isar has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()` and `or()` groups and sort the results.
+Isar has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()` and `or()` groups, query links and sort the results.
 
 ```dart
 final usersWithPrefix = isar.users
