@@ -1,6 +1,0 @@
-include: package:lints/recommended.yaml
-
-analyzer:
-  exclude:
-    - "**/*.g.dart"
-    - "**/*.freezed.dart"

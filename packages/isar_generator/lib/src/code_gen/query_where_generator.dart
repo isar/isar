@@ -135,7 +135,7 @@ class WhereGenerator {
     if (!existing.add(name)) return '';
     return '''
     QueryBuilder<$objName, $objName, QAfterWhere> $name() {
-      return addWhereClause(
+      return addWhereClauseInternal(
         const WhereClause(
           indexName: ${indexName == null ? null : "'$indexName'"}
         )
@@ -155,7 +155,7 @@ class WhereGenerator {
     final params = joinToParams(properties);
     return '''
     $mPrefix $name($params) {
-      return addWhereClause(WhereClause(
+      return addWhereClauseInternal(WhereClause(
         indexName: ${indexName == null ? null : "'$indexName'"},
         lower: [$values],
         includeLower: true,
@@ -176,21 +176,21 @@ class WhereGenerator {
     return '''
     $mPrefix $name($params) {
       if (whereSortInternal == Sort.asc) {
-        return addWhereClause(WhereClause(
+        return addWhereClauseInternal(WhereClause(
           indexName: ${indexName == null ? null : "'$indexName'"},
           upper: [$values],
           includeUpper: false,
-        )).addWhereClause(WhereClause(
+        )).addWhereClauseInternal(WhereClause(
           indexName: ${indexName == null ? null : "'$indexName'"},
           lower: [$values],
           includeLower: false,
         ));
       } else {
-        return addWhereClause(WhereClause(
+        return addWhereClauseInternal(WhereClause(
           indexName: ${indexName == null ? null : "'$indexName'"},
           lower: [$values],
           includeLower: false,
-        )).addWhereClause(WhereClause(
+        )).addWhereClauseInternal(WhereClause(
           indexName: ${indexName == null ? null : "'$indexName'"},
           upper: [$values],
           includeUpper: false,
@@ -209,7 +209,7 @@ class WhereGenerator {
         !properties.containsFloat ? ', {bool include = false,}' : '';
     return '''
     $mPrefix $name(${joinToParams(properties)} $include) {
-      return addWhereClause(WhereClause(
+      return addWhereClauseInternal(WhereClause(
         indexName: ${indexName == null ? null : "'$indexName'"},
         lower: [${joinToValues(properties)}],
         includeLower: ${!properties.containsFloat ? 'include' : 'false'},
@@ -227,7 +227,7 @@ class WhereGenerator {
         !properties.containsFloat ? ', {bool include = false,}' : '';
     return '''
     $mPrefix $name(${joinToParams(properties)} $include) {
-      return addWhereClause(WhereClause(
+      return addWhereClauseInternal(WhereClause(
         indexName: ${indexName == null ? null : "'$indexName'"},
         upper: [${joinToValues(properties)}],
         includeUpper: ${!properties.containsFloat ? 'include' : 'false'},
@@ -262,7 +262,7 @@ class WhereGenerator {
         : '';
     return '''
     $mPrefix $name($params $include) {
-      return addWhereClause(WhereClause(
+      return addWhereClauseInternal(WhereClause(
         indexName: ${indexName == null ? null : "'$indexName'"},
         lower: [$values $lowerName],
         includeLower: ${!properties.containsFloat ? 'includeLower' : 'false'},
@@ -280,7 +280,7 @@ class WhereGenerator {
 
     return '''
     $mPrefix $name() {
-      return addWhereClause(const WhereClause(
+      return addWhereClauseInternal(const WhereClause(
         indexName: '$indexName',
         upper: [null],
         includeUpper: true,
@@ -298,7 +298,7 @@ class WhereGenerator {
 
     return '''
     $mPrefix $name() {
-      return addWhereClause(const WhereClause(
+      return addWhereClauseInternal(const WhereClause(
         indexName: '$indexName',
         lower: [null],
         includeLower: false,
@@ -327,7 +327,7 @@ class WhereGenerator {
 
     return '''
     $mPrefix $name($params) {
-      return addWhereClause(WhereClause(
+      return addWhereClauseInternal(WhereClause(
         indexName: '$indexName',
         lower: [$values $lastName],
         includeLower: true,

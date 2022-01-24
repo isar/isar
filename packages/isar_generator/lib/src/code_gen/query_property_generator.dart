@@ -6,7 +6,7 @@ String generatePropertyQuery(ObjectInfo oi) {
   for (var property in oi.properties) {
     code += '''
       QueryBuilder<${oi.dartName}, ${property.dartType}, QQueryOperations>${property.dartName}Property() {
-        return addPropertyName('${property.dartName}');
+        return addPropertyNameInternal('${property.dartName}');
       }''';
   }
   return '$code}';

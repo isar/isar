@@ -8,12 +8,9 @@ import 'package:isar/isar.dart';
 
 import 'bindings.dart';
 
-const nullBool = 0;
 const falseBool = 1;
 const trueBool = 2;
 
-const minBool = nullBool;
-const maxBool = trueBool;
 const minInt = -2147483648;
 const maxInt = 2147483647;
 const minLong = -9223372036854775808;
@@ -23,8 +20,8 @@ const maxFloat = double.infinity;
 const minDouble = double.nan;
 const maxDouble = double.infinity;
 final minDate = DateTime.fromMicrosecondsSinceEpoch(minLong, isUtc: true);
-final maxDate = DateTime.fromMicrosecondsSinceEpoch(maxLong, isUtc: true);
 
+const nullBool = 0;
 const nullInt = minInt;
 const nullLong = minLong;
 const nullFloat = minFloat;
@@ -35,7 +32,7 @@ class IsarCoreUtils {
   static final nullPtr = Pointer.fromAddress(0);
   static final syncTxnPtr = malloc<Pointer>();
   static final syncRawObjPtr = malloc<RawObject>();
-  static int? syncRawObjBufferSize;
+  static final syncRawObjSetPtr = malloc<RawObjectSet>();
 }
 
 // ignore: non_constant_identifier_names
@@ -43,25 +40,25 @@ IsarCoreBindings? _IC;
 // ignore: non_constant_identifier_names
 IsarCoreBindings get IC => _IC!;
 
-void initializeIsarCore({Map<String, String> dylibs = const {}}) {
+void initializeIsarCore({Map<String, String> libraries = const {}}) {
   if (_IC != null) {
     return;
   }
-  late String dylib;
+  late String library;
   if (Platform.isAndroid) {
-    dylib = dylibs['android'] ?? 'libisar.so';
+    library = libraries['android'] ?? 'libisar.so';
   } else if (Platform.isMacOS) {
-    dylib = dylibs['macos'] ?? 'libisar.dylib';
+    library = libraries['macos'] ?? 'libisar.dylib';
   } else if (Platform.isWindows) {
-    dylib = dylibs['windows'] ?? 'isar.dll';
+    library = libraries['windows'] ?? 'isar.dll';
   } else if (Platform.isLinux) {
-    dylib = dylibs['linux'] ?? 'libisar.so';
+    library = libraries['linux'] ?? 'libisar.so';
   }
   try {
     if (Platform.isIOS) {
       _IC = IsarCoreBindings(DynamicLibrary.process());
     } else {
-      _IC ??= IsarCoreBindings(DynamicLibrary.open(dylib));
+      _IC ??= IsarCoreBindings(DynamicLibrary.open(library));
     }
   } catch (e) {
     print(e);

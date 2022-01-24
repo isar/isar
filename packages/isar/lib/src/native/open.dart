@@ -10,45 +10,30 @@ import 'package:path/path.dart' as p;
 import 'isar_core.dart';
 import 'isar_impl.dart';
 
-Future<Isar> openIsarNative({
-  required List<CollectionSchema> schemas,
-  required String directory,
-  String name = 'isar',
-  bool relaxedDurability = true,
-}) async {
-  assert(name.isNotEmpty);
+final _isarPtrPtr = malloc<Pointer>();
+
+Isar? _openExisting(
+    String name, String schemaStr, List<CollectionSchema> schemas) {
   final existingInstance = Isar.getInstance(name);
   if (existingInstance != null) {
     return existingInstance;
   }
 
-  final path = p.join(directory, name);
-  await Directory(path).create(recursive: true);
   initializeIsarCore();
   IC.isar_connect_dart_api(NativeApi.postCObject);
 
-  final schema = '[' + schemas.map((e) => e.schema).join(',') + ']';
+  final namePtr = name.toNativeUtf8();
+  IC.isar_get_instance(_isarPtrPtr, namePtr.cast());
+  malloc.free(namePtr);
 
-  final isarPtrPtr = malloc<Pointer>();
-  final pathPtr = path.toNativeUtf8();
-  IC.isar_get_instance(isarPtrPtr, pathPtr.cast());
-  if (isarPtrPtr.value.address == 0) {
-    final schemaPtr = schema.toNativeUtf8();
-    final receivePort = ReceivePort();
-    final nativePort = receivePort.sendPort.nativePort;
-    final stream = wrapIsarPort(receivePort);
-    IC.isar_create_instance(isarPtrPtr, pathPtr.cast(), relaxedDurability,
-        schemaPtr.cast(), nativePort);
-    await stream.first;
-    malloc.free(schemaPtr);
+  if (_isarPtrPtr.value.address != 0) {
+    final isar = IsarImpl(name, schemaStr, _isarPtrPtr.value);
+    _initializeInstance(isar, schemas);
+    return isar;
   }
-  malloc.free(pathPtr);
+}
 
-  final isarPtr = isarPtrPtr.value;
-  malloc.free(isarPtrPtr);
-
-  final isar = IsarImpl(name, schema, isarPtr);
-
+void _initializeInstance(IsarImpl isar, List<CollectionSchema> schemas) {
   final maxProperties = schemas
       .map((e) => e.propertyIds.length)
       .reduce((value, element) => max(value, element));
@@ -72,5 +57,70 @@ Future<Isar> openIsarNative({
 
   // ignore: invalid_use_of_protected_member
   isar.attachCollections(cols);
+}
+
+Future<Isar> openIsarNative({
+  required List<CollectionSchema> schemas,
+  required String directory,
+  String name = 'isar',
+  bool relaxedDurability = true,
+}) async {
+  final schemaStr = '[' + schemas.map((e) => e.schema).join(',') + ']';
+  final existingInstance = _openExisting(name, schemaStr, schemas);
+  if (existingInstance != null) {
+    return existingInstance;
+  }
+
+  final path = p.join(directory, name);
+  await Directory(path).create(recursive: true);
+
+  final namePtr = name.toNativeUtf8();
+  final dirPtr = directory.toNativeUtf8();
+  final schemaStrPtr = schemaStr.toNativeUtf8();
+
+  final receivePort = ReceivePort();
+  final nativePort = receivePort.sendPort.nativePort;
+  final stream = wrapIsarPort(receivePort);
+  IC.isar_create_instance_async(_isarPtrPtr, namePtr.cast(), dirPtr.cast(),
+      relaxedDurability, schemaStrPtr.cast(), nativePort);
+  await stream.first;
+
+  malloc.free(namePtr);
+  malloc.free(dirPtr);
+  malloc.free(schemaStrPtr);
+
+  final isar = IsarImpl(name, schemaStr, _isarPtrPtr.value);
+  _initializeInstance(isar, schemas);
+  return isar;
+}
+
+Isar openIsarNativeSync({
+  required List<CollectionSchema> schemas,
+  required String directory,
+  String name = 'isar',
+  bool relaxedDurability = true,
+}) {
+  final schemaStr = '[' + schemas.map((e) => e.schema).join(',') + ']';
+  final existingInstance = _openExisting(name, schemaStr, schemas);
+  if (existingInstance != null) {
+    return existingInstance;
+  }
+
+  final path = p.join(directory, name);
+  Directory(path).createSync(recursive: true);
+
+  final namePtr = name.toNativeUtf8();
+  final dirPtr = directory.toNativeUtf8();
+  final schemaStrPtr = schemaStr.toNativeUtf8();
+
+  nCall(IC.isar_create_instance(_isarPtrPtr, namePtr.cast(), dirPtr.cast(),
+      relaxedDurability, schemaStrPtr.cast()));
+
+  malloc.free(namePtr);
+  malloc.free(dirPtr);
+  malloc.free(schemaStrPtr);
+
+  final isar = IsarImpl(name, schemaStr, _isarPtrPtr.value);
+  _initializeInstance(isar, schemas);
   return isar;
 }

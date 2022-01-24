@@ -4,7 +4,7 @@ part of isar;
 extension QueryWhereOr<OBJ, R> on QueryBuilder<OBJ, R, QWhereOr> {
   /// Union of two where clauses.
   QueryBuilder<OBJ, R, QWhereClause> or() {
-    return copyWith();
+    return copyWithInternal();
   }
 }
 
@@ -12,7 +12,7 @@ extension QueryWhereOr<OBJ, R> on QueryBuilder<OBJ, R, QWhereOr> {
 extension QueryFilter<OBJ, R> on QueryBuilder<OBJ, R, QFilter> {
   /// Start using filter conditions.
   QueryBuilder<OBJ, R, QFilterCondition> filter() {
-    return copyWith();
+    return copyWithInternal();
   }
 }
 
@@ -50,7 +50,7 @@ extension QueryFilterNoGroups<OBJ, R>
 extension QueryOffset<OBJ, R> on QueryBuilder<OBJ, R, QOffset> {
   /// Offset the query results by a static number.
   QueryBuilder<OBJ, R, QAfterOffset> offset(int offset) {
-    return copyWith(offset: offset);
+    return copyWithInternal(offset: offset);
   }
 }
 
@@ -58,7 +58,7 @@ extension QueryOffset<OBJ, R> on QueryBuilder<OBJ, R, QOffset> {
 extension QueryLimit<OBJ, R> on QueryBuilder<OBJ, R, QLimit> {
   /// Limit the maximum number of query results.
   QueryBuilder<OBJ, R, QAfterLimit> limit(int limit) {
-    return copyWith(limit: limit);
+    return copyWithInternal(limit: limit);
   }
 }
 
@@ -80,7 +80,7 @@ extension QueryModifier<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
     if (enabled) {
       return option(this);
     } else {
-      return cast();
+      return castInternal();
     }
   }
 
@@ -89,9 +89,9 @@ extension QueryModifier<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
       Iterable<E> items, QueryRepeatModifier<OBJ, S, RS, E> modifier) {
     QueryBuilder<OBJ, OBJ, RS>? q;
     for (var e in items) {
-      q = modifier((q ?? this).cast(), e);
+      q = modifier((q ?? this).castInternal(), e);
     }
-    return q ?? cast();
+    return q ?? castInternal();
   }
 }
 

@@ -34,16 +34,27 @@
 > 2. Database that will make your life easier.
 
 
-### Features
+## Features
 
 - 💙 **Made for Flutter**. Easy to use, no config, no boilerplate
-- 🚀 **Highly scalable** from hundreds to hundreds of thousands of records
-- 🍭 **Feature rich**. Composite & multi indexes, query modifiers, JSON support and more
-- 🔎 **Full-text search**. Make searching fast and fun
+- 🚀 **Highly scalable** The sky is the limit (pun intended)
+- 🍭 **Feature rich**. Composite & multi-entry indexes, query modifiers, JSON support etc.
+- ⏱ **Asynchronous**. Parallel query operations & multi-isolate support by default
+- 🦄 **Open source**. Everything is open source and free forever!
+
+Isar can do much more (and we are just getting started)
+- 🕵️ **Full-text search**. Make searching fast and fun
 - 📱 **Multiplatform**. iOS, Android, Desktop and the web (soon™)
 - 🧪 **ACID semantics**. Rely on consistency
-- ⏱ **Asynchronous**. Parallel query operations & multi-isolate support
 - 💃 **Static typing**. Compile-time checked and autocompleted queries
+- ✨ **Beautiful documentation**. Readable, easy to understand and ever improving
+
+
+If you want to say thank you, star us on GitHub and like us on pub.dev 🙌💙
+
+## Quickstart
+
+Holy smokes you're here! Let's get started...
 
 ### 1. Add to pubspec.yaml
 
@@ -51,7 +62,6 @@
 dependencies:
   isar: $latest
   isar_flutter_libs: $latest # contains the binaries
-  isar_connect: $latest # if you want to use the Isar Inspector
 
 dev_dependencies:
   isar_generator: $latest
@@ -60,30 +70,36 @@ dev_dependencies:
 
 Replace `$latest` with the latest Isar version.
 
-### 2. Define a Collection
+### 2. Annotate a Collection
 ```dart
 @Collection()
 class Post {
-  int? id; // auto increment id
+  int id = Isar.autoIncrement;
 
   late String title;
 
-  @Index(type: IndexType.value) // Search index
-  List<String> get titleWords => Isar.splitWords(title);
+  late DateTime date;
 }
 ```
 
 ### 3. Open an instance
 ```dart
-initializeIsarConnect(); // if you want to use the Isar Inspector
-
 final dir = await getApplicationSupportDirectory(); // path_provider package
 final isar = await Isar.open(
   schemas: [PostSchema],
   path: dir.path,
+  inspector: true,
 );
 ```
 
+### 4. Query the database
+```dart
+final posts = await isar.posts.filter()
+  .titleContains('awesome', caseSensitive: false)
+  .sortByDateDesc()
+  .limit(10)
+  .findAll();
+```
 
 ## Isar Inspector
 
@@ -112,7 +128,7 @@ await isar.writeTxn((isar) {
 
 ## Queries
 
-Isar has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()` and `or()` groups and sort the results.
+Isar has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()` and `or()` groups, query links and sort the results.
 
 ```dart
 final usersWithPrefix = isar.users

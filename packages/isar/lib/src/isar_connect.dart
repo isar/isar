@@ -4,12 +4,12 @@ import 'dart:developer';
 
 import 'package:isar/isar.dart';
 
-const handlers = {
-  'getVersion': getVersion,
-  'getSchema': getSchema,
-  'listInstances': listInstances,
-  'executeQuery': executeQuery,
-  'watchQuery': watchQuery,
+const _handlers = {
+  'getVersion': _getVersion,
+  'getSchema': _getSchema,
+  'listInstances': _listInstances,
+  'executeQuery': _executeQuery,
+  'watchQuery': _watchQuery,
 };
 
 var _initialized = false;
@@ -33,7 +33,7 @@ void _connectInternal() {
     postEvent('isar.instancesChanged', {});
   });
 
-  for (var handler in handlers.entries) {
+  for (var handler in _handlers.entries) {
     registerExtension('ext.isar.${handler.key}', (method, parameters) async {
       try {
         final result = await handler.value(parameters);
@@ -73,51 +73,52 @@ void _connectInternal() {
   });
 }
 
-Future<dynamic> getVersion(Map<String, String> _) async {
+Future<dynamic> _getVersion(Map<String, String> _) async {
   return 1;
 }
 
-Future<dynamic> getSchema(Map<String, String> _) async {
+Future<dynamic> _getSchema(Map<String, String> _) async {
   // ignore: invalid_use_of_protected_member
   return jsonDecode(Isar.schema!);
 }
 
-Future<dynamic> listInstances(Map<String, String> _) async {
+Future<dynamic> _listInstances(Map<String, String> _) async {
   return Isar.instanceNames;
 }
 
-Future<List<Map<String, dynamic>>> executeQuery(Map<String, String> params) {
-  final query = getQuery(params);
+Future<List<Map<String, dynamic>>> _executeQuery(Map<String, String> params) {
+  final query = _getQuery(params);
   return query.exportJson();
 }
 
-StreamSubscription? watchSubscription;
+StreamSubscription? _watchSubscription;
 
-Future<String> watchQuery(Map<String, String> params) async {
-  unawaited(watchSubscription?.cancel());
-  watchSubscription = null;
+Future<String> _watchQuery(Map<String, String> params) async {
+  unawaited(_watchSubscription?.cancel());
+  _watchSubscription = null;
   if (params['filter'] == null) return 'ok';
 
-  final query = getQuery(params);
+  final query = _getQuery(params);
   final stream = query.watchLazy();
 
-  watchSubscription = stream.listen((event) {
+  _watchSubscription = stream.listen((event) {
     postEvent('isar.queryChanged', {});
   });
 
   return 'ok';
 }
 
-Query getQuery(Map<String, String> params) {
+Query _getQuery(Map<String, String> params) {
   final instanceName = params['instance'] as String;
   final collectionName = params['collection'] as String;
-  final collection = Isar.getInstance(instanceName)!.getCollection(collectionName);
+  final collection =
+      Isar.getInstance(instanceName)!.getCollection(collectionName);
   final offset = int.tryParse(params['offset'] ?? '');
   final limit = int.tryParse(params['limit'] ?? '');
   final sortProperty = params['sortProperty'];
   final sort = Sort.values[int.parse(params['sort'] ?? '0')];
   final filterJson = jsonDecode(params['filter']!);
-  final filter = parseFilter(filterJson);
+  final filter = _parseFilter(filterJson);
   return collection.buildQuery(
       filter: FilterGroup.or([filter]),
       offset: offset,
@@ -128,7 +129,7 @@ Query getQuery(Map<String, String> params) {
       ]);
 }
 
-FilterOperation parseFilter(Map<String, dynamic> json) {
+FilterOperation _parseFilter(Map<String, dynamic> json) {
   final type = json['type'];
   switch (type) {
     case 'FilterCondition':
@@ -152,12 +153,12 @@ FilterOperation parseFilter(Map<String, dynamic> json) {
     case 'FilterGroup':
       final type = FilterGroupType.values[json['groupType']];
       if (type == FilterGroupType.not) {
-        final filter = parseFilter(json['filter']!);
+        final filter = _parseFilter(json['filter']!);
         return FilterGroup.not(filter);
       } else {
         final filters = <FilterOperation>[];
         for (var filterJson in json['filters']) {
-          filters.add(parseFilter(filterJson));
+          filters.add(_parseFilter(filterJson));
         }
 
         if (type == FilterGroupType.and) {

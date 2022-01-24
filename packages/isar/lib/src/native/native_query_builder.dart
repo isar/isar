@@ -16,7 +16,7 @@ Query<T> buildNativeQuery<T>(
   List<WhereClause> whereClauses,
   bool? whereDistinct,
   Sort? whereSort,
-  FilterGroup? filter,
+  FilterOperation? filter,
   List<SortProperty> sortBy,
   List<DistinctProperty> distinctBy,
   int? offset,
@@ -293,20 +293,22 @@ Pointer<NativeType> _buildConditionInternal({
         nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId, true));
       } else if (val is int) {
         nCall(IC.isar_filter_long(
-            col.ptr,
-            filterPtrPtr,
-            val1 as int? ?? nullLong,
-            include1,
-            val2 as int? ?? maxLong,
-            include2,
-            propertyId));
+          col.ptr,
+          filterPtrPtr,
+          val1 as int? ?? nullLong,
+          include1,
+          val2 as int? ?? maxLong,
+          include2,
+          propertyId,
+        ));
       } else if (val is double) {
         nCall(IC.isar_filter_double(
-            col.ptr,
-            filterPtrPtr,
-            val1 as double? ?? nullDouble,
-            val2 as double? ?? maxDouble,
-            propertyId));
+          col.ptr,
+          filterPtrPtr,
+          val1 as double? ?? nullDouble,
+          val2 as double? ?? maxDouble,
+          propertyId,
+        ));
       } else if (val is String) {
         late Pointer<Int8> lowerPtr;
         late Pointer<Int8> upperPtr;

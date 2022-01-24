@@ -3,7 +3,7 @@ part of isar;
 /// @nodoc
 @protected
 class CollectionSchema<OBJ> {
-  static const generatorVersion = 0;
+  static const generatorVersion = 1;
 
   final String name;
   final String schema;
@@ -38,25 +38,30 @@ class CollectionSchema<OBJ> {
   }) : assert(generatorVersion == version,
             'Incompatible generated code. Please rerun code generation using the latest generator.');
 
-  IsarCollection<OBJ> toNativeCollection(
-      {required IsarImpl isar,
-      required Pointer<NativeType> ptr,
-      required List<int> offsets}) {
-    return IsarCollectionImpl(
-      isar: isar,
-      adapter: adapter,
-      ptr: ptr,
-      idName: idName,
-      offsets: offsets,
-      propertyIds: propertyIds,
-      indexIds: indexIds,
-      indexTypes: indexTypes,
-      linkIds: linkIds,
-      backlinkIds: backlinkIds,
-      getLinks: getLinks,
-      getId: getId,
-      setId: setId,
-    );
+  IsarCollection<OBJ> toNativeCollection({
+    required IsarImpl isar,
+    required Pointer<NativeType> ptr,
+    required List<int> offsets,
+  }) {
+    if (kIsWeb) {
+      throw UnimplementedError();
+    } else {
+      return IsarCollectionImpl(
+        isar: isar,
+        adapter: adapter,
+        ptr: ptr,
+        idName: idName,
+        offsets: offsets,
+        propertyIds: propertyIds,
+        indexIds: indexIds,
+        indexTypes: indexTypes,
+        linkIds: linkIds,
+        backlinkIds: backlinkIds,
+        getLinks: getLinks,
+        getId: getId,
+        setId: setId,
+      );
+    }
   }
 }
 

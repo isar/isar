@@ -1,1 +1,0 @@
-See [Isar Changelog](https://pub.dev/packages/isar/changelog)
