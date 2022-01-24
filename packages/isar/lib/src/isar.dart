@@ -64,7 +64,11 @@ abstract class Isar {
     required String directory,
     String name = 'isar',
     bool relaxedDurability = true,
+    bool inspector = false,
   }) {
+    if (inspector) {
+      initializeIsarConnect();
+    }
     _checkOpen(name, schemas);
     if (kIsWeb) {
       throw UnimplementedError();
@@ -84,7 +88,11 @@ abstract class Isar {
     required String directory,
     String name = 'isar',
     bool relaxedDurability = true,
+    bool inspector = false,
   }) {
+    if (inspector) {
+      initializeIsarConnect();
+    }
     _checkOpen(name, schemas);
     if (kIsWeb) {
       throw UnimplementedError();

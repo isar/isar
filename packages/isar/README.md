@@ -62,7 +62,6 @@ Holy smokes you're here! Let's get started...
 dependencies:
   isar: $latest
   isar_flutter_libs: $latest # contains the binaries
-  isar_connect: $latest # if you want to use the Isar Inspector
 
 dev_dependencies:
   isar_generator: $latest
@@ -85,12 +84,11 @@ class Post {
 
 ### 3. Open an instance
 ```dart
-initializeIsarConnect(); // if you want to use the Isar Inspector
-
 final dir = await getApplicationSupportDirectory(); // path_provider package
 final isar = await Isar.open(
   schemas: [PostSchema],
   path: dir.path,
+  inspector: true,
 );
 ```
 

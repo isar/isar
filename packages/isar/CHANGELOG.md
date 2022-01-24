@@ -3,6 +3,7 @@
 - Improved performance for queries
 - Added check for outdated generated files
 - Added `Isar.openSync()`
+- `isar_connect` is now integrated into `isar`
 
 ## 2.0.0
 
