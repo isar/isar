@@ -37,13 +37,20 @@
 ### Features
 
 - 💙 **Made for Flutter**. Easy to use, no config, no boilerplate
-- 🚀 **Highly scalable** from hundreds to hundreds of thousands of records
-- 🍭 **Feature rich**. Composite & multi indexes, query modifiers, JSON support and more
-- 🔎 **Full-text search**. Make searching fast and fun
+- 🚀 **Highly scalable** The sky is the limit (pun intended)
+- 🍭 **Feature rich**. Composite & multi-entry indexes, query modifiers, JSON support etc.
+- ⏱ **Asynchronous**. Parallel query operations & multi-isolate support by default
+- 🦄 **Open source**. Everything is open source and free forever!
+
+Isar can do much more and we are just getting started.
+- 🕵️ **Full-text search**. Make searching fast and fun
 - 📱 **Multiplatform**. iOS, Android, Desktop and the web (soon™)
 - 🧪 **ACID semantics**. Rely on consistency
-- ⏱ **Asynchronous**. Parallel query operations & multi-isolate support
 - 💃 **Static typing**. Compile-time checked and autocompleted queries
+- ✨ **Beautiful documentation**. Readable, easy to understand and ever improving
+
+
+If you want to say thank you, star us on GitHub and like us on pub.dev 🙌💙
 
 ### 1. Add to pubspec.yaml
 
