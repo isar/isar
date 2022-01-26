@@ -1,15 +1,18 @@
+import 'dart:ffi';
+
 import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
 import 'bindings.dart';
+
+typedef AdapterAlloc = Pointer<Uint8> Function(int size);
 
 /// @nodoc
 @protected
 abstract class IsarTypeAdapter<T> {
   const IsarTypeAdapter();
 
-  int serialize(IsarCollection<T> collection, RawObject rawObj, T object,
-      List<int> offsets,
-      [int? existingBufferSize]);
+  void serialize(IsarCollection<T> collection, RawObject rawObj, T object,
+      List<int> offsets, AdapterAlloc alloc);
 
   T deserialize(IsarCollection<T> collection, int id, BinaryReader reader,
       List<int> offsets);

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:ffi';
 import 'dart:isolate';
 
@@ -6,17 +7,17 @@ import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
 import 'isar_core.dart';
+import 'bindings.dart';
 
 const _zoneTxn = #zoneTxn;
-const _zoneTxnWrite = #zoneTxnWrite;
-const _zoneTxnStream = #zoneTxnStream;
 
 class IsarImpl extends Isar {
   final Pointer ptr;
 
   final List<Future> _activeAsyncTxns = [];
-  Pointer? _currentTxnSync;
-  bool _currentTxnSyncWrite = false;
+
+  final _syncTxnPtrPtr = malloc<Pointer>();
+  SyncTxn? _currentTxnSync;
 
   IsarImpl(String name, String schema, this.ptr) : super(name, schema);
 
@@ -47,37 +48,32 @@ class IsarImpl extends Isar {
     IC.isar_txn_begin(
         ptr, txnPtrPtr, false, write, silent, port.sendPort.nativePort);
 
-    Pointer<NativeType> txnPtr;
+    Txn txn;
     try {
       await portStream.first;
-      txnPtr = txnPtrPtr.value;
+      txn = Txn._(txnPtrPtr.value, write, portStream);
     } finally {
       malloc.free(txnPtrPtr);
     }
 
-    final zone = Zone.current.fork(zoneValues: {
-      _zoneTxn: txnPtr,
-      _zoneTxnWrite: write,
-      _zoneTxnStream: portStream,
-    });
+    final zone = Zone.current.fork(
+      zoneValues: {_zoneTxn: txn},
+    );
 
     T result;
     try {
       result = await zone.run(() => callback(this));
+      IC.isar_txn_finish(txn.ptr, true);
+      await txn.wait();
     } catch (e) {
-      IC.isar_txn_finish(txnPtr, false);
+      IC.isar_txn_finish(txn.ptr, false);
+      rethrow;
+    } finally {
+      txn.free();
       port.close();
       completer.complete();
       _activeAsyncTxns.remove(completer.future);
-      rethrow;
     }
-
-    IC.isar_txn_finish(txnPtr, true);
-    await portStream.first;
-
-    port.close();
-    completer.complete();
-    _activeAsyncTxns.remove(completer.future);
 
     return result;
   }
@@ -93,17 +89,16 @@ class IsarImpl extends Isar {
     return _txn(true, silent, callback);
   }
 
-  Future<T> getTxn<T>(bool write,
-      Future<T> Function(Pointer txn, Stream<void> stream) callback) {
-    final currentTxn = Zone.current[_zoneTxn];
+  Future<T> getTxn<T>(bool write, Future<T> Function(Txn txn) callback) {
+    Txn? currentTxn = Zone.current[_zoneTxn];
     if (currentTxn != null) {
-      if (write && !Zone.current[_zoneTxnWrite]) {
+      if (write && !currentTxn.write) {
         throw 'Operation cannot be performed within a read transaction.';
       }
-      return callback(currentTxn, Zone.current[_zoneTxnStream]);
+      return callback(currentTxn);
     } else if (!write) {
       return _txn(false, false, (isar) {
-        return callback(Zone.current[_zoneTxn], Zone.current[_zoneTxnStream]);
+        return callback(Zone.current[_zoneTxn]);
       });
     } else {
       throw 'Write operations require an explicit transaction.';
@@ -114,23 +109,21 @@ class IsarImpl extends Isar {
     requireOpen();
     requireNotInTxn();
 
-    var txnPtr = IsarCoreUtils.syncTxnPtr;
-    nCall(IC.isar_txn_begin(ptr, txnPtr, true, write, silent, 0));
-    var txn = txnPtr.value;
+    nCall(IC.isar_txn_begin(ptr, _syncTxnPtrPtr, true, write, silent, 0));
+    final txn = SyncTxn._(_syncTxnPtrPtr.value, write);
     _currentTxnSync = txn;
-    _currentTxnSyncWrite = write;
 
     T result;
     try {
       result = callback(this);
+      nCall(IC.isar_txn_finish(txn.ptr, true));
     } catch (e) {
-      _currentTxnSync = null;
-      IC.isar_txn_finish(txn, false);
+      IC.isar_txn_finish(txn.ptr, false);
       rethrow;
+    } finally {
+      _currentTxnSync = null;
+      txn.free();
     }
-
-    _currentTxnSync = null;
-    nCall(IC.isar_txn_finish(txn, true));
 
     return result;
   }
@@ -145,9 +138,9 @@ class IsarImpl extends Isar {
     return _txnSync(true, silent, callback);
   }
 
-  T getTxnSync<T>(bool write, T Function(Pointer txn) callback) {
+  T getTxnSync<T>(bool write, T Function(SyncTxn txn) callback) {
     if (_currentTxnSync != null) {
-      if (write && !_currentTxnSyncWrite) {
+      if (write && !_currentTxnSync!.write) {
         throw 'Operation cannot be performed within a read transaction.';
       }
       return callback(_currentTxnSync!);
@@ -165,5 +158,93 @@ class IsarImpl extends Isar {
     await Future.wait(_activeAsyncTxns);
     await super.close();
     return IC.isar_close_instance(ptr);
+  }
+}
+
+class SyncTxn {
+  final Pointer ptr;
+
+  final bool write;
+
+  final alloc = Arena(malloc);
+
+  SyncTxn._(this.ptr, this.write);
+
+  Pointer<RawObject>? _rawObjsPtr;
+  var _rawObjsLen = -1;
+
+  Pointer<RawObjectSet>? _rawObjSetPtr;
+
+  Pointer<Uint8>? _buffer;
+  var _bufferLen = -1;
+
+  Pointer<RawObject> allocRawObject() {
+    if (_rawObjsLen < 1) {
+      _rawObjsPtr = alloc();
+      _rawObjsLen = 1;
+    }
+    return _rawObjsPtr!;
+  }
+
+  Pointer<RawObjectSet> allocRawObjectsSet() {
+    _rawObjSetPtr ??= alloc();
+    return _rawObjSetPtr!;
+  }
+
+  Pointer<Uint8> allocBuffer(int size) {
+    if (_bufferLen < size) {
+      _buffer = alloc(size);
+      _bufferLen = size;
+    }
+    return _buffer!;
+  }
+
+  void free() {
+    alloc.releaseAll();
+  }
+}
+
+class Txn {
+  final Pointer ptr;
+
+  final bool write;
+
+  final alloc = Arena(malloc);
+
+  final _completers = Queue<Completer>();
+
+  Txn._(this.ptr, this.write, Stream stream) {
+    stream.listen(
+      (_) {
+        assert(
+            _completers.isNotEmpty, 'There should be a completer listening.');
+        final completer = _completers.removeFirst();
+        completer.complete();
+      },
+      onError: (e) {
+        assert(
+            _completers.isNotEmpty, 'There should be a completer listening.');
+        final completer = _completers.removeFirst();
+        completer.completeError(e);
+      },
+    );
+  }
+
+  Future<void> wait() {
+    final completer = Completer();
+    _completers.add(completer);
+    return completer.future;
+  }
+
+  Pointer<RawObjectSet> allocRawObjSet(int length) {
+    final rawObjSetPtr = malloc<RawObjectSet>();
+    rawObjSetPtr.ref
+      ..objects = malloc<RawObject>(length)
+      ..length = length;
+    return rawObjSetPtr;
+  }
+
+  void free() {
+    alloc.releaseAll();
   }
 }

@@ -115,22 +115,9 @@ String _generatePrepareSerialize(ObjectInfo object) {
 String _generateSerialize(ObjectInfo object) {
   var code = '''
   @override  
-  int serialize(IsarCollection<${object.dartName}> collection, IsarRawObject rawObj, ${object.dartName} object, List<int> offsets, [int? existingBufferSize]) {
-    rawObj.id = object.${object.idProperty.dartName} ${object.idProperty.nullable ? '?? Isar.autoIncrement' : ''};
+  void serialize(IsarCollection<${object.dartName}> collection, IsarRawObject rawObj, ${object.dartName} object, List<int> offsets, AdapterAlloc alloc) {
     ${_generatePrepareSerialize(object)}
-    late int bufferSize;
-    if (existingBufferSize != null) {
-      if (existingBufferSize < size) {
-        isarFree(rawObj.buffer);
-        rawObj.buffer = isarMalloc(size);
-        bufferSize = size;
-      } else {
-        bufferSize = existingBufferSize;
-      }
-    } else {
-      rawObj.buffer = isarMalloc(size);
-      bufferSize = size;
-    }
+    rawObj.buffer = alloc(size);
     rawObj.buffer_length = size;
     final buffer = bufAsBytes(rawObj.buffer, size);
     final writer = BinaryWriter(buffer, ${object.staticSize});
@@ -191,10 +178,7 @@ String _generateSerialize(ObjectInfo object) {
     code += 'attachLinks(collection.isar, object);';
   }
 
-  return '''
-    $code
-    return bufferSize;
-  }''';
+  return '$code}';
 }
 
 String _generateDeserialize(ObjectInfo object) {

@@ -28,13 +28,6 @@ const nullFloat = minFloat;
 const nullDouble = minDouble;
 final nullDate = minDate;
 
-class IsarCoreUtils {
-  static final nullPtr = Pointer.fromAddress(0);
-  static final syncTxnPtr = malloc<Pointer>();
-  static final syncRawObjPtr = malloc<RawObject>();
-  static final syncRawObjSetPtr = malloc<RawObjectSet>();
-}
-
 // ignore: non_constant_identifier_names
 IsarCoreBindings? _IC;
 // ignore: non_constant_identifier_names
@@ -112,6 +105,7 @@ extension RawObjectX on RawObject {
   void freeData() {
     if (buffer.address != 0) {
       malloc.free(buffer);
+      buffer = nullptr;
     }
   }
 }

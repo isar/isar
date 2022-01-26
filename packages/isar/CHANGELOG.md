@@ -2,8 +2,12 @@
 - Fixed issue where imported json required existing ids
 - Improved performance for queries
 - Added check for outdated generated files
+- Added check for changed schema across isolates
 - Added `Isar.openSync()`
+- Added `col.importJsonRawSync()`, `col.importJsonSync()`, `query.exportJsonRawSync()`, `query.exportJsonSync()`
 - `isar_connect` is now integrated into `isar`
+- Fixed issue with transaction handling (thanks @Peng-Qian for the awesome help)
+- Improved handling of ffi memory
 
 ## 2.0.0
 

@@ -15,10 +15,10 @@ import 'src/native/bindings.dart';
 import 'src/native/open.dart';
 import 'src/native/isar_link_impl.dart';
 import 'src/native/isar_type_adapter.dart';
+import 'src/isar_connect.dart';
 import 'src/util.dart';
 
 export 'src/native/isar_type_adapter.dart';
-
 export 'src/native/binary_reader.dart';
 export 'src/native/binary_writer.dart';
 
@@ -48,14 +48,6 @@ typedef IsarRawObject = RawObject;
 /// @nodoc
 @protected
 typedef IsarUint8List = Uint8List;
-
-/// @nodoc
-@protected
-Pointer<Uint8> isarMalloc(int count) => malloc(count);
-
-/// @nodoc
-@protected
-void isarFree(Pointer<Uint8> pointer) => malloc.free(pointer);
 
 /// @nodoc
 @protected

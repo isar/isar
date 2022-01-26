@@ -80,11 +80,26 @@ abstract class Query<T> {
   Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
       {bool primitiveNull = true});
 
+  /// {@macro query_export_json_raw}
+  R exportJsonRawSync<R>(R Function(Uint8List) callback,
+      {bool primitiveNull = true});
+
   /// {@template query_export_json}
   /// Export the results of this query as json.
   /// {@endtemplate}
   Future<List<Map<String, dynamic>>> exportJson({bool primitiveNull = true}) {
     return exportJsonRaw(
+      (bytes) {
+        final json = jsonDecode(Utf8Decoder().convert(bytes)) as List;
+        return json.cast<Map<String, dynamic>>();
+      },
+      primitiveNull: primitiveNull,
+    );
+  }
+
+  /// {@macro query_export_json}
+  List<Map<String, dynamic>> exportJsonSync({bool primitiveNull = true}) {
+    return exportJsonRawSync(
       (bytes) {
         final json = jsonDecode(Utf8Decoder().convert(bytes)) as List;
         return json.cast<Map<String, dynamic>>();

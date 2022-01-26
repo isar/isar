@@ -10,6 +10,11 @@ class Message {
   String? message;
 
   @override
+  String toString() {
+    return '{id: $id, message: $message}';
+  }
+
+  @override
   bool operator ==(dynamic other) {
     if (other is Message) {
       return other.message == message;

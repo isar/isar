@@ -35,15 +35,14 @@ class NativeQuery<T> extends Query<T> {
   Future<List<T>> findAll() => findInternal(maxLimit);
 
   Future<List<T>> findInternal(int limit) {
-    return col.isar.getTxn(false, (txnPtr, stream) async {
-      final resultsPtr = malloc<RawObjectSet>();
+    return col.isar.getTxn(false, (txn) async {
+      final resultsPtr = txn.alloc<RawObjectSet>();
       try {
-        IC.isar_q_find(queryPtr, txnPtr, resultsPtr, limit);
-        await stream.first;
+        IC.isar_q_find(queryPtr, txn.ptr, resultsPtr, limit);
+        await txn.wait();
         return deserialize(resultsPtr.ref).cast();
       } finally {
         IC.isar_free_raw_obj_list(resultsPtr);
-        malloc.free(resultsPtr);
       }
     });
   }
@@ -60,13 +59,13 @@ class NativeQuery<T> extends Query<T> {
   List<T> findAllSync() => findSyncInternal(maxLimit);
 
   List<T> findSyncInternal(int limit) {
-    return col.isar.getTxnSync(false, (txnPtr) {
-      final resultsPtr = malloc<RawObjectSet>();
+    return col.isar.getTxnSync(false, (txn) {
+      final resultsPtr = txn.allocRawObjectsSet();
       try {
-        nCall(IC.isar_q_find(queryPtr, txnPtr, resultsPtr, limit));
+        nCall(IC.isar_q_find(queryPtr, txn.ptr, resultsPtr, limit));
         return deserialize(resultsPtr.ref).cast();
       } finally {
-        malloc.free(resultsPtr);
+        IC.isar_free_raw_obj_list(resultsPtr);
       }
     });
   }
@@ -78,21 +77,11 @@ class NativeQuery<T> extends Query<T> {
   Future<int> deleteAll() => deleteInternal(maxLimit);
 
   Future<int> deleteInternal(int limit) {
-    return col.isar.getTxn(false, (txnPtr, stream) async {
-      final countPtr = malloc<Uint32>();
-      try {
-        IC.isar_q_delete(
-          queryPtr,
-          col.ptr,
-          txnPtr,
-          limit,
-          countPtr,
-        );
-        await stream.first;
-        return countPtr.value;
-      } finally {
-        malloc.free(countPtr);
-      }
+    return col.isar.getTxn(false, (txn) async {
+      final countPtr = txn.alloc<Uint32>();
+      IC.isar_q_delete(queryPtr, col.ptr, txn.ptr, limit, countPtr);
+      await txn.wait();
+      return countPtr.value;
     });
   }
 
@@ -103,20 +92,10 @@ class NativeQuery<T> extends Query<T> {
   int deleteAllSync() => deleteSyncInternal(maxLimit);
 
   int deleteSyncInternal(int limit) {
-    return col.isar.getTxnSync(false, (txnPtr) {
-      final countPtr = malloc<Uint32>();
-      try {
-        nCall(IC.isar_q_delete(
-          queryPtr,
-          col.ptr,
-          txnPtr,
-          limit,
-          countPtr,
-        ));
-        return countPtr.value;
-      } finally {
-        malloc.free(countPtr);
-      }
+    return col.isar.getTxnSync(false, (txn) {
+      final countPtr = txn.alloc<Uint32>();
+      nCall(IC.isar_q_delete(queryPtr, col.ptr, txn.ptr, limit, countPtr));
+      return countPtr.value;
     });
   }
 
@@ -147,55 +126,63 @@ class NativeQuery<T> extends Query<T> {
   @override
   Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
       {bool primitiveNull = true}) {
-    return col.isar.getTxn(false, (txnPtr, stream) async {
-      final bytesPtrPtr = malloc<Pointer<Uint8>>();
-      final lengthPtr = malloc<Uint32>();
-      final idNamePtr = col.idName.toNativeUtf8();
-      nCall(IC.isar_q_export_json(queryPtr, col.ptr, txnPtr, idNamePtr.cast(),
+    return col.isar.getTxn(false, (txn) async {
+      final bytesPtrPtr = txn.alloc<Pointer<Uint8>>();
+      final lengthPtr = txn.alloc<Uint32>();
+      final idNamePtr = col.idName.toNativeUtf8(allocator: txn.alloc);
+      nCall(IC.isar_q_export_json(queryPtr, col.ptr, txn.ptr, idNamePtr.cast(),
           primitiveNull, bytesPtrPtr, lengthPtr));
 
       try {
-        await stream.first;
+        await txn.wait();
         final bytes = bytesPtrPtr.value.asTypedList(lengthPtr.value);
         return callback(bytes);
       } finally {
         IC.isar_free_json(bytesPtrPtr.value, lengthPtr.value);
-        malloc.free(bytesPtrPtr);
-        malloc.free(lengthPtr);
-        malloc.free(idNamePtr);
+      }
+    });
+  }
+
+  @override
+  R exportJsonRawSync<R>(R Function(Uint8List) callback,
+      {bool primitiveNull = true}) {
+    return col.isar.getTxnSync(false, (txn) {
+      final bytesPtrPtr = txn.alloc<Pointer<Uint8>>();
+      final lengthPtr = txn.alloc<Uint32>();
+      final idNamePtr = col.idName.toNativeUtf8(allocator: txn.alloc);
+
+      try {
+        nCall(IC.isar_q_export_json(queryPtr, col.ptr, txn.ptr,
+            idNamePtr.cast(), primitiveNull, bytesPtrPtr, lengthPtr));
+        final bytes = bytesPtrPtr.value.asTypedList(lengthPtr.value);
+        return callback(bytes);
+      } finally {
+        IC.isar_free_json(bytesPtrPtr.value, lengthPtr.value);
       }
     });
   }
 
   @override
   Future<R?> aggregate<R>(AggregationOp op) async {
-    return col.isar.getTxn(false, (txnPtr, stream) async {
-      final resultPtrPtr = malloc<Pointer>();
+    return col.isar.getTxn(false, (txn) async {
+      final resultPtrPtr = txn.alloc<Pointer>();
 
       IC.isar_q_aggregate(
-          col.ptr, queryPtr, txnPtr, op.index, propertyId ?? 0, resultPtrPtr);
+          col.ptr, queryPtr, txn.ptr, op.index, propertyId ?? 0, resultPtrPtr);
+      await txn.wait();
 
-      try {
-        await stream.first;
-        return _convertAggregatedResult<R>(resultPtrPtr.value, op);
-      } finally {
-        malloc.free(resultPtrPtr);
-      }
+      return _convertAggregatedResult<R>(resultPtrPtr.value, op);
     });
   }
 
   @override
   R? aggregateSync<R>(AggregationOp op) {
-    return col.isar.getTxnSync(false, (txnPtr) {
-      final resultPtrPtr = malloc<Pointer>();
+    return col.isar.getTxnSync(false, (txn) {
+      final resultPtrPtr = txn.alloc<Pointer>();
 
-      try {
-        nCall(IC.isar_q_aggregate(col.ptr, queryPtr, txnPtr, op.index,
-            propertyId ?? 0, resultPtrPtr));
-        return _convertAggregatedResult(resultPtrPtr.value, op);
-      } finally {
-        malloc.free(resultPtrPtr);
-      }
+      nCall(IC.isar_q_aggregate(
+          col.ptr, queryPtr, txn.ptr, op.index, propertyId ?? 0, resultPtrPtr));
+      return _convertAggregatedResult(resultPtrPtr.value, op);
     });
   }
 

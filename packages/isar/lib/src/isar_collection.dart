@@ -19,16 +19,14 @@ abstract class IsarCollection<OBJ> {
   /// exist.
   List<OBJ?> getAllSync(List<int> ids);
 
-  /// Get a list of objects by the [indexName] index or `null` if an object
-  /// does not exist. Don't use this method directly.
+  /// @nodoc
   @protected
   Future<List<OBJ?>> getAllByIndex(
     String indexName,
     List<List<Object?>> values,
   );
 
-  /// Get a list of objects by the [indexName] index or `null` if an object
-  /// does not exist. Don't use this method directly.
+  /// @nodoc
   @protected
   List<OBJ?> getAllByIndexSync(String indexName, List<List<Object?>> values);
 
@@ -70,13 +68,11 @@ abstract class IsarCollection<OBJ> {
   /// have been deleted.
   int deleteAllSync(List<int> ids);
 
-  /// Delete a list of objecs by the [indexName] index. Returns the number
-  /// of objects that have been deleted. Don't use this method directly.
+  /// @nodoc
   @protected
   Future<int> deleteAllByIndex(String indexName, List<List<Object?>> values);
 
-  /// Delete a list of objecs by the [indexName] index. Returns the number
-  /// of objects that have been deleted. Don't use this method directly.
+  /// @nodoc
   @protected
   int deleteAllByIndexSync(String indexName, List<List<Object?>> values);
 
@@ -91,10 +87,20 @@ abstract class IsarCollection<OBJ> {
       {bool replaceOnConflict = false});
 
   /// Import a list of json objects.
+  void importJsonRawSync(Uint8List jsonBytes, {bool replaceOnConflict = false});
+
+  /// Import a list of json objects.
   Future<void> importJson(List<Map<String, dynamic>> json,
       {bool replaceOnConflict = false}) {
     final bytes = Utf8Encoder().convert(jsonEncode(json));
     return importJsonRaw(bytes, replaceOnConflict: replaceOnConflict);
+  }
+
+  /// Import a list of json objects.
+  void importJsonSync(List<Map<String, dynamic>> json,
+      {bool replaceOnConflict = false}) {
+    final bytes = Utf8Encoder().convert(jsonEncode(json));
+    importJsonRawSync(bytes, replaceOnConflict: replaceOnConflict);
   }
 
   /// Start building a query using the [QueryBuilder].

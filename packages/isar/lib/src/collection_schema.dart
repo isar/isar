@@ -36,7 +36,7 @@ class CollectionSchema<OBJ> {
     required this.setId,
     required this.version,
   }) : assert(generatorVersion == version,
-            'Incompatible generated code. Please rerun code generation using the latest generator.');
+            'Incompatible generated code. Please re-run code generation using the latest generator.');
 
   IsarCollection<OBJ> toNativeCollection({
     required IsarImpl isar,

@@ -46,10 +46,11 @@ void main() {
 
       await isar.writeTxn((isar) async {
         await messages.put(message1);
-        message2.id = await messages.put(message2);
+        await messages.put(message2);
       });
 
       final newMessage1 = await messages.get(message1.id!);
+      expect(message1.id, 5);
       expect(message1, newMessage1);
 
       expect(message2.id, 6);

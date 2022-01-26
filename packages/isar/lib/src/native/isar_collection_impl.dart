@@ -97,8 +97,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @pragma('vm:prefer-inline')
   Pointer<Pointer<NativeType>> _getKeysPtr(
-      String indexName, List<List<Object?>> values) {
-    final keysPtrPtr = malloc<Pointer>(values.length);
+      String indexName, List<List<Object?>> values, Allocator alloc) {
+    final keysPtrPtr = alloc<Pointer>(values.length);
     for (var i = 0; i < values.length; i++) {
       keysPtrPtr[i] = buildIndexKey(this, indexName, values[i]);
     }
@@ -121,58 +121,42 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return values;
   }
 
-  Pointer<RawObjectSet> allocRawObjSet(int length) {
-    final rawObjSetPtr = malloc<RawObjectSet>();
-    rawObjSetPtr.ref
-      ..objects = malloc<RawObject>(length)
-      ..length = length;
-    return rawObjSetPtr;
-  }
-
   @override
   Future<List<OBJ?>> getAll(List<int> ids) {
-    return isar.getTxn(false, (txnPtr, stream) async {
-      final rawObjSetPtr = allocRawObjSet(ids.length);
+    return isar.getTxn(false, (txn) async {
+      final rawObjSetPtr = txn.allocRawObjSet(ids.length);
       final objectsPtr = rawObjSetPtr.ref.objects;
       for (var i = 0; i < ids.length; i++) {
         objectsPtr.elementAt(i).ref.id = ids[i];
       }
-      IC.isar_get_all(ptr, txnPtr, rawObjSetPtr);
-      try {
-        await stream.first;
-        return deserializeObjectsOrNull(rawObjSetPtr.ref);
-      } finally {
-        rawObjSetPtr.free();
-      }
+      IC.isar_get_all(ptr, txn.ptr, rawObjSetPtr);
+      await txn.wait();
+      return deserializeObjectsOrNull(rawObjSetPtr.ref);
     });
   }
 
   @override
   Future<List<OBJ?>> getAllByIndex(String indexName, List<List> values) {
-    return isar.getTxn(false, (txnPtr, stream) async {
-      final rawObjSetPtr = allocRawObjSet(values.length);
-      final keysPtrPtr = _getKeysPtr(indexName, values);
+    return isar.getTxn(false, (txn) async {
+      final rawObjSetPtr = txn.allocRawObjSet(values.length);
+      final keysPtrPtr = _getKeysPtr(indexName, values, txn.alloc);
       IC.isar_get_all_by_index(
-          ptr, txnPtr, indexIdOrErr(indexName), keysPtrPtr, rawObjSetPtr);
-      try {
-        await stream.first;
-        return deserializeObjectsOrNull(rawObjSetPtr.ref);
-      } finally {
-        rawObjSetPtr.free();
-      }
+          ptr, txn.ptr, indexIdOrErr(indexName), keysPtrPtr, rawObjSetPtr);
+      await txn.wait();
+      return deserializeObjectsOrNull(rawObjSetPtr.ref);
     });
   }
 
   @override
   List<OBJ?> getAllSync(List<int> ids) {
-    return isar.getTxnSync(false, (txnPtr) {
-      final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
+    return isar.getTxnSync(false, (txn) {
+      final rawObjPtr = txn.allocRawObject();
       final rawObj = rawObjPtr.ref;
 
       final objects = List<OBJ?>.filled(ids.length, null);
       for (var i = 0; i < ids.length; i++) {
         rawObj.id = ids[i];
-        nCall(IC.isar_get(ptr, txnPtr, rawObjPtr));
+        nCall(IC.isar_get(ptr, txn.ptr, rawObjPtr));
         objects[i] = deserializeObjectOrNull(rawObj);
       }
 
@@ -182,15 +166,15 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   List<OBJ?> getAllByIndexSync(String indexName, List<List> values) {
-    return isar.getTxnSync(false, (txnPtr) {
-      final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
+    return isar.getTxnSync(false, (txn) {
+      final rawObjPtr = txn.allocRawObject();
       final rawObj = rawObjPtr.ref;
       final indexId = indexIdOrErr(indexName);
 
       final objects = List<OBJ?>.filled(values.length, null);
       for (var i = 0; i < values.length; i++) {
         final keyPtr = buildIndexKey(this, indexName, values[i]);
-        nCall(IC.isar_get_by_index(ptr, txnPtr, indexId, keyPtr, rawObjPtr));
+        nCall(IC.isar_get_by_index(ptr, txn.ptr, indexId, keyPtr, rawObjPtr));
         objects[i] = deserializeObjectOrNull(rawObj);
       }
 
@@ -203,44 +187,43 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     List<OBJ> objects, {
     bool replaceOnConflict = false,
   }) {
-    return isar.getTxn(true, (txnPtr, stream) async {
-      final rawObjSetPtr = allocRawObjSet(objects.length);
+    return isar.getTxn(true, (txn) async {
+      final rawObjSetPtr = txn.allocRawObjSet(objects.length);
       final objectsPtr = rawObjSetPtr.ref.objects;
 
+      Pointer<Uint8> allocBuf(int size) => txn.alloc<Uint8>(size);
       for (var i = 0; i < objects.length; i++) {
+        final object = objects[i];
         final rawObj = objectsPtr.elementAt(i).ref;
-        adapter.serialize(this, rawObj, objects[i], offsets);
+        adapter.serialize(this, rawObj, object, offsets, allocBuf);
+        rawObj.id = getId(object) ?? Isar.autoIncrement;
       }
-      IC.isar_put_all(ptr, txnPtr, rawObjSetPtr, replaceOnConflict);
+      IC.isar_put_all(ptr, txn.ptr, rawObjSetPtr, replaceOnConflict);
 
-      try {
-        await stream.first;
-        final rawObjectSet = rawObjSetPtr.ref;
-        final ids = List<int>.filled(objects.length, 0);
-        final linkFutures = <Future>[];
-        for (var i = 0; i < objects.length; i++) {
-          final rawObjPtr = rawObjectSet.objects.elementAt(i);
-          final id = rawObjPtr.ref.id;
-          ids[i] = id;
+      await txn.wait();
+      final rawObjectSet = rawObjSetPtr.ref;
+      final ids = List<int>.filled(objects.length, 0);
+      final linkFutures = <Future>[];
+      for (var i = 0; i < objects.length; i++) {
+        final rawObjPtr = rawObjectSet.objects.elementAt(i);
+        final id = rawObjPtr.ref.id;
+        ids[i] = id;
 
-          final object = objects[i];
-          setId?.call(object, id);
+        final object = objects[i];
+        setId?.call(object, id);
 
-          if (getLinks != null) {
-            for (var link in getLinks!(object)) {
-              if (link.isChanged) {
-                linkFutures.add(link.save());
-              }
+        if (getLinks != null) {
+          for (var link in getLinks!(object)) {
+            if (link.isChanged) {
+              linkFutures.add(link.save());
             }
           }
         }
-        if (linkFutures.isNotEmpty) {
-          await Future.wait(linkFutures);
-        }
-        return ids;
-      } finally {
-        rawObjSetPtr.free(freeData: true);
       }
+      if (linkFutures.isNotEmpty) {
+        await Future.wait(linkFutures);
+      }
+      return ids;
     });
   }
 
@@ -249,136 +232,127 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     List<OBJ> objects, {
     bool replaceOnConflict = false,
   }) {
-    return isar.getTxnSync(true, (txnPtr) {
-      final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
+    return isar.getTxnSync(true, (txn) {
+      final rawObjPtr = txn.allocRawObject();
       final rawObj = rawObjPtr.ref;
-      int? bufferSize;
-      try {
-        final ids = List<int>.filled(objects.length, 0);
-        for (var i = 0; i < objects.length; i++) {
-          final object = objects[i];
-          bufferSize =
-              adapter.serialize(this, rawObj, object, offsets, bufferSize);
-          nCall(IC.isar_put(ptr, txnPtr, rawObjPtr, replaceOnConflict));
-          ids[i] = rawObj.id;
 
-          setId?.call(object, rawObj.id);
+      final ids = List<int>.filled(objects.length, 0);
+      for (var i = 0; i < objects.length; i++) {
+        final object = objects[i];
+        adapter.serialize(this, rawObj, object, offsets, txn.allocBuffer);
+        rawObj.id = getId(object) ?? Isar.autoIncrement;
+        nCall(IC.isar_put(ptr, txn.ptr, rawObjPtr, replaceOnConflict));
 
-          if (getLinks != null) {
-            for (var link in getLinks!(object)) {
-              if (link.isChanged) {
-                link.saveSync();
-              }
+        ids[i] = rawObj.id;
+        setId?.call(object, rawObj.id);
+
+        if (getLinks != null) {
+          for (var link in getLinks!(object)) {
+            if (link.isChanged) {
+              link.saveSync();
             }
           }
         }
-        return ids;
-      } finally {
-        rawObj.freeData();
       }
+      return ids;
     });
   }
 
   @override
   Future<int> deleteAll(List<int> ids) {
-    return isar.getTxn(true, (txnPtr, stream) async {
-      final countPtr = malloc<Uint32>();
-      final idsPtr = malloc<Int64>(ids.length);
+    return isar.getTxn(true, (txn) async {
+      final countPtr = txn.alloc<Uint32>();
+      final idsPtr = txn.alloc<Int64>(ids.length);
       idsPtr.asTypedList(ids.length).setAll(0, ids);
-      IC.isar_delete_all(ptr, txnPtr, idsPtr, ids.length, countPtr);
-      try {
-        await stream.first;
-        return countPtr.value;
-      } finally {
-        malloc.free(countPtr);
-        malloc.free(idsPtr);
-      }
+
+      IC.isar_delete_all(ptr, txn.ptr, idsPtr, ids.length, countPtr);
+      await txn.wait();
+
+      return countPtr.value;
     });
   }
 
   @override
   Future<int> deleteAllByIndex(String indexName, List<List> values) {
-    return isar.getTxn(true, (txnPtr, stream) async {
-      final countPtr = malloc<Uint32>();
-      final keysPtrPtr = _getKeysPtr(indexName, values);
-      IC.isar_delete_all_by_index(ptr, txnPtr, indexIdOrErr(indexName),
+    return isar.getTxn(true, (txn) async {
+      final countPtr = txn.alloc<Uint32>();
+      final keysPtrPtr = _getKeysPtr(indexName, values, txn.alloc);
+
+      IC.isar_delete_all_by_index(ptr, txn.ptr, indexIdOrErr(indexName),
           keysPtrPtr, values.length, countPtr);
-      try {
-        await stream.first;
-        return countPtr.value;
-      } finally {
-        malloc.free(countPtr);
-        malloc.free(keysPtrPtr);
-      }
+      await txn.wait();
+
+      return countPtr.value;
     });
   }
 
   @override
   int deleteAllSync(List<int> ids) {
-    return isar.getTxnSync(true, (txnPtr) {
-      final deletedPtr = malloc<Uint8>();
-      try {
-        var counter = 0;
-        for (var id in ids) {
-          nCall(IC.isar_delete(ptr, txnPtr, id, deletedPtr));
-          if (deletedPtr.value == 1) {
-            counter++;
-          }
+    return isar.getTxnSync(true, (txn) {
+      final deletedPtr = txn.allocBuffer(1);
+
+      var counter = 0;
+      for (var id in ids) {
+        nCall(IC.isar_delete(ptr, txn.ptr, id, deletedPtr));
+        if (deletedPtr.value == 1) {
+          counter++;
         }
-        return counter;
-      } finally {
-        malloc.free(deletedPtr);
       }
+      return counter;
     });
   }
 
   @override
   int deleteAllByIndexSync(String indexName, List<List> values) {
-    return isar.getTxnSync(true, (txnPtr) {
-      final countPtr = malloc<Uint32>();
-      final keysPtrPtr = _getKeysPtr(indexName, values);
-      try {
-        nCall(IC.isar_delete_all_by_index(ptr, txnPtr, indexIdOrErr(indexName),
-            keysPtrPtr, values.length, countPtr));
-        return countPtr.value;
-      } finally {
-        malloc.free(countPtr);
-        malloc.free(keysPtrPtr);
-      }
+    return isar.getTxnSync(true, (txn) {
+      final countPtr = txn.alloc<Uint32>();
+      final keysPtrPtr = _getKeysPtr(indexName, values, txn.alloc);
+
+      nCall(IC.isar_delete_all_by_index(ptr, txn.ptr, indexIdOrErr(indexName),
+          keysPtrPtr, values.length, countPtr));
+      return countPtr.value;
     });
   }
 
   @override
   Future<void> clear() {
-    return isar.getTxn(true, (txnPtr, stream) async {
-      IC.isar_clear(ptr, txnPtr);
-      await stream.first;
+    return isar.getTxn(true, (txn) async {
+      IC.isar_clear(ptr, txn.ptr);
+      await txn.wait();
     });
   }
 
   @override
   void clearSync() {
-    isar.getTxnSync(true, (txnPtr) {
-      nCall(IC.isar_clear(ptr, txnPtr));
+    isar.getTxnSync(true, (txn) {
+      nCall(IC.isar_clear(ptr, txn.ptr));
     });
   }
 
   @override
   Future<void> importJsonRaw(Uint8List jsonBytes,
       {bool replaceOnConflict = false}) {
-    return isar.getTxn(true, (txnPtr, stream) async {
-      final bytesPtr = malloc<Uint8>(jsonBytes.length);
+    return isar.getTxn(true, (txn) async {
+      final bytesPtr = txn.alloc<Uint8>(jsonBytes.length);
       bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
-      final idNamePtr = idName.toNativeUtf8();
-      IC.isar_json_import(ptr, txnPtr, idNamePtr.cast(), bytesPtr,
-          jsonBytes.length, replaceOnConflict);
+      final idNamePtr = idName.toNativeUtf8(allocator: txn.alloc);
 
-      try {
-        await stream.first;
-      } finally {
-        malloc.free(bytesPtr);
-        malloc.free(idNamePtr);
-      }
+      IC.isar_json_import(ptr, txn.ptr, idNamePtr.cast(), bytesPtr,
+          jsonBytes.length, replaceOnConflict);
+      await txn.wait();
+    });
+  }
+
+  @override
+  void importJsonRawSync(Uint8List jsonBytes,
+      {bool replaceOnConflict = false}) {
+    return isar.getTxnSync(true, (txn) async {
+      final bytesPtr = txn.allocBuffer(jsonBytes.length);
+      bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
+      final idNamePtr = idName.toNativeUtf8(allocator: txn.alloc);
+
+      nCall(IC.isar_json_import(ptr, txn.ptr, idNamePtr.cast(), bytesPtr,
+          jsonBytes.length, replaceOnConflict));
     });
   }
 

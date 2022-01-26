@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'dart:ffi';
 
-import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
 import 'bindings.dart';
@@ -84,27 +83,25 @@ class IsarLinkImpl<OBJ> extends IsarLinkBaseImpl<OBJ> implements IsarLink<OBJ> {
   @override
   Future<void> load() {
     final containingId = requireAttached();
-    return col.isar.getTxn(false, (txnPtr, stream) async {
-      final rawObjPtr = malloc<RawObject>();
+    return col.isar.getTxn(false, (txn) async {
+      final rawObjPtr = txn.alloc<RawObject>();
+
       nCall(IC.isar_link_get_first(
-          col.ptr, txnPtr, linkIndex, backlink, containingId, rawObjPtr));
-      try {
-        await stream.first;
-        _value = targetCol.deserializeObjectOrNull(rawObjPtr.ref);
-        isChanged = false;
-      } finally {
-        malloc.free(rawObjPtr);
-      }
+          col.ptr, txn.ptr, linkIndex, backlink, containingId, rawObjPtr));
+      await txn.wait();
+
+      _value = targetCol.deserializeObjectOrNull(rawObjPtr.ref);
+      isChanged = false;
     });
   }
 
   @override
   void loadSync() {
     final containingId = requireAttached();
-    col.isar.getTxnSync(true, (txnPtr) {
-      final rawObjPtr = IsarCoreUtils.syncRawObjPtr;
+    col.isar.getTxnSync(true, (txn) {
+      final rawObjPtr = txn.allocRawObject();
       nCall(IC.isar_link_get_first(
-          col.ptr, txnPtr, linkIndex, backlink, containingId, rawObjPtr));
+          col.ptr, txn.ptr, linkIndex, backlink, containingId, rawObjPtr));
       _value = targetCol.deserializeObjectOrNull(rawObjPtr.ref);
       isChanged = false;
     });
@@ -115,7 +112,7 @@ class IsarLinkImpl<OBJ> extends IsarLinkBaseImpl<OBJ> implements IsarLink<OBJ> {
     final containingId = requireAttached();
     if (!isChanged) Future.value();
 
-    return col.isar.getTxn(true, (txnPtr, stream) async {
+    return col.isar.getTxn(true, (txn) async {
       var targetOid = minLong;
       if (_value != null) {
         final id = targetCol.getId(_value!);
@@ -126,8 +123,8 @@ class IsarLinkImpl<OBJ> extends IsarLinkBaseImpl<OBJ> implements IsarLink<OBJ> {
         }
       }
       IC.isar_link_replace(
-          col.ptr, txnPtr, linkIndex, backlink, containingId, targetOid);
-      await stream.first;
+          col.ptr, txn.ptr, linkIndex, backlink, containingId, targetOid);
+      await txn.wait();
       isChanged = false;
     });
   }
@@ -137,7 +134,7 @@ class IsarLinkImpl<OBJ> extends IsarLinkBaseImpl<OBJ> implements IsarLink<OBJ> {
     final containingId = requireAttached();
     if (!isChanged) return;
 
-    col.isar.getTxnSync(true, (txnPtr) {
+    col.isar.getTxnSync(true, (txn) {
       var targetOid = minLong;
       if (_value != null) {
         final id = targetCol.getId(_value!);
@@ -149,7 +146,7 @@ class IsarLinkImpl<OBJ> extends IsarLinkBaseImpl<OBJ> implements IsarLink<OBJ> {
         }
       }
       nCall(IC.isar_link_replace(
-          col.ptr, txnPtr, linkIndex, backlink, containingId, targetOid));
+          col.ptr, txn.ptr, linkIndex, backlink, containingId, targetOid));
       isChanged = false;
     });
   }
@@ -192,16 +189,15 @@ class IsarLinksImpl<OBJ> extends IsarLinkBaseImpl<OBJ>
       _addedObjects.clear();
       _removedObjects.clear();
     }
-    final objects = await col.isar.getTxn(false, (txnPtr, stream) async {
-      final resultsPtr = malloc<RawObjectSet>();
+    final objects = await col.isar.getTxn(false, (txn) async {
+      final resultsPtr = txn.alloc<RawObjectSet>();
       try {
         IC.isar_link_get_all(
-            col.ptr, txnPtr, linkIndex, backlink, containingId, resultsPtr);
-        await stream.first;
+            col.ptr, txn.ptr, linkIndex, backlink, containingId, resultsPtr);
+        await txn.wait();
         return targetCol.deserializeObjects(resultsPtr.ref);
       } finally {
         IC.isar_free_raw_obj_list(resultsPtr);
-        malloc.free(resultsPtr);
       }
     });
     applyLoaded(objects);
@@ -214,11 +210,11 @@ class IsarLinksImpl<OBJ> extends IsarLinkBaseImpl<OBJ>
       _addedObjects.clear();
       _removedObjects.clear();
     }
-    final objects = col.isar.getTxnSync(false, (txnPtr) {
-      final resultsPtr = IsarCoreUtils.syncRawObjSetPtr;
+    final objects = col.isar.getTxnSync(false, (txn) {
+      final resultsPtr = txn.allocRawObjectsSet();
       try {
         nCall(IC.isar_link_get_all(
-            col.ptr, txnPtr, linkIndex, backlink, containingId, resultsPtr));
+            col.ptr, txn.ptr, linkIndex, backlink, containingId, resultsPtr));
         return targetCol.deserializeObjects(resultsPtr.ref);
       } finally {
         IC.isar_free_raw_obj_list(resultsPtr);
@@ -239,9 +235,9 @@ class IsarLinksImpl<OBJ> extends IsarLinkBaseImpl<OBJ>
     final containingId = requireAttached();
     if (!isChanged) return Future.value();
 
-    return col.isar.getTxn(true, (txnPtr, stream) async {
+    return col.isar.getTxn(true, (txn) async {
       final count = _addedObjects.length + _removedObjects.length;
-      final idsPtr = malloc<Int64>(count);
+      final idsPtr = txn.alloc<Int64>(count);
       final ids = idsPtr.asTypedList(count);
 
       var i = 0;
@@ -254,14 +250,10 @@ class IsarLinksImpl<OBJ> extends IsarLinkBaseImpl<OBJ>
       for (var removed in _removedObjects) {
         ids[i++] = targetCol.getId(removed)!;
       }
-      IC.isar_link_update_all(col.ptr, txnPtr, linkIndex, backlink,
-          containingId, idsPtr, _addedObjects.length, _removedObjects.length);
 
-      try {
-        await stream.first;
-      } finally {
-        malloc.free(idsPtr);
-      }
+      IC.isar_link_update_all(col.ptr, txn.ptr, linkIndex, backlink,
+          containingId, idsPtr, _addedObjects.length, _removedObjects.length);
+      await txn.wait();
     });
   }
 
@@ -270,7 +262,7 @@ class IsarLinksImpl<OBJ> extends IsarLinkBaseImpl<OBJ>
     final containingId = requireAttached();
     if (!isChanged) return;
 
-    col.isar.getTxnSync(true, (txnPtr) {
+    col.isar.getTxnSync(true, (txn) {
       for (var added in _addedObjects) {
         var id = targetCol.getId(added);
         if (id == null) {
@@ -278,12 +270,12 @@ class IsarLinksImpl<OBJ> extends IsarLinkBaseImpl<OBJ>
           id = targetCol.getId(added)!;
         }
         nCall(IC.isar_link(
-            col.ptr, txnPtr, linkIndex, backlink, containingId, id));
+            col.ptr, txn.ptr, linkIndex, backlink, containingId, id));
       }
       for (var removed in _removedObjects) {
         final removedId = targetCol.getId(removed)!;
         nCall(IC.isar_link_unlink(
-            col.ptr, txnPtr, linkIndex, backlink, containingId, removedId));
+            col.ptr, txn.ptr, linkIndex, backlink, containingId, removedId));
       }
     });
   }
