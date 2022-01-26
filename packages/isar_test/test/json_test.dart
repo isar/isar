@@ -28,7 +28,7 @@ void main() {
     }
 
     isarTest('big json', () async {
-      final json = generateJson(1000000);
+      final json = generateJson(100000);
 
       await isar.writeTxn((isar) async {
         await col.importJson(json);
