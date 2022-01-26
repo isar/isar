@@ -16,8 +16,11 @@ class SchemaTestModel {
   @Index(unique: true)
   bool get someGetter => false;
 
-  //@Ignore()
-  // late bool someOtherField;
+  @Ignore()
+  late bool someOtherField;
+
+  @Ignore()
+  bool get someOtherGetter => false;
 
   @Index()
   late bool boolField;

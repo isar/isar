@@ -39,8 +39,7 @@ extension ClassElementX on ClassElement {
           (e) =>
               e.isPublic &&
               !e.isStatic &&
-              !_ignoreChecker.hasAnnotationOfExact(nonSynthetic) &&
-              !_ignoreChecker.hasAnnotationOfExact(this),
+              !_ignoreChecker.hasAnnotationOf(e.nonSynthetic),
         )
         .distinctBy((e) => e.name)
         .toList();
