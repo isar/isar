@@ -100,7 +100,7 @@ void main() {
         ..stringValue = '1'
         ..stringValue2 = 'b';
 
-      expect(
+      await expectLater(
         () => isar.writeTxn((isar) async {
           await isar.compositeModels.put(newObj);
         }),
