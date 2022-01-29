@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 
-part 'date_time_model.g.dart';
+part 'filter_date_test.g.dart';
 
 @Collection()
 class DateTimeModel {
@@ -38,3 +38,5 @@ class DateTimeModel {
     return false;
   }
 }
+
+void main() {}

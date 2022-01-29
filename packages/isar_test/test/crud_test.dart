@@ -1,8 +1,32 @@
 import 'package:isar/isar.dart';
 import 'package:isar_test/user_model.dart';
-import 'package:isar_test/common.dart';
-import 'package:isar_test/message_model.dart';
 import 'package:test/test.dart';
+
+import 'common.dart';
+
+part 'crud_test.g.dart';
+
+@Collection()
+class Message {
+  int? id;
+
+  @Index()
+  String? message;
+
+  @override
+  String toString() {
+    return '{id: $id, message: $message}';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is Message) {
+      return other.message == message;
+    } else {
+      return false;
+    }
+  }
+}
 
 void main() {
   group('CRUD', () {

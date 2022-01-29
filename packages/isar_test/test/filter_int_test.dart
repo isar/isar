@@ -1,7 +1,41 @@
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
-import 'package:isar_test/common.dart';
-import 'package:isar_test/int_model.dart';
+import 'common.dart';
 import 'package:test/test.dart';
+
+part 'filter_int_test.g.dart';
+
+@Collection()
+class IntModel {
+  @Id()
+  int? id;
+
+  @Index()
+  @Size32()
+  int? field = 0;
+
+  @Index(type: IndexType.value)
+  @Size32()
+  List<int?>? list;
+
+  @Index(type: IndexType.hash)
+  @Size32()
+  List<int>? hashList;
+
+  IntModel();
+
+  @override
+  String toString() {
+    return '{id: $id, field: $field, list: $list}';
+  }
+
+  @override
+  bool operator ==(other) {
+    return (other as IntModel).field == field &&
+        listEquals(list, other.list) &&
+        listEquals(hashList, other.hashList);
+  }
+}
 
 void main() {
   group('Int filter', () {

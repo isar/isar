@@ -1,27 +1,41 @@
 import 'package:isar/isar.dart';
-import 'package:isar_test/common.dart';
-import 'package:isar_test/int_model.dart';
+import 'common.dart';
 import 'package:test/test.dart';
+
+part 'query_where_sort_distinct_test.g.dart';
+
+@Collection()
+class TestModel {
+  int? id;
+
+  @Index()
+  int? value;
+
+  @override
+  operator ==(other) {
+    return other is TestModel && other.id == id && other.value == value;
+  }
+}
 
 void main() {
   group('Where sort distinct', () {
     late Isar isar;
-    late IsarCollection<IntModel> col;
+    late IsarCollection<TestModel> col;
 
     setUp(() async {
-      isar = await openTempIsar([IntModelSchema]);
-      col = isar.intModels;
+      isar = await openTempIsar([TestModelSchema]);
+      col = isar.testModels;
 
       await isar.writeTxn((isar) async {
         for (var i = 0; i <= 2; i++) {
-          var obj = IntModel()..field = i;
+          var obj = TestModel()..value = i;
           obj.id = await col.put(obj);
         }
         for (var i = 2; i >= 0; i--) {
-          var obj = IntModel()..field = i;
+          var obj = TestModel()..value = i;
           obj.id = await col.put(obj);
         }
-        await col.put(IntModel()..field = null);
+        await col.put(TestModel()..value = null);
       });
     });
 
@@ -31,25 +45,25 @@ void main() {
 
     isarTest('.any()', () async {
       await qEqual(
-        col.where().anyField().fieldProperty().findAll(),
+        col.where().anyValue().valueProperty().findAll(),
         [null, 0, 0, 1, 1, 2, 2],
       );
 
       await qEqual(
-        col.where(distinct: true).anyField().fieldProperty().findAll(),
+        col.where(distinct: true).anyValue().valueProperty().findAll(),
         [null, 0, 1, 2],
       );
 
       await qEqual(
-        col.where(sort: Sort.desc).anyField().fieldProperty().findAll(),
+        col.where(sort: Sort.desc).anyValue().valueProperty().findAll(),
         [2, 2, 1, 1, 0, 0, null],
       );
 
       await qEqual(
         col
             .where(sort: Sort.desc, distinct: true)
-            .anyField()
-            .fieldProperty()
+            .anyValue()
+            .valueProperty()
             .findAll(),
         [2, 1, 0, null],
       );
@@ -57,25 +71,25 @@ void main() {
 
     isarTest('.notEqualTo()', () async {
       await qEqual(
-        col.where().fieldNotEqualTo(1).fieldProperty().findAll(),
+        col.where().valueNotEqualTo(1).valueProperty().findAll(),
         [null, 0, 0, 2, 2],
       );
 
       await qEqual(
-        col.where(distinct: true).fieldNotEqualTo(1).fieldProperty().findAll(),
+        col.where(distinct: true).valueNotEqualTo(1).valueProperty().findAll(),
         [null, 0, 2],
       );
 
       await qEqual(
-        col.where(sort: Sort.desc).fieldNotEqualTo(1).fieldProperty().findAll(),
+        col.where(sort: Sort.desc).valueNotEqualTo(1).valueProperty().findAll(),
         [2, 2, 0, 0, null],
       );
 
       await qEqual(
         col
             .where(sort: Sort.desc, distinct: true)
-            .fieldNotEqualTo(1)
-            .fieldProperty()
+            .valueNotEqualTo(1)
+            .valueProperty()
             .findAll(),
         [2, 0, null],
       );
@@ -83,25 +97,25 @@ void main() {
 
     isarTest('.isNotNull()', () async {
       await qEqual(
-        col.where().fieldIsNotNull().fieldProperty().findAll(),
+        col.where().valueIsNotNull().valueProperty().findAll(),
         [0, 0, 1, 1, 2, 2],
       );
 
       await qEqual(
-        col.where(distinct: true).fieldIsNotNull().fieldProperty().findAll(),
+        col.where(distinct: true).valueIsNotNull().valueProperty().findAll(),
         [0, 1, 2],
       );
 
       await qEqual(
-        col.where(sort: Sort.desc).fieldIsNotNull().fieldProperty().findAll(),
+        col.where(sort: Sort.desc).valueIsNotNull().valueProperty().findAll(),
         [2, 2, 1, 1, 0, 0],
       );
 
       await qEqual(
         col
             .where(sort: Sort.desc, distinct: true)
-            .fieldIsNotNull()
-            .fieldProperty()
+            .valueIsNotNull()
+            .valueProperty()
             .findAll(),
         [2, 1, 0],
       );

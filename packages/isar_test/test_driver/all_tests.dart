@@ -3,6 +3,7 @@ import '../test/converter_test.dart' as converter_test;
 import '../test/crud_test.dart' as crud_test;
 
 import '../test/filter_bool_test.dart' as bool_filter_test;
+import '../test/filter_date_test.dart' as date_filter_test;
 import '../test/filter_double_test.dart' as double_filter_test;
 import '../test/filter_float_test.dart' as float_filter_test;
 import '../test/filter_int_test.dart' as int_filter_test;
@@ -16,6 +17,7 @@ import '../test/index_get_by_delete_by_test.dart'
     as index_get_by_delete_by_test;
 import '../test/index_multi_entry_test.dart' as index_multi_entry_test;
 
+import '../test/inheritance_test.dart' as inheritance_test;
 import '../test/json_test.dart' as json_test;
 import '../test/link_test.dart' as link_test;
 import '../test/name_test.dart' as name_test;
@@ -38,6 +40,7 @@ void run() {
   crud_test.main();
 
   bool_filter_test.main();
+  date_filter_test.main();
   double_filter_test.main();
   float_filter_test.main();
   int_filter_test.main();
@@ -50,6 +53,7 @@ void run() {
   index_get_by_delete_by_test.main();
   index_multi_entry_test.main();
 
+  inheritance_test.main();
   json_test.main();
   link_test.main();
   name_test.main();

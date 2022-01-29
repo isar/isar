@@ -1,7 +1,39 @@
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
-import 'package:isar_test/bool_model.dart';
-import 'package:isar_test/common.dart';
+import 'common.dart';
 import 'package:test/test.dart';
+
+part 'filter_bool_test.g.dart';
+
+@Collection()
+class BoolModel {
+  @Id()
+  int? id;
+
+  @Index()
+  bool? field = false;
+
+  @Index(type: IndexType.value)
+  List<bool?>? list;
+
+  @Index(type: IndexType.hash)
+  List<bool?>? hashList;
+
+  BoolModel();
+
+  @override
+  String toString() {
+    return '{id: $id, field: $field, list: $list, hashList: $hashList}';
+  }
+
+  @override
+  bool operator ==(other) {
+    return (other as BoolModel).id == id &&
+        other.field == field &&
+        listEquals(list, other.list) &&
+        listEquals(hashList, other.hashList);
+  }
+}
 
 void main() {
   group('Bool filter', () {

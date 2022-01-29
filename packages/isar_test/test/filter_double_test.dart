@@ -2,9 +2,45 @@
 // Float -> Double, float -> double
 
 import 'package:isar/isar.dart';
-import 'package:isar_test/common.dart';
-import 'package:isar_test/double_model.dart';
+import 'common.dart';
 import 'package:test/test.dart';
+
+part 'filter_double_test.g.dart';
+
+@Collection()
+class DoubleModel {
+  @Id()
+  int? id;
+
+  @Index()
+  double? field = 0;
+
+  @Index(type: IndexType.value)
+  List<double?>? list;
+
+  DoubleModel();
+
+  @override
+  String toString() {
+    return '{id: $id, field: $field, list: $list}';
+  }
+
+  @override
+  bool operator ==(other) {
+    final otherModel = other as DoubleModel;
+    if ((other.field == null) != (field == null)) {
+      return false;
+    } else if (id != other.id) {
+      return false;
+    } else if (field != null && (otherModel.field! - field!).abs() > 0.001) {
+      return false;
+    } else if (!doubleListEquals(list, other.list)) {
+      return false;
+    }
+
+    return true;
+  }
+}
 
 void main() {
   group('Double filter', () {

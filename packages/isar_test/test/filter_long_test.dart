@@ -1,7 +1,38 @@
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
-import 'package:isar_test/common.dart';
-import 'package:isar_test/long_model.dart';
+import 'common.dart';
 import 'package:test/test.dart';
+
+part 'filter_long_test.g.dart';
+
+@Collection()
+class LongModel {
+  @Id()
+  int? id;
+
+  @Index()
+  int? field = 0;
+
+  @Index(type: IndexType.value)
+  List<int>? list;
+
+  @Index(type: IndexType.hash)
+  List<int>? hashList;
+
+  LongModel();
+
+  @override
+  String toString() {
+    return '{field: $field, list: $list}';
+  }
+
+  @override
+  bool operator ==(other) {
+    return (other as LongModel).field == field &&
+        listEquals(list, other.list) &&
+        listEquals(hashList, other.hashList);
+  }
+}
 
 void main() async {
   group('Long filter', () {
