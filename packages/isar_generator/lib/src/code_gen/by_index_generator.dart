@@ -30,38 +30,66 @@ String generateSingleByIndex(ObjectInfo oi, ObjectIndex index) {
   final paramsList = index.properties.map((i) => i.property.dartName).join(',');
   return '''
     Future<${oi.dartName}?> getBy${index.dartName}($params) {
-      return getAllByIndex('${index.name}', [[$paramsList]]).then((e) => e[0]);
+      return getByIndex('${index.name}', [$paramsList]);
     }
 
     ${oi.dartName}? getBy${index.dartName}Sync($params) {
-      return getAllByIndexSync('${index.name}', [[$paramsList]])[0];
+      return getByIndexSync('${index.name}', [$paramsList]);
     }
 
     Future<bool> deleteBy${index.dartName}($params) {
-      return deleteAllByIndex('${index.name}', [[$paramsList]]).then((e) => e == 1);
+      return deleteByIndex('${index.name}', [$paramsList]);
     }
 
     bool deleteBy${index.dartName}Sync($params) {
-      return deleteAllByIndexSync('${index.name}', [[$paramsList]]) == 1;
+      return deleteByIndexSync('${index.name}', [$paramsList]);
     }
   ''';
 }
 
 String generateAllByIndex(ObjectInfo oi, ObjectIndex index) {
+  String valsName(ObjectProperty p) => '${p.dartName}Values';
+
+  final props = index.properties;
+  final params = props
+      .map((ip) => 'List<${ip.property.dartType}> ${valsName(ip.property)}')
+      .join(',');
+  String createValues;
+  if (props.length == 1) {
+    final p = props.first.property;
+    createValues = 'final values = ${valsName(p)}.map((e) => [e]).toList();';
+  } else {
+    final lenAssert = props
+        .sublist(1)
+        .map((i) => '${valsName(i.property)}.length == len')
+        .join('&&');
+    createValues = '''
+      final len = ${valsName(props.first.property)}.length;
+      assert($lenAssert, 'All index values must have the same length');
+      final values = <List<dynamic>>[];
+      for (var i = 0; i < len; i++) {
+        values.add([${props.map((ip) => '${valsName(ip.property)}[i]').join(',')}]);
+      }
+    ''';
+  }
   return '''
-    Future<List<${oi.dartName}?>> getAllBy${index.dartName}(List<List<Object?>> values) {
+    Future<List<${oi.dartName}?>> getAllBy${index.dartName}($params) {
+      $createValues
       return getAllByIndex('${index.name}', values);
     }
 
-    List<${oi.dartName}?> getAllBy${index.dartName}Sync(List<List<Object?>> values) {
+    List<${oi.dartName}?> getAllBy${index.dartName}Sync($params) {
+      $createValues
       return getAllByIndexSync('${index.name}', values);
     }
 
-    Future<int> deleteAllBy${index.dartName}(List<List<Object?>> values) {
+    Future<int> deleteAllBy${index.dartName}($params) {
+      $createValues
       return deleteAllByIndex('${index.name}', values);
     }
 
-    int deleteAllBy${index.dartName}Sync(List<List<Object?>> values) {
+    int deleteAllBy${index.dartName}Sync($params) {
+      $createValues
       return deleteAllByIndexSync('${index.name}', values);
     }
   ''';

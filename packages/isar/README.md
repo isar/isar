@@ -60,11 +60,11 @@ Holy smokes you're here! Let's get started...
 
 ```yaml
 dependencies:
-  isar: $latest
-  isar_flutter_libs: $latest # contains the binaries
+  isar: 2.1.0
+  isar_flutter_libs: 2.1.0 # contains the binaries
 
 dev_dependencies:
-  isar_generator: $latest
+  isar_generator: 2.1.0
   build_runner: any
 ```
 
@@ -88,7 +88,7 @@ final dir = await getApplicationSupportDirectory(); // path_provider package
 final isar = await Isar.open(
   schemas: [PostSchema],
   path: dir.path,
-  inspector: true,
+  inspector: true, // if you want to enable the inspector for debug builds
 );
 ```
 

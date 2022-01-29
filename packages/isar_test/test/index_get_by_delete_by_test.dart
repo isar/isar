@@ -1,1 +1,174 @@
-void main() {}
+import 'package:flutter_test/flutter_test.dart';
+import 'package:isar/isar.dart';
+import 'package:isar_test/common.dart';
+
+part 'index_get_by_delete_by_test.g.dart';
+
+@Collection()
+class Model {
+  final int? id;
+
+  @Index(unique: true, type: IndexType.value)
+  final String guid;
+
+  @Index(unique: true, composite: [CompositeIndex('guid')])
+  final String content;
+
+  Model({required this.id, required this.guid, required this.content});
+
+  @override
+  String toString() {
+    return '{id: $id, guid: $guid, content: $content}';
+  }
+
+  @override
+  operator ==(other) {
+    return other is Model &&
+        other.id == id &&
+        other.guid == guid &&
+        other.content == content;
+  }
+}
+
+void main() {
+  group('Index', () {
+    late Isar isar;
+    late IsarCollection<Model> col;
+
+    late Model obj1;
+    late Model obj2;
+    late Model obj3;
+
+    setUp(() async {
+      isar = await openTempIsar([ModelSchema]);
+      col = isar.models;
+
+      obj1 = Model(id: 1, guid: 'AAA-001', content: 'A');
+      obj2 = Model(id: 2, guid: 'BBB-002', content: 'B');
+      obj3 = Model(id: 3, guid: 'CCC-003', content: 'C');
+
+      await isar.writeTxn((isar) async {
+        await col.putAll([obj1, obj2, obj3]);
+      });
+    });
+
+    tearDown(() async {
+      await isar.close();
+    });
+
+    test('getBy', () async {
+      expect(await col.getByGuid(obj1.guid), obj1);
+      expect(await col.getByGuid(obj2.guid), obj2);
+      expect(await col.getByGuid(obj3.guid), obj3);
+      expect(await col.getByGuid('SOMETHING'), null);
+
+      expect(await col.getByContentGuid('A', obj1.guid), obj1);
+      expect(await col.getByContentGuid('B', obj1.guid), null);
+    });
+
+    test('getAllBy', () async {
+      expect(
+        await col.getAllByGuid([obj3.guid, 'SOMETHING', obj1.guid]),
+        [obj3, null, obj1],
+      );
+
+      expect(
+        await col.getAllByContentGuid(
+          ['C', 'X', 'A'],
+          [obj3.guid, 'SOMETHING', obj1.guid],
+        ),
+        [obj3, null, obj1],
+      );
+    });
+
+    test('getBySync', () {
+      expect(col.getByGuidSync(obj1.guid), obj1);
+      expect(col.getByGuidSync(obj2.guid), obj2);
+      expect(col.getByGuidSync(obj3.guid), obj3);
+      expect(col.getByGuidSync('SOMETHING'), null);
+
+      expect(col.getByContentGuidSync('A', obj1.guid), obj1);
+      expect(col.getByContentGuidSync('B', obj1.guid), null);
+    });
+
+    test('getAllBySync', () {
+      expect(col.getAllByGuidSync([obj3.guid, obj1.guid]), [obj3, obj1]);
+
+      expect(
+        col.getAllByContentGuidSync(
+          ['C', 'X', 'A'],
+          [obj3.guid, 'SOMETHING', obj1.guid],
+        ),
+        [obj3, null, obj1],
+      );
+    });
+
+    test('deleteBy', () async {
+      await isar.writeTxn((isar) async {
+        expect(await col.deleteByGuid(obj1.guid), true);
+        expect(await col.deleteByGuid('SOMETHING'), false);
+      });
+      await qEqual(col.where().findAll(), [obj2, obj3]);
+
+      await isar.writeTxn((isar) async {
+        expect(await col.deleteByContentGuid('B', obj2.guid), true);
+        expect(await col.deleteByContentGuid('D', obj3.guid), false);
+      });
+      await qEqual(col.where().findAll(), [obj3]);
+    });
+
+    test('deleteAllBy', () async {
+      await isar.writeTxn((isar) async {
+        expect(await col.deleteAllByGuid([obj3.guid, obj1.guid, 'AAA']), 2);
+      });
+      await qEqual(col.where().findAll(), [obj2]);
+    });
+
+    test('deleteAllBy composite', () async {
+      await isar.writeTxn((isar) async {
+        expect(
+          await col.deleteAllByContentGuid(
+            ['C', 'A', 'D'],
+            [obj3.guid, obj1.guid, obj2.guid],
+          ),
+          2,
+        );
+      });
+      await qEqual(col.where().findAll(), [obj2]);
+    });
+
+    test('deleteBySync', () {
+      isar.writeTxnSync((isar) {
+        expect(col.deleteByGuidSync(obj1.guid), true);
+        expect(col.deleteByGuidSync('SOMETHING'), false);
+      });
+      expect(col.where().findAllSync(), [obj2, obj3]);
+
+      isar.writeTxnSync((isar) {
+        expect(col.deleteByContentGuidSync('B', obj2.guid), true);
+        expect(col.deleteByContentGuidSync('D', obj3.guid), false);
+      });
+      expect(col.where().findAllSync(), [obj3]);
+    });
+
+    test('deleteAllBySync', () {
+      isar.writeTxnSync((isar) {
+        expect(col.deleteAllByGuidSync([obj3.guid, obj1.guid, 'AAA']), 2);
+      });
+      expect(col.where().findAllSync(), [obj2]);
+    });
+
+    test('deleteAllBySync composite', () {
+      isar.writeTxnSync((isar) {
+        expect(
+          col.deleteAllByContentGuidSync(
+            ['C', 'A', 'D'],
+            [obj3.guid, obj1.guid, obj2.guid],
+          ),
+          2,
+        );
+      });
+      expect(col.where().findAllSync(), [obj2]);
+    });
+  });
+}

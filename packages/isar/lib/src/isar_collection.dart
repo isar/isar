@@ -21,14 +21,27 @@ abstract class IsarCollection<OBJ> {
 
   /// @nodoc
   @protected
+  Future<OBJ?> getByIndex(
+    String indexName,
+    List<dynamic> value,
+  ) =>
+      getAllByIndex(indexName, [value]).then((objects) => objects[0]);
+
+  /// @nodoc
+  @protected
   Future<List<OBJ?>> getAllByIndex(
     String indexName,
-    List<List<Object?>> values,
+    List<List<dynamic>> values,
   );
 
   /// @nodoc
   @protected
-  List<OBJ?> getAllByIndexSync(String indexName, List<List<Object?>> values);
+  OBJ? getByIndexSync(String indexName, List<dynamic> value) =>
+      getAllByIndexSync(indexName, [value])[0];
+
+  /// @nodoc
+  @protected
+  List<OBJ?> getAllByIndexSync(String indexName, List<List<dynamic>> values);
 
   /// Insert or update an [object] and returns the assigned id.
   Future<int> put(OBJ object, {bool replaceOnConflict = false}) {
@@ -70,11 +83,21 @@ abstract class IsarCollection<OBJ> {
 
   /// @nodoc
   @protected
-  Future<int> deleteAllByIndex(String indexName, List<List<Object?>> values);
+  Future<bool> deleteByIndex(String indexName, List<dynamic> value) =>
+      deleteAllByIndex(indexName, [value]).then((count) => count == 1);
 
   /// @nodoc
   @protected
-  int deleteAllByIndexSync(String indexName, List<List<Object?>> values);
+  Future<int> deleteAllByIndex(String indexName, List<List<dynamic>> values);
+
+  /// @nodoc
+  @protected
+  bool deleteByIndexSync(String indexName, List<dynamic> value) =>
+      deleteAllByIndexSync(indexName, [value]) == 1;
+
+  /// @nodoc
+  @protected
+  int deleteAllByIndexSync(String indexName, List<List<dynamic>> values);
 
   /// Remove all data in this collection and reset the auto increment value.
   Future<void> clear();
