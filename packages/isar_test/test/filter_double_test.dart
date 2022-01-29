@@ -2,7 +2,7 @@
 // Float -> Double, float -> double
 
 import 'package:isar/isar.dart';
-import 'common.dart';
+import 'package:isar_test/common.dart';
 import 'package:test/test.dart';
 
 part 'filter_double_test.g.dart';

@@ -2,7 +2,7 @@ import 'package:isar/isar.dart';
 import 'package:isar_test/user_model.dart';
 import 'package:test/test.dart';
 
-import 'common.dart';
+import 'package:isar_test/common.dart';
 
 void main() {
   group('Sort By', () {

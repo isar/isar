@@ -1,5 +1,5 @@
 import 'package:isar/isar.dart';
-import 'common.dart';
+import 'package:isar_test/common.dart';
 import 'package:test/test.dart';
 
 part 'index_composite_test.g.dart';

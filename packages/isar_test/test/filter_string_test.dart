@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
-import 'common.dart';
+import 'package:isar_test/common.dart';
 import 'package:test/test.dart';
 
 part 'filter_string_test.g.dart';

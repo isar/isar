@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:isar/isar.dart';
 
-import 'common.dart';
+import 'package:isar_test/common.dart';
 
 part 'constructor_test.g.dart';
 part 'constructor_test.freezed.dart';
