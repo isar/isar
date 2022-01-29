@@ -31,7 +31,7 @@ class Model {
 }
 
 void main() {
-  group('Index', () {
+  group('IndexGet', () {
     late Isar isar;
     late IsarCollection<Model> col;
 

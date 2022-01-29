@@ -197,30 +197,4 @@ void main() {
       await qEqual(col.filter().fieldIsNull().findAll(), [objNull]);
     });
   });
-
-  group('Float list filter', () {
-    late Isar isar;
-    late IsarCollection<IntModel> col;
-
-    late IntModel objEmpty;
-    late IntModel obj1;
-    late IntModel obj2;
-    late IntModel obj3;
-    late IntModel objNull;
-
-    setUp(() async {
-      isar = await openTempIsar([IntModelSchema]);
-      col = isar.intModels;
-
-      objEmpty = IntModel()..list = [];
-      obj1 = IntModel()..list = [-1, 5, 10];
-      obj2 = IntModel()..list = [null];
-      obj3 = IntModel()..list = [null, 5, 8];
-      objNull = IntModel()..list = null;
-
-      await isar.writeTxn((isar) async {
-        await col.putAll([objEmpty, obj1, obj3, obj2, objNull]);
-      });
-    });
-  });
 }
