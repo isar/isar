@@ -6,15 +6,32 @@ on:
       - '*'
 
 jobs:
-  build_and_upload:
-    strategy:
-      matrix:
-        args: 
-          - os: macos-latest
-            build: macos
-          - os: ubuntu-latest
-            build: linux
-    runs-on: ${{ matrix.args.os }}
+  build_and_upload_macos:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: subosito/flutter-action@v1
+      with:
+        channel: 'stable'
+    - name: Build
+      working-directory: packages/isar_inspector
+      run: |
+        flutter config --enable-macos-desktop
+        flutter build macos
+    - name: Compress
+      working-directory: packages/isar_inspector/build/macos/Build/Products/Release/
+      run: zip -r -y inspector.zip "Isar Inspector.app"
+    - name: Upload binary
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: packages/isar_inspector/build/macos/Build/Products/Release/inspector.zip
+        asset_name: Isar Inspector MacOS.zip
+        tag: ${{ github.ref }}
+
+  build_and_upload_linux:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - uses: subosito/flutter-action@v1
@@ -22,19 +39,25 @@ jobs:
           channel: 'stable'
       - name: Install Linux requirements
         run: sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
-        if: matrix.args.os == 'ubuntu-latest'
       - name: Build
         working-directory: packages/isar_inspector
         run: |
-          flutter config --enable-${{ matrix.args.build }}-desktop
-          flutter build ${{ matrix.args.build }}
+          flutter config --enable-linux-desktop
+          flutter build linux
+      - name: AppImage
+        uses: AppImageCrafters/build-appimage@v1
+        working-directory: packages/isar_inspector/linux/appimage
+        with:
+          recipe: "AppImageBuilder.yml"
+          env:
+            VERSION: ${{ github.ref }}
       - name: Compress
-        working-directory: packages/isar_inspector/build/${{ matrix.args.build }}/Build/Products/Release/
-        run: zip -r -y inspector.zip "isar_inspector"
+        working-directory: packages/isar_inspector/linux/appimage
+        run: zip -r -y inspector.zip isar*.AppImage
       - name: Upload binary
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: packages/isar_inspector/build/${{ matrix.args.build }}/Build/Products/Release/inspector.zip
-          asset_name: Isar Inspector ${{ matrix.args.build }}.zip
+          file: packages/isar_inspector//linux/appimage/inspector.zip
+          asset_name: Isar Inspector Linux AppImage.zip
           tag: ${{ github.ref }}
