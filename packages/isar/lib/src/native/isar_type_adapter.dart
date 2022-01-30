@@ -4,6 +4,8 @@ import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
 import 'bindings.dart';
 
+/// @nodoc
+@protected
 typedef AdapterAlloc = Pointer<Uint8> Function(int size);
 
 /// @nodoc
