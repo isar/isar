@@ -45,9 +45,9 @@ class IsarInspector extends StatelessWidget {
         ),
       ),
       home: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xff111216), //Color.fromARGB(255, 34, 36, 41),
-          borderRadius: BorderRadius.circular(20),
+        decoration: const BoxDecoration(
+          color: Color(0xff111216), //Color.fromARGB(255, 34, 36, 41),
+          // borderRadius: BorderRadius.circular(20),
         ),
         child: GestureDetector(
           onTap: () {
