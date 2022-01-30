@@ -8,7 +8,6 @@ on:
 jobs:
   build_and_upload_macos:
     runs-on: macos-latest
-
     steps:
     - uses: actions/checkout@v1
     - uses: subosito/flutter-action@v1
@@ -53,11 +52,11 @@ jobs:
             VERSION: ${{ github.ref }}
       - name: Compress
         working-directory: packages/isar_inspector/linux/appimage
-        run: zip -r -y inspector.zip isar*.AppImage
+        run: zip -r -y inspector.zip *.AppImage
       - name: Upload binary
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: packages/isar_inspector//linux/appimage/inspector.zip
+          file: packages/isar_inspector/linux/appimage/inspector.zip
           asset_name: Isar Inspector Linux AppImage.zip
           tag: ${{ github.ref }}
