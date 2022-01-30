@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:isar_inspector/app_state.dart';
 import 'package:isar_inspector/collection_table.dart';
@@ -45,9 +47,9 @@ class IsarInspector extends StatelessWidget {
         ),
       ),
       home: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xff111216), //Color.fromARGB(255, 34, 36, 41),
-          // borderRadius: BorderRadius.circular(20),
+        decoration: BoxDecoration(
+          color: const Color(0xff111216), //Color.fromARGB(255, 34, 36, 41),
+          borderRadius: Platform.isMacOS ? BorderRadius.circular(20) : null,
         ),
         child: GestureDetector(
           onTap: () {
