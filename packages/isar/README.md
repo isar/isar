@@ -68,8 +68,6 @@ dev_dependencies:
   build_runner: any
 ```
 
-Replace `$latest` with the latest Isar version.
-
 ### 2. Annotate a Collection
 ```dart
 @Collection()

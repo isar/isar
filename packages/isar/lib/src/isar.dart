@@ -44,6 +44,9 @@ abstract class Isar {
     if (name.isEmpty || name.startsWith('_')) {
       throw IsarError('Instance names must not be empty or start with "_".');
     }
+    if (_instances.containsKey(name)) {
+      throw IsarError('Instance has already been opened.');
+    }
     if (schemas.isEmpty) {
       throw IsarError('At least one collection needs to be opened.');
     }
