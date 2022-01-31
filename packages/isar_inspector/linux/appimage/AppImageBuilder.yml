@@ -7,9 +7,9 @@
 version: 1
 script:
  - rm -rf AppDir; mkdir AppDir
- - cp -r $APPDIR/../../../build/linux/x64/release/bundle/* $APPDIR/
- - mkdir -p $APPDIR/usr/share/icons/hicolor/scalable/apps/
- - cp $APPDIR/../../../../../.github/assets/isar.svg $APPDIR/usr/share/icons/hicolor/scalable/apps/dev.isar.isar-inspector.svg
+ - cp -r AppDir/../../../build/linux/x64/release/bundle/* AppDir/
+ - mkdir -p AppDir/usr/share/icons/hicolor/scalable/apps/
+ - cp AppDir/../../../../../.github/assets/isar.svg AppDir/usr/share/icons/hicolor/scalable/apps/dev.isar.isar-inspector.svg
 AppDir:
   path: ./AppDir
   app_info:

@@ -45,14 +45,9 @@ jobs:
           flutter config --enable-linux-desktop
           flutter build linux
       - name: AppImage
-        # https://github.com/AppImageCrafters/build-appimage/blob/master/action.yml
-        uses: addnab/docker-run-action@v3
-        with:
-          image: appimagecrafters/appimage-builder:0.8.2
-          options: -v ${{ github.workspace }}:/app
-          run: |
-            cd /app/packages/isar_inspector/linux/appimage
-            VERSION=${{ github.ref }} appimage-builder --recipe AppImageBuilder.yml
+        run: |
+          docker build -t local_appimage < ./packages/isar_inspector/linux/appimage/Dockerfile
+          docker run -it -v ${{ github.workspace }}:/app local_appimage bash "-c 'cd /app/packages/isar_inspector/linux/appimage && VERSION=${{ github.ref }} appimage-builder --recipe AppImageBuilder.yml --skip-test'" 
       - name: Upload binary
         uses: svenstaro/upload-release-action@v1-release
         with:
