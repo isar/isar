@@ -864,21 +864,6 @@ class IsarCoreBindings {
       _isar_create_instance_async_ptr
           .asFunction<_dart_isar_create_instance_async>();
 
-  void isar_get_instance(
-    ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
-    ffi.Pointer<ffi.Int8> name,
-  ) {
-    return _isar_get_instance(
-      isar,
-      name,
-    );
-  }
-
-  late final _isar_get_instance_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_get_instance>>('isar_get_instance');
-  late final _dart_isar_get_instance _isar_get_instance =
-      _isar_get_instance_ptr.asFunction<_dart_isar_get_instance>();
-
   bool isar_close_instance(
     ffi.Pointer<ffi.NativeType> isar,
   ) {
@@ -2101,16 +2086,6 @@ typedef _dart_isar_create_instance_async = void Function(
   int relaxed_durability,
   ffi.Pointer<ffi.Int8> schema_json,
   int port,
-);
-
-typedef _c_isar_get_instance = ffi.Void Function(
-  ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
-  ffi.Pointer<ffi.Int8> name,
-);
-
-typedef _dart_isar_get_instance = void Function(
-  ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
-  ffi.Pointer<ffi.Int8> name,
 );
 
 typedef _c_isar_close_instance = ffi.Uint8 Function(
