@@ -47,12 +47,12 @@ jobs:
       - name: AppImage
         # https://github.com/AppImageCrafters/build-appimage/blob/master/action.yml
         uses: addnab/docker-run-action@v3
-          with:
-            image: appimagecrafters/appimage-builder:0.8.2
-            options: -v ${{ github.workspace }}:/app
-            run: |
-              cd /app/packages/isar_inspector/linux/appimage
-              VERSION=${{ github.ref }} appimage-builder --recipe AppImageBuilder.yml
+        with:
+          image: appimagecrafters/appimage-builder:0.8.2
+          options: -v ${{ github.workspace }}:/app
+          run: |
+            cd /app/packages/isar_inspector/linux/appimage
+            VERSION=${{ github.ref }} appimage-builder --recipe AppImageBuilder.yml
       - name: Upload binary
         uses: svenstaro/upload-release-action@v1-release
         with:
