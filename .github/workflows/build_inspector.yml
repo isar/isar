@@ -26,7 +26,7 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: packages/isar_inspector/build/macos/Build/Products/Release/inspector.zip
-        asset_name: Isar Inspector MacOS.zip
+        asset_name: Isar_Inspector_MacOS.zip
         tag: ${{ github.ref }}
 
   build_and_upload_linux:
@@ -50,14 +50,13 @@ jobs:
           flutter build linux
       - name: AppImage
         working-directory: packages/isar_inspector/linux/appimage
-        run: VERSION=${{ github.ref }}; appimage-builder --recipe AppImageBuilder.yml
-      - name: Compress
-        working-directory: packages/isar_inspector/linux/appimage
-        run: zip -r -y inspector.zip *.AppImage
+        run: |
+          VERSION=${{ github.ref }} appimage-builder --recipe AppImageBuilder.yml && \
+          mv *.AppImage Isar_Inspector_Linux.AppImage
       - name: Upload binary
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: packages/isar_inspector/linux/appimage/inspector.zip
-          asset_name: Isar Inspector Linux AppImage.zip
+          file: packages/isar_inspector/linux/appimage/Isar_Inspector_Linux.AppImage
+          asset_name: Isar_Inspector_Linux.AppImage
           tag: ${{ github.ref }}
