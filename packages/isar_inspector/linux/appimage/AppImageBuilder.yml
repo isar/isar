@@ -1,23 +1,22 @@
 # env VERSION must be given
 # e.g.: 
 # cd packages/isar_inspector/linux/appimage
-# VERSION=1.0.0; appimage-builder --recipe AppImageBuilder.yml 
+# VERSION=1.0.0 appimage-builder --recipe AppImageBuilder.yml 
 #
 
 version: 1
 script:
  - rm -rf AppDir; mkdir AppDir
  - cp -r $APPDIR/../../../build/linux/x64/release/bundle/* $APPDIR/
- - cp $APPDIR/../dev.isar.isar-inspector.desktop $APPDIR/
- - mkdir -p $APPDIR/usr/share/icons/hicolor/64x64/apps/
- - cp $APPDIR/../icon.png $APPDIR/usr/share/icons/hicolor/64x64/apps/isar.png
+ - mkdir -p $APPDIR/usr/share/icons/hicolor/scalable/apps/
+ - cp $APPDIR/../../../../../.github/assets/isar.svg $APPDIR/usr/share/icons/hicolor/scalable/apps/dev.isar.isar-inspector.svg
 AppDir:
   path: ./AppDir
   app_info:
     id: dev.isar.isar-inspector
     name: Isar Inspector
-    icon: isar
-    version: latest
+    icon: dev.isar.isar-inspector
+    version: !ENV ${VERSION}
     exec: isar_inspector
     exec_args: $@
 AppImage:
