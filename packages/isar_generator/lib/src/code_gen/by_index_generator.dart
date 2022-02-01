@@ -1,4 +1,5 @@
 import 'package:dartx/dartx.dart';
+import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 String generateByIndexExtension(ObjectInfo oi) {
@@ -30,19 +31,19 @@ String generateSingleByIndex(ObjectInfo oi, ObjectIndex index) {
   final paramsList = index.properties.map((i) => i.property.dartName).join(',');
   return '''
     Future<${oi.dartName}?> getBy${index.dartName}($params) {
-      return getByIndex('${index.name}', [$paramsList]);
+      return getByIndex('${index.name.esc}', [$paramsList]);
     }
 
     ${oi.dartName}? getBy${index.dartName}Sync($params) {
-      return getByIndexSync('${index.name}', [$paramsList]);
+      return getByIndexSync('${index.name.esc}', [$paramsList]);
     }
 
     Future<bool> deleteBy${index.dartName}($params) {
-      return deleteByIndex('${index.name}', [$paramsList]);
+      return deleteByIndex('${index.name.esc}', [$paramsList]);
     }
 
     bool deleteBy${index.dartName}Sync($params) {
-      return deleteByIndexSync('${index.name}', [$paramsList]);
+      return deleteByIndexSync('${index.name.esc}', [$paramsList]);
     }
   ''';
 }
@@ -75,22 +76,22 @@ String generateAllByIndex(ObjectInfo oi, ObjectIndex index) {
   return '''
     Future<List<${oi.dartName}?>> getAllBy${index.dartName}($params) {
       $createValues
-      return getAllByIndex('${index.name}', values);
+      return getAllByIndex('${index.name.esc}', values);
     }
 
     List<${oi.dartName}?> getAllBy${index.dartName}Sync($params) {
       $createValues
-      return getAllByIndexSync('${index.name}', values);
+      return getAllByIndexSync('${index.name.esc}', values);
     }
 
     Future<int> deleteAllBy${index.dartName}($params) {
       $createValues
-      return deleteAllByIndex('${index.name}', values);
+      return deleteAllByIndex('${index.name.esc}', values);
     }
 
     int deleteAllBy${index.dartName}Sync($params) {
       $createValues
-      return deleteAllByIndexSync('${index.name}', values);
+      return deleteAllByIndexSync('${index.name.esc}', values);
     }
   ''';
 }

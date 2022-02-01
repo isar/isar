@@ -208,6 +208,22 @@ class SchemaTestModel {
   var otherLinks = IsarLinks<SchemaTestModel>();
 }
 
+@Collection()
+class $Dollar$Model {
+  @Id()
+  int? $dollar$id;
+
+  @Index(unique: true)
+  late bool $dollar$Field;
+
+  @Index()
+  bool get $dollar$Getter => false;
+
+  final $dollar$Link = IsarLink<$Dollar$Model>();
+
+  final $dollar$Links = IsarLinks<$Dollar$Model>();
+}
+
 void main() {
   isarTest('Schema test', () {
     final schemaJson = jsonDecode(SchemaTestModelSchema.schema);
@@ -554,6 +570,41 @@ void main() {
         {'name': 'links', 'target': 'SchemaTestModel'},
         {'name': 'renamedLink', 'target': 'SchemaTestModel'},
         {'name': 'renamedLinks', 'target': 'SchemaTestModel'}
+      ]
+    });
+  });
+
+  isarTest('Dollar Schema test', () {
+    final schemaJson = jsonDecode($Dollar$ModelSchema.schema);
+    expect(schemaJson, {
+      'name': '\$Dollar\$Model',
+      'properties': [
+        {'name': '\$dollar\$Field', 'type': 'Byte'},
+        {'name': '\$dollar\$Getter', 'type': 'Byte'}
+      ],
+      'indexes': [
+        {
+          'name': '\$dollar\$Field',
+          'unique': true,
+          'properties': [
+            {'name': '\$dollar\$Field', 'type': 'Value', 'caseSensitive': false}
+          ]
+        },
+        {
+          'name': '\$dollar\$Getter',
+          'unique': false,
+          'properties': [
+            {
+              'name': '\$dollar\$Getter',
+              'type': 'Value',
+              'caseSensitive': false
+            }
+          ]
+        }
+      ],
+      'links': [
+        {'name': '\$dollar\$Link', 'target': '\$Dollar\$Model'},
+        {'name': '\$dollar\$Links', 'target': '\$Dollar\$Model'}
       ]
     });
   });

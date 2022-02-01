@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
@@ -137,7 +138,7 @@ class WhereGenerator {
     QueryBuilder<$objName, $objName, QAfterWhere> $name() {
       return addWhereClauseInternal(
         const WhereClause(
-          indexName: ${indexName == null ? null : "'$indexName'"}
+          indexName: ${indexName == null ? null : "'${indexName.esc}'"}
         )
       );
     }
@@ -156,7 +157,7 @@ class WhereGenerator {
     return '''
     $mPrefix $name($params) {
       return addWhereClauseInternal(WhereClause(
-        indexName: ${indexName == null ? null : "'$indexName'"},
+        indexName: ${indexName == null ? null : "'${indexName.esc}'"},
         lower: [$values],
         includeLower: true,
         upper: [$values],
@@ -177,21 +178,21 @@ class WhereGenerator {
     $mPrefix $name($params) {
       if (whereSortInternal == Sort.asc) {
         return addWhereClauseInternal(WhereClause(
-          indexName: ${indexName == null ? null : "'$indexName'"},
+          indexName: ${indexName == null ? null : "'${indexName.esc}'"},
           upper: [$values],
           includeUpper: false,
         )).addWhereClauseInternal(WhereClause(
-          indexName: ${indexName == null ? null : "'$indexName'"},
+          indexName: ${indexName == null ? null : "'${indexName.esc}'"},
           lower: [$values],
           includeLower: false,
         ));
       } else {
         return addWhereClauseInternal(WhereClause(
-          indexName: ${indexName == null ? null : "'$indexName'"},
+          indexName: ${indexName == null ? null : "'${indexName.esc}'"},
           lower: [$values],
           includeLower: false,
         )).addWhereClauseInternal(WhereClause(
-          indexName: ${indexName == null ? null : "'$indexName'"},
+          indexName: ${indexName == null ? null : "'${indexName.esc}'"},
           upper: [$values],
           includeUpper: false,
         ));
@@ -210,7 +211,7 @@ class WhereGenerator {
     return '''
     $mPrefix $name(${joinToParams(properties)} $include) {
       return addWhereClauseInternal(WhereClause(
-        indexName: ${indexName == null ? null : "'$indexName'"},
+        indexName: ${indexName == null ? null : "'${indexName.esc}'"},
         lower: [${joinToValues(properties)}],
         includeLower: ${!properties.containsFloat ? 'include' : 'false'},
       ));
@@ -228,7 +229,7 @@ class WhereGenerator {
     return '''
     $mPrefix $name(${joinToParams(properties)} $include) {
       return addWhereClauseInternal(WhereClause(
-        indexName: ${indexName == null ? null : "'$indexName'"},
+        indexName: ${indexName == null ? null : "'${indexName.esc}'"},
         upper: [${joinToValues(properties)}],
         includeUpper: ${!properties.containsFloat ? 'include' : 'false'},
       ));
@@ -263,7 +264,7 @@ class WhereGenerator {
     return '''
     $mPrefix $name($params $include) {
       return addWhereClauseInternal(WhereClause(
-        indexName: ${indexName == null ? null : "'$indexName'"},
+        indexName: ${indexName == null ? null : "'${indexName.esc}'"},
         lower: [$values $lowerName],
         includeLower: ${!properties.containsFloat ? 'includeLower' : 'false'},
         upper: [$values $upperName],
@@ -281,7 +282,7 @@ class WhereGenerator {
     return '''
     $mPrefix $name() {
       return addWhereClauseInternal(const WhereClause(
-        indexName: '$indexName',
+        indexName: '${indexName.esc}',
         upper: [null],
         includeUpper: true,
         lower: [null],
@@ -299,7 +300,7 @@ class WhereGenerator {
     return '''
     $mPrefix $name() {
       return addWhereClauseInternal(const WhereClause(
-        indexName: '$indexName',
+        indexName: '${indexName.esc}',
         lower: [null],
         includeLower: false,
       ));
@@ -328,7 +329,7 @@ class WhereGenerator {
     return '''
     $mPrefix $name($params) {
       return addWhereClauseInternal(WhereClause(
-        indexName: '$indexName',
+        indexName: '${indexName.esc}',
         lower: [$values $lastName],
         includeLower: true,
         upper: [$values '\$$lastName\\u{FFFFF}'],

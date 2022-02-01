@@ -1,3 +1,4 @@
+import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
@@ -11,11 +12,11 @@ String generateSortBy(ObjectInfo oi) {
 
     code += '''
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>sortBy${property.dartName.capitalize()}() {
-      return addSortByInternal('${property.dartName}', Sort.asc);
+      return addSortByInternal('${property.dartName.esc}', Sort.asc);
     }
     
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>sortBy${property.dartName.capitalize()}Desc() {
-      return addSortByInternal('${property.dartName}', Sort.desc);
+      return addSortByInternal('${property.dartName.esc}', Sort.desc);
     }''';
   }
 
@@ -29,11 +30,11 @@ String generateSortBy(ObjectInfo oi) {
 
     code += '''
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>thenBy${property.dartName.capitalize()}() {
-      return addSortByInternal('${property.dartName}', Sort.asc);
+      return addSortByInternal('${property.dartName.esc}', Sort.asc);
     }
     
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>thenBy${property.dartName.capitalize()}Desc() {
-      return addSortByInternal('${property.dartName}', Sort.desc);
+      return addSortByInternal('${property.dartName.esc}', Sort.desc);
     }''';
   }
   code += '}';

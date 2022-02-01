@@ -4,7 +4,8 @@
 - Fixed incorrect return value of `deleteByIndex()`
 - Fixed wrong auto increment ids in some cases (thanks @robban112)
 - Fixed an issue with `Isar.close()` (thanks @msxenon)
-- Fixed broken link in pub.dev example page (thanks @)
+- Fixed `$` escaping in generated code (thanks @jtzell)
+- Fixed broken link in pub.dev example page
 
 ## 2.1.0
 `isar_connect` is now integrated into `isar`

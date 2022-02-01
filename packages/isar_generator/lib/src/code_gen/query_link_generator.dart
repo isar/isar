@@ -1,3 +1,4 @@
+import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
 
@@ -12,7 +13,7 @@ String generateQueryLinks(ObjectInfo oi, List<ObjectInfo?> objects) {
         return linkInternal(
           isar.${targetOi.accessor},
           q,
-          '${link.dartName}',
+          '${link.dartName.esc}',
         );
       }''';
   }

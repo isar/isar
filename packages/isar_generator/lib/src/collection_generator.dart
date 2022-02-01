@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:isar_generator/src/code_gen/collection_schema_generator.dart';
+import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_analyzer.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:isar/isar.dart';
@@ -25,7 +26,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
 
     extension Get${object.dartName}Collection on Isar {
       IsarCollection<${object.dartName}> get ${object.accessor} {
-        return getCollection('${object.dartName}');
+        return getCollection('${object.dartName.esc}');
       }
     }''';
 

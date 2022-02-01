@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:isar/isar.dart';
+import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
@@ -8,24 +9,25 @@ import 'package:dartx/dartx.dart';
 String generateCollectionSchema(ObjectInfo object) {
   final schema = generateSchema(object);
   final propertyIds = object.objectProperties
-      .mapIndexed((index, p) => "'${p.dartName}': $index")
+      .mapIndexed((index, p) => "'${p.dartName.esc}': $index")
       .join(',');
-  final indexIds =
-      object.indexes.mapIndexed((index, i) => "'${i.name}': $index").join(',');
+  final indexIds = object.indexes
+      .mapIndexed((index, i) => "'${i.name.esc}': $index")
+      .join(',');
   final indexTypes = object.indexes
       .map((i) =>
-          "'${i.name}': [${i.properties.map((e) => e.indexTypeEnum).join(',')},]")
+          "'${i.name.esc}': [${i.properties.map((e) => e.indexTypeEnum).join(',')},]")
       .join(',');
   final linkIds = object.links
       .where((l) => !l.backlink)
-      .mapIndexed((i, link) => "'${link.dartName}': $i")
+      .mapIndexed((i, link) => "'${link.dartName.esc}': $i")
       .join(',');
   final backlinkIds = object.links
       .where((l) => l.backlink)
-      .mapIndexed((i, link) => "'${link.dartName}': $i")
+      .mapIndexed((i, link) => "'${link.dartName.esc}': $i")
       .join(',');
   final linkedCollections = object.links
-      .map((e) => "'${e.targetCollectionDartName}'")
+      .map((e) => "'${e.targetCollectionDartName.esc}'")
       .distinct()
       .join(',');
   final getLinks =
@@ -34,10 +36,10 @@ String generateCollectionSchema(ObjectInfo object) {
   final setId = '(obj, id) => obj.${object.idProperty.dartName} = id';
   return '''
     final ${object.dartName.capitalize()}Schema = CollectionSchema(
-      name: '${object.dartName}',
+      name: '${object.dartName.esc}',
       schema: '$schema',
       adapter: const ${object.adapterName}(),
-      idName: '${object.idProperty.isarName}',
+      idName: '${object.idProperty.isarName.esc}',
       propertyIds: {$propertyIds},
       indexIds: {$indexIds},
       indexTypes: {$indexTypes},
@@ -86,7 +88,7 @@ String generateSchema(ObjectInfo object) {
       ]
     ]
   };
-  return jsonEncode(json);
+  return jsonEncode(json).esc;
 }
 
 extension on IndexType {

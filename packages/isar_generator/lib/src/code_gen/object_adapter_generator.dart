@@ -1,3 +1,4 @@
+import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
@@ -316,9 +317,9 @@ String _generateAttachLinks(ObjectInfo object) {
   for (var link in object.links) {
     code += '''object.${link.dartName}.attach(
       isar.${object.accessor},
-      isar.getCollection<${link.targetCollectionDartName}>("${link.targetCollectionDartName}"),
+      isar.getCollection<${link.targetCollectionDartName}>("${link.targetCollectionDartName.esc}"),
       object,
-      "${link.dartName}",
+      "${link.dartName.esc}",
       ${link.backlink},
     );
     ''';

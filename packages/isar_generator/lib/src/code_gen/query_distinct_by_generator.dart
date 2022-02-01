@@ -1,3 +1,4 @@
+import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
@@ -9,12 +10,12 @@ String generateDistinctBy(ObjectInfo oi) {
     if (property.isarType == IsarType.string) {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}({bool caseSensitive = true}) {
-            return addDistinctByInternal('${property.dartName}', caseSensitive: caseSensitive);
+            return addDistinctByInternal('${property.dartName.esc}', caseSensitive: caseSensitive);
         }''';
     } else if (property.isarType.index < IsarType.string.index) {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}() {
-            return addDistinctByInternal('${property.dartName}');
+            return addDistinctByInternal('${property.dartName.esc}');
         }''';
     }
   }

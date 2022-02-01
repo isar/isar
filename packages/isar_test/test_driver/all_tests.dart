@@ -17,6 +17,7 @@ import '../test/index_get_by_delete_by_test.dart'
     as index_get_by_delete_by_test;
 import '../test/index_multi_entry_test.dart' as index_multi_entry_test;
 
+import '../test/instance_test.dart' as instance_test;
 import '../test/isolate_test.dart' as isolate_test;
 import '../test/inheritance_test.dart' as inheritance_test;
 import '../test/json_test.dart' as json_test;
@@ -54,6 +55,7 @@ void run() {
   index_get_by_delete_by_test.main();
   index_multi_entry_test.main();
 
+  instance_test.main();
   isolate_test.main();
   inheritance_test.main();
   json_test.main();

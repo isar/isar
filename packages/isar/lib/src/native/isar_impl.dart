@@ -23,13 +23,14 @@ class IsarImpl extends Isar {
 
   void requireNotInTxn() {
     if (_currentTxnSync != null || Zone.current[_zoneTxn] != null) {
-      throw 'Cannot perform this operation from within an active transaction.';
+      throw IsarError(
+          'Cannot perform this operation from within an active transaction.');
     }
   }
 
   void requireOpen() {
     if (!isOpen) {
-      throw 'Isar instance has already been closed';
+      throw IsarError('Isar instance has already been closed');
     }
   }
 
@@ -93,7 +94,8 @@ class IsarImpl extends Isar {
     Txn? currentTxn = Zone.current[_zoneTxn];
     if (currentTxn != null) {
       if (write && !currentTxn.write) {
-        throw 'Operation cannot be performed within a read transaction.';
+        throw IsarError(
+            'Operation cannot be performed within a read transaction.');
       }
       return callback(currentTxn);
     } else if (!write) {
@@ -101,7 +103,7 @@ class IsarImpl extends Isar {
         return callback(Zone.current[_zoneTxn]);
       });
     } else {
-      throw 'Write operations require an explicit transaction.';
+      throw IsarError('Write operations require an explicit transaction.');
     }
   }
 
@@ -141,13 +143,14 @@ class IsarImpl extends Isar {
   T getTxnSync<T>(bool write, T Function(SyncTxn txn) callback) {
     if (_currentTxnSync != null) {
       if (write && !_currentTxnSync!.write) {
-        throw 'Operation cannot be performed within a read transaction.';
+        throw IsarError(
+            'Operation cannot be performed within a read transaction.');
       }
       return callback(_currentTxnSync!);
     } else if (!write) {
       return _txnSync(false, false, (isar) => callback(_currentTxnSync!));
     } else {
-      throw 'Write operations require an explicit transaction.';
+      throw IsarError('Write operations require an explicit transaction.');
     }
   }
 

@@ -1,3 +1,4 @@
+import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 String generatePropertyQuery(ObjectInfo oi) {
@@ -6,7 +7,7 @@ String generatePropertyQuery(ObjectInfo oi) {
   for (var property in oi.properties) {
     code += '''
       QueryBuilder<${oi.dartName}, ${property.dartType}, QQueryOperations>${property.dartName}Property() {
-        return addPropertyNameInternal('${property.dartName}');
+        return addPropertyNameInternal('${property.dartName.esc}');
       }''';
   }
   return '$code}';
