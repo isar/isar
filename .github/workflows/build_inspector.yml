@@ -38,8 +38,9 @@ jobs:
           channel: 'stable'
       - name: Install Linux requirements
         run: |
-          sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev tar flatpak flatpak-builder
-          flatpak install flathub org.freedesktop.Platform//21.08 org.freedesktop.Sdk//21.08
+          sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
+        #  tar flatpak flatpak-builder
+        # flatpak install flathub org.freedesktop.Platform//21.08 org.freedesktop.Sdk//21.08
       - name: Build
         working-directory: packages/isar_inspector
         run: |
