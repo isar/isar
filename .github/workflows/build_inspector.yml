@@ -48,8 +48,7 @@ jobs:
       - name: Docker freedesktop
         uses: docker://freedesktopsdk/flatpak:21.08-x86_64
         with:
-          volumes:
-            - ${{ github.workspace }}:/app
+          args: -v ${{ github.workspace }}:/app
           run: |
             cd /app/packages/isar_inspector/linux/flatpak
             ./build-tar.sh
