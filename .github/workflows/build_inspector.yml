@@ -45,12 +45,21 @@ jobs:
         run: |
           flutter config --enable-linux-desktop
           flutter build linux
-      - name: Compress Tar
-        working-directory: packages/isar_inspector/linux/flatpak
-        run: ./build-tar.sh
-      - name: Flatpak
-        working-directory: packages/isar_inspector/linux/flatpak
-        run: ./build-flatpak.sh
+      - name: Docker freedesktop
+        uses: docker://freedesktopsdk/flatpak:21.08-x86_64
+          with:
+            volumes:
+              - ${{ github.workspace }}:/app
+            run: |
+              cd /app/packages/isar_inspector/linux/flatpak
+              ./build-tar.sh
+              ./build-flatpak.sh
+      # - name: Compress Tar
+      #   working-directory: packages/isar_inspector/linux/flatpak
+      #   run: ./build-tar.sh
+      # - name: Flatpak
+      #   working-directory: packages/isar_inspector/linux/flatpak
+      #   run: ./build-flatpak.sh
       - name: Upload tar
         uses: svenstaro/upload-release-action@v1-release
         with:
