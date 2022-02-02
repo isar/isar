@@ -47,13 +47,13 @@ jobs:
           flutter build linux
       - name: Docker freedesktop
         uses: docker://freedesktopsdk/flatpak:21.08-x86_64
-          with:
-            volumes:
-              - ${{ github.workspace }}:/app
-            run: |
-              cd /app/packages/isar_inspector/linux/flatpak
-              ./build-tar.sh
-              ./build-flatpak.sh
+        with:
+          volumes:
+            - ${{ github.workspace }}:/app
+          run: |
+            cd /app/packages/isar_inspector/linux/flatpak
+            ./build-tar.sh
+            ./build-flatpak.sh
       # - name: Compress Tar
       #   working-directory: packages/isar_inspector/linux/flatpak
       #   run: ./build-tar.sh
