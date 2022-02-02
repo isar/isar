@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Isar Inspector
+Icon=dev.isar.IsarInspector
+Exec=/app/bin/isar_inspector %u
+Categories=Development;
+Keywords=Database;Isar;

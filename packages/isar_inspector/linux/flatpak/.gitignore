@@ -1,0 +1,6 @@
+/build-dir
+/repo
+/*.flatpak
+/bundle.tar.gz
+/.flatpak-builder
+/icon.svg

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>dev.isar.IsarInspector</id>
+  <name>Isar Inspector</name>
+  <summary>Inspect the Isar instances and collections of your app</summary>
+  <metadata_license>CC-BY-4.0</metadata_license>
+  <project_license>Apache-2.0</project_license>
+  <recommends>
+    <control>keyboard</control>
+  </recommends>
+  <developer_name>isar.dev</developer_name>
+  <url type="homepage">https://isar.dev</url>
+  <description>
+    <p>The Isar Inspector allows you to inspect the Isar instances and collections of your app in real time. You can execute queries, switch between instances and sort the data.</p>
+  </description>
+  <screenshots>
+    <screenshot type="default">
+      <image type="source">https://raw.githubusercontent.com/isar/isar/main/.github/assets/isar-inspector.png</image>
+    </screenshot>
+  </screenshots>
+  <launchable type="desktop-id">dev.isar.IsarInspector.desktop</launchable>
+  <releases>
+    <release version="1.0" date="2022-02-02"/>
+  </releases>
+  <content_rating type="oars-1.1"></content_rating>
+  <update_contact>hello@isar.dev</update_contact>
+</component>
