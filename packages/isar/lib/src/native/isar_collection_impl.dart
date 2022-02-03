@@ -7,6 +7,7 @@ import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 import 'package:isar/src/native/isar_core.dart';
 
+import 'binary_reader.dart';
 import 'bindings.dart';
 import 'index_key.dart';
 import 'isar_impl.dart';
@@ -16,7 +17,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   final IsarImpl isar;
 
-  final IsarTypeAdapter<OBJ> adapter;
+  final IsarNativeTypeAdapter<OBJ> adapter;
   final Pointer ptr;
 
   final String idName;

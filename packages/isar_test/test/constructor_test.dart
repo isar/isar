@@ -11,11 +11,15 @@ part 'constructor_test.freezed.dart';
 class EmptyConstructorModel {
   int? id;
 
+  late String name;
+
   EmptyConstructorModel();
 
   @override
   operator ==(dynamic other) {
-    return other is EmptyConstructorModel && other.id == id;
+    return other is EmptyConstructorModel &&
+        other.id == id &&
+        other.name == name;
   }
 }
 
@@ -126,8 +130,8 @@ void main() {
     });
 
     isarTest('EmptyConstructorModel', () async {
-      final obj1 = EmptyConstructorModel();
-      final obj2 = EmptyConstructorModel();
+      final obj1 = EmptyConstructorModel()..name = 'obj1';
+      final obj2 = EmptyConstructorModel()..name = 'obj2';
       await isar.writeTxn((isar) async {
         await isar.emptyConstructorModels.putAll([obj1, obj2]);
       });

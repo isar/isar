@@ -3,9 +3,9 @@ import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
 
-String generateObjectAdapter(ObjectInfo object) {
+String generateNativeTypeAdapter(ObjectInfo object) {
   return '''
-    class ${object.adapterName} extends IsarTypeAdapter<${object.dartName}> {
+    class ${object.adapterName} extends IsarNativeTypeAdapter<${object.dartName}> {
 
       const ${object.adapterName}();
 
@@ -48,12 +48,12 @@ String _generatePrepareSerialize(ObjectInfo object) {
           code += '''
           IsarUint8List? $accessor;
           if (value$i != null) {
-            $accessor = BinaryWriter.utf8Encoder.convert(value$i);
+            $accessor = IsarBinaryWriter.utf8Encoder.convert(value$i);
           }
           ''';
         } else {
           code +=
-              'final $accessor = BinaryWriter.utf8Encoder.convert(value$i);';
+              'final $accessor = IsarBinaryWriter.utf8Encoder.convert(value$i);';
         }
         code += 'dynamicSize += $accessor$nOp.length $nLen;';
         break;
@@ -72,7 +72,7 @@ String _generatePrepareSerialize(ObjectInfo object) {
           code += 'if (str != null) {';
         }
         code += '''
-          final bytes = BinaryWriter.utf8Encoder.convert(str);
+          final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
           bytesList$i.add(bytes);
           dynamicSize += bytes.length;''';
         if (property.elementNullable) {
@@ -120,8 +120,8 @@ String _generateSerialize(ObjectInfo object) {
     ${_generatePrepareSerialize(object)}
     rawObj.buffer = alloc(size);
     rawObj.buffer_length = size;
-    final buffer = bufAsBytes(rawObj.buffer, size);
-    final writer = BinaryWriter(buffer, ${object.staticSize});
+    final buffer = nativeBufAsBytes(rawObj.buffer, size);
+    final writer = IsarBinaryWriter(buffer, ${object.staticSize});
   ''';
   for (var i = 0; i < object.objectProperties.length; i++) {
     final property = object.objectProperties[i];
@@ -185,7 +185,7 @@ String _generateSerialize(ObjectInfo object) {
 String _generateDeserialize(ObjectInfo object) {
   var code = '''
   @override
-  ${object.dartName} deserialize(IsarCollection<${object.dartName}> collection, int id, BinaryReader reader, List<int> offsets) {
+  ${object.dartName} deserialize(IsarCollection<${object.dartName}> collection, int id, IsarBinaryReader reader, List<int> offsets) {
     final object = ${object.dartName}(''';
   final propertiesByMode = object.properties.groupBy((p) => p.deserialize);
   final positional = propertiesByMode[PropertyDeser.positionalParam] ?? [];
@@ -226,7 +226,7 @@ String _generateDeserialize(ObjectInfo object) {
 String _generateDeserializeProperty(ObjectInfo object) {
   var code = '''
   @override
-  P deserializeProperty<P>(int id, BinaryReader reader, int propertyIndex, int offset) {
+  P deserializeProperty<P>(int id, IsarBinaryReader reader, int propertyIndex, int offset) {
     switch (propertyIndex) {
       case -1:
         return id as P;''';

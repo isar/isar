@@ -38,7 +38,8 @@ String generateCollectionSchema(ObjectInfo object) {
     final ${object.dartName.capitalize()}Schema = CollectionSchema(
       name: '${object.dartName.esc}',
       schema: '$schema',
-      adapter: const ${object.adapterName}(),
+      nativeAdapter: const ${object.nativeAdapterName}(),
+      webAdapter: const ${object.webAdapterName}(),
       idName: '${object.idProperty.isarName.esc}',
       propertyIds: {$propertyIds},
       indexIds: {$indexIds},

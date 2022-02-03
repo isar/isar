@@ -1,10 +1,12 @@
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-import 'package:isar/isar.dart';
 import 'package:isar/src/native/isar_core.dart';
 
-List<String> splitWordsNative(String input) {
+import 'binary_reader.dart';
+import 'binary_writer.dart';
+
+List<String> splitWords(String input) {
   initializeIsarCore();
 
   final bytes = BinaryWriter.utf8Encoder.convert(input);

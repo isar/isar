@@ -7,11 +7,11 @@ import 'bindings.dart';
 import 'isar_collection_impl.dart';
 import 'isar_core.dart';
 
-IsarLink<OBJ> nativeIsarLink<OBJ>() {
+IsarLink<OBJ> createIsarLink<OBJ>() {
   return IsarLinkImpl();
 }
 
-IsarLinks<OBJ> nativeIsarLinks<OBJ>() {
+IsarLinks<OBJ> createIsarLinks<OBJ>() {
   return IsarLinksImpl();
 }
 

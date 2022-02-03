@@ -2,14 +2,12 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
 import 'bindings.dart';
-
-const falseBool = 1;
-const trueBool = 2;
 
 const minInt = -2147483648;
 const maxInt = 2147483647;
@@ -27,6 +25,9 @@ const nullLong = minLong;
 const nullFloat = minFloat;
 const nullDouble = minDouble;
 final nullDate = minDate;
+
+const falseBool = 1;
+const trueBool = 2;
 
 // ignore: non_constant_identifier_names
 IsarCoreBindings? _IC;
@@ -100,6 +101,9 @@ Stream<void> wrapIsarPort(ReceivePort port) {
   );
   return portStreamController.stream;
 }
+
+Uint8List bufAsBytes(Pointer<Uint8> pointer, int length) =>
+    pointer.asTypedList(length);
 
 extension RawObjectX on RawObject {
   void freeData() {

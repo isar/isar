@@ -32,13 +32,7 @@ abstract class IsarLinkBase<OBJ> {
 abstract class IsarLink<OBJ> extends IsarLinkBase<OBJ> {
   /// Create an empty, unattached link. Make sure to provide the correct
   /// generic argument.
-  factory IsarLink() {
-    if (kIsWeb) {
-      throw UnimplementedError();
-    } else {
-      return nativeIsarLink();
-    }
-  }
+  factory IsarLink() => isarCreateLink();
 
   /// The linked object or `null` if no object is linked.
   OBJ? get value;
@@ -52,12 +46,7 @@ abstract class IsarLink<OBJ> extends IsarLinkBase<OBJ> {
 abstract class IsarLinks<OBJ> extends IsarLinkBase<OBJ> implements Set<OBJ> {
   /// Create an empty, unattached link. Make sure to provide the correct
   /// generic argument.
-  factory IsarLinks() {
-    if (kIsWeb) {
-      throw UnimplementedError();
-    } else {}
-    return nativeIsarLinks();
-  }
+  factory IsarLinks() => isarCreateLinks();
 
   @override
   Future<void> load({bool overrideChanges = false});

@@ -73,16 +73,12 @@ abstract class Isar {
       initializeIsarConnect();
     }
     _checkOpen(name, schemas);
-    if (kIsWeb) {
-      throw UnimplementedError();
-    } else {
-      return openIsarNative(
-        schemas: schemas,
-        directory: directory,
-        name: name,
-        relaxedDurability: relaxedDurability,
-      );
-    }
+    return isarOpen(
+      schemas: schemas,
+      directory: directory,
+      name: name,
+      relaxedDurability: relaxedDurability,
+    );
   }
 
   /// Open a new Isar instance.
@@ -97,16 +93,12 @@ abstract class Isar {
       initializeIsarConnect();
     }
     _checkOpen(name, schemas);
-    if (kIsWeb) {
-      throw UnimplementedError();
-    } else {
-      return openIsarNativeSync(
-        schemas: schemas,
-        directory: directory,
-        name: name,
-        relaxedDurability: relaxedDurability,
-      );
-    }
+    return isarOpenSync(
+      schemas: schemas,
+      directory: directory,
+      name: name,
+      relaxedDurability: relaxedDurability,
+    );
   }
 
   /// Is the instance open?
@@ -163,7 +155,7 @@ abstract class Isar {
   /// Isar instance will be closed.
   ///
   /// Returns whether the instance was actually closed.
-  Future<bool> close() {
+  Future<bool> close({bool deleteFromDisk = false}) {
     _isOpen = false;
     if (identical(_instances[name], this)) {
       _instances.remove(name);
@@ -212,11 +204,5 @@ abstract class Isar {
 
   /// Split a String into words according to Unicode Annex #29. Only words
   /// containing at least one alphanumeric character will be included.
-  static List<String> splitWords(String input) {
-    if (kIsWeb) {
-      throw UnimplementedError();
-    } else {
-      return splitWordsNative(input);
-    }
-  }
+  static List<String> splitWords(String input) => isarSplitWords(input);
 }
