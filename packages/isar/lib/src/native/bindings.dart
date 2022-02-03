@@ -866,9 +866,11 @@ class IsarCoreBindings {
 
   bool isar_close_instance(
     ffi.Pointer<ffi.NativeType> isar,
+    bool delete_from_disk,
   ) {
     return _isar_close_instance(
           isar,
+          delete_from_disk ? 1 : 0,
         ) !=
         0;
   }
@@ -2090,10 +2092,12 @@ typedef _dart_isar_create_instance_async = void Function(
 
 typedef _c_isar_close_instance = ffi.Uint8 Function(
   ffi.Pointer<ffi.NativeType> isar,
+  ffi.Uint8 delete_from_disk,
 );
 
 typedef _dart_isar_close_instance = int Function(
   ffi.Pointer<ffi.NativeType> isar,
+  int delete_from_disk,
 );
 
 typedef _c_isar_get_collection = ffi.Int64 Function(
