@@ -53,11 +53,11 @@ void main() {
         message2.id = await messages.put(message2);
       });
 
-      expect(message1.id, Isar.minId);
+      expect(message1.id, 1);
       final newMessage1 = await messages.get(message1.id!);
       expect(message1, newMessage1);
 
-      expect(message2.id, Isar.minId + 1);
+      expect(message2.id, 2);
       final newMessage2 = await messages.get(message2.id!);
       expect(message2, newMessage2);
     });
@@ -75,17 +75,17 @@ void main() {
 
       final newMessage1 = await messages.get(message1.id!);
       expect(message1.id, 5);
-      expect(message1, newMessage1);
+      expect(newMessage1, message1);
 
       expect(message2.id, 6);
       final newMessage2 = await messages.get(message2.id!);
-      expect(message2, newMessage2);
+      expect(newMessage2, message2);
 
       final noMessage = await messages.get(7);
       expect(noMessage, null);
     });
 
-    isarTest('getSync() / putSync() without int oid', () {
+    isarTestSync('getSync() / putSync() without int oid', () {
       final message = Message()..message = 'This is a new message';
 
       isar.writeTxnSync((isar) {
@@ -96,7 +96,7 @@ void main() {
       expect(message, newMessage);
     });
 
-    isarTest('getSync() / putSync() with oid', () {
+    isarTestSync('getSync() / putSync() with oid', () {
       final message = Message()
         ..id = 5
         ..message = 'This is a new message';
@@ -116,7 +116,7 @@ void main() {
       final message1 = Message()..message = 'Message one';
       final message2 = Message()
         ..message = 'Message two'
-        ..id = -10;
+        ..id = 9;
       final message3 = Message()..message = 'Message three';
 
       late List<int> ids;
@@ -124,16 +124,16 @@ void main() {
         ids = await messages.putAll([message1, message2, message3]);
       });
 
-      expect(ids, [Isar.minId, -10, -9]);
+      expect(ids, [1, 9, 10]);
       final newMessages = await messages.getAll(ids);
       expect(newMessages, [message1, message2, message3]);
     });
 
-    isarTest('getAllSync() / putAllSync()', () {
+    isarTestSync('getAllSync() / putAllSync()', () {
       final message1 = Message()..message = 'Message one';
       final message2 = Message()
         ..message = 'Message two'
-        ..id = -10;
+        ..id = 9;
       final message3 = Message()..message = 'Message three';
 
       late List<int> ids;
@@ -141,7 +141,7 @@ void main() {
         ids = messages.putAllSync([message1, message2, message3]);
       });
 
-      expect(ids, [Isar.minId, -10, -9]);
+      expect(ids, [1, 9, 10]);
       final newMessages = messages.getAllSync(ids);
       expect(newMessages, [message1, message2, message3]);
     });
@@ -166,7 +166,7 @@ void main() {
       expect(await users.get(user.id!), null);
     });
 
-    isarTest('deleteSync()', () async {
+    isarTestSync('deleteSync()', () async {
       final user = UserModel()
         ..name = 'Some User'
         ..age = 24;

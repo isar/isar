@@ -46,7 +46,7 @@ class _IsarWeb implements IsarNativeInterface {
 
   @override
   dynamic jsObjectGet(Object o, Object key) {
-    getProperty(o, key);
+    return getProperty(o, key);
   }
 
   @override

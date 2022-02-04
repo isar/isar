@@ -49,6 +49,7 @@ Future<Isar> openIsar({
         isar: isar,
         col: col,
         adapter: schema.webAdapter,
+        setId: schema.setId,
       );
     });
   }

@@ -14,11 +14,13 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   final IsarCollectionJs col;
 
   final IsarWebTypeAdapter<OBJ> adapter;
+  final void Function(OBJ, int)? setId;
 
   IsarCollectionImpl({
     required this.isar,
     required this.col,
     required this.adapter,
+    required this.setId,
   });
 
   @override
@@ -72,6 +74,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return isar.getTxn(true, (txn) async {
       final serialized = adapter.serialize(this, object);
       final id = await col.put(txn, serialized, replaceOnConflict).wait();
+      setId?.call(object, id);
       return id;
     });
   }
@@ -85,7 +88,12 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       final serialized =
           objects.map((e) => adapter.serialize(this, e)).toList();
       final ids = await col.putAll(txn, serialized, replaceOnConflict).wait();
-      return ids.cast();
+      if (setId != null) {
+        for (var i = 0; i < objects.length; i++) {
+          setId?.call(objects[i], ids[i]);
+        }
+      }
+      return ids.cast<int>().toList();
     });
   }
 
