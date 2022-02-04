@@ -9,13 +9,13 @@ typedef IsarCloseCallback = void Function(String);
 /// An instance of the Isar Database.
 abstract class Isar {
   /// Smallest valid id.
-  static const minId = kIsWeb ? -9007199254740991 : -9223372036854775807;
+  static const minId = isarMinId;
 
   /// Largest valid id.
-  static const maxId = kIsWeb ? 9007199254740991 : 9223372036854775807;
+  static const maxId = isarMaxId;
 
   /// Placeholder for an auto-increment id.
-  static const autoIncrement = -9223372036854775808;
+  static const autoIncrement = isarAutoIncrementId;
 
   static final _instances = <String, Isar>{};
   static final _openCallbacks = <IsarOpenCallback>{};
@@ -73,7 +73,7 @@ abstract class Isar {
       initializeIsarConnect();
     }
     _checkOpen(name, schemas);
-    return isarOpen(
+    return IsarNative.open(
       schemas: schemas,
       directory: directory,
       name: name,
@@ -93,7 +93,7 @@ abstract class Isar {
       initializeIsarConnect();
     }
     _checkOpen(name, schemas);
-    return isarOpenSync(
+    return IsarNative.openSync(
       schemas: schemas,
       directory: directory,
       name: name,
@@ -152,7 +152,8 @@ abstract class Isar {
   /// Releases an Isar instance.
   ///
   /// If this is the only isolate that holds a reference to this instance, the
-  /// Isar instance will be closed.
+  /// Isar instance will be closed. [deleteFromDisk] additionally removes all
+  /// database files if enabled.
   ///
   /// Returns whether the instance was actually closed.
   Future<bool> close({bool deleteFromDisk = false}) {
@@ -202,7 +203,10 @@ abstract class Isar {
     _closeCallbacks.remove(callback);
   }
 
+  static initializeLibraries({Map<String, String> libraries = const {}}) =>
+      IsarNative.initializeLibraries(libraries: libraries);
+
   /// Split a String into words according to Unicode Annex #29. Only words
   /// containing at least one alphanumeric character will be included.
-  static List<String> splitWords(String input) => isarSplitWords(input);
+  static List<String> splitWords(String input) => IsarNative.splitWords(input);
 }

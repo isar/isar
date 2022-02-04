@@ -1,7 +1,8 @@
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
-import 'package:isar/src/isar_native_def.dart';
+import 'package:isar/src/isar_native_interface.dart';
 import 'package:isar/src/native/binary_reader.dart';
 import 'package:isar/src/native/binary_writer.dart';
 import 'package:isar/src/native/isar_core.dart';
@@ -11,6 +12,10 @@ import 'package:meta/meta.dart';
 
 import 'bindings.dart';
 import 'split_words.dart';
+
+const isarMinId = -9223372036854775807;
+const isarMaxId = 9223372036854775807;
+const isarAutoIncrementId = -9223372036854775808;
 
 /// @nodoc
 @protected
@@ -30,36 +35,84 @@ typedef IsarBinaryWriter = BinaryWriter;
 
 /// @nodoc
 @protected
-typedef IsarJsObject = dynamic;
+// ignore: constant_identifier_names
+const dynamic IsarJsConverter = null;
 
-/// @nodoc
-@protected
-const IsarBufAsBytes isarBufAsBytes = bufAsBytes;
+class _IsarNative implements IsarNativeInterface {
+  const _IsarNative();
 
-/// @nodoc
-@protected
-const IsarSplitWords isarSplitWords = splitWords;
+  @override
+  Uint8List bufAsBytes(IsarBytePointer pointer, int length) {
+    return pointer.asTypedList(length);
+  }
 
-/// @nodoc
-@protected
-const IsarOpen isarOpen = openIsar;
+  @override
+  void initializeLibraries({Map<String, String> libraries = const {}}) {
+    return initializeIsarCore(libraries: libraries);
+  }
 
-/// @nodoc
-@protected
-const IsarOpenSync isarOpenSync = openIsarSync;
+  @override
+  dynamic jsObjectGet(Object o, Object key) {
+    throw UnimplementedError();
+  }
 
-/// @nodoc
-@protected
-const IsarCreateLink isarCreateLink = createIsarLink;
+  @override
+  void jsObjectSet(Object o, Object key, value) {
+    throw UnimplementedError();
+  }
 
-/// @nodoc
-@protected
-const IsarCreateLinks isarCreateLinks = createIsarLinks;
+  @override
+  dynamic newJsObject() {
+    throw UnimplementedError();
+  }
 
-IsarJsObject _isarCreateJsObject() {
-  throw UnimplementedError();
+  @override
+  IsarLink<OBJ> newLink<OBJ>() {
+    return IsarLinkImpl();
+  }
+
+  @override
+  IsarLinks<OBJ> newLinks<OBJ>() {
+    return IsarLinksImpl();
+  }
+
+  @override
+  Future<Isar> open({
+    required String directory,
+    required String name,
+    required bool relaxedDurability,
+    required List<CollectionSchema> schemas,
+  }) {
+    return openIsar(
+      directory: directory,
+      name: name,
+      relaxedDurability: relaxedDurability,
+      schemas: schemas,
+    );
+  }
+
+  @override
+  Isar openSync({
+    required String directory,
+    required String name,
+    required bool relaxedDurability,
+    required List<CollectionSchema> schemas,
+  }) {
+    return openIsarSync(
+      directory: directory,
+      name: name,
+      relaxedDurability: relaxedDurability,
+      schemas: schemas,
+    );
+  }
+
+  @override
+  List<String> splitWords(String value) {
+    return splitWordsCore(value);
+  }
 }
 
 /// @nodoc
 @protected
-const IsarCreateJsObject isarCreateJsObject = _isarCreateJsObject;
+// ignore: constant_identifier_names
+const IsarNative = _IsarNative();

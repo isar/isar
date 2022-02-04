@@ -102,9 +102,6 @@ Stream<void> wrapIsarPort(ReceivePort port) {
   return portStreamController.stream;
 }
 
-Uint8List bufAsBytes(Pointer<Uint8> pointer, int length) =>
-    pointer.asTypedList(length);
-
 extension RawObjectX on RawObject {
   void freeData() {
     if (buffer.address != 0) {

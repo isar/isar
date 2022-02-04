@@ -8,8 +8,10 @@ import 'package:meta/meta_meta.dart';
 
 import 'src/isar_connect.dart';
 
-import 'src/native/isar_native.dart' if (dart.io) 'src/web/isar_web.dart';
-export 'src/native/isar_native.dart' if (dart.io) 'src/web/isar_web.dart';
+import 'src/native/isar_native.dart'
+    if (dart.library.html) 'src/web/isar_web.dart';
+export 'src/native/isar_native.dart'
+    if (dart.library.html) 'src/web/isar_web.dart';
 
 part 'src/annotations/backlink.dart';
 part 'src/annotations/collection.dart';

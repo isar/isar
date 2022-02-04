@@ -28,7 +28,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
 
     extension Get${object.dartName}Collection on Isar {
       IsarCollection<${object.dartName}> get ${object.accessor} {
-        return getCollection('${object.dartName.esc}');
+        return getCollection('${object.isarName.esc}');
       }
     }''';
 
@@ -39,7 +39,6 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
         .map((it) => 'const ${it.converterName(object)} = ${it.converter}();')
         .join('\n');
     final webAdapter = generateWebTypeAdapter(object);
-    print(webAdapter);
     final nativeAdapter = generateNativeTypeAdapter(object);
     final byIndexExtensions = generateByIndexExtension(object);
     final queryWhereExtensions = WhereGenerator(object).generate();

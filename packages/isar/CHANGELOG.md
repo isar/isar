@@ -1,3 +1,7 @@
+## 2.2.0
+- Improved write performance
+- Added `deleteFromDisk` option to `isar.close()`
+
 ## 2.1.4
 
 - Removed `path` dependency

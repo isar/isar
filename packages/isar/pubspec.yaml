@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   ffi: ^1.1.2
+  js: ^0.6.3
   meta: ^1.7.0
 
 dev_dependencies:

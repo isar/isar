@@ -13,7 +13,7 @@ String generateQueryLinks(ObjectInfo oi, List<ObjectInfo?> objects) {
         return linkInternal(
           isar.${targetOi.accessor},
           q,
-          '${link.dartName.esc}',
+          '${link.isarName.esc}',
         );
       }''';
   }

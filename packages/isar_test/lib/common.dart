@@ -1,7 +1,6 @@
 // ignore_for_file: implementation_imports
 import 'dart:io';
 import 'package:isar/isar.dart';
-import 'package:isar/src/native/isar_core.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'dart:math';
@@ -50,10 +49,10 @@ void isarTest(String name, dynamic Function() body) {
 String? testTempPath;
 
 void registerBinaries() {
-  if (testTempPath == null) {
+  if (!kIsWeb && testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
     testTempPath = path.join(dartToolDir, 'test', 'tmp');
-    initializeIsarCore(
+    Isar.initializeLibraries(
       libraries: {
         'windows': path.join(dartToolDir, 'libisar_windows_x64.dll'),
         'macos': path.join(dartToolDir, 'libisar_macos_x64.dylib'),
@@ -64,7 +63,7 @@ void registerBinaries() {
 }
 
 String getRandomName() {
-  var random = Random().nextInt(pow(2, 32) as int);
+  var random = Random().nextInt(pow(2, 32) as int).toString();
   return '${random}_tmp';
 }
 
@@ -75,7 +74,7 @@ Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> schemas,
   return Isar.open(
     schemas: schemas,
     name: name ?? getRandomName(),
-    directory: testTempPath!,
+    directory: kIsWeb ? '' : testTempPath!,
   );
 }
 

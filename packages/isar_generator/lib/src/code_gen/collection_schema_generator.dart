@@ -9,7 +9,7 @@ import 'package:dartx/dartx.dart';
 String generateCollectionSchema(ObjectInfo object) {
   final schema = generateSchema(object);
   final propertyIds = object.objectProperties
-      .mapIndexed((index, p) => "'${p.dartName.esc}': $index")
+      .mapIndexed((index, p) => "'${p.isarName.esc}': $index")
       .join(',');
   final indexIds = object.indexes
       .mapIndexed((index, i) => "'${i.name.esc}': $index")
@@ -20,14 +20,14 @@ String generateCollectionSchema(ObjectInfo object) {
       .join(',');
   final linkIds = object.links
       .where((l) => !l.backlink)
-      .mapIndexed((i, link) => "'${link.dartName.esc}': $i")
+      .mapIndexed((i, link) => "'${link.isarName.esc}': $i")
       .join(',');
   final backlinkIds = object.links
       .where((l) => l.backlink)
-      .mapIndexed((i, link) => "'${link.dartName.esc}': $i")
+      .mapIndexed((i, link) => "'${link.isarName.esc}': $i")
       .join(',');
   final linkedCollections = object.links
-      .map((e) => "'${e.targetCollectionDartName.esc}'")
+      .map((e) => "'${e.targetCollectionIsarName.esc}'")
       .distinct()
       .join(',');
   final getLinks =
@@ -36,7 +36,7 @@ String generateCollectionSchema(ObjectInfo object) {
   final setId = '(obj, id) => obj.${object.idProperty.dartName} = id';
   return '''
     final ${object.dartName.capitalize()}Schema = CollectionSchema(
-      name: '${object.dartName.esc}',
+      name: '${object.isarName.esc}',
       schema: '$schema',
       nativeAdapter: const ${object.nativeAdapterName}(),
       webAdapter: const ${object.webAdapterName}(),

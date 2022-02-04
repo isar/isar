@@ -6,7 +6,7 @@ import 'package:isar/src/native/isar_core.dart';
 import 'binary_reader.dart';
 import 'binary_writer.dart';
 
-List<String> splitWords(String input) {
+List<String> splitWordsCore(String input) {
   initializeIsarCore();
 
   final bytes = BinaryWriter.utf8Encoder.convert(input);

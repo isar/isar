@@ -24,9 +24,9 @@ abstract class IsarNativeTypeAdapter<T> {
 abstract class IsarWebTypeAdapter<T> {
   const IsarWebTypeAdapter();
 
-  IsarJsObject serialize(IsarCollection<T> collection, T object);
+  dynamic serialize(IsarCollection<T> collection, T object);
 
-  T deserialize(IsarCollection<T> collection, IsarJsObject object);
+  T deserialize(IsarCollection<T> collection, dynamic jsObj);
 
-  P deserializeProperty<P>(IsarJsObject object, int propertyIndex);
+  P deserializeProperty<P>(Object jsObj, String propertyName);
 }
