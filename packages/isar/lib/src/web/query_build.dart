@@ -6,24 +6,10 @@ import 'package:js/js.dart';
 import 'bindings.dart';
 import 'isar_collection_impl.dart';
 import 'js_converter.dart';
+import 'query_impl.dart';
 
 @JS('JSON.stringify')
 external String _escape(String value);
-
-@JS('Function')
-class FilterFun {
-  external FilterFun(String obj, String cmp, String method);
-}
-
-@JS('Function')
-class SortCmpFun {
-  external SortCmpFun(String a, String b, String cmp, String method);
-}
-
-@JS('Function')
-class DistinctValueFun {
-  external DistinctValueFun(String obj, String method);
-}
 
 Query<T> buildNativeQuery<T>(
   IsarCollectionImpl col,
@@ -43,6 +29,19 @@ Query<T> buildNativeQuery<T>(
   final filterJs = filter != null ? _buildFilter(col, filter) : null;
   final sortJs = sortBy.isNotEmpty ? _buildSort(sortBy) : null;
   final distinctJs = distinctBy.isNotEmpty ? _buildDistinct(distinctBy) : null;
+
+  final queryJs = QueryJs(
+    col.col,
+    whereClausesJs,
+    whereDistinct,
+    whereSort == Sort.asc,
+    filterJs,
+    sortJs,
+    distinctJs,
+    offset,
+  );
+
+  return QueryImpl<T>(col, queryJs, property);
 }
 
 WhereClauseJs _buildWhereClause(
@@ -82,10 +81,10 @@ WhereClauseJs _buildWhereClause(
   return WhereClauseJs(whereClause.indexName, range);
 }
 
-FilterFun? _buildFilter(IsarCollectionImpl col, FilterOperation filter) {
+FilterJs? _buildFilter(IsarCollectionImpl col, FilterOperation filter) {
   final filterStr = _buildFilterOperation(col, filter);
   if (filterStr != null) {
-    return FilterFun('obj', 'cmp', filterStr);
+    return FilterJs('obj', 'cmp', filterStr);
   }
 }
 
@@ -231,12 +230,15 @@ String _buildConditionInternal({
   }
 }
 
-SortCmpFun _buildSort(List<SortProperty> properties) {
-  final sort = '';
-  return SortCmpFun('a', 'b', 'cmp', sort);
+SortCmpJs _buildSort(List<SortProperty> properties) {
+  final sort = properties.map((e) {
+    final op = e.sort == Sort.asc ? '' : '-';
+    return '${op}cmp(a.${e.property} ?? "-Infinity", b.${e.property} ?? "-Infinity")';
+  }).join('||');
+  return SortCmpJs('a', 'b', 'cmp', 'return $sort');
 }
 
-DistinctValueFun _buildDistinct(List<DistinctProperty> properties) {
+DistinctValueJs _buildDistinct(List<DistinctProperty> properties) {
   final distinct = properties.map((e) {
     if (e.caseSensitive == false) {
       return 'obj.${e.property}?.toLowerCase() ?? "-Infinity"';
@@ -244,5 +246,5 @@ DistinctValueFun _buildDistinct(List<DistinctProperty> properties) {
       return 'obj.${e.property}?.toString() ?? "-Infinity"';
     }
   }).join('+');
-  return DistinctValueFun('obj', distinct);
+  return DistinctValueJs('obj', 'return $distinct');
 }

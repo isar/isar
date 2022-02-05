@@ -63,3 +63,50 @@ class IsarCollectionJs {
 class WhereClauseJs {
   external WhereClauseJs(String? indexName, KeyRange? range);
 }
+
+@JS('Function')
+class FilterJs {
+  external FilterJs(String obj, String cmp, String method);
+}
+
+@JS('Function')
+class SortCmpJs {
+  external SortCmpJs(String a, String b, String cmp, String method);
+}
+
+@JS('Function')
+class DistinctValueJs {
+  external DistinctValueJs(String obj, String method);
+}
+
+@JS('IsarQuery')
+class QueryJs {
+  external QueryJs(
+    IsarCollectionJs collection,
+    List<WhereClauseJs> whereClauses,
+    bool whereDistinct,
+    bool whereAscending,
+    FilterJs? filter,
+    SortCmpJs? sortCmp,
+    DistinctValueJs? distinctValue,
+    int? offset,
+  );
+
+  external Promise findFirst(IsarTxnJs txn);
+
+  external Promise findAll(IsarTxnJs txn);
+
+  external Promise deleteFirst(IsarTxnJs txn);
+
+  external Promise deleteAll(IsarTxnJs txn);
+
+  external Promise min(IsarTxnJs txn, String propertyName);
+
+  external Promise max(IsarTxnJs txn, String propertyName);
+
+  external Promise sum(IsarTxnJs txn, String propertyName);
+
+  external Promise average(IsarTxnJs txn, String propertyName);
+
+  external Promise count(IsarTxnJs txn);
+}

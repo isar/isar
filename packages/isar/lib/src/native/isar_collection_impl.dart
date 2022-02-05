@@ -12,7 +12,7 @@ import 'binary_reader.dart';
 import 'bindings.dart';
 import 'index_key.dart';
 import 'isar_impl.dart';
-import 'native_query_builder.dart';
+import 'query_build.dart';
 
 class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override

@@ -12,7 +12,7 @@ import 'isar_core.dart';
 
 typedef QueryDeserialize<T> = List<T> Function(RawObjectSet);
 
-class NativeQuery<T> extends Query<T> {
+class QueryImpl<T> extends Query<T> {
   static const maxLimit = 4294967295;
 
   final IsarCollectionImpl col;
@@ -20,7 +20,7 @@ class NativeQuery<T> extends Query<T> {
   final QueryDeserialize<T> deserialize;
   final int? propertyId;
 
-  NativeQuery(this.col, this.queryPtr, this.deserialize, this.propertyId);
+  QueryImpl(this.col, this.queryPtr, this.deserialize, this.propertyId);
 
   @override
   Future<T?> findFirst() {

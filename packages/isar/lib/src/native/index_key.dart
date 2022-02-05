@@ -6,7 +6,7 @@ import 'package:isar/isar.dart';
 
 import 'isar_core.dart';
 import 'isar_collection_impl.dart';
-import 'native_query_builder.dart';
+import 'query_build.dart';
 
 final _keyPtrPtr = malloc<Pointer>();
 

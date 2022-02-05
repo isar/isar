@@ -6,7 +6,7 @@ import 'package:isar/isar.dart';
 import 'isar_collection_impl.dart';
 import 'isar_core.dart';
 import 'index_key.dart';
-import 'native_query.dart';
+import 'query_impl.dart';
 
 final minStr = Pointer<Int8>.fromAddress(0);
 final maxStr = '\u{FFFFF}'.toNativeUtf8().cast<Int8>();
@@ -88,7 +88,7 @@ Query<T> buildNativeQuery<T>(
   }
 
   final queryPtr = IC.isar_qb_build(qbPtr);
-  return NativeQuery(col, queryPtr, deserialize, propertyId);
+  return QueryImpl(col, queryPtr, deserialize, propertyId);
 }
 
 void _addWhereClause(IsarCollectionImpl col, Pointer qbPtr, WhereClause wc,
