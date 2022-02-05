@@ -56,7 +56,7 @@ class JsConverter {
   }
 
   @tryInline
-  static DateTime? dateOrNullFromJs(dynamic value) {
+  static DateTime? dateTimeOrNullFromJs(dynamic value) {
     if (value == nullValue) {
       return null;
     } else {
@@ -65,8 +65,8 @@ class JsConverter {
   }
 
   @tryInline
-  static DateTime? dateFromJs(dynamic value) {
-    return dateOrNullFromJs(value) ?? minDate;
+  static DateTime dateTimeFromJs(dynamic value) {
+    return dateTimeOrNullFromJs(value) ?? minDate;
   }
 
   @tryInline

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_test/common.dart';
 import 'package:isar_test/user_model.dart';

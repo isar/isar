@@ -14,8 +14,8 @@ final maxStr = '\u{FFFFF}'.toNativeUtf8().cast<Int8>();
 Query<T> buildNativeQuery<T>(
   IsarCollectionImpl col,
   List<WhereClause> whereClauses,
-  bool? whereDistinct,
-  Sort? whereSort,
+  bool whereDistinct,
+  Sort whereSort,
   FilterOperation? filter,
   List<SortProperty> sortBy,
   List<DistinctProperty> distinctBy,
@@ -92,7 +92,7 @@ Query<T> buildNativeQuery<T>(
 }
 
 void _addWhereClause(IsarCollectionImpl col, Pointer qbPtr, WhereClause wc,
-    bool? distinct, Sort? sort) {
+    bool distinct, Sort sort) {
   if (wc.indexName == null) {
     if (wc.lower != null && wc.lower!.length != 1 || wc.lower?[0] is! int?) {
       throw 'Invalid WhereClause';
@@ -127,7 +127,7 @@ void _addWhereClause(IsarCollectionImpl col, Pointer qbPtr, WhereClause wc,
       sort == Sort.asc ? wc.includeLower : wc.includeUpper,
       sort == Sort.asc ? upperPtr : lowerPtr,
       sort == Sort.asc ? wc.includeUpper : wc.includeLower,
-      distinct ?? false,
+      distinct,
     ));
   }
 }

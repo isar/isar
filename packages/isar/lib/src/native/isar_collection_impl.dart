@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:isolate';
 import 'dart:typed_data';
@@ -123,6 +124,9 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
+  Future<OBJ?> get(int id) => getAll([id]).then((objects) => objects[0]);
+
+  @override
   Future<List<OBJ?>> getAll(List<int> ids) {
     return isar.getTxn(false, (txn) async {
       final rawObjSetPtr = txn.allocRawObjSet(ids.length);
@@ -137,16 +141,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<List<OBJ?>> getAllByIndex(String indexName, List<List> values) {
-    return isar.getTxn(false, (txn) async {
-      final rawObjSetPtr = txn.allocRawObjSet(values.length);
-      final keysPtrPtr = _getKeysPtr(indexName, values, txn.alloc);
-      IC.isar_get_all_by_index(
-          ptr, txn.ptr, indexIdOrErr(indexName), keysPtrPtr, rawObjSetPtr);
-      await txn.wait();
-      return deserializeObjectsOrNull(rawObjSetPtr.ref);
-    });
-  }
+  OBJ? getSync(int id) => getAllSync([id])[0];
 
   @override
   List<OBJ?> getAllSync(List<int> ids) {
@@ -166,21 +161,55 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  List<OBJ?> getAllByIndexSync(String indexName, List<List> values) {
+  Future<OBJ?> getByIndex(
+    String indexName,
+    List<dynamic> key,
+  ) =>
+      getAllByIndex(indexName, [key]).then((objects) => objects[0]);
+
+  @override
+  Future<List<OBJ?>> getAllByIndex(String indexName, List<List> keys) {
+    return isar.getTxn(false, (txn) async {
+      final rawObjSetPtr = txn.allocRawObjSet(keys.length);
+      final keysPtrPtr = _getKeysPtr(indexName, keys, txn.alloc);
+      IC.isar_get_all_by_index(
+          ptr, txn.ptr, indexIdOrErr(indexName), keysPtrPtr, rawObjSetPtr);
+      await txn.wait();
+      return deserializeObjectsOrNull(rawObjSetPtr.ref);
+    });
+  }
+
+  @override
+  OBJ? getByIndexSync(
+    String indexName,
+    List<dynamic> key,
+  ) =>
+      getAllByIndexSync(indexName, [key])[0];
+
+  @override
+  List<OBJ?> getAllByIndexSync(String indexName, List<List> keys) {
     return isar.getTxnSync(false, (txn) {
       final rawObjPtr = txn.allocRawObject();
       final rawObj = rawObjPtr.ref;
       final indexId = indexIdOrErr(indexName);
 
-      final objects = List<OBJ?>.filled(values.length, null);
-      for (var i = 0; i < values.length; i++) {
-        final keyPtr = buildIndexKey(this, indexName, values[i]);
+      final objects = List<OBJ?>.filled(keys.length, null);
+      for (var i = 0; i < keys.length; i++) {
+        final keyPtr = buildIndexKey(this, indexName, keys[i]);
         nCall(IC.isar_get_by_index(ptr, txn.ptr, indexId, keyPtr, rawObjPtr));
         objects[i] = deserializeObjectOrNull(rawObj);
       }
 
       return objects;
     });
+  }
+
+  @override
+  Future<int> put(OBJ object, {bool replaceOnConflict = false}) {
+    return putAll(
+      [object],
+      replaceOnConflict: replaceOnConflict,
+    ).then((ids) => ids[0]);
   }
 
   @override
@@ -229,6 +258,14 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
+  int putSync(OBJ object, {bool replaceOnConflict = false}) {
+    return putAllSync(
+      [object],
+      replaceOnConflict: replaceOnConflict,
+    )[0];
+  }
+
+  @override
   List<int> putAllSync(
     List<OBJ> objects, {
     bool replaceOnConflict = false,
@@ -260,6 +297,9 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
+  Future<bool> delete(int id) => deleteAll([id]).then((count) => count == 1);
+
+  @override
   Future<int> deleteAll(List<int> ids) {
     return isar.getTxn(true, (txn) async {
       final countPtr = txn.alloc<Uint32>();
@@ -274,18 +314,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<int> deleteAllByIndex(String indexName, List<List> values) {
-    return isar.getTxn(true, (txn) async {
-      final countPtr = txn.alloc<Uint32>();
-      final keysPtrPtr = _getKeysPtr(indexName, values, txn.alloc);
-
-      IC.isar_delete_all_by_index(ptr, txn.ptr, indexIdOrErr(indexName),
-          keysPtrPtr, values.length, countPtr);
-      await txn.wait();
-
-      return countPtr.value;
-    });
-  }
+  bool deleteSync(int id) => deleteAllSync([id]) == 1;
 
   @override
   int deleteAllSync(List<int> ids) {
@@ -304,13 +333,35 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  int deleteAllByIndexSync(String indexName, List<List> values) {
+  Future<bool> deleteByIndex(String indexName, List<dynamic> key) =>
+      deleteAllByIndex(indexName, [key]).then((count) => count == 1);
+
+  @override
+  Future<int> deleteAllByIndex(String indexName, List<List> keys) {
+    return isar.getTxn(true, (txn) async {
+      final countPtr = txn.alloc<Uint32>();
+      final keysPtrPtr = _getKeysPtr(indexName, keys, txn.alloc);
+
+      IC.isar_delete_all_by_index(ptr, txn.ptr, indexIdOrErr(indexName),
+          keysPtrPtr, keys.length, countPtr);
+      await txn.wait();
+
+      return countPtr.value;
+    });
+  }
+
+  @override
+  bool deleteByIndexSync(String indexName, List<dynamic> key) =>
+      deleteAllByIndexSync(indexName, [key]) == 1;
+
+  @override
+  int deleteAllByIndexSync(String indexName, List<List> keys) {
     return isar.getTxnSync(true, (txn) {
       final countPtr = txn.alloc<Uint32>();
-      final keysPtrPtr = _getKeysPtr(indexName, values, txn.alloc);
+      final keysPtrPtr = _getKeysPtr(indexName, keys, txn.alloc);
 
       nCall(IC.isar_delete_all_by_index(ptr, txn.ptr, indexIdOrErr(indexName),
-          keysPtrPtr, values.length, countPtr));
+          keysPtrPtr, keys.length, countPtr));
       return countPtr.value;
     });
   }
@@ -331,6 +382,13 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
+  Future<void> importJson(List<Map<String, dynamic>> json,
+      {bool replaceOnConflict = false}) {
+    final bytes = Utf8Encoder().convert(jsonEncode(json));
+    return importJsonRaw(bytes, replaceOnConflict: replaceOnConflict);
+  }
+
+  @override
   Future<void> importJsonRaw(Uint8List jsonBytes,
       {bool replaceOnConflict = false}) {
     return isar.getTxn(true, (txn) async {
@@ -342,6 +400,13 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
           jsonBytes.length, replaceOnConflict);
       await txn.wait();
     });
+  }
+
+  @override
+  void importJsonSync(List<Map<String, dynamic>> json,
+      {bool replaceOnConflict = false}) {
+    final bytes = Utf8Encoder().convert(jsonEncode(json));
+    importJsonRawSync(bytes, replaceOnConflict: replaceOnConflict);
   }
 
   @override

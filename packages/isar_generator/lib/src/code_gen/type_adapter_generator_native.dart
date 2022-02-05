@@ -45,7 +45,7 @@ String _generatePrepareSerialize(ObjectInfo object) {
           code +=
               'final $accessor = IsarBinaryWriter.utf8Encoder.convert(value$i);';
         }
-        code += 'dynamicSize += $accessor$nOp.length $nLen;';
+        code += 'dynamicSize += ($accessor$nOp.length $nLen) as int;';
         break;
       case IsarType.stringList:
         code += 'dynamicSize += (value$i$nOp.length $nLen) * 8;';
@@ -64,7 +64,7 @@ String _generatePrepareSerialize(ObjectInfo object) {
         code += '''
           final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
           bytesList$i.add(bytes);
-          dynamicSize += bytes.length;''';
+          dynamicSize += bytes.length as int;''';
         if (property.elementNullable) {
           code += '''
           } else {

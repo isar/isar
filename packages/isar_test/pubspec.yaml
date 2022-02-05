@@ -10,10 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   isar: any
   isar_flutter_libs: any
   path_provider: any
-  integration_test: any
   freezed_annotation: any
   meta: any
 

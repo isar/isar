@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:js';
-import 'dart:js_util';
 import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
@@ -14,12 +11,14 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   final IsarCollectionJs col;
 
   final IsarWebTypeAdapter<OBJ> adapter;
+  final Map<String, bool> isCompositeIndex;
   final void Function(OBJ, int)? setId;
 
   IsarCollectionImpl({
     required this.isar,
     required this.col,
     required this.adapter,
+    required this.isCompositeIndex,
     required this.setId,
   });
 
@@ -60,10 +59,16 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
+  OBJ? getSync(int id) => throw UnimplementedError();
+
+  @override
   List<OBJ?> getAllSync(List<int> ids) => throw UnimplementedError();
 
   @override
-  List<OBJ?> getAllByIndexSync(String indexName, List<List> values) =>
+  OBJ? getByIndexSync(String indexName, List key) => throw UnimplementedError();
+
+  @override
+  List<OBJ?> getAllByIndexSync(String indexName, List<List> keys) =>
       throw UnimplementedError();
 
   @override
@@ -96,6 +101,13 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       return ids.cast<int>().toList();
     });
   }
+
+  @override
+  int putSync(
+    OBJ object, {
+    bool replaceOnConflict = false,
+  }) =>
+      throw UnimplementedError();
 
   @override
   List<int> putAllSync(
@@ -136,7 +148,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   int deleteAllSync(List<int> ids) => throw UnimplementedError();
 
   @override
-  int deleteAllByIndexSync(String indexName, List<List> values) =>
+  bool deleteByIndexSync(String indexName, List<dynamic> key) =>
+      throw UnimplementedError();
+
+  @override
+  int deleteAllByIndexSync(String indexName, List<List> keys) =>
       throw UnimplementedError();
 
   @override
@@ -150,17 +166,28 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   void clearSync() => throw UnimplementedError();
 
   @override
+  Future<void> importJson(List<Map<String, dynamic>> json,
+      {bool replaceOnConflict = false}) {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<void> importJsonRaw(Uint8List jsonBytes,
       {bool replaceOnConflict = false}) {
-    return isar.getTxn(true, (txn) {
-      return col.importJsonRaw(txn, jsonBytes, replaceOnConflict).wait();
-    });
+    throw UnimplementedError();
+  }
+
+  @override
+  void importJsonSync(List<Map<String, dynamic>> json,
+      {bool replaceOnConflict = false}) {
+    throw UnimplementedError();
   }
 
   @override
   void importJsonRawSync(Uint8List jsonBytes,
-          {bool replaceOnConflict = false}) =>
-      throw UnimplementedError();
+      {bool replaceOnConflict = false}) {
+    throw UnimplementedError();
+  }
 
   @override
   Stream<void> watchLazy() => throw UnimplementedError();

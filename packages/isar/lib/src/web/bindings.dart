@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'dart:indexed_db';
 
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
@@ -57,10 +57,9 @@ class IsarCollectionJs {
   external Promise deleteAllByIndex(IsarTxnJs txn, List<dynamic> keys);
 
   external Promise clear(IsarTxnJs txn);
+}
 
-  external Promise importJsonRaw(
-      IsarTxnJs txn, Uint8List jsonBytes, bool replaceOnConflict);
-
-  external Promise importJson(
-      IsarTxnJs txn, Map<String, dynamic> json, bool replaceOnConflict);
+@JS('WhereClause')
+class WhereClauseJs {
+  external WhereClauseJs(String? indexName, KeyRange? range);
 }

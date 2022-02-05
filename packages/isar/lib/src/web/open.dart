@@ -45,10 +45,13 @@ Future<Isar> openIsar({
     final col = instance.getCollection(schema.name);
     collections[schema.name] = schema.toCollection(<OBJ>() {
       schema as CollectionSchema<OBJ>;
+      final isComposite =
+          schema.indexTypes.map((name, e) => MapEntry(name, e.length != 1));
       return IsarCollectionImpl<OBJ>(
         isar: isar,
         col: col,
         adapter: schema.webAdapter,
+        isCompositeIndex: isComposite,
         setId: schema.setId,
       );
     });
