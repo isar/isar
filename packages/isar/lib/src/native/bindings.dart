@@ -1264,7 +1264,6 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
     ffi.Pointer<ffi.Int8> id_name,
-    bool primitive_null,
     ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
     ffi.Pointer<ffi.Uint32> json_length,
   ) {
@@ -1273,7 +1272,6 @@ class IsarCoreBindings {
       collection,
       txn,
       id_name,
-      primitive_null ? 1 : 0,
       json_bytes,
       json_length,
     );
@@ -2375,7 +2373,6 @@ typedef _c_isar_q_export_json = ffi.Int64 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<ffi.Int8> id_name,
-  ffi.Uint8 primitive_null,
   ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
   ffi.Pointer<ffi.Uint32> json_length,
 );
@@ -2385,7 +2382,6 @@ typedef _dart_isar_q_export_json = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> txn,
   ffi.Pointer<ffi.Int8> id_name,
-  int primitive_null,
   ffi.Pointer<ffi.Pointer<ffi.Uint8>> json_bytes,
   ffi.Pointer<ffi.Uint32> json_length,
 );
