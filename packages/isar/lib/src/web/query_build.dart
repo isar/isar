@@ -5,13 +5,12 @@ import 'package:js/js.dart';
 
 import 'bindings.dart';
 import 'isar_collection_impl.dart';
-import 'js_converter.dart';
 import 'query_impl.dart';
 
 @JS('JSON.stringify')
 external String _escape(String value);
 
-Query<T> buildNativeQuery<T>(
+Query<T> buildWebQuery<T>(
   IsarCollectionImpl col,
   List<WhereClause> whereClauses,
   bool whereDistinct,
@@ -52,12 +51,14 @@ WhereClauseJs _buildWhereClause(
     return WhereClauseJs(whereClause.indexName, null);
   }
 
-  dynamic lower = whereClause.lower?.map((e) => e ?? nullValue).toList();
+  dynamic lower =
+      whereClause.lower?.map((e) => e ?? double.negativeInfinity).toList();
   if (isComposite && lower != null) {
     lower = lower[0];
   }
 
-  dynamic upper = whereClause.upper?.map((e) => e ?? nullValue).toList();
+  dynamic upper =
+      whereClause.upper?.map((e) => e ?? double.negativeInfinity).toList();
   if (isComposite && upper != null) {
     upper = upper[0];
   }

@@ -1,6 +1,7 @@
 ## 2.2.0
 - Improved write performance
 - Added `deleteFromDisk` option to `isar.close()`
+- Fixed value of `null` dates to be `DateTime.fromMillisecondsSinceEpoch(0)`
 
 ## 2.1.4
 

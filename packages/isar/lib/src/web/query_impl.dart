@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/web/bindings.dart';
-import 'package:isar/src/web/js_converter.dart';
 
 import 'isar_collection_impl.dart';
 
@@ -65,12 +64,9 @@ class QueryImpl<T> extends Query<T> {
           break;
       }
 
-      if (result == nullValue) {
-        return null;
-      }
-
       if (R == DateTime) {
-        return JsConverter.dateTimeFromJs(result.toInt()) as R;
+        return DateTime.fromMillisecondsSinceEpoch(result.toInt()).toLocal()
+            as R;
       } else if (R == int) {
         return result.toInt() as R;
       } else if (R == double) {
@@ -111,16 +107,19 @@ class QueryImpl<T> extends Query<T> {
 
   @override
   Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
-          {bool primitiveNull = true}) =>
-      throw UnimplementedError();
+      {bool primitiveNull = true}) {}
+
+  @override
+  Future<List<Map<String, dynamic>>> exportJson({bool primitiveNull = true}) {
+    return col.isar.getTxn(false, (txn) async {
+      final results = await queryJs.findAll(txn).wait();
+      return results;
+    });
+  }
 
   @override
   R exportJsonRawSync<R>(R Function(Uint8List) callback,
           {bool primitiveNull = true}) =>
-      throw UnimplementedError();
-
-  @override
-  Future<List<Map<String, dynamic>>> exportJson({bool primitiveNull = true}) =>
       throw UnimplementedError();
 
   @override

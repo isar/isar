@@ -33,11 +33,6 @@ typedef IsarBinaryReader = BinaryReader;
 @protected
 typedef IsarBinaryWriter = BinaryWriter;
 
-/// @nodoc
-@protected
-// ignore: constant_identifier_names
-const dynamic IsarJsConverter = null;
-
 class _IsarNative implements IsarNativeInterface {
   const _IsarNative();
 

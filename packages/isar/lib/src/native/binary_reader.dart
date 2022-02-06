@@ -98,8 +98,10 @@ class BinaryReader {
 
   @pragma('vm:prefer-inline')
   DateTime readDateTime(int offset, {bool staticOffset = true}) {
-    final time = readLong(offset, staticOffset: staticOffset);
-    return DateTime.fromMicrosecondsSinceEpoch(time, isUtc: true).toLocal();
+    final time = readLongOrNull(offset, staticOffset: staticOffset);
+    return time != null
+        ? DateTime.fromMicrosecondsSinceEpoch(time, isUtc: true).toLocal()
+        : DateTime.fromMicrosecondsSinceEpoch(0);
   }
 
   @pragma('vm:prefer-inline')

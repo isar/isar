@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/isar_native_interface.dart';
-import 'package:isar/src/web/js_converter.dart';
 import 'package:meta/meta.dart';
 
 import 'open.dart';
@@ -28,8 +27,6 @@ typedef IsarBinaryReader = dynamic;
 @protected
 // ignore: constant_identifier_names
 const dynamic IsarBinaryWriter = null;
-
-typedef IsarJsConverter = JsConverter;
 
 class _IsarWeb implements IsarNativeInterface {
   const _IsarWeb();

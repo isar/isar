@@ -50,25 +50,15 @@ String _generateSerialize(ObjectInfo object) {
       propertyValue = property.toIsar(propertyValue, object);
     }
 
-    switch (property.isarType) {
-      case IsarType.bool:
-        code += write('IsarJsConverter.boolToJs($propertyValue)');
-        break;
-      case IsarType.int:
-      case IsarType.long:
-      case IsarType.float:
-      case IsarType.double:
-        code += write('IsarJsConverter.numToJs($propertyValue)');
-        break;
-      case IsarType.dateTime:
-        code += write('IsarJsConverter.dateToJs($propertyValue)');
-        break;
-      /*case IsarType.boolList:
-        code += '$accessor = value$i ? $trueBool : $falseBool;';
-        break;*/
-      default:
-        code += write(propertyValue);
-        break;
+    final nOp = property.nullable ? '?' : '';
+    final nElOp = property.elementNullable ? '?' : '';
+    if (property.isarType == IsarType.dateTime) {
+      code += write('$propertyValue$nOp.toUtc().millisecondsSinceEpoch');
+    } else if (property.isarType == IsarType.dateTimeList) {
+      code += write(
+          '$propertyValue$nOp.map((e) => e$nElOp.toUtc().millisecondsSinceEpoch).toList()');
+    } else {
+      code += write(propertyValue);
     }
   }
 
@@ -88,56 +78,61 @@ String _generateDeserialize(ObjectInfo object) {
   ''';
 }
 
-String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
-  final orNull = property.nullable ? 'OrNull' : '';
-  final orNullList = property.nullable ? '' : '?? []';
-  final orElNull = property.elementNullable ? 'OrNull' : '';
-
-  final read = "IsarNative.jsObjectGet(jsObj, '${property.isarName.esc}')";
-
-  String? deser;
-  switch (property.isarType) {
+String _defaultVal(IsarType type) {
+  if (type.isList && type != IsarType.bytes) {
+    type = type.scalarType;
+  }
+  switch (type) {
     case IsarType.bool:
-      deser = 'IsarJsConverter.bool${orNull}FromJs($read)';
-      break;
+      return 'false';
     case IsarType.int:
     case IsarType.float:
     case IsarType.long:
     case IsarType.double:
-      deser = 'IsarJsConverter.num${orNull}FromJs($read)';
-      break;
+      return 'double.negativeInfinity';
     case IsarType.dateTime:
-      deser = 'IsarJsConverter.dateTime${orNull}FromJs($read)';
-      break;
+      return 'DateTime.fromMillisecondsSinceEpoch(0)';
     case IsarType.string:
-      deser = 'IsarJsConverter.string${orNull}FromJs($read)';
-      break;
-    /*case IsarType.bytes:
-      deser = 'reader.readBytes$orNull($propertyOffset)';
-      break;
-    case IsarType.boolList:
-      deser = 'reader.readBool${orElNull}List($propertyOffset) $orNullList';
-      break;
-    case IsarType.stringList:
-      deser = 'reader.readString${orElNull}List($propertyOffset) $orNullList';
-      break;
-    case IsarType.intList:
-      deser = 'reader.readInt${orElNull}List($propertyOffset) $orNullList';
-      break;
-    case IsarType.floatList:
-      deser = 'reader.readFloat${orElNull}List($propertyOffset) $orNullList';
-      break;
-    case IsarType.longList:
-      deser = 'reader.readLong${orElNull}List($propertyOffset) $orNullList';
-      break;
-    case IsarType.doubleList:
-      deser = 'reader.readDouble${orElNull}List($propertyOffset) $orNullList';
-      break;
-    case IsarType.dateTimeList:
-      deser = 'reader.readDateTime${orElNull}List($propertyOffset) $orNullList';
-      break;*/
+      return "''";
+    case IsarType.bytes:
+      return 'Uint8List(0)';
     default:
-      deser = '(null as dynamic)';
+      throw UnimplementedError();
+  }
+}
+
+String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
+  final read = "IsarNative.jsObjectGet(jsObj, '${property.isarName.esc}')";
+  String convDate(String e, bool nullable) {
+    final c = 'DateTime.fromMillisecondsSinceEpoch($e, isUtc: true).toLocal()';
+    if (nullable) {
+      return '$e != null ? $c : null';
+    } else {
+      return '$e != null ? $c : ${_defaultVal(property.isarType)}';
+    }
+  }
+
+  String deser;
+  if (property.isarType.isList && property.isarType != IsarType.bytes) {
+    final defaultList = property.nullable ? '?? []' : '';
+    String? convert;
+    if (property.isarType == IsarType.dateTimeList) {
+      convert = convDate('e', property.elementNullable);
+    } else if (!property.elementNullable) {
+      convert = 'e ?? ${_defaultVal(property.isarType)}';
+    }
+    if (convert != null) {
+      final nOp = property.nullable ? '?' : '';
+      deser = '$read$nOp.map((e) => $convert).toList() $defaultList';
+    } else {
+      deser = '$read $defaultList';
+    }
+  } else if (property.isarType == IsarType.dateTime) {
+    deser = convDate(read, property.nullable);
+  } else {
+    final defaultVal =
+        property.nullable ? '?? ${_defaultVal(property.isarType)}' : '';
+    deser = '$read $defaultVal';
   }
 
   return property.fromIsar(deser, object);

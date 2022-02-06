@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
+import 'package:isar/src/web/query_build.dart';
 
 import 'bindings.dart';
 import 'isar_impl.dart';
@@ -168,13 +170,16 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<void> importJson(List<Map<String, dynamic>> json,
       {bool replaceOnConflict = false}) {
-    throw UnimplementedError();
+    return isar.getTxn(true, (txn) async {
+      await col.putAll(txn, json, replaceOnConflict).wait();
+    });
   }
 
   @override
   Future<void> importJsonRaw(Uint8List jsonBytes,
       {bool replaceOnConflict = false}) {
-    throw UnimplementedError();
+    final json = jsonDecode(Utf8Decoder().convert(jsonBytes));
+    return importJson(json, replaceOnConflict: replaceOnConflict);
   }
 
   @override
@@ -213,6 +218,18 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     int? offset,
     int? limit,
     String? property,
-  }) =>
-      throw UnimplementedError();
+  }) {
+    return buildWebQuery(
+      this,
+      whereClauses,
+      whereDistinct,
+      whereSort,
+      filter,
+      sortBy,
+      distinctBy,
+      offset,
+      limit,
+      property,
+    );
+  }
 }
