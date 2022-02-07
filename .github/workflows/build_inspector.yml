@@ -46,26 +46,25 @@ jobs:
         run: |
           flutter config --enable-linux-desktop
           flutter build linux
-        # docker run -v $(pwd):/app freedesktopsdk/flatpak:21.08-x86_64 bash -c 'cd /app/packages/isar_inspector/linux/flatpak; && ./build-tar.sh && ./build-flatpak.sh'
-      - name: Docker freedesktop
-        uses: docker://freedesktopsdk/flatpak:21.08-x86_64
+        # docker run -v $(pwd):/app bilelmoussaoui/flatpak-github-actions:freedesktop-21.08 bash -c 'cd /app/packages/isar_inspector/linux/flatpak; && ./build-tar.sh && ./build-flatpak.sh'
+      - name: Compress Tar
+        working-directory: packages/isar_inspector/linux/flatpak
+        run: ./build-tar.sh
+      - name: Flatpak
+        uses: addnab/docker-run-action@v3
         with:
-          args: -v ${{ github.workspace }}:/app
-          shell: bash
-          run: cd /app/packages/isar_inspector/linux/flatpak; ./build-tar.sh && ./build-flatpak.sh
-        # - name: Compress Tar
-        #   working-directory: packages/isar_inspector/linux/flatpak
-        #   run: ./build-tar.sh
-        # - name: Flatpak
-        #   working-directory: packages/isar_inspector/linux/flatpak
-        #   run: ./build-flatpak.sh
-      - name: Upload tar
-        uses: svenstaro/upload-release-action@v1-release
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: packages/isar_inspector/linux/flatpak/bundle.tar.gz
-          asset_name: Isar_Inspector_Linux.tar.gz
-          tag: ${{ github.ref }}
+          image: bilelmoussaoui/flatpak-github-actions:gnome-40
+          options: --privileged -v ${{ github.workspace }}:/app
+          run: |
+            cd app/packages/isar_inspector/linux/flatpak
+            ./build-flatpak.sh
+        # - name: Upload tar
+        #   uses: svenstaro/upload-release-action@v1-release
+        #   with:
+        #     repo_token: ${{ secrets.GITHUB_TOKEN }}
+        #     file: packages/isar_inspector/linux/flatpak/bundle.tar.gz
+        #     asset_name: Isar_Inspector_Linux.tar.gz
+        #     tag: ${{ github.ref }}
       - name: Upload flatpak
         uses: svenstaro/upload-release-action@v1-release
         with:
