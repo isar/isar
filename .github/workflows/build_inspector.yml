@@ -30,7 +30,10 @@ jobs:
         tag: ${{ github.ref }}
 
   build_and_upload_linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:gnome-40
+      options: --privileged
     steps:
       - uses: actions/checkout@v1
       - uses: subosito/flutter-action@v1
@@ -39,32 +42,17 @@ jobs:
       - name: Install Linux requirements
         run: |
           sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
-        #  tar flatpak flatpak-builder
-        # flatpak install flathub org.freedesktop.Platform//21.08 org.freedesktop.Sdk//21.08
       - name: Build
         working-directory: packages/isar_inspector
         run: |
           flutter config --enable-linux-desktop
           flutter build linux
-        # docker run -v $(pwd):/app bilelmoussaoui/flatpak-github-actions:freedesktop-21.08 bash -c 'cd /app/packages/isar_inspector/linux/flatpak; && ./build-tar.sh && ./build-flatpak.sh'
       - name: Compress Tar
         working-directory: packages/isar_inspector/linux/flatpak
         run: ./build-tar.sh
       - name: Flatpak
-        uses: addnab/docker-run-action@v3
-        with:
-          image: bilelmoussaoui/flatpak-github-actions:gnome-40
-          options: --privileged -v ${{ github.workspace }}:/app
-          run: |
-            cd app/packages/isar_inspector/linux/flatpak
-            ./build-flatpak.sh
-        # - name: Upload tar
-        #   uses: svenstaro/upload-release-action@v1-release
-        #   with:
-        #     repo_token: ${{ secrets.GITHUB_TOKEN }}
-        #     file: packages/isar_inspector/linux/flatpak/bundle.tar.gz
-        #     asset_name: Isar_Inspector_Linux.tar.gz
-        #     tag: ${{ github.ref }}
+        working-directory: packages/isar_inspector/linux/flatpak
+        run: ./build-flatpak.sh
       - name: Upload flatpak
         uses: svenstaro/upload-release-action@v1-release
         with:
