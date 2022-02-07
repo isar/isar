@@ -1,7 +1,7 @@
 #!/bin/sh
 
-pushd ../../build/linux/x64/release/bundle/
+cd ../../build/linux/x64/release/bundle/
 tar -czvf bundle.tar.gz ./*
-popd
+cd ../../../../../linux/flatpak/
 
 mv ../../build/linux/x64/release/bundle/bundle.tar.gz ./
