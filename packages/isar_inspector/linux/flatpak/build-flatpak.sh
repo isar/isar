@@ -1,7 +1,5 @@
 #!/bin/sh
 
-flatpak install flathub org.freedesktop.Platform//21.08 org.freedesktop.Sdk//21.08
-
 rm -r build-dir
 cp ../../../../.github/assets/isar.svg icon.svg
 flatpak-builder build-dir dev.isar.IsarInspector.yml && \

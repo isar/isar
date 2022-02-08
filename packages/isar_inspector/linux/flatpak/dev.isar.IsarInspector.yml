@@ -7,12 +7,10 @@ modules:
   - name: isar_inspector
     buildsystem: simple
     build-commands:
-      - mkdir -p /app/isar_inspector
-      - mv data isar_inspector lib /app/isar_inspector/
-      - chmod +x /app/isar_inspector/isar_inspector
+      - mkdir -p /app/bin
+      - mv data isar_inspector lib /app/bin/
+      - chmod +x /app/bin/isar_inspector
       - install -Dm644 icon.svg /app/share/icons/hicolor/scalable/apps/dev.isar.IsarInspector.svg
-      - mkdir /app/bin
-      - ln -s /app/isar_inspector/isar_inspector /app/bin/isar_inspector
       - install -Dm644 dev.isar.IsarInspector.desktop /app/share/applications/dev.isar.IsarInspector.desktop
       - install -Dm644 dev.isar.IsarInspector.metainfo.xml /app/share/appdata/dev.isar.IsarInspector.metainfo.xml
     sources:
@@ -33,5 +31,4 @@ finish-args:
   - --share=network
   - --device=all
   - --filesystem=xdg-download
-  - --talk-name=org.freedesktop.Notifications
   - --own-name=dev.isar.IsarInspector

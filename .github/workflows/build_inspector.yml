@@ -32,12 +32,9 @@ jobs:
   build_and_upload_linux:
     runs-on: ubuntu-latest
     container:
-      image: bilelmoussaoui/flatpak-github-actions:gnome-40
+      image: lil5/flatpak-flutter-docker:1.0.0
       options: --privileged
     steps:
-      - name: Install Linux requirements
-        run: |
-          sudo dnf install -y tar clang cmake ninja-build pkg-config gtk3-devel
       - uses: actions/checkout@v1
       - uses: subosito/flutter-action@v1
         with:
