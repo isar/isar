@@ -6,7 +6,7 @@ import 'package:isar/isar.dart';
 import 'isar_collection_impl.dart';
 import 'isar_core.dart';
 import 'index_key.dart';
-import 'native_query.dart';
+import 'query_impl.dart';
 
 final minStr = Pointer<Int8>.fromAddress(0);
 final maxStr = '\u{FFFFF}'.toNativeUtf8().cast<Int8>();
@@ -14,8 +14,8 @@ final maxStr = '\u{FFFFF}'.toNativeUtf8().cast<Int8>();
 Query<T> buildNativeQuery<T>(
   IsarCollectionImpl col,
   List<WhereClause> whereClauses,
-  bool? whereDistinct,
-  Sort? whereSort,
+  bool whereDistinct,
+  Sort whereSort,
   FilterOperation? filter,
   List<SortProperty> sortBy,
   List<DistinctProperty> distinctBy,
@@ -88,11 +88,11 @@ Query<T> buildNativeQuery<T>(
   }
 
   final queryPtr = IC.isar_qb_build(qbPtr);
-  return NativeQuery(col, queryPtr, deserialize, propertyId);
+  return QueryImpl(col, queryPtr, deserialize, propertyId);
 }
 
 void _addWhereClause(IsarCollectionImpl col, Pointer qbPtr, WhereClause wc,
-    bool? distinct, Sort? sort) {
+    bool distinct, Sort sort) {
   if (wc.indexName == null) {
     if (wc.lower != null && wc.lower!.length != 1 || wc.lower?[0] is! int?) {
       throw 'Invalid WhereClause';
@@ -102,8 +102,12 @@ void _addWhereClause(IsarCollectionImpl col, Pointer qbPtr, WhereClause wc,
     }
     nCall(IC.isar_qb_add_id_where_clause(
       qbPtr,
-      sort == Sort.asc ? (wc.lower?[0] ?? minLong) : (wc.upper?[0] ?? maxLong),
-      sort == Sort.asc ? (wc.upper?[0] ?? maxLong) : (wc.lower?[0] ?? minLong),
+      sort == Sort.asc
+          ? (wc.lower?[0] as int? ?? nullLong)
+          : (wc.upper?[0] as int? ?? maxLong),
+      sort == Sort.asc
+          ? (wc.upper?[0] as int? ?? nullLong)
+          : (wc.lower?[0] as int? ?? minLong),
     ));
   } else {
     late Pointer<NativeType> lowerPtr;
@@ -127,7 +131,7 @@ void _addWhereClause(IsarCollectionImpl col, Pointer qbPtr, WhereClause wc,
       sort == Sort.asc ? wc.includeLower : wc.includeUpper,
       sort == Sort.asc ? upperPtr : lowerPtr,
       sort == Sort.asc ? wc.includeUpper : wc.includeLower,
-      distinct ?? false,
+      distinct,
     ));
   }
 }

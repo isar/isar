@@ -1,49 +1,37 @@
 library isar;
 
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:ffi/ffi.dart';
 import 'package:meta/meta_meta.dart';
 
-import 'src/native/isar_collection_impl.dart';
-import 'src/native/isar_impl.dart';
-import 'src/native/split_words.dart';
-import 'src/native/bindings.dart';
-import 'src/native/open.dart';
-import 'src/native/isar_link_impl.dart';
-import 'src/native/isar_type_adapter.dart';
 import 'src/isar_connect.dart';
-import 'src/util.dart';
 
-export 'src/native/isar_type_adapter.dart';
-export 'src/native/binary_reader.dart';
-export 'src/native/binary_writer.dart';
+import 'src/native/isar_native.dart'
+    if (dart.library.html) 'src/web/isar_web.dart';
+export 'src/native/isar_native.dart'
+    if (dart.library.html) 'src/web/isar_web.dart';
 
-part 'package:isar/src/annotations/backlink.dart';
-part 'package:isar/src/annotations/collection.dart';
-part 'package:isar/src/annotations/id.dart';
-part 'package:isar/src/annotations/ignore.dart';
-part 'package:isar/src/annotations/index.dart';
-part 'package:isar/src/annotations/name.dart';
-part 'package:isar/src/annotations/size32.dart';
-part 'package:isar/src/annotations/type_converter.dart';
+part 'src/annotations/backlink.dart';
+part 'src/annotations/collection.dart';
+part 'src/annotations/id.dart';
+part 'src/annotations/ignore.dart';
+part 'src/annotations/index.dart';
+part 'src/annotations/name.dart';
+part 'src/annotations/size32.dart';
+part 'src/annotations/type_converter.dart';
 
-part 'package:isar/src/isar_collection.dart';
-part 'package:isar/src/collection_schema.dart';
-part 'package:isar/src/isar_error.dart';
-part 'package:isar/src/isar_link.dart';
-part 'package:isar/src/isar.dart';
-part 'package:isar/src/query_builder.dart';
-part 'package:isar/src/query_builder_extensions.dart';
-part 'package:isar/src/query_components.dart';
-part 'package:isar/src/query.dart';
-
-/// @nodoc
-@protected
-typedef IsarRawObject = RawObject;
+part 'src/isar_collection.dart';
+part 'src/collection_schema.dart';
+part 'src/isar_error.dart';
+part 'src/isar_link.dart';
+part 'src/isar_type_adapter.dart';
+part 'src/isar.dart';
+part 'src/query_builder.dart';
+part 'src/query_builder_extensions.dart';
+part 'src/query_components.dart';
+part 'src/query.dart';
 
 /// @nodoc
 @protected
@@ -51,5 +39,4 @@ typedef IsarUint8List = Uint8List;
 
 /// @nodoc
 @protected
-Uint8List bufAsBytes(Pointer<Uint8> pointer, int length) =>
-    pointer.asTypedList(length);
+const isarWebVersion = '2.1.10';

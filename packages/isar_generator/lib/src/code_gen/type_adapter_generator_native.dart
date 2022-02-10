@@ -1,30 +1,19 @@
-import 'package:isar_generator/src/helper.dart';
+import 'package:isar_generator/src/code_gen/type_adapter_generator_common.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
-import 'package:dartx/dartx.dart';
 
-String generateObjectAdapter(ObjectInfo object) {
+String generateNativeTypeAdapter(ObjectInfo object) {
   return '''
-    class ${object.adapterName} extends IsarTypeAdapter<${object.dartName}> {
+    class ${object.nativeAdapterName} extends IsarNativeTypeAdapter<${object.dartName}> {
 
-      const ${object.adapterName}();
-
-      ${generateConverterFields(object)}
+      const ${object.nativeAdapterName}();
 
       ${_generateSerialize(object)}
       ${_generateDeserialize(object)}
       ${_generateDeserializeProperty(object)}
-      ${_generateAttachLinks(object)}
+      ${generateAttachLinks(object)}
     }
     ''';
-}
-
-String generateConverterFields(ObjectInfo object) {
-  return object.properties
-      .where((it) => it.converter != null)
-      .distinctBy((it) => it.converter)
-      .map((it) => 'static const ${it.converterName} = ${it.converter}();')
-      .join('\n');
 }
 
 String _generatePrepareSerialize(ObjectInfo object) {
@@ -48,14 +37,14 @@ String _generatePrepareSerialize(ObjectInfo object) {
           code += '''
           IsarUint8List? $accessor;
           if (value$i != null) {
-            $accessor = BinaryWriter.utf8Encoder.convert(value$i);
+            $accessor = IsarBinaryWriter.utf8Encoder.convert(value$i);
           }
           ''';
         } else {
           code +=
-              'final $accessor = BinaryWriter.utf8Encoder.convert(value$i);';
+              'final $accessor = IsarBinaryWriter.utf8Encoder.convert(value$i);';
         }
-        code += 'dynamicSize += $accessor$nOp.length $nLen;';
+        code += 'dynamicSize += ($accessor$nOp.length $nLen) as int;';
         break;
       case IsarType.stringList:
         code += 'dynamicSize += (value$i$nOp.length $nLen) * 8;';
@@ -72,9 +61,9 @@ String _generatePrepareSerialize(ObjectInfo object) {
           code += 'if (str != null) {';
         }
         code += '''
-          final bytes = BinaryWriter.utf8Encoder.convert(str);
+          final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
           bytesList$i.add(bytes);
-          dynamicSize += bytes.length;''';
+          dynamicSize += bytes.length as int;''';
         if (property.elementNullable) {
           code += '''
           } else {
@@ -120,8 +109,8 @@ String _generateSerialize(ObjectInfo object) {
     ${_generatePrepareSerialize(object)}
     rawObj.buffer = alloc(size);
     rawObj.buffer_length = size;
-    final buffer = bufAsBytes(rawObj.buffer, size);
-    final writer = BinaryWriter(buffer, ${object.staticSize});
+    final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+    final writer = IsarBinaryWriter(buffer, ${object.staticSize});
   ''';
   for (var i = 0; i < object.objectProperties.length; i++) {
     final property = object.objectProperties[i];
@@ -183,42 +172,15 @@ String _generateSerialize(ObjectInfo object) {
 }
 
 String _generateDeserialize(ObjectInfo object) {
-  var code = '''
-  @override
-  ${object.dartName} deserialize(IsarCollection<${object.dartName}> collection, int id, BinaryReader reader, List<int> offsets) {
-    final object = ${object.dartName}(''';
-  final propertiesByMode = object.properties.groupBy((p) => p.deserialize);
-  final positional = propertiesByMode[PropertyDeser.positionalParam] ?? [];
-  final sortedPositional = positional.sortedBy((p) => p.constructorPosition!);
-  for (var p in sortedPositional) {
+  String deserProp(ObjectProperty p) {
     final index = object.objectProperties.indexOf(p);
-    final deser = _deserializeProperty(object, p, 'offsets[$index]');
-    code += '$deser,';
-  }
-
-  final named = propertiesByMode[PropertyDeser.namedParam] ?? [];
-  for (var p in named) {
-    final index = object.objectProperties.indexOf(p);
-    final deser = _deserializeProperty(object, p, 'offsets[$index]');
-    code += '${p.dartName}: $deser,';
-  }
-
-  code += ');';
-
-  final assign = propertiesByMode[PropertyDeser.assign] ?? [];
-  for (var p in assign) {
-    final index = object.objectProperties.indexOf(p);
-    final deser = _deserializeProperty(object, p, 'offsets[$index]');
-    code += 'object.${p.dartName} = $deser;';
-  }
-
-  if (object.links.isNotEmpty) {
-    code += 'attachLinks(collection.isar, object);';
+    return _deserializeProperty(object, p, 'offsets[$index]');
   }
 
   return '''
-    $code
-    return object;
+  @override
+  ${object.dartName} deserialize(IsarCollection<${object.dartName}> collection, int id, IsarBinaryReader reader, List<int> offsets) {
+    ${deserializeMethodBody(object, deserProp)}
   }
   ''';
 }
@@ -226,7 +188,7 @@ String _generateDeserialize(ObjectInfo object) {
 String _generateDeserializeProperty(ObjectInfo object) {
   var code = '''
   @override
-  P deserializeProperty<P>(int id, BinaryReader reader, int propertyIndex, int offset) {
+  P deserializeProperty<P>(int id, IsarBinaryReader reader, int propertyIndex, int offset) {
     switch (propertyIndex) {
       case -1:
         return id as P;''';
@@ -259,7 +221,8 @@ String _deserializeProperty(
   String? deser;
   switch (property.isarType) {
     case IsarType.bool:
-      return 'reader.readBool$orNull($propertyOffset)';
+      deser = 'reader.readBool$orNull($propertyOffset)';
+      break;
     case IsarType.int:
       deser = 'reader.readInt$orNull($propertyOffset)';
       break;
@@ -305,24 +268,4 @@ String _deserializeProperty(
   }
 
   return property.fromIsar(deser, object);
-}
-
-String _generateAttachLinks(ObjectInfo object) {
-  if (object.links.isEmpty) {
-    return '';
-  }
-
-  var code = 'void attachLinks(Isar isar, ${object.dartName} object) {';
-
-  for (var link in object.links) {
-    code += '''object.${link.dartName}.attach(
-      isar.${object.accessor},
-      isar.getCollection<${link.targetCollectionDartName}>("${link.targetCollectionDartName.esc}"),
-      object,
-      "${link.dartName.esc}",
-      ${link.backlink},
-    );
-    ''';
-  }
-  return code + '}';
 }

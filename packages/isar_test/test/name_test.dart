@@ -48,7 +48,7 @@ void main() {
 
       expect(await isar.nameModels.where().exportJson(), [
         {
-          'idN': Isar.minId,
+          'idN': 1,
           'valueN': 'test',
           'otherValueN': 'test2',
         },

@@ -1,8 +1,8 @@
 name: IsarCoreBindings
-output: 'lib/src/native/bindings.dart'
+output: "lib/src/native/bindings.dart"
 headers:
   entry-points:
-    - 'isar-dart.h'
+    - "isar-dart.h"
 
 functions:
   include:
@@ -16,4 +16,6 @@ structs:
   include:
     - RawObject
     - RawOid
-    
+
+preamble: |
+  // ignore_for_file: camel_case_types, non_constant_identifier_names

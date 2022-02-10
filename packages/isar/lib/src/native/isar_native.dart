@@ -1,0 +1,113 @@
+import 'dart:ffi';
+import 'dart:typed_data';
+
+import 'package:isar/isar.dart';
+import 'package:isar/src/isar_native_interface.dart';
+import 'package:isar/src/native/binary_reader.dart';
+import 'package:isar/src/native/binary_writer.dart';
+import 'package:isar/src/native/isar_core.dart';
+import 'package:isar/src/native/isar_link_impl.dart';
+import 'package:isar/src/native/open.dart';
+import 'package:meta/meta.dart';
+
+import 'bindings.dart';
+import 'split_words.dart';
+
+const isarMinId = -9223372036854775807;
+const isarMaxId = 9223372036854775807;
+const isarAutoIncrementId = -9223372036854775808;
+
+/// @nodoc
+@protected
+typedef IsarRawObject = RawObject;
+
+/// @nodoc
+@protected
+typedef IsarBytePointer = Pointer<Uint8>;
+
+/// @nodoc
+@protected
+typedef IsarBinaryReader = BinaryReader;
+
+/// @nodoc
+@protected
+typedef IsarBinaryWriter = BinaryWriter;
+
+class _IsarNative implements IsarNativeInterface {
+  const _IsarNative();
+
+  @override
+  Uint8List bufAsBytes(IsarBytePointer pointer, int length) {
+    return pointer.asTypedList(length);
+  }
+
+  @override
+  void initializeLibraries({Map<String, String> libraries = const {}}) {
+    return initializeIsarCore(libraries: libraries);
+  }
+
+  @override
+  dynamic jsObjectGet(Object o, Object key) {
+    throw UnimplementedError();
+  }
+
+  @override
+  void jsObjectSet(Object o, Object key, value) {
+    throw UnimplementedError();
+  }
+
+  @override
+  dynamic newJsObject() {
+    throw UnimplementedError();
+  }
+
+  @override
+  IsarLink<OBJ> newLink<OBJ>() {
+    return IsarLinkImpl();
+  }
+
+  @override
+  IsarLinks<OBJ> newLinks<OBJ>() {
+    return IsarLinksImpl();
+  }
+
+  @override
+  Future<Isar> open({
+    required String directory,
+    required String name,
+    required bool relaxedDurability,
+    required List<CollectionSchema> schemas,
+  }) {
+    return openIsar(
+      directory: directory,
+      name: name,
+      relaxedDurability: relaxedDurability,
+      schemas: schemas,
+    );
+  }
+
+  @override
+  Isar openSync({
+    required String directory,
+    required String name,
+    required bool relaxedDurability,
+    required List<CollectionSchema> schemas,
+  }) {
+    return openIsarSync(
+      directory: directory,
+      name: name,
+      relaxedDurability: relaxedDurability,
+      schemas: schemas,
+    );
+  }
+
+  @override
+  List<String> splitWords(String value) {
+    return splitWordsCore(value);
+  }
+}
+
+/// @nodoc
+@protected
+// ignore: constant_identifier_names
+const IsarNative = _IsarNative();

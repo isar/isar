@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
+import 'isar_collection_impl.dart';
 import 'isar_core.dart';
 import 'isar_impl.dart';
 
@@ -24,18 +25,31 @@ void _initializeInstance(
     final schema = schemas[i];
     nCall(IC.isar_get_collection(isar.ptr, colPtrPtr, i));
     IC.isar_get_property_offsets(colPtrPtr.value, offsetsPtr);
-    cols[schema.name] = schema.toNativeCollection(
-      isar: isar,
-      ptr: colPtrPtr.value,
-      offsets: offsetsPtr.asTypedList(schema.propertyIds.length).toList(),
-    );
+    cols[schema.name] = schema.toCollection(<OBJ>() {
+      schema as CollectionSchema<OBJ>;
+      return IsarCollectionImpl<OBJ>(
+        isar: isar,
+        adapter: schema.nativeAdapter,
+        ptr: colPtrPtr.value,
+        idName: schema.idName,
+        offsets: offsetsPtr.asTypedList(schema.propertyIds.length).toList(),
+        propertyIds: schema.propertyIds,
+        indexIds: schema.indexIds,
+        indexTypes: schema.indexTypes,
+        linkIds: schema.linkIds,
+        backlinkIds: schema.backlinkIds,
+        getLinks: schema.getLinks,
+        getId: schema.getId,
+        setId: schema.setId,
+      );
+    });
   }
 
   // ignore: invalid_use_of_protected_member
   isar.attachCollections(cols);
 }
 
-Future<Isar> openIsarNative({
+Future<Isar> openIsar({
   required List<CollectionSchema> schemas,
   required String directory,
   String name = 'isar',
@@ -64,7 +78,7 @@ Future<Isar> openIsarNative({
   });
 }
 
-Isar openIsarNativeSync({
+Isar openIsarSync({
   required List<CollectionSchema> schemas,
   required String directory,
   String name = 'isar',

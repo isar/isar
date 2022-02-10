@@ -1,6 +1,5 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-
   errors:
     hash_and_equals: ignore

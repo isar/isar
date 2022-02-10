@@ -10,12 +10,12 @@ String generateDistinctBy(ObjectInfo oi) {
     if (property.isarType == IsarType.string) {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}({bool caseSensitive = true}) {
-            return addDistinctByInternal('${property.dartName.esc}', caseSensitive: caseSensitive);
+            return addDistinctByInternal('${property.isarName.esc}', caseSensitive: caseSensitive);
         }''';
     } else if (property.isarType.index < IsarType.string.index) {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}() {
-            return addDistinctByInternal('${property.dartName.esc}');
+            return addDistinctByInternal('${property.isarName.esc}');
         }''';
     }
   }

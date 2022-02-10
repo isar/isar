@@ -1,7 +1,6 @@
-import 'dart:math';
-
+@TestOn('vm')
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_test/common.dart';
 
@@ -51,7 +50,7 @@ Future<bool> _isolateFunc(String name) async {
 }
 
 void main() {
-  test('Isolate test', () async {
+  isarTest('Isolate test', () async {
     final isar = await openTempIsar([TestModelSchema]);
 
     await isar.writeTxn((isar) async {

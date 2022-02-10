@@ -1,11 +1,12 @@
 // ignore_for_file: implementation_imports
 import 'dart:io';
 import 'package:isar/isar.dart';
-import 'package:isar/src/native/isar_core.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'dart:math';
 import 'package:test/test.dart';
+
+const bool kIsWeb = identical(0, 0.0);
 
 Future qEqualSet<T>(Future<Iterable<T>> actual, Iterable<T> target) async {
   expect((await actual).toSet(), target.toSet());
@@ -47,24 +48,41 @@ void isarTest(String name, dynamic Function() body) {
   });
 }
 
+@isTest
+void isarTestVm(String name, dynamic Function() body) {
+  test(name, () async {
+    try {
+      await body();
+      testCount++;
+    } catch (e) {
+      allTestsSuccessful = false;
+      rethrow;
+    }
+  }, skip: kIsWeb);
+}
+
 String? testTempPath;
 
 void registerBinaries() {
-  if (testTempPath == null) {
+  if (!kIsWeb && testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
     testTempPath = path.join(dartToolDir, 'test', 'tmp');
-    initializeIsarCore(
-      libraries: {
-        'windows': path.join(dartToolDir, 'libisar_windows_x64.dll'),
-        'macos': path.join(dartToolDir, 'libisar_macos_x64.dylib'),
-        'linux': path.join(dartToolDir, 'libisar_linux_x64.so'),
-      },
-    );
+    try {
+      Isar.initializeLibraries(
+        libraries: {
+          'windows': path.join(dartToolDir, 'libisar_windows_x64.dll'),
+          'macos': path.join(dartToolDir, 'libisar_macos_x64.dylib'),
+          'linux': path.join(dartToolDir, 'libisar_linux_x64.so'),
+        },
+      );
+    } catch (e) {
+      // ignore. maybe this is an instrumentation test
+    }
   }
 }
 
 String getRandomName() {
-  var random = Random().nextInt(pow(2, 32) as int);
+  var random = Random().nextInt(pow(2, 32) as int).toString();
   return '${random}_tmp';
 }
 
@@ -75,7 +93,7 @@ Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> schemas,
   return Isar.open(
     schemas: schemas,
     name: name ?? getRandomName(),
-    directory: testTempPath!,
+    directory: kIsWeb ? '' : testTempPath!,
   );
 }
 
@@ -111,4 +129,22 @@ Matcher isIsarError([String? contains]) {
 
 Matcher throwsIsarError([String? contains]) {
   return throwsA(isIsarError(contains));
+}
+
+bool listEquals<T>(List<T>? a, List<T>? b) {
+  if (a == null) {
+    return b == null;
+  }
+  if (b == null || a.length != b.length) {
+    return false;
+  }
+  if (identical(a, b)) {
+    return true;
+  }
+  for (int index = 0; index < a.length; index += 1) {
+    if (a[index] != b[index]) {
+      return false;
+    }
+  }
+  return true;
 }

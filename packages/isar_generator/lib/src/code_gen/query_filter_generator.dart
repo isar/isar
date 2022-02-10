@@ -86,7 +86,7 @@ class FilterGenerator {
     ${mPrefix(p)}EqualTo(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return addFilterConditionInternal(FilterCondition(
         type: ConditionType.eq,
-        property: '${p.dartName.esc}',
+        property: '${p.isarName.esc}',
         value: ${toIsar(p, 'value')},
         ${caseSensitiveValue(p)}
       ));
@@ -101,7 +101,7 @@ class FilterGenerator {
       return addFilterConditionInternal(FilterCondition(
         type: ConditionType.gt,
         include: ${!p.isarType.containsFloat ? 'include' : 'false'},
-        property: '${p.dartName.esc}',
+        property: '${p.isarName.esc}',
         value: ${toIsar(p, 'value')},
         ${caseSensitiveValue(p)}
       ));
@@ -116,7 +116,7 @@ class FilterGenerator {
       return addFilterConditionInternal(FilterCondition(
         type: ConditionType.lt,
         include: ${!p.isarType.containsFloat ? 'include' : 'false'},
-        property: '${p.dartName.esc}',
+        property: '${p.isarName.esc}',
         value: ${toIsar(p, 'value')},
         ${caseSensitiveValue(p)}
       ));
@@ -131,7 +131,7 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}Between(${vType(p)} lower, ${vType(p)} upper ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return addFilterConditionInternal(FilterCondition.between(
-        property: '${p.dartName.esc}',
+        property: '${p.isarName.esc}',
         lower: ${toIsar(p, 'lower')},
         includeLower: ${!p.isarType.containsFloat ? 'includeLower' : 'false'},
         upper: ${toIsar(p, 'upper')},
@@ -146,7 +146,7 @@ class FilterGenerator {
     ${mPrefix(p, false)}IsNull() {
       return addFilterConditionInternal(FilterCondition(
         type: ConditionType.isNull,
-        property: '${p.dartName.esc}',
+        property: '${p.isarName.esc}',
         value: null,
       ));
     }''';
@@ -155,7 +155,7 @@ class FilterGenerator {
       ${mPrefix(p)}IsNull() {
         return addFilterConditionInternal(FilterCondition(
           type: ConditionType.eq,
-          property: '${p.dartName.esc}',
+          property: '${p.isarName.esc}',
           value: null,
         ));
       }''';
@@ -168,7 +168,7 @@ class FilterGenerator {
     ${mPrefix(p)}StartsWith(${vType(p, false)} value, {bool caseSensitive = true,}) {
       return addFilterConditionInternal(FilterCondition(
         type: ConditionType.startsWith,
-        property: '${p.dartName.esc}',
+        property: '${p.isarName.esc}',
         value: ${toIsar(p, 'value')},
         caseSensitive: caseSensitive,
       ));
@@ -180,7 +180,7 @@ class FilterGenerator {
     ${mPrefix(p)}EndsWith(${vType(p, false)} value, {bool caseSensitive = true,}) {
       return addFilterConditionInternal(FilterCondition(
         type: ConditionType.endsWith,
-        property: '${p.dartName.esc}',
+        property: '${p.isarName.esc}',
         value: ${toIsar(p, 'value')},
         caseSensitive: caseSensitive,
       ));
@@ -192,7 +192,7 @@ class FilterGenerator {
     ${mPrefix(p)}Contains(${vType(p, false)} value, {bool caseSensitive = true}) {
       return addFilterConditionInternal(FilterCondition(
         type: ConditionType.contains,
-        property: '${p.dartName.esc}',
+        property: '${p.isarName.esc}',
         value: ${toIsar(p, 'value')},
         caseSensitive: caseSensitive,
       ));
@@ -204,7 +204,7 @@ class FilterGenerator {
     ${mPrefix(p)}Matches(String pattern, {bool caseSensitive = true}) {
       return addFilterConditionInternal(FilterCondition(
         type: ConditionType.matches,
-        property: '${p.dartName.esc}',
+        property: '${p.isarName.esc}',
         value: pattern,
         caseSensitive: caseSensitive,
       ));

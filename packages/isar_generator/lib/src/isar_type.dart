@@ -69,38 +69,6 @@ extension IsarTypeX on IsarType {
     }
   }
 
-  int get typeId {
-    switch (this) {
-      case IsarType.bool:
-        return 0;
-      case IsarType.int:
-        return 1;
-      case IsarType.float:
-        return 2;
-      case IsarType.long:
-      case IsarType.dateTime:
-        return 3;
-      case IsarType.double:
-        return 4;
-      case IsarType.string:
-        return 5;
-      case IsarType.bytes:
-      case IsarType.boolList:
-        return 6;
-      case IsarType.intList:
-        return 7;
-      case IsarType.floatList:
-        return 8;
-      case IsarType.longList:
-      case IsarType.dateTimeList:
-        return 9;
-      case IsarType.doubleList:
-        return 10;
-      case IsarType.stringList:
-        return 11;
-    }
-  }
-
   IsarType get scalarType {
     switch (this) {
       case IsarType.boolList:
@@ -119,6 +87,39 @@ extension IsarTypeX on IsarType {
         return IsarType.string;
       default:
         return this;
+    }
+  }
+
+  String get name {
+    switch (this) {
+      case IsarType.bool:
+        return "Bool";
+      case IsarType.int:
+        return "Int";
+      case IsarType.float:
+        return "Float";
+      case IsarType.long:
+      case IsarType.dateTime:
+        return "Long";
+      case IsarType.double:
+        return "Double";
+      case IsarType.string:
+        return "String";
+      case IsarType.bytes:
+        return "ByteList";
+      case IsarType.boolList:
+        return "BoolList";
+      case IsarType.intList:
+        return "IntList";
+      case IsarType.floatList:
+        return "FloatList";
+      case IsarType.longList:
+      case IsarType.dateTimeList:
+        return "LongList";
+      case IsarType.doubleList:
+        return "DoubleList";
+      case IsarType.stringList:
+        return "StringList";
     }
   }
 

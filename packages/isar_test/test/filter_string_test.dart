@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_test/common.dart';
 import 'package:test/test.dart';
@@ -298,7 +297,7 @@ void main() {
       await qEqualSet(col.where().filter().fieldContains('x').findAll(), {});
     });
 
-    isarTest('.matches()', () async {
+    isarTestVm('.matches()', () async {
       await qEqualSet(
         col.where().filter().fieldMatches('*ng 4').findAll(),
         {

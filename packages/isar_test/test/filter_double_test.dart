@@ -151,7 +151,7 @@ void main() {
       objEmpty = DoubleModel()..list = [];
       obj1 = DoubleModel()..list = [1.1, 3.3];
       obj2 = DoubleModel()..list = [null];
-      obj3 = DoubleModel()..list = [null, double.negativeInfinity];
+      obj3 = DoubleModel()..list = [null, -1000];
       objNull = DoubleModel()..list = null;
 
       await isar.writeTxn((isar) async {

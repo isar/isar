@@ -38,7 +38,9 @@ class ObjectInfo with _$ObjectInfo {
     return propertiesSize + 2;
   }
 
-  String get adapterName => '_${dartName}Adapter';
+  String get nativeAdapterName => '_${dartName}NativeAdapter';
+
+  String get webAdapterName => '_${dartName}WebAdapter';
 }
 
 enum PropertyDeser {
@@ -69,11 +71,12 @@ class ObjectProperty with _$ObjectProperty {
   factory ObjectProperty.fromJson(Map<String, dynamic> json) =>
       _$ObjectPropertyFromJson(json);
 
-  String get converterName => '_${converter?.decapitalize()}';
+  String converterName(ObjectInfo oi) =>
+      '_${oi.dartName.decapitalize()}${converter?.capitalize()}';
 
   String toIsar(String input, ObjectInfo oi) {
     if (converter != null) {
-      return '${oi.adapterName}.$converterName.toIsar($input)';
+      return '${converterName(oi)}.toIsar($input)';
     } else {
       return input;
     }
@@ -81,7 +84,7 @@ class ObjectProperty with _$ObjectProperty {
 
   String fromIsar(String input, ObjectInfo oi) {
     if (converter != null) {
-      return '${oi.adapterName}.$converterName.fromIsar($input)';
+      return '${converterName(oi)}.fromIsar($input)';
     } else {
       return input;
     }

@@ -56,7 +56,7 @@ class BinaryReader {
 
   @pragma('vm:prefer-inline')
   double readFloat(int offset, {bool staticOffset = true}) {
-    if (staticOffset && offset >= _staticSize) return nullFloat;
+    if (staticOffset && offset >= _staticSize) return nullDouble;
     return _byteData.getFloat32(offset, Endian.little);
   }
 
@@ -98,8 +98,10 @@ class BinaryReader {
 
   @pragma('vm:prefer-inline')
   DateTime readDateTime(int offset, {bool staticOffset = true}) {
-    final time = readLong(offset, staticOffset: staticOffset);
-    return DateTime.fromMicrosecondsSinceEpoch(time, isUtc: true).toLocal();
+    final time = readLongOrNull(offset, staticOffset: staticOffset);
+    return time != null
+        ? DateTime.fromMicrosecondsSinceEpoch(time, isUtc: true).toLocal()
+        : DateTime.fromMicrosecondsSinceEpoch(0);
   }
 
   @pragma('vm:prefer-inline')

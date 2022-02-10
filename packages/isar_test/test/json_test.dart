@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_test/common.dart';
 import 'package:isar_test/user_model.dart';
@@ -39,7 +39,7 @@ void main() {
       });
 
       for (var i = 0; i < json.length; i++) {
-        json[i]['id'] = Isar.minId + i;
+        json[i]['id'] = i + 1;
       }
       final exportedJson = await col.where().exportJson();
       expect(exportedJson, json);
@@ -67,23 +67,6 @@ void main() {
 
       final exportedJsonNull = await col.where().exportJson();
       expect(exportedJsonNull, json);
-
-      final exportedJsonNonNull =
-          await col.where().exportJson(primitiveNull: false);
-      expect(exportedJsonNonNull, [
-        {
-          'id': 0,
-          'name': null,
-          'age': Isar.minId - 1,
-          'admin': true,
-        },
-        {
-          'id': 1,
-          'name': 'null user 2',
-          'age': Isar.minId - 1,
-          'admin': false,
-        }
-      ]);
     });
 
     isarTest('raw json', () async {
@@ -94,7 +77,7 @@ void main() {
       });
 
       for (var i = 0; i < json.length; i++) {
-        json[i]['id'] = Isar.minId + i;
+        json[i]['id'] = i + 1;
       }
       final exportedJson = await col.where().exportJsonRaw((bytes) {
         return jsonDecode(const Utf8Decoder().convert(bytes));

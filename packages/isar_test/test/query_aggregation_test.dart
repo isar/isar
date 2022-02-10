@@ -570,8 +570,8 @@ void main() {
     });
 
     group('DateTime', () {
-      DateTime date(int microseconds) =>
-          DateTime.fromMicrosecondsSinceEpoch(microseconds);
+      DateTime date(int milliseconds) =>
+          DateTime.fromMillisecondsSinceEpoch(milliseconds);
 
       setUp(() async {
         await _isar.writeTxn((isar) => col.putAll([

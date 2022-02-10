@@ -229,11 +229,12 @@ void main() {
     final schemaJson = jsonDecode(SchemaTestModelSchema.schema);
     expect(schemaJson, {
       'name': 'SchemaTestModel',
+      'idName': 'id',
       'properties': [
-        {'name': 'boolField', 'type': 'Byte'},
-        {'name': 'boolGetter', 'type': 'Byte'},
-        {'name': 'boolListField', 'type': 'ByteList'},
-        {'name': 'boolListGetter', 'type': 'ByteList'},
+        {'name': 'boolField', 'type': 'Bool'},
+        {'name': 'boolGetter', 'type': 'Bool'},
+        {'name': 'boolListField', 'type': 'BoolList'},
+        {'name': 'boolListGetter', 'type': 'BoolList'},
         {'name': 'bytesField', 'type': 'ByteList'},
         {'name': 'bytesGetter', 'type': 'ByteList'},
         {'name': 'compositeField', 'type': 'String'},
@@ -254,8 +255,8 @@ void main() {
         {'name': 'longGetter', 'type': 'Long'},
         {'name': 'longListField', 'type': 'LongList'},
         {'name': 'longListGetter', 'type': 'LongList'},
-        {'name': 'renamedField', 'type': 'Byte'},
-        {'name': 'renamedGetter', 'type': 'Byte'},
+        {'name': 'renamedField', 'type': 'Bool'},
+        {'name': 'renamedGetter', 'type': 'Bool'},
         {'name': 'stringField', 'type': 'String'},
         {'name': 'stringGetter', 'type': 'String'},
         {'name': 'stringListField', 'type': 'StringList'}
@@ -578,9 +579,10 @@ void main() {
     final schemaJson = jsonDecode($Dollar$ModelSchema.schema);
     expect(schemaJson, {
       'name': '\$Dollar\$Model',
+      'idName': '\$dollar\$id',
       'properties': [
-        {'name': '\$dollar\$Field', 'type': 'Byte'},
-        {'name': '\$dollar\$Getter', 'type': 'Byte'}
+        {'name': '\$dollar\$Field', 'type': 'Bool'},
+        {'name': '\$dollar\$Getter', 'type': 'Bool'}
       ],
       'indexes': [
         {

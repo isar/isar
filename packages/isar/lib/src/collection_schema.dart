@@ -3,13 +3,15 @@ part of isar;
 /// @nodoc
 @protected
 class CollectionSchema<OBJ> {
-  static const generatorVersion = 1;
+  static const generatorVersion = 2;
 
   final String name;
   final String schema;
-  final IsarTypeAdapter<OBJ> adapter;
+  final IsarNativeTypeAdapter<OBJ> nativeAdapter;
+  final IsarWebTypeAdapter<OBJ> webAdapter;
   final String idName;
   final Map<String, int> propertyIds;
+  final Set<String> listProperties;
   final Map<String, int> indexIds;
   final Map<String, List<NativeIndexType>> indexTypes;
   final Map<String, int> linkIds;
@@ -23,9 +25,11 @@ class CollectionSchema<OBJ> {
   const CollectionSchema({
     required this.name,
     required this.schema,
-    required this.adapter,
+    required this.nativeAdapter,
+    required this.webAdapter,
     required this.idName,
     required this.propertyIds,
+    required this.listProperties,
     required this.indexIds,
     required this.indexTypes,
     required this.linkIds,
@@ -38,31 +42,9 @@ class CollectionSchema<OBJ> {
   }) : assert(generatorVersion == version,
             'Incompatible generated code. Please re-run code generation using the latest generator.');
 
-  IsarCollection<OBJ> toNativeCollection({
-    required IsarImpl isar,
-    required Pointer<NativeType> ptr,
-    required List<int> offsets,
-  }) {
-    if (kIsWeb) {
-      throw UnimplementedError();
-    } else {
-      return IsarCollectionImpl(
-        isar: isar,
-        adapter: adapter,
-        ptr: ptr,
-        idName: idName,
-        offsets: offsets,
-        propertyIds: propertyIds,
-        indexIds: indexIds,
-        indexTypes: indexTypes,
-        linkIds: linkIds,
-        backlinkIds: backlinkIds,
-        getLinks: getLinks,
-        getId: getId,
-        setId: setId,
-      );
-    }
-  }
+  IsarCollection<OBJ> toCollection(
+          IsarCollection<OBJ> Function<OBJ>() callback) =>
+      callback();
 }
 
 /// @nodoc

@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
+import 'package:isar_test/common.dart';
 
 part 'filter_date_test.g.dart';
 

@@ -6,10 +6,10 @@ abstract class IsarCollection<OBJ> {
   Isar get isar;
 
   /// Get a single object by its [id] or `null` if the object does not exist.
-  Future<OBJ?> get(int id) => getAll([id]).then((objects) => objects[0]);
+  Future<OBJ?> get(int id);
 
   /// Get a single object by [its] id or `null` if the object does not exist.
-  OBJ? getSync(int id) => getAllSync([id])[0];
+  OBJ? getSync(int id);
 
   /// Get a list of objects by their [ids] or `null` if an object does not
   /// exist.
@@ -21,83 +21,85 @@ abstract class IsarCollection<OBJ> {
 
   /// @nodoc
   @protected
-  Future<OBJ?> getByIndex(
-    String indexName,
-    List<dynamic> value,
-  ) =>
-      getAllByIndex(indexName, [value]).then((objects) => objects[0]);
+  Future<OBJ?> getByIndex(String indexName, List<Object?> key);
 
   /// @nodoc
   @protected
-  Future<List<OBJ?>> getAllByIndex(
-    String indexName,
-    List<List<dynamic>> values,
-  );
+  Future<List<OBJ?>> getAllByIndex(String indexName, List<List<Object?>> keys);
 
   /// @nodoc
   @protected
-  OBJ? getByIndexSync(String indexName, List<dynamic> value) =>
-      getAllByIndexSync(indexName, [value])[0];
+  OBJ? getByIndexSync(String indexName, List<Object?> key);
 
   /// @nodoc
   @protected
-  List<OBJ?> getAllByIndexSync(String indexName, List<List<dynamic>> values);
+  List<OBJ?> getAllByIndexSync(String indexName, List<List<Object?>> keys);
 
   /// Insert or update an [object] and returns the assigned id.
-  Future<int> put(OBJ object, {bool replaceOnConflict = false}) {
-    return putAll(
-      [object],
-      replaceOnConflict: replaceOnConflict,
-    ).then((ids) => ids[0]);
-  }
+  Future<int> put(
+    OBJ object, {
+    bool replaceOnConflict = false,
+    bool saveLinks = false,
+  });
 
   /// Insert or update an [object] and returns the assigned id.
-  int putSync(OBJ object, {bool replaceOnConflict = false}) {
-    return putAllSync(
-      [object],
-      replaceOnConflict: replaceOnConflict,
-    )[0];
-  }
+  int putSync(
+    OBJ object, {
+    bool replaceOnConflict = false,
+    bool saveLinks = false,
+  });
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  Future<List<int>> putAll(List<OBJ> objects, {bool replaceOnConflict = false});
+  Future<List<int>> putAll(
+    List<OBJ> objects, {
+    bool replaceOnConflict = false,
+    bool saveLinks = false,
+  });
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  List<int> putAllSync(List<OBJ> objects, {bool replaceOnConflict = false});
+  List<int> putAllSync(
+    List<OBJ> objects, {
+    bool replaceOnConflict = false,
+    bool saveLinks = false,
+  });
 
-  /// Delete a single object by its [id]. Returns whether the object has been
-  /// deleted.
+  /// Delete a single object by its [id].
+  ///
+  /// Returns whether the object has been deleted. Isar web always returns
+  /// `true`.
   Future<bool> delete(int id) => deleteAll([id]).then((count) => count == 1);
 
-  /// Delete a single object by its [id]. Returns whether the object has been
-  /// deleted.
+  /// Delete a single object by its [id].
+  ///
+  /// Returns whether the object has been deleted.
   bool deleteSync(int id) => deleteAllSync([id]) == 1;
 
-  /// Delete a list of objecs by their [ids]. Returns the number of objects that
-  /// have been deleted.
+  /// Delete a list of objecs by their [ids].
+  ///
+  /// Returns the number of objects that have been deleted. Isar web always
+  /// returns `ids.length`.
   Future<int> deleteAll(List<int> ids);
 
-  /// Delete a list of objecs by their [ids]. Returns the number of objects that
-  /// have been deleted.
+  /// Delete a list of objecs by their [ids].
+  ///
+  /// Returns the number of objects that have been deleted.
   int deleteAllSync(List<int> ids);
 
   /// @nodoc
   @protected
-  Future<bool> deleteByIndex(String indexName, List<dynamic> value) =>
-      deleteAllByIndex(indexName, [value]).then((count) => count == 1);
+  Future<bool> deleteByIndex(String indexName, List<Object?> key);
 
   /// @nodoc
   @protected
-  Future<int> deleteAllByIndex(String indexName, List<List<dynamic>> values);
+  Future<int> deleteAllByIndex(String indexName, List<List<Object?>> keys);
 
   /// @nodoc
   @protected
-  bool deleteByIndexSync(String indexName, List<dynamic> value) =>
-      deleteAllByIndexSync(indexName, [value]) == 1;
+  bool deleteByIndexSync(String indexName, List<Object?> key);
 
   /// @nodoc
   @protected
-  int deleteAllByIndexSync(String indexName, List<List<dynamic>> values);
+  int deleteAllByIndexSync(String indexName, List<List<Object?>> keys);
 
   /// Remove all data in this collection and reset the auto increment value.
   Future<void> clear();
@@ -114,17 +116,11 @@ abstract class IsarCollection<OBJ> {
 
   /// Import a list of json objects.
   Future<void> importJson(List<Map<String, dynamic>> json,
-      {bool replaceOnConflict = false}) {
-    final bytes = Utf8Encoder().convert(jsonEncode(json));
-    return importJsonRaw(bytes, replaceOnConflict: replaceOnConflict);
-  }
+      {bool replaceOnConflict = false});
 
   /// Import a list of json objects.
   void importJsonSync(List<Map<String, dynamic>> json,
-      {bool replaceOnConflict = false}) {
-    final bytes = Utf8Encoder().convert(jsonEncode(json));
-    importJsonRawSync(bytes, replaceOnConflict: replaceOnConflict);
-  }
+      {bool replaceOnConflict = false});
 
   /// Start building a query using the [QueryBuilder].
   QueryBuilder<OBJ, OBJ, QWhere> where(

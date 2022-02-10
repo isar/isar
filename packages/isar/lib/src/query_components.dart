@@ -6,14 +6,14 @@ class WhereClause {
   final String? indexName;
 
   /// The lower bound of the where clause.
-  final List? lower;
+  final List<Object?>? lower;
 
   /// Whether the lower bound should be included in the results. Double values
   /// are never included.
   final bool includeLower;
 
   /// The upper bound of the where clause.
-  final List? upper;
+  final List<Object?>? upper;
 
   /// Whether the upper bound should be included in the results. Double values
   /// are never included.
@@ -35,6 +35,9 @@ abstract class FilterOperation {
 }
 
 /// The type of dynamic filter conditions.
+///
+/// For lists, at least one of the values in the list has to match. For
+/// `isNull`, the entire list hast to be null.
 enum ConditionType {
   eq,
   gt,

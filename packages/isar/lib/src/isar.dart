@@ -9,13 +9,13 @@ typedef IsarCloseCallback = void Function(String);
 /// An instance of the Isar Database.
 abstract class Isar {
   /// Smallest valid id.
-  static const minId = kIsWeb ? -9007199254740991 : -9223372036854775807;
+  static const minId = isarMinId;
 
   /// Largest valid id.
-  static const maxId = kIsWeb ? 9007199254740991 : 9223372036854775807;
+  static const maxId = isarMaxId;
 
   /// Placeholder for an auto-increment id.
-  static const autoIncrement = -9223372036854775808;
+  static const autoIncrement = isarAutoIncrementId;
 
   static final _instances = <String, Isar>{};
   static final _openCallbacks = <IsarOpenCallback>{};
@@ -50,7 +50,11 @@ abstract class Isar {
     if (schemas.isEmpty) {
       throw IsarError('At least one collection needs to be opened.');
     }
-    for (var schema in schemas) {
+    for (var i = 0; i < schemas.length; i++) {
+      final schema = schemas[i];
+      if (schemas.indexWhere((e) => e.name == schema.name) != i) {
+        throw IsarError('Duplicate collection ${schema.name}.');
+      }
       for (var linkedCol in schema.linkedCollections) {
         if (!schemas.any((e) => e.name == linkedCol)) {
           throw IsarError(
@@ -73,16 +77,12 @@ abstract class Isar {
       initializeIsarConnect();
     }
     _checkOpen(name, schemas);
-    if (kIsWeb) {
-      throw UnimplementedError();
-    } else {
-      return openIsarNative(
-        schemas: schemas,
-        directory: directory,
-        name: name,
-        relaxedDurability: relaxedDurability,
-      );
-    }
+    return IsarNative.open(
+      schemas: schemas,
+      directory: directory,
+      name: name,
+      relaxedDurability: relaxedDurability,
+    );
   }
 
   /// Open a new Isar instance.
@@ -97,16 +97,12 @@ abstract class Isar {
       initializeIsarConnect();
     }
     _checkOpen(name, schemas);
-    if (kIsWeb) {
-      throw UnimplementedError();
-    } else {
-      return openIsarNativeSync(
-        schemas: schemas,
-        directory: directory,
-        name: name,
-        relaxedDurability: relaxedDurability,
-      );
-    }
+    return IsarNative.openSync(
+      schemas: schemas,
+      directory: directory,
+      name: name,
+      relaxedDurability: relaxedDurability,
+    );
   }
 
   /// Is the instance open?
@@ -160,10 +156,11 @@ abstract class Isar {
   /// Releases an Isar instance.
   ///
   /// If this is the only isolate that holds a reference to this instance, the
-  /// Isar instance will be closed.
+  /// Isar instance will be closed. [deleteFromDisk] additionally removes all
+  /// database files if enabled.
   ///
   /// Returns whether the instance was actually closed.
-  Future<bool> close() {
+  Future<bool> close({bool deleteFromDisk = false}) {
     _isOpen = false;
     if (identical(_instances[name], this)) {
       _instances.remove(name);
@@ -210,13 +207,10 @@ abstract class Isar {
     _closeCallbacks.remove(callback);
   }
 
+  static initializeLibraries({Map<String, String> libraries = const {}}) =>
+      IsarNative.initializeLibraries(libraries: libraries);
+
   /// Split a String into words according to Unicode Annex #29. Only words
   /// containing at least one alphanumeric character will be included.
-  static List<String> splitWords(String input) {
-    if (kIsWeb) {
-      throw UnimplementedError();
-    } else {
-      return splitWordsNative(input);
-    }
-  }
+  static List<String> splitWords(String input) => IsarNative.splitWords(input);
 }

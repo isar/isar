@@ -28,11 +28,10 @@
   <a href="https://pub.dev/packages/isar">Pub.dev</a>
 </p>
 
-
 > #### Isar [ee-zahr]:
+>
 > 1. River in Bavaria, Germany.
 > 2. Database that will make your life easier.
-
 
 ## Features
 
@@ -43,12 +42,12 @@
 - 🦄 **Open source**. Everything is open source and free forever!
 
 Isar can do much more (and we are just getting started)
+
 - 🕵️ **Full-text search**. Make searching fast and fun
-- 📱 **Multiplatform**. iOS, Android, Desktop and the web (soon™)
+- 📱 **Multiplatform**. iOS, Android, Desktop and FULL WEB SUPPORT!
 - 🧪 **ACID semantics**. Rely on consistency
 - 💃 **Static typing**. Compile-time checked and autocompleted queries
 - ✨ **Beautiful documentation**. Readable, easy to understand and ever improving
-
 
 If you want to say thank you, star us on GitHub and like us on pub.dev 🙌💙
 
@@ -60,15 +59,16 @@ Holy smokes you're here! Let's get started...
 
 ```yaml
 dependencies:
-  isar: 2.1.0
-  isar_flutter_libs: 2.1.0 # contains the binaries
+  isar: 2.2.0
+  isar_flutter_libs: 2.2.0 # contains the binaries
 
 dev_dependencies:
-  isar_generator: 2.1.0
+  isar_generator: 2.2.0
   build_runner: any
 ```
 
 ### 2. Annotate a Collection
+
 ```dart
 @Collection()
 class Post {
@@ -81,6 +81,7 @@ class Post {
 ```
 
 ### 3. Open an instance
+
 ```dart
 final dir = await getApplicationSupportDirectory(); // path_provider package
 final isar = await Isar.open(
@@ -91,6 +92,7 @@ final isar = await Isar.open(
 ```
 
 ### 4. Query the database
+
 ```dart
 final posts = await isar.posts.filter()
   .titleContains('awesome', caseSensitive: false)
@@ -104,7 +106,6 @@ final posts = await isar.posts.filter()
 The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to inspect the Isar instances & collections of your app in real time. You can execute queries, switch between instances and sort the data.
 
 <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/isar-inspector.png?sanitize=true">
-
 
 ## CRUD operations
 
@@ -142,7 +143,7 @@ final usersLivingInMunich = isar.users
   .addressMatches('*Munich*', caseSensitive: false) // address containing 'munich' (case insensitive)
   .optional(
     shouldSort, // only apply if shouldSort == true
-    (q) => q.sortedByAge(), 
+    (q) => q.sortedByAge(),
   )
   .findAll()
 ```

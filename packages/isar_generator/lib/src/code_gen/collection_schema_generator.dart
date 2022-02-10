@@ -9,7 +9,11 @@ import 'package:dartx/dartx.dart';
 String generateCollectionSchema(ObjectInfo object) {
   final schema = generateSchema(object);
   final propertyIds = object.objectProperties
-      .mapIndexed((index, p) => "'${p.dartName.esc}': $index")
+      .mapIndexed((index, p) => "'${p.isarName.esc}': $index")
+      .join(',');
+  final listProperties = object.objectProperties
+      .filter((p) => p.isarType.isList)
+      .map((p) => "'${p.isarName.esc}'")
       .join(',');
   final indexIds = object.indexes
       .mapIndexed((index, i) => "'${i.name.esc}': $index")
@@ -20,14 +24,14 @@ String generateCollectionSchema(ObjectInfo object) {
       .join(',');
   final linkIds = object.links
       .where((l) => !l.backlink)
-      .mapIndexed((i, link) => "'${link.dartName.esc}': $i")
+      .mapIndexed((i, link) => "'${link.isarName.esc}': $i")
       .join(',');
   final backlinkIds = object.links
       .where((l) => l.backlink)
-      .mapIndexed((i, link) => "'${link.dartName.esc}': $i")
+      .mapIndexed((i, link) => "'${link.isarName.esc}': $i")
       .join(',');
   final linkedCollections = object.links
-      .map((e) => "'${e.targetCollectionDartName.esc}'")
+      .map((e) => "'${e.targetCollectionIsarName.esc}'")
       .distinct()
       .join(',');
   final getLinks =
@@ -36,11 +40,13 @@ String generateCollectionSchema(ObjectInfo object) {
   final setId = '(obj, id) => obj.${object.idProperty.dartName} = id';
   return '''
     final ${object.dartName.capitalize()}Schema = CollectionSchema(
-      name: '${object.dartName.esc}',
+      name: '${object.isarName.esc}',
       schema: '$schema',
-      adapter: const ${object.adapterName}(),
+      nativeAdapter: const ${object.nativeAdapterName}(),
+      webAdapter: const ${object.webAdapterName}(),
       idName: '${object.idProperty.isarName.esc}',
       propertyIds: {$propertyIds},
+      listProperties: {$listProperties},
       indexIds: {$indexIds},
       indexTypes: {$indexTypes},
       linkIds: {$linkIds},
@@ -56,6 +62,7 @@ String generateCollectionSchema(ObjectInfo object) {
 String generateSchema(ObjectInfo object) {
   final json = {
     'name': object.isarName,
+    'idName': object.idProperty.isarName,
     'properties': [
       for (var property in object.objectProperties)
         {
@@ -100,40 +107,6 @@ extension on IndexType {
         return 'Hash';
       case IndexType.hashElements:
         return 'HashElements';
-    }
-  }
-}
-
-extension on IsarType {
-  String get name {
-    switch (this) {
-      case IsarType.bool:
-        return "Byte";
-      case IsarType.int:
-        return "Int";
-      case IsarType.float:
-        return "Float";
-      case IsarType.long:
-      case IsarType.dateTime:
-        return "Long";
-      case IsarType.double:
-        return "Double";
-      case IsarType.string:
-        return "String";
-      case IsarType.bytes:
-      case IsarType.boolList:
-        return "ByteList";
-      case IsarType.intList:
-        return "IntList";
-      case IsarType.floatList:
-        return "FloatList";
-      case IsarType.longList:
-      case IsarType.dateTimeList:
-        return "LongList";
-      case IsarType.doubleList:
-        return "DoubleList";
-      case IsarType.stringList:
-        return "StringList";
     }
   }
 }

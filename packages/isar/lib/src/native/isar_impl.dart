@@ -155,12 +155,12 @@ class IsarImpl extends Isar {
   }
 
   @override
-  Future<bool> close() async {
+  Future<bool> close({bool deleteFromDisk = false}) async {
     requireOpen();
     requireNotInTxn();
     await Future.wait(_activeAsyncTxns);
     await super.close();
-    return IC.isar_close_instance(ptr);
+    return IC.isar_close_instance(ptr, deleteFromDisk);
   }
 }
 

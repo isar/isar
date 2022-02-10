@@ -1,8 +1,7 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:isar/isar.dart';
-
 import 'package:isar_test/common.dart';
+import 'package:test/test.dart';
 
 part 'constructor_test.g.dart';
 part 'constructor_test.freezed.dart';
@@ -11,11 +10,15 @@ part 'constructor_test.freezed.dart';
 class EmptyConstructorModel {
   int? id;
 
+  late String name;
+
   EmptyConstructorModel();
 
   @override
   operator ==(dynamic other) {
-    return other is EmptyConstructorModel && other.id == id;
+    return other is EmptyConstructorModel &&
+        other.id == id &&
+        other.name == name;
   }
 }
 
@@ -58,6 +61,9 @@ class OptionalConstructorModel {
   final String name;
 
   OptionalConstructorModel(this.name, [this.id]);
+
+  @override
+  String toString() => '{id: $id, name: $name}';
 
   @override
   operator ==(dynamic other) {
@@ -126,8 +132,8 @@ void main() {
     });
 
     isarTest('EmptyConstructorModel', () async {
-      final obj1 = EmptyConstructorModel();
-      final obj2 = EmptyConstructorModel();
+      final obj1 = EmptyConstructorModel()..name = 'obj1';
+      final obj2 = EmptyConstructorModel()..name = 'obj2';
       await isar.writeTxn((isar) async {
         await isar.emptyConstructorModels.putAll([obj1, obj2]);
       });
@@ -161,7 +167,7 @@ void main() {
 
     isarTest('OptionalConstructorModel', () async {
       final obj1 = OptionalConstructorModel('obj1');
-      final obj1WithId = OptionalConstructorModel('obj1', Isar.minId);
+      final obj1WithId = OptionalConstructorModel('obj1', 1);
       final obj2 = OptionalConstructorModel('obj2', 5);
       final obj3 = OptionalConstructorModel('obj3', 15);
       await isar.writeTxn((isar) async {

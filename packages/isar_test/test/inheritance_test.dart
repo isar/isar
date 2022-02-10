@@ -27,8 +27,8 @@ class Child extends Parent {
 
 @Collection(inheritance: false)
 class NoInheritanceChild extends Parent {
-  @override
-  int? id;
+  @Id()
+  int? myId;
 
   late String childField;
 

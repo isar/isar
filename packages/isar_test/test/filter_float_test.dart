@@ -149,7 +149,7 @@ void main() {
       objEmpty = FloatModel()..list = [];
       obj1 = FloatModel()..list = [1.1, 3.3];
       obj2 = FloatModel()..list = [null];
-      obj3 = FloatModel()..list = [null, double.negativeInfinity];
+      obj3 = FloatModel()..list = [null, -1000];
       objNull = FloatModel()..list = null;
 
       await isar.writeTxn((isar) async {
