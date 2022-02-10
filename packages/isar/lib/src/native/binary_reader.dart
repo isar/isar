@@ -56,7 +56,7 @@ class BinaryReader {
 
   @pragma('vm:prefer-inline')
   double readFloat(int offset, {bool staticOffset = true}) {
-    if (staticOffset && offset >= _staticSize) return nullFloat;
+    if (staticOffset && offset >= _staticSize) return nullDouble;
     return _byteData.getFloat32(offset, Endian.little);
   }
 

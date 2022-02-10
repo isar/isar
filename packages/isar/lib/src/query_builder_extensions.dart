@@ -138,13 +138,11 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
   Stream<void> watchLazy() => build().watchLazy();
 
   /// {@macro query_export_json_raw}
-  Future<T> exportJsonRaw<T>(T Function(Uint8List) callback,
-          {bool primitiveNull = true}) =>
-      build().exportJsonRaw(callback, primitiveNull: primitiveNull);
+  Future<T> exportJsonRaw<T>(T Function(Uint8List) callback) =>
+      build().exportJsonRaw(callback);
 
   /// {@macro query_export_json}
-  Future<List<Map<String, dynamic>>> exportJson({bool primitiveNull = true}) =>
-      build().exportJson(primitiveNull: primitiveNull);
+  Future<List<Map<String, dynamic>>> exportJson() => build().exportJson();
 }
 
 /// Extension for QueryBuilders

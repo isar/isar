@@ -163,12 +163,12 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<OBJ?> getByIndex(
     String indexName,
-    List<dynamic> key,
+    List<Object?> key,
   ) =>
       getAllByIndex(indexName, [key]).then((objects) => objects[0]);
 
   @override
-  Future<List<OBJ?>> getAllByIndex(String indexName, List<List> keys) {
+  Future<List<OBJ?>> getAllByIndex(String indexName, List<List<Object?>> keys) {
     return isar.getTxn(false, (txn) async {
       final rawObjSetPtr = txn.allocRawObjSet(keys.length);
       final keysPtrPtr = _getKeysPtr(indexName, keys, txn.alloc);
@@ -182,12 +182,12 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   OBJ? getByIndexSync(
     String indexName,
-    List<dynamic> key,
+    List<Object?> key,
   ) =>
       getAllByIndexSync(indexName, [key])[0];
 
   @override
-  List<OBJ?> getAllByIndexSync(String indexName, List<List> keys) {
+  List<OBJ?> getAllByIndexSync(String indexName, List<List<Object?>> keys) {
     return isar.getTxnSync(false, (txn) {
       final rawObjPtr = txn.allocRawObject();
       final rawObj = rawObjPtr.ref;
@@ -205,7 +205,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<int> put(OBJ object, {bool replaceOnConflict = false}) {
+  Future<int> put(
+    OBJ object, {
+    bool replaceOnConflict = false,
+    bool saveLinks = false,
+  }) {
     return putAll(
       [object],
       replaceOnConflict: replaceOnConflict,
@@ -216,6 +220,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   Future<List<int>> putAll(
     List<OBJ> objects, {
     bool replaceOnConflict = false,
+    bool saveLinks = false,
   }) {
     return isar.getTxn(true, (txn) async {
       final rawObjSetPtr = txn.allocRawObjSet(objects.length);
@@ -258,10 +263,15 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  int putSync(OBJ object, {bool replaceOnConflict = false}) {
+  int putSync(
+    OBJ object, {
+    bool replaceOnConflict = false,
+    bool saveLinks = false,
+  }) {
     return putAllSync(
       [object],
       replaceOnConflict: replaceOnConflict,
+      saveLinks: saveLinks,
     )[0];
   }
 
@@ -269,6 +279,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   List<int> putAllSync(
     List<OBJ> objects, {
     bool replaceOnConflict = false,
+    bool saveLinks = false,
   }) {
     return isar.getTxnSync(true, (txn) {
       final rawObjPtr = txn.allocRawObject();
@@ -284,7 +295,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         ids[i] = rawObj.id;
         setId?.call(object, rawObj.id);
 
-        if (getLinks != null) {
+        if (saveLinks && getLinks != null) {
           for (var link in getLinks!(object)) {
             if (link.isChanged) {
               link.saveSync();
@@ -333,11 +344,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<bool> deleteByIndex(String indexName, List<dynamic> key) =>
+  Future<bool> deleteByIndex(String indexName, List<Object?> key) =>
       deleteAllByIndex(indexName, [key]).then((count) => count == 1);
 
   @override
-  Future<int> deleteAllByIndex(String indexName, List<List> keys) {
+  Future<int> deleteAllByIndex(String indexName, List<List<Object?>> keys) {
     return isar.getTxn(true, (txn) async {
       final countPtr = txn.alloc<Uint32>();
       final keysPtrPtr = _getKeysPtr(indexName, keys, txn.alloc);
@@ -351,11 +362,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  bool deleteByIndexSync(String indexName, List<dynamic> key) =>
+  bool deleteByIndexSync(String indexName, List<Object?> key) =>
       deleteAllByIndexSync(indexName, [key]) == 1;
 
   @override
-  int deleteAllByIndexSync(String indexName, List<List> keys) {
+  int deleteAllByIndexSync(String indexName, List<List<Object?>> keys) {
     return isar.getTxnSync(true, (txn) {
       final countPtr = txn.alloc<Uint32>();
       final keysPtrPtr = _getKeysPtr(indexName, keys, txn.alloc);

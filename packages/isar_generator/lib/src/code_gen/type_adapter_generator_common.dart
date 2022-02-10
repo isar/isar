@@ -1,4 +1,5 @@
 import 'package:dartx/dartx.dart';
+import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 String deserializeMethodBody(ObjectInfo object,
@@ -33,4 +34,24 @@ String deserializeMethodBody(ObjectInfo object,
   return '''
     $code
     return object;''';
+}
+
+String generateAttachLinks(ObjectInfo object) {
+  if (object.links.isEmpty) {
+    return '';
+  }
+
+  var code = 'void attachLinks(Isar isar, ${object.dartName} object) {';
+
+  for (var link in object.links) {
+    code += '''object.${link.dartName}.attach(
+      isar.${object.accessor},
+      isar.getCollection<${link.targetCollectionDartName}>('${link.targetCollectionIsarName.esc}'),
+      object,
+      '${link.isarName.esc}',
+      ${link.backlink},
+    );
+    ''';
+  }
+  return code + '}';
 }

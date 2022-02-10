@@ -3,6 +3,8 @@ import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/isar_native_interface.dart';
+import 'package:isar/src/web/isar_link_impl.dart';
+import 'package:js/js.dart';
 import 'package:meta/meta.dart';
 
 import 'open.dart';
@@ -10,6 +12,10 @@ import 'open.dart';
 const isarMinId = -9007199254740991;
 const isarMaxId = 9007199254740991;
 const isarAutoIncrementId = double.negativeInfinity;
+
+Never unsupportedOnWeb() {
+  throw UnsupportedError('This operation is not supported for Isar web');
+}
 
 /// @nodoc
 @protected
@@ -58,12 +64,12 @@ class _IsarWeb implements IsarNativeInterface {
 
   @override
   IsarLink<OBJ> newLink<OBJ>() {
-    throw UnimplementedError();
+    return IsarLinkImpl();
   }
 
   @override
   IsarLinks<OBJ> newLinks<OBJ>() {
-    throw UnimplementedError();
+    return IsarLinksImpl();
   }
 
   @override
@@ -87,9 +93,8 @@ class _IsarWeb implements IsarNativeInterface {
     required String name,
     required bool relaxedDurability,
     required List<CollectionSchema> schemas,
-  }) {
-    throw UnimplementedError();
-  }
+  }) =>
+      unsupportedOnWeb();
 
   @override
   List<String> splitWords(String value) {

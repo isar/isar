@@ -77,35 +77,27 @@ abstract class Query<T> {
   /// **IMPORTANT:** Do not leak the bytes outside the callback. If you need to
   /// use the bytes outside, create a copy of the `Uint8List`.
   /// {@endtemplate}
-  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
-      {bool primitiveNull = true});
+  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback);
 
   /// {@macro query_export_json_raw}
-  R exportJsonRawSync<R>(R Function(Uint8List) callback,
-      {bool primitiveNull = true});
+  R exportJsonRawSync<R>(R Function(Uint8List) callback);
 
   /// {@template query_export_json}
   /// Export the results of this query as json.
   /// {@endtemplate}
-  Future<List<Map<String, dynamic>>> exportJson({bool primitiveNull = true}) {
-    return exportJsonRaw(
-      (bytes) {
-        final json = jsonDecode(Utf8Decoder().convert(bytes)) as List;
-        return json.cast<Map<String, dynamic>>();
-      },
-      primitiveNull: primitiveNull,
-    );
+  Future<List<Map<String, dynamic>>> exportJson() {
+    return exportJsonRaw((bytes) {
+      final json = jsonDecode(Utf8Decoder().convert(bytes)) as List;
+      return json.cast<Map<String, dynamic>>();
+    });
   }
 
   /// {@macro query_export_json}
-  List<Map<String, dynamic>> exportJsonSync({bool primitiveNull = true}) {
-    return exportJsonRawSync(
-      (bytes) {
-        final json = jsonDecode(Utf8Decoder().convert(bytes)) as List;
-        return json.cast<Map<String, dynamic>>();
-      },
-      primitiveNull: primitiveNull,
-    );
+  List<Map<String, dynamic>> exportJsonSync() {
+    return exportJsonRawSync((bytes) {
+      final json = jsonDecode(Utf8Decoder().convert(bytes)) as List;
+      return json.cast<Map<String, dynamic>>();
+    });
   }
 }
 

@@ -1,7 +1,24 @@
 ## 2.2.0
+
+Isar now has full web support 🎉. No changes to your code required, just run it.
+
+_Web passes all unit tests but is still considered beta for now._
+
+### Minor Breaking
+
+- Added `saveLinks` parameter to `.put()` and `.putAll()` which defaults to `false`
+- Changed default `overrideChanges` parameter of `links.load()` to `true` to avoid unintended behavior
+
+### Enhancements
+
 - Improved write performance
 - Added `deleteFromDisk` option to `isar.close()`
+- Added `.reset()` and `.resetSync()` methods to `IsarLink` and `IsarLinks`
+
+### Fixed
+
 - Fixed value of `null` dates to be `DateTime.fromMillisecondsSinceEpoch(0)`
+- Improved handling of link edge-cases
 
 ## 2.1.4
 
@@ -13,9 +30,11 @@
 - Fixed broken link in pub.dev example page
 
 ## 2.1.0
+
 `isar_connect` is now integrated into `isar`
 
 ### Enhancements
+
 - Added check for outdated generated files
 - Added check for changed schema across isolates
 - Added `Isar.openSync()`
@@ -25,6 +44,7 @@
 - More tests
 
 ### Fixed
+
 - Fixed issue where imported json required existing ids
 - Fixed issue with transaction handling (thanks @Peng-Qian for the awesome help)
 - Fixed issue with `@Ignore` annotation not always working
@@ -33,6 +53,7 @@
 ## 2.0.0
 
 ### Breaking
+
 - The id for non-final objects is now assigned automatically after `.put()` and `.putSync()`
 - `double` and `List<double>` indexes can no longer be at the beginning of a composite index
 - `List<double>` indexes can no longer be hashed
@@ -42,6 +63,7 @@
 - Dart `2.14` or higher is required
 
 ### Enhancements
+
 - Added API docs for all public methods
 - Added `isar.clear()`, `isar.clearSync()`, `col.clear()` and `col.clearSync()`
 - Added `col.filter()` as shortcut for `col.where().filter()`
@@ -60,6 +82,7 @@
 - More tests
 
 ### Fixed
+
 - `IsarLink` and `IsarLinks` can now be final
 - Fixed multi-entry index queries returning items multiple times in some cases
 - Fixed `.anyLessThan()` and `.anyGreaterThan()` issues
@@ -75,9 +98,11 @@
 ## 1.0.5
 
 ### Enhancements
+
 - Updated dependencies
 
 ### Fixes:
+
 - Included desktop binaries
 - Fixed "Cannot allocate memory" error on older iOS devices
 - Fixed stripped binaries for iOS release builds
@@ -92,13 +117,16 @@ Added missing binaries
 Switched from liblmdb to libmdbx for better performance, more stability and many internal improvements.
 
 ### Breaking
+
 The internal database format has been changed to improve performance. Old databases do not work anymore!
 
 ### Fixes
+
 - Fix issue with links being removed after object update
 - Fix String index problems
 
 ### Enhancements
+
 - Support `greaterThan`, `lessThan` and `between` queries for String values
 - Support for inheritance (enabled by default)
 - Support for `final` properties and getters
@@ -113,21 +141,25 @@ The internal database format has been changed to improve performance. Old databa
 - many more...
 
 ### Internal
+
 - Improve generated code
 - Many new unit tests
 
 ## 0.4.0
 
 ### Breaking
+
 - Remove `.where...In()` and `...In()` extension methods
 - Split `.watch(lazy: bool)` into `.watch()` and `.watchLazy()`
 - Remove `include` option for filters
 
 ### Fixes
+
 - Generate id for JSON imports that don't have an id
 - Enable `sortBy` and `thenBy` generation
 
 ### Enhancements
+
 - Add `.optional()` and `.repeat()` query modifiers
 - Support property queries
 - Support query aggregation
@@ -136,23 +168,29 @@ The internal database format has been changed to improve performance. Old databa
 - Add `caseSensitive` option to `.distinctBy()`
 
 ### Internal
+
 - Change iOS linking
 - Improve generated code
 - Set up integration tests and improve unit tests
 - Use CORE/0.4.0
 
 ## 0.2.0
+
 - Link support
 - Many improvements and fixes
 
 ## 0.1.0
+
 - Support for links and backlinks
 
 ## 0.0.4
+
 - Bugfixes and many improvements
 
 ## 0.0.2
+
 Fix dependency issue
 
 ## 0.0.1
+
 Initial release

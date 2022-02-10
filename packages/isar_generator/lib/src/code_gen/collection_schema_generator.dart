@@ -11,6 +11,10 @@ String generateCollectionSchema(ObjectInfo object) {
   final propertyIds = object.objectProperties
       .mapIndexed((index, p) => "'${p.isarName.esc}': $index")
       .join(',');
+  final listProperties = object.objectProperties
+      .filter((p) => p.isarType.isList)
+      .map((p) => "'${p.isarName.esc}'")
+      .join(',');
   final indexIds = object.indexes
       .mapIndexed((index, i) => "'${i.name.esc}': $index")
       .join(',');
@@ -42,6 +46,7 @@ String generateCollectionSchema(ObjectInfo object) {
       webAdapter: const ${object.webAdapterName}(),
       idName: '${object.idProperty.isarName.esc}',
       propertyIds: {$propertyIds},
+      listProperties: {$listProperties},
       indexIds: {$indexIds},
       indexTypes: {$indexTypes},
       linkIds: {$linkIds},
@@ -57,6 +62,7 @@ String generateCollectionSchema(ObjectInfo object) {
 String generateSchema(ObjectInfo object) {
   final json = {
     'name': object.isarName,
+    'idName': object.idProperty.isarName,
     'properties': [
       for (var property in object.objectProperties)
         {

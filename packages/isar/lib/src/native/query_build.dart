@@ -102,8 +102,12 @@ void _addWhereClause(IsarCollectionImpl col, Pointer qbPtr, WhereClause wc,
     }
     nCall(IC.isar_qb_add_id_where_clause(
       qbPtr,
-      sort == Sort.asc ? (wc.lower?[0] ?? minLong) : (wc.upper?[0] ?? maxLong),
-      sort == Sort.asc ? (wc.upper?[0] ?? maxLong) : (wc.lower?[0] ?? minLong),
+      sort == Sort.asc
+          ? (wc.lower?[0] as int? ?? minLong)
+          : (wc.upper?[0] as int? ?? maxLong),
+      sort == Sort.asc
+          ? (wc.upper?[0] as int? ?? maxLong)
+          : (wc.lower?[0] as int? ?? minLong),
     ));
   } else {
     late Pointer<NativeType> lowerPtr;

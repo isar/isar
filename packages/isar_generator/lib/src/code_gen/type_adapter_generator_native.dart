@@ -1,5 +1,4 @@
 import 'package:isar_generator/src/code_gen/type_adapter_generator_common.dart';
-import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
@@ -12,7 +11,7 @@ String generateNativeTypeAdapter(ObjectInfo object) {
       ${_generateSerialize(object)}
       ${_generateDeserialize(object)}
       ${_generateDeserializeProperty(object)}
-      ${_generateAttachLinks(object)}
+      ${generateAttachLinks(object)}
     }
     ''';
 }
@@ -269,24 +268,4 @@ String _deserializeProperty(
   }
 
   return property.fromIsar(deser, object);
-}
-
-String _generateAttachLinks(ObjectInfo object) {
-  if (object.links.isEmpty) {
-    return '';
-  }
-
-  var code = 'void attachLinks(Isar isar, ${object.dartName} object) {';
-
-  for (var link in object.links) {
-    code += '''object.${link.dartName}.attach(
-      isar.${object.accessor},
-      isar.getCollection<${link.targetCollectionDartName}>("${link.targetCollectionIsarName.esc}"),
-      object,
-      "${link.isarName.esc}",
-      ${link.backlink},
-    );
-    ''';
-  }
-  return code + '}';
 }

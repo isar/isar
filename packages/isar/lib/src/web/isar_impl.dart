@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:isar/isar.dart';
 
 import 'bindings.dart';
+import 'isar_web.dart';
 
 const _zoneTxn = #zoneTxn;
 
@@ -66,11 +67,11 @@ class IsarImpl extends Isar {
   }
 
   @override
-  T txnSync<T>(T Function(Isar isar) callback) => throw UnimplementedError();
+  T txnSync<T>(T Function(Isar isar) callback) => unsupportedOnWeb();
 
   @override
   T writeTxnSync<T>(T Function(Isar isar) callback, {bool silent = false}) =>
-      throw UnimplementedError();
+      unsupportedOnWeb();
 
   Future<T> getTxn<T>(bool write, Future<T> Function(IsarTxnJs txn) callback) {
     IsarTxnJs? currentTxn = Zone.current[_zoneTxn];

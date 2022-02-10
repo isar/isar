@@ -81,7 +81,7 @@ void main() {
       );
     });
 
-    isarTest('getBySync', () {
+    isarTestSync('getBySync', () {
       expect(col.getByGuidSync(obj1.guid), obj1);
       expect(col.getByGuidSync(obj2.guid), obj2);
       expect(col.getByGuidSync(obj3.guid), obj3);
@@ -91,7 +91,7 @@ void main() {
       expect(col.getByContentGuidSync('B', obj1.guid), null);
     });
 
-    isarTest('getAllBySync', () {
+    isarTestSync('getAllBySync', () {
       expect(col.getAllByGuidSync([obj3.guid, obj1.guid]), [obj3, obj1]);
 
       expect(
@@ -137,7 +137,7 @@ void main() {
       await qEqual(col.where().findAll(), [obj2]);
     });
 
-    isarTest('deleteBySync', () {
+    isarTestSync('deleteBySync', () {
       isar.writeTxnSync((isar) {
         expect(col.deleteByGuidSync(obj1.guid), true);
         expect(col.deleteByGuidSync('SOMETHING'), false);
@@ -151,14 +151,14 @@ void main() {
       expect(col.where().findAllSync(), [obj3]);
     });
 
-    isarTest('deleteAllBySync', () {
+    isarTestSync('deleteAllBySync', () {
       isar.writeTxnSync((isar) {
         expect(col.deleteAllByGuidSync([obj3.guid, obj1.guid, 'AAA']), 2);
       });
       expect(col.where().findAllSync(), [obj2]);
     });
 
-    isarTest('deleteAllBySync composite', () {
+    isarTestSync('deleteAllBySync composite', () {
       isar.writeTxnSync((isar) {
         expect(
           col.deleteAllByContentGuidSync(

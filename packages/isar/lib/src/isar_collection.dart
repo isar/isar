@@ -21,69 +21,85 @@ abstract class IsarCollection<OBJ> {
 
   /// @nodoc
   @protected
-  Future<OBJ?> getByIndex(
-    String indexName,
-    List<dynamic> key,
-  );
+  Future<OBJ?> getByIndex(String indexName, List<Object?> key);
 
   /// @nodoc
   @protected
-  Future<List<OBJ?>> getAllByIndex(
-    String indexName,
-    List<List<dynamic>> keys,
-  );
+  Future<List<OBJ?>> getAllByIndex(String indexName, List<List<Object?>> keys);
 
   /// @nodoc
   @protected
-  OBJ? getByIndexSync(String indexName, List<dynamic> key);
+  OBJ? getByIndexSync(String indexName, List<Object?> key);
 
   /// @nodoc
   @protected
-  List<OBJ?> getAllByIndexSync(String indexName, List<List<dynamic>> keys);
+  List<OBJ?> getAllByIndexSync(String indexName, List<List<Object?>> keys);
 
   /// Insert or update an [object] and returns the assigned id.
-  Future<int> put(OBJ object, {bool replaceOnConflict = false});
+  Future<int> put(
+    OBJ object, {
+    bool replaceOnConflict = false,
+    bool saveLinks = false,
+  });
 
   /// Insert or update an [object] and returns the assigned id.
-  int putSync(OBJ object, {bool replaceOnConflict = false});
+  int putSync(
+    OBJ object, {
+    bool replaceOnConflict = false,
+    bool saveLinks = false,
+  });
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  Future<List<int>> putAll(List<OBJ> objects, {bool replaceOnConflict = false});
+  Future<List<int>> putAll(
+    List<OBJ> objects, {
+    bool replaceOnConflict = false,
+    bool saveLinks = false,
+  });
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  List<int> putAllSync(List<OBJ> objects, {bool replaceOnConflict = false});
+  List<int> putAllSync(
+    List<OBJ> objects, {
+    bool replaceOnConflict = false,
+    bool saveLinks = false,
+  });
 
-  /// Delete a single object by its [id]. Returns whether the object has been
-  /// deleted.
+  /// Delete a single object by its [id].
+  ///
+  /// Returns whether the object has been deleted. Isar web always returns
+  /// `true`.
   Future<bool> delete(int id) => deleteAll([id]).then((count) => count == 1);
 
-  /// Delete a single object by its [id]. Returns whether the object has been
-  /// deleted.
+  /// Delete a single object by its [id].
+  ///
+  /// Returns whether the object has been deleted.
   bool deleteSync(int id) => deleteAllSync([id]) == 1;
 
-  /// Delete a list of objecs by their [ids]. Returns the number of objects that
-  /// have been deleted.
+  /// Delete a list of objecs by their [ids].
+  ///
+  /// Returns the number of objects that have been deleted. Isar web always
+  /// returns `ids.length`.
   Future<int> deleteAll(List<int> ids);
 
-  /// Delete a list of objecs by their [ids]. Returns the number of objects that
-  /// have been deleted.
+  /// Delete a list of objecs by their [ids].
+  ///
+  /// Returns the number of objects that have been deleted.
   int deleteAllSync(List<int> ids);
 
   /// @nodoc
   @protected
-  Future<bool> deleteByIndex(String indexName, List<dynamic> key);
+  Future<bool> deleteByIndex(String indexName, List<Object?> key);
 
   /// @nodoc
   @protected
-  Future<int> deleteAllByIndex(String indexName, List<List<dynamic>> keys);
+  Future<int> deleteAllByIndex(String indexName, List<List<Object?>> keys);
 
   /// @nodoc
   @protected
-  bool deleteByIndexSync(String indexName, List<dynamic> key);
+  bool deleteByIndexSync(String indexName, List<Object?> key);
 
   /// @nodoc
   @protected
-  int deleteAllByIndexSync(String indexName, List<List<dynamic>> keys);
+  int deleteAllByIndexSync(String indexName, List<List<Object?>> keys);
 
   /// Remove all data in this collection and reset the auto increment value.
   Future<void> clear();

@@ -1,9 +1,12 @@
+import 'dart:convert';
+import 'dart:js';
 import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/web/bindings.dart';
 
 import 'isar_collection_impl.dart';
+import 'isar_web.dart';
 
 typedef QueryDeserialize<T> = T Function(dynamic);
 
@@ -27,25 +30,25 @@ class QueryImpl<T> extends Query<T> {
   }
 
   @override
-  T? findFirstSync() => throw UnimplementedError();
+  T? findFirstSync() => unsupportedOnWeb();
 
   @override
   Future<List<T>> findAll() {
     return col.isar.getTxn(false, (txn) async {
       final result = await queryJs.findAll(txn).wait();
-      return result.map((e) => deserialize(e)).toList();
+      return (result as List).map(deserialize).toList();
     });
   }
 
   @override
-  List<T> findAllSync() => throw UnimplementedError();
+  List<T> findAllSync() => unsupportedOnWeb();
 
   @override
   Future<R?> aggregate<R>(AggregationOp op) {
     return col.isar.getTxn(false, (txn) async {
       final property = propertyName ?? col.idName;
 
-      num result;
+      num? result;
       switch (op) {
         case AggregationOp.min:
           result = await queryJs.min(txn, property).wait();
@@ -64,6 +67,10 @@ class QueryImpl<T> extends Query<T> {
           break;
       }
 
+      if (result == null) {
+        return null;
+      }
+
       if (R == DateTime) {
         return DateTime.fromMillisecondsSinceEpoch(result.toInt()).toLocal()
             as R;
@@ -76,7 +83,7 @@ class QueryImpl<T> extends Query<T> {
   }
 
   @override
-  R? aggregateSync<R>(AggregationOp op) => throw UnimplementedError();
+  R? aggregateSync<R>(AggregationOp op) => unsupportedOnWeb();
 
   @override
   Future<bool> deleteFirst() {
@@ -86,7 +93,7 @@ class QueryImpl<T> extends Query<T> {
   }
 
   @override
-  bool deleteFirstSync() => throw UnimplementedError();
+  bool deleteFirstSync() => unsupportedOnWeb();
 
   @override
   Future<int> deleteAll() {
@@ -96,7 +103,7 @@ class QueryImpl<T> extends Query<T> {
   }
 
   @override
-  int deleteAllSync() => throw UnimplementedError();
+  int deleteAllSync() => unsupportedOnWeb();
 
   @override
   Stream<List<T>> watch({bool initialReturn = false}) =>
@@ -106,23 +113,26 @@ class QueryImpl<T> extends Query<T> {
   Stream<void> watchLazy() => throw UnimplementedError();
 
   @override
-  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
-      {bool primitiveNull = true}) {}
-
-  @override
-  Future<List<Map<String, dynamic>>> exportJson({bool primitiveNull = true}) {
+  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback) async {
     return col.isar.getTxn(false, (txn) async {
-      final results = await queryJs.findAll(txn).wait();
-      return results;
+      final result = await queryJs.findAll(txn).wait();
+      final jsonStr = context['JSON'].callMethod('stringify', [result]);
+      return callback(Utf8Encoder().convert(jsonStr));
     });
   }
 
   @override
-  R exportJsonRawSync<R>(R Function(Uint8List) callback,
-          {bool primitiveNull = true}) =>
-      throw UnimplementedError();
+  Future<List<Map<String, dynamic>>> exportJson() {
+    return col.isar.getTxn(false, (txn) async {
+      final result = await queryJs.findAll(txn).wait();
+      return (result as List).map(jsMapToDart).toList();
+    });
+  }
+
+  @override
+  R exportJsonRawSync<R>(R Function(Uint8List) callback) => unsupportedOnWeb();
 
   @override
   List<Map<String, dynamic>> exportJsonSync({bool primitiveNull = true}) =>
-      throw UnimplementedError();
+      unsupportedOnWeb();
 }

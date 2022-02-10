@@ -4,10 +4,6 @@ import 'package:isar_generator/src/object_info.dart';
 
 import 'type_adapter_generator_common.dart';
 
-const falseBool = 1;
-const trueBool = 2;
-const nullValue = 'double.negativeInfinity';
-
 String generateWebTypeAdapter(ObjectInfo object) {
   return '''
     class ${object.webAdapterName} extends IsarWebTypeAdapter<${object.dartName}> {
@@ -18,14 +14,9 @@ String generateWebTypeAdapter(ObjectInfo object) {
 
       ${_generateDeserialize(object)}
 
-      @override
-      P deserializeProperty<P>(Object object, String propertyName) {
-        throw UnimplementedError();
-      }
+      ${_generateDeserializeProperty(object)}
 
-      @override
-      void attachLinks(Isar isar, ${object.dartName} object) {
-      }
+      ${generateAttachLinks(object)}
     }
     ''';
 }
@@ -34,14 +25,9 @@ String _generateSerialize(ObjectInfo object) {
   var code = '''
   @override  
   Object serialize(IsarCollection<${object.dartName}> collection, ${object.dartName} object) {
-    final jsObj = IsarNative.newJsObject();
-    if (object.${object.idProperty.dartName} != null) {
-      IsarNative.jsObjectSet(jsObj, '${object.idProperty.isarName.esc}', object.${object.idProperty.dartName});
-    }
-  ''';
-  for (var i = 0; i < object.objectProperties.length; i++) {
-    final property = object.objectProperties[i];
+    final jsObj = IsarNative.newJsObject();''';
 
+  for (var property in object.properties) {
     String write(String value) =>
         "IsarNative.jsObjectSet(jsObj, '${property.isarName.esc}', $value);";
 
@@ -62,6 +48,10 @@ String _generateSerialize(ObjectInfo object) {
     }
   }
 
+  if (object.links.isNotEmpty) {
+    code += 'attachLinks(collection.isar, object);';
+  }
+
   code += 'return jsObj;';
 
   return '$code}';
@@ -76,6 +66,26 @@ String _generateDeserialize(ObjectInfo object) {
     ${deserializeMethodBody(object, deserProp)}
   }
   ''';
+}
+
+String _generateDeserializeProperty(ObjectInfo object) {
+  var code = '''
+  @override
+  P deserializeProperty<P>(Object jsObj, String propertyName) {
+    switch (propertyName) {''';
+
+  for (var property in object.properties) {
+    final deser = _deserializeProperty(object, property);
+    code += "case '${property.isarName.esc}': return ($deser) as P;";
+  }
+
+  return '''
+      $code
+      default:
+        throw 'Illegal propertyName';
+      }
+    }
+    ''';
 }
 
 String _defaultVal(IsarType type) {
@@ -114,24 +124,27 @@ String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
 
   String deser;
   if (property.isarType.isList && property.isarType != IsarType.bytes) {
-    final defaultList = property.nullable ? '?? []' : '';
+    final defaultList = property.nullable ? '' : '?? []';
     String? convert;
     if (property.isarType == IsarType.dateTimeList) {
       convert = convDate('e', property.elementNullable);
     } else if (!property.elementNullable) {
       convert = 'e ?? ${_defaultVal(property.isarType)}';
     }
+
+    final elType =
+        property.isarType.scalarType.dartType(property.elementNullable, false);
     if (convert != null) {
-      final nOp = property.nullable ? '?' : '';
-      deser = '$read$nOp.map((e) => $convert).toList() $defaultList';
+      deser =
+          '($read as List?)?.map((e) => $convert).toList().cast<$elType>() $defaultList';
     } else {
-      deser = '$read $defaultList';
+      deser = '($read as List?)?.cast<$elType>() $defaultList';
     }
   } else if (property.isarType == IsarType.dateTime) {
     deser = convDate(read, property.nullable);
   } else {
     final defaultVal =
-        property.nullable ? '?? ${_defaultVal(property.isarType)}' : '';
+        property.nullable ? '' : '?? ${_defaultVal(property.isarType)}';
     deser = '$read $defaultVal';
   }
 

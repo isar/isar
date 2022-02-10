@@ -63,6 +63,9 @@ class OptionalConstructorModel {
   OptionalConstructorModel(this.name, [this.id]);
 
   @override
+  String toString() => '{id: $id, name: $name}';
+
+  @override
   operator ==(dynamic other) {
     return other is OptionalConstructorModel &&
         other.id == id &&
@@ -164,7 +167,7 @@ void main() {
 
     isarTest('OptionalConstructorModel', () async {
       final obj1 = OptionalConstructorModel('obj1');
-      final obj1WithId = OptionalConstructorModel('obj1', Isar.minId);
+      final obj1WithId = OptionalConstructorModel('obj1', 1);
       final obj2 = OptionalConstructorModel('obj2', 5);
       final obj3 = OptionalConstructorModel('obj3', 15);
       await isar.writeTxn((isar) async {

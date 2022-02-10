@@ -229,6 +229,7 @@ void main() {
     final schemaJson = jsonDecode(SchemaTestModelSchema.schema);
     expect(schemaJson, {
       'name': 'SchemaTestModel',
+      'idName': 'id',
       'properties': [
         {'name': 'boolField', 'type': 'Byte'},
         {'name': 'boolGetter', 'type': 'Byte'},
@@ -578,6 +579,7 @@ void main() {
     final schemaJson = jsonDecode($Dollar$ModelSchema.schema);
     expect(schemaJson, {
       'name': '\$Dollar\$Model',
+      'idName': '\$dollar\$id',
       'properties': [
         {'name': '\$dollar\$Field', 'type': 'Byte'},
         {'name': '\$dollar\$Getter', 'type': 'Byte'}

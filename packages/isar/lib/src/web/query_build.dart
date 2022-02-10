@@ -1,14 +1,11 @@
 import 'dart:indexed_db';
 
 import 'package:isar/isar.dart';
-import 'package:js/js.dart';
 
 import 'bindings.dart';
 import 'isar_collection_impl.dart';
+import 'isar_web.dart';
 import 'query_impl.dart';
-
-@JS('JSON.stringify')
-external String _escape(String value);
 
 Query<T> buildWebQuery<T>(
   IsarCollectionImpl col,
@@ -38,9 +35,33 @@ Query<T> buildWebQuery<T>(
     sortJs,
     distinctJs,
     offset,
+    limit,
   );
 
-  return QueryImpl<T>(col, queryJs, property);
+  QueryDeserialize<T> deserialize;
+  if (property == null) {
+    deserialize = (jsObj) => col.adapter.deserialize(col, jsObj);
+  } else {
+    deserialize = (jsObj) => col.adapter.deserializeProperty(jsObj, property);
+  }
+
+  return QueryImpl<T>(col, queryJs, deserialize, property);
+}
+
+dynamic _valueToJs(dynamic value) {
+  if (value == null) {
+    return double.negativeInfinity;
+  } else if (value == true) {
+    return 1;
+  } else if (value == false) {
+    return 0;
+  } else if (value is DateTime) {
+    return value.toUtc().millisecondsSinceEpoch;
+  } else if (value is List) {
+    return value.map(_valueToJs).toList();
+  } else {
+    return value;
+  }
 }
 
 WhereClauseJs _buildWhereClause(
@@ -48,20 +69,20 @@ WhereClauseJs _buildWhereClause(
   final isComposite = col.isCompositeIndex[whereClause.indexName]!;
 
   if (whereClause.lower == null && whereClause.upper == null) {
-    return WhereClauseJs(whereClause.indexName, null);
+    return WhereClauseJs()..indexName = whereClause.indexName;
   }
 
-  dynamic lower =
-      whereClause.lower?.map((e) => e ?? double.negativeInfinity).toList();
-  if (isComposite && lower != null) {
+  dynamic lower = whereClause.lower;
+  if (!isComposite && lower != null) {
     lower = lower[0];
   }
+  lower = _valueToJs(lower);
 
-  dynamic upper =
-      whereClause.upper?.map((e) => e ?? double.negativeInfinity).toList();
-  if (isComposite && upper != null) {
+  dynamic upper = whereClause.upper;
+  if (!isComposite && upper != null) {
     upper = upper[0];
   }
+  upper = _valueToJs(upper);
 
   KeyRange range;
   if (whereClause.lower != null) {
@@ -79,13 +100,15 @@ WhereClauseJs _buildWhereClause(
     range = KeyRange.upperBound(upper, !whereClause.includeUpper);
   }
 
-  return WhereClauseJs(whereClause.indexName, range);
+  return WhereClauseJs()
+    ..indexName = whereClause.indexName
+    ..range = range;
 }
 
 FilterJs? _buildFilter(IsarCollectionImpl col, FilterOperation filter) {
   final filterStr = _buildFilterOperation(col, filter);
   if (filterStr != null) {
-    return FilterJs('obj', 'cmp', filterStr);
+    return FilterJs('obj', 'return $filterStr');
   }
 }
 
@@ -96,7 +119,7 @@ String? _buildFilterOperation(
   if (filter is FilterGroup) {
     return _buildFilterGroup(col, filter);
   } else if (filter is LinkFilter) {
-    return _buildLink(col, filter);
+    unsupportedOnWeb();
   } else if (filter is FilterCondition) {
     return _buildCondition(col, filter);
   }
@@ -121,60 +144,79 @@ String? _buildFilterGroup(IsarCollectionImpl col, FilterGroup group) {
   }
 }
 
-String? _buildLink(IsarCollectionImpl col, LinkFilter link) {
-  throw UnimplementedError();
-}
-
-dynamic _prepareValue(dynamic value) {
-  if (value is DateTime) {
-    return value.toUtc().millisecondsSinceEpoch;
-  } else if (value is String) {
-    return _escape(value);
-  } else {
-    return value;
-  }
-}
-
 String _buildCondition(IsarCollectionImpl col, FilterCondition condition) {
-  return _buildConditionInternal(
+  dynamic _prepareFilterValue(dynamic value) {
+    if (value == null) {
+      return null;
+    } else if (value is String) {
+      return stringify(value);
+    } else {
+      return _valueToJs(value);
+    }
+  }
+
+  final isListOp = condition.type != ConditionType.isNull &&
+      col.listProperties.contains(condition.property);
+  final accessor = 'obj.${condition.property}';
+  final variable = isListOp ? 'e' : accessor;
+
+  final cond = _buildConditionInternal(
     col: col,
     conditionType: condition.type,
-    propertyName: condition.property,
-    val1: _prepareValue(condition.value1),
+    variable: variable,
+    val1: _prepareFilterValue(condition.value1),
     include1: condition.include1,
-    val2: _prepareValue(condition.value2),
+    val2: _prepareFilterValue(condition.value2),
     include2: condition.include2,
     caseSensitive: condition.caseSensitive,
   );
+
+  if (isListOp) {
+    return '(Array.isArray($accessor) && $accessor.some(e => $cond))';
+  } else {
+    return cond;
+  }
 }
 
 String _buildConditionInternal({
   required IsarCollectionImpl col,
   required ConditionType conditionType,
-  required String propertyName,
+  required String variable,
   required Object? val1,
   required bool include1,
   required Object? val2,
   required bool include2,
   required bool caseSensitive,
 }) {
-  final isNull =
-      '(obj.$propertyName == null || obj.$propertyName === -Infinity)';
+  final isNull = '($variable == null || $variable === -Infinity)';
   switch (conditionType) {
     case ConditionType.eq:
       if (val1 == null) {
         return isNull;
       } else if (val1 is String && !caseSensitive) {
-        return 'obj.$propertyName?.toLowerCase() === "${val1.toLowerCase()}"';
+        return '$variable?.toLowerCase() === ${val1.toLowerCase()}';
       } else {
-        return 'obj.$propertyName === $val1';
+        return '$variable === $val1';
       }
     case ConditionType.between:
       final val = val1 ?? val2;
+      final lowerOp = include1 ? '>=' : '>';
+      final upperOp = include2 ? '<=' : '<';
       if (val == null) {
         return isNull;
+      } else if ((val1 is String?) && (val2 is String?) && !caseSensitive) {
+        final lower = val1?.toLowerCase() ?? '-Infinity';
+        final upper = val2?.toLowerCase() ?? '-Infinity';
+        final variableLc = '$variable?.toLowerCase() ?? -Infinity';
+        final lowerCond = 'indexedDB.cmp($variableLc, $lower) $lowerOp 0';
+        final upperCond = 'indexedDB.cmp($variableLc, $upper) $upperOp 0';
+        return '($lowerCond && $upperCond)';
       } else {
-        throw UnimplementedError();
+        final lowerCond =
+            'indexedDB.cmp($variable, ${val1 ?? '-Infinity'}) $lowerOp 0';
+        final upperCond =
+            'indexedDB.cmp($variable, ${val2 ?? '-Infinity'}) $upperOp 0';
+        return '($lowerCond && $upperCond)';
       }
     case ConditionType.lt:
       if (val1 == null) {
@@ -186,9 +228,9 @@ String _buildConditionInternal({
       } else {
         final op = include1 ? '<=' : '<';
         if (val1 is String && !caseSensitive) {
-          return 'cmp($propertyName?.toLowerCase() ?? -Infinity, "${val1.toLowerCase()}") $op 0';
+          return 'indexedDB.cmp($variable?.toLowerCase() ?? -Infinity, ${val1.toLowerCase()}) $op 0';
         } else {
-          return 'cmp(obj.$propertyName, $val1) $op 0';
+          return 'indexedDB.cmp($variable, $val1) $op 0';
         }
       }
     case ConditionType.gt:
@@ -201,9 +243,9 @@ String _buildConditionInternal({
       } else {
         final op = include1 ? '>=' : '>';
         if (val1 is String && !caseSensitive) {
-          return 'cmp($propertyName?.toLowerCase() ?? -Infinity, "${val1.toLowerCase()}") $op 0';
+          return 'indexedDB.cmp($variable?.toLowerCase() ?? -Infinity, ${val1.toLowerCase()}) $op 0';
         } else {
-          return 'cmp(obj.$propertyName, $val1) $op 0';
+          return 'indexedDB.cmp($variable, $val1) $op 0';
         }
       }
     case ConditionType.startsWith:
@@ -215,11 +257,11 @@ String _buildConditionInternal({
               ? 'endsWith'
               : 'contains';
       if (val1 is String) {
-        final isString = 'obj.$propertyName instanceof String';
-        if (caseSensitive) {
-          return '($isString && obj.$propertyName.$op("$val1"))';
+        final isString = 'typeof $variable == "string"';
+        if (!caseSensitive) {
+          return '($isString && $variable.toLowerCase().$op(${val1.toLowerCase()}))';
         } else {
-          return '($isString && obj.$propertyName.toLowerCase().$op("${val1.toLowerCase()}"))';
+          return '($isString && $variable.$op($val1))';
         }
       } else {
         throw 'Unsupported type for condition';
@@ -234,9 +276,9 @@ String _buildConditionInternal({
 SortCmpJs _buildSort(List<SortProperty> properties) {
   final sort = properties.map((e) {
     final op = e.sort == Sort.asc ? '' : '-';
-    return '${op}cmp(a.${e.property} ?? "-Infinity", b.${e.property} ?? "-Infinity")';
+    return '${op}indexedDB.cmp(a.${e.property} ?? "-Infinity", b.${e.property} ?? "-Infinity")';
   }).join('||');
-  return SortCmpJs('a', 'b', 'cmp', 'return $sort');
+  return SortCmpJs('a', 'b', 'return $sort');
 }
 
 DistinctValueJs _buildDistinct(List<DistinctProperty> properties) {

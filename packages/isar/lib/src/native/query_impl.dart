@@ -124,14 +124,13 @@ class QueryImpl<T> extends Query<T> {
   }
 
   @override
-  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback,
-      {bool primitiveNull = true}) {
+  Future<R> exportJsonRaw<R>(R Function(Uint8List) callback) {
     return col.isar.getTxn(false, (txn) async {
       final bytesPtrPtr = txn.alloc<Pointer<Uint8>>();
       final lengthPtr = txn.alloc<Uint32>();
       final idNamePtr = col.idName.toNativeUtf8(allocator: txn.alloc);
       nCall(IC.isar_q_export_json(queryPtr, col.ptr, txn.ptr, idNamePtr.cast(),
-          primitiveNull, bytesPtrPtr, lengthPtr));
+          bytesPtrPtr, lengthPtr));
 
       try {
         await txn.wait();
@@ -144,8 +143,7 @@ class QueryImpl<T> extends Query<T> {
   }
 
   @override
-  R exportJsonRawSync<R>(R Function(Uint8List) callback,
-      {bool primitiveNull = true}) {
+  R exportJsonRawSync<R>(R Function(Uint8List) callback) {
     return col.isar.getTxnSync(false, (txn) {
       final bytesPtrPtr = txn.alloc<Pointer<Uint8>>();
       final lengthPtr = txn.alloc<Uint32>();
@@ -153,7 +151,7 @@ class QueryImpl<T> extends Query<T> {
 
       try {
         nCall(IC.isar_q_export_json(queryPtr, col.ptr, txn.ptr,
-            idNamePtr.cast(), primitiveNull, bytesPtrPtr, lengthPtr));
+            idNamePtr.cast(), bytesPtrPtr, lengthPtr));
         final bytes = bytesPtrPtr.value.asTypedList(lengthPtr.value);
         return callback(bytes);
       } finally {

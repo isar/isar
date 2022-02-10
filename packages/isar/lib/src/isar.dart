@@ -50,7 +50,11 @@ abstract class Isar {
     if (schemas.isEmpty) {
       throw IsarError('At least one collection needs to be opened.');
     }
-    for (var schema in schemas) {
+    for (var i = 0; i < schemas.length; i++) {
+      final schema = schemas[i];
+      if (schemas.indexWhere((e) => e.name == schema.name) != i) {
+        throw IsarError('Duplicate collection ${schema.name}.');
+      }
       for (var linkedCol in schema.linkedCollections) {
         if (!schemas.any((e) => e.name == linkedCol)) {
           throw IsarError(

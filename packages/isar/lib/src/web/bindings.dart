@@ -3,6 +3,21 @@ import 'dart:indexed_db';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 
+@JS('JSON.stringify')
+external String stringify(String value);
+
+@JS('Object.keys')
+external List<String> objectKeys(dynamic obj);
+
+Map<String, dynamic> jsMapToDart(dynamic obj) {
+  final keys = objectKeys(obj);
+  final map = <String, dynamic>{};
+  for (final key in keys) {
+    map[key] = getProperty(obj, key);
+  }
+  return map;
+}
+
 @JS('Promise')
 class Promise {}
 
@@ -34,6 +49,8 @@ class IsarInstanceJs {
 
 @JS('IsarCollection')
 class IsarCollectionJs {
+  external IsarLinkJs getLink(String name);
+
   external Promise get(IsarTxnJs txn, int id);
 
   external Promise getAll(IsarTxnJs txn, List<int> ids);
@@ -50,28 +67,46 @@ class IsarCollectionJs {
 
   external Promise delete(IsarTxnJs txn, int id);
 
-  external Promise deleteByIndex(IsarTxnJs txn, dynamic key);
+  external Promise deleteByIndex(IsarTxnJs txn, String indexName, dynamic key);
 
   external Promise deleteAll(IsarTxnJs txn, List<int> ids);
 
-  external Promise deleteAllByIndex(IsarTxnJs txn, List<dynamic> keys);
+  external Promise deleteAllByIndex(
+      IsarTxnJs txn, String indexName, List<dynamic> keys);
 
   external Promise clear(IsarTxnJs txn);
 }
 
+@JS('IsarLink')
+class IsarLinkJs {
+  external Promise loadFirst(IsarTxnJs txn, int id, bool backlink);
+
+  external Promise loadAll(IsarTxnJs txn, int id, bool backlink);
+
+  external Promise replace(
+      IsarTxnJs txn, int source, int target, bool backlink);
+
+  external Promise update(IsarTxnJs txn, int source, List<int> addedTargets,
+      List<int> deletedTargets, bool backlink);
+
+  external Promise clear(IsarTxnJs txn, int id, bool backlink);
+}
+
 @JS('WhereClause')
+@anonymous
 class WhereClauseJs {
-  external WhereClauseJs(String? indexName, KeyRange? range);
+  external String? indexName;
+  external KeyRange? range;
 }
 
 @JS('Function')
 class FilterJs {
-  external FilterJs(String obj, String cmp, String method);
+  external FilterJs(String obj, String method);
 }
 
 @JS('Function')
 class SortCmpJs {
-  external SortCmpJs(String a, String b, String cmp, String method);
+  external SortCmpJs(String a, String b, String method);
 }
 
 @JS('Function')
@@ -90,6 +125,7 @@ class QueryJs {
     SortCmpJs? sortCmp,
     DistinctValueJs? distinctValue,
     int? offset,
+    int? limit,
   );
 
   external Promise findFirst(IsarTxnJs txn);

@@ -3,7 +3,7 @@ part of isar;
 /// @nodoc
 @protected
 abstract class IsarLinkBase<OBJ> {
-  /// Is the containing objects managed by Isar?
+  /// Is the containing object managed by Isar?
   bool get isAttached;
 
   /// Have the contents been changed? If not, `.save()` is a no-op.
@@ -20,6 +20,16 @@ abstract class IsarLinkBase<OBJ> {
 
   /// Saves the linked object(s) to the databse if there are changes.
   void saveSync();
+
+  /// Unlinks all linked object(s).
+  ///
+  /// You can even call this method on links that have not been loaded yet.
+  Future<void> reset();
+
+  /// Unlinks all linked object(s).
+  ///
+  /// You can even call this method on links that have not been loaded yet.
+  void resetSync();
 
   /// @nodoc
   @protected
@@ -49,8 +59,8 @@ abstract class IsarLinks<OBJ> extends IsarLinkBase<OBJ> implements Set<OBJ> {
   factory IsarLinks() => IsarNative.newLinks();
 
   @override
-  Future<void> load({bool overrideChanges = false});
+  Future<void> load({bool overrideChanges = true});
 
   @override
-  void loadSync({bool overrideChanges = false});
+  void loadSync({bool overrideChanges = true});
 }

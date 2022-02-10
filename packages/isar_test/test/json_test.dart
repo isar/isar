@@ -67,23 +67,6 @@ void main() {
 
       final exportedJsonNull = await col.where().exportJson();
       expect(exportedJsonNull, json);
-
-      final exportedJsonNonNull =
-          await col.where().exportJson(primitiveNull: false);
-      expect(exportedJsonNonNull, [
-        {
-          'id': 0,
-          'name': null,
-          'age': Isar.minId - 1,
-          'admin': true,
-        },
-        {
-          'id': 1,
-          'name': 'null user 2',
-          'age': Isar.minId - 1,
-          'admin': false,
-        }
-      ]);
     });
 
     isarTest('raw json', () async {
@@ -94,7 +77,7 @@ void main() {
       });
 
       for (var i = 0; i < json.length; i++) {
-        json[i]['id'] = Isar.minId + i;
+        json[i]['id'] = i + 1;
       }
       final exportedJson = await col.where().exportJsonRaw((bytes) {
         return jsonDecode(const Utf8Decoder().convert(bytes));
