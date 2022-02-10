@@ -109,7 +109,7 @@ jobs:
         run: |
           dart pub get
           dart pub run build_runner build
-          dart test -p {{ matrix.browser }}
+          dart test -p ${{ matrix.browser }}
         working-directory: packages/isar_test
 
   test_multi:
