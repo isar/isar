@@ -110,37 +110,3 @@ extension on IndexType {
     }
   }
 }
-
-extension on IsarType {
-  String get name {
-    switch (this) {
-      case IsarType.bool:
-        return "Byte";
-      case IsarType.int:
-        return "Int";
-      case IsarType.float:
-        return "Float";
-      case IsarType.long:
-      case IsarType.dateTime:
-        return "Long";
-      case IsarType.double:
-        return "Double";
-      case IsarType.string:
-        return "String";
-      case IsarType.bytes:
-      case IsarType.boolList:
-        return "ByteList";
-      case IsarType.intList:
-        return "IntList";
-      case IsarType.floatList:
-        return "FloatList";
-      case IsarType.longList:
-      case IsarType.dateTimeList:
-        return "LongList";
-      case IsarType.doubleList:
-        return "DoubleList";
-      case IsarType.stringList:
-        return "StringList";
-    }
-  }
-}

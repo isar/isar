@@ -39,7 +39,7 @@ void main() {
       });
 
       for (var i = 0; i < json.length; i++) {
-        json[i]['id'] = Isar.minId + i;
+        json[i]['id'] = i + 1;
       }
       final exportedJson = await col.where().exportJson();
       expect(exportedJson, json);

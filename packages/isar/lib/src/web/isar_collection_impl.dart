@@ -234,8 +234,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<void> importJsonRaw(Uint8List jsonBytes,
       {bool replaceOnConflict = false}) {
-    final json = jsonDecode(Utf8Decoder().convert(jsonBytes));
-    return importJson(json, replaceOnConflict: replaceOnConflict);
+    final json = jsonDecode(Utf8Decoder().convert(jsonBytes)) as List;
+    return importJson(json.cast(), replaceOnConflict: replaceOnConflict);
   }
 
   @override

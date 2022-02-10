@@ -4,7 +4,7 @@ import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 
 @JS('JSON.stringify')
-external String stringify(String value);
+external String stringify(dynamic value);
 
 @JS('Object.keys')
 external List<String> objectKeys(dynamic obj);

@@ -68,8 +68,8 @@ void main() {
 
       expect(await isar.close(), true);
 
-      expect(
-          () => isar.models.getSync(1), throwsIsarError('already been closed'));
+      await expectLater(
+          () => isar.models.get(1), throwsIsarError('already been closed'));
     });
   });
 }

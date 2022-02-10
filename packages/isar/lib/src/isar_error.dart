@@ -13,3 +13,7 @@ class IsarError {
     return 'IsarError: $message';
   }
 }
+
+class IsarUniqueViolationError extends IsarError {
+  IsarUniqueViolationError() : super('Unique index violated');
+}

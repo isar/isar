@@ -116,7 +116,7 @@ class QueryImpl<T> extends Query<T> {
   Future<R> exportJsonRaw<R>(R Function(Uint8List) callback) async {
     return col.isar.getTxn(false, (txn) async {
       final result = await queryJs.findAll(txn).wait();
-      final jsonStr = context['JSON'].callMethod('stringify', [result]);
+      final jsonStr = stringify(result);
       return callback(Utf8Encoder().convert(jsonStr));
     });
   }

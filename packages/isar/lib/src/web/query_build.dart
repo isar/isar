@@ -255,7 +255,7 @@ String _buildConditionInternal({
           ? 'startsWith'
           : conditionType == ConditionType.endsWith
               ? 'endsWith'
-              : 'contains';
+              : 'includes';
       if (val1 is String) {
         final isString = 'typeof $variable == "string"';
         if (!caseSensitive) {

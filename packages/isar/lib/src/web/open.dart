@@ -19,7 +19,9 @@ Future<void> initializeIsarWeb() async {
   script.async = true;
   assert(document.head != null);
   document.head!.append(script);
-  await script.onLoad.first;
+  await script.onLoad.first.timeout(Duration(seconds: 30), onTimeout: () {
+    throw IsarError('Failed to load Isar');
+  });
 }
 
 Future<Isar> openIsar({
