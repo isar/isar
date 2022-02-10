@@ -6,6 +6,8 @@ import 'package:path/path.dart' as path;
 import 'dart:math';
 import 'package:test/test.dart';
 
+const bool kIsWeb = identical(0, 0.0);
+
 Future qEqualSet<T>(Future<Iterable<T>> actual, Iterable<T> target) async {
   expect((await actual).toSet(), target.toSet());
 }

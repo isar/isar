@@ -35,10 +35,6 @@ part 'src/query.dart';
 
 /// @nodoc
 @protected
-const bool kIsWeb = identical(0, 0.0);
-
-/// @nodoc
-@protected
 typedef IsarUint8List = Uint8List;
 
 /// @nodoc
