@@ -103,10 +103,10 @@ void _addWhereClause(IsarCollectionImpl col, Pointer qbPtr, WhereClause wc,
     nCall(IC.isar_qb_add_id_where_clause(
       qbPtr,
       sort == Sort.asc
-          ? (wc.lower?[0] as int? ?? minLong)
+          ? (wc.lower?[0] as int? ?? nullLong)
           : (wc.upper?[0] as int? ?? maxLong),
       sort == Sort.asc
-          ? (wc.upper?[0] as int? ?? maxLong)
+          ? (wc.upper?[0] as int? ?? nullLong)
           : (wc.lower?[0] as int? ?? minLong),
     ));
   } else {

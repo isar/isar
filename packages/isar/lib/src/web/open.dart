@@ -15,7 +15,7 @@ Future<void> initializeIsarWeb() async {
 
   ScriptElement script = ScriptElement();
   script.type = 'text/javascript';
-  script.src = 'http://127.0.0.1:8080/dist/bundle.js';
+  script.src = 'https://unpkg.com/isar@$isarWebVersion/dist/index.js';
   script.async = true;
   assert(document.head != null);
   document.head!.append(script);

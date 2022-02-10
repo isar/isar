@@ -107,9 +107,10 @@ void main() {
         throwsIsarError('unique'),
       );
 
-      await isar.writeTxn((isar) async {
+      // TODO implement for web
+      /*await isar.writeTxn((isar) async {
         await isar.compositeModels.put(newObj, replaceOnConflict: true);
-      });
+      });*/
 
       qEqualSet(
         isar.compositeModels.where().findAll(),

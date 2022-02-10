@@ -85,7 +85,7 @@ void main() {
       expect(noMessage, null);
     });
 
-    isarTestSync('getSync() / putSync() without int oid', () {
+    isarTestVm('getSync() / putSync() without int oid', () {
       final message = Message()..message = 'This is a new message';
 
       isar.writeTxnSync((isar) {
@@ -96,7 +96,7 @@ void main() {
       expect(message, newMessage);
     });
 
-    isarTestSync('getSync() / putSync() with oid', () {
+    isarTestVm('getSync() / putSync() with oid', () {
       final message = Message()
         ..id = 5
         ..message = 'This is a new message';
@@ -129,7 +129,7 @@ void main() {
       expect(newMessages, [message1, message2, message3]);
     });
 
-    isarTestSync('getAllSync() / putAllSync()', () {
+    isarTestVm('getAllSync() / putAllSync()', () {
       final message1 = Message()..message = 'Message one';
       final message2 = Message()
         ..message = 'Message two'
@@ -166,7 +166,7 @@ void main() {
       expect(await users.get(user.id!), null);
     });
 
-    isarTestSync('deleteSync()', () async {
+    isarTestVm('deleteSync()', () async {
       final user = UserModel()
         ..name = 'Some User'
         ..age = 24;

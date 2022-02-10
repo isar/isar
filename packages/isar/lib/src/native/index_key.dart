@@ -63,7 +63,7 @@ void _addKeyValue(
       break;
     case NativeIndexType.long:
       if (value is int?) {
-        IC.isar_key_add_long(keyPtr, value ?? nullInt);
+        IC.isar_key_add_long(keyPtr, value ?? nullLong);
         return;
       }
       break;

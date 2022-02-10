@@ -47,7 +47,7 @@ void isarTest(String name, dynamic Function() body) {
 }
 
 @isTest
-void isarTestSync(String name, dynamic Function() body) {
+void isarTestVm(String name, dynamic Function() body) {
   test(name, () async {
     try {
       await body();

@@ -1,7 +1,7 @@
 name: child_package1
 
 environment:
-  sdk: '>=2.14.0 <3.0.0'
+  sdk: ">=2.14.0 <3.0.0"
 
 dependencies:
   isar: any

@@ -1,5 +1,5 @@
 name: isar_inspector
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
@@ -29,7 +29,7 @@ dev_dependencies:
   flutter_lints: ^1.0.4
 
 dependency_overrides:
-  isar: 
+  isar:
     path: ../isar
 
 flutter:

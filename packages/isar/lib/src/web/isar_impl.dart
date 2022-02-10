@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:html';
 
 import 'package:isar/isar.dart';
 
@@ -46,7 +47,15 @@ class IsarImpl extends Isar {
       await txn.commit().wait();
     } catch (e) {
       txn.abort();
-      rethrow;
+      if (e is DomException) {
+        if (e.name == DomException.CONSTRAINT) {
+          throw IsarUniqueViolationError();
+        } else {
+          throw IsarError('${e.name}: ${e.message}');
+        }
+      } else {
+        rethrow;
+      }
     } finally {
       completer.complete();
       _activeAsyncTxns.remove(completer.future);

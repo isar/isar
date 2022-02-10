@@ -297,7 +297,7 @@ void main() {
       await qEqualSet(col.where().filter().fieldContains('x').findAll(), {});
     });
 
-    isarTest('.matches()', () async {
+    isarTestVm('.matches()', () async {
       await qEqualSet(
         col.where().filter().fieldMatches('*ng 4').findAll(),
         {

@@ -40,3 +40,7 @@ const bool kIsWeb = identical(0, 0.0);
 /// @nodoc
 @protected
 typedef IsarUint8List = Uint8List;
+
+/// @nodoc
+@protected
+const isarWebVersion = '2.1.10';
