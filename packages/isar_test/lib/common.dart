@@ -67,13 +67,17 @@ void registerBinaries() {
   if (!kIsWeb && testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
     testTempPath = path.join(dartToolDir, 'test', 'tmp');
-    Isar.initializeLibraries(
-      libraries: {
-        'windows': path.join(dartToolDir, 'libisar_windows_x64.dll'),
-        'macos': path.join(dartToolDir, 'libisar_macos_x64.dylib'),
-        'linux': path.join(dartToolDir, 'libisar_linux_x64.so'),
-      },
-    );
+    try {
+      Isar.initializeLibraries(
+        libraries: {
+          'windows': path.join(dartToolDir, 'libisar_windows_x64.dll'),
+          'macos': path.join(dartToolDir, 'libisar_macos_x64.dylib'),
+          'linux': path.join(dartToolDir, 'libisar_linux_x64.so'),
+        },
+      );
+    } catch (e) {
+      // ignore. maybe this is an instrumentation test
+    }
   }
 }
 
