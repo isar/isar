@@ -69,7 +69,7 @@ abstract class Query<T> {
   /// {@template query_watch_lazy}
   /// Watch the query for changes.
   /// {@endtemplate}
-  Stream<void> watchLazy({bool initialReturn = false});
+  Stream<void> watchLazy();
 
   /// {@template query_export_json_raw}
   /// Export the results of this query as json bytes.
