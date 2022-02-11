@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:js';
 import 'dart:js_util';
 import 'dart:typed_data';
 
@@ -249,17 +251,40 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       unsupportedOnWeb();
 
   @override
-  Stream<void> watchLazy() => unsupportedOnWeb();
+  Stream<void> watchLazy() {
+    JsFunction? stop;
+    final controller = StreamController<void>(onCancel: () {
+      stop?.apply([]);
+    });
 
-  @override
-  Stream<OBJ?> watchObject(int id, {bool initialReturn = false}) {
-    return watchObjectLazy(id, initialReturn: initialReturn)
-        .asyncMap((event) => get(id));
+    final callback = allowInterop(() => controller.add(null));
+    stop = col.watchLazy(callback);
+
+    return controller.stream;
   }
 
   @override
-  Stream<void> watchObjectLazy(int id, {bool initialReturn = false}) =>
-      unsupportedOnWeb();
+  Stream<OBJ?> watchObject(
+    int id, {
+    bool initialReturn = false,
+    bool deserialize = true,
+  }) {
+    JsFunction? stop;
+    final controller = StreamController<OBJ?>(onCancel: () {
+      stop?.apply([]);
+    });
+
+    final callback = allowInterop((obj) {
+      final object = deserialize ? deserializeObject(obj) : null;
+      controller.add(object);
+    });
+    stop = col.watchObject(id, callback);
+
+    return controller.stream;
+  }
+
+  @override
+  Stream<void> watchObjectLazy(int id) => watchObject(id, deserialize: false);
 
   @override
   Query<T> buildQuery<T>({

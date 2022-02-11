@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:js';
 import 'dart:typed_data';
@@ -106,11 +107,38 @@ class QueryImpl<T> extends Query<T> {
   int deleteAllSync() => unsupportedOnWeb();
 
   @override
-  Stream<List<T>> watch({bool initialReturn = false}) =>
-      throw UnimplementedError();
+  Stream<List<T>> watch({bool initialReturn = false}) {
+    JsFunction? stop;
+    final controller = StreamController<List<T>>(onCancel: () {
+      stop?.apply([]);
+    });
+
+    if (initialReturn) {
+      findAll().then((results) {
+        controller.add(results);
+      });
+    }
+
+    stop = col.col.watchQuery(queryJs, (results) {
+      controller.add(results.map(deserialize).toList());
+    });
+
+    return controller.stream;
+  }
 
   @override
-  Stream<void> watchLazy() => throw UnimplementedError();
+  Stream<void> watchLazy() {
+    JsFunction? stop;
+    final controller = StreamController<void>(onCancel: () {
+      stop?.apply([]);
+    });
+
+    stop = col.col.watchQueryLazy(queryJs, () {
+      controller.add(null);
+    });
+
+    return controller.stream;
+  }
 
   @override
   Future<R> exportJsonRaw<R>(R Function(Uint8List) callback) async {

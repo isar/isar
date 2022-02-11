@@ -108,7 +108,7 @@ WhereClauseJs _buildWhereClause(
 FilterJs? _buildFilter(IsarCollectionImpl col, FilterOperation filter) {
   final filterStr = _buildFilterOperation(col, filter);
   if (filterStr != null) {
-    return FilterJs('obj', 'return $filterStr');
+    return FilterJs('id', 'obj', 'return $filterStr');
   }
 }
 
@@ -157,7 +157,8 @@ String _buildCondition(IsarCollectionImpl col, FilterCondition condition) {
 
   final isListOp = condition.type != ConditionType.isNull &&
       col.listProperties.contains(condition.property);
-  final accessor = 'obj.${condition.property}';
+  final accessor =
+      condition.property == col.idName ? 'id' : 'obj.${condition.property}';
   final variable = isListOp ? 'e' : accessor;
 
   final cond = _buildConditionInternal(

@@ -247,178 +247,249 @@ Pointer<NativeType> _buildCondition(
       val2Raw is DateTime ? val2Raw.toUtc().microsecondsSinceEpoch : val2Raw;
 
   final propertyId = col.propertyIds[condition.property];
-  if (propertyId != null) {
-    return _buildConditionInternal(
-      col: col,
-      conditionType: condition.type,
-      propertyId: propertyId,
-      val1: val1,
-      include1: condition.include1,
-      val2: val2,
-      include2: condition.include2,
-      caseSensitive: condition.caseSensitive,
-      alloc: alloc,
-    );
-  } else {
+  if (propertyId == null && col.idName != condition.property) {
     throw 'Unknown property "${condition.property}"';
+  }
+  switch (condition.type) {
+    case ConditionType.isNull:
+      return _buildConditionIsNull(
+          col: col, propertyId: propertyId, alloc: alloc);
+    case ConditionType.eq:
+      return _buildConditionEqual(
+        col: col,
+        propertyId: propertyId,
+        val: val1,
+        include: condition.include1,
+        caseSensitive: condition.caseSensitive,
+        alloc: alloc,
+      );
+    case ConditionType.between:
+      return _buildConditionBetween(
+        col: col,
+        propertyId: propertyId,
+        lower: val1,
+        includeLower: condition.include1,
+        upper: val2,
+        includeUpper: condition.include2,
+        caseSensitive: condition.caseSensitive,
+        alloc: alloc,
+      );
+    case ConditionType.lt:
+      return _buildConditionLessThan(
+        col: col,
+        propertyId: propertyId,
+        val: val1,
+        include: condition.include1,
+        caseSensitive: condition.caseSensitive,
+        alloc: alloc,
+      );
+    case ConditionType.gt:
+      return _buildConditionGreaterThan(
+        col: col,
+        propertyId: propertyId,
+        val: val1,
+        include: condition.include1,
+        caseSensitive: condition.caseSensitive,
+        alloc: alloc,
+      );
+    default:
+      return _buildConditionStringOp(
+        col: col,
+        conditionType: condition.type,
+        propertyId: propertyId,
+        val: val1,
+        include: condition.include1,
+        caseSensitive: condition.caseSensitive,
+        alloc: alloc,
+      );
   }
 }
 
-Pointer<NativeType> _buildConditionInternal({
+Pointer<NativeType> _buildConditionIsNull({
   required IsarCollectionImpl col,
-  required ConditionType conditionType,
-  required int propertyId,
-  required Object? val1,
-  required bool include1,
-  required Object? val2,
-  required bool include2,
+  required int? propertyId,
+  required Allocator alloc,
+}) {
+  final filterPtrPtr = alloc<Pointer<Pointer<NativeType>>>();
+  nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId!, false));
+  return filterPtrPtr.value;
+}
+
+Pointer<NativeType> _buildConditionEqual({
+  required IsarCollectionImpl col,
+  required int? propertyId,
+  required Object? val,
+  required bool include,
   required bool caseSensitive,
   required Allocator alloc,
 }) {
   final filterPtrPtr = alloc<Pointer<Pointer<NativeType>>>();
-
-  switch (conditionType) {
-    case ConditionType.eq:
-      if (val1 == null) {
-        nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId, true));
-      } else if (val1 is bool) {
-        final value = boolToByte(val1);
-        nCall(IC.isar_filter_byte(
-            col.ptr, filterPtrPtr, value, true, value, true, propertyId));
-      } else if (val1 is int) {
-        nCall(IC.isar_filter_long(
-            col.ptr, filterPtrPtr, val1, true, val1, true, propertyId));
-      } else if (val1 is String) {
-        final strPtr = val1.toNativeUtf8(allocator: alloc);
-        nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, strPtr.cast(), true,
-            strPtr.cast(), true, caseSensitive, propertyId));
-      } else {
-        throw 'Unsupported type for condition';
-      }
-      break;
-    case ConditionType.between:
-      final val = val1 ?? val2;
-      if (val == null) {
-        nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId, true));
-      } else if (val is int) {
-        nCall(IC.isar_filter_long(
-          col.ptr,
-          filterPtrPtr,
-          val1 as int? ?? nullLong,
-          include1,
-          val2 as int? ?? maxLong,
-          include2,
-          propertyId,
-        ));
-      } else if (val is double) {
-        nCall(IC.isar_filter_double(
-          col.ptr,
-          filterPtrPtr,
-          val1 as double? ?? nullDouble,
-          val2 as double? ?? maxDouble,
-          propertyId,
-        ));
-      } else if (val is String) {
-        late Pointer<Int8> lowerPtr;
-        late Pointer<Int8> upperPtr;
-        if (val1 is String) {
-          lowerPtr = val1.toNativeUtf8(allocator: alloc).cast();
-        } else {
-          lowerPtr = minStr;
-        }
-        if (val2 is String) {
-          upperPtr = val2.toNativeUtf8(allocator: alloc).cast();
-        } else {
-          upperPtr = maxStr;
-        }
-        nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, lowerPtr, include1,
-            upperPtr, include2, caseSensitive, propertyId));
-      } else {
-        throw 'Unsupported type for condition';
-      }
-      break;
-    case ConditionType.lt:
-      if (val1 == null) {
-        if (include1) {
-          nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId, true));
-        } else {
-          IC.isar_filter_static(filterPtrPtr, false);
-        }
-      } else if (val1 is int) {
-        nCall(IC.isar_filter_long(
-            col.ptr, filterPtrPtr, minLong, true, val1, include1, propertyId));
-      } else if (val1 is double) {
-        nCall(IC.isar_filter_double(
-            col.ptr, filterPtrPtr, minDouble, val1, propertyId));
-      } else if (val1 is String) {
-        final value = val1.toNativeUtf8(allocator: alloc);
-        nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, minStr, true,
-            value.cast(), include1, caseSensitive, propertyId));
-      } else {
-        throw 'Unsupported type for condition';
-      }
-      break;
-    case ConditionType.gt:
-      if (val1 == null) {
-        if (include1) {
-          IC.isar_filter_static(filterPtrPtr, true);
-        } else {
-          nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId, true));
-          IC.isar_filter_not(filterPtrPtr, filterPtrPtr.value);
-        }
-      } else if (val1 is int) {
-        nCall(IC.isar_filter_long(
-            col.ptr, filterPtrPtr, val1, include1, maxLong, true, propertyId));
-      } else if (val1 is double) {
-        nCall(IC.isar_filter_double(
-            col.ptr, filterPtrPtr, val1, maxDouble, propertyId));
-      } else if (val1 is String) {
-        final value = val1.toNativeUtf8(allocator: alloc);
-        nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, value.cast(),
-            include1, maxStr, true, caseSensitive, propertyId));
-      } else {
-        throw 'Unsupported type for condition';
-      }
-      break;
-    case ConditionType.startsWith:
-      if (val1 is String) {
-        final strPtr = val1.toNativeUtf8(allocator: alloc);
-        nCall(IC.isar_filter_string_starts_with(
-            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId));
-      } else {
-        throw 'Unsupported type for condition';
-      }
-      break;
-    case ConditionType.endsWith:
-      if (val1 is String) {
-        final strPtr = val1.toNativeUtf8(allocator: alloc);
-        nCall(IC.isar_filter_string_ends_with(
-            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId));
-      } else {
-        throw 'Unsupported type for condition';
-      }
-      break;
-    case ConditionType.contains:
-      if (val1 is String) {
-        final strPtr = val1.toNativeUtf8(allocator: alloc);
-        nCall(IC.isar_filter_string_contains(
-            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId));
-      } else {
-        throw 'Unsupported type for condition';
-      }
-      break;
-    case ConditionType.matches:
-      if (val1 is String) {
-        final strPtr = val1.toNativeUtf8(allocator: alloc);
-        nCall(IC.isar_filter_string_matches(
-            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId));
-      } else {
-        throw 'Unsupported type for condition';
-      }
-      break;
-    case ConditionType.isNull:
-      nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId, false));
-      break;
+  if (val == null) {
+    nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId!, true));
+  } else if (val is bool) {
+    final value = boolToByte(val);
+    nCall(IC.isar_filter_byte(
+        col.ptr, filterPtrPtr, value, true, value, true, propertyId!));
+  } else if (val is int) {
+    if (propertyId == null) {
+      nCall(IC.isar_filter_id(filterPtrPtr, val, true, val, true));
+    } else {
+      nCall(IC.isar_filter_long(
+          col.ptr, filterPtrPtr, val, true, val, true, propertyId));
+    }
+  } else if (val is String) {
+    final strPtr = val.toNativeUtf8(allocator: alloc);
+    nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, strPtr.cast(), true,
+        strPtr.cast(), true, caseSensitive, propertyId!));
+  } else {
+    throw 'Unsupported type for condition';
   }
+  return filterPtrPtr.value;
+}
+
+Pointer<NativeType> _buildConditionBetween({
+  required IsarCollectionImpl col,
+  required int? propertyId,
+  required Object? lower,
+  required bool includeLower,
+  required Object? upper,
+  required bool includeUpper,
+  required bool caseSensitive,
+  required Allocator alloc,
+}) {
+  final filterPtrPtr = alloc<Pointer<Pointer<NativeType>>>();
+  if (lower == null && upper == null) {
+    nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId!, true));
+  } else if ((lower is int?) && upper is int?) {
+    if (propertyId == null) {
+      nCall(IC.isar_filter_id(filterPtrPtr, lower ?? nullLong, includeLower,
+          upper ?? maxLong, includeUpper));
+    } else {
+      nCall(IC.isar_filter_long(col.ptr, filterPtrPtr, lower ?? nullLong,
+          includeLower, upper ?? maxLong, includeUpper, propertyId));
+    }
+  } else if ((lower is double?) && upper is double?) {
+    nCall(IC.isar_filter_double(col.ptr, filterPtrPtr, lower ?? nullDouble,
+        upper ?? maxDouble, propertyId!));
+  } else if ((lower is String?) && upper is String?) {
+    final lowerPtr =
+        lower?.toNativeUtf8(allocator: alloc).cast<Int8>() ?? minStr;
+    final upperPtr =
+        upper?.toNativeUtf8(allocator: alloc).cast<Int8>() ?? maxStr;
+    nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, lowerPtr, includeLower,
+        upperPtr, includeUpper, caseSensitive, propertyId!));
+  } else {
+    throw 'Unsupported type for condition';
+  }
+  return filterPtrPtr.value;
+}
+
+Pointer<NativeType> _buildConditionLessThan({
+  required IsarCollectionImpl col,
+  required int? propertyId,
+  required Object? val,
+  required bool include,
+  required bool caseSensitive,
+  required Allocator alloc,
+}) {
+  final filterPtrPtr = alloc<Pointer<Pointer<NativeType>>>();
+  if (val == null) {
+    if (include) {
+      nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId!, true));
+    } else {
+      IC.isar_filter_static(filterPtrPtr, false);
+    }
+  } else if (val is int) {
+    if (propertyId == null) {
+      nCall(IC.isar_filter_id(filterPtrPtr, minLong, true, val, include));
+    } else {
+      nCall(IC.isar_filter_long(
+          col.ptr, filterPtrPtr, minLong, true, val, include, propertyId));
+    }
+  } else if (val is double) {
+    nCall(IC.isar_filter_double(
+        col.ptr, filterPtrPtr, minDouble, val, propertyId!));
+  } else if (val is String) {
+    final value = val.toNativeUtf8(allocator: alloc);
+    nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, minStr, true,
+        value.cast(), include, caseSensitive, propertyId!));
+  } else {
+    throw 'Unsupported type for condition';
+  }
+  return filterPtrPtr.value;
+}
+
+Pointer<NativeType> _buildConditionGreaterThan({
+  required IsarCollectionImpl col,
+  required int? propertyId,
+  required Object? val,
+  required bool include,
+  required bool caseSensitive,
+  required Allocator alloc,
+}) {
+  final filterPtrPtr = alloc<Pointer<Pointer<NativeType>>>();
+  if (val == null) {
+    if (include) {
+      IC.isar_filter_static(filterPtrPtr, true);
+    } else {
+      nCall(IC.isar_filter_null(col.ptr, filterPtrPtr, propertyId!, true));
+      IC.isar_filter_not(filterPtrPtr, filterPtrPtr.value);
+    }
+  } else if (val is int) {
+    if (propertyId == null) {
+      nCall(IC.isar_filter_id(filterPtrPtr, val, include, maxLong, true));
+    } else {
+      nCall(IC.isar_filter_long(
+          col.ptr, filterPtrPtr, val, include, maxLong, true, propertyId));
+    }
+  } else if (val is double) {
+    nCall(IC.isar_filter_double(
+        col.ptr, filterPtrPtr, val, maxDouble, propertyId!));
+  } else if (val is String) {
+    final value = val.toNativeUtf8(allocator: alloc);
+    nCall(IC.isar_filter_string(col.ptr, filterPtrPtr, value.cast(), include,
+        maxStr, true, caseSensitive, propertyId!));
+  } else {
+    throw 'Unsupported type for condition';
+  }
+  return filterPtrPtr.value;
+}
+
+Pointer<NativeType> _buildConditionStringOp({
+  required IsarCollectionImpl col,
+  required ConditionType conditionType,
+  required int? propertyId,
+  required Object? val,
+  required bool include,
+  required bool caseSensitive,
+  required Allocator alloc,
+}) {
+  final filterPtrPtr = alloc<Pointer<Pointer<NativeType>>>();
+  if (val is String) {
+    final strPtr = val.toNativeUtf8(allocator: alloc);
+    switch (conditionType) {
+      case ConditionType.startsWith:
+        nCall(IC.isar_filter_string_starts_with(
+            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId!));
+        break;
+      case ConditionType.endsWith:
+        nCall(IC.isar_filter_string_ends_with(
+            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId!));
+        break;
+      case ConditionType.contains:
+        nCall(IC.isar_filter_string_contains(
+            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId!));
+        break;
+      case ConditionType.matches:
+        nCall(IC.isar_filter_string_matches(
+            col.ptr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId!));
+        break;
+      default:
+        throw 'Unsupported condition type';
+    }
+  } else {
+    throw 'Unsupported type for condition';
+  }
+
   return filterPtrPtr.value;
 }

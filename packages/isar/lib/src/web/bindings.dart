@@ -1,4 +1,5 @@
 import 'dart:indexed_db';
+import 'dart:js';
 
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
@@ -47,6 +48,14 @@ class IsarInstanceJs {
   external Promise close(bool deleteFromDisk);
 }
 
+typedef ChangeCallbackJs = void Function();
+
+typedef ObjectChangeCallbackJs = void Function(dynamic object);
+
+typedef QueryChangeCallbackJs = void Function(List<dynamic> results);
+
+typedef StopWatchingJs = JsFunction;
+
 @JS('IsarCollection')
 class IsarCollectionJs {
   external IsarLinkJs getLink(String name);
@@ -75,6 +84,16 @@ class IsarCollectionJs {
       IsarTxnJs txn, String indexName, List<dynamic> keys);
 
   external Promise clear(IsarTxnJs txn);
+
+  external StopWatchingJs watchLazy(ChangeCallbackJs callback);
+
+  external StopWatchingJs watchObject(int id, ObjectChangeCallbackJs callback);
+
+  external StopWatchingJs watchQuery(
+      QueryJs query, QueryChangeCallbackJs callback);
+
+  external StopWatchingJs watchQueryLazy(
+      QueryJs query, ChangeCallbackJs callback);
 }
 
 @JS('IsarLink')
@@ -101,7 +120,7 @@ class WhereClauseJs {
 
 @JS('Function')
 class FilterJs {
-  external FilterJs(String obj, String method);
+  external FilterJs(String id, String obj, String method);
 }
 
 @JS('Function')
