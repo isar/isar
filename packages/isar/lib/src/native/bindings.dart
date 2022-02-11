@@ -425,6 +425,27 @@ class IsarCoreBindings {
   late final _dart_isar_filter_null _isar_filter_null =
       _isar_filter_null_ptr.asFunction<_dart_isar_filter_null>();
 
+  int isar_filter_id(
+    ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+    int lower,
+    bool include_lower,
+    int upper,
+    bool include_upper,
+  ) {
+    return _isar_filter_id(
+      filter,
+      lower,
+      include_lower ? 1 : 0,
+      upper,
+      include_upper ? 1 : 0,
+    );
+  }
+
+  late final _isar_filter_id_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_filter_id>>('isar_filter_id');
+  late final _dart_isar_filter_id _isar_filter_id =
+      _isar_filter_id_ptr.asFunction<_dart_isar_filter_id>();
+
   int isar_filter_byte(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
@@ -1780,6 +1801,22 @@ typedef _dart_isar_filter_null = int Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
   int property_index,
   int any_null,
+);
+
+typedef _c_isar_filter_id = ffi.Int64 Function(
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  ffi.Int64 lower,
+  ffi.Uint8 include_lower,
+  ffi.Int64 upper,
+  ffi.Uint8 include_upper,
+);
+
+typedef _dart_isar_filter_id = int Function(
+  ffi.Pointer<ffi.Pointer<ffi.NativeType>> filter,
+  int lower,
+  int include_lower,
+  int upper,
+  int include_upper,
 );
 
 typedef _c_isar_filter_byte = ffi.Int64 Function(
