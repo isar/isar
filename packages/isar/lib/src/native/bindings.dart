@@ -922,22 +922,22 @@ class IsarCoreBindings {
   late final _dart_isar_get_collection _isar_get_collection =
       _isar_get_collection_ptr.asFunction<_dart_isar_get_collection>();
 
-  void isar_get_property_offsets(
+  int isar_get_static_size_and_offsets(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.Uint32> offsets,
   ) {
-    return _isar_get_property_offsets(
+    return _isar_get_static_size_and_offsets(
       collection,
       offsets,
     );
   }
 
-  late final _isar_get_property_offsets_ptr =
-      _lookup<ffi.NativeFunction<_c_isar_get_property_offsets>>(
-          'isar_get_property_offsets');
-  late final _dart_isar_get_property_offsets _isar_get_property_offsets =
-      _isar_get_property_offsets_ptr
-          .asFunction<_dart_isar_get_property_offsets>();
+  late final _isar_get_static_size_and_offsets_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_get_static_size_and_offsets>>(
+          'isar_get_static_size_and_offsets');
+  late final _dart_isar_get_static_size_and_offsets
+      _isar_get_static_size_and_offsets = _isar_get_static_size_and_offsets_ptr
+          .asFunction<_dart_isar_get_static_size_and_offsets>();
 
   int isar_link(
     ffi.Pointer<ffi.NativeType> collection,
@@ -2149,12 +2149,12 @@ typedef _dart_isar_get_collection = int Function(
   int index,
 );
 
-typedef _c_isar_get_property_offsets = ffi.Void Function(
+typedef _c_isar_get_static_size_and_offsets = ffi.Uint32 Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Uint32> offsets,
 );
 
-typedef _dart_isar_get_property_offsets = void Function(
+typedef _dart_isar_get_static_size_and_offsets = int Function(
   ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.Uint32> offsets,
 );
