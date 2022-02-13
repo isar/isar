@@ -21,8 +21,8 @@ mixin IsarBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   Future<void> reset() async {
     final containingId = requireAttached();
     return col.isar.getTxn(true, (txn) async {
-      IC.isar_link_replace(col.ptr, txn.ptr, linkIndex, backlink, containingId,
-          Isar.autoIncrement);
+      IC.isar_link_replace(col.ptr, txn.ptr, linkIndex, isBacklink,
+          containingId, Isar.autoIncrement);
       await txn.wait();
       resetContent();
     });
@@ -32,8 +32,8 @@ mixin IsarBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   void resetSync() {
     final containingId = requireAttached();
     return col.isar.getTxnSync(true, (txn) async {
-      IC.isar_link_replace(col.ptr, txn.ptr, linkIndex, backlink, containingId,
-          Isar.autoIncrement);
+      IC.isar_link_replace(col.ptr, txn.ptr, linkIndex, isBacklink,
+          containingId, Isar.autoIncrement);
       resetContent();
     });
   }
@@ -47,7 +47,7 @@ class IsarLinkImpl<OBJ> extends IsarLinkCommon<OBJ> with IsarBaseMixin<OBJ> {
       final rawObjPtr = txn.alloc<RawObject>();
 
       nCall(IC.isar_link_get_first(
-          col.ptr, txn.ptr, linkIndex, backlink, containingId, rawObjPtr));
+          col.ptr, txn.ptr, linkIndex, isBacklink, containingId, rawObjPtr));
       await txn.wait();
 
       final obj = targetCol.deserializeObjectOrNull(rawObjPtr.ref);
@@ -61,7 +61,7 @@ class IsarLinkImpl<OBJ> extends IsarLinkCommon<OBJ> with IsarBaseMixin<OBJ> {
     col.isar.getTxnSync(true, (txn) {
       final rawObjPtr = txn.allocRawObject();
       nCall(IC.isar_link_get_first(
-          col.ptr, txn.ptr, linkIndex, backlink, containingId, rawObjPtr));
+          col.ptr, txn.ptr, linkIndex, isBacklink, containingId, rawObjPtr));
       final obj = targetCol.deserializeObjectOrNull(rawObjPtr.ref);
       applyLoaded(obj);
     });
@@ -79,7 +79,7 @@ class IsarLinkImpl<OBJ> extends IsarLinkCommon<OBJ> with IsarBaseMixin<OBJ> {
         targetId = targetCol.getId(val) ?? await targetCol.put(val);
       }
       IC.isar_link_replace(
-          col.ptr, txn.ptr, linkIndex, backlink, containingId, targetId);
+          col.ptr, txn.ptr, linkIndex, isBacklink, containingId, targetId);
       await txn.wait();
       applySaved(val);
     });
@@ -97,7 +97,7 @@ class IsarLinkImpl<OBJ> extends IsarLinkCommon<OBJ> with IsarBaseMixin<OBJ> {
         targetId = targetCol.getId(val) ?? targetCol.putSync(val);
       }
       nCall(IC.isar_link_replace(
-          col.ptr, txn.ptr, linkIndex, backlink, containingId, targetId));
+          col.ptr, txn.ptr, linkIndex, isBacklink, containingId, targetId));
       applySaved(val);
     });
   }
@@ -114,7 +114,7 @@ class IsarLinksImpl<OBJ> extends IsarLinksCommon<OBJ> with IsarBaseMixin<OBJ> {
       final resultsPtr = txn.alloc<RawObjectSet>();
       try {
         IC.isar_link_get_all(
-            col.ptr, txn.ptr, linkIndex, backlink, containingId, resultsPtr);
+            col.ptr, txn.ptr, linkIndex, isBacklink, containingId, resultsPtr);
         await txn.wait();
         return targetCol.deserializeObjects(resultsPtr.ref);
       } finally {
@@ -134,7 +134,7 @@ class IsarLinksImpl<OBJ> extends IsarLinksCommon<OBJ> with IsarBaseMixin<OBJ> {
       final resultsPtr = txn.allocRawObjectsSet();
       try {
         nCall(IC.isar_link_get_all(
-            col.ptr, txn.ptr, linkIndex, backlink, containingId, resultsPtr));
+            col.ptr, txn.ptr, linkIndex, isBacklink, containingId, resultsPtr));
         return targetCol.deserializeObjects(resultsPtr.ref);
       } finally {
         IC.isar_free_raw_obj_list(resultsPtr);
@@ -179,7 +179,7 @@ class IsarLinksImpl<OBJ> extends IsarLinksCommon<OBJ> with IsarBaseMixin<OBJ> {
         }
       }
 
-      IC.isar_link_update_all(col.ptr, txn.ptr, linkIndex, backlink,
+      IC.isar_link_update_all(col.ptr, txn.ptr, linkIndex, isBacklink,
           containingId, idsPtr, added.length, i - added.length);
       await txn.wait();
       applySaved(added, removed);
@@ -199,13 +199,13 @@ class IsarLinksImpl<OBJ> extends IsarLinksCommon<OBJ> with IsarBaseMixin<OBJ> {
           id = targetCol.getId(added)!;
         }
         nCall(IC.isar_link(
-            col.ptr, txn.ptr, linkIndex, backlink, containingId, id));
+            col.ptr, txn.ptr, linkIndex, isBacklink, containingId, id));
       }
       for (var removed in removedObjects) {
         final removedId = targetCol.getId(removed);
         if (removedId != null) {
-          nCall(IC.isar_link_unlink(
-              col.ptr, txn.ptr, linkIndex, backlink, containingId, removedId));
+          nCall(IC.isar_link_unlink(col.ptr, txn.ptr, linkIndex, isBacklink,
+              containingId, removedId));
         }
       }
     });

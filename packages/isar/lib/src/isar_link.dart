@@ -39,8 +39,8 @@ abstract class IsarLinkBase<OBJ> {
 
   /// @nodoc
   @protected
-  void attach(IsarCollection col, IsarCollection<OBJ> targetCol,
-      Object containingObject, String linkName, bool backlink);
+  void attach(int? objectId, IsarCollection col, IsarCollection<OBJ> targetCol,
+      String linkName, bool backlink);
 }
 
 /// Establishes a 1:1 relationship with the same or another collection. The

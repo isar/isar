@@ -11,11 +11,8 @@ String generateWebTypeAdapter(ObjectInfo object) {
       const ${object.webAdapterName}();
 
       ${_generateSerialize(object)}
-
       ${_generateDeserialize(object)}
-
       ${_generateDeserializeProperty(object)}
-
       ${generateAttachLinks(object)}
     }
     ''';
@@ -48,10 +45,6 @@ String _generateSerialize(ObjectInfo object) {
     }
   }
 
-  if (object.links.isNotEmpty) {
-    code += 'attachLinks(collection.isar, object);';
-  }
-
   code += 'return jsObj;';
 
   return '$code}';
@@ -60,12 +53,19 @@ String _generateSerialize(ObjectInfo object) {
 String _generateDeserialize(ObjectInfo object) {
   String deserProp(ObjectProperty p) => _deserializeProperty(object, p);
 
-  return '''
+  var code = '''
   @override  
   ${object.dartName} deserialize(IsarCollection<${object.dartName}> collection, dynamic jsObj) {
-    ${deserializeMethodBody(object, deserProp)}
+    ${deserializeMethodBody(object, deserProp)}''';
+
+  if (object.links.isNotEmpty) {
+    final deserId = deserProp(object.idProperty);
+    code += 'attachLinks(collection.isar, $deserId, object);';
   }
-  ''';
+
+  return '''$code
+    return object;
+  }''';
 }
 
 String _generateDeserializeProperty(ObjectInfo object) {

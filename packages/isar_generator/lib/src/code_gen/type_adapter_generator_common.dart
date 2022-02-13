@@ -27,27 +27,19 @@ String deserializeMethodBody(ObjectInfo object,
     code += 'object.${p.dartName} = $deser;';
   }
 
-  if (object.links.isNotEmpty) {
-    code += 'attachLinks(collection.isar, object);';
-  }
-
-  return '''
-    $code
-    return object;''';
+  return code;
 }
 
 String generateAttachLinks(ObjectInfo object) {
-  if (object.links.isEmpty) {
-    return '';
-  }
-
-  var code = 'void attachLinks(Isar isar, ${object.dartName} object) {';
+  var code = '''
+  @override
+  void attachLinks(Isar isar, int id, ${object.dartName} object) {''';
 
   for (var link in object.links) {
     code += '''object.${link.dartName}.attach(
+      id,
       isar.${object.accessor},
       isar.getCollection<${link.targetCollectionDartName}>('${link.targetCollectionIsarName.esc}'),
-      object,
       '${link.isarName.esc}',
       ${link.backlink},
     );

@@ -163,10 +163,6 @@ String _generateSerialize(ObjectInfo object) {
     }
   }
 
-  if (object.links.isNotEmpty) {
-    code += 'attachLinks(collection.isar, object);';
-  }
-
   return '$code}';
 }
 
@@ -176,12 +172,18 @@ String _generateDeserialize(ObjectInfo object) {
     return _deserializeProperty(object, p, 'offsets[$index]');
   }
 
-  return '''
+  var code = '''
   @override
   ${object.dartName} deserialize(IsarCollection<${object.dartName}> collection, int id, IsarBinaryReader reader, List<int> offsets) {
-    ${deserializeMethodBody(object, deserProp)}
+    ${deserializeMethodBody(object, deserProp)}''';
+
+  if (object.links.isNotEmpty) {
+    code += 'attachLinks(collection.isar, id, object);';
   }
-  ''';
+
+  return '''$code
+    return object;
+  }''';
 }
 
 String _generateDeserializeProperty(ObjectInfo object) {

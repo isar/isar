@@ -3,40 +3,35 @@ import 'dart:collection';
 import 'package:isar/isar.dart';
 
 abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
+  int? _objectId;
   late IsarCollection<dynamic> col;
   late IsarCollection<OBJ> targetCol;
-  late dynamic containingObject;
   late String linkName;
-  late bool backlink;
+  late bool isBacklink;
 
   @override
-  bool isAttached = false;
+  bool get isAttached => _objectId != null;
 
   @override
-  void attach(IsarCollection col, IsarCollection<OBJ> targetCol,
-      dynamic containingObject, String linkName, bool backlink) {
+  void attach(int? objectId, IsarCollection col, IsarCollection targetCol,
+      String linkName, bool isBacklink) {
     if (!identical(col.isar, targetCol.isar)) {
       throw IsarError('Collections need to have the same Isar instance.');
     }
+    _objectId = objectId;
     this.col = col;
-    this.targetCol = targetCol;
-    this.containingObject = containingObject;
+    this.targetCol = targetCol as IsarCollection<OBJ>;
     this.linkName = linkName;
-    this.backlink = backlink;
-    isAttached = true;
+    this.isBacklink = isBacklink;
   }
 
   int requireAttached() {
-    if (!isAttached) {
+    if (_objectId == null) {
       throw IsarError(
           'Containing object needs to be managed by Isar to use this method.');
+    } else {
+      return _objectId!;
     }
-
-    final id = (col as dynamic).getId(containingObject);
-    if (id == null) {
-      throw IsarError('Containing object has no id.');
-    }
-    return id;
   }
 
   int? getId(OBJ obj) => (targetCol as dynamic).getId(obj);

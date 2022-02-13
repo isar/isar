@@ -22,7 +22,7 @@ mixin IsarBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   Future<void> reset() {
     final containingId = requireAttached();
     return col.isar.getTxn(true, (txn) async {
-      await link.clear(txn, containingId, backlink).wait();
+      await link.clear(txn, containingId, isBacklink).wait();
       resetContent();
     });
   }
@@ -39,7 +39,7 @@ class IsarLinkImpl<OBJ> extends IsarLinkCommon<OBJ> with IsarBaseMixin<OBJ> {
   Future<void> load() {
     final containingId = requireAttached();
     return col.isar.getTxn(false, (txn) async {
-      final obj = await link.loadFirst(txn, containingId, backlink).wait();
+      final obj = await link.loadFirst(txn, containingId, isBacklink).wait();
       applyLoaded(targetCol.deserializeObject(obj));
     });
   }
@@ -53,9 +53,9 @@ class IsarLinkImpl<OBJ> extends IsarLinkCommon<OBJ> with IsarBaseMixin<OBJ> {
     return col.isar.getTxn(true, (txn) async {
       if (val != null) {
         final id = getId(val) ?? await targetCol.put(val);
-        await link.replace(txn, containingId, id, backlink).wait();
+        await link.replace(txn, containingId, id, isBacklink).wait();
       } else {
-        await link.clear(txn, containingId, backlink).wait();
+        await link.clear(txn, containingId, isBacklink).wait();
       }
 
       applySaved(val);
@@ -74,7 +74,7 @@ class IsarLinksImpl<OBJ> extends IsarLinksCommon<OBJ> with IsarBaseMixin<OBJ> {
       clearChanges();
     }
     final objects = await col.isar.getTxn(false, (txn) {
-      return link.loadAll(txn, containingId, backlink).wait();
+      return link.loadAll(txn, containingId, isBacklink).wait();
     });
     final result = targetCol.deserializeObjects(objects).cast<OBJ>();
     applyLoaded(result);
@@ -104,7 +104,7 @@ class IsarLinksImpl<OBJ> extends IsarLinksCommon<OBJ> with IsarBaseMixin<OBJ> {
       }
 
       await link
-          .update(txn, containingId, addedIds, removedIds, backlink)
+          .update(txn, containingId, addedIds, removedIds, isBacklink)
           .wait();
     });
   }

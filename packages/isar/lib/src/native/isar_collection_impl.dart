@@ -250,6 +250,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         setId?.call(object, id);
 
         if (getLinks != null) {
+          adapter.attachLinks(isar, id, object);
           for (var link in getLinks!(object)) {
             if (link.isChanged) {
               linkFutures.add(link.save());
@@ -295,13 +296,17 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         rawObj.id = getId(object) ?? Isar.autoIncrement;
         nCall(IC.isar_put(ptr, txn.ptr, rawObjPtr, replaceOnConflict));
 
-        ids[i] = rawObj.id;
-        setId?.call(object, rawObj.id);
+        final id = rawObj.id;
+        ids[i] = id;
+        setId?.call(object, id);
 
-        if (saveLinks && getLinks != null) {
-          for (var link in getLinks!(object)) {
-            if (link.isChanged) {
-              link.saveSync();
+        if (getLinks != null) {
+          adapter.attachLinks(isar, id, object);
+          if (saveLinks) {
+            for (var link in getLinks!(object)) {
+              if (link.isChanged) {
+                link.saveSync();
+              }
             }
           }
         }

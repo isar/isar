@@ -39,4 +39,4 @@ typedef IsarUint8List = Uint8List;
 
 /// @nodoc
 @protected
-const isarWebVersion = '2.1.10';
+const isarWebVersion = '2.1.13';

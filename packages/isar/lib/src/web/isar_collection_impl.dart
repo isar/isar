@@ -110,16 +110,20 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       setId?.call(object, id);
 
       final linkFutures = <Future>[];
-      if (saveLinks && getLinks != null) {
-        for (var link in getLinks!(object)) {
-          if (link.isChanged) {
-            linkFutures.add(link.save());
+      if (getLinks != null) {
+        adapter.attachLinks(isar, id, object);
+        if (saveLinks) {
+          for (var link in getLinks!(object)) {
+            if (link.isChanged) {
+              linkFutures.add(link.save());
+            }
+          }
+          if (linkFutures.isNotEmpty) {
+            await Future.wait(linkFutures);
           }
         }
       }
-      if (linkFutures.isNotEmpty) {
-        await Future.wait(linkFutures);
-      }
+
       return id;
     });
   }
@@ -140,11 +144,16 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       if (setId != null || (getLinks != null && saveLinks)) {
         for (var i = 0; i < objects.length; i++) {
           final object = objects[i];
-          setId?.call(object, ids[i]);
-          if (getLinks != null && saveLinks) {
-            for (var link in getLinks!(object)) {
-              if (link.isChanged) {
-                linkFutures.add(link.save());
+          final id = ids[i];
+          setId?.call(object, id);
+
+          if (getLinks != null) {
+            adapter.attachLinks(isar, id, object);
+            if (saveLinks) {
+              for (var link in getLinks!(object)) {
+                if (link.isChanged) {
+                  linkFutures.add(link.save());
+                }
               }
             }
           }

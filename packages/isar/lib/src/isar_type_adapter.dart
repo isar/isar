@@ -17,6 +17,8 @@ abstract class IsarNativeTypeAdapter<T> {
 
   P deserializeProperty<P>(
       int id, IsarBinaryReader reader, int propertyIndex, int offset);
+
+  void attachLinks(Isar isar, int id, T object);
 }
 
 /// @nodoc
@@ -29,4 +31,6 @@ abstract class IsarWebTypeAdapter<T> {
   T deserialize(IsarCollection<T> collection, dynamic jsObj);
 
   P deserializeProperty<P>(Object jsObj, String propertyName);
+
+  void attachLinks(Isar isar, int id, T object);
 }

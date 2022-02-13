@@ -15,7 +15,7 @@ abstract class Isar {
   static const maxId = isarMaxId;
 
   /// Placeholder for an auto-increment id.
-  static const autoIncrement = isarAutoIncrementId;
+  static final autoIncrement = isarAutoIncrementId;
 
   static final _instances = <String, Isar>{};
   static final _openCallbacks = <IsarOpenCallback>{};
@@ -108,6 +108,14 @@ abstract class Isar {
   /// Is the instance open?
   bool get isOpen => _isOpen;
 
+  /// @nodoc
+  @protected
+  void requireOpen() {
+    if (!isOpen) {
+      throw IsarError('Isar instance has already been closed');
+    }
+  }
+
   /// Executes an asynchronous read-only transaction.
   Future<T> txn<T>(Future<T> Function(Isar isar) callback);
 
@@ -131,12 +139,19 @@ abstract class Isar {
   ///
   /// You should use the generated extension methods instead.
   IsarCollection<T> getCollection<T>(String name) {
+    requireOpen();
     final collection = _collections[name];
     if (collection is IsarCollection<T>) {
       return collection;
     } else {
       throw 'Unknown collection or invalid type. Make sure that you opened the collection.';
     }
+  }
+
+  /// @nodoc
+  @protected
+  IsarCollection? getCollectionInternal(String name) {
+    return _collections[name];
   }
 
   /// Remove all data in this instance and reset the auto increment values.
@@ -161,6 +176,7 @@ abstract class Isar {
   ///
   /// Returns whether the instance was actually closed.
   Future<bool> close({bool deleteFromDisk = false}) {
+    requireOpen();
     _isOpen = false;
     if (identical(_instances[name], this)) {
       _instances.remove(name);

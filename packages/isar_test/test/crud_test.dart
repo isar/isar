@@ -44,8 +44,10 @@ void main() {
       await isar.close();
     });
 
-    isarTest('get() / put() without oid', () async {
-      final message1 = Message()..message = 'This is a new message';
+    isarTest('get() / put() without id', () async {
+      final message1 = Message()
+        ..id = Isar.autoIncrement
+        ..message = 'This is a new message';
       final message2 = Message()..message = 'This is another new message';
 
       await isar.writeTxn((isar) async {
@@ -62,7 +64,7 @@ void main() {
       expect(message2, newMessage2);
     });
 
-    isarTest('get() / put() with oid', () async {
+    isarTest('get() / put() with id', () async {
       final message1 = Message()
         ..id = 5
         ..message = 'This is a new message';
@@ -85,7 +87,7 @@ void main() {
       expect(noMessage, null);
     });
 
-    isarTestVm('getSync() / putSync() without int oid', () {
+    isarTestVm('getSync() / putSync() without id', () {
       final message = Message()..message = 'This is a new message';
 
       isar.writeTxnSync((isar) {
@@ -96,7 +98,7 @@ void main() {
       expect(message, newMessage);
     });
 
-    isarTestVm('getSync() / putSync() with oid', () {
+    isarTestVm('getSync() / putSync() with id', () {
       final message = Message()
         ..id = 5
         ..message = 'This is a new message';
