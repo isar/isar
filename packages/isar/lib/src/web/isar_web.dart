@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:isar/isar.dart';
 import 'package:isar/src/isar_native_interface.dart';
 import 'package:isar/src/web/isar_link_impl.dart';
-import 'package:js/js.dart';
+import 'package:meta/dart2js.dart';
 import 'package:meta/meta.dart';
 
 import 'open.dart';
@@ -48,31 +48,37 @@ class _IsarWeb implements IsarNativeInterface {
   }
 
   @override
+  @tryInline
   dynamic jsObjectGet(Object o, Object key) {
     return getProperty(o, key);
   }
 
   @override
+  @tryInline
   void jsObjectSet(Object o, Object key, dynamic value) {
     setProperty(o, key, value);
   }
 
   @override
+  @tryInline
   dynamic newJsObject() {
     return newObject();
   }
 
   @override
+  @tryInline
   IsarLink<OBJ> newLink<OBJ>() {
     return IsarLinkImpl();
   }
 
   @override
+  @tryInline
   IsarLinks<OBJ> newLinks<OBJ>() {
     return IsarLinksImpl();
   }
 
   @override
+  @tryInline
   Future<Isar> open({
     required String directory,
     required String name,

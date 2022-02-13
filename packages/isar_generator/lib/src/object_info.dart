@@ -32,12 +32,6 @@ class ObjectInfo with _$ObjectInfo {
   List<ObjectProperty> get objectProperties =>
       properties.where((p) => !p.isId).toList();
 
-  int get staticSize {
-    final propertiesSize =
-        objectProperties.sumBy((p) => p.isarType.staticSize).toInt();
-    return propertiesSize + 2;
-  }
-
   String get nativeAdapterName => '_${dartName}NativeAdapter';
 
   String get webAdapterName => '_${dartName}WebAdapter';

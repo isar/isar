@@ -30,6 +30,6 @@ void executeTests(Completer<bool> completer) {
       completer.complete(testCount != 0 && allTestsSuccessful);
     });
 
-    tests.run();
+    tests.main();
   });
 }

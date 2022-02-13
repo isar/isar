@@ -10,7 +10,7 @@ abstract class IsarNativeTypeAdapter<T> {
   const IsarNativeTypeAdapter();
 
   void serialize(IsarCollection<T> collection, IsarRawObject rawObj, T object,
-      List<int> offsets, AdapterAlloc alloc);
+      int staticSize, List<int> offsets, AdapterAlloc alloc);
 
   T deserialize(IsarCollection<T> collection, int id, IsarBinaryReader reader,
       List<int> offsets);

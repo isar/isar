@@ -27,6 +27,7 @@ jobs:
         run: |
           flutter pub get
           flutter pub run build_runner build
+          dart tool/generate_all_tests.dart
           flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart
         working-directory: packages/isar_test
 
@@ -42,14 +43,15 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           channel: "stable"
+      - name: Download binaries
+        run: bash tool/download_binaries.sh
+        working-directory: packages/isar_flutter_libs
       - name: Run isar_generator
         run: |
           flutter pub get
           flutter pub run build_runner build
+          dart tool/generate_all_tests.dart
         working-directory: packages/isar_test
-      - name: Download binaries
-        run: bash tool/download_binaries.sh
-        working-directory: packages/isar_flutter_libs
       - name: Run Flutter Driver tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -81,6 +83,7 @@ jobs:
         run: |
           flutter pub get
           flutter pub run build_runner build
+          dart tool/generate_all_tests.dart
           flutter config --no-enable-web
           flutter config --enable-macos-desktop 
           flutter config --enable-linux-desktop 

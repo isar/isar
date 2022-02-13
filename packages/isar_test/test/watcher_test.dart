@@ -1,5 +1,13 @@
+import 'package:isar/isar.dart';
+import 'package:isar_test/common.dart';
+import 'package:test/test.dart';
+
+/*class _ColListener {
+
+}
+
 void main() {
-  /*group('Watcher', () {
+  group('Watcher', () {
     late Isar isar;
     late IsarCollection<Message> col;
     late List<Message> messages;
@@ -21,6 +29,52 @@ void main() {
 
     tearDown(() async {
       await isar.close();
+    });
+
+    group('Collection', () {
+      Future expectEvent() {
+        expect()
+      }
+
+      isarTest('.put()', () {});
+
+      isarTest('.putAll()', () {});
+
+      isarTest('.delete()', () {});
+
+      isarTest('.deleteAll()', () {});
+
+      isarTest('.deleteBy()', () {});
+
+      isarTest('.deleteAllBy()', () {});
+    });
+
+    group('Object', () {
+      isarTest('.put()', () {});
+
+      isarTest('.putAll()', () {});
+
+      isarTest('.delete()', () {});
+
+      isarTest('.deleteAll()', () {});
+
+      isarTest('.deleteBy()', () {});
+
+      isarTest('.deleteAllBy()', () {});
+    });
+
+    group('Query', () {
+      isarTest('.put()', () {});
+
+      isarTest('.putAll()', () {});
+
+      isarTest('.delete()', () {});
+
+      isarTest('.deleteAll()', () {});
+
+      isarTest('.deleteBy()', () {});
+
+      isarTest('.deleteAllBy()', () {});
     });
 
     isarTest('Collection', () async {
@@ -127,7 +181,7 @@ void main() {
       expect(event, null);
     });
 
-    /*isarTest('Query', () async {
+    isarTest('Query', () async {
       final query =
           col.where().filter().messageEqualTo(messages[1].message).build();
 
@@ -159,6 +213,8 @@ void main() {
       await Future.delayed(Duration(seconds: 1));
       expect(changeRegistered, true);
       expect(event, [messages[3]]);
-    });*/
-  });*/
-}
+    });
+  });
+}*/
+
+void main() {}

@@ -156,10 +156,20 @@ class IsarLinksImpl<OBJ> extends IsarLinksCommon<OBJ> with IsarBaseMixin<OBJ> {
       final ids = idsPtr.asTypedList(count);
 
       var i = 0;
+      final unsavedAdded = <OBJ>[];
       for (var object in added) {
-        var id = targetCol.getId(object);
-        id ??= await targetCol.put(object);
-        ids[i++] = id;
+        final id = targetCol.getId(object);
+        if (id == null) {
+          unsavedAdded.add(object);
+        } else {
+          ids[i++] = id;
+        }
+      }
+
+      if (unsavedAdded.isNotEmpty) {
+        final unsavedIds = await targetCol.putAll(unsavedAdded);
+        ids.setAll(i, unsavedIds);
+        i += unsavedIds.length;
       }
 
       for (var removed in removed) {

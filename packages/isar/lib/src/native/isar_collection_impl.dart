@@ -22,6 +22,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   final Pointer ptr;
 
   final String idName;
+  final int staticSize;
   final List<int> offsets;
   final Map<String, int> propertyIds;
   final Map<String, int> indexIds;
@@ -37,6 +38,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     required this.adapter,
     required this.ptr,
     required this.idName,
+    required this.staticSize,
     required this.offsets,
     required this.propertyIds,
     required this.indexIds,
@@ -230,7 +232,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       for (var i = 0; i < objects.length; i++) {
         final object = objects[i];
         final rawObj = objectsPtr.elementAt(i).ref;
-        adapter.serialize(this, rawObj, object, offsets, allocBuf);
+        adapter.serialize(this, rawObj, object, staticSize, offsets, allocBuf);
         rawObj.id = getId(object) ?? Isar.autoIncrement;
       }
       IC.isar_put_all(ptr, txn.ptr, rawObjSetPtr, replaceOnConflict);
@@ -288,7 +290,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       final ids = List<int>.filled(objects.length, 0);
       for (var i = 0; i < objects.length; i++) {
         final object = objects[i];
-        adapter.serialize(this, rawObj, object, offsets, txn.allocBuffer);
+        adapter.serialize(
+            this, rawObj, object, staticSize, offsets, txn.allocBuffer);
         rawObj.id = getId(object) ?? Isar.autoIncrement;
         nCall(IC.isar_put(ptr, txn.ptr, rawObjPtr, replaceOnConflict));
 

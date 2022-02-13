@@ -80,18 +80,21 @@ class IsarAnalyzer {
 
     final accessor = modelClass.collectionAnnotation?.accessor ??
         '${modelClass.displayName.decapitalize()}s';
-    final modelInfo = ObjectInfo(
+
+    final sortedLinks =
+        links.where((it) => !it.backlink).sortedBy((it) => it.isarName);
+    final sortedBacklinks = links
+        .where((it) => it.backlink)
+        .sortedBy((it) => it.targetCollectionIsarName)
+        .thenBy((it) => it.targetIsarName!);
+    return ObjectInfo(
       dartName: modelClass.displayName,
       isarName: modelClass.isarName,
       accessor: accessor,
       properties: properties.sortedBy((e) => e.isarName),
       indexes: indexes.sortedBy((e) => e.name),
-      links: links
-          .sortedBy((e) => e.targetCollectionIsarName)
-          .thenBy((e) => e.targetIsarName ?? ''),
+      links: [...sortedLinks, ...sortedBacklinks],
     );
-
-    return modelInfo;
   }
 
   ObjectProperty? analyzeObjectProperty(

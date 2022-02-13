@@ -24,7 +24,9 @@ void _initializeInstance(
   for (var i = 0; i < schemas.length; i++) {
     final schema = schemas[i];
     nCall(IC.isar_get_collection(isar.ptr, colPtrPtr, i));
-    IC.isar_get_property_offsets(colPtrPtr.value, offsetsPtr);
+    final staticSize =
+        IC.isar_get_static_size_and_offsets(colPtrPtr.value, offsetsPtr);
+    final offsets = offsetsPtr.asTypedList(schema.propertyIds.length).toList();
     cols[schema.name] = schema.toCollection(<OBJ>() {
       schema as CollectionSchema<OBJ>;
       return IsarCollectionImpl<OBJ>(
@@ -32,7 +34,8 @@ void _initializeInstance(
         adapter: schema.nativeAdapter,
         ptr: colPtrPtr.value,
         idName: schema.idName,
-        offsets: offsetsPtr.asTypedList(schema.propertyIds.length).toList(),
+        staticSize: staticSize,
+        offsets: offsets,
         propertyIds: schema.propertyIds,
         indexIds: schema.indexIds,
         indexTypes: schema.indexTypes,

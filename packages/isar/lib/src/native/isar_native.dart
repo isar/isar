@@ -37,11 +37,13 @@ class _IsarNative implements IsarNativeInterface {
   const _IsarNative();
 
   @override
+  @pragma('vm:prefer-inline')
   Uint8List bufAsBytes(IsarBytePointer pointer, int length) {
     return pointer.asTypedList(length);
   }
 
   @override
+  @pragma('vm:prefer-inline')
   void initializeLibraries({Map<String, String> libraries = const {}}) {
     return initializeIsarCore(libraries: libraries);
   }
@@ -62,16 +64,19 @@ class _IsarNative implements IsarNativeInterface {
   }
 
   @override
+  @pragma('vm:prefer-inline')
   IsarLink<OBJ> newLink<OBJ>() {
     return IsarLinkImpl();
   }
 
   @override
+  @pragma('vm:prefer-inline')
   IsarLinks<OBJ> newLinks<OBJ>() {
     return IsarLinksImpl();
   }
 
   @override
+  @pragma('vm:prefer-inline')
   Future<Isar> open({
     required String directory,
     required String name,
@@ -87,6 +92,7 @@ class _IsarNative implements IsarNativeInterface {
   }
 
   @override
+  @pragma('vm:prefer-inline')
   Isar openSync({
     required String directory,
     required String name,
@@ -102,6 +108,7 @@ class _IsarNative implements IsarNativeInterface {
   }
 
   @override
+  @pragma('vm:prefer-inline')
   List<String> splitWords(String value) {
     return splitWordsCore(value);
   }

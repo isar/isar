@@ -104,6 +104,7 @@ void main() {
         objA1.selfLink.value = objA2;
         objA3.selfLink.value = objA3;
         await isar.writeTxn((isar) async {
+          objA1.id = Isar.autoIncrement;
           await linksA.putAll([objA1, objA3], saveLinks: true);
         });
 
@@ -245,6 +246,7 @@ void main() {
         objA1.selfLinks.add(objA3);
 
         await isar.writeTxn((isar) async {
+          objA1.id = Isar.autoIncrement;
           await linksA.put(objA1, saveLinks: true);
         });
 

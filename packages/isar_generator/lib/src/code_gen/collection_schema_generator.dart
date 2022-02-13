@@ -52,7 +52,13 @@ String generateCollectionSchema(ObjectInfo object) {
       linkIds: {$linkIds},
       backlinkIds: {$backlinkIds},
       linkedCollections: [$linkedCollections],
-      getId: (obj) => obj.${object.idProperty.dartName},
+      getId: (obj) {
+        if (obj.${object.idProperty.dartName} == Isar.autoIncrement) {
+          return null;
+        } else {
+          return obj.${object.idProperty.dartName};
+        }
+      },
       setId: ${object.idProperty.assignable ? setId : 'null'},
       getLinks: $getLinks,
       version: ${CollectionSchema.generatorVersion},

@@ -17,7 +17,6 @@ String generateNativeTypeAdapter(ObjectInfo object) {
 }
 
 String _generatePrepareSerialize(ObjectInfo object) {
-  final staticSize = object.staticSize;
   var code = 'var dynamicSize = 0;';
   for (var i = 0; i < object.objectProperties.length; i++) {
     final property = object.objectProperties[i];
@@ -96,7 +95,7 @@ String _generatePrepareSerialize(ObjectInfo object) {
     }
   }
   code += '''
-    final size = dynamicSize + $staticSize;
+    final size = staticSize + dynamicSize;
     ''';
 
   return code;
@@ -105,12 +104,12 @@ String _generatePrepareSerialize(ObjectInfo object) {
 String _generateSerialize(ObjectInfo object) {
   var code = '''
   @override  
-  void serialize(IsarCollection<${object.dartName}> collection, IsarRawObject rawObj, ${object.dartName} object, List<int> offsets, AdapterAlloc alloc) {
+  void serialize(IsarCollection<${object.dartName}> collection, IsarRawObject rawObj, ${object.dartName} object, int staticSize, List<int> offsets, AdapterAlloc alloc) {
     ${_generatePrepareSerialize(object)}
     rawObj.buffer = alloc(size);
     rawObj.buffer_length = size;
     final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
-    final writer = IsarBinaryWriter(buffer, ${object.staticSize});
+    final writer = IsarBinaryWriter(buffer, staticSize);
   ''';
   for (var i = 0; i < object.objectProperties.length; i++) {
     final property = object.objectProperties[i];

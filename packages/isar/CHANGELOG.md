@@ -11,13 +11,18 @@ _Web passes all unit tests but is still considered beta for now._
 
 ### Enhancements
 
+- Full web support!
 - Improved write performance
 - Added `deleteFromDisk` option to `isar.close()`
 - Added `.reset()` and `.resetSync()` methods to `IsarLink` and `IsarLinks`
+- Improved `links.save()` performance
+- Added many tests
 
 ### Fixed
 
 - Fixed value of `null` dates to be `DateTime.fromMillisecondsSinceEpoch(0)`
+- Fixed problem with migration
+- Fixed incorrect list values for new properties (`[]` instead of `null`)
 - Improved handling of link edge-cases
 
 ## 2.1.4

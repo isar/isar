@@ -16,9 +16,15 @@ abstract class IsarLinkBase<OBJ> {
   void loadSync();
 
   /// Saves the linked object(s) to the databse if there are changes.
+  ///
+  /// Also puts new objects into the database that have id set to `null` or
+  /// `Isar.autoIncrement`.
   Future<void> save();
 
   /// Saves the linked object(s) to the databse if there are changes.
+  ///
+  /// Also puts new objects into the database that have id set to `null` or
+  /// `Isar.autoIncrement`.
   void saveSync();
 
   /// Unlinks all linked object(s).

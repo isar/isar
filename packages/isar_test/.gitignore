@@ -1,2 +1,3 @@
 *.g.dart
 *.freezed.dart
+test_driver/all_tests.dart
