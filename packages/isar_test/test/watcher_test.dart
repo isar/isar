@@ -1,30 +1,75 @@
+import 'dart:async';
+
 import 'package:isar/isar.dart';
 import 'package:isar_test/common.dart';
 import 'package:test/test.dart';
 
-/*class _ColListener {
+part 'watcher_test.g.dart';
 
+@Collection()
+class Value {
+  int? id;
+
+  @Index(unique: true)
+  String? value;
+
+  Value(this.id, this.value);
+
+  @override
+  operator ==(other) =>
+      other is Value && id == other.id && value == other.value;
+}
+
+class Listener<T> {
+  late StreamSubscription subscription;
+  final _unprocessed = <T>[];
+  Completer<T>? _completer;
+
+  Listener(Stream<T> stream) {
+    subscription = stream.listen((event) {
+      if (_completer != null) {
+        _completer!.complete(event);
+        _completer = null;
+      } else {
+        _unprocessed.add(event);
+      }
+    });
+  }
+
+  Future<T> get next {
+    if (_unprocessed.isEmpty) {
+      expect(_completer, null);
+      _completer = Completer<T>();
+      return _completer!.future;
+    } else {
+      return Future.value(_unprocessed.removeAt(0));
+    }
+  }
+
+  Future done() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    await subscription.cancel();
+    expect(_completer, null);
+    expect(_unprocessed, []);
+  }
 }
 
 void main() {
   group('Watcher', () {
     late Isar isar;
-    late IsarCollection<Message> col;
-    late List<Message> messages;
+    late IsarCollection<Value> col;
+
+    late Value obj1;
+    late Value obj2;
+    late Value obj3;
 
     setUp(() async {
-      isar = await openTempIsar();
-      col = isar.messages;
+      isar = await openTempIsar([ValueSchema]);
+      col = isar.values;
 
-      messages = [
-        Message()..message = 'How are you?',
-        Message()..message = 'Good, thanks!',
-        Message()..message = 'Third message',
-        Message()..message = 'Good, thanks!',
-      ];
-      await isar.writeTxn((isar) async {
-        await col.putAll(messages);
-      });
+      obj1 = Value(1, 'Hello');
+      obj2 = Value(2, 'Hi');
+      obj3 = Value(3, 'Test');
     });
 
     tearDown(() async {
@@ -32,189 +77,301 @@ void main() {
     });
 
     group('Collection', () {
-      Future expectEvent() {
-        expect()
-      }
+      isarTest('.put()', () async {
+        final listener = Listener(col.watchLazy());
 
-      isarTest('.put()', () {});
+        isar.writeTxn((isar) => col.put(obj1));
+        await listener.next;
 
-      isarTest('.putAll()', () {});
+        isar.writeTxn((isar) => col.put(obj1));
+        await listener.next;
 
-      isarTest('.delete()', () {});
+        await listener.done();
+      });
 
-      isarTest('.deleteAll()', () {});
+      isarTest('.putAll()', () async {
+        final listener = Listener(col.watchLazy());
 
-      isarTest('.deleteBy()', () {});
+        isar.writeTxn((isar) => col.putAll([obj1, obj2]));
+        await listener.next;
 
-      isarTest('.deleteAllBy()', () {});
+        isar.writeTxn((isar) => col.putAll([obj1]));
+        await listener.next;
+
+        await listener.done();
+      });
+
+      isarTest('.delete()', () async {
+        await isar.writeTxn((isar) => col.putAll([obj1, obj2]));
+
+        final listener = Listener(col.watchLazy());
+
+        isar.writeTxn((isar) => col.delete(1));
+        await listener.next;
+
+        isar.writeTxn((isar) => col.delete(2));
+        await listener.next;
+
+        await listener.done();
+      });
+
+      isarTest('.deleteAll()', () async {
+        await isar.writeTxn((isar) => col.putAll([obj1, obj2]));
+
+        final listener = Listener(col.watchLazy());
+
+        isar.writeTxn((isar) => col.deleteAll([1, 3]));
+        await listener.next;
+
+        isar.writeTxn((isar) => col.deleteAll([2]));
+        await listener.next;
+
+        await listener.done();
+      });
+
+      isarTest('.deleteBy()', () async {
+        await isar.writeTxn((isar) => col.putAll([obj1, obj2]));
+
+        final listener = Listener(col.watchLazy());
+
+        isar.writeTxn((isar) => col.deleteByValue(obj1.value));
+        await listener.next;
+
+        isar.writeTxn((isar) => col.deleteByValue(obj2.value));
+        await listener.next;
+
+        await listener.done();
+      });
+
+      isarTest('.deleteAllBy()', () async {
+        await isar.writeTxn((isar) => col.putAll([obj1, obj2]));
+
+        final listener = Listener(col.watchLazy());
+
+        isar.writeTxn(
+            (isar) => col.deleteAllByValue([obj1.value, 'something']));
+        await listener.next;
+
+        isar.writeTxn((isar) => col.deleteAllByValue([obj2.value]));
+        await listener.next;
+
+        await listener.done();
+      });
     });
 
     group('Object', () {
-      isarTest('.put()', () {});
+      isarTest('.put()', () async {
+        final listenerLazy = Listener(col.watchObjectLazy(1));
+        final listener = Listener(col.watchObject(2));
 
-      isarTest('.putAll()', () {});
+        isar.writeTxn((isar) => col.put(obj1));
+        await listenerLazy.next;
 
-      isarTest('.delete()', () {});
+        isar.writeTxn((isar) => col.put(obj2));
+        expect(await listener.next, obj2);
 
-      isarTest('.deleteAll()', () {});
+        await listenerLazy.done();
+        await listener.done();
+      });
 
-      isarTest('.deleteBy()', () {});
+      isarTest('.putAll()', () async {
+        final listenerLazy = Listener(col.watchObjectLazy(1));
+        final listener = Listener(col.watchObject(2));
 
-      isarTest('.deleteAllBy()', () {});
+        isar.writeTxn((isar) => col.putAll([obj1, obj3]));
+        await listenerLazy.next;
+
+        isar.writeTxn((isar) => col.putAll([obj1, obj2]));
+        await listenerLazy.next;
+        expect(await listener.next, obj2);
+
+        await listenerLazy.done();
+        await listener.done();
+      });
+
+      isarTest('.delete()', () async {
+        await isar.writeTxn((isar) => col.putAll([obj1, obj2, obj3]));
+
+        final listenerLazy = Listener(col.watchObjectLazy(1));
+        final listener = Listener(col.watchObject(2));
+
+        isar.writeTxn((isar) => col.delete(1));
+        await listenerLazy.next;
+
+        isar.writeTxn((isar) => col.delete(2));
+        expect(await listener.next, null);
+
+        await listenerLazy.done();
+        await listener.done();
+      });
+
+      isarTest('.deleteAll()', () async {
+        await isar.writeTxn((isar) => col.putAll([obj1, obj2, obj3]));
+
+        final listenerLazy = Listener(col.watchObjectLazy(1));
+        final listener = Listener(col.watchObject(2));
+
+        isar.writeTxn((isar) => col.deleteAll([4, 1]));
+        await listenerLazy.next;
+
+        isar.writeTxn((isar) => col.deleteAll([2, 3]));
+        expect(await listener.next, null);
+
+        await listenerLazy.done();
+        await listener.done();
+      });
+
+      isarTest('.deleteBy()', () async {
+        await isar.writeTxn((isar) => col.putAll([obj1, obj2, obj3]));
+
+        final listenerLazy = Listener(col.watchObjectLazy(1));
+        final listener = Listener(col.watchObject(2));
+
+        isar.writeTxn((isar) => col.deleteByValue(obj1.value));
+        await listenerLazy.next;
+
+        isar.writeTxn((isar) => col.deleteByValue(obj2.value));
+        expect(await listener.next, null);
+
+        await listenerLazy.done();
+        await listener.done();
+      });
+
+      isarTest('.deleteAllBy()', () async {
+        await isar.writeTxn((isar) => col.putAll([obj1, obj2, obj3]));
+
+        final listenerLazy = Listener(col.watchObjectLazy(1));
+        final listener = Listener(col.watchObject(2));
+
+        isar.writeTxn((isar) => col.deleteAllByValue(['AAA', obj1.value]));
+        await listenerLazy.next;
+
+        isar.writeTxn((isar) => col.deleteAllByValue([obj2.value, obj3.value]));
+        expect(await listener.next, null);
+
+        await listenerLazy.done();
+        await listener.done();
+      });
     });
 
     group('Query', () {
-      isarTest('.put()', () {});
+      isarTest('.put()', () async {
+        final listenerLazy =
+            Listener(col.where().valueEqualTo('Hello').watchLazy());
+        final listener = Listener(col.where().valueEqualTo('Hi').watch());
 
-      isarTest('.putAll()', () {});
+        isar.writeTxn((isar) => col.put(obj1));
+        await listenerLazy.next;
 
-      isarTest('.delete()', () {});
+        isar.writeTxn((isar) => col.put(obj2));
+        expect(await listener.next, [obj2]);
 
-      isarTest('.deleteAll()', () {});
-
-      isarTest('.deleteBy()', () {});
-
-      isarTest('.deleteAllBy()', () {});
-    });
-
-    isarTest('Collection', () async {
-      var changeRegistered = false;
-      col.watchLazy().listen((event) {
-        changeRegistered = true;
+        await listenerLazy.done();
+        await listener.done();
       });
 
-      expect(changeRegistered, false);
-      await isar.writeTxn((isar) => col.delete(messages[0].id!));
-      expect(changeRegistered, true);
+      isarTest('.putAll()', () async {
+        final listenerLazy =
+            Listener(col.filter().valueContains('H').watchLazy());
+        final listener = Listener(col.filter().valueContains('H').watch());
 
-      changeRegistered = false;
-      await isar.writeTxn((isar) => col.delete(5));
-      expect(changeRegistered, false);
+        isar.writeTxn((isar) => col.putAll([obj1, obj2]));
+        await listenerLazy.next;
+        expect(await listener.next, [obj1, obj2]);
 
-      await isar.writeTxn((isar) => col.where().deleteFirst());
-      expect(changeRegistered, true);
-    });
+        await isar.writeTxn((isar) => col.putAll([obj3]));
 
-    isarTest('Object lazy', () async {
-      var changeRegistered = false;
-      col.watchObjectLazy(messages[1].id!).listen((e) {
-        changeRegistered = true;
+        await listenerLazy.done();
+        await listener.done();
       });
 
-      expect(changeRegistered, false);
-      await isar.writeTxn(
-        (isar) => col.delete(messages[0].id!),
-      );
-      expect(changeRegistered, false);
+      isarTest('.delete()', () async {
+        await isar.writeTxn((isar) => col.putAll([obj1, obj2, obj3]));
 
-      await isar.writeTxn((isar) {
-        return col.put(messages[1]);
-      });
-      expect(changeRegistered, true);
+        final listenerLazy =
+            Listener(col.where().valueEqualTo('Hello').watchLazy());
+        final listener = Listener(col.where().valueEqualTo('Hi').watch());
 
-      changeRegistered = false;
-      await isar.writeTxn(
-          (isar) => col.where().messageEqualTo('Good, thanks!').deleteFirst());
-      expect(changeRegistered, true);
-    });
+        isar.writeTxn((isar) => col.delete(1));
+        await listenerLazy.next;
+        if (kIsWeb) {
+          expect(await listener.next, [obj2]);
+        }
 
-    isarTest('Object', () async {
-      var changeRegistered = false;
-      Message? event;
-      col.watchObject(messages[1].id!).listen((e) {
-        changeRegistered = true;
-        event = e;
+        isar.writeTxn((isar) => col.delete(2));
+        if (kIsWeb) {
+          await listenerLazy.next;
+        }
+        expect(await listener.next, []);
+
+        await listenerLazy.done();
+        await listener.done();
       });
 
-      expect(changeRegistered, false);
-      expect(event, null);
-      await isar.writeTxn((isar) => col.delete(messages[0].id!));
-      await Future.delayed(Duration(seconds: 1));
-      expect(changeRegistered, false);
-      expect(event, null);
+      isarTest('.deleteAll()', () async {
+        await isar.writeTxn((isar) => col.putAll([obj1, obj2, obj3]));
 
-      messages[1].message = 'New message';
-      await isar.writeTxn((isar) {
-        return col.put(messages[1]);
-      });
-      await Future.delayed(Duration(seconds: 1));
-      expect(changeRegistered, true);
-      expect(event, messages[1]);
+        final listenerLazy =
+            Listener(col.filter().valueContains('H').watchLazy());
+        final listener = Listener(col.filter().valueContains('H').watch());
 
-      changeRegistered = false;
-      await isar.writeTxn(
-          (isar) => col.where().messageEqualTo('New message').deleteFirst());
-      await Future.delayed(Duration(seconds: 1));
-      expect(changeRegistered, true);
-      expect(event, null);
-    });
+        isar.writeTxn((isar) => col.deleteAll([1, 2]));
+        await listenerLazy.next;
+        expect(await listener.next, []);
 
-    isarTest('Query lazy', () async {
-      final query =
-          col.where().filter().messageEqualTo(messages[1].message).build();
+        await isar.writeTxn((isar) => col.deleteAll([3]));
+        if (kIsWeb) {
+          await listenerLazy.next;
+          expect(await listener.next, []);
+        }
 
-      var changeRegistered = false;
-      List<Message>? event;
-      query.watch().listen((e) {
-        changeRegistered = true;
-        event = e;
+        await listenerLazy.done();
+        await listener.done();
       });
 
-      expect(changeRegistered, false);
-      expect(event, null);
-      await isar.writeTxn(
-        (isar) => col.delete(messages[0].id!),
-      );
-      expect(changeRegistered, false);
-      expect(event, null);
+      isarTest('.deleteBy()', () async {
+        await isar.writeTxn((isar) => col.putAll([obj1, obj2, obj3]));
 
-      await isar.writeTxn((isar) {
-        return col.put(messages[1]);
-      });
-      expect(changeRegistered, true);
-      expect(event, null);
+        final listenerLazy =
+            Listener(col.where().valueEqualTo('Hello').watchLazy());
+        final listener = Listener(col.where().valueEqualTo('Hi').watch());
 
-      changeRegistered = false;
-      await isar.writeTxn((isar) => query.deleteFirst());
+        isar.writeTxn((isar) => col.deleteByValue(obj1.value));
+        await listenerLazy.next;
+        if (kIsWeb) {
+          expect(await listener.next, [obj2]);
+        }
 
-      expect(changeRegistered, true);
-      expect(event, null);
-    });
+        isar.writeTxn((isar) => col.deleteByValue(obj2.value));
+        if (kIsWeb) {
+          await listenerLazy.next;
+        }
+        expect(await listener.next, []);
 
-    isarTest('Query', () async {
-      final query =
-          col.where().filter().messageEqualTo(messages[1].message).build();
-
-      var changeRegistered = false;
-      List<Message>? event;
-      query.watch(lazy: false).listen((e) {
-        changeRegistered = true;
-        event = e;
+        await listenerLazy.done();
+        await listener.done();
       });
 
-      expect(changeRegistered, false);
-      expect(event, null);
-      await isar.writeTxn(
-        (isar) => col.delete(messages[0].id!),
-      );
-      await Future.delayed(Duration(seconds: 1));
-      expect(changeRegistered, false);
-      expect(event, null);
+      isarTest('.deleteAllByValue()', () async {
+        await isar.writeTxn((isar) => col.putAll([obj1, obj2, obj3]));
 
-      await isar.writeTxn((isar) {
-        return col.put(messages[1]);
+        final listenerLazy =
+            Listener(col.filter().valueContains('H').watchLazy());
+        final listener = Listener(col.filter().valueContains('H').watch());
+
+        isar.writeTxn((isar) => col.deleteAllByValue([obj1.value, obj2.value]));
+        await listenerLazy.next;
+        expect(await listener.next, []);
+
+        await isar.writeTxn((isar) => col.deleteAllByValue([obj3.value]));
+        if (kIsWeb) {
+          await listenerLazy.next;
+          expect(await listener.next, []);
+        }
+
+        await listenerLazy.done();
+        await listener.done();
       });
-      await Future.delayed(Duration(seconds: 1));
-      expect(changeRegistered, true);
-      expect(event, [messages[1], messages[3]]);
-
-      changeRegistered = false;
-      await isar.writeTxn((isar) => query.deleteFirst());
-      await Future.delayed(Duration(seconds: 1));
-      expect(changeRegistered, true);
-      expect(event, [messages[3]]);
     });
   });
-}*/
-
-void main() {}
+}

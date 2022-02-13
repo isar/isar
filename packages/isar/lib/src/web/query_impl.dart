@@ -119,9 +119,10 @@ class QueryImpl<T> extends Query<T> {
       });
     }
 
-    stop = col.col.watchQuery(queryJs, (results) {
+    final callback = allowInterop((List results) {
       controller.add(results.map(deserialize).toList());
     });
+    stop = col.col.watchQuery(queryJs, callback);
 
     return controller.stream;
   }
@@ -133,9 +134,10 @@ class QueryImpl<T> extends Query<T> {
       stop?.apply([]);
     });
 
-    stop = col.col.watchQueryLazy(queryJs, () {
+    final callback = allowInterop(() {
       controller.add(null);
     });
+    stop = col.col.watchQueryLazy(queryJs, callback);
 
     return controller.stream;
   }
