@@ -21,12 +21,6 @@ class IsarImpl extends Isar {
     }
   }
 
-  void requireOpen() {
-    if (!isOpen) {
-      throw IsarError('Isar instance has already been closed');
-    }
-  }
-
   Future<T> _txn<T>(
       bool write, bool silent, Future<T> Function(Isar isar) callback) async {
     requireOpen();

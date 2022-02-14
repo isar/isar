@@ -443,6 +443,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   Stream<void> watchLazy() {
+    // ignore: invalid_use_of_protected_member
     isar.requireOpen();
     final port = ReceivePort();
     final handle =
@@ -462,6 +463,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   Stream<void> watchObjectLazy(int id, {bool initialReturn = false}) {
+    // ignore: invalid_use_of_protected_member
     isar.requireOpen();
     final rawObjPtr = malloc<RawObject>();
 
@@ -494,6 +496,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     int? limit,
     String? property,
   }) {
+    // ignore: invalid_use_of_protected_member
     isar.requireOpen();
     return buildNativeQuery(
       this,
