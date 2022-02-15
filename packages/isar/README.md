@@ -83,10 +83,11 @@ class Post {
 ### 3. Open an instance
 
 ```dart
+part 'Post.g.dart';
 final dir = await getApplicationSupportDirectory(); // path_provider package
 final isar = await Isar.open(
   schemas: [PostSchema],
-  path: dir.path,
+  directory: dir.path,
   inspector: true, // if you want to enable the inspector for debug builds
 );
 ```
