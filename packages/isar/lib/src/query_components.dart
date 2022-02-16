@@ -120,7 +120,7 @@ class FilterGroup extends FilterOperation {
 
   FilterGroup.not(FilterOperation filter)
       : filters = [filter],
-        type = FilterGroupType.or;
+        type = FilterGroupType.not;
 }
 
 /// Sort order
