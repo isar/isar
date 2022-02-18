@@ -51,7 +51,6 @@ void initializeIsarCore({Map<String, String> libraries = const {}}) {
       _IC ??= IsarCoreBindings(DynamicLibrary.open(library));
     }
   } catch (e) {
-    print(e);
     throw IsarError(
         'Could not initialize IsarCore library. If you create a Flutter app, '
         'make sure to add isar_flutter_libs to your dependencies.');
