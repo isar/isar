@@ -78,11 +78,15 @@ class _IsarNative implements IsarNativeInterface {
   @override
   @pragma('vm:prefer-inline')
   Future<Isar> open({
-    required String directory,
+    String? directory,
     required String name,
     required bool relaxedDurability,
     required List<CollectionSchema> schemas,
   }) {
+    if (directory == null) {
+      throw IsarError(
+          'You need to provide a valid directory for mobile or desktop apps.');
+    }
     return openIsar(
       directory: directory,
       name: name,

@@ -133,6 +133,7 @@ _$_ObjectLink _$$_ObjectLinkFromJson(Map<String, dynamic> json) =>
       targetIsarName: json['targetIsarName'] as String?,
       targetCollectionDartName: json['targetCollectionDartName'] as String,
       targetCollectionIsarName: json['targetCollectionIsarName'] as String,
+      targetCollectionAccessor: json['targetCollectionAccessor'] as String,
       links: json['links'] as bool,
       backlink: json['backlink'] as bool,
     );
@@ -144,6 +145,7 @@ Map<String, dynamic> _$$_ObjectLinkToJson(_$_ObjectLink instance) =>
       'targetIsarName': instance.targetIsarName,
       'targetCollectionDartName': instance.targetCollectionDartName,
       'targetCollectionIsarName': instance.targetCollectionIsarName,
+      'targetCollectionAccessor': instance.targetCollectionAccessor,
       'links': instance.links,
       'backlink': instance.backlink,
     };

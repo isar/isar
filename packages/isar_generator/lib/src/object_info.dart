@@ -197,6 +197,7 @@ class ObjectLink with _$ObjectLink {
     required String? targetIsarName,
     required String targetCollectionDartName,
     required String targetCollectionIsarName,
+    required String targetCollectionAccessor,
     required bool links,
     required bool backlink,
   }) = _ObjectLink;

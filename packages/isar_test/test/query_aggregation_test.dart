@@ -1,7 +1,8 @@
 import 'package:isar/isar.dart';
-import 'package:isar_test/common.dart';
-import 'package:isar_test/mutli_type_model.dart';
 import 'package:test/test.dart';
+
+import 'common.dart';
+import 'mutli_type_model.dart';
 
 late Isar _isar;
 

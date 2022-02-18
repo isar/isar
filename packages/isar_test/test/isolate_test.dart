@@ -2,7 +2,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:test/test.dart';
 import 'package:isar/isar.dart';
-import 'package:isar_test/common.dart';
+
+import 'common.dart';
 
 part 'isolate_test.g.dart';
 

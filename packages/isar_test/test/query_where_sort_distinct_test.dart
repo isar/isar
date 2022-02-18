@@ -1,6 +1,7 @@
 import 'package:isar/isar.dart';
-import 'package:isar_test/common.dart';
 import 'package:test/test.dart';
+
+import 'common.dart';
 
 part 'query_where_sort_distinct_test.g.dart';
 

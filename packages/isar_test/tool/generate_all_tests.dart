@@ -4,7 +4,7 @@ void main() {
   final testDir = Directory('test');
   final files = testDir
       .listSync(recursive: true)
-      .where((e) => e is File && e.path.split('.').length == 2)
+      .where((e) => e is File && e.path.endsWith('_test.dart'))
       .map((e) => e.path)
       .toList();
 

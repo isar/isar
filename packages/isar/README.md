@@ -59,17 +59,19 @@ Holy smokes you're here! Let's get started...
 
 ```yaml
 dependencies:
-  isar: 2.2.0
-  isar_flutter_libs: 2.2.0 # contains the binaries
+  isar: 2.2.1
+  isar_flutter_libs: 2.2.1 # contains the binaries
 
 dev_dependencies:
-  isar_generator: 2.2.0
+  isar_generator: 2.2.1
   build_runner: any
 ```
 
 ### 2. Annotate a Collection
 
 ```dart
+part 'post.g.dart';
+
 @Collection()
 class Post {
   int id = Isar.autoIncrement;
@@ -86,7 +88,7 @@ class Post {
 final dir = await getApplicationSupportDirectory(); // path_provider package
 final isar = await Isar.open(
   schemas: [PostSchema],
-  path: dir.path,
+  directory: dir.path,
   inspector: true, // if you want to enable the inspector for debug builds
 );
 ```

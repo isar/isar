@@ -25,7 +25,6 @@ Future<void> initializeIsarWeb() async {
 }
 
 Future<Isar> openIsar({
-  required String directory,
   required String name,
   required bool relaxedDurability,
   required List<CollectionSchema> schemas,

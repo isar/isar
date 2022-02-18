@@ -80,14 +80,13 @@ class _IsarWeb implements IsarNativeInterface {
   @override
   @tryInline
   Future<Isar> open({
-    required String directory,
+    String? directory,
     required String name,
     required bool relaxedDurability,
     required List<CollectionSchema> schemas,
   }) {
     return openIsar(
       name: name,
-      directory: directory,
       relaxedDurability: relaxedDurability,
       schemas: schemas,
     );

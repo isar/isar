@@ -10,7 +10,7 @@ abstract class IsarNativeInterface {
   List<String> splitWords(String value);
 
   Future<Isar> open({
-    required String directory,
+    String? directory,
     required String name,
     required bool relaxedDurability,
     required List<CollectionSchema> schemas,

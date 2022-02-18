@@ -1,95 +1,110 @@
+import 'package:isar/isar.dart';
+import 'package:test/test.dart';
+
+import 'common.dart';
+
+part 'filter_link_test.g.dart';
+
+@Collection()
+class LinkModelA {
+  int? id;
+
+  late String name;
+
+  final selfLinks = IsarLinks<LinkModelA>();
+
+  final links = IsarLinks<LinkModelB>();
+
+  LinkModelA(this.name);
+
+  @override
+  bool operator ==(Object other) {
+    return other is LinkModelA && id == other.id && other.name == name;
+  }
+}
+
+@Collection()
+class LinkModelB {
+  int? id;
+
+  late String name;
+
+  @Backlink(to: 'links')
+  final backlink = IsarLinks<LinkModelA>();
+
+  LinkModelB(this.name);
+
+  @override
+  bool operator ==(Object other) {
+    return other is LinkModelB && id == other.id && other.name == name;
+  }
+}
+
 void main() {
-  /*group('Groups', () {
+  group('Groups', () {
     late Isar isar;
-    late IsarCollection<LinkModelA> linksA;
-    late IsarCollection<LinkModelB> linksB;
+    late IsarCollection<LinkModelA> colA;
+    late IsarCollection<LinkModelB> colB;
+
+    late LinkModelA objA1;
+    late LinkModelA objA2;
+    late LinkModelA objA3;
+    late LinkModelB objB1;
+    late LinkModelB objB2;
 
     setUp(() async {
       isar = await openTempIsar([LinkModelASchema, LinkModelBSchema]);
-      linksA = isar.linkModelAs;
-      linksB = isar.linkModelBs;
+      colA = isar.linkModelAs;
+      colB = isar.linkModelBs;
+
+      objA1 = LinkModelA('model a1');
+      objA2 = LinkModelA('model a2');
+      objA3 = LinkModelA('model a3');
+      objB1 = LinkModelB('model b1');
+      objB2 = LinkModelB('model b2');
+
+      objA1.selfLinks.addAll([objA1, objA2, objA3]);
+      objA2.selfLinks.addAll([objA1, objA3]);
+      objA1.links.addAll([objB1]);
+      objA2.links.addAll([objB2]);
+      objA3.links.addAll([objB1, objB2]);
+
+      await isar.writeTxn((isar) async {
+        await colA.putAll(
+          [objA1, objA2, objA3],
+          saveLinks: true,
+        );
+      });
     });
 
     tearDown(() async {
       await isar.close();
     });
 
-    Future<List<LinkModelA>> getModels() async {
-      final models = [
-        LinkModelA.name('modelA_1'),
-        LinkModelA.name('modelA_2'),
-        LinkModelA.name('modelA_3'),
-      ];
-      await isar.writeTxn((isar) => linksA.putAll(models));
-      return models;
-    }
-
-    Future<List<LinkModelB>> getModels2() async {
-      final models = [
-        LinkModelB.name('modelB_1'),
-        LinkModelB.name('modelB_2'),
-        LinkModelB.name('modelB_3'),
-      ];
-      await isar.writeTxn((isar) => linksB.putAll(models));
-      return models;
-    }
-
-    Future linkSelfLinks(List<LinkModelA> models) {
-      return isar.writeTxn((isar) async {
-        final firstLinks = models[0].selfLinks;
-        firstLinks.add(models[0]);
-        firstLinks.add(models[1]);
-        firstLinks.add(models[2]);
-        await firstLinks.saveChanges();
-
-        final secondLinks = models[1].selfLinks;
-        secondLinks.add(models[0]);
-        secondLinks.add(models[1]);
-        await secondLinks.saveChanges();
-
-        final thirdLinks = models[2].selfLinks;
-        thirdLinks.add(models[0]);
-        await thirdLinks.saveChanges();
-      });
-    }
-
-    Future linkOtherLinks(List<LinkModelA> models, List<LinkModelB> models2) {
-      return isar.writeTxn((isar) async {
-        final firstLinks = models[0].otherLinks;
-        firstLinks.add(models2[0]);
-        firstLinks.add(models2[1]);
-        firstLinks.add(models2[2]);
-        await firstLinks.saveChanges();
-
-        final secondLinks = models[1].otherLinks;
-        secondLinks.add(models2[0]);
-        secondLinks.add(models2[1]);
-        await secondLinks.saveChanges();
-
-        final thirdLinks = models[2].otherLinks;
-        thirdLinks.add(models2[0]);
-        await thirdLinks.saveChanges();
-      });
-    }
-
     isarTest('Single self link', () async {
-      final models = await getModels();
-      await linkSelfLinks(models);
+      final sl = colA.getSync(1)!.selfLinks;
+      sl.loadSync(overrideChanges: true);
+      print(sl);
 
       await qEqualSet(
-        linksA
-            .where()
-            .filter()
-            .selfLinks((q) => q.nameEqualTo('modelA_2'))
-            .findAll(),
-        {
-          LinkModelA.name('modelA_1'),
-          LinkModelA.name('modelA_2'),
-        },
+        colA.where().filter().selfLinks((q) => q.nameContains('a1')).findAll(),
+        {objA1, objA2},
       );
     });
 
-    isarTest('Self link and filter', () async {
+    isarTest('Single self link without results', () async {
+      await qEqualSet(
+        colA
+            .where()
+            .filter()
+            .not()
+            .selfLinks((q) => q.nameContains('a4'))
+            .findAll(),
+        {objA1, objA2, objA3},
+      );
+    });
+
+    /*isarTest('Self link and filter', () async {
       final models = await getModels();
       await linkSelfLinks(models);
 
@@ -128,10 +143,6 @@ void main() {
         {LinkModelA.name('modelA_1'), LinkModelA.name('modelA_2')},
       );
     });
-
-    /////
-    ///
-    ///
 
     isarTest('Single other link', () async {
       final models = await getModels();
@@ -191,6 +202,6 @@ void main() {
             .findAll(),
         {LinkModelB.name('modelB_1'), LinkModelB.name('modelB_2')},
       );
-    });
-  });*/
+    });*/
+  });
 }

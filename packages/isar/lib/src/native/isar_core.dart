@@ -71,6 +71,8 @@ IsarError? isarErrorFromResult(int result) {
     } finally {
       IC.isar_free_error(error);
     }
+  } else {
+    return null;
   }
 }
 

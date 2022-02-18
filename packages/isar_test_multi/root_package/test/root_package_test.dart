@@ -1,7 +1,6 @@
 import 'package:child_package1/child_package1.dart';
 import 'package:child_package2/child_package2.dart';
 import 'package:isar/isar.dart';
-import 'package:isar_test/common.dart';
 import 'package:root_package/root_model1.dart';
 import 'package:root_package/root_model2.dart';
 import 'package:test/test.dart';

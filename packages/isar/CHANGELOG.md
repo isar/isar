@@ -1,3 +1,20 @@
+## 2.2.1
+
+### Enhancements
+
+- Reduced Isar web code size by 50%
+- Made `directory` parameter of `Isar.open()` optional for web
+- Made `name` parameter of `Isar.getInstance()` optional
+- Added `Isar.defaultName` constant
+- Enabled `TypeConverter`s with supertypes
+- Added message if `TypeConverter` nullability doesn't match
+- Added more tests
+
+### Fixes
+
+- Fixed issue with date queries
+- Fixed `FilterGroup.not` constructor (thanks for the PR @jtzell)
+
 ## 2.2.0
 
 Isar now has full web support 🎉. No changes to your code required, just run it.

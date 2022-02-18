@@ -14,6 +14,9 @@ abstract class Isar {
   /// Largest valid id.
   static const maxId = isarMaxId;
 
+  /// The default Isar instance name.
+  static const defaultName = 'isar';
+
   /// Placeholder for an auto-increment id.
   static final autoIncrement = isarAutoIncrementId;
 
@@ -21,12 +24,13 @@ abstract class Isar {
   static final _openCallbacks = <IsarOpenCallback>{};
   static final _closeCallbacks = <IsarCloseCallback>{};
   static String? _schema;
-  var _isOpen = true;
 
   /// Name of the instance.
   final String name;
 
   late final Map<String, IsarCollection> _collections;
+
+  var _isOpen = true;
 
   @protected
   Isar(this.name, String schema) {
@@ -68,8 +72,8 @@ abstract class Isar {
   /// Open a new Isar instance.
   static Future<Isar> open({
     required List<CollectionSchema> schemas,
-    required String directory,
-    String name = 'isar',
+    String? directory,
+    String name = defaultName,
     bool relaxedDurability = true,
     bool inspector = false,
   }) {
@@ -89,7 +93,7 @@ abstract class Isar {
   static Isar openSync({
     required List<CollectionSchema> schemas,
     required String directory,
-    String name = 'isar',
+    String name = defaultName,
     bool relaxedDurability = true,
     bool inspector = false,
   }) {
@@ -197,8 +201,9 @@ abstract class Isar {
   /// A list of all Isar instances opened in the current isolate.
   static List<String> get instanceNames => _instances.keys.toList();
 
-  /// Returns an Isar instance opened in the current isolate by its name.
-  static Isar? getInstance(String name) {
+  /// Returns an Isar instance opened in the current isolate by its name. If
+  /// no name is provided, the default instane is returned.
+  static Isar? getInstance([String name = defaultName]) {
     return _instances[name];
   }
 
@@ -223,6 +228,8 @@ abstract class Isar {
     _closeCallbacks.remove(callback);
   }
 
+  /// Initialize Isar Code. You need to provide binaries for every platform
+  /// your app will run on.
   static initializeLibraries({Map<String, String> libraries = const {}}) =>
       IsarNative.initializeLibraries(libraries: libraries);
 

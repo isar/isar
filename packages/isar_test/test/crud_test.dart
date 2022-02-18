@@ -1,8 +1,8 @@
 import 'package:isar/isar.dart';
-import 'package:isar_test/user_model.dart';
 import 'package:test/test.dart';
 
-import 'package:isar_test/common.dart';
+import 'common.dart';
+import 'user_model.dart';
 
 part 'crud_test.g.dart';
 

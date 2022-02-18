@@ -1,6 +1,7 @@
 import 'package:test/test.dart';
 import 'package:isar/isar.dart';
-import 'package:isar_test/common.dart';
+
+import '../common.dart';
 
 part 'issue_235_rename_field_test.g.dart';
 

@@ -1,9 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
-import 'package:isar_test/common.dart';
-import 'package:isar_test/mutli_type_model.dart';
 import 'package:test/test.dart';
+
+import 'common.dart';
+import 'mutli_type_model.dart';
 
 void main() async {
   group('Query property', () {

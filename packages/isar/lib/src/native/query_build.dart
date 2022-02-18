@@ -157,6 +157,8 @@ Pointer<NativeType>? _buildFilter(
     return _buildLink(col, filter, alloc);
   } else if (filter is FilterCondition) {
     return _buildCondition(col, filter, alloc);
+  } else {
+    return null;
   }
 }
 

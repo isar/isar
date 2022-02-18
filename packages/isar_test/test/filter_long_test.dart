@@ -1,6 +1,10 @@
+// DO NOT EDIT. Copy of float_filter.dart
+// Int -> Long, int -> long, remove @Size32()
+
 import 'package:isar/isar.dart';
-import 'package:isar_test/common.dart';
 import 'package:test/test.dart';
+
+import 'common.dart';
 
 part 'filter_long_test.g.dart';
 

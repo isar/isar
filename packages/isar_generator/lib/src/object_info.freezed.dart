@@ -1,5 +1,6 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
 
 part of 'object_info.dart';
@@ -1092,6 +1093,7 @@ class _$ObjectLinkTearOff {
       required String? targetIsarName,
       required String targetCollectionDartName,
       required String targetCollectionIsarName,
+      required String targetCollectionAccessor,
       required bool links,
       required bool backlink}) {
     return _ObjectLink(
@@ -1100,6 +1102,7 @@ class _$ObjectLinkTearOff {
       targetIsarName: targetIsarName,
       targetCollectionDartName: targetCollectionDartName,
       targetCollectionIsarName: targetCollectionIsarName,
+      targetCollectionAccessor: targetCollectionAccessor,
       links: links,
       backlink: backlink,
     );
@@ -1120,6 +1123,7 @@ mixin _$ObjectLink {
   String? get targetIsarName => throw _privateConstructorUsedError;
   String get targetCollectionDartName => throw _privateConstructorUsedError;
   String get targetCollectionIsarName => throw _privateConstructorUsedError;
+  String get targetCollectionAccessor => throw _privateConstructorUsedError;
   bool get links => throw _privateConstructorUsedError;
   bool get backlink => throw _privateConstructorUsedError;
 
@@ -1140,6 +1144,7 @@ abstract class $ObjectLinkCopyWith<$Res> {
       String? targetIsarName,
       String targetCollectionDartName,
       String targetCollectionIsarName,
+      String targetCollectionAccessor,
       bool links,
       bool backlink});
 }
@@ -1159,6 +1164,7 @@ class _$ObjectLinkCopyWithImpl<$Res> implements $ObjectLinkCopyWith<$Res> {
     Object? targetIsarName = freezed,
     Object? targetCollectionDartName = freezed,
     Object? targetCollectionIsarName = freezed,
+    Object? targetCollectionAccessor = freezed,
     Object? links = freezed,
     Object? backlink = freezed,
   }) {
@@ -1182,6 +1188,10 @@ class _$ObjectLinkCopyWithImpl<$Res> implements $ObjectLinkCopyWith<$Res> {
       targetCollectionIsarName: targetCollectionIsarName == freezed
           ? _value.targetCollectionIsarName
           : targetCollectionIsarName // ignore: cast_nullable_to_non_nullable
+              as String,
+      targetCollectionAccessor: targetCollectionAccessor == freezed
+          ? _value.targetCollectionAccessor
+          : targetCollectionAccessor // ignore: cast_nullable_to_non_nullable
               as String,
       links: links == freezed
           ? _value.links
@@ -1207,6 +1217,7 @@ abstract class _$ObjectLinkCopyWith<$Res> implements $ObjectLinkCopyWith<$Res> {
       String? targetIsarName,
       String targetCollectionDartName,
       String targetCollectionIsarName,
+      String targetCollectionAccessor,
       bool links,
       bool backlink});
 }
@@ -1228,6 +1239,7 @@ class __$ObjectLinkCopyWithImpl<$Res> extends _$ObjectLinkCopyWithImpl<$Res>
     Object? targetIsarName = freezed,
     Object? targetCollectionDartName = freezed,
     Object? targetCollectionIsarName = freezed,
+    Object? targetCollectionAccessor = freezed,
     Object? links = freezed,
     Object? backlink = freezed,
   }) {
@@ -1252,6 +1264,10 @@ class __$ObjectLinkCopyWithImpl<$Res> extends _$ObjectLinkCopyWithImpl<$Res>
           ? _value.targetCollectionIsarName
           : targetCollectionIsarName // ignore: cast_nullable_to_non_nullable
               as String,
+      targetCollectionAccessor: targetCollectionAccessor == freezed
+          ? _value.targetCollectionAccessor
+          : targetCollectionAccessor // ignore: cast_nullable_to_non_nullable
+              as String,
       links: links == freezed
           ? _value.links
           : links // ignore: cast_nullable_to_non_nullable
@@ -1273,6 +1289,7 @@ class _$_ObjectLink implements _ObjectLink {
       required this.targetIsarName,
       required this.targetCollectionDartName,
       required this.targetCollectionIsarName,
+      required this.targetCollectionAccessor,
       required this.links,
       required this.backlink});
 
@@ -1290,13 +1307,15 @@ class _$_ObjectLink implements _ObjectLink {
   @override
   final String targetCollectionIsarName;
   @override
+  final String targetCollectionAccessor;
+  @override
   final bool links;
   @override
   final bool backlink;
 
   @override
   String toString() {
-    return 'ObjectLink(dartName: $dartName, isarName: $isarName, targetIsarName: $targetIsarName, targetCollectionDartName: $targetCollectionDartName, targetCollectionIsarName: $targetCollectionIsarName, links: $links, backlink: $backlink)';
+    return 'ObjectLink(dartName: $dartName, isarName: $isarName, targetIsarName: $targetIsarName, targetCollectionDartName: $targetCollectionDartName, targetCollectionIsarName: $targetCollectionIsarName, targetCollectionAccessor: $targetCollectionAccessor, links: $links, backlink: $backlink)';
   }
 
   @override
@@ -1312,6 +1331,8 @@ class _$_ObjectLink implements _ObjectLink {
                 other.targetCollectionDartName, targetCollectionDartName) &&
             const DeepCollectionEquality().equals(
                 other.targetCollectionIsarName, targetCollectionIsarName) &&
+            const DeepCollectionEquality().equals(
+                other.targetCollectionAccessor, targetCollectionAccessor) &&
             const DeepCollectionEquality().equals(other.links, links) &&
             const DeepCollectionEquality().equals(other.backlink, backlink));
   }
@@ -1324,6 +1345,7 @@ class _$_ObjectLink implements _ObjectLink {
       const DeepCollectionEquality().hash(targetIsarName),
       const DeepCollectionEquality().hash(targetCollectionDartName),
       const DeepCollectionEquality().hash(targetCollectionIsarName),
+      const DeepCollectionEquality().hash(targetCollectionAccessor),
       const DeepCollectionEquality().hash(links),
       const DeepCollectionEquality().hash(backlink));
 
@@ -1345,6 +1367,7 @@ abstract class _ObjectLink implements ObjectLink {
       required String? targetIsarName,
       required String targetCollectionDartName,
       required String targetCollectionIsarName,
+      required String targetCollectionAccessor,
       required bool links,
       required bool backlink}) = _$_ObjectLink;
 
@@ -1361,6 +1384,8 @@ abstract class _ObjectLink implements ObjectLink {
   String get targetCollectionDartName;
   @override
   String get targetCollectionIsarName;
+  @override
+  String get targetCollectionAccessor;
   @override
   bool get links;
   @override

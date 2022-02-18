@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:isar/isar.dart';
 import 'package:test/expect.dart';
 
-import 'package:isar_test/common.dart';
+import 'common.dart';
 
 part 'schema_test.g.dart';
 

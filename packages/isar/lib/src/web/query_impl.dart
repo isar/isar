@@ -79,6 +79,8 @@ class QueryImpl<T> extends Query<T> {
         return result.toInt() as R;
       } else if (R == double) {
         return result.toDouble() as R;
+      } else {
+        return null;
       }
     });
   }

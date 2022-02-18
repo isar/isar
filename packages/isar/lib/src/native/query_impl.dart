@@ -27,6 +27,8 @@ class QueryImpl<T> extends Query<T> {
     return findInternal(maxLimit).then((result) {
       if (result.isNotEmpty) {
         return result[0];
+      } else {
+        return null;
       }
     });
   }
@@ -52,6 +54,8 @@ class QueryImpl<T> extends Query<T> {
     final results = findSyncInternal(1);
     if (results.isNotEmpty) {
       return results[0];
+    } else {
+      return null;
     }
   }
 

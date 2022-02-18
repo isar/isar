@@ -78,9 +78,6 @@ class IsarAnalyzer {
           unknownConstructorParameter);
     }
 
-    final accessor = modelClass.collectionAnnotation?.accessor ??
-        '${modelClass.displayName.decapitalize()}s';
-
     final sortedLinks =
         links.where((it) => !it.backlink).sortedBy((it) => it.isarName);
     final sortedBacklinks = links
@@ -90,7 +87,7 @@ class IsarAnalyzer {
     return ObjectInfo(
       dartName: modelClass.displayName,
       isarName: modelClass.isarName,
-      accessor: accessor,
+      accessor: modelClass.collectionAccessor,
       properties: properties.sortedBy((e) => e.isarName),
       indexes: indexes.sortedBy((e) => e.name),
       links: [...sortedLinks, ...sortedBacklinks],
@@ -99,23 +96,25 @@ class IsarAnalyzer {
 
   ObjectProperty? analyzeObjectProperty(
       PropertyInducingElement property, ConstructorElement constructor) {
-    final nullable = property.type.nullabilitySuffix != NullabilitySuffix.none;
+    final converter = property.typeConverter;
+
+    late final DartType isarDartType;
+    if (converter == null) {
+      isarDartType = property.type;
+    } else {
+      isarDartType = converter.supertype!.typeArguments[1];
+    }
+
+    final isarType = getIsarType(isarDartType, converter ?? property);
+
+    final nullable = isarDartType.nullabilitySuffix != NullabilitySuffix.none;
     var elementNullable = false;
-    if (property.type is ParameterizedType) {
-      final typeArguments = (property.type as ParameterizedType).typeArguments;
+    if (isarDartType is ParameterizedType) {
+      final typeArguments = isarDartType.typeArguments;
       if (typeArguments.isNotEmpty) {
         final listType = typeArguments[0];
         elementNullable = listType.nullabilitySuffix != NullabilitySuffix.none;
       }
-    }
-
-    final converter = property.typeConverter;
-    IsarType? isarType;
-    if (converter == null) {
-      isarType = getIsarType(property.type, property);
-    } else {
-      final isarDartType = converter.supertype!.typeArguments[1];
-      isarType = getIsarType(isarDartType, converter);
     }
 
     if (isarType == null) {
@@ -129,11 +128,6 @@ class IsarAnalyzer {
       } else if (isarType != IsarType.long) {
         err('Only int ids are allowed', property);
       }
-    }
-
-    var type = property.type.getDisplayString(withNullability: true);
-    if (type.endsWith('*')) {
-      type = type.removeSuffix('*') + '?';
     }
 
     final constructorParameter =
@@ -154,10 +148,14 @@ class IsarAnalyzer {
       deserialize =
           property.setter == null ? PropertyDeser.none : PropertyDeser.assign;
     }
+
+    var dartTypeStr = property.type.getDisplayString(withNullability: true);
+    dartTypeStr = dartTypeStr.replaceAll('*', '?');
+
     return ObjectProperty(
       dartName: property.displayName,
       isarName: property.isarName,
-      dartType: type,
+      dartType: dartTypeStr,
       isarType: isarType,
       isId: isId,
       converter: converter?.name,
@@ -192,6 +190,10 @@ class IsarAnalyzer {
 
     final targetCol = linkType.element! as ClassElement;
 
+    if (targetCol.collectionAnnotation == null) {
+      err('Link target is not annotated with @Collection()');
+    }
+
     final backlinkAnn = property.backlinkAnnotation;
     String? targetIsarName;
     if (backlinkAnn != null) {
@@ -215,6 +217,7 @@ class IsarAnalyzer {
       targetIsarName: targetIsarName,
       targetCollectionDartName: linkType.element!.name!,
       targetCollectionIsarName: targetCol.isarName,
+      targetCollectionAccessor: targetCol.collectionAccessor,
       links: isLinks,
       backlink: backlinkAnn != null,
     );

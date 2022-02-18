@@ -212,4 +212,5 @@ IsarType? getIsarType(DartType type, Element element) {
   } else if (_isUint8List(type.element!)) {
     return IsarType.bytes;
   }
+  return null;
 }

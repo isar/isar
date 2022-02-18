@@ -2,7 +2,8 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:isar/isar.dart';
-import 'package:isar_test/common.dart';
+
+import '../common.dart';
 
 part 'change_field_type_test.g.dart';
 

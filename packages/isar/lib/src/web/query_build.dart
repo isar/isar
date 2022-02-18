@@ -109,6 +109,8 @@ FilterJs? _buildFilter(IsarCollectionImpl col, FilterOperation filter) {
   final filterStr = _buildFilterOperation(col, filter);
   if (filterStr != null) {
     return FilterJs('id', 'obj', 'return $filterStr');
+  } else {
+    return null;
   }
 }
 
@@ -122,6 +124,8 @@ String? _buildFilterOperation(
     unsupportedOnWeb();
   } else if (filter is FilterCondition) {
     return _buildCondition(col, filter);
+  } else {
+    return null;
   }
 }
 

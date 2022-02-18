@@ -1,9 +1,10 @@
 // DO NOT EDIT. Copy of float_filter.dart
-// Float -> Double, float -> double
+// Float -> Double, float -> double, remove @Size32()
 
 import 'package:isar/isar.dart';
-import 'package:isar_test/common.dart';
 import 'package:test/test.dart';
+
+import 'common.dart';
 
 part 'filter_double_test.g.dart';
 

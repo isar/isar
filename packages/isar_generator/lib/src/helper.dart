@@ -1,7 +1,19 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
+import 'package:analyzer/src/dart/element/type_system.dart';
 import 'package:dartx/dartx.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:isar/isar.dart';
+import 'package:analyzer/dart/analysis/features.dart';
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/dart/element/type_provider.dart';
+import 'package:analyzer/error/listener.dart';
+import 'package:analyzer/src/dart/ast/extensions.dart';
+import 'package:analyzer/src/dart/element/type.dart';
+import 'package:analyzer/src/dart/element/type_system.dart';
+import 'package:analyzer/src/error/codes.dart';
+import 'package:analyzer/src/generated/error_verifier.dart';
 
 final _collectionChecker = const TypeChecker.fromRuntime(Collection);
 final _ignoreChecker = const TypeChecker.fromRuntime(Ignore);
@@ -24,6 +36,10 @@ extension ClassElementX on ClassElement {
       inheritance: ann.getField('inheritance')!.toBoolValue()!,
       accessor: ann.getField('accessor')!.toStringValue(),
     );
+  }
+
+  String get collectionAccessor {
+    return collectionAnnotation?.accessor ?? '${displayName.decapitalize()}s';
   }
 
   List<PropertyInducingElement> get allAccessors {
@@ -67,9 +83,20 @@ extension PropertyElementX on PropertyInducingElement {
         }
 
         final cls = ann.type!.element as ClassElement;
-        final dartType = cls.supertype!.typeArguments[0];
-        if (dartType == type) {
-          return cls;
+        final adapterDartType = cls.supertype!.typeArguments[0];
+        final checker = TypeChecker.fromStatic(adapterDartType);
+        final nullabilityMatches =
+            adapterDartType.nullabilitySuffix != NullabilitySuffix.none ||
+                type.nullabilitySuffix == NullabilitySuffix.none;
+        if (checker.isAssignableFromType(type)) {
+          if (nullabilityMatches) {
+            return cls;
+          } else {
+            err(
+              'The TypeConverter has incompatible nullability.',
+              ann.type!.element,
+            );
+          }
         }
       }
       element = element.enclosingElement;

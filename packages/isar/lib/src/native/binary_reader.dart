@@ -37,6 +37,8 @@ class BinaryReader {
       return true;
     } else if (value == falseBool) {
       return false;
+    } else {
+      return null;
     }
   }
 
@@ -51,6 +53,8 @@ class BinaryReader {
     final value = readInt(offset, staticOffset: staticOffset);
     if (value != nullInt) {
       return value;
+    } else {
+      return null;
     }
   }
 
@@ -65,6 +69,8 @@ class BinaryReader {
     final value = readFloat(offset, staticOffset: staticOffset);
     if (!value.isNaN) {
       return value;
+    } else {
+      return null;
     }
   }
 
@@ -79,6 +85,8 @@ class BinaryReader {
     final value = readLong(offset, staticOffset: staticOffset);
     if (value != nullLong) {
       return value;
+    } else {
+      return null;
     }
   }
 
@@ -93,6 +101,8 @@ class BinaryReader {
     final value = readDouble(offset, staticOffset: staticOffset);
     if (!value.isNaN) {
       return value;
+    } else {
+      return null;
     }
   }
 
@@ -109,6 +119,8 @@ class BinaryReader {
     final time = readLongOrNull(offset, staticOffset: staticOffset);
     if (time != null) {
       return DateTime.fromMicrosecondsSinceEpoch(time, isUtc: true).toLocal();
+    } else {
+      return null;
     }
   }
 
