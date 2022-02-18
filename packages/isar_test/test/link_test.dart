@@ -68,7 +68,7 @@ class LinkModelB {
 }
 
 void main() {
-  /*group('Links', () {
+  group('Links', () {
     late Isar isar;
     late IsarCollection<LinkModelA> linksA;
     late IsarCollection<LinkModelB> linksB;
@@ -273,5 +273,5 @@ void main() {
         expect(newA1.selfLinks, {objA2, objA3});
       });
     });
-  });*/
+  });
 }

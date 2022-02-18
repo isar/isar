@@ -41,7 +41,7 @@ class LinkModelB {
 }
 
 void main() {
-  group('Groups', () {
+  /*group('Groups', () {
     late Isar isar;
     late IsarCollection<LinkModelA> colA;
     late IsarCollection<LinkModelB> colB;
@@ -203,5 +203,5 @@ void main() {
         {LinkModelB.name('modelB_1'), LinkModelB.name('modelB_2')},
       );
     });*/
-  });
+  });*/
 }
