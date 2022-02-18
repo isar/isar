@@ -114,32 +114,3 @@ jobs:
           dart pub run build_runner build
           dart test -p ${{ matrix.browser }}
         working-directory: packages/isar_test
-
-  test_multi:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v1
-        with:
-          channel: "stable"
-      - name: Run child1 isar_generator
-        run: |
-          dart pub get
-          dart pub run build_runner build
-        working-directory: packages/isar_test_multi/child_package1
-      - name: Run child2 isar_generator
-        run: |
-          dart pub get
-          dart pub run build_runner build
-        working-directory: packages/isar_test_multi/child_package2
-      - name: Run isar_generator
-        run: |
-          flutter pub get
-          flutter pub run build_runner build
-        working-directory: packages/isar_test_multi/root_package
-      - name: Download binaries
-        run: bash tool/setup_tests.sh
-        working-directory: packages/isar_test_multi/root_package
-      - name: Run tests
-        run: flutter test
-        working-directory: packages/isar_test_multi/root_package
