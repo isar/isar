@@ -11,14 +11,17 @@ class CollectionsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, state, _) {
-        return ListView.builder(itemBuilder: (context, index) {
-          final collection = state.collections.elementAt(index);
-                return _buildCollection(
-                  context,
-                  collection,
-                  state.selectedCollection == collection,
-                );
-        }, itemCount: state.collections.length,);
+        return ListView.builder(
+          itemBuilder: (context, index) {
+            final collection = state.collections.elementAt(index);
+            return _buildCollection(
+              context,
+              collection,
+              state.selectedCollection == collection,
+            );
+          },
+          itemCount: state.collections.length,
+        );
       },
     );
   }
