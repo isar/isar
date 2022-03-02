@@ -83,8 +83,8 @@ class AppState extends ChangeNotifier {
 
   int _subscriptionHandle = 0;
 
-  List<Map<String, Object>>? _objects;
-  List<Map<String, Object>>? get objects => _objects;
+  List<Map<String, Object?>>? _objects;
+  List<Map<String, Object?>>? get objects => _objects;
 
   FilterOperation _filter = const FilterGroup.or([]);
   FilterOperation get filter => _filter;
