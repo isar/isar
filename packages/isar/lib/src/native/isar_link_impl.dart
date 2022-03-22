@@ -58,7 +58,7 @@ class IsarLinkImpl<OBJ> extends IsarLinkCommon<OBJ> with IsarBaseMixin<OBJ> {
   @override
   void loadSync() {
     final containingId = requireAttached();
-    col.isar.getTxnSync(true, (txn) {
+    col.isar.getTxnSync(false, (txn) {
       final rawObjPtr = txn.allocRawObject();
       nCall(IC.isar_link_get_first(
           col.ptr, txn.ptr, linkIndex, isBacklink, containingId, rawObjPtr));
