@@ -94,7 +94,10 @@ Future<List<Map<String, dynamic>>> _executeQuery(Map<String, String> params) {
 StreamSubscription? _watchSubscription;
 
 Future<String> _watchQuery(Map<String, String> params) async {
-  unawaited(_watchSubscription?.cancel());
+  if (_watchSubscription != null) {
+    unawaited(_watchSubscription!.cancel());
+  }
+
   _watchSubscription = null;
   if (params['filter'] == null) return 'ok';
 
