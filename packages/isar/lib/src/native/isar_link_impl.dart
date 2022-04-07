@@ -15,7 +15,7 @@ mixin IsarBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   IsarCollectionImpl<OBJ> get targetCol =>
       super.targetCol as IsarCollectionImpl<OBJ>;
 
-  int get linkIndex => col.linkIds[linkName]!;
+  int get linkIndex => isBacklink ? col.backlinkIds[linkName]! : col.linkIds[linkName]!;
 
   @override
   Future<void> reset() async {
