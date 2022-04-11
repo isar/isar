@@ -210,7 +210,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   Future<int> put(
     OBJ object, {
     bool replaceOnConflict = false,
-    bool saveLinks = false,
+    bool saveLinks = true,
   }) {
     return putAll(
       [object],
@@ -222,7 +222,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   Future<List<int>> putAll(
     List<OBJ> objects, {
     bool replaceOnConflict = false,
-    bool saveLinks = false,
+    bool saveLinks = true,
   }) {
     return isar.getTxn(true, (txn) async {
       final rawObjSetPtr = txn.allocRawObjSet(objects.length);
@@ -251,9 +251,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
         if (getLinks != null) {
           adapter.attachLinks(isar, id, object);
-          for (var link in getLinks!(object)) {
-            if (link.isChanged) {
-              linkFutures.add(link.save());
+          if (saveLinks) {
+            for (var link in getLinks!(object)) {
+              if (link.isChanged) {
+                linkFutures.add(link.save());
+              }
             }
           }
         }
@@ -269,7 +271,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   int putSync(
     OBJ object, {
     bool replaceOnConflict = false,
-    bool saveLinks = false,
+    bool saveLinks = true,
   }) {
     return putAllSync(
       [object],
@@ -282,7 +284,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   List<int> putAllSync(
     List<OBJ> objects, {
     bool replaceOnConflict = false,
-    bool saveLinks = false,
+    bool saveLinks = true,
   }) {
     return isar.getTxnSync(true, (txn) {
       final rawObjPtr = txn.allocRawObject();
