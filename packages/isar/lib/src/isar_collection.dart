@@ -39,28 +39,28 @@ abstract class IsarCollection<OBJ> {
   Future<int> put(
     OBJ object, {
     bool replaceOnConflict = false,
-    bool saveLinks = false,
+    bool saveLinks = true,
   });
 
   /// Insert or update an [object] and returns the assigned id.
   int putSync(
     OBJ object, {
     bool replaceOnConflict = false,
-    bool saveLinks = false,
+    bool saveLinks = true,
   });
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
   Future<List<int>> putAll(
     List<OBJ> objects, {
     bool replaceOnConflict = false,
-    bool saveLinks = false,
+    bool saveLinks = true,
   });
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
   List<int> putAllSync(
     List<OBJ> objects, {
     bool replaceOnConflict = false,
-    bool saveLinks = false,
+    bool saveLinks = true,
   });
 
   /// Delete a single object by its [id].
