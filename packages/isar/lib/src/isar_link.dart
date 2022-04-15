@@ -9,6 +9,9 @@ abstract class IsarLinkBase<OBJ> {
   /// Have the contents been changed? If not, `.save()` is a no-op.
   bool get isChanged;
 
+  /// Is the containing object have been loaded?
+  bool get isLoaded;
+
   /// Loads the linked object(s) from the databse
   Future<void> load();
 
