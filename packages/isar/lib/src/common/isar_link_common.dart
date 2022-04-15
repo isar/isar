@@ -60,6 +60,7 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   set value(OBJ? value) {
     _isChanged |= !identical(_value, value);
     _value = value;
+    _isLoaded = true;
   }
 
   void applyLoaded(OBJ? object) {
@@ -72,6 +73,7 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
     if (identical(value, object)) {
       _isChanged = false;
     }
+    _isLoaded = true;
   }
 
   @override
@@ -108,6 +110,7 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   void applySaved(List<OBJ> added, List<OBJ> removed) {
     addedObjects.removeAll(added);
     removedObjects.removeAll(removed);
+    _isLoaded = true;
   }
 
   void clearChanges() {
