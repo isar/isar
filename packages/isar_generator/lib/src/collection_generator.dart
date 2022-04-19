@@ -9,6 +9,7 @@ import 'package:source_gen/source_gen.dart';
 import 'package:isar/isar.dart';
 
 import 'code_gen/by_index_generator.dart';
+import 'code_gen/query_link_generator.dart';
 import 'code_gen/type_adapter_generator_native.dart';
 import 'code_gen/query_distinct_by_generator.dart';
 import 'code_gen/query_filter_generator.dart';
@@ -43,7 +44,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
     final byIndexExtensions = generateByIndexExtension(object);
     final queryWhereExtensions = WhereGenerator(object).generate();
     final queryFilterExtensions = FilterGenerator(object).generate();
-    final queryLinkExtensions = ''; //generateQueryLinks(object);
+    final queryLinkExtensions = generateQueryLinks(object);
     final querySortByExtensions = generateSortBy(object);
     final queryDistinctByExtensions = generateDistinctBy(object);
     final propertyQueries = generatePropertyQuery(object);

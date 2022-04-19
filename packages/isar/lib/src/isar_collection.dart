@@ -5,6 +5,9 @@ abstract class IsarCollection<OBJ> {
   /// The corresponding Isar instance.
   Isar get isar;
 
+  /// The name of the collection.
+  String get name;
+
   /// Get a single object by its [id] or `null` if the object does not exist.
   Future<OBJ?> get(int id);
 
@@ -145,6 +148,12 @@ abstract class IsarCollection<OBJ> {
     int? limit,
     String? property,
   });
+
+  /// Returns the total number of objects in this collection
+  Future<int> count() => where().count();
+
+  /// Returns the total number of objects in this collection
+  int countSync() => where().countSync();
 
   /// Watch the collection for changes.
   Stream<void> watchLazy();

@@ -41,28 +41,26 @@ Future<Isar> openIsar({
   final IsarInstanceJs instance =
       await openIsarJs(name, schemasJs, relaxedDurability).wait();
   final isar = IsarImpl(name, schemaStr, instance);
-  final collections = <String, IsarCollection>{};
+  final cols = <Type, IsarCollection>{};
   for (var schema in schemas) {
     final col = instance.getCollection(schema.name);
-    collections[schema.name] = schema.toCollection(<OBJ>() {
+    schema.toCollection(<OBJ>() {
       schema as CollectionSchema<OBJ>;
-      final isComposite =
-          schema.indexTypes.map((name, e) => MapEntry(name, e.length != 1));
-      return IsarCollectionImpl<OBJ>(
+      final compositeIndexes = <String>{};
+      for (var indexName in schema.indexTypes.keys) {
+        if (schema.indexTypes[indexName]!.length > 1) {
+          compositeIndexes.add(indexName);
+        }
+      }
+      cols[OBJ] = IsarCollectionImpl<OBJ>(
         isar: isar,
-        col: col,
-        adapter: schema.webAdapter,
-        listProperties: schema.listProperties,
-        isCompositeIndex: isComposite,
-        idName: schema.idName,
-        getId: schema.getId,
-        setId: schema.setId,
-        getLinks: schema.getLinks,
+        native: col,
+        schema: schema,
       );
     });
   }
 
   // ignore: invalid_use_of_protected_member
-  isar.attachCollections(collections);
+  isar.attachCollections(cols);
   return isar;
 }

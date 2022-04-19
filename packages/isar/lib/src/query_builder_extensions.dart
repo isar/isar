@@ -116,7 +116,7 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
   Future<int> count() => build().count();
 
   /// {@macro query_count}
-  int? countSync() => build().countSync();
+  int countSync() => build().countSync();
 
   /// {@macro query_delete_first}
   Future<bool> deleteFirst() => build().deleteFirst();

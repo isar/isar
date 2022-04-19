@@ -1,3 +1,22 @@
+## 2.3.0
+
+### Enhancements
+
+- Support for querying links
+- Support for filtering and sorting links
+- Added methods to update and count links without loading them
+- Big internal improvements
+
+### Minor Breaking
+
+- There are now different kinds of where clauses for dynamic queries
+- `isar.getCollection()` no longer requires the name of the collection
+
+### Fixes
+
+- Fixed iOS crash that frequently happened on older devices
+- Fixed link issues
+
 ## 2.2.1
 
 ### Enhancements

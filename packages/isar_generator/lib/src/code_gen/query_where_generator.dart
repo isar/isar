@@ -7,23 +7,18 @@ import 'package:dartx/dartx.dart';
 class WhereGenerator {
   final ObjectInfo object;
   final String objName;
+  final ObjectProperty id;
   final existing = <String>{};
 
-  WhereGenerator(this.object) : objName = object.dartName;
+  WhereGenerator(this.object)
+      : objName = object.dartName,
+        id = object.idProperty;
 
   String generate() {
     var code =
         'extension ${objName}QueryWhereSort on QueryBuilder<$objName, $objName, QWhere> {';
 
-    final idIndexProps = [
-      ObjectIndexProperty(
-        property: object.idProperty,
-        type: IndexType.value,
-        caseSensitive: false,
-      )
-    ];
-
-    code += generateAny(null, idIndexProps);
+    code += generateAnyId();
     for (var index in object.indexes) {
       code += generateAny(index.name, index.properties);
     }
@@ -34,11 +29,11 @@ class WhereGenerator {
   extension ${objName}QueryWhere on QueryBuilder<$objName, $objName, QWhereClause> {
   ''';
 
-    code += generateWhereEqualTo(null, idIndexProps);
-    code += generateWhereNotEqualTo(null, idIndexProps);
-    code += generateWhereGreaterThan(null, idIndexProps);
-    code += generateWhereLessThan(null, idIndexProps);
-    code += generateWhereBetween(null, idIndexProps);
+    code += generateWhereIdEqualTo();
+    code += generateWhereIdNotEqualTo();
+    code += generateWhereIdGreaterThan();
+    code += generateWhereIdLessThan();
+    code += generateWhereIdBetween();
 
     for (var index in object.indexes) {
       for (var n = 0; n < index.properties.length; n++) {
@@ -131,15 +126,21 @@ class WhereGenerator {
     }).join(', ');
   }
 
-  String generateAny(String? indexName, List<ObjectIndexProperty> properties) {
+  String generateAnyId() {
+    return '''
+    QueryBuilder<$objName, $objName, QAfterWhere> any${id.dartName.capitalize()}() {
+      return addWhereClauseInternal(const IdWhereClause());
+    }
+    ''';
+  }
+
+  String generateAny(String indexName, List<ObjectIndexProperty> properties) {
     final name = 'any' + joinToName(properties, false).capitalize();
     if (!existing.add(name)) return '';
     return '''
     QueryBuilder<$objName, $objName, QAfterWhere> $name() {
       return addWhereClauseInternal(
-        const WhereClause(
-          indexName: ${indexName == null ? null : "'${indexName.esc}'"}
-        )
+        const IndexWhereClause(indexName: '${indexName.esc}')
       );
     }
     ''';
@@ -147,8 +148,22 @@ class WhereGenerator {
 
   String get mPrefix => 'QueryBuilder<$objName, $objName, QAfterWhereClause>';
 
+  String generateWhereIdEqualTo() {
+    final idName = id.dartName.decapitalize();
+    return '''
+    $mPrefix ${idName}EqualTo(${id.dartType} $idName) {
+      return addWhereClauseInternal(const IdWhereClause(
+        lower: $idName,
+        includeLower: true,
+        upper: $idName,
+        includeUpper: true,
+      ));
+    }
+    ''';
+  }
+
   String generateWhereEqualTo(
-      String? indexName, List<ObjectIndexProperty> properties) {
+      String indexName, List<ObjectIndexProperty> properties) {
     final name = joinToName(properties, false) + 'EqualTo';
     if (!existing.add(name)) return '';
 
@@ -156,8 +171,8 @@ class WhereGenerator {
     final params = joinToParams(properties);
     return '''
     $mPrefix $name($params) {
-      return addWhereClauseInternal(WhereClause(
-        indexName: ${indexName == null ? null : "'${indexName.esc}'"},
+      return addWhereClauseInternal(IndexWhereClause(
+        indexName: '${indexName.esc}',
         lower: [$values],
         includeLower: true,
         upper: [$values],
@@ -167,8 +182,29 @@ class WhereGenerator {
     ''';
   }
 
+  String generateWhereIdNotEqualTo() {
+    final idName = id.dartName.decapitalize();
+    return '''
+    $mPrefix ${idName}NotEqualTo(${id.dartType} $idName) {
+      if (whereSortInternal == Sort.asc) {
+        return addWhereClauseInternal(
+          const IdWhereClause(upper: $idName, includeUpper: false),
+        ).addWhereClauseInternal(
+          const IdWhereClause(lower: $idName, includeLower: false),
+        );
+      } else {
+        return addWhereClauseInternal(
+          const IdWhereClause(lower: $idName, includeLower: false),
+        ).addWhereClauseInternal(
+          const IdWhereClause(upper: $idName, includeUpper: false),
+        );
+      }
+    }
+    ''';
+  }
+
   String generateWhereNotEqualTo(
-      String? indexName, List<ObjectIndexProperty> properties) {
+      String indexName, List<ObjectIndexProperty> properties) {
     final name = joinToName(properties, false) + 'NotEqualTo';
     if (!existing.add(name)) return '';
 
@@ -177,22 +213,22 @@ class WhereGenerator {
     return '''
     $mPrefix $name($params) {
       if (whereSortInternal == Sort.asc) {
-        return addWhereClauseInternal(WhereClause(
-          indexName: ${indexName == null ? null : "'${indexName.esc}'"},
+        return addWhereClauseInternal(IndexWhereClause(
+          indexName: '${indexName.esc}',
           upper: [$values],
           includeUpper: false,
-        )).addWhereClauseInternal(WhereClause(
-          indexName: ${indexName == null ? null : "'${indexName.esc}'"},
+        )).addWhereClauseInternal(IndexWhereClause(
+          indexName: '${indexName.esc}',
           lower: [$values],
           includeLower: false,
         ));
       } else {
-        return addWhereClauseInternal(WhereClause(
-          indexName: ${indexName == null ? null : "'${indexName.esc}'"},
+        return addWhereClauseInternal(IndexWhereClause(
+          indexName: '${indexName.esc}',
           lower: [$values],
           includeLower: false,
-        )).addWhereClauseInternal(WhereClause(
-          indexName: ${indexName == null ? null : "'${indexName.esc}'"},
+        )).addWhereClauseInternal(IndexWhereClause(
+          indexName: '${indexName.esc}',
           upper: [$values],
           includeUpper: false,
         ));
@@ -201,8 +237,19 @@ class WhereGenerator {
     ''';
   }
 
+  String generateWhereIdGreaterThan() {
+    final idName = id.dartName.decapitalize();
+    return '''
+    $mPrefix ${idName}GreaterThan(${id.dartType} $idName, {bool include = false}) {
+      return addWhereClauseInternal(
+        const IdWhereClause(lower: $idName, includeLower: include),
+      );
+    }
+    ''';
+  }
+
   String generateWhereGreaterThan(
-      String? indexName, List<ObjectIndexProperty> properties) {
+      String indexName, List<ObjectIndexProperty> properties) {
     final name = joinToName(properties, true) + 'GreaterThan';
     if (!existing.add(name)) return '';
 
@@ -210,8 +257,8 @@ class WhereGenerator {
         !properties.containsFloat ? ', {bool include = false,}' : '';
     return '''
     $mPrefix $name(${joinToParams(properties)} $include) {
-      return addWhereClauseInternal(WhereClause(
-        indexName: ${indexName == null ? null : "'${indexName.esc}'"},
+      return addWhereClauseInternal(IndexWhereClause(
+        indexName: '${indexName.esc}',
         lower: [${joinToValues(properties)}],
         includeLower: ${!properties.containsFloat ? 'include' : 'false'},
       ));
@@ -219,8 +266,19 @@ class WhereGenerator {
     ''';
   }
 
+  String generateWhereIdLessThan() {
+    final idName = id.dartName.decapitalize();
+    return '''
+    $mPrefix ${idName}LessThan(${id.dartType} $idName, {bool include = false}) {
+      return addWhereClauseInternal(
+        const IdWhereClause(upper: $idName, includeUpper: include),
+      );
+    }
+    ''';
+  }
+
   String generateWhereLessThan(
-      String? indexName, List<ObjectIndexProperty> properties) {
+      String indexName, List<ObjectIndexProperty> properties) {
     final name = joinToName(properties, true) + 'LessThan';
     if (!existing.add(name)) return '';
 
@@ -228,8 +286,8 @@ class WhereGenerator {
         !properties.containsFloat ? ', {bool include = false,}' : '';
     return '''
     $mPrefix $name(${joinToParams(properties)} $include) {
-      return addWhereClauseInternal(WhereClause(
-        indexName: ${indexName == null ? null : "'${indexName.esc}'"},
+      return addWhereClauseInternal(IndexWhereClause(
+        indexName: '${indexName.esc}',
         upper: [${joinToValues(properties)}],
         includeUpper: ${!properties.containsFloat ? 'include' : 'false'},
       ));
@@ -237,8 +295,24 @@ class WhereGenerator {
     ''';
   }
 
+  String generateWhereIdBetween() {
+    final idName = id.dartName.decapitalize();
+    final lowerName = 'lower${id.dartName.capitalize()}';
+    final upperName = 'upper${id.dartName.capitalize()}';
+    return '''
+    $mPrefix ${idName}Between(${id.dartType} $idName {bool includeLower = true, bool includeUpper = true,}) {
+      return addWhereClauseInternal(const IdWhereClause(
+        lower: $lowerName,
+        includeLower: 'includeLower',
+        upper: $upperName],
+        includeUpper: 'includeUpper',
+      ));
+    }
+  ''';
+  }
+
   String generateWhereBetween(
-      String? indexName, List<ObjectIndexProperty> properties) {
+      String indexName, List<ObjectIndexProperty> properties) {
     final firstPs = properties.sublist(0, properties.length - 1);
     final lastP = properties.last;
     final name = joinToName(properties, true) + 'Between';
@@ -263,8 +337,8 @@ class WhereGenerator {
         : '';
     return '''
     $mPrefix $name($params $include) {
-      return addWhereClauseInternal(WhereClause(
-        indexName: ${indexName == null ? null : "'${indexName.esc}'"},
+      return addWhereClauseInternal(IndexWhereClause(
+        indexName: '${indexName.esc}',
         lower: [$values $lowerName],
         includeLower: ${!properties.containsFloat ? 'includeLower' : 'false'},
         upper: [$values $upperName],
@@ -281,7 +355,7 @@ class WhereGenerator {
 
     return '''
     $mPrefix $name() {
-      return addWhereClauseInternal(const WhereClause(
+      return addWhereClauseInternal(const IndexWhereClause(
         indexName: '${indexName.esc}',
         upper: [null],
         includeUpper: true,
@@ -299,7 +373,7 @@ class WhereGenerator {
 
     return '''
     $mPrefix $name() {
-      return addWhereClauseInternal(const WhereClause(
+      return addWhereClauseInternal(const IndexWhereClause(
         indexName: '${indexName.esc}',
         lower: [null],
         includeLower: false,
@@ -328,7 +402,7 @@ class WhereGenerator {
 
     return '''
     $mPrefix $name($params) {
-      return addWhereClauseInternal(WhereClause(
+      return addWhereClauseInternal(IndexWhereClause(
         indexName: '${indexName.esc}',
         lower: [$values $lastName],
         includeLower: true,

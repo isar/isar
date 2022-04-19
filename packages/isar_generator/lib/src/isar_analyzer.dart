@@ -44,6 +44,13 @@ class IsarAnalyzer {
         properties.add(property);
       }
     }
+    if (properties.map((e) => e.isarName).distinct().length !=
+        properties.length) {
+      err('Two or more properties have the same name.', modelClass);
+    }
+    if (links.map((e) => e.isarName).distinct().length != links.length) {
+      err('Two or more links have the same name.', modelClass);
+    }
 
     final indexes = <ObjectIndex>[];
     for (var propertyElement in modelClass.allAccessors) {

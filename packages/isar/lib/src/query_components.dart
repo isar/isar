@@ -1,9 +1,51 @@
+// ignore_for_file: prefer_initializing_formals
+
 part of isar;
 
-/// Create a where clause dynamically.
-class WhereClause {
-  /// THe Isar name of the index to be used.
-  final String? indexName;
+abstract class WhereClause {
+  const WhereClause();
+}
+
+/// A where clause traversing the primary index (ids).
+class IdWhereClause extends WhereClause {
+  /// The lower bound id or `null` for unbounded.
+  final int? lower;
+
+  /// Whether the lower bound should be included in the results.
+  final bool includeLower;
+
+  /// The upper bound id or `null` for unbounded.
+  final int? upper;
+
+  /// Whether the upper bound should be included in the results.
+  final bool includeUpper;
+
+  const IdWhereClause.greaterThan({
+    required int lower,
+    this.includeLower = true,
+  })  : lower = lower,
+        upper = null,
+        includeUpper = true;
+
+  const IdWhereClause.lessThan({
+    required int upper,
+    this.includeUpper = true,
+  })  : upper = upper,
+        lower = null,
+        includeLower = true;
+
+  const IdWhereClause.between({
+    this.lower,
+    this.includeLower = true,
+    this.upper,
+    this.includeUpper = true,
+  });
+}
+
+/// A where clause traversing an index.
+class IndexWhereClause extends WhereClause {
+  /// The Isar name of the index to be used.
+  final String indexName;
 
   /// The lower bound of the where clause.
   final List<Object?>? lower;
@@ -19,12 +61,42 @@ class WhereClause {
   /// are never included.
   final bool includeUpper;
 
-  const WhereClause({
-    this.indexName,
+  const IndexWhereClause.greaterThan({
+    required this.indexName,
+    required List<Object?> lower,
+    this.includeLower = true,
+  })  : lower = lower,
+        upper = null,
+        includeUpper = true;
+
+  const IndexWhereClause.lessThan({
+    required this.indexName,
+    required List<Object?> upper,
+    this.includeUpper = true,
+  })  : upper = upper,
+        lower = null,
+        includeLower = true;
+
+  const IndexWhereClause.between({
+    required this.indexName,
     this.lower,
     this.includeLower = true,
     this.upper,
     this.includeUpper = true,
+  });
+}
+
+/// A where clause traversing objects linked to the specified object.
+class LinkWhereClause extends WhereClause {
+  /// The isar name of the link to be used.
+  final String linkName;
+
+  /// The id of the source object.
+  final int id;
+
+  const LinkWhereClause({
+    required this.linkName,
+    required this.id,
   });
 }
 
@@ -114,10 +186,13 @@ class FilterGroup extends FilterOperation {
   /// Type of this group.
   final FilterGroupType type;
 
+  /// Create a logical AND filter group.
   const FilterGroup.and(this.filters) : type = FilterGroupType.and;
 
+  /// Create a logical OR filter group.
   const FilterGroup.or(this.filters) : type = FilterGroupType.or;
 
+  /// Negate a filter.
   FilterGroup.not(FilterOperation filter)
       : filters = [filter],
         type = FilterGroupType.not;
@@ -153,9 +228,6 @@ class DistinctProperty {
 
 /// Filter condition based on a link.
 class LinkFilter extends FilterOperation {
-  /// Isar name of the target collection of the link.
-  final IsarCollection targetCollection;
-
   /// Filter condition that should be applied
   final FilterOperation filter;
 
@@ -163,7 +235,6 @@ class LinkFilter extends FilterOperation {
   final String linkName;
 
   const LinkFilter({
-    required this.targetCollection,
     required this.filter,
     required this.linkName,
   });

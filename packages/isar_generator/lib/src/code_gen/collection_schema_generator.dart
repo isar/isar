@@ -23,12 +23,12 @@ String generateCollectionSchema(ObjectInfo object) {
           "'${i.name.esc}': [${i.properties.map((e) => e.indexTypeEnum).join(',')},]")
       .join(',');
   final linkIds = object.links
-      .where((l) => !l.backlink)
+      .where((e) => !e.backlink)
       .mapIndexed((i, link) => "'${link.isarName.esc}': $i")
       .join(',');
-  final backlinkIds = object.links
-      .where((l) => l.backlink)
-      .mapIndexed((i, link) => "'${link.isarName.esc}': $i")
+  final backlinkCollections = object.links
+      .where((e) => e.backlink)
+      .map((link) => "'${link.isarName.esc}': ${link.targetCollectionIsarName}")
       .join(',');
   final linkedCollections = object.links
       .map((e) => "'${e.targetCollectionIsarName.esc}'")
@@ -50,7 +50,6 @@ String generateCollectionSchema(ObjectInfo object) {
       indexIds: {$indexIds},
       indexTypes: {$indexTypes},
       linkIds: {$linkIds},
-      backlinkIds: {$backlinkIds},
       linkedCollections: [$linkedCollections],
       getId: (obj) {
         if (obj.${object.idProperty.dartName} == Isar.autoIncrement) {

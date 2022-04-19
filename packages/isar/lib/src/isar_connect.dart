@@ -1,8 +1,4 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:developer';
-
-import 'package:isar/isar.dart';
+part of isar;
 
 const _handlers = {
   'getVersion': _getVersion,
@@ -13,15 +9,7 @@ const _handlers = {
 };
 
 var _initialized = false;
-
-void initializeIsarConnect() {
-  assert(() {
-    _connectInternal();
-    return true;
-  }());
-}
-
-void _connectInternal() {
+void _initializeIsarConnect() {
   if (_initialized) return;
   _initialized = true;
 
@@ -112,7 +100,7 @@ Query _getQuery(Map<String, String> params) {
   final instanceName = params['instance'] as String;
   final collectionName = params['collection'] as String;
   final collection =
-      Isar.getInstance(instanceName)!.getCollection(collectionName);
+      Isar.getInstance(instanceName)!.getCollectionByName(collectionName)!;
   final offset = int.tryParse(params['offset'] ?? '');
   final limit = int.tryParse(params['limit'] ?? '');
   final sortProperty = params['sortProperty'];

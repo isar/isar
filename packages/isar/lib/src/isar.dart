@@ -28,7 +28,7 @@ abstract class Isar {
   /// Name of the instance.
   final String name;
 
-  late final Map<String, IsarCollection> _collections;
+  late final Map<Type, IsarCollection> _collections;
 
   var _isOpen = true;
 
@@ -59,7 +59,11 @@ abstract class Isar {
       if (schemas.indexWhere((e) => e.name == schema.name) != i) {
         throw IsarError('Duplicate collection ${schema.name}.');
       }
-      for (var linkedCol in schema.linkedCollections) {
+      final linkedCols = [
+        ...schema.linkTargetCollections.values,
+        ...schema.backlinkSourceCollections.values
+      ];
+      for (var linkedCol in linkedCols) {
         if (!schemas.any((e) => e.name == linkedCol)) {
           throw IsarError(
               'Linked collection "$linkedCol" is not part of the schema.');
@@ -78,7 +82,10 @@ abstract class Isar {
     bool inspector = false,
   }) {
     if (inspector) {
-      initializeIsarConnect();
+      assert(() {
+        _initializeIsarConnect();
+        return true;
+      }());
     }
     _checkOpen(name, schemas);
     return IsarNative.open(
@@ -98,7 +105,10 @@ abstract class Isar {
     bool inspector = false,
   }) {
     if (inspector) {
-      initializeIsarConnect();
+      assert(() {
+        _initializeIsarConnect();
+        return true;
+      }());
     }
     _checkOpen(name, schemas);
     return IsarNative.openSync(
@@ -135,21 +145,16 @@ abstract class Isar {
 
   /// @nodoc
   @protected
-  void attachCollections(Map<String, IsarCollection> collections) {
+  void attachCollections(Map<Type, IsarCollection> collections) {
     _collections = collections;
   }
 
-  /// Get a collection by its name.
+  /// Get a collection by its type.
   ///
   /// You should use the generated extension methods instead.
-  IsarCollection<T> getCollection<T>(String name) {
+  IsarCollection<T> getCollection<T>() {
     requireOpen();
-    final collection = _collections[name];
-    if (collection is IsarCollection<T>) {
-      return collection;
-    } else {
-      throw 'Unknown collection or invalid type. Make sure that you opened the collection.';
-    }
+    return _collections[T] as IsarCollection<T>;
   }
 
   /// @nodoc

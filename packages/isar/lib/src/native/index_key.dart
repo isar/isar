@@ -5,14 +5,13 @@ import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
 import 'isar_core.dart';
-import 'isar_collection_impl.dart';
 import 'query_build.dart';
 
 final _keyPtrPtr = malloc<Pointer>();
 
 Pointer<NativeType> buildIndexKey(
-    IsarCollectionImpl col, String indexName, List<Object?> values) {
-  final types = col.indexTypes[indexName]!;
+    CollectionSchema schema, String indexName, List<Object?> values) {
+  final types = schema.indexTypeOrErr(indexName);
   if (values.length > types.length) {
     throw 'Invalid values for index $indexName';
   }
@@ -27,12 +26,12 @@ Pointer<NativeType> buildIndexKey(
   return keyPtr;
 }
 
-Pointer<NativeType> buildLowerUnboundedIndexKey(IsarCollectionImpl col) {
+Pointer<NativeType> buildLowerUnboundedIndexKey() {
   IC.isar_key_create(_keyPtrPtr);
   return _keyPtrPtr.value;
 }
 
-Pointer<NativeType> buildUpperUnboundedIndexKey(IsarCollectionImpl col) {
+Pointer<NativeType> buildUpperUnboundedIndexKey() {
   IC.isar_key_create(_keyPtrPtr);
   final keyPtr = _keyPtrPtr.value;
   IC.isar_key_add_long(keyPtr, maxLong);
