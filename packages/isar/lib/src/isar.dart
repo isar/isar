@@ -29,6 +29,7 @@ abstract class Isar {
   final String name;
 
   late final Map<Type, IsarCollection> _collections;
+  late final Map<String, IsarCollection> _collectionsByName;
 
   var _isOpen = true;
 
@@ -147,6 +148,9 @@ abstract class Isar {
   @protected
   void attachCollections(Map<Type, IsarCollection> collections) {
     _collections = collections;
+    _collectionsByName = {
+      for (var col in collections.values) col.name: col,
+    };
   }
 
   /// Get a collection by its type.
@@ -160,7 +164,7 @@ abstract class Isar {
   /// @nodoc
   @protected
   IsarCollection? getCollectionInternal(String name) {
-    return _collections[name];
+    return _collectionsByName[name];
   }
 
   /// Remove all data in this instance and reset the auto increment values.
@@ -204,7 +208,7 @@ abstract class Isar {
   static String? get schema => _schema;
 
   /// A list of all Isar instances opened in the current isolate.
-  static List<String> get instanceNames => _instances.keys.toList();
+  static Set<String> get instanceNames => _instances.keys.toSet();
 
   /// Returns an Isar instance opened in the current isolate by its name. If
   /// no name is provided, the default instane is returned.

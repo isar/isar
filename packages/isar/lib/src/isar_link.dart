@@ -9,6 +9,9 @@ abstract class IsarLinkBase<OBJ> {
   /// Have the contents been changed? If not, `.save()` is a no-op.
   bool get isChanged;
 
+  /// Has this link been loaded?
+  bool get isLoaded;
+
   /// Loads the linked object(s) from the databse
   Future<void> load();
 
@@ -39,7 +42,7 @@ abstract class IsarLinkBase<OBJ> {
 
   /// @nodoc
   @protected
-  void attach(IsarCollection<OBJ> collection, String linkName, int? objectId);
+  void attach(IsarCollection collection, String linkName, int? objectId);
 }
 
 /// Establishes a 1:1 relationship with the same or another collection. The

@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'dart:developer';
 import 'dart:async';
 
-import 'package:isar/src/web/bindings.dart';
 import 'package:meta/meta.dart';
 import 'package:meta/meta_meta.dart';
 
@@ -40,4 +39,4 @@ typedef IsarUint8List = Uint8List;
 
 /// @nodoc
 @protected
-const isarWebVersion = '2.2.1';
+const isarWebVersion = '2.3.0';

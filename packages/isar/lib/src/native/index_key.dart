@@ -11,7 +11,7 @@ final _keyPtrPtr = malloc<Pointer>();
 
 Pointer<NativeType> buildIndexKey(
     CollectionSchema schema, String indexName, List<Object?> values) {
-  final types = schema.indexTypeOrErr(indexName);
+  final types = schema.indexValueTypeOrErr(indexName);
   if (values.length > types.length) {
     throw 'Invalid values for index $indexName';
   }
@@ -40,42 +40,42 @@ Pointer<NativeType> buildUpperUnboundedIndexKey() {
 }
 
 void _addKeyValue(
-    Pointer<NativeType> keyPtr, Object? value, NativeIndexType type) {
+    Pointer<NativeType> keyPtr, Object? value, IndexValueType type) {
   if (value is DateTime) {
     value = value.toUtc().microsecondsSinceEpoch;
   } else if (value is List<DateTime?>) {
     value = value.map((e) => e?.toUtc().microsecondsSinceEpoch);
   }
   switch (type) {
-    case NativeIndexType.bool:
+    case IndexValueType.bool:
       IC.isar_key_add_byte(keyPtr, boolToByte(value as bool?));
       break;
-    case NativeIndexType.int:
+    case IndexValueType.int:
       IC.isar_key_add_int(keyPtr, (value as int?) ?? nullInt);
       break;
-    case NativeIndexType.float:
+    case IndexValueType.float:
       IC.isar_key_add_float(keyPtr, (value as double?) ?? nullFloat);
       break;
-    case NativeIndexType.long:
+    case IndexValueType.long:
       IC.isar_key_add_long(keyPtr, (value as int?) ?? nullLong);
       break;
-    case NativeIndexType.double:
+    case IndexValueType.double:
       IC.isar_key_add_double(keyPtr, (value as double?) ?? nullDouble);
       break;
-    case NativeIndexType.string:
-    case NativeIndexType.stringCIS:
+    case IndexValueType.string:
+    case IndexValueType.stringCIS:
       final strPtr = _strToNative(value as String?);
-      IC.isar_key_add_string(keyPtr, strPtr, type == NativeIndexType.string);
+      IC.isar_key_add_string(keyPtr, strPtr, type == IndexValueType.string);
       _freeStr(strPtr);
       break;
-    case NativeIndexType.stringHash:
-    case NativeIndexType.stringHashCIS:
+    case IndexValueType.stringHash:
+    case IndexValueType.stringHashCIS:
       final strPtr = _strToNative(value as String?);
       IC.isar_key_add_string_hash(
-          keyPtr, strPtr, type == NativeIndexType.stringHash);
+          keyPtr, strPtr, type == IndexValueType.stringHash);
       _freeStr(strPtr);
       break;
-    case NativeIndexType.bytesHash:
+    case IndexValueType.bytesHash:
       if (value == null) {
         IC.isar_key_add_byte_list_hash(keyPtr, nullptr, 0);
       } else {
@@ -86,7 +86,7 @@ void _addKeyValue(
         malloc.free(bytesPtr);
       }
       break;
-    case NativeIndexType.boolListHash:
+    case IndexValueType.boolListHash:
       if (value == null) {
         IC.isar_key_add_byte_list_hash(keyPtr, nullptr, 0);
       } else {
@@ -97,7 +97,7 @@ void _addKeyValue(
         malloc.free(boolListPtr);
       }
       break;
-    case NativeIndexType.intListHash:
+    case IndexValueType.intListHash:
       if (value == null) {
         IC.isar_key_add_int_list_hash(keyPtr, nullptr, 0);
       } else {
@@ -110,7 +110,7 @@ void _addKeyValue(
         malloc.free(intListPtr);
       }
       break;
-    case NativeIndexType.longListHash:
+    case IndexValueType.longListHash:
       if (value == null) {
         IC.isar_key_add_long_list_hash(keyPtr, nullptr, 0);
       } else {
@@ -123,8 +123,8 @@ void _addKeyValue(
         malloc.free(longListPtr);
       }
       break;
-    case NativeIndexType.stringListHash:
-    case NativeIndexType.stringListHashCIS:
+    case IndexValueType.stringListHash:
+    case IndexValueType.stringListHashCIS:
       if (value == null) {
         IC.isar_key_add_string_list_hash(keyPtr, nullptr, 0, false);
       } else {
@@ -134,7 +134,7 @@ void _addKeyValue(
           stringListPtr[i] = _strToNative(value[i]);
         }
         IC.isar_key_add_string_list_hash(keyPtr, stringListPtr, value.length,
-            type == NativeIndexType.stringListHash);
+            type == IndexValueType.stringListHash);
         for (var i = 0; i < value.length; i++) {
           _freeStr(stringListPtr[i]);
         }

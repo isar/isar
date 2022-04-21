@@ -7,15 +7,15 @@ import 'isar_core.dart';
 
 mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   @override
-  IsarCollectionImpl? get sourceCollection =>
-      super.sourceCollection as IsarCollectionImpl?;
+  IsarCollectionImpl get sourceCollection =>
+      super.sourceCollection as IsarCollectionImpl;
 
   @override
-  late final IsarCollectionImpl<OBJ> targetCollection = sourceCollection!.schema
-          .linkColOrErr(sourceCollection!.isar, linkName, false)
+  late final IsarCollectionImpl<OBJ> targetCollection = sourceCollection.schema
+          .linkColOrErr(sourceCollection.isar, linkName, false)
       as IsarCollectionImpl<OBJ>;
 
-  late final linkIndex = sourceCollection!.schema.linkIdOrErr(linkName);
+  late final linkIndex = sourceCollection.schema.linkIdOrErr(linkName);
 
   @override
   late final getId = targetCollection.schema.getId;
@@ -32,7 +32,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
       ids.setAll(0, linkIds);
       ids.setAll(linkIds.length, unlinkIds);
 
-      IC.isar_link_update_all(sourceCollection!.ptr, txn.ptr, linkIndex,
+      IC.isar_link_update_all(sourceCollection.ptr, txn.ptr, linkIndex,
           containingId, idsPtr, linkIds.length, unlinkIds.length, reset);
       return txn.wait();
     });
@@ -42,7 +42,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   void updateIdsInternalSync(
       List<int> linkIds, List<int> unlinkIds, bool reset) {
     final containingId = requireAttached();
-    final sourceCol = sourceCollection!;
+    final sourceCol = sourceCollection;
     sourceCol.isar.getTxnSync(true, (txn) {
       for (var linkId in linkIds) {
         nCall(IC.isar_link(

@@ -3,7 +3,7 @@
 part of isar;
 
 abstract class WhereClause {
-  const WhereClause();
+  const WhereClause._();
 }
 
 /// A where clause traversing the primary index (ids).
@@ -20,26 +20,43 @@ class IdWhereClause extends WhereClause {
   /// Whether the upper bound should be included in the results.
   final bool includeUpper;
 
+  const IdWhereClause.any()
+      : lower = null,
+        upper = null,
+        includeLower = true,
+        includeUpper = true,
+        super._();
+
   const IdWhereClause.greaterThan({
     required int lower,
     this.includeLower = true,
   })  : lower = lower,
         upper = null,
-        includeUpper = true;
+        includeUpper = true,
+        super._();
 
   const IdWhereClause.lessThan({
     required int upper,
     this.includeUpper = true,
   })  : upper = upper,
         lower = null,
-        includeLower = true;
+        includeLower = true,
+        super._();
+
+  const IdWhereClause.equalTo({
+    required int value,
+  })  : lower = value,
+        upper = value,
+        includeLower = true,
+        includeUpper = true,
+        super._();
 
   const IdWhereClause.between({
     this.lower,
     this.includeLower = true,
     this.upper,
     this.includeUpper = true,
-  });
+  }) : super._();
 }
 
 /// A where clause traversing an index.
@@ -61,13 +78,21 @@ class IndexWhereClause extends WhereClause {
   /// are never included.
   final bool includeUpper;
 
+  const IndexWhereClause.any({required this.indexName})
+      : lower = null,
+        upper = null,
+        includeLower = true,
+        includeUpper = true,
+        super._();
+
   const IndexWhereClause.greaterThan({
     required this.indexName,
     required List<Object?> lower,
     this.includeLower = true,
   })  : lower = lower,
         upper = null,
-        includeUpper = true;
+        includeUpper = true,
+        super._();
 
   const IndexWhereClause.lessThan({
     required this.indexName,
@@ -75,7 +100,17 @@ class IndexWhereClause extends WhereClause {
     this.includeUpper = true,
   })  : upper = upper,
         lower = null,
-        includeLower = true;
+        includeLower = true,
+        super._();
+
+  const IndexWhereClause.equalTo({
+    required this.indexName,
+    required List<Object?> value,
+  })  : lower = value,
+        upper = value,
+        includeLower = true,
+        includeUpper = true,
+        super._();
 
   const IndexWhereClause.between({
     required this.indexName,
@@ -83,11 +118,14 @@ class IndexWhereClause extends WhereClause {
     this.includeLower = true,
     this.upper,
     this.includeUpper = true,
-  });
+  }) : super._();
 }
 
 /// A where clause traversing objects linked to the specified object.
 class LinkWhereClause extends WhereClause {
+  /// The name of the collection containing the link
+  final String collectionName;
+
   /// The isar name of the link to be used.
   final String linkName;
 
@@ -95,9 +133,10 @@ class LinkWhereClause extends WhereClause {
   final int id;
 
   const LinkWhereClause({
+    required this.collectionName,
     required this.linkName,
     required this.id,
-  });
+  }) : super._();
 }
 
 /// @nodoc

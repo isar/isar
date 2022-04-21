@@ -32,9 +32,22 @@ class ObjectInfo with _$ObjectInfo {
   List<ObjectProperty> get objectProperties =>
       properties.where((p) => !p.isId).toList();
 
-  String get nativeAdapterName => '_${dartName}NativeAdapter';
+  String get getIdName => '_${dartName.decapitalize()}GetId';
+  String get setIdName => '_${dartName.decapitalize()}SetId';
+  String get getLinksName => '_${dartName.decapitalize()}GetLinks';
+  String get attachLinksName => '_${dartName.decapitalize()}AttachLinks';
 
-  String get webAdapterName => '_${dartName}WebAdapter';
+  String get serializeNativeName =>
+      '_${dartName.decapitalize()}SerializeNative';
+  String get deserializeNativeName =>
+      '_${dartName.decapitalize()}DeserializeNative';
+  String get deserializePropNativeName =>
+      '_${dartName.decapitalize()}DeserializePropNative';
+
+  String get serializeWebName => '_${dartName.decapitalize()}SerializeWeb';
+  String get deserializeWebName => '_${dartName.decapitalize()}DeserializeWeb';
+  String get deserializePropWebName =>
+      '_${dartName.decapitalize()}DeserializePropWeb';
 }
 
 enum PropertyDeser {
@@ -102,73 +115,73 @@ class ObjectIndexProperty with _$ObjectIndexProperty {
 
   IsarType get scalarType => property.isarType.scalarType;
 
-  String get indexTypeEnum {
+  String get indexValueTypeEnum {
     switch (property.isarType) {
       case IsarType.bool:
-        return 'NativeIndexType.bool';
+        return 'IndexValueType.bool';
       case IsarType.int:
-        return 'NativeIndexType.int';
+        return 'IndexValueType.int';
       case IsarType.float:
-        return 'NativeIndexType.float';
+        return 'IndexValueType.float';
       case IsarType.long:
       case IsarType.dateTime:
-        return 'NativeIndexType.long';
+        return 'IndexValueType.long';
       case IsarType.double:
-        return 'NativeIndexType.double';
+        return 'IndexValueType.double';
       case IsarType.string:
         if (caseSensitive) {
           return type == IndexType.hash
-              ? 'NativeIndexType.stringHash'
-              : 'NativeIndexType.string';
+              ? 'IndexValueType.stringHash'
+              : 'IndexValueType.string';
         } else {
           return type == IndexType.hash
-              ? 'NativeIndexType.stringHashCIS'
-              : 'NativeIndexType.stringCIS';
+              ? 'IndexValueType.stringHashCIS'
+              : 'IndexValueType.stringCIS';
         }
       case IsarType.bytes:
         assert(type == IndexType.hash);
-        return 'NativeIndexType.bytesHash';
+        return 'IndexValueType.bytesHash';
       case IsarType.boolList:
         if (type == IndexType.hash) {
-          return 'NativeIndexType.boolListHash';
+          return 'IndexValueType.boolListHash';
         } else {
-          return 'NativeIndexType.bool';
+          return 'IndexValueType.bool';
         }
       case IsarType.intList:
         if (type == IndexType.hash) {
-          return 'NativeIndexType.intListHash';
+          return 'IndexValueType.intListHash';
         } else {
-          return 'NativeIndexType.int';
+          return 'IndexValueType.int';
         }
       case IsarType.floatList:
         assert(type == IndexType.value);
-        return 'NativeIndexType.float';
+        return 'IndexValueType.float';
       case IsarType.longList:
       case IsarType.dateTimeList:
         if (type == IndexType.hash) {
-          return 'NativeIndexType.longListHash';
+          return 'IndexValueType.longListHash';
         } else {
-          return 'NativeIndexType.long';
+          return 'IndexValueType.long';
         }
       case IsarType.doubleList:
         assert(type == IndexType.value);
-        return 'NativeIndexType.double';
+        return 'IndexValueType.double';
       case IsarType.stringList:
         if (caseSensitive) {
           if (type == IndexType.hash) {
-            return 'NativeIndexType.stringListHash';
+            return 'IndexValueType.stringListHash';
           } else if (type == IndexType.hashElements) {
-            return 'NativeIndexType.stringHash';
+            return 'IndexValueType.stringHash';
           } else {
-            return 'NativeIndexType.string';
+            return 'IndexValueType.string';
           }
         } else {
           if (type == IndexType.hash) {
-            return 'NativeIndexType.stringListHashCIS';
+            return 'IndexValueType.stringListHashCIS';
           } else if (type == IndexType.hashElements) {
-            return 'NativeIndexType.stringHashCIS';
+            return 'IndexValueType.stringHashCIS';
           } else {
-            return 'NativeIndexType.stringCIS';
+            return 'IndexValueType.stringCIS';
           }
         }
     }

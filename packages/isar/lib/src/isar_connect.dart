@@ -100,7 +100,7 @@ Query _getQuery(Map<String, String> params) {
   final instanceName = params['instance'] as String;
   final collectionName = params['collection'] as String;
   final collection =
-      Isar.getInstance(instanceName)!.getCollectionByName(collectionName)!;
+      Isar.getInstance(instanceName)!.getCollectionInternal(collectionName)!;
   final offset = int.tryParse(params['offset'] ?? '');
   final limit = int.tryParse(params['limit'] ?? '');
   final sortProperty = params['sortProperty'];

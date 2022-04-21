@@ -4,24 +4,9 @@ import 'package:isar_generator/src/object_info.dart';
 
 import 'type_adapter_generator_common.dart';
 
-String generateWebTypeAdapter(ObjectInfo object) {
-  return '''
-    class ${object.webAdapterName} extends IsarWebTypeAdapter<${object.dartName}> {
-
-      const ${object.webAdapterName}();
-
-      ${_generateSerialize(object)}
-      ${_generateDeserialize(object)}
-      ${_generateDeserializeProperty(object)}
-      ${generateAttachLinks(object)}
-    }
-    ''';
-}
-
-String _generateSerialize(ObjectInfo object) {
+String generateSerializeWeb(ObjectInfo object) {
   var code = '''
-  @override  
-  Object serialize(IsarCollection<${object.dartName}> collection, ${object.dartName} object) {
+  dynamic ${object.serializeWebName}(IsarCollection<${object.dartName}> collection, ${object.dartName} object) {
     final jsObj = IsarNative.newJsObject();''';
 
   for (var property in object.properties) {
@@ -50,17 +35,16 @@ String _generateSerialize(ObjectInfo object) {
   return '$code}';
 }
 
-String _generateDeserialize(ObjectInfo object) {
+String generateDeserializeWeb(ObjectInfo object) {
   String deserProp(ObjectProperty p) => _deserializeProperty(object, p);
 
   var code = '''
-  @override  
-  ${object.dartName} deserialize(IsarCollection<${object.dartName}> collection, dynamic jsObj) {
+  ${object.dartName} ${object.deserializeWebName}(IsarCollection<${object.dartName}> collection, dynamic jsObj) {
     ${deserializeMethodBody(object, deserProp)}''';
 
   if (object.links.isNotEmpty) {
     final deserId = deserProp(object.idProperty);
-    code += 'attachLinks(collection.isar, $deserId, object);';
+    code += '${object.attachLinksName}(collection, $deserId, object);';
   }
 
   return '''$code
@@ -68,10 +52,9 @@ String _generateDeserialize(ObjectInfo object) {
   }''';
 }
 
-String _generateDeserializeProperty(ObjectInfo object) {
+String generateDeserializePropWeb(ObjectInfo object) {
   var code = '''
-  @override
-  P deserializeProperty<P>(Object jsObj, String propertyName) {
+  P ${object.deserializePropWebName}<P>(Object jsObj, String propertyName) {
     switch (propertyName) {''';
 
   for (var property in object.properties) {

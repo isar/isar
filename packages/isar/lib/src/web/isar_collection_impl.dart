@@ -98,11 +98,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return isar.getTxn(true, (txn) async {
       final serialized = schema.serializeWeb(this, object);
       final id = await native.put(txn, serialized, replaceOnConflict).wait();
-      schema.setId(object, id);
+      schema.setId?.call(object, id);
 
       final linkFutures = <Future>[];
       if (schema.hasLinks) {
-        schema.attachLinks(isar, id, object);
+        schema.attachLinks(this, id, object);
         if (saveLinks) {
           for (var link in schema.getLinks(object)) {
             if (link.isChanged) {
@@ -136,10 +136,10 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       for (var i = 0; i < objects.length; i++) {
         final object = objects[i];
         final id = ids[i];
-        schema.setId(object, id);
+        schema.setId?.call(object, id);
 
         if (schema.hasLinks) {
-          schema.attachLinks(isar, id, object);
+          schema.attachLinks(this, id, object);
           if (saveLinks) {
             for (var link in schema.getLinks(object)) {
               if (link.isChanged) {

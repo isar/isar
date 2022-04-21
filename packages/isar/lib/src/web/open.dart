@@ -47,8 +47,8 @@ Future<Isar> openIsar({
     schema.toCollection(<OBJ>() {
       schema as CollectionSchema<OBJ>;
       final compositeIndexes = <String>{};
-      for (var indexName in schema.indexTypes.keys) {
-        if (schema.indexTypes[indexName]!.length > 1) {
+      for (var indexName in schema.indexValueTypes.keys) {
+        if (schema.indexValueTypes[indexName]!.length > 1) {
           compositeIndexes.add(indexName);
         }
       }

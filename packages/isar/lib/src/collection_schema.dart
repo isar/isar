@@ -62,6 +62,22 @@ class CollectionSchema<OBJ> {
   final String name;
   final String schema;
 
+  final String idName;
+  final Map<String, int> propertyIds;
+  final Set<String> listProperties;
+  final Map<String, int> indexIds;
+  final Map<String, List<IndexValueType>> indexValueTypes;
+  final Map<String, int> linkIds;
+
+  final Map<String, String> linkTargetCollections;
+  final Map<String, String> backlinkSourceCollections;
+
+  final int? Function(OBJ object) getId;
+  final void Function(OBJ object, int id)? setId;
+
+  final List<IsarLinkBase> Function(OBJ object) getLinks;
+  final void Function(IsarCollection col, int id, OBJ object) attachLinks;
+
   final SerializeNative<OBJ> serializeNative;
   final DeserializeNative<OBJ> deserializeNative;
   final DeserializePropNative deserializePropNative;
@@ -70,51 +86,36 @@ class CollectionSchema<OBJ> {
   final DeserializeWeb<OBJ> deserializeWeb;
   final DeserializePropWeb deserializePropWeb;
 
-  final String idName;
-  final Map<String, int> propertyIds;
-  final Set<String> listProperties;
-  final Map<String, int> indexIds;
-  final Map<String, List<NativeIndexType>> indexTypes;
-  final Map<String, int> linkIds;
-
-  final Map<String, String> linkTargetCollections;
-  final Map<String, String> backlinkSourceCollections;
-
-  final int? Function(OBJ object) getId;
-  final void Function(OBJ object, int id) setId;
-
-  final List<IsarLinkBase> Function(OBJ object) getLinks;
-  final List<IsarLinkBase> Function(Isar isar, int id, OBJ object) attachLinks;
   final int version;
 
-  CollectionSchema({
+  const CollectionSchema({
     required this.name,
     required this.schema,
-    required this.serializeNative,
-    required this.deserializeNative,
-    required this.deserializePropNative,
-    required this.serializeWeb,
-    required this.deserializeWeb,
-    required this.deserializePropWeb,
     required this.idName,
     required this.propertyIds,
     required this.listProperties,
     required this.indexIds,
-    required this.indexTypes,
+    required this.indexValueTypes,
     required this.linkIds,
     required this.linkTargetCollections,
     required this.backlinkSourceCollections,
     required this.getLinks,
     required this.attachLinks,
     required this.getId,
-    required this.setId,
+    this.setId,
+    required this.serializeNative,
+    required this.deserializeNative,
+    required this.deserializePropNative,
+    required this.serializeWeb,
+    required this.deserializeWeb,
+    required this.deserializePropWeb,
     required this.version,
   }) : assert(generatorVersion == version,
             'Incompatible generated code. Please re-run code generation using the latest generator.');
 
-  void toCollection(void Function<OBJ>() callback) => callback();
+  void toCollection(void Function<OBJ>() callback) => callback<OBJ>();
 
-  late final bool hasLinks =
+  bool get hasLinks =>
       linkTargetCollections.isNotEmpty || backlinkSourceCollections.isNotEmpty;
 
   @pragma('vm:prefer-inline')
@@ -138,10 +139,10 @@ class CollectionSchema<OBJ> {
   }
 
   @pragma('vm:prefer-inline')
-  List<NativeIndexType> indexTypeOrErr(String indexName) {
-    final indexType = indexTypes[indexName];
-    if (indexType != null) {
-      return indexType;
+  List<IndexValueType> indexValueTypeOrErr(String indexName) {
+    final indexValueType = indexValueTypes[indexName];
+    if (indexValueType != null) {
+      return indexValueType;
     } else {
       throw IsarError('Unknown index "$indexName"');
     }
@@ -158,24 +159,23 @@ class CollectionSchema<OBJ> {
   }
 
   @pragma('vm:prefer-inline')
-  IsarCollection linkColOrErr(
-      IsarCollection col, String linkName, bool source) {
+  IsarCollection linkColOrErr(Isar isar, String linkName, bool source) {
     final linkTarget = linkTargetCollections[linkName];
     if (linkTarget != null) {
       if (source) {
-        return col;
+        return isar.getCollectionInternal(name)!;
       } else {
         // ignore: invalid_use_of_protected_member
-        return col.isar.getCollectionInternal(linkTarget)!;
+        return isar.getCollectionInternal(linkTarget)!;
       }
     } else {
       final backlinkSource = backlinkSourceCollections[linkName];
       if (backlinkSource != null) {
         if (source) {
           // ignore: invalid_use_of_protected_member
-          return col.isar.getCollectionInternal(backlinkSource)!;
+          return isar.getCollectionInternal(backlinkSource)!;
         } else {
-          return col;
+          return isar.getCollectionInternal(name)!;
         }
       } else {
         throw IsarError('Unknown link "$linkName"');
@@ -186,20 +186,20 @@ class CollectionSchema<OBJ> {
 
 /// @nodoc
 @protected
-enum NativeIndexType {
+enum IndexValueType {
   bool,
   int,
   float,
   long,
   double,
-  string,
-  stringCIS,
-  stringHash,
-  stringHashCIS,
+  string, // Case-sensitive
+  stringCIS, // Case-insensitive
+  stringHash, // Case-sensitive, hashed
+  stringHashCIS, // Case-insensitive, hashed
   bytesHash,
   boolListHash,
   intListHash,
   longListHash,
-  stringListHash,
-  stringListHashCIS,
+  stringListHash, // Case-sensitive, hashed
+  stringListHashCIS, // Case-insensitive, hashed
 }

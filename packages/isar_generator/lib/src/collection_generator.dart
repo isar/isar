@@ -3,13 +3,13 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:dartx/dartx.dart';
 import 'package:isar_generator/src/code_gen/collection_schema_generator.dart';
-import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_analyzer.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:isar/isar.dart';
 
 import 'code_gen/by_index_generator.dart';
 import 'code_gen/query_link_generator.dart';
+import 'code_gen/type_adapter_generator_common.dart';
 import 'code_gen/type_adapter_generator_native.dart';
 import 'code_gen/query_distinct_by_generator.dart';
 import 'code_gen/query_filter_generator.dart';
@@ -25,12 +25,10 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
     final object = IsarAnalyzer().analyze(element);
 
     var code = '''
-    // ignore_for_file: duplicate_ignore, non_constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast
+    // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
 
     extension Get${object.dartName}Collection on Isar {
-      IsarCollection<${object.dartName}> get ${object.accessor} {
-        return getCollection('${object.isarName.esc}');
-      }
+      IsarCollection<${object.dartName}> get ${object.accessor} => getCollection();
     }''';
 
     final collectionSchema = generateCollectionSchema(object);
@@ -39,29 +37,29 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
         .distinctBy((it) => it.converter)
         .map((it) => 'const ${it.converterName(object)} = ${it.converter}();')
         .join('\n');
-    final webAdapter = generateWebTypeAdapter(object);
-    final nativeAdapter = generateNativeTypeAdapter(object);
-    final byIndexExtensions = generateByIndexExtension(object);
-    final queryWhereExtensions = WhereGenerator(object).generate();
-    final queryFilterExtensions = FilterGenerator(object).generate();
-    final queryLinkExtensions = generateQueryLinks(object);
-    final querySortByExtensions = generateSortBy(object);
-    final queryDistinctByExtensions = generateDistinctBy(object);
-    final propertyQueries = generatePropertyQuery(object);
 
     code += '''
       $collectionSchema
-
       $converters
-      $webAdapter
-      $nativeAdapter
-      $byIndexExtensions
-      $queryWhereExtensions
-      $queryFilterExtensions
-      $queryLinkExtensions
-      $querySortByExtensions
-      $queryDistinctByExtensions
-      $propertyQueries''';
+
+      ${generateSerializeNative(object)}
+      ${generateDeserializeNative(object)}
+      ${generateDeserializePropNative(object)}
+
+      ${generateSerializeWeb(object)}
+      ${generateDeserializeWeb(object)}
+      ${generateDeserializePropWeb(object)}
+
+      ${generateAttachLinks(object)}
+
+      ${generateByIndexExtension(object)}
+      ${WhereGenerator(object).generate()}
+      ${FilterGenerator(object).generate()}
+      ${generateQueryLinks(object)}
+      ${generateSortBy(object)}
+      ${generateDistinctBy(object)}
+      ${generatePropertyQuery(object)}
+    ''';
 
     return code;
   }

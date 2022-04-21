@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_protected_member
+
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
@@ -32,7 +34,7 @@ Query<T> buildNativeQuery<T>(
       _addIndexWhereClause(
           col.schema, qbPtr, whereClause, whereDistinct, whereSort);
     } else {
-      _addLinkWhereClause(col.schema, qbPtr, whereClause as LinkWhereClause);
+      _addLinkWhereClause(col.isar, qbPtr, whereClause as LinkWhereClause);
     }
   }
 
@@ -123,10 +125,18 @@ void _addIndexWhereClause(CollectionSchema schema, Pointer qbPtr,
   ));
 }
 
-void _addLinkWhereClause(
-    CollectionSchema schema, Pointer qbPtr, LinkWhereClause wc) {
-  final linkId = schema.linkIdOrErr(wc.linkName);
-  nCall(IC.isar_qb_add_link_where_clause(qbPtr, linkId, wc.id));
+void _addLinkWhereClause(Isar isar, Pointer qbPtr, LinkWhereClause wc) {
+  final col =
+      isar.getCollectionInternal(wc.collectionName) as IsarCollectionImpl;
+  final backlinkSourceColName =
+      col.schema.backlinkSourceCollections[wc.linkName];
+  final linkSourceCol = backlinkSourceColName != null
+      ? col.isar.getCollectionInternal(backlinkSourceColName)
+          as IsarCollectionImpl
+      : col;
+  final linkId = linkSourceCol.schema.linkIdOrErr(wc.linkName);
+  nCall(IC.isar_qb_add_link_where_clause(
+      qbPtr, linkSourceCol.ptr, linkId, wc.id));
 }
 
 int boolToByte(bool? value) {
@@ -192,10 +202,10 @@ Pointer<NativeType>? _buildFilterGroup(
 
 Pointer<NativeType>? _buildLink(
     IsarCollectionImpl col, LinkFilter link, Allocator alloc) {
-  final linkSourceCol =
-      col.schema.linkColOrErr(col, link.linkName, true) as IsarCollectionImpl;
-  final linkTargetCol =
-      col.schema.linkColOrErr(col, link.linkName, false) as IsarCollectionImpl;
+  final linkSourceCol = col.schema.linkColOrErr(col.isar, link.linkName, true)
+      as IsarCollectionImpl;
+  final linkTargetCol = col.schema.linkColOrErr(col.isar, link.linkName, false)
+      as IsarCollectionImpl;
   final linkId = col.schema.linkIdOrErr(link.linkName);
 
   final condition = _buildFilter(linkTargetCol, link.filter, alloc);

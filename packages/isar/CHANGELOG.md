@@ -5,17 +5,21 @@
 - Support for querying links
 - Support for filtering and sorting links
 - Added methods to update and count links without loading them
+- Added `isLoaded` property to links
+- Added methods to count the number of objects in a collection
 - Big internal improvements
 
 ### Minor Breaking
 
 - There are now different kinds of where clauses for dynamic queries
 - `isar.getCollection()` no longer requires the name of the collection
+- `Isar.instanceNames` now returns a `Set` instead of a `List`
 
 ### Fixes
 
 - Fixed iOS crash that frequently happened on older devices
 - Fixed link issues
+- Fixed missing `BroadcastChannel` API for older Safari versions
 
 ## 2.2.1
 

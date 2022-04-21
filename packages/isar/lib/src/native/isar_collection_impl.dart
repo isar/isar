@@ -223,10 +223,10 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         ids[i] = id;
 
         final object = objects[i];
-        schema.setId(object, id);
+        schema.setId?.call(object, id);
 
         if (schema.hasLinks) {
-          schema.attachLinks(isar, id, object);
+          schema.attachLinks(this, id, object);
           for (var link in schema.getLinks(object)) {
             if (link.isChanged) {
               linkFutures.add(link.save());
@@ -274,10 +274,10 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
         final id = rawObj.id;
         ids[i] = id;
-        schema.setId(object, id);
+        schema.setId?.call(object, id);
 
         if (schema.hasLinks) {
-          schema.attachLinks(isar, id, object);
+          schema.attachLinks(this, id, object);
           if (saveLinks) {
             for (var link in schema.getLinks(object)) {
               if (link.isChanged) {

@@ -8,7 +8,7 @@ import 'isar_web.dart';
 import 'query_impl.dart';
 
 Query<T> buildWebQuery<T>(
-  IsarCollectionImpl<T> col,
+  IsarCollectionImpl col,
   List<WhereClause> whereClauses,
   bool whereDistinct,
   Sort whereSort,
@@ -83,7 +83,7 @@ IdWhereClauseJs _buildIdWhereClause(IdWhereClause wc) {
 
 IndexWhereClauseJs _buildIndexWhereClause(
     CollectionSchema schema, IndexWhereClause wc) {
-  final isComposite = schema.indexTypes[wc.indexName]!.length > 1;
+  final isComposite = schema.indexValueTypes[wc.indexName]!.length > 1;
 
   dynamic lower = wc.lower;
   if (!isComposite && lower != null) {
