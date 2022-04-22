@@ -1068,11 +1068,13 @@ class IsarCoreBindings {
 
   int isar_qb_add_link_where_clause(
     ffi.Pointer<ffi.NativeType> builder,
+    ffi.Pointer<ffi.NativeType> source_collection,
     int link_id,
     int id,
   ) {
     return _isar_qb_add_link_where_clause(
       builder,
+      source_collection,
       link_id,
       id,
     );
@@ -1101,13 +1103,11 @@ class IsarCoreBindings {
       _isar_qb_set_filter_ptr.asFunction<_dart_isar_qb_set_filter>();
 
   int isar_qb_add_sort_by(
-    ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> builder,
     int property_id,
     bool asc,
   ) {
     return _isar_qb_add_sort_by(
-      collection,
       builder,
       property_id,
       asc ? 1 : 0,
@@ -1121,13 +1121,11 @@ class IsarCoreBindings {
       _isar_qb_add_sort_by_ptr.asFunction<_dart_isar_qb_add_sort_by>();
 
   int isar_qb_add_distinct_by(
-    ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> builder,
     int property_id,
     bool case_sensitive,
   ) {
     return _isar_qb_add_distinct_by(
-      collection,
       builder,
       property_id,
       case_sensitive ? 1 : 0,
@@ -2196,12 +2194,14 @@ typedef _dart_isar_qb_add_index_where_clause = int Function(
 
 typedef _c_isar_qb_add_link_where_clause = ffi.Int64 Function(
   ffi.Pointer<ffi.NativeType> builder,
+  ffi.Pointer<ffi.NativeType> source_collection,
   ffi.Uint32 link_id,
   ffi.Int64 id,
 );
 
 typedef _dart_isar_qb_add_link_where_clause = int Function(
   ffi.Pointer<ffi.NativeType> builder,
+  ffi.Pointer<ffi.NativeType> source_collection,
   int link_id,
   int id,
 );
@@ -2217,28 +2217,24 @@ typedef _dart_isar_qb_set_filter = void Function(
 );
 
 typedef _c_isar_qb_add_sort_by = ffi.Int64 Function(
-  ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> builder,
   ffi.Uint32 property_id,
   ffi.Uint8 asc,
 );
 
 typedef _dart_isar_qb_add_sort_by = int Function(
-  ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> builder,
   int property_id,
   int asc,
 );
 
 typedef _c_isar_qb_add_distinct_by = ffi.Int64 Function(
-  ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> builder,
   ffi.Uint32 property_id,
   ffi.Uint8 case_sensitive,
 );
 
 typedef _dart_isar_qb_add_distinct_by = int Function(
-  ffi.Pointer<ffi.NativeType> collection,
   ffi.Pointer<ffi.NativeType> builder,
   int property_id,
   int case_sensitive,
