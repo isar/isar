@@ -98,17 +98,8 @@ class IsarCollectionJs {
 
 @JS('IsarLink')
 class IsarLinkJs {
-  external Promise loadFirst(IsarTxnJs txn, int id, bool backlink);
-
-  external Promise loadAll(IsarTxnJs txn, int id, bool backlink);
-
-  external Promise replace(
-      IsarTxnJs txn, int source, int target, bool backlink);
-
   external Promise update(IsarTxnJs txn, int source, List<int> addedTargets,
-      List<int> deletedTargets, bool backlink);
-
-  external Promise clear(IsarTxnJs txn, int id, bool backlink);
+      List<int> deletedTargets, bool reset);
 }
 
 @JS('IdWhereClause')

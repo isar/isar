@@ -151,6 +151,7 @@ class QueryBuilder<OBJ, R, S> {
     return addFilterConditionInternal(LinkFilter(
       filter: filter,
       linkName: linkName,
+      targetCollection: targetCollection.name,
     ));
   }
 

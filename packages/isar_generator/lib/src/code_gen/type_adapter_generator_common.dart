@@ -35,7 +35,12 @@ String generateAttachLinks(ObjectInfo object) {
   void ${object.attachLinksName}(IsarCollection col, int id, ${object.dartName} object) {''';
 
   for (var link in object.links) {
-    code += "object.${link.dartName}.attach(col, '${link.isarName.esc}', id);";
+    code += '''object.${link.dartName}.attach(
+      col,
+      col.isar.${link.targetCollectionAccessor},
+      '${link.isarName.esc}',
+      id
+    );''';
   }
   return code + '}';
 }

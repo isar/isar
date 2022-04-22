@@ -11,9 +11,8 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
       super.sourceCollection as IsarCollectionImpl;
 
   @override
-  late final IsarCollectionImpl<OBJ> targetCollection = sourceCollection.schema
-          .linkColOrErr(sourceCollection.isar, linkName, false)
-      as IsarCollectionImpl<OBJ>;
+  IsarCollectionImpl<OBJ> get targetCollection =>
+      super.targetCollection as IsarCollectionImpl<OBJ>;
 
   late final linkIndex = sourceCollection.schema.linkIdOrErr(linkName);
 

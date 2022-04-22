@@ -69,9 +69,6 @@ class CollectionSchema<OBJ> {
   final Map<String, List<IndexValueType>> indexValueTypes;
   final Map<String, int> linkIds;
 
-  final Map<String, String> linkTargetCollections;
-  final Map<String, String> backlinkSourceCollections;
-
   final int? Function(OBJ object) getId;
   final void Function(OBJ object, int id)? setId;
 
@@ -97,8 +94,6 @@ class CollectionSchema<OBJ> {
     required this.indexIds,
     required this.indexValueTypes,
     required this.linkIds,
-    required this.linkTargetCollections,
-    required this.backlinkSourceCollections,
     required this.getLinks,
     required this.attachLinks,
     required this.getId,
@@ -115,8 +110,7 @@ class CollectionSchema<OBJ> {
 
   void toCollection(void Function<OBJ>() callback) => callback<OBJ>();
 
-  bool get hasLinks =>
-      linkTargetCollections.isNotEmpty || backlinkSourceCollections.isNotEmpty;
+  bool get hasLinks => linkIds.isNotEmpty;
 
   @pragma('vm:prefer-inline')
   int propertyIdOrErr(String propertyName) {
@@ -155,31 +149,6 @@ class CollectionSchema<OBJ> {
       return linkId;
     } else {
       throw IsarError('Unknown link "$linkId"');
-    }
-  }
-
-  @pragma('vm:prefer-inline')
-  IsarCollection linkColOrErr(Isar isar, String linkName, bool source) {
-    final linkTarget = linkTargetCollections[linkName];
-    if (linkTarget != null) {
-      if (source) {
-        return isar.getCollectionInternal(name)!;
-      } else {
-        // ignore: invalid_use_of_protected_member
-        return isar.getCollectionInternal(linkTarget)!;
-      }
-    } else {
-      final backlinkSource = backlinkSourceCollections[linkName];
-      if (backlinkSource != null) {
-        if (source) {
-          // ignore: invalid_use_of_protected_member
-          return isar.getCollectionInternal(backlinkSource)!;
-        } else {
-          return isar.getCollectionInternal(name)!;
-        }
-      } else {
-        throw IsarError('Unknown link "$linkName"');
-      }
     }
   }
 }

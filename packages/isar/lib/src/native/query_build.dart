@@ -53,7 +53,6 @@ Query<T> buildNativeQuery<T>(
   for (var sortProperty in sortBy) {
     final propertyId = col.schema.propertyIdOrErr(sortProperty.property);
     nCall(IC.isar_qb_add_sort_by(
-      col.ptr,
       qbPtr,
       propertyId,
       sortProperty.sort == Sort.asc,
@@ -67,7 +66,6 @@ Query<T> buildNativeQuery<T>(
   for (var distinctByProperty in distinctBy) {
     final propertyId = col.schema.propertyIdOrErr(distinctByProperty.property);
     nCall(IC.isar_qb_add_distinct_by(
-      col.ptr,
       qbPtr,
       propertyId,
       distinctByProperty.caseSensitive ?? true,
@@ -126,14 +124,8 @@ void _addIndexWhereClause(CollectionSchema schema, Pointer qbPtr,
 }
 
 void _addLinkWhereClause(Isar isar, Pointer qbPtr, LinkWhereClause wc) {
-  final col =
-      isar.getCollectionInternal(wc.collectionName) as IsarCollectionImpl;
-  final backlinkSourceColName =
-      col.schema.backlinkSourceCollections[wc.linkName];
-  final linkSourceCol = backlinkSourceColName != null
-      ? col.isar.getCollectionInternal(backlinkSourceColName)
-          as IsarCollectionImpl
-      : col;
+  final linkSourceCol =
+      isar.getCollectionInternal(wc.sourceCollection) as IsarCollectionImpl;
   final linkId = linkSourceCol.schema.linkIdOrErr(wc.linkName);
   nCall(IC.isar_qb_add_link_where_clause(
       qbPtr, linkSourceCol.ptr, linkId, wc.id));
@@ -202,9 +194,7 @@ Pointer<NativeType>? _buildFilterGroup(
 
 Pointer<NativeType>? _buildLink(
     IsarCollectionImpl col, LinkFilter link, Allocator alloc) {
-  final linkSourceCol = col.schema.linkColOrErr(col.isar, link.linkName, true)
-      as IsarCollectionImpl;
-  final linkTargetCol = col.schema.linkColOrErr(col.isar, link.linkName, false)
+  final linkTargetCol = col.isar.getCollectionInternal(link.targetCollection)!
       as IsarCollectionImpl;
   final linkId = col.schema.linkIdOrErr(link.linkName);
 
@@ -214,7 +204,7 @@ Pointer<NativeType>? _buildLink(
   final filterPtrPtr = alloc<Pointer<NativeType>>();
 
   nCall(IC.isar_filter_link(
-    linkSourceCol.ptr,
+    linkTargetCol.ptr,
     filterPtrPtr,
     condition,
     linkId,

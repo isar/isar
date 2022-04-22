@@ -63,6 +63,7 @@ void isarTestVm(String name, dynamic Function() body) {
 
 String? testTempPath;
 
+// Change the path for your platform to point to a local isar core build
 void registerBinaries() {
   if (!kIsWeb && testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
@@ -119,12 +120,13 @@ bool doubleListEquals(List<double?>? l1, List<double?>? l2) {
 
 Matcher isIsarError([String? contains]) {
   return allOf(
-      isA<IsarError>(),
-      predicate(
-        (IsarError e) =>
-            contains == null ||
-            e.toString().toLowerCase().contains(contains.toLowerCase()),
-      ));
+    isA<IsarError>(),
+    predicate(
+      (IsarError e) =>
+          contains == null ||
+          e.toString().toLowerCase().contains(contains.toLowerCase()),
+    ),
+  );
 }
 
 Matcher throwsIsarError([String? contains]) {
@@ -141,7 +143,7 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
   if (identical(a, b)) {
     return true;
   }
-  for (int index = 0; index < a.length; index += 1) {
+  for (var index = 0; index < a.length; index += 1) {
     if (a[index] != b[index]) {
       return false;
     }

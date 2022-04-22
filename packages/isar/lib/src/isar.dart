@@ -60,16 +60,6 @@ abstract class Isar {
       if (schemas.indexWhere((e) => e.name == schema.name) != i) {
         throw IsarError('Duplicate collection ${schema.name}.');
       }
-      final linkedCols = [
-        ...schema.linkTargetCollections.values,
-        ...schema.backlinkSourceCollections.values
-      ];
-      for (var linkedCol in linkedCols) {
-        if (!schemas.any((e) => e.name == linkedCol)) {
-          throw IsarError(
-              'Linked collection "$linkedCol" is not part of the schema.');
-        }
-      }
     }
     schemas.sort((a, b) => a.name.compareTo(b.name));
   }

@@ -6,21 +6,17 @@ import 'isar_web.dart';
 
 mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   @override
-  IsarCollectionImpl<OBJ> get sourceCollection =>
-      super.sourceCollection as IsarCollectionImpl<OBJ>;
+  IsarCollectionImpl get sourceCollection =>
+      super.sourceCollection as IsarCollectionImpl;
 
   @override
-  late final IsarCollectionImpl<OBJ> targetCollection = sourceCollection.schema
-          .linkColOrErr(sourceCollection.isar, linkName, false)
-      as IsarCollectionImpl<OBJ>;
+  IsarCollectionImpl<OBJ> get targetCollection =>
+      super.targetCollection as IsarCollectionImpl<OBJ>;
 
   @override
   late final getId = targetCollection.schema.getId;
 
   late final IsarLinkJs link = sourceCollection.native.getLink(linkName);
-
-  late final isBacklink =
-      sourceCollection.schema.backlinkSourceCollections.containsKey(linkName);
 
   @override
   Future<void> updateIdsInternal(
@@ -28,9 +24,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
     final containingId = requireAttached();
 
     return targetCollection.isar.getTxn(true, (txn) {
-      return link
-          .update(txn, containingId, linkIds, linkIds, isBacklink)
-          .wait();
+      return link.update(txn, containingId, linkIds, linkIds, reset).wait();
     });
   }
 

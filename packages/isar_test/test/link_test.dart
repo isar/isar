@@ -102,19 +102,19 @@ void main() {
     group('self link', () {
       isarTest('new obj new target', () async {
         objA1.selfLink.value = objA2;
-        //objA3.selfLink.value = objA3;
+        objA3.selfLink.value = objA3;
         await isar.writeTxn((isar) async {
           objA1.id = Isar.autoIncrement;
-          await linksA.putAll([objA1], saveLinks: true);
+          await linksA.putAll([objA1, objA3], saveLinks: true);
         });
 
         final newA1 = await linksA.get(1);
         await newA1!.selfLink.load();
         expect(newA1.selfLink.value, objA2);
 
-        /*final newA3 = await linksA.get(2);
+        final newA3 = await linksA.get(2);
         await newA3!.selfLink.load();
-        expect(newA3.selfLink.value, objA3);*/
+        expect(newA3.selfLink.value, objA3);
       });
 
       isarTest('new obj existing target', () async {
@@ -145,6 +145,38 @@ void main() {
         final newA1 = await linksA.get(objA1.id!);
         await newA1!.selfLink.load();
         expect(newA1.selfLink.value, objA2);
+      });
+
+      isarTest('delete source', () async {
+        objA1.selfLink.value = objA2;
+        await isar.writeTxn((isar) async {
+          objA1.id = Isar.autoIncrement;
+          await linksA.put(objA1, saveLinks: true);
+        });
+
+        await isar.writeTxn((isar) async {
+          await linksA.delete(objA1.id!);
+        });
+
+        final newA2 = await linksA.get(objA2.id!);
+        await newA2!.selfLinkBacklink.load();
+        expect(newA2.selfLinkBacklink, []);
+      });
+
+      isarTest('delete target', () async {
+        objA1.selfLink.value = objA2;
+        await isar.writeTxn((isar) async {
+          objA1.id = Isar.autoIncrement;
+          await linksA.put(objA1, saveLinks: true);
+        });
+
+        await isar.writeTxn((isar) async {
+          await linksA.delete(objA2.id!);
+        });
+
+        final newA1 = await linksA.get(objA1.id!);
+        await newA1!.selfLink.load();
+        expect(newA1.selfLink.value, null);
       });
 
       isarTest('.load() / .save()', () async {
@@ -178,9 +210,13 @@ void main() {
           await linksA.put(objA1, saveLinks: true);
         });
 
+        await isar.writeTxn((isar) async {
+          await linksB.delete(objB1.id!);
+        });
+
         final newA1 = await linksA.get(objA1.id!);
         await newA1!.otherLink.load();
-        expect(newA1.otherLink.value, objB1);
+        expect(newA1.otherLink.value, null);
       });
 
       isarTest('new obj existing target', () async {

@@ -24,19 +24,7 @@ String generateCollectionSchema(ObjectInfo object) {
           "'${i.name.esc}': [${i.properties.map((e) => e.indexValueTypeEnum).join(',')},]")
       .join(',');
   final linkIds = object.links
-      .where((e) => !e.backlink)
       .mapIndexed((i, link) => "'${link.isarName.esc}': $i")
-      .join(',');
-
-  final linkTargetCollections = object.links
-      .where((e) => !e.backlink)
-      .map((link) =>
-          "'${link.isarName.esc}': '${link.targetCollectionIsarName.esc}'")
-      .join(',');
-  final backlinkSourceCollections = object.links
-      .where((e) => e.backlink)
-      .map((link) =>
-          "'${link.isarName.esc}': '${link.targetCollectionIsarName.esc}'")
       .join(',');
 
   return '''
@@ -50,9 +38,6 @@ String generateCollectionSchema(ObjectInfo object) {
       indexIds: {$indexIds},
       indexValueTypes: {$indexValueTypes},
       linkIds: {$linkIds},
-
-      linkTargetCollections: {$linkTargetCollections},
-      backlinkSourceCollections: {$backlinkSourceCollections},
 
       getId: ${object.getIdName},
       ${object.idProperty.assignable ? 'setId: ${object.setIdName},' : ''}

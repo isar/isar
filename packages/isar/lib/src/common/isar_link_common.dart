@@ -11,23 +11,30 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
 
   late final IsarCollection sourceCollection;
 
-  IsarCollection<OBJ> get targetCollection;
+  late final IsarCollection<OBJ> targetCollection;
 
   @override
   bool get isAttached => _objectId != null;
 
   @override
-  void attach(IsarCollection collection, String linkName, int? objectId) {
+  void attach(
+    IsarCollection sourceCollection,
+    IsarCollection<OBJ> targetCollection,
+    String linkName,
+    int? objectId,
+  ) {
     if (_initialized) {
       if (linkName != this.linkName ||
-          !identical(collection, sourceCollection)) {
+          !identical(sourceCollection, this.sourceCollection) ||
+          !identical(targetCollection, this.targetCollection)) {
         throw IsarError(
             'Link has been moved! It is not allowed to move a link to a differenct collection.');
       }
     } else {
       _initialized = true;
+      this.sourceCollection = sourceCollection;
+      this.targetCollection = targetCollection;
       this.linkName = linkName;
-      sourceCollection = collection;
     }
 
     _objectId = objectId;
@@ -54,8 +61,8 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
 
     // ignore: invalid_use_of_protected_member
     return qb.addWhereClauseInternal(LinkWhereClause(
-      collectionName: sourceCollection.name,
       linkName: linkName,
+      sourceCollection: sourceCollection.name,
       id: containingId,
     ));
   }

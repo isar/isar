@@ -7,8 +7,8 @@ import 'isar_collection_impl.dart';
 import 'isar_web.dart';
 import 'query_impl.dart';
 
-Query<T> buildWebQuery<T>(
-  IsarCollectionImpl col,
+Query<T> buildWebQuery<T, OBJ>(
+  IsarCollectionImpl<OBJ> col,
   List<WhereClause> whereClauses,
   bool whereDistinct,
   Sort whereSort,
@@ -47,7 +47,7 @@ Query<T> buildWebQuery<T>(
 
   QueryDeserialize<T> deserialize;
   if (property == null) {
-    deserialize = (jsObj) => col.schema.deserializeWeb(col, jsObj);
+    deserialize = (jsObj) => col.schema.deserializeWeb(col, jsObj) as T;
   } else {
     deserialize = (jsObj) => col.schema.deserializePropWeb(jsObj, property);
   }
@@ -98,8 +98,8 @@ IndexWhereClauseJs _buildIndexWhereClause(
   return IndexWhereClauseJs()
     ..indexName = wc.indexName
     ..range = _buildKeyRange(
-      lower != null ? _valueToJs(lower) : null,
-      upper != null ? _valueToJs(upper) : null,
+      wc.lower != null ? _valueToJs(lower) : null,
+      wc.upper != null ? _valueToJs(upper) : null,
       wc.includeLower,
       wc.includeUpper,
     );
