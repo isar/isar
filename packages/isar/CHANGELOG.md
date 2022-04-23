@@ -18,6 +18,7 @@
 ### Fixes
 
 - Fixed iOS crash that frequently happened on older devices
+- Fixed 32bit issue on Android
 - Fixed link issues
 - Fixed missing `BroadcastChannel` API for older Safari versions
 

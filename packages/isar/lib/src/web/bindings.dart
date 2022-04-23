@@ -119,6 +119,7 @@ class IndexWhereClauseJs {
 @anonymous
 class LinkWhereClauseJs {
   external String linkName;
+  external String sourceCollection;
   external int id;
 }
 

@@ -67,7 +67,7 @@ class IsarAnalyzer {
         if (property.isarName == 'id' &&
             property.converter == null &&
             property.isarType == IsarType.long) {
-          idProperty = properties[i].copyWith(isId: true);
+          idProperty = properties[i].copyWithIsId(true);
           properties[i] = idProperty;
           break;
         }
