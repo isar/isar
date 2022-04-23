@@ -2,7 +2,7 @@ part of isar;
 
 /// Create a where clause dynamically.
 class WhereClause {
-  /// THe Isar name of the index to be used.
+  /// The Isar name of the index to be used.
   final String? indexName;
 
   /// The lower bound of the where clause.
