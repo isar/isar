@@ -45,8 +45,13 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   var _isChanged = false;
 
+  var _isLoaded = false;
+
   @override
   bool get isChanged => _isChanged;
+
+  @override
+  bool get isLoaded => _isLoaded;
 
   @override
   OBJ? get value => _value;
@@ -55,23 +60,27 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   set value(OBJ? value) {
     _isChanged |= !identical(_value, value);
     _value = value;
+    _isLoaded = true;
   }
 
   void applyLoaded(OBJ? object) {
     _value = object;
     _isChanged = false;
+    _isLoaded = true;
   }
 
   void applySaved(OBJ? object) {
     if (identical(value, object)) {
       _isChanged = false;
     }
+    _isLoaded = true;
   }
 
   @override
   void resetContent() {
     _value = null;
     _isChanged = false;
+    _isLoaded = true;
   }
 }
 
@@ -82,19 +91,26 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   final addedObjects = HashSet<OBJ>.identity();
   final removedObjects = HashSet<OBJ>.identity();
 
+  var _isLoaded = false;
+
   @override
   bool get isChanged => addedObjects.isNotEmpty || removedObjects.isNotEmpty;
+
+  @override
+  bool get isLoaded => _isLoaded;
 
   void applyLoaded(List<OBJ> objects) {
     _objects.clear();
     _objects.addAll(objects);
     _objects.addAll(addedObjects);
     _objects.removeAll(removedObjects);
+    _isLoaded = true;
   }
 
   void applySaved(List<OBJ> added, List<OBJ> removed) {
     addedObjects.removeAll(added);
     removedObjects.removeAll(removed);
+    _isLoaded = true;
   }
 
   void clearChanges() {
@@ -106,6 +122,7 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   void resetContent() {
     clearChanges();
     _objects.clear();
+    _isLoaded = true;
   }
 
   @override
