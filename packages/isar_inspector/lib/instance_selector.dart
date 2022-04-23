@@ -154,11 +154,11 @@ class _InstanceSelectorState extends State<InstanceSelector>
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: const [
-                       Icon(
+                      Icon(
                         FontAwesomeIcons.chevronUp,
                         size: 12,
                       ),
-                       Icon(
+                      Icon(
                         FontAwesomeIcons.chevronDown,
                         size: 12,
                       ),

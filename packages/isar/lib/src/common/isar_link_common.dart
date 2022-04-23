@@ -145,6 +145,7 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   set value(OBJ? value) {
     _isChanged |= !identical(_value, value);
     _value = value;
+    _isLoaded = true;
   }
 
   @override
