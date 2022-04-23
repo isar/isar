@@ -124,11 +124,10 @@ void _addIndexWhereClause(CollectionSchema schema, Pointer qbPtr,
 }
 
 void _addLinkWhereClause(Isar isar, Pointer qbPtr, LinkWhereClause wc) {
-  final linkSourceCol =
-      isar.getCollectionInternal(wc.sourceCollection) as IsarCollectionImpl;
-  final linkId = linkSourceCol.schema.linkIdOrErr(wc.linkName);
-  nCall(IC.isar_qb_add_link_where_clause(
-      qbPtr, linkSourceCol.ptr, linkId, wc.id));
+  final linkCol =
+      isar.getCollectionInternal(wc.linkCollection) as IsarCollectionImpl;
+  final linkId = linkCol.schema.linkIdOrErr(wc.linkName);
+  nCall(IC.isar_qb_add_link_where_clause(qbPtr, linkCol.ptr, linkId, wc.id));
 }
 
 int boolToByte(bool? value) {

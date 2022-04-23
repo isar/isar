@@ -68,6 +68,7 @@ class CollectionSchema<OBJ> {
   final Map<String, int> indexIds;
   final Map<String, List<IndexValueType>> indexValueTypes;
   final Map<String, int> linkIds;
+  final Map<String, String> backlinkLinkNames;
 
   final int? Function(OBJ object) getId;
   final void Function(OBJ object, int id)? setId;
@@ -94,6 +95,7 @@ class CollectionSchema<OBJ> {
     required this.indexIds,
     required this.indexValueTypes,
     required this.linkIds,
+    required this.backlinkLinkNames,
     required this.getLinks,
     required this.attachLinks,
     required this.getId,

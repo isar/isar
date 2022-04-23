@@ -16,15 +16,26 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   @override
   late final getId = targetCollection.schema.getId;
 
-  late final IsarLinkJs link = sourceCollection.native.getLink(linkName);
+  late final backlinkLinkName =
+      sourceCollection.schema.backlinkLinkNames[linkName];
+
+  late final link = backlinkLinkName != null
+      ? targetCollection.native.getLink(backlinkLinkName!)
+      : sourceCollection.native.getLink(linkName);
 
   @override
   Future<void> updateIdsInternal(
       List<int> linkIds, List<int> unlinkIds, bool reset) {
     final containingId = requireAttached();
+    final backlink = backlinkLinkName != null;
 
-    return targetCollection.isar.getTxn(true, (txn) {
-      return link.update(txn, containingId, linkIds, linkIds, reset).wait();
+    return targetCollection.isar.getTxn(true, (txn) async {
+      if (reset) {
+        await link.clear(txn, containingId, backlink).wait();
+      }
+      return await link
+          .update(txn, backlink, containingId, linkIds, linkIds)
+          .wait();
     });
   }
 

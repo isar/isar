@@ -26,6 +26,10 @@ String generateCollectionSchema(ObjectInfo object) {
   final linkIds = object.links
       .mapIndexed((i, link) => "'${link.isarName.esc}': $i")
       .join(',');
+  final backlinkLinkNames = object.links
+      .where((e) => e.backlink)
+      .map((link) => "'${link.isarName.esc}': '${link.targetIsarName}'")
+      .join(',');
 
   return '''
     const ${object.dartName.capitalize()}Schema = CollectionSchema(
@@ -38,6 +42,7 @@ String generateCollectionSchema(ObjectInfo object) {
       indexIds: {$indexIds},
       indexValueTypes: {$indexValueTypes},
       linkIds: {$linkIds},
+      backlinkLinkNames: {$backlinkLinkNames},
 
       getId: ${object.getIdName},
       ${object.idProperty.assignable ? 'setId: ${object.setIdName},' : ''}

@@ -107,8 +107,13 @@ IndexWhereClauseJs _buildIndexWhereClause(
 
 LinkWhereClauseJs _buildLinkWhereClause(
     IsarCollectionImpl col, LinkWhereClause wc) {
+  final linkCol =
+      col.isar.getCollectionInternal(wc.linkCollection) as IsarCollectionImpl;
+  final backlinkLinkName = linkCol.schema.backlinkLinkNames[wc.linkName];
   return LinkWhereClauseJs()
-    ..linkName = wc.linkName
+    ..linkCollection = wc.linkCollection
+    ..linkName = backlinkLinkName ?? wc.linkName
+    ..backlink = backlinkLinkName != null
     ..id = wc.id;
 }
 

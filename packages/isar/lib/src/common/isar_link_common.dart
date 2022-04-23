@@ -61,8 +61,8 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
 
     // ignore: invalid_use_of_protected_member
     return qb.addWhereClauseInternal(LinkWhereClause(
+      linkCollection: sourceCollection.name,
       linkName: linkName,
-      sourceCollection: sourceCollection.name,
       id: containingId,
     ));
   }

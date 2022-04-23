@@ -123,18 +123,18 @@ class IndexWhereClause extends WhereClause {
 
 /// A where clause traversing objects linked to the specified object.
 class LinkWhereClause extends WhereClause {
+  /// The name of the collection the link originates from.
+  final String linkCollection;
+
   /// The isar name of the link to be used.
   final String linkName;
-
-  /// The name of the collection the link originates from.
-  final String sourceCollection;
 
   /// The id of the source object.
   final int id;
 
   const LinkWhereClause({
+    required this.linkCollection,
     required this.linkName,
-    required this.sourceCollection,
     required this.id,
   }) : super._();
 }

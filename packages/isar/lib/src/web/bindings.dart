@@ -98,8 +98,10 @@ class IsarCollectionJs {
 
 @JS('IsarLink')
 class IsarLinkJs {
-  external Promise update(IsarTxnJs txn, int source, List<int> addedTargets,
-      List<int> deletedTargets, bool reset);
+  external Promise update(IsarTxnJs txn, bool backlink, int id,
+      List<int> addedTargets, List<int> deletedTargets);
+
+  external Promise clear(IsarTxnJs txn, int id, bool backlink);
 }
 
 @JS('IdWhereClause')
@@ -118,8 +120,9 @@ class IndexWhereClauseJs {
 @JS('LinkWhereClause')
 @anonymous
 class LinkWhereClauseJs {
+  external String linkCollection;
   external String linkName;
-  external String sourceCollection;
+  external bool backlink;
   external int id;
 }
 
