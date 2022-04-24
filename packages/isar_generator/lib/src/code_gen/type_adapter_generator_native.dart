@@ -2,20 +2,6 @@ import 'package:isar_generator/src/code_gen/type_adapter_generator_common.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
-String generateNativeTypeAdapter(ObjectInfo object) {
-  return '''
-    class ${object.nativeAdapterName} extends IsarNativeTypeAdapter<${object.dartName}> {
-
-      const ${object.nativeAdapterName}();
-
-      ${_generateSerialize(object)}
-      ${_generateDeserialize(object)}
-      ${_generateDeserializeProperty(object)}
-      ${generateAttachLinks(object)}
-    }
-    ''';
-}
-
 String _generatePrepareSerialize(ObjectInfo object) {
   var code = 'var dynamicSize = 0;';
   for (var i = 0; i < object.objectProperties.length; i++) {
@@ -101,10 +87,9 @@ String _generatePrepareSerialize(ObjectInfo object) {
   return code;
 }
 
-String _generateSerialize(ObjectInfo object) {
+String generateSerializeNative(ObjectInfo object) {
   var code = '''
-  @override  
-  void serialize(IsarCollection<${object.dartName}> collection, IsarRawObject rawObj, ${object.dartName} object, int staticSize, List<int> offsets, AdapterAlloc alloc) {
+  void ${object.serializeNativeName}(IsarCollection<${object.dartName}> collection, IsarRawObject rawObj, ${object.dartName} object, int staticSize, List<int> offsets, AdapterAlloc alloc) {
     ${_generatePrepareSerialize(object)}
     rawObj.buffer = alloc(size);
     rawObj.buffer_length = size;
@@ -166,19 +151,18 @@ String _generateSerialize(ObjectInfo object) {
   return '$code}';
 }
 
-String _generateDeserialize(ObjectInfo object) {
+String generateDeserializeNative(ObjectInfo object) {
   String deserProp(ObjectProperty p) {
     final index = object.objectProperties.indexOf(p);
     return _deserializeProperty(object, p, 'offsets[$index]');
   }
 
   var code = '''
-  @override
-  ${object.dartName} deserialize(IsarCollection<${object.dartName}> collection, int id, IsarBinaryReader reader, List<int> offsets) {
+  ${object.dartName} ${object.deserializeNativeName}(IsarCollection<${object.dartName}> collection, int id, IsarBinaryReader reader, List<int> offsets) {
     ${deserializeMethodBody(object, deserProp)}''';
 
   if (object.links.isNotEmpty) {
-    code += 'attachLinks(collection.isar, id, object);';
+    code += '${object.attachLinksName}(collection, id, object);';
   }
 
   return '''$code
@@ -186,10 +170,9 @@ String _generateDeserialize(ObjectInfo object) {
   }''';
 }
 
-String _generateDeserializeProperty(ObjectInfo object) {
+String generateDeserializePropNative(ObjectInfo object) {
   var code = '''
-  @override
-  P deserializeProperty<P>(int id, IsarBinaryReader reader, int propertyIndex, int offset) {
+  P ${object.deserializePropNativeName}<P>(int id, IsarBinaryReader reader, int propertyIndex, int offset) {
     switch (propertyIndex) {
       case -1:
         return id as P;''';

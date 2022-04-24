@@ -20,30 +20,21 @@ void _initializeInstance(
   final colPtrPtr = alloc<Pointer>();
   final offsetsPtr = alloc<Uint32>(maxProperties);
 
-  final cols = <String, IsarCollection>{};
+  final cols = <Type, IsarCollection>{};
   for (var i = 0; i < schemas.length; i++) {
     final schema = schemas[i];
     nCall(IC.isar_get_collection(isar.ptr, colPtrPtr, i));
     final staticSize =
         IC.isar_get_static_size_and_offsets(colPtrPtr.value, offsetsPtr);
     final offsets = offsetsPtr.asTypedList(schema.propertyIds.length).toList();
-    cols[schema.name] = schema.toCollection(<OBJ>() {
+    schema.toCollection(<OBJ>() {
       schema as CollectionSchema<OBJ>;
-      return IsarCollectionImpl<OBJ>(
+      cols[OBJ] = IsarCollectionImpl<OBJ>(
         isar: isar,
-        adapter: schema.nativeAdapter,
         ptr: colPtrPtr.value,
-        idName: schema.idName,
+        schema: schema,
         staticSize: staticSize,
         offsets: offsets,
-        propertyIds: schema.propertyIds,
-        indexIds: schema.indexIds,
-        indexTypes: schema.indexTypes,
-        linkIds: schema.linkIds,
-        backlinkIds: schema.backlinkIds,
-        getLinks: schema.getLinks,
-        getId: schema.getId,
-        setId: schema.setId,
       );
     });
   }

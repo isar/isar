@@ -15,31 +15,22 @@ import 'isar_web.dart';
 class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   final IsarImpl isar;
-  final IsarCollectionJs col;
+  final IsarCollectionJs native;
 
-  final IsarWebTypeAdapter<OBJ> adapter;
-  final Set<String> listProperties;
-  final Map<String, bool> isCompositeIndex;
-  final String idName;
-  final int? Function(OBJ) getId;
-  final void Function(OBJ, int)? setId;
-  final List<IsarLinkBase> Function(OBJ)? getLinks;
+  final CollectionSchema<OBJ> schema;
 
   IsarCollectionImpl({
     required this.isar,
-    required this.col,
-    required this.adapter,
-    required this.listProperties,
-    required this.isCompositeIndex,
-    required this.idName,
-    required this.getId,
-    required this.setId,
-    required this.getLinks,
+    required this.native,
+    required this.schema,
   });
+
+  @override
+  String get name => schema.name;
 
   @tryInline
   OBJ? deserializeObject(dynamic object) {
-    return object != null ? adapter.deserialize(this, object) : null;
+    return object != null ? schema.deserializeWeb(this, object) : null;
   }
 
   @tryInline
@@ -55,7 +46,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<OBJ?> get(int id) {
     return isar.getTxn(false, (txn) async {
-      final object = await col.get(txn, id).wait();
+      final object = await native.get(txn, id).wait();
       return deserializeObject(object);
     });
   }
@@ -63,7 +54,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<List<OBJ?>> getAll(List<int> ids) {
     return isar.getTxn(false, (txn) async {
-      final objects = await col.getAll(txn, ids).wait();
+      final objects = await native.getAll(txn, ids).wait();
       return deserializeObjects(objects);
     });
   }
@@ -71,7 +62,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<OBJ?> getByIndex(String indexName, List<Object?> key) {
     return isar.getTxn(false, (txn) async {
-      final object = await col.getByIndex(txn, indexName, key).wait();
+      final object = await native.getByIndex(txn, indexName, key).wait();
       return deserializeObject(object);
     });
   }
@@ -79,7 +70,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<List<OBJ?>> getAllByIndex(String indexName, List<List<Object?>> keys) {
     return isar.getTxn(false, (txn) async {
-      final objects = await col.getAllByIndex(txn, indexName, keys).wait();
+      final objects = await native.getAllByIndex(txn, indexName, keys).wait();
       return deserializeObjects(objects);
     });
   }
@@ -105,15 +96,15 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     bool saveLinks = false,
   }) {
     return isar.getTxn(true, (txn) async {
-      final serialized = adapter.serialize(this, object);
-      final id = await col.put(txn, serialized, replaceOnConflict).wait();
-      setId?.call(object, id);
+      final serialized = schema.serializeWeb(this, object);
+      final id = await native.put(txn, serialized, replaceOnConflict).wait();
+      schema.setId?.call(object, id);
 
       final linkFutures = <Future>[];
-      if (getLinks != null) {
-        adapter.attachLinks(isar, id, object);
+      if (schema.hasLinks) {
+        schema.attachLinks(this, id, object);
         if (saveLinks) {
-          for (var link in getLinks!(object)) {
+          for (var link in schema.getLinks(object)) {
             if (link.isChanged) {
               linkFutures.add(link.save());
             }
@@ -137,23 +128,22 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return isar.getTxn(true, (txn) async {
       final serialized = [];
       for (var object in objects) {
-        serialized.add(adapter.serialize(this, object));
+        serialized.add(schema.serializeWeb(this, object));
       }
-      final ids = await col.putAll(txn, serialized, replaceOnConflict).wait();
+      final ids =
+          await native.putAll(txn, serialized, replaceOnConflict).wait();
       final linkFutures = <Future>[];
-      if (setId != null || (getLinks != null && saveLinks)) {
-        for (var i = 0; i < objects.length; i++) {
-          final object = objects[i];
-          final id = ids[i];
-          setId?.call(object, id);
+      for (var i = 0; i < objects.length; i++) {
+        final object = objects[i];
+        final id = ids[i];
+        schema.setId?.call(object, id);
 
-          if (getLinks != null) {
-            adapter.attachLinks(isar, id, object);
-            if (saveLinks) {
-              for (var link in getLinks!(object)) {
-                if (link.isChanged) {
-                  linkFutures.add(link.save());
-                }
+        if (schema.hasLinks) {
+          schema.attachLinks(this, id, object);
+          if (saveLinks) {
+            for (var link in schema.getLinks(object)) {
+              if (link.isChanged) {
+                linkFutures.add(link.save());
               }
             }
           }
@@ -186,7 +176,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<bool> delete(int id) async {
     await isar.getTxn(true, (txn) {
-      return col.delete(txn, id).wait();
+      return native.delete(txn, id).wait();
     });
     return true;
   }
@@ -194,7 +184,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<int> deleteAll(List<int> ids) async {
     await isar.getTxn(true, (txn) {
-      return col.deleteAll(txn, ids).wait();
+      return native.deleteAll(txn, ids).wait();
     });
     return ids.length;
   }
@@ -202,14 +192,14 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<bool> deleteByIndex(String indexName, List<Object?> key) {
     return isar.getTxn(true, (txn) {
-      return col.deleteByIndex(txn, indexName, key).wait();
+      return native.deleteByIndex(txn, indexName, key).wait();
     });
   }
 
   @override
   Future<int> deleteAllByIndex(String indexName, List<List<Object?>> keys) {
     return isar.getTxn(true, (txn) {
-      return col.deleteAllByIndex(txn, indexName, keys).wait();
+      return native.deleteAllByIndex(txn, indexName, keys).wait();
     });
   }
 
@@ -227,7 +217,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<void> clear() {
     return isar.getTxn(true, (txn) {
-      return col.clear(txn).wait();
+      return native.clear(txn).wait();
     });
   }
 
@@ -238,7 +228,9 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   Future<void> importJson(List<Map<String, dynamic>> json,
       {bool replaceOnConflict = false}) {
     return isar.getTxn(true, (txn) async {
-      await col.putAll(txn, json.map(jsify).toList(), replaceOnConflict).wait();
+      await native
+          .putAll(txn, json.map(jsify).toList(), replaceOnConflict)
+          .wait();
     });
   }
 
@@ -267,7 +259,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     });
 
     final callback = allowInterop(() => controller.add(null));
-    stop = col.watchLazy(callback);
+    stop = native.watchLazy(callback);
 
     return controller.stream;
   }
@@ -287,7 +279,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       final object = deserialize ? deserializeObject(obj) : null;
       controller.add(object);
     });
-    stop = col.watchObject(id, callback);
+    stop = native.watchObject(id, callback);
 
     return controller.stream;
   }

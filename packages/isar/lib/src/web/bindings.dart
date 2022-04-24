@@ -98,24 +98,32 @@ class IsarCollectionJs {
 
 @JS('IsarLink')
 class IsarLinkJs {
-  external Promise loadFirst(IsarTxnJs txn, int id, bool backlink);
-
-  external Promise loadAll(IsarTxnJs txn, int id, bool backlink);
-
-  external Promise replace(
-      IsarTxnJs txn, int source, int target, bool backlink);
-
-  external Promise update(IsarTxnJs txn, int source, List<int> addedTargets,
-      List<int> deletedTargets, bool backlink);
+  external Promise update(IsarTxnJs txn, bool backlink, int id,
+      List<int> addedTargets, List<int> deletedTargets);
 
   external Promise clear(IsarTxnJs txn, int id, bool backlink);
 }
 
-@JS('WhereClause')
+@JS('IdWhereClause')
 @anonymous
-class WhereClauseJs {
-  external String? indexName;
+class IdWhereClauseJs {
   external KeyRange? range;
+}
+
+@JS('IndexWhereClause')
+@anonymous
+class IndexWhereClauseJs {
+  external String indexName;
+  external KeyRange? range;
+}
+
+@JS('LinkWhereClause')
+@anonymous
+class LinkWhereClauseJs {
+  external String linkCollection;
+  external String linkName;
+  external bool backlink;
+  external int id;
 }
 
 @JS('Function')
@@ -137,7 +145,7 @@ class DistinctValueJs {
 class QueryJs {
   external QueryJs(
     IsarCollectionJs collection,
-    List<WhereClauseJs> whereClauses,
+    List<dynamic> whereClauses,
     bool whereDistinct,
     bool whereAscending,
     FilterJs? filter,

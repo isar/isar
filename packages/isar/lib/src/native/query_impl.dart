@@ -132,7 +132,7 @@ class QueryImpl<T> extends Query<T> {
     return col.isar.getTxn(false, (txn) async {
       final bytesPtrPtr = txn.alloc<Pointer<Uint8>>();
       final lengthPtr = txn.alloc<Uint32>();
-      final idNamePtr = col.idName.toNativeUtf8(allocator: txn.alloc);
+      final idNamePtr = col.schema.idName.toNativeUtf8(allocator: txn.alloc);
       nCall(IC.isar_q_export_json(queryPtr, col.ptr, txn.ptr, idNamePtr.cast(),
           bytesPtrPtr, lengthPtr));
 
@@ -151,7 +151,7 @@ class QueryImpl<T> extends Query<T> {
     return col.isar.getTxnSync(false, (txn) {
       final bytesPtrPtr = txn.alloc<Pointer<Uint8>>();
       final lengthPtr = txn.alloc<Uint32>();
-      final idNamePtr = col.idName.toNativeUtf8(allocator: txn.alloc);
+      final idNamePtr = col.schema.idName.toNativeUtf8(allocator: txn.alloc);
 
       try {
         nCall(IC.isar_q_export_json(queryPtr, col.ptr, txn.ptr,

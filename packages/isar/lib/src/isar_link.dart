@@ -9,7 +9,7 @@ abstract class IsarLinkBase<OBJ> {
   /// Have the contents been changed? If not, `.save()` is a no-op.
   bool get isChanged;
 
-  /// Is the containing object have been loaded?
+  /// Has this link been loaded?
   bool get isLoaded;
 
   /// Loads the linked object(s) from the databse
@@ -42,13 +42,13 @@ abstract class IsarLinkBase<OBJ> {
 
   /// @nodoc
   @protected
-  void attach(int? objectId, IsarCollection col, IsarCollection<OBJ> targetCol,
-      String linkName, bool backlink);
+  void attach(IsarCollection sourceCollection,
+      IsarCollection<OBJ> targetCollection, String linkName, int? objectId);
 }
 
 /// Establishes a 1:1 relationship with the same or another collection. The
 /// target collection is specified by the generic type argument.
-abstract class IsarLink<OBJ> extends IsarLinkBase<OBJ> {
+abstract class IsarLink<OBJ> implements IsarLinkBase<OBJ> {
   /// Create an empty, unattached link. Make sure to provide the correct
   /// generic argument.
   factory IsarLink() => IsarNative.newLink();
@@ -62,7 +62,7 @@ abstract class IsarLink<OBJ> extends IsarLinkBase<OBJ> {
 
 /// Establishes a 1:n relationship with the same or another collection. The
 /// target collection is specified by the generic type argument.
-abstract class IsarLinks<OBJ> extends IsarLinkBase<OBJ> implements Set<OBJ> {
+abstract class IsarLinks<OBJ> implements IsarLinkBase<OBJ>, Set<OBJ> {
   /// Create an empty, unattached link. Make sure to provide the correct
   /// generic argument.
   factory IsarLinks() => IsarNative.newLinks();
@@ -72,4 +72,31 @@ abstract class IsarLinks<OBJ> extends IsarLinkBase<OBJ> implements Set<OBJ> {
 
   @override
   void loadSync({bool overrideChanges = true});
+
+  /// Creates and removes the specified links in the database.
+  ///
+  /// This operation does not alter the state of the local copy of this link
+  /// and it can even be used without loading the link.
+  Future<void> update({List<OBJ> link = const [], List<OBJ> unlink = const []});
+
+  /// Creates and removes the specified links in the database.
+  ///
+  /// This operation does not alter the state of the local copy of this link
+  /// and it can even be used without loading the link.
+  void updateSync({List<OBJ> link = const [], List<OBJ> unlink = const []});
+
+  /// Starty a query for linked objects.
+  QueryBuilder<OBJ, OBJ, QAfterFilterCondition> filter();
+
+  /// Counts the linked objects in the database.
+  ///
+  /// It does not take the local state into account and can even be used
+  /// without loading the link.
+  Future<int> count() => filter().count();
+
+  /// Counts the linked objects in the database.
+  ///
+  /// It does not take the local state into account and can even be used
+  /// without loading the link.
+  int countSync() => filter().countSync();
 }

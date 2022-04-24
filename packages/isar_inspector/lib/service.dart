@@ -18,7 +18,6 @@ class Service {
     final vmService = await vmServiceConnectUri(uri);
     final vm = await vmService.getVM();
     final isolateId = vm.isolates!.where((e) => e.name == 'main').first.id!;
-    print(isolateId);
     final service = Service._(vmService, isolateId);
     final version = await service.getVersion();
     await service._service.streamListen(EventStreams.kExtension);

@@ -47,7 +47,7 @@ class QueryImpl<T> extends Query<T> {
   @override
   Future<R?> aggregate<R>(AggregationOp op) {
     return col.isar.getTxn(false, (txn) async {
-      final property = propertyName ?? col.idName;
+      final property = propertyName ?? col.schema.idName;
 
       num? result;
       switch (op) {
@@ -124,7 +124,7 @@ class QueryImpl<T> extends Query<T> {
     final callback = allowInterop((List results) {
       controller.add(results.map(deserialize).toList());
     });
-    stop = col.col.watchQuery(queryJs, callback);
+    stop = col.native.watchQuery(queryJs, callback);
 
     return controller.stream;
   }
@@ -139,7 +139,7 @@ class QueryImpl<T> extends Query<T> {
     final callback = allowInterop(() {
       controller.add(null);
     });
-    stop = col.col.watchQueryLazy(queryJs, callback);
+    stop = col.native.watchQueryLazy(queryJs, callback);
 
     return controller.stream;
   }

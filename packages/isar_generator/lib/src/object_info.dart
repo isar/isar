@@ -1,40 +1,46 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 
 import 'isar_type.dart';
 
-part 'object_info.g.dart';
-part 'object_info.freezed.dart';
+class ObjectInfo {
+  final String dartName;
+  final String isarName;
+  final String accessor;
+  final List<ObjectProperty> properties;
+  final List<ObjectIndex> indexes;
+  final List<ObjectLink> links;
 
-@freezed
-class ObjectInfo with _$ObjectInfo {
-  const ObjectInfo._();
-
-  const factory ObjectInfo({
-    required String dartName,
-    required String isarName,
-    required String accessor,
-    required List<ObjectProperty> properties,
-    required List<ObjectIndex> indexes,
-    required List<ObjectLink> links,
-  }) = _ObjectInfo;
-
-  factory ObjectInfo.fromJson(Map<String, dynamic> json) =>
-      _$ObjectInfoFromJson(json);
-
-  ObjectProperty getProperty(String isarName) {
-    return properties.filter(((it) => it.isarName == isarName)).first;
-  }
+  const ObjectInfo({
+    required this.dartName,
+    required this.isarName,
+    required this.accessor,
+    required this.properties,
+    required this.indexes,
+    required this.links,
+  });
 
   ObjectProperty get idProperty => properties.firstWhere((it) => it.isId);
 
   List<ObjectProperty> get objectProperties =>
       properties.where((p) => !p.isId).toList();
 
-  String get nativeAdapterName => '_${dartName}NativeAdapter';
+  String get getIdName => '_${dartName.decapitalize()}GetId';
+  String get setIdName => '_${dartName.decapitalize()}SetId';
+  String get getLinksName => '_${dartName.decapitalize()}GetLinks';
+  String get attachLinksName => '_${dartName.decapitalize()}AttachLinks';
 
-  String get webAdapterName => '_${dartName}WebAdapter';
+  String get serializeNativeName =>
+      '_${dartName.decapitalize()}SerializeNative';
+  String get deserializeNativeName =>
+      '_${dartName.decapitalize()}DeserializeNative';
+  String get deserializePropNativeName =>
+      '_${dartName.decapitalize()}DeserializePropNative';
+
+  String get serializeWebName => '_${dartName.decapitalize()}SerializeWeb';
+  String get deserializeWebName => '_${dartName.decapitalize()}DeserializeWeb';
+  String get deserializePropWebName =>
+      '_${dartName.decapitalize()}DeserializePropWeb';
 }
 
 enum PropertyDeser {
@@ -44,26 +50,48 @@ enum PropertyDeser {
   namedParam,
 }
 
-@freezed
-class ObjectProperty with _$ObjectProperty {
-  const ObjectProperty._();
+class ObjectProperty {
+  final String dartName;
+  final String isarName;
+  final String dartType;
+  final IsarType isarType;
+  final bool isId;
+  final String? converter;
+  final bool nullable;
+  final bool elementNullable;
+  final PropertyDeser deserialize;
+  final bool assignable;
+  final int? constructorPosition;
 
-  const factory ObjectProperty({
-    required String dartName,
-    required String isarName,
-    required String dartType,
-    required IsarType isarType,
-    required bool isId,
-    String? converter,
-    required bool nullable,
-    required bool elementNullable,
-    required PropertyDeser deserialize,
-    required bool assignable,
-    int? constructorPosition,
-  }) = _ObjectProperty;
+  const ObjectProperty({
+    required this.dartName,
+    required this.isarName,
+    required this.dartType,
+    required this.isarType,
+    required this.isId,
+    this.converter,
+    required this.nullable,
+    required this.elementNullable,
+    required this.deserialize,
+    required this.assignable,
+    this.constructorPosition,
+  });
 
-  factory ObjectProperty.fromJson(Map<String, dynamic> json) =>
-      _$ObjectPropertyFromJson(json);
+  ObjectProperty copyWithIsId(bool isId) {
+    return ObjectProperty(
+      dartName: dartName,
+      isarName: isarName,
+      dartType: dartType,
+      isarType: isarType,
+      isId: isId,
+      converter: converter,
+      nullable: nullable,
+      elementNullable: elementNullable,
+      deserialize: deserialize,
+      assignable: assignable,
+      constructorPosition: constructorPosition,
+    );
+  }
 
   String converterName(ObjectInfo oi) =>
       '_${oi.dartName.decapitalize()}${converter?.capitalize()}';
@@ -85,123 +113,126 @@ class ObjectProperty with _$ObjectProperty {
   }
 }
 
-@freezed
-class ObjectIndexProperty with _$ObjectIndexProperty {
-  const ObjectIndexProperty._();
+class ObjectIndexProperty {
+  final ObjectProperty property;
+  final IndexType type;
+  final bool caseSensitive;
 
-  const factory ObjectIndexProperty({
-    required ObjectProperty property,
-    required IndexType type,
-    required bool caseSensitive,
-  }) = _ObjectIndexProperty;
-
-  factory ObjectIndexProperty.fromJson(Map<String, dynamic> json) =>
-      _$ObjectIndexPropertyFromJson(json);
+  const ObjectIndexProperty({
+    required this.property,
+    required this.type,
+    required this.caseSensitive,
+  });
 
   IsarType get isarType => property.isarType;
 
   IsarType get scalarType => property.isarType.scalarType;
 
-  String get indexTypeEnum {
+  String get indexValueTypeEnum {
     switch (property.isarType) {
       case IsarType.bool:
-        return 'NativeIndexType.bool';
+        return 'IndexValueType.bool';
       case IsarType.int:
-        return 'NativeIndexType.int';
+        return 'IndexValueType.int';
       case IsarType.float:
-        return 'NativeIndexType.float';
+        return 'IndexValueType.float';
       case IsarType.long:
       case IsarType.dateTime:
-        return 'NativeIndexType.long';
+        return 'IndexValueType.long';
       case IsarType.double:
-        return 'NativeIndexType.double';
+        return 'IndexValueType.double';
       case IsarType.string:
         if (caseSensitive) {
           return type == IndexType.hash
-              ? 'NativeIndexType.stringHash'
-              : 'NativeIndexType.string';
+              ? 'IndexValueType.stringHash'
+              : 'IndexValueType.string';
         } else {
           return type == IndexType.hash
-              ? 'NativeIndexType.stringHashCIS'
-              : 'NativeIndexType.stringCIS';
+              ? 'IndexValueType.stringHashCIS'
+              : 'IndexValueType.stringCIS';
         }
       case IsarType.bytes:
         assert(type == IndexType.hash);
-        return 'NativeIndexType.bytesHash';
+        return 'IndexValueType.bytesHash';
       case IsarType.boolList:
         if (type == IndexType.hash) {
-          return 'NativeIndexType.boolListHash';
+          return 'IndexValueType.boolListHash';
         } else {
-          return 'NativeIndexType.bool';
+          return 'IndexValueType.bool';
         }
       case IsarType.intList:
         if (type == IndexType.hash) {
-          return 'NativeIndexType.intListHash';
+          return 'IndexValueType.intListHash';
         } else {
-          return 'NativeIndexType.int';
+          return 'IndexValueType.int';
         }
       case IsarType.floatList:
         assert(type == IndexType.value);
-        return 'NativeIndexType.float';
+        return 'IndexValueType.float';
       case IsarType.longList:
       case IsarType.dateTimeList:
         if (type == IndexType.hash) {
-          return 'NativeIndexType.longListHash';
+          return 'IndexValueType.longListHash';
         } else {
-          return 'NativeIndexType.long';
+          return 'IndexValueType.long';
         }
       case IsarType.doubleList:
         assert(type == IndexType.value);
-        return 'NativeIndexType.double';
+        return 'IndexValueType.double';
       case IsarType.stringList:
         if (caseSensitive) {
           if (type == IndexType.hash) {
-            return 'NativeIndexType.stringListHash';
+            return 'IndexValueType.stringListHash';
           } else if (type == IndexType.hashElements) {
-            return 'NativeIndexType.stringHash';
+            return 'IndexValueType.stringHash';
           } else {
-            return 'NativeIndexType.string';
+            return 'IndexValueType.string';
           }
         } else {
           if (type == IndexType.hash) {
-            return 'NativeIndexType.stringListHashCIS';
+            return 'IndexValueType.stringListHashCIS';
           } else if (type == IndexType.hashElements) {
-            return 'NativeIndexType.stringHashCIS';
+            return 'IndexValueType.stringHashCIS';
           } else {
-            return 'NativeIndexType.stringCIS';
+            return 'IndexValueType.stringCIS';
           }
         }
     }
   }
 }
 
-@freezed
-class ObjectIndex with _$ObjectIndex {
-  const ObjectIndex._();
+class ObjectIndex {
+  final String name;
+  final List<ObjectIndexProperty> properties;
+  final bool unique;
 
-  const factory ObjectIndex({
-    required String name,
-    required List<ObjectIndexProperty> properties,
-    required bool unique,
-  }) = _ObjectIndex;
-
-  factory ObjectIndex.fromJson(Map<String, dynamic> json) =>
-      _$ObjectIndexFromJson(json);
+  const ObjectIndex({
+    required this.name,
+    required this.properties,
+    required this.unique,
+  });
 }
 
-@freezed
-class ObjectLink with _$ObjectLink {
-  const factory ObjectLink({
-    required String dartName,
-    required String isarName,
-    required String? targetIsarName,
-    required String targetCollectionDartName,
-    required String targetCollectionIsarName,
-    required String targetCollectionAccessor,
-    required bool links,
-    required bool backlink,
-  }) = _ObjectLink;
+class ObjectLink {
+  final String dartName;
+  final String isarName;
 
-  factory ObjectLink.fromJson(Map<String, dynamic> json) =>
-      _$ObjectLinkFromJson(json);
+  // isar name of the original link (only for backlinks)
+  final String? targetIsarName;
+  final String targetCollectionDartName;
+  final String targetCollectionIsarName;
+  final String targetCollectionAccessor;
+  final bool links;
+  final bool backlink;
+
+  const ObjectLink({
+    required this.dartName,
+    required this.isarName,
+    this.targetIsarName,
+    required this.targetCollectionDartName,
+    required this.targetCollectionIsarName,
+    required this.targetCollectionAccessor,
+    required this.links,
+    required this.backlink,
+  });
 }

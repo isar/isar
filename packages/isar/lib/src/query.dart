@@ -36,7 +36,7 @@ abstract class Query<T> {
       aggregate<int>(AggregationOp.count).then((value) => value!);
 
   /// {@macro query_count}
-  int? countSync() => aggregateSync<int>(AggregationOp.count);
+  int countSync() => aggregateSync<int>(AggregationOp.count)!;
 
   /// {@template query_delete_first}
   /// Delete the first object that matches this query. Returns whether a object

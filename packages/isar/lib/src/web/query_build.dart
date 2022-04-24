@@ -7,8 +7,8 @@ import 'isar_collection_impl.dart';
 import 'isar_web.dart';
 import 'query_impl.dart';
 
-Query<T> buildWebQuery<T>(
-  IsarCollectionImpl col,
+Query<T> buildWebQuery<T, OBJ>(
+  IsarCollectionImpl<OBJ> col,
   List<WhereClause> whereClauses,
   bool whereDistinct,
   Sort whereSort,
@@ -19,15 +19,22 @@ Query<T> buildWebQuery<T>(
   int? limit,
   String? property,
 ) {
-  final whereClausesJs =
-      whereClauses.map((wc) => _buildWhereClause(col, wc)).toList();
+  final whereClausesJs = whereClauses.map((wc) {
+    if (wc is IdWhereClause) {
+      return _buildIdWhereClause(wc);
+    } else if (wc is IndexWhereClause) {
+      return _buildIndexWhereClause(col.schema, wc);
+    } else {
+      return _buildLinkWhereClause(col, wc as LinkWhereClause);
+    }
+  }).toList();
 
-  final filterJs = filter != null ? _buildFilter(col, filter) : null;
+  final filterJs = filter != null ? _buildFilter(col.schema, filter) : null;
   final sortJs = sortBy.isNotEmpty ? _buildSort(sortBy) : null;
   final distinctJs = distinctBy.isNotEmpty ? _buildDistinct(distinctBy) : null;
 
   final queryJs = QueryJs(
-    col.col,
+    col.native,
     whereClausesJs,
     whereDistinct,
     whereSort == Sort.asc,
@@ -40,9 +47,9 @@ Query<T> buildWebQuery<T>(
 
   QueryDeserialize<T> deserialize;
   if (property == null) {
-    deserialize = (jsObj) => col.adapter.deserialize(col, jsObj);
+    deserialize = (jsObj) => col.schema.deserializeWeb(col, jsObj) as T;
   } else {
-    deserialize = (jsObj) => col.adapter.deserializeProperty(jsObj, property);
+    deserialize = (jsObj) => col.schema.deserializePropWeb(jsObj, property);
   }
 
   return QueryImpl<T>(col, queryJs, deserialize, property);
@@ -64,49 +71,74 @@ dynamic _valueToJs(dynamic value) {
   }
 }
 
-WhereClauseJs _buildWhereClause(
-    IsarCollectionImpl col, WhereClause whereClause) {
-  final isComposite = col.isCompositeIndex[whereClause.indexName]!;
+IdWhereClauseJs _buildIdWhereClause(IdWhereClause wc) {
+  return IdWhereClauseJs()
+    ..range = _buildKeyRange(
+      wc.lower != null ? _valueToJs(wc.lower) : null,
+      wc.upper != null ? _valueToJs(wc.upper) : null,
+      wc.includeLower,
+      wc.includeUpper,
+    );
+}
 
-  if (whereClause.lower == null && whereClause.upper == null) {
-    return WhereClauseJs()..indexName = whereClause.indexName;
-  }
+IndexWhereClauseJs _buildIndexWhereClause(
+    CollectionSchema schema, IndexWhereClause wc) {
+  final isComposite = schema.indexValueTypes[wc.indexName]!.length > 1;
 
-  dynamic lower = whereClause.lower;
+  dynamic lower = wc.lower;
   if (!isComposite && lower != null) {
     lower = lower[0];
   }
-  lower = _valueToJs(lower);
 
-  dynamic upper = whereClause.upper;
+  dynamic upper = wc.upper;
   if (!isComposite && upper != null) {
     upper = upper[0];
   }
-  upper = _valueToJs(upper);
 
-  KeyRange range;
-  if (whereClause.lower != null) {
-    if (whereClause.upper != null) {
+  return IndexWhereClauseJs()
+    ..indexName = wc.indexName
+    ..range = _buildKeyRange(
+      wc.lower != null ? _valueToJs(lower) : null,
+      wc.upper != null ? _valueToJs(upper) : null,
+      wc.includeLower,
+      wc.includeUpper,
+    );
+}
+
+LinkWhereClauseJs _buildLinkWhereClause(
+    IsarCollectionImpl col, LinkWhereClause wc) {
+  final linkCol =
+      col.isar.getCollectionInternal(wc.linkCollection) as IsarCollectionImpl;
+  final backlinkLinkName = linkCol.schema.backlinkLinkNames[wc.linkName];
+  return LinkWhereClauseJs()
+    ..linkCollection = wc.linkCollection
+    ..linkName = backlinkLinkName ?? wc.linkName
+    ..backlink = backlinkLinkName != null
+    ..id = wc.id;
+}
+
+KeyRange? _buildKeyRange(
+    dynamic lower, dynamic upper, bool includeLower, bool includeUpper) {
+  KeyRange? range;
+  if (lower != null) {
+    if (upper != null) {
       range = KeyRange.bound(
         lower,
         upper,
-        !whereClause.includeLower,
-        !whereClause.includeUpper,
+        !includeLower,
+        !includeUpper,
       );
     } else {
-      range = KeyRange.lowerBound(lower, !whereClause.includeLower);
+      range = KeyRange.lowerBound(lower, !includeLower);
     }
-  } else {
-    range = KeyRange.upperBound(upper, !whereClause.includeUpper);
+  } else if (upper != null) {
+    range = KeyRange.upperBound(upper, !includeUpper);
   }
-
-  return WhereClauseJs()
-    ..indexName = whereClause.indexName
-    ..range = range;
+  return range;
 }
 
-FilterJs? _buildFilter(IsarCollectionImpl col, FilterOperation filter) {
-  final filterStr = _buildFilterOperation(col, filter);
+FilterJs? _buildFilter(CollectionSchema schema, FilterOperation filter) {
+  final filterStr = _buildFilterOperation(schema, filter);
   if (filterStr != null) {
     return FilterJs('id', 'obj', 'return $filterStr');
   } else {
@@ -115,23 +147,23 @@ FilterJs? _buildFilter(IsarCollectionImpl col, FilterOperation filter) {
 }
 
 String? _buildFilterOperation(
-  IsarCollectionImpl col,
+  CollectionSchema schema,
   FilterOperation filter,
 ) {
   if (filter is FilterGroup) {
-    return _buildFilterGroup(col, filter);
+    return _buildFilterGroup(schema, filter);
   } else if (filter is LinkFilter) {
     unsupportedOnWeb();
   } else if (filter is FilterCondition) {
-    return _buildCondition(col, filter);
+    return _buildCondition(schema, filter);
   } else {
     return null;
   }
 }
 
-String? _buildFilterGroup(IsarCollectionImpl col, FilterGroup group) {
+String? _buildFilterGroup(CollectionSchema schema, FilterGroup group) {
   final builtConditions = group.filters
-      .map((op) => _buildFilterOperation(col, op))
+      .map((op) => _buildFilterOperation(schema, op))
       .where((e) => e != null)
       .toList();
 
@@ -148,7 +180,7 @@ String? _buildFilterGroup(IsarCollectionImpl col, FilterGroup group) {
   }
 }
 
-String _buildCondition(IsarCollectionImpl col, FilterCondition condition) {
+String _buildCondition(CollectionSchema schema, FilterCondition condition) {
   dynamic _prepareFilterValue(dynamic value) {
     if (value == null) {
       return null;
@@ -160,13 +192,12 @@ String _buildCondition(IsarCollectionImpl col, FilterCondition condition) {
   }
 
   final isListOp = condition.type != ConditionType.isNull &&
-      col.listProperties.contains(condition.property);
+      schema.listProperties.contains(condition.property);
   final accessor =
-      condition.property == col.idName ? 'id' : 'obj.${condition.property}';
+      condition.property == schema.idName ? 'id' : 'obj.${condition.property}';
   final variable = isListOp ? 'e' : accessor;
 
   final cond = _buildConditionInternal(
-    col: col,
     conditionType: condition.type,
     variable: variable,
     val1: _prepareFilterValue(condition.value1),
@@ -184,7 +215,6 @@ String _buildCondition(IsarCollectionImpl col, FilterCondition condition) {
 }
 
 String _buildConditionInternal({
-  required IsarCollectionImpl col,
   required ConditionType conditionType,
   required String variable,
   required Object? val1,

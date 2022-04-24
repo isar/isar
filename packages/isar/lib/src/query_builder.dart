@@ -149,9 +149,9 @@ class QueryBuilder<OBJ, R, S> {
       filter = qbFinished._filterOr;
     }
     return addFilterConditionInternal(LinkFilter(
-      targetCollection: targetCollection,
       filter: filter,
       linkName: linkName,
+      targetCollection: targetCollection.name,
     ));
   }
 

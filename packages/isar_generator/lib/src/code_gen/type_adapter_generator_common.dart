@@ -32,18 +32,15 @@ String deserializeMethodBody(ObjectInfo object,
 
 String generateAttachLinks(ObjectInfo object) {
   var code = '''
-  @override
-  void attachLinks(Isar isar, int id, ${object.dartName} object) {''';
+  void ${object.attachLinksName}(IsarCollection col, int id, ${object.dartName} object) {''';
 
   for (var link in object.links) {
     code += '''object.${link.dartName}.attach(
-      id,
-      isar.${object.accessor},
-      isar.getCollection<${link.targetCollectionDartName}>('${link.targetCollectionIsarName.esc}'),
+      col,
+      col.isar.${link.targetCollectionAccessor},
       '${link.isarName.esc}',
-      ${link.backlink},
-    );
-    ''';
+      id
+    );''';
   }
   return code + '}';
 }

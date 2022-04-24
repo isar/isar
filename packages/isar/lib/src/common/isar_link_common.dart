@@ -3,26 +3,41 @@ import 'dart:collection';
 import 'package:isar/isar.dart';
 
 abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
+  var _initialized = false;
+
   int? _objectId;
-  late IsarCollection<dynamic> col;
-  late IsarCollection<OBJ> targetCol;
-  late String linkName;
-  late bool isBacklink;
+
+  late final String linkName;
+
+  late final IsarCollection sourceCollection;
+
+  late final IsarCollection<OBJ> targetCollection;
 
   @override
   bool get isAttached => _objectId != null;
 
   @override
-  void attach(int? objectId, IsarCollection col, IsarCollection targetCol,
-      String linkName, bool isBacklink) {
-    if (!identical(col.isar, targetCol.isar)) {
-      throw IsarError('Collections need to have the same Isar instance.');
+  void attach(
+    IsarCollection sourceCollection,
+    IsarCollection<OBJ> targetCollection,
+    String linkName,
+    int? objectId,
+  ) {
+    if (_initialized) {
+      if (linkName != this.linkName ||
+          !identical(sourceCollection, this.sourceCollection) ||
+          !identical(targetCollection, this.targetCollection)) {
+        throw IsarError(
+            'Link has been moved! It is not allowed to move a link to a differenct collection.');
+      }
+    } else {
+      _initialized = true;
+      this.sourceCollection = sourceCollection;
+      this.targetCollection = targetCollection;
+      this.linkName = linkName;
     }
+
     _objectId = objectId;
-    this.col = col;
-    this.targetCol = targetCol as IsarCollection<OBJ>;
-    this.linkName = linkName;
-    this.isBacklink = isBacklink;
   }
 
   int requireAttached() {
@@ -34,13 +49,83 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
     }
   }
 
-  int? getId(OBJ obj) => (targetCol as dynamic).getId(obj);
+  int? Function(OBJ obj) get getId;
 
-  void resetContent();
+  QueryBuilder<OBJ, OBJ, QAfterFilterCondition> filter() {
+    final containingId = requireAttached();
+    final qb = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>(
+      targetCollection,
+      false,
+      Sort.asc,
+    );
+
+    // ignore: invalid_use_of_protected_member
+    return qb.addWhereClauseInternal(LinkWhereClause(
+      linkCollection: sourceCollection.name,
+      linkName: linkName,
+      id: containingId,
+    ));
+  }
+
+  Future<void> updateInternal(
+      Iterable<OBJ> link, Iterable<OBJ> unlink, bool reset) async {
+    final unsavedAdded = <OBJ>[];
+    final linkIds = <int>[];
+    final unlinkIds = <int>[];
+
+    for (var object in link) {
+      final id = getId(object);
+      if (id != null) {
+        linkIds.add(id);
+      } else {
+        unsavedAdded.add(object);
+      }
+    }
+
+    if (unsavedAdded.isNotEmpty) {
+      final unsavedIds = await targetCollection.putAll(unsavedAdded);
+      linkIds.addAll(unsavedIds);
+    }
+
+    for (var object in unlink) {
+      final removedId = getId(object);
+      if (removedId != null) {
+        unlinkIds.add(removedId);
+      }
+    }
+
+    await updateIdsInternal(linkIds, unlinkIds, reset);
+  }
+
+  void updateInternalSync(
+      Iterable<OBJ> link, Iterable<OBJ> unlink, bool reset) {
+    final linkIds = <int>[];
+    final unlinkIds = <int>[];
+
+    for (var object in link) {
+      final id = getId(object) ?? targetCollection.putSync(object);
+      linkIds.add(id);
+    }
+
+    for (var object in unlink) {
+      final removedId = getId(object);
+      if (removedId != null) {
+        unlinkIds.add(removedId);
+      }
+    }
+
+    updateIdsInternalSync(linkIds, unlinkIds, reset);
+  }
+
+  Future<void> updateIdsInternal(
+      List<int> linkIds, List<int> unlinkIds, bool reset);
+
+  void updateIdsInternalSync(
+      List<int> linkIds, List<int> unlinkIds, bool reset);
 }
 
 abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
-    implements IsarLink<OBJ> {
+    with IsarLink<OBJ> {
   OBJ? _value;
 
   var _isChanged = false;
@@ -63,21 +148,55 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
     _isLoaded = true;
   }
 
-  void applyLoaded(OBJ? object) {
-    _value = object;
+  @override
+  Future<void> load() async {
+    _value = await filter().findFirst();
     _isChanged = false;
     _isLoaded = true;
   }
 
-  void applySaved(OBJ? object) {
-    if (identical(value, object)) {
+  @override
+  void loadSync() {
+    _value = filter().findFirstSync();
+    _isChanged = false;
+    _isLoaded = true;
+  }
+
+  @override
+  Future<void> save() async {
+    if (!isChanged) return;
+    final object = _value;
+
+    await updateInternal([if (object != null) object], [], true);
+    if (identical(_value, object)) {
       _isChanged = false;
     }
     _isLoaded = true;
   }
 
   @override
-  void resetContent() {
+  void saveSync() {
+    if (!isChanged) return;
+    final object = _value;
+
+    updateInternalSync([if (object != null) object], [], true);
+    if (identical(_value, object)) {
+      _isChanged = false;
+    }
+    _isLoaded = true;
+  }
+
+  @override
+  Future<void> reset() async {
+    await updateIdsInternal([], [], true);
+    _value = null;
+    _isChanged = false;
+    _isLoaded = true;
+  }
+
+  @override
+  void resetSync() {
+    updateIdsInternal([], [], true);
     _value = null;
     _isChanged = false;
     _isLoaded = true;
@@ -85,8 +204,7 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 }
 
 abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
-    with SetMixin<OBJ>
-    implements IsarLinks<OBJ> {
+    with IsarLinks<OBJ>, SetMixin<OBJ> {
   final _objects = HashSet<OBJ>.identity();
   final addedObjects = HashSet<OBJ>.identity();
   final removedObjects = HashSet<OBJ>.identity();
@@ -99,7 +217,23 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   @override
   bool get isLoaded => _isLoaded;
 
-  void applyLoaded(List<OBJ> objects) {
+  @override
+  Future<void> load({bool overrideChanges = true}) async {
+    final objects = await filter().findAll();
+    _applyLoaded(objects, overrideChanges);
+  }
+
+  @override
+  void loadSync({bool overrideChanges = true}) {
+    final objects = filter().findAllSync();
+    _applyLoaded(objects, overrideChanges);
+  }
+
+  void _applyLoaded(List<OBJ> objects, bool overrideChanges) {
+    if (overrideChanges) {
+      addedObjects.clear();
+      removedObjects.clear();
+    }
     _objects.clear();
     _objects.addAll(objects);
     _objects.addAll(addedObjects);
@@ -107,21 +241,55 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
     _isLoaded = true;
   }
 
-  void applySaved(List<OBJ> added, List<OBJ> removed) {
+  @override
+  Future<void> save() async {
+    if (!isChanged) return;
+
+    final added = addedObjects.toList();
+    final removed = removedObjects.toList();
+
+    await updateInternal(added, removed, false);
+
     addedObjects.removeAll(added);
     removedObjects.removeAll(removed);
     _isLoaded = true;
   }
 
-  void clearChanges() {
+  @override
+  void saveSync() {
+    if (!isChanged) return;
+
+    updateInternalSync(addedObjects, removedObjects, false);
+
     addedObjects.clear();
     removedObjects.clear();
+    _isLoaded = true;
   }
 
   @override
-  void resetContent() {
-    clearChanges();
-    _objects.clear();
+  Future<void> update({
+    List<OBJ> link = const [],
+    List<OBJ> unlink = const [],
+  }) {
+    return updateInternal(link, unlink, false);
+  }
+
+  @override
+  void updateSync({List<OBJ> link = const [], List<OBJ> unlink = const []}) {
+    return updateInternalSync(link, unlink, false);
+  }
+
+  @override
+  Future<void> reset() async {
+    await updateIdsInternal([], [], true);
+    clear();
+    _isLoaded = true;
+  }
+
+  @override
+  void resetSync() {
+    updateIdsInternal([], [], true);
+    clear();
     _isLoaded = true;
   }
 

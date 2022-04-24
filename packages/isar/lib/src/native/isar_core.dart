@@ -76,6 +76,7 @@ IsarError? isarErrorFromResult(int result) {
   }
 }
 
+@pragma('vm:prefer-inline')
 void nCall(int result) {
   final error = isarErrorFromResult(result);
   if (error != null) {
@@ -124,5 +125,6 @@ extension RawObjectSetPointerX on Pointer<RawObjectSet> {
 }
 
 extension PointerX on Pointer {
+  @pragma('vm:prefer-inline')
   bool get isNull => address == 0;
 }
