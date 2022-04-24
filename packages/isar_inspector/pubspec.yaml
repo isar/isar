@@ -8,13 +8,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  isar: 2.4.0
   vm_service: ^7.2.0
   provider: ^5.0.0
-  dartx: ^0.7.1
-  freezed_annotation: any
+  dartx: ^1.0.0
   json_annotation: ^4.0.0
   petitparser: ^4.0.2
-  isar: any
   linked_scroll_controller: ^0.2.0
   flutter_svg: any
   font_awesome_flutter: any
@@ -23,7 +22,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  freezed: any
   json_serializable: ^4.0.0
   build_runner: any
   flutter_lints: ^1.0.4

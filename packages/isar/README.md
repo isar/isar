@@ -59,11 +59,11 @@ Holy smokes you're here! Let's get started...
 
 ```yaml
 dependencies:
-  isar: 2.2.1
-  isar_flutter_libs: 2.2.1 # contains the binaries
+  isar: 2.4.0
+  isar_flutter_libs: 2.4.0 # contains the binaries
 
 dev_dependencies:
-  isar_generator: 2.2.1
+  isar_generator: 2.4.0
   build_runner: any
 ```
 

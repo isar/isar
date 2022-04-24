@@ -1,37 +1,46 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 
-part 'schema.freezed.dart';
 part 'schema.g.dart';
 
-@freezed
-class Collection with _$Collection {
-  const factory Collection(
-    String name,
-    List<Property> properties,
-    List<Link> links,
-  ) = _Collection;
+@JsonSerializable()
+class Collection {
+  final String name;
+  final List<Property> properties;
+  final List<Link> links;
+
+  const Collection(
+    this.name,
+    this.properties,
+    this.links,
+  );
 
   factory Collection.fromJson(Map<String, dynamic> json) =>
       _$CollectionFromJson(json);
 }
 
-@freezed
-class Property with _$Property {
-  const factory Property(
-    String name,
-    String type,
-  ) = _Property;
+@JsonSerializable()
+class Property {
+  final String name;
+  final String type;
+
+  const Property(
+    this.name,
+    this.type,
+  );
 
   factory Property.fromJson(Map<String, dynamic> json) =>
       _$PropertyFromJson(json);
 }
 
-@freezed
-class Link with _$Link {
-  const factory Link(
-    String name,
-    String target,
-  ) = _Link;
+@JsonSerializable()
+class Link {
+  final String name;
+  final String target;
+
+  const Link(
+    this.name,
+    this.target,
+  );
 
   factory Link.fromJson(Map<String, dynamic> json) => _$LinkFromJson(json);
 }
