@@ -190,6 +190,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return putAll(
       [object],
       replaceOnConflict: replaceOnConflict,
+      saveLinks: saveLinks,
     ).then((ids) => ids[0]);
   }
 
