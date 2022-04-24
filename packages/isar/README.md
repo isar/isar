@@ -162,7 +162,7 @@ class Teacher {
     late String subject;
 
     @Backlink(to: 'teacher')
-    var students = IsarLinks<Student>();
+    final students = IsarLinks<Student>();
 }
 
 @Collection()
@@ -171,7 +171,7 @@ class Student {
 
     late String name;
 
-    var teacher = IsarLink<Teacher>();
+    final teacher = IsarLink<Teacher>();
 }
 ```
 
