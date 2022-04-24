@@ -85,7 +85,7 @@ abstract class IsarLinks<OBJ> implements IsarLinkBase<OBJ>, Set<OBJ> {
   /// and it can even be used without loading the link.
   void updateSync({List<OBJ> link = const [], List<OBJ> unlink = const []});
 
-  /// Starty a query for linked objects.
+  /// Starts a query for linked objects.
   QueryBuilder<OBJ, OBJ, QAfterFilterCondition> filter();
 
   /// Counts the linked objects in the database.
