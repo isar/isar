@@ -164,6 +164,7 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   Future<void> save() async {
+    if (!isChanged) return;
     final object = _value;
 
     await updateInternal([if (object != null) object], [], true);
@@ -175,7 +176,9 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   void saveSync() {
+    if (!isChanged) return;
     final object = _value;
+
     updateInternalSync([if (object != null) object], [], true);
     if (identical(_value, object)) {
       _isChanged = false;

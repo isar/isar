@@ -227,9 +227,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
         if (schema.hasLinks) {
           schema.attachLinks(this, id, object);
-          for (var link in schema.getLinks(object)) {
-            if (link.isChanged) {
-              linkFutures.add(link.save());
+          if (saveLinks) {
+            for (var link in schema.getLinks(object)) {
+              if (link.isChanged) {
+                linkFutures.add(link.save());
+              }
             }
           }
         }

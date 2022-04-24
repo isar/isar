@@ -34,7 +34,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
         await link.clear(txn, containingId, backlink).wait();
       }
       return await link
-          .update(txn, backlink, containingId, linkIds, linkIds)
+          .update(txn, backlink, containingId, linkIds, unlinkIds)
           .wait();
     });
   }
