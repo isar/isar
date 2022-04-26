@@ -6,11 +6,14 @@
 </p>
 
 <p align="center">
+<a href="https://pub.dev/packages/isar">
+    <img src="https://img.shields.io/pub/v/isar?label=pub.dev&labelColor=333940&logo=dart">
+  </a>
   <a href="https://github.com/isar/isar/actions/workflows/test.yml">
     <img src="https://img.shields.io/github/workflow/status/isar/isar/Dart%20CI/main?label=tests&labelColor=333940&logo=github">
   </a>
-  <a href="https://pub.dev/packages/isar">
-    <img src="https://img.shields.io/pub/v/isar?label=pub.dev&labelColor=333940&logo=dart">
+  <a href="https://t.me/isardb">
+    <img src="https://img.shields.io/static/v1?label=join&message=isardb&labelColor=333940&logo=telegram&logoColor=white&color=229ED9">
   </a>
   <a href="https://github.com/isar/isar/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/isar/isar?color=%23007A88&labelColor=333940&logo=apache">
@@ -48,6 +51,8 @@ Isar can do much more (and we are just getting started)
 - 🧪 **ACID semantics**. Rely on consistency
 - 💃 **Static typing**. Compile-time checked and autocompleted queries
 - ✨ **Beautiful documentation**. Readable, easy to understand and ever improving
+
+Join the [Telegram group](https://t.me/isardb) for discussion and check out the [CONTRIBUTING.md](https://github.com/isar/isar/blob/main/CONTRIBUTING.md) doc.
 
 If you want to say thank you, star us on GitHub and like us on pub.dev 🙌💙
 
