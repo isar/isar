@@ -6,11 +6,11 @@ First of all, join the Isar Telegram channel: [t.me/isardb](https://t.me/isardb)
 
 Right now, the most helpful contributions are tests! The goal is to have at least 1k unit and integration tests by the end of 2022. Also, don't hesitate to refactor tests.
 
-# Isar Dart
+# Isar Dart 🎯
 
 Isar Dart is the main Isar repository (the one you are looking at right now).
 
-## Project Strucutre
+## Project Strucutre 🏛
 
 - `isar` package in _packages/isar_ is the only library that has runtime Dart code. It contains all the public API interfaces as well as platform specific implementations (_src/native_ and _src/web_) to communicate with the respective backend.
 - `isar_flutter_libs` does not contain any Dart code but a native project for every platform to ensure that compiled Isar Code binaries are shipped correctly.
@@ -18,7 +18,7 @@ Isar Dart is the main Isar repository (the one you are looking at right now).
 - `isar_inspector` is a standalone package that contains the Isar inspector and communicates with the _packages/isar_ package via the Dart Observatory protocol.
 - `isar_test` contains all the tests for Isar. The reason why we have a separate package is that tests can be run in two modes: As unit tests on your development machine and as integration tests on any supported device.
 
-## Running tests
+## Running tests 💨
 
 You can run the tests as unit or integration tests. Either way, the first step is to run the generator to create all necessary files. Run the following in _packages/isar_test_:
 
@@ -26,7 +26,7 @@ You can run the tests as unit or integration tests. Either way, the first step i
 flutter pub run build_runner build
 ```
 
-### Unit tests
+### Unit tests 🧪
 
 To run the Isar tests on your development machine you need to download the Isar Core binaries to the test directory. Run in _packages/isar_test_:
 
@@ -52,7 +52,7 @@ To see what is going wrong with a specific web test, you can run it inside a bro
 flutter run test/some_test.dart
 ```
 
-### Integration tests
+### Integration tests 📲
 
 To run the tests on an actual device, we use the Flutter test driver. First you need to generate the test file:
 
@@ -66,11 +66,11 @@ Now the fun part: Running the tests on a device.
 flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart
 ```
 
-## Contributing
+## Contributing ⛹️‍♂️
 
 There are two areas where contributions are most helpful: Tests and Isar Inspector improvements.
 
-### Tests
+### Tests 🧪
 
 The major limit for new features right now is not enough tests to make sure that the new features work as expected.  
 The goal is complete test coverage. Every edge case of every feature should be tested.
@@ -83,7 +83,7 @@ Currently, many features are not tested well enough. When you write tests, make 
 - all query modifiers
 - sync and async methods
 
-### Isar Inspector
+### Isar Inspector 🔎
 
 Currently, the Inspector is lacking support for lists and links. Also we need to update the CI to build for Windows and Linux.
 
@@ -91,13 +91,13 @@ Finally, it would be nice to have integration tests that check whether the conne
 
 ---
 
-# Isar Core
+# Isar Core 👨‍🔧
 
 [Isar Core](https://github.com/isar/isar-core) is the backend on Android, iOS, macOS, and Windows. It's written in Rust and gets compiled to binaries for every platform and processor architecture before shipping it to pub.dev.
 
 Isar Core depends on the [mdbx](https://github.com/isar/libmdbx) key-value database to handle storing the data.
 
-## Setup
+## Setup ⚙️
 
 To get started you first need to install Rust on your machine: Use [rustup](https://rustup.rs) and follow the instructions. It's easy 😉
 
@@ -105,7 +105,7 @@ Next, you need an IDE to write your code in. I recommend [CLion](https://www.jet
 
 If you choose CLion, choose `External linter: Clippy` and `Run linter on the fly: true` in _Settings > Languages and Frameworks > Rust > External Linters_.
 
-## Project Structure
+## Project Structure 🏛
 
 The entire repository is a cargo project and the _src_ folder contains the actual code.
 
@@ -113,7 +113,7 @@ The entire repository is a cargo project and the _src_ folder contains the actua
 - `mdbx-sys` contains the build script and bindings for libmdbx.
 - the integration tests can be found in `tests`.
 
-## Contributing
+## Contributing ⛹️‍♂️
 
 Currently, the most helpful contributions are unit and integration tests.
 
@@ -127,7 +127,7 @@ As a rule of thumb, all platform independent tests should be located in Isar Dar
 
 Once you are done, open a PR and briefly explain your contribution 🙌
 
-## Testing in combination with Isar Dart
+## Testing in combination with Isar Dart 🪢
 
 To test your code together with the Dart bindings and Isar Dart, you need to build dart-ffi for your platform.
 
@@ -137,7 +137,7 @@ If you change the `dart-ffi` bindings, don't forget to run `ffigen` to update th
 
 ---
 
-# Isar Web
+# Isar Web 🕸
 
 [Isar Web](https://github.com/isar/isar-web) is the backend for browsers. It's written in TypeScript and gets compiled to JavaScript before shipping it to pub.dev.
 
