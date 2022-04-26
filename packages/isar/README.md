@@ -122,10 +122,10 @@ All basic crud operations are available via the IsarCollection.
 final newPost = Post()..title = 'Amazing new database';
 
 await isar.writeTxn((isar) {
-  newPost.id = await isar.posts.put(newPost); // insert
+  newPost.id = await isar.posts.put(newPost); // insert & update
 });
 
-final existingPost = await isar.get(newPost.id!); // get
+final existingPost = await isar.posts.get(newPost.id!); // get
 
 await isar.writeTxn((isar) {
   await isar.posts.delete(existingPost.id!); // delete
