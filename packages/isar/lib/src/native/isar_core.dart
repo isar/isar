@@ -48,9 +48,6 @@ void initializeIsarCore({Map<Abi, String> libraries = const {}}) {
       case Abi.iosArm64:
       case Abi.iosX64:
         break;
-      case Abi.linuxArm64:
-        library = 'arm64/libisar.so';
-        break;
       case Abi.linuxX64:
         library = 'x64/libisar.so';
         break;
