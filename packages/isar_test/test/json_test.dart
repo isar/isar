@@ -37,19 +37,23 @@ void tests() {
       return json;
     }
 
-    isarTest('big json', () async {
-      final json = generateJson(100000);
+    isarTest(
+      'big json',
+      () async {
+        final json = generateJson(100000);
 
-      await isar.tWriteTxn((isar) async {
-        await col.tImportJson(json);
-      });
+        await isar.tWriteTxn((isar) async {
+          await col.tImportJson(json);
+        });
 
-      for (var i = 0; i < json.length; i++) {
-        json[i]['id'] = i + 1;
-      }
-      final exportedJson = await col.where().exportJson();
-      expect(exportedJson, json);
-    });
+        for (var i = 0; i < json.length; i++) {
+          json[i]['id'] = i + 1;
+        }
+        final exportedJson = await col.where().exportJson();
+        expect(exportedJson, json);
+      },
+      timeout: const Timeout(Duration(seconds: 60)),
+    );
 
     isarTest('primitive null', () async {
       final json = [

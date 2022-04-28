@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:isar/isar.dart';
+import 'package:test/test.dart';
 import 'dart:typed_data';
 
 import 'common.dart';

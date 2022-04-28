@@ -95,12 +95,12 @@ jobs:
     strategy:
       matrix:
         include:
-          #- os: macos-latest
-          #  browser: safari
+          - os: macos-latest
+            browser: safari
           - os: ubuntu-latest
             browser: chrome
-          #- os: ubuntu-latest
-          #  browser: firefox
+          - os: ubuntu-latest
+            browser: firefox
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:

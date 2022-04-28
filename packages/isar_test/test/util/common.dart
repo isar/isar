@@ -1,5 +1,4 @@
 // ignore_for_file: implementation_imports
-import 'dart:ffi';
 import 'dart:io';
 import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
@@ -39,16 +38,20 @@ var allTestsSuccessful = true;
 var testCount = 0;
 
 @isTest
-void isarTest(String name, dynamic Function() body) {
-  test(name, () async {
-    try {
-      await body();
-      testCount++;
-    } catch (e) {
-      allTestsSuccessful = false;
-      rethrow;
-    }
-  });
+void isarTest(String name, dynamic Function() body, {Timeout? timeout}) {
+  test(
+    name,
+    () async {
+      try {
+        await body();
+        testCount++;
+      } catch (e) {
+        allTestsSuccessful = false;
+        rethrow;
+      }
+    },
+    timeout: timeout,
+  );
 }
 
 @isTest
@@ -74,10 +77,9 @@ void registerBinaries() {
     try {
       Isar.initializeLibraries(
         libraries: {
-          Abi.windowsX64: path.join(dartToolDir, 'libisar_windows_x64.dll'),
-          Abi.macosX64: path.join(dartToolDir,
-              '/Users/simon/Documents/GitHub/isar-core/dart-ffi/libisar_macos.dylib'),
-          Abi.linuxArm64: path.join(dartToolDir, 'libisar_linux_x64.so'),
+          IsarAbi.windowsX64: path.join(dartToolDir, 'libisar_windows_x64.dll'),
+          IsarAbi.macosX64: path.join(dartToolDir, 'libisar_macos.dylib'),
+          IsarAbi.linuxArm64: path.join(dartToolDir, 'libisar_linux_x64.so'),
         },
       );
     } catch (e) {
