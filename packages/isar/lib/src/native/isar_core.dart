@@ -30,20 +30,46 @@ IsarCoreBindings? _IC;
 // ignore: non_constant_identifier_names
 IsarCoreBindings get IC => _IC!;
 
-void initializeIsarCore({Map<String, String> libraries = const {}}) {
+void initializeIsarCore({Map<Abi, String> libraries = const {}}) {
   if (_IC != null) {
     return;
   }
   late String library;
-  if (Platform.isAndroid) {
-    library = libraries['android'] ?? 'libisar.so';
-  } else if (Platform.isMacOS) {
-    library = libraries['macos'] ?? 'libisar.dylib';
-  } else if (Platform.isWindows) {
-    library = libraries['windows'] ?? 'isar.dll';
-  } else if (Platform.isLinux) {
-    library = libraries['linux'] ?? 'libisar.so';
+  if (libraries.containsKey(Abi.current())) {
+    library = libraries[Abi.current()]!;
+  } else {
+    switch (Abi.current()) {
+      case Abi.androidArm:
+      case Abi.androidArm64:
+      case Abi.androidIA32:
+      case Abi.androidX64:
+        library = 'libisar.so';
+        break;
+      case Abi.iosArm64:
+      case Abi.iosX64:
+        break;
+      case Abi.linuxArm64:
+        library = 'arm64/libisar.so';
+        break;
+      case Abi.linuxX64:
+        library = 'x64/libisar.so';
+        break;
+      case Abi.macosArm64:
+      case Abi.macosX64:
+        library = 'libisar.dylib';
+        break;
+      case Abi.windowsArm64:
+        library = 'arm64/isar.dll';
+        break;
+      case Abi.windowsX64:
+        library = 'x64/isar.dll';
+        break;
+      default:
+        throw 'Unsupported processor architecture "${Abi.current()}".'
+            'Please open an issue on GitHub to request it.';
+    }
   }
+
   try {
     if (Platform.isIOS) {
       _IC = IsarCoreBindings(DynamicLibrary.process());

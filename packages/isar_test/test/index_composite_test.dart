@@ -1,7 +1,8 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'common.dart';
+import 'util/common.dart';
+import 'util/sync_async_helper.dart';
 
 part 'index_composite_test.g.dart';
 
@@ -43,6 +44,10 @@ class CompositeModel {
 }
 
 void main() {
+  testSyncAsync(tests);
+}
+
+void tests() {
   group('Composite', () {
     late Isar isar;
     late IsarCollection<CompositeModel> col;
@@ -73,7 +78,7 @@ void main() {
         ..stringValue = '2'
         ..stringValue2 = null;
 
-      isar.writeTxn((isar) async {
+      await isar.writeTxn((isar) async {
         await col.putAll([obj2, obj1, obj4, obj3]);
       });
     });
@@ -87,23 +92,23 @@ void main() {
         ..id = 5
         ..intValue = 1
         ..stringValue = 'a';
-      await isar.writeTxn((isar) async {
-        await isar.compositeModels.put(newObj);
+      await isar.tWriteTxn((isar) async {
+        await isar.compositeModels.tPut(newObj);
       });
 
-      qEqualSet(isar.compositeModels.where().findAll(),
+      qEqualSet(isar.compositeModels.where().tFindAll(),
           [obj1, obj2, obj3, obj4, newObj]);
     });
 
-    isarTest('.put() duplicate unique index', () async {
+    /*isarTest('.put() duplicate unique index', () async {
       final newObj = CompositeModel()
         ..id = 5
         ..stringValue = '1'
         ..stringValue2 = 'b';
 
       await expectLater(
-        () => isar.writeTxn((isar) async {
-          await isar.compositeModels.put(newObj);
+        () => isar.tWriteTxn((isar) async {
+          await isar.compositeModels.tPut(newObj);
         }),
         throwsIsarError('unique'),
       );
@@ -117,6 +122,6 @@ void main() {
         isar.compositeModels.where().findAll(),
         [obj1, obj3, obj4, newObj],
       );*/
-    });
+    });*/
   });
 }

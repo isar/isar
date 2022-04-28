@@ -1,10 +1,13 @@
 // ignore_for_file: implementation_imports
+import 'dart:ffi';
 import 'dart:io';
 import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'dart:math';
 import 'package:test/test.dart';
+
+import 'sync_async_helper.dart';
 
 const bool kIsWeb = identical(0, 0.0);
 
@@ -71,9 +74,10 @@ void registerBinaries() {
     try {
       Isar.initializeLibraries(
         libraries: {
-          'windows': path.join(dartToolDir, 'libisar_windows_x64.dll'),
-          'macos': path.join(dartToolDir, 'libisar_macos_x64.dylib'),
-          'linux': path.join(dartToolDir, 'libisar_linux_x64.so'),
+          Abi.windowsX64: path.join(dartToolDir, 'libisar_windows_x64.dll'),
+          Abi.macosX64: path.join(dartToolDir,
+              '/Users/simon/Documents/GitHub/isar-core/dart-ffi/libisar_macos.dylib'),
+          Abi.linuxArm64: path.join(dartToolDir, 'libisar_linux_x64.so'),
         },
       );
     } catch (e) {
@@ -91,7 +95,7 @@ Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> schemas,
     {String? name}) async {
   registerBinaries();
 
-  return Isar.open(
+  return tOpen(
     schemas: schemas,
     name: name ?? getRandomName(),
     directory: kIsWeb ? '' : testTempPath!,

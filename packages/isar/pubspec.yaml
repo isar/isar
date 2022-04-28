@@ -5,7 +5,7 @@ repository: https://github.com/isar/isar
 homepage: https://isar.dev
 
 environment:
-  sdk: ">=2.14.0 <3.0.0"
+  sdk: ">=2.16.0 <3.0.0"
 
 dependencies:
   ffi: ^1.1.2

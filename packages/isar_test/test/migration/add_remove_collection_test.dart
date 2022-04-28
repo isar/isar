@@ -1,7 +1,8 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import '../common.dart';
+import '../util/common.dart';
+import '../util/sync_async_helper.dart';
 
 part 'add_remove_collection_test.g.dart';
 
@@ -30,23 +31,27 @@ class Col2 {
 }
 
 void main() {
+  testSyncAsync(tests);
+}
+
+void tests() {
   isarTest('Add collection', () async {
     final isar1 = await openTempIsar([Col1Schema]);
     final col1A = Col1(5, 'col1_a');
     final col1B = Col1(15, 'col1_b');
-    await isar1.writeTxn((isar) {
-      return isar.col1s.putAll([col1A, col1B]);
+    await isar1.tWriteTxn((isar) {
+      return isar.col1s.tPutAll([col1A, col1B]);
     });
     expect(await isar1.close(), true);
 
     final isar2 =
         await openTempIsar([Col1Schema, Col2Schema], name: isar1.name);
-    await qEqual(isar2.col1s.where().findAll(), [col1A, col1B]);
-    await qEqual(isar2.col2s.where().findAll(), []);
-    await isar2.writeTxn((isar) {
-      return isar.col2s.put(Col2(null, 'col2_a'));
+    await qEqual(isar2.col1s.where().tFindAll(), [col1A, col1B]);
+    await qEqual(isar2.col2s.where().tFindAll(), []);
+    await isar2.tWriteTxn((isar) {
+      return isar.col2s.tPut(Col2(null, 'col2_a'));
     });
-    await qEqual(isar2.col2s.where().findAll(), [Col2(1, 'col2_a')]);
+    await qEqual(isar2.col2s.where().tFindAll(), [Col2(1, 'col2_a')]);
     expect(await isar2.close(), true);
   });
 

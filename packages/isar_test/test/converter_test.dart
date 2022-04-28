@@ -1,7 +1,7 @@
 import 'package:test/test.dart';
 import 'package:isar/isar.dart';
 
-import 'common.dart';
+import 'util/common.dart';
 
 part 'converter_test.g.dart';
 

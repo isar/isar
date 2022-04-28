@@ -1,14 +1,19 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'common.dart';
+import 'util/common.dart';
 import 'mutli_type_model.dart';
+import 'util/sync_async_helper.dart';
 
 late Isar _isar;
 
 IsarCollection<MultiTypeModel> get col => _isar.multiTypeModels;
 
 void main() {
+  testSyncAsync(tests);
+}
+
+void tests() {
   group('Aggregation', () {
     setUp(() async {
       _isar = await openTempIsar([MultiTypeModelSchema]);
@@ -30,8 +35,8 @@ void main() {
       });
 
       isarTest('min', () async {
-        expect(await col.where().intValueProperty().min(), -5);
-        expect(await col.where().intValueNProperty().min(), 10);
+        expect(await col.where().intValueProperty().tMin(), -5);
+        expect(await col.where().intValueNProperty().tMin(), 10);
 
         expect(
           await col
@@ -39,7 +44,7 @@ void main() {
               .filter()
               .intValueEqualTo(10)
               .intValueProperty()
-              .min(),
+              .tMin(),
           10,
         );
 
@@ -49,14 +54,14 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .intValueProperty()
-              .min(),
+              .tMin(),
           null,
         );
       });
 
       isarTest('max', () async {
-        expect(await col.where().intValueProperty().max(), 10);
-        expect(await col.where().intValueNProperty().max(), 10);
+        expect(await col.where().intValueProperty().tMax(), 10);
+        expect(await col.where().intValueNProperty().tMax(), 10);
 
         expect(
           await col
@@ -64,7 +69,7 @@ void main() {
               .filter()
               .intValueEqualTo(-5)
               .intValueProperty()
-              .max(),
+              .tMax(),
           -5,
         );
 
@@ -74,14 +79,14 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .intValueProperty()
-              .max(),
+              .tMax(),
           null,
         );
       });
 
       isarTest('sum', () async {
-        expect(await col.where().intValueProperty().sum(), 5);
-        expect(await col.where().intValueNProperty().sum(), 10);
+        expect(await col.where().intValueProperty().tSum(), 5);
+        expect(await col.where().intValueNProperty().tSum(), 10);
 
         expect(
           await col
@@ -89,7 +94,7 @@ void main() {
               .filter()
               .intValueEqualTo(10)
               .intValueProperty()
-              .sum(),
+              .tSum(),
           10,
         );
 
@@ -99,14 +104,14 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .intValueProperty()
-              .sum(),
+              .tSum(),
           0,
         );
       });
 
       isarTest('average', () async {
-        expect(await col.where().intValueProperty().average(), 5 / 3);
-        expect(await col.where().intValueNProperty().average(), 10);
+        expect(await col.where().intValueProperty().tAverage(), 5 / 3);
+        expect(await col.where().intValueNProperty().tAverage(), 10);
 
         expect(
           await col
@@ -114,7 +119,7 @@ void main() {
               .filter()
               .intValueEqualTo(10)
               .intValueProperty()
-              .average(),
+              .tAverage(),
           10.0,
         );
 
@@ -124,15 +129,15 @@ void main() {
                   .filter()
                   .boolValueEqualTo(true)
                   .intValueProperty()
-                  .average())
+                  .tAverage())
               .isNaN,
           true,
         );
       });
 
       isarTest('count', () async {
-        expect(await col.where().intValueProperty().count(), 3);
-        expect(await col.where().intValueNProperty().count(), 3);
+        expect(await col.where().intValueProperty().tCount(), 3);
+        expect(await col.where().intValueNProperty().tCount(), 3);
 
         expect(
           await col
@@ -140,7 +145,7 @@ void main() {
               .filter()
               .intValueEqualTo(10)
               .intValueProperty()
-              .count(),
+              .tCount(),
           1,
         );
 
@@ -150,7 +155,7 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .intValueProperty()
-              .count(),
+              .tCount(),
           0,
         );
       });
@@ -168,8 +173,8 @@ void main() {
       });
 
       isarTest('min', () async {
-        expect(await col.where().floatValueProperty().min(), -5.0);
-        expect(await col.where().floatValueNProperty().min(), 10.0);
+        expect(await col.where().floatValueProperty().tMin(), -5.0);
+        expect(await col.where().floatValueNProperty().tMin(), 10.0);
 
         expect(
           await col
@@ -177,7 +182,7 @@ void main() {
               .filter()
               .floatValueGreaterThan(9)
               .floatValueProperty()
-              .min(),
+              .tMin(),
           10.0,
         );
 
@@ -187,14 +192,14 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .floatValueProperty()
-              .min(),
+              .tMin(),
           null,
         );
       });
 
       isarTest('max', () async {
-        expect(await col.where().floatValueProperty().max(), 10.0);
-        expect(await col.where().floatValueNProperty().max(), 10.0);
+        expect(await col.where().floatValueProperty().tMax(), 10.0);
+        expect(await col.where().floatValueNProperty().tMax(), 10.0);
 
         expect(
           await col
@@ -202,7 +207,7 @@ void main() {
               .filter()
               .floatValueLessThan(-4.0)
               .floatValueProperty()
-              .max(),
+              .tMax(),
           -5.0,
         );
 
@@ -212,14 +217,14 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .floatValueProperty()
-              .max(),
+              .tMax(),
           null,
         );
       });
 
       isarTest('sum', () async {
-        expect(await col.where().floatValueProperty().sum(), 5.0);
-        expect(await col.where().floatValueNProperty().sum(), 10.0);
+        expect(await col.where().floatValueProperty().tSum(), 5.0);
+        expect(await col.where().floatValueNProperty().tSum(), 10.0);
 
         expect(
           await col
@@ -227,7 +232,7 @@ void main() {
               .filter()
               .floatValueGreaterThan(9)
               .floatValueProperty()
-              .sum(),
+              .tSum(),
           10.0,
         );
 
@@ -237,14 +242,14 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .floatValueProperty()
-              .sum(),
+              .tSum(),
           0,
         );
       });
 
       isarTest('average', () async {
-        expect(await col.where().floatValueProperty().average(), 5 / 3);
-        expect(await col.where().floatValueNProperty().average(), 10.0);
+        expect(await col.where().floatValueProperty().tAverage(), 5 / 3);
+        expect(await col.where().floatValueNProperty().tAverage(), 10.0);
 
         expect(
           await col
@@ -252,7 +257,7 @@ void main() {
               .filter()
               .floatValueGreaterThan(9)
               .floatValueProperty()
-              .average(),
+              .tAverage(),
           10.0,
         );
 
@@ -262,15 +267,15 @@ void main() {
                   .filter()
                   .boolValueEqualTo(true)
                   .floatValueProperty()
-                  .average())
+                  .tAverage())
               .isNaN,
           true,
         );
       });
 
       isarTest('count', () async {
-        expect(await col.where().floatValueProperty().count(), 3);
-        expect(await col.where().floatValueNProperty().count(), 3);
+        expect(await col.where().floatValueProperty().tCount(), 3);
+        expect(await col.where().floatValueNProperty().tCount(), 3);
 
         expect(
           await col
@@ -278,7 +283,7 @@ void main() {
               .filter()
               .floatValueGreaterThan(9)
               .floatValueProperty()
-              .count(),
+              .tCount(),
           1,
         );
 
@@ -288,7 +293,7 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .floatValueProperty()
-              .count(),
+              .tCount(),
           0,
         );
       });
@@ -306,8 +311,8 @@ void main() {
       });
 
       isarTest('min', () async {
-        expect(await col.where().longValueProperty().min(), -5);
-        expect(await col.where().longValueNProperty().min(), 10);
+        expect(await col.where().longValueProperty().tMin(), -5);
+        expect(await col.where().longValueNProperty().tMin(), 10);
 
         expect(
           await col
@@ -315,7 +320,7 @@ void main() {
               .filter()
               .longValueEqualTo(10)
               .longValueProperty()
-              .min(),
+              .tMin(),
           10,
         );
 
@@ -325,14 +330,14 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .longValueProperty()
-              .min(),
+              .tMin(),
           null,
         );
       });
 
       isarTest('max', () async {
-        expect(await col.where().longValueProperty().max(), 10);
-        expect(await col.where().longValueNProperty().max(), 10);
+        expect(await col.where().longValueProperty().tMax(), 10);
+        expect(await col.where().longValueNProperty().tMax(), 10);
 
         expect(
           await col
@@ -340,7 +345,7 @@ void main() {
               .filter()
               .longValueEqualTo(-5)
               .longValueProperty()
-              .max(),
+              .tMax(),
           -5,
         );
 
@@ -350,14 +355,14 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .longValueProperty()
-              .max(),
+              .tMax(),
           null,
         );
       });
 
       isarTest('sum', () async {
-        expect(await col.where().longValueProperty().sum(), 5);
-        expect(await col.where().longValueNProperty().sum(), 10);
+        expect(await col.where().longValueProperty().tSum(), 5);
+        expect(await col.where().longValueNProperty().tSum(), 10);
 
         expect(
           await col
@@ -365,7 +370,7 @@ void main() {
               .filter()
               .longValueEqualTo(10)
               .longValueProperty()
-              .sum(),
+              .tSum(),
           10,
         );
 
@@ -375,14 +380,14 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .longValueProperty()
-              .sum(),
+              .tSum(),
           0,
         );
       });
 
       isarTest('average', () async {
-        expect(await col.where().longValueProperty().average(), 5 / 3);
-        expect(await col.where().longValueNProperty().average(), 10);
+        expect(await col.where().longValueProperty().tAverage(), 5 / 3);
+        expect(await col.where().longValueNProperty().tAverage(), 10);
 
         expect(
           await col
@@ -390,7 +395,7 @@ void main() {
               .filter()
               .longValueEqualTo(10)
               .longValueProperty()
-              .average(),
+              .tAverage(),
           10.0,
         );
 
@@ -400,15 +405,15 @@ void main() {
                   .filter()
                   .boolValueEqualTo(true)
                   .longValueProperty()
-                  .average())
+                  .tAverage())
               .isNaN,
           true,
         );
       });
 
       isarTest('count', () async {
-        expect(await col.where().longValueProperty().count(), 3);
-        expect(await col.where().longValueNProperty().count(), 3);
+        expect(await col.where().longValueProperty().tCount(), 3);
+        expect(await col.where().longValueNProperty().tCount(), 3);
 
         expect(
           await col
@@ -416,7 +421,7 @@ void main() {
               .filter()
               .longValueEqualTo(10)
               .longValueProperty()
-              .count(),
+              .tCount(),
           1,
         );
 
@@ -426,7 +431,7 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .longValueProperty()
-              .count(),
+              .tCount(),
           0,
         );
       });
@@ -444,8 +449,8 @@ void main() {
       });
 
       isarTest('min', () async {
-        expect(await col.where().doubleValueProperty().min(), -5.0);
-        expect(await col.where().doubleValueNProperty().min(), 10.0);
+        expect(await col.where().doubleValueProperty().tMin(), -5.0);
+        expect(await col.where().doubleValueNProperty().tMin(), 10.0);
 
         expect(
           await col
@@ -453,7 +458,7 @@ void main() {
               .filter()
               .doubleValueGreaterThan(9)
               .doubleValueProperty()
-              .min(),
+              .tMin(),
           10.0,
         );
 
@@ -463,14 +468,14 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .doubleValueProperty()
-              .min(),
+              .tMin(),
           null,
         );
       });
 
       isarTest('max', () async {
-        expect(await col.where().doubleValueProperty().max(), 10.0);
-        expect(await col.where().doubleValueNProperty().max(), 10.0);
+        expect(await col.where().doubleValueProperty().tMax(), 10.0);
+        expect(await col.where().doubleValueNProperty().tMax(), 10.0);
 
         expect(
           await col
@@ -478,7 +483,7 @@ void main() {
               .filter()
               .doubleValueLessThan(-4.0)
               .doubleValueProperty()
-              .max(),
+              .tMax(),
           -5.0,
         );
 
@@ -488,14 +493,14 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .doubleValueProperty()
-              .max(),
+              .tMax(),
           null,
         );
       });
 
       isarTest('sum', () async {
-        expect(await col.where().doubleValueProperty().sum(), 5.0);
-        expect(await col.where().doubleValueNProperty().sum(), 10.0);
+        expect(await col.where().doubleValueProperty().tSum(), 5.0);
+        expect(await col.where().doubleValueNProperty().tSum(), 10.0);
 
         expect(
           await col
@@ -503,7 +508,7 @@ void main() {
               .filter()
               .doubleValueGreaterThan(9)
               .doubleValueProperty()
-              .sum(),
+              .tSum(),
           10.0,
         );
 
@@ -513,14 +518,14 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .doubleValueProperty()
-              .sum(),
+              .tSum(),
           0,
         );
       });
 
       isarTest('average', () async {
-        expect(await col.where().doubleValueProperty().average(), 5 / 3);
-        expect(await col.where().doubleValueNProperty().average(), 10.0);
+        expect(await col.where().doubleValueProperty().tAverage(), 5 / 3);
+        expect(await col.where().doubleValueNProperty().tAverage(), 10.0);
 
         expect(
           await col
@@ -528,7 +533,7 @@ void main() {
               .filter()
               .doubleValueGreaterThan(9)
               .doubleValueProperty()
-              .average(),
+              .tAverage(),
           10.0,
         );
 
@@ -538,15 +543,15 @@ void main() {
                   .filter()
                   .boolValueEqualTo(true)
                   .doubleValueProperty()
-                  .average())
+                  .tAverage())
               .isNaN,
           true,
         );
       });
 
       isarTest('count', () async {
-        expect(await col.where().doubleValueProperty().count(), 3);
-        expect(await col.where().doubleValueNProperty().count(), 3);
+        expect(await col.where().doubleValueProperty().tCount(), 3);
+        expect(await col.where().doubleValueNProperty().tCount(), 3);
 
         expect(
           await col
@@ -554,7 +559,7 @@ void main() {
               .filter()
               .doubleValueGreaterThan(9)
               .doubleValueProperty()
-              .count(),
+              .tCount(),
           1,
         );
 
@@ -564,7 +569,7 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .doubleValueProperty()
-              .count(),
+              .tCount(),
           0,
         );
       });
@@ -585,8 +590,8 @@ void main() {
       });
 
       isarTest('min', () async {
-        expect(await col.where().dateTimeValueProperty().min(), date(-5));
-        expect(await col.where().dateTimeValueNProperty().min(), date(10));
+        expect(await col.where().dateTimeValueProperty().tMin(), date(-5));
+        expect(await col.where().dateTimeValueNProperty().tMin(), date(10));
 
         expect(
           await col
@@ -594,7 +599,7 @@ void main() {
               .filter()
               .dateTimeValueEqualTo(date(10))
               .dateTimeValueProperty()
-              .min(),
+              .tMin(),
           date(10),
         );
 
@@ -604,14 +609,14 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .dateTimeValueProperty()
-              .min(),
+              .tMin(),
           null,
         );
       });
 
       isarTest('max', () async {
-        expect(await col.where().dateTimeValueProperty().max(), date(10));
-        expect(await col.where().dateTimeValueNProperty().max(), date(10));
+        expect(await col.where().dateTimeValueProperty().tMax(), date(10));
+        expect(await col.where().dateTimeValueNProperty().tMax(), date(10));
 
         expect(
           await col
@@ -619,7 +624,7 @@ void main() {
               .filter()
               .dateTimeValueEqualTo(date(-5))
               .dateTimeValueProperty()
-              .max(),
+              .tMax(),
           date(-5),
         );
 
@@ -629,14 +634,14 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .dateTimeValueProperty()
-              .max(),
+              .tMax(),
           null,
         );
       });
 
       isarTest('count', () async {
-        expect(await col.where().dateTimeValueProperty().count(), 3);
-        expect(await col.where().dateTimeValueNProperty().count(), 3);
+        expect(await col.where().dateTimeValueProperty().tCount(), 3);
+        expect(await col.where().dateTimeValueNProperty().tCount(), 3);
 
         expect(
           await col
@@ -644,7 +649,7 @@ void main() {
               .filter()
               .dateTimeValueEqualTo(date(10))
               .dateTimeValueProperty()
-              .count(),
+              .tCount(),
           1,
         );
 
@@ -654,7 +659,7 @@ void main() {
               .filter()
               .boolValueEqualTo(true)
               .dateTimeValueProperty()
-              .count(),
+              .tCount(),
           0,
         );
       });

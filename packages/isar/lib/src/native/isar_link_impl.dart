@@ -43,6 +43,10 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
     final containingId = requireAttached();
     final sourceCol = sourceCollection;
     sourceCol.isar.getTxnSync(true, (txn) {
+      if (reset) {
+        //nCall(IC.isar_link)
+      }
+
       for (var linkId in linkIds) {
         nCall(IC.isar_link(
             sourceCol.ptr, txn.ptr, linkIndex, containingId, linkId));

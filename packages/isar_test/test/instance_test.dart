@@ -1,7 +1,8 @@
 import 'package:test/test.dart';
 import 'package:isar/isar.dart';
 
-import 'common.dart';
+import 'util/common.dart';
+import 'util/sync_async_helper.dart';
 
 part 'instance_test.g.dart';
 
@@ -24,17 +25,21 @@ class Model {
 }
 
 void main() {
+  testSyncAsync(tests);
+}
+
+void tests() {
   group('Instance test', () {
     isarTest('persists auto increment', () async {
       var isar = await openTempIsar([ModelSchema]);
       final isarName = isar.name;
 
       final obj1 = Model()..value = 'M1';
-      await isar.writeTxn((isar) async {
-        await isar.models.put(obj1);
+      await isar.tWriteTxn((isar) async {
+        await isar.models.tPut(obj1);
       });
       expect(obj1.id, 1);
-      expect(await isar.models.get(obj1.id!), obj1);
+      expect(await isar.models.tGet(obj1.id!), obj1);
 
       expect(await isar.close(), true);
       isar = await openTempIsar([ModelSchema], name: isarName);
@@ -43,23 +48,23 @@ void main() {
       final obj3 = Model()
         ..value = 'M3'
         ..id = 20;
-      await isar.writeTxn((isar) async {
-        await isar.models.putAll([obj2, obj3]);
+      await isar.tWriteTxn((isar) async {
+        await isar.models.tPutAll([obj2, obj3]);
       });
       expect(obj2.id, 2);
       expect(obj3.id, 20);
-      expect(await isar.models.get(obj2.id!), obj2);
-      expect(await isar.models.get(obj3.id!), obj3);
+      expect(await isar.models.tGet(obj2.id!), obj2);
+      expect(await isar.models.tGet(obj3.id!), obj3);
 
       expect(await isar.close(), true);
       isar = await openTempIsar([ModelSchema], name: isarName);
 
       final obj4 = Model()..value = 'M4';
-      await isar.writeTxn((isar) async {
-        await isar.models.put(obj4);
+      await isar.tWriteTxn((isar) async {
+        await isar.models.tPut(obj4);
       });
       expect(obj4.id, 21);
-      qEqual(isar.models.where().findAll(), [obj1, obj2, obj3, obj4]);
+      qEqual(isar.models.where().tFindAll(), [obj1, obj2, obj3, obj4]);
 
       await isar.close();
     });
@@ -70,7 +75,7 @@ void main() {
       expect(await isar.close(), true);
 
       await expectLater(
-          () => isar.models.get(1), throwsIsarError('already been closed'));
+          () => isar.models.tGet(1), throwsIsarError('already been closed'));
     });
   });
 }

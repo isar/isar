@@ -6,7 +6,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 import 'all_tests.dart' as tests;
 
-import '../test/common.dart';
+import '../test/util/common.dart';
 
 void main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

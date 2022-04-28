@@ -1,7 +1,8 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'common.dart';
+import 'util/common.dart';
+import 'util/sync_async_helper.dart';
 
 part 'name_test.g.dart';
 
@@ -29,6 +30,10 @@ class NameModel {
 }
 
 void main() {
+  testSyncAsync(tests);
+}
+
+void tests() {
   group('Name', () {
     late Isar isar;
 
@@ -41,7 +46,7 @@ void main() {
     });
 
     isarTest('json', () async {
-      await isar.writeTxn((isar) => isar.nameModels.put(
+      await isar.tWriteTxn((isar) => isar.nameModels.tPut(
             NameModel()
               ..value = 'test'
               ..otherValue = 'test2',

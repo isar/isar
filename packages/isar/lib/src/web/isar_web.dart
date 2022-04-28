@@ -19,6 +19,10 @@ Never unsupportedOnWeb() {
 
 /// @nodoc
 @protected
+typedef IsarAbi = dynamic;
+
+/// @nodoc
+@protected
 typedef IsarRawObject = dynamic;
 
 /// @nodoc
@@ -43,7 +47,7 @@ class _IsarWeb implements IsarNativeInterface {
   }
 
   @override
-  void initializeLibraries({Map<String, String> libraries = const {}}) {
+  void initializeLibraries({Map<IsarAbi, String> libraries = const {}}) {
     throw UnimplementedError();
   }
 

@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:test/test.dart';
 import 'package:isar/isar.dart';
 
-import 'common.dart';
+import 'util/common.dart';
+import 'util/sync_async_helper.dart';
 
 part 'isolate_test.g.dart';
 
@@ -51,17 +52,21 @@ Future<bool> _isolateFunc(String name) async {
 }
 
 void main() {
+  testSyncAsync(tests);
+}
+
+void tests() {
   isarTest('Isolate test', () async {
     final isar = await openTempIsar([TestModelSchema]);
 
-    await isar.writeTxn((isar) async {
-      await isar.testModels.putAll([_obj1, _obj2]);
+    await isar.tWriteTxn((isar) async {
+      await isar.testModels.tPutAll([_obj1, _obj2]);
     });
 
     final result = await compute(_isolateFunc, isar.name);
     expect(result, true);
 
-    qEqual(isar.testModels.where().findAll(), [_obj1, _obj3]);
+    qEqual(isar.testModels.where().tFindAll(), [_obj1, _obj3]);
 
     expect(await isar.close(), true);
   });

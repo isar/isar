@@ -3,10 +3,15 @@ import 'dart:convert';
 import 'package:test/test.dart';
 import 'package:isar/isar.dart';
 
-import 'common.dart';
+import 'util/common.dart';
 import 'user_model.dart';
+import 'util/sync_async_helper.dart';
 
 void main() {
+  testSyncAsync(tests);
+}
+
+void tests() {
   group('Json', () {
     late Isar isar;
     late IsarCollection<UserModel> col;
@@ -35,8 +40,8 @@ void main() {
     isarTest('big json', () async {
       final json = generateJson(100000);
 
-      await isar.writeTxn((isar) async {
-        await col.importJson(json);
+      await isar.tWriteTxn((isar) async {
+        await col.tImportJson(json);
       });
 
       for (var i = 0; i < json.length; i++) {
@@ -62,8 +67,8 @@ void main() {
         }
       ];
 
-      await isar.writeTxn((isar) async {
-        await col.importJson(json);
+      await isar.tWriteTxn((isar) async {
+        await col.tImportJson(json);
       });
 
       final exportedJsonNull = await col.where().exportJson();
@@ -73,8 +78,8 @@ void main() {
     isarTest('raw json', () async {
       final json = generateJson(10000);
       final bytes = const Utf8Encoder().convert(jsonEncode(json));
-      await isar.writeTxn((isar) async {
-        await col.importJsonRaw(bytes);
+      await isar.tWriteTxn((isar) async {
+        await col.tImportJsonRaw(bytes);
       });
 
       for (var i = 0; i < json.length; i++) {

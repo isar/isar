@@ -1,7 +1,8 @@
 import 'package:test/test.dart';
 import 'package:isar/isar.dart';
 
-import '../common.dart';
+import '../util/common.dart';
+import '../util/sync_async_helper.dart';
 
 part 'issue_235_rename_field_test.g.dart';
 
@@ -56,15 +57,19 @@ class Col2 {
 }
 
 void main() {
+  testSyncAsync(tests);
+}
+
+void tests() {
   isarTest('Regression 235 Rename field', () async {
     final isar1 = await openTempIsar([Col1Schema]);
-    await isar1.writeTxn((isar) {
-      return isar.col1s.put(Col1(id: 5));
+    await isar1.tWriteTxn((isar) {
+      return isar.col1s.tPut(Col1(id: 5));
     });
     expect(await isar1.close(), true);
 
     final isar2 = await openTempIsar([Col2Schema], name: isar1.name);
-    final existing = await isar2.col2s.get(5);
+    final existing = await isar2.col2s.tGet(5);
     expect(
       existing,
       Col2(
@@ -82,10 +87,10 @@ void main() {
       numberText1: "New Value1",
       numberText22: 'New Value22',
     );
-    await isar2.writeTxn((isar) {
-      return isar.col2s.put(newObj);
+    await isar2.tWriteTxn((isar) {
+      return isar.col2s.tPut(newObj);
     });
-    expect(await isar2.col2s.get(5), newObj);
+    expect(await isar2.col2s.tGet(5), newObj);
     expect(await isar2.close(), true);
   });
 }

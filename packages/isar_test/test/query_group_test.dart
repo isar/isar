@@ -1,10 +1,15 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'common.dart';
+import 'util/common.dart';
 import 'user_model.dart';
+import 'util/sync_async_helper.dart';
 
 void main() {
+  testSyncAsync(tests);
+}
+
+void tests() {
   group('Groups', () {
     late Isar isar;
     late IsarCollection<UserModel> users;
@@ -30,7 +35,7 @@ void main() {
 
     isarTest('Simple or', () async {
       await qEqualSet(
-        users.where().filter().ageEqualTo(20).or().ageEqualTo(30).findAll(),
+        users.where().filter().ageEqualTo(20).or().ageEqualTo(30).tFindAll(),
         [
           UserModel.fill('David', 20, false),
           UserModel.fill('Emma', 30, true),
@@ -39,7 +44,7 @@ void main() {
       );
 
       await qEqualSet(
-        users.where().filter().ageEqualTo(20).ageEqualTo(30).findAll(),
+        users.where().filter().ageEqualTo(20).ageEqualTo(30).tFindAll(),
         [
           UserModel.fill('David', 20, false),
           UserModel.fill('Emma', 30, true),
@@ -56,7 +61,7 @@ void main() {
             .ageEqualTo(40)
             .and()
             .adminEqualTo(true)
-            .findAll(),
+            .tFindAll(),
         [UserModel.fill('Bjorn', 40, true)],
       );
     });
@@ -71,7 +76,7 @@ void main() {
             .ageEqualTo(30)
             .and()
             .nameEqualTo('Emma')
-            .findAll(),
+            .tFindAll(),
         [
           UserModel.fill('David', 20, false),
           UserModel.fill('Emma', 30, true),
@@ -89,7 +94,7 @@ void main() {
             .nameEqualTo('Simon')
             .or()
             .ageEqualTo(20)
-            .findAll(),
+            .tFindAll(),
         [
           UserModel.fill('David', 20, false),
           UserModel.fill('Simon', 30, false),
@@ -105,7 +110,7 @@ void main() {
             .ageEqualTo(20)
             .or()
             .group((q) => q.ageEqualTo(30).and().nameEqualTo('Emma'))
-            .findAll(),
+            .tFindAll(),
         [
           UserModel.fill('David', 20, false),
           UserModel.fill('Emma', 30, true),
@@ -121,7 +126,7 @@ void main() {
             .ageEqualTo(30)
             .and()
             .group((q) => q.nameEqualTo('Simon').or().ageEqualTo(20))
-            .findAll(),
+            .tFindAll(),
         [UserModel.fill('Simon', 30, false)],
       );
     });
@@ -137,7 +142,7 @@ void main() {
                   .or()
                   .group((q) => q.ageEqualTo(30).or().ageEqualTo(20)),
             )
-            .findAll(),
+            .tFindAll(),
         [
           UserModel.fill('Simon', 30, false),
           UserModel.fill('David', 20, false),

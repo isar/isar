@@ -2,7 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'common.dart';
+import 'util/common.dart';
+import 'util/sync_async_helper.dart';
 
 part 'constructor_test.g.dart';
 part 'constructor_test.freezed.dart';
@@ -113,6 +114,10 @@ class FreezedModel with _$FreezedModel {
 }
 
 void main() {
+  testSyncAsync(tests);
+}
+
+void tests() {
   group('Constructor', () {
     late Isar isar;
 
@@ -135,33 +140,35 @@ void main() {
     isarTest('EmptyConstructorModel', () async {
       final obj1 = EmptyConstructorModel()..name = 'obj1';
       final obj2 = EmptyConstructorModel()..name = 'obj2';
-      await isar.writeTxn((isar) async {
-        await isar.emptyConstructorModels.putAll([obj1, obj2]);
+      await isar.tWriteTxn((isar) async {
+        await isar.emptyConstructorModels.tPutAll([obj1, obj2]);
       });
 
-      await qEqual(isar.emptyConstructorModels.where().findAll(), [obj1, obj2]);
+      await qEqual(
+          isar.emptyConstructorModels.where().tFindAll(), [obj1, obj2]);
     });
 
     isarTest('NamedConstructorModel', () async {
       final obj1 = NamedConstructorModel(name: 'obj1');
       final obj2 = NamedConstructorModel(name: 'obj2');
-      await isar.writeTxn((isar) async {
-        await isar.namedConstructorModels.putAll([obj1, obj2]);
+      await isar.tWriteTxn((isar) async {
+        await isar.namedConstructorModels.tPutAll([obj1, obj2]);
       });
 
-      await qEqual(isar.namedConstructorModels.where().findAll(), [obj1, obj2]);
+      await qEqual(
+          isar.namedConstructorModels.where().tFindAll(), [obj1, obj2]);
     });
 
     isarTest('PositionalConstructorModel', () async {
       final obj1 = PositionalConstructorModel(0, 'obj1');
       final obj2 = PositionalConstructorModel(5, 'obj2');
       final obj3 = PositionalConstructorModel(15, 'obj3');
-      await isar.writeTxn((isar) async {
-        await isar.positionalConstructorModels.putAll([obj1, obj2, obj3]);
+      await isar.tWriteTxn((isar) async {
+        await isar.positionalConstructorModels.tPutAll([obj1, obj2, obj3]);
       });
 
       await qEqual(
-        isar.positionalConstructorModels.where().findAll(),
+        isar.positionalConstructorModels.where().tFindAll(),
         [obj1, obj2, obj3],
       );
     });
@@ -171,12 +178,12 @@ void main() {
       final obj1WithId = OptionalConstructorModel('obj1', 1);
       final obj2 = OptionalConstructorModel('obj2', 5);
       final obj3 = OptionalConstructorModel('obj3', 15);
-      await isar.writeTxn((isar) async {
-        await isar.optionalConstructorModels.putAll([obj1, obj2, obj3]);
+      await isar.tWriteTxn((isar) async {
+        await isar.optionalConstructorModels.tPutAll([obj1, obj2, obj3]);
       });
 
       await qEqual(
-        isar.optionalConstructorModels.where().findAll(),
+        isar.optionalConstructorModels.where().tFindAll(),
         [obj1WithId, obj2, obj3],
       );
     });
@@ -184,12 +191,12 @@ void main() {
     isarTest('PositionalNamedConstructorModel', () async {
       final obj1 = PositionalNamedConstructorModel('obj1', id: 1);
       final obj2 = PositionalNamedConstructorModel('obj2', id: 2);
-      await isar.writeTxn((isar) async {
-        await isar.positionalNamedConstructorModels.putAll([obj1, obj2]);
+      await isar.tWriteTxn((isar) async {
+        await isar.positionalNamedConstructorModels.tPutAll([obj1, obj2]);
       });
 
       await qEqual(
-        isar.positionalNamedConstructorModels.where().findAll(),
+        isar.positionalNamedConstructorModels.where().tFindAll(),
         [obj1, obj2],
       );
     });
@@ -197,12 +204,12 @@ void main() {
     isarTest('FreezedModel', () async {
       const obj1 = FreezedModel(id: 1, name: 'obj1');
       const obj2 = FreezedModel(id: 2, name: 'obj2');
-      await isar.writeTxn((isar) async {
-        await isar.freezedModels.putAll([obj1, obj2]);
+      await isar.tWriteTxn((isar) async {
+        await isar.freezedModels.tPutAll([obj1, obj2]);
       });
 
       await qEqual(
-        isar.freezedModels.where().findAll(),
+        isar.freezedModels.where().tFindAll(),
         [obj1, obj2],
       );
     });

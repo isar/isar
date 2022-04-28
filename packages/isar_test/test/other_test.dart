@@ -1,7 +1,7 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'common.dart';
+import 'util/common.dart';
 
 void main() {
   group("Other", () {
