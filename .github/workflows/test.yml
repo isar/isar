@@ -28,7 +28,7 @@ jobs:
           flutter pub get
           flutter pub run build_runner build
           dart tool/generate_all_tests.dart
-          flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart
+          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart
         working-directory: packages/isar_test
 
   drive_android:
@@ -60,7 +60,7 @@ jobs:
           arch: x86_64
           profile: Nexus 6
           working-directory: packages/isar_test
-          script: "flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart"
+          script: "flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart"
 
   drive_desktop:
     strategy:
@@ -88,29 +88,59 @@ jobs:
           flutter config --enable-macos-desktop 
           flutter config --enable-linux-desktop 
           flutter config --enable-windows-desktop 
-          flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart
+          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart
         working-directory: packages/isar_test
 
-  test_web:
-    strategy:
-      matrix:
-        include:
-          - os: macos-latest
-            browser: safari
-          - os: ubuntu-latest
-            browser: chrome
-          - os: ubuntu-latest
-            browser: firefox
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+  drive_chrome:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v1
         with:
           channel: "stable"
+      - name: Install chromedricer
+        uses: nanasess/setup-chromedriver@v1
+      - name: Prepare chromedricer
+        run: chromedriver --port=4444 &
       - name: Run Dart tests in browser
         run: |
-          dart pub get
-          dart pub run build_runner build
-          dart test -p ${{ matrix.browser }}
+          flutter pub get
+          flutter pub run build_runner build
+          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart -d web-server --browser-name chrome
+        working-directory: packages/isar_test
+
+  drive_safari:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: "stable"
+      - name: Prepare safaridricer
+        run: |
+          sudo safaridriver--enable
+          safaridriver --port=4444 &
+      - name: Run Dart tests in browser
+        run: |
+          flutter pub get
+          flutter pub run build_runner build
+          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart -d web-server --browser-name safari
+        working-directory: packages/isar_test
+
+  drive_firefox:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: "stable"
+      - name: Install geckodriver
+        uses: browser-actions/setup-geckodriver@latest
+      - name: Prepare geckodriver
+        run: geckodriver --port=4444 &
+      - name: Run Dart tests in browser
+        run: |
+          flutter pub get
+          flutter pub run build_runner build
+          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart -d web-server --browser-name firefox
         working-directory: packages/isar_test

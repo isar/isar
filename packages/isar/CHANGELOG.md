@@ -1,3 +1,20 @@
+## 2.5.0
+
+### Enhancements
+
+- Support for Android x86, macOS M1 (arm64) and Windows arm64
+- Greatly improved test coverage for sync methods
+
+### Minor Breaking
+
+- Changed `initializeLibraries(Map<String, String> libraries)` to `initializeLibraries(Map<IsarAbi, String> libraries)`
+- Changed min Dart SDK to `2.16.0`
+
+### Fixes
+
+- Fixed issue with `IsarLink.saveSync()`
+- Fixed error thrown by `BroadcastChannel` in Firefox
+
 ## 2.4.0
 
 ### Enhancements
