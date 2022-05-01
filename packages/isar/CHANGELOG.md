@@ -4,6 +4,7 @@
 
 - Support for Android x86, macOS M1 (arm64) and Windows arm64
 - Greatly improved test coverage for sync methods
+- `col.clear()` now resets the auto increment counter to `0`
 
 ### Minor Breaking
 
