@@ -41,19 +41,19 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   void updateIdsInternalSync(
       List<int> linkIds, List<int> unlinkIds, bool reset) {
     final containingId = requireAttached();
-    final sourceCol = sourceCollection;
-    sourceCol.isar.getTxnSync(true, (txn) {
+    targetCollection.isar.getTxnSync(true, (txn) {
       if (reset) {
-        //nCall(IC.isar_link)
+        nCall(IC.isar_link_unlink_all(
+            sourceCollection.ptr, txn.ptr, linkIndex, containingId));
       }
 
       for (var linkId in linkIds) {
         nCall(IC.isar_link(
-            sourceCol.ptr, txn.ptr, linkIndex, containingId, linkId));
+            sourceCollection.ptr, txn.ptr, linkIndex, containingId, linkId));
       }
-      for (var unlinkId in linkIds) {
+      for (var unlinkId in unlinkIds) {
         nCall(IC.isar_link_unlink(
-            sourceCol.ptr, txn.ptr, linkIndex, containingId, unlinkId));
+            sourceCollection.ptr, txn.ptr, linkIndex, containingId, unlinkId));
       }
     });
   }

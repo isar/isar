@@ -89,10 +89,12 @@ Query<T> buildNativeQuery<T>(
 }
 
 void _addIdWhereClause(Pointer qbPtr, IdWhereClause wc, Sort sort) {
+  final lower = (wc.lower ?? minLong) + (wc.includeLower ? 0 : 1);
+  final upper = (wc.upper ?? maxLong) - (wc.includeUpper ? 0 : 1);
   nCall(IC.isar_qb_add_id_where_clause(
     qbPtr,
-    sort == Sort.asc ? (wc.lower ?? nullLong) : (wc.upper ?? maxLong),
-    sort == Sort.asc ? (wc.upper ?? nullLong) : (wc.lower ?? minLong),
+    sort == Sort.asc ? lower : upper,
+    sort == Sort.asc ? upper : lower,
   ));
 }
 
@@ -222,7 +224,9 @@ Pointer<NativeType> _buildCondition(
   final val2 =
       val2Raw is DateTime ? val2Raw.toUtc().microsecondsSinceEpoch : val2Raw;
 
-  final propertyId = col.schema.propertyIdOrErr(condition.property);
+  final propertyId = condition.property != col.schema.idName
+      ? col.schema.propertyIdOrErr(condition.property)
+      : null;
   switch (condition.type) {
     case ConditionType.isNull:
       return _buildConditionIsNull(

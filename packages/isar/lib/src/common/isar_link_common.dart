@@ -288,7 +288,7 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   void resetSync() {
-    updateIdsInternal([], [], true);
+    updateIdsInternalSync([], [], true);
     clear();
     _isLoaded = true;
   }

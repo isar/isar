@@ -60,7 +60,8 @@ class IsarAnalyzer {
       err('Two or more indexes have the same name.', modelClass);
     }
 
-    var idProperty = properties.firstOrNullWhere((it) => it.isId);
+    final idProperties = properties.where((it) => it.isId);
+    var idProperty = idProperties.firstOrNull;
     if (idProperty == null) {
       for (var i = 0; i < properties.length; i++) {
         final property = properties[i];
@@ -75,7 +76,13 @@ class IsarAnalyzer {
     }
 
     if (idProperty == null) {
-      err('No property annotated with @Id().', modelClass);
+      err('No int property named "id" or annotated with @Id().', modelClass);
+    } else if (idProperties.length > 1) {
+      err('Two or more properties annotated with @Id().', modelClass);
+    } else if (idProperty.converter != null) {
+      err('Converters are not allowed for ids.', modelClass);
+    } else if (idProperty.isarType != IsarType.long) {
+      err('Only int ids are allowed', modelClass);
     }
 
     final unknownConstructorParameter = constructor.parameters.firstOrNullWhere(
@@ -128,15 +135,6 @@ class IsarAnalyzer {
       return null;
     }
 
-    final isId = property.hasIdAnnotation;
-    if (isId) {
-      if (converter != null) {
-        err('Converters are not allowed for ids.', property);
-      } else if (isarType != IsarType.long) {
-        err('Only int ids are allowed', property);
-      }
-    }
-
     final constructorParameter =
         constructor.parameters.firstOrNullWhere((p) => p.name == property.name);
     int? constructorPosition;
@@ -164,7 +162,7 @@ class IsarAnalyzer {
       isarName: property.isarName,
       dartType: dartTypeStr,
       isarType: isarType,
-      isId: isId,
+      isId: property.hasIdAnnotation,
       converter: converter?.name,
       nullable: nullable,
       elementNullable: elementNullable,

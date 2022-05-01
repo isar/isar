@@ -113,11 +113,11 @@ void tests() {
           await linksA.tPutAll([objA1, objA3], saveLinks: true);
         });
 
-        final newA1 = await linksA.get(1);
+        final newA1 = await linksA.tGet(objA1.id!);
         await newA1!.selfLink.tLoad();
         expect(newA1.selfLink.value, objA2);
 
-        final newA3 = await linksA.get(2);
+        final newA3 = await linksA.tGet(objA3.id!);
         await newA3!.selfLink.tLoad();
         expect(newA3.selfLink.value, objA3);
       });
@@ -132,7 +132,7 @@ void tests() {
           await linksA.tPut(objA1, saveLinks: true);
         });
 
-        final newA1 = await linksA.get(objA1.id!);
+        final newA1 = await linksA.tGet(objA1.id!);
         await newA1!.selfLink.tLoad();
         expect(newA1.selfLink.value, objA2);
       });
@@ -147,7 +147,7 @@ void tests() {
           await linksA.tPut(objA1, saveLinks: true);
         });
 
-        final newA1 = await linksA.get(objA1.id!);
+        final newA1 = await linksA.tGet(objA1.id!);
         await newA1!.selfLink.tLoad();
         expect(newA1.selfLink.value, objA2);
       });
@@ -163,7 +163,7 @@ void tests() {
           await linksA.tDelete(objA1.id!);
         });
 
-        final newA2 = await linksA.get(objA2.id!);
+        final newA2 = await linksA.tGet(objA2.id!);
         await newA2!.selfLinkBacklink.tLoad();
         expect(newA2.selfLinkBacklink, []);
       });
@@ -179,7 +179,7 @@ void tests() {
           await linksA.tDelete(objA2.id!);
         });
 
-        final newA1 = await linksA.get(objA1.id!);
+        final newA1 = await linksA.tGet(objA1.id!);
         await newA1!.selfLink.tLoad();
         expect(newA1.selfLink.value, null);
       });
@@ -194,7 +194,7 @@ void tests() {
           await objA1.selfLink.tSave();
         });
 
-        final newA1 = await linksA.get(objA1.id!);
+        final newA1 = await linksA.tGet(objA1.id!);
         await newA1!.selfLink.tLoad();
         expect(newA1.selfLink.value, objA2);
 
@@ -219,7 +219,7 @@ void tests() {
           await linksB.tDelete(objB1.id!);
         });
 
-        final newA1 = await linksA.get(objA1.id!);
+        final newA1 = await linksA.tGet(objA1.id!);
         await newA1!.otherLink.tLoad();
         expect(newA1.otherLink.value, null);
       });
@@ -234,7 +234,7 @@ void tests() {
           await linksA.tPut(objA1, saveLinks: true);
         });
 
-        final newA1 = await linksA.get(objA1.id!);
+        final newA1 = await linksA.tGet(objA1.id!);
         await newA1!.otherLink.tLoad();
         expect(newA1.otherLink.value, objB1);
       });
@@ -249,7 +249,7 @@ void tests() {
           await linksA.tPut(objA1, saveLinks: true);
         });
 
-        final newA1 = await linksA.get(objA1.id!);
+        final newA1 = await linksA.tGet(objA1.id!);
         await newA1!.otherLink.tLoad();
         expect(newA1.otherLink.value, objB1);
       });
@@ -264,7 +264,7 @@ void tests() {
           await objA1.otherLink.tSave();
         });
 
-        final newA1 = await linksA.get(objA1.id!);
+        final newA1 = await linksA.tGet(objA1.id!);
         await newA1!.otherLink.tLoad();
         expect(newA1.otherLink.value, objB1);
 
