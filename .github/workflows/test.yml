@@ -1,6 +1,6 @@
 name: Dart CI
 
-on: [push, pull_request]
+on: push
 
 jobs:
   drive_ios:
