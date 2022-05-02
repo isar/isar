@@ -24,6 +24,16 @@ jobs:
         uses: subosito/flutter-action@v1
         with:
           flutter-version: ${{ secrets.FLUTTER_VERSION }}
+      - run: flutter pub get
+        working-directory: packages/isar
+      - run: flutter pub get
+        working-directory: packages/isar_flutter_libs
+      - run: flutter pub get
+        working-directory: packages/isar_generator
+      - run: flutter pub get
+        working-directory: packages/isar_inspector
+      - run: flutter pub get
+        working-directory: packages/isar_test
       - name: Lint
         run: flutter analyze
 
