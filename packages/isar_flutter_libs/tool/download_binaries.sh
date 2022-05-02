@@ -12,8 +12,5 @@ curl "${github}/libisar_android_x86.so" -o android/src/main/jniLibs/x86/libisar.
 curl "${github}/libisar_ios.a" -o ios/libisar.a --create-dirs -L
 
 curl "${github}/libisar_macos.dylib" -o macos/libisar.dylib --create-dirs -L
-
-curl "${github}/libisar_linux_x64.so" -o linux/x64/libisar.so --create-dirs -L
-
-curl "${github}/isar_windows_arm64.dll" -o windows/arm64/isar.dll --create-dirs -L
-curl "${github}/isar_windows_x64.dll" -o windows/x64/isar.dll --create-dirs -L
+curl "${github}/libisar_linux_x64.so" -o linux/libisar.so --create-dirs -L
+curl "${github}/isar_windows_x64.dll" -o windows/isar.dll --create-dirs -L

@@ -2,9 +2,10 @@
 
 ### Enhancements
 
-- Support for Android x86, macOS M1 (arm64) and Windows arm64
+- Support for Android x86 (32 bit emulator) and macOS arm64 (Apple Silicon)
 - Greatly improved test coverage for sync methods
 - `col.clear()` now resets the auto increment counter to `0`
+- Significantly reduced Isar Core binary size (about 1.4MB -> 800KB)
 
 ### Minor Breaking
 
