@@ -113,7 +113,6 @@ void tests() {
         throwsIsarError('unique'),
       );
 
-      // TODO implement for web
       /*await isar.writeTxn((isar) async {
         await isar.compositeModels.put(newObj, replaceOnConflict: true);
       });

@@ -2,7 +2,6 @@ import 'package:test/test.dart';
 import 'package:isar/isar.dart';
 
 import 'util/common.dart';
-import 'util/sync_async_helper.dart';
 
 part 'index_get_by_delete_by_test.g.dart';
 

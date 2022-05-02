@@ -3,6 +3,30 @@ name: Dart CI
 on: push
 
 jobs:
+  format:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ secrets.FLUTTER_VERSION }}
+      - name: Check formatting
+        run: flutter format --dry-run . --set-exit-if-changed
+
+  lint:
+    name: Check lints
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ secrets.FLUTTER_VERSION }}
+      - name: Lint
+        run: flutter analyze
+
   drive_ios:
     strategy:
       matrix:
