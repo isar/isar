@@ -71,7 +71,7 @@ Future<dynamic> _getSchema(Map<String, String> _) async {
 }
 
 Future<dynamic> _listInstances(Map<String, String> _) async {
-  return Isar.instanceNames;
+  return Isar.instanceNames.toList();
 }
 
 Future<List<Map<String, dynamic>>> _executeQuery(Map<String, String> params) {

@@ -17,6 +17,7 @@
 - Fixed issue with `IsarLink.saveSync()`
 - Fixed `id` queries
 - Fixed error thrown by `BroadcastChannel` in Firefox
+- Fixed Isar Inspector connection issue
 
 ## 2.4.0
 
