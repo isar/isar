@@ -13,9 +13,18 @@ import 'package:meta/meta.dart';
 import 'bindings.dart';
 import 'split_words.dart';
 
+/// @nodoc
 const isarMinId = -9223372036854775807;
+
+/// @nodoc
 const isarMaxId = 9223372036854775807;
+
+/// @nodoc
 const isarAutoIncrementId = -9223372036854775808;
+
+/// @nodoc
+@protected
+typedef IsarAbi = Abi;
 
 /// @nodoc
 @protected
@@ -44,7 +53,7 @@ class _IsarNative implements IsarNativeInterface {
 
   @override
   @pragma('vm:prefer-inline')
-  void initializeLibraries({Map<String, String> libraries = const {}}) {
+  void initializeLibraries({Map<IsarAbi, String> libraries = const {}}) {
     return initializeIsarCore(libraries: libraries);
   }
 
@@ -98,11 +107,15 @@ class _IsarNative implements IsarNativeInterface {
   @override
   @pragma('vm:prefer-inline')
   Isar openSync({
-    required String directory,
+    String? directory,
     required String name,
     required bool relaxedDurability,
     required List<CollectionSchema> schemas,
   }) {
+    if (directory == null) {
+      throw IsarError(
+          'You need to provide a valid directory for mobile or desktop apps.');
+    }
     return openIsarSync(
       directory: directory,
       name: name,

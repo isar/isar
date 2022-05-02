@@ -1,3 +1,23 @@
+## 2.5.0
+
+### Enhancements
+
+- Support for Android x86 (32 bit emulator) and macOS arm64 (Apple Silicon)
+- Greatly improved test coverage for sync methods
+- `col.clear()` now resets the auto increment counter to `0`
+- Significantly reduced Isar Core binary size (about 1.4MB -> 800KB)
+
+### Minor Breaking
+
+- Changed `initializeLibraries(Map<String, String> libraries)` to `initializeLibraries(Map<IsarAbi, String> libraries)`
+- Changed min Dart SDK to `2.16.0`
+
+### Fixes
+
+- Fixed issue with `IsarLink.saveSync()`
+- Fixed `id` queries
+- Fixed error thrown by `BroadcastChannel` in Firefox
+
 ## 2.4.0
 
 ### Enhancements

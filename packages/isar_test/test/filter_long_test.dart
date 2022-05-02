@@ -4,7 +4,8 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'common.dart';
+import 'util/common.dart';
+import 'util/sync_async_helper.dart';
 
 part 'filter_long_test.g.dart';
 
@@ -37,7 +38,11 @@ class LongModel {
   }
 }
 
-void main() async {
+void main() {
+  testSyncAsync(tests);
+}
+
+void tests() async {
   group('Long filter', () {
     late Isar isar;
     late IsarCollection<LongModel> col;
@@ -61,63 +66,63 @@ void main() async {
 
     isarTest('equalTo()', () async {
       await qEqual(
-        col.where().fieldEqualTo(2).findAll(),
+        col.where().fieldEqualTo(2).tFindAll(),
         [LongModel()..field = 2],
       );
       await qEqual(
-        col.where().filter().fieldEqualTo(2).findAll(),
+        col.where().filter().fieldEqualTo(2).tFindAll(),
         [LongModel()..field = 2],
       );
 
       await qEqual(
-        col.where().fieldEqualTo(null).findAll(),
+        col.where().fieldEqualTo(null).tFindAll(),
         [LongModel()..field = null],
       );
       await qEqual(
-        col.where().filter().fieldEqualTo(null).findAll(),
+        col.where().filter().fieldEqualTo(null).tFindAll(),
         [LongModel()..field = null],
       );
 
       await qEqual(
-        col.where().fieldEqualTo(5).findAll(),
+        col.where().fieldEqualTo(5).tFindAll(),
         [],
       );
       await qEqual(
-        col.where().filter().fieldEqualTo(5).findAll(),
+        col.where().filter().fieldEqualTo(5).tFindAll(),
         [],
       );
     });
 
     isarTest('greaterThan()', () async {
       await qEqual(
-        col.where().filter().fieldGreaterThan(3).findAll(),
+        col.where().filter().fieldGreaterThan(3).tFindAll(),
         [LongModel()..field = 4],
       );
 
       await qEqual(
-        col.where().fieldGreaterThan(4).findAll(),
+        col.where().fieldGreaterThan(4).tFindAll(),
         [],
       );
       await qEqualSet(
-        col.where().filter().fieldGreaterThan(4).findAll(),
+        col.where().filter().fieldGreaterThan(4).tFindAll(),
         [],
       );
     });
 
     isarTest('lessThan()', () async {
       await qEqual(
-        col.where().fieldLessThan(1).findAll(),
+        col.where().fieldLessThan(1).tFindAll(),
         [LongModel()..field = null, LongModel()..field = 0],
       );
       await qEqualSet(
-        col.where().filter().fieldLessThan(1).findAll(),
+        col.where().filter().fieldLessThan(1).tFindAll(),
         {LongModel()..field = null, LongModel()..field = 0},
       );
     });
 
     isarTest('between()', () async {
       await qEqual(
-        col.where().fieldBetween(1, 3).findAll(),
+        col.where().fieldBetween(1, 3).tFindAll(),
         [
           LongModel()..field = 1,
           LongModel()..field = 2,
@@ -125,7 +130,7 @@ void main() async {
         ],
       );
       await qEqualSet(
-        col.where().filter().fieldBetween(1, 3).findAll(),
+        col.where().filter().fieldBetween(1, 3).tFindAll(),
         {
           LongModel()..field = 1,
           LongModel()..field = 2,
@@ -134,38 +139,38 @@ void main() async {
       );
 
       await qEqual(
-        col.where().fieldBetween(null, 0).findAll(),
+        col.where().fieldBetween(null, 0).tFindAll(),
         [LongModel()..field = null, LongModel()..field = 0],
       );
       await qEqualSet(
-        col.where().filter().fieldBetween(null, 0).findAll(),
+        col.where().filter().fieldBetween(null, 0).tFindAll(),
         {LongModel()..field = null, LongModel()..field = 0},
       );
 
       await qEqual(
-        col.where().fieldBetween(5, 6).findAll(),
+        col.where().fieldBetween(5, 6).tFindAll(),
         [],
       );
       await qEqual(
-        col.where().filter().fieldBetween(5, 6).findAll(),
+        col.where().filter().fieldBetween(5, 6).tFindAll(),
         [],
       );
     });
 
     isarTest('isNull()', () async {
       await qEqual(
-        col.where().fieldIsNull().findAll(),
+        col.where().fieldIsNull().tFindAll(),
         [LongModel()..field = null],
       );
       await qEqual(
-        col.where().filter().fieldIsNull().findAll(),
+        col.where().filter().fieldIsNull().tFindAll(),
         [LongModel()..field = null],
       );
     });
 
     isarTest('isNotNull()', () async {
       await qEqualSet(
-        col.where().fieldIsNotNull().findAll(),
+        col.where().fieldIsNotNull().tFindAll(),
         {
           LongModel()..field = 0,
           LongModel()..field = 1,

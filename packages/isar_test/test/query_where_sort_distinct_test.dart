@@ -1,7 +1,8 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'common.dart';
+import 'util/common.dart';
+import 'util/sync_async_helper.dart';
 
 part 'query_where_sort_distinct_test.g.dart';
 
@@ -19,6 +20,10 @@ class TestModel {
 }
 
 void main() {
+  testSyncAsync(tests);
+}
+
+void tests() {
   group('Where sort distinct', () {
     late Isar isar;
     late IsarCollection<TestModel> col;
@@ -46,17 +51,17 @@ void main() {
 
     isarTest('.any()', () async {
       await qEqual(
-        col.where().anyValue().valueProperty().findAll(),
+        col.where().anyValue().valueProperty().tFindAll(),
         [null, 0, 0, 1, 1, 2, 2],
       );
 
       await qEqual(
-        col.where(distinct: true).anyValue().valueProperty().findAll(),
+        col.where(distinct: true).anyValue().valueProperty().tFindAll(),
         [null, 0, 1, 2],
       );
 
       await qEqual(
-        col.where(sort: Sort.desc).anyValue().valueProperty().findAll(),
+        col.where(sort: Sort.desc).anyValue().valueProperty().tFindAll(),
         [2, 2, 1, 1, 0, 0, null],
       );
 
@@ -65,24 +70,28 @@ void main() {
             .where(sort: Sort.desc, distinct: true)
             .anyValue()
             .valueProperty()
-            .findAll(),
+            .tFindAll(),
         [2, 1, 0, null],
       );
     });
 
     isarTest('.notEqualTo()', () async {
       await qEqual(
-        col.where().valueNotEqualTo(1).valueProperty().findAll(),
+        col.where().valueNotEqualTo(1).valueProperty().tFindAll(),
         [null, 0, 0, 2, 2],
       );
 
       await qEqual(
-        col.where(distinct: true).valueNotEqualTo(1).valueProperty().findAll(),
+        col.where(distinct: true).valueNotEqualTo(1).valueProperty().tFindAll(),
         [null, 0, 2],
       );
 
       await qEqual(
-        col.where(sort: Sort.desc).valueNotEqualTo(1).valueProperty().findAll(),
+        col
+            .where(sort: Sort.desc)
+            .valueNotEqualTo(1)
+            .valueProperty()
+            .tFindAll(),
         [2, 2, 0, 0, null],
       );
 
@@ -91,24 +100,24 @@ void main() {
             .where(sort: Sort.desc, distinct: true)
             .valueNotEqualTo(1)
             .valueProperty()
-            .findAll(),
+            .tFindAll(),
         [2, 0, null],
       );
     });
 
     isarTest('.isNotNull()', () async {
       await qEqual(
-        col.where().valueIsNotNull().valueProperty().findAll(),
+        col.where().valueIsNotNull().valueProperty().tFindAll(),
         [0, 0, 1, 1, 2, 2],
       );
 
       await qEqual(
-        col.where(distinct: true).valueIsNotNull().valueProperty().findAll(),
+        col.where(distinct: true).valueIsNotNull().valueProperty().tFindAll(),
         [0, 1, 2],
       );
 
       await qEqual(
-        col.where(sort: Sort.desc).valueIsNotNull().valueProperty().findAll(),
+        col.where(sort: Sort.desc).valueIsNotNull().valueProperty().tFindAll(),
         [2, 2, 1, 1, 0, 0],
       );
 
@@ -117,7 +126,7 @@ void main() {
             .where(sort: Sort.desc, distinct: true)
             .valueIsNotNull()
             .valueProperty()
-            .findAll(),
+            .tFindAll(),
         [2, 1, 0],
       );
     });

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:path/path.dart' as p;
 
 void main() {
   final testDir = Directory('test');
@@ -9,14 +10,21 @@ void main() {
       .toList();
 
   final imports = files.map((e) {
-    return "import '../$e' as ${e.split('.')[0].replaceAll('/', '_')};";
+    return "import '$e' as ${e.split('.')[0].replaceAll(p.separator, '_')};";
   }).join('\n');
 
   final calls = files.map((e) {
-    return "${e.split('.')[0].replaceAll('/', '_')}.main();";
+    final content = File(e).readAsStringSync();
+    final call = "${e.split('.')[0].replaceAll(p.separator, '_')}.main();";
+    if (content.startsWith("@TestOn('vm')")) {
+      return 'if (!kIsWeb) $call';
+    } else {
+      return call;
+    }
   }).join('\n');
 
   final code = """
+    import 'test/util/common.dart';
     $imports
 
     void main() {
@@ -24,5 +32,5 @@ void main() {
     }
   """;
 
-  File('test_driver/all_tests.dart').writeAsStringSync(code);
+  File('all_tests.dart').writeAsStringSync(code);
 }

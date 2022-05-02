@@ -90,7 +90,7 @@ abstract class Isar {
   /// Open a new Isar instance.
   static Isar openSync({
     required List<CollectionSchema> schemas,
-    required String directory,
+    String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
     bool inspector = false,
@@ -229,7 +229,7 @@ abstract class Isar {
 
   /// Initialize Isar Code. You need to provide binaries for every platform
   /// your app will run on.
-  static initializeLibraries({Map<String, String> libraries = const {}}) =>
+  static initializeLibraries({Map<IsarAbi, String> libraries = const {}}) =>
       IsarNative.initializeLibraries(libraries: libraries);
 
   /// Split a String into words according to Unicode Annex #29. Only words

@@ -6,7 +6,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 import 'all_tests.dart' as tests;
 
-import '../test/common.dart';
+import 'test/util/common.dart';
 
 void main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -24,8 +24,10 @@ void main() async {
 void executeTests(Completer<bool> completer) {
   group('Integration test', () {
     setUpAll(() async {
-      final dir = await getTemporaryDirectory();
-      testTempPath = dir.path;
+      if (!kIsWeb) {
+        final dir = await getTemporaryDirectory();
+        testTempPath = dir.path;
+      }
     });
     tearDownAll(() {
       completer.complete(testCount != 0 && allTestsSuccessful);

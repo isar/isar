@@ -1,7 +1,8 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import '../common.dart';
+import '../util/common.dart';
+import '../util/sync_async_helper.dart';
 
 part 'add_remove_link_test.g.dart';
 
@@ -35,30 +36,34 @@ class Col2 {
 }
 
 void main() {
+  testSyncAsync(tests);
+}
+
+void tests() {
   isarTest('Add remove link', () async {
     final isar1 = await openTempIsar([Col1Schema]);
-    await isar1.writeTxn((isar) async {
+    await isar1.tWriteTxn((isar) async {
       final obj = Col1(1);
       obj.link.value = Col1(null);
-      await isar.col1s.put(obj, saveLinks: true);
+      await isar.col1s.tPut(obj, saveLinks: true);
     });
     expect(await isar1.close(), true);
 
     final isar2 = await openTempIsar([Col2Schema], name: isar1.name);
-    final obj = await isar2.col2s.get(1);
-    await obj!.link1.load();
-    await obj.link2.load();
+    final obj = await isar2.col2s.tGet(1);
+    await obj!.link1.tLoad();
+    await obj.link2.tLoad();
     expect(obj.link1.value, Col2(2));
     expect(obj.link2.value, null);
-    await isar2.writeTxn((isar) {
+    await isar2.tWriteTxn((isar) {
       obj.link2.value = Col2(3);
-      return obj.link2.save();
+      return obj.link2.tSave();
     });
     expect(await isar2.close(), true);
 
     final isar3 = await openTempIsar([Col1Schema], name: isar1.name);
-    final obj1 = await isar3.col1s.get(1);
-    await obj1!.link.load();
+    final obj1 = await isar3.col1s.tGet(1);
+    await obj1!.link.tLoad();
     expect(obj1.link.value, Col1(2));
     expect(await isar3.close(), true);
   });

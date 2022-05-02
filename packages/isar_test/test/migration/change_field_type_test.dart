@@ -3,7 +3,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:isar/isar.dart';
 
-import '../common.dart';
+import '../util/common.dart';
+import '../util/sync_async_helper.dart';
 
 part 'change_field_type_test.g.dart';
 
@@ -26,10 +27,14 @@ class Col2 {
 }
 
 void main() {
+  testSyncAsync(tests);
+}
+
+void tests() {
   isarTest('Change field type', () async {
     final isar1 = await openTempIsar([Col1Schema]);
-    await isar1.writeTxn((isar) {
-      return isar.col1s.put(Col1(1, 'a'));
+    await isar1.tWriteTxn((isar) {
+      return isar.col1s.tPut(Col1(1, 'a'));
     });
     expect(await isar1.close(), true);
     await expectLater(

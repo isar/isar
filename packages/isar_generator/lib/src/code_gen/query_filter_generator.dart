@@ -60,7 +60,7 @@ class FilterGenerator {
   String vType(ObjectProperty p, [bool nullable = true]) {
     if (p.isarType.isList) {
       return p.isarType.scalarType.dartType(p.nullable && nullable, false);
-    } else if (nullable) {
+    } else if (nullable && !p.isId) {
       return p.dartType;
     } else {
       return p.dartType.removeSuffix('?');

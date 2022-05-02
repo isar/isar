@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field, invalid_override
+
 import 'dart:js_util';
 import 'dart:typed_data';
 
@@ -16,6 +18,25 @@ final isarAutoIncrementId = double.negativeInfinity as int;
 Never unsupportedOnWeb() {
   throw UnsupportedError('This operation is not supported for Isar web');
 }
+
+class _WebAbi {
+  static const androidArm = (null as dynamic);
+  static const androidArm64 = (null as dynamic);
+  static const androidIA32 = (null as dynamic);
+  static const androidX64 = (null as dynamic);
+  static const iosArm64 = (null as dynamic);
+  static const iosX64 = (null as dynamic);
+  static const linuxArm64 = (null as dynamic);
+  static const linuxX64 = (null as dynamic);
+  static const macosArm64 = (null as dynamic);
+  static const macosX64 = (null as dynamic);
+  static const windowsArm64 = (null as dynamic);
+  static const windowsX64 = (null as dynamic);
+}
+
+/// @nodoc
+@protected
+typedef IsarAbi = _WebAbi;
 
 /// @nodoc
 @protected
@@ -43,7 +64,7 @@ class _IsarWeb implements IsarNativeInterface {
   }
 
   @override
-  void initializeLibraries({Map<String, String> libraries = const {}}) {
+  void initializeLibraries({Map<IsarAbi, String> libraries = const {}}) {
     throw UnimplementedError();
   }
 
@@ -94,7 +115,7 @@ class _IsarWeb implements IsarNativeInterface {
 
   @override
   Isar openSync({
-    required String directory,
+    String? directory,
     required String name,
     required bool relaxedDurability,
     required List<CollectionSchema> schemas,

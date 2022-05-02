@@ -979,6 +979,26 @@ class IsarCoreBindings {
   late final _dart_isar_link_unlink _isar_link_unlink =
       _isar_link_unlink_ptr.asFunction<_dart_isar_link_unlink>();
 
+  int isar_link_unlink_all(
+    ffi.Pointer<ffi.NativeType> collection,
+    ffi.Pointer<ffi.NativeType> txn,
+    int link_id,
+    int id,
+  ) {
+    return _isar_link_unlink_all(
+      collection,
+      txn,
+      link_id,
+      id,
+    );
+  }
+
+  late final _isar_link_unlink_all_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_link_unlink_all>>(
+          'isar_link_unlink_all');
+  late final _dart_isar_link_unlink_all _isar_link_unlink_all =
+      _isar_link_unlink_all_ptr.asFunction<_dart_isar_link_unlink_all>();
+
   int isar_link_update_all(
     ffi.Pointer<ffi.NativeType> collection,
     ffi.Pointer<ffi.NativeType> txn,
@@ -2128,6 +2148,20 @@ typedef _dart_isar_link_unlink = int Function(
   int link_id,
   int id,
   int target_id,
+);
+
+typedef _c_isar_link_unlink_all = ffi.Int64 Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  ffi.Uint32 link_id,
+  ffi.Int64 id,
+);
+
+typedef _dart_isar_link_unlink_all = int Function(
+  ffi.Pointer<ffi.NativeType> collection,
+  ffi.Pointer<ffi.NativeType> txn,
+  int link_id,
+  int id,
 );
 
 typedef _c_isar_link_update_all = ffi.Int64 Function(

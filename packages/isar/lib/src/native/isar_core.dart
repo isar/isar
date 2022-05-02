@@ -30,20 +30,40 @@ IsarCoreBindings? _IC;
 // ignore: non_constant_identifier_names
 IsarCoreBindings get IC => _IC!;
 
-void initializeIsarCore({Map<String, String> libraries = const {}}) {
+void initializeIsarCore({Map<Abi, String> libraries = const {}}) {
   if (_IC != null) {
     return;
   }
   late String library;
-  if (Platform.isAndroid) {
-    library = libraries['android'] ?? 'libisar.so';
-  } else if (Platform.isMacOS) {
-    library = libraries['macos'] ?? 'libisar.dylib';
-  } else if (Platform.isWindows) {
-    library = libraries['windows'] ?? 'isar.dll';
-  } else if (Platform.isLinux) {
-    library = libraries['linux'] ?? 'libisar.so';
+  if (libraries.containsKey(Abi.current())) {
+    library = libraries[Abi.current()]!;
+  } else {
+    switch (Abi.current()) {
+      case Abi.androidArm:
+      case Abi.androidArm64:
+      case Abi.androidIA32:
+      case Abi.androidX64:
+        library = 'libisar.so';
+        break;
+      case Abi.iosArm64:
+      case Abi.iosX64:
+        break;
+      case Abi.macosArm64:
+      case Abi.macosX64:
+        library = 'libisar.dylib';
+        break;
+      case Abi.linuxX64:
+        library = 'libisar.so';
+        break;
+      case Abi.windowsX64:
+        library = 'isar.dll';
+        break;
+      default:
+        throw 'Unsupported processor architecture "${Abi.current()}".'
+            'Please open an issue on GitHub to request it.';
+    }
   }
+
   try {
     if (Platform.isIOS) {
       _IC = IsarCoreBindings(DynamicLibrary.process());
@@ -51,10 +71,9 @@ void initializeIsarCore({Map<String, String> libraries = const {}}) {
       _IC ??= IsarCoreBindings(DynamicLibrary.open(library));
     }
   } catch (e) {
-    print(e);
     throw IsarError(
         'Could not initialize IsarCore library. If you create a Flutter app, '
-        'make sure to add isar_flutter_libs to your dependencies.');
+        'make sure to add isar_flutter_libs to your dependencies: $e');
   }
 }
 

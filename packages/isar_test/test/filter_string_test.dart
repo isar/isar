@@ -1,7 +1,8 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'common.dart';
+import 'util/common.dart';
+import 'util/sync_async_helper.dart';
 
 part 'filter_string_test.g.dart';
 
@@ -50,6 +51,10 @@ class StringModel {
 }
 
 void main() {
+  testSyncAsync(tests);
+}
+
+void tests() {
   group('String filter', () {
     late Isar isar;
     late IsarCollection<StringModel> col;
@@ -75,75 +80,75 @@ void main() {
 
     isarTest('equalTo()', () async {
       await qEqual(
-        col.where().hashFieldEqualTo('string 2').findAll(),
+        col.where().hashFieldEqualTo('string 2').tFindAll(),
         [StringModel.init('string 2')],
       );
       await qEqual(
-        col.where().fieldEqualTo('string 2').findAll(),
-        [StringModel.init('string 2')],
-      );
-
-      await qEqual(
-        col.where().filter().hashFieldEqualTo('string 2').findAll(),
+        col.where().fieldEqualTo('string 2').tFindAll(),
         [StringModel.init('string 2')],
       );
 
       await qEqual(
-        col.where().hashFieldEqualTo(null).findAll(),
+        col.where().filter().hashFieldEqualTo('string 2').tFindAll(),
+        [StringModel.init('string 2')],
+      );
+
+      await qEqual(
+        col.where().hashFieldEqualTo(null).tFindAll(),
         [StringModel.init(null)],
       );
       await qEqual(
-        col.where().fieldEqualTo(null).findAll(),
+        col.where().fieldEqualTo(null).tFindAll(),
         [StringModel.init(null)],
       );
 
       await qEqual(
-        col.where().hashFieldEqualTo('string 5').findAll(),
+        col.where().hashFieldEqualTo('string 5').tFindAll(),
         [],
       );
       await qEqual(
-        col.where().fieldEqualTo('string 5').findAll(),
+        col.where().fieldEqualTo('string 5').tFindAll(),
         [],
       );
       await qEqual(
-        col.where().filter().hashFieldEqualTo('string 5').findAll(),
+        col.where().filter().hashFieldEqualTo('string 5').tFindAll(),
         [],
       );
 
       await qEqual(
-        col.where().hashFieldEqualTo('').findAll(),
+        col.where().hashFieldEqualTo('').tFindAll(),
         [StringModel.init('')],
       );
       await qEqual(
-        col.where().fieldEqualTo('').findAll(),
+        col.where().fieldEqualTo('').tFindAll(),
         [StringModel.init('')],
       );
 
       await qEqual(
-        col.where().filter().hashFieldEqualTo('').findAll(),
+        col.where().filter().hashFieldEqualTo('').tFindAll(),
         [StringModel.init('')],
       );
     });
 
     isarTest('isNull()', () async {
       await qEqual(
-        col.where().hashFieldIsNull().findAll(),
+        col.where().hashFieldIsNull().tFindAll(),
         [StringModel.init(null)],
       );
       await qEqual(
-        col.where().fieldIsNull().findAll(),
+        col.where().fieldIsNull().tFindAll(),
         [StringModel.init(null)],
       );
 
       await qEqual(
-        col.where().filter().hashFieldIsNull().findAll(),
+        col.where().filter().hashFieldIsNull().tFindAll(),
         [StringModel.init(null)],
       );
     });
 
     isarTest('isNotNull()', () async {
       await qEqualSet(
-        col.where().hashFieldIsNotNull().findAll(),
+        col.where().hashFieldIsNotNull().tFindAll(),
         {
           StringModel.init(''),
           StringModel.init('string 0'),
@@ -156,7 +161,7 @@ void main() {
       );
 
       await qEqual(
-        col.where().fieldIsNotNull().findAll(),
+        col.where().fieldIsNotNull().tFindAll(),
         [
           StringModel.init(''),
           StringModel.init('string 0'),
@@ -171,7 +176,7 @@ void main() {
 
     isarTest('isNotEqualTo()', () async {
       await qEqualSet(
-        col.where().hashFieldNotEqualTo('string 4').findAll(),
+        col.where().hashFieldNotEqualTo('string 4').tFindAll(),
         {
           StringModel.init(null),
           StringModel.init(''),
@@ -182,7 +187,7 @@ void main() {
         },
       );
       await qEqualSet(
-        col.where().fieldNotEqualTo('string 4').findAll(),
+        col.where().fieldNotEqualTo('string 4').tFindAll(),
         [
           StringModel.init(null),
           StringModel.init(''),
@@ -196,7 +201,7 @@ void main() {
 
     isarTest('.startsWith()', () async {
       await qEqual(
-        col.where().fieldStartsWith('string').findAll(),
+        col.where().fieldStartsWith('string').tFindAll(),
         [
           StringModel.init('string 0'),
           StringModel.init('string 1'),
@@ -207,7 +212,7 @@ void main() {
         ],
       );
       await qEqualSet(
-        col.where().filter().fieldStartsWith('string').findAll(),
+        col.where().filter().fieldStartsWith('string').tFindAll(),
         {
           StringModel.init('string 0'),
           StringModel.init('string 1'),
@@ -219,7 +224,7 @@ void main() {
       );
 
       await qEqual(
-        col.where().fieldStartsWith('').findAll(),
+        col.where().fieldStartsWith('').tFindAll(),
         [
           StringModel.init(''),
           StringModel.init('string 0'),
@@ -231,7 +236,7 @@ void main() {
         ],
       );
       await qEqualSet(
-        col.where().filter().fieldStartsWith('').findAll(),
+        col.where().filter().fieldStartsWith('').tFindAll(),
         {
           StringModel.init(''),
           StringModel.init('string 0'),
@@ -243,13 +248,13 @@ void main() {
         },
       );
 
-      await qEqual(col.where().fieldStartsWith('S').findAll(), []);
-      await qEqualSet(col.where().filter().fieldStartsWith('S').findAll(), {});
+      await qEqual(col.where().fieldStartsWith('S').tFindAll(), []);
+      await qEqualSet(col.where().filter().fieldStartsWith('S').tFindAll(), {});
     });
 
     isarTest('.endsWith()', () async {
       await qEqualSet(
-        col.where().filter().fieldEndsWith('4').findAll(),
+        col.where().filter().fieldEndsWith('4').tFindAll(),
         {
           StringModel.init('string 4'),
           StringModel.init('string 4'),
@@ -257,7 +262,7 @@ void main() {
       );
 
       await qEqualSet(
-        col.where().filter().fieldEndsWith('').findAll(),
+        col.where().filter().fieldEndsWith('').tFindAll(),
         {
           StringModel.init(''),
           StringModel.init('string 0'),
@@ -269,11 +274,11 @@ void main() {
         },
       );
 
-      await qEqualSet(col.where().filter().fieldEndsWith('8').findAll(), {});
+      await qEqualSet(col.where().filter().fieldEndsWith('8').tFindAll(), {});
     });
 
     isarTest('.contains()', () async {
-      await qEqualSet(col.where().filter().fieldContains('ing').findAll(), {
+      await qEqualSet(col.where().filter().fieldContains('ing').tFindAll(), {
         StringModel.init('string 0'),
         StringModel.init('string 1'),
         StringModel.init('string 2'),
@@ -283,7 +288,7 @@ void main() {
       });
 
       await qEqualSet(
-        col.where().filter().fieldContains('').findAll(),
+        col.where().filter().fieldContains('').tFindAll(),
         {
           StringModel.init(''),
           StringModel.init('string 0'),
@@ -295,12 +300,12 @@ void main() {
         },
       );
 
-      await qEqualSet(col.where().filter().fieldContains('x').findAll(), {});
+      await qEqualSet(col.where().filter().fieldContains('x').tFindAll(), {});
     });
 
     isarTestVm('.matches()', () async {
       await qEqualSet(
-        col.where().filter().fieldMatches('*ng 4').findAll(),
+        col.where().filter().fieldMatches('*ng 4').tFindAll(),
         {
           StringModel.init('string 4'),
           StringModel.init('string 4'),
@@ -308,7 +313,7 @@ void main() {
       );
 
       await qEqualSet(
-        col.where().filter().fieldMatches('????????').findAll(),
+        col.where().filter().fieldMatches('????????').tFindAll(),
         {
           StringModel.init('string 0'),
           StringModel.init('string 1'),
@@ -320,11 +325,11 @@ void main() {
       );
 
       await qEqualSet(
-        col.where().filter().fieldMatches('').findAll(),
+        col.where().filter().fieldMatches('').tFindAll(),
         {StringModel.init('')},
       );
 
-      await qEqualSet(col.where().filter().fieldMatches('*4?').findAll(), {});
+      await qEqualSet(col.where().filter().fieldMatches('*4?').tFindAll(), {});
     });
   });
 }
