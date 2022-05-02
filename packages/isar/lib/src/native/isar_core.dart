@@ -48,18 +48,15 @@ void initializeIsarCore({Map<Abi, String> libraries = const {}}) {
       case Abi.iosArm64:
       case Abi.iosX64:
         break;
-      case Abi.linuxX64:
-        library = 'x64/libisar.so';
-        break;
       case Abi.macosArm64:
       case Abi.macosX64:
         library = 'libisar.dylib';
         break;
-      case Abi.windowsArm64:
-        library = 'arm64/isar.dll';
+      case Abi.linuxX64:
+        library = 'libisar.so';
         break;
       case Abi.windowsX64:
-        library = 'x64/isar.dll';
+        library = 'isar.dll';
         break;
       default:
         throw 'Unsupported processor architecture "${Abi.current()}".'
@@ -74,10 +71,9 @@ void initializeIsarCore({Map<Abi, String> libraries = const {}}) {
       _IC ??= IsarCoreBindings(DynamicLibrary.open(library));
     }
   } catch (e) {
-    print(e);
     throw IsarError(
         'Could not initialize IsarCore library. If you create a Flutter app, '
-        'make sure to add isar_flutter_libs to your dependencies.');
+        'make sure to add isar_flutter_libs to your dependencies: $e');
   }
 }
 
