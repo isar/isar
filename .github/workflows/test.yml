@@ -32,13 +32,13 @@ jobs:
         working-directory: packages/isar_generator
       - run: flutter pub get
         working-directory: packages/isar_inspector
-      - run: flutter pub get
-        working-directory: packages/isar_test
-      - name: Lint
-        run: |
+      - run: |
+          flutter pub get
           flutter pub run build_runner build
           dart tool/generate_all_tests.dart
-          flutter analyze
+        working-directory: packages/isar_test
+      - name: Lint
+        run: flutter analyze
 
   drive_ios:
     strategy:
