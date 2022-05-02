@@ -35,7 +35,10 @@ jobs:
       - run: flutter pub get
         working-directory: packages/isar_test
       - name: Lint
-        run: flutter analyze
+        run: |
+          flutter pub run build_runner build
+          dart tool/generate_all_tests.dart
+          flutter analyze
 
   drive_ios:
     strategy:
