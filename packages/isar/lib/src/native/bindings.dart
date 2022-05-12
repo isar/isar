@@ -838,6 +838,15 @@ class IsarCoreBindings {
       _isar_key_add_long_list_hash_ptr
           .asFunction<_dart_isar_key_add_long_list_hash>();
 
+  int isar_version() {
+    return _isar_version();
+  }
+
+  late final _isar_version_ptr =
+      _lookup<ffi.NativeFunction<_c_isar_version>>('isar_version');
+  late final _dart_isar_version _isar_version =
+      _isar_version_ptr.asFunction<_dart_isar_version>();
+
   int isar_create_instance(
     ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
     ffi.Pointer<ffi.Int8> name,
@@ -2065,6 +2074,10 @@ typedef _dart_isar_key_add_long_list_hash = void Function(
   ffi.Pointer<ffi.Int64> value,
   int length,
 );
+
+typedef _c_isar_version = ffi.Int64 Function();
+
+typedef _dart_isar_version = int Function();
 
 typedef _c_isar_create_instance = ffi.Int64 Function(
   ffi.Pointer<ffi.Pointer<ffi.NativeType>> isar,
