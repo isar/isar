@@ -1,6 +1,6 @@
 #!/bin/bash
 
-core_version=`cat ../../CORE_VERSION`
+core_version=`dart ../isar/tool/get_version.dart`
 github="https://github.com/isar/isar-core/releases/download/${core_version:5}"
 
 

@@ -5,17 +5,17 @@ repository: https://github.com/isar/isar
 homepage: https://isar.dev
 
 environment:
-  sdk: ">=2.16.0 <3.0.0"
+  sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
   isar: 2.5.0
   build: ^2.2.1
   source_gen: ^1.2.1
-  analyzer: ^3.0.0
+  analyzer: ^4.0.0
   glob: ^2.0.2
   path: ^1.8.0
   dart_style: ^2.2.1
   dartx: ^1.0.0
 
 dev_dependencies:
-  lints: ^1.0.1
+  lints: ^2.0.0

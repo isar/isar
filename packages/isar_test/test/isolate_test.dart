@@ -31,7 +31,6 @@ final _obj3 = TestModel()
   ..value = 'Model 3';
 
 Future<bool> _isolateFunc(String name) async {
-  registerBinaries();
   final isar = Isar.openSync(
     name: name,
     schemas: [TestModelSchema],

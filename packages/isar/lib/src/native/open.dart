@@ -49,14 +49,14 @@ Future<Isar> openIsar({
   String name = 'isar',
   bool relaxedDurability = true,
 }) async {
-  initializeIsarCore();
+  initializeCoreBinary();
   IC.isar_connect_dart_api(NativeApi.postCObject);
 
   return using((alloc) async {
     final namePtr = name.toNativeUtf8(allocator: alloc);
     final dirPtr = directory.toNativeUtf8(allocator: alloc);
 
-    final schemaStr = '[' + schemas.map((e) => e.schema).join(',') + ']';
+    final schemaStr = '[${schemas.map((e) => e.schema).join(',')}]';
     final schemaStrPtr = schemaStr.toNativeUtf8(allocator: alloc);
 
     final receivePort = ReceivePort();
@@ -78,14 +78,14 @@ Isar openIsarSync({
   String name = 'isar',
   bool relaxedDurability = true,
 }) {
-  initializeIsarCore();
+  initializeCoreBinary();
   IC.isar_connect_dart_api(NativeApi.postCObject);
 
   return using((alloc) {
     final namePtr = name.toNativeUtf8(allocator: alloc);
     final dirPtr = directory.toNativeUtf8(allocator: alloc);
 
-    final schemaStr = '[' + schemas.map((e) => e.schema).join(',') + ']';
+    final schemaStr = '[${schemas.map((e) => e.schema).join(',')}]';
     final schemaStrPtr = schemaStr.toNativeUtf8(allocator: alloc);
 
     nCall(IC.isar_create_instance(_isarPtrPtr, namePtr.cast(), dirPtr.cast(),

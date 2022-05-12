@@ -5,6 +5,7 @@ import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
+import 'package:isar/src/version.dart';
 
 import 'bindings.dart';
 
@@ -25,56 +26,67 @@ const nullBool = 0;
 const falseBool = 1;
 const trueBool = 2;
 
-// ignore: non_constant_identifier_names
-IsarCoreBindings? _IC;
-// ignore: non_constant_identifier_names
-IsarCoreBindings get IC => _IC!;
+var _isarInitialized = false;
+var _isarInitializing = false;
+bool get isarInitialized => _isarInitialized;
 
-void initializeIsarCore({Map<Abi, String> libraries = const {}}) {
-  if (_IC != null) {
-    return;
+// ignore: non_constant_identifier_names
+late final IsarCoreBindings IC;
+
+typedef FinalizerFunction = void Function(Pointer<Void> token);
+late final Pointer<NativeFinalizerFunction> isarClose;
+late final Pointer<NativeFinalizerFunction> isarQueryFree;
+
+FutureOr<void> initializeCoreBinary(
+    {Map<Abi, String> libraries = const {}, bool download = false}) {
+  if (_isarInitialized) return null;
+  if (_isarInitializing) {
+    throw IsarError('Isar is already initializing.');
   }
-  late String library;
-  if (libraries.containsKey(Abi.current())) {
-    library = libraries[Abi.current()]!;
-  } else {
-    switch (Abi.current()) {
-      case Abi.androidArm:
-      case Abi.androidArm64:
-      case Abi.androidIA32:
-      case Abi.androidX64:
-        library = 'libisar.so';
-        break;
-      case Abi.iosArm64:
-      case Abi.iosX64:
-        break;
-      case Abi.macosArm64:
-      case Abi.macosX64:
-        library = 'libisar.dylib';
-        break;
-      case Abi.linuxX64:
-        library = 'libisar.so';
-        break;
-      case Abi.windowsX64:
-        library = 'isar.dll';
-        break;
-      default:
-        throw 'Unsupported processor architecture "${Abi.current()}".'
-            'Please open an issue on GitHub to request it.';
-    }
-  }
+  _isarInitializing = true;
+
+  final libraryPath = libraries[Abi.current()] ?? Abi.current().localName;
 
   try {
+    late DynamicLibrary dylib;
     if (Platform.isIOS) {
-      _IC = IsarCoreBindings(DynamicLibrary.process());
+      dylib = DynamicLibrary.process();
     } else {
-      _IC ??= IsarCoreBindings(DynamicLibrary.open(library));
+      dylib = DynamicLibrary.open(libraryPath);
     }
+
+    _isarInitialized = true;
+    _isarInitializing = false;
+    IC = IsarCoreBindings(dylib);
+    isarClose = dylib.lookup('isar_close_instance');
+    isarQueryFree = dylib.lookup('isar_q_free');
   } catch (e) {
-    throw IsarError(
-        'Could not initialize IsarCore library. If you create a Flutter app, '
-        'make sure to add isar_flutter_libs to your dependencies: $e');
+    if (download) {
+      return _downloadIsarCore(libraryPath).then((value) {
+        _isarInitializing = false;
+        return initializeCoreBinary(libraries: libraries, download: false);
+      });
+    } else {
+      _isarInitializing = false;
+      throw IsarError(
+        'Could not initialize IsarCore library for processor architecture '
+        '"${Abi.current()}". If you create a Flutter app, make sure to add '
+        'isar_flutter_libs to your dependencies.\n$e',
+      );
+    }
   }
+}
+
+Future<void> _downloadIsarCore(String libraryPath) async {
+  final remoteName = Abi.current().remoteName;
+  if (remoteName == null) {
+    throw IsarError('This platform does not support downloading IsarCore.');
+  }
+
+  final uri = Uri.parse('$githubUrl/$isarCoreVersion/$remoteName');
+  final request = await HttpClient().getUrl(uri);
+  final response = await request.close();
+  await response.pipe(File(libraryPath).openWrite());
 }
 
 IsarError? isarErrorFromResult(int result) {
@@ -146,4 +158,42 @@ extension RawObjectSetPointerX on Pointer<RawObjectSet> {
 extension PointerX on Pointer {
   @pragma('vm:prefer-inline')
   bool get isNull => address == 0;
+}
+
+extension on Abi {
+  String get localName {
+    switch (Abi.current()) {
+      case Abi.androidArm:
+      case Abi.androidArm64:
+      case Abi.androidIA32:
+      case Abi.androidX64:
+        return 'libisar.so';
+      case Abi.macosArm64:
+      case Abi.macosX64:
+        return 'libisar.dylib';
+      case Abi.linuxX64:
+        return 'libisar.so';
+      case Abi.windowsArm64:
+      case Abi.windowsX64:
+        return 'isar.dll';
+      default:
+        throw 'Unsupported processor architecture "${Abi.current()}".'
+            'Please open an issue on GitHub to request it.';
+    }
+  }
+
+  String? get remoteName {
+    switch (Abi.current()) {
+      case Abi.macosArm64:
+      case Abi.macosX64:
+        return 'libisar_macos.dylib';
+      case Abi.linuxX64:
+        return 'libisar_x64.so';
+      case Abi.windowsArm64:
+        return 'isar_arm64.dll';
+      case Abi.windowsX64:
+        return 'isar_x64.dll';
+    }
+    return null;
+  }
 }

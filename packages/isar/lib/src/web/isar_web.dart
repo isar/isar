@@ -59,14 +59,15 @@ class _IsarWeb implements IsarNativeInterface {
   const _IsarWeb();
 
   @override
-  Uint8List bufAsBytes(IsarBytePointer pointer, int length) {
-    throw UnimplementedError();
-  }
+  Uint8List bufAsBytes(IsarBytePointer pointer, int length) =>
+      unsupportedOnWeb();
 
   @override
-  void initializeLibraries({Map<IsarAbi, String> libraries = const {}}) {
-    throw UnimplementedError();
-  }
+  Future<void> initializeIsarCore({
+    Map<IsarAbi, String> libraries = const {},
+    bool download = false,
+  }) =>
+      unsupportedOnWeb();
 
   @override
   @tryInline
@@ -123,9 +124,7 @@ class _IsarWeb implements IsarNativeInterface {
       unsupportedOnWeb();
 
   @override
-  List<String> splitWords(String value) {
-    throw UnimplementedError();
-  }
+  List<String> splitWords(String value) => unsupportedOnWeb();
 }
 
 /// @nodoc

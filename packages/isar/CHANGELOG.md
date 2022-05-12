@@ -1,3 +1,17 @@
+## 2.6.0
+
+### Enhancements
+
+- Added `download` option to `Isar.initializeIsarCore()` to download binaries automatically. This is useful for unit tests.
+
+### Minor Breaking
+
+- Renamed `Isar.initializeLibraries()` to `Isar.initializeIsarCore()`.
+
+### Fixes
+
+- Fixed issues with binaries of the previous version
+
 ## 2.5.0
 
 ### Enhancements

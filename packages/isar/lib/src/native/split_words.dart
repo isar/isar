@@ -7,7 +7,7 @@ import 'binary_reader.dart';
 import 'binary_writer.dart';
 
 List<String> splitWordsCore(String input) {
-  initializeIsarCore();
+  initializeCoreBinary();
 
   final bytes = BinaryWriter.utf8Encoder.convert(input);
   final bytesPtr = malloc<Uint8>(bytes.length);

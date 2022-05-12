@@ -127,7 +127,7 @@ class StringConverter extends TypeConverter<String, int> {
 }
 
 void main() {
-  final _converterObject = ConverterModel()
+  final converterObject = ConverterModel()
     ..id = 123
     ..boolValue = true
     ..intValue = 25
@@ -137,7 +137,7 @@ void main() {
     ..dateValue = DateTime.fromMillisecondsSinceEpoch(123123)
     ..stringValue = 'five';
 
-  final _converterObjectJson = {
+  final converterObjectJson = {
     'id': 123,
     'boolValue': 'true',
     'intValue': '25',
@@ -166,12 +166,12 @@ void main() {
       final isar = await openTempIsar([ConverterModelSchema]);
 
       await isar.writeTxn((isar) async {
-        await isar.converterModels.importJson([_converterObjectJson]);
+        await isar.converterModels.importJson([converterObjectJson]);
       });
 
       expect(
         await isar.converterModels.get(123),
-        _converterObject,
+        converterObject,
       );
 
       await isar.close();

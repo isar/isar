@@ -11,15 +11,19 @@ import 'bindings.dart';
 
 const _zoneTxn = #zoneTxn;
 
-class IsarImpl extends Isar {
+class IsarImpl extends Isar implements Finalizable {
   final Pointer ptr;
+  late final NativeFinalizer _finalizer;
 
   final List<Future> _activeAsyncTxns = [];
 
   final _syncTxnPtrPtr = malloc<Pointer>();
   SyncTxn? _currentTxnSync;
 
-  IsarImpl(String name, String schema, this.ptr) : super(name, schema);
+  IsarImpl(String name, String schema, this.ptr) : super(name, schema) {
+    _finalizer = NativeFinalizer(isarClose);
+    _finalizer.attach(this, ptr.cast());
+  }
 
   void requireNotInTxn() {
     if (_currentTxnSync != null || Zone.current[_zoneTxn] != null) {
@@ -154,7 +158,13 @@ class IsarImpl extends Isar {
     requireNotInTxn();
     await Future.wait(_activeAsyncTxns);
     await super.close();
-    return IC.isar_close_instance(ptr, deleteFromDisk);
+
+    _finalizer.detach(this);
+    if (deleteFromDisk) {
+      return IC.isar_close_delete_instance(ptr);
+    } else {
+      return IC.isar_close_instance(ptr);
+    }
   }
 }
 

@@ -22,6 +22,8 @@ const isarMaxId = 9223372036854775807;
 /// @nodoc
 const isarAutoIncrementId = -9223372036854775808;
 
+const githubUrl = 'https://github.com/isar/isar-core/releases/download';
+
 /// @nodoc
 @protected
 typedef IsarAbi = Abi;
@@ -52,9 +54,14 @@ class _IsarNative implements IsarNativeInterface {
   }
 
   @override
-  @pragma('vm:prefer-inline')
-  void initializeLibraries({Map<IsarAbi, String> libraries = const {}}) {
-    return initializeIsarCore(libraries: libraries);
+  Future<void> initializeIsarCore({
+    Map<IsarAbi, String> libraries = const {},
+    bool download = false,
+  }) async {
+    await initializeCoreBinary(
+      libraries: libraries,
+      download: download,
+    );
   }
 
   @override

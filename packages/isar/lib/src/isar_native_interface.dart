@@ -5,7 +5,8 @@ import 'package:isar/isar.dart';
 abstract class IsarNativeInterface {
   Uint8List bufAsBytes(IsarBytePointer pointer, int length);
 
-  void initializeLibraries({Map<IsarAbi, String> libraries = const {}});
+  Future<void> initializeIsarCore(
+      {Map<IsarAbi, String> libraries, bool download});
 
   List<String> splitWords(String value);
 

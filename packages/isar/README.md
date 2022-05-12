@@ -195,6 +195,12 @@ queryStream.listen((newResult) {
 })
 ```
 
+## Unit tests
+
+If you want to use Isar in unit tests or Dart code, call `await Isar.initializeIsarCore(download: true)` before using Isar in your tests.
+
+Isar will automatically download the correct binary for your platform. You can also pass a `libraries` map to adjust the download location for each platform.
+
 ### License
 
 ```

@@ -67,35 +67,23 @@ void isarTestVm(String name, dynamic Function() body) {
   }, skip: kIsWeb);
 }
 
-String? testTempPath;
-
-// Change the path for your platform to point to a local isar core build
-void registerBinaries() {
-  if (!kIsWeb && testTempPath == null) {
-    final dartToolDir = path.join(Directory.current.path, '.dart_tool');
-    testTempPath = path.join(dartToolDir, 'test', 'tmp');
-    try {
-      Isar.initializeLibraries(
-        libraries: {
-          IsarAbi.windowsX64: path.join(dartToolDir, 'libisar_windows_x64.dll'),
-          IsarAbi.macosX64: path.join(dartToolDir, 'libisar_macos.dylib'),
-          IsarAbi.linuxArm64: path.join(dartToolDir, 'libisar_linux_x64.so'),
-        },
-      );
-    } catch (e) {
-      // ignore. maybe this is an instrumentation test
-    }
-  }
-}
-
 String getRandomName() {
   var random = Random().nextInt(pow(2, 32) as int).toString();
   return '${random}_tmp';
 }
 
+String? testTempPath;
 Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> schemas,
     {String? name}) async {
-  registerBinaries();
+  if (!kIsWeb && testTempPath == null) {
+    final dartToolDir = path.join(Directory.current.path, '.dart_tool');
+    testTempPath = path.join(dartToolDir, 'test', 'tmp');
+    try {
+      await Isar.initializeIsarCore(download: true);
+    } catch (e) {
+      // ignore. maybe this is an instrumentation test
+    }
+  }
 
   return tOpen(
     schemas: schemas,

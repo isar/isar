@@ -3,6 +3,7 @@ import 'dart:html';
 import 'dart:js_util';
 
 import 'package:isar/isar.dart';
+import 'package:isar/src/version.dart';
 
 import 'bindings.dart';
 import 'isar_collection_impl.dart';
@@ -30,7 +31,7 @@ Future<Isar> openIsar({
   required List<CollectionSchema> schemas,
 }) async {
   await initializeIsarWeb();
-  final schemaStr = '[' + schemas.map((e) => e.schema).join(',') + ']';
+  final schemaStr = '[${schemas.map((e) => e.schema).join(',')}]';
 
   final schemasJson = schemas.map((e) {
     final json = jsonDecode(e.schema);
