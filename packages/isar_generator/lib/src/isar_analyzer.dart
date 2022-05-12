@@ -311,6 +311,10 @@ class IsarAnalyzer {
         }
       }
 
+      if (!index.unique && index.replace) {
+        err('Only unique indexes can replace.', element);
+      }
+
       final name = index.name ??
           indexProperties.map((e) => e.property.isarName).join('_');
       checkIsarName(name, element);
@@ -319,6 +323,7 @@ class IsarAnalyzer {
         name: name,
         properties: indexProperties,
         unique: index.unique,
+        replace: index.replace,
       );
     }
   }

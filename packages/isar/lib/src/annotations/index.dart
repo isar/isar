@@ -30,6 +30,10 @@ class Index {
   /// duplicate will result in an error.
   final bool unique;
 
+  /// If set to `true`, inserting a duplicate unique value will replace the
+  /// existing object instead of throwing an error.
+  final bool replace;
+
   /// Specifies how an index is stored in Isar.
   ///
   /// Defaults to:
@@ -47,6 +51,7 @@ class Index {
     this.name,
     this.composite = const [],
     this.unique = false,
+    this.replace = false,
     this.type,
     this.caseSensitive,
   });

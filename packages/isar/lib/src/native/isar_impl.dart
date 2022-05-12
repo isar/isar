@@ -22,7 +22,7 @@ class IsarImpl extends Isar implements Finalizable {
 
   IsarImpl(String name, String schema, this.ptr) : super(name, schema) {
     _finalizer = NativeFinalizer(isarClose);
-    _finalizer.attach(this, ptr.cast());
+    _finalizer.attach(this, ptr.cast(), detach: this);
   }
 
   void requireNotInTxn() {
