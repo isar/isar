@@ -55,9 +55,16 @@ FutureOr<void> initializeCoreBinary(
       dylib = DynamicLibrary.open(libraryPath);
     }
 
+    final bindings = IsarCoreBindings(dylib);
+    final binaryVersion = bindings.isar_version();
+    if (binaryVersion != 0 && binaryVersion != isarCoreVersionNumber) {
+      print(binaryVersion);
+      throw 'Incorrect Isar binary.';
+    }
+
     _isarInitialized = true;
     _isarInitializing = false;
-    IC = IsarCoreBindings(dylib);
+    IC = bindings;
     isarClose = dylib.lookup('isar_close_instance');
     isarQueryFree = dylib.lookup('isar_q_free');
   } catch (e) {

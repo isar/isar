@@ -90,14 +90,10 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       unsupportedOnWeb();
 
   @override
-  Future<int> put(
-    OBJ object, {
-    bool replaceOnConflict = false,
-    bool saveLinks = false,
-  }) {
+  Future<int> put(OBJ object, {bool saveLinks = false}) {
     return isar.getTxn(true, (txn) async {
       final serialized = schema.serializeWeb(this, object);
-      final id = await native.put(txn, serialized, replaceOnConflict).wait();
+      final id = await native.put(txn, serialized).wait();
       schema.setId?.call(object, id);
 
       final linkFutures = <Future>[];
@@ -120,18 +116,13 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<List<int>> putAll(
-    List<OBJ> objects, {
-    bool replaceOnConflict = false,
-    bool saveLinks = false,
-  }) {
+  Future<List<int>> putAll(List<OBJ> objects, {bool saveLinks = false}) {
     return isar.getTxn(true, (txn) async {
       final serialized = [];
       for (var object in objects) {
         serialized.add(schema.serializeWeb(this, object));
       }
-      final ids =
-          await native.putAll(txn, serialized, replaceOnConflict).wait();
+      final ids = await native.putAll(txn, serialized).wait();
       final linkFutures = <Future>[];
       for (var i = 0; i < objects.length; i++) {
         final object = objects[i];
@@ -158,19 +149,10 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  int putSync(
-    OBJ object, {
-    bool replaceOnConflict = false,
-    bool saveLinks = false,
-  }) =>
-      unsupportedOnWeb();
+  int putSync(OBJ object, {bool saveLinks = false}) => unsupportedOnWeb();
 
   @override
-  List<int> putAllSync(
-    List<OBJ> objects, {
-    bool replaceOnConflict = false,
-    bool saveLinks = false,
-  }) =>
+  List<int> putAllSync(List<OBJ> objects, {bool saveLinks = false}) =>
       unsupportedOnWeb();
 
   @override
@@ -225,31 +207,23 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   void clearSync() => unsupportedOnWeb();
 
   @override
-  Future<void> importJson(List<Map<String, dynamic>> json,
-      {bool replaceOnConflict = false}) {
+  Future<void> importJson(List<Map<String, dynamic>> json) {
     return isar.getTxn(true, (txn) async {
-      await native
-          .putAll(txn, json.map(jsify).toList(), replaceOnConflict)
-          .wait();
+      await native.putAll(txn, json.map(jsify).toList()).wait();
     });
   }
 
   @override
-  Future<void> importJsonRaw(Uint8List jsonBytes,
-      {bool replaceOnConflict = false}) {
+  Future<void> importJsonRaw(Uint8List jsonBytes) {
     final json = jsonDecode(Utf8Decoder().convert(jsonBytes)) as List;
-    return importJson(json.cast(), replaceOnConflict: replaceOnConflict);
+    return importJson(json.cast());
   }
 
   @override
-  void importJsonSync(List<Map<String, dynamic>> json,
-          {bool replaceOnConflict = false}) =>
-      unsupportedOnWeb();
+  void importJsonSync(List<Map<String, dynamic>> json) => unsupportedOnWeb();
 
   @override
-  void importJsonRawSync(Uint8List jsonBytes,
-          {bool replaceOnConflict = false}) =>
-      unsupportedOnWeb();
+  void importJsonRawSync(Uint8List jsonBytes) => unsupportedOnWeb();
 
   @override
   Stream<void> watchLazy() {

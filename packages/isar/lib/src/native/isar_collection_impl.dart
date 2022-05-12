@@ -182,24 +182,12 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<int> put(
-    OBJ object, {
-    bool replaceOnConflict = false,
-    bool saveLinks = false,
-  }) {
-    return putAll(
-      [object],
-      replaceOnConflict: replaceOnConflict,
-      saveLinks: saveLinks,
-    ).then((ids) => ids[0]);
+  Future<int> put(OBJ object, {bool saveLinks = false}) {
+    return putAll([object], saveLinks: saveLinks).then((ids) => ids[0]);
   }
 
   @override
-  Future<List<int>> putAll(
-    List<OBJ> objects, {
-    bool replaceOnConflict = false,
-    bool saveLinks = false,
-  }) {
+  Future<List<int>> putAll(List<OBJ> objects, {bool saveLinks = false}) {
     return isar.getTxn(true, (txn) async {
       final rawObjSetPtr = txn.allocRawObjSet(objects.length);
       final objectsPtr = rawObjSetPtr.ref.objects;
@@ -212,7 +200,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
             this, rawObj, object, _staticSize, _offsets, allocBuf);
         rawObj.id = schema.getId(object) ?? Isar.autoIncrement;
       }
-      IC.isar_put_all(ptr, txn.ptr, rawObjSetPtr, replaceOnConflict);
+      IC.isar_put_all(ptr, txn.ptr, rawObjSetPtr);
 
       await txn.wait();
       final rawObjectSet = rawObjSetPtr.ref;
@@ -245,24 +233,12 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  int putSync(
-    OBJ object, {
-    bool replaceOnConflict = false,
-    bool saveLinks = false,
-  }) {
-    return putAllSync(
-      [object],
-      replaceOnConflict: replaceOnConflict,
-      saveLinks: saveLinks,
-    )[0];
+  int putSync(OBJ object, {bool saveLinks = false}) {
+    return putAllSync([object], saveLinks: saveLinks)[0];
   }
 
   @override
-  List<int> putAllSync(
-    List<OBJ> objects, {
-    bool replaceOnConflict = false,
-    bool saveLinks = false,
-  }) {
+  List<int> putAllSync(List<OBJ> objects, {bool saveLinks = false}) {
     return isar.getTxnSync(true, (txn) {
       final rawObjPtr = txn.allocRawObject();
       final rawObj = rawObjPtr.ref;
@@ -273,7 +249,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         schema.serializeNative(
             this, rawObj, object, _staticSize, _offsets, txn.allocBuffer);
         rawObj.id = schema.getId(object) ?? Isar.autoIncrement;
-        nCall(IC.isar_put(ptr, txn.ptr, rawObjPtr, replaceOnConflict));
+        nCall(IC.isar_put(ptr, txn.ptr, rawObjPtr));
 
         final id = rawObj.id;
         ids[i] = id;
@@ -380,43 +356,39 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Future<void> importJson(List<Map<String, dynamic>> json,
-      {bool replaceOnConflict = false}) {
+  Future<void> importJson(List<Map<String, dynamic>> json) {
     final bytes = Utf8Encoder().convert(jsonEncode(json));
-    return importJsonRaw(bytes, replaceOnConflict: replaceOnConflict);
+    return importJsonRaw(bytes);
   }
 
   @override
-  Future<void> importJsonRaw(Uint8List jsonBytes,
-      {bool replaceOnConflict = false}) {
+  Future<void> importJsonRaw(Uint8List jsonBytes) {
     return isar.getTxn(true, (txn) async {
       final bytesPtr = txn.alloc<Uint8>(jsonBytes.length);
       bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
       final idNamePtr = schema.idName.toNativeUtf8(allocator: txn.alloc);
 
-      IC.isar_json_import(ptr, txn.ptr, idNamePtr.cast(), bytesPtr,
-          jsonBytes.length, replaceOnConflict);
+      IC.isar_json_import(
+          ptr, txn.ptr, idNamePtr.cast(), bytesPtr, jsonBytes.length);
       await txn.wait();
     });
   }
 
   @override
-  void importJsonSync(List<Map<String, dynamic>> json,
-      {bool replaceOnConflict = false}) {
+  void importJsonSync(List<Map<String, dynamic>> json) {
     final bytes = Utf8Encoder().convert(jsonEncode(json));
-    importJsonRawSync(bytes, replaceOnConflict: replaceOnConflict);
+    importJsonRawSync(bytes);
   }
 
   @override
-  void importJsonRawSync(Uint8List jsonBytes,
-      {bool replaceOnConflict = false}) {
+  void importJsonRawSync(Uint8List jsonBytes) {
     return isar.getTxnSync(true, (txn) async {
       final bytesPtr = txn.allocBuffer(jsonBytes.length);
       bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
       final idNamePtr = schema.idName.toNativeUtf8(allocator: txn.alloc);
 
-      nCall(IC.isar_json_import(ptr, txn.ptr, idNamePtr.cast(), bytesPtr,
-          jsonBytes.length, replaceOnConflict));
+      nCall(IC.isar_json_import(
+          ptr, txn.ptr, idNamePtr.cast(), bytesPtr, jsonBytes.length));
     });
   }
 

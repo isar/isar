@@ -90,43 +90,19 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
     }
   }
 
-  Future<int> tPut(
-    OBJ object, {
-    bool replaceOnConflict = false,
-    bool saveLinks = false,
-  }) {
+  Future<int> tPut(OBJ object, {bool saveLinks = false}) {
     if (_testSync) {
-      return SynchronousFuture(putSync(
-        object,
-        replaceOnConflict: replaceOnConflict,
-        saveLinks: saveLinks,
-      ));
+      return SynchronousFuture(putSync(object, saveLinks: saveLinks));
     } else {
-      return put(
-        object,
-        replaceOnConflict: replaceOnConflict,
-        saveLinks: saveLinks,
-      );
+      return put(object, saveLinks: saveLinks);
     }
   }
 
-  Future<List<int>> tPutAll(
-    List<OBJ> objects, {
-    bool replaceOnConflict = false,
-    bool saveLinks = false,
-  }) {
+  Future<List<int>> tPutAll(List<OBJ> objects, {bool saveLinks = false}) {
     if (_testSync) {
-      return SynchronousFuture(putAllSync(
-        objects,
-        replaceOnConflict: replaceOnConflict,
-        saveLinks: saveLinks,
-      ));
+      return SynchronousFuture(putAllSync(objects, saveLinks: saveLinks));
     } else {
-      return putAll(
-        objects,
-        replaceOnConflict: replaceOnConflict,
-        saveLinks: saveLinks,
-      );
+      return putAll(objects, saveLinks: saveLinks);
     }
   }
 
@@ -155,23 +131,21 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
     }
   }
 
-  Future<void> tImportJsonRaw(Uint8List jsonBytes,
-      {bool replaceOnConflict = false}) {
+  Future<void> tImportJsonRaw(Uint8List jsonBytes) {
     if (_testSync) {
-      importJsonRawSync(jsonBytes, replaceOnConflict: replaceOnConflict);
+      importJsonRawSync(jsonBytes);
       return SynchronousFuture(null);
     } else {
-      return importJsonRaw(jsonBytes, replaceOnConflict: replaceOnConflict);
+      return importJsonRaw(jsonBytes);
     }
   }
 
-  Future<void> tImportJson(List<Map<String, dynamic>> json,
-      {bool replaceOnConflict = false}) {
+  Future<void> tImportJson(List<Map<String, dynamic>> json) {
     if (_testSync) {
-      importJsonSync(json, replaceOnConflict: replaceOnConflict);
+      importJsonSync(json);
       return SynchronousFuture(null);
     } else {
-      return importJson(json, replaceOnConflict: replaceOnConflict);
+      return importJson(json);
     }
   }
 }

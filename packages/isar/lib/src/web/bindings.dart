@@ -70,9 +70,9 @@ class IsarCollectionJs {
   external Promise getAllByIndex(
       IsarTxnJs txn, String indexName, List<List<dynamic>> values);
 
-  external Promise put(IsarTxnJs txn, dynamic object, bool replaceOnConflict);
+  external Promise put(IsarTxnJs txn, dynamic object);
 
-  external Promise putAll(IsarTxnJs txn, List objects, bool replaceOnConflict);
+  external Promise putAll(IsarTxnJs txn, List objects);
 
   external Promise delete(IsarTxnJs txn, int id);
 

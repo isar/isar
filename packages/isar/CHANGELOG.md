@@ -1,12 +1,15 @@
-## 2.6.0
+## 3.0.0
 
 ### Enhancements
 
-- Added `download` option to `Isar.initializeIsarCore()` to download binaries automatically. This is useful for unit tests.
+- Added `download` option to `Isar.initializeIsarCore()` to download binaries automatically. This is useful for unit tests
+- Added `replace` option for indexes
+- Added verification for correct Isar binary version
 
-### Minor Breaking
+### Breaking
 
-- Renamed `Isar.initializeLibraries()` to `Isar.initializeIsarCore()`.
+- Renamed `Isar.initializeLibraries()` to `Isar.initializeIsarCore()`
+- Removed `replaceOnConflict` parameter
 
 ### Fixes
 

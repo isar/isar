@@ -57,7 +57,7 @@ typedef DeserializePropWeb = dynamic Function(
 /// @nodoc
 @protected
 class CollectionSchema<OBJ> {
-  static const generatorVersion = 3;
+  static const generatorVersion = 4;
 
   final String name;
   final String schema;
