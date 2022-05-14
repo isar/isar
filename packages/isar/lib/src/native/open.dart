@@ -45,7 +45,7 @@ void _initializeInstance(
 
 Future<Isar> openIsar({
   required List<CollectionSchema> schemas,
-  required String directory,
+  String? directory,
   String name = 'isar',
   bool relaxedDurability = true,
 }) async {
@@ -54,7 +54,7 @@ Future<Isar> openIsar({
 
   return using((alloc) async {
     final namePtr = name.toNativeUtf8(allocator: alloc);
-    final dirPtr = directory.toNativeUtf8(allocator: alloc);
+    final dirPtr = directory?.toNativeUtf8(allocator: alloc) ?? nullptr;
 
     final schemaStr = '[${schemas.map((e) => e.schema).join(',')}]';
     final schemaStrPtr = schemaStr.toNativeUtf8(allocator: alloc);
@@ -74,7 +74,7 @@ Future<Isar> openIsar({
 
 Isar openIsarSync({
   required List<CollectionSchema> schemas,
-  required String directory,
+  String? directory,
   String name = 'isar',
   bool relaxedDurability = true,
 }) {
@@ -83,7 +83,7 @@ Isar openIsarSync({
 
   return using((alloc) {
     final namePtr = name.toNativeUtf8(allocator: alloc);
-    final dirPtr = directory.toNativeUtf8(allocator: alloc);
+    final dirPtr = directory?.toNativeUtf8(allocator: alloc) ?? nullptr;
 
     final schemaStr = '[${schemas.map((e) => e.schema).join(',')}]';
     final schemaStrPtr = schemaStr.toNativeUtf8(allocator: alloc);

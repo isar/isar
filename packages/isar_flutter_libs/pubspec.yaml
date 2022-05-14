@@ -13,6 +13,10 @@ dependencies:
     sdk: flutter
   isar: 2.5.0
 
+dependency_overrides:
+  isar:
+    path: ../isar
+
 flutter:
   plugin:
     platforms:

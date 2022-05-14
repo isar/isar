@@ -14,6 +14,7 @@
 ### Fixes
 
 - Fixed issues with binaries of the previous version
+- Providing a path is now optional in isolates
 
 ## 2.5.0
 

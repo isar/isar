@@ -99,10 +99,6 @@ class _IsarNative implements IsarNativeInterface {
     required bool relaxedDurability,
     required List<CollectionSchema> schemas,
   }) {
-    if (directory == null) {
-      throw IsarError(
-          'You need to provide a valid directory for mobile or desktop apps.');
-    }
     return openIsar(
       directory: directory,
       name: name,
@@ -119,10 +115,6 @@ class _IsarNative implements IsarNativeInterface {
     required bool relaxedDurability,
     required List<CollectionSchema> schemas,
   }) {
-    if (directory == null) {
-      throw IsarError(
-          'You need to provide a valid directory for mobile or desktop apps.');
-    }
     return openIsarSync(
       directory: directory,
       name: name,
