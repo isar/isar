@@ -201,6 +201,12 @@ If you want to use Isar in unit tests or Dart code, call `await Isar.initializeI
 
 Isar will automatically download the correct binary for your platform. You can also pass a `libraries` map to adjust the download location for each platform.
 
+## Bechmarks
+
+Benchmarks only give a rough idea of the performance of a database. As you can see, Isar is quite fast 😇
+
+![benchmark](https://raw.githubusercontent.com/isar/isar/dev/.github/assets/benchmarks/insert.png)
+
 ### License
 
 ```

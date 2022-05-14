@@ -19,3 +19,7 @@ dependencies:
 
 dev_dependencies:
   lints: ^2.0.0
+
+dependency_overrides:
+  isar:
+    path: ../isar
