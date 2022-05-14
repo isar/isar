@@ -205,7 +205,9 @@ Isar will automatically download the correct binary for your platform. You can a
 
 Benchmarks only give a rough idea of the performance of a database. As you can see, Isar is quite fast 😇
 
-![benchmark](https://raw.githubusercontent.com/isar/isar/dev/.github/assets/benchmarks/insert.png)
+<img src="../../.github/assets/benchmarks/insert.png" width="100%" /> | <img src="../../.github/assets/benchmarks/query.png" width="100%" />
+--- | ---
+<img src="../../.github/assets/benchmarks/delete.png" width="100%" /> | <img src="../../.github/assets/benchmarks/size.png" width="100%" />
 
 ### License
 
