@@ -37,12 +37,23 @@ Future qEqualSync<T>(List<T> actual, List<T> target) async {
 var allTestsSuccessful = true;
 var testCount = 0;
 
+Future<void> _prepareTest() async {
+  if (!kIsWeb) {
+    try {
+      await Isar.initializeIsarCore(download: true);
+    } catch (e) {
+      // ignore. maybe this is an instrumentation test
+    }
+  }
+}
+
 @isTest
 void isarTest(String name, dynamic Function() body, {Timeout? timeout}) {
   test(
     name,
     () async {
       try {
+        await _prepareTest();
         await body();
         testCount++;
       } catch (e) {
@@ -58,6 +69,7 @@ void isarTest(String name, dynamic Function() body, {Timeout? timeout}) {
 void isarTestVm(String name, dynamic Function() body) {
   test(name, () async {
     try {
+      await _prepareTest();
       await body();
       testCount++;
     } catch (e) {
@@ -74,15 +86,10 @@ String getRandomName() {
 
 String? testTempPath;
 Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> schemas,
-    {String? name}) async {
+    {String? name}) {
   if (!kIsWeb && testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
     testTempPath = path.join(dartToolDir, 'test', 'tmp');
-    try {
-      await Isar.initializeIsarCore(download: true);
-    } catch (e) {
-      // ignore. maybe this is an instrumentation test
-    }
   }
 
   return tOpen(

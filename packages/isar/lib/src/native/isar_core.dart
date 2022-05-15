@@ -45,38 +45,28 @@ FutureOr<void> initializeCoreBinary(
   }
   _isarInitializing = true;
 
+  String? libraryPath;
+  if (!Platform.isIOS) {
+    libraryPath = libraries[Abi.current()] ?? Abi.current().localName;
+  }
+
   try {
-    late DynamicLibrary dylib;
-    if (Platform.isIOS) {
-      dylib = DynamicLibrary.process();
-    } else {
-      final libraryPath = libraries[Abi.current()] ?? Abi.current().localName;
-      print('opening $libraryPath');
-      dylib = DynamicLibrary.open(libraryPath);
-    }
-
-    final bindings = IsarCoreBindings(dylib);
-    final binaryVersion = bindings.isar_version();
-    if (binaryVersion != 0 && binaryVersion != isarCoreVersionNumber) {
-      print(binaryVersion);
-      throw 'Incorrect Isar binary.';
-    }
-
+    _initializePath(libraryPath);
     _isarInitialized = true;
     _isarInitializing = false;
-    IC = bindings;
-    isarClose = dylib.lookup('isar_close_instance');
-    isarQueryFree = dylib.lookup('isar_q_free');
   } catch (e) {
-    if (download && !Platform.isAndroid && !Platform.isIOS) {
+    if (!Platform.isAndroid && !Platform.isIOS) {
       final downloadPath = _getLibraryDownloadPath(libraries);
-      return _downloadIsarCore(downloadPath).then((value) {
+      if (download) {
+        return _downloadIsarCore(downloadPath).then((value) {
+          _isarInitializing = false;
+          _initializePath(downloadPath);
+        });
+      } else {
+        // try to use the binary at the download path anyway
         _isarInitializing = false;
-        return initializeCoreBinary(
-          libraries: {Abi.current(): downloadPath},
-          download: false,
-        );
-      });
+        _initializePath(downloadPath);
+      }
     } else {
       _isarInitializing = false;
       throw IsarError(
@@ -86,6 +76,25 @@ FutureOr<void> initializeCoreBinary(
       );
     }
   }
+}
+
+void _initializePath(String? libraryPath) {
+  late DynamicLibrary dylib;
+  if (Platform.isIOS) {
+    dylib = DynamicLibrary.process();
+  } else {
+    dylib = DynamicLibrary.open(libraryPath!);
+  }
+
+  final bindings = IsarCoreBindings(dylib);
+  final binaryVersion = bindings.isar_version();
+  if (binaryVersion != 0 && binaryVersion != isarCoreVersionNumber) {
+    throw 'Incorrect Isar binary: Required $isarCoreVersionNumber found $binaryVersion.';
+  }
+
+  IC = bindings;
+  isarClose = dylib.lookup('isar_close_instance');
+  isarQueryFree = dylib.lookup('isar_q_free');
 }
 
 String _getLibraryDownloadPath(Map<Abi, String> libraries) {
@@ -116,13 +125,11 @@ Future<void> _downloadIsarCore(String libraryPath) async {
   final uri = Uri.parse('$githubUrl/$isarCoreVersion/$remoteName');
   final request = await HttpClient().getUrl(uri);
   final response = await request.close();
-  print('downloading $uri');
   if (response.statusCode != 200) {
     throw IsarError(
         'Could not download IsarCore library: ${response.reasonPhrase}');
   }
   await response.pipe(libraryFile.openWrite());
-  print('downloaded ${libraryFile.path}');
 }
 
 IsarError? isarErrorFromResult(int result) {
