@@ -72,13 +72,13 @@ abstract class Isar {
     bool relaxedDurability = true,
     bool inspector = false,
   }) {
-    if (inspector) {
+    _checkOpen(name, schemas);
+    if (inspector && !_kIsWeb) {
       assert(() {
         _initializeIsarConnect();
         return true;
       }());
     }
-    _checkOpen(name, schemas);
     return IsarNative.open(
       schemas: schemas,
       directory: directory,
@@ -95,13 +95,13 @@ abstract class Isar {
     bool relaxedDurability = true,
     bool inspector = false,
   }) {
-    if (inspector) {
+    _checkOpen(name, schemas);
+    if (inspector && !_kIsWeb) {
       assert(() {
         _initializeIsarConnect();
         return true;
       }());
     }
-    _checkOpen(name, schemas);
     return IsarNative.openSync(
       schemas: schemas,
       directory: directory,
