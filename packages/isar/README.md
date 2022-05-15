@@ -203,6 +203,8 @@ Benchmarks only give a rough idea of the performance of a database but as you ca
 --- | ---
 <img src="/.github/assets/benchmarks/delete.png" width="100%" /> | <img src="/.github/assets/benchmarks/size.png" width="100%" />
 
+If you are interested in more benchmarks or check how Isar performs on your device you can run the [benchmarks](https://github.com/isar/isar_benchmark) yourself.
+
 ## Unit tests
 
 If you want to use Isar in unit tests or Dart code, call `await Isar.initializeIsarCore(download: true)` before using Isar in your tests.
