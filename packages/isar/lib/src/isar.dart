@@ -231,7 +231,7 @@ abstract class Isar {
   /// for every platform your app will run on.
   ///
   /// If [download] is `true`, Isar will attempt to download the correct
-  /// library and place it in the specified path or the current directory.
+  /// library and place it in the specified path or the script directory.
   ///
   /// Only use this method for non-Flutter code or unit tests.
   static Future<void> initializeIsarCore({

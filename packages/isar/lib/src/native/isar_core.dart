@@ -45,14 +45,12 @@ FutureOr<void> initializeCoreBinary(
   }
   _isarInitializing = true;
 
-  String? libraryPath;
-
   try {
     late DynamicLibrary dylib;
     if (Platform.isIOS) {
       dylib = DynamicLibrary.process();
     } else {
-      libraryPath = libraries[Abi.current()] ?? Abi.current().localName;
+      final libraryPath = libraries[Abi.current()] ?? Abi.current().localName;
       dylib = DynamicLibrary.open(libraryPath);
     }
 
@@ -69,10 +67,14 @@ FutureOr<void> initializeCoreBinary(
     isarClose = dylib.lookup('isar_close_instance');
     isarQueryFree = dylib.lookup('isar_q_free');
   } catch (e) {
-    if (download && libraryPath != null) {
-      return _downloadIsarCore(libraryPath).then((value) {
+    if (download && !Platform.isAndroid && !Platform.isIOS) {
+      final downloadPath = _getLibraryDownloadPath(libraries);
+      return _downloadIsarCore(downloadPath).then((value) {
         _isarInitializing = false;
-        return initializeCoreBinary(libraries: libraries, download: false);
+        return initializeCoreBinary(
+          libraries: {Abi.current(): downloadPath},
+          download: false,
+        );
       });
     } else {
       _isarInitializing = false;
@@ -85,16 +87,40 @@ FutureOr<void> initializeCoreBinary(
   }
 }
 
+String _getLibraryDownloadPath(Map<Abi, String> libraries) {
+  final providedPath = libraries[Abi.current()];
+  if (providedPath != null) {
+    return providedPath;
+  } else {
+    final name = Abi.current().localName;
+    final dirSegments = Platform.script.path.split(Platform.pathSeparator);
+    if (dirSegments.isNotEmpty) {
+      final dir = dirSegments
+          .sublist(0, dirSegments.length - 1)
+          .join(Platform.pathSeparator);
+      return '$dir${Platform.pathSeparator}$name';
+    } else {
+      return name;
+    }
+  }
+}
+
 Future<void> _downloadIsarCore(String libraryPath) async {
-  final remoteName = Abi.current().remoteName;
-  if (remoteName == null) {
-    throw IsarError('This platform does not support downloading IsarCore.');
+  final libraryFile = File(libraryPath);
+  if (await libraryFile.exists()) {
+    return;
   }
 
+  print('downloading');
+  final remoteName = Abi.current().remoteName;
   final uri = Uri.parse('$githubUrl/$isarCoreVersion/$remoteName');
   final request = await HttpClient().getUrl(uri);
   final response = await request.close();
-  await response.pipe(File(libraryPath).openWrite());
+  if (response.statusCode != 200) {
+    throw IsarError(
+        'Could not download IsarCore library: ${response.reasonPhrase}');
+  }
+  await response.pipe(libraryFile.openWrite());
 }
 
 IsarError? isarErrorFromResult(int result) {
@@ -190,7 +216,7 @@ extension on Abi {
     }
   }
 
-  String? get remoteName {
+  String get remoteName {
     switch (Abi.current()) {
       case Abi.macosArm64:
       case Abi.macosX64:
@@ -202,6 +228,6 @@ extension on Abi {
       case Abi.windowsX64:
         return 'isar_windows_x64.dll';
     }
-    return null;
+    throw UnimplementedError();
   }
 }
