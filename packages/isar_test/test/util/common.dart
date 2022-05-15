@@ -86,13 +86,14 @@ String getRandomName() {
 
 String? testTempPath;
 Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> schemas,
-    {String? name}) {
+    {String? name}) async {
+  await _prepareTest();
   if (!kIsWeb && testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
     testTempPath = path.join(dartToolDir, 'test', 'tmp');
   }
 
-  return tOpen(
+  return await tOpen(
     schemas: schemas,
     name: name ?? getRandomName(),
     directory: kIsWeb ? '' : testTempPath!,

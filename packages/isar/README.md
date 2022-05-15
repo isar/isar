@@ -209,6 +209,8 @@ If you want to use Isar in unit tests or Dart code, call `await Isar.initializeI
 
 Isar will automatically download the correct binary for your platform. You can also pass a `libraries` map to adjust the download location for each platform.
 
+Make sure to use `flutter test -j 1` to avoid tests running in parallel. This would break the automatic download.
+
 ### License
 
 ```

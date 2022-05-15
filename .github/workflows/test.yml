@@ -55,7 +55,7 @@ jobs:
         run: |
           flutter pub get
           flutter pub run build_runner build
-          flutter test
+          flutter test -j 1
         working-directory: packages/isar_test
 
   drive_ios:

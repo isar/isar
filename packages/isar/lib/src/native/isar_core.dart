@@ -27,7 +27,6 @@ const falseBool = 1;
 const trueBool = 2;
 
 var _isarInitialized = false;
-var _isarInitializing = false;
 bool get isarInitialized => _isarInitialized;
 
 // ignore: non_constant_identifier_names
@@ -40,10 +39,6 @@ late final Pointer<NativeFinalizerFunction> isarQueryFree;
 FutureOr<void> initializeCoreBinary(
     {Map<Abi, String> libraries = const {}, bool download = false}) {
   if (_isarInitialized) return null;
-  if (_isarInitializing) {
-    throw IsarError('Isar is already initializing.');
-  }
-  _isarInitializing = true;
 
   String? libraryPath;
   if (!Platform.isIOS) {
@@ -52,23 +47,18 @@ FutureOr<void> initializeCoreBinary(
 
   try {
     _initializePath(libraryPath);
-    _isarInitialized = true;
-    _isarInitializing = false;
   } catch (e) {
     if (!Platform.isAndroid && !Platform.isIOS) {
       final downloadPath = _getLibraryDownloadPath(libraries);
       if (download) {
         return _downloadIsarCore(downloadPath).then((value) {
-          _isarInitializing = false;
           _initializePath(downloadPath);
         });
       } else {
         // try to use the binary at the download path anyway
-        _isarInitializing = false;
         _initializePath(downloadPath);
       }
     } else {
-      _isarInitializing = false;
       throw IsarError(
         'Could not initialize IsarCore library for processor architecture '
         '"${Abi.current()}". If you create a Flutter app, make sure to add '
@@ -95,6 +85,7 @@ void _initializePath(String? libraryPath) {
   IC = bindings;
   isarClose = dylib.lookup('isar_close_instance');
   isarQueryFree = dylib.lookup('isar_q_free');
+  _isarInitialized = true;
 }
 
 String _getLibraryDownloadPath(Map<Abi, String> libraries) {
@@ -120,7 +111,6 @@ Future<void> _downloadIsarCore(String libraryPath) async {
   if (await libraryFile.exists()) {
     return;
   }
-
   final remoteName = Abi.current().remoteName;
   final uri = Uri.parse('$githubUrl/$isarCoreVersion/$remoteName');
   final request = await HttpClient().getUrl(uri);
