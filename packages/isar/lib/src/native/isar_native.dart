@@ -30,7 +30,7 @@ typedef IsarAbi = Abi;
 
 /// @nodoc
 @protected
-typedef IsarRawObject = RawObject;
+typedef IsarCObject = CObject;
 
 /// @nodoc
 @protected

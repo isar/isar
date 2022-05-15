@@ -10,7 +10,7 @@ class Sidebar extends StatefulWidget {
   const Sidebar({Key? key}) : super(key: key);
 
   @override
-  _SidebarState createState() => _SidebarState();
+  State<Sidebar> createState() => _SidebarState();
 }
 
 class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {

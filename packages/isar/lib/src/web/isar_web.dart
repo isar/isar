@@ -40,7 +40,7 @@ typedef IsarAbi = _WebAbi;
 
 /// @nodoc
 @protected
-typedef IsarRawObject = dynamic;
+typedef IsarCObject = dynamic;
 
 /// @nodoc
 @protected

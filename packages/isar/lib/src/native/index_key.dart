@@ -4,12 +4,13 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
+import 'bindings.dart';
 import 'isar_core.dart';
 import 'query_build.dart';
 
-final _keyPtrPtr = malloc<Pointer>();
+final _keyPtrPtr = malloc<Pointer<CIndexKey>>();
 
-Pointer<NativeType> buildIndexKey(
+Pointer<CIndexKey> buildIndexKey(
     CollectionSchema schema, String indexName, List<Object?> values) {
   final types = schema.indexValueTypeOrErr(indexName);
   if (values.length > types.length) {
@@ -26,12 +27,12 @@ Pointer<NativeType> buildIndexKey(
   return keyPtr;
 }
 
-Pointer<NativeType> buildLowerUnboundedIndexKey() {
+Pointer<CIndexKey> buildLowerUnboundedIndexKey() {
   IC.isar_key_create(_keyPtrPtr);
   return _keyPtrPtr.value;
 }
 
-Pointer<NativeType> buildUpperUnboundedIndexKey() {
+Pointer<CIndexKey> buildUpperUnboundedIndexKey() {
   IC.isar_key_create(_keyPtrPtr);
   final keyPtr = _keyPtrPtr.value;
   IC.isar_key_add_long(keyPtr, maxLong);
@@ -40,7 +41,7 @@ Pointer<NativeType> buildUpperUnboundedIndexKey() {
 }
 
 void _addKeyValue(
-    Pointer<NativeType> keyPtr, Object? value, IndexValueType type) {
+    Pointer<CIndexKey> keyPtr, Object? value, IndexValueType type) {
   if (value is DateTime) {
     value = value.toUtc().microsecondsSinceEpoch;
   } else if (value is List<DateTime?>) {
@@ -129,7 +130,7 @@ void _addKeyValue(
         IC.isar_key_add_string_list_hash(keyPtr, nullptr, 0, false);
       } else {
         value as List<String?>;
-        final stringListPtr = malloc<Pointer<Int8>>(value.length);
+        final stringListPtr = malloc<Pointer<Char>>(value.length);
         for (var i = 0; i < value.length; i++) {
           stringListPtr[i] = _strToNative(value[i]);
         }
@@ -143,7 +144,7 @@ void _addKeyValue(
   }
 }
 
-Pointer<Int8> _strToNative(String? str) {
+Pointer<Char> _strToNative(String? str) {
   if (str == null) {
     return Pointer.fromAddress(0);
   } else {
@@ -151,7 +152,7 @@ Pointer<Int8> _strToNative(String? str) {
   }
 }
 
-void _freeStr(Pointer<Int8> strPtr) {
+void _freeStr(Pointer<Char> strPtr) {
   if (!strPtr.isNull) {
     malloc.free(strPtr);
   }

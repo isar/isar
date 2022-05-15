@@ -111,7 +111,6 @@ Future<void> _downloadIsarCore(String libraryPath) async {
     return;
   }
 
-  print('downloading');
   final remoteName = Abi.current().remoteName;
   final uri = Uri.parse('$githubUrl/$isarCoreVersion/$remoteName');
   final request = await HttpClient().getUrl(uri);
@@ -166,7 +165,7 @@ Stream<void> wrapIsarPort(ReceivePort port) {
   return portStreamController.stream;
 }
 
-extension RawObjectX on RawObject {
+extension CObjectX on CObject {
   void freeData() {
     if (buffer.address != 0) {
       malloc.free(buffer);
@@ -175,13 +174,13 @@ extension RawObjectX on RawObject {
   }
 }
 
-extension RawObjectSetPointerX on Pointer<RawObjectSet> {
+extension CObjectSetPointerX on Pointer<CObjectSet> {
   void free({bool freeData = false}) {
     final objectsPtr = ref.objects;
     if (freeData) {
       for (var i = 0; i < ref.length; i++) {
-        final rawObj = objectsPtr.elementAt(i).ref;
-        rawObj.freeData();
+        final cObj = objectsPtr.elementAt(i).ref;
+        cObj.freeData();
       }
     }
     malloc.free(objectsPtr);

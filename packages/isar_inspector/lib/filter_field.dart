@@ -9,7 +9,7 @@ class FilterField extends StatefulWidget {
   const FilterField({Key? key}) : super(key: key);
 
   @override
-  _FilterFieldState createState() => _FilterFieldState();
+  State<FilterField> createState() => _FilterFieldState();
 }
 
 class _FilterFieldState extends State<FilterField> {

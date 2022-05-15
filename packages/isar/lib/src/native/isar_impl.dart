@@ -12,12 +12,12 @@ import 'bindings.dart';
 const _zoneTxn = #zoneTxn;
 
 class IsarImpl extends Isar implements Finalizable {
-  final Pointer ptr;
+  final Pointer<CIsarInstance> ptr;
   late final NativeFinalizer _finalizer;
 
   final List<Future> _activeAsyncTxns = [];
 
-  final _syncTxnPtrPtr = malloc<Pointer>();
+  final _syncTxnPtrPtr = malloc<Pointer<CIsarTxn>>();
   SyncTxn? _currentTxnSync;
 
   IsarImpl(String name, String schema, this.ptr) : super(name, schema) {
@@ -43,7 +43,7 @@ class IsarImpl extends Isar implements Finalizable {
     final port = ReceivePort();
     final portStream = wrapIsarPort(port);
 
-    final txnPtrPtr = malloc<Pointer<NativeType>>();
+    final txnPtrPtr = malloc<Pointer<CIsarTxn>>();
     IC.isar_txn_begin(
         ptr, txnPtrPtr, false, write, silent, port.sendPort.nativePort);
 
@@ -169,7 +169,7 @@ class IsarImpl extends Isar implements Finalizable {
 }
 
 class SyncTxn {
-  final Pointer ptr;
+  final Pointer<CIsarTxn> ptr;
 
   final bool write;
 
@@ -177,25 +177,25 @@ class SyncTxn {
 
   SyncTxn._(this.ptr, this.write);
 
-  Pointer<RawObject>? _rawObjsPtr;
-  var _rawObjsLen = -1;
+  Pointer<CObject>? _cObjsPtr;
+  var _cObjsLen = -1;
 
-  Pointer<RawObjectSet>? _rawObjSetPtr;
+  Pointer<CObjectSet>? _cObjSetPtr;
 
   Pointer<Uint8>? _buffer;
   var _bufferLen = -1;
 
-  Pointer<RawObject> allocRawObject() {
-    if (_rawObjsLen < 1) {
-      _rawObjsPtr = alloc();
-      _rawObjsLen = 1;
+  Pointer<CObject> allocCObject() {
+    if (_cObjsLen < 1) {
+      _cObjsPtr = alloc();
+      _cObjsLen = 1;
     }
-    return _rawObjsPtr!;
+    return _cObjsPtr!;
   }
 
-  Pointer<RawObjectSet> allocRawObjectsSet() {
-    _rawObjSetPtr ??= alloc();
-    return _rawObjSetPtr!;
+  Pointer<CObjectSet> allocCObjectsSet() {
+    _cObjSetPtr ??= alloc();
+    return _cObjSetPtr!;
   }
 
   Pointer<Uint8> allocBuffer(int size) {
@@ -212,7 +212,7 @@ class SyncTxn {
 }
 
 class Txn {
-  final Pointer ptr;
+  final Pointer<CIsarTxn> ptr;
 
   final bool write;
 
@@ -243,12 +243,12 @@ class Txn {
     return completer.future;
   }
 
-  Pointer<RawObjectSet> allocRawObjSet(int length) {
-    final rawObjSetPtr = malloc<RawObjectSet>();
-    rawObjSetPtr.ref
-      ..objects = malloc<RawObject>(length)
+  Pointer<CObjectSet> allocRawObjSet(int length) {
+    final cObjSetPtr = malloc<CObjectSet>();
+    cObjSetPtr.ref
+      ..objects = malloc<CObject>(length)
       ..length = length;
-    return rawObjSetPtr;
+    return cObjSetPtr;
   }
 
   void free() {

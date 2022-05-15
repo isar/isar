@@ -5,11 +5,12 @@ import 'dart:math';
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
+import 'bindings.dart';
 import 'isar_collection_impl.dart';
 import 'isar_core.dart';
 import 'isar_impl.dart';
 
-final _isarPtrPtr = malloc<Pointer>();
+final _isarPtrPtr = malloc<Pointer<CIsarInstance>>();
 
 void _initializeInstance(
     Allocator alloc, IsarImpl isar, List<CollectionSchema> schemas) {
@@ -17,7 +18,7 @@ void _initializeInstance(
       .map((e) => e.propertyIds.length)
       .reduce((value, element) => max(value, element));
 
-  final colPtrPtr = alloc<Pointer>();
+  final colPtrPtr = alloc<Pointer<CIsarCollection>>();
   final offsetsPtr = alloc<Uint32>(maxProperties);
 
   final cols = <Type, IsarCollection>{};
@@ -50,7 +51,7 @@ Future<Isar> openIsar({
   bool relaxedDurability = true,
 }) async {
   initializeCoreBinary();
-  IC.isar_connect_dart_api(NativeApi.postCObject);
+  IC.isar_connect_dart_api(NativeApi.postCObject.cast());
 
   return using((alloc) async {
     final namePtr = name.toNativeUtf8(allocator: alloc);
@@ -79,7 +80,7 @@ Isar openIsarSync({
   bool relaxedDurability = true,
 }) {
   initializeCoreBinary();
-  IC.isar_connect_dart_api(NativeApi.postCObject);
+  IC.isar_connect_dart_api(NativeApi.postCObject.cast());
 
   return using((alloc) {
     final namePtr = name.toNativeUtf8(allocator: alloc);

@@ -8,7 +8,7 @@ class InstanceSelector extends StatefulWidget {
   const InstanceSelector({Key? key}) : super(key: key);
 
   @override
-  _InstanceSelectorState createState() => _InstanceSelectorState();
+  State<InstanceSelector> createState() => _InstanceSelectorState();
 }
 
 class _InstanceSelectorState extends State<InstanceSelector>

@@ -8,7 +8,7 @@ typedef AdapterAlloc = IsarBytePointer Function(int size);
 @protected
 typedef SerializeNative<T> = void Function(
   IsarCollection<T> collection,
-  IsarRawObject rawObj,
+  IsarCObject cObj,
   T object,
   int staticSize,
   List<int> offsets,
