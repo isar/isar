@@ -45,13 +45,14 @@ FutureOr<void> initializeCoreBinary(
   }
   _isarInitializing = true;
 
-  final libraryPath = libraries[Abi.current()] ?? Abi.current().localName;
+  String? libraryPath;
 
   try {
     late DynamicLibrary dylib;
     if (Platform.isIOS) {
       dylib = DynamicLibrary.process();
     } else {
+      libraryPath = libraries[Abi.current()] ?? Abi.current().localName;
       dylib = DynamicLibrary.open(libraryPath);
     }
 
@@ -68,7 +69,7 @@ FutureOr<void> initializeCoreBinary(
     isarClose = dylib.lookup('isar_close_instance');
     isarQueryFree = dylib.lookup('isar_q_free');
   } catch (e) {
-    if (download) {
+    if (download && libraryPath != null) {
       return _downloadIsarCore(libraryPath).then((value) {
         _isarInitializing = false;
         return initializeCoreBinary(libraries: libraries, download: false);
