@@ -51,6 +51,7 @@ FutureOr<void> initializeCoreBinary(
       dylib = DynamicLibrary.process();
     } else {
       final libraryPath = libraries[Abi.current()] ?? Abi.current().localName;
+      print('opening $libraryPath');
       dylib = DynamicLibrary.open(libraryPath);
     }
 
@@ -115,11 +116,13 @@ Future<void> _downloadIsarCore(String libraryPath) async {
   final uri = Uri.parse('$githubUrl/$isarCoreVersion/$remoteName');
   final request = await HttpClient().getUrl(uri);
   final response = await request.close();
+  print('downloading $uri');
   if (response.statusCode != 200) {
     throw IsarError(
         'Could not download IsarCore library: ${response.reasonPhrase}');
   }
   await response.pipe(libraryFile.openWrite());
+  print('downloaded ${libraryFile.path}');
 }
 
 IsarError? isarErrorFromResult(int result) {
