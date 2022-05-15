@@ -3,19 +3,24 @@ output: "lib/src/native/bindings.dart"
 headers:
   entry-points:
     - "isar-dart.h"
-
-functions:
-  include:
-    - isar_.*
-
-macros:
-  include:
-    - ISAR_.*
+  include-directives:
+    - '**isar-dart.h'
 
 structs:
+  dependency-only: opaque
   include:
     - RawObject
-    - RawOid
+    - RawObjectSet
+  rename:
+    RawObject: CObject
+    RawObjectSet: CObjectSet
+    IsarDartTxn: CIsarTxn
+    '(.*)': 'C$1'
+  
+unions:
+  dependency-only: opaque
+  include:
+    - 'isar*'
 
 preamble: |
   // ignore_for_file: camel_case_types, non_constant_identifier_names

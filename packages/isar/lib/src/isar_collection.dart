@@ -39,32 +39,16 @@ abstract class IsarCollection<OBJ> {
   List<OBJ?> getAllByIndexSync(String indexName, List<List<Object?>> keys);
 
   /// Insert or update an [object] and returns the assigned id.
-  Future<int> put(
-    OBJ object, {
-    bool replaceOnConflict = false,
-    bool saveLinks = false,
-  });
+  Future<int> put(OBJ object, {bool saveLinks = false});
 
   /// Insert or update an [object] and returns the assigned id.
-  int putSync(
-    OBJ object, {
-    bool replaceOnConflict = false,
-    bool saveLinks = false,
-  });
+  int putSync(OBJ object, {bool saveLinks = false});
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  Future<List<int>> putAll(
-    List<OBJ> objects, {
-    bool replaceOnConflict = false,
-    bool saveLinks = false,
-  });
+  Future<List<int>> putAll(List<OBJ> objects, {bool saveLinks = false});
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  List<int> putAllSync(
-    List<OBJ> objects, {
-    bool replaceOnConflict = false,
-    bool saveLinks = false,
-  });
+  List<int> putAllSync(List<OBJ> objects, {bool saveLinks = false});
 
   /// Delete a single object by its [id].
   ///
@@ -111,19 +95,16 @@ abstract class IsarCollection<OBJ> {
   void clearSync();
 
   /// Import a list of json objects.
-  Future<void> importJsonRaw(Uint8List jsonBytes,
-      {bool replaceOnConflict = false});
+  Future<void> importJsonRaw(Uint8List jsonBytes);
 
   /// Import a list of json objects.
-  void importJsonRawSync(Uint8List jsonBytes, {bool replaceOnConflict = false});
+  void importJsonRawSync(Uint8List jsonBytes);
 
   /// Import a list of json objects.
-  Future<void> importJson(List<Map<String, dynamic>> json,
-      {bool replaceOnConflict = false});
+  Future<void> importJson(List<Map<String, dynamic>> json);
 
   /// Import a list of json objects.
-  void importJsonSync(List<Map<String, dynamic>> json,
-      {bool replaceOnConflict = false});
+  void importJsonSync(List<Map<String, dynamic>> json);
 
   /// Start building a query using the [QueryBuilder].
   QueryBuilder<OBJ, OBJ, QWhere> where(

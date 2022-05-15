@@ -40,6 +40,24 @@ jobs:
       - name: Lint
         run: flutter analyze
 
+  test:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: "stable"
+      - name: Run Flutter Unit tests
+        run: |
+          flutter pub get
+          flutter pub run build_runner build
+          flutter test -j 1
+        working-directory: packages/isar_test
+
   drive_ios:
     strategy:
       matrix:

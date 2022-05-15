@@ -5,13 +5,17 @@ repository: https://github.com/isar/isar
 homepage: https://isar.dev
 
 environment:
-  sdk: ">=2.16.0 <3.0.0"
+  sdk: ">=2.17.0 <3.0.0"
   flutter: ">=2.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   isar: 2.5.0
+
+dependency_overrides:
+  isar:
+    path: ../isar
 
 flutter:
   plugin:

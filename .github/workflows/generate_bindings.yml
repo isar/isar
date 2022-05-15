@@ -3,7 +3,7 @@ name: Generate Bindings
 on:
   push:
     paths:
-      - 'CORE_VERSION'
+      - "packages/isar/lib/src/version.dart"
 
 env:
   CARGO_TERM_COLOR: always
@@ -13,30 +13,30 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        persist-credentials: false
-        fetch-depth: 0
-    - uses: dart-lang/setup-dart@v1
-    - name: Install Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: nightly
-        default: true
-    - name: Setup dependencies
-      run: sudo apt-get install libclang-dev
-    - name: Generate bindings
-      run: |
-        cd packages/isar
-        bash tool/generate_bindings.sh
-    - name: Commit changes
-      run: |
-        git add packages/isar/lib/src/native/bindings.dart
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git commit -m "Generated bindings" || echo "No changes to commit"
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: ${{ github.ref }}
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          default: true
+      - name: Setup dependencies
+        run: sudo apt-get install libclang-dev
+      - name: Generate bindings
+        run: |
+          cd packages/isar
+          bash tool/generate_bindings.sh
+      - name: Commit changes
+        run: |
+          git add packages/isar/lib/src/native/bindings.dart
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "Generated bindings" || echo "No changes to commit"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}

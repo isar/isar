@@ -8,7 +8,7 @@ typedef AdapterAlloc = IsarBytePointer Function(int size);
 @protected
 typedef SerializeNative<T> = void Function(
   IsarCollection<T> collection,
-  IsarRawObject rawObj,
+  IsarCObject cObj,
   T object,
   int staticSize,
   List<int> offsets,
@@ -57,7 +57,7 @@ typedef DeserializePropWeb = dynamic Function(
 /// @nodoc
 @protected
 class CollectionSchema<OBJ> {
-  static const generatorVersion = 3;
+  static const generatorVersion = 4;
 
   final String name;
   final String schema;

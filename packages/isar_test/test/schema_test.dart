@@ -16,7 +16,7 @@ class SchemaTestModel {
   late bool someField;
 
   @Name('renamedGetter')
-  @Index(unique: true)
+  @Index(unique: true, replace: true)
   bool get someGetter => false;
 
   @Ignore()
@@ -264,6 +264,7 @@ void main() {
         {
           'name': 'boolField',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'boolField', 'type': 'Value', 'caseSensitive': false}
           ]
@@ -271,6 +272,7 @@ void main() {
         {
           'name': 'boolGetter',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'boolGetter', 'type': 'Value', 'caseSensitive': false}
           ]
@@ -278,6 +280,7 @@ void main() {
         {
           'name': 'boolListFieldHash',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'boolListField', 'type': 'Hash', 'caseSensitive': false}
           ]
@@ -285,6 +288,7 @@ void main() {
         {
           'name': 'boolListFieldValue',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'boolListField', 'type': 'Value', 'caseSensitive': false}
           ]
@@ -292,6 +296,7 @@ void main() {
         {
           'name': 'boolListGetterHash',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'boolListGetter', 'type': 'Hash', 'caseSensitive': false}
           ]
@@ -299,6 +304,7 @@ void main() {
         {
           'name': 'boolListGetterValue',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'boolListGetter', 'type': 'Value', 'caseSensitive': false}
           ]
@@ -306,6 +312,7 @@ void main() {
         {
           'name': 'bytesField',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'bytesField', 'type': 'Hash', 'caseSensitive': false}
           ]
@@ -313,6 +320,7 @@ void main() {
         {
           'name': 'bytesGetter',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'bytesGetter', 'type': 'Hash', 'caseSensitive': false}
           ]
@@ -320,6 +328,7 @@ void main() {
         {
           'name': 'compositeField1',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
             {'name': 'boolField', 'type': 'Value', 'caseSensitive': false}
@@ -328,6 +337,7 @@ void main() {
         {
           'name': 'compositeField2',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
             {'name': 'boolField', 'type': 'Value', 'caseSensitive': false},
@@ -337,6 +347,7 @@ void main() {
         {
           'name': 'compositeFieldCICI',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': false},
             {'name': 'stringField', 'type': 'Hash', 'caseSensitive': false}
@@ -345,6 +356,7 @@ void main() {
         {
           'name': 'compositeFieldCICS',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': false},
             {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
@@ -353,6 +365,7 @@ void main() {
         {
           'name': 'compositeFieldCSCI',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
             {'name': 'stringField', 'type': 'Hash', 'caseSensitive': false}
@@ -361,6 +374,7 @@ void main() {
         {
           'name': 'compositeFieldCSCS',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
             {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
@@ -369,6 +383,7 @@ void main() {
         {
           'name': 'compositeFieldHashed',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
             {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
@@ -377,6 +392,7 @@ void main() {
         {
           'name': 'compositeFieldValue',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
             {'name': 'stringField', 'type': 'Value', 'caseSensitive': true}
@@ -385,6 +401,7 @@ void main() {
         {
           'name': 'compositeGetter1',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': true},
             {'name': 'boolGetter', 'type': 'Value', 'caseSensitive': false}
@@ -393,6 +410,7 @@ void main() {
         {
           'name': 'compositeGetter2',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': true},
             {'name': 'boolGetter', 'type': 'Value', 'caseSensitive': false},
@@ -402,6 +420,7 @@ void main() {
         {
           'name': 'compositeGetterCICI',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': false},
             {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': false}
@@ -410,6 +429,7 @@ void main() {
         {
           'name': 'compositeGetterCICS',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': false},
             {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
@@ -418,6 +438,7 @@ void main() {
         {
           'name': 'compositeGetterCSCI',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': true},
             {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': false}
@@ -426,6 +447,7 @@ void main() {
         {
           'name': 'compositeGetterCSCS',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': true},
             {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
@@ -434,6 +456,7 @@ void main() {
         {
           'name': 'compositeGetterHashed',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': true},
             {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
@@ -442,6 +465,7 @@ void main() {
         {
           'name': 'compositeGetterValue',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': true},
             {'name': 'stringGetter', 'type': 'Value', 'caseSensitive': true}
@@ -450,6 +474,7 @@ void main() {
         {
           'name': 'renamedField',
           'unique': true,
+          'replace': false,
           'properties': [
             {'name': 'renamedField', 'type': 'Value', 'caseSensitive': false}
           ]
@@ -457,6 +482,7 @@ void main() {
         {
           'name': 'renamedGetter',
           'unique': true,
+          'replace': true,
           'properties': [
             {'name': 'renamedGetter', 'type': 'Value', 'caseSensitive': false}
           ]
@@ -464,6 +490,7 @@ void main() {
         {
           'name': 'stringFieldCaseInsensitive',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'stringField', 'type': 'Hash', 'caseSensitive': false}
           ]
@@ -471,6 +498,7 @@ void main() {
         {
           'name': 'stringFieldCaseSensitive',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
           ]
@@ -478,6 +506,7 @@ void main() {
         {
           'name': 'stringFieldHashed',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
           ]
@@ -485,6 +514,7 @@ void main() {
         {
           'name': 'stringFieldValue',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'stringField', 'type': 'Value', 'caseSensitive': true}
           ]
@@ -492,6 +522,7 @@ void main() {
         {
           'name': 'stringGetterCaseInsensitive',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': false}
           ]
@@ -499,6 +530,7 @@ void main() {
         {
           'name': 'stringGetterCaseSensitive',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
           ]
@@ -506,6 +538,7 @@ void main() {
         {
           'name': 'stringGetterHashed',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
           ]
@@ -513,6 +546,7 @@ void main() {
         {
           'name': 'stringGetterValue',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'stringGetter', 'type': 'Value', 'caseSensitive': true}
           ]
@@ -520,6 +554,7 @@ void main() {
         {
           'name': 'stringListFieldCaseInsensitive',
           'unique': false,
+          'replace': false,
           'properties': [
             {
               'name': 'stringListField',
@@ -531,6 +566,7 @@ void main() {
         {
           'name': 'stringListFieldCaseSensitive',
           'unique': false,
+          'replace': false,
           'properties': [
             {
               'name': 'stringListField',
@@ -542,6 +578,7 @@ void main() {
         {
           'name': 'stringListFieldHashed',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'stringListField', 'type': 'Hash', 'caseSensitive': true}
           ]
@@ -549,6 +586,7 @@ void main() {
         {
           'name': 'stringListFieldHashedElements',
           'unique': false,
+          'replace': false,
           'properties': [
             {
               'name': 'stringListField',
@@ -560,6 +598,7 @@ void main() {
         {
           'name': 'stringListFieldValue',
           'unique': false,
+          'replace': false,
           'properties': [
             {'name': 'stringListField', 'type': 'Value', 'caseSensitive': true}
           ]
@@ -587,6 +626,7 @@ void main() {
         {
           'name': '\$dollar\$Field',
           'unique': true,
+          'replace': false,
           'properties': [
             {'name': '\$dollar\$Field', 'type': 'Value', 'caseSensitive': false}
           ]
@@ -594,6 +634,7 @@ void main() {
         {
           'name': '\$dollar\$Getter',
           'unique': false,
+          'replace': false,
           'properties': [
             {
               'name': '\$dollar\$Getter',

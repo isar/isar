@@ -135,7 +135,7 @@ class WhereGenerator {
   }
 
   String generateAny(String indexName, List<ObjectIndexProperty> properties) {
-    final name = 'any' + joinToName(properties, false).capitalize();
+    final name = 'any${joinToName(properties, false).capitalize()}';
     if (!existing.add(name)) return '';
     return '''
     QueryBuilder<$objName, $objName, QAfterWhere> $name() {
@@ -164,7 +164,7 @@ class WhereGenerator {
 
   String generateWhereEqualTo(
       String indexName, List<ObjectIndexProperty> properties) {
-    final name = joinToName(properties, false) + 'EqualTo';
+    final name = '${joinToName(properties, false)}EqualTo';
     if (!existing.add(name)) return '';
 
     final values = joinToValues(properties);
@@ -202,7 +202,7 @@ class WhereGenerator {
 
   String generateWhereNotEqualTo(
       String indexName, List<ObjectIndexProperty> properties) {
-    final name = joinToName(properties, false) + 'NotEqualTo';
+    final name = '${joinToName(properties, false)}NotEqualTo';
     if (!existing.add(name)) return '';
 
     final values = joinToValues(properties);
@@ -247,7 +247,7 @@ class WhereGenerator {
 
   String generateWhereGreaterThan(
       String indexName, List<ObjectIndexProperty> properties) {
-    final name = joinToName(properties, true) + 'GreaterThan';
+    final name = '${joinToName(properties, true)}GreaterThan';
     if (!existing.add(name)) return '';
 
     final include =
@@ -276,7 +276,7 @@ class WhereGenerator {
 
   String generateWhereLessThan(
       String indexName, List<ObjectIndexProperty> properties) {
-    final name = joinToName(properties, true) + 'LessThan';
+    final name = '${joinToName(properties, true)}LessThan';
     if (!existing.add(name)) return '';
 
     final include =
@@ -312,7 +312,7 @@ class WhereGenerator {
       String indexName, List<ObjectIndexProperty> properties) {
     final firstPs = properties.sublist(0, properties.length - 1);
     final lastP = properties.last;
-    final name = joinToName(properties, true) + 'Between';
+    final name = '${joinToName(properties, true)}Between';
     if (!existing.add(name)) return '';
 
     var params = joinToParams(firstPs);
@@ -347,7 +347,7 @@ class WhereGenerator {
 
   String generateWhereIsNull(
       String indexName, ObjectIndexProperty indexProperty) {
-    final name = joinToName([indexProperty], false) + 'IsNull';
+    final name = '${joinToName([indexProperty], false)}IsNull';
     if (!existing.add(name)) return '';
 
     return '''
@@ -362,7 +362,7 @@ class WhereGenerator {
 
   String generateWhereIsNotNull(
       String indexName, ObjectIndexProperty indexProperty) {
-    final name = joinToName([indexProperty], false) + 'IsNotNull';
+    final name = '${joinToName([indexProperty], false)}IsNotNull';
     if (!existing.add(name)) return '';
 
     return '''
@@ -380,7 +380,7 @@ class WhereGenerator {
       String indexName, List<ObjectIndexProperty> properties) {
     final firsPs = properties.sublist(0, properties.length - 1);
     final lastP = properties.last;
-    final name = joinToName(properties, true) + 'StartsWith';
+    final name = '${joinToName(properties, true)}StartsWith';
     if (!existing.add(name)) return '';
 
     var params = joinToParams(firsPs);

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-core_version=`cat ../../CORE_VERSION`
-github="https://github.com/isar/isar-core/releases/download/${core_version:5}"
+core_version=`dart ../isar/tool/get_version.dart`
+github="https://github.com/isar/isar-core/releases/download/${core_version}"
 
 
 curl "${github}/libisar_android_arm64.so" -o android/src/main/jniLibs/arm64-v8a/libisar.so --create-dirs -L

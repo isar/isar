@@ -22,13 +22,15 @@ const isarMaxId = 9223372036854775807;
 /// @nodoc
 const isarAutoIncrementId = -9223372036854775808;
 
+const githubUrl = 'https://github.com/isar/isar-core/releases/download';
+
 /// @nodoc
 @protected
 typedef IsarAbi = Abi;
 
 /// @nodoc
 @protected
-typedef IsarRawObject = RawObject;
+typedef IsarCObject = CObject;
 
 /// @nodoc
 @protected
@@ -52,9 +54,14 @@ class _IsarNative implements IsarNativeInterface {
   }
 
   @override
-  @pragma('vm:prefer-inline')
-  void initializeLibraries({Map<IsarAbi, String> libraries = const {}}) {
-    return initializeIsarCore(libraries: libraries);
+  Future<void> initializeIsarCore({
+    Map<IsarAbi, String> libraries = const {},
+    bool download = false,
+  }) async {
+    await initializeCoreBinary(
+      libraries: libraries,
+      download: download,
+    );
   }
 
   @override
@@ -92,10 +99,6 @@ class _IsarNative implements IsarNativeInterface {
     required bool relaxedDurability,
     required List<CollectionSchema> schemas,
   }) {
-    if (directory == null) {
-      throw IsarError(
-          'You need to provide a valid directory for mobile or desktop apps.');
-    }
     return openIsar(
       directory: directory,
       name: name,
@@ -112,10 +115,6 @@ class _IsarNative implements IsarNativeInterface {
     required bool relaxedDurability,
     required List<CollectionSchema> schemas,
   }) {
-    if (directory == null) {
-      throw IsarError(
-          'You need to provide a valid directory for mobile or desktop apps.');
-    }
     return openIsarSync(
       directory: directory,
       name: name,

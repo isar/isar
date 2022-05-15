@@ -89,11 +89,11 @@ String _generatePrepareSerialize(ObjectInfo object) {
 
 String generateSerializeNative(ObjectInfo object) {
   var code = '''
-  void ${object.serializeNativeName}(IsarCollection<${object.dartName}> collection, IsarRawObject rawObj, ${object.dartName} object, int staticSize, List<int> offsets, AdapterAlloc alloc) {
+  void ${object.serializeNativeName}(IsarCollection<${object.dartName}> collection, IsarCObject cObj, ${object.dartName} object, int staticSize, List<int> offsets, AdapterAlloc alloc) {
     ${_generatePrepareSerialize(object)}
-    rawObj.buffer = alloc(size);
-    rawObj.buffer_length = size;
-    final buffer = IsarNative.bufAsBytes(rawObj.buffer, size);
+    cObj.buffer = alloc(size);
+    cObj.buffer_length = size;
+    final buffer = IsarNative.bufAsBytes(cObj.buffer, size);
     final writer = IsarBinaryWriter(buffer, staticSize);
   ''';
   for (var i = 0; i < object.objectProperties.length; i++) {

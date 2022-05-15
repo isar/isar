@@ -5,10 +5,6 @@ import 'util/common.dart';
 
 void main() {
   group("Other", () {
-    setUp(() {
-      registerBinaries();
-    });
-
     isarTestVm('split words', () {
       expect(Isar.splitWords(""), []);
       expect(Isar.splitWords("single"), ["single"]);

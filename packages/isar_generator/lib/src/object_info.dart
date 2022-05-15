@@ -205,11 +205,13 @@ class ObjectIndex {
   final String name;
   final List<ObjectIndexProperty> properties;
   final bool unique;
+  final bool replace;
 
   const ObjectIndex({
     required this.name,
     required this.properties,
     required this.unique,
+    required this.replace,
   });
 }
 

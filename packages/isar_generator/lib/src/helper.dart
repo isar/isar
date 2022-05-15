@@ -129,6 +129,7 @@ extension PropertyElementX on PropertyInducingElement {
         name: ann.getField('name')!.toStringValue(),
         composite: composite,
         unique: ann.getField('unique')!.toBoolValue()!,
+        replace: ann.getField('replace')!.toBoolValue()!,
         type: indexType,
         caseSensitive: ann.getField('caseSensitive')!.toBoolValue(),
       );

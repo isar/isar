@@ -227,10 +227,26 @@ abstract class Isar {
     _closeCallbacks.remove(callback);
   }
 
-  /// Initialize Isar Code. You need to provide binaries for every platform
-  /// your app will run on.
-  static initializeLibraries({Map<IsarAbi, String> libraries = const {}}) =>
-      IsarNative.initializeLibraries(libraries: libraries);
+  /// Initialize Isar Core manually. You need to provide Isar Core libraries
+  /// for every platform your app will run on.
+  ///
+  /// If [download] is `true`, Isar will attempt to download the correct
+  /// library and place it in the specified path or the script directory.
+  ///
+  /// Be careful if multiple unit tests try to download the library at the
+  /// same time. Always use `flutter test -j 1` when you rely on auto
+  /// downloading to ensure that only one test is running at a time.
+  ///
+  /// Only use this method for non-Flutter code or unit tests.
+  static Future<void> initializeIsarCore({
+    Map<IsarAbi, String> libraries = const {},
+    bool download = false,
+  }) {
+    return IsarNative.initializeIsarCore(
+      libraries: libraries,
+      download: download,
+    );
+  }
 
   /// Split a String into words according to Unicode Annex #29. Only words
   /// containing at least one alphanumeric character will be included.

@@ -42,5 +42,5 @@ String generateAttachLinks(ObjectInfo object) {
       id
     );''';
   }
-  return code + '}';
+  return '$code}';
 }

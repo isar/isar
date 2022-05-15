@@ -36,7 +36,3 @@ part 'src/query.dart';
 /// @nodoc
 @protected
 typedef IsarUint8List = Uint8List;
-
-/// @nodoc
-@protected
-const isarWebVersion = '2.5.0';

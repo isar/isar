@@ -10,17 +10,19 @@ import 'bindings.dart';
 import 'isar_collection_impl.dart';
 import 'isar_core.dart';
 
-typedef QueryDeserialize<T> = List<T> Function(RawObjectSet);
+typedef QueryDeserialize<T> = List<T> Function(CObjectSet);
 
-class QueryImpl<T> extends Query<T> {
+class QueryImpl<T> extends Query<T> implements Finalizable {
   static const maxLimit = 4294967295;
 
   final IsarCollectionImpl col;
-  final Pointer<NativeType> queryPtr;
+  final Pointer<CQuery> queryPtr;
   final QueryDeserialize<T> deserialize;
   final int? propertyId;
 
-  QueryImpl(this.col, this.queryPtr, this.deserialize, this.propertyId);
+  QueryImpl(this.col, this.queryPtr, this.deserialize, this.propertyId) {
+    NativeFinalizer(isarQueryFree).attach(this, queryPtr.cast());
+  }
 
   @override
   Future<T?> findFirst() {
@@ -38,7 +40,7 @@ class QueryImpl<T> extends Query<T> {
 
   Future<List<T>> findInternal(int limit) {
     return col.isar.getTxn(false, (txn) async {
-      final resultsPtr = txn.alloc<RawObjectSet>();
+      final resultsPtr = txn.alloc<CObjectSet>();
       try {
         IC.isar_q_find(queryPtr, txn.ptr, resultsPtr, limit);
         await txn.wait();
@@ -64,7 +66,7 @@ class QueryImpl<T> extends Query<T> {
 
   List<T> findSyncInternal(int limit) {
     return col.isar.getTxnSync(false, (txn) {
-      final resultsPtr = txn.allocRawObjectsSet();
+      final resultsPtr = txn.allocCObjectsSet();
       try {
         nCall(IC.isar_q_find(queryPtr, txn.ptr, resultsPtr, limit));
         return deserialize(resultsPtr.ref).cast();
@@ -167,7 +169,7 @@ class QueryImpl<T> extends Query<T> {
   @override
   Future<R?> aggregate<R>(AggregationOp op) async {
     return col.isar.getTxn(false, (txn) async {
-      final resultPtrPtr = txn.alloc<Pointer>();
+      final resultPtrPtr = txn.alloc<Pointer<CAggregationResult>>();
 
       IC.isar_q_aggregate(
           col.ptr, queryPtr, txn.ptr, op.index, propertyId ?? 0, resultPtrPtr);
@@ -180,7 +182,7 @@ class QueryImpl<T> extends Query<T> {
   @override
   R? aggregateSync<R>(AggregationOp op) {
     return col.isar.getTxnSync(false, (txn) {
-      final resultPtrPtr = txn.alloc<Pointer>();
+      final resultPtrPtr = txn.alloc<Pointer<CAggregationResult>>();
 
       nCall(IC.isar_q_aggregate(
           col.ptr, queryPtr, txn.ptr, op.index, propertyId ?? 0, resultPtrPtr));
@@ -188,7 +190,8 @@ class QueryImpl<T> extends Query<T> {
     });
   }
 
-  R? _convertAggregatedResult<R>(Pointer resultPtr, AggregationOp op) {
+  R? _convertAggregatedResult<R>(
+      Pointer<CAggregationResult> resultPtr, AggregationOp op) {
     final nullable = op == AggregationOp.min || op == AggregationOp.max;
     if (R == int || R == DateTime) {
       final value = IC.isar_q_aggregate_long_result(resultPtr);

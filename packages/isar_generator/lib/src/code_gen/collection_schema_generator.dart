@@ -82,6 +82,7 @@ String _generateSchema(ObjectInfo object) {
         {
           'name': index.name,
           'unique': index.unique,
+          'replace': index.replace,
           'properties': [
             for (var indexProperty in index.properties)
               {

@@ -11,7 +11,7 @@ class ConnectPage extends StatefulWidget {
   const ConnectPage({Key? key}) : super(key: key);
 
   @override
-  _ConnectPageState createState() => _ConnectPageState();
+  State<ConnectPage> createState() => _ConnectPageState();
 }
 
 class _ConnectPageState extends State<ConnectPage> {
@@ -20,6 +20,8 @@ class _ConnectPageState extends State<ConnectPage> {
   String _message = '';
 
   Future<void> _connect() async {
+    final provider = Provider.of<AppState>(context, listen: false);
+
     try {
       final service = await Service.connect(_uriController.text);
       final instances = await service.listInstances();
@@ -29,7 +31,6 @@ class _ConnectPageState extends State<ConnectPage> {
         return Collection.fromJson(json);
       }).toList();
 
-      final provider = Provider.of<AppState>(context, listen: false);
       provider.service = service;
       provider.instances = instances;
       provider.collections = collections;

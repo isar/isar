@@ -27,7 +27,7 @@ class CollectionTable extends StatefulWidget {
   const CollectionTable({Key? key}) : super(key: key);
 
   @override
-  _CollectionTableState createState() => _CollectionTableState();
+  State<CollectionTable> createState() => _CollectionTableState();
 }
 
 class _CollectionTableState extends State<CollectionTable> {
