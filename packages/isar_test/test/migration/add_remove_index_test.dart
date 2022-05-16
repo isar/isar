@@ -40,16 +40,16 @@ void main() {
 void tests() {
   isarTest('Add remove index', () async {
     final isar1 = await openTempIsar([Col1Schema]);
-    await isar1.tWriteTxn((isar) {
-      return isar.col1s.tPutAll([Col1(1, 'a'), Col1(2, 'b')]);
+    await isar1.tWriteTxn(() {
+      return isar1.col1s.tPutAll([Col1(1, 'a'), Col1(2, 'b')]);
     });
     expect(await isar1.close(), true);
 
     final isar2 = await openTempIsar([Col2Schema], name: isar1.name);
     await qEqual(isar2.col2s.where().tFindAll(), [Col2(1, 'a'), Col2(2, 'b')]);
     expect(await isar2.col2s.getByValue('a'), Col2(1, 'a'));
-    await isar2.tWriteTxn((isar) {
-      return isar.col2s.tPutAll([Col2(1, 'c'), Col2(3, 'd')]);
+    await isar2.tWriteTxn(() {
+      return isar2.col2s.tPutAll([Col2(1, 'c'), Col2(3, 'd')]);
     });
     expect(await isar2.close(), true);
 

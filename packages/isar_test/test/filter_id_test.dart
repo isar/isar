@@ -47,7 +47,7 @@ void tests() {
       obj2 = IdModel()..id = 2;
       obj3 = IdModel()..id = 3;
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await isar.idModels.putAll([obj0, obj2, obj3, obj1]);
       });
     });

@@ -79,7 +79,7 @@ void tests() {
       obj5 = DateTimeModel()..field = local(2026);
       objNull = DateTimeModel()..field = null;
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await isar.dateTimeModels
             .putAll([obj4, obj1, obj5, obj3, obj2, objNull]);
       });

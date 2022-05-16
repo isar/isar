@@ -39,8 +39,8 @@ void tests() {
     final isar1 = await openTempIsar([Col1Schema]);
     final col1A = Col1(5, 'col1_a');
     final col1B = Col1(15, 'col1_b');
-    await isar1.tWriteTxn((isar) {
-      return isar.col1s.tPutAll([col1A, col1B]);
+    await isar1.tWriteTxn(() {
+      return isar1.col1s.tPutAll([col1A, col1B]);
     });
     expect(await isar1.close(), true);
 
@@ -48,8 +48,8 @@ void tests() {
         await openTempIsar([Col1Schema, Col2Schema], name: isar1.name);
     await qEqual(isar2.col1s.where().tFindAll(), [col1A, col1B]);
     await qEqual(isar2.col2s.where().tFindAll(), []);
-    await isar2.tWriteTxn((isar) {
-      return isar.col2s.tPut(Col2(null, 'col2_a'));
+    await isar2.tWriteTxn(() {
+      return isar2.col2s.tPut(Col2(null, 'col2_a'));
     });
     await qEqual(isar2.col2s.where().tFindAll(), [Col2(1, 'col2_a')]);
     expect(await isar2.close(), true);
@@ -59,9 +59,9 @@ void tests() {
     final isar1 = await openTempIsar([Col1Schema, Col2Schema]);
     final col1A = Col1(5, 'col1_a');
     final col1B = Col1(15, 'col1_b');
-    await isar1.writeTxn((isar) async {
-      await isar.col1s.putAll([col1A, col1B]);
-      await isar.col2s.put(Col2(100, 'col2_a'));
+    await isar1.writeTxn(() async {
+      await isar1.col1s.putAll([col1A, col1B]);
+      await isar1.col2s.put(Col2(100, 'col2_a'));
     });
     expect(await isar1.close(), true);
 

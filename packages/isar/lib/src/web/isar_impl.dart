@@ -22,7 +22,7 @@ class IsarImpl extends Isar {
   }
 
   Future<T> _txn<T>(
-      bool write, bool silent, Future<T> Function(Isar isar) callback) async {
+      bool write, bool silent, Future<T> Function() callback) async {
     requireOpen();
     requireNotInTxn();
 
@@ -37,7 +37,7 @@ class IsarImpl extends Isar {
 
     T result;
     try {
-      result = await zone.run(() => callback(this));
+      result = await zone.run(callback);
       await txn.commit().wait();
     } catch (e) {
       txn.abort();
@@ -59,21 +59,20 @@ class IsarImpl extends Isar {
   }
 
   @override
-  Future<T> txn<T>(Future<T> Function(Isar isar) callback) {
+  Future<T> txn<T>(Future<T> Function() callback) {
     return _txn(false, false, callback);
   }
 
   @override
-  Future<T> writeTxn<T>(Future<T> Function(Isar isar) callback,
-      {bool silent = false}) {
+  Future<T> writeTxn<T>(Future<T> Function() callback, {bool silent = false}) {
     return _txn(true, silent, callback);
   }
 
   @override
-  T txnSync<T>(T Function(Isar isar) callback) => unsupportedOnWeb();
+  T txnSync<T>(T Function() callback) => unsupportedOnWeb();
 
   @override
-  T writeTxnSync<T>(T Function(Isar isar) callback, {bool silent = false}) =>
+  T writeTxnSync<T>(T Function() callback, {bool silent = false}) =>
       unsupportedOnWeb();
 
   Future<T> getTxn<T>(bool write, Future<T> Function(IsarTxnJs txn) callback) {
@@ -85,7 +84,7 @@ class IsarImpl extends Isar {
       }
       return callback(currentTxn);
     } else if (!write) {
-      return _txn(false, false, (isar) {
+      return _txn(false, false, () {
         return callback(Zone.current[_zoneTxn]!);
       });
     } else {

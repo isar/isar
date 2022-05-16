@@ -55,16 +55,15 @@ Future<Isar> tOpen({
 }
 
 extension TIsar on Isar {
-  Future<T> tTxn<T>(Future<T> Function(Isar isar) callback) {
+  Future<T> tTxn<T>(Future<T> Function() callback) {
     if (_testSync) {
-      return Future.value(txnSync((isar) => callback(isar)));
+      return Future.value(txnSync(callback));
     } else {
       return txn(callback);
     }
   }
 
-  Future<T> tWriteTxn<T>(Future<T> Function(Isar isar) callback,
-      {bool silent = false}) {
+  Future<T> tWriteTxn<T>(Future<T> Function() callback, {bool silent = false}) {
     if (_testSync) {
       return writeTxnSync(callback, silent: silent);
     } else {

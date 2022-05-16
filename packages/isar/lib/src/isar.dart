@@ -122,17 +122,16 @@ abstract class Isar {
   }
 
   /// Executes an asynchronous read-only transaction.
-  Future<T> txn<T>(Future<T> Function(Isar isar) callback);
+  Future<T> txn<T>(Future<T> Function() callback);
 
   /// Executes an asynchronous read-write transaction.
-  Future<T> writeTxn<T>(Future<T> Function(Isar isar) callback,
-      {bool silent = false});
+  Future<T> writeTxn<T>(Future<T> Function() callback, {bool silent = false});
 
   /// Executes a synchronous read-only transaction.
-  T txnSync<T>(T Function(Isar isar) callback);
+  T txnSync<T>(T Function() callback);
 
   /// Executes a synchronous read-write transaction.
-  T writeTxnSync<T>(T Function(Isar isar) callback, {bool silent = false});
+  T writeTxnSync<T>(T Function() callback, {bool silent = false});
 
   /// @nodoc
   @protected

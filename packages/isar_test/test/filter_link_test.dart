@@ -66,7 +66,7 @@ void main() {
       objA2.links.addAll([objB2]);
       objA3.links.addAll([objB1, objB2]);
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await colA.putAll(
           [objA1, objA2, objA3],
           saveLinks: true,

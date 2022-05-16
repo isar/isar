@@ -2,148 +2,182 @@ import 'package:isar_generator/src/code_gen/type_adapter_generator_common.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
-String _generatePrepareSerialize(ObjectInfo object) {
-  var code = 'var dynamicSize = 0;';
-  for (var i = 0; i < object.objectProperties.length; i++) {
-    final property = object.objectProperties[i];
-    var propertyValue = 'object.${property.dartName}';
-    if (property.converter != null) {
-      propertyValue = property.toIsar(propertyValue, object);
-    }
-    code += 'final value$i = $propertyValue;';
+class _GetPropResult {
+  final String code;
+  final String value;
+  final String? dynamicSize;
 
-    final nOp = property.nullable ? '?' : '';
-    final elNOp = property.elementNullable ? '?' : '';
-    final nLen = property.nullable ? '?? 0' : '';
-    final accessor = '_${property.isarName}';
-    switch (property.isarType) {
-      case IsarType.string:
-        if (property.nullable) {
-          code += '''
-          IsarUint8List? $accessor;
-          if (value$i != null) {
-            $accessor = IsarBinaryWriter.utf8Encoder.convert(value$i);
+  _GetPropResult({
+    required this.code,
+    required this.value,
+    required this.dynamicSize,
+  });
+}
+
+_GetPropResult _generateGetPropertyValue(
+    ObjectProperty property, ObjectInfo object) {
+  var code = '';
+  var value = 'object.${property.dartName}';
+  String? dynamicSize;
+
+  if (property.converter != null) {
+    final convertedValue = '${property.dartName}\$Converted';
+    code += 'final $convertedValue = ${property.toIsar(value, object)};';
+    value = convertedValue;
+  }
+
+  final nOp = property.nullable ? '?' : '';
+  final nLen = property.nullable ? '?? 0' : '';
+  switch (property.isarType) {
+    case IsarType.string:
+      final stringBytes = '${property.dartName}\$Bytes';
+      if (property.nullable) {
+        final stringValue = '${property.dartName}\$Value';
+        code += '''
+          IsarUint8List? $stringBytes;
+          final $stringValue = $value;
+          if ($stringValue != null) {
+            $stringBytes = IsarBinaryWriter.utf8Encoder.convert($stringValue);
           }
           ''';
-        } else {
-          code +=
-              'final $accessor = IsarBinaryWriter.utf8Encoder.convert(value$i);';
-        }
-        code += 'dynamicSize += ($accessor$nOp.length $nLen) as int;';
-        break;
-      case IsarType.stringList:
-        code += 'dynamicSize += (value$i$nOp.length $nLen) * 8;';
-        if (property.nullable) {
-          code += '''
-          List<IsarUint8List?>? bytesList$i;
-          if (value$i != null) {
-            bytesList$i = [];''';
-        } else {
-          code += 'final bytesList$i = <IsarUint8List$elNOp>[];';
-        }
-        code += 'for (var str in value$i) {';
-        if (property.elementNullable) {
-          code += 'if (str != null) {';
-        }
-        code += '''
-          final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
-          bytesList$i.add(bytes);
-          dynamicSize += bytes.length as int;''';
-        if (property.elementNullable) {
-          code += '''
-          } else {
-            bytesList$i.add(null);
-          }''';
-        }
-        if (property.nullable) {
-          code += '}';
-        }
-        code += '''
-        }
-        final $accessor = bytesList$i;''';
-        break;
-      case IsarType.bytes:
-      case IsarType.boolList:
-      case IsarType.intList:
-      case IsarType.floatList:
-      case IsarType.longList:
-      case IsarType.doubleList:
-      case IsarType.dateTimeList:
+      } else {
         code +=
-            'dynamicSize += (value$i$nOp.length $nLen) * ${property.isarType.elementSize};';
-        break;
-      default:
-        break;
-    }
-    if (property.isarType != IsarType.string &&
-        property.isarType != IsarType.stringList) {
-      code += 'final $accessor = value$i;';
-    }
-  }
-  code += '''
-    final size = staticSize + dynamicSize;
-    ''';
+            'final $stringBytes = IsarBinaryWriter.utf8Encoder.convert($value);';
+      }
+      value = stringBytes;
+      dynamicSize = '($stringBytes$nOp.length $nLen)';
+      break;
+    case IsarType.stringList:
+      final stringBytesList = '${property.dartName}\$BytesList';
+      dynamicSize = '${property.dartName}\$BytesCount';
+      code += 'var $dynamicSize = ($value$nOp.length $nLen) * 8;';
 
-  return code;
+      if (property.nullable) {
+        final stringValue = '${property.dartName}\$Value';
+        code += '''
+          List<IsarUint8List?>? $stringBytesList;
+          final $stringValue = $value;
+          if ($stringValue != null) {
+            $stringBytesList = [];
+            for (var str in $stringValue) {''';
+      } else {
+        final elNOp = property.elementNullable ? '?' : '';
+        code += '''
+          final $stringBytesList = <IsarUint8List$elNOp>[];
+          for (var str in $value) {''';
+      }
+      if (property.elementNullable) {
+        code += 'if (str != null) {';
+      }
+      code += '''
+        final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
+        $stringBytesList.add(bytes);
+        $dynamicSize += bytes.length;''';
+      if (property.elementNullable) {
+        code += '''
+          } else {
+            $stringBytesList.add(null);
+          }''';
+      }
+      if (property.nullable) {
+        code += '}';
+      }
+      code += '}';
+      value = stringBytesList;
+      break;
+    case IsarType.bytes:
+    case IsarType.boolList:
+      dynamicSize = '($value$nOp.length $nLen)';
+      break;
+    case IsarType.intList:
+    case IsarType.floatList:
+    case IsarType.longList:
+    case IsarType.doubleList:
+    case IsarType.dateTimeList:
+      dynamicSize =
+          '($value$nOp.length $nLen) * ${property.isarType.elementSize}';
+      break;
+    default:
+      break;
+  }
+
+  return _GetPropResult(code: code, value: value, dynamicSize: dynamicSize);
 }
 
 String generateSerializeNative(ObjectInfo object) {
-  var code = '''
-  void ${object.serializeNativeName}(IsarCollection<${object.dartName}> collection, IsarCObject cObj, ${object.dartName} object, int staticSize, List<int> offsets, AdapterAlloc alloc) {
-    ${_generatePrepareSerialize(object)}
+  var code =
+      'void ${object.serializeNativeName}(IsarCollection<${object.dartName}>'
+      ' collection, IsarCObject cObj, ${object.dartName} object, '
+      'int staticSize, List<int> offsets, AdapterAlloc alloc) {';
+
+  final values = <String>[];
+  final sizes = <String>['staticSize'];
+  for (var i = 0; i < object.objectProperties.length; i++) {
+    final property = object.objectProperties[i];
+    final serialize = _generateGetPropertyValue(property, object);
+
+    code += serialize.code;
+    values.add(serialize.value);
+    if (serialize.dynamicSize != null) {
+      sizes.add(serialize.dynamicSize!);
+    }
+  }
+
+  code += '''
+    final size = ${sizes.join(' + ')};
     cObj.buffer = alloc(size);
     cObj.buffer_length = size;
+
     final buffer = IsarNative.bufAsBytes(cObj.buffer, size);
     final writer = IsarBinaryWriter(buffer, staticSize);
   ''';
   for (var i = 0; i < object.objectProperties.length; i++) {
     final property = object.objectProperties[i];
-    final accessor = '_${property.isarName}';
     switch (property.isarType) {
       case IsarType.bool:
-        code += 'writer.writeBool(offsets[$i], $accessor);';
+        code += 'writer.writeBool(offsets[$i], ${values[i]});';
         break;
       case IsarType.int:
-        code += 'writer.writeInt(offsets[$i], $accessor);';
+        code += 'writer.writeInt(offsets[$i], ${values[i]});';
         break;
       case IsarType.float:
-        code += 'writer.writeFloat(offsets[$i], $accessor);';
+        code += 'writer.writeFloat(offsets[$i], ${values[i]});';
         break;
       case IsarType.long:
-        code += 'writer.writeLong(offsets[$i], $accessor);';
+        code += 'writer.writeLong(offsets[$i], ${values[i]});';
         break;
       case IsarType.double:
-        code += 'writer.writeDouble(offsets[$i], $accessor);';
+        code += 'writer.writeDouble(offsets[$i], ${values[i]});';
         break;
       case IsarType.dateTime:
-        code += 'writer.writeDateTime(offsets[$i], $accessor);';
+        code += 'writer.writeDateTime(offsets[$i], ${values[i]});';
         break;
       case IsarType.string:
-        code += 'writer.writeBytes(offsets[$i], $accessor);';
+        code += 'writer.writeBytes(offsets[$i], ${values[i]});';
         break;
       case IsarType.bytes:
-        code += 'writer.writeBytes(offsets[$i], $accessor);';
+        code += 'writer.writeBytes(offsets[$i], ${values[i]});';
         break;
       case IsarType.boolList:
-        code += 'writer.writeBoolList(offsets[$i], $accessor);';
+        code += 'writer.writeBoolList(offsets[$i], ${values[i]});';
         break;
       case IsarType.stringList:
-        code += 'writer.writeStringList(offsets[$i], $accessor);';
+        code += 'writer.writeStringList(offsets[$i], ${values[i]});';
         break;
       case IsarType.intList:
-        code += 'writer.writeIntList(offsets[$i], $accessor);';
+        code += 'writer.writeIntList(offsets[$i], ${values[i]});';
         break;
       case IsarType.longList:
-        code += 'writer.writeLongList(offsets[$i], $accessor);';
+        code += 'writer.writeLongList(offsets[$i], ${values[i]});';
         break;
       case IsarType.floatList:
-        code += 'writer.writeFloatList(offsets[$i], $accessor);';
+        code += 'writer.writeFloatList(offsets[$i], ${values[i]});';
         break;
       case IsarType.doubleList:
-        code += 'writer.writeDoubleList(offsets[$i], $accessor);';
+        code += 'writer.writeDoubleList(offsets[$i], ${values[i]});';
         break;
       case IsarType.dateTimeList:
-        code += 'writer.writeDateTimeList(offsets[$i], $accessor);';
+        code += 'writer.writeDateTimeList(offsets[$i], ${values[i]});';
         break;
     }
   }

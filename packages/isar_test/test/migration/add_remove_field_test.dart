@@ -45,8 +45,8 @@ void main() {
 void tests() {
   isarTest('Add field', () async {
     final isar1 = await openTempIsar([Col1Schema]);
-    await isar1.tWriteTxn((isar) {
-      return isar.col1s.tPutAll([Col1(1, 'value1'), Col1(2, 'value2')]);
+    await isar1.tWriteTxn(() {
+      return isar1.col1s.tPutAll([Col1(1, 'value1'), Col1(2, 'value2')]);
     });
     expect(await isar1.close(), true);
 
@@ -55,8 +55,8 @@ void tests() {
       Col2(1, 'value1', null),
       Col2(2, 'value2', null),
     ]);
-    await isar2.tWriteTxn((isar) {
-      return isar.col2s.tPutAll([
+    await isar2.tWriteTxn(() {
+      return isar2.col2s.tPutAll([
         Col2(1, 'value3', ['hi']),
         Col2(3, 'value4', [])
       ]);
@@ -79,8 +79,8 @@ void tests() {
 
   isarTest('Remove field', () async {
     final isar1 = await openTempIsar([Col2Schema]);
-    await isar1.writeTxn((isar) {
-      return isar.col2s.putAll([
+    await isar1.writeTxn(() {
+      return isar1.col2s.putAll([
         Col2(1, 'value1', ['hi']),
         Col2(2, 'value2', ['val2', 'val22']),
       ]);
@@ -92,8 +92,8 @@ void tests() {
       Col1(1, 'value1'),
       Col1(2, 'value2'),
     ]);
-    await isar2.writeTxn((isar) {
-      return isar.col1s.put(Col1(1, 'value3'));
+    await isar2.writeTxn(() {
+      return isar2.col1s.put(Col1(1, 'value3'));
     });
     qEqual(isar2.col1s.where().findAll(), [
       Col1(1, 'value3'),

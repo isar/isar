@@ -140,7 +140,7 @@ void tests() {
     isarTest('EmptyConstructorModel', () async {
       final obj1 = EmptyConstructorModel()..name = 'obj1';
       final obj2 = EmptyConstructorModel()..name = 'obj2';
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await isar.emptyConstructorModels.tPutAll([obj1, obj2]);
       });
 
@@ -151,7 +151,7 @@ void tests() {
     isarTest('NamedConstructorModel', () async {
       final obj1 = NamedConstructorModel(name: 'obj1');
       final obj2 = NamedConstructorModel(name: 'obj2');
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await isar.namedConstructorModels.tPutAll([obj1, obj2]);
       });
 
@@ -163,7 +163,7 @@ void tests() {
       final obj1 = PositionalConstructorModel(0, 'obj1');
       final obj2 = PositionalConstructorModel(5, 'obj2');
       final obj3 = PositionalConstructorModel(15, 'obj3');
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await isar.positionalConstructorModels.tPutAll([obj1, obj2, obj3]);
       });
 
@@ -178,7 +178,7 @@ void tests() {
       final obj1WithId = OptionalConstructorModel('obj1', 1);
       final obj2 = OptionalConstructorModel('obj2', 5);
       final obj3 = OptionalConstructorModel('obj3', 15);
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await isar.optionalConstructorModels.tPutAll([obj1, obj2, obj3]);
       });
 
@@ -191,7 +191,7 @@ void tests() {
     isarTest('PositionalNamedConstructorModel', () async {
       final obj1 = PositionalNamedConstructorModel('obj1', id: 1);
       final obj2 = PositionalNamedConstructorModel('obj2', id: 2);
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await isar.positionalNamedConstructorModels.tPutAll([obj1, obj2]);
       });
 
@@ -204,7 +204,7 @@ void tests() {
     isarTest('FreezedModel', () async {
       const obj1 = FreezedModel(id: 1, name: 'obj1');
       const obj2 = FreezedModel(id: 2, name: 'obj2');
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await isar.freezedModels.tPutAll([obj1, obj2]);
       });
 

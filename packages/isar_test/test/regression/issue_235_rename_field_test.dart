@@ -63,8 +63,8 @@ void main() {
 void tests() {
   isarTest('Regression 235 Rename field', () async {
     final isar1 = await openTempIsar([Col1Schema]);
-    await isar1.tWriteTxn((isar) {
-      return isar.col1s.tPut(Col1(id: 5));
+    await isar1.tWriteTxn(() {
+      return isar1.col1s.tPut(Col1(id: 5));
     });
     expect(await isar1.close(), true);
 
@@ -87,8 +87,8 @@ void tests() {
       numberText1: "New Value1",
       numberText22: 'New Value22',
     );
-    await isar2.tWriteTxn((isar) {
-      return isar.col2s.tPut(newObj);
+    await isar2.tWriteTxn(() {
+      return isar2.col2s.tPut(newObj);
     });
     expect(await isar2.col2s.tGet(5), newObj);
     expect(await isar2.close(), true);

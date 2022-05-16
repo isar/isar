@@ -19,7 +19,7 @@ void tests() {
       users = isar.userModels;
 
       await isar.writeTxn(
-        (isar) => users.putAll([
+        () => users.putAll([
           UserModel.fill('a', 100, true),
           UserModel.fill('a', 200, true),
           UserModel.fill('c', 1, false),

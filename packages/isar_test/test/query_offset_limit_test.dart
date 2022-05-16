@@ -26,7 +26,7 @@ void tests() {
         UserModel.fill('user4', 40, false),
         UserModel.fill('user5', 50, false),
       ];
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await col.putAll(users);
       });
     });

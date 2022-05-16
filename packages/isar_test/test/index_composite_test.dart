@@ -78,7 +78,7 @@ void tests() {
         ..stringValue = '2'
         ..stringValue2 = null;
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await col.putAll([obj2, obj1, obj4, obj3]);
       });
     });
@@ -92,7 +92,7 @@ void tests() {
         ..id = 5
         ..intValue = 1
         ..stringValue = 'a';
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await isar.compositeModels.tPut(newObj);
       });
 
@@ -107,13 +107,13 @@ void tests() {
         ..stringValue2 = 'b';
 
       await expectLater(
-        () => isar.tWriteTxn((isar) async {
+        () => isar.tWriteTxn(() async {
           await isar.compositeModels.tPut(newObj);
         }),
         throwsIsarError('unique'),
       );
 
-      /*await isar.writeTxn((isar) async {
+      /*await isar.writeTxn(() async {
         await isar.compositeModels.put(newObj, replaceOnConflict: true);
       });
 

@@ -322,9 +322,9 @@ class BinaryReader {
     var length = _byteData.getUint32(offset + 4, Endian.little);
     if (listOffset == 0) return null;
 
-    final list = <String>[];
+    final list = List.filled(length, '');
     for (var i = 0; i < length; i++) {
-      list.add(readString(listOffset + i * 8, staticOffset: false));
+      list[i] = readString(listOffset + i * 8, staticOffset: false);
     }
     return list;
   }

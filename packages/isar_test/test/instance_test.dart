@@ -35,7 +35,7 @@ void tests() {
       final isarName = isar.name;
 
       final obj1 = Model()..value = 'M1';
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await isar.models.tPut(obj1);
       });
       expect(obj1.id, 1);
@@ -48,7 +48,7 @@ void tests() {
       final obj3 = Model()
         ..value = 'M3'
         ..id = 20;
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await isar.models.tPutAll([obj2, obj3]);
       });
       expect(obj2.id, 2);
@@ -60,7 +60,7 @@ void tests() {
       isar = await openTempIsar([ModelSchema], name: isarName);
 
       final obj4 = Model()..value = 'M4';
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await isar.models.tPut(obj4);
       });
       expect(obj4.id, 21);

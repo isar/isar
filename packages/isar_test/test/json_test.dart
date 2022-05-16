@@ -42,7 +42,7 @@ void tests() {
       () async {
         final json = generateJson(100000);
 
-        await isar.tWriteTxn((isar) async {
+        await isar.tWriteTxn(() async {
           await col.tImportJson(json);
         });
 
@@ -71,7 +71,7 @@ void tests() {
         }
       ];
 
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await col.tImportJson(json);
       });
 
@@ -82,7 +82,7 @@ void tests() {
     isarTest('raw json', () async {
       final json = generateJson(10000);
       final bytes = const Utf8Encoder().convert(jsonEncode(json));
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await col.tImportJsonRaw(bytes);
       });
 

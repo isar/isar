@@ -55,7 +55,7 @@ void tests() {
         ..message = 'This is a new message';
       final message2 = Message()..message = 'This is another new message';
 
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         message1.id = await messages.tPut(message1);
         message2.id = await messages.tPut(message2);
       });
@@ -75,7 +75,7 @@ void tests() {
         ..message = 'This is a new message';
       final message2 = Message()..message = 'This is another new message';
 
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await messages.tPut(message1);
         await messages.tPut(message2);
       });
@@ -100,7 +100,7 @@ void tests() {
       final message3 = Message()..message = 'Message three';
 
       late List<int> ids;
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         ids = await messages.tPutAll([message1, message2, message3]);
       });
 
@@ -114,16 +114,16 @@ void tests() {
         ..name = 'Some User'
         ..age = 24;
 
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         user.id = await users.tPut(user);
       });
 
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await users.tDelete(9999);
       });
       expect(await users.tGet(user.id!), user);
 
-      await isar.tWriteTxn((isar) async {
+      await isar.tWriteTxn(() async {
         await users.tDelete(user.id!);
       });
       expect(await users.tGet(user.id!), null);

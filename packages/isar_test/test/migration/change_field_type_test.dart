@@ -33,8 +33,8 @@ void main() {
 void tests() {
   isarTest('Change field type', () async {
     final isar1 = await openTempIsar([Col1Schema]);
-    await isar1.tWriteTxn((isar) {
-      return isar.col1s.tPut(Col1(1, 'a'));
+    await isar1.tWriteTxn(() {
+      return isar1.col1s.tPut(Col1(1, 'a'));
     });
     expect(await isar1.close(), true);
     await expectLater(

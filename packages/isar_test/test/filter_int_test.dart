@@ -65,7 +65,7 @@ void tests() {
       obj4 = IntModel()..field = 4;
       objNull = IntModel()..field = null;
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await isar.intModels.putAll([obj4, obj0, obj2, obj3, obj1, objNull]);
       });
     });

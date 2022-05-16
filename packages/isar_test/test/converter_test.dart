@@ -152,7 +152,7 @@ void main() {
     /*isarTest('toIsar()', () async {
       final isar = await openTempIsar([ConverterModelSchema]);
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await isar.converterModels.put(_converterObject);
       });
 
@@ -165,7 +165,7 @@ void main() {
     isarTest('fromIsar()', () async {
       final isar = await openTempIsar([ConverterModelSchema]);
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await isar.converterModels.importJson([converterObjectJson]);
       });
 

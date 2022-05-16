@@ -48,7 +48,7 @@ void main() {
       obj2 = Model(id: 2, guid: 'BBB-002', content: 'B');
       obj3 = Model(id: 3, guid: 'CCC-003', content: 'C');
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await col.putAll([obj1, obj2, obj3]);
       });
     });
@@ -105,13 +105,13 @@ void main() {
     });
 
     isarTest('deleteBy', () async {
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         expect(await col.deleteByGuid(obj1.guid), true);
         expect(await col.deleteByGuid('SOMETHING'), false);
       });
       await qEqual(col.where().findAll(), [obj2, obj3]);
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         expect(await col.deleteByContentGuid('B', obj2.guid), true);
         expect(await col.deleteByContentGuid('D', obj3.guid), false);
       });
@@ -119,14 +119,14 @@ void main() {
     });
 
     isarTest('deleteAllBy', () async {
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         expect(await col.deleteAllByGuid([obj3.guid, obj1.guid, 'AAA']), 2);
       });
       await qEqual(col.where().findAll(), [obj2]);
     });
 
     isarTest('deleteAllBy composite', () async {
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         expect(
           await col.deleteAllByContentGuid(
             ['C', 'A', 'D'],
@@ -139,13 +139,13 @@ void main() {
     });
 
     isarTestVm('deleteBySync', () {
-      isar.writeTxnSync((isar) {
+      isar.writeTxnSync(() {
         expect(col.deleteByGuidSync(obj1.guid), true);
         expect(col.deleteByGuidSync('SOMETHING'), false);
       });
       expect(col.where().findAllSync(), [obj2, obj3]);
 
-      isar.writeTxnSync((isar) {
+      isar.writeTxnSync(() {
         expect(col.deleteByContentGuidSync('B', obj2.guid), true);
         expect(col.deleteByContentGuidSync('D', obj3.guid), false);
       });
@@ -153,14 +153,14 @@ void main() {
     });
 
     isarTestVm('deleteAllBySync', () {
-      isar.writeTxnSync((isar) {
+      isar.writeTxnSync(() {
         expect(col.deleteAllByGuidSync([obj3.guid, obj1.guid, 'AAA']), 2);
       });
       expect(col.where().findAllSync(), [obj2]);
     });
 
     isarTestVm('deleteAllBySync composite', () {
-      isar.writeTxnSync((isar) {
+      isar.writeTxnSync(() {
         expect(
           col.deleteAllByContentGuidSync(
             ['C', 'A', 'D'],

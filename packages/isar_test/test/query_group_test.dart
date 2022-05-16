@@ -18,7 +18,7 @@ void tests() {
       isar = await openTempIsar([UserModelSchema]);
       users = isar.userModels;
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await users.putAll([
           UserModel.fill('David', 20, false),
           UserModel.fill('Emma', 30, true),

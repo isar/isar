@@ -63,7 +63,7 @@ void tests() {
       isar = await openTempIsar([StringModelSchema]);
       col = isar.stringModels;
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         for (var i = 0; i < 5; i++) {
           final obj = StringModel.init('string $i');
           await col.put(obj);

@@ -32,7 +32,7 @@ void tests() {
       isar = await openTempIsar([TestModelSchema]);
       col = isar.testModels;
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         for (var i = 0; i <= 2; i++) {
           var obj = TestModel()..value = i;
           obj.id = await col.put(obj);

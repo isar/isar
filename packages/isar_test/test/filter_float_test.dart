@@ -69,7 +69,7 @@ void tests() {
       objInf = FloatModel()..field = double.infinity;
       objNull = FloatModel()..field = null;
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await col.putAll([objInf, obj0, obj2, obj1, obj3, objNull]);
       });
     });
@@ -160,7 +160,7 @@ void tests() {
       obj3 = FloatModel()..list = [null, -1000];
       objNull = FloatModel()..list = null;
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await col.putAll([objEmpty, obj1, obj3, obj2, objNull]);
       });
     });

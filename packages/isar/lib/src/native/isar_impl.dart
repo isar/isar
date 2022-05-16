@@ -20,7 +20,7 @@ class IsarImpl extends Isar implements Finalizable {
   final _syncTxnPtrPtr = malloc<Pointer<CIsarTxn>>();
   SyncTxn? _currentTxnSync;
 
-  IsarImpl(String name, String schema, this.ptr) : super(name, schema) {
+  IsarImpl(super.name, super.schema, this.ptr) {
     _finalizer = NativeFinalizer(isarClose);
     _finalizer.attach(this, ptr.cast(), detach: this);
   }
@@ -33,7 +33,7 @@ class IsarImpl extends Isar implements Finalizable {
   }
 
   Future<T> _txn<T>(
-      bool write, bool silent, Future<T> Function(Isar isar) callback) async {
+      bool write, bool silent, Future<T> Function() callback) async {
     requireOpen();
     requireNotInTxn();
 
@@ -61,7 +61,7 @@ class IsarImpl extends Isar implements Finalizable {
 
     T result;
     try {
-      result = await zone.run(() => callback(this));
+      result = await zone.run(callback);
       IC.isar_txn_finish(txn.ptr, true);
       await txn.wait();
     } catch (e) {
@@ -78,13 +78,12 @@ class IsarImpl extends Isar implements Finalizable {
   }
 
   @override
-  Future<T> txn<T>(Future<T> Function(Isar isar) callback) {
+  Future<T> txn<T>(Future<T> Function() callback) {
     return _txn(false, false, callback);
   }
 
   @override
-  Future<T> writeTxn<T>(Future<T> Function(Isar isar) callback,
-      {bool silent = false}) {
+  Future<T> writeTxn<T>(Future<T> Function() callback, {bool silent = false}) {
     return _txn(true, silent, callback);
   }
 
@@ -97,7 +96,7 @@ class IsarImpl extends Isar implements Finalizable {
       }
       return callback(currentTxn);
     } else if (!write) {
-      return _txn(false, false, (isar) {
+      return _txn(false, false, () {
         return callback(Zone.current[_zoneTxn]);
       });
     } else {
@@ -105,7 +104,7 @@ class IsarImpl extends Isar implements Finalizable {
     }
   }
 
-  T _txnSync<T>(bool write, bool silent, T Function(Isar isar) callback) {
+  T _txnSync<T>(bool write, bool silent, T Function() callback) {
     requireOpen();
     requireNotInTxn();
 
@@ -115,7 +114,7 @@ class IsarImpl extends Isar implements Finalizable {
 
     T result;
     try {
-      result = callback(this);
+      result = callback();
       nCall(IC.isar_txn_finish(txn.ptr, true));
     } catch (e) {
       IC.isar_txn_finish(txn.ptr, false);
@@ -129,12 +128,12 @@ class IsarImpl extends Isar implements Finalizable {
   }
 
   @override
-  T txnSync<T>(T Function(Isar isar) callback) {
+  T txnSync<T>(T Function() callback) {
     return _txnSync(false, false, callback);
   }
 
   @override
-  T writeTxnSync<T>(T Function(Isar isar) callback, {bool silent = false}) {
+  T writeTxnSync<T>(T Function() callback, {bool silent = false}) {
     return _txnSync(true, silent, callback);
   }
 
@@ -146,7 +145,7 @@ class IsarImpl extends Isar implements Finalizable {
       }
       return callback(_currentTxnSync!);
     } else if (!write) {
-      return _txnSync(false, false, (isar) => callback(_currentTxnSync!));
+      return _txnSync(false, false, () => callback(_currentTxnSync!));
     } else {
       throw IsarError('Write operations require an explicit transaction.');
     }

@@ -71,7 +71,7 @@ void tests() {
       objInf = DoubleModel()..field = double.infinity;
       objNull = DoubleModel()..field = null;
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await col.putAll([objInf, obj0, obj2, obj1, obj3, objNull]);
       });
     });
@@ -162,7 +162,7 @@ void tests() {
       obj3 = DoubleModel()..list = [null, -1000];
       objNull = DoubleModel()..list = null;
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await col.putAll([objEmpty, obj1, obj3, obj2, objNull]);
       });
     });

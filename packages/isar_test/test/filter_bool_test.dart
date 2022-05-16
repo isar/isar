@@ -59,7 +59,7 @@ void tests() {
       objTrue = BoolModel()..field = true;
       objFalse2 = BoolModel()..field = false;
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await col.putAll([objNull, objFalse, objTrue, objFalse2]);
       });
     });
@@ -130,7 +130,7 @@ void tests() {
       obj2 = BoolModel()..list = [null, false];
       obj3 = BoolModel()..list = [true, false, true];
       objNull = BoolModel()..list = null;
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await col.putAll([objEmpty, obj1, obj2, obj3, objNull]);
       });
     });
@@ -182,7 +182,7 @@ void tests() {
       obj2 = BoolModel()..hashList = [null, true];
       obj3 = BoolModel()..hashList = [true, null];
       objNull = BoolModel()..hashList = null;
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         await col.putAll([objEmpty, obj1, obj2, obj3, objNull]);
       });
     });

@@ -51,7 +51,7 @@ void tests() async {
       isar = await openTempIsar([LongModelSchema]);
       col = isar.longModels;
 
-      await isar.writeTxn((isar) async {
+      await isar.writeTxn(() async {
         for (var i = 0; i < 5; i++) {
           final obj = LongModel()..field = i;
           await col.put(obj);

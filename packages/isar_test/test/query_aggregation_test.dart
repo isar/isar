@@ -25,7 +25,7 @@ void tests() {
 
     group('int', () {
       setUp(() async {
-        await _isar.writeTxn((isar) => col.putAll([
+        await _isar.writeTxn(() => col.putAll([
               MultiTypeModel()..intValue = -5,
               MultiTypeModel()..intValue = 0,
               MultiTypeModel()
@@ -163,7 +163,7 @@ void tests() {
 
     group('float', () {
       setUp(() async {
-        await _isar.writeTxn((isar) => col.putAll([
+        await _isar.writeTxn(() => col.putAll([
               MultiTypeModel()..floatValue = -5.0,
               MultiTypeModel()..floatValue = 0.0,
               MultiTypeModel()
@@ -301,7 +301,7 @@ void tests() {
 
     group('long', () {
       setUp(() async {
-        await _isar.writeTxn((isar) => col.putAll([
+        await _isar.writeTxn(() => col.putAll([
               MultiTypeModel()..longValue = -5,
               MultiTypeModel()..longValue = 0,
               MultiTypeModel()
@@ -439,7 +439,7 @@ void tests() {
 
     group('double', () {
       setUp(() async {
-        await _isar.writeTxn((isar) => col.putAll([
+        await _isar.writeTxn(() => col.putAll([
               MultiTypeModel()..doubleValue = -5.0,
               MultiTypeModel()..doubleValue = 0.0,
               MultiTypeModel()
@@ -580,7 +580,7 @@ void tests() {
           DateTime.fromMillisecondsSinceEpoch(milliseconds);
 
       setUp(() async {
-        await _isar.writeTxn((isar) => col.putAll([
+        await _isar.writeTxn(() => col.putAll([
               MultiTypeModel()..dateTimeValue = date(-5),
               MultiTypeModel()..dateTimeValue = date(0),
               MultiTypeModel()

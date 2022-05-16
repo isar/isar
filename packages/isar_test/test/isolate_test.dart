@@ -40,7 +40,7 @@ Future<bool> _isolateFunc(String name) async {
   final current = isar.testModels.where().findAllSync();
   assert(current[0] == _obj1 && current[1] == _obj2);
 
-  isar.writeTxnSync((isar) {
+  isar.writeTxnSync(() {
     isar.testModels.deleteSync(2);
     isar.testModels.putSync(_obj3);
   });
@@ -58,7 +58,7 @@ void tests() {
   isarTest('Isolate test', () async {
     final isar = await openTempIsar([TestModelSchema]);
 
-    await isar.tWriteTxn((isar) async {
+    await isar.tWriteTxn(() async {
       await isar.testModels.tPutAll([_obj1, _obj2]);
     });
 

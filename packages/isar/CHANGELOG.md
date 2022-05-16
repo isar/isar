@@ -1,3 +1,9 @@
+## 3.0.0-dev.1
+
+### Breaking
+
+- Removed `isar` parameter from `Isar.txn()`, `Isar.writeTxn()`, `Isar.txnSync()` and `Isar.writeTxnSync()`
+
 ## 3.0.0-dev.0
 
 ### Enhancements
