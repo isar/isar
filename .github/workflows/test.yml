@@ -54,6 +54,7 @@ jobs:
       - name: Run Flutter Unit tests
         run: |
           flutter pub get
+          dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
           flutter test -j 1
         working-directory: packages/isar_test
@@ -81,6 +82,7 @@ jobs:
       - name: Run Flutter Driver tests
         run: |
           flutter pub get
+          dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
           dart tool/generate_all_tests.dart
           flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart
@@ -104,6 +106,7 @@ jobs:
       - name: Run isar_generator
         run: |
           flutter pub get
+          dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
           dart tool/generate_all_tests.dart
         working-directory: packages/isar_test
@@ -137,6 +140,7 @@ jobs:
       - name: Run Flutter Driver tests
         run: |
           flutter pub get
+          dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
           dart tool/generate_all_tests.dart
           flutter config --no-enable-web
@@ -160,6 +164,7 @@ jobs:
       - name: Run Dart tests in browser
         run: |
           flutter pub get
+          dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
           dart tool/generate_all_tests.dart
           flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart -d web-server --browser-name chrome
@@ -179,6 +184,7 @@ jobs:
       - name: Run Dart tests in browser
         run: |
           flutter pub get
+          dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
           dart tool/generate_all_tests.dart
           flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart -d web-server --browser-name safari
@@ -198,6 +204,7 @@ jobs:
       - name: Run Dart tests in browser
         run: |
           flutter pub get
+          dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
           dart tool/generate_all_tests.dart
           flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart -d web-server --browser-name firefox

@@ -1,3 +1,6 @@
 *.g.dart
 *.freezed.dart
 all_tests.dart
+
+filter_long_test.dart
+filter_double_test.dart
