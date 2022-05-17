@@ -1,9 +1,13 @@
 name: isar_inspector
-publish_to: "none"
+publish_to: none
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.16.0 <3.0.0"
+
+platforms:
+  windows:
+  macos:
 
 dependencies:
   flutter:
@@ -18,6 +22,7 @@ dependencies:
   flutter_svg: any
   font_awesome_flutter: any
   google_fonts: ^2.0.0
+  window_manager: ^0.2.3
 
 dev_dependencies:
   flutter_test:

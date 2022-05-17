@@ -6,26 +6,46 @@ on:
       - "*"
 
 jobs:
-  build_and_upload:
+  build_and_upload_macos:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v1
-      - uses: subosito/flutter-action@v1
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
       - name: Build
         working-directory: packages/isar_inspector
-        run: |
-          flutter config --enable-macos-desktop
-          flutter build macos
+        run: flutter build macos
       - name: Compress
         working-directory: packages/isar_inspector/build/macos/Build/Products/Release/
         run: zip -r -y inspector.zip "Isar Inspector.app"
       - name: Upload binary
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: packages/isar_inspector/build/macos/Build/Products/Release/inspector.zip
-          asset_name: Isar Inspector.zip
+          asset_name: Isar Inspector MacOS.zip
+          tag: ${{ github.ref }}
+
+  build_and_upload_windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+      - name: Build
+        working-directory: packages/isar_inspector
+        run: flutter build windows
+      - name: Compress
+        working-directory: packages/isar_inspector/build/windows/runner/Release/
+        run: 7z a -y -tzip inspector.zip .
+      - name: Upload binary
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: packages/isar_inspector/build/windows/runner/Release/inspector.zip
+          asset_name: Isar Inspector Windows.zip
           tag: ${{ github.ref }}

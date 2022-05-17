@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:isar_inspector/app_state.dart';
 import 'package:isar_inspector/collection_table.dart';
@@ -5,10 +7,25 @@ import 'package:isar_inspector/filter_field.dart';
 import 'package:isar_inspector/sidebar.dart';
 import 'package:provider/provider.dart';
 import 'package:isar_inspector/error.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'connect.dart';
 
 void main() async {
+  if (Platform.isWindows) {
+    WidgetsFlutterBinding.ensureInitialized();
+    await windowManager.ensureInitialized();
+    windowManager.waitUntilReadyToShow(
+      null,
+      () async {
+        await windowManager.setTitle("Isar Inspector");
+        await windowManager.setTitleBarStyle(
+          TitleBarStyle.hidden,
+          windowButtonVisibility: false,
+        );
+      },
+    );
+  }
   print('Connecting…');
   runApp(ChangeNotifierProvider(
     create: (_) => AppState(),
@@ -44,20 +61,33 @@ class IsarInspector extends StatelessWidget {
           brightness: Brightness.dark,
         ),
       ),
-      home: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xff111216), //Color.fromARGB(255, 34, 36, 41),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: GestureDetector(
-          onTap: () {
-            FocusScope.of(context).requestFocus(FocusNode());
-          },
-          child: Scaffold(
-            extendBody: true,
-            body: _buildApp(state),
+      home: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xff111216), //Color.fromARGB(255, 34, 36, 41),
+              borderRadius: Platform.isMacOS ? BorderRadius.circular(20) : null,
+            ),
+            child: GestureDetector(
+              onTap: () {
+                FocusScope.of(context).requestFocus(FocusNode());
+              },
+              child: Scaffold(
+                extendBody: true,
+                body: _buildApp(state),
+              ),
+            ),
           ),
-        ),
+          if (Platform.isWindows)
+            const SizedBox(
+              width: double.infinity,
+              height: 30,
+              child: WindowCaption(
+                backgroundColor: Colors.transparent,
+                brightness: Brightness.dark,
+              ),
+            ),
+        ],
       ),
     );
   }
