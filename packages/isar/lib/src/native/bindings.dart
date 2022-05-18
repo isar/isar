@@ -385,6 +385,54 @@ class IsarCoreBindings {
       int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>,
           ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Uint8>, int)>();
 
+  int isar_count(
+    ffi.Pointer<CIsarCollection> collection,
+    ffi.Pointer<CIsarTxn> txn,
+    ffi.Pointer<ffi.Int64> count,
+  ) {
+    return _isar_count(
+      collection,
+      txn,
+      count,
+    );
+  }
+
+  late final _isar_countPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int64 Function(ffi.Pointer<CIsarCollection>,
+              ffi.Pointer<CIsarTxn>, ffi.Pointer<ffi.Int64>)>>('isar_count');
+  late final _isar_count = _isar_countPtr.asFunction<
+      int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>,
+          ffi.Pointer<ffi.Int64>)>();
+
+  int isar_get_size(
+    ffi.Pointer<CIsarCollection> collection,
+    ffi.Pointer<CIsarTxn> txn,
+    bool include_indexes,
+    bool include_links,
+    ffi.Pointer<ffi.Int64> size,
+  ) {
+    return _isar_get_size(
+      collection,
+      txn,
+      include_indexes ? 1 : 0,
+      include_links ? 1 : 0,
+      size,
+    );
+  }
+
+  late final _isar_get_sizePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int64 Function(
+              ffi.Pointer<CIsarCollection>,
+              ffi.Pointer<CIsarTxn>,
+              ffi.Uint8,
+              ffi.Uint8,
+              ffi.Pointer<ffi.Int64>)>>('isar_get_size');
+  late final _isar_get_size = _isar_get_sizePtr.asFunction<
+      int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>, int,
+          int, ffi.Pointer<ffi.Int64>)>();
+
   void isar_connect_dart_api(
     DartPostCObjectFnType ptr,
   ) {
