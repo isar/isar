@@ -226,6 +226,26 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   void importJsonRawSync(Uint8List jsonBytes) => unsupportedOnWeb();
 
   @override
+  Future<int> count() => where().count();
+
+  @override
+  int countSync() => unsupportedOnWeb();
+
+  @override
+  Future<int> getSize({
+    bool includeIndexes = false,
+    bool includeLinks = false,
+  }) =>
+      unsupportedOnWeb();
+
+  @override
+  int getSizeSync({
+    bool includeIndexes = false,
+    bool includeLinks = false,
+  }) =>
+      unsupportedOnWeb();
+
+  @override
   Stream<void> watchLazy() {
     JsFunction? stop;
     final controller = StreamController<void>(onCancel: () {

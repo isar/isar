@@ -70,12 +70,12 @@ abstract class Isar {
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
-    bool inspector = false,
+    bool inspector = true,
   }) {
     _checkOpen(name, schemas);
     if (inspector && !_kIsWeb) {
       assert(() {
-        _initializeIsarConnect();
+        _IsarConnect.initialize();
         return true;
       }());
     }
@@ -93,12 +93,12 @@ abstract class Isar {
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
-    bool inspector = false,
+    bool inspector = true,
   }) {
     _checkOpen(name, schemas);
     if (inspector && !_kIsWeb) {
       assert(() {
-        _initializeIsarConnect();
+        _IsarConnect.initialize();
         return true;
       }());
     }

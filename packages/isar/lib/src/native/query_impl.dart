@@ -25,6 +25,9 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
   }
 
   @override
+  Isar get isar => col.isar;
+
+  @override
   Future<T?> findFirst() {
     return findInternal(maxLimit).then((result) {
       if (result.isNotEmpty) {

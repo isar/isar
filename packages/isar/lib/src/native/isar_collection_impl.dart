@@ -84,18 +84,25 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return keysPtrPtr;
   }
 
-  List<T> deserializeProperty<T>(CObjectSet objectSet, int propertyIndex) {
+  List<T> deserializeProperty<T>(CObjectSet objectSet, int? propertyIndex) {
     final values = <T>[];
-    final propertyOffset = _offsets[propertyIndex];
-    for (var i = 0; i < objectSet.length; i++) {
-      final cObj = objectSet.objects.elementAt(i).ref;
-      final buffer = cObj.buffer.asTypedList(cObj.buffer_length);
-      values.add(schema.deserializePropNative(
-        cObj.id,
-        BinaryReader(buffer),
-        propertyIndex,
-        propertyOffset,
-      ));
+    if (propertyIndex != null) {
+      final propertyOffset = _offsets[propertyIndex];
+      for (var i = 0; i < objectSet.length; i++) {
+        final cObj = objectSet.objects.elementAt(i).ref;
+        final buffer = cObj.buffer.asTypedList(cObj.buffer_length);
+        values.add(schema.deserializePropNative(
+          cObj.id,
+          BinaryReader(buffer),
+          propertyIndex,
+          propertyOffset,
+        ));
+      }
+    } else {
+      for (var i = 0; i < objectSet.length; i++) {
+        final cObj = objectSet.objects.elementAt(i).ref;
+        values.add(cObj.id as T);
+      }
     }
     return values;
   }
@@ -389,6 +396,48 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
       nCall(IC.isar_json_import(
           ptr, txn.ptr, idNamePtr.cast(), bytesPtr, jsonBytes.length));
+    });
+  }
+
+  @override
+  Future<int> count() {
+    return isar.getTxn(false, (txn) async {
+      final countPtr = txn.alloc<Int64>();
+      IC.isar_count(ptr, txn.ptr, countPtr);
+      await txn.wait();
+      return countPtr.value;
+    });
+  }
+
+  @override
+  int countSync() {
+    return isar.getTxnSync(false, (txn) {
+      final countPtr = txn.alloc<Int64>();
+      nCall(IC.isar_count(ptr, txn.ptr, countPtr));
+      return countPtr.value;
+    });
+  }
+
+  @override
+  Future<int> getSize({
+    bool includeIndexes = false,
+    bool includeLinks = false,
+  }) {
+    return isar.getTxn(false, (txn) async {
+      final sizePtr = txn.alloc<Int64>();
+      IC.isar_get_size(ptr, txn.ptr, includeIndexes, includeLinks, sizePtr);
+      await txn.wait();
+      return sizePtr.value;
+    });
+  }
+
+  @override
+  int getSizeSync({bool includeIndexes = false, bool includeLinks = false}) {
+    return isar.getTxnSync(false, (txn) {
+      final sizePtr = txn.alloc<Int64>();
+      nCall(IC.isar_get_size(
+          ptr, txn.ptr, includeIndexes, includeLinks, sizePtr));
+      return sizePtr.value;
     });
   }
 

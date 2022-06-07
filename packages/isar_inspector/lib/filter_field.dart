@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:isar/isar.dart';
-import 'package:isar_inspector/app_state.dart';
 import 'package:isar_inspector/query_parser.dart';
-import 'package:provider/provider.dart';
+import 'package:isar_inspector/state/collections_state.dart';
+import 'package:isar_inspector/state/instances_state.dart';
+import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
+import 'package:isar_inspector/state/query_state.dart';
+import 'package:isar/src/isar_connect_api.dart';
 
-class FilterField extends StatefulWidget {
+import 'schema.dart';
+
+class FilterField extends ConsumerStatefulWidget {
   const FilterField({Key? key}) : super(key: key);
 
   @override
-  State<FilterField> createState() => _FilterFieldState();
+  ConsumerState<FilterField> createState() => _FilterFieldState();
 }
 
-class _FilterFieldState extends State<FilterField> {
+class _FilterFieldState extends ConsumerState<FilterField> {
   final controller = TextEditingController();
   String? error;
 
@@ -46,27 +52,54 @@ class _FilterFieldState extends State<FilterField> {
         const SizedBox(width: 20),
         ElevatedButton(
           onPressed: () {
-            final appState = context.read<AppState>();
-            final parser = QueryParser(appState.selectedCollection!.properties);
-            try {
-              if (controller.text.isEmpty) {
-                appState.filter = const FilterGroup.or([]);
-              } else {
-                final filter = parser.parse(controller.text);
-                appState.filter = filter;
-                setState(() {
-                  error = null;
-                });
-              }
-            } catch (e) {
-              setState(() {
-                error = "Invalid query";
-              });
-            }
+            final selectedCollection = ref.read(selectedCollectionPod).value!;
+            final filter = _parseFilter(selectedCollection);
+            ref.read(queryFilterPod.state).state = filter;
           },
-          child: const Text('Run'),
+          child: const Text('Query'),
+        ),
+        const SizedBox(width: 20),
+        ElevatedButton(
+          onPressed: () {
+            final selectedCollection = ref.read(selectedCollectionPod).value!;
+            final filter = _parseFilter(selectedCollection);
+            final query = ConnectQuery(
+              instance: ref.read(selectedInstancePod).value!,
+              collection: selectedCollection.name,
+              filter: filter,
+            );
+            ref.read(isarConnectPod.notifier).removeQuery(query);
+          },
+          child: const Text('Remove'),
         )
       ],
     );
+  }
+
+  FilterOperation? _parseFilter(ICollection collection) {
+    final parser = QueryParser(collection.properties);
+    FilterOperation? newFilter;
+    try {
+      if (controller.text.isNotEmpty) {
+        final filter = parser.parse(controller.text);
+        newFilter = filter;
+      }
+
+      setState(() {
+        error = null;
+      });
+
+      return newFilter;
+    } catch (e) {
+      setState(() {
+        error = "Invalid query";
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }

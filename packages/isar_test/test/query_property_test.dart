@@ -23,6 +23,21 @@ void tests() async {
       await isar.close();
     });
 
+    isarTest('id property', () async {
+      await isar.tWriteTxn(
+        () => isar.multiTypeModels.tPutAll([
+          MultiTypeModel(),
+          MultiTypeModel(),
+          MultiTypeModel(),
+        ]),
+      );
+
+      await qEqual(
+        isar.multiTypeModels.where().idProperty().tFindAll(),
+        [1, 2, 3],
+      );
+    });
+
     isarTest('bool property', () async {
       await isar.tWriteTxn(
         () => isar.multiTypeModels.tPutAll([

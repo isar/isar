@@ -20,6 +20,9 @@ class QueryImpl<T> extends Query<T> {
   QueryImpl(this.col, this.queryJs, this.deserialize, this.propertyName);
 
   @override
+  Isar get isar => col.isar;
+
+  @override
   Future<T?> findFirst() {
     return col.isar.getTxn(false, (txn) async {
       final result = await queryJs.findFirst(txn).wait();

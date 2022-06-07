@@ -6,45 +6,58 @@ part of 'schema.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Collection _$CollectionFromJson(Map<String, dynamic> json) {
-  return Collection(
-    json['name'] as String,
-    (json['properties'] as List<dynamic>)
-        .map((e) => Property.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    (json['links'] as List<dynamic>)
-        .map((e) => Link.fromJson(e as Map<String, dynamic>))
-        .toList(),
-  );
-}
+ICollection _$ICollectionFromJson(Map<String, dynamic> json) => ICollection(
+      name: json['name'] as String,
+      idName: json['idName'] as String,
+      properties: (json['properties'] as List<dynamic>)
+          .map((e) => IProperty.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      links: (json['links'] as List<dynamic>)
+          .map((e) => ILink.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
 
-Map<String, dynamic> _$CollectionToJson(Collection instance) =>
+Map<String, dynamic> _$ICollectionToJson(ICollection instance) =>
     <String, dynamic>{
       'name': instance.name,
+      'idName': instance.idName,
       'properties': instance.properties,
       'links': instance.links,
     };
 
-Property _$PropertyFromJson(Map<String, dynamic> json) {
-  return Property(
-    json['name'] as String,
-    json['type'] as String,
-  );
-}
+IProperty _$IPropertyFromJson(Map<String, dynamic> json) => IProperty(
+      name: json['name'] as String,
+      type: _typeFromJson(json['type'] as String),
+      isId: json['isId'] as bool? ?? false,
+    );
 
-Map<String, dynamic> _$PropertyToJson(Property instance) => <String, dynamic>{
+Map<String, dynamic> _$IPropertyToJson(IProperty instance) => <String, dynamic>{
       'name': instance.name,
-      'type': instance.type,
+      'type': _$IsarTypeEnumMap[instance.type],
+      'isId': instance.isId,
     };
 
-Link _$LinkFromJson(Map<String, dynamic> json) {
-  return Link(
-    json['name'] as String,
-    json['target'] as String,
-  );
-}
+const _$IsarTypeEnumMap = {
+  IsarType.Bool: 'Bool',
+  IsarType.Int: 'Int',
+  IsarType.Float: 'Float',
+  IsarType.Long: 'Long',
+  IsarType.Double: 'Double',
+  IsarType.String: 'String',
+  IsarType.Bytes: 'Bytes',
+  IsarType.IntList: 'IntList',
+  IsarType.FloatList: 'FloatList',
+  IsarType.LongList: 'LongList',
+  IsarType.DoubleList: 'DoubleList',
+  IsarType.StringList: 'StringList',
+};
 
-Map<String, dynamic> _$LinkToJson(Link instance) => <String, dynamic>{
+ILink _$ILinkFromJson(Map<String, dynamic> json) => ILink(
+      name: json['name'] as String,
+      target: json['target'] as String,
+    );
+
+Map<String, dynamic> _$ILinkToJson(ILink instance) => <String, dynamic>{
       'name': instance.name,
       'target': instance.target,
     };

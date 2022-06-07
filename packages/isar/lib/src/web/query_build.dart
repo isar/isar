@@ -192,7 +192,7 @@ String _buildCondition(CollectionSchema schema, FilterCondition condition) {
     }
   }
 
-  final isListOp = condition.type != ConditionType.isNull &&
+  final isListOp = condition.type != FilterConditionType.isNull &&
       schema.listProperties.contains(condition.property);
   final accessor =
       condition.property == schema.idName ? 'id' : 'obj.${condition.property}';
@@ -216,7 +216,7 @@ String _buildCondition(CollectionSchema schema, FilterCondition condition) {
 }
 
 String _buildConditionInternal({
-  required ConditionType conditionType,
+  required FilterConditionType conditionType,
   required String variable,
   required Object? val1,
   required bool include1,
@@ -226,7 +226,7 @@ String _buildConditionInternal({
 }) {
   final isNull = '($variable == null || $variable === -Infinity)';
   switch (conditionType) {
-    case ConditionType.eq:
+    case FilterConditionType.equalTo:
       if (val1 == null) {
         return isNull;
       } else if (val1 is String && !caseSensitive) {
@@ -234,7 +234,7 @@ String _buildConditionInternal({
       } else {
         return '$variable === $val1';
       }
-    case ConditionType.between:
+    case FilterConditionType.between:
       final val = val1 ?? val2;
       final lowerOp = include1 ? '>=' : '>';
       final upperOp = include2 ? '<=' : '<';
@@ -254,7 +254,7 @@ String _buildConditionInternal({
             'indexedDB.cmp($variable, ${val2 ?? '-Infinity'}) $upperOp 0';
         return '($lowerCond && $upperCond)';
       }
-    case ConditionType.lt:
+    case FilterConditionType.lessThan:
       if (val1 == null) {
         if (include1) {
           return isNull;
@@ -269,7 +269,7 @@ String _buildConditionInternal({
           return 'indexedDB.cmp($variable, $val1) $op 0';
         }
       }
-    case ConditionType.gt:
+    case FilterConditionType.greaterThan:
       if (val1 == null) {
         if (include1) {
           return 'true';
@@ -284,12 +284,12 @@ String _buildConditionInternal({
           return 'indexedDB.cmp($variable, $val1) $op 0';
         }
       }
-    case ConditionType.startsWith:
-    case ConditionType.endsWith:
-    case ConditionType.contains:
-      final op = conditionType == ConditionType.startsWith
+    case FilterConditionType.startsWith:
+    case FilterConditionType.endsWith:
+    case FilterConditionType.contains:
+      final op = conditionType == FilterConditionType.startsWith
           ? 'startsWith'
-          : conditionType == ConditionType.endsWith
+          : conditionType == FilterConditionType.endsWith
               ? 'endsWith'
               : 'includes';
       if (val1 is String) {
@@ -302,9 +302,9 @@ String _buildConditionInternal({
       } else {
         throw 'Unsupported type for condition';
       }
-    case ConditionType.matches:
+    case FilterConditionType.matches:
       throw UnimplementedError();
-    case ConditionType.isNull:
+    case FilterConditionType.isNull:
       return isNull;
   }
 }

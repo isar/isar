@@ -1,4 +1,8 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:isar/isar.dart';
+
+import 'util/common.dart';
+import 'util/sync_async_helper.dart';
 
 part 'filter_link_test.g.dart';
 
@@ -38,7 +42,11 @@ class LinkModelB {
 }
 
 void main() {
-  /*group('Groups', () {
+  testSyncAsync(tests);
+}
+
+void tests() {
+  group('Groups', () {
     late Isar isar;
     late IsarCollection<LinkModelA> colA;
     late IsarCollection<LinkModelB> colB;
@@ -72,6 +80,8 @@ void main() {
           saveLinks: true,
         );
       });
+
+      print(await colA.where().exportJson());
     });
 
     tearDown(() async {
@@ -79,17 +89,22 @@ void main() {
     });
 
     isarTest('Single self link', () async {
-      final sl = colA.getSync(1)!.selfLinks;
-      sl.loadSync(overrideChanges: true);
-      print(sl);
+      print(objA1.id);
+      print(objA2.id);
+      print(objA3.id);
+      print(objB1.id);
+      print(objB2.id);
+      //final sl = colA.getSync(1)!.selfLinks;
+      //sl.loadSync(overrideChanges: true);
+      //print(sl);
 
       await qEqualSet(
-        colA.where().filter().selfLinks((q) => q.nameContains('a1')).findAll(),
+        colA.where().filter().selfLinks((q) => q.nameContains('a1')).tFindAll(),
         {objA1, objA2},
       );
     });
 
-    isarTest('Single self link without results', () async {
+    /*isarTest('Single self link without results', () async {
       await qEqualSet(
         colA
             .where()
@@ -101,7 +116,7 @@ void main() {
       );
     });
 
-    /*isarTest('Self link and filter', () async {
+    isarTest('Self link and filter', () async {
       final models = await getModels();
       await linkSelfLinks(models);
 
@@ -200,5 +215,5 @@ void main() {
         {LinkModelB.name('modelB_1'), LinkModelB.name('modelB_2')},
       );
     });*/
-  });*/
+  });
 }

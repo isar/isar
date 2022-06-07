@@ -130,18 +130,36 @@ abstract class IsarCollection<OBJ> {
     String? property,
   });
 
-  /// Returns the total number of objects in this collection
-  Future<int> count() => where().count();
+  /// Returns the total number of objects in this collection.
+  ///
+  /// For non-web apps, this method is extremely fast and independent of the
+  /// number of objects in the collection.
+  Future<int> count();
 
-  /// Returns the total number of objects in this collection
-  int countSync() => where().countSync();
+  /// Returns the total number of objects in this collection.
+  ///
+  /// For non-web apps, this method is extremely fast and independent of the
+  /// number of objects in the collection.
+  int countSync();
+
+  /// Returns the size of the collection in bytes. Not supported on web.
+  ///
+  /// This method is extremely fast and independent of the number of objects in
+  /// the collection.
+  Future<int> getSize({bool includeIndexes = false, bool includeLinks = false});
+
+  /// Returns the size of the collection in bytes. Not supported on web.
+  ///
+  /// This method is extremely fast and independent of the number of objects in
+  /// the collection.
+  int getSizeSync({bool includeIndexes = false, bool includeLinks = false});
 
   /// Watch the collection for changes.
   Stream<void> watchLazy();
 
   /// Watch an object with [id] for changes.
   ///
-  /// Objects that don't exist (yet) can also be called. If [initialReturn]
+  /// Objects that don't exist (yet) can also be watched. If [initialReturn]
   /// is `true`, the object will be sent to the consumer immediately.
   Stream<OBJ?> watchObject(int id, {bool initialReturn = false});
 

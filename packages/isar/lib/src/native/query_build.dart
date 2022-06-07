@@ -78,11 +78,10 @@ Query<T> buildNativeQuery<T>(
   if (property == null) {
     deserialize = (col as IsarCollectionImpl<T>).deserializeObjects;
   } else {
-    propertyId = col.schema.propertyIdOrErr(property);
-    deserialize = (cObjSet) => col.deserializeProperty(
-          cObjSet,
-          propertyId!,
-        );
+    propertyId = property != col.schema.idName
+        ? col.schema.propertyIdOrErr(property)
+        : null;
+    deserialize = (cObjSet) => col.deserializeProperty(cObjSet, propertyId);
   }
 
   final queryPtr = IC.isar_qb_build(qbPtr);
@@ -231,10 +230,10 @@ Pointer<CFilter> _buildCondition(
       ? col.schema.propertyIdOrErr(condition.property)
       : null;
   switch (condition.type) {
-    case ConditionType.isNull:
+    case FilterConditionType.isNull:
       return _buildConditionIsNull(
           colPtr: col.ptr, propertyId: propertyId, alloc: alloc);
-    case ConditionType.eq:
+    case FilterConditionType.equalTo:
       return _buildConditionEqual(
         colPtr: col.ptr,
         propertyId: propertyId,
@@ -243,7 +242,7 @@ Pointer<CFilter> _buildCondition(
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
       );
-    case ConditionType.between:
+    case FilterConditionType.between:
       return _buildConditionBetween(
         colPtr: col.ptr,
         propertyId: propertyId,
@@ -254,7 +253,7 @@ Pointer<CFilter> _buildCondition(
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
       );
-    case ConditionType.lt:
+    case FilterConditionType.lessThan:
       return _buildConditionLessThan(
         colPtr: col.ptr,
         propertyId: propertyId,
@@ -263,7 +262,7 @@ Pointer<CFilter> _buildCondition(
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
       );
-    case ConditionType.gt:
+    case FilterConditionType.greaterThan:
       return _buildConditionGreaterThan(
         colPtr: col.ptr,
         propertyId: propertyId,
@@ -437,7 +436,7 @@ Pointer<CFilter> _buildConditionGreaterThan({
 
 Pointer<CFilter> _buildConditionStringOp({
   required Pointer<CIsarCollection> colPtr,
-  required ConditionType conditionType,
+  required FilterConditionType conditionType,
   required int? propertyId,
   required Object? val,
   required bool include,
@@ -448,19 +447,19 @@ Pointer<CFilter> _buildConditionStringOp({
   if (val is String) {
     final strPtr = val.toNativeUtf8(allocator: alloc);
     switch (conditionType) {
-      case ConditionType.startsWith:
+      case FilterConditionType.startsWith:
         nCall(IC.isar_filter_string_starts_with(
             colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId!));
         break;
-      case ConditionType.endsWith:
+      case FilterConditionType.endsWith:
         nCall(IC.isar_filter_string_ends_with(
             colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId!));
         break;
-      case ConditionType.contains:
+      case FilterConditionType.contains:
         nCall(IC.isar_filter_string_contains(
             colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId!));
         break;
-      case ConditionType.matches:
+      case FilterConditionType.matches:
         nCall(IC.isar_filter_string_matches(
             colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId!));
         break;

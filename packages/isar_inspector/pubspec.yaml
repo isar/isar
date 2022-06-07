@@ -3,25 +3,25 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  isar: 2.4.0
+  isar: any
   vm_service: ^8.3.0
-  provider: ^6.0.2
+  flutter_riverpod: ^2.0.0-dev.7
   dartx: ^1.0.0
-  json_annotation: ^4.0.0
+  json_annotation: ^4.5.0
   petitparser: ^4.4.0
   linked_scroll_controller: ^0.2.0
   flutter_svg: any
   font_awesome_flutter: any
   google_fonts: ^2.0.0
+  web_socket_channel: ^2.2.0
+  routemaster: ^1.0.0
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
   json_serializable: ^6.2.0
   build_runner: any
   flutter_lints: ^2.0.1
