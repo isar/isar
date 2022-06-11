@@ -1,8 +1,8 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:dartx/dartx.dart';
-import 'package:source_gen/source_gen.dart';
 import 'package:isar/isar.dart';
+import 'package:source_gen/source_gen.dart';
 
 final _collectionChecker = const TypeChecker.fromRuntime(Collection);
 final _ignoreChecker = const TypeChecker.fromRuntime(Ignore);

@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:isar_inspector/app_state.dart';
 import 'package:isar_inspector/common.dart';
 import 'package:isar_inspector/schema.dart';
 import 'package:isar_inspector/service.dart';
-import 'package:isar_inspector/app_state.dart';
 import 'package:provider/provider.dart';
 
 class ConnectPage extends StatefulWidget {

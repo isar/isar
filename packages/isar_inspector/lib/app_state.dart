@@ -1,7 +1,7 @@
 // ignore_for_file: implementation_imports
 
-import 'package:flutter/material.dart';
 import 'package:dartx/dartx.dart';
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart' hide Collection;
 import 'package:isar_inspector/schema.dart';
 import 'package:isar_inspector/service.dart';

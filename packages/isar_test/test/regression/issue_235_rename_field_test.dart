@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:isar/isar.dart';
+import 'package:test/test.dart';
 
 import '../util/common.dart';
 import '../util/sync_async_helper.dart';
@@ -20,9 +20,9 @@ class Col1 {
   Col1({
     required this.id,
     this.number = 22,
-    this.numberText3 = "Default Value3",
-    this.numberText2 = "Default Value2",
-    this.numberText1 = "Default Value1",
+    this.numberText3 = 'Default Value3',
+    this.numberText2 = 'Default Value2',
+    this.numberText1 = 'Default Value1',
   });
 }
 
@@ -75,16 +75,16 @@ void tests() {
       Col2(
         id: 5,
         number: 22,
-        numberText3: "Default Value3",
-        numberText1: "Default Value1",
+        numberText3: 'Default Value3',
+        numberText1: 'Default Value1',
       ),
     );
 
     final newObj = Col2(
       id: 5,
       number: 111,
-      numberText3: "New Value3",
-      numberText1: "New Value1",
+      numberText3: 'New Value3',
+      numberText1: 'New Value1',
       numberText22: 'New Value22',
     );
     await isar2.tWriteTxn(() {

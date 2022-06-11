@@ -93,33 +93,33 @@ extension IsarTypeX on IsarType {
   String get name {
     switch (this) {
       case IsarType.bool:
-        return "Bool";
+        return 'Bool';
       case IsarType.int:
-        return "Int";
+        return 'Int';
       case IsarType.float:
-        return "Float";
+        return 'Float';
       case IsarType.long:
       case IsarType.dateTime:
-        return "Long";
+        return 'Long';
       case IsarType.double:
-        return "Double";
+        return 'Double';
       case IsarType.string:
-        return "String";
+        return 'String';
       case IsarType.bytes:
-        return "ByteList";
+        return 'ByteList';
       case IsarType.boolList:
-        return "BoolList";
+        return 'BoolList';
       case IsarType.intList:
-        return "IntList";
+        return 'IntList';
       case IsarType.floatList:
-        return "FloatList";
+        return 'FloatList';
       case IsarType.longList:
       case IsarType.dateTimeList:
-        return "LongList";
+        return 'LongList';
       case IsarType.doubleList:
-        return "DoubleList";
+        return 'DoubleList';
       case IsarType.stringList:
-        return "StringList";
+        return 'StringList';
     }
   }
 

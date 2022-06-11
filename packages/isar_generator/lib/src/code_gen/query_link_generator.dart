@@ -1,6 +1,6 @@
+import 'package:dartx/dartx.dart';
 import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
-import 'package:dartx/dartx.dart';
 
 String generateQueryLinks(ObjectInfo oi) {
   var code =

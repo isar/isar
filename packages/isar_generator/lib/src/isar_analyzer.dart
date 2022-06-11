@@ -1,10 +1,10 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
-import 'package:dartx/dartx.dart';
 
 import 'isar_type.dart';
 
@@ -86,7 +86,7 @@ class IsarAnalyzer {
     }
 
     final unknownConstructorParameter = constructor.parameters.firstOrNullWhere(
-        (p) => p.isNotOptional && properties.none((e) => e.dartName == p.name));
+        (p) => p.isRequired && properties.none((e) => e.dartName == p.name));
     if (unknownConstructorParameter != null) {
       err('Constructor parameter does not match a property.',
           unknownConstructorParameter);

@@ -6,8 +6,8 @@ import 'dart:isolate';
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
-import 'isar_core.dart';
 import 'bindings.dart';
+import 'isar_core.dart';
 
 const _zoneTxn = #zoneTxn;
 

@@ -6,9 +6,9 @@ import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
 import 'bindings.dart';
+import 'index_key.dart';
 import 'isar_collection_impl.dart';
 import 'isar_core.dart';
-import 'index_key.dart';
 import 'query_impl.dart';
 
 final minStr = Pointer<Char>.fromAddress(0);

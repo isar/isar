@@ -4,23 +4,23 @@ import 'package:test/test.dart';
 import 'util/common.dart';
 
 void main() {
-  group("Other", () {
+  group('Other', () {
     isarTestVm('split words', () {
-      expect(Isar.splitWords(""), []);
-      expect(Isar.splitWords("single"), ["single"]);
+      expect(Isar.splitWords(''), []);
+      expect(Isar.splitWords('single'), ['single']);
       expect(
           Isar.splitWords(
-              "The quick (“brown”) fox can’t jump 32.3 feet, right?"),
+              'The quick (“brown”) fox can’t jump 32.3 feet, right?'),
           [
-            "The",
-            "quick",
-            "brown",
-            "fox",
-            "can’t",
-            "jump",
-            "32.3",
-            "feet",
-            "right"
+            'The',
+            'quick',
+            'brown',
+            'fox',
+            'can’t',
+            'jump',
+            '32.3',
+            'feet',
+            'right'
           ]);
       expect(Isar.splitWords('איך בלש תפס גמד רוצח עז קטנה?'),
           ['איך', 'בלש', 'תפס', 'גמד', 'רוצח', 'עז', 'קטנה']);

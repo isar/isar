@@ -33,7 +33,7 @@ class _FilterFieldState extends State<FilterField> {
               ),
               contentPadding: const EdgeInsets.all(20),
               errorText: error,
-              hintText: "Enter Query to filter the results",
+              hintText: 'Enter Query to filter the results',
               suffixIcon: IconButton(
                 onPressed: controller.clear,
                 icon: const Icon(Icons.clear),
@@ -60,7 +60,7 @@ class _FilterFieldState extends State<FilterField> {
               }
             } catch (e) {
               setState(() {
-                error = "Invalid query";
+                error = 'Invalid query';
               });
             }
           },

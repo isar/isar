@@ -1,21 +1,22 @@
 import 'dart:async';
+
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:dartx/dartx.dart';
+import 'package:isar/isar.dart';
 import 'package:isar_generator/src/code_gen/collection_schema_generator.dart';
 import 'package:isar_generator/src/isar_analyzer.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:isar/isar.dart';
 
 import 'code_gen/by_index_generator.dart';
-import 'code_gen/query_link_generator.dart';
-import 'code_gen/type_adapter_generator_common.dart';
-import 'code_gen/type_adapter_generator_native.dart';
 import 'code_gen/query_distinct_by_generator.dart';
 import 'code_gen/query_filter_generator.dart';
+import 'code_gen/query_link_generator.dart';
 import 'code_gen/query_property_generator.dart';
 import 'code_gen/query_sort_by_generator.dart';
 import 'code_gen/query_where_generator.dart';
+import 'code_gen/type_adapter_generator_common.dart';
+import 'code_gen/type_adapter_generator_native.dart';
 import 'code_gen/type_adapter_generator_web.dart';
 
 class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {

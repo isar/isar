@@ -1,7 +1,7 @@
+import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_inspector/schema.dart';
 import 'package:petitparser/petitparser.dart';
-import 'package:dartx/dartx.dart';
 
 class QueryParser {
   final List<Property> properties;

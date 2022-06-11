@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:isar_inspector/app_state.dart';
 import 'package:isar_inspector/collection_table.dart';
+import 'package:isar_inspector/error.dart';
 import 'package:isar_inspector/filter_field.dart';
 import 'package:isar_inspector/sidebar.dart';
 import 'package:provider/provider.dart';
-import 'package:isar_inspector/error.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'connect.dart';
@@ -18,7 +18,7 @@ void main() async {
     windowManager.waitUntilReadyToShow(
       null,
       () async {
-        await windowManager.setTitle("Isar Inspector");
+        await windowManager.setTitle('Isar Inspector');
         await windowManager.setTitleBarStyle(
           TitleBarStyle.hidden,
           windowButtonVisibility: false,

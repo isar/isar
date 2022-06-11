@@ -1,9 +1,10 @@
 // ignore_for_file: implementation_imports
 import 'dart:io';
+import 'dart:math';
+
 import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'dart:math';
 import 'package:test/test.dart';
 
 import 'sync_async_helper.dart';
