@@ -1,9 +1,16 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  # strong-mode:
+  #   implicit-casts: false
+  errors:
+    avoid_print: ignore
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
 
-  errors:
-    avoid_print: ignore
+linter:
+  rules:
+    - avoid_private_typedef_functions
+    - directives_ordering
+    - prefer_single_quotes

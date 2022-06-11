@@ -1,5 +1,13 @@
 include: package:lints/recommended.yaml
 
 analyzer:
+  # strong-mode:
+  #   implicit-casts: false
   exclude:
     - "lib/src/native/bindings.dart"
+
+linter:
+  rules:
+    - avoid_private_typedef_functions
+    - directives_ordering
+    - prefer_single_quotes

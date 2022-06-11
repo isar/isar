@@ -1,5 +1,14 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  # strong-mode:
+  #   implicit-casts: false
   errors:
     hash_and_equals: ignore
+
+linter:
+  rules:
+    - avoid_private_typedef_functions
+    - directives_ordering
+    - prefer_single_quotes
+    
