@@ -1881,7 +1881,7 @@ class CObjectSet extends ffi.Struct {
 
 class CLink extends ffi.Struct {
   @ffi.Int64()
-  external int source_id_index;
+  external int source_index;
 
   @ffi.Int64()
   external int target_id;
