@@ -5,6 +5,7 @@ import 'dart:js_util';
 import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
+import 'package:isar/src/common/isar_collection_common.dart';
 import 'package:isar/src/web/query_build.dart';
 import 'package:meta/dart2js.dart';
 
@@ -12,11 +13,12 @@ import 'bindings.dart';
 import 'isar_impl.dart';
 import 'isar_web.dart';
 
-class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
+class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
   @override
   final IsarImpl isar;
   final IsarCollectionJs native;
 
+  @override
   final CollectionSchema<OBJ> schema;
 
   IsarCollectionImpl({
@@ -68,8 +70,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       unsupportedOnWeb();
 
   @override
-  Future<List<int>> putAll(List<OBJ> objects) {
-    return isar.getTxn(true, (txn) async {
+  Future<List<int>> putAllNative(AsyncObjectLinkList<OBJ> list) {
+    /*return isar.getTxn(true, (txn) async {
       final serialized = <Object>[];
       for (var object in objects) {
         serialized.add(schema.serializeWeb(this, object));
@@ -97,7 +99,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       }
 
       return ids.cast<int>().toList();
-    });
+    });*/
+    throw UnimplementedError();
   }
 
   @override

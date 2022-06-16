@@ -76,8 +76,6 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
       final id = getId(object);
       if (id != null) {
         linkIds.add(id);
-      } else {
-        throw IsarError('Cannot link objects that are not saved yet.');
       }
     }
 
@@ -88,7 +86,7 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
       }
     }
 
-    await updateIdsInternal(linkIds, unlinkIds, reset);
+    await updateIdsNative(linkIds, unlinkIds, reset);
   }
 
   void updateInternalSync(
@@ -108,14 +106,13 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
       }
     }
 
-    updateIdsInternalSync(linkIds, unlinkIds, reset);
+    updateIdsNativeSync(linkIds, unlinkIds, reset);
   }
 
-  Future<void> updateIdsInternal(
+  Future<void> updateIdsNative(
       List<int> linkIds, List<int> unlinkIds, bool reset);
 
-  void updateIdsInternalSync(
-      List<int> linkIds, List<int> unlinkIds, bool reset);
+  void updateIdsNativeSync(List<int> linkIds, List<int> unlinkIds, bool reset);
 }
 
 abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
@@ -182,7 +179,7 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   Future<void> reset() async {
-    await updateIdsInternal([], [], true);
+    await updateIdsNative([], [], true);
     _value = null;
     _isChanged = false;
     _isLoaded = true;
@@ -190,7 +187,7 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   void resetSync() {
-    updateIdsInternal([], [], true);
+    updateIdsNative([], [], true);
     _value = null;
     _isChanged = false;
     _isLoaded = true;
@@ -275,14 +272,14 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   Future<void> reset() async {
-    await updateIdsInternal([], [], true);
+    await updateIdsNative([], [], true);
     clear();
     _isLoaded = true;
   }
 
   @override
   void resetSync() {
-    updateIdsInternalSync([], [], true);
+    updateIdsNativeSync([], [], true);
     clear();
     _isLoaded = true;
   }

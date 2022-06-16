@@ -24,7 +24,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
       : sourceCollection.native.getLink(linkName);
 
   @override
-  Future<void> updateIdsInternal(
+  Future<void> updateIdsNative(
       List<int> linkIds, List<int> unlinkIds, bool reset) {
     final containingId = requireAttached();
     final backlink = backlinkLinkName != null;
@@ -40,7 +40,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   }
 
   @override
-  void updateIdsInternalSync(
+  void updateIdsNativeSync(
           List<int> linkIds, List<int> unlinkIds, bool reset) =>
       unsupportedOnWeb();
 }

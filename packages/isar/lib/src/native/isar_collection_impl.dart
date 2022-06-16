@@ -176,13 +176,13 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
       if (asyncLinks.isNotEmpty) {
         cLinkSet
           ..links = txn.alloc<CLink>(asyncLinks.length)
-          ..length = list.addedLinks.length;
-        for (var i = 0; i < list.addedLinks.length; i++) {
-          final addedLink = list.addedLinks[i];
+          ..length = asyncLinks.length;
+        for (var i = 0; i < asyncLinks.length; i++) {
+          final link = asyncLinks[i];
           cLinkSet.links.elementAt(i).ref
-            ..link_id = schema.linkIdOrErr(addedLink.linkName)
-            ..source_id_index = addedLink.sourceIdIndex
-            ..target_id = addedLink.targetId;
+            ..link_id = schema.linkIdOrErr(link.linkName)
+            ..source_id_index = link.sourceIndex
+            ..target_id = link.targetId;
         }
       } else {
         cLinkSet
