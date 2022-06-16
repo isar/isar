@@ -2,12 +2,12 @@ import 'package:isar/isar.dart';
 import 'package:isar/src/common/isar_link_common.dart';
 
 class AsyncLink {
-  final int sourceId;
+  final int sourceIdIndex;
   final int targetId;
-  final int linkName;
+  final String linkName;
 
   AsyncLink({
-    required this.sourceId,
+    required this.sourceIdIndex,
     required this.targetId,
     required this.linkName,
   });

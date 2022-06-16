@@ -89,19 +89,19 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
     }
   }
 
-  Future<int> tPut(OBJ object, {bool saveLinks = false}) {
+  Future<int> tPut(OBJ object) {
     if (_testSync) {
-      return SynchronousFuture(putSync(object, saveLinks: saveLinks));
+      return SynchronousFuture(putSync(object));
     } else {
-      return put(object, saveLinks: saveLinks);
+      return put(object);
     }
   }
 
-  Future<List<int>> tPutAll(List<OBJ> objects, {bool saveLinks = false}) {
+  Future<List<int>> tPutAll(List<OBJ> objects) {
     if (_testSync) {
-      return SynchronousFuture(putAllSync(objects, saveLinks: saveLinks));
+      return SynchronousFuture(putAllSync(objects));
     } else {
-      return putAll(objects, saveLinks: saveLinks);
+      return putAll(objects);
     }
   }
 

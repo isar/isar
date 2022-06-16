@@ -242,10 +242,10 @@ class Txn {
     return completer.future;
   }
 
-  Pointer<CObjectSet> allocRawObjSet(int length) {
-    final cObjSetPtr = malloc<CObjectSet>();
+  Pointer<CObjectSet> allocCObjectSet(int length) {
+    final cObjSetPtr = alloc<CObjectSet>();
     cObjSetPtr.ref
-      ..objects = malloc<CObject>(length)
+      ..objects = alloc<CObject>(length)
       ..length = length;
     return cObjSetPtr;
   }

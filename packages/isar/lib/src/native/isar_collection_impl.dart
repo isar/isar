@@ -112,7 +112,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
   @override
   Future<List<OBJ?>> getAll(List<int> ids) {
     return isar.getTxn(false, (txn) async {
-      final cObjSetPtr = txn.allocRawObjSet(ids.length);
+      final cObjSetPtr = txn.allocCObjectSet(ids.length);
       final objectsPtr = cObjSetPtr.ref.objects;
       for (var i = 0; i < ids.length; i++) {
         objectsPtr.elementAt(i).ref.id = ids[i];
@@ -143,7 +143,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
   @override
   Future<List<OBJ?>> getAllByIndex(String indexName, List<List<Object?>> keys) {
     return isar.getTxn(false, (txn) async {
-      final cObjSetPtr = txn.allocRawObjSet(keys.length);
+      final cObjSetPtr = txn.allocCObjectSet(keys.length);
       final keysPtrPtr = _getKeysPtr(indexName, keys, txn.alloc);
       IC.isar_get_all_by_index(
           ptr, txn.ptr, schema.indexIdOrErr(indexName), keysPtrPtr, cObjSetPtr);
@@ -172,51 +172,52 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
 
   @override
   Future<List<int>> putAllNative(AsyncObjectLinkList<OBJ> list) {
-    // TODO: implement putAllNative
-    throw UnimplementedError();
-  }
+    void _fillCLinkSet(Txn txn, List<AsyncLink> asyncLinks, CLinkSet cLinkSet) {
+      if (asyncLinks.isNotEmpty) {
+        cLinkSet
+          ..links = txn.alloc<CLink>(asyncLinks.length)
+          ..length = list.addedLinks.length;
+        for (var i = 0; i < list.addedLinks.length; i++) {
+          final addedLink = list.addedLinks[i];
+          cLinkSet.links.elementAt(i).ref
+            ..link_id = schema.linkIdOrErr(addedLink.linkName)
+            ..source_id_index = addedLink.sourceIdIndex
+            ..target_id = addedLink.targetId;
+        }
+      } else {
+        cLinkSet
+          ..links = nullptr.cast()
+          ..length = 0;
+      }
+    }
 
-  @override
-  Future<List<int>> putAll(List<OBJ> objects) {
     return isar.getTxn(true, (txn) async {
-      final cObjSetPtr = txn.allocRawObjSet(objects.length);
-      final objectsPtr = cObjSetPtr.ref.objects;
+      final cObjLinkSetPtr = txn.alloc<CObjectLinkSet>();
+      final cObjLinkSet = cObjLinkSetPtr.ref;
+      cObjLinkSet.objects
+        ..objects = txn.alloc<CObject>(list.objects.length)
+        ..length = list.objects.length;
 
+      final objectsPtr = cObjLinkSet.objects.objects;
       Pointer<Uint8> allocBuf(int size) => txn.alloc<Uint8>(size);
-      for (var i = 0; i < objects.length; i++) {
-        final object = objects[i];
+      for (var i = 0; i < list.objects.length; i++) {
+        final object = list.objects[i];
         final cObj = objectsPtr.elementAt(i).ref;
         schema.serializeNative(
             this, cObj, object, _staticSize, _offsets, allocBuf);
         cObj.id = schema.getId(object) ?? Isar.autoIncrement;
       }
-      //IC.isar_put_all(ptr, txn.ptr, cObjSetPtr);
 
+      _fillCLinkSet(txn, list.addedLinks, cObjLinkSet.added_links);
+      _fillCLinkSet(txn, list.removedLinks, cObjLinkSet.removed_links);
+
+      IC.isar_put_all(ptr, txn.ptr, cObjLinkSetPtr);
       await txn.wait();
-      final cObjectSet = cObjSetPtr.ref;
-      final ids = List<int>.filled(objects.length, 0);
-      final linkFutures = <Future<void>>[];
-      for (var i = 0; i < objects.length; i++) {
-        final cObjPtr = cObjectSet.objects.elementAt(i);
-        final id = cObjPtr.ref.id;
-        ids[i] = id;
 
-        final object = objects[i];
-        schema.setId?.call(object, id);
-
-        if (schema.hasLinks) {
-          schema.attachLinks(this, id, object);
-          if (saveLinks) {
-            for (var link in schema.getLinks(object)) {
-              if (link.isChanged) {
-                linkFutures.add(link.save());
-              }
-            }
-          }
-        }
-      }
-      if (linkFutures.isNotEmpty) {
-        await Future.wait(linkFutures);
+      final ids = List<int>.filled(list.objects.length, 0);
+      for (var i = 0; i < list.objects.length; i++) {
+        final cObjPtr = objectsPtr.elementAt(i);
+        ids[i] = cObjPtr.ref.id;
       }
       return ids;
     });

@@ -62,12 +62,12 @@ abstract class IsarCollection<OBJ> {
   ///
   /// Returns whether the object has been deleted. Isar web always returns
   /// `true`.
-  Future<bool> delete(int id) => deleteAll([id]).then((count) => count == 1);
+  Future<bool> delete(int id);
 
   /// Delete a single object by its [id].
   ///
   /// Returns whether the object has been deleted.
-  bool deleteSync(int id) => deleteAllSync([id]) == 1;
+  bool deleteSync(int id);
 
   /// Delete a list of objecs by their [ids].
   ///
@@ -115,8 +115,10 @@ abstract class IsarCollection<OBJ> {
   void importJsonSync(List<Map<String, dynamic>> json);
 
   /// Start building a query using the [QueryBuilder].
-  QueryBuilder<OBJ, OBJ, QWhere> where(
-      {bool distinct = false, Sort sort = Sort.asc}) {
+  QueryBuilder<OBJ, OBJ, QWhere> where({
+    bool distinct = false,
+    Sort sort = Sort.asc,
+  }) {
     return QueryBuilder(this, distinct, sort);
   }
 
