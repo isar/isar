@@ -12,8 +12,8 @@ abstract class _IsarConnect {
   };
 
   static var _initialized = false;
-  static StreamSubscription? _querySubscription;
-  static final _collectionSubscriptions = <StreamSubscription>[];
+  static StreamSubscription<void>? _querySubscription;
+  static final _collectionSubscriptions = <StreamSubscription<void>>[];
 
   static void initialize() {
     if (_initialized) {
@@ -33,7 +33,7 @@ abstract class _IsarConnect {
       registerExtension(handler.key.method, (method, parameters) async {
         try {
           final args = parameters.containsKey('args')
-              ? jsonDecode(parameters['args']!)
+              ? jsonDecode(parameters['args']!) as Map<String, dynamic>
               : <String, dynamic>{};
           final result = {'result': await handler.value(args)};
           return ServiceExtensionResponse.result(jsonEncode(result));
@@ -93,7 +93,7 @@ abstract class _IsarConnect {
     _collectionSubscriptions.clear();
     if (params.isEmpty) return true;
 
-    final instanceName = params['instance']!;
+    final instanceName = params['instance'] as String;
     final instance = Isar.getInstance(instanceName)!;
 
     for (var collection in instance._collections.values) {
@@ -155,7 +155,7 @@ abstract class _IsarConnect {
     return true;
   }
 
-  static Query _getQuery(Map<String, dynamic> params) {
+  static Query<dynamic> _getQuery(Map<String, dynamic> params) {
     final query = ConnectQuery.fromJson(params);
     final collection = Isar.getInstance(query.instance)!
         .getCollectionInternal(query.collection)!;

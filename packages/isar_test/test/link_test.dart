@@ -165,7 +165,7 @@ void tests() {
 
         final newA2 = await linksA.tGet(objA2.id!);
         await newA2!.selfLinkBacklink.tLoad();
-        expect(newA2.selfLinkBacklink, []);
+        expect(newA2.selfLinkBacklink, <dynamic>[]);
       });
 
       isarTest('delete target', () async {

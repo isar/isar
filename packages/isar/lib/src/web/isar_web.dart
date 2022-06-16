@@ -71,7 +71,7 @@ class _IsarWeb implements IsarNativeInterface {
 
   @override
   @tryInline
-  dynamic jsObjectGet(Object o, Object key) {
+  T jsObjectGet<T>(Object o, Object key) {
     return getProperty(o, key);
   }
 
@@ -83,7 +83,7 @@ class _IsarWeb implements IsarNativeInterface {
 
   @override
   @tryInline
-  dynamic newJsObject() {
+  Object newJsObject() {
     return newObject();
   }
 
@@ -105,7 +105,7 @@ class _IsarWeb implements IsarNativeInterface {
     String? directory,
     required String name,
     required bool relaxedDurability,
-    required List<CollectionSchema> schemas,
+    required List<CollectionSchema<dynamic>> schemas,
   }) {
     return openIsar(
       name: name,
@@ -119,7 +119,7 @@ class _IsarWeb implements IsarNativeInterface {
     String? directory,
     required String name,
     required bool relaxedDurability,
-    required List<CollectionSchema> schemas,
+    required List<CollectionSchema<dynamic>> schemas,
   }) =>
       unsupportedOnWeb();
 

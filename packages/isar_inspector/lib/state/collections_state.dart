@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_inspector/schema.dart';
 import 'package:isar_inspector/state/instances_state.dart';
+// ignore: implementation_imports
 import 'package:isar/src/isar_connect_api.dart';
 
 import 'isar_connect_state_notifier.dart';
@@ -9,7 +10,9 @@ final collectionsPod = FutureProvider((ref) async {
   ref.watch(isarConnectPod);
   final isarConnect = ref.watch(isarConnectPod.notifier);
   final schema = await isarConnect.getSchema();
-  return schema.map((e) => ICollection.fromJson(e)).toList();
+  return schema
+      .map((e) => ICollection.fromJson(e as Map<String, dynamic>))
+      .toList();
 });
 
 final selectedCollectionNamePod = StateProvider<String?>((ref) => null);

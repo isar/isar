@@ -10,11 +10,11 @@ external String stringify(dynamic value);
 @JS('Object.keys')
 external List<String> objectKeys(dynamic obj);
 
-Map<String, dynamic> jsMapToDart(dynamic obj) {
+Map<String, dynamic> jsMapToDart(Object obj) {
   final keys = objectKeys(obj);
   final map = <String, dynamic>{};
   for (final key in keys) {
-    map[key] = getProperty(obj, key);
+    map[key] = getProperty<dynamic>(obj, key);
   }
   return map;
 }
@@ -50,7 +50,7 @@ class IsarInstanceJs {
 
 typedef ChangeCallbackJs = void Function();
 
-typedef ObjectChangeCallbackJs = void Function(dynamic object);
+typedef ObjectChangeCallbackJs = void Function(Object object);
 
 typedef QueryChangeCallbackJs = void Function(List<dynamic> results);
 
@@ -60,23 +60,12 @@ typedef StopWatchingJs = JsFunction;
 class IsarCollectionJs {
   external IsarLinkJs getLink(String name);
 
-  external Promise get(IsarTxnJs txn, int id);
-
   external Promise getAll(IsarTxnJs txn, List<int> ids);
-
-  external Promise getByIndex(
-      IsarTxnJs txn, String indexName, List<dynamic> value);
 
   external Promise getAllByIndex(
       IsarTxnJs txn, String indexName, List<List<dynamic>> values);
 
-  external Promise put(IsarTxnJs txn, dynamic object);
-
-  external Promise putAll(IsarTxnJs txn, List objects);
-
-  external Promise delete(IsarTxnJs txn, int id);
-
-  external Promise deleteByIndex(IsarTxnJs txn, String indexName, dynamic key);
+  external Promise putAll(IsarTxnJs txn, List<Object> objects);
 
   external Promise deleteAll(IsarTxnJs txn, List<int> ids);
 

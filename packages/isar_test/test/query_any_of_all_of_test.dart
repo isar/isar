@@ -1,10 +1,12 @@
+// ignore_for_file: inference_failure_on_function_invocation
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:isar/isar.dart';
 
 import 'util/common.dart';
 import 'util/sync_async_helper.dart';
 
-part 'query_any_of_all_of.g.dart';
+part 'query_any_of_all_of_test.g.dart';
 
 @Collection()
 class Model {
@@ -35,7 +37,7 @@ void tests() {
     late Model model2;
     late Model model3;
 
-    Future setupModels() async {
+    Future<void> setupModels() async {
       model0 = Model(0, 0);
       model1 = Model(1, 1);
       model2 = Model(2, 2);

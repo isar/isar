@@ -44,15 +44,15 @@ class ConnectQuery {
 
   factory ConnectQuery.fromJson(Map<String, dynamic> json) {
     return ConnectQuery(
-      instance: json['instance'],
-      collection: json['collection'],
-      filter: _filterFromJson(json['filter']),
-      offset: json['offset'],
-      limit: json['limit'],
+      instance: json['instance'] as String,
+      collection: json['collection'] as String,
+      filter: _filterFromJson(json['filter'] as Map<String, dynamic>?),
+      offset: json['offset'] as int?,
+      limit: json['limit'] as int?,
       sortProperty: json.containsKey('sortProperty')
           ? SortProperty(
-              property: json['sortProperty']['property'],
-              sort: Sort.values[json['sortProperty']['sort']],
+              property: json['sortProperty']['property'] as String,
+              sort: Sort.values[json['sortProperty']['sort'] as int],
             )
           : null,
     );
@@ -76,21 +76,22 @@ class ConnectQuery {
   static FilterOperation? _filterFromJson(Map<String, dynamic>? json) {
     if (json == null) return null;
     if (json.containsKey('filters')) {
-      final filters =
-          (json['filters'] as List).map((e) => _filterFromJson(e)!).toList();
+      final filters = (json['filters'] as List)
+          .map((e) => _filterFromJson(e as Map<String, dynamic>?)!)
+          .toList();
       return FilterGroup(
-        type: FilterGroupType.values[json['type']],
+        type: FilterGroupType.values[json['type'] as int],
         filters: filters,
       );
     } else {
       return FilterCondition(
-        type: FilterConditionType.values[json['type']],
-        property: json['property'],
+        type: FilterConditionType.values[json['type'] as int],
+        property: json['property'] as String,
         value1: json['value1'],
         value2: json['value2'],
-        include1: json['include1'],
-        include2: json['include2'],
-        caseSensitive: json['caseSensitive'],
+        include1: json['include1'] as bool,
+        include2: json['include2'] as bool,
+        caseSensitive: json['caseSensitive'] as bool,
       );
     }
   }
@@ -132,10 +133,10 @@ class ConnectCollectionInfo {
 
   factory ConnectCollectionInfo.fromJson(Map<String, dynamic> json) {
     return ConnectCollectionInfo(
-      instance: json['instance'],
-      collection: json['collection'],
-      size: json['size'],
-      count: json['count'],
+      instance: json['instance'] as String,
+      collection: json['collection'] as String,
+      size: json['size'] as int,
+      count: json['count'] as int,
     );
   }
 

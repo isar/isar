@@ -28,7 +28,7 @@ void testSyncAsync(Function test) {
 }
 
 Future<Isar> tOpen({
-  required List<CollectionSchema> schemas,
+  required List<CollectionSchema<dynamic>> schemas,
   String? directory,
   String name = Isar.defaultName,
   bool relaxedDurability = true,

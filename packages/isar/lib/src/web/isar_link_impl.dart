@@ -6,7 +6,7 @@ import 'isar_web.dart';
 
 mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   @override
-  IsarCollectionImpl get sourceCollection =>
+  IsarCollectionImpl<dynamic> get sourceCollection =>
       super.sourceCollection as IsarCollectionImpl;
 
   @override
@@ -31,7 +31,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
 
     return targetCollection.isar.getTxn(true, (txn) async {
       if (reset) {
-        await link.clear(txn, containingId, backlink).wait();
+        await link.clear(txn, containingId, backlink).wait<dynamic>();
       }
       return await link
           .update(txn, backlink, containingId, linkIds, unlinkIds)

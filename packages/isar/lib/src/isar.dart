@@ -28,8 +28,8 @@ abstract class Isar {
   /// Name of the instance.
   final String name;
 
-  late final Map<Type, IsarCollection> _collections;
-  late final Map<String, IsarCollection> _collectionsByName;
+  late final Map<Type, IsarCollection<dynamic>> _collections;
+  late final Map<String, IsarCollection<dynamic>> _collectionsByName;
 
   var _isOpen = true;
 
@@ -45,7 +45,7 @@ abstract class Isar {
     }
   }
 
-  static void _checkOpen(String name, List<CollectionSchema> schemas) {
+  static void _checkOpen(String name, List<CollectionSchema<dynamic>> schemas) {
     if (name.isEmpty || name.startsWith('_')) {
       throw IsarError('Instance names must not be empty or start with "_".');
     }
@@ -66,7 +66,7 @@ abstract class Isar {
 
   /// Open a new Isar instance.
   static Future<Isar> open({
-    required List<CollectionSchema> schemas,
+    required List<CollectionSchema<dynamic>> schemas,
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
@@ -89,7 +89,7 @@ abstract class Isar {
 
   /// Open a new Isar instance.
   static Isar openSync({
-    required List<CollectionSchema> schemas,
+    required List<CollectionSchema<dynamic>> schemas,
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
@@ -135,7 +135,7 @@ abstract class Isar {
 
   /// @nodoc
   @protected
-  void attachCollections(Map<Type, IsarCollection> collections) {
+  void attachCollections(Map<Type, IsarCollection<dynamic>> collections) {
     _collections = collections;
     _collectionsByName = {
       for (var col in collections.values) col.name: col,
@@ -152,7 +152,7 @@ abstract class Isar {
 
   /// @nodoc
   @protected
-  IsarCollection? getCollectionInternal(String name) {
+  IsarCollection<dynamic>? getCollectionInternal(String name) {
     return _collectionsByName[name];
   }
 

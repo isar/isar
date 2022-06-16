@@ -75,7 +75,7 @@ class QueryParser {
       case 'matches':
         return FilterCondition.matches(
           property: propertyName,
-          wildcard: value,
+          wildcard: value as String,
         );
       default:
         throw 'unreachable';

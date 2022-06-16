@@ -15,7 +15,7 @@ final minStr = Pointer<Char>.fromAddress(0);
 final maxStr = '\u{FFFFF}'.toNativeUtf8().cast<Char>();
 
 Query<T> buildNativeQuery<T>(
-  IsarCollectionImpl col,
+  IsarCollectionImpl<dynamic> col,
   List<WhereClause> whereClauses,
   bool whereDistinct,
   Sort whereSort,
@@ -99,8 +99,12 @@ void _addIdWhereClause(
   ));
 }
 
-void _addIndexWhereClause(CollectionSchema schema, Pointer<CQueryBuilder> qbPtr,
-    IndexWhereClause wc, bool distinct, Sort sort) {
+void _addIndexWhereClause(
+    CollectionSchema<dynamic> schema,
+    Pointer<CQueryBuilder> qbPtr,
+    IndexWhereClause wc,
+    bool distinct,
+    Sort sort) {
   late Pointer<CIndexKey> lowerPtr;
   if (wc.lower != null) {
     lowerPtr = buildIndexKey(schema, wc.indexName, wc.lower!);
@@ -145,7 +149,7 @@ int boolToByte(bool? value) {
 }
 
 Pointer<CFilter>? _buildFilter(
-  IsarCollectionImpl col,
+  IsarCollectionImpl<dynamic> col,
   FilterOperation filter,
   Allocator alloc,
 ) {
@@ -161,7 +165,7 @@ Pointer<CFilter>? _buildFilter(
 }
 
 Pointer<CFilter>? _buildFilterGroup(
-    IsarCollectionImpl col, FilterGroup group, Allocator alloc) {
+    IsarCollectionImpl<dynamic> col, FilterGroup group, Allocator alloc) {
   final builtConditions = group.filters
       .map((op) => _buildFilter(col, op, alloc))
       .where((it) => it != null)
@@ -196,7 +200,7 @@ Pointer<CFilter>? _buildFilterGroup(
 }
 
 Pointer<CFilter>? _buildLink(
-    IsarCollectionImpl col, LinkFilter link, Allocator alloc) {
+    IsarCollectionImpl<dynamic> col, LinkFilter link, Allocator alloc) {
   final linkTargetCol = col.isar.getCollectionInternal(link.targetCollection)!
       as IsarCollectionImpl;
   final linkId = col.schema.linkIdOrErr(link.linkName);
@@ -216,8 +220,8 @@ Pointer<CFilter>? _buildLink(
   return filterPtrPtr.value;
 }
 
-Pointer<CFilter> _buildCondition(
-    IsarCollectionImpl col, FilterCondition condition, Allocator alloc) {
+Pointer<CFilter> _buildCondition(IsarCollectionImpl<dynamic> col,
+    FilterCondition condition, Allocator alloc) {
   final val1Raw = condition.value1;
   final val1 =
       val1Raw is DateTime ? val1Raw.toUtc().microsecondsSinceEpoch : val1Raw;

@@ -39,16 +39,24 @@ abstract class IsarCollection<OBJ> {
   List<OBJ?> getAllByIndexSync(String indexName, List<List<Object?>> keys);
 
   /// Insert or update an [object] and returns the assigned id.
-  Future<int> put(OBJ object, {bool saveLinks = false});
+  ///
+  /// Also saves the links of the object.
+  Future<int> put(OBJ object);
 
   /// Insert or update an [object] and returns the assigned id.
-  int putSync(OBJ object, {bool saveLinks = false});
+  ///
+  /// Also saves the links of the object.
+  int putSync(OBJ object);
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  Future<List<int>> putAll(List<OBJ> objects, {bool saveLinks = false});
+  ///
+  /// Also saves the links of the objects.
+  Future<List<int>> putAll(List<OBJ> objects);
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  List<int> putAllSync(List<OBJ> objects, {bool saveLinks = false});
+  ///
+  /// Also saves the links of the objects.
+  List<int> putAllSync(List<OBJ> objects);
 
   /// Delete a single object by its [id].
   ///

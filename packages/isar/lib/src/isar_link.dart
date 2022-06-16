@@ -42,7 +42,7 @@ abstract class IsarLinkBase<OBJ> {
 
   /// @nodoc
   @protected
-  void attach(IsarCollection sourceCollection,
+  void attach(IsarCollection<dynamic> sourceCollection,
       IsarCollection<OBJ> targetCollection, String linkName, int? objectId);
 }
 

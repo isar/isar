@@ -9,7 +9,7 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
 
   late final String linkName;
 
-  late final IsarCollection sourceCollection;
+  late final IsarCollection<dynamic> sourceCollection;
 
   late final IsarCollection<OBJ> targetCollection;
 
@@ -18,7 +18,7 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
 
   @override
   void attach(
-    IsarCollection sourceCollection,
+    IsarCollection<dynamic> sourceCollection,
     IsarCollection<OBJ> targetCollection,
     String linkName,
     int? objectId,
@@ -69,7 +69,6 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
 
   Future<void> updateInternal(
       Iterable<OBJ> link, Iterable<OBJ> unlink, bool reset) async {
-    final unsavedAdded = <OBJ>[];
     final linkIds = <int>[];
     final unlinkIds = <int>[];
 
@@ -78,13 +77,8 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
       if (id != null) {
         linkIds.add(id);
       } else {
-        unsavedAdded.add(object);
+        throw IsarError('Cannot link objects that are not saved yet.');
       }
-    }
-
-    if (unsavedAdded.isNotEmpty) {
-      final unsavedIds = await targetCollection.putAll(unsavedAdded);
-      linkIds.addAll(unsavedIds);
     }
 
     for (var object in unlink) {

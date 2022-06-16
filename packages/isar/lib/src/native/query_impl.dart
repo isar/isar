@@ -15,7 +15,7 @@ typedef QueryDeserialize<T> = List<T> Function(CObjectSet);
 class QueryImpl<T> extends Query<T> implements Finalizable {
   static const maxLimit = 4294967295;
 
-  final IsarCollectionImpl col;
+  final IsarCollectionImpl<dynamic> col;
   final Pointer<CQuery> queryPtr;
   final QueryDeserialize<T> deserialize;
   final int? propertyId;
@@ -49,7 +49,7 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
         await txn.wait();
         return deserialize(resultsPtr.ref).cast();
       } finally {
-        IC.isar_free_raw_obj_list(resultsPtr);
+        IC.isar_free_c_object_set(resultsPtr);
       }
     });
   }
@@ -74,7 +74,7 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
         nCall(IC.isar_q_find(queryPtr, txn.ptr, resultsPtr, limit));
         return deserialize(resultsPtr.ref).cast();
       } finally {
-        IC.isar_free_raw_obj_list(resultsPtr);
+        IC.isar_free_c_object_set(resultsPtr);
       }
     });
   }
@@ -120,12 +120,12 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
     final handle = IC.isar_watch_query(
         col.isar.ptr, col.ptr, queryPtr, port.sendPort.nativePort);
 
-    final controller = StreamController(onCancel: () {
+    final controller = StreamController<void>(onCancel: () {
       IC.isar_stop_watching(handle);
     });
 
     if (initialReturn) {
-      controller.add(true);
+      controller.add(null);
     }
 
     controller.addStream(port);

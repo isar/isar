@@ -7,7 +7,7 @@ import 'isar_core.dart';
 
 mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   @override
-  IsarCollectionImpl get sourceCollection =>
+  IsarCollectionImpl<dynamic> get sourceCollection =>
       super.sourceCollection as IsarCollectionImpl;
 
   @override

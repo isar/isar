@@ -49,7 +49,7 @@ void tests() {
   group('Groups', () {
     late Isar isar;
     late IsarCollection<LinkModelA> colA;
-    late IsarCollection<LinkModelB> colB;
+    //late IsarCollection<LinkModelB> colB;
 
     late LinkModelA objA1;
     late LinkModelA objA2;
@@ -60,7 +60,7 @@ void tests() {
     setUp(() async {
       isar = await openTempIsar([LinkModelASchema, LinkModelBSchema]);
       colA = isar.linkModelAs;
-      colB = isar.linkModelBs;
+      //colB = isar.linkModelBs;
 
       objA1 = LinkModelA('model a1');
       objA2 = LinkModelA('model a2');
@@ -81,7 +81,7 @@ void tests() {
         );
       });
 
-      print(await colA.where().exportJson());
+      //print(await colA.where().exportJson());
     });
 
     tearDown(() async {
@@ -89,11 +89,11 @@ void tests() {
     });
 
     isarTest('Single self link', () async {
-      print(objA1.id);
+      /*print(objA1.id);
       print(objA2.id);
       print(objA3.id);
       print(objB1.id);
-      print(objB2.id);
+      print(objB2.id);*/
       //final sl = colA.getSync(1)!.selfLinks;
       //sl.loadSync(overrideChanges: true);
       //print(sl);

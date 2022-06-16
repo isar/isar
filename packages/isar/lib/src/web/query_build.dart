@@ -49,7 +49,8 @@ Query<T> buildWebQuery<T, OBJ>(
   if (property == null) {
     deserialize = (jsObj) => col.schema.deserializeWeb(col, jsObj) as T;
   } else {
-    deserialize = (jsObj) => col.schema.deserializePropWeb(jsObj, property);
+    deserialize =
+        (jsObj) => col.schema.deserializePropWeb(jsObj, property) as T;
   }
 
   return QueryImpl<T>(col, queryJs, deserialize, property);
@@ -82,7 +83,7 @@ IdWhereClauseJs _buildIdWhereClause(IdWhereClause wc) {
 }
 
 IndexWhereClauseJs _buildIndexWhereClause(
-    CollectionSchema schema, IndexWhereClause wc) {
+    CollectionSchema<dynamic> schema, IndexWhereClause wc) {
   final isComposite = schema.indexValueTypes[wc.indexName]!.length > 1;
 
   dynamic lower = wc.lower;
@@ -106,7 +107,7 @@ IndexWhereClauseJs _buildIndexWhereClause(
 }
 
 LinkWhereClauseJs _buildLinkWhereClause(
-    IsarCollectionImpl col, LinkWhereClause wc) {
+    IsarCollectionImpl<dynamic> col, LinkWhereClause wc) {
   final linkCol =
       // ignore: invalid_use_of_protected_member
       col.isar.getCollectionInternal(wc.linkCollection) as IsarCollectionImpl;
@@ -138,7 +139,8 @@ KeyRange? _buildKeyRange(
   return range;
 }
 
-FilterJs? _buildFilter(CollectionSchema schema, FilterOperation filter) {
+FilterJs? _buildFilter(
+    CollectionSchema<dynamic> schema, FilterOperation filter) {
   final filterStr = _buildFilterOperation(schema, filter);
   if (filterStr != null) {
     return FilterJs('id', 'obj', 'return $filterStr');
@@ -148,7 +150,7 @@ FilterJs? _buildFilter(CollectionSchema schema, FilterOperation filter) {
 }
 
 String? _buildFilterOperation(
-  CollectionSchema schema,
+  CollectionSchema<dynamic> schema,
   FilterOperation filter,
 ) {
   if (filter is FilterGroup) {
@@ -162,7 +164,7 @@ String? _buildFilterOperation(
   }
 }
 
-String? _buildFilterGroup(CollectionSchema schema, FilterGroup group) {
+String? _buildFilterGroup(CollectionSchema<dynamic> schema, FilterGroup group) {
   final builtConditions = group.filters
       .map((op) => _buildFilterOperation(schema, op))
       .where((e) => e != null)
@@ -181,7 +183,8 @@ String? _buildFilterGroup(CollectionSchema schema, FilterGroup group) {
   }
 }
 
-String _buildCondition(CollectionSchema schema, FilterCondition condition) {
+String _buildCondition(
+    CollectionSchema<dynamic> schema, FilterCondition condition) {
   dynamic _prepareFilterValue(dynamic value) {
     if (value == null) {
       return null;

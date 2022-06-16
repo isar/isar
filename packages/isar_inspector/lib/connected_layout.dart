@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_inspector/filter_field.dart';
 import 'package:isar_inspector/state/instances_state.dart';
@@ -33,16 +31,16 @@ class _ConnectedLayoutState extends ConsumerState<ConnectedLayout> {
         children: [
           const SizedBox(
             width: 300,
-            child: const Sidebar(),
+            child: Sidebar(),
           ),
-          SizedBox(width: 25),
+          const SizedBox(width: 25),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const FilterField(),
+              children: const [
+                FilterField(),
                 SizedBox(height: 25),
-                const Expanded(
+                Expanded(
                   child: QueryTable(),
                 ),
               ],

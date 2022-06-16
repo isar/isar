@@ -10,7 +10,7 @@ const _zoneTxn = #zoneTxn;
 
 class IsarImpl extends Isar {
   final IsarInstanceJs instance;
-  final List<Future> _activeAsyncTxns = [];
+  final List<Future<void>> _activeAsyncTxns = [];
 
   IsarImpl(String name, String schema, this.instance) : super(name, schema);
 
@@ -26,7 +26,7 @@ class IsarImpl extends Isar {
     requireOpen();
     requireNotInTxn();
 
-    final completer = Completer();
+    final completer = Completer<void>();
     _activeAsyncTxns.add(completer.future);
 
     final txn = instance.beginTxn(write);
@@ -38,7 +38,7 @@ class IsarImpl extends Isar {
     T result;
     try {
       result = await zone.run(callback);
-      await txn.commit().wait();
+      await txn.commit().wait<dynamic>();
     } catch (e) {
       txn.abort();
       if (e is DomException) {
@@ -76,7 +76,7 @@ class IsarImpl extends Isar {
       unsupportedOnWeb();
 
   Future<T> getTxn<T>(bool write, Future<T> Function(IsarTxnJs txn) callback) {
-    IsarTxnJs? currentTxn = Zone.current[_zoneTxn];
+    final currentTxn = Zone.current[_zoneTxn] as IsarTxnJs?;
     if (currentTxn != null) {
       if (write && !currentTxn.write) {
         throw IsarError(
@@ -85,7 +85,7 @@ class IsarImpl extends Isar {
       return callback(currentTxn);
     } else if (!write) {
       return _txn(false, false, () {
-        return callback(Zone.current[_zoneTxn]!);
+        return callback(Zone.current[_zoneTxn] as IsarTxnJs);
       });
     } else {
       throw IsarError('Write operations require an explicit transaction.');
@@ -98,7 +98,7 @@ class IsarImpl extends Isar {
     requireNotInTxn();
     await Future.wait(_activeAsyncTxns);
     await super.close();
-    await instance.close(deleteFromDisk).wait();
+    await instance.close(deleteFromDisk).wait<dynamic>();
     return true;
   }
 }

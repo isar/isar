@@ -37,7 +37,7 @@ class CollectionsList extends ConsumerWidget {
                       fontSize: 16,
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   if (info != null)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -49,7 +49,7 @@ class CollectionsList extends ConsumerWidget {
                             fontSize: 12,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
                           _formatSize(info.size),
                           style: const TextStyle(

@@ -14,23 +14,23 @@ abstract class IsarNativeInterface {
     String? directory,
     required String name,
     required bool relaxedDurability,
-    required List<CollectionSchema> schemas,
+    required List<CollectionSchema<dynamic>> schemas,
   });
 
   Isar openSync({
     required String directory,
     required String name,
     required bool relaxedDurability,
-    required List<CollectionSchema> schemas,
+    required List<CollectionSchema<dynamic>> schemas,
   });
 
   IsarLink<OBJ> newLink<OBJ>();
 
   IsarLinks<OBJ> newLinks<OBJ>();
 
-  dynamic newJsObject();
+  Object newJsObject();
 
-  dynamic jsObjectGet(Object o, Object key);
+  T jsObjectGet<T>(Object o, Object key);
 
   void jsObjectSet(Object o, Object key, dynamic value);
 }

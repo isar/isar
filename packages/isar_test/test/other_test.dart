@@ -6,7 +6,7 @@ import 'util/common.dart';
 void main() {
   group("Other", () {
     isarTestVm('split words', () {
-      expect(Isar.splitWords(""), []);
+      expect(Isar.splitWords(""), <String>[]);
       expect(Isar.splitWords("single"), ["single"]);
       expect(
           Isar.splitWords(
