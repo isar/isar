@@ -1879,29 +1879,15 @@ class CObjectSet extends ffi.Struct {
   external int length;
 }
 
-class CObjectCollectionSet extends ffi.Struct {
-  external ffi.Pointer<CObject> objects;
-
-  external ffi.Pointer<ffi.Pointer<CIsarCollection>> collections;
-
-  @ffi.Uint32()
-  external int length;
-}
-
-class CIsarCollection extends ffi.Opaque {}
-
 class CLink extends ffi.Struct {
   @ffi.Int64()
-  external int source_id;
+  external int source_id_index;
 
   @ffi.Int64()
   external int target_id;
 
   @ffi.Uint32()
   external int link_id;
-
-  @ffi.Uint8()
-  external int new_target;
 }
 
 class CLinkSet extends ffi.Struct {
@@ -1914,12 +1900,12 @@ class CLinkSet extends ffi.Struct {
 class CObjectLinkSet extends ffi.Struct {
   external CObjectSet objects;
 
-  external CObjectCollectionSet linked_objects;
-
   external CLinkSet added_links;
 
   external CLinkSet removed_links;
 }
+
+class CIsarCollection extends ffi.Opaque {}
 
 class CIsarTxn extends ffi.Opaque {}
 
