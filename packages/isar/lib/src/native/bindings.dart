@@ -1903,6 +1903,8 @@ class CObjectLinkSet extends ffi.Struct {
   external CLinkSet added_links;
 
   external CLinkSet removed_links;
+
+  external CLinkSet reset_links;
 }
 
 class CIsarCollection extends ffi.Opaque {}
