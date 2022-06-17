@@ -86,7 +86,7 @@ class IsarAnalyzer {
     }
 
     final unknownConstructorParameter = constructor.parameters.firstOrNullWhere(
-        (p) => p.isNotOptional && properties.none((e) => e.dartName == p.name));
+        (p) => p.isRequired && properties.none((e) => e.dartName == p.name));
     if (unknownConstructorParameter != null) {
       err('Constructor parameter does not match a property.',
           unknownConstructorParameter);
