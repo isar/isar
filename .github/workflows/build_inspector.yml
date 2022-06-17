@@ -1,9 +1,6 @@
 name: Build Inspector
 
-on:
-  push:
-    tags:
-      - "*"
+on: push
 
 jobs:
   build_and_upload:
@@ -12,12 +9,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v2
-        architecture: x64
-      
       - name: Build
         working-directory: packages/isar_inspector
         run: flutter build web
-
       - name: Deploy to GitHub Pages
         uses: crazy-max/ghaction-github-pages@v2
         with:
