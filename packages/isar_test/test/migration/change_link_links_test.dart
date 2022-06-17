@@ -40,9 +40,12 @@ void tests() {
   isarTest('Add remove link', () async {
     final isar1 = await openTempIsar([Col1Schema]);
     await isar1.tWriteTxn(() async {
+      final linkedObj = Col1(2);
+      await isar1.col1s.tPut(linkedObj);
+
       final obj = Col1(1);
-      obj.link.value = Col1(null);
-      await isar1.col1s.tPut(obj, saveLinks: true);
+      obj.link.value = linkedObj;
+      await isar1.col1s.tPut(obj);
     });
     expect(await isar1.close(), true);
 
@@ -52,7 +55,11 @@ void tests() {
     expect(obj.link, {Col2(2)});
     await isar2.tWriteTxn(() async {
       await obj.link.tReset();
-      obj.link.add(Col2(null));
+
+      final obj3 = Col2(3);
+      await isar2.col2s.tPut(obj3);
+
+      obj.link.add(obj3);
       await obj.link.tSave();
     });
     expect(await isar2.close(), true);

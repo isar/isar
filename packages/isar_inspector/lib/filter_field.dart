@@ -7,8 +7,6 @@ import 'package:isar_inspector/state/collections_state.dart';
 import 'package:isar_inspector/state/instances_state.dart';
 import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
 import 'package:isar_inspector/state/query_state.dart';
-// ignore: implementation_imports
-import 'package:isar/src/isar_connect_api.dart';
 
 import 'schema.dart';
 
@@ -56,6 +54,7 @@ class _FilterFieldState extends ConsumerState<FilterField> {
             final selectedCollection = ref.read(selectedCollectionPod).value!;
             final filter = _parseFilter(selectedCollection);
             ref.read(queryFilterPod.state).state = filter;
+            ref.read(queryPagePod.state).state = 0;
           },
           child: const Text('Query'),
         ),

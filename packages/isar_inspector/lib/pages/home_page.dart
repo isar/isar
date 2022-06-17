@@ -6,7 +6,12 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text('Home'),
+      child: Text(
+        'Welcome to the Isar Inspector!\nPlease open the link displayed when '
+        'running the debug version of an Isar app.',
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 18),
+      ),
     );
   }
 }

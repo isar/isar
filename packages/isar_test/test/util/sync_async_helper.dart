@@ -32,7 +32,6 @@ Future<Isar> tOpen({
   String? directory,
   String name = Isar.defaultName,
   bool relaxedDurability = true,
-  bool inspector = false,
 }) {
   if (_testSync) {
     final isar = Isar.openSync(
@@ -40,7 +39,6 @@ Future<Isar> tOpen({
       directory: directory,
       name: name,
       relaxedDurability: relaxedDurability,
-      inspector: inspector,
     );
     return SynchronousFuture(isar);
   } else {
@@ -49,7 +47,6 @@ Future<Isar> tOpen({
       directory: directory,
       name: name,
       relaxedDurability: relaxedDurability,
-      inspector: inspector,
     );
   }
 }

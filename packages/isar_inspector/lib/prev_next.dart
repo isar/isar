@@ -8,27 +8,37 @@ class PrevNext extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final offset = ref.watch(queryOffsetPod);
+    final theme = Theme.of(context);
+    final page = ref.watch(queryPagePod);
     final result = ref.watch(queryResultsPod).valueOrNull;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
       children: [
-        _Button(
-          label: 'Prev',
-          onPressed: offset > 0
-              ? () {
-                  ref.read(queryOffsetPod.state).state -= objectsPerPage;
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _Button(
+              label: 'Prev',
+              onPressed: () {
+                if (page > 0) {
+                  ref.read(queryPagePod.state).state -= 1;
                 }
-              : null,
-        ),
-        const SizedBox(width: 20),
-        _Button(
-          label: 'Next',
-          onPressed: result?.hasMore ?? false
-              ? () {
-                  ref.read(queryOffsetPod.state).state += objectsPerPage;
+              },
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'Page ${page + 1}',
+              style: TextStyle(fontSize: 12, color: theme.hintColor),
+            ),
+            const SizedBox(width: 10),
+            _Button(
+              label: 'Next',
+              onPressed: () {
+                if (result?.hasMore ?? false) {
+                  ref.read(queryPagePod.state).state += 1;
                 }
-              : null,
+              },
+            ),
+          ],
         ),
       ],
     );
@@ -57,7 +67,7 @@ class _Button extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: onPressed != null ? theme.primaryColor : null,
+            color: onPressed != null ? theme.primaryColor : theme.hintColor,
           ),
         ),
       ),

@@ -5,10 +5,14 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/src/isar_connect_api.dart';
+import 'package:isar_inspector/state/instances_state.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'collections_state.dart';
+import 'query_state.dart';
+
+export 'package:isar/src/isar_connect_api.dart';
 
 class IsarConnection {
   IsarConnection(this.vmService, this.isolateId);
@@ -108,10 +112,11 @@ class IsarConnectStateNotifier
     return response.json?['result'] as T;
   }
 
-  void _onInstancesChanged(Map<String, dynamic> data) {}
+  void _onInstancesChanged(_) {
+    ref.refresh(instancesPod);
+  }
 
   void _onCollectionInfoChanged(Map<String, dynamic> data) {
-    print('UPDATED INFO');
     final collectionInfo = ConnectCollectionInfo.fromJson(data);
     final infoPod = ref.read(collectionInfoPod.state);
     infoPod.state = {
@@ -120,7 +125,9 @@ class IsarConnectStateNotifier
     };
   }
 
-  void _onQueryChanged(Map<String, dynamic> data) {}
+  void _onQueryChanged(_) {
+    ref.refresh(queryResultsPod);
+  }
 
   Future<int> getVersion() => _call(ConnectAction.getVersion);
 
@@ -128,7 +135,6 @@ class IsarConnectStateNotifier
 
   Future<List<String>> listInstances() async {
     final instances = await _call(ConnectAction.listInstances);
-    print(instances);
     return (instances as List).cast();
   }
 
@@ -143,14 +149,6 @@ class IsarConnectStateNotifier
       timeout: kLongTimeout,
     );
     return (objects as List).cast();
-  }
-
-  Future watchQuery(ConnectQuery query) async {
-    await _call(
-      ConnectAction.watchQuery,
-      args: query.toJson(),
-      timeout: kNormalTimeout,
-    );
   }
 
   Future removeQuery(ConnectQuery query) async {

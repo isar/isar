@@ -74,8 +74,7 @@ class CollectionSchema<OBJ> {
   final void Function(OBJ object, int id)? setId;
 
   final List<IsarLinkBase<dynamic>> Function(OBJ object) getLinks;
-  final void Function(IsarCollection<dynamic> col, int id, OBJ object)
-      attachLinks;
+  final void Function(IsarCollection<OBJ> col, int id, OBJ object) attachLinks;
 
   final SerializeNative<OBJ> serializeNative;
   final DeserializeNative<OBJ> deserializeNative;

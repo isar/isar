@@ -9,7 +9,7 @@ dependencies:
   flutter:
     sdk: flutter
   isar: any
-  vm_service: ^8.3.0
+  vm_service: ^9.0.0
   flutter_riverpod: ^2.0.0-dev.7
   dartx: ^1.0.0
   json_annotation: ^4.5.0
@@ -17,9 +17,9 @@ dependencies:
   linked_scroll_controller: ^0.2.0
   flutter_svg: any
   font_awesome_flutter: any
-  google_fonts: ^2.0.0
+  google_fonts: ^3.0.1
   web_socket_channel: ^2.2.0
-  routemaster: ^1.0.0
+  routemaster: ^1.0.1
 
 dev_dependencies:
   json_serializable: ^6.2.0

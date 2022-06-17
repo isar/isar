@@ -65,7 +65,7 @@ class IsarCollectionJs {
   external Promise getAllByIndex(
       IsarTxnJs txn, String indexName, List<List<dynamic>> values);
 
-  external Promise putAll(IsarTxnJs txn, List<Object> objects);
+  external Promise putAll(IsarTxnJs txn, List<dynamic> objects);
 
   external Promise deleteAll(IsarTxnJs txn, List<int> ids);
 

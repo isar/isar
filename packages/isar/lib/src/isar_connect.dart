@@ -7,7 +7,6 @@ abstract class _IsarConnect {
     ConnectAction.listInstances: _listInstances,
     ConnectAction.watchInstance: _watchInstance,
     ConnectAction.executeQuery: _executeQuery,
-    ConnectAction.watchQuery: _watchQuery,
     ConnectAction.removeQuery: _removeQuery,
   };
 
@@ -61,15 +60,21 @@ abstract class _IsarConnect {
         return;
       }
       final port = serviceUri.port;
-      final path = serviceUri.path;
-      print('╔════════════════════════════════════════╗');
-      print('║          ISAR CONNECT STARTED          ║');
-      print('╟────────────────────────────────────────╢');
-      print('║ Open the Isar Inspector and enter the  ║');
-      print('║ following URL to connect:              ║');
-      print('╟────────────────────────────────────────╢');
-      print('║   $port $path   ║');
-      print('╚════════════════════════════════════════╝');
+      var path = serviceUri.path;
+      if (path.endsWith('/')) {
+        path = path.substring(0, path.length - 1);
+      }
+      if (path.endsWith('=')) {
+        path = path.substring(0, path.length - 1);
+      }
+      print('╔════════════════════════════════════════════╗');
+      print('║          ISAR CONNECT STARTED              ║');
+      print('╟────────────────────────────────────────────╢');
+      print('║ Open this link to connect to the Isar      ║');
+      print('║ Inspector while a debug build is running.  ║');
+      print('╟────────────────────────────────────────────╢');
+      print('║ https://inspect.isar.dev/$port$path ║');
+      print('╚════════════════════════════════════════════╝');
     });
   }
 
@@ -126,44 +131,53 @@ abstract class _IsarConnect {
   }
 
   static Future<List<Map<String, dynamic>>> _executeQuery(
-      Map<String, dynamic> params) {
-    final query = _getQuery(params);
-    return query.exportJson();
-  }
-
-  static Future<bool> _watchQuery(Map<String, dynamic> params) async {
+      Map<String, dynamic> params) async {
     if (_querySubscription != null) {
       unawaited(_querySubscription!.cancel());
     }
-
     _querySubscription = null;
-    if (params.isEmpty) return true;
+    if (params.isEmpty) return <Map<String, dynamic>>[];
 
     final query = _getQuery(params);
-    final stream = query.watchLazy();
 
+    final stream = query.watchLazy();
     _querySubscription = stream.listen((event) {
       postEvent(ConnectEvent.queryChanged.event, {});
     });
 
-    return true;
+    return await query.exportJson();
   }
 
   static Future<bool> _removeQuery(Map<String, dynamic> params) async {
     final query = _getQuery(params);
-    await query.isar.writeTxnSync(query.deleteAll);
+    await query.isar.writeTxn(query.deleteAll);
     return true;
   }
 
   static Query<dynamic> _getQuery(Map<String, dynamic> params) {
     final query = ConnectQuery.fromJson(params);
     final collection = Isar.getInstance(query.instance)!
-        .getCollectionInternal(query.collection)!;
+        .getCollectionByNameInternal(query.collection)!;
+    WhereClause? whereClause;
+    var whereSort = Sort.asc;
+    SortProperty? sortProperty;
+
+    final qSort = query.sortProperty;
+    if (qSort != null) {
+      if (qSort.property == collection.schema.idName) {
+        whereClause = IdWhereClause.any();
+        whereSort = qSort.sort;
+      } else {
+        sortProperty = qSort;
+      }
+    }
     return collection.buildQuery(
+      whereClauses: [if (whereClause != null) whereClause],
+      whereSort: whereSort,
       filter: query.filter,
       offset: query.offset,
       limit: query.limit,
-      sortBy: [if (query.sortProperty != null) query.sortProperty!],
+      sortBy: [if (sortProperty != null) sortProperty],
     );
   }
 }

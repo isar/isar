@@ -181,7 +181,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
           final link = asyncLinks[i];
           cLinkSet.links.elementAt(i).ref
             ..link_id = schema.linkIdOrErr(link.linkName)
-            ..source_id_index = link.sourceIndex
+            ..source_index = link.sourceIndex
             ..target_id = link.targetId;
         }
       } else {
@@ -210,6 +210,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
 
       _fillCLinkSet(txn, list.addedLinks, cObjLinkSet.added_links);
       _fillCLinkSet(txn, list.removedLinks, cObjLinkSet.removed_links);
+      _fillCLinkSet(txn, list.resetLinks, cObjLinkSet.reset_links);
 
       IC.isar_put_all(ptr, txn.ptr, cObjLinkSetPtr);
       await txn.wait();

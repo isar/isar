@@ -8,6 +8,11 @@ import 'package:isar_inspector/schema.dart';
 import 'package:isar_inspector/state/collections_state.dart';
 import 'package:isar_inspector/state/query_state.dart';
 
+import 'state/instances_state.dart';
+import 'state/isar_connect_state_notifier.dart';
+
+const _deleteColWidth = 60.0;
+
 class QueryTable extends ConsumerWidget {
   const QueryTable({Key? key}) : super(key: key);
 
@@ -30,6 +35,7 @@ class QueryTable extends ConsumerWidget {
                     children: [
                       for (var property in collection.allProperties)
                         HeaderProperty(property: property),
+                      const SizedBox(width: _deleteColWidth),
                     ],
                   ),
                 ),
@@ -69,25 +75,23 @@ class HeaderProperty extends ConsumerWidget {
     final sortProperty = ref.watch(querySortPod);
 
     return IsarCard(
-      onTap: property.isId
-          ? null
-          : () {
-              SortProperty? newSortProperty;
-              if (sortProperty?.property == property.name) {
-                if (sortProperty!.sort == Sort.asc) {
-                  newSortProperty = SortProperty(
-                    property: property.name,
-                    sort: Sort.desc,
-                  );
-                }
-              } else if (property.type.sortable) {
-                newSortProperty = SortProperty(
-                  property: property.name,
-                  sort: Sort.asc,
-                );
-              }
-              ref.read(querySortPod.state).state = newSortProperty;
-            },
+      onTap: () {
+        SortProperty? newSortProperty;
+        if (sortProperty?.property == property.name) {
+          if (sortProperty!.sort == Sort.asc) {
+            newSortProperty = SortProperty(
+              property: property.name,
+              sort: Sort.desc,
+            );
+          }
+        } else if (property.type.sortable) {
+          newSortProperty = SortProperty(
+            property: property.name,
+            sort: sortProperty == null && property.isId ? Sort.desc : Sort.asc,
+          );
+        }
+        ref.read(querySortPod.state).state = newSortProperty;
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
         child: SizedBox(
@@ -123,6 +127,11 @@ class HeaderProperty extends ConsumerWidget {
                       ? FontAwesomeIcons.caretUp
                       : FontAwesomeIcons.caretDown,
                   size: 20,
+                )
+              else if (sortProperty == null && property.isId)
+                const Icon(
+                  FontAwesomeIcons.caretUp,
+                  size: 20,
                 ),
             ],
           ),
@@ -132,7 +141,7 @@ class HeaderProperty extends ConsumerWidget {
   }
 }
 
-class TableRow extends StatelessWidget {
+class TableRow extends ConsumerWidget {
   final ICollection collection;
   final int index;
   final QueryObject object;
@@ -145,7 +154,7 @@ class TableRow extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return IsarCard(
       color: index % 2 == 0 ? Colors.transparent : null,
       radius: BorderRadius.circular(15),
@@ -170,6 +179,30 @@ class TableRow extends StatelessWidget {
                 ),
               ),
             ),
+          SizedBox(
+            width: _deleteColWidth,
+            child: Center(
+              child: IconButton(
+                icon: const Icon(Icons.delete),
+                splashRadius: 25,
+                onPressed: () {
+                  final collection =
+                      ref.read(selectedCollectionPod).valueOrNull;
+                  if (collection == null) return;
+
+                  final query = ConnectQuery(
+                    instance: ref.read(selectedInstanceNamePod),
+                    collection: collection.name,
+                    filter: FilterCondition.equalTo(
+                      property: collection.idName,
+                      value: int.parse(object.getValue(collection.idName)),
+                    ),
+                  );
+                  ref.read(isarConnectPod.notifier).removeQuery(query);
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );

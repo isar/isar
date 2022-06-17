@@ -66,17 +66,18 @@ abstract class IsarCollectionBase<OBJ> extends IsarCollection<OBJ> {
       list.objects.add(object);
       for (var link in schema.getLinks(object)) {
         if (!link.isChanged) continue;
+        if (!link.isAttached) {
+          schema.attachLinks(this, Isar.autoIncrement, object);
+        }
+
         if (link is IsarLinkCommon) {
-          final target = link.value;
-          if (target != null) {
-            final targetId = link.getId(target);
-            if (targetId != null) {
-              list.addedLinks.add(AsyncLink(
-                sourceIndex: list.objects.length - 1,
-                targetId: targetId,
-                linkName: link.linkName,
-              ));
-            }
+          final targetId = link.valueId;
+          if (targetId != null) {
+            list.addedLinks.add(AsyncLink(
+              sourceIndex: list.objects.length - 1,
+              targetId: targetId,
+              linkName: link.linkName,
+            ));
           }
 
           list.resetLinks.add(AsyncLink(
@@ -85,26 +86,20 @@ abstract class IsarCollectionBase<OBJ> extends IsarCollection<OBJ> {
             linkName: link.linkName,
           ));
         } else if (link is IsarLinksCommon) {
-          for (var added in link.addedObjects) {
-            final addedId = link.getId(added);
-            if (addedId != null) {
-              list.addedLinks.add(AsyncLink(
-                sourceIndex: list.objects.length - 1,
-                targetId: addedId,
-                linkName: link.linkName,
-              ));
-            }
+          for (var addedId in link.addedIds) {
+            list.addedLinks.add(AsyncLink(
+              sourceIndex: list.objects.length - 1,
+              targetId: addedId,
+              linkName: link.linkName,
+            ));
           }
 
-          for (var removed in link.removedObjects) {
-            final removedId = link.getId(removed);
-            if (removedId != null) {
-              list.addedLinks.add(AsyncLink(
-                sourceIndex: list.objects.length - 1,
-                targetId: removedId,
-                linkName: link.linkName,
-              ));
-            }
+          for (var removedId in link.removedIds) {
+            list.addedLinks.add(AsyncLink(
+              sourceIndex: list.objects.length - 1,
+              targetId: removedId,
+              linkName: link.linkName,
+            ));
           }
         }
       }

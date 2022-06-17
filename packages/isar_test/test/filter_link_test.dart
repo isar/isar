@@ -49,7 +49,7 @@ void tests() {
   group('Groups', () {
     late Isar isar;
     late IsarCollection<LinkModelA> colA;
-    //late IsarCollection<LinkModelB> colB;
+    late IsarCollection<LinkModelB> colB;
 
     late LinkModelA objA1;
     late LinkModelA objA2;
@@ -60,13 +60,18 @@ void tests() {
     setUp(() async {
       isar = await openTempIsar([LinkModelASchema, LinkModelBSchema]);
       colA = isar.linkModelAs;
-      //colB = isar.linkModelBs;
+      colB = isar.linkModelBs;
 
       objA1 = LinkModelA('model a1');
       objA2 = LinkModelA('model a2');
       objA3 = LinkModelA('model a3');
       objB1 = LinkModelB('model b1');
       objB2 = LinkModelB('model b2');
+
+      await isar.writeTxn(() async {
+        await colA.putAll([objA1, objA2, objA3]);
+        await colB.putAll([objB1, objB2]);
+      });
 
       objA1.selfLinks.addAll([objA1, objA2, objA3]);
       objA2.selfLinks.addAll([objA1, objA3]);
@@ -75,13 +80,8 @@ void tests() {
       objA3.links.addAll([objB1, objB2]);
 
       await isar.writeTxn(() async {
-        await colA.putAll(
-          [objA1, objA2, objA3],
-          saveLinks: true,
-        );
+        await colA.putAll([objA1, objA2, objA3]);
       });
-
-      //print(await colA.where().exportJson());
     });
 
     tearDown(() async {

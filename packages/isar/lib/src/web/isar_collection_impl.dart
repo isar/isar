@@ -140,10 +140,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
 
   @override
   Future<void> importJson(List<Map<String, dynamic>> json) {
-    return isar.getTxn(true, (txn) async {
-      // for performance reasons
-      // ignore: argument_type_not_assignable
-      await native.putAll(txn, json.map(jsify).toList()).wait<dynamic>();
+    return isar.getTxn(true, (txn) {
+      return native.putAll(txn, json.map(jsify).toList()).wait<dynamic>();
     });
   }
 

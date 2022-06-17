@@ -28,8 +28,8 @@ abstract class Isar {
   /// Name of the instance.
   final String name;
 
-  late final Map<Type, IsarCollection<dynamic>> _collections;
-  late final Map<String, IsarCollection<dynamic>> _collectionsByName;
+  late final Map<Type, IsarCollectionBase<dynamic>> _collections;
+  late final Map<String, IsarCollectionBase<dynamic>> _collectionsByName;
 
   var _isOpen = true;
 
@@ -70,10 +70,9 @@ abstract class Isar {
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
-    bool inspector = true,
   }) {
     _checkOpen(name, schemas);
-    if (inspector && !_kIsWeb) {
+    if (!_kIsWeb) {
       assert(() {
         _IsarConnect.initialize();
         return true;
@@ -93,10 +92,9 @@ abstract class Isar {
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
-    bool inspector = true,
   }) {
     _checkOpen(name, schemas);
-    if (inspector && !_kIsWeb) {
+    if (!_kIsWeb) {
       assert(() {
         _IsarConnect.initialize();
         return true;
@@ -135,7 +133,7 @@ abstract class Isar {
 
   /// @nodoc
   @protected
-  void attachCollections(Map<Type, IsarCollection<dynamic>> collections) {
+  void attachCollections(Map<Type, IsarCollectionBase<dynamic>> collections) {
     _collections = collections;
     _collectionsByName = {
       for (var col in collections.values) col.name: col,
@@ -152,8 +150,15 @@ abstract class Isar {
 
   /// @nodoc
   @protected
-  IsarCollection<dynamic>? getCollectionInternal(String name) {
-    return _collectionsByName[name];
+  IsarCollectionBase<T> getCollectionInternal<T>() {
+    requireOpen();
+    return _collections[T] as IsarCollectionBase<T>;
+  }
+
+  /// @nodoc
+  @protected
+  IsarCollectionBase<dynamic>? getCollectionByNameInternal(String name) {
+    return _collectionsByName[name] as IsarCollectionBase<dynamic>;
   }
 
   /// Remove all data in this instance and reset the auto increment values.

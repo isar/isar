@@ -133,7 +133,7 @@ void _addIndexWhereClause(
 void _addLinkWhereClause(
     Isar isar, Pointer<CQueryBuilder> qbPtr, LinkWhereClause wc) {
   final linkCol =
-      isar.getCollectionInternal(wc.linkCollection) as IsarCollectionImpl;
+      isar.getCollectionByNameInternal(wc.linkCollection) as IsarCollectionImpl;
   final linkId = linkCol.schema.linkIdOrErr(wc.linkName);
   nCall(IC.isar_qb_add_link_where_clause(qbPtr, linkCol.ptr, linkId, wc.id));
 }
@@ -201,8 +201,9 @@ Pointer<CFilter>? _buildFilterGroup(
 
 Pointer<CFilter>? _buildLink(
     IsarCollectionImpl<dynamic> col, LinkFilter link, Allocator alloc) {
-  final linkTargetCol = col.isar.getCollectionInternal(link.targetCollection)!
-      as IsarCollectionImpl;
+  final linkTargetCol =
+      col.isar.getCollectionByNameInternal(link.targetCollection)!
+          as IsarCollectionImpl;
   final linkId = col.schema.linkIdOrErr(link.linkName);
 
   final condition = _buildFilter(linkTargetCol, link.filter, alloc);

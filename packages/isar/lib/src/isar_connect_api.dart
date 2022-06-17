@@ -6,7 +6,6 @@ enum ConnectAction {
   listInstances('ext.isar.listInstances'),
   watchInstance('ext.isar.watchInstance'),
   executeQuery('ext.isar.executeQuery'),
-  watchQuery('ext.isar.watchQuery'),
   removeQuery('ext.isar.removeQuery'),
   exportQuery('ext.isar.exportQuery');
 

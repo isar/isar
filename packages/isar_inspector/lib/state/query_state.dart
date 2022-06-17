@@ -1,8 +1,7 @@
-// ignore_for_file: implementation_imports
+import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
-import 'package:isar/src/isar_connect_api.dart';
 
 import 'collections_state.dart';
 import 'instances_state.dart';
@@ -20,7 +19,7 @@ class QueryObject {
   }
 }
 
-final queryOffsetPod = StateProvider((ref) => 0);
+final queryPagePod = StateProvider((ref) => 0);
 
 final queryFilterPod = StateProvider<FilterOperation?>((ref) => null);
 
@@ -34,7 +33,7 @@ class QueryResult {
 }
 
 final queryResultsPod = FutureProvider<QueryResult>((ref) async {
-  final offset = ref.watch(queryOffsetPod);
+  final page = ref.watch(queryPagePod);
   final filter = ref.watch(queryFilterPod);
   final sort = ref.watch(querySortPod);
   final isarConnect = ref.watch(isarConnectPod.notifier);
@@ -46,13 +45,20 @@ final queryResultsPod = FutureProvider<QueryResult>((ref) async {
     collection: selectedCollection.name,
     filter: filter,
     sortProperty: sort,
-    offset: offset,
+    offset: page * objectsPerPage,
     limit: objectsPerPage + 1,
   ));
 
   final objects = result.map(QueryObject.new).toList();
+
+  if (objects.isEmpty && page != 0) {
+    Timer.run(() {
+      ref.read(queryPagePod.state).state = 0;
+    });
+  }
+
   return QueryResult(
-    objects: objects.sublist(0, objectsPerPage - 1),
+    objects: objects.isNotEmpty ? objects.sublist(0, objectsPerPage - 1) : [],
     hasMore: objects.length > objectsPerPage,
   );
 });

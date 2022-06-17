@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'dart:developer';
 import 'dart:async';
 
+import 'package:isar/src/common/isar_collection_common.dart';
 import 'package:meta/meta.dart';
 import 'package:meta/meta_meta.dart';
 
