@@ -22,8 +22,6 @@ const isarMaxId = 9223372036854775807;
 /// @nodoc
 const isarAutoIncrementId = -9223372036854775808;
 
-const githubUrl = 'https://github.com/isar/isar-core/releases/download';
-
 /// @nodoc
 @protected
 typedef IsarAbi = Abi;

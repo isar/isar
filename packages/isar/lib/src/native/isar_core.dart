@@ -26,6 +26,8 @@ const nullBool = 0;
 const falseBool = 1;
 const trueBool = 2;
 
+const _githubUrl = 'https://github.com/isar/isar-core/releases/download';
+
 var _isarInitialized = false;
 bool get isarInitialized => _isarInitialized;
 
@@ -112,7 +114,7 @@ Future<void> _downloadIsarCore(String libraryPath) async {
     return;
   }
   final remoteName = Abi.current().remoteName;
-  final uri = Uri.parse('$githubUrl/$isarCoreVersion/$remoteName');
+  final uri = Uri.parse('$_githubUrl/$isarCoreVersion/$remoteName');
   final request = await HttpClient().getUrl(uri);
   final response = await request.close();
   if (response.statusCode != 200) {
