@@ -216,27 +216,75 @@ class IsarCoreBindings {
       int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>,
           ffi.Pointer<CObject>)>();
 
+  int isar_put_by_index(
+    ffi.Pointer<CIsarCollection> collection,
+    ffi.Pointer<CIsarTxn> txn,
+    int index_id,
+    ffi.Pointer<CObject> object,
+  ) {
+    return _isar_put_by_index(
+      collection,
+      txn,
+      index_id,
+      object,
+    );
+  }
+
+  late final _isar_put_by_indexPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int64 Function(
+              ffi.Pointer<CIsarCollection>,
+              ffi.Pointer<CIsarTxn>,
+              ffi.Uint32,
+              ffi.Pointer<CObject>)>>('isar_put_by_index');
+  late final _isar_put_by_index = _isar_put_by_indexPtr.asFunction<
+      int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>, int,
+          ffi.Pointer<CObject>)>();
+
   int isar_put_all(
     ffi.Pointer<CIsarCollection> collection,
     ffi.Pointer<CIsarTxn> txn,
-    ffi.Pointer<CObjectLinkSet> objects_links,
+    ffi.Pointer<CObjectSet> objects,
   ) {
     return _isar_put_all(
       collection,
       txn,
-      objects_links,
+      objects,
     );
   }
 
   late final _isar_put_allPtr = _lookup<
       ffi.NativeFunction<
+          ffi.Int64 Function(ffi.Pointer<CIsarCollection>,
+              ffi.Pointer<CIsarTxn>, ffi.Pointer<CObjectSet>)>>('isar_put_all');
+  late final _isar_put_all = _isar_put_allPtr.asFunction<
+      int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>,
+          ffi.Pointer<CObjectSet>)>();
+
+  int isar_put_all_by_index(
+    ffi.Pointer<CIsarCollection> collection,
+    ffi.Pointer<CIsarTxn> txn,
+    int index_id,
+    ffi.Pointer<CObjectSet> objects,
+  ) {
+    return _isar_put_all_by_index(
+      collection,
+      txn,
+      index_id,
+      objects,
+    );
+  }
+
+  late final _isar_put_all_by_indexPtr = _lookup<
+      ffi.NativeFunction<
           ffi.Int64 Function(
               ffi.Pointer<CIsarCollection>,
               ffi.Pointer<CIsarTxn>,
-              ffi.Pointer<CObjectLinkSet>)>>('isar_put_all');
-  late final _isar_put_all = _isar_put_allPtr.asFunction<
-      int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>,
-          ffi.Pointer<CObjectLinkSet>)>();
+              ffi.Uint32,
+              ffi.Pointer<CObjectSet>)>>('isar_put_all_by_index');
+  late final _isar_put_all_by_index = _isar_put_all_by_indexPtr.asFunction<
+      int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>, int,
+          ffi.Pointer<CObjectSet>)>();
 
   int isar_delete(
     ffi.Pointer<CIsarCollection> collection,
@@ -1877,34 +1925,6 @@ class CObjectSet extends ffi.Struct {
 
   @ffi.Uint32()
   external int length;
-}
-
-class CLink extends ffi.Struct {
-  @ffi.Int64()
-  external int source_index;
-
-  @ffi.Int64()
-  external int target_id;
-
-  @ffi.Uint32()
-  external int link_id;
-}
-
-class CLinkSet extends ffi.Struct {
-  external ffi.Pointer<CLink> links;
-
-  @ffi.Uint32()
-  external int length;
-}
-
-class CObjectLinkSet extends ffi.Struct {
-  external CObjectSet objects;
-
-  external CLinkSet added_links;
-
-  external CLinkSet removed_links;
-
-  external CLinkSet reset_links;
 }
 
 class CIsarCollection extends ffi.Opaque {}
