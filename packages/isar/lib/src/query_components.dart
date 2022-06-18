@@ -2,6 +2,7 @@
 
 part of isar;
 
+/// A where clause to tranverse an Isar index.
 abstract class WhereClause {
   const WhereClause._();
 }
@@ -78,6 +79,7 @@ class IndexWhereClause extends WhereClause {
   /// are never included.
   final bool includeUpper;
 
+  /// Where clause that matches all index values. Useful to get sorted results.
   const IndexWhereClause.any({required this.indexName})
       : lower = null,
         upper = null,
@@ -85,6 +87,11 @@ class IndexWhereClause extends WhereClause {
         includeUpper = true,
         super._();
 
+  /// Where clause that matches all index values greater than the given [lower]
+  /// bound.
+  ///
+  /// For composite indexes, the first elements of the [lower] list are checked
+  /// for equality.
   const IndexWhereClause.greaterThan({
     required this.indexName,
     required List<Object?> lower,
@@ -94,6 +101,8 @@ class IndexWhereClause extends WhereClause {
         includeUpper = true,
         super._();
 
+  /// Where clause that matches all index values less than the given [upper]
+  /// bound.
   const IndexWhereClause.lessThan({
     required this.indexName,
     required List<Object?> upper,
@@ -103,6 +112,7 @@ class IndexWhereClause extends WhereClause {
         includeLower = true,
         super._();
 
+  /// Where clause that matches all index values equal to the given [value].
   const IndexWhereClause.equalTo({
     required this.indexName,
     required List<Object?> value,
@@ -112,6 +122,8 @@ class IndexWhereClause extends WhereClause {
         includeUpper = true,
         super._();
 
+  /// Where clause that matches all index values between the given [lower] and
+  /// [upper] bounds.
   const IndexWhereClause.between({
     required this.indexName,
     this.lower,
@@ -132,6 +144,7 @@ class LinkWhereClause extends WhereClause {
   /// The id of the source object.
   final int id;
 
+  /// Create a where clause for the specified link.
   const LinkWhereClause({
     required this.linkCollection,
     required this.linkName,
@@ -142,17 +155,14 @@ class LinkWhereClause extends WhereClause {
 /// @nodoc
 @protected
 abstract class FilterOperation {
-  const FilterOperation();
+  const FilterOperation._();
 }
 
 /// The type of dynamic filter conditions.
-///
-/// For lists, at least one of the values in the list has to match. For
-/// `isNull`, the entire list hast to be null.
-enum ConditionType {
-  eq,
-  gt,
-  lt,
+enum FilterConditionType {
+  equalTo,
+  greaterThan,
+  lessThan,
   between,
   startsWith,
   endsWith,
@@ -162,21 +172,21 @@ enum ConditionType {
 }
 
 /// Create a filter condition dynamically.
-class FilterCondition<T> extends FilterOperation {
+class FilterCondition extends FilterOperation {
   /// Type of the filter condition.
-  final ConditionType type;
+  final FilterConditionType type;
 
   /// Property used for comparisons.
   final String property;
 
   /// Value used for comparisons. Lower bound for `ConditionType.between`.
-  final T? value1;
+  final Object? value1;
 
   /// Should `value1` be part of the results.
   final bool include1;
 
   /// Upper bound for `ConditionType.between`.
-  final T? value2;
+  final Object? value2;
 
   /// Should `value1` be part of the results.
   final bool include2;
@@ -184,33 +194,159 @@ class FilterCondition<T> extends FilterOperation {
   /// Are string operations case sensitive.
   final bool caseSensitive;
 
-  const FilterCondition({
-    required this.type,
+  /// Filters the results to only include objects where the property equals
+  /// [value].
+  ///
+  /// For lists, at least one of the values in the list has to match.
+  const FilterCondition.equalTo({
+    required String property,
+    required Object? value,
+    this.caseSensitive = true,
+  })  : type = FilterConditionType.equalTo,
+        property = property,
+        value1 = value,
+        include1 = true,
+        value2 = null,
+        include2 = false,
+        super._();
+
+  /// Filters the results to only include objects where the property is greater
+  /// than [value].
+  ///
+  /// For lists, at least one of the values in the list has to match.
+  const FilterCondition.greaterThan({
     required this.property,
-    T? value,
+    required Object? value,
     bool include = false,
     this.caseSensitive = true,
-  })  : value1 = value,
+  })  : type = FilterConditionType.greaterThan,
+        value1 = value,
         include1 = include,
         value2 = null,
         include2 = false,
-        assert(type != ConditionType.between);
+        super._();
 
+  /// Filters the results to only include objects where the property is less
+  /// than [value].
+  ///
+  /// For lists, at least one of the values in the list has to match.
+  const FilterCondition.lessThan({
+    required this.property,
+    required Object? value,
+    bool include = false,
+    this.caseSensitive = true,
+  })  : type = FilterConditionType.lessThan,
+        value1 = value,
+        include1 = include,
+        value2 = null,
+        include2 = false,
+        super._();
+
+  /// Filters the results to only include objects where the property is
+  /// between [lower] and [upper].
+  ///
+  /// For lists, at least one of the values in the list has to match.
   const FilterCondition.between({
     required this.property,
-    T? lower,
+    Object? lower,
     bool includeLower = true,
-    T? upper,
+    Object? upper,
     bool includeUpper = true,
     this.caseSensitive = true,
   })  : value1 = lower,
         include1 = includeLower,
         value2 = upper,
         include2 = includeUpper,
-        type = ConditionType.between;
+        type = FilterConditionType.between,
+        super._();
+
+  /// Filters the results to only include objects where the property starts
+  /// with [value].
+  ///
+  /// For lists, at least one of the values in the list has to match.
+  const FilterCondition.startsWith({
+    required this.property,
+    required String value,
+    this.caseSensitive = true,
+  })  : type = FilterConditionType.startsWith,
+        value1 = value,
+        include1 = true,
+        value2 = null,
+        include2 = false,
+        super._();
+
+  /// Filters the results to only include objects where the property ends with
+  /// [value].
+  ///
+  /// For lists, at least one of the values in the list has to match.
+  const FilterCondition.endsWith({
+    required this.property,
+    required String value,
+    this.caseSensitive = true,
+  })  : type = FilterConditionType.endsWith,
+        value1 = value,
+        include1 = true,
+        value2 = null,
+        include2 = false,
+        super._();
+
+  /// Filters the results to only include objects where the property contains
+  /// [value].
+  ///
+  /// For lists, at least one of the values in the list has to match.
+  const FilterCondition.contains({
+    required this.property,
+    required String value,
+    this.caseSensitive = true,
+  })  : type = FilterConditionType.contains,
+        value1 = value,
+        include1 = true,
+        value2 = null,
+        include2 = false,
+        super._();
+
+  /// Filters the results to only include objects where the property matches
+  /// the [wildcard].
+  ///
+  /// For lists, at least one of the values in the list has to match.
+  const FilterCondition.matches({
+    required this.property,
+    required String wildcard,
+    this.caseSensitive = true,
+  })  : type = FilterConditionType.matches,
+        value1 = wildcard,
+        include1 = true,
+        value2 = null,
+        include2 = false,
+        super._();
+
+  /// Filters the results to only include objects where the property is null.
+  ///
+  /// Lists match if they are null.
+  const FilterCondition.isNull({
+    required this.property,
+  })  : type = FilterConditionType.isNull,
+        value1 = null,
+        include1 = false,
+        value2 = null,
+        include2 = false,
+        caseSensitive = false,
+        super._();
+
+  /// @nodoc
+  @protected
+  const FilterCondition({
+    required this.type,
+    required this.property,
+    this.value1,
+    this.value2,
+    required this.include1,
+    required this.include2,
+    required this.caseSensitive,
+  }) : super._();
 }
 
-/// Thw type of filter groups.
+/// The type of filter groups.
 enum FilterGroupType {
   and,
   or,
@@ -219,22 +355,34 @@ enum FilterGroupType {
 
 /// Group one or more filter conditions.
 class FilterGroup extends FilterOperation {
-  /// The filter(s) to be grouped.
-  final List<FilterOperation> filters;
-
   /// Type of this group.
   final FilterGroupType type;
 
+  /// The filter(s) to be grouped.
+  final List<FilterOperation> filters;
+
   /// Create a logical AND filter group.
-  const FilterGroup.and(this.filters) : type = FilterGroupType.and;
+  const FilterGroup.and(this.filters)
+      : type = FilterGroupType.and,
+        super._();
 
   /// Create a logical OR filter group.
-  const FilterGroup.or(this.filters) : type = FilterGroupType.or;
+  const FilterGroup.or(this.filters)
+      : type = FilterGroupType.or,
+        super._();
 
   /// Negate a filter.
   FilterGroup.not(FilterOperation filter)
       : filters = [filter],
-        type = FilterGroupType.not;
+        type = FilterGroupType.not,
+        super._();
+
+  /// @nodoc
+  @protected
+  FilterGroup({
+    required this.type,
+    required this.filters,
+  }) : super._();
 }
 
 /// Sort order
@@ -251,6 +399,7 @@ class SortProperty {
   /// Sort order.
   final Sort sort;
 
+  /// Create a sort property.
   const SortProperty({required this.property, required this.sort});
 }
 
@@ -262,6 +411,7 @@ class DistinctProperty {
   /// Should Strings be case sensitive?
   final bool? caseSensitive;
 
+  /// Create a distinct property.
   const DistinctProperty({required this.property, this.caseSensitive});
 }
 
@@ -276,9 +426,10 @@ class LinkFilter extends FilterOperation {
   /// The name of the collection the link points to.
   final String targetCollection;
 
+  /// Create a filter condition based on a link.
   const LinkFilter({
     required this.filter,
     required this.linkName,
     required this.targetCollection,
-  });
+  }) : super._();
 }

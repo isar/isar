@@ -155,7 +155,8 @@ Stream<void> wrapIsarPort(ReceivePort port) {
       if (event == 0) {
         portStreamController.add(null);
       } else {
-        portStreamController.addError(isarErrorFromResult(event)!);
+        final error = isarErrorFromResult(event as int);
+        portStreamController.addError(error!);
       }
     },
     onDone: () {

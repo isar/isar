@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:isar_inspector/app_state.dart';
 import 'package:isar_inspector/common.dart';
-import 'package:provider/provider.dart';
 
-class InstanceSelector extends StatefulWidget {
+import 'state/instances_state.dart';
+
+class InstanceSelector extends ConsumerStatefulWidget {
   const InstanceSelector({Key? key}) : super(key: key);
 
   @override
-  State<InstanceSelector> createState() => _InstanceSelectorState();
+  ConsumerState<InstanceSelector> createState() => _InstanceSelectorState();
 }
 
-class _InstanceSelectorState extends State<InstanceSelector>
+class _InstanceSelectorState extends ConsumerState<InstanceSelector>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(milliseconds: 500),
@@ -39,8 +40,9 @@ class _InstanceSelectorState extends State<InstanceSelector>
 
   @override
   Widget build(BuildContext context) {
-    final state = Provider.of<AppState>(context);
-    final theme = Theme.of(context);
+    final instances = ref.watch(instancesPod).value!;
+    final selectedInstance = ref.watch(selectedInstancePod).value!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -61,33 +63,60 @@ class _InstanceSelectorState extends State<InstanceSelector>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const SizedBox(height: 15),
-                      for (var instance in state.instances
-                          .where((e) => e != state.selectedInstance))
-                        _buildInstanceButton(theme, instance),
+                      for (var instance in instances)
+                        if (instance != selectedInstance)
+                          InstanceButton(
+                            instance: instance,
+                            onTap: () {
+                              ref.read(selectedInstanceNamePod.state).state =
+                                  instance;
+                              _controller.reverse();
+                            },
+                          ),
                       const SizedBox(height: 80),
                     ],
                   ),
                 ),
               ),
             ),
-            if (state.selectedInstance != null)
-              _buildSelectedInstanceButton(
-                  state.selectedInstance!, state.instances.length > 1),
+            SelectedInstanceButton(
+              instance: selectedInstance,
+              hasMultiple: instances.length > 1,
+              color: _animation.status != AnimationStatus.dismissed
+                  ? Colors.blue
+                  : null,
+              onTap: () {
+                if (_controller.status == AnimationStatus.completed) {
+                  _controller.reverse();
+                } else {
+                  _controller.forward();
+                }
+              },
+            ),
           ],
         ),
       ],
     );
   }
+}
 
-  Widget _buildInstanceButton(ThemeData theme, String instance) {
+class InstanceButton extends StatelessWidget {
+  final String instance;
+  final VoidCallback onTap;
+
+  const InstanceButton({
+    Key? key,
+    required this.instance,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: IsarCard(
         color: Colors.transparent,
-        onTap: () {
-          context.read<AppState>().selectedInstance = instance;
-          _controller.reverse();
-        },
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Center(
@@ -105,26 +134,30 @@ class _InstanceSelectorState extends State<InstanceSelector>
       ),
     );
   }
+}
 
-  Widget _buildSelectedInstanceButton(
-      String selectedInstance, bool hasMultiple) {
+class SelectedInstanceButton extends StatelessWidget {
+  final String instance;
+  final VoidCallback onTap;
+  final bool hasMultiple;
+  final Color? color;
+
+  const SelectedInstanceButton({
+    Key? key,
+    required this.instance,
+    required this.onTap,
+    required this.hasMultiple,
+    required this.color,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
       height: 65,
       child: IsarCard(
-        color:
-            _animation.status != AnimationStatus.dismissed ? Colors.blue : null,
+        color: color,
         radius: BorderRadius.circular(15),
-        onTap: hasMultiple
-            ? () {
-                if (context.read<AppState>().instances.length > 1) {
-                  if (_controller.status == AnimationStatus.completed) {
-                    _controller.reverse();
-                  } else {
-                    _controller.forward();
-                  }
-                }
-              }
-            : null,
+        onTap: hasMultiple ? onTap : null,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -140,7 +173,7 @@ class _InstanceSelectorState extends State<InstanceSelector>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      selectedInstance,
+                      instance,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,

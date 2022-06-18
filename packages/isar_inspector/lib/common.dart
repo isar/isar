@@ -7,14 +7,14 @@ class IsarCard extends StatelessWidget {
   final VoidCallback? onLongPress;
   final BorderRadius radius;
 
-  IsarCard(
-      {Key? key,
-      required this.child,
-      this.color,
-      this.onTap,
-      this.onLongPress,
-      BorderRadius? radius})
-      : radius = radius ?? BorderRadius.circular(20),
+  IsarCard({
+    Key? key,
+    required this.child,
+    this.color,
+    this.onTap,
+    this.onLongPress,
+    BorderRadius? radius,
+  })  : radius = radius ?? BorderRadius.circular(20),
         super(key: key);
 
   @override
@@ -23,7 +23,7 @@ class IsarCard extends StatelessWidget {
       margin: EdgeInsets.zero,
       color: color,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: radius,
       ),
       clipBehavior: Clip.antiAlias,
       elevation: 0,

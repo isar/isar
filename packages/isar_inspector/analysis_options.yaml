@@ -5,5 +5,8 @@ analyzer:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
 
+  language:
+    strict-casts: true
+
   errors:
     avoid_print: ignore

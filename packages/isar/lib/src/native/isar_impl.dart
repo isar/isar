@@ -15,7 +15,7 @@ class IsarImpl extends Isar implements Finalizable {
   final Pointer<CIsarInstance> ptr;
   late final NativeFinalizer _finalizer;
 
-  final List<Future> _activeAsyncTxns = [];
+  final List<Future<void>> _activeAsyncTxns = [];
 
   final _syncTxnPtrPtr = malloc<Pointer<CIsarTxn>>();
   SyncTxn? _currentTxnSync;
@@ -37,7 +37,7 @@ class IsarImpl extends Isar implements Finalizable {
     requireOpen();
     requireNotInTxn();
 
-    final completer = Completer();
+    final completer = Completer<void>();
     _activeAsyncTxns.add(completer.future);
 
     final port = ReceivePort();
@@ -88,7 +88,7 @@ class IsarImpl extends Isar implements Finalizable {
   }
 
   Future<T> getTxn<T>(bool write, Future<T> Function(Txn txn) callback) {
-    Txn? currentTxn = Zone.current[_zoneTxn];
+    final currentTxn = Zone.current[_zoneTxn] as Txn?;
     if (currentTxn != null) {
       if (write && !currentTxn.write) {
         throw IsarError(
@@ -97,7 +97,7 @@ class IsarImpl extends Isar implements Finalizable {
       return callback(currentTxn);
     } else if (!write) {
       return _txn(false, false, () {
-        return callback(Zone.current[_zoneTxn]);
+        return callback(Zone.current[_zoneTxn] as Txn);
       });
     } else {
       throw IsarError('Write operations require an explicit transaction.');
@@ -217,9 +217,9 @@ class Txn {
 
   final alloc = Arena(malloc);
 
-  final _completers = Queue<Completer>();
+  final _completers = Queue<Completer<void>>();
 
-  Txn._(this.ptr, this.write, Stream stream) {
+  Txn._(this.ptr, this.write, Stream<void> stream) {
     stream.listen(
       (_) {
         assert(
@@ -227,25 +227,25 @@ class Txn {
         final completer = _completers.removeFirst();
         completer.complete();
       },
-      onError: (e) {
+      onError: (dynamic e) {
         assert(
             _completers.isNotEmpty, 'There should be a completer listening.');
         final completer = _completers.removeFirst();
-        completer.completeError(e);
+        completer.completeError(e as Object);
       },
     );
   }
 
   Future<void> wait() {
-    final completer = Completer();
+    final completer = Completer<void>();
     _completers.add(completer);
     return completer.future;
   }
 
-  Pointer<CObjectSet> allocRawObjSet(int length) {
-    final cObjSetPtr = malloc<CObjectSet>();
+  Pointer<CObjectSet> allocCObjectSet(int length) {
+    final cObjSetPtr = alloc<CObjectSet>();
     cObjSetPtr.ref
-      ..objects = malloc<CObject>(length)
+      ..objects = alloc<CObject>(length)
       ..length = length;
     return cObjSetPtr;
   }

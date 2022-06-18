@@ -23,7 +23,7 @@ class Value {
 }
 
 class Listener<T> {
-  late StreamSubscription subscription;
+  late StreamSubscription<void> subscription;
   final _unprocessed = <T>[];
   Completer<T>? _completer;
 
@@ -48,11 +48,11 @@ class Listener<T> {
     }
   }
 
-  Future done() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+  Future<void> done() async {
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     await subscription.cancel();
     expect(_completer, null);
-    expect(_unprocessed, []);
+    expect(_unprocessed, <dynamic>[]);
   }
 }
 
@@ -307,7 +307,7 @@ void tests() {
         if (kIsWeb) {
           await listenerLazy.next;
         }
-        expect(await listener.next, []);
+        expect(await listener.next, <dynamic>[]);
 
         await listenerLazy.done();
         await listener.done();
@@ -322,12 +322,12 @@ void tests() {
 
         isar.tWriteTxn(() => col.tDeleteAll([1, 2]));
         await listenerLazy.next;
-        expect(await listener.next, []);
+        expect(await listener.next, <dynamic>[]);
 
         await isar.tWriteTxn(() => col.tDeleteAll([3]));
         if (kIsWeb) {
           await listenerLazy.next;
-          expect(await listener.next, []);
+          expect(await listener.next, <dynamic>[]);
         }
 
         await listenerLazy.done();
@@ -351,7 +351,7 @@ void tests() {
         if (kIsWeb) {
           await listenerLazy.next;
         }
-        expect(await listener.next, []);
+        expect(await listener.next, <dynamic>[]);
 
         await listenerLazy.done();
         await listener.done();
@@ -366,12 +366,12 @@ void tests() {
 
         isar.writeTxn(() => col.deleteAllByValue([obj1.value, obj2.value]));
         await listenerLazy.next;
-        expect(await listener.next, []);
+        expect(await listener.next, <dynamic>[]);
 
         await isar.writeTxn(() => col.deleteAllByValue([obj3.value]));
         if (kIsWeb) {
           await listenerLazy.next;
-          expect(await listener.next, []);
+          expect(await listener.next, <dynamic>[]);
         }
 
         await listenerLazy.done();

@@ -10,16 +10,17 @@ import 'sync_async_helper.dart';
 
 const bool kIsWeb = identical(0, 0.0);
 
-Future qEqualSet<T>(Future<Iterable<T>> actual, Iterable<T> target) async {
+Future<void> qEqualSet<T>(
+    Future<Iterable<T>> actual, Iterable<T> target) async {
   expect((await actual).toSet(), target.toSet());
 }
 
-Future qEqual<T>(Future<Iterable<T>> actual, List<T> target) async {
+Future<void> qEqual<T>(Future<Iterable<T>> actual, List<T> target) async {
   final results = (await actual).toList();
   qEqualSync(results, target);
 }
 
-Future qEqualSync<T>(List<T> actual, List<T> target) async {
+Future<void> qEqualSync<T>(List<T> actual, List<T> target) async {
   if (actual is List<double?>) {
     for (var i = 0; i < actual.length; i++) {
       final result = (actual[i] as double) - (target[i] as double);

@@ -15,7 +15,7 @@ final minStr = Pointer<Char>.fromAddress(0);
 final maxStr = '\u{FFFFF}'.toNativeUtf8().cast<Char>();
 
 Query<T> buildNativeQuery<T>(
-  IsarCollectionImpl col,
+  IsarCollectionImpl<dynamic> col,
   List<WhereClause> whereClauses,
   bool whereDistinct,
   Sort whereSort,
@@ -78,11 +78,10 @@ Query<T> buildNativeQuery<T>(
   if (property == null) {
     deserialize = (col as IsarCollectionImpl<T>).deserializeObjects;
   } else {
-    propertyId = col.schema.propertyIdOrErr(property);
-    deserialize = (cObjSet) => col.deserializeProperty(
-          cObjSet,
-          propertyId!,
-        );
+    propertyId = property != col.schema.idName
+        ? col.schema.propertyIdOrErr(property)
+        : null;
+    deserialize = (cObjSet) => col.deserializeProperty(cObjSet, propertyId);
   }
 
   final queryPtr = IC.isar_qb_build(qbPtr);
@@ -100,8 +99,12 @@ void _addIdWhereClause(
   ));
 }
 
-void _addIndexWhereClause(CollectionSchema schema, Pointer<CQueryBuilder> qbPtr,
-    IndexWhereClause wc, bool distinct, Sort sort) {
+void _addIndexWhereClause(
+    CollectionSchema<dynamic> schema,
+    Pointer<CQueryBuilder> qbPtr,
+    IndexWhereClause wc,
+    bool distinct,
+    Sort sort) {
   late Pointer<CIndexKey> lowerPtr;
   if (wc.lower != null) {
     lowerPtr = buildIndexKey(schema, wc.indexName, wc.lower!);
@@ -130,7 +133,7 @@ void _addIndexWhereClause(CollectionSchema schema, Pointer<CQueryBuilder> qbPtr,
 void _addLinkWhereClause(
     Isar isar, Pointer<CQueryBuilder> qbPtr, LinkWhereClause wc) {
   final linkCol =
-      isar.getCollectionInternal(wc.linkCollection) as IsarCollectionImpl;
+      isar.getCollectionByNameInternal(wc.linkCollection) as IsarCollectionImpl;
   final linkId = linkCol.schema.linkIdOrErr(wc.linkName);
   nCall(IC.isar_qb_add_link_where_clause(qbPtr, linkCol.ptr, linkId, wc.id));
 }
@@ -146,7 +149,7 @@ int boolToByte(bool? value) {
 }
 
 Pointer<CFilter>? _buildFilter(
-  IsarCollectionImpl col,
+  IsarCollectionImpl<dynamic> col,
   FilterOperation filter,
   Allocator alloc,
 ) {
@@ -162,7 +165,7 @@ Pointer<CFilter>? _buildFilter(
 }
 
 Pointer<CFilter>? _buildFilterGroup(
-    IsarCollectionImpl col, FilterGroup group, Allocator alloc) {
+    IsarCollectionImpl<dynamic> col, FilterGroup group, Allocator alloc) {
   final builtConditions = group.filters
       .map((op) => _buildFilter(col, op, alloc))
       .where((it) => it != null)
@@ -197,9 +200,10 @@ Pointer<CFilter>? _buildFilterGroup(
 }
 
 Pointer<CFilter>? _buildLink(
-    IsarCollectionImpl col, LinkFilter link, Allocator alloc) {
-  final linkTargetCol = col.isar.getCollectionInternal(link.targetCollection)!
-      as IsarCollectionImpl;
+    IsarCollectionImpl<dynamic> col, LinkFilter link, Allocator alloc) {
+  final linkTargetCol =
+      col.isar.getCollectionByNameInternal(link.targetCollection)!
+          as IsarCollectionImpl;
   final linkId = col.schema.linkIdOrErr(link.linkName);
 
   final condition = _buildFilter(linkTargetCol, link.filter, alloc);
@@ -217,8 +221,8 @@ Pointer<CFilter>? _buildLink(
   return filterPtrPtr.value;
 }
 
-Pointer<CFilter> _buildCondition(
-    IsarCollectionImpl col, FilterCondition condition, Allocator alloc) {
+Pointer<CFilter> _buildCondition(IsarCollectionImpl<dynamic> col,
+    FilterCondition condition, Allocator alloc) {
   final val1Raw = condition.value1;
   final val1 =
       val1Raw is DateTime ? val1Raw.toUtc().microsecondsSinceEpoch : val1Raw;
@@ -231,10 +235,10 @@ Pointer<CFilter> _buildCondition(
       ? col.schema.propertyIdOrErr(condition.property)
       : null;
   switch (condition.type) {
-    case ConditionType.isNull:
+    case FilterConditionType.isNull:
       return _buildConditionIsNull(
           colPtr: col.ptr, propertyId: propertyId, alloc: alloc);
-    case ConditionType.eq:
+    case FilterConditionType.equalTo:
       return _buildConditionEqual(
         colPtr: col.ptr,
         propertyId: propertyId,
@@ -243,7 +247,7 @@ Pointer<CFilter> _buildCondition(
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
       );
-    case ConditionType.between:
+    case FilterConditionType.between:
       return _buildConditionBetween(
         colPtr: col.ptr,
         propertyId: propertyId,
@@ -254,7 +258,7 @@ Pointer<CFilter> _buildCondition(
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
       );
-    case ConditionType.lt:
+    case FilterConditionType.lessThan:
       return _buildConditionLessThan(
         colPtr: col.ptr,
         propertyId: propertyId,
@@ -263,7 +267,7 @@ Pointer<CFilter> _buildCondition(
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
       );
-    case ConditionType.gt:
+    case FilterConditionType.greaterThan:
       return _buildConditionGreaterThan(
         colPtr: col.ptr,
         propertyId: propertyId,
@@ -437,7 +441,7 @@ Pointer<CFilter> _buildConditionGreaterThan({
 
 Pointer<CFilter> _buildConditionStringOp({
   required Pointer<CIsarCollection> colPtr,
-  required ConditionType conditionType,
+  required FilterConditionType conditionType,
   required int? propertyId,
   required Object? val,
   required bool include,
@@ -448,19 +452,19 @@ Pointer<CFilter> _buildConditionStringOp({
   if (val is String) {
     final strPtr = val.toNativeUtf8(allocator: alloc);
     switch (conditionType) {
-      case ConditionType.startsWith:
+      case FilterConditionType.startsWith:
         nCall(IC.isar_filter_string_starts_with(
             colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId!));
         break;
-      case ConditionType.endsWith:
+      case FilterConditionType.endsWith:
         nCall(IC.isar_filter_string_ends_with(
             colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId!));
         break;
-      case ConditionType.contains:
+      case FilterConditionType.contains:
         nCall(IC.isar_filter_string_contains(
             colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId!));
         break;
-      case ConditionType.matches:
+      case FilterConditionType.matches:
         nCall(IC.isar_filter_string_matches(
             colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId!));
         break;

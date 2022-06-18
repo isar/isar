@@ -5,8 +5,12 @@ import 'dart:typed_data';
 import 'dart:developer';
 import 'dart:async';
 
+import 'package:isar/src/common/isar_collection_common.dart';
 import 'package:meta/meta.dart';
 import 'package:meta/meta_meta.dart';
+
+import 'src/isar_connect_api.dart';
+import 'src/version.dart';
 
 import 'src/native/isar_native.dart'
     if (dart.library.html) 'src/web/isar_web.dart';

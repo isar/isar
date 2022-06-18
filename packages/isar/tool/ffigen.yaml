@@ -9,13 +9,14 @@ headers:
 structs:
   dependency-only: opaque
   include:
-    - RawObject
-    - RawObjectSet
+    - CObject
+    - CObjectSet
+    - CObjectCollectionSet
+    - CLink
+    - CLinkSet
+    - CObjectLinkSet
   rename:
-    RawObject: CObject
-    RawObjectSet: CObjectSet
-    IsarDartTxn: CIsarTxn
-    '(.*)': 'C$1'
+    '^(?!C)(.*)': 'C$1'
   
 unions:
   dependency-only: opaque

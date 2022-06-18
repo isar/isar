@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
+import 'package:isar/src/common/isar_collection_common.dart';
 
 import 'bindings.dart';
 import 'isar_collection_impl.dart';
@@ -13,7 +14,7 @@ import 'isar_impl.dart';
 final _isarPtrPtr = malloc<Pointer<CIsarInstance>>();
 
 void _initializeInstance(
-    Allocator alloc, IsarImpl isar, List<CollectionSchema> schemas) {
+    Allocator alloc, IsarImpl isar, List<CollectionSchema<dynamic>> schemas) {
   final maxProperties = schemas
       .map((e) => e.propertyIds.length)
       .reduce((value, element) => max(value, element));
@@ -21,7 +22,7 @@ void _initializeInstance(
   final colPtrPtr = alloc<Pointer<CIsarCollection>>();
   final offsetsPtr = alloc<Uint32>(maxProperties);
 
-  final cols = <Type, IsarCollection>{};
+  final cols = <Type, IsarCollectionBase<dynamic>>{};
   for (var i = 0; i < schemas.length; i++) {
     final schema = schemas[i];
     nCall(IC.isar_get_collection(isar.ptr, colPtrPtr, i));
@@ -45,7 +46,7 @@ void _initializeInstance(
 }
 
 Future<Isar> openIsar({
-  required List<CollectionSchema> schemas,
+  required List<CollectionSchema<dynamic>> schemas,
   String? directory,
   String name = 'isar',
   bool relaxedDurability = true,
@@ -74,7 +75,7 @@ Future<Isar> openIsar({
 }
 
 Isar openIsarSync({
-  required List<CollectionSchema> schemas,
+  required List<CollectionSchema<dynamic>> schemas,
   String? directory,
   String name = 'isar',
   bool relaxedDurability = true,

@@ -84,8 +84,7 @@ class FilterGenerator {
     final optional = caseSensitiveProperty(p);
     return '''
     ${mPrefix(p)}EqualTo(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
-      return addFilterConditionInternal(FilterCondition(
-        type: ConditionType.eq,
+      return addFilterConditionInternal(FilterCondition.equalTo(
         property: '${p.isarName.esc}',
         value: ${toIsar(p, 'value')},
         ${caseSensitiveValue(p)}
@@ -98,8 +97,7 @@ class FilterGenerator {
     final optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}GreaterThan(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
-      return addFilterConditionInternal(FilterCondition(
-        type: ConditionType.gt,
+      return addFilterConditionInternal(FilterCondition.greaterThan(
         include: ${!p.isarType.containsFloat ? 'include' : 'false'},
         property: '${p.isarName.esc}',
         value: ${toIsar(p, 'value')},
@@ -113,8 +111,7 @@ class FilterGenerator {
     final optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}LessThan(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
-      return addFilterConditionInternal(FilterCondition(
-        type: ConditionType.lt,
+      return addFilterConditionInternal(FilterCondition.lessThan(
         include: ${!p.isarType.containsFloat ? 'include' : 'false'},
         property: '${p.isarName.esc}',
         value: ${toIsar(p, 'value')},
@@ -144,17 +141,14 @@ class FilterGenerator {
   String generateIsNull(ObjectProperty p) {
     var code = '''
     ${mPrefix(p, false)}IsNull() {
-      return addFilterConditionInternal(FilterCondition(
-        type: ConditionType.isNull,
+      return addFilterConditionInternal(const FilterCondition.isNull(
         property: '${p.isarName.esc}',
-        value: null,
       ));
     }''';
     if (p.isarType.isList && p.isarType != IsarType.bytes) {
       code += '''
       ${mPrefix(p)}IsNull() {
-        return addFilterConditionInternal(FilterCondition(
-          type: ConditionType.eq,
+        return addFilterConditionInternal(const FilterCondition.equalTo(
           property: '${p.isarName.esc}',
           value: null,
         ));
@@ -166,8 +160,7 @@ class FilterGenerator {
   String generateStringStartsWith(ObjectProperty p) {
     return '''
     ${mPrefix(p)}StartsWith(${vType(p, false)} value, {bool caseSensitive = true,}) {
-      return addFilterConditionInternal(FilterCondition(
-        type: ConditionType.startsWith,
+      return addFilterConditionInternal(FilterCondition.startsWith(
         property: '${p.isarName.esc}',
         value: ${toIsar(p, 'value')},
         caseSensitive: caseSensitive,
@@ -178,8 +171,7 @@ class FilterGenerator {
   String generateStringEndsWith(ObjectProperty p) {
     return '''
     ${mPrefix(p)}EndsWith(${vType(p, false)} value, {bool caseSensitive = true,}) {
-      return addFilterConditionInternal(FilterCondition(
-        type: ConditionType.endsWith,
+      return addFilterConditionInternal(FilterCondition.endsWith(
         property: '${p.isarName.esc}',
         value: ${toIsar(p, 'value')},
         caseSensitive: caseSensitive,
@@ -190,8 +182,7 @@ class FilterGenerator {
   String generateStringContains(ObjectProperty p) {
     return '''
     ${mPrefix(p)}Contains(${vType(p, false)} value, {bool caseSensitive = true}) {
-      return addFilterConditionInternal(FilterCondition(
-        type: ConditionType.contains,
+      return addFilterConditionInternal(FilterCondition.contains(
         property: '${p.isarName.esc}',
         value: ${toIsar(p, 'value')},
         caseSensitive: caseSensitive,
@@ -202,10 +193,9 @@ class FilterGenerator {
   String generateStringMatches(ObjectProperty p) {
     return '''
     ${mPrefix(p)}Matches(String pattern, {bool caseSensitive = true}) {
-      return addFilterConditionInternal(FilterCondition(
-        type: ConditionType.matches,
+      return addFilterConditionInternal(FilterCondition.matches(
         property: '${p.isarName.esc}',
-        value: pattern,
+        wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
     }''';

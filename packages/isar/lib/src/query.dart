@@ -2,6 +2,9 @@ part of isar;
 
 /// Querying is how you find records that match certain conditions.
 abstract class Query<T> {
+  /// The corresponding Isar instance.
+  Isar get isar;
+
   /// {@template query_find_first}
   /// Find the first object that matches this query or `null` if no object
   /// matches.

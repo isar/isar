@@ -4,7 +4,7 @@ import 'package:petitparser/petitparser.dart';
 import 'package:dartx/dartx.dart';
 
 class QueryParser {
-  final List<Property> properties;
+  final List<IProperty> properties;
   late final Parser _parser;
 
   QueryParser(this.properties) {
@@ -49,8 +49,7 @@ class QueryParser {
     switch (cmp) {
       case '!=':
       case '==':
-        final filter = FilterCondition(
-          type: ConditionType.eq,
+        final filter = FilterCondition.equalTo(
           property: propertyName,
           value: value,
         );
@@ -61,30 +60,22 @@ class QueryParser {
         }
       case '>':
       case '>=':
+        return FilterCondition.greaterThan(
+          property: propertyName,
+          value: value,
+          include: cmp == '>=',
+        );
       case '<':
       case '<=':
-        final filter = FilterCondition(
-          type: cmp == '>=' || cmp == '>' ? ConditionType.gt : ConditionType.lt,
+        return FilterCondition.lessThan(
           property: propertyName,
           value: value,
+          include: cmp == '<=',
         );
-        if (cmp == '>=' || cmp == '<=') {
-          return FilterGroup.or([
-            filter,
-            FilterCondition(
-              type: ConditionType.eq,
-              property: propertyName,
-              value: value,
-            ),
-          ]);
-        } else {
-          return filter;
-        }
       case 'matches':
-        return FilterCondition(
-          type: ConditionType.matches,
+        return FilterCondition.matches(
           property: propertyName,
-          value: value,
+          wildcard: value as String,
         );
       default:
         throw 'unreachable';
@@ -194,7 +185,7 @@ class AndOr {
     if (and) {
       seperator = ' && ';
     } else {
-      seperator = ' || ';
+      seperator = ' || ';
     }
     final joined = conditions.join(seperator);
     return '($joined)';
