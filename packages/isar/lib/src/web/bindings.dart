@@ -50,7 +50,7 @@ class IsarInstanceJs {
 
 typedef ChangeCallbackJs = void Function();
 
-typedef ObjectChangeCallbackJs = void Function(Object object);
+typedef ObjectChangeCallbackJs = void Function(Object? object);
 
 typedef QueryChangeCallbackJs = void Function(List<dynamic> results);
 

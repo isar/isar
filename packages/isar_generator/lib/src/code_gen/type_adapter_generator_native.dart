@@ -72,7 +72,7 @@ _GetPropResult _generateGetPropertyValue(
       code += '''
         final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
         $stringBytesList.add(bytes);
-        $dynamicSize += bytes.length;''';
+        $dynamicSize += bytes.length as int;''';
       if (property.elementNullable) {
         code += '''
           } else {
@@ -124,7 +124,7 @@ String generateSerializeNative(ObjectInfo object) {
   }
 
   code += '''
-    final size = ${sizes.join(' + ')};
+    final size = (${sizes.join(' + ')}) as int;
     cObj.buffer = alloc(size);
     cObj.buffer_length = size;
 

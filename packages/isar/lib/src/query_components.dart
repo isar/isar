@@ -66,14 +66,14 @@ class IndexWhereClause extends WhereClause {
   final String indexName;
 
   /// The lower bound of the where clause.
-  final List<Object?>? lower;
+  final IndexKey? lower;
 
   /// Whether the lower bound should be included in the results. Double values
   /// are never included.
   final bool includeLower;
 
   /// The upper bound of the where clause.
-  final List<Object?>? upper;
+  final IndexKey? upper;
 
   /// Whether the upper bound should be included in the results. Double values
   /// are never included.
@@ -94,7 +94,7 @@ class IndexWhereClause extends WhereClause {
   /// for equality.
   const IndexWhereClause.greaterThan({
     required this.indexName,
-    required List<Object?> lower,
+    required IndexKey lower,
     this.includeLower = true,
   })  : lower = lower,
         upper = null,
@@ -105,7 +105,7 @@ class IndexWhereClause extends WhereClause {
   /// bound.
   const IndexWhereClause.lessThan({
     required this.indexName,
-    required List<Object?> upper,
+    required IndexKey upper,
     this.includeUpper = true,
   })  : upper = upper,
         lower = null,
@@ -115,7 +115,7 @@ class IndexWhereClause extends WhereClause {
   /// Where clause that matches all index values equal to the given [value].
   const IndexWhereClause.equalTo({
     required this.indexName,
-    required List<Object?> value,
+    required IndexKey value,
   })  : lower = value,
         upper = value,
         includeLower = true,
