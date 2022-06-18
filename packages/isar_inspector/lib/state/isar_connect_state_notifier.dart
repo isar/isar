@@ -61,7 +61,7 @@ class IsarConnectStateNotifier
   void connect() async {
     state = const AsyncValue.loading();
     try {
-      final wsUrl = Uri.parse('ws://127.0.0.1:$port/$secret/ws');
+      final wsUrl = Uri.parse('wss://127.0.0.1:$port/$secret=/ws');
       final channel = WebSocketChannel.connect(wsUrl);
 
       var done = false;

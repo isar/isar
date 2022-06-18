@@ -67,14 +67,14 @@ abstract class _IsarConnect {
       if (path.endsWith('=')) {
         path = path.substring(0, path.length - 1);
       }
-      print('╔════════════════════════════════════════════╗');
-      print('║          ISAR CONNECT STARTED              ║');
-      print('╟────────────────────────────────────────────╢');
-      print('║ Open this link to connect to the Isar      ║');
-      print('║ Inspector while a debug build is running.  ║');
-      print('╟────────────────────────────────────────────╢');
-      print('║ https://inspect.isar.dev/$port$path ║');
-      print('╚════════════════════════════════════════════╝');
+      print('╔══════════════════════════════════════════════╗');
+      print('║          ISAR CONNECT STARTED                ║');
+      print('╟──────────────────────────────────────────────╢');
+      print('║ Open this link to connect to the Isar        ║');
+      print('║ Inspector while this debug build is running. ║');
+      print('╟──────────────────────────────────────────────╢');
+      print('║ https://inspect.isar.dev/#/$port$path ║');
+      print('╚══════════════════════════════════════════════╝');
     });
   }
 
