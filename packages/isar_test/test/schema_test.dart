@@ -196,15 +196,15 @@ class SchemaTestModel {
   )
   String get compositeGetter => '';
 
-  var link = IsarLink<SchemaTestModel>();
+  IsarLink<SchemaTestModel> link = IsarLink<SchemaTestModel>();
 
-  var links = IsarLinks<SchemaTestModel>();
+  IsarLinks<SchemaTestModel> links = IsarLinks<SchemaTestModel>();
 
   @Name('renamedLink')
-  var otherLink = IsarLink<SchemaTestModel>();
+  IsarLink<SchemaTestModel> otherLink = IsarLink<SchemaTestModel>();
 
   @Name('renamedLinks')
-  var otherLinks = IsarLinks<SchemaTestModel>();
+  IsarLinks<SchemaTestModel> otherLinks = IsarLinks<SchemaTestModel>();
 }
 
 @Collection()
@@ -218,9 +218,9 @@ class $Dollar$Model {
   @Index()
   bool get $dollar$Getter => false;
 
-  final $dollar$Link = IsarLink<$Dollar$Model>();
+  final IsarLink<$Dollar$Model> $dollar$Link = IsarLink<$Dollar$Model>();
 
-  final $dollar$Links = IsarLinks<$Dollar$Model>();
+  final IsarLinks<$Dollar$Model> $dollar$Links = IsarLinks<$Dollar$Model>();
 }
 
 void main() {
@@ -616,28 +616,28 @@ void main() {
   isarTest('Dollar Schema test', () {
     final schemaJson = jsonDecode($Dollar$ModelSchema.schema);
     expect(schemaJson, {
-      'name': '\$Dollar\$Model',
-      'idName': '\$dollar\$id',
+      'name': r'$Dollar$Model',
+      'idName': r'$dollar$id',
       'properties': [
-        {'name': '\$dollar\$Field', 'type': 'Bool'},
-        {'name': '\$dollar\$Getter', 'type': 'Bool'}
+        {'name': r'$dollar$Field', 'type': 'Bool'},
+        {'name': r'$dollar$Getter', 'type': 'Bool'}
       ],
       'indexes': [
         {
-          'name': '\$dollar\$Field',
+          'name': r'$dollar$Field',
           'unique': true,
           'replace': false,
           'properties': [
-            {'name': '\$dollar\$Field', 'type': 'Value', 'caseSensitive': false}
+            {'name': r'$dollar$Field', 'type': 'Value', 'caseSensitive': false}
           ]
         },
         {
-          'name': '\$dollar\$Getter',
+          'name': r'$dollar$Getter',
           'unique': false,
           'replace': false,
           'properties': [
             {
-              'name': '\$dollar\$Getter',
+              'name': r'$dollar$Getter',
               'type': 'Value',
               'caseSensitive': false
             }
@@ -645,8 +645,8 @@ void main() {
         }
       ],
       'links': [
-        {'name': '\$dollar\$Link', 'target': '\$Dollar\$Model'},
-        {'name': '\$dollar\$Links', 'target': '\$Dollar\$Model'}
+        {'name': r'$dollar$Link', 'target': r'$Dollar$Model'},
+        {'name': r'$dollar$Links', 'target': r'$Dollar$Model'}
       ]
     });
   });

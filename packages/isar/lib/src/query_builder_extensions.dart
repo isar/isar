@@ -18,7 +18,7 @@ extension QueryWhere<OBJ, R> on QueryBuilder<OBJ, R, QWhereClause> {
   QueryBuilder<OBJ, R, QAfterWhereClause> anyOf<E, RS>(
       Iterable<E> items, WhereRepeatModifier<OBJ, R, E> modifier) {
     QueryBuilder<OBJ, R, QAfterWhereClause>? q;
-    for (var e in items) {
+    for (final e in items) {
       q = modifier(q?.or() ?? castInternal(), e);
     }
     return q ?? castInternal();
@@ -62,7 +62,7 @@ extension QueryFilterNot<OBJ, R> on QueryBuilder<OBJ, R, QFilterCondition> {
   QueryBuilder<OBJ, R, QAfterFilterCondition> anyOf<E, RS>(
       Iterable<E> items, FilterRepeatModifier<OBJ, R, E> modifier) {
     QueryBuilder<OBJ, R, QAfterFilterCondition>? q;
-    for (var e in items) {
+    for (final e in items) {
       q = modifier(q?.or() ?? castInternal(), e);
     }
     return q ?? castInternal();
@@ -71,7 +71,7 @@ extension QueryFilterNot<OBJ, R> on QueryBuilder<OBJ, R, QFilterCondition> {
   QueryBuilder<OBJ, R, QAfterFilterCondition> allOf<E, RS>(
       Iterable<E> items, FilterRepeatModifier<OBJ, R, E> modifier) {
     QueryBuilder<OBJ, R, QAfterFilterCondition>? q;
-    for (var e in items) {
+    for (final e in items) {
       q = modifier(q?.and() ?? castInternal(), e);
     }
     return q ?? castInternal();

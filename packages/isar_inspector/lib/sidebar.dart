@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:isar_inspector/collections.dart';
-import 'package:isar_inspector/common.dart';
-import 'package:isar_inspector/instance_selector.dart';
+import 'collections.dart';
+import 'common.dart';
+import 'instance_selector.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({Key? key}) : super(key: key);
@@ -22,7 +22,6 @@ class Sidebar extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SvgPicture.asset(
                       'assets/logo.svg',

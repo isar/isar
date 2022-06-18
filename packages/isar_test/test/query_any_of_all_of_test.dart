@@ -10,12 +10,11 @@ part 'query_any_of_all_of_test.g.dart';
 
 @Collection()
 class Model {
+  Model(this.id, this.value);
   final int id;
 
   @Index()
   final int value;
-
-  Model(this.id, this.value);
 
   @override
   operator ==(Object other) => other is Model && id == other.id;

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar_inspector/connected_layout.dart';
-import 'package:isar_inspector/error_screen.dart';
-import 'package:isar_inspector/state/collections_state.dart';
-import 'package:isar_inspector/state/instances_state.dart';
-import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
+import '../connected_layout.dart';
+import '../error_screen.dart';
+import '../state/collections_state.dart';
+import '../state/instances_state.dart';
+import '../state/isar_connect_state_notifier.dart';
 
 class ConnectionPage extends ConsumerStatefulWidget {
-  final String port;
-  final String secret;
 
   const ConnectionPage({
     Key? key,
     required this.port,
     required this.secret,
   }) : super(key: key);
+  final String port;
+  final String secret;
 
   @override
   ConsumerState<ConnectionPage> createState() => _ConnectionPageState();

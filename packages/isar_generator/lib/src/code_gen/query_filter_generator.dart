@@ -1,18 +1,19 @@
-import 'package:isar_generator/src/helper.dart';
-import 'package:isar_generator/src/isar_type.dart';
-import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
 
+import '../helper.dart';
+import '../isar_type.dart';
+import '../object_info.dart';
+
 class FilterGenerator {
+
+  FilterGenerator(this.object) : objName = object.dartName;
   final ObjectInfo object;
   final String objName;
 
-  FilterGenerator(this.object) : objName = object.dartName;
-
   String generate() {
-    var code =
+    String code =
         'extension ${objName}QueryFilter on QueryBuilder<$objName, $objName, QFilterCondition> {';
-    for (var property in object.properties) {
+    for (final ObjectProperty property in object.properties) {
       if (property.nullable) {
         code += generateIsNull(property);
       }
@@ -68,7 +69,7 @@ class FilterGenerator {
   }
 
   String mPrefix(ObjectProperty p, [bool listAny = true]) {
-    final any = listAny && p.isarType.isList ? 'Any' : '';
+    final String any = listAny && p.isarType.isList ? 'Any' : '';
     return 'QueryBuilder<$objName, $objName, QAfterFilterCondition> ${p.dartName.decapitalize()}$any';
   }
 
@@ -81,7 +82,7 @@ class FilterGenerator {
   }
 
   String generateEqualTo(ObjectProperty p) {
-    final optional = caseSensitiveProperty(p);
+    final String optional = caseSensitiveProperty(p);
     return '''
     ${mPrefix(p)}EqualTo(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return addFilterConditionInternal(FilterCondition.equalTo(
@@ -93,8 +94,8 @@ class FilterGenerator {
   }
 
   String generateGreaterThan(ObjectProperty p) {
-    final include = !p.isarType.containsFloat ? 'bool include = false,' : '';
-    final optional = '${caseSensitiveProperty(p)} $include';
+    final String include = !p.isarType.containsFloat ? 'bool include = false,' : '';
+    final String optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}GreaterThan(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return addFilterConditionInternal(FilterCondition.greaterThan(
@@ -107,8 +108,8 @@ class FilterGenerator {
   }
 
   String generateLessThan(ObjectProperty p) {
-    final include = !p.isarType.containsFloat ? 'bool include = false,' : '';
-    final optional = '${caseSensitiveProperty(p)} $include';
+    final String include = !p.isarType.containsFloat ? 'bool include = false,' : '';
+    final String optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}LessThan(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return addFilterConditionInternal(FilterCondition.lessThan(
@@ -121,10 +122,10 @@ class FilterGenerator {
   }
 
   String generateBetween(ObjectProperty p) {
-    final include = !p.isarType.containsFloat
+    final String include = !p.isarType.containsFloat
         ? 'bool includeLower = true, bool includeUpper = true,'
         : '';
-    final optional = '${caseSensitiveProperty(p)} $include';
+    final String optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}Between(${vType(p)} lower, ${vType(p)} upper ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return addFilterConditionInternal(FilterCondition.between(
@@ -139,7 +140,7 @@ class FilterGenerator {
   }
 
   String generateIsNull(ObjectProperty p) {
-    var code = '''
+    String code = '''
     ${mPrefix(p, false)}IsNull() {
       return addFilterConditionInternal(const FilterCondition.isNull(
         property: '${p.isarName.esc}',

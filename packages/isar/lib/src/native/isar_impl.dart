@@ -4,29 +4,29 @@ import 'dart:ffi';
 import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
-import 'package:isar/isar.dart';
 
-import 'isar_core.dart';
+import '../../isar.dart';
 import 'bindings.dart';
+import 'isar_core.dart';
 
-const _zoneTxn = #zoneTxn;
+const Symbol _zoneTxn = #zoneTxn;
 
 class IsarImpl extends Isar implements Finalizable {
+  IsarImpl(super.name, super.schema, this.ptr) {
+    _finalizer = NativeFinalizer(isarClose);
+    _finalizer.attach(this, ptr.cast(), detach: this);
+  }
   final Pointer<CIsarInstance> ptr;
   late final NativeFinalizer _finalizer;
 
   final List<Future<void>> _activeAsyncTxns = [];
 
-  final _syncTxnPtrPtr = malloc<Pointer<CIsarTxn>>();
+  final Pointer<Pointer<CIsarTxn>> _syncTxnPtrPtr = malloc<Pointer<CIsarTxn>>();
   SyncTxn? _currentTxnSync;
-
-  IsarImpl(super.name, super.schema, this.ptr) {
-    _finalizer = NativeFinalizer(isarClose);
-    _finalizer.attach(this, ptr.cast(), detach: this);
-  }
 
   void requireNotInTxn() {
     if (_currentTxnSync != null || Zone.current[_zoneTxn] != null) {
+      // ignore: only_throw_errors
       throw IsarError(
           'Cannot perform this operation from within an active transaction.');
     }
@@ -37,13 +37,13 @@ class IsarImpl extends Isar implements Finalizable {
     requireOpen();
     requireNotInTxn();
 
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
     _activeAsyncTxns.add(completer.future);
 
-    final port = ReceivePort();
-    final portStream = wrapIsarPort(port);
+    final ReceivePort port = ReceivePort();
+    final Stream<void> portStream = wrapIsarPort(port);
 
-    final txnPtrPtr = malloc<Pointer<CIsarTxn>>();
+    final Pointer<Pointer<CIsarTxn>> txnPtrPtr = malloc<Pointer<CIsarTxn>>();
     IC.isar_txn_begin(
         ptr, txnPtrPtr, false, write, silent, port.sendPort.nativePort);
 
@@ -55,7 +55,7 @@ class IsarImpl extends Isar implements Finalizable {
       malloc.free(txnPtrPtr);
     }
 
-    final zone = Zone.current.fork(
+    final Zone zone = Zone.current.fork(
       zoneValues: {_zoneTxn: txn},
     );
 
@@ -88,9 +88,10 @@ class IsarImpl extends Isar implements Finalizable {
   }
 
   Future<T> getTxn<T>(bool write, Future<T> Function(Txn txn) callback) {
-    final currentTxn = Zone.current[_zoneTxn] as Txn?;
+    final Txn? currentTxn = Zone.current[_zoneTxn] as Txn?;
     if (currentTxn != null) {
       if (write && !currentTxn.write) {
+        // ignore: only_throw_errors
         throw IsarError(
             'Operation cannot be performed within a read transaction.');
       }
@@ -100,6 +101,7 @@ class IsarImpl extends Isar implements Finalizable {
         return callback(Zone.current[_zoneTxn] as Txn);
       });
     } else {
+      // ignore: only_throw_errors
       throw IsarError('Write operations require an explicit transaction.');
     }
   }
@@ -109,7 +111,7 @@ class IsarImpl extends Isar implements Finalizable {
     requireNotInTxn();
 
     nCall(IC.isar_txn_begin(ptr, _syncTxnPtrPtr, true, write, silent, 0));
-    final txn = SyncTxn._(_syncTxnPtrPtr.value, write);
+    final SyncTxn txn = SyncTxn._(_syncTxnPtrPtr.value, write);
     _currentTxnSync = txn;
 
     T result;
@@ -140,6 +142,7 @@ class IsarImpl extends Isar implements Finalizable {
   T getTxnSync<T>(bool write, T Function(SyncTxn txn) callback) {
     if (_currentTxnSync != null) {
       if (write && !_currentTxnSync!.write) {
+        // ignore: only_throw_errors
         throw IsarError(
             'Operation cannot be performed within a read transaction.');
       }
@@ -147,6 +150,7 @@ class IsarImpl extends Isar implements Finalizable {
     } else if (!write) {
       return _txnSync(false, false, () => callback(_currentTxnSync!));
     } else {
+      // ignore: only_throw_errors
       throw IsarError('Write operations require an explicit transaction.');
     }
   }
@@ -168,21 +172,22 @@ class IsarImpl extends Isar implements Finalizable {
 }
 
 class SyncTxn {
+  SyncTxn._(this.ptr, this.write);
   final Pointer<CIsarTxn> ptr;
 
   final bool write;
 
-  final alloc = Arena(malloc);
+  final Arena alloc = Arena(malloc);
 
-  SyncTxn._(this.ptr, this.write);
-
+  // ignore: use_late_for_private_fields_and_variables
   Pointer<CObject>? _cObjsPtr;
-  var _cObjsLen = -1;
+  int _cObjsLen = -1;
 
   Pointer<CObjectSet>? _cObjSetPtr;
 
+  // ignore: use_late_for_private_fields_and_variables
   Pointer<Uint8>? _buffer;
-  var _bufferLen = -1;
+  int _bufferLen = -1;
 
   Pointer<CObject> allocCObject() {
     if (_cObjsLen < 1) {
@@ -211,39 +216,38 @@ class SyncTxn {
 }
 
 class Txn {
-  final Pointer<CIsarTxn> ptr;
-
-  final bool write;
-
-  final alloc = Arena(malloc);
-
-  final _completers = Queue<Completer<void>>();
-
   Txn._(this.ptr, this.write, Stream<void> stream) {
     stream.listen(
       (_) {
         assert(
             _completers.isNotEmpty, 'There should be a completer listening.');
-        final completer = _completers.removeFirst();
+        final Completer<void> completer = _completers.removeFirst();
         completer.complete();
       },
       onError: (dynamic e) {
         assert(
             _completers.isNotEmpty, 'There should be a completer listening.');
-        final completer = _completers.removeFirst();
+        final Completer<void> completer = _completers.removeFirst();
         completer.completeError(e as Object);
       },
     );
   }
+  final Pointer<CIsarTxn> ptr;
+
+  final bool write;
+
+  final Arena alloc = Arena(malloc);
+
+  final Queue<Completer<void>> _completers = Queue<Completer<void>>();
 
   Future<void> wait() {
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
     _completers.add(completer);
     return completer.future;
   }
 
   Pointer<CObjectSet> allocCObjectSet(int length) {
-    final cObjSetPtr = alloc<CObjectSet>();
+    final Pointer<CObjectSet> cObjSetPtr = alloc<CObjectSet>();
     cObjSetPtr.ref
       ..objects = alloc<CObject>(length)
       ..length = length;

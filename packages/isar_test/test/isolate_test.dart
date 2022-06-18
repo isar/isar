@@ -1,7 +1,7 @@
 @TestOn('vm')
 import 'package:flutter/foundation.dart';
-import 'package:test/test.dart';
 import 'package:isar/isar.dart';
+import 'package:test/test.dart';
 
 import 'util/common.dart';
 import 'util/sync_async_helper.dart';
@@ -15,23 +15,23 @@ class TestModel {
   String? value;
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     return other is TestModel && other.id == id && other.value == value;
   }
 }
 
-final _obj1 = TestModel()
+final TestModel _obj1 = TestModel()
   ..id = 1
   ..value = 'Model 1';
-final _obj2 = TestModel()
+final TestModel _obj2 = TestModel()
   ..id = 2
   ..value = 'Model 2';
-final _obj3 = TestModel()
+final TestModel _obj3 = TestModel()
   ..id = 3
   ..value = 'Model 3';
 
 Future<bool> _isolateFunc(String name) async {
-  final isar = Isar.openSync(
+  final Isar isar = Isar.openSync(
     name: name,
     schemas: [TestModelSchema],
     directory: '////',
@@ -56,13 +56,13 @@ void main() {
 
 void tests() {
   isarTest('Isolate test', () async {
-    final isar = await openTempIsar([TestModelSchema]);
+    final Isar isar = await openTempIsar([TestModelSchema]);
 
     await isar.tWriteTxn(() async {
       await isar.testModels.tPutAll([_obj1, _obj2]);
     });
 
-    final result = await compute(_isolateFunc, isar.name);
+    final bool result = await compute(_isolateFunc, isar.name);
     expect(result, true);
 
     qEqual(isar.testModels.where().tFindAll(), [_obj1, _obj3]);

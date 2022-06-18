@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:isar/isar.dart';
+import '../isar.dart';
 
 abstract class IsarNativeInterface {
   Uint8List bufAsBytes(IsarBytePointer pointer, int length);

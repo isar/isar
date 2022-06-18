@@ -8,6 +8,7 @@ part 'filter_int_test.g.dart';
 
 @Collection()
 class IntModel {
+  IntModel();
   @Id()
   int? id;
 
@@ -23,15 +24,14 @@ class IntModel {
   @Size32()
   List<int>? hashList;
 
-  IntModel();
-
   @override
   String toString() {
     return '{id: $id, field: $field, list: $list}';
   }
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
+    // ignore: test_types_in_equals
     return (other as IntModel).field == field &&
         listEquals(list, other.list) &&
         listEquals(hashList, other.hashList);

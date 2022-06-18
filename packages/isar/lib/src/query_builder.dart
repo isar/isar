@@ -5,32 +5,20 @@ part of isar;
 typedef FilterQuery<OBJ> = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>
     Function(QueryBuilder<OBJ, OBJ, QFilterCondition> q);
 
-const _nullFilterGroup = FilterGroup.and([]);
+const FilterGroup _nullFilterGroup = FilterGroup.and([]);
 
 /// Query builders are used to create queries in a safe way.
 ///
 /// Aquire a `QueryBuilder` instance using `collection.where()` or
 /// `collection.filter()`.
 class QueryBuilder<OBJ, R, S> {
-  final IsarCollection<OBJ> _collection;
-  final List<WhereClause> _whereClauses;
-  final bool _whereDistinct;
-  final Sort _whereSort;
-  final FilterGroup _filterOr;
-  final FilterGroup? _filterAnd;
-  final bool _filterNot;
-  final List<DistinctProperty> _distinctByProperties;
-  final List<SortProperty> _sortByProperties;
-  final int? _offset;
-  final int? _limit;
-  final String? _propertyName;
 
   @protected
   QueryBuilder(this._collection, this._whereDistinct, this._whereSort)
       : _whereClauses = const [],
         _distinctByProperties = const [],
         _sortByProperties = const [],
-        _filterOr = FilterGroup.or([]),
+        _filterOr = const FilterGroup.or([]),
         _filterAnd = null,
         _filterNot = false,
         _offset = null,
@@ -53,6 +41,18 @@ class QueryBuilder<OBJ, R, S> {
     this._limit,
     this._propertyName,
   ]);
+  final IsarCollection<OBJ> _collection;
+  final List<WhereClause> _whereClauses;
+  final bool _whereDistinct;
+  final Sort _whereSort;
+  final FilterGroup _filterOr;
+  final FilterGroup? _filterAnd;
+  final bool _filterNot;
+  final List<DistinctProperty> _distinctByProperties;
+  final List<SortProperty> _sortByProperties;
+  final int? _offset;
+  final int? _limit;
+  final String? _propertyName;
 
   /// @nodoc
   @protected
@@ -115,8 +115,8 @@ class QueryBuilder<OBJ, R, S> {
   @protected
   QueryBuilder<OBJ, R, QAfterFilterCondition> groupInternal(
       FilterQuery<OBJ> q) {
-    final qb = q(QueryBuilder(_collection, _whereDistinct, _whereSort));
-    final qbFinished = qb.andOrInternal(FilterGroupType.or);
+    final QueryBuilder<OBJ, OBJ, QAfterFilterCondition> qb = q(QueryBuilder(_collection, _whereDistinct, _whereSort));
+    final QueryBuilder<OBJ, OBJ, QAfterFilterOperator> qbFinished = qb.andOrInternal(FilterGroupType.or);
 
     if (qbFinished._filterOr.filters.isEmpty) {
       return copyWithInternal();
@@ -134,10 +134,10 @@ class QueryBuilder<OBJ, R, S> {
     FilterQuery<E> q,
     String linkName,
   ) {
-    final qb = q(QueryBuilder(targetCollection, false, _whereSort));
-    final qbFinished = qb.andOrInternal(FilterGroupType.or);
+    final QueryBuilder<E, E, QAfterFilterCondition> qb = q(QueryBuilder(targetCollection, false, _whereSort));
+    final QueryBuilder<E, E, QAfterFilterOperator> qbFinished = qb.andOrInternal(FilterGroupType.or);
 
-    final conditions = qbFinished._filterOr.filters;
+    final List<FilterOperation> conditions = qbFinished._filterOr.filters;
     if (conditions.isEmpty) {
       return copyWithInternal();
     }
@@ -237,7 +237,7 @@ class QueryBuilder<OBJ, R, S> {
   /// @nodoc
   @protected
   Query<R> buildInternal() {
-    final builder = andOrInternal(FilterGroupType.or);
+    final QueryBuilder<OBJ, R, QAfterFilterOperator> builder = andOrInternal(FilterGroupType.or);
     FilterOperation? filter = builder._filterOr;
     while (filter is FilterGroup) {
       if (filter.filters.isEmpty) {

@@ -1,15 +1,15 @@
 import 'dart:math';
 
-const isarCoreVersion = '2.5.21';
-final isarCoreVersionNumber = _getVersionNumber(isarCoreVersion);
+const String isarCoreVersion = '2.5.21';
+final int isarCoreVersionNumber = _getVersionNumber(isarCoreVersion);
 
-const isarWebVersion = '2.5.1';
+const String isarWebVersion = '2.5.1';
 
 int _getVersionNumber(String version) {
-  var number = 0;
-  final components = isarCoreVersion.split('.');
-  for (var i = 0; i < components.length; i++) {
-    final component = components[components.length - i - 1];
+  int number = 0;
+  final List<String> components = isarCoreVersion.split('.');
+  for (int i = 0; i < components.length; i++) {
+    final String component = components[components.length - i - 1];
     number += (pow(100, i) * int.parse(component)).toInt();
   }
   return number;

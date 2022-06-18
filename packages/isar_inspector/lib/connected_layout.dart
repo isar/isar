@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar_inspector/filter_field.dart';
-import 'package:isar_inspector/state/instances_state.dart';
 
+import 'filter_field.dart';
 import 'query_table.dart';
 import 'sidebar.dart';
+import 'state/instances_state.dart';
 import 'state/isar_connect_state_notifier.dart';
 
 class ConnectedLayout extends ConsumerStatefulWidget {

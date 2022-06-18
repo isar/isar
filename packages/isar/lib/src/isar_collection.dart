@@ -16,7 +16,7 @@ abstract class IsarCollection<OBJ> {
 
   /// Get a single object by its [id] or `null` if the object does not exist.
   Future<OBJ?> get(int id) {
-    return getAll([id]).then((objects) => objects[0]);
+    return getAll([id]).then((List<OBJ?> objects) => objects[0]);
   }
 
   /// Get a single object by [its] id or `null` if the object does not exist.
@@ -35,7 +35,7 @@ abstract class IsarCollection<OBJ> {
   /// @nodoc
   @protected
   Future<OBJ?> getByIndex(String indexName, IndexKey key) {
-    return getAllByIndex(indexName, [key]).then((objects) => objects[0]);
+    return getAllByIndex(indexName, [key]).then((List<OBJ?> objects) => objects[0]);
   }
 
   /// @nodoc
@@ -54,7 +54,7 @@ abstract class IsarCollection<OBJ> {
 
   /// Insert or update an [object] and returns the assigned id.
   Future<int> put(OBJ object) {
-    return putAll([object]).then((ids) => ids[0]);
+    return putAll([object]).then((List<int> ids) => ids[0]);
   }
 
   /// Insert or update an [object] and returns the assigned id.
@@ -71,7 +71,7 @@ abstract class IsarCollection<OBJ> {
   /// @nodoc
   @protected
   Future<int> putByIndex(String indexName, OBJ object) {
-    return putAllByIndex(indexName, [object]).then((ids) => ids[0]);
+    return putAllByIndex(indexName, [object]).then((List<int> ids) => ids[0]);
   }
 
   /// @nodoc
@@ -94,7 +94,7 @@ abstract class IsarCollection<OBJ> {
   /// Returns whether the object has been deleted. Isar web always returns
   /// `true`.
   Future<bool> delete(int id) {
-    return deleteAll([id]).then((count) => count == 1);
+    return deleteAll([id]).then((int count) => count == 1);
   }
 
   /// Delete a single object by its [id].
@@ -118,7 +118,7 @@ abstract class IsarCollection<OBJ> {
   /// @nodoc
   @protected
   Future<bool> deleteByIndex(String indexName, IndexKey key) {
-    return deleteAllByIndex(indexName, [key]).then((count) => count == 1);
+    return deleteAllByIndex(indexName, [key]).then((int count) => count == 1);
   }
 
   /// @nodoc

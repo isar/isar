@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:isar/isar.dart';
-import 'package:isar_inspector/query_parser.dart';
-import 'package:isar_inspector/state/collections_state.dart';
-import 'package:isar_inspector/state/instances_state.dart';
-import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
-import 'package:isar_inspector/state/query_state.dart';
 
+import 'query_parser.dart';
 import 'schema.dart';
+import 'state/collections_state.dart';
+import 'state/instances_state.dart';
+import 'state/isar_connect_state_notifier.dart';
+import 'state/query_state.dart';
 
 class FilterField extends ConsumerStatefulWidget {
   const FilterField({Key? key}) : super(key: key);
@@ -18,7 +18,7 @@ class FilterField extends ConsumerStatefulWidget {
 }
 
 class _FilterFieldState extends ConsumerState<FilterField> {
-  final controller = TextEditingController();
+  final TextEditingController controller = TextEditingController();
   String? error;
 
   @override
@@ -38,7 +38,7 @@ class _FilterFieldState extends ConsumerState<FilterField> {
               ),
               contentPadding: const EdgeInsets.all(20),
               errorText: error,
-              hintText: "Enter Query to filter the results",
+              hintText: 'Enter Query to filter the results',
               suffixIcon: IconButton(
                 onPressed: controller.clear,
                 icon: const Icon(Icons.clear),
@@ -52,7 +52,7 @@ class _FilterFieldState extends ConsumerState<FilterField> {
         ElevatedButton(
           onPressed: () {
             final selectedCollection = ref.read(selectedCollectionPod).value!;
-            final filter = _parseFilter(selectedCollection);
+            final FilterOperation? filter = _parseFilter(selectedCollection);
             ref.read(queryFilterPod.state).state = filter;
             ref.read(queryPagePod.state).state = 0;
           },
@@ -62,8 +62,8 @@ class _FilterFieldState extends ConsumerState<FilterField> {
         ElevatedButton(
           onPressed: () {
             final selectedCollection = ref.read(selectedCollectionPod).value!;
-            final filter = _parseFilter(selectedCollection);
-            final query = ConnectQuery(
+            final FilterOperation? filter = _parseFilter(selectedCollection);
+            final ConnectQuery query = ConnectQuery(
               instance: ref.read(selectedInstancePod).value!,
               collection: selectedCollection.name,
               filter: filter,
@@ -77,11 +77,11 @@ class _FilterFieldState extends ConsumerState<FilterField> {
   }
 
   FilterOperation? _parseFilter(ICollection collection) {
-    final parser = QueryParser(collection.properties);
+    final QueryParser parser = QueryParser(collection.properties);
     FilterOperation? newFilter;
     try {
       if (controller.text.isNotEmpty) {
-        final filter = parser.parse(controller.text);
+        final FilterOperation filter = parser.parse(controller.text);
         newFilter = filter;
       }
 
@@ -92,7 +92,7 @@ class _FilterFieldState extends ConsumerState<FilterField> {
       return newFilter;
     } catch (e) {
       setState(() {
-        error = "Invalid query";
+        error = 'Invalid query';
       });
     }
 

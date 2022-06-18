@@ -1,17 +1,15 @@
-import 'package:isar/isar.dart';
-import 'package:isar_inspector/schema.dart';
-import 'package:petitparser/petitparser.dart';
 import 'package:dartx/dartx.dart';
+import 'package:isar/isar.dart';
+import 'package:petitparser/petitparser.dart';
+
+import 'schema.dart';
 
 class QueryParser {
-  final List<IProperty> properties;
-  late final Parser _parser;
-
   QueryParser(this.properties) {
-    final builder = ExpressionBuilder();
+    final ExpressionBuilder builder = ExpressionBuilder();
     builder.group().primitive(QueryGrammar.condition, (List condition) {
-      final property = condition[0] as String;
-      final cmp = condition[1] as String;
+      final String property = condition[0] as String;
+      final String cmp = condition[1] as String;
       final value = condition[2];
       return createQueryCondition(property, cmp, value);
     });
@@ -19,37 +17,42 @@ class QueryParser {
     builder.group().wrapper(
           char('(').trim(),
           char(')').trim(),
-          (left, value, right) => value,
+          (Object? left, Object? value, Object? right) => value,
         );
 
     builder.group().left(
           string('&&').trim(),
-          (l, _, r) => FilterGroup.and(
+          (Object? l, _, Object? r) => FilterGroup.and(
             [l as FilterOperation, r as FilterOperation],
           ),
         );
 
     builder.group().left(
           string('||').trim(),
-          (l, _, r) => FilterGroup.or(
+          (Object? l, _, Object? r) => FilterGroup.or(
             [l as FilterOperation, r as FilterOperation],
           ),
         );
 
     _parser = builder.build();
   }
+  final List<IProperty> properties;
+  late final Parser _parser;
 
   FilterOperation createQueryCondition(
       String propertyName, String cmp, dynamic value) {
-    final property =
-        properties.where((p) => p.name == propertyName).firstOrNull;
+    final IProperty? property =
+        properties.where((IProperty p) => p.name == propertyName).firstOrNull;
 
-    if (property == null) throw 'Unknown property "$propertyName"';
+    if (property == null) {
+      // ignore: only_throw_errors
+      throw 'Unknown property "$propertyName"';
+    }
 
     switch (cmp) {
       case '!=':
       case '==':
-        final filter = FilterCondition.equalTo(
+        final FilterCondition filter = FilterCondition.equalTo(
           property: propertyName,
           value: value,
         );
@@ -78,27 +81,31 @@ class QueryParser {
           wildcard: value as String,
         );
       default:
+        // ignore: only_throw_errors
         throw 'unreachable';
     }
   }
 
   FilterOperation parse(String filter) {
-    final result = _parser.parse(filter);
+    final Result result = _parser.parse(filter);
     if (result.isFailure) {
+      // ignore: only_throw_errors
       throw result.message;
     }
     return result.value as FilterOperation;
   }
 }
 
+// ignore: avoid_classes_with_only_static_members
 class QueryGrammar {
-  static Parser get cmpOperator => (string('==') |
+  static Parser get cmpOperator =>
+      string('==') |
       string('!=') |
       string('>') |
       string('>=') |
       string('<') |
       string('<=') |
-      'matches'.toParser(caseInsensitive: true).map((_) => 'matches'));
+      'matches'.toParser(caseInsensitive: true).map((_) => 'matches');
 
   static Parser get boolToken =>
       (string('true') | string('false')).map((value) => value == 'true');
@@ -112,13 +119,13 @@ class QueryGrammar {
                               digit().plus()))
                       .optional()))
           .flatten()
-          .map((v) {
+          .map((String v) {
         return num.parse(v);
       });
 
   static String unescape(String v) => v.replaceAllMapped(
       RegExp("\\\\[nrtbf\"']"),
-      (v) => const {
+      (Match v) => const {
             'n': '\n',
             'r': '\r',
             't': '\t',
@@ -150,23 +157,22 @@ class QueryGrammar {
   static Parser get valueToken => boolToken | numberToken | stringToken;
 
   static Parser get identifier =>
-      (letter() | digit()).plus().map((chars) => chars.join());
+      (letter() | digit()).plus().map((List chars) => chars.join());
 
   static Parser<List> get condition =>
       identifier.trim() & cmpOperator.trim() & valueToken.trim();
 }
 
 class AndOr {
+  AndOr(this.conditions, this.and);
   final List<dynamic> conditions;
   final bool and;
 
-  AndOr(this.conditions, this.and);
-
   AndOr flatten() {
-    final newConditions = [];
-    for (var condition in conditions) {
+    final List newConditions = [];
+    for (final condition in conditions) {
       if (condition is AndOr) {
-        final flatCondition = condition.flatten();
+        final AndOr flatCondition = condition.flatten();
         if (flatCondition.and == and) {
           newConditions.addAll(flatCondition.conditions);
         } else {
@@ -187,7 +193,7 @@ class AndOr {
     } else {
       seperator = ' || ';
     }
-    final joined = conditions.join(seperator);
+    final String joined = conditions.join(seperator);
     return '($joined)';
   }
 }

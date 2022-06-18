@@ -1,6 +1,6 @@
 import 'dart:indexed_db';
 
-import 'package:isar/isar.dart';
+import '../../isar.dart';
 
 import 'bindings.dart';
 import 'isar_collection_impl.dart';
@@ -19,7 +19,7 @@ Query<T> buildWebQuery<T, OBJ>(
   int? limit,
   String? property,
 ) {
-  final whereClausesJs = whereClauses.map((wc) {
+  final List<Object> whereClausesJs = whereClauses.map((WhereClause wc) {
     if (wc is IdWhereClause) {
       return _buildIdWhereClause(wc);
     } else if (wc is IndexWhereClause) {
@@ -29,11 +29,13 @@ Query<T> buildWebQuery<T, OBJ>(
     }
   }).toList();
 
-  final filterJs = filter != null ? _buildFilter(col.schema, filter) : null;
-  final sortJs = sortBy.isNotEmpty ? _buildSort(sortBy) : null;
-  final distinctJs = distinctBy.isNotEmpty ? _buildDistinct(distinctBy) : null;
+  final FilterJs? filterJs =
+      filter != null ? _buildFilter(col.schema, filter) : null;
+  final SortCmpJs? sortJs = sortBy.isNotEmpty ? _buildSort(sortBy) : null;
+  final DistinctValueJs? distinctJs =
+      distinctBy.isNotEmpty ? _buildDistinct(distinctBy) : null;
 
-  final queryJs = QueryJs(
+  final QueryJs queryJs = QueryJs(
     col.native,
     whereClausesJs,
     whereDistinct,
@@ -47,10 +49,10 @@ Query<T> buildWebQuery<T, OBJ>(
 
   QueryDeserialize<T> deserialize;
   if (property == null) {
-    deserialize = (jsObj) => col.schema.deserializeWeb(col, jsObj) as T;
+    deserialize = (Object jsObj) => col.schema.deserializeWeb(col, jsObj) as T;
   } else {
     deserialize =
-        (jsObj) => col.schema.deserializePropWeb(jsObj, property) as T;
+        (Object jsObj) => col.schema.deserializePropWeb(jsObj, property) as T;
   }
 
   return QueryImpl<T>(col, queryJs, deserialize, property);
@@ -84,7 +86,7 @@ IdWhereClauseJs _buildIdWhereClause(IdWhereClause wc) {
 
 IndexWhereClauseJs _buildIndexWhereClause(
     CollectionSchema<dynamic> schema, IndexWhereClause wc) {
-  final isComposite = schema.indexValueTypes[wc.indexName]!.length > 1;
+  final bool isComposite = schema.indexValueTypes[wc.indexName]!.length > 1;
 
   dynamic lower = wc.lower;
   if (!isComposite && lower != null) {
@@ -108,11 +110,12 @@ IndexWhereClauseJs _buildIndexWhereClause(
 
 LinkWhereClauseJs _buildLinkWhereClause(
     IsarCollectionImpl<dynamic> col, LinkWhereClause wc) {
-  final linkCol =
+  final IsarCollectionImpl linkCol =
       // ignore: invalid_use_of_protected_member
       col.isar.getCollectionByNameInternal(wc.linkCollection)
           as IsarCollectionImpl;
-  final backlinkLinkName = linkCol.schema.backlinkLinkNames[wc.linkName];
+  final String? backlinkLinkName =
+      linkCol.schema.backlinkLinkNames[wc.linkName];
   return LinkWhereClauseJs()
     ..linkCollection = wc.linkCollection
     ..linkName = backlinkLinkName ?? wc.linkName
@@ -142,7 +145,7 @@ KeyRange? _buildKeyRange(
 
 FilterJs? _buildFilter(
     CollectionSchema<dynamic> schema, FilterOperation filter) {
-  final filterStr = _buildFilterOperation(schema, filter);
+  final String? filterStr = _buildFilterOperation(schema, filter);
   if (filterStr != null) {
     return FilterJs('id', 'obj', 'return $filterStr');
   } else {
@@ -166,9 +169,9 @@ String? _buildFilterOperation(
 }
 
 String? _buildFilterGroup(CollectionSchema<dynamic> schema, FilterGroup group) {
-  final builtConditions = group.filters
-      .map((op) => _buildFilterOperation(schema, op))
-      .where((e) => e != null)
+  final List<String?> builtConditions = group.filters
+      .map((FilterOperation op) => _buildFilterOperation(schema, op))
+      .where((String? e) => e != null)
       .toList();
 
   if (builtConditions.isEmpty) {
@@ -178,14 +181,15 @@ String? _buildFilterGroup(CollectionSchema<dynamic> schema, FilterGroup group) {
   if (group.type == FilterGroupType.not) {
     return '(!${builtConditions[0]})';
   } else {
-    final op = group.type == FilterGroupType.or ? '||' : '&&';
-    final condition = builtConditions.join(op);
+    final String op = group.type == FilterGroupType.or ? '||' : '&&';
+    final String condition = builtConditions.join(op);
     return '($condition)';
   }
 }
 
 String _buildCondition(
     CollectionSchema<dynamic> schema, FilterCondition condition) {
+  // ignore: no_leading_underscores_for_local_identifiers
   dynamic _prepareFilterValue(dynamic value) {
     if (value == null) {
       return null;
@@ -196,13 +200,13 @@ String _buildCondition(
     }
   }
 
-  final isListOp = condition.type != FilterConditionType.isNull &&
+  final bool isListOp = condition.type != FilterConditionType.isNull &&
       schema.listProperties.contains(condition.property);
-  final accessor =
+  final String accessor =
       condition.property == schema.idName ? 'id' : 'obj.${condition.property}';
-  final variable = isListOp ? 'e' : accessor;
+  final String variable = isListOp ? 'e' : accessor;
 
-  final cond = _buildConditionInternal(
+  final String cond = _buildConditionInternal(
     conditionType: condition.type,
     variable: variable,
     val1: _prepareFilterValue(condition.value1),
@@ -228,7 +232,7 @@ String _buildConditionInternal({
   required bool include2,
   required bool caseSensitive,
 }) {
-  final isNull = '($variable == null || $variable === -Infinity)';
+  final String isNull = '($variable == null || $variable === -Infinity)';
   switch (conditionType) {
     case FilterConditionType.equalTo:
       if (val1 == null) {
@@ -239,22 +243,24 @@ String _buildConditionInternal({
         return '$variable === $val1';
       }
     case FilterConditionType.between:
-      final val = val1 ?? val2;
-      final lowerOp = include1 ? '>=' : '>';
-      final upperOp = include2 ? '<=' : '<';
+      final Object? val = val1 ?? val2;
+      final String lowerOp = include1 ? '>=' : '>';
+      final String upperOp = include2 ? '<=' : '<';
       if (val == null) {
         return isNull;
       } else if ((val1 is String?) && (val2 is String?) && !caseSensitive) {
-        final lower = val1?.toLowerCase() ?? '-Infinity';
-        final upper = val2?.toLowerCase() ?? '-Infinity';
-        final variableLc = '$variable?.toLowerCase() ?? -Infinity';
-        final lowerCond = 'indexedDB.cmp($variableLc, $lower) $lowerOp 0';
-        final upperCond = 'indexedDB.cmp($variableLc, $upper) $upperOp 0';
+        final String lower = val1?.toLowerCase() ?? '-Infinity';
+        final String upper = val2?.toLowerCase() ?? '-Infinity';
+        final String variableLc = '$variable?.toLowerCase() ?? -Infinity';
+        final String lowerCond =
+            'indexedDB.cmp($variableLc, $lower) $lowerOp 0';
+        final String upperCond =
+            'indexedDB.cmp($variableLc, $upper) $upperOp 0';
         return '($lowerCond && $upperCond)';
       } else {
-        final lowerCond =
+        final String lowerCond =
             'indexedDB.cmp($variable, ${val1 ?? '-Infinity'}) $lowerOp 0';
-        final upperCond =
+        final String upperCond =
             'indexedDB.cmp($variable, ${val2 ?? '-Infinity'}) $upperOp 0';
         return '($lowerCond && $upperCond)';
       }
@@ -266,7 +272,7 @@ String _buildConditionInternal({
           return 'false';
         }
       } else {
-        final op = include1 ? '<=' : '<';
+        final String op = include1 ? '<=' : '<';
         if (val1 is String && !caseSensitive) {
           return 'indexedDB.cmp($variable?.toLowerCase() ?? -Infinity, ${val1.toLowerCase()}) $op 0';
         } else {
@@ -281,7 +287,7 @@ String _buildConditionInternal({
           return '!$isNull';
         }
       } else {
-        final op = include1 ? '>=' : '>';
+        final String op = include1 ? '>=' : '>';
         if (val1 is String && !caseSensitive) {
           return 'indexedDB.cmp($variable?.toLowerCase() ?? -Infinity, ${val1.toLowerCase()}) $op 0';
         } else {
@@ -291,19 +297,20 @@ String _buildConditionInternal({
     case FilterConditionType.startsWith:
     case FilterConditionType.endsWith:
     case FilterConditionType.contains:
-      final op = conditionType == FilterConditionType.startsWith
+      final String op = conditionType == FilterConditionType.startsWith
           ? 'startsWith'
           : conditionType == FilterConditionType.endsWith
               ? 'endsWith'
               : 'includes';
       if (val1 is String) {
-        final isString = 'typeof $variable == "string"';
+        final String isString = 'typeof $variable == "string"';
         if (!caseSensitive) {
           return '($isString && $variable.toLowerCase().$op(${val1.toLowerCase()}))';
         } else {
           return '($isString && $variable.$op($val1))';
         }
       } else {
+        // ignore: only_throw_errors
         throw 'Unsupported type for condition';
       }
     case FilterConditionType.matches:
@@ -314,15 +321,15 @@ String _buildConditionInternal({
 }
 
 SortCmpJs _buildSort(List<SortProperty> properties) {
-  final sort = properties.map((e) {
-    final op = e.sort == Sort.asc ? '' : '-';
+  final String sort = properties.map((SortProperty e) {
+    final String op = e.sort == Sort.asc ? '' : '-';
     return '${op}indexedDB.cmp(a.${e.property} ?? "-Infinity", b.${e.property} ?? "-Infinity")';
   }).join('||');
   return SortCmpJs('a', 'b', 'return $sort');
 }
 
 DistinctValueJs _buildDistinct(List<DistinctProperty> properties) {
-  final distinct = properties.map((e) {
+  final String distinct = properties.map((DistinctProperty e) {
     if (e.caseSensitive == false) {
       return 'obj.${e.property}?.toLowerCase() ?? "-Infinity"';
     } else {

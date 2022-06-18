@@ -11,9 +11,9 @@ external String stringify(dynamic value);
 external List<String> objectKeys(dynamic obj);
 
 Map<String, dynamic> jsMapToDart(Object obj) {
-  final keys = objectKeys(obj);
-  final map = <String, dynamic>{};
-  for (final key in keys) {
+  final List<String> keys = objectKeys(obj);
+  final Map<String, dynamic> map = <String, dynamic>{};
+  for (final String key in keys) {
     map[key] = getProperty<dynamic>(obj, key);
   }
   return map;

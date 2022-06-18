@@ -3,35 +3,35 @@
 import 'dart:js_util';
 import 'dart:typed_data';
 
-import 'package:isar/isar.dart';
-import 'package:isar/src/isar_native_interface.dart';
-import 'package:isar/src/web/isar_link_impl.dart';
 import 'package:meta/dart2js.dart';
 import 'package:meta/meta.dart';
 
+import '../../isar.dart';
+import '../isar_native_interface.dart';
+import 'isar_link_impl.dart';
 import 'open.dart';
 
-const isarMinId = -9007199254740991;
-const isarMaxId = 9007199254740991;
-final isarAutoIncrementId = double.negativeInfinity as int;
+const int isarMinId = -9007199254740991;
+const int isarMaxId = 9007199254740991;
+final int isarAutoIncrementId = double.negativeInfinity as int;
 
 Never unsupportedOnWeb() {
   throw UnsupportedError('This operation is not supported for Isar web');
 }
 
 class _WebAbi {
-  static const androidArm = (null as dynamic);
-  static const androidArm64 = (null as dynamic);
-  static const androidIA32 = (null as dynamic);
-  static const androidX64 = (null as dynamic);
-  static const iosArm64 = (null as dynamic);
-  static const iosX64 = (null as dynamic);
-  static const linuxArm64 = (null as dynamic);
-  static const linuxX64 = (null as dynamic);
-  static const macosArm64 = (null as dynamic);
-  static const macosX64 = (null as dynamic);
-  static const windowsArm64 = (null as dynamic);
-  static const windowsX64 = (null as dynamic);
+  static const androidArm = null as dynamic;
+  static const androidArm64 = null as dynamic;
+  static const androidIA32 = null as dynamic;
+  static const androidX64 = null as dynamic;
+  static const iosArm64 = null as dynamic;
+  static const iosX64 = null as dynamic;
+  static const linuxArm64 = null as dynamic;
+  static const linuxX64 = null as dynamic;
+  static const macosArm64 = null as dynamic;
+  static const macosX64 = null as dynamic;
+  static const windowsArm64 = null as dynamic;
+  static const windowsX64 = null as dynamic;
 }
 
 /// @nodoc
@@ -129,5 +129,5 @@ class _IsarWeb implements IsarNativeInterface {
 
 /// @nodoc
 @protected
-// ignore: constant_identifier_names
-const IsarNative = _IsarWeb();
+// ignore: constant_identifier_names, library_private_types_in_public_api
+const _IsarWeb IsarNative = _IsarWeb();

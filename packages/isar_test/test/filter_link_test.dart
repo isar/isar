@@ -8,15 +8,15 @@ part 'filter_link_test.g.dart';
 
 @Collection()
 class LinkModelA {
+
+  LinkModelA(this.name);
   int? id;
 
   late String name;
 
-  final selfLinks = IsarLinks<LinkModelA>();
+  final IsarLinks<LinkModelA> selfLinks = IsarLinks<LinkModelA>();
 
-  final links = IsarLinks<LinkModelB>();
-
-  LinkModelA(this.name);
+  final IsarLinks<LinkModelB> links = IsarLinks<LinkModelB>();
 
   @override
   bool operator ==(Object other) {
@@ -26,14 +26,14 @@ class LinkModelA {
 
 @Collection()
 class LinkModelB {
+
+  LinkModelB(this.name);
   int? id;
 
   late String name;
 
   @Backlink(to: 'links')
-  final backlink = IsarLinks<LinkModelA>();
-
-  LinkModelB(this.name);
+  final IsarLinks<LinkModelA> backlink = IsarLinks<LinkModelA>();
 
   @override
   bool operator ==(Object other) {
