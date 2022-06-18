@@ -12,6 +12,9 @@ String generateByIndexExtension(ObjectInfo oi) {
   for (var index in uniqueIndexes) {
     code += generateSingleByIndex(oi, index);
     code += generateAllByIndex(oi, index);
+    if (!index.properties.first.isMultiEntry) {
+      code += generatePutByIndex(oi, index);
+    }
   }
   return '''
     $code
@@ -92,6 +95,26 @@ String generateAllByIndex(ObjectInfo oi, ObjectIndex index) {
     int deleteAllBy${index.dartName}Sync($params) {
       $createValues
       return deleteAllByIndexSync('${index.name.esc}', values);
+    }
+  ''';
+}
+
+String generatePutByIndex(ObjectInfo oi, ObjectIndex index) {
+  return '''
+    Future<int> putBy${index.dartName}(${oi.dartName} object) {
+      return putByIndex('${index.name.esc}', object);
+    }
+
+    int putBy${index.dartName}Sync(${oi.dartName} object, {bool saveLinks = false}) {
+      return putByIndexSync('${index.name.esc}', object, saveLinks: saveLinks);
+    }
+
+    Future<List<int>> putAllBy${index.dartName}(List<${oi.dartName}> objects) {
+      return putAllByIndex('${index.name.esc}', objects);
+    }
+
+    List<int> putAllBy${index.dartName}Sync(List<${oi.dartName}> objects, {bool saveLinks = false}) {
+      return putAllByIndexSync('${index.name.esc}', objects, saveLinks: saveLinks);
     }
   ''';
 }

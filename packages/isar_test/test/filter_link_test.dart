@@ -93,7 +93,7 @@ void tests() {
       print(objA2.id);
       print(objA3.id);
       print(objB1.id);
-      print(objB2.id);*/
+      print(objB2.id);
       //final sl = colA.getSync(1)!.selfLinks;
       //sl.loadSync(overrideChanges: true);
       //print(sl);
@@ -101,7 +101,7 @@ void tests() {
       await qEqualSet(
         colA.where().filter().selfLinks((q) => q.nameContains('a1')).tFindAll(),
         {objA1, objA2},
-      );
+      );*/
     });
 
     /*isarTest('Single self link without results', () async {

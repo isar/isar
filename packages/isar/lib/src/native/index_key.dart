@@ -11,17 +11,17 @@ import 'query_build.dart';
 final _keyPtrPtr = malloc<Pointer<CIndexKey>>();
 
 Pointer<CIndexKey> buildIndexKey(
-    CollectionSchema<dynamic> schema, String indexName, List<Object?> values) {
+    CollectionSchema<dynamic> schema, String indexName, IndexKey key) {
   final types = schema.indexValueTypeOrErr(indexName);
-  if (values.length > types.length) {
+  if (key.length > types.length) {
     throw 'Invalid values for index $indexName';
   }
 
   IC.isar_key_create(_keyPtrPtr);
   final keyPtr = _keyPtrPtr.value;
 
-  for (var i = 0; i < values.length; i++) {
-    _addKeyValue(keyPtr, values[i], types[i]);
+  for (var i = 0; i < key.length; i++) {
+    _addKeyValue(keyPtr, key[i], types[i]);
   }
 
   return keyPtr;

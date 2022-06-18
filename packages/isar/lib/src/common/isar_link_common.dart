@@ -57,6 +57,9 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
       final id = getId(object);
       if (id != null) {
         ids.add(id);
+      } else {
+        throw IsarError(
+            'Object $object has no id and can therefore not be linked.');
       }
     }
     return ids;
@@ -100,8 +103,6 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   @override
   OBJ? get value => _value;
 
-  int? get valueId => value != null ? getId(value as OBJ) : null;
-
   @override
   set value(OBJ? value) {
     _isChanged |= !identical(_value, value);
@@ -127,9 +128,9 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   Future<void> save() async {
     if (!isChanged) return;
     final object = _value;
-    final objectId = valueId;
+    final objectIds = objectsToIds([if (object != null) object]);
 
-    await updateNative([if (objectId != null) objectId], [], true);
+    await updateNative(objectIds, [], true);
     if (identical(_value, object)) {
       _isChanged = false;
     }
@@ -140,9 +141,9 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   void saveSync() {
     if (!isChanged) return;
     final object = _value;
-    final objectId = valueId;
+    final objectIds = objectsToIds([if (object != null) object]);
 
-    updateNativeSync([if (objectId != null) objectId], [], true);
+    updateNativeSync(objectIds, [], true);
     if (identical(_value, object)) {
       _isChanged = false;
     }

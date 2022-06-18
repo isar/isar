@@ -28,8 +28,8 @@ abstract class Isar {
   /// Name of the instance.
   final String name;
 
-  late final Map<Type, IsarCollectionBase<dynamic>> _collections;
-  late final Map<String, IsarCollectionBase<dynamic>> _collectionsByName;
+  late final Map<Type, IsarCollection<dynamic>> _collections;
+  late final Map<String, IsarCollection<dynamic>> _collectionsByName;
 
   var _isOpen = true;
 
@@ -133,7 +133,7 @@ abstract class Isar {
 
   /// @nodoc
   @protected
-  void attachCollections(Map<Type, IsarCollectionBase<dynamic>> collections) {
+  void attachCollections(Map<Type, IsarCollection<dynamic>> collections) {
     _collections = collections;
     _collectionsByName = {
       for (var col in collections.values) col.name: col,
@@ -150,15 +150,15 @@ abstract class Isar {
 
   /// @nodoc
   @protected
-  IsarCollectionBase<T> getCollectionInternal<T>() {
+  IsarCollection<T> getCollectionInternal<T>() {
     requireOpen();
-    return _collections[T] as IsarCollectionBase<T>;
+    return _collections[T] as IsarCollection<T>;
   }
 
   /// @nodoc
   @protected
-  IsarCollectionBase<dynamic>? getCollectionByNameInternal(String name) {
-    return _collectionsByName[name] as IsarCollectionBase<dynamic>;
+  IsarCollection<dynamic>? getCollectionByNameInternal(String name) {
+    return _collectionsByName[name] as IsarCollection<dynamic>;
   }
 
   /// Remove all data in this instance and reset the auto increment values.

@@ -1,5 +1,7 @@
 part of isar;
 
+typedef IndexKey = List<Object?>;
+
 /// Collections are used to store and receive your objects from Isar.
 abstract class IsarCollection<OBJ> {
   /// The corresponding Isar instance.
@@ -8,11 +10,19 @@ abstract class IsarCollection<OBJ> {
   /// The name of the collection.
   String get name;
 
+  /// @nodoc
+  @protected
+  String get idName;
+
   /// Get a single object by its [id] or `null` if the object does not exist.
-  Future<OBJ?> get(int id);
+  Future<OBJ?> get(int id) {
+    return getAll([id]).then((objects) => objects[0]);
+  }
 
   /// Get a single object by [its] id or `null` if the object does not exist.
-  OBJ? getSync(int id);
+  OBJ? getSync(int id) {
+    return getAllSync([id])[0];
+  }
 
   /// Get a list of objects by their [ids] or `null` if an object does not
   /// exist.
@@ -24,50 +34,75 @@ abstract class IsarCollection<OBJ> {
 
   /// @nodoc
   @protected
-  Future<OBJ?> getByIndex(String indexName, List<Object?> key);
+  Future<OBJ?> getByIndex(String indexName, IndexKey key) {
+    return getAllByIndex(indexName, [key]).then((objects) => objects[0]);
+  }
 
   /// @nodoc
   @protected
-  Future<List<OBJ?>> getAllByIndex(String indexName, List<List<Object?>> keys);
+  OBJ? getByIndexSync(String indexName, IndexKey key) {
+    return getAllByIndexSync(indexName, [key])[0];
+  }
 
   /// @nodoc
   @protected
-  OBJ? getByIndexSync(String indexName, List<Object?> key);
+  Future<List<OBJ?>> getAllByIndex(String indexName, List<IndexKey> keys);
 
   /// @nodoc
   @protected
-  List<OBJ?> getAllByIndexSync(String indexName, List<List<Object?>> keys);
+  List<OBJ?> getAllByIndexSync(String indexName, List<IndexKey> keys);
 
   /// Insert or update an [object] and returns the assigned id.
-  ///
-  /// Also saves the links of the object.
-  Future<int> put(OBJ object);
+  Future<int> put(OBJ object) {
+    return putAll([object]).then((ids) => ids[0]);
+  }
 
   /// Insert or update an [object] and returns the assigned id.
-  ///
-  /// Also saves the links of the object.
-  int putSync(OBJ object);
+  int putSync(OBJ object, {bool saveLinks = false}) {
+    return putAllSync([object], saveLinks: saveLinks)[0];
+  }
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  ///
-  /// Also saves the links of the objects.
   Future<List<int>> putAll(List<OBJ> objects);
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  ///
-  /// Also saves the links of the objects.
-  List<int> putAllSync(List<OBJ> objects);
+  List<int> putAllSync(List<OBJ> objects, {bool saveLinks = false});
+
+  /// @nodoc
+  @protected
+  Future<int> putByIndex(String indexName, OBJ object) {
+    return putAllByIndex(indexName, [object]).then((ids) => ids[0]);
+  }
+
+  /// @nodoc
+  @protected
+  int putByIndexSync(String indexName, OBJ object, {bool saveLinks = false}) {
+    return putAllByIndexSync(indexName, [object])[0];
+  }
+
+  /// @nodoc
+  @protected
+  Future<List<int>> putAllByIndex(String indexName, List<OBJ> objects);
+
+  /// @nodoc
+  @protected
+  List<int> putAllByIndexSync(String indexName, List<OBJ> objects,
+      {bool saveLinks = false});
 
   /// Delete a single object by its [id].
   ///
   /// Returns whether the object has been deleted. Isar web always returns
   /// `true`.
-  Future<bool> delete(int id);
+  Future<bool> delete(int id) {
+    return deleteAll([id]).then((count) => count == 1);
+  }
 
   /// Delete a single object by its [id].
   ///
   /// Returns whether the object has been deleted.
-  bool deleteSync(int id);
+  bool deleteSync(int id) {
+    return deleteAllSync([id]) == 1;
+  }
 
   /// Delete a list of objecs by their [ids].
   ///
@@ -82,19 +117,23 @@ abstract class IsarCollection<OBJ> {
 
   /// @nodoc
   @protected
-  Future<bool> deleteByIndex(String indexName, List<Object?> key);
+  Future<bool> deleteByIndex(String indexName, IndexKey key) {
+    return deleteAllByIndex(indexName, [key]).then((count) => count == 1);
+  }
 
   /// @nodoc
   @protected
-  Future<int> deleteAllByIndex(String indexName, List<List<Object?>> keys);
+  bool deleteByIndexSync(String indexName, IndexKey key) {
+    return deleteAllByIndexSync(indexName, [key]) == 1;
+  }
 
   /// @nodoc
   @protected
-  bool deleteByIndexSync(String indexName, List<Object?> key);
+  Future<int> deleteAllByIndex(String indexName, List<IndexKey> keys);
 
   /// @nodoc
   @protected
-  int deleteAllByIndexSync(String indexName, List<List<Object?>> keys);
+  int deleteAllByIndexSync(String indexName, List<IndexKey> keys);
 
   /// Remove all data in this collection and reset the auto increment value.
   Future<void> clear();

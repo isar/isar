@@ -1,4 +1,10 @@
+## 3.0.0-dev.2
+
 ## 3.0.0-dev.1
+
+### Breaking
+
+- `collection.put()` and `collection.putAll()` no longer allow saving links
 
 ### Enhancements
 

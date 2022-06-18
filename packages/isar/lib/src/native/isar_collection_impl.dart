@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
-import 'package:isar/src/common/isar_collection_common.dart';
 import 'package:isar/src/native/isar_core.dart';
 
 import 'binary_reader.dart';
@@ -15,12 +14,11 @@ import 'index_key.dart';
 import 'isar_impl.dart';
 import 'query_build.dart';
 
-class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
+class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   final IsarImpl isar;
   final Pointer<CIsarCollection> ptr;
 
-  @override
   final CollectionSchema<OBJ> schema;
   final int _staticSize;
   final List<int> _offsets;
@@ -36,6 +34,9 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
 
   @override
   String get name => schema.name;
+
+  @override
+  String get idName => schema.idName;
 
   @pragma('vm:prefer-inline')
   OBJ deserializeObject(CObject cObj) {
@@ -78,7 +79,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
 
   @pragma('vm:prefer-inline')
   Pointer<Pointer<CIndexKey>> _getKeysPtr(
-      String indexName, List<List<Object?>> values, Allocator alloc) {
+      String indexName, List<IndexKey> values, Allocator alloc) {
     final keysPtrPtr = alloc<Pointer<CIndexKey>>(values.length);
     for (var i = 0; i < values.length; i++) {
       keysPtrPtr[i] = buildIndexKey(schema, indexName, values[i]);
@@ -141,7 +142,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
   }
 
   @override
-  Future<List<OBJ?>> getAllByIndex(String indexName, List<List<Object?>> keys) {
+  Future<List<OBJ?>> getAllByIndex(String indexName, List<IndexKey> keys) {
     return isar.getTxn(false, (txn) async {
       final cObjSetPtr = txn.allocCObjectSet(keys.length);
       final keysPtrPtr = _getKeysPtr(indexName, keys, txn.alloc);
@@ -153,7 +154,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
   }
 
   @override
-  List<OBJ?> getAllByIndexSync(String indexName, List<List<Object?>> keys) {
+  List<OBJ?> getAllByIndexSync(String indexName, List<IndexKey> keys) {
     return isar.getTxnSync(false, (txn) {
       final cObjPtr = txn.allocCObject();
       final cObj = cObjPtr.ref;
@@ -171,61 +172,60 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
   }
 
   @override
-  Future<List<int>> putAllNative(AsyncObjectLinkList<OBJ> list) {
-    void _fillCLinkSet(Txn txn, List<AsyncLink> asyncLinks, CLinkSet cLinkSet) {
-      if (asyncLinks.isNotEmpty) {
-        cLinkSet
-          ..links = txn.alloc<CLink>(asyncLinks.length)
-          ..length = asyncLinks.length;
-        for (var i = 0; i < asyncLinks.length; i++) {
-          final link = asyncLinks[i];
-          cLinkSet.links.elementAt(i).ref
-            ..link_id = schema.linkIdOrErr(link.linkName)
-            ..source_index = link.sourceIndex
-            ..target_id = link.targetId;
-        }
-      } else {
-        cLinkSet
-          ..links = nullptr.cast()
-          ..length = 0;
-      }
-    }
+  Future<List<int>> putAll(List<OBJ> objects) {
+    return putAllByIndex(null, objects);
+  }
 
+  @override
+  List<int> putAllSync(List<OBJ> objects, {bool saveLinks = false}) {
+    return putAllByIndexSync(null, objects);
+  }
+
+  @override
+  Future<List<int>> putAllByIndex(String? indexName, List<OBJ> objects) {
     return isar.getTxn(true, (txn) async {
-      final cObjLinkSetPtr = txn.alloc<CObjectLinkSet>();
-      final cObjLinkSet = cObjLinkSetPtr.ref;
-      cObjLinkSet.objects
-        ..objects = txn.alloc<CObject>(list.objects.length)
-        ..length = list.objects.length;
+      final cObjSetPtr = txn.allocCObjectSet(objects.length);
+      final objectsPtr = cObjSetPtr.ref.objects;
 
-      final objectsPtr = cObjLinkSet.objects.objects;
       Pointer<Uint8> allocBuf(int size) => txn.alloc<Uint8>(size);
-      for (var i = 0; i < list.objects.length; i++) {
-        final object = list.objects[i];
+      for (var i = 0; i < objects.length; i++) {
+        final object = objects[i];
         final cObj = objectsPtr.elementAt(i).ref;
         schema.serializeNative(
             this, cObj, object, _staticSize, _offsets, allocBuf);
         cObj.id = schema.getId(object) ?? Isar.autoIncrement;
       }
+      if (indexName != null) {
+        final indexId = schema.indexIdOrErr(indexName);
+        IC.isar_put_all_by_index(ptr, txn.ptr, indexId, cObjSetPtr);
+      } else {
+        IC.isar_put_all(ptr, txn.ptr, cObjSetPtr);
+      }
 
-      _fillCLinkSet(txn, list.addedLinks, cObjLinkSet.added_links);
-      _fillCLinkSet(txn, list.removedLinks, cObjLinkSet.removed_links);
-      _fillCLinkSet(txn, list.resetLinks, cObjLinkSet.reset_links);
-
-      IC.isar_put_all(ptr, txn.ptr, cObjLinkSetPtr);
       await txn.wait();
+      final cObjectSet = cObjSetPtr.ref;
+      final ids = List<int>.filled(objects.length, 0);
+      for (var i = 0; i < objects.length; i++) {
+        final cObjPtr = cObjectSet.objects.elementAt(i);
+        final id = cObjPtr.ref.id;
+        ids[i] = id;
 
-      final ids = List<int>.filled(list.objects.length, 0);
-      for (var i = 0; i < list.objects.length; i++) {
-        final cObjPtr = objectsPtr.elementAt(i);
-        ids[i] = cObjPtr.ref.id;
+        final object = objects[i];
+        schema.setId?.call(object, id);
+        schema.attachLinks(this, id, object);
       }
       return ids;
     });
   }
 
   @override
-  List<int> putAllSync(List<OBJ> objects) {
+  List<int> putAllByIndexSync(String? indexName, List<OBJ> objects,
+      {bool saveLinks = false}) {
+    int? indexId;
+    if (indexName != null) {
+      indexId = schema.indexIdOrErr(indexName);
+    }
+
     return isar.getTxnSync(true, (txn) {
       final cObjPtr = txn.allocCObject();
       final cObj = cObjPtr.ref;
@@ -236,7 +236,12 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
         schema.serializeNative(
             this, cObj, object, _staticSize, _offsets, txn.allocBuffer);
         cObj.id = schema.getId(object) ?? Isar.autoIncrement;
-        nCall(IC.isar_put(ptr, txn.ptr, cObjPtr));
+
+        if (indexId != null) {
+          nCall(IC.isar_put_by_index(ptr, txn.ptr, indexId, cObjPtr));
+        } else {
+          nCall(IC.isar_put(ptr, txn.ptr, cObjPtr));
+        }
 
         final id = cObj.id;
         ids[i] = id;
@@ -244,8 +249,10 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
 
         if (schema.hasLinks) {
           schema.attachLinks(this, id, object);
-          for (var link in schema.getLinks(object)) {
-            link.saveSync();
+          if (saveLinks) {
+            for (var link in schema.getLinks(object)) {
+              link.saveSync();
+            }
           }
         }
       }
@@ -284,7 +291,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
   }
 
   @override
-  Future<int> deleteAllByIndex(String indexName, List<List<Object?>> keys) {
+  Future<int> deleteAllByIndex(String indexName, List<IndexKey> keys) {
     return isar.getTxn(true, (txn) async {
       final countPtr = txn.alloc<Uint32>();
       final keysPtrPtr = _getKeysPtr(indexName, keys, txn.alloc);
@@ -298,7 +305,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
   }
 
   @override
-  int deleteAllByIndexSync(String indexName, List<List<Object?>> keys) {
+  int deleteAllByIndexSync(String indexName, List<IndexKey> keys) {
     return isar.getTxnSync(true, (txn) {
       final countPtr = txn.alloc<Uint32>();
       final keysPtrPtr = _getKeysPtr(indexName, keys, txn.alloc);

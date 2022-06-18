@@ -128,6 +128,8 @@ class ObjectIndexProperty {
 
   IsarType get scalarType => property.isarType.scalarType;
 
+  bool get isMultiEntry => isarType.isList && type != IndexType.hash;
+
   String get indexValueTypeEnum {
     switch (property.isarType) {
       case IsarType.bool:

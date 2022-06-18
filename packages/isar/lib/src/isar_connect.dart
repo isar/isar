@@ -52,11 +52,6 @@ abstract class _IsarConnect {
     Service.getInfo().then((info) {
       final serviceUri = info.serverUri;
       if (serviceUri == null) {
-        print('╔════════════════════════════════════════╗');
-        print('║      ERROR STARTING ISAR CONNECT       ║');
-        print('╟────────────────────────────────────────╢');
-        print('║ No Dart Service seems to be connected. ║');
-        print('╚════════════════════════════════════════╝');
         return;
       }
       final port = serviceUri.port;
@@ -164,7 +159,7 @@ abstract class _IsarConnect {
 
     final qSort = query.sortProperty;
     if (qSort != null) {
-      if (qSort.property == collection.schema.idName) {
+      if (qSort.property == collection.idName) {
         whereClause = IdWhereClause.any();
         whereSort = qSort.sort;
       } else {

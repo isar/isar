@@ -72,7 +72,7 @@ _GetPropResult _generateGetPropertyValue(
       code += '''
         final bytes = IsarBinaryWriter.utf8Encoder.convert(str);
         $stringBytesList.add(bytes);
-        $dynamicSize += bytes.length;''';
+        $dynamicSize += bytes.length as int;''';
       if (property.elementNullable) {
         code += '''
           } else {
