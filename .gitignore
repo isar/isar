@@ -116,3 +116,5 @@ app.*.symbols
 *.so
 *.dylib
 *.dll
+
+.fvm/

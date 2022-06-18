@@ -86,6 +86,20 @@ class IsarCoreBindings {
   late final _isar_free_error =
       _isar_free_errorPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
 
+  void isar_free_c_object_set(
+    ffi.Pointer<CObjectSet> ros,
+  ) {
+    return _isar_free_c_object_set(
+      ros,
+    );
+  }
+
+  late final _isar_free_c_object_setPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<CObjectSet>)>>(
+          'isar_free_c_object_set');
+  late final _isar_free_c_object_set = _isar_free_c_object_setPtr
+      .asFunction<void Function(ffi.Pointer<CObjectSet>)>();
+
   int isar_get(
     ffi.Pointer<CIsarCollection> collection,
     ffi.Pointer<CIsarTxn> txn,
@@ -205,22 +219,24 @@ class IsarCoreBindings {
   int isar_put_all(
     ffi.Pointer<CIsarCollection> collection,
     ffi.Pointer<CIsarTxn> txn,
-    ffi.Pointer<CObjectSet> objects,
+    ffi.Pointer<CObjectLinkSet> objects_links,
   ) {
     return _isar_put_all(
       collection,
       txn,
-      objects,
+      objects_links,
     );
   }
 
   late final _isar_put_allPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Int64 Function(ffi.Pointer<CIsarCollection>,
-              ffi.Pointer<CIsarTxn>, ffi.Pointer<CObjectSet>)>>('isar_put_all');
+          ffi.Int64 Function(
+              ffi.Pointer<CIsarCollection>,
+              ffi.Pointer<CIsarTxn>,
+              ffi.Pointer<CObjectLinkSet>)>>('isar_put_all');
   late final _isar_put_all = _isar_put_allPtr.asFunction<
       int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>,
-          ffi.Pointer<CObjectSet>)>();
+          ffi.Pointer<CObjectLinkSet>)>();
 
   int isar_delete(
     ffi.Pointer<CIsarCollection> collection,
@@ -384,6 +400,54 @@ class IsarCoreBindings {
   late final _isar_json_import = _isar_json_importPtr.asFunction<
       int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>,
           ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Uint8>, int)>();
+
+  int isar_count(
+    ffi.Pointer<CIsarCollection> collection,
+    ffi.Pointer<CIsarTxn> txn,
+    ffi.Pointer<ffi.Int64> count,
+  ) {
+    return _isar_count(
+      collection,
+      txn,
+      count,
+    );
+  }
+
+  late final _isar_countPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int64 Function(ffi.Pointer<CIsarCollection>,
+              ffi.Pointer<CIsarTxn>, ffi.Pointer<ffi.Int64>)>>('isar_count');
+  late final _isar_count = _isar_countPtr.asFunction<
+      int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>,
+          ffi.Pointer<ffi.Int64>)>();
+
+  int isar_get_size(
+    ffi.Pointer<CIsarCollection> collection,
+    ffi.Pointer<CIsarTxn> txn,
+    bool include_indexes,
+    bool include_links,
+    ffi.Pointer<ffi.Int64> size,
+  ) {
+    return _isar_get_size(
+      collection,
+      txn,
+      include_indexes ? 1 : 0,
+      include_links ? 1 : 0,
+      size,
+    );
+  }
+
+  late final _isar_get_sizePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int64 Function(
+              ffi.Pointer<CIsarCollection>,
+              ffi.Pointer<CIsarTxn>,
+              ffi.Uint8,
+              ffi.Uint8,
+              ffi.Pointer<ffi.Int64>)>>('isar_get_size');
+  late final _isar_get_size = _isar_get_sizePtr.asFunction<
+      int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>, int,
+          int, ffi.Pointer<ffi.Int64>)>();
 
   void isar_connect_dart_api(
     DartPostCObjectFnType ptr,
@@ -1663,20 +1727,6 @@ class IsarCoreBindings {
       _isar_q_aggregate_double_resultPtr
           .asFunction<double Function(ffi.Pointer<CAggregationResult>)>();
 
-  void isar_free_raw_obj_list(
-    ffi.Pointer<CObjectSet> ros,
-  ) {
-    return _isar_free_raw_obj_list(
-      ros,
-    );
-  }
-
-  late final _isar_free_raw_obj_listPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<CObjectSet>)>>(
-          'isar_free_raw_obj_list');
-  late final _isar_free_raw_obj_list = _isar_free_raw_obj_listPtr
-      .asFunction<void Function(ffi.Pointer<CObjectSet>)>();
-
   int isar_txn_begin(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<ffi.Pointer<CIsarTxn>> txn,
@@ -1827,6 +1877,34 @@ class CObjectSet extends ffi.Struct {
 
   @ffi.Uint32()
   external int length;
+}
+
+class CLink extends ffi.Struct {
+  @ffi.Int64()
+  external int source_index;
+
+  @ffi.Int64()
+  external int target_id;
+
+  @ffi.Uint32()
+  external int link_id;
+}
+
+class CLinkSet extends ffi.Struct {
+  external ffi.Pointer<CLink> links;
+
+  @ffi.Uint32()
+  external int length;
+}
+
+class CObjectLinkSet extends ffi.Struct {
+  external CObjectSet objects;
+
+  external CLinkSet added_links;
+
+  external CLinkSet removed_links;
+
+  external CLinkSet reset_links;
 }
 
 class CIsarCollection extends ffi.Opaque {}

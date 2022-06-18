@@ -105,31 +105,14 @@ void tests() {
     });
 
     group('self link', () {
-      isarTest('new obj new target', () async {
-        objA1.selfLink.value = objA2;
-        objA3.selfLink.value = objA3;
-        await isar.tWriteTxn(() async {
-          objA1.id = Isar.autoIncrement;
-          await linksA.tPutAll([objA1, objA3], saveLinks: true);
-        });
-
-        final newA1 = await linksA.tGet(objA1.id!);
-        await newA1!.selfLink.tLoad();
-        expect(newA1.selfLink.value, objA2);
-
-        final newA3 = await linksA.tGet(objA3.id!);
-        await newA3!.selfLink.tLoad();
-        expect(newA3.selfLink.value, objA3);
-      });
-
-      isarTest('new obj existing target', () async {
+      isarTest('new object', () async {
         await isar.tWriteTxn(() async {
           await linksA.tPut(objA2);
         });
 
         objA1.selfLink.value = objA2;
         await isar.tWriteTxn(() async {
-          await linksA.tPut(objA1, saveLinks: true);
+          await linksA.tPut(objA1);
         });
 
         final newA1 = await linksA.tGet(objA1.id!);
@@ -137,14 +120,14 @@ void tests() {
         expect(newA1.selfLink.value, objA2);
       });
 
-      isarTest('existing obj new target', () async {
+      isarTest('existing object', () async {
         await isar.tWriteTxn(() async {
-          await linksA.tPut(objA1);
+          await linksA.tPutAll([objA1, objA2]);
         });
 
         objA1.selfLink.value = objA2;
         await isar.tWriteTxn(() async {
-          await linksA.tPut(objA1, saveLinks: true);
+          await linksA.tPut(objA1);
         });
 
         final newA1 = await linksA.tGet(objA1.id!);
@@ -153,10 +136,14 @@ void tests() {
       });
 
       isarTest('delete source', () async {
+        await isar.tWriteTxn(() async {
+          await linksA.tPut(objA2);
+        });
+
         objA1.selfLink.value = objA2;
         await isar.tWriteTxn(() async {
           objA1.id = Isar.autoIncrement;
-          await linksA.tPut(objA1, saveLinks: true);
+          await linksA.tPut(objA1);
         });
 
         await isar.tWriteTxn(() async {
@@ -165,14 +152,18 @@ void tests() {
 
         final newA2 = await linksA.tGet(objA2.id!);
         await newA2!.selfLinkBacklink.tLoad();
-        expect(newA2.selfLinkBacklink, []);
+        expect(newA2.selfLinkBacklink, <dynamic>[]);
       });
 
       isarTest('delete target', () async {
+        await isar.tWriteTxn(() async {
+          await linksA.tPut(objA2);
+        });
+
         objA1.selfLink.value = objA2;
         await isar.tWriteTxn(() async {
           objA1.id = Isar.autoIncrement;
-          await linksA.tPut(objA1, saveLinks: true);
+          await linksA.tPut(objA1);
         });
 
         await isar.tWriteTxn(() async {
@@ -186,7 +177,7 @@ void tests() {
 
       isarTest('.load() / .save()', () async {
         await isar.tWriteTxn(() async {
-          await linksA.tPut(objA1);
+          await linksA.tPutAll([objA1, objA2]);
         });
 
         objA1.selfLink.value = objA2;
@@ -209,29 +200,14 @@ void tests() {
     });
 
     group('other link', () {
-      isarTest('new obj new target', () async {
-        objA1.otherLink.value = objB1;
-        await isar.tWriteTxn(() async {
-          await linksA.tPut(objA1, saveLinks: true);
-        });
-
-        await isar.tWriteTxn(() async {
-          await linksB.tDelete(objB1.id!);
-        });
-
-        final newA1 = await linksA.tGet(objA1.id!);
-        await newA1!.otherLink.tLoad();
-        expect(newA1.otherLink.value, null);
-      });
-
-      isarTest('new obj existing target', () async {
+      isarTest('new object', () async {
         await isar.tWriteTxn(() async {
           await linksB.tPut(objB1);
         });
 
         objA1.otherLink.value = objB1;
         await isar.tWriteTxn(() async {
-          await linksA.tPut(objA1, saveLinks: true);
+          await linksA.tPut(objA1);
         });
 
         final newA1 = await linksA.tGet(objA1.id!);
@@ -239,14 +215,15 @@ void tests() {
         expect(newA1.otherLink.value, objB1);
       });
 
-      isarTest('existing obj added new', () async {
+      isarTest('existing object', () async {
         await isar.tWriteTxn(() async {
           await linksA.tPut(objA1);
+          await linksB.tPut(objB1);
         });
 
         objA1.otherLink.value = objB1;
         await isar.tWriteTxn(() async {
-          await linksA.tPut(objA1, saveLinks: true);
+          await linksA.tPut(objA1);
         });
 
         final newA1 = await linksA.tGet(objA1.id!);
@@ -257,6 +234,7 @@ void tests() {
       isarTest('.load() / .save()', () async {
         await isar.tWriteTxn(() async {
           await linksA.tPut(objA1);
+          await linksB.tPut(objB1);
         });
 
         objA1.otherLink.value = objB1;
@@ -281,14 +259,14 @@ void tests() {
     group('self links', () {
       isarTest('new obj', () async {
         await isar.tWriteTxn(() async {
-          await linksA.tPut(objA3);
+          await linksA.tPutAll([objA2, objA3]);
         });
         objA1.selfLinks.add(objA2);
         objA1.selfLinks.add(objA3);
 
         await isar.tWriteTxn(() async {
           objA1.id = Isar.autoIncrement;
-          await linksA.tPut(objA1, saveLinks: true);
+          await linksA.tPut(objA1);
         });
 
         final newA1 = await linksA.tGet(objA1.id!);
@@ -299,13 +277,13 @@ void tests() {
 
       isarTest('existing obj', () async {
         await isar.tWriteTxn(() async {
-          await linksA.tPutAll([objA1, objA3]);
+          await linksA.tPutAll([objA1, objA2, objA3]);
         });
         objA1.selfLinks.add(objA2);
         objA1.selfLinks.add(objA3);
 
         await isar.tWriteTxn(() async {
-          await linksA.tPut(objA1, saveLinks: true);
+          await linksA.tPut(objA1);
         });
 
         final newA1 = await linksA.tGet(objA1.id!);

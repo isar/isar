@@ -23,6 +23,21 @@ void tests() async {
       await isar.close();
     });
 
+    isarTest('id property', () async {
+      await isar.tWriteTxn(
+        () => isar.multiTypeModels.tPutAll([
+          MultiTypeModel(),
+          MultiTypeModel(),
+          MultiTypeModel(),
+        ]),
+      );
+
+      await qEqual(
+        isar.multiTypeModels.where().idProperty().tFindAll(),
+        [1, 2, 3],
+      );
+    });
+
     isarTest('bool property', () async {
       await isar.tWriteTxn(
         () => isar.multiTypeModels.tPutAll([
@@ -143,7 +158,7 @@ void tests() async {
 
       await qEqual(isar.multiTypeModels.where().boolListProperty().tFindAll(), [
         [true, false, true],
-        [],
+        <bool>[],
         [true]
       ]);
     });
@@ -159,7 +174,7 @@ void tests() async {
 
       await qEqual(isar.multiTypeModels.where().intListProperty().tFindAll(), [
         [-5, 70, 999],
-        [],
+        <int>[],
         [0]
       ]);
     });
@@ -176,7 +191,7 @@ void tests() async {
       await qEqual(
           isar.multiTypeModels.where().floatListProperty().tFindAll(), [
         [-5.5, 70.7, 999.999],
-        [],
+        <double>[],
         [0.0]
       ]);
     });
@@ -192,7 +207,7 @@ void tests() async {
 
       await qEqual(isar.multiTypeModels.where().longListProperty().tFindAll(), [
         [-5, 70, 999],
-        [],
+        <int>[],
         [0]
       ]);
     });
@@ -209,7 +224,7 @@ void tests() async {
       await qEqual(
           isar.multiTypeModels.where().doubleListProperty().tFindAll(), [
         [-5.5, 70.7, 999.999],
-        [],
+        <double>[],
         [0.0]
       ]);
     });
@@ -227,7 +242,7 @@ void tests() async {
         isar.multiTypeModels.where().stringListProperty().tFindAll(),
         [
           ['Just', 'a', 'test'],
-          [],
+          <String>[],
           ['']
         ],
       );

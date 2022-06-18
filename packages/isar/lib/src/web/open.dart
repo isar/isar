@@ -3,6 +3,7 @@ import 'dart:html';
 import 'dart:js_util';
 
 import 'package:isar/isar.dart';
+import 'package:isar/src/common/isar_collection_common.dart';
 import 'package:isar/src/version.dart';
 
 import 'bindings.dart';
@@ -28,7 +29,7 @@ Future<void> initializeIsarWeb() async {
 Future<Isar> openIsar({
   required String name,
   required bool relaxedDurability,
-  required List<CollectionSchema> schemas,
+  required List<CollectionSchema<dynamic>> schemas,
 }) async {
   await initializeIsarWeb();
   final schemaStr = '[${schemas.map((e) => e.schema).join(',')}]';
@@ -38,11 +39,11 @@ Future<Isar> openIsar({
     json['idName'] = e.idName;
     return json;
   });
-  final schemasJs = jsify(schemasJson);
+  final schemasJs = jsify(schemasJson) as List<dynamic>;
   final IsarInstanceJs instance =
       await openIsarJs(name, schemasJs, relaxedDurability).wait();
   final isar = IsarImpl(name, schemaStr, instance);
-  final cols = <Type, IsarCollection>{};
+  final cols = <Type, IsarCollectionBase<dynamic>>{};
   for (var schema in schemas) {
     final col = instance.getCollection(schema.name);
     schema.toCollection(<OBJ>() {

@@ -11,7 +11,7 @@ import 'query_build.dart';
 final _keyPtrPtr = malloc<Pointer<CIndexKey>>();
 
 Pointer<CIndexKey> buildIndexKey(
-    CollectionSchema schema, String indexName, List<Object?> values) {
+    CollectionSchema<dynamic> schema, String indexName, List<Object?> values) {
   final types = schema.indexValueTypeOrErr(indexName);
   if (values.length > types.length) {
     throw 'Invalid values for index $indexName';

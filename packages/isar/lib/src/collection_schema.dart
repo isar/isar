@@ -35,7 +35,7 @@ typedef DeserializePropNative = dynamic Function(
 
 /// @nodoc
 @protected
-typedef SerializeWeb<T> = dynamic Function(
+typedef SerializeWeb<T> = Object Function(
   IsarCollection<T> collection,
   T object,
 );
@@ -44,7 +44,7 @@ typedef SerializeWeb<T> = dynamic Function(
 @protected
 typedef DeserializeWeb<T> = T Function(
   IsarCollection<T> collection,
-  dynamic jsObj,
+  Object jsObj,
 );
 
 /// @nodoc
@@ -73,8 +73,8 @@ class CollectionSchema<OBJ> {
   final int? Function(OBJ object) getId;
   final void Function(OBJ object, int id)? setId;
 
-  final List<IsarLinkBase> Function(OBJ object) getLinks;
-  final void Function(IsarCollection col, int id, OBJ object) attachLinks;
+  final List<IsarLinkBase<dynamic>> Function(OBJ object) getLinks;
+  final void Function(IsarCollection<OBJ> col, int id, OBJ object) attachLinks;
 
   final SerializeNative<OBJ> serializeNative;
   final DeserializeNative<OBJ> deserializeNative;

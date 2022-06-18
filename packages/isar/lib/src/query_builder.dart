@@ -179,7 +179,8 @@ class QueryBuilder<OBJ, R, S> {
   @protected
   QueryBuilder<OBJ, E, QQueryOperations> addPropertyNameInternal<E>(
       String propertyName) {
-    return copyWithInternal(propertyName: propertyName).castInternal();
+    return copyWithInternal<QQueryOperations>(propertyName: propertyName)
+        .castInternal();
   }
 
   /// @nodoc

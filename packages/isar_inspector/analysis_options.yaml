@@ -9,8 +9,8 @@ analyzer:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
 
-linter:
-  rules:
-    - avoid_private_typedef_functions
-    - directives_ordering
-    - prefer_single_quotes
+  language:
+    strict-casts: true
+
+  errors:
+    avoid_print: ignore

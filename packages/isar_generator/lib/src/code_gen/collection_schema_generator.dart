@@ -130,7 +130,7 @@ String _generateSetId(ObjectInfo object) {
 
 String _generateGetLinks(ObjectInfo object) {
   return '''
-    List<IsarLinkBase> ${object.getLinksName}(${object.dartName} object) {
+    List<IsarLinkBase<dynamic>> ${object.getLinksName}(${object.dartName} object) {
       return [${object.links.map((e) => 'object.${e.dartName}').join(',')}];
     }
   ''';

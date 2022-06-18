@@ -65,7 +65,7 @@ class _IsarNative implements IsarNativeInterface {
   }
 
   @override
-  dynamic jsObjectGet(Object o, Object key) {
+  T jsObjectGet<T>(Object o, Object key) {
     throw UnimplementedError();
   }
 
@@ -75,7 +75,7 @@ class _IsarNative implements IsarNativeInterface {
   }
 
   @override
-  dynamic newJsObject() {
+  Object newJsObject() {
     throw UnimplementedError();
   }
 
@@ -97,7 +97,7 @@ class _IsarNative implements IsarNativeInterface {
     String? directory,
     required String name,
     required bool relaxedDurability,
-    required List<CollectionSchema> schemas,
+    required List<CollectionSchema<dynamic>> schemas,
   }) {
     return openIsar(
       directory: directory,
@@ -113,7 +113,7 @@ class _IsarNative implements IsarNativeInterface {
     String? directory,
     required String name,
     required bool relaxedDurability,
-    required List<CollectionSchema> schemas,
+    required List<CollectionSchema<dynamic>> schemas,
   }) {
     return openIsarSync(
       directory: directory,

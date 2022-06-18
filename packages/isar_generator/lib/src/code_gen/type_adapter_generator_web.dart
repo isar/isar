@@ -6,7 +6,7 @@ import 'type_adapter_generator_common.dart';
 
 String generateSerializeWeb(ObjectInfo object) {
   var code = '''
-  dynamic ${object.serializeWebName}(IsarCollection<${object.dartName}> collection, ${object.dartName} object) {
+  Object ${object.serializeWebName}(IsarCollection<${object.dartName}> collection, ${object.dartName} object) {
     final jsObj = IsarNative.newJsObject();''';
 
   for (var property in object.properties) {
@@ -39,7 +39,7 @@ String generateDeserializeWeb(ObjectInfo object) {
   String deserProp(ObjectProperty p) => _deserializeProperty(object, p);
 
   var code = '''
-  ${object.dartName} ${object.deserializeWebName}(IsarCollection<${object.dartName}> collection, dynamic jsObj) {
+  ${object.dartName} ${object.deserializeWebName}(IsarCollection<${object.dartName}> collection, Object jsObj) {
     ${deserializeMethodBody(object, deserProp)}''';
 
   if (object.links.isNotEmpty) {
@@ -79,8 +79,9 @@ String _defaultVal(IsarType type) {
     case IsarType.bool:
       return 'false';
     case IsarType.int:
-    case IsarType.float:
     case IsarType.long:
+      return '(double.negativeInfinity as int)';
+    case IsarType.float:
     case IsarType.double:
       return 'double.negativeInfinity';
     case IsarType.dateTime:
@@ -97,7 +98,8 @@ String _defaultVal(IsarType type) {
 String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
   final read = "IsarNative.jsObjectGet(jsObj, '${property.isarName.esc}')";
   String convDate(String e, bool nullable) {
-    final c = 'DateTime.fromMillisecondsSinceEpoch($e, isUtc: true).toLocal()';
+    final c =
+        'DateTime.fromMillisecondsSinceEpoch($e as int, isUtc: true).toLocal()';
     if (nullable) {
       return '$e != null ? $c : null';
     } else {

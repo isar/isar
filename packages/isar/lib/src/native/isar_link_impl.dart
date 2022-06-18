@@ -7,7 +7,7 @@ import 'isar_core.dart';
 
 mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   @override
-  IsarCollectionImpl get sourceCollection =>
+  IsarCollectionImpl<dynamic> get sourceCollection =>
       super.sourceCollection as IsarCollectionImpl;
 
   @override
@@ -20,7 +20,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   late final getId = targetCollection.schema.getId;
 
   @override
-  Future<void> updateIdsInternal(
+  Future<void> updateNative(
       List<int> linkIds, List<int> unlinkIds, bool reset) {
     final containingId = requireAttached();
     return targetCollection.isar.getTxn(true, (txn) {
@@ -38,8 +38,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   }
 
   @override
-  void updateIdsInternalSync(
-      List<int> linkIds, List<int> unlinkIds, bool reset) {
+  void updateNativeSync(List<int> linkIds, List<int> unlinkIds, bool reset) {
     final containingId = requireAttached();
     targetCollection.isar.getTxnSync(true, (txn) {
       if (reset) {

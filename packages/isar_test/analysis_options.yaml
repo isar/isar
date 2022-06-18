@@ -1,8 +1,11 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  # strong-mode:
-  #   implicit-casts: false
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+
   errors:
     hash_and_equals: ignore
 
