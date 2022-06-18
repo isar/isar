@@ -1,6 +1,9 @@
 name: Build Inspector
 
-on: push
+on:
+  push:
+    tags:
+      - "*"
 
 jobs:
   build_and_upload:
