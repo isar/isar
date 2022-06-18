@@ -65,7 +65,7 @@ class IsarCollectionJs {
   external Promise getAllByIndex(
       IsarTxnJs txn, String indexName, List<List<dynamic>> values);
 
-  external Promise putAll(IsarTxnJs txn, List<dynamic> objects);
+  external Promise putAll(IsarTxnJs txn, AsyncObjectLinkListJs objects);
 
   external Promise deleteAll(IsarTxnJs txn, List<int> ids);
 
@@ -91,6 +91,23 @@ class IsarLinkJs {
       List<int> addedTargets, List<int> deletedTargets);
 
   external Promise clear(IsarTxnJs txn, int id, bool backlink);
+}
+
+@JS('AsyncLink')
+@anonymous
+class AsyncLinkJs {
+  external int sourceIndex;
+  external int? targetId;
+  external String linkName;
+}
+
+@JS('AsyncObjectLinkList')
+@anonymous
+class AsyncObjectLinkListJs {
+  external List<dynamic> objects;
+  external List<AsyncLinkJs>? addedLinks;
+  external List<AsyncLinkJs>? removedLinks;
+  external List<AsyncLinkJs>? resetLinks;
 }
 
 @JS('IdWhereClause')

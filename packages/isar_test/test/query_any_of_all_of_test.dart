@@ -1,7 +1,7 @@
 // ignore_for_file: inference_failure_on_function_invocation
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:isar/isar.dart';
+import 'package:test/test.dart';
 
 import 'util/common.dart';
 import 'util/sync_async_helper.dart';

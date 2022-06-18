@@ -72,17 +72,9 @@ abstract class IsarCollectionBase<OBJ> extends IsarCollection<OBJ> {
 
         if (link is IsarLinkCommon) {
           final targetId = link.valueId;
-          if (targetId != null) {
-            list.addedLinks.add(AsyncLink(
-              sourceIndex: list.objects.length - 1,
-              targetId: targetId,
-              linkName: link.linkName,
-            ));
-          }
-
           list.resetLinks.add(AsyncLink(
             sourceIndex: list.objects.length - 1,
-            targetId: 0,
+            targetId: targetId ?? Isar.autoIncrement,
             linkName: link.linkName,
           ));
         } else if (link is IsarLinksCommon) {
@@ -95,7 +87,7 @@ abstract class IsarCollectionBase<OBJ> extends IsarCollection<OBJ> {
           }
 
           for (var removedId in link.removedIds) {
-            list.addedLinks.add(AsyncLink(
+            list.removedLinks.add(AsyncLink(
               sourceIndex: list.objects.length - 1,
               targetId: removedId,
               linkName: link.linkName,

@@ -124,7 +124,7 @@ String generateSerializeNative(ObjectInfo object) {
   }
 
   code += '''
-    final size = ${sizes.join(' + ')};
+    final size = (${sizes.join(' + ')}) as int;
     cObj.buffer = alloc(size);
     cObj.buffer_length = size;
 

@@ -71,36 +71,31 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
 
   @override
   Future<List<int>> putAllNative(AsyncObjectLinkList<OBJ> list) {
-    /*return isar.getTxn(true, (txn) async {
+    List<AsyncLinkJs>? _toAsyncLinkJS(List<AsyncLink> asyncLinks) {
+      if (asyncLinks.isNotEmpty) {
+        return asyncLinks
+            .map((e) => AsyncLinkJs()
+              ..linkName = e.linkName
+              ..sourceIndex = e.sourceIndex
+              ..targetId = e.targetId)
+            .toList();
+      } else {
+        return null;
+      }
+    }
+
+    return isar.getTxn(true, (txn) {
       final serialized = <Object>[];
-      for (var object in objects) {
+      for (var object in list.objects) {
         serialized.add(schema.serializeWeb(this, object));
       }
-      final ids = await native.putAll(txn, serialized).wait<List<int>>();
-      final linkFutures = <Future<void>>[];
-      for (var i = 0; i < objects.length; i++) {
-        final object = objects[i];
-        final id = ids[i];
-        schema.setId?.call(object, id);
-
-        if (schema.hasLinks) {
-          schema.attachLinks(this, id, object);
-          if (saveLinks) {
-            for (var link in schema.getLinks(object)) {
-              if (link.isChanged) {
-                linkFutures.add(link.save());
-              }
-            }
-          }
-        }
-      }
-      if (linkFutures.isNotEmpty) {
-        await Future.wait(linkFutures);
-      }
-
-      return ids.cast<int>().toList();
-    });*/
-    throw UnimplementedError();
+      final listJs = AsyncObjectLinkListJs()
+        ..objects = serialized
+        ..addedLinks = _toAsyncLinkJS(list.addedLinks)
+        ..removedLinks = _toAsyncLinkJS(list.removedLinks)
+        ..resetLinks = _toAsyncLinkJS(list.resetLinks);
+      return native.putAll(txn, listJs).wait<List<int>>();
+    });
   }
 
   @override
@@ -141,7 +136,9 @@ class IsarCollectionImpl<OBJ> extends IsarCollectionBase<OBJ> {
   @override
   Future<void> importJson(List<Map<String, dynamic>> json) {
     return isar.getTxn(true, (txn) {
-      return native.putAll(txn, json.map(jsify).toList()).wait<dynamic>();
+      final objectsList = json.map(jsify).toList();
+      final objects = AsyncObjectLinkListJs()..objects = objectsList;
+      return native.putAll(txn, objects).wait<dynamic>();
     });
   }
 
