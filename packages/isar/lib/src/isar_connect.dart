@@ -55,7 +55,7 @@ abstract class _IsarConnect {
         print('╔════════════════════════════════════════╗');
         print('║      ERROR STARTING ISAR CONNECT       ║');
         print('╟────────────────────────────────────────╢');
-        print('║ No Dart Service seems to be connected  ║');
+        print('║ No Dart Service seems to be connected. ║');
         print('╚════════════════════════════════════════╝');
         return;
       }
@@ -68,10 +68,10 @@ abstract class _IsarConnect {
         path = path.substring(0, path.length - 1);
       }
       print('╔══════════════════════════════════════════════╗');
-      print('║          ISAR CONNECT STARTED                ║');
+      print('║             ISAR CONNECT STARTED             ║');
       print('╟──────────────────────────────────────────────╢');
-      print('║ Open this link to connect to the Isar        ║');
-      print('║ Inspector while this debug build is running. ║');
+      print('║ Open the link in Chrome to connect to the    ║');
+      print('║ Isar Inspector while this build is running.  ║');
       print('╟──────────────────────────────────────────────╢');
       print('║ https://inspect.isar.dev/#/$port$path ║');
       print('╚══════════════════════════════════════════════╝');

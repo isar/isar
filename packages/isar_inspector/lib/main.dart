@@ -9,6 +9,7 @@ import 'pages/base_page.dart';
 void main() async {
   runApp(ProviderScope(
     child: MaterialApp.router(
+      title: 'Isar Inspector',
       routerDelegate: RoutemasterDelegate(
         routesBuilder: (context) => RouteMap(
           routes: {
