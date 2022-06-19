@@ -1,6 +1,4 @@
-void main() {}
-
-/*import 'package:isar/isar.dart';
+import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import 'util/common.dart';
@@ -18,7 +16,7 @@ class LinkModelA {
 
   final otherLink = IsarLink<LinkModelB>();
 
-  var selfLinks = IsarLinks<LinkModelA>();
+  final selfLinks = IsarLinks<LinkModelA>();
 
   final otherLinks = IsarLinks<LinkModelB>();
 
@@ -107,30 +105,13 @@ void tests() {
     });
 
     group('self link', () {
-      isarTest('new object', () async {
-        await isar.tWriteTxn(() async {
-          await linksA.tPut(objA2);
-        });
-
-        objA1.selfLink.value = objA2;
-        await isar.tWriteTxn(() async {
-          await linksA.tPut(objA1);
-        });
-
-        final newA1 = await linksA.tGet(objA1.id!);
-        await newA1!.selfLink.tLoad();
-        expect(newA1.selfLink.value, objA2);
-      });
-
-      isarTest('existing object', () async {
+      isarTest('save link', () async {
         await isar.tWriteTxn(() async {
           await linksA.tPutAll([objA1, objA2]);
         });
 
         objA1.selfLink.value = objA2;
-        await isar.tWriteTxn(() async {
-          await linksA.tPut(objA1);
-        });
+        await isar.tWriteTxn(() => objA1.selfLink.tSave());
 
         final newA1 = await linksA.tGet(objA1.id!);
         await newA1!.selfLink.tLoad();
@@ -139,13 +120,12 @@ void tests() {
 
       isarTest('delete source', () async {
         await isar.tWriteTxn(() async {
-          await linksA.tPut(objA2);
+          await linksA.tPutAll([objA1, objA2]);
         });
 
         objA1.selfLink.value = objA2;
         await isar.tWriteTxn(() async {
-          objA1.id = Isar.autoIncrement;
-          await linksA.tPut(objA1);
+          await objA1.selfLink.tSave();
         });
 
         await isar.tWriteTxn(() async {
@@ -154,18 +134,17 @@ void tests() {
 
         final newA2 = await linksA.tGet(objA2.id!);
         await newA2!.selfLinkBacklink.tLoad();
-        expect(newA2.selfLinkBacklink, <dynamic>[]);
+        expect(newA2.selfLinkBacklink, const <LinkModelA>[]);
       });
 
       isarTest('delete target', () async {
         await isar.tWriteTxn(() async {
-          await linksA.tPut(objA2);
+          await linksA.tPutAll([objA1, objA2]);
         });
 
         objA1.selfLink.value = objA2;
         await isar.tWriteTxn(() async {
-          objA1.id = Isar.autoIncrement;
-          await linksA.tPut(objA1);
+          await objA1.selfLink.tSave();
         });
 
         await isar.tWriteTxn(() async {
@@ -177,7 +156,7 @@ void tests() {
         expect(newA1.selfLink.value, null);
       });
 
-      isarTest('.load() / .save()', () async {
+      isarTest('.reset() on loaded link', () async {
         await isar.tWriteTxn(() async {
           await linksA.tPutAll([objA1, objA2]);
         });
@@ -191,13 +170,15 @@ void tests() {
         await newA1!.selfLink.tLoad();
         expect(newA1.selfLink.value, objA2);
 
-        objA1.selfLink.value = null;
+        // resetSync doesn't currently seems to work
+        // Write operations require an explicit transaction.
         await isar.tWriteTxn(() async {
-          await objA1.selfLink.tSave();
+          await objA1.selfLink.tReset();
         });
 
-        await newA1.selfLink.tLoad();
-        expect(newA1.selfLink.value, null);
+        final newestA1 = await linksA.tGet(objA1.id!);
+        await newestA1!.selfLink.tLoad();
+        expect(newestA1.selfLink.value, null);
       });
     });
 
@@ -296,4 +277,3 @@ void tests() {
     });
   });
 }
-*/
