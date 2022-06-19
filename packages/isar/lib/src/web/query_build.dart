@@ -108,10 +108,9 @@ IndexWhereClauseJs _buildIndexWhereClause(
 
 LinkWhereClauseJs _buildLinkWhereClause(
     IsarCollectionImpl<dynamic> col, LinkWhereClause wc) {
-  final linkCol =
-      // ignore: invalid_use_of_protected_member
-      col.isar.getCollectionByNameInternal(wc.linkCollection)
-          as IsarCollectionImpl;
+  // ignore: invalid_use_of_protected_member
+  final linkCol = col.isar.getCollectionByNameInternal(wc.linkCollection)
+      as IsarCollectionImpl;
   final backlinkLinkName = linkCol.schema.backlinkLinkNames[wc.linkName];
   return LinkWhereClauseJs()
     ..linkCollection = wc.linkCollection
