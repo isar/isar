@@ -16,15 +16,15 @@ const int maxLong = 9223372036854775807;
 const double minDouble = double.nan;
 const double maxDouble = double.infinity;
 
-const int nullInt = minInt;
-const int nullLong = minLong;
-const double nullFloat = double.nan;
-const double nullDouble = double.nan;
-final DateTime nullDate = DateTime.fromMillisecondsSinceEpoch(0);
+const nullInt = IsarObject_NULL_INT;
+const nullLong = IsarObject_NULL_LONG;
+const nullFloat = double.nan;
+const nullDouble = double.nan;
+final nullDate = DateTime.fromMillisecondsSinceEpoch(0);
 
-const int nullBool = 0;
-const int falseBool = 1;
-const int trueBool = 2;
+const nullBool = IsarObject_NULL_BYTE;
+const falseBool = IsarObject_FALSE_BYTE;
+const trueBool = IsarObject_TRUE_BYTE;
 
 const String _githubUrl = 'https://github.com/isar/isar-core/releases/download';
 

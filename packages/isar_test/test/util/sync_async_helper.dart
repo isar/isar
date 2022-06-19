@@ -147,7 +147,51 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
   }
 }
 
-extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
+extension QueryBuilderExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
+  Future<R?> tFindFirst() {
+    if (_testSync) {
+      return SynchronousFuture(findFirstSync());
+    } else {
+      return findFirst();
+    }
+  }
+
+  Future<List<R>> tFindAll() {
+    if (_testSync) {
+      return SynchronousFuture(findAllSync());
+    } else {
+      return findAll();
+    }
+  }
+
+  Future<int> tCount() {
+    if (_testSync) {
+      return SynchronousFuture(countSync());
+    } else {
+      return count();
+    }
+  }
+
+  Future<bool> tDeleteFirst() {
+    if (_testSync) {
+      return SynchronousFuture(deleteFirstSync());
+    } else {
+      return deleteFirst();
+    }
+  }
+
+  Future<int> tDeleteAll() {
+    if (_testSync) {
+      return SynchronousFuture(deleteAllSync());
+    } else {
+      return deleteAll();
+    }
+  }
+}
+
+/// Extension for Queries
+/// Same as [QueryBuilderExecute], but for [Query] instead of [QueryBuilder].
+extension QueryExecute<R> on Query<R> {
   Future<R?> tFindFirst() {
     if (_testSync) {
       return SynchronousFuture(findFirstSync());
