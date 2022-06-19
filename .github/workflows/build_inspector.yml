@@ -16,7 +16,7 @@ jobs:
         working-directory: packages/isar_inspector
         run: flutter build web
       - name: Deploy to GitHub Pages
-        uses: crazy-max/ghaction-github-pages@v2
+        uses: crazy-max/ghaction-github-pages@v3
         with:
           target_branch: gh-pages
           fqdn: inspect.isar.dev
