@@ -175,7 +175,7 @@ String? _buildFilterGroup(CollectionSchema<dynamic> schema, FilterGroup group) {
   }
 
   if (group.type == FilterGroupType.not) {
-    return '(!${builtConditions[0]})';
+    return '!(${builtConditions[0]})';
   } else {
     final op = group.type == FilterGroupType.or ? '||' : '&&';
     final condition = builtConditions.join(op);
