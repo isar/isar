@@ -25,6 +25,7 @@ class UserModel {
 
   @override
   bool operator ==(Object other) {
+    // ignore: test_types_in_equals
     final UserModel otherModel = other as UserModel;
     return name == otherModel.name &&
         age == otherModel.age &&
