@@ -1,0 +1,45 @@
+version: 2
+enable-beta-ecosystems: true
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "leisim"
+  - package-ecosystem: "pub"
+    directory: "/packages/isar"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "leisim"
+  - package-ecosystem: "pub"
+    directory: "/packages/isar_flutter_libs"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "leisim"
+  - package-ecosystem: "pub"
+    directory: "/packages/isar_generator"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "leisim"
+  - package-ecosystem: "pub"
+    directory: "/packages/isar_inspector"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "leisim"
+  - package-ecosystem: gradle
+    directory: "/packages/isar_flutter_libs/android"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "leisim"
+  - package-ecosystem: gradle
+    directory: "/packages/isar_test/android"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "leisim"
