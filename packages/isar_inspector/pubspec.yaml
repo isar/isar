@@ -13,7 +13,7 @@ dependencies:
   flutter_riverpod: ^2.0.0-dev.7
   dartx: ^1.0.0
   json_annotation: ^4.5.0
-  petitparser: ^4.4.0
+  petitparser: ^5.0.0
   linked_scroll_controller: ^0.2.0
   flutter_svg: any
   font_awesome_flutter: any
