@@ -14,5 +14,5 @@ dependencies:
 
 dev_dependencies:
   test: ^1.21.1
-  ffigen: ^5.0.0
+  ffigen: ">=5.0.0 <7.0.0"
   lints: ^2.0.0
