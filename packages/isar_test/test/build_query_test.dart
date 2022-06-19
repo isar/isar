@@ -20,7 +20,13 @@ class Account {
 
   Account();
 
-  Account.fromFields(this.userId, this.email, this.firstname, this.lastname, this.birthdate);
+  Account.fromFields(
+    this.userId,
+    this.email,
+    this.firstname,
+    this.lastname,
+    this.birthdate,
+  );
 
   @override
   String toString() {
@@ -68,22 +74,38 @@ void tests() {
     setUp(() async {
       isar = await openTempIsar([AccountSchema]);
 
-      account0 = Account.fromFields("oauth2|00000000", "foo0@bar.com", "Foo0", "Bar", DateTime(1955, 6, 8));
-      account1 = Account.fromFields("password|00000001", "foo1@bar.com", "Foo1", "Bar", DateTime(1990, 3, 17));
-      account2 = Account.fromFields("password|00000002", "foo2@bar.com", "Foo2", "Bar", DateTime(2008, 11, 3));
-      account3 = Account.fromFields("oauth2|00000003", "foo3@bar.com", "Foo3", "Not Bar", DateTime(1968, 4, 24));
-      account4 = Account.fromFields("oauth2|00000004", "foo4@bar.com", "Foo4", "Bar", DateTime(1992, 6, 11));
-      account5 = Account.fromFields("oauth2|00000005", "foo5@bar.com", "Foo5", "Bar", DateTime(2001, 12, 12));
-      account6 = Account.fromFields("password|00000006", "foo6@bar.com", "Foo6", "Not Bar", DateTime(1998, 2, 22));
-      account7 = Account.fromFields("oauth2|00000007", "foo7@bar.com", "Foo7", "Bar", DateTime(1991, 11, 11));
-      account8 = Account.fromFields("password|00000008", "foo8@bar.com", "Foo8", "Bar", DateTime(1988, 7, 17));
-      account9 = Account.fromFields("oauth2|00000009", "foo9@bar.com", "Foo9", "Not Bar", DateTime(1980, 4, 24));
-      account10 = Account.fromFields("oauth2|0000000A", "foo10@bar.com", "Foo10", "Not Bar", DateTime(1971, 9, 24));
-      account11 = Account.fromFields("oauth2|0000000B", "foo11@bar.com", "Foo11", "Bar", DateTime(1999, 2, 12));
-      account12 = Account.fromFields("password|0000000C", "foo12@bar.com", "Foo12", "Bar", DateTime(1988, 6, 16));
-      account13 = Account.fromFields("password|0000000D", "foo13@bar.com", "Foo13", "Bar", DateTime(1993, 3, 13));
-      account14 = Account.fromFields("oauth2|0000000E", "foo14@bar.com", "Foo14", "Bar", DateTime(1942, 4, 2));
-      account15 = Account.fromFields("oauth2|0000000F", "foo15@bar.com", "Foo15", "Not Bar", DateTime(1977, 5, 15));
+      account0 = Account.fromFields("oauth2|00000000", "foo0@bar.com", "Foo0",
+          "Bar", DateTime(1955, 6, 8));
+      account1 = Account.fromFields("password|00000001", "foo1@bar.com", "Foo1",
+          "Bar", DateTime(1990, 3, 17));
+      account2 = Account.fromFields("password|00000002", "foo2@bar.com", "Foo2",
+          "Bar", DateTime(2008, 11, 3));
+      account3 = Account.fromFields("oauth2|00000003", "foo3@bar.com", "Foo3",
+          "Not Bar", DateTime(1968, 4, 24));
+      account4 = Account.fromFields("oauth2|00000004", "foo4@bar.com", "Foo4",
+          "Bar", DateTime(1992, 6, 11));
+      account5 = Account.fromFields("oauth2|00000005", "foo5@bar.com", "Foo5",
+          "Bar", DateTime(2001, 12, 12));
+      account6 = Account.fromFields("password|00000006", "foo6@bar.com", "Foo6",
+          "Not Bar", DateTime(1998, 2, 22));
+      account7 = Account.fromFields("oauth2|00000007", "foo7@bar.com", "Foo7",
+          "Bar", DateTime(1991, 11, 11));
+      account8 = Account.fromFields("password|00000008", "foo8@bar.com", "Foo8",
+          "Bar", DateTime(1988, 7, 17));
+      account9 = Account.fromFields("oauth2|00000009", "foo9@bar.com", "Foo9",
+          "Not Bar", DateTime(1980, 4, 24));
+      account10 = Account.fromFields("oauth2|0000000A", "foo10@bar.com",
+          "Foo10", "Not Bar", DateTime(1971, 9, 24));
+      account11 = Account.fromFields("oauth2|0000000B", "foo11@bar.com",
+          "Foo11", "Bar", DateTime(1999, 2, 12));
+      account12 = Account.fromFields("password|0000000C", "foo12@bar.com",
+          "Foo12", "Bar", DateTime(1988, 6, 16));
+      account13 = Account.fromFields("password|0000000D", "foo13@bar.com",
+          "Foo13", "Bar", DateTime(1993, 3, 13));
+      account14 = Account.fromFields("oauth2|0000000E", "foo14@bar.com",
+          "Foo14", "Bar", DateTime(1942, 4, 2));
+      account15 = Account.fromFields("oauth2|0000000F", "foo15@bar.com",
+          "Foo15", "Not Bar", DateTime(1977, 5, 15));
 
       await isar.tWriteTxn(() async {
         await isar.accounts.tPutAll([

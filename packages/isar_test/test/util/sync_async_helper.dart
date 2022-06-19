@@ -146,7 +146,8 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
   }
 }
 
-extension QueryBuilderExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
+extension QueryBuilderExecute<OBJ, R>
+    on QueryBuilder<OBJ, R, QQueryOperations> {
   Future<R?> tFindFirst() {
     if (_testSync) {
       return SynchronousFuture(findFirstSync());
