@@ -11,7 +11,12 @@ class Account {
   Account();
 
   Account.fromFields(
-      this.userId, this.email, this.firstname, this.lastname, this.birthdate);
+    this.userId,
+    this.email,
+    this.firstname,
+    this.lastname,
+    this.birthdate,
+  );
   @Id()
   final int id = Isar.autoIncrement;
 
