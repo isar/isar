@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 import 'util/common.dart';
 import 'util/sync_async_helper.dart';
 
-part 'build_query_test.g.dart';
+part 'query_build_test.g.dart';
 
 @Collection()
 class Account {
@@ -251,30 +251,31 @@ void tests() {
       expect(objs, [account5, account11]);
     });
 
-    // This test currently crashes the native process
-    // with one of the following errors:
-    // - "double free or corruption (out)"
-    // - "free(): invalid pointer"
-    // - "munmap_chunk(): invalid pointer"
-    isarTest('Empty filter groups', () async {
+    isarTest("Empty filter groups", () async {
       final objs = await isar.accounts.buildQuery<Account>(
-        filter: FilterGroup.and([
-          FilterGroup.not(
-            FilterGroup.and([
-              FilterGroup.and([
-                FilterGroup.not(
-                  FilterCondition.greaterThan(
-                    property: 'birthdate',
-                    value: DateTime(1999, 2, 12),
+        filter: FilterGroup.and(
+          [
+            FilterGroup.not(
+              FilterGroup.and(
+                [
+                  FilterGroup.and(
+                    [
+                      FilterGroup.not(
+                        FilterCondition.greaterThan(
+                          property: 'birthdate',
+                          value: DateTime(1999, 2, 12),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ]),
+                ],
+              ),
+            ),
+            const FilterGroup.or([
+              FilterGroup.or([]),
             ]),
-          ),
-          const FilterGroup.or([
-            FilterGroup.or([]),
-          ]),
-        ]),
+          ],
+        ),
         sortBy: const [SortProperty(property: 'firstname', sort: Sort.desc)],
       ).tFindAll();
 
