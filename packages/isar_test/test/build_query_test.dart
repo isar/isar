@@ -217,7 +217,10 @@ void tests() {
     });
 
     // This test currently crashes the native process
-    // with error 'double free or corruption (out)'
+    // with one of the following errors:
+    // - "double free or corruption (out)"
+    // - "free(): invalid pointer"
+    // - "munmap_chunk(): invalid pointer"
     isarTest("Empty filter groups", () async {
       final objs = await isar.accounts.buildQuery<Account>(
         filter: FilterGroup.and([

@@ -234,7 +234,7 @@ extension QueryExecute<R> on Query<R> {
 
 /// Extension for QueryBuilders
 extension QueryExecuteAggregation<OBJ, T extends num>
-on QueryBuilder<OBJ, T?, QQueryOperations> {
+    on QueryBuilder<OBJ, T?, QQueryOperations> {
   Future<T?> tMin() {
     if (_testSync) {
       return SynchronousFuture(minSync());
@@ -270,7 +270,7 @@ on QueryBuilder<OBJ, T?, QQueryOperations> {
 
 /// Extension for QueryBuilders
 extension QueryExecuteDateAggregation<OBJ>
-on QueryBuilder<OBJ, DateTime?, QQueryOperations> {
+    on QueryBuilder<OBJ, DateTime?, QQueryOperations> {
   Future<DateTime?> tMin() {
     if (_testSync) {
       return SynchronousFuture(minSync());
