@@ -56,7 +56,8 @@ void tests() {
     });
 
     isarTest('big limit', () async {
-      final Future<List<UserModel>> result = col.where().limit(999999).tFindAll();
+      final Future<List<UserModel>> result =
+          col.where().limit(999999).tFindAll();
       await qEqual(result, users);
     });
 
@@ -66,17 +67,20 @@ void tests() {
     });
 
     isarTest('offset and limit', () async {
-      final Future<List<UserModel>> result = col.where().offset(3).limit(1).tFindAll();
+      final Future<List<UserModel>> result =
+          col.where().offset(3).limit(1).tFindAll();
       await qEqual(result, users.sublist(3, 4));
     });
 
     isarTest('offset and big limit', () async {
-      final Future<List<UserModel>> result = col.where().offset(3).limit(1000).tFindAll();
+      final Future<List<UserModel>> result =
+          col.where().offset(3).limit(1000).tFindAll();
       await qEqual(result, users.sublist(3));
     });
 
     isarTest('big offset and big limit', () async {
-      final Future<List<UserModel>> result = col.where().offset(300).limit(5).tFindAll();
+      final Future<List<UserModel>> result =
+          col.where().offset(300).limit(5).tFindAll();
       await qEqual(result, []);
     });
   });

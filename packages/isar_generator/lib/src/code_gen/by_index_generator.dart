@@ -3,7 +3,8 @@ import '../helper.dart';
 import '../object_info.dart';
 
 String generateByIndexExtension(ObjectInfo oi) {
-  final List<ObjectIndex> uniqueIndexes = oi.indexes.where((ObjectIndex e) => e.unique).toList();
+  final List<ObjectIndex> uniqueIndexes =
+      oi.indexes.where((ObjectIndex e) => e.unique).toList();
   if (uniqueIndexes.isEmpty) {
     return '';
   }
@@ -23,15 +24,20 @@ String generateByIndexExtension(ObjectInfo oi) {
 
 extension on ObjectIndex {
   String get dartName {
-    return properties.map((ObjectIndexProperty e) => e.property.dartName.capitalize()).join();
+    return properties
+        .map((ObjectIndexProperty e) => e.property.dartName.capitalize())
+        .join();
   }
 }
 
 String generateSingleByIndex(ObjectInfo oi, ObjectIndex index) {
   final String params = index.properties
-      .map((ObjectIndexProperty i) => '${i.property.dartType} ${i.property.dartName}')
+      .map((ObjectIndexProperty i) =>
+          '${i.property.dartType} ${i.property.dartName}')
       .join(',');
-  final String paramsList = index.properties.map((ObjectIndexProperty i) => i.property.dartName).join(',');
+  final String paramsList = index.properties
+      .map((ObjectIndexProperty i) => i.property.dartName)
+      .join(',');
   return '''
     Future<${oi.dartName}?> getBy${index.dartName}($params) {
       return getByIndex('${index.name.esc}', [$paramsList]);
@@ -56,7 +62,8 @@ String generateAllByIndex(ObjectInfo oi, ObjectIndex index) {
 
   final List<ObjectIndexProperty> props = index.properties;
   final String params = props
-      .map((ObjectIndexProperty ip) => 'List<${ip.property.dartType}> ${valsName(ip.property)}')
+      .map((ObjectIndexProperty ip) =>
+          'List<${ip.property.dartType}> ${valsName(ip.property)}')
       .join(',');
   String createValues;
   if (props.length == 1) {

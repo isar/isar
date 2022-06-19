@@ -10,9 +10,9 @@ part of isar;
   TargetKind.setter,
 })
 class Name {
-
   /// Annotate Isar collections or properties to change their name.
   const Name(this.name);
+
   /// The name this entity should have in the database.
   final String name;
 }

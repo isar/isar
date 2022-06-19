@@ -53,7 +53,8 @@ void tests() {
       final Message message1 = Message()
         ..id = Isar.autoIncrement
         ..message = 'This is a new message';
-      final Message message2 = Message()..message = 'This is another new message';
+      final Message message2 = Message()
+        ..message = 'This is another new message';
 
       await isar.tWriteTxn(() async {
         message1.id = await messages.tPut(message1);
@@ -73,7 +74,8 @@ void tests() {
       final Message message1 = Message()
         ..id = 5
         ..message = 'This is a new message';
-      final Message message2 = Message()..message = 'This is another new message';
+      final Message message2 = Message()
+        ..message = 'This is another new message';
 
       await isar.tWriteTxn(() async {
         await messages.tPut(message1);

@@ -17,7 +17,8 @@ class Model {
   final int value;
 
   @override
-  operator ==(Object other) => other is Model && id == other.id;
+  operator @override
+  bool ==(Object other) => other is Model && id == other.id;
 
   @override
   int get hashCode => id.hashCode;

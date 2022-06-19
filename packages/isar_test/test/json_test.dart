@@ -50,7 +50,8 @@ void tests() {
         for (int i = 0; i < json.length; i++) {
           json[i]['id'] = i + 1;
         }
-        final List<Map<String, dynamic>> exportedJson = await col.where().exportJson();
+        final List<Map<String, dynamic>> exportedJson =
+            await col.where().exportJson();
         expect(exportedJson, json);
       },
       timeout: const Timeout(Duration(seconds: 60)),
@@ -76,7 +77,8 @@ void tests() {
         await col.tImportJson(json);
       });
 
-      final List<Map<String, dynamic>> exportedJsonNull = await col.where().exportJson();
+      final List<Map<String, dynamic>> exportedJsonNull =
+          await col.where().exportJson();
       expect(exportedJsonNull, json);
     });
 

@@ -15,7 +15,6 @@ import 'isar_impl.dart';
 import 'query_build.dart';
 
 class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
-
   IsarCollectionImpl({
     required this.isar,
     required this.ptr,
@@ -80,7 +79,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @pragma('vm:prefer-inline')
   Pointer<Pointer<CIndexKey>> _getKeysPtr(
       String indexName, List<IndexKey> values, Allocator alloc) {
-    final Pointer<Pointer<CIndexKey>> keysPtrPtr = alloc<Pointer<CIndexKey>>(values.length);
+    final Pointer<Pointer<CIndexKey>> keysPtrPtr =
+        alloc<Pointer<CIndexKey>>(values.length);
     for (int i = 0; i < values.length; i++) {
       keysPtrPtr[i] = buildIndexKey(schema, indexName, values[i]);
     }
@@ -145,7 +145,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   Future<List<OBJ?>> getAllByIndex(String indexName, List<IndexKey> keys) {
     return isar.getTxn(false, (Txn txn) async {
       final Pointer<CObjectSet> cObjSetPtr = txn.allocCObjectSet(keys.length);
-      final Pointer<Pointer<CIndexKey>> keysPtrPtr = _getKeysPtr(indexName, keys, txn.alloc);
+      final Pointer<Pointer<CIndexKey>> keysPtrPtr =
+          _getKeysPtr(indexName, keys, txn.alloc);
       IC.isar_get_all_by_index(
           ptr, txn.ptr, schema.indexIdOrErr(indexName), keysPtrPtr, cObjSetPtr);
       await txn.wait();
@@ -162,7 +163,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
       final List<OBJ?> objects = List<OBJ?>.filled(keys.length, null);
       for (int i = 0; i < keys.length; i++) {
-        final Pointer<CIndexKey> keyPtr = buildIndexKey(schema, indexName, keys[i]);
+        final Pointer<CIndexKey> keyPtr =
+            buildIndexKey(schema, indexName, keys[i]);
         nCall(IC.isar_get_by_index(ptr, txn.ptr, indexId, keyPtr, cObjPtr));
         objects[i] = deserializeObjectOrNull(cObj);
       }
@@ -184,7 +186,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<List<int>> putAllByIndex(String? indexName, List<OBJ> objects) {
     return isar.getTxn(true, (Txn txn) async {
-      final Pointer<CObjectSet> cObjSetPtr = txn.allocCObjectSet(objects.length);
+      final Pointer<CObjectSet> cObjSetPtr =
+          txn.allocCObjectSet(objects.length);
       final Pointer<CObject> objectsPtr = cObjSetPtr.ref.objects;
 
       Pointer<Uint8> allocBuf(int size) => txn.alloc<Uint8>(size);
@@ -294,7 +297,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   Future<int> deleteAllByIndex(String indexName, List<IndexKey> keys) {
     return isar.getTxn(true, (Txn txn) async {
       final Pointer<Uint32> countPtr = txn.alloc<Uint32>();
-      final Pointer<Pointer<CIndexKey>> keysPtrPtr = _getKeysPtr(indexName, keys, txn.alloc);
+      final Pointer<Pointer<CIndexKey>> keysPtrPtr =
+          _getKeysPtr(indexName, keys, txn.alloc);
 
       IC.isar_delete_all_by_index(ptr, txn.ptr, schema.indexIdOrErr(indexName),
           keysPtrPtr, keys.length, countPtr);
@@ -308,7 +312,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   int deleteAllByIndexSync(String indexName, List<IndexKey> keys) {
     return isar.getTxnSync(true, (SyncTxn txn) {
       final Pointer<Uint32> countPtr = txn.alloc<Uint32>();
-      final Pointer<Pointer<CIndexKey>> keysPtrPtr = _getKeysPtr(indexName, keys, txn.alloc);
+      final Pointer<Pointer<CIndexKey>> keysPtrPtr =
+          _getKeysPtr(indexName, keys, txn.alloc);
 
       nCall(IC.isar_delete_all_by_index(ptr, txn.ptr,
           schema.indexIdOrErr(indexName), keysPtrPtr, keys.length, countPtr));
@@ -342,7 +347,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return isar.getTxn(true, (Txn txn) async {
       final Pointer<Uint8> bytesPtr = txn.alloc<Uint8>(jsonBytes.length);
       bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
-      final Pointer<Utf8> idNamePtr = schema.idName.toNativeUtf8(allocator: txn.alloc);
+      final Pointer<Utf8> idNamePtr =
+          schema.idName.toNativeUtf8(allocator: txn.alloc);
 
       IC.isar_json_import(
           ptr, txn.ptr, idNamePtr.cast(), bytesPtr, jsonBytes.length);
@@ -361,7 +367,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return isar.getTxnSync(true, (SyncTxn txn) async {
       final Pointer<Uint8> bytesPtr = txn.allocBuffer(jsonBytes.length);
       bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
-      final Pointer<Utf8> idNamePtr = schema.idName.toNativeUtf8(allocator: txn.alloc);
+      final Pointer<Utf8> idNamePtr =
+          schema.idName.toNativeUtf8(allocator: txn.alloc);
 
       nCall(IC.isar_json_import(
           ptr, txn.ptr, idNamePtr.cast(), bytesPtr, jsonBytes.length));
@@ -417,7 +424,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     final ReceivePort port = ReceivePort();
     final Pointer<CWatchHandle> handle =
         IC.isar_watch_collection(isar.ptr, ptr, port.sendPort.nativePort);
-    final StreamController<void> controller = StreamController<void>(onCancel: () {
+    final StreamController<void> controller =
+        StreamController<void>(onCancel: () {
       IC.isar_stop_watching(handle);
     });
     controller.addStream(port);
@@ -441,7 +449,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         IC.isar_watch_object(isar.ptr, ptr, id, port.sendPort.nativePort);
     malloc.free(cObjPtr);
 
-    final StreamController<void> controller = StreamController<void>(onCancel: () {
+    final StreamController<void> controller =
+        StreamController<void>(onCancel: () {
       IC.isar_stop_watching(handle);
     });
 

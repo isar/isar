@@ -10,7 +10,6 @@ import 'isar_connect_state_notifier.dart';
 const int objectsPerPage = 50;
 
 class QueryObject {
-
   const QueryObject(this.data);
   final Map<String, dynamic> data;
 
@@ -26,7 +25,6 @@ final queryFilterPod = StateProvider<FilterOperation?>((ref) => null);
 final querySortPod = StateProvider<SortProperty?>((ref) => null);
 
 class QueryResult {
-
   QueryResult({required this.objects, required this.hasMore});
   final List<QueryObject> objects;
   final bool hasMore;

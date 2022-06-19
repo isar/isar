@@ -4,7 +4,6 @@ part 'user_model.g.dart';
 
 @Collection()
 class UserModel {
-
   UserModel();
 
   UserModel.fill(this.name, this.age, this.admin);

@@ -46,7 +46,6 @@ class PrevNext extends ConsumerWidget {
 }
 
 class _Button extends StatelessWidget {
-
   const _Button({
     Key? key,
     required this.label,

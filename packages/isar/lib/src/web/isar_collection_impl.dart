@@ -13,7 +13,6 @@ import 'isar_web.dart';
 import 'query_build.dart';
 
 class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
-
   IsarCollectionImpl({
     required this.isar,
     required this.native,
@@ -49,7 +48,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<List<OBJ?>> getAll(List<int> ids) {
     return isar.getTxn(false, (IsarTxnJs txn) async {
-      final List<Object?> objects = await native.getAll(txn, ids).wait<List<Object?>>();
+      final List<Object?> objects =
+          await native.getAll(txn, ids).wait<List<Object?>>();
       return deserializeObjects(objects);
     });
   }
@@ -88,7 +88,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       for (final object in objects) {
         serialized.add(schema.serializeWeb(this, object));
       }
-      final List ids = await native.putAll(txn, serialized).wait<List<dynamic>>();
+      final List ids =
+          await native.putAll(txn, serialized).wait<List<dynamic>>();
       for (int i = 0; i < objects.length; i++) {
         final object = objects[i];
         final int id = ids[i] as int;
@@ -149,7 +150,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   Future<void> importJsonRaw(Uint8List jsonBytes) {
-    final List json = jsonDecode(const Utf8Decoder().convert(jsonBytes)) as List;
+    final List json =
+        jsonDecode(const Utf8Decoder().convert(jsonBytes)) as List;
     return importJson(json.cast());
   }
 
@@ -179,7 +181,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Stream<void> watchLazy() {
     JsFunction? stop;
-    final StreamController<void> controller = StreamController<void>(onCancel: () {
+    final StreamController<void> controller =
+        StreamController<void>(onCancel: () {
       stop?.apply([]);
     });
 
@@ -196,7 +199,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     bool deserialize = true,
   }) {
     JsFunction? stop;
-    final StreamController<OBJ?> controller = StreamController<OBJ?>(onCancel: () {
+    final StreamController<OBJ?> controller =
+        StreamController<OBJ?>(onCancel: () {
       stop?.apply([]);
     });
 

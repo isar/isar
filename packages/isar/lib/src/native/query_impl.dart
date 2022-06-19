@@ -14,7 +14,6 @@ import 'isar_impl.dart';
 typedef QueryDeserialize<T> = List<T> Function(CObjectSet);
 
 class QueryImpl<T> extends Query<T> implements Finalizable {
-
   QueryImpl(this.col, this.queryPtr, this.deserialize, this.propertyId) {
     NativeFinalizer(isarQueryFree).attach(this, queryPtr.cast());
   }
@@ -81,7 +80,8 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
   }
 
   @override
-  Future<bool> deleteFirst() => deleteInternal(1).then((int count) => count == 1);
+  Future<bool> deleteFirst() =>
+      deleteInternal(1).then((int count) => count == 1);
 
   @override
   Future<int> deleteAll() => deleteInternal(maxLimit);
@@ -121,7 +121,8 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
     final Pointer<CWatchHandle> handle = IC.isar_watch_query(
         col.isar.ptr, col.ptr, queryPtr, port.sendPort.nativePort);
 
-    final StreamController<void> controller = StreamController<void>(onCancel: () {
+    final StreamController<void> controller =
+        StreamController<void>(onCancel: () {
       IC.isar_stop_watching(handle);
     });
 
@@ -138,7 +139,8 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
     return col.isar.getTxn(false, (Txn txn) async {
       final Pointer<Pointer<Uint8>> bytesPtrPtr = txn.alloc<Pointer<Uint8>>();
       final Pointer<Uint32> lengthPtr = txn.alloc<Uint32>();
-      final Pointer<Utf8> idNamePtr = col.schema.idName.toNativeUtf8(allocator: txn.alloc);
+      final Pointer<Utf8> idNamePtr =
+          col.schema.idName.toNativeUtf8(allocator: txn.alloc);
       nCall(IC.isar_q_export_json(queryPtr, col.ptr, txn.ptr, idNamePtr.cast(),
           bytesPtrPtr, lengthPtr));
 
@@ -157,7 +159,8 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
     return col.isar.getTxnSync(false, (SyncTxn txn) {
       final Pointer<Pointer<Uint8>> bytesPtrPtr = txn.alloc<Pointer<Uint8>>();
       final Pointer<Uint32> lengthPtr = txn.alloc<Uint32>();
-      final Pointer<Utf8> idNamePtr = col.schema.idName.toNativeUtf8(allocator: txn.alloc);
+      final Pointer<Utf8> idNamePtr =
+          col.schema.idName.toNativeUtf8(allocator: txn.alloc);
 
       try {
         nCall(IC.isar_q_export_json(queryPtr, col.ptr, txn.ptr,
@@ -173,7 +176,8 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
   @override
   Future<R?> aggregate<R>(AggregationOp op) async {
     return col.isar.getTxn(false, (Txn txn) async {
-      final Pointer<Pointer<CAggregationResult>> resultPtrPtr = txn.alloc<Pointer<CAggregationResult>>();
+      final Pointer<Pointer<CAggregationResult>> resultPtrPtr =
+          txn.alloc<Pointer<CAggregationResult>>();
 
       IC.isar_q_aggregate(
           col.ptr, queryPtr, txn.ptr, op.index, propertyId ?? 0, resultPtrPtr);
@@ -186,7 +190,8 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
   @override
   R? aggregateSync<R>(AggregationOp op) {
     return col.isar.getTxnSync(false, (SyncTxn txn) {
-      final Pointer<Pointer<CAggregationResult>> resultPtrPtr = txn.alloc<Pointer<CAggregationResult>>();
+      final Pointer<Pointer<CAggregationResult>> resultPtrPtr =
+          txn.alloc<Pointer<CAggregationResult>>();
 
       nCall(IC.isar_q_aggregate(
           col.ptr, queryPtr, txn.ptr, op.index, propertyId ?? 0, resultPtrPtr));

@@ -35,7 +35,8 @@ abstract class IsarCollection<OBJ> {
   /// @nodoc
   @protected
   Future<OBJ?> getByIndex(String indexName, IndexKey key) {
-    return getAllByIndex(indexName, [key]).then((List<OBJ?> objects) => objects[0]);
+    return getAllByIndex(indexName, [key])
+        .then((List<OBJ?> objects) => objects[0]);
   }
 
   /// @nodoc

@@ -100,7 +100,6 @@ class _InstanceSelectorState extends ConsumerState<InstanceSelector>
 }
 
 class InstanceButton extends StatelessWidget {
-
   const InstanceButton({
     Key? key,
     required this.instance,
@@ -136,7 +135,6 @@ class InstanceButton extends StatelessWidget {
 }
 
 class SelectedInstanceButton extends StatelessWidget {
-
   const SelectedInstanceButton({
     Key? key,
     required this.instance,

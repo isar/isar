@@ -15,7 +15,8 @@ void main() {
 
   final String calls = files.map((String e) {
     final String content = File(e).readAsStringSync();
-    final String call = "${e.split('.')[0].replaceAll(p.separator, '_')}.main();";
+    final String call =
+        "${e.split('.')[0].replaceAll(p.separator, '_')}.main();";
     if (content.startsWith("@TestOn('vm')")) {
       return 'if (!kIsWeb) $call';
     } else {

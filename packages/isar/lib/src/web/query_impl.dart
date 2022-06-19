@@ -12,7 +12,6 @@ import 'isar_web.dart';
 typedef QueryDeserialize<T> = T Function(Object);
 
 class QueryImpl<T> extends Query<T> {
-
   QueryImpl(this.col, this.queryJs, this.deserialize, this.propertyName);
   final IsarCollectionImpl<dynamic> col;
   final QueryJs queryJs;
@@ -114,7 +113,8 @@ class QueryImpl<T> extends Query<T> {
   @override
   Stream<List<T>> watch({bool initialReturn = false}) {
     JsFunction? stop;
-    final StreamController<List<T>> controller = StreamController<List<T>>(onCancel: () {
+    final StreamController<List<T>> controller =
+        StreamController<List<T>>(onCancel: () {
       stop?.apply([]);
     });
 
@@ -124,7 +124,8 @@ class QueryImpl<T> extends Query<T> {
       });
     }
 
-    final Null Function(List results) callback = allowInterop((List<dynamic> results) {
+    final Null Function(List results) callback =
+        allowInterop((List<dynamic> results) {
       controller.add(results.map((e) => deserialize(e as Object)).toList());
     });
     stop = col.native.watchQuery(queryJs, callback);
@@ -135,7 +136,8 @@ class QueryImpl<T> extends Query<T> {
   @override
   Stream<void> watchLazy() {
     JsFunction? stop;
-    final StreamController<void> controller = StreamController<void>(onCancel: () {
+    final StreamController<void> controller =
+        StreamController<void>(onCancel: () {
       stop?.apply([]);
     });
 

@@ -8,7 +8,6 @@ part 'filter_string_test.g.dart';
 
 @Collection()
 class StringModel {
-
   StringModel();
 
   StringModel.init(String? value)

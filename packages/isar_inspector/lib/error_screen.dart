@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ErrorScreen extends StatelessWidget {
-
   const ErrorScreen({
     Key? key,
     required this.message,

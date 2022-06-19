@@ -4,7 +4,6 @@ import 'package:isar/isar.dart';
 import 'isar_type.dart';
 
 class ObjectInfo {
-
   const ObjectInfo({
     required this.dartName,
     required this.isarName,
@@ -20,7 +19,8 @@ class ObjectInfo {
   final List<ObjectIndex> indexes;
   final List<ObjectLink> links;
 
-  ObjectProperty get idProperty => properties.firstWhere((ObjectProperty it) => it.isId);
+  ObjectProperty get idProperty =>
+      properties.firstWhere((ObjectProperty it) => it.isId);
 
   List<ObjectProperty> get objectProperties =>
       properties.where((ObjectProperty p) => !p.isId).toList();
@@ -51,7 +51,6 @@ enum PropertyDeser {
 }
 
 class ObjectProperty {
-
   const ObjectProperty({
     required this.dartName,
     required this.isarName,
@@ -114,7 +113,6 @@ class ObjectProperty {
 }
 
 class ObjectIndexProperty {
-
   const ObjectIndexProperty({
     required this.property,
     required this.type,
@@ -204,7 +202,6 @@ class ObjectIndexProperty {
 }
 
 class ObjectIndex {
-
   const ObjectIndex({
     required this.name,
     required this.properties,
@@ -218,7 +215,6 @@ class ObjectIndex {
 }
 
 class ObjectLink {
-
   const ObjectLink({
     required this.dartName,
     required this.isarName,

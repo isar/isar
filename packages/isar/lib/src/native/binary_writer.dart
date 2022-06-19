@@ -8,7 +8,6 @@ import 'isar_core.dart';
 /// @nodoc
 @protected
 class BinaryWriter {
-
   BinaryWriter(Uint8List buffer, int staticSize)
       : _staticSize = staticSize,
         _dynamicOffset = staticSize,
@@ -169,8 +168,9 @@ class BinaryWriter {
   }
 
   void writeDateTimeList(int offset, List<DateTime?>? values) {
-    final List<int?>? longList =
-        values?.map((DateTime? e) => e?.toUtc().microsecondsSinceEpoch).toList();
+    final List<int?>? longList = values
+        ?.map((DateTime? e) => e?.toUtc().microsecondsSinceEpoch)
+        .toList();
     writeLongList(offset, longList);
   }
 

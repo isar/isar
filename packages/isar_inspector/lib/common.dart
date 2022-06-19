@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class IsarCard extends StatelessWidget {
-
   IsarCard({
     Key? key,
     required this.child,

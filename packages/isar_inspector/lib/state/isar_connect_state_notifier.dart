@@ -37,7 +37,6 @@ final isarConnectPod =
 
 class IsarConnectStateNotifier
     extends StateNotifier<AsyncValue<IsarConnection>> {
-
   IsarConnectStateNotifier({
     required this.ref,
     required this.port,
@@ -78,7 +77,8 @@ class IsarConnectStateNotifier
         disposeHandler: channel.sink.close,
       );
       final VM vm = await service.getVM();
-      final String isolateId = vm.isolates!.where((IsolateRef e) => e.name == 'main').first.id!;
+      final String isolateId =
+          vm.isolates!.where((IsolateRef e) => e.name == 'main').first.id!;
       await service.streamListen(EventStreams.kExtension);
 
       service.onExtensionEvent.listen((Event event) {
@@ -117,7 +117,8 @@ class IsarConnectStateNotifier
   }
 
   void _onCollectionInfoChanged(Map<String, dynamic> data) {
-    final ConnectCollectionInfo collectionInfo = ConnectCollectionInfo.fromJson(data);
+    final ConnectCollectionInfo collectionInfo =
+        ConnectCollectionInfo.fromJson(data);
     final infoPod = ref.read(collectionInfoPod.state);
     infoPod.state = {
       ...infoPod.state,

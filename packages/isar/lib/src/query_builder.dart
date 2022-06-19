@@ -12,7 +12,6 @@ const FilterGroup _nullFilterGroup = FilterGroup.and([]);
 /// Aquire a `QueryBuilder` instance using `collection.where()` or
 /// `collection.filter()`.
 class QueryBuilder<OBJ, R, S> {
-
   @protected
   QueryBuilder(this._collection, this._whereDistinct, this._whereSort)
       : _whereClauses = const [],
@@ -115,8 +114,10 @@ class QueryBuilder<OBJ, R, S> {
   @protected
   QueryBuilder<OBJ, R, QAfterFilterCondition> groupInternal(
       FilterQuery<OBJ> q) {
-    final QueryBuilder<OBJ, OBJ, QAfterFilterCondition> qb = q(QueryBuilder(_collection, _whereDistinct, _whereSort));
-    final QueryBuilder<OBJ, OBJ, QAfterFilterOperator> qbFinished = qb.andOrInternal(FilterGroupType.or);
+    final QueryBuilder<OBJ, OBJ, QAfterFilterCondition> qb =
+        q(QueryBuilder(_collection, _whereDistinct, _whereSort));
+    final QueryBuilder<OBJ, OBJ, QAfterFilterOperator> qbFinished =
+        qb.andOrInternal(FilterGroupType.or);
 
     if (qbFinished._filterOr.filters.isEmpty) {
       return copyWithInternal();
@@ -134,8 +135,10 @@ class QueryBuilder<OBJ, R, S> {
     FilterQuery<E> q,
     String linkName,
   ) {
-    final QueryBuilder<E, E, QAfterFilterCondition> qb = q(QueryBuilder(targetCollection, false, _whereSort));
-    final QueryBuilder<E, E, QAfterFilterOperator> qbFinished = qb.andOrInternal(FilterGroupType.or);
+    final QueryBuilder<E, E, QAfterFilterCondition> qb =
+        q(QueryBuilder(targetCollection, false, _whereSort));
+    final QueryBuilder<E, E, QAfterFilterOperator> qbFinished =
+        qb.andOrInternal(FilterGroupType.or);
 
     final List<FilterOperation> conditions = qbFinished._filterOr.filters;
     if (conditions.isEmpty) {
@@ -237,7 +240,8 @@ class QueryBuilder<OBJ, R, S> {
   /// @nodoc
   @protected
   Query<R> buildInternal() {
-    final QueryBuilder<OBJ, R, QAfterFilterOperator> builder = andOrInternal(FilterGroupType.or);
+    final QueryBuilder<OBJ, R, QAfterFilterOperator> builder =
+        andOrInternal(FilterGroupType.or);
     FilterOperation? filter = builder._filterOr;
     while (filter is FilterGroup) {
       if (filter.filters.isEmpty) {

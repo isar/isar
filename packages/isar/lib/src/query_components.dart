@@ -9,7 +9,6 @@ abstract class WhereClause {
 
 /// A where clause traversing the primary index (ids).
 class IdWhereClause extends WhereClause {
-
   const IdWhereClause.any()
       : lower = null,
         upper = null,
@@ -47,6 +46,7 @@ class IdWhereClause extends WhereClause {
     this.upper,
     this.includeUpper = true,
   }) : super._();
+
   /// The lower bound id or `null` for unbounded.
   final int? lower;
 
@@ -62,7 +62,6 @@ class IdWhereClause extends WhereClause {
 
 /// A where clause traversing an index.
 class IndexWhereClause extends WhereClause {
-
   /// Where clause that matches all index values. Useful to get sorted results.
   const IndexWhereClause.any({required this.indexName})
       : lower = null,
@@ -115,6 +114,7 @@ class IndexWhereClause extends WhereClause {
     this.upper,
     this.includeUpper = true,
   }) : super._();
+
   /// The Isar name of the index to be used.
   final String indexName;
 
@@ -135,13 +135,13 @@ class IndexWhereClause extends WhereClause {
 
 /// A where clause traversing objects linked to the specified object.
 class LinkWhereClause extends WhereClause {
-
   /// Create a where clause for the specified link.
   const LinkWhereClause({
     required this.linkCollection,
     required this.linkName,
     required this.id,
   }) : super._();
+
   /// The name of the collection the link originates from.
   final String linkCollection;
 
@@ -173,7 +173,6 @@ enum FilterConditionType {
 
 /// Create a filter condition dynamically.
 class FilterCondition extends FilterOperation {
-
   /// Filters the results to only include objects where the property equals
   /// [value].
   ///
@@ -312,6 +311,7 @@ class FilterCondition extends FilterOperation {
         include2 = false,
         caseSensitive = false,
         super._();
+
   /// @nodoc
   @protected
   const FilterCondition({
@@ -355,7 +355,6 @@ enum FilterGroupType {
 
 /// Group one or more filter conditions.
 class FilterGroup extends FilterOperation {
-
   /// Create a logical AND filter group.
   const FilterGroup.and(this.filters)
       : type = FilterGroupType.and,
@@ -371,6 +370,7 @@ class FilterGroup extends FilterOperation {
       : filters = [filter],
         type = FilterGroupType.not,
         super._();
+
   /// @nodoc
   @protected
   FilterGroup({
@@ -393,9 +393,9 @@ enum Sort {
 
 /// Property used to sort query results.
 class SortProperty {
-
   /// Create a sort property.
   const SortProperty({required this.property, required this.sort});
+
   /// Isar name of the property used for sorting.
   final String property;
 
@@ -405,9 +405,9 @@ class SortProperty {
 
 /// Property used to filter duplicate values.
 class DistinctProperty {
-
   /// Create a distinct property.
   const DistinctProperty({required this.property, this.caseSensitive});
+
   /// Isar name of the property used for sorting.
   final String property;
 
@@ -417,13 +417,13 @@ class DistinctProperty {
 
 /// Filter condition based on a link.
 class LinkFilter extends FilterOperation {
-
   /// Create a filter condition based on a link.
   const LinkFilter({
     required this.filter,
     required this.linkName,
     required this.targetCollection,
   }) : super._();
+
   /// Filter condition that should be applied
   final FilterOperation filter;
 

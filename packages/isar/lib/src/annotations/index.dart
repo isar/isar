@@ -18,7 +18,6 @@ enum IndexType {
 /// Annotate properties to build an index.
 @Target({TargetKind.field, TargetKind.getter, TargetKind.setter})
 class Index {
-
   /// Annotate properties to build an index.
   const Index({
     this.name,
@@ -28,6 +27,7 @@ class Index {
     this.type,
     this.caseSensitive,
   });
+
   /// Name of the index. By default, the names of the properties are
   /// concatenated using "_"
   final String? name;
@@ -59,13 +59,13 @@ class Index {
 
 /// Another property that is part of the composite index.
 class CompositeIndex {
-
   /// Another property that is part of the composite index.
   const CompositeIndex(
     this.property, {
     this.type,
     this.caseSensitive,
   });
+
   /// Dart name of the property.
   final String property;
 

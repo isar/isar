@@ -38,7 +38,8 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
     final String converters = object.properties
         .where((ObjectProperty it) => it.converter != null)
         .distinctBy((ObjectProperty it) => it.converter)
-        .map((ObjectProperty it) => 'const ${it.converterName(object)} = ${it.converter}();')
+        .map((ObjectProperty it) =>
+            'const ${it.converterName(object)} = ${it.converter}();')
         .join('\n');
 
     code += '''

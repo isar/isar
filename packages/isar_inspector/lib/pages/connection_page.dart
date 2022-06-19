@@ -7,7 +7,6 @@ import '../state/instances_state.dart';
 import '../state/isar_connect_state_notifier.dart';
 
 class ConnectionPage extends ConsumerStatefulWidget {
-
   const ConnectionPage({
     Key? key,
     required this.port,

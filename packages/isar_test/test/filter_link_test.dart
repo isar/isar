@@ -8,7 +8,6 @@ part 'filter_link_test.g.dart';
 
 @Collection()
 class LinkModelA {
-
   LinkModelA(this.name);
   int? id;
 
@@ -26,7 +25,6 @@ class LinkModelA {
 
 @Collection()
 class LinkModelB {
-
   LinkModelB(this.name);
   int? id;
 

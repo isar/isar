@@ -5,7 +5,6 @@ import '../isar_type.dart';
 import '../object_info.dart';
 
 class FilterGenerator {
-
   FilterGenerator(this.object) : objName = object.dartName;
   final ObjectInfo object;
   final String objName;
@@ -94,7 +93,8 @@ class FilterGenerator {
   }
 
   String generateGreaterThan(ObjectProperty p) {
-    final String include = !p.isarType.containsFloat ? 'bool include = false,' : '';
+    final String include =
+        !p.isarType.containsFloat ? 'bool include = false,' : '';
     final String optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}GreaterThan(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
@@ -108,7 +108,8 @@ class FilterGenerator {
   }
 
   String generateLessThan(ObjectProperty p) {
-    final String include = !p.isarType.containsFloat ? 'bool include = false,' : '';
+    final String include =
+        !p.isarType.containsFloat ? 'bool include = false,' : '';
     final String optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}LessThan(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {

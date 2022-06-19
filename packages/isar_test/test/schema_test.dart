@@ -636,11 +636,7 @@ void main() {
           'unique': false,
           'replace': false,
           'properties': [
-            {
-              'name': r'$dollar$Getter',
-              'type': 'Value',
-              'caseSensitive': false
-            }
+            {'name': r'$dollar$Getter', 'type': 'Value', 'caseSensitive': false}
           ]
         }
       ],
