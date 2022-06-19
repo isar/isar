@@ -192,7 +192,7 @@ Pointer<CFilter>? _buildFilterGroup(
       filterPtrPtr,
       group.type == FilterGroupType.and,
       conditionsPtrPtr,
-      group.filters.length,
+      builtConditions.length,
     );
   }
 
