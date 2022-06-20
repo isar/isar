@@ -1443,19 +1443,21 @@ class IsarCoreBindings {
   int isar_qb_add_index_where_clause(
     ffi.Pointer<CQueryBuilder> builder,
     int index_id,
-    ffi.Pointer<CIndexKey> start_key,
-    bool include_start,
-    ffi.Pointer<CIndexKey> end_key,
-    bool include_end,
+    ffi.Pointer<CIndexKey> lower_key,
+    bool include_lower,
+    ffi.Pointer<CIndexKey> upper_key,
+    bool include_upper,
+    bool sort_asc,
     bool skip_duplicates,
   ) {
     return _isar_qb_add_index_where_clause(
       builder,
       index_id,
-      start_key,
-      include_start ? 1 : 0,
-      end_key,
-      include_end ? 1 : 0,
+      lower_key,
+      include_lower ? 1 : 0,
+      upper_key,
+      include_upper ? 1 : 0,
+      sort_asc ? 1 : 0,
       skip_duplicates ? 1 : 0,
     );
   }
@@ -1469,11 +1471,12 @@ class IsarCoreBindings {
               ffi.Uint8,
               ffi.Pointer<CIndexKey>,
               ffi.Uint8,
+              ffi.Uint8,
               ffi.Uint8)>>('isar_qb_add_index_where_clause');
   late final _isar_qb_add_index_where_clause =
       _isar_qb_add_index_where_clausePtr.asFunction<
           int Function(ffi.Pointer<CQueryBuilder>, int, ffi.Pointer<CIndexKey>,
-              int, ffi.Pointer<CIndexKey>, int, int)>();
+              int, ffi.Pointer<CIndexKey>, int, int, int)>();
 
   int isar_qb_add_link_where_clause(
     ffi.Pointer<CQueryBuilder> builder,
