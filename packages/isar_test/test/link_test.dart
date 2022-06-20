@@ -424,7 +424,7 @@ void tests() {
     });
 
     group('multiple links', () {
-      isarTest('.load() / .save()1', () async {
+      isarTest('.load() / .save()', () async {
         await isar.tWriteTxn(() async {
           await linksA.tPutAll([objA1, objA2, objA3]);
           await linksB.tPutAll([objB1, objB2, objB3]);
