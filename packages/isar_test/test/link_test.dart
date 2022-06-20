@@ -381,9 +381,9 @@ void tests() {
         final newA3 = await linksA.tGet(objA3.id!);
 
         await Future.wait([
-          newA1!.selfLinksBacklink.load(),
-          newA2!.selfLinksBacklink.load(),
-          newA3!.selfLinksBacklink.load(),
+          newA1!.selfLinksBacklink.tLoad(),
+          newA2!.selfLinksBacklink.tLoad(),
+          newA3!.selfLinksBacklink.tLoad(),
         ]);
 
         expect(newA1.selfLinksBacklink, [objA1]);
@@ -399,8 +399,8 @@ void tests() {
         final newestA3 = await linksA.tGet(objA3.id!);
 
         await Future.wait([
-          newestA2!.selfLinksBacklink.load(),
-          newestA3!.selfLinksBacklink.load(),
+          newestA2!.selfLinksBacklink.tLoad(),
+          newestA3!.selfLinksBacklink.tLoad(),
         ]);
 
         expect(newestA2.selfLinksBacklink, const <LinkModelA>[]);
