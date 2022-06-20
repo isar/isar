@@ -1,6 +1,6 @@
 import 'dart:math';
 
-const isarCoreVersion = '2.5.21'; //
+const isarCoreVersion = '2.5.22';
 final isarCoreVersionNumber = _getVersionNumber(isarCoreVersion);
 
 const isarWebVersion = '2.5.1';
