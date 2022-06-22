@@ -18,15 +18,6 @@ class HashIndexesModel {
     required this.stringListInsensitiveIndex,
   });
 
-  HashIndexesModel({
-    required this.stringSensitiveIndex,
-    required this.stringInsensitiveIndex,
-    required this.boolListIndex,
-    required this.intListIndex,
-    required this.dateTimeListIndex,
-    required this.stringListSensitiveIndex,
-    required this.stringListInsensitiveIndex,
-  });
   int? id;
 
   @Index(type: IndexType.hash, caseSensitive: true)
