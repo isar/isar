@@ -1,3 +1,5 @@
+// ignore_for_file: cast_nullable_to_non_nullable
+
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 import 'package:petitparser/petitparser.dart';

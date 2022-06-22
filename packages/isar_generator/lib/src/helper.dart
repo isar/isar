@@ -78,6 +78,7 @@ extension PropertyElementX on PropertyInducingElement {
           );
         }
 
+        // ignore: cast_nullable_to_non_nullable
         final ClassElement cls = ann.type!.element as ClassElement;
         final DartType adapterDartType = cls.supertype!.typeArguments[0];
         final TypeChecker checker = TypeChecker.fromStatic(adapterDartType);

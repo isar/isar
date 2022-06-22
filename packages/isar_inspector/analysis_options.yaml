@@ -25,7 +25,7 @@ linter:
     - avoid_bool_literals_in_conditional_expressions
     - avoid_classes_with_only_static_members
     - avoid_double_and_int_checks
-    # - avoid_dynamic_calls
+    - avoid_dynamic_calls
     - avoid_empty_else
     - avoid_equals_and_hash_code_on_mutable_classes
     - avoid_escaping_inner_quotes
@@ -56,7 +56,7 @@ linter:
     - camel_case_extensions
     - camel_case_types
     - cancel_subscriptions
-    # - cast_nullable_to_non_nullable
+    - cast_nullable_to_non_nullable
     - control_flow_in_finally
     - curly_braces_in_flow_control_structures # not required by flutter style, , but developer-facing code should have this on
     - depend_on_referenced_packages
@@ -123,7 +123,7 @@ linter:
     - prefer_is_not_operator
     - prefer_iterable_whereType
     - prefer_null_aware_operators
-    # - prefer_relative_imports
+    - prefer_relative_imports
     - prefer_single_quotes
     - prefer_spread_collections
     - prefer_typing_uninitialized_variables

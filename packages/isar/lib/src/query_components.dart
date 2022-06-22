@@ -173,6 +173,18 @@ enum FilterConditionType {
 
 /// Create a filter condition dynamically.
 class FilterCondition extends FilterOperation {
+  /// @nodoc
+  @protected
+  const FilterCondition({
+    required this.type,
+    required this.property,
+    this.value1,
+    this.value2,
+    required this.include1,
+    required this.include2,
+    required this.caseSensitive,
+  }) : super._();
+
   /// Filters the results to only include objects where the property equals
   /// [value].
   ///
@@ -312,18 +324,6 @@ class FilterCondition extends FilterOperation {
         caseSensitive = false,
         super._();
 
-  /// @nodoc
-  @protected
-  const FilterCondition({
-    required this.type,
-    required this.property,
-    this.value1,
-    this.value2,
-    required this.include1,
-    required this.include2,
-    required this.caseSensitive,
-  }) : super._();
-
   /// Type of the filter condition.
   final FilterConditionType type;
 
@@ -355,6 +355,13 @@ enum FilterGroupType {
 
 /// Group one or more filter conditions.
 class FilterGroup extends FilterOperation {
+  /// @nodoc
+  @protected
+  FilterGroup({
+    required this.type,
+    required this.filters,
+  }) : super._();
+
   /// Create a logical AND filter group.
   const FilterGroup.and(this.filters)
       : type = FilterGroupType.and,
@@ -370,13 +377,6 @@ class FilterGroup extends FilterOperation {
       : filters = [filter],
         type = FilterGroupType.not,
         super._();
-
-  /// @nodoc
-  @protected
-  FilterGroup({
-    required this.type,
-    required this.filters,
-  }) : super._();
 
   /// Type of this group.
   final FilterGroupType type;

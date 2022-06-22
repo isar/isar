@@ -8,9 +8,10 @@ part 'link_test.g.dart';
 
 @Collection()
 class LinkModelA {
+  LinkModelA();
+
   LinkModelA.name(this.name);
 
-  LinkModelA();
   int? id;
 
   late String name;
@@ -42,9 +43,10 @@ class LinkModelA {
 
 @Collection()
 class LinkModelB {
+  LinkModelB();
+
   LinkModelB.name(this.name);
 
-  LinkModelB();
   int? id;
 
   late String name;
