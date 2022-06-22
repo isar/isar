@@ -152,7 +152,7 @@ void tests() {
     isarTest('Query List<String> sensitive index', () async {
       final result = await isar.hashIndexesModels
           .where()
-          .stringListSensitiveIndexEqualTo([]).tFindAll();
+          .stringListSensitiveIndexEqualTo(<String>[]).tFindAll();
       expect(result, <HashIndexesModel>[]);
     });
 
