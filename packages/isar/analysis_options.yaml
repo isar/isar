@@ -1,7 +1,9 @@
 include: package:lints/recommended.yaml
 
 analyzer:
+
   exclude:
+    - "**/*.g.dart"
     - "lib/src/native/bindings.dart"
 
   language:
