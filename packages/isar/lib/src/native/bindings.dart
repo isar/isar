@@ -528,29 +528,32 @@ class IsarCoreBindings {
   late final _isar_filter_static = _isar_filter_staticPtr
       .asFunction<void Function(ffi.Pointer<ffi.Pointer<CFilter>>, int)>();
 
-  void isar_filter_and_or(
+  void isar_filter_and_or_xor(
     ffi.Pointer<ffi.Pointer<CFilter>> filter,
     bool and,
+    bool exclusive,
     ffi.Pointer<ffi.Pointer<CFilter>> conditions,
     int length,
   ) {
-    return _isar_filter_and_or(
+    return _isar_filter_and_or_xor(
       filter,
       and ? 1 : 0,
+      exclusive ? 1 : 0,
       conditions,
       length,
     );
   }
 
-  late final _isar_filter_and_orPtr = _lookup<
+  late final _isar_filter_and_or_xorPtr = _lookup<
       ffi.NativeFunction<
           ffi.Void Function(
               ffi.Pointer<ffi.Pointer<CFilter>>,
               ffi.Uint8,
+              ffi.Uint8,
               ffi.Pointer<ffi.Pointer<CFilter>>,
-              ffi.Uint32)>>('isar_filter_and_or');
-  late final _isar_filter_and_or = _isar_filter_and_orPtr.asFunction<
-      void Function(ffi.Pointer<ffi.Pointer<CFilter>>, int,
+              ffi.Uint32)>>('isar_filter_and_or_xor');
+  late final _isar_filter_and_or_xor = _isar_filter_and_or_xorPtr.asFunction<
+      void Function(ffi.Pointer<ffi.Pointer<CFilter>>, int, int,
           ffi.Pointer<ffi.Pointer<CFilter>>, int)>();
 
   void isar_filter_not(
