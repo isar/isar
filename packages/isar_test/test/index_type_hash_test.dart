@@ -39,7 +39,10 @@ class HashIndexesModel {
   List<bool> boolListIndex;
 
   @Index(type: IndexType.hash)
-  t<String> stringListInsensitiveIndex;
+  List<int> intListIndex;
+
+  @Index(type: IndexType.hash)
+  List<String> stringListInsensitiveIndex;
 
   @override
   bool operator ==(Object other) =>
