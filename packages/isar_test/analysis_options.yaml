@@ -2,6 +2,8 @@ include: package:flutter_lints/flutter.yaml
 
 analyzer:
   exclude:
+    - "all_tests.dart"
+    - "test/**/*.g.dart"
     - "**/*.g.dart"
 
   language:
