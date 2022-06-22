@@ -39,7 +39,13 @@ class HashIndexesModel {
   List<bool> boolListIndex;
 
   @Index(type: IndexType.hash)
+  List<DateTime> dateTimeListIndex;
+
+  @Index(type: IndexType.hash)
   List<int> intListIndex;
+
+  @Index(type: IndexType.hash, caseSensitive: true)
+  List<String> stringListSensitiveIndex;
 
   @Index(type: IndexType.hash)
   List<String> stringListInsensitiveIndex;
@@ -85,16 +91,19 @@ void tests() {
           stringInsensitiveIndex: 'John Smith',
           boolListIndex: [true, true, false],
           intListIndex: [1, 99, 42],
-          dateTimeListIndex: [DateTime(2001, 4, 4), DateTime(1995, 7, 27)],
-          stringListSensitiveIndex: ['FOO'],
-          stringListInsensitiveIndex: ['loREM', 'IPSum'],
+          dateTimeListIndex: <DateTime>[
+            DateTime(2001, 4, 4),
+            DateTime(1995, 7, 27)
+          ],
+          stringListSensitiveIndex: <String>['FOO'],
+          stringListInsensitiveIndex: <String>['loREM', 'IPSum'],
         );
         model1 = HashIndexesModel(
           stringSensitiveIndex: 'mY INDEX',
           stringInsensitiveIndex: 'jOHN SMiTh',
           boolListIndex: List.filled(100, true),
           intListIndex: [6, -5],
-          dateTimeListIndex: [DateTime(1992, 1, 24)],
+          dateTimeListIndex: <DateTime>[DateTime(1992, 1, 24)],
           stringListSensitiveIndex: ['foo', 'bar'],
           stringListInsensitiveIndex: ['LORem', 'ipsum'],
         );
