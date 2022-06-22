@@ -17,6 +17,7 @@
      }
    ],
    "contributorsPerLine": 7,
+   "contributorsSortAlphabetically": true,
    "projectName": "isar",
    "projectOwner": "isar",
    "repoType": "github",
