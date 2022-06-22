@@ -19,7 +19,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   late final int linkIndex = sourceCollection.schema.linkIdOrErr(linkName);
 
   @override
-  late final int? Function(object) getId = targetCollection.schema.getId;
+  late final getId = targetCollection.schema.getId;
 
   @override
   Future<void> updateNative(

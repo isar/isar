@@ -8,7 +8,6 @@ part 'index_type_hash_elements_test.g.dart';
 
 @Collection()
 class HashElementsIndexesModel {
-
   HashElementsIndexesModel({
     required this.stringListSensitiveIndex,
     required this.stringListInsensitiveIndex,

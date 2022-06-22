@@ -4,7 +4,6 @@ part 'schema.g.dart';
 
 @JsonSerializable()
 class ICollection {
-
   ICollection({
     required this.name,
     required this.idName,
@@ -27,7 +26,6 @@ class ICollection {
 
 @JsonSerializable()
 class IProperty {
-
   const IProperty({
     required this.name,
     required this.type,
@@ -48,7 +46,6 @@ IsarType _typeFromJson(String type) {
 
 @JsonSerializable()
 class ILink {
-
   const ILink({
     required this.name,
     required this.target,
@@ -61,7 +58,6 @@ class ILink {
 
 // ignore_for_file: constant_identifier_names
 enum IsarType {
-  const IsarType(this.sortable, this.width);
   Bool(true, 80),
   Int(true, 80),
   Float(true, 80),
@@ -77,4 +73,7 @@ enum IsarType {
 
   final bool sortable;
   final double width;
+
+  // False warning // ignore: sort_constructors_first
+  const IsarType(this.sortable, this.width);
 }
