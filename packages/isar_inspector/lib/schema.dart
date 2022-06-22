@@ -74,6 +74,7 @@ enum IsarType {
   final bool sortable;
   final double width;
 
-  // False warning // ignore: sort_constructors_first
+  // False warning
+  // ignore: sort_constructors_first
   const IsarType(this.sortable, this.width);
 }
