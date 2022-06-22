@@ -14,7 +14,7 @@ import 'state/query_state.dart';
 const double _deleteColWidth = 60.0;
 
 class QueryTable extends ConsumerWidget {
-  const QueryTable({Key? key}) : super(key: key);
+  const QueryTable({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -65,7 +65,7 @@ class QueryTable extends ConsumerWidget {
 }
 
 class HeaderProperty extends ConsumerWidget {
-  const HeaderProperty({Key? key, required this.property}) : super(key: key);
+  const HeaderProperty({super.key, required this.property});
   final IProperty property;
 
   @override
@@ -142,11 +142,11 @@ class HeaderProperty extends ConsumerWidget {
 
 class TableRow extends ConsumerWidget {
   const TableRow({
-    Key? key,
+    super.key,
     required this.collection,
     required this.index,
     required this.object,
-  }) : super(key: key);
+  });
   final ICollection collection;
   final int index;
   final QueryObject object;

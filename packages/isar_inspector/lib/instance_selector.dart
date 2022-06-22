@@ -6,7 +6,7 @@ import 'common.dart';
 import 'state/instances_state.dart';
 
 class InstanceSelector extends ConsumerStatefulWidget {
-  const InstanceSelector({Key? key}) : super(key: key);
+  const InstanceSelector({super.key});
 
   @override
   ConsumerState<InstanceSelector> createState() => _InstanceSelectorState();
@@ -101,10 +101,10 @@ class _InstanceSelectorState extends ConsumerState<InstanceSelector>
 
 class InstanceButton extends StatelessWidget {
   const InstanceButton({
-    Key? key,
+    super.key,
     required this.instance,
     required this.onTap,
-  }) : super(key: key);
+  });
   final String instance;
   final VoidCallback onTap;
 
@@ -136,12 +136,12 @@ class InstanceButton extends StatelessWidget {
 
 class SelectedInstanceButton extends StatelessWidget {
   const SelectedInstanceButton({
-    Key? key,
+    super.key,
     required this.instance,
     required this.onTap,
     required this.hasMultiple,
     required this.color,
-  }) : super(key: key);
+  });
   final String instance;
   final VoidCallback onTap;
   final bool hasMultiple;

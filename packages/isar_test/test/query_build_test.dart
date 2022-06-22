@@ -251,7 +251,7 @@ void tests() {
       expect(objs, [account5, account11]);
     });
 
-    isarTest("Empty filter groups", () async {
+    isarTest('Empty filter groups', () async {
       final objs = await isar.accounts.buildQuery<Account>(
         filter: FilterGroup.and(
           [

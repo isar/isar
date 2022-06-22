@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 class ErrorScreen extends StatelessWidget {
   const ErrorScreen({
-    Key? key,
+    super.key,
     required this.message,
     required this.retry,
-  }) : super(key: key);
+  });
   final String message;
   final VoidCallback retry;
 

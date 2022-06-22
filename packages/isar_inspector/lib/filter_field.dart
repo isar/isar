@@ -11,7 +11,7 @@ import 'state/isar_connect_state_notifier.dart';
 import 'state/query_state.dart';
 
 class FilterField extends ConsumerStatefulWidget {
-  const FilterField({Key? key}) : super(key: key);
+  const FilterField({super.key});
 
   @override
   ConsumerState<FilterField> createState() => _FilterFieldState();

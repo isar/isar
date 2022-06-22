@@ -4,7 +4,7 @@ import 'common.dart';
 import 'state/query_state.dart';
 
 class PrevNext extends ConsumerWidget {
-  const PrevNext({Key? key}) : super(key: key);
+  const PrevNext({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -47,10 +47,11 @@ class PrevNext extends ConsumerWidget {
 
 class _Button extends StatelessWidget {
   const _Button({
-    Key? key,
+    // ignore: unused_element
+    super.key,
     required this.label,
     this.onPressed,
-  }) : super(key: key);
+  });
   final String label;
   final VoidCallback? onPressed;
 

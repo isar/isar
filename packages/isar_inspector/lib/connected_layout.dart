@@ -8,7 +8,7 @@ import 'state/instances_state.dart';
 import 'state/isar_connect_state_notifier.dart';
 
 class ConnectedLayout extends ConsumerStatefulWidget {
-  const ConnectedLayout({Key? key}) : super(key: key);
+  const ConnectedLayout({super.key});
 
   @override
   ConsumerState<ConnectedLayout> createState() => _ConnectedLayoutState();

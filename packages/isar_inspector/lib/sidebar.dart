@@ -5,7 +5,7 @@ import 'common.dart';
 import 'instance_selector.dart';
 
 class Sidebar extends StatelessWidget {
-  const Sidebar({Key? key}) : super(key: key);
+  const Sidebar({super.key});
 
   @override
   Widget build(BuildContext context) {

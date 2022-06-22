@@ -4,7 +4,7 @@ import 'common.dart';
 import 'state/collections_state.dart';
 
 class CollectionsList extends ConsumerWidget {
-  const CollectionsList({Key? key}) : super(key: key);
+  const CollectionsList({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

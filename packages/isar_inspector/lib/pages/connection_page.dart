@@ -8,10 +8,10 @@ import '../state/isar_connect_state_notifier.dart';
 
 class ConnectionPage extends ConsumerStatefulWidget {
   const ConnectionPage({
-    Key? key,
+    super.key,
     required this.port,
     required this.secret,
-  }) : super(key: key);
+  });
   final String port;
   final String secret;
 
@@ -50,7 +50,8 @@ class _ConnectionPageState extends ConsumerState<ConnectionPage> {
 }
 
 class _InstancesLoader extends ConsumerWidget {
-  const _InstancesLoader({Key? key}) : super(key: key);
+  // ignore: unused_element
+  const _InstancesLoader({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -69,7 +70,8 @@ class _InstancesLoader extends ConsumerWidget {
 }
 
 class _CollectionsLoader extends ConsumerWidget {
-  const _CollectionsLoader({Key? key}) : super(key: key);
+  // ignore: unused_element
+  const _CollectionsLoader({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -88,7 +90,7 @@ class _CollectionsLoader extends ConsumerWidget {
 }
 
 class Loading extends StatelessWidget {
-  const Loading({Key? key}) : super(key: key);
+  const Loading({super.key});
 
   @override
   Widget build(BuildContext context) {
