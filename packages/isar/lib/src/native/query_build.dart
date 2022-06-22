@@ -178,20 +178,19 @@ Pointer<CFilter>? _buildFilterGroup(
     return null;
   }
 
-  final Pointer<Pointer<CFilter>> conditionsPtrPtr =
-      alloc<Pointer<CFilter>>(builtConditions.length);
-
-  for (int i = 0; i < builtConditions.length; i++) {
-    conditionsPtrPtr[i] = builtConditions[i]!;
-  }
-
-  final Pointer<Pointer<CFilter>> filterPtrPtr = alloc<Pointer<CFilter>>();
+  final filterPtrPtr = alloc<Pointer<CFilter>>();
   if (group.type == FilterGroupType.not) {
     IC.isar_filter_not(
       filterPtrPtr,
       builtConditions.first!,
     );
+  } else if (builtConditions.length == 1) {
+    return builtConditions[0];
   } else {
+    final conditionsPtrPtr = alloc<Pointer<CFilter>>(builtConditions.length);
+    for (var i = 0; i < builtConditions.length; i++) {
+      conditionsPtrPtr[i] = builtConditions[i]!;
+    }
     IC.isar_filter_and_or(
       filterPtrPtr,
       group.type == FilterGroupType.and,

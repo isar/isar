@@ -179,7 +179,7 @@ String? _buildFilterGroup(CollectionSchema<dynamic> schema, FilterGroup group) {
   }
 
   if (group.type == FilterGroupType.not) {
-    return '(!${builtConditions[0]})';
+    return '!(${builtConditions[0]})';
   } else {
     final String op = group.type == FilterGroupType.or ? '||' : '&&';
     final String condition = builtConditions.join(op);

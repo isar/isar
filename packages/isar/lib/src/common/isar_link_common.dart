@@ -168,7 +168,7 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   void resetSync() {
-    updateNative([], [], true);
+    updateNativeSync([], [], true);
     _value = null;
     _isChanged = false;
     _isLoaded = true;

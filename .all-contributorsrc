@@ -1,0 +1,39 @@
+{
+  "files": [
+    "packages/isar/README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "Jtplouffe",
+      "name": "JT",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32107801?v=4",
+      "profile": "https://github.com/Jtplouffe",
+      "contributions": [
+        "test",
+        "bug"
+      ]
+    },
+    {
+      "login": "leisim",
+      "name": "Simon Leier",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13610195?v=4",
+      "profile": "https://www.linkedin.com/in/simon-leier/",
+      "contributions": [
+        "bug",
+        "code",
+        "doc",
+        "test",
+        "example"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "contributorsSortAlphabetically": true,
+  "projectName": "isar",
+  "projectOwner": "isar",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
