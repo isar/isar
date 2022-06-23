@@ -933,6 +933,36 @@ class IsarCoreBindings {
   late final _isar_key_create = _isar_key_createPtr
       .asFunction<void Function(ffi.Pointer<ffi.Pointer<CIndexKey>>)>();
 
+  bool isar_key_increase(
+    ffi.Pointer<CIndexKey> key,
+  ) {
+    return _isar_key_increase(
+          key,
+        ) !=
+        0;
+  }
+
+  late final _isar_key_increasePtr =
+      _lookup<ffi.NativeFunction<ffi.Uint8 Function(ffi.Pointer<CIndexKey>)>>(
+          'isar_key_increase');
+  late final _isar_key_increase =
+      _isar_key_increasePtr.asFunction<int Function(ffi.Pointer<CIndexKey>)>();
+
+  bool isar_key_decrease(
+    ffi.Pointer<CIndexKey> key,
+  ) {
+    return _isar_key_decrease(
+          key,
+        ) !=
+        0;
+  }
+
+  late final _isar_key_decreasePtr =
+      _lookup<ffi.NativeFunction<ffi.Uint8 Function(ffi.Pointer<CIndexKey>)>>(
+          'isar_key_decrease');
+  late final _isar_key_decrease =
+      _isar_key_decreasePtr.asFunction<int Function(ffi.Pointer<CIndexKey>)>();
+
   void isar_key_add_byte(
     ffi.Pointer<CIndexKey> key,
     int value,
@@ -1447,9 +1477,7 @@ class IsarCoreBindings {
     ffi.Pointer<CQueryBuilder> builder,
     int index_id,
     ffi.Pointer<CIndexKey> lower_key,
-    bool include_lower,
     ffi.Pointer<CIndexKey> upper_key,
-    bool include_upper,
     bool sort_asc,
     bool skip_duplicates,
   ) {
@@ -1457,9 +1485,7 @@ class IsarCoreBindings {
       builder,
       index_id,
       lower_key,
-      include_lower ? 1 : 0,
       upper_key,
-      include_upper ? 1 : 0,
       sort_asc ? 1 : 0,
       skip_duplicates ? 1 : 0,
     );
@@ -1471,15 +1497,13 @@ class IsarCoreBindings {
               ffi.Pointer<CQueryBuilder>,
               ffi.Uint32,
               ffi.Pointer<CIndexKey>,
-              ffi.Uint8,
               ffi.Pointer<CIndexKey>,
-              ffi.Uint8,
               ffi.Uint8,
               ffi.Uint8)>>('isar_qb_add_index_where_clause');
   late final _isar_qb_add_index_where_clause =
       _isar_qb_add_index_where_clausePtr.asFunction<
           int Function(ffi.Pointer<CQueryBuilder>, int, ffi.Pointer<CIndexKey>,
-              int, ffi.Pointer<CIndexKey>, int, int, int)>();
+              ffi.Pointer<CIndexKey>, int, int)>();
 
   int isar_qb_add_link_where_clause(
     ffi.Pointer<CQueryBuilder> builder,
