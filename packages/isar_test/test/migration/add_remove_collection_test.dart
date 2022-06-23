@@ -31,10 +31,6 @@ class Col2 {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   isarTest('Add collection', () async {
     final isar1 = await openTempIsar([Col1Schema]);
     final col1A = Col1(5, 'col1_a');

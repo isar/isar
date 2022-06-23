@@ -25,10 +25,6 @@ class IdModel {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Int filter', () {
     late Isar isar;
     late IsarCollection<IdModel> col;

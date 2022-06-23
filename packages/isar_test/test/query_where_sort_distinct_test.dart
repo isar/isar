@@ -20,10 +20,6 @@ class TestModel {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Where sort distinct', () {
     late Isar isar;
     late IsarCollection<TestModel> col;

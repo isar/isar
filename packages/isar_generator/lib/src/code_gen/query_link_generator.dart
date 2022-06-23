@@ -8,11 +8,13 @@ String generateQueryLinks(ObjectInfo oi) {
   for (var link in oi.links) {
     code += '''
       QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterFilterCondition> ${link.dartName.decapitalize()}(FilterQuery<${link.targetCollectionDartName}> q) {
-        return linkInternal(
-          isar.${link.targetCollectionAccessor},
-          q,
-          '${link.isarName.esc}',
-        );
+        return QueryBuilder.apply(this, (query) {
+          return query.link(
+            query.collection.isar.${link.targetCollectionAccessor},
+            q,
+            '${link.isarName.esc}',
+          );
+        });
       }''';
   }
   return '''

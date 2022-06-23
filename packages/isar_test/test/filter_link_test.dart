@@ -2,7 +2,6 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import 'util/common.dart';
-import 'util/sync_async_helper.dart';
 
 part 'filter_link_test.g.dart';
 
@@ -42,10 +41,6 @@ class LinkModelB {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Groups', () {
     late Isar isar;
     late IsarCollection<LinkModelA> colA;

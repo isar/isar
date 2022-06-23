@@ -12,12 +12,16 @@ String generateDistinctBy(ObjectInfo oi) {
     if (property.isarType == IsarType.string) {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}({bool caseSensitive = true}) {
-            return addDistinctByInternal('${property.isarName.esc}', caseSensitive: caseSensitive);
+          return QueryBuilder.apply(this, (query) {
+            return query.addDistinctBy('${property.isarName.esc}', caseSensitive: caseSensitive);
+          });
         }''';
-    } else if (property.isarType.index < IsarType.string.index) {
+    } else {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}() {
-            return addDistinctByInternal('${property.isarName.esc}');
+          return QueryBuilder.apply(this, (query) {
+            return query.addDistinctBy('${property.isarName.esc}');
+          });
         }''';
     }
   }

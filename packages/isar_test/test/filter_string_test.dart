@@ -51,10 +51,6 @@ class StringModel {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('String filter', () {
     late Isar isar;
     late IsarCollection<StringModel> col;

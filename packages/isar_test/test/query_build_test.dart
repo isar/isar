@@ -47,10 +47,6 @@ class Account {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group("Build query", () {
     late Isar isar;
 

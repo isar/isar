@@ -7,6 +7,9 @@ import 'package:js/js_util.dart';
 @JS('JSON.stringify')
 external String stringify(dynamic value);
 
+@JS('indexedDB.cmp')
+external int idbCmp(dynamic value1, dynamic value2);
+
 @JS('Object.keys')
 external List<String> objectKeys(dynamic obj);
 

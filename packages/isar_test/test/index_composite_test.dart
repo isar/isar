@@ -44,10 +44,6 @@ class CompositeModel {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Composite', () {
     late Isar isar;
     late IsarCollection<CompositeModel> col;

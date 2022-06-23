@@ -25,10 +25,6 @@ class Model {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Instance test', () {
     isarTest('persists auto increment', () async {
       var isar = await openTempIsar([ModelSchema]);

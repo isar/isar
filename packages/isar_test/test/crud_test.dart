@@ -30,10 +30,6 @@ class Message {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('CRUD', () {
     late Isar isar;
     late IsarCollection<Message> messages;

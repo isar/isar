@@ -69,10 +69,6 @@ class LinkModelB {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Links', () {
     late Isar isar;
     late IsarCollection<LinkModelA> linksA;

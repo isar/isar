@@ -11,10 +11,16 @@ import 'query_build.dart';
 final _keyPtrPtr = malloc<Pointer<CIndexKey>>();
 
 Pointer<CIndexKey> buildIndexKey(
-    CollectionSchema<dynamic> schema, String indexName, IndexKey key) {
+  CollectionSchema<dynamic> schema,
+  String indexName,
+  IndexKey key, {
+  bool addMaxComposite = false,
+  bool requireFullKey = false,
+}) {
   final types = schema.indexValueTypeOrErr(indexName);
-  if (key.length > types.length) {
-    throw 'Invalid values for index $indexName';
+  if (key.length > types.length ||
+      (requireFullKey && key.length != types.length)) {
+    throw IsarError('Invalid values for index $indexName.');
   }
 
   IC.isar_key_create(_keyPtrPtr);
@@ -22,6 +28,13 @@ Pointer<CIndexKey> buildIndexKey(
 
   for (var i = 0; i < key.length; i++) {
     _addKeyValue(keyPtr, key[i], types[i]);
+  }
+
+  // Also include composite indexes for upper keys
+  if (addMaxComposite) {
+    for (var i = 0; i < types.length - key.length; i++) {
+      IC.isar_key_add_long(keyPtr, maxLong);
+    }
   }
 
   return keyPtr;
@@ -47,6 +60,7 @@ void _addKeyValue(
   } else if (value is List<DateTime?>) {
     value = value.map((e) => e?.toUtc().microsecondsSinceEpoch);
   }
+
   switch (type) {
     case IndexValueType.bool:
       IC.isar_key_add_byte(keyPtr, boolToByte(value as bool?));

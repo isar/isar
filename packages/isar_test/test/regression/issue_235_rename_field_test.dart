@@ -57,10 +57,6 @@ class Col2 {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   isarTest('Regression 235 Rename field', () async {
     final isar1 = await openTempIsar([Col1Schema]);
     await isar1.tWriteTxn(() {

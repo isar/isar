@@ -67,18 +67,17 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
 
   QueryBuilder<OBJ, OBJ, QAfterFilterCondition> filter() {
     final containingId = requireAttached();
-    final qb = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>(
-      targetCollection,
-      false,
-      Sort.asc,
+    final qb = QueryBuilderInternal(
+      collection: targetCollection,
+      whereClauses: [
+        LinkWhereClause(
+          linkCollection: sourceCollection.name,
+          linkName: linkName,
+          id: containingId,
+        ),
+      ],
     );
-
-    // ignore: invalid_use_of_protected_member
-    return qb.addWhereClauseInternal(LinkWhereClause(
-      linkCollection: sourceCollection.name,
-      linkName: linkName,
-      id: containingId,
-    ));
+    return QueryBuilder(qb);
   }
 
   Future<void> updateNative(List<int> linkIds, List<int> unlinkIds, bool reset);

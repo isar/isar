@@ -33,10 +33,6 @@ class Col2 {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   isarTest('Change field nullability', () async {
     final isar1 = await openTempIsar([Col1Schema]);
     await isar1.tWriteTxn(() {

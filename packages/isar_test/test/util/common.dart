@@ -1,4 +1,4 @@
-// ignore_for_file: implementation_imports
+import 'dart:async';
 import 'dart:io';
 import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
@@ -49,35 +49,41 @@ Future<void> _prepareTest() async {
 }
 
 @isTest
-void isarTest(String name, dynamic Function() body, {Timeout? timeout}) {
-  test(
-    name,
-    () async {
-      try {
-        await _prepareTest();
-        await body();
-        testCount++;
-      } catch (e) {
-        allTestsSuccessful = false;
-        rethrow;
-      }
-    },
-    timeout: timeout,
-  );
+void isarTest(String name, dynamic Function() body,
+    {Timeout? timeout, bool skip = false}) {
+  void runTest(bool testSync) {
+    final testName = testSync ? '$name SYNC' : name;
+    runZoned(
+      zoneValues: {'testSync': testSync},
+      () {
+        test(
+          testName,
+          () async {
+            try {
+              await _prepareTest();
+              await body();
+              testCount++;
+            } catch (e) {
+              allTestsSuccessful = false;
+              rethrow;
+            }
+          },
+          timeout: timeout,
+          skip: skip,
+        );
+      },
+    );
+  }
+
+  runTest(false);
+  if (!kIsWeb) {
+    runTest(true);
+  }
 }
 
 @isTest
 void isarTestVm(String name, dynamic Function() body) {
-  test(name, () async {
-    try {
-      await _prepareTest();
-      await body();
-      testCount++;
-    } catch (e) {
-      allTestsSuccessful = false;
-      rethrow;
-    }
-  }, skip: kIsWeb);
+  isarTest(name, body, skip: kIsWeb);
 }
 
 String getRandomName() {

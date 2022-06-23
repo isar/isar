@@ -30,10 +30,6 @@ class NameModel {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Name', () {
     late Isar isar;
 

@@ -126,11 +126,13 @@ class IndexWhereClause extends WhereClause {
   /// [upper] bounds.
   const IndexWhereClause.between({
     required this.indexName,
-    this.lower,
+    required IndexKey lower,
     this.includeLower = true,
-    this.upper,
+    required IndexKey upper,
     this.includeUpper = true,
-  }) : super._();
+  })  : lower = lower,
+        upper = upper,
+        super._();
 }
 
 /// A where clause traversing objects linked to the specified object.
@@ -350,6 +352,7 @@ class FilterCondition extends FilterOperation {
 enum FilterGroupType {
   and,
   or,
+  xor,
   not,
 }
 
@@ -369,6 +372,11 @@ class FilterGroup extends FilterOperation {
   /// Create a logical OR filter group.
   const FilterGroup.or(this.filters)
       : type = FilterGroupType.or,
+        super._();
+
+  /// Create a logical XOR filter group.
+  const FilterGroup.xor(this.filters)
+      : type = FilterGroupType.xor,
         super._();
 
   /// Negate a filter.

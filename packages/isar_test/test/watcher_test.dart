@@ -57,10 +57,6 @@ class Listener<T> {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Watcher', () {
     late Isar isar;
     late IsarCollection<Value> col;

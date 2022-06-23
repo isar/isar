@@ -79,10 +79,15 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @pragma('vm:prefer-inline')
   Pointer<Pointer<CIndexKey>> _getKeysPtr(
-      String indexName, List<IndexKey> values, Allocator alloc) {
-    final keysPtrPtr = alloc<Pointer<CIndexKey>>(values.length);
-    for (var i = 0; i < values.length; i++) {
-      keysPtrPtr[i] = buildIndexKey(schema, indexName, values[i]);
+      String indexName, List<IndexKey> keys, Allocator alloc) {
+    final keysPtrPtr = alloc<Pointer<CIndexKey>>(keys.length);
+    for (var i = 0; i < keys.length; i++) {
+      keysPtrPtr[i] = buildIndexKey(
+        schema,
+        indexName,
+        keys[i],
+        requireFullKey: true,
+      );
     }
     return keysPtrPtr;
   }
@@ -162,7 +167,12 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
       final objects = List<OBJ?>.filled(keys.length, null);
       for (var i = 0; i < keys.length; i++) {
-        final keyPtr = buildIndexKey(schema, indexName, keys[i]);
+        final keyPtr = buildIndexKey(
+          schema,
+          indexName,
+          keys[i],
+          requireFullKey: true,
+        );
         nCall(IC.isar_get_by_index(ptr, txn.ptr, indexId, keyPtr, cObjPtr));
         objects[i] = deserializeObjectOrNull(cObj);
       }

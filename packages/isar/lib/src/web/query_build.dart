@@ -84,23 +84,31 @@ IdWhereClauseJs _buildIdWhereClause(IdWhereClause wc) {
 
 IndexWhereClauseJs _buildIndexWhereClause(
     CollectionSchema<dynamic> schema, IndexWhereClause wc) {
-  final isComposite = schema.indexValueTypes[wc.indexName]!.length > 1;
+  final keySize = schema.indexValueTypes[wc.indexName]!.length;
 
-  dynamic lower = wc.lower;
-  if (!isComposite && lower != null) {
-    lower = lower[0];
+  final lower = wc.lower?.toList();
+  final upper = wc.upper?.toList();
+  if (upper != null) {
+    while (keySize > upper.length) {
+      upper.add([]);
+    }
   }
 
-  dynamic upper = wc.upper;
-  if (!isComposite && upper != null) {
-    upper = upper[0];
+  dynamic lowerUnwrapped = wc.lower;
+  if (keySize == 1 && lower != null) {
+    lowerUnwrapped = lower.isNotEmpty ? lower[0] : null;
+  }
+
+  dynamic upperUnwrapped = upper;
+  if (keySize == 1 && upper != null) {
+    upperUnwrapped = upper.isNotEmpty ? upper[0] : double.infinity;
   }
 
   return IndexWhereClauseJs()
     ..indexName = wc.indexName
     ..range = _buildKeyRange(
-      wc.lower != null ? _valueToJs(lower) : null,
-      wc.upper != null ? _valueToJs(upper) : null,
+      wc.lower != null ? _valueToJs(lowerUnwrapped) : null,
+      wc.upper != null ? _valueToJs(upperUnwrapped) : null,
       wc.includeLower,
       wc.includeUpper,
     );
@@ -121,22 +129,31 @@ LinkWhereClauseJs _buildLinkWhereClause(
 
 KeyRange? _buildKeyRange(
     dynamic lower, dynamic upper, bool includeLower, bool includeUpper) {
-  KeyRange? range;
   if (lower != null) {
     if (upper != null) {
-      range = KeyRange.bound(
+      final boundsEqual = idbCmp(lower, upper) == 0;
+      if (boundsEqual) {
+        if (includeLower && includeUpper) {
+          return KeyRange.only(lower);
+        } else {
+          // empty range
+          return KeyRange.upperBound(double.negativeInfinity, true);
+        }
+      }
+
+      return KeyRange.bound(
         lower,
         upper,
         !includeLower,
         !includeUpper,
       );
     } else {
-      range = KeyRange.lowerBound(lower, !includeLower);
+      return KeyRange.lowerBound(lower, !includeLower);
     }
   } else if (upper != null) {
-    range = KeyRange.upperBound(upper, !includeUpper);
+    return KeyRange.upperBound(upper, !includeUpper);
   }
-  return range;
+  return null;
 }
 
 FilterJs? _buildFilter(
@@ -176,6 +193,11 @@ String? _buildFilterGroup(CollectionSchema<dynamic> schema, FilterGroup group) {
 
   if (group.type == FilterGroupType.not) {
     return '!(${builtConditions[0]})';
+  } else if (builtConditions.length == 1) {
+    return builtConditions[0];
+  } else if (group.type == FilterGroupType.xor) {
+    final conditions = builtConditions.join(',');
+    return 'IsarQuery.xor($conditions)';
   } else {
     final op = group.type == FilterGroupType.or ? '||' : '&&';
     final condition = builtConditions.join(op);

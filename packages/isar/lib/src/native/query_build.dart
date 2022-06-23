@@ -114,7 +114,8 @@ void _addIndexWhereClause(
 
   late Pointer<CIndexKey> upperPtr;
   if (wc.upper != null) {
-    upperPtr = buildIndexKey(schema, wc.indexName, wc.upper!);
+    upperPtr =
+        buildIndexKey(schema, wc.indexName, wc.upper!, addMaxComposite: true);
   } else {
     upperPtr = buildUpperUnboundedIndexKey();
   }
@@ -122,10 +123,11 @@ void _addIndexWhereClause(
   nCall(IC.isar_qb_add_index_where_clause(
     qbPtr,
     schema.indexIdOrErr(wc.indexName),
-    sort == Sort.asc ? lowerPtr : upperPtr,
-    sort == Sort.asc ? wc.includeLower : wc.includeUpper,
-    sort == Sort.asc ? upperPtr : lowerPtr,
-    sort == Sort.asc ? wc.includeUpper : wc.includeLower,
+    lowerPtr,
+    wc.includeLower,
+    upperPtr,
+    wc.includeUpper,
+    sort == Sort.asc,
     distinct,
   ));
 }
@@ -188,9 +190,10 @@ Pointer<CFilter>? _buildFilterGroup(
     for (var i = 0; i < builtConditions.length; i++) {
       conditionsPtrPtr[i] = builtConditions[i]!;
     }
-    IC.isar_filter_and_or(
+    IC.isar_filter_and_or_xor(
       filterPtrPtr,
       group.type == FilterGroupType.and,
+      group.type == FilterGroupType.xor,
       conditionsPtrPtr,
       builtConditions.length,
     );

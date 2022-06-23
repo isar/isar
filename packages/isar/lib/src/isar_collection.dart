@@ -158,7 +158,12 @@ abstract class IsarCollection<OBJ> {
     bool distinct = false,
     Sort sort = Sort.asc,
   }) {
-    return QueryBuilder(this, distinct, sort);
+    final qb = QueryBuilderInternal(
+      collection: this,
+      whereDistinct: distinct,
+      whereSort: sort,
+    );
+    return QueryBuilder(qb);
   }
 
   /// Start building a query using the [QueryBuilder].

@@ -5,190 +5,152 @@ part of isar;
 typedef FilterQuery<OBJ> = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>
     Function(QueryBuilder<OBJ, OBJ, QFilterCondition> q);
 
-const _nullFilterGroup = FilterGroup.and([]);
-
 /// Query builders are used to create queries in a safe way.
 ///
 /// Aquire a `QueryBuilder` instance using `collection.where()` or
 /// `collection.filter()`.
 class QueryBuilder<OBJ, R, S> {
-  final IsarCollection<OBJ> _collection;
-  final List<WhereClause> _whereClauses;
-  final bool _whereDistinct;
-  final Sort _whereSort;
-  final FilterGroup _filterOr;
-  final FilterGroup? _filterAnd;
-  final bool _filterNot;
-  final List<DistinctProperty> _distinctByProperties;
-  final List<SortProperty> _sortByProperties;
-  final int? _offset;
-  final int? _limit;
-  final String? _propertyName;
-
-  @protected
-  QueryBuilder(this._collection, this._whereDistinct, this._whereSort)
-      : _whereClauses = const [],
-        _distinctByProperties = const [],
-        _sortByProperties = const [],
-        _filterOr = FilterGroup.or([]),
-        _filterAnd = null,
-        _filterNot = false,
-        _offset = null,
-        _limit = null,
-        _propertyName = null;
+  final QueryBuilderInternal<OBJ> _query;
 
   /// @nodoc
   @protected
-  QueryBuilder._(
-    this._collection,
-    this._filterOr,
-    this._filterAnd,
-    this._filterNot, [
-    this._whereClauses = const [],
-    this._whereDistinct = false,
-    this._whereSort = Sort.asc,
-    this._distinctByProperties = const [],
-    this._sortByProperties = const [],
-    this._offset,
-    this._limit,
-    this._propertyName,
-  ]);
+  QueryBuilder(this._query);
 
   /// @nodoc
   @protected
-  QueryBuilder<OBJ, R, NS> addFilterConditionInternal<NS>(
-      FilterOperation cond) {
-    if (_filterNot) {
+  static QueryBuilder<OBJ, R, S> apply<OBJ, R, S>(
+      QueryBuilder<OBJ, dynamic, dynamic> qb,
+      QueryBuilderInternal<OBJ> Function(QueryBuilderInternal<OBJ> query)
+          transform) {
+    return QueryBuilder(transform(qb._query));
+  }
+}
+
+/// @nodoc
+@protected
+class QueryBuilderInternal<OBJ> {
+  final IsarCollection<OBJ> collection;
+  final List<WhereClause> whereClauses;
+  final bool whereDistinct;
+  final Sort whereSort;
+  final FilterGroup filter;
+  final FilterGroupType filterGroupType;
+  final bool filterNot;
+  final List<DistinctProperty> distinctByProperties;
+  final List<SortProperty> sortByProperties;
+  final int? offset;
+  final int? limit;
+  final String? propertyName;
+
+  const QueryBuilderInternal({
+    required this.collection,
+    this.whereClauses = const [],
+    this.whereDistinct = false,
+    this.whereSort = Sort.asc,
+    this.filter = const FilterGroup.and([]),
+    this.filterGroupType = FilterGroupType.and,
+    this.filterNot = false,
+    this.distinctByProperties = const [],
+    this.sortByProperties = const [],
+    this.offset,
+    this.limit,
+    this.propertyName,
+  });
+
+  QueryBuilderInternal<OBJ> addFilterCondition(FilterOperation cond) {
+    if (filterNot) {
       cond = FilterGroup.not(cond);
     }
 
-    if (_filterAnd != null) {
-      return copyWithInternal(
-        filterAnd: FilterGroup.and([..._filterAnd!.filters, cond]),
-        filterNot: false,
+    late FilterGroup filterGroup;
+
+    if (filter.type == filterGroupType || filter.filters.length <= 1) {
+      filterGroup = FilterGroup(
+        type: filterGroupType,
+        filters: [...filter.filters, cond],
+      );
+    } else if (filterGroupType == FilterGroupType.and) {
+      filterGroup = FilterGroup(
+        type: filter.type,
+        filters: [
+          ...filter.filters.sublist(0, filter.filters.length - 1),
+          FilterGroup(
+            type: filterGroupType,
+            filters: [filter.filters.last, cond],
+          ),
+        ],
       );
     } else {
-      return copyWithInternal(
-        filterOr: FilterGroup.or([..._filterOr.filters, cond]),
-        filterNot: false,
+      filterGroup = FilterGroup(
+        type: filterGroupType,
+        filters: [filter, cond],
       );
     }
-  }
 
-  /// @nodoc
-  @protected
-  QueryBuilder<OBJ, R, NS> addWhereClauseInternal<NS>(WhereClause where) {
-    return copyWithInternal(whereClauses: [..._whereClauses, where]);
-  }
-
-  /// @nodoc
-  @protected
-  QueryBuilder<OBJ, R, QAfterFilterOperator> andOrInternal(
-      FilterGroupType andOr) {
-    if (andOr == FilterGroupType.and) {
-      if (_filterAnd == null) {
-        return copyWithInternal(
-          filterOr: FilterGroup.or(
-            _filterOr.filters.sublist(0, _filterOr.filters.length - 1),
-          ),
-          filterAnd: FilterGroup.and([_filterOr.filters.last]),
-        );
-      }
-    } else if (_filterAnd != null) {
-      return copyWithInternal(
-        filterOr: FilterGroup.or([..._filterOr.filters, _filterAnd!]),
-        filterAnd: null,
-      );
-    }
-    return copyWithInternal();
-  }
-
-  /// @nodoc
-  @protected
-  QueryBuilder<OBJ, R, NS> notInternal<NS>() {
-    return copyWithInternal(
-      filterNot: !_filterNot,
+    return copyWith(
+      filter: filterGroup,
+      filterGroupType: FilterGroupType.and,
+      filterNot: false,
     );
   }
 
-  /// @nodoc
-  @protected
-  QueryBuilder<OBJ, R, QAfterFilterCondition> groupInternal(
-      FilterQuery<OBJ> q) {
-    final qb = q(QueryBuilder(_collection, _whereDistinct, _whereSort));
-    final qbFinished = qb.andOrInternal(FilterGroupType.or);
-
-    if (qbFinished._filterOr.filters.isEmpty) {
-      return copyWithInternal();
-    } else if (qbFinished._filterOr.filters.length == 1) {
-      return addFilterConditionInternal(qbFinished._filterOr.filters.first);
-    } else {
-      return addFilterConditionInternal(qbFinished._filterOr);
-    }
+  QueryBuilderInternal<OBJ> addWhereClause(WhereClause where) {
+    return copyWith(whereClauses: [...whereClauses, where]);
   }
 
-  /// @nodoc
-  @protected
-  QueryBuilder<OBJ, R, QAfterFilterCondition> linkInternal<E>(
+  QueryBuilderInternal<OBJ> group(FilterQuery<OBJ> q) {
+    final internalQb = QueryBuilderInternal(collection: collection);
+    final qb = q(QueryBuilder(internalQb));
+    return addFilterCondition(qb._query.filter);
+  }
+
+  QueryBuilderInternal<OBJ> link<E>(
     IsarCollection<E> targetCollection,
     FilterQuery<E> q,
     String linkName,
   ) {
-    final qb = q(QueryBuilder(targetCollection, false, _whereSort));
-    final qbFinished = qb.andOrInternal(FilterGroupType.or);
-
-    final conditions = qbFinished._filterOr.filters;
-    if (conditions.isEmpty) {
-      return copyWithInternal();
-    }
-
-    FilterOperation filter;
-    if (conditions.length == 1) {
-      filter = conditions[0];
-    } else {
-      filter = qbFinished._filterOr;
-    }
-    return addFilterConditionInternal(LinkFilter(
-      filter: filter,
-      linkName: linkName,
-      targetCollection: targetCollection.name,
-    ));
+    final internalQb = QueryBuilderInternal(collection: targetCollection);
+    final qb = q(QueryBuilder(internalQb));
+    return addFilterCondition(
+      LinkFilter(
+        filter: qb._query.filter,
+        linkName: linkName,
+        targetCollection: targetCollection.name,
+      ),
+    );
   }
 
-  /// @nodoc
-  @protected
-  QueryBuilder<OBJ, R, NS> addSortByInternal<NS>(
-      String propertyName, Sort sort) {
-    return copyWithInternal(sortByProperties: [
-      ..._sortByProperties,
-      SortProperty(property: propertyName, sort: sort),
-    ]);
+  QueryBuilderInternal<OBJ> addSortBy(String propertyName, Sort sort) {
+    return copyWith(
+      sortByProperties: [
+        ...sortByProperties,
+        SortProperty(property: propertyName, sort: sort),
+      ],
+    );
   }
 
-  /// @nodoc
-  @protected
-  QueryBuilder<OBJ, R, QDistinct> addDistinctByInternal(String propertyName,
+  QueryBuilderInternal<OBJ> addDistinctBy(String propertyName,
       {bool? caseSensitive}) {
-    return copyWithInternal(distinctByProperties: [
-      ..._distinctByProperties,
-      DistinctProperty(property: propertyName, caseSensitive: caseSensitive),
-    ]);
+    return copyWith(
+      distinctByProperties: [
+        ...distinctByProperties,
+        DistinctProperty(
+          property: propertyName,
+          caseSensitive: caseSensitive,
+        ),
+      ],
+    );
   }
 
-  /// @nodoc
-  @protected
-  QueryBuilder<OBJ, E, QQueryOperations> addPropertyNameInternal<E>(
-      String propertyName) {
-    return copyWithInternal<QQueryOperations>(propertyName: propertyName)
-        .castInternal();
+  QueryBuilderInternal<OBJ> addPropertyName<E>(String propertyName) {
+    return copyWith(propertyName: propertyName);
   }
 
-  /// @nodoc
-  @protected
-  QueryBuilder<OBJ, R, NS> copyWithInternal<NS>({
+  QueryBuilderInternal<OBJ> copyWith({
     List<WhereClause>? whereClauses,
-    FilterGroup? filterOr,
-    FilterGroup? filterAnd = _nullFilterGroup,
+    FilterGroup? filter,
+    bool? filterIsGrouped,
+    FilterGroupType? filterGroupType,
     bool? filterNot,
     List<FilterGroup>? parentFilters,
     List<DistinctProperty>? distinctByProperties,
@@ -199,77 +161,39 @@ class QueryBuilder<OBJ, R, S> {
   }) {
     assert(offset == null || offset >= 0);
     assert(limit == null || limit >= 0);
-    return QueryBuilder._(
-      _collection,
-      filterOr ?? _filterOr,
-      identical(filterAnd, _nullFilterGroup) ? _filterAnd : filterAnd,
-      filterNot ?? _filterNot,
-      whereClauses ?? List.unmodifiable(_whereClauses),
-      _whereDistinct,
-      _whereSort,
-      distinctByProperties ?? List.unmodifiable(_distinctByProperties),
-      sortByProperties ?? List.unmodifiable(_sortByProperties),
-      offset ?? _offset,
-      limit ?? _limit,
-      propertyName ?? _propertyName,
+    return QueryBuilderInternal(
+      collection: collection,
+      whereClauses: whereClauses ?? List.unmodifiable(this.whereClauses),
+      whereDistinct: whereDistinct,
+      whereSort: whereSort,
+      filter: filter ?? this.filter,
+      filterGroupType: filterGroupType ?? this.filterGroupType,
+      filterNot: filterNot ?? this.filterNot,
+      distinctByProperties:
+          distinctByProperties ?? List.unmodifiable(this.distinctByProperties),
+      sortByProperties:
+          sortByProperties ?? List.unmodifiable(this.sortByProperties),
+      offset: offset ?? this.offset,
+      limit: limit ?? this.limit,
+      propertyName: propertyName ?? this.propertyName,
     );
   }
 
   /// @nodoc
   @protected
-  QueryBuilder<OBJ, NR, NS> castInternal<NR, NS>() {
-    return QueryBuilder._(
-      _collection,
-      _filterOr,
-      _filterAnd,
-      _filterNot,
-      _whereClauses,
-      _whereDistinct,
-      _whereSort,
-      _distinctByProperties,
-      _sortByProperties,
-      _offset,
-      _limit,
-      _propertyName,
-    );
-  }
-
-  /// @nodoc
-  @protected
-  Query<R> buildInternal() {
-    final builder = andOrInternal(FilterGroupType.or);
-    FilterOperation? filter = builder._filterOr;
-    while (filter is FilterGroup) {
-      if (filter.filters.isEmpty) {
-        filter = null;
-      } else if (filter.filters.length == 1 &&
-          filter.type != FilterGroupType.not) {
-        filter = filter.filters.first;
-      } else {
-        break;
-      }
-    }
-
-    return _collection.buildQuery(
-      whereDistinct: _whereDistinct,
-      whereSort: _whereSort,
-      whereClauses: _whereClauses,
+  Query<R> build<R>() {
+    return collection.buildQuery(
+      whereDistinct: whereDistinct,
+      whereSort: whereSort,
+      whereClauses: whereClauses,
       filter: filter,
-      sortBy: _sortByProperties,
-      distinctBy: _distinctByProperties,
-      offset: _offset,
-      limit: _limit,
-      property: _propertyName,
+      sortBy: sortByProperties,
+      distinctBy: distinctByProperties,
+      offset: offset,
+      limit: limit,
+      property: propertyName,
     );
   }
-
-  /// @nodoc
-  @protected
-  Isar get isar => _collection.isar;
-
-  /// @nodoc
-  @protected
-  Sort get whereSortInternal => _whereSort;
 }
 
 /// @nodoc

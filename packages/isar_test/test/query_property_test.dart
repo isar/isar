@@ -8,10 +8,6 @@ import 'mutli_type_model.dart';
 import 'util/sync_async_helper.dart';
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() async {
   group('Query property', () {
     late Isar isar;
 

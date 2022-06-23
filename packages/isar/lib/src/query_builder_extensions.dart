@@ -4,7 +4,7 @@ part of isar;
 extension QueryWhereOr<OBJ, R> on QueryBuilder<OBJ, R, QWhereOr> {
   /// Union of two where clauses.
   QueryBuilder<OBJ, R, QWhereClause> or() {
-    return copyWithInternal();
+    return QueryBuilder(_query);
   }
 }
 
@@ -19,9 +19,9 @@ extension QueryWhere<OBJ, R> on QueryBuilder<OBJ, R, QWhereClause> {
       Iterable<E> items, WhereRepeatModifier<OBJ, R, E> modifier) {
     QueryBuilder<OBJ, R, QAfterWhereClause>? q;
     for (var e in items) {
-      q = modifier(q?.or() ?? castInternal(), e);
+      q = modifier(q?.or() ?? QueryBuilder(_query), e);
     }
-    return q ?? castInternal();
+    return q ?? QueryBuilder(_query);
   }
 }
 
@@ -29,7 +29,7 @@ extension QueryWhere<OBJ, R> on QueryBuilder<OBJ, R, QWhereClause> {
 extension QueryFilter<OBJ, R> on QueryBuilder<OBJ, R, QFilter> {
   /// Start using filter conditions.
   QueryBuilder<OBJ, R, QFilterCondition> filter() {
-    return copyWithInternal();
+    return QueryBuilder(_query);
   }
 }
 
@@ -43,12 +43,26 @@ typedef FilterRepeatModifier<OBJ, R, E>
 extension QueryFilterAndOr<OBJ, R> on QueryBuilder<OBJ, R, QFilterOperator> {
   /// Intersection of two filter conditions.
   QueryBuilder<OBJ, R, QFilterCondition> and() {
-    return andOrInternal(FilterGroupType.and);
+    return QueryBuilder.apply(
+      this,
+      (q) => q.copyWith(filterGroupType: FilterGroupType.and),
+    );
   }
 
   /// Union of two filter conditions.
   QueryBuilder<OBJ, R, QFilterCondition> or() {
-    return andOrInternal(FilterGroupType.or);
+    return QueryBuilder.apply(
+      this,
+      (q) => q.copyWith(filterGroupType: FilterGroupType.or),
+    );
+  }
+
+  /// Logical XOR of two filter conditions.
+  QueryBuilder<OBJ, R, QFilterCondition> xor() {
+    return QueryBuilder.apply(
+      this,
+      (q) => q.copyWith(filterGroupType: FilterGroupType.xor),
+    );
   }
 }
 
@@ -56,25 +70,37 @@ extension QueryFilterAndOr<OBJ, R> on QueryBuilder<OBJ, R, QFilterOperator> {
 extension QueryFilterNot<OBJ, R> on QueryBuilder<OBJ, R, QFilterCondition> {
   /// Complement the next filter condition or group.
   QueryBuilder<OBJ, R, QFilterCondition> not() {
-    return notInternal();
+    return QueryBuilder.apply(
+      this,
+      (q) => q.copyWith(filterNot: !q.filterNot),
+    );
   }
 
   QueryBuilder<OBJ, R, QAfterFilterCondition> anyOf<E, RS>(
       Iterable<E> items, FilterRepeatModifier<OBJ, R, E> modifier) {
     QueryBuilder<OBJ, R, QAfterFilterCondition>? q;
     for (var e in items) {
-      q = modifier(q?.or() ?? castInternal(), e);
+      q = modifier(q?.or() ?? QueryBuilder(_query), e);
     }
-    return q ?? castInternal();
+    return q ?? QueryBuilder(_query);
   }
 
   QueryBuilder<OBJ, R, QAfterFilterCondition> allOf<E, RS>(
       Iterable<E> items, FilterRepeatModifier<OBJ, R, E> modifier) {
     QueryBuilder<OBJ, R, QAfterFilterCondition>? q;
     for (var e in items) {
-      q = modifier(q?.and() ?? castInternal(), e);
+      q = modifier(q?.and() ?? QueryBuilder(_query), e);
     }
-    return q ?? castInternal();
+    return q ?? QueryBuilder(_query);
+  }
+
+  QueryBuilder<OBJ, R, QAfterFilterCondition> oneOf<E, RS>(
+      Iterable<E> items, FilterRepeatModifier<OBJ, R, E> modifier) {
+    QueryBuilder<OBJ, R, QAfterFilterCondition>? q;
+    for (var e in items) {
+      q = modifier(q?.xor() ?? QueryBuilder(_query), e);
+    }
+    return q ?? QueryBuilder(_query);
   }
 }
 
@@ -83,7 +109,7 @@ extension QueryFilterNoGroups<OBJ, R>
     on QueryBuilder<OBJ, R, QFilterCondition> {
   /// Group filter conditions.
   QueryBuilder<OBJ, R, QAfterFilterCondition> group(FilterQuery<OBJ> q) {
-    return groupInternal(q);
+    return QueryBuilder.apply(this, (query) => query.group(q));
   }
 }
 
@@ -91,7 +117,7 @@ extension QueryFilterNoGroups<OBJ, R>
 extension QueryOffset<OBJ, R> on QueryBuilder<OBJ, R, QOffset> {
   /// Offset the query results by a static number.
   QueryBuilder<OBJ, R, QAfterOffset> offset(int offset) {
-    return copyWithInternal(offset: offset);
+    return QueryBuilder.apply(this, (q) => q.copyWith(offset: offset));
   }
 }
 
@@ -99,7 +125,7 @@ extension QueryOffset<OBJ, R> on QueryBuilder<OBJ, R, QOffset> {
 extension QueryLimit<OBJ, R> on QueryBuilder<OBJ, R, QLimit> {
   /// Limit the maximum number of query results.
   QueryBuilder<OBJ, R, QAfterLimit> limit(int limit) {
-    return copyWithInternal(limit: limit);
+    return QueryBuilder.apply(this, (q) => q.copyWith(limit: limit));
   }
 }
 
@@ -116,7 +142,7 @@ extension QueryModifier<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
     if (enabled) {
       return option(this);
     } else {
-      return castInternal();
+      return QueryBuilder(_query);
     }
   }
 }
@@ -124,7 +150,7 @@ extension QueryModifier<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
 /// Extension for QueryBuilders
 extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
   /// Create a query from this query builder.
-  Query<R> build() => buildInternal();
+  Query<R> build() => _query.build();
 
   /// {@macro query_find_first}
   Future<R?> findFirst() => build().findFirst();

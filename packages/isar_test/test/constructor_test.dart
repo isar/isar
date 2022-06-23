@@ -114,10 +114,6 @@ class FreezedModel with _$FreezedModel {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Constructor', () {
     late Isar isar;
 

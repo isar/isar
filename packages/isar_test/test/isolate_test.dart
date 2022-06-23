@@ -51,10 +51,6 @@ Future<bool> _isolateFunc(String name) async {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   isarTest('Isolate test', () async {
     final isar = await openTempIsar([TestModelSchema]);
 

@@ -51,10 +51,6 @@ DateTime utc(int year, [int month = 1, int day = 1]) {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Date filter', () {
     late Isar isar;
     late IsarCollection<DateTimeModel> col;
@@ -162,13 +158,13 @@ void tests() {
       );
 
       // filters
-      await qEqualSet(col.where().fieldLessThan(local(2025)).tFindAll(),
+      await qEqualSet(col.filter().fieldLessThan(local(2025)).tFindAll(),
           [objNull, obj1, obj2, obj3]);
-      await qEqualSet(col.where().fieldLessThan(utc(2025)).tFindAll(),
+      await qEqualSet(col.filter().fieldLessThan(utc(2025)).tFindAll(),
           [objNull, obj1, obj2, obj3]);
-      await qEqual(col.where().fieldLessThan(null).tFindAll(), []);
+      await qEqual(col.filter().fieldLessThan(null).tFindAll(), []);
       await qEqual(
-        col.where().fieldLessThan(null, include: true).tFindAll(),
+        col.filter().fieldLessThan(null, include: true).tFindAll(),
         [objNull],
       );
     });

@@ -12,11 +12,15 @@ String generateSortBy(ObjectInfo oi) {
 
     code += '''
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>sortBy${property.dartName.capitalize()}() {
-      return addSortByInternal('${property.isarName.esc}', Sort.asc);
+      return QueryBuilder.apply(this, (query) {
+        return query.addSortBy('${property.isarName.esc}', Sort.asc);
+      });
     }
     
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>sortBy${property.dartName.capitalize()}Desc() {
-      return addSortByInternal('${property.isarName.esc}', Sort.desc);
+      return QueryBuilder.apply(this, (query) {
+        return query.addSortBy('${property.isarName.esc}', Sort.desc);
+      });
     }''';
   }
 
@@ -30,11 +34,15 @@ String generateSortBy(ObjectInfo oi) {
 
     code += '''
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>thenBy${property.dartName.capitalize()}() {
-      return addSortByInternal('${property.isarName.esc}', Sort.asc);
+      return QueryBuilder.apply(this, (query) {
+        return query.addSortBy('${property.isarName.esc}', Sort.asc);
+      });
     }
     
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>thenBy${property.dartName.capitalize()}Desc() {
-      return addSortByInternal('${property.isarName.esc}', Sort.desc);
+      return QueryBuilder.apply(this, (query) {
+        return query.addSortBy('${property.isarName.esc}', Sort.desc);
+      });
     }''';
   }
   code += '}';

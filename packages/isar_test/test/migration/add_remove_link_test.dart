@@ -36,10 +36,6 @@ class Col2 {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   isarTest('Add remove link', () async {
     final isar1 = await openTempIsar([Col1Schema]);
     await isar1.tWriteTxn(() async {

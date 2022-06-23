@@ -10,10 +10,6 @@ late Isar _isar;
 IsarCollection<MultiTypeModel> get col => _isar.multiTypeModels;
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Aggregation', () {
     setUp(() async {
       _isar = await openTempIsar([MultiTypeModelSchema]);
