@@ -213,6 +213,27 @@ Isar will automatically download the correct binary for your platform. You can a
 
 Make sure to use `flutter test -j 1` to avoid tests running in parallel. This would break the automatic download.
 
+## Contributors ✨
+
+Thanks goes to these wonderful people:
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/Jtplouffe"><img src="https://avatars.githubusercontent.com/u/32107801?v=4?s=100" width="100px;" alt=""/><br /><sub><b>JT</b></sub></a><br /><a href="https://github.com/isar/isar/commits?author=Jtplouffe" title="Tests">⚠️</a> <a href="https://github.com/isar/isar/issues?q=author%3AJtplouffe" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://www.linkedin.com/in/simon-leier/"><img src="https://avatars.githubusercontent.com/u/13610195?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Simon Leier</b></sub></a><br /><a href="https://github.com/isar/isar/issues?q=author%3Aleisim" title="Bug reports">🐛</a> <a href="https://github.com/isar/isar/commits?author=leisim" title="Code">💻</a> <a href="https://github.com/isar/isar/commits?author=leisim" title="Documentation">📖</a> <a href="https://github.com/isar/isar/commits?author=leisim" title="Tests">⚠️</a> <a href="#example-leisim" title="Examples">💡</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
 ### License
 
 ```
