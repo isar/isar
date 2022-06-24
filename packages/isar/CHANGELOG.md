@@ -10,6 +10,7 @@
 ### Breaking
 
 - Fixed `.or()` instead of `.and()` being used implicitly when combining filters
+- Renamed multi-entry where clauses from `.yourListAnyEqualTo()` to `.yourListElementEqualTo()` to avoid confusion
 
 ### Fixes
 
