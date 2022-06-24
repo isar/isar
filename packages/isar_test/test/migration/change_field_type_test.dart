@@ -27,7 +27,7 @@ class Col2 {
 
 void main() {
   isarTest('Change field type', () async {
-    final Isar isar1 = await openTempIsar([Col1Schema]);
+    final isar1 = await openTempIsar([Col1Schema]);
     await isar1.tWriteTxn(() {
       return isar1.col1s.tPut(Col1(1, 'a'));
     });

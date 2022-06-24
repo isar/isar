@@ -46,7 +46,7 @@ void main() {
             NameModel()
               ..value = 'test'
               ..otherValue = 'test2',
-          ));
+          ),);
 
       expect(await isar.nameModels.where().exportJson(), [
         {

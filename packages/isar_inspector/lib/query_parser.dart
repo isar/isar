@@ -2,16 +2,16 @@
 
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
+import 'package:isar_inspector/schema.dart';
 import 'package:petitparser/petitparser.dart';
-
-import 'schema.dart';
 
 class QueryParser {
   QueryParser(this.properties) {
-    final ExpressionBuilder builder = ExpressionBuilder();
-    builder.group().primitive(QueryGrammar.condition, (List condition) {
-      final String property = condition[0] as String;
-      final String cmp = condition[1] as String;
+    final builder = ExpressionBuilder();
+    builder.group().primitive(QueryGrammar.condition,
+        (List<dynamic> condition) {
+      final property = condition[0] as String;
+      final cmp = condition[1] as String;
       final value = condition[2];
       return createQueryCondition(property, cmp, value);
     });
@@ -42,19 +42,21 @@ class QueryParser {
   late final Parser _parser;
 
   FilterOperation createQueryCondition(
-      String propertyName, String cmp, dynamic value) {
-    final IProperty? property =
+    String propertyName,
+    String cmp,
+    dynamic value,
+  ) {
+    final property =
         properties.where((IProperty p) => p.name == propertyName).firstOrNull;
 
     if (property == null) {
-      // ignore: only_throw_errors
-      throw 'Unknown property "$propertyName"';
+      throw IsarError('Unknown property "$propertyName"');
     }
 
     switch (cmp) {
       case '!=':
       case '==':
-        final FilterCondition filter = FilterCondition.equalTo(
+        final filter = FilterCondition.equalTo(
           property: propertyName,
           value: value,
         );
@@ -83,16 +85,14 @@ class QueryParser {
           wildcard: value as String,
         );
       default:
-        // ignore: only_throw_errors
-        throw 'unreachable';
+        throw UnimplementedError();
     }
   }
 
   FilterOperation parse(String filter) {
-    final Result result = _parser.parse(filter);
+    final result = _parser.parse(filter);
     if (result.isFailure) {
-      // ignore: only_throw_errors
-      throw result.message;
+      throw IsarError(result.message);
     }
     return result.value as FilterOperation;
   }
@@ -113,30 +113,27 @@ class QueryGrammar {
       (string('true') | string('false')).map((value) => value == 'true');
 
   static Parser<num> get numberToken => ((digit() | char('.')).and() &
-              (digit().star() &
-                  ((char('.') & digit().plus()) |
-                          (char('x') & digit().plus()) |
-                          (anyOf('Ee') &
-                              anyOf('+-').optional() &
-                              digit().plus()))
-                      .optional()))
-          .flatten()
-          .map((String v) {
-        return num.parse(v);
-      });
+          (digit().star() &
+              ((char('.') & digit().plus()) |
+                      (char('x') & digit().plus()) |
+                      (anyOf('Ee') & anyOf('+-').optional() & digit().plus()))
+                  .optional()))
+      .flatten()
+      .map(num.parse);
 
   static String unescape(String v) => v.replaceAllMapped(
-      RegExp("\\\\[nrtbf\"']"),
-      (Match v) => const {
-            'n': '\n',
-            'r': '\r',
-            't': '\t',
-            'b': '\b',
-            'f': '\f',
-            'v': '\v',
-            "'": "'",
-            '"': '"'
-          }[v.group(0)!.substring(1)]!);
+        RegExp("\\\\[nrtbf\"']"),
+        (Match v) => const {
+          'n': '\n',
+          'r': '\r',
+          't': '\t',
+          'b': '\b',
+          'f': '\f',
+          'v': '\v',
+          "'": "'",
+          '"': '"'
+        }[v.group(0)!.substring(1)]!,
+      );
 
   static Parser<String> get escapedChar =>
       (char(r'\') & anyOf("nrtbfv\"'")).pick(1).cast();
@@ -159,9 +156,9 @@ class QueryGrammar {
   static Parser get valueToken => boolToken | numberToken | stringToken;
 
   static Parser get identifier =>
-      (letter() | digit()).plus().map((List chars) => chars.join());
+      (letter() | digit()).plus().map((List<dynamic> chars) => chars.join());
 
-  static Parser<List> get condition =>
+  static Parser<List<dynamic>> get condition =>
       identifier.trim() & cmpOperator.trim() & valueToken.trim();
 }
 
@@ -171,10 +168,10 @@ class AndOr {
   final bool and;
 
   AndOr flatten() {
-    final List newConditions = [];
+    final newConditions = <dynamic>[];
     for (final condition in conditions) {
       if (condition is AndOr) {
-        final AndOr flatCondition = condition.flatten();
+        final flatCondition = condition.flatten();
         if (flatCondition.and == and) {
           newConditions.addAll(flatCondition.conditions);
         } else {
@@ -195,7 +192,7 @@ class AndOr {
     } else {
       seperator = ' || ';
     }
-    final String joined = conditions.join(seperator);
+    final joined = conditions.join(seperator);
     return '($joined)';
   }
 }

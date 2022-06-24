@@ -1,5 +1,6 @@
 part of isar;
 
+/// Normal keys consist of a single object, composite keys multiple.
 typedef IndexKey = List<Object?>;
 
 /// Collections are used to store and receive your objects from Isar.
@@ -19,7 +20,7 @@ abstract class IsarCollection<OBJ> {
     return getAll([id]).then((List<OBJ?> objects) => objects[0]);
   }
 
-  /// Get a single object by [its] id or `null` if the object does not exist.
+  /// Get a single object by its [id] or `null` if the object does not exist.
   OBJ? getSync(int id) {
     return getAllSync([id])[0];
   }
@@ -87,8 +88,11 @@ abstract class IsarCollection<OBJ> {
 
   /// @nodoc
   @protected
-  List<int> putAllByIndexSync(String indexName, List<OBJ> objects,
-      {bool saveLinks = false});
+  List<int> putAllByIndexSync(
+    String indexName,
+    List<OBJ> objects, {
+    bool saveLinks = false,
+  });
 
   /// Delete a single object by its [id].
   ///

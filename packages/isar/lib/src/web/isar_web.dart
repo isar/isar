@@ -1,15 +1,14 @@
-// ignore_for_file: unused_field, invalid_override
+// ignore_for_file: unused_field, invalid_override, public_member_api_docs
 
 import 'dart:js_util';
 import 'dart:typed_data';
 
+import 'package:isar/isar.dart';
+import 'package:isar/src/isar_native_interface.dart';
+import 'package:isar/src/web/isar_link_impl.dart';
+import 'package:isar/src/web/open.dart';
 import 'package:meta/dart2js.dart';
 import 'package:meta/meta.dart';
-
-import '../../isar.dart';
-import '../isar_native_interface.dart';
-import 'isar_link_impl.dart';
-import 'open.dart';
 
 const int isarMinId = -9007199254740991;
 const int isarMaxId = 9007199254740991;

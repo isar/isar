@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 part of isar;
 
 /// @nodoc
@@ -78,8 +80,11 @@ class CollectionSchema<OBJ> {
     required this.deserializeWeb,
     required this.deserializePropWeb,
     required this.version,
-  }) : assert(generatorVersion == version,
-            'Incompatible generated code. Please re-run code generation using the latest generator.');
+  }) : assert(
+          generatorVersion == version,
+          'Incompatible generated code. Please re-run code '
+          'generation using the latest generator.',
+        );
   static const int generatorVersion = 4;
 
   final String name;
@@ -115,44 +120,40 @@ class CollectionSchema<OBJ> {
 
   @pragma('vm:prefer-inline')
   int propertyIdOrErr(String propertyName) {
-    final int? propertyId = propertyIds[propertyName];
+    final propertyId = propertyIds[propertyName];
     if (propertyId != null) {
       return propertyId;
     } else {
-      // ignore: only_throw_errors
       throw IsarError('Unknown propery "$propertyName"');
     }
   }
 
   @pragma('vm:prefer-inline')
   int indexIdOrErr(String indexName) {
-    final int? indexId = indexIds[indexName];
+    final indexId = indexIds[indexName];
     if (indexId != null) {
       return indexId;
     } else {
-      // ignore: only_throw_errors
       throw IsarError('Unknown index "$indexName"');
     }
   }
 
   @pragma('vm:prefer-inline')
   List<IndexValueType> indexValueTypeOrErr(String indexName) {
-    final List<IndexValueType>? indexValueType = indexValueTypes[indexName];
+    final indexValueType = indexValueTypes[indexName];
     if (indexValueType != null) {
       return indexValueType;
     } else {
-      // ignore: only_throw_errors
       throw IsarError('Unknown index "$indexName"');
     }
   }
 
   @pragma('vm:prefer-inline')
   int linkIdOrErr(String linkName) {
-    final int? linkId = linkIds[linkName];
+    final linkId = linkIds[linkName];
     if (linkId != null) {
       return linkId;
     } else {
-      // ignore: only_throw_errors
       throw IsarError('Unknown link "$linkId"');
     }
   }

@@ -27,9 +27,10 @@ class BoolModel {
   }
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
-    // ignore: test_types_in_equals
-    return (other as BoolModel).id == id &&
+    return other is BoolModel &&
+        other.id == id &&
         other.field == field &&
         listEquals(list, other.list) &&
         listEquals(hashList, other.hashList);
@@ -138,7 +139,9 @@ void main() {
     isarTest('.anyEqualTo() / .anyNotEqualTo()', () async {
       // where clauses
       await qEqualSet(
-          col.where().listElementEqualTo(true).tFindAll(), [obj1, obj3]);
+        col.where().listElementEqualTo(true).tFindAll(),
+        [obj1, obj3],
+      );
       await qEqualSet(col.where().listElementEqualTo(null).tFindAll(), [obj2]);
       await qEqualSet(
         col.where().listElementNotEqualTo(true).tFindAll(),
@@ -210,7 +213,9 @@ void main() {
         [obj1, obj2, obj3],
       );
       await qEqualSet(
-          col.filter().hashListElementEqualTo(false).tFindAll(), []);
+        col.filter().hashListElementEqualTo(false).tFindAll(),
+        [],
+      );
     });
 
     isarTest('.isNull() / .isNotNull()', () async {

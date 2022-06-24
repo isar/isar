@@ -1,13 +1,13 @@
 import 'package:dartx/dartx.dart';
 
-import '../helper.dart';
-import '../isar_type.dart';
-import '../object_info.dart';
+import 'package:isar_generator/src/helper.dart';
+import 'package:isar_generator/src/isar_type.dart';
+import 'package:isar_generator/src/object_info.dart';
 
 String generateDistinctBy(ObjectInfo oi) {
-  String code = '''
+  var code = '''
   extension ${oi.dartName}QueryWhereDistinct on QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct> {''';
-  for (final ObjectProperty property in oi.properties) {
+  for (final property in oi.properties) {
     if (property.isId) {
       continue;
     }

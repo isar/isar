@@ -3,15 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:isar/isar.dart';
 
-import 'common.dart';
-import 'prev_next.dart';
-import 'schema.dart';
-import 'state/collections_state.dart';
-import 'state/instances_state.dart';
-import 'state/isar_connect_state_notifier.dart';
-import 'state/query_state.dart';
+import 'package:isar_inspector/common.dart';
+import 'package:isar_inspector/prev_next.dart';
+import 'package:isar_inspector/schema.dart';
+import 'package:isar_inspector/state/collections_state.dart';
+import 'package:isar_inspector/state/instances_state.dart';
+import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
+import 'package:isar_inspector/state/query_state.dart';
 
-const double _deleteColWidth = 60.0;
+const double _deleteColWidth = 60;
 
 class QueryTable extends ConsumerWidget {
   const QueryTable({super.key});
@@ -70,7 +70,7 @@ class HeaderProperty extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
     final sortProperty = ref.watch(querySortPod);
 
     return IsarCard(
@@ -190,7 +190,7 @@ class TableRow extends ConsumerWidget {
                     return;
                   }
 
-                  final ConnectQuery query = ConnectQuery(
+                  final query = ConnectQuery(
                     instance: ref.read(selectedInstanceNamePod),
                     collection: collection.name,
                     filter: FilterCondition.equalTo(

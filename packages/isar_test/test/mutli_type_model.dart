@@ -22,7 +22,7 @@ class MultiTypeModel {
   double? floatValueN;
 
   @Size32()
-  double floatValue = 0.0;
+  double floatValue = 0;
 
   int? longValueN;
 
@@ -30,7 +30,7 @@ class MultiTypeModel {
 
   double? doubleValueN;
 
-  double doubleValue = 0.0;
+  double doubleValue = 0;
 
   DateTime? dateTimeValueN;
 

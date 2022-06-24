@@ -5,13 +5,12 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:isar/src/isar_connect_api.dart';
+import 'package:isar/src/native/isar_native.dart'
+    if (dart.library.html) 'src/web/isar_web.dart';
+import 'package:isar/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:meta/meta_meta.dart';
-
-import 'src/isar_connect_api.dart';
-import 'src/native/isar_native.dart'
-    if (dart.library.html) 'src/web/isar_web.dart';
-import 'src/version.dart';
 
 export 'src/native/isar_native.dart'
     if (dart.library.html) 'src/web/isar_web.dart';

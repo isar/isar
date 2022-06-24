@@ -2,20 +2,20 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 void main() {
-  final Directory testDir = Directory('test');
-  final List<String> files = testDir
+  final testDir = Directory('test');
+  final files = testDir
       .listSync(recursive: true)
       .where((FileSystemEntity e) => e is File && e.path.endsWith('_test.dart'))
       .map((FileSystemEntity e) => e.path)
       .toList();
 
-  final String imports = files.map((String e) {
+  final imports = files.map((String e) {
     return "import '$e' as ${e.split('.')[0].replaceAll(p.separator, '_')};";
   }).join('\n');
 
-  final String calls = files.map((String e) {
-    final String content = File(e).readAsStringSync();
-    final String call =
+  final calls = files.map((String e) {
+    final content = File(e).readAsStringSync();
+    final call =
         "${e.split('.')[0].replaceAll(p.separator, '_')}.main();";
     if (content.startsWith("@TestOn('vm')")) {
       return 'if (!kIsWeb) $call';
@@ -24,7 +24,7 @@ void main() {
     }
   }).join('\n');
 
-  final String code = """
+  final code = """
     import 'test/util/common.dart';
     $imports
 

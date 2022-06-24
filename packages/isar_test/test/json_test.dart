@@ -23,8 +23,8 @@ void main() {
     });
 
     List<Map<String, dynamic>> generateJson(int count) {
-      final List<Map<String, dynamic>> json = <Map<String, dynamic>>[];
-      for (int i = 0; i < count; i++) {
+      final json = <Map<String, dynamic>>[];
+      for (var i = 0; i < count; i++) {
         json.add({
           'name': 'User Number $i',
           'age': i % 100,
@@ -37,16 +37,16 @@ void main() {
     isarTest(
       'big json',
       () async {
-        final List<Map<String, dynamic>> json = generateJson(100000);
+        final json = generateJson(100000);
 
         await isar.tWriteTxn(() async {
           await col.tImportJson(json);
         });
 
-        for (int i = 0; i < json.length; i++) {
+        for (var i = 0; i < json.length; i++) {
           json[i]['id'] = i + 1;
         }
-        final List<Map<String, dynamic>> exportedJson =
+        final exportedJson =
             await col.where().exportJson();
         expect(exportedJson, json);
       },
@@ -54,7 +54,7 @@ void main() {
     );
 
     isarTest('primitive null', () async {
-      final List<Map<String, Object?>> json = [
+      final json = <Map<String, Object?>>[
         {
           'id': 0,
           'name': null,
@@ -73,19 +73,19 @@ void main() {
         await col.tImportJson(json);
       });
 
-      final List<Map<String, dynamic>> exportedJsonNull =
+      final exportedJsonNull =
           await col.where().exportJson();
       expect(exportedJsonNull, json);
     });
 
     isarTest('raw json', () async {
-      final List<Map<String, dynamic>> json = generateJson(10000);
-      final Uint8List bytes = const Utf8Encoder().convert(jsonEncode(json));
+      final json = generateJson(10000);
+      final bytes = const Utf8Encoder().convert(jsonEncode(json));
       await isar.tWriteTxn(() async {
         await col.tImportJsonRaw(bytes);
       });
 
-      for (int i = 0; i < json.length; i++) {
+      for (var i = 0; i < json.length; i++) {
         json[i]['id'] = i + 1;
       }
       final exportedJson = await col.where().exportJsonRaw((Uint8List bytes) {

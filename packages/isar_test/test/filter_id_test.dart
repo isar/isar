@@ -18,9 +18,9 @@ class IdModel {
   }
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
-    // ignore: test_types_in_equals
-    return (other as IdModel).id == id;
+    return other is IdModel && other.id == id;
   }
 }
 
@@ -84,13 +84,17 @@ void main() {
       // where clauses
       await qEqual(col.where().idLessThan(1).tFindAll(), [obj0]);
       await qEqual(
-          col.where().idLessThan(1, include: true).tFindAll(), [obj0, obj1]);
+        col.where().idLessThan(1, include: true).tFindAll(),
+        [obj0, obj1],
+      );
       await qEqual(col.where().idLessThan(-1).tFindAll(), []);
 
       // filters
       await qEqual(col.filter().idLessThan(1).tFindAll(), [obj0]);
       await qEqual(
-          col.filter().idLessThan(1, include: true).tFindAll(), [obj0, obj1]);
+        col.filter().idLessThan(1, include: true).tFindAll(),
+        [obj0, obj1],
+      );
       await qEqual(col.filter().idLessThan(0).tFindAll(), []);
     });
 

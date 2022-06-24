@@ -1,12 +1,14 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
-import 'bindings.dart';
-import 'isar_core.dart';
-import 'query_build.dart';
+import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/isar_core.dart';
+import 'package:isar/src/native/query_build.dart';
 
 final _keyPtrPtr = malloc<Pointer<CIndexKey>>();
 
@@ -66,7 +68,10 @@ Pointer<CIndexKey> buildUpperUnboundedIndexKey() {
 }
 
 void _addKeyValue(
-    Pointer<CIndexKey> keyPtr, Object? value, IndexValueType type) {
+  Pointer<CIndexKey> keyPtr,
+  Object? value,
+  IndexValueType type,
+) {
   if (value is DateTime) {
     value = value.toUtc().microsecondsSinceEpoch;
   } else if (value is List<DateTime?>) {
@@ -99,7 +104,10 @@ void _addKeyValue(
     case IndexValueType.stringHashCIS:
       final strPtr = _strToNative(value as String?);
       IC.isar_key_add_string_hash(
-          keyPtr, strPtr, type == IndexValueType.stringHash);
+        keyPtr,
+        strPtr,
+        type == IndexValueType.stringHash,
+      );
       _freeStr(strPtr);
       break;
     case IndexValueType.bytesHash:
@@ -160,8 +168,12 @@ void _addKeyValue(
         for (var i = 0; i < value.length; i++) {
           stringListPtr[i] = _strToNative(value[i]);
         }
-        IC.isar_key_add_string_list_hash(keyPtr, stringListPtr, value.length,
-            type == IndexValueType.stringListHash);
+        IC.isar_key_add_string_list_hash(
+          keyPtr,
+          stringListPtr,
+          value.length,
+          type == IndexValueType.stringListHash,
+        );
         for (var i = 0; i < value.length; i++) {
           _freeStr(stringListPtr[i]);
         }

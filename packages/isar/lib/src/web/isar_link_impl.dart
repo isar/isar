@@ -1,8 +1,10 @@
-import '../common/isar_link_common.dart';
-import 'bindings.dart';
+// ignore_for_file: public_member_api_docs
 
-import 'isar_collection_impl.dart';
-import 'isar_web.dart';
+import 'package:isar/src/common/isar_link_common.dart';
+import 'package:isar/src/web/bindings.dart';
+
+import 'package:isar/src/web/isar_collection_impl.dart';
+import 'package:isar/src/web/isar_web.dart';
 
 mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   @override
@@ -25,9 +27,12 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
 
   @override
   Future<void> updateNative(
-      List<int> linkIds, List<int> unlinkIds, bool reset) {
-    final int containingId = requireAttached();
-    final bool backlink = backlinkLinkName != null;
+    List<int> linkIds,
+    List<int> unlinkIds,
+    bool reset,
+  ) {
+    final containingId = requireAttached();
+    final backlink = backlinkLinkName != null;
 
     return targetCollection.isar.getTxn(true, (IsarTxnJs txn) async {
       if (reset) {

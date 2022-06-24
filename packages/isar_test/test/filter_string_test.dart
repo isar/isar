@@ -33,10 +33,12 @@ class StringModel {
 
   @override
   String toString() {
-    return '{field: $field, hashField: $hashField, list: $list, hashList: $hashList, hashElementList: $hashElementList}';
+    return '{field: $field, hashField: $hashField, list: $list, hashList: '
+        '$hashList, hashElementList: $hashElementList}';
   }
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     if (other is StringModel) {
       return field == other.field &&
@@ -59,8 +61,8 @@ void main() {
       col = isar.stringModels;
 
       await isar.writeTxn(() async {
-        for (int i = 0; i < 5; i++) {
-          final StringModel obj = StringModel.init('string $i');
+        for (var i = 0; i < 5; i++) {
+          final obj = StringModel.init('string $i');
           await col.put(obj);
         }
         await col.put(StringModel.init(null));

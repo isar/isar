@@ -17,6 +17,7 @@ class LinkModelA {
   final IsarLinks<LinkModelB> links = IsarLinks<LinkModelB>();
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is LinkModelA && id == other.id && other.name == name;
   }
@@ -33,6 +34,7 @@ class LinkModelB {
   final IsarLinks<LinkModelA> backlink = IsarLinks<LinkModelA>();
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is LinkModelB && id == other.id && other.name == name;
   }

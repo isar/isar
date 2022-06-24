@@ -1,14 +1,14 @@
 import 'package:dartx/dartx.dart';
 
-import '../helper.dart';
-import '../isar_type.dart';
-import '../object_info.dart';
+import 'package:isar_generator/src/helper.dart';
+import 'package:isar_generator/src/isar_type.dart';
+import 'package:isar_generator/src/object_info.dart';
 
 String generateSortBy(ObjectInfo oi) {
-  String code = '''
+  var code = '''
   extension ${oi.dartName}QueryWhereSortBy on QueryBuilder<${oi.dartName}, ${oi.dartName}, QSortBy> {''';
 
-  for (final ObjectProperty property in oi.properties) {
+  for (final property in oi.properties) {
     if (property.isarType.isList || property.isId) {
       continue;
     }
@@ -32,7 +32,7 @@ String generateSortBy(ObjectInfo oi) {
 
   extension ${oi.dartName}QueryWhereSortThenBy on QueryBuilder<${oi.dartName}, ${oi.dartName}, QSortThenBy> {''';
 
-  for (final ObjectProperty property in oi.properties) {
+  for (final property in oi.properties) {
     if (property.isarType.isList) {
       continue;
     }
@@ -50,7 +50,6 @@ String generateSortBy(ObjectInfo oi) {
       });
     }''';
   }
-  code += '}';
 
-  return code;
+  return '$code}';
 }

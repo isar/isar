@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'common.dart';
+import 'package:isar_inspector/common.dart';
 
-import 'state/instances_state.dart';
+import 'package:isar_inspector/state/instances_state.dart';
 
 class InstanceSelector extends ConsumerStatefulWidget {
   const InstanceSelector({super.key});

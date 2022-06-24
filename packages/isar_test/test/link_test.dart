@@ -36,6 +36,7 @@ class LinkModelA {
   }
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is LinkModelA && id == other.id && other.name == name;
   }
@@ -55,7 +56,7 @@ class LinkModelB {
   final linkBacklinks = IsarLinks<LinkModelA>();
 
   @Backlink(to: 'otherLinks')
-  var linksBacklinks = IsarLinks<LinkModelA>();
+  IsarLinks<LinkModelA> linksBacklinks = IsarLinks<LinkModelA>();
 
   @override
   String toString() {
@@ -63,6 +64,7 @@ class LinkModelB {
   }
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is LinkModelB && id == other.id && other.name == name;
   }
@@ -253,7 +255,7 @@ void main() {
         expect(newA2.selfLinkBacklink, [objA1]);
 
         newA2.selfLink.value = newA2;
-        await isar.tWriteTxn(() => newA2.selfLink.tSave());
+        await isar.tWriteTxn(newA2.selfLink.tSave);
 
         final newestA2 = await linksA.tGet(objA2.id!);
         await newestA2!.selfLinkBacklink.tLoad();

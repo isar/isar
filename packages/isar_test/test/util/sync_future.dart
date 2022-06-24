@@ -7,7 +7,7 @@ class SynchronousFuture<T> implements Future<T> {
 
   @override
   Stream<T> asStream() {
-    final StreamController<T> controller = StreamController<T>();
+    final controller = StreamController<T>();
     controller.add(_value);
     controller.close();
     return controller.stream;
@@ -19,7 +19,7 @@ class SynchronousFuture<T> implements Future<T> {
 
   @override
   Future<R> then<R>(FutureOr<R> Function(T value) onValue,
-      {Function? onError}) {
+      {Function? onError,}) {
     final dynamic result = onValue(_value);
     if (result is Future<R>) {
       return result;
@@ -35,7 +35,7 @@ class SynchronousFuture<T> implements Future<T> {
   @override
   Future<T> whenComplete(FutureOr<dynamic> Function() action) {
     try {
-      final FutureOr<dynamic> result = action();
+      final result = action();
       if (result is Future) {
         return result.then<T>((dynamic value) => _value);
       }

@@ -14,8 +14,8 @@ class Col1 {
   String? value;
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(Object other) =>
+  // ignore: hash_and_equals
+  bool operator ==(Object other) =>
       other is Col1 && id == other.id && value == other.value;
 }
 
@@ -27,22 +27,22 @@ class Col2 {
   String? value;
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(Object other) =>
+  // ignore: hash_and_equals
+  bool operator ==(Object other) =>
       other is Col2 && id == other.id && value == other.value;
 }
 
 void main() {
   isarTest('Add collection', () async {
-    final Isar isar1 = await openTempIsar([Col1Schema]);
-    final Col1 col1A = Col1(5, 'col1_a');
-    final Col1 col1B = Col1(15, 'col1_b');
+    final isar1 = await openTempIsar([Col1Schema]);
+    final col1A = Col1(5, 'col1_a');
+    final col1B = Col1(15, 'col1_b');
     await isar1.tWriteTxn(() {
       return isar1.col1s.tPutAll([col1A, col1B]);
     });
     expect(await isar1.close(), true);
 
-    final Isar isar2 =
+    final isar2 =
         await openTempIsar([Col1Schema, Col2Schema], name: isar1.name);
     await qEqual(isar2.col1s.where().tFindAll(), [col1A, col1B]);
     await qEqual(isar2.col2s.where().tFindAll(), []);
@@ -54,20 +54,20 @@ void main() {
   });
 
   isarTest('Remove collection', () async {
-    final Isar isar1 = await openTempIsar([Col1Schema, Col2Schema]);
-    final Col1 col1A = Col1(5, 'col1_a');
-    final Col1 col1B = Col1(15, 'col1_b');
+    final isar1 = await openTempIsar([Col1Schema, Col2Schema]);
+    final col1A = Col1(5, 'col1_a');
+    final col1B = Col1(15, 'col1_b');
     await isar1.writeTxn(() async {
       await isar1.col1s.putAll([col1A, col1B]);
       await isar1.col2s.put(Col2(100, 'col2_a'));
     });
     expect(await isar1.close(), true);
 
-    final Isar isar2 = await openTempIsar([Col1Schema], name: isar1.name);
+    final isar2 = await openTempIsar([Col1Schema], name: isar1.name);
     await qEqual(isar2.col1s.where().findAll(), [col1A, col1B]);
     expect(await isar2.close(), true);
 
-    final Isar isar3 =
+    final isar3 =
         await openTempIsar([Col1Schema, Col2Schema], name: isar1.name);
     await qEqual(isar3.col1s.where().findAll(), [col1A, col1B]);
     await qEqual(isar3.col2s.where().findAll(), []);

@@ -1,18 +1,19 @@
+import 'package:dartx/dartx.dart';
+
 import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
-import 'package:dartx/dartx.dart';
 
 class FilterGenerator {
+  FilterGenerator(this.object) : objName = object.dartName;
   final ObjectInfo object;
   final String objName;
 
-  FilterGenerator(this.object) : objName = object.dartName;
-
   String generate() {
     var code =
-        'extension ${objName}QueryFilter on QueryBuilder<$objName, $objName, QFilterCondition> {';
-    for (var property in object.properties) {
+        'extension ${objName}QueryFilter on QueryBuilder<$objName, $objName, '
+        'QFilterCondition> {';
+    for (final property in object.properties) {
       if (property.nullable) {
         code += generateIsNull(property);
       }
@@ -69,7 +70,8 @@ class FilterGenerator {
 
   String mPrefix(ObjectProperty p, [bool listAny = true]) {
     final any = listAny && p.isarType.isList ? 'Element' : '';
-    return 'QueryBuilder<$objName, $objName, QAfterFilterCondition> ${p.dartName.decapitalize()}$any';
+    return 'QueryBuilder<$objName, $objName, QAfterFilterCondition> '
+        '${p.dartName.decapitalize()}$any';
   }
 
   String toIsar(ObjectProperty p, String name) {

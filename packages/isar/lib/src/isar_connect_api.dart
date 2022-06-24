@@ -1,4 +1,6 @@
-import '../isar.dart';
+// ignore_for_file: public_member_api_docs
+
+import 'package:isar/isar.dart';
 
 enum ConnectAction {
   getVersion('ext.isar.getVersion'),
@@ -43,7 +45,9 @@ class ConnectQuery {
       limit: json['limit'] as int?,
       sortProperty: json.containsKey('sortProperty')
           ? SortProperty(
+              // ignore: avoid_dynamic_calls
               property: json['sortProperty']['property'] as String,
+              // ignore: avoid_dynamic_calls
               sort: Sort.values[json['sortProperty']['sort'] as int],
             )
           : null,
@@ -76,7 +80,7 @@ class ConnectQuery {
       return null;
     }
     if (json.containsKey('filters')) {
-      final List<FilterOperation> filters = (json['filters'] as List)
+      final filters = (json['filters'] as List)
           .map((e) => _filterFromJson(e as Map<String, dynamic>?)!)
           .toList();
       return FilterGroup(

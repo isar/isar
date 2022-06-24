@@ -22,8 +22,8 @@ class Model {
   }
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(Object other) {
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
     return other is Model &&
         other.id == id &&
         other.guid == guid &&

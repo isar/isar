@@ -15,8 +15,8 @@ class Col1 {
   String? value;
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(Object other) =>
+  // ignore: hash_and_equals
+  bool operator ==(Object other) =>
       other is Col1 && id == other.id && value == other.value;
 }
 
@@ -29,27 +29,27 @@ class Col2 {
   late String value;
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(Object other) =>
+  // ignore: hash_and_equals
+  bool operator ==(Object other) =>
       other is Col2 && id == other.id && value == other.value;
 }
 
 void main() {
   isarTest('Change field nullability', () async {
-    final Isar isar1 = await openTempIsar([Col1Schema]);
+    final isar1 = await openTempIsar([Col1Schema]);
     await isar1.tWriteTxn(() {
       return isar1.col1s.tPutAll([Col1(1, 'a'), Col1(2, null)]);
     });
     expect(await isar1.close(), true);
 
-    final Isar isar2 = await openTempIsar([Col2Schema], name: isar1.name);
+    final isar2 = await openTempIsar([Col2Schema], name: isar1.name);
     await qEqual(isar2.col2s.where().tFindAll(), [Col2(1, 'a'), Col2(2, '')]);
     await isar2.tWriteTxn(() {
       return isar2.col2s.tPut(Col2(1, 'c'));
     });
     expect(await isar2.close(), true);
 
-    final Isar isar3 = await openTempIsar([Col1Schema], name: isar1.name);
+    final isar3 = await openTempIsar([Col1Schema], name: isar1.name);
     await qEqual(isar3.col1s.where().tFindAll(), [Col1(1, 'c'), Col1(2, null)]);
     expect(await isar3.close(), true);
   });

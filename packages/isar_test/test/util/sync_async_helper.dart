@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
-import 'dart:typed_data';
 
 import 'sync_future.dart';
 
@@ -300,7 +300,7 @@ extension TIsarLinkBase<OBJ> on IsarLinkBase<OBJ> {
 
 extension TIsarLinks<OBJ> on IsarLinks<OBJ> {
   Future<void> tUpdate(
-      {List<OBJ> link = const [], List<OBJ> unlink = const []}) {
+      {List<OBJ> link = const [], List<OBJ> unlink = const [],}) {
     if (_testSync) {
       updateSync(link: link, unlink: unlink);
       return SynchronousFuture(null);

@@ -15,10 +15,15 @@ typedef WhereRepeatModifier<OBJ, R, E> = QueryBuilder<OBJ, R, QAfterWhereClause>
 
 /// Extension for QueryBuilders.
 extension QueryWhere<OBJ, R> on QueryBuilder<OBJ, R, QWhereClause> {
+  /// Joins the results of the [modifier] for each item in [items] using logical
+  /// OR. So an object will be included if it matches at least one of the
+  /// resulting where clauses.
   QueryBuilder<OBJ, R, QAfterWhereClause> anyOf<E, RS>(
-      Iterable<E> items, WhereRepeatModifier<OBJ, R, E> modifier) {
+    Iterable<E> items,
+    WhereRepeatModifier<OBJ, R, E> modifier,
+  ) {
     QueryBuilder<OBJ, R, QAfterWhereClause>? q;
-    for (var e in items) {
+    for (final e in items) {
       q = modifier(q?.or() ?? QueryBuilder(_query), e);
     }
     return q ?? QueryBuilder(_query);
@@ -37,7 +42,9 @@ extension QueryFilter<OBJ, R> on QueryBuilder<OBJ, R, QFilter> {
 @protected
 typedef FilterRepeatModifier<OBJ, R, E>
     = QueryBuilder<OBJ, R, QAfterFilterCondition> Function(
-        QueryBuilder<OBJ, R, QFilterCondition> q, E element);
+  QueryBuilder<OBJ, R, QFilterCondition> q,
+  E element,
+);
 
 /// Extension for QueryBuilders.
 extension QueryFilterAndOr<OBJ, R> on QueryBuilder<OBJ, R, QFilterOperator> {
@@ -76,28 +83,43 @@ extension QueryFilterNot<OBJ, R> on QueryBuilder<OBJ, R, QFilterCondition> {
     );
   }
 
+  /// Joins the results of the [modifier] for each item in [items] using logical
+  /// OR. So an object will be included if it matches at least one of the
+  /// resulting filters.
   QueryBuilder<OBJ, R, QAfterFilterCondition> anyOf<E, RS>(
-      Iterable<E> items, FilterRepeatModifier<OBJ, R, E> modifier) {
+    Iterable<E> items,
+    FilterRepeatModifier<OBJ, R, E> modifier,
+  ) {
     QueryBuilder<OBJ, R, QAfterFilterCondition>? q;
-    for (var e in items) {
+    for (final e in items) {
       q = modifier(q?.or() ?? QueryBuilder(_query), e);
     }
     return q ?? QueryBuilder(_query);
   }
 
+  /// Joins the results of the [modifier] for each item in [items] using logical
+  /// AND. So an object will be included if it matches all of the resulting
+  /// filters.
   QueryBuilder<OBJ, R, QAfterFilterCondition> allOf<E, RS>(
-      Iterable<E> items, FilterRepeatModifier<OBJ, R, E> modifier) {
+    Iterable<E> items,
+    FilterRepeatModifier<OBJ, R, E> modifier,
+  ) {
     QueryBuilder<OBJ, R, QAfterFilterCondition>? q;
-    for (var e in items) {
+    for (final e in items) {
       q = modifier(q?.and() ?? QueryBuilder(_query), e);
     }
     return q ?? QueryBuilder(_query);
   }
 
+  /// Joins the results of the [modifier] for each item in [items] using logical
+  /// XOR. So an object will be included if it matches exactly one of the
+  /// resulting filters.
   QueryBuilder<OBJ, R, QAfterFilterCondition> oneOf<E, RS>(
-      Iterable<E> items, FilterRepeatModifier<OBJ, R, E> modifier) {
+    Iterable<E> items,
+    FilterRepeatModifier<OBJ, R, E> modifier,
+  ) {
     QueryBuilder<OBJ, R, QAfterFilterCondition>? q;
-    for (var e in items) {
+    for (final e in items) {
       q = modifier(q?.xor() ?? QueryBuilder(_query), e);
     }
     return q ?? QueryBuilder(_query);
@@ -132,13 +154,16 @@ extension QueryLimit<OBJ, R> on QueryBuilder<OBJ, R, QLimit> {
 /// @nodoc
 @protected
 typedef QueryOption<OBJ, S, RS> = QueryBuilder<OBJ, OBJ, RS> Function(
-    QueryBuilder<OBJ, OBJ, S> q);
+  QueryBuilder<OBJ, OBJ, S> q,
+);
 
 /// Extension for QueryBuilders.
 extension QueryModifier<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
   /// Only apply a part of the query if `enabled` is true.
   QueryBuilder<OBJ, OBJ, RS> optional<RS>(
-      bool enabled, QueryOption<OBJ, S, RS> option) {
+    bool enabled,
+    QueryOption<OBJ, S, RS> option,
+  ) {
     if (enabled) {
       return option(this);
     } else {

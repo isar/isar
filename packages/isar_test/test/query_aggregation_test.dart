@@ -27,7 +27,7 @@ void main() {
               MultiTypeModel()
                 ..intValue = 10
                 ..intValueN = 10,
-            ]));
+            ]),);
       });
 
       isarTest('min', () async {
@@ -165,7 +165,7 @@ void main() {
               MultiTypeModel()
                 ..floatValue = 10.0
                 ..floatValueN = 10.0,
-            ]));
+            ]),);
       });
 
       isarTest('min', () async {
@@ -201,7 +201,7 @@ void main() {
           await col
               .where()
               .filter()
-              .floatValueLessThan(-4.0)
+              .floatValueLessThan(-4)
               .floatValueProperty()
               .tMax(),
           -5.0,
@@ -303,7 +303,7 @@ void main() {
               MultiTypeModel()
                 ..longValue = 10
                 ..longValueN = 10,
-            ]));
+            ]),);
       });
 
       isarTest('min', () async {
@@ -441,7 +441,7 @@ void main() {
               MultiTypeModel()
                 ..doubleValue = 10.0
                 ..doubleValueN = 10.0,
-            ]));
+            ]),);
       });
 
       isarTest('min', () async {
@@ -477,7 +477,7 @@ void main() {
           await col
               .where()
               .filter()
-              .doubleValueLessThan(-4.0)
+              .doubleValueLessThan(-4)
               .doubleValueProperty()
               .tMax(),
           -5.0,
@@ -582,7 +582,7 @@ void main() {
               MultiTypeModel()
                 ..dateTimeValue = date(10)
                 ..dateTimeValueN = date(10),
-            ]));
+            ]),);
       });
 
       isarTest('min', () async {

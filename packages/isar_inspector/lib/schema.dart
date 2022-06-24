@@ -41,7 +41,7 @@ class IProperty {
 }
 
 IsarType _typeFromJson(String type) {
-  return IsarType.values.firstWhere((IsarType e) => e.name == type);
+  return IsarType.values.firstWhere((e) => e.name == type);
 }
 
 @JsonSerializable()

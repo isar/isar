@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'isar_connect_state_notifier.dart';
+import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
 
 final instancesPod = FutureProvider((ref) {
   final isarConnect = ref.watch(isarConnectPod.notifier);

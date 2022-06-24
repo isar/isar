@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 
-import 'collections_state.dart';
-import 'instances_state.dart';
-import 'isar_connect_state_notifier.dart';
+import 'package:isar_inspector/state/collections_state.dart';
+import 'package:isar_inspector/state/instances_state.dart';
+import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
 
 const int objectsPerPage = 50;
 
@@ -45,7 +45,7 @@ final queryResultsPod = FutureProvider<QueryResult>((ref) async {
     sortProperty: sort,
     offset: page * objectsPerPage,
     limit: objectsPerPage + 1,
-  ));
+  ),);
 
   final objects = result.map(QueryObject.new).toList();
 

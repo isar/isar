@@ -15,8 +15,8 @@ class Col1 {
   final IsarLink<Col1> link = IsarLink<Col1>();
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(Object other) => other is Col1 && id == other.id;
+  // ignore: hash_and_equals
+  bool operator ==(Object other) => other is Col1 && id == other.id;
 }
 
 @Collection()
@@ -31,16 +31,16 @@ class Col2 {
   final IsarLink<Col2> link2 = IsarLink<Col2>();
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(Object other) => other is Col2 && id == other.id;
+  // ignore: hash_and_equals
+  bool operator ==(Object other) => other is Col2 && id == other.id;
 }
 
 void main() {
   isarTest('Add remove link', () async {
-    final Isar isar1 = await openTempIsar([Col1Schema]);
+    final isar1 = await openTempIsar([Col1Schema]);
     await isar1.tWriteTxn(() async {
-      final Col1 obj = Col1(1);
-      final Col1 linkedObj = Col1(2);
+      final obj = Col1(1);
+      final linkedObj = Col1(2);
       await isar1.col1s.tPutAll([obj, linkedObj]);
 
       obj.link.value = linkedObj;
@@ -48,14 +48,14 @@ void main() {
     });
     expect(await isar1.close(), true);
 
-    final Isar isar2 = await openTempIsar([Col2Schema], name: isar1.name);
+    final isar2 = await openTempIsar([Col2Schema], name: isar1.name);
     final obj = await isar2.col2s.tGet(1);
     await obj!.link1.tLoad();
     await obj.link2.tLoad();
     expect(obj.link1.value, Col2(2));
     expect(obj.link2.value, null);
     await isar2.tWriteTxn(() async {
-      final Col2 obj3 = Col2(3);
+      final obj3 = Col2(3);
       await isar2.col2s.tPut(obj3);
 
       obj.link2.value = obj3;
@@ -63,7 +63,7 @@ void main() {
     });
     expect(await isar2.close(), true);
 
-    final Isar isar3 = await openTempIsar([Col1Schema], name: isar1.name);
+    final isar3 = await openTempIsar([Col1Schema], name: isar1.name);
     final obj1 = await isar3.col1s.tGet(1);
     await obj1!.link.tLoad();
     expect(obj1.link.value, Col1(2));

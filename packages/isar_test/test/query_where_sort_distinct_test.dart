@@ -14,8 +14,8 @@ class TestModel {
   int? value;
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(Object other) {
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
     return other is TestModel && other.id == id && other.value == value;
   }
 }
@@ -30,12 +30,12 @@ void main() {
       col = isar.testModels;
 
       await isar.writeTxn(() async {
-        for (int i = 0; i <= 2; i++) {
-          final TestModel obj = TestModel()..value = i;
+        for (var i = 0; i <= 2; i++) {
+          final obj = TestModel()..value = i;
           obj.id = await col.put(obj);
         }
-        for (int i = 2; i >= 0; i--) {
-          final TestModel obj = TestModel()..value = i;
+        for (var i = 2; i >= 0; i--) {
+          final obj = TestModel()..value = i;
           obj.id = await col.put(obj);
         }
         await col.put(TestModel()..value = null);

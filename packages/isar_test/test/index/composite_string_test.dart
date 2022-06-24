@@ -5,6 +5,7 @@ part 'composite_string_test.g.dart';
 
 @Collection()
 class Model {
+  Model(this.value, this.value2);
   int? id;
 
   @Index(
@@ -20,15 +21,14 @@ class Model {
 
   String value2;
 
-  Model(this.value, this.value2);
-
   @override
   String toString() {
     return '{id: $id, value: $value, value2: $value2}';
   }
 
   @override
-  bool operator ==(other) {
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
     return (other is Model) &&
         other.id == id &&
         other.value == value &&

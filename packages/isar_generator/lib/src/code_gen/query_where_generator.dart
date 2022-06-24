@@ -1,25 +1,25 @@
+import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
+
 import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
-import 'package:dartx/dartx.dart';
 
 class WhereGenerator {
+  WhereGenerator(this.object)
+      : objName = object.dartName,
+        id = object.idProperty;
   final ObjectInfo object;
   final String objName;
   final ObjectProperty id;
   final existing = <String>{};
 
-  WhereGenerator(this.object)
-      : objName = object.dartName,
-        id = object.idProperty;
-
   String generate() {
-    var code =
-        'extension ${objName}QueryWhereSort on QueryBuilder<$objName, $objName, QWhere> {';
+    var code = 'extension ${objName}QueryWhereSort on QueryBuilder<$objName, '
+        '$objName, QWhere> {';
 
     code += generateAnyId();
-    for (var index in object.indexes) {
+    for (final index in object.indexes) {
       code += generateAny(index);
     }
 
@@ -35,7 +35,7 @@ class WhereGenerator {
     code += generateWhereIdLessThan();
     code += generateWhereIdBetween();
 
-    for (var index in object.indexes) {
+    for (final index in object.indexes) {
       for (var n = 0; n < index.properties.length; n++) {
         final property = index.properties[n];
 
@@ -148,7 +148,9 @@ class WhereGenerator {
 
   String generateAny(ObjectIndex index) {
     final name = getMethodName(index, 0);
-    if (!existing.add(name)) return '';
+    if (!existing.add(name)) {
+      return '';
+    }
     return '''
     QueryBuilder<$objName, $objName, QAfterWhere> $name() {
       return QueryBuilder.apply(this, (query) {
@@ -180,7 +182,9 @@ class WhereGenerator {
 
   String generateWhereEqualTo(ObjectIndex index, int propertyCount) {
     final name = getMethodName(index, propertyCount);
-    if (!existing.add(name)) return '';
+    if (!existing.add(name)) {
+      return '';
+    }
 
     final properties = index.properties.takeFirst(propertyCount);
     final values = joinToValues(properties);
@@ -222,7 +226,9 @@ class WhereGenerator {
 
   String generateWhereNotEqualTo(ObjectIndex index, int propertyCount) {
     final name = getMethodName(index, propertyCount, 'NotEqualTo');
-    if (!existing.add(name)) return '';
+    if (!existing.add(name)) {
+      return '';
+    }
 
     final properties = index.properties.takeFirst(propertyCount);
     final params = joinToParams(properties);
@@ -287,7 +293,9 @@ class WhereGenerator {
 
   String generateWhereGreaterThan(ObjectIndex index, int propertyCount) {
     final name = getMethodName(index, propertyCount, 'GreaterThan');
-    if (!existing.add(name)) return '';
+    if (!existing.add(name)) {
+      return '';
+    }
 
     final properties = index.properties.takeFirst(propertyCount);
     final include =
@@ -322,7 +330,9 @@ class WhereGenerator {
 
   String generateWhereLessThan(ObjectIndex index, int propertyCount) {
     final name = getMethodName(index, propertyCount, 'LessThan');
-    if (!existing.add(name)) return '';
+    if (!existing.add(name)) {
+      return '';
+    }
 
     final properties = index.properties.takeFirst(propertyCount);
     final include =
@@ -362,7 +372,9 @@ class WhereGenerator {
 
   String generateWhereBetween(ObjectIndex index, int propertyCount) {
     final name = getMethodName(index, propertyCount, 'Between');
-    if (!existing.add(name)) return '';
+    if (!existing.add(name)) {
+      return '';
+    }
 
     final properties = index.properties.takeFirst(propertyCount);
     final equalProperties = properties.dropLast(1);
@@ -402,7 +414,9 @@ class WhereGenerator {
 
   String generateWhereIsNull(ObjectIndex index, int propertyCount) {
     final name = getMethodName(index, propertyCount, 'IsNull');
-    if (!existing.add(name)) return '';
+    if (!existing.add(name)) {
+      return '';
+    }
 
     final properties = index.properties.takeFirst(propertyCount - 1);
     var values = joinToValues(properties);
@@ -424,7 +438,9 @@ class WhereGenerator {
 
   String generateWhereIsNotNull(ObjectIndex index, int propertyCount) {
     final name = getMethodName(index, propertyCount, 'IsNotNull');
-    if (!existing.add(name)) return '';
+    if (!existing.add(name)) {
+      return '';
+    }
 
     final properties = index.properties.takeFirst(propertyCount - 1);
     var values = joinToValues(properties);
@@ -449,7 +465,9 @@ class WhereGenerator {
 
   String generateWhereStartsWith(ObjectIndex index, int propertyCount) {
     final name = getMethodName(index, propertyCount, 'StartsWith');
-    if (!existing.add(name)) return '';
+    if (!existing.add(name)) {
+      return '';
+    }
 
     final equalProperties = index.properties.dropLast(1);
     final prefixProperty = index.properties.last;

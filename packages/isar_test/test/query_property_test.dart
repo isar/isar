@@ -3,8 +3,8 @@ import 'dart:typed_data';
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'util/common.dart';
 import 'mutli_type_model.dart';
+import 'util/common.dart';
 import 'util/sync_async_helper.dart';
 
 void main() {

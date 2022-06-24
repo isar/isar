@@ -10,18 +10,19 @@ typedef FilterQuery<OBJ> = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>
 /// Aquire a `QueryBuilder` instance using `collection.where()` or
 /// `collection.filter()`.
 class QueryBuilder<OBJ, R, S> {
-  final QueryBuilderInternal<OBJ> _query;
-
   /// @nodoc
   @protected
   QueryBuilder(this._query);
 
+  final QueryBuilderInternal<OBJ> _query;
+
   /// @nodoc
   @protected
   static QueryBuilder<OBJ, R, S> apply<OBJ, R, S>(
-      QueryBuilder<OBJ, dynamic, dynamic> qb,
-      QueryBuilderInternal<OBJ> Function(QueryBuilderInternal<OBJ> query)
-          transform) {
+    QueryBuilder<OBJ, dynamic, dynamic> qb,
+    QueryBuilderInternal<OBJ> Function(QueryBuilderInternal<OBJ> query)
+        transform,
+  ) {
     return QueryBuilder(transform(qb._query));
   }
 }
@@ -29,19 +30,7 @@ class QueryBuilder<OBJ, R, S> {
 /// @nodoc
 @protected
 class QueryBuilderInternal<OBJ> {
-  final IsarCollection<OBJ> collection;
-  final List<WhereClause> whereClauses;
-  final bool whereDistinct;
-  final Sort whereSort;
-  final FilterGroup filter;
-  final FilterGroupType filterGroupType;
-  final bool filterNot;
-  final List<DistinctProperty> distinctByProperties;
-  final List<SortProperty> sortByProperties;
-  final int? offset;
-  final int? limit;
-  final String? propertyName;
-
+  /// @nodoc
   const QueryBuilderInternal({
     required this.collection,
     this.whereClauses = const [],
@@ -57,6 +46,43 @@ class QueryBuilderInternal<OBJ> {
     this.propertyName,
   });
 
+  /// @nodoc
+  final IsarCollection<OBJ> collection;
+
+  /// @nodoc
+  final List<WhereClause> whereClauses;
+
+  /// @nodoc
+  final bool whereDistinct;
+
+  /// @nodoc
+  final Sort whereSort;
+
+  /// @nodoc
+  final FilterGroup filter;
+
+  /// @nodoc
+  final FilterGroupType filterGroupType;
+
+  /// @nodoc
+  final bool filterNot;
+
+  /// @nodoc
+  final List<DistinctProperty> distinctByProperties;
+
+  /// @nodoc
+  final List<SortProperty> sortByProperties;
+
+  /// @nodoc
+  final int? offset;
+
+  /// @nodoc
+  final int? limit;
+
+  /// @nodoc
+  final String? propertyName;
+
+  /// @nodoc
   QueryBuilderInternal<OBJ> addFilterCondition(FilterOperation cond) {
     if (filterNot) {
       cond = FilterGroup.not(cond);
@@ -94,16 +120,19 @@ class QueryBuilderInternal<OBJ> {
     );
   }
 
+  /// @nodoc
   QueryBuilderInternal<OBJ> addWhereClause(WhereClause where) {
     return copyWith(whereClauses: [...whereClauses, where]);
   }
 
+  /// @nodoc
   QueryBuilderInternal<OBJ> group(FilterQuery<OBJ> q) {
     final internalQb = QueryBuilderInternal(collection: collection);
     final qb = q(QueryBuilder(internalQb));
     return addFilterCondition(qb._query.filter);
   }
 
+  /// @nodoc
   QueryBuilderInternal<OBJ> link<E>(
     IsarCollection<E> targetCollection,
     FilterQuery<E> q,
@@ -120,6 +149,7 @@ class QueryBuilderInternal<OBJ> {
     );
   }
 
+  /// @nodoc
   QueryBuilderInternal<OBJ> addSortBy(String propertyName, Sort sort) {
     return copyWith(
       sortByProperties: [
@@ -129,8 +159,11 @@ class QueryBuilderInternal<OBJ> {
     );
   }
 
-  QueryBuilderInternal<OBJ> addDistinctBy(String propertyName,
-      {bool? caseSensitive}) {
+  /// @nodoc
+  QueryBuilderInternal<OBJ> addDistinctBy(
+    String propertyName, {
+    bool? caseSensitive,
+  }) {
     return copyWith(
       distinctByProperties: [
         ...distinctByProperties,
@@ -142,10 +175,12 @@ class QueryBuilderInternal<OBJ> {
     );
   }
 
+  /// @nodoc
   QueryBuilderInternal<OBJ> addPropertyName<E>(String propertyName) {
     return copyWith(propertyName: propertyName);
   }
 
+  /// @nodoc
   QueryBuilderInternal<OBJ> copyWith({
     List<WhereClause>? whereClauses,
     FilterGroup? filter,
@@ -159,8 +194,8 @@ class QueryBuilderInternal<OBJ> {
     int? limit,
     String? propertyName,
   }) {
-    assert(offset == null || offset >= 0);
-    assert(limit == null || limit >= 0);
+    assert(offset == null || offset >= 0, 'Invalid offset');
+    assert(limit == null || limit >= 0, 'Invalid limit');
     return QueryBuilderInternal(
       collection: collection,
       whereClauses: whereClauses ?? List.unmodifiable(this.whereClauses),

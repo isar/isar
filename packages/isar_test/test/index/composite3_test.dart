@@ -7,6 +7,7 @@ part 'composite3_test.g.dart';
 
 @Collection()
 class Model {
+  Model(this.value1, this.value2, this.value3);
   int? id;
 
   @Index(
@@ -22,15 +23,14 @@ class Model {
 
   int? value3;
 
-  Model(this.value1, this.value2, this.value3);
-
   @override
   String toString() {
     return '{id: $id, value1: $value1, value2: $value2, value3: $value3}';
   }
 
   @override
-  bool operator ==(other) {
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
     return (other is Model) &&
         other.id == id &&
         other.value1 == value1 &&
@@ -212,8 +212,12 @@ void main() {
         await qEqual(
           isar.models
               .where()
-              .value1BetweenAnyValue2Value3(null, 100,
-                  includeLower: false, includeUpper: false)
+              .value1BetweenAnyValue2Value3(
+                null,
+                100,
+                includeLower: false,
+                includeUpper: false,
+              )
               .findAll(),
           [objNull2, objNull3],
         );
@@ -349,16 +353,24 @@ void main() {
         await qEqual(
           isar.models
               .where()
-              .value1EqualToValue2BetweenAnyValue3(200, 10, 20,
-                  includeLower: false)
+              .value1EqualToValue2BetweenAnyValue3(
+                200,
+                10,
+                20,
+                includeLower: false,
+              )
               .findAll(),
           [obj6],
         );
         await qEqual(
           isar.models
               .where()
-              .value1EqualToValue2BetweenAnyValue3(200, 10, 20,
-                  includeUpper: false)
+              .value1EqualToValue2BetweenAnyValue3(
+                200,
+                10,
+                20,
+                includeUpper: false,
+              )
               .findAll(),
           [obj4, obj5],
         );
@@ -480,24 +492,40 @@ void main() {
         await qEqual(
           isar.models
               .where()
-              .value1Value2EqualToValue3Between(200, 10, 1, 2,
-                  includeLower: false)
+              .value1Value2EqualToValue3Between(
+                200,
+                10,
+                1,
+                2,
+                includeLower: false,
+              )
               .findAll(),
           [obj5],
         );
         await qEqual(
           isar.models
               .where()
-              .value1Value2EqualToValue3Between(200, 10, 1, 2,
-                  includeUpper: false)
+              .value1Value2EqualToValue3Between(
+                200,
+                10,
+                1,
+                2,
+                includeUpper: false,
+              )
               .findAll(),
           [obj4],
         );
         await qEqual(
           isar.models
               .where()
-              .value1Value2EqualToValue3Between(200, 10, 1, 2,
-                  includeLower: false, includeUpper: false)
+              .value1Value2EqualToValue3Between(
+                200,
+                10,
+                1,
+                2,
+                includeLower: false,
+                includeUpper: false,
+              )
               .findAll(),
           [],
         );

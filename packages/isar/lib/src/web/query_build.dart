@@ -1,11 +1,13 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:indexed_db';
 
 import 'package:isar/isar.dart';
 
-import 'bindings.dart';
-import 'isar_collection_impl.dart';
-import 'isar_web.dart';
-import 'query_impl.dart';
+import 'package:isar/src/web/bindings.dart';
+import 'package:isar/src/web/isar_collection_impl.dart';
+import 'package:isar/src/web/isar_web.dart';
+import 'package:isar/src/web/query_impl.dart';
 
 Query<T> buildWebQuery<T, OBJ>(
   IsarCollectionImpl<OBJ> col,
@@ -83,7 +85,9 @@ IdWhereClauseJs _buildIdWhereClause(IdWhereClause wc) {
 }
 
 IndexWhereClauseJs _buildIndexWhereClause(
-    CollectionSchema<dynamic> schema, IndexWhereClause wc) {
+  CollectionSchema<dynamic> schema,
+  IndexWhereClause wc,
+) {
   final keySize = schema.indexValueTypes[wc.indexName]!.length;
 
   final lower = wc.lower?.toList();
@@ -115,9 +119,11 @@ IndexWhereClauseJs _buildIndexWhereClause(
 }
 
 LinkWhereClauseJs _buildLinkWhereClause(
-    IsarCollectionImpl<dynamic> col, LinkWhereClause wc) {
+  IsarCollectionImpl<dynamic> col,
+  LinkWhereClause wc,
+) {
   // ignore: invalid_use_of_protected_member
-  final linkCol = col.isar.getCollectionByNameInternal(wc.linkCollection)
+  final linkCol = col.isar.getCollectionByNameInternal(wc.linkCollection)!
       as IsarCollectionImpl;
   final backlinkLinkName = linkCol.schema.backlinkLinkNames[wc.linkName];
   return LinkWhereClauseJs()
@@ -128,7 +134,11 @@ LinkWhereClauseJs _buildLinkWhereClause(
 }
 
 KeyRange? _buildKeyRange(
-    dynamic lower, dynamic upper, bool includeLower, bool includeUpper) {
+  dynamic lower,
+  dynamic upper,
+  bool includeLower,
+  bool includeUpper,
+) {
   if (lower != null) {
     if (upper != null) {
       final boundsEqual = idbCmp(lower, upper) == 0;
@@ -157,7 +167,9 @@ KeyRange? _buildKeyRange(
 }
 
 FilterJs? _buildFilter(
-    CollectionSchema<dynamic> schema, FilterOperation filter) {
+  CollectionSchema<dynamic> schema,
+  FilterOperation filter,
+) {
   final filterStr = _buildFilterOperation(schema, filter);
   if (filterStr != null) {
     return FilterJs('id', 'obj', 'return $filterStr');
@@ -206,7 +218,9 @@ String? _buildFilterGroup(CollectionSchema<dynamic> schema, FilterGroup group) {
 }
 
 String _buildCondition(
-    CollectionSchema<dynamic> schema, FilterCondition condition) {
+  CollectionSchema<dynamic> schema,
+  FilterCondition condition,
+) {
   dynamic _prepareFilterValue(dynamic value) {
     if (value == null) {
       return null;
@@ -289,7 +303,8 @@ String _buildConditionInternal({
       } else {
         final op = include1 ? '<=' : '<';
         if (val1 is String && !caseSensitive) {
-          return 'indexedDB.cmp($variable?.toLowerCase() ?? -Infinity, ${val1.toLowerCase()}) $op 0';
+          return 'indexedDB.cmp($variable?.toLowerCase() ?? '
+              '-Infinity, ${val1.toLowerCase()}) $op 0';
         } else {
           return 'indexedDB.cmp($variable, $val1) $op 0';
         }
@@ -304,7 +319,8 @@ String _buildConditionInternal({
       } else {
         final op = include1 ? '>=' : '>';
         if (val1 is String && !caseSensitive) {
-          return 'indexedDB.cmp($variable?.toLowerCase() ?? -Infinity, ${val1.toLowerCase()}) $op 0';
+          return 'indexedDB.cmp($variable?.toLowerCase() ?? '
+              '-Infinity, ${val1.toLowerCase()}) $op 0';
         } else {
           return 'indexedDB.cmp($variable, $val1) $op 0';
         }
@@ -320,12 +336,13 @@ String _buildConditionInternal({
       if (val1 is String) {
         final isString = 'typeof $variable == "string"';
         if (!caseSensitive) {
-          return '($isString && $variable.toLowerCase().$op(${val1.toLowerCase()}))';
+          return '($isString && $variable.toLowerCase() '
+              '.$op(${val1.toLowerCase()}))';
         } else {
           return '($isString && $variable.$op($val1))';
         }
       } else {
-        throw 'Unsupported type for condition';
+        throw IsarError('Unsupported type for condition');
       }
     case FilterConditionType.matches:
       throw UnimplementedError();
@@ -337,7 +354,8 @@ String _buildConditionInternal({
 SortCmpJs _buildSort(List<SortProperty> properties) {
   final sort = properties.map((e) {
     final op = e.sort == Sort.asc ? '' : '-';
-    return '${op}indexedDB.cmp(a.${e.property} ?? "-Infinity", b.${e.property} ?? "-Infinity")';
+    return '${op}indexedDB.cmp(a.${e.property} ?? "-Infinity", b.${e.property} '
+        '?? "-Infinity")';
   }).join('||');
   return SortCmpJs('a', 'b', 'return $sort');
 }

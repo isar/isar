@@ -7,6 +7,7 @@ part 'composite2_test.g.dart';
 
 @Collection()
 class Model {
+  Model(this.value1, this.value2);
   int? id;
 
   @Index(
@@ -17,15 +18,14 @@ class Model {
 
   double value2;
 
-  Model(this.value1, this.value2);
-
   @override
   String toString() {
     return '{id: $id, value1: $value1, value2: $value2}';
   }
 
   @override
-  bool operator ==(other) {
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
     return (other is Model) &&
         other.id == id &&
         other.value1 == value1 &&
@@ -47,10 +47,10 @@ void main() {
       isar = await openTempIsar([ModelSchema]);
       col = isar.models;
 
-      obj1 = Model(1, 1.0);
-      obj2 = Model(1, 2.0);
-      obj3 = Model(2, 1.0);
-      obj4 = Model(2, 3.0);
+      obj1 = Model(1, 1);
+      obj2 = Model(1, 2);
+      obj3 = Model(2, 1);
+      obj4 = Model(2, 3);
 
       await isar.writeTxn(() async {
         await col.putAll([obj3, obj1, obj4, obj2]);

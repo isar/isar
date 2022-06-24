@@ -15,6 +15,7 @@ class TestModel {
   String? value;
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is TestModel && other.id == id && other.value == value;
   }
@@ -31,37 +32,37 @@ final TestModel _obj3 = TestModel()
   ..value = 'Model 3';
 
 Future<bool> _isolateFunc(String name) async {
-  final Isar isar = Isar.openSync(
+  final isar = Isar.openSync(
     name: name,
     schemas: [TestModelSchema],
     directory: '////',
   );
 
   final current = isar.testModels.where().findAllSync();
-  assert(current[0] == _obj1 && current[1] == _obj2);
+  expect(current[0] == _obj1 && current[1] == _obj2, true);
 
   isar.writeTxnSync(() {
     isar.testModels.deleteSync(2);
     isar.testModels.putSync(_obj3);
   });
 
-  assert(!(await isar.close()));
+  expect(await isar.close(), false);
 
   return true;
 }
 
 void main() {
   isarTest('Isolate test', () async {
-    final Isar isar = await openTempIsar([TestModelSchema]);
+    final isar = await openTempIsar([TestModelSchema]);
 
     await isar.tWriteTxn(() async {
       await isar.testModels.tPutAll([_obj1, _obj2]);
     });
 
-    final bool result = await compute(_isolateFunc, isar.name);
+    final result = await compute(_isolateFunc, isar.name);
     expect(result, true);
 
-    qEqual(isar.testModels.where().tFindAll(), [_obj1, _obj3]);
+    await qEqual(isar.testModels.where().tFindAll(), [_obj1, _obj3]);
 
     expect(await isar.close(), true);
   });

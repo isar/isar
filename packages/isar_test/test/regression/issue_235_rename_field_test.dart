@@ -44,8 +44,8 @@ class Col2 {
   String? numberText1;
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(Object other) {
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
     return other is Col2 &&
         other.id == id &&
         other.number == number &&
@@ -57,13 +57,13 @@ class Col2 {
 
 void main() {
   isarTest('Regression 235 Rename field', () async {
-    final Isar isar1 = await openTempIsar([Col1Schema]);
+    final isar1 = await openTempIsar([Col1Schema]);
     await isar1.tWriteTxn(() {
       return isar1.col1s.tPut(Col1(id: 5));
     });
     expect(await isar1.close(), true);
 
-    final Isar isar2 = await openTempIsar([Col2Schema], name: isar1.name);
+    final isar2 = await openTempIsar([Col2Schema], name: isar1.name);
     final existing = await isar2.col2s.tGet(5);
     expect(
       existing,
@@ -75,7 +75,7 @@ void main() {
       ),
     );
 
-    final Col2 newObj = Col2(
+    final newObj = Col2(
       id: 5,
       number: 111,
       numberText3: 'New Value3',
