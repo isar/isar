@@ -1,10 +1,10 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'util/common.dart';
-import 'util/sync_async_helper.dart';
+import '../util/common.dart';
+import '../util/sync_async_helper.dart';
 
-part 'index_type_hash_test.g.dart';
+part 'type_hash_test.g.dart';
 
 @Collection()
 class HashIndexesModel {
@@ -64,10 +64,6 @@ class HashIndexesModel {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group("Index hash type", () {
     late Isar isar;
     late HashIndexesModel model0;
