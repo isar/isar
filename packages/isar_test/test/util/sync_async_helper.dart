@@ -1,32 +1,11 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
-import 'package:test/test.dart';
 
-import 'common.dart';
 import 'sync_future.dart';
 
-bool _testSync = false;
-
-void testSyncAsync(Function test) {
-  if (kIsWeb) {
-    test();
-  } else {
-    group('sync', () {
-      setUp(() {
-        _testSync = true;
-      });
-      test();
-    });
-
-    group('async', () {
-      setUp(() {
-        _testSync = false;
-      });
-      test();
-    });
-  }
-}
+bool get _testSync => Zone.current['testSync'] as bool? ?? false;
 
 Future<Isar> tOpen({
   required List<CollectionSchema<dynamic>> schemas,
@@ -35,7 +14,7 @@ Future<Isar> tOpen({
   bool relaxedDurability = true,
 }) {
   if (_testSync) {
-    final Isar isar = Isar.openSync(
+    final isar = Isar.openSync(
       schemas: schemas,
       directory: directory,
       name: name,
@@ -321,7 +300,7 @@ extension TIsarLinkBase<OBJ> on IsarLinkBase<OBJ> {
 
 extension TIsarLinks<OBJ> on IsarLinks<OBJ> {
   Future<void> tUpdate(
-      {List<OBJ> link = const [], List<OBJ> unlink = const []}) {
+      {List<OBJ> link = const [], List<OBJ> unlink = const [],}) {
     if (_testSync) {
       updateSync(link: link, unlink: unlink);
       return SynchronousFuture(null);

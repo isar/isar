@@ -1,8 +1,8 @@
 import 'package:dartx/dartx.dart';
 
-import '../helper.dart';
-import '../isar_type.dart';
-import '../object_info.dart';
+import 'package:isar_generator/src/helper.dart';
+import 'package:isar_generator/src/isar_type.dart';
+import 'package:isar_generator/src/object_info.dart';
 
 class FilterGenerator {
   FilterGenerator(this.object) : objName = object.dartName;
@@ -10,9 +10,10 @@ class FilterGenerator {
   final String objName;
 
   String generate() {
-    String code =
-        'extension ${objName}QueryFilter on QueryBuilder<$objName, $objName, QFilterCondition> {';
-    for (final ObjectProperty property in object.properties) {
+    var code =
+        'extension ${objName}QueryFilter on QueryBuilder<$objName, $objName, '
+        'QFilterCondition> {';
+    for (final property in object.properties) {
       if (property.nullable) {
         code += generateIsNull(property);
       }
@@ -68,8 +69,9 @@ class FilterGenerator {
   }
 
   String mPrefix(ObjectProperty p, [bool listAny = true]) {
-    final String any = listAny && p.isarType.isList ? 'Any' : '';
-    return 'QueryBuilder<$objName, $objName, QAfterFilterCondition> ${p.dartName.decapitalize()}$any';
+    final any = listAny && p.isarType.isList ? 'Element' : '';
+    return 'QueryBuilder<$objName, $objName, QAfterFilterCondition> '
+        '${p.dartName.decapitalize()}$any';
   }
 
   String toIsar(ObjectProperty p, String name) {
@@ -81,79 +83,89 @@ class FilterGenerator {
   }
 
   String generateEqualTo(ObjectProperty p) {
-    final String optional = caseSensitiveProperty(p);
+    final optional = caseSensitiveProperty(p);
     return '''
     ${mPrefix(p)}EqualTo(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
-      return addFilterConditionInternal(FilterCondition.equalTo(
-        property: '${p.isarName.esc}',
-        value: ${toIsar(p, 'value')},
-        ${caseSensitiveValue(p)}
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(FilterCondition.equalTo(
+          property: '${p.isarName.esc}',
+          value: ${toIsar(p, 'value')},
+          ${caseSensitiveValue(p)}
+        ));
+      });
     }''';
   }
 
   String generateGreaterThan(ObjectProperty p) {
-    final String include =
-        !p.isarType.containsFloat ? 'bool include = false,' : '';
-    final String optional = '${caseSensitiveProperty(p)} $include';
+    final include = !p.isarType.containsFloat ? 'bool include = false,' : '';
+    final optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}GreaterThan(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
-      return addFilterConditionInternal(FilterCondition.greaterThan(
-        include: ${!p.isarType.containsFloat ? 'include' : 'false'},
-        property: '${p.isarName.esc}',
-        value: ${toIsar(p, 'value')},
-        ${caseSensitiveValue(p)}
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(FilterCondition.greaterThan(
+          include: ${!p.isarType.containsFloat ? 'include' : 'false'},
+          property: '${p.isarName.esc}',
+          value: ${toIsar(p, 'value')},
+          ${caseSensitiveValue(p)}
+        ));
+      });
     }''';
   }
 
   String generateLessThan(ObjectProperty p) {
-    final String include =
-        !p.isarType.containsFloat ? 'bool include = false,' : '';
-    final String optional = '${caseSensitiveProperty(p)} $include';
+    final include = !p.isarType.containsFloat ? 'bool include = false,' : '';
+    final optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}LessThan(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
-      return addFilterConditionInternal(FilterCondition.lessThan(
-        include: ${!p.isarType.containsFloat ? 'include' : 'false'},
-        property: '${p.isarName.esc}',
-        value: ${toIsar(p, 'value')},
-        ${caseSensitiveValue(p)}
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(FilterCondition.lessThan(
+          include: ${!p.isarType.containsFloat ? 'include' : 'false'},
+          property: '${p.isarName.esc}',
+          value: ${toIsar(p, 'value')},
+          ${caseSensitiveValue(p)}
+        ));
+      });
     }''';
   }
 
   String generateBetween(ObjectProperty p) {
-    final String include = !p.isarType.containsFloat
+    final include = !p.isarType.containsFloat
         ? 'bool includeLower = true, bool includeUpper = true,'
         : '';
-    final String optional = '${caseSensitiveProperty(p)} $include';
+    final optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}Between(${vType(p)} lower, ${vType(p)} upper ${optional.isNotBlank ? ', {$optional}' : ''}) {
-      return addFilterConditionInternal(FilterCondition.between(
-        property: '${p.isarName.esc}',
-        lower: ${toIsar(p, 'lower')},
-        includeLower: ${!p.isarType.containsFloat ? 'includeLower' : 'false'},
-        upper: ${toIsar(p, 'upper')},
-        includeUpper: ${!p.isarType.containsFloat ? 'includeUpper' : 'false'},
-        ${caseSensitiveValue(p)}
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(FilterCondition.between(
+          property: '${p.isarName.esc}',
+          lower: ${toIsar(p, 'lower')},
+          includeLower: ${!p.isarType.containsFloat ? 'includeLower' : 'false'},
+          upper: ${toIsar(p, 'upper')},
+          includeUpper: ${!p.isarType.containsFloat ? 'includeUpper' : 'false'},
+          ${caseSensitiveValue(p)}
+        ));
+      });
     }''';
   }
 
   String generateIsNull(ObjectProperty p) {
-    String code = '''
+    var code = '''
     ${mPrefix(p, false)}IsNull() {
-      return addFilterConditionInternal(const FilterCondition.isNull(
-        property: '${p.isarName.esc}',
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(const FilterCondition.isNull(
+          property: '${p.isarName.esc}',
+        ));
+      });
     }''';
     if (p.isarType.isList && p.isarType != IsarType.bytes) {
       code += '''
       ${mPrefix(p)}IsNull() {
-        return addFilterConditionInternal(const FilterCondition.equalTo(
-          property: '${p.isarName.esc}',
-          value: null,
-        ));
+        return QueryBuilder.apply(this, (query) {
+          return query.addFilterCondition(const FilterCondition.equalTo(
+            property: '${p.isarName.esc}',
+            value: null,
+          ));
+        });
       }''';
     }
     return code;
@@ -162,44 +174,52 @@ class FilterGenerator {
   String generateStringStartsWith(ObjectProperty p) {
     return '''
     ${mPrefix(p)}StartsWith(${vType(p, false)} value, {bool caseSensitive = true,}) {
-      return addFilterConditionInternal(FilterCondition.startsWith(
-        property: '${p.isarName.esc}',
-        value: ${toIsar(p, 'value')},
-        caseSensitive: caseSensitive,
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(FilterCondition.startsWith(
+          property: '${p.isarName.esc}',
+          value: ${toIsar(p, 'value')},
+          caseSensitive: caseSensitive,
+        ));
+      });
     }''';
   }
 
   String generateStringEndsWith(ObjectProperty p) {
     return '''
     ${mPrefix(p)}EndsWith(${vType(p, false)} value, {bool caseSensitive = true,}) {
-      return addFilterConditionInternal(FilterCondition.endsWith(
-        property: '${p.isarName.esc}',
-        value: ${toIsar(p, 'value')},
-        caseSensitive: caseSensitive,
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(FilterCondition.endsWith(
+          property: '${p.isarName.esc}',
+          value: ${toIsar(p, 'value')},
+          caseSensitive: caseSensitive,
+        ));
+      });
     }''';
   }
 
   String generateStringContains(ObjectProperty p) {
     return '''
     ${mPrefix(p)}Contains(${vType(p, false)} value, {bool caseSensitive = true}) {
-      return addFilterConditionInternal(FilterCondition.contains(
-        property: '${p.isarName.esc}',
-        value: ${toIsar(p, 'value')},
-        caseSensitive: caseSensitive,
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(FilterCondition.contains(
+          property: '${p.isarName.esc}',
+          value: ${toIsar(p, 'value')},
+          caseSensitive: caseSensitive,
+        ));
+      });
     }''';
   }
 
   String generateStringMatches(ObjectProperty p) {
     return '''
     ${mPrefix(p)}Matches(String pattern, {bool caseSensitive = true}) {
-      return addFilterConditionInternal(FilterCondition.matches(
-        property: '${p.isarName.esc}',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(FilterCondition.matches(
+          property: '${p.isarName.esc}',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ));
+      });
     }''';
   }
 }

@@ -19,22 +19,19 @@ class Model {
   }
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(dynamic other) {
     return other is Model && other.id == id && other.value == value;
   }
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Instance test', () {
     isarTest('persists auto increment', () async {
-      Isar isar = await openTempIsar([ModelSchema]);
-      final String isarName = isar.name;
+      var isar = await openTempIsar([ModelSchema]);
+      final isarName = isar.name;
 
-      final Model obj1 = Model()..value = 'M1';
+      final obj1 = Model()..value = 'M1';
       await isar.tWriteTxn(() async {
         await isar.models.tPut(obj1);
       });
@@ -44,8 +41,8 @@ void tests() {
       expect(await isar.close(), true);
       isar = await openTempIsar([ModelSchema], name: isarName);
 
-      final Model obj2 = Model()..value = 'M2';
-      final Model obj3 = Model()
+      final obj2 = Model()..value = 'M2';
+      final obj3 = Model()
         ..value = 'M3'
         ..id = 20;
       await isar.tWriteTxn(() async {
@@ -59,23 +56,25 @@ void tests() {
       expect(await isar.close(), true);
       isar = await openTempIsar([ModelSchema], name: isarName);
 
-      final Model obj4 = Model()..value = 'M4';
+      final obj4 = Model()..value = 'M4';
       await isar.tWriteTxn(() async {
         await isar.models.tPut(obj4);
       });
       expect(obj4.id, 21);
-      qEqual(isar.models.where().tFindAll(), [obj1, obj2, obj3, obj4]);
+      await qEqual(isar.models.where().tFindAll(), [obj1, obj2, obj3, obj4]);
 
       await isar.close();
     });
 
     isarTest('Prevents usage of closed collection', () async {
-      final Isar isar = await openTempIsar([ModelSchema]);
+      final isar = await openTempIsar([ModelSchema]);
 
       expect(await isar.close(), true);
 
       await expectLater(
-          () => isar.models.tGet(1), throwsIsarError('already been closed'));
+        () => isar.models.tGet(1),
+        throwsIsarError('already been closed'),
+      );
     });
   });
 }

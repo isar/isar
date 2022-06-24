@@ -10,10 +10,6 @@ late Isar _isar;
 IsarCollection<MultiTypeModel> get col => _isar.multiTypeModels;
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Aggregation', () {
     setUp(() async {
       _isar = await openTempIsar([MultiTypeModelSchema]);
@@ -31,7 +27,7 @@ void tests() {
               MultiTypeModel()
                 ..intValue = 10
                 ..intValueN = 10,
-            ]));
+            ]),);
       });
 
       isarTest('min', () async {
@@ -169,7 +165,7 @@ void tests() {
               MultiTypeModel()
                 ..floatValue = 10.0
                 ..floatValueN = 10.0,
-            ]));
+            ]),);
       });
 
       isarTest('min', () async {
@@ -205,7 +201,7 @@ void tests() {
           await col
               .where()
               .filter()
-              .floatValueLessThan(-4.0)
+              .floatValueLessThan(-4)
               .floatValueProperty()
               .tMax(),
           -5.0,
@@ -307,7 +303,7 @@ void tests() {
               MultiTypeModel()
                 ..longValue = 10
                 ..longValueN = 10,
-            ]));
+            ]),);
       });
 
       isarTest('min', () async {
@@ -445,7 +441,7 @@ void tests() {
               MultiTypeModel()
                 ..doubleValue = 10.0
                 ..doubleValueN = 10.0,
-            ]));
+            ]),);
       });
 
       isarTest('min', () async {
@@ -481,7 +477,7 @@ void tests() {
           await col
               .where()
               .filter()
-              .doubleValueLessThan(-4.0)
+              .doubleValueLessThan(-4)
               .doubleValueProperty()
               .tMax(),
           -5.0,
@@ -586,7 +582,7 @@ void tests() {
               MultiTypeModel()
                 ..dateTimeValue = date(10)
                 ..dateTimeValueN = date(10),
-            ]));
+            ]),);
       });
 
       isarTest('min', () async {

@@ -30,19 +30,16 @@ class IntModel {
   }
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
-    // ignore: test_types_in_equals
-    return (other as IntModel).field == field &&
+    return other is IntModel &&
+        other.field == field &&
         listEquals(list, other.list) &&
         listEquals(hashList, other.hashList);
   }
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Int filter', () {
     late Isar isar;
     late IsarCollection<IntModel> col;
@@ -131,7 +128,9 @@ void tests() {
 
       // filters
       await qEqualSet(
-          col.filter().fieldLessThan(1).tFindAll(), [objNull, obj0]);
+        col.filter().fieldLessThan(1).tFindAll(),
+        [objNull, obj0],
+      );
       await qEqualSet(col.filter().fieldLessThan(null).tFindAll(), []);
       await qEqualSet(
         col.filter().fieldLessThan(null, include: true).tFindAll(),

@@ -9,6 +9,7 @@ abstract class WhereClause {
 
 /// A where clause traversing the primary index (ids).
 class IdWhereClause extends WhereClause {
+  /// Where clause that matches all ids. Useful to get sorted results.
   const IdWhereClause.any()
       : lower = null,
         upper = null,
@@ -16,6 +17,8 @@ class IdWhereClause extends WhereClause {
         includeUpper = true,
         super._();
 
+  /// Where clause that matches all id values greater than the given [lower]
+  /// bound.
   const IdWhereClause.greaterThan({
     required int lower,
     this.includeLower = true,
@@ -24,6 +27,8 @@ class IdWhereClause extends WhereClause {
         includeUpper = true,
         super._();
 
+  /// Where clause that matches all id values less than the given [upper]
+  /// bound.
   const IdWhereClause.lessThan({
     required int upper,
     this.includeUpper = true,
@@ -32,6 +37,7 @@ class IdWhereClause extends WhereClause {
         includeLower = true,
         super._();
 
+  /// Where clause that matches the id value equal to the given [value].
   const IdWhereClause.equalTo({
     required int value,
   })  : lower = value,
@@ -40,6 +46,8 @@ class IdWhereClause extends WhereClause {
         includeUpper = true,
         super._();
 
+  /// Where clause that matches all id values between the given [lower] and
+  /// [upper] bounds.
   const IdWhereClause.between({
     this.lower,
     this.includeLower = true,
@@ -86,6 +94,9 @@ class IndexWhereClause extends WhereClause {
 
   /// Where clause that matches all index values less than the given [upper]
   /// bound.
+  ///
+  /// For composite indexes, the first elements of the [upper] list are checked
+  /// for equality.
   const IndexWhereClause.lessThan({
     required this.indexName,
     required IndexKey upper,
@@ -107,13 +118,18 @@ class IndexWhereClause extends WhereClause {
 
   /// Where clause that matches all index values between the given [lower] and
   /// [upper] bounds.
+  ///
+  /// For composite indexes, the first elements of the [lower] and [upper] lists
+  /// are checked for equality.
   const IndexWhereClause.between({
     required this.indexName,
-    this.lower,
+    required IndexKey lower,
     this.includeLower = true,
-    this.upper,
+    required IndexKey upper,
     this.includeUpper = true,
-  }) : super._();
+  })  : lower = lower,
+        upper = upper,
+        super._();
 
   /// The Isar name of the index to be used.
   final String indexName;
@@ -160,14 +176,31 @@ abstract class FilterOperation {
 
 /// The type of dynamic filter conditions.
 enum FilterConditionType {
+  /// Filter checking for equality.
   equalTo,
+
+  /// Filter matching values greater than the bound.
   greaterThan,
+
+  /// Filter matching values smaller than the bound.
   lessThan,
+
+  /// Filter matching values between the bounds.
   between,
+
+  /// Filter matching String values starting with the prefix.
   startsWith,
+
+  /// Filter matching String values ending with the suffix.
   endsWith,
+
+  /// Filter matching String values containing the String.
   contains,
+
+  /// Filter matching String values matching the wildcard.
   matches,
+
+  /// Filter matching values that are `null`.
   isNull,
 }
 
@@ -348,8 +381,16 @@ class FilterCondition extends FilterOperation {
 
 /// The type of filter groups.
 enum FilterGroupType {
+  /// Logical AND.
   and,
+
+  /// Logical OR.
   or,
+
+  /// Logical XOR.
+  xor,
+
+  /// Logical NOT.
   not,
 }
 
@@ -372,6 +413,11 @@ class FilterGroup extends FilterOperation {
       : type = FilterGroupType.or,
         super._();
 
+  /// Create a logical XOR filter group.
+  const FilterGroup.xor(this.filters)
+      : type = FilterGroupType.xor,
+        super._();
+
   /// Negate a filter.
   FilterGroup.not(FilterOperation filter)
       : filters = [filter],
@@ -387,7 +433,10 @@ class FilterGroup extends FilterOperation {
 
 /// Sort order
 enum Sort {
+  /// Ascending sort order.
   asc,
+
+  /// Descending sort order.
   desc,
 }
 

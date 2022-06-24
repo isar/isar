@@ -16,8 +16,8 @@ class EmptyConstructorModel {
   late String name;
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(dynamic other) {
+  // ignore: hash_and_equals
+  bool operator ==(dynamic other) {
     return other is EmptyConstructorModel &&
         other.id == id &&
         other.name == name;
@@ -32,8 +32,8 @@ class NamedConstructorModel {
   final String name;
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(dynamic other) {
+  // ignore: hash_and_equals
+  bool operator ==(dynamic other) {
     return other is NamedConstructorModel &&
         other.id == id &&
         other.name == name;
@@ -48,8 +48,8 @@ class PositionalConstructorModel {
   final String name;
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(dynamic other) {
+  // ignore: hash_and_equals
+  bool operator ==(dynamic other) {
     return other is PositionalConstructorModel &&
         other.id == id &&
         other.name == name;
@@ -67,8 +67,8 @@ class OptionalConstructorModel {
   String toString() => '{id: $id, name: $name}';
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(dynamic other) {
+  // ignore: hash_and_equals
+  bool operator ==(dynamic other) {
     return other is OptionalConstructorModel &&
         other.id == id &&
         other.name == name;
@@ -83,8 +83,8 @@ class PositionalNamedConstructorModel {
   String name;
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(dynamic other) {
+  // ignore: hash_and_equals
+  bool operator ==(dynamic other) {
     return other is PositionalNamedConstructorModel &&
         other.id == id &&
         other.name == name;
@@ -101,8 +101,8 @@ class SerializeOnlyModel {
   String get someGetter => '$name$name';
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(dynamic other) {
+  // ignore: hash_and_equals
+  bool operator ==(dynamic other) {
     return other is SerializeOnlyModel && other.id == id;
   }
 }
@@ -114,10 +114,6 @@ class FreezedModel with _$FreezedModel {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Constructor', () {
     late Isar isar;
 
@@ -138,34 +134,35 @@ void tests() {
     });
 
     isarTest('EmptyConstructorModel', () async {
-      final EmptyConstructorModel obj1 = EmptyConstructorModel()..name = 'obj1';
-      final EmptyConstructorModel obj2 = EmptyConstructorModel()..name = 'obj2';
+      final obj1 = EmptyConstructorModel()..name = 'obj1';
+      final obj2 = EmptyConstructorModel()..name = 'obj2';
       await isar.tWriteTxn(() async {
         await isar.emptyConstructorModels.tPutAll([obj1, obj2]);
       });
 
       await qEqual(
-          isar.emptyConstructorModels.where().tFindAll(), [obj1, obj2]);
+        isar.emptyConstructorModels.where().tFindAll(),
+        [obj1, obj2],
+      );
     });
 
     isarTest('NamedConstructorModel', () async {
-      final NamedConstructorModel obj1 = NamedConstructorModel(name: 'obj1');
-      final NamedConstructorModel obj2 = NamedConstructorModel(name: 'obj2');
+      final obj1 = NamedConstructorModel(name: 'obj1');
+      final obj2 = NamedConstructorModel(name: 'obj2');
       await isar.tWriteTxn(() async {
         await isar.namedConstructorModels.tPutAll([obj1, obj2]);
       });
 
       await qEqual(
-          isar.namedConstructorModels.where().tFindAll(), [obj1, obj2]);
+        isar.namedConstructorModels.where().tFindAll(),
+        [obj1, obj2],
+      );
     });
 
     isarTest('PositionalConstructorModel', () async {
-      final PositionalConstructorModel obj1 =
-          PositionalConstructorModel(0, 'obj1');
-      final PositionalConstructorModel obj2 =
-          PositionalConstructorModel(5, 'obj2');
-      final PositionalConstructorModel obj3 =
-          PositionalConstructorModel(15, 'obj3');
+      final obj1 = PositionalConstructorModel(0, 'obj1');
+      final obj2 = PositionalConstructorModel(5, 'obj2');
+      final obj3 = PositionalConstructorModel(15, 'obj3');
       await isar.tWriteTxn(() async {
         await isar.positionalConstructorModels.tPutAll([obj1, obj2, obj3]);
       });
@@ -177,12 +174,10 @@ void tests() {
     });
 
     isarTest('OptionalConstructorModel', () async {
-      final OptionalConstructorModel obj1 = OptionalConstructorModel('obj1');
-      final OptionalConstructorModel obj1WithId =
-          OptionalConstructorModel('obj1', 1);
-      final OptionalConstructorModel obj2 = OptionalConstructorModel('obj2', 5);
-      final OptionalConstructorModel obj3 =
-          OptionalConstructorModel('obj3', 15);
+      final obj1 = OptionalConstructorModel('obj1');
+      final obj1WithId = OptionalConstructorModel('obj1', 1);
+      final obj2 = OptionalConstructorModel('obj2', 5);
+      final obj3 = OptionalConstructorModel('obj3', 15);
       await isar.tWriteTxn(() async {
         await isar.optionalConstructorModels.tPutAll([obj1, obj2, obj3]);
       });
@@ -194,10 +189,8 @@ void tests() {
     });
 
     isarTest('PositionalNamedConstructorModel', () async {
-      final PositionalNamedConstructorModel obj1 =
-          PositionalNamedConstructorModel('obj1', id: 1);
-      final PositionalNamedConstructorModel obj2 =
-          PositionalNamedConstructorModel('obj2', id: 2);
+      final obj1 = PositionalNamedConstructorModel('obj1', id: 1);
+      final obj2 = PositionalNamedConstructorModel('obj2', id: 2);
       await isar.tWriteTxn(() async {
         await isar.positionalNamedConstructorModels.tPutAll([obj1, obj2]);
       });
@@ -209,8 +202,8 @@ void tests() {
     });
 
     isarTest('FreezedModel', () async {
-      const FreezedModel obj1 = FreezedModel(id: 1, name: 'obj1');
-      const FreezedModel obj2 = FreezedModel(id: 2, name: 'obj2');
+      const obj1 = FreezedModel(id: 1, name: 'obj1');
+      const obj2 = FreezedModel(id: 2, name: 'obj2');
       await isar.tWriteTxn(() async {
         await isar.freezedModels.tPutAll([obj1, obj2]);
       });

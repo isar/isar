@@ -1,17 +1,16 @@
 import 'dart:ffi';
 import 'dart:typed_data';
 
+import 'package:isar/isar.dart';
+import 'package:isar/src/isar_native_interface.dart';
+import 'package:isar/src/native/binary_reader.dart';
+import 'package:isar/src/native/binary_writer.dart';
+import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/isar_core.dart';
+import 'package:isar/src/native/isar_link_impl.dart';
+import 'package:isar/src/native/open.dart';
+import 'package:isar/src/native/split_words.dart';
 import 'package:meta/meta.dart';
-
-import '../../isar.dart';
-import '../isar_native_interface.dart';
-import 'binary_reader.dart';
-import 'binary_writer.dart';
-import 'bindings.dart';
-import 'isar_core.dart';
-import 'isar_link_impl.dart';
-import 'open.dart';
-import 'split_words.dart';
 
 /// @nodoc
 const int isarMinId = -9223372036854775807;
@@ -68,7 +67,7 @@ class _IsarNative implements IsarNativeInterface {
   }
 
   @override
-  void jsObjectSet(Object o, Object key, value) {
+  void jsObjectSet(Object o, Object key, dynamic value) {
     throw UnimplementedError();
   }
 

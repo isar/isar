@@ -1,7 +1,7 @@
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 
-import 'isar_type.dart';
+import 'package:isar_generator/src/isar_type.dart';
 
 class ObjectInfo {
   const ObjectInfo({
@@ -152,7 +152,7 @@ class ObjectIndexProperty {
               : 'IndexValueType.stringCIS';
         }
       case IsarType.bytes:
-        assert(type == IndexType.hash);
+        assert(type == IndexType.hash, 'Bytes indexes have to be hashed');
         return 'IndexValueType.bytesHash';
       case IsarType.boolList:
         if (type == IndexType.hash) {
@@ -167,7 +167,7 @@ class ObjectIndexProperty {
           return 'IndexValueType.int';
         }
       case IsarType.floatList:
-        assert(type == IndexType.value);
+        assert(type == IndexType.value, 'FloatList indexes must to be hashed');
         return 'IndexValueType.float';
       case IsarType.longList:
       case IsarType.dateTimeList:
@@ -177,7 +177,7 @@ class ObjectIndexProperty {
           return 'IndexValueType.long';
         }
       case IsarType.doubleList:
-        assert(type == IndexType.value);
+        assert(type == IndexType.value, 'DoubleList indexes must to be hashed');
         return 'IndexValueType.double';
       case IsarType.stringList:
         if (caseSensitive) {

@@ -2,7 +2,6 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import 'util/common.dart';
-import 'util/sync_async_helper.dart';
 
 part 'filter_link_test.g.dart';
 
@@ -18,6 +17,7 @@ class LinkModelA {
   final IsarLinks<LinkModelB> links = IsarLinks<LinkModelB>();
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is LinkModelA && id == other.id && other.name == name;
   }
@@ -34,16 +34,13 @@ class LinkModelB {
   final IsarLinks<LinkModelA> backlink = IsarLinks<LinkModelA>();
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is LinkModelB && id == other.id && other.name == name;
   }
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Groups', () {
     late Isar isar;
     late IsarCollection<LinkModelA> colA;

@@ -6,10 +6,6 @@ import 'util/common.dart';
 import 'util/sync_async_helper.dart';
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Groups', () {
     late Isar isar;
     late IsarCollection<UserModel> users;
@@ -42,15 +38,6 @@ void tests() {
           UserModel.fill('Simon', 30, false),
         ],
       );
-
-      await qEqualSet(
-        users.where().filter().ageEqualTo(20).ageEqualTo(30).tFindAll(),
-        [
-          UserModel.fill('David', 20, false),
-          UserModel.fill('Emma', 30, true),
-          UserModel.fill('Simon', 30, false),
-        ],
-      );
     });
 
     isarTest('Simple and', () async {
@@ -63,6 +50,28 @@ void tests() {
             .adminEqualTo(true)
             .tFindAll(),
         [UserModel.fill('Bjorn', 40, true)],
+      );
+
+      await qEqualSet(
+        users.where().filter().ageEqualTo(40).adminEqualTo(true).tFindAll(),
+        [UserModel.fill('Bjorn', 40, true)],
+      );
+    });
+
+    isarTest('Simple xor', () async {
+      await qEqualSet(
+        users
+            .where()
+            .filter()
+            .ageGreaterThan(20)
+            .xor()
+            .adminEqualTo(false)
+            .tFindAll(),
+        [
+          UserModel.fill('David', 20, false),
+          UserModel.fill('Emma', 30, true),
+          UserModel.fill('Bjorn', 40, true),
+        ],
       );
     });
 

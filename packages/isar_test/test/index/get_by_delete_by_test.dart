@@ -1,9 +1,9 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'util/common.dart';
+import '../util/common.dart';
 
-part 'index_get_by_delete_by_test.g.dart';
+part 'get_by_delete_by_test.g.dart';
 
 @Collection()
 class Model {
@@ -22,8 +22,8 @@ class Model {
   }
 
   @override
-  // ignore: hash_and_equals, always_declare_return_types
-  operator ==(Object other) {
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
     return other is Model &&
         other.id == id &&
         other.guid == guid &&

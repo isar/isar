@@ -1,13 +1,15 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js';
 import 'dart:typed_data';
 
-import '../../isar.dart';
-import 'bindings.dart';
+import 'package:isar/isar.dart';
+import 'package:isar/src/web/bindings.dart';
 
-import 'isar_collection_impl.dart';
-import 'isar_web.dart';
+import 'package:isar/src/web/isar_collection_impl.dart';
+import 'package:isar/src/web/isar_web.dart';
 
 typedef QueryDeserialize<T> = T Function(Object);
 
@@ -24,7 +26,7 @@ class QueryImpl<T> extends Query<T> {
   @override
   Future<T?> findFirst() {
     return col.isar.getTxn(false, (IsarTxnJs txn) async {
-      final Object? result = await queryJs.findFirst(txn).wait<Object?>();
+      final result = await queryJs.findFirst(txn).wait<Object?>();
       if (result == null) {
         return null;
       }
@@ -38,7 +40,7 @@ class QueryImpl<T> extends Query<T> {
   @override
   Future<List<T>> findAll() {
     return col.isar.getTxn(false, (IsarTxnJs txn) async {
-      final List result = await queryJs.findAll(txn).wait<List<dynamic>>();
+      final result = await queryJs.findAll(txn).wait<List<dynamic>>();
       return result.map((e) => deserialize(e as Object)).toList();
     });
   }
@@ -49,7 +51,7 @@ class QueryImpl<T> extends Query<T> {
   @override
   Future<R?> aggregate<R>(AggregationOp op) {
     return col.isar.getTxn(false, (IsarTxnJs txn) async {
-      final String property = propertyName ?? col.schema.idName;
+      final property = propertyName ?? col.schema.idName;
 
       num? result;
       switch (op) {
@@ -113,18 +115,17 @@ class QueryImpl<T> extends Query<T> {
   @override
   Stream<List<T>> watch({bool initialReturn = false}) {
     JsFunction? stop;
-    final StreamController<List<T>> controller =
-        StreamController<List<T>>(onCancel: () {
-      stop?.apply([]);
-    });
+    final controller = StreamController<List<T>>(
+      onCancel: () {
+        stop?.apply([]);
+      },
+    );
 
     if (initialReturn) {
-      findAll().then((List<T> results) {
-        controller.add(results);
-      });
+      findAll().then(controller.add);
     }
 
-    final Null Function(List results) callback =
+    final Null Function(List<dynamic> results) callback =
         allowInterop((List<dynamic> results) {
       controller.add(results.map((e) => deserialize(e as Object)).toList());
     });
@@ -136,10 +137,11 @@ class QueryImpl<T> extends Query<T> {
   @override
   Stream<void> watchLazy() {
     JsFunction? stop;
-    final StreamController<void> controller =
-        StreamController<void>(onCancel: () {
-      stop?.apply([]);
-    });
+    final controller = StreamController<void>(
+      onCancel: () {
+        stop?.apply([]);
+      },
+    );
 
     final Null Function() callback = allowInterop(() {
       controller.add(null);
@@ -153,7 +155,7 @@ class QueryImpl<T> extends Query<T> {
   Future<R> exportJsonRaw<R>(R Function(Uint8List) callback) async {
     return col.isar.getTxn(false, (IsarTxnJs txn) async {
       final result = await queryJs.findAll(txn).wait<dynamic>();
-      final String jsonStr = stringify(result);
+      final jsonStr = stringify(result);
       return callback(const Utf8Encoder().convert(jsonStr));
     });
   }
@@ -161,7 +163,7 @@ class QueryImpl<T> extends Query<T> {
   @override
   Future<List<Map<String, dynamic>>> exportJson() {
     return col.isar.getTxn(false, (IsarTxnJs txn) async {
-      final List result = await queryJs.findAll(txn).wait<List<dynamic>>();
+      final result = await queryJs.findAll(txn).wait<List<dynamic>>();
       return result.map((e) => jsMapToDart(e as Object)).toList();
     });
   }

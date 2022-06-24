@@ -1,25 +1,29 @@
 import 'package:dartx/dartx.dart';
 
-import '../helper.dart';
-import '../isar_type.dart';
-import '../object_info.dart';
+import 'package:isar_generator/src/helper.dart';
+import 'package:isar_generator/src/isar_type.dart';
+import 'package:isar_generator/src/object_info.dart';
 
 String generateSortBy(ObjectInfo oi) {
-  String code = '''
+  var code = '''
   extension ${oi.dartName}QueryWhereSortBy on QueryBuilder<${oi.dartName}, ${oi.dartName}, QSortBy> {''';
 
-  for (final ObjectProperty property in oi.properties) {
+  for (final property in oi.properties) {
     if (property.isarType.isList || property.isId) {
       continue;
     }
 
     code += '''
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>sortBy${property.dartName.capitalize()}() {
-      return addSortByInternal('${property.isarName.esc}', Sort.asc);
+      return QueryBuilder.apply(this, (query) {
+        return query.addSortBy('${property.isarName.esc}', Sort.asc);
+      });
     }
     
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>sortBy${property.dartName.capitalize()}Desc() {
-      return addSortByInternal('${property.isarName.esc}', Sort.desc);
+      return QueryBuilder.apply(this, (query) {
+        return query.addSortBy('${property.isarName.esc}', Sort.desc);
+      });
     }''';
   }
 
@@ -28,21 +32,24 @@ String generateSortBy(ObjectInfo oi) {
 
   extension ${oi.dartName}QueryWhereSortThenBy on QueryBuilder<${oi.dartName}, ${oi.dartName}, QSortThenBy> {''';
 
-  for (final ObjectProperty property in oi.properties) {
+  for (final property in oi.properties) {
     if (property.isarType.isList) {
       continue;
     }
 
     code += '''
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>thenBy${property.dartName.capitalize()}() {
-      return addSortByInternal('${property.isarName.esc}', Sort.asc);
+      return QueryBuilder.apply(this, (query) {
+        return query.addSortBy('${property.isarName.esc}', Sort.asc);
+      });
     }
     
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>thenBy${property.dartName.capitalize()}Desc() {
-      return addSortByInternal('${property.isarName.esc}', Sort.desc);
+      return QueryBuilder.apply(this, (query) {
+        return query.addSortBy('${property.isarName.esc}', Sort.desc);
+      });
     }''';
   }
-  code += '}';
 
-  return code;
+  return '$code}';
 }

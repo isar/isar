@@ -1,11 +1,13 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:indexed_db';
 
-import '../../isar.dart';
+import 'package:isar/isar.dart';
 
-import 'bindings.dart';
-import 'isar_collection_impl.dart';
-import 'isar_web.dart';
-import 'query_impl.dart';
+import 'package:isar/src/web/bindings.dart';
+import 'package:isar/src/web/isar_collection_impl.dart';
+import 'package:isar/src/web/isar_web.dart';
+import 'package:isar/src/web/query_impl.dart';
 
 Query<T> buildWebQuery<T, OBJ>(
   IsarCollectionImpl<OBJ> col,
@@ -19,7 +21,7 @@ Query<T> buildWebQuery<T, OBJ>(
   int? limit,
   String? property,
 ) {
-  final List<Object> whereClausesJs = whereClauses.map((WhereClause wc) {
+  final whereClausesJs = whereClauses.map((wc) {
     if (wc is IdWhereClause) {
       return _buildIdWhereClause(wc);
     } else if (wc is IndexWhereClause) {
@@ -29,13 +31,11 @@ Query<T> buildWebQuery<T, OBJ>(
     }
   }).toList();
 
-  final FilterJs? filterJs =
-      filter != null ? _buildFilter(col.schema, filter) : null;
-  final SortCmpJs? sortJs = sortBy.isNotEmpty ? _buildSort(sortBy) : null;
-  final DistinctValueJs? distinctJs =
-      distinctBy.isNotEmpty ? _buildDistinct(distinctBy) : null;
+  final filterJs = filter != null ? _buildFilter(col.schema, filter) : null;
+  final sortJs = sortBy.isNotEmpty ? _buildSort(sortBy) : null;
+  final distinctJs = distinctBy.isNotEmpty ? _buildDistinct(distinctBy) : null;
 
-  final QueryJs queryJs = QueryJs(
+  final queryJs = QueryJs(
     col.native,
     whereClausesJs,
     whereDistinct,
@@ -49,10 +49,10 @@ Query<T> buildWebQuery<T, OBJ>(
 
   QueryDeserialize<T> deserialize;
   if (property == null) {
-    deserialize = (Object jsObj) => col.schema.deserializeWeb(col, jsObj) as T;
+    deserialize = (jsObj) => col.schema.deserializeWeb(col, jsObj) as T;
   } else {
     deserialize =
-        (Object jsObj) => col.schema.deserializePropWeb(jsObj, property) as T;
+        (jsObj) => col.schema.deserializePropWeb(jsObj, property) as T;
   }
 
   return QueryImpl<T>(col, queryJs, deserialize, property);
@@ -85,37 +85,47 @@ IdWhereClauseJs _buildIdWhereClause(IdWhereClause wc) {
 }
 
 IndexWhereClauseJs _buildIndexWhereClause(
-    CollectionSchema<dynamic> schema, IndexWhereClause wc) {
-  final bool isComposite = schema.indexValueTypes[wc.indexName]!.length > 1;
+  CollectionSchema<dynamic> schema,
+  IndexWhereClause wc,
+) {
+  final keySize = schema.indexValueTypes[wc.indexName]!.length;
 
-  dynamic lower = wc.lower;
-  if (!isComposite && lower != null) {
-    lower = lower[0];
+  final lower = wc.lower?.toList();
+  final upper = wc.upper?.toList();
+  if (upper != null) {
+    while (keySize > upper.length) {
+      upper.add([]);
+    }
   }
 
-  dynamic upper = wc.upper;
-  if (!isComposite && upper != null) {
-    upper = upper[0];
+  dynamic lowerUnwrapped = wc.lower;
+  if (keySize == 1 && lower != null) {
+    lowerUnwrapped = lower.isNotEmpty ? lower[0] : null;
+  }
+
+  dynamic upperUnwrapped = upper;
+  if (keySize == 1 && upper != null) {
+    upperUnwrapped = upper.isNotEmpty ? upper[0] : double.infinity;
   }
 
   return IndexWhereClauseJs()
     ..indexName = wc.indexName
     ..range = _buildKeyRange(
-      wc.lower != null ? _valueToJs(lower) : null,
-      wc.upper != null ? _valueToJs(upper) : null,
+      wc.lower != null ? _valueToJs(lowerUnwrapped) : null,
+      wc.upper != null ? _valueToJs(upperUnwrapped) : null,
       wc.includeLower,
       wc.includeUpper,
     );
 }
 
 LinkWhereClauseJs _buildLinkWhereClause(
-    IsarCollectionImpl<dynamic> col, LinkWhereClause wc) {
-  final IsarCollectionImpl linkCol =
-      // ignore: invalid_use_of_protected_member
-      col.isar.getCollectionByNameInternal(wc.linkCollection)
-          as IsarCollectionImpl;
-  final String? backlinkLinkName =
-      linkCol.schema.backlinkLinkNames[wc.linkName];
+  IsarCollectionImpl<dynamic> col,
+  LinkWhereClause wc,
+) {
+  // ignore: invalid_use_of_protected_member
+  final linkCol = col.isar.getCollectionByNameInternal(wc.linkCollection)!
+      as IsarCollectionImpl;
+  final backlinkLinkName = linkCol.schema.backlinkLinkNames[wc.linkName];
   return LinkWhereClauseJs()
     ..linkCollection = wc.linkCollection
     ..linkName = backlinkLinkName ?? wc.linkName
@@ -124,28 +134,43 @@ LinkWhereClauseJs _buildLinkWhereClause(
 }
 
 KeyRange? _buildKeyRange(
-    dynamic lower, dynamic upper, bool includeLower, bool includeUpper) {
-  KeyRange? range;
+  dynamic lower,
+  dynamic upper,
+  bool includeLower,
+  bool includeUpper,
+) {
   if (lower != null) {
     if (upper != null) {
-      range = KeyRange.bound(
+      final boundsEqual = idbCmp(lower, upper) == 0;
+      if (boundsEqual) {
+        if (includeLower && includeUpper) {
+          return KeyRange.only(lower);
+        } else {
+          // empty range
+          return KeyRange.upperBound(double.negativeInfinity, true);
+        }
+      }
+
+      return KeyRange.bound(
         lower,
         upper,
         !includeLower,
         !includeUpper,
       );
     } else {
-      range = KeyRange.lowerBound(lower, !includeLower);
+      return KeyRange.lowerBound(lower, !includeLower);
     }
   } else if (upper != null) {
-    range = KeyRange.upperBound(upper, !includeUpper);
+    return KeyRange.upperBound(upper, !includeUpper);
   }
-  return range;
+  return null;
 }
 
 FilterJs? _buildFilter(
-    CollectionSchema<dynamic> schema, FilterOperation filter) {
-  final String? filterStr = _buildFilterOperation(schema, filter);
+  CollectionSchema<dynamic> schema,
+  FilterOperation filter,
+) {
+  final filterStr = _buildFilterOperation(schema, filter);
   if (filterStr != null) {
     return FilterJs('id', 'obj', 'return $filterStr');
   } else {
@@ -169,9 +194,9 @@ String? _buildFilterOperation(
 }
 
 String? _buildFilterGroup(CollectionSchema<dynamic> schema, FilterGroup group) {
-  final List<String?> builtConditions = group.filters
-      .map((FilterOperation op) => _buildFilterOperation(schema, op))
-      .where((String? e) => e != null)
+  final builtConditions = group.filters
+      .map((op) => _buildFilterOperation(schema, op))
+      .where((e) => e != null)
       .toList();
 
   if (builtConditions.isEmpty) {
@@ -180,16 +205,22 @@ String? _buildFilterGroup(CollectionSchema<dynamic> schema, FilterGroup group) {
 
   if (group.type == FilterGroupType.not) {
     return '!(${builtConditions[0]})';
+  } else if (builtConditions.length == 1) {
+    return builtConditions[0];
+  } else if (group.type == FilterGroupType.xor) {
+    final conditions = builtConditions.join(',');
+    return 'IsarQuery.xor($conditions)';
   } else {
-    final String op = group.type == FilterGroupType.or ? '||' : '&&';
-    final String condition = builtConditions.join(op);
+    final op = group.type == FilterGroupType.or ? '||' : '&&';
+    final condition = builtConditions.join(op);
     return '($condition)';
   }
 }
 
 String _buildCondition(
-    CollectionSchema<dynamic> schema, FilterCondition condition) {
-  // ignore: no_leading_underscores_for_local_identifiers
+  CollectionSchema<dynamic> schema,
+  FilterCondition condition,
+) {
   dynamic _prepareFilterValue(dynamic value) {
     if (value == null) {
       return null;
@@ -200,13 +231,13 @@ String _buildCondition(
     }
   }
 
-  final bool isListOp = condition.type != FilterConditionType.isNull &&
+  final isListOp = condition.type != FilterConditionType.isNull &&
       schema.listProperties.contains(condition.property);
-  final String accessor =
+  final accessor =
       condition.property == schema.idName ? 'id' : 'obj.${condition.property}';
-  final String variable = isListOp ? 'e' : accessor;
+  final variable = isListOp ? 'e' : accessor;
 
-  final String cond = _buildConditionInternal(
+  final cond = _buildConditionInternal(
     conditionType: condition.type,
     variable: variable,
     val1: _prepareFilterValue(condition.value1),
@@ -232,7 +263,7 @@ String _buildConditionInternal({
   required bool include2,
   required bool caseSensitive,
 }) {
-  final String isNull = '($variable == null || $variable === -Infinity)';
+  final isNull = '($variable == null || $variable === -Infinity)';
   switch (conditionType) {
     case FilterConditionType.equalTo:
       if (val1 == null) {
@@ -243,24 +274,22 @@ String _buildConditionInternal({
         return '$variable === $val1';
       }
     case FilterConditionType.between:
-      final Object? val = val1 ?? val2;
-      final String lowerOp = include1 ? '>=' : '>';
-      final String upperOp = include2 ? '<=' : '<';
+      final val = val1 ?? val2;
+      final lowerOp = include1 ? '>=' : '>';
+      final upperOp = include2 ? '<=' : '<';
       if (val == null) {
         return isNull;
       } else if ((val1 is String?) && (val2 is String?) && !caseSensitive) {
-        final String lower = val1?.toLowerCase() ?? '-Infinity';
-        final String upper = val2?.toLowerCase() ?? '-Infinity';
-        final String variableLc = '$variable?.toLowerCase() ?? -Infinity';
-        final String lowerCond =
-            'indexedDB.cmp($variableLc, $lower) $lowerOp 0';
-        final String upperCond =
-            'indexedDB.cmp($variableLc, $upper) $upperOp 0';
+        final lower = val1?.toLowerCase() ?? '-Infinity';
+        final upper = val2?.toLowerCase() ?? '-Infinity';
+        final variableLc = '$variable?.toLowerCase() ?? -Infinity';
+        final lowerCond = 'indexedDB.cmp($variableLc, $lower) $lowerOp 0';
+        final upperCond = 'indexedDB.cmp($variableLc, $upper) $upperOp 0';
         return '($lowerCond && $upperCond)';
       } else {
-        final String lowerCond =
+        final lowerCond =
             'indexedDB.cmp($variable, ${val1 ?? '-Infinity'}) $lowerOp 0';
-        final String upperCond =
+        final upperCond =
             'indexedDB.cmp($variable, ${val2 ?? '-Infinity'}) $upperOp 0';
         return '($lowerCond && $upperCond)';
       }
@@ -272,9 +301,10 @@ String _buildConditionInternal({
           return 'false';
         }
       } else {
-        final String op = include1 ? '<=' : '<';
+        final op = include1 ? '<=' : '<';
         if (val1 is String && !caseSensitive) {
-          return 'indexedDB.cmp($variable?.toLowerCase() ?? -Infinity, ${val1.toLowerCase()}) $op 0';
+          return 'indexedDB.cmp($variable?.toLowerCase() ?? '
+              '-Infinity, ${val1.toLowerCase()}) $op 0';
         } else {
           return 'indexedDB.cmp($variable, $val1) $op 0';
         }
@@ -287,9 +317,10 @@ String _buildConditionInternal({
           return '!$isNull';
         }
       } else {
-        final String op = include1 ? '>=' : '>';
+        final op = include1 ? '>=' : '>';
         if (val1 is String && !caseSensitive) {
-          return 'indexedDB.cmp($variable?.toLowerCase() ?? -Infinity, ${val1.toLowerCase()}) $op 0';
+          return 'indexedDB.cmp($variable?.toLowerCase() ?? '
+              '-Infinity, ${val1.toLowerCase()}) $op 0';
         } else {
           return 'indexedDB.cmp($variable, $val1) $op 0';
         }
@@ -297,21 +328,21 @@ String _buildConditionInternal({
     case FilterConditionType.startsWith:
     case FilterConditionType.endsWith:
     case FilterConditionType.contains:
-      final String op = conditionType == FilterConditionType.startsWith
+      final op = conditionType == FilterConditionType.startsWith
           ? 'startsWith'
           : conditionType == FilterConditionType.endsWith
               ? 'endsWith'
               : 'includes';
       if (val1 is String) {
-        final String isString = 'typeof $variable == "string"';
+        final isString = 'typeof $variable == "string"';
         if (!caseSensitive) {
-          return '($isString && $variable.toLowerCase().$op(${val1.toLowerCase()}))';
+          return '($isString && $variable.toLowerCase() '
+              '.$op(${val1.toLowerCase()}))';
         } else {
           return '($isString && $variable.$op($val1))';
         }
       } else {
-        // ignore: only_throw_errors
-        throw 'Unsupported type for condition';
+        throw IsarError('Unsupported type for condition');
       }
     case FilterConditionType.matches:
       throw UnimplementedError();
@@ -321,15 +352,16 @@ String _buildConditionInternal({
 }
 
 SortCmpJs _buildSort(List<SortProperty> properties) {
-  final String sort = properties.map((SortProperty e) {
-    final String op = e.sort == Sort.asc ? '' : '-';
-    return '${op}indexedDB.cmp(a.${e.property} ?? "-Infinity", b.${e.property} ?? "-Infinity")';
+  final sort = properties.map((e) {
+    final op = e.sort == Sort.asc ? '' : '-';
+    return '${op}indexedDB.cmp(a.${e.property} ?? "-Infinity", b.${e.property} '
+        '?? "-Infinity")';
   }).join('||');
   return SortCmpJs('a', 'b', 'return $sort');
 }
 
 DistinctValueJs _buildDistinct(List<DistinctProperty> properties) {
-  final String distinct = properties.map((DistinctProperty e) {
+  final distinct = properties.map((e) {
     if (e.caseSensitive == false) {
       return 'obj.${e.property}?.toLowerCase() ?? "-Infinity"';
     } else {

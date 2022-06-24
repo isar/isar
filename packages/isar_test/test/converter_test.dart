@@ -41,6 +41,7 @@ class ConverterModel {
   late String stringValue;
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     if (other is ConverterModel) {
       return boolValue == other.boolValue &&
@@ -127,7 +128,7 @@ class StringConverter extends TypeConverter<String, int> {
 }
 
 void main() {
-  final ConverterModel converterObject = ConverterModel()
+  final converterObject = ConverterModel()
     ..id = 123
     ..boolValue = true
     ..intValue = 25
@@ -137,7 +138,7 @@ void main() {
     ..dateValue = DateTime.fromMillisecondsSinceEpoch(123123)
     ..stringValue = 'five';
 
-  final Map<String, Object> converterObjectJson = {
+  final converterObjectJson = <String, Object>{
     'id': 123,
     'boolValue': 'true',
     'intValue': '25',
@@ -163,7 +164,7 @@ void main() {
     });*/
 
     isarTest('fromIsar()', () async {
-      final Isar isar = await openTempIsar([ConverterModelSchema]);
+      final isar = await openTempIsar([ConverterModelSchema]);
 
       await isar.writeTxn(() async {
         await isar.converterModels.importJson([converterObjectJson]);

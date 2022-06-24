@@ -30,10 +30,6 @@ class NameModel {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Name', () {
     late Isar isar;
 
@@ -50,7 +46,7 @@ void tests() {
             NameModel()
               ..value = 'test'
               ..otherValue = 'test2',
-          ));
+          ),);
 
       expect(await isar.nameModels.where().exportJson(), [
         {

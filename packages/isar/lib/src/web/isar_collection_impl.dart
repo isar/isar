@@ -1,16 +1,17 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js';
 import 'dart:js_util';
 import 'dart:typed_data';
 
+import 'package:isar/isar.dart';
+import 'package:isar/src/web/bindings.dart';
+import 'package:isar/src/web/isar_impl.dart';
+import 'package:isar/src/web/isar_web.dart';
+import 'package:isar/src/web/query_build.dart';
 import 'package:meta/dart2js.dart';
-
-import '../../isar.dart';
-import 'bindings.dart';
-import 'isar_impl.dart';
-import 'isar_web.dart';
-import 'query_build.dart';
 
 class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   IsarCollectionImpl({
@@ -37,8 +38,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @tryInline
   List<OBJ?> deserializeObjects(dynamic objects) {
-    final List list = objects as List;
-    final List<OBJ?> results = <OBJ?>[];
+    final list = objects as List;
+    final results = <OBJ?>[];
     for (final object in list) {
       results.add(deserializeObject(object));
     }
@@ -48,8 +49,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<List<OBJ?>> getAll(List<int> ids) {
     return isar.getTxn(false, (IsarTxnJs txn) async {
-      final List<Object?> objects =
-          await native.getAll(txn, ids).wait<List<Object?>>();
+      final objects = await native.getAll(txn, ids).wait<List<Object?>>();
       return deserializeObjects(objects);
     });
   }
@@ -57,7 +57,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Future<List<OBJ?>> getAllByIndex(String indexName, List<IndexKey> keys) {
     return isar.getTxn(false, (IsarTxnJs txn) async {
-      final List<Object?> objects = await native
+      final objects = await native
           .getAllByIndex(txn, indexName, keys)
           .wait<List<Object?>>();
       return deserializeObjects(objects);
@@ -81,18 +81,20 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       unsupportedOnWeb();
 
   @override
-  Future<List<int>> putAllByIndex(String? indexName, List<OBJ> objects,
-      {bool saveLinks = false}) {
+  Future<List<int>> putAllByIndex(
+    String? indexName,
+    List<OBJ> objects, {
+    bool saveLinks = false,
+  }) {
     return isar.getTxn(true, (IsarTxnJs txn) async {
-      final List<Object> serialized = <Object>[];
+      final serialized = <Object>[];
       for (final object in objects) {
         serialized.add(schema.serializeWeb(this, object));
       }
-      final List ids =
-          await native.putAll(txn, serialized).wait<List<dynamic>>();
-      for (int i = 0; i < objects.length; i++) {
+      final ids = await native.putAll(txn, serialized).wait<List<dynamic>>();
+      for (var i = 0; i < objects.length; i++) {
         final object = objects[i];
-        final int id = ids[i] as int;
+        final id = ids[i] as int;
         schema.setId?.call(object, id);
         schema.attachLinks(this, id, object);
       }
@@ -150,8 +152,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   Future<void> importJsonRaw(Uint8List jsonBytes) {
-    final List json =
-        jsonDecode(const Utf8Decoder().convert(jsonBytes)) as List;
+    final json = jsonDecode(const Utf8Decoder().convert(jsonBytes)) as List;
     return importJson(json.cast());
   }
 
@@ -181,10 +182,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Stream<void> watchLazy() {
     JsFunction? stop;
-    final StreamController<void> controller =
-        StreamController<void>(onCancel: () {
-      stop?.apply([]);
-    });
+    final controller = StreamController<void>(
+      onCancel: () {
+        stop?.apply([]);
+      },
+    );
 
     final void Function() callback = allowInterop(() => controller.add(null));
     stop = native.watchLazy(callback);
@@ -199,10 +201,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     bool deserialize = true,
   }) {
     JsFunction? stop;
-    final StreamController<OBJ?> controller =
-        StreamController<OBJ?>(onCancel: () {
-      stop?.apply([]);
-    });
+    final controller = StreamController<OBJ?>(
+      onCancel: () {
+        stop?.apply([]);
+      },
+    );
 
     final Null Function(Object? obj) callback = allowInterop((Object? obj) {
       final object = deserialize ? deserializeObject(obj) : null;

@@ -28,7 +28,7 @@ class BasePage extends StatelessWidget {
           brightness: Brightness.dark,
         ),
       ),
-      home: Container(
+      home: ColoredBox(
         color: const Color(0xff111216), //Color.fromARGB(255, 34, 36, 41),
         child: GestureDetector(
           onTap: () {

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'common.dart';
-import 'state/collections_state.dart';
+import 'package:isar_inspector/common.dart';
+import 'package:isar_inspector/state/collections_state.dart';
 
 class CollectionsList extends ConsumerWidget {
   const CollectionsList({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
     final collections = ref.watch(collectionsPod).valueOrNull ?? [];
     final collectionInfo = ref.watch(collectionInfoPod);
     final selectedCollection = ref.watch(selectedCollectionPod).valueOrNull;

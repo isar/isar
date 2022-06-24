@@ -126,8 +126,8 @@ extension IsarTypeX on IsarType {
   }
 
   String dartType(bool nullable, bool elementNullable) {
-    final String nQ = nullable ? '?' : '';
-    final String nEQ = elementNullable ? '?' : '';
+    final nQ = nullable ? '?' : '';
+    final nEQ = elementNullable ? '?' : '';
     switch (this) {
       case IsarType.bool:
         return 'bool$nQ';
@@ -167,7 +167,7 @@ bool _isUint8List(Element element) => _uint8ListChecker.isExactly(element);
 
 const TypeChecker _size32Checker = TypeChecker.fromRuntime(Size32);
 IsarType? getIsarType(DartType type, Element element) {
-  final bool size32 = _size32Checker.hasAnnotationOfExact(element.nonSynthetic);
+  final size32 = _size32Checker.hasAnnotationOfExact(element.nonSynthetic);
   if (type.isDartCoreBool) {
     return IsarType.bool;
   } else if (type.isDartCoreInt) {
@@ -185,10 +185,10 @@ IsarType? getIsarType(DartType type, Element element) {
   } else if (type.isDartCoreString) {
     return IsarType.string;
   } else if (type.isDartCoreList) {
-    final ParameterizedType parameterizedType = type as ParameterizedType;
-    final List<DartType> typeArguments = parameterizedType.typeArguments;
+    final parameterizedType = type as ParameterizedType;
+    final typeArguments = parameterizedType.typeArguments;
     if (typeArguments.isNotEmpty) {
-      final DartType listType = typeArguments[0];
+      final listType = typeArguments[0];
       if (listType.isDartCoreBool) {
         return IsarType.boolList;
       } else if (listType.isDartCoreInt) {

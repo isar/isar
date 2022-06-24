@@ -4,8 +4,8 @@ part of isar;
 
 // ignore: avoid_classes_with_only_static_members
 abstract class _IsarConnect {
-  static const Map<ConnectAction, Future Function(Map<String, dynamic> _)>
-      _handlers = {
+  static const Map<ConnectAction,
+      Future<dynamic> Function(Map<String, dynamic> _)> _handlers = {
     ConnectAction.getVersion: _getVersion,
     ConnectAction.getSchema: _getSchema,
     ConnectAction.listInstances: _listInstances,
@@ -34,17 +34,14 @@ abstract class _IsarConnect {
       postEvent(ConnectEvent.instancesChanged.event, {});
     });
 
-    for (final MapEntry<ConnectAction,
-        Future Function(Map<String, dynamic> _)> handler in _handlers.entries) {
+    for (final handler in _handlers.entries) {
       registerExtension(handler.key.method,
           (String method, Map<String, String> parameters) async {
         try {
-          final Map<String, dynamic> args = parameters.containsKey('args')
+          final args = parameters.containsKey('args')
               ? jsonDecode(parameters['args']!) as Map<String, dynamic>
               : <String, dynamic>{};
-          final Map<String, dynamic> result = {
-            'result': await handler.value(args)
-          };
+          final result = <String, dynamic>{'result': await handler.value(args)};
           return ServiceExtensionResponse.result(jsonEncode(result));
         } catch (e) {
           return ServiceExtensionResponse.error(
@@ -60,12 +57,12 @@ abstract class _IsarConnect {
 
   static void _printConnection() {
     Service.getInfo().then((ServiceProtocolInfo info) {
-      final Uri? serviceUri = info.serverUri;
+      final serviceUri = info.serverUri;
       if (serviceUri == null) {
         return;
       }
-      final int port = serviceUri.port;
-      String path = serviceUri.path;
+      final port = serviceUri.port;
+      var path = serviceUri.path;
       if (path.endsWith('/')) {
         path = path.substring(0, path.length - 1);
       }
@@ -96,7 +93,7 @@ abstract class _IsarConnect {
   }
 
   static Future<bool> _watchInstance(Map<String, dynamic> params) async {
-    for (final StreamSubscription<void> sub in _collectionSubscriptions) {
+    for (final sub in _collectionSubscriptions) {
       unawaited(sub.cancel());
     }
 
@@ -105,12 +102,12 @@ abstract class _IsarConnect {
       return true;
     }
 
-    final String instanceName = params['instance'] as String;
-    final Isar instance = Isar.getInstance(instanceName)!;
+    final instanceName = params['instance'] as String;
+    final instance = Isar.getInstance(instanceName)!;
 
-    for (final IsarCollection collection in instance._collections.values) {
+    for (final collection in instance._collections.values) {
       _sendCollectionInfo(collection);
-      final StreamSubscription<void> sub = collection.watchLazy().listen((_) {
+      final sub = collection.watchLazy().listen((_) {
         _sendCollectionInfo(collection);
       });
       _collectionSubscriptions.add(sub);
@@ -120,12 +117,12 @@ abstract class _IsarConnect {
   }
 
   static void _sendCollectionInfo(IsarCollection<dynamic> collection) {
-    final int count = collection.countSync();
-    final int size = collection.getSizeSync(
+    final count = collection.countSync();
+    final size = collection.getSizeSync(
       includeIndexes: true,
       includeLinks: true,
     );
-    final ConnectCollectionInfo collectionInfo = ConnectCollectionInfo(
+    final collectionInfo = ConnectCollectionInfo(
       instance: collection.isar.name,
       collection: collection.name,
       size: size,
@@ -138,7 +135,8 @@ abstract class _IsarConnect {
   }
 
   static Future<List<Map<String, dynamic>>> _executeQuery(
-      Map<String, dynamic> params) async {
+    Map<String, dynamic> params,
+  ) async {
     if (_querySubscription != null) {
       unawaited(_querySubscription!.cancel());
     }
@@ -147,9 +145,9 @@ abstract class _IsarConnect {
       return <Map<String, dynamic>>[];
     }
 
-    final Query query = _getQuery(params);
+    final query = _getQuery(params);
 
-    final Stream<void> stream = query.watchLazy();
+    final stream = query.watchLazy();
     _querySubscription = stream.listen((event) {
       postEvent(ConnectEvent.queryChanged.event, {});
     });
@@ -158,20 +156,20 @@ abstract class _IsarConnect {
   }
 
   static Future<bool> _removeQuery(Map<String, dynamic> params) async {
-    final Query query = _getQuery(params);
+    final query = _getQuery(params);
     await query.isar.writeTxn(query.deleteAll);
     return true;
   }
 
   static Query<dynamic> _getQuery(Map<String, dynamic> params) {
-    final ConnectQuery query = ConnectQuery.fromJson(params);
-    final IsarCollection collection = Isar.getInstance(query.instance)!
+    final query = ConnectQuery.fromJson(params);
+    final collection = Isar.getInstance(query.instance)!
         .getCollectionByNameInternal(query.collection)!;
     WhereClause? whereClause;
-    Sort whereSort = Sort.asc;
+    var whereSort = Sort.asc;
     SortProperty? sortProperty;
 
-    final SortProperty? qSort = query.sortProperty;
+    final qSort = query.sortProperty;
     if (qSort != null) {
       if (qSort.property == collection.idName) {
         whereClause = const IdWhereClause.any();

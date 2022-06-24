@@ -3,35 +3,33 @@ import 'dart:convert';
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 
-import '../helper.dart';
-import '../isar_type.dart';
-import '../object_info.dart';
+import 'package:isar_generator/src/helper.dart';
+import 'package:isar_generator/src/isar_type.dart';
+import 'package:isar_generator/src/object_info.dart';
 
 String generateCollectionSchema(ObjectInfo object) {
-  final String schema = _generateSchema(object);
+  final schema = _generateSchema(object);
 
-  final String propertyIds = object.objectProperties
-      .mapIndexed(
-          (int index, ObjectProperty p) => "'${p.isarName.esc}': $index")
+  final propertyIds = object.objectProperties
+      .mapIndexed((i, p) => "'${p.isarName.esc}': $i")
       .join(',');
-  final String listProperties = object.objectProperties
-      .filter((ObjectProperty p) => p.isarType.isList)
-      .map((ObjectProperty p) => "'${p.isarName.esc}'")
+  final listProperties = object.objectProperties
+      .filter((p) => p.isarType.isList)
+      .map((p) => "'${p.isarName.esc}'")
       .join(',');
-  final String indexIds = object.indexes
-      .mapIndexed((int index, ObjectIndex i) => "'${i.name.esc}': $index")
+  final indexIds = object.indexes
+      .mapIndexed((i, index) => "'${index.name.esc}': $i")
       .join(',');
-  final String indexValueTypes = object.indexes
-      .map((ObjectIndex i) =>
-          "'${i.name.esc}': [${i.properties.map((ObjectIndexProperty e) => e.indexValueTypeEnum).join(',')},]")
+  final indexValueTypes = object.indexes.map((i) {
+    final types = i.properties.map((e) => e.indexValueTypeEnum).join(',');
+    return "'${i.name.esc}': [$types,]";
+  }).join(',');
+  final linkIds = object.links
+      .mapIndexed((i, link) => "'${link.isarName.esc}': $i")
       .join(',');
-  final String linkIds = object.links
-      .mapIndexed((int i, ObjectLink link) => "'${link.isarName.esc}': $i")
-      .join(',');
-  final String backlinkLinkNames = object.links
-      .where((ObjectLink e) => e.backlink)
-      .map((ObjectLink link) =>
-          "'${link.isarName.esc}': '${link.targetIsarName}'")
+  final backlinkLinkNames = object.links
+      .where((e) => e.backlink)
+      .map((link) => "'${link.isarName.esc}': '${link.targetIsarName}'")
       .join(',');
 
   return '''
@@ -70,24 +68,24 @@ String generateCollectionSchema(ObjectInfo object) {
 }
 
 String _generateSchema(ObjectInfo object) {
-  final Map<String, Object> json = {
+  final json = <String, Object>{
     'name': object.isarName,
     'idName': object.idProperty.isarName,
     'properties': [
-      for (ObjectProperty property in object.objectProperties)
+      for (var property in object.objectProperties)
         {
           'name': property.isarName,
           'type': property.isarType.name,
         },
     ],
     'indexes': [
-      for (ObjectIndex index in object.indexes)
+      for (var index in object.indexes)
         {
           'name': index.name,
           'unique': index.unique,
           'replace': index.replace,
           'properties': [
-            for (ObjectIndexProperty indexProperty in index.properties)
+            for (var indexProperty in index.properties)
               {
                 'name': indexProperty.property.isarName,
                 'type': indexProperty.type.name,
@@ -97,7 +95,7 @@ String _generateSchema(ObjectInfo object) {
         }
     ],
     'links': [
-      for (ObjectLink link in object.links) ...[
+      for (var link in object.links) ...[
         if (!link.backlink)
           {
             'name': link.isarName,
@@ -136,7 +134,7 @@ String _generateSetId(ObjectInfo object) {
 String _generateGetLinks(ObjectInfo object) {
   return '''
     List<IsarLinkBase<dynamic>> ${object.getLinksName}(${object.dartName} object) {
-      return [${object.links.map((ObjectLink e) => 'object.${e.dartName}').join(',')}];
+      return [${object.links.map((e) => 'object.${e.dartName}').join(',')}];
     }
   ''';
 }

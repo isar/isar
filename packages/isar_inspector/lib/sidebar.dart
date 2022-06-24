@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'collections.dart';
-import 'common.dart';
-import 'instance_selector.dart';
+import 'package:isar_inspector/collections.dart';
+import 'package:isar_inspector/common.dart';
+import 'package:isar_inspector/instance_selector.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({super.key});

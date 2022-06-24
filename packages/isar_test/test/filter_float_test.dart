@@ -25,9 +25,10 @@ class FloatModel {
   }
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     // ignore: test_types_in_equals
-    final FloatModel otherModel = other as FloatModel;
+    final otherModel = other as FloatModel;
     if ((other.field == null) != (field == null)) {
       return false;
     } else if (id != other.id) {
@@ -43,10 +44,6 @@ class FloatModel {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Float filter', () {
     late Isar isar;
     late IsarCollection<FloatModel> col;
@@ -85,9 +82,13 @@ void tests() {
         [obj0, obj1, obj2, obj3, objInf],
       );
       await qEqual(
-          col.where().fieldGreaterThan(2.2).tFindAll(), [obj3, objInf]);
+        col.where().fieldGreaterThan(2.2).tFindAll(),
+        [obj3, objInf],
+      );
       await qEqual(
-          col.where().fieldGreaterThan(double.infinity).tFindAll(), []);
+        col.where().fieldGreaterThan(double.infinity).tFindAll(),
+        [],
+      );
 
       // filters
       await qEqualSet(
@@ -99,7 +100,9 @@ void tests() {
         [obj3, objInf],
       );
       await qEqualSet(
-          col.filter().fieldGreaterThan(double.infinity).tFindAll(), []);
+        col.filter().fieldGreaterThan(double.infinity).tFindAll(),
+        [],
+      );
     });
 
     isarTest('.lessThan()', () async {
@@ -116,14 +119,14 @@ void tests() {
     isarTest('.between()', () async {
       // where clauses
       await qEqual(
-        col.where().fieldBetween(1.0, 3.5).tFindAll(),
+        col.where().fieldBetween(1, 3.5).tFindAll(),
         [obj1, obj2, obj3],
       );
       await qEqual(col.where().fieldBetween(5, 6).tFindAll(), []);
 
       // filters
       await qEqualSet(
-        col.filter().fieldBetween(1.0, 3.5).tFindAll(),
+        col.filter().fieldBetween(1, 3.5).tFindAll(),
         [obj1, obj2, obj3],
       );
       await qEqualSet(col.filter().fieldBetween(5, 6).tFindAll(), []);
@@ -171,39 +174,56 @@ void tests() {
 
     isarTest('.anyGreaterThan() / .anyLessThan()', () async {
       // where clauses
-      await qEqualSet(col.where().listAnyGreaterThan(1.1).tFindAll(), [obj1]);
-      await qEqualSet(col.where().listAnyGreaterThan(4).tFindAll(), []);
       await qEqualSet(
-          col.where().listAnyLessThan(1.1).tFindAll(), [obj2, obj3]);
-      await qEqualSet(col.where().listAnyLessThan(null).tFindAll(), []);
-
-      // filters
-      await qEqualSet(col.filter().listAnyGreaterThan(1.1).tFindAll(), [obj1]);
-      await qEqualSet(col.filter().listAnyGreaterThan(4).tFindAll(), []);
+        col.where().listElementGreaterThan(1.1).tFindAll(),
+        [obj1],
+      );
+      await qEqualSet(col.where().listElementGreaterThan(4).tFindAll(), []);
       await qEqualSet(
-        col.filter().listAnyLessThan(1.1).tFindAll(),
+        col.where().listElementLessThan(1.1).tFindAll(),
         [obj2, obj3],
       );
-      await qEqualSet(col.filter().listAnyLessThan(null).tFindAll(), []);
+      await qEqualSet(col.where().listElementLessThan(null).tFindAll(), []);
+
+      // filters
+      await qEqualSet(
+        col.filter().listElementGreaterThan(1.1).tFindAll(),
+        [obj1],
+      );
+      await qEqualSet(col.filter().listElementGreaterThan(4).tFindAll(), []);
+      await qEqualSet(
+        col.filter().listElementLessThan(1.1).tFindAll(),
+        [obj2, obj3],
+      );
+      await qEqualSet(col.filter().listElementLessThan(null).tFindAll(), []);
     });
 
     isarTest('.anyBetween()', () async {
       // where clauses
-      await qEqualSet(col.where().listAnyBetween(1, 5).tFindAll(), [obj1]);
-      await qEqualSet(col.where().listAnyBetween(5.0, 10.0).tFindAll(), []);
+      await qEqualSet(col.where().listElementBetween(1, 5).tFindAll(), [obj1]);
+      await qEqualSet(col.where().listElementBetween(5, 10).tFindAll(), []);
 
       // filters
-      await qEqualSet(col.filter().listAnyBetween(1, 5).tFindAll(), [obj1]);
-      await qEqualSet(col.filter().listAnyBetween(5.0, 10.0).tFindAll(), []);
+      await qEqualSet(col.filter().listElementBetween(1, 5).tFindAll(), [obj1]);
+      await qEqualSet(
+        col.filter().listElementBetween(5, 10).tFindAll(),
+        [],
+      );
     });
 
     isarTest('.anyIsNull() / .anyIsNotNull()', () async {
       // where clauses
-      await qEqualSet(col.where().listAnyIsNull().tFindAll(), [obj2, obj3]);
-      await qEqualSet(col.where().listAnyIsNotNull().tFindAll(), [obj1, obj3]);
+      await qEqualSet(col.where().listElementIsNull().tFindAll(), [obj2, obj3]);
+      await qEqualSet(
+        col.where().listElementIsNotNull().tFindAll(),
+        [obj1, obj3],
+      );
 
       // filters
-      await qEqualSet(col.filter().listAnyIsNull().tFindAll(), [obj2, obj3]);
+      await qEqualSet(
+        col.filter().listElementIsNull().tFindAll(),
+        [obj2, obj3],
+      );
     });
   });
 }

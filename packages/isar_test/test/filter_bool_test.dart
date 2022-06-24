@@ -27,9 +27,10 @@ class BoolModel {
   }
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
-    // ignore: test_types_in_equals
-    return (other as BoolModel).id == id &&
+    return other is BoolModel &&
+        other.id == id &&
         other.field == field &&
         listEquals(list, other.list) &&
         listEquals(hashList, other.hashList);
@@ -37,10 +38,6 @@ class BoolModel {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Bool filter', () {
     late Isar isar;
     late IsarCollection<BoolModel> col;
@@ -142,24 +139,26 @@ void tests() {
     isarTest('.anyEqualTo() / .anyNotEqualTo()', () async {
       // where clauses
       await qEqualSet(
-          col.where().listAnyEqualTo(true).tFindAll(), [obj1, obj3]);
-      await qEqualSet(col.where().listAnyEqualTo(null).tFindAll(), [obj2]);
+        col.where().listElementEqualTo(true).tFindAll(),
+        [obj1, obj3],
+      );
+      await qEqualSet(col.where().listElementEqualTo(null).tFindAll(), [obj2]);
       await qEqualSet(
-        col.where().listAnyNotEqualTo(true).tFindAll(),
+        col.where().listElementNotEqualTo(true).tFindAll(),
         [obj2, obj3],
       );
 
       await qEqualSet(
-        col.where().listAnyNotEqualTo(null).tFindAll(),
+        col.where().listElementNotEqualTo(null).tFindAll(),
         [obj1, obj2, obj3],
       );
 
       // filters
       await qEqualSet(
-        col.filter().listAnyEqualTo(true).tFindAll(),
+        col.filter().listElementEqualTo(true).tFindAll(),
         [obj1, obj3],
       );
-      await qEqualSet(col.filter().listAnyEqualTo(null).tFindAll(), [obj2]);
+      await qEqualSet(col.filter().listElementEqualTo(null).tFindAll(), [obj2]);
     });
   });
 
@@ -210,10 +209,13 @@ void tests() {
 
       // filters
       await qEqualSet(
-        col.filter().hashListAnyEqualTo(true).tFindAll(),
+        col.filter().hashListElementEqualTo(true).tFindAll(),
         [obj1, obj2, obj3],
       );
-      await qEqualSet(col.filter().hashListAnyEqualTo(false).tFindAll(), []);
+      await qEqualSet(
+        col.filter().hashListElementEqualTo(false).tFindAll(),
+        [],
+      );
     });
 
     isarTest('.isNull() / .isNotNull()', () async {

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'common.dart';
-import 'state/query_state.dart';
+import 'package:isar_inspector/common.dart';
+import 'package:isar_inspector/state/query_state.dart';
 
 class PrevNext extends ConsumerWidget {
   const PrevNext({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
     final page = ref.watch(queryPagePod);
     final result = ref.watch(queryResultsPod).valueOrNull;
     return Column(
@@ -57,7 +57,7 @@ class _Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
     return IsarCard(
       color: Colors.transparent,
       radius: BorderRadius.circular(15),

@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:isar/isar.dart';
 
-import 'query_parser.dart';
-import 'schema.dart';
-import 'state/collections_state.dart';
-import 'state/instances_state.dart';
-import 'state/isar_connect_state_notifier.dart';
-import 'state/query_state.dart';
+import 'package:isar_inspector/query_parser.dart';
+import 'package:isar_inspector/schema.dart';
+import 'package:isar_inspector/state/collections_state.dart';
+import 'package:isar_inspector/state/instances_state.dart';
+import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
+import 'package:isar_inspector/state/query_state.dart';
 
 class FilterField extends ConsumerStatefulWidget {
   const FilterField({super.key});
@@ -52,7 +52,7 @@ class _FilterFieldState extends ConsumerState<FilterField> {
         ElevatedButton(
           onPressed: () {
             final selectedCollection = ref.read(selectedCollectionPod).value!;
-            final FilterOperation? filter = _parseFilter(selectedCollection);
+            final filter = _parseFilter(selectedCollection);
             ref.read(queryFilterPod.state).state = filter;
             ref.read(queryPagePod.state).state = 0;
           },
@@ -62,8 +62,8 @@ class _FilterFieldState extends ConsumerState<FilterField> {
         ElevatedButton(
           onPressed: () {
             final selectedCollection = ref.read(selectedCollectionPod).value!;
-            final FilterOperation? filter = _parseFilter(selectedCollection);
-            final ConnectQuery query = ConnectQuery(
+            final filter = _parseFilter(selectedCollection);
+            final query = ConnectQuery(
               instance: ref.read(selectedInstancePod).value!,
               collection: selectedCollection.name,
               filter: filter,
@@ -77,11 +77,11 @@ class _FilterFieldState extends ConsumerState<FilterField> {
   }
 
   FilterOperation? _parseFilter(ICollection collection) {
-    final QueryParser parser = QueryParser(collection.properties);
+    final parser = QueryParser(collection.properties);
     FilterOperation? newFilter;
     try {
       if (controller.text.isNotEmpty) {
-        final FilterOperation filter = parser.parse(controller.text);
+        final filter = parser.parse(controller.text);
         newFilter = filter;
       }
 

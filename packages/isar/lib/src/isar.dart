@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_asserts_with_message
+
 part of isar;
 
 /// Callback for a newly opened Isar instance.
@@ -8,15 +10,17 @@ typedef IsarCloseCallback = void Function(String);
 
 /// An instance of the Isar Database.
 abstract class Isar {
+  /// @nodoc
   @protected
   Isar(this.name, String schema) {
     if (_schema != null && _schema != schema) {
-      // ignore: only_throw_errors
-      throw 'Cannot open multiple Isar instances with different schema.';
+      throw IsarError(
+        'Cannot open multiple Isar instances with different schema.',
+      );
     }
     _schema = schema;
     _instances[name] = this;
-    for (final IsarOpenCallback callback in _openCallbacks) {
+    for (final callback in _openCallbacks) {
       callback(this);
     }
   }
@@ -48,27 +52,21 @@ abstract class Isar {
 
   static void _checkOpen(String name, List<CollectionSchema<dynamic>> schemas) {
     if (name.isEmpty || name.startsWith('_')) {
-      // ignore: only_throw_errors
       throw IsarError('Instance names must not be empty or start with "_".');
     }
     if (_instances.containsKey(name)) {
-      // ignore: only_throw_errors
       throw IsarError('Instance has already been opened.');
     }
     if (schemas.isEmpty) {
-      // ignore: only_throw_errors
       throw IsarError('At least one collection needs to be opened.');
     }
-    for (int i = 0; i < schemas.length; i++) {
-      final CollectionSchema schema = schemas[i];
-      if (schemas.indexWhere((CollectionSchema e) => e.name == schema.name) !=
-          i) {
-        // ignore: only_throw_errors
+    for (var i = 0; i < schemas.length; i++) {
+      final schema = schemas[i];
+      if (schemas.indexWhere((e) => e.name == schema.name) != i) {
         throw IsarError('Duplicate collection ${schema.name}.');
       }
     }
-    schemas.sort(
-        (CollectionSchema a, CollectionSchema b) => a.name.compareTo(b.name));
+    schemas.sort((a, b) => a.name.compareTo(b.name));
   }
 
   /// Open a new Isar instance.
@@ -80,10 +78,12 @@ abstract class Isar {
   }) {
     _checkOpen(name, schemas);
     if (!_kIsWeb) {
-      assert(() {
-        _IsarConnect.initialize();
-        return true;
-      }());
+      assert(
+        () {
+          _IsarConnect.initialize();
+          return true;
+        }(),
+      );
     }
     return IsarNative.open(
       schemas: schemas,
@@ -102,10 +102,12 @@ abstract class Isar {
   }) {
     _checkOpen(name, schemas);
     if (!_kIsWeb) {
-      assert(() {
-        _IsarConnect.initialize();
-        return true;
-      }());
+      assert(
+        () {
+          _IsarConnect.initialize();
+          return true;
+        }(),
+      );
     }
     return IsarNative.openSync(
       schemas: schemas,
@@ -122,7 +124,6 @@ abstract class Isar {
   @protected
   void requireOpen() {
     if (!isOpen) {
-      // ignore: only_throw_errors
       throw IsarError('Isar instance has already been closed');
     }
   }
@@ -144,7 +145,7 @@ abstract class Isar {
   void attachCollections(Map<Type, IsarCollection<dynamic>> collections) {
     _collections = collections;
     _collectionsByName = {
-      for (IsarCollection col in collections.values) col.name: col,
+      for (IsarCollection<dynamic> col in collections.values) col.name: col,
     };
   }
 
@@ -153,32 +154,32 @@ abstract class Isar {
   /// You should use the generated extension methods instead.
   IsarCollection<T> getCollection<T>() {
     requireOpen();
-    return _collections[T] as IsarCollection<T>;
+    return _collections[T]! as IsarCollection<T>;
   }
 
   /// @nodoc
   @protected
   IsarCollection<T> getCollectionInternal<T>() {
     requireOpen();
-    return _collections[T] as IsarCollection<T>;
+    return _collections[T]! as IsarCollection<T>;
   }
 
   /// @nodoc
   @protected
   IsarCollection<dynamic>? getCollectionByNameInternal(String name) {
-    return _collectionsByName[name] as IsarCollection<dynamic>;
+    return _collectionsByName[name];
   }
 
   /// Remove all data in this instance and reset the auto increment values.
   Future<void> clear() async {
-    for (final IsarCollection col in _collections.values) {
+    for (final col in _collections.values) {
       await col.clear();
     }
   }
 
   /// Remove all data in this instance and reset the auto increment values.
   void clearSync() {
-    for (final IsarCollection col in _collections.values) {
+    for (final col in _collections.values) {
       col.clearSync();
     }
   }
@@ -199,13 +200,14 @@ abstract class Isar {
         _schema = null;
       }
     }
-    for (final IsarCloseCallback callback in _closeCallbacks) {
+    for (final callback in _closeCallbacks) {
       callback(name);
     }
     return Future.value(false);
   }
 
-  /// Returns the schema of this Instance. You should avoid usint the schema directly.
+  /// Returns the schema of this Instance. You should avoid usint the schema
+  /// directly.
   @protected
   static String? get schema => _schema;
 

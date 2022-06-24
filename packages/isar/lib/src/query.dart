@@ -90,7 +90,7 @@ abstract class Query<T> {
   /// {@endtemplate}
   Future<List<Map<String, dynamic>>> exportJson() {
     return exportJsonRaw((Uint8List bytes) {
-      final List json = jsonDecode(const Utf8Decoder().convert(bytes)) as List;
+      final json = jsonDecode(const Utf8Decoder().convert(bytes)) as List;
       return json.cast<Map<String, dynamic>>();
     });
   }
@@ -98,7 +98,7 @@ abstract class Query<T> {
   /// {@macro query_export_json}
   List<Map<String, dynamic>> exportJsonSync() {
     return exportJsonRawSync((Uint8List bytes) {
-      final List json = jsonDecode(const Utf8Decoder().convert(bytes)) as List;
+      final json = jsonDecode(const Utf8Decoder().convert(bytes)) as List;
       return json.cast<Map<String, dynamic>>();
     });
   }
@@ -107,10 +107,19 @@ abstract class Query<T> {
 /// @nodoc
 @protected
 enum AggregationOp {
+  /// Finds the smallest value.
   min,
+
+  /// Finds the largest value.
   max,
+
+  /// Calculates the sum of all values.
   sum,
+
+  /// Calculates the average of all values.
   average,
+
+  /// Counts all values.
   count,
 }
 

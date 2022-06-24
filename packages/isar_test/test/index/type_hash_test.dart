@@ -1,10 +1,10 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'util/common.dart';
-import 'util/sync_async_helper.dart';
+import '../util/common.dart';
+import '../util/sync_async_helper.dart';
 
-part 'index_type_hash_test.g.dart';
+part 'type_hash_test.g.dart';
 
 @Collection()
 class HashIndexesModel {
@@ -17,7 +17,6 @@ class HashIndexesModel {
     required this.stringListSensitiveIndex,
     required this.stringListInsensitiveIndex,
   });
-
   int? id;
 
   @Index(type: IndexType.hash, caseSensitive: true)
@@ -30,18 +29,19 @@ class HashIndexesModel {
   List<bool> boolListIndex;
 
   @Index(type: IndexType.hash)
-  List<DateTime> dateTimeListIndex;
+  List<int> intListIndex;
 
   @Index(type: IndexType.hash)
-  List<int> intListIndex;
+  List<DateTime> dateTimeListIndex;
 
   @Index(type: IndexType.hash, caseSensitive: true)
   List<String> stringListSensitiveIndex;
 
-  @Index(type: IndexType.hash)
+  @Index(type: IndexType.hash, caseSensitive: false)
   List<String> stringListInsensitiveIndex;
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is HashIndexesModel &&
@@ -53,21 +53,26 @@ class HashIndexesModel {
           listEquals(intListIndex, other.intListIndex) &&
           listEquals(dateTimeListIndex, other.dateTimeListIndex) &&
           listEquals(
-              stringListSensitiveIndex, other.stringListSensitiveIndex) &&
+            stringListSensitiveIndex,
+            other.stringListSensitiveIndex,
+          ) &&
           listEquals(
-              stringListInsensitiveIndex, other.stringListInsensitiveIndex);
+            stringListInsensitiveIndex,
+            other.stringListInsensitiveIndex,
+          );
 
   @override
   String toString() {
-    return 'HashIndexesModel{stringSensitiveIndex: $stringSensitiveIndex, stringInsensitiveIndex: $stringInsensitiveIndex, boolListIndex: $boolListIndex, intListIndex: $intListIndex, dateTimeListIndex: $dateTimeListIndex, stringListSensitiveIndex: $stringListSensitiveIndex, stringListInsensitiveIndex: $stringListInsensitiveIndex}';
+    return 'HashIndexesModel{stringSensitiveIndex: $stringSensitiveIndex, '
+        'stringInsensitiveIndex: $stringInsensitiveIndex, boolListIndex: '
+        '$boolListIndex, intListIndex: $intListIndex, dateTimeListIndex: '
+        '$dateTimeListIndex, stringListSensitiveIndex: '
+        '$stringListSensitiveIndex, stringListInsensitiveIndex: '
+        '$stringListInsensitiveIndex}';
   }
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Index hash type', () {
     late Isar isar;
     late HashIndexesModel model0;
@@ -82,19 +87,16 @@ void tests() {
           stringInsensitiveIndex: 'John Smith',
           boolListIndex: [true, true, false],
           intListIndex: [1, 99, 42],
-          dateTimeListIndex: <DateTime>[
-            DateTime(2001, 4, 4),
-            DateTime(1995, 7, 27)
-          ],
-          stringListSensitiveIndex: <String>['FOO'],
-          stringListInsensitiveIndex: <String>['loREM', 'IPSum'],
+          dateTimeListIndex: [DateTime(2001, 4, 4), DateTime(1995, 7, 27)],
+          stringListSensitiveIndex: ['FOO'],
+          stringListInsensitiveIndex: ['loREM', 'IPSum'],
         );
         model1 = HashIndexesModel(
           stringSensitiveIndex: 'mY INDEX',
           stringInsensitiveIndex: 'jOHN SMiTh',
           boolListIndex: List.filled(100, true),
           intListIndex: [6, -5],
-          dateTimeListIndex: <DateTime>[DateTime(1992, 1, 24)],
+          dateTimeListIndex: [DateTime(1992, 1, 24)],
           stringListSensitiveIndex: ['foo', 'bar'],
           stringListInsensitiveIndex: ['LORem', 'ipsum'],
         );
@@ -152,7 +154,7 @@ void tests() {
     isarTest('Query List<String> sensitive index', () async {
       final result = await isar.hashIndexesModels
           .where()
-          .stringListSensitiveIndexEqualTo(<String>[]).tFindAll();
+          .stringListSensitiveIndexEqualTo([]).tFindAll();
       expect(result, <HashIndexesModel>[]);
     });
 

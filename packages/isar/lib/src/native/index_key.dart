@@ -1,28 +1,54 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
-import '../../isar.dart';
+import 'package:isar/isar.dart';
 
-import 'bindings.dart';
-import 'isar_core.dart';
-import 'query_build.dart';
+import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/isar_core.dart';
+import 'package:isar/src/native/query_build.dart';
 
-final Pointer<Pointer<CIndexKey>> _keyPtrPtr = malloc<Pointer<CIndexKey>>();
+final _keyPtrPtr = malloc<Pointer<CIndexKey>>();
 
-Pointer<CIndexKey> buildIndexKey(
-    CollectionSchema<dynamic> schema, String indexName, IndexKey key) {
-  final List<IndexValueType> types = schema.indexValueTypeOrErr(indexName);
-  if (key.length > types.length) {
-    // ignore: only_throw_errors
-    throw 'Invalid values for index $indexName';
+Pointer<CIndexKey>? buildIndexKey(
+  CollectionSchema<dynamic> schema,
+  String indexName,
+  IndexKey key, {
+  bool addMaxComposite = false,
+  bool requireFullKey = false,
+  bool increase = false,
+  bool decrease = false,
+}) {
+  final types = schema.indexValueTypeOrErr(indexName);
+  if (key.length > types.length ||
+      (requireFullKey && key.length != types.length)) {
+    throw IsarError('Invalid values for index $indexName.');
   }
 
   IC.isar_key_create(_keyPtrPtr);
-  final Pointer<CIndexKey> keyPtr = _keyPtrPtr.value;
+  final keyPtr = _keyPtrPtr.value;
 
-  for (int i = 0; i < key.length; i++) {
+  for (var i = 0; i < key.length; i++) {
     _addKeyValue(keyPtr, key[i], types[i]);
+  }
+
+  if (increase) {
+    if (!IC.isar_key_increase(keyPtr)) {
+      return null;
+    }
+  }
+
+  if (decrease) {
+    if (!IC.isar_key_decrease(keyPtr)) {
+      return null;
+    }
+  }
+
+  // Also include composite indexes for upper keys
+  if (addMaxComposite && types.length > key.length) {
+    IC.isar_key_add_long(keyPtr, maxLong);
   }
 
   return keyPtr;
@@ -35,19 +61,23 @@ Pointer<CIndexKey> buildLowerUnboundedIndexKey() {
 
 Pointer<CIndexKey> buildUpperUnboundedIndexKey() {
   IC.isar_key_create(_keyPtrPtr);
-  final Pointer<CIndexKey> keyPtr = _keyPtrPtr.value;
+  final keyPtr = _keyPtrPtr.value;
   IC.isar_key_add_long(keyPtr, maxLong);
 
   return keyPtr;
 }
 
 void _addKeyValue(
-    Pointer<CIndexKey> keyPtr, Object? value, IndexValueType type) {
+  Pointer<CIndexKey> keyPtr,
+  Object? value,
+  IndexValueType type,
+) {
   if (value is DateTime) {
     value = value.toUtc().microsecondsSinceEpoch;
   } else if (value is List<DateTime?>) {
-    value = value.map((DateTime? e) => e?.toUtc().microsecondsSinceEpoch);
+    value = value.map((e) => e?.toUtc().microsecondsSinceEpoch);
   }
+
   switch (type) {
     case IndexValueType.bool:
       IC.isar_key_add_byte(keyPtr, boolToByte(value as bool?));
@@ -66,15 +96,18 @@ void _addKeyValue(
       break;
     case IndexValueType.string:
     case IndexValueType.stringCIS:
-      final Pointer<Char> strPtr = _strToNative(value as String?);
+      final strPtr = _strToNative(value as String?);
       IC.isar_key_add_string(keyPtr, strPtr, type == IndexValueType.string);
       _freeStr(strPtr);
       break;
     case IndexValueType.stringHash:
     case IndexValueType.stringHashCIS:
-      final Pointer<Char> strPtr = _strToNative(value as String?);
+      final strPtr = _strToNative(value as String?);
       IC.isar_key_add_string_hash(
-          keyPtr, strPtr, type == IndexValueType.stringHash);
+        keyPtr,
+        strPtr,
+        type == IndexValueType.stringHash,
+      );
       _freeStr(strPtr);
       break;
     case IndexValueType.bytesHash:
@@ -82,7 +115,7 @@ void _addKeyValue(
         IC.isar_key_add_byte_list_hash(keyPtr, nullptr, 0);
       } else {
         value as Uint8List;
-        final Pointer<Uint8> bytesPtr = malloc<Uint8>(value.length);
+        final bytesPtr = malloc<Uint8>(value.length);
         bytesPtr.asTypedList(value.length).setAll(0, value);
         IC.isar_key_add_byte_list_hash(keyPtr, bytesPtr, value.length);
         malloc.free(bytesPtr);
@@ -93,7 +126,7 @@ void _addKeyValue(
         IC.isar_key_add_byte_list_hash(keyPtr, nullptr, 0);
       } else {
         value as List<bool?>;
-        final Pointer<Uint8> boolListPtr = malloc<Uint8>(value.length);
+        final boolListPtr = malloc<Uint8>(value.length);
         boolListPtr.asTypedList(value.length).setAll(0, value.map(boolToByte));
         IC.isar_key_add_byte_list_hash(keyPtr, boolListPtr, value.length);
         malloc.free(boolListPtr);
@@ -104,10 +137,10 @@ void _addKeyValue(
         IC.isar_key_add_int_list_hash(keyPtr, nullptr, 0);
       } else {
         value as List<int?>;
-        final Pointer<Int32> intListPtr = malloc<Int32>(value.length);
+        final intListPtr = malloc<Int32>(value.length);
         intListPtr
             .asTypedList(value.length)
-            .setAll(0, value.map((int? e) => e ?? nullInt));
+            .setAll(0, value.map((e) => e ?? nullInt));
         IC.isar_key_add_int_list_hash(keyPtr, intListPtr, value.length);
         malloc.free(intListPtr);
       }
@@ -117,10 +150,10 @@ void _addKeyValue(
         IC.isar_key_add_long_list_hash(keyPtr, nullptr, 0);
       } else {
         value as List<int?>;
-        final Pointer<Int64> longListPtr = malloc<Int64>(value.length);
+        final longListPtr = malloc<Int64>(value.length);
         longListPtr
             .asTypedList(value.length)
-            .setAll(0, value.map((int? e) => e ?? nullLong));
+            .setAll(0, value.map((e) => e ?? nullLong));
         IC.isar_key_add_long_list_hash(keyPtr, longListPtr, value.length);
         malloc.free(longListPtr);
       }
@@ -131,14 +164,17 @@ void _addKeyValue(
         IC.isar_key_add_string_list_hash(keyPtr, nullptr, 0, false);
       } else {
         value as List<String?>;
-        final Pointer<Pointer<Char>> stringListPtr =
-            malloc<Pointer<Char>>(value.length);
-        for (int i = 0; i < value.length; i++) {
+        final stringListPtr = malloc<Pointer<Char>>(value.length);
+        for (var i = 0; i < value.length; i++) {
           stringListPtr[i] = _strToNative(value[i]);
         }
-        IC.isar_key_add_string_list_hash(keyPtr, stringListPtr, value.length,
-            type == IndexValueType.stringListHash);
-        for (int i = 0; i < value.length; i++) {
+        IC.isar_key_add_string_list_hash(
+          keyPtr,
+          stringListPtr,
+          value.length,
+          type == IndexValueType.stringListHash,
+        );
+        for (var i = 0; i < value.length; i++) {
           _freeStr(stringListPtr[i]);
         }
       }

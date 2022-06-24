@@ -8,10 +8,6 @@ import 'util/common.dart';
 import 'util/sync_async_helper.dart';
 
 void main() {
-  testSyncAsync(tests);
-}
-
-Future<void> tests() async {
   group('Query property', () {
     late Isar isar;
 

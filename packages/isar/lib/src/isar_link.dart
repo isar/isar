@@ -42,8 +42,12 @@ abstract class IsarLinkBase<OBJ> {
 
   /// @nodoc
   @protected
-  void attach(IsarCollection<dynamic> sourceCollection,
-      IsarCollection<OBJ> targetCollection, String linkName, int? objectId);
+  void attach(
+    IsarCollection<dynamic> sourceCollection,
+    IsarCollection<OBJ> targetCollection,
+    String linkName,
+    int? objectId,
+  );
 }
 
 /// Establishes a 1:1 relationship with the same or another collection. The

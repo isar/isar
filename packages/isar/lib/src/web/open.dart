@@ -1,13 +1,15 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:convert';
 import 'dart:html';
 import 'dart:js_util';
 
-import '../../isar.dart';
-import '../version.dart';
+import 'package:isar/isar.dart';
+import 'package:isar/src/version.dart';
 
-import 'bindings.dart';
-import 'isar_collection_impl.dart';
-import 'isar_impl.dart';
+import 'package:isar/src/web/bindings.dart';
+import 'package:isar/src/web/isar_collection_impl.dart';
+import 'package:isar/src/web/isar_impl.dart';
 
 bool _loaded = false;
 Future<void> initializeIsarWeb() async {
@@ -16,17 +18,18 @@ Future<void> initializeIsarWeb() async {
   }
   _loaded = true;
 
-  final ScriptElement script = ScriptElement();
+  final script = ScriptElement();
   script.type = 'text/javascript';
   // ignore: unsafe_html
   script.src = 'https://unpkg.com/isar@$isarWebVersion/dist/index.js';
   script.async = true;
-  assert(document.head != null);
   document.head!.append(script);
-  await script.onLoad.first.timeout(const Duration(seconds: 30), onTimeout: () {
-    // ignore: only_throw_errors
-    throw IsarError('Failed to load Isar');
-  });
+  await script.onLoad.first.timeout(
+    const Duration(seconds: 30),
+    onTimeout: () {
+      throw IsarError('Failed to load Isar');
+    },
+  );
 }
 
 Future<Isar> openIsar({
@@ -35,25 +38,24 @@ Future<Isar> openIsar({
   required List<CollectionSchema<dynamic>> schemas,
 }) async {
   await initializeIsarWeb();
-  final String schemaStr =
-      '[${schemas.map((CollectionSchema e) => e.schema).join(',')}]';
+  final schemaStr = '[${schemas.map((e) => e.schema).join(',')}]';
 
-  final Iterable schemasJson = schemas.map((CollectionSchema e) {
-    final json = jsonDecode(e.schema);
+  final schemasJson = schemas.map((e) {
+    final json = jsonDecode(e.schema) as Map<String, dynamic>;
     json['idName'] = e.idName;
     return json;
   });
-  final List schemasJs = jsify(schemasJson) as List<dynamic>;
-  final IsarInstanceJs instance =
-      await openIsarJs(name, schemasJs, relaxedDurability).wait();
-  final IsarImpl isar = IsarImpl(name, schemaStr, instance);
-  final Map<Type, IsarCollection> cols = <Type, IsarCollection<dynamic>>{};
-  for (final CollectionSchema schema in schemas) {
-    final IsarCollectionJs col = instance.getCollection(schema.name);
+  final schemasJs = jsify(schemasJson) as List<dynamic>;
+  final instance = await openIsarJs(name, schemasJs, relaxedDurability)
+      .wait<IsarInstanceJs>();
+  final isar = IsarImpl(name, schemaStr, instance);
+  final cols = <Type, IsarCollection<dynamic>>{};
+  for (final schema in schemas) {
+    final col = instance.getCollection(schema.name);
     schema.toCollection(<OBJ>() {
       schema as CollectionSchema<OBJ>;
-      final Set<String> compositeIndexes = <String>{};
-      for (final String indexName in schema.indexValueTypes.keys) {
+      final compositeIndexes = <String>{};
+      for (final indexName in schema.indexValueTypes.keys) {
         if (schema.indexValueTypes[indexName]!.length > 1) {
           compositeIndexes.add(indexName);
         }

@@ -1,9 +1,9 @@
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 
-import '../helper.dart';
-import '../isar_type.dart';
-import '../object_info.dart';
+import 'package:isar_generator/src/helper.dart';
+import 'package:isar_generator/src/isar_type.dart';
+import 'package:isar_generator/src/object_info.dart';
 
 class WhereGenerator {
   WhereGenerator(this.object)
@@ -12,15 +12,15 @@ class WhereGenerator {
   final ObjectInfo object;
   final String objName;
   final ObjectProperty id;
-  final Set<String> existing = <String>{};
+  final existing = <String>{};
 
   String generate() {
-    String code =
-        'extension ${objName}QueryWhereSort on QueryBuilder<$objName, $objName, QWhere> {';
+    var code = 'extension ${objName}QueryWhereSort on QueryBuilder<$objName, '
+        '$objName, QWhere> {';
 
     code += generateAnyId();
-    for (final ObjectIndex index in object.indexes) {
-      code += generateAny(index.name, index.properties);
+    for (final index in object.indexes) {
+      code += generateAny(index);
     }
 
     code += '''
@@ -35,32 +35,34 @@ class WhereGenerator {
     code += generateWhereIdLessThan();
     code += generateWhereIdBetween();
 
-    for (final ObjectIndex index in object.indexes) {
-      for (int n = 0; n < index.properties.length; n++) {
-        final List<ObjectIndexProperty> properties =
-            index.properties.sublist(0, n + 1);
+    for (final index in object.indexes) {
+      for (var n = 0; n < index.properties.length; n++) {
+        final property = index.properties[n];
 
-        final ObjectIndexProperty lastProperty = properties.last;
-        if (!properties.containsFloat) {
-          code += generateWhereEqualTo(index.name, properties);
-          code += generateWhereNotEqualTo(index.name, properties);
+        if (!property.property.isarType.containsFloat) {
+          code += generateWhereEqualTo(index, n + 1);
+          code += generateWhereNotEqualTo(index, n + 1);
         }
 
-        if (index.properties.length == 1 && lastProperty.property.nullable) {
-          code += generateWhereIsNull(index.name, lastProperty);
-          code += generateWhereIsNotNull(index.name, lastProperty);
+        if (property.property.nullable) {
+          code += generateWhereIsNull(index, n + 1);
+          code += generateWhereIsNotNull(index, n + 1);
         }
 
-        if (lastProperty.type != IndexType.hash) {
-          if (lastProperty.scalarType != IsarType.bool) {
-            code += generateWhereGreaterThan(index.name, properties);
-            code += generateWhereLessThan(index.name, properties);
-            code += generateWhereBetween(index.name, properties);
+        if (property.type != IndexType.hash) {
+          if (property.scalarType != IsarType.bool) {
+            code += generateWhereGreaterThan(index, n + 1);
+            code += generateWhereLessThan(index, n + 1);
+            code += generateWhereBetween(index, n + 1);
           }
 
-          if (lastProperty.scalarType == IsarType.string) {
-            code += generateWhereStartsWith(index.name, properties);
+          if (property.scalarType == IsarType.string) {
+            code += generateWhereStartsWith(index, n + 1);
           }
+        }
+
+        if (property.property.isarType.containsFloat) {
+          break;
         }
       }
     }
@@ -68,31 +70,38 @@ class WhereGenerator {
     return '$code}';
   }
 
-  String joinToName(List<ObjectIndexProperty> properties, bool firstEqualTo) {
-    String propertyName(ObjectIndexProperty p, int i) {
-      if (i == 0) {
-        return p.property.dartName.decapitalize();
-      } else {
-        return p.property.dartName.capitalize();
+  String getMethodName(ObjectIndex index, int propertyCount, [String? method]) {
+    String propertyName(ObjectIndexProperty p) {
+      var name = p.property.dartName.capitalize();
+      if (p.isMultiEntry) {
+        name += 'Element';
       }
+      return name;
     }
 
-    String firstPropertiesName = properties
-        .sublist(0, properties.length - 1)
-        .mapIndexed((int i, ObjectIndexProperty p) => propertyName(p, i))
-        .join();
-
-    if (firstPropertiesName.isNotEmpty && firstEqualTo) {
-      firstPropertiesName += 'EqualTo';
+    var name = '';
+    final eqProperties =
+        index.properties.sublist(0, propertyCount - (method != null ? 1 : 0));
+    if (eqProperties.isNotEmpty) {
+      name += eqProperties.map(propertyName).join();
+      name += 'EqualTo';
     }
 
-    firstPropertiesName += propertyName(properties.last, properties.lastIndex);
-    if (properties.last.isarType.isList &&
-        properties.last.type != IndexType.hash) {
-      firstPropertiesName += 'Any';
+    if (method != null) {
+      name += propertyName(index.properties[propertyCount - 1]);
+      name += method;
     }
 
-    return firstPropertiesName;
+    final remainingProperties = propertyCount < index.properties.length
+        ? index.properties.sublist(propertyCount)
+        : null;
+
+    if (remainingProperties != null) {
+      name += 'Any';
+      name += remainingProperties.map(propertyName).join();
+    }
+
+    return name.decapitalize();
   }
 
   String paramType(ObjectIndexProperty p) {
@@ -113,16 +122,16 @@ class WhereGenerator {
 
   String joinToParams(List<ObjectIndexProperty> properties) {
     return properties
-        .map((ObjectIndexProperty it) => '${paramType(it)} ${paramName(it)}')
+        .map((it) => '${paramType(it)} ${paramName(it)}')
         .join(',');
   }
 
   String joinToValues(List<ObjectIndexProperty> properties) {
-    return properties.map((ObjectIndexProperty it) {
+    return properties.map((it) {
       if (it.property.isarType.isList && it.type != IndexType.hash) {
         return '${it.property.dartName}Element';
       } else {
-        return it.property.toIsar(it.property.dartName, object);
+        return it.property.toIsar(paramName(it), object);
       }
     }).join(', ');
   }
@@ -130,21 +139,25 @@ class WhereGenerator {
   String generateAnyId() {
     return '''
     QueryBuilder<$objName, $objName, QAfterWhere> any${id.dartName.capitalize()}() {
-      return addWhereClauseInternal(const IdWhereClause.any());
+      return QueryBuilder.apply(this, (query) {
+        return query.addWhereClause(const IdWhereClause.any());
+      });
     }
     ''';
   }
 
-  String generateAny(String indexName, List<ObjectIndexProperty> properties) {
-    final String name = 'any${joinToName(properties, false).capitalize()}';
+  String generateAny(ObjectIndex index) {
+    final name = getMethodName(index, 0);
     if (!existing.add(name)) {
       return '';
     }
     return '''
     QueryBuilder<$objName, $objName, QAfterWhere> $name() {
-      return addWhereClauseInternal(
-        const IndexWhereClause.any(indexName: '${indexName.esc}')
-      );
+      return QueryBuilder.apply(this, (query) {
+        return query.addWhereClause(
+          const IndexWhereClause.any(indexName: '${index.name.esc}'),
+        );
+      });
     }
     ''';
   }
@@ -152,278 +165,334 @@ class WhereGenerator {
   String get mPrefix => 'QueryBuilder<$objName, $objName, QAfterWhereClause>';
 
   String generateWhereIdEqualTo() {
-    final String idName = id.dartName.decapitalize();
+    final idName = id.dartName.decapitalize();
     return '''
     $mPrefix ${idName}EqualTo(int $idName) {
-      return addWhereClauseInternal( IdWhereClause.between(
-        lower: $idName,
-        includeLower: true,
-        upper: $idName,
-        includeUpper: true,
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addWhereClause(IdWhereClause.between(
+          lower: $idName,
+          includeLower: true,
+          upper: $idName,
+          includeUpper: true,
+        ));
+      });
     }
     ''';
   }
 
-  String generateWhereEqualTo(
-      String indexName, List<ObjectIndexProperty> properties) {
-    final String name = '${joinToName(properties, false)}EqualTo';
+  String generateWhereEqualTo(ObjectIndex index, int propertyCount) {
+    final name = getMethodName(index, propertyCount);
     if (!existing.add(name)) {
       return '';
     }
 
-    final String values = joinToValues(properties);
-    final String params = joinToParams(properties);
+    final properties = index.properties.takeFirst(propertyCount);
+    final values = joinToValues(properties);
+    final params = joinToParams(properties);
     return '''
     $mPrefix $name($params) {
-      return addWhereClauseInternal(IndexWhereClause.equalTo(
-        indexName: '${indexName.esc}',
-        value: [$values],
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addWhereClause(IndexWhereClause.equalTo(
+          indexName: '${index.name.esc}',
+          value: [$values],
+        ));
+      });
     }
     ''';
   }
 
   String generateWhereIdNotEqualTo() {
-    final String idName = id.dartName.decapitalize();
+    final idName = id.dartName.decapitalize();
     return '''
     $mPrefix ${idName}NotEqualTo(int $idName) {
-      if (whereSortInternal == Sort.asc) {
-        return addWhereClauseInternal(
-          IdWhereClause.lessThan(upper: $idName, includeUpper: false),
-        ).addWhereClauseInternal(
-          IdWhereClause.greaterThan(lower: $idName, includeLower: false),
-        );
-      } else {
-        return addWhereClauseInternal(
-          IdWhereClause.greaterThan(lower: $idName, includeLower: false),
-        ).addWhereClauseInternal(
-          IdWhereClause.lessThan(upper: $idName, includeUpper: false),
-        );
-      }
+      return QueryBuilder.apply(this, (query) {
+        if (query.whereSort == Sort.asc) {
+          return query.addWhereClause(
+            IdWhereClause.lessThan(upper: $idName, includeUpper: false),
+          ).addWhereClause(
+            IdWhereClause.greaterThan(lower: $idName, includeLower: false),
+          );
+        } else {
+          return query.addWhereClause(
+            IdWhereClause.greaterThan(lower: $idName, includeLower: false),
+          ).addWhereClause(
+            IdWhereClause.lessThan(upper: $idName, includeUpper: false),
+          );
+        }
+      });
     }
     ''';
   }
 
-  String generateWhereNotEqualTo(
-      String indexName, List<ObjectIndexProperty> properties) {
-    final String name = '${joinToName(properties, false)}NotEqualTo';
+  String generateWhereNotEqualTo(ObjectIndex index, int propertyCount) {
+    final name = getMethodName(index, propertyCount, 'NotEqualTo');
     if (!existing.add(name)) {
       return '';
     }
 
-    final String values = joinToValues(properties);
-    final String params = joinToParams(properties);
+    final properties = index.properties.takeFirst(propertyCount);
+    final params = joinToParams(properties);
+
+    final equalProperties = properties.dropLast(1);
+    final notEqualProperty = properties.last;
+    final equalValues = joinToValues(equalProperties);
+    var notEqualValue = joinToValues([notEqualProperty]);
+    if (equalValues.isNotEmpty) {
+      notEqualValue = ',$notEqualValue';
+    }
+
     return '''
     $mPrefix $name($params) {
-      if (whereSortInternal == Sort.asc) {
-        return addWhereClauseInternal(IndexWhereClause.lessThan(
-          indexName: '${indexName.esc}',
-          upper: [$values],
-          includeUpper: false,
-        )).addWhereClauseInternal(IndexWhereClause.greaterThan(
-          indexName: '${indexName.esc}',
-          lower: [$values],
-          includeLower: false,
-        ));
-      } else {
-        return addWhereClauseInternal(IndexWhereClause.greaterThan(
-          indexName: '${indexName.esc}',
-          lower: [$values],
-          includeLower: false,
-        )).addWhereClauseInternal(IndexWhereClause.lessThan(
-          indexName: '${indexName.esc}',
-          upper: [$values],
-          includeUpper: false,
-        ));
-      }
+      return QueryBuilder.apply(this, (query) {
+        if (query.whereSort == Sort.asc) {
+          return query.addWhereClause(IndexWhereClause.between(
+            indexName: '${index.name.esc}',
+            lower: [$equalValues],
+            includeLower: true,
+            upper: [$equalValues $notEqualValue],
+            includeUpper: false,
+          )).addWhereClause(IndexWhereClause.between(
+            indexName: '${index.name.esc}',
+            lower: [$equalValues $notEqualValue],
+            includeLower: false,
+            upper: [$equalValues],
+            includeUpper: true,
+          ));
+        } else {
+          return query.addWhereClause(IndexWhereClause.between(
+            indexName: '${index.name.esc}',
+            lower: [$equalValues $notEqualValue],
+            includeLower: false,
+            upper: [$equalValues],
+            includeUpper: true,
+          )).addWhereClause(IndexWhereClause.between(
+            indexName: '${index.name.esc}',
+            lower: [$equalValues],
+            includeLower: true,
+            upper: [$equalValues $notEqualValue],
+            includeUpper: false,
+          ));
+        }
+      });
     }
     ''';
   }
 
   String generateWhereIdGreaterThan() {
-    final String idName = id.dartName.decapitalize();
+    final idName = id.dartName.decapitalize();
     return '''
     $mPrefix ${idName}GreaterThan(int $idName, {bool include = false}) {
-      return addWhereClauseInternal(
-        IdWhereClause.greaterThan(lower: $idName, includeLower: include),
-      );
+      return QueryBuilder.apply(this, (query) {
+        return query.addWhereClause(
+          IdWhereClause.greaterThan(lower: $idName, includeLower: include),
+        );
+      });
     }
     ''';
   }
 
-  String generateWhereGreaterThan(
-      String indexName, List<ObjectIndexProperty> properties) {
-    final String name = '${joinToName(properties, true)}GreaterThan';
+  String generateWhereGreaterThan(ObjectIndex index, int propertyCount) {
+    final name = getMethodName(index, propertyCount, 'GreaterThan');
     if (!existing.add(name)) {
       return '';
     }
 
-    final String include =
+    final properties = index.properties.takeFirst(propertyCount);
+    final include =
         !properties.containsFloat ? ', {bool include = false,}' : '';
     return '''
     $mPrefix $name(${joinToParams(properties)} $include) {
-      return addWhereClauseInternal(IndexWhereClause.greaterThan(
-        indexName: '${indexName.esc}',
-        lower: [${joinToValues(properties)}],
-        includeLower: ${!properties.containsFloat ? 'include' : 'false'},
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addWhereClause(IndexWhereClause.between(
+          indexName: '${index.name.esc}',
+          lower: [${joinToValues(properties)}],
+          includeLower: ${!properties.containsFloat ? 'include' : 'false'},
+          upper: [${joinToValues(properties.dropLast(1))}],
+          includeUpper: true,
+        ));
+      });
     }
     ''';
   }
 
   String generateWhereIdLessThan() {
-    final String idName = id.dartName.decapitalize();
+    final idName = id.dartName.decapitalize();
     return '''
     $mPrefix ${idName}LessThan(int $idName, {bool include = false}) {
-      return addWhereClauseInternal(
-        IdWhereClause.lessThan(upper: $idName, includeUpper: include),
-      );
+      return QueryBuilder.apply(this, (query) {
+        return query.addWhereClause(
+          IdWhereClause.lessThan(upper: $idName, includeUpper: include),
+        );
+      });
     }
     ''';
   }
 
-  String generateWhereLessThan(
-      String indexName, List<ObjectIndexProperty> properties) {
-    final String name = '${joinToName(properties, true)}LessThan';
+  String generateWhereLessThan(ObjectIndex index, int propertyCount) {
+    final name = getMethodName(index, propertyCount, 'LessThan');
     if (!existing.add(name)) {
       return '';
     }
 
-    final String include =
+    final properties = index.properties.takeFirst(propertyCount);
+    final include =
         !properties.containsFloat ? ', {bool include = false,}' : '';
     return '''
     $mPrefix $name(${joinToParams(properties)} $include) {
-      return addWhereClauseInternal(IndexWhereClause.lessThan(
-        indexName: '${indexName.esc}',
-        upper: [${joinToValues(properties)}],
-        includeUpper: ${!properties.containsFloat ? 'include' : 'false'},
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addWhereClause(IndexWhereClause.between(
+          indexName: '${index.name.esc}',
+          lower: [${joinToValues(properties.dropLast(1))}],
+          includeLower: true,
+          upper: [${joinToValues(properties)}],
+          includeUpper: ${!properties.containsFloat ? 'include' : 'false'},
+        ));
+      });
     }
     ''';
   }
 
   String generateWhereIdBetween() {
-    final String idName = id.dartName.decapitalize();
-    final String lowerName = 'lower${id.dartName.capitalize()}';
-    final String upperName = 'upper${id.dartName.capitalize()}';
+    final idName = id.dartName.decapitalize();
+    final lowerName = 'lower${id.dartName.capitalize()}';
+    final upperName = 'upper${id.dartName.capitalize()}';
     return '''
     $mPrefix ${idName}Between(int $lowerName,int $upperName, {bool includeLower = true, bool includeUpper = true,}) {
-      return addWhereClauseInternal(IdWhereClause.between(
-        lower: $lowerName,
-        includeLower: includeLower,
-        upper: $upperName,
-        includeUpper: includeUpper,
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addWhereClause(IdWhereClause.between(
+          lower: $lowerName,
+          includeLower: includeLower,
+          upper: $upperName,
+          includeUpper: includeUpper,
+        ));
+      });
     }
   ''';
   }
 
-  String generateWhereBetween(
-      String indexName, List<ObjectIndexProperty> properties) {
-    final List<ObjectIndexProperty> firstPs =
-        properties.sublist(0, properties.length - 1);
-    final ObjectIndexProperty lastP = properties.last;
-    final String name = '${joinToName(properties, true)}Between';
+  String generateWhereBetween(ObjectIndex index, int propertyCount) {
+    final name = getMethodName(index, propertyCount, 'Between');
     if (!existing.add(name)) {
       return '';
     }
 
-    String params = joinToParams(firstPs);
+    final properties = index.properties.takeFirst(propertyCount);
+    final equalProperties = properties.dropLast(1);
+    final betweenProperty = properties.last;
+    var params = joinToParams(equalProperties);
     if (params.isNotEmpty) {
       params += ',';
     }
 
-    final String lowerName = 'lower${paramName(lastP).capitalize()}';
-    final String upperName = 'upper${paramName(lastP).capitalize()}';
-    params += '${paramType(lastP)} $lowerName, ${paramType(lastP)} $upperName';
+    final betweenType = paramType(betweenProperty);
+    final lowerName = 'lower${paramName(betweenProperty).capitalize()}';
+    final upperName = 'upper${paramName(betweenProperty).capitalize()}';
+    params += '$betweenType $lowerName, $betweenType $upperName';
 
-    String values = joinToValues(firstPs);
+    var values = joinToValues(equalProperties);
     if (values.isNotEmpty) {
       values += ',';
     }
 
-    final String include = !properties.containsFloat
-        ? ', {bool includeLower = true, bool includeUpper = true,}'
-        : '';
+    final float = properties.containsFloat;
+    final include =
+        !float ? ', {bool includeLower = true, bool includeUpper = true,}' : '';
     return '''
     $mPrefix $name($params $include) {
-      return addWhereClauseInternal(IndexWhereClause.between(
-        indexName: '${indexName.esc}',
-        lower: [$values $lowerName],
-        includeLower: ${!properties.containsFloat ? 'includeLower' : 'false'},
-        upper: [$values $upperName],
-        includeUpper: ${!properties.containsFloat ? 'includeUpper' : 'false'},
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addWhereClause(IndexWhereClause.between(
+          indexName: '${index.name.esc}',
+          lower: [$values $lowerName],
+          includeLower: ${!float ? 'includeLower' : 'false'},
+          upper: [$values $upperName],
+          includeUpper: ${!float ? 'includeUpper' : 'false'},
+        ));
+      });
     }
   ''';
   }
 
-  String generateWhereIsNull(
-      String indexName, ObjectIndexProperty indexProperty) {
-    final String name = '${joinToName([indexProperty], false)}IsNull';
+  String generateWhereIsNull(ObjectIndex index, int propertyCount) {
+    final name = getMethodName(index, propertyCount, 'IsNull');
     if (!existing.add(name)) {
       return '';
     }
 
+    final properties = index.properties.takeFirst(propertyCount - 1);
+    var values = joinToValues(properties);
+    if (values.isNotEmpty) {
+      values += ',';
+    }
+    final params = joinToParams(properties);
     return '''
-    $mPrefix $name() {
-      return addWhereClauseInternal(const IndexWhereClause.equalTo(
-        indexName: '${indexName.esc}',
-        value: [null],
-      ));
+    $mPrefix $name($params) {
+      return QueryBuilder.apply(this, (query) {
+        return query.addWhereClause(IndexWhereClause.equalTo(
+          indexName: '${index.name.esc}',
+          value: [$values null],
+        ));
+      });
     }
     ''';
   }
 
-  String generateWhereIsNotNull(
-      String indexName, ObjectIndexProperty indexProperty) {
-    final String name = '${joinToName([indexProperty], false)}IsNotNull';
+  String generateWhereIsNotNull(ObjectIndex index, int propertyCount) {
+    final name = getMethodName(index, propertyCount, 'IsNotNull');
     if (!existing.add(name)) {
       return '';
     }
 
+    final properties = index.properties.takeFirst(propertyCount - 1);
+    var values = joinToValues(properties);
+    if (values.isNotEmpty) {
+      values += ',';
+    }
+    final params = joinToParams(properties);
     return '''
-    $mPrefix $name() {
-      return addWhereClauseInternal(const IndexWhereClause.greaterThan(
-        indexName: '${indexName.esc}',
-        lower: [null],
-        includeLower: false,
-      ));
+    $mPrefix $name($params) {
+      return QueryBuilder.apply(this, (query) {
+        return query.addWhereClause(IndexWhereClause.between(
+          indexName: '${index.name.esc}',
+          lower: [$values null],
+          includeLower: false,
+          upper: [$values],
+          includeUpper: true,
+        ));
+      });
     }
     ''';
   }
 
-  String generateWhereStartsWith(
-      String indexName, List<ObjectIndexProperty> properties) {
-    final List<ObjectIndexProperty> firsPs =
-        properties.sublist(0, properties.length - 1);
-    final ObjectIndexProperty lastP = properties.last;
-    final String name = '${joinToName(properties, true)}StartsWith';
+  String generateWhereStartsWith(ObjectIndex index, int propertyCount) {
+    final name = getMethodName(index, propertyCount, 'StartsWith');
     if (!existing.add(name)) {
       return '';
     }
 
-    String params = joinToParams(firsPs);
+    final equalProperties = index.properties.dropLast(1);
+    final prefixProperty = index.properties.last;
+    var params = joinToParams(equalProperties);
     if (params.isNotEmpty) {
       params += ',';
     }
-    final String lastName = '${paramName(lastP).capitalize()}Prefix';
-    params += '${paramType(lastP)} $lastName';
-    String values = joinToValues(firsPs);
+    final prefixName = '${paramName(prefixProperty).capitalize()}Prefix';
+    params += '${paramType(prefixProperty)} $prefixName';
+    var values = joinToValues(equalProperties);
     if (values.isNotEmpty) {
       values += ',';
     }
 
     return '''
     $mPrefix $name($params) {
-      return addWhereClauseInternal(IndexWhereClause.between(
-        indexName: '${indexName.esc}',
-        lower: [$values $lastName],
-        includeLower: true,
-        upper: [$values '\$$lastName\\u{FFFFF}'],
-        includeUpper: true,
-      ));
+      return QueryBuilder.apply(this, (query) {
+        return query.addWhereClause(IndexWhereClause.between(
+          indexName: '${index.name.esc}',
+          lower: [$values $prefixName],
+          includeLower: true,
+          upper: [$values '\$$prefixName\\u{FFFFF}'],
+          includeUpper: true,
+        ));
+      });
     }
     ''';
   }

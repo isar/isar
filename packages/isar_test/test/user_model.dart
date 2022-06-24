@@ -24,11 +24,12 @@ class UserModel {
   }
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     // ignore: test_types_in_equals
-    final UserModel otherModel = other as UserModel;
-    return name == otherModel.name &&
-        age == otherModel.age &&
-        admin == otherModel.admin;
+    return other is UserModel &&
+        name == other.name &&
+        age == other.age &&
+        admin == other.admin;
   }
 }
