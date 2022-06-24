@@ -225,29 +225,45 @@ class WhereGenerator {
     if (!existing.add(name)) return '';
 
     final properties = index.properties.takeFirst(propertyCount);
-    final values = joinToValues(properties);
     final params = joinToParams(properties);
+
+    final equalProperties = properties.dropLast(1);
+    final notEqualProperty = properties.last;
+    final equalValues = joinToValues(equalProperties);
+    var notEqualValue = joinToValues([notEqualProperty]);
+    if (equalValues.isNotEmpty) {
+      notEqualValue = ',$notEqualValue';
+    }
+
     return '''
     $mPrefix $name($params) {
       return QueryBuilder.apply(this, (query) {
         if (query.whereSort == Sort.asc) {
-          return query.addWhereClause(IndexWhereClause.lessThan(
+          return query.addWhereClause(IndexWhereClause.between(
             indexName: '${index.name.esc}',
-            upper: [$values],
+            lower: [$equalValues],
+            includeLower: true,
+            upper: [$equalValues $notEqualValue],
             includeUpper: false,
-          )).addWhereClause(IndexWhereClause.greaterThan(
+          )).addWhereClause(IndexWhereClause.between(
             indexName: '${index.name.esc}',
-            lower: [$values],
+            lower: [$equalValues $notEqualValue],
             includeLower: false,
+            upper: [$equalValues],
+            includeUpper: true,
           ));
         } else {
-          return query.addWhereClause(IndexWhereClause.greaterThan(
+          return query.addWhereClause(IndexWhereClause.between(
             indexName: '${index.name.esc}',
-            lower: [$values],
+            lower: [$equalValues $notEqualValue],
             includeLower: false,
-          )).addWhereClause(IndexWhereClause.lessThan(
+            upper: [$equalValues],
+            includeUpper: true,
+          )).addWhereClause(IndexWhereClause.between(
             indexName: '${index.name.esc}',
-            upper: [$values],
+            lower: [$equalValues],
+            includeLower: true,
+            upper: [$equalValues $notEqualValue],
             includeUpper: false,
           ));
         }
@@ -348,8 +364,9 @@ class WhereGenerator {
     final name = getMethodName(index, propertyCount, 'Between');
     if (!existing.add(name)) return '';
 
-    final equalProperties = index.properties.dropLast(1);
-    final betweenProperty = index.properties.last;
+    final properties = index.properties.takeFirst(propertyCount);
+    final equalProperties = properties.dropLast(1);
+    final betweenProperty = properties.last;
     var params = joinToParams(equalProperties);
     if (params.isNotEmpty) {
       params += ',';
@@ -365,7 +382,7 @@ class WhereGenerator {
       values += ',';
     }
 
-    final float = index.properties.containsFloat;
+    final float = properties.containsFloat;
     final include =
         !float ? ', {bool includeLower = true, bool includeUpper = true,}' : '';
     return '''
@@ -418,10 +435,12 @@ class WhereGenerator {
     return '''
     $mPrefix $name($params) {
       return QueryBuilder.apply(this, (query) {
-        return query.addWhereClause(IndexWhereClause.greaterThan(
+        return query.addWhereClause(IndexWhereClause.between(
           indexName: '${index.name.esc}',
           lower: [$values null],
           includeLower: false,
+          upper: [$values],
+          includeUpper: true,
         ));
       });
     }

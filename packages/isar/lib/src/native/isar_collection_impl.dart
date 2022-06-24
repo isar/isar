@@ -87,7 +87,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         indexName,
         keys[i],
         requireFullKey: true,
-      );
+      )!;
     }
     return keysPtrPtr;
   }
@@ -172,7 +172,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
           indexName,
           keys[i],
           requireFullKey: true,
-        );
+        )!;
         nCall(IC.isar_get_by_index(ptr, txn.ptr, indexId, keyPtr, cObjPtr));
         objects[i] = deserializeObjectOrNull(cObj);
       }

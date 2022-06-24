@@ -105,31 +105,44 @@ void _addIndexWhereClause(
     IndexWhereClause wc,
     bool distinct,
     Sort sort) {
-  late Pointer<CIndexKey> lowerPtr;
+  Pointer<CIndexKey>? lowerPtr;
   if (wc.lower != null) {
-    lowerPtr = buildIndexKey(schema, wc.indexName, wc.lower!);
+    lowerPtr = buildIndexKey(
+      schema,
+      wc.indexName,
+      wc.lower!,
+      increase: !wc.includeLower,
+    );
   } else {
     lowerPtr = buildLowerUnboundedIndexKey();
   }
 
-  late Pointer<CIndexKey> upperPtr;
+  Pointer<CIndexKey>? upperPtr;
   if (wc.upper != null) {
-    upperPtr =
-        buildIndexKey(schema, wc.indexName, wc.upper!, addMaxComposite: true);
+    upperPtr = buildIndexKey(
+      schema,
+      wc.indexName,
+      wc.upper!,
+      addMaxComposite: true,
+      decrease: !wc.includeUpper,
+    );
   } else {
     upperPtr = buildUpperUnboundedIndexKey();
   }
 
-  nCall(IC.isar_qb_add_index_where_clause(
-    qbPtr,
-    schema.indexIdOrErr(wc.indexName),
-    lowerPtr,
-    wc.includeLower,
-    upperPtr,
-    wc.includeUpper,
-    sort == Sort.asc,
-    distinct,
-  ));
+  if (lowerPtr != null && upperPtr != null) {
+    nCall(IC.isar_qb_add_index_where_clause(
+      qbPtr,
+      schema.indexIdOrErr(wc.indexName),
+      lowerPtr,
+      upperPtr,
+      sort == Sort.asc,
+      distinct,
+    ));
+  } else {
+    nCall(IC.isar_qb_add_id_where_clause(
+        qbPtr, Isar.autoIncrement, Isar.autoIncrement));
+  }
 }
 
 void _addLinkWhereClause(

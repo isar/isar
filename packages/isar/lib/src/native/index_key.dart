@@ -10,12 +10,14 @@ import 'query_build.dart';
 
 final _keyPtrPtr = malloc<Pointer<CIndexKey>>();
 
-Pointer<CIndexKey> buildIndexKey(
+Pointer<CIndexKey>? buildIndexKey(
   CollectionSchema<dynamic> schema,
   String indexName,
   IndexKey key, {
   bool addMaxComposite = false,
   bool requireFullKey = false,
+  bool increase = false,
+  bool decrease = false,
 }) {
   final types = schema.indexValueTypeOrErr(indexName);
   if (key.length > types.length ||
@@ -30,11 +32,21 @@ Pointer<CIndexKey> buildIndexKey(
     _addKeyValue(keyPtr, key[i], types[i]);
   }
 
-  // Also include composite indexes for upper keys
-  if (addMaxComposite) {
-    for (var i = 0; i < types.length - key.length; i++) {
-      IC.isar_key_add_long(keyPtr, maxLong);
+  if (increase) {
+    if (!IC.isar_key_increase(keyPtr)) {
+      return null;
     }
+  }
+
+  if (decrease) {
+    if (!IC.isar_key_decrease(keyPtr)) {
+      return null;
+    }
+  }
+
+  // Also include composite indexes for upper keys
+  if (addMaxComposite && types.length > key.length) {
+    IC.isar_key_add_long(keyPtr, maxLong);
   }
 
   return keyPtr;

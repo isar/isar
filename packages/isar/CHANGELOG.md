@@ -1,16 +1,20 @@
 ## 3.0.0-dev.2
 
 ## Enhancements
-- Support for more complex composite index queries
+
+- Support for much more complex composite index queries
 - Support for logical XOR and the `.oneOf()` query modifier
 - Internal query methods not longer appear in auto complete results
+- A lot more unit tests especially for where clauses
 
 ### Breaking
+
 - Fixed `.or()` instead of `.and()` being used implicitly when combining filters
 
 ### Fixes
+
 - More link fixes
-- Fixed composite queries
+- Fixed composite query issues
 - Fixed crash caused by empty and/or filter
 - Fixed incorrect analyzer dependency
 
