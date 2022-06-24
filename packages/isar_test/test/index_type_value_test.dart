@@ -8,6 +8,20 @@ part 'index_type_value_test.g.dart';
 
 @Collection()
 class ValueIndexesModel {
+  ValueIndexesModel({
+    required this.boolIndex,
+    required this.intIndex,
+    required this.doubleIndex,
+    required this.dateTimeIndex,
+    required this.stringIndexSensitive,
+    required this.stringIndexInsensitive,
+    required this.boolListIndex,
+    required this.intListIndex,
+    required this.doubleListIndex,
+    required this.dateTimeListIndex,
+    required this.stringListSensitiveIndex,
+    required this.stringListInsensitiveIndex,
+  });
   int? id;
 
   @Index(type: IndexType.value)
@@ -46,21 +60,6 @@ class ValueIndexesModel {
   @Index(type: IndexType.value, caseSensitive: false)
   List<String> stringListInsensitiveIndex;
 
-  ValueIndexesModel({
-    required this.boolIndex,
-    required this.intIndex,
-    required this.doubleIndex,
-    required this.dateTimeIndex,
-    required this.stringIndexSensitive,
-    required this.stringIndexInsensitive,
-    required this.boolListIndex,
-    required this.intListIndex,
-    required this.doubleListIndex,
-    required this.dateTimeListIndex,
-    required this.stringListSensitiveIndex,
-    required this.stringListInsensitiveIndex,
-  });
-
   @override
   bool operator ==(Object other) {
     return other is ValueIndexesModel &&
@@ -92,7 +91,7 @@ void main() {
 }
 
 void tests() {
-  group("Index value type", () {
+  group('Index value type', () {
     late Isar isar;
     late ValueIndexesModel model0;
     late ValueIndexesModel model1;
@@ -106,28 +105,28 @@ void tests() {
           intIndex: 55,
           doubleIndex: 0.42,
           dateTimeIndex: DateTime(1950, 1, 13),
-          stringIndexSensitive: "My index",
-          stringIndexInsensitive: "fOo BaR",
+          stringIndexSensitive: 'My index',
+          stringIndexInsensitive: 'fOo BaR',
           boolListIndex: [true, true, false],
           intListIndex: [1, 99, 42],
           doubleListIndex: [4.32, 8, 44.23, 1509182.1231089124089571209377],
           dateTimeListIndex: [DateTime(2001, 4, 4), DateTime(1995, 7, 27)],
           stringListSensitiveIndex: [],
-          stringListInsensitiveIndex: ["Earth"],
+          stringListInsensitiveIndex: ['Earth'],
         );
         model1 = ValueIndexesModel(
           boolIndex: false,
           intIndex: -123,
           doubleIndex: 4432.1,
           dateTimeIndex: DateTime(2100, 4, 4),
-          stringIndexSensitive: "mY INDEX",
-          stringIndexInsensitive: "FoO bAr",
+          stringIndexSensitive: 'mY INDEX',
+          stringIndexInsensitive: 'FoO bAr',
           boolListIndex: List.filled(100, true),
           intListIndex: [6, -5],
           doubleListIndex: [-4.32, 8, 44, -152.001, -0.0],
           dateTimeListIndex: [DateTime(1992, 1, 24)],
-          stringListSensitiveIndex: ["foo", "bar"],
-          stringListInsensitiveIndex: ["eArTh"],
+          stringListSensitiveIndex: ['foo', 'bar'],
+          stringListInsensitiveIndex: ['eArTh'],
         );
         await isar.valueIndexesModels.tPutAll([model0, model1]);
       });
@@ -135,7 +134,7 @@ void tests() {
 
     tearDown(() => isar.close());
 
-    isarTest("Query bool index", () async {
+    isarTest('Query bool index', () async {
       final result = await isar.valueIndexesModels
           .where()
           .boolIndexEqualTo(true)
@@ -143,7 +142,7 @@ void tests() {
       expect(result, [model0]);
     });
 
-    isarTest("Query int test", () async {
+    isarTest('Query int test', () async {
       final result1 = await isar.valueIndexesModels
           .where()
           .intIndexEqualTo(-123)
@@ -155,7 +154,7 @@ void tests() {
       expect(result2, <ValueIndexesModel>[]);
     });
 
-    isarTest("Query double index", () async {
+    isarTest('Query double index', () async {
       final result = await isar.valueIndexesModels
           .where()
           .doubleIndexGreaterThan(4432.0999999999999)
@@ -163,7 +162,7 @@ void tests() {
       expect(result, [model1]);
     });
 
-    isarTest("query DateTime index", () async {
+    isarTest('query DateTime index', () async {
       final result = await isar.valueIndexesModels
           .where()
           .dateTimeIndexEqualTo(DateTime(2100, 4, 4))
@@ -171,41 +170,41 @@ void tests() {
       expect(result, [model1]);
     });
 
-    isarTest("Query String sensitive index", () async {
+    isarTest('Query String sensitive index', () async {
       final result1 = await isar.valueIndexesModels
           .where()
-          .stringIndexSensitiveNotEqualTo("mY INDEX")
+          .stringIndexSensitiveNotEqualTo('mY INDEX')
           .tFindAll();
       expect(result1, [model0]);
 
       final result2 = await isar.valueIndexesModels
           .where()
-          .stringIndexSensitiveStartsWith("mY")
+          .stringIndexSensitiveStartsWith('mY')
           .tFindAll();
       expect(result2, [model1]);
     });
 
-    isarTest("Query String insensitive index", () async {
+    isarTest('Query String insensitive index', () async {
       final result1 = await isar.valueIndexesModels
           .where()
-          .stringIndexInsensitiveEqualTo("foo bar")
+          .stringIndexInsensitiveEqualTo('foo bar')
           .tFindAll();
       expect(result1, {model0, model1});
 
       final result2 = await isar.valueIndexesModels
           .where()
-          .stringIndexInsensitiveStartsWith("f")
+          .stringIndexInsensitiveStartsWith('f')
           .tFindAll();
       expect(result2, {model0, model1});
 
       final result3 = await isar.valueIndexesModels
           .where()
-          .stringIndexInsensitiveGreaterThan("foo bar")
+          .stringIndexInsensitiveGreaterThan('foo bar')
           .tFindAll();
       expect(result3, <ValueIndexesModel>[]);
     });
 
-    isarTest("Query List<bool> index", () async {
+    isarTest('Query List<bool> index', () async {
       final result = await isar.valueIndexesModels
           .where()
           .boolListIndexAnyEqualTo(false)
@@ -213,7 +212,7 @@ void tests() {
       expect(result, [model0]);
     });
 
-    isarTest("query List<int> index", () async {
+    isarTest('query List<int> index', () async {
       final result = await isar.valueIndexesModels
           .where()
           .intListIndexAnyGreaterThan(42)
@@ -221,7 +220,7 @@ void tests() {
       expect(result, [model0]);
     });
 
-    isarTest("Query List<double> index", () async {
+    isarTest('Query List<double> index', () async {
       final result = await isar.valueIndexesModels
           .where()
           .doubleListIndexAnyLessThan(100)
@@ -229,43 +228,43 @@ void tests() {
       expect(result, {model0, model1});
     });
 
-    isarTest("Query List<DateTime> index", () async {
+    isarTest('Query List<DateTime> index', () async {
       final result = await isar.valueIndexesModels
           .where()
-          .dateTimeListIndexAnyLessThan(DateTime(1995, 1, 1))
+          .dateTimeListIndexAnyLessThan(DateTime(1995))
           .tFindAll();
       expect(result, [model1]);
     });
 
-    isarTest("Query List<String> sensitive index", () async {
+    isarTest('Query List<String> sensitive index', () async {
       final result = await isar.valueIndexesModels
           .where()
-          .stringListSensitiveIndexAnyGreaterThan("d")
+          .stringListSensitiveIndexAnyGreaterThan('d')
           .tFindAll();
       expect(result, [model1]);
     });
 
-    isarTest("Query List<String> insensitive index", () async {
+    isarTest('Query List<String> insensitive index', () async {
       final result1 = await isar.valueIndexesModels
           .where()
-          .stringListInsensitiveIndexAnyEqualTo("earth")
+          .stringListInsensitiveIndexAnyEqualTo('earth')
           .tFindAll();
       expect(result1, {model0, model1});
 
       final result2 = await isar.valueIndexesModels
           .where()
-          .stringListInsensitiveIndexAnyStartsWith("e")
+          .stringListInsensitiveIndexAnyStartsWith('e')
           .tFindAll();
       expect(result2, {model0, model1});
 
       final result3 = await isar.valueIndexesModels
           .where()
-          .stringListInsensitiveIndexAnyStartsWith("mars")
+          .stringListInsensitiveIndexAnyStartsWith('mars')
           .tFindAll();
       expect(result3, <ValueIndexesModel>[]);
     });
 
-    isarTest("Query every index", () async {
+    isarTest('Query every index', () async {
       final result = await isar.valueIndexesModels
           .where()
           .boolIndexEqualTo(false)
@@ -276,9 +275,9 @@ void tests() {
           .or()
           .dateTimeIndexEqualTo(DateTime(2100, 4, 4))
           .or()
-          .stringIndexSensitiveNotEqualTo("My index")
+          .stringIndexSensitiveNotEqualTo('My index')
           .or()
-          .stringIndexInsensitiveStartsWith("foo")
+          .stringIndexInsensitiveStartsWith('foo')
           .or()
           .boolListIndexAnyNotEqualTo(false)
           .or()
@@ -286,11 +285,11 @@ void tests() {
           .or()
           .doubleListIndexAnyLessThan(-100)
           .or()
-          .dateTimeListIndexAnyLessThan(DateTime(1995, 1, 1))
+          .dateTimeListIndexAnyLessThan(DateTime(1995))
           .or()
-          .stringListSensitiveIndexAnyEqualTo("foo")
+          .stringListSensitiveIndexAnyEqualTo('foo')
           .or()
-          .stringListInsensitiveIndexAnyStartsWith("e")
+          .stringListInsensitiveIndexAnyStartsWith('e')
           .tFindAll();
       expect(result, {model0, model1});
     });

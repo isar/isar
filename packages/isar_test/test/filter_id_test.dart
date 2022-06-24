@@ -8,10 +8,9 @@ part 'filter_id_test.g.dart';
 
 @Collection()
 class IdModel {
+  IdModel();
   @Id()
   int? id;
-
-  IdModel();
 
   @override
   String toString() {
@@ -19,7 +18,8 @@ class IdModel {
   }
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
+    // ignore: test_types_in_equals
     return (other as IdModel).id == id;
   }
 }

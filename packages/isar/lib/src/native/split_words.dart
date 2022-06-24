@@ -1,27 +1,28 @@
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
-import 'package:isar/src/native/isar_core.dart';
 
 import 'binary_reader.dart';
 import 'binary_writer.dart';
+import 'isar_core.dart';
 
 List<String> splitWordsCore(String input) {
   initializeCoreBinary();
 
-  final bytes = BinaryWriter.utf8Encoder.convert(input);
-  final bytesPtr = malloc<Uint8>(bytes.length);
+  final Uint8List bytes = BinaryWriter.utf8Encoder.convert(input);
+  final Pointer<Uint8> bytesPtr = malloc<Uint8>(bytes.length);
   bytesPtr.asTypedList(bytes.length).setAll(0, bytes);
 
-  final wordCountPtr = malloc<Uint32>();
-  final boundariesPtr =
+  final Pointer<Uint32> wordCountPtr = malloc<Uint32>();
+  final Pointer<Uint32> boundariesPtr =
       IC.isar_find_word_boundaries(bytesPtr.cast(), bytes.length, wordCountPtr);
-  final wordCount = wordCountPtr.value;
-  final boundaries = boundariesPtr.asTypedList(wordCount * 2);
+  final int wordCount = wordCountPtr.value;
+  final Uint32List boundaries = boundariesPtr.asTypedList(wordCount * 2);
 
-  final words = <String>[];
-  for (var i = 0; i < wordCount * 2; i++) {
-    final wordBytes = bytes.sublist(boundaries[i++], boundaries[i]);
+  final List<String> words = <String>[];
+  for (int i = 0; i < wordCount * 2; i++) {
+    final Uint8List wordBytes = bytes.sublist(boundaries[i++], boundaries[i]);
     words.add(BinaryReader.utf8Decoder.convert(wordBytes));
   }
 

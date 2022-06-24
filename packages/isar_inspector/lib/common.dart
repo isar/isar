@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 
 class IsarCard extends StatelessWidget {
-  final Widget child;
-  final Color? color;
-  final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
-  final BorderRadius radius;
-
   IsarCard({
-    Key? key,
+    super.key,
     required this.child,
     this.color,
     this.onTap,
     this.onLongPress,
     BorderRadius? radius,
-  })  : radius = radius ?? BorderRadius.circular(20),
-        super(key: key);
+  }) : radius = radius ?? BorderRadius.circular(20);
+  final Widget child;
+  final Color? color;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+  final BorderRadius radius;
 
   @override
   Widget build(BuildContext context) {

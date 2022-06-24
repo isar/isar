@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import '../isar.dart';
 
 enum ConnectAction {
   getVersion('ext.isar.getVersion'),
@@ -25,13 +25,6 @@ enum ConnectEvent {
 }
 
 class ConnectQuery {
-  final String instance;
-  final String collection;
-  final FilterOperation? filter;
-  final int? offset;
-  final int? limit;
-  final SortProperty? sortProperty;
-
   ConnectQuery({
     required this.instance,
     required this.collection,
@@ -56,6 +49,12 @@ class ConnectQuery {
           : null,
     );
   }
+  final String instance;
+  final String collection;
+  final FilterOperation? filter;
+  final int? offset;
+  final int? limit;
+  final SortProperty? sortProperty;
 
   Map<String, dynamic> toJson() {
     return {
@@ -73,9 +72,11 @@ class ConnectQuery {
   }
 
   static FilterOperation? _filterFromJson(Map<String, dynamic>? json) {
-    if (json == null) return null;
+    if (json == null) {
+      return null;
+    }
     if (json.containsKey('filters')) {
-      final filters = (json['filters'] as List)
+      final List<FilterOperation> filters = (json['filters'] as List)
           .map((e) => _filterFromJson(e as Map<String, dynamic>?)!)
           .toList();
       return FilterGroup(
@@ -118,11 +119,6 @@ class ConnectQuery {
 }
 
 class ConnectCollectionInfo {
-  final String instance;
-  final String collection;
-  final int size;
-  final int count;
-
   ConnectCollectionInfo({
     required this.instance,
     required this.collection,
@@ -138,6 +134,10 @@ class ConnectCollectionInfo {
       count: json['count'] as int,
     );
   }
+  final String instance;
+  final String collection;
+  final int size;
+  final int count;
 
   Map<String, dynamic> toJson() {
     return {

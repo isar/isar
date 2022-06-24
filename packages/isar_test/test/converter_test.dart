@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:isar/isar.dart';
+import 'package:test/test.dart';
 
 import 'util/common.dart';
 
@@ -127,7 +127,7 @@ class StringConverter extends TypeConverter<String, int> {
 }
 
 void main() {
-  final converterObject = ConverterModel()
+  final ConverterModel converterObject = ConverterModel()
     ..id = 123
     ..boolValue = true
     ..intValue = 25
@@ -137,7 +137,7 @@ void main() {
     ..dateValue = DateTime.fromMillisecondsSinceEpoch(123123)
     ..stringValue = 'five';
 
-  final converterObjectJson = {
+  final Map<String, Object> converterObjectJson = {
     'id': 123,
     'boolValue': 'true',
     'intValue': '25',
@@ -163,7 +163,7 @@ void main() {
     });*/
 
     isarTest('fromIsar()', () async {
-      final isar = await openTempIsar([ConverterModelSchema]);
+      final Isar isar = await openTempIsar([ConverterModelSchema]);
 
       await isar.writeTxn(() async {
         await isar.converterModels.importJson([converterObjectJson]);

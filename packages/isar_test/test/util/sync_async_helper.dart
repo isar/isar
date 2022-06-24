@@ -1,11 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
-import 'dart:typed_data';
 
 import 'common.dart';
 import 'sync_future.dart';
 
-var _testSync = false;
+bool _testSync = false;
 
 void testSyncAsync(Function test) {
   if (kIsWeb) {
@@ -34,7 +35,7 @@ Future<Isar> tOpen({
   bool relaxedDurability = true,
 }) {
   if (_testSync) {
-    final isar = Isar.openSync(
+    final Isar isar = Isar.openSync(
       schemas: schemas,
       directory: directory,
       name: name,

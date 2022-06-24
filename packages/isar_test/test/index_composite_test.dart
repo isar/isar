@@ -34,7 +34,7 @@ class CompositeModel {
   }
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     return (other is CompositeModel) &&
         other.id == id &&
         other.intValue == intValue &&
@@ -88,7 +88,7 @@ void tests() {
     });
 
     isarTest('.put() duplicate index', () async {
-      final newObj = CompositeModel()
+      final CompositeModel newObj = CompositeModel()
         ..id = 5
         ..intValue = 1
         ..stringValue = 'a';

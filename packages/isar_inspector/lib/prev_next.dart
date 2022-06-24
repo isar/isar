@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar_inspector/common.dart';
-import 'package:isar_inspector/state/query_state.dart';
+import 'common.dart';
+import 'state/query_state.dart';
 
 class PrevNext extends ConsumerWidget {
-  const PrevNext({Key? key}) : super(key: key);
+  const PrevNext({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     final page = ref.watch(queryPagePod);
     final result = ref.watch(queryResultsPod).valueOrNull;
     return Column(
@@ -46,18 +46,18 @@ class PrevNext extends ConsumerWidget {
 }
 
 class _Button extends StatelessWidget {
+  const _Button({
+    // ignore: unused_element
+    super.key,
+    required this.label,
+    this.onPressed,
+  });
   final String label;
   final VoidCallback? onPressed;
 
-  const _Button({
-    Key? key,
-    required this.label,
-    this.onPressed,
-  }) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     return IsarCard(
       color: Colors.transparent,
       radius: BorderRadius.circular(15),

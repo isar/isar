@@ -1,21 +1,21 @@
 import 'dart:async';
 import 'dart:html';
 
-import 'package:isar/isar.dart';
+import '../../isar.dart';
 
 import 'bindings.dart';
 import 'isar_web.dart';
 
-const _zoneTxn = #zoneTxn;
+const Symbol _zoneTxn = #zoneTxn;
 
 class IsarImpl extends Isar {
+  IsarImpl(super.name, super.schema, this.instance);
   final IsarInstanceJs instance;
   final List<Future<void>> _activeAsyncTxns = [];
 
-  IsarImpl(String name, String schema, this.instance) : super(name, schema);
-
   void requireNotInTxn() {
     if (Zone.current[_zoneTxn] != null) {
+      // ignore: only_throw_errors
       throw IsarError(
           'Cannot perform this operation from within an active transaction.');
     }
@@ -26,12 +26,12 @@ class IsarImpl extends Isar {
     requireOpen();
     requireNotInTxn();
 
-    final completer = Completer<void>();
+    final Completer<void> completer = Completer<void>();
     _activeAsyncTxns.add(completer.future);
 
-    final txn = instance.beginTxn(write);
+    final IsarTxnJs txn = instance.beginTxn(write);
 
-    final zone = Zone.current.fork(
+    final Zone zone = Zone.current.fork(
       zoneValues: {_zoneTxn: txn},
     );
 
@@ -43,8 +43,10 @@ class IsarImpl extends Isar {
       txn.abort();
       if (e is DomException) {
         if (e.name == DomException.CONSTRAINT) {
+          // ignore: only_throw_errors
           throw IsarUniqueViolationError();
         } else {
+          // ignore: only_throw_errors
           throw IsarError('${e.name}: ${e.message}');
         }
       } else {
@@ -76,9 +78,10 @@ class IsarImpl extends Isar {
       unsupportedOnWeb();
 
   Future<T> getTxn<T>(bool write, Future<T> Function(IsarTxnJs txn) callback) {
-    final currentTxn = Zone.current[_zoneTxn] as IsarTxnJs?;
+    final IsarTxnJs? currentTxn = Zone.current[_zoneTxn] as IsarTxnJs?;
     if (currentTxn != null) {
       if (write && !currentTxn.write) {
+        // ignore: only_throw_errors
         throw IsarError(
             'Operation cannot be performed within a read transaction.');
       }
@@ -88,6 +91,7 @@ class IsarImpl extends Isar {
         return callback(Zone.current[_zoneTxn] as IsarTxnJs);
       });
     } else {
+      // ignore: only_throw_errors
       throw IsarError('Write operations require an explicit transaction.');
     }
   }

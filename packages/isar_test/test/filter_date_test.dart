@@ -8,6 +8,7 @@ part 'filter_date_test.g.dart';
 
 @Collection()
 class DateTimeModel {
+  DateTimeModel();
   @Id()
   int? id;
 
@@ -20,19 +21,17 @@ class DateTimeModel {
   @Index(type: IndexType.hash)
   List<DateTime?>? hashList;
 
-  DateTimeModel();
-
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is DateTimeModel) {
       return other.field?.toUtc() == field?.toUtc() &&
           listEquals(
-            list?.map((e) => e?.toUtc()).toList(),
-            other.list?.map((e) => e?.toUtc()).toList(),
+            list?.map((DateTime? e) => e?.toUtc()).toList(),
+            other.list?.map((DateTime? e) => e?.toUtc()).toList(),
           ) &&
           listEquals(
-            hashList?.map((e) => e?.toUtc()).toList(),
-            other.hashList?.map((e) => e?.toUtc()).toList(),
+            hashList?.map((DateTime? e) => e?.toUtc()).toList(),
+            other.hashList?.map((DateTime? e) => e?.toUtc()).toList(),
           );
     }
     return false;

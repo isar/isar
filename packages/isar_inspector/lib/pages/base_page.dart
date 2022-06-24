@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 class BasePage extends StatelessWidget {
+  const BasePage(this.page, {super.key});
   final Widget page;
-
-  const BasePage(this.page, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

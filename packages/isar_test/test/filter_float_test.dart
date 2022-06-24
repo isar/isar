@@ -8,6 +8,7 @@ part 'filter_float_test.g.dart';
 
 @Collection()
 class FloatModel {
+  FloatModel();
   @Id()
   int? id;
 
@@ -18,16 +19,15 @@ class FloatModel {
   @Size32()
   List<double?>? list;
 
-  FloatModel();
-
   @override
   String toString() {
     return '{id: $id, field: $field, list: $list}';
   }
 
   @override
-  bool operator ==(other) {
-    final otherModel = other as FloatModel;
+  bool operator ==(Object other) {
+    // ignore: test_types_in_equals
+    final FloatModel otherModel = other as FloatModel;
     if ((other.field == null) != (field == null)) {
       return false;
     } else if (id != other.id) {

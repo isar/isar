@@ -9,18 +9,6 @@ abstract class WhereClause {
 
 /// A where clause traversing the primary index (ids).
 class IdWhereClause extends WhereClause {
-  /// The lower bound id or `null` for unbounded.
-  final int? lower;
-
-  /// Whether the lower bound should be included in the results.
-  final bool includeLower;
-
-  /// The upper bound id or `null` for unbounded.
-  final int? upper;
-
-  /// Whether the upper bound should be included in the results.
-  final bool includeUpper;
-
   const IdWhereClause.any()
       : lower = null,
         upper = null,
@@ -58,27 +46,22 @@ class IdWhereClause extends WhereClause {
     this.upper,
     this.includeUpper = true,
   }) : super._();
+
+  /// The lower bound id or `null` for unbounded.
+  final int? lower;
+
+  /// Whether the lower bound should be included in the results.
+  final bool includeLower;
+
+  /// The upper bound id or `null` for unbounded.
+  final int? upper;
+
+  /// Whether the upper bound should be included in the results.
+  final bool includeUpper;
 }
 
 /// A where clause traversing an index.
 class IndexWhereClause extends WhereClause {
-  /// The Isar name of the index to be used.
-  final String indexName;
-
-  /// The lower bound of the where clause.
-  final IndexKey? lower;
-
-  /// Whether the lower bound should be included in the results. Double values
-  /// are never included.
-  final bool includeLower;
-
-  /// The upper bound of the where clause.
-  final IndexKey? upper;
-
-  /// Whether the upper bound should be included in the results. Double values
-  /// are never included.
-  final bool includeUpper;
-
   /// Where clause that matches all index values. Useful to get sorted results.
   const IndexWhereClause.any({required this.indexName})
       : lower = null,
@@ -131,10 +114,34 @@ class IndexWhereClause extends WhereClause {
     this.upper,
     this.includeUpper = true,
   }) : super._();
+
+  /// The Isar name of the index to be used.
+  final String indexName;
+
+  /// The lower bound of the where clause.
+  final IndexKey? lower;
+
+  /// Whether the lower bound should be included in the results. Double values
+  /// are never included.
+  final bool includeLower;
+
+  /// The upper bound of the where clause.
+  final IndexKey? upper;
+
+  /// Whether the upper bound should be included in the results. Double values
+  /// are never included.
+  final bool includeUpper;
 }
 
 /// A where clause traversing objects linked to the specified object.
 class LinkWhereClause extends WhereClause {
+  /// Create a where clause for the specified link.
+  const LinkWhereClause({
+    required this.linkCollection,
+    required this.linkName,
+    required this.id,
+  }) : super._();
+
   /// The name of the collection the link originates from.
   final String linkCollection;
 
@@ -143,13 +150,6 @@ class LinkWhereClause extends WhereClause {
 
   /// The id of the source object.
   final int id;
-
-  /// Create a where clause for the specified link.
-  const LinkWhereClause({
-    required this.linkCollection,
-    required this.linkName,
-    required this.id,
-  }) : super._();
 }
 
 /// @nodoc
@@ -173,26 +173,17 @@ enum FilterConditionType {
 
 /// Create a filter condition dynamically.
 class FilterCondition extends FilterOperation {
-  /// Type of the filter condition.
-  final FilterConditionType type;
-
-  /// Property used for comparisons.
-  final String property;
-
-  /// Value used for comparisons. Lower bound for `ConditionType.between`.
-  final Object? value1;
-
-  /// Should `value1` be part of the results.
-  final bool include1;
-
-  /// Upper bound for `ConditionType.between`.
-  final Object? value2;
-
-  /// Should `value1` be part of the results.
-  final bool include2;
-
-  /// Are string operations case sensitive.
-  final bool caseSensitive;
+  /// @nodoc
+  @protected
+  const FilterCondition({
+    required this.type,
+    required this.property,
+    this.value1,
+    this.value2,
+    required this.include1,
+    required this.include2,
+    required this.caseSensitive,
+  }) : super._();
 
   /// Filters the results to only include objects where the property equals
   /// [value].
@@ -333,17 +324,26 @@ class FilterCondition extends FilterOperation {
         caseSensitive = false,
         super._();
 
-  /// @nodoc
-  @protected
-  const FilterCondition({
-    required this.type,
-    required this.property,
-    this.value1,
-    this.value2,
-    required this.include1,
-    required this.include2,
-    required this.caseSensitive,
-  }) : super._();
+  /// Type of the filter condition.
+  final FilterConditionType type;
+
+  /// Property used for comparisons.
+  final String property;
+
+  /// Value used for comparisons. Lower bound for `ConditionType.between`.
+  final Object? value1;
+
+  /// Should `value1` be part of the results.
+  final bool include1;
+
+  /// Upper bound for `ConditionType.between`.
+  final Object? value2;
+
+  /// Should `value1` be part of the results.
+  final bool include2;
+
+  /// Are string operations case sensitive.
+  final bool caseSensitive;
 }
 
 /// The type of filter groups.
@@ -355,11 +355,12 @@ enum FilterGroupType {
 
 /// Group one or more filter conditions.
 class FilterGroup extends FilterOperation {
-  /// Type of this group.
-  final FilterGroupType type;
-
-  /// The filter(s) to be grouped.
-  final List<FilterOperation> filters;
+  /// @nodoc
+  @protected
+  FilterGroup({
+    required this.type,
+    required this.filters,
+  }) : super._();
 
   /// Create a logical AND filter group.
   const FilterGroup.and(this.filters)
@@ -377,12 +378,11 @@ class FilterGroup extends FilterOperation {
         type = FilterGroupType.not,
         super._();
 
-  /// @nodoc
-  @protected
-  FilterGroup({
-    required this.type,
-    required this.filters,
-  }) : super._();
+  /// Type of this group.
+  final FilterGroupType type;
+
+  /// The filter(s) to be grouped.
+  final List<FilterOperation> filters;
 }
 
 /// Sort order
@@ -393,30 +393,37 @@ enum Sort {
 
 /// Property used to sort query results.
 class SortProperty {
+  /// Create a sort property.
+  const SortProperty({required this.property, required this.sort});
+
   /// Isar name of the property used for sorting.
   final String property;
 
   /// Sort order.
   final Sort sort;
-
-  /// Create a sort property.
-  const SortProperty({required this.property, required this.sort});
 }
 
 /// Property used to filter duplicate values.
 class DistinctProperty {
+  /// Create a distinct property.
+  const DistinctProperty({required this.property, this.caseSensitive});
+
   /// Isar name of the property used for sorting.
   final String property;
 
   /// Should Strings be case sensitive?
   final bool? caseSensitive;
-
-  /// Create a distinct property.
-  const DistinctProperty({required this.property, this.caseSensitive});
 }
 
 /// Filter condition based on a link.
 class LinkFilter extends FilterOperation {
+  /// Create a filter condition based on a link.
+  const LinkFilter({
+    required this.filter,
+    required this.linkName,
+    required this.targetCollection,
+  }) : super._();
+
   /// Filter condition that should be applied
   final FilterOperation filter;
 
@@ -425,11 +432,4 @@ class LinkFilter extends FilterOperation {
 
   /// The name of the collection the link points to.
   final String targetCollection;
-
-  /// Create a filter condition based on a link.
-  const LinkFilter({
-    required this.filter,
-    required this.linkName,
-    required this.targetCollection,
-  }) : super._();
 }

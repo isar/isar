@@ -8,6 +8,7 @@ part 'filter_bool_test.g.dart';
 
 @Collection()
 class BoolModel {
+  BoolModel();
   @Id()
   int? id;
 
@@ -20,15 +21,14 @@ class BoolModel {
   @Index(type: IndexType.hash)
   List<bool?>? hashList;
 
-  BoolModel();
-
   @override
   String toString() {
     return '{id: $id, field: $field, list: $list, hashList: $hashList}';
   }
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
+    // ignore: test_types_in_equals
     return (other as BoolModel).id == id &&
         other.field == field &&
         listEquals(list, other.list) &&

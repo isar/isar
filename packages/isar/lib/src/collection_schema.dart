@@ -57,7 +57,30 @@ typedef DeserializePropWeb = dynamic Function(
 /// @nodoc
 @protected
 class CollectionSchema<OBJ> {
-  static const generatorVersion = 4;
+  const CollectionSchema({
+    required this.name,
+    required this.schema,
+    required this.idName,
+    required this.propertyIds,
+    required this.listProperties,
+    required this.indexIds,
+    required this.indexValueTypes,
+    required this.linkIds,
+    required this.backlinkLinkNames,
+    required this.getLinks,
+    required this.attachLinks,
+    required this.getId,
+    this.setId,
+    required this.serializeNative,
+    required this.deserializeNative,
+    required this.deserializePropNative,
+    required this.serializeWeb,
+    required this.deserializeWeb,
+    required this.deserializePropWeb,
+    required this.version,
+  }) : assert(generatorVersion == version,
+            'Incompatible generated code. Please re-run code generation using the latest generator.');
+  static const int generatorVersion = 4;
 
   final String name;
   final String schema;
@@ -86,70 +109,50 @@ class CollectionSchema<OBJ> {
 
   final int version;
 
-  const CollectionSchema({
-    required this.name,
-    required this.schema,
-    required this.idName,
-    required this.propertyIds,
-    required this.listProperties,
-    required this.indexIds,
-    required this.indexValueTypes,
-    required this.linkIds,
-    required this.backlinkLinkNames,
-    required this.getLinks,
-    required this.attachLinks,
-    required this.getId,
-    this.setId,
-    required this.serializeNative,
-    required this.deserializeNative,
-    required this.deserializePropNative,
-    required this.serializeWeb,
-    required this.deserializeWeb,
-    required this.deserializePropWeb,
-    required this.version,
-  }) : assert(generatorVersion == version,
-            'Incompatible generated code. Please re-run code generation using the latest generator.');
-
   void toCollection(void Function<OBJ>() callback) => callback<OBJ>();
 
   bool get hasLinks => linkIds.isNotEmpty;
 
   @pragma('vm:prefer-inline')
   int propertyIdOrErr(String propertyName) {
-    final propertyId = propertyIds[propertyName];
+    final int? propertyId = propertyIds[propertyName];
     if (propertyId != null) {
       return propertyId;
     } else {
+      // ignore: only_throw_errors
       throw IsarError('Unknown propery "$propertyName"');
     }
   }
 
   @pragma('vm:prefer-inline')
   int indexIdOrErr(String indexName) {
-    final indexId = indexIds[indexName];
+    final int? indexId = indexIds[indexName];
     if (indexId != null) {
       return indexId;
     } else {
+      // ignore: only_throw_errors
       throw IsarError('Unknown index "$indexName"');
     }
   }
 
   @pragma('vm:prefer-inline')
   List<IndexValueType> indexValueTypeOrErr(String indexName) {
-    final indexValueType = indexValueTypes[indexName];
+    final List<IndexValueType>? indexValueType = indexValueTypes[indexName];
     if (indexValueType != null) {
       return indexValueType;
     } else {
+      // ignore: only_throw_errors
       throw IsarError('Unknown index "$indexName"');
     }
   }
 
   @pragma('vm:prefer-inline')
   int linkIdOrErr(String linkName) {
-    final linkId = linkIds[linkName];
+    final int? linkId = linkIds[linkName];
     if (linkId != null) {
       return linkId;
     } else {
+      // ignore: only_throw_errors
       throw IsarError('Unknown link "$linkId"');
     }
   }
