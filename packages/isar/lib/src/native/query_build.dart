@@ -3,16 +3,16 @@
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-import 'package:isar/isar.dart';
 
+import '../../isar.dart';
 import 'bindings.dart';
+import 'index_key.dart';
 import 'isar_collection_impl.dart';
 import 'isar_core.dart';
-import 'index_key.dart';
 import 'query_impl.dart';
 
-final minStr = Pointer<Char>.fromAddress(0);
-final maxStr = '\u{FFFFF}'.toNativeUtf8().cast<Char>();
+final Pointer<Char> minStr = Pointer<Char>.fromAddress(0);
+final Pointer<Char> maxStr = '\u{FFFFF}'.toNativeUtf8().cast<Char>();
 
 Query<T> buildNativeQuery<T>(
   IsarCollectionImpl<dynamic> col,
@@ -26,9 +26,9 @@ Query<T> buildNativeQuery<T>(
   int? limit,
   String? property,
 ) {
-  final qbPtr = IC.isar_qb_create(col.ptr);
+  final Pointer<CQueryBuilder> qbPtr = IC.isar_qb_create(col.ptr);
 
-  for (var whereClause in whereClauses) {
+  for (final WhereClause whereClause in whereClauses) {
     if (whereClause is IdWhereClause) {
       _addIdWhereClause(qbPtr, whereClause, whereSort);
     } else if (whereClause is IndexWhereClause) {
@@ -40,9 +40,9 @@ Query<T> buildNativeQuery<T>(
   }
 
   if (filter != null) {
-    final alloc = Arena(malloc);
+    final Arena alloc = Arena(malloc);
     try {
-      final filterPtr = _buildFilter(col, filter, alloc);
+      final Pointer<CFilter>? filterPtr = _buildFilter(col, filter, alloc);
       if (filterPtr != null) {
         IC.isar_qb_set_filter(qbPtr, filterPtr);
       }
@@ -51,8 +51,8 @@ Query<T> buildNativeQuery<T>(
     }
   }
 
-  for (var sortProperty in sortBy) {
-    final propertyId = col.schema.propertyIdOrErr(sortProperty.property);
+  for (final SortProperty sortProperty in sortBy) {
+    final int propertyId = col.schema.propertyIdOrErr(sortProperty.property);
     nCall(IC.isar_qb_add_sort_by(
       qbPtr,
       propertyId,
@@ -64,8 +64,9 @@ Query<T> buildNativeQuery<T>(
     IC.isar_qb_set_offset_limit(qbPtr, offset ?? -1, limit ?? -1);
   }
 
-  for (var distinctByProperty in distinctBy) {
-    final propertyId = col.schema.propertyIdOrErr(distinctByProperty.property);
+  for (final DistinctProperty distinctByProperty in distinctBy) {
+    final int propertyId =
+        col.schema.propertyIdOrErr(distinctByProperty.property);
     nCall(IC.isar_qb_add_distinct_by(
       qbPtr,
       propertyId,
@@ -81,17 +82,18 @@ Query<T> buildNativeQuery<T>(
     propertyId = property != col.schema.idName
         ? col.schema.propertyIdOrErr(property)
         : null;
-    deserialize = (cObjSet) => col.deserializeProperty(cObjSet, propertyId);
+    deserialize =
+        (CObjectSet cObjSet) => col.deserializeProperty(cObjSet, propertyId);
   }
 
-  final queryPtr = IC.isar_qb_build(qbPtr);
+  final Pointer<CQuery> queryPtr = IC.isar_qb_build(qbPtr);
   return QueryImpl(col, queryPtr, deserialize, propertyId);
 }
 
 void _addIdWhereClause(
     Pointer<CQueryBuilder> qbPtr, IdWhereClause wc, Sort sort) {
-  final lower = (wc.lower ?? minLong) + (wc.includeLower ? 0 : 1);
-  final upper = (wc.upper ?? maxLong) - (wc.includeUpper ? 0 : 1);
+  final int lower = (wc.lower ?? minLong) + (wc.includeLower ? 0 : 1);
+  final int upper = (wc.upper ?? maxLong) - (wc.includeUpper ? 0 : 1);
   nCall(IC.isar_qb_add_id_where_clause(
     qbPtr,
     sort == Sort.asc ? lower : upper,
@@ -147,9 +149,10 @@ void _addIndexWhereClause(
 
 void _addLinkWhereClause(
     Isar isar, Pointer<CQueryBuilder> qbPtr, LinkWhereClause wc) {
-  final linkCol =
+  final IsarCollectionImpl linkCol =
+      // ignore: cast_nullable_to_non_nullable
       isar.getCollectionByNameInternal(wc.linkCollection) as IsarCollectionImpl;
-  final linkId = linkCol.schema.linkIdOrErr(wc.linkName);
+  final int linkId = linkCol.schema.linkIdOrErr(wc.linkName);
   nCall(IC.isar_qb_add_link_where_clause(qbPtr, linkCol.ptr, linkId, wc.id));
 }
 
@@ -181,9 +184,9 @@ Pointer<CFilter>? _buildFilter(
 
 Pointer<CFilter>? _buildFilterGroup(
     IsarCollectionImpl<dynamic> col, FilterGroup group, Allocator alloc) {
-  final builtConditions = group.filters
-      .map((op) => _buildFilter(col, op, alloc))
-      .where((it) => it != null)
+  final List<Pointer<CFilter>?> builtConditions = group.filters
+      .map((FilterOperation op) => _buildFilter(col, op, alloc))
+      .where((Pointer<CFilter>? it) => it != null)
       .toList();
 
   if (builtConditions.isEmpty) {
@@ -217,15 +220,18 @@ Pointer<CFilter>? _buildFilterGroup(
 
 Pointer<CFilter>? _buildLink(
     IsarCollectionImpl<dynamic> col, LinkFilter link, Allocator alloc) {
-  final linkTargetCol =
+  final IsarCollectionImpl linkTargetCol =
       col.isar.getCollectionByNameInternal(link.targetCollection)!
           as IsarCollectionImpl;
-  final linkId = col.schema.linkIdOrErr(link.linkName);
+  final int linkId = col.schema.linkIdOrErr(link.linkName);
 
-  final condition = _buildFilter(linkTargetCol, link.filter, alloc);
-  if (condition == null) return null;
+  final Pointer<CFilter>? condition =
+      _buildFilter(linkTargetCol, link.filter, alloc);
+  if (condition == null) {
+    return null;
+  }
 
-  final filterPtrPtr = alloc<Pointer<CFilter>>();
+  final Pointer<Pointer<CFilter>> filterPtrPtr = alloc<Pointer<CFilter>>();
 
   nCall(IC.isar_filter_link(
     linkTargetCol.ptr,
@@ -239,15 +245,15 @@ Pointer<CFilter>? _buildLink(
 
 Pointer<CFilter> _buildCondition(IsarCollectionImpl<dynamic> col,
     FilterCondition condition, Allocator alloc) {
-  final val1Raw = condition.value1;
-  final val1 =
+  final Object? val1Raw = condition.value1;
+  final Object? val1 =
       val1Raw is DateTime ? val1Raw.toUtc().microsecondsSinceEpoch : val1Raw;
 
-  final val2Raw = condition.value2;
-  final val2 =
+  final Object? val2Raw = condition.value2;
+  final Object? val2 =
       val2Raw is DateTime ? val2Raw.toUtc().microsecondsSinceEpoch : val2Raw;
 
-  final propertyId = condition.property != col.schema.idName
+  final int? propertyId = condition.property != col.schema.idName
       ? col.schema.propertyIdOrErr(condition.property)
       : null;
   switch (condition.type) {
@@ -292,6 +298,7 @@ Pointer<CFilter> _buildCondition(IsarCollectionImpl<dynamic> col,
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
       );
+    // ignore: no_default_cases
     default:
       return _buildConditionStringOp(
         colPtr: col.ptr,
@@ -310,7 +317,7 @@ Pointer<CFilter> _buildConditionIsNull({
   required int? propertyId,
   required Allocator alloc,
 }) {
-  final filterPtrPtr = alloc<Pointer<CFilter>>();
+  final Pointer<Pointer<CFilter>> filterPtrPtr = alloc<Pointer<CFilter>>();
   nCall(IC.isar_filter_null(colPtr, filterPtrPtr, propertyId!, false));
   return filterPtrPtr.value;
 }
@@ -323,11 +330,11 @@ Pointer<CFilter> _buildConditionEqual({
   required bool caseSensitive,
   required Allocator alloc,
 }) {
-  final filterPtrPtr = alloc<Pointer<CFilter>>();
+  final Pointer<Pointer<CFilter>> filterPtrPtr = alloc<Pointer<CFilter>>();
   if (val == null) {
     nCall(IC.isar_filter_null(colPtr, filterPtrPtr, propertyId!, true));
   } else if (val is bool) {
-    final value = boolToByte(val);
+    final int value = boolToByte(val);
     nCall(IC.isar_filter_byte(
         colPtr, filterPtrPtr, value, true, value, true, propertyId!));
   } else if (val is int) {
@@ -338,10 +345,11 @@ Pointer<CFilter> _buildConditionEqual({
           colPtr, filterPtrPtr, val, true, val, true, propertyId));
     }
   } else if (val is String) {
-    final strPtr = val.toNativeUtf8(allocator: alloc);
+    final Pointer<Utf8> strPtr = val.toNativeUtf8(allocator: alloc);
     nCall(IC.isar_filter_string(colPtr, filterPtrPtr, strPtr.cast(), true,
         strPtr.cast(), true, caseSensitive, propertyId!));
   } else {
+    // ignore: only_throw_errors
     throw 'Unsupported type for condition';
   }
   return filterPtrPtr.value;
@@ -357,7 +365,7 @@ Pointer<CFilter> _buildConditionBetween({
   required bool caseSensitive,
   required Allocator alloc,
 }) {
-  final filterPtrPtr = alloc<Pointer<CFilter>>();
+  final Pointer<Pointer<CFilter>> filterPtrPtr = alloc<Pointer<CFilter>>();
   if (lower == null && upper == null) {
     nCall(IC.isar_filter_null(colPtr, filterPtrPtr, propertyId!, true));
   } else if ((lower is int?) && upper is int?) {
@@ -372,13 +380,14 @@ Pointer<CFilter> _buildConditionBetween({
     nCall(IC.isar_filter_double(colPtr, filterPtrPtr, lower ?? nullDouble,
         upper ?? maxDouble, propertyId!));
   } else if ((lower is String?) && upper is String?) {
-    final lowerPtr =
+    final Pointer<Char> lowerPtr =
         lower?.toNativeUtf8(allocator: alloc).cast<Char>() ?? minStr;
-    final upperPtr =
+    final Pointer<Char> upperPtr =
         upper?.toNativeUtf8(allocator: alloc).cast<Char>() ?? maxStr;
     nCall(IC.isar_filter_string(colPtr, filterPtrPtr, lowerPtr, includeLower,
         upperPtr, includeUpper, caseSensitive, propertyId!));
   } else {
+    // ignore: only_throw_errors
     throw 'Unsupported type for condition';
   }
   return filterPtrPtr.value;
@@ -392,7 +401,7 @@ Pointer<CFilter> _buildConditionLessThan({
   required bool caseSensitive,
   required Allocator alloc,
 }) {
-  final filterPtrPtr = alloc<Pointer<CFilter>>();
+  final Pointer<Pointer<CFilter>> filterPtrPtr = alloc<Pointer<CFilter>>();
   if (val == null) {
     if (include) {
       nCall(IC.isar_filter_null(colPtr, filterPtrPtr, propertyId!, true));
@@ -410,10 +419,11 @@ Pointer<CFilter> _buildConditionLessThan({
     nCall(IC.isar_filter_double(
         colPtr, filterPtrPtr, minDouble, val, propertyId!));
   } else if (val is String) {
-    final value = val.toNativeUtf8(allocator: alloc);
+    final Pointer<Utf8> value = val.toNativeUtf8(allocator: alloc);
     nCall(IC.isar_filter_string(colPtr, filterPtrPtr, minStr, true,
         value.cast(), include, caseSensitive, propertyId!));
   } else {
+    // ignore: only_throw_errors
     throw 'Unsupported type for condition';
   }
   return filterPtrPtr.value;
@@ -427,7 +437,7 @@ Pointer<CFilter> _buildConditionGreaterThan({
   required bool caseSensitive,
   required Allocator alloc,
 }) {
-  final filterPtrPtr = alloc<Pointer<CFilter>>();
+  final Pointer<Pointer<CFilter>> filterPtrPtr = alloc<Pointer<CFilter>>();
   if (val == null) {
     if (include) {
       IC.isar_filter_static(filterPtrPtr, true);
@@ -446,10 +456,11 @@ Pointer<CFilter> _buildConditionGreaterThan({
     nCall(IC.isar_filter_double(
         colPtr, filterPtrPtr, val, maxDouble, propertyId!));
   } else if (val is String) {
-    final value = val.toNativeUtf8(allocator: alloc);
+    final Pointer<Utf8> value = val.toNativeUtf8(allocator: alloc);
     nCall(IC.isar_filter_string(colPtr, filterPtrPtr, value.cast(), include,
         maxStr, true, caseSensitive, propertyId!));
   } else {
+    // ignore: only_throw_errors
     throw 'Unsupported type for condition';
   }
   return filterPtrPtr.value;
@@ -464,9 +475,9 @@ Pointer<CFilter> _buildConditionStringOp({
   required bool caseSensitive,
   required Allocator alloc,
 }) {
-  final filterPtrPtr = alloc<Pointer<CFilter>>();
+  final Pointer<Pointer<CFilter>> filterPtrPtr = alloc<Pointer<CFilter>>();
   if (val is String) {
-    final strPtr = val.toNativeUtf8(allocator: alloc);
+    final Pointer<Utf8> strPtr = val.toNativeUtf8(allocator: alloc);
     switch (conditionType) {
       case FilterConditionType.startsWith:
         nCall(IC.isar_filter_string_starts_with(
@@ -484,10 +495,13 @@ Pointer<CFilter> _buildConditionStringOp({
         nCall(IC.isar_filter_string_matches(
             colPtr, filterPtrPtr, strPtr.cast(), caseSensitive, propertyId!));
         break;
+      // ignore: no_default_cases
       default:
+        // ignore: only_throw_errors
         throw 'Unsupported condition type';
     }
   } else {
+    // ignore: only_throw_errors
     throw 'Unsupported type for condition';
   }
 

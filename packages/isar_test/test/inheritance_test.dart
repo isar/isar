@@ -8,7 +8,7 @@ class Parent {
   @Index()
   String? parentField;
 
-  @Name("name")
+  @Name('name')
   int get parentFieldLength => parentField?.length ?? 0;
 
   @Ignore()

@@ -1,11 +1,12 @@
-import 'package:isar_generator/src/helper.dart';
-import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
 
+import '../helper.dart';
+import '../object_info.dart';
+
 String generateQueryLinks(ObjectInfo oi) {
-  var code =
+  String code =
       'extension ${oi.dartName}QueryLinks on QueryBuilder<${oi.dartName}, ${oi.dartName}, QFilterCondition> {';
-  for (var link in oi.links) {
+  for (final ObjectLink link in oi.links) {
     code += '''
       QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterFilterCondition> ${link.dartName.decapitalize()}(FilterQuery<${link.targetCollectionDartName}> q) {
         return QueryBuilder.apply(this, (query) {

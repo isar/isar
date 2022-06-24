@@ -8,6 +8,10 @@ part 'link_test.g.dart';
 
 @Collection()
 class LinkModelA {
+  LinkModelA();
+
+  LinkModelA.name(this.name);
+
   int? id;
 
   late String name;
@@ -26,10 +30,6 @@ class LinkModelA {
   @Backlink(to: 'selfLinks')
   final selfLinksBacklink = IsarLinks<LinkModelA>();
 
-  LinkModelA();
-
-  LinkModelA.name(this.name);
-
   @override
   String toString() {
     return 'LinkModelA($id, $name)';
@@ -43,6 +43,10 @@ class LinkModelA {
 
 @Collection()
 class LinkModelB {
+  LinkModelB();
+
+  LinkModelB.name(this.name);
+
   int? id;
 
   late String name;
@@ -52,10 +56,6 @@ class LinkModelB {
 
   @Backlink(to: 'otherLinks')
   var linksBacklinks = IsarLinks<LinkModelA>();
-
-  LinkModelB();
-
-  LinkModelB.name(this.name);
 
   @override
   String toString() {

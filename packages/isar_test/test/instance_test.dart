@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:isar/isar.dart';
+import 'package:test/test.dart';
 
 import 'util/common.dart';
 import 'util/sync_async_helper.dart';
@@ -27,10 +27,10 @@ class Model {
 void main() {
   group('Instance test', () {
     isarTest('persists auto increment', () async {
-      var isar = await openTempIsar([ModelSchema]);
-      final isarName = isar.name;
+      Isar isar = await openTempIsar([ModelSchema]);
+      final String isarName = isar.name;
 
-      final obj1 = Model()..value = 'M1';
+      final Model obj1 = Model()..value = 'M1';
       await isar.tWriteTxn(() async {
         await isar.models.tPut(obj1);
       });
@@ -40,8 +40,8 @@ void main() {
       expect(await isar.close(), true);
       isar = await openTempIsar([ModelSchema], name: isarName);
 
-      final obj2 = Model()..value = 'M2';
-      final obj3 = Model()
+      final Model obj2 = Model()..value = 'M2';
+      final Model obj3 = Model()
         ..value = 'M3'
         ..id = 20;
       await isar.tWriteTxn(() async {
@@ -55,7 +55,7 @@ void main() {
       expect(await isar.close(), true);
       isar = await openTempIsar([ModelSchema], name: isarName);
 
-      final obj4 = Model()..value = 'M4';
+      final Model obj4 = Model()..value = 'M4';
       await isar.tWriteTxn(() async {
         await isar.models.tPut(obj4);
       });
@@ -66,7 +66,7 @@ void main() {
     });
 
     isarTest('Prevents usage of closed collection', () async {
-      final isar = await openTempIsar([ModelSchema]);
+      final Isar isar = await openTempIsar([ModelSchema]);
 
       expect(await isar.close(), true);
 

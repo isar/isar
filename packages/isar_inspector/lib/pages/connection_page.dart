@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar_inspector/connected_layout.dart';
-import 'package:isar_inspector/error_screen.dart';
-import 'package:isar_inspector/state/collections_state.dart';
-import 'package:isar_inspector/state/instances_state.dart';
-import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
+import '../connected_layout.dart';
+import '../error_screen.dart';
+import '../state/collections_state.dart';
+import '../state/instances_state.dart';
+import '../state/isar_connect_state_notifier.dart';
 
 class ConnectionPage extends ConsumerStatefulWidget {
-  final String port;
-  final String secret;
-
   const ConnectionPage({
-    Key? key,
+    super.key,
     required this.port,
     required this.secret,
-  }) : super(key: key);
+  });
+  final String port;
+  final String secret;
 
   @override
   ConsumerState<ConnectionPage> createState() => _ConnectionPageState();
@@ -51,7 +50,8 @@ class _ConnectionPageState extends ConsumerState<ConnectionPage> {
 }
 
 class _InstancesLoader extends ConsumerWidget {
-  const _InstancesLoader({Key? key}) : super(key: key);
+  // ignore: unused_element
+  const _InstancesLoader({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -70,7 +70,8 @@ class _InstancesLoader extends ConsumerWidget {
 }
 
 class _CollectionsLoader extends ConsumerWidget {
-  const _CollectionsLoader({Key? key}) : super(key: key);
+  // ignore: unused_element
+  const _CollectionsLoader({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -89,7 +90,7 @@ class _CollectionsLoader extends ConsumerWidget {
 }
 
 class Loading extends StatelessWidget {
-  const Loading({Key? key}) : super(key: key);
+  const Loading({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -22,11 +22,11 @@ class NameModel {
   String? otherValue;
 
   @Name('linkN')
-  var link = IsarLinks<NameModel>();
+  IsarLinks<NameModel> link = IsarLinks<NameModel>();
 
   @Backlink(to: 'link')
   @Name('backlink')
-  var backlink = IsarLinks<NameModel>();
+  IsarLinks<NameModel> backlink = IsarLinks<NameModel>();
 }
 
 void main() {

@@ -11,11 +11,10 @@ part 'change_field_type_test.g.dart';
 @Collection()
 @Name('Col')
 class Col1 {
+  Col1(this.id, this.value);
   int? id;
 
   String? value;
-
-  Col1(this.id, this.value);
 }
 
 @Collection()
@@ -28,7 +27,7 @@ class Col2 {
 
 void main() {
   isarTest('Change field type', () async {
-    final isar1 = await openTempIsar([Col1Schema]);
+    final Isar isar1 = await openTempIsar([Col1Schema]);
     await isar1.tWriteTxn(() {
       return isar1.col1s.tPut(Col1(1, 'a'));
     });

@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
+
 import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'dart:math';
 import 'package:test/test.dart';
 
 import 'sync_async_helper.dart';
@@ -16,27 +17,27 @@ Future<void> qEqualSet<T>(
 }
 
 Future<void> qEqual<T>(Future<Iterable<T>> actual, List<T> target) async {
-  final results = (await actual).toList();
+  final List<T> results = (await actual).toList();
   qEqualSync(results, target);
 }
 
 Future<void> qEqualSync<T>(List<T> actual, List<T> target) async {
   if (actual is List<double?>) {
-    for (var i = 0; i < actual.length; i++) {
-      final result = (actual[i] as double) - (target[i] as double);
+    for (int i = 0; i < actual.length; i++) {
+      final double result = (actual[i] as double) - (target[i] as double);
       expect(result.abs() < 0.01, true);
     }
   } else if (actual is List<List<double?>?>) {
-    for (var i = 0; i < actual.length; i++) {
-      qEqualSync((actual[i] as List), (target[i] as List));
+    for (int i = 0; i < actual.length; i++) {
+      qEqualSync(actual[i] as List, target[i] as List);
     }
   } else {
     expect(actual, target);
   }
 }
 
-var allTestsSuccessful = true;
-var testCount = 0;
+bool allTestsSuccessful = true;
+int testCount = 0;
 
 Future<void> _prepareTest() async {
   if (!kIsWeb) {
@@ -87,7 +88,7 @@ void isarTestVm(String name, dynamic Function() body) {
 }
 
 String getRandomName() {
-  var random = Random().nextInt(pow(2, 32) as int).toString();
+  final String random = Random().nextInt(pow(2, 32) as int).toString();
   return '${random}_tmp';
 }
 
@@ -96,11 +97,11 @@ Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> schemas,
     {String? name}) async {
   await _prepareTest();
   if (!kIsWeb && testTempPath == null) {
-    final dartToolDir = path.join(Directory.current.path, '.dart_tool');
+    final String dartToolDir = path.join(Directory.current.path, '.dart_tool');
     testTempPath = path.join(dartToolDir, 'test', 'tmp');
   }
 
-  return await tOpen(
+  return tOpen(
     schemas: schemas,
     name: name ?? getRandomName(),
     directory: kIsWeb ? '' : testTempPath!,
@@ -112,9 +113,9 @@ bool doubleListEquals(List<double?>? l1, List<double?>? l2) {
     return false;
   }
   if (l1 != null && l2 != null) {
-    for (var i = 0; i < l1.length; i++) {
-      final e1 = l1[i];
-      final e2 = l2[i];
+    for (int i = 0; i < l1.length; i++) {
+      final double? e1 = l1[i];
+      final double? e2 = l2[i];
       if (e1 != null && e2 != null) {
         if ((e1 - e2).abs() > 0.001) {
           return false;
@@ -152,7 +153,7 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
   if (identical(a, b)) {
     return true;
   }
-  for (var index = 0; index < a.length; index += 1) {
+  for (int index = 0; index < a.length; index += 1) {
     if (a[index] != b[index]) {
       return false;
     }

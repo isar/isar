@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,12 +12,12 @@ import 'test/util/common.dart';
 void main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  final completer = Completer<bool>();
+  final Completer<bool> completer = Completer<bool>();
   executeTests(completer);
 
   testWidgets('Isar', (WidgetTester tester) async {
     await tester.pumpWidget(Container());
-    final result = await completer.future;
+    final bool result = await completer.future;
     expect(result, true);
   });
 }
@@ -25,7 +26,7 @@ void executeTests(Completer<bool> completer) {
   group('Integration test', () {
     setUpAll(() async {
       if (!kIsWeb) {
-        final dir = await getTemporaryDirectory();
+        final Directory dir = await getTemporaryDirectory();
         testTempPath = dir.path;
       }
     });

@@ -8,6 +8,11 @@ part 'filter_string_test.g.dart';
 
 @Collection()
 class StringModel {
+  StringModel();
+
+  StringModel.init(String? value)
+      : field = value,
+        hashField = value;
   @Id()
   int? id;
 
@@ -31,14 +36,8 @@ class StringModel {
     return '{field: $field, hashField: $hashField, list: $list, hashList: $hashList, hashElementList: $hashElementList}';
   }
 
-  StringModel();
-
-  StringModel.init(String? value)
-      : field = value,
-        hashField = value;
-
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is StringModel) {
       return field == other.field &&
           hashField == other.hashField &&
@@ -60,8 +59,8 @@ void main() {
       col = isar.stringModels;
 
       await isar.writeTxn(() async {
-        for (var i = 0; i < 5; i++) {
-          final obj = StringModel.init('string $i');
+        for (int i = 0; i < 5; i++) {
+          final StringModel obj = StringModel.init('string $i');
           await col.put(obj);
         }
         await col.put(StringModel.init(null));

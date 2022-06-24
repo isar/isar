@@ -18,6 +18,16 @@ enum IndexType {
 /// Annotate properties to build an index.
 @Target({TargetKind.field, TargetKind.getter, TargetKind.setter})
 class Index {
+  /// Annotate properties to build an index.
+  const Index({
+    this.name,
+    this.composite = const [],
+    this.unique = false,
+    this.replace = false,
+    this.type,
+    this.caseSensitive,
+  });
+
   /// Name of the index. By default, the names of the properties are
   /// concatenated using "_"
   final String? name;
@@ -45,20 +55,17 @@ class Index {
   /// String or `List<String>` indexes can be case sensitive (default) or case
   /// insensitive.
   final bool? caseSensitive;
-
-  /// Annotate properties to build an index.
-  const Index({
-    this.name,
-    this.composite = const [],
-    this.unique = false,
-    this.replace = false,
-    this.type,
-    this.caseSensitive,
-  });
 }
 
 /// Another property that is part of the composite index.
 class CompositeIndex {
+  /// Another property that is part of the composite index.
+  const CompositeIndex(
+    this.property, {
+    this.type,
+    this.caseSensitive,
+  });
+
   /// Dart name of the property.
   final String property;
 
@@ -67,11 +74,4 @@ class CompositeIndex {
 
   /// See [Index.caseSensitive].
   final bool? caseSensitive;
-
-  /// Another property that is part of the composite index.
-  const CompositeIndex(
-    this.property, {
-    this.type,
-    this.caseSensitive,
-  });
 }

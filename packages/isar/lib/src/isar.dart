@@ -8,21 +8,34 @@ typedef IsarCloseCallback = void Function(String);
 
 /// An instance of the Isar Database.
 abstract class Isar {
+  @protected
+  Isar(this.name, String schema) {
+    if (_schema != null && _schema != schema) {
+      // ignore: only_throw_errors
+      throw 'Cannot open multiple Isar instances with different schema.';
+    }
+    _schema = schema;
+    _instances[name] = this;
+    for (final IsarOpenCallback callback in _openCallbacks) {
+      callback(this);
+    }
+  }
+
   /// Smallest valid id.
-  static const minId = isarMinId;
+  static const int minId = isarMinId;
 
   /// Largest valid id.
-  static const maxId = isarMaxId;
+  static const int maxId = isarMaxId;
 
   /// The default Isar instance name.
-  static const defaultName = 'isar';
+  static const String defaultName = 'isar';
 
   /// Placeholder for an auto-increment id.
-  static final autoIncrement = isarAutoIncrementId;
+  static int autoIncrement = isarAutoIncrementId;
 
-  static final _instances = <String, Isar>{};
-  static final _openCallbacks = <IsarOpenCallback>{};
-  static final _closeCallbacks = <IsarCloseCallback>{};
+  static final Map<String, Isar> _instances = <String, Isar>{};
+  static final Set<IsarOpenCallback> _openCallbacks = <IsarOpenCallback>{};
+  static final Set<IsarCloseCallback> _closeCallbacks = <IsarCloseCallback>{};
   static String? _schema;
 
   /// Name of the instance.
@@ -31,37 +44,31 @@ abstract class Isar {
   late final Map<Type, IsarCollection<dynamic>> _collections;
   late final Map<String, IsarCollection<dynamic>> _collectionsByName;
 
-  var _isOpen = true;
-
-  @protected
-  Isar(this.name, String schema) {
-    if (_schema != null && _schema != schema) {
-      throw 'Cannot open multiple Isar instances with different schema.';
-    }
-    _schema = schema;
-    _instances[name] = this;
-    for (var callback in _openCallbacks) {
-      callback(this);
-    }
-  }
+  bool _isOpen = true;
 
   static void _checkOpen(String name, List<CollectionSchema<dynamic>> schemas) {
     if (name.isEmpty || name.startsWith('_')) {
+      // ignore: only_throw_errors
       throw IsarError('Instance names must not be empty or start with "_".');
     }
     if (_instances.containsKey(name)) {
+      // ignore: only_throw_errors
       throw IsarError('Instance has already been opened.');
     }
     if (schemas.isEmpty) {
+      // ignore: only_throw_errors
       throw IsarError('At least one collection needs to be opened.');
     }
-    for (var i = 0; i < schemas.length; i++) {
-      final schema = schemas[i];
-      if (schemas.indexWhere((e) => e.name == schema.name) != i) {
+    for (int i = 0; i < schemas.length; i++) {
+      final CollectionSchema schema = schemas[i];
+      if (schemas.indexWhere((CollectionSchema e) => e.name == schema.name) !=
+          i) {
+        // ignore: only_throw_errors
         throw IsarError('Duplicate collection ${schema.name}.');
       }
     }
-    schemas.sort((a, b) => a.name.compareTo(b.name));
+    schemas.sort(
+        (CollectionSchema a, CollectionSchema b) => a.name.compareTo(b.name));
   }
 
   /// Open a new Isar instance.
@@ -115,6 +122,7 @@ abstract class Isar {
   @protected
   void requireOpen() {
     if (!isOpen) {
+      // ignore: only_throw_errors
       throw IsarError('Isar instance has already been closed');
     }
   }
@@ -136,7 +144,7 @@ abstract class Isar {
   void attachCollections(Map<Type, IsarCollection<dynamic>> collections) {
     _collections = collections;
     _collectionsByName = {
-      for (var col in collections.values) col.name: col,
+      for (IsarCollection col in collections.values) col.name: col,
     };
   }
 
@@ -163,14 +171,14 @@ abstract class Isar {
 
   /// Remove all data in this instance and reset the auto increment values.
   Future<void> clear() async {
-    for (var col in _collections.values) {
+    for (final IsarCollection col in _collections.values) {
       await col.clear();
     }
   }
 
   /// Remove all data in this instance and reset the auto increment values.
   void clearSync() {
-    for (var col in _collections.values) {
+    for (final IsarCollection col in _collections.values) {
       col.clearSync();
     }
   }
@@ -191,7 +199,7 @@ abstract class Isar {
         _schema = null;
       }
     }
-    for (var callback in _closeCallbacks) {
+    for (final IsarCloseCallback callback in _closeCallbacks) {
       callback(name);
     }
     return Future.value(false);

@@ -4,13 +4,6 @@ import 'package:isar/isar.dart';
 import 'isar_type.dart';
 
 class ObjectInfo {
-  final String dartName;
-  final String isarName;
-  final String accessor;
-  final List<ObjectProperty> properties;
-  final List<ObjectIndex> indexes;
-  final List<ObjectLink> links;
-
   const ObjectInfo({
     required this.dartName,
     required this.isarName,
@@ -19,11 +12,18 @@ class ObjectInfo {
     required this.indexes,
     required this.links,
   });
+  final String dartName;
+  final String isarName;
+  final String accessor;
+  final List<ObjectProperty> properties;
+  final List<ObjectIndex> indexes;
+  final List<ObjectLink> links;
 
-  ObjectProperty get idProperty => properties.firstWhere((it) => it.isId);
+  ObjectProperty get idProperty =>
+      properties.firstWhere((ObjectProperty it) => it.isId);
 
   List<ObjectProperty> get objectProperties =>
-      properties.where((p) => !p.isId).toList();
+      properties.where((ObjectProperty p) => !p.isId).toList();
 
   String get getIdName => '_${dartName.decapitalize()}GetId';
   String get setIdName => '_${dartName.decapitalize()}SetId';
@@ -51,18 +51,6 @@ enum PropertyDeser {
 }
 
 class ObjectProperty {
-  final String dartName;
-  final String isarName;
-  final String dartType;
-  final IsarType isarType;
-  final bool isId;
-  final String? converter;
-  final bool nullable;
-  final bool elementNullable;
-  final PropertyDeser deserialize;
-  final bool assignable;
-  final int? constructorPosition;
-
   const ObjectProperty({
     required this.dartName,
     required this.isarName,
@@ -76,6 +64,17 @@ class ObjectProperty {
     required this.assignable,
     this.constructorPosition,
   });
+  final String dartName;
+  final String isarName;
+  final String dartType;
+  final IsarType isarType;
+  final bool isId;
+  final String? converter;
+  final bool nullable;
+  final bool elementNullable;
+  final PropertyDeser deserialize;
+  final bool assignable;
+  final int? constructorPosition;
 
   ObjectProperty copyWithIsId(bool isId) {
     return ObjectProperty(
@@ -114,15 +113,14 @@ class ObjectProperty {
 }
 
 class ObjectIndexProperty {
-  final ObjectProperty property;
-  final IndexType type;
-  final bool caseSensitive;
-
   const ObjectIndexProperty({
     required this.property,
     required this.type,
     required this.caseSensitive,
   });
+  final ObjectProperty property;
+  final IndexType type;
+  final bool caseSensitive;
 
   IsarType get isarType => property.isarType;
 
@@ -204,31 +202,19 @@ class ObjectIndexProperty {
 }
 
 class ObjectIndex {
-  final String name;
-  final List<ObjectIndexProperty> properties;
-  final bool unique;
-  final bool replace;
-
   const ObjectIndex({
     required this.name,
     required this.properties,
     required this.unique,
     required this.replace,
   });
+  final String name;
+  final List<ObjectIndexProperty> properties;
+  final bool unique;
+  final bool replace;
 }
 
 class ObjectLink {
-  final String dartName;
-  final String isarName;
-
-  // isar name of the original link (only for backlinks)
-  final String? targetIsarName;
-  final String targetCollectionDartName;
-  final String targetCollectionIsarName;
-  final String targetCollectionAccessor;
-  final bool links;
-  final bool backlink;
-
   const ObjectLink({
     required this.dartName,
     required this.isarName,
@@ -239,4 +225,14 @@ class ObjectLink {
     required this.links,
     required this.backlink,
   });
+  final String dartName;
+  final String isarName;
+
+  // isar name of the original link (only for backlinks)
+  final String? targetIsarName;
+  final String targetCollectionDartName;
+  final String targetCollectionIsarName;
+  final String targetCollectionAccessor;
+  final bool links;
+  final bool backlink;
 }

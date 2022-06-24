@@ -2,11 +2,11 @@ part of isar;
 
 /// An error raised by Isar.
 class IsarError {
-  /// The message
-  final String message;
-
   @protected
   IsarError(this.message);
+
+  /// The message
+  final String message;
 
   @override
   String toString() {

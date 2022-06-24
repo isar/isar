@@ -10,13 +10,13 @@ part 'constructor_test.freezed.dart';
 
 @Collection()
 class EmptyConstructorModel {
+  EmptyConstructorModel();
   int? id;
 
   late String name;
 
-  EmptyConstructorModel();
-
   @override
+  // ignore: hash_and_equals, always_declare_return_types
   operator ==(dynamic other) {
     return other is EmptyConstructorModel &&
         other.id == id &&
@@ -26,13 +26,13 @@ class EmptyConstructorModel {
 
 @Collection()
 class NamedConstructorModel {
+  NamedConstructorModel({required this.name});
   int? id;
 
   final String name;
 
-  NamedConstructorModel({required this.name});
-
   @override
+  // ignore: hash_and_equals, always_declare_return_types
   operator ==(dynamic other) {
     return other is NamedConstructorModel &&
         other.id == id &&
@@ -42,13 +42,13 @@ class NamedConstructorModel {
 
 @Collection()
 class PositionalConstructorModel {
+  PositionalConstructorModel(this.id, this.name);
   final int? id;
 
   final String name;
 
-  PositionalConstructorModel(this.id, this.name);
-
   @override
+  // ignore: hash_and_equals, always_declare_return_types
   operator ==(dynamic other) {
     return other is PositionalConstructorModel &&
         other.id == id &&
@@ -58,16 +58,16 @@ class PositionalConstructorModel {
 
 @Collection()
 class OptionalConstructorModel {
+  OptionalConstructorModel(this.name, [this.id]);
   final int? id;
 
   final String name;
-
-  OptionalConstructorModel(this.name, [this.id]);
 
   @override
   String toString() => '{id: $id, name: $name}';
 
   @override
+  // ignore: hash_and_equals, always_declare_return_types
   operator ==(dynamic other) {
     return other is OptionalConstructorModel &&
         other.id == id &&
@@ -77,13 +77,13 @@ class OptionalConstructorModel {
 
 @Collection()
 class PositionalNamedConstructorModel {
+  PositionalNamedConstructorModel(this.name, {required this.id});
   final int id;
 
   String name;
 
-  PositionalNamedConstructorModel(this.name, {required this.id});
-
   @override
+  // ignore: hash_and_equals, always_declare_return_types
   operator ==(dynamic other) {
     return other is PositionalNamedConstructorModel &&
         other.id == id &&
@@ -93,15 +93,15 @@ class PositionalNamedConstructorModel {
 
 @Collection()
 class SerializeOnlyModel {
+  SerializeOnlyModel(this.id);
   final int? id;
 
   final String name = 'myName';
 
   String get someGetter => '$name$name';
 
-  SerializeOnlyModel(this.id);
-
   @override
+  // ignore: hash_and_equals, always_declare_return_types
   operator ==(dynamic other) {
     return other is SerializeOnlyModel && other.id == id;
   }
@@ -134,8 +134,8 @@ void main() {
     });
 
     isarTest('EmptyConstructorModel', () async {
-      final obj1 = EmptyConstructorModel()..name = 'obj1';
-      final obj2 = EmptyConstructorModel()..name = 'obj2';
+      final EmptyConstructorModel obj1 = EmptyConstructorModel()..name = 'obj1';
+      final EmptyConstructorModel obj2 = EmptyConstructorModel()..name = 'obj2';
       await isar.tWriteTxn(() async {
         await isar.emptyConstructorModels.tPutAll([obj1, obj2]);
       });
@@ -145,8 +145,8 @@ void main() {
     });
 
     isarTest('NamedConstructorModel', () async {
-      final obj1 = NamedConstructorModel(name: 'obj1');
-      final obj2 = NamedConstructorModel(name: 'obj2');
+      final NamedConstructorModel obj1 = NamedConstructorModel(name: 'obj1');
+      final NamedConstructorModel obj2 = NamedConstructorModel(name: 'obj2');
       await isar.tWriteTxn(() async {
         await isar.namedConstructorModels.tPutAll([obj1, obj2]);
       });
@@ -156,9 +156,12 @@ void main() {
     });
 
     isarTest('PositionalConstructorModel', () async {
-      final obj1 = PositionalConstructorModel(0, 'obj1');
-      final obj2 = PositionalConstructorModel(5, 'obj2');
-      final obj3 = PositionalConstructorModel(15, 'obj3');
+      final PositionalConstructorModel obj1 =
+          PositionalConstructorModel(0, 'obj1');
+      final PositionalConstructorModel obj2 =
+          PositionalConstructorModel(5, 'obj2');
+      final PositionalConstructorModel obj3 =
+          PositionalConstructorModel(15, 'obj3');
       await isar.tWriteTxn(() async {
         await isar.positionalConstructorModels.tPutAll([obj1, obj2, obj3]);
       });
@@ -170,10 +173,12 @@ void main() {
     });
 
     isarTest('OptionalConstructorModel', () async {
-      final obj1 = OptionalConstructorModel('obj1');
-      final obj1WithId = OptionalConstructorModel('obj1', 1);
-      final obj2 = OptionalConstructorModel('obj2', 5);
-      final obj3 = OptionalConstructorModel('obj3', 15);
+      final OptionalConstructorModel obj1 = OptionalConstructorModel('obj1');
+      final OptionalConstructorModel obj1WithId =
+          OptionalConstructorModel('obj1', 1);
+      final OptionalConstructorModel obj2 = OptionalConstructorModel('obj2', 5);
+      final OptionalConstructorModel obj3 =
+          OptionalConstructorModel('obj3', 15);
       await isar.tWriteTxn(() async {
         await isar.optionalConstructorModels.tPutAll([obj1, obj2, obj3]);
       });
@@ -185,8 +190,10 @@ void main() {
     });
 
     isarTest('PositionalNamedConstructorModel', () async {
-      final obj1 = PositionalNamedConstructorModel('obj1', id: 1);
-      final obj2 = PositionalNamedConstructorModel('obj2', id: 2);
+      final PositionalNamedConstructorModel obj1 =
+          PositionalNamedConstructorModel('obj1', id: 1);
+      final PositionalNamedConstructorModel obj2 =
+          PositionalNamedConstructorModel('obj2', id: 2);
       await isar.tWriteTxn(() async {
         await isar.positionalNamedConstructorModels.tPutAll([obj1, obj2]);
       });
@@ -198,8 +205,8 @@ void main() {
     });
 
     isarTest('FreezedModel', () async {
-      const obj1 = FreezedModel(id: 1, name: 'obj1');
-      const obj2 = FreezedModel(id: 2, name: 'obj2');
+      const FreezedModel obj1 = FreezedModel(id: 1, name: 'obj1');
+      const FreezedModel obj2 = FreezedModel(id: 2, name: 'obj2');
       await isar.tWriteTxn(() async {
         await isar.freezedModels.tPutAll([obj1, obj2]);
       });

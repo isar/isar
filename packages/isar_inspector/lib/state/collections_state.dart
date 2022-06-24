@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar_inspector/schema.dart';
-import 'package:isar_inspector/state/instances_state.dart';
+import '../schema.dart';
+import 'instances_state.dart';
 
 import 'isar_connect_state_notifier.dart';
 
