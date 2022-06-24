@@ -35,18 +35,17 @@ Future<bool> _isolateFunc(String name) async {
   final isar = Isar.openSync(
     name: name,
     schemas: [TestModelSchema],
-    directory: '////',
   );
 
   final current = isar.testModels.where().findAllSync();
-  expect(current[0] == _obj1 && current[1] == _obj2, true);
+  assert(current[0] == _obj1 && current[1] == _obj2, 'Did not find objects');
 
   isar.writeTxnSync(() {
     isar.testModels.deleteSync(2);
     isar.testModels.putSync(_obj3);
   });
 
-  expect(await isar.close(), false);
+  assert(!(await isar.close()), 'Instance was closed incorrectly');
 
   return true;
 }
