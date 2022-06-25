@@ -42,7 +42,7 @@ class Account {
         other.email == email &&
         other.firstname == firstname &&
         other.lastname == lastname &&
-        other.birthdate != birthdate;
+        other.birthdate == birthdate;
   }
 }
 

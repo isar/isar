@@ -1,6 +1,6 @@
 name: isar
 description: Fast Cross Platform Database for Flutter Apps. Supports indexes, FTS, queries etc.
-version: 3.0.0-dev.1
+version: 3.0.0-dev.2
 repository: https://github.com/isar/isar
 homepage: https://isar.dev
 

@@ -48,7 +48,7 @@ class Listener<T> {
   }
 
   Future<void> done() async {
-    await Future<void>.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     await subscription.cancel();
     expect(_completer, null);
     expect(_unprocessed, <dynamic>[]);

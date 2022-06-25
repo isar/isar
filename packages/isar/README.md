@@ -64,11 +64,11 @@ Holy smokes you're here! Let's get started...
 
 ```yaml
 dependencies:
-  isar: 3.0.0-dev.1
-  isar_flutter_libs: 3.0.0-dev.1 # contains the binaries
+  isar: 3.0.0-dev.2
+  isar_flutter_libs: 3.0.0-dev.2 # contains the binaries
 
 dev_dependencies:
-  isar_generator: 3.0.0-dev.1
+  isar_generator: 3.0.0-dev.2
   build_runner: any
 ```
 
