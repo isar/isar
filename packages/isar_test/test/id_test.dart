@@ -23,11 +23,7 @@ class ExplicitIdModel {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
-  group("Id", () {
+  group('Id', () {
     late Isar isar;
 
     setUp(() async {
@@ -40,8 +36,8 @@ void tests() {
 
     tearDown(() => isar.close());
 
-    group("Implicit nullable id", () {
-      isarTest("Id should auto increment", () async {
+    group('Implicit nullable id', () {
+      isarTest('Id should auto increment', () async {
         final id1 = await isar.tWriteTxn(
           () => isar.implicitNullableIdModels.tPut(ImplicitNullableIdModel()),
         );
@@ -70,7 +66,7 @@ void tests() {
         expect(allIds, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
       });
 
-      isarTest("Auto increment should reset", () async {
+      isarTest('Auto increment should reset', () async {
         final ids1 = await isar.tWriteTxn(() {
           return isar.implicitNullableIdModels.tPutAll(
             List.generate(10, (_) => ImplicitNullableIdModel()),
@@ -104,7 +100,7 @@ void tests() {
         expect(ids2, [1, 2, 3, 4, 5, 6]);
       });
 
-      isarTest("Negative id", () async {
+      isarTest('Negative id', () async {
         final model = ImplicitNullableIdModel()..id = -10;
         final id = await isar.tWriteTxn(
           () => isar.implicitNullableIdModels.tPut(model),
@@ -124,7 +120,7 @@ void tests() {
       });
 
       isarTest(
-        "Auto increment counter should always be the next biggest id",
+        'Auto increment counter should always be the next biggest id',
         () async {
           final id1 = await isar.tWriteTxn(
             () => isar.implicitNullableIdModels.tPut(
@@ -163,8 +159,8 @@ void tests() {
       );
     });
 
-    group("Implicit final id", () {
-      isarTest("Id should auto increment", () async {
+    group('Implicit final id', () {
+      isarTest('Id should auto increment', () async {
         final id1 = await isar.tWriteTxn(
           () => isar.implicitFinalIdModels.tPut(ImplicitFinalIdModel()),
         );
@@ -188,8 +184,8 @@ void tests() {
       });
     });
 
-    group("Explicit id", () {
-      isarTest("Id should auto increment", () async {
+    group('Explicit id', () {
+      isarTest('Id should auto increment', () async {
         final id1 = await isar.tWriteTxn(
           () => isar.explicitIdModels.tPut(ExplicitIdModel()),
         );
