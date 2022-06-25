@@ -28,9 +28,11 @@ void _initializeInstance(
   final cols = <Type, IsarCollection<dynamic>>{};
   for (var i = 0; i < schemas.length; i++) {
     final schema = schemas[i];
-    nCall(IC.isar_get_collection(isar.ptr, colPtrPtr, i));
-    final staticSize =
-        IC.isar_get_static_size_and_offsets(colPtrPtr.value, offsetsPtr);
+    nCall(IC.isar_instance_get_collection(isar.ptr, colPtrPtr, i));
+    final staticSize = IC.isar_collection_get_static_size_and_offsets(
+      colPtrPtr.value,
+      offsetsPtr,
+    );
     final offsets = offsetsPtr.asTypedList(schema.propertyIds.length).toList();
     schema.toCollection(<OBJ>() {
       schema as CollectionSchema<OBJ>;
@@ -67,7 +69,7 @@ Future<Isar> openIsar({
     final receivePort = ReceivePort();
     final nativePort = receivePort.sendPort.nativePort;
     final stream = wrapIsarPort(receivePort);
-    IC.isar_create_instance_async(
+    IC.isar_instance_create_async(
       _isarPtrPtr,
       namePtr.cast(),
       dirPtr.cast(),
@@ -101,7 +103,7 @@ Isar openIsarSync({
       final schemaStrPtr = schemaStr.toNativeUtf8(allocator: alloc);
 
       nCall(
-        IC.isar_create_instance(
+        IC.isar_instance_create(
           _isarPtrPtr,
           namePtr.cast(),
           dirPtr.cast(),

@@ -1,5 +1,10 @@
 ## 3.0.0-dev.3
 
+### Enhancements
+
+- Made providing a path optional
+- Added `isar.path` property
+
 ### Breaking
 
 - The default Isar name is now `default`. On non-web targets, migration will happen automatically.

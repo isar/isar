@@ -15,6 +15,9 @@ class IsarImpl extends Isar {
   final IsarInstanceJs instance;
   final List<Future<void>> _activeAsyncTxns = [];
 
+  @override
+  final String? path = null;
+
   void requireNotInTxn() {
     if (Zone.current[_zoneTxn] != null) {
       throw IsarError(
