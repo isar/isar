@@ -33,8 +33,8 @@ final TestModel _obj3 = TestModel()
 
 Future<bool> _isolateFunc(String name) async {
   final isar = Isar.openSync(
+    [TestModelSchema],
     name: name,
-    schemas: [TestModelSchema],
   );
 
   final current = isar.testModels.where().findAllSync();

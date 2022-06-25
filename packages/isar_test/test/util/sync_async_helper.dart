@@ -15,7 +15,7 @@ Future<Isar> tOpen({
 }) {
   if (_testSync) {
     final isar = Isar.openSync(
-      schemas: schemas,
+      schemas,
       directory: directory,
       name: name,
       relaxedDurability: relaxedDurability,
@@ -23,7 +23,7 @@ Future<Isar> tOpen({
     return SynchronousFuture(isar);
   } else {
     return Isar.open(
-      schemas: schemas,
+      schemas,
       directory: directory,
       name: name,
       relaxedDurability: relaxedDurability,
@@ -308,8 +308,10 @@ extension TIsarLinkBase<OBJ> on IsarLinkBase<OBJ> {
 }
 
 extension TIsarLinks<OBJ> on IsarLinks<OBJ> {
-  Future<void> tUpdate(
-      {List<OBJ> link = const [], List<OBJ> unlink = const [],}) {
+  Future<void> tUpdate({
+    List<OBJ> link = const [],
+    List<OBJ> unlink = const [],
+  }) {
     if (_testSync) {
       updateSync(link: link, unlink: unlink);
       return SynchronousFuture(null);

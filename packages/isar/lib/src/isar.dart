@@ -77,8 +77,8 @@ abstract class Isar {
   }
 
   /// Open a new Isar instance.
-  static Future<Isar> open({
-    required List<CollectionSchema<dynamic>> schemas,
+  static Future<Isar> open(
+    List<CollectionSchema<dynamic>> schemas, {
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
@@ -101,8 +101,8 @@ abstract class Isar {
   }
 
   /// Open a new Isar instance.
-  static Isar openSync({
-    required List<CollectionSchema<dynamic>> schemas,
+  static Isar openSync(
+    List<CollectionSchema<dynamic>> schemas, {
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,

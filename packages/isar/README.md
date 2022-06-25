@@ -90,7 +90,7 @@ class Post {
 ### 3. Open an instance
 
 ```dart
-final isar = await Isar.open(schemas: [PostSchema]);
+final isar = await Isar.open([PostSchema]);
 ```
 
 ### 4. Query the database
