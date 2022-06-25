@@ -1,10 +1,11 @@
-include: package:lints/recommended.yaml
+include: package:very_good_analysis/analysis_options.yaml
 
 analyzer:
   exclude:
+    - "**/*.g.dart"
     - "lib/src/native/bindings.dart"
 
-  language:
-    strict-casts: true
-    strict-inference: true
-    strict-raw-types: true
+  errors:
+    cascade_invocations: ignore
+    avoid_positional_boolean_parameters: ignore
+    parameter_assignments: ignore

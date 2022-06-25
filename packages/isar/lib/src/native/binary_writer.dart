@@ -1,5 +1,7 @@
-import 'dart:convert';
+// ignore_for_file: public_member_api_docs, prefer_asserts_with_message,
+// avoid_positional_boolean_parameters
 
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:isar/src/native/isar_core.dart';
@@ -8,7 +10,14 @@ import 'package:meta/meta.dart';
 /// @nodoc
 @protected
 class BinaryWriter {
-  static const utf8Encoder = Utf8Encoder();
+  BinaryWriter(Uint8List buffer, int staticSize)
+      : _staticSize = staticSize,
+        _dynamicOffset = staticSize,
+        _buffer = buffer,
+        _byteData = ByteData.view(buffer.buffer) {
+    _byteData.setUint16(0, staticSize, Endian.little);
+  }
+  static const Utf8Encoder utf8Encoder = Utf8Encoder();
 
   final Uint8List _buffer;
 
@@ -17,14 +26,6 @@ class BinaryWriter {
   final int _staticSize;
 
   int _dynamicOffset;
-
-  BinaryWriter(Uint8List buffer, int staticSize)
-      : _staticSize = staticSize,
-        _dynamicOffset = staticSize,
-        _buffer = buffer,
-        _byteData = ByteData.view(buffer.buffer) {
-    _byteData.setUint16(0, staticSize, Endian.little);
-  }
 
   @pragma('vm:prefer-inline')
   void writeBool(int offset, bool? value, {bool staticOffset = true}) {
@@ -72,7 +73,7 @@ class BinaryWriter {
       _byteData.setUint32(offsetOffset, 0, Endian.little);
       _byteData.setUint32(offsetOffset + 4, 0, Endian.little);
     } else {
-      var bytesLen = value.length;
+      final bytesLen = value.length;
       _byteData.setUint32(offsetOffset, dataOffset, Endian.little);
       _byteData.setUint32(offsetOffset + 4, bytesLen, Endian.little);
       _buffer.setRange(dataOffset, dataOffset + bytesLen, value);
@@ -95,7 +96,7 @@ class BinaryWriter {
       _byteData.setUint32(offset, _dynamicOffset, Endian.little);
       _byteData.setUint32(offset + 4, values.length, Endian.little);
 
-      for (var value in values) {
+      for (final value in values) {
         writeBool(_dynamicOffset++, value, staticOffset: false);
       }
     }
@@ -128,7 +129,7 @@ class BinaryWriter {
       _byteData.setUint32(offset, _dynamicOffset, Endian.little);
       _byteData.setUint32(offset + 4, values.length, Endian.little);
 
-      for (var value in values) {
+      for (final value in values) {
         _byteData.setFloat32(_dynamicOffset, value ?? nullFloat, Endian.little);
         _dynamicOffset += 4;
       }
@@ -144,7 +145,7 @@ class BinaryWriter {
       _byteData.setUint32(offset, _dynamicOffset, Endian.little);
       _byteData.setUint32(offset + 4, values.length, Endian.little);
 
-      for (var value in values) {
+      for (final value in values) {
         _byteData.setInt64(_dynamicOffset, value ?? nullLong, Endian.little);
         _dynamicOffset += 8;
       }
@@ -160,9 +161,12 @@ class BinaryWriter {
       _byteData.setUint32(offset, _dynamicOffset, Endian.little);
       _byteData.setUint32(offset + 4, values.length, Endian.little);
 
-      for (var value in values) {
+      for (final value in values) {
         _byteData.setFloat64(
-            _dynamicOffset, value ?? nullDouble, Endian.little);
+          _dynamicOffset,
+          value ?? nullDouble,
+          Endian.little,
+        );
         _dynamicOffset += 8;
       }
     }

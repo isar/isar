@@ -4,6 +4,9 @@ part 'user_model.g.dart';
 
 @Collection()
 class UserModel {
+  UserModel();
+
+  UserModel.fill(this.name, this.age, this.admin);
   @Id()
   int? id;
 
@@ -15,20 +18,18 @@ class UserModel {
 
   bool admin = false;
 
-  UserModel();
-
-  UserModel.fill(this.name, this.age, this.admin);
-
   @override
   String toString() {
     return '{name: $name, age: $age, admin: $admin}';
   }
 
   @override
-  bool operator ==(other) {
-    final otherModel = other as UserModel;
-    return name == otherModel.name &&
-        age == otherModel.age &&
-        admin == otherModel.admin;
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
+    // ignore: test_types_in_equals
+    return other is UserModel &&
+        name == other.name &&
+        age == other.age &&
+        admin == other.admin;
   }
 }

@@ -1,12 +1,12 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:isar/isar.dart';
-import 'package:isar_generator/src/helper.dart';
-import 'package:isar_generator/src/object_info.dart';
 import 'package:dartx/dartx.dart';
+import 'package:isar/isar.dart';
 
-import 'isar_type.dart';
+import 'package:isar_generator/src/helper.dart';
+import 'package:isar_generator/src/isar_type.dart';
+import 'package:isar_generator/src/object_info.dart';
 
 class IsarAnalyzer {
   ObjectInfo analyze(Element modelClass) {
@@ -22,8 +22,8 @@ class IsarAnalyzer {
       err('Class must be public.', modelClass);
     }
 
-    final constructor =
-        modelClass.constructors.firstOrNullWhere((c) => c.periodOffset == null);
+    final constructor = modelClass.constructors
+        .firstOrNullWhere((ConstructorElement c) => c.periodOffset == null);
 
     if (constructor == null) {
       err('Class needs an unnamed constructor.');
@@ -31,7 +31,7 @@ class IsarAnalyzer {
 
     final properties = <ObjectProperty>[];
     final links = <ObjectLink>[];
-    for (var propertyElement in modelClass.allAccessors) {
+    for (final propertyElement in modelClass.allAccessors) {
       final link = analyzeObjectLink(propertyElement);
       if (link != null) {
         links.add(link);
@@ -40,7 +40,9 @@ class IsarAnalyzer {
           propertyElement,
           constructor,
         );
-        if (property == null) continue;
+        if (property == null) {
+          continue;
+        }
         properties.add(property);
       }
     }
@@ -53,14 +55,14 @@ class IsarAnalyzer {
     }
 
     final indexes = <ObjectIndex>[];
-    for (var propertyElement in modelClass.allAccessors) {
+    for (final propertyElement in modelClass.allAccessors) {
       indexes.addAll(analyzeObjectIndex(properties, propertyElement));
     }
     if (indexes.map((e) => e.name).distinct().length != indexes.length) {
       err('Two or more indexes have the same name.', modelClass);
     }
 
-    final idProperties = properties.where((it) => it.isId);
+    final idProperties = properties.where((ObjectProperty it) => it.isId);
     var idProperty = idProperties.firstOrNull;
     if (idProperty == null) {
       for (var i = 0; i < properties.length; i++) {
@@ -86,10 +88,13 @@ class IsarAnalyzer {
     }
 
     final unknownConstructorParameter = constructor.parameters.firstOrNullWhere(
-        (p) => p.isRequired && properties.none((e) => e.dartName == p.name));
+      (p) => p.isRequired && properties.none((e) => e.dartName == p.name),
+    );
     if (unknownConstructorParameter != null) {
-      err('Constructor parameter does not match a property.',
-          unknownConstructorParameter);
+      err(
+        'Constructor parameter does not match a property.',
+        unknownConstructorParameter,
+      );
     }
 
     final sortedLinks =
@@ -109,7 +114,9 @@ class IsarAnalyzer {
   }
 
   ObjectProperty? analyzeObjectProperty(
-      PropertyInducingElement property, ConstructorElement constructor) {
+    PropertyInducingElement property,
+    ConstructorElement constructor,
+  ) {
     final converter = property.typeConverter;
 
     late final DartType isarDartType;
@@ -141,8 +148,10 @@ class IsarAnalyzer {
     late PropertyDeser deserialize;
     if (constructorParameter != null) {
       if (constructorParameter.type != property.type) {
-        err('Constructor parameter type does not match property type',
-            constructorParameter);
+        err(
+          'Constructor parameter type does not match property type',
+          constructorParameter,
+        );
       }
       deserialize = constructorParameter.isNamed
           ? PropertyDeser.namedParam
@@ -176,7 +185,9 @@ class IsarAnalyzer {
     final isLink = property.type.element!.name == 'IsarLink';
     final isLinks = property.type.element!.name == 'IsarLinks';
 
-    if (!isLink && !isLinks) return null;
+    if (!isLink && !isLinks) {
+      return null;
+    }
 
     if (property.type.nullabilitySuffix != NullabilitySuffix.none) {
       err('Link properties must not be nullable.', property);
@@ -229,12 +240,16 @@ class IsarAnalyzer {
   }
 
   Iterable<ObjectIndex> analyzeObjectIndex(
-      List<ObjectProperty> properties, PropertyInducingElement element) sync* {
+    List<ObjectProperty> properties,
+    PropertyInducingElement element,
+  ) sync* {
     final property =
         properties.firstOrNullWhere((it) => it.dartName == element.name);
-    if (property == null || property.isId) return;
+    if (property == null || property.isId) {
+      return;
+    }
 
-    for (var index in element.indexAnnotations) {
+    for (final index in element.indexAnnotations) {
       final indexProperties = <ObjectIndexProperty>[];
 
       late IndexType defaultType;
@@ -246,12 +261,15 @@ class IsarAnalyzer {
       } else {
         defaultType = IndexType.value;
       }
-      indexProperties.add(ObjectIndexProperty(
-        property: property,
-        type: index.type ?? defaultType,
-        caseSensitive: index.caseSensitive ?? property.isarType.containsString,
-      ));
-      for (var c in index.composite) {
+      indexProperties.add(
+        ObjectIndexProperty(
+          property: property,
+          type: index.type ?? defaultType,
+          caseSensitive:
+              index.caseSensitive ?? property.isarType.containsString,
+        ),
+      );
+      for (final c in index.composite) {
         final compositeProperty =
             properties.firstOrNullWhere((it) => it.dartName == c.property);
         if (compositeProperty == null) {
@@ -259,15 +277,17 @@ class IsarAnalyzer {
         } else if (compositeProperty.isId) {
           err('The Id property cannot be part of composite indexes.', element);
         } else {
-          indexProperties.add(ObjectIndexProperty(
-            property: compositeProperty,
-            type: c.type ??
-                (compositeProperty.isarType.isDynamic
-                    ? IndexType.hash
-                    : IndexType.value),
-            caseSensitive:
-                c.caseSensitive ?? compositeProperty.isarType.containsString,
-          ));
+          indexProperties.add(
+            ObjectIndexProperty(
+              property: compositeProperty,
+              type: c.type ??
+                  (compositeProperty.isarType.isDynamic
+                      ? IndexType.hash
+                      : IndexType.value),
+              caseSensitive:
+                  c.caseSensitive ?? compositeProperty.isarType.containsString,
+            ),
+          );
         }
       }
 
@@ -284,14 +304,20 @@ class IsarAnalyzer {
           err('Composite indexes do not support non-hashed lists.', element);
         }
         if (property.isarType.containsFloat && i != indexProperties.lastIndex) {
-          err('Only the last property of a composite index may be a double value.',
-              element);
+          err(
+            'Only the last property of a composite index may be a '
+            'double value.',
+            element,
+          );
         }
         if (indexProperty.isarType == IsarType.string) {
           if (indexProperty.type != IndexType.hash &&
               i != indexProperties.lastIndex) {
-            err('Only the last property of a composite index may be a non-hashed String.',
-                element);
+            err(
+              'Only the last property of a composite index may be a '
+              'non-hashed String.',
+              element,
+            );
           }
         }
         if (indexProperty.type != IndexType.value) {

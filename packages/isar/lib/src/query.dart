@@ -36,7 +36,7 @@ abstract class Query<T> {
   /// This operation is much faster than using `findAll().length`.
   /// {@endtemplate}
   Future<int> count() =>
-      aggregate<int>(AggregationOp.count).then((value) => value!);
+      aggregate<int>(AggregationOp.count).then((int? value) => value!);
 
   /// {@macro query_count}
   int countSync() => aggregateSync<int>(AggregationOp.count)!;
@@ -89,16 +89,16 @@ abstract class Query<T> {
   /// Export the results of this query as json.
   /// {@endtemplate}
   Future<List<Map<String, dynamic>>> exportJson() {
-    return exportJsonRaw((bytes) {
-      final json = jsonDecode(Utf8Decoder().convert(bytes)) as List;
+    return exportJsonRaw((Uint8List bytes) {
+      final json = jsonDecode(const Utf8Decoder().convert(bytes)) as List;
       return json.cast<Map<String, dynamic>>();
     });
   }
 
   /// {@macro query_export_json}
   List<Map<String, dynamic>> exportJsonSync() {
-    return exportJsonRawSync((bytes) {
-      final json = jsonDecode(Utf8Decoder().convert(bytes)) as List;
+    return exportJsonRawSync((Uint8List bytes) {
+      final json = jsonDecode(const Utf8Decoder().convert(bytes)) as List;
       return json.cast<Map<String, dynamic>>();
     });
   }
@@ -107,10 +107,19 @@ abstract class Query<T> {
 /// @nodoc
 @protected
 enum AggregationOp {
+  /// Finds the smallest value.
   min,
+
+  /// Finds the largest value.
   max,
+
+  /// Calculates the sum of all values.
   sum,
+
+  /// Calculates the average of all values.
   average,
+
+  /// Counts all values.
   count,
 }
 
@@ -136,7 +145,7 @@ extension QueryAggregation<T extends num> on Query<T?> {
   /// Returns the average value of this query.
   /// {@endtemplate}
   Future<double> average() =>
-      aggregate<double>(AggregationOp.average).then((value) => value!);
+      aggregate<double>(AggregationOp.average).then((double? value) => value!);
 
   /// {@macro aggregation_average}
   double averageSync() => aggregateSync<double>(AggregationOp.average)!;

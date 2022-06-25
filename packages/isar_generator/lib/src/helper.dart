@@ -1,26 +1,34 @@
+import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:dartx/dartx.dart';
-import 'package:source_gen/source_gen.dart';
 import 'package:isar/isar.dart';
+import 'package:source_gen/source_gen.dart';
 
-final _collectionChecker = const TypeChecker.fromRuntime(Collection);
-final _ignoreChecker = const TypeChecker.fromRuntime(Ignore);
-final _nameChecker = const TypeChecker.fromRuntime(Name);
-final _indexChecker = const TypeChecker.fromRuntime(Index);
-final _oidKeyChecker = const TypeChecker.fromRuntime(Id);
-final _backlinkChecker = const TypeChecker.fromRuntime(Backlink);
-final _typeConverterChecker = const TypeChecker.fromRuntime(TypeConverter);
+const TypeChecker _collectionChecker = TypeChecker.fromRuntime(Collection);
+const TypeChecker _ignoreChecker = TypeChecker.fromRuntime(Ignore);
+const TypeChecker _nameChecker = TypeChecker.fromRuntime(Name);
+const TypeChecker _indexChecker = TypeChecker.fromRuntime(Index);
+const TypeChecker _oidKeyChecker = TypeChecker.fromRuntime(Id);
+const TypeChecker _backlinkChecker = TypeChecker.fromRuntime(Backlink);
+const TypeChecker _typeConverterChecker =
+    TypeChecker.fromRuntime(TypeConverter);
 
 extension ClassElementX on ClassElement {
   bool get hasZeroArgsConstructor {
-    return constructors
-        .any((c) => c.isPublic && !c.parameters.any((p) => !p.isOptional));
+    return constructors.any(
+      (ConstructorElement c) =>
+          c.isPublic &&
+          !c.parameters.any((ParameterElement p) => !p.isOptional),
+    );
   }
 
   Collection? get collectionAnnotation {
-    var ann = _collectionChecker.firstAnnotationOfExact(nonSynthetic);
-    if (ann == null) return null;
+    final ann = _collectionChecker.firstAnnotationOfExact(nonSynthetic);
+    if (ann == null) {
+      return null;
+    }
     return Collection(
       inheritance: ann.getField('inheritance')!.toBoolValue()!,
       accessor: ann.getField('accessor')!.toStringValue(),
@@ -35,13 +43,13 @@ extension ClassElementX on ClassElement {
     return [
       ...accessors.mapNotNull((e) => e.variable),
       if (collectionAnnotation!.inheritance)
-        for (var supertype in allSupertypes) ...[
+        for (InterfaceType supertype in allSupertypes) ...[
           if (!supertype.isDartCoreObject)
             ...supertype.accessors.mapNotNull((e) => e.variable)
         ]
     ]
         .where(
-          (e) =>
+          (PropertyInducingElement e) =>
               e.isPublic &&
               !e.isStatic &&
               !_ignoreChecker.hasAnnotationOf(e.nonSynthetic),
@@ -61,7 +69,7 @@ extension PropertyElementX on PropertyInducingElement {
     while (element != null) {
       final elementAnns =
           _typeConverterChecker.annotationsOf(element.nonSynthetic);
-      for (var ann in elementAnns) {
+      for (final ann in elementAnns) {
         final reviver = ConstantReader(ann).revive();
         if (reviver.namedArguments.isNotEmpty ||
             reviver.positionalArguments.isNotEmpty) {
@@ -71,6 +79,7 @@ extension PropertyElementX on PropertyInducingElement {
           );
         }
 
+        // ignore: cast_nullable_to_non_nullable
         final cls = ann.type!.element as ClassElement;
         final adapterDartType = cls.supertype!.typeArguments[0];
         final checker = TypeChecker.fromStatic(adapterDartType);
@@ -94,17 +103,19 @@ extension PropertyElementX on PropertyInducingElement {
   }
 
   Backlink? get backlinkAnnotation {
-    var ann = _backlinkChecker.firstAnnotationOfExact(nonSynthetic);
-    if (ann == null) return null;
+    final ann = _backlinkChecker.firstAnnotationOfExact(nonSynthetic);
+    if (ann == null) {
+      return null;
+    }
     return Backlink(to: ann.getField('to')!.toStringValue()!);
   }
 
   List<Index> get indexAnnotations {
-    return _indexChecker.annotationsOfExact(nonSynthetic).map((ann) {
-      var rawComposite = ann.getField('composite')!.toListValue();
+    return _indexChecker.annotationsOfExact(nonSynthetic).map((DartObject ann) {
+      final rawComposite = ann.getField('composite')!.toListValue();
       final composite = <CompositeIndex>[];
       if (rawComposite != null) {
-        for (var c in rawComposite) {
+        for (final c in rawComposite) {
           final indexTypeField = c.getField('type')!;
           IndexType? indexType;
           if (!indexTypeField.isNull) {
@@ -112,11 +123,13 @@ extension PropertyElementX on PropertyInducingElement {
                 indexTypeField.getField('index')!.toIntValue()!;
             indexType = IndexType.values[indexTypeIndex];
           }
-          composite.add(CompositeIndex(
-            c.getField('property')!.toStringValue()!,
-            type: indexType,
-            caseSensitive: c.getField('caseSensitive')!.toBoolValue(),
-          ));
+          composite.add(
+            CompositeIndex(
+              c.getField('property')!.toStringValue()!,
+              type: indexType,
+              caseSensitive: c.getField('caseSensitive')!.toBoolValue(),
+            ),
+          );
         }
       }
       final indexTypeField = ann.getField('type')!;
@@ -139,7 +152,7 @@ extension PropertyElementX on PropertyInducingElement {
 
 extension ElementX on Element {
   String get isarName {
-    var ann = _nameChecker.firstAnnotationOfExact(nonSynthetic);
+    final ann = _nameChecker.firstAnnotationOfExact(nonSynthetic);
     late String name;
     if (ann == null) {
       name = displayName;
@@ -162,5 +175,5 @@ Never err(String msg, [Element? element]) {
 }
 
 extension StringEsc on String {
-  String get esc => replaceAll('\$', '\\\$');
+  String get esc => replaceAll(r'$', r'\$');
 }

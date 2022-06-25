@@ -5,12 +5,11 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/src/isar_connect_api.dart';
+import 'package:isar_inspector/state/collections_state.dart';
 import 'package:isar_inspector/state/instances_state.dart';
+import 'package:isar_inspector/state/query_state.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-
-import 'collections_state.dart';
-import 'query_state.dart';
 
 export 'package:isar/src/isar_connect_api.dart';
 
@@ -37,19 +36,6 @@ final isarConnectPod =
 
 class IsarConnectStateNotifier
     extends StateNotifier<AsyncValue<IsarConnection>> {
-  static const kNormalTimeout = Duration(seconds: 4);
-  static const kLongTimeout = Duration(seconds: 10);
-
-  final Ref ref;
-  final String port;
-  final String secret;
-
-  late final eventHandler = {
-    ConnectEvent.instancesChanged.event: _onInstancesChanged,
-    ConnectEvent.collectionInfoChanged.event: _onCollectionInfoChanged,
-    ConnectEvent.queryChanged.event: _onQueryChanged,
-  };
-
   IsarConnectStateNotifier({
     required this.ref,
     required this.port,
@@ -57,8 +43,20 @@ class IsarConnectStateNotifier
   }) : super(const AsyncValue.loading()) {
     connect();
   }
+  static const Duration kNormalTimeout = Duration(seconds: 4);
+  static const Duration kLongTimeout = Duration(seconds: 10);
 
-  void connect() async {
+  final Ref ref;
+  final String port;
+  final String secret;
+
+  late final Map<String, void Function(Map<String, dynamic> _)> eventHandler = {
+    ConnectEvent.instancesChanged.event: _onInstancesChanged,
+    ConnectEvent.collectionInfoChanged.event: _onCollectionInfoChanged,
+    ConnectEvent.queryChanged.event: _onQueryChanged,
+  };
+
+  Future<void> connect() async {
     state = const AsyncValue.loading();
     try {
       final wsUrl = Uri.parse('ws://127.0.0.1:$port/$secret=/ws');
@@ -81,7 +79,7 @@ class IsarConnectStateNotifier
       final isolateId = vm.isolates!.where((e) => e.name == 'main').first.id!;
       await service.streamListen(EventStreams.kExtension);
 
-      service.onExtensionEvent.listen((event) {
+      service.onExtensionEvent.listen((Event event) {
         final data = event.extensionData?.data ?? {};
         eventHandler[event.extensionKind]?.call(data);
       });
@@ -94,8 +92,11 @@ class IsarConnectStateNotifier
     }
   }
 
-  Future<T> _call<T>(ConnectAction action,
-      {Duration? timeout = kNormalTimeout, Map<String, dynamic>? args}) async {
+  Future<T> _call<T>(
+    ConnectAction action, {
+    Duration? timeout = kNormalTimeout,
+    Map<String, dynamic>? args,
+  }) async {
     final connection = state.value!;
     var responseFuture = connection.vmService.callServiceExtension(
       action.method,
@@ -134,25 +135,28 @@ class IsarConnectStateNotifier
   Future<List<dynamic>> getSchema() => _call(ConnectAction.getSchema);
 
   Future<List<String>> listInstances() async {
-    final instances = await _call(ConnectAction.listInstances);
-    return (instances as List).cast();
+    final instances = await _call<List<dynamic>>(ConnectAction.listInstances);
+    return instances.cast();
   }
 
   Future<void> watchInstance(String instance) async {
-    await _call(ConnectAction.watchInstance, args: {'instance': instance});
+    await _call<dynamic>(
+      ConnectAction.watchInstance,
+      args: {'instance': instance},
+    );
   }
 
   Future<List<Map<String, Object?>>> executeQuery(ConnectQuery query) async {
-    final objects = await _call(
+    final objects = await _call<List<dynamic>>(
       ConnectAction.executeQuery,
       args: query.toJson(),
       timeout: kLongTimeout,
     );
-    return (objects as List).cast();
+    return objects.cast();
   }
 
-  Future removeQuery(ConnectQuery query) async {
-    await _call(
+  Future<void> removeQuery(ConnectQuery query) async {
+    await _call<dynamic>(
       ConnectAction.removeQuery,
       args: query.toJson(),
       timeout: kLongTimeout,

@@ -8,6 +8,10 @@ part 'link_test.g.dart';
 
 @Collection()
 class LinkModelA {
+  LinkModelA();
+
+  LinkModelA.name(this.name);
+
   int? id;
 
   late String name;
@@ -26,16 +30,13 @@ class LinkModelA {
   @Backlink(to: 'selfLinks')
   final selfLinksBacklink = IsarLinks<LinkModelA>();
 
-  LinkModelA();
-
-  LinkModelA.name(this.name);
-
   @override
   String toString() {
     return 'LinkModelA($id, $name)';
   }
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is LinkModelA && id == other.id && other.name == name;
   }
@@ -43,6 +44,10 @@ class LinkModelA {
 
 @Collection()
 class LinkModelB {
+  LinkModelB();
+
+  LinkModelB.name(this.name);
+
   int? id;
 
   late String name;
@@ -51,11 +56,7 @@ class LinkModelB {
   final linkBacklinks = IsarLinks<LinkModelA>();
 
   @Backlink(to: 'otherLinks')
-  var linksBacklinks = IsarLinks<LinkModelA>();
-
-  LinkModelB();
-
-  LinkModelB.name(this.name);
+  IsarLinks<LinkModelA> linksBacklinks = IsarLinks<LinkModelA>();
 
   @override
   String toString() {
@@ -63,16 +64,13 @@ class LinkModelB {
   }
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is LinkModelB && id == other.id && other.name == name;
   }
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Links', () {
     late Isar isar;
     late IsarCollection<LinkModelA> linksA;
@@ -257,7 +255,7 @@ void tests() {
         expect(newA2.selfLinkBacklink, [objA1]);
 
         newA2.selfLink.value = newA2;
-        await isar.tWriteTxn(() => newA2.selfLink.tSave());
+        await isar.tWriteTxn(newA2.selfLink.tSave);
 
         final newestA2 = await linksA.tGet(objA2.id!);
         await newestA2!.selfLinkBacklink.tLoad();

@@ -1,8 +1,8 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'util/common.dart';
 import 'user_model.dart';
+import 'util/common.dart';
 import 'util/sync_async_helper.dart';
 
 part 'crud_test.g.dart';
@@ -20,6 +20,7 @@ class Message {
   }
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(dynamic other) {
     if (other is Message) {
       return other.message == message;
@@ -30,10 +31,6 @@ class Message {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('CRUD', () {
     late Isar isar;
     late IsarCollection<Message> messages;

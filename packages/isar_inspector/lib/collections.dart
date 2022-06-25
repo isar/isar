@@ -4,7 +4,7 @@ import 'package:isar_inspector/common.dart';
 import 'package:isar_inspector/state/collections_state.dart';
 
 class CollectionsList extends ConsumerWidget {
-  const CollectionsList({Key? key}) : super(key: key);
+  const CollectionsList({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -14,7 +14,7 @@ class CollectionsList extends ConsumerWidget {
     final selectedCollection = ref.watch(selectedCollectionPod).valueOrNull;
 
     return ListView.builder(
-      itemBuilder: (context, index) {
+      itemBuilder: (BuildContext context, int index) {
         final collection = collections.elementAt(index);
         final info = collectionInfo[collection.name];
         return SizedBox(
@@ -28,7 +28,6 @@ class CollectionsList extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     collection.name,

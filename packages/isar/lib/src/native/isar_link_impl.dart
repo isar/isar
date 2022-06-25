@@ -1,9 +1,12 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:ffi';
 
 import 'package:isar/src/common/isar_link_common.dart';
 
-import 'isar_collection_impl.dart';
-import 'isar_core.dart';
+import 'package:isar/src/native/isar_collection_impl.dart';
+import 'package:isar/src/native/isar_core.dart';
+import 'package:isar/src/native/isar_impl.dart';
 
 mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   @override
@@ -14,16 +17,19 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   IsarCollectionImpl<OBJ> get targetCollection =>
       super.targetCollection as IsarCollectionImpl<OBJ>;
 
-  late final linkIndex = sourceCollection.schema.linkIdOrErr(linkName);
+  late final int linkIndex = sourceCollection.schema.linkIdOrErr(linkName);
 
   @override
   late final getId = targetCollection.schema.getId;
 
   @override
   Future<void> updateNative(
-      List<int> linkIds, List<int> unlinkIds, bool reset) {
+    List<int> linkIds,
+    List<int> unlinkIds,
+    bool reset,
+  ) {
     final containingId = requireAttached();
-    return targetCollection.isar.getTxn(true, (txn) {
+    return targetCollection.isar.getTxn(true, (Txn txn) {
       final count = linkIds.length + unlinkIds.length;
       final idsPtr = txn.alloc<Int64>(count);
       final ids = idsPtr.asTypedList(count);
@@ -31,8 +37,16 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
       ids.setAll(0, linkIds);
       ids.setAll(linkIds.length, unlinkIds);
 
-      IC.isar_link_update_all(sourceCollection.ptr, txn.ptr, linkIndex,
-          containingId, idsPtr, linkIds.length, unlinkIds.length, reset);
+      IC.isar_link_update_all(
+        sourceCollection.ptr,
+        txn.ptr,
+        linkIndex,
+        containingId,
+        idsPtr,
+        linkIds.length,
+        unlinkIds.length,
+        reset,
+      );
       return txn.wait();
     });
   }
@@ -40,19 +54,39 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   @override
   void updateNativeSync(List<int> linkIds, List<int> unlinkIds, bool reset) {
     final containingId = requireAttached();
-    targetCollection.isar.getTxnSync(true, (txn) {
+    targetCollection.isar.getTxnSync(true, (SyncTxn txn) {
       if (reset) {
-        nCall(IC.isar_link_unlink_all(
-            sourceCollection.ptr, txn.ptr, linkIndex, containingId));
+        nCall(
+          IC.isar_link_unlink_all(
+            sourceCollection.ptr,
+            txn.ptr,
+            linkIndex,
+            containingId,
+          ),
+        );
       }
 
-      for (var linkId in linkIds) {
-        nCall(IC.isar_link(
-            sourceCollection.ptr, txn.ptr, linkIndex, containingId, linkId));
+      for (final linkId in linkIds) {
+        nCall(
+          IC.isar_link(
+            sourceCollection.ptr,
+            txn.ptr,
+            linkIndex,
+            containingId,
+            linkId,
+          ),
+        );
       }
-      for (var unlinkId in unlinkIds) {
-        nCall(IC.isar_link_unlink(
-            sourceCollection.ptr, txn.ptr, linkIndex, containingId, unlinkId));
+      for (final unlinkId in unlinkIds) {
+        nCall(
+          IC.isar_link_unlink(
+            sourceCollection.ptr,
+            txn.ptr,
+            linkIndex,
+            containingId,
+            unlinkId,
+          ),
+        );
       }
     });
   }

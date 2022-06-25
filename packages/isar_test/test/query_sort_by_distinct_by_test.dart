@@ -1,15 +1,11 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'util/common.dart';
 import 'user_model.dart';
+import 'util/common.dart';
 import 'util/sync_async_helper.dart';
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Sort By', () {
     late Isar isar;
     late IsarCollection<UserModel> users;

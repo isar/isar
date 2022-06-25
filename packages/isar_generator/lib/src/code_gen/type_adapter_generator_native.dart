@@ -3,19 +3,20 @@ import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 class _GetPropResult {
-  final String code;
-  final String value;
-  final String? dynamicSize;
-
   _GetPropResult({
     required this.code,
     required this.value,
     required this.dynamicSize,
   });
+  final String code;
+  final String value;
+  final String? dynamicSize;
 }
 
 _GetPropResult _generateGetPropertyValue(
-    ObjectProperty property, ObjectInfo object) {
+  ObjectProperty property,
+  ObjectInfo object,
+) {
   var code = '';
   var value = 'object.${property.dartName}';
   String? dynamicSize;
@@ -41,8 +42,8 @@ _GetPropResult _generateGetPropertyValue(
           }
           ''';
       } else {
-        code +=
-            'final $stringBytes = IsarBinaryWriter.utf8Encoder.convert($value);';
+        code += 'final $stringBytes = IsarBinaryWriter.utf8Encoder '
+            '.convert($value);';
       }
       value = stringBytes;
       dynamicSize = '($stringBytes$nOp.length $nLen)';
@@ -97,6 +98,7 @@ _GetPropResult _generateGetPropertyValue(
       dynamicSize =
           '($value$nOp.length $nLen) * ${property.isarType.elementSize}';
       break;
+    // ignore: no_default_cases
     default:
       break;
   }
@@ -199,6 +201,7 @@ String generateDeserializeNative(ObjectInfo object) {
     code += '${object.attachLinksName}(collection, id, object);';
   }
 
+  // ignore: leading_newlines_in_multiline_strings
   return '''$code
     return object;
   }''';
@@ -227,7 +230,10 @@ String generateDeserializePropNative(ObjectInfo object) {
 }
 
 String _deserializeProperty(
-    ObjectInfo object, ObjectProperty property, String propertyOffset) {
+  ObjectInfo object,
+  ObjectProperty property,
+  String propertyOffset,
+) {
   final orNull = property.nullable ? 'OrNull' : '';
   final orNullList = property.nullable ? '' : '?? []';
   final orElNull = property.elementNullable ? 'OrNull' : '';

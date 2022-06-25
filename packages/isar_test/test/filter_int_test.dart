@@ -8,6 +8,7 @@ part 'filter_int_test.g.dart';
 
 @Collection()
 class IntModel {
+  IntModel();
   @Id()
   int? id;
 
@@ -23,26 +24,22 @@ class IntModel {
   @Size32()
   List<int>? hashList;
 
-  IntModel();
-
   @override
   String toString() {
     return '{id: $id, field: $field, list: $list}';
   }
 
   @override
-  bool operator ==(other) {
-    return (other as IntModel).field == field &&
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
+    return other is IntModel &&
+        other.field == field &&
         listEquals(list, other.list) &&
         listEquals(hashList, other.hashList);
   }
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Int filter', () {
     late Isar isar;
     late IsarCollection<IntModel> col;
@@ -131,7 +128,9 @@ void tests() {
 
       // filters
       await qEqualSet(
-          col.filter().fieldLessThan(1).tFindAll(), [objNull, obj0]);
+        col.filter().fieldLessThan(1).tFindAll(),
+        [objNull, obj0],
+      );
       await qEqualSet(col.filter().fieldLessThan(null).tFindAll(), []);
       await qEqualSet(
         col.filter().fieldLessThan(null, include: true).tFindAll(),

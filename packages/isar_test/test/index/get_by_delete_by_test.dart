@@ -1,12 +1,13 @@
-import 'package:test/test.dart';
 import 'package:isar/isar.dart';
+import 'package:test/test.dart';
 
-import 'util/common.dart';
+import '../util/common.dart';
 
-part 'index_get_by_delete_by_test.g.dart';
+part 'get_by_delete_by_test.g.dart';
 
 @Collection()
 class Model {
+  Model({required this.id, required this.guid, required this.content});
   final int? id;
 
   @Index(unique: true, type: IndexType.value)
@@ -15,15 +16,14 @@ class Model {
   @Index(unique: true, composite: [CompositeIndex('guid')])
   final String content;
 
-  Model({required this.id, required this.guid, required this.content});
-
   @override
   String toString() {
     return '{id: $id, guid: $guid, content: $content}';
   }
 
   @override
-  operator ==(other) {
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
     return other is Model &&
         other.id == id &&
         other.guid == guid &&

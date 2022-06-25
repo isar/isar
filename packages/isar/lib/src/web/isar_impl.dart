@@ -1,28 +1,33 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 import 'dart:html';
 
 import 'package:isar/isar.dart';
 
-import 'bindings.dart';
-import 'isar_web.dart';
+import 'package:isar/src/web/bindings.dart';
+import 'package:isar/src/web/isar_web.dart';
 
-const _zoneTxn = #zoneTxn;
+const Symbol _zoneTxn = #zoneTxn;
 
 class IsarImpl extends Isar {
+  IsarImpl(super.name, super.schema, this.instance);
   final IsarInstanceJs instance;
   final List<Future<void>> _activeAsyncTxns = [];
-
-  IsarImpl(String name, String schema, this.instance) : super(name, schema);
 
   void requireNotInTxn() {
     if (Zone.current[_zoneTxn] != null) {
       throw IsarError(
-          'Cannot perform this operation from within an active transaction.');
+        'Cannot perform this operation from within an active transaction.',
+      );
     }
   }
 
   Future<T> _txn<T>(
-      bool write, bool silent, Future<T> Function() callback) async {
+    bool write,
+    bool silent,
+    Future<T> Function() callback,
+  ) async {
     requireOpen();
     requireNotInTxn();
 
@@ -80,7 +85,8 @@ class IsarImpl extends Isar {
     if (currentTxn != null) {
       if (write && !currentTxn.write) {
         throw IsarError(
-            'Operation cannot be performed within a read transaction.');
+          'Operation cannot be performed within a read transaction.',
+        );
       }
       return callback(currentTxn);
     } else if (!write) {

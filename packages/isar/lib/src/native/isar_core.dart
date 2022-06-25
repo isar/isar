@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
@@ -5,16 +7,15 @@ import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
+import 'package:isar/src/native/bindings.dart';
 import 'package:isar/src/version.dart';
 
-import 'bindings.dart';
-
-const minInt = -2147483648;
-const maxInt = 2147483647;
-const minLong = -9223372036854775808;
-const maxLong = 9223372036854775807;
-const minDouble = double.nan;
-const maxDouble = double.infinity;
+const int minInt = -2147483648;
+const int maxInt = 2147483647;
+const int minLong = -9223372036854775808;
+const int maxLong = 9223372036854775807;
+const double minDouble = double.nan;
+const double maxDouble = double.infinity;
 
 const nullInt = IsarObject_NULL_INT;
 const nullLong = IsarObject_NULL_LONG;
@@ -26,9 +27,9 @@ const nullBool = IsarObject_NULL_BYTE;
 const falseBool = IsarObject_FALSE_BYTE;
 const trueBool = IsarObject_TRUE_BYTE;
 
-const _githubUrl = 'https://github.com/isar/isar-core/releases/download';
+const String _githubUrl = 'https://github.com/isar/isar-core/releases/download';
 
-var _isarInitialized = false;
+bool _isarInitialized = false;
 bool get isarInitialized => _isarInitialized;
 
 // ignore: non_constant_identifier_names
@@ -38,9 +39,13 @@ typedef FinalizerFunction = void Function(Pointer<Void> token);
 late final Pointer<NativeFinalizerFunction> isarClose;
 late final Pointer<NativeFinalizerFunction> isarQueryFree;
 
-FutureOr<void> initializeCoreBinary(
-    {Map<Abi, String> libraries = const {}, bool download = false}) {
-  if (_isarInitialized) return null;
+FutureOr<void> initializeCoreBinary({
+  Map<Abi, String> libraries = const {},
+  bool download = false,
+}) {
+  if (_isarInitialized) {
+    return null;
+  }
 
   String? libraryPath;
   if (!Platform.isIOS) {
@@ -81,7 +86,10 @@ void _initializePath(String? libraryPath) {
   final bindings = IsarCoreBindings(dylib);
   final binaryVersion = bindings.isar_version();
   if (binaryVersion != 0 && binaryVersion != isarCoreVersionNumber) {
-    throw 'Incorrect Isar binary: Required $isarCoreVersionNumber found $binaryVersion.';
+    throw IsarError(
+      'Incorrect Isar binary: Required '
+      '$isarCoreVersionNumber found $binaryVersion.',
+    );
   }
 
   IC = bindings;
@@ -110,6 +118,7 @@ String _getLibraryDownloadPath(Map<Abi, String> libraries) {
 
 Future<void> _downloadIsarCore(String libraryPath) async {
   final libraryFile = File(libraryPath);
+  // ignore: avoid_slow_async_io
   if (await libraryFile.exists()) {
     return;
   }
@@ -119,7 +128,8 @@ Future<void> _downloadIsarCore(String libraryPath) async {
   final response = await request.close();
   if (response.statusCode != 200) {
     throw IsarError(
-        'Could not download IsarCore library: ${response.reasonPhrase}');
+      'Could not download IsarCore library: ${response.reasonPhrase}',
+    );
   }
   await response.pipe(libraryFile.openWrite());
 }
@@ -129,7 +139,8 @@ IsarError? isarErrorFromResult(int result) {
     final error = IC.isar_get_error(result);
     if (error.address == 0) {
       throw IsarError(
-          'There was an error but it could not be loaded from IsarCore.');
+        'There was an error but it could not be loaded from IsarCore.',
+      );
     }
     try {
       final message = error.cast<Utf8>().toDartString();
@@ -161,9 +172,7 @@ Stream<void> wrapIsarPort(ReceivePort port) {
         portStreamController.addError(error!);
       }
     },
-    onDone: () {
-      portStreamController.close();
-    },
+    onDone: portStreamController.close,
   );
   return portStreamController.stream;
 }
@@ -213,8 +222,10 @@ extension on Abi {
       case Abi.windowsX64:
         return 'isar.dll';
       default:
-        throw 'Unsupported processor architecture "${Abi.current()}".'
-            'Please open an issue on GitHub to request it.';
+        throw IsarError(
+          'Unsupported processor architecture "${Abi.current()}". '
+          'Please open an issue on GitHub to request it.',
+        );
     }
   }
 

@@ -8,33 +8,31 @@ part 'add_remove_collection_test.g.dart';
 
 @Collection()
 class Col1 {
+  Col1(this.id, this.value);
   int? id;
 
   String? value;
 
-  Col1(this.id, this.value);
-
   @override
-  operator ==(other) => other is Col1 && id == other.id && value == other.value;
+  // ignore: hash_and_equals
+  bool operator ==(Object other) =>
+      other is Col1 && id == other.id && value == other.value;
 }
 
 @Collection()
 class Col2 {
+  Col2(this.id, this.value);
   int? id;
 
   String? value;
 
-  Col2(this.id, this.value);
-
   @override
-  operator ==(other) => other is Col2 && id == other.id && value == other.value;
+  // ignore: hash_and_equals
+  bool operator ==(Object other) =>
+      other is Col2 && id == other.id && value == other.value;
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   isarTest('Add collection', () async {
     final isar1 = await openTempIsar([Col1Schema]);
     final col1A = Col1(5, 'col1_a');

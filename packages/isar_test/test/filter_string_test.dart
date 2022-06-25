@@ -8,6 +8,11 @@ part 'filter_string_test.g.dart';
 
 @Collection()
 class StringModel {
+  StringModel();
+
+  StringModel.init(String? value)
+      : field = value,
+        hashField = value;
   @Id()
   int? id;
 
@@ -28,17 +33,13 @@ class StringModel {
 
   @override
   String toString() {
-    return '{field: $field, hashField: $hashField, list: $list, hashList: $hashList, hashElementList: $hashElementList}';
+    return '{field: $field, hashField: $hashField, list: $list, hashList: '
+        '$hashList, hashElementList: $hashElementList}';
   }
 
-  StringModel();
-
-  StringModel.init(String? value)
-      : field = value,
-        hashField = value;
-
   @override
-  bool operator ==(other) {
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
     if (other is StringModel) {
       return field == other.field &&
           hashField == other.hashField &&
@@ -51,10 +52,6 @@ class StringModel {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('String filter', () {
     late Isar isar;
     late IsarCollection<StringModel> col;

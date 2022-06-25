@@ -5,6 +5,7 @@ part of isar;
 /// It is your responsibility to make this class backwards compatible if
 /// you change the schema of your collection.
 abstract class TypeConverter<T, I> {
+  /// This const constructor is required to use the converter as annotation.
   const TypeConverter();
 
   /// Convert the value from the Isar type to the Dart type.

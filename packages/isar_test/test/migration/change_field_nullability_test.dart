@@ -9,34 +9,32 @@ part 'change_field_nullability_test.g.dart';
 @Collection()
 @Name('Col')
 class Col1 {
+  Col1(this.id, this.value);
   int? id;
 
   String? value;
 
-  Col1(this.id, this.value);
-
   @override
-  operator ==(other) => other is Col1 && id == other.id && value == other.value;
+  // ignore: hash_and_equals
+  bool operator ==(Object other) =>
+      other is Col1 && id == other.id && value == other.value;
 }
 
 @Collection()
 @Name('Col')
 class Col2 {
+  Col2(this.id, this.value);
   int? id;
 
   late String value;
 
-  Col2(this.id, this.value);
-
   @override
-  operator ==(other) => other is Col2 && id == other.id && value == other.value;
+  // ignore: hash_and_equals
+  bool operator ==(Object other) =>
+      other is Col2 && id == other.id && value == other.value;
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   isarTest('Change field nullability', () async {
     final isar1 = await openTempIsar([Col1Schema]);
     await isar1.tWriteTxn(() {

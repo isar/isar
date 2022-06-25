@@ -1,10 +1,14 @@
-include: package:flutter_lints/flutter.yaml
+include: package:very_good_analysis/analysis_options.yaml
 
 analyzer:
-  language:
-    strict-casts: true
-    strict-inference: true
-    strict-raw-types: true
+  exclude:
+    - "**/*.g.dart"
 
   errors:
-    hash_and_equals: ignore
+    cascade_invocations: ignore
+    avoid_positional_boolean_parameters: ignore
+    parameter_assignments: ignore
+    public_member_api_docs: ignore
+    use_string_buffers: ignore
+    avoid_equals_and_hash_code_on_mutable_classes: ignore
+    

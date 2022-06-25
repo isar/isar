@@ -1,28 +1,29 @@
 import 'dart:convert';
 
+import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
+
 import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
-import 'package:dartx/dartx.dart';
 
 String generateCollectionSchema(ObjectInfo object) {
   final schema = _generateSchema(object);
 
   final propertyIds = object.objectProperties
-      .mapIndexed((index, p) => "'${p.isarName.esc}': $index")
+      .mapIndexed((i, p) => "'${p.isarName.esc}': $i")
       .join(',');
   final listProperties = object.objectProperties
       .filter((p) => p.isarType.isList)
       .map((p) => "'${p.isarName.esc}'")
       .join(',');
   final indexIds = object.indexes
-      .mapIndexed((index, i) => "'${i.name.esc}': $index")
+      .mapIndexed((i, index) => "'${index.name.esc}': $i")
       .join(',');
-  final indexValueTypes = object.indexes
-      .map((i) =>
-          "'${i.name.esc}': [${i.properties.map((e) => e.indexValueTypeEnum).join(',')},]")
-      .join(',');
+  final indexValueTypes = object.indexes.map((i) {
+    final types = i.properties.map((e) => e.indexValueTypeEnum).join(',');
+    return "'${i.name.esc}': [$types,]";
+  }).join(',');
   final linkIds = object.links
       .mapIndexed((i, link) => "'${link.isarName.esc}': $i")
       .join(',');
@@ -67,7 +68,7 @@ String generateCollectionSchema(ObjectInfo object) {
 }
 
 String _generateSchema(ObjectInfo object) {
-  final json = {
+  final json = <String, Object>{
     'name': object.isarName,
     'idName': object.idProperty.isarName,
     'properties': [
@@ -119,7 +120,9 @@ String _generateGetId(ObjectInfo object) {
 }
 
 String _generateSetId(ObjectInfo object) {
-  if (!object.idProperty.assignable) return '';
+  if (!object.idProperty.assignable) {
+    return '';
+  }
 
   return '''
     void ${object.setIdName}(${object.dartName} object, int id) {

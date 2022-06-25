@@ -1,15 +1,14 @@
+import 'package:isar_generator/src/code_gen/type_adapter_generator_common.dart';
 import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
-
-import 'type_adapter_generator_common.dart';
 
 String generateSerializeWeb(ObjectInfo object) {
   var code = '''
   Object ${object.serializeWebName}(IsarCollection<${object.dartName}> collection, ${object.dartName} object) {
     final jsObj = IsarNative.newJsObject();''';
 
-  for (var property in object.properties) {
+  for (final property in object.properties) {
     String write(String value) =>
         "IsarNative.jsObjectSet(jsObj, '${property.isarName.esc}', $value);";
 
@@ -24,7 +23,9 @@ String generateSerializeWeb(ObjectInfo object) {
       code += write('$propertyValue$nOp.toUtc().millisecondsSinceEpoch');
     } else if (property.isarType == IsarType.dateTimeList) {
       code += write(
-          '$propertyValue$nOp.map((e) => e$nElOp.toUtc().millisecondsSinceEpoch).toList()');
+        '$propertyValue$nOp.map((e) => e$nElOp.toUtc() '
+        '.millisecondsSinceEpoch).toList()',
+      );
     } else {
       code += write(propertyValue);
     }
@@ -47,6 +48,7 @@ String generateDeserializeWeb(ObjectInfo object) {
     code += '${object.attachLinksName}(collection, $deserId, object);';
   }
 
+  // ignore: leading_newlines_in_multiline_strings
   return '''$code
     return object;
   }''';
@@ -57,7 +59,7 @@ String generateDeserializePropWeb(ObjectInfo object) {
   P ${object.deserializePropWebName}<P>(Object jsObj, String propertyName) {
     switch (propertyName) {''';
 
-  for (var property in object.properties) {
+  for (final property in object.properties) {
     final deser = _deserializeProperty(object, property);
     code += "case '${property.isarName.esc}': return ($deser) as P;";
   }
@@ -90,6 +92,7 @@ String _defaultVal(IsarType type) {
       return "''";
     case IsarType.bytes:
       return 'Uint8List(0)';
+    // ignore: no_default_cases
     default:
       throw UnimplementedError();
   }
@@ -120,8 +123,8 @@ String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
     final elType =
         property.isarType.scalarType.dartType(property.elementNullable, false);
     if (convert != null) {
-      deser =
-          '($read as List?)?.map((e) => $convert).toList().cast<$elType>() $defaultList';
+      deser = '($read as List?)?.map((e) => $convert).toList().cast<$elType>() '
+          '$defaultList';
     } else {
       deser = '($read as List?)?.cast<$elType>() $defaultList';
     }

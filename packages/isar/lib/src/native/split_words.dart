@@ -1,11 +1,12 @@
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
+
+import 'package:isar/src/native/binary_reader.dart';
+import 'package:isar/src/native/binary_writer.dart';
 import 'package:isar/src/native/isar_core.dart';
 
-import 'binary_reader.dart';
-import 'binary_writer.dart';
-
+// ignore: public_member_api_docs
 List<String> splitWordsCore(String input) {
   initializeCoreBinary();
 

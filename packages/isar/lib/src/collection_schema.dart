@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 part of isar;
 
 /// @nodoc
@@ -57,7 +59,33 @@ typedef DeserializePropWeb = dynamic Function(
 /// @nodoc
 @protected
 class CollectionSchema<OBJ> {
-  static const generatorVersion = 4;
+  const CollectionSchema({
+    required this.name,
+    required this.schema,
+    required this.idName,
+    required this.propertyIds,
+    required this.listProperties,
+    required this.indexIds,
+    required this.indexValueTypes,
+    required this.linkIds,
+    required this.backlinkLinkNames,
+    required this.getLinks,
+    required this.attachLinks,
+    required this.getId,
+    this.setId,
+    required this.serializeNative,
+    required this.deserializeNative,
+    required this.deserializePropNative,
+    required this.serializeWeb,
+    required this.deserializeWeb,
+    required this.deserializePropWeb,
+    required this.version,
+  }) : assert(
+          generatorVersion == version,
+          'Incompatible generated code. Please re-run code '
+          'generation using the latest generator.',
+        );
+  static const int generatorVersion = 4;
 
   final String name;
   final String schema;
@@ -85,30 +113,6 @@ class CollectionSchema<OBJ> {
   final DeserializePropWeb deserializePropWeb;
 
   final int version;
-
-  const CollectionSchema({
-    required this.name,
-    required this.schema,
-    required this.idName,
-    required this.propertyIds,
-    required this.listProperties,
-    required this.indexIds,
-    required this.indexValueTypes,
-    required this.linkIds,
-    required this.backlinkLinkNames,
-    required this.getLinks,
-    required this.attachLinks,
-    required this.getId,
-    this.setId,
-    required this.serializeNative,
-    required this.deserializeNative,
-    required this.deserializePropNative,
-    required this.serializeWeb,
-    required this.deserializeWeb,
-    required this.deserializePropWeb,
-    required this.version,
-  }) : assert(generatorVersion == version,
-            'Incompatible generated code. Please re-run code generation using the latest generator.');
 
   void toCollection(void Function<OBJ>() callback) => callback<OBJ>();
 

@@ -1,13 +1,17 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'util/common.dart';
-import 'util/sync_async_helper.dart';
+import '../util/common.dart';
+import '../util/sync_async_helper.dart';
 
-part 'index_type_hash_elements_test.g.dart';
+part 'type_hash_elements_test.g.dart';
 
 @Collection()
 class HashElementsIndexesModel {
+  HashElementsIndexesModel({
+    required this.stringListSensitiveIndex,
+    required this.stringListInsensitiveIndex,
+  });
   int? id;
 
   @Index(type: IndexType.hashElements, caseSensitive: true)
@@ -16,31 +20,27 @@ class HashElementsIndexesModel {
   @Index(type: IndexType.hashElements, caseSensitive: false)
   List<String> stringListInsensitiveIndex;
 
-  HashElementsIndexesModel({
-    required this.stringListSensitiveIndex,
-    required this.stringListInsensitiveIndex,
-  });
-
   @override
+  // ignore: hash_and_equals
   bool operator ==(dynamic other) {
     return other is HashElementsIndexesModel &&
         listEquals(stringListSensitiveIndex, other.stringListSensitiveIndex) &&
         listEquals(
-            stringListInsensitiveIndex, other.stringListInsensitiveIndex);
+          stringListInsensitiveIndex,
+          other.stringListInsensitiveIndex,
+        );
   }
 
   @override
   String toString() {
-    return 'HashElementsIndexModel{stringListSensitiveIndex: $stringListSensitiveIndex, stringListInsensitiveIndex: $stringListInsensitiveIndex}';
+    return 'HashElementsIndexModel{stringListSensitiveIndex: '
+        '$stringListSensitiveIndex, stringListInsensitiveIndex: '
+        '$stringListInsensitiveIndex}';
   }
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
-  group("Index hash elements type", () {
+  group('Index hash elements type', () {
     late Isar isar;
 
     late HashElementsIndexesModel model0;
@@ -53,18 +53,18 @@ void tests() {
       isar = await openTempIsar([HashElementsIndexesModelSchema]);
 
       model0 = HashElementsIndexesModel(
-        stringListSensitiveIndex: ["Foo", "bAR", "", ""],
-        stringListInsensitiveIndex: ["fOo", "BaR"],
+        stringListSensitiveIndex: ['Foo', 'bAR', '', ''],
+        stringListInsensitiveIndex: ['fOo', 'BaR'],
       );
       model1 = HashElementsIndexesModel(
         stringListSensitiveIndex: [
-          "Γαζέες καὶ μυρτιὲς δὲν θὰ βρῶ πιὰ στὸ χρυσαφὶ ξέφωτο",
-          "The quick brown fox jumps over the lazy dog",
-          "イロハニホヘト チリヌルヲ ワカヨタレソ ツネナラム",
-          "Pchnąć w tę łódź jeża lub ośm skrzyń fig",
-          "В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!",
+          'Γαζέες καὶ μυρτιὲς δὲν θὰ βρῶ πιὰ στὸ χρυσαφὶ ξέφωτο',
+          'The quick brown fox jumps over the lazy dog',
+          'イロハニホヘト チリヌルヲ ワカヨタレソ ツネナラム',
+          'Pchnąć w tę łódź jeża lub ośm skrzyń fig',
+          'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
         ],
-        stringListInsensitiveIndex: ["FoO", "bAr"],
+        stringListInsensitiveIndex: ['FoO', 'bAr'],
       );
       model2 = HashElementsIndexesModel(
         stringListSensitiveIndex: [],
@@ -72,18 +72,18 @@ void tests() {
       );
       model3 = HashElementsIndexesModel(
         stringListSensitiveIndex: [
-          "Pijamalı hasta, yağız şoföre çabucak güvendi.",
-          "0",
-          "\u0000",
-          "Δ",
-          "͌",
-          "⋮",
+          'Pijamalı hasta, yağız şoföre çabucak güvendi.',
+          '0',
+          '\u0000',
+          'Δ',
+          '͌',
+          '⋮',
         ],
-        stringListInsensitiveIndex: ["BaR", "fOo"],
+        stringListInsensitiveIndex: ['BaR', 'fOo'],
       );
       model4 = HashElementsIndexesModel(
-        stringListSensitiveIndex: ["\u0000", "0"],
-        stringListInsensitiveIndex: ["0", "\u0000"],
+        stringListSensitiveIndex: ['\u0000', '0'],
+        stringListInsensitiveIndex: ['0', '\u0000'],
       );
 
       await isar.tWriteTxn(() async {
@@ -99,22 +99,22 @@ void tests() {
 
     tearDown(() => isar.close());
 
-    isarTest("Query List<String> sensitive index", () async {
+    isarTest('Query List<String> sensitive index', () async {
       final result1 = await isar.hashElementsIndexesModels
           .where()
-          .stringListSensitiveIndexAnyEqualTo("Foo")
+          .stringListSensitiveIndexElementEqualTo('Foo')
           .tFindAll();
       expect(result1, [model0]);
 
       final result2 = await isar.hashElementsIndexesModels
           .where()
-          .stringListSensitiveIndexAnyEqualTo("")
+          .stringListSensitiveIndexElementEqualTo('')
           .tFindAll();
       expect(result2, [model0]);
 
       final result3 = await isar.hashElementsIndexesModels
           .where()
-          .anyStringListSensitiveIndexAny()
+          .anyStringListSensitiveIndexElement()
           .tFindAll();
       expect(result3, {model0, model1, model3, model4});
 
@@ -127,16 +127,16 @@ void tests() {
       // expect(result4, {model3, model4});
     });
 
-    isarTest("Query List<String> insensitive index", () async {
+    isarTest('Query List<String> insensitive index', () async {
       final result1 = await isar.hashElementsIndexesModels
           .where()
-          .stringListInsensitiveIndexAnyEqualTo("bar")
+          .stringListInsensitiveIndexElementEqualTo('bar')
           .tFindAll();
       expect(result1, {model0, model1, model3});
 
       final result2 = await isar.hashElementsIndexesModels
           .where()
-          .stringListInsensitiveIndexAnyEqualTo("")
+          .stringListInsensitiveIndexElementEqualTo('')
           .tFindAll();
       expect(result2, <HashElementsIndexesModel>[]);
 

@@ -528,29 +528,32 @@ class IsarCoreBindings {
   late final _isar_filter_static = _isar_filter_staticPtr
       .asFunction<void Function(ffi.Pointer<ffi.Pointer<CFilter>>, int)>();
 
-  void isar_filter_and_or(
+  void isar_filter_and_or_xor(
     ffi.Pointer<ffi.Pointer<CFilter>> filter,
     bool and,
+    bool exclusive,
     ffi.Pointer<ffi.Pointer<CFilter>> conditions,
     int length,
   ) {
-    return _isar_filter_and_or(
+    return _isar_filter_and_or_xor(
       filter,
       and ? 1 : 0,
+      exclusive ? 1 : 0,
       conditions,
       length,
     );
   }
 
-  late final _isar_filter_and_orPtr = _lookup<
+  late final _isar_filter_and_or_xorPtr = _lookup<
       ffi.NativeFunction<
           ffi.Void Function(
               ffi.Pointer<ffi.Pointer<CFilter>>,
               ffi.Uint8,
+              ffi.Uint8,
               ffi.Pointer<ffi.Pointer<CFilter>>,
-              ffi.Uint32)>>('isar_filter_and_or');
-  late final _isar_filter_and_or = _isar_filter_and_orPtr.asFunction<
-      void Function(ffi.Pointer<ffi.Pointer<CFilter>>, int,
+              ffi.Uint32)>>('isar_filter_and_or_xor');
+  late final _isar_filter_and_or_xor = _isar_filter_and_or_xorPtr.asFunction<
+      void Function(ffi.Pointer<ffi.Pointer<CFilter>>, int, int,
           ffi.Pointer<ffi.Pointer<CFilter>>, int)>();
 
   void isar_filter_not(
@@ -929,6 +932,36 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<CIndexKey>>)>>('isar_key_create');
   late final _isar_key_create = _isar_key_createPtr
       .asFunction<void Function(ffi.Pointer<ffi.Pointer<CIndexKey>>)>();
+
+  bool isar_key_increase(
+    ffi.Pointer<CIndexKey> key,
+  ) {
+    return _isar_key_increase(
+          key,
+        ) !=
+        0;
+  }
+
+  late final _isar_key_increasePtr =
+      _lookup<ffi.NativeFunction<ffi.Uint8 Function(ffi.Pointer<CIndexKey>)>>(
+          'isar_key_increase');
+  late final _isar_key_increase =
+      _isar_key_increasePtr.asFunction<int Function(ffi.Pointer<CIndexKey>)>();
+
+  bool isar_key_decrease(
+    ffi.Pointer<CIndexKey> key,
+  ) {
+    return _isar_key_decrease(
+          key,
+        ) !=
+        0;
+  }
+
+  late final _isar_key_decreasePtr =
+      _lookup<ffi.NativeFunction<ffi.Uint8 Function(ffi.Pointer<CIndexKey>)>>(
+          'isar_key_decrease');
+  late final _isar_key_decrease =
+      _isar_key_decreasePtr.asFunction<int Function(ffi.Pointer<CIndexKey>)>();
 
   void isar_key_add_byte(
     ffi.Pointer<CIndexKey> key,
@@ -1443,19 +1476,17 @@ class IsarCoreBindings {
   int isar_qb_add_index_where_clause(
     ffi.Pointer<CQueryBuilder> builder,
     int index_id,
-    ffi.Pointer<CIndexKey> start_key,
-    bool include_start,
-    ffi.Pointer<CIndexKey> end_key,
-    bool include_end,
+    ffi.Pointer<CIndexKey> lower_key,
+    ffi.Pointer<CIndexKey> upper_key,
+    bool sort_asc,
     bool skip_duplicates,
   ) {
     return _isar_qb_add_index_where_clause(
       builder,
       index_id,
-      start_key,
-      include_start ? 1 : 0,
-      end_key,
-      include_end ? 1 : 0,
+      lower_key,
+      upper_key,
+      sort_asc ? 1 : 0,
       skip_duplicates ? 1 : 0,
     );
   }
@@ -1466,14 +1497,13 @@ class IsarCoreBindings {
               ffi.Pointer<CQueryBuilder>,
               ffi.Uint32,
               ffi.Pointer<CIndexKey>,
-              ffi.Uint8,
               ffi.Pointer<CIndexKey>,
               ffi.Uint8,
               ffi.Uint8)>>('isar_qb_add_index_where_clause');
   late final _isar_qb_add_index_where_clause =
       _isar_qb_add_index_where_clausePtr.asFunction<
           int Function(ffi.Pointer<CQueryBuilder>, int, ffi.Pointer<CIndexKey>,
-              int, ffi.Pointer<CIndexKey>, int, int)>();
+              ffi.Pointer<CIndexKey>, int, int)>();
 
   int isar_qb_add_link_where_clause(
     ffi.Pointer<CQueryBuilder> builder,

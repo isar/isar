@@ -1,9 +1,10 @@
-// ignore_for_file: implementation_imports
+import 'dart:async';
 import 'dart:io';
+import 'dart:math';
+
 import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'dart:math';
 import 'package:test/test.dart';
 
 import 'sync_async_helper.dart';
@@ -11,13 +12,13 @@ import 'sync_async_helper.dart';
 const bool kIsWeb = identical(0, 0.0);
 
 Future<void> qEqualSet<T>(
-    Future<Iterable<T>> actual, Iterable<T> target) async {
+    Future<Iterable<T>> actual, Iterable<T> target,) async {
   expect((await actual).toSet(), target.toSet());
 }
 
 Future<void> qEqual<T>(Future<Iterable<T>> actual, List<T> target) async {
   final results = (await actual).toList();
-  qEqualSync(results, target);
+  await qEqualSync(results, target);
 }
 
 Future<void> qEqualSync<T>(List<T> actual, List<T> target) async {
@@ -28,15 +29,15 @@ Future<void> qEqualSync<T>(List<T> actual, List<T> target) async {
     }
   } else if (actual is List<List<double?>?>) {
     for (var i = 0; i < actual.length; i++) {
-      qEqualSync((actual[i] as List), (target[i] as List));
+      await qEqualSync(actual[i] as List, target[i] as List);
     }
   } else {
     expect(actual, target);
   }
 }
 
-var allTestsSuccessful = true;
-var testCount = 0;
+bool allTestsSuccessful = true;
+int testCount = 0;
 
 Future<void> _prepareTest() async {
   if (!kIsWeb) {
@@ -49,52 +50,58 @@ Future<void> _prepareTest() async {
 }
 
 @isTest
-void isarTest(String name, dynamic Function() body, {Timeout? timeout}) {
-  test(
-    name,
-    () async {
-      try {
-        await _prepareTest();
-        await body();
-        testCount++;
-      } catch (e) {
-        allTestsSuccessful = false;
-        rethrow;
-      }
-    },
-    timeout: timeout,
-  );
+void isarTest(String name, dynamic Function() body,
+    {Timeout? timeout, bool skip = false,}) {
+  void runTest(bool testSync) {
+    final testName = testSync ? '$name SYNC' : name;
+    runZoned(
+      zoneValues: {'testSync': testSync},
+      () {
+        test(
+          testName,
+          () async {
+            try {
+              await _prepareTest();
+              await body();
+              testCount++;
+            } catch (e) {
+              allTestsSuccessful = false;
+              rethrow;
+            }
+          },
+          timeout: timeout,
+          skip: skip,
+        );
+      },
+    );
+  }
+
+  runTest(false);
+  if (!kIsWeb) {
+    runTest(true);
+  }
 }
 
 @isTest
 void isarTestVm(String name, dynamic Function() body) {
-  test(name, () async {
-    try {
-      await _prepareTest();
-      await body();
-      testCount++;
-    } catch (e) {
-      allTestsSuccessful = false;
-      rethrow;
-    }
-  }, skip: kIsWeb);
+  isarTest(name, body, skip: kIsWeb);
 }
 
 String getRandomName() {
-  var random = Random().nextInt(pow(2, 32) as int).toString();
+  final random = Random().nextInt(pow(2, 32) as int).toString();
   return '${random}_tmp';
 }
 
 String? testTempPath;
 Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> schemas,
-    {String? name}) async {
+    {String? name,}) async {
   await _prepareTest();
   if (!kIsWeb && testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
     testTempPath = path.join(dartToolDir, 'test', 'tmp');
   }
 
-  return await tOpen(
+  return tOpen(
     schemas: schemas,
     name: name ?? getRandomName(),
     directory: kIsWeb ? '' : testTempPath!,

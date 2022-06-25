@@ -3,16 +3,15 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 
-import 'collections_state.dart';
-import 'instances_state.dart';
-import 'isar_connect_state_notifier.dart';
+import 'package:isar_inspector/state/collections_state.dart';
+import 'package:isar_inspector/state/instances_state.dart';
+import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
 
-const objectsPerPage = 50;
+const int objectsPerPage = 50;
 
 class QueryObject {
-  final Map<String, dynamic> data;
-
   const QueryObject(this.data);
+  final Map<String, dynamic> data;
 
   String getValue(String propertyName) {
     return data[propertyName]?.toString() ?? '';
@@ -26,10 +25,9 @@ final queryFilterPod = StateProvider<FilterOperation?>((ref) => null);
 final querySortPod = StateProvider<SortProperty?>((ref) => null);
 
 class QueryResult {
+  QueryResult({required this.objects, required this.hasMore});
   final List<QueryObject> objects;
   final bool hasMore;
-
-  QueryResult({required this.objects, required this.hasMore});
 }
 
 final queryResultsPod = FutureProvider<QueryResult>((ref) async {
@@ -47,7 +45,7 @@ final queryResultsPod = FutureProvider<QueryResult>((ref) async {
     sortProperty: sort,
     offset: page * objectsPerPage,
     limit: objectsPerPage + 1,
-  ));
+  ),);
 
   final objects = result.map(QueryObject.new).toList();
 

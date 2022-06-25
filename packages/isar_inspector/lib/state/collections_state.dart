@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_inspector/schema.dart';
 import 'package:isar_inspector/state/instances_state.dart';
 
-import 'isar_connect_state_notifier.dart';
+import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
 
 final collectionsPod = FutureProvider((ref) async {
   ref.watch(isarConnectPod);

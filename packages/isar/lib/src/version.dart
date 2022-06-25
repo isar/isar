@@ -1,6 +1,8 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:math';
 
-const isarCoreVersion = '2.5.21'; //
+const isarCoreVersion = '2.5.24';
 final isarCoreVersionNumber = _getVersionNumber(isarCoreVersion);
 
 const isarWebVersion = '2.5.1';

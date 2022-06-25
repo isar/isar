@@ -9,7 +9,7 @@ String generateByIndexExtension(ObjectInfo oi) {
   }
   var code =
       'extension ${oi.dartName}ByIndex on IsarCollection<${oi.dartName}> {';
-  for (var index in uniqueIndexes) {
+  for (final index in uniqueIndexes) {
     code += generateSingleByIndex(oi, index);
     code += generateAllByIndex(oi, index);
     if (!index.properties.first.isMultiEntry) {

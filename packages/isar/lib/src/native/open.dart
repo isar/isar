@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:ffi';
 import 'dart:isolate';
 import 'dart:math';
@@ -5,18 +7,20 @@ import 'dart:math';
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
-import 'bindings.dart';
-import 'isar_collection_impl.dart';
-import 'isar_core.dart';
-import 'isar_impl.dart';
+import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/isar_collection_impl.dart';
+import 'package:isar/src/native/isar_core.dart';
+import 'package:isar/src/native/isar_impl.dart';
 
-final _isarPtrPtr = malloc<Pointer<CIsarInstance>>();
+final Pointer<Pointer<CIsarInstance>> _isarPtrPtr =
+    malloc<Pointer<CIsarInstance>>();
 
 void _initializeInstance(
-    Allocator alloc, IsarImpl isar, List<CollectionSchema<dynamic>> schemas) {
-  final maxProperties = schemas
-      .map((e) => e.propertyIds.length)
-      .reduce((value, element) => max(value, element));
+  Allocator alloc,
+  IsarImpl isar,
+  List<CollectionSchema<dynamic>> schemas,
+) {
+  final maxProperties = schemas.map((e) => e.propertyIds.length).reduce(max);
 
   final colPtrPtr = alloc<Pointer<CIsarCollection>>();
   final offsetsPtr = alloc<Uint32>(maxProperties);
@@ -53,7 +57,7 @@ Future<Isar> openIsar({
   initializeCoreBinary();
   IC.isar_connect_dart_api(NativeApi.postCObject.cast());
 
-  return using((alloc) async {
+  return using((Arena alloc) async {
     final namePtr = name.toNativeUtf8(allocator: alloc);
     final dirPtr = directory?.toNativeUtf8(allocator: alloc) ?? nullptr;
 
@@ -63,8 +67,14 @@ Future<Isar> openIsar({
     final receivePort = ReceivePort();
     final nativePort = receivePort.sendPort.nativePort;
     final stream = wrapIsarPort(receivePort);
-    IC.isar_create_instance_async(_isarPtrPtr, namePtr.cast(), dirPtr.cast(),
-        relaxedDurability, schemaStrPtr.cast(), nativePort);
+    IC.isar_create_instance_async(
+      _isarPtrPtr,
+      namePtr.cast(),
+      dirPtr.cast(),
+      relaxedDurability,
+      schemaStrPtr.cast(),
+      nativePort,
+    );
     await stream.first;
 
     final isar = IsarImpl(name, schemaStr, _isarPtrPtr.value);
@@ -82,18 +92,28 @@ Isar openIsarSync({
   initializeCoreBinary();
   IC.isar_connect_dart_api(NativeApi.postCObject.cast());
 
-  return using((alloc) {
-    final namePtr = name.toNativeUtf8(allocator: alloc);
-    final dirPtr = directory?.toNativeUtf8(allocator: alloc) ?? nullptr;
+  return using(
+    (Arena alloc) {
+      final namePtr = name.toNativeUtf8(allocator: alloc);
+      final dirPtr = directory?.toNativeUtf8(allocator: alloc) ?? nullptr;
 
-    final schemaStr = '[${schemas.map((e) => e.schema).join(',')}]';
-    final schemaStrPtr = schemaStr.toNativeUtf8(allocator: alloc);
+      final schemaStr = '[${schemas.map((e) => e.schema).join(',')}]';
+      final schemaStrPtr = schemaStr.toNativeUtf8(allocator: alloc);
 
-    nCall(IC.isar_create_instance(_isarPtrPtr, namePtr.cast(), dirPtr.cast(),
-        relaxedDurability, schemaStrPtr.cast()));
+      nCall(
+        IC.isar_create_instance(
+          _isarPtrPtr,
+          namePtr.cast(),
+          dirPtr.cast(),
+          relaxedDurability,
+          schemaStrPtr.cast(),
+        ),
+      );
 
-    final isar = IsarImpl(name, schemaStr, _isarPtrPtr.value);
-    _initializeInstance(alloc, isar, schemas);
-    return isar;
-  }, malloc);
+      final isar = IsarImpl(name, schemaStr, _isarPtrPtr.value);
+      _initializeInstance(alloc, isar, schemas);
+      return isar;
+    },
+    malloc,
+  );
 }

@@ -1,17 +1,14 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
-import 'package:test/test.dart';
 import 'package:isar/isar.dart';
+import 'package:test/test.dart';
 
-import 'util/common.dart';
 import 'user_model.dart';
+import 'util/common.dart';
 import 'util/sync_async_helper.dart';
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Json', () {
     late Isar isar;
     late IsarCollection<UserModel> col;
@@ -49,14 +46,15 @@ void tests() {
         for (var i = 0; i < json.length; i++) {
           json[i]['id'] = i + 1;
         }
-        final exportedJson = await col.where().exportJson();
+        final exportedJson =
+            await col.where().exportJson();
         expect(exportedJson, json);
       },
       timeout: const Timeout(Duration(seconds: 60)),
     );
 
     isarTest('primitive null', () async {
-      final json = [
+      final json = <Map<String, Object?>>[
         {
           'id': 0,
           'name': null,
@@ -75,7 +73,8 @@ void tests() {
         await col.tImportJson(json);
       });
 
-      final exportedJsonNull = await col.where().exportJson();
+      final exportedJsonNull =
+          await col.where().exportJson();
       expect(exportedJsonNull, json);
     });
 
@@ -89,7 +88,7 @@ void tests() {
       for (var i = 0; i < json.length; i++) {
         json[i]['id'] = i + 1;
       }
-      final exportedJson = await col.where().exportJsonRaw((bytes) {
+      final exportedJson = await col.where().exportJsonRaw((Uint8List bytes) {
         return jsonDecode(const Utf8Decoder().convert(bytes));
       });
       expect(exportedJson, json);

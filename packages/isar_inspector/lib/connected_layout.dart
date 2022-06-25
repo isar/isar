@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar_inspector/filter_field.dart';
-import 'package:isar_inspector/state/instances_state.dart';
 
-import 'query_table.dart';
-import 'sidebar.dart';
-import 'state/isar_connect_state_notifier.dart';
+import 'package:isar_inspector/filter_field.dart';
+import 'package:isar_inspector/query_table.dart';
+import 'package:isar_inspector/sidebar.dart';
+import 'package:isar_inspector/state/instances_state.dart';
+import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
 
 class ConnectedLayout extends ConsumerStatefulWidget {
-  const ConnectedLayout({Key? key}) : super(key: key);
+  const ConnectedLayout({super.key});
 
   @override
   ConsumerState<ConnectedLayout> createState() => _ConnectedLayoutState();

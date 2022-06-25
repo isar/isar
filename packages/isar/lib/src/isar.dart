@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_asserts_with_message
+
 part of isar;
 
 /// Callback for a newly opened Isar instance.
@@ -8,21 +10,36 @@ typedef IsarCloseCallback = void Function(String);
 
 /// An instance of the Isar Database.
 abstract class Isar {
+  /// @nodoc
+  @protected
+  Isar(this.name, String schema) {
+    if (_schema != null && _schema != schema) {
+      throw IsarError(
+        'Cannot open multiple Isar instances with different schema.',
+      );
+    }
+    _schema = schema;
+    _instances[name] = this;
+    for (final callback in _openCallbacks) {
+      callback(this);
+    }
+  }
+
   /// Smallest valid id.
-  static const minId = isarMinId;
+  static const int minId = isarMinId;
 
   /// Largest valid id.
-  static const maxId = isarMaxId;
+  static const int maxId = isarMaxId;
 
   /// The default Isar instance name.
-  static const defaultName = 'isar';
+  static const String defaultName = 'isar';
 
   /// Placeholder for an auto-increment id.
-  static final autoIncrement = isarAutoIncrementId;
+  static int autoIncrement = isarAutoIncrementId;
 
-  static final _instances = <String, Isar>{};
-  static final _openCallbacks = <IsarOpenCallback>{};
-  static final _closeCallbacks = <IsarCloseCallback>{};
+  static final Map<String, Isar> _instances = <String, Isar>{};
+  static final Set<IsarOpenCallback> _openCallbacks = <IsarOpenCallback>{};
+  static final Set<IsarCloseCallback> _closeCallbacks = <IsarCloseCallback>{};
   static String? _schema;
 
   /// Name of the instance.
@@ -31,19 +48,7 @@ abstract class Isar {
   late final Map<Type, IsarCollection<dynamic>> _collections;
   late final Map<String, IsarCollection<dynamic>> _collectionsByName;
 
-  var _isOpen = true;
-
-  @protected
-  Isar(this.name, String schema) {
-    if (_schema != null && _schema != schema) {
-      throw 'Cannot open multiple Isar instances with different schema.';
-    }
-    _schema = schema;
-    _instances[name] = this;
-    for (var callback in _openCallbacks) {
-      callback(this);
-    }
-  }
+  bool _isOpen = true;
 
   static void _checkOpen(String name, List<CollectionSchema<dynamic>> schemas) {
     if (name.isEmpty || name.startsWith('_')) {
@@ -73,10 +78,12 @@ abstract class Isar {
   }) {
     _checkOpen(name, schemas);
     if (!_kIsWeb) {
-      assert(() {
-        _IsarConnect.initialize();
-        return true;
-      }());
+      assert(
+        () {
+          _IsarConnect.initialize();
+          return true;
+        }(),
+      );
     }
     return IsarNative.open(
       schemas: schemas,
@@ -95,10 +102,12 @@ abstract class Isar {
   }) {
     _checkOpen(name, schemas);
     if (!_kIsWeb) {
-      assert(() {
-        _IsarConnect.initialize();
-        return true;
-      }());
+      assert(
+        () {
+          _IsarConnect.initialize();
+          return true;
+        }(),
+      );
     }
     return IsarNative.openSync(
       schemas: schemas,
@@ -136,7 +145,7 @@ abstract class Isar {
   void attachCollections(Map<Type, IsarCollection<dynamic>> collections) {
     _collections = collections;
     _collectionsByName = {
-      for (var col in collections.values) col.name: col,
+      for (IsarCollection<dynamic> col in collections.values) col.name: col,
     };
   }
 
@@ -145,32 +154,32 @@ abstract class Isar {
   /// You should use the generated extension methods instead.
   IsarCollection<T> getCollection<T>() {
     requireOpen();
-    return _collections[T] as IsarCollection<T>;
+    return _collections[T]! as IsarCollection<T>;
   }
 
   /// @nodoc
   @protected
   IsarCollection<T> getCollectionInternal<T>() {
     requireOpen();
-    return _collections[T] as IsarCollection<T>;
+    return _collections[T]! as IsarCollection<T>;
   }
 
   /// @nodoc
   @protected
   IsarCollection<dynamic>? getCollectionByNameInternal(String name) {
-    return _collectionsByName[name] as IsarCollection<dynamic>;
+    return _collectionsByName[name];
   }
 
   /// Remove all data in this instance and reset the auto increment values.
   Future<void> clear() async {
-    for (var col in _collections.values) {
+    for (final col in _collections.values) {
       await col.clear();
     }
   }
 
   /// Remove all data in this instance and reset the auto increment values.
   void clearSync() {
-    for (var col in _collections.values) {
+    for (final col in _collections.values) {
       col.clearSync();
     }
   }
@@ -191,13 +200,14 @@ abstract class Isar {
         _schema = null;
       }
     }
-    for (var callback in _closeCallbacks) {
+    for (final callback in _closeCallbacks) {
       callback(name);
     }
     return Future.value(false);
   }
 
-  /// Returns the schema of this Instance. You should avoid usint the schema directly.
+  /// Returns the schema of this Instance. You should avoid usint the schema
+  /// directly.
   @protected
   static String? get schema => _schema;
 

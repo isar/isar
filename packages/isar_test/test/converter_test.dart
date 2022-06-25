@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:isar/isar.dart';
+import 'package:test/test.dart';
 
 import 'util/common.dart';
 
@@ -41,6 +41,7 @@ class ConverterModel {
   late String stringValue;
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     if (other is ConverterModel) {
       return boolValue == other.boolValue &&
@@ -137,7 +138,7 @@ void main() {
     ..dateValue = DateTime.fromMillisecondsSinceEpoch(123123)
     ..stringValue = 'five';
 
-  final converterObjectJson = {
+  final converterObjectJson = <String, Object>{
     'id': 123,
     'boolValue': 'true',
     'intValue': '25',

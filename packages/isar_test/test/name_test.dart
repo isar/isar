@@ -22,18 +22,14 @@ class NameModel {
   String? otherValue;
 
   @Name('linkN')
-  var link = IsarLinks<NameModel>();
+  IsarLinks<NameModel> link = IsarLinks<NameModel>();
 
   @Backlink(to: 'link')
   @Name('backlink')
-  var backlink = IsarLinks<NameModel>();
+  IsarLinks<NameModel> backlink = IsarLinks<NameModel>();
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Name', () {
     late Isar isar;
 
@@ -50,7 +46,7 @@ void tests() {
             NameModel()
               ..value = 'test'
               ..otherValue = 'test2',
-          ));
+          ),);
 
       expect(await isar.nameModels.where().exportJson(), [
         {

@@ -6,25 +6,26 @@ environment:
   sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
+  dartx: ^1.0.0
   flutter:
     sdk: flutter
-  isar: any
-  vm_service: ^9.0.0
   flutter_riverpod: ^2.0.0-dev.7
-  dartx: ^1.0.0
-  json_annotation: ^4.5.0
-  petitparser: ^4.4.0
-  linked_scroll_controller: ^0.2.0
   flutter_svg: any
   font_awesome_flutter: any
   google_fonts: ^3.0.1
-  web_socket_channel: ^2.2.0
+  isar: any
+  json_annotation: ^4.5.0
+  petitparser: ^4.4.0
   routemaster: ^1.0.1
+  vm_service: ^9.0.0
+  web_socket_channel: ^2.2.0
+  
 
 dev_dependencies:
-  json_serializable: ^6.2.0
   build_runner: any
   flutter_lints: ^2.0.1
+  json_serializable: ^6.2.0
+  very_good_analysis: ^3.0.1
 
 dependency_overrides:
   isar:

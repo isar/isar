@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'package:isar/isar.dart';
 
 enum ConnectAction {
@@ -25,13 +27,6 @@ enum ConnectEvent {
 }
 
 class ConnectQuery {
-  final String instance;
-  final String collection;
-  final FilterOperation? filter;
-  final int? offset;
-  final int? limit;
-  final SortProperty? sortProperty;
-
   ConnectQuery({
     required this.instance,
     required this.collection,
@@ -50,12 +45,20 @@ class ConnectQuery {
       limit: json['limit'] as int?,
       sortProperty: json.containsKey('sortProperty')
           ? SortProperty(
+              // ignore: avoid_dynamic_calls
               property: json['sortProperty']['property'] as String,
+              // ignore: avoid_dynamic_calls
               sort: Sort.values[json['sortProperty']['sort'] as int],
             )
           : null,
     );
   }
+  final String instance;
+  final String collection;
+  final FilterOperation? filter;
+  final int? offset;
+  final int? limit;
+  final SortProperty? sortProperty;
 
   Map<String, dynamic> toJson() {
     return {
@@ -73,7 +76,9 @@ class ConnectQuery {
   }
 
   static FilterOperation? _filterFromJson(Map<String, dynamic>? json) {
-    if (json == null) return null;
+    if (json == null) {
+      return null;
+    }
     if (json.containsKey('filters')) {
       final filters = (json['filters'] as List)
           .map((e) => _filterFromJson(e as Map<String, dynamic>?)!)
@@ -118,11 +123,6 @@ class ConnectQuery {
 }
 
 class ConnectCollectionInfo {
-  final String instance;
-  final String collection;
-  final int size;
-  final int count;
-
   ConnectCollectionInfo({
     required this.instance,
     required this.collection,
@@ -138,6 +138,10 @@ class ConnectCollectionInfo {
       count: json['count'] as int,
     );
   }
+  final String instance;
+  final String collection;
+  final int size;
+  final int count;
 
   Map<String, dynamic> toJson() {
     return {

@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:indexed_db';
 import 'dart:js';
 
@@ -6,6 +8,9 @@ import 'package:js/js_util.dart';
 
 @JS('JSON.stringify')
 external String stringify(dynamic value);
+
+@JS('indexedDB.cmp')
+external int idbCmp(dynamic value1, dynamic value2);
 
 @JS('Object.keys')
 external List<String> objectKeys(dynamic obj);
@@ -28,7 +33,10 @@ extension PromiseX on Promise {
 
 @JS('openIsar')
 external Promise openIsarJs(
-    String name, List<dynamic> schemas, bool relaxedDurability);
+  String name,
+  List<dynamic> schemas,
+  bool relaxedDurability,
+);
 
 @JS('IsarTxn')
 class IsarTxnJs {
@@ -63,14 +71,20 @@ class IsarCollectionJs {
   external Promise getAll(IsarTxnJs txn, List<int> ids);
 
   external Promise getAllByIndex(
-      IsarTxnJs txn, String indexName, List<List<dynamic>> values);
+    IsarTxnJs txn,
+    String indexName,
+    List<List<dynamic>> values,
+  );
 
   external Promise putAll(IsarTxnJs txn, List<dynamic> objects);
 
   external Promise deleteAll(IsarTxnJs txn, List<int> ids);
 
   external Promise deleteAllByIndex(
-      IsarTxnJs txn, String indexName, List<dynamic> keys);
+    IsarTxnJs txn,
+    String indexName,
+    List<dynamic> keys,
+  );
 
   external Promise clear(IsarTxnJs txn);
 
@@ -79,16 +93,25 @@ class IsarCollectionJs {
   external StopWatchingJs watchObject(int id, ObjectChangeCallbackJs callback);
 
   external StopWatchingJs watchQuery(
-      QueryJs query, QueryChangeCallbackJs callback);
+    QueryJs query,
+    QueryChangeCallbackJs callback,
+  );
 
   external StopWatchingJs watchQueryLazy(
-      QueryJs query, ChangeCallbackJs callback);
+    QueryJs query,
+    ChangeCallbackJs callback,
+  );
 }
 
 @JS('IsarLink')
 class IsarLinkJs {
-  external Promise update(IsarTxnJs txn, bool backlink, int id,
-      List<int> addedTargets, List<int> deletedTargets);
+  external Promise update(
+    IsarTxnJs txn,
+    bool backlink,
+    int id,
+    List<int> addedTargets,
+    List<int> deletedTargets,
+  );
 
   external Promise clear(IsarTxnJs txn, int id, bool backlink);
 }

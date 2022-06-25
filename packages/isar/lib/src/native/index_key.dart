@@ -1,20 +1,30 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
-import 'bindings.dart';
-import 'isar_core.dart';
-import 'query_build.dart';
+import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/isar_core.dart';
+import 'package:isar/src/native/query_build.dart';
 
 final _keyPtrPtr = malloc<Pointer<CIndexKey>>();
 
-Pointer<CIndexKey> buildIndexKey(
-    CollectionSchema<dynamic> schema, String indexName, IndexKey key) {
+Pointer<CIndexKey>? buildIndexKey(
+  CollectionSchema<dynamic> schema,
+  String indexName,
+  IndexKey key, {
+  bool addMaxComposite = false,
+  bool requireFullKey = false,
+  bool increase = false,
+  bool decrease = false,
+}) {
   final types = schema.indexValueTypeOrErr(indexName);
-  if (key.length > types.length) {
-    throw 'Invalid values for index $indexName';
+  if (key.length > types.length ||
+      (requireFullKey && key.length != types.length)) {
+    throw IsarError('Invalid values for index $indexName.');
   }
 
   IC.isar_key_create(_keyPtrPtr);
@@ -22,6 +32,23 @@ Pointer<CIndexKey> buildIndexKey(
 
   for (var i = 0; i < key.length; i++) {
     _addKeyValue(keyPtr, key[i], types[i]);
+  }
+
+  if (increase) {
+    if (!IC.isar_key_increase(keyPtr)) {
+      return null;
+    }
+  }
+
+  if (decrease) {
+    if (!IC.isar_key_decrease(keyPtr)) {
+      return null;
+    }
+  }
+
+  // Also include composite indexes for upper keys
+  if (addMaxComposite && types.length > key.length) {
+    IC.isar_key_add_long(keyPtr, maxLong);
   }
 
   return keyPtr;
@@ -41,12 +68,16 @@ Pointer<CIndexKey> buildUpperUnboundedIndexKey() {
 }
 
 void _addKeyValue(
-    Pointer<CIndexKey> keyPtr, Object? value, IndexValueType type) {
+  Pointer<CIndexKey> keyPtr,
+  Object? value,
+  IndexValueType type,
+) {
   if (value is DateTime) {
     value = value.toUtc().microsecondsSinceEpoch;
   } else if (value is List<DateTime?>) {
     value = value.map((e) => e?.toUtc().microsecondsSinceEpoch);
   }
+
   switch (type) {
     case IndexValueType.bool:
       IC.isar_key_add_byte(keyPtr, boolToByte(value as bool?));
@@ -73,7 +104,10 @@ void _addKeyValue(
     case IndexValueType.stringHashCIS:
       final strPtr = _strToNative(value as String?);
       IC.isar_key_add_string_hash(
-          keyPtr, strPtr, type == IndexValueType.stringHash);
+        keyPtr,
+        strPtr,
+        type == IndexValueType.stringHash,
+      );
       _freeStr(strPtr);
       break;
     case IndexValueType.bytesHash:
@@ -134,8 +168,12 @@ void _addKeyValue(
         for (var i = 0; i < value.length; i++) {
           stringListPtr[i] = _strToNative(value[i]);
         }
-        IC.isar_key_add_string_list_hash(keyPtr, stringListPtr, value.length,
-            type == IndexValueType.stringListHash);
+        IC.isar_key_add_string_list_hash(
+          keyPtr,
+          stringListPtr,
+          value.length,
+          type == IndexValueType.stringListHash,
+        );
         for (var i = 0; i < value.length; i++) {
           _freeStr(stringListPtr[i]);
         }

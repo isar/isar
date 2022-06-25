@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:isar/isar.dart';
+import 'package:test/test.dart';
 
 import 'util/common.dart';
 import 'util/sync_async_helper.dart';
@@ -19,16 +19,13 @@ class Model {
   }
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(dynamic other) {
     return other is Model && other.id == id && other.value == value;
   }
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Instance test', () {
     isarTest('persists auto increment', () async {
       var isar = await openTempIsar([ModelSchema]);
@@ -64,7 +61,7 @@ void tests() {
         await isar.models.tPut(obj4);
       });
       expect(obj4.id, 21);
-      qEqual(isar.models.where().tFindAll(), [obj1, obj2, obj3, obj4]);
+      await qEqual(isar.models.where().tFindAll(), [obj1, obj2, obj3, obj4]);
 
       await isar.close();
     });
@@ -75,7 +72,9 @@ void tests() {
       expect(await isar.close(), true);
 
       await expectLater(
-          () => isar.models.tGet(1), throwsIsarError('already been closed'));
+        () => isar.models.tGet(1),
+        throwsIsarError('already been closed'),
+      );
     });
   });
 }

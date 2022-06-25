@@ -5,17 +5,18 @@ void main() {
   final testDir = Directory('test');
   final files = testDir
       .listSync(recursive: true)
-      .where((e) => e is File && e.path.endsWith('_test.dart'))
-      .map((e) => e.path)
+      .where((FileSystemEntity e) => e is File && e.path.endsWith('_test.dart'))
+      .map((FileSystemEntity e) => e.path)
       .toList();
 
-  final imports = files.map((e) {
+  final imports = files.map((String e) {
     return "import '$e' as ${e.split('.')[0].replaceAll(p.separator, '_')};";
   }).join('\n');
 
-  final calls = files.map((e) {
+  final calls = files.map((String e) {
     final content = File(e).readAsStringSync();
-    final call = "${e.split('.')[0].replaceAll(p.separator, '_')}.main();";
+    final call =
+        "${e.split('.')[0].replaceAll(p.separator, '_')}.main();";
     if (content.startsWith("@TestOn('vm')")) {
       return 'if (!kIsWeb) $call';
     } else {

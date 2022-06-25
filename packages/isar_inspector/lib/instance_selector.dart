@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:isar_inspector/common.dart';
 
-import 'state/instances_state.dart';
+import 'package:isar_inspector/state/instances_state.dart';
 
 class InstanceSelector extends ConsumerStatefulWidget {
-  const InstanceSelector({Key? key}) : super(key: key);
+  const InstanceSelector({super.key});
 
   @override
   ConsumerState<InstanceSelector> createState() => _InstanceSelectorState();
@@ -26,7 +26,7 @@ class _InstanceSelectorState extends ConsumerState<InstanceSelector>
 
   @override
   void initState() {
-    _animation.addStatusListener((status) {
+    _animation.addStatusListener((AnimationStatus status) {
       setState(() {});
     });
     super.initState();
@@ -56,7 +56,6 @@ class _InstanceSelectorState extends ConsumerState<InstanceSelector>
                 radius: BorderRadius.circular(15),
                 child: SizeTransition(
                   sizeFactor: _animation,
-                  axis: Axis.vertical,
                   axisAlignment: -1,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -101,14 +100,13 @@ class _InstanceSelectorState extends ConsumerState<InstanceSelector>
 }
 
 class InstanceButton extends StatelessWidget {
-  final String instance;
-  final VoidCallback onTap;
-
   const InstanceButton({
-    Key? key,
+    super.key,
     required this.instance,
     required this.onTap,
-  }) : super(key: key);
+  });
+  final String instance;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -137,18 +135,17 @@ class InstanceButton extends StatelessWidget {
 }
 
 class SelectedInstanceButton extends StatelessWidget {
-  final String instance;
-  final VoidCallback onTap;
-  final bool hasMultiple;
-  final Color? color;
-
   const SelectedInstanceButton({
-    Key? key,
+    super.key,
     required this.instance,
     required this.onTap,
     required this.hasMultiple,
     required this.color,
-  }) : super(key: key);
+  });
+  final String instance;
+  final VoidCallback onTap;
+  final bool hasMultiple;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {

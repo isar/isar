@@ -1,15 +1,15 @@
+// ignore_for_file: cast_nullable_to_non_nullable
+
+import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_inspector/schema.dart';
 import 'package:petitparser/petitparser.dart';
-import 'package:dartx/dartx.dart';
 
 class QueryParser {
-  final List<IProperty> properties;
-  late final Parser _parser;
-
   QueryParser(this.properties) {
     final builder = ExpressionBuilder();
-    builder.group().primitive(QueryGrammar.condition, (List condition) {
+    builder.group().primitive(QueryGrammar.condition,
+        (List<dynamic> condition) {
       final property = condition[0] as String;
       final cmp = condition[1] as String;
       final value = condition[2];
@@ -19,32 +19,39 @@ class QueryParser {
     builder.group().wrapper(
           char('(').trim(),
           char(')').trim(),
-          (left, value, right) => value,
+          (Object? left, Object? value, Object? right) => value,
         );
 
     builder.group().left(
           string('&&').trim(),
-          (l, _, r) => FilterGroup.and(
+          (Object? l, _, Object? r) => FilterGroup.and(
             [l as FilterOperation, r as FilterOperation],
           ),
         );
 
     builder.group().left(
           string('||').trim(),
-          (l, _, r) => FilterGroup.or(
+          (Object? l, _, Object? r) => FilterGroup.or(
             [l as FilterOperation, r as FilterOperation],
           ),
         );
 
     _parser = builder.build();
   }
+  final List<IProperty> properties;
+  late final Parser _parser;
 
   FilterOperation createQueryCondition(
-      String propertyName, String cmp, dynamic value) {
+    String propertyName,
+    String cmp,
+    dynamic value,
+  ) {
     final property =
-        properties.where((p) => p.name == propertyName).firstOrNull;
+        properties.where((IProperty p) => p.name == propertyName).firstOrNull;
 
-    if (property == null) throw 'Unknown property "$propertyName"';
+    if (property == null) {
+      throw IsarError('Unknown property "$propertyName"');
+    }
 
     switch (cmp) {
       case '!=':
@@ -78,56 +85,55 @@ class QueryParser {
           wildcard: value as String,
         );
       default:
-        throw 'unreachable';
+        throw UnimplementedError();
     }
   }
 
   FilterOperation parse(String filter) {
     final result = _parser.parse(filter);
     if (result.isFailure) {
-      throw result.message;
+      throw IsarError(result.message);
     }
     return result.value as FilterOperation;
   }
 }
 
+// ignore: avoid_classes_with_only_static_members
 class QueryGrammar {
-  static Parser get cmpOperator => (string('==') |
+  static Parser get cmpOperator =>
+      string('==') |
       string('!=') |
       string('>') |
       string('>=') |
       string('<') |
       string('<=') |
-      'matches'.toParser(caseInsensitive: true).map((_) => 'matches'));
+      'matches'.toParser(caseInsensitive: true).map((_) => 'matches');
 
   static Parser get boolToken =>
       (string('true') | string('false')).map((value) => value == 'true');
 
   static Parser<num> get numberToken => ((digit() | char('.')).and() &
-              (digit().star() &
-                  ((char('.') & digit().plus()) |
-                          (char('x') & digit().plus()) |
-                          (anyOf('Ee') &
-                              anyOf('+-').optional() &
-                              digit().plus()))
-                      .optional()))
-          .flatten()
-          .map((v) {
-        return num.parse(v);
-      });
+          (digit().star() &
+              ((char('.') & digit().plus()) |
+                      (char('x') & digit().plus()) |
+                      (anyOf('Ee') & anyOf('+-').optional() & digit().plus()))
+                  .optional()))
+      .flatten()
+      .map(num.parse);
 
   static String unescape(String v) => v.replaceAllMapped(
-      RegExp("\\\\[nrtbf\"']"),
-      (v) => const {
-            'n': '\n',
-            'r': '\r',
-            't': '\t',
-            'b': '\b',
-            'f': '\f',
-            'v': '\v',
-            "'": "'",
-            '"': '"'
-          }[v.group(0)!.substring(1)]!);
+        RegExp("\\\\[nrtbf\"']"),
+        (Match v) => const {
+          'n': '\n',
+          'r': '\r',
+          't': '\t',
+          'b': '\b',
+          'f': '\f',
+          'v': '\v',
+          "'": "'",
+          '"': '"'
+        }[v.group(0)!.substring(1)]!,
+      );
 
   static Parser<String> get escapedChar =>
       (char(r'\') & anyOf("nrtbfv\"'")).pick(1).cast();
@@ -150,21 +156,20 @@ class QueryGrammar {
   static Parser get valueToken => boolToken | numberToken | stringToken;
 
   static Parser get identifier =>
-      (letter() | digit()).plus().map((chars) => chars.join());
+      (letter() | digit()).plus().map((List<dynamic> chars) => chars.join());
 
-  static Parser<List> get condition =>
+  static Parser<List<dynamic>> get condition =>
       identifier.trim() & cmpOperator.trim() & valueToken.trim();
 }
 
 class AndOr {
+  AndOr(this.conditions, this.and);
   final List<dynamic> conditions;
   final bool and;
 
-  AndOr(this.conditions, this.and);
-
   AndOr flatten() {
-    final newConditions = [];
-    for (var condition in conditions) {
+    final newConditions = <dynamic>[];
+    for (final condition in conditions) {
       if (condition is AndOr) {
         final flatCondition = condition.flatten();
         if (flatCondition.and == and) {

@@ -2,23 +2,22 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import 'util/common.dart';
-import 'util/sync_async_helper.dart';
 
 part 'filter_link_test.g.dart';
 
 @Collection()
 class LinkModelA {
+  LinkModelA(this.name);
   int? id;
 
   late String name;
 
-  final selfLinks = IsarLinks<LinkModelA>();
+  final IsarLinks<LinkModelA> selfLinks = IsarLinks<LinkModelA>();
 
-  final links = IsarLinks<LinkModelB>();
-
-  LinkModelA(this.name);
+  final IsarLinks<LinkModelB> links = IsarLinks<LinkModelB>();
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is LinkModelA && id == other.id && other.name == name;
   }
@@ -26,26 +25,22 @@ class LinkModelA {
 
 @Collection()
 class LinkModelB {
+  LinkModelB(this.name);
   int? id;
 
   late String name;
 
   @Backlink(to: 'links')
-  final backlink = IsarLinks<LinkModelA>();
-
-  LinkModelB(this.name);
+  final IsarLinks<LinkModelA> backlink = IsarLinks<LinkModelA>();
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is LinkModelB && id == other.id && other.name == name;
   }
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Groups', () {
     late Isar isar;
     late IsarCollection<LinkModelA> colA;

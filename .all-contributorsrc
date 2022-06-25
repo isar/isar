@@ -27,6 +27,16 @@
         "test",
         "example"
       ]
+    },
+    {
+      "login": "h1376h",
+      "name": "Hamed H.",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3498335?v=4",
+      "profile": "https://github.com/h1376h",
+      "contributions": [
+        "code",
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7,

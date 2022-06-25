@@ -1,8 +1,10 @@
+// ignore_for_file: public_member_api_docs
+
 import 'package:isar/src/common/isar_link_common.dart';
 import 'package:isar/src/web/bindings.dart';
 
-import 'isar_collection_impl.dart';
-import 'isar_web.dart';
+import 'package:isar/src/web/isar_collection_impl.dart';
+import 'package:isar/src/web/isar_web.dart';
 
 mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   @override
@@ -14,26 +16,29 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
       super.targetCollection as IsarCollectionImpl<OBJ>;
 
   @override
-  late final getId = targetCollection.schema.getId;
+  late final int? Function(OBJ) getId = targetCollection.schema.getId;
 
-  late final backlinkLinkName =
+  late final String? backlinkLinkName =
       sourceCollection.schema.backlinkLinkNames[linkName];
 
-  late final link = backlinkLinkName != null
+  late final IsarLinkJs link = backlinkLinkName != null
       ? targetCollection.native.getLink(backlinkLinkName!)
       : sourceCollection.native.getLink(linkName);
 
   @override
   Future<void> updateNative(
-      List<int> linkIds, List<int> unlinkIds, bool reset) {
+    List<int> linkIds,
+    List<int> unlinkIds,
+    bool reset,
+  ) {
     final containingId = requireAttached();
     final backlink = backlinkLinkName != null;
 
-    return targetCollection.isar.getTxn(true, (txn) async {
+    return targetCollection.isar.getTxn(true, (IsarTxnJs txn) async {
       if (reset) {
         await link.clear(txn, containingId, backlink).wait<dynamic>();
       }
-      return await link
+      return link
           .update(txn, backlink, containingId, linkIds, unlinkIds)
           .wait();
     });

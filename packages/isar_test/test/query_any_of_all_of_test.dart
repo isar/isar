@@ -4,31 +4,25 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import 'util/common.dart';
-import 'util/sync_async_helper.dart';
 
 part 'query_any_of_all_of_test.g.dart';
 
 @Collection()
 class Model {
+  Model(this.id, this.value);
   final int id;
 
   @Index()
   final int value;
 
-  Model(this.id, this.value);
-
   @override
-  operator ==(Object other) => other is Model && id == other.id;
+  bool operator ==(Object other) => other is Model && id == other.id;
 
   @override
   int get hashCode => id.hashCode;
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('AnyOf AllOf', () {
     late Isar isar;
 

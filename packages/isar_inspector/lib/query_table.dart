@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:isar/isar.dart';
+
 import 'package:isar_inspector/common.dart';
 import 'package:isar_inspector/prev_next.dart';
 import 'package:isar_inspector/schema.dart';
 import 'package:isar_inspector/state/collections_state.dart';
+import 'package:isar_inspector/state/instances_state.dart';
+import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
 import 'package:isar_inspector/state/query_state.dart';
 
-import 'state/instances_state.dart';
-import 'state/isar_connect_state_notifier.dart';
-
-const _deleteColWidth = 60.0;
+const double _deleteColWidth = 60;
 
 class QueryTable extends ConsumerWidget {
-  const QueryTable({Key? key}) : super(key: key);
+  const QueryTable({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -43,7 +43,7 @@ class QueryTable extends ConsumerWidget {
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        for (var i = 0; i < objects.length; i++)
+                        for (int i = 0; i < objects.length; i++)
                           TableRow(
                             collection: collection,
                             object: objects[i],
@@ -65,9 +65,8 @@ class QueryTable extends ConsumerWidget {
 }
 
 class HeaderProperty extends ConsumerWidget {
+  const HeaderProperty({super.key, required this.property});
   final IProperty property;
-
-  const HeaderProperty({Key? key, required this.property}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -142,27 +141,26 @@ class HeaderProperty extends ConsumerWidget {
 }
 
 class TableRow extends ConsumerWidget {
+  const TableRow({
+    super.key,
+    required this.collection,
+    required this.index,
+    required this.object,
+  });
   final ICollection collection;
   final int index;
   final QueryObject object;
 
-  const TableRow({
-    Key? key,
-    required this.collection,
-    required this.index,
-    required this.object,
-  }) : super(key: key);
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return IsarCard(
-      color: index % 2 == 0 ? Colors.transparent : null,
+      color: index.isEven ? Colors.transparent : null,
       radius: BorderRadius.circular(15),
       onTap: () {},
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          for (var property in collection.allProperties)
+          for (IProperty property in collection.allProperties)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
               child: SizedBox(
@@ -188,7 +186,9 @@ class TableRow extends ConsumerWidget {
                 onPressed: () {
                   final collection =
                       ref.read(selectedCollectionPod).valueOrNull;
-                  if (collection == null) return;
+                  if (collection == null) {
+                    return;
+                  }
 
                   final query = ConnectQuery(
                     instance: ref.read(selectedInstanceNamePod),

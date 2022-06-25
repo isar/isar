@@ -1,15 +1,11 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'util/common.dart';
 import 'user_model.dart';
+import 'util/common.dart';
 import 'util/sync_async_helper.dart';
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('OffsetLimit', () {
     late Isar isar;
     late IsarCollection<UserModel> col;
@@ -56,7 +52,8 @@ void tests() {
     });
 
     isarTest('big limit', () async {
-      final result = col.where().limit(999999).tFindAll();
+      final result =
+          col.where().limit(999999).tFindAll();
       await qEqual(result, users);
     });
 
@@ -66,17 +63,20 @@ void tests() {
     });
 
     isarTest('offset and limit', () async {
-      final result = col.where().offset(3).limit(1).tFindAll();
+      final result =
+          col.where().offset(3).limit(1).tFindAll();
       await qEqual(result, users.sublist(3, 4));
     });
 
     isarTest('offset and big limit', () async {
-      final result = col.where().offset(3).limit(1000).tFindAll();
+      final result =
+          col.where().offset(3).limit(1000).tFindAll();
       await qEqual(result, users.sublist(3));
     });
 
     isarTest('big offset and big limit', () async {
-      final result = col.where().offset(300).limit(5).tFindAll();
+      final result =
+          col.where().offset(300).limit(5).tFindAll();
       await qEqual(result, []);
     });
   });

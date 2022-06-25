@@ -2,23 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:isar/isar.dart';
+
 import 'package:isar_inspector/query_parser.dart';
+import 'package:isar_inspector/schema.dart';
 import 'package:isar_inspector/state/collections_state.dart';
 import 'package:isar_inspector/state/instances_state.dart';
 import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
 import 'package:isar_inspector/state/query_state.dart';
 
-import 'schema.dart';
-
 class FilterField extends ConsumerStatefulWidget {
-  const FilterField({Key? key}) : super(key: key);
+  const FilterField({super.key});
 
   @override
   ConsumerState<FilterField> createState() => _FilterFieldState();
 }
 
 class _FilterFieldState extends ConsumerState<FilterField> {
-  final controller = TextEditingController();
+  final TextEditingController controller = TextEditingController();
   String? error;
 
   @override
@@ -38,7 +38,7 @@ class _FilterFieldState extends ConsumerState<FilterField> {
               ),
               contentPadding: const EdgeInsets.all(20),
               errorText: error,
-              hintText: "Enter Query to filter the results",
+              hintText: 'Enter Query to filter the results',
               suffixIcon: IconButton(
                 onPressed: controller.clear,
                 icon: const Icon(Icons.clear),
@@ -92,7 +92,7 @@ class _FilterFieldState extends ConsumerState<FilterField> {
       return newFilter;
     } catch (e) {
       setState(() {
-        error = "Invalid query";
+        error = 'Invalid query';
       });
     }
 

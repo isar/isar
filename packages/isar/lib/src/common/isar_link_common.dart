@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:collection';
 
 import 'package:isar/isar.dart';
@@ -28,7 +30,9 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
           !identical(sourceCollection, this.sourceCollection) ||
           !identical(targetCollection, this.targetCollection)) {
         throw IsarError(
-            'Link has been moved! It is not allowed to move a link to a differenct collection.');
+          'Link has been moved! It is not allowed to move '
+          'a link to a differenct collection.',
+        );
       }
     } else {
       _initialized = true;
@@ -43,7 +47,8 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
   int requireAttached() {
     if (_objectId == null) {
       throw IsarError(
-          'Containing object needs to be managed by Isar to use this method.');
+        'Containing object needs to be managed by Isar to use this method.',
+      );
     } else {
       return _objectId!;
     }
@@ -53,13 +58,14 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
 
   List<int> objectsToIds(Iterable<OBJ> objetcs) {
     final ids = <int>[];
-    for (var object in objetcs) {
+    for (final object in objetcs) {
       final id = getId(object);
       if (id != null) {
         ids.add(id);
       } else {
         throw IsarError(
-            'Object $object has no id and can therefore not be linked.');
+          'Object $object has no id and can therefore not be linked.',
+        );
       }
     }
     return ids;
@@ -67,18 +73,17 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
 
   QueryBuilder<OBJ, OBJ, QAfterFilterCondition> filter() {
     final containingId = requireAttached();
-    final qb = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>(
-      targetCollection,
-      false,
-      Sort.asc,
+    final qb = QueryBuilderInternal(
+      collection: targetCollection,
+      whereClauses: [
+        LinkWhereClause(
+          linkCollection: sourceCollection.name,
+          linkName: linkName,
+          id: containingId,
+        ),
+      ],
     );
-
-    // ignore: invalid_use_of_protected_member
-    return qb.addWhereClauseInternal(LinkWhereClause(
-      linkCollection: sourceCollection.name,
-      linkName: linkName,
-      id: containingId,
-    ));
+    return QueryBuilder(qb);
   }
 
   Future<void> updateNative(List<int> linkIds, List<int> unlinkIds, bool reset);
@@ -126,7 +131,10 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   Future<void> save() async {
-    if (!isChanged) return;
+    if (!isChanged) {
+      return;
+    }
+
     final object = _value;
     final objectIds = objectsToIds([if (object != null) object]);
 
@@ -139,7 +147,10 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   void saveSync() {
-    if (!isChanged) return;
+    if (!isChanged) {
+      return;
+    }
+
     final object = _value;
     final objectIds = objectsToIds([if (object != null) object]);
 
@@ -210,7 +221,9 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   Future<void> save() async {
-    if (!isChanged) return;
+    if (!isChanged) {
+      return;
+    }
 
     final added = addedObjects.toList();
     final removed = removedObjects.toList();
@@ -224,7 +237,9 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   void saveSync() {
-    if (!isChanged) return;
+    if (!isChanged) {
+      return;
+    }
 
     updateNativeSync(addedIds, removedIds, false);
 

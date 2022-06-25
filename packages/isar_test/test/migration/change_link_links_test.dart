@@ -9,34 +9,30 @@ part 'change_link_links_test.g.dart';
 @Collection()
 @Name('Col')
 class Col1 {
+  Col1(this.id);
   int? id;
 
-  final link = IsarLink<Col1>();
-
-  Col1(this.id);
+  final IsarLink<Col1> link = IsarLink<Col1>();
 
   @override
-  operator ==(other) => other is Col1 && id == other.id;
+  // ignore: hash_and_equals
+  bool operator ==(Object other) => other is Col1 && id == other.id;
 }
 
 @Collection()
 @Name('Col')
 class Col2 {
+  Col2(this.id);
   int? id;
 
-  final link = IsarLinks<Col2>();
-
-  Col2(this.id);
+  final IsarLinks<Col2> link = IsarLinks<Col2>();
 
   @override
-  operator ==(other) => other is Col2 && id == other.id;
+  // ignore: hash_and_equals
+  bool operator ==(Object other) => other is Col2 && id == other.id;
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   isarTest('Add remove link', () async {
     final isar1 = await openTempIsar([Col1Schema]);
     await isar1.tWriteTxn(() async {

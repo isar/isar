@@ -10,14 +10,14 @@ part 'constructor_test.freezed.dart';
 
 @Collection()
 class EmptyConstructorModel {
+  EmptyConstructorModel();
   int? id;
 
   late String name;
 
-  EmptyConstructorModel();
-
   @override
-  operator ==(dynamic other) {
+  // ignore: hash_and_equals
+  bool operator ==(dynamic other) {
     return other is EmptyConstructorModel &&
         other.id == id &&
         other.name == name;
@@ -26,14 +26,14 @@ class EmptyConstructorModel {
 
 @Collection()
 class NamedConstructorModel {
+  NamedConstructorModel({required this.name});
   int? id;
 
   final String name;
 
-  NamedConstructorModel({required this.name});
-
   @override
-  operator ==(dynamic other) {
+  // ignore: hash_and_equals
+  bool operator ==(dynamic other) {
     return other is NamedConstructorModel &&
         other.id == id &&
         other.name == name;
@@ -42,14 +42,14 @@ class NamedConstructorModel {
 
 @Collection()
 class PositionalConstructorModel {
+  PositionalConstructorModel(this.id, this.name);
   final int? id;
 
   final String name;
 
-  PositionalConstructorModel(this.id, this.name);
-
   @override
-  operator ==(dynamic other) {
+  // ignore: hash_and_equals
+  bool operator ==(dynamic other) {
     return other is PositionalConstructorModel &&
         other.id == id &&
         other.name == name;
@@ -58,17 +58,17 @@ class PositionalConstructorModel {
 
 @Collection()
 class OptionalConstructorModel {
+  OptionalConstructorModel(this.name, [this.id]);
   final int? id;
 
   final String name;
-
-  OptionalConstructorModel(this.name, [this.id]);
 
   @override
   String toString() => '{id: $id, name: $name}';
 
   @override
-  operator ==(dynamic other) {
+  // ignore: hash_and_equals
+  bool operator ==(dynamic other) {
     return other is OptionalConstructorModel &&
         other.id == id &&
         other.name == name;
@@ -77,14 +77,14 @@ class OptionalConstructorModel {
 
 @Collection()
 class PositionalNamedConstructorModel {
+  PositionalNamedConstructorModel(this.name, {required this.id});
   final int id;
 
   String name;
 
-  PositionalNamedConstructorModel(this.name, {required this.id});
-
   @override
-  operator ==(dynamic other) {
+  // ignore: hash_and_equals
+  bool operator ==(dynamic other) {
     return other is PositionalNamedConstructorModel &&
         other.id == id &&
         other.name == name;
@@ -93,16 +93,16 @@ class PositionalNamedConstructorModel {
 
 @Collection()
 class SerializeOnlyModel {
+  SerializeOnlyModel(this.id);
   final int? id;
 
   final String name = 'myName';
 
   String get someGetter => '$name$name';
 
-  SerializeOnlyModel(this.id);
-
   @override
-  operator ==(dynamic other) {
+  // ignore: hash_and_equals
+  bool operator ==(dynamic other) {
     return other is SerializeOnlyModel && other.id == id;
   }
 }
@@ -114,10 +114,6 @@ class FreezedModel with _$FreezedModel {
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Constructor', () {
     late Isar isar;
 
@@ -145,7 +141,9 @@ void tests() {
       });
 
       await qEqual(
-          isar.emptyConstructorModels.where().tFindAll(), [obj1, obj2]);
+        isar.emptyConstructorModels.where().tFindAll(),
+        [obj1, obj2],
+      );
     });
 
     isarTest('NamedConstructorModel', () async {
@@ -156,7 +154,9 @@ void tests() {
       });
 
       await qEqual(
-          isar.namedConstructorModels.where().tFindAll(), [obj1, obj2]);
+        isar.namedConstructorModels.where().tFindAll(),
+        [obj1, obj2],
+      );
     });
 
     isarTest('PositionalConstructorModel', () async {

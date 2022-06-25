@@ -8,10 +8,9 @@ part 'filter_id_test.g.dart';
 
 @Collection()
 class IdModel {
+  IdModel();
   @Id()
   int? id;
-
-  IdModel();
 
   @override
   String toString() {
@@ -19,16 +18,13 @@ class IdModel {
   }
 
   @override
-  bool operator ==(other) {
-    return (other as IdModel).id == id;
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
+    return other is IdModel && other.id == id;
   }
 }
 
 void main() {
-  testSyncAsync(tests);
-}
-
-void tests() {
   group('Int filter', () {
     late Isar isar;
     late IsarCollection<IdModel> col;
@@ -88,13 +84,17 @@ void tests() {
       // where clauses
       await qEqual(col.where().idLessThan(1).tFindAll(), [obj0]);
       await qEqual(
-          col.where().idLessThan(1, include: true).tFindAll(), [obj0, obj1]);
+        col.where().idLessThan(1, include: true).tFindAll(),
+        [obj0, obj1],
+      );
       await qEqual(col.where().idLessThan(-1).tFindAll(), []);
 
       // filters
       await qEqual(col.filter().idLessThan(1).tFindAll(), [obj0]);
       await qEqual(
-          col.filter().idLessThan(1, include: true).tFindAll(), [obj0, obj1]);
+        col.filter().idLessThan(1, include: true).tFindAll(),
+        [obj0, obj1],
+      );
       await qEqual(col.filter().idLessThan(0).tFindAll(), []);
     });
 

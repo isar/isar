@@ -4,11 +4,6 @@ part 'schema.g.dart';
 
 @JsonSerializable()
 class ICollection {
-  final String name;
-  final String idName;
-  final List<IProperty> properties;
-  final List<ILink> links;
-
   ICollection({
     required this.name,
     required this.idName,
@@ -16,22 +11,21 @@ class ICollection {
     required this.links,
   });
 
-  late final allProperties = [
+  factory ICollection.fromJson(Map<String, dynamic> json) =>
+      _$ICollectionFromJson(json);
+  final String name;
+  final String idName;
+  final List<IProperty> properties;
+  final List<ILink> links;
+
+  late final List<IProperty> allProperties = [
     IProperty(name: idName, type: IsarType.Long, isId: true),
     ...properties,
   ];
-
-  factory ICollection.fromJson(Map<String, dynamic> json) =>
-      _$ICollectionFromJson(json);
 }
 
 @JsonSerializable()
 class IProperty {
-  final String name;
-  @JsonKey(fromJson: _typeFromJson)
-  final IsarType type;
-  final bool isId;
-
   const IProperty({
     required this.name,
     required this.type,
@@ -40,6 +34,10 @@ class IProperty {
 
   factory IProperty.fromJson(Map<String, dynamic> json) =>
       _$IPropertyFromJson(json);
+  final String name;
+  @JsonKey(fromJson: _typeFromJson)
+  final IsarType type;
+  final bool isId;
 }
 
 IsarType _typeFromJson(String type) {
@@ -48,15 +46,14 @@ IsarType _typeFromJson(String type) {
 
 @JsonSerializable()
 class ILink {
-  final String name;
-  final String target;
-
   const ILink({
     required this.name,
     required this.target,
   });
 
   factory ILink.fromJson(Map<String, dynamic> json) => _$ILinkFromJson(json);
+  final String name;
+  final String target;
 }
 
 // ignore_for_file: constant_identifier_names
@@ -77,5 +74,7 @@ enum IsarType {
   final bool sortable;
   final double width;
 
+  // False warning
+  // ignore: sort_constructors_first
   const IsarType(this.sortable, this.width);
 }

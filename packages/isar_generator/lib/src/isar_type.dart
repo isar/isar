@@ -64,6 +64,7 @@ extension IsarTypeX on IsarType {
       case IsarType.doubleList:
       case IsarType.dateTimeList:
         return 8;
+      // ignore: no_default_cases
       default:
         return 0;
     }
@@ -85,6 +86,7 @@ extension IsarTypeX on IsarType {
         return IsarType.dateTime;
       case IsarType.stringList:
         return IsarType.string;
+      // ignore: no_default_cases
       default:
         return this;
     }
@@ -93,33 +95,33 @@ extension IsarTypeX on IsarType {
   String get name {
     switch (this) {
       case IsarType.bool:
-        return "Bool";
+        return 'Bool';
       case IsarType.int:
-        return "Int";
+        return 'Int';
       case IsarType.float:
-        return "Float";
+        return 'Float';
       case IsarType.long:
       case IsarType.dateTime:
-        return "Long";
+        return 'Long';
       case IsarType.double:
-        return "Double";
+        return 'Double';
       case IsarType.string:
-        return "String";
+        return 'String';
       case IsarType.bytes:
-        return "ByteList";
+        return 'ByteList';
       case IsarType.boolList:
-        return "BoolList";
+        return 'BoolList';
       case IsarType.intList:
-        return "IntList";
+        return 'IntList';
       case IsarType.floatList:
-        return "FloatList";
+        return 'FloatList';
       case IsarType.longList:
       case IsarType.dateTimeList:
-        return "LongList";
+        return 'LongList';
       case IsarType.doubleList:
-        return "DoubleList";
+        return 'DoubleList';
       case IsarType.stringList:
-        return "StringList";
+        return 'StringList';
     }
   }
 
@@ -157,13 +159,13 @@ extension IsarTypeX on IsarType {
   }
 }
 
-final _dateTimeChecker = const TypeChecker.fromRuntime(DateTime);
+const TypeChecker _dateTimeChecker = TypeChecker.fromRuntime(DateTime);
 bool _isDateTime(Element element) => _dateTimeChecker.isExactly(element);
 
-final _uint8ListChecker = const TypeChecker.fromRuntime(Uint8List);
+const TypeChecker _uint8ListChecker = TypeChecker.fromRuntime(Uint8List);
 bool _isUint8List(Element element) => _uint8ListChecker.isExactly(element);
 
-final _size32Checker = const TypeChecker.fromRuntime(Size32);
+const TypeChecker _size32Checker = TypeChecker.fromRuntime(Size32);
 IsarType? getIsarType(DartType type, Element element) {
   final size32 = _size32Checker.hasAnnotationOfExact(element.nonSynthetic);
   if (type.isDartCoreBool) {
