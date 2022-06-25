@@ -6,8 +6,8 @@ import 'package:isar_inspector/state/collections_state.dart';
 import 'package:isar_inspector/state/instances_state.dart';
 import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
 
-class ConnectionPage extends ConsumerStatefulWidget {
-  const ConnectionPage({
+class ConnectionScreen extends ConsumerStatefulWidget {
+  const ConnectionScreen({
     super.key,
     required this.port,
     required this.secret,
@@ -16,10 +16,10 @@ class ConnectionPage extends ConsumerStatefulWidget {
   final String secret;
 
   @override
-  ConsumerState<ConnectionPage> createState() => _ConnectionPageState();
+  ConsumerState<ConnectionScreen> createState() => _ConnectionPageState();
 }
 
-class _ConnectionPageState extends ConsumerState<ConnectionPage> {
+class _ConnectionPageState extends ConsumerState<ConnectionScreen> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {

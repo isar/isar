@@ -12,9 +12,24 @@ class ErrorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: ElevatedButton(
-        onPressed: retry,
-        child: Text(message),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            message,
+            style: const TextStyle(fontSize: 20),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Please make sure your Isar instance is '
+            'running and you use the Chrome browser.',
+          ),
+          const SizedBox(height: 40),
+          ElevatedButton(
+            onPressed: retry,
+            child: const Text('Retry Connection'),
+          ),
+        ],
       ),
     );
   }

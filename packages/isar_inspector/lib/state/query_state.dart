@@ -38,14 +38,16 @@ final queryResultsPod = FutureProvider<QueryResult>((ref) async {
   final selectedInstance = await ref.watch(selectedInstancePod.future);
   final selectedCollection = await ref.watch(selectedCollectionPod.future);
 
-  final result = await isarConnect.executeQuery(ConnectQuery(
-    instance: selectedInstance,
-    collection: selectedCollection.name,
-    filter: filter,
-    sortProperty: sort,
-    offset: page * objectsPerPage,
-    limit: objectsPerPage + 1,
-  ),);
+  final result = await isarConnect.executeQuery(
+    ConnectQuery(
+      instance: selectedInstance,
+      collection: selectedCollection.name,
+      filter: filter,
+      sortProperty: sort,
+      offset: page * objectsPerPage,
+      limit: objectsPerPage + 1,
+    ),
+  );
 
   final objects = result.map(QueryObject.new).toList();
 
@@ -56,7 +58,9 @@ final queryResultsPod = FutureProvider<QueryResult>((ref) async {
   }
 
   return QueryResult(
-    objects: objects.isNotEmpty ? objects.sublist(0, objectsPerPage - 1) : [],
+    objects: objects.length > objectsPerPage
+        ? objects.sublist(0, objectsPerPage - 1)
+        : objects,
     hasMore: objects.length > objectsPerPage,
   );
 });

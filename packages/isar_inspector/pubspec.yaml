@@ -12,11 +12,11 @@ dependencies:
   flutter_riverpod: ^2.0.0-dev.7
   flutter_svg: any
   font_awesome_flutter: any
+  go_router: ^4.1.0
   google_fonts: ^3.0.1
   isar: any
   json_annotation: ^4.5.0
   petitparser: ^4.4.0
-  routemaster: ^1.0.1
   vm_service: ^9.0.0
   web_socket_channel: ^2.2.0
   

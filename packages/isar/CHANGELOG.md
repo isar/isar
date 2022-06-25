@@ -1,3 +1,10 @@
+## 3.0.0-dev.4
+
+### Fixes
+
+- Allow more ffi versions
+- Another Inspector fix
+
 ## 3.0.0-dev.3
 
 ### Enhancements
