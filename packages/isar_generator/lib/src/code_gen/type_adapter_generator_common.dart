@@ -1,5 +1,4 @@
 import 'package:dartx/dartx.dart';
-import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 String deserializeMethodBody(
@@ -43,7 +42,7 @@ String generateAttachLinks(ObjectInfo object) {
     code += '''object.${link.dartName}.attach(
       col,
       col.isar.${link.targetCollectionAccessor},
-      '${link.isarName.esc}',
+      r'${link.isarName}',
       id
     );''';
   }

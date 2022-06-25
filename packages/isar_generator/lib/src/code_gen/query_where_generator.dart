@@ -1,7 +1,6 @@
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 
-import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
@@ -155,7 +154,7 @@ class WhereGenerator {
     QueryBuilder<$objName, $objName, QAfterWhere> $name() {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(
-          const IndexWhereClause.any(indexName: '${index.name.esc}'),
+          const IndexWhereClause.any(indexName: r'${index.name}'),
         );
       });
     }
@@ -171,9 +170,7 @@ class WhereGenerator {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IdWhereClause.between(
           lower: $idName,
-          includeLower: true,
           upper: $idName,
-          includeUpper: true,
         ));
       });
     }
@@ -193,7 +190,7 @@ class WhereGenerator {
     $mPrefix $name($params) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IndexWhereClause.equalTo(
-          indexName: '${index.name.esc}',
+          indexName: r'${index.name}',
           value: [$values],
         ));
       });
@@ -246,29 +243,25 @@ class WhereGenerator {
       return QueryBuilder.apply(this, (query) {
         if (query.whereSort == Sort.asc) {
           return query.addWhereClause(IndexWhereClause.between(
-            indexName: '${index.name.esc}',
+            indexName: r'${index.name}',
             lower: [$equalValues],
-            includeLower: true,
             upper: [$equalValues $notEqualValue],
             includeUpper: false,
           )).addWhereClause(IndexWhereClause.between(
-            indexName: '${index.name.esc}',
+            indexName: r'${index.name}',
             lower: [$equalValues $notEqualValue],
             includeLower: false,
             upper: [$equalValues],
-            includeUpper: true,
           ));
         } else {
           return query.addWhereClause(IndexWhereClause.between(
-            indexName: '${index.name.esc}',
+            indexName: r'${index.name}',
             lower: [$equalValues $notEqualValue],
             includeLower: false,
             upper: [$equalValues],
-            includeUpper: true,
           )).addWhereClause(IndexWhereClause.between(
-            indexName: '${index.name.esc}',
+            indexName: r'${index.name}',
             lower: [$equalValues],
-            includeLower: true,
             upper: [$equalValues $notEqualValue],
             includeUpper: false,
           ));
@@ -304,11 +297,10 @@ class WhereGenerator {
     $mPrefix $name(${joinToParams(properties)} $include) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IndexWhereClause.between(
-          indexName: '${index.name.esc}',
+          indexName: r'${index.name}',
           lower: [${joinToValues(properties)}],
           includeLower: ${!properties.containsFloat ? 'include' : 'false'},
           upper: [${joinToValues(properties.dropLast(1))}],
-          includeUpper: true,
         ));
       });
     }
@@ -341,9 +333,8 @@ class WhereGenerator {
     $mPrefix $name(${joinToParams(properties)} $include) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IndexWhereClause.between(
-          indexName: '${index.name.esc}',
+          indexName: r'${index.name}',
           lower: [${joinToValues(properties.dropLast(1))}],
-          includeLower: true,
           upper: [${joinToValues(properties)}],
           includeUpper: ${!properties.containsFloat ? 'include' : 'false'},
         ));
@@ -401,7 +392,7 @@ class WhereGenerator {
     $mPrefix $name($params $include) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IndexWhereClause.between(
-          indexName: '${index.name.esc}',
+          indexName: r'${index.name}',
           lower: [$values $lowerName],
           includeLower: ${!float ? 'includeLower' : 'false'},
           upper: [$values $upperName],
@@ -428,7 +419,7 @@ class WhereGenerator {
     $mPrefix $name($params) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IndexWhereClause.equalTo(
-          indexName: '${index.name.esc}',
+          indexName: r'${index.name}',
           value: [$values null],
         ));
       });
@@ -452,11 +443,10 @@ class WhereGenerator {
     $mPrefix $name($params) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IndexWhereClause.between(
-          indexName: '${index.name.esc}',
+          indexName: r'${index.name}',
           lower: [$values null],
           includeLower: false,
           upper: [$values],
-          includeUpper: true,
         ));
       });
     }
@@ -486,11 +476,9 @@ class WhereGenerator {
     $mPrefix $name($params) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IndexWhereClause.between(
-          indexName: '${index.name.esc}',
+          indexName: r'${index.name}',
           lower: [$values $prefixName],
-          includeLower: true,
           upper: [$values '\$$prefixName\\u{FFFFF}'],
-          includeUpper: true,
         ));
       });
     }

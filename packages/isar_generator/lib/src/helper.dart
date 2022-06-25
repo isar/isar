@@ -173,7 +173,3 @@ void checkIsarName(String name, Element element) {
 Never err(String msg, [Element? element]) {
   throw InvalidGenerationSourceError(msg, element: element);
 }
-
-extension StringEsc on String {
-  String get esc => replaceAll(r'$', r'\$');
-}

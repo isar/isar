@@ -1,6 +1,5 @@
 import 'package:dartx/dartx.dart';
 
-import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
@@ -88,7 +87,7 @@ class FilterGenerator {
     ${mPrefix(p)}EqualTo(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.equalTo(
-          property: '${p.isarName.esc}',
+          property: r'${p.isarName}',
           value: ${toIsar(p, 'value')},
           ${caseSensitiveValue(p)}
         ));
@@ -103,8 +102,8 @@ class FilterGenerator {
     ${mPrefix(p)}GreaterThan(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.greaterThan(
-          include: ${!p.isarType.containsFloat ? 'include' : 'false'},
-          property: '${p.isarName.esc}',
+          ${!p.isarType.containsFloat ? 'include: include,' : ''}
+          property: r'${p.isarName}',
           value: ${toIsar(p, 'value')},
           ${caseSensitiveValue(p)}
         ));
@@ -119,8 +118,8 @@ class FilterGenerator {
     ${mPrefix(p)}LessThan(${vType(p)} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.lessThan(
-          include: ${!p.isarType.containsFloat ? 'include' : 'false'},
-          property: '${p.isarName.esc}',
+          ${!p.isarType.containsFloat ? 'include: include,' : ''}
+          property: r'${p.isarName}',
           value: ${toIsar(p, 'value')},
           ${caseSensitiveValue(p)}
         ));
@@ -137,7 +136,7 @@ class FilterGenerator {
     ${mPrefix(p)}Between(${vType(p)} lower, ${vType(p)} upper ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.between(
-          property: '${p.isarName.esc}',
+          property: r'${p.isarName}',
           lower: ${toIsar(p, 'lower')},
           includeLower: ${!p.isarType.containsFloat ? 'includeLower' : 'false'},
           upper: ${toIsar(p, 'upper')},
@@ -153,7 +152,7 @@ class FilterGenerator {
     ${mPrefix(p, false)}IsNull() {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(const FilterCondition.isNull(
-          property: '${p.isarName.esc}',
+          property: r'${p.isarName}',
         ));
       });
     }''';
@@ -162,7 +161,7 @@ class FilterGenerator {
       ${mPrefix(p)}IsNull() {
         return QueryBuilder.apply(this, (query) {
           return query.addFilterCondition(const FilterCondition.equalTo(
-            property: '${p.isarName.esc}',
+            property: r'${p.isarName}',
             value: null,
           ));
         });
@@ -176,7 +175,7 @@ class FilterGenerator {
     ${mPrefix(p)}StartsWith(${vType(p, false)} value, {bool caseSensitive = true,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.startsWith(
-          property: '${p.isarName.esc}',
+          property: r'${p.isarName}',
           value: ${toIsar(p, 'value')},
           caseSensitive: caseSensitive,
         ));
@@ -189,7 +188,7 @@ class FilterGenerator {
     ${mPrefix(p)}EndsWith(${vType(p, false)} value, {bool caseSensitive = true,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.endsWith(
-          property: '${p.isarName.esc}',
+          property: r'${p.isarName}',
           value: ${toIsar(p, 'value')},
           caseSensitive: caseSensitive,
         ));
@@ -202,7 +201,7 @@ class FilterGenerator {
     ${mPrefix(p)}Contains(${vType(p, false)} value, {bool caseSensitive = true}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.contains(
-          property: '${p.isarName.esc}',
+          property: r'${p.isarName}',
           value: ${toIsar(p, 'value')},
           caseSensitive: caseSensitive,
         ));
@@ -215,7 +214,7 @@ class FilterGenerator {
     ${mPrefix(p)}Matches(String pattern, {bool caseSensitive = true}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.matches(
-          property: '${p.isarName.esc}',
+          property: r'${p.isarName}',
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ));

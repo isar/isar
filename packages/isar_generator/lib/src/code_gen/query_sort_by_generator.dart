@@ -1,6 +1,5 @@
 import 'package:dartx/dartx.dart';
 
-import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
@@ -16,13 +15,13 @@ String generateSortBy(ObjectInfo oi) {
     code += '''
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>sortBy${property.dartName.capitalize()}() {
       return QueryBuilder.apply(this, (query) {
-        return query.addSortBy('${property.isarName.esc}', Sort.asc);
+        return query.addSortBy(r'${property.isarName}', Sort.asc);
       });
     }
     
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>sortBy${property.dartName.capitalize()}Desc() {
       return QueryBuilder.apply(this, (query) {
-        return query.addSortBy('${property.isarName.esc}', Sort.desc);
+        return query.addSortBy(r'${property.isarName}', Sort.desc);
       });
     }''';
   }
@@ -40,13 +39,13 @@ String generateSortBy(ObjectInfo oi) {
     code += '''
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>thenBy${property.dartName.capitalize()}() {
       return QueryBuilder.apply(this, (query) {
-        return query.addSortBy('${property.isarName.esc}', Sort.asc);
+        return query.addSortBy(r'${property.isarName}', Sort.asc);
       });
     }
     
     QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>thenBy${property.dartName.capitalize()}Desc() {
       return QueryBuilder.apply(this, (query) {
-        return query.addSortBy('${property.isarName.esc}', Sort.desc);
+        return query.addSortBy(r'${property.isarName}', Sort.desc);
       });
     }''';
   }

@@ -4,12 +4,16 @@
 
 - Made providing a path optional
 - Added `isar.path` property
+- The default Isar name is now `default`. On non-web targets, migration will happen automatically.
+- The isar database file is now stored in the location `dir/name.isar` the lock file in `dir/name.isar.lock`. Migration will happen automatically.
 
 ### Breaking
 
-- The default Isar name is now `default`. On non-web targets, migration will happen automatically.
-- The isar database file is now stored in the location `dir/name.isar` the lock file in `dir/name.isar.lock`. Migration will happen automatically.
 - Changed the `schemas` parameter from named to positional
+
+### Fixes
+
+- Fixed an Isar Inspector issue with non-default instance names
 
 ## 3.0.0-dev.2
 

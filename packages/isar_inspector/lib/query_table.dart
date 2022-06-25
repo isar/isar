@@ -191,7 +191,7 @@ class TableRow extends ConsumerWidget {
                   }
 
                   final query = ConnectQuery(
-                    instance: ref.read(selectedInstanceNamePod),
+                    instance: ref.read(selectedInstancePod).value!,
                     collection: collection.name,
                     filter: FilterCondition.equalTo(
                       property: collection.idName,

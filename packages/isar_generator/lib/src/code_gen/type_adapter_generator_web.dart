@@ -1,5 +1,4 @@
 import 'package:isar_generator/src/code_gen/type_adapter_generator_common.dart';
-import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
@@ -10,7 +9,7 @@ String generateSerializeWeb(ObjectInfo object) {
 
   for (final property in object.properties) {
     String write(String value) =>
-        "IsarNative.jsObjectSet(jsObj, '${property.isarName.esc}', $value);";
+        "IsarNative.jsObjectSet(jsObj, r'${property.isarName}', $value);";
 
     var propertyValue = 'object.${property.dartName}';
     if (property.converter != null) {
@@ -61,13 +60,13 @@ String generateDeserializePropWeb(ObjectInfo object) {
 
   for (final property in object.properties) {
     final deser = _deserializeProperty(object, property);
-    code += "case '${property.isarName.esc}': return ($deser) as P;";
+    code += "case r'${property.isarName}': return ($deser) as P;";
   }
 
   return '''
       $code
       default:
-        throw 'Illegal propertyName';
+        throw IsarError('Illegal propertyName');
       }
     }
     ''';
@@ -99,7 +98,7 @@ String _defaultVal(IsarType type) {
 }
 
 String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
-  final read = "IsarNative.jsObjectGet(jsObj, '${property.isarName.esc}')";
+  final read = "IsarNative.jsObjectGet(jsObj, r'${property.isarName}')";
   String convDate(String e, bool nullable) {
     final c =
         'DateTime.fromMillisecondsSinceEpoch($e as int, isUtc: true).toLocal()';

@@ -7,14 +7,18 @@ final instancesPod = FutureProvider((ref) {
   return isarConnect.listInstances();
 });
 
-final selectedInstanceNamePod = StateProvider((ref) => 'isar');
+final _selectedInstanceNamePod = StateProvider((ref) => 'isar');
+
+void selectInstane(WidgetRef ref, String instance) {
+  ref.read(_selectedInstanceNamePod.state).state = instance;
+}
 
 final selectedInstancePod = FutureProvider<String>((ref) async {
   final instances = await ref.watch(instancesPod.future);
-  final selectedInstance = ref.watch(selectedInstanceNamePod);
+  final selectedInstance = ref.watch(_selectedInstanceNamePod);
 
   return instances.firstWhere(
     (e) => e == selectedInstance,
-    orElse: () => selectedInstance,
+    orElse: () => instances.first,
   );
 });

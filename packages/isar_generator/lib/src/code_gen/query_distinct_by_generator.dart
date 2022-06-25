@@ -1,6 +1,5 @@
 import 'package:dartx/dartx.dart';
 
-import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
@@ -16,14 +15,14 @@ String generateDistinctBy(ObjectInfo oi) {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}({bool caseSensitive = true}) {
           return QueryBuilder.apply(this, (query) {
-            return query.addDistinctBy('${property.isarName.esc}', caseSensitive: caseSensitive);
+            return query.addDistinctBy(r'${property.isarName}', caseSensitive: caseSensitive);
           });
         }''';
     } else {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}() {
           return QueryBuilder.apply(this, (query) {
-            return query.addDistinctBy('${property.isarName.esc}');
+            return query.addDistinctBy(r'${property.isarName}');
           });
         }''';
     }

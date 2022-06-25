@@ -60,12 +60,12 @@ _GetPropResult _generateGetPropertyValue(
           final $stringValue = $value;
           if ($stringValue != null) {
             $stringBytesList = [];
-            for (var str in $stringValue) {''';
+            for (final str in $stringValue) {''';
       } else {
         final elNOp = property.elementNullable ? '?' : '';
         code += '''
           final $stringBytesList = <IsarUint8List$elNOp>[];
-          for (var str in $value) {''';
+          for (final str in $value) {''';
       }
       if (property.elementNullable) {
         code += 'if (str != null) {';
@@ -132,6 +132,7 @@ String generateSerializeNative(ObjectInfo object) {
 
     final buffer = IsarNative.bufAsBytes(cObj.buffer, size);
     final writer = IsarBinaryWriter(buffer, staticSize);
+    writer.writeHeader();
   ''';
   for (var i = 0; i < object.objectProperties.length; i++) {
     final property = object.objectProperties[i];
@@ -223,7 +224,7 @@ String generateDeserializePropNative(ObjectInfo object) {
   return '''
       $code
       default:
-        throw 'Illegal propertyIndex';
+        throw IsarError('Illegal propertyIndex');
       }
     }
     ''';

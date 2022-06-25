@@ -19,6 +19,20 @@ import 'package:isar_generator/src/isar_analyzer.dart';
 import 'package:isar_generator/src/object_info.dart';
 import 'package:source_gen/source_gen.dart';
 
+const ignoreLints = [
+  'duplicate_ignore',
+  'non_constant_identifier_names',
+  'constant_identifier_names',
+  'invalid_use_of_protected_member',
+  'unnecessary_cast',
+  'prefer_const_constructors',
+  'lines_longer_than_80_chars',
+  'require_trailing_commas',
+  'inference_failure_on_function_invocation',
+  'unnecessary_parenthesis',
+  'unnecessary_raw_strings',
+];
+
 class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
   @override
   Future<String> generateForAnnotatedElement(
@@ -40,11 +54,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
 
     return '''
       // coverage:ignore-file
-      // ignore_for_file: duplicate_ignore, non_constant_identifier_names,
-      // constant_identifier_names, invalid_use_of_protected_member, 
-      // unnecessary_cast, unused_local_variable, 
-      // no_leading_underscores_for_local_identifiers, 
-      // inference_failure_on_function_invocation, prefer_const_constructors
+      // ignore_for_file: ${ignoreLints.join(', ')}
 
       extension Get${object.dartName}Collection on Isar {
         IsarCollection<${object.dartName}> get ${object.accessor} => getCollection();

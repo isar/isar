@@ -1,5 +1,4 @@
 import 'package:dartx/dartx.dart';
-import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 String generateByIndexExtension(ObjectInfo oi) {
@@ -34,19 +33,19 @@ String generateSingleByIndex(ObjectInfo oi, ObjectIndex index) {
   final paramsList = index.properties.map((i) => i.property.dartName).join(',');
   return '''
     Future<${oi.dartName}?> getBy${index.dartName}($params) {
-      return getByIndex('${index.name.esc}', [$paramsList]);
+      return getByIndex(r'${index.name}', [$paramsList]);
     }
 
     ${oi.dartName}? getBy${index.dartName}Sync($params) {
-      return getByIndexSync('${index.name.esc}', [$paramsList]);
+      return getByIndexSync(r'${index.name}', [$paramsList]);
     }
 
     Future<bool> deleteBy${index.dartName}($params) {
-      return deleteByIndex('${index.name.esc}', [$paramsList]);
+      return deleteByIndex(r'${index.name}', [$paramsList]);
     }
 
     bool deleteBy${index.dartName}Sync($params) {
-      return deleteByIndexSync('${index.name.esc}', [$paramsList]);
+      return deleteByIndexSync(r'${index.name}', [$paramsList]);
     }
   ''';
 }
@@ -79,22 +78,22 @@ String generateAllByIndex(ObjectInfo oi, ObjectIndex index) {
   return '''
     Future<List<${oi.dartName}?>> getAllBy${index.dartName}($params) {
       $createValues
-      return getAllByIndex('${index.name.esc}', values);
+      return getAllByIndex(r'${index.name}', values);
     }
 
     List<${oi.dartName}?> getAllBy${index.dartName}Sync($params) {
       $createValues
-      return getAllByIndexSync('${index.name.esc}', values);
+      return getAllByIndexSync(r'${index.name}', values);
     }
 
     Future<int> deleteAllBy${index.dartName}($params) {
       $createValues
-      return deleteAllByIndex('${index.name.esc}', values);
+      return deleteAllByIndex(r'${index.name}', values);
     }
 
     int deleteAllBy${index.dartName}Sync($params) {
       $createValues
-      return deleteAllByIndexSync('${index.name.esc}', values);
+      return deleteAllByIndexSync(r'${index.name}', values);
     }
   ''';
 }
@@ -102,19 +101,19 @@ String generateAllByIndex(ObjectInfo oi, ObjectIndex index) {
 String generatePutByIndex(ObjectInfo oi, ObjectIndex index) {
   return '''
     Future<int> putBy${index.dartName}(${oi.dartName} object) {
-      return putByIndex('${index.name.esc}', object);
+      return putByIndex(r'${index.name}', object);
     }
 
     int putBy${index.dartName}Sync(${oi.dartName} object, {bool saveLinks = false}) {
-      return putByIndexSync('${index.name.esc}', object, saveLinks: saveLinks);
+      return putByIndexSync(r'${index.name}', object, saveLinks: saveLinks);
     }
 
     Future<List<int>> putAllBy${index.dartName}(List<${oi.dartName}> objects) {
-      return putAllByIndex('${index.name.esc}', objects);
+      return putAllByIndex(r'${index.name}', objects);
     }
 
     List<int> putAllBy${index.dartName}Sync(List<${oi.dartName}> objects, {bool saveLinks = false}) {
-      return putAllByIndexSync('${index.name.esc}', objects, saveLinks: saveLinks);
+      return putAllByIndexSync(r'${index.name}', objects, saveLinks: saveLinks);
     }
   ''';
 }

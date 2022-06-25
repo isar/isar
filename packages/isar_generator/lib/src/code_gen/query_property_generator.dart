@@ -1,4 +1,3 @@
-import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 String generatePropertyQuery(ObjectInfo oi) {
@@ -8,7 +7,7 @@ String generatePropertyQuery(ObjectInfo oi) {
     code += '''
       QueryBuilder<${oi.dartName}, ${property.dartType}, QQueryOperations>${property.dartName}Property() {
         return QueryBuilder.apply(this, (query) {
-          return query.addPropertyName('${property.isarName.esc}');
+          return query.addPropertyName(r'${property.isarName}');
         });
       }''';
   }

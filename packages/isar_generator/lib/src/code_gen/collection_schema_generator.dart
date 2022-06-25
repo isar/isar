@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 
-import 'package:isar_generator/src/helper.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
@@ -11,33 +10,31 @@ String generateCollectionSchema(ObjectInfo object) {
   final schema = _generateSchema(object);
 
   final propertyIds = object.objectProperties
-      .mapIndexed((i, p) => "'${p.isarName.esc}': $i")
+      .mapIndexed((i, p) => "r'${p.isarName}': $i")
       .join(',');
   final listProperties = object.objectProperties
       .filter((p) => p.isarType.isList)
-      .map((p) => "'${p.isarName.esc}'")
+      .map((p) => "r'${p.isarName}'")
       .join(',');
-  final indexIds = object.indexes
-      .mapIndexed((i, index) => "'${index.name.esc}': $i")
-      .join(',');
+  final indexIds =
+      object.indexes.mapIndexed((i, index) => "r'${index.name}': $i").join(',');
   final indexValueTypes = object.indexes.map((i) {
     final types = i.properties.map((e) => e.indexValueTypeEnum).join(',');
-    return "'${i.name.esc}': [$types,]";
+    return "r'${i.name}': [$types,]";
   }).join(',');
-  final linkIds = object.links
-      .mapIndexed((i, link) => "'${link.isarName.esc}': $i")
-      .join(',');
+  final linkIds =
+      object.links.mapIndexed((i, link) => "r'${link.isarName}': $i").join(',');
   final backlinkLinkNames = object.links
       .where((e) => e.backlink)
-      .map((link) => "'${link.isarName.esc}': '${link.targetIsarName}'")
+      .map((link) => "r'${link.isarName}': r'${link.targetIsarName}'")
       .join(',');
 
   return '''
     const ${object.dartName.capitalize()}Schema = CollectionSchema(
-      name: '${object.isarName.esc}',
-      schema: '$schema',
+      name: r'${object.isarName}',
+      schema: r'$schema',
       
-      idName: '${object.idProperty.isarName.esc}',
+      idName: r'${object.idProperty.isarName}',
       propertyIds: {$propertyIds},
       listProperties: {$listProperties},
       indexIds: {$indexIds},
@@ -104,7 +101,7 @@ String _generateSchema(ObjectInfo object) {
       ]
     ]
   };
-  return jsonEncode(json).esc;
+  return jsonEncode(json);
 }
 
 String _generateGetId(ObjectInfo object) {

@@ -14,9 +14,8 @@ class BinaryWriter {
       : _staticSize = staticSize,
         _dynamicOffset = staticSize,
         _buffer = buffer,
-        _byteData = ByteData.view(buffer.buffer) {
-    _byteData.setUint16(0, staticSize, Endian.little);
-  }
+        _byteData = ByteData.view(buffer.buffer);
+
   static const Utf8Encoder utf8Encoder = Utf8Encoder();
 
   final Uint8List _buffer;
@@ -26,6 +25,10 @@ class BinaryWriter {
   final int _staticSize;
 
   int _dynamicOffset;
+
+  void writeHeader() {
+    _byteData.setUint16(0, _staticSize, Endian.little);
+  }
 
   @pragma('vm:prefer-inline')
   void writeBool(int offset, bool? value, {bool staticOffset = true}) {
