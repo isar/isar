@@ -47,6 +47,15 @@ extension TIsar on Isar {
       return writeTxn(callback, silent: silent);
     }
   }
+
+  Future<void> tClear() {
+    if (_testSync) {
+      clearSync();
+      return SynchronousFuture(null);
+    } else {
+      return clear();
+    }
+  }
 }
 
 extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
