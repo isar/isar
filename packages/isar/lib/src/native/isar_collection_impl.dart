@@ -313,12 +313,12 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   int deleteAllSync(List<int> ids) {
     return isar.getTxnSync(true, (txn) {
-      final deletedPtr = txn.allocBuffer(1);
+      final deletedPtr = txn.alloc<Bool>();
 
       var counter = 0;
       for (final id in ids) {
         nCall(IC.isar_delete(ptr, txn.ptr, id, deletedPtr));
-        if (deletedPtr.value == 1) {
+        if (deletedPtr.value) {
           counter++;
         }
       }
