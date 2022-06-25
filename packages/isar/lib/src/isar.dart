@@ -32,7 +32,7 @@ abstract class Isar {
   static const int maxId = isarMaxId;
 
   /// The default Isar instance name.
-  static const String defaultName = 'isar';
+  static const String defaultName = 'default';
 
   /// Placeholder for an auto-increment id.
   static int autoIncrement = isarAutoIncrementId;
@@ -44,6 +44,13 @@ abstract class Isar {
 
   /// Name of the instance.
   final String name;
+
+  /// The path of the directory containing the database file or `null` on the
+  /// web.
+  ///
+  /// The full path of the database file is `path/name.isar` and the lockfile
+  /// `path/name.isar.lock`.
+  String? get path;
 
   late final Map<Type, IsarCollection<dynamic>> _collections;
   late final Map<String, IsarCollection<dynamic>> _collectionsByName;

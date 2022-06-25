@@ -1,9 +1,9 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'user_model.dart';
-import 'util/common.dart';
-import 'util/sync_async_helper.dart';
+import '../user_model.dart';
+import '../util/common.dart';
+import '../util/sync_async_helper.dart';
 
 void main() {
   group('Groups', () {

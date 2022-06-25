@@ -1,7 +1,7 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'util/common.dart';
+import '../util/common.dart';
 
 part 'filter_link_test.g.dart';
 

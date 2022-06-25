@@ -26,6 +26,18 @@ class IsarImpl extends Isar implements Finalizable {
   final Pointer<Pointer<CIsarTxn>> _syncTxnPtrPtr = malloc<Pointer<CIsarTxn>>();
   SyncTxn? _currentTxnSync;
 
+  @override
+  String get path {
+    requireOpen();
+
+    final path = IC.isar_instance_get_path(ptr);
+    try {
+      return path.cast<Utf8>().toDartString();
+    } finally {
+      IC.isar_free_string(path);
+    }
+  }
+
   void requireNotInTxn() {
     if (_currentTxnSync != null || Zone.current[_zoneTxn] != null) {
       throw IsarError(
@@ -172,11 +184,7 @@ class IsarImpl extends Isar implements Finalizable {
     await super.close();
 
     _finalizer.detach(this);
-    if (deleteFromDisk) {
-      return IC.isar_close_delete_instance(ptr);
-    } else {
-      return IC.isar_close_instance(ptr);
-    }
+    return IC.isar_instance_close(ptr, deleteFromDisk);
   }
 }
 

@@ -93,7 +93,7 @@ void _initializePath(String? libraryPath) {
   }
 
   IC = bindings;
-  isarClose = dylib.lookup('isar_close_instance');
+  isarClose = dylib.lookup('isar_instance_close');
   isarQueryFree = dylib.lookup('isar_q_free');
   _isarInitialized = true;
 }
@@ -146,7 +146,7 @@ IsarError? isarErrorFromResult(int result) {
       final message = error.cast<Utf8>().toDartString();
       return IsarError(message);
     } finally {
-      IC.isar_free_error(error);
+      IC.isar_free_string(error);
     }
   } else {
     return null;

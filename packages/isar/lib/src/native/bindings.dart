@@ -58,6 +58,20 @@ class IsarCoreBindings {
   late final _isar_free_word_boundaries = _isar_free_word_boundariesPtr
       .asFunction<void Function(ffi.Pointer<ffi.Uint32>, int)>();
 
+  void isar_free_string(
+    ffi.Pointer<ffi.Char> string,
+  ) {
+    return _isar_free_string(
+      string,
+    );
+  }
+
+  late final _isar_free_stringPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Char>)>>(
+          'isar_free_string');
+  late final _isar_free_string =
+      _isar_free_stringPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
+
   ffi.Pointer<ffi.Char> isar_get_error(
     int err_code,
   ) {
@@ -71,20 +85,6 @@ class IsarCoreBindings {
           'isar_get_error');
   late final _isar_get_error =
       _isar_get_errorPtr.asFunction<ffi.Pointer<ffi.Char> Function(int)>();
-
-  void isar_free_error(
-    ffi.Pointer<ffi.Char> error,
-  ) {
-    return _isar_free_error(
-      error,
-    );
-  }
-
-  late final _isar_free_errorPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Char>)>>(
-          'isar_free_error');
-  late final _isar_free_error =
-      _isar_free_errorPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
 
   void isar_free_c_object_set(
     ffi.Pointer<CObjectSet> ros,
@@ -1181,14 +1181,14 @@ class IsarCoreBindings {
       _lookup<ffi.NativeFunction<ffi.Int64 Function()>>('isar_version');
   late final _isar_version = _isar_versionPtr.asFunction<int Function()>();
 
-  int isar_create_instance(
+  int isar_instance_create(
     ffi.Pointer<ffi.Pointer<CIsarInstance>> isar,
     ffi.Pointer<ffi.Char> name,
     ffi.Pointer<ffi.Char> path,
     bool relaxed_durability,
     ffi.Pointer<ffi.Char> schema_json,
   ) {
-    return _isar_create_instance(
+    return _isar_instance_create(
       isar,
       name,
       path,
@@ -1197,15 +1197,15 @@ class IsarCoreBindings {
     );
   }
 
-  late final _isar_create_instancePtr = _lookup<
+  late final _isar_instance_createPtr = _lookup<
       ffi.NativeFunction<
           ffi.Int64 Function(
               ffi.Pointer<ffi.Pointer<CIsarInstance>>,
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
               ffi.Uint8,
-              ffi.Pointer<ffi.Char>)>>('isar_create_instance');
-  late final _isar_create_instance = _isar_create_instancePtr.asFunction<
+              ffi.Pointer<ffi.Char>)>>('isar_instance_create');
+  late final _isar_instance_create = _isar_instance_createPtr.asFunction<
       int Function(
           ffi.Pointer<ffi.Pointer<CIsarInstance>>,
           ffi.Pointer<ffi.Char>,
@@ -1213,7 +1213,7 @@ class IsarCoreBindings {
           int,
           ffi.Pointer<ffi.Char>)>();
 
-  void isar_create_instance_async(
+  void isar_instance_create_async(
     ffi.Pointer<ffi.Pointer<CIsarInstance>> isar,
     ffi.Pointer<ffi.Char> name,
     ffi.Pointer<ffi.Char> path,
@@ -1221,7 +1221,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.Char> schema_json,
     int port,
   ) {
-    return _isar_create_instance_async(
+    return _isar_instance_create_async(
       isar,
       name,
       path,
@@ -1231,7 +1231,7 @@ class IsarCoreBindings {
     );
   }
 
-  late final _isar_create_instance_asyncPtr = _lookup<
+  late final _isar_instance_create_asyncPtr = _lookup<
       ffi.NativeFunction<
           ffi.Void Function(
               ffi.Pointer<ffi.Pointer<CIsarInstance>>,
@@ -1239,9 +1239,9 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Char>,
               ffi.Uint8,
               ffi.Pointer<ffi.Char>,
-              DartPort)>>('isar_create_instance_async');
-  late final _isar_create_instance_async =
-      _isar_create_instance_asyncPtr.asFunction<
+              DartPort)>>('isar_instance_create_async');
+  late final _isar_instance_create_async =
+      _isar_instance_create_asyncPtr.asFunction<
           void Function(
               ffi.Pointer<ffi.Pointer<CIsarInstance>>,
               ffi.Pointer<ffi.Char>,
@@ -1250,74 +1250,79 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Char>,
               int)>();
 
-  bool isar_close_instance(
+  bool isar_instance_close(
     ffi.Pointer<CIsarInstance> isar,
+    bool delete_,
   ) {
-    return _isar_close_instance(
+    return _isar_instance_close(
           isar,
+          delete_ ? 1 : 0,
         ) !=
         0;
   }
 
-  late final _isar_close_instancePtr = _lookup<
-          ffi.NativeFunction<ffi.Uint8 Function(ffi.Pointer<CIsarInstance>)>>(
-      'isar_close_instance');
-  late final _isar_close_instance = _isar_close_instancePtr
-      .asFunction<int Function(ffi.Pointer<CIsarInstance>)>();
+  late final _isar_instance_closePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Uint8 Function(
+              ffi.Pointer<CIsarInstance>, ffi.Uint8)>>('isar_instance_close');
+  late final _isar_instance_close = _isar_instance_closePtr
+      .asFunction<int Function(ffi.Pointer<CIsarInstance>, int)>();
 
-  bool isar_close_delete_instance(
+  ffi.Pointer<ffi.Char> isar_instance_get_path(
     ffi.Pointer<CIsarInstance> isar,
   ) {
-    return _isar_close_delete_instance(
-          isar,
-        ) !=
-        0;
+    return _isar_instance_get_path(
+      isar,
+    );
   }
 
-  late final _isar_close_delete_instancePtr = _lookup<
-          ffi.NativeFunction<ffi.Uint8 Function(ffi.Pointer<CIsarInstance>)>>(
-      'isar_close_delete_instance');
-  late final _isar_close_delete_instance = _isar_close_delete_instancePtr
-      .asFunction<int Function(ffi.Pointer<CIsarInstance>)>();
+  late final _isar_instance_get_pathPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<ffi.Char> Function(
+              ffi.Pointer<CIsarInstance>)>>('isar_instance_get_path');
+  late final _isar_instance_get_path = _isar_instance_get_pathPtr
+      .asFunction<ffi.Pointer<ffi.Char> Function(ffi.Pointer<CIsarInstance>)>();
 
-  int isar_get_collection(
+  int isar_instance_get_collection(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<ffi.Pointer<CIsarCollection>> collection,
     int index,
   ) {
-    return _isar_get_collection(
+    return _isar_instance_get_collection(
       isar,
       collection,
       index,
     );
   }
 
-  late final _isar_get_collectionPtr = _lookup<
+  late final _isar_instance_get_collectionPtr = _lookup<
       ffi.NativeFunction<
           ffi.Int64 Function(
               ffi.Pointer<CIsarInstance>,
               ffi.Pointer<ffi.Pointer<CIsarCollection>>,
-              ffi.Uint32)>>('isar_get_collection');
-  late final _isar_get_collection = _isar_get_collectionPtr.asFunction<
-      int Function(ffi.Pointer<CIsarInstance>,
-          ffi.Pointer<ffi.Pointer<CIsarCollection>>, int)>();
+              ffi.Uint32)>>('isar_instance_get_collection');
+  late final _isar_instance_get_collection =
+      _isar_instance_get_collectionPtr.asFunction<
+          int Function(ffi.Pointer<CIsarInstance>,
+              ffi.Pointer<ffi.Pointer<CIsarCollection>>, int)>();
 
-  int isar_get_static_size_and_offsets(
+  int isar_collection_get_static_size_and_offsets(
     ffi.Pointer<CIsarCollection> collection,
     ffi.Pointer<ffi.Uint32> offsets,
   ) {
-    return _isar_get_static_size_and_offsets(
+    return _isar_collection_get_static_size_and_offsets(
       collection,
       offsets,
     );
   }
 
-  late final _isar_get_static_size_and_offsetsPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Uint32 Function(ffi.Pointer<CIsarCollection>,
-              ffi.Pointer<ffi.Uint32>)>>('isar_get_static_size_and_offsets');
-  late final _isar_get_static_size_and_offsets =
-      _isar_get_static_size_and_offsetsPtr.asFunction<
+  late final _isar_collection_get_static_size_and_offsetsPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Uint32 Function(
+                  ffi.Pointer<CIsarCollection>, ffi.Pointer<ffi.Uint32>)>>(
+      'isar_collection_get_static_size_and_offsets');
+  late final _isar_collection_get_static_size_and_offsets =
+      _isar_collection_get_static_size_and_offsetsPtr.asFunction<
           int Function(
               ffi.Pointer<CIsarCollection>, ffi.Pointer<ffi.Uint32>)>();
 

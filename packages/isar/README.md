@@ -90,12 +90,7 @@ class Post {
 ### 3. Open an instance
 
 ```dart
-final dir = await getApplicationSupportDirectory(); // path_provider package
-final isar = await Isar.open(
-  schemas: [PostSchema],
-  directory: dir.path,
-  inspector: true, // if you want to enable the inspector for debug builds
-);
+final isar = await Isar.open(schemas: [PostSchema]);
 ```
 
 ### 4. Query the database

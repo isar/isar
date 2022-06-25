@@ -1,9 +1,9 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'mutli_type_model.dart';
-import 'util/common.dart';
-import 'util/sync_async_helper.dart';
+import '../mutli_type_model.dart';
+import '../util/common.dart';
+import '../util/sync_async_helper.dart';
 
 late Isar _isar;
 
@@ -21,13 +21,15 @@ void main() {
 
     group('int', () {
       setUp(() async {
-        await _isar.writeTxn(() => col.putAll([
-              MultiTypeModel()..intValue = -5,
-              MultiTypeModel()..intValue = 0,
-              MultiTypeModel()
-                ..intValue = 10
-                ..intValueN = 10,
-            ]),);
+        await _isar.writeTxn(
+          () => col.putAll([
+            MultiTypeModel()..intValue = -5,
+            MultiTypeModel()..intValue = 0,
+            MultiTypeModel()
+              ..intValue = 10
+              ..intValueN = 10,
+          ]),
+        );
       });
 
       isarTest('min', () async {
@@ -159,13 +161,15 @@ void main() {
 
     group('float', () {
       setUp(() async {
-        await _isar.writeTxn(() => col.putAll([
-              MultiTypeModel()..floatValue = -5.0,
-              MultiTypeModel()..floatValue = 0.0,
-              MultiTypeModel()
-                ..floatValue = 10.0
-                ..floatValueN = 10.0,
-            ]),);
+        await _isar.writeTxn(
+          () => col.putAll([
+            MultiTypeModel()..floatValue = -5.0,
+            MultiTypeModel()..floatValue = 0.0,
+            MultiTypeModel()
+              ..floatValue = 10.0
+              ..floatValueN = 10.0,
+          ]),
+        );
       });
 
       isarTest('min', () async {
@@ -297,13 +301,15 @@ void main() {
 
     group('long', () {
       setUp(() async {
-        await _isar.writeTxn(() => col.putAll([
-              MultiTypeModel()..longValue = -5,
-              MultiTypeModel()..longValue = 0,
-              MultiTypeModel()
-                ..longValue = 10
-                ..longValueN = 10,
-            ]),);
+        await _isar.writeTxn(
+          () => col.putAll([
+            MultiTypeModel()..longValue = -5,
+            MultiTypeModel()..longValue = 0,
+            MultiTypeModel()
+              ..longValue = 10
+              ..longValueN = 10,
+          ]),
+        );
       });
 
       isarTest('min', () async {
@@ -435,13 +441,15 @@ void main() {
 
     group('double', () {
       setUp(() async {
-        await _isar.writeTxn(() => col.putAll([
-              MultiTypeModel()..doubleValue = -5.0,
-              MultiTypeModel()..doubleValue = 0.0,
-              MultiTypeModel()
-                ..doubleValue = 10.0
-                ..doubleValueN = 10.0,
-            ]),);
+        await _isar.writeTxn(
+          () => col.putAll([
+            MultiTypeModel()..doubleValue = -5.0,
+            MultiTypeModel()..doubleValue = 0.0,
+            MultiTypeModel()
+              ..doubleValue = 10.0
+              ..doubleValueN = 10.0,
+          ]),
+        );
       });
 
       isarTest('min', () async {
@@ -576,13 +584,15 @@ void main() {
           DateTime.fromMillisecondsSinceEpoch(milliseconds);
 
       setUp(() async {
-        await _isar.writeTxn(() => col.putAll([
-              MultiTypeModel()..dateTimeValue = date(-5),
-              MultiTypeModel()..dateTimeValue = date(0),
-              MultiTypeModel()
-                ..dateTimeValue = date(10)
-                ..dateTimeValueN = date(10),
-            ]),);
+        await _isar.writeTxn(
+          () => col.putAll([
+            MultiTypeModel()..dateTimeValue = date(-5),
+            MultiTypeModel()..dateTimeValue = date(0),
+            MultiTypeModel()
+              ..dateTimeValue = date(10)
+              ..dateTimeValueN = date(10),
+          ]),
+        );
       });
 
       isarTest('min', () async {

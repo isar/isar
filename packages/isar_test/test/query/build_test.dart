@@ -1,10 +1,10 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'util/common.dart';
-import 'util/sync_async_helper.dart';
+import '../util/common.dart';
+import '../util/sync_async_helper.dart';
 
-part 'query_build_test.g.dart';
+part 'build_test.g.dart';
 
 @Collection()
 class Account {

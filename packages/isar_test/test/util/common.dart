@@ -12,7 +12,9 @@ import 'sync_async_helper.dart';
 const bool kIsWeb = identical(0, 0.0);
 
 Future<void> qEqualSet<T>(
-    Future<Iterable<T>> actual, Iterable<T> target,) async {
+  Future<Iterable<T>> actual,
+  Iterable<T> target,
+) async {
   expect((await actual).toSet(), target.toSet());
 }
 
@@ -50,8 +52,12 @@ Future<void> _prepareTest() async {
 }
 
 @isTest
-void isarTest(String name, dynamic Function() body,
-    {Timeout? timeout, bool skip = false,}) {
+void isarTest(
+  String name,
+  dynamic Function() body, {
+  Timeout? timeout,
+  bool skip = false,
+}) {
   void runTest(bool testSync) {
     final testName = testSync ? '$name SYNC' : name;
     runZoned(
@@ -93,12 +99,15 @@ String getRandomName() {
 }
 
 String? testTempPath;
-Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> schemas,
-    {String? name,}) async {
+Future<Isar> openTempIsar(
+  List<CollectionSchema<dynamic>> schemas, {
+  String? name,
+}) async {
   await _prepareTest();
   if (!kIsWeb && testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
     testTempPath = path.join(dartToolDir, 'test', 'tmp');
+    await Directory(testTempPath!).create(recursive: true);
   }
 
   return tOpen(
