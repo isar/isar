@@ -3,9 +3,9 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'util/common.dart';
+import '../util/common.dart';
 
-part 'query_any_of_all_of_test.g.dart';
+part 'any_of_all_of_test.g.dart';
 
 @Collection()
 class Model {

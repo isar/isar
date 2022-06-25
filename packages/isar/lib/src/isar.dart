@@ -32,7 +32,7 @@ abstract class Isar {
   static const int maxId = isarMaxId;
 
   /// The default Isar instance name.
-  static const String defaultName = 'isar';
+  static const String defaultName = 'default';
 
   /// Placeholder for an auto-increment id.
   static int autoIncrement = isarAutoIncrementId;

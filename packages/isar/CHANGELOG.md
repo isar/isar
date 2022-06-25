@@ -1,6 +1,13 @@
+## 3.0.0-dev.3
+
+### Breaking
+
+- The default Isar name is now `default`. On non-web targets, migration will happen automatically.
+- The isar database file is now stored in the location `dir/name.isar` the lock file in `dir/name.isar.lock`. Migration will happen automatically.
+
 ## 3.0.0-dev.2
 
-## Enhancements
+### Enhancements
 
 - Support for much more complex composite index queries
 - Support for logical XOR and the `.oneOf()` query modifier
