@@ -23,8 +23,6 @@ class Value {
       other is Value && id == other.id && value == other.value;
 }
 
-
-
 void main() {
   group('Watcher', () {
     late Isar isar;
