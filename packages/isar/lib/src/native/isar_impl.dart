@@ -184,7 +184,11 @@ class IsarImpl extends Isar implements Finalizable {
     await super.close();
 
     _finalizer.detach(this);
-    return IC.isar_instance_close(ptr, deleteFromDisk);
+    if (deleteFromDisk) {
+      return IC.isar_instance_close_and_delete(ptr);
+    } else {
+      return IC.isar_instance_close(ptr);
+    }
   }
 }
 

@@ -1,3 +1,9 @@
+## 3.0.0-dev.5
+
+### Fixes
+
+- Fixed dropped database on hot restart
+
 ## 3.0.0-dev.4
 
 ### Fixes
