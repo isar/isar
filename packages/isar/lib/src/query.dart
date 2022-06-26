@@ -60,7 +60,7 @@ abstract class Query<T> {
   int deleteAllSync();
 
   /// {@template query_watch}
-  /// Create a watcher that yiels the results of this query whenever its
+  /// Create a watcher that yields the results of this query whenever its
   /// results have (potentially) changed.
   ///
   /// If you don't always use the results, consider using `watchLazy` and rerun

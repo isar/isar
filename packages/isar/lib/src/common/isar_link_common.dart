@@ -31,7 +31,7 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
           !identical(targetCollection, this.targetCollection)) {
         throw IsarError(
           'Link has been moved! It is not allowed to move '
-          'a link to a differenct collection.',
+          'a link to a different collection.',
         );
       }
     } else {
@@ -56,9 +56,9 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
 
   int? Function(OBJ obj) get getId;
 
-  List<int> objectsToIds(Iterable<OBJ> objetcs) {
+  List<int> objectsToIds(Iterable<OBJ> objects) {
     final ids = <int>[];
-    for (final object in objetcs) {
+    for (final object in objects) {
       final id = getId(object);
       if (id != null) {
         ids.add(id);

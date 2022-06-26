@@ -3,7 +3,7 @@ part of isar;
 /// Normal keys consist of a single object, composite keys multiple.
 typedef IndexKey = List<Object?>;
 
-/// Collections are used to store and receive your objects from Isar.
+/// Collections are used to store and retrieve your objects from Isar.
 abstract class IsarCollection<OBJ> {
   /// The corresponding Isar instance.
   Isar get isar;
@@ -109,13 +109,13 @@ abstract class IsarCollection<OBJ> {
     return deleteAllSync([id]) == 1;
   }
 
-  /// Delete a list of objecs by their [ids].
+  /// Delete a list of objects by their [ids].
   ///
   /// Returns the number of objects that have been deleted. Isar web always
   /// returns `ids.length`.
   Future<int> deleteAll(List<int> ids);
 
-  /// Delete a list of objecs by their [ids].
+  /// Delete a list of objects by their [ids].
   ///
   /// Returns the number of objects that have been deleted.
   int deleteAllSync(List<int> ids);

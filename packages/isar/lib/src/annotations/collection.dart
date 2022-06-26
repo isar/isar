@@ -18,7 +18,7 @@ class Collection {
   ///   int? id;
   /// }
   ///
-  /// // access colection using: isar.col
+  /// // access collection using: isar.col
   /// ```
   final String? accessor;
 }
