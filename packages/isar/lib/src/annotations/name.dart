@@ -2,7 +2,7 @@ part of isar;
 
 /// Annotate Isar collections or properties to change their name.
 ///
-/// Can be used to change the name in Dart independantly of Isar.
+/// Can be used to change the name in Dart independently of Isar.
 @Target({
   TargetKind.classType,
   TargetKind.field,

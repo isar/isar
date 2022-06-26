@@ -7,7 +7,7 @@ typedef FilterQuery<OBJ> = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>
 
 /// Query builders are used to create queries in a safe way.
 ///
-/// Aquire a `QueryBuilder` instance using `collection.where()` or
+/// Acquire a `QueryBuilder` instance using `collection.where()` or
 /// `collection.filter()`.
 class QueryBuilder<OBJ, R, S> {
   /// @nodoc

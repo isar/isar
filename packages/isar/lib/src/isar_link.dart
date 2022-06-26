@@ -12,19 +12,19 @@ abstract class IsarLinkBase<OBJ> {
   /// Has this link been loaded?
   bool get isLoaded;
 
-  /// Loads the linked object(s) from the databse
+  /// Loads the linked object(s) from the database
   Future<void> load();
 
-  /// Loads the linked object(s) from the databse
+  /// Loads the linked object(s) from the database
   void loadSync();
 
-  /// Saves the linked object(s) to the databse if there are changes.
+  /// Saves the linked object(s) to the database if there are changes.
   ///
   /// Also puts new objects into the database that have id set to `null` or
   /// `Isar.autoIncrement`.
   Future<void> save();
 
-  /// Saves the linked object(s) to the databse if there are changes.
+  /// Saves the linked object(s) to the database if there are changes.
   ///
   /// Also puts new objects into the database that have id set to `null` or
   /// `Isar.autoIncrement`.
@@ -89,7 +89,7 @@ abstract class IsarLinks<OBJ> implements IsarLinkBase<OBJ>, Set<OBJ> {
   /// and it can even be used without loading the link.
   void updateSync({List<OBJ> link = const [], List<OBJ> unlink = const []});
 
-  /// Starty a query for linked objects.
+  /// Starts a query for linked objects.
   QueryBuilder<OBJ, OBJ, QAfterFilterCondition> filter();
 
   /// Counts the linked objects in the database.

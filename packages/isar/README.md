@@ -190,7 +190,7 @@ queryStream.listen((newResult) {
 })
 ```
 
-## Bechmarks
+## Benchmarks
 
 Benchmarks only give a rough idea of the performance of a database but as you can see, Isar is quite fast 😇
 

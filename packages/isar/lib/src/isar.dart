@@ -213,7 +213,7 @@ abstract class Isar {
     return Future.value(false);
   }
 
-  /// Returns the schema of this Instance. You should avoid usint the schema
+  /// Returns the schema of this Instance. You should avoid using the schema
   /// directly.
   @protected
   static String? get schema => _schema;
@@ -222,7 +222,7 @@ abstract class Isar {
   static Set<String> get instanceNames => _instances.keys.toSet();
 
   /// Returns an Isar instance opened in the current isolate by its name. If
-  /// no name is provided, the default instane is returned.
+  /// no name is provided, the default instance is returned.
   static Isar? getInstance([String name = defaultName]) {
     return _instances[name];
   }

@@ -2,7 +2,7 @@
 
 part of isar;
 
-/// A where clause to tranverse an Isar index.
+/// A where clause to traverse an Isar index.
 abstract class WhereClause {
   const WhereClause._();
 }
