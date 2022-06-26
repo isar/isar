@@ -1250,20 +1250,32 @@ class IsarCoreBindings {
 
   bool isar_instance_close(
     ffi.Pointer<CIsarInstance> isar,
-    bool delete_,
   ) {
     return _isar_instance_close(
       isar,
-      delete_,
     );
   }
 
   late final _isar_instance_closePtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Bool Function(
-              ffi.Pointer<CIsarInstance>, ffi.Bool)>>('isar_instance_close');
+          ffi.NativeFunction<ffi.Bool Function(ffi.Pointer<CIsarInstance>)>>(
+      'isar_instance_close');
   late final _isar_instance_close = _isar_instance_closePtr
-      .asFunction<bool Function(ffi.Pointer<CIsarInstance>, bool)>();
+      .asFunction<bool Function(ffi.Pointer<CIsarInstance>)>();
+
+  bool isar_instance_close_and_delete(
+    ffi.Pointer<CIsarInstance> isar,
+  ) {
+    return _isar_instance_close_and_delete(
+      isar,
+    );
+  }
+
+  late final _isar_instance_close_and_deletePtr = _lookup<
+          ffi.NativeFunction<ffi.Bool Function(ffi.Pointer<CIsarInstance>)>>(
+      'isar_instance_close_and_delete');
+  late final _isar_instance_close_and_delete =
+      _isar_instance_close_and_deletePtr
+          .asFunction<bool Function(ffi.Pointer<CIsarInstance>)>();
 
   ffi.Pointer<ffi.Char> isar_instance_get_path(
     ffi.Pointer<CIsarInstance> isar,
