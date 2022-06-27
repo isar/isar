@@ -102,6 +102,20 @@ class IsarImpl extends Isar {
   }
 
   @override
+  Future<int> getSize({
+    bool includeIndexes = false,
+    bool includeLinks = false,
+  }) =>
+      unsupportedOnWeb();
+
+  @override
+  int getSizeSync({
+    bool includeIndexes = false,
+    bool includeLinks = false,
+  }) =>
+      unsupportedOnWeb();
+
+  @override
   Future<bool> close({bool deleteFromDisk = false}) async {
     requireOpen();
     requireNotInTxn();

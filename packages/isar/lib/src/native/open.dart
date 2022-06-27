@@ -29,10 +29,7 @@ void _initializeInstance(
   for (var i = 0; i < schemas.length; i++) {
     final schema = schemas[i];
     nCall(IC.isar_instance_get_collection(isar.ptr, colPtrPtr, i));
-    final staticSize = IC.isar_collection_get_static_size_and_offsets(
-      colPtrPtr.value,
-      offsetsPtr,
-    );
+    final staticSize = IC.isar_get_offsets(colPtrPtr.value, offsetsPtr);
     final offsets = offsetsPtr.asTypedList(schema.propertyIds.length).toList();
     schema.toCollection(<OBJ>() {
       schema as CollectionSchema<OBJ>;

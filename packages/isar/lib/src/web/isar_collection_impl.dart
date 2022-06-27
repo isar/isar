@@ -72,19 +72,19 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       unsupportedOnWeb();
 
   @override
-  Future<List<int>> putAll(List<OBJ> objects, {bool saveLinks = false}) {
+  Future<List<int>> putAll(List<OBJ> objects, {bool saveLinks = true}) {
     return putAllByIndex(null, objects, saveLinks: saveLinks);
   }
 
   @override
-  List<int> putAllSync(List<OBJ> objects, {bool saveLinks = false}) =>
+  List<int> putAllSync(List<OBJ> objects, {bool saveLinks = true}) =>
       unsupportedOnWeb();
 
   @override
   Future<List<int>> putAllByIndex(
     String? indexName,
     List<OBJ> objects, {
-    bool saveLinks = false,
+    bool saveLinks = true,
   }) {
     return isar.getTxn(true, (IsarTxnJs txn) async {
       final serialized = <Object>[];
@@ -107,7 +107,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   List<int> putAllByIndexSync(
     String indexName,
     List<OBJ> objects, {
-    bool saveLinks = false,
+    bool saveLinks = true,
   }) =>
       unsupportedOnWeb();
 
@@ -176,7 +176,10 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       unsupportedOnWeb();
 
   @override
-  int getSizeSync({bool includeIndexes = false, bool includeLinks = false}) =>
+  int getSizeSync({
+    bool includeIndexes = false,
+    bool includeLinks = false,
+  }) =>
       unsupportedOnWeb();
 
   @override

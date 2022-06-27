@@ -104,7 +104,7 @@ String generatePutByIndex(ObjectInfo oi, ObjectIndex index) {
       return putByIndex(r'${index.name}', object);
     }
 
-    int putBy${index.dartName}Sync(${oi.dartName} object, {bool saveLinks = false}) {
+    int putBy${index.dartName}Sync(${oi.dartName} object, {bool saveLinks = true}) {
       return putByIndexSync(r'${index.name}', object, saveLinks: saveLinks);
     }
 
@@ -112,7 +112,7 @@ String generatePutByIndex(ObjectInfo oi, ObjectIndex index) {
       return putAllByIndex(r'${index.name}', objects);
     }
 
-    List<int> putAllBy${index.dartName}Sync(List<${oi.dartName}> objects, {bool saveLinks = false}) {
+    List<int> putAllBy${index.dartName}Sync(List<${oi.dartName}> objects, {bool saveLinks = true}) {
       return putAllByIndexSync(r'${index.name}', objects, saveLinks: saveLinks);
     }
   ''';

@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_asserts_with_message
-
 part of isar;
 
 /// Callback for a newly opened Isar instance.
@@ -82,14 +80,16 @@ abstract class Isar {
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
+    bool inspector = true,
   }) {
     _checkOpen(name, schemas);
-    if (!_kIsWeb) {
+    if (!_kIsWeb && inspector) {
       assert(
         () {
           _IsarConnect.initialize();
           return true;
         }(),
+        'Remove the Inspector in release mode.',
       );
     }
     return IsarNative.open(
@@ -106,14 +106,16 @@ abstract class Isar {
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
+    bool inspector = true,
   }) {
     _checkOpen(name, schemas);
-    if (!_kIsWeb) {
+    if (!_kIsWeb && inspector) {
       assert(
         () {
           _IsarConnect.initialize();
           return true;
         }(),
+        'Remove the Inspector in release mode.',
       );
     }
     return IsarNative.openSync(
@@ -139,12 +141,18 @@ abstract class Isar {
   Future<T> txn<T>(Future<T> Function() callback);
 
   /// Executes an asynchronous read-write transaction.
+  ///
+  /// If [silent] is `true`, watchers are not notified about changes in this
+  /// transaction.
   Future<T> writeTxn<T>(Future<T> Function() callback, {bool silent = false});
 
   /// Executes a synchronous read-only transaction.
   T txnSync<T>(T Function() callback);
 
   /// Executes a synchronous read-write transaction.
+  ///
+  /// If [silent] is `true`, watchers are not notified about changes in this
+  /// transaction.
   T writeTxnSync<T>(T Function() callback, {bool silent = false});
 
   /// @nodoc
@@ -159,7 +167,7 @@ abstract class Isar {
   /// Get a collection by its type.
   ///
   /// You should use the generated extension methods instead.
-  IsarCollection<T> getCollection<T>() {
+  IsarCollection<T> collection<T>() {
     requireOpen();
     return _collections[T]! as IsarCollection<T>;
   }
@@ -190,6 +198,18 @@ abstract class Isar {
       col.clearSync();
     }
   }
+
+  /// Returns the size of all the collections in bytes. Not supported on web.
+  ///
+  /// This method is extremely fast and independent of the number of objects in
+  /// the instance.
+  Future<int> getSize({bool includeIndexes = false, bool includeLinks = false});
+
+  /// Returns the size of all collections in bytes. Not supported on web.
+  ///
+  /// This method is extremely fast and independent of the number of objects in
+  /// the instance.
+  int getSizeSync({bool includeIndexes = false, bool includeLinks = false});
 
   /// Releases an Isar instance.
   ///

@@ -60,7 +60,7 @@ abstract class IsarCollection<OBJ> {
   }
 
   /// Insert or update an [object] and returns the assigned id.
-  int putSync(OBJ object, {bool saveLinks = false}) {
+  int putSync(OBJ object, {bool saveLinks = true}) {
     return putAllSync([object], saveLinks: saveLinks)[0];
   }
 
@@ -68,7 +68,7 @@ abstract class IsarCollection<OBJ> {
   Future<List<int>> putAll(List<OBJ> objects);
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  List<int> putAllSync(List<OBJ> objects, {bool saveLinks = false});
+  List<int> putAllSync(List<OBJ> objects, {bool saveLinks = true});
 
   /// @nodoc
   @protected
@@ -78,7 +78,7 @@ abstract class IsarCollection<OBJ> {
 
   /// @nodoc
   @protected
-  int putByIndexSync(String indexName, OBJ object, {bool saveLinks = false}) {
+  int putByIndexSync(String indexName, OBJ object, {bool saveLinks = true}) {
     return putAllByIndexSync(indexName, [object])[0];
   }
 
@@ -91,7 +91,7 @@ abstract class IsarCollection<OBJ> {
   List<int> putAllByIndexSync(
     String indexName,
     List<OBJ> objects, {
-    bool saveLinks = false,
+    bool saveLinks = true,
   });
 
   /// Delete a single object by its [id].
@@ -177,6 +177,9 @@ abstract class IsarCollection<OBJ> {
   QueryBuilder<OBJ, OBJ, QFilterCondition> filter() => where().filter();
 
   /// Build a query dynamically. Can be used to build a custom query language.
+  ///
+  /// The type argument [R] needs to be equal to [OBJ] if no [property] is
+  /// specified. Otherwise it should be the type of the property.
   Query<R> buildQuery<R>({
     List<WhereClause> whereClauses = const [],
     bool whereDistinct = false,

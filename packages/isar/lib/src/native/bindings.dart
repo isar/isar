@@ -1315,25 +1315,50 @@ class IsarCoreBindings {
           int Function(ffi.Pointer<CIsarInstance>,
               ffi.Pointer<ffi.Pointer<CIsarCollection>>, int)>();
 
-  int isar_collection_get_static_size_and_offsets(
+  int isar_instance_get_size(
+    ffi.Pointer<CIsarInstance> instance,
+    ffi.Pointer<CIsarTxn> txn,
+    bool include_indexes,
+    bool include_links,
+    ffi.Pointer<ffi.Int64> size,
+  ) {
+    return _isar_instance_get_size(
+      instance,
+      txn,
+      include_indexes,
+      include_links,
+      size,
+    );
+  }
+
+  late final _isar_instance_get_sizePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int64 Function(
+              ffi.Pointer<CIsarInstance>,
+              ffi.Pointer<CIsarTxn>,
+              ffi.Bool,
+              ffi.Bool,
+              ffi.Pointer<ffi.Int64>)>>('isar_instance_get_size');
+  late final _isar_instance_get_size = _isar_instance_get_sizePtr.asFunction<
+      int Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>, bool,
+          bool, ffi.Pointer<ffi.Int64>)>();
+
+  int isar_get_offsets(
     ffi.Pointer<CIsarCollection> collection,
     ffi.Pointer<ffi.Uint32> offsets,
   ) {
-    return _isar_collection_get_static_size_and_offsets(
+    return _isar_get_offsets(
       collection,
       offsets,
     );
   }
 
-  late final _isar_collection_get_static_size_and_offsetsPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Uint32 Function(
-                  ffi.Pointer<CIsarCollection>, ffi.Pointer<ffi.Uint32>)>>(
-      'isar_collection_get_static_size_and_offsets');
-  late final _isar_collection_get_static_size_and_offsets =
-      _isar_collection_get_static_size_and_offsetsPtr.asFunction<
-          int Function(
-              ffi.Pointer<CIsarCollection>, ffi.Pointer<ffi.Uint32>)>();
+  late final _isar_get_offsetsPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Uint32 Function(ffi.Pointer<CIsarCollection>,
+              ffi.Pointer<ffi.Uint32>)>>('isar_get_offsets');
+  late final _isar_get_offsets = _isar_get_offsetsPtr.asFunction<
+      int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<ffi.Uint32>)>();
 
   int isar_link(
     ffi.Pointer<CIsarCollection> collection,

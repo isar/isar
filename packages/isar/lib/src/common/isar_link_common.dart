@@ -4,6 +4,8 @@ import 'dart:collection';
 
 import 'package:isar/isar.dart';
 
+const bool _kIsWeb = identical(0, 0.0);
+
 abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
   var _initialized = false;
 
@@ -56,19 +58,16 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
 
   int? Function(OBJ obj) get getId;
 
-  List<int> objectsToIds(Iterable<OBJ> objects) {
-    final ids = <int>[];
-    for (final object in objects) {
-      final id = getId(object);
-      if (id != null) {
-        ids.add(id);
-      } else {
-        throw IsarError(
-          'Object $object has no id and can therefore not be linked.',
-        );
-      }
+  int requireGetId(OBJ object) {
+    final id = getId(object);
+    if (id != null) {
+      return id;
+    } else {
+      throw IsarError(
+        'Object $object has no id and can therefore not be linked. '
+        'Make sure to .put() objects before you use them in links.',
+      );
     }
-    return ids;
   }
 
   QueryBuilder<OBJ, OBJ, QAfterFilterCondition> filter() {
@@ -86,9 +85,17 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
     return QueryBuilder(qb);
   }
 
-  Future<void> updateNative(List<int> linkIds, List<int> unlinkIds, bool reset);
+  Future<void> update({
+    List<OBJ> link = const [],
+    List<OBJ> unlink = const [],
+    bool reset = false,
+  });
 
-  void updateNativeSync(List<int> linkIds, List<int> unlinkIds, bool reset);
+  void updateSync({
+    List<OBJ> link = const [],
+    List<OBJ> unlink = const [],
+    bool reset = false,
+  });
 }
 
 abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
@@ -106,7 +113,12 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   bool get isLoaded => _isLoaded;
 
   @override
-  OBJ? get value => _value;
+  OBJ? get value {
+    if (!_isLoaded && !_isChanged && !_kIsWeb) {
+      loadSync();
+    }
+    return _value;
+  }
 
   @override
   set value(OBJ? value) {
@@ -136,9 +148,8 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
     }
 
     final object = _value;
-    final objectIds = objectsToIds([if (object != null) object]);
 
-    await updateNative(objectIds, [], true);
+    await update(link: [if (object != null) object], reset: true);
     if (identical(_value, object)) {
       _isChanged = false;
     }
@@ -152,9 +163,8 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
     }
 
     final object = _value;
-    final objectIds = objectsToIds([if (object != null) object]);
+    updateSync(link: [if (object != null) object], reset: true);
 
-    updateNativeSync(objectIds, [], true);
     if (identical(_value, object)) {
       _isChanged = false;
     }
@@ -163,7 +173,7 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   Future<void> reset() async {
-    await updateNative([], [], true);
+    await update(reset: true);
     _value = null;
     _isChanged = false;
     _isLoaded = true;
@@ -171,7 +181,7 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   void resetSync() {
-    updateNativeSync([], [], true);
+    updateSync(reset: true);
     _value = null;
     _isChanged = false;
     _isLoaded = true;
@@ -184,9 +194,6 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   final addedObjects = HashSet<OBJ>.identity();
   final removedObjects = HashSet<OBJ>.identity();
 
-  List<int> get addedIds => objectsToIds(addedObjects);
-  List<int> get removedIds => objectsToIds(removedObjects);
-
   var _isLoaded = false;
 
   @override
@@ -194,6 +201,13 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   bool get isLoaded => _isLoaded;
+
+  HashSet<OBJ> get _loadedObjects {
+    if (!_isLoaded && !_kIsWeb) {
+      loadSync();
+    }
+    return _objects;
+  }
 
   @override
   Future<void> load({bool overrideChanges = true}) async {
@@ -227,8 +241,7 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
     final added = addedObjects.toList();
     final removed = removedObjects.toList();
-
-    await updateNative(addedIds, removedIds, false);
+    await update(link: added, unlink: removed);
 
     addedObjects.removeAll(added);
     removedObjects.removeAll(removed);
@@ -241,7 +254,9 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
       return;
     }
 
-    updateNativeSync(addedIds, removedIds, false);
+    final added = addedObjects.toList();
+    final removed = removedObjects.toList();
+    updateSync(link: added, unlink: removed);
 
     addedObjects.clear();
     removedObjects.clear();
@@ -249,35 +264,22 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   }
 
   @override
-  Future<void> update({
-    List<OBJ> link = const [],
-    List<OBJ> unlink = const [],
-  }) {
-    return updateNative(objectsToIds(link), objectsToIds(unlink), false);
-  }
-
-  @override
-  void updateSync({List<OBJ> link = const [], List<OBJ> unlink = const []}) {
-    return updateNativeSync(objectsToIds(link), objectsToIds(unlink), false);
-  }
-
-  @override
   Future<void> reset() async {
-    await updateNative([], [], true);
+    await update(reset: true);
     clear();
     _isLoaded = true;
   }
 
   @override
   void resetSync() {
-    updateNativeSync([], [], true);
+    updateSync(reset: true);
     clear();
     _isLoaded = true;
   }
 
   @override
   bool add(OBJ value) {
-    if (_objects.add(value)) {
+    if (_loadedObjects.add(value)) {
       addedObjects.add(value);
       removedObjects.remove(value);
       return true;
@@ -287,21 +289,21 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   }
 
   @override
-  bool contains(Object? element) => _objects.contains(element);
+  bool contains(Object? element) => _loadedObjects.contains(element);
 
   @override
-  Iterator<OBJ> get iterator => _objects.iterator;
+  Iterator<OBJ> get iterator => _loadedObjects.iterator;
 
   @override
-  int get length => _objects.length;
+  int get length => _loadedObjects.length;
 
   @override
-  OBJ? lookup(Object? element) => _objects.lookup(element);
+  OBJ? lookup(Object? element) => _loadedObjects.lookup(element);
 
   @override
   bool remove(Object? value) {
     if (value is OBJ) {
-      final removed = _objects.remove(value);
+      final removed = _loadedObjects.remove(value);
       addedObjects.remove(value);
       if (removed && isAttached) {
         removedObjects.add(value);
@@ -313,11 +315,11 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
   @override
   void clear() {
-    _objects.clear();
+    _loadedObjects.clear();
     addedObjects.clear();
     removedObjects.clear();
   }
 
   @override
-  Set<OBJ> toSet() => _objects.toSet();
+  Set<OBJ> toSet() => _loadedObjects.toSet();
 }
