@@ -139,12 +139,18 @@ abstract class Isar {
   Future<T> txn<T>(Future<T> Function() callback);
 
   /// Executes an asynchronous read-write transaction.
+  ///
+  /// If [silent] is `true`, watchers are not notified about changes in this
+  /// transaction.
   Future<T> writeTxn<T>(Future<T> Function() callback, {bool silent = false});
 
   /// Executes a synchronous read-only transaction.
   T txnSync<T>(T Function() callback);
 
   /// Executes a synchronous read-write transaction.
+  ///
+  /// If [silent] is `true`, watchers are not notified about changes in this
+  /// transaction.
   T writeTxnSync<T>(T Function() callback, {bool silent = false});
 
   /// @nodoc
@@ -159,7 +165,7 @@ abstract class Isar {
   /// Get a collection by its type.
   ///
   /// You should use the generated extension methods instead.
-  IsarCollection<T> getCollection<T>() {
+  IsarCollection<T> collection<T>() {
     requireOpen();
     return _collections[T]! as IsarCollection<T>;
   }

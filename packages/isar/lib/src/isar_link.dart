@@ -81,13 +81,21 @@ abstract class IsarLinks<OBJ> implements IsarLinkBase<OBJ>, Set<OBJ> {
   ///
   /// This operation does not alter the state of the local copy of this link
   /// and it can even be used without loading the link.
-  Future<void> update({List<OBJ> link = const [], List<OBJ> unlink = const []});
+  Future<void> update({
+    List<OBJ> link = const [],
+    List<OBJ> unlink = const [],
+    bool reset = false,
+  });
 
   /// Creates and removes the specified links in the database.
   ///
   /// This operation does not alter the state of the local copy of this link
   /// and it can even be used without loading the link.
-  void updateSync({List<OBJ> link = const [], List<OBJ> unlink = const []});
+  void updateSync({
+    List<OBJ> link = const [],
+    List<OBJ> unlink = const [],
+    bool reset = false,
+  });
 
   /// Starts a query for linked objects.
   QueryBuilder<OBJ, OBJ, QAfterFilterCondition> filter();

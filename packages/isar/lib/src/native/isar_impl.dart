@@ -200,14 +200,12 @@ class SyncTxn {
 
   final Arena alloc = Arena(malloc);
 
-  // ignore: use_late_for_private_fields_and_variables
-  Pointer<CObject>? _cObjsPtr;
+  late Pointer<CObject> _cObjsPtr;
   int _cObjsLen = -1;
 
   Pointer<CObjectSet>? _cObjSetPtr;
 
-  // ignore: use_late_for_private_fields_and_variables
-  Pointer<Uint8>? _buffer;
+  late Pointer<Uint8> _buffer;
   int _bufferLen = -1;
 
   Pointer<CObject> allocCObject() {
@@ -215,7 +213,7 @@ class SyncTxn {
       _cObjsPtr = alloc();
       _cObjsLen = 1;
     }
-    return _cObjsPtr!;
+    return _cObjsPtr;
   }
 
   Pointer<CObjectSet> allocCObjectsSet() {
@@ -228,7 +226,7 @@ class SyncTxn {
       _buffer = alloc(size);
       _bufferLen = size;
     }
-    return _buffer!;
+    return _buffer;
   }
 
   void free() {
@@ -261,9 +259,9 @@ class Txn {
 
   final bool write;
 
-  final Arena alloc = Arena(malloc);
+  final alloc = Arena(malloc);
 
-  final Queue<Completer<void>> _completers = Queue<Completer<void>>();
+  final _completers = Queue<Completer<void>>();
 
   Future<void> wait() {
     final completer = Completer<void>();

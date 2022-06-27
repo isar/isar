@@ -171,10 +171,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   List<OBJ?> getAllByIndexSync(String indexName, List<IndexKey> keys) {
+    final indexId = schema.indexIdOrErr(indexName);
+
     return isar.getTxnSync(false, (txn) {
       final cObjPtr = txn.allocCObject();
       final cObj = cObjPtr.ref;
-      final indexId = schema.indexIdOrErr(indexName);
 
       final objects = List<OBJ?>.filled(keys.length, null);
       for (var i = 0; i < keys.length; i++) {
@@ -193,17 +194,82 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
+  int putSync(OBJ object, {bool saveLinks = true}) {
+    return isar.getTxnSync(true, (txn) {
+      return putByIndexSyncInternal(
+        txn: txn,
+        object: object,
+        saveLinks: saveLinks,
+      );
+    });
+  }
+
+  @override
+  int putByIndexSync(String indexName, OBJ object, {bool saveLinks = true}) {
+    return isar.getTxnSync(true, (txn) {
+      return putByIndexSyncInternal(
+        txn: txn,
+        object: object,
+        indexId: schema.indexIdOrErr(indexName),
+        saveLinks: saveLinks,
+      );
+    });
+  }
+
+  int putByIndexSyncInternal({
+    required SyncTxn txn,
+    int? indexId,
+    required OBJ object,
+    bool saveLinks = true,
+  }) {
+    final cObjPtr = txn.allocCObject();
+    final cObj = cObjPtr.ref;
+
+    schema.serializeNative(
+      this,
+      cObj,
+      object,
+      _staticSize,
+      _offsets,
+      txn.allocBuffer,
+    );
+    cObj.id = schema.getId(object) ?? Isar.autoIncrement;
+
+    if (indexId != null) {
+      nCall(IC.isar_put_by_index(ptr, txn.ptr, indexId, cObjPtr));
+    } else {
+      nCall(IC.isar_put(ptr, txn.ptr, cObjPtr));
+    }
+
+    final id = cObj.id;
+    schema.setId?.call(object, id);
+
+    if (schema.hasLinks) {
+      schema.attachLinks(this, id, object);
+      if (saveLinks) {
+        for (final link in schema.getLinks(object)) {
+          link.saveSync();
+        }
+      }
+    }
+
+    return id;
+  }
+
+  @override
   Future<List<int>> putAll(List<OBJ> objects) {
     return putAllByIndex(null, objects);
   }
 
   @override
-  List<int> putAllSync(List<OBJ> objects, {bool saveLinks = false}) {
+  List<int> putAllSync(List<OBJ> objects, {bool saveLinks = true}) {
     return putAllByIndexSync(null, objects);
   }
 
   @override
   Future<List<int>> putAllByIndex(String? indexName, List<OBJ> objects) {
+    final indexId = indexName != null ? schema.indexIdOrErr(indexName) : null;
+
     return isar.getTxn(true, (txn) async {
       final cObjSetPtr = txn.allocCObjectSet(objects.length);
       final objectsPtr = cObjSetPtr.ref.objects;
@@ -222,8 +288,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         );
         cObj.id = schema.getId(object) ?? Isar.autoIncrement;
       }
-      if (indexName != null) {
-        final indexId = schema.indexIdOrErr(indexName);
+      if (indexId != null) {
         IC.isar_put_all_by_index(ptr, txn.ptr, indexId, cObjSetPtr);
       } else {
         IC.isar_put_all(ptr, txn.ptr, cObjSetPtr);
@@ -249,51 +314,21 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   List<int> putAllByIndexSync(
     String? indexName,
     List<OBJ> objects, {
-    bool saveLinks = false,
+    bool saveLinks = true,
   }) {
-    int? indexId;
-    if (indexName != null) {
-      indexId = schema.indexIdOrErr(indexName);
-    }
-
-    return isar.getTxnSync(true, (txn) {
-      final cObjPtr = txn.allocCObject();
-      final cObj = cObjPtr.ref;
-
-      final ids = List<int>.filled(objects.length, 0);
+    final indexId = indexName != null ? schema.indexIdOrErr(indexName) : null;
+    final ids = List.filled(objects.length, 0);
+    isar.getTxnSync(true, (txn) {
       for (var i = 0; i < objects.length; i++) {
-        final object = objects[i];
-        schema.serializeNative(
-          this,
-          cObj,
-          object,
-          _staticSize,
-          _offsets,
-          txn.allocBuffer,
+        ids[i] = putByIndexSyncInternal(
+          txn: txn,
+          object: objects[i],
+          indexId: indexId,
+          saveLinks: saveLinks,
         );
-        cObj.id = schema.getId(object) ?? Isar.autoIncrement;
-
-        if (indexId != null) {
-          nCall(IC.isar_put_by_index(ptr, txn.ptr, indexId, cObjPtr));
-        } else {
-          nCall(IC.isar_put(ptr, txn.ptr, cObjPtr));
-        }
-
-        final id = cObj.id;
-        ids[i] = id;
-        schema.setId?.call(object, id);
-
-        if (schema.hasLinks) {
-          schema.attachLinks(this, id, object);
-          if (saveLinks) {
-            for (final link in schema.getLinks(object)) {
-              link.saveSync();
-            }
-          }
-        }
       }
-      return ids;
     });
+    return ids;
   }
 
   @override

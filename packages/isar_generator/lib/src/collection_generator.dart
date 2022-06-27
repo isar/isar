@@ -57,7 +57,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       // ignore_for_file: ${ignoreLints.join(', ')}
 
       extension Get${object.dartName}Collection on Isar {
-        IsarCollection<${object.dartName}> get ${object.accessor} => getCollection();
+        IsarCollection<${object.dartName}> get ${object.accessor} => collection();
       }
 
       $collectionSchema

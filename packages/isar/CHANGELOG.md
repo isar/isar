@@ -1,3 +1,15 @@
+## 3.0.0-dev.6
+
+### Enhancements
+
+- On non-web platforms, `IsarLink` and `IsarLinks` will load automatically
+- `.putSync()`, `.putAllSync()` etc. will now save links recursively by default
+- Improved `.putSync()` and `.putIndexedSync()` performance
+
+### Breaking
+
+- Renamed `isar.getCollection()` to `isar.collection()`
+
 ## 3.0.0-dev.5
 
 ### Fixes
