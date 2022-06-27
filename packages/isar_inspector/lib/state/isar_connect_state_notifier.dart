@@ -97,7 +97,7 @@ class IsarConnectStateNotifier
     Duration? timeout = kNormalTimeout,
     Map<String, dynamic>? args,
   }) async {
-    final connection = state.value1!;
+    final connection = state.value!;
     var responseFuture = connection.vmService.callServiceExtension(
       action.method,
       isolateId: connection.isolateId,
@@ -164,7 +164,7 @@ class IsarConnectStateNotifier
   }
 
   Future<void> disconnect() async {
-    await state.value1?.vmService.dispose();
+    await state.value?.vmService.dispose();
   }
 
   @override

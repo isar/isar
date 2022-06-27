@@ -58,7 +58,7 @@ class QueryParser {
       case '==':
         final filter = FilterCondition.equalTo(
           property: propertyName,
-          value1: value,
+          value: value,
         );
         if (cmp == '!=') {
           return FilterGroup.not(filter);
@@ -69,14 +69,14 @@ class QueryParser {
       case '>=':
         return FilterCondition.greaterThan(
           property: propertyName,
-          value1: value,
+          value: value,
           include: cmp == '>=',
         );
       case '<':
       case '<=':
         return FilterCondition.lessThan(
           property: propertyName,
-          value1: value,
+          value: value,
           include: cmp == '<=',
         );
       case 'matches':
@@ -94,7 +94,7 @@ class QueryParser {
     if (result.isFailure) {
       throw IsarError(result.message);
     }
-    return result.value1 as FilterOperation;
+    return result.value as FilterOperation;
   }
 }
 
