@@ -18,8 +18,8 @@ class QueryTable extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final collection = ref.watch(selectedCollectionPod).value!;
-    final objects = ref.watch(queryResultsPod).value?.objects ?? [];
+    final collection = ref.watch(selectedCollectionPod).value1!;
+    final objects = ref.watch(queryResultsPod).value1?.objects ?? [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -191,11 +191,11 @@ class TableRow extends ConsumerWidget {
                   }
 
                   final query = ConnectQuery(
-                    instance: ref.read(selectedInstancePod).value!,
+                    instance: ref.read(selectedInstancePod).value1!,
                     collection: collection.name,
                     filter: FilterCondition.equalTo(
                       property: collection.idName,
-                      value: int.parse(object.getValue(collection.idName)),
+                      value1: int.parse(object.getValue(collection.idName)),
                     ),
                   );
                   ref.read(isarConnectPod.notifier).removeQuery(query);

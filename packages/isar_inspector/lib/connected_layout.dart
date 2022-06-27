@@ -17,7 +17,7 @@ class ConnectedLayout extends ConsumerStatefulWidget {
 class _ConnectedLayoutState extends ConsumerState<ConnectedLayout> {
   @override
   void initState() {
-    final instance = ref.read(selectedInstancePod).value!;
+    final instance = ref.read(selectedInstancePod).value1!;
     ref.read(isarConnectPod.notifier).watchInstance(instance);
     super.initState();
   }

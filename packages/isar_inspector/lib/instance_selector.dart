@@ -40,8 +40,8 @@ class _InstanceSelectorState extends ConsumerState<InstanceSelector>
 
   @override
   Widget build(BuildContext context) {
-    final instances = ref.watch(instancesPod).value!;
-    final selectedInstance = ref.watch(selectedInstancePod).value!;
+    final instances = ref.watch(instancesPod).value1!;
+    final selectedInstance = ref.watch(selectedInstancePod).value1!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
