@@ -1,6 +1,12 @@
 name: Dart CI
 
-on: push
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
 
 jobs:
   format:
@@ -56,6 +62,17 @@ jobs:
           flutter pub run build_runner build
           flutter test -j 1
         working-directory: packages/isar_test
+
+  test_generator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - name: Run Generator Unit tests
+        run: |
+          dart pub get
+          dart test
+        working-directory: packages/isar_generator
 
   drive_ios:
     strategy:

@@ -10,7 +10,9 @@ import 'package:isar_generator/src/object_info.dart';
 
 class IsarAnalyzer {
   ObjectInfo analyze(Element modelClass) {
-    if (modelClass is! ClassElement) {
+    if (modelClass is! ClassElement ||
+        modelClass.isEnum ||
+        modelClass.isMixin) {
       err('Only classes may be annotated with @Collection.', modelClass);
     }
 
