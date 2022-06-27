@@ -51,7 +51,7 @@ class _FilterFieldState extends ConsumerState<FilterField> {
         const SizedBox(width: 20),
         ElevatedButton(
           onPressed: () {
-            final selectedCollection = ref.read(selectedCollectionPod).value;
+            final selectedCollection = ref.read(selectedCollectionPod).value!;
             final filter = _parseFilter(selectedCollection);
             ref.read(queryFilterPod.state).state = filter;
             ref.read(queryPagePod.state).state = 0;
@@ -61,10 +61,10 @@ class _FilterFieldState extends ConsumerState<FilterField> {
         const SizedBox(width: 20),
         ElevatedButton(
           onPressed: () {
-            final selectedCollection = ref.read(selectedCollectionPod).value;
+            final selectedCollection = ref.read(selectedCollectionPod).value!;
             final filter = _parseFilter(selectedCollection);
             final query = ConnectQuery(
-              instance: ref.read(selectedInstancePod).value,
+              instance: ref.read(selectedInstancePod).value!,
               collection: selectedCollection.name,
               filter: filter,
             );
