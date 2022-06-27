@@ -41,7 +41,7 @@ class Model {
 }
 
 void main() {
-  group('Composite String', () {
+  group('Composite String index', () {
     late Isar isar;
     late Model obj0;
     late Model obj1;
