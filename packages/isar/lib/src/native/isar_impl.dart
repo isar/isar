@@ -177,6 +177,42 @@ class IsarImpl extends Isar implements Finalizable {
   }
 
   @override
+  Future<int> getSize({
+    bool includeIndexes = false,
+    bool includeLinks = false,
+  }) {
+    return getTxn(false, (txn) async {
+      final sizePtr = txn.alloc<Int64>();
+      IC.isar_instance_get_size(
+        ptr,
+        txn.ptr,
+        includeIndexes,
+        includeLinks,
+        sizePtr,
+      );
+      await txn.wait();
+      return sizePtr.value;
+    });
+  }
+
+  @override
+  int getSizeSync({bool includeIndexes = false, bool includeLinks = false}) {
+    return getTxnSync(false, (txn) {
+      final sizePtr = txn.alloc<Int64>();
+      nCall(
+        IC.isar_instance_get_size(
+          ptr,
+          txn.ptr,
+          includeIndexes,
+          includeLinks,
+          sizePtr,
+        ),
+      );
+      return sizePtr.value;
+    });
+  }
+
+  @override
   Future<bool> close({bool deleteFromDisk = false}) async {
     requireOpen();
     requireNotInTxn();

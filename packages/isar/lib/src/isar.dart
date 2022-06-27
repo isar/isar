@@ -197,6 +197,18 @@ abstract class Isar {
     }
   }
 
+  /// Returns the size of all the collections in bytes. Not supported on web.
+  ///
+  /// This method is extremely fast and independent of the number of objects in
+  /// the instance.
+  Future<int> getSize({bool includeIndexes = false, bool includeLinks = false});
+
+  /// Returns the size of all collections in bytes. Not supported on web.
+  ///
+  /// This method is extremely fast and independent of the number of objects in
+  /// the instance.
+  int getSizeSync({bool includeIndexes = false, bool includeLinks = false});
+
   /// Releases an Isar instance.
   ///
   /// If this is the only isolate that holds a reference to this instance, the

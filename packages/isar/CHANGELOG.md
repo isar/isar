@@ -5,6 +5,7 @@
 - On non-web platforms, `IsarLink` and `IsarLinks` will load automatically
 - `.putSync()`, `.putAllSync()` etc. will now save links recursively by default
 - Improved `.putSync()` and `.putIndexedSync()` performance
+- Added `isar.getSize()` and `isar.getSizeSync()`
 
 ### Breaking
 
