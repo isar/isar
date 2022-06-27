@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_asserts_with_message
-
 part of isar;
 
 /// Callback for a newly opened Isar instance.
@@ -82,14 +80,16 @@ abstract class Isar {
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
+    bool inspector = true,
   }) {
     _checkOpen(name, schemas);
-    if (!_kIsWeb) {
+    if (!_kIsWeb && inspector) {
       assert(
         () {
           _IsarConnect.initialize();
           return true;
         }(),
+        'Remove the Inspector in release mode.',
       );
     }
     return IsarNative.open(
@@ -106,14 +106,16 @@ abstract class Isar {
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
+    bool inspector = true,
   }) {
     _checkOpen(name, schemas);
-    if (!_kIsWeb) {
+    if (!_kIsWeb && inspector) {
       assert(
         () {
           _IsarConnect.initialize();
           return true;
         }(),
+        'Remove the Inspector in release mode.',
       );
     }
     return IsarNative.openSync(

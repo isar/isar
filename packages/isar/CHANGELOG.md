@@ -6,6 +6,7 @@
 - `.putSync()`, `.putAllSync()` etc. will now save links recursively by default
 - Improved `.putSync()` and `.putIndexedSync()` performance
 - Added `isar.getSize()` and `isar.getSizeSync()`
+- Reintrodced option to disable the inspector
 
 ### Breaking
 
