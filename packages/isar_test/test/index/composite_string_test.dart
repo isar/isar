@@ -103,37 +103,152 @@ void main() {
       );
     });
 
-    // FIXME: Test currently does not pass.
-    isarTest('Sorted by value1 value2', () async {
+    isarTest('Query value1 equalTo and value2 startsWith', () async {
       await qEqual(
-        isar.models.where().sortByValue1().thenByValue2().tFindAll(),
-        [obj2, obj1, obj0, obj4, obj6, obj5, obj3],
-      );
-
-      // FIXME: when there is an empty string (obj2), using `anyValue1Value2()`
-      // to sort values breaks, and for some reasons puts obj in order of
-      // [obj6, obj2, obj3, obj1, obj0, obj4, obj5]. The first 3 are wrong.
-      // The value before and after (coincidence?) the empty string are at the
-      // wrong place.
-      // Replacing the empty string with text fixes the issue.
-      await qEqual(
-        isar.models.where().anyValue1Value2().tFindAll(),
-        [obj2, obj1, obj0, obj4, obj6, obj5, obj3],
+        isar.models
+            .where()
+            .value1EqualToValue2StartsWith('John', 'D')
+            .tFindAll(),
+        [obj5],
       );
     });
 
-    isarTest('Get by value1 sorted by value2', () async {
+    isarTest('Query value1 equalTo and value2 greaterThan', () async {
       await qEqual(
-        isar.models.where().value1EqualToAnyValue2('Foo').tFindAll(),
+        isar.models
+            .where()
+            .value1EqualToValue2GreaterThan('Foo', 'Bar')
+            .tFindAll(),
+        [obj4],
+      );
+
+      await qEqual(
+        isar.models
+            .where()
+            .value1EqualToValue2GreaterThan('Foo', 'B')
+            .tFindAll(),
+        [obj0, obj4],
+      );
+    });
+
+    isarTest('Query value1 equalTo and value2 notEqualTo', () async {
+      await qEqual(
+        isar.models
+            .where()
+            .value1EqualToValue2NotEqualTo('Bar', 'Bar')
+            .tFindAll(),
+        [obj1],
+      );
+
+      await qEqual(
+        isar.models
+            .where()
+            .value1EqualToValue2NotEqualTo('Foo', 'Bar')
+            .tFindAll(),
+        [obj4],
+      );
+    });
+
+    isarTest('Query value1 equalTo and value2 lessThan', () async {
+      await qEqual(
+        isar.models.where().value1EqualToValue2LessThan('', 'D').tFindAll(),
+        [obj2],
+      );
+
+      await qEqual(
+        isar.models
+            .where()
+            .value1EqualToValue2LessThan('Foo', 'bar')
+            .tFindAll(),
+        [obj0, obj4],
+      );
+    });
+
+    isarTest('Query value1 equalTo and value2 between', () async {
+      await qEqual(
+        isar.models
+            .where()
+            .value1EqualToValue2Between(
+              'Foo',
+              'AAAAAAaAAaaAAaAAaAAaaA',
+              'zZZzzZZzzZzzZZzzZzzZZzZZzzzz',
+            )
+            .tFindAll(),
         [obj0, obj4],
       );
 
-      // FIXME: Weird value order
-      // Seems to be sorted according to value1 and encountering empty string
-      // sort bug
       await qEqual(
-        isar.models.where().value1NotEqualToAnyValue2('Foo').tFindAll(),
-        [obj2, obj5, obj6, obj1, obj3],
+        isar.models
+            .where()
+            .value1EqualToValue2Between('John', 'Z', 'A')
+            .tFindAll(),
+        [],
+      );
+
+      await qEqual(
+        isar.models
+            .where()
+            .value1EqualToValue2Between('John', 'A', 'Z')
+            .tFindAll(),
+        [obj5],
+      );
+    });
+
+    isarTest('anyOf value1 equalTo and any value2', () async {
+      await qEqual(
+        isar.models.where().anyOf<String, Model>(
+          ['Foo', 'John'],
+          (q, element) => q.value1EqualToAnyValue2(element),
+        ).tFindAll(),
+        [obj0, obj4, obj5],
+      );
+    });
+
+    isarTest('Multiple where queries', () async {
+      await qEqual(
+        isar.models
+            .where()
+            .value1EqualToAnyValue2('aoeu')
+            .or()
+            .value1EqualToAnyValue2('Bar')
+            .or()
+            .value1EqualToValue2GreaterThan('Foo', 'Isar')
+            .tFindAll(),
+        [obj3, obj1, obj4],
+      );
+
+      await qEqual(
+        isar.models
+            .where()
+            .value1EqualToAnyValue2('aoeu')
+            .or()
+            .value1EqualToValue2StartsWith('Foo', 'Not')
+            .tFindAll(),
+        [obj3, obj4],
+      );
+
+      await qEqual(
+        isar.models
+            .where()
+            .value1EqualToValue2StartsWith('aoeu', 'A')
+            .or()
+            .value1EqualToValue2StartsWith('Foo', 'Ba')
+            .or()
+            .value1EqualToValue2StartsWith('Foo', 'Not ')
+            .tFindAll(),
+        [obj0, obj4],
+      );
+
+      await qEqual(
+        isar.models
+            .where()
+            .value1EqualToValue2GreaterThan('Foo', 'A')
+            .or()
+            .value1EqualToValue2LessThan('Jane', 'dOE')
+            .or()
+            .value1EqualToValue2NotEqualTo('', '')
+            .tFindAll(),
+        [obj0, obj4, obj6, obj2],
       );
     });
 
