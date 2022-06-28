@@ -67,7 +67,7 @@ void main() {
       );
     });
 
-    isarTest('Query by value1 and value2', () async {
+    isarTest('Query value1 equalTo and value2 equalTo', () async {
       await qEqual(
         isar.models.where().value1Value2EqualTo('Foo', 'Bar').tFindAll(),
         [obj0],
@@ -103,6 +103,24 @@ void main() {
       );
     });
 
+    isarTest('Query value1 equalTo and value notEqualTo', () async {
+      await qEqual(
+        isar.models
+            .where()
+            .value1EqualToValue2NotEqualTo('Foo', 'Not bar')
+            .tFindAll(),
+        [obj0],
+      );
+
+      await qEqual(
+        isar.models
+            .where()
+            .value1EqualToValue2NotEqualTo('unknown', 'value')
+            .tFindAll(),
+        [],
+      );
+    });
+
     isarTest('Query value1 equalTo and value2 startsWith', () async {
       await qEqual(
         isar.models
@@ -110,6 +128,27 @@ void main() {
             .value1EqualToValue2StartsWith('John', 'D')
             .tFindAll(),
         [obj5],
+      );
+
+      await qEqual(
+        isar.models
+            .where()
+            .value1EqualToValue2StartsWith('John', 'd')
+            .tFindAll(),
+        [],
+      );
+
+      await qEqual(
+        isar.models.where().value1EqualToValue2StartsWith('Foo', '').tFindAll(),
+        [obj0, obj4],
+      );
+
+      await qEqual(
+        isar.models
+            .where()
+            .value1EqualToValue2StartsWith('Foo', 'Bar')
+            .tFindAll(),
+        [obj0],
       );
     });
 
