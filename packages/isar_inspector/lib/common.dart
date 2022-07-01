@@ -7,6 +7,7 @@ class IsarCard extends StatelessWidget {
     this.color,
     this.onTap,
     this.onLongPress,
+    this.padding = EdgeInsets.zero,
     BorderRadius? radius,
   }) : radius = radius ?? BorderRadius.circular(20);
   final Widget child;
@@ -14,6 +15,7 @@ class IsarCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final BorderRadius radius;
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +27,13 @@ class IsarCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       elevation: 0,
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        child: child,
+      child: Padding(
+        padding: padding,
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          child: child,
+        ),
       ),
     );
   }

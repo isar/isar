@@ -13,9 +13,7 @@ class QueryObject {
   const QueryObject(this.data);
   final Map<String, dynamic> data;
 
-  String getValue(String propertyName) {
-    return data[propertyName]?.toString() ?? '';
-  }
+  dynamic getValue(String propertyName) => data[propertyName];
 }
 
 final queryPagePod = StateProvider((ref) => 0);

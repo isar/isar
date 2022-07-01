@@ -44,12 +44,13 @@ const _$IsarTypeEnumMap = {
   IsarType.Long: 'Long',
   IsarType.Double: 'Double',
   IsarType.String: 'String',
-  IsarType.Bytes: 'Bytes',
+  IsarType.ByteList: 'ByteList',
   IsarType.IntList: 'IntList',
   IsarType.FloatList: 'FloatList',
   IsarType.LongList: 'LongList',
   IsarType.DoubleList: 'DoubleList',
   IsarType.StringList: 'StringList',
+  IsarType.BoolList: 'BoolList',
 };
 
 ILink _$ILinkFromJson(Map<String, dynamic> json) => ILink(

@@ -1,3 +1,5 @@
+import 'dart:core';
+
 import 'package:json_annotation/json_annotation.dart';
 
 part 'schema.g.dart';
@@ -58,23 +60,17 @@ class ILink {
 
 // ignore_for_file: constant_identifier_names
 enum IsarType {
-  Bool(true, 80),
-  Int(true, 80),
-  Float(true, 80),
-  Long(true, 80),
-  Double(true, 80),
-  String(true, 200),
-  Bytes(false, 200),
-  IntList(false, 200),
-  FloatList(false, 200),
-  LongList(false, 200),
-  DoubleList(false, 200),
-  StringList(false, 200);
-
-  final bool sortable;
-  final double width;
-
-  // False warning
-  // ignore: sort_constructors_first
-  const IsarType(this.sortable, this.width);
+  Bool,
+  Int,
+  Float,
+  Long,
+  Double,
+  String,
+  ByteList,
+  IntList,
+  FloatList,
+  LongList,
+  DoubleList,
+  StringList,
+  BoolList;
 }
