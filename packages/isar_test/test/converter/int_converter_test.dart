@@ -12,6 +12,7 @@ class IntModel {
     required this.offsettedInt,
     required this.day,
     required this.otherDay,
+    required this.nullableDay,
   });
 
   int id = Isar.autoIncrement;
@@ -26,9 +27,13 @@ class IntModel {
   @DaysTypeConverter()
   final Days otherDay;
 
+  @NullableDaysTypeConverter()
+  @Size32()
+  final Days? nullableDay;
+
   @override
   String toString() {
-    return 'IntModel{id: $id, offsettedInt: $offsettedInt, day: $day}';
+    return 'IntModel{id: $id, offsettedInt: $offsettedInt, day: $day, otherDay: $otherDay, nullableDay: $nullableDay}';
   }
 
   @override
@@ -39,7 +44,9 @@ class IntModel {
             runtimeType == other.runtimeType &&
             id == other.id &&
             offsettedInt == other.offsettedInt &&
-            day == other.day;
+            day == other.day &&
+            otherDay == other.otherDay &&
+            nullableDay == other.nullableDay;
   }
 }
 
@@ -79,6 +86,19 @@ class DaysTypeConverter extends TypeConverter<Days, int> {
   int toIsar(Days day) => day.value;
 }
 
+class NullableDaysTypeConverter extends TypeConverter<Days?, int?> {
+  const NullableDaysTypeConverter();
+
+  @override
+  Days? fromIsar(int? value) {
+    if (value == null) return null;
+    return Days.values.firstWhere((element) => element.value == value);
+  }
+
+  @override
+  int? toIsar(Days? day) => day?.value;
+}
+
 void main() {
   group('Int converter', () {
     late Isar isar;
@@ -99,41 +119,49 @@ void main() {
         offsettedInt: 0,
         day: Days.wednesday,
         otherDay: Days.sunday,
+        nullableDay: null,
       );
       obj1 = IntModel(
         offsettedInt: 24,
         day: Days.saturday,
         otherDay: Days.monday,
+        nullableDay: Days.tuesday,
       );
       obj2 = IntModel(
         offsettedInt: 42,
         day: Days.thursday,
         otherDay: Days.tuesday,
+        nullableDay: Days.sunday,
       );
       obj3 = IntModel(
         offsettedInt: -1024,
         day: Days.saturday,
         otherDay: Days.wednesday,
+        nullableDay: Days.friday,
       );
       obj4 = IntModel(
         offsettedInt: 2048,
         day: Days.monday,
         otherDay: Days.thursday,
+        nullableDay: null,
       );
       obj5 = IntModel(
         offsettedInt: -0,
         day: Days.sunday,
         otherDay: Days.friday,
+        nullableDay: null,
       );
       obj6 = IntModel(
         offsettedInt: 5673873209,
         day: Days.saturday,
         otherDay: Days.saturday,
+        nullableDay: Days.wednesday,
       );
       obj7 = IntModel(
         offsettedInt: 40,
         day: Days.friday,
         otherDay: Days.saturday,
+        nullableDay: null,
       );
 
       await isar.tWriteTxn(
@@ -239,6 +267,26 @@ void main() {
             .dayEqualToOtherDayNotEqualTo(Days.saturday, Days.wednesday)
             .tFindAll(),
         [obj1, obj6],
+      );
+    });
+
+    isarTest('Query by nullableDay', () async {
+      await qEqual(
+        isar.intModels.filter().nullableDayIsNull().tFindAll(),
+        [obj0, obj4, obj5, obj7],
+      );
+
+      await qEqual(
+        isar.intModels
+            .filter()
+            .nullableDayGreaterThan(Days.wednesday)
+            .tFindAll(),
+        [obj3],
+      );
+
+      await qEqual(
+        isar.intModels.filter().nullableDayEqualTo(Days.saturday).tFindAll(),
+        [],
       );
     });
   });

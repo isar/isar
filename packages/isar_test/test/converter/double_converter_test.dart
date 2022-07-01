@@ -149,6 +149,22 @@ void main() {
             .tFindAll(),
         [],
       );
+
+      await qEqual(
+        isar.doubleModels
+            .where()
+            .someIntEqualToValueLessThan(0, Values.first)
+            .tFindAll(),
+        [],
+      );
+
+      await qEqual(
+        isar.doubleModels
+            .where()
+            .someIntEqualToValueLessThan(0, Values.second)
+            .tFindAll(),
+        [obj1],
+      );
     });
   });
 }

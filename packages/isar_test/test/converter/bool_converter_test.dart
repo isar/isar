@@ -326,5 +326,34 @@ void main() {
         [childObj0],
       );
     });
+
+    isarTest('Sort by boolEnum', () async {
+      await qEqual(
+        isar.boolModels.where().sortByBoolEnum().tFindAll(),
+        [obj0, obj1, obj2],
+      );
+
+      await qEqual(
+        isar.boolModels.where().sortByBoolEnumDesc().tFindAll(),
+        [obj1, obj2, obj0],
+      );
+
+      await qEqual(
+        isar.childBoolModels.where().sortByBoolEnumDesc().tFindAll(),
+        [childObj0, childObj1, childObj2],
+      );
+    });
+
+    isarTest('Sort by mayBoolEnum', () async {
+      await qEqual(
+        isar.boolModels.where().sortByMaybeBoolEnum().tFindAll(),
+        [obj0, obj2, obj1],
+      );
+
+      await qEqual(
+        isar.boolModels.where().sortByMaybeBoolEnumDesc().tFindAll(),
+        [obj1, obj0, obj2],
+      );
+    });
   });
 }
