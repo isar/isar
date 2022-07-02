@@ -199,12 +199,7 @@ class _TableBlockState extends State<TableBlock> {
         controller: _treeViewController,
         shrinkWrap: true,
         nodeBuilder: (context, node) {
-          final data = node.data as TreeViewHelper;
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 5),
-            child: TableItem(data: data),
-          );
+          return TableItem(data: node.data as TreeViewHelper);
         },
         onExpansionChanged: (key, expanded) {
           _expanding(_treeViewController.getNode(key)!, expanded);
