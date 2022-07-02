@@ -36,6 +36,13 @@ class QueryParser {
           ),
         );
 
+    builder.group().left(
+      string('^').trim(),
+          (Object? l, _, Object? r) => FilterGroup.xor(
+        [l as FilterOperation, r as FilterOperation],
+      ),
+    );
+
     _parser = builder.build();
   }
   final List<IProperty> properties;
@@ -160,39 +167,4 @@ class QueryGrammar {
 
   static Parser<List<dynamic>> get condition =>
       identifier.trim() & cmpOperator.trim() & valueToken.trim();
-}
-
-class AndOr {
-  AndOr(this.conditions, this.and);
-  final List<dynamic> conditions;
-  final bool and;
-
-  AndOr flatten() {
-    final newConditions = <dynamic>[];
-    for (final condition in conditions) {
-      if (condition is AndOr) {
-        final flatCondition = condition.flatten();
-        if (flatCondition.and == and) {
-          newConditions.addAll(flatCondition.conditions);
-        } else {
-          newConditions.add(flatCondition);
-        }
-      } else {
-        newConditions.add(condition);
-      }
-    }
-    return AndOr(newConditions, and);
-  }
-
-  @override
-  String toString() {
-    String seperator;
-    if (and) {
-      seperator = ' && ';
-    } else {
-      seperator = ' || ';
-    }
-    final joined = conditions.join(seperator);
-    return '($joined)';
-  }
 }
