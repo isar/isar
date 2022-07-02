@@ -1,12 +1,23 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'util/common.dart';
+import '../util/common.dart';
 
-part 'converter_test.g.dart';
+part 'multiple_converter_test.g.dart';
 
 @Collection()
-class ConverterModel {
+class MultiConverterModel {
+  MultiConverterModel({
+    required this.id,
+    required this.boolValue,
+    required this.intValue,
+    required this.longValue,
+    required this.floatValue,
+    required this.doubleValue,
+    required this.dateValue,
+    required this.stringValue,
+  });
+
   @Id()
   int? id;
 
@@ -43,7 +54,7 @@ class ConverterModel {
   @override
   // ignore: hash_and_equals
   bool operator ==(Object other) {
-    if (other is ConverterModel) {
+    if (other is MultiConverterModel) {
       return boolValue == other.boolValue &&
           intValue == other.intValue &&
           longValue == other.longValue &&
@@ -128,15 +139,16 @@ class StringConverter extends TypeConverter<String, int> {
 }
 
 void main() {
-  final converterObject = ConverterModel()
-    ..id = 123
-    ..boolValue = true
-    ..intValue = 25
-    ..floatValue = 17.17
-    ..longValue = 123123
-    ..doubleValue = 123.123
-    ..dateValue = DateTime.fromMillisecondsSinceEpoch(123123)
-    ..stringValue = 'five';
+  final converterObject = MultiConverterModel(
+    id: 123,
+    boolValue: true,
+    intValue: 25,
+    floatValue: 17.17,
+    longValue: 123123,
+    doubleValue: 123.123,
+    dateValue: DateTime.fromMillisecondsSinceEpoch(123123),
+    stringValue: 'five',
+  );
 
   final converterObjectJson = <String, Object>{
     'id': 123,
@@ -149,29 +161,29 @@ void main() {
     'stringValue': 5,
   };
 
-  group('Converter', () {
-    /*isarTest('toIsar()', () async {
-      final isar = await openTempIsar([ConverterModelSchema]);
+  group('Multiple converter', () {
+    isarTest('toIsar()', () async {
+      final isar = await openTempIsar([MultiConverterModelSchema]);
 
       await isar.writeTxn(() async {
-        await isar.converterModels.put(_converterObject);
+        await isar.multiConverterModels.put(converterObject);
       });
 
-      final json = await isar.converterModels.where().exportJson();
-      expect(json[0], _converterObjectJson);
+      final json = await isar.multiConverterModels.where().exportJson();
+      expect(json[0], converterObjectJson);
 
       await isar.close();
-    });*/
+    });
 
     isarTest('fromIsar()', () async {
-      final isar = await openTempIsar([ConverterModelSchema]);
+      final isar = await openTempIsar([MultiConverterModelSchema]);
 
       await isar.writeTxn(() async {
-        await isar.converterModels.importJson([converterObjectJson]);
+        await isar.multiConverterModels.importJson([converterObjectJson]);
       });
 
       expect(
-        await isar.converterModels.get(123),
+        await isar.multiConverterModels.get(123),
         converterObject,
       );
 
