@@ -345,6 +345,8 @@ void main() {
       );
     });
 
+    tearDown(() => isar.close());
+
     isarTest('Query grandparent', () async {
       expect(
         GrandparentSchema.propertyIds.containsKey('ignoredFieldGrandparent'),
