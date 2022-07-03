@@ -9,7 +9,8 @@ enum ConnectAction {
   watchInstance('ext.isar.watchInstance'),
   executeQuery('ext.isar.executeQuery'),
   removeQuery('ext.isar.removeQuery'),
-  exportQuery('ext.isar.exportQuery');
+  exportQuery('ext.isar.exportQuery'),
+  exportJson('ext.isar.exportJson');
 
   const ConnectAction(this.method);
 

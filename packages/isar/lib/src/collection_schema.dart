@@ -124,7 +124,7 @@ class CollectionSchema<OBJ> {
     if (propertyId != null) {
       return propertyId;
     } else {
-      throw IsarError('Unknown propery "$propertyName"');
+      throw IsarError('Unknown property "$propertyName"');
     }
   }
 

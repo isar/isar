@@ -14,7 +14,7 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   final _textController = TextEditingController();
-  final urlRE = RegExp(r'^https:\/\/inspect\.isar\.dev\/#\/(\d+)\/(\w+)$');
+  final urlRE = RegExp(r'^https:\/\/inspect\.isar\.dev\/#\/(\d+)\/([\w-]+)$');
   String? _port;
   String? _secret;
   String? _error;
@@ -77,26 +77,11 @@ class _AppState extends State<App> {
                               errorText: _error,
                               labelText: 'Enter URL',
                             ),
+                            onSubmitted: (_) => _connect(),
                             style: GoogleFonts.sourceCodePro(),
                           ),
                           ElevatedButton(
-                            onPressed: () {
-                              final url = _textController.text.trim();
-                              if (!urlRE.hasMatch(url)) {
-                                setState(() {
-                                  _error = 'Invalid Url';
-                                });
-                                return;
-                              }
-
-                              final match = urlRE.firstMatch(url)!;
-
-                              setState(() {
-                                _port = match.group(1);
-                                _secret = match.group(2);
-                                _error = null;
-                              });
-                            },
+                            onPressed: _connect,
                             child: const Text('Connect'),
                           ),
                         ],
@@ -107,5 +92,23 @@ class _AppState extends State<App> {
         ),
       ),
     );
+  }
+
+  void _connect() {
+    final url = _textController.text.trim();
+    if (!urlRE.hasMatch(url)) {
+      setState(() {
+        _error = 'Invalid Url';
+      });
+      return;
+    }
+
+    final match = urlRE.firstMatch(url)!;
+
+    setState(() {
+      _port = match.group(1);
+      _secret = match.group(2);
+      _error = null;
+    });
   }
 }

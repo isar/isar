@@ -12,6 +12,7 @@ abstract class _IsarConnect {
     ConnectAction.watchInstance: _watchInstance,
     ConnectAction.executeQuery: _executeQuery,
     ConnectAction.removeQuery: _removeQuery,
+    ConnectAction.exportJson: _exportJson,
   };
 
   static bool _initialized = false;
@@ -159,6 +160,12 @@ abstract class _IsarConnect {
     final query = _getQuery(params);
     await query.isar.writeTxn(query.deleteAll);
     return true;
+  }
+
+  static Future<List<dynamic>> _exportJson(Map<String, dynamic> params) async {
+    final collection = Isar.getInstance(params['instance'] as String)!
+        .getCollectionByNameInternal(params['collection'] as String)!;
+    return collection.where().exportJson();
   }
 
   static Query<dynamic> _getQuery(Map<String, dynamic> params) {

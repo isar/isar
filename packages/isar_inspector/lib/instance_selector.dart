@@ -67,7 +67,7 @@ class _InstanceSelectorState extends ConsumerState<InstanceSelector>
                           InstanceButton(
                             instance: instance,
                             onTap: () {
-                              selectInstane(ref, instance);
+                              selectInstance(ref, instance);
                               _controller.reverse();
                             },
                           ),

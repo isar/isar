@@ -43,6 +43,7 @@ class IsarConnectStateNotifier
   }) : super(const AsyncValue.loading()) {
     connect();
   }
+
   static const Duration kNormalTimeout = Duration(seconds: 4);
   static const Duration kLongTimeout = Duration(seconds: 10);
 
@@ -161,6 +162,16 @@ class IsarConnectStateNotifier
       args: query.toJson(),
       timeout: kLongTimeout,
     );
+  }
+
+  Future<List<dynamic>> exportJson(String instance, String collection) async {
+    final data = await _call<List<dynamic>>(
+      ConnectAction.exportJson,
+      args: {'instance': instance, 'collection': collection},
+      timeout: kLongTimeout,
+    );
+
+    return data.cast();
   }
 
   Future<void> disconnect() async {

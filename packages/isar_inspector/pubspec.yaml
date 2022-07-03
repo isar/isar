@@ -7,6 +7,7 @@ environment:
 
 dependencies:
   dartx: ^1.0.0
+  file_picker: ^4.6.1
   flutter:
     sdk: flutter
   flutter_riverpod: ^2.0.0-dev.7
@@ -29,6 +30,8 @@ dev_dependencies:
   very_good_analysis: ^3.0.1
 
 dependency_overrides:
+  ffi: '>=2.0.0 <3.0.0'
+
   isar:
     path: ../isar
 

@@ -41,7 +41,7 @@ class QueryTable extends ConsumerWidget {
                 return Stack(
                   children: [
                     TableBlock(
-                      key: Key(objects[index].hashCode.toString()),
+                      key: ObjectKey(objects[index]),
                       collection: collection,
                       object: objects[index],
                     ),
@@ -97,7 +97,7 @@ class QueryTable extends ConsumerWidget {
 
 class TableBlock extends StatefulWidget {
   const TableBlock({
-    super.key,
+    required super.key,
     required this.collection,
     required this.object,
   });

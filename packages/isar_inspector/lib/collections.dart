@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_inspector/common.dart';
+import 'package:isar_inspector/desktop/download.dart'
+    if (dart.library.html) 'package:isar_inspector/web/download.dart';
 import 'package:isar_inspector/state/collections_state.dart';
+import 'package:isar_inspector/state/instances_state.dart';
+import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
 
 class CollectionsList extends ConsumerWidget {
   const CollectionsList({super.key});
@@ -12,11 +16,14 @@ class CollectionsList extends ConsumerWidget {
     final collections = ref.watch(collectionsPod).valueOrNull ?? [];
     final collectionInfo = ref.watch(collectionInfoPod);
     final selectedCollection = ref.watch(selectedCollectionPod).valueOrNull;
+    final isarConnect = ref.watch(isarConnectPod.notifier);
+    final selectedInstance = ref.watch(selectedInstancePod).value!;
 
     return ListView.builder(
       itemBuilder: (BuildContext context, int index) {
         final collection = collections.elementAt(index);
         final info = collectionInfo[collection.name];
+
         return SizedBox(
           height: 55,
           child: IsarCard(
@@ -26,7 +33,7 @@ class CollectionsList extends ConsumerWidget {
               ref.read(selectedCollectionNamePod.state).state = collection.name;
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
+              padding: const EdgeInsets.only(left: 25, right: 10),
               child: Row(
                 children: [
                   Text(
@@ -37,7 +44,7 @@ class CollectionsList extends ConsumerWidget {
                     ),
                   ),
                   const Spacer(),
-                  if (info != null)
+                  if (info != null) ...[
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -57,6 +64,29 @@ class CollectionsList extends ConsumerWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(width: 5),
+                  ],
+                  GestureDetector(
+                    onTap: () async {
+                      await download(
+                        await isarConnect.exportJson(
+                          selectedInstance,
+                          collection.name,
+                        ),
+                        '${selectedInstance}_${collection.name}.json',
+                      );
+                    },
+                    child: Tooltip(
+                      message: 'Download collection',
+                      child: Icon(
+                        Icons.download,
+                        size: 30,
+                        color: info != null && info.count == 0
+                            ? Colors.grey
+                            : null,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -9,7 +9,7 @@ final instancesPod = FutureProvider((ref) {
 
 final _selectedInstanceNamePod = StateProvider((ref) => 'isar');
 
-void selectInstane(WidgetRef ref, String instance) {
+void selectInstance(WidgetRef ref, String instance) {
   ref.read(_selectedInstanceNamePod.state).state = instance;
 }
 
