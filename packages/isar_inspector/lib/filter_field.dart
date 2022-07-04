@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:isar/isar.dart';
 
+import 'package:isar_inspector/desktop/download.dart'
+    if (dart.library.html) 'package:isar_inspector/web/download.dart';
 import 'package:isar_inspector/query_parser.dart';
 import 'package:isar_inspector/schema.dart';
 import 'package:isar_inspector/state/collections_state.dart';
@@ -60,6 +62,22 @@ class _FilterFieldState extends ConsumerState<FilterField> {
         ),
         const SizedBox(width: 20),
         ElevatedButton(
+          onPressed: () async {
+            final selectedCollection = ref.read(selectedCollectionPod).value!;
+            final filter = _parseFilter(selectedCollection);
+            final q = ConnectQuery(
+              instance: ref.read(selectedInstancePod).value!,
+              collection: selectedCollection.name,
+              filter: filter,
+            );
+
+            final data = await ref.read(isarConnectPod.notifier).exportJson(q);
+            await download(data, '${q.instance}_${q.collection}_query.json');
+          },
+          child: const Text('Download'),
+        ),
+        const SizedBox(width: 20),
+        ElevatedButton(
           onPressed: () {
             final selectedCollection = ref.read(selectedCollectionPod).value!;
             final filter = _parseFilter(selectedCollection);
@@ -71,7 +89,7 @@ class _FilterFieldState extends ConsumerState<FilterField> {
             ref.read(isarConnectPod.notifier).removeQuery(query);
           },
           child: const Text('Remove'),
-        )
+        ),
       ],
     );
   }

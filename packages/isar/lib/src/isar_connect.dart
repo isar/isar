@@ -163,9 +163,8 @@ abstract class _IsarConnect {
   }
 
   static Future<List<dynamic>> _exportJson(Map<String, dynamic> params) async {
-    final collection = Isar.getInstance(params['instance'] as String)!
-        .getCollectionByNameInternal(params['collection'] as String)!;
-    return collection.where().exportJson();
+    final query = _getQuery(params);
+    return query.exportJson();
   }
 
   static Query<dynamic> _getQuery(Map<String, dynamic> params) {

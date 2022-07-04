@@ -164,10 +164,10 @@ class IsarConnectStateNotifier
     );
   }
 
-  Future<List<dynamic>> exportJson(String instance, String collection) async {
+  Future<List<dynamic>> exportJson(ConnectQuery query) async {
     final data = await _call<List<dynamic>>(
       ConnectAction.exportJson,
-      args: {'instance': instance, 'collection': collection},
+      args: query.toJson(),
       timeout: kLongTimeout,
     );
 

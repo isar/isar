@@ -36,14 +36,19 @@ class CollectionsList extends ConsumerWidget {
               padding: const EdgeInsets.only(left: 25, right: 10),
               child: Row(
                 children: [
-                  Text(
-                    collection.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                  Expanded(
+                    child: Tooltip(
+                      message: collection.name,
+                      child: Text(
+                        collection.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ),
                   ),
-                  const Spacer(),
                   if (info != null) ...[
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -68,11 +73,15 @@ class CollectionsList extends ConsumerWidget {
                   ],
                   GestureDetector(
                     onTap: () async {
+                      final query = ConnectQuery(
+                        instance: selectedInstance,
+                        collection: collection.name,
+                      );
+
+                      final data = await isarConnect.exportJson(query);
+
                       await download(
-                        await isarConnect.exportJson(
-                          selectedInstance,
-                          collection.name,
-                        ),
+                        data,
                         '${selectedInstance}_${collection.name}.json',
                       );
                     },
