@@ -1,5 +1,6 @@
 import 'dart:core';
 
+import 'package:isar/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'schema.g.dart';
@@ -64,6 +65,7 @@ enum IsarType {
   Int,
   Float,
   Long,
+  Byte,
   Double,
   String,
   ByteList,
@@ -73,4 +75,43 @@ enum IsarType {
   DoubleList,
   StringList,
   BoolList;
+
+  bool get isList {
+    return const [
+      ByteList,
+      IntList,
+      FloatList,
+      LongList,
+      DoubleList,
+      StringList,
+      BoolList
+    ].contains(this);
+  }
+
+  IsarType get childType {
+    //ignore: missing_enum_constant_in_switch
+    switch (this) {
+      case ByteList:
+        return Byte;
+
+      case IntList:
+        return Int;
+
+      case FloatList:
+        return Float;
+
+      case LongList:
+        return Long;
+
+      case DoubleList:
+        return Double;
+
+      case StringList:
+        return String;
+
+      case BoolList:
+        return Bool;
+    }
+    throw IsarError('new IsarType ($name), rule not defined');
+  }
 }

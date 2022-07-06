@@ -13,9 +13,11 @@ abstract class _IsarConnect {
     ConnectAction.executeQuery: _executeQuery,
     ConnectAction.removeQuery: _removeQuery,
     ConnectAction.exportJson: _exportJson,
+    ConnectAction.editProperty: _editProperty,
   };
 
   static bool _initialized = false;
+
   // ignore: cancel_subscriptions
   static StreamSubscription<void>? _querySubscription;
   static final List<StreamSubscription<void>> _collectionSubscriptions =
@@ -165,6 +167,34 @@ abstract class _IsarConnect {
   static Future<List<dynamic>> _exportJson(Map<String, dynamic> params) async {
     final query = _getQuery(params);
     return query.exportJson();
+  }
+
+  static Future<bool> _editProperty(
+    Map<String, dynamic> params,
+  ) async {
+    final cEdit = ConnectEdit.fromJson(params);
+    final collection = Isar.getInstance(cEdit.instance)!
+        .getCollectionByNameInternal(cEdit.collection)!;
+
+    final query = collection.buildQuery<dynamic>(
+      whereClauses: [IdWhereClause.equalTo(value: cEdit.id)],
+    );
+
+    final objects = await query.exportJson();
+
+    if (objects.isEmpty || !objects[0].containsKey(cEdit.property)) {
+      throw IsarError('Cant get object or property is wrong for edit');
+    }
+
+    if (cEdit.index == null) {
+      objects[0][cEdit.property] = cEdit.value;
+    } else {
+      //ignore: avoid_dynamic_calls
+      objects[0][cEdit.property][cEdit.index] = cEdit.value;
+    }
+
+    await collection.isar.writeTxn(() async => collection.importJson(objects));
+    return true;
   }
 
   static Query<dynamic> _getQuery(Map<String, dynamic> params) {

@@ -5,6 +5,7 @@ import 'package:flutter_treeview/flutter_treeview.dart';
 import 'package:isar/isar.dart';
 
 import 'package:isar_inspector/common.dart';
+import 'package:isar_inspector/edit_popup.dart';
 import 'package:isar_inspector/prev_next.dart';
 import 'package:isar_inspector/schema.dart';
 import 'package:isar_inspector/state/collections_state.dart';
@@ -17,6 +18,13 @@ const _numberColor = Color(0xFF6897BB);
 const _boolColor = Color(0xFFCC7832);
 const _disableColor = Colors.grey;
 
+typedef Editor = void Function(
+  int id,
+  String property,
+  int? index,
+  dynamic value,
+);
+
 class QueryTable extends ConsumerWidget {
   QueryTable({super.key});
 
@@ -26,6 +34,11 @@ class QueryTable extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final collection = ref.watch(selectedCollectionPod).value!;
     final objects = ref.watch(queryResultsPod).value?.objects ?? [];
+
+    if (objects.isEmpty ||
+        collection.allProperties.length != objects[0].data.length) {
+      return Container();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -41,9 +54,21 @@ class QueryTable extends ConsumerWidget {
                 return Stack(
                   children: [
                     TableBlock(
-                      key: ObjectKey(objects[index]),
+                      key: ValueKey('${collection.name}'
+                          '_${objects[index].getValue(collection.idName)}'),
                       collection: collection,
                       object: objects[index],
+                      editor: (id, property, index, value) {
+                        final edit = ConnectEdit(
+                          instance: ref.read(selectedInstancePod).value!,
+                          collection: collection.name,
+                          id: id,
+                          property: property,
+                          index: index,
+                          value: value,
+                        );
+                        ref.read(isarConnectPod.notifier).editProperty(edit);
+                      },
                     ),
                     Align(
                       alignment: Alignment.topLeft,
@@ -100,94 +125,24 @@ class TableBlock extends StatefulWidget {
     required super.key,
     required this.collection,
     required this.object,
+    required this.editor,
   });
 
   final ICollection collection;
   final QueryObject object;
+  final Editor editor;
 
   @override
   State<TableBlock> createState() => _TableBlockState();
 }
 
 class _TableBlockState extends State<TableBlock> {
-  late TreeViewController _treeViewController = TreeViewController(
-    children: widget.collection.allProperties.map((property) {
-      final children = <Node<TreeViewHelper>>[];
-      final rawValue = widget.object.getValue(property.name);
-      String value;
-      Color color;
-
-      switch (property.type) {
-        case IsarType.Bool:
-          value = rawValue.toString();
-          color = _boolColor;
-          break;
-
-        case IsarType.Int:
-        case IsarType.Float:
-        case IsarType.Long:
-        case IsarType.Double:
-          value = rawValue.toString();
-          color = _numberColor;
-          break;
-
-        case IsarType.String:
-          value = '"$rawValue"';
-          color = _stringColor;
-          break;
-
-        case IsarType.ByteList:
-        case IsarType.IntList:
-        case IsarType.FloatList:
-        case IsarType.BoolList:
-        case IsarType.LongList:
-        case IsarType.DoubleList:
-        case IsarType.StringList:
-          final list = rawValue as List<dynamic>;
-
-          value = '${property.type.toString().replaceAll('IsarType.', '')}'
-              ' [${list.length}]';
-          color = _disableColor;
-
-          for (var index = 0; index < list.length; index++) {
-            children.add(
-              Node(
-                key: '${property.name}_$index',
-                label: '',
-                data: TreeViewHelper(
-                  name: index.toString(),
-                  value: property.type == IsarType.StringList
-                      ? '"${list[index]}"'
-                      : list[index].toString(),
-                  rawValue: list[index],
-                  valueColor: property.type == IsarType.StringList
-                      ? _stringColor
-                      : property.type == IsarType.BoolList
-                          ? _boolColor
-                          : _numberColor,
-                ),
-              ),
-            );
-          }
-          break;
-      }
-
-      return Node<TreeViewHelper>(
-        key: property.name,
-        label: '',
-        children: children,
-        data: TreeViewHelper(
-          name: property.name,
-          value: value,
-          rawValue: rawValue,
-          valueColor: color,
-        ),
-      );
-    }).toList(),
-  );
+  late final int _id = widget.object.getValue(widget.collection.idName) as int;
+  TreeViewController _treeViewController = TreeViewController();
 
   @override
   Widget build(BuildContext context) {
+    _updateNodes();
     return IsarCard(
       color: const Color(0xFF1F2128),
       padding: const EdgeInsets.fromLTRB(25, 15, 15, 15),
@@ -199,7 +154,11 @@ class _TableBlockState extends State<TableBlock> {
         controller: _treeViewController,
         shrinkWrap: true,
         nodeBuilder: (context, node) {
-          return TableItem(data: node.data as TreeViewHelper);
+          return TableItem(
+            data: node.data as TreeViewHelper,
+            editor: widget.editor,
+            objectId: _id,
+          );
         },
         onExpansionChanged: (key, expanded) {
           _expanding(_treeViewController.getNode(key)!, expanded);
@@ -222,12 +181,59 @@ class _TableBlockState extends State<TableBlock> {
       );
     });
   }
+
+  void _updateNodes() {
+    _treeViewController = _treeViewController.copyWith(
+      children: widget.collection.allProperties.map((property) {
+        final children = <Node<TreeViewHelper>>[];
+        final value = widget.object.getValue(property.name);
+
+        if (property.type.isList) {
+          final list = value as List<dynamic>;
+
+          for (var index = 0; index < list.length; index++) {
+            children.add(
+              Node(
+                key: '${property.name}_$index',
+                label: '',
+                data: TreeViewHelper(
+                  property: IProperty(
+                    name: property.name,
+                    type: property.type.childType,
+                  ),
+                  value: list[index],
+                  index: index,
+                ),
+              ),
+            );
+          }
+        }
+
+        return Node<TreeViewHelper>(
+          key: property.name,
+          label: '',
+          children: children,
+          data: TreeViewHelper(
+            property: property,
+            value: value,
+          ),
+        );
+      }).toList(),
+    );
+  }
 }
 
 class TableItem extends StatefulWidget {
-  const TableItem({super.key, required this.data});
+  const TableItem({
+    super.key,
+    required this.data,
+    required this.editor,
+    required this.objectId,
+  });
 
   final TreeViewHelper data;
+  final int objectId;
+  final Editor editor;
 
   @override
   State<TableItem> createState() => _TableItemState();
@@ -238,24 +244,6 @@ class _TableItemState extends State<TableItem> {
 
   @override
   Widget build(BuildContext context) {
-    final richText = RichText(
-      overflow: TextOverflow.ellipsis,
-      text: TextSpan(
-        text: '${widget.data.name}: ',
-        style: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-        children: [
-          TextSpan(
-            text: widget.data.value,
-            style: TextStyle(color: widget.data.valueColor),
-          )
-        ],
-      ),
-    );
-
     return MouseRegion(
       onEnter: (_) {
         setState(() {
@@ -272,20 +260,53 @@ class _TableItemState extends State<TableItem> {
         child: Row(
           children: [
             Expanded(
-              child: widget.data.rawValue is String
+              child: widget.data.value is String
                   ? Tooltip(
-                      message: widget.data.value,
-                      child: richText,
+                      message: widget.data.value.toString(),
+                      child: _createText(),
                     )
-                  : richText,
+                  : _createText(),
             ),
-            if (_entered)
-              InkWell(
+            if (_entered) ...[
+              if (!widget.data.property.isId &&
+                  !widget.data.property.type.isList) ...[
+                GestureDetector(
+                  onTap: () async {
+                    final result = await showDialog<Map<String, dynamic>?>(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          content: EditPopup(
+                            type: widget.data.property.type,
+                            value: widget.data.value,
+                            enableNull: widget.data.index == null,
+                          ),
+                        );
+                      },
+                    );
+
+                    if (result != null) {
+                      widget.editor(
+                        widget.objectId,
+                        widget.data.property.name,
+                        widget.data.index,
+                        result['value'],
+                      );
+                    }
+                  },
+                  child: const Tooltip(
+                    message: 'Edit property',
+                    child: Icon(Icons.edit, size: 18),
+                  ),
+                ),
+                const SizedBox(width: 10),
+              ],
+              GestureDetector(
                 onTap: () async {
                   ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
                   await Clipboard.setData(
-                    ClipboardData(text: widget.data.rawValue.toString()),
+                    ClipboardData(text: widget.data.value.toString()),
                   );
 
                   if (mounted) {
@@ -313,8 +334,69 @@ class _TableItemState extends State<TableItem> {
                   ),
                 ),
               ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _createText() {
+    var value = '';
+    var color = Colors.white;
+
+    if (widget.data.value == null) {
+      value = 'null';
+      color = _boolColor;
+    } else {
+      switch (widget.data.property.type) {
+        case IsarType.Bool:
+          value = widget.data.value.toString();
+          color = _boolColor;
+          break;
+
+        case IsarType.Byte:
+        case IsarType.Int:
+        case IsarType.Float:
+        case IsarType.Long:
+        case IsarType.Double:
+          value = widget.data.value.toString();
+          color = _numberColor;
+          break;
+
+        case IsarType.String:
+          value = '"${widget.data.value.toString().replaceAll('\n', '⤵')}"';
+          color = _stringColor;
+          break;
+
+        case IsarType.ByteList:
+        case IsarType.IntList:
+        case IsarType.FloatList:
+        case IsarType.LongList:
+        case IsarType.DoubleList:
+        case IsarType.StringList:
+        case IsarType.BoolList:
+          value = '${widget.data.property.type.name}'
+              ' [${(widget.data.value as List).length}]';
+          color = _disableColor;
+      }
+    }
+
+    return RichText(
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(
+        text: '${widget.data.index ?? widget.data.property.name}: ',
+        style: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+        children: [
+          TextSpan(
+            text: value,
+            style: TextStyle(color: color),
+          ),
+        ],
       ),
     );
   }
@@ -322,14 +404,12 @@ class _TableItemState extends State<TableItem> {
 
 class TreeViewHelper {
   const TreeViewHelper({
-    required this.name,
+    required this.property,
     required this.value,
-    required this.rawValue,
-    required this.valueColor,
+    this.index,
   });
 
-  final String name;
-  final String value;
-  final dynamic rawValue;
-  final Color valueColor;
+  final IProperty property;
+  final dynamic value;
+  final int? index;
 }

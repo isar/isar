@@ -10,7 +10,8 @@ enum ConnectAction {
   executeQuery('ext.isar.executeQuery'),
   removeQuery('ext.isar.removeQuery'),
   exportQuery('ext.isar.exportQuery'),
-  exportJson('ext.isar.exportJson');
+  exportJson('ext.isar.exportJson'),
+  editProperty('ext.isar.editProperty');
 
   const ConnectAction(this.method);
 
@@ -120,6 +121,46 @@ class ConnectQuery {
     } else {
       throw UnimplementedError();
     }
+  }
+}
+
+class ConnectEdit {
+  ConnectEdit({
+    required this.instance,
+    required this.collection,
+    required this.id,
+    required this.property,
+    this.index,
+    required this.value,
+  });
+
+  factory ConnectEdit.fromJson(Map<String, dynamic> json) {
+    return ConnectEdit(
+      instance: json['instance'] as String,
+      collection: json['collection'] as String,
+      id: json['id'] as int,
+      index: json['index'] as int?,
+      property: json['property'] as String,
+      value: json['value'],
+    );
+  }
+
+  final String instance;
+  final String collection;
+  final int id;
+  final String property;
+  final int? index;
+  final dynamic value;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'instance': instance,
+      'collection': collection,
+      'id': id,
+      'index': index,
+      'property': property,
+      'value': value,
+    };
   }
 }
 

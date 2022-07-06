@@ -174,6 +174,14 @@ class IsarConnectStateNotifier
     return data.cast();
   }
 
+  Future<void> editProperty(ConnectEdit edit) async {
+    await _call<dynamic>(
+      ConnectAction.editProperty,
+      args: edit.toJson(),
+      timeout: kLongTimeout,
+    );
+  }
+
   Future<void> disconnect() async {
     await state.value?.vmService.dispose();
   }
