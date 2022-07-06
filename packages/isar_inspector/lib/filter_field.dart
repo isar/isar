@@ -56,7 +56,7 @@ class _FilterFieldState extends ConsumerState<FilterField> {
             final selectedCollection = ref.read(selectedCollectionPod).value!;
             final filter = _parseFilter(selectedCollection);
             ref.read(queryFilterPod.state).state = filter;
-            ref.read(queryPagePod.state).state = 0;
+            ref.read(queryPagePod.state).state = 1;
           },
           child: const Text('Query'),
         ),

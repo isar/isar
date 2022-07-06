@@ -72,6 +72,9 @@ class App extends StatelessWidget {
             secondary: Colors.blue,
             brightness: Brightness.dark,
           ),
+          scrollbarTheme: ScrollbarThemeData(
+            thumbColor: MaterialStateProperty.all(Colors.grey),
+          ),
         ),
       ),
     );

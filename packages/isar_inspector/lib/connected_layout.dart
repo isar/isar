@@ -37,9 +37,9 @@ class _ConnectedLayoutState extends ConsumerState<ConnectedLayout> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const FilterField(),
-                const SizedBox(height: 25),
+              children: const [
+                FilterField(),
+                SizedBox(height: 25),
                 Expanded(
                   child: QueryTable(),
                 ),

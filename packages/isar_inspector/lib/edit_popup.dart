@@ -85,7 +85,7 @@ class _EditPopupState extends State<EditPopup> {
             ),
             const SizedBox(height: 15),
           ],
-          if (widget.type == IsarType.Bool) ...[
+          if (widget.type == IsarType.Bool)
             DropdownButtonHideUnderline(
               child: DropdownButton<bool>(
                 value: _boolValue,
@@ -109,10 +109,8 @@ class _EditPopupState extends State<EditPopup> {
                         }
                       },
               ),
-            ),
-            const SizedBox(height: 15),
-          ],
-          if (widget.type != IsarType.Bool) ...[
+            )
+          else
             Form(
               key: _formKey,
               child: TextFormField(
@@ -145,8 +143,7 @@ class _EditPopupState extends State<EditPopup> {
                 onFieldSubmitted: (_) => _save(),
               ),
             ),
-            const SizedBox(height: 15),
-          ],
+          const SizedBox(height: 15),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [

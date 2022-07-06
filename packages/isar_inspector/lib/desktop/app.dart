@@ -44,6 +44,9 @@ class _AppState extends State<App> {
             secondary: Colors.blue,
             brightness: Brightness.dark,
           ),
+          scrollbarTheme: ScrollbarThemeData(
+            thumbColor: MaterialStateProperty.all(Colors.grey),
+          ),
         ),
         home: ColoredPage(
           child: _port != null

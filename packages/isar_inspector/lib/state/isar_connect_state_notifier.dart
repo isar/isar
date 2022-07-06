@@ -147,13 +147,12 @@ class IsarConnectStateNotifier
     );
   }
 
-  Future<List<Map<String, Object?>>> executeQuery(ConnectQuery query) async {
-    final objects = await _call<List<dynamic>>(
+  Future<Map<String, Object?>> executeQuery(ConnectQuery query) async {
+    return _call<Map<String, Object?>>(
       ConnectAction.executeQuery,
       args: query.toJson(),
       timeout: kLongTimeout,
     );
-    return objects.cast();
   }
 
   Future<void> removeQuery(ConnectQuery query) async {

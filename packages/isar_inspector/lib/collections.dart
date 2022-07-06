@@ -6,6 +6,7 @@ import 'package:isar_inspector/desktop/download.dart'
 import 'package:isar_inspector/state/collections_state.dart';
 import 'package:isar_inspector/state/instances_state.dart';
 import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
+import 'package:isar_inspector/state/query_state.dart';
 
 class CollectionsList extends ConsumerWidget {
   const CollectionsList({super.key});
@@ -30,7 +31,12 @@ class CollectionsList extends ConsumerWidget {
             color: collection == selectedCollection ? theme.primaryColor : null,
             radius: BorderRadius.circular(60),
             onTap: () {
-              ref.read(selectedCollectionNamePod.state).state = collection.name;
+              if (ref.read(selectedCollectionNamePod.state).state !=
+                  collection.name) {
+                ref.read(selectedCollectionNamePod.state).state =
+                    collection.name;
+                ref.read(queryPagePod.state).state = 1;
+              }
             },
             child: Padding(
               padding: const EdgeInsets.only(left: 25, right: 10),

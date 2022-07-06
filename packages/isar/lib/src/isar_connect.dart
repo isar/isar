@@ -137,25 +137,28 @@ abstract class _IsarConnect {
     );
   }
 
-  static Future<List<Map<String, dynamic>>> _executeQuery(
+  static Future<Map<String, dynamic>> _executeQuery(
     Map<String, dynamic> params,
   ) async {
     if (_querySubscription != null) {
       unawaited(_querySubscription!.cancel());
     }
     _querySubscription = null;
-    if (params.isEmpty) {
-      return <Map<String, dynamic>>[];
-    }
 
     final query = _getQuery(params);
+    params.remove('limit');
+    params.remove('offset');
+    final countQuery = _getQuery(params);
 
     final stream = query.watchLazy();
     _querySubscription = stream.listen((event) {
       postEvent(ConnectEvent.queryChanged.event, {});
     });
 
-    return query.exportJson();
+    return {
+      'results': await query.exportJson(),
+      'count': await countQuery.count(),
+    };
   }
 
   static Future<bool> _removeQuery(Map<String, dynamic> params) async {

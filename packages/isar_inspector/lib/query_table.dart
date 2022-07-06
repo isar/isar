@@ -26,9 +26,7 @@ typedef Editor = void Function(
 );
 
 class QueryTable extends ConsumerWidget {
-  QueryTable({super.key});
-
-  final _controller = ScrollController();
+  const QueryTable({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,73 +42,69 @@ class QueryTable extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-          child: RawScrollbar(
-            controller: _controller,
-            thumbColor: Colors.grey,
-            child: ListView.separated(
-              controller: _controller,
-              itemCount: objects.length,
-              itemBuilder: (context, index) {
-                return Stack(
-                  children: [
-                    TableBlock(
-                      key: ValueKey('${collection.name}'
-                          '_${objects[index].getValue(collection.idName)}'),
-                      collection: collection,
-                      object: objects[index],
-                      editor: (id, property, index, value) {
-                        final edit = ConnectEdit(
-                          instance: ref.read(selectedInstancePod).value!,
-                          collection: collection.name,
-                          id: id,
-                          property: property,
-                          index: index,
-                          value: value,
-                        );
-                        ref.read(isarConnectPod.notifier).editProperty(edit);
-                      },
-                    ),
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 10, right: 10),
-                        child: Tooltip(
-                          message: 'Delete object',
-                          child: IconButton(
-                            icon: const Icon(Icons.delete),
-                            splashRadius: 25,
-                            onPressed: () {
-                              final collection =
-                                  ref.read(selectedCollectionPod).valueOrNull;
-                              if (collection == null) {
-                                return;
-                              }
+          child: ListView.separated(
+            controller: ScrollController(),
+            itemCount: objects.length,
+            itemBuilder: (context, index) {
+              return Stack(
+                children: [
+                  TableBlock(
+                    key: ValueKey('${collection.name}'
+                        '_${objects[index].getValue(collection.idName)}'),
+                    collection: collection,
+                    object: objects[index],
+                    editor: (id, property, index, value) {
+                      final edit = ConnectEdit(
+                        instance: ref.read(selectedInstancePod).value!,
+                        collection: collection.name,
+                        id: id,
+                        property: property,
+                        index: index,
+                        value: value,
+                      );
+                      ref.read(isarConnectPod.notifier).editProperty(edit);
+                    },
+                  ),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10, right: 10),
+                      child: Tooltip(
+                        message: 'Delete object',
+                        child: IconButton(
+                          icon: const Icon(Icons.delete),
+                          splashRadius: 25,
+                          onPressed: () {
+                            final collection =
+                                ref.read(selectedCollectionPod).valueOrNull;
+                            if (collection == null) {
+                              return;
+                            }
 
-                              final query = ConnectQuery(
-                                instance: ref.read(selectedInstancePod).value!,
-                                collection: collection.name,
-                                filter: FilterCondition.equalTo(
-                                  property: collection.idName,
-                                  value: objects[index].getValue(
-                                    collection.idName,
-                                  ),
+                            final query = ConnectQuery(
+                              instance: ref.read(selectedInstancePod).value!,
+                              collection: collection.name,
+                              filter: FilterCondition.equalTo(
+                                property: collection.idName,
+                                value: objects[index].getValue(
+                                  collection.idName,
                                 ),
-                              );
-                              ref
-                                  .read(isarConnectPod.notifier)
-                                  .removeQuery(query);
-                            },
-                          ),
+                              ),
+                            );
+                            ref
+                                .read(isarConnectPod.notifier)
+                                .removeQuery(query);
+                          },
                         ),
                       ),
                     ),
-                  ],
-                );
-              },
-              separatorBuilder: (BuildContext context, int index) {
-                return const SizedBox(height: 15);
-              },
-            ),
+                  ),
+                ],
+              );
+            },
+            separatorBuilder: (BuildContext context, int index) {
+              return const SizedBox(height: 15);
+            },
           ),
         ),
         const SizedBox(height: 20),
