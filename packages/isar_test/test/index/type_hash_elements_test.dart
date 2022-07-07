@@ -111,12 +111,6 @@ void main() {
           .stringListSensitiveIndexElementEqualTo('')
           .tFindAll();
       expect(result2, [model0]);
-
-      final result3 = await isar.hashElementsIndexesModels
-          .where()
-          .anyStringListSensitiveIndexElement()
-          .tFindAll();
-      expect(result3, {model0, model1, model3, model4});
     });
 
     isarTest('Query List<String> insensitive index', () async {

@@ -61,7 +61,34 @@ jobs:
           dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
           flutter test -j 1
+          flutter test -j 1 test_flutter
         working-directory: packages/isar_test
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - name: Prepare Unit tests
+        run: |
+          flutter pub get
+          dart tool/generate_long_double_test.dart
+          flutter pub run build_runner build
+        working-directory: packages/isar_test
+      - name: Collect isar Coverage
+        run: |
+          flutter test --coverage
+        working-directory: packages/isar
+      - uses: codecov/codecov-action@v3
+        with:
+          files: packages/isar/coverage/lcov.info
+      - name: Collect isar_test Coverage
+        run: |
+          flutter test --coverage ../isar_test/test
+        working-directory: packages/isar
+      - uses: codecov/codecov-action@v3
+        with:
+          files: packages/isar/coverage/lcov.info
 
   test_generator:
     runs-on: ubuntu-latest

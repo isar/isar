@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -46,14 +44,8 @@ int testCount = 0;
 Future<void> _prepareTest() async {
   if (!kIsWeb) {
     try {
-      await Isar.initializeIsarCore(download: true, libraries: {
-        Abi.current():
-            '/Users/simon/Documents/GitHub/isar-core/dart-ffi/target/x86_64-apple-darwin/debug/libisar.dylib'
-      });
+      await Isar.initializeIsarCore(download: true);
     } catch (e) {
-      if (kDebugMode) {
-        print('Could not initialize isar core: $e');
-      }
       // ignore. maybe this is an instrumentation test
     }
   }

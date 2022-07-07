@@ -25,9 +25,9 @@ const nullFloat = double.nan;
 const nullDouble = double.nan;
 final nullDate = DateTime.fromMillisecondsSinceEpoch(0);
 
-const nullBool = IsarObject_NULL_BYTE;
-const falseBool = IsarObject_FALSE_BYTE;
-const trueBool = IsarObject_TRUE_BYTE;
+const nullBool = IsarObject_NULL_BOOL;
+const falseBool = IsarObject_FALSE_BOOL;
+const trueBool = IsarObject_TRUE_BOOL;
 
 const String _githubUrl = 'https://github.com/isar/isar-core/releases/download';
 

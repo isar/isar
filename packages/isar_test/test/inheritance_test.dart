@@ -1,10 +1,12 @@
-import 'package:isar/isar.dart';
+void main() {}
+
+/*import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import 'util/common.dart';
 import 'util/sync_async_helper.dart';
 
-/*part 'inheritance_test.g.dart';
+part 'inheritance_test.g.dart';
 
 abstract class Person {
   Person({
@@ -27,7 +29,7 @@ class Grandparent extends Person {
     required super.age,
   });
 
-  @Ignore()
+  @ignore
   String? ignoredFieldGrandparent;
 
   final friends = IsarLinks<Friend>();
@@ -81,7 +83,7 @@ class Child extends Parent {
   }) : super(jobTitle: null);
 
   @override
-  @Ignore()
+  @ignore
   // ignore: overridden_fields
   String? jobTitle;
 
@@ -470,7 +472,7 @@ void main() {
         false,
       );
 
-      // FIXME: overriding a property and adding @Ignore() to it is not working
+      // FIXME: overriding a property and adding @ignore to it is not working
       // Query methods are also generated for the ignored property
       expect(
         ChildSchema.propertyIds.containsKey('jobTitle'),

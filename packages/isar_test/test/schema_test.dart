@@ -21,10 +21,10 @@ class SchemaTestModel {
   @Index(unique: true, replace: true)
   bool get someGetter => false;
 
-  @Ignore()
+  @ignore
   late bool someOtherField;
 
-  @Ignore()
+  @ignore
   bool get someOtherGetter => false;
 
   @Index()
@@ -55,15 +55,23 @@ class SchemaTestModel {
 
   @Index(name: 'stringFieldValue', type: IndexType.value)
   @Index(name: 'stringFieldHashed')
-  @Index(name: 'stringFieldCaseSensitive', caseSensitive: true)
+  @Index(name: 'stringFieldCaseSensitive')
   @Index(name: 'stringFieldCaseInsensitive', caseSensitive: false)
   late String stringField;
 
   @Index(name: 'stringGetterValue', type: IndexType.value)
   @Index(name: 'stringGetterHashed')
-  @Index(name: 'stringGetterCaseSensitive', caseSensitive: true)
+  @Index(name: 'stringGetterCaseSensitive')
   @Index(name: 'stringGetterCaseInsensitive', caseSensitive: false)
   String get stringGetter => '';
+
+  @Index(name: 'boolListFieldValue', type: IndexType.value)
+  @Index(name: 'boolListFieldHash')
+  late List<bool> boolListField;
+
+  @Index(name: 'boolListGetterValue', type: IndexType.value)
+  @Index(name: 'boolListGetterHash')
+  List<bool> get boolListGetter => [];
 
   @Index()
   late Uint8List bytesField;
@@ -76,14 +84,6 @@ class SchemaTestModel {
 
   @Index()
   List<byte> get bytesGetter2 => [];
-
-  @Index(name: 'boolListFieldValue')
-  @Index(name: 'boolListFieldHash', type: IndexType.hash)
-  late List<bool> boolListField;
-
-  @Index(name: 'boolListGetterValue')
-  @Index(name: 'boolListGetterHash', type: IndexType.hash)
-  List<bool> get boolListGetter => [];
 
   late List<short> intListField;
 
@@ -102,9 +102,9 @@ class SchemaTestModel {
   List<double> get doubleListGetter => [];
 
   @Index(name: 'stringListFieldValue', type: IndexType.value)
-  @Index(name: 'stringListFieldHashed', type: IndexType.hash)
-  @Index(name: 'stringListFieldHashedElements')
-  @Index(name: 'stringListFieldCaseSensitive', caseSensitive: true)
+  @Index(name: 'stringListFieldHashed')
+  @Index(name: 'stringListFieldHashedElements', type: IndexType.hashElements)
+  @Index(name: 'stringListFieldCaseSensitive')
   @Index(name: 'stringListFieldCaseInsensitive', caseSensitive: false)
   late List<String> stringListField;
 
@@ -333,7 +333,7 @@ void main() {
             'unique': false,
             'replace': false,
             'properties': [
-              {'name': 'boolListField', 'type': 'Hash', 'caseSensitive': false}
+              {'name': 'boolListField', 'type': 'Value', 'caseSensitive': false}
             ]
           },
           {
@@ -349,7 +349,11 @@ void main() {
             'unique': false,
             'replace': false,
             'properties': [
-              {'name': 'boolListGetter', 'type': 'Hash', 'caseSensitive': false}
+              {
+                'name': 'boolListGetter',
+                'type': 'Value',
+                'caseSensitive': false
+              }
             ]
           },
           {
@@ -683,7 +687,11 @@ void main() {
             'unique': false,
             'replace': false,
             'properties': [
-              {'name': 'stringListField', 'type': 'Hash', 'caseSensitive': true}
+              {
+                'name': 'stringListField',
+                'type': 'HashElements',
+                'caseSensitive': true
+              }
             ]
           },
           {

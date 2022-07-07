@@ -1,3 +1,5 @@
+void main() {}
+
 /*import 'package:collection/collection.dart' show IterableExtension;
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
