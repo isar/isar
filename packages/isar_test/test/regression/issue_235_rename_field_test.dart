@@ -16,7 +16,7 @@ class Col1 {
     this.numberText2 = 'Default Value2',
     this.numberText1 = 'Default Value1',
   });
-  int? id;
+  Id? id;
 
   int number;
 
@@ -35,7 +35,7 @@ class Col2 {
     this.numberText22,
     this.numberText1,
   });
-  int id;
+  Id id;
 
   int? number;
 

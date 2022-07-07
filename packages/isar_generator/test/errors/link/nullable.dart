@@ -4,12 +4,12 @@ import 'package:isar/isar.dart';
 
 @Collection()
 class Model {
-  int? id;
+  Id? id;
 
   IsarLink<Model2>? link;
 }
 
 @Collection()
 class Model2 {
-  int? id;
+  Id? id;
 }

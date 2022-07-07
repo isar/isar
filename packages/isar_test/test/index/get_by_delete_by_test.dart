@@ -8,7 +8,7 @@ part 'get_by_delete_by_test.g.dart';
 @Collection()
 class Model {
   Model({required this.id, required this.guid, required this.content});
-  final int? id;
+  final Id? id;
 
   @Index(unique: true, type: IndexType.value)
   final String guid;

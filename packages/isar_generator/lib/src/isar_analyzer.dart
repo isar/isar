@@ -28,7 +28,16 @@ class IsarAnalyzer {
         .firstOrNullWhere((ConstructorElement c) => c.periodOffset == null);
 
     if (constructor == null) {
-      err('Class needs an unnamed constructor.');
+      err('Class needs an unnamed constructor.', modelClass);
+    }
+
+    final hasCollectionSupertype = modelClass.allSupertypes
+        .any((type) => type.element.collectionAnnotation != null);
+    if (hasCollectionSupertype) {
+      err(
+        'Class must not have a supertype annotated with @Collection.',
+        modelClass,
+      );
     }
 
     final properties = <ObjectProperty>[];
@@ -64,29 +73,18 @@ class IsarAnalyzer {
       err('Two or more indexes have the same name.', modelClass);
     }
 
-    final idProperties = properties.where((ObjectProperty it) => it.isId);
-    var idProperty = idProperties.firstOrNull;
-    if (idProperty == null) {
-      for (var i = 0; i < properties.length; i++) {
-        final property = properties[i];
-        if (property.isarName == 'id' &&
-            property.converter == null &&
-            property.isarType == IsarType.long) {
-          idProperty = properties[i].copyWithIsId(true);
-          properties[i] = idProperty;
-          break;
-        }
-      }
-    }
-
-    if (idProperty == null) {
-      err('No int property named "id" or annotated with @Id().', modelClass);
+    final idProperties =
+        properties.where((ObjectProperty it) => it.isarType == IsarType.id);
+    if (idProperties.isEmpty) {
+      err(
+        'No id property defined. Use the "Id" typedef '
+        'as type for your id property.',
+        modelClass,
+      );
     } else if (idProperties.length > 1) {
-      err('Two or more properties annotated with @Id().', modelClass);
-    } else if (idProperty.converter != null) {
+      err('Two or more properties with type "Id" defined.', modelClass);
+    } else if (idProperties.first.converter != null) {
       err('Converters are not allowed for ids.', modelClass);
-    } else if (idProperty.isarType != IsarType.long) {
-      err('Only int ids are allowed', modelClass);
     }
 
     final unknownConstructorParameter = constructor.parameters.firstOrNullWhere(
@@ -129,6 +127,13 @@ class IsarAnalyzer {
     }
 
     final isarType = getIsarType(isarDartType, converter ?? property);
+    if (isarType == null) {
+      err(
+        'Unsupported type. Please use a TypeConverter or annotate the '
+        'propery with @ignore.',
+        property,
+      );
+    }
 
     final nullable = isarDartType.nullabilitySuffix != NullabilitySuffix.none;
     var elementNullable = false;
@@ -140,8 +145,9 @@ class IsarAnalyzer {
       }
     }
 
-    if (isarType == null) {
-      return null;
+    if ((isarType == IsarType.byte && nullable) ||
+        (isarType == IsarType.byteList && elementNullable)) {
+      err('Bytes cannot be nullable', property);
     }
 
     final constructorParameter =
@@ -173,7 +179,6 @@ class IsarAnalyzer {
       isarName: property.isarName,
       dartType: dartTypeStr,
       isarType: isarType,
-      isId: property.hasIdAnnotation,
       converter: converter?.name,
       nullable: nullable,
       elementNullable: elementNullable,
@@ -247,22 +252,14 @@ class IsarAnalyzer {
   ) sync* {
     final property =
         properties.firstOrNullWhere((it) => it.dartName == element.name);
-    if (property == null || property.isId) {
+    if (property == null || property.isarType == IsarType.id) {
       return;
     }
 
     for (final index in element.indexAnnotations) {
       final indexProperties = <ObjectIndexProperty>[];
-
-      late IndexType defaultType;
-      if (property.isarType == IsarType.string ||
-          property.isarType == IsarType.bytes) {
-        defaultType = IndexType.hash;
-      } else if (property.isarType == IsarType.stringList) {
-        defaultType = IndexType.hashElements;
-      } else {
-        defaultType = IndexType.value;
-      }
+      final defaultType =
+          property.isarType.isDynamic ? IndexType.hash : IndexType.value;
       indexProperties.add(
         ObjectIndexProperty(
           property: property,
@@ -276,8 +273,8 @@ class IsarAnalyzer {
             properties.firstOrNullWhere((it) => it.dartName == c.property);
         if (compositeProperty == null) {
           err('Property does not exist: "${c.property}".', element);
-        } else if (compositeProperty.isId) {
-          err('The Id property cannot be part of composite indexes.', element);
+        } else if (compositeProperty.isarType == IsarType.id) {
+          err('Ids cannot be indexed', element);
         } else {
           indexProperties.add(
             ObjectIndexProperty(
@@ -332,10 +329,6 @@ class IsarAnalyzer {
         if (indexProperty.isarType != IsarType.stringList &&
             indexProperty.type == IndexType.hashElements) {
           err('Only String lists may have hashed elements.', element);
-        }
-        if (indexProperty.isarType == IsarType.bytes &&
-            indexProperty.type != IndexType.hash) {
-          err('Bytes indexes need to be hashed.', element);
         }
       }
 

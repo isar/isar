@@ -10,7 +10,7 @@ part 'composite_string_test.g.dart';
 class Model {
   Model(this.value1, this.value2);
 
-  int? id;
+  Id? id;
 
   @Index(
     composite: [
@@ -21,7 +21,7 @@ class Model {
     ],
     unique: true,
   )
-  String value1;
+  String? value1;
 
   String value2;
 

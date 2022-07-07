@@ -8,7 +8,7 @@ part 'filter_link_test.g.dart';
 @Collection()
 class LinkModelA {
   LinkModelA(this.name);
-  int? id;
+  Id? id;
 
   late String name;
 
@@ -26,7 +26,7 @@ class LinkModelA {
 @Collection()
 class LinkModelB {
   LinkModelB(this.name);
-  int? id;
+  Id? id;
 
   late String name;
 

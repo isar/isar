@@ -9,8 +9,8 @@ part 'filter_id_test.g.dart';
 @Collection()
 class IdModel {
   IdModel();
-  @Id()
-  int? id;
+
+  Id? id;
 
   @override
   String toString() {

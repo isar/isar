@@ -18,26 +18,23 @@ class MultiConverterModel {
     required this.stringValue,
   });
 
-  @Id()
-  int? id;
+  Id? id;
 
   @BoolConverter()
   @Index()
   late bool boolValue;
 
   @IntConverter()
-  @Size32()
   @Index()
-  late int intValue;
+  late short intValue;
 
   @IntConverter()
   @Index()
   late int longValue;
 
   @DoubleConverter()
-  @Size32()
   @Index()
-  late double floatValue;
+  late float floatValue;
 
   @DoubleConverter()
   @Index()

@@ -73,7 +73,7 @@ String generateDeserializePropWeb(ObjectInfo object) {
 }
 
 String _defaultVal(IsarType type) {
-  if (type.isList && type != IsarType.bytes) {
+  if (type.isList && type != IsarType.byteList) {
     type = type.scalarType;
   }
   switch (type) {
@@ -89,10 +89,11 @@ String _defaultVal(IsarType type) {
       return 'DateTime.fromMillisecondsSinceEpoch(0)';
     case IsarType.string:
       return "''";
-    case IsarType.bytes:
+    case IsarType.byteList:
       return 'Uint8List(0)';
     // ignore: no_default_cases
     default:
+      print('HMM $type');
       throw UnimplementedError();
   }
 }
@@ -110,7 +111,7 @@ String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
   }
 
   String deser;
-  if (property.isarType.isList && property.isarType != IsarType.bytes) {
+  if (property.isarType.isList && property.isarType != IsarType.byteList) {
     final defaultList = property.nullable ? '' : '?? []';
     String? convert;
     if (property.isarType == IsarType.dateTimeList) {
@@ -130,8 +131,11 @@ String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
   } else if (property.isarType == IsarType.dateTime) {
     deser = convDate(read, property.nullable);
   } else {
-    final defaultVal =
-        property.nullable ? '' : '?? ${_defaultVal(property.isarType)}';
+    final defaultVal = property.nullable ||
+            property.isarType == IsarType.id ||
+            property.isarType == IsarType.byte
+        ? ''
+        : '?? ${_defaultVal(property.isarType)}';
     deser = '$read $defaultVal';
   }
 

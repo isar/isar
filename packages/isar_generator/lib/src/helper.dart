@@ -10,7 +10,6 @@ const TypeChecker _collectionChecker = TypeChecker.fromRuntime(Collection);
 const TypeChecker _ignoreChecker = TypeChecker.fromRuntime(Ignore);
 const TypeChecker _nameChecker = TypeChecker.fromRuntime(Name);
 const TypeChecker _indexChecker = TypeChecker.fromRuntime(Index);
-const TypeChecker _oidKeyChecker = TypeChecker.fromRuntime(Id);
 const TypeChecker _backlinkChecker = TypeChecker.fromRuntime(Backlink);
 const TypeChecker _typeConverterChecker =
     TypeChecker.fromRuntime(TypeConverter);
@@ -22,21 +21,6 @@ extension ClassElementX on ClassElement {
           c.isPublic &&
           !c.parameters.any((ParameterElement p) => !p.isOptional),
     );
-  }
-
-  Collection? get collectionAnnotation {
-    final ann = _collectionChecker.firstAnnotationOfExact(nonSynthetic);
-    if (ann == null) {
-      return null;
-    }
-    return Collection(
-      inheritance: ann.getField('inheritance')!.toBoolValue()!,
-      accessor: ann.getField('accessor')!.toStringValue(),
-    );
-  }
-
-  String get collectionAccessor {
-    return collectionAnnotation?.accessor ?? '${displayName.decapitalize()}s';
   }
 
   List<PropertyInducingElement> get allAccessors {
@@ -60,10 +44,6 @@ extension ClassElementX on ClassElement {
 }
 
 extension PropertyElementX on PropertyInducingElement {
-  bool get hasIdAnnotation {
-    return _oidKeyChecker.hasAnnotationOfExact(nonSynthetic);
-  }
-
   ClassElement? get typeConverter {
     Element? element = this;
     while (element != null) {
@@ -161,6 +141,31 @@ extension ElementX on Element {
     }
     checkIsarName(name, this);
     return name;
+  }
+
+  Collection? get collectionAnnotation {
+    final ann = _collectionChecker.firstAnnotationOfExact(nonSynthetic);
+    if (ann == null) {
+      return null;
+    }
+    return Collection(
+      inheritance: ann.getField('inheritance')!.toBoolValue()!,
+      accessor: ann.getField('accessor')!.toStringValue(),
+    );
+  }
+
+  String get collectionAccessor {
+    var accessor = collectionAnnotation?.accessor;
+    if (accessor != null) {
+      return accessor;
+    }
+
+    accessor = displayName.decapitalize();
+    if (!accessor.endsWith('s')) {
+      accessor += 's';
+    }
+
+    return accessor;
   }
 }
 

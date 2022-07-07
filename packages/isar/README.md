@@ -79,7 +79,7 @@ part 'post.g.dart';
 
 @Collection()
 class Post {
-  int id = Isar.autoIncrement;
+  Id id = Isar.autoIncrement;
 
   late String title;
 
@@ -157,7 +157,7 @@ You can easily define relationships between objects. In Isar they are called lin
 ```dart
 @Collection()
 class Teacher {
-    int? id;
+    Id? id;
 
     late String subject;
 
@@ -167,7 +167,7 @@ class Teacher {
 
 @Collection()
 class Student {
-    int? id;
+    Id? id;
 
     late String name;
 

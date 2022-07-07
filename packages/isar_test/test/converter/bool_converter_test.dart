@@ -1,4 +1,4 @@
-import 'package:collection/collection.dart' show IterableExtension;
+/*import 'package:collection/collection.dart' show IterableExtension;
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
@@ -15,7 +15,7 @@ class BoolModel {
     required this.indexedBoolEnum,
   });
 
-  int id = Isar.autoIncrement;
+  Id id = Isar.autoIncrement;
 
   @MyBoolEnumTypeConverter()
   final MyBoolEnum boolEnum;
@@ -40,7 +40,8 @@ class BoolModel {
 
   @override
   String toString() {
-    return 'BoolModel{id: $id, boolEnum: $boolEnum, maybeBoolEnum: $maybeBoolEnum, indexedBoolEnum: $indexedBoolEnum}';
+    return 'BoolModel{id: $id, boolEnum: $boolEnum, maybeBoolEnum: '
+        '$maybeBoolEnum, indexedBoolEnum: $indexedBoolEnum}';
   }
 }
 
@@ -357,3 +358,4 @@ void main() {
     });
   });
 }
+*/

@@ -4,9 +4,7 @@ import 'package:isar/isar.dart';
 
 @Collection()
 class Test {
-  @Id()
-  int? id1;
+  Id? id1;
 
-  @Id()
-  int? id2;
+  Id? id2;
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: type_annotate_public_apis
+
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:isar/isar.dart';
@@ -9,7 +11,7 @@ part 'schema_test.g.dart';
 
 @Collection()
 class SchemaTestModel {
-  int? id;
+  Id? id;
 
   @Name('renamedField')
   @Index(unique: true)
@@ -31,21 +33,21 @@ class SchemaTestModel {
   @Index()
   bool get boolGetter => false;
 
-  @Size32()
-  late int intField;
+  late byte byteField;
 
-  @Size32()
-  int get intGetter => 0;
+  byte get byteGetter => 2;
+
+  late short intField;
+
+  short get intGetter => 0;
 
   late int longField;
 
   int get longGetter => 0;
 
-  @Size32()
-  late double floatField;
+  late float floatField;
 
-  @Size32()
-  double get floatGetter => 0;
+  float get floatGetter => 0;
 
   late double doubleField;
 
@@ -67,7 +69,13 @@ class SchemaTestModel {
   late Uint8List bytesField;
 
   @Index()
+  late List<byte> bytesField2;
+
+  @Index()
   Uint8List get bytesGetter => Uint8List(1);
+
+  @Index()
+  List<byte> get bytesGetter2 => [];
 
   @Index(name: 'boolListFieldValue')
   @Index(name: 'boolListFieldHash', type: IndexType.hash)
@@ -77,21 +85,17 @@ class SchemaTestModel {
   @Index(name: 'boolListGetterHash', type: IndexType.hash)
   List<bool> get boolListGetter => [];
 
-  @Size32()
-  late List<int> intListField;
+  late List<short> intListField;
 
-  @Size32()
-  List<int> get intListGetter => [];
+  List<short> get intListGetter => [];
 
   late List<int> longListField;
 
   List<int> get longListGetter => [];
 
-  @Size32()
-  late List<double> floatListField;
+  late List<float> floatListField;
 
-  @Size32()
-  List<double> get floatListGetter => [];
+  List<float> get floatListGetter => [];
 
   late List<double> doubleListField;
 
@@ -196,21 +200,20 @@ class SchemaTestModel {
   )
   String get compositeGetter => '';
 
-  IsarLink<SchemaTestModel> link = IsarLink<SchemaTestModel>();
+  var link = IsarLink<SchemaTestModel>();
 
-  IsarLinks<SchemaTestModel> links = IsarLinks<SchemaTestModel>();
+  var links = IsarLinks<SchemaTestModel>();
 
   @Name('renamedLink')
-  IsarLink<SchemaTestModel> otherLink = IsarLink<SchemaTestModel>();
+  var otherLink = IsarLink<SchemaTestModel>();
 
   @Name('renamedLinks')
-  IsarLinks<SchemaTestModel> otherLinks = IsarLinks<SchemaTestModel>();
+  var otherLinks = IsarLinks<SchemaTestModel>();
 }
 
 @Collection()
 class $Dollar$Model {
-  @Id()
-  int? $dollar$id;
+  Id? $dollar$id;
 
   @Index(unique: true)
   late bool $dollar$Field;
@@ -218,402 +221,13 @@ class $Dollar$Model {
   @Index()
   bool get $dollar$Getter => false;
 
-  final IsarLink<$Dollar$Model> $dollar$Link = IsarLink<$Dollar$Model>();
+  final $dollar$Link = IsarLink<$Dollar$Model>();
 
-  final IsarLinks<$Dollar$Model> $dollar$Links = IsarLinks<$Dollar$Model>();
+  final $dollar$Links = IsarLinks<$Dollar$Model>();
 }
 
 void main() {
-  isarTest('Schema test', () {
-    final schemaJson = jsonDecode(SchemaTestModelSchema.schema);
-    expect(schemaJson, {
-      'name': 'SchemaTestModel',
-      'idName': 'id',
-      'properties': [
-        {'name': 'boolField', 'type': 'Bool'},
-        {'name': 'boolGetter', 'type': 'Bool'},
-        {'name': 'boolListField', 'type': 'BoolList'},
-        {'name': 'boolListGetter', 'type': 'BoolList'},
-        {'name': 'bytesField', 'type': 'ByteList'},
-        {'name': 'bytesGetter', 'type': 'ByteList'},
-        {'name': 'compositeField', 'type': 'String'},
-        {'name': 'compositeGetter', 'type': 'String'},
-        {'name': 'doubleField', 'type': 'Double'},
-        {'name': 'doubleGetter', 'type': 'Double'},
-        {'name': 'doubleListField', 'type': 'DoubleList'},
-        {'name': 'doubleListGetter', 'type': 'DoubleList'},
-        {'name': 'floatField', 'type': 'Float'},
-        {'name': 'floatGetter', 'type': 'Float'},
-        {'name': 'floatListField', 'type': 'FloatList'},
-        {'name': 'floatListGetter', 'type': 'FloatList'},
-        {'name': 'intField', 'type': 'Int'},
-        {'name': 'intGetter', 'type': 'Int'},
-        {'name': 'intListField', 'type': 'IntList'},
-        {'name': 'intListGetter', 'type': 'IntList'},
-        {'name': 'longField', 'type': 'Long'},
-        {'name': 'longGetter', 'type': 'Long'},
-        {'name': 'longListField', 'type': 'LongList'},
-        {'name': 'longListGetter', 'type': 'LongList'},
-        {'name': 'renamedField', 'type': 'Bool'},
-        {'name': 'renamedGetter', 'type': 'Bool'},
-        {'name': 'stringField', 'type': 'String'},
-        {'name': 'stringGetter', 'type': 'String'},
-        {'name': 'stringListField', 'type': 'StringList'}
-      ],
-      'indexes': [
-        {
-          'name': 'boolField',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'boolField', 'type': 'Value', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'boolGetter',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'boolGetter', 'type': 'Value', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'boolListFieldHash',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'boolListField', 'type': 'Hash', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'boolListFieldValue',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'boolListField', 'type': 'Value', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'boolListGetterHash',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'boolListGetter', 'type': 'Hash', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'boolListGetterValue',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'boolListGetter', 'type': 'Value', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'bytesField',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'bytesField', 'type': 'Hash', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'bytesGetter',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'bytesGetter', 'type': 'Hash', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'compositeField1',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
-            {'name': 'boolField', 'type': 'Value', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'compositeField2',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
-            {'name': 'boolField', 'type': 'Value', 'caseSensitive': false},
-            {'name': 'intField', 'type': 'Value', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'compositeFieldCICI',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': false},
-            {'name': 'stringField', 'type': 'Hash', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'compositeFieldCICS',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': false},
-            {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'compositeFieldCSCI',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
-            {'name': 'stringField', 'type': 'Hash', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'compositeFieldCSCS',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
-            {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'compositeFieldHashed',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
-            {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'compositeFieldValue',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
-            {'name': 'stringField', 'type': 'Value', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'compositeGetter1',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': true},
-            {'name': 'boolGetter', 'type': 'Value', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'compositeGetter2',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': true},
-            {'name': 'boolGetter', 'type': 'Value', 'caseSensitive': false},
-            {'name': 'intGetter', 'type': 'Value', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'compositeGetterCICI',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': false},
-            {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'compositeGetterCICS',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': false},
-            {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'compositeGetterCSCI',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': true},
-            {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'compositeGetterCSCS',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': true},
-            {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'compositeGetterHashed',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': true},
-            {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'compositeGetterValue',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'compositeGetter', 'type': 'Hash', 'caseSensitive': true},
-            {'name': 'stringGetter', 'type': 'Value', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'renamedField',
-          'unique': true,
-          'replace': false,
-          'properties': [
-            {'name': 'renamedField', 'type': 'Value', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'renamedGetter',
-          'unique': true,
-          'replace': true,
-          'properties': [
-            {'name': 'renamedGetter', 'type': 'Value', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'stringFieldCaseInsensitive',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'stringField', 'type': 'Hash', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'stringFieldCaseSensitive',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'stringFieldHashed',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'stringFieldValue',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'stringField', 'type': 'Value', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'stringGetterCaseInsensitive',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': false}
-          ]
-        },
-        {
-          'name': 'stringGetterCaseSensitive',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'stringGetterHashed',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'stringGetterValue',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'stringGetter', 'type': 'Value', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'stringListFieldCaseInsensitive',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {
-              'name': 'stringListField',
-              'type': 'HashElements',
-              'caseSensitive': false
-            }
-          ]
-        },
-        {
-          'name': 'stringListFieldCaseSensitive',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {
-              'name': 'stringListField',
-              'type': 'HashElements',
-              'caseSensitive': true
-            }
-          ]
-        },
-        {
-          'name': 'stringListFieldHashed',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'stringListField', 'type': 'Hash', 'caseSensitive': true}
-          ]
-        },
-        {
-          'name': 'stringListFieldHashedElements',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {
-              'name': 'stringListField',
-              'type': 'HashElements',
-              'caseSensitive': true
-            }
-          ]
-        },
-        {
-          'name': 'stringListFieldValue',
-          'unique': false,
-          'replace': false,
-          'properties': [
-            {'name': 'stringListField', 'type': 'Value', 'caseSensitive': true}
-          ]
-        }
-      ],
-      'links': [
-        {'name': 'link', 'target': 'SchemaTestModel'},
-        {'name': 'links', 'target': 'SchemaTestModel'},
-        {'name': 'renamedLink', 'target': 'SchemaTestModel'},
-        {'name': 'renamedLinks', 'target': 'SchemaTestModel'}
-      ]
-    });
-  });
-
-  isarTest('Dollar Schema test', () {
+  isarTest('DollarModel Schema test', () {
     final schemaJson = jsonDecode($Dollar$ModelSchema.schema);
     expect(schemaJson, {
       'name': r'$Dollar$Model',
@@ -645,5 +259,453 @@ void main() {
         {'name': r'$dollar$Links', 'target': r'$Dollar$Model'}
       ]
     });
+  });
+
+  isarTest('Schema test', () {
+    final schemaJson = jsonDecode(SchemaTestModelSchema.schema);
+    expect(
+      schemaJson,
+      {
+        'name': 'SchemaTestModel',
+        'idName': 'id',
+        'properties': [
+          {'name': 'boolField', 'type': 'Bool'},
+          {'name': 'boolGetter', 'type': 'Bool'},
+          {'name': 'boolListField', 'type': 'BoolList'},
+          {'name': 'boolListGetter', 'type': 'BoolList'},
+          {'name': 'byteField', 'type': 'Byte'},
+          {'name': 'byteGetter', 'type': 'Byte'},
+          {'name': 'bytesField', 'type': 'ByteList'},
+          {'name': 'bytesField2', 'type': 'ByteList'},
+          {'name': 'bytesGetter', 'type': 'ByteList'},
+          {'name': 'bytesGetter2', 'type': 'ByteList'},
+          {'name': 'compositeField', 'type': 'String'},
+          {'name': 'compositeGetter', 'type': 'String'},
+          {'name': 'doubleField', 'type': 'Double'},
+          {'name': 'doubleGetter', 'type': 'Double'},
+          {'name': 'doubleListField', 'type': 'DoubleList'},
+          {'name': 'doubleListGetter', 'type': 'DoubleList'},
+          {'name': 'floatField', 'type': 'Float'},
+          {'name': 'floatGetter', 'type': 'Float'},
+          {'name': 'floatListField', 'type': 'FloatList'},
+          {'name': 'floatListGetter', 'type': 'FloatList'},
+          {'name': 'intField', 'type': 'Int'},
+          {'name': 'intGetter', 'type': 'Int'},
+          {'name': 'intListField', 'type': 'IntList'},
+          {'name': 'intListGetter', 'type': 'IntList'},
+          {'name': 'longField', 'type': 'Long'},
+          {'name': 'longGetter', 'type': 'Long'},
+          {'name': 'longListField', 'type': 'LongList'},
+          {'name': 'longListGetter', 'type': 'LongList'},
+          {'name': 'renamedField', 'type': 'Bool'},
+          {'name': 'renamedGetter', 'type': 'Bool'},
+          {'name': 'stringField', 'type': 'String'},
+          {'name': 'stringGetter', 'type': 'String'},
+          {'name': 'stringListField', 'type': 'StringList'}
+        ],
+        'indexes': [
+          {
+            'name': 'boolField',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'boolField', 'type': 'Value', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'boolGetter',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'boolGetter', 'type': 'Value', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'boolListFieldHash',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'boolListField', 'type': 'Hash', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'boolListFieldValue',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'boolListField', 'type': 'Hash', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'boolListGetterHash',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'boolListGetter', 'type': 'Hash', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'boolListGetterValue',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'boolListGetter', 'type': 'Hash', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'bytesField',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'bytesField', 'type': 'Hash', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'bytesField2',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'bytesField2', 'type': 'Hash', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'bytesGetter',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'bytesGetter', 'type': 'Hash', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'bytesGetter2',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'bytesGetter2', 'type': 'Hash', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'compositeField1',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
+              {'name': 'boolField', 'type': 'Value', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'compositeField2',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
+              {'name': 'boolField', 'type': 'Value', 'caseSensitive': false},
+              {'name': 'intField', 'type': 'Value', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'compositeFieldCICI',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {
+                'name': 'compositeField',
+                'type': 'Hash',
+                'caseSensitive': false
+              },
+              {'name': 'stringField', 'type': 'Hash', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'compositeFieldCICS',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {
+                'name': 'compositeField',
+                'type': 'Hash',
+                'caseSensitive': false
+              },
+              {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'compositeFieldCSCI',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
+              {'name': 'stringField', 'type': 'Hash', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'compositeFieldCSCS',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
+              {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'compositeFieldHashed',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
+              {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'compositeFieldValue',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'compositeField', 'type': 'Hash', 'caseSensitive': true},
+              {'name': 'stringField', 'type': 'Value', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'compositeGetter1',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {
+                'name': 'compositeGetter',
+                'type': 'Hash',
+                'caseSensitive': true
+              },
+              {'name': 'boolGetter', 'type': 'Value', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'compositeGetter2',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {
+                'name': 'compositeGetter',
+                'type': 'Hash',
+                'caseSensitive': true
+              },
+              {'name': 'boolGetter', 'type': 'Value', 'caseSensitive': false},
+              {'name': 'intGetter', 'type': 'Value', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'compositeGetterCICI',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {
+                'name': 'compositeGetter',
+                'type': 'Hash',
+                'caseSensitive': false
+              },
+              {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'compositeGetterCICS',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {
+                'name': 'compositeGetter',
+                'type': 'Hash',
+                'caseSensitive': false
+              },
+              {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'compositeGetterCSCI',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {
+                'name': 'compositeGetter',
+                'type': 'Hash',
+                'caseSensitive': true
+              },
+              {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'compositeGetterCSCS',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {
+                'name': 'compositeGetter',
+                'type': 'Hash',
+                'caseSensitive': true
+              },
+              {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'compositeGetterHashed',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {
+                'name': 'compositeGetter',
+                'type': 'Hash',
+                'caseSensitive': true
+              },
+              {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'compositeGetterValue',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {
+                'name': 'compositeGetter',
+                'type': 'Hash',
+                'caseSensitive': true
+              },
+              {'name': 'stringGetter', 'type': 'Value', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'renamedField',
+            'unique': true,
+            'replace': false,
+            'properties': [
+              {'name': 'renamedField', 'type': 'Value', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'renamedGetter',
+            'unique': true,
+            'replace': true,
+            'properties': [
+              {'name': 'renamedGetter', 'type': 'Value', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'stringFieldCaseInsensitive',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'stringField', 'type': 'Hash', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'stringFieldCaseSensitive',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'stringFieldHashed',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'stringField', 'type': 'Hash', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'stringFieldValue',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'stringField', 'type': 'Value', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'stringGetterCaseInsensitive',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': false}
+            ]
+          },
+          {
+            'name': 'stringGetterCaseSensitive',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'stringGetterHashed',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'stringGetter', 'type': 'Hash', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'stringGetterValue',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'stringGetter', 'type': 'Value', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'stringListFieldCaseInsensitive',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {
+                'name': 'stringListField',
+                'type': 'Hash',
+                'caseSensitive': false
+              }
+            ]
+          },
+          {
+            'name': 'stringListFieldCaseSensitive',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'stringListField', 'type': 'Hash', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'stringListFieldHashed',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'stringListField', 'type': 'Hash', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'stringListFieldHashedElements',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {'name': 'stringListField', 'type': 'Hash', 'caseSensitive': true}
+            ]
+          },
+          {
+            'name': 'stringListFieldValue',
+            'unique': false,
+            'replace': false,
+            'properties': [
+              {
+                'name': 'stringListField',
+                'type': 'Value',
+                'caseSensitive': true
+              }
+            ]
+          }
+        ],
+        'links': [
+          {'name': 'link', 'target': 'SchemaTestModel'},
+          {'name': 'links', 'target': 'SchemaTestModel'},
+          {'name': 'renamedLink', 'target': 'SchemaTestModel'},
+          {'name': 'renamedLinks', 'target': 'SchemaTestModel'}
+        ]
+      },
+    );
   });
 }

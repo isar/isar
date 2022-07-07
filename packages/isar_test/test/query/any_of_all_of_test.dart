@@ -10,7 +10,7 @@ part 'any_of_all_of_test.g.dart';
 @Collection()
 class Model {
   Model(this.id, this.value);
-  final int id;
+  final Id id;
 
   @Index()
   final int value;

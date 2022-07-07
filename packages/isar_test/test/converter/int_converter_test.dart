@@ -15,7 +15,7 @@ class IntModel {
     required this.nullableDay,
   });
 
-  int id = Isar.autoIncrement;
+  Id id = Isar.autoIncrement;
 
   @OffsettedIntTypeConverter()
   final int offsettedInt;
@@ -28,12 +28,12 @@ class IntModel {
   final Days otherDay;
 
   @NullableDaysTypeConverter()
-  @Size32()
   final Days? nullableDay;
 
   @override
   String toString() {
-    return 'IntModel{id: $id, offsettedInt: $offsettedInt, day: $day, otherDay: $otherDay, nullableDay: $nullableDay}';
+    return 'IntModel{id: $id, offsettedInt: $offsettedInt, day: $day, '
+        'otherDay: $otherDay, nullableDay: $nullableDay}';
   }
 
   @override
@@ -86,17 +86,17 @@ class DaysTypeConverter extends TypeConverter<Days, int> {
   int toIsar(Days day) => day.value;
 }
 
-class NullableDaysTypeConverter extends TypeConverter<Days?, int?> {
+class NullableDaysTypeConverter extends TypeConverter<Days?, short?> {
   const NullableDaysTypeConverter();
 
   @override
-  Days? fromIsar(int? value) {
+  Days? fromIsar(short? value) {
     if (value == null) return null;
     return Days.values.firstWhere((element) => element.value == value);
   }
 
   @override
-  int? toIsar(Days? day) => day?.value;
+  short? toIsar(Days? day) => day?.value;
 }
 
 void main() {

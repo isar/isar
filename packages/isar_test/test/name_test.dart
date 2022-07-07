@@ -9,9 +9,8 @@ part 'name_test.g.dart';
 @Collection()
 @Name('NameModelN')
 class NameModel {
-  @Id()
   @Name('idN')
-  int? id;
+  Id? id;
 
   @Index()
   @Name('valueN')
@@ -42,11 +41,13 @@ void main() {
     });
 
     isarTest('json', () async {
-      await isar.tWriteTxn(() => isar.nameModels.tPut(
-            NameModel()
-              ..value = 'test'
-              ..otherValue = 'test2',
-          ),);
+      await isar.tWriteTxn(
+        () => isar.nameModels.tPut(
+          NameModel()
+            ..value = 'test'
+            ..otherValue = 'test2',
+        ),
+      );
 
       expect(await isar.nameModels.where().exportJson(), [
         {

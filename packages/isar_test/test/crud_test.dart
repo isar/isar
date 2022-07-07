@@ -9,7 +9,7 @@ part 'crud_test.g.dart';
 
 @Collection()
 class Message {
-  int? id;
+  Id? id;
 
   @Index()
   String? message;

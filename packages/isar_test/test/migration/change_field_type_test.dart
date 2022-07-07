@@ -12,7 +12,7 @@ part 'change_field_type_test.g.dart';
 @Name('Col')
 class Col1 {
   Col1(this.id, this.value);
-  int? id;
+  Id? id;
 
   String? value;
 }
@@ -20,7 +20,7 @@ class Col1 {
 @Collection()
 @Name('Col')
 class Col2 {
-  int? id;
+  Id? id;
 
   int? value;
 }

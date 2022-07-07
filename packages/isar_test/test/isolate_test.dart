@@ -10,7 +10,7 @@ part 'isolate_test.g.dart';
 
 @Collection()
 class TestModel {
-  int? id;
+  Id? id;
 
   String? value;
 

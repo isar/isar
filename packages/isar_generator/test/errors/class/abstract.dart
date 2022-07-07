@@ -4,5 +4,5 @@ import 'package:isar/isar.dart';
 
 @Collection()
 abstract class Model {
-  int? id;
+  Id? id;
 }

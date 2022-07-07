@@ -8,7 +8,7 @@ part 'composite2_test.g.dart';
 @Collection()
 class Model {
   Model(this.value1, this.value2);
-  int? id;
+  Id? id;
 
   @Index(
     composite: [CompositeIndex('value2')],

@@ -13,8 +13,7 @@ class StringModel {
   StringModel.init(String? value)
       : field = value,
         hashField = value;
-  @Id()
-  int? id;
+  Id? id;
 
   @Index(type: IndexType.value)
   String? field = '';

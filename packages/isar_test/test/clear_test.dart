@@ -8,12 +8,12 @@ part 'clear_test.g.dart';
 
 @Collection()
 class ModelA {
-  int? id;
+  Id? id;
 }
 
 @Collection()
 class ModelB {
-  int? id;
+  Id? id;
 }
 
 void main() {

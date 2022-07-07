@@ -10,6 +10,8 @@ import 'package:isar/isar.dart';
 import 'package:isar/src/native/bindings.dart';
 import 'package:isar/src/version.dart';
 
+const int minByte = 0;
+const int maxByte = 255;
 const int minInt = -2147483648;
 const int maxInt = 2147483647;
 const int minLong = -9223372036854775808;

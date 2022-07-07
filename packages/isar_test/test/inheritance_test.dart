@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 import 'util/common.dart';
 import 'util/sync_async_helper.dart';
 
-part 'inheritance_test.g.dart';
+/*part 'inheritance_test.g.dart';
 
 abstract class Person {
   Person({
@@ -12,13 +12,12 @@ abstract class Person {
     required this.age,
   });
 
-  int id = Isar.autoIncrement;
+  Id id = Isar.autoIncrement;
 
   String? name;
 
   @Index()
-  @Size32()
-  int? age;
+  float? age;
 }
 
 @Collection()
@@ -142,7 +141,7 @@ class Friend extends Parent {
 
   @override
   // ignore: overridden_fields
-  int id = Isar.autoIncrement;
+  Id id = Isar.autoIncrement;
 
   @Index(caseSensitive: false, type: IndexType.value)
   String nickname;
@@ -729,3 +728,4 @@ void main() {
     });
   });
 }
+*/

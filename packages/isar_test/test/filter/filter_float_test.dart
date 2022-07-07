@@ -9,15 +9,13 @@ part 'filter_float_test.g.dart';
 @Collection()
 class FloatModel {
   FloatModel();
-  @Id()
-  int? id;
+  Id? id;
 
   @Index()
   double? field = 0;
 
   @Index(type: IndexType.value)
-  @Size32()
-  List<double?>? list;
+  List<float?>? list;
 
   @override
   String toString() {

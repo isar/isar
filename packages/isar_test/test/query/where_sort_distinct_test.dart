@@ -8,7 +8,7 @@ part 'where_sort_distinct_test.g.dart';
 
 @Collection()
 class TestModel {
-  int? id;
+  Id? id;
 
   @Index()
   int? value;

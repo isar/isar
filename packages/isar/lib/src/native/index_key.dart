@@ -82,6 +82,9 @@ void _addKeyValue(
     case IndexValueType.bool:
       IC.isar_key_add_byte(keyPtr, boolToByte(value as bool?));
       break;
+    case IndexValueType.byte:
+      IC.isar_key_add_byte(keyPtr, value! as int);
+      break;
     case IndexValueType.int:
       IC.isar_key_add_int(keyPtr, (value as int?) ?? nullInt);
       break;
@@ -110,17 +113,7 @@ void _addKeyValue(
       );
       _freeStr(strPtr);
       break;
-    case IndexValueType.bytesHash:
-      if (value == null) {
-        IC.isar_key_add_byte_list_hash(keyPtr, nullptr, 0);
-      } else {
-        value as Uint8List;
-        final bytesPtr = malloc<Uint8>(value.length);
-        bytesPtr.asTypedList(value.length).setAll(0, value);
-        IC.isar_key_add_byte_list_hash(keyPtr, bytesPtr, value.length);
-        malloc.free(bytesPtr);
-      }
-      break;
+
     case IndexValueType.boolListHash:
       if (value == null) {
         IC.isar_key_add_byte_list_hash(keyPtr, nullptr, 0);
@@ -130,6 +123,17 @@ void _addKeyValue(
         boolListPtr.asTypedList(value.length).setAll(0, value.map(boolToByte));
         IC.isar_key_add_byte_list_hash(keyPtr, boolListPtr, value.length);
         malloc.free(boolListPtr);
+      }
+      break;
+    case IndexValueType.byteListHash:
+      if (value == null) {
+        IC.isar_key_add_byte_list_hash(keyPtr, nullptr, 0);
+      } else {
+        value as Uint8List;
+        final bytesPtr = malloc<Uint8>(value.length);
+        bytesPtr.asTypedList(value.length).setAll(0, value);
+        IC.isar_key_add_byte_list_hash(keyPtr, bytesPtr, value.length);
+        malloc.free(bytesPtr);
       }
       break;
     case IndexValueType.intListHash:

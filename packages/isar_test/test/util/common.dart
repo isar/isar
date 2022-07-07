@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 
@@ -45,7 +46,10 @@ int testCount = 0;
 Future<void> _prepareTest() async {
   if (!kIsWeb) {
     try {
-      await Isar.initializeIsarCore(download: true);
+      await Isar.initializeIsarCore(download: true, libraries: {
+        Abi.current():
+            '/Users/simon/Documents/GitHub/isar-core/dart-ffi/target/x86_64-apple-darwin/debug/libisar.dylib'
+      });
     } catch (e) {
       if (kDebugMode) {
         print('Could not initialize isar core: $e');

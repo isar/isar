@@ -12,7 +12,7 @@ class LinkModelA {
 
   LinkModelA.name(this.name);
 
-  int? id;
+  Id? id;
 
   late String name;
 
@@ -48,7 +48,7 @@ class LinkModelB {
 
   LinkModelB.name(this.name);
 
-  int? id;
+  Id? id;
 
   late String name;
 
