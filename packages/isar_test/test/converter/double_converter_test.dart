@@ -132,8 +132,6 @@ void main() {
         [obj2],
       );
 
-      // FIXME: TypeConverter is not called on `Values.first` and `Values.fifth`
-      //  in the generated code.
       //
       // Current:
       // lower: [someInt, lowerValue],

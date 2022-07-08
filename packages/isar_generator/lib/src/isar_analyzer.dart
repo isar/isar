@@ -77,8 +77,7 @@ class IsarAnalyzer {
         properties.where((ObjectProperty it) => it.isarType == IsarType.id);
     if (idProperties.isEmpty) {
       err(
-        'No id property defined. Use the "Id" typedef '
-        'as type for your id property.',
+        'No id property defined. Use the "Id" type for your id property.',
         modelClass,
       );
     } else if (idProperties.length > 1) {

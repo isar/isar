@@ -23,12 +23,15 @@ void main() {
   }).join('\n');
 
   final code = """
+    // ignore_for_file: directives_ordering
+
     import 'test/util/common.dart';
     $imports
 
     void main() {
       $calls
     }
+
   """;
 
   File('all_tests.dart').writeAsStringSync(code);

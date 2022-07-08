@@ -1,4 +1,4 @@
-// Two or more properties annotated with @Id()
+// two or more properties with type "Id" defined
 
 import 'package:isar/isar.dart';
 

@@ -36,7 +36,8 @@ class Grandparent extends Person {
 
   @override
   String toString() {
-    return 'Grandparent{id: $id, ignoredFieldGrandparent: $ignoredFieldGrandparent, name: $name, age: $age}';
+    return 'Grandparent{id: $id, ignoredFieldGrandparent: 
+    $ignoredFieldGrandparent, name: $name, age: $age}';
   }
 
   @override
@@ -656,7 +657,8 @@ void main() {
 
       /*
       FIXME: Loading backlinks crashes with
-      'IsarError: IllegalArg: Link target collection does not match query collection.'
+      'IsarError: IllegalArg: Link target collection does not match query 
+      collection.'
       await Future.wait([
         for (final friend in [friend0, friend1, friend0]) ...[
           friend.grandparentFriends.load(),
@@ -666,7 +668,8 @@ void main() {
         ],
       ]);
 
-      TODO(jtplouffe): Implement more link tests on inheritance collections once backlinking works.
+      TODO(jtplouffe): Implement more link tests on inheritance collections once
+      backlinking works.
       */
     });
 
