@@ -1,12 +1,13 @@
 @TestOn('vm')
-import 'package:flutter/foundation.dart';
+
+import 'package:compute/compute.dart';
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import '../test/util/common.dart';
-import '../test/util/sync_async_helper.dart';
+import 'util/common.dart';
+import 'util/sync_async_helper.dart';
 
-part '../test/isolate_test.g.dart';
+part 'isolate_test.g.dart';
 
 @Collection()
 class TestModel {

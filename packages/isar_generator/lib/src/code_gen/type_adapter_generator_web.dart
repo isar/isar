@@ -93,7 +93,6 @@ String _defaultVal(IsarType type) {
       return 'Uint8List(0)';
     // ignore: no_default_cases
     default:
-      print('HMM $type');
       throw UnimplementedError();
   }
 }

@@ -46,8 +46,7 @@ void main() {
         for (var i = 0; i < json.length; i++) {
           json[i]['id'] = i + 1;
         }
-        final exportedJson =
-            await col.where().exportJson();
+        final exportedJson = await col.where().exportJson();
         expect(exportedJson, json);
       },
       timeout: const Timeout(Duration(seconds: 60)),
@@ -73,8 +72,7 @@ void main() {
         await col.tImportJson(json);
       });
 
-      final exportedJsonNull =
-          await col.where().exportJson();
+      final exportedJsonNull = await col.where().exportJson();
       expect(exportedJsonNull, json);
     });
 

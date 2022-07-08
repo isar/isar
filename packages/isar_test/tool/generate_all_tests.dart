@@ -1,19 +1,12 @@
 import 'dart:io';
 import 'package:path/path.dart' as p;
 
-List<String> getTestFiles(Directory dir) {
-  return dir
+void main() {
+  final files = Directory('test')
       .listSync(recursive: true)
       .where((FileSystemEntity e) => e is File && e.path.endsWith('_test.dart'))
       .map((FileSystemEntity e) => e.path)
       .toList();
-}
-
-void main() {
-  final files = [
-    ...getTestFiles(Directory('test')),
-    ...getTestFiles(Directory('test_flutter')),
-  ];
 
   final imports = files.map((String e) {
     return "import '$e' as ${e.split('.')[0].replaceAll(p.separator, '_')};";
