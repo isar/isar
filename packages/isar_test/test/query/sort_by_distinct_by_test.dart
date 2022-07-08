@@ -26,9 +26,7 @@ void main() {
       );
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.sortBy()', () async {
       await qEqual(

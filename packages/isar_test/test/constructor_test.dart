@@ -120,9 +120,7 @@ void main() {
       ]);
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('EmptyConstructorModel', () async {
       final obj1 = EmptyConstructorModel()..name = 'obj1';

@@ -69,9 +69,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.greaterThan()', () async {
       // where clauses
@@ -166,9 +164,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.anyGreaterThan() / .anyLessThan()', () async {
       // where clauses

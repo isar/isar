@@ -36,9 +36,7 @@ void main() {
       isar = await openTempIsar([NameModelSchema]);
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('json', () async {
       await isar.tWriteTxn(

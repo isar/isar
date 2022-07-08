@@ -84,9 +84,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.anyValue1Value2Value3', () async {
       await qEqual(

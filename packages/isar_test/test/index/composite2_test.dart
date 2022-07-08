@@ -57,9 +57,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('sorted by value1 value2', () async {
       await qEqual(

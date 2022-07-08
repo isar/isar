@@ -53,9 +53,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('getBy', () async {
       expect(await col.getByGuid(obj1.guid), obj1);

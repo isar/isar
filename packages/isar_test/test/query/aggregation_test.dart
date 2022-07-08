@@ -5,23 +5,21 @@ import '../mutli_type_model.dart';
 import '../util/common.dart';
 import '../util/sync_async_helper.dart';
 
-late Isar _isar;
-
-IsarCollection<MultiTypeModel> get col => _isar.multiTypeModels;
-
 void main() {
   group('Aggregation', () {
+    late Isar isar;
+    late IsarCollection<MultiTypeModel> col;
+
     setUp(() async {
-      _isar = await openTempIsar([MultiTypeModelSchema]);
+      isar = await openTempIsar([MultiTypeModelSchema]);
+      col = isar.multiTypeModels;
     });
 
-    tearDown(() async {
-      await _isar.close();
-    });
+    tearDown(() => isar.close());
 
     group('int', () {
       setUp(() async {
-        await _isar.writeTxn(
+        await isar.writeTxn(
           () => col.putAll([
             MultiTypeModel()..intValue = -5,
             MultiTypeModel()..intValue = 0,
@@ -161,7 +159,7 @@ void main() {
 
     group('float', () {
       setUp(() async {
-        await _isar.writeTxn(
+        await isar.writeTxn(
           () => col.putAll([
             MultiTypeModel()..floatValue = -5.0,
             MultiTypeModel()..floatValue = 0.0,
@@ -301,7 +299,7 @@ void main() {
 
     group('long', () {
       setUp(() async {
-        await _isar.writeTxn(
+        await isar.writeTxn(
           () => col.putAll([
             MultiTypeModel()..longValue = -5,
             MultiTypeModel()..longValue = 0,
@@ -441,7 +439,7 @@ void main() {
 
     group('double', () {
       setUp(() async {
-        await _isar.writeTxn(
+        await isar.writeTxn(
           () => col.putAll([
             MultiTypeModel()..doubleValue = -5.0,
             MultiTypeModel()..doubleValue = 0.0,
@@ -584,7 +582,7 @@ void main() {
           DateTime.fromMillisecondsSinceEpoch(milliseconds);
 
       setUp(() async {
-        await _isar.writeTxn(
+        await isar.writeTxn(
           () => col.putAll([
             MultiTypeModel()..dateTimeValue = date(-5),
             MultiTypeModel()..dateTimeValue = date(0),

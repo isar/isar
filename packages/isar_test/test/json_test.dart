@@ -18,9 +18,7 @@ void main() {
       col = isar.userModels;
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     List<Map<String, dynamic>> generateJson(int count) {
       final json = <Map<String, dynamic>>[];

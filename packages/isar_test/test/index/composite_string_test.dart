@@ -72,6 +72,8 @@ void main() {
       );
     });
 
+    tearDown(() => isar.close());
+
     isarTest('getBy value1 sorted by value2', () async {
       await qEqual(
         col.where().value1EqualToAnyValue2('a').findAll(),

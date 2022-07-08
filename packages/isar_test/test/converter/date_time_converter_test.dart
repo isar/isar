@@ -111,6 +111,8 @@ void main() {
       );
     });
 
+    tearDown(() => isar.close());
+
     isarTest('Query by dateTime', () async {
       await qEqualSet(
         isar.dateTimeModels

@@ -42,9 +42,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.any()', () async {
       await qEqual(

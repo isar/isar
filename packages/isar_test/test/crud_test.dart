@@ -42,9 +42,7 @@ void main() {
       users = isar.userModels;
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('get() / put() without id', () async {
       final message1 = Message()

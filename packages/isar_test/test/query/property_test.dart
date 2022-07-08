@@ -15,9 +15,7 @@ void main() {
       isar = await openTempIsar([MultiTypeModelSchema]);
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('id property', () async {
       await isar.tWriteTxn(

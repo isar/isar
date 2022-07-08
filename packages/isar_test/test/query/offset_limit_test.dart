@@ -27,9 +27,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('0 offset', () async {
       final result = col.where().offset(0).tFindAll();

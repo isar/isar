@@ -60,9 +60,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.equalTo() / .notEqualTo()', () async {
       // where clauses
@@ -131,9 +129,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.anyEqualTo() / .anyNotEqualTo()', () async {
       // where clauses
@@ -185,9 +181,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.equalTo() / .notEqualTo()', () async {
       // where clauses
