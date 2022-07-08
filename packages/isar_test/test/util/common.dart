@@ -38,7 +38,7 @@ Future<void> qEqualSync<T>(List<T> actual, List<T> target) async {
   }
 }
 
-bool allTestsSuccessful = true;
+final testErrors = <String>[];
 int testCount = 0;
 
 Future<void> _prepareTest() async {
@@ -71,7 +71,7 @@ void isarTest(
               await body();
               testCount++;
             } catch (e) {
-              allTestsSuccessful = false;
+              testErrors.add('$testName: $e');
               rethrow;
             }
           },
