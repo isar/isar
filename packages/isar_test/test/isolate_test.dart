@@ -1,6 +1,7 @@
 @TestOn('vm')
 
-import 'package:compute/compute.dart';
+import 'dart:isolate';
+
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
@@ -32,10 +33,10 @@ final TestModel _obj3 = TestModel()
   ..id = 3
   ..value = 'Model 3';
 
-Future<bool> _isolateFunc(String name) async {
+Future<void> _isolateFunc(SendPort port) async {
   final isar = Isar.openSync(
     [TestModelSchema],
-    name: name,
+    name: 'test',
   );
 
   final current = isar.testModels.where().findAllSync();
@@ -48,18 +49,24 @@ Future<bool> _isolateFunc(String name) async {
 
   assert(!(await isar.close()), 'Instance was closed incorrectly');
 
-  return true;
+  port.send(true);
 }
 
 void main() {
   isarTest('Isolate test', () async {
-    final isar = await openTempIsar([TestModelSchema]);
+    final isar = await openTempIsar([TestModelSchema], name: 'test');
 
     await isar.tWriteTxn(() async {
       await isar.testModels.tPutAll([_obj1, _obj2]);
     });
 
-    final result = await compute(_isolateFunc, isar.name);
+    final port = ReceivePort();
+    await Isolate.spawn(
+      _isolateFunc,
+      port.sendPort,
+      onError: port.sendPort,
+    );
+    final result = await port.first;
     expect(result, true);
 
     await qEqual(isar.testModels.where().tFindAll(), [_obj1, _obj3]);
