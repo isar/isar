@@ -19,6 +19,7 @@ Future<Isar> tOpen({
       directory: directory,
       name: name,
       relaxedDurability: relaxedDurability,
+      inspector: false,
     );
     return SynchronousFuture(isar);
   } else {
@@ -27,6 +28,7 @@ Future<Isar> tOpen({
       directory: directory,
       name: name,
       relaxedDurability: relaxedDurability,
+      inspector: false,
     );
   }
 }
@@ -59,7 +61,7 @@ extension TIsar on Isar {
 }
 
 extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
-  Future<OBJ?> tGet(int id) {
+  Future<OBJ?> tGet(Id id) {
     if (_testSync) {
       return SynchronousFuture(getSync(id));
     } else {
@@ -91,7 +93,7 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
     }
   }
 
-  Future<bool> tDelete(int id) {
+  Future<bool> tDelete(Id id) {
     if (_testSync) {
       return SynchronousFuture(deleteSync(id));
     } else {

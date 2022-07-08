@@ -47,8 +47,7 @@ class Index {
   /// Specifies how an index is stored in Isar.
   ///
   /// Defaults to:
-  /// - `IndexType.hash` for `String` and `Uint8List`
-  /// - `IndexType.hashElements` for `List<String>`
+  /// - `IndexType.hash` for `String`s and `List`s
   /// - `IndexType.value` for all other types
   final IndexType? type;
 

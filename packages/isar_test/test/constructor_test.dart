@@ -1,4 +1,3 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
@@ -6,12 +5,11 @@ import 'util/common.dart';
 import 'util/sync_async_helper.dart';
 
 part 'constructor_test.g.dart';
-part 'constructor_test.freezed.dart';
 
 @Collection()
 class EmptyConstructorModel {
   EmptyConstructorModel();
-  int? id;
+  Id? id;
 
   late String name;
 
@@ -27,7 +25,7 @@ class EmptyConstructorModel {
 @Collection()
 class NamedConstructorModel {
   NamedConstructorModel({required this.name});
-  int? id;
+  Id? id;
 
   final String name;
 
@@ -43,7 +41,7 @@ class NamedConstructorModel {
 @Collection()
 class PositionalConstructorModel {
   PositionalConstructorModel(this.id, this.name);
-  final int? id;
+  final Id? id;
 
   final String name;
 
@@ -59,7 +57,7 @@ class PositionalConstructorModel {
 @Collection()
 class OptionalConstructorModel {
   OptionalConstructorModel(this.name, [this.id]);
-  final int? id;
+  final Id? id;
 
   final String name;
 
@@ -78,7 +76,7 @@ class OptionalConstructorModel {
 @Collection()
 class PositionalNamedConstructorModel {
   PositionalNamedConstructorModel(this.name, {required this.id});
-  final int id;
+  final Id id;
 
   String name;
 
@@ -94,7 +92,7 @@ class PositionalNamedConstructorModel {
 @Collection()
 class SerializeOnlyModel {
   SerializeOnlyModel(this.id);
-  final int? id;
+  final Id? id;
 
   final String name = 'myName';
 
@@ -105,12 +103,6 @@ class SerializeOnlyModel {
   bool operator ==(dynamic other) {
     return other is SerializeOnlyModel && other.id == id;
   }
-}
-
-@freezed
-@Collection()
-class FreezedModel with _$FreezedModel {
-  const factory FreezedModel({int? id, required String name}) = MyFreezedModel;
 }
 
 void main() {
@@ -125,7 +117,6 @@ void main() {
         OptionalConstructorModelSchema,
         PositionalNamedConstructorModelSchema,
         SerializeOnlyModelSchema,
-        FreezedModelSchema,
       ]);
     });
 
@@ -197,19 +188,6 @@ void main() {
 
       await qEqual(
         isar.positionalNamedConstructorModels.where().tFindAll(),
-        [obj1, obj2],
-      );
-    });
-
-    isarTest('FreezedModel', () async {
-      const obj1 = FreezedModel(id: 1, name: 'obj1');
-      const obj2 = FreezedModel(id: 2, name: 'obj2');
-      await isar.tWriteTxn(() async {
-        await isar.freezedModels.tPutAll([obj1, obj2]);
-      });
-
-      await qEqual(
-        isar.freezedModels.where().tFindAll(),
         [obj1, obj2],
       );
     });

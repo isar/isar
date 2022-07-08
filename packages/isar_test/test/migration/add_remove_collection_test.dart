@@ -9,7 +9,7 @@ part 'add_remove_collection_test.g.dart';
 @Collection()
 class Col1 {
   Col1(this.id, this.value);
-  int? id;
+  Id? id;
 
   String? value;
 
@@ -22,7 +22,7 @@ class Col1 {
 @Collection()
 class Col2 {
   Col2(this.id, this.value);
-  int? id;
+  Id? id;
 
   String? value;
 

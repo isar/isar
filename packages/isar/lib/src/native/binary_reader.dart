@@ -20,10 +20,7 @@ class BinaryReader {
   late int _staticSize;
 
   @pragma('vm:prefer-inline')
-  bool readBool(int offset, {bool staticOffset = true}) {
-    if (staticOffset && offset >= _staticSize) {
-      return false;
-    }
+  bool _readBool(int offset) {
     final value = _buffer[offset];
     if (value == trueBool) {
       return true;
@@ -33,10 +30,15 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
-  bool? readBoolOrNull(int offset, {bool staticOffset = true}) {
-    if (staticOffset && offset >= _staticSize) {
-      return null;
+  bool readBool(int offset) {
+    if (offset >= _staticSize) {
+      return false;
     }
+    return _readBool(offset);
+  }
+
+  @pragma('vm:prefer-inline')
+  bool? _readBoolOrNull(int offset) {
     final value = _buffer[offset];
     if (value == trueBool) {
       return true;
@@ -48,16 +50,32 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
-  int readInt(int offset, {bool staticOffset = true}) {
-    if (staticOffset && offset >= _staticSize) {
+  bool? readBoolOrNull(int offset) {
+    if (offset >= _staticSize) {
+      return null;
+    }
+    return _readBoolOrNull(offset);
+  }
+
+  @pragma('vm:prefer-inline')
+  int readByte(int offset) {
+    if (offset >= _staticSize) {
+      return 0;
+    }
+    return _buffer[offset];
+  }
+
+  @pragma('vm:prefer-inline')
+  int readInt(int offset) {
+    if (offset >= _staticSize) {
       return nullInt;
     }
     return _byteData.getInt32(offset, Endian.little);
   }
 
   @pragma('vm:prefer-inline')
-  int? readIntOrNull(int offset, {bool staticOffset = true}) {
-    final value = readInt(offset, staticOffset: staticOffset);
+  int? _readIntOrNull(int offset) {
+    final value = _byteData.getInt32(offset, Endian.little);
     if (value != nullInt) {
       return value;
     } else {
@@ -66,16 +84,24 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
-  double readFloat(int offset, {bool staticOffset = true}) {
-    if (staticOffset && offset >= _staticSize) {
+  int? readIntOrNull(int offset) {
+    if (offset >= _staticSize) {
+      return null;
+    }
+    return _readIntOrNull(offset);
+  }
+
+  @pragma('vm:prefer-inline')
+  double readFloat(int offset) {
+    if (offset >= _staticSize) {
       return nullDouble;
     }
     return _byteData.getFloat32(offset, Endian.little);
   }
 
   @pragma('vm:prefer-inline')
-  double? readFloatOrNull(int offset, {bool staticOffset = true}) {
-    final value = readFloat(offset, staticOffset: staticOffset);
+  double? _readFloatOrNull(int offset) {
+    final value = _byteData.getFloat32(offset, Endian.little);
     if (!value.isNaN) {
       return value;
     } else {
@@ -84,16 +110,24 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
-  int readLong(int offset, {bool staticOffset = true}) {
-    if (staticOffset && offset >= _staticSize) {
+  double? readFloatOrNull(int offset) {
+    if (offset >= _staticSize) {
+      return null;
+    }
+    return _readFloatOrNull(offset);
+  }
+
+  @pragma('vm:prefer-inline')
+  int readLong(int offset) {
+    if (offset >= _staticSize) {
       return nullLong;
     }
     return _byteData.getInt64(offset, Endian.little);
   }
 
   @pragma('vm:prefer-inline')
-  int? readLongOrNull(int offset, {bool staticOffset = true}) {
-    final value = readLong(offset, staticOffset: staticOffset);
+  int? _readLongOrNull(int offset) {
+    final value = _byteData.getInt64(offset, Endian.little);
     if (value != nullLong) {
       return value;
     } else {
@@ -102,16 +136,24 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
-  double readDouble(int offset, {bool staticOffset = true}) {
-    if (staticOffset && offset >= _staticSize) {
+  int? readLongOrNull(int offset) {
+    if (offset >= _staticSize) {
+      return null;
+    }
+    return _readLongOrNull(offset);
+  }
+
+  @pragma('vm:prefer-inline')
+  double readDouble(int offset) {
+    if (offset >= _staticSize) {
       return nullDouble;
     }
     return _byteData.getFloat64(offset, Endian.little);
   }
 
   @pragma('vm:prefer-inline')
-  double? readDoubleOrNull(int offset, {bool staticOffset = true}) {
-    final value = readDouble(offset, staticOffset: staticOffset);
+  double? _readDoubleOrNull(int offset) {
+    final value = _byteData.getFloat64(offset, Endian.little);
     if (!value.isNaN) {
       return value;
     } else {
@@ -120,16 +162,24 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
-  DateTime readDateTime(int offset, {bool staticOffset = true}) {
-    final time = readLongOrNull(offset, staticOffset: staticOffset);
-    return time != null
-        ? DateTime.fromMicrosecondsSinceEpoch(time, isUtc: true).toLocal()
-        : DateTime.fromMicrosecondsSinceEpoch(0);
+  double? readDoubleOrNull(int offset) {
+    if (offset >= _staticSize) {
+      return null;
+    }
+    return _readDoubleOrNull(offset);
   }
 
   @pragma('vm:prefer-inline')
-  DateTime? readDateTimeOrNull(int offset, {bool staticOffset = true}) {
-    final time = readLongOrNull(offset, staticOffset: staticOffset);
+  DateTime readDateTime(int offset) {
+    final time = readLongOrNull(offset);
+    return time != null
+        ? DateTime.fromMicrosecondsSinceEpoch(time, isUtc: true).toLocal()
+        : nullDate;
+  }
+
+  @pragma('vm:prefer-inline')
+  DateTime? readDateTimeOrNull(int offset) {
+    final time = readLongOrNull(offset);
     if (time != null) {
       return DateTime.fromMicrosecondsSinceEpoch(time, isUtc: true).toLocal();
     } else {
@@ -138,43 +188,32 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
-  String readString(int offset, {bool staticOffset = true}) {
-    return readStringOrNull(offset, staticOffset: staticOffset) ?? '';
+  int _readUint24(int offset) {
+    return _buffer[offset] |
+        _buffer[offset + 1] << 8 |
+        _buffer[offset + 2] << 16;
   }
 
   @pragma('vm:prefer-inline')
-  String? readStringOrNull(int offset, {bool staticOffset = true}) {
-    if (staticOffset && offset >= _staticSize) {
+  String readString(int offset) {
+    return readStringOrNull(offset) ?? '';
+  }
+
+  @pragma('vm:prefer-inline')
+  String? readStringOrNull(int offset) {
+    if (offset >= _staticSize) {
       return null;
     }
-    final bytesOffset = _byteData.getUint32(offset, Endian.little);
+
+    var bytesOffset = _readUint24(offset);
     if (bytesOffset == 0) {
       return null;
     }
-    final length = _byteData.getUint32(offset + 4, Endian.little);
+
+    final length = _readUint24(bytesOffset);
+    bytesOffset += 3;
 
     return utf8Decoder.convert(_buffer, bytesOffset, bytesOffset + length);
-  }
-
-  Uint8List readBytes(int offset, {bool staticOffset = true}) {
-    return readBytesOrNull(offset, staticOffset: staticOffset) ??
-        Uint8List.fromList([]);
-  }
-
-  Uint8List? readBytesOrNull(int offset, {bool staticOffset = true}) {
-    if (staticOffset && offset >= _staticSize) {
-      return null;
-    }
-    final bytesOffset = _byteData.getUint32(offset, Endian.little);
-    if (bytesOffset == 0) {
-      return null;
-    }
-    final length = _byteData.getUint32(offset + 4, Endian.little);
-    return Uint8List.view(
-      _buffer.buffer,
-      _buffer.offsetInBytes + bytesOffset,
-      length,
-    );
   }
 
   List<bool>? readBoolList(int offset) {
@@ -182,15 +221,17 @@ class BinaryReader {
       return null;
     }
 
-    final listOffset = _byteData.getUint32(offset, Endian.little);
-    final length = _byteData.getUint32(offset + 4, Endian.little);
+    var listOffset = _readUint24(offset);
     if (listOffset == 0) {
       return null;
     }
 
+    final length = _readUint24(listOffset);
+    listOffset += 3;
+
     final list = List<bool>.filled(length, false);
     for (var i = 0; i < length; i++) {
-      list[i] = readBool(listOffset + i, staticOffset: false);
+      list[i] = _readBool(listOffset + i);
     }
     return list;
   }
@@ -200,17 +241,39 @@ class BinaryReader {
       return null;
     }
 
-    final listOffset = _byteData.getUint32(offset, Endian.little);
-    final length = _byteData.getUint32(offset + 4, Endian.little);
+    var listOffset = _readUint24(offset);
     if (listOffset == 0) {
       return null;
     }
 
+    final length = _readUint24(listOffset);
+    listOffset += 3;
+
     final list = List<bool?>.filled(length, null);
     for (var i = 0; i < length; i++) {
-      list[i] = readBoolOrNull(listOffset + i, staticOffset: false);
+      list[i] = _readBoolOrNull(listOffset + i);
     }
     return list;
+  }
+
+  Uint8List readByteList(int offset) {
+    return readByteListOrNull(offset) ?? Uint8List.fromList([]);
+  }
+
+  Uint8List? readByteListOrNull(int offset) {
+    if (offset >= _staticSize) {
+      return null;
+    }
+
+    var listOffset = _readUint24(offset);
+    if (listOffset == 0) {
+      return null;
+    }
+
+    final length = _readUint24(listOffset);
+    listOffset += 3;
+
+    return _buffer.sublist(listOffset, listOffset + length);
   }
 
   List<int>? readIntList(int offset) {
@@ -218,13 +281,15 @@ class BinaryReader {
       return null;
     }
 
-    final listOffset = _byteData.getUint32(offset, Endian.little);
-    final length = _byteData.getUint32(offset + 4, Endian.little);
+    var listOffset = _readUint24(offset);
     if (listOffset == 0) {
       return null;
     }
 
-    final list = List<int>.filled(length, 0);
+    final length = _readUint24(listOffset);
+    listOffset += 3;
+
+    final list = Int32List(length);
     for (var i = 0; i < length; i++) {
       list[i] = _byteData.getInt32(listOffset + i * 4, Endian.little);
     }
@@ -236,15 +301,17 @@ class BinaryReader {
       return null;
     }
 
-    final listOffset = _byteData.getUint32(offset, Endian.little);
-    final length = _byteData.getUint32(offset + 4, Endian.little);
+    var listOffset = _readUint24(offset);
     if (listOffset == 0) {
       return null;
     }
 
+    final length = _readUint24(listOffset);
+    listOffset += 3;
+
     final list = List<int?>.filled(length, null);
     for (var i = 0; i < length; i++) {
-      list[i] = readIntOrNull(listOffset + i * 4, staticOffset: false);
+      list[i] = _readIntOrNull(listOffset + i * 4);
     }
     return list;
   }
@@ -254,13 +321,15 @@ class BinaryReader {
       return null;
     }
 
-    final listOffset = _byteData.getUint32(offset, Endian.little);
-    final length = _byteData.getUint32(offset + 4, Endian.little);
+    var listOffset = _readUint24(offset);
     if (listOffset == 0) {
       return null;
     }
 
-    final list = List<double>.filled(length, double.nan);
+    final length = _readUint24(listOffset);
+    listOffset += 3;
+
+    final list = Float32List(length);
     for (var i = 0; i < length; i++) {
       list[i] = _byteData.getFloat32(listOffset + i * 4, Endian.little);
     }
@@ -272,15 +341,17 @@ class BinaryReader {
       return null;
     }
 
-    final listOffset = _byteData.getUint32(offset, Endian.little);
-    final length = _byteData.getUint32(offset + 4, Endian.little);
+    var listOffset = _readUint24(offset);
     if (listOffset == 0) {
       return null;
     }
 
+    final length = _readUint24(listOffset);
+    listOffset += 3;
+
     final list = List<double?>.filled(length, null);
     for (var i = 0; i < length; i++) {
-      list[i] = readFloatOrNull(listOffset + i * 4, staticOffset: false);
+      list[i] = _readFloatOrNull(listOffset + i * 4);
     }
     return list;
   }
@@ -290,13 +361,15 @@ class BinaryReader {
       return null;
     }
 
-    final listOffset = _byteData.getUint32(offset, Endian.little);
-    final length = _byteData.getUint32(offset + 4, Endian.little);
+    var listOffset = _readUint24(offset);
     if (listOffset == 0) {
       return null;
     }
 
-    final list = List<int>.filled(length, 0);
+    final length = _readUint24(listOffset);
+    listOffset += 3;
+
+    final list = Int64List(length);
     for (var i = 0; i < length; i++) {
       list[i] = _byteData.getInt64(listOffset + i * 8, Endian.little);
     }
@@ -308,15 +381,17 @@ class BinaryReader {
       return null;
     }
 
-    final listOffset = _byteData.getUint32(offset, Endian.little);
-    final length = _byteData.getUint32(offset + 4, Endian.little);
+    var listOffset = _readUint24(offset);
     if (listOffset == 0) {
       return null;
     }
 
+    final length = _readUint24(listOffset);
+    listOffset += 3;
+
     final list = List<int?>.filled(length, null);
     for (var i = 0; i < length; i++) {
-      list[i] = readLongOrNull(listOffset + i * 8, staticOffset: false);
+      list[i] = _readLongOrNull(listOffset + i * 8);
     }
     return list;
   }
@@ -326,13 +401,15 @@ class BinaryReader {
       return null;
     }
 
-    final listOffset = _byteData.getUint32(offset, Endian.little);
-    final length = _byteData.getUint32(offset + 4, Endian.little);
+    var listOffset = _readUint24(offset);
     if (listOffset == 0) {
       return null;
     }
 
-    final list = List<double>.filled(length, double.nan);
+    final length = _readUint24(listOffset);
+    listOffset += 3;
+
+    final list = Float64List(length);
     for (var i = 0; i < length; i++) {
       list[i] = _byteData.getFloat64(listOffset + i * 8, Endian.little);
     }
@@ -344,15 +421,17 @@ class BinaryReader {
       return null;
     }
 
-    final listOffset = _byteData.getUint32(offset, Endian.little);
-    final length = _byteData.getUint32(offset + 4, Endian.little);
+    var listOffset = _readUint24(offset);
     if (listOffset == 0) {
       return null;
     }
 
+    final length = _readUint24(listOffset);
+    listOffset += 3;
+
     final list = List<double?>.filled(length, null);
     for (var i = 0; i < length; i++) {
-      list[i] = readDoubleOrNull(listOffset + i * 8, staticOffset: false);
+      list[i] = _readDoubleOrNull(listOffset + i * 8);
     }
     return list;
   }
@@ -375,39 +454,46 @@ class BinaryReader {
     }).toList();
   }
 
-  List<String>? readStringList(int offset) {
+  List<T>? readDynamicList<T>(
+    int offset,
+    T nullValue,
+    T Function(int startOffset, int endOffset) transform,
+  ) {
     if (offset >= _staticSize) {
       return null;
     }
 
-    final listOffset = _byteData.getUint32(offset, Endian.little);
-    final length = _byteData.getUint32(offset + 4, Endian.little);
+    var listOffset = _readUint24(offset);
     if (listOffset == 0) {
       return null;
     }
 
-    final list = List<String>.filled(length, '');
+    final length = _readUint24(listOffset);
+    listOffset += 3;
+
+    final list = List.filled(length, nullValue);
+    var contentOffset = listOffset + length * 3;
     for (var i = 0; i < length; i++) {
-      list[i] = readString(listOffset + i * 8, staticOffset: false);
+      final itemSize = _readUint24(listOffset + i * 3);
+
+      if (itemSize != 0) {
+        list[i] = transform(contentOffset, contentOffset + itemSize - 1);
+        contentOffset += itemSize - 1;
+      }
     }
+
     return list;
   }
 
+  List<String>? readStringList(int offset) {
+    return readDynamicList(offset, '', (startOffset, endOffset) {
+      return utf8Decoder.convert(_buffer, startOffset, endOffset);
+    });
+  }
+
   List<String?>? readStringOrNullList(int offset) {
-    if (offset >= _staticSize) {
-      return null;
-    }
-
-    final listOffset = _byteData.getUint32(offset, Endian.little);
-    final length = _byteData.getUint32(offset + 4, Endian.little);
-    if (listOffset == 0) {
-      return null;
-    }
-
-    final list = List<String?>.filled(length, null);
-    for (var i = 0; i < length; i++) {
-      list[i] = readStringOrNull(listOffset + i * 8, staticOffset: false);
-    }
-    return list;
+    return readDynamicList(offset, null, (startOffset, endOffset) {
+      return utf8Decoder.convert(_buffer, startOffset, endOffset);
+    });
   }
 }

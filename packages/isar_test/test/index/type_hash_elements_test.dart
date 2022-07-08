@@ -12,7 +12,7 @@ class HashElementsIndexesModel {
     required this.stringListSensitiveIndex,
     required this.stringListInsensitiveIndex,
   });
-  int? id;
+  Id? id;
 
   @Index(type: IndexType.hashElements, caseSensitive: true)
   List<String> stringListSensitiveIndex;
@@ -111,20 +111,6 @@ void main() {
           .stringListSensitiveIndexElementEqualTo('')
           .tFindAll();
       expect(result2, [model0]);
-
-      final result3 = await isar.hashElementsIndexesModels
-          .where()
-          .anyStringListSensitiveIndexElement()
-          .tFindAll();
-      expect(result3, {model0, model1, model3, model4});
-
-      // FIXME: The null character ("\u0000") causes issues in the index.
-      // Works with other characters
-      // final result4 = await isar.hashElementsIndexesModels
-      //     .where()
-      //     .stringListSensitiveIndexAnyEqualTo("\u0000")
-      //     .tFindAll();
-      // expect(result4, {model3, model4});
     });
 
     isarTest('Query List<String> insensitive index', () async {
@@ -139,13 +125,6 @@ void main() {
           .stringListInsensitiveIndexElementEqualTo('')
           .tFindAll();
       expect(result2, <HashElementsIndexesModel>[]);
-
-      // FIXME: null character
-      // final result3 = await isar.hashElementsIndexesModels
-      //     .where()
-      //    .stringListInsensitiveIndexAnyEqualTo("\u0000")
-      //    .tFindAll();
-      // expect(result3, [model4]);
     });
   });
 }

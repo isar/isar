@@ -4,7 +4,7 @@ import 'package:isar/isar.dart';
 
 @Collection()
 class Model {
-  int? id;
+  Id? id;
 
   @Index(name: 'myindex')
   String? prop1;

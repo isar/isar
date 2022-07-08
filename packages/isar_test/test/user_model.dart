@@ -7,8 +7,7 @@ class UserModel {
   UserModel();
 
   UserModel.fill(this.name, this.age, this.admin);
-  @Id()
-  int? id;
+  Id? id;
 
   @Index()
   String? name;

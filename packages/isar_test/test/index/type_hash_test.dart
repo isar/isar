@@ -17,7 +17,7 @@ class HashIndexesModel {
     required this.stringListSensitiveIndex,
     required this.stringListInsensitiveIndex,
   });
-  int? id;
+  Id? id;
 
   @Index(type: IndexType.hash, caseSensitive: true)
   String stringSensitiveIndex;
@@ -63,12 +63,7 @@ class HashIndexesModel {
 
   @override
   String toString() {
-    return 'HashIndexesModel{stringSensitiveIndex: $stringSensitiveIndex, '
-        'stringInsensitiveIndex: $stringInsensitiveIndex, boolListIndex: '
-        '$boolListIndex, intListIndex: $intListIndex, dateTimeListIndex: '
-        '$dateTimeListIndex, stringListSensitiveIndex: '
-        '$stringListSensitiveIndex, stringListInsensitiveIndex: '
-        '$stringListInsensitiveIndex}';
+    return 'HashIndexesModel($id)';
   }
 }
 
@@ -188,7 +183,6 @@ void main() {
           .or()
           .stringListInsensitiveIndexEqualTo(['lorem', 'ipsum'])
           .tFindAll();
-      // FIXME: multiple duplicates in result
       expect(result, {model0, model1});
     });
   });

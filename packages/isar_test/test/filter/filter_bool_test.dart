@@ -9,8 +9,7 @@ part 'filter_bool_test.g.dart';
 @Collection()
 class BoolModel {
   BoolModel();
-  @Id()
-  int? id;
+  Id? id;
 
   @Index()
   bool? field = false;

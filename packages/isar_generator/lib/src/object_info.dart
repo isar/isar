@@ -20,10 +20,11 @@ class ObjectInfo {
   final List<ObjectLink> links;
 
   ObjectProperty get idProperty =>
-      properties.firstWhere((ObjectProperty it) => it.isId);
+      properties.firstWhere((ObjectProperty it) => it.isarType == IsarType.id);
 
-  List<ObjectProperty> get objectProperties =>
-      properties.where((ObjectProperty p) => !p.isId).toList();
+  List<ObjectProperty> get objectProperties => properties
+      .where((ObjectProperty it) => it.isarType != IsarType.id)
+      .toList();
 
   String get getIdName => '_${dartName.decapitalize()}GetId';
   String get setIdName => '_${dartName.decapitalize()}SetId';
@@ -56,7 +57,6 @@ class ObjectProperty {
     required this.isarName,
     required this.dartType,
     required this.isarType,
-    required this.isId,
     this.converter,
     required this.nullable,
     required this.elementNullable,
@@ -68,29 +68,12 @@ class ObjectProperty {
   final String isarName;
   final String dartType;
   final IsarType isarType;
-  final bool isId;
   final String? converter;
   final bool nullable;
   final bool elementNullable;
   final PropertyDeser deserialize;
   final bool assignable;
   final int? constructorPosition;
-
-  ObjectProperty copyWithIsId(bool isId) {
-    return ObjectProperty(
-      dartName: dartName,
-      isarName: isarName,
-      dartType: dartType,
-      isarType: isarType,
-      isId: isId,
-      converter: converter,
-      nullable: nullable,
-      elementNullable: elementNullable,
-      deserialize: deserialize,
-      assignable: assignable,
-      constructorPosition: constructorPosition,
-    );
-  }
 
   String converterName(ObjectInfo oi) =>
       '_${oi.dartName.decapitalize()}${converter?.capitalize()}';
@@ -130,8 +113,12 @@ class ObjectIndexProperty {
 
   String get indexValueTypeEnum {
     switch (property.isarType) {
+      case IsarType.id:
+        throw UnimplementedError();
       case IsarType.bool:
         return 'IndexValueType.bool';
+      case IsarType.byte:
+        return 'IndexValueType.byte';
       case IsarType.int:
         return 'IndexValueType.int';
       case IsarType.float:
@@ -151,15 +138,16 @@ class ObjectIndexProperty {
               ? 'IndexValueType.stringHashCIS'
               : 'IndexValueType.stringCIS';
         }
-      case IsarType.bytes:
-        assert(type == IndexType.hash, 'Bytes indexes have to be hashed');
-        return 'IndexValueType.bytesHash';
+
       case IsarType.boolList:
         if (type == IndexType.hash) {
           return 'IndexValueType.boolListHash';
         } else {
           return 'IndexValueType.bool';
         }
+      case IsarType.byteList:
+        assert(type == IndexType.hash, 'ByteList indexes have to be hashed');
+        return 'IndexValueType.byteListHash';
       case IsarType.intList:
         if (type == IndexType.hash) {
           return 'IndexValueType.intListHash';

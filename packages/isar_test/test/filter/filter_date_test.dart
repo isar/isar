@@ -9,8 +9,7 @@ part 'filter_date_test.g.dart';
 @Collection()
 class DateTimeModel {
   DateTimeModel();
-  @Id()
-  int? id;
+  Id? id;
 
   @Index()
   DateTime? field;

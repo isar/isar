@@ -19,7 +19,9 @@ class WhereGenerator {
 
     code += generateAnyId();
     for (final index in object.indexes) {
-      code += generateAny(index);
+      if (index.properties.all((element) => element.type == IndexType.value)) {
+        code += generateAny(index);
+      }
     }
 
     code += '''

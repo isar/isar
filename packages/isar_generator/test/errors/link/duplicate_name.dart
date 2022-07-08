@@ -4,7 +4,7 @@ import 'package:isar/isar.dart';
 
 @Collection()
 class Model {
-  int? id;
+  Id? id;
 
   final IsarLink<Model2> prop1 = IsarLink();
 
@@ -14,5 +14,5 @@ class Model {
 
 @Collection()
 class Model2 {
-  int? id;
+  Id? id;
 }

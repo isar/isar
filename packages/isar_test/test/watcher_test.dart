@@ -12,7 +12,7 @@ part 'watcher_test.g.dart';
 @Collection()
 class Value {
   Value(this.id, this.value);
-  int? id;
+  Id? id;
 
   @Index(unique: true)
   String? value;

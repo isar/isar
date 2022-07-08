@@ -6,11 +6,7 @@ import 'package:isar_generator/src/object_info.dart';
 String generateDistinctBy(ObjectInfo oi) {
   var code = '''
   extension ${oi.dartName}QueryWhereDistinct on QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct> {''';
-  for (final property in oi.properties) {
-    if (property.isId) {
-      continue;
-    }
-
+  for (final property in oi.objectProperties) {
     if (property.isarType == IsarType.string) {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}({bool caseSensitive = true}) {

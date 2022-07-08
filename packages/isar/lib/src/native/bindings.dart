@@ -2024,9 +2024,11 @@ const int IsarIndex_MAX_STRING_INDEX_SIZE = 1024;
 
 const int IsarObject_NULL_BYTE = 0;
 
-const int IsarObject_FALSE_BYTE = 1;
+const int IsarObject_NULL_BOOL = 0;
 
-const int IsarObject_TRUE_BYTE = 2;
+const int IsarObject_FALSE_BOOL = 1;
+
+const int IsarObject_TRUE_BOOL = 2;
 
 const int IsarObject_NULL_INT = -2147483648;
 

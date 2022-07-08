@@ -6,23 +6,19 @@ part 'mutli_type_model.g.dart';
 
 @Collection()
 class MultiTypeModel {
-  int? id;
+  Id? id;
 
   bool? boolValueN;
 
   bool boolValue = false;
 
-  @Size32()
-  int? intValueN;
+  short? intValueN;
 
-  @Size32()
-  int intValue = 0;
+  short intValue = 0;
 
-  @Size32()
-  double? floatValueN;
+  float? floatValueN;
 
-  @Size32()
-  double floatValue = 0;
+  float floatValue = 0;
 
   int? longValueN;
 
@@ -52,29 +48,21 @@ class MultiTypeModel {
 
   List<bool?>? boolNListN;
 
-  @Size32()
-  List<int> intList = [];
+  List<short> intList = [];
 
-  @Size32()
-  List<int?> intNList = [];
+  List<short?> intNList = [];
 
-  @Size32()
-  List<int>? intListN;
+  List<short>? intListN;
 
-  @Size32()
-  List<int?>? intNListN;
+  List<short?>? intNListN;
 
-  @Size32()
-  List<double> floatList = [];
+  List<float> floatList = [];
 
-  @Size32()
-  List<double?> floatNList = [];
+  List<float?> floatNList = [];
 
-  @Size32()
-  List<double>? floatListN;
+  List<float>? floatListN;
 
-  @Size32()
-  List<double?>? floatNListN;
+  List<float?>? floatNListN;
 
   List<int> longList = [];
 

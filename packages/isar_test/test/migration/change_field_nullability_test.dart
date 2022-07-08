@@ -10,7 +10,7 @@ part 'change_field_nullability_test.g.dart';
 @Name('Col')
 class Col1 {
   Col1(this.id, this.value);
-  int? id;
+  Id? id;
 
   String? value;
 
@@ -24,7 +24,7 @@ class Col1 {
 @Name('Col')
 class Col2 {
   Col2(this.id, this.value);
-  int? id;
+  Id? id;
 
   late String value;
 
