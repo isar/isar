@@ -3,10 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import 'util/common.dart';
-import 'util/sync_async_helper.dart';
+import '../test/util/common.dart';
+import '../test/util/sync_async_helper.dart';
 
-part 'isolate_test.g.dart';
+part '../test/isolate_test.g.dart';
 
 @Collection()
 class TestModel {

@@ -157,21 +157,21 @@ You can easily define relationships between objects. In Isar they are called lin
 ```dart
 @Collection()
 class Teacher {
-    Id? id;
+  Id? id;
 
-    late String subject;
+  late String subject;
 
-    @Backlink(to: 'teacher')
-    final students = IsarLinks<Student>();
+  @Backlink(to: 'teacher')
+  final students = IsarLinks<Student>();
 }
 
 @Collection()
 class Student {
-    Id? id;
+  Id? id;
 
-    late String name;
+  late String name;
 
-    final teacher = IsarLink<Teacher>();
+  final teacher = IsarLink<Teacher>();
 }
 ```
 
