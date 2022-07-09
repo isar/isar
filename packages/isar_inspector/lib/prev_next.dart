@@ -8,7 +8,6 @@ class PrevNext extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final page = ref.watch(queryPagePod);
     final result = ref.watch(queryResultsPod).valueOrNull;
 
@@ -45,26 +44,23 @@ class PrevNext extends ConsumerWidget {
               ),
               const SizedBox(width: 10),
               DropdownButtonHideUnderline(
-                child: ButtonTheme(
-                  alignedDropdown: true,
-                  child: DropdownButton<int>(
-                    icon: const Icon(Icons.arrow_drop_up),
-                    value: page,
-                    items: List.generate(
-                      pages,
-                      (page) => DropdownMenuItem(
-                        value: page + 1,
-                        child: Center(child: Text('Page ${page + 1}')),
-                      ),
+                child: DropdownButton<int>(
+                  icon: const Icon(Icons.arrow_drop_up),
+                  value: page,
+                  items: List.generate(
+                    pages,
+                    (page) => DropdownMenuItem(
+                      value: page + 1,
+                      child: Center(child: Text('Page ${page + 1}')),
                     ),
-                    onChanged: pages > 1
-                        ? (p) {
-                            if (p != null) {
-                              ref.read(queryPagePod.state).state = p;
-                            }
-                          }
-                        : null,
                   ),
+                  onChanged: pages > 1
+                      ? (p) {
+                          if (p != null) {
+                            ref.read(queryPagePod.state).state = p;
+                          }
+                        }
+                      : null,
                 ),
               ),
               const SizedBox(width: 10),

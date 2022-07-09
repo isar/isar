@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_inspector/common.dart';
 import 'package:isar_inspector/desktop/download.dart'
     if (dart.library.html) 'package:isar_inspector/web/download.dart';
+import 'package:isar_inspector/query_builder.dart';
 import 'package:isar_inspector/state/collections_state.dart';
 import 'package:isar_inspector/state/instances_state.dart';
 import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
@@ -35,6 +36,12 @@ class CollectionsList extends ConsumerWidget {
                   collection.name) {
                 ref.read(selectedCollectionNamePod.state).state =
                     collection.name;
+
+                ref.read(queryFilterPod.state).state =
+                    collection.lastFilter == null
+                        ? null
+                        : QueryBuilderUI.parseQuery(collection.lastFilter!);
+
                 ref.read(queryPagePod.state).state = 1;
               }
             },

@@ -206,6 +206,10 @@ class _TableBlockState extends State<TableBlock> {
         return Node<TreeViewHelper>(
           key: property.name,
           label: '',
+          expanded: _treeViewController
+                  .getNode<TreeViewHelper>(property.name)
+                  ?.expanded ??
+              false,
           children: children,
           data: TreeViewHelper(
             property: property,

@@ -1,11 +1,8 @@
 import 'dart:core';
 
 import 'package:isar/isar.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:isar_inspector/query_builder.dart';
 
-part 'schema.g.dart';
-
-@JsonSerializable()
 class ICollection {
   ICollection({
     required this.name,
@@ -14,12 +11,22 @@ class ICollection {
     required this.links,
   });
 
-  factory ICollection.fromJson(Map<String, dynamic> json) =>
-      _$ICollectionFromJson(json);
+  factory ICollection.fromJson(Map<String, dynamic> json) => ICollection(
+        name: json['name'] as String,
+        idName: json['idName'] as String,
+        properties: (json['properties'] as List<dynamic>)
+            .map((e) => IProperty.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        links: (json['links'] as List<dynamic>)
+            .map((e) => ILink.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+
   final String name;
   final String idName;
   final List<IProperty> properties;
   final List<ILink> links;
+  QueryBuilderUIGroupHelper? lastFilter;
 
   late final List<IProperty> allProperties = [
     IProperty(name: idName, type: IsarType.Long, isId: true),
@@ -27,7 +34,6 @@ class ICollection {
   ];
 }
 
-@JsonSerializable()
 class IProperty {
   const IProperty({
     required this.name,
@@ -36,25 +42,28 @@ class IProperty {
   });
 
   factory IProperty.fromJson(Map<String, dynamic> json) =>
-      _$IPropertyFromJson(json);
+      IProperty(
+        name: json['name'] as String,
+        type: IsarType.values.firstWhere((e) => e.name == json['type']),
+        isId: json['isId'] as bool? ?? false,
+      );
+
   final String name;
-  @JsonKey(fromJson: _typeFromJson)
   final IsarType type;
   final bool isId;
 }
 
-IsarType _typeFromJson(String type) {
-  return IsarType.values.firstWhere((e) => e.name == type);
-}
-
-@JsonSerializable()
 class ILink {
   const ILink({
     required this.name,
     required this.target,
   });
 
-  factory ILink.fromJson(Map<String, dynamic> json) => _$ILinkFromJson(json);
+  factory ILink.fromJson(Map<String, dynamic> json) => ILink(
+    name: json['name'] as String,
+    target: json['target'] as String,
+  );
+
   final String name;
   final String target;
 }

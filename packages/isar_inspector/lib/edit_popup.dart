@@ -183,6 +183,8 @@ class _EditPopupState extends State<EditPopup> {
               break;
           }
           value ??= _controller.text;
+        } else {
+          return;
         }
       }
     }

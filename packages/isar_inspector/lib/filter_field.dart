@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:isar/isar.dart';
 
 import 'package:isar_inspector/desktop/download.dart'
     if (dart.library.html) 'package:isar_inspector/web/download.dart';
-import 'package:isar_inspector/query_parser.dart';
-import 'package:isar_inspector/schema.dart';
+import 'package:isar_inspector/query_builder.dart';
 import 'package:isar_inspector/state/collections_state.dart';
 import 'package:isar_inspector/state/instances_state.dart';
 import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
@@ -27,44 +24,38 @@ class _FilterFieldState extends ConsumerState<FilterField> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-                borderSide: const BorderSide(color: Colors.white),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              contentPadding: const EdgeInsets.all(20),
-              errorText: error,
-              hintText: 'Enter Query to filter the results',
-              suffixIcon: IconButton(
-                onPressed: controller.clear,
-                icon: const Icon(Icons.clear),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-              ),
-            ),
-            style: GoogleFonts.sourceCodePro(),
-          ),
-        ),
         const SizedBox(width: 20),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             final selectedCollection = ref.read(selectedCollectionPod).value!;
-            final filter = _parseFilter(selectedCollection);
-            ref.read(queryFilterPod.state).state = filter;
-            ref.read(queryPagePod.state).state = 1;
+            final filter = await showDialog<QueryBuilderUIGroupHelper?>(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  content: QueryBuilderUI(
+                    collection: selectedCollection,
+                    filter: selectedCollection.lastFilter,
+                  ),
+                );
+              },
+            );
+
+            if (filter != null) {
+              selectedCollection.lastFilter = filter;
+              ref.read(queryFilterPod.state).state =
+                  QueryBuilderUI.parseQuery(filter);
+              ref.read(queryPagePod.state).state = 1;
+            }
           },
-          child: const Text('Query'),
+          child: const Text('Query Builder'),
         ),
         const SizedBox(width: 20),
         ElevatedButton(
           onPressed: () async {
             final selectedCollection = ref.read(selectedCollectionPod).value!;
-            final filter = _parseFilter(selectedCollection);
+            final filter = selectedCollection.lastFilter == null
+                ? null
+                : QueryBuilderUI.parseQuery(selectedCollection.lastFilter!);
             final q = ConnectQuery(
               instance: ref.read(selectedInstancePod).value!,
               collection: selectedCollection.name,
@@ -80,7 +71,9 @@ class _FilterFieldState extends ConsumerState<FilterField> {
         ElevatedButton(
           onPressed: () {
             final selectedCollection = ref.read(selectedCollectionPod).value!;
-            final filter = _parseFilter(selectedCollection);
+            final filter = selectedCollection.lastFilter == null
+                ? null
+                : QueryBuilderUI.parseQuery(selectedCollection.lastFilter!);
             final query = ConnectQuery(
               instance: ref.read(selectedInstancePod).value!,
               collection: selectedCollection.name,
@@ -92,29 +85,6 @@ class _FilterFieldState extends ConsumerState<FilterField> {
         ),
       ],
     );
-  }
-
-  FilterOperation? _parseFilter(ICollection collection) {
-    final parser = QueryParser(collection.properties);
-    FilterOperation? newFilter;
-    try {
-      if (controller.text.isNotEmpty) {
-        final filter = parser.parse(controller.text);
-        newFilter = filter;
-      }
-
-      setState(() {
-        error = null;
-      });
-
-      return newFilter;
-    } catch (e) {
-      setState(() {
-        error = 'Invalid query';
-      });
-    }
-
-    return null;
   }
 
   @override

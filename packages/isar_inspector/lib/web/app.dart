@@ -58,6 +58,12 @@ class App extends StatelessWidget {
           cardColor: const Color(0xff1f2128),
           // Color.fromARGB(255, 40, 41, 46),
           dividerColor: const Color.fromARGB(255, 40, 41, 46),
+          checkboxTheme: CheckboxThemeData(
+            fillColor: MaterialStateProperty.all(Colors.blue),
+          ),
+          buttonTheme: const ButtonThemeData(
+            alignedDropdown: true,
+          ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
               shape: MaterialStateProperty.all(
