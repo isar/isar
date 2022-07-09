@@ -17,8 +17,8 @@ class Account {
     this.lastname,
     this.birthdate,
   );
-  @Id()
-  final int id = Isar.autoIncrement;
+
+  final Id id = Isar.autoIncrement;
 
   @Index(unique: true)
   late String userId;

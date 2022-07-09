@@ -17,7 +17,7 @@ class HashIndexesModel {
     required this.stringListSensitiveIndex,
     required this.stringListInsensitiveIndex,
   });
-  int? id;
+  Id? id;
 
   @Index(type: IndexType.hash, caseSensitive: true)
   String stringSensitiveIndex;
@@ -63,12 +63,7 @@ class HashIndexesModel {
 
   @override
   String toString() {
-    return 'HashIndexesModel{stringSensitiveIndex: $stringSensitiveIndex, '
-        'stringInsensitiveIndex: $stringInsensitiveIndex, boolListIndex: '
-        '$boolListIndex, intListIndex: $intListIndex, dateTimeListIndex: '
-        '$dateTimeListIndex, stringListSensitiveIndex: '
-        '$stringListSensitiveIndex, stringListInsensitiveIndex: '
-        '$stringListInsensitiveIndex}';
+    return 'HashIndexesModel($id)';
   }
 }
 
@@ -142,8 +137,8 @@ void main() {
       expect(result, [model0]);
     });
 
-    // FIXME: type issue with List<DateTime> hash
-    // type 'MappedListIterable<DateTime, int?>' is not a subtype of type 'List<int?>' in type cast
+    // type 'MappedListIterable<DateTime, int?>' is not a subtype of type
+    // 'List<int?>' in type cast
     // isarTest("Query List<DateTime> index", () async {
     //   final result = await isar.hashIndexesModels
     //       .where()
@@ -181,14 +176,13 @@ void main() {
           .or()
           .intListIndexNotEqualTo([])
           .or()
-          // FIXME: type issue with List<DateTime> hash
+          // FIX ME: type issue with List<DateTime> hash
           // .dateTimeListIndexNotEqualTo([DateTime(1234, 1, 1)])
           // .or()
           .stringListSensitiveIndexEqualTo(['foo', 'bar'])
           .or()
           .stringListInsensitiveIndexEqualTo(['lorem', 'ipsum'])
           .tFindAll();
-      // FIXME: multiple duplicates in result
       expect(result, {model0, model1});
     });
   });

@@ -9,8 +9,7 @@ part 'filter_bool_test.g.dart';
 @Collection()
 class BoolModel {
   BoolModel();
-  @Id()
-  int? id;
+  Id? id;
 
   @Index()
   bool? field = false;
@@ -61,9 +60,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.equalTo() / .notEqualTo()', () async {
       // where clauses
@@ -132,9 +129,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.anyEqualTo() / .anyNotEqualTo()', () async {
       // where clauses
@@ -186,9 +181,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.equalTo() / .notEqualTo()', () async {
       // where clauses

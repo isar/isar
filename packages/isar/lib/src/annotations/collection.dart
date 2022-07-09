@@ -15,7 +15,7 @@ class Collection {
   /// ```dart
   /// @Collection(accessor: 'col')
   /// class MyCol {
-  ///   int? id;
+  ///   Id? id;
   /// }
   ///
   /// // access collection using: isar.col

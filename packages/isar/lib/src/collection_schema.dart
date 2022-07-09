@@ -163,6 +163,7 @@ class CollectionSchema<OBJ> {
 @protected
 enum IndexValueType {
   bool,
+  byte,
   int,
   float,
   long,
@@ -171,8 +172,8 @@ enum IndexValueType {
   stringCIS, // Case-insensitive
   stringHash, // Case-sensitive, hashed
   stringHashCIS, // Case-insensitive, hashed
-  bytesHash,
   boolListHash,
+  byteListHash,
   intListHash,
   longListHash,
   stringListHash, // Case-sensitive, hashed

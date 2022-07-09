@@ -1,4 +1,4 @@
-// same name
+// Bytes cannot be nullable
 
 import 'package:isar/isar.dart';
 
@@ -6,8 +6,5 @@ import 'package:isar/isar.dart';
 class Model {
   Id? id;
 
-  String? prop1;
-
-  @Name('prop1')
-  String? prop2;
+  late byte? prop;
 }

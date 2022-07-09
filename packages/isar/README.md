@@ -79,7 +79,7 @@ part 'post.g.dart';
 
 @Collection()
 class Post {
-  int id = Isar.autoIncrement;
+  Id id = Isar.autoIncrement;
 
   late String title;
 
@@ -157,21 +157,21 @@ You can easily define relationships between objects. In Isar they are called lin
 ```dart
 @Collection()
 class Teacher {
-    int? id;
+  Id? id;
 
-    late String subject;
+  late String subject;
 
-    @Backlink(to: 'teacher')
-    final students = IsarLinks<Student>();
+  @Backlink(to: 'teacher')
+  final students = IsarLinks<Student>();
 }
 
 @Collection()
 class Student {
-    int? id;
+  Id? id;
 
-    late String name;
+  late String name;
 
-    final teacher = IsarLink<Teacher>();
+  final teacher = IsarLink<Teacher>();
 }
 ```
 
@@ -219,7 +219,7 @@ Thanks goes to these wonderful people:
   <tr>
     <td align="center"><a href="https://github.com/h1376h"><img src="https://avatars.githubusercontent.com/u/3498335?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Hamed H.</b></sub></a><br /><a href="https://github.com/isar/isar/commits?author=h1376h" title="Code">💻</a> <a href="#maintenance-h1376h" title="Maintenance">🚧</a></td>
     <td align="center"><a href="https://github.com/Jtplouffe"><img src="https://avatars.githubusercontent.com/u/32107801?v=4?s=100" width="100px;" alt=""/><br /><sub><b>JT</b></sub></a><br /><a href="https://github.com/isar/isar/commits?author=Jtplouffe" title="Tests">⚠️</a> <a href="https://github.com/isar/isar/issues?q=author%3AJtplouffe" title="Bug reports">🐛</a></td>
-    <td align="center"><a href="https://github.com/Viper-Bit"><img src="https://avatars.githubusercontent.com/u/24822764?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Peyman</b></sub></a><br /><a href="https://github.com/isar/isar/issues?q=author%3AViper-Bit" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/Viper-Bit"><img src="https://avatars.githubusercontent.com/u/24822764?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Peyman</b></sub></a><br /><a href="https://github.com/isar/isar/issues?q=author%3AViper-Bit" title="Bug reports">🐛</a> <a href="https://github.com/isar/isar/commits?author=Viper-Bit" title="Code">💻</a></td>
     <td align="center"><a href="https://www.linkedin.com/in/simon-leier/"><img src="https://avatars.githubusercontent.com/u/13610195?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Simon Leier</b></sub></a><br /><a href="https://github.com/isar/isar/issues?q=author%3Aleisim" title="Bug reports">🐛</a> <a href="https://github.com/isar/isar/commits?author=leisim" title="Code">💻</a> <a href="https://github.com/isar/isar/commits?author=leisim" title="Documentation">📖</a> <a href="https://github.com/isar/isar/commits?author=leisim" title="Tests">⚠️</a> <a href="#example-leisim" title="Examples">💡</a></td>
   </tr>
 </table>

@@ -18,8 +18,10 @@ class SynchronousFuture<T> implements Future<T> {
       Completer<T>().future;
 
   @override
-  Future<R> then<R>(FutureOr<R> Function(T value) onValue,
-      {Function? onError,}) {
+  Future<R> then<R>(
+    FutureOr<R> Function(T value) onValue, {
+    Function? onError,
+  }) {
     final dynamic result = onValue(_value);
     if (result is Future<R>) {
       return result;

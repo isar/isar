@@ -9,20 +9,16 @@ part 'filter_int_test.g.dart';
 @Collection()
 class IntModel {
   IntModel();
-  @Id()
-  int? id;
+  Id? id;
 
   @Index()
-  @Size32()
-  int? field = 0;
+  short? field = 0;
 
   @Index(type: IndexType.value)
-  @Size32()
-  List<int?>? list;
+  List<short?>? list;
 
   @Index(type: IndexType.hash)
-  @Size32()
-  List<int>? hashList;
+  List<short>? hashList;
 
   @override
   String toString() {
@@ -67,9 +63,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.equalTo()', () async {
       // where clause

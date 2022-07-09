@@ -22,7 +22,7 @@ class ValueIndexesModel {
     required this.stringListSensitiveIndex,
     required this.stringListInsensitiveIndex,
   });
-  int? id;
+  Id? id;
 
   @Index(type: IndexType.value)
   bool boolIndex;

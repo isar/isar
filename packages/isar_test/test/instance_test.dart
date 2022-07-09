@@ -8,7 +8,7 @@ part 'instance_test.g.dart';
 
 @Collection()
 class Model {
-  int? id;
+  Id? id;
 
   @Index()
   String? value;

@@ -8,7 +8,7 @@ part 'composite3_test.g.dart';
 @Collection()
 class Model {
   Model(this.value1, this.value2, this.value3);
-  int? id;
+  Id? id;
 
   @Index(
     composite: [
@@ -84,9 +84,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.anyValue1Value2Value3', () async {
       await qEqual(

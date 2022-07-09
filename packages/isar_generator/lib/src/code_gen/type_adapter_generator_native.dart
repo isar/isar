@@ -46,12 +46,12 @@ _GetPropResult _generateGetPropertyValue(
             '.convert($value);';
       }
       value = stringBytes;
-      dynamicSize = '($stringBytes$nOp.length $nLen)';
+      dynamicSize = '3 + ($stringBytes$nOp.length $nLen)';
       break;
     case IsarType.stringList:
       final stringBytesList = '${property.dartName}\$BytesList';
       dynamicSize = '${property.dartName}\$BytesCount';
-      code += 'var $dynamicSize = ($value$nOp.length $nLen) * 8;';
+      code += 'var $dynamicSize = 3 + ($value$nOp.length $nLen) * 3;';
 
       if (property.nullable) {
         final stringValue = '${property.dartName}\$Value';
@@ -86,9 +86,9 @@ _GetPropResult _generateGetPropertyValue(
       code += '}';
       value = stringBytesList;
       break;
-    case IsarType.bytes:
+    case IsarType.byteList:
     case IsarType.boolList:
-      dynamicSize = '($value$nOp.length $nLen)';
+      dynamicSize = '3 + ($value$nOp.length $nLen)';
       break;
     case IsarType.intList:
     case IsarType.floatList:
@@ -96,7 +96,7 @@ _GetPropResult _generateGetPropertyValue(
     case IsarType.doubleList:
     case IsarType.dateTimeList:
       dynamicSize =
-          '($value$nOp.length $nLen) * ${property.isarType.elementSize}';
+          '3 + ($value$nOp.length $nLen) * ${property.isarType.elementSize}';
       break;
     // ignore: no_default_cases
     default:
@@ -137,8 +137,13 @@ String generateSerializeNative(ObjectInfo object) {
   for (var i = 0; i < object.objectProperties.length; i++) {
     final property = object.objectProperties[i];
     switch (property.isarType) {
+      case IsarType.id:
+        throw UnimplementedError();
       case IsarType.bool:
         code += 'writer.writeBool(offsets[$i], ${values[i]});';
+        break;
+      case IsarType.byte:
+        code += 'writer.writeByte(offsets[$i], ${values[i]});';
         break;
       case IsarType.int:
         code += 'writer.writeInt(offsets[$i], ${values[i]});';
@@ -156,16 +161,14 @@ String generateSerializeNative(ObjectInfo object) {
         code += 'writer.writeDateTime(offsets[$i], ${values[i]});';
         break;
       case IsarType.string:
-        code += 'writer.writeBytes(offsets[$i], ${values[i]});';
-        break;
-      case IsarType.bytes:
-        code += 'writer.writeBytes(offsets[$i], ${values[i]});';
+      case IsarType.byteList:
+        code += 'writer.writeByteList(offsets[$i], ${values[i]});';
         break;
       case IsarType.boolList:
         code += 'writer.writeBoolList(offsets[$i], ${values[i]});';
         break;
       case IsarType.stringList:
-        code += 'writer.writeStringList(offsets[$i], ${values[i]});';
+        code += 'writer.writeByteLists(offsets[$i], ${values[i]});';
         break;
       case IsarType.intList:
         code += 'writer.writeIntList(offsets[$i], ${values[i]});';
@@ -239,14 +242,15 @@ String _deserializeProperty(
   final orNullList = property.nullable ? '' : '?? []';
   final orElNull = property.elementNullable ? 'OrNull' : '';
 
-  if (property.isId) {
-    return 'id';
-  }
-
   String? deser;
   switch (property.isarType) {
+    case IsarType.id:
+      return 'id';
     case IsarType.bool:
       deser = 'reader.readBool$orNull($propertyOffset)';
+      break;
+    case IsarType.byte:
+      deser = 'reader.readByte($propertyOffset)';
       break;
     case IsarType.int:
       deser = 'reader.readInt$orNull($propertyOffset)';
@@ -266,8 +270,8 @@ String _deserializeProperty(
     case IsarType.string:
       deser = 'reader.readString$orNull($propertyOffset)';
       break;
-    case IsarType.bytes:
-      deser = 'reader.readBytes$orNull($propertyOffset)';
+    case IsarType.byteList:
+      deser = 'reader.readByteList$orNull($propertyOffset)';
       break;
     case IsarType.boolList:
       deser = 'reader.readBool${orElNull}List($propertyOffset) $orNullList';

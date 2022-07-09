@@ -8,18 +8,17 @@ part 'id_test.g.dart';
 
 @Collection()
 class ImplicitNullableIdModel {
-  int? id;
+  Id? id;
 }
 
 @Collection()
 class ImplicitFinalIdModel {
-  final int id = Isar.autoIncrement;
+  final Id id = Isar.autoIncrement;
 }
 
 @Collection()
 class ExplicitIdModel {
-  @Id()
-  int? id;
+  Id? id;
 }
 
 void main() {

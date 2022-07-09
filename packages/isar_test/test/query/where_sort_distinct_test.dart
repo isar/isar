@@ -8,7 +8,7 @@ part 'where_sort_distinct_test.g.dart';
 
 @Collection()
 class TestModel {
-  int? id;
+  Id? id;
 
   @Index()
   int? value;
@@ -42,9 +42,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.any()', () async {
       await qEqual(

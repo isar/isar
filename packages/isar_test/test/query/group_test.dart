@@ -25,9 +25,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('Simple or', () async {
       await qEqualSet(

@@ -10,7 +10,7 @@ part 'any_of_all_of_test.g.dart';
 @Collection()
 class Model {
   Model(this.id, this.value);
-  final int id;
+  final Id id;
 
   @Index()
   final int value;
@@ -31,7 +31,7 @@ void main() {
     late Model model2;
     late Model model3;
 
-    Future<void> setupModels() async {
+    setUp(() async {
       model0 = Model(0, 0);
       model1 = Model(1, 1);
       model2 = Model(2, 2);
@@ -40,13 +40,11 @@ void main() {
       await isar.writeTxn(() {
         return isar.models.putAll([model0, model1, model2, model3]);
       });
-    }
+    });
+
+    tearDown(() => isar.close());
 
     group('where anyOf', () {
-      setUp(setupModels);
-
-      tearDown(() => isar.close());
-
       isarTest('zero elements', () async {
         final one = isar.models.where().anyOf(
           <int>[],
@@ -89,10 +87,6 @@ void main() {
     });
 
     group('filter anyOf', () {
-      setUp(setupModels);
-
-      tearDown(() => isar.close());
-
       isarTest('zero elements', () async {
         final one = isar.models.filter().anyOf(
           <int>[],
@@ -135,10 +129,6 @@ void main() {
     });
 
     group('filter allOf', () {
-      setUp(setupModels);
-
-      tearDown(() => isar.close());
-
       isarTest('zero elements', () async {
         final one = isar.models.filter().allOf(
           <int>[],

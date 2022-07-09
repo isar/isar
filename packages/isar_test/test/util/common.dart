@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -39,7 +38,7 @@ Future<void> qEqualSync<T>(List<T> actual, List<T> target) async {
   }
 }
 
-bool allTestsSuccessful = true;
+final testErrors = <String>[];
 int testCount = 0;
 
 Future<void> _prepareTest() async {
@@ -47,9 +46,6 @@ Future<void> _prepareTest() async {
     try {
       await Isar.initializeIsarCore(download: true);
     } catch (e) {
-      if (kDebugMode) {
-        print('Could not initialize isar core: $e');
-      }
       // ignore. maybe this is an instrumentation test
     }
   }
@@ -75,7 +71,7 @@ void isarTest(
               await body();
               testCount++;
             } catch (e) {
-              allTestsSuccessful = false;
+              testErrors.add('$testName: $e');
               rethrow;
             }
           },

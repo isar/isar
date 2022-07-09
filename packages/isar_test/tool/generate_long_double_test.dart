@@ -6,7 +6,7 @@ void main() {
 
   final longTest = intTest
       .replaceAll('Int', 'Long')
-      .replaceAll('@Size32()', '')
+      .replaceAll('short', 'int')
       .replaceAll('filter_int_test', 'filter_long_test')
       .replaceAll('intModels', 'longModels');
   File('test/filter/filter_long_test.dart').writeAsStringSync(longTest);
@@ -16,7 +16,7 @@ void main() {
 
   final doubleTest = floatTest
       .replaceAll('Float', 'Double')
-      .replaceAll('@Size32()', '')
+      .replaceAll('float', 'double')
       .replaceAll('filter_float_test', 'filter_double_test')
       .replaceAll('floatModels', 'doubleModels');
   File('test/filter/filter_double_test.dart').writeAsStringSync(doubleTest);

@@ -1,16 +1,37 @@
 ## 3.0.0-dev.6
 
+**⚠️ BE CAREFUL ⚠️** This version of Isar does not allow downgrading.
+
 ### Enhancements
 
+- Vastly improved Isar binary format space efficiency resulting in up to 20% smaller databases
+- Slighly improved String index space efficiency saving two bytes per string
 - On non-web platforms, `IsarLink` and `IsarLinks` will load automatically
 - `.putSync()`, `.putAllSync()` etc. will now save links recursively by default
 - Improved `.putSync()` and `.putIndexedSync()` performance
 - Added `isar.getSize()` and `isar.getSizeSync()`
 - Reintrodced option to disable the inspector
+- Slighly improved default collection accessor naming
+- Id property queries now always return a `List<int>` even if the id is nullable
+- Added `id`, `byte`, `short` and `float` typedefs
+- `Uint8List` properties now support multi-entry indexes
 
 ### Breaking
 
+- Removed `@Id()` and `@Size32()` annotations
+- Changed the default index type for all `List`s to `IndexType.hash`
 - Renamed `isar.getCollection()` to `isar.collection()`
+- The maximum size of objects is now 16MB
+- It is no longer allowed to extend or implement another collection
+- Unsupported properties will no longer be ignored by default
+
+### Fixes
+
+- Fixed missing symbols on 32-bit Android 5 & 6 devices
+- Fixed inconsistent `null` handling in json export
+- Fixed default directory issue on Android
+- Fixed different where clauses returning duplicate results
+- Fixed hash index issue where multiple list values resulted in the same hash
 
 ## 3.0.0-dev.5
 
@@ -37,6 +58,7 @@
 ### Breaking
 
 - Changed the `schemas` parameter from named to positional
+- Isar will no longer create the provided directory. Make sure it exists before opening an Isar Instance.
 
 ### Fixes
 

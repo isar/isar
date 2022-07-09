@@ -2,19 +2,21 @@ import 'dart:typed_data';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_generator/src/helper.dart';
 import 'package:source_gen/source_gen.dart';
 
 enum IsarType {
+  id,
   bool,
+  byte,
   int,
   float,
   long,
   double,
   dateTime,
   string,
-  bytes,
   boolList,
+  byteList,
   intList,
   floatList,
   longList,
@@ -43,7 +45,7 @@ extension IsarTypeX on IsarType {
       index == IsarType.string.index || index == IsarType.stringList.index;
 
   int get staticSize {
-    if (this == IsarType.bool) {
+    if (this == IsarType.bool || this == IsarType.byte) {
       return 1;
     } else if (this == IsarType.int || this == IsarType.float) {
       return 4;
@@ -54,8 +56,8 @@ extension IsarTypeX on IsarType {
 
   int get elementSize {
     switch (this) {
-      case IsarType.bytes:
       case IsarType.boolList:
+      case IsarType.byteList:
         return 1;
       case IsarType.intList:
       case IsarType.floatList:
@@ -74,6 +76,8 @@ extension IsarTypeX on IsarType {
     switch (this) {
       case IsarType.boolList:
         return IsarType.bool;
+      case IsarType.byteList:
+        return IsarType.byte;
       case IsarType.intList:
         return IsarType.int;
       case IsarType.floatList:
@@ -94,8 +98,12 @@ extension IsarTypeX on IsarType {
 
   String get name {
     switch (this) {
+      case IsarType.id:
+        throw UnimplementedError();
       case IsarType.bool:
         return 'Bool';
+      case IsarType.byte:
+        return 'Byte';
       case IsarType.int:
         return 'Int';
       case IsarType.float:
@@ -107,10 +115,10 @@ extension IsarTypeX on IsarType {
         return 'Double';
       case IsarType.string:
         return 'String';
-      case IsarType.bytes:
-        return 'ByteList';
       case IsarType.boolList:
         return 'BoolList';
+      case IsarType.byteList:
+        return 'ByteList';
       case IsarType.intList:
         return 'IntList';
       case IsarType.floatList:
@@ -129,8 +137,11 @@ extension IsarTypeX on IsarType {
     final nQ = nullable ? '?' : '';
     final nEQ = elementNullable ? '?' : '';
     switch (this) {
+      case IsarType.id:
+        return 'Id$nQ';
       case IsarType.bool:
         return 'bool$nQ';
+      case IsarType.byte:
       case IsarType.int:
       case IsarType.long:
         return 'int$nQ';
@@ -141,10 +152,10 @@ extension IsarTypeX on IsarType {
         return 'DateTime$nQ';
       case IsarType.string:
         return 'String$nQ';
-      case IsarType.bytes:
-        return 'Uint8List$nQ';
       case IsarType.boolList:
         return 'List<bool$nEQ>$nQ';
+      case IsarType.byteList:
+        return 'Uint8List$nQ';
       case IsarType.intList:
       case IsarType.longList:
         return 'List<int$nEQ>$nQ';
@@ -165,25 +176,29 @@ bool _isDateTime(Element element) => _dateTimeChecker.isExactly(element);
 const TypeChecker _uint8ListChecker = TypeChecker.fromRuntime(Uint8List);
 bool _isUint8List(Element element) => _uint8ListChecker.isExactly(element);
 
-const TypeChecker _size32Checker = TypeChecker.fromRuntime(Size32);
 IsarType? getIsarType(DartType type, Element element) {
-  final size32 = _size32Checker.hasAnnotationOfExact(element.nonSynthetic);
   if (type.isDartCoreBool) {
     return IsarType.bool;
   } else if (type.isDartCoreInt) {
-    if (size32) {
+    if (type.alias?.element.name == 'Id') {
+      return IsarType.id;
+    } else if (type.alias?.element.name == 'byte') {
+      return IsarType.byte;
+    } else if (type.alias?.element.name == 'short') {
       return IsarType.int;
     } else {
       return IsarType.long;
     }
   } else if (type.isDartCoreDouble) {
-    if (size32) {
+    if (type.alias?.element.name == 'float') {
       return IsarType.float;
     } else {
       return IsarType.double;
     }
   } else if (type.isDartCoreString) {
     return IsarType.string;
+  } else if (_isUint8List(type.element!)) {
+    return IsarType.byteList;
   } else if (type.isDartCoreList) {
     final parameterizedType = type as ParameterizedType;
     final typeArguments = parameterizedType.typeArguments;
@@ -192,13 +207,17 @@ IsarType? getIsarType(DartType type, Element element) {
       if (listType.isDartCoreBool) {
         return IsarType.boolList;
       } else if (listType.isDartCoreInt) {
-        if (size32) {
+        if (type.alias?.element.name == 'Id') {
+          err('Id lists are not supported.', element);
+        } else if (listType.alias?.element.name == 'byte') {
+          return IsarType.byteList;
+        } else if (listType.alias?.element.name == 'short') {
           return IsarType.intList;
         } else {
           return IsarType.longList;
         }
       } else if (listType.isDartCoreDouble) {
-        if (size32) {
+        if (listType.alias?.element.name == 'float') {
           return IsarType.floatList;
         } else {
           return IsarType.doubleList;
@@ -211,8 +230,6 @@ IsarType? getIsarType(DartType type, Element element) {
     }
   } else if (_isDateTime(type.element!)) {
     return IsarType.dateTime;
-  } else if (_isUint8List(type.element!)) {
-    return IsarType.bytes;
   }
   return null;
 }

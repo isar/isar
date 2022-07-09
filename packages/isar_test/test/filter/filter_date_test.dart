@@ -9,8 +9,7 @@ part 'filter_date_test.g.dart';
 @Collection()
 class DateTimeModel {
   DateTimeModel();
-  @Id()
-  int? id;
+  Id? id;
 
   @Index()
   DateTime? field;
@@ -81,9 +80,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('.equalTo()', () async {
       // where clause

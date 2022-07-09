@@ -7,8 +7,8 @@ String generateSortBy(ObjectInfo oi) {
   var code = '''
   extension ${oi.dartName}QueryWhereSortBy on QueryBuilder<${oi.dartName}, ${oi.dartName}, QSortBy> {''';
 
-  for (final property in oi.properties) {
-    if (property.isarType.isList || property.isId) {
+  for (final property in oi.objectProperties) {
+    if (property.isarType.isList) {
       continue;
     }
 

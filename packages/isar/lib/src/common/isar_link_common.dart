@@ -64,7 +64,7 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
       return id;
     } else {
       throw IsarError(
-        'Object $object has no id and can therefore not be linked. '
+        'Object "$object" has no id and can therefore not be linked. '
         'Make sure to .put() objects before you use them in links.',
       );
     }

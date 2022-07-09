@@ -10,7 +10,7 @@ part 'change_link_links_test.g.dart';
 @Name('Col')
 class Col1 {
   Col1(this.id);
-  int? id;
+  Id? id;
 
   final IsarLink<Col1> link = IsarLink<Col1>();
 
@@ -23,7 +23,7 @@ class Col1 {
 @Name('Col')
 class Col2 {
   Col2(this.id);
-  int? id;
+  Id? id;
 
   final IsarLinks<Col2> link = IsarLinks<Col2>();
 

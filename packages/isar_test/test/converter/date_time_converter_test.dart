@@ -13,7 +13,7 @@ class DateTimeModel {
     required this.nullableDateTime,
   });
 
-  int id = Isar.autoIncrement;
+  Id id = Isar.autoIncrement;
 
   @UnixToDateTimeTypeConverter()
   final DateTime dateTime;
@@ -23,7 +23,8 @@ class DateTimeModel {
 
   @override
   String toString() {
-    return 'DateTimeModel{id: $id, dateTime: $dateTime, nullableDateTime: $nullableDateTime}';
+    return 'DateTimeModel{id: $id, dateTime: $dateTime, nullableDateTime: '
+        '$nullableDateTime}';
   }
 
   @override
@@ -110,8 +111,10 @@ void main() {
       );
     });
 
+    tearDown(() => isar.close());
+
     isarTest('Query by dateTime', () async {
-      await qEqual(
+      await qEqualSet(
         isar.dateTimeModels
             .filter()
             .dateTimeEqualTo(DateTime(2010, 12, 13))
@@ -119,7 +122,7 @@ void main() {
         [obj3],
       );
 
-      await qEqual(
+      await qEqualSet(
         isar.dateTimeModels
             .filter()
             .dateTimeGreaterThan(DateTime(2000))
@@ -127,7 +130,7 @@ void main() {
         [obj2, obj3, obj5],
       );
 
-      await qEqual(
+      await qEqualSet(
         isar.dateTimeModels
             .filter()
             .dateTimeBetween(DateTime(1980, 1, 2), DateTime(2005, 1, 2))
@@ -135,19 +138,19 @@ void main() {
         [obj0, obj5],
       );
 
-      await qEqual(
+      await qEqualSet(
         isar.dateTimeModels.filter().dateTimeLessThan(DateTime(0)).tFindAll(),
         [obj4],
       );
     });
 
     isarTest('Query by nullableDateTime', () async {
-      await qEqual(
+      await qEqualSet(
         isar.dateTimeModels.filter().nullableDateTimeIsNull().tFindAll(),
         [obj1, obj2, obj4],
       );
 
-      await qEqual(
+      await qEqualSet(
         isar.dateTimeModels
             .filter()
             .nullableDateTimeGreaterThan(DateTime(2000))
@@ -155,17 +158,15 @@ void main() {
         [obj5],
       );
 
-      // FIXME: lessThan queries on nullable dates also returns objects where
-      //  the field is null
-      await qEqual(
+      await qEqualSet(
         isar.dateTimeModels
             .filter()
             .nullableDateTimeLessThan(DateTime(1969))
             .tFindAll(),
-        [obj3],
+        [obj1, obj2, obj3, obj4],
       );
 
-      await qEqual(
+      await qEqualSet(
         isar.dateTimeModels
             .filter()
             .nullableDateTimeBetween(DateTime(1950), DateTime(9999))

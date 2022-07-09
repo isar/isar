@@ -17,7 +17,7 @@ class FilterGenerator {
         code += generateIsNull(property);
       }
 
-      if (property.isarType != IsarType.bytes) {
+      if (property.isarType != IsarType.byteList) {
         if (!property.isarType.scalarType.containsFloat) {
           code += generateEqualTo(property);
         }
@@ -60,7 +60,7 @@ class FilterGenerator {
   String vType(ObjectProperty p, [bool nullable = true]) {
     if (p.isarType.isList) {
       return p.isarType.scalarType.dartType(p.nullable && nullable, false);
-    } else if (nullable && !p.isId) {
+    } else if (nullable && p.isarType != IsarType.id) {
       return p.dartType;
     } else {
       return p.dartType.removeSuffix('?');
@@ -156,7 +156,7 @@ class FilterGenerator {
         ));
       });
     }''';
-    if (p.isarType.isList && p.isarType != IsarType.bytes) {
+    if (p.isarType.isList && p.isarType != IsarType.byteList) {
       code += '''
       ${mPrefix(p)}IsNull() {
         return QueryBuilder.apply(this, (query) {

@@ -18,10 +18,12 @@ void main() {
       final isar1 = await openTempIsar([UserModelSchema]);
       final listenedIsar1 = await listener.next;
       expect(isar1, listenedIsar1);
+      await isar1.close();
 
       final isar2 = await openTempIsar([UserModelSchema]);
       final listenerIsar2 = await listener.next;
       expect(isar2, listenerIsar2);
+      await isar2.close();
 
       Isar.removeOpenListener(openListener);
       await listener.done();

@@ -8,7 +8,7 @@ part 'composite2_test.g.dart';
 @Collection()
 class Model {
   Model(this.value1, this.value2);
-  int? id;
+  Id? id;
 
   @Index(
     composite: [CompositeIndex('value2')],
@@ -57,9 +57,7 @@ void main() {
       });
     });
 
-    tearDown(() async {
-      await isar.close();
-    });
+    tearDown(() => isar.close());
 
     isarTest('sorted by value1 value2', () async {
       await qEqual(

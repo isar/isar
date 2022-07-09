@@ -2,8 +2,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 void main() {
-  final testDir = Directory('test');
-  final files = testDir
+  final files = Directory('test')
       .listSync(recursive: true)
       .where((FileSystemEntity e) => e is File && e.path.endsWith('_test.dart'))
       .map((FileSystemEntity e) => e.path)
@@ -15,8 +14,7 @@ void main() {
 
   final calls = files.map((String e) {
     final content = File(e).readAsStringSync();
-    final call =
-        "${e.split('.')[0].replaceAll(p.separator, '_')}.main();";
+    final call = "${e.split('.')[0].replaceAll(p.separator, '_')}.main();";
     if (content.startsWith("@TestOn('vm')")) {
       return 'if (!kIsWeb) $call';
     } else {
@@ -25,12 +23,15 @@ void main() {
   }).join('\n');
 
   final code = """
+    // ignore_for_file: directives_ordering
+
     import 'test/util/common.dart';
     $imports
 
     void main() {
       $calls
     }
+
   """;
 
   File('all_tests.dart').writeAsStringSync(code);
