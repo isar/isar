@@ -1,6 +1,6 @@
 ## 3.0.0-dev.6
 
-**⚠️ BE CAREFUL ⚠️** This version of Isar does not allow downgrading.
+**⚠️ BE CAREFUL ⚠️** This version of Isar uses an experimental binary format does not allow downgrading.
 
 ### Enhancements
 
@@ -32,6 +32,7 @@
 - Fixed default directory issue on Android
 - Fixed different where clauses returning duplicate results
 - Fixed hash index issue where multiple list values resulted in the same hash
+- Fixed edge case where creating a new index failed
 
 ## 3.0.0-dev.5
 
