@@ -231,7 +231,6 @@ void main() {
             .tFindAll(),
         [obj0, obj4],
       );
-      return;
     });
 
     isarTest('Ints query', () async {
