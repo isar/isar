@@ -736,15 +736,13 @@ void main() {
         [obj1, obj3, obj4, obj5],
       );
 
-      // FIXME: lessThan on nullable fields also return null values.
-      // We could fix this be adding a lower bound in the query and excluding it
-      // await qEqualSet(
-      //   isar.multiEntryNullableIndexModels
-      //       .where()
-      //       .intsElementLessThan(0)
-      //       .tFindAll(),
-      //   [],
-      // );
+      await qEqualSet(
+        isar.multiEntryNullableIndexModels
+            .where()
+            .intsElementLessThan(0)
+            .tFindAll(),
+        [obj3, obj4],
+      );
 
       await qEqualSet(
         isar.multiEntryNullableIndexModels
@@ -785,14 +783,13 @@ void main() {
     });
 
     isarTest('Doubles query', () async {
-      // FIXME: Same as ints query
-      // await qEqualSet(
-      //   isar.multiEntryNullableIndexModels
-      //       .where()
-      //       .doublesElementLessThan(10)
-      //       .tFindAll(),
-      //   [obj0],
-      // );
+      await qEqualSet(
+        isar.multiEntryNullableIndexModels
+            .where()
+            .doublesElementLessThan(10)
+            .tFindAll(),
+        [obj0, obj3, obj4, obj5],
+      );
 
       await qEqualSet(
         isar.multiEntryNullableIndexModels
@@ -854,15 +851,13 @@ void main() {
         [obj0, obj3, obj4, obj5],
       );
 
-      // FIXME: Same as ints lessThan
-      // Could fix with lower bound in generator
-      // await qEqualSet(
-      //   isar.multiEntryNullableIndexModels
-      //       .where()
-      //       .dateTimesElementLessThan(DateTime(2000))
-      //       .tFindAll(),
-      //   [obj4, obj5],
-      // );
+      await qEqualSet(
+        isar.multiEntryNullableIndexModels
+            .where()
+            .dateTimesElementLessThan(DateTime(2000))
+            .tFindAll(),
+        [obj3, obj4, obj5],
+      );
 
       await qEqualSet(
         isar.multiEntryNullableIndexModels
@@ -922,14 +917,13 @@ void main() {
         [obj0, obj5],
       );
 
-      // FIXME: Same issue as ints lessThan
-      // await qEqualSet(
-      //   isar.multiEntryNullableIndexModels
-      //       .where()
-      //       .stringsSensitiveElementLessThan('aaaa')
-      //       .tFindAll(),
-      //   [obj0, obj1, obj5],
-      // );
+      await qEqualSet(
+        isar.multiEntryNullableIndexModels
+            .where()
+            .stringsSensitiveElementLessThan('aaaa')
+            .tFindAll(),
+        [obj0, obj1, obj3, obj5],
+      );
 
       await qEqualSet(
         isar.multiEntryNullableIndexModels
@@ -1005,14 +999,13 @@ void main() {
         [obj4],
       );
 
-      // FIXME: Same issue as ints lessThan
-      // await qEqualSet(
-      //   isar.multiEntryNullableIndexModels
-      //       .where()
-      //       .stringsInsensitiveElementLessThan('desert')
-      //       .tFindAll(),
-      //   [obj0, obj1, obj4, obj5],
-      // );
+      await qEqualSet(
+        isar.multiEntryNullableIndexModels
+            .where()
+            .stringsInsensitiveElementLessThan('desert')
+            .tFindAll(),
+        [obj0, obj1, obj3, obj4, obj5],
+      );
 
       await qEqualSet(
         isar.multiEntryNullableIndexModels
