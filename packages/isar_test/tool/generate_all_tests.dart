@@ -31,8 +31,7 @@ void main() {
     void main() {
       $calls
     }
-
-  """;
+""";
 
   File('all_tests.dart').writeAsStringSync(code);
 }
