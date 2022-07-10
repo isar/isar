@@ -1,3 +1,7 @@
+## 3.0.0-dev.7
+
+Small hotfix: existing bool properties were rejected in schema migration.
+
 ## 3.0.0-dev.6
 
 **⚠️ BE CAREFUL ⚠️** This version of Isar uses an experimental binary format does not allow downgrading.
