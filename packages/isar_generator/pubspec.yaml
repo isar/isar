@@ -1,5 +1,5 @@
 name: isar_generator
-description: Code generator for the Isar Database. Finds classes annotated with @IsarCollection.
+description: Code generator for the Isar Database. Finds classes annotated with @Collection.
 version: 3.0.0-dev.7
 repository: https://github.com/isar/isar
 homepage: https://isar.dev
