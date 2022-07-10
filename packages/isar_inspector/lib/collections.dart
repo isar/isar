@@ -38,10 +38,11 @@ class CollectionsList extends ConsumerWidget {
                     collection.name;
 
                 ref.read(queryFilterPod.state).state =
-                    collection.lastFilter == null
+                    collection.uiFilter == null
                         ? null
-                        : QueryBuilderUI.parseQuery(collection.lastFilter!);
+                        : QueryBuilderUI.parseQuery(collection.uiFilter!);
 
+                ref.read(querySortPod.state).state = collection.uiSort;
                 ref.read(queryPagePod.state).state = 1;
               }
             },

@@ -49,8 +49,10 @@ class QueryTable extends ConsumerWidget {
               return Stack(
                 children: [
                   TableBlock(
-                    key: ValueKey('${collection.name}'
-                        '_${objects[index].getValue(collection.idName)}'),
+                    key: ValueKey(
+                      '${collection.name}'
+                      '_${objects[index].getValue(collection.idName)}',
+                    ),
                     collection: collection,
                     object: objects[index],
                     editor: (id, property, index, value) {

@@ -26,7 +26,8 @@ class ICollection {
   final String idName;
   final List<IProperty> properties;
   final List<ILink> links;
-  QueryBuilderUIGroupHelper? lastFilter;
+  QueryBuilderUIGroupHelper? uiFilter;
+  SortProperty? uiSort;
 
   late final List<IProperty> allProperties = [
     IProperty(name: idName, type: IsarType.Long, isId: true),
@@ -41,8 +42,7 @@ class IProperty {
     this.isId = false,
   });
 
-  factory IProperty.fromJson(Map<String, dynamic> json) =>
-      IProperty(
+  factory IProperty.fromJson(Map<String, dynamic> json) => IProperty(
         name: json['name'] as String,
         type: IsarType.values.firstWhere((e) => e.name == json['type']),
         isId: json['isId'] as bool? ?? false,
@@ -60,9 +60,9 @@ class ILink {
   });
 
   factory ILink.fromJson(Map<String, dynamic> json) => ILink(
-    name: json['name'] as String,
-    target: json['target'] as String,
-  );
+        name: json['name'] as String,
+        target: json['target'] as String,
+      );
 
   final String name;
   final String target;

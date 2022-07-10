@@ -50,7 +50,6 @@ final queryResultsPod = FutureProvider<QueryResult>((ref) async {
     ),
   );
 
-  //ignore: avoid_dynamic_calls
   final objects = (result['results']! as List<dynamic>)
       .map((e) => e as Map<String, dynamic>)
       .toList()

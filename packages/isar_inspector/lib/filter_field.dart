@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar/isar.dart';
 
 import 'package:isar_inspector/desktop/download.dart'
     if (dart.library.html) 'package:isar_inspector/web/download.dart';
@@ -28,22 +29,28 @@ class _FilterFieldState extends ConsumerState<FilterField> {
         ElevatedButton(
           onPressed: () async {
             final selectedCollection = ref.read(selectedCollectionPod).value!;
-            final filter = await showDialog<QueryBuilderUIGroupHelper?>(
+            final result = await showDialog<Map<String, dynamic>>(
               context: context,
               builder: (context) {
                 return AlertDialog(
                   content: QueryBuilderUI(
                     collection: selectedCollection,
-                    filter: selectedCollection.lastFilter,
+                    filter: selectedCollection.uiFilter,
+                    sort: selectedCollection.uiSort,
                   ),
                 );
               },
             );
 
-            if (filter != null) {
-              selectedCollection.lastFilter = filter;
+            if (result != null) {
+              final filter = result['filter'] as QueryBuilderUIGroupHelper;
+              final sort = result['sort'] as SortProperty?;
+
+              selectedCollection.uiFilter = filter;
+              selectedCollection.uiSort = sort;
               ref.read(queryFilterPod.state).state =
                   QueryBuilderUI.parseQuery(filter);
+              ref.read(querySortPod.state).state = sort;
               ref.read(queryPagePod.state).state = 1;
             }
           },
@@ -53,9 +60,9 @@ class _FilterFieldState extends ConsumerState<FilterField> {
         ElevatedButton(
           onPressed: () async {
             final selectedCollection = ref.read(selectedCollectionPod).value!;
-            final filter = selectedCollection.lastFilter == null
+            final filter = selectedCollection.uiFilter == null
                 ? null
-                : QueryBuilderUI.parseQuery(selectedCollection.lastFilter!);
+                : QueryBuilderUI.parseQuery(selectedCollection.uiFilter!);
             final q = ConnectQuery(
               instance: ref.read(selectedInstancePod).value!,
               collection: selectedCollection.name,
@@ -71,9 +78,9 @@ class _FilterFieldState extends ConsumerState<FilterField> {
         ElevatedButton(
           onPressed: () {
             final selectedCollection = ref.read(selectedCollectionPod).value!;
-            final filter = selectedCollection.lastFilter == null
+            final filter = selectedCollection.uiFilter == null
                 ? null
-                : QueryBuilderUI.parseQuery(selectedCollection.lastFilter!);
+                : QueryBuilderUI.parseQuery(selectedCollection.uiFilter!);
             final query = ConnectQuery(
               instance: ref.read(selectedInstancePod).value!,
               collection: selectedCollection.name,

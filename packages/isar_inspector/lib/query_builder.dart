@@ -6,10 +6,16 @@ import 'package:isar_inspector/common.dart';
 import 'package:isar_inspector/schema.dart';
 
 class QueryBuilderUI extends StatefulWidget {
-  const QueryBuilderUI({super.key, required this.collection, this.filter});
+  const QueryBuilderUI({
+    super.key,
+    required this.collection,
+    this.filter,
+    this.sort,
+  });
 
   final ICollection collection;
-  final QueryBuilderUIHelper? filter;
+  final QueryBuilderUIGroupHelper? filter;
+  final SortProperty? sort;
 
   @override
   State<QueryBuilderUI> createState() => _QueryBuilderUIState();
@@ -113,14 +119,22 @@ class QueryBuilderUI extends StatefulWidget {
 
 class _QueryBuilderUIState extends State<QueryBuilderUI> {
   late final QueryBuilderUIGroupHelper _filter;
+  late SortProperty? _sort = widget.sort;
+  late final List<IProperty> _sortProps;
 
   @override
   void initState() {
     super.initState();
 
-    _filter = widget.filter == null
-        ? QueryBuilderUIGroupHelper(QueryBuilderUIOP.and)
-        : widget.filter! as QueryBuilderUIGroupHelper;
+    if (widget.filter != null) {
+      _filter = QueryBuilderUIGroupHelper(widget.filter!.operation)
+        ..children.addAll(widget.filter!.children);
+    } else {
+      _filter = QueryBuilderUIGroupHelper(QueryBuilderUIOP.and);
+    }
+
+    _sortProps =
+        widget.collection.allProperties.where((p) => !p.type.isList).toList();
   }
 
   @override
@@ -135,9 +149,7 @@ class _QueryBuilderUIState extends State<QueryBuilderUI> {
           Expanded(
             child: SingleChildScrollView(
               child: Container(
-                constraints: BoxConstraints(
-                  minHeight: size.height - 260,
-                ),
+                constraints: BoxConstraints(minHeight: size.height - 270),
                 child: _GroupUI(
                   helper: _filter,
                   collection: widget.collection,
@@ -150,7 +162,7 @@ class _QueryBuilderUIState extends State<QueryBuilderUI> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context, _filter);
+                  Navigator.pop(context, {'filter': _filter, 'sort': _sort});
                 },
                 child: const Text('Build'),
               ),
@@ -159,13 +171,85 @@ class _QueryBuilderUIState extends State<QueryBuilderUI> {
                 onPressed: () {
                   Navigator.pop(
                     context,
-                    QueryBuilderUIGroupHelper(QueryBuilderUIOP.and),
+                    {
+                      'filter': QueryBuilderUIGroupHelper(QueryBuilderUIOP.and),
+                      'sort': null
+                    },
                   );
                 },
                 child: const Text('Clear'),
               ),
+              const Spacer(),
+              CheckBoxLabel(
+                value: _sort != null,
+                text: 'Sort By',
+                onChanged: (value) {
+                  setState(() {
+                    _sort = !value
+                        ? null
+                        : SortProperty(
+                            property: _sortProps.first.name,
+                            sort: Sort.asc,
+                          );
+                  });
+                },
+              ),
+              const SizedBox(width: 15),
+              DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _sort?.property ?? _sortProps.first.name,
+                  items: _sortProps
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.name,
+                          child: Text(e.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: _sort == null
+                      ? null
+                      : (value) {
+                          if (value != null) {
+                            setState(() {
+                              _sort = SortProperty(
+                                property: value,
+                                sort: _sort!.sort,
+                              );
+                            });
+                          }
+                        },
+                ),
+              ),
+              const SizedBox(width: 15),
+              DropdownButtonHideUnderline(
+                child: DropdownButton<Sort>(
+                  value: _sort?.sort ?? Sort.asc,
+                  items: const [
+                    DropdownMenuItem(
+                      value: Sort.asc,
+                      child: Text('ASC'),
+                    ),
+                    DropdownMenuItem(
+                      value: Sort.desc,
+                      child: Text('DESC'),
+                    )
+                  ],
+                  onChanged: _sort == null
+                      ? null
+                      : (value) {
+                          if (value != null) {
+                            setState(() {
+                              _sort = SortProperty(
+                                property: _sort!.property,
+                                sort: value,
+                              );
+                            });
+                          }
+                        },
+                ),
+              ),
             ],
-          )
+          ),
         ],
       ),
     );

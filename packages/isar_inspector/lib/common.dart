@@ -42,11 +42,11 @@ class IsarCard extends StatelessWidget {
 
 class CheckBoxLabel extends StatelessWidget {
   const CheckBoxLabel({
-  super.key,
-  required this.value,
-  required this.text,
-  this.padding = EdgeInsets.zero,
-  required this.onChanged,
+    super.key,
+    required this.value,
+    required this.text,
+    this.padding = EdgeInsets.zero,
+    required this.onChanged,
   });
 
   final String text;
@@ -61,9 +61,7 @@ class CheckBoxLabel extends StatelessWidget {
       child: Row(
         children: [
           InkWell(
-            onTap: onChanged != null
-                ? () => onChanged!(!value)
-                : null,
+            onTap: onChanged != null ? () => onChanged!(!value) : null,
             child: Padding(
               padding: const EdgeInsets.all(8),
               child: Row(
