@@ -89,8 +89,10 @@ void _initializePath(String? libraryPath) {
   final binaryVersion = bindings.isar_version();
   if (binaryVersion != 0 && binaryVersion != isarCoreVersionNumber) {
     throw IsarError(
-      'Incorrect Isar binary: Required '
-      '$isarCoreVersionNumber found $binaryVersion.',
+      'Incorrect Isar Core version: Required $isarCoreVersionNumber found '
+      '$binaryVersion. Make sure to use the latest isar_flutter_libs. If you '
+      'have a Dart only project, make sure that old Isar Core binaries are '
+      'deleted.',
     );
   }
 
