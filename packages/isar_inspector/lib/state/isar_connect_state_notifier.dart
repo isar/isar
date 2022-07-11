@@ -43,6 +43,7 @@ class IsarConnectStateNotifier
   }) : super(const AsyncValue.loading()) {
     connect();
   }
+
   static const Duration kNormalTimeout = Duration(seconds: 4);
   static const Duration kLongTimeout = Duration(seconds: 10);
 
@@ -146,19 +147,36 @@ class IsarConnectStateNotifier
     );
   }
 
-  Future<List<Map<String, Object?>>> executeQuery(ConnectQuery query) async {
-    final objects = await _call<List<dynamic>>(
+  Future<Map<String, Object?>> executeQuery(ConnectQuery query) async {
+    return _call<Map<String, Object?>>(
       ConnectAction.executeQuery,
       args: query.toJson(),
       timeout: kLongTimeout,
     );
-    return objects.cast();
   }
 
   Future<void> removeQuery(ConnectQuery query) async {
     await _call<dynamic>(
       ConnectAction.removeQuery,
       args: query.toJson(),
+      timeout: kLongTimeout,
+    );
+  }
+
+  Future<List<dynamic>> exportJson(ConnectQuery query) async {
+    final data = await _call<List<dynamic>>(
+      ConnectAction.exportJson,
+      args: query.toJson(),
+      timeout: kLongTimeout,
+    );
+
+    return data.cast();
+  }
+
+  Future<void> editProperty(ConnectEdit edit) async {
+    await _call<dynamic>(
+      ConnectAction.editProperty,
+      args: edit.toJson(),
       timeout: kLongTimeout,
     );
   }

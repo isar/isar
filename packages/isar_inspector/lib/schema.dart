@@ -1,8 +1,8 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'dart:core';
 
-part 'schema.g.dart';
+import 'package:isar/isar.dart';
+import 'package:isar_inspector/query_builder.dart';
 
-@JsonSerializable()
 class ICollection {
   ICollection({
     required this.name,
@@ -11,12 +11,40 @@ class ICollection {
     required this.links,
   });
 
-  factory ICollection.fromJson(Map<String, dynamic> json) =>
-      _$ICollectionFromJson(json);
+  factory ICollection.fromJson(Map<String, dynamic> json) {
+    final indexes = <String>{};
+    final jsonIndexes = json['indexes'] as List<dynamic>;
+
+    for (var i = 0; i < jsonIndexes.length; i++) {
+      indexes.addAll(
+        //ignore: avoid_dynamic_calls
+        (jsonIndexes[i]['properties'] as List<dynamic>).map(
+          (e) {
+            //ignore: avoid_dynamic_calls
+            return e['name'] as String;
+          },
+        ).toList(),
+      );
+    }
+
+    return ICollection(
+      name: json['name'] as String,
+      idName: json['idName'] as String,
+      properties: (json['properties'] as List<dynamic>)
+          .map((e) => IProperty.fromJson(e as Map<String, dynamic>, indexes))
+          .toList(),
+      links: (json['links'] as List<dynamic>)
+          .map((e) => ILink.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
   final String name;
   final String idName;
   final List<IProperty> properties;
   final List<ILink> links;
+  QueryBuilderUIGroupHelper? uiFilter;
+  SortProperty? uiSort;
 
   late final List<IProperty> allProperties = [
     IProperty(name: idName, type: IsarType.Long, isId: true),
@@ -24,57 +52,97 @@ class ICollection {
   ];
 }
 
-@JsonSerializable()
 class IProperty {
   const IProperty({
     required this.name,
     required this.type,
+    this.isIndex = false,
     this.isId = false,
   });
 
-  factory IProperty.fromJson(Map<String, dynamic> json) =>
-      _$IPropertyFromJson(json);
+  factory IProperty.fromJson(Map<String, dynamic> json, Set<String> indexes) {
+    return IProperty(
+      name: json['name'] as String,
+      type: IsarType.values.firstWhere((e) => e.name == json['type']),
+      isId: json['isId'] as bool? ?? false,
+      isIndex: indexes.contains(json['name']),
+    );
+  }
+
   final String name;
-  @JsonKey(fromJson: _typeFromJson)
   final IsarType type;
   final bool isId;
+  final bool isIndex;
 }
 
-IsarType _typeFromJson(String type) {
-  return IsarType.values.firstWhere((e) => e.name == type);
-}
-
-@JsonSerializable()
 class ILink {
   const ILink({
     required this.name,
     required this.target,
   });
 
-  factory ILink.fromJson(Map<String, dynamic> json) => _$ILinkFromJson(json);
+  factory ILink.fromJson(Map<String, dynamic> json) => ILink(
+        name: json['name'] as String,
+        target: json['target'] as String,
+      );
+
   final String name;
   final String target;
 }
 
 // ignore_for_file: constant_identifier_names
 enum IsarType {
-  Bool(true, 80),
-  Int(true, 80),
-  Float(true, 80),
-  Long(true, 80),
-  Double(true, 80),
-  String(true, 200),
-  Bytes(false, 200),
-  IntList(false, 200),
-  FloatList(false, 200),
-  LongList(false, 200),
-  DoubleList(false, 200),
-  StringList(false, 200);
+  Bool,
+  Int,
+  Float,
+  Long,
+  Byte,
+  Double,
+  String,
+  ByteList,
+  IntList,
+  FloatList,
+  LongList,
+  DoubleList,
+  StringList,
+  BoolList;
 
-  final bool sortable;
-  final double width;
+  bool get isList {
+    return const [
+      ByteList,
+      IntList,
+      FloatList,
+      LongList,
+      DoubleList,
+      StringList,
+      BoolList
+    ].contains(this);
+  }
 
-  // False warning
-  // ignore: sort_constructors_first
-  const IsarType(this.sortable, this.width);
+  IsarType get childType {
+    //ignore: missing_enum_constant_in_switch
+    switch (this) {
+      case ByteList:
+        return Byte;
+
+      case IntList:
+        return Int;
+
+      case FloatList:
+        return Float;
+
+      case LongList:
+        return Long;
+
+      case DoubleList:
+        return Double;
+
+      case StringList:
+        return String;
+
+      case BoolList:
+        return Bool;
+    }
+    throw IsarError('new IsarType ($name), rule not defined');
+  }
 }

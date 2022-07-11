@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 
@@ -7,27 +5,30 @@ import 'package:isar_inspector/state/collections_state.dart';
 import 'package:isar_inspector/state/instances_state.dart';
 import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
 
-const int objectsPerPage = 50;
+const int objectsPerPage = 20;
 
 class QueryObject {
   const QueryObject(this.data);
+
   final Map<String, dynamic> data;
 
-  String getValue(String propertyName) {
-    return data[propertyName]?.toString() ?? '';
-  }
+  dynamic getValue(String propertyName) => data[propertyName];
 }
 
-final queryPagePod = StateProvider((ref) => 0);
+final queryPagePod = StateProvider((ref) => 1);
 
 final queryFilterPod = StateProvider<FilterOperation?>((ref) => null);
 
 final querySortPod = StateProvider<SortProperty?>((ref) => null);
 
 class QueryResult {
-  QueryResult({required this.objects, required this.hasMore});
+  QueryResult({
+    required this.objects,
+    required this.count,
+  });
+
   final List<QueryObject> objects;
-  final bool hasMore;
+  final int count;
 }
 
 final queryResultsPod = FutureProvider<QueryResult>((ref) async {
@@ -44,23 +45,19 @@ final queryResultsPod = FutureProvider<QueryResult>((ref) async {
       collection: selectedCollection.name,
       filter: filter,
       sortProperty: sort,
-      offset: page * objectsPerPage,
-      limit: objectsPerPage + 1,
+      offset: (page - 1) * objectsPerPage,
+      limit: objectsPerPage,
     ),
   );
 
-  final objects = result.map(QueryObject.new).toList();
-
-  if (objects.isEmpty && page != 0) {
-    Timer.run(() {
-      ref.read(queryPagePod.state).state = 0;
-    });
-  }
+  final objects = (result['results']! as List<dynamic>)
+      .map((e) => e as Map<String, dynamic>)
+      .toList()
+      .map(QueryObject.new)
+      .toList();
 
   return QueryResult(
-    objects: objects.length > objectsPerPage
-        ? objects.sublist(0, objectsPerPage - 1)
-        : objects,
-    hasMore: objects.length > objectsPerPage,
+    objects: objects,
+    count: result['count']! as int,
   );
 });

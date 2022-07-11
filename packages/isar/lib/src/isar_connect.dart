@@ -12,9 +12,12 @@ abstract class _IsarConnect {
     ConnectAction.watchInstance: _watchInstance,
     ConnectAction.executeQuery: _executeQuery,
     ConnectAction.removeQuery: _removeQuery,
+    ConnectAction.exportJson: _exportJson,
+    ConnectAction.editProperty: _editProperty,
   };
 
   static bool _initialized = false;
+
   // ignore: cancel_subscriptions
   static StreamSubscription<void>? _querySubscription;
   static final List<StreamSubscription<void>> _collectionSubscriptions =
@@ -134,30 +137,66 @@ abstract class _IsarConnect {
     );
   }
 
-  static Future<List<Map<String, dynamic>>> _executeQuery(
+  static Future<Map<String, dynamic>> _executeQuery(
     Map<String, dynamic> params,
   ) async {
     if (_querySubscription != null) {
       unawaited(_querySubscription!.cancel());
     }
     _querySubscription = null;
-    if (params.isEmpty) {
-      return <Map<String, dynamic>>[];
-    }
 
     final query = _getQuery(params);
+    params.remove('limit');
+    params.remove('offset');
+    final countQuery = _getQuery(params);
 
     final stream = query.watchLazy();
     _querySubscription = stream.listen((event) {
       postEvent(ConnectEvent.queryChanged.event, {});
     });
 
-    return query.exportJson();
+    return {
+      'results': await query.exportJson(),
+      'count': await countQuery.count(),
+    };
   }
 
   static Future<bool> _removeQuery(Map<String, dynamic> params) async {
     final query = _getQuery(params);
     await query.isar.writeTxn(query.deleteAll);
+    return true;
+  }
+
+  static Future<List<dynamic>> _exportJson(Map<String, dynamic> params) async {
+    final query = _getQuery(params);
+    return query.exportJson();
+  }
+
+  static Future<bool> _editProperty(
+    Map<String, dynamic> params,
+  ) async {
+    final cEdit = ConnectEdit.fromJson(params);
+    final collection = Isar.getInstance(cEdit.instance)!
+        .getCollectionByNameInternal(cEdit.collection)!;
+
+    final query = collection.buildQuery<dynamic>(
+      whereClauses: [IdWhereClause.equalTo(value: cEdit.id)],
+    );
+
+    final objects = await query.exportJson();
+
+    if (objects.isEmpty || !objects[0].containsKey(cEdit.property)) {
+      throw IsarError('Cant get object or property is wrong for edit');
+    }
+
+    if (cEdit.index == null) {
+      objects[0][cEdit.property] = cEdit.value;
+    } else {
+      //ignore: avoid_dynamic_calls
+      objects[0][cEdit.property][cEdit.index] = cEdit.value;
+    }
+
+    await collection.isar.writeTxn(() async => collection.importJson(objects));
     return true;
   }
 

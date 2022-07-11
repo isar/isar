@@ -8,37 +8,70 @@ class PrevNext extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final page = ref.watch(queryPagePod);
     final result = ref.watch(queryResultsPod).valueOrNull;
-    return Column(
+
+    int from, to, total, pages = 1;
+    if (result != null && result.count > 0) {
+      from = (page - 1) * objectsPerPage + 1;
+      to = from + objectsPerPage - 1;
+      total = result.count;
+
+      if (to > total) {
+        to = total;
+      }
+
+      pages = (total / objectsPerPage).ceil();
+    } else {
+      from = to = total = 0;
+    }
+
+    return Stack(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _Button(
-              label: 'Prev',
-              onPressed: () {
-                if (page > 0) {
-                  ref.read(queryPagePod.state).state -= 1;
-                }
-              },
-            ),
-            const SizedBox(width: 10),
-            Text(
-              'Page ${page + 1}',
-              style: TextStyle(fontSize: 12, color: theme.hintColor),
-            ),
-            const SizedBox(width: 10),
-            _Button(
-              label: 'Next',
-              onPressed: () {
-                if (result?.hasMore ?? false) {
-                  ref.read(queryPagePod.state).state += 1;
-                }
-              },
-            ),
-          ],
+        Align(
+          alignment: Alignment.bottomLeft,
+          child: Text('Displaying objects $from - $to of $total'),
+        ),
+        Align(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _Button(
+                label: 'Prev',
+                onPressed: page > 1
+                    ? () => ref.read(queryPagePod.state).state -= 1
+                    : null,
+              ),
+              const SizedBox(width: 10),
+              DropdownButtonHideUnderline(
+                child: DropdownButton<int>(
+                  icon: const Icon(Icons.arrow_drop_up),
+                  value: page,
+                  items: List.generate(
+                    pages,
+                    (page) => DropdownMenuItem(
+                      value: page + 1,
+                      child: Center(child: Text('Page ${page + 1}')),
+                    ),
+                  ),
+                  onChanged: pages > 1
+                      ? (p) {
+                          if (p != null) {
+                            ref.read(queryPagePod.state).state = p;
+                          }
+                        }
+                      : null,
+                ),
+              ),
+              const SizedBox(width: 10),
+              _Button(
+                label: 'Next',
+                onPressed: to == total
+                    ? null
+                    : () => ref.read(queryPagePod.state).state += 1,
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -52,6 +85,7 @@ class _Button extends StatelessWidget {
     required this.label,
     this.onPressed,
   });
+
   final String label;
   final VoidCallback? onPressed;
 

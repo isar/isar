@@ -40,9 +40,7 @@ class _ConnectedLayoutState extends ConsumerState<ConnectedLayout> {
               children: const [
                 FilterField(),
                 SizedBox(height: 25),
-                Expanded(
-                  child: QueryTable(),
-                ),
+                Expanded(child: QueryTable()),
               ],
             ),
           )
