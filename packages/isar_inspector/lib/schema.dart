@@ -11,16 +11,33 @@ class ICollection {
     required this.links,
   });
 
-  factory ICollection.fromJson(Map<String, dynamic> json) => ICollection(
-        name: json['name'] as String,
-        idName: json['idName'] as String,
-        properties: (json['properties'] as List<dynamic>)
-            .map((e) => IProperty.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        links: (json['links'] as List<dynamic>)
-            .map((e) => ILink.fromJson(e as Map<String, dynamic>))
-            .toList(),
+  factory ICollection.fromJson(Map<String, dynamic> json) {
+    final indexes = <String>{};
+    final jsonIndexes = json['indexes'] as List<dynamic>;
+
+    for (var i = 0; i < jsonIndexes.length; i++) {
+      indexes.addAll(
+        //ignore: avoid_dynamic_calls
+        (jsonIndexes[i]['properties'] as List<dynamic>).map(
+          (e) {
+            //ignore: avoid_dynamic_calls
+            return e['name'] as String;
+          },
+        ).toList(),
       );
+    }
+
+    return ICollection(
+      name: json['name'] as String,
+      idName: json['idName'] as String,
+      properties: (json['properties'] as List<dynamic>)
+          .map((e) => IProperty.fromJson(e as Map<String, dynamic>, indexes))
+          .toList(),
+      links: (json['links'] as List<dynamic>)
+          .map((e) => ILink.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 
   final String name;
   final String idName;
@@ -39,18 +56,23 @@ class IProperty {
   const IProperty({
     required this.name,
     required this.type,
+    this.isIndex = false,
     this.isId = false,
   });
 
-  factory IProperty.fromJson(Map<String, dynamic> json) => IProperty(
-        name: json['name'] as String,
-        type: IsarType.values.firstWhere((e) => e.name == json['type']),
-        isId: json['isId'] as bool? ?? false,
-      );
+  factory IProperty.fromJson(Map<String, dynamic> json, Set<String> indexes) {
+    return IProperty(
+      name: json['name'] as String,
+      type: IsarType.values.firstWhere((e) => e.name == json['type']),
+      isId: json['isId'] as bool? ?? false,
+      isIndex: indexes.contains(json['name']),
+    );
+  }
 
   final String name;
   final IsarType type;
   final bool isId;
+  final bool isIndex;
 }
 
 class ILink {

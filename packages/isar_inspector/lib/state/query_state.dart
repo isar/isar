@@ -5,7 +5,7 @@ import 'package:isar_inspector/state/collections_state.dart';
 import 'package:isar_inspector/state/instances_state.dart';
 import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
 
-const int objectsPerPage = 50;
+const int objectsPerPage = 20;
 
 class QueryObject {
   const QueryObject(this.data);

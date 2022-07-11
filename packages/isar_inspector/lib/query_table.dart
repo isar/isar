@@ -385,7 +385,7 @@ class _TableItemState extends State<TableItem> {
     return RichText(
       overflow: TextOverflow.ellipsis,
       text: TextSpan(
-        text: '${widget.data.index ?? widget.data.property.name}: ',
+        text: '',
         style: const TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.bold,
@@ -393,9 +393,26 @@ class _TableItemState extends State<TableItem> {
         ),
         children: [
           TextSpan(
+            text: '${widget.data.index ?? widget.data.property.name}',
+            style: TextStyle(
+              decoration: widget.data.property.isIndex
+                  ? TextDecoration.underline
+                  : null,
+              decorationThickness: 2,
+              decorationColor: Colors.green,
+              decorationStyle: TextDecorationStyle.wavy,
+            ),
+          ),
+          const TextSpan(text: ': '),
+          TextSpan(
             text: value,
             style: TextStyle(color: color),
           ),
+          if (widget.data.property.isId)
+            const TextSpan(
+              text: ' IsarId',
+              style: TextStyle(color: _disableColor),
+            ),
         ],
       ),
     );

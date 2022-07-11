@@ -10,19 +10,11 @@ import 'package:isar_inspector/state/instances_state.dart';
 import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
 import 'package:isar_inspector/state/query_state.dart';
 
-class FilterField extends ConsumerStatefulWidget {
+class FilterField extends ConsumerWidget {
   const FilterField({super.key});
 
   @override
-  ConsumerState<FilterField> createState() => _FilterFieldState();
-}
-
-class _FilterFieldState extends ConsumerState<FilterField> {
-  final TextEditingController controller = TextEditingController();
-  String? error;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
         const SizedBox(width: 20),
@@ -92,11 +84,5 @@ class _FilterFieldState extends ConsumerState<FilterField> {
         ),
       ],
     );
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
   }
 }

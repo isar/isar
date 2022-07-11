@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_inspector/common.dart';
@@ -122,13 +124,8 @@ class CollectionsList extends ConsumerWidget {
 }
 
 String _formatSize(int bytes) {
-  if (bytes < 10000) {
-    return '${bytes.toStringAsFixed(2)}B';
-  } else if (bytes < 1000000) {
-    return '${(bytes / 1000).toStringAsFixed(2)}KB';
-  } else if (bytes < 1000000000) {
-    return '${(bytes / 1000000).toStringAsFixed(2)}MB';
-  } else {
-    return '${(bytes / 1000000000).toStringAsFixed(2)}GB';
-  }
+  if (bytes <= 0) return '0 B';
+  const suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  final i = (log(bytes) / log(1000)).floor();
+  return '${(bytes / pow(1000, i)).toStringAsFixed(2)} ${suffixes[i]}';
 }

@@ -56,7 +56,6 @@ class App extends StatelessWidget {
           scaffoldBackgroundColor: Colors.transparent,
           primaryColor: Colors.blue,
           cardColor: const Color(0xff1f2128),
-          // Color.fromARGB(255, 40, 41, 46),
           dividerColor: const Color.fromARGB(255, 40, 41, 46),
           checkboxTheme: CheckboxThemeData(
             fillColor: MaterialStateProperty.all(Colors.blue),

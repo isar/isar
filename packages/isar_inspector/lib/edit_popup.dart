@@ -67,7 +67,6 @@ class _EditPopupState extends State<EditPopup> {
   Widget build(BuildContext context) {
     return SizedBox(
       width: widget.type == IsarType.String ? 500 : 300,
-      //height: 210,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
