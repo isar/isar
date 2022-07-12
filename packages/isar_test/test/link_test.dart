@@ -327,6 +327,21 @@ void main() {
         expect(newA1.selfLinks, {objA2, objA3});
       });
 
+      isarTest('save link in unsaved object', () async {
+        await isar.tWriteTxn(() => linksA.tPutAll([objA2, objA3]));
+
+        objA1.selfLinks.addAll([objA2, objA3]);
+
+        await isar.tWriteTxn(() async {
+          await linksA.tPut(objA1);
+          await objA1.selfLinks.tSave();
+        });
+
+        final newA1 = await linksA.tGet(objA1.id!);
+        await newA1!.selfLinks.tLoad();
+        expect(newA1.selfLinks, {objA2, objA3});
+      });
+
       isarTest('delete source', () async {
         await isar.tWriteTxn(() => linksA.tPutAll([objA1, objA2, objA3]));
 
