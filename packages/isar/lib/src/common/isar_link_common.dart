@@ -203,7 +203,7 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   bool get isLoaded => _isLoaded;
 
   HashSet<OBJ> get _loadedObjects {
-    if (!_isLoaded && !_kIsWeb) {
+    if (!_isLoaded && !_kIsWeb && _objectId != null) {
       loadSync();
     }
     return _objects;
