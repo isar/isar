@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_inspector/common.dart';
@@ -506,8 +505,8 @@ class _ConditionUIState extends State<_ConditionUI> {
                 contentPadding: const EdgeInsets.all(20),
               ),
               inputFormatters: [
-                if (widget.helper.textRe != null)
-                  FilteringTextInputFormatter.allow(widget.helper.textRe!)
+                if (widget.helper.textFormatter != null)
+                  widget.helper.textFormatter!
               ],
               style: GoogleFonts.sourceCodePro(),
             ),
@@ -686,7 +685,7 @@ class _ConditionHelper extends QueryBuilderUIHelper {
     }
   }
 
-  RegExp? get textRe {
+  CustomTextInputFormatter? get textFormatter {
     switch (property.type) {
       case IsarType.String:
       case IsarType.StringList:
@@ -698,17 +697,17 @@ class _ConditionHelper extends QueryBuilderUIHelper {
       case IsarType.LongList:
       case IsarType.Int:
       case IsarType.Long:
-        return RegExp(r'^\d*$');
+        return CustomTextInputFormatter(IsarType.Int);
 
       case IsarType.ByteList:
       case IsarType.Byte:
-        return RegExp(r'^\d{0,3}$');
+        return CustomTextInputFormatter(IsarType.Byte);
 
       case IsarType.FloatList:
       case IsarType.DoubleList:
       case IsarType.Float:
       case IsarType.Double:
-        return RegExp(r'^(\d+)?\.?\d*$');
+        return CustomTextInputFormatter(IsarType.Double);
     }
   }
 

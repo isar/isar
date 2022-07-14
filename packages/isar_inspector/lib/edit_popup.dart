@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_inspector/common.dart';
 import 'package:isar_inspector/schema.dart';
 
 class EditPopup extends StatefulWidget {
@@ -23,7 +22,7 @@ class _EditPopupState extends State<EditPopup> {
   final _formKey = GlobalKey<FormState>();
   final _controller = TextEditingController();
   final _focus = FocusNode();
-  RegExp? _re;
+  CustomTextInputFormatter? _inputFormatter;
 
   bool? _boolValue;
   bool _null = false;
@@ -43,16 +42,8 @@ class _EditPopupState extends State<EditPopup> {
         extentOffset: _controller.text.length,
       );
 
-      if ([IsarType.Float, IsarType.Double].contains(widget.type)) {
-        _re = RegExp(r'^(\d+)?\.?\d*$');
-      } else if ([IsarType.Int, IsarType.Long].contains(widget.type)) {
-        _re = RegExp(r'^\d*$');
-      } else if (widget.type == IsarType.Byte) {
-        _re = RegExp(r'^\d{0,3}$');
-      } else if (widget.type == IsarType.String) {
-        _re = null;
-      } else {
-        throw IsarError('new IsarType (${widget.type.name}), rule not defined');
+      if (widget.type != IsarType.String) {
+        _inputFormatter = CustomTextInputFormatter(widget.type);
       }
 
       if (!_null) {
@@ -127,7 +118,7 @@ class _EditPopupState extends State<EditPopup> {
                   contentPadding: const EdgeInsets.all(20),
                 ),
                 inputFormatters: [
-                  if (_re != null) FilteringTextInputFormatter.allow(_re!)
+                  if (_inputFormatter != null) _inputFormatter!
                 ],
                 maxLines: widget.type == IsarType.String ? 3 : 1,
                 validator: (value) {

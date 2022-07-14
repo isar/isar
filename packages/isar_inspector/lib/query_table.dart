@@ -43,7 +43,7 @@ class QueryTable extends ConsumerWidget {
       children: [
         Expanded(
           child: ListView.separated(
-            controller: ScrollController(),
+            primary: true,
             itemCount: objects.length,
             itemBuilder: (context, index) {
               return Stack(
