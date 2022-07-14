@@ -42,7 +42,8 @@ class InheritingModel extends BaseModel {
 
   @override
   String toString() {
-    return 'InheritingModel{name: $name, nameHash: $nameHash, nickname: $nickname, age: $age}';
+    return 'InheritingModel{name: $name, nameHash: $nameHash, nickname: '
+        '$nickname, age: $age}';
   }
 
   @override
