@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:isar/isar.dart';
+import 'package:isar_inspector/schema.dart';
 
 class IsarCard extends StatelessWidget {
   IsarCard({
@@ -83,5 +86,67 @@ class CheckBoxLabel extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class CustomTextInputFormatter extends TextInputFormatter {
+  CustomTextInputFormatter(this.type) {
+    if (type == IsarType.Byte) {
+      _callback = _byte;
+    } else if (type == IsarType.Long || type == IsarType.Int) {
+      _callback = _int;
+    } else if (type == IsarType.Double || type == IsarType.Float) {
+      _callback = _double;
+    } else {
+      throw IsarError('new IsarType (${type.name}), rule not defined');
+    }
+  }
+
+  final IsarType type;
+  late TextEditingValue Function(TextEditingValue, TextEditingValue) _callback;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return _callback(oldValue, newValue);
+  }
+
+  TextEditingValue _byte(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty ||
+        newValue.text.length <= 3 && int.tryParse(newValue.text) != null) {
+      return newValue;
+    }
+    return oldValue;
+  }
+
+  TextEditingValue _int(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty ||
+        (newValue.text.length == 1 && newValue.text == '-') ||
+        int.tryParse(newValue.text) != null) {
+      return newValue;
+    }
+
+    return oldValue;
+  }
+
+  TextEditingValue _double(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty ||
+        (newValue.text.length == 1 && newValue.text == '-') ||
+        double.tryParse(newValue.text) != null) {
+      return newValue;
+    }
+
+    return oldValue;
   }
 }

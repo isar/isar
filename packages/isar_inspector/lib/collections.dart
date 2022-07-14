@@ -24,6 +24,7 @@ class CollectionsList extends ConsumerWidget {
     final selectedInstance = ref.watch(selectedInstancePod).value!;
 
     return ListView.builder(
+      primary: false,
       itemBuilder: (BuildContext context, int index) {
         final collection = collections.elementAt(index);
         final info = collectionInfo[collection.name];
