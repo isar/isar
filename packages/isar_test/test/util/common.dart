@@ -57,6 +57,7 @@ void isarTest(
   dynamic Function() body, {
   Timeout? timeout,
   bool skip = false,
+  bool syncOnly = false,
 }) {
   void runTest(bool testSync) {
     final testName = testSync ? '$name SYNC' : name;
@@ -82,7 +83,10 @@ void isarTest(
     );
   }
 
-  runTest(false);
+  if (!syncOnly) {
+    runTest(false);
+  }
+
   if (!kIsWeb) {
     runTest(true);
   }
@@ -91,6 +95,11 @@ void isarTest(
 @isTest
 void isarTestVm(String name, dynamic Function() body) {
   isarTest(name, body, skip: kIsWeb);
+}
+
+@isTest
+void isarTestSync(String name, void Function() body) {
+  isarTest(name, body, skip: kIsWeb, syncOnly: true);
 }
 
 String getRandomName() {
