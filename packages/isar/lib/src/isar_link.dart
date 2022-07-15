@@ -82,8 +82,8 @@ abstract class IsarLinks<OBJ> implements IsarLinkBase<OBJ>, Set<OBJ> {
   /// This operation does not alter the state of the local copy of this link
   /// and it can even be used without loading the link.
   Future<void> update({
-    List<OBJ> link = const [],
-    List<OBJ> unlink = const [],
+    Iterable<OBJ> link = const [],
+    Iterable<OBJ> unlink = const [],
     bool reset = false,
   });
 
@@ -92,8 +92,8 @@ abstract class IsarLinks<OBJ> implements IsarLinkBase<OBJ>, Set<OBJ> {
   /// This operation does not alter the state of the local copy of this link
   /// and it can even be used without loading the link.
   void updateSync({
-    List<OBJ> link = const [],
-    List<OBJ> unlink = const [],
+    Iterable<OBJ> link = const [],
+    Iterable<OBJ> unlink = const [],
     bool reset = false,
   });
 

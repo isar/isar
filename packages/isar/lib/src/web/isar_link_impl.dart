@@ -1,8 +1,9 @@
 // ignore_for_file: public_member_api_docs
 
+import 'package:isar/src/common/isar_link_base_impl.dart';
 import 'package:isar/src/common/isar_link_common.dart';
+import 'package:isar/src/common/isar_links_common.dart';
 import 'package:isar/src/web/bindings.dart';
-
 import 'package:isar/src/web/isar_collection_impl.dart';
 import 'package:isar/src/web/isar_web.dart';
 
@@ -27,21 +28,24 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
 
   @override
   Future<void> update({
-    List<OBJ> link = const [],
-    List<OBJ> unlink = const [],
+    Iterable<OBJ> link = const [],
+    Iterable<OBJ> unlink = const [],
     bool reset = false,
   }) {
+    final linkList = link.toList();
+    final unlinkList = unlink.toList();
+
     final containingId = requireAttached();
     final backlink = backlinkLinkName != null;
 
-    final linkIds = List.filled(link.length, 0);
-    for (var i = 0; i < link.length; i++) {
-      linkIds[i] = requireGetId(link[i]);
+    final linkIds = List.filled(linkList.length, 0);
+    for (var i = 0; i < linkList.length; i++) {
+      linkIds[i] = requireGetId(linkList[i]);
     }
 
-    final unlinkIds = List.filled(unlink.length, 0);
-    for (var i = 0; i < unlink.length; i++) {
-      unlinkIds[i] = requireGetId(unlink[i]);
+    final unlinkIds = List.filled(unlinkList.length, 0);
+    for (var i = 0; i < unlinkList.length; i++) {
+      unlinkIds[i] = requireGetId(unlinkList[i]);
     }
 
     return targetCollection.isar.getTxn(true, (IsarTxnJs txn) async {
@@ -56,8 +60,8 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
 
   @override
   void updateSync({
-    List<OBJ> link = const [],
-    List<OBJ> unlink = const [],
+    Iterable<OBJ> link = const [],
+    Iterable<OBJ> unlink = const [],
     bool reset = false,
   }) =>
       unsupportedOnWeb();

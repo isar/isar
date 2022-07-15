@@ -101,7 +101,7 @@ void main() {
     tearDown(() => isar.close());
 
     group('self link', () {
-      isarTest('save link', () async {
+      isarTest('save link manually', () async {
         await isar.tWriteTxn(() => linksA.tPutAll([objA1, objA2]));
 
         objA1.selfLink.value = objA2;

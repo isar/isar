@@ -2,11 +2,11 @@
 
 import 'dart:ffi';
 
+import 'package:isar/src/common/isar_link_base_impl.dart';
 import 'package:isar/src/common/isar_link_common.dart';
-
+import 'package:isar/src/common/isar_links_common.dart';
 import 'package:isar/src/native/isar_collection_impl.dart';
 import 'package:isar/src/native/isar_core.dart';
-import 'package:isar/src/native/isar_impl.dart';
 
 mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   @override
@@ -24,21 +24,24 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
 
   @override
   Future<void> update({
-    List<OBJ> link = const [],
-    List<OBJ> unlink = const [],
+    Iterable<OBJ> link = const [],
+    Iterable<OBJ> unlink = const [],
     bool reset = false,
   }) {
+    final linkList = link.toList();
+    final unlinkList = unlink.toList();
+
     final containingId = requireAttached();
-    return targetCollection.isar.getTxn(true, (Txn txn) {
-      final count = link.length + unlink.length;
+    return targetCollection.isar.getTxn(true, (txn) {
+      final count = linkList.length + unlinkList.length;
       final idsPtr = txn.alloc<Int64>(count);
       final ids = idsPtr.asTypedList(count);
 
-      for (var i = 0; i < link.length; i++) {
-        ids[i] = requireGetId(link[i]);
+      for (var i = 0; i < linkList.length; i++) {
+        ids[i] = requireGetId(linkList[i]);
       }
-      for (var i = 0; i < unlink.length; i++) {
-        ids[link.length + i] = requireGetId(unlink[i]);
+      for (var i = 0; i < unlinkList.length; i++) {
+        ids[linkList.length + i] = requireGetId(unlinkList[i]);
       }
 
       IC.isar_link_update_all(
@@ -47,8 +50,8 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
         linkIndex,
         containingId,
         idsPtr,
-        link.length,
-        unlink.length,
+        linkList.length,
+        unlinkList.length,
         reset,
       );
       return txn.wait();
@@ -57,12 +60,12 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
 
   @override
   void updateSync({
-    List<OBJ> link = const [],
-    List<OBJ> unlink = const [],
+    Iterable<OBJ> link = const [],
+    Iterable<OBJ> unlink = const [],
     bool reset = false,
   }) {
     final containingId = requireAttached();
-    targetCollection.isar.getTxnSync(true, (SyncTxn txn) {
+    targetCollection.isar.getTxnSync(true, (txn) {
       if (reset) {
         nCall(
           IC.isar_link_unlink_all(

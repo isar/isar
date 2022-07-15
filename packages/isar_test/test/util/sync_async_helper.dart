@@ -77,17 +77,17 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
     }
   }
 
-  Future<int> tPut(OBJ object) {
+  Future<int> tPut(OBJ object, {bool saveLinks = false}) {
     if (_testSync) {
-      return SynchronousFuture(putSync(object));
+      return SynchronousFuture(putSync(object, saveLinks: saveLinks));
     } else {
       return put(object);
     }
   }
 
-  Future<List<int>> tPutAll(List<OBJ> objects) {
+  Future<List<int>> tPutAll(List<OBJ> objects, {bool saveLinks = false}) {
     if (_testSync) {
-      return SynchronousFuture(putAllSync(objects));
+      return SynchronousFuture(putAllSync(objects, saveLinks: saveLinks));
     } else {
       return putAll(objects);
     }
@@ -310,6 +310,15 @@ extension TIsarLinkBase<OBJ> on IsarLinkBase<OBJ> {
 }
 
 extension TIsarLinks<OBJ> on IsarLinks<OBJ> {
+  Future<void> tLoad({bool overrideChanges = false}) {
+    if (_testSync) {
+      loadSync(overrideChanges: overrideChanges);
+      return SynchronousFuture(null);
+    } else {
+      return load(overrideChanges: overrideChanges);
+    }
+  }
+
   Future<void> tUpdate({
     List<OBJ> link = const [],
     List<OBJ> unlink = const [],

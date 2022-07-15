@@ -264,7 +264,7 @@ Pointer<CFilter>? _buildLink(
 
   nCall(
     IC.isar_filter_link(
-      linkTargetCol.ptr,
+      col.ptr,
       filterPtrPtr,
       condition,
       linkId,

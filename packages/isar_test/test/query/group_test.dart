@@ -6,7 +6,7 @@ import '../util/common.dart';
 import '../util/sync_async_helper.dart';
 
 void main() {
-  group('Groups', () {
+  group('Filter Groups', () {
     late Isar isar;
     late IsarCollection<UserModel> users;
 
