@@ -145,35 +145,31 @@ void main() {
       nonInheritingObj1 = NonInheritingModel(age: 56, nickname: 'non-obj1');
       nonInheritingObj2 = NonInheritingModel(age: 65, nickname: 'non-obj2');
 
-      await isar.tWriteTxn(
-        () => Future.wait([
-          isar.inheritingModels.tPutAll([
-            inheritingObj0,
-            inheritingObj1,
-            inheritingObj2,
-            inheritingObj3,
-            inheritingObj4,
-            inheritingObj5,
-          ]),
-          isar.nonInheritingModels.tPutAll([
-            nonInheritingObj0,
-            nonInheritingObj1,
-            nonInheritingObj2,
-          ]),
-        ]),
-      );
+      await isar.tWriteTxn(() async {
+        await isar.inheritingModels.tPutAll([
+          inheritingObj0,
+          inheritingObj1,
+          inheritingObj2,
+          inheritingObj3,
+          inheritingObj4,
+          inheritingObj5,
+        ]);
+        await isar.nonInheritingModels.tPutAll([
+          nonInheritingObj0,
+          nonInheritingObj1,
+          nonInheritingObj2,
+        ]);
+      });
 
       inheritingObj0.link.value = inheritingObj1;
       inheritingObj2.link.value = inheritingObj0;
       inheritingObj5.link.value = inheritingObj3;
 
-      await isar.tWriteTxn(
-        () => Future.wait([
-          inheritingObj0.link.save(),
-          inheritingObj2.link.save(),
-          inheritingObj5.link.save(),
-        ]),
-      );
+      await isar.tWriteTxn(() async {
+        await inheritingObj0.link.tSave();
+        await inheritingObj2.link.tSave();
+        await inheritingObj5.link.tSave();
+      });
     });
 
     tearDown(() => isar.close());

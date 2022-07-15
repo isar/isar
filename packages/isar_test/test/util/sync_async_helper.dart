@@ -3,9 +3,8 @@ import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
 
+import 'common.dart';
 import 'sync_future.dart';
-
-bool get _testSync => Zone.current['testSync'] as bool? ?? false;
 
 Future<Isar> tOpen({
   required List<CollectionSchema<dynamic>> schemas,
@@ -13,7 +12,7 @@ Future<Isar> tOpen({
   String name = Isar.defaultName,
   bool relaxedDurability = true,
 }) {
-  if (_testSync) {
+  if (syncTest) {
     final isar = Isar.openSync(
       schemas,
       directory: directory,
@@ -35,7 +34,7 @@ Future<Isar> tOpen({
 
 extension TIsar on Isar {
   Future<T> tTxn<T>(Future<T> Function() callback) {
-    if (_testSync) {
+    if (syncTest) {
       return Future.value(txnSync(callback));
     } else {
       return txn(callback);
@@ -43,7 +42,7 @@ extension TIsar on Isar {
   }
 
   Future<T> tWriteTxn<T>(Future<T> Function() callback, {bool silent = false}) {
-    if (_testSync) {
+    if (syncTest) {
       return writeTxnSync(callback, silent: silent);
     } else {
       return writeTxn(callback, silent: silent);
@@ -51,7 +50,7 @@ extension TIsar on Isar {
   }
 
   Future<void> tClear() {
-    if (_testSync) {
+    if (syncTest) {
       clearSync();
       return SynchronousFuture(null);
     } else {
@@ -62,7 +61,7 @@ extension TIsar on Isar {
 
 extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
   Future<OBJ?> tGet(Id id) {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(getSync(id));
     } else {
       return get(id);
@@ -70,7 +69,7 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
   }
 
   Future<List<OBJ?>> tGetAll(List<int> ids) {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(getAllSync(ids));
     } else {
       return getAll(ids);
@@ -78,7 +77,7 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
   }
 
   Future<int> tPut(OBJ object, {bool saveLinks = false}) {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(putSync(object, saveLinks: saveLinks));
     } else {
       return put(object);
@@ -86,7 +85,7 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
   }
 
   Future<List<int>> tPutAll(List<OBJ> objects, {bool saveLinks = false}) {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(putAllSync(objects, saveLinks: saveLinks));
     } else {
       return putAll(objects);
@@ -94,7 +93,7 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
   }
 
   Future<bool> tDelete(Id id) {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(deleteSync(id));
     } else {
       return delete(id);
@@ -102,7 +101,7 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
   }
 
   Future<int> tDeleteAll(List<int> ids) {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(deleteAllSync(ids));
     } else {
       return deleteAll(ids);
@@ -110,7 +109,7 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
   }
 
   Future<void> tClear() {
-    if (_testSync) {
+    if (syncTest) {
       clearSync();
       return SynchronousFuture(null);
     } else {
@@ -119,7 +118,7 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
   }
 
   Future<void> tImportJsonRaw(Uint8List jsonBytes) {
-    if (_testSync) {
+    if (syncTest) {
       importJsonRawSync(jsonBytes);
       return SynchronousFuture(null);
     } else {
@@ -128,7 +127,7 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
   }
 
   Future<void> tImportJson(List<Map<String, dynamic>> json) {
-    if (_testSync) {
+    if (syncTest) {
       importJsonSync(json);
       return SynchronousFuture(null);
     } else {
@@ -140,7 +139,7 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
 extension QueryBuilderExecute<OBJ, R>
     on QueryBuilder<OBJ, R, QQueryOperations> {
   Future<R?> tFindFirst() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(findFirstSync());
     } else {
       return findFirst();
@@ -148,7 +147,7 @@ extension QueryBuilderExecute<OBJ, R>
   }
 
   Future<List<R>> tFindAll() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(findAllSync());
     } else {
       return findAll();
@@ -156,7 +155,7 @@ extension QueryBuilderExecute<OBJ, R>
   }
 
   Future<int> tCount() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(countSync());
     } else {
       return count();
@@ -164,7 +163,7 @@ extension QueryBuilderExecute<OBJ, R>
   }
 
   Future<bool> tDeleteFirst() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(deleteFirstSync());
     } else {
       return deleteFirst();
@@ -172,7 +171,7 @@ extension QueryBuilderExecute<OBJ, R>
   }
 
   Future<int> tDeleteAll() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(deleteAllSync());
     } else {
       return deleteAll();
@@ -184,7 +183,7 @@ extension QueryBuilderExecute<OBJ, R>
 /// Same as [QueryBuilderExecute], but for [Query] instead of [QueryBuilder].
 extension QueryExecute<R> on Query<R> {
   Future<R?> tFindFirst() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(findFirstSync());
     } else {
       return findFirst();
@@ -192,7 +191,7 @@ extension QueryExecute<R> on Query<R> {
   }
 
   Future<List<R>> tFindAll() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(findAllSync());
     } else {
       return findAll();
@@ -200,7 +199,7 @@ extension QueryExecute<R> on Query<R> {
   }
 
   Future<int> tCount() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(countSync());
     } else {
       return count();
@@ -208,7 +207,7 @@ extension QueryExecute<R> on Query<R> {
   }
 
   Future<bool> tDeleteFirst() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(deleteFirstSync());
     } else {
       return deleteFirst();
@@ -216,7 +215,7 @@ extension QueryExecute<R> on Query<R> {
   }
 
   Future<int> tDeleteAll() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(deleteAllSync());
     } else {
       return deleteAll();
@@ -228,7 +227,7 @@ extension QueryExecute<R> on Query<R> {
 extension QueryExecuteAggregation<OBJ, T extends num>
     on QueryBuilder<OBJ, T?, QQueryOperations> {
   Future<T?> tMin() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(minSync());
     } else {
       return min();
@@ -236,7 +235,7 @@ extension QueryExecuteAggregation<OBJ, T extends num>
   }
 
   Future<T?> tMax() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(maxSync());
     } else {
       return max();
@@ -244,7 +243,7 @@ extension QueryExecuteAggregation<OBJ, T extends num>
   }
 
   Future<double> tAverage() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(averageSync());
     } else {
       return average();
@@ -252,7 +251,7 @@ extension QueryExecuteAggregation<OBJ, T extends num>
   }
 
   Future<T> tSum() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(sumSync());
     } else {
       return sum();
@@ -264,7 +263,7 @@ extension QueryExecuteAggregation<OBJ, T extends num>
 extension QueryExecuteDateAggregation<OBJ>
     on QueryBuilder<OBJ, DateTime?, QQueryOperations> {
   Future<DateTime?> tMin() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(minSync());
     } else {
       return min();
@@ -272,7 +271,7 @@ extension QueryExecuteDateAggregation<OBJ>
   }
 
   Future<DateTime?> tMax() {
-    if (_testSync) {
+    if (syncTest) {
       return SynchronousFuture(maxSync());
     } else {
       return max();
@@ -282,7 +281,7 @@ extension QueryExecuteDateAggregation<OBJ>
 
 extension TIsarLinkBase<OBJ> on IsarLinkBase<OBJ> {
   Future<void> tLoad() {
-    if (_testSync) {
+    if (syncTest) {
       loadSync();
       return SynchronousFuture(null);
     } else {
@@ -291,7 +290,7 @@ extension TIsarLinkBase<OBJ> on IsarLinkBase<OBJ> {
   }
 
   Future<void> tSave() {
-    if (_testSync) {
+    if (syncTest) {
       saveSync();
       return SynchronousFuture(null);
     } else {
@@ -300,7 +299,7 @@ extension TIsarLinkBase<OBJ> on IsarLinkBase<OBJ> {
   }
 
   Future<void> tReset() {
-    if (_testSync) {
+    if (syncTest) {
       resetSync();
       return SynchronousFuture(null);
     } else {
@@ -311,7 +310,7 @@ extension TIsarLinkBase<OBJ> on IsarLinkBase<OBJ> {
 
 extension TIsarLinks<OBJ> on IsarLinks<OBJ> {
   Future<void> tLoad({bool overrideChanges = false}) {
-    if (_testSync) {
+    if (syncTest) {
       loadSync(overrideChanges: overrideChanges);
       return SynchronousFuture(null);
     } else {
@@ -323,7 +322,7 @@ extension TIsarLinks<OBJ> on IsarLinks<OBJ> {
     List<OBJ> link = const [],
     List<OBJ> unlink = const [],
   }) {
-    if (_testSync) {
+    if (syncTest) {
       updateSync(link: link, unlink: unlink);
       return SynchronousFuture(null);
     } else {

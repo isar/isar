@@ -67,7 +67,7 @@ void main() {
 
     tearDown(() => isar.close());
 
-    isarTest('.save() / .load() manually', () async {
+    isarTest('.tSave() / .load() manually', () async {
       await isar.tWriteTxn(() async {
         await isar.linkModelAs.tPut(a1);
         await isar.linkModelBs.tPutAll([b1, b2]);
@@ -179,8 +179,8 @@ void main() {
       await isar.tWriteTxn(() async {
         await isar.linkModelBs.tPutAll([b1, b2]);
         await isar.linkModelAs.tPut(a2, saveLinks: false);
-        await a1.links.save();
-        await a2.links.save();
+        await a1.links.tSave();
+        await a2.links.tSave();
       });
 
       final newA1 = await isar.linkModelAs.tGet(a1.id!);
@@ -208,8 +208,8 @@ void main() {
 
       await isar.tWriteTxn(() async {
         await isar.linkModelAs.tPut(a2, saveLinks: false);
-        await a1.links.save();
-        await a2.links.save();
+        await a1.links.tSave();
+        await a2.links.tSave();
       });
 
       final newA1 = await isar.linkModelAs.tGet(a1.id!);
@@ -235,8 +235,8 @@ void main() {
       await isar.tWriteTxn(() async {
         await isar.linkModelBs.tPutAll([b1, b2]);
         await isar.linkModelAs.tPut(a2, saveLinks: false);
-        await a1.links.save();
-        await a2.links.save();
+        await a1.links.tSave();
+        await a2.links.tSave();
       });
 
       final newA1 = await isar.linkModelAs.tGet(a1.id!);
@@ -264,14 +264,14 @@ void main() {
 
         final newA1 = await isar.linkModelAs.tGet(a1.id!);
         newA1!.links.addAll([b1, b2]);
-        await newA1.links.save();
+        await newA1.links.tSave();
 
         final newA2 = await isar.linkModelAs.tGet(a2.id!);
         newA2!.links.addAll([b1, b2]);
-        await newA2.links.save();
+        await newA2.links.tSave();
 
-        await a1.links.save();
-        await a2.links.save();
+        await a1.links.tSave();
+        await a2.links.tSave();
       });
 
       final newA1 = await isar.linkModelAs.tGet(a1.id!);
@@ -289,7 +289,7 @@ void main() {
         await isar.linkModelBs.tPutAll([b1, b2]);
 
         a1.links.addAll([b1, b2]);
-        await a1.links.save();
+        await a1.links.tSave();
       });
 
       expect(a1.links.remove(b1), true);
@@ -305,10 +305,10 @@ void main() {
 
         final newA2 = await isar.linkModelAs.tGet(a2.id!);
         newA2!.links.addAll([b1, b2]);
-        await newA2.links.save();
+        await newA2.links.tSave();
 
-        await a1.links.save();
-        await a2.links.save();
+        await a1.links.tSave();
+        await a2.links.tSave();
       });
 
       final newA1 = await isar.linkModelAs.tGet(a1.id!);
@@ -326,7 +326,7 @@ void main() {
         await isar.linkModelBs.tPutAll([b1, b2]);
 
         a1.links.addAll([b1, b2]);
-        await a1.links.save();
+        await a1.links.tSave();
       });
 
       final newA1 = await isar.linkModelAs.tGet(a1.id!);
@@ -335,7 +335,7 @@ void main() {
       expect(newA1.links.remove(newB1), true);
 
       await isar.tWriteTxn(() async {
-        await a1.links.save();
+        await a1.links.tSave();
       });
 
       await a1.links.tLoad();
@@ -357,8 +357,8 @@ void main() {
       await isar.tWriteTxn(() async {
         await isar.linkModelBs.tPutAll([b1, b2]);
         await isar.linkModelAs.tPut(a2, saveLinks: false);
-        await a1.links.save();
-        await a2.links.save();
+        await a1.links.tSave();
+        await a2.links.tSave();
       });
 
       final newA1 = await isar.linkModelAs.tGet(a1.id!);
@@ -431,7 +431,7 @@ void main() {
         await isar.linkModelBs.tPutAll([b1, b2]);
 
         a1.links.addAll([b1, b2]);
-        await a1.links.save();
+        await a1.links.tSave();
       });
 
       await qEqualSet(a1.links.filter().findAll(), [b1, b2]);
@@ -476,7 +476,7 @@ void main() {
     });
 
     isarTest('.iterator .length .toSet() new target', () async {
-      await isar.writeTxn(() async {
+      await isar.tWriteTxn(() async {
         await isar.linkModelAs.tPut(a1);
       });
 
@@ -492,7 +492,7 @@ void main() {
     });
 
     isarTest('.iterator .length .toSet() existing target', () async {
-      await isar.writeTxn(() async {
+      await isar.tWriteTxn(() async {
         await isar.linkModelAs.tPut(a1);
         await isar.linkModelBs.tPutAll([b1, b2]);
       });
