@@ -2,6 +2,8 @@ name: Generate Bindings
 
 on:
   push:
+    tags-ignore:
+      - '*'
     paths:
       - "packages/isar/lib/src/version.dart"
 
