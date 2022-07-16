@@ -33,7 +33,7 @@ abstract class Isar {
   static const String defaultName = 'default';
 
   /// Placeholder for an auto-increment id.
-  static Id autoIncrement = isarAutoIncrementId;
+  static const Id autoIncrement = isarAutoIncrementId;
 
   static final Map<String, Isar> _instances = <String, Isar>{};
   static final Set<IsarOpenCallback> _openCallbacks = <IsarOpenCallback>{};
