@@ -4,7 +4,7 @@
 
 - Really cool new Inspector
 - Much improved consistency of `IsarLinks` behavior
-- `IsarLinks` now supports all `Set` methods based on the Isar `Id` rather the `identity()` of objects
+- `IsarLinks` now support all `Set` methods based on the Isar `Id` rather the `identity()` of objects
 - A lot of new unit tests to make links bulletproof
 
 ### Fixes

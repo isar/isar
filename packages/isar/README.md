@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-<a href="https://pub.dev/packages/isar">
+  <a href="https://pub.dev/packages/isar">
     <img src="https://img.shields.io/pub/v/isar?label=pub.dev&labelColor=333940&logo=dart">
   </a>
   <a href="https://github.com/isar/isar/actions/workflows/test.yml">
@@ -64,11 +64,11 @@ Holy smokes you're here! Let's get started...
 
 ```yaml
 dependencies:
-  isar: 3.0.0-dev.7
-  isar_flutter_libs: 3.0.0-dev.7 # contains Isar Core
+  isar: 3.0.0-dev.8
+  isar_flutter_libs: 3.0.0-dev.8 # contains Isar Core
 
 dev_dependencies:
-  isar_generator: 3.0.0-dev.7
+  isar_generator: 3.0.0-dev.8
   build_runner: any
 ```
 
