@@ -13,13 +13,13 @@ import 'package:isar/src/native/split_words.dart';
 import 'package:meta/meta.dart';
 
 /// @nodoc
-const int isarMinId = -9223372036854775807;
+const Id isarMinId = -9223372036854775807;
 
 /// @nodoc
-const int isarMaxId = 9223372036854775807;
+const Id isarMaxId = 9223372036854775807;
 
 /// @nodoc
-const int isarAutoIncrementId = -9223372036854775808;
+const Id isarAutoIncrementId = -9223372036854775808;
 
 /// @nodoc
 @protected
