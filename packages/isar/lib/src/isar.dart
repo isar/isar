@@ -24,16 +24,16 @@ abstract class Isar {
   }
 
   /// Smallest valid id.
-  static const int minId = isarMinId;
+  static const Id minId = isarMinId;
 
   /// Largest valid id.
-  static const int maxId = isarMaxId;
+  static const Id maxId = isarMaxId;
 
   /// The default Isar instance name.
   static const String defaultName = 'default';
 
   /// Placeholder for an auto-increment id.
-  static int autoIncrement = isarAutoIncrementId;
+  static const Id autoIncrement = isarAutoIncrementId;
 
   static final Map<String, Isar> _instances = <String, Isar>{};
   static final Set<IsarOpenCallback> _openCallbacks = <IsarOpenCallback>{};

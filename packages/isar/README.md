@@ -79,7 +79,7 @@ part 'post.g.dart';
 
 @Collection()
 class Post {
-  Id id = Isar.autoIncrement;
+  final id = Isar.autoIncrement;
 
   late String title;
 
