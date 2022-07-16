@@ -47,6 +47,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "blendthink",
+      "name": "blendthink",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32213113?v=4",
+      "profile": "https://github.com/blendthink",
+      "contributions": [
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7,
