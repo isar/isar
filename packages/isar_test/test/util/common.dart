@@ -51,9 +51,6 @@ Future<void> _prepareTest() async {
   }
 }
 
-bool _syncTest = false;
-bool get syncTest => _syncTest;
-
 @isTest
 void isarTest(
   String name,
@@ -62,33 +59,37 @@ void isarTest(
   bool skip = false,
   bool syncOnly = false,
 }) {
-  void runTest() {
+  void runTest(bool syncTest) {
     final testName = syncTest ? '$name SYNC' : name;
     test(
       testName,
       () async {
-        try {
-          await _prepareTest();
-          await body();
-          testCount++;
-        } catch (e) {
-          testErrors.add('$testName: $e');
-          rethrow;
-        }
+        await runZoned(
+          () async {
+            try {
+              await _prepareTest();
+              await body();
+              testCount++;
+            } catch (e) {
+              testErrors.add('$testName: $e');
+              rethrow;
+            }
+          },
+          zoneValues: {
+            #syncTest: syncTest,
+          },
+        );
       },
       timeout: timeout,
-      skip: skip,
     );
   }
 
   if (!syncOnly) {
-    _syncTest = false;
-    runTest();
+    runTest(false);
   }
 
   if (!kIsWeb) {
-    _syncTest = true;
-    runTest();
+    runTest(true);
   }
 }
 

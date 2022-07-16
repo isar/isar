@@ -1,3 +1,17 @@
+## 3.0.0-dev.8
+
+### Enhancements
+
+- Really cool new Inspector
+- Much improved consistency of `IsarLinks` behavior
+- `IsarLinks` now supports all `Set` methods based on the Isar `Id` rather the `identity()` of objects
+- A lot of new unit tests to make links bulletproof
+
+### Fixes
+
+- Fixed issues with edge cases in `IsarLink` and `IsarLinks`
+- Fixed link queries and filters
+
 ## 3.0.0-dev.7
 
 Small hotfix: existing bool properties were rejected in schema migration.

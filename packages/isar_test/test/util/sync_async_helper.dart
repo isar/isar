@@ -3,8 +3,9 @@ import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
 
-import 'common.dart';
 import 'sync_future.dart';
+
+bool get syncTest => Zone.current[#syncTest] as bool? ?? false;
 
 Future<Isar> tOpen({
   required List<CollectionSchema<dynamic>> schemas,
@@ -219,6 +220,22 @@ extension QueryExecute<R> on Query<R> {
       return SynchronousFuture(deleteAllSync());
     } else {
       return deleteAll();
+    }
+  }
+
+  Future<M> tExportJsonRaw<M>(M Function(Uint8List) callback) {
+    if (syncTest) {
+      return SynchronousFuture(exportJsonRawSync(callback));
+    } else {
+      return exportJsonRaw(callback);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> tExportJson() {
+    if (syncTest) {
+      return SynchronousFuture(exportJsonSync());
+    } else {
+      return exportJson();
     }
   }
 }

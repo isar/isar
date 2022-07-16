@@ -1,3 +1,4 @@
+// coverage:ignore-file
 // ignore_for_file: avoid_print
 
 part of isar;

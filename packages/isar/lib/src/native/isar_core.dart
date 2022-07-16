@@ -181,29 +181,6 @@ Stream<void> wrapIsarPort(ReceivePort port) {
   return portStreamController.stream;
 }
 
-extension CObjectX on CObject {
-  void freeData() {
-    if (buffer.address != 0) {
-      malloc.free(buffer);
-      buffer = nullptr;
-    }
-  }
-}
-
-extension CObjectSetPointerX on Pointer<CObjectSet> {
-  void free({bool freeData = false}) {
-    final objectsPtr = ref.objects;
-    if (freeData) {
-      for (var i = 0; i < ref.length; i++) {
-        final cObj = objectsPtr.elementAt(i).ref;
-        cObj.freeData();
-      }
-    }
-    malloc.free(objectsPtr);
-    malloc.free(this);
-  }
-}
-
 extension PointerX on Pointer {
   @pragma('vm:prefer-inline')
   bool get isNull => address == 0;

@@ -44,7 +44,7 @@ void main() {
         for (var i = 0; i < json.length; i++) {
           json[i]['id'] = i + 1;
         }
-        final exportedJson = await col.where().exportJson();
+        final exportedJson = await col.where().build().tExportJson();
         expect(exportedJson, json);
       },
       timeout: const Timeout(Duration(seconds: 60)),
@@ -70,7 +70,7 @@ void main() {
         await col.tImportJson(json);
       });
 
-      final exportedJsonNull = await col.where().exportJson();
+      final exportedJsonNull = await col.where().build().tExportJson();
       expect(exportedJsonNull, json);
     });
 
@@ -84,7 +84,8 @@ void main() {
       for (var i = 0; i < json.length; i++) {
         json[i]['id'] = i + 1;
       }
-      final exportedJson = await col.where().exportJsonRaw((Uint8List bytes) {
+      final exportedJson =
+          await col.where().build().tExportJsonRaw((Uint8List bytes) {
         return jsonDecode(const Utf8Decoder().convert(bytes));
       });
       expect(exportedJson, json);
