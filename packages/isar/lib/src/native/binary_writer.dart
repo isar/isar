@@ -217,4 +217,9 @@ class BinaryWriter {
       }
     }
   }
+
+  void validate() {
+    assert(_dynamicOffset == _buffer.length,
+        'Invalid write buffer size. $_dynamicOffset != ${_buffer.length}');
+  }
 }

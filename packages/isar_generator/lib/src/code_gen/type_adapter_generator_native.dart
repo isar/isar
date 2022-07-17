@@ -27,8 +27,6 @@ _GetPropResult _generateGetPropertyValue(
     value = convertedValue;
   }
 
-  final nOp = property.nullable ? '?' : '';
-  final nLen = property.nullable ? '?? 0' : '';
   switch (property.isarType) {
     case IsarType.string:
       final stringBytes = '${property.dartName}\$Bytes';
@@ -41,30 +39,31 @@ _GetPropResult _generateGetPropertyValue(
             $stringBytes = IsarBinaryWriter.utf8Encoder.convert($stringValue);
           }
           ''';
+        dynamicSize = '($stringBytes != null ? 3 + $stringBytes.length : 0)';
       } else {
         code += 'final $stringBytes = IsarBinaryWriter.utf8Encoder '
             '.convert($value);';
+        dynamicSize = '(3 + $stringBytes.length)';
       }
       value = stringBytes;
-      dynamicSize = '3 + ($stringBytes$nOp.length $nLen)';
       break;
     case IsarType.stringList:
       final stringBytesList = '${property.dartName}\$BytesList';
       dynamicSize = '${property.dartName}\$BytesCount';
-      code += 'var $dynamicSize = 3 + ($value$nOp.length $nLen) * 3;';
-
       if (property.nullable) {
         final stringValue = '${property.dartName}\$Value';
         code += '''
           List<IsarUint8List?>? $stringBytesList;
+          var $dynamicSize = 0;
           final $stringValue = $value;
           if ($stringValue != null) {
+            $dynamicSize = 3 + $stringValue.length * 3;
             $stringBytesList = [];
             for (final str in $stringValue) {''';
       } else {
-        final elNOp = property.elementNullable ? '?' : '';
         code += '''
-          final $stringBytesList = <IsarUint8List$elNOp>[];
+          final $stringBytesList = <IsarUint8List?>[];
+          var $dynamicSize = 3 + $value.length * 3;
           for (final str in $value) {''';
       }
       if (property.elementNullable) {
@@ -88,15 +87,17 @@ _GetPropResult _generateGetPropertyValue(
       break;
     case IsarType.byteList:
     case IsarType.boolList:
-      dynamicSize = '3 + ($value$nOp.length $nLen)';
-      break;
     case IsarType.intList:
     case IsarType.floatList:
     case IsarType.longList:
     case IsarType.doubleList:
     case IsarType.dateTimeList:
-      dynamicSize =
-          '3 + ($value$nOp.length $nLen) * ${property.isarType.elementSize}';
+      if (property.nullable) {
+        dynamicSize = '($value != null ? 3 + $value!.length * '
+            '${property.isarType.elementSize} : 0)';
+      } else {
+        dynamicSize = '(3 + $value.length * ${property.isarType.elementSize})';
+      }
       break;
     // ignore: no_default_cases
     default:
@@ -187,6 +188,8 @@ String generateSerializeNative(ObjectInfo object) {
         break;
     }
   }
+
+  code += 'writer.validate();';
 
   return '$code}';
 }
