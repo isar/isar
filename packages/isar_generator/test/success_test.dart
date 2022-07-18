@@ -1,23 +1,22 @@
 import 'dart:io';
 
-import 'package:build/build.dart';
-import 'package:build_test/build_test.dart';
-import 'package:isar_generator/isar_generator.dart';
-import 'package:test/test.dart';
+import 'package:dartx/dartx_io.dart';
+import 'package:isar/isar.dart';
+import 'package:isar_generator/src/collection_generator.dart';
+import 'package:source_gen_test/source_gen_test.dart';
 
-void main() {
-  group('Success case', () {
-    for (final file in Directory('test/successes').listSync(recursive: true)) {
-      if (file is! File || !file.path.endsWith('.dart')) continue;
+Future<void> main() async {
+  initializeBuildLogTracking();
+  for (final file in Directory('test/successes').listSync(recursive: true)) {
+    if (file is! File || !file.path.endsWith('.dart')) continue;
 
-      test(file.path, () async {
-        final content = await file.readAsString();
-        await testBuilder(
-          getIsarGenerator(BuilderOptions.empty),
-          {'a|${file.path}': content},
-          reader: await PackageAssetReader.currentIsolate(),
-        );
-      });
-    }
-  });
+    final reader = await initializeLibraryReaderForDirectory(
+      file.dirName,
+      file.name,
+    );
+    testAnnotatedElements<Collection>(
+      reader,
+      IsarCollectionGenerator(),
+    );
+  }
 }
