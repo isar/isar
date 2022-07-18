@@ -56,9 +56,12 @@ class App extends StatelessWidget {
           scaffoldBackgroundColor: Colors.transparent,
           primaryColor: Colors.blue,
           cardColor: const Color(0xff1f2128),
-          dividerColor: const Color.fromARGB(255, 40, 41, 46),
+          dividerColor: Colors.grey,
           checkboxTheme: CheckboxThemeData(
             fillColor: MaterialStateProperty.all(Colors.blue),
+          ),
+          popupMenuTheme: const PopupMenuThemeData(
+            color: Color.fromARGB(255, 40, 41, 46),
           ),
           buttonTheme: const ButtonThemeData(
             alignedDropdown: true,
