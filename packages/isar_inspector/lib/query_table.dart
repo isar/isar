@@ -184,7 +184,7 @@ class _TableBlockState extends State<TableBlock> {
         final children = <Node<TreeViewHelper>>[];
         final value = widget.object.getValue(property.name);
 
-        if (property.type.isList) {
+        if (property.type.isList && value != null) {
           final list = value as List<dynamic>;
 
           for (var index = 0; index < list.length; index++) {
@@ -345,7 +345,7 @@ class _TableItemState extends State<TableItem> {
     var value = '';
     var color = Colors.white;
 
-    if (widget.data.value == null) {
+    if (widget.data.value == null && !widget.data.property.type.isList) {
       value = 'null';
       color = _boolColor;
     } else {
@@ -376,8 +376,10 @@ class _TableItemState extends State<TableItem> {
         case IsarType.DoubleList:
         case IsarType.StringList:
         case IsarType.BoolList:
-          value = '${widget.data.property.type.name}'
-              ' [${(widget.data.value as List).length}]';
+          value = '${widget.data.property.type.name} [';
+          value += widget.data.value == null
+              ? 'null]'
+              : '${(widget.data.value as List).length.toString()}]';
           color = _disableColor;
       }
     }
