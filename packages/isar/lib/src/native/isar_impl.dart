@@ -216,6 +216,12 @@ class IsarImpl extends Isar implements Finalizable {
   }
 
   @override
+  Future<void> copyToFile(String targetPath) {
+    // TODO: implement copyToFile
+    throw UnimplementedError();
+  }
+
+  @override
   Future<bool> close({bool deleteFromDisk = false}) async {
     requireOpen();
     requireNotInTxn();

@@ -30,8 +30,8 @@ void _initializeInstance(
     final schema = schemas[i];
     nCall(IC.isar_instance_get_collection(isar.ptr, colPtrPtr, i));
 
-    final offsets = offsetsPtr.asTypedList(schema.propertyIds.length).toList();
     final staticSize = IC.isar_get_offsets(colPtrPtr.value, offsetsPtr);
+    final offsets = offsetsPtr.asTypedList(schema.propertyIds.length).toList();
     offsets.add(staticSize);
 
     schema.toCollection(<OBJ>() {
@@ -55,6 +55,7 @@ Future<Isar> openIsar({
   String? directory,
   String name = 'isar',
   bool relaxedDurability = true,
+  CompactCondition? compactOnLaunch,
 }) async {
   initializeCoreBinary();
   IC.isar_connect_dart_api(NativeApi.postCObject.cast());
@@ -90,6 +91,7 @@ Isar openIsarSync({
   String? directory,
   String name = 'isar',
   bool relaxedDurability = true,
+  CompactCondition? compactOnLaunch,
 }) {
   initializeCoreBinary();
   IC.isar_connect_dart_api(NativeApi.postCObject.cast());

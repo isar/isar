@@ -38,7 +38,8 @@ String _prepareSerializeList(
   }
   code += '''
     bytesCount += 3 + $value.length * 3;
-    for (final value in $value) {''';
+    for (var i = 0; i < $value.length; i++) {
+      final value = $value[i];''';
   if (elementNullable) {
     code += 'if (value != null) {';
   }

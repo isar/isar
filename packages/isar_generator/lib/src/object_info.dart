@@ -32,7 +32,7 @@ class ObjectInfo {
   String get getLinksName => '_${dartName.decapitalize()}GetLinks';
   String get attachName => '_${dartName.decapitalize()}Attach';
 
-  String get estimateSize => '_${dartName.decapitalize()}estimateSize';
+  String get estimateSize => '_${dartName.decapitalize()}EstimateSize';
   String get serializeNativeName =>
       '_${dartName.decapitalize()}SerializeNative';
   String get deserializeNativeName =>

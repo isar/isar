@@ -135,7 +135,8 @@ class BinaryWriter {
     _writeListOffset(offset, values?.length);
 
     if (values != null) {
-      for (final value in values) {
+      for (var i = 0; i < values.length; i++) {
+        final value = values[i];
         if (value == null) {
           _buffer[_dynamicOffset++] = nullBool;
         } else {
@@ -164,8 +165,12 @@ class BinaryWriter {
     _writeListOffset(offset, values?.length);
 
     if (values != null) {
-      for (final value in values) {
-        _byteData.setFloat32(_dynamicOffset, value ?? nullFloat, Endian.little);
+      for (var i = 0; i < values.length; i++) {
+        _byteData.setFloat32(
+          _dynamicOffset,
+          values[i] ?? nullFloat,
+          Endian.little,
+        );
         _dynamicOffset += 4;
       }
     }
@@ -175,8 +180,12 @@ class BinaryWriter {
     _writeListOffset(offset, values?.length);
 
     if (values != null) {
-      for (final value in values) {
-        _byteData.setInt64(_dynamicOffset, value ?? nullLong, Endian.little);
+      for (var i = 0; i < values.length; i++) {
+        _byteData.setInt64(
+          _dynamicOffset,
+          values[i] ?? nullLong,
+          Endian.little,
+        );
         _dynamicOffset += 8;
       }
     }
@@ -187,10 +196,10 @@ class BinaryWriter {
     _writeListOffset(offset, values?.length);
 
     if (values != null) {
-      for (final value in values) {
+      for (var i = 0; i < values.length; i++) {
         _byteData.setFloat64(
           _dynamicOffset,
-          value ?? nullDouble,
+          values[i] ?? nullDouble,
           Endian.little,
         );
         _dynamicOffset += 8;

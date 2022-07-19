@@ -116,6 +116,9 @@ class IsarImpl extends Isar {
       unsupportedOnWeb();
 
   @override
+  Future<void> copyToFile(String targetPath) => unsupportedOnWeb();
+
+  @override
   Future<bool> close({bool deleteFromDisk = false}) async {
     requireOpen();
     requireNotInTxn();

@@ -1,10 +1,10 @@
 part of isar;
 
 /// Callback for a newly opened Isar instance.
-typedef IsarOpenCallback = void Function(Isar);
+typedef IsarOpenCallback = void Function(Isar isar);
 
 /// Callback for a release Isar instance.
-typedef IsarCloseCallback = void Function(String);
+typedef IsarCloseCallback = void Function(String isarName);
 
 /// An instance of the Isar Database.
 abstract class Isar {
@@ -92,6 +92,7 @@ abstract class Isar {
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
+    CompactCondition? compactOnLaunch,
     bool inspector = true,
   }) {
     _checkOpen(name, schemas);
@@ -109,6 +110,7 @@ abstract class Isar {
       directory: directory,
       name: name,
       relaxedDurability: relaxedDurability,
+      compactOnLaunch: compactOnLaunch,
     );
   }
 
@@ -118,6 +120,7 @@ abstract class Isar {
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
+    CompactCondition? compactOnLaunch,
     bool inspector = true,
   }) {
     _checkOpen(name, schemas);
@@ -135,6 +138,7 @@ abstract class Isar {
       directory: directory,
       name: name,
       relaxedDurability: relaxedDurability,
+      compactOnLaunch: compactOnLaunch,
     );
   }
 
@@ -223,6 +227,12 @@ abstract class Isar {
   /// the instance.
   int getSizeSync({bool includeIndexes = false, bool includeLinks = false});
 
+  /// Copy a compacted version of the database to the specified file.
+  ///
+  /// If you want to backup your database, you should always use a compacted
+  /// version.
+  Future<void> copyToFile(String targetPath);
+
   /// Releases an Isar instance.
   ///
   /// If this is the only isolate that holds a reference to this instance, the
@@ -304,4 +314,16 @@ abstract class Isar {
   /// Split a String into words according to Unicode Annex #29. Only words
   /// containing at least one alphanumeric character will be included.
   static List<String> splitWords(String input) => IsarNative.splitWords(input);
+}
+
+class CompactCondition {
+  final int? minFileSize;
+  final int? minBytes;
+  final double? minPercentage;
+
+  const CompactCondition({
+    this.minFileSize,
+    this.minBytes,
+    this.minPercentage,
+  });
 }

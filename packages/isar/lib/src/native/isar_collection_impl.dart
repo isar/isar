@@ -31,7 +31,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   final CollectionSchema<OBJ> schema;
 
   late final _offsets = isar.offsets[OBJ]!;
-  late final _staticSize = _offsets[0];
+  late final _staticSize = _offsets.last;
 
   @override
   String get name => schema.name;
@@ -351,8 +351,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       final deletedPtr = txn.alloc<Bool>();
 
       var counter = 0;
-      for (final id in ids) {
-        nCall(IC.isar_delete(ptr, txn.ptr, id, deletedPtr));
+      for (var i = 0; i < ids.length; i++) {
+        nCall(IC.isar_delete(ptr, txn.ptr, ids[i], deletedPtr));
         if (deletedPtr.value) {
           counter++;
         }

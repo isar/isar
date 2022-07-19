@@ -5,7 +5,7 @@ import 'package:isar/isar.dart';
 
 import 'sync_future.dart';
 
-bool get syncTest => Zone.current[#syncTest] as bool? ?? false;
+bool get syncTest => true; //Zone.current[#syncTest] as bool? ?? false;
 
 Future<Isar> tOpen({
   required List<CollectionSchema<dynamic>> schemas,

@@ -75,32 +75,36 @@ class _IsarNative implements IsarNativeInterface {
   @override
   @pragma('vm:prefer-inline')
   Future<Isar> open({
+    required List<CollectionSchema<dynamic>> schemas,
     String? directory,
     required String name,
     required bool relaxedDurability,
-    required List<CollectionSchema<dynamic>> schemas,
+    CompactCondition? compactOnLaunch,
   }) {
     return openIsar(
+      schemas: schemas,
       directory: directory,
       name: name,
       relaxedDurability: relaxedDurability,
-      schemas: schemas,
+      compactOnLaunch: compactOnLaunch,
     );
   }
 
   @override
   @pragma('vm:prefer-inline')
   Isar openSync({
+    required List<CollectionSchema<dynamic>> schemas,
     String? directory,
     required String name,
     required bool relaxedDurability,
-    required List<CollectionSchema<dynamic>> schemas,
+    CompactCondition? compactOnLaunch,
   }) {
     return openIsarSync(
+      schemas: schemas,
       directory: directory,
       name: name,
       relaxedDurability: relaxedDurability,
-      schemas: schemas,
+      compactOnLaunch: compactOnLaunch,
     );
   }
 
