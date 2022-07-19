@@ -7,12 +7,10 @@ class EditPopup extends StatefulWidget {
     super.key,
     required this.type,
     required this.value,
-    required this.enableNull,
   });
 
   final IsarType type;
   final dynamic value;
-  final bool enableNull;
 
   @override
   State<EditPopup> createState() => _EditPopupState();
@@ -25,18 +23,13 @@ class _EditPopupState extends State<EditPopup> {
   CustomTextInputFormatter? _inputFormatter;
 
   bool? _boolValue;
-  bool _null = false;
 
   @override
   void initState() {
-    if (widget.enableNull && widget.value == null) {
-      _null = true;
-    }
-
     if (widget.type == IsarType.Bool) {
-      _boolValue = _null || widget.value as bool;
+      _boolValue = widget.value == null || widget.value as bool;
     } else {
-      _controller.text = _null ? '' : widget.value.toString();
+      _controller.text = widget.value == null ? '' : widget.value.toString();
       _controller.selection = TextSelection(
         baseOffset: 0,
         extentOffset: _controller.text.length,
@@ -46,9 +39,7 @@ class _EditPopupState extends State<EditPopup> {
         _inputFormatter = CustomTextInputFormatter(widget.type);
       }
 
-      if (!_null) {
-        _focus.requestFocus();
-      }
+      _focus.requestFocus();
     }
 
     super.initState();
@@ -61,20 +52,6 @@ class _EditPopupState extends State<EditPopup> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (widget.enableNull) ...[
-            CheckboxListTile(
-              value: _null,
-              title: const Text('NULL'),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _null = value;
-                  });
-                }
-              },
-            ),
-            const SizedBox(height: 15),
-          ],
           if (widget.type == IsarType.Bool)
             DropdownButtonHideUnderline(
               child: DropdownButton<bool>(
@@ -89,15 +66,13 @@ class _EditPopupState extends State<EditPopup> {
                     child: Text('FALSE'),
                   ),
                 ],
-                onChanged: _null
-                    ? null
-                    : (value) {
-                        if (value != null) {
-                          setState(() {
-                            _boolValue = value;
-                          });
-                        }
-                      },
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _boolValue = value;
+                    });
+                  }
+                },
               ),
             )
           else
@@ -106,7 +81,6 @@ class _EditPopupState extends State<EditPopup> {
               child: TextFormField(
                 controller: _controller,
                 focusNode: _focus,
-                enabled: !_null,
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -152,30 +126,26 @@ class _EditPopupState extends State<EditPopup> {
   void _save() {
     dynamic value;
 
-    if (_null) {
-      value = null;
+    if (widget.type == IsarType.Bool) {
+      value = _boolValue;
     } else {
-      if (widget.type == IsarType.Bool) {
-        value = _boolValue;
-      } else {
-        if (_formKey.currentState!.validate()) {
-          //ignore: missing_enum_constant_in_switch
-          switch (widget.type) {
-            case IsarType.Float:
-            case IsarType.Double:
-              value = double.tryParse(_controller.text) ?? 0.0;
-              break;
+      if (_formKey.currentState!.validate()) {
+        //ignore: missing_enum_constant_in_switch
+        switch (widget.type) {
+          case IsarType.Float:
+          case IsarType.Double:
+            value = double.tryParse(_controller.text) ?? 0.0;
+            break;
 
-            case IsarType.Byte:
-            case IsarType.Int:
-            case IsarType.Long:
-              value = int.tryParse(_controller.text) ?? 0;
-              break;
-          }
-          value ??= _controller.text;
-        } else {
-          return;
+          case IsarType.Byte:
+          case IsarType.Int:
+          case IsarType.Long:
+            value = int.tryParse(_controller.text) ?? 0;
+            break;
         }
+        value ??= _controller.text;
+      } else {
+        return;
       }
     }
 

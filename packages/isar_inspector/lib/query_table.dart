@@ -245,16 +245,8 @@ class _TableItemState extends State<TableItem> {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) {
-        setState(() {
-          _entered = true;
-        });
-      },
-      onExit: (e) {
-        setState(() {
-          _entered = false;
-        });
-      },
+      onEnter: (_) => setState(() => _entered = true),
+      onExit: (_) => setState(() => _entered = false),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5),
         child: Row(
@@ -267,77 +259,103 @@ class _TableItemState extends State<TableItem> {
                     )
                   : _createText(),
             ),
-            if (_entered) ...[
-              if (!widget.data.property.isId &&
-                  !widget.data.property.type.isList) ...[
-                GestureDetector(
-                  onTap: () async {
-                    final result = await showDialog<Map<String, dynamic>?>(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          content: EditPopup(
-                            type: widget.data.property.type,
-                            value: widget.data.value,
-                            enableNull: widget.data.index == null,
-                          ),
-                        );
+            if (_entered)
+              PopupMenuButton<dynamic>(
+                elevation: 20,
+                itemBuilder: (context) => [
+                  PopupMenuItem<dynamic>(
+                    onTap: _copy,
+                    child: const PopUpMenuRow(
+                      icon: Icon(Icons.copy, size: PopUpMenuRow.iconSize),
+                      text: 'Copy to clipboard',
+                    ),
+                  ),
+                  if (!widget.data.property.isId &&
+                      !widget.data.property.type.isList)
+                    PopupMenuItem<dynamic>(
+                      onTap: () {
+                        WidgetsBinding.instance
+                            .addPostFrameCallback((_) => _edit());
                       },
-                    );
-
-                    if (result != null) {
-                      widget.editor(
-                        widget.objectId,
-                        widget.data.property.name,
-                        widget.data.index,
-                        result['value'],
-                      );
-                    }
-                  },
-                  child: const Tooltip(
-                    message: 'Edit property',
-                    child: Icon(Icons.edit, size: 18),
-                  ),
-                ),
-                const SizedBox(width: 10),
-              ],
-              GestureDetector(
-                onTap: () async {
-                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
-
-                  await Clipboard.setData(
-                    ClipboardData(text: widget.data.value.toString()),
-                  );
-
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        duration: Duration(seconds: 1),
-                        width: 200,
-                        behavior: SnackBarBehavior.floating,
-                        content: Text(
-                          'Copied To Clipboard',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                      child: const PopUpMenuRow(
+                        icon: Icon(Icons.edit, size: PopUpMenuRow.iconSize),
+                        text: 'Edit item',
                       ),
-                    );
-                  }
-                },
-                child: const Center(
-                  child: Tooltip(
-                    message: 'Copy to clipboard',
-                    child: Icon(Icons.copy, size: 18),
-                  ),
-                ),
+                    ),
+                  if (widget.data.property.type.isList)
+                    PopupMenuItem<dynamic>(
+                      onTap: () => _setValue(<dynamic>[]),
+                      child: const PopUpMenuRow(
+                        text: 'Clear list',
+                      ),
+                    ),
+                  if (!widget.data.property.isId && widget.data.value != null)
+                    PopupMenuItem<dynamic>(
+                      onTap: () => _setValue(null),
+                      child: const PopUpMenuRow(
+                        text: 'Set value to null',
+                      ),
+                    ),
+                ],
+                tooltip: 'Options',
+                child: const Icon(Icons.more_vert, size: 18),
               ),
-            ],
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _edit() async {
+    final result = await showDialog<Map<String, dynamic>?>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: EditPopup(
+            type: widget.data.property.type,
+            value: widget.data.value,
+          ),
+        );
+      },
+    );
+
+    if (result != null) {
+      await _setValue(result['value']);
+    }
+  }
+
+  Future<void> _copy() async {
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+    await Clipboard.setData(
+      ClipboardData(text: widget.data.value.toString()),
+    );
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          duration: Duration(seconds: 1),
+          width: 200,
+          behavior: SnackBarBehavior.floating,
+          content: Text(
+            'Copied To Clipboard',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _setValue(dynamic value) async {
+    widget.editor(
+      widget.objectId,
+      widget.data.property.name,
+      widget.data.index,
+      value,
     );
   }
 
@@ -417,6 +435,26 @@ class _TableItemState extends State<TableItem> {
             ),
         ],
       ),
+    );
+  }
+}
+
+class PopUpMenuRow extends StatelessWidget {
+  const PopUpMenuRow({super.key, this.icon, required this.text});
+
+  final Icon? icon;
+  final String text;
+
+  static const double iconSize = 18;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        if (icon != null) icon! else const SizedBox(width: iconSize),
+        const SizedBox(width: 15),
+        Text(text, style: const TextStyle(fontSize: 15)),
+      ],
     );
   }
 }
