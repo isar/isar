@@ -8,6 +8,7 @@ import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
 import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_collection_impl.dart';
 import 'package:isar/src/native/isar_core.dart';
 import 'package:isar/src/native/isar_impl.dart';
@@ -61,21 +62,29 @@ Future<Isar> openIsar({
   IC.isar_connect_dart_api(NativeApi.postCObject.cast());
 
   return using((Arena alloc) async {
-    final namePtr = name.toNativeUtf8(allocator: alloc);
-    final dirPtr = directory?.toNativeUtf8(allocator: alloc) ?? nullptr;
+    final namePtr = name.toCString(alloc);
+    final dirPtr = directory?.toCString(alloc) ?? nullptr;
 
     final schemaStr = '[${schemas.map((e) => e.schema).join(',')}]';
-    final schemaStrPtr = schemaStr.toNativeUtf8(allocator: alloc);
+    final schemaStrPtr = schemaStr.toCString(alloc);
+
+    final compactMinFileSize = compactOnLaunch?.minFileSize;
+    final compactMinBytes = compactOnLaunch?.minBytes;
+    final compactMinRatio =
+        compactOnLaunch == null ? double.nan : compactOnLaunch.minRatio;
 
     final receivePort = ReceivePort();
     final nativePort = receivePort.sendPort.nativePort;
     final stream = wrapIsarPort(receivePort);
     IC.isar_instance_create_async(
       _isarPtrPtr,
-      namePtr.cast(),
-      dirPtr.cast(),
+      namePtr,
+      dirPtr,
+      schemaStrPtr,
       relaxedDurability,
-      schemaStrPtr.cast(),
+      compactMinFileSize ?? 0,
+      compactMinBytes ?? 0,
+      compactMinRatio ?? 0,
       nativePort,
     );
     await stream.first;
@@ -98,19 +107,27 @@ Isar openIsarSync({
 
   return using(
     (Arena alloc) {
-      final namePtr = name.toNativeUtf8(allocator: alloc);
-      final dirPtr = directory?.toNativeUtf8(allocator: alloc) ?? nullptr;
+      final namePtr = name.toCString(alloc);
+      final dirPtr = directory?.toCString(alloc) ?? nullptr;
 
       final schemaStr = '[${schemas.map((e) => e.schema).join(',')}]';
-      final schemaStrPtr = schemaStr.toNativeUtf8(allocator: alloc);
+      final schemaStrPtr = schemaStr.toCString(alloc);
+
+      final compactMinFileSize = compactOnLaunch?.minFileSize;
+      final compactMinBytes = compactOnLaunch?.minBytes;
+      final compactMinRatio =
+          compactOnLaunch == null ? double.nan : compactOnLaunch.minRatio;
 
       nCall(
         IC.isar_instance_create(
           _isarPtrPtr,
-          namePtr.cast(),
-          dirPtr.cast(),
+          namePtr,
+          dirPtr,
+          schemaStrPtr,
           relaxedDurability,
-          schemaStrPtr.cast(),
+          compactMinFileSize ?? 0,
+          compactMinBytes ?? 0,
+          compactMinRatio ?? 0,
         ),
       );
 

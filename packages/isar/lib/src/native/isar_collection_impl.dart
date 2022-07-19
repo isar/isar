@@ -12,6 +12,7 @@ import 'package:isar/isar.dart';
 import 'package:isar/src/native/binary_reader.dart';
 import 'package:isar/src/native/binary_writer.dart';
 import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/index_key.dart';
 import 'package:isar/src/native/isar_core.dart';
 import 'package:isar/src/native/isar_impl.dart';
@@ -427,12 +428,12 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return isar.getTxn(true, (txn) async {
       final bytesPtr = txn.alloc<Uint8>(jsonBytes.length);
       bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
-      final idNamePtr = schema.idName.toNativeUtf8(allocator: txn.alloc);
+      final idNamePtr = schema.idName.toCString(txn.alloc);
 
       IC.isar_json_import(
         ptr,
         txn.ptr,
-        idNamePtr.cast(),
+        idNamePtr,
         bytesPtr,
         jsonBytes.length,
       );
@@ -451,13 +452,13 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return isar.getTxnSync(true, (txn) async {
       final bytesPtr = txn.allocBuffer(jsonBytes.length);
       bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
-      final idNamePtr = schema.idName.toNativeUtf8(allocator: txn.alloc);
+      final idNamePtr = schema.idName.toCString(txn.alloc);
 
       nCall(
         IC.isar_json_import(
           ptr,
           txn.ptr,
-          idNamePtr.cast(),
+          idNamePtr,
           bytesPtr,
           jsonBytes.length,
         ),

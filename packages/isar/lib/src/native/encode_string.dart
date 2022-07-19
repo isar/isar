@@ -1,4 +1,7 @@
+import 'dart:ffi';
 import 'dart:typed_data';
+
+import 'package:ffi/ffi.dart';
 
 const int _oneByteLimit = 0x7f; // 7 bits
 const int _twoByteLimit = 0x7ff; // 11 bits
@@ -38,4 +41,16 @@ int encodeString(String str, Uint8List buffer, int offset) {
     }
   }
   return offset - startOffset;
+}
+
+/// @nodoc
+extension CString on String {
+  /// Create a zero terminated C-String from a Dart String
+  Pointer<Char> toCString(Allocator alloc) {
+    final bufferPtr = alloc<Uint8>(length * 3 + 1);
+    final buffer = bufferPtr.asTypedList(length * 3 + 1);
+    final size = encodeString(this, buffer, 0);
+    buffer[size + 1] = 0;
+    return bufferPtr.cast();
+  }
 }

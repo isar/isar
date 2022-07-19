@@ -9,6 +9,7 @@ import 'package:ffi/ffi.dart';
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_core.dart';
 
 const Symbol _zoneTxn = #zoneTxn;
@@ -216,9 +217,18 @@ class IsarImpl extends Isar implements Finalizable {
   }
 
   @override
-  Future<void> copyToFile(String targetPath) {
-    // TODO: implement copyToFile
-    throw UnimplementedError();
+  Future<void> copyToFile(String targetPath) async {
+    final pathPtr = targetPath.toCString(malloc);
+    final receivePort = ReceivePort();
+    final nativePort = receivePort.sendPort.nativePort;
+
+    try {
+      final stream = wrapIsarPort(receivePort);
+      IC.isar_instance_copy_to_file(ptr, pathPtr, nativePort);
+      await stream.first;
+    } finally {
+      malloc.free(pathPtr);
+    }
   }
 
   @override

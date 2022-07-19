@@ -231,6 +231,9 @@ abstract class Isar {
   ///
   /// If you want to backup your database, you should always use a compacted
   /// version.
+  ///
+  /// Do not run this method while other transactions are active to avoid
+  /// unnecessary growth of the database.
   Future<void> copyToFile(String targetPath);
 
   /// Releases an Isar instance.
@@ -316,14 +319,31 @@ abstract class Isar {
   static List<String> splitWords(String input) => IsarNative.splitWords(input);
 }
 
+/// Isar databases can contain unused space that will be reused for later
+/// operations. You can specify conditions to trigger manual compaction where
+/// the entire database is copied and unused space freed.
+///
+/// This operation can only be performed while a database is being opened and
+/// should only be used if absolutely necessary.
 class CompactCondition {
-  final int? minFileSize;
-  final int? minBytes;
-  final double? minPercentage;
-
+  /// Compaction whill happen if all of the specified conditions are true.
   const CompactCondition({
     this.minFileSize,
     this.minBytes,
-    this.minPercentage,
-  });
+    this.minRatio,
+  }) : assert(
+          minFileSize != null || minBytes != null || minRatio != null,
+          'At least one condition needs to be specified.',
+        );
+
+  /// The minimum size in bytes of the database file to trigger compaction. It
+  /// is highly  discouraged to trigger compaction solely on this condition.
+  final int? minFileSize;
+
+  /// The minumum number of bytes that can be freed with compaction.
+  final int? minBytes;
+
+  /// The minimum file size reduction ration. For example 2.0 would trigger
+  /// compaction as soon as the file size can be halved.
+  final double? minRatio;
 }

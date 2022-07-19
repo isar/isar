@@ -7,6 +7,7 @@ import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
 import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_core.dart';
 import 'package:isar/src/native/query_build.dart';
 
@@ -190,7 +191,7 @@ Pointer<Char> _strToNative(String? str) {
   if (str == null) {
     return Pointer.fromAddress(0);
   } else {
-    return str.toNativeUtf8().cast();
+    return str.toCString(malloc);
   }
 }
 

@@ -6,6 +6,7 @@ import 'package:ffi/ffi.dart';
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/index_key.dart';
 import 'package:isar/src/native/isar_collection_impl.dart';
 import 'package:isar/src/native/isar_core.dart';
@@ -400,14 +401,14 @@ Pointer<CFilter> _buildConditionEqual({
       );
     }
   } else if (val is String) {
-    final strPtr = val.toNativeUtf8(allocator: alloc);
+    final strPtr = val.toCString(alloc);
     nCall(
       IC.isar_filter_string(
         colPtr,
         filterPtrPtr,
-        strPtr.cast(),
+        strPtr,
         true,
-        strPtr.cast(),
+        strPtr,
         true,
         caseSensitive,
         propertyId!,
@@ -467,10 +468,8 @@ Pointer<CFilter> _buildConditionBetween({
       ),
     );
   } else if ((lower is String?) && upper is String?) {
-    final lowerPtr =
-        lower?.toNativeUtf8(allocator: alloc).cast<Char>() ?? minStr;
-    final upperPtr =
-        upper?.toNativeUtf8(allocator: alloc).cast<Char>() ?? maxStr;
+    final lowerPtr = lower?.toCString(alloc) ?? minStr;
+    final upperPtr = upper?.toCString(alloc) ?? maxStr;
     nCall(
       IC.isar_filter_string(
         colPtr,
@@ -531,14 +530,14 @@ Pointer<CFilter> _buildConditionLessThan({
       ),
     );
   } else if (val is String) {
-    final value = val.toNativeUtf8(allocator: alloc);
+    final value = val.toCString(alloc);
     nCall(
       IC.isar_filter_string(
         colPtr,
         filterPtrPtr,
         minStr,
         true,
-        value.cast(),
+        value,
         include,
         caseSensitive,
         propertyId!,
@@ -593,12 +592,12 @@ Pointer<CFilter> _buildConditionGreaterThan({
       ),
     );
   } else if (val is String) {
-    final value = val.toNativeUtf8(allocator: alloc);
+    final value = val.toCString(alloc);
     nCall(
       IC.isar_filter_string(
         colPtr,
         filterPtrPtr,
-        value.cast(),
+        value,
         include,
         maxStr,
         true,
@@ -623,14 +622,14 @@ Pointer<CFilter> _buildConditionStringOp({
 }) {
   final filterPtrPtr = alloc<Pointer<CFilter>>();
   if (val is String) {
-    final strPtr = val.toNativeUtf8(allocator: alloc);
+    final strPtr = val.toCString(alloc);
     switch (conditionType) {
       case FilterConditionType.startsWith:
         nCall(
           IC.isar_filter_string_starts_with(
             colPtr,
             filterPtrPtr,
-            strPtr.cast(),
+            strPtr,
             caseSensitive,
             propertyId!,
           ),
@@ -641,7 +640,7 @@ Pointer<CFilter> _buildConditionStringOp({
           IC.isar_filter_string_ends_with(
             colPtr,
             filterPtrPtr,
-            strPtr.cast(),
+            strPtr,
             caseSensitive,
             propertyId!,
           ),
@@ -652,7 +651,7 @@ Pointer<CFilter> _buildConditionStringOp({
           IC.isar_filter_string_contains(
             colPtr,
             filterPtrPtr,
-            strPtr.cast(),
+            strPtr,
             caseSensitive,
             propertyId!,
           ),
@@ -663,7 +662,7 @@ Pointer<CFilter> _buildConditionStringOp({
           IC.isar_filter_string_matches(
             colPtr,
             filterPtrPtr,
-            strPtr.cast(),
+            strPtr,
             caseSensitive,
             propertyId!,
           ),
