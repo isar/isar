@@ -7,17 +7,19 @@ class ObjectInfo {
   const ObjectInfo({
     required this.dartName,
     required this.isarName,
-    required this.accessor,
+    this.accessor,
     required this.properties,
-    required this.indexes,
-    required this.links,
+    this.indexes = const [],
+    this.links = const [],
   });
   final String dartName;
   final String isarName;
-  final String accessor;
+  final String? accessor;
   final List<ObjectProperty> properties;
   final List<ObjectIndex> indexes;
   final List<ObjectLink> links;
+
+  bool get isEmbedded => accessor == null;
 
   ObjectProperty get idProperty =>
       properties.firstWhere((ObjectProperty it) => it.isarType == IsarType.id);
@@ -27,10 +29,10 @@ class ObjectInfo {
       .toList();
 
   String get getIdName => '_${dartName.decapitalize()}GetId';
-  String get setIdName => '_${dartName.decapitalize()}SetId';
   String get getLinksName => '_${dartName.decapitalize()}GetLinks';
-  String get attachLinksName => '_${dartName.decapitalize()}AttachLinks';
+  String get attachName => '_${dartName.decapitalize()}Attach';
 
+  String get estimateSize => '_${dartName.decapitalize()}estimateSize';
   String get serializeNativeName =>
       '_${dartName.decapitalize()}SerializeNative';
   String get deserializeNativeName =>
@@ -57,6 +59,8 @@ class ObjectProperty {
     required this.isarName,
     required this.dartType,
     required this.isarType,
+    this.embeddedDartName,
+    this.embeddedIsarName,
     this.converter,
     required this.nullable,
     required this.elementNullable,
@@ -64,13 +68,19 @@ class ObjectProperty {
     required this.assignable,
     this.constructorPosition,
   });
+
   final String dartName;
   final String isarName;
   final String dartType;
   final IsarType isarType;
+
+  final String? embeddedDartName;
+  final String? embeddedIsarName;
+
   final String? converter;
   final bool nullable;
   final bool elementNullable;
+
   final PropertyDeser deserialize;
   final bool assignable;
   final int? constructorPosition;
@@ -113,8 +123,6 @@ class ObjectIndexProperty {
 
   String get indexValueTypeEnum {
     switch (property.isarType) {
-      case IsarType.id:
-        throw UnimplementedError();
       case IsarType.bool:
         return 'IndexValueType.bool';
       case IsarType.byte:
@@ -185,6 +193,10 @@ class ObjectIndexProperty {
             return 'IndexValueType.stringCIS';
           }
         }
+      case IsarType.id:
+      case IsarType.object:
+      case IsarType.objectList:
+        throw UnimplementedError();
     }
   }
 }

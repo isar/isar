@@ -44,7 +44,7 @@ String generateDeserializeWeb(ObjectInfo object) {
 
   if (object.links.isNotEmpty) {
     final deserId = deserProp(object.idProperty);
-    code += '${object.attachLinksName}(collection, $deserId, object);';
+    code += '${object.attachName}(collection, $deserId, object);';
   }
 
   // ignore: leading_newlines_in_multiline_strings

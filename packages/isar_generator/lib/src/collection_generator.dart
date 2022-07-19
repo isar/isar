@@ -12,7 +12,6 @@ import 'package:isar_generator/src/code_gen/query_link_generator.dart';
 import 'package:isar_generator/src/code_gen/query_property_generator.dart';
 import 'package:isar_generator/src/code_gen/query_sort_by_generator.dart';
 import 'package:isar_generator/src/code_gen/query_where_generator.dart';
-import 'package:isar_generator/src/code_gen/type_adapter_generator_common.dart';
 import 'package:isar_generator/src/code_gen/type_adapter_generator_native.dart';
 import 'package:isar_generator/src/code_gen/type_adapter_generator_web.dart';
 import 'package:isar_generator/src/isar_analyzer.dart';
@@ -40,7 +39,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
-    final object = IsarAnalyzer().analyze(element);
+    final object = IsarAnalyzer().analyzeCollection(element);
 
     final collectionSchema = generateCollectionSchema(object);
     final converters = object.properties
@@ -63,6 +62,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       $collectionSchema
       $converters
 
+      ${generateEstimateSerializeNative(object)}
       ${generateSerializeNative(object)}
       ${generateDeserializeNative(object)}
       ${generateDeserializePropNative(object)}
@@ -70,8 +70,6 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       ${generateSerializeWeb(object)}
       ${generateDeserializeWeb(object)}
       ${generateDeserializePropWeb(object)}
-
-      ${generateAttachLinks(object)}
 
       ${generateByIndexExtension(object)}
       ${WhereGenerator(object).generate()}

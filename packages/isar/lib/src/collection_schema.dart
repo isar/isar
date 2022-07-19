@@ -4,60 +4,6 @@ part of isar;
 
 /// @nodoc
 @protected
-typedef AdapterAlloc = IsarBytePointer Function(int size);
-
-/// @nodoc
-@protected
-typedef SerializeNative<T> = void Function(
-  IsarCollection<T> collection,
-  IsarCObject cObj,
-  T object,
-  int staticSize,
-  List<int> offsets,
-  AdapterAlloc alloc,
-);
-
-/// @nodoc
-@protected
-typedef DeserializeNative<T> = T Function(
-  IsarCollection<T> collection,
-  int id,
-  IsarBinaryReader reader,
-  List<int> offsets,
-);
-
-/// @nodoc
-@protected
-typedef DeserializePropNative = dynamic Function(
-  int id,
-  IsarBinaryReader reader,
-  int propertyIndex,
-  int offset,
-);
-
-/// @nodoc
-@protected
-typedef SerializeWeb<T> = Object Function(
-  IsarCollection<T> collection,
-  T object,
-);
-
-/// @nodoc
-@protected
-typedef DeserializeWeb<T> = T Function(
-  IsarCollection<T> collection,
-  Object jsObj,
-);
-
-/// @nodoc
-@protected
-typedef DeserializePropWeb = dynamic Function(
-  Object jsObj,
-  String propertyName,
-);
-
-/// @nodoc
-@protected
 class CollectionSchema<OBJ> {
   const CollectionSchema({
     required this.name,
@@ -69,11 +15,12 @@ class CollectionSchema<OBJ> {
     required this.indexValueTypes,
     required this.linkIds,
     required this.backlinkLinkNames,
-    required this.getLinks,
-    required this.attachLinks,
+    required this.dependencies,
     required this.getId,
-    this.setId,
+    required this.getLinks,
+    required this.attach,
     required this.serializeNative,
+    required this.estimateSize,
     required this.deserializeNative,
     required this.deserializePropNative,
     required this.serializeWeb,
@@ -97,13 +44,13 @@ class CollectionSchema<OBJ> {
   final Map<String, List<IndexValueType>> indexValueTypes;
   final Map<String, int> linkIds;
   final Map<String, String> backlinkLinkNames;
+  final List<String> dependencies;
 
-  final int? Function(OBJ object) getId;
-  final void Function(OBJ object, int id)? setId;
+  final GetId<OBJ> getId;
+  final GetLinks<OBJ> getLinks;
+  final Attach<OBJ> attach;
 
-  final List<IsarLinkBase<dynamic>> Function(OBJ object) getLinks;
-  final void Function(IsarCollection<OBJ> col, int id, OBJ object) attachLinks;
-
+  final EstimateSize<OBJ> estimateSize;
   final SerializeNative<OBJ> serializeNative;
   final DeserializeNative<OBJ> deserializeNative;
   final DeserializePropNative deserializePropNative;
@@ -179,3 +126,71 @@ enum IndexValueType {
   stringListHash, // Case-sensitive, hashed
   stringListHashCIS, // Case-insensitive, hashed
 }
+
+/// @nodoc
+@protected
+typedef GetId<T> = int? Function(T object);
+
+/// @nodoc
+@protected
+typedef GetLinks<T> = List<IsarLinkBase<dynamic>> Function(T object);
+
+/// @nodoc
+@protected
+typedef Attach<T> = void Function(IsarCollection<T> col, int id, T object);
+
+/// @nodoc
+@protected
+typedef EstimateSize<T> = int Function(
+  T object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+);
+
+/// @nodoc
+@protected
+typedef SerializeNative<T> = int Function(
+  T object,
+  IsarBinaryWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+);
+
+/// @nodoc
+@protected
+typedef DeserializeNative<T> = T Function(
+  IsarCollection<T> collection,
+  int id,
+  IsarBinaryReader reader,
+  List<int> offsets,
+);
+
+/// @nodoc
+@protected
+typedef DeserializePropNative = dynamic Function(
+  int id,
+  IsarBinaryReader reader,
+  int propertyIndex,
+  int offset,
+);
+
+/// @nodoc
+@protected
+typedef SerializeWeb<T> = Object Function(
+  IsarCollection<T> collection,
+  T object,
+);
+
+/// @nodoc
+@protected
+typedef DeserializeWeb<T> = T Function(
+  IsarCollection<T> collection,
+  Object jsObj,
+);
+
+/// @nodoc
+@protected
+typedef DeserializePropWeb = dynamic Function(
+  Object jsObj,
+  String propertyName,
+);

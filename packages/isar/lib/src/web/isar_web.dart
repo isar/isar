@@ -1,7 +1,6 @@
 // ignore_for_file: unused_field, invalid_override, public_member_api_docs
 
 import 'dart:js_util';
-import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/isar_native_interface.dart';
@@ -39,14 +38,6 @@ typedef IsarAbi = _WebAbi;
 
 /// @nodoc
 @protected
-typedef IsarCObject = dynamic;
-
-/// @nodoc
-@protected
-typedef IsarBytePointer = dynamic;
-
-/// @nodoc
-@protected
 typedef IsarBinaryReader = dynamic;
 
 /// @nodoc
@@ -56,10 +47,6 @@ const dynamic IsarBinaryWriter = null;
 
 class _IsarWeb implements IsarNativeInterface {
   const _IsarWeb();
-
-  @override
-  Uint8List bufAsBytes(IsarBytePointer pointer, int length) =>
-      unsupportedOnWeb();
 
   @override
   Future<void> initializeIsarCore({

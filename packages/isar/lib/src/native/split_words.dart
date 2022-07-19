@@ -3,20 +3,20 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'package:isar/src/native/binary_reader.dart';
-import 'package:isar/src/native/binary_writer.dart';
+import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_core.dart';
 
 // ignore: public_member_api_docs
 List<String> splitWordsCore(String input) {
   initializeCoreBinary();
 
-  final bytes = BinaryWriter.utf8Encoder.convert(input);
-  final bytesPtr = malloc<Uint8>(bytes.length);
-  bytesPtr.asTypedList(bytes.length).setAll(0, bytes);
+  final bytesPtr = malloc<Uint8>(input.length * 3);
+  final bytes = bytesPtr.asTypedList(input.length * 3);
+  final byteCount = encodeString(input, bytes, 0);
 
   final wordCountPtr = malloc<Uint32>();
   final boundariesPtr =
-      IC.isar_find_word_boundaries(bytesPtr.cast(), bytes.length, wordCountPtr);
+      IC.isar_find_word_boundaries(bytesPtr.cast(), byteCount, wordCountPtr);
   final wordCount = wordCountPtr.value;
   final boundaries = boundariesPtr.asTypedList(wordCount * 2);
 

@@ -9,58 +9,22 @@ import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 class IsarAnalyzer {
-  ObjectInfo analyze(Element modelClass) {
-    if (modelClass is! ClassElement ||
-        modelClass.isEnum ||
-        modelClass.isMixin) {
-      err('Only classes may be annotated with @Collection.', modelClass);
-    }
-
-    if (modelClass.isAbstract) {
-      err('Class must not be abstract.', modelClass);
-    }
-
-    if (!modelClass.isPublic) {
-      err('Class must be public.', modelClass);
-    }
-
-    final constructor = modelClass.constructors
-        .firstOrNullWhere((ConstructorElement c) => c.periodOffset == null);
-
-    if (constructor == null) {
-      err('Class needs an unnamed constructor.', modelClass);
-    }
-
-    final hasCollectionSupertype = modelClass.allSupertypes
-        .any((type) => type.element.collectionAnnotation != null);
-    if (hasCollectionSupertype) {
-      err(
-        'Class must not have a supertype annotated with @Collection.',
-        modelClass,
-      );
-    }
+  ObjectInfo analyzeCollection(Element element) {
+    final constructor = _checkValidClass(element);
+    final modelClass = element as ClassElement;
 
     final properties = <ObjectProperty>[];
     final links = <ObjectLink>[];
     for (final propertyElement in modelClass.allAccessors) {
-      final link = analyzeObjectLink(propertyElement);
-      if (link != null) {
+      if (propertyElement.isLink || propertyElement.isLinks) {
+        final link = analyzeObjectLink(propertyElement);
         links.add(link);
       } else {
-        final property = analyzeObjectProperty(
-          propertyElement,
-          constructor,
-        );
-        if (property == null) {
-          continue;
-        }
+        final property = analyzeObjectProperty(propertyElement, constructor);
         properties.add(property);
       }
     }
-    if (properties.map((e) => e.isarName).distinct().length !=
-        properties.length) {
-      err('Two or more properties have the same name.', modelClass);
-    }
+    _checkValidPropertiesConstructor(properties, constructor);
     if (links.map((e) => e.isarName).distinct().length != links.length) {
       err('Two or more links have the same name.', modelClass);
     }
@@ -73,8 +37,7 @@ class IsarAnalyzer {
       err('Two or more indexes have the same name.', modelClass);
     }
 
-    final idProperties =
-        properties.where((ObjectProperty it) => it.isarType == IsarType.id);
+    final idProperties = properties.where((it) => it.isarType == IsarType.id);
     if (idProperties.isEmpty) {
       err(
         'No id property defined. Use the "Id" type for your id property.',
@@ -84,16 +47,6 @@ class IsarAnalyzer {
       err('Two or more properties with type "Id" defined.', modelClass);
     } else if (idProperties.first.converter != null) {
       err('Converters are not allowed for ids.', modelClass);
-    }
-
-    final unknownConstructorParameter = constructor.parameters.firstOrNullWhere(
-      (p) => p.isRequired && properties.none((e) => e.dartName == p.name),
-    );
-    if (unknownConstructorParameter != null) {
-      err(
-        'Constructor parameter does not match a property.',
-        unknownConstructorParameter,
-      );
     }
 
     final sortedLinks =
@@ -112,7 +65,104 @@ class IsarAnalyzer {
     );
   }
 
-  ObjectProperty? analyzeObjectProperty(
+  ObjectInfo analyzeEmbedded(Element element) {
+    final constructor = _checkValidClass(element);
+    final modelClass = element as ClassElement;
+
+    final properties = <ObjectProperty>[];
+    for (final propertyElement in modelClass.allAccessors) {
+      if (propertyElement.isLink || propertyElement.isLinks) {
+        err('Embedded objects must not contain links', propertyElement);
+      } else {
+        final property = analyzeObjectProperty(propertyElement, constructor);
+        properties.add(property);
+      }
+    }
+    _checkValidPropertiesConstructor(properties, constructor);
+
+    final hasIndex = modelClass.allAccessors.any(
+      (it) => it.indexAnnotations.isNotEmpty,
+    );
+    if (hasIndex) {
+      err('Embedded objects must have indexes.', modelClass);
+    }
+
+    final hasIdProperty = properties.any((it) => it.isarType == IsarType.id);
+    if (hasIdProperty) {
+      err('Embedded objects must not define an id.', modelClass);
+    }
+
+    return ObjectInfo(
+      dartName: modelClass.displayName,
+      isarName: modelClass.isarName,
+      accessor: modelClass.collectionAccessor,
+      properties: properties.sortedBy((e) => e.isarName),
+    );
+  }
+
+  ConstructorElement _checkValidClass(Element modelClass) {
+    if (modelClass is! ClassElement ||
+        modelClass.isEnum ||
+        modelClass.isMixin) {
+      err(
+        'Only classes may be annotated with @Collection or @Embedded.',
+        modelClass,
+      );
+    }
+
+    if (modelClass.isAbstract) {
+      err('Class must not be abstract.', modelClass);
+    }
+
+    if (!modelClass.isPublic) {
+      err('Class must be public.', modelClass);
+    }
+
+    final constructor = modelClass.constructors
+        .firstOrNullWhere((ConstructorElement c) => c.periodOffset == null);
+    if (constructor == null) {
+      err('Class needs an unnamed constructor.', modelClass);
+    }
+
+    final hasCollectionSupertype = modelClass.allSupertypes.any((type) {
+      return type.element.collectionAnnotation != null ||
+          type.element.embeddedAnnotation != null;
+    });
+    if (hasCollectionSupertype) {
+      err(
+        'Class must not have a supertype annotated with @Collection or '
+        '@Embedded.',
+        modelClass,
+      );
+    }
+
+    return constructor;
+  }
+
+  void _checkValidPropertiesConstructor(
+    List<ObjectProperty> properties,
+    ConstructorElement constructor,
+  ) {
+    if (properties.map((e) => e.isarName).distinct().length !=
+        properties.length) {
+      err(
+        'Two or more properties have the same name.',
+        constructor.enclosingElement,
+      );
+    }
+
+    final unknownConstructorParameter = constructor.parameters.firstOrNullWhere(
+      (p) => p.isRequired && properties.none((e) => e.dartName == p.name),
+    );
+    if (unknownConstructorParameter != null) {
+      err(
+        'Constructor parameter does not match a property.',
+        unknownConstructorParameter,
+      );
+    }
+  }
+
+  ObjectProperty analyzeObjectProperty(
     PropertyInducingElement property,
     ConstructorElement constructor,
   ) {
@@ -187,14 +237,7 @@ class IsarAnalyzer {
     );
   }
 
-  ObjectLink? analyzeObjectLink(PropertyInducingElement property) {
-    final isLink = property.type.element!.name == 'IsarLink';
-    final isLinks = property.type.element!.name == 'IsarLinks';
-
-    if (!isLink && !isLinks) {
-      return null;
-    }
-
+  ObjectLink analyzeObjectLink(PropertyInducingElement property) {
     if (property.type.nullabilitySuffix != NullabilitySuffix.none) {
       err('Link properties must not be nullable.', property);
     } else if (property.isLate) {
@@ -226,10 +269,12 @@ class IsarAnalyzer {
       } else if (targetProperty.backlinkAnnotation != null) {
         err('Target of Backlink is also a backlink', property);
       }
-      final targetLink = analyzeObjectLink(targetProperty);
-      if (targetLink == null) {
+
+      if (!targetProperty.isLink && !targetProperty.isLinks) {
         err('Target of backlink is not a link', property);
       }
+
+      final targetLink = analyzeObjectLink(targetProperty);
       targetIsarName = targetLink.isarName;
     }
 
@@ -240,7 +285,7 @@ class IsarAnalyzer {
       targetCollectionDartName: linkType.element!.name!,
       targetCollectionIsarName: targetCol.isarName,
       targetCollectionAccessor: targetCol.collectionAccessor,
-      links: isLinks,
+      links: property.isLinks,
       backlink: backlinkAnn != null,
     );
   }

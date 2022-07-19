@@ -59,7 +59,8 @@ void main() {
         final size =
             test.types.fold<int>(0, (sum, type) => sum + type.size) + 2;
 
-        final writer = BinaryWriter(buffer, size);
+        final bufferView = buffer.buffer.asUint8List(0, test.bytes.length);
+        final writer = BinaryWriter(bufferView, size);
         writer.writeHeader();
         var offset = 2;
         for (var i = 0; i < test.types.length; i++) {
@@ -298,10 +299,5 @@ List<String?>? _readStringList(BinaryReader reader, int offset, bool nullable) {
 }
 
 void _writeStringList(BinaryWriter writer, int offset, dynamic value) {
-  final byteLists = value is List
-      ? value
-          .map((s) => s is String ? utf8.encode(s) as Uint8List : null)
-          .toList()
-      : null;
-  writer.writeByteLists(offset, byteLists);
+  writer.writeStringList(offset, (value as List?)?.cast());
 }

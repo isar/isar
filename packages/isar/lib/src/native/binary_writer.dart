@@ -1,10 +1,10 @@
 // ignore_for_file: public_member_api_docs, prefer_asserts_with_message,
 // avoid_positional_boolean_parameters
 
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
+import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_core.dart';
 import 'package:meta/meta.dart';
 
@@ -15,7 +15,7 @@ class BinaryWriter {
       : _staticSize = staticSize,
         _dynamicOffset = staticSize,
         _buffer = buffer,
-        _byteData = ByteData.view(buffer.buffer) {
+        _byteData = ByteData.sublistView(buffer) {
     if (buffer.length >= maxObjectSize) {
       throw IsarError(
         'The object exceeds the maximum size of $maxObjectSize bytes.',
@@ -25,8 +25,6 @@ class BinaryWriter {
 
   static const maxObjectSize = 1 << 24;
 
-  static const Utf8Encoder utf8Encoder = Utf8Encoder();
-
   final Uint8List _buffer;
 
   final ByteData _byteData;
@@ -34,6 +32,8 @@ class BinaryWriter {
   final int _staticSize;
 
   int _dynamicOffset;
+
+  int get usedBytes => _dynamicOffset;
 
   @pragma('vm:prefer-inline')
   void writeHeader() {
@@ -93,6 +93,19 @@ class BinaryWriter {
     _buffer[offset] = value;
     _buffer[offset + 1] = value >> 8;
     _buffer[offset + 2] = value >> 16;
+  }
+
+  @pragma('vm:prefer-inline')
+  void writeString(int offset, String? value) {
+    assert(offset < _staticSize);
+    if (value != null) {
+      final byteCount = encodeString(value, _buffer, _dynamicOffset + 3);
+      _writeUint24(offset, _dynamicOffset);
+      _writeUint24(_dynamicOffset, byteCount);
+      _dynamicOffset += byteCount + 3;
+    } else {
+      _writeUint24(offset, 0);
+    }
   }
 
   @pragma('vm:prefer-inline')
@@ -194,7 +207,7 @@ class BinaryWriter {
     writeLongList(offset, longList);
   }
 
-  void writeByteLists(int offset, List<Uint8List?>? values) {
+  void writeStringList(int offset, List<String?>? values) {
     assert(offset < _staticSize);
     _writeListOffset(offset, values?.length);
 
@@ -204,22 +217,13 @@ class BinaryWriter {
       for (var i = 0; i < values.length; i++) {
         final value = values[i];
         if (value != null) {
-          _writeUint24(offsetListOffset + i * 3, value.length + 1);
-          _buffer.setRange(
-            _dynamicOffset,
-            _dynamicOffset + value.length,
-            value,
-          );
-          _dynamicOffset += value.length;
+          final byteCount = encodeString(value, _buffer, _dynamicOffset);
+          _writeUint24(offsetListOffset + i * 3, byteCount + 1);
+          _dynamicOffset += byteCount;
         } else {
           _writeUint24(offsetListOffset + i * 3, 0);
         }
       }
     }
-  }
-
-  void validate() {
-    assert(_dynamicOffset == _buffer.length,
-        'Invalid write buffer size. $_dynamicOffset != ${_buffer.length}');
   }
 }

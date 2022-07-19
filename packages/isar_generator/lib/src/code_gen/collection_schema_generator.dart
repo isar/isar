@@ -41,12 +41,13 @@ String generateCollectionSchema(ObjectInfo object) {
       indexValueTypes: {$indexValueTypes},
       linkIds: {$linkIds},
       backlinkLinkNames: {$backlinkLinkNames},
+      dependencies: [],
 
       getId: ${object.getIdName},
-      ${object.idProperty.assignable ? 'setId: ${object.setIdName},' : ''}
       getLinks: ${object.getLinksName},
-      attachLinks: ${object.attachLinksName},
+      attach: ${object.attachName},
 
+      estimateSize: ${object.estimateSize},
       serializeNative: ${object.serializeNativeName},
       deserializeNative: ${object.deserializeNativeName},
       deserializePropNative: ${object.deserializePropNativeName},
@@ -59,8 +60,8 @@ String generateCollectionSchema(ObjectInfo object) {
     );
     
     ${_generateGetId(object)}
-    ${_generateSetId(object)}
     ${_generateGetLinks(object)}
+    ${_generateAttach(object)}
     ''';
 }
 
@@ -116,24 +117,32 @@ String _generateGetId(ObjectInfo object) {
   ''';
 }
 
-String _generateSetId(ObjectInfo object) {
-  if (!object.idProperty.assignable) {
-    return '';
-  }
-
-  return '''
-    void ${object.setIdName}(${object.dartName} object, int id) {
-      object.${object.idProperty.dartName} = id;
-    }
-  ''';
-}
-
 String _generateGetLinks(ObjectInfo object) {
   return '''
     List<IsarLinkBase<dynamic>> ${object.getLinksName}(${object.dartName} object) {
       return [${object.links.map((e) => 'object.${e.dartName}').join(',')}];
     }
   ''';
+}
+
+String _generateAttach(ObjectInfo object) {
+  var code = '''
+  void ${object.attachName}(IsarCollection<dynamic> col, Id id, ${object.dartName} object) {''';
+
+  if (object.idProperty.assignable) {
+    code += 'object.${object.idProperty.dartName} = id;';
+  }
+
+  for (final link in object.links) {
+    // ignore: leading_newlines_in_multiline_strings
+    code += '''object.${link.dartName}.attach(
+      col,
+      col.isar.${link.targetCollectionAccessor},
+      r'${link.isarName}',
+      id
+    );''';
+  }
+  return '$code}';
 }
 
 extension on IndexType {

@@ -7,6 +7,7 @@ import 'package:isar/isar.dart';
 import 'package:source_gen/source_gen.dart';
 
 const TypeChecker _collectionChecker = TypeChecker.fromRuntime(Collection);
+const TypeChecker _embeddedChecker = TypeChecker.fromRuntime(Embedded);
 const TypeChecker _ignoreChecker = TypeChecker.fromRuntime(Ignore);
 const TypeChecker _nameChecker = TypeChecker.fromRuntime(Name);
 const TypeChecker _indexChecker = TypeChecker.fromRuntime(Index);
@@ -44,6 +45,10 @@ extension ClassElementX on ClassElement {
 }
 
 extension PropertyElementX on PropertyInducingElement {
+  bool get isLink => type.element!.name == 'IsarLink';
+
+  bool get isLinks => type.element!.name == 'IsarLinks';
+
   ClassElement? get typeConverter {
     Element? element = this;
     while (element != null) {
@@ -166,6 +171,16 @@ extension ElementX on Element {
     }
 
     return accessor;
+  }
+
+  Embedded? get embeddedAnnotation {
+    final ann = _embeddedChecker.firstAnnotationOfExact(nonSynthetic);
+    if (ann == null) {
+      return null;
+    }
+    return Embedded(
+      inheritance: ann.getField('inheritance')!.toBoolValue()!,
+    );
   }
 }
 

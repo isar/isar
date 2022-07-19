@@ -17,6 +17,7 @@ export 'src/native/isar_native.dart'
 
 part 'src/annotations/backlink.dart';
 part 'src/annotations/collection.dart';
+part 'src/annotations/embedded.dart';
 part 'src/annotations/ignore.dart';
 part 'src/annotations/index.dart';
 part 'src/annotations/name.dart';

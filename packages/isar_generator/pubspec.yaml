@@ -23,3 +23,6 @@ dev_dependencies:
   test: ^1.21.0
   very_good_analysis: ^3.0.1
 
+dependency_overrides:
+  isar: 
+    path: ../isar

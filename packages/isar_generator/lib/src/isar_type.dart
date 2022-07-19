@@ -15,6 +15,7 @@ enum IsarType {
   double,
   dateTime,
   string,
+  object,
   boolList,
   byteList,
   intList,
@@ -23,6 +24,7 @@ enum IsarType {
   doubleList,
   dateTimeList,
   stringList,
+  objectList,
 }
 
 extension IsarTypeX on IsarType {
@@ -90,6 +92,34 @@ extension IsarTypeX on IsarType {
         return IsarType.dateTime;
       case IsarType.stringList:
         return IsarType.string;
+      case IsarType.objectList:
+        return IsarType.object;
+      // ignore: no_default_cases
+      default:
+        return this;
+    }
+  }
+
+  IsarType get listType {
+    switch (this) {
+      case IsarType.bool:
+        return IsarType.boolList;
+      case IsarType.byte:
+        return IsarType.byteList;
+      case IsarType.int:
+        return IsarType.intList;
+      case IsarType.float:
+        return IsarType.floatList;
+      case IsarType.long:
+        return IsarType.longList;
+      case IsarType.double:
+        return IsarType.doubleList;
+      case IsarType.dateTime:
+        return IsarType.dateTimeList;
+      case IsarType.string:
+        return IsarType.stringList;
+      case IsarType.object:
+        return IsarType.objectList;
       // ignore: no_default_cases
       default:
         return this;
@@ -115,6 +145,8 @@ extension IsarTypeX on IsarType {
         return 'Double';
       case IsarType.string:
         return 'String';
+      case IsarType.object:
+        return 'Object';
       case IsarType.boolList:
         return 'BoolList';
       case IsarType.byteList:
@@ -130,6 +162,8 @@ extension IsarTypeX on IsarType {
         return 'DoubleList';
       case IsarType.stringList:
         return 'StringList';
+      case IsarType.objectList:
+        return 'ObjectList';
     }
   }
 
@@ -167,6 +201,7 @@ extension IsarTypeX on IsarType {
       case IsarType.stringList:
         return 'List<String$nEQ>$nQ';
     }
+    throw '';
   }
 }
 
@@ -176,7 +211,7 @@ bool _isDateTime(Element element) => _dateTimeChecker.isExactly(element);
 const TypeChecker _uint8ListChecker = TypeChecker.fromRuntime(Uint8List);
 bool _isUint8List(Element element) => _uint8ListChecker.isExactly(element);
 
-IsarType? getIsarType(DartType type, Element element) {
+IsarType? _getPrimitiveIsarType(DartType type) {
   if (type.isDartCoreBool) {
     return IsarType.bool;
   } else if (type.isDartCoreInt) {
@@ -197,39 +232,34 @@ IsarType? getIsarType(DartType type, Element element) {
     }
   } else if (type.isDartCoreString) {
     return IsarType.string;
-  } else if (_isUint8List(type.element!)) {
+  } else if (_isDateTime(type.element!)) {
+    return IsarType.dateTime;
+  }
+
+  return null;
+}
+
+IsarType? getIsarType(DartType type, Element element) {
+  final primitiveType = _getPrimitiveIsarType(type);
+  if (primitiveType != null) {
+    return primitiveType;
+  }
+
+  if (_isUint8List(type.element!)) {
     return IsarType.byteList;
   } else if (type.isDartCoreList) {
     final parameterizedType = type as ParameterizedType;
     final typeArguments = parameterizedType.typeArguments;
     if (typeArguments.isNotEmpty) {
       final listType = typeArguments[0];
-      if (listType.isDartCoreBool) {
-        return IsarType.boolList;
-      } else if (listType.isDartCoreInt) {
-        if (type.alias?.element.name == 'Id') {
-          err('Id lists are not supported.', element);
-        } else if (listType.alias?.element.name == 'byte') {
-          return IsarType.byteList;
-        } else if (listType.alias?.element.name == 'short') {
-          return IsarType.intList;
-        } else {
-          return IsarType.longList;
-        }
-      } else if (listType.isDartCoreDouble) {
-        if (listType.alias?.element.name == 'float') {
-          return IsarType.floatList;
-        } else {
-          return IsarType.doubleList;
-        }
-      } else if (listType.isDartCoreString) {
-        return IsarType.stringList;
-      } else if (_isDateTime(listType.element!)) {
-        return IsarType.dateTimeList;
+      final primitiveType = _getPrimitiveIsarType(listType);
+      if (primitiveType == IsarType.id) {
+        err('Id lists are not supported.', element);
+      } else {
+        return primitiveType?.listType;
       }
     }
-  } else if (_isDateTime(type.element!)) {
-    return IsarType.dateTime;
   }
+
   return null;
 }

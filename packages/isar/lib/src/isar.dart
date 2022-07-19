@@ -66,10 +66,21 @@ abstract class Isar {
     if (schemas.isEmpty) {
       throw IsarError('At least one collection needs to be opened.');
     }
-    for (var i = 0; i < schemas.length; i++) {
-      final schema = schemas[i];
-      if (schemas.indexWhere((e) => e.name == schema.name) != i) {
+
+    final schemaNames = <String>{};
+    for (final schema in schemas) {
+      if (!schemaNames.add(schema.name)) {
         throw IsarError('Duplicate collection ${schema.name}.');
+      }
+    }
+    for (final schema in schemas) {
+      for (final dependency in schema.dependencies) {
+        if (schemaNames.contains(dependency)) {
+          throw IsarError(
+            "Collection ${schema.name} depends on $dependency but it's schema "
+            'was not provided.',
+          );
+        }
       }
     }
     schemas.sort((a, b) => a.name.compareTo(b.name));

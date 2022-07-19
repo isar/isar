@@ -14,10 +14,13 @@ import 'package:isar/src/native/isar_core.dart';
 const Symbol _zoneTxn = #zoneTxn;
 
 class IsarImpl extends Isar implements Finalizable {
-  IsarImpl(super.name, super.schema, this.ptr) {
+  IsarImpl(super.name, super.schema, this.offsets, this.ptr) {
     _finalizer = NativeFinalizer(isarClose);
     _finalizer.attach(this, ptr.cast(), detach: this);
   }
+
+  final Map<Type, List<int>> offsets;
+
   final Pointer<CIsarInstance> ptr;
   late final NativeFinalizer _finalizer;
 
@@ -259,8 +262,9 @@ class SyncTxn {
 
   Pointer<Uint8> allocBuffer(int size) {
     if (_bufferLen < size) {
-      _buffer = alloc(size);
-      _bufferLen = size;
+      final allocSize = (size * 1.3).toInt();
+      _buffer = alloc(allocSize);
+      _bufferLen = allocSize;
     }
     return _buffer;
   }

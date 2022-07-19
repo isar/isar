@@ -10,6 +10,7 @@ import 'package:ffi/ffi.dart';
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/native/binary_reader.dart';
+import 'package:isar/src/native/binary_writer.dart';
 import 'package:isar/src/native/bindings.dart';
 import 'package:isar/src/native/index_key.dart';
 import 'package:isar/src/native/isar_core.dart';
@@ -21,17 +22,16 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     required this.isar,
     required this.ptr,
     required this.schema,
-    required int staticSize,
-    required List<int> offsets,
-  })  : _staticSize = staticSize,
-        _offsets = offsets;
+  });
+
   @override
   final IsarImpl isar;
   final Pointer<CIsarCollection> ptr;
 
   final CollectionSchema<OBJ> schema;
-  final int _staticSize;
-  final List<int> _offsets;
+
+  late final _offsets = isar.offsets[OBJ]!;
+  late final _staticSize = _offsets[0];
 
   @override
   String get name => schema.name;
@@ -225,14 +225,18 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     final cObjPtr = txn.allocCObject();
     final cObj = cObjPtr.ref;
 
-    schema.serializeNative(
-      this,
-      cObj,
+    final estimatedSize = schema.estimateSize(object, _offsets, isar.offsets);
+    cObj.buffer = txn.allocBuffer(estimatedSize);
+    final buffer = cObj.buffer.asTypedList(estimatedSize);
+
+    final writer = BinaryWriter(buffer, _staticSize);
+    cObj.buffer_length = schema.serializeNative(
       object,
-      _staticSize,
+      writer,
       _offsets,
-      txn.allocBuffer,
+      isar.offsets,
     );
+
     cObj.id = schema.getId(object) ?? Isar.autoIncrement;
 
     if (indexId != null) {
@@ -242,14 +246,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     }
 
     final id = cObj.id;
-    schema.setId?.call(object, id);
+    schema.attach(this, id, object);
 
-    if (schema.hasLinks) {
-      schema.attachLinks(this, id, object);
-      if (saveLinks) {
-        for (final link in schema.getLinks(object)) {
-          link.saveSync();
-        }
+    if (schema.hasLinks && saveLinks) {
+      for (final link in schema.getLinks(object)) {
+        link.saveSync();
       }
     }
 
@@ -278,14 +279,14 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       for (var i = 0; i < objects.length; i++) {
         final object = objects[i];
         final cObj = objectsPtr.elementAt(i).ref;
-        schema.serializeNative(
+        /*schema.serializeNative(
           this,
           cObj,
           object,
           _staticSize,
           _offsets,
           allocBuf,
-        );
+        );*/
         cObj.id = schema.getId(object) ?? Isar.autoIncrement;
       }
       if (indexId != null) {
@@ -303,8 +304,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         ids[i] = id;
 
         final object = objects[i];
-        schema.setId?.call(object, id);
-        schema.attachLinks(this, id, object);
+        schema.attach(this, id, object);
       }
       return ids;
     });

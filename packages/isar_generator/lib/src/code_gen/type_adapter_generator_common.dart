@@ -32,19 +32,3 @@ String deserializeMethodBody(
 
   return code;
 }
-
-String generateAttachLinks(ObjectInfo object) {
-  var code = '''
-  void ${object.attachLinksName}(IsarCollection<dynamic> col, int id, ${object.dartName} object) {''';
-
-  for (final link in object.links) {
-    // ignore: leading_newlines_in_multiline_strings
-    code += '''object.${link.dartName}.attach(
-      col,
-      col.isar.${link.targetCollectionAccessor},
-      r'${link.isarName}',
-      id
-    );''';
-  }
-  return '$code}';
-}

@@ -95,8 +95,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       for (var i = 0; i < objects.length; i++) {
         final object = objects[i];
         final id = ids[i] as int;
-        schema.setId?.call(object, id);
-        schema.attachLinks(this, id, object);
+        schema.attach(this, id, object);
       }
 
       return ids.cast<int>().toList();
