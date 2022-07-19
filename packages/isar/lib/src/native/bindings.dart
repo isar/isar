@@ -1183,15 +1183,21 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.Pointer<CIsarInstance>> isar,
     ffi.Pointer<ffi.Char> name,
     ffi.Pointer<ffi.Char> path,
-    bool relaxed_durability,
     ffi.Pointer<ffi.Char> schema_json,
+    bool relaxed_durability,
+    int compact_min_file_size,
+    int compact_min_bytes,
+    double compact_min_ratio,
   ) {
     return _isar_instance_create(
       isar,
       name,
       path,
-      relaxed_durability,
       schema_json,
+      relaxed_durability,
+      compact_min_file_size,
+      compact_min_bytes,
+      compact_min_ratio,
     );
   }
 
@@ -1201,30 +1207,42 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<CIsarInstance>>,
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
+              ffi.Pointer<ffi.Char>,
               ffi.Bool,
-              ffi.Pointer<ffi.Char>)>>('isar_instance_create');
+              ffi.Uint32,
+              ffi.Uint32,
+              ffi.Double)>>('isar_instance_create');
   late final _isar_instance_create = _isar_instance_createPtr.asFunction<
       int Function(
           ffi.Pointer<ffi.Pointer<CIsarInstance>>,
           ffi.Pointer<ffi.Char>,
           ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>,
           bool,
-          ffi.Pointer<ffi.Char>)>();
+          int,
+          int,
+          double)>();
 
   void isar_instance_create_async(
     ffi.Pointer<ffi.Pointer<CIsarInstance>> isar,
     ffi.Pointer<ffi.Char> name,
     ffi.Pointer<ffi.Char> path,
-    bool relaxed_durability,
     ffi.Pointer<ffi.Char> schema_json,
+    bool relaxed_durability,
+    int compact_min_file_size,
+    int compact_min_bytes,
+    double compact_min_ratio,
     int port,
   ) {
     return _isar_instance_create_async(
       isar,
       name,
       path,
-      relaxed_durability,
       schema_json,
+      relaxed_durability,
+      compact_min_file_size,
+      compact_min_bytes,
+      compact_min_ratio,
       port,
     );
   }
@@ -1235,8 +1253,11 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<CIsarInstance>>,
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
-              ffi.Bool,
               ffi.Pointer<ffi.Char>,
+              ffi.Bool,
+              ffi.Uint32,
+              ffi.Uint32,
+              ffi.Double,
               DartPort)>>('isar_instance_create_async');
   late final _isar_instance_create_async =
       _isar_instance_create_asyncPtr.asFunction<
@@ -1244,8 +1265,11 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<CIsarInstance>>,
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
-              bool,
               ffi.Pointer<ffi.Char>,
+              bool,
+              int,
+              int,
+              double,
               int)>();
 
   bool isar_instance_close(
@@ -1342,6 +1366,27 @@ class IsarCoreBindings {
   late final _isar_instance_get_size = _isar_instance_get_sizePtr.asFunction<
       int Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>, bool,
           bool, ffi.Pointer<ffi.Int64>)>();
+
+  void isar_instance_copy_to_file(
+    ffi.Pointer<CIsarInstance> instance,
+    ffi.Pointer<ffi.Char> path,
+    int port,
+  ) {
+    return _isar_instance_copy_to_file(
+      instance,
+      path,
+      port,
+    );
+  }
+
+  late final _isar_instance_copy_to_filePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<ffi.Char>,
+              DartPort)>>('isar_instance_copy_to_file');
+  late final _isar_instance_copy_to_file =
+      _isar_instance_copy_to_filePtr.asFunction<
+          void Function(
+              ffi.Pointer<CIsarInstance>, ffi.Pointer<ffi.Char>, int)>();
 
   int isar_get_offsets(
     ffi.Pointer<CIsarCollection> collection,
@@ -2022,14 +2067,16 @@ class CWatchHandle extends ffi.Opaque {}
 
 const int IsarIndex_MAX_STRING_INDEX_SIZE = 1024;
 
-const int IsarObject_NULL_BYTE = 0;
+const int LegacyIsarObject_NULL_BYTE = 0;
+
+const int LegacyIsarObject_TRUE_BYTE = 2;
+
+const int LegacyIsarObject_NULL_INT = -2147483648;
+
+const int LegacyIsarObject_NULL_LONG = -9223372036854775808;
 
 const int IsarObject_NULL_BOOL = 0;
 
 const int IsarObject_FALSE_BOOL = 1;
 
 const int IsarObject_TRUE_BOOL = 2;
-
-const int IsarObject_NULL_INT = -2147483648;
-
-const int IsarObject_NULL_LONG = -9223372036854775808;
