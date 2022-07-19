@@ -56,7 +56,7 @@ String _prepareSerializeList(
 String generateEstimateSerializeNative(ObjectInfo object) {
   var code = '''
     int ${object.estimateSize}(${object.dartName} object, List<int> offsets, Map<Type, List<int>> allOffsets) {
-      var bytesCount = offsets[0];''';
+      var bytesCount = offsets.last;''';
 
   for (final property in object.properties) {
     var value = 'object.${property.dartName}';
@@ -144,52 +144,52 @@ String generateSerializeNative(ObjectInfo object) {
       case IsarType.id:
         throw UnimplementedError();
       case IsarType.bool:
-        code += 'writer.writeBool(offsets[${i + 1}], $value);';
+        code += 'writer.writeBool(offsets[$i], $value);';
         break;
       case IsarType.byte:
-        code += 'writer.writeByte(offsets[${i + 1}], $value);';
+        code += 'writer.writeByte(offsets[$i], $value);';
         break;
       case IsarType.int:
-        code += 'writer.writeInt(offsets[${i + 1}], $value);';
+        code += 'writer.writeInt(offsets[$i], $value);';
         break;
       case IsarType.float:
-        code += 'writer.writeFloat(offsets[${i + 1}], $value);';
+        code += 'writer.writeFloat(offsets[$i], $value);';
         break;
       case IsarType.long:
-        code += 'writer.writeLong(offsets[${i + 1}], $value);';
+        code += 'writer.writeLong(offsets[$i], $value);';
         break;
       case IsarType.double:
-        code += 'writer.writeDouble(offsets[${i + 1}], $value);';
+        code += 'writer.writeDouble(offsets[$i], $value);';
         break;
       case IsarType.dateTime:
-        code += 'writer.writeDateTime(offsets[${i + 1}], $value);';
+        code += 'writer.writeDateTime(offsets[$i], $value);';
         break;
       case IsarType.string:
-        code += 'writer.writeString(offsets[${i + 1}], $value);';
+        code += 'writer.writeString(offsets[$i], $value);';
         break;
       case IsarType.byteList:
-        code += 'writer.writeByteList(offsets[${i + 1}], $value);';
+        code += 'writer.writeByteList(offsets[$i], $value);';
         break;
       case IsarType.boolList:
-        code += 'writer.writeBoolList(offsets[${i + 1}], $value);';
+        code += 'writer.writeBoolList(offsets[$i], $value);';
         break;
       case IsarType.intList:
-        code += 'writer.writeIntList(offsets[${i + 1}], $value);';
+        code += 'writer.writeIntList(offsets[$i], $value);';
         break;
       case IsarType.longList:
-        code += 'writer.writeLongList(offsets[${i + 1}], $value);';
+        code += 'writer.writeLongList(offsets[$i], $value);';
         break;
       case IsarType.floatList:
-        code += 'writer.writeFloatList(offsets[${i + 1}], $value);';
+        code += 'writer.writeFloatList(offsets[$i], $value);';
         break;
       case IsarType.doubleList:
-        code += 'writer.writeDoubleList(offsets[${i + 1}], $value);';
+        code += 'writer.writeDoubleList(offsets[$i], $value);';
         break;
       case IsarType.dateTimeList:
-        code += 'writer.writeDateTimeList(offsets[${i + 1}], $value);';
+        code += 'writer.writeDateTimeList(offsets[$i], $value);';
         break;
       case IsarType.stringList:
-        code += 'writer.writeStringList(offsets[${i + 1}], $value);';
+        code += 'writer.writeStringList(offsets[$i], $value);';
         break;
     }
   }
