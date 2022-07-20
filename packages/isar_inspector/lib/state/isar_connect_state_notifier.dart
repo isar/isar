@@ -181,6 +181,14 @@ class IsarConnectStateNotifier
     );
   }
 
+  Future<void> addInList(ConnectEdit edit) async {
+    await _call<dynamic>(
+      ConnectAction.addInList,
+      args: edit.toJson(),
+      timeout: kLongTimeout,
+    );
+  }
+
   Future<void> disconnect() async {
     await state.value?.vmService.dispose();
   }

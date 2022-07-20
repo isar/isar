@@ -12,7 +12,8 @@ enum ConnectAction {
   removeQuery('ext.isar.removeQuery'),
   exportQuery('ext.isar.exportQuery'),
   exportJson('ext.isar.exportJson'),
-  editProperty('ext.isar.editProperty');
+  editProperty('ext.isar.editProperty'),
+  addInList('ext.isar.addInList');
 
   const ConnectAction(this.method);
 
@@ -56,6 +57,7 @@ class ConnectQuery {
           : null,
     );
   }
+
   final String instance;
   final String collection;
   final FilterOperation? filter;

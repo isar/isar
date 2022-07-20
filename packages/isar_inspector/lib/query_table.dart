@@ -23,6 +23,7 @@ typedef Editor = void Function(
   String property,
   int? index,
   dynamic value,
+  bool editing,
 );
 
 class QueryTable extends ConsumerWidget {
@@ -55,7 +56,7 @@ class QueryTable extends ConsumerWidget {
                     ),
                     collection: collection,
                     object: objects[index],
-                    editor: (id, property, index, value) {
+                    editor: (id, property, index, value, editing) {
                       final edit = ConnectEdit(
                         instance: ref.read(selectedInstancePod).value!,
                         collection: collection.name,
@@ -64,7 +65,12 @@ class QueryTable extends ConsumerWidget {
                         index: index,
                         value: value,
                       );
-                      ref.read(isarConnectPod.notifier).editProperty(edit);
+
+                      if (editing) {
+                        ref.read(isarConnectPod.notifier).editProperty(edit);
+                      } else {
+                        ref.read(isarConnectPod.notifier).addInList(edit);
+                      }
                     },
                   ),
                   Align(
@@ -274,14 +280,62 @@ class _TableItemState extends State<TableItem> {
                       !widget.data.property.type.isList)
                     PopupMenuItem<dynamic>(
                       onTap: () {
-                        WidgetsBinding.instance
-                            .addPostFrameCallback((_) => _edit());
+                        WidgetsBinding.instance.addPostFrameCallback(
+                          (_) => _edit(),
+                        );
                       },
-                      child: const PopUpMenuRow(
-                        icon: Icon(Icons.edit, size: PopUpMenuRow.iconSize),
-                        text: 'Edit item',
+                      child: PopUpMenuRow(
+                        icon: const Icon(
+                          Icons.edit,
+                          size: PopUpMenuRow.iconSize,
+                        ),
+                        text: widget.data.index != null
+                            ? 'Edit item ${widget.data.index!}'
+                            : 'Edit property',
                       ),
                     ),
+                  if (widget.data.property.type.isList &&
+                      widget.data.value != null)
+                    PopupMenuItem<dynamic>(
+                      onTap: () {
+                        WidgetsBinding.instance
+                            .addPostFrameCallback((_) => _addInList(null));
+                      },
+                      child: const PopUpMenuRow(
+                        icon: Icon(Icons.add, size: PopUpMenuRow.iconSize),
+                        text: 'Add item',
+                      ),
+                    ),
+                  if (widget.data.index != null) ...[
+                    PopupMenuItem<dynamic>(
+                      onTap: () {
+                        WidgetsBinding.instance.addPostFrameCallback(
+                          (_) => _addInList(widget.data.index),
+                        );
+                      },
+                      child: PopUpMenuRow(
+                        icon: const Icon(
+                          Icons.add,
+                          size: PopUpMenuRow.iconSize,
+                        ),
+                        text: 'Add item before ${widget.data.index!}',
+                      ),
+                    ),
+                    PopupMenuItem<dynamic>(
+                      onTap: () {
+                        WidgetsBinding.instance.addPostFrameCallback(
+                          (_) => _addInList(widget.data.index! + 1),
+                        );
+                      },
+                      child: PopUpMenuRow(
+                        icon: const Icon(
+                          Icons.add,
+                          size: PopUpMenuRow.iconSize,
+                        ),
+                        text: 'Add item after ${widget.data.index!}',
+                      ),
+                    ),
+                  ],
                   if (widget.data.property.type.isList)
                     PopupMenuItem<dynamic>(
                       onTap: () => _setValue(<dynamic>[]),
@@ -324,6 +378,32 @@ class _TableItemState extends State<TableItem> {
     }
   }
 
+  Future<void> _addInList(int? index) async {
+    final result = await showDialog<Map<String, dynamic>?>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: EditPopup(
+            type: widget.data.property.type.isList
+                ? widget.data.property.type.childType
+                : widget.data.property.type,
+            value: null,
+          ),
+        );
+      },
+    );
+
+    if (result != null) {
+      widget.editor(
+        widget.objectId,
+        widget.data.property.name,
+        index,
+        result['value'],
+        false,
+      );
+    }
+  }
+
   Future<void> _copy() async {
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
@@ -356,6 +436,7 @@ class _TableItemState extends State<TableItem> {
       widget.data.property.name,
       widget.data.index,
       value,
+      true,
     );
   }
 
