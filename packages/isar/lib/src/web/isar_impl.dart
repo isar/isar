@@ -16,7 +16,7 @@ class IsarImpl extends Isar {
   final List<Future<void>> _activeAsyncTxns = [];
 
   @override
-  final String? path = null;
+  final String? directory = null;
 
   void requireNotInTxn() {
     if (Zone.current[_zoneTxn] != null) {

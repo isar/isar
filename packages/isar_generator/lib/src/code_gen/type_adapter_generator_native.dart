@@ -61,7 +61,7 @@ String generateEstimateSerializeNative(ObjectInfo object) {
 
   for (final property in object.properties) {
     var value = 'object.${property.dartName}';
-    if (property.converter != null) {
+    if (property.converter != null && property.isarType.isDynamic) {
       final convertedValue = '${property.dartName}\$Converted';
       code += 'final $convertedValue = ${property.toIsar(value, object)};';
       value = convertedValue;
@@ -81,7 +81,7 @@ String generateEstimateSerializeNative(ObjectInfo object) {
           property.nullable,
           property.elementNullable,
           value,
-          'value.length',
+          'value.length * 3',
         );
         break;
 

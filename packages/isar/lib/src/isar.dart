@@ -44,12 +44,12 @@ abstract class Isar {
   /// Name of the instance.
   final String name;
 
-  /// The path of the directory containing the database file or `null` on the
-  /// web.
-  ///
+  /// The directory containing the database file or `null` on the web.
+  String? get directory;
+
   /// The full path of the database file is `path/name.isar` and the lockfile
   /// `path/name.isar.lock`.
-  String? get path;
+  String? get path => directory != null ? '$directory/$name.isar' : null;
 
   late final Map<Type, IsarCollection<dynamic>> _collections;
   late final Map<String, IsarCollection<dynamic>> _collectionsByName;

@@ -85,7 +85,7 @@ void isarTest(
   }
 
   if (!syncOnly) {
-    //runTest(false);
+    runTest(false);
   }
 
   if (!kIsWeb) {

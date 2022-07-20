@@ -133,6 +133,18 @@ extension PropertyElementX on PropertyInducingElement {
       );
     }).toList();
   }
+
+  bool get shouldIgnore {
+    if (!isPublic || isStatic) return true;
+    if (_ignoreChecker.hasAnnotationOf(nonSynthetic)) return true;
+
+    /*final jsonKey = nonSynthetic.metadata.firstOrNullWhere(
+      (e) => e.computeConstantValue()?.type?.element?.name == 'JsonKey',
+    )?.computeConstantValue();
+
+    if (jsonKey != nu)*/
+    return false;
+  }
 }
 
 extension ElementX on Element {

@@ -3,7 +3,6 @@
 
 import 'dart:typed_data';
 
-import 'package:isar/isar.dart';
 import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_core.dart';
 import 'package:meta/meta.dart';
@@ -15,13 +14,7 @@ class BinaryWriter {
       : _staticSize = staticSize,
         _dynamicOffset = staticSize,
         _buffer = buffer,
-        _byteData = ByteData.sublistView(buffer) {
-    if (buffer.length >= maxObjectSize) {
-      throw IsarError(
-        'The object exceeds the maximum size of $maxObjectSize bytes.',
-      );
-    }
-  }
+        _byteData = ByteData.view(buffer.buffer, buffer.offsetInBytes);
 
   static const maxObjectSize = 1 << 24;
 

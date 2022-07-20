@@ -276,20 +276,35 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       final cObjSetPtr = txn.allocCObjectSet(objects.length);
       final objectsPtr = cObjSetPtr.ref.objects;
 
-      Pointer<Uint8> allocBuf(int size) => txn.alloc<Uint8>(size);
+      var maxBufferSize = 0;
       for (var i = 0; i < objects.length; i++) {
         final object = objects[i];
-        final cObj = objectsPtr.elementAt(i).ref;
-        /*schema.serializeNative(
-          this,
-          cObj,
-          object,
-          _staticSize,
-          _offsets,
-          allocBuf,
-        );*/
-        cObj.id = schema.getId(object) ?? Isar.autoIncrement;
+        maxBufferSize += schema.estimateSize(object, _offsets, isar.offsets);
       }
+      final bufferPtr = txn.alloc<Uint8>(maxBufferSize);
+      final buffer = bufferPtr.asTypedList(maxBufferSize).buffer;
+
+      var writtenBytes = 0;
+      for (var i = 0; i < objects.length; i++) {
+        final objBuffer = buffer.asUint8List(writtenBytes);
+        final binaryWriter = BinaryWriter(objBuffer, _staticSize);
+
+        final object = objects[i];
+        final size = schema.serializeNative(
+          object,
+          binaryWriter,
+          _offsets,
+          isar.offsets,
+        );
+
+        final cObj = objectsPtr.elementAt(i).ref;
+        cObj.id = schema.getId(object) ?? Isar.autoIncrement;
+        cObj.buffer = bufferPtr.elementAt(writtenBytes);
+        cObj.buffer_length = size;
+
+        writtenBytes += size;
+      }
+
       if (indexId != null) {
         IC.isar_put_all_by_index(ptr, txn.ptr, indexId, cObjSetPtr);
       } else {

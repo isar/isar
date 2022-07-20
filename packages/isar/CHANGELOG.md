@@ -1,3 +1,17 @@
+## 3.0.0-dev.9
+
+### Enhancements
+
+- Improved `put()` performance by about 50% (yes, that is insane)
+- Added `compactOnLaunch` conditions to `Isar.open()` for automatic database compaction
+- Added `isar.copyToFile()` which copies a compacted version of the database to a path
+- Added `isar.path` to get the full path of the database file
+- Added check to verify that linked collections schemas are provided for opening an instance
+
+### Breaking
+
+- Renamed `isar.path` to `isar.directory`
+
 ## 3.0.0-dev.8
 
 ### Enhancements

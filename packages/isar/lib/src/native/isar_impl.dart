@@ -30,16 +30,22 @@ class IsarImpl extends Isar implements Finalizable {
   final Pointer<Pointer<CIsarTxn>> _syncTxnPtrPtr = malloc<Pointer<CIsarTxn>>();
   SyncTxn? _currentTxnSync;
 
+  String? _directory;
+
   @override
-  String get path {
+  String get directory {
     requireOpen();
 
-    final path = IC.isar_instance_get_path(ptr);
-    try {
-      return path.cast<Utf8>().toDartString();
-    } finally {
-      IC.isar_free_string(path);
+    if (_directory == null) {
+      final dirPtr = IC.isar_instance_get_path(ptr);
+      try {
+        _directory = dirPtr.cast<Utf8>().toDartString();
+      } finally {
+        IC.isar_free_string(dirPtr);
+      }
     }
+
+    return _directory!;
   }
 
   void requireNotInTxn() {

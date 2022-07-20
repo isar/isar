@@ -1,8 +1,6 @@
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:ffi/ffi.dart';
-
 const int _oneByteLimit = 0x7f; // 7 bits
 const int _twoByteLimit = 0x7ff; // 11 bits
 const int _surrogateTagMask = 0xFC00;
@@ -50,7 +48,7 @@ extension CString on String {
     final bufferPtr = alloc<Uint8>(length * 3 + 1);
     final buffer = bufferPtr.asTypedList(length * 3 + 1);
     final size = encodeString(this, buffer, 0);
-    buffer[size + 1] = 0;
+    buffer[size] = 0;
     return bufferPtr.cast();
   }
 }
