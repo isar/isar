@@ -97,6 +97,7 @@ String _generateSchema(ObjectInfo object) {
           {
             'name': link.isarName,
             'target': link.targetCollectionIsarName,
+            'single': !link.links, // property is only used by the inspector
           }
       ]
     ]
