@@ -9,7 +9,7 @@ final collectionsPod = FutureProvider((ref) async {
   final isarConnect = ref.watch(isarConnectPod.notifier);
   final schema = await isarConnect.getSchema();
   return schema
-      .map((e) => ICollection.fromJson(e as Map<String, dynamic>))
+      .map((e) => ICollection.fromJson(e as Map<String, dynamic>, schema))
       .toList();
 });
 

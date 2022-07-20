@@ -21,7 +21,7 @@ abstract class _IsarConnect {
   static bool _initialized = false;
 
   // ignore: cancel_subscriptions
-  static StreamSubscription<void>? _querySubscription;
+  static final _querySubscription = <StreamSubscription<void>>[];
   static final List<StreamSubscription<void>> _collectionSubscriptions =
       <StreamSubscription<void>>[];
 
@@ -142,35 +142,90 @@ abstract class _IsarConnect {
   static Future<Map<String, dynamic>> _executeQuery(
     Map<String, dynamic> params,
   ) async {
-    if (_querySubscription != null) {
-      unawaited(_querySubscription!.cancel());
+    if (_querySubscription.isNotEmpty) {
+      for (final sub in _querySubscription) {
+        unawaited(sub.cancel());
+      }
+      _querySubscription.clear();
     }
-    _querySubscription = null;
 
-    final query = _getQuery(params);
+    void listener(event) {
+      postEvent(ConnectEvent.queryChanged.event, {});
+    }
+
+    final cQuery = ConnectQuery.fromJson(params);
+    final schema = jsonDecode(Isar.schema!) as List<dynamic>;
+
+    //ignore: avoid_dynamic_calls
+    final links = schema.firstWhere(
+      //ignore: avoid_dynamic_calls
+      (e) => e['name'] as String == cQuery.collection,
+    )['links'] as List<dynamic>;
+
+    final query = _getQuery(cQuery);
     params.remove('limit');
     params.remove('offset');
-    final countQuery = _getQuery(params);
+    final countQuery = _getQuery(cQuery);
 
     final stream = query.watchLazy();
-    _querySubscription = stream.listen((event) {
-      postEvent(ConnectEvent.queryChanged.event, {});
-    });
+    _querySubscription.add(stream.listen(listener));
+
+    final results = await query.exportJson();
+
+    if (links.isNotEmpty) {
+      final source = Isar.getInstance(cQuery.instance)!
+          .getCollectionByNameInternal(cQuery.collection)!;
+      for (var index = 0; index < results.length; index++) {
+        for (final link in links) {
+          final target = Isar.getInstance(cQuery.instance)!
+              //ignore: avoid_dynamic_calls
+              .getCollectionByNameInternal(link['target'] as String)!;
+
+          _querySubscription.add(target.watchLazy().listen(listener));
+
+          final qb = QueryBuilderInternal<dynamic>(
+            collection: target,
+            whereClauses: [
+              LinkWhereClause(
+                linkCollection: source.name,
+                //ignore: avoid_dynamic_calls
+                linkName: link['name'] as String,
+                id: results[index][source.idName] as int,
+              ),
+            ],
+          );
+
+          final q = QueryBuilder<dynamic, dynamic, QAfterFilterCondition>(qb);
+
+          //ignore: avoid_dynamic_calls
+          if (link['single'] as bool) {
+            //ignore: avoid_dynamic_calls
+            results[index][link['name'] as String] =
+                await q.findFirst() == null ? null : (await q.exportJson())[0];
+          } else {
+            //ignore: avoid_dynamic_calls
+            results[index][link['name'] as String] =
+                await QueryBuilder<dynamic, dynamic, QAfterFilterCondition>(qb)
+                    .exportJson();
+          }
+        }
+      }
+    }
 
     return {
-      'results': await query.exportJson(),
+      'results': results,
       'count': await countQuery.count(),
     };
   }
 
   static Future<bool> _removeQuery(Map<String, dynamic> params) async {
-    final query = _getQuery(params);
+    final query = _getQuery(ConnectQuery.fromJson(params));
     await query.isar.writeTxn(query.deleteAll);
     return true;
   }
 
   static Future<List<dynamic>> _exportJson(Map<String, dynamic> params) async {
-    final query = _getQuery(params);
+    final query = _getQuery(ConnectQuery.fromJson(params));
     return query.exportJson();
   }
 
@@ -225,8 +280,7 @@ abstract class _IsarConnect {
     await collection.isar.writeTxn(() async => collection.importJson(objects));
   }
 
-  static Query<dynamic> _getQuery(Map<String, dynamic> params) {
-    final query = ConnectQuery.fromJson(params);
+  static Query<dynamic> _getQuery(ConnectQuery query) {
     final collection = Isar.getInstance(query.instance)!
         .getCollectionByNameInternal(query.collection)!;
     WhereClause? whereClause;
