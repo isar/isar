@@ -23,8 +23,10 @@ typedef Editor = void Function(
   String property,
   int? index,
   dynamic value,
-  bool editing,
+  EditorType editing,
 );
+
+enum EditorType { add, edit, remove }
 
 class QueryTable extends ConsumerWidget {
   const QueryTable({super.key});
@@ -67,10 +69,20 @@ class QueryTable extends ConsumerWidget {
                         value: value,
                       );
 
-                      if (editing) {
-                        ref.read(isarConnectPod.notifier).editProperty(edit);
-                      } else {
-                        ref.read(isarConnectPod.notifier).addInList(edit);
+                      switch (editing) {
+                        case EditorType.add:
+                          ref.read(isarConnectPod.notifier).addInList(edit);
+                          break;
+
+                        case EditorType.edit:
+                          ref.read(isarConnectPod.notifier).editProperty(edit);
+                          break;
+
+                        case EditorType.remove:
+                          ref
+                              .read(isarConnectPod.notifier)
+                              .removeFromList(edit);
+                          break;
                       }
                     },
                   ),
@@ -362,6 +374,19 @@ class _TableItemState extends State<TableItem> {
       ),
     if (widget.data is PropertyHelper &&
         !(widget.data as PropertyHelper).subLink &&
+        widget.data.index != null)
+      PopupMenuItem<dynamic>(
+        onTap: _removeListItem,
+        child: PopUpMenuRow(
+          icon: const Icon(
+            Icons.delete,
+            size: PopUpMenuRow.iconSize,
+          ),
+          text: 'Remove item ${widget.data.index!}',
+        ),
+      ),
+    if (widget.data is PropertyHelper &&
+        !(widget.data as PropertyHelper).subLink &&
         (widget.data as PropertyHelper).property.type.isList &&
         widget.data.value != null)
       PopupMenuItem<dynamic>(
@@ -495,7 +520,7 @@ class _TableItemState extends State<TableItem> {
         property.name,
         index,
         result['value'],
-        false,
+        EditorType.add,
       );
     }
   }
@@ -550,7 +575,17 @@ class _TableItemState extends State<TableItem> {
       (widget.data as PropertyHelper).property.name,
       widget.data.index,
       value,
-      true,
+      EditorType.edit,
+    );
+  }
+
+  Future<void> _removeListItem() async {
+    widget.editor(
+      widget.objectId,
+      (widget.data as PropertyHelper).property.name,
+      widget.data.index,
+      null,
+      EditorType.remove,
     );
   }
 

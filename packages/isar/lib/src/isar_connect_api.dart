@@ -13,7 +13,8 @@ enum ConnectAction {
   exportQuery('ext.isar.exportQuery'),
   exportJson('ext.isar.exportJson'),
   editProperty('ext.isar.editProperty'),
-  addInList('ext.isar.addInList');
+  addInList('ext.isar.addInList'),
+  removeFromList('ext.isar.removeFromList');
 
   const ConnectAction(this.method);
 

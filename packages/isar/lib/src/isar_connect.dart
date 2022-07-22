@@ -16,6 +16,7 @@ abstract class _IsarConnect {
     ConnectAction.exportJson: _exportJson,
     ConnectAction.editProperty: _editProperty,
     ConnectAction.addInList: _addInList,
+    ConnectAction.removeFromList: _removeFromList,
   };
 
   static bool _initialized = false;
@@ -277,6 +278,27 @@ abstract class _IsarConnect {
       (objects[0][cEdit.property] as List).insert(cEdit.index!, cEdit.value);
     }
 
+    await collection.isar.writeTxn(() async => collection.importJson(objects));
+  }
+
+  static Future<void> _removeFromList(Map<String, dynamic> params) async {
+    final cEdit = ConnectEdit.fromJson(params);
+    final collection = Isar.getInstance(cEdit.instance)!
+        .getCollectionByNameInternal(cEdit.collection)!;
+
+    final query = collection.buildQuery<dynamic>(
+      whereClauses: [IdWhereClause.equalTo(value: cEdit.id)],
+    );
+
+    final objects = await query.exportJson();
+
+    if (objects.isEmpty ||
+        !objects[0].containsKey(cEdit.property) ||
+        objects[0][cEdit.property] is! List) {
+      throw IsarError('Cant get object or property is wrong for remove');
+    }
+
+    (objects[0][cEdit.property] as List).removeAt(cEdit.index!);
     await collection.isar.writeTxn(() async => collection.importJson(objects));
   }
 
