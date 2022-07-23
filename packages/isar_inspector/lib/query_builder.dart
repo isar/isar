@@ -24,24 +24,18 @@ class QueryBuilderUI extends StatefulWidget {
     for (final item in group.children) {
       if (item is QueryBuilderUIGroupHelper) {
         filters.add(parseQuery(item));
-      } else {
-        filters.add(_parseCondition(item as _ConditionHelper));
+      } else if (item is _ConditionHelper) {
+        filters.add(_parseCondition(item));
+      } else if (item is _LinkHelper) {
+        filters.add(_parseLink(item));
       }
     }
 
-    FilterOperation filter;
+    final filter = FilterGroup(
+      filters: filters,
+      type: group.operation,
+    );
 
-    switch (group.operation) {
-      case QueryBuilderUIOP.and:
-        filter = FilterGroup.and(filters);
-        break;
-      case QueryBuilderUIOP.or:
-        filter = FilterGroup.or(filters);
-        break;
-      case QueryBuilderUIOP.xor:
-        filter = FilterGroup.xor(filters);
-        break;
-    }
     return group.not ? FilterGroup.not(filter) : filter;
   }
 
@@ -114,6 +108,24 @@ class QueryBuilderUI extends StatefulWidget {
 
     return condition.not ? FilterGroup.not(ret) : ret;
   }
+
+  static FilterOperation _parseLink(_LinkHelper link) {
+    final filters = <FilterOperation>[];
+
+    for (final item in link.children) {
+      if (item is QueryBuilderUIGroupHelper) {
+        filters.add(parseQuery(item));
+      } else if (item is _ConditionHelper) {
+        filters.add(_parseCondition(item));
+      }
+    }
+
+    return LinkFilter(
+      filter: FilterGroup(filters: filters, type: link.operation),
+      linkName: link.link.name,
+      targetCollection: link.link.target.name,
+    );
+  }
 }
 
 class _QueryBuilderUIState extends State<QueryBuilderUI> {
@@ -126,10 +138,9 @@ class _QueryBuilderUIState extends State<QueryBuilderUI> {
     super.initState();
 
     if (widget.filter != null) {
-      _filter = QueryBuilderUIGroupHelper(widget.filter!.operation)
-        ..children.addAll(widget.filter!.children);
+      _filter = widget.filter!.clone();
     } else {
-      _filter = QueryBuilderUIGroupHelper(QueryBuilderUIOP.and);
+      _filter = QueryBuilderUIGroupHelper();
     }
 
     _sortProps =
@@ -170,10 +181,7 @@ class _QueryBuilderUIState extends State<QueryBuilderUI> {
                 onPressed: () {
                   Navigator.pop(
                     context,
-                    {
-                      'filter': QueryBuilderUIGroupHelper(QueryBuilderUIOP.and),
-                      'sort': null
-                    },
+                    {'filter': QueryBuilderUIGroupHelper(), 'sort': null},
                   );
                 },
                 child: const Text('Clear'),
@@ -258,14 +266,16 @@ class _QueryBuilderUIState extends State<QueryBuilderUI> {
 class _GroupUI extends StatefulWidget {
   const _GroupUI({
     required this.helper,
+    required this.collection,
     this.index,
     this.removeItem,
-    required this.collection,
+    this.link,
   });
 
   final QueryBuilderUIGroupHelper helper;
   final ICollection collection;
   final int? index;
+  final ILink? link;
   final void Function(int index)? removeItem;
 
   @override
@@ -287,10 +297,10 @@ class _GroupUIState extends State<_GroupUI> {
                 _GroupButton(
                   onTap: () {
                     setState(() {
-                      widget.helper.operation = QueryBuilderUIOP.and;
+                      widget.helper.operation = FilterGroupType.and;
                     });
                   },
-                  color: widget.helper.operation == QueryBuilderUIOP.and
+                  color: widget.helper.operation == FilterGroupType.and
                       ? Colors.blue
                       : null,
                   child: const Text('And'),
@@ -299,10 +309,10 @@ class _GroupUIState extends State<_GroupUI> {
                 _GroupButton(
                   onTap: () {
                     setState(() {
-                      widget.helper.operation = QueryBuilderUIOP.or;
+                      widget.helper.operation = FilterGroupType.or;
                     });
                   },
-                  color: widget.helper.operation == QueryBuilderUIOP.or
+                  color: widget.helper.operation == FilterGroupType.or
                       ? Colors.blue
                       : null,
                   child: const Text('Or'),
@@ -311,10 +321,10 @@ class _GroupUIState extends State<_GroupUI> {
                 _GroupButton(
                   onTap: () {
                     setState(() {
-                      widget.helper.operation = QueryBuilderUIOP.xor;
+                      widget.helper.operation = FilterGroupType.xor;
                     });
                   },
-                  color: widget.helper.operation == QueryBuilderUIOP.xor
+                  color: widget.helper.operation == FilterGroupType.xor
                       ? Colors.blue
                       : null,
                   child: const Text('Xor'),
@@ -330,6 +340,18 @@ class _GroupUIState extends State<_GroupUI> {
                   },
                 ),
                 const Spacer(),
+                if (widget.link == null && widget.collection.links.isNotEmpty)
+                  TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        widget.helper.children.add(
+                          _LinkHelper(widget.collection.links.first),
+                        );
+                      });
+                    },
+                    icon: const Icon(Icons.link),
+                    label: const Text('Link'),
+                  ),
                 TextButton.icon(
                   onPressed: () {
                     setState(() {
@@ -344,9 +366,7 @@ class _GroupUIState extends State<_GroupUI> {
                 TextButton.icon(
                   onPressed: () {
                     setState(() {
-                      widget.helper.children.add(
-                        QueryBuilderUIGroupHelper(QueryBuilderUIOP.and),
-                      );
+                      widget.helper.children.add(QueryBuilderUIGroupHelper());
                     });
                   },
                   icon: const Icon(Icons.add),
@@ -383,6 +403,182 @@ class _GroupUIState extends State<_GroupUI> {
           _GroupUI(
             helper: widget.helper.children[index] as QueryBuilderUIGroupHelper,
             collection: widget.collection,
+            link: widget.link,
+            removeItem: _removeItem,
+            index: index,
+          ),
+        );
+      } else if (widget.helper.children[index] is _ConditionHelper) {
+        children.add(
+          _ConditionUI(
+            helper: widget.helper.children[index] as _ConditionHelper,
+            collection: widget.collection,
+            link: widget.link,
+            removeItem: _removeItem,
+            index: index,
+          ),
+        );
+      } else if (widget.helper.children[index] is _LinkHelper) {
+        children.add(
+          _LinkUI(
+            helper: widget.helper.children[index] as _LinkHelper,
+            collection: widget.collection,
+            removeItem: _removeItem,
+            index: index,
+          ),
+        );
+      }
+
+      children.add(const SizedBox(height: 15));
+    }
+    return children;
+  }
+
+  void _removeItem(int index) {
+    setState(() {
+      widget.helper.children.removeAt(index);
+    });
+  }
+}
+
+class _LinkUI extends StatefulWidget {
+  const _LinkUI({
+    required this.helper,
+    required this.index,
+    required this.removeItem,
+    required this.collection,
+  });
+
+  final _LinkHelper helper;
+  final ICollection collection;
+  final int index;
+  final void Function(int index) removeItem;
+
+  @override
+  State<_LinkUI> createState() => _LinkUIState();
+}
+
+class _LinkUIState extends State<_LinkUI> {
+  @override
+  Widget build(BuildContext context) {
+    return IsarCard(
+      side: const BorderSide(color: Colors.green),
+      radius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.all(15),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<ILink>(
+                    value: widget.helper.link,
+                    items: widget.collection.links.map((e) {
+                      return DropdownMenuItem(value: e, child: Text(e.name));
+                    }).toList(),
+                    onChanged: widget.helper.children.isNotEmpty
+                        ? null
+                        : (link) {
+                            if (link != null) {
+                              setState(() {
+                                widget.helper.link = link;
+                              });
+                            }
+                          },
+                  ),
+                ),
+                const SizedBox(width: 5),
+                _GroupButton(
+                  onTap: () {
+                    setState(() {
+                      widget.helper.operation = FilterGroupType.and;
+                    });
+                  },
+                  color: widget.helper.operation == FilterGroupType.and
+                      ? Colors.blue
+                      : null,
+                  child: const Text('And'),
+                ),
+                const SizedBox(width: 5),
+                _GroupButton(
+                  onTap: () {
+                    setState(() {
+                      widget.helper.operation = FilterGroupType.or;
+                    });
+                  },
+                  color: widget.helper.operation == FilterGroupType.or
+                      ? Colors.blue
+                      : null,
+                  child: const Text('Or'),
+                ),
+                const SizedBox(width: 5),
+                _GroupButton(
+                  onTap: () {
+                    setState(() {
+                      widget.helper.operation = FilterGroupType.xor;
+                    });
+                  },
+                  color: widget.helper.operation == FilterGroupType.xor
+                      ? Colors.blue
+                      : null,
+                  child: const Text('Xor'),
+                ),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      widget.helper.children.add(
+                        _ConditionHelper(
+                          widget.helper.link.target.allProperties.first,
+                        ),
+                      );
+                    });
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Condition'),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      widget.helper.children.add(
+                        QueryBuilderUIGroupHelper(),
+                      );
+                    });
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('(Group)'),
+                ),
+                IconButton(
+                  color: Colors.blue,
+                  onPressed: () {
+                    widget.removeItem(widget.index);
+                  },
+                  icon: const Icon(Icons.clear),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 50, top: 20),
+              child: Column(
+                children: _generateChildren(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _generateChildren() {
+    final children = <Widget>[];
+
+    for (var index = 0; index < widget.helper.children.length; index++) {
+      if (widget.helper.children[index] is QueryBuilderUIGroupHelper) {
+        children.add(
+          _GroupUI(
+            helper: widget.helper.children[index] as QueryBuilderUIGroupHelper,
+            collection: widget.collection,
+            link: widget.helper.link,
             removeItem: _removeItem,
             index: index,
           ),
@@ -392,6 +588,7 @@ class _GroupUIState extends State<_GroupUI> {
           _ConditionUI(
             helper: widget.helper.children[index] as _ConditionHelper,
             collection: widget.collection,
+            link: widget.helper.link,
             removeItem: _removeItem,
             index: index,
           ),
@@ -416,18 +613,23 @@ class _ConditionUI extends StatefulWidget {
     required this.index,
     required this.removeItem,
     required this.collection,
+    this.link,
   });
 
   final _ConditionHelper helper;
   final int index;
   final void Function(int index) removeItem;
   final ICollection collection;
+  final ILink? link;
 
   @override
   State<_ConditionUI> createState() => _ConditionUIState();
 }
 
 class _ConditionUIState extends State<_ConditionUI> {
+  late final properties =
+      widget.link?.target.allProperties ?? widget.collection.allProperties;
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -435,7 +637,7 @@ class _ConditionUIState extends State<_ConditionUI> {
         DropdownButtonHideUnderline(
           child: DropdownButton<IProperty>(
             value: widget.helper.property,
-            items: widget.collection.allProperties
+            items: properties
                 .map((e) => DropdownMenuItem(value: e, child: Text(e.name)))
                 .toList(),
             onChanged: (property) {
@@ -582,16 +784,25 @@ class _GroupButton extends StatelessWidget {
   }
 }
 
-enum QueryBuilderUIOP { and, or, xor }
-
-abstract class QueryBuilderUIHelper {}
+//ignore: one_member_abstracts
+abstract class QueryBuilderUIHelper {
+  QueryBuilderUIHelper clone();
+}
 
 class QueryBuilderUIGroupHelper extends QueryBuilderUIHelper {
-  QueryBuilderUIGroupHelper(this.operation);
+  QueryBuilderUIGroupHelper();
 
-  QueryBuilderUIOP operation;
+  FilterGroupType operation = FilterGroupType.and;
   bool not = false;
   final children = <QueryBuilderUIHelper>[];
+
+  @override
+  QueryBuilderUIGroupHelper clone() {
+    return QueryBuilderUIGroupHelper()
+      ..operation = operation
+      ..not = not
+      ..children.addAll(children.map((e) => e.clone()).toList());
+  }
 }
 
 enum _ConditionType {
@@ -623,6 +834,16 @@ class _ConditionHelper extends QueryBuilderUIHelper {
   TextEditingController controller = TextEditingController();
 
   IProperty get property => _property;
+
+  @override
+  _ConditionHelper clone() {
+    return _ConditionHelper(property)
+      ..not = not
+      ..caseSensitive = caseSensitive
+      ..boolValue = boolValue
+      ..type = type
+      ..controller = controller;
+  }
 
   set property(IProperty property) {
     _property = property;
@@ -751,5 +972,20 @@ class _ConditionHelper extends QueryBuilderUIHelper {
       case GenericType.bool:
         return boolValue;
     }
+  }
+}
+
+class _LinkHelper extends QueryBuilderUIHelper {
+  _LinkHelper(this.link);
+
+  FilterGroupType operation = FilterGroupType.and;
+  ILink link;
+  final children = <QueryBuilderUIHelper>[];
+
+  @override
+  _LinkHelper clone() {
+    return _LinkHelper(link)
+      ..operation = operation
+      ..children.addAll(children.map((e) => e.clone()).toList());
   }
 }

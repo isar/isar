@@ -93,6 +93,12 @@ class ConnectQuery {
         type: FilterGroupType.values[json['type'] as int],
         filters: filters,
       );
+    } else if (json.containsKey('linkName')) {
+      return LinkFilter(
+        filter: _filterFromJson(json['filter'] as Map<String, dynamic>)!,
+        linkName: json['linkName'] as String,
+        targetCollection: json['targetCollection'] as String,
+      );
     } else {
       return FilterCondition(
         type: FilterConditionType.values[json['type'] as int],
@@ -121,6 +127,12 @@ class ConnectQuery {
       return {
         'type': filter.type.index,
         'filters': filter.filters.map(_filterToJson).toList(),
+      };
+    } else if (filter is LinkFilter) {
+      return {
+        'filter': _filterToJson(filter.filter),
+        'targetCollection': filter.targetCollection,
+        'linkName': filter.linkName,
       };
     } else {
       throw UnimplementedError();

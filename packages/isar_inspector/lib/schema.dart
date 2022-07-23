@@ -1,5 +1,7 @@
 import 'dart:core';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_inspector/query_builder.dart';
 
@@ -55,6 +57,7 @@ class ICollection {
   ];
 }
 
+@immutable
 class IProperty {
   const IProperty({
     required this.name,
@@ -76,6 +79,18 @@ class IProperty {
   final IsarType type;
   final bool isId;
   final bool isIndex;
+
+  @override
+  bool operator ==(Object other) {
+    return other is IProperty &&
+        other.name == name &&
+        other.type == type &&
+        other.isId == isId &&
+        other.isIndex == isIndex;
+  }
+
+  @override
+  int get hashCode => Object.hash(name, type, isId, isIndex);
 }
 
 class ILink {
