@@ -230,6 +230,7 @@ class _TableBlockState extends State<TableBlock> {
             Node(
               key: '$prefixKey${property.name}_$index',
               label: '',
+              expanded: _isExpanded('$prefixKey${property.name}_$index'),
               data: PropertyHelper(
                 property: IProperty(
                   name: property.name,
@@ -245,12 +246,9 @@ class _TableBlockState extends State<TableBlock> {
       }
 
       return Node<TreeViewHelper>(
-        key: '${prefixKey}_${property.name}',
+        key: '$prefixKey${property.name}',
         label: '',
-        expanded: _treeViewController
-                .getNode<TreeViewHelper>(property.name)
-                ?.expanded ??
-            false,
+        expanded: _isExpanded('$prefixKey${property.name}'),
         children: children,
         data: PropertyHelper(
           property: property,
@@ -285,6 +283,7 @@ class _TableBlockState extends State<TableBlock> {
             Node<TreeViewHelper>(
               key: '${link.name}_$index',
               label: '',
+              expanded: _isExpanded('${link.name}_$index'),
               children: _createProperties(
                 properties: link.target.allProperties,
                 data: list[index] as Map<String, dynamic>,
@@ -304,9 +303,7 @@ class _TableBlockState extends State<TableBlock> {
       return Node<TreeViewHelper>(
         key: link.name,
         label: '',
-        expanded:
-            _treeViewController.getNode<TreeViewHelper>(link.name)?.expanded ??
-                false,
+        expanded: _isExpanded(link.name),
         children: children,
         data: LinkHelper(
           link: link,
@@ -314,6 +311,10 @@ class _TableBlockState extends State<TableBlock> {
         ),
       );
     }).toList();
+  }
+
+  bool _isExpanded(String key) {
+    return _treeViewController.getNode<TreeViewHelper>(key)?.expanded ?? false;
   }
 }
 
