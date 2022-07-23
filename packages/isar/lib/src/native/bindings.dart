@@ -685,6 +685,34 @@ class IsarCoreBindings {
       int Function(ffi.Pointer<CIsarCollection>,
           ffi.Pointer<ffi.Pointer<CFilter>>, int, int, int, int)>();
 
+  int isar_filter_null(
+    ffi.Pointer<CIsarCollection> collection,
+    ffi.Pointer<ffi.Pointer<CFilter>> filter,
+    int property_id,
+    bool any_null,
+    int embedded_property_id,
+  ) {
+    return _isar_filter_null(
+      collection,
+      filter,
+      property_id,
+      any_null,
+      embedded_property_id,
+    );
+  }
+
+  late final _isar_filter_nullPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int64 Function(
+              ffi.Pointer<CIsarCollection>,
+              ffi.Pointer<ffi.Pointer<CFilter>>,
+              ffi.Uint32,
+              ffi.Bool,
+              ffi.Int32)>>('isar_filter_null');
+  late final _isar_filter_null = _isar_filter_nullPtr.asFunction<
+      int Function(ffi.Pointer<CIsarCollection>,
+          ffi.Pointer<ffi.Pointer<CFilter>>, int, bool, int)>();
+
   void isar_filter_id(
     ffi.Pointer<ffi.Pointer<CFilter>> filter,
     int lower,
