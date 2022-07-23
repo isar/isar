@@ -16,8 +16,6 @@ class BinaryWriter {
         _buffer = buffer,
         _byteData = ByteData.view(buffer.buffer, buffer.offsetInBytes);
 
-  static const maxObjectSize = 1 << 24;
-
   final Uint8List _buffer;
 
   final ByteData _byteData;

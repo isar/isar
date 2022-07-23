@@ -68,6 +68,7 @@ String generateCollectionSchema(ObjectInfo object) {
 String _generateSchema(ObjectInfo object) {
   final json = <String, Object>{
     'name': object.isarName,
+    'embedded': object.isEmbedded,
     'idName': object.idProperty.isarName,
     'properties': [
       for (var property in object.objectProperties)

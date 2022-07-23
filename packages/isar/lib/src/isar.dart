@@ -343,7 +343,7 @@ class CompactCondition {
   /// The minumum number of bytes that can be freed with compaction.
   final int? minBytes;
 
-  /// The minimum file size reduction ration. For example 2.0 would trigger
-  /// compaction as soon as the file size can be halved.
+  /// The minimum compaction ration. For example 2.0 would trigger compaction
+  /// as soon as the file size can be halved.
   final double? minRatio;
 }

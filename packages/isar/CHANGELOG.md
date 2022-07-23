@@ -7,6 +7,7 @@
 - Added `isar.copyToFile()` which copies a compacted version of the database to a path
 - Added `isar.path` to get the full path of the database file
 - Added check to verify that linked collections schemas are provided for opening an instance
+- Apply default values from constructor during deserialization
 
 ### Breaking
 

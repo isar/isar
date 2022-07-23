@@ -64,6 +64,7 @@ class ObjectProperty {
     this.converter,
     required this.nullable,
     required this.elementNullable,
+    this.defaultValue,
     required this.deserialize,
     required this.assignable,
     this.constructorPosition,
@@ -80,6 +81,7 @@ class ObjectProperty {
   final String? converter;
   final bool nullable;
   final bool elementNullable;
+  final String? defaultValue;
 
   final PropertyDeser deserialize;
   final bool assignable;

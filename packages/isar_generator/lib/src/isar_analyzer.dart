@@ -69,6 +69,13 @@ class IsarAnalyzer {
     final constructor = _checkValidClass(element);
     final modelClass = element as ClassElement;
 
+    if (constructor.parameters.any((e) => e.isRequired)) {
+      err(
+        'Constructors of embedded objects must not have required parameters.',
+        constructor,
+      );
+    }
+
     final properties = <ObjectProperty>[];
     for (final propertyElement in modelClass.allAccessors) {
       if (propertyElement.isLink || propertyElement.isLinks) {
@@ -84,7 +91,7 @@ class IsarAnalyzer {
       (it) => it.indexAnnotations.isNotEmpty,
     );
     if (hasIndex) {
-      err('Embedded objects must have indexes.', modelClass);
+      err('Embedded objects must noy have indexes.', modelClass);
     }
 
     final hasIdProperty = properties.any((it) => it.isarType == IsarType.id);
@@ -231,6 +238,7 @@ class IsarAnalyzer {
       converter: converter?.name,
       nullable: nullable,
       elementNullable: elementNullable,
+      defaultValue: constructorParameter?.defaultValueCode,
       deserialize: deserialize,
       assignable: property.setter != null,
       constructorPosition: constructorPosition,

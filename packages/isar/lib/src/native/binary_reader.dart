@@ -13,6 +13,7 @@ class BinaryReader {
       : _byteData = ByteData.view(_buffer.buffer, _buffer.offsetInBytes) {
     _staticSize = _byteData.getUint16(0, Endian.little);
   }
+
   static const Utf8Decoder utf8Decoder = Utf8Decoder();
 
   final Uint8List _buffer;
@@ -256,11 +257,7 @@ class BinaryReader {
     return list;
   }
 
-  Uint8List readByteList(int offset) {
-    return readByteListOrNull(offset) ?? Uint8List.fromList([]);
-  }
-
-  Uint8List? readByteListOrNull(int offset) {
+  Uint8List? readByteList(int offset) {
     if (offset >= _staticSize) {
       return null;
     }

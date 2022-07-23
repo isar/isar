@@ -248,8 +248,10 @@ String _deserializeProperty(
   ObjectProperty property,
   String propertyOffset,
 ) {
-  final orNull = property.nullable ? 'OrNull' : '';
-  final orNullList = property.nullable ? '' : '?? []';
+  final orNull =
+      property.nullable || property.defaultValue != null ? 'OrNull' : '';
+  final orNullList =
+      property.nullable || property.defaultValue != null ? '' : '?? []';
   final orElNull = property.elementNullable ? 'OrNull' : '';
 
   String? deser;
@@ -306,5 +308,10 @@ String _deserializeProperty(
       break;
   }
 
-  return property.fromIsar(deser!, object);
+  final value = property.fromIsar(deser!, object);
+  if (property.defaultValue != null) {
+    return '$value ?? ${property.defaultValue}';
+  } else {
+    return value;
+  }
 }
