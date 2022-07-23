@@ -80,6 +80,11 @@ class BinaryWriter {
   }
 
   @pragma('vm:prefer-inline')
+  void writeEnum(int offset, Enum? value) {
+    writeByte(offset, (value?.index ?? -1) + 1);
+  }
+
+  @pragma('vm:prefer-inline')
   void _writeUint24(int offset, int value) {
     _buffer[offset] = value;
     _buffer[offset + 1] = value >> 8;
@@ -199,12 +204,14 @@ class BinaryWriter {
   }
 
   void writeDateTimeList(int offset, List<DateTime?>? values) {
-    final longList = values
-        ?.map(
-          (e) => e?.toUtc().microsecondsSinceEpoch,
-        )
-        .toList();
+    final longList =
+        values?.map((e) => e?.toUtc().microsecondsSinceEpoch).toList();
     writeLongList(offset, longList);
+  }
+
+  void writeEnumList(int offset, List<Enum?>? values) {
+    final byteList = values?.map((e) => (e?.index ?? -1) + 1).toList();
+    writeByteList(offset, byteList);
   }
 
   void writeStringList(int offset, List<String?>? values) {

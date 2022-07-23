@@ -11,22 +11,19 @@ String generateSerializeWeb(ObjectInfo object) {
     String write(String value) =>
         "IsarNative.jsObjectSet(jsObj, r'${property.isarName}', $value);";
 
-    var propertyValue = 'object.${property.dartName}';
-    if (property.converter != null) {
-      propertyValue = property.toIsar(propertyValue, object);
-    }
+    final value = 'object.${property.dartName}';
 
     final nOp = property.nullable ? '?' : '';
     final nElOp = property.elementNullable ? '?' : '';
     if (property.isarType == IsarType.dateTime) {
-      code += write('$propertyValue$nOp.toUtc().millisecondsSinceEpoch');
+      code += write('$value$nOp.toUtc().millisecondsSinceEpoch');
     } else if (property.isarType == IsarType.dateTimeList) {
       code += write(
-        '$propertyValue$nOp.map((e) => e$nElOp.toUtc() '
+        '$value$nOp.map((e) => e$nElOp.toUtc() '
         '.millisecondsSinceEpoch).toList()',
       );
     } else {
-      code += write(propertyValue);
+      code += write(value);
     }
   }
 
@@ -73,27 +70,35 @@ String generateDeserializePropWeb(ObjectInfo object) {
 }
 
 String _defaultVal(IsarType type) {
-  if (type.isList && type != IsarType.byteList) {
-    type = type.scalarType;
-  }
   switch (type) {
-    case IsarType.bool:
-      return 'false';
-    case IsarType.int:
-    case IsarType.long:
-      return '(double.negativeInfinity as int)';
-    case IsarType.float:
-    case IsarType.double:
-      return 'double.negativeInfinity';
-    case IsarType.dateTime:
-      return 'DateTime.fromMillisecondsSinceEpoch(0)';
-    case IsarType.string:
-      return "''";
+    case IsarType.id:
+    case IsarType.byte:
     case IsarType.byteList:
       return 'Uint8List(0)';
-    // ignore: no_default_cases
-    default:
-      throw UnimplementedError();
+    case IsarType.bool:
+    case IsarType.boolList:
+      return 'false';
+    case IsarType.int:
+    case IsarType.intList:
+    case IsarType.long:
+    case IsarType.longList:
+      return '(double.negativeInfinity as int)';
+    case IsarType.float:
+    case IsarType.floatList:
+    case IsarType.double:
+    case IsarType.doubleList:
+      return 'double.negativeInfinity';
+    case IsarType.dateTime:
+    case IsarType.dateTimeList:
+      return 'DateTime.fromMillisecondsSinceEpoch(0)';
+    case IsarType.enumeration:
+    case IsarType.enumerationList:
+    case IsarType.string:
+    case IsarType.stringList:
+      return "''";
+    case IsarType.object:
+    case IsarType.objectList:
+      return "''";
   }
 }
 
@@ -119,8 +124,7 @@ String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
       convert = 'e ?? ${_defaultVal(property.isarType)}';
     }
 
-    final elType =
-        property.isarType.scalarType.dartType(property.elementNullable, false);
+    final elType = property.scalarDartType;
     if (convert != null) {
       deser = '($read as List?)?.map((e) => $convert).toList().cast<$elType>() '
           '$defaultList';
@@ -138,5 +142,5 @@ String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
     deser = '$read $defaultVal';
   }
 
-  return property.fromIsar(deser, object);
+  return deser;
 }

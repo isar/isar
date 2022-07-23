@@ -75,6 +75,9 @@ String _generateSchema(ObjectInfo object) {
         {
           'name': property.isarName,
           'type': property.isarType.name,
+          if (property.isarType == IsarType.object ||
+              property.isarType == IsarType.objectList)
+            'target': property.scalarDartType,
         },
     ],
     'indexes': [

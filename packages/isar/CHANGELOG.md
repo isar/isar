@@ -2,6 +2,8 @@
 
 ### Enhancements
 
+- Support for embedded objects using `@Embedded()`
+- Support for enums using `@Enum()`
 - Improved `put()` performance by about 50% (yes, that is insane)
 - Added `compactOnLaunch` conditions to `Isar.open()` for automatic database compaction
 - Added `isar.copyToFile()` which copies a compacted version of the database to a path
@@ -12,6 +14,7 @@
 ### Breaking
 
 - Renamed `isar.path` to `isar.directory`
+- Removed support for type converters
 
 ## 3.0.0-dev.8
 

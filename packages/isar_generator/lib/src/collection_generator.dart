@@ -42,14 +42,6 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
     final object = IsarAnalyzer().analyzeCollection(element);
 
     final collectionSchema = generateCollectionSchema(object);
-    final converters = object.properties
-        .where((ObjectProperty it) => it.converter != null)
-        .distinctBy((ObjectProperty it) => it.converter)
-        .map(
-          (ObjectProperty it) =>
-              'const ${it.converterName(object)} = ${it.converter}();',
-        )
-        .join('\n');
 
     return '''
       // coverage:ignore-file
@@ -60,7 +52,6 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       }
 
       $collectionSchema
-      $converters
 
       ${generateEstimateSerializeNative(object)}
       ${generateSerializeNative(object)}

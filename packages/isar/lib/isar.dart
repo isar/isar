@@ -22,7 +22,6 @@ part 'src/annotations/ignore.dart';
 part 'src/annotations/index.dart';
 part 'src/annotations/name.dart';
 part 'src/annotations/type.dart';
-part 'src/annotations/type_converter.dart';
 part 'src/collection_schema.dart';
 part 'src/isar.dart';
 part 'src/isar_collection.dart';

@@ -38,32 +38,32 @@ class WhereGenerator {
 
     for (final index in object.indexes) {
       for (var n = 0; n < index.properties.length; n++) {
-        final property = index.properties[n];
+        final indexProperty = index.properties[n];
+        final property = indexProperty.property;
 
-        if (!property.property.isarType.containsFloat) {
-          code += generateWhereEqualTo(index, n + 1);
-          code += generateWhereNotEqualTo(index, n + 1);
-        }
-
-        if (property.property.nullable) {
+        if (property.nullable) {
           code += generateWhereIsNull(index, n + 1);
           code += generateWhereIsNotNull(index, n + 1);
         }
 
-        if (property.type != IndexType.hash) {
-          if (property.scalarType != IsarType.bool) {
+        if (property.isarType != IsarType.float &&
+            property.isarType != IsarType.floatList) {
+          code += generateWhereEqualTo(index, n + 1);
+          code += generateWhereNotEqualTo(index, n + 1);
+        }
+
+        if (indexProperty.type != IndexType.hash) {
+          if (property.isarType != IsarType.bool &&
+              property.isarType != IsarType.boolList) {
             code += generateWhereGreaterThan(index, n + 1);
             code += generateWhereLessThan(index, n + 1);
             code += generateWhereBetween(index, n + 1);
           }
 
-          if (property.scalarType == IsarType.string) {
+          if (property.isarType == IsarType.string ||
+              property.isarType == IsarType.stringList) {
             code += generateWhereStartsWith(index, n + 1);
           }
-        }
-
-        if (property.property.isarType.containsFloat) {
-          break;
         }
       }
     }
@@ -106,10 +106,10 @@ class WhereGenerator {
   }
 
   String paramType(ObjectIndexProperty p) {
-    if (p.property.isarType.isList && p.type != IndexType.hash) {
-      return p.isarType.scalarType.dartType(p.property.nullable, false);
+    if (p.property.isarType.isList && p.type == IndexType.hash) {
+      return 'List<${p.property.scalarDartType}?>?';
     } else {
-      return p.property.dartType;
+      return '${p.property.scalarDartType}?';
     }
   }
 
@@ -132,7 +132,7 @@ class WhereGenerator {
       if (it.property.isarType.isList && it.type != IndexType.hash) {
         return '${it.property.dartName}Element';
       } else {
-        return it.property.toIsar(paramName(it), object);
+        return paramName(it);
       }
     }).join(', ');
   }
@@ -462,13 +462,14 @@ class WhereGenerator {
     }
 
     final equalProperties = index.properties.dropLast(1);
-    final prefixProperty = index.properties.last;
     var params = joinToParams(equalProperties);
     if (params.isNotEmpty) {
       params += ',';
     }
+
+    final prefixProperty = index.properties.last;
     final prefixName = '${paramName(prefixProperty).capitalize()}Prefix';
-    params += '${paramType(prefixProperty)} $prefixName';
+    params += 'String $prefixName';
     var values = joinToValues(equalProperties);
     if (values.isNotEmpty) {
       values += ',';
@@ -489,5 +490,6 @@ class WhereGenerator {
 }
 
 extension on List<ObjectIndexProperty> {
-  bool get containsFloat => last.isarType.containsFloat;
+  bool get containsFloat =>
+      last.isarType == IsarType.float || last.isarType == IsarType.floatList;
 }

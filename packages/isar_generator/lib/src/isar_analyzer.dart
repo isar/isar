@@ -45,8 +45,6 @@ class IsarAnalyzer {
       );
     } else if (idProperties.length > 1) {
       err('Two or more properties with type "Id" defined.', modelClass);
-    } else if (idProperties.first.converter != null) {
-      err('Converters are not allowed for ids.', modelClass);
     }
 
     final sortedLinks =
@@ -173,16 +171,8 @@ class IsarAnalyzer {
     PropertyInducingElement property,
     ConstructorElement constructor,
   ) {
-    final converter = property.typeConverter;
-
-    late final DartType isarDartType;
-    if (converter == null) {
-      isarDartType = property.type;
-    } else {
-      isarDartType = converter.supertype!.typeArguments[1];
-    }
-
-    final isarType = getIsarType(isarDartType, converter ?? property);
+    final dartType = property.type;
+    final isarType = getIsarType(property.type, property);
     if (isarType == null) {
       err(
         'Unsupported type. Please use a TypeConverter or annotate the '
@@ -191,13 +181,15 @@ class IsarAnalyzer {
       );
     }
 
-    final nullable = isarDartType.nullabilitySuffix != NullabilitySuffix.none;
+    final nullable = dartType.nullabilitySuffix != NullabilitySuffix.none;
     var elementNullable = false;
-    if (isarDartType is ParameterizedType) {
-      final typeArguments = isarDartType.typeArguments;
+    DartType? elementType;
+    if (dartType is ParameterizedType) {
+      final typeArguments = dartType.typeArguments;
       if (typeArguments.isNotEmpty) {
-        final listType = typeArguments[0];
-        elementNullable = listType.nullabilitySuffix != NullabilitySuffix.none;
+        elementType = typeArguments[0];
+        elementNullable =
+            elementType.nullabilitySuffix != NullabilitySuffix.none;
       }
     }
 
@@ -227,15 +219,11 @@ class IsarAnalyzer {
           property.setter == null ? PropertyDeser.none : PropertyDeser.assign;
     }
 
-    var dartTypeStr = property.type.getDisplayString(withNullability: true);
-    dartTypeStr = dartTypeStr.replaceAll('*', '?');
-
     return ObjectProperty(
       dartName: property.displayName,
       isarName: property.isarName,
-      dartType: dartTypeStr,
+      scalarDartType: elementType?.element!.name ?? dartType.element!.name!,
       isarType: isarType,
-      converter: converter?.name,
       nullable: nullable,
       elementNullable: elementNullable,
       defaultValue: constructorParameter?.defaultValueCode,
@@ -312,12 +300,13 @@ class IsarAnalyzer {
       final indexProperties = <ObjectIndexProperty>[];
       final defaultType =
           property.isarType.isDynamic ? IndexType.hash : IndexType.value;
+      final isString = property.isarType == IsarType.string ||
+          property.isarType == IsarType.stringList;
       indexProperties.add(
         ObjectIndexProperty(
           property: property,
           type: index.type ?? defaultType,
-          caseSensitive:
-              index.caseSensitive ?? property.isarType.containsString,
+          caseSensitive: index.caseSensitive ?? isString,
         ),
       );
       for (final c in index.composite) {
@@ -328,6 +317,8 @@ class IsarAnalyzer {
         } else if (compositeProperty.isarType == IsarType.id) {
           err('Ids cannot be indexed', element);
         } else {
+          final isString = property.isarType == IsarType.string ||
+              property.isarType == IsarType.stringList;
           indexProperties.add(
             ObjectIndexProperty(
               property: compositeProperty,
@@ -335,8 +326,7 @@ class IsarAnalyzer {
                   (compositeProperty.isarType.isDynamic
                       ? IndexType.hash
                       : IndexType.value),
-              caseSensitive:
-                  c.caseSensitive ?? compositeProperty.isarType.containsString,
+              caseSensitive: c.caseSensitive ?? isString,
             ),
           );
         }
@@ -354,7 +344,9 @@ class IsarAnalyzer {
             indexProperties.length > 1) {
           err('Composite indexes do not support non-hashed lists.', element);
         }
-        if (property.isarType.containsFloat && i != indexProperties.lastIndex) {
+        if ((property.isarType == IsarType.float ||
+                property.isarType == IsarType.floatList) &&
+            i != indexProperties.lastIndex) {
           err(
             'Only the last property of a composite index may be a '
             'double value.',
@@ -374,7 +366,8 @@ class IsarAnalyzer {
         if (indexProperty.type != IndexType.value) {
           if (!indexProperty.isarType.isDynamic) {
             err('Only Strings and Lists may be hashed.', element);
-          } else if (indexProperty.isarType.containsFloat) {
+          } else if (property.isarType == IsarType.float ||
+              property.isarType == IsarType.floatList) {
             err('List<double> may must not be hashed.', element);
           }
         }

@@ -57,11 +57,8 @@ class ObjectProperty {
   const ObjectProperty({
     required this.dartName,
     required this.isarName,
-    required this.dartType,
+    required this.scalarDartType,
     required this.isarType,
-    this.embeddedDartName,
-    this.embeddedIsarName,
-    this.converter,
     required this.nullable,
     required this.elementNullable,
     this.defaultValue,
@@ -72,13 +69,9 @@ class ObjectProperty {
 
   final String dartName;
   final String isarName;
-  final String dartType;
+  final String scalarDartType;
   final IsarType isarType;
 
-  final String? embeddedDartName;
-  final String? embeddedIsarName;
-
-  final String? converter;
   final bool nullable;
   final bool elementNullable;
   final String? defaultValue;
@@ -87,24 +80,11 @@ class ObjectProperty {
   final bool assignable;
   final int? constructorPosition;
 
-  String converterName(ObjectInfo oi) =>
-      '_${oi.dartName.decapitalize()}${converter?.capitalize()}';
+  String get dartType => isarType.isList
+      ? 'List<$scalarDartType${elementNullable ? '?' : ''}>${nullable ? '?' : ''}'
+      : '$scalarDartType${nullable ? '?' : ''}';
 
-  String toIsar(String input, ObjectInfo oi) {
-    if (converter != null) {
-      return '${converterName(oi)}.toIsar($input)';
-    } else {
-      return input;
-    }
-  }
-
-  String fromIsar(String input, ObjectInfo oi) {
-    if (converter != null) {
-      return '${converterName(oi)}.fromIsar($input)';
-    } else {
-      return input;
-    }
-  }
+  String get targetSchema => '${scalarDartType.capitalize()}Schema';
 }
 
 class ObjectIndexProperty {
@@ -119,8 +99,6 @@ class ObjectIndexProperty {
 
   IsarType get isarType => property.isarType;
 
-  IsarType get scalarType => property.isarType.scalarType;
-
   bool get isMultiEntry => isarType.isList && type != IndexType.hash;
 
   String get indexValueTypeEnum {
@@ -128,6 +106,7 @@ class ObjectIndexProperty {
       case IsarType.bool:
         return 'IndexValueType.bool';
       case IsarType.byte:
+      case IsarType.enumeration:
         return 'IndexValueType.byte';
       case IsarType.int:
         return 'IndexValueType.int';
@@ -156,8 +135,12 @@ class ObjectIndexProperty {
           return 'IndexValueType.bool';
         }
       case IsarType.byteList:
-        assert(type == IndexType.hash, 'ByteList indexes have to be hashed');
-        return 'IndexValueType.byteListHash';
+      case IsarType.enumerationList:
+        if (type == IndexType.hash) {
+          return 'IndexValueType.byteListHash';
+        } else {
+          return 'IndexValueType.byte';
+        }
       case IsarType.intList:
         if (type == IndexType.hash) {
           return 'IndexValueType.intListHash';

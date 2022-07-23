@@ -275,18 +275,25 @@ Pointer<CFilter>? _buildLink(
   return filterPtrPtr.value;
 }
 
+dynamic _prepareValue(dynamic value) {
+  if (value is bool) {
+    return boolToByte(value);
+  } else if (value is DateTime) {
+    return value.toUtc().microsecondsSinceEpoch;
+  } else if (value is Enum) {
+    return value.index;
+  } else {
+    return value;
+  }
+}
+
 Pointer<CFilter> _buildCondition(
   IsarCollectionImpl<dynamic> col,
   FilterCondition condition,
   Allocator alloc,
 ) {
-  final val1Raw = condition.value1;
-  final val1 =
-      val1Raw is DateTime ? val1Raw.toUtc().microsecondsSinceEpoch : val1Raw;
-
-  final val2Raw = condition.value2;
-  final val2 =
-      val2Raw is DateTime ? val2Raw.toUtc().microsecondsSinceEpoch : val2Raw;
+  final value1 = _prepareValue(condition.value1);
+  final value2 = _prepareValue(condition.value2);
 
   final propertyId = condition.property != col.schema.idName
       ? col.schema.propertyIdOrErr(condition.property)
@@ -302,7 +309,7 @@ Pointer<CFilter> _buildCondition(
       return _buildConditionEqual(
         colPtr: col.ptr,
         propertyId: propertyId,
-        val: val1,
+        val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
@@ -311,9 +318,9 @@ Pointer<CFilter> _buildCondition(
       return _buildConditionBetween(
         colPtr: col.ptr,
         propertyId: propertyId,
-        lower: val1,
+        lower: value1,
         includeLower: condition.include1,
-        upper: val2,
+        upper: value2,
         includeUpper: condition.include2,
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
@@ -322,7 +329,7 @@ Pointer<CFilter> _buildCondition(
       return _buildConditionLessThan(
         colPtr: col.ptr,
         propertyId: propertyId,
-        val: val1,
+        val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
@@ -331,7 +338,7 @@ Pointer<CFilter> _buildCondition(
       return _buildConditionGreaterThan(
         colPtr: col.ptr,
         propertyId: propertyId,
-        val: val1,
+        val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
@@ -342,7 +349,7 @@ Pointer<CFilter> _buildCondition(
         colPtr: col.ptr,
         conditionType: condition.type,
         propertyId: propertyId,
-        val: val1,
+        val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
@@ -371,19 +378,6 @@ Pointer<CFilter> _buildConditionEqual({
   final filterPtrPtr = alloc<Pointer<CFilter>>();
   if (val == null) {
     nCall(IC.isar_filter_null(colPtr, filterPtrPtr, propertyId!, true));
-  } else if (val is bool) {
-    final value = boolToByte(val);
-    nCall(
-      IC.isar_filter_byte(
-        colPtr,
-        filterPtrPtr,
-        value,
-        true,
-        value,
-        true,
-        propertyId!,
-      ),
-    );
   } else if (val is int) {
     if (propertyId == null) {
       nCall(IC.isar_filter_id(filterPtrPtr, val, true, val, true));
@@ -435,14 +429,12 @@ Pointer<CFilter> _buildConditionBetween({
     nCall(IC.isar_filter_null(colPtr, filterPtrPtr, propertyId!, true));
   } else if ((lower is int?) && upper is int?) {
     if (propertyId == null) {
-      nCall(
-        IC.isar_filter_id(
-          filterPtrPtr,
-          lower ?? nullLong,
-          includeLower,
-          upper ?? maxLong,
-          includeUpper,
-        ),
+      IC.isar_filter_id(
+        filterPtrPtr,
+        lower ?? nullLong,
+        includeLower,
+        upper ?? maxLong,
+        includeUpper,
       );
     } else {
       nCall(
@@ -505,7 +497,7 @@ Pointer<CFilter> _buildConditionLessThan({
     }
   } else if (val is int) {
     if (propertyId == null) {
-      nCall(IC.isar_filter_id(filterPtrPtr, minLong, true, val, include));
+      IC.isar_filter_id(filterPtrPtr, minLong, true, val, include);
     } else {
       nCall(
         IC.isar_filter_long(

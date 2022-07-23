@@ -125,14 +125,14 @@ void main() {
     isarTest('bytes property', () async {
       await isar.tWriteTxn(
         () => isar.multiTypeModels.tPutAll([
-          MultiTypeModel()..bytesValue = Uint8List.fromList([0, 10, 255]),
-          MultiTypeModel()..bytesValue = Uint8List.fromList([]),
-          MultiTypeModel()..bytesValue = Uint8List.fromList([3]),
+          MultiTypeModel()..byteList = Uint8List.fromList([0, 10, 255]),
+          MultiTypeModel()..byteList = Uint8List.fromList([]),
+          MultiTypeModel()..byteList = Uint8List.fromList([3]),
         ]),
       );
 
       await qEqual(
-        isar.multiTypeModels.where().bytesValueProperty().tFindAll(),
+        isar.multiTypeModels.where().byteListProperty().tFindAll(),
         [
           Uint8List.fromList([0, 10, 255]),
           Uint8List.fromList([]),

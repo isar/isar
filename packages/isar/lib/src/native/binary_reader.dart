@@ -189,6 +189,26 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  T readEnum<T>(int offset, List<T> values) {
+    final index = readByte(offset);
+    if (index > 0 && index <= values.length) {
+      return values[index - 1];
+    } else {
+      return values.first;
+    }
+  }
+
+  @pragma('vm:prefer-inline')
+  T? readEnumOrNull<T>(int offset, List<T> values) {
+    final index = readByte(offset);
+    if (index > 0 && index <= values.length) {
+      return values[index - 1];
+    } else {
+      return null;
+    }
+  }
+
+  @pragma('vm:prefer-inline')
   int _readUint24(int offset) {
     return _buffer[offset] |
         _buffer[offset + 1] << 8 |
@@ -447,6 +467,26 @@ class BinaryReader {
     return readLongOrNullList(offset)?.map((e) {
       if (e != null) {
         return DateTime.fromMicrosecondsSinceEpoch(e, isUtc: true).toLocal();
+      }
+    }).toList();
+  }
+
+  List<T>? readEnumList<T>(int offset, List<T> values) {
+    return readByteList(offset)?.map((index) {
+      if (index > 0 && index <= values.length) {
+        return values[index - 1];
+      } else {
+        return values.first;
+      }
+    }).toList();
+  }
+
+  List<T?>? readEnumOrNullList<T>(int offset, List<T> values) {
+    return readByteList(offset)?.map((index) {
+      if (index > 0 && index <= values.length) {
+        return values[index - 1];
+      } else {
+        return null;
       }
     }).toList();
   }

@@ -202,6 +202,9 @@ enum FilterConditionType {
 
   /// Filter matching values that are `null`.
   isNull,
+
+  /// Filter matching the length of a list.
+  listLength,
 }
 
 /// Create a filter condition dynamically.
@@ -357,6 +360,22 @@ class FilterCondition extends FilterOperation {
         caseSensitive = false,
         super._();
 
+  /// Filters the results to only include objects where the length of
+  /// [property] is between [lower] and [upper].
+  ///
+  /// Only list properties are supported.
+  const FilterCondition.listLength({
+    required this.property,
+    required int lower,
+    required int upper,
+  })  : type = FilterConditionType.listLength,
+        value1 = lower,
+        include1 = true,
+        value2 = upper,
+        include2 = true,
+        caseSensitive = false,
+        super._();
+
   /// Type of the filter condition.
   final FilterConditionType type;
 
@@ -468,13 +487,33 @@ class DistinctProperty {
 class LinkFilter extends FilterOperation {
   /// Create a filter condition based on a link.
   const LinkFilter({
-    required this.filter,
+    required FilterOperation filter,
     required this.linkName,
     required this.targetCollection,
-  }) : super._();
+  })  : filter = filter,
+        lower = null,
+        upper = null,
+        super._();
+
+  /// Create a filter condition based on the number of linked objects.
+  const LinkFilter.length({
+    required int lower,
+    required int upper,
+    required this.linkName,
+    required this.targetCollection,
+  })  : filter = null,
+        lower = lower,
+        upper = upper,
+        super._();
 
   /// Filter condition that should be applied
-  final FilterOperation filter;
+  final FilterOperation? filter;
+
+  /// The minumum number of linked objects
+  final int? lower;
+
+  /// The maximum number of linked objects
+  final int? upper;
 
   /// Isar name of the link.
   final String linkName;

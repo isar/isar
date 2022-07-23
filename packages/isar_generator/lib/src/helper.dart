@@ -1,6 +1,5 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
@@ -12,8 +11,6 @@ const TypeChecker _ignoreChecker = TypeChecker.fromRuntime(Ignore);
 const TypeChecker _nameChecker = TypeChecker.fromRuntime(Name);
 const TypeChecker _indexChecker = TypeChecker.fromRuntime(Index);
 const TypeChecker _backlinkChecker = TypeChecker.fromRuntime(Backlink);
-const TypeChecker _typeConverterChecker =
-    TypeChecker.fromRuntime(TypeConverter);
 
 extension ClassElementX on ClassElement {
   bool get hasZeroArgsConstructor {
@@ -48,44 +45,6 @@ extension PropertyElementX on PropertyInducingElement {
   bool get isLink => type.element!.name == 'IsarLink';
 
   bool get isLinks => type.element!.name == 'IsarLinks';
-
-  ClassElement? get typeConverter {
-    Element? element = this;
-    while (element != null) {
-      final elementAnns =
-          _typeConverterChecker.annotationsOf(element.nonSynthetic);
-      for (final ann in elementAnns) {
-        final reviver = ConstantReader(ann).revive();
-        if (reviver.namedArguments.isNotEmpty ||
-            reviver.positionalArguments.isNotEmpty) {
-          err(
-            'TypeConverters with constructor arguments are not supported.',
-            ann.type!.element,
-          );
-        }
-
-        // ignore: cast_nullable_to_non_nullable
-        final cls = ann.type!.element as ClassElement;
-        final adapterDartType = cls.supertype!.typeArguments[0];
-        final checker = TypeChecker.fromStatic(adapterDartType);
-        final nullabilityMatches =
-            adapterDartType.nullabilitySuffix != NullabilitySuffix.none ||
-                type.nullabilitySuffix == NullabilitySuffix.none;
-        if (checker.isAssignableFromType(type)) {
-          if (nullabilityMatches) {
-            return cls;
-          } else {
-            err(
-              'The TypeConverter has incompatible nullability.',
-              ann.type!.element,
-            );
-          }
-        }
-      }
-      element = element.enclosingElement;
-    }
-    return null;
-  }
 
   Backlink? get backlinkAnnotation {
     final ann = _backlinkChecker.firstAnnotationOfExact(nonSynthetic);

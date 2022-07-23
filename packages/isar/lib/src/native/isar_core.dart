@@ -19,6 +19,7 @@ const int maxLong = 9223372036854775807;
 const double minDouble = double.nan;
 const double maxDouble = double.infinity;
 
+const nullByte = IsarObject_NULL_BYTE;
 const nullInt = IsarObject_NULL_INT;
 const nullLong = IsarObject_NULL_LONG;
 const nullFloat = double.nan;
