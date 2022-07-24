@@ -858,6 +858,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.Char> value,
     bool case_sensitive,
     int property_id,
+    int embedded_property_id,
   ) {
     return _isar_filter_string_starts_with(
       collection,
@@ -865,6 +866,7 @@ class IsarCoreBindings {
       value,
       case_sensitive,
       property_id,
+      embedded_property_id,
     );
   }
 
@@ -875,7 +877,8 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<CFilter>>,
               ffi.Pointer<ffi.Char>,
               ffi.Bool,
-              ffi.Uint32)>>('isar_filter_string_starts_with');
+              ffi.Uint32,
+              ffi.Int32)>>('isar_filter_string_starts_with');
   late final _isar_filter_string_starts_with =
       _isar_filter_string_starts_withPtr.asFunction<
           int Function(
@@ -883,6 +886,7 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<CFilter>>,
               ffi.Pointer<ffi.Char>,
               bool,
+              int,
               int)>();
 
   int isar_filter_string_ends_with(
@@ -891,6 +895,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.Char> value,
     bool case_sensitive,
     int property_id,
+    int embedded_property_id,
   ) {
     return _isar_filter_string_ends_with(
       collection,
@@ -898,6 +903,7 @@ class IsarCoreBindings {
       value,
       case_sensitive,
       property_id,
+      embedded_property_id,
     );
   }
 
@@ -908,7 +914,8 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<CFilter>>,
               ffi.Pointer<ffi.Char>,
               ffi.Bool,
-              ffi.Uint32)>>('isar_filter_string_ends_with');
+              ffi.Uint32,
+              ffi.Int32)>>('isar_filter_string_ends_with');
   late final _isar_filter_string_ends_with =
       _isar_filter_string_ends_withPtr.asFunction<
           int Function(
@@ -916,6 +923,7 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<CFilter>>,
               ffi.Pointer<ffi.Char>,
               bool,
+              int,
               int)>();
 
   int isar_filter_string_contains(
@@ -924,6 +932,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.Char> value,
     bool case_sensitive,
     int property_id,
+    int embedded_property_id,
   ) {
     return _isar_filter_string_contains(
       collection,
@@ -931,6 +940,7 @@ class IsarCoreBindings {
       value,
       case_sensitive,
       property_id,
+      embedded_property_id,
     );
   }
 
@@ -941,7 +951,8 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<CFilter>>,
               ffi.Pointer<ffi.Char>,
               ffi.Bool,
-              ffi.Uint32)>>('isar_filter_string_contains');
+              ffi.Uint32,
+              ffi.Int32)>>('isar_filter_string_contains');
   late final _isar_filter_string_contains =
       _isar_filter_string_containsPtr.asFunction<
           int Function(
@@ -949,6 +960,7 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<CFilter>>,
               ffi.Pointer<ffi.Char>,
               bool,
+              int,
               int)>();
 
   int isar_filter_string_matches(
@@ -957,6 +969,7 @@ class IsarCoreBindings {
     ffi.Pointer<ffi.Char> value,
     bool case_sensitive,
     int property_id,
+    int embedded_property_id,
   ) {
     return _isar_filter_string_matches(
       collection,
@@ -964,6 +977,7 @@ class IsarCoreBindings {
       value,
       case_sensitive,
       property_id,
+      embedded_property_id,
     );
   }
 
@@ -974,7 +988,8 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<CFilter>>,
               ffi.Pointer<ffi.Char>,
               ffi.Bool,
-              ffi.Uint32)>>('isar_filter_string_matches');
+              ffi.Uint32,
+              ffi.Int32)>>('isar_filter_string_matches');
   late final _isar_filter_string_matches =
       _isar_filter_string_matchesPtr.asFunction<
           int Function(
@@ -982,6 +997,7 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<CFilter>>,
               ffi.Pointer<ffi.Char>,
               bool,
+              int,
               int)>();
 
   void isar_key_create(
