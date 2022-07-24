@@ -166,7 +166,7 @@ abstract class _IsarConnect {
     final query = _getQuery(cQuery);
     params.remove('limit');
     params.remove('offset');
-    final countQuery = _getQuery(cQuery);
+    final countQuery = _getQuery(ConnectQuery.fromJson(params));
 
     final stream = query.watchLazy();
     _querySubscription.add(stream.listen(listener));
