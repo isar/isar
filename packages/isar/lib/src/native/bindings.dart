@@ -1401,12 +1401,12 @@ class IsarCoreBindings {
   int isar_instance_get_collection(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<ffi.Pointer<CIsarCollection>> collection,
-    int index,
+    int collection_id,
   ) {
     return _isar_instance_get_collection(
       isar,
       collection,
-      index,
+      collection_id,
     );
   }
 
@@ -1415,7 +1415,7 @@ class IsarCoreBindings {
           ffi.Int64 Function(
               ffi.Pointer<CIsarInstance>,
               ffi.Pointer<ffi.Pointer<CIsarCollection>>,
-              ffi.Uint32)>>('isar_instance_get_collection');
+              ffi.Uint64)>>('isar_instance_get_collection');
   late final _isar_instance_get_collection =
       _isar_instance_get_collectionPtr.asFunction<
           int Function(ffi.Pointer<CIsarInstance>,
