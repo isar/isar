@@ -1,7 +1,11 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 
 import 'package:isar_generator/src/isar_type.dart';
+import 'package:xxh3/xxh3.dart';
 
 class ObjectInfo {
   const ObjectInfo({
@@ -18,6 +22,8 @@ class ObjectInfo {
   final List<ObjectProperty> properties;
   final List<ObjectIndex> indexes;
   final List<ObjectLink> links;
+
+  int get id => xxh3(utf8.encode(isarName) as Uint8List);
 
   bool get isEmbedded => accessor == null;
 
@@ -80,6 +86,8 @@ class ObjectProperty {
   final bool assignable;
   final int? constructorPosition;
 
+  int get id => xxh3(utf8.encode(isarName) as Uint8List);
+
   String get dartType => isarType.isList
       ? 'List<$scalarDartType${elementNullable ? '?' : ''}>${nullable ? '?' : ''}'
       : '$scalarDartType${nullable ? '?' : ''}';
@@ -100,90 +108,6 @@ class ObjectIndexProperty {
   IsarType get isarType => property.isarType;
 
   bool get isMultiEntry => isarType.isList && type != IndexType.hash;
-
-  String get indexValueTypeEnum {
-    switch (property.isarType) {
-      case IsarType.bool:
-        return 'IndexValueType.bool';
-      case IsarType.byte:
-      case IsarType.enumeration:
-        return 'IndexValueType.byte';
-      case IsarType.int:
-        return 'IndexValueType.int';
-      case IsarType.float:
-        return 'IndexValueType.float';
-      case IsarType.long:
-      case IsarType.dateTime:
-        return 'IndexValueType.long';
-      case IsarType.double:
-        return 'IndexValueType.double';
-      case IsarType.string:
-        if (caseSensitive) {
-          return type == IndexType.hash
-              ? 'IndexValueType.stringHash'
-              : 'IndexValueType.string';
-        } else {
-          return type == IndexType.hash
-              ? 'IndexValueType.stringHashCIS'
-              : 'IndexValueType.stringCIS';
-        }
-
-      case IsarType.boolList:
-        if (type == IndexType.hash) {
-          return 'IndexValueType.boolListHash';
-        } else {
-          return 'IndexValueType.bool';
-        }
-      case IsarType.byteList:
-      case IsarType.enumerationList:
-        if (type == IndexType.hash) {
-          return 'IndexValueType.byteListHash';
-        } else {
-          return 'IndexValueType.byte';
-        }
-      case IsarType.intList:
-        if (type == IndexType.hash) {
-          return 'IndexValueType.intListHash';
-        } else {
-          return 'IndexValueType.int';
-        }
-      case IsarType.floatList:
-        assert(type == IndexType.value, 'FloatList indexes must to be hashed');
-        return 'IndexValueType.float';
-      case IsarType.longList:
-      case IsarType.dateTimeList:
-        if (type == IndexType.hash) {
-          return 'IndexValueType.longListHash';
-        } else {
-          return 'IndexValueType.long';
-        }
-      case IsarType.doubleList:
-        assert(type == IndexType.value, 'DoubleList indexes must to be hashed');
-        return 'IndexValueType.double';
-      case IsarType.stringList:
-        if (caseSensitive) {
-          if (type == IndexType.hash) {
-            return 'IndexValueType.stringListHash';
-          } else if (type == IndexType.hashElements) {
-            return 'IndexValueType.stringHash';
-          } else {
-            return 'IndexValueType.string';
-          }
-        } else {
-          if (type == IndexType.hash) {
-            return 'IndexValueType.stringListHashCIS';
-          } else if (type == IndexType.hashElements) {
-            return 'IndexValueType.stringHashCIS';
-          } else {
-            return 'IndexValueType.stringCIS';
-          }
-        }
-      case IsarType.id:
-      case IsarType.object:
-      case IsarType.objectList:
-        throw UnimplementedError();
-    }
-  }
 }
 
 class ObjectIndex {
@@ -193,10 +117,13 @@ class ObjectIndex {
     required this.unique,
     required this.replace,
   });
+
   final String name;
   final List<ObjectIndexProperty> properties;
   final bool unique;
   final bool replace;
+
+  int get id => xxh3(utf8.encode(name) as Uint8List);
 }
 
 class ObjectLink {
@@ -210,6 +137,7 @@ class ObjectLink {
     required this.links,
     required this.backlink,
   });
+
   final String dartName;
   final String isarName;
 
@@ -220,4 +148,12 @@ class ObjectLink {
   final String targetCollectionAccessor;
   final bool links;
   final bool backlink;
+
+  int id(String objectIsarName) {
+    final col = backlink ? targetCollectionIsarName : objectIsarName;
+    final colId = xxh3(utf8.encode(col) as Uint8List, seed: backlink ? 1 : 0);
+
+    final name = backlink ? targetIsarName! : isarName;
+    return xxh3(utf8.encode(name) as Uint8List, seed: colId);
+  }
 }

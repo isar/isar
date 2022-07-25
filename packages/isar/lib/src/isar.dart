@@ -10,13 +10,12 @@ typedef IsarCloseCallback = void Function(String isarName);
 abstract class Isar {
   /// @nodoc
   @protected
-  Isar(this.name, String schema) {
-    if (_schema != null && _schema != schema) {
+  Isar(this.name, int schemaHash) {
+    if (_schemaHash != null && _schemaHash != schemaHash) {
       throw IsarError(
         'Cannot open multiple Isar instances with different schema.',
       );
     }
-    _schema = schema;
     _instances[name] = this;
     for (final callback in _openCallbacks) {
       callback(this);
@@ -39,7 +38,7 @@ abstract class Isar {
   static final Map<String, Isar> _instances = <String, Isar>{};
   static final Set<IsarOpenCallback> _openCallbacks = <IsarOpenCallback>{};
   static final Set<IsarCloseCallback> _closeCallbacks = <IsarCloseCallback>{};
-  static String? _schema;
+  static int? _schemaHash;
 
   /// Name of the instance.
   final String name;
@@ -74,7 +73,8 @@ abstract class Isar {
       }
     }
     for (final schema in schemas) {
-      for (final dependency in schema.dependencies) {
+      final dependencies = schema.links.values.map((e) => e.targetColllection);
+      for (final dependency in dependencies) {
         if (schemaNames.contains(dependency)) {
           throw IsarError(
             "Collection ${schema.name} depends on $dependency but it's schema "
@@ -83,7 +83,6 @@ abstract class Isar {
         }
       }
     }
-    schemas.sort((a, b) => a.name.compareTo(b.name));
   }
 
   /// Open a new Isar instance.
@@ -99,7 +98,7 @@ abstract class Isar {
     if (!_kIsWeb && inspector) {
       assert(
         () {
-          _IsarConnect.initialize();
+          _IsarConnect.initialize(schemas);
           return true;
         }(),
         'Remove the Inspector in release mode.',
@@ -127,7 +126,7 @@ abstract class Isar {
     if (!_kIsWeb && inspector) {
       assert(
         () {
-          _IsarConnect.initialize();
+          _IsarConnect.initialize(schemas);
           return true;
         }(),
         'Remove the Inspector in release mode.',
@@ -249,7 +248,7 @@ abstract class Isar {
     if (identical(_instances[name], this)) {
       _instances.remove(name);
       if (_instances.isEmpty) {
-        _schema = null;
+        _schemaHash = null;
       }
     }
     for (final callback in _closeCallbacks) {
@@ -257,11 +256,6 @@ abstract class Isar {
     }
     return Future.value(false);
   }
-
-  /// Returns the schema of this Instance. You should avoid using the schema
-  /// directly.
-  @protected
-  static String? get schema => _schema;
 
   /// A list of all Isar instances opened in the current isolate.
   static Set<String> get instanceNames => _instances.keys.toSet();

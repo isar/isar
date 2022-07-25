@@ -3,11 +3,14 @@
 ### Enhancements
 
 - Support for embedded objects using `@Embedded()`
-- Support for enums using `@Enum()`
+- Support for enums
 - Improved `put()` performance by about 50% (yes, that is insane)
+- Added `linksLengthEqualTo()`, `linksLengthGreaterThan()`, `linksLengthLessThan()`, `linksLengthBetween()` and `linkIsNull()` filters
+- Added `listLengthEqualTo()`, `listLengthGreaterThan()`, `listLengthLessThan()`, `listLengthBetween()` filters
 - Added `compactOnLaunch` conditions to `Isar.open()` for automatic database compaction
 - Added `isar.copyToFile()` which copies a compacted version of the database to a path
 - Added `isar.path` to get the full path of the database file
+- Added `collection.schema` to receive the layout of a collection
 - Added check to verify that linked collections schemas are provided for opening an instance
 - Apply default values from constructor during deserialization
 

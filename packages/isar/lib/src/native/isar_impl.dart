@@ -15,15 +15,15 @@ import 'package:isar/src/native/isar_core.dart';
 const Symbol _zoneTxn = #zoneTxn;
 
 class IsarImpl extends Isar implements Finalizable {
-  IsarImpl(super.name, super.schema, this.ptr) {
+  IsarImpl(super.name, super.schemaHash, this.ptr) {
     _finalizer = NativeFinalizer(isarClose);
     _finalizer.attach(this, ptr.cast(), detach: this);
   }
 
-  final offsets = <Type, List<int>>{};
-
   final Pointer<CIsarInstance> ptr;
   late final NativeFinalizer _finalizer;
+
+  final offsets = <Type, List<int>>{};
 
   final List<Future<void>> _activeAsyncTxns = [];
 

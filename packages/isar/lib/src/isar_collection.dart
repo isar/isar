@@ -11,9 +11,8 @@ abstract class IsarCollection<OBJ> {
   /// The name of the collection.
   String get name;
 
-  /// @nodoc
-  @protected
-  String get idName;
+  /// Get the schema of the collection.
+  CollectionSchema<OBJ> get schema;
 
   /// Get a single object by its [id] or `null` if the object does not exist.
   Future<OBJ?> get(int id) {

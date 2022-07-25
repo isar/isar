@@ -47,19 +47,13 @@ class IsarAnalyzer {
       err('Two or more properties with type "Id" defined.', modelClass);
     }
 
-    final sortedLinks =
-        links.where((it) => !it.backlink).sortedBy((it) => it.isarName);
-    final sortedBacklinks = links
-        .where((it) => it.backlink)
-        .sortedBy((it) => it.targetCollectionIsarName)
-        .thenBy((it) => it.targetIsarName!);
     return ObjectInfo(
       dartName: modelClass.displayName,
       isarName: modelClass.isarName,
       accessor: modelClass.collectionAccessor,
-      properties: properties.sortedBy((e) => e.isarName),
-      indexes: indexes.sortedBy((e) => e.name),
-      links: [...sortedLinks, ...sortedBacklinks],
+      properties: properties,
+      indexes: indexes,
+      links: links,
     );
   }
 
@@ -101,7 +95,7 @@ class IsarAnalyzer {
       dartName: modelClass.displayName,
       isarName: modelClass.isarName,
       accessor: modelClass.collectionAccessor,
-      properties: properties.sortedBy((e) => e.isarName),
+      properties: properties,
     );
   }
 
@@ -191,11 +185,6 @@ class IsarAnalyzer {
         elementNullable =
             elementType.nullabilitySuffix != NullabilitySuffix.none;
       }
-    }
-
-    if ((isarType == IsarType.byte && nullable) ||
-        (isarType == IsarType.byteList && elementNullable)) {
-      err('Bytes cannot be nullable', property);
     }
 
     final constructorParameter =

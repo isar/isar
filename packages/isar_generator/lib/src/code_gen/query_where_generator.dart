@@ -350,7 +350,7 @@ class WhereGenerator {
     final lowerName = 'lower${id.dartName.capitalize()}';
     final upperName = 'upper${id.dartName.capitalize()}';
     return '''
-    $mPrefix ${idName}Between(int $lowerName,int $upperName, {bool includeLower = true, bool includeUpper = true,}) {
+    $mPrefix ${idName}Between(int $lowerName, int $upperName, {bool includeLower = true, bool includeUpper = true,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IdWhereClause.between(
           lower: $lowerName,

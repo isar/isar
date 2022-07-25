@@ -2,32 +2,9 @@ import 'dart:typed_data';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:isar/isar.dart';
 import 'package:isar_generator/src/helper.dart';
 import 'package:source_gen/source_gen.dart';
-
-enum IsarType {
-  id,
-  bool,
-  byte,
-  int,
-  float,
-  long,
-  double,
-  dateTime,
-  enumeration,
-  string,
-  object,
-  boolList,
-  byteList,
-  intList,
-  floatList,
-  longList,
-  doubleList,
-  dateTimeList,
-  enumerationList,
-  stringList,
-  objectList,
-}
 
 extension IsarTypeX on IsarType {
   bool get isDynamic {
@@ -45,49 +22,6 @@ extension IsarTypeX on IsarType {
       return 4;
     } else {
       return 8;
-    }
-  }
-
-  String get name {
-    switch (this) {
-      case IsarType.id:
-        throw UnimplementedError();
-      case IsarType.bool:
-        return 'Bool';
-      case IsarType.byte:
-      case IsarType.enumeration:
-        return 'Byte';
-      case IsarType.int:
-        return 'Int';
-      case IsarType.float:
-        return 'Float';
-      case IsarType.long:
-      case IsarType.dateTime:
-        return 'Long';
-      case IsarType.double:
-        return 'Double';
-      case IsarType.string:
-        return 'String';
-      case IsarType.object:
-        return 'Object';
-      case IsarType.boolList:
-        return 'BoolList';
-      case IsarType.byteList:
-      case IsarType.enumerationList:
-        return 'ByteList';
-      case IsarType.intList:
-        return 'IntList';
-      case IsarType.floatList:
-        return 'FloatList';
-      case IsarType.longList:
-      case IsarType.dateTimeList:
-        return 'LongList';
-      case IsarType.doubleList:
-        return 'DoubleList';
-      case IsarType.stringList:
-        return 'StringList';
-      case IsarType.objectList:
-        return 'ObjectList';
     }
   }
 }

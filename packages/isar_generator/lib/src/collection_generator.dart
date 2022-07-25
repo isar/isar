@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
-import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_generator/src/code_gen/by_index_generator.dart';
 import 'package:isar_generator/src/code_gen/collection_schema_generator.dart';
@@ -15,7 +14,6 @@ import 'package:isar_generator/src/code_gen/query_where_generator.dart';
 import 'package:isar_generator/src/code_gen/type_adapter_generator_native.dart';
 import 'package:isar_generator/src/code_gen/type_adapter_generator_web.dart';
 import 'package:isar_generator/src/isar_analyzer.dart';
-import 'package:isar_generator/src/object_info.dart';
 import 'package:source_gen/source_gen.dart';
 
 const ignoreLints = [
@@ -30,6 +28,7 @@ const ignoreLints = [
   'inference_failure_on_function_invocation',
   'unnecessary_parenthesis',
   'unnecessary_raw_strings',
+  'join_return_with_assignment',
 ];
 
 class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {

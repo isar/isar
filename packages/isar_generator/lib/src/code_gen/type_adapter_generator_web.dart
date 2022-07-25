@@ -1,3 +1,4 @@
+import 'package:isar/isar.dart';
 import 'package:isar_generator/src/code_gen/type_adapter_generator_common.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';

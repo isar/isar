@@ -22,7 +22,13 @@ part 'src/annotations/ignore.dart';
 part 'src/annotations/index.dart';
 part 'src/annotations/name.dart';
 part 'src/annotations/type.dart';
-part 'src/collection_schema.dart';
+
+part 'src/schema/collection_schema.dart';
+part 'src/schema/index_schema.dart';
+part 'src/schema/link_schema.dart';
+part 'src/schema/property_schema.dart';
+part 'src/schema/schema.dart';
+
 part 'src/isar.dart';
 part 'src/isar_collection.dart';
 part 'src/isar_connect.dart';

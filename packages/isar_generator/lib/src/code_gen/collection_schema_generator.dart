@@ -9,29 +9,44 @@ import 'package:isar_generator/src/object_info.dart';
 String generateCollectionSchema(ObjectInfo object) {
   final schema = _generateSchema(object);
 
-  final propertyIds = object.objectProperties
-      .mapIndexed((i, p) => "r'${p.isarName}': $i")
-      .join(',');
+  final propertyIds =
+      object.objectProperties.map((p) => "r'${p.isarName}': ${p.id}").join(',');
   final listProperties = object.objectProperties
       .filter((p) => p.isarType.isList)
       .map((p) => "r'${p.isarName}'")
       .join(',');
-  final indexIds =
-      object.indexes.mapIndexed((i, index) => "r'${index.name}': $i").join(',');
+
+  final indexIds = object.indexes.map((i) => "r'${i.name}': ${i.id}").join(',');
   final indexValueTypes = object.indexes.map((i) {
     final types = i.properties.map((e) => e.indexValueTypeEnum).join(',');
     return "r'${i.name}': [$types,]";
   }).join(',');
-  final linkIds =
-      object.links.mapIndexed((i, link) => "r'${link.isarName}': $i").join(',');
+
+  final linkIds = object.links
+      .map((l) => "r'${l.isarName}': ${l.id(object.isarName)}")
+      .join(',');
   final backlinkLinkNames = object.links
       .where((e) => e.backlink)
       .map((link) => "r'${link.isarName}': r'${link.targetIsarName}'")
+      .join(',');
+  final linkedSchemaNames =
+      object.links.map((l) => "r'${l.targetCollectionIsarName}'").join(',');
+
+  final embeddedSchemas = object.properties
+      .where(
+        (e) =>
+            e.isarType == IsarType.object || e.isarType == IsarType.objectList,
+      )
+      .map((e) => e.dartName)
+      .where((e) => e != object.dartName)
+      .toSet()
+      .map((e) => "r'$e': ${e.capitalize()}Schema")
       .join(',');
 
   return '''
     const ${object.dartName.capitalize()}Schema = CollectionSchema(
       name: r'${object.isarName}',
+      id: ${object.id},
       schema: r'$schema',
       
       idName: r'${object.idProperty.isarName}',
@@ -41,7 +56,9 @@ String generateCollectionSchema(ObjectInfo object) {
       indexValueTypes: {$indexValueTypes},
       linkIds: {$linkIds},
       backlinkLinkNames: {$backlinkLinkNames},
-      dependencies: [],
+      linkedSchemaNames: [$linkedSchemaNames],
+
+      embeddedSchemas: {$embeddedSchemas},
 
       getId: ${object.getIdName},
       getLinks: ${object.getLinksName},

@@ -147,6 +147,7 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
       final bytesPtrPtr = txn.alloc<Pointer<Uint8>>();
       final lengthPtr = txn.alloc<Uint32>();
       final idNamePtr = col.schema.idName.toCString(txn.alloc);
+
       nCall(
         IC.isar_q_export_json(
           queryPtr,

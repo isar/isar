@@ -54,12 +54,6 @@ Future<Isar> openIsar({
     final col = instance.getCollection(schema.name);
     schema.toCollection(<OBJ>() {
       schema as CollectionSchema<OBJ>;
-      final compositeIndexes = <String>{};
-      for (final indexName in schema.indexValueTypes.keys) {
-        if (schema.indexValueTypes[indexName]!.length > 1) {
-          compositeIndexes.add(indexName);
-        }
-      }
       cols[OBJ] = IsarCollectionImpl<OBJ>(
         isar: isar,
         native: col,

@@ -153,13 +153,9 @@ class IndexWhereClause extends WhereClause {
 class LinkWhereClause extends WhereClause {
   /// Create a where clause for the specified link.
   const LinkWhereClause({
-    required this.linkCollection,
     required this.linkName,
     required this.id,
   }) : super._();
-
-  /// The name of the collection the link originates from.
-  final String linkCollection;
 
   /// The isar name of the link to be used.
   final String linkName;
@@ -423,21 +419,29 @@ class FilterGroup extends FilterOperation {
   }) : super._();
 
   /// Create a logical AND filter group.
+  ///
+  /// Matches when all [filters] match.
   const FilterGroup.and(this.filters)
       : type = FilterGroupType.and,
         super._();
 
   /// Create a logical OR filter group.
+  ///
+  /// Matches when any of the [filters] matches.
   const FilterGroup.or(this.filters)
       : type = FilterGroupType.or,
         super._();
 
   /// Create a logical XOR filter group.
+  ///
+  /// Matches when exactly one of the [filters] matches.
   const FilterGroup.xor(this.filters)
       : type = FilterGroupType.xor,
         super._();
 
   /// Negate a filter.
+  ///
+  /// Matches when any of the [filter] doesn't matches.
   FilterGroup.not(FilterOperation filter)
       : filters = [filter],
         type = FilterGroupType.not,
@@ -483,13 +487,27 @@ class DistinctProperty {
   final bool? caseSensitive;
 }
 
+/// Filter condition based on an embedded object.
+class ObjectFilter extends FilterOperation {
+  /// Create a filter condition based on an embedded object.
+  const ObjectFilter({
+    required this.property,
+    required this.filter,
+  }) : super._();
+
+  /// Property containing the embedded object(s).
+  final String property;
+
+  /// Filter condition that should be applied
+  final FilterOperation filter;
+}
+
 /// Filter condition based on a link.
 class LinkFilter extends FilterOperation {
   /// Create a filter condition based on a link.
   const LinkFilter({
-    required FilterOperation filter,
     required this.linkName,
-    required this.targetCollection,
+    required FilterOperation filter,
   })  : filter = filter,
         lower = null,
         upper = null,
@@ -497,14 +515,16 @@ class LinkFilter extends FilterOperation {
 
   /// Create a filter condition based on the number of linked objects.
   const LinkFilter.length({
+    required this.linkName,
     required int lower,
     required int upper,
-    required this.linkName,
-    required this.targetCollection,
   })  : filter = null,
         lower = lower,
         upper = upper,
         super._();
+
+  /// Isar name of the link.
+  final String linkName;
 
   /// Filter condition that should be applied
   final FilterOperation? filter;
@@ -514,10 +534,4 @@ class LinkFilter extends FilterOperation {
 
   /// The maximum number of linked objects
   final int? upper;
-
-  /// Isar name of the link.
-  final String linkName;
-
-  /// The name of the collection the link points to.
-  final String targetCollection;
 }

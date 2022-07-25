@@ -34,16 +34,13 @@ class BinaryWriter {
   @pragma('vm:prefer-inline')
   void writeBool(int offset, bool? value) {
     assert(offset < _staticSize);
-    if (value == null) {
-      _buffer[offset] = nullBool;
-    } else {
-      _buffer[offset] = value ? trueBool : falseBool;
-    }
+    _buffer[offset] = value.isarValue;
   }
 
   @pragma('vm:prefer-inline')
-  void writeByte(int offset, int value) {
+  void writeByte(int offset, int? value) {
     assert(offset < _staticSize);
+    value ??= nullByte;
     assert(value >= minByte && value <= maxByte);
     _buffer[offset] = value;
   }
@@ -116,13 +113,14 @@ class BinaryWriter {
   }
 
   @pragma('vm:prefer-inline')
-  void writeByteList(int offset, List<int>? value) {
+  void writeByteList(int offset, List<int?>? values) {
     assert(offset < _staticSize);
-    _writeListOffset(offset, value?.length);
+    _writeListOffset(offset, values?.length);
 
-    if (value != null) {
-      _buffer.setRange(_dynamicOffset, _dynamicOffset + value.length, value);
-      _dynamicOffset += value.length;
+    if (values != null) {
+      for (var i = 0; i < values.length; i++) {
+        _buffer[_dynamicOffset++] = values[i] ?? nullByte;
+      }
     }
   }
 
@@ -132,12 +130,7 @@ class BinaryWriter {
 
     if (values != null) {
       for (var i = 0; i < values.length; i++) {
-        final value = values[i];
-        if (value == null) {
-          _buffer[_dynamicOffset++] = nullBool;
-        } else {
-          _buffer[_dynamicOffset++] = value ? trueBool : falseBool;
-        }
+        _buffer[_dynamicOffset++] = values[i].isarValue;
       }
     }
   }
@@ -204,13 +197,12 @@ class BinaryWriter {
   }
 
   void writeDateTimeList(int offset, List<DateTime?>? values) {
-    final longList =
-        values?.map((e) => e?.toUtc().microsecondsSinceEpoch).toList();
+    final longList = values?.map((e) => e.isarValue).toList();
     writeLongList(offset, longList);
   }
 
   void writeEnumList(int offset, List<Enum?>? values) {
-    final byteList = values?.map((e) => (e?.index ?? -1) + 1).toList();
+    final byteList = values?.map((e) => e.isarValue).toList();
     writeByteList(offset, byteList);
   }
 
@@ -233,4 +225,20 @@ class BinaryWriter {
       }
     }
   }
+}
+
+extension IsarBoolValue on bool? {
+  @pragma('vm:prefer-inline')
+  int get isarValue =>
+      this == null ? nullBool : (this == true ? trueBool : falseBool);
+}
+
+extension IsarEnumValue on Enum? {
+  @pragma('vm:prefer-inline')
+  int get isarValue => (this?.index ?? -1) + 1;
+}
+
+extension IsarDateTimeValue on DateTime? {
+  @pragma('vm:prefer-inline')
+  int get isarValue => this?.toUtc().microsecondsSinceEpoch ?? nullLong;
 }

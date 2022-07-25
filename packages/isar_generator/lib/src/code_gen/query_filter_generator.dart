@@ -1,5 +1,6 @@
 import 'package:dartx/dartx.dart';
-
+import 'package:isar/isar.dart';
+import 'package:isar_generator/src/code_gen/query_filter_length.dart';
 import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
@@ -17,15 +18,19 @@ class FilterGenerator {
         code += generateIsNull(property);
       }
 
-      if (property.isarType != IsarType.float ||
-          property.isarType != IsarType.floatList ||
-          property.isarType != IsarType.double ||
-          property.isarType != IsarType.doubleList) {
+      if (property.isarType != IsarType.float &&
+          property.isarType != IsarType.floatList &&
+          property.isarType != IsarType.double &&
+          property.isarType != IsarType.doubleList &&
+          property.isarType != IsarType.object &&
+          property.isarType != IsarType.objectList) {
         code += generateEqualTo(property);
       }
 
       if (property.isarType != IsarType.bool &&
-          property.isarType != IsarType.boolList) {
+          property.isarType != IsarType.boolList &&
+          property.isarType != IsarType.object &&
+          property.isarType != IsarType.objectList) {
         code += generateGreaterThan(property);
         code += generateLessThan(property);
         code += generateBetween(property);
@@ -37,6 +42,12 @@ class FilterGenerator {
         code += generateStringEndsWith(property);
         code += generateStringContains(property);
         code += generateStringMatches(property);
+      }
+
+      if (property.isarType.isList &&
+          property.isarType != IsarType.object &&
+          property.isarType != IsarType.objectList) {
+        code += generateListLength(property);
       }
     }
     return '''
@@ -210,5 +221,21 @@ class FilterGenerator {
         ));
       });
     }''';
+  }
+
+  String generateListLength(ObjectProperty p) {
+    return generateLength(objName, p.dartName,
+        (lower, includeLower, upper, includeUpper) {
+      return '''
+        QueryBuilder.apply(this, (query) {
+          return query.listLength(
+            r'${p.isarName}',
+            $lower,
+            $includeLower,
+            $upper,
+            $includeUpper,
+          );
+        })''';
+    });
   }
 }

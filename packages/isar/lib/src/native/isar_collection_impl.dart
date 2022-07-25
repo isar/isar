@@ -161,7 +161,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       IC.isar_get_all_by_index(
         ptr,
         txn.ptr,
-        schema.indexIdOrErr(indexName),
+        schema.index(indexName).id,
         keysPtrPtr,
         cObjSetPtr,
       );
@@ -172,7 +172,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   List<OBJ?> getAllByIndexSync(String indexName, List<IndexKey> keys) {
-    final indexId = schema.indexIdOrErr(indexName);
+    final index = schema.index(indexName);
 
     return isar.getTxnSync(false, (txn) {
       final cObjPtr = txn.allocCObject();
@@ -186,7 +186,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
           keys[i],
           requireFullKey: true,
         )!;
-        nCall(IC.isar_get_by_index(ptr, txn.ptr, indexId, keyPtr, cObjPtr));
+        nCall(IC.isar_get_by_index(ptr, txn.ptr, index.id, keyPtr, cObjPtr));
         objects[i] = deserializeObjectOrNull(cObj);
       }
 
@@ -211,7 +211,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       return putByIndexSyncInternal(
         txn: txn,
         object: object,
-        indexId: schema.indexIdOrErr(indexName),
+        indexId: schema.index(indexName).id,
         saveLinks: saveLinks,
       );
     });
@@ -270,7 +270,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   Future<List<int>> putAllByIndex(String? indexName, List<OBJ> objects) {
-    final indexId = indexName != null ? schema.indexIdOrErr(indexName) : null;
+    final indexId = indexName != null ? schema.index(indexName).id : null;
 
     return isar.getTxn(true, (txn) async {
       final cObjSetPtr = txn.allocCObjectSet(objects.length);
@@ -332,7 +332,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     List<OBJ> objects, {
     bool saveLinks = true,
   }) {
-    final indexId = indexName != null ? schema.indexIdOrErr(indexName) : null;
+    final indexId = indexName != null ? schema.index(indexName).id : null;
     final ids = List.filled(objects.length, 0);
     isar.getTxnSync(true, (txn) {
       for (var i = 0; i < objects.length; i++) {
@@ -386,7 +386,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       IC.isar_delete_all_by_index(
         ptr,
         txn.ptr,
-        schema.indexIdOrErr(indexName),
+        schema.index(indexName).id,
         keysPtrPtr,
         keys.length,
         countPtr,
@@ -407,7 +407,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         IC.isar_delete_all_by_index(
           ptr,
           txn.ptr,
-          schema.indexIdOrErr(indexName),
+          schema.index(indexName).id,
           keysPtrPtr,
           keys.length,
           countPtr,

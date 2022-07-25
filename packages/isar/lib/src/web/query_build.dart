@@ -349,6 +349,7 @@ String _buildConditionInternal({
     case FilterConditionType.isNull:
       return isNull;
   }
+  return isNull; // TOCO fix
 }
 
 SortCmpJs _buildSort(List<SortProperty> properties) {
