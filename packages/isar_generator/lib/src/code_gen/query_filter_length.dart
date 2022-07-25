@@ -16,6 +16,14 @@ String generateLength(
         return ${codeGen('length', 'true', 'length', 'true')};
       }
 
+      QueryBuilder<$objectName, $objectName, QAfterFilterCondition> ${propertyName.decapitalize()}IsEmpty() {
+        return ${codeGen('0', 'true', '0', 'true')};
+      }
+
+      QueryBuilder<$objectName, $objectName, QAfterFilterCondition> ${propertyName.decapitalize()}IsNotEmpty() {
+        return ${codeGen('0', 'false', '999999', 'true')};
+      }
+
       QueryBuilder<$objectName, $objectName, QAfterFilterCondition> ${propertyName.decapitalize()}LengthLessThan(
         int length, {
         bool include = false,
