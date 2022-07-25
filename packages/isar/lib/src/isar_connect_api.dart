@@ -14,7 +14,8 @@ enum ConnectAction {
   exportJson('ext.isar.exportJson'),
   editProperty('ext.isar.editProperty'),
   addInList('ext.isar.addInList'),
-  removeFromList('ext.isar.removeFromList');
+  removeFromList('ext.isar.removeFromList'),
+  aggregation('ext.isar.aggregation');
 
   const ConnectAction(this.method);
 
@@ -39,6 +40,7 @@ class ConnectQuery {
     this.offset,
     this.limit,
     this.sortProperty,
+    this.property,
   });
 
   factory ConnectQuery.fromJson(Map<String, dynamic> json) {
@@ -56,6 +58,7 @@ class ConnectQuery {
               sort: Sort.values[json['sortProperty']['sort'] as int],
             )
           : null,
+      property: json['property'] as String?,
     );
   }
 
@@ -65,6 +68,7 @@ class ConnectQuery {
   final int? offset;
   final int? limit;
   final SortProperty? sortProperty;
+  final String? property;
 
   Map<String, dynamic> toJson() {
     return {
@@ -78,6 +82,7 @@ class ConnectQuery {
           'property': sortProperty!.property,
           'sort': sortProperty!.sort.index,
         },
+      if (property != null) 'property': property
     };
   }
 

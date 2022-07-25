@@ -17,6 +17,7 @@ abstract class _IsarConnect {
     ConnectAction.editProperty: _editProperty,
     ConnectAction.addInList: _addInList,
     ConnectAction.removeFromList: _removeFromList,
+    ConnectAction.aggregation: _aggregation,
   };
 
   static bool _initialized = false;
@@ -302,6 +303,15 @@ abstract class _IsarConnect {
     await collection.isar.writeTxn(() async => collection.importJson(objects));
   }
 
+  static Future<num?> _aggregation(Map<String, dynamic> params) async {
+    final cQuery = ConnectQuery.fromJson(
+      params['query'] as Map<String, dynamic>,
+    );
+
+    final query = _getQuery(cQuery);
+    return query.aggregate<num>(AggregationOp.values[params['op'] as int]);
+  }
+
   static Query<dynamic> _getQuery(ConnectQuery query) {
     final collection = Isar.getInstance(query.instance)!
         .getCollectionByNameInternal(query.collection)!;
@@ -325,6 +335,7 @@ abstract class _IsarConnect {
       offset: query.offset,
       limit: query.limit,
       sortBy: [if (sortProperty != null) sortProperty],
+      property: query.property,
     );
   }
 }

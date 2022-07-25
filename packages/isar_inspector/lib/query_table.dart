@@ -7,6 +7,7 @@ import 'package:isar/isar.dart';
 import 'package:isar_inspector/common.dart';
 import 'package:isar_inspector/edit_popup.dart';
 import 'package:isar_inspector/prev_next.dart';
+import 'package:isar_inspector/query_builder.dart';
 import 'package:isar_inspector/schema.dart';
 import 'package:isar_inspector/state/collections_state.dart';
 import 'package:isar_inspector/state/instances_state.dart';
@@ -25,6 +26,8 @@ typedef Editor = void Function(
   dynamic value,
   EditorType editing,
 );
+
+typedef Aggregate = Future<num?> Function(String property, AggregationOp op);
 
 enum EditorType { add, edit, remove }
 
@@ -69,21 +72,34 @@ class QueryTable extends ConsumerWidget {
                         value: value,
                       );
 
+                      final pod = ref.read(isarConnectPod.notifier);
                       switch (editing) {
                         case EditorType.add:
-                          ref.read(isarConnectPod.notifier).addInList(edit);
+                          pod.addInList(edit);
                           break;
 
                         case EditorType.edit:
-                          ref.read(isarConnectPod.notifier).editProperty(edit);
+                          pod.editProperty(edit);
                           break;
 
                         case EditorType.remove:
-                          ref
-                              .read(isarConnectPod.notifier)
-                              .removeFromList(edit);
+                          pod.removeFromList(edit);
                           break;
                       }
+                    },
+                    aggregate: (property, op) async {
+                      final query = ConnectQuery(
+                        instance: ref.read(selectedInstancePod).value!,
+                        collection: collection.name,
+                        filter: collection.uiFilter == null
+                            ? null
+                            : QueryBuilderUI.parseQuery(collection.uiFilter!),
+                        property: property,
+                      );
+
+                      return ref
+                          .read(isarConnectPod.notifier)
+                          .aggregate(query, op);
                     },
                   ),
                   Align(
@@ -141,11 +157,13 @@ class TableBlock extends StatefulWidget {
     required this.collection,
     required this.object,
     required this.editor,
+    required this.aggregate,
   });
 
   final ICollection collection;
   final QueryObject object;
   final Editor editor;
+  final Aggregate aggregate;
 
   @override
   State<TableBlock> createState() => _TableBlockState();
@@ -173,6 +191,7 @@ class _TableBlockState extends State<TableBlock> {
             data: node.data as TreeViewHelper,
             editor: widget.editor,
             objectId: _id,
+            aggregate: widget.aggregate,
           );
         },
         onExpansionChanged: (key, expanded) {
@@ -324,11 +343,13 @@ class TableItem extends StatefulWidget {
     required this.data,
     required this.editor,
     required this.objectId,
+    required this.aggregate,
   });
 
   final TreeViewHelper data;
   final int objectId;
   final Editor editor;
+  final Aggregate aggregate;
 
   @override
   State<TableItem> createState() => _TableItemState();
@@ -337,7 +358,7 @@ class TableItem extends StatefulWidget {
 class _TableItemState extends State<TableItem> {
   bool _entered = false;
 
-  late final _options = [
+  late final _options = <PopupMenuEntry<dynamic>>[
     if (widget.data is LinkHelper && widget.data.value != null)
       PopupMenuItem<dynamic>(
         onTap: () => _copy(true),
@@ -448,6 +469,53 @@ class _TableItemState extends State<TableItem> {
         onTap: () => _setValue(null),
         child: const PopUpMenuRow(
           text: 'Set value to null',
+        ),
+      ),
+    if (widget.data is PropertyHelper &&
+        !(widget.data as PropertyHelper).subLink &&
+        (widget.data as PropertyHelper).index == null &&
+        (widget.data as PropertyHelper).property.type.isNum)
+      PopupMenuItem(
+        padding: EdgeInsets.zero,
+        child: PopupMenuButton(
+          position: PopupMenuPosition.under,
+          tooltip: '',
+          onCanceled: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
+          },
+          itemBuilder: (BuildContext context) => [
+            PopupMenuItem<dynamic>(
+              onTap: () => _aggregate(AggregationOp.min),
+              child: const PopUpMenuRow(text: 'Min'),
+            ),
+            PopupMenuItem<dynamic>(
+              onTap: () => _aggregate(AggregationOp.max),
+              child: const PopUpMenuRow(text: 'Max'),
+            ),
+            PopupMenuItem<dynamic>(
+              onTap: () => _aggregate(AggregationOp.sum),
+              child: const PopUpMenuRow(text: 'Sum'),
+            ),
+            PopupMenuItem<dynamic>(
+              onTap: () => _aggregate(AggregationOp.average),
+              child: const PopUpMenuRow(text: 'Average'),
+            ),
+          ],
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            constraints: const BoxConstraints(
+              minHeight: kMinInteractiveDimension,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                PopUpMenuRow(text: 'Aggregation'),
+                Icon(Icons.arrow_right),
+              ],
+            ),
+          ),
         ),
       ),
   ];
@@ -588,6 +656,38 @@ class _TableItemState extends State<TableItem> {
       null,
       EditorType.remove,
     );
+  }
+
+  Future<void> _aggregate(AggregationOp op) async {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    final property = (widget.data as PropertyHelper).property;
+    dynamic result;
+
+    if (property.type == IsarType.Int ||
+        property.type == IsarType.Long ||
+        property.type == IsarType.Byte) {
+      result = (await widget.aggregate(property.name, op))?.toInt();
+    } else {
+      result = await widget.aggregate(property.name, op);
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 8),
+          width: 300,
+          behavior: SnackBarBehavior.floating,
+          content: Text(
+            '${op.name}(${property.name}) = $result',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   Widget _createText() {

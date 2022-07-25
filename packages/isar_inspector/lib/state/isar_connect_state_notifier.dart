@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar/isar.dart';
 import 'package:isar/src/isar_connect_api.dart';
 import 'package:isar_inspector/state/collections_state.dart';
 import 'package:isar_inspector/state/instances_state.dart';
@@ -193,6 +194,14 @@ class IsarConnectStateNotifier
     await _call<dynamic>(
       ConnectAction.removeFromList,
       args: edit.toJson(),
+      timeout: kLongTimeout,
+    );
+  }
+
+  Future<num?> aggregate(ConnectQuery query, AggregationOp op) async {
+    return _call<num?>(
+      ConnectAction.aggregation,
+      args: {'query': query.toJson(), 'op': op.index},
       timeout: kLongTimeout,
     );
   }

@@ -1,6 +1,5 @@
 import 'dart:core';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_inspector/query_builder.dart';
@@ -216,5 +215,19 @@ enum IsarType {
         return Bool;
     }
     throw IsarError('new IsarType ($name), rule not defined');
+  }
+
+  bool get isNum {
+    //ignore: missing_enum_constant_in_switch
+    switch (this) {
+      case IsarType.Int:
+      case IsarType.Float:
+      case IsarType.Long:
+      case IsarType.Byte:
+      case IsarType.Double:
+        return true;
+    }
+
+    return false;
   }
 }
