@@ -1908,7 +1908,6 @@ class IsarCoreBindings {
     ffi.Pointer<CQuery> query,
     ffi.Pointer<CIsarTxn> txn,
     int operation,
-    int embedded_col_id,
     int property_id,
     ffi.Pointer<ffi.Pointer<CAggregationResult>> result,
   ) {
@@ -1917,7 +1916,6 @@ class IsarCoreBindings {
       query,
       txn,
       operation,
-      embedded_col_id,
       property_id,
       result,
     );
@@ -1931,7 +1929,6 @@ class IsarCoreBindings {
                   ffi.Pointer<CIsarTxn>,
                   ffi.Uint8,
                   ffi.Uint64,
-                  ffi.Uint64,
                   ffi.Pointer<ffi.Pointer<CAggregationResult>>)>>(
       'isar_q_aggregate');
   late final _isar_q_aggregate = _isar_q_aggregatePtr.asFunction<
@@ -1939,7 +1936,6 @@ class IsarCoreBindings {
           ffi.Pointer<CIsarCollection>,
           ffi.Pointer<CQuery>,
           ffi.Pointer<CIsarTxn>,
-          int,
           int,
           int,
           ffi.Pointer<ffi.Pointer<CAggregationResult>>)>();
