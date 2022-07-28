@@ -28,7 +28,7 @@ Small hotfix: existing bool properties were rejected in schema migration.
 - `.putSync()`, `.putAllSync()` etc. will now save links recursively by default
 - Improved `.putSync()` and `.putIndexedSync()` performance
 - Added `isar.getSize()` and `isar.getSizeSync()`
-- Reintrodced option to disable the inspector
+- Reintroduced option to disable the inspector
 - Slightly improved default collection accessor naming
 - Id property queries now always return a `List<int>` even if the id is nullable
 - Added `id`, `byte`, `short` and `float` typedefs
