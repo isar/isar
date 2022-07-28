@@ -295,7 +295,7 @@ _Web passes all unit tests but is still considered beta for now._
 - Allowed multiple indexes on the same property
 - Removed exported packages from API docs
 - Improved generated code
-- Imoroved Isar Core error messages
+- Improved Isar Core error messages
 - Minor performance improvements
 - Automatic XCode configuration
 - Updated analyzer to `3.0.0`
