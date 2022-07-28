@@ -23,13 +23,13 @@ Small hotfix: existing bool properties were rejected in schema migration.
 ### Enhancements
 
 - Vastly improved Isar binary format space efficiency resulting in up to 20% smaller databases
-- Slighly improved String index space efficiency saving two bytes per string
+- Slightly improved String index space efficiency saving two bytes per string
 - On non-web platforms, `IsarLink` and `IsarLinks` will load automatically
 - `.putSync()`, `.putAllSync()` etc. will now save links recursively by default
 - Improved `.putSync()` and `.putIndexedSync()` performance
 - Added `isar.getSize()` and `isar.getSizeSync()`
 - Reintrodced option to disable the inspector
-- Slighly improved default collection accessor naming
+- Slightly improved default collection accessor naming
 - Id property queries now always return a `List<int>` even if the id is nullable
 - Added `id`, `byte`, `short` and `float` typedefs
 - `Uint8List` properties now support multi-entry indexes
