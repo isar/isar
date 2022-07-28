@@ -129,7 +129,7 @@ class IsarAnalyzer {
     if (isarType == null) {
       err(
         'Unsupported type. Please use a TypeConverter or annotate the '
-        'propery with @ignore.',
+        'property with @ignore.',
         property,
       );
     }
