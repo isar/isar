@@ -10,7 +10,7 @@ Right now, the most helpful contributions are tests! The goal is to have at leas
 
 Isar Dart is the main Isar repository (the one you are looking at right now).
 
-## Project Strucutre 🏛
+## Project Structure 🏛
 
 - `isar` package in _packages/isar_ is the only library that has runtime Dart code. It contains all the public API interfaces as well as platform specific implementations (_src/native_ and _src/web_) to communicate with the respective backend.
 - `isar_flutter_libs` does not contain any Dart code but a native project for every platform to ensure that compiled Isar Code binaries are shipped correctly.
