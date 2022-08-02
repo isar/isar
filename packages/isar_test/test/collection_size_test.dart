@@ -236,7 +236,7 @@ void main() {
 
     isarTest('Update should change size', () async {
       await isar.tWriteTxn(
-            () => Future.wait([
+        () => Future.wait([
           isar.modelAs.tPutAll([objA0, objA1, objA2, objA3]),
           isar.modelBs.tPutAll([objB0, objB1, objB2, objB3, objB4]),
         ]),
