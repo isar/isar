@@ -135,6 +135,23 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
       return importJson(json);
     }
   }
+
+  Future<int> tGetSize({
+    bool includeIndexes = false,
+    bool includeLinks = false,
+  }) {
+    if (syncTest) {
+      return SynchronousFuture(getSizeSync(
+        includeIndexes: includeIndexes,
+        includeLinks: includeLinks,
+      ));
+    } else {
+      return getSize(
+        includeIndexes: includeIndexes,
+        includeLinks: includeLinks,
+      );
+    }
+  }
 }
 
 extension QueryBuilderExecute<OBJ, R>
