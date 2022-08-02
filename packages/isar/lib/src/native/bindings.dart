@@ -497,6 +497,26 @@ class IsarCoreBindings {
       int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>, bool,
           bool, ffi.Pointer<ffi.Int64>)>();
 
+  int isar_verify(
+    ffi.Pointer<CIsarCollection> collection,
+    ffi.Pointer<CIsarTxn> txn,
+    ffi.Pointer<CObjectSet> objects,
+  ) {
+    return _isar_verify(
+      collection,
+      txn,
+      objects,
+    );
+  }
+
+  late final _isar_verifyPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int64 Function(ffi.Pointer<CIsarCollection>,
+              ffi.Pointer<CIsarTxn>, ffi.Pointer<CObjectSet>)>>('isar_verify');
+  late final _isar_verify = _isar_verifyPtr.asFunction<
+      int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>,
+          ffi.Pointer<CObjectSet>)>();
+
   void isar_connect_dart_api(
     DartPostCObjectFnType ptr,
   ) {
@@ -1470,6 +1490,23 @@ class IsarCoreBindings {
           void Function(
               ffi.Pointer<CIsarInstance>, ffi.Pointer<ffi.Char>, int)>();
 
+  int isar_instance_verify(
+    ffi.Pointer<CIsarInstance> instance,
+    ffi.Pointer<CIsarTxn> txn,
+  ) {
+    return _isar_instance_verify(
+      instance,
+      txn,
+    );
+  }
+
+  late final _isar_instance_verifyPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int64 Function(ffi.Pointer<CIsarInstance>,
+              ffi.Pointer<CIsarTxn>)>>('isar_instance_verify');
+  late final _isar_instance_verify = _isar_instance_verifyPtr.asFunction<
+      int Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>)>();
+
   int isar_get_offsets(
     ffi.Pointer<CIsarCollection> collection,
     ffi.Pointer<ffi.Uint32> offsets,
@@ -2160,3 +2197,5 @@ const int IsarObject_TRUE_BOOL = 2;
 const int IsarObject_NULL_INT = -2147483648;
 
 const int IsarObject_NULL_LONG = -9223372036854775808;
+
+const int SchemaManager_ISAR_VERSION = 2;
