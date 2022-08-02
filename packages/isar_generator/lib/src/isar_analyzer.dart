@@ -245,7 +245,7 @@ class IsarAnalyzer {
     }
 
     final backlinkAnn = property.backlinkAnnotation;
-    String? targetIsarName;
+    String? targetLinkIsarName;
     if (backlinkAnn != null) {
       final targetProperty = targetCol.allAccessors
           .firstOrNullWhere((e) => e.displayName == backlinkAnn.to);
@@ -260,18 +260,16 @@ class IsarAnalyzer {
       }
 
       final targetLink = analyzeObjectLink(targetProperty);
-      targetIsarName = targetLink.isarName;
+      targetLinkIsarName = targetLink.isarName;
     }
 
     return ObjectLink(
       dartName: property.displayName,
       isarName: property.isarName,
-      targetIsarName: targetIsarName,
+      targetLinkIsarName: targetLinkIsarName,
       targetCollectionDartName: linkType.element!.name!,
       targetCollectionIsarName: targetCol.isarName,
-      targetCollectionAccessor: targetCol.collectionAccessor,
-      links: property.isLinks,
-      backlink: backlinkAnn != null,
+      isSingle: property.isLink,
     );
   }
 
@@ -287,10 +285,12 @@ class IsarAnalyzer {
 
     for (final index in element.indexAnnotations) {
       final indexProperties = <ObjectIndexProperty>[];
-      final defaultType =
-          property.isarType.isDynamic ? IndexType.hash : IndexType.value;
       final isString = property.isarType == IsarType.string ||
           property.isarType == IsarType.stringList;
+      final defaultType = property.isarType.isList || isString
+          ? IndexType.hash
+          : IndexType.value;
+
       indexProperties.add(
         ObjectIndexProperty(
           property: property,
@@ -306,80 +306,86 @@ class IsarAnalyzer {
         } else if (compositeProperty.isarType == IsarType.id) {
           err('Ids cannot be indexed', element);
         } else {
-          final isString = property.isarType == IsarType.string ||
-              property.isarType == IsarType.stringList;
+          final isString = compositeProperty.isarType == IsarType.string ||
+              compositeProperty.isarType == IsarType.stringList;
+          final defaultType = compositeProperty.isarType.isList || isString
+              ? IndexType.hash
+              : IndexType.value;
           indexProperties.add(
             ObjectIndexProperty(
               property: compositeProperty,
-              type: c.type ??
-                  (compositeProperty.isarType.isDynamic
-                      ? IndexType.hash
-                      : IndexType.value),
+              type: c.type ?? defaultType,
               caseSensitive: c.caseSensitive ?? isString,
             ),
           );
         }
       }
 
-      if (indexProperties.map((it) => it.property.isarName).distinct().length !=
-          indexProperties.length) {
-        err('Composite index contains duplicate properties.', element);
-      }
-
-      for (var i = 0; i < indexProperties.length; i++) {
-        final indexProperty = indexProperties[i];
-        if (indexProperty.isarType.isList &&
-            indexProperty.type != IndexType.hash &&
-            indexProperties.length > 1) {
-          err('Composite indexes do not support non-hashed lists.', element);
-        }
-        if ((property.isarType == IsarType.float ||
-                property.isarType == IsarType.floatList) &&
-            i != indexProperties.lastIndex) {
-          err(
-            'Only the last property of a composite index may be a '
-            'double value.',
-            element,
-          );
-        }
-        if (indexProperty.isarType == IsarType.string) {
-          if (indexProperty.type != IndexType.hash &&
-              i != indexProperties.lastIndex) {
-            err(
-              'Only the last property of a composite index may be a '
-              'non-hashed String.',
-              element,
-            );
-          }
-        }
-        if (indexProperty.type != IndexType.value) {
-          if (!indexProperty.isarType.isDynamic) {
-            err('Only Strings and Lists may be hashed.', element);
-          } else if (property.isarType == IsarType.float ||
-              property.isarType == IsarType.floatList) {
-            err('List<double> may must not be hashed.', element);
-          }
-        }
-        if (indexProperty.isarType != IsarType.stringList &&
-            indexProperty.type == IndexType.hashElements) {
-          err('Only String lists may have hashed elements.', element);
-        }
-      }
-
-      if (!index.unique && index.replace) {
-        err('Only unique indexes can replace.', element);
-      }
-
       final name = index.name ??
           indexProperties.map((e) => e.property.isarName).join('_');
       checkIsarName(name, element);
 
-      yield ObjectIndex(
+      final objectIndex = ObjectIndex(
         name: name,
         properties: indexProperties,
         unique: index.unique,
         replace: index.replace,
       );
+      _verifyObjectIndex(objectIndex, element);
+
+      yield objectIndex;
+    }
+  }
+
+  void _verifyObjectIndex(ObjectIndex index, Element element) {
+    final properties = index.properties;
+
+    if (properties.map((it) => it.property.isarName).distinct().length !=
+        properties.length) {
+      err('Composite index contains duplicate properties.', element);
+    }
+
+    for (var i = 0; i < properties.length; i++) {
+      final property = properties[i];
+      if (property.isarType.isList &&
+          property.type != IndexType.hash &&
+          properties.length > 1) {
+        err('Composite indexes do not support non-hashed lists.', element);
+      }
+      if ((property.isarType == IsarType.float ||
+              property.isarType == IsarType.floatList) &&
+          i != properties.lastIndex) {
+        err(
+          'Only the last property of a composite index may be a '
+          'double value.',
+          element,
+        );
+      }
+      if (property.isarType == IsarType.string) {
+        if (property.type != IndexType.hash && i != properties.lastIndex) {
+          err(
+            'Only the last property of a composite index may be a '
+            'non-hashed String.',
+            element,
+          );
+        }
+      }
+      if (property.type != IndexType.value) {
+        if (!property.isarType.isList && property.isarType != IsarType.string) {
+          err('Only Strings and Lists may be hashed.', element);
+        } else if (property.isarType == IsarType.float ||
+            property.isarType == IsarType.floatList) {
+          err('List<double> may must not be hashed.', element);
+        }
+      }
+      if (property.isarType != IsarType.stringList &&
+          property.type == IndexType.hashElements) {
+        err('Only String lists may have hashed elements.', element);
+      }
+    }
+
+    if (!index.unique && index.replace) {
+      err('Only unique indexes can replace.', element);
     }
   }
 }

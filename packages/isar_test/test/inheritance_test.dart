@@ -174,7 +174,7 @@ void main() {
 
     tearDown(() => isar.close());
 
-    test('Validate inheritance model properties', () {
+    /*test('Validate inheritance model properties', () {
       expect(InheritingModelSchema.idName, 'identifier');
       expect(InheritingModelSchema.propertyIds.containsKey('nameHash'), true);
       expect(InheritingModelSchema.propertyIds.containsKey('name'), true);
@@ -214,7 +214,7 @@ void main() {
       );
       expect(NonInheritingModelSchema.linkIds.containsKey('link'), false);
       expect(NonInheritingModelSchema.indexIds.containsKey('nameHash'), false);
-    });
+    });*/
 
     isarTest('Query model with inheritance', () async {
       await qEqualSet(

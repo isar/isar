@@ -34,7 +34,7 @@ class BinaryWriter {
   @pragma('vm:prefer-inline')
   void writeBool(int offset, bool? value) {
     assert(offset < _staticSize);
-    _buffer[offset] = value.isarValue;
+    _buffer[offset] = value.byteValue;
   }
 
   @pragma('vm:prefer-inline')
@@ -130,7 +130,7 @@ class BinaryWriter {
 
     if (values != null) {
       for (var i = 0; i < values.length; i++) {
-        _buffer[_dynamicOffset++] = values[i].isarValue;
+        _buffer[_dynamicOffset++] = values[i].byteValue;
       }
     }
   }
@@ -197,12 +197,12 @@ class BinaryWriter {
   }
 
   void writeDateTimeList(int offset, List<DateTime?>? values) {
-    final longList = values?.map((e) => e.isarValue).toList();
+    final longList = values?.map((e) => e.longValue).toList();
     writeLongList(offset, longList);
   }
 
   void writeEnumList(int offset, List<Enum?>? values) {
-    final byteList = values?.map((e) => e.isarValue).toList();
+    final byteList = values?.map((e) => e.byteValue).toList();
     writeByteList(offset, byteList);
   }
 
@@ -229,16 +229,16 @@ class BinaryWriter {
 
 extension IsarBoolValue on bool? {
   @pragma('vm:prefer-inline')
-  int get isarValue =>
+  int get byteValue =>
       this == null ? nullBool : (this == true ? trueBool : falseBool);
 }
 
 extension IsarEnumValue on Enum? {
   @pragma('vm:prefer-inline')
-  int get isarValue => (this?.index ?? -1) + 1;
+  int get byteValue => (this?.index ?? -1) + 1;
 }
 
 extension IsarDateTimeValue on DateTime? {
   @pragma('vm:prefer-inline')
-  int get isarValue => this?.toUtc().microsecondsSinceEpoch ?? nullLong;
+  int get longValue => this?.toUtc().microsecondsSinceEpoch ?? nullLong;
 }

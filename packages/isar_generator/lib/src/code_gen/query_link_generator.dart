@@ -10,43 +10,25 @@ String generateQueryLinks(ObjectInfo oi) {
     code += '''
       QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterFilterCondition> ${link.dartName.decapitalize()}(FilterQuery<${link.targetCollectionDartName}> q) {
         return QueryBuilder.apply(this, (query) {
-          return query.link(
-            query.collection.isar.${link.targetCollectionAccessor},
-            q,
-            r'${link.isarName}',
-          );
+          return query.link(q, r'${link.isarName}');
         });
       }''';
 
-    if (link.links) {
+    if (link.isSingle) {
+      code += '''
+        QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterFilterCondition> ${link.dartName.decapitalize()}isNull() {
+          return QueryBuilder.apply(this, (query) {
+            return query.linkLength(r'${link.isarName}', 0, true, 0, true);
+          });
+        }''';
+    } else {
       code += generateLength(oi.dartName, link.dartName,
           (lower, includeLower, upper, includeUpper) {
         return '''
         QueryBuilder.apply(this, (query) {
-          return query.linkLength(
-            query.collection.isar.${link.targetCollectionAccessor},
-            r'${link.isarName}',
-            $lower,
-            $includeLower,
-            $upper,
-            $includeUpper,
-          );
+          return query.linkLength(r'${link.isarName}', $lower, $includeLower, $upper, $includeUpper);
         })''';
       });
-    } else {
-      code += '''
-      QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterFilterCondition> ${link.dartName.decapitalize()}isNull() {
-        return QueryBuilder.apply(this, (query) {
-          return query.linkLength(
-            query.collection.isar.${link.targetCollectionAccessor},
-            r'${link.isarName}',
-            0,
-            true,
-            0,
-            true,
-          );
-        });
-      }''';
     }
   }
 

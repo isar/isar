@@ -83,7 +83,6 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
       collection: targetCollection,
       whereClauses: [
         LinkWhereClause(
-          linkCollection: sourceCollection.name,
           linkName: linkName,
           id: containingId,
         ),

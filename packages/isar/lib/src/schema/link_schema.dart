@@ -3,7 +3,7 @@ part of isar;
 class LinkSchema {
   /// @nodoc
   @protected
-  LinkSchema({
+  const LinkSchema({
     required this.id,
     required this.name,
     required this.target,
@@ -13,9 +13,11 @@ class LinkSchema {
 
   final int id;
   final String name;
-
   final String target;
   final bool isSingle;
+
+  /// If this is a backlink, [linkName] is the name of the source link in the
+  /// [target] collection.
   final String? linkName;
 
   bool get isBacklink => linkName != null;

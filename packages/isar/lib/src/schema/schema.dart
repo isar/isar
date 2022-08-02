@@ -5,8 +5,8 @@ class Schema<OBJ> {
   /// @nodoc
   @protected
   const Schema({
-    required this.name,
     required this.id,
+    required this.name,
     required this.properties,
     required this.serializeNative,
     required this.estimateSize,
@@ -24,8 +24,7 @@ class Schema<OBJ> {
   final String name;
 
   /// Whether this is an embedded object
-  // ignore: avoid_field_initializers_in_const_classes
-  final bool embedded = true;
+  bool get embedded => true;
 
   /// A map of name -> property pairs
   final Map<String, PropertySchema> properties;
@@ -107,7 +106,7 @@ typedef DeserializeNative<T> = T Function(
 typedef DeserializePropNative = dynamic Function(
   int id,
   IsarBinaryReader reader,
-  int propertyIndex,
+  int propertyId,
   int offset,
 );
 

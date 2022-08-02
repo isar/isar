@@ -9,12 +9,7 @@ class PropertySchema {
     required this.name,
     required this.type,
     this.target,
-  })  : assert(type != IsarType.id, 'Id properties are not supported'),
-        assert(
-          (type == IsarType.object || type == IsarType.objectList) ==
-              (target != null),
-          'Embedded object properties must define a target',
-        );
+  });
 
   /// Hashed name
   final int id;
@@ -33,7 +28,7 @@ class PropertySchema {
   Map<String, dynamic> toSchemaJson() {
     return {
       'name': name,
-      'type': type.name,
+      'type': type.schemaName,
       if (target != null) 'target': target,
     };
   }
@@ -109,4 +104,10 @@ enum IsarType {
 
   /// @nodoc
   final String schemaName;
+}
+
+/// @nodoc
+extension IsarTypeX on IsarType {
+  /// Whether this type represents a list
+  bool get isList => index >= IsarType.boolList.index;
 }

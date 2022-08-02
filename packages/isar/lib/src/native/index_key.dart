@@ -8,7 +8,6 @@ import 'package:isar/src/native/binary_writer.dart';
 import 'package:isar/src/native/bindings.dart';
 import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_core.dart';
-import 'package:isar/src/native/query_build.dart';
 
 final _keyPtrPtr = malloc<Pointer<CIndexKey>>();
 
@@ -89,7 +88,7 @@ void _addKeyValue(
 
   switch (property.type) {
     case IsarType.bool:
-      IC.isar_key_add_byte(keyPtr, boolToByte(value as bool?));
+      IC.isar_key_add_byte(keyPtr, (value as bool?).byteValue);
       break;
     case IsarType.byte:
       IC.isar_key_add_byte(keyPtr, value! as int);
@@ -107,10 +106,10 @@ void _addKeyValue(
       IC.isar_key_add_double(keyPtr, (value as double?) ?? nullDouble);
       break;
     case IsarType.dateTime:
-      IC.isar_key_add_long(keyPtr, (value as DateTime?).isarValue);
+      IC.isar_key_add_long(keyPtr, (value as DateTime?).longValue);
       break;
     case IsarType.enumeration:
-      IC.isar_key_add_byte(keyPtr, (value as Enum?).isarValue);
+      IC.isar_key_add_byte(keyPtr, (value as Enum?).byteValue);
       break;
     case IsarType.string:
       final strPtr = _strToNative(value as String?);
@@ -127,7 +126,9 @@ void _addKeyValue(
       } else {
         value as List<bool?>;
         final boolListPtr = malloc<Uint8>(value.length);
-        boolListPtr.asTypedList(value.length).setAll(0, value.map(boolToByte));
+        boolListPtr
+            .asTypedList(value.length)
+            .setAll(0, value.map((e) => e.byteValue));
         IC.isar_key_add_byte_list_hash(keyPtr, boolListPtr, value.length);
         malloc.free(boolListPtr);
       }
@@ -176,7 +177,7 @@ void _addKeyValue(
         value as List<DateTime?>;
         final longListPtr = malloc<Int64>(value.length);
         for (var i = 0; i < value.length; i++) {
-          longListPtr[i] = value[i].isarValue;
+          longListPtr[i] = value[i].longValue;
         }
         IC.isar_key_add_long_list_hash(keyPtr, longListPtr, value.length);
       }
@@ -188,7 +189,7 @@ void _addKeyValue(
         value as List<Enum?>;
         final byteListPtr = malloc<Uint8>(value.length);
         for (var i = 0; i < value.length; i++) {
-          byteListPtr[i] = value[i].isarValue;
+          byteListPtr[i] = value[i].byteValue;
         }
         IC.isar_key_add_byte_list_hash(keyPtr, byteListPtr, value.length);
       }

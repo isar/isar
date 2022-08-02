@@ -10,12 +10,7 @@ typedef IsarCloseCallback = void Function(String isarName);
 abstract class Isar {
   /// @nodoc
   @protected
-  Isar(this.name, int schemaHash) {
-    if (_schemaHash != null && _schemaHash != schemaHash) {
-      throw IsarError(
-        'Cannot open multiple Isar instances with different schema.',
-      );
-    }
+  Isar(this.name) {
     _instances[name] = this;
     for (final callback in _openCallbacks) {
       callback(this);
@@ -38,7 +33,6 @@ abstract class Isar {
   static final Map<String, Isar> _instances = <String, Isar>{};
   static final Set<IsarOpenCallback> _openCallbacks = <IsarOpenCallback>{};
   static final Set<IsarCloseCallback> _closeCallbacks = <IsarCloseCallback>{};
-  static int? _schemaHash;
 
   /// Name of the instance.
   final String name;
@@ -73,9 +67,9 @@ abstract class Isar {
       }
     }
     for (final schema in schemas) {
-      final dependencies = schema.links.values.map((e) => e.targetColllection);
+      final dependencies = schema.links.values.map((e) => e.target);
       for (final dependency in dependencies) {
-        if (schemaNames.contains(dependency)) {
+        if (!schemaNames.contains(dependency)) {
           throw IsarError(
             "Collection ${schema.name} depends on $dependency but it's schema "
             'was not provided.',
@@ -247,9 +241,6 @@ abstract class Isar {
     _isOpen = false;
     if (identical(_instances[name], this)) {
       _instances.remove(name);
-      if (_instances.isEmpty) {
-        _schemaHash = null;
-      }
     }
     for (final callback in _closeCallbacks) {
       callback(name);

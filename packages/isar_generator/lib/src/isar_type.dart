@@ -6,26 +6,6 @@ import 'package:isar/isar.dart';
 import 'package:isar_generator/src/helper.dart';
 import 'package:source_gen/source_gen.dart';
 
-extension IsarTypeX on IsarType {
-  bool get isDynamic {
-    return index >= IsarType.string.index;
-  }
-
-  bool get isList {
-    return index > IsarType.string.index;
-  }
-
-  int get staticSize {
-    if (this == IsarType.bool || this == IsarType.byte) {
-      return 1;
-    } else if (this == IsarType.int || this == IsarType.float) {
-      return 4;
-    } else {
-      return 8;
-    }
-  }
-}
-
 const TypeChecker _dateTimeChecker = TypeChecker.fromRuntime(DateTime);
 bool _isDateTime(Element element) => _dateTimeChecker.isExactly(element);
 

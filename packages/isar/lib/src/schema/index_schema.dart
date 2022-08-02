@@ -3,19 +3,19 @@ part of isar;
 class IndexSchema {
   /// @nodoc
   @protected
-  IndexSchema({
-    required this.name,
+  const IndexSchema({
     required this.id,
+    required this.name,
     required this.unique,
     required this.replace,
     required this.properties,
   });
 
-  final String name;
   final int id;
+  final String name;
   final bool unique;
   final bool replace;
-  final List<IndexProperySchema> properties;
+  final List<IndexPropertySchema> properties;
 
   /// @nodoc
   Map<String, dynamic> toSchemaJson() {
@@ -30,10 +30,10 @@ class IndexSchema {
   }
 }
 
-class IndexProperySchema {
+class IndexPropertySchema {
   /// @nodoc
   @protected
-  IndexProperySchema({
+  const IndexPropertySchema({
     required this.name,
     required this.type,
     required this.caseSensitive,
@@ -47,8 +47,14 @@ class IndexProperySchema {
   Map<String, dynamic> toSchemaJson() {
     return {
       'name': name,
-      'type': type.name,
+      'type': _typeName[type],
       'caseSensitive': caseSensitive,
     };
   }
+
+  static const _typeName = {
+    IndexType.value: 'Value',
+    IndexType.hash: 'Hash',
+    IndexType.hashElements: 'HashElements',
+  };
 }

@@ -8,11 +8,11 @@ abstract class IsarCollection<OBJ> {
   /// The corresponding Isar instance.
   Isar get isar;
 
-  /// The name of the collection.
-  String get name;
-
   /// Get the schema of the collection.
   CollectionSchema<OBJ> get schema;
+
+  /// The name of the collection.
+  String get name => schema.name;
 
   /// Get a single object by its [id] or `null` if the object does not exist.
   Future<OBJ?> get(int id) {

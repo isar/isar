@@ -239,15 +239,14 @@ String generateDeserializeNative(ObjectInfo object) {
 
 String generateDeserializePropNative(ObjectInfo object) {
   var code = '''
-  P ${object.deserializePropNativeName}<P>(Id id, IsarBinaryReader reader, int propertyIndex, int offset) {
+  P ${object.deserializePropNativeName}<P>(Id id, IsarBinaryReader reader, int propertyId, int offset) {
     switch (propertyIndex) {
-      case -1:
+      case 0:
         return id as P;''';
 
-  for (var i = 0; i < object.objectProperties.length; i++) {
-    final property = object.objectProperties[i];
+  for (final property in object.objectProperties) {
     final deser = _deserializeProperty(object, property, 'offset');
-    code += 'case $i: return ($deser) as P;';
+    code += 'case ${property.id}: return ($deser) as P;';
   }
 
   return '''

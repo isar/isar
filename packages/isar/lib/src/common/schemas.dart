@@ -11,12 +11,3 @@ List<Schema<dynamic>> getSchemas(
   }
   return schemas.toList();
 }
-
-/// @nodoc
-int schemasHash(List<CollectionSchema<dynamic>> collectionSchemas) {
-  var hash = 0;
-  for (final schema in collectionSchemas) {
-    hash ^= schema.id;
-  }
-  return hash;
-}

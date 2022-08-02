@@ -15,7 +15,7 @@ import 'package:isar/src/native/isar_core.dart';
 const Symbol _zoneTxn = #zoneTxn;
 
 class IsarImpl extends Isar implements Finalizable {
-  IsarImpl(super.name, super.schemaHash, this.ptr) {
+  IsarImpl(super.name, this.ptr) {
     _finalizer = NativeFinalizer(isarClose);
     _finalizer.attach(this, ptr.cast(), detach: this);
   }

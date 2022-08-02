@@ -29,16 +29,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   final IsarImpl isar;
   final Pointer<CIsarCollection> ptr;
 
+  @override
   final CollectionSchema<OBJ> schema;
 
   late final _offsets = isar.offsets[OBJ]!;
   late final _staticSize = _offsets.last;
-
-  @override
-  String get name => schema.name;
-
-  @override
-  String get idName => schema.idName;
 
   @pragma('vm:prefer-inline')
   OBJ deserializeObject(CObject cObj) {
@@ -97,10 +92,10 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return keysPtrPtr;
   }
 
-  List<T> deserializeProperty<T>(CObjectSet objectSet, int? propertyIndex) {
+  List<T> deserializeProperty<T>(CObjectSet objectSet, int? propertyId) {
     final values = <T>[];
-    if (propertyIndex != null) {
-      final propertyOffset = _offsets[propertyIndex];
+    if (propertyId != null) {
+      final propertyOffset = _offsets[propertyId];
       for (var i = 0; i < objectSet.length; i++) {
         final cObj = objectSet.objects.elementAt(i).ref;
         final buffer = cObj.buffer.asTypedList(cObj.buffer_length);
@@ -108,7 +103,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
           schema.deserializePropNative(
             cObj.id,
             BinaryReader(buffer),
-            propertyIndex,
+            propertyId,
             propertyOffset,
           ) as T,
         );

@@ -1,11 +1,12 @@
 part of isar;
 
+/// This schema represents a collection.
 class CollectionSchema<OBJ> extends Schema<OBJ> {
   /// @nodoc
   @protected
   const CollectionSchema({
-    required super.name,
     required super.id,
+    required super.name,
     required super.properties,
     required super.serializeNative,
     required super.estimateSize,
@@ -35,8 +36,7 @@ class CollectionSchema<OBJ> extends Schema<OBJ> {
   final String idName;
 
   @override
-  // ignore: avoid_field_initializers_in_const_classes
-  final bool embedded = false;
+  bool get embedded => false;
 
   /// A map of name -> index pairs
   final Map<String, IndexSchema> indexes;
@@ -65,6 +65,7 @@ class CollectionSchema<OBJ> extends Schema<OBJ> {
   /// Whether this collection has links
   bool get hasLinks => links.isNotEmpty;
 
+  /// @nodoc
   @pragma('vm:prefer-inline')
   IndexSchema index(String indexName) {
     final index = indexes[indexName];
@@ -75,6 +76,7 @@ class CollectionSchema<OBJ> extends Schema<OBJ> {
     }
   }
 
+  /// @nodoc
   @pragma('vm:prefer-inline')
   LinkSchema link(String linkName) {
     final link = links[linkName];

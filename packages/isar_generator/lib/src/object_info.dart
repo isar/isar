@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 
-import 'package:isar_generator/src/isar_type.dart';
 import 'package:xxh3/xxh3.dart';
 
 class ObjectInfo {
@@ -60,7 +59,7 @@ enum PropertyDeser {
 }
 
 class ObjectProperty {
-  const ObjectProperty({
+  ObjectProperty({
     required this.dartName,
     required this.isarName,
     required this.scalarDartType,
@@ -86,7 +85,7 @@ class ObjectProperty {
   final bool assignable;
   final int? constructorPosition;
 
-  int get id => xxh3(utf8.encode(isarName) as Uint8List);
+  late final id = xxh3(utf8.encode(isarName) as Uint8List);
 
   String get dartType => isarType.isList
       ? 'List<$scalarDartType${elementNullable ? '?' : ''}>${nullable ? '?' : ''}'
@@ -111,7 +110,7 @@ class ObjectIndexProperty {
 }
 
 class ObjectIndex {
-  const ObjectIndex({
+  ObjectIndex({
     required this.name,
     required this.properties,
     required this.unique,
@@ -123,37 +122,35 @@ class ObjectIndex {
   final bool unique;
   final bool replace;
 
-  int get id => xxh3(utf8.encode(name) as Uint8List);
+  late final id = xxh3(utf8.encode(name) as Uint8List);
 }
 
 class ObjectLink {
   const ObjectLink({
     required this.dartName,
     required this.isarName,
-    this.targetIsarName,
+    this.targetLinkIsarName,
     required this.targetCollectionDartName,
     required this.targetCollectionIsarName,
-    required this.targetCollectionAccessor,
-    required this.links,
-    required this.backlink,
+    required this.isSingle,
   });
 
   final String dartName;
   final String isarName;
 
   // isar name of the original link (only for backlinks)
-  final String? targetIsarName;
+  final String? targetLinkIsarName;
   final String targetCollectionDartName;
   final String targetCollectionIsarName;
-  final String targetCollectionAccessor;
-  final bool links;
-  final bool backlink;
+  final bool isSingle;
+
+  bool get isBacklink => targetLinkIsarName != null;
 
   int id(String objectIsarName) {
-    final col = backlink ? targetCollectionIsarName : objectIsarName;
-    final colId = xxh3(utf8.encode(col) as Uint8List, seed: backlink ? 1 : 0);
+    final col = isBacklink ? objectIsarName : targetCollectionIsarName;
+    final colId = xxh3(utf8.encode(col) as Uint8List, seed: isBacklink ? 1 : 0);
 
-    final name = backlink ? targetIsarName! : isarName;
+    final name = targetLinkIsarName ?? isarName;
     return xxh3(utf8.encode(name) as Uint8List, seed: colId);
   }
 }

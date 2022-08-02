@@ -227,7 +227,7 @@ class $Dollar$Model {
 }
 
 void main() {
-  isarTest('DollarModel Schema test', () {
+  /*isarTest('DollarModel Schema test', () {
     final schemaJson = jsonDecode($Dollar$ModelSchema.schema);
     expect(schemaJson, {
       'name': r'$Dollar$Model',
@@ -715,5 +715,5 @@ void main() {
         ]
       },
     );
-  });
+  });*/
 }

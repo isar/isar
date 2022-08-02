@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: public_member_api_docs, invalid_use_of_protected_member
 
 import 'dart:convert';
 import 'dart:ffi';
@@ -47,7 +47,6 @@ void _initializeInstance(
     });
   }
 
-  // ignore: invalid_use_of_protected_member
   isar.attachCollections(cols);
 }
 
@@ -65,8 +64,10 @@ Future<Isar> openIsar({
     final namePtr = name.toCString(alloc);
     final dirPtr = directory?.toCString(alloc) ?? nullptr;
 
+    final s = Stopwatch()..start();
     final schemasJson = getSchemas(schemas).map((e) => e.toSchemaJson());
     final schemaStrPtr = jsonEncode(schemasJson.toList()).toCString(alloc);
+    print('DELAY: ${s.elapsedMicroseconds}');
 
     final compactMinFileSize = compactOnLaunch?.minFileSize;
     final compactMinBytes = compactOnLaunch?.minBytes;
@@ -89,7 +90,7 @@ Future<Isar> openIsar({
     );
     await stream.first;
 
-    final isar = IsarImpl(name, schemasHash(schemas), _isarPtrPtr.value);
+    final isar = IsarImpl(name, _isarPtrPtr.value);
     _initializeInstance(alloc, isar, schemas);
     return isar;
   });
@@ -130,7 +131,7 @@ Isar openIsarSync({
       ),
     );
 
-    final isar = IsarImpl(name, schemasHash(schemas), _isarPtrPtr.value);
+    final isar = IsarImpl(name, _isarPtrPtr.value);
     _initializeInstance(alloc, isar, schemas);
     return isar;
   });

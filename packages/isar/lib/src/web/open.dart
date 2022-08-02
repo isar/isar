@@ -38,13 +38,7 @@ Future<Isar> openIsar({
   required List<CollectionSchema<dynamic>> schemas,
 }) async {
   await initializeIsarWeb();
-  final schemaStr = '[${schemas.map((e) => e.schema).join(',')}]';
-
-  final schemasJson = schemas.map((e) {
-    final json = jsonDecode(e.schema) as Map<String, dynamic>;
-    json['idName'] = e.idName;
-    return json;
-  });
+  final schema = '[${schemas.map((e) => e.schema).join(',')}]';
   final schemasJs = jsify(schemasJson) as List<dynamic>;
   final instance = await openIsarJs(name, schemasJs, relaxedDurability)
       .wait<IsarInstanceJs>();

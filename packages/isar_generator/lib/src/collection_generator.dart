@@ -29,6 +29,7 @@ const ignoreLints = [
   'unnecessary_parenthesis',
   'unnecessary_raw_strings',
   'join_return_with_assignment',
+  'avoid_js_rounded_ints',
 ];
 
 class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
@@ -40,7 +41,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
   ) async {
     final object = IsarAnalyzer().analyzeCollection(element);
 
-    final collectionSchema = generateCollectionSchema(object);
+    final schema = generateSchema(object);
 
     return '''
       // coverage:ignore-file
@@ -50,7 +51,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
         IsarCollection<${object.dartName}> get ${object.accessor} => collection();
       }
 
-      $collectionSchema
+      $schema
 
       ${generateEstimateSerializeNative(object)}
       ${generateSerializeNative(object)}
