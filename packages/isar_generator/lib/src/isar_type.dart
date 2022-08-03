@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:isar/isar.dart';
-import 'package:isar_generator/src/helper.dart';
 import 'package:source_gen/source_gen.dart';
 
 const TypeChecker _dateTimeChecker = TypeChecker.fromRuntime(DateTime);
@@ -16,9 +15,7 @@ IsarType? _getPrimitiveIsarType(DartType type) {
   if (type.isDartCoreBool) {
     return IsarType.bool;
   } else if (type.isDartCoreInt) {
-    if (type.alias?.element.name == 'Id') {
-      return IsarType.id;
-    } else if (type.alias?.element.name == 'byte') {
+    if (type.alias?.element.name == 'byte') {
       return IsarType.byte;
     } else if (type.alias?.element.name == 'short') {
       return IsarType.int;
@@ -42,6 +39,10 @@ IsarType? _getPrimitiveIsarType(DartType type) {
   return null;
 }
 
+bool isIsarId(DartType type) {
+  return type.alias?.element.name == 'Id';
+}
+
 IsarType? getIsarType(DartType type, Element element) {
   final primitiveType = _getPrimitiveIsarType(type);
   if (primitiveType != null) {
@@ -55,8 +56,6 @@ IsarType? getIsarType(DartType type, Element element) {
     final typeArguments = parameterizedType.typeArguments;
     if (typeArguments.isNotEmpty) {
       switch (_getPrimitiveIsarType(typeArguments[0])) {
-        case IsarType.id:
-          err('Id lists are not supported.', element);
         case IsarType.bool:
           return IsarType.boolList;
         case IsarType.byte:

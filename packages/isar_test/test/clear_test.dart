@@ -27,51 +27,45 @@ void main() {
     tearDown(() => isar.close());
 
     isarTest('Clear should empty target collection', () async {
+      final modelAs = List.generate(100, (_) => ModelA());
+      final modelBs = List.generate(200, (_) => ModelB());
+
       await isar.tWriteTxn(() async {
         await Future.wait([
-          isar.modelAs.tPutAll(List.generate(100, (_) => ModelA())),
-          isar.modelBs.tPutAll(List.generate(200, (_) => ModelB())),
+          isar.modelAs.tPutAll(modelAs),
+          isar.modelBs.tPutAll(modelBs),
         ]);
       });
 
-      final modelACount = await isar.modelAs.where().tCount();
-      expect(modelACount, 100);
-
-      final modelBCount = await isar.modelBs.where().tCount();
-      expect(modelBCount, 200);
+      await isar.modelAs.verify(modelAs);
+      await isar.modelBs.verify(modelBs);
 
       await isar.tWriteTxn(
         () => isar.modelAs.tClear(),
       );
 
-      final newModelACount = await isar.modelAs.where().tCount();
-      expect(newModelACount, 0);
-
-      final newModelBCount = await isar.modelBs.where().tCount();
-      expect(newModelBCount, 200);
+      await isar.modelAs.verify([]);
+      await isar.modelBs.verify(modelBs);
     });
 
     isarTest('Isar clear should clear every collection', () async {
+      final modelAs = List.generate(250, (_) => ModelA());
+      final modelBs = List.generate(500, (_) => ModelB());
+
       await isar.tWriteTxn(() async {
         await Future.wait([
-          isar.modelAs.tPutAll(List.generate(250, (_) => ModelA())),
-          isar.modelBs.tPutAll(List.generate(500, (_) => ModelB())),
+          isar.modelAs.tPutAll(modelAs),
+          isar.modelBs.tPutAll(modelBs),
         ]);
       });
 
-      final modelACount = await isar.modelAs.where().tCount();
-      expect(modelACount, 250);
-
-      final modelBCount = await isar.modelBs.where().tCount();
-      expect(modelBCount, 500);
+      await isar.modelAs.verify(modelAs);
+      await isar.modelBs.verify(modelBs);
 
       await isar.tWriteTxn(() => isar.tClear());
 
-      final newModelACount = await isar.modelAs.where().tCount();
-      expect(newModelACount, 0);
-
-      final newModelBCount = await isar.modelBs.where().tCount();
-      expect(newModelBCount, 0);
+      await isar.modelAs.verify([]);
+      await isar.modelBs.verify([]);
     });
 
     isarTest('Clear already cleared collection', () async {

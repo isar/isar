@@ -129,12 +129,6 @@ void main() {
     });
 
     isarTest('.isNull() / .isNotNull()', () async {
-      await qEqual(col.where().fieldIsNull().tFindAll(), [objNull]);
-      await qEqual(
-        col.where().fieldIsNotNull().tFindAll(),
-        [obj0, obj1, obj2, obj3, objInf],
-      );
-
       await qEqual(col.filter().fieldIsNull().tFindAll(), [objNull]);
     });
   });
@@ -206,13 +200,6 @@ void main() {
     });
 
     isarTest('.anyIsNull() / .anyIsNotNull()', () async {
-      // where clauses
-      await qEqualSet(col.where().listElementIsNull().tFindAll(), [obj2, obj3]);
-      await qEqualSet(
-        col.where().listElementIsNotNull().tFindAll(),
-        [obj1, obj3],
-      );
-
       // filters
       await qEqualSet(
         col.filter().listElementIsNull().tFindAll(),

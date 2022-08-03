@@ -37,7 +37,7 @@ class IsarAnalyzer {
       err('Two or more indexes have the same name.', modelClass);
     }
 
-    final idProperties = properties.where((it) => it.isarType == IsarType.id);
+    final idProperties = properties.where((it) => it.isId);
     if (idProperties.isEmpty) {
       err(
         'No id property defined. Use the "Id" type for your id property.',
@@ -86,7 +86,7 @@ class IsarAnalyzer {
       err('Embedded objects must noy have indexes.', modelClass);
     }
 
-    final hasIdProperty = properties.any((it) => it.isarType == IsarType.id);
+    final hasIdProperty = properties.any((it) => it.isId);
     if (hasIdProperty) {
       err('Embedded objects must not define an id.', modelClass);
     }
@@ -211,7 +211,8 @@ class IsarAnalyzer {
     return ObjectProperty(
       dartName: property.displayName,
       isarName: property.isarName,
-      scalarDartType: elementType?.element!.name ?? dartType.element!.name!,
+      typeClassName: elementType?.element!.name ?? dartType.element!.name!,
+      isId: isIsarId(dartType),
       isarType: isarType,
       nullable: nullable,
       elementNullable: elementNullable,
@@ -279,7 +280,7 @@ class IsarAnalyzer {
   ) sync* {
     final property =
         properties.firstOrNullWhere((it) => it.dartName == element.name);
-    if (property == null || property.isarType == IsarType.id) {
+    if (property == null || property.isId) {
       return;
     }
 
@@ -303,7 +304,7 @@ class IsarAnalyzer {
             properties.firstOrNullWhere((it) => it.dartName == c.property);
         if (compositeProperty == null) {
           err('Property does not exist: "${c.property}".', element);
-        } else if (compositeProperty.isarType == IsarType.id) {
+        } else if (compositeProperty.isId) {
           err('Ids cannot be indexed', element);
         } else {
           final isString = compositeProperty.isarType == IsarType.string ||

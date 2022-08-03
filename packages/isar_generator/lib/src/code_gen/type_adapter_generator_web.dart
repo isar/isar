@@ -1,6 +1,5 @@
 import 'package:isar/isar.dart';
 import 'package:isar_generator/src/code_gen/type_adapter_generator_common.dart';
-import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 String generateSerializeWeb(ObjectInfo object) {
@@ -72,7 +71,6 @@ String generateDeserializePropWeb(ObjectInfo object) {
 
 String _defaultVal(IsarType type) {
   switch (type) {
-    case IsarType.id:
     case IsarType.byte:
     case IsarType.byteList:
       return 'Uint8List(0)';
@@ -135,9 +133,7 @@ String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
   } else if (property.isarType == IsarType.dateTime) {
     deser = convDate(read, property.nullable);
   } else {
-    final defaultVal = property.nullable ||
-            property.isarType == IsarType.id ||
-            property.isarType == IsarType.byte
+    final defaultVal = property.nullable || property.isarType == IsarType.byte
         ? ''
         : '?? ${_defaultVal(property.isarType)}';
     deser = '$read $defaultVal';

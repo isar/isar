@@ -120,11 +120,14 @@ Future<Isar> openTempIsar(
     await Directory(testTempPath!).create(recursive: true);
   }
 
-  return tOpen(
+  final isar = await tOpen(
     schemas: schemas,
     name: name ?? getRandomName(),
     directory: kIsWeb ? '' : testTempPath!,
   );
+
+  await isar.verify();
+  return isar;
 }
 
 bool doubleListEquals(List<double?>? l1, List<double?>? l2) {

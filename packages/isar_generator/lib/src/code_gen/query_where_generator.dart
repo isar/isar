@@ -1,7 +1,5 @@
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
-
-import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 class WhereGenerator {
@@ -41,13 +39,13 @@ class WhereGenerator {
         final indexProperty = index.properties[n];
         final property = indexProperty.property;
 
-        if (property.nullable) {
-          code += generateWhereIsNull(index, n + 1);
-          code += generateWhereIsNotNull(index, n + 1);
-        }
-
         if (property.isarType != IsarType.float &&
             property.isarType != IsarType.floatList) {
+          if (property.nullable) {
+            code += generateWhereIsNull(index, n + 1);
+            code += generateWhereIsNotNull(index, n + 1);
+          }
+
           code += generateWhereEqualTo(index, n + 1);
           code += generateWhereNotEqualTo(index, n + 1);
         }

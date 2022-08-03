@@ -13,6 +13,7 @@
 - Added `collection.schema` to receive the layout of a collection
 - Added check to verify that linked collections schemas are provided for opening an instance
 - Apply default values from constructor during deserialization
+- Added `isar.verify()` and `col.verify()` methods for checking database integrity in unit tests
 
 ### Breaking
 

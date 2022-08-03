@@ -36,9 +36,6 @@ class PropertySchema {
 
 /// Supported Isar types
 enum IsarType {
-  /// 64-bit singed id
-  id('Id'),
-
   /// Boolean
   bool('Bool'),
 
@@ -110,4 +107,31 @@ enum IsarType {
 extension IsarTypeX on IsarType {
   /// Whether this type represents a list
   bool get isList => index >= IsarType.boolList.index;
+
+  IsarType get scalarType {
+    switch (this) {
+      case IsarType.boolList:
+        return IsarType.bool;
+      case IsarType.byteList:
+        return IsarType.byte;
+      case IsarType.intList:
+        return IsarType.int;
+      case IsarType.floatList:
+        return IsarType.float;
+      case IsarType.longList:
+        return IsarType.long;
+      case IsarType.doubleList:
+        return IsarType.double;
+      case IsarType.dateTimeList:
+        return IsarType.dateTime;
+      case IsarType.enumerationList:
+        return IsarType.enumeration;
+      case IsarType.stringList:
+        return IsarType.string;
+      case IsarType.objectList:
+        return IsarType.object;
+      default:
+        return this;
+    }
+  }
 }

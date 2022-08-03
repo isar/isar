@@ -251,6 +251,14 @@ class IsarImpl extends Isar implements Finalizable {
       return IC.isar_instance_close(ptr);
     }
   }
+
+  @override
+  Future<void> verify() async {
+    return getTxn(false, (txn) async {
+      IC.isar_instance_verify(ptr, txn.ptr);
+      await txn.wait();
+    });
+  }
 }
 
 class SyncTxn {

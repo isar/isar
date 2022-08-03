@@ -12,7 +12,9 @@ String generateSchema(ObjectInfo object) {
   }
 
   final properties = object.objectProperties
-      .map((e) => "r'${e.isarName}': ${_generatePropertySchema(e)}")
+      .mapIndexed(
+        (i, e) => "r'${e.isarName}': ${_generatePropertySchema(i, e)}",
+      )
       .join(',');
 
   code += '''
@@ -60,7 +62,7 @@ String generateSchema(ObjectInfo object) {
     ${_generateAttach(object)}''';
 }
 
-String _generatePropertySchema(ObjectProperty property) {
+String _generatePropertySchema(int index, ObjectProperty property) {
   var target = '';
   if (property.isarType == IsarType.object ||
       property.isarType == IsarType.objectList) {
@@ -68,7 +70,7 @@ String _generatePropertySchema(ObjectProperty property) {
   }
   return '''
   PropertySchema(
-    id: ${property.id},
+    id: $index,
     name: r'${property.isarName}',
     type: IsarType.${property.isarType.name},
     $target
@@ -143,7 +145,7 @@ String _generateAttach(ObjectInfo object) {
     // ignore: leading_newlines_in_multiline_strings
     code += '''object.${link.dartName}.attach(
       col,
-      col.isar.collection<${link.targetCollectionDartName}>,
+      col.isar.collection<${link.targetCollectionDartName}>(),
       r'${link.isarName}',
       id
     );''';

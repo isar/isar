@@ -1,6 +1,5 @@
 import 'package:isar/isar.dart';
 import 'package:isar_generator/src/code_gen/type_adapter_generator_common.dart';
-import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 String _prepareSerialize(
@@ -152,8 +151,6 @@ String generateSerializeNative(ObjectInfo object) {
     final property = object.objectProperties[i];
     final value = 'object.${property.dartName}';
     switch (property.isarType) {
-      case IsarType.id:
-        throw UnimplementedError();
       case IsarType.bool:
         code += 'writer.writeBool(offsets[$i], $value);';
         break;
@@ -240,13 +237,12 @@ String generateDeserializeNative(ObjectInfo object) {
 String generateDeserializePropNative(ObjectInfo object) {
   var code = '''
   P ${object.deserializePropNativeName}<P>(Id id, IsarBinaryReader reader, int propertyId, int offset) {
-    switch (propertyIndex) {
-      case 0:
-        return id as P;''';
+    switch (propertyId) {''';
 
-  for (final property in object.objectProperties) {
+  for (var i = 0; i < object.objectProperties.length; i++) {
+    final property = object.objectProperties[i];
     final deser = _deserializeProperty(object, property, 'offset');
-    code += 'case ${property.id}: return ($deser) as P;';
+    code += 'case $i: return ($deser) as P;';
   }
 
   return '''
@@ -263,6 +259,10 @@ String _deserializeProperty(
   ObjectProperty property,
   String propertyOffset,
 ) {
+  if (property.isId) {
+    return 'id';
+  }
+
   final orNull =
       property.nullable || property.defaultValue != null ? 'OrNull' : '';
   final orElNull = property.elementNullable ? 'OrNull' : '';
@@ -279,8 +279,6 @@ String _deserializeProperty(
   }
 
   switch (property.isarType) {
-    case IsarType.id:
-      return 'id';
     case IsarType.bool:
       return 'reader.readBool$orNull($propertyOffset) $defaultValue';
     case IsarType.byte:

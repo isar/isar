@@ -80,13 +80,9 @@ void _addKeyValue(
   IndexType type,
   bool caseSensitive,
 ) {
-  if (value is DateTime) {
-    value = value.toUtc().microsecondsSinceEpoch;
-  } else if (value is List<DateTime?>) {
-    value = value.map((e) => e?.toUtc().microsecondsSinceEpoch);
-  }
-
-  switch (property.type) {
+  final isarType =
+      type != IndexType.hash ? property.type.scalarType : property.type;
+  switch (isarType) {
     case IsarType.bool:
       IC.isar_key_add_byte(keyPtr, (value as bool?).byteValue);
       break;
@@ -113,10 +109,10 @@ void _addKeyValue(
       break;
     case IsarType.string:
       final strPtr = _strToNative(value as String?);
-      if (type == IndexType.hash) {
-        IC.isar_key_add_string_hash(keyPtr, strPtr, caseSensitive);
-      } else {
+      if (type == IndexType.value) {
         IC.isar_key_add_string(keyPtr, strPtr, caseSensitive);
+      } else {
+        IC.isar_key_add_string_hash(keyPtr, strPtr, caseSensitive);
       }
       _freeStr(strPtr);
       break;
@@ -214,7 +210,6 @@ void _addKeyValue(
         }
       }
       break;
-    case IsarType.id:
     case IsarType.object:
     case IsarType.floatList:
     case IsarType.doubleList:

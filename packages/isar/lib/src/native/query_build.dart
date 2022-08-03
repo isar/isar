@@ -42,7 +42,7 @@ Query<T> buildNativeQuery<T>(
         whereSort,
       );
     } else {
-      _addLinkWhereClause(col, qbPtr, whereClause as LinkWhereClause);
+      _addLinkWhereClause(col.isar, qbPtr, whereClause as LinkWhereClause);
     }
   }
 
@@ -170,12 +170,15 @@ void _addIndexWhereClause(
 }
 
 void _addLinkWhereClause(
-  IsarCollectionImpl<dynamic> col,
+  Isar isar,
   Pointer<CQueryBuilder> qbPtr,
   LinkWhereClause wc,
 ) {
-  final link = col.schema.link(wc.linkName);
-  nCall(IC.isar_qb_add_link_where_clause(qbPtr, col.ptr, link.id, wc.id));
+  final linkCol = isar.getCollectionByNameInternal(wc.linkCollection)!;
+  linkCol as IsarCollectionImpl;
+
+  final linkId = linkCol.schema.link(wc.linkName).id;
+  nCall(IC.isar_qb_add_link_where_clause(qbPtr, linkCol.ptr, linkId, wc.id));
 }
 
 Pointer<CFilter>? _buildFilter(

@@ -117,6 +117,41 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return values;
   }
 
+  void serializeObjects(
+    Txn txn,
+    Pointer<CObject> objectsPtr,
+    List<OBJ> objects,
+  ) {
+    var maxBufferSize = 0;
+    for (var i = 0; i < objects.length; i++) {
+      final object = objects[i];
+      maxBufferSize += schema.estimateSize(object, _offsets, isar.offsets);
+    }
+    final bufferPtr = txn.alloc<Uint8>(maxBufferSize);
+    final buffer = bufferPtr.asTypedList(maxBufferSize).buffer;
+
+    var writtenBytes = 0;
+    for (var i = 0; i < objects.length; i++) {
+      final objBuffer = buffer.asUint8List(writtenBytes);
+      final binaryWriter = BinaryWriter(objBuffer, _staticSize);
+
+      final object = objects[i];
+      final size = schema.serializeNative(
+        object,
+        binaryWriter,
+        _offsets,
+        isar.offsets,
+      );
+
+      final cObj = objectsPtr.elementAt(i).ref;
+      cObj.id = schema.getId(object) ?? Isar.autoIncrement;
+      cObj.buffer = bufferPtr.elementAt(writtenBytes);
+      cObj.buffer_length = size;
+
+      writtenBytes += size;
+    }
+  }
+
   @override
   Future<List<OBJ?>> getAll(List<int> ids) {
     return isar.getTxn(false, (txn) async {
@@ -269,36 +304,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
     return isar.getTxn(true, (txn) async {
       final cObjSetPtr = txn.allocCObjectSet(objects.length);
-      final objectsPtr = cObjSetPtr.ref.objects;
-
-      var maxBufferSize = 0;
-      for (var i = 0; i < objects.length; i++) {
-        final object = objects[i];
-        maxBufferSize += schema.estimateSize(object, _offsets, isar.offsets);
-      }
-      final bufferPtr = txn.alloc<Uint8>(maxBufferSize);
-      final buffer = bufferPtr.asTypedList(maxBufferSize).buffer;
-
-      var writtenBytes = 0;
-      for (var i = 0; i < objects.length; i++) {
-        final objBuffer = buffer.asUint8List(writtenBytes);
-        final binaryWriter = BinaryWriter(objBuffer, _staticSize);
-
-        final object = objects[i];
-        final size = schema.serializeNative(
-          object,
-          binaryWriter,
-          _offsets,
-          isar.offsets,
-        );
-
-        final cObj = objectsPtr.elementAt(i).ref;
-        cObj.id = schema.getId(object) ?? Isar.autoIncrement;
-        cObj.buffer = bufferPtr.elementAt(writtenBytes);
-        cObj.buffer_length = size;
-
-        writtenBytes += size;
-      }
+      serializeObjects(txn, cObjSetPtr.ref.objects, objects);
 
       if (indexId != null) {
         IC.isar_put_all_by_index(ptr, txn.ptr, indexId, cObjSetPtr);
@@ -598,5 +604,16 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       limit,
       property,
     );
+  }
+
+  @override
+  Future<void> verify(List<OBJ> objects) async {
+    return isar.getTxn(false, (txn) async {
+      final cObjSetPtr = txn.allocCObjectSet(objects.length);
+      serializeObjects(txn, cObjSetPtr.ref.objects, objects);
+
+      IC.isar_verify(ptr, txn.ptr, cObjSetPtr);
+      await txn.wait();
+    });
   }
 }

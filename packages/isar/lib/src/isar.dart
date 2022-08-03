@@ -223,7 +223,7 @@ abstract class Isar {
   /// Copy a compacted version of the database to the specified file.
   ///
   /// If you want to backup your database, you should always use a compacted
-  /// version.
+  /// version. Compacted does not mean compressed.
   ///
   /// Do not run this method while other transactions are active to avoid
   /// unnecessary growth of the database.
@@ -247,6 +247,13 @@ abstract class Isar {
     }
     return Future.value(false);
   }
+
+  /// Verifies the integrity of the database file.
+  ///
+  /// Do not use this method in production apps.
+  @visibleForTesting
+  @experimental
+  Future<void> verify();
 
   /// A list of all Isar instances opened in the current isolate.
   static Set<String> get instanceNames => _instances.keys.toSet();
@@ -328,7 +335,7 @@ class CompactCondition {
   /// The minumum number of bytes that can be freed with compaction.
   final int? minBytes;
 
-  /// The minimum compaction ration. For example 2.0 would trigger compaction
+  /// The minimum compaction ration. For example `2.0` would trigger compaction
   /// as soon as the file size can be halved.
   final double? minRatio;
 }

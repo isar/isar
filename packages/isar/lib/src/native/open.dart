@@ -64,10 +64,8 @@ Future<Isar> openIsar({
     final namePtr = name.toCString(alloc);
     final dirPtr = directory?.toCString(alloc) ?? nullptr;
 
-    final s = Stopwatch()..start();
     final schemasJson = getSchemas(schemas).map((e) => e.toSchemaJson());
     final schemaStrPtr = jsonEncode(schemasJson.toList()).toCString(alloc);
-    print('DELAY: ${s.elapsedMicroseconds}');
 
     final compactMinFileSize = compactOnLaunch?.minFileSize;
     final compactMinBytes = compactOnLaunch?.minBytes;

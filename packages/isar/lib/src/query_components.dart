@@ -153,9 +153,13 @@ class IndexWhereClause extends WhereClause {
 class LinkWhereClause extends WhereClause {
   /// Create a where clause for the specified link.
   const LinkWhereClause({
+    required this.linkCollection,
     required this.linkName,
     required this.id,
   }) : super._();
+
+  /// The name of the collection the link originates from.
+  final String linkCollection;
 
   /// The isar name of the link to be used.
   final String linkName;

@@ -7,18 +7,21 @@ import 'package:isar/isar.dart';
 import 'package:xxh3/xxh3.dart';
 
 class ObjectInfo {
-  const ObjectInfo({
+  ObjectInfo({
     required this.dartName,
     required this.isarName,
     this.accessor,
-    required this.properties,
+    required List<ObjectProperty> properties,
     this.indexes = const [],
     this.links = const [],
-  });
+  }) {
+    this.properties = properties.sortedBy((e) => e.isarName).toList();
+  }
+
   final String dartName;
   final String isarName;
   final String? accessor;
-  final List<ObjectProperty> properties;
+  late final List<ObjectProperty> properties;
   final List<ObjectIndex> indexes;
   final List<ObjectLink> links;
 
@@ -26,12 +29,10 @@ class ObjectInfo {
 
   bool get isEmbedded => accessor == null;
 
-  ObjectProperty get idProperty =>
-      properties.firstWhere((ObjectProperty it) => it.isarType == IsarType.id);
+  ObjectProperty get idProperty => properties.firstWhere((it) => it.isId);
 
-  List<ObjectProperty> get objectProperties => properties
-      .where((ObjectProperty it) => it.isarType != IsarType.id)
-      .toList();
+  List<ObjectProperty> get objectProperties =>
+      properties.where((it) => !it.isId).toList();
 
   String get getIdName => '_${dartName.decapitalize()}GetId';
   String get getLinksName => '_${dartName.decapitalize()}GetLinks';
@@ -62,8 +63,9 @@ class ObjectProperty {
   ObjectProperty({
     required this.dartName,
     required this.isarName,
-    required this.scalarDartType,
+    required this.typeClassName,
     required this.isarType,
+    required this.isId,
     required this.nullable,
     required this.elementNullable,
     this.defaultValue,
@@ -74,7 +76,8 @@ class ObjectProperty {
 
   final String dartName;
   final String isarName;
-  final String scalarDartType;
+  final String typeClassName;
+  final bool isId;
   final IsarType isarType;
 
   final bool nullable;
@@ -85,7 +88,36 @@ class ObjectProperty {
   final bool assignable;
   final int? constructorPosition;
 
-  late final id = xxh3(utf8.encode(isarName) as Uint8List);
+  String get scalarDartType {
+    switch (isarType) {
+      case IsarType.bool:
+      case IsarType.boolList:
+        return 'bool';
+      case IsarType.byte:
+      case IsarType.byteList:
+      case IsarType.int:
+      case IsarType.intList:
+      case IsarType.long:
+      case IsarType.longList:
+        return 'int';
+      case IsarType.float:
+      case IsarType.floatList:
+      case IsarType.double:
+      case IsarType.doubleList:
+        return 'double';
+      case IsarType.dateTime:
+      case IsarType.dateTimeList:
+        return 'DateTime';
+      case IsarType.enumeration:
+      case IsarType.enumerationList:
+      case IsarType.object:
+      case IsarType.objectList:
+        return typeClassName;
+      case IsarType.string:
+      case IsarType.stringList:
+        return 'String';
+    }
+  }
 
   String get dartType => isarType.isList
       ? 'List<$scalarDartType${elementNullable ? '?' : ''}>${nullable ? '?' : ''}'
@@ -100,6 +132,7 @@ class ObjectIndexProperty {
     required this.type,
     required this.caseSensitive,
   });
+
   final ObjectProperty property;
   final IndexType type;
   final bool caseSensitive;
@@ -147,10 +180,12 @@ class ObjectLink {
   bool get isBacklink => targetLinkIsarName != null;
 
   int id(String objectIsarName) {
-    final col = isBacklink ? objectIsarName : targetCollectionIsarName;
+    final col = isBacklink ? targetCollectionIsarName : objectIsarName;
     final colId = xxh3(utf8.encode(col) as Uint8List, seed: isBacklink ? 1 : 0);
 
     final name = targetLinkIsarName ?? isarName;
+    print(
+        'COL $isBacklink $col NAME $name ID ${xxh3(utf8.encode(name) as Uint8List, seed: colId)}');
     return xxh3(utf8.encode(name) as Uint8List, seed: colId);
   }
 }

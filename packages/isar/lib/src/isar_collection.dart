@@ -226,4 +226,14 @@ abstract class IsarCollection<OBJ> {
 
   /// Watch an object with [id] for changes.
   Stream<void> watchObjectLazy(int id);
+
+  /// Verifies the integrity of the collection and its indexes.
+  ///
+  /// Throws an exception if the collection does not contain exactly the
+  /// provided [objects].
+  ///
+  /// Do not use this method in production apps.
+  @visibleForTesting
+  @experimental
+  Future<void> verify(List<OBJ> objects);
 }

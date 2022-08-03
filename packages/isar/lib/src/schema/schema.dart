@@ -68,8 +68,7 @@ class Schema<OBJ> {
       'name': name,
       'embedded': embedded,
       'properties': [
-        for (final property in properties.values)
-          if (property.type != IsarType.id) property.toSchemaJson(),
+        for (final property in properties.values) property.toSchemaJson(),
       ],
     };
   }
