@@ -3,6 +3,7 @@
 
 import 'dart:typed_data';
 
+import 'package:isar/isar.dart';
 import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_core.dart';
 import 'package:meta/meta.dart';
@@ -11,43 +12,33 @@ import 'package:meta/meta.dart';
 @protected
 class BinaryWriter {
   BinaryWriter(Uint8List buffer, int staticSize)
-      : _staticSize = staticSize,
-        _dynamicOffset = staticSize,
+      : _dynamicOffset = staticSize,
         _buffer = buffer,
-        _byteData = ByteData.view(buffer.buffer, buffer.offsetInBytes);
+        _byteData = ByteData.view(buffer.buffer, buffer.offsetInBytes) {
+    _byteData.setUint16(0, staticSize, Endian.little);
+  }
 
   final Uint8List _buffer;
 
   final ByteData _byteData;
-
-  final int _staticSize;
 
   int _dynamicOffset;
 
   int get usedBytes => _dynamicOffset;
 
   @pragma('vm:prefer-inline')
-  void writeHeader() {
-    _byteData.setUint16(0, _staticSize, Endian.little);
-  }
-
-  @pragma('vm:prefer-inline')
   void writeBool(int offset, bool? value) {
-    assert(offset < _staticSize);
     _buffer[offset] = value.byteValue;
   }
 
   @pragma('vm:prefer-inline')
-  void writeByte(int offset, int? value) {
-    assert(offset < _staticSize);
-    value ??= nullByte;
+  void writeByte(int offset, int value) {
     assert(value >= minByte && value <= maxByte);
     _buffer[offset] = value;
   }
 
   @pragma('vm:prefer-inline')
   void writeInt(int offset, int? value) {
-    assert(offset < _staticSize);
     value ??= nullInt;
     assert(value >= minInt && value <= maxInt);
     _byteData.setInt32(offset, value, Endian.little);
@@ -55,30 +46,22 @@ class BinaryWriter {
 
   @pragma('vm:prefer-inline')
   void writeFloat(int offset, double? value) {
-    assert(offset < _staticSize);
     _byteData.setFloat32(offset, value ?? double.nan, Endian.little);
   }
 
   @pragma('vm:prefer-inline')
   void writeLong(int offset, int? value) {
-    assert(offset < _staticSize);
     _byteData.setInt64(offset, value ?? nullLong, Endian.little);
   }
 
   @pragma('vm:prefer-inline')
   void writeDouble(int offset, double? value) {
-    assert(offset < _staticSize);
     _byteData.setFloat64(offset, value ?? double.nan, Endian.little);
   }
 
   @pragma('vm:prefer-inline')
   void writeDateTime(int offset, DateTime? value) {
     writeLong(offset, value?.toUtc().microsecondsSinceEpoch);
-  }
-
-  @pragma('vm:prefer-inline')
-  void writeEnum(int offset, Enum? value) {
-    writeByte(offset, (value?.index ?? -1) + 1);
   }
 
   @pragma('vm:prefer-inline')
@@ -90,9 +73,28 @@ class BinaryWriter {
 
   @pragma('vm:prefer-inline')
   void writeString(int offset, String? value) {
-    assert(offset < _staticSize);
     if (value != null) {
       final byteCount = encodeString(value, _buffer, _dynamicOffset + 3);
+      _writeUint24(offset, _dynamicOffset);
+      _writeUint24(_dynamicOffset, byteCount);
+      _dynamicOffset += byteCount + 3;
+    } else {
+      _writeUint24(offset, 0);
+    }
+  }
+
+  @pragma('vm:prefer-inline')
+  void writeObject<T>(
+    int offset,
+    Map<Type, List<int>> allOffsets,
+    SerializeNative<T> serialize,
+    T? value,
+  ) {
+    if (value != null) {
+      final buffer = Uint8List.sublistView(_buffer, _dynamicOffset + 3);
+      final offsets = allOffsets[T]!;
+      final binaryWriter = BinaryWriter(buffer, offsets.last);
+      final byteCount = serialize(value, binaryWriter, offsets, allOffsets);
       _writeUint24(offset, _dynamicOffset);
       _writeUint24(_dynamicOffset, byteCount);
       _dynamicOffset += byteCount + 3;
@@ -113,19 +115,17 @@ class BinaryWriter {
   }
 
   @pragma('vm:prefer-inline')
-  void writeByteList(int offset, List<int?>? values) {
-    assert(offset < _staticSize);
+  void writeByteList(int offset, List<int>? values) {
     _writeListOffset(offset, values?.length);
 
     if (values != null) {
       for (var i = 0; i < values.length; i++) {
-        _buffer[_dynamicOffset++] = values[i] ?? nullByte;
+        _buffer[_dynamicOffset++] = values[i];
       }
     }
   }
 
   void writeBoolList(int offset, List<bool?>? values) {
-    assert(offset < _staticSize);
     _writeListOffset(offset, values?.length);
 
     if (values != null) {
@@ -136,7 +136,6 @@ class BinaryWriter {
   }
 
   void writeIntList(int offset, List<int?>? values) {
-    assert(offset < _staticSize);
     _writeListOffset(offset, values?.length);
 
     if (values != null) {
@@ -150,7 +149,6 @@ class BinaryWriter {
   }
 
   void writeFloatList(int offset, List<double?>? values) {
-    assert(offset < _staticSize);
     _writeListOffset(offset, values?.length);
 
     if (values != null) {
@@ -181,7 +179,6 @@ class BinaryWriter {
   }
 
   void writeDoubleList(int offset, List<double?>? values) {
-    assert(offset < _staticSize);
     _writeListOffset(offset, values?.length);
 
     if (values != null) {
@@ -201,13 +198,7 @@ class BinaryWriter {
     writeLongList(offset, longList);
   }
 
-  void writeEnumList(int offset, List<Enum?>? values) {
-    final byteList = values?.map((e) => e.byteValue).toList();
-    writeByteList(offset, byteList);
-  }
-
   void writeStringList(int offset, List<String?>? values) {
-    assert(offset < _staticSize);
     _writeListOffset(offset, values?.length);
 
     if (values != null) {
@@ -225,17 +216,41 @@ class BinaryWriter {
       }
     }
   }
+
+  void writeObjectList<T>(
+    int offset,
+    Map<Type, List<int>> allOffsets,
+    SerializeNative<T> serialize,
+    List<T?>? values,
+  ) {
+    _writeListOffset(offset, values?.length);
+
+    if (values != null) {
+      final offsetListOffset = _dynamicOffset;
+      _dynamicOffset += values.length * 3;
+
+      final offsets = allOffsets[T]!;
+      final staticSize = offsets.last;
+      for (var i = 0; i < values.length; i++) {
+        final value = values[i];
+        if (value != null) {
+          final buffer = Uint8List.sublistView(_buffer, _dynamicOffset);
+          final binaryWriter = BinaryWriter(buffer, staticSize);
+          final byteCount = serialize(value, binaryWriter, offsets, allOffsets);
+          _writeUint24(offsetListOffset + i * 3, byteCount + 1);
+          _dynamicOffset += byteCount;
+        } else {
+          _writeUint24(offsetListOffset + i * 3, 0);
+        }
+      }
+    }
+  }
 }
 
 extension IsarBoolValue on bool? {
   @pragma('vm:prefer-inline')
   int get byteValue =>
       this == null ? nullBool : (this == true ? trueBool : falseBool);
-}
-
-extension IsarEnumValue on Enum? {
-  @pragma('vm:prefer-inline')
-  int get byteValue => (this?.index ?? -1) + 1;
 }
 
 extension IsarDateTimeValue on DateTime? {

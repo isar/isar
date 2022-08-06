@@ -1,5 +1,6 @@
 part of isar;
 
+/// This schema represents an index.
 class IndexSchema {
   /// @nodoc
   @protected
@@ -11,10 +12,19 @@ class IndexSchema {
     required this.properties,
   });
 
+  /// Internal id of this index.
   final int id;
+
+  /// Name of this index.
   final String name;
+
+  /// Whether duplicates are disallowed in this index.
   final bool unique;
+
+  /// Whether duplocates will be replaced or throw an error.
   final bool replace;
+
+  /// Composite properties.
   final List<IndexPropertySchema> properties;
 
   /// @nodoc
@@ -30,6 +40,7 @@ class IndexSchema {
   }
 }
 
+/// This schema represents a composite index property.
 class IndexPropertySchema {
   /// @nodoc
   @protected
@@ -39,8 +50,13 @@ class IndexPropertySchema {
     required this.caseSensitive,
   });
 
+  /// Isar name of the property.
   final String name;
+
+  /// Type of index.
   final IndexType type;
+
+  /// Whether String properties should be stored with casing.
   final bool caseSensitive;
 
   /// @nodoc

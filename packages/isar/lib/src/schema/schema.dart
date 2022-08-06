@@ -17,7 +17,7 @@ class Schema<OBJ> {
     required this.deserializePropWeb,
   });
 
-  /// The hashed name of this schema.
+  /// Internal id of this collection or embedded object.
   final int id;
 
   /// Name of the collection or embedded object
@@ -30,24 +30,31 @@ class Schema<OBJ> {
   final Map<String, PropertySchema> properties;
 
   /// @nodoc
+  @protected
   final EstimateSize<OBJ> estimateSize;
 
   /// @nodoc
+  @protected
   final SerializeNative<OBJ> serializeNative;
 
   /// @nodoc
+  @protected
   final DeserializeNative<OBJ> deserializeNative;
 
   /// @nodoc
+  @protected
   final DeserializePropNative deserializePropNative;
 
   /// @nodoc
+  @protected
   final SerializeWeb<OBJ> serializeWeb;
 
   /// @nodoc
+  @protected
   final DeserializeWeb<OBJ> deserializeWeb;
 
   /// @nodoc
+  @protected
   final DeserializePropWeb deserializePropWeb;
 
   /// Returns a property by its name or throws an error.
@@ -94,10 +101,10 @@ typedef SerializeNative<T> = int Function(
 /// @nodoc
 @protected
 typedef DeserializeNative<T> = T Function(
-  IsarCollection<T> collection,
   int id,
   IsarBinaryReader reader,
   List<int> offsets,
+  Map<Type, List<int>> allOffsets,
 );
 
 /// @nodoc
@@ -107,6 +114,7 @@ typedef DeserializePropNative = dynamic Function(
   IsarBinaryReader reader,
   int propertyId,
   int offset,
+  Map<Type, List<int>> allOffsets,
 );
 
 /// @nodoc

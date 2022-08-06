@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:isar/isar.dart';
 import 'package:isar/src/native/isar_core.dart';
 import 'package:meta/meta.dart';
 
@@ -62,6 +63,14 @@ class BinaryReader {
   int readByte(int offset) {
     if (offset >= _staticSize) {
       return 0;
+    }
+    return _buffer[offset];
+  }
+
+  @pragma('vm:prefer-inline')
+  int? readByteOrNull(int offset) {
+    if (offset >= _staticSize) {
+      return null;
     }
     return _buffer[offset];
   }
@@ -189,26 +198,6 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
-  T readEnum<T>(int offset, List<T> values) {
-    final index = readByte(offset);
-    if (index > 0 && index <= values.length) {
-      return values[index - 1];
-    } else {
-      return values.first;
-    }
-  }
-
-  @pragma('vm:prefer-inline')
-  T? readEnumOrNull<T>(int offset, List<T> values) {
-    final index = readByte(offset);
-    if (index > 0 && index <= values.length) {
-      return values[index - 1];
-    } else {
-      return null;
-    }
-  }
-
-  @pragma('vm:prefer-inline')
   int _readUint24(int offset) {
     return _buffer[offset] |
         _buffer[offset + 1] << 8 |
@@ -235,6 +224,30 @@ class BinaryReader {
     bytesOffset += 3;
 
     return utf8Decoder.convert(_buffer, bytesOffset, bytesOffset + length);
+  }
+
+  @pragma('vm:prefer-inline')
+  T? readObjectOrNull<T>(
+    int offset,
+    DeserializeNative<T> deserialize,
+    Map<Type, List<int>> allOffsets,
+  ) {
+    if (offset >= _staticSize) {
+      return null;
+    }
+
+    var bytesOffset = _readUint24(offset);
+    if (bytesOffset == 0) {
+      return null;
+    }
+
+    final length = _readUint24(bytesOffset);
+    bytesOffset += 3;
+
+    final buffer = Uint8List.sublistView(_buffer, bytesOffset, length);
+    final reader = BinaryReader(buffer);
+    final offsets = allOffsets[T]!;
+    return deserialize(0, reader, offsets, allOffsets);
   }
 
   List<bool>? readBoolList(int offset) {
@@ -471,26 +484,6 @@ class BinaryReader {
     }).toList();
   }
 
-  List<T>? readEnumList<T>(int offset, List<T> values) {
-    return readByteList(offset)?.map((index) {
-      if (index > 0 && index <= values.length) {
-        return values[index - 1];
-      } else {
-        return values.first;
-      }
-    }).toList();
-  }
-
-  List<T?>? readEnumOrNullList<T>(int offset, List<T> values) {
-    return readByteList(offset)?.map((index) {
-      if (index > 0 && index <= values.length) {
-        return values[index - 1];
-      } else {
-        return null;
-      }
-    }).toList();
-  }
-
   List<T>? readDynamicList<T>(
     int offset,
     T nullValue,
@@ -531,6 +524,35 @@ class BinaryReader {
   List<String?>? readStringOrNullList(int offset) {
     return readDynamicList(offset, null, (startOffset, endOffset) {
       return utf8Decoder.convert(_buffer, startOffset, endOffset);
+    });
+  }
+
+  List<T>? readObjectList<T>(
+    int offset,
+    DeserializeNative<T> deserialize,
+    Map<Type, List<int>> allOffsets,
+    T defaultValue,
+  ) {
+    final offsets = allOffsets[T]!;
+    return readDynamicList(offset, defaultValue, (startOffset, endOffset) {
+      final buffer =
+          Uint8List.sublistView(_buffer, startOffset, endOffset - startOffset);
+      final reader = BinaryReader(buffer);
+      return deserialize(0, reader, offsets, allOffsets);
+    });
+  }
+
+  List<T?>? readObjectOrNullList<T>(
+    int offset,
+    DeserializeNative<T> deserialize,
+    Map<Type, List<int>> allOffsets,
+  ) {
+    final offsets = allOffsets[T]!;
+    return readDynamicList(offset, null, (startOffset, endOffset) {
+      final buffer =
+          Uint8List.sublistView(_buffer, startOffset, endOffset - startOffset);
+      final reader = BinaryReader(buffer);
+      return deserialize(0, reader, offsets, allOffsets);
     });
   }
 }

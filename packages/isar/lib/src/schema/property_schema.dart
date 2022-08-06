@@ -11,7 +11,7 @@ class PropertySchema {
     this.target,
   });
 
-  /// Hashed name
+  /// Internal id of this property.
   final int id;
 
   /// Name of the property
@@ -20,7 +20,7 @@ class PropertySchema {
   /// Isar type of the property
   final IsarType type;
 
-  /// For embedde objects: Name of the target schema
+  /// For embedded objects: Name of the target schema
   final String? target;
 
   /// @nodoc
@@ -57,9 +57,6 @@ enum IsarType {
   /// DateTime
   dateTime('Long'),
 
-  /// Enum
-  enumeration('Byte'),
-
   /// String
   string('String'),
 
@@ -87,9 +84,6 @@ enum IsarType {
   /// DateTime list
   dateTimeList('LongList'),
 
-  /// Enum list
-  enumerationList('ByteList'),
-
   /// String list
   stringList('StringList'),
 
@@ -108,6 +102,7 @@ extension IsarTypeX on IsarType {
   /// Whether this type represents a list
   bool get isList => index >= IsarType.boolList.index;
 
+  /// @nodoc
   IsarType get scalarType {
     switch (this) {
       case IsarType.boolList:
@@ -124,12 +119,11 @@ extension IsarTypeX on IsarType {
         return IsarType.double;
       case IsarType.dateTimeList:
         return IsarType.dateTime;
-      case IsarType.enumerationList:
-        return IsarType.enumeration;
       case IsarType.stringList:
         return IsarType.string;
       case IsarType.objectList:
         return IsarType.object;
+      // ignore: no_default_cases
       default:
         return this;
     }

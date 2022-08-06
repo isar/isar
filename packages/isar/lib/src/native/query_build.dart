@@ -323,8 +323,8 @@ dynamic _prepareValue(dynamic value) {
     return value.byteValue;
   } else if (value is DateTime) {
     return value.longValue;
-  } else if (value is Enum) {
-    return value.byteValue;
+  } else if (value is IsarEnum) {
+    return _prepareValue(value.isarValue);
   } else {
     return value;
   }

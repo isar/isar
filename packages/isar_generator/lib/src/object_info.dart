@@ -66,9 +66,10 @@ class ObjectProperty {
     required this.typeClassName,
     required this.isarType,
     required this.isId,
+    required this.enumConsts,
     required this.nullable,
     required this.elementNullable,
-    this.defaultValue,
+    this.userDefaultValue,
     required this.deserialize,
     required this.assignable,
     this.constructorPosition,
@@ -77,18 +78,26 @@ class ObjectProperty {
   final String dartName;
   final String isarName;
   final String typeClassName;
+
   final bool isId;
   final IsarType isarType;
+  final List<String>? enumConsts;
 
   final bool nullable;
   final bool elementNullable;
-  final String? defaultValue;
+  final String? userDefaultValue;
 
   final PropertyDeser deserialize;
   final bool assignable;
   final int? constructorPosition;
 
+  bool get isEnum => enumConsts != null;
+
   String get scalarDartType {
+    if (isEnum) {
+      return typeClassName;
+    }
+
     switch (isarType) {
       case IsarType.bool:
       case IsarType.boolList:
@@ -108,8 +117,6 @@ class ObjectProperty {
       case IsarType.dateTime:
       case IsarType.dateTimeList:
         return 'DateTime';
-      case IsarType.enumeration:
-      case IsarType.enumerationList:
       case IsarType.object:
       case IsarType.objectList:
         return typeClassName;
@@ -124,6 +131,12 @@ class ObjectProperty {
       : '$scalarDartType${nullable ? '?' : ''}';
 
   String get targetSchema => '${scalarDartType.capitalize()}Schema';
+
+  String get defaultEnum => '$typeClassName.${enumConsts!.first}';
+
+  String enumValues(ObjectInfo object) {
+    return '_${object.dartName}${scalarDartType}Values';
+  }
 }
 
 class ObjectIndexProperty {
@@ -184,8 +197,6 @@ class ObjectLink {
     final colId = xxh3(utf8.encode(col) as Uint8List, seed: isBacklink ? 1 : 0);
 
     final name = targetLinkIsarName ?? isarName;
-    print(
-        'COL $isBacklink $col NAME $name ID ${xxh3(utf8.encode(name) as Uint8List, seed: colId)}');
     return xxh3(utf8.encode(name) as Uint8List, seed: colId);
   }
 }

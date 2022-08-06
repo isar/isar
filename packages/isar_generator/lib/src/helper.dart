@@ -24,7 +24,7 @@ extension ClassElementX on ClassElement {
   List<PropertyInducingElement> get allAccessors {
     return [
       ...accessors.mapNotNull((e) => e.variable),
-      if (collectionAnnotation!.inheritance)
+      if (collectionAnnotation?.inheritance ?? embeddedAnnotation!.inheritance)
         for (InterfaceType supertype in allSupertypes) ...[
           if (!supertype.isDartCoreObject)
             ...supertype.accessors.mapNotNull((e) => e.variable)
@@ -38,6 +38,10 @@ extension ClassElementX on ClassElement {
         )
         .distinctBy((e) => e.name)
         .toList();
+  }
+
+  List<String> get enumConsts {
+    return fields.where((e) => e.isEnumConstant).map((e) => e.name).toList();
   }
 }
 
@@ -97,11 +101,22 @@ extension PropertyElementX on PropertyInducingElement {
     if (!isPublic || isStatic) return true;
     if (_ignoreChecker.hasAnnotationOf(nonSynthetic)) return true;
 
-    /*final jsonKey = nonSynthetic.metadata.firstOrNullWhere(
-      (e) => e.computeConstantValue()?.type?.element?.name == 'JsonKey',
-    )?.computeConstantValue();
+    final jsonKey = nonSynthetic.metadata
+        .firstOrNullWhere(
+          (e) => e.computeConstantValue()?.type?.element?.name == 'JsonKey',
+        )
+        ?.computeConstantValue();
 
-    if (jsonKey != nu)*/
+    if (jsonKey != null) {
+      if (jsonKey.getField('ignore')?.toBoolValue() == true) {
+        return true;
+      }
+    }
+
+    if (name == 'copyWith') {
+      return true;
+    }
+
     return false;
   }
 }

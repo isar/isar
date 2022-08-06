@@ -32,6 +32,7 @@ part 'src/schema/schema.dart';
 part 'src/isar.dart';
 part 'src/isar_collection.dart';
 part 'src/isar_connect.dart';
+part 'src/isar_enum.dart';
 part 'src/isar_error.dart';
 part 'src/isar_link.dart';
 part 'src/query.dart';

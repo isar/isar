@@ -94,7 +94,6 @@ class IsarAnalyzer {
     return ObjectInfo(
       dartName: modelClass.displayName,
       isarName: modelClass.isarName,
-      accessor: modelClass.collectionAccessor,
       properties: properties,
     );
   }
@@ -146,7 +145,7 @@ class IsarAnalyzer {
         properties.length) {
       err(
         'Two or more properties have the same name.',
-        constructor.enclosingElement,
+        constructor.enclosingElement2,
       );
     }
 
@@ -166,11 +165,10 @@ class IsarAnalyzer {
     ConstructorElement constructor,
   ) {
     final dartType = property.type;
-    final isarType = getIsarType(property.type, property);
+    final isarType = dartType.isarType;
     if (isarType == null) {
       err(
-        'Unsupported type. Please use a TypeConverter or annotate the '
-        'propery with @ignore.',
+        'Unsupported type. Please annotate the propery with @ignore.',
         property,
       );
     }
@@ -185,6 +183,11 @@ class IsarAnalyzer {
         elementNullable =
             elementType.nullabilitySuffix != NullabilitySuffix.none;
       }
+    }
+
+    if ((isarType == IsarType.byte && nullable) ||
+        (isarType == IsarType.byteList && elementNullable)) {
+      err('Bytes must not be nullable.', property);
     }
 
     final constructorParameter =
@@ -208,15 +211,20 @@ class IsarAnalyzer {
           property.setter == null ? PropertyDeser.none : PropertyDeser.assign;
     }
 
+    final enumConsts = dartType.scalarType.isIsarEnum
+        ? (dartType.scalarType.element! as ClassElement).enumConsts
+        : null;
+
     return ObjectProperty(
       dartName: property.displayName,
       isarName: property.isarName,
       typeClassName: elementType?.element!.name ?? dartType.element!.name!,
-      isId: isIsarId(dartType),
       isarType: isarType,
+      isId: dartType.isIsarId,
+      enumConsts: enumConsts,
       nullable: nullable,
       elementNullable: elementNullable,
-      defaultValue: constructorParameter?.defaultValueCode,
+      userDefaultValue: constructorParameter?.defaultValueCode,
       deserialize: deserialize,
       assignable: property.setter != null,
       constructorPosition: constructorPosition,

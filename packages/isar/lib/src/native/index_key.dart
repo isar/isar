@@ -80,6 +80,12 @@ void _addKeyValue(
   IndexType type,
   bool caseSensitive,
 ) {
+  if (value is IsarEnum) {
+    value = value.isarValue;
+  } else if (value is List<IsarEnum?>) {
+    value = value.map((e) => e?.isarValue).toList();
+  }
+
   final isarType =
       type != IndexType.hash ? property.type.scalarType : property.type;
   switch (isarType) {
@@ -103,9 +109,6 @@ void _addKeyValue(
       break;
     case IsarType.dateTime:
       IC.isar_key_add_long(keyPtr, (value as DateTime?).longValue);
-      break;
-    case IsarType.enumeration:
-      IC.isar_key_add_byte(keyPtr, (value as Enum?).byteValue);
       break;
     case IsarType.string:
       final strPtr = _strToNative(value as String?);
@@ -176,18 +179,6 @@ void _addKeyValue(
           longListPtr[i] = value[i].longValue;
         }
         IC.isar_key_add_long_list_hash(keyPtr, longListPtr, value.length);
-      }
-      break;
-    case IsarType.enumerationList:
-      if (value == null) {
-        IC.isar_key_add_long_list_hash(keyPtr, nullptr, 0);
-      } else {
-        value as List<Enum?>;
-        final byteListPtr = malloc<Uint8>(value.length);
-        for (var i = 0; i < value.length; i++) {
-          byteListPtr[i] = value[i].byteValue;
-        }
-        IC.isar_key_add_byte_list_hash(keyPtr, byteListPtr, value.length);
       }
       break;
     case IsarType.stringList:

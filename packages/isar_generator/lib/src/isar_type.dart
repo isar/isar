@@ -1,8 +1,11 @@
 import 'dart:typed_data';
 
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
+import 'package:isar_generator/src/helper.dart';
 import 'package:source_gen/source_gen.dart';
 
 const TypeChecker _dateTimeChecker = TypeChecker.fromRuntime(DateTime);
@@ -11,51 +14,81 @@ bool _isDateTime(Element element) => _dateTimeChecker.isExactly(element);
 const TypeChecker _uint8ListChecker = TypeChecker.fromRuntime(Uint8List);
 bool _isUint8List(Element element) => _uint8ListChecker.isExactly(element);
 
-IsarType? _getPrimitiveIsarType(DartType type) {
-  if (type.isDartCoreBool) {
-    return IsarType.bool;
-  } else if (type.isDartCoreInt) {
-    if (type.alias?.element.name == 'byte') {
-      return IsarType.byte;
-    } else if (type.alias?.element.name == 'short') {
-      return IsarType.int;
-    } else {
-      return IsarType.long;
+const TypeChecker _isarEnumChecker = TypeChecker.fromRuntime(IsarEnum);
+bool _isIsarEnum(Element element) => _isarEnumChecker.isAssignableFrom(element);
+
+extension DartTypeX on DartType {
+  IsarType? get _primitiveIsarType {
+    if (isDartCoreBool) {
+      return IsarType.bool;
+    } else if (isDartCoreInt) {
+      if (alias?.element.name == 'byte') {
+        return IsarType.byte;
+      } else if (alias?.element.name == 'short') {
+        return IsarType.int;
+      } else {
+        return IsarType.long;
+      }
+    } else if (isDartCoreDouble) {
+      if (alias?.element.name == 'float') {
+        return IsarType.float;
+      } else {
+        return IsarType.double;
+      }
+    } else if (isDartCoreString) {
+      return IsarType.string;
+    } else if (_isDateTime(element!)) {
+      return IsarType.dateTime;
+    } else if (element!.embeddedAnnotation != null) {
+      return IsarType.object;
+    } else if (isIsarEnum) {
+      final enumElement = element! as ClassElement;
+      final isarEnum =
+          enumElement.allSupertypes.firstWhere((e) => e.isIsarEnum);
+      if (isarEnum.typeArguments.firstOrNull?.nullabilitySuffix ==
+          NullabilitySuffix.none) {
+        final type = isarEnum.typeArguments[0];
+        final isarType = type.isarType;
+        if (!type.isIsarEnum &&
+            isarType != IsarType.object &&
+            isarType != IsarType.objectList) {
+          return isarType;
+        }
+      }
     }
-  } else if (type.isDartCoreDouble) {
-    if (type.alias?.element.name == 'float') {
-      return IsarType.float;
-    } else {
-      return IsarType.double;
-    }
-  } else if (type.isDartCoreString) {
-    return IsarType.string;
-  } else if (_isDateTime(type.element!)) {
-    return IsarType.dateTime;
-  } else if (type.isDartCoreEnum) {
-    return IsarType.enumeration;
+
+    return null;
   }
 
-  return null;
-}
-
-bool isIsarId(DartType type) {
-  return type.alias?.element.name == 'Id';
-}
-
-IsarType? getIsarType(DartType type, Element element) {
-  final primitiveType = _getPrimitiveIsarType(type);
-  if (primitiveType != null) {
-    return primitiveType;
+  bool get isIsarId {
+    return alias?.element.name == 'Id';
   }
 
-  if (_isUint8List(type.element!)) {
-    return IsarType.byteList;
-  } else if (type.isDartCoreList) {
-    final parameterizedType = type as ParameterizedType;
-    final typeArguments = parameterizedType.typeArguments;
-    if (typeArguments.isNotEmpty) {
-      switch (_getPrimitiveIsarType(typeArguments[0])) {
+  bool get isIsarEnum {
+    return _isIsarEnum(element!);
+  }
+
+  DartType get scalarType {
+    if (isDartCoreList) {
+      final parameterizedType = this as ParameterizedType;
+      final typeArguments = parameterizedType.typeArguments;
+      if (typeArguments.isNotEmpty) {
+        return typeArguments[0];
+      }
+    }
+    return this;
+  }
+
+  IsarType? get isarType {
+    final primitiveType = _primitiveIsarType;
+    if (primitiveType != null) {
+      return primitiveType;
+    }
+
+    if (_isUint8List(element!)) {
+      return IsarType.byteList;
+    } else if (isDartCoreList) {
+      switch (scalarType._primitiveIsarType) {
         case IsarType.bool:
           return IsarType.boolList;
         case IsarType.byte:
@@ -70,8 +103,6 @@ IsarType? getIsarType(DartType type, Element element) {
           return IsarType.doubleList;
         case IsarType.dateTime:
           return IsarType.dateTimeList;
-        case IsarType.enumeration:
-          return IsarType.enumerationList;
         case IsarType.string:
           return IsarType.stringList;
         case IsarType.object:
@@ -81,7 +112,7 @@ IsarType? getIsarType(DartType type, Element element) {
           throw UnimplementedError();
       }
     }
-  }
 
-  return null;
+    return null;
+  }
 }

@@ -39,9 +39,10 @@ String _prepareSerializeList(
   }
   code += '''
     bytesCount += 3 + $value.length * 3;
-    ${prepare ?? ''}
-    for (var i = 0; i < $value.length; i++) {
-      final value = $value[i];''';
+    {
+      ${prepare ?? ''}
+      for (var i = 0; i < $value.length; i++) {
+        final value = $value[i];''';
   if (elementNullable) {
     code += 'if (value != null) {';
   }
@@ -49,35 +50,52 @@ String _prepareSerializeList(
   if (elementNullable) {
     code += '}';
   }
-  code += '}';
+  code += '}}';
   if (nullable) {
     code += '}}';
   }
   return code;
 }
 
+String _convertEnum(ObjectProperty property, String value) {
+  final nOp = property.nullable ? '?' : '';
+  if (property.isarType.isList) {
+    final nElOp = property.elementNullable ? '?' : '';
+    return '$value$nOp.map((e) => e$nElOp.isarValue).toList()';
+  } else {
+    return '$value$nOp.isarValue';
+  }
+}
+
 String generateEstimateSerializeNative(ObjectInfo object) {
   var code = '''
-    int ${object.estimateSize}(${object.dartName} object, List<int> offsets, Map<Type, List<int>> allOffsets) {
+    int ${object.estimateSize}(
+      ${object.dartName} object,
+      List<int> offsets,
+      Map<Type, List<int>> allOffsets,
+    ) {
       var bytesCount = offsets.last;''';
 
   for (final property in object.properties) {
     final value = 'object.${property.dartName}';
+
     switch (property.isarType) {
       case IsarType.string:
+        final enumValue = property.isEnum ? '.isarValue' : '';
         code += _prepareSerialize(
           property.nullable,
           value,
-          (value) => '3 + $value.length * 3',
+          (value) => '3 + $value${enumValue}.length * 3',
         );
         break;
 
       case IsarType.stringList:
+        final enumValue = property.isEnum ? '.isarValue' : '';
         code += _prepareSerializeList(
           property.nullable,
           property.elementNullable,
           value,
-          'value.length * 3',
+          'value${enumValue}.length * 3',
         );
         break;
 
@@ -97,14 +115,13 @@ String generateEstimateSerializeNative(ObjectInfo object) {
           property.nullable,
           property.elementNullable,
           value,
-          '${property.targetSchema}.estimateSize(value, off, allOffsets)',
-          'final off = allOffsets[${property.scalarDartType}]!;',
+          '${property.targetSchema}.estimateSize(value, offsets, allOffsets)',
+          'final offsets = allOffsets[${property.scalarDartType}]!;',
         );
         break;
 
       case IsarType.byteList:
       case IsarType.boolList:
-      case IsarType.enumerationList:
         code += _prepareSerialize(
           property.nullable,
           value,
@@ -142,14 +159,21 @@ String generateEstimateSerializeNative(ObjectInfo object) {
 }
 
 String generateSerializeNative(ObjectInfo object) {
-  var code = 'int ${object.serializeNativeName}(${object.dartName} object, '
-      'IsarBinaryWriter writer, List<int> offsets, '
-      'Map<Type, List<int>> allOffsets,) {';
+  var code = '''
+  int ${object.serializeNativeName}(
+    ${object.dartName} object, 
+    IsarBinaryWriter writer,
+    List<int> offsets, 
+    Map<Type, List<int>> allOffsets,
+  ) {''';
 
-  code += 'writer.writeHeader();';
   for (var i = 0; i < object.objectProperties.length; i++) {
     final property = object.objectProperties[i];
-    final value = 'object.${property.dartName}';
+    var value = 'object.${property.dartName}';
+    if (property.isEnum) {
+      value = _convertEnum(property, value);
+    }
+
     switch (property.isarType) {
       case IsarType.bool:
         code += 'writer.writeBool(offsets[$i], $value);';
@@ -172,11 +196,17 @@ String generateSerializeNative(ObjectInfo object) {
       case IsarType.dateTime:
         code += 'writer.writeDateTime(offsets[$i], $value);';
         break;
-      case IsarType.enumeration:
-        code += 'writer.writeEnum(offsets[$i], $value);';
-        break;
       case IsarType.string:
         code += 'writer.writeString(offsets[$i], $value);';
+        break;
+      case IsarType.object:
+        code += '''
+          writer.writeObject<${property.typeClassName}>(
+            offsets[$i],
+            allOffsets,
+            ${property.targetSchema}.serializeNative,
+            $value,
+          );''';
         break;
       case IsarType.byteList:
         code += 'writer.writeByteList(offsets[$i], $value);';
@@ -199,11 +229,17 @@ String generateSerializeNative(ObjectInfo object) {
       case IsarType.dateTimeList:
         code += 'writer.writeDateTimeList(offsets[$i], $value);';
         break;
-      case IsarType.enumerationList:
-        code += 'writer.writeEnumList(offsets[$i], $value);';
-        break;
       case IsarType.stringList:
         code += 'writer.writeStringList(offsets[$i], $value);';
+        break;
+      case IsarType.objectList:
+        code += '''
+          writer.writeObjectList<${property.typeClassName}>(
+            offsets[$i],
+            allOffsets,
+            ${property.targetSchema}.serializeNative,
+            $value,
+          );''';
         break;
     }
   }
@@ -220,24 +256,29 @@ String generateDeserializeNative(ObjectInfo object) {
     return _deserializeProperty(object, p, 'offsets[$index]');
   }
 
-  var code = '''
-  ${object.dartName} ${object.deserializeNativeName}(IsarCollection<${object.dartName}> collection, int id, IsarBinaryReader reader, List<int> offsets) {
-    ${deserializeMethodBody(object, deserProp)}''';
-
-  if (object.links.isNotEmpty) {
-    code += '${object.attachName}(collection, id, object);';
-  }
-
-  // ignore: leading_newlines_in_multiline_strings
-  return '''$code
-    return object;
-  }''';
+  return '''
+    ${object.dartName} ${object.deserializeNativeName}(
+      int id,
+      IsarBinaryReader reader,
+      List<int> offsets,
+      Map<Type, List<int>> allOffsets,
+    ) {
+      ${deserializeMethodBody(object, deserProp)}
+      return object;
+    }''';
 }
 
 String generateDeserializePropNative(ObjectInfo object) {
   var code = '''
-  P ${object.deserializePropNativeName}<P>(Id id, IsarBinaryReader reader, int propertyId, int offset) {
-    switch (propertyId) {''';
+    P ${object.deserializePropNativeName}<P>(
+      Id id,
+      IsarBinaryReader reader,
+      int propertyId,
+      int offset,
+      Map<Type,
+      List<int>> allOffsets,
+    ) {
+      switch (propertyId) {''';
 
   for (var i = 0; i < object.objectProperties.length; i++) {
     final property = object.objectProperties[i];
@@ -248,7 +289,7 @@ String generateDeserializePropNative(ObjectInfo object) {
   return '''
       $code
       default:
-        throw IsarError('Illegal propertyIndex');
+        throw IsarError('Unknown property with id \$propertyId');
       }
     }
     ''';
@@ -263,63 +304,91 @@ String _deserializeProperty(
     return 'id';
   }
 
-  final orNull =
-      property.nullable || property.defaultValue != null ? 'OrNull' : '';
-  final orElNull = property.elementNullable ? 'OrNull' : '';
+  final deser = _deserialize(property, propertyOffset);
 
   var defaultValue = '';
   if (!property.nullable) {
-    if (property.defaultValue != null) {
-      defaultValue = '?? ${property.defaultValue}';
+    if (property.userDefaultValue != null) {
+      defaultValue = '?? ${property.userDefaultValue}';
+    } else if (property.isarType == IsarType.object) {
+      defaultValue = '?? ${property.typeClassName}()';
     } else if (property.isarType == IsarType.byteList) {
       defaultValue = '?? Uint8List(0)';
     } else if (property.isarType.isList) {
       defaultValue = '?? []';
+    } else if (property.isEnum) {
+      defaultValue = '?? ${property.defaultEnum}';
     }
   }
 
+  if (property.isEnum) {
+    if (property.isarType.isList) {
+      final elDefault =
+          !property.elementNullable ? '?? ${property.defaultEnum}' : '';
+      return '$deser?.map((e) => ${property.enumValues(object)}[e] '
+          '$elDefault).toList() $defaultValue';
+    } else {
+      return '${property.enumValues(object)}[$deser] $defaultValue';
+    }
+  } else {
+    return '$deser $defaultValue';
+  }
+}
+
+String _deserialize(ObjectProperty property, String propertyOffset) {
+  final orNull =
+      property.nullable || property.userDefaultValue != null || property.isEnum
+          ? 'OrNull'
+          : '';
+  final orElNull = property.elementNullable ? 'OrNull' : '';
+
   switch (property.isarType) {
     case IsarType.bool:
-      return 'reader.readBool$orNull($propertyOffset) $defaultValue';
+      return 'reader.readBool$orNull($propertyOffset)';
     case IsarType.byte:
-      return 'reader.readByte($propertyOffset) $defaultValue';
+      return 'reader.readByte$orNull($propertyOffset)';
     case IsarType.int:
-      return 'reader.readInt$orNull($propertyOffset) $defaultValue';
+      return 'reader.readInt$orNull($propertyOffset)';
     case IsarType.float:
-      return 'reader.readFloat$orNull($propertyOffset) $defaultValue';
+      return 'reader.readFloat$orNull($propertyOffset)';
     case IsarType.long:
-      return 'reader.readLong$orNull($propertyOffset) $defaultValue';
+      return 'reader.readLong$orNull($propertyOffset)';
     case IsarType.double:
-      return 'reader.readDouble$orNull($propertyOffset) $defaultValue';
+      return 'reader.readDouble$orNull($propertyOffset)';
     case IsarType.dateTime:
-      return 'reader.readDateTime$orNull($propertyOffset) $defaultValue';
-    case IsarType.enumeration:
-      final values = '${property.scalarDartType}.values';
-      return 'reader.readEnum$orNull($propertyOffset, $values) $defaultValue';
+      return 'reader.readDateTime$orNull($propertyOffset)';
     case IsarType.string:
-      return 'reader.readString$orNull($propertyOffset) $defaultValue';
-    case IsarType.boolList:
-      return 'reader.readBool${orElNull}List($propertyOffset) $defaultValue';
-    case IsarType.byteList:
-      return 'reader.readByteList($propertyOffset) $defaultValue';
-    case IsarType.intList:
-      return 'reader.readInt${orElNull}List($propertyOffset) $defaultValue';
-    case IsarType.floatList:
-      return 'reader.readFloat${orElNull}List($propertyOffset) $defaultValue';
-    case IsarType.longList:
-      return 'reader.readLong${orElNull}List($propertyOffset) $defaultValue';
-    case IsarType.doubleList:
-      return 'reader.readDouble${orElNull}List($propertyOffset) $defaultValue';
-    case IsarType.dateTimeList:
-      return 'reader.readDateTime${orElNull}List($propertyOffset) $defaultValue';
-    case IsarType.enumerationList:
-      final values = '${property.scalarDartType}.values';
-      return 'reader.readEnum${orElNull}List($propertyOffset, $values) $defaultValue';
-    case IsarType.stringList:
-      return 'reader.readString${orElNull}List($propertyOffset) $defaultValue';
+      return 'reader.readString$orNull($propertyOffset)';
     case IsarType.object:
-      throw UnimplementedError();
+      return '''
+        reader.readObjectOrNull<${property.typeClassName}>(
+          $propertyOffset,
+          ${property.targetSchema}.deserializeNative,
+          allOffsets,
+        )''';
+    case IsarType.boolList:
+      return 'reader.readBool${orElNull}List($propertyOffset)';
+    case IsarType.byteList:
+      return 'reader.readByteList($propertyOffset)';
+    case IsarType.intList:
+      return 'reader.readInt${orElNull}List($propertyOffset)';
+    case IsarType.floatList:
+      return 'reader.readFloat${orElNull}List($propertyOffset)';
+    case IsarType.longList:
+      return 'reader.readLong${orElNull}List($propertyOffset)';
+    case IsarType.doubleList:
+      return 'reader.readDouble${orElNull}List($propertyOffset)';
+    case IsarType.dateTimeList:
+      return 'reader.readDateTime${orElNull}List($propertyOffset)';
+    case IsarType.stringList:
+      return 'reader.readString${orElNull}List($propertyOffset)';
     case IsarType.objectList:
-      throw UnimplementedError();
+      return '''
+        reader.readObject${orElNull}List<${property.typeClassName}>(
+          $propertyOffset,
+          ${property.targetSchema}.deserializeNative,
+          allOffsets,
+          ${!property.elementNullable ? '${property.typeClassName}(),' : ''}
+        )''';
   }
 }

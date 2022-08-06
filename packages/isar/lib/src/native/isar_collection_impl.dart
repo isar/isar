@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: public_member_api_docs, invalid_use_of_protected_member
 
 import 'dart:async';
 import 'dart:convert';
@@ -39,7 +39,14 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   OBJ deserializeObject(CObject cObj) {
     final buffer = cObj.buffer.asTypedList(cObj.buffer_length);
     final reader = BinaryReader(buffer);
-    return schema.deserializeNative(this, cObj.id, reader, _offsets);
+    final object = schema.deserializeNative(
+      cObj.id,
+      reader,
+      _offsets,
+      isar.offsets,
+    );
+    schema.attach(this, cObj.id, object);
+    return object;
   }
 
   @pragma('vm:prefer-inline')
@@ -105,6 +112,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
             BinaryReader(buffer),
             propertyId,
             propertyOffset,
+            isar.offsets,
           ) as T,
         );
       }
@@ -533,7 +541,6 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   Stream<void> watchLazy() {
-    // ignore: invalid_use_of_protected_member
     isar.requireOpen();
     final port = ReceivePort();
     final handle =
@@ -555,7 +562,6 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   Stream<void> watchObjectLazy(int id, {bool initialReturn = false}) {
-    // ignore: invalid_use_of_protected_member
     isar.requireOpen();
     final cObjPtr = malloc<CObject>();
 
@@ -590,7 +596,6 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     int? limit,
     String? property,
   }) {
-    // ignore: invalid_use_of_protected_member
     isar.requireOpen();
     return buildNativeQuery(
       this,

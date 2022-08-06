@@ -69,8 +69,11 @@ String generateDeserializePropWeb(ObjectInfo object) {
     ''';
 }
 
-String _defaultVal(IsarType type) {
-  switch (type) {
+String _defaultVal(ObjectProperty property) {
+  if (property.isEnum) {
+    return property.defaultEnum;
+  }
+  switch (property.isarType) {
     case IsarType.byte:
     case IsarType.byteList:
       return 'Uint8List(0)';
@@ -90,14 +93,12 @@ String _defaultVal(IsarType type) {
     case IsarType.dateTime:
     case IsarType.dateTimeList:
       return 'DateTime.fromMillisecondsSinceEpoch(0)';
-    case IsarType.enumeration:
-    case IsarType.enumerationList:
     case IsarType.string:
     case IsarType.stringList:
       return "''";
     case IsarType.object:
     case IsarType.objectList:
-      return "''";
+      return '${property.typeClassName}()';
   }
 }
 
@@ -109,7 +110,7 @@ String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
     if (nullable) {
       return '$e != null ? $c : null';
     } else {
-      return '$e != null ? $c : ${_defaultVal(property.isarType)}';
+      return '$e != null ? $c : ${_defaultVal(property)}';
     }
   }
 
@@ -120,7 +121,7 @@ String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
     if (property.isarType == IsarType.dateTimeList) {
       convert = convDate('e', property.elementNullable);
     } else if (!property.elementNullable) {
-      convert = 'e ?? ${_defaultVal(property.isarType)}';
+      convert = 'e ?? ${_defaultVal(property)}';
     }
 
     final elType = property.scalarDartType;
@@ -135,7 +136,7 @@ String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
   } else {
     final defaultVal = property.nullable || property.isarType == IsarType.byte
         ? ''
-        : '?? ${_defaultVal(property.isarType)}';
+        : '?? ${_defaultVal(property)}';
     deser = '$read $defaultVal';
   }
 

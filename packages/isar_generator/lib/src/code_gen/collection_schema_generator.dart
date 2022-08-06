@@ -38,12 +38,18 @@ String generateSchema(ObjectInfo object) {
     final links = object.links
         .map((e) => "r'${e.isarName}': ${_generateLinkSchema(object, e)}")
         .join(',');
+    final embeddedSchemas = object.properties
+        .where((e) =>
+            e.isarType == IsarType.object || e.isarType == IsarType.objectList)
+        .distinctBy((e) => e.targetSchema)
+        .map((e) => "r'${e.typeClassName}': ${e.targetSchema}")
+        .join(',');
 
     code += '''
       idName: r'${object.idProperty.isarName}',
       indexes: {$indexes},
       links: {$links},
-      embeddedSchemas: {},
+      embeddedSchemas: {$embeddedSchemas},
 
       getId: ${object.getIdName},
       getLinks: ${object.getLinksName},
@@ -51,15 +57,8 @@ String generateSchema(ObjectInfo object) {
       version: ${CollectionSchema.generatorVersion},
     ''';
   }
-  //print(code);
 
-  return '''
-    $code
-    );
-    
-    ${_generateGetId(object)}
-    ${_generateGetLinks(object)}
-    ${_generateAttach(object)}''';
+  return '$code);';
 }
 
 String _generatePropertySchema(int index, ObjectProperty property) {
@@ -111,44 +110,4 @@ String _generateLinkSchema(ObjectInfo object, ObjectLink link) {
       isSingle: ${link.isSingle},
       $linkName
     )''';
-}
-
-String _generateGetId(ObjectInfo object) {
-  return '''
-    int? ${object.getIdName}(${object.dartName} object) {
-      if (object.${object.idProperty.dartName} == Isar.autoIncrement) {
-        return null;
-      } else {
-        return object.${object.idProperty.dartName};
-      }
-    }
-  ''';
-}
-
-String _generateGetLinks(ObjectInfo object) {
-  return '''
-    List<IsarLinkBase<dynamic>> ${object.getLinksName}(${object.dartName} object) {
-      return [${object.links.map((e) => 'object.${e.dartName}').join(',')}];
-    }
-  ''';
-}
-
-String _generateAttach(ObjectInfo object) {
-  var code = '''
-  void ${object.attachName}(IsarCollection<dynamic> col, Id id, ${object.dartName} object) {''';
-
-  if (object.idProperty.assignable) {
-    code += 'object.${object.idProperty.dartName} = id;';
-  }
-
-  for (final link in object.links) {
-    // ignore: leading_newlines_in_multiline_strings
-    code += '''object.${link.dartName}.attach(
-      col,
-      col.isar.collection<${link.targetCollectionDartName}>(),
-      r'${link.isarName}',
-      id
-    );''';
-  }
-  return '$code}';
 }

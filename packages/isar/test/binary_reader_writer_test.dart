@@ -61,7 +61,6 @@ void main() {
 
         final bufferView = buffer.buffer.asUint8List(0, test.bytes.length);
         final writer = BinaryWriter(bufferView, size);
-        writer.writeHeader();
         var offset = 2;
         for (var i = 0; i < test.types.length; i++) {
           final type = test.types[i];

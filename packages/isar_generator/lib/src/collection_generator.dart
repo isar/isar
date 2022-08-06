@@ -11,6 +11,7 @@ import 'package:isar_generator/src/code_gen/query_link_generator.dart';
 import 'package:isar_generator/src/code_gen/query_property_generator.dart';
 import 'package:isar_generator/src/code_gen/query_sort_by_generator.dart';
 import 'package:isar_generator/src/code_gen/query_where_generator.dart';
+import 'package:isar_generator/src/code_gen/type_adapter_generator_common.dart';
 import 'package:isar_generator/src/code_gen/type_adapter_generator_native.dart';
 import 'package:isar_generator/src/code_gen/type_adapter_generator_web.dart';
 import 'package:isar_generator/src/isar_analyzer.dart';
@@ -30,6 +31,7 @@ const ignoreLints = [
   'unnecessary_raw_strings',
   'join_return_with_assignment',
   'avoid_js_rounded_ints',
+  'prefer_final_locals',
 ];
 
 class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
@@ -40,9 +42,6 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
     BuildStep buildStep,
   ) async {
     final object = IsarAnalyzer().analyzeCollection(element);
-
-    final schema = generateSchema(object);
-
     return '''
       // coverage:ignore-file
       // ignore_for_file: ${ignoreLints.join(', ')}
@@ -51,7 +50,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
         IsarCollection<${object.dartName}> get ${object.accessor} => collection();
       }
 
-      $schema
+      ${generateSchema(object)}
 
       ${generateEstimateSerializeNative(object)}
       ${generateSerializeNative(object)}
@@ -62,6 +61,12 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       ${generateDeserializeWeb(object)}
       ${generateDeserializePropWeb(object)}
 
+      ${generateEnumValues(object)}
+
+      ${generateGetId(object)}
+      ${generateGetLinks(object)}
+      ${generateAttach(object)}
+
       ${generateByIndexExtension(object)}
       ${WhereGenerator(object).generate()}
       ${FilterGenerator(object).generate()}
@@ -69,6 +74,34 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       ${generateSortBy(object)}
       ${generateDistinctBy(object)}
       ${generatePropertyQuery(object)}
+    ''';
+  }
+}
+
+class IsarEmbeddedGenerator extends GeneratorForAnnotation<Embedded> {
+  @override
+  Future<String> generateForAnnotatedElement(
+    Element element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) async {
+    final object = IsarAnalyzer().analyzeEmbedded(element);
+    return '''
+      // coverage:ignore-file
+      // ignore_for_file: ${ignoreLints.join(', ')}å
+
+      ${generateSchema(object)}
+
+      ${generateEstimateSerializeNative(object)}
+      ${generateSerializeNative(object)}
+      ${generateDeserializeNative(object)}
+      ${generateDeserializePropNative(object)}
+
+      ${generateSerializeWeb(object)}
+      ${generateDeserializeWeb(object)}
+      ${generateDeserializePropWeb(object)}
+
+      ${generateEnumValues(object)}
     ''';
   }
 }
