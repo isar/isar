@@ -1645,6 +1645,34 @@ class IsarCoreBindings {
       int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>, int,
           int, ffi.Pointer<ffi.Int64>, int, int, bool)>();
 
+  int isar_link_verify(
+    ffi.Pointer<CIsarCollection> collection,
+    ffi.Pointer<CIsarTxn> txn,
+    int link_id,
+    ffi.Pointer<ffi.Int64> ids,
+    int ids_count,
+  ) {
+    return _isar_link_verify(
+      collection,
+      txn,
+      link_id,
+      ids,
+      ids_count,
+    );
+  }
+
+  late final _isar_link_verifyPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int64 Function(
+              ffi.Pointer<CIsarCollection>,
+              ffi.Pointer<CIsarTxn>,
+              ffi.Uint64,
+              ffi.Pointer<ffi.Int64>,
+              ffi.Uint32)>>('isar_link_verify');
+  late final _isar_link_verify = _isar_link_verifyPtr.asFunction<
+      int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<CIsarTxn>, int,
+          ffi.Pointer<ffi.Int64>, int)>();
+
   ffi.Pointer<CQueryBuilder> isar_qb_create(
     ffi.Pointer<CIsarCollection> collection,
   ) {
