@@ -1509,20 +1509,23 @@ class IsarCoreBindings {
 
   int isar_get_offsets(
     ffi.Pointer<CIsarCollection> collection,
+    int embedded_col_id,
     ffi.Pointer<ffi.Uint32> offsets,
   ) {
     return _isar_get_offsets(
       collection,
+      embedded_col_id,
       offsets,
     );
   }
 
   late final _isar_get_offsetsPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Uint32 Function(ffi.Pointer<CIsarCollection>,
+          ffi.Uint32 Function(ffi.Pointer<CIsarCollection>, ffi.Uint64,
               ffi.Pointer<ffi.Uint32>)>>('isar_get_offsets');
   late final _isar_get_offsets = _isar_get_offsetsPtr.asFunction<
-      int Function(ffi.Pointer<CIsarCollection>, ffi.Pointer<ffi.Uint32>)>();
+      int Function(
+          ffi.Pointer<CIsarCollection>, int, ffi.Pointer<ffi.Uint32>)>();
 
   int isar_link(
     ffi.Pointer<CIsarCollection> collection,
