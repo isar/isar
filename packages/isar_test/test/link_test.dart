@@ -98,7 +98,7 @@ void main() {
       objB3 = LinkModelB.name('modelB3');
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     group('self link', () {
       isarTest('save link manually', () async {

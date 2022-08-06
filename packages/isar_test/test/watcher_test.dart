@@ -41,7 +41,7 @@ void main() {
       obj3 = Value(3, 'Test');
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     group('Collection', () {
       isarTest('.put()', () async {

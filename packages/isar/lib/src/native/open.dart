@@ -17,6 +17,18 @@ import 'package:isar/src/native/isar_impl.dart';
 final Pointer<Pointer<CIsarInstance>> _isarPtrPtr =
     malloc<Pointer<CIsarInstance>>();
 
+List<int> _getOffsets(
+  Pointer<CIsarCollection> colPtr,
+  Pointer<Uint32> offsetsPtr,
+  int propertiesCount,
+  int embeddedColId,
+) {
+  final staticSize = IC.isar_get_offsets(colPtr, embeddedColId, offsetsPtr);
+  final offsets = offsetsPtr.asTypedList(propertiesCount).toList();
+  offsets.add(staticSize);
+  return offsets;
+}
+
 void _initializeInstance(
   Allocator alloc,
   IsarImpl isar,
@@ -31,9 +43,21 @@ void _initializeInstance(
   for (final schema in schemas) {
     nCall(IC.isar_instance_get_collection(isar.ptr, colPtrPtr, schema.id));
 
-    final staticSize = IC.isar_get_offsets(colPtrPtr.value, offsetsPtr);
-    final offsets = offsetsPtr.asTypedList(schema.properties.length).toList();
-    offsets.add(staticSize);
+    final offsets =
+        _getOffsets(colPtrPtr.value, offsetsPtr, schema.properties.length, 0);
+
+    for (final embeddedSchema in schema.embeddedSchemas.values) {
+      final embeddedType = embeddedSchema.type;
+      if (!isar.offsets.containsKey(embeddedType)) {
+        final offsets = _getOffsets(
+          colPtrPtr.value,
+          offsetsPtr,
+          embeddedSchema.properties.length,
+          embeddedSchema.id,
+        );
+        isar.offsets[embeddedType] = offsets;
+      }
+    }
 
     schema.toCollection(<OBJ>() {
       isar.offsets[OBJ] = offsets;

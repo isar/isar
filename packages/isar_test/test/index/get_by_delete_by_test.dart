@@ -53,7 +53,7 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('getBy', () async {
       expect(await col.getByGuid(obj1.guid), obj1);

@@ -85,7 +85,7 @@ String generateEstimateSerializeNative(ObjectInfo object) {
         code += _prepareSerialize(
           property.nullable,
           value,
-          (value) => '3 + $value${enumValue}.length * 3',
+          (value) => '3 + $value$enumValue.length * 3',
         );
         break;
 
@@ -95,7 +95,7 @@ String generateEstimateSerializeNative(ObjectInfo object) {
           property.nullable,
           property.elementNullable,
           value,
-          'value${enumValue}.length * 3',
+          'value$enumValue.length * 3',
         );
         break;
 
@@ -312,8 +312,6 @@ String _deserializeProperty(
       defaultValue = '?? ${property.userDefaultValue}';
     } else if (property.isarType == IsarType.object) {
       defaultValue = '?? ${property.typeClassName}()';
-    } else if (property.isarType == IsarType.byteList) {
-      defaultValue = '?? Uint8List(0)';
     } else if (property.isarType.isList) {
       defaultValue = '?? []';
     } else if (property.isEnum) {

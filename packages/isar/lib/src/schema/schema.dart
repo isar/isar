@@ -79,6 +79,10 @@ class Schema<OBJ> {
       ],
     };
   }
+
+  /// @nodoc
+  @protected
+  Type get type => OBJ;
 }
 
 /// @nodoc

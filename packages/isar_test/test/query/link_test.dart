@@ -82,7 +82,7 @@ void main() {
     group('Other', () {
       setUp(_setup);
 
-      tearDown(() => isar.close());
+      tearDown(() => isar.close(deleteFromDisk: true));
 
       isarTest('single', () async {
         a1.links.addAll([b1, b3]);
@@ -186,7 +186,7 @@ void main() {
     group('Self', () {
       setUp(_setup);
 
-      tearDown(() => isar.close());
+      tearDown(() => isar.close(deleteFromDisk: true));
 
       isarTest('single', () async {
         a1.selfLinks.addAll([a1, a2, a3]);
@@ -290,7 +290,7 @@ void main() {
     group('Backlink', () {
       setUp(_setup);
 
-      tearDown(() => isar.close());
+      tearDown(() => isar.close(deleteFromDisk: true));
 
       isarTest('single', () async {
         a1.links.addAll([b1, b3]);

@@ -244,7 +244,8 @@ class BinaryReader {
     final length = _readUint24(bytesOffset);
     bytesOffset += 3;
 
-    final buffer = Uint8List.sublistView(_buffer, bytesOffset, length);
+    final buffer =
+        Uint8List.sublistView(_buffer, bytesOffset, bytesOffset + length);
     final reader = BinaryReader(buffer);
     final offsets = allOffsets[T]!;
     return deserialize(0, reader, offsets, allOffsets);
@@ -290,7 +291,7 @@ class BinaryReader {
     return list;
   }
 
-  Uint8List? readByteList(int offset) {
+  List<int>? readByteList(int offset) {
     if (offset >= _staticSize) {
       return null;
     }
@@ -535,8 +536,7 @@ class BinaryReader {
   ) {
     final offsets = allOffsets[T]!;
     return readDynamicList(offset, defaultValue, (startOffset, endOffset) {
-      final buffer =
-          Uint8List.sublistView(_buffer, startOffset, endOffset - startOffset);
+      final buffer = Uint8List.sublistView(_buffer, startOffset, endOffset);
       final reader = BinaryReader(buffer);
       return deserialize(0, reader, offsets, allOffsets);
     });
@@ -549,8 +549,7 @@ class BinaryReader {
   ) {
     final offsets = allOffsets[T]!;
     return readDynamicList(offset, null, (startOffset, endOffset) {
-      final buffer =
-          Uint8List.sublistView(_buffer, startOffset, endOffset - startOffset);
+      final buffer = Uint8List.sublistView(_buffer, startOffset, endOffset);
       final reader = BinaryReader(buffer);
       return deserialize(0, reader, offsets, allOffsets);
     });

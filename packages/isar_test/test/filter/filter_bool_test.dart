@@ -60,7 +60,7 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.equalTo() / .notEqualTo()', () async {
       // where clauses
@@ -129,7 +129,7 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.anyEqualTo() / .anyNotEqualTo()', () async {
       // where clauses
@@ -181,7 +181,7 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.equalTo() / .notEqualTo()', () async {
       // where clauses

@@ -65,7 +65,7 @@ void main() {
       b2 = LinkModelB('modelB2');
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.tSave() / .load() manually', () async {
       await isar.tWriteTxn(() async {

@@ -42,7 +42,7 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     group('where anyOf', () {
       isarTest('zero elements', () async {

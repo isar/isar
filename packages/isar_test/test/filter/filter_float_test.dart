@@ -69,7 +69,7 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.greaterThan()', () async {
       // where clauses
@@ -158,7 +158,7 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.anyGreaterThan() / .anyLessThan()', () async {
       // where clauses

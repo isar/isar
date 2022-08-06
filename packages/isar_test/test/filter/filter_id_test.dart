@@ -48,7 +48,7 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.equalTo()', () async {
       // where clause

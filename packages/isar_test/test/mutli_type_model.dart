@@ -44,13 +44,9 @@ class MultiTypeModel {
 
   List<bool?>? boolNListN;
 
-  Uint8List? byteListN;
+  List<byte>? byteListN;
 
-  List<byte>? byteList2N;
-
-  Uint8List byteList = Uint8List(0);
-
-  List<byte> byteList2 = [];
+  List<byte> byteList = Uint8List(0);
 
   List<short> intList = [];
 

@@ -76,7 +76,7 @@ String _defaultVal(ObjectProperty property) {
   switch (property.isarType) {
     case IsarType.byte:
     case IsarType.byteList:
-      return 'Uint8List(0)';
+      return '0';
     case IsarType.bool:
     case IsarType.boolList:
       return 'false';
@@ -115,7 +115,7 @@ String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
   }
 
   String deser;
-  if (property.isarType.isList && property.isarType != IsarType.byteList) {
+  if (property.isarType.isList) {
     final defaultList = property.nullable ? '' : '?? []';
     String? convert;
     if (property.isarType == IsarType.dateTimeList) {

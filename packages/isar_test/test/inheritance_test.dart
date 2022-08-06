@@ -172,7 +172,7 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     /*test('Validate inheritance model properties', () {
       expect(InheritingModelSchema.idName, 'identifier');

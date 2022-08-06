@@ -57,7 +57,7 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('sorted by value1 value2', () async {
       await qEqual(

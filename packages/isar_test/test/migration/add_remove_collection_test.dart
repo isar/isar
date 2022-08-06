@@ -7,8 +7,9 @@ import '../util/sync_async_helper.dart';
 part 'add_remove_collection_test.g.dart';
 
 @Collection()
-class Col1 {
-  Col1(this.id, this.value);
+class Model1 {
+  Model1(this.id, this.value);
+
   Id? id;
 
   String? value;
@@ -16,12 +17,13 @@ class Col1 {
   @override
   // ignore: hash_and_equals
   bool operator ==(Object other) =>
-      other is Col1 && id == other.id && value == other.value;
+      other is Model1 && id == other.id && value == other.value;
 }
 
 @Collection()
-class Col2 {
-  Col2(this.id, this.value);
+class Model2 {
+  Model2(this.id, this.value);
+
   Id? id;
 
   String? value;
@@ -29,17 +31,18 @@ class Col2 {
   @override
   // ignore: hash_and_equals
   bool operator ==(Object other) =>
-      other is Col2 && id == other.id && value == other.value;
+      other is Model2 && id == other.id && value == other.value;
 }
 
 void main() {
   isarTest('Add collection', () async {
     final isar1 = await openTempIsar([Col1Schema]);
-    final col1A = Col1(5, 'col1_a');
-    final col1B = Col1(15, 'col1_b');
+    final obj1A = Model1(5, 'col1_a');
+    final obj1B = Model1(15, 'col1_b');
     await isar1.tWriteTxn(() {
-      return isar1.col1s.tPutAll([col1A, col1B]);
+      return isar1.col1s.tPutAll([obj1A, obj1B]);
     });
+    await isar1.col1s.verify([obj1A, obj1B]);
     expect(await isar1.close(), true);
 
     final isar2 =

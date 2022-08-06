@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
@@ -10,9 +8,6 @@ import 'package:source_gen/source_gen.dart';
 
 const TypeChecker _dateTimeChecker = TypeChecker.fromRuntime(DateTime);
 bool _isDateTime(Element element) => _dateTimeChecker.isExactly(element);
-
-const TypeChecker _uint8ListChecker = TypeChecker.fromRuntime(Uint8List);
-bool _isUint8List(Element element) => _uint8ListChecker.isExactly(element);
 
 const TypeChecker _isarEnumChecker = TypeChecker.fromRuntime(IsarEnum);
 bool _isIsarEnum(Element element) => _isarEnumChecker.isAssignableFrom(element);
@@ -85,9 +80,7 @@ extension DartTypeX on DartType {
       return primitiveType;
     }
 
-    if (_isUint8List(element!)) {
-      return IsarType.byteList;
-    } else if (isDartCoreList) {
+    if (isDartCoreList) {
       switch (scalarType._primitiveIsarType) {
         case IsarType.bool:
           return IsarType.boolList;
