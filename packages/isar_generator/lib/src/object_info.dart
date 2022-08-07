@@ -126,9 +126,13 @@ class ObjectProperty {
     }
   }
 
-  String get dartType => isarType.isList
-      ? 'List<$scalarDartType${elementNullable ? '?' : ''}>${nullable ? '?' : ''}'
+  String get nScalarDartType => isarType.isList
+      ? '$scalarDartType${elementNullable ? '?' : ''}'
       : '$scalarDartType${nullable ? '?' : ''}';
+
+  String get dartType => isarType.isList
+      ? 'List<$nScalarDartType>${nullable ? '?' : ''}'
+      : nScalarDartType;
 
   String get targetSchema => '${scalarDartType.capitalize()}Schema';
 

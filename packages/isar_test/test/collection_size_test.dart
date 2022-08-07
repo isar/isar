@@ -68,7 +68,8 @@ void main() {
       objB5 = ModelB();
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
+    ;
 
     isarTest('Size should start at 0', () async {
       expect(await isar.modelAs.tGetSize(), 0);

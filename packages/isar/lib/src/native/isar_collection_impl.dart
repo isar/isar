@@ -303,7 +303,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   List<int> putAllSync(List<OBJ> objects, {bool saveLinks = true}) {
-    return putAllByIndexSync(null, objects);
+    return putAllByIndexSync(null, objects, saveLinks: saveLinks);
   }
 
   @override

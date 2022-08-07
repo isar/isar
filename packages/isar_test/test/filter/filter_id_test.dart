@@ -60,6 +60,15 @@ void main() {
       await qEqualSet(col.filter().idEqualTo(5).tFindAll(), []);
     });
 
+    isarTest('.notEqualTo()', () async {
+      // where clause
+      await qEqual(col.where().idNotEqualTo(2).tFindAll(), [obj0, obj1, obj3]);
+      await qEqual(
+        col.where().idNotEqualTo(5).tFindAll(),
+        [obj0, obj1, obj2, obj3],
+      );
+    });
+
     isarTest('.greaterThan()', () async {
       // where clause
       await qEqual(col.where().idGreaterThan(2).tFindAll(), [obj3]);

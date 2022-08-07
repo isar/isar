@@ -12,33 +12,12 @@ class FloatModel {
   Id? id;
 
   @Index()
-  double? field = 0;
-
-  @Index(type: IndexType.value)
-  List<float?>? list;
-
-  @override
-  String toString() {
-    return '{id: $id, field: $field, list: $list}';
-  }
+  float? field = 0;
 
   @override
   // ignore: hash_and_equals
-  bool operator ==(Object other) {
-    // ignore: test_types_in_equals
-    final otherModel = other as FloatModel;
-    if ((other.field == null) != (field == null)) {
-      return false;
-    } else if (id != other.id) {
-      return false;
-    } else if (field != null && (otherModel.field! - field!).abs() > 0.001) {
-      return false;
-    } else if (!doubleListEquals(list, other.list)) {
-      return false;
-    }
-
-    return true;
-  }
+  bool operator ==(Object other) =>
+      other is FloatModel && doubleEquals(field, other.field);
 }
 
 void main() {
@@ -128,83 +107,16 @@ void main() {
       await qEqualSet(col.filter().fieldBetween(5, 6).tFindAll(), []);
     });
 
-    isarTest('.isNull() / .isNotNull()', () async {
+    isarTest('.isNull()', () async {
+      // where clauses
+      await qEqual(col.where().fieldIsNull().tFindAll(), [objNull]);
+
+      // filters
       await qEqual(col.filter().fieldIsNull().tFindAll(), [objNull]);
     });
-  });
 
-  group('Float list filter', () {
-    late Isar isar;
-    late IsarCollection<FloatModel> col;
-
-    late FloatModel objEmpty;
-    late FloatModel obj1;
-    late FloatModel obj2;
-    late FloatModel obj3;
-    late FloatModel objNull;
-
-    setUp(() async {
-      isar = await openTempIsar([FloatModelSchema]);
-      col = isar.floatModels;
-
-      objEmpty = FloatModel()..list = [];
-      obj1 = FloatModel()..list = [1.1, 3.3];
-      obj2 = FloatModel()..list = [null];
-      obj3 = FloatModel()..list = [null, -1000];
-      objNull = FloatModel()..list = null;
-
-      await isar.writeTxn(() async {
-        await col.putAll([objEmpty, obj1, obj3, obj2, objNull]);
-      });
-    });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
-
-    isarTest('.anyGreaterThan() / .anyLessThan()', () async {
-      // where clauses
-      await qEqualSet(
-        col.where().listElementGreaterThan(1.1).tFindAll(),
-        [obj1],
-      );
-      await qEqualSet(col.where().listElementGreaterThan(4).tFindAll(), []);
-      await qEqualSet(
-        col.where().listElementLessThan(1.1).tFindAll(),
-        [obj2, obj3],
-      );
-      await qEqualSet(col.where().listElementLessThan(null).tFindAll(), []);
-
-      // filters
-      await qEqualSet(
-        col.filter().listElementGreaterThan(1.1).tFindAll(),
-        [obj1],
-      );
-      await qEqualSet(col.filter().listElementGreaterThan(4).tFindAll(), []);
-      await qEqualSet(
-        col.filter().listElementLessThan(1.1).tFindAll(),
-        [obj2, obj3],
-      );
-      await qEqualSet(col.filter().listElementLessThan(null).tFindAll(), []);
-    });
-
-    isarTest('.anyBetween()', () async {
-      // where clauses
-      await qEqualSet(col.where().listElementBetween(1, 5).tFindAll(), [obj1]);
-      await qEqualSet(col.where().listElementBetween(5, 10).tFindAll(), []);
-
-      // filters
-      await qEqualSet(col.filter().listElementBetween(1, 5).tFindAll(), [obj1]);
-      await qEqualSet(
-        col.filter().listElementBetween(5, 10).tFindAll(),
-        [],
-      );
-    });
-
-    isarTest('.anyIsNull() / .anyIsNotNull()', () async {
-      // filters
-      await qEqualSet(
-        col.filter().listElementIsNull().tFindAll(),
-        [obj2, obj3],
-      );
+    isarTest('.isNotNull()', () async {
+      await qEqual(col.filter().fieldIsNull().tFindAll(), [objNull]);
     });
   });
 }

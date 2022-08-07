@@ -79,7 +79,7 @@ class FilterGenerator {
   String generateEqualTo(ObjectProperty p) {
     final optional = caseSensitiveProperty(p);
     return '''
-    ${mPrefix(p)}EqualTo(${p.scalarDartType}? value ${optional.isNotBlank ? ', {$optional}' : ''}) {
+    ${mPrefix(p)}EqualTo(${p.nScalarDartType} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.equalTo(
           property: r'${p.isarName}',
@@ -96,7 +96,7 @@ class FilterGenerator {
     final include = !isFloat ? 'bool include = false,' : '';
     final optional = '${caseSensitiveProperty(p)} $include';
     return '''
-    ${mPrefix(p)}GreaterThan(${p.scalarDartType}? value ${optional.isNotBlank ? ', {$optional}' : ''}) {
+    ${mPrefix(p)}GreaterThan(${p.nScalarDartType} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.greaterThan(
           ${!isFloat ? 'include: include,' : ''}
@@ -114,7 +114,7 @@ class FilterGenerator {
     final include = !isFloat ? 'bool include = false,' : '';
     final optional = '${caseSensitiveProperty(p)} $include';
     return '''
-    ${mPrefix(p)}LessThan(${p.scalarDartType}? value ${optional.isNotBlank ? ', {$optional}' : ''}) {
+    ${mPrefix(p)}LessThan(${p.nScalarDartType} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.lessThan(
           ${!isFloat ? 'include: include,' : ''}
@@ -133,7 +133,7 @@ class FilterGenerator {
         !isFloat ? 'bool includeLower = true, bool includeUpper = true,' : '';
     final optional = '${caseSensitiveProperty(p)} $include';
     return '''
-    ${mPrefix(p)}Between(${p.scalarDartType}? lower, ${p.scalarDartType}? upper ${optional.isNotBlank ? ', {$optional}' : ''}) {
+    ${mPrefix(p)}Between(${p.nScalarDartType} lower, ${p.nScalarDartType} upper ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.between(
           property: r'${p.isarName}',

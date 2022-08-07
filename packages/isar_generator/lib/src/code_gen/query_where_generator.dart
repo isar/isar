@@ -39,13 +39,13 @@ class WhereGenerator {
         final indexProperty = index.properties[n];
         final property = indexProperty.property;
 
+        if (property.nullable) {
+          code += generateWhereIsNull(index, n + 1);
+          code += generateWhereIsNotNull(index, n + 1);
+        }
+
         if (property.isarType != IsarType.float &&
             property.isarType != IsarType.floatList) {
-          if (property.nullable) {
-            code += generateWhereIsNull(index, n + 1);
-            code += generateWhereIsNotNull(index, n + 1);
-          }
-
           code += generateWhereEqualTo(index, n + 1);
           code += generateWhereNotEqualTo(index, n + 1);
         }
@@ -105,9 +105,9 @@ class WhereGenerator {
 
   String paramType(ObjectIndexProperty p) {
     if (p.property.isarType.isList && p.type == IndexType.hash) {
-      return 'List<${p.property.scalarDartType}?>?';
+      return p.property.dartType;
     } else {
-      return '${p.property.scalarDartType}?';
+      return p.property.nScalarDartType;
     }
   }
 

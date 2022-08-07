@@ -10,9 +10,7 @@ part 'filter_string_test.g.dart';
 class StringModel {
   StringModel();
 
-  StringModel.init(String? value)
-      : field = value,
-        hashField = value;
+  StringModel.init(this.field) : hashField = field;
   Id? id;
 
   @Index(type: IndexType.value)
@@ -21,30 +19,11 @@ class StringModel {
   @Index(type: IndexType.hash)
   String? hashField = '';
 
-  @Index(type: IndexType.value)
-  List<String>? list;
-
-  @Index(type: IndexType.hash)
-  List<String>? hashList;
-
-  @Index(type: IndexType.hashElements)
-  List<String>? hashElementList;
-
-  @override
-  String toString() {
-    return '{field: $field, hashField: $hashField, list: $list, hashList: '
-        '$hashList, hashElementList: $hashElementList}';
-  }
-
   @override
   // ignore: hash_and_equals
   bool operator ==(Object other) {
     if (other is StringModel) {
-      return field == other.field &&
-          hashField == other.hashField &&
-          listEquals(list, other.list) &&
-          listEquals(hashList, other.hashList) &&
-          listEquals(hashElementList, other.hashElementList);
+      return field == other.field && hashField == other.hashField;
     }
     return false;
   }
@@ -72,7 +51,7 @@ void main() {
 
     tearDown(() => isar.close(deleteFromDisk: true));
 
-    isarTest('equalTo()', () async {
+    isarTest('.equalTo()', () async {
       await qEqual(
         col.where().hashFieldEqualTo('string 2').tFindAll(),
         [StringModel.init('string 2')],
@@ -124,7 +103,7 @@ void main() {
       );
     });
 
-    isarTest('isNull()', () async {
+    isarTest('.isNull()', () async {
       await qEqual(
         col.where().hashFieldIsNull().tFindAll(),
         [StringModel.init(null)],
@@ -140,7 +119,7 @@ void main() {
       );
     });
 
-    isarTest('isNotNull()', () async {
+    isarTest('.isNotNull()', () async {
       await qEqualSet(
         col.where().hashFieldIsNotNull().tFindAll(),
         {
@@ -168,7 +147,7 @@ void main() {
       );
     });
 
-    isarTest('isNotEqualTo()', () async {
+    isarTest('.notEqualTo()', () async {
       await qEqualSet(
         col.where().hashFieldNotEqualTo('string 4').tFindAll(),
         {

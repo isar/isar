@@ -8,31 +8,17 @@ part 'filter_bool_test.g.dart';
 
 @Collection()
 class BoolModel {
-  BoolModel();
+  BoolModel(this.field);
+
   Id? id;
 
   @Index()
-  bool? field = false;
-
-  @Index(type: IndexType.value)
-  List<bool?>? list;
-
-  @Index(type: IndexType.hash)
-  List<bool?>? hashList;
-
-  @override
-  String toString() {
-    return '{id: $id, field: $field, list: $list, hashList: $hashList}';
-  }
+  bool? field;
 
   @override
   // ignore: hash_and_equals
   bool operator ==(Object other) {
-    return other is BoolModel &&
-        other.id == id &&
-        other.field == field &&
-        listEquals(list, other.list) &&
-        listEquals(hashList, other.hashList);
+    return other is BoolModel && other.id == id && other.field == field;
   }
 }
 
@@ -50,10 +36,10 @@ void main() {
       isar = await openTempIsar([BoolModelSchema]);
       col = isar.boolModels;
 
-      objNull = BoolModel()..field = null;
-      objFalse = BoolModel()..field = false;
-      objTrue = BoolModel()..field = true;
-      objFalse2 = BoolModel()..field = false;
+      objNull = BoolModel(null);
+      objFalse = BoolModel(false);
+      objTrue = BoolModel(true);
+      objFalse2 = BoolModel(false);
 
       await isar.writeTxn(() async {
         await col.putAll([objNull, objFalse, objTrue, objFalse2]);
@@ -62,165 +48,54 @@ void main() {
 
     tearDown(() => isar.close(deleteFromDisk: true));
 
-    isarTest('.equalTo() / .notEqualTo()', () async {
+    isarTest('.equalTo()', () async {
       // where clauses
       await qEqual(col.where().fieldEqualTo(true).tFindAll(), [objTrue]);
-      await qEqual(
-        col.where().fieldNotEqualTo(true).tFindAll(),
-        [objNull, objFalse, objFalse2],
-      );
       await qEqual(
         col.where().fieldEqualTo(false).tFindAll(),
         [objFalse, objFalse2],
       );
-      await qEqual(
-        col.where().fieldNotEqualTo(false).tFindAll(),
-        [objNull, objTrue],
-      );
       await qEqual(col.where().fieldEqualTo(null).tFindAll(), [objNull]);
-      await qEqual(
-        col.where().fieldNotEqualTo(null).tFindAll(),
-        [objFalse, objFalse2, objTrue],
-      );
 
       // filters
       await qEqual(col.filter().fieldEqualTo(true).tFindAll(), [objTrue]);
-      await qEqual(
+      await qEqualSet(
         col.filter().fieldEqualTo(false).tFindAll(),
         [objFalse, objFalse2],
       );
       await qEqual(col.where().fieldEqualTo(null).tFindAll(), [objNull]);
     });
 
-    isarTest('.isNull() / .isNotNull()', () async {
+    isarTest('.notEqualTo()', () async {
       // where clauses
-      await qEqualSet(col.where().fieldIsNull().tFindAll(), [objNull]);
-      await qEqualSet(
+      await qEqual(
+        col.where().fieldNotEqualTo(true).tFindAll(),
+        [objNull, objFalse, objFalse2],
+      );
+      await qEqual(
+        col.where().fieldNotEqualTo(false).tFindAll(),
+        [objNull, objTrue],
+      );
+      await qEqual(
+        col.where().fieldNotEqualTo(null).tFindAll(),
+        [objFalse, objFalse2, objTrue],
+      );
+    });
+
+    isarTest('.isNull()', () async {
+      // where clause
+      await qEqual(col.where().fieldIsNull().tFindAll(), [objNull]);
+
+      // filter
+      await qEqualSet(col.where().filter().fieldIsNull().tFindAll(), [objNull]);
+    });
+
+    isarTest('.isNotNull()', () async {
+      // where clause
+      await qEqual(
         col.where().fieldIsNotNull().findAll(),
         [objFalse, objFalse2, objTrue],
       );
-
-      // filters
-      await qEqualSet(col.where().filter().fieldIsNull().tFindAll(), [objNull]);
-    });
-  });
-
-  group('Bool list filter', () {
-    late Isar isar;
-    late IsarCollection<BoolModel> col;
-
-    late BoolModel objEmpty;
-    late BoolModel obj1;
-    late BoolModel obj2;
-    late BoolModel obj3;
-    late BoolModel objNull;
-
-    setUp(() async {
-      isar = await openTempIsar([BoolModelSchema]);
-      col = isar.boolModels;
-
-      objEmpty = BoolModel()..list = [];
-      obj1 = BoolModel()..list = [true];
-      obj2 = BoolModel()..list = [null, false];
-      obj3 = BoolModel()..list = [true, false, true];
-      objNull = BoolModel()..list = null;
-      await isar.writeTxn(() async {
-        await col.putAll([objEmpty, obj1, obj2, obj3, objNull]);
-      });
-    });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
-
-    isarTest('.anyEqualTo() / .anyNotEqualTo()', () async {
-      // where clauses
-      await qEqualSet(
-        col.where().listElementEqualTo(true).tFindAll(),
-        [obj1, obj3],
-      );
-      await qEqualSet(col.where().listElementEqualTo(null).tFindAll(), [obj2]);
-      await qEqualSet(
-        col.where().listElementNotEqualTo(true).tFindAll(),
-        [obj2, obj3],
-      );
-
-      await qEqualSet(
-        col.where().listElementNotEqualTo(null).tFindAll(),
-        [obj1, obj2, obj3],
-      );
-
-      // filters
-      await qEqualSet(
-        col.filter().listElementEqualTo(true).tFindAll(),
-        [obj1, obj3],
-      );
-      await qEqualSet(col.filter().listElementEqualTo(null).tFindAll(), [obj2]);
-    });
-  });
-
-  group('Bool hashList filter', () {
-    late Isar isar;
-    late IsarCollection<BoolModel> col;
-
-    late BoolModel objEmpty;
-    late BoolModel obj1;
-    late BoolModel obj2;
-    late BoolModel obj3;
-    late BoolModel objNull;
-
-    setUp(() async {
-      isar = await openTempIsar([BoolModelSchema]);
-      col = isar.boolModels;
-
-      objEmpty = BoolModel()..hashList = [];
-      obj1 = BoolModel()..hashList = [true, null];
-      obj2 = BoolModel()..hashList = [null, true];
-      obj3 = BoolModel()..hashList = [true, null];
-      objNull = BoolModel()..hashList = null;
-      await isar.writeTxn(() async {
-        await col.putAll([objEmpty, obj1, obj2, obj3, objNull]);
-      });
-    });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
-
-    isarTest('.equalTo() / .notEqualTo()', () async {
-      // where clauses
-      await qEqualSet(col.where().hashListEqualTo(null).tFindAll(), [objNull]);
-      await qEqualSet(col.where().hashListEqualTo([]).tFindAll(), [objEmpty]);
-      await qEqualSet(
-        col.where().hashListEqualTo([true, null]).tFindAll(),
-        [obj1, obj3],
-      );
-      await qEqualSet(
-        col.where().hashListNotEqualTo([]).tFindAll(),
-        [objNull, obj1, obj2, obj3],
-      );
-      await qEqualSet(
-        col.where().hashListNotEqualTo([true, null]).tFindAll(),
-        [objNull, obj2, objEmpty],
-      );
-
-      // filters
-      await qEqualSet(
-        col.filter().hashListElementEqualTo(true).tFindAll(),
-        [obj1, obj2, obj3],
-      );
-      await qEqualSet(
-        col.filter().hashListElementEqualTo(false).tFindAll(),
-        [],
-      );
-    });
-
-    isarTest('.isNull() / .isNotNull()', () async {
-      // where clauses
-      await qEqualSet(col.where().hashListIsNull().tFindAll(), [objNull]);
-      await qEqualSet(
-        col.where().hashListIsNotNull().findAll(),
-        [obj1, obj2, obj3, objEmpty],
-      );
-
-      // filters
-      await qEqualSet(col.filter().hashListIsNull().tFindAll(), [objNull]);
     });
   });
 }

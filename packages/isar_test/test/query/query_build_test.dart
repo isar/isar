@@ -54,7 +54,8 @@ void main() {
       );
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
+    ;
 
     isarTest('Build and query', () async {
       final query1 = isar.models
