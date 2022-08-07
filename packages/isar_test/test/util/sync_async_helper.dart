@@ -141,10 +141,12 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
     bool includeLinks = false,
   }) {
     if (syncTest) {
-      return SynchronousFuture(getSizeSync(
-        includeIndexes: includeIndexes,
-        includeLinks: includeLinks,
-      ));
+      return SynchronousFuture(
+        getSizeSync(
+          includeIndexes: includeIndexes,
+          includeLinks: includeLinks,
+        ),
+      );
     } else {
       return getSize(
         includeIndexes: includeIndexes,
