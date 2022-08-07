@@ -12,7 +12,10 @@ enum ConnectAction {
   removeQuery('ext.isar.removeQuery'),
   exportQuery('ext.isar.exportQuery'),
   exportJson('ext.isar.exportJson'),
-  editProperty('ext.isar.editProperty');
+  editProperty('ext.isar.editProperty'),
+  addInList('ext.isar.addInList'),
+  removeFromList('ext.isar.removeFromList'),
+  aggregation('ext.isar.aggregation');
 
   const ConnectAction(this.method);
 
@@ -37,6 +40,7 @@ class ConnectQuery {
     this.offset,
     this.limit,
     this.sortProperty,
+    this.property,
   });
 
   factory ConnectQuery.fromJson(Map<String, dynamic> json) {
@@ -54,14 +58,17 @@ class ConnectQuery {
               sort: Sort.values[json['sortProperty']['sort'] as int],
             )
           : null,
+      property: json['property'] as String?,
     );
   }
+
   final String instance;
   final String collection;
   final FilterOperation? filter;
   final int? offset;
   final int? limit;
   final SortProperty? sortProperty;
+  final String? property;
 
   Map<String, dynamic> toJson() {
     return {
@@ -75,6 +82,7 @@ class ConnectQuery {
           'property': sortProperty!.property,
           'sort': sortProperty!.sort.index,
         },
+      if (property != null) 'property': property
     };
   }
 
@@ -89,6 +97,12 @@ class ConnectQuery {
       return FilterGroup(
         type: FilterGroupType.values[json['type'] as int],
         filters: filters,
+      );
+    } else if (json.containsKey('linkName')) {
+      return LinkFilter(
+        filter: _filterFromJson(json['filter'] as Map<String, dynamic>)!,
+        linkName: json['linkName'] as String,
+        targetCollection: json['targetCollection'] as String,
       );
     } else {
       return FilterCondition(
@@ -118,6 +132,12 @@ class ConnectQuery {
       return {
         'type': filter.type.index,
         'filters': filter.filters.map(_filterToJson).toList(),
+      };
+    } else if (filter is LinkFilter) {
+      return {
+        'filter': _filterToJson(filter.filter),
+        'targetCollection': filter.targetCollection,
+        'linkName': filter.linkName,
       };
     } else {
       throw UnimplementedError();

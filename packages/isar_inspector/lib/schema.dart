@@ -1,5 +1,6 @@
 import 'dart:core';
 
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_inspector/query_builder.dart';
 
@@ -11,7 +12,10 @@ class ICollection {
     required this.links,
   });
 
-  factory ICollection.fromJson(Map<String, dynamic> json) {
+  factory ICollection.fromJson(
+    Map<String, dynamic> json,
+    List<dynamic> schema,
+  ) {
     final indexes = <String>{};
     final jsonIndexes = json['indexes'] as List<dynamic>;
 
@@ -33,9 +37,9 @@ class ICollection {
       properties: (json['properties'] as List<dynamic>)
           .map((e) => IProperty.fromJson(e as Map<String, dynamic>, indexes))
           .toList(),
-      links: (json['links'] as List<dynamic>)
-          .map((e) => ILink.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      links: (json['links'] as List<dynamic>).map((e) {
+        return ILink.fromJson(e as Map<String, dynamic>, schema);
+      }).toList(),
     );
   }
 
@@ -52,6 +56,7 @@ class ICollection {
   ];
 }
 
+@immutable
 class IProperty {
   const IProperty({
     required this.name,
@@ -73,21 +78,87 @@ class IProperty {
   final IsarType type;
   final bool isId;
   final bool isIndex;
+
+  @override
+  bool operator ==(Object other) {
+    return other is IProperty &&
+        other.name == name &&
+        other.type == type &&
+        other.isId == isId &&
+        other.isIndex == isIndex;
+  }
+
+  @override
+  int get hashCode => Object.hash(name, type, isId, isIndex);
 }
 
 class ILink {
   const ILink({
     required this.name,
+    required this.single,
     required this.target,
   });
 
-  factory ILink.fromJson(Map<String, dynamic> json) => ILink(
-        name: json['name'] as String,
-        target: json['target'] as String,
-      );
+  factory ILink.fromJson(
+    Map<String, dynamic> json,
+    List<dynamic> schema,
+  ) {
+    return ILink(
+      name: json['name'] as String,
+      single: json['single'] as bool,
+      target: ILinkCollection.fromJson(
+        //ignore: avoid_dynamic_calls
+        schema.firstWhere((e) => e['name'] == json['target'])
+            as Map<String, dynamic>,
+      ),
+    );
+  }
 
   final String name;
-  final String target;
+  final bool single;
+  final ILinkCollection target;
+}
+
+class ILinkCollection {
+  ILinkCollection({
+    required this.name,
+    required this.idName,
+    required this.properties,
+  });
+
+  factory ILinkCollection.fromJson(Map<String, dynamic> json) {
+    final indexes = <String>{};
+    final jsonIndexes = json['indexes'] as List<dynamic>;
+
+    for (var i = 0; i < jsonIndexes.length; i++) {
+      indexes.addAll(
+        //ignore: avoid_dynamic_calls
+        (jsonIndexes[i]['properties'] as List<dynamic>).map(
+          (e) {
+            //ignore: avoid_dynamic_calls
+            return e['name'] as String;
+          },
+        ).toList(),
+      );
+    }
+
+    return ILinkCollection(
+      name: json['name'] as String,
+      idName: json['idName'] as String,
+      properties: (json['properties'] as List<dynamic>)
+          .map((e) => IProperty.fromJson(e as Map<String, dynamic>, indexes))
+          .toList(),
+    );
+  }
+
+  final String name;
+  final String idName;
+  final List<IProperty> properties;
+
+  late final List<IProperty> allProperties = [
+    IProperty(name: idName, type: IsarType.Long, isId: true),
+    ...properties,
+  ];
 }
 
 // ignore_for_file: constant_identifier_names
@@ -115,7 +186,7 @@ enum IsarType {
       LongList,
       DoubleList,
       StringList,
-      BoolList
+      BoolList,
     ].contains(this);
   }
 
@@ -144,5 +215,19 @@ enum IsarType {
         return Bool;
     }
     throw IsarError('new IsarType ($name), rule not defined');
+  }
+
+  bool get isNum {
+    //ignore: missing_enum_constant_in_switch
+    switch (this) {
+      case IsarType.Int:
+      case IsarType.Float:
+      case IsarType.Long:
+      case IsarType.Byte:
+      case IsarType.Double:
+        return true;
+    }
+
+    return false;
   }
 }
