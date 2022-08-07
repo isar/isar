@@ -75,28 +75,45 @@ dev_dependencies:
 ### 2. Annotate a Collection
 
 ```dart
-part 'post.g.dart';
+part 'email.g.dart';
 
 @Collection()
-class Post {
-  var id = Isar.autoIncrement;
+class Email {
+  Id id = Isar.autoIncrement;
 
-  late String title;
+  String? title;
 
-  late DateTime date;
+  List<Recipient>? recipients;
+
+  Status? status;
+}
+
+@Embedded()
+class Recipient {
+  String? name;
+
+  String? address;
+}
+
+enum Status with IsarEnum<String> {
+  draft,
+  sending,
+  sent;
+
+  String get isarValue => name;
 }
 ```
 
 ### 3. Open an instance
 
 ```dart
-final isar = await Isar.open([PostSchema]);
+final isar = await Isar.open([EmailSchema]);
 ```
 
 ### 4. Query the database
 
 ```dart
-final posts = await isar.posts.filter()
+final emails = await isar.emails.filter()
   .titleContains('awesome', caseSensitive: false)
   .sortByDateDesc()
   .limit(10)
@@ -129,7 +146,7 @@ await isar.writeTxn(() {
 
 ## Queries
 
-Isar has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()` and `or()` groups, query links and sort the results.
+Isar has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()`, `or()` and `.xor()` groups, query links and sort the results.
 
 ```dart
 final usersWithPrefix = isar.users

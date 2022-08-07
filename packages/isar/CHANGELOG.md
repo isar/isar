@@ -14,12 +14,12 @@
 - Added check to verify that linked collections schemas are provided for opening an instance
 - Apply default values from constructor during deserialization
 - Added `isar.verify()` and `col.verify()` methods for checking database integrity in unit tests
+- An exception is now thrown when a sync write txn is started while an async write txn is active. This prevents deadlock.
 
 ### Breaking
 
 - Renamed `isar.path` to `isar.directory`
 - Removed support for type converters
-- An exception is now thrown when a sync write txn is started while an async write txn is active. This prevents deadlock.
 
 ## 3.0.0-dev.8
 
