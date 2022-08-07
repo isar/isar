@@ -249,8 +249,8 @@ void main() {
         }
       ],
       'links': [
-        {'name': r'$dollar$Link', 'target': r'$Dollar$Model'},
-        {'name': r'$dollar$Links', 'target': r'$Dollar$Model'}
+        {'name': r'$dollar$Link', 'target': r'$Dollar$Model', 'single': true},
+        {'name': r'$dollar$Links', 'target': r'$Dollar$Model', 'single': false}
       ]
     });
   });
@@ -702,10 +702,10 @@ void main() {
           }
         ],
         'links': [
-          {'name': 'link', 'target': 'SchemaTestModel'},
-          {'name': 'links', 'target': 'SchemaTestModel'},
-          {'name': 'renamedLink', 'target': 'SchemaTestModel'},
-          {'name': 'renamedLinks', 'target': 'SchemaTestModel'}
+          {'name': 'link', 'target': 'SchemaTestModel', 'single': true},
+          {'name': 'links', 'target': 'SchemaTestModel', 'single': false},
+          {'name': 'renamedLink', 'target': 'SchemaTestModel', 'single': true},
+          {'name': 'renamedLinks', 'target': 'SchemaTestModel', 'single': false}
         ]
       },
     );

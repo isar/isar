@@ -45,13 +45,13 @@ Small hotfix: existing bool properties were rejected in schema migration.
 ### Enhancements
 
 - Vastly improved Isar binary format space efficiency resulting in up to 20% smaller databases
-- Slighly improved String index space efficiency saving two bytes per string
+- Slightly improved String index space efficiency saving two bytes per string
 - On non-web platforms, `IsarLink` and `IsarLinks` will load automatically
 - `.putSync()`, `.putAllSync()` etc. will now save links recursively by default
 - Improved `.putSync()` and `.putIndexedSync()` performance
 - Added `isar.getSize()` and `isar.getSizeSync()`
-- Reintrodced option to disable the inspector
-- Slighly improved default collection accessor naming
+- Reintroduced option to disable the inspector
+- Slightly improved default collection accessor naming
 - Id property queries now always return a `List<int>` even if the id is nullable
 - Added `id`, `byte`, `short` and `float` typedefs
 - `Uint8List` properties now support multi-entry indexes
@@ -317,7 +317,7 @@ _Web passes all unit tests but is still considered beta for now._
 - Allowed multiple indexes on the same property
 - Removed exported packages from API docs
 - Improved generated code
-- Imoroved Isar Core error messages
+- Improved Isar Core error messages
 - Minor performance improvements
 - Automatic XCode configuration
 - Updated analyzer to `3.0.0`
