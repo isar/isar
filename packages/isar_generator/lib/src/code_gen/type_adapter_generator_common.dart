@@ -33,18 +33,60 @@ String deserializeMethodBody(
   return code;
 }
 
-String generateAttachLinks(ObjectInfo object) {
+String generateGetId(ObjectInfo object) {
+  return '''
+    int? ${object.getIdName}(${object.dartName} object) {
+      if (object.${object.idProperty.dartName} == Isar.autoIncrement) {
+        return null;
+      } else {
+        return object.${object.idProperty.dartName};
+      }
+    }
+  ''';
+}
+
+String generateGetLinks(ObjectInfo object) {
+  return '''
+    List<IsarLinkBase<dynamic>> ${object.getLinksName}(${object.dartName} object) {
+      return [${object.links.map((e) => 'object.${e.dartName}').join(',')}];
+    }
+  ''';
+}
+
+String generateAttach(ObjectInfo object) {
   var code = '''
-  void ${object.attachLinksName}(IsarCollection<dynamic> col, int id, ${object.dartName} object) {''';
+  void ${object.attachName}(IsarCollection<dynamic> col, Id id, ${object.dartName} object) {''';
+
+  if (object.idProperty.assignable) {
+    code += 'object.${object.idProperty.dartName} = id;';
+  }
 
   for (final link in object.links) {
     // ignore: leading_newlines_in_multiline_strings
     code += '''object.${link.dartName}.attach(
       col,
-      col.isar.${link.targetCollectionAccessor},
+      col.isar.collection<${link.targetCollectionDartName}>(),
       r'${link.isarName}',
       id
     );''';
   }
   return '$code}';
+}
+
+String generateEnumValues(ObjectInfo object) {
+  final completedEnums = <String>{};
+
+  var code = '';
+  for (final property in object.properties) {
+    final enumName = property.typeClassName;
+    if (property.isEnum && completedEnums.add(enumName)) {
+      code += 'final ${property.enumValues(object)} = {';
+      for (final c in property.enumConsts!) {
+        code += '$enumName.$c.isarValue: $enumName.$c,';
+      }
+      code += '};';
+    }
+  }
+
+  return code;
 }

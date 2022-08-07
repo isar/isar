@@ -17,15 +17,22 @@ export 'src/native/isar_native.dart'
 
 part 'src/annotations/backlink.dart';
 part 'src/annotations/collection.dart';
+part 'src/annotations/embedded.dart';
 part 'src/annotations/ignore.dart';
 part 'src/annotations/index.dart';
 part 'src/annotations/name.dart';
 part 'src/annotations/type.dart';
-part 'src/annotations/type_converter.dart';
-part 'src/collection_schema.dart';
+
+part 'src/schema/collection_schema.dart';
+part 'src/schema/index_schema.dart';
+part 'src/schema/link_schema.dart';
+part 'src/schema/property_schema.dart';
+part 'src/schema/schema.dart';
+
 part 'src/isar.dart';
 part 'src/isar_collection.dart';
 part 'src/isar_connect.dart';
+part 'src/isar_enum.dart';
 part 'src/isar_error.dart';
 part 'src/isar_link.dart';
 part 'src/query.dart';

@@ -82,7 +82,7 @@ void main() {
     group('Other', () {
       setUp(_setup);
 
-      tearDown(() => isar.close());
+      tearDown(() => isar.close(deleteFromDisk: true));
 
       isarTest('single', () async {
         a1.links.addAll([b1, b3]);
@@ -99,7 +99,7 @@ void main() {
           isar.linkModelAs
               .where()
               .filter()
-              .links((q) => q.idEqualTo(b1.id!))
+              .links((q) => q.idEqualTo(b1.id))
               .tFindAll(),
           [a1, a3],
         );
@@ -138,8 +138,8 @@ void main() {
           isar.linkModelAs
               .where()
               .filter()
-              .links((q) => q.idEqualTo(b1.id!))
-              .links((q) => q.idEqualTo(b3.id!))
+              .links((q) => q.idEqualTo(b1.id))
+              .links((q) => q.idEqualTo(b3.id))
               .tFindAll(),
           [a1],
         );
@@ -167,7 +167,7 @@ void main() {
           isar.linkModelAs
               .where()
               .filter()
-              .links((q) => q.idEqualTo(b1.id!))
+              .links((q) => q.idEqualTo(b1.id))
               .tFindAll(),
           [a1],
         );
@@ -186,7 +186,7 @@ void main() {
     group('Self', () {
       setUp(_setup);
 
-      tearDown(() => isar.close());
+      tearDown(() => isar.close(deleteFromDisk: true));
 
       isarTest('single', () async {
         a1.selfLinks.addAll([a1, a2, a3]);
@@ -203,7 +203,7 @@ void main() {
           isar.linkModelAs
               .where()
               .filter()
-              .selfLinks((q) => q.idEqualTo(a1.id!))
+              .selfLinks((q) => q.idEqualTo(a1.id))
               .tFindAll(),
           [a1],
         );
@@ -242,8 +242,8 @@ void main() {
           isar.linkModelAs
               .where()
               .filter()
-              .selfLinks((q) => q.idEqualTo(a1.id!))
-              .selfLinks((q) => q.idEqualTo(a3.id!))
+              .selfLinks((q) => q.idEqualTo(a1.id))
+              .selfLinks((q) => q.idEqualTo(a3.id))
               .tFindAll(),
           [a1],
         );
@@ -271,7 +271,7 @@ void main() {
           isar.linkModelAs
               .where()
               .filter()
-              .selfLinks((q) => q.idEqualTo(a2.id!))
+              .selfLinks((q) => q.idEqualTo(a2.id))
               .tFindAll(),
           [a1],
         );
@@ -290,7 +290,7 @@ void main() {
     group('Backlink', () {
       setUp(_setup);
 
-      tearDown(() => isar.close());
+      tearDown(() => isar.close(deleteFromDisk: true));
 
       isarTest('single', () async {
         a1.links.addAll([b1, b3]);
@@ -307,7 +307,7 @@ void main() {
           isar.linkModelBs
               .where()
               .filter()
-              .backlinks((q) => q.idEqualTo(a1.id!))
+              .backlinks((q) => q.idEqualTo(a1.id))
               .tFindAll(),
           [b1, b3],
         );
@@ -346,8 +346,8 @@ void main() {
           isar.linkModelBs
               .where()
               .filter()
-              .backlinks((q) => q.idEqualTo(a1.id!))
-              .backlinks((q) => q.idEqualTo(a3.id!))
+              .backlinks((q) => q.idEqualTo(a1.id))
+              .backlinks((q) => q.idEqualTo(a3.id))
               .tFindAll(),
           [b1],
         );
@@ -375,7 +375,7 @@ void main() {
           isar.linkModelBs
               .where()
               .filter()
-              .backlinks((q) => q.idEqualTo(a1.id!))
+              .backlinks((q) => q.idEqualTo(a1.id))
               .tFindAll(),
           [b1],
         );

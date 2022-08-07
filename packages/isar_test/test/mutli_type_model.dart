@@ -36,10 +36,6 @@ class MultiTypeModel {
 
   String stringValue = '';
 
-  Uint8List? bytesValueN;
-
-  Uint8List bytesValue = Uint8List(0);
-
   List<bool> boolList = [];
 
   List<bool?> boolNList = [];
@@ -47,6 +43,10 @@ class MultiTypeModel {
   List<bool>? boolListN;
 
   List<bool?>? boolNListN;
+
+  List<byte>? byteListN;
+
+  List<byte> byteList = Uint8List(0);
 
   List<short> intList = [];
 

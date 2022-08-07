@@ -26,12 +26,14 @@ Future<void> qEqual<T>(Future<Iterable<T>> actual, List<T> target) async {
 Future<void> qEqualSync<T>(List<T> actual, List<T> target) async {
   if (actual is List<double?>) {
     for (var i = 0; i < actual.length; i++) {
-      final result = (actual[i] as double) - (target[i] as double);
-      expect(result.abs() < 0.01, true);
+      expect(doubleListEquals(actual.cast(), target.cast()), true);
     }
   } else if (actual is List<List<double?>?>) {
     for (var i = 0; i < actual.length; i++) {
-      await qEqualSync(actual[i] as List, target[i] as List);
+      doubleListEquals(
+        actual[i] as List<double?>?,
+        target[i] as List<double?>?,
+      );
     }
   } else {
     expect(actual, target);
@@ -120,11 +122,14 @@ Future<Isar> openTempIsar(
     await Directory(testTempPath!).create(recursive: true);
   }
 
-  return tOpen(
+  final isar = await tOpen(
     schemas: schemas,
     name: name ?? getRandomName(),
     directory: kIsWeb ? '' : testTempPath!,
   );
+
+  await isar.verify();
+  return isar;
 }
 
 bool doubleListEquals(List<double?>? l1, List<double?>? l2) {
@@ -133,18 +138,19 @@ bool doubleListEquals(List<double?>? l1, List<double?>? l2) {
   }
   if (l1 != null && l2 != null) {
     for (var i = 0; i < l1.length; i++) {
-      final e1 = l1[i];
-      final e2 = l2[i];
-      if (e1 != null && e2 != null) {
-        if ((e1 - e2).abs() > 0.001) {
-          return false;
-        }
-      } else if (e1 != null || e2 != null) {
+      if (!doubleEquals(l1[i], l2[i])) {
         return false;
       }
     }
   }
   return true;
+}
+
+bool doubleEquals(double? d1, double? d2) {
+  return d1 == d2 ||
+      (d1 != null &&
+          d2 != null &&
+          ((d1.isNaN && d2.isNaN) || (d1 - d2).abs() < 0.001));
 }
 
 Matcher isIsarError([String? contains]) {

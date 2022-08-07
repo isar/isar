@@ -20,18 +20,18 @@ abstract class _IsarConnect {
     ConnectAction.aggregation: _aggregation,
   };
 
-  static bool _initialized = false;
+  static List<CollectionSchema<dynamic>>? _schemas;
 
   // ignore: cancel_subscriptions
   static final _querySubscription = <StreamSubscription<void>>[];
   static final List<StreamSubscription<void>> _collectionSubscriptions =
       <StreamSubscription<void>>[];
 
-  static void initialize() {
-    if (_initialized) {
+  static void initialize(List<CollectionSchema<dynamic>> schemas) {
+    if (_schemas != null) {
       return;
     }
-    _initialized = true;
+    _schemas = schemas;
 
     Isar.addOpenListener((_) {
       postEvent(ConnectEvent.instancesChanged.event, {});
@@ -92,7 +92,7 @@ abstract class _IsarConnect {
   }
 
   static Future<dynamic> _getSchema(Map<String, dynamic> _) async {
-    return jsonDecode(Isar.schema!);
+    return [..._schemas!.map((e) => e.toSchemaJson())];
   }
 
   static Future<dynamic> _listInstances(Map<String, dynamic> _) async {
@@ -321,7 +321,7 @@ abstract class _IsarConnect {
 
     final qSort = query.sortProperty;
     if (qSort != null) {
-      if (qSort.property == collection.idName) {
+      if (qSort.property == collection.schema.idName) {
         whereClause = const IdWhereClause.any();
         whereSort = qSort.sort;
       } else {

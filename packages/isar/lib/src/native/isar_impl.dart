@@ -9,33 +9,43 @@ import 'package:ffi/ffi.dart';
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_core.dart';
 
 const Symbol _zoneTxn = #zoneTxn;
 
 class IsarImpl extends Isar implements Finalizable {
-  IsarImpl(super.name, super.schema, this.ptr) {
+  IsarImpl(super.name, this.ptr) {
     _finalizer = NativeFinalizer(isarClose);
     _finalizer.attach(this, ptr.cast(), detach: this);
   }
+
   final Pointer<CIsarInstance> ptr;
   late final NativeFinalizer _finalizer;
+
+  final offsets = <Type, List<int>>{};
 
   final List<Future<void>> _activeAsyncTxns = [];
 
   final Pointer<Pointer<CIsarTxn>> _syncTxnPtrPtr = malloc<Pointer<CIsarTxn>>();
   SyncTxn? _currentTxnSync;
 
+  String? _directory;
+
   @override
-  String get path {
+  String get directory {
     requireOpen();
 
-    final path = IC.isar_instance_get_path(ptr);
-    try {
-      return path.cast<Utf8>().toDartString();
-    } finally {
-      IC.isar_free_string(path);
+    if (_directory == null) {
+      final dirPtr = IC.isar_instance_get_path(ptr);
+      try {
+        _directory = dirPtr.cast<Utf8>().toDartString();
+      } finally {
+        IC.isar_free_string(dirPtr);
+      }
     }
+
+    return _directory!;
   }
 
   void requireNotInTxn() {
@@ -213,6 +223,21 @@ class IsarImpl extends Isar implements Finalizable {
   }
 
   @override
+  Future<void> copyToFile(String targetPath) async {
+    final pathPtr = targetPath.toCString(malloc);
+    final receivePort = ReceivePort();
+    final nativePort = receivePort.sendPort.nativePort;
+
+    try {
+      final stream = wrapIsarPort(receivePort);
+      IC.isar_instance_copy_to_file(ptr, pathPtr, nativePort);
+      await stream.first;
+    } finally {
+      malloc.free(pathPtr);
+    }
+  }
+
+  @override
   Future<bool> close({bool deleteFromDisk = false}) async {
     requireOpen();
     requireNotInTxn();
@@ -225,6 +250,14 @@ class IsarImpl extends Isar implements Finalizable {
     } else {
       return IC.isar_instance_close(ptr);
     }
+  }
+
+  @override
+  Future<void> verify() async {
+    return getTxn(false, (txn) async {
+      IC.isar_instance_verify(ptr, txn.ptr);
+      await txn.wait();
+    });
   }
 }
 
@@ -259,8 +292,9 @@ class SyncTxn {
 
   Pointer<Uint8> allocBuffer(int size) {
     if (_bufferLen < size) {
-      _buffer = alloc(size);
-      _bufferLen = size;
+      final allocSize = (size * 1.3).toInt();
+      _buffer = alloc(allocSize);
+      _bufferLen = allocSize;
     }
     return _buffer;
   }

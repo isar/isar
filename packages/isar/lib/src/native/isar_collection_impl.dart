@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: public_member_api_docs, invalid_use_of_protected_member
 
 import 'dart:async';
 import 'dart:convert';
@@ -10,7 +10,9 @@ import 'package:ffi/ffi.dart';
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/native/binary_reader.dart';
+import 'package:isar/src/native/binary_writer.dart';
 import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/index_key.dart';
 import 'package:isar/src/native/isar_core.dart';
 import 'package:isar/src/native/isar_impl.dart';
@@ -21,29 +23,30 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     required this.isar,
     required this.ptr,
     required this.schema,
-    required int staticSize,
-    required List<int> offsets,
-  })  : _staticSize = staticSize,
-        _offsets = offsets;
+  });
+
   @override
   final IsarImpl isar;
   final Pointer<CIsarCollection> ptr;
 
+  @override
   final CollectionSchema<OBJ> schema;
-  final int _staticSize;
-  final List<int> _offsets;
 
-  @override
-  String get name => schema.name;
-
-  @override
-  String get idName => schema.idName;
+  late final _offsets = isar.offsets[OBJ]!;
+  late final _staticSize = _offsets.last;
 
   @pragma('vm:prefer-inline')
   OBJ deserializeObject(CObject cObj) {
     final buffer = cObj.buffer.asTypedList(cObj.buffer_length);
     final reader = BinaryReader(buffer);
-    return schema.deserializeNative(this, cObj.id, reader, _offsets);
+    final object = schema.deserializeNative(
+      cObj.id,
+      reader,
+      _offsets,
+      isar.offsets,
+    );
+    schema.attach(this, cObj.id, object);
+    return object;
   }
 
   @pragma('vm:prefer-inline')
@@ -96,10 +99,10 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return keysPtrPtr;
   }
 
-  List<T> deserializeProperty<T>(CObjectSet objectSet, int? propertyIndex) {
+  List<T> deserializeProperty<T>(CObjectSet objectSet, int? propertyId) {
     final values = <T>[];
-    if (propertyIndex != null) {
-      final propertyOffset = _offsets[propertyIndex];
+    if (propertyId != null) {
+      final propertyOffset = _offsets[propertyId];
       for (var i = 0; i < objectSet.length; i++) {
         final cObj = objectSet.objects.elementAt(i).ref;
         final buffer = cObj.buffer.asTypedList(cObj.buffer_length);
@@ -107,8 +110,9 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
           schema.deserializePropNative(
             cObj.id,
             BinaryReader(buffer),
-            propertyIndex,
+            propertyId,
             propertyOffset,
+            isar.offsets,
           ) as T,
         );
       }
@@ -119,6 +123,41 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       }
     }
     return values;
+  }
+
+  void serializeObjects(
+    Txn txn,
+    Pointer<CObject> objectsPtr,
+    List<OBJ> objects,
+  ) {
+    var maxBufferSize = 0;
+    for (var i = 0; i < objects.length; i++) {
+      final object = objects[i];
+      maxBufferSize += schema.estimateSize(object, _offsets, isar.offsets);
+    }
+    final bufferPtr = txn.alloc<Uint8>(maxBufferSize);
+    final buffer = bufferPtr.asTypedList(maxBufferSize).buffer;
+
+    var writtenBytes = 0;
+    for (var i = 0; i < objects.length; i++) {
+      final objBuffer = buffer.asUint8List(writtenBytes);
+      final binaryWriter = BinaryWriter(objBuffer, _staticSize);
+
+      final object = objects[i];
+      final size = schema.serializeNative(
+        object,
+        binaryWriter,
+        _offsets,
+        isar.offsets,
+      );
+
+      final cObj = objectsPtr.elementAt(i).ref;
+      cObj.id = schema.getId(object) ?? Isar.autoIncrement;
+      cObj.buffer = bufferPtr.elementAt(writtenBytes);
+      cObj.buffer_length = size;
+
+      writtenBytes += size;
+    }
   }
 
   @override
@@ -160,7 +199,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       IC.isar_get_all_by_index(
         ptr,
         txn.ptr,
-        schema.indexIdOrErr(indexName),
+        schema.index(indexName).id,
         keysPtrPtr,
         cObjSetPtr,
       );
@@ -171,7 +210,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   List<OBJ?> getAllByIndexSync(String indexName, List<IndexKey> keys) {
-    final indexId = schema.indexIdOrErr(indexName);
+    final index = schema.index(indexName);
 
     return isar.getTxnSync(false, (txn) {
       final cObjPtr = txn.allocCObject();
@@ -185,7 +224,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
           keys[i],
           requireFullKey: true,
         )!;
-        nCall(IC.isar_get_by_index(ptr, txn.ptr, indexId, keyPtr, cObjPtr));
+        nCall(IC.isar_get_by_index(ptr, txn.ptr, index.id, keyPtr, cObjPtr));
         objects[i] = deserializeObjectOrNull(cObj);
       }
 
@@ -210,7 +249,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       return putByIndexSyncInternal(
         txn: txn,
         object: object,
-        indexId: schema.indexIdOrErr(indexName),
+        indexId: schema.index(indexName).id,
         saveLinks: saveLinks,
       );
     });
@@ -225,14 +264,18 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     final cObjPtr = txn.allocCObject();
     final cObj = cObjPtr.ref;
 
-    schema.serializeNative(
-      this,
-      cObj,
+    final estimatedSize = schema.estimateSize(object, _offsets, isar.offsets);
+    cObj.buffer = txn.allocBuffer(estimatedSize);
+    final buffer = cObj.buffer.asTypedList(estimatedSize);
+
+    final writer = BinaryWriter(buffer, _staticSize);
+    cObj.buffer_length = schema.serializeNative(
       object,
-      _staticSize,
+      writer,
       _offsets,
-      txn.allocBuffer,
+      isar.offsets,
     );
+
     cObj.id = schema.getId(object) ?? Isar.autoIncrement;
 
     if (indexId != null) {
@@ -242,14 +285,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     }
 
     final id = cObj.id;
-    schema.setId?.call(object, id);
+    schema.attach(this, id, object);
 
-    if (schema.hasLinks) {
-      schema.attachLinks(this, id, object);
-      if (saveLinks) {
-        for (final link in schema.getLinks(object)) {
-          link.saveSync();
-        }
+    if (schema.hasLinks && saveLinks) {
+      for (final link in schema.getLinks(object)) {
+        link.saveSync();
       }
     }
 
@@ -268,26 +308,12 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   Future<List<int>> putAllByIndex(String? indexName, List<OBJ> objects) {
-    final indexId = indexName != null ? schema.indexIdOrErr(indexName) : null;
+    final indexId = indexName != null ? schema.index(indexName).id : null;
 
     return isar.getTxn(true, (txn) async {
       final cObjSetPtr = txn.allocCObjectSet(objects.length);
-      final objectsPtr = cObjSetPtr.ref.objects;
+      serializeObjects(txn, cObjSetPtr.ref.objects, objects);
 
-      Pointer<Uint8> allocBuf(int size) => txn.alloc<Uint8>(size);
-      for (var i = 0; i < objects.length; i++) {
-        final object = objects[i];
-        final cObj = objectsPtr.elementAt(i).ref;
-        schema.serializeNative(
-          this,
-          cObj,
-          object,
-          _staticSize,
-          _offsets,
-          allocBuf,
-        );
-        cObj.id = schema.getId(object) ?? Isar.autoIncrement;
-      }
       if (indexId != null) {
         IC.isar_put_all_by_index(ptr, txn.ptr, indexId, cObjSetPtr);
       } else {
@@ -303,8 +329,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         ids[i] = id;
 
         final object = objects[i];
-        schema.setId?.call(object, id);
-        schema.attachLinks(this, id, object);
+        schema.attach(this, id, object);
       }
       return ids;
     });
@@ -316,7 +341,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     List<OBJ> objects, {
     bool saveLinks = true,
   }) {
-    final indexId = indexName != null ? schema.indexIdOrErr(indexName) : null;
+    final indexId = indexName != null ? schema.index(indexName).id : null;
     final ids = List.filled(objects.length, 0);
     isar.getTxnSync(true, (txn) {
       for (var i = 0; i < objects.length; i++) {
@@ -351,8 +376,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       final deletedPtr = txn.alloc<Bool>();
 
       var counter = 0;
-      for (final id in ids) {
-        nCall(IC.isar_delete(ptr, txn.ptr, id, deletedPtr));
+      for (var i = 0; i < ids.length; i++) {
+        nCall(IC.isar_delete(ptr, txn.ptr, ids[i], deletedPtr));
         if (deletedPtr.value) {
           counter++;
         }
@@ -370,7 +395,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       IC.isar_delete_all_by_index(
         ptr,
         txn.ptr,
-        schema.indexIdOrErr(indexName),
+        schema.index(indexName).id,
         keysPtrPtr,
         keys.length,
         countPtr,
@@ -391,7 +416,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         IC.isar_delete_all_by_index(
           ptr,
           txn.ptr,
-          schema.indexIdOrErr(indexName),
+          schema.index(indexName).id,
           keysPtrPtr,
           keys.length,
           countPtr,
@@ -427,12 +452,12 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return isar.getTxn(true, (txn) async {
       final bytesPtr = txn.alloc<Uint8>(jsonBytes.length);
       bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
-      final idNamePtr = schema.idName.toNativeUtf8(allocator: txn.alloc);
+      final idNamePtr = schema.idName.toCString(txn.alloc);
 
       IC.isar_json_import(
         ptr,
         txn.ptr,
-        idNamePtr.cast(),
+        idNamePtr,
         bytesPtr,
         jsonBytes.length,
       );
@@ -451,13 +476,13 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return isar.getTxnSync(true, (txn) async {
       final bytesPtr = txn.allocBuffer(jsonBytes.length);
       bytesPtr.asTypedList(jsonBytes.length).setAll(0, jsonBytes);
-      final idNamePtr = schema.idName.toNativeUtf8(allocator: txn.alloc);
+      final idNamePtr = schema.idName.toCString(txn.alloc);
 
       nCall(
         IC.isar_json_import(
           ptr,
           txn.ptr,
-          idNamePtr.cast(),
+          idNamePtr,
           bytesPtr,
           jsonBytes.length,
         ),
@@ -516,7 +541,6 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   Stream<void> watchLazy() {
-    // ignore: invalid_use_of_protected_member
     isar.requireOpen();
     final port = ReceivePort();
     final handle =
@@ -538,7 +562,6 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   Stream<void> watchObjectLazy(int id, {bool initialReturn = false}) {
-    // ignore: invalid_use_of_protected_member
     isar.requireOpen();
     final cObjPtr = malloc<CObject>();
 
@@ -573,7 +596,6 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     int? limit,
     String? property,
   }) {
-    // ignore: invalid_use_of_protected_member
     isar.requireOpen();
     return buildNativeQuery(
       this,
@@ -587,5 +609,43 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       limit,
       property,
     );
+  }
+
+  @override
+  Future<void> verify(List<OBJ> objects) async {
+    await isar.verify();
+    return isar.getTxn(false, (txn) async {
+      final cObjSetPtr = txn.allocCObjectSet(objects.length);
+      serializeObjects(txn, cObjSetPtr.ref.objects, objects);
+
+      IC.isar_verify(ptr, txn.ptr, cObjSetPtr);
+      await txn.wait();
+    });
+  }
+
+  @override
+  Future<void> verifyLink(
+    String linkName,
+    List<int> sourceIds,
+    List<int> targetIds,
+  ) async {
+    final link = schema.link(linkName);
+
+    return isar.getTxn(false, (txn) async {
+      final idsPtr = txn.alloc<Int64>(sourceIds.length + targetIds.length);
+      for (var i = 0; i < sourceIds.length; i++) {
+        idsPtr[i * 2] = sourceIds[i];
+        idsPtr[i * 2 + 1] = targetIds[i];
+      }
+
+      IC.isar_link_verify(
+        ptr,
+        txn.ptr,
+        link.id,
+        idsPtr,
+        sourceIds.length + targetIds.length,
+      );
+      await txn.wait();
+    });
   }
 }

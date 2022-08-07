@@ -10,31 +10,53 @@ part 'change_field_type_test.g.dart';
 
 @Collection()
 @Name('Col')
-class Col1 {
-  Col1(this.id, this.value);
+class Model1 {
+  Model1(this.id, this.value, this.str);
+
   Id? id;
 
+  @Index()
+  @Index(composite: [CompositeIndex('str')])
   String? value;
+
+  @Index(composite: [CompositeIndex('value')])
+  String str;
 }
 
 @Collection()
 @Name('Col')
-class Col2 {
+class Model2 {
+  Model2(this.id, this.value, this.str);
+
   Id? id;
 
+  @Index()
+  @Index(composite: [CompositeIndex('str')])
   int? value;
+
+  @Index(composite: [CompositeIndex('value')])
+  String str;
 }
 
 void main() {
   isarTest('Change field type', () async {
-    final isar1 = await openTempIsar([Col1Schema]);
+    final isar1 = await openTempIsar([Model1Schema]);
+    final obj1A = Model1(1, 'a', 'OBJ1');
+    final obj1B = Model1(2, 'bbb', 'OBJ2');
     await isar1.tWriteTxn(() {
-      return isar1.col1s.tPut(Col1(1, 'a'));
+      return isar1.model1s.tPutAll([obj1A, obj1B]);
     });
     expect(await isar1.close(), true);
-    await expectLater(
-      () => openTempIsar([Col2Schema], name: isar1.name),
-      throwsIsarError('SchemaError'),
-    );
+
+    final isar2 = await openTempIsar([Model2Schema], name: isar1.name);
+    final obj2A = Model2(1, null, 'OBJ1');
+    final obj2B = Model2(2, null, 'OBJ2');
+    await isar2.model2s.verify([obj2A, obj2B]);
+    final obj2C = Model2(1, 123, 'OBJ3');
+    await isar2.tWriteTxn(() {
+      return isar2.model2s.tPut(obj2C);
+    });
+    await isar2.model2s.verify([obj2C, obj2B]);
+    expect(await isar2.close(), true);
   });
 }

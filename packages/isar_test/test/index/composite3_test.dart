@@ -84,7 +84,7 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.anyValue1Value2Value3', () async {
       await qEqual(

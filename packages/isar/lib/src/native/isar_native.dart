@@ -1,11 +1,9 @@
 import 'dart:ffi';
-import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/isar_native_interface.dart';
 import 'package:isar/src/native/binary_reader.dart';
 import 'package:isar/src/native/binary_writer.dart';
-import 'package:isar/src/native/bindings.dart';
 import 'package:isar/src/native/isar_core.dart';
 import 'package:isar/src/native/isar_link_impl.dart';
 import 'package:isar/src/native/open.dart';
@@ -27,14 +25,6 @@ typedef IsarAbi = Abi;
 
 /// @nodoc
 @protected
-typedef IsarCObject = CObject;
-
-/// @nodoc
-@protected
-typedef IsarBytePointer = Pointer<Uint8>;
-
-/// @nodoc
-@protected
 typedef IsarBinaryReader = BinaryReader;
 
 /// @nodoc
@@ -43,12 +33,6 @@ typedef IsarBinaryWriter = BinaryWriter;
 
 class _IsarNative implements IsarNativeInterface {
   const _IsarNative();
-
-  @override
-  @pragma('vm:prefer-inline')
-  Uint8List bufAsBytes(IsarBytePointer pointer, int length) {
-    return pointer.asTypedList(length);
-  }
 
   @override
   Future<void> initializeIsarCore({
@@ -91,32 +75,36 @@ class _IsarNative implements IsarNativeInterface {
   @override
   @pragma('vm:prefer-inline')
   Future<Isar> open({
+    required List<CollectionSchema<dynamic>> schemas,
     String? directory,
     required String name,
     required bool relaxedDurability,
-    required List<CollectionSchema<dynamic>> schemas,
+    CompactCondition? compactOnLaunch,
   }) {
     return openIsar(
+      schemas: schemas,
       directory: directory,
       name: name,
       relaxedDurability: relaxedDurability,
-      schemas: schemas,
+      compactOnLaunch: compactOnLaunch,
     );
   }
 
   @override
   @pragma('vm:prefer-inline')
   Isar openSync({
+    required List<CollectionSchema<dynamic>> schemas,
     String? directory,
     required String name,
     required bool relaxedDurability,
-    required List<CollectionSchema<dynamic>> schemas,
+    CompactCondition? compactOnLaunch,
   }) {
     return openIsarSync(
+      schemas: schemas,
       directory: directory,
       name: name,
       relaxedDurability: relaxedDurability,
-      schemas: schemas,
+      compactOnLaunch: compactOnLaunch,
     );
   }
 

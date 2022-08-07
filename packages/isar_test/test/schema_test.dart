@@ -74,16 +74,10 @@ class SchemaTestModel {
   List<bool> get boolListGetter => [];
 
   @Index()
-  late Uint8List bytesField;
+  late List<byte> bytesField;
 
   @Index()
-  late List<byte> bytesField2;
-
-  @Index()
-  Uint8List get bytesGetter => Uint8List(1);
-
-  @Index()
-  List<byte> get bytesGetter2 => [];
+  List<byte> get bytesGetter => Uint8List(1);
 
   late List<short> intListField;
 
@@ -227,7 +221,7 @@ class $Dollar$Model {
 }
 
 void main() {
-  isarTest('DollarModel Schema test', () {
+  /*isarTest('DollarModel Schema test', () {
     final schemaJson = jsonDecode($Dollar$ModelSchema.schema);
     expect(schemaJson, {
       'name': r'$Dollar$Model',
@@ -715,5 +709,5 @@ void main() {
         ]
       },
     );
-  });
+  });*/
 }

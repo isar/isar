@@ -138,7 +138,7 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('Query bool index', () async {
       final result = await isar.valueIndexesModels

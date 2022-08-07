@@ -1,22 +1,16 @@
 part of isar;
 
 /// Callback for a newly opened Isar instance.
-typedef IsarOpenCallback = void Function(Isar);
+typedef IsarOpenCallback = void Function(Isar isar);
 
 /// Callback for a release Isar instance.
-typedef IsarCloseCallback = void Function(String);
+typedef IsarCloseCallback = void Function(String isarName);
 
 /// An instance of the Isar Database.
 abstract class Isar {
   /// @nodoc
   @protected
-  Isar(this.name, String schema) {
-    if (_schema != null && _schema != schema) {
-      throw IsarError(
-        'Cannot open multiple Isar instances with different schema.',
-      );
-    }
-    _schema = schema;
+  Isar(this.name) {
     _instances[name] = this;
     for (final callback in _openCallbacks) {
       callback(this);
@@ -39,17 +33,16 @@ abstract class Isar {
   static final Map<String, Isar> _instances = <String, Isar>{};
   static final Set<IsarOpenCallback> _openCallbacks = <IsarOpenCallback>{};
   static final Set<IsarCloseCallback> _closeCallbacks = <IsarCloseCallback>{};
-  static String? _schema;
 
   /// Name of the instance.
   final String name;
 
-  /// The path of the directory containing the database file or `null` on the
-  /// web.
-  ///
+  /// The directory containing the database file or `null` on the web.
+  String? get directory;
+
   /// The full path of the database file is `path/name.isar` and the lockfile
   /// `path/name.isar.lock`.
-  String? get path;
+  String? get path => directory != null ? '$directory/$name.isar' : null;
 
   late final Map<Type, IsarCollection<dynamic>> _collections;
   late final Map<String, IsarCollection<dynamic>> _collectionsByName;
@@ -66,13 +59,24 @@ abstract class Isar {
     if (schemas.isEmpty) {
       throw IsarError('At least one collection needs to be opened.');
     }
-    for (var i = 0; i < schemas.length; i++) {
-      final schema = schemas[i];
-      if (schemas.indexWhere((e) => e.name == schema.name) != i) {
+
+    final schemaNames = <String>{};
+    for (final schema in schemas) {
+      if (!schemaNames.add(schema.name)) {
         throw IsarError('Duplicate collection ${schema.name}.');
       }
     }
-    schemas.sort((a, b) => a.name.compareTo(b.name));
+    for (final schema in schemas) {
+      final dependencies = schema.links.values.map((e) => e.target);
+      for (final dependency in dependencies) {
+        if (!schemaNames.contains(dependency)) {
+          throw IsarError(
+            "Collection ${schema.name} depends on $dependency but it's schema "
+            'was not provided.',
+          );
+        }
+      }
+    }
   }
 
   /// Open a new Isar instance.
@@ -81,13 +85,14 @@ abstract class Isar {
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
+    CompactCondition? compactOnLaunch,
     bool inspector = true,
   }) {
     _checkOpen(name, schemas);
     if (!_kIsWeb && inspector) {
       assert(
         () {
-          _IsarConnect.initialize();
+          _IsarConnect.initialize(schemas);
           return true;
         }(),
         'Remove the Inspector in release mode.',
@@ -98,6 +103,7 @@ abstract class Isar {
       directory: directory,
       name: name,
       relaxedDurability: relaxedDurability,
+      compactOnLaunch: compactOnLaunch,
     );
   }
 
@@ -107,13 +113,14 @@ abstract class Isar {
     String? directory,
     String name = defaultName,
     bool relaxedDurability = true,
+    CompactCondition? compactOnLaunch,
     bool inspector = true,
   }) {
     _checkOpen(name, schemas);
     if (!_kIsWeb && inspector) {
       assert(
         () {
-          _IsarConnect.initialize();
+          _IsarConnect.initialize(schemas);
           return true;
         }(),
         'Remove the Inspector in release mode.',
@@ -124,6 +131,7 @@ abstract class Isar {
       directory: directory,
       name: name,
       relaxedDurability: relaxedDurability,
+      compactOnLaunch: compactOnLaunch,
     );
   }
 
@@ -212,6 +220,15 @@ abstract class Isar {
   /// the instance.
   int getSizeSync({bool includeIndexes = false, bool includeLinks = false});
 
+  /// Copy a compacted version of the database to the specified file.
+  ///
+  /// If you want to backup your database, you should always use a compacted
+  /// version. Compacted does not mean compressed.
+  ///
+  /// Do not run this method while other transactions are active to avoid
+  /// unnecessary growth of the database.
+  Future<void> copyToFile(String targetPath);
+
   /// Releases an Isar instance.
   ///
   /// If this is the only isolate that holds a reference to this instance, the
@@ -224,9 +241,6 @@ abstract class Isar {
     _isOpen = false;
     if (identical(_instances[name], this)) {
       _instances.remove(name);
-      if (_instances.isEmpty) {
-        _schema = null;
-      }
     }
     for (final callback in _closeCallbacks) {
       callback(name);
@@ -234,10 +248,12 @@ abstract class Isar {
     return Future.value(false);
   }
 
-  /// Returns the schema of this Instance. You should avoid using the schema
-  /// directly.
-  @protected
-  static String? get schema => _schema;
+  /// Verifies the integrity of the database file.
+  ///
+  /// Do not use this method in production apps.
+  @visibleForTesting
+  @experimental
+  Future<void> verify();
 
   /// A list of all Isar instances opened in the current isolate.
   static Set<String> get instanceNames => _instances.keys.toSet();
@@ -293,4 +309,33 @@ abstract class Isar {
   /// Split a String into words according to Unicode Annex #29. Only words
   /// containing at least one alphanumeric character will be included.
   static List<String> splitWords(String input) => IsarNative.splitWords(input);
+}
+
+/// Isar databases can contain unused space that will be reused for later
+/// operations. You can specify conditions to trigger manual compaction where
+/// the entire database is copied and unused space freed.
+///
+/// This operation can only be performed while a database is being opened and
+/// should only be used if absolutely necessary.
+class CompactCondition {
+  /// Compaction whill happen if all of the specified conditions are true.
+  const CompactCondition({
+    this.minFileSize,
+    this.minBytes,
+    this.minRatio,
+  }) : assert(
+          minFileSize != null || minBytes != null || minRatio != null,
+          'At least one condition needs to be specified.',
+        );
+
+  /// The minimum size in bytes of the database file to trigger compaction. It
+  /// is highly  discouraged to trigger compaction solely on this condition.
+  final int? minFileSize;
+
+  /// The minumum number of bytes that can be freed with compaction.
+  final int? minBytes;
+
+  /// The minimum compaction ration. For example `2.0` would trigger compaction
+  /// as soon as the file size can be halved.
+  final double? minRatio;
 }

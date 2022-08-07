@@ -1,36 +1,44 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 
-import 'package:isar_generator/src/isar_type.dart';
+import 'package:xxh3/xxh3.dart';
 
 class ObjectInfo {
-  const ObjectInfo({
+  ObjectInfo({
     required this.dartName,
     required this.isarName,
-    required this.accessor,
-    required this.properties,
-    required this.indexes,
-    required this.links,
-  });
+    this.accessor,
+    required List<ObjectProperty> properties,
+    this.indexes = const [],
+    this.links = const [],
+  }) {
+    this.properties = properties.sortedBy((e) => e.isarName).toList();
+  }
+
   final String dartName;
   final String isarName;
-  final String accessor;
-  final List<ObjectProperty> properties;
+  final String? accessor;
+  late final List<ObjectProperty> properties;
   final List<ObjectIndex> indexes;
   final List<ObjectLink> links;
 
-  ObjectProperty get idProperty =>
-      properties.firstWhere((ObjectProperty it) => it.isarType == IsarType.id);
+  int get id => xxh3(utf8.encode(isarName) as Uint8List);
 
-  List<ObjectProperty> get objectProperties => properties
-      .where((ObjectProperty it) => it.isarType != IsarType.id)
-      .toList();
+  bool get isEmbedded => accessor == null;
+
+  ObjectProperty get idProperty => properties.firstWhere((it) => it.isId);
+
+  List<ObjectProperty> get objectProperties =>
+      properties.where((it) => !it.isId).toList();
 
   String get getIdName => '_${dartName.decapitalize()}GetId';
-  String get setIdName => '_${dartName.decapitalize()}SetId';
   String get getLinksName => '_${dartName.decapitalize()}GetLinks';
-  String get attachLinksName => '_${dartName.decapitalize()}AttachLinks';
+  String get attachName => '_${dartName.decapitalize()}Attach';
 
+  String get estimateSize => '_${dartName.decapitalize()}EstimateSize';
   String get serializeNativeName =>
       '_${dartName.decapitalize()}SerializeNative';
   String get deserializeNativeName =>
@@ -52,46 +60,82 @@ enum PropertyDeser {
 }
 
 class ObjectProperty {
-  const ObjectProperty({
+  ObjectProperty({
     required this.dartName,
     required this.isarName,
-    required this.dartType,
+    required this.typeClassName,
     required this.isarType,
-    this.converter,
+    required this.isId,
+    required this.enumConsts,
     required this.nullable,
     required this.elementNullable,
+    this.userDefaultValue,
     required this.deserialize,
     required this.assignable,
     this.constructorPosition,
   });
+
   final String dartName;
   final String isarName;
-  final String dartType;
+  final String typeClassName;
+
+  final bool isId;
   final IsarType isarType;
-  final String? converter;
+  final List<String>? enumConsts;
+
   final bool nullable;
   final bool elementNullable;
+  final String? userDefaultValue;
+
   final PropertyDeser deserialize;
   final bool assignable;
   final int? constructorPosition;
 
-  String converterName(ObjectInfo oi) =>
-      '_${oi.dartName.decapitalize()}${converter?.capitalize()}';
+  bool get isEnum => enumConsts != null;
 
-  String toIsar(String input, ObjectInfo oi) {
-    if (converter != null) {
-      return '${converterName(oi)}.toIsar($input)';
-    } else {
-      return input;
+  String get scalarDartType {
+    if (isEnum) {
+      return typeClassName;
+    }
+
+    switch (isarType) {
+      case IsarType.bool:
+      case IsarType.boolList:
+        return 'bool';
+      case IsarType.byte:
+      case IsarType.byteList:
+      case IsarType.int:
+      case IsarType.intList:
+      case IsarType.long:
+      case IsarType.longList:
+        return 'int';
+      case IsarType.float:
+      case IsarType.floatList:
+      case IsarType.double:
+      case IsarType.doubleList:
+        return 'double';
+      case IsarType.dateTime:
+      case IsarType.dateTimeList:
+        return 'DateTime';
+      case IsarType.object:
+      case IsarType.objectList:
+        return typeClassName;
+      case IsarType.string:
+      case IsarType.stringList:
+        return 'String';
     }
   }
 
-  String fromIsar(String input, ObjectInfo oi) {
-    if (converter != null) {
-      return '${converterName(oi)}.fromIsar($input)';
-    } else {
-      return input;
-    }
+  String get dartType => isarType.isList
+      ? 'List<$scalarDartType${elementNullable ? '?' : ''}>${nullable ? '?' : ''}'
+      : '$scalarDartType${nullable ? '?' : ''}';
+
+  String get targetSchema => '${scalarDartType.capitalize()}Schema';
+
+  String get defaultEnum => '$typeClassName.${enumConsts!.first}';
+
+  String enumValues(ObjectInfo object) {
+    return '_${object.dartName}${scalarDartType}Values';
   }
 }
 
@@ -101,126 +145,58 @@ class ObjectIndexProperty {
     required this.type,
     required this.caseSensitive,
   });
+
   final ObjectProperty property;
   final IndexType type;
   final bool caseSensitive;
 
   IsarType get isarType => property.isarType;
 
-  IsarType get scalarType => property.isarType.scalarType;
-
   bool get isMultiEntry => isarType.isList && type != IndexType.hash;
-
-  String get indexValueTypeEnum {
-    switch (property.isarType) {
-      case IsarType.id:
-        throw UnimplementedError();
-      case IsarType.bool:
-        return 'IndexValueType.bool';
-      case IsarType.byte:
-        return 'IndexValueType.byte';
-      case IsarType.int:
-        return 'IndexValueType.int';
-      case IsarType.float:
-        return 'IndexValueType.float';
-      case IsarType.long:
-      case IsarType.dateTime:
-        return 'IndexValueType.long';
-      case IsarType.double:
-        return 'IndexValueType.double';
-      case IsarType.string:
-        if (caseSensitive) {
-          return type == IndexType.hash
-              ? 'IndexValueType.stringHash'
-              : 'IndexValueType.string';
-        } else {
-          return type == IndexType.hash
-              ? 'IndexValueType.stringHashCIS'
-              : 'IndexValueType.stringCIS';
-        }
-
-      case IsarType.boolList:
-        if (type == IndexType.hash) {
-          return 'IndexValueType.boolListHash';
-        } else {
-          return 'IndexValueType.bool';
-        }
-      case IsarType.byteList:
-        assert(type == IndexType.hash, 'ByteList indexes have to be hashed');
-        return 'IndexValueType.byteListHash';
-      case IsarType.intList:
-        if (type == IndexType.hash) {
-          return 'IndexValueType.intListHash';
-        } else {
-          return 'IndexValueType.int';
-        }
-      case IsarType.floatList:
-        assert(type == IndexType.value, 'FloatList indexes must to be hashed');
-        return 'IndexValueType.float';
-      case IsarType.longList:
-      case IsarType.dateTimeList:
-        if (type == IndexType.hash) {
-          return 'IndexValueType.longListHash';
-        } else {
-          return 'IndexValueType.long';
-        }
-      case IsarType.doubleList:
-        assert(type == IndexType.value, 'DoubleList indexes must to be hashed');
-        return 'IndexValueType.double';
-      case IsarType.stringList:
-        if (caseSensitive) {
-          if (type == IndexType.hash) {
-            return 'IndexValueType.stringListHash';
-          } else if (type == IndexType.hashElements) {
-            return 'IndexValueType.stringHash';
-          } else {
-            return 'IndexValueType.string';
-          }
-        } else {
-          if (type == IndexType.hash) {
-            return 'IndexValueType.stringListHashCIS';
-          } else if (type == IndexType.hashElements) {
-            return 'IndexValueType.stringHashCIS';
-          } else {
-            return 'IndexValueType.stringCIS';
-          }
-        }
-    }
-  }
 }
 
 class ObjectIndex {
-  const ObjectIndex({
+  ObjectIndex({
     required this.name,
     required this.properties,
     required this.unique,
     required this.replace,
   });
+
   final String name;
   final List<ObjectIndexProperty> properties;
   final bool unique;
   final bool replace;
+
+  late final id = xxh3(utf8.encode(name) as Uint8List);
 }
 
 class ObjectLink {
   const ObjectLink({
     required this.dartName,
     required this.isarName,
-    this.targetIsarName,
+    this.targetLinkIsarName,
     required this.targetCollectionDartName,
     required this.targetCollectionIsarName,
-    required this.targetCollectionAccessor,
-    required this.links,
-    required this.backlink,
+    required this.isSingle,
   });
+
   final String dartName;
   final String isarName;
 
   // isar name of the original link (only for backlinks)
-  final String? targetIsarName;
+  final String? targetLinkIsarName;
   final String targetCollectionDartName;
   final String targetCollectionIsarName;
-  final String targetCollectionAccessor;
-  final bool links;
-  final bool backlink;
+  final bool isSingle;
+
+  bool get isBacklink => targetLinkIsarName != null;
+
+  int id(String objectIsarName) {
+    final col = isBacklink ? targetCollectionIsarName : objectIsarName;
+    final colId = xxh3(utf8.encode(col) as Uint8List, seed: isBacklink ? 1 : 0);
+
+    final name = targetLinkIsarName ?? isarName;
+    return xxh3(utf8.encode(name) as Uint8List, seed: colId);
+  }
 }

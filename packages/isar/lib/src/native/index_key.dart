@@ -1,14 +1,13 @@
 // ignore_for_file: public_member_api_docs
 
 import 'dart:ffi';
-import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
-
+import 'package:isar/src/native/binary_writer.dart';
 import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_core.dart';
-import 'package:isar/src/native/query_build.dart';
 
 final _keyPtrPtr = malloc<Pointer<CIndexKey>>();
 
@@ -21,9 +20,9 @@ Pointer<CIndexKey>? buildIndexKey(
   bool increase = false,
   bool decrease = false,
 }) {
-  final types = schema.indexValueTypeOrErr(indexName);
-  if (key.length > types.length ||
-      (requireFullKey && key.length != types.length)) {
+  final index = schema.index(indexName);
+  if (key.length > index.properties.length ||
+      (requireFullKey && key.length != index.properties.length)) {
     throw IsarError('Invalid values for index $indexName.');
   }
 
@@ -31,7 +30,14 @@ Pointer<CIndexKey>? buildIndexKey(
   final keyPtr = _keyPtrPtr.value;
 
   for (var i = 0; i < key.length; i++) {
-    _addKeyValue(keyPtr, key[i], types[i]);
+    final indexProperty = index.properties[i];
+    _addKeyValue(
+      keyPtr,
+      key[i],
+      schema.property(indexProperty.name),
+      indexProperty.type,
+      indexProperty.caseSensitive,
+    );
   }
 
   if (increase) {
@@ -47,7 +53,7 @@ Pointer<CIndexKey>? buildIndexKey(
   }
 
   // Also include composite indexes for upper keys
-  if (addMaxComposite && types.length > key.length) {
+  if (addMaxComposite && index.properties.length > key.length) {
     IC.isar_key_add_long(keyPtr, maxLong);
   }
 
@@ -70,73 +76,74 @@ Pointer<CIndexKey> buildUpperUnboundedIndexKey() {
 void _addKeyValue(
   Pointer<CIndexKey> keyPtr,
   Object? value,
-  IndexValueType type,
+  PropertySchema property,
+  IndexType type,
+  bool caseSensitive,
 ) {
-  if (value is DateTime) {
-    value = value.toUtc().microsecondsSinceEpoch;
-  } else if (value is List<DateTime?>) {
-    value = value.map((e) => e?.toUtc().microsecondsSinceEpoch);
+  if (value is IsarEnum) {
+    value = value.isarValue;
+  } else if (value is List<IsarEnum?>) {
+    value = value.map((e) => e?.isarValue).toList();
   }
 
-  switch (type) {
-    case IndexValueType.bool:
-      IC.isar_key_add_byte(keyPtr, boolToByte(value as bool?));
+  final isarType =
+      type != IndexType.hash ? property.type.scalarType : property.type;
+  switch (isarType) {
+    case IsarType.bool:
+      IC.isar_key_add_byte(keyPtr, (value as bool?).byteValue);
       break;
-    case IndexValueType.byte:
+    case IsarType.byte:
       IC.isar_key_add_byte(keyPtr, value! as int);
       break;
-    case IndexValueType.int:
+    case IsarType.int:
       IC.isar_key_add_int(keyPtr, (value as int?) ?? nullInt);
       break;
-    case IndexValueType.float:
+    case IsarType.float:
       IC.isar_key_add_float(keyPtr, (value as double?) ?? nullFloat);
       break;
-    case IndexValueType.long:
+    case IsarType.long:
       IC.isar_key_add_long(keyPtr, (value as int?) ?? nullLong);
       break;
-    case IndexValueType.double:
+    case IsarType.double:
       IC.isar_key_add_double(keyPtr, (value as double?) ?? nullDouble);
       break;
-    case IndexValueType.string:
-    case IndexValueType.stringCIS:
+    case IsarType.dateTime:
+      IC.isar_key_add_long(keyPtr, (value as DateTime?).longValue);
+      break;
+    case IsarType.string:
       final strPtr = _strToNative(value as String?);
-      IC.isar_key_add_string(keyPtr, strPtr, type == IndexValueType.string);
+      if (type == IndexType.value) {
+        IC.isar_key_add_string(keyPtr, strPtr, caseSensitive);
+      } else {
+        IC.isar_key_add_string_hash(keyPtr, strPtr, caseSensitive);
+      }
       _freeStr(strPtr);
       break;
-    case IndexValueType.stringHash:
-    case IndexValueType.stringHashCIS:
-      final strPtr = _strToNative(value as String?);
-      IC.isar_key_add_string_hash(
-        keyPtr,
-        strPtr,
-        type == IndexValueType.stringHash,
-      );
-      _freeStr(strPtr);
-      break;
-
-    case IndexValueType.boolListHash:
+    case IsarType.boolList:
       if (value == null) {
         IC.isar_key_add_byte_list_hash(keyPtr, nullptr, 0);
       } else {
         value as List<bool?>;
         final boolListPtr = malloc<Uint8>(value.length);
-        boolListPtr.asTypedList(value.length).setAll(0, value.map(boolToByte));
+        boolListPtr
+            .asTypedList(value.length)
+            .setAll(0, value.map((e) => e.byteValue));
         IC.isar_key_add_byte_list_hash(keyPtr, boolListPtr, value.length);
         malloc.free(boolListPtr);
       }
       break;
-    case IndexValueType.byteListHash:
+    case IsarType.byteList:
       if (value == null) {
         IC.isar_key_add_byte_list_hash(keyPtr, nullptr, 0);
       } else {
-        value as Uint8List;
+        value as List<int>;
         final bytesPtr = malloc<Uint8>(value.length);
         bytesPtr.asTypedList(value.length).setAll(0, value);
         IC.isar_key_add_byte_list_hash(keyPtr, bytesPtr, value.length);
         malloc.free(bytesPtr);
       }
       break;
-    case IndexValueType.intListHash:
+    case IsarType.intList:
       if (value == null) {
         IC.isar_key_add_int_list_hash(keyPtr, nullptr, 0);
       } else {
@@ -149,7 +156,7 @@ void _addKeyValue(
         malloc.free(intListPtr);
       }
       break;
-    case IndexValueType.longListHash:
+    case IsarType.longList:
       if (value == null) {
         IC.isar_key_add_long_list_hash(keyPtr, nullptr, 0);
       } else {
@@ -162,8 +169,19 @@ void _addKeyValue(
         malloc.free(longListPtr);
       }
       break;
-    case IndexValueType.stringListHash:
-    case IndexValueType.stringListHashCIS:
+    case IsarType.dateTimeList:
+      if (value == null) {
+        IC.isar_key_add_long_list_hash(keyPtr, nullptr, 0);
+      } else {
+        value as List<DateTime?>;
+        final longListPtr = malloc<Int64>(value.length);
+        for (var i = 0; i < value.length; i++) {
+          longListPtr[i] = value[i].longValue;
+        }
+        IC.isar_key_add_long_list_hash(keyPtr, longListPtr, value.length);
+      }
+      break;
+    case IsarType.stringList:
       if (value == null) {
         IC.isar_key_add_string_list_hash(keyPtr, nullptr, 0, false);
       } else {
@@ -176,13 +194,18 @@ void _addKeyValue(
           keyPtr,
           stringListPtr,
           value.length,
-          type == IndexValueType.stringListHash,
+          caseSensitive,
         );
         for (var i = 0; i < value.length; i++) {
           _freeStr(stringListPtr[i]);
         }
       }
       break;
+    case IsarType.object:
+    case IsarType.floatList:
+    case IsarType.doubleList:
+    case IsarType.objectList:
+      throw IsarError('Unsupported property type.');
   }
 }
 
@@ -190,7 +213,7 @@ Pointer<Char> _strToNative(String? str) {
   if (str == null) {
     return Pointer.fromAddress(0);
   } else {
-    return str.toNativeUtf8().cast();
+    return str.toCString(malloc);
   }
 }
 

@@ -5,7 +5,9 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 
 import 'package:isar/isar.dart';
+import 'package:isar/src/native/binary_writer.dart';
 import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/index_key.dart';
 import 'package:isar/src/native/isar_collection_impl.dart';
 import 'package:isar/src/native/isar_core.dart';
@@ -47,7 +49,7 @@ Query<T> buildNativeQuery<T>(
   if (filter != null) {
     final alloc = Arena(malloc);
     try {
-      final filterPtr = _buildFilter(col, filter, alloc);
+      final filterPtr = _buildFilter(col, null, filter, alloc);
       if (filterPtr != null) {
         IC.isar_qb_set_filter(qbPtr, filterPtr);
       }
@@ -57,11 +59,11 @@ Query<T> buildNativeQuery<T>(
   }
 
   for (final sortProperty in sortBy) {
-    final propertyId = col.schema.propertyIdOrErr(sortProperty.property);
+    final property = col.schema.property(sortProperty.property);
     nCall(
       IC.isar_qb_add_sort_by(
         qbPtr,
-        propertyId,
+        property.id,
         sortProperty.sort == Sort.asc,
       ),
     );
@@ -72,11 +74,11 @@ Query<T> buildNativeQuery<T>(
   }
 
   for (final distinctByProperty in distinctBy) {
-    final propertyId = col.schema.propertyIdOrErr(distinctByProperty.property);
+    final property = col.schema.property(distinctByProperty.property);
     nCall(
       IC.isar_qb_add_distinct_by(
         qbPtr,
-        propertyId,
+        property.id,
         distinctByProperty.caseSensitive ?? true,
       ),
     );
@@ -87,9 +89,8 @@ Query<T> buildNativeQuery<T>(
   if (property == null) {
     deserialize = (col as IsarCollectionImpl<T>).deserializeObjects;
   } else {
-    propertyId = property != col.schema.idName
-        ? col.schema.propertyIdOrErr(property)
-        : null;
+    propertyId =
+        property != col.schema.idName ? col.schema.property(property).id : null;
     deserialize =
         (CObjectSet cObjSet) => col.deserializeProperty(cObjSet, propertyId);
   }
@@ -150,7 +151,7 @@ void _addIndexWhereClause(
     nCall(
       IC.isar_qb_add_index_where_clause(
         qbPtr,
-        schema.indexIdOrErr(wc.indexName),
+        schema.index(wc.indexName).id,
         lowerPtr,
         upperPtr,
         sort == Sort.asc,
@@ -173,34 +174,27 @@ void _addLinkWhereClause(
   Pointer<CQueryBuilder> qbPtr,
   LinkWhereClause wc,
 ) {
-  final linkCol =
-      // ignore: cast_nullable_to_non_nullable
-      isar.getCollectionByNameInternal(wc.linkCollection) as IsarCollectionImpl;
-  final linkId = linkCol.schema.linkIdOrErr(wc.linkName);
-  nCall(IC.isar_qb_add_link_where_clause(qbPtr, linkCol.ptr, linkId, wc.id));
-}
+  final linkCol = isar.getCollectionByNameInternal(wc.linkCollection)!;
+  linkCol as IsarCollectionImpl;
 
-int boolToByte(bool? value) {
-  if (value == null) {
-    return nullBool;
-  } else if (value) {
-    return trueBool;
-  } else {
-    return falseBool;
-  }
+  final linkId = linkCol.schema.link(wc.linkName).id;
+  nCall(IC.isar_qb_add_link_where_clause(qbPtr, linkCol.ptr, linkId, wc.id));
 }
 
 Pointer<CFilter>? _buildFilter(
   IsarCollectionImpl<dynamic> col,
+  Schema<dynamic>? embeddedCol,
   FilterOperation filter,
   Allocator alloc,
 ) {
   if (filter is FilterGroup) {
-    return _buildFilterGroup(col, filter, alloc);
+    return _buildFilterGroup(col, embeddedCol, filter, alloc);
   } else if (filter is LinkFilter) {
     return _buildLink(col, filter, alloc);
+  } else if (filter is ObjectFilter) {
+    return _buildObject(col, filter, alloc);
   } else if (filter is FilterCondition) {
-    return _buildCondition(col, filter, alloc);
+    return _buildCondition(col, embeddedCol, filter, alloc);
   } else {
     return null;
   }
@@ -208,11 +202,12 @@ Pointer<CFilter>? _buildFilter(
 
 Pointer<CFilter>? _buildFilterGroup(
   IsarCollectionImpl<dynamic> col,
+  Schema<dynamic>? embeddedCol,
   FilterGroup group,
   Allocator alloc,
 ) {
   final builtConditions = group.filters
-      .map((FilterOperation op) => _buildFilter(col, op, alloc))
+      .map((FilterOperation op) => _buildFilter(col, embeddedCol, op, alloc))
       .where((Pointer<CFilter>? it) => it != null)
       .toList();
 
@@ -250,58 +245,117 @@ Pointer<CFilter>? _buildLink(
   LinkFilter link,
   Allocator alloc,
 ) {
+  final linkSchema = col.schema.link(link.linkName);
   final linkTargetCol =
-      col.isar.getCollectionByNameInternal(link.targetCollection)!
-          as IsarCollectionImpl;
-  final linkId = col.schema.linkIdOrErr(link.linkName);
+      col.isar.getCollectionByNameInternal(linkSchema.target)!;
+  final linkId = col.schema.link(link.linkName).id;
 
-  final condition = _buildFilter(linkTargetCol, link.filter, alloc);
+  final filterPtrPtr = alloc<Pointer<CFilter>>();
+
+  if (link.filter != null) {
+    final condition = _buildFilter(
+      linkTargetCol as IsarCollectionImpl,
+      null,
+      link.filter!,
+      alloc,
+    );
+    if (condition == null) {
+      return null;
+    }
+
+    nCall(
+      IC.isar_filter_link(
+        col.ptr,
+        filterPtrPtr,
+        condition,
+        linkId,
+      ),
+    );
+  } else {
+    nCall(
+      IC.isar_filter_link_length(
+        col.ptr,
+        filterPtrPtr,
+        link.lower!,
+        link.upper!,
+        linkId,
+      ),
+    );
+  }
+
+  return filterPtrPtr.value;
+}
+
+Pointer<CFilter>? _buildObject(
+  IsarCollectionImpl<dynamic> col,
+  ObjectFilter objectFilter,
+  Allocator alloc, {
+  Schema<dynamic>? embeddedCol,
+}) {
+  final property = (embeddedCol ?? col.schema).property(objectFilter.property);
+
+  final condition = _buildFilter(
+    col,
+    col.schema.embeddedSchemas[property.target],
+    objectFilter.filter,
+    alloc,
+  );
   if (condition == null) {
     return null;
   }
 
   final filterPtrPtr = alloc<Pointer<CFilter>>();
-
   nCall(
-    IC.isar_filter_link(
+    IC.isar_filter_object(
       col.ptr,
       filterPtrPtr,
       condition,
-      linkId,
+      embeddedCol?.id ?? 0,
+      property.id,
     ),
   );
 
   return filterPtrPtr.value;
 }
 
+dynamic _prepareValue(dynamic value) {
+  if (value is bool) {
+    return value.byteValue;
+  } else if (value is DateTime) {
+    return value.longValue;
+  } else if (value is IsarEnum) {
+    return _prepareValue(value.isarValue);
+  } else {
+    return value;
+  }
+}
+
 Pointer<CFilter> _buildCondition(
   IsarCollectionImpl<dynamic> col,
+  Schema<dynamic>? embeddedCol,
   FilterCondition condition,
   Allocator alloc,
 ) {
-  final val1Raw = condition.value1;
-  final val1 =
-      val1Raw is DateTime ? val1Raw.toUtc().microsecondsSinceEpoch : val1Raw;
+  final value1 = _prepareValue(condition.value1);
+  final value2 = _prepareValue(condition.value2);
 
-  final val2Raw = condition.value2;
-  final val2 =
-      val2Raw is DateTime ? val2Raw.toUtc().microsecondsSinceEpoch : val2Raw;
-
-  final propertyId = condition.property != col.schema.idName
-      ? col.schema.propertyIdOrErr(condition.property)
+  final property = condition.property != col.schema.idName
+      ? (embeddedCol ?? col.schema).property(condition.property)
       : null;
   switch (condition.type) {
     case FilterConditionType.isNull:
       return _buildConditionIsNull(
         colPtr: col.ptr,
-        propertyId: propertyId,
+        embeddedColId: embeddedCol?.id,
+        propertyId: property?.id,
         alloc: alloc,
       );
     case FilterConditionType.equalTo:
       return _buildConditionEqual(
         colPtr: col.ptr,
-        propertyId: propertyId,
-        val: val1,
+        embeddedColId: embeddedCol?.id,
+        propertyId: property?.id,
+        val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
@@ -309,10 +363,11 @@ Pointer<CFilter> _buildCondition(
     case FilterConditionType.between:
       return _buildConditionBetween(
         colPtr: col.ptr,
-        propertyId: propertyId,
-        lower: val1,
+        embeddedColId: embeddedCol?.id,
+        propertyId: property?.id,
+        lower: value1,
         includeLower: condition.include1,
-        upper: val2,
+        upper: value2,
         includeUpper: condition.include2,
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
@@ -320,8 +375,9 @@ Pointer<CFilter> _buildCondition(
     case FilterConditionType.lessThan:
       return _buildConditionLessThan(
         colPtr: col.ptr,
-        propertyId: propertyId,
-        val: val1,
+        embeddedColId: embeddedCol?.id,
+        propertyId: property?.id,
+        val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
@@ -329,21 +385,34 @@ Pointer<CFilter> _buildCondition(
     case FilterConditionType.greaterThan:
       return _buildConditionGreaterThan(
         colPtr: col.ptr,
-        propertyId: propertyId,
-        val: val1,
+        embeddedColId: embeddedCol?.id,
+        propertyId: property?.id,
+        val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
         alloc: alloc,
       );
-    // ignore: no_default_cases
-    default:
+    case FilterConditionType.startsWith:
+    case FilterConditionType.endsWith:
+    case FilterConditionType.contains:
+    case FilterConditionType.matches:
       return _buildConditionStringOp(
         colPtr: col.ptr,
         conditionType: condition.type,
-        propertyId: propertyId,
-        val: val1,
+        embeddedColId: embeddedCol?.id,
+        propertyId: property?.id,
+        val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
+        alloc: alloc,
+      );
+    case FilterConditionType.listLength:
+      return _buildListLength(
+        colPtr: col.ptr,
+        embeddedColId: embeddedCol?.id,
+        propertyId: property?.id,
+        lower: value1 as int,
+        upper: value2 as int,
         alloc: alloc,
       );
   }
@@ -351,16 +420,30 @@ Pointer<CFilter> _buildCondition(
 
 Pointer<CFilter> _buildConditionIsNull({
   required Pointer<CIsarCollection> colPtr,
+  required int? embeddedColId,
   required int? propertyId,
   required Allocator alloc,
 }) {
   final filterPtrPtr = alloc<Pointer<CFilter>>();
-  nCall(IC.isar_filter_null(colPtr, filterPtrPtr, propertyId!, false));
+  if (propertyId != null) {
+    nCall(
+      IC.isar_filter_null(
+        colPtr,
+        filterPtrPtr,
+        false,
+        embeddedColId ?? 0,
+        propertyId,
+      ),
+    );
+  } else {
+    IC.isar_filter_static(filterPtrPtr, false);
+  }
   return filterPtrPtr.value;
 }
 
 Pointer<CFilter> _buildConditionEqual({
   required Pointer<CIsarCollection> colPtr,
+  required int? embeddedColId,
   required int? propertyId,
   required Object? val,
   required bool include,
@@ -369,23 +452,18 @@ Pointer<CFilter> _buildConditionEqual({
 }) {
   final filterPtrPtr = alloc<Pointer<CFilter>>();
   if (val == null) {
-    nCall(IC.isar_filter_null(colPtr, filterPtrPtr, propertyId!, true));
-  } else if (val is bool) {
-    final value = boolToByte(val);
     nCall(
-      IC.isar_filter_byte(
+      IC.isar_filter_null(
         colPtr,
         filterPtrPtr,
-        value,
         true,
-        value,
-        true,
+        embeddedColId ?? 0,
         propertyId!,
       ),
     );
   } else if (val is int) {
     if (propertyId == null) {
-      nCall(IC.isar_filter_id(filterPtrPtr, val, true, val, true));
+      IC.isar_filter_id(filterPtrPtr, val, true, val, true);
     } else {
       nCall(
         IC.isar_filter_long(
@@ -395,21 +473,23 @@ Pointer<CFilter> _buildConditionEqual({
           true,
           val,
           true,
+          embeddedColId ?? 0,
           propertyId,
         ),
       );
     }
   } else if (val is String) {
-    final strPtr = val.toNativeUtf8(allocator: alloc);
+    final strPtr = val.toCString(alloc);
     nCall(
       IC.isar_filter_string(
         colPtr,
         filterPtrPtr,
-        strPtr.cast(),
+        strPtr,
         true,
-        strPtr.cast(),
+        strPtr,
         true,
         caseSensitive,
+        embeddedColId ?? 0,
         propertyId!,
       ),
     );
@@ -421,6 +501,7 @@ Pointer<CFilter> _buildConditionEqual({
 
 Pointer<CFilter> _buildConditionBetween({
   required Pointer<CIsarCollection> colPtr,
+  required int? embeddedColId,
   required int? propertyId,
   required Object? lower,
   required bool includeLower,
@@ -431,17 +512,23 @@ Pointer<CFilter> _buildConditionBetween({
 }) {
   final filterPtrPtr = alloc<Pointer<CFilter>>();
   if (lower == null && upper == null) {
-    nCall(IC.isar_filter_null(colPtr, filterPtrPtr, propertyId!, true));
+    nCall(
+      IC.isar_filter_null(
+        colPtr,
+        filterPtrPtr,
+        true,
+        embeddedColId ?? 0,
+        propertyId!,
+      ),
+    );
   } else if ((lower is int?) && upper is int?) {
     if (propertyId == null) {
-      nCall(
-        IC.isar_filter_id(
-          filterPtrPtr,
-          lower ?? nullLong,
-          includeLower,
-          upper ?? maxLong,
-          includeUpper,
-        ),
+      IC.isar_filter_id(
+        filterPtrPtr,
+        lower ?? nullLong,
+        includeLower,
+        upper ?? maxLong,
+        includeUpper,
       );
     } else {
       nCall(
@@ -452,6 +539,7 @@ Pointer<CFilter> _buildConditionBetween({
           includeLower,
           upper ?? maxLong,
           includeUpper,
+          embeddedColId ?? 0,
           propertyId,
         ),
       );
@@ -463,14 +551,13 @@ Pointer<CFilter> _buildConditionBetween({
         filterPtrPtr,
         lower ?? nullDouble,
         upper ?? maxDouble,
+        embeddedColId ?? 0,
         propertyId!,
       ),
     );
   } else if ((lower is String?) && upper is String?) {
-    final lowerPtr =
-        lower?.toNativeUtf8(allocator: alloc).cast<Char>() ?? minStr;
-    final upperPtr =
-        upper?.toNativeUtf8(allocator: alloc).cast<Char>() ?? maxStr;
+    final lowerPtr = lower?.toCString(alloc) ?? minStr;
+    final upperPtr = upper?.toCString(alloc) ?? maxStr;
     nCall(
       IC.isar_filter_string(
         colPtr,
@@ -480,6 +567,7 @@ Pointer<CFilter> _buildConditionBetween({
         upperPtr,
         includeUpper,
         caseSensitive,
+        embeddedColId ?? 0,
         propertyId!,
       ),
     );
@@ -491,6 +579,7 @@ Pointer<CFilter> _buildConditionBetween({
 
 Pointer<CFilter> _buildConditionLessThan({
   required Pointer<CIsarCollection> colPtr,
+  required int? embeddedColId,
   required int? propertyId,
   required Object? val,
   required bool include,
@@ -500,13 +589,21 @@ Pointer<CFilter> _buildConditionLessThan({
   final filterPtrPtr = alloc<Pointer<CFilter>>();
   if (val == null) {
     if (include) {
-      nCall(IC.isar_filter_null(colPtr, filterPtrPtr, propertyId!, true));
+      nCall(
+        IC.isar_filter_null(
+          colPtr,
+          filterPtrPtr,
+          true,
+          embeddedColId ?? 0,
+          propertyId!,
+        ),
+      );
     } else {
       IC.isar_filter_static(filterPtrPtr, false);
     }
   } else if (val is int) {
     if (propertyId == null) {
-      nCall(IC.isar_filter_id(filterPtrPtr, minLong, true, val, include));
+      IC.isar_filter_id(filterPtrPtr, minLong, true, val, include);
     } else {
       nCall(
         IC.isar_filter_long(
@@ -516,6 +613,7 @@ Pointer<CFilter> _buildConditionLessThan({
           true,
           val,
           include,
+          embeddedColId ?? 0,
           propertyId,
         ),
       );
@@ -527,20 +625,22 @@ Pointer<CFilter> _buildConditionLessThan({
         filterPtrPtr,
         minDouble,
         val,
+        embeddedColId ?? 0,
         propertyId!,
       ),
     );
   } else if (val is String) {
-    final value = val.toNativeUtf8(allocator: alloc);
+    final value = val.toCString(alloc);
     nCall(
       IC.isar_filter_string(
         colPtr,
         filterPtrPtr,
         minStr,
         true,
-        value.cast(),
+        value,
         include,
         caseSensitive,
+        embeddedColId ?? 0,
         propertyId!,
       ),
     );
@@ -552,6 +652,7 @@ Pointer<CFilter> _buildConditionLessThan({
 
 Pointer<CFilter> _buildConditionGreaterThan({
   required Pointer<CIsarCollection> colPtr,
+  required int? embeddedColId,
   required int? propertyId,
   required Object? val,
   required bool include,
@@ -563,12 +664,20 @@ Pointer<CFilter> _buildConditionGreaterThan({
     if (include) {
       IC.isar_filter_static(filterPtrPtr, true);
     } else {
-      nCall(IC.isar_filter_null(colPtr, filterPtrPtr, propertyId!, true));
+      nCall(
+        IC.isar_filter_null(
+          colPtr,
+          filterPtrPtr,
+          true,
+          embeddedColId ?? 0,
+          propertyId!,
+        ),
+      );
       IC.isar_filter_not(filterPtrPtr, filterPtrPtr.value);
     }
   } else if (val is int) {
     if (propertyId == null) {
-      nCall(IC.isar_filter_id(filterPtrPtr, val, include, maxLong, true));
+      IC.isar_filter_id(filterPtrPtr, val, include, maxLong, true);
     } else {
       nCall(
         IC.isar_filter_long(
@@ -578,6 +687,7 @@ Pointer<CFilter> _buildConditionGreaterThan({
           include,
           maxLong,
           true,
+          embeddedColId ?? 0,
           propertyId,
         ),
       );
@@ -589,20 +699,22 @@ Pointer<CFilter> _buildConditionGreaterThan({
         filterPtrPtr,
         val,
         maxDouble,
+        embeddedColId ?? 0,
         propertyId!,
       ),
     );
   } else if (val is String) {
-    final value = val.toNativeUtf8(allocator: alloc);
+    final value = val.toCString(alloc);
     nCall(
       IC.isar_filter_string(
         colPtr,
         filterPtrPtr,
-        value.cast(),
+        value,
         include,
         maxStr,
         true,
         caseSensitive,
+        embeddedColId ?? 0,
         propertyId!,
       ),
     );
@@ -615,6 +727,7 @@ Pointer<CFilter> _buildConditionGreaterThan({
 Pointer<CFilter> _buildConditionStringOp({
   required Pointer<CIsarCollection> colPtr,
   required FilterConditionType conditionType,
+  required int? embeddedColId,
   required int? propertyId,
   required Object? val,
   required bool include,
@@ -623,15 +736,16 @@ Pointer<CFilter> _buildConditionStringOp({
 }) {
   final filterPtrPtr = alloc<Pointer<CFilter>>();
   if (val is String) {
-    final strPtr = val.toNativeUtf8(allocator: alloc);
+    final strPtr = val.toCString(alloc);
     switch (conditionType) {
       case FilterConditionType.startsWith:
         nCall(
           IC.isar_filter_string_starts_with(
             colPtr,
             filterPtrPtr,
-            strPtr.cast(),
+            strPtr,
             caseSensitive,
+            embeddedColId ?? 0,
             propertyId!,
           ),
         );
@@ -641,8 +755,9 @@ Pointer<CFilter> _buildConditionStringOp({
           IC.isar_filter_string_ends_with(
             colPtr,
             filterPtrPtr,
-            strPtr.cast(),
+            strPtr,
             caseSensitive,
+            embeddedColId ?? 0,
             propertyId!,
           ),
         );
@@ -652,8 +767,9 @@ Pointer<CFilter> _buildConditionStringOp({
           IC.isar_filter_string_contains(
             colPtr,
             filterPtrPtr,
-            strPtr.cast(),
+            strPtr,
             caseSensitive,
+            embeddedColId ?? 0,
             propertyId!,
           ),
         );
@@ -663,8 +779,9 @@ Pointer<CFilter> _buildConditionStringOp({
           IC.isar_filter_string_matches(
             colPtr,
             filterPtrPtr,
-            strPtr.cast(),
+            strPtr,
             caseSensitive,
+            embeddedColId ?? 0,
             propertyId!,
           ),
         );
@@ -677,5 +794,27 @@ Pointer<CFilter> _buildConditionStringOp({
     throw IsarError('Unsupported type for condition');
   }
 
+  return filterPtrPtr.value;
+}
+
+Pointer<CFilter> _buildListLength({
+  required Pointer<CIsarCollection> colPtr,
+  required int? embeddedColId,
+  required int? propertyId,
+  required int lower,
+  required int upper,
+  required Allocator alloc,
+}) {
+  final filterPtrPtr = alloc<Pointer<CFilter>>();
+  nCall(
+    IC.isar_filter_list_length(
+      colPtr,
+      filterPtrPtr,
+      lower,
+      upper,
+      embeddedColId ?? 0,
+      propertyId!,
+    ),
+  );
   return filterPtrPtr.value;
 }

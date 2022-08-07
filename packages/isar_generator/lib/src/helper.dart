@@ -1,18 +1,16 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 import 'package:source_gen/source_gen.dart';
 
 const TypeChecker _collectionChecker = TypeChecker.fromRuntime(Collection);
+const TypeChecker _embeddedChecker = TypeChecker.fromRuntime(Embedded);
 const TypeChecker _ignoreChecker = TypeChecker.fromRuntime(Ignore);
 const TypeChecker _nameChecker = TypeChecker.fromRuntime(Name);
 const TypeChecker _indexChecker = TypeChecker.fromRuntime(Index);
 const TypeChecker _backlinkChecker = TypeChecker.fromRuntime(Backlink);
-const TypeChecker _typeConverterChecker =
-    TypeChecker.fromRuntime(TypeConverter);
 
 extension ClassElementX on ClassElement {
   bool get hasZeroArgsConstructor {
@@ -26,7 +24,7 @@ extension ClassElementX on ClassElement {
   List<PropertyInducingElement> get allAccessors {
     return [
       ...accessors.mapNotNull((e) => e.variable),
-      if (collectionAnnotation!.inheritance)
+      if (collectionAnnotation?.inheritance ?? embeddedAnnotation!.inheritance)
         for (InterfaceType supertype in allSupertypes) ...[
           if (!supertype.isDartCoreObject)
             ...supertype.accessors.mapNotNull((e) => e.variable)
@@ -41,46 +39,16 @@ extension ClassElementX on ClassElement {
         .distinctBy((e) => e.name)
         .toList();
   }
+
+  List<String> get enumConsts {
+    return fields.where((e) => e.isEnumConstant).map((e) => e.name).toList();
+  }
 }
 
 extension PropertyElementX on PropertyInducingElement {
-  ClassElement? get typeConverter {
-    Element? element = this;
-    while (element != null) {
-      final elementAnns =
-          _typeConverterChecker.annotationsOf(element.nonSynthetic);
-      for (final ann in elementAnns) {
-        final reviver = ConstantReader(ann).revive();
-        if (reviver.namedArguments.isNotEmpty ||
-            reviver.positionalArguments.isNotEmpty) {
-          err(
-            'TypeConverters with constructor arguments are not supported.',
-            ann.type!.element,
-          );
-        }
+  bool get isLink => type.element!.name == 'IsarLink';
 
-        // ignore: cast_nullable_to_non_nullable
-        final cls = ann.type!.element as ClassElement;
-        final adapterDartType = cls.supertype!.typeArguments[0];
-        final checker = TypeChecker.fromStatic(adapterDartType);
-        final nullabilityMatches =
-            adapterDartType.nullabilitySuffix != NullabilitySuffix.none ||
-                type.nullabilitySuffix == NullabilitySuffix.none;
-        if (checker.isAssignableFromType(type)) {
-          if (nullabilityMatches) {
-            return cls;
-          } else {
-            err(
-              'The TypeConverter has incompatible nullability.',
-              ann.type!.element,
-            );
-          }
-        }
-      }
-      element = element.enclosingElement;
-    }
-    return null;
-  }
+  bool get isLinks => type.element!.name == 'IsarLinks';
 
   Backlink? get backlinkAnnotation {
     final ann = _backlinkChecker.firstAnnotationOfExact(nonSynthetic);
@@ -128,6 +96,29 @@ extension PropertyElementX on PropertyInducingElement {
       );
     }).toList();
   }
+
+  bool get shouldIgnore {
+    if (!isPublic || isStatic) return true;
+    if (_ignoreChecker.hasAnnotationOf(nonSynthetic)) return true;
+
+    final jsonKey = nonSynthetic.metadata
+        .firstOrNullWhere(
+          (e) => e.computeConstantValue()?.type?.element?.name == 'JsonKey',
+        )
+        ?.computeConstantValue();
+
+    if (jsonKey != null) {
+      if (jsonKey.getField('ignore')?.toBoolValue() == true) {
+        return true;
+      }
+    }
+
+    if (name == 'copyWith') {
+      return true;
+    }
+
+    return false;
+  }
 }
 
 extension ElementX on Element {
@@ -166,6 +157,16 @@ extension ElementX on Element {
     }
 
     return accessor;
+  }
+
+  Embedded? get embeddedAnnotation {
+    final ann = _embeddedChecker.firstAnnotationOfExact(nonSynthetic);
+    if (ann == null) {
+      return null;
+    }
+    return Embedded(
+      inheritance: ann.getField('inheritance')!.toBoolValue()!,
+    );
   }
 }
 

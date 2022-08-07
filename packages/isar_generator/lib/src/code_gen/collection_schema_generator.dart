@@ -1,151 +1,113 @@
-import 'dart:convert';
-
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 
-import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
-String generateCollectionSchema(ObjectInfo object) {
-  final schema = _generateSchema(object);
+String generateSchema(ObjectInfo object) {
+  var code = 'const ${object.dartName.capitalize()}Schema = ';
+  if (!object.isEmbedded) {
+    code += 'CollectionSchema(';
+  } else {
+    code += 'Schema(';
+  }
 
-  final propertyIds = object.objectProperties
-      .mapIndexed((i, p) => "r'${p.isarName}': $i")
-      .join(',');
-  final listProperties = object.objectProperties
-      .filter((p) => p.isarType.isList)
-      .map((p) => "r'${p.isarName}'")
-      .join(',');
-  final indexIds =
-      object.indexes.mapIndexed((i, index) => "r'${index.name}': $i").join(',');
-  final indexValueTypes = object.indexes.map((i) {
-    final types = i.properties.map((e) => e.indexValueTypeEnum).join(',');
-    return "r'${i.name}': [$types,]";
-  }).join(',');
-  final linkIds =
-      object.links.mapIndexed((i, link) => "r'${link.isarName}': $i").join(',');
-  final backlinkLinkNames = object.links
-      .where((e) => e.backlink)
-      .map((link) => "r'${link.isarName}': r'${link.targetIsarName}'")
+  final properties = object.objectProperties
+      .mapIndexed(
+        (i, e) => "r'${e.isarName}': ${_generatePropertySchema(i, e)}",
+      )
       .join(',');
 
-  return '''
-    const ${object.dartName.capitalize()}Schema = CollectionSchema(
-      name: r'${object.isarName}',
-      schema: r'$schema',
-      
+  code += '''
+    name: r'${object.isarName}',
+    id: ${object.id},
+    properties: {$properties},
+
+    estimateSize: ${object.estimateSize},
+    serializeNative: ${object.serializeNativeName},
+    deserializeNative: ${object.deserializeNativeName},
+    deserializePropNative: ${object.deserializePropNativeName},
+
+    serializeWeb: ${object.serializeWebName},
+    deserializeWeb: ${object.deserializeWebName},
+    deserializePropWeb: ${object.deserializePropWebName},''';
+
+  if (!object.isEmbedded) {
+    final indexes = object.indexes
+        .map((e) => "r'${e.name}': ${_generateIndexSchema(e)}")
+        .join(',');
+    final links = object.links
+        .map((e) => "r'${e.isarName}': ${_generateLinkSchema(object, e)}")
+        .join(',');
+    final embeddedSchemas = object.properties
+        .where((e) =>
+            e.isarType == IsarType.object || e.isarType == IsarType.objectList)
+        .distinctBy((e) => e.targetSchema)
+        .map((e) => "r'${e.typeClassName}': ${e.targetSchema}")
+        .join(',');
+
+    code += '''
       idName: r'${object.idProperty.isarName}',
-      propertyIds: {$propertyIds},
-      listProperties: {$listProperties},
-      indexIds: {$indexIds},
-      indexValueTypes: {$indexValueTypes},
-      linkIds: {$linkIds},
-      backlinkLinkNames: {$backlinkLinkNames},
+      indexes: {$indexes},
+      links: {$links},
+      embeddedSchemas: {$embeddedSchemas},
 
       getId: ${object.getIdName},
-      ${object.idProperty.assignable ? 'setId: ${object.setIdName},' : ''}
       getLinks: ${object.getLinksName},
-      attachLinks: ${object.attachLinksName},
-
-      serializeNative: ${object.serializeNativeName},
-      deserializeNative: ${object.deserializeNativeName},
-      deserializePropNative: ${object.deserializePropNativeName},
-
-      serializeWeb: ${object.serializeWebName},
-      deserializeWeb: ${object.deserializeWebName},
-      deserializePropWeb: ${object.deserializePropWebName},
-
+      attach: ${object.attachName},
       version: ${CollectionSchema.generatorVersion},
-    );
-    
-    ${_generateGetId(object)}
-    ${_generateSetId(object)}
-    ${_generateGetLinks(object)}
     ''';
-}
-
-String _generateSchema(ObjectInfo object) {
-  final json = <String, Object>{
-    'name': object.isarName,
-    'idName': object.idProperty.isarName,
-    'properties': [
-      for (var property in object.objectProperties)
-        {
-          'name': property.isarName,
-          'type': property.isarType.name,
-        },
-    ],
-    'indexes': [
-      for (var index in object.indexes)
-        {
-          'name': index.name,
-          'unique': index.unique,
-          'replace': index.replace,
-          'properties': [
-            for (var indexProperty in index.properties)
-              {
-                'name': indexProperty.property.isarName,
-                'type': indexProperty.type.name,
-                'caseSensitive': indexProperty.caseSensitive,
-              }
-          ]
-        }
-    ],
-    'links': [
-      for (var link in object.links) ...[
-        if (!link.backlink)
-          {
-            'name': link.isarName,
-            'target': link.targetCollectionIsarName,
-            'single': !link.links, // property is only used by the inspector
-          }
-      ]
-    ]
-  };
-  return jsonEncode(json);
-}
-
-String _generateGetId(ObjectInfo object) {
-  return '''
-    int? ${object.getIdName}(${object.dartName} object) {
-      if (object.${object.idProperty.dartName} == Isar.autoIncrement) {
-        return null;
-      } else {
-        return object.${object.idProperty.dartName};
-      }
-    }
-  ''';
-}
-
-String _generateSetId(ObjectInfo object) {
-  if (!object.idProperty.assignable) {
-    return '';
   }
 
-  return '''
-    void ${object.setIdName}(${object.dartName} object, int id) {
-      object.${object.idProperty.dartName} = id;
-    }
-  ''';
+  return '$code);';
 }
 
-String _generateGetLinks(ObjectInfo object) {
-  return '''
-    List<IsarLinkBase<dynamic>> ${object.getLinksName}(${object.dartName} object) {
-      return [${object.links.map((e) => 'object.${e.dartName}').join(',')}];
-    }
-  ''';
-}
-
-extension on IndexType {
-  String get name {
-    switch (this) {
-      case IndexType.value:
-        return 'Value';
-      case IndexType.hash:
-        return 'Hash';
-      case IndexType.hashElements:
-        return 'HashElements';
-    }
+String _generatePropertySchema(int index, ObjectProperty property) {
+  var target = '';
+  if (property.isarType == IsarType.object ||
+      property.isarType == IsarType.objectList) {
+    target = "target: r'${property.scalarDartType}',";
   }
+  return '''
+  PropertySchema(
+    id: $index,
+    name: r'${property.isarName}',
+    type: IsarType.${property.isarType.name},
+    $target
+  )
+  ''';
+}
+
+String _generateIndexSchema(ObjectIndex index) {
+  final properties = index.properties.map((e) {
+    return '''
+      IndexPropertySchema(
+        name: r'${e.property.isarName}',
+        type: IndexType.${e.type.name},
+        caseSensitive: ${e.caseSensitive},
+      )''';
+  }).join(',');
+
+  return '''
+    IndexSchema(
+      id: ${index.id},
+      name: r'${index.name}',
+      unique: ${index.unique},
+      replace: ${index.replace},
+      properties: [$properties],
+    )''';
+}
+
+String _generateLinkSchema(ObjectInfo object, ObjectLink link) {
+  var linkName = '';
+  if (link.isBacklink) {
+    linkName = "linkName: r'${link.targetLinkIsarName}',";
+  }
+  return '''
+    LinkSchema(
+      id: ${link.id(object.isarName)},
+      name: r'${link.isarName}',
+      target: r'${link.targetCollectionIsarName}',
+      isSingle: ${link.isSingle},
+      $linkName
+    )''';
 }

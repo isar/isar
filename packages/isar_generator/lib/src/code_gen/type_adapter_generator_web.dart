@@ -1,36 +1,35 @@
+import 'package:isar/isar.dart';
 import 'package:isar_generator/src/code_gen/type_adapter_generator_common.dart';
-import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 String generateSerializeWeb(ObjectInfo object) {
   var code = '''
   Object ${object.serializeWebName}(IsarCollection<${object.dartName}> collection, ${object.dartName} object) {
-    final jsObj = IsarNative.newJsObject();''';
+    /*final jsObj = IsarNative.newJsObject();*/''';
 
-  for (final property in object.properties) {
+  /*for (final property in object.properties) {
     String write(String value) =>
         "IsarNative.jsObjectSet(jsObj, r'${property.isarName}', $value);";
 
-    var propertyValue = 'object.${property.dartName}';
-    if (property.converter != null) {
-      propertyValue = property.toIsar(propertyValue, object);
-    }
+    final value = 'object.${property.dartName}';
 
     final nOp = property.nullable ? '?' : '';
     final nElOp = property.elementNullable ? '?' : '';
     if (property.isarType == IsarType.dateTime) {
-      code += write('$propertyValue$nOp.toUtc().millisecondsSinceEpoch');
+      code += write('$value$nOp.toUtc().millisecondsSinceEpoch');
     } else if (property.isarType == IsarType.dateTimeList) {
       code += write(
-        '$propertyValue$nOp.map((e) => e$nElOp.toUtc() '
+        '$value$nOp.map((e) => e$nElOp.toUtc() '
         '.millisecondsSinceEpoch).toList()',
       );
     } else {
-      code += write(propertyValue);
+      code += write(value);
     }
-  }
+  }*/
 
-  code += 'return jsObj;';
+  //code += 'return jsObj;';
+
+  code += 'throw UnimplementedError();';
 
   return '$code}';
 }
@@ -40,16 +39,17 @@ String generateDeserializeWeb(ObjectInfo object) {
 
   var code = '''
   ${object.dartName} ${object.deserializeWebName}(IsarCollection<${object.dartName}> collection, Object jsObj) {
-    ${deserializeMethodBody(object, deserProp)}''';
+    /*${deserializeMethodBody(object, deserProp)}*/''';
 
-  if (object.links.isNotEmpty) {
+  /*if (object.links.isNotEmpty) {
     final deserId = deserProp(object.idProperty);
-    code += '${object.attachLinksName}(collection, $deserId, object);';
-  }
+    code += '${object.attachName}(collection, $deserId, object);';
+  }*/
 
   // ignore: leading_newlines_in_multiline_strings
   return '''$code
-    return object;
+    //return object;
+    throw UnimplementedError();
   }''';
 }
 
@@ -58,10 +58,10 @@ String generateDeserializePropWeb(ObjectInfo object) {
   P ${object.deserializePropWebName}<P>(Object jsObj, String propertyName) {
     switch (propertyName) {''';
 
-  for (final property in object.properties) {
+  /*for (final property in object.properties) {
     final deser = _deserializeProperty(object, property);
     code += "case r'${property.isarName}': return ($deser) as P;";
-  }
+  }*/
 
   return '''
       $code
@@ -72,28 +72,36 @@ String generateDeserializePropWeb(ObjectInfo object) {
     ''';
 }
 
-String _defaultVal(IsarType type) {
-  if (type.isList && type != IsarType.byteList) {
-    type = type.scalarType;
+String _defaultVal(ObjectProperty property) {
+  if (property.isEnum) {
+    return property.defaultEnum;
   }
-  switch (type) {
+  switch (property.isarType) {
+    case IsarType.byte:
+    case IsarType.byteList:
+      return '0';
     case IsarType.bool:
+    case IsarType.boolList:
       return 'false';
     case IsarType.int:
+    case IsarType.intList:
     case IsarType.long:
+    case IsarType.longList:
       return '(double.negativeInfinity as int)';
     case IsarType.float:
+    case IsarType.floatList:
     case IsarType.double:
+    case IsarType.doubleList:
       return 'double.negativeInfinity';
     case IsarType.dateTime:
+    case IsarType.dateTimeList:
       return 'DateTime.fromMillisecondsSinceEpoch(0)';
     case IsarType.string:
+    case IsarType.stringList:
       return "''";
-    case IsarType.byteList:
-      return 'Uint8List(0)';
-    // ignore: no_default_cases
-    default:
-      throw UnimplementedError();
+    case IsarType.object:
+    case IsarType.objectList:
+      return '${property.typeClassName}()';
   }
 }
 
@@ -105,22 +113,21 @@ String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
     if (nullable) {
       return '$e != null ? $c : null';
     } else {
-      return '$e != null ? $c : ${_defaultVal(property.isarType)}';
+      return '$e != null ? $c : ${_defaultVal(property)}';
     }
   }
 
   String deser;
-  if (property.isarType.isList && property.isarType != IsarType.byteList) {
+  if (property.isarType.isList) {
     final defaultList = property.nullable ? '' : '?? []';
     String? convert;
     if (property.isarType == IsarType.dateTimeList) {
       convert = convDate('e', property.elementNullable);
     } else if (!property.elementNullable) {
-      convert = 'e ?? ${_defaultVal(property.isarType)}';
+      convert = 'e ?? ${_defaultVal(property)}';
     }
 
-    final elType =
-        property.isarType.scalarType.dartType(property.elementNullable, false);
+    final elType = property.scalarDartType;
     if (convert != null) {
       deser = '($read as List?)?.map((e) => $convert).toList().cast<$elType>() '
           '$defaultList';
@@ -130,13 +137,11 @@ String _deserializeProperty(ObjectInfo object, ObjectProperty property) {
   } else if (property.isarType == IsarType.dateTime) {
     deser = convDate(read, property.nullable);
   } else {
-    final defaultVal = property.nullable ||
-            property.isarType == IsarType.id ||
-            property.isarType == IsarType.byte
+    final defaultVal = property.nullable || property.isarType == IsarType.byte
         ? ''
-        : '?? ${_defaultVal(property.isarType)}';
+        : '?? ${_defaultVal(property)}';
     deser = '$read $defaultVal';
   }
 
-  return property.fromIsar(deser, object);
+  return deser;
 }

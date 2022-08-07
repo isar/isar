@@ -17,7 +17,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   IsarCollectionImpl<OBJ> get targetCollection =>
       super.targetCollection as IsarCollectionImpl<OBJ>;
 
-  late final int linkIndex = sourceCollection.schema.linkIdOrErr(linkName);
+  late final int linkId = sourceCollection.schema.link(linkName).id;
 
   @override
   late final getId = targetCollection.schema.getId;
@@ -47,7 +47,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
       IC.isar_link_update_all(
         sourceCollection.ptr,
         txn.ptr,
-        linkIndex,
+        linkId,
         containingId,
         idsPtr,
         linkList.length,
@@ -71,7 +71,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
           IC.isar_link_unlink_all(
             sourceCollection.ptr,
             txn.ptr,
-            linkIndex,
+            linkId,
             containingId,
           ),
         );
@@ -88,7 +88,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
           IC.isar_link(
             sourceCollection.ptr,
             txn.ptr,
-            linkIndex,
+            linkId,
             containingId,
             id,
           ),
@@ -100,7 +100,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
           IC.isar_link_unlink(
             sourceCollection.ptr,
             txn.ptr,
-            linkIndex,
+            linkId,
             containingId,
             unlinkId,
           ),

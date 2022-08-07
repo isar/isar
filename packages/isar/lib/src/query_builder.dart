@@ -133,18 +133,68 @@ class QueryBuilderInternal<OBJ> {
   }
 
   /// @nodoc
+  QueryBuilderInternal<OBJ> listLength<E>(
+    String property,
+    int lower,
+    bool includeLower,
+    int upper,
+    bool includeUpper,
+  ) {
+    if (!includeLower) {
+      lower += 1;
+    }
+    if (!includeUpper) {
+      if (upper == 0) {
+        lower = 1;
+      } else {
+        upper -= 1;
+      }
+    }
+    return addFilterCondition(
+      FilterCondition.listLength(
+        property: property,
+        lower: lower,
+        upper: upper,
+      ),
+    );
+  }
+
+  /// @nodoc
   QueryBuilderInternal<OBJ> link<E>(
-    IsarCollection<E> targetCollection,
     FilterQuery<E> q,
     String linkName,
   ) {
-    final internalQb = QueryBuilderInternal(collection: targetCollection);
+    final targetCol = collection.isar.collection<E>();
+    final internalQb = QueryBuilderInternal(collection: targetCol);
     final qb = q(QueryBuilder(internalQb));
     return addFilterCondition(
-      LinkFilter(
-        filter: qb._query.filter,
+      LinkFilter(filter: qb._query.filter, linkName: linkName),
+    );
+  }
+
+  /// @nodoc
+  QueryBuilderInternal<OBJ> linkLength<E>(
+    String linkName,
+    int lower,
+    bool includeLower,
+    int upper,
+    bool includeUpper,
+  ) {
+    if (!includeLower) {
+      lower += 1;
+    }
+    if (!includeUpper) {
+      if (upper == 0) {
+        lower = 1;
+      } else {
+        upper -= 1;
+      }
+    }
+    return addFilterCondition(
+      LinkFilter.length(
+        lower: lower,
+        upper: upper,
         linkName: linkName,
-        targetCollection: targetCollection.name,
       ),
     );
   }

@@ -16,7 +16,7 @@ class IsarImpl extends Isar {
   final List<Future<void>> _activeAsyncTxns = [];
 
   @override
-  final String? path = null;
+  final String? directory = null;
 
   void requireNotInTxn() {
     if (Zone.current[_zoneTxn] != null) {
@@ -114,6 +114,9 @@ class IsarImpl extends Isar {
     bool includeLinks = false,
   }) =>
       unsupportedOnWeb();
+
+  @override
+  Future<void> copyToFile(String targetPath) => unsupportedOnWeb();
 
   @override
   Future<bool> close({bool deleteFromDisk = false}) async {

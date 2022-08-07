@@ -8,12 +8,11 @@ abstract class IsarCollection<OBJ> {
   /// The corresponding Isar instance.
   Isar get isar;
 
-  /// The name of the collection.
-  String get name;
+  /// Get the schema of the collection.
+  CollectionSchema<OBJ> get schema;
 
-  /// @nodoc
-  @protected
-  String get idName;
+  /// The name of the collection.
+  String get name => schema.name;
 
   /// Get a single object by its [id] or `null` if the object does not exist.
   Future<OBJ?> get(int id) {
@@ -227,4 +226,28 @@ abstract class IsarCollection<OBJ> {
 
   /// Watch an object with [id] for changes.
   Stream<void> watchObjectLazy(int id);
+
+  /// Verifies the integrity of the collection and its indexes.
+  ///
+  /// Throws an exception if the collection does not contain exactly the
+  /// provided [objects].
+  ///
+  /// Do not use this method in production apps.
+  @visibleForTesting
+  @experimental
+  Future<void> verify(List<OBJ> objects);
+
+  /// Verifies the integrity of a link.
+  ///
+  /// Throws an exception if not exactly [sourceIds] as linked to the
+  /// [targetIds].
+  ///
+  /// Do not use this method in production apps.
+  @visibleForTesting
+  @experimental
+  Future<void> verifyLink(
+    String linkName,
+    List<int> sourceIds,
+    List<int> targetIds,
+  );
 }

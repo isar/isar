@@ -20,7 +20,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   late final int? Function(OBJ) getId = targetCollection.schema.getId;
 
   late final String? backlinkLinkName =
-      sourceCollection.schema.backlinkLinkNames[linkName];
+      sourceCollection.schema.link(linkName).linkName;
 
   late final IsarLinkJs jsLink = backlinkLinkName != null
       ? targetCollection.native.getLink(backlinkLinkName!)

@@ -5,10 +5,10 @@ import 'dart:ffi';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 
 import 'package:isar/src/native/bindings.dart';
+import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_collection_impl.dart';
 import 'package:isar/src/native/isar_core.dart';
 import 'package:isar/src/native/isar_impl.dart';
@@ -146,13 +146,14 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
     return col.isar.getTxn(false, (Txn txn) async {
       final bytesPtrPtr = txn.alloc<Pointer<Uint8>>();
       final lengthPtr = txn.alloc<Uint32>();
-      final idNamePtr = col.schema.idName.toNativeUtf8(allocator: txn.alloc);
+      final idNamePtr = col.schema.idName.toCString(txn.alloc);
+
       nCall(
         IC.isar_q_export_json(
           queryPtr,
           col.ptr,
           txn.ptr,
-          idNamePtr.cast(),
+          idNamePtr,
           bytesPtrPtr,
           lengthPtr,
         ),
@@ -173,7 +174,7 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
     return col.isar.getTxnSync(false, (SyncTxn txn) {
       final bytesPtrPtr = txn.alloc<Pointer<Uint8>>();
       final lengthPtr = txn.alloc<Uint32>();
-      final idNamePtr = col.schema.idName.toNativeUtf8(allocator: txn.alloc);
+      final idNamePtr = col.schema.idName.toCString(txn.alloc);
 
       try {
         nCall(
@@ -181,7 +182,7 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
             queryPtr,
             col.ptr,
             txn.ptr,
-            idNamePtr.cast(),
+            idNamePtr,
             bytesPtrPtr,
             lengthPtr,
           ),

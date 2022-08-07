@@ -97,7 +97,7 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('Query List<String> sensitive index', () async {
       final result1 = await isar.hashElementsIndexesModels

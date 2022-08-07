@@ -183,7 +183,7 @@ void main() {
       );
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('Bools query', () async {
       await qEqualSet(
@@ -678,7 +678,7 @@ void main() {
       );
     });
 
-    tearDown(() => isar.close());
+    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('Bools query', () async {
       await qEqualSet(
