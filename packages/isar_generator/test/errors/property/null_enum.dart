@@ -8,3 +8,10 @@ class Model {
 
   late byte? prop;
 }
+
+enum MyEnum with IsarEnum<String?> {
+  optionA;
+
+  @override
+  String? get isarValue => null;
+}

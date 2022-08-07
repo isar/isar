@@ -83,7 +83,7 @@ class IsarAnalyzer {
       (it) => it.indexAnnotations.isNotEmpty,
     );
     if (hasIndex) {
-      err('Embedded objects must noy have indexes.', modelClass);
+      err('Embedded objects must not have indexes.', modelClass);
     }
 
     final hasIdProperty = properties.any((it) => it.isId);
@@ -239,16 +239,12 @@ class IsarAnalyzer {
     }
 
     final type = property.type as ParameterizedType;
-    if (type.typeArguments.length != 1) {
-      err('Illegal type arguments for link.', property);
-    }
     final linkType = type.typeArguments[0];
     if (linkType.nullabilitySuffix != NullabilitySuffix.none) {
       err('Links type must not be nullable.', property);
     }
 
     final targetCol = linkType.element! as ClassElement;
-
     if (targetCol.collectionAnnotation == null) {
       err('Link target is not annotated with @Collection()');
     }
@@ -361,9 +357,7 @@ class IsarAnalyzer {
           properties.length > 1) {
         err('Composite indexes do not support non-hashed lists.', element);
       }
-      if ((property.isarType == IsarType.float ||
-              property.isarType == IsarType.floatList) &&
-          i != properties.lastIndex) {
+      if (property.isarType.containsFloat && i != properties.lastIndex) {
         err(
           'Only the last property of a composite index may be a '
           'double value.',
@@ -382,8 +376,7 @@ class IsarAnalyzer {
       if (property.type != IndexType.value) {
         if (!property.isarType.isList && property.isarType != IsarType.string) {
           err('Only Strings and Lists may be hashed.', element);
-        } else if (property.isarType == IsarType.float ||
-            property.isarType == IsarType.floatList) {
+        } else if (property.isarType.containsFloat) {
           err('List<double> may must not be hashed.', element);
         }
       }

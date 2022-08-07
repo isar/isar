@@ -109,3 +109,11 @@ extension DartTypeX on DartType {
     return null;
   }
 }
+
+extension IsarTypeX on IsarType {
+  bool get containsFloat =>
+      this == IsarType.float ||
+      this == IsarType.floatList ||
+      this == IsarType.double ||
+      this == IsarType.doubleList;
+}

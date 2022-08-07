@@ -1,6 +1,7 @@
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_generator/src/code_gen/query_filter_length.dart';
+import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 class FilterGenerator {
@@ -17,10 +18,7 @@ class FilterGenerator {
         code += generateIsNull(property);
       }
 
-      if (property.isarType != IsarType.float &&
-          property.isarType != IsarType.floatList &&
-          property.isarType != IsarType.double &&
-          property.isarType != IsarType.doubleList &&
+      if (!property.isarType.containsFloat &&
           property.isarType != IsarType.object &&
           property.isarType != IsarType.objectList) {
         code += generateEqualTo(property);
@@ -91,15 +89,13 @@ class FilterGenerator {
   }
 
   String generateGreaterThan(ObjectProperty p) {
-    final isFloat =
-        p.isarType == IsarType.float || p.isarType == IsarType.floatList;
-    final include = !isFloat ? 'bool include = false,' : '';
+    final include = !p.isarType.containsFloat ? 'bool include = false,' : '';
     final optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}GreaterThan(${p.nScalarDartType} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.greaterThan(
-          ${!isFloat ? 'include: include,' : ''}
+          ${!p.isarType.containsFloat ? 'include: include,' : ''}
           property: r'${p.isarName}',
           value: value,
           ${caseSensitiveValue(p)}
@@ -109,15 +105,13 @@ class FilterGenerator {
   }
 
   String generateLessThan(ObjectProperty p) {
-    final isFloat =
-        p.isarType == IsarType.float || p.isarType == IsarType.floatList;
-    final include = !isFloat ? 'bool include = false,' : '';
+    final include = !p.isarType.containsFloat ? 'bool include = false,' : '';
     final optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}LessThan(${p.nScalarDartType} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.lessThan(
-          ${!isFloat ? 'include: include,' : ''}
+          ${!p.isarType.containsFloat ? 'include: include,' : ''}
           property: r'${p.isarName}',
           value: value,
           ${caseSensitiveValue(p)}
@@ -127,10 +121,9 @@ class FilterGenerator {
   }
 
   String generateBetween(ObjectProperty p) {
-    final isFloat =
-        p.isarType == IsarType.float || p.isarType == IsarType.floatList;
-    final include =
-        !isFloat ? 'bool includeLower = true, bool includeUpper = true,' : '';
+    final include = !p.isarType.containsFloat
+        ? 'bool includeLower = true, bool includeUpper = true,'
+        : '';
     final optional = '${caseSensitiveProperty(p)} $include';
     return '''
     ${mPrefix(p)}Between(${p.nScalarDartType} lower, ${p.nScalarDartType} upper ${optional.isNotBlank ? ', {$optional}' : ''}) {
@@ -138,9 +131,9 @@ class FilterGenerator {
         return query.addFilterCondition(FilterCondition.between(
           property: r'${p.isarName}',
           lower: lower,
-          includeLower: ${!isFloat ? 'includeLower' : 'false'},
+          includeLower: ${!p.isarType.containsFloat ? 'includeLower' : 'false'},
           upper: upper,
-          includeUpper: ${!isFloat ? 'includeUpper' : 'false'},
+          includeUpper: ${!p.isarType.containsFloat ? 'includeUpper' : 'false'},
           ${caseSensitiveValue(p)}
         ));
       });

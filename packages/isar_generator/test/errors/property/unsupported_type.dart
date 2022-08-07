@@ -1,4 +1,4 @@
-// bytes must not be nullable
+// unsupported type
 
 import 'package:isar/isar.dart';
 
@@ -6,5 +6,9 @@ import 'package:isar/isar.dart';
 class Model {
   Id? id;
 
-  late List<byte?> prop;
+  late MyEnum? prop;
+}
+
+enum MyEnum {
+  a;
 }
