@@ -613,11 +613,38 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
   @override
   Future<void> verify(List<OBJ> objects) async {
+    await isar.verify();
     return isar.getTxn(false, (txn) async {
       final cObjSetPtr = txn.allocCObjectSet(objects.length);
       serializeObjects(txn, cObjSetPtr.ref.objects, objects);
 
       IC.isar_verify(ptr, txn.ptr, cObjSetPtr);
+      await txn.wait();
+    });
+  }
+
+  @override
+  Future<void> verifyLink(
+    String linkName,
+    List<int> sourceIds,
+    List<int> targetIds,
+  ) async {
+    final link = schema.link(linkName);
+
+    return isar.getTxn(false, (txn) async {
+      final idsPtr = txn.alloc<Int64>(sourceIds.length + targetIds.length);
+      for (var i = 0; i < sourceIds.length; i++) {
+        idsPtr[i * 2] = sourceIds[i];
+        idsPtr[i * 2 + 1] = targetIds[i];
+      }
+
+      IC.isar_link_verify(
+        ptr,
+        txn.ptr,
+        link.id,
+        idsPtr,
+        sourceIds.length + targetIds.length,
+      );
       await txn.wait();
     });
   }

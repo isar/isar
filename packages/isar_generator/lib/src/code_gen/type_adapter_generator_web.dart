@@ -5,9 +5,9 @@ import 'package:isar_generator/src/object_info.dart';
 String generateSerializeWeb(ObjectInfo object) {
   var code = '''
   Object ${object.serializeWebName}(IsarCollection<${object.dartName}> collection, ${object.dartName} object) {
-    final jsObj = IsarNative.newJsObject();''';
+    /*final jsObj = IsarNative.newJsObject();*/''';
 
-  for (final property in object.properties) {
+  /*for (final property in object.properties) {
     String write(String value) =>
         "IsarNative.jsObjectSet(jsObj, r'${property.isarName}', $value);";
 
@@ -25,9 +25,11 @@ String generateSerializeWeb(ObjectInfo object) {
     } else {
       code += write(value);
     }
-  }
+  }*/
 
-  code += 'return jsObj;';
+  //code += 'return jsObj;';
+
+  code += 'throw UnimplementedError();';
 
   return '$code}';
 }
@@ -37,16 +39,17 @@ String generateDeserializeWeb(ObjectInfo object) {
 
   var code = '''
   ${object.dartName} ${object.deserializeWebName}(IsarCollection<${object.dartName}> collection, Object jsObj) {
-    ${deserializeMethodBody(object, deserProp)}''';
+    /*${deserializeMethodBody(object, deserProp)}*/''';
 
-  if (object.links.isNotEmpty) {
+  /*if (object.links.isNotEmpty) {
     final deserId = deserProp(object.idProperty);
     code += '${object.attachName}(collection, $deserId, object);';
-  }
+  }*/
 
   // ignore: leading_newlines_in_multiline_strings
   return '''$code
-    return object;
+    //return object;
+    throw UnimplementedError();
   }''';
 }
 
@@ -55,10 +58,10 @@ String generateDeserializePropWeb(ObjectInfo object) {
   P ${object.deserializePropWebName}<P>(Object jsObj, String propertyName) {
     switch (propertyName) {''';
 
-  for (final property in object.properties) {
+  /*for (final property in object.properties) {
     final deser = _deserializeProperty(object, property);
     code += "case r'${property.isarName}': return ($deser) as P;";
-  }
+  }*/
 
   return '''
       $code

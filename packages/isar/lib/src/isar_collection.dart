@@ -236,4 +236,18 @@ abstract class IsarCollection<OBJ> {
   @visibleForTesting
   @experimental
   Future<void> verify(List<OBJ> objects);
+
+  /// Verifies the integrity of a link.
+  ///
+  /// Throws an exception if not exactly [sourceIds] as linked to the
+  /// [targetIds].
+  ///
+  /// Do not use this method in production apps.
+  @visibleForTesting
+  @experimental
+  Future<void> verifyLink(
+    String linkName,
+    List<int> sourceIds,
+    List<int> targetIds,
+  );
 }
