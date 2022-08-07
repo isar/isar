@@ -156,7 +156,8 @@ abstract class _IsarConnect {
     }
 
     final cQuery = ConnectQuery.fromJson(params);
-    final schema = jsonDecode(Isar.schema!) as List<dynamic>;
+    final schema =
+        <dynamic>[]; //TODO fix jsonDecode(Isar.schema!) as List<dynamic>;
 
     //ignore: avoid_dynamic_calls
     final links = schema.firstWhere(
@@ -192,7 +193,7 @@ abstract class _IsarConnect {
                 linkCollection: source.name,
                 //ignore: avoid_dynamic_calls
                 linkName: link['name'] as String,
-                id: results[index][source.idName] as int,
+                id: results[index][source.schema.idName] as int,
               ),
             ],
           );

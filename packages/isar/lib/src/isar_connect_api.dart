@@ -102,7 +102,6 @@ class ConnectQuery {
       return LinkFilter(
         filter: _filterFromJson(json['filter'] as Map<String, dynamic>)!,
         linkName: json['linkName'] as String,
-        targetCollection: json['targetCollection'] as String,
       );
     } else {
       return FilterCondition(
@@ -135,8 +134,7 @@ class ConnectQuery {
       };
     } else if (filter is LinkFilter) {
       return {
-        'filter': _filterToJson(filter.filter),
-        'targetCollection': filter.targetCollection,
+        'filter': _filterToJson(filter.filter!),
         'linkName': filter.linkName,
       };
     } else {
