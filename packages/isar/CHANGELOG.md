@@ -19,6 +19,7 @@
 
 - Renamed `isar.path` to `isar.directory`
 - Removed support for type converters
+- An exception is now thrown when a sync write txn is started while an async write txn is active. This prevents deadlock.
 
 ## 3.0.0-dev.8
 

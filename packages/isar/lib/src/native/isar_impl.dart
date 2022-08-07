@@ -26,6 +26,7 @@ class IsarImpl extends Isar implements Finalizable {
   final offsets = <Type, List<int>>{};
 
   final List<Future<void>> _activeAsyncTxns = [];
+  var _asyncWriteTxnActive = false;
 
   final Pointer<Pointer<CIsarTxn>> _syncTxnPtrPtr = malloc<Pointer<CIsarTxn>>();
   SyncTxn? _currentTxnSync;
@@ -80,34 +81,39 @@ class IsarImpl extends Isar implements Finalizable {
       port.sendPort.nativePort,
     );
 
-    Txn txn;
     try {
+      if (write) {
+        _asyncWriteTxnActive = true;
+      }
+
       await portStream.first;
-      txn = Txn._(txnPtrPtr.value, write, portStream);
+      final txn = Txn._(txnPtrPtr.value, write, portStream);
+
+      final zone = Zone.current.fork(
+        zoneValues: {_zoneTxn: txn},
+      );
+
+      T result;
+      try {
+        result = await zone.run(callback);
+        IC.isar_txn_finish(txn.ptr, true);
+        await txn.wait();
+      } catch (e) {
+        IC.isar_txn_finish(txn.ptr, false);
+        rethrow;
+      } finally {
+        txn.free();
+        port.close();
+        completer.complete();
+        _activeAsyncTxns.remove(completer.future);
+      }
+      return result;
     } finally {
       malloc.free(txnPtrPtr);
+      if (write) {
+        _asyncWriteTxnActive = false;
+      }
     }
-
-    final zone = Zone.current.fork(
-      zoneValues: {_zoneTxn: txn},
-    );
-
-    T result;
-    try {
-      result = await zone.run(callback);
-      IC.isar_txn_finish(txn.ptr, true);
-      await txn.wait();
-    } catch (e) {
-      IC.isar_txn_finish(txn.ptr, false);
-      rethrow;
-    } finally {
-      txn.free();
-      port.close();
-      completer.complete();
-      _activeAsyncTxns.remove(completer.future);
-    }
-
-    return result;
   }
 
   @override
@@ -141,6 +147,12 @@ class IsarImpl extends Isar implements Finalizable {
   T _txnSync<T>(bool write, bool silent, T Function() callback) {
     requireOpen();
     requireNotInTxn();
+
+    if (write && _asyncWriteTxnActive) {
+      throw IsarError(
+        'An async write transaction is already in progress in this isolate.',
+      );
+    }
 
     nCall(IC.isar_txn_begin(ptr, _syncTxnPtrPtr, true, write, silent, 0));
     final txn = SyncTxn._(_syncTxnPtrPtr.value, write);
