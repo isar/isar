@@ -34,7 +34,7 @@
 > #### Isar [ee-zahr]:
 >
 > 1. River in Bavaria, Germany.
-> 2. Database that will make your life easier.
+> 2. Crazy fast database that is a joy to use.
 
 ## Features
 
@@ -100,6 +100,7 @@ enum Status with IsarEnum<String> {
   sending,
   sent;
 
+  @override
   String get isarValue => name;
 }
 ```
