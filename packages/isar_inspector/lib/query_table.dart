@@ -238,6 +238,19 @@ class _TableBlockState extends State<TableBlock> {
     bool subLink = false,
   }) {
     return properties.map((property) {
+
+      if ([IsarType.dateTime, IsarType.dateTimeList, IsarType.object, IsarType.objectList].contains(property.type)) {
+        return Node<TreeViewHelper>(
+          key: '$prefixKey${property.name}',
+          label: '',
+          data: PropertyHelper(
+            property: IProperty(name: property.name, type: IsarType.string),
+            value: 'TODO',
+            subLink: false,
+          ),
+        );
+      }
+
       final children = <Node<TreeViewHelper>>[];
       final value = data[property.name];
 
@@ -253,7 +266,7 @@ class _TableBlockState extends State<TableBlock> {
               data: PropertyHelper(
                 property: IProperty(
                   name: property.name,
-                  type: property.type.childType,
+                  type: property.type.scalarType,
                 ),
                 value: list[index],
                 index: index,
@@ -576,7 +589,7 @@ class _TableItemState extends State<TableItem> {
         return AlertDialog(
           content: EditPopup(
             type:
-                property.type.isList ? property.type.childType : property.type,
+                property.type.isList ? property.type.scalarType : property.type,
             value: null,
           ),
         );
@@ -663,9 +676,9 @@ class _TableItemState extends State<TableItem> {
     final property = (widget.data as PropertyHelper).property;
     dynamic result;
 
-    if (property.type == IsarType.Int ||
-        property.type == IsarType.Long ||
-        property.type == IsarType.Byte) {
+    if (property.type == IsarType.int ||
+        property.type == IsarType.long ||
+        property.type == IsarType.byte) {
       result = (await widget.aggregate(property.name, op))?.toInt();
     } else {
       result = await widget.aggregate(property.name, op);
@@ -727,32 +740,32 @@ class _TableItemState extends State<TableItem> {
         color = _boolColor;
       } else {
         switch (prop.type) {
-          case IsarType.Bool:
+          case IsarType.bool:
             value = widget.data.value.toString();
             color = _boolColor;
             break;
 
-          case IsarType.Byte:
-          case IsarType.Int:
-          case IsarType.Float:
-          case IsarType.Long:
-          case IsarType.Double:
+          case IsarType.byte:
+          case IsarType.int:
+          case IsarType.float:
+          case IsarType.long:
+          case IsarType.double:
             value = widget.data.value.toString();
             color = _numberColor;
             break;
 
-          case IsarType.String:
+          case IsarType.string:
             value = '"${widget.data.value.toString().replaceAll('\n', '⤵')}"';
             color = _stringColor;
             break;
 
-          case IsarType.ByteList:
-          case IsarType.IntList:
-          case IsarType.FloatList:
-          case IsarType.LongList:
-          case IsarType.DoubleList:
-          case IsarType.StringList:
-          case IsarType.BoolList:
+          case IsarType.byteList:
+          case IsarType.intList:
+          case IsarType.floatList:
+          case IsarType.longList:
+          case IsarType.doubleList:
+          case IsarType.stringList:
+          case IsarType.boolList:
             value = '${prop.type.name} [';
             value += widget.data.value == null
                 ? 'null]'

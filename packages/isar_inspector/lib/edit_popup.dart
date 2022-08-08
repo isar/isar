@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:isar/isar.dart';
 import 'package:isar_inspector/common.dart';
-import 'package:isar_inspector/schema.dart';
 
 class EditPopup extends StatefulWidget {
   const EditPopup({
@@ -26,7 +26,7 @@ class _EditPopupState extends State<EditPopup> {
 
   @override
   void initState() {
-    if (widget.type == IsarType.Bool) {
+    if (widget.type == IsarType.bool) {
       _boolValue = widget.value == null || widget.value as bool;
     } else {
       _controller.text = widget.value == null ? '' : widget.value.toString();
@@ -35,7 +35,7 @@ class _EditPopupState extends State<EditPopup> {
         extentOffset: _controller.text.length,
       );
 
-      if (widget.type != IsarType.String) {
+      if (widget.type != IsarType.string) {
         _inputFormatter = CustomTextInputFormatter(widget.type);
       }
 
@@ -48,11 +48,11 @@ class _EditPopupState extends State<EditPopup> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.type == IsarType.String ? 500 : 300,
+      width: widget.type == IsarType.string ? 500 : 300,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (widget.type == IsarType.Bool)
+          if (widget.type == IsarType.bool)
             DropdownButtonHideUnderline(
               child: DropdownButton<bool>(
                 value: _boolValue,
@@ -94,9 +94,9 @@ class _EditPopupState extends State<EditPopup> {
                 inputFormatters: [
                   if (_inputFormatter != null) _inputFormatter!
                 ],
-                maxLines: widget.type == IsarType.String ? 3 : 1,
+                maxLines: widget.type == IsarType.string ? 3 : 1,
                 validator: (value) {
-                  if (widget.type == IsarType.Byte) {
+                  if (widget.type == IsarType.byte) {
                     final val = int.parse(value!);
                     if (val < 0 || val > 255) {
                       return 'Byte values must between 0-255';
@@ -126,20 +126,20 @@ class _EditPopupState extends State<EditPopup> {
   void _save() {
     dynamic value;
 
-    if (widget.type == IsarType.Bool) {
+    if (widget.type == IsarType.bool) {
       value = _boolValue;
     } else {
       if (_formKey.currentState!.validate()) {
         //ignore: missing_enum_constant_in_switch
         switch (widget.type) {
-          case IsarType.Float:
-          case IsarType.Double:
+          case IsarType.float:
+          case IsarType.double:
             value = double.tryParse(_controller.text) ?? 0.0;
             break;
 
-          case IsarType.Byte:
-          case IsarType.Int:
-          case IsarType.Long:
+          case IsarType.byte:
+          case IsarType.int:
+          case IsarType.long:
             value = int.tryParse(_controller.text) ?? 0;
             break;
         }

@@ -123,7 +123,6 @@ class QueryBuilderUI extends StatefulWidget {
     return LinkFilter(
       filter: FilterGroup(filters: filters, type: link.operation),
       linkName: link.link.name,
-      targetCollection: link.link.target.name,
     );
   }
 }
@@ -870,20 +869,27 @@ class _ConditionHelper extends QueryBuilderUIHelper {
     }
 
     switch (property.type) {
-      case IsarType.BoolList:
-      case IsarType.Bool:
+      case IsarType.boolList:
+      case IsarType.bool:
         return const [_ConditionType.equalTo, _ConditionType.isNull];
 
-      case IsarType.ByteList:
-      case IsarType.IntList:
-      case IsarType.FloatList:
-      case IsarType.LongList:
-      case IsarType.DoubleList:
-      case IsarType.Int:
-      case IsarType.Float:
-      case IsarType.Long:
-      case IsarType.Byte:
-      case IsarType.Double:
+        //todo
+      case IsarType.object:
+      case IsarType.objectList:
+      case IsarType.dateTime:
+      case IsarType.dateTimeList:
+        return const [_ConditionType.equalTo, _ConditionType.isNull];
+
+      case IsarType.byteList:
+      case IsarType.intList:
+      case IsarType.floatList:
+      case IsarType.longList:
+      case IsarType.doubleList:
+      case IsarType.int:
+      case IsarType.float:
+      case IsarType.long:
+      case IsarType.byte:
+      case IsarType.double:
         return const [
           _ConditionType.equalTo,
           _ConditionType.greaterThan,
@@ -893,8 +899,8 @@ class _ConditionHelper extends QueryBuilderUIHelper {
           _ConditionType.isNull
         ];
 
-      case IsarType.String:
-      case IsarType.StringList:
+      case IsarType.string:
+      case IsarType.stringList:
         return const [
           _ConditionType.equalTo,
           _ConditionType.contains,
@@ -908,52 +914,59 @@ class _ConditionHelper extends QueryBuilderUIHelper {
 
   CustomTextInputFormatter? get textFormatter {
     switch (property.type) {
-      case IsarType.String:
-      case IsarType.StringList:
-      case IsarType.BoolList:
-      case IsarType.Bool:
+      case IsarType.string:
+      case IsarType.stringList:
+      case IsarType.boolList:
+      case IsarType.bool:
         return null;
 
-      case IsarType.IntList:
-      case IsarType.LongList:
-      case IsarType.Int:
-      case IsarType.Long:
-        return CustomTextInputFormatter(IsarType.Int);
+      case IsarType.intList:
+      case IsarType.longList:
+      case IsarType.int:
+      case IsarType.long:
+        return CustomTextInputFormatter(IsarType.int);
 
-      case IsarType.ByteList:
-      case IsarType.Byte:
-        return CustomTextInputFormatter(IsarType.Byte);
+      case IsarType.byteList:
+      case IsarType.byte:
+        return CustomTextInputFormatter(IsarType.byte);
 
-      case IsarType.FloatList:
-      case IsarType.DoubleList:
-      case IsarType.Float:
-      case IsarType.Double:
-        return CustomTextInputFormatter(IsarType.Double);
+      case IsarType.floatList:
+      case IsarType.doubleList:
+      case IsarType.float:
+      case IsarType.double:
+        return CustomTextInputFormatter(IsarType.double);
     }
   }
 
   GenericType get generic {
     switch (property.type) {
-      case IsarType.Bool:
-      case IsarType.BoolList:
-        return GenericType.bool;
-
-      case IsarType.Long:
-      case IsarType.Int:
-      case IsarType.Byte:
-      case IsarType.ByteList:
-      case IsarType.IntList:
-      case IsarType.LongList:
+      //todo
+      case IsarType.object:
+      case IsarType.dateTime:
+      case IsarType.objectList:
+      case IsarType.dateTimeList:
         return GenericType.int;
 
-      case IsarType.Double:
-      case IsarType.FloatList:
-      case IsarType.Float:
-      case IsarType.DoubleList:
+      case IsarType.bool:
+      case IsarType.boolList:
+        return GenericType.bool;
+
+      case IsarType.long:
+      case IsarType.int:
+      case IsarType.byte:
+      case IsarType.byteList:
+      case IsarType.intList:
+      case IsarType.longList:
+        return GenericType.int;
+
+      case IsarType.double:
+      case IsarType.floatList:
+      case IsarType.float:
+      case IsarType.doubleList:
         return GenericType.double;
 
-      case IsarType.StringList:
-      case IsarType.String:
+      case IsarType.stringList:
+      case IsarType.string:
         return GenericType.string;
     }
   }

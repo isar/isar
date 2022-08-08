@@ -156,14 +156,9 @@ abstract class _IsarConnect {
     }
 
     final cQuery = ConnectQuery.fromJson(params);
-    final schema =
-        <dynamic>[]; //TODO fix jsonDecode(Isar.schema!) as List<dynamic>;
 
-    //ignore: avoid_dynamic_calls
-    final links = schema.firstWhere(
-      //ignore: avoid_dynamic_calls
-      (e) => e['name'] as String == cQuery.collection,
-    )['links'] as List<dynamic>;
+    final links =
+        _schemas!.firstWhere((e) => e.name == cQuery.collection).links;
 
     final query = _getQuery(cQuery);
     params.remove('limit');
@@ -179,10 +174,9 @@ abstract class _IsarConnect {
       final source = Isar.getInstance(cQuery.instance)!
           .getCollectionByNameInternal(cQuery.collection)!;
       for (var index = 0; index < results.length; index++) {
-        for (final link in links) {
+        for (final link in links.values) {
           final target = Isar.getInstance(cQuery.instance)!
-              //ignore: avoid_dynamic_calls
-              .getCollectionByNameInternal(link['target'] as String)!;
+              .getCollectionByNameInternal(link.target)!;
 
           _querySubscription.add(target.watchLazy().listen(listener));
 
@@ -191,8 +185,7 @@ abstract class _IsarConnect {
             whereClauses: [
               LinkWhereClause(
                 linkCollection: source.name,
-                //ignore: avoid_dynamic_calls
-                linkName: link['name'] as String,
+                linkName: link.name,
                 id: results[index][source.schema.idName] as int,
               ),
             ],
@@ -200,16 +193,13 @@ abstract class _IsarConnect {
 
           final q = QueryBuilder<dynamic, dynamic, QAfterFilterCondition>(qb);
 
-          //ignore: avoid_dynamic_calls
-          if (link['single'] as bool) {
-            //ignore: avoid_dynamic_calls
-            results[index][link['name'] as String] =
+          if (link.isSingle) {
+            results[index][link.name] =
                 await q.findFirst() == null ? null : (await q.exportJson())[0];
           } else {
-            //ignore: avoid_dynamic_calls
-            results[index][link['name'] as String] =
-                await QueryBuilder<dynamic, dynamic, QAfterFilterCondition>(qb)
-                    .exportJson();
+          results[index][link.name] =
+          await QueryBuilder<dynamic, dynamic, QAfterFilterCondition>(qb)
+              .exportJson();
           }
         }
       }

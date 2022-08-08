@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:isar/isar.dart';
-import 'package:isar_inspector/schema.dart';
 
 class IsarCard extends StatelessWidget {
   IsarCard({
@@ -91,11 +90,11 @@ class CheckBoxLabel extends StatelessWidget {
 
 class CustomTextInputFormatter extends TextInputFormatter {
   CustomTextInputFormatter(this.type) {
-    if (type == IsarType.Byte) {
+    if (type == IsarType.byte) {
       _callback = _byte;
-    } else if (type == IsarType.Long || type == IsarType.Int) {
+    } else if (type == IsarType.long || type == IsarType.int) {
       _callback = _int;
-    } else if (type == IsarType.Double || type == IsarType.Float) {
+    } else if (type == IsarType.double || type == IsarType.float) {
       _callback = _double;
     } else {
       throw IsarError('new IsarType (${type.name}), rule not defined');

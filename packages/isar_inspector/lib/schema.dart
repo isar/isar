@@ -51,7 +51,7 @@ class ICollection {
   SortProperty? uiSort;
 
   late final List<IProperty> allProperties = [
-    IProperty(name: idName, type: IsarType.Long, isId: true),
+    IProperty(name: idName, type: IsarType.long, isId: true),
     ...properties,
   ];
 }
@@ -68,7 +68,7 @@ class IProperty {
   factory IProperty.fromJson(Map<String, dynamic> json, Set<String> indexes) {
     return IProperty(
       name: json['name'] as String,
-      type: IsarType.values.firstWhere((e) => e.name == json['type']),
+      type: IsarType.values.firstWhere((e) => e.schemaName == json['type']),
       isId: json['isId'] as bool? ?? false,
       isIndex: indexes.contains(json['name']),
     );
@@ -156,75 +156,22 @@ class ILinkCollection {
   final List<IProperty> properties;
 
   late final List<IProperty> allProperties = [
-    IProperty(name: idName, type: IsarType.Long, isId: true),
+    IProperty(name: idName, type: IsarType.long, isId: true),
     ...properties,
   ];
 }
 
 // ignore_for_file: constant_identifier_names
-enum IsarType {
-  Bool,
-  Int,
-  Float,
-  Long,
-  Byte,
-  Double,
-  String,
-  ByteList,
-  IntList,
-  FloatList,
-  LongList,
-  DoubleList,
-  StringList,
-  BoolList;
-
-  bool get isList {
-    return const [
-      ByteList,
-      IntList,
-      FloatList,
-      LongList,
-      DoubleList,
-      StringList,
-      BoolList,
-    ].contains(this);
-  }
-
-  IsarType get childType {
-    //ignore: missing_enum_constant_in_switch
-    switch (this) {
-      case ByteList:
-        return Byte;
-
-      case IntList:
-        return Int;
-
-      case FloatList:
-        return Float;
-
-      case LongList:
-        return Long;
-
-      case DoubleList:
-        return Double;
-
-      case StringList:
-        return String;
-
-      case BoolList:
-        return Bool;
-    }
-    throw IsarError('new IsarType ($name), rule not defined');
-  }
+extension IsarTypeNum on IsarType {
 
   bool get isNum {
     //ignore: missing_enum_constant_in_switch
     switch (this) {
-      case IsarType.Int:
-      case IsarType.Float:
-      case IsarType.Long:
-      case IsarType.Byte:
-      case IsarType.Double:
+      case IsarType.int:
+      case IsarType.float:
+      case IsarType.long:
+      case IsarType.byte:
+      case IsarType.double:
         return true;
     }
 
