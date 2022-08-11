@@ -168,7 +168,7 @@ class IsarAnalyzer {
     final isarType = dartType.isarType;
     if (isarType == null) {
       err(
-        'Unsupported type. Please annotate the propery with @ignore.',
+        'Unsupported type. Please annotate the property with @ignore.',
         property,
       );
     }
