@@ -24,6 +24,7 @@ jobs:
   lint:
     name: Check lints
     runs-on: ubuntu-latest
+    if: ${{ false }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup Flutter
