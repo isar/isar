@@ -130,6 +130,7 @@ jobs:
 
   drive_android:
     runs-on: macos-latest
+    if: ${{ false }}
     strategy:
       matrix:
         api-level: [29] #[21, 29]
