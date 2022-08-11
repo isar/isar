@@ -34,7 +34,7 @@
 > #### Isar [ee-zahr]:
 >
 > 1. River in Bavaria, Germany.
-> 2. Crazy fast database that is a joy to use.
+> 2. [Crazy fast](#benchmarks) database that is a joy to use.
 
 ## Features
 
@@ -48,7 +48,7 @@ Isar can do much more (and we are just getting started)
 
 - 🕵️ **Full-text search**. Make searching fast and fun
 - 📱 **Multiplatform**. iOS, Android, Desktop and FULL WEB SUPPORT!
-- 🧪 **ACID semantics**. Rely on consistency
+- 🧪 **ACID semantics**. Rely on database consistency
 - 💃 **Static typing**. Compile-time checked and autocompleted queries
 - ✨ **Beautiful documentation**. Readable, easy to understand and ever improving
 
@@ -58,7 +58,7 @@ If you want to say thank you, star us on GitHub and like us on pub.dev 🙌💙
 
 ## Quickstart
 
-Holy smokes you're here! Let's get started...
+Holy smokes you're here! Let's get started on using the coolest Flutter database out there...
 
 ### 1. Add to pubspec.yaml
 
@@ -105,7 +105,7 @@ enum Status with IsarEnum<String> {
 }
 ```
 
-### 3. Open an instance
+### 3. Open a database instance
 
 ```dart
 final isar = await Isar.open([EmailSchema]);
@@ -195,7 +195,7 @@ class Student {
 
 ## Watchers
 
-With Isar, you can watch Collections, Objects, or Queries. A watcher is notified after a transaction commits successfully and the target actually changes.
+With Isar database, you can watch Collections, Objects, or Queries. A watcher is notified after a transaction commits successfully and the target actually changes.
 Watchers can be lazy and not reload the data or they can be non-lazy and fetch new results in the background.
 
 ```dart
@@ -210,7 +210,7 @@ queryStream.listen((newResult) {
 
 ## Benchmarks
 
-Benchmarks only give a rough idea of the performance of a database but as you can see, Isar is quite fast 😇
+Benchmarks only give a rough idea of the performance of a database but as you can see, Isar database is quite fast 😇
 
 <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/benchmarks/insert.png" width="100%" /> | <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/benchmarks/query.png" width="100%" />
 --- | ---
@@ -220,7 +220,7 @@ If you are interested in more benchmarks or want to check how Isar performs on y
 
 ## Unit tests
 
-If you want to use Isar in unit tests or Dart code, call `await Isar.initializeIsarCore(download: true)` before using Isar in your tests.
+If you want to use Isar database in unit tests or Dart code, call `await Isar.initializeIsarCore(download: true)` before using Isar in your tests.
 
 Isar will automatically download the correct binary for your platform. You can also pass a `libraries` map to adjust the download location for each platform.
 
