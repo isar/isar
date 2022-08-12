@@ -12,7 +12,6 @@ class ByteModel {
 
   Id? id;
 
-  @Index()
   byte field;
 
   @override
@@ -51,44 +50,11 @@ void main() {
     tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.equalTo()', () async {
-      // where clauses
-      await qEqual(col.where().fieldEqualTo(0).tFindAll(), [objMin]);
-      await qEqual(col.where().fieldEqualTo(1).tFindAll(), [obj1, obj3]);
-
-      // filters
       await qEqual(col.filter().fieldEqualTo(0).tFindAll(), [objMin]);
       await qEqual(col.filter().fieldEqualTo(1).tFindAll(), [obj1, obj3]);
     });
 
-    isarTest('.notEqualTo()', () async {
-      // where clauses
-      await qEqual(
-        col.where().fieldNotEqualTo(0).tFindAll(),
-        [obj1, obj3, obj2, objMax],
-      );
-      await qEqual(
-        col.where().fieldNotEqualTo(1).tFindAll(),
-        [objMin, obj2, objMax],
-      );
-    });
-
     isarTest('.greaterThan()', () async {
-      // where clause
-      await qEqual(
-        col.where().fieldGreaterThan(0).tFindAll(),
-        [obj1, obj3, obj2, objMax],
-      );
-      await qEqual(
-        col.where().fieldGreaterThan(0, include: true).tFindAll(),
-        [objMin, obj1, obj3, obj2, objMax],
-      );
-      await qEqual(col.where().fieldGreaterThan(255).tFindAll(), []);
-      await qEqual(
-        col.where().fieldGreaterThan(255, include: true).tFindAll(),
-        [objMax],
-      );
-
-      // filter
       await qEqual(
         col.filter().fieldGreaterThan(0).tFindAll(),
         [obj1, obj2, obj3, objMax],
@@ -105,22 +71,6 @@ void main() {
     });
 
     isarTest('.lessThan()', () async {
-      // where clause
-      await qEqual(
-        col.where().fieldLessThan(255).tFindAll(),
-        [objMin, obj1, obj3, obj2],
-      );
-      await qEqual(
-        col.where().fieldLessThan(255, include: true).tFindAll(),
-        [objMin, obj1, obj3, obj2, objMax],
-      );
-      await qEqual(col.where().fieldLessThan(0).tFindAll(), []);
-      await qEqual(
-        col.where().fieldLessThan(0, include: true).tFindAll(),
-        [objMin],
-      );
-
-      // filter
       await qEqual(
         col.filter().fieldLessThan(255).tFindAll(),
         [objMin, obj1, obj2, obj3],
@@ -137,23 +87,6 @@ void main() {
     });
 
     isarTest('.between()', () async {
-      // where clause
-      await qEqual(
-        col.where().fieldBetween(0, 255).tFindAll(),
-        [objMin, obj1, obj3, obj2, objMax],
-      );
-      await qEqual(
-        col.where().fieldBetween(0, 255, includeLower: false).tFindAll(),
-        [obj1, obj3, obj2, objMax],
-      );
-      await qEqual(
-        col.where().fieldBetween(0, 255, includeUpper: false).tFindAll(),
-        [objMin, obj1, obj3, obj2],
-      );
-      await qEqual(col.where().fieldBetween(255, 0).tFindAll(), []);
-      await qEqual(col.where().fieldBetween(100, 110).tFindAll(), []);
-
-      // filter
       await qEqual(
         col.filter().fieldBetween(0, 255).tFindAll(),
         [objMin, obj1, obj2, obj3, objMax],

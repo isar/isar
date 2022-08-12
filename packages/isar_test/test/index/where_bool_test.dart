@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 import '../util/common.dart';
 import '../util/sync_async_helper.dart';
 
-part 'filter_bool_test.g.dart';
+part 'where_bool_test.g.dart';
 
 @Collection()
 class BoolModel {
@@ -12,6 +12,7 @@ class BoolModel {
 
   Id? id;
 
+  @Index()
   bool? field;
 
   @override
@@ -22,7 +23,7 @@ class BoolModel {
 }
 
 void main() {
-  group('Bool filter', () {
+  group('Where bool', () {
     late Isar isar;
     late IsarCollection<BoolModel> col;
 
@@ -48,16 +49,38 @@ void main() {
     tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.equalTo()', () async {
-      await qEqual(col.filter().fieldEqualTo(true).tFindAll(), [objTrue]);
-      await qEqualSet(
-        col.filter().fieldEqualTo(false).tFindAll(),
+      await qEqual(col.where().fieldEqualTo(true).tFindAll(), [objTrue]);
+      await qEqual(
+        col.where().fieldEqualTo(false).tFindAll(),
         [objFalse, objFalse2],
       );
-      await qEqual(col.filter().fieldEqualTo(null).tFindAll(), [objNull]);
+      await qEqual(col.where().fieldEqualTo(null).tFindAll(), [objNull]);
+    });
+
+    isarTest('.notEqualTo()', () async {
+      await qEqual(
+        col.where().fieldNotEqualTo(true).tFindAll(),
+        [objNull, objFalse, objFalse2],
+      );
+      await qEqual(
+        col.where().fieldNotEqualTo(false).tFindAll(),
+        [objNull, objTrue],
+      );
+      await qEqual(
+        col.where().fieldNotEqualTo(null).tFindAll(),
+        [objFalse, objFalse2, objTrue],
+      );
     });
 
     isarTest('.isNull()', () async {
-      await qEqualSet(col.where().filter().fieldIsNull().tFindAll(), [objNull]);
+      await qEqual(col.where().fieldIsNull().tFindAll(), [objNull]);
+    });
+
+    isarTest('.isNotNull()', () async {
+      await qEqual(
+        col.where().fieldIsNotNull().findAll(),
+        [objFalse, objFalse2, objTrue],
+      );
     });
   });
 }

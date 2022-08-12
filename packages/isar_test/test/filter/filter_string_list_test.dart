@@ -10,31 +10,16 @@ part 'filter_string_list_test.g.dart';
 class StringModel {
   StringModel();
 
-  StringModel.init(this.list)
-      : hashList = list,
-        hashElementList = list;
+  StringModel.init(this.list);
 
   Id? id;
 
-  @Index(type: IndexType.value)
   List<String>? list;
-
-  @Index(type: IndexType.hash)
-  List<String>? hashList;
-
-  @Index(type: IndexType.hashElements)
-  List<String>? hashElementList;
 
   @override
   // ignore: hash_and_equals
-  bool operator ==(Object other) {
-    if (other is StringModel) {
-      return listEquals(list, other.list) &&
-          listEquals(hashList, other.hashList) &&
-          listEquals(hashElementList, other.hashElementList);
-    }
-    return false;
-  }
+  bool operator ==(Object other) =>
+      other is StringModel && listEquals(list, other.list);
 }
 
 void main() {

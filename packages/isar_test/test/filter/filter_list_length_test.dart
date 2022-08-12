@@ -152,17 +152,6 @@ void main() {
         isar.models.filter().boolsLengthGreaterThan(0).tFindAll(),
         [obj2, obj3, obj4, obj5],
       );
-
-      // FIXME: length of max i64 returns values with any length
-      // The problem seems to be that since greaterThan are includeLower: false
-      // by default, the lower becomes `lower += 1`, which overflows to min i64
-      // await qEqualSet(
-      //   isar.models
-      //       .filter()
-      //       .stringsLengthGreaterThan(9223372036854775807)
-      //       .tFindAll(),
-      //   [],
-      // );
     });
 
     isarTest('.lengthLessThan()', () async {
@@ -252,96 +241,22 @@ void main() {
       );
     });
 
-    isarTest('.isEmpty() / .isNotEmpty()', () async {
+    isarTest('.isEmpty()', () async {
       await qEqualSet(
         isar.models.filter().boolsIsEmpty().tFindAll(),
         [obj1],
       );
-
-      await qEqualSet(
-        isar.models.filter().boolsIsNotEmpty().tFindAll(),
-        [obj2, obj3, obj4, obj5],
-      );
-
       await qEqualSet(
         isar.models.filter().intsIsEmpty().tFindAll(),
         [obj5],
       );
-
-      await qEqualSet(
-        isar.models.filter().intsIsNotEmpty().tFindAll(),
-        [obj1, obj2, obj3, obj4],
-      );
-
       await qEqualSet(
         isar.models.filter().doublesIsEmpty().tFindAll(),
         [obj5],
       );
-
-      await qEqualSet(
-        isar.models.filter().doublesIsNotEmpty().tFindAll(),
-        [obj1, obj2, obj3, obj4],
-      );
-
       await qEqualSet(
         isar.models.filter().stringsIsEmpty().tFindAll(),
         [],
-      );
-
-      await qEqualSet(
-        isar.models.filter().stringsIsNotEmpty().tFindAll(),
-        [obj2, obj3, obj4, obj5],
-      );
-    });
-
-    isarTest('Grouped length filters', () async {
-      await qEqualSet(
-        isar.models
-            .filter()
-            .boolsIsEmpty()
-            .and()
-            .intsLengthGreaterThan(1)
-            .tFindAll(),
-        [obj1],
-      );
-
-      await qEqualSet(
-        isar.models.filter().boolsIsEmpty().and().boolsIsNotEmpty().tFindAll(),
-        [],
-      );
-
-      await qEqualSet(
-        isar.models
-            .filter()
-            .doublesLengthLessThan(5)
-            .and()
-            .doublesLengthGreaterThan(2)
-            .tFindAll(),
-        [obj3, obj4],
-      );
-
-      await qEqualSet(
-        isar.models
-            .filter()
-            .boolsIsNotEmpty()
-            .and()
-            .intsIsNotEmpty()
-            .and()
-            .doublesIsNotEmpty()
-            .and()
-            .stringsIsNotEmpty()
-            .tFindAll(),
-        [obj2, obj3, obj4],
-      );
-
-      await qEqualSet(
-        isar.models
-            .filter()
-            .boolsLengthBetween(3, 5)
-            .or()
-            .intsIsEmpty()
-            .tFindAll(),
-        [obj2, obj4, obj5],
       );
     });
   });

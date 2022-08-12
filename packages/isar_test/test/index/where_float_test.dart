@@ -4,13 +4,14 @@ import 'package:test/test.dart';
 import '../util/common.dart';
 import '../util/sync_async_helper.dart';
 
-part 'filter_float_test.g.dart';
+part 'where_float_test.g.dart';
 
 @Collection()
 class FloatModel {
   FloatModel();
   Id? id;
 
+  @Index()
   float? field = 0;
 
   @override
@@ -20,7 +21,7 @@ class FloatModel {
 }
 
 void main() {
-  group('Float filter', () {
+  group('Where float', () {
     late Isar isar;
     late IsarCollection<FloatModel> col;
 
@@ -50,37 +51,38 @@ void main() {
     tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.greaterThan()', () async {
-      await qEqualSet(
-        col.filter().fieldGreaterThan(null).tFindAll(),
+      await qEqual(
+        col.where().fieldGreaterThan(null).tFindAll(),
         [obj0, obj1, obj2, obj3, objInf],
       );
-      await qEqualSet(
-        col.filter().fieldGreaterThan(2.2).tFindAll(),
+      await qEqual(
+        col.where().fieldGreaterThan(2.2).tFindAll(),
         [obj3, objInf],
       );
-      await qEqualSet(
-        col.filter().fieldGreaterThan(double.infinity).tFindAll(),
+      await qEqual(
+        col.where().fieldGreaterThan(double.infinity).tFindAll(),
         [],
       );
     });
 
     isarTest('.lessThan()', () async {
-      /*await qEqualSet(
-        col.filter().fieldLessThan(1.1).tFindAll(),
-        [objNull, obj0],
-      );*/
-      await qEqualSet(col.filter().fieldLessThan(null).tFindAll(), []);
+      await qEqual(col.where().fieldLessThan(1.1).tFindAll(), [objNull, obj0]);
+      await qEqual(col.where().fieldLessThan(null).tFindAll(), []);
     });
 
     isarTest('.between()', () async {
-      await qEqualSet(
-        col.filter().fieldBetween(1, 3.5).tFindAll(),
+      await qEqual(
+        col.where().fieldBetween(1, 3.5).tFindAll(),
         [obj1, obj2, obj3],
       );
-      await qEqualSet(col.filter().fieldBetween(5, 6).tFindAll(), []);
+      await qEqual(col.where().fieldBetween(5, 6).tFindAll(), []);
     });
 
     isarTest('.isNull()', () async {
+      await qEqual(col.where().fieldIsNull().tFindAll(), [objNull]);
+    });
+
+    isarTest('.isNotNull()', () async {
       await qEqual(col.filter().fieldIsNull().tFindAll(), [objNull]);
     });
   });
