@@ -318,7 +318,7 @@ abstract class Isar {
 /// This operation can only be performed while a database is being opened and
 /// should only be used if absolutely necessary.
 class CompactCondition {
-  /// Compaction whill happen if all of the specified conditions are true.
+  /// Compaction will happen if all of the specified conditions are true.
   const CompactCondition({
     this.minFileSize,
     this.minBytes,
@@ -332,7 +332,7 @@ class CompactCondition {
   /// is highly  discouraged to trigger compaction solely on this condition.
   final int? minFileSize;
 
-  /// The minumum number of bytes that can be freed with compaction.
+  /// The minimum number of bytes that can be freed with compaction.
   final int? minBytes;
 
   /// The minimum compaction ration. For example `2.0` would trigger compaction
