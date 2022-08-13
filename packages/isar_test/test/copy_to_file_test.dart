@@ -31,160 +31,148 @@ class Model {
 }
 
 void main() {
-  group(
-    'Copy to file',
-    skip: kIsWeb, // Unsupported on web
-    () {
-      late Isar isar;
-      late File originalDbFile;
+  group('Copy to file', () {
+    late Isar isar;
 
-      late Directory directory;
+    setUp(() async {
+      isar = await openTempIsar([ModelSchema]);
 
-      setUp(() async {
-        isar = await openTempIsar([ModelSchema]);
-        originalDbFile = File(isar.path!);
+      await isar.tWriteTxn(
+        () => isar.models.tPutAll(List.filled(100, Model())),
+      );
+    });
 
-        await isar.tWriteTxn(
-          () => isar.models.tPutAll(List.filled(100, Model())),
-        );
+    tearDown(() async {
+      await isar.close(deleteFromDisk: true);
+    });
 
-        directory = Directory('copy-to-file-test-database-copies');
-        await directory.create(recursive: true);
-      });
+    isarTestVm('.copyToFile() should create a new file', () async {
+      final copiedDbFile = File(path.join(isar.directory!, getRandomName()));
+      expect(copiedDbFile.existsSync(), false);
 
-      tearDown(() async {
-        await isar.close(deleteFromDisk: true);
-        await directory.delete(recursive: true);
-      });
+      await isar.copyToFile(copiedDbFile.path);
 
-      isarTest('.copyToFile() should create a new file', () async {
-        final copiedDbFile = File(path.join(directory.path, getRandomName()));
-        expect(copiedDbFile.existsSync(), false);
+      expect(copiedDbFile.existsSync(), true);
+      expect(copiedDbFile.lengthSync(), greaterThan(0));
+    });
 
-        await isar.copyToFile(copiedDbFile.path);
+    isarTestVm('.copyToFile() should keep the same content', () async {
+      final copiedDbFilename = getRandomName();
+      final copiedDbFile = File(
+        path.join(
+          isar.directory!,
+          '$copiedDbFilename.isar',
+        ),
+      );
 
-        expect(copiedDbFile.existsSync(), true);
-        expect(copiedDbFile.lengthSync(), greaterThan(0));
-      });
+      await isar.copyToFile(copiedDbFile.path);
 
-      isarTest('.copyToFile() should keep the same content', () async {
-        final copiedDbFilename = getRandomName();
-        final copiedDbFile = File(
-          path.join(
-            directory.path,
-            '$copiedDbFilename.isar',
-          ),
-        );
+      final copiedIsar = await tOpen(
+        schemas: [ModelSchema],
+        directory: isar.directory,
+        name: copiedDbFilename,
+      );
+      addTearDown(() => copiedIsar.close(deleteFromDisk: true));
 
-        await isar.copyToFile(copiedDbFile.path);
+      final originalObjs = await isar.models.where().tFindAll();
+      await qEqualSet(
+        copiedIsar.models.where().tFindAll(),
+        originalObjs,
+      );
+    });
 
-        final copiedIsar = await tOpen(
-          schemas: [ModelSchema],
-          directory: directory.path,
-          name: copiedDbFilename,
-        );
-        addTearDown(() => copiedIsar.close(deleteFromDisk: true));
+    isarTestVm('.copyToFile() should compact copied file', () async {
+      await isar.tWriteTxn(() => isar.models.where().limit(50).tDeleteAll());
 
-        final originalObjs = await isar.models.where().tFindAll();
-        await qEqualSet(
-          copiedIsar.models.where().tFindAll(),
-          originalObjs,
-        );
-      });
+      final copiedDbFilename1 = getRandomName();
+      final copiedDbFile1 = File(
+        path.join(
+          isar.directory!,
+          '$copiedDbFilename1.isar',
+        ),
+      );
 
-      isarTest('.copyToFile() should compact copied file', () async {
-        await isar.tWriteTxn(() => isar.models.where().limit(50).tDeleteAll());
+      await isar.copyToFile(copiedDbFile1.path);
 
-        final copiedDbFilename1 = getRandomName();
-        final copiedDbFile1 = File(
-          path.join(
-            directory.path,
-            '$copiedDbFilename1.isar',
-          ),
-        );
+      final isarCopy1 = await tOpen(
+        schemas: [ModelSchema],
+        directory: isar.directory,
+        name: copiedDbFilename1,
+      );
+      addTearDown(() => isarCopy1.close(deleteFromDisk: true));
 
-        await isar.copyToFile(copiedDbFile1.path);
+      expect(copiedDbFile1.lengthSync(), greaterThan(0));
+      expect(
+        copiedDbFile1.lengthSync(),
+        lessThan(File(isar.path!).lengthSync()),
+      );
 
-        final isarCopy1 = await tOpen(
-          schemas: [ModelSchema],
-          directory: directory.path,
-          name: copiedDbFilename1,
-        );
-        addTearDown(() => isarCopy1.close(deleteFromDisk: true));
+      await isarCopy1.tWriteTxn(
+        () => isarCopy1.models.where().limit(25).tDeleteAll(),
+      );
 
-        expect(copiedDbFile1.lengthSync(), greaterThan(0));
-        expect(
-          copiedDbFile1.lengthSync(),
-          lessThan(originalDbFile.lengthSync()),
-        );
+      final copiedDbFilename2 = getRandomName();
+      final copiedDbFile2 = File(
+        path.join(
+          isar.directory!,
+          '$copiedDbFilename2.isar',
+        ),
+      );
 
-        await isarCopy1.tWriteTxn(
-          () => isarCopy1.models.where().limit(25).tDeleteAll(),
-        );
+      final isarCopy2 = await tOpen(
+        schemas: [ModelSchema],
+        directory: isar.directory,
+        name: copiedDbFilename2,
+      );
+      addTearDown(() => isarCopy2.close(deleteFromDisk: true));
 
-        final copiedDbFilename2 = getRandomName();
-        final copiedDbFile2 = File(
-          path.join(
-            directory.path,
-            '$copiedDbFilename2.isar',
-          ),
-        );
+      expect(copiedDbFile2.lengthSync(), greaterThan(0));
+      expect(
+        copiedDbFile2.lengthSync(),
+        lessThan(copiedDbFile1.lengthSync()),
+      );
+    });
 
-        final isarCopy2 = await tOpen(
-          schemas: [ModelSchema],
-          directory: directory.path,
-          name: copiedDbFilename2,
-        );
-        addTearDown(() => isarCopy2.close(deleteFromDisk: true));
+    isarTestVm('Copies should be the same size', () async {
+      final copiedDbFilename1 = getRandomName();
+      final copiedDbFile1 = File(
+        path.join(
+          isar.directory!,
+          '$copiedDbFilename1.isar',
+        ),
+      );
 
-        expect(copiedDbFile2.lengthSync(), greaterThan(0));
-        expect(
-          copiedDbFile2.lengthSync(),
-          lessThan(copiedDbFile1.lengthSync()),
-        );
-      });
+      final copiedDbFilename2 = getRandomName();
+      final copiedDbFile2 = File(
+        path.join(
+          isar.directory!,
+          '$copiedDbFilename2.isar',
+        ),
+      );
 
-      isarTest('Copies should be the same size', () async {
-        final copiedDbFilename1 = getRandomName();
-        final copiedDbFile1 = File(
-          path.join(
-            directory.path,
-            '$copiedDbFilename1.isar',
-          ),
-        );
+      await isar.copyToFile(copiedDbFile1.path);
+      await isar.copyToFile(copiedDbFile2.path);
 
-        final copiedDbFilename2 = getRandomName();
-        final copiedDbFile2 = File(
-          path.join(
-            directory.path,
-            '$copiedDbFilename2.isar',
-          ),
-        );
+      expect(copiedDbFile1.lengthSync(), copiedDbFile2.lengthSync());
 
-        await isar.copyToFile(copiedDbFile1.path);
-        await isar.copyToFile(copiedDbFile2.path);
+      final isarCopy = await tOpen(
+        schemas: [ModelSchema],
+        directory: isar.directory,
+        name: copiedDbFilename1,
+      );
+      addTearDown(() => isarCopy.close(deleteFromDisk: true));
 
-        expect(copiedDbFile1.lengthSync(), copiedDbFile2.lengthSync());
+      final copiedDbFilename3 = getRandomName();
+      final copiedDbFile3 = File(
+        path.join(
+          isar.directory!,
+          '$copiedDbFilename3.isar',
+        ),
+      );
 
-        final isarCopy = await tOpen(
-          schemas: [ModelSchema],
-          directory: directory.path,
-          name: copiedDbFilename1,
-        );
-        addTearDown(() => isarCopy.close(deleteFromDisk: true));
+      await isarCopy.copyToFile(copiedDbFile3.path);
 
-        final copiedDbFilename3 = getRandomName();
-        final copiedDbFile3 = File(
-          path.join(
-            directory.path,
-            '$copiedDbFilename3.isar',
-          ),
-        );
-
-        await isarCopy.copyToFile(copiedDbFile3.path);
-
-        expect(copiedDbFile3.lengthSync(), copiedDbFile1.lengthSync());
-      });
-    },
-  );
+      expect(copiedDbFile3.lengthSync(), copiedDbFile1.lengthSync());
+    });
+  });
 }
