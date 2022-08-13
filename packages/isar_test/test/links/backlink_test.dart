@@ -82,8 +82,6 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     test('otherlinks', () async {
       await isar.tWriteTxn(() async {
         a1.links.addAll([b1, b2, b3]);

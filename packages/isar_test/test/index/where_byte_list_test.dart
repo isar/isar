@@ -56,8 +56,6 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.elementEqualTo()', () async {
       await qEqualSet(
         col.where().listElementEqualTo(0).tFindAll(),

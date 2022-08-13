@@ -42,8 +42,6 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     group('where anyOf', () {
       isarTest('zero elements', () async {
         final one = isar.models.where().anyOf(

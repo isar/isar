@@ -1,5 +1,6 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
+import 'package:test_api/backend.dart';
 
 import '../util/common.dart';
 import '../util/sync_async_helper.dart';
@@ -76,6 +77,7 @@ class DefaultListModel {
 }
 
 void main() {
+  Invoker.current;
   group('Default value', () {
     isarTest('scalar', () async {
       final emptyObj = EmptyModel(0);

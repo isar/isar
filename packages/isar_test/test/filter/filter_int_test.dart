@@ -9,6 +9,7 @@ part 'filter_int_test.g.dart';
 @Collection()
 class IntModel {
   IntModel(this.field);
+
   Id? id;
 
   short? field = 0;
@@ -17,11 +18,6 @@ class IntModel {
   // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is IntModel && other.field == field;
-  }
-
-  @override
-  String toString() {
-    return '$field';
   }
 }
 
@@ -50,8 +46,6 @@ void main() {
         await isar.intModels.putAll([obj0, obj1, obj2, obj3, objNull]);
       });
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.equalTo()', () async {
       await qEqual(col.filter().fieldEqualTo(2).tFindAll(), [obj2]);

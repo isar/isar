@@ -26,8 +26,6 @@ void main() {
       );
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.sortBy()', () async {
       await qEqual(
         users.where().sortByName().nameProperty().tFindAll(),

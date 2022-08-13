@@ -47,8 +47,6 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.equalTo()', () async {
       await qEqual(col.filter().fieldEqualTo(0).tFindAll(), [objMin]);
       await qEqual(col.filter().fieldEqualTo(1).tFindAll(), [obj1, obj3]);

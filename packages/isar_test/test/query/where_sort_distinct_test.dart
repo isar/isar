@@ -42,8 +42,6 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.any()', () async {
       await qEqual(
         col.where().anyValue().valueProperty().tFindAll(),

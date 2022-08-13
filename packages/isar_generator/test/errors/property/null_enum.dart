@@ -13,5 +13,5 @@ enum MyEnum with IsarEnum<String?> {
   optionA;
 
   @override
-  String? get isarValue => null;
+  String? get value => null;
 }

@@ -205,8 +205,6 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('Simple filter with sort', () async {
       final objs = await isar.accounts.buildQuery<Account>(
         filter: FilterCondition.lessThan(

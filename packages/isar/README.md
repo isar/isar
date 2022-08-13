@@ -101,7 +101,7 @@ enum Status with IsarEnum<String> {
   sent;
 
   @override
-  String get isarValue => name;
+  String get value => name;
 }
 ```
 

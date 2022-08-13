@@ -61,7 +61,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       ${generateDeserializeWeb(object)}
       ${generateDeserializePropWeb(object)}
 
-      ${generateEnumValues(object)}
+      ${generateEnumMap(object)}
 
       ${generateGetId(object)}
       ${generateGetLinks(object)}
@@ -101,7 +101,7 @@ class IsarEmbeddedGenerator extends GeneratorForAnnotation<Embedded> {
       ${generateDeserializeWeb(object)}
       ${generateDeserializePropWeb(object)}
 
-      ${generateEnumValues(object)}
+      ${generateEnumMap(object)}
     ''';
   }
 }

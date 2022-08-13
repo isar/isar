@@ -135,7 +135,7 @@ enum TestEnum with IsarEnum<String> {
   option3;
 
   @override
-  String get isarValue => name;
+  String get value => name;
 }
 
 @Collection()

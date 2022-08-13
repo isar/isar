@@ -61,9 +61,9 @@ String _convertEnum(ObjectProperty property, String value) {
   final nOp = property.nullable ? '?' : '';
   if (property.isarType.isList) {
     final nElOp = property.elementNullable ? '?' : '';
-    return '$value$nOp.map((e) => e$nElOp.isarValue).toList()';
+    return '$value$nOp.map((e) => e$nElOp.value).toList()';
   } else {
-    return '$value$nOp.isarValue';
+    return '$value$nOp.value';
   }
 }
 
@@ -81,7 +81,7 @@ String generateEstimateSerializeNative(ObjectInfo object) {
 
     switch (property.isarType) {
       case IsarType.string:
-        final enumValue = property.isEnum ? '.isarValue' : '';
+        final enumValue = property.isEnum ? '.value' : '';
         code += _prepareSerialize(
           property.nullable,
           value,
@@ -90,7 +90,7 @@ String generateEstimateSerializeNative(ObjectInfo object) {
         break;
 
       case IsarType.stringList:
-        final enumValue = property.isEnum ? '.isarValue' : '';
+        final enumValue = property.isEnum ? '.value' : '';
         code += _prepareSerializeList(
           property.nullable,
           property.elementNullable,
@@ -323,10 +323,10 @@ String _deserializeProperty(
     if (property.isarType.isList) {
       final elDefault =
           !property.elementNullable ? '?? ${property.defaultEnum}' : '';
-      return '$deser?.map((e) => ${property.enumValues(object)}[e] '
+      return '$deser?.map((e) => ${property.enumMap(object)}[e] '
           '$elDefault).toList() $defaultValue';
     } else {
-      return '${property.enumValues(object)}[$deser] $defaultValue';
+      return '${property.enumMap(object)}[$deser] $defaultValue';
     }
   } else {
     return '$deser $defaultValue';

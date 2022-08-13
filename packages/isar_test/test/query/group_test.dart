@@ -25,8 +25,6 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('Simple or', () async {
       await qEqualSet(
         users.where().filter().ageEqualTo(20).or().ageEqualTo(30).tFindAll(),

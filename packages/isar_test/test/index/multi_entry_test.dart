@@ -183,8 +183,6 @@ void main() {
       );
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('Bools query', () async {
       await qEqualSet(
         isar.multiEntryIndexModels.where().boolsElementEqualTo(true).tFindAll(),
@@ -677,8 +675,6 @@ void main() {
         ]),
       );
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('Bools query', () async {
       await qEqualSet(

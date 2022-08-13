@@ -324,7 +324,7 @@ Object _prepareValue(Object? value, Allocator alloc, IsarType type) {
   } else if (value is DateTime) {
     return value.longValue;
   } else if (value is IsarEnum) {
-    return _prepareValue(value.isarValue, alloc, type);
+    return _prepareValue(value.value, alloc, type);
   } else if (value is String) {
     return value.toCString(alloc);
   } else if (value == null) {

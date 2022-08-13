@@ -56,8 +56,6 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.equalTo()', () async {
       await qEqual(
         col.where().hashFieldEqualTo('string 2').tFindAll(),

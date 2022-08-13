@@ -33,8 +33,6 @@ void main() {
       ]);
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     group('Implicit nullable id', () {
       isarTest('Id should auto increment', () async {
         final id1 = await isar.tWriteTxn(

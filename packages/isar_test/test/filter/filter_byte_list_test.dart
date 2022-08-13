@@ -49,18 +49,13 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.elementEqualTo()', () async {
       await qEqual(
         col.filter().listElementEqualTo(0).tFindAll(),
         [obj2, obj4],
       );
       await qEqual(col.filter().listElementEqualTo(1).tFindAll(), [obj3]);
-      await qEqual(
-        col.filter().listElementEqualTo(55).tFindAll(),
-        [],
-      );
+      await qEqual(col.filter().listElementEqualTo(55).tFindAll(), []);
     });
 
     isarTest('.elementGreaterThan()', () async {

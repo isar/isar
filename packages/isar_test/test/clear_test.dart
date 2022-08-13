@@ -24,8 +24,6 @@ void main() {
       isar = await openTempIsar([ModelASchema, ModelBSchema]);
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('Clear should empty target collection', () async {
       final modelAs = List.generate(100, (_) => ModelA());
       final modelBs = List.generate(200, (_) => ModelB());

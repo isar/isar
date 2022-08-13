@@ -36,8 +36,6 @@ void main() {
       isar = await openTempIsar([NameModelSchema]);
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('json', () async {
       await isar.tWriteTxn(
         () => isar.nameModels.tPut(

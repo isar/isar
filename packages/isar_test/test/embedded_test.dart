@@ -137,8 +137,6 @@ void main() {
       );
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.put() .get()', () async {
       await isar.tWriteTxn(() async {
         await isar.models.tPutAll([allNull, simple, nested]);

@@ -10,7 +10,7 @@ enum ByteEnum with IsarEnum<byte> {
   byte2;
 
   @override
-  byte get isarValue => index;
+  byte get value => index;
 }
 
 @Collection()
@@ -31,7 +31,7 @@ enum StringEnum with IsarEnum<String> {
   option3;
 
   @override
-  String get isarValue => name;
+  String get value => name;
 }
 
 enum StringEnum2 with IsarEnum<String> {
@@ -39,7 +39,7 @@ enum StringEnum2 with IsarEnum<String> {
   option3;
 
   @override
-  String get isarValue => name;
+  String get value => name;
 }
 
 @Collection()
@@ -83,7 +83,7 @@ enum DateTimeEnum with IsarEnum<DateTime> {
   option3;
 
   @override
-  DateTime get isarValue => DateTime(2000 + index);
+  DateTime get value => DateTime(2000 + index);
 }
 
 @Collection()

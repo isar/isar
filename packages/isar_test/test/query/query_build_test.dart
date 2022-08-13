@@ -53,8 +53,6 @@ void main() {
         () => isar.models.tPutAll([obj0, obj1, obj2, obj3, obj4, obj5]),
       );
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
     ;
 
     isarTest('Build and query', () async {

@@ -172,8 +172,6 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     /*test('Validate inheritance model properties', () {
       expect(InheritingModelSchema.idName, 'identifier');
       expect(InheritingModelSchema.propertyIds.containsKey('nameHash'), true);

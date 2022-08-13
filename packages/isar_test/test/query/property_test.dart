@@ -26,8 +26,6 @@ void main() {
       ]);
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('id property', () async {
       await isar.tWriteTxn(
         () => isar.boolModels.tPutAll([

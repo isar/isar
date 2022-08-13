@@ -81,9 +81,9 @@ void _addKeyValue(
   bool caseSensitive,
 ) {
   if (value is IsarEnum) {
-    value = value.isarValue;
+    value = value.value;
   } else if (value is List<IsarEnum?>) {
-    value = value.map((e) => e?.isarValue).toList();
+    value = value.map((e) => e?.value).toList();
   }
 
   final isarType =

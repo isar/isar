@@ -65,8 +65,6 @@ void main() {
       b2 = LinkModelB('modelB2');
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.isAttached .isLoaded .isChanged', () async {
       void verify(bool attached, bool loaded, bool changed) {
         expect(a1.link.isAttached, attached);

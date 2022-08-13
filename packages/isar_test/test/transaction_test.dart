@@ -20,8 +20,6 @@ void main() {
       isar = await openTempIsar([ModelSchema]);
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('Sync txn cannot be opened in sync txn', () {
       isar.txnSync(() {
         expect(

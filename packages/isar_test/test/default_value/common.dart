@@ -8,7 +8,7 @@ enum MyEnum with IsarEnum<String> {
   value3;
 
   @override
-  String get isarValue => name;
+  String get value => name;
 }
 
 @Embedded()

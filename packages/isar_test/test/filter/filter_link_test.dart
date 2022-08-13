@@ -79,8 +79,6 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('Single self link', () async {
       /*print(objA1.id);
       print(objA2.id);

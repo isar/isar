@@ -92,8 +92,6 @@ void main() {
       );
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.lengthEqualTo()', () async {
       await qEqualSet(
         isar.models.filter().boolsLengthEqualTo(1).tFindAll(),

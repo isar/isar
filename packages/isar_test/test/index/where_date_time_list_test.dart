@@ -56,8 +56,6 @@ void main() {
       col = isar.dateTimeModels;
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     //TODO
   });
 }

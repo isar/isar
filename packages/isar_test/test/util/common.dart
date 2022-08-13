@@ -128,6 +128,8 @@ Future<Isar> openTempIsar(
     directory: kIsWeb ? '' : testTempPath!,
   );
 
+  addTearDown(() => isar.close(deleteFromDisk: true));
+
   await isar.verify();
   return isar;
 }

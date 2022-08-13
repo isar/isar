@@ -31,7 +31,7 @@ DateTime utc(int year, [int month = 1, int day = 1]) {
 }
 
 void main() {
-  group('Date filter', () {
+  group('DateTime filter', () {
     late Isar isar;
     late IsarCollection<DateTimeModel> col;
 
@@ -55,8 +55,6 @@ void main() {
         await isar.dateTimeModels.putAll([obj1, obj2, obj3, obj4, objNull]);
       });
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.equalTo()', () async {
       await qEqual(

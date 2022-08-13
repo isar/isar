@@ -1,5 +1,7 @@
 ## 3.0.0-dev.9
 
+This is the last big feature release before a stable 3.0 version.
+
 ### Enhancements
 
 - Support for embedded objects using `@Embedded()`
@@ -20,6 +22,11 @@
 
 - Renamed `isar.path` to `isar.directory`
 - Removed support for type converters
+
+### Fixes
+
+- Minor fixes for query edge cases
+- Memory is now always initialized before it gets stored
 
 ## 3.0.0-dev.8
 

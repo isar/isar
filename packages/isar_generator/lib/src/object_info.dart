@@ -138,8 +138,8 @@ class ObjectProperty {
 
   String get defaultEnum => '$typeClassName.${enumConsts!.first}';
 
-  String enumValues(ObjectInfo object) {
-    return '_${object.dartName}${scalarDartType}Values';
+  String enumMap(ObjectInfo object) {
+    return '_${object.dartName}${scalarDartType}Map';
   }
 }
 

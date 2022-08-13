@@ -18,8 +18,6 @@ void main() {
       col = isar.userModels;
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     List<Map<String, dynamic>> generateJson(int count) {
       final json = <Map<String, dynamic>>[];
       for (var i = 0; i < count; i++) {

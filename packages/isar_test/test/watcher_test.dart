@@ -41,8 +41,6 @@ void main() {
       obj3 = Value(3, 'Test');
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     group('Collection', () {
       isarTest('.put()', () async {
         final listener = Listener<void>(col.watchLazy());

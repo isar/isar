@@ -51,8 +51,6 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.elementGreaterThan()', () async {
       await qEqualSet(
         col.where().listElementGreaterThan(1.1).tFindAll(),

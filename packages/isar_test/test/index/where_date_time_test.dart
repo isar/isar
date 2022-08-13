@@ -57,8 +57,6 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.equalTo()', () async {
       await qEqual(
         col.where().fieldEqualTo(local(2010)).tFindAll(),

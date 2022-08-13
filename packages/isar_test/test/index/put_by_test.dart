@@ -202,8 +202,6 @@ void main() {
       ]);
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('Put by bool index', () async {
       final obj0 = BoolIndexModel(value: true, index: 0);
       final obj1 = BoolIndexModel(value: false, index: 1);

@@ -27,8 +27,6 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('0 offset', () async {
       final result = col.where().offset(0).tFindAll();
       await qEqual(result, users);
