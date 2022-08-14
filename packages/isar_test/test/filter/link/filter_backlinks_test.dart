@@ -398,6 +398,10 @@ void main() {
       // FIXME: IsarError: Cannot perform this operation from within an active
       // transaction.
       // Are we suppose to a able to reset backlinks?
+      //
+      // It seems that a sync method is called in an async transaction
+      // Also seems to only happen on `.reset()` of backlinks
+
       // await isar.tWriteTxn(() => target1.backlinks.tReset());
 
       // await qEqualSet(
@@ -422,6 +426,10 @@ void main() {
       // FIXME: IsarError: Cannot perform this operation from within an active
       // transaction.
       // Are we suppose to a able to reset backlinks?
+      //
+      // It seems that a sync method is called in an async transaction
+      // Also seems to only happen on `.reset()` of backlinks
+
       // await isar.tWriteTxn(() => target1.backlinks.tReset());
 
       // await qEqualSet(
