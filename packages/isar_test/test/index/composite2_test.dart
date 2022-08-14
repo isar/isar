@@ -59,42 +59,30 @@ void main() {
 
     isarTest('sorted by value1 value2', () async {
       await qEqual(
-        col.where().anyValue1Value2().findAll(),
+        col.where().anyValue1Value2(),
         [obj1, obj2, obj3, obj4],
       );
     });
 
     isarTest('getBy value1 sorted by value2', () async {
       await qEqual(
-        col.where().value1GreaterThanAnyValue2(0).findAll(),
+        col.where().value1GreaterThanAnyValue2(0),
         [obj1, obj2, obj3, obj4],
       );
-      await qEqual(
-        col.where().value1EqualToAnyValue2(1).findAll(),
-        [obj1, obj2],
-      );
-
-      await qEqual(
-        col.where().value1EqualToAnyValue2(2).findAll(),
-        [obj3, obj4],
-      );
+      await qEqual(col.where().value1EqualToAnyValue2(1), [obj1, obj2]);
+      await qEqual(col.where().value1EqualToAnyValue2(2), [obj3, obj4]);
     });
 
     isarTest('getBy value1 and value2', () async {
       await qEqual(
-        col.where().value1EqualToValue2GreaterThan(1, 0).findAll(),
+        col.where().value1EqualToValue2GreaterThan(1, 0),
         [obj1, obj2],
       );
-
       await qEqual(
-        col.where().value1EqualToValue2GreaterThan(2, 0).findAll(),
+        col.where().value1EqualToValue2GreaterThan(2, 0),
         [obj3, obj4],
       );
-
-      await qEqual(
-        col.where().value1EqualToValue2GreaterThan(2, 1).findAll(),
-        [obj4],
-      );
+      await qEqual(col.where().value1EqualToValue2GreaterThan(2, 1), [obj4]);
     });
   });
 }

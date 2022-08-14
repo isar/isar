@@ -44,47 +44,39 @@ void main() {
 
     isarTest('.any()', () async {
       await qEqual(
-        col.where().anyValue().valueProperty().tFindAll(),
+        col.where().anyValue().valueProperty(),
         [null, 0, 0, 1, 1, 2, 2],
       );
 
       await qEqual(
-        col.where(distinct: true).anyValue().valueProperty().tFindAll(),
+        col.where(distinct: true).anyValue().valueProperty(),
         [null, 0, 1, 2],
       );
 
       await qEqual(
-        col.where(sort: Sort.desc).anyValue().valueProperty().tFindAll(),
+        col.where(sort: Sort.desc).anyValue().valueProperty(),
         [2, 2, 1, 1, 0, 0, null],
       );
 
       await qEqual(
-        col
-            .where(sort: Sort.desc, distinct: true)
-            .anyValue()
-            .valueProperty()
-            .tFindAll(),
+        col.where(sort: Sort.desc, distinct: true).anyValue().valueProperty(),
         [2, 1, 0, null],
       );
     });
 
     isarTest('.notEqualTo()', () async {
       await qEqual(
-        col.where().valueNotEqualTo(1).valueProperty().tFindAll(),
+        col.where().valueNotEqualTo(1).valueProperty(),
         [null, 0, 0, 2, 2],
       );
 
       await qEqual(
-        col.where(distinct: true).valueNotEqualTo(1).valueProperty().tFindAll(),
+        col.where(distinct: true).valueNotEqualTo(1).valueProperty(),
         [null, 0, 2],
       );
 
       await qEqual(
-        col
-            .where(sort: Sort.desc)
-            .valueNotEqualTo(1)
-            .valueProperty()
-            .tFindAll(),
+        col.where(sort: Sort.desc).valueNotEqualTo(1).valueProperty(),
         [2, 2, 0, 0, null],
       );
 
@@ -92,25 +84,24 @@ void main() {
         col
             .where(sort: Sort.desc, distinct: true)
             .valueNotEqualTo(1)
-            .valueProperty()
-            .tFindAll(),
+            .valueProperty(),
         [2, 0, null],
       );
     });
 
     isarTest('.isNotNull()', () async {
       await qEqual(
-        col.where().valueIsNotNull().valueProperty().tFindAll(),
+        col.where().valueIsNotNull().valueProperty(),
         [0, 0, 1, 1, 2, 2],
       );
 
       await qEqual(
-        col.where(distinct: true).valueIsNotNull().valueProperty().tFindAll(),
+        col.where(distinct: true).valueIsNotNull().valueProperty(),
         [0, 1, 2],
       );
 
       await qEqual(
-        col.where(sort: Sort.desc).valueIsNotNull().valueProperty().tFindAll(),
+        col.where(sort: Sort.desc).valueIsNotNull().valueProperty(),
         [2, 2, 1, 1, 0, 0],
       );
 
@@ -118,8 +109,7 @@ void main() {
         col
             .where(sort: Sort.desc, distinct: true)
             .valueIsNotNull()
-            .valueProperty()
-            .tFindAll(),
+            .valueProperty(),
         [2, 1, 0],
       );
     });

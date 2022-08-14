@@ -90,7 +90,7 @@ void main() {
       //print(sl);
 
       await qEqualSet(
-        colA.where().filter().selfLinks((q) => q.nameContains('a1')).tFindAll(),
+        colA.where().filter().selfLinks((q) => q.nameContains('a1')),
         {objA1, objA2},
       );*/
     });

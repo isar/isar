@@ -1,6 +1,5 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
-import 'package:test_api/backend.dart';
 
 import '../util/common.dart';
 import '../util/sync_async_helper.dart';
@@ -77,11 +76,10 @@ class DefaultListModel {
 }
 
 void main() {
-  Invoker.current;
   group('Default value', () {
     isarTest('scalar', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -96,12 +94,11 @@ void main() {
       expect(obj.doubleValue, 10.10);
       expect(obj.stringValue, 'hello');
       expect(obj.embeddedValue, const MyEmbedded('abc'));
-      await isar2.close();
     });
 
     isarTest('scalar property', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -139,12 +136,11 @@ void main() {
         await isar2.defaultModels.where().embeddedValueProperty().tFindFirst(),
         const MyEmbedded('abc'),
       );
-      await isar2.close();
     });
 
     isarTest('list', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -160,12 +156,11 @@ void main() {
       expect(obj.doubleValue, [null, 10.10]);
       expect(obj.stringValue, ['abc', null, 'def']);
       expect(obj.embeddedValue, [null, const MyEmbedded('test')]);
-      await isar2.close();
     });
 
     isarTest('list property', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -213,7 +208,6 @@ void main() {
             .tFindFirst(),
         [null, const MyEmbedded('test')],
       );
-      await isar2.close();
     });
   });
 }

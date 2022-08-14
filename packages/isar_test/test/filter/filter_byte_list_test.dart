@@ -2,7 +2,6 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
-import '../util/sync_async_helper.dart';
 
 part 'filter_byte_list_test.g.dart';
 
@@ -51,64 +50,49 @@ void main() {
 
     isarTest('.elementEqualTo()', () async {
       await qEqual(
-        col.filter().listElementEqualTo(0).tFindAll(),
+        col.filter().listElementEqualTo(0),
         [obj2, obj4],
       );
-      await qEqual(col.filter().listElementEqualTo(1).tFindAll(), [obj3]);
-      await qEqual(col.filter().listElementEqualTo(55).tFindAll(), []);
+      await qEqual(col.filter().listElementEqualTo(1), [obj3]);
+      await qEqual(col.filter().listElementEqualTo(55), []);
     });
 
     isarTest('.elementGreaterThan()', () async {
+      await qEqual(col.filter().listElementGreaterThan(123), [obj2, obj4]);
       await qEqual(
-        col.filter().listElementGreaterThan(123).tFindAll(),
-        [obj2, obj4],
-      );
-      await qEqual(
-        col.filter().listElementGreaterThan(123, include: true).tFindAll(),
+        col.filter().listElementGreaterThan(123, include: true),
         [obj1, obj2, obj3, obj4],
       );
-      await qEqual(col.filter().listElementGreaterThan(255).tFindAll(), []);
+      await qEqual(col.filter().listElementGreaterThan(255), []);
     });
 
     isarTest('.elementLessThan()', () async {
+      await qEqual(col.filter().listElementLessThan(123), [obj2, obj3, obj4]);
       await qEqual(
-        col.filter().listElementLessThan(123).tFindAll(),
-        [obj2, obj3, obj4],
-      );
-      await qEqual(
-        col.filter().listElementLessThan(123, include: true).tFindAll(),
+        col.filter().listElementLessThan(123, include: true),
         [obj1, obj2, obj3, obj4],
       );
-      await qEqual(col.filter().listElementLessThan(0).tFindAll(), []);
+      await qEqual(col.filter().listElementLessThan(0), []);
     });
 
     isarTest('.elementBetween()', () async {
       await qEqual(
-        col.filter().listElementBetween(123, 255).tFindAll(),
+        col.filter().listElementBetween(123, 255),
         [obj1, obj2, obj3, obj4],
       );
       await qEqual(
-        col
-            .filter()
-            .listElementBetween(123, 255, includeLower: false)
-            .tFindAll(),
+        col.filter().listElementBetween(123, 255, includeLower: false),
         [obj2, obj4],
       );
       await qEqual(
-        col
-            .filter()
-            .listElementBetween(123, 255, includeUpper: false)
-            .tFindAll(),
+        col.filter().listElementBetween(123, 255, includeUpper: false),
         [obj1, obj3],
       );
-      await qEqual(col.filter().listElementBetween(50, 100).tFindAll(), []);
+      await qEqual(col.filter().listElementBetween(50, 100), []);
     });
 
     isarTest('.isNull()', () async {
-      await qEqual(
-        col.where().filter().listIsNull().tFindAll(),
-        [objNull],
-      );
+      await qEqual(col.where().filter().listIsNull(), [objNull]);
     });
   });
 }

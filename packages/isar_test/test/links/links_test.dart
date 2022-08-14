@@ -432,10 +432,10 @@ void main() {
         await a1.links.tSave();
       });
 
-      await qEqualSet(a1.links.filter().findAll(), [b1, b2]);
-      await qEqual(a1.links.filter().sortByNameDesc().findAll(), [b2, b1]);
-      await qEqualSet(a1.links.filter().idEqualTo(b2.id!).findAll(), [b2]);
-      await qEqualSet(a1.links.filter().idEqualTo(5).findAll(), []);
+      await qEqualSet(a1.links.filter(), [b1, b2]);
+      await qEqual(a1.links.filter().sortByNameDesc(), [b2, b1]);
+      await qEqualSet(a1.links.filter().idEqualTo(b2.id), [b2]);
+      await qEqualSet(a1.links.filter().idEqualTo(5), []);
     });
 
     isarTest('.reset()', () async {

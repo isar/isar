@@ -50,33 +50,33 @@ void main() {
 
     isarTest('.equalTo()', () async {
       await qEqual(
-        col.filter().fieldEqualTo('string 2').tFindAll(),
+        col.filter().fieldEqualTo('string 2'),
         [StringModel.init('string 2')],
       );
       await qEqual(
-        col.filter().fieldEqualTo(null).tFindAll(),
+        col.filter().fieldEqualTo(null),
         [StringModel.init(null)],
       );
       await qEqual(
-        col.filter().fieldEqualTo('string 5').tFindAll(),
+        col.filter().fieldEqualTo('string 5'),
         [],
       );
       await qEqual(
-        col.filter().fieldEqualTo('').tFindAll(),
+        col.filter().fieldEqualTo(''),
         [StringModel.init('')],
       );
     });
 
     isarTest('.isNull()', () async {
       await qEqual(
-        col.filter().fieldIsNull().tFindAll(),
+        col.filter().fieldIsNull(),
         [StringModel.init(null)],
       );
     });
 
     isarTest('.startsWith()', () async {
       await qEqualSet(
-        col.filter().fieldStartsWith('string').tFindAll(),
+        col.filter().fieldStartsWith('string'),
         {
           StringModel.init('string 0'),
           StringModel.init('string 1'),
@@ -87,7 +87,7 @@ void main() {
         },
       );
       await qEqualSet(
-        col.filter().fieldStartsWith('').tFindAll(),
+        col.filter().fieldStartsWith(''),
         {
           StringModel.init(''),
           StringModel.init('string 0'),
@@ -98,19 +98,19 @@ void main() {
           StringModel.init('string 4'),
         },
       );
-      await qEqualSet(col.filter().fieldStartsWith('S').tFindAll(), {});
+      await qEqualSet(col.filter().fieldStartsWith('S'), {});
     });
 
     isarTest('.endsWith()', () async {
       await qEqualSet(
-        col.filter().fieldEndsWith('4').tFindAll(),
+        col.filter().fieldEndsWith('4'),
         {
           StringModel.init('string 4'),
           StringModel.init('string 4'),
         },
       );
       await qEqualSet(
-        col.filter().fieldEndsWith('').tFindAll(),
+        col.filter().fieldEndsWith(''),
         {
           StringModel.init(''),
           StringModel.init('string 0'),
@@ -121,11 +121,11 @@ void main() {
           StringModel.init('string 4'),
         },
       );
-      await qEqualSet(col.filter().fieldEndsWith('8').tFindAll(), {});
+      await qEqualSet(col.filter().fieldEndsWith('8'), {});
     });
 
     isarTest('.contains()', () async {
-      await qEqualSet(col.filter().fieldContains('ing').tFindAll(), {
+      await qEqualSet(col.filter().fieldContains('ing'), {
         StringModel.init('string 0'),
         StringModel.init('string 1'),
         StringModel.init('string 2'),
@@ -134,7 +134,7 @@ void main() {
         StringModel.init('string 4'),
       });
       await qEqualSet(
-        col.filter().fieldContains('').tFindAll(),
+        col.filter().fieldContains(''),
         {
           StringModel.init(''),
           StringModel.init('string 0'),
@@ -145,19 +145,19 @@ void main() {
           StringModel.init('string 4'),
         },
       );
-      await qEqualSet(col.where().filter().fieldContains('x').tFindAll(), {});
+      await qEqualSet(col.where().filter().fieldContains('x'), {});
     });
 
     isarTestVm('.matches()', () async {
       await qEqualSet(
-        col.filter().fieldMatches('*ng 4').tFindAll(),
+        col.filter().fieldMatches('*ng 4'),
         {
           StringModel.init('string 4'),
           StringModel.init('string 4'),
         },
       );
       await qEqualSet(
-        col.filter().fieldMatches('????????').tFindAll(),
+        col.filter().fieldMatches('????????'),
         {
           StringModel.init('string 0'),
           StringModel.init('string 1'),
@@ -168,11 +168,11 @@ void main() {
         },
       );
       await qEqualSet(
-        col.filter().fieldMatches('').tFindAll(),
+        col.filter().fieldMatches(''),
         {StringModel.init('')},
       );
 
-      await qEqualSet(col.filter().fieldMatches('*4?').tFindAll(), {});
+      await qEqualSet(col.filter().fieldMatches('*4?'), {});
     });
   });
 }

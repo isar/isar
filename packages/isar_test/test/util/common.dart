@@ -12,14 +12,18 @@ import 'sync_async_helper.dart';
 const bool kIsWeb = identical(0, 0.0);
 
 Future<void> qEqualSet<T>(
-  Future<Iterable<T>> actual,
+  QueryBuilder<dynamic, T, QQueryOperations> query,
   Iterable<T> target,
 ) async {
-  expect((await actual).toSet(), target.toSet());
+  final results = (await query.tFindAll()).toList();
+  expect(results.toSet(), target.toSet());
 }
 
-Future<void> qEqual<T>(Future<Iterable<T>> actual, List<T> target) async {
-  final results = (await actual).toList();
+Future<void> qEqual<T>(
+  QueryBuilder<dynamic, T, QQueryOperations> query,
+  List<T> target,
+) async {
+  final results = (await query.tFindAll()).toList();
   await qEqualSync(results, target);
 }
 
@@ -111,14 +115,12 @@ String getRandomName() {
 }
 
 String? testTempPath;
-Future<Isar> openTempIsar(
-  List<CollectionSchema<dynamic>> schemas, {
-  String? name,
-}) async {
+Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> schemas,
+    {String? name, String? directory, bool autoClose = true}) async {
   await _prepareTest();
   if (!kIsWeb && testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
-    testTempPath = path.join(dartToolDir, 'test', 'tmp');
+    testTempPath = directory ?? path.join(dartToolDir, 'test', 'tmp');
     await Directory(testTempPath!).create(recursive: true);
   }
 
@@ -128,7 +130,9 @@ Future<Isar> openTempIsar(
     directory: kIsWeb ? '' : testTempPath!,
   );
 
-  addTearDown(() => isar.close(deleteFromDisk: true));
+  if (autoClose) {
+    addTearDown(() => isar.close(deleteFromDisk: true));
+  }
 
   await isar.verify();
   return isar;

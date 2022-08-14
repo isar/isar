@@ -15,12 +15,12 @@ void main() {
       Isar.addOpenListener(openListener);
       final listener = Listener(streamController.stream);
 
-      final isar1 = await openTempIsar([UserModelSchema]);
+      final isar1 = await openTempIsar([UserModelSchema], autoClose: false);
       final listenedIsar1 = await listener.next;
       expect(isar1, listenedIsar1);
       await isar1.close();
 
-      final isar2 = await openTempIsar([UserModelSchema]);
+      final isar2 = await openTempIsar([UserModelSchema], autoClose: false);
       final listenerIsar2 = await listener.next;
       expect(isar2, listenerIsar2);
       await isar2.close();
@@ -36,12 +36,12 @@ void main() {
       Isar.addCloseListener(closeListener);
       final listener = Listener(streamController.stream);
 
-      final isar1 = await openTempIsar([UserModelSchema]);
+      final isar1 = await openTempIsar([UserModelSchema], autoClose: false);
       await isar1.close();
       final listenedName1 = await listener.next;
       expect(isar1.name, listenedName1);
 
-      final isar2 = await openTempIsar([UserModelSchema]);
+      final isar2 = await openTempIsar([UserModelSchema], autoClose: false);
       await isar2.close();
       final listenedName2 = await listener.next;
       expect(isar2.name, listenedName2);

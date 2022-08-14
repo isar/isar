@@ -49,49 +49,37 @@ void main() {
     });
 
     isarTest('.equalTo()', () async {
-      await qEqualSet(col.filter().idEqualTo(2).tFindAll(), [obj2]);
-      await qEqualSet(col.filter().idEqualTo(5).tFindAll(), []);
+      await qEqual(col.filter().idEqualTo(2), [obj2]);
+      await qEqual(col.filter().idEqualTo(5), []);
     });
 
     isarTest('.greaterThan()', () async {
-      await qEqual(col.filter().idGreaterThan(2).tFindAll(), [obj3]);
-      await qEqual(
-        col.filter().idGreaterThan(2, include: true).tFindAll(),
-        [obj2, obj3],
-      );
-      await qEqual(col.filter().idGreaterThan(3).tFindAll(), []);
+      await qEqual(col.filter().idGreaterThan(2), [obj3]);
+      await qEqual(col.filter().idGreaterThan(2, include: true), [obj2, obj3]);
+      await qEqual(col.filter().idGreaterThan(3), []);
     });
 
     isarTest('.lessThan()', () async {
-      await qEqual(col.filter().idLessThan(1).tFindAll(), [obj0]);
-      await qEqual(
-        col.filter().idLessThan(1, include: true).tFindAll(),
-        [obj0, obj1],
-      );
-      await qEqual(col.filter().idLessThan(0).tFindAll(), []);
+      await qEqual(col.filter().idLessThan(1), [obj0]);
+      await qEqual(col.filter().idLessThan(1, include: true), [obj0, obj1]);
+      await qEqual(col.filter().idLessThan(0), []);
     });
 
     isarTest('.between()', () async {
+      await qEqual(col.filter().idBetween(1, 3), [obj1, obj2, obj3]);
       await qEqual(
-        col.filter().idBetween(1, 3).tFindAll(),
-        [obj1, obj2, obj3],
-      );
-      await qEqual(
-        col.filter().idBetween(1, 3, includeLower: false).tFindAll(),
+        col.filter().idBetween(1, 3, includeLower: false),
         [obj2, obj3],
       );
       await qEqual(
-        col.filter().idBetween(1, 3, includeUpper: false).tFindAll(),
+        col.filter().idBetween(1, 3, includeUpper: false),
         [obj1, obj2],
       );
       await qEqual(
-        col
-            .filter()
-            .idBetween(1, 3, includeLower: false, includeUpper: false)
-            .tFindAll(),
+        col.filter().idBetween(1, 3, includeLower: false, includeUpper: false),
         [obj2],
       );
-      await qEqual(col.filter().idBetween(5, 6).tFindAll(), []);
+      await qEqual(col.filter().idBetween(5, 6), []);
     });
   });
 }

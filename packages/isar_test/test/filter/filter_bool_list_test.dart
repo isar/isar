@@ -49,25 +49,16 @@ void main() {
     });
 
     isarTest('.elementEqualTo()', () async {
-      await qEqual(
-        col.filter().listElementEqualTo(true).tFindAll(),
-        [obj1, obj3],
-      );
-      await qEqual(col.filter().listElementEqualTo(null).tFindAll(), [obj2]);
+      await qEqual(col.filter().listElementEqualTo(true), [obj1, obj3]);
+      await qEqual(col.filter().listElementEqualTo(null), [obj2]);
     });
 
     isarTest('.elementIsNull()', () async {
-      await qEqual(
-        col.where().filter().listElementIsNull().tFindAll(),
-        [obj2],
-      );
+      await qEqual(col.where().filter().listElementIsNull(), [obj2]);
     });
 
     isarTest('.isNull()', () async {
-      await qEqual(
-        col.where().filter().listIsNull().tFindAll(),
-        [objNull],
-      );
+      await qEqual(col.where().filter().listIsNull(), [objNull]);
     });
   });
 }

@@ -54,7 +54,11 @@ Future<void> _isolateFunc(SendPort port) async {
 
 void main() {
   isarTest('Isolate test', () async {
-    final isar = await openTempIsar([TestModelSchema], name: 'test');
+    final isar = await openTempIsar(
+      [TestModelSchema],
+      name: 'test',
+      autoClose: false,
+    );
 
     await isar.tWriteTxn(() async {
       await isar.testModels.tPutAll([_obj1, _obj2]);
@@ -69,7 +73,7 @@ void main() {
     final result = await port.first;
     expect(result, true);
 
-    await qEqual(isar.testModels.where().tFindAll(), [_obj1, _obj3]);
+    await qEqual(isar.testModels.where(), [_obj1, _obj3]);
 
     expect(await isar.close(), true);
   });

@@ -144,7 +144,7 @@ void main() {
 
       await isar.models.verify([allNull, simple, nested]);
 
-      await qEqual(isar.models.where().findAll(), [allNull, simple, nested]);
+      await qEqual(isar.models.where(), [allNull, simple, nested]);
     });
 
     isarTest('.importJson()', () async {
@@ -164,8 +164,8 @@ void main() {
         await isar.models.tPutAll([allNull, simple, nested]);
       });
 
-      await qEqual(
-        isar.models.where().exportJson(),
+      expect(
+        await isar.models.where().exportJson(),
         [
           allNull.toJson(),
           simple.toJson(),

@@ -53,35 +53,35 @@ void main() {
 
     isarTest('.elementGreaterThan()', () async {
       await qEqualSet(
-        col.where().listElementGreaterThan(1.1).tFindAll(),
+        col.where().listElementGreaterThan(1.1),
         [obj1],
       );
-      await qEqualSet(col.where().listElementGreaterThan(4).tFindAll(), []);
+      await qEqualSet(col.where().listElementGreaterThan(4), []);
     });
 
     isarTest('.elementLessThan()', () async {
       await qEqualSet(
-        col.where().listElementLessThan(1.1).tFindAll(),
+        col.where().listElementLessThan(1.1),
         [obj2, obj3],
       );
-      await qEqualSet(col.where().listElementLessThan(null).tFindAll(), []);
+      await qEqualSet(col.where().listElementLessThan(null), []);
     });
 
     isarTest('.anyBetween()', () async {
-      await qEqualSet(col.where().listElementBetween(1, 5).tFindAll(), [obj1]);
-      await qEqualSet(col.where().listElementBetween(5, 10).tFindAll(), []);
+      await qEqualSet(col.where().listElementBetween(1, 5), [obj1]);
+      await qEqualSet(col.where().listElementBetween(5, 10), []);
     });
 
     isarTest('.elementIsNull()', () async {
       await qEqualSet(
-        col.where().listElementIsNull().tFindAll(),
+        col.where().listElementIsNull(),
         [obj2, obj3],
       );
     });
 
     isarTest('.elementIsNotNull()', () async {
       await qEqualSet(
-        col.where().listElementIsNotNull().tFindAll(),
+        col.where().listElementIsNotNull(),
         [obj1, obj3],
       );
     });

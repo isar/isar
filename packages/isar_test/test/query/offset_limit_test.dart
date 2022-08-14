@@ -1,74 +1,95 @@
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
-import '../user_model.dart';
 import '../util/common.dart';
 import '../util/sync_async_helper.dart';
 
+part 'offset_limit_test.g.dart';
+
+@Collection()
+class Model {
+  Model(this.value);
+
+  final Id id = Isar.autoIncrement;
+
+  final String value;
+
+  @override
+  // ignore: hash_and_equals
+  bool operator ==(Object other) =>
+      other is Model && other.id == id && other.value == value;
+}
+
 void main() {
-  group('OffsetLimit', () {
+  group('Offset Limit', () {
     late Isar isar;
-    late IsarCollection<UserModel> col;
-    late List<UserModel> users;
+    late IsarCollection<Model> col;
+
+    late List<Model> objects;
+    late Model objA;
+    late Model objA2;
+    late Model objB;
+    late Model objC;
+    late Model objC2;
 
     setUp(() async {
-      isar = await openTempIsar([UserModelSchema]);
-      col = isar.userModels;
+      isar = await openTempIsar([ModelSchema]);
+      col = isar.models;
 
-      users = [
-        UserModel.fill('user1', 10, false),
-        UserModel.fill('user2', 20, false),
-        UserModel.fill('user3', 30, true),
-        UserModel.fill('user4', 40, false),
-        UserModel.fill('user5', 50, false),
-      ];
+      objA = Model('A');
+      objA2 = Model('A');
+      objB = Model('B');
+      objC = Model('C');
+      objC2 = Model('C');
+      objects = [objB, objA, objC, objA2, objC2];
+
       await isar.writeTxn(() async {
-        await col.putAll(users);
+        await col.putAll(objects);
       });
     });
 
     isarTest('0 offset', () async {
-      final result = col.where().offset(0).tFindAll();
-      await qEqual(result, users);
+      final result = col.where().offset(0);
+      await qEqual(result, objects);
     });
 
     isarTest('big offset', () async {
-      final result = col.where().offset(99).tFindAll();
+      final result = col.where().offset(99);
       await qEqual(result, []);
     });
 
     isarTest('offset', () async {
-      final result = col.where().offset(2).tFindAll();
-      await qEqual(result, users.sublist(2, 5));
+      final result = col.where().offset(2);
+      await qEqual(result, objects.sublist(2, 5));
     });
 
     isarTest('0 limit', () async {
-      final result = col.where().limit(0).tFindAll();
+      final result = col.where().limit(0);
       await qEqual(result, []);
     });
 
     isarTest('big limit', () async {
-      final result = col.where().limit(999999).tFindAll();
-      await qEqual(result, users);
+      final result = col.where().limit(999999);
+      await qEqual(result, objects);
     });
 
     isarTest('limit', () async {
-      final result = col.where().limit(3).tFindAll();
-      await qEqual(result, users.sublist(0, 3));
+      final result = col.where().limit(3);
+      await qEqual(result, objects.sublist(0, 3));
     });
 
     isarTest('offset and limit', () async {
-      final result = col.where().offset(3).limit(1).tFindAll();
-      await qEqual(result, users.sublist(3, 4));
+      final result = col.where().offset(3).limit(1);
+      await qEqual(result, objects.sublist(3, 4));
     });
 
     isarTest('offset and big limit', () async {
-      final result = col.where().offset(3).limit(1000).tFindAll();
-      await qEqual(result, users.sublist(3));
+      final result = col.where().offset(3).limit(1000);
+      await qEqual(result, objects.sublist(3));
     });
 
     isarTest('big offset and big limit', () async {
-      final result = col.where().offset(300).limit(5).tFindAll();
+      final result = col.where().offset(300).limit(5);
       await qEqual(result, []);
     });
   });

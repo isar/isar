@@ -82,8 +82,6 @@ void main() {
     group('Other', () {
       setUp(_setup);
 
-      tearDown(() => isar.close(deleteFromDisk: true));
-
       isarTest('single', () async {
         a1.links.addAll([b1, b3]);
         a2.links.addAll([b2, b3]);
@@ -96,11 +94,7 @@ void main() {
         });
 
         await qEqualSet(
-          isar.linkModelAs
-              .where()
-              .filter()
-              .links((q) => q.idEqualTo(b1.id))
-              .tFindAll(),
+          isar.linkModelAs.where().filter().links((q) => q.idEqualTo(b1.id)),
           [a1, a3],
         );
 
@@ -108,17 +102,12 @@ void main() {
           isar.linkModelAs
               .where()
               .filter()
-              .links((q) => q.not().nameContains('1'))
-              .tFindAll(),
+              .links((q) => q.not().nameContains('1')),
           [a1, a2],
         );
 
         await qEqualSet(
-          isar.linkModelAs
-              .where()
-              .filter()
-              .links((q) => q.idGreaterThan(5))
-              .tFindAll(),
+          isar.linkModelAs.where().filter().links((q) => q.idGreaterThan(5)),
           [],
         );
       });
@@ -139,8 +128,7 @@ void main() {
               .where()
               .filter()
               .links((q) => q.idEqualTo(b1.id))
-              .links((q) => q.idEqualTo(b3.id))
-              .tFindAll(),
+              .links((q) => q.idEqualTo(b3.id)),
           [a1],
         );
 
@@ -150,8 +138,7 @@ void main() {
               .filter()
               .links((q) => q.nameContains('2'))
               .or()
-              .links((q) => q.nameContains('3'))
-              .tFindAll(),
+              .links((q) => q.nameContains('3')),
           [a1, a2],
         );
       });
@@ -164,20 +151,12 @@ void main() {
         });
 
         await qEqualSet(
-          isar.linkModelAs
-              .where()
-              .filter()
-              .links((q) => q.idEqualTo(b1.id))
-              .tFindAll(),
+          isar.linkModelAs.where().filter().links((q) => q.idEqualTo(b1.id)),
           [a1],
         );
 
         await qEqualSet(
-          isar.linkModelAs
-              .where()
-              .filter()
-              .links((q) => q.idGreaterThan(5))
-              .tFindAll(),
+          isar.linkModelAs.where().filter().links((q) => q.idGreaterThan(5)),
           [],
         );
       });
@@ -185,8 +164,6 @@ void main() {
 
     group('Self', () {
       setUp(_setup);
-
-      tearDown(() => isar.close(deleteFromDisk: true));
 
       isarTest('single', () async {
         a1.selfLinks.addAll([a1, a2, a3]);
@@ -203,8 +180,7 @@ void main() {
           isar.linkModelAs
               .where()
               .filter()
-              .selfLinks((q) => q.idEqualTo(a1.id))
-              .tFindAll(),
+              .selfLinks((q) => q.idEqualTo(a1.id)),
           [a1],
         );
 
@@ -212,17 +188,12 @@ void main() {
           isar.linkModelAs
               .where()
               .filter()
-              .selfLinks((q) => q.not().nameContains('2'))
-              .tFindAll(),
+              .selfLinks((q) => q.not().nameContains('2')),
           [a1, a2],
         );
 
         await qEqualSet(
-          isar.linkModelAs
-              .where()
-              .filter()
-              .links((q) => q.idGreaterThan(5))
-              .tFindAll(),
+          isar.linkModelAs.where().filter().links((q) => q.idGreaterThan(5)),
           [],
         );
       });
@@ -243,8 +214,7 @@ void main() {
               .where()
               .filter()
               .selfLinks((q) => q.idEqualTo(a1.id))
-              .selfLinks((q) => q.idEqualTo(a3.id))
-              .tFindAll(),
+              .selfLinks((q) => q.idEqualTo(a3.id)),
           [a1],
         );
 
@@ -254,8 +224,7 @@ void main() {
               .filter()
               .selfLinks((q) => q.nameContains('2'))
               .or()
-              .selfLinks((q) => q.nameContains('1'))
-              .tFindAll(),
+              .selfLinks((q) => q.nameContains('1')),
           [a1, a2, a3],
         );
       });
@@ -271,8 +240,7 @@ void main() {
           isar.linkModelAs
               .where()
               .filter()
-              .selfLinks((q) => q.idEqualTo(a2.id))
-              .tFindAll(),
+              .selfLinks((q) => q.idEqualTo(a2.id)),
           [a1],
         );
 
@@ -280,8 +248,7 @@ void main() {
           isar.linkModelAs
               .where()
               .filter()
-              .selfLinks((q) => q.idGreaterThan(5))
-              .tFindAll(),
+              .selfLinks((q) => q.idGreaterThan(5)),
           [],
         );
       });
@@ -289,8 +256,6 @@ void main() {
 
     group('Backlink', () {
       setUp(_setup);
-
-      tearDown(() => isar.close(deleteFromDisk: true));
 
       isarTest('single', () async {
         a1.links.addAll([b1, b3]);
@@ -307,8 +272,7 @@ void main() {
           isar.linkModelBs
               .where()
               .filter()
-              .backlinks((q) => q.idEqualTo(a1.id))
-              .tFindAll(),
+              .backlinks((q) => q.idEqualTo(a1.id)),
           [b1, b3],
         );
 
@@ -316,8 +280,7 @@ void main() {
           isar.linkModelBs
               .where()
               .filter()
-              .backlinks((q) => q.not().nameContains('3'))
-              .tFindAll(),
+              .backlinks((q) => q.not().nameContains('3')),
           [b1, b3],
         );
 
@@ -325,8 +288,7 @@ void main() {
           isar.linkModelBs
               .where()
               .filter()
-              .backlinks((q) => q.idGreaterThan(5))
-              .tFindAll(),
+              .backlinks((q) => q.idGreaterThan(5)),
           [],
         );
       });
@@ -347,8 +309,7 @@ void main() {
               .where()
               .filter()
               .backlinks((q) => q.idEqualTo(a1.id))
-              .backlinks((q) => q.idEqualTo(a3.id))
-              .tFindAll(),
+              .backlinks((q) => q.idEqualTo(a3.id)),
           [b1],
         );
 
@@ -358,8 +319,7 @@ void main() {
               .filter()
               .backlinks((q) => q.nameContains('2'))
               .or()
-              .backlinks((q) => q.nameContains('1'))
-              .tFindAll(),
+              .backlinks((q) => q.nameContains('1')),
           [b1, b3],
         );
       });
@@ -375,8 +335,7 @@ void main() {
           isar.linkModelBs
               .where()
               .filter()
-              .backlinks((q) => q.idEqualTo(a1.id))
-              .tFindAll(),
+              .backlinks((q) => q.idEqualTo(a1.id)),
           [b1],
         );
 
@@ -384,8 +343,7 @@ void main() {
           isar.linkModelBs
               .where()
               .filter()
-              .backlinks((q) => q.idGreaterThan(5))
-              .tFindAll(),
+              .backlinks((q) => q.idGreaterThan(5)),
           [],
         );
       });

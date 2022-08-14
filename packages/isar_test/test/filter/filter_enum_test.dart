@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 import '../util/common.dart';
 
-part 'enum_test.g.dart';
+part 'filter_enum_test.g.dart';
 
 @Collection()
 class EnumModel {
@@ -47,7 +47,6 @@ void main() {
   group('Enum filter', () {
     late Isar isar;
     late IsarCollection<EnumModel> col;
-    In
 
     late EnumModel objMin;
     late EnumModel obj1;

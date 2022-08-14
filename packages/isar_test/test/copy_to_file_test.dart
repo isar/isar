@@ -42,10 +42,6 @@ void main() {
       );
     });
 
-    tearDown(() async {
-      await isar.close(deleteFromDisk: true);
-    });
-
     isarTestVm('.copyToFile() should create a new file', () async {
       final copiedDbFile = File(path.join(isar.directory!, getRandomName()));
       expect(copiedDbFile.existsSync(), false);
@@ -67,16 +63,15 @@ void main() {
 
       await isar.copyToFile(copiedDbFile.path);
 
-      final copiedIsar = await tOpen(
-        schemas: [ModelSchema],
+      final copiedIsar = await openTempIsar(
+        [ModelSchema],
         directory: isar.directory,
         name: copiedDbFilename,
       );
-      addTearDown(() => copiedIsar.close(deleteFromDisk: true));
 
       final originalObjs = await isar.models.where().tFindAll();
-      await qEqualSet(
-        copiedIsar.models.where().tFindAll(),
+      await qEqual(
+        copiedIsar.models.where(),
         originalObjs,
       );
     });
@@ -94,12 +89,11 @@ void main() {
 
       await isar.copyToFile(copiedDbFile1.path);
 
-      final isarCopy1 = await tOpen(
-        schemas: [ModelSchema],
+      final isarCopy1 = await openTempIsar(
+        [ModelSchema],
         directory: isar.directory,
         name: copiedDbFilename1,
       );
-      addTearDown(() => isarCopy1.close(deleteFromDisk: true));
 
       expect(copiedDbFile1.lengthSync(), greaterThan(0));
       expect(
@@ -118,13 +112,6 @@ void main() {
           '$copiedDbFilename2.isar',
         ),
       );
-
-      final isarCopy2 = await tOpen(
-        schemas: [ModelSchema],
-        directory: isar.directory,
-        name: copiedDbFilename2,
-      );
-      addTearDown(() => isarCopy2.close(deleteFromDisk: true));
 
       expect(copiedDbFile2.lengthSync(), greaterThan(0));
       expect(
@@ -155,12 +142,11 @@ void main() {
 
       expect(copiedDbFile1.lengthSync(), copiedDbFile2.lengthSync());
 
-      final isarCopy = await tOpen(
-        schemas: [ModelSchema],
+      final isarCopy = await openTempIsar(
+        [ModelSchema],
         directory: isar.directory,
         name: copiedDbFilename1,
       );
-      addTearDown(() => isarCopy.close(deleteFromDisk: true));
 
       final copiedDbFilename3 = getRandomName();
       final copiedDbFile3 = File(

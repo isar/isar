@@ -37,14 +37,18 @@ class Col2 {
 
 void main() {
   isarTest('Add remove index', () async {
-    final isar1 = await openTempIsar([Col1Schema]);
+    final isar1 = await openTempIsar([Col1Schema], autoClose: false);
     await isar1.tWriteTxn(() {
       return isar1.col1s.tPutAll([Col1(1, 'a'), Col1(2, 'b')]);
     });
     expect(await isar1.close(), true);
 
-    final isar2 = await openTempIsar([Col2Schema], name: isar1.name);
-    await qEqual(isar2.col2s.where().tFindAll(), [Col2(1, 'a'), Col2(2, 'b')]);
+    final isar2 = await openTempIsar(
+      [Col2Schema],
+      name: isar1.name,
+      autoClose: false,
+    );
+    await qEqual(isar2.col2s.where(), [Col2(1, 'a'), Col2(2, 'b')]);
     expect(await isar2.col2s.getByValue('a'), Col2(1, 'a'));
     await isar2.tWriteTxn(() {
       return isar2.col2s.tPutAll([Col2(1, 'c'), Col2(3, 'd')]);
@@ -52,11 +56,10 @@ void main() {
     expect(await isar2.close(), true);
 
     final isar3 = await openTempIsar([Col1Schema], name: isar1.name);
-    await qEqual(isar3.col1s.where().tFindAll(), [
+    await qEqual(isar3.col1s.where(), [
       Col1(1, 'c'),
       Col1(2, 'b'),
       Col1(3, 'd'),
     ]);
-    expect(await isar3.close(), true);
   });
 }

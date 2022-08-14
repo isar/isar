@@ -51,43 +51,28 @@ void main() {
     });
 
     isarTest('.elementGreaterThan()', () async {
-      await qEqual(
-        col.filter().listElementGreaterThan(1.1).tFindAll(),
-        [obj1],
-      );
-      await qEqual(col.filter().listElementGreaterThan(4).tFindAll(), []);
-      await qEqual(
-        col.filter().listElementGreaterThan(null).tFindAll(),
-        [obj1, obj3],
-      );
+      await qEqual(col.filter().listElementGreaterThan(1.1), [obj1]);
+      await qEqual(col.filter().listElementGreaterThan(4), []);
+      await qEqual(col.filter().listElementGreaterThan(null), [obj1, obj3]);
     });
 
     isarTest('.elementLessThan()', () async {
-      await qEqual(
-        col.filter().listElementLessThan(1.1).tFindAll(),
-        [obj2, obj3],
-      );
-      await qEqual(col.filter().listElementLessThan(null).tFindAll(), []);
+      await qEqual(col.filter().listElementLessThan(1.1), [obj2, obj3]);
+      await qEqual(col.filter().listElementLessThan(null), []);
     });
 
     isarTest('.anyBetween()', () async {
-      await qEqual(col.filter().listElementBetween(1, 5).tFindAll(), [obj1]);
-      await qEqual(col.filter().listElementBetween(5, 10).tFindAll(), []);
+      await qEqual(col.filter().listElementBetween(1, 5), [obj1]);
+      await qEqual(col.filter().listElementBetween(5, 10), []);
+      await qEqual(col.filter().listElementBetween(null, null), [obj2, obj3]);
       await qEqual(
-        col.filter().listElementBetween(null, null).tFindAll(),
-        [obj2, obj3],
-      );
-      await qEqual(
-        col.filter().listElementBetween(null, 1.2).tFindAll(),
+        col.filter().listElementBetween(null, 1.2),
         [obj1, obj2, obj3],
       );
     });
 
     isarTest('.elementIsNull()', () async {
-      await qEqual(
-        col.filter().listElementIsNull().tFindAll(),
-        [obj2, obj3],
-      );
+      await qEqual(col.filter().listElementIsNull(), [obj2, obj3]);
     });
   });
 }

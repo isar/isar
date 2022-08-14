@@ -58,50 +58,50 @@ void main() {
 
     isarTest('.equalTo()', () async {
       await qEqual(
-        col.where().hashFieldEqualTo('string 2').tFindAll(),
+        col.where().hashFieldEqualTo('string 2'),
         [StringModel.init('string 2')],
       );
       await qEqual(
-        col.where().fieldEqualTo('string 2').tFindAll(),
+        col.where().fieldEqualTo('string 2'),
         [StringModel.init('string 2')],
       );
 
       await qEqual(
-        col.where().hashFieldEqualTo(null).tFindAll(),
+        col.where().hashFieldEqualTo(null),
         [StringModel.init(null)],
       );
       await qEqual(
-        col.where().fieldEqualTo(null).tFindAll(),
+        col.where().fieldEqualTo(null),
         [StringModel.init(null)],
       );
 
-      await qEqual(col.where().hashFieldEqualTo('string 5').tFindAll(), []);
-      await qEqual(col.where().fieldEqualTo('string 5').tFindAll(), []);
+      await qEqual(col.where().hashFieldEqualTo('string 5'), []);
+      await qEqual(col.where().fieldEqualTo('string 5'), []);
 
       await qEqual(
-        col.where().hashFieldEqualTo('').tFindAll(),
+        col.where().hashFieldEqualTo(''),
         [StringModel.init('')],
       );
       await qEqual(
-        col.where().fieldEqualTo('').tFindAll(),
+        col.where().fieldEqualTo(''),
         [StringModel.init('')],
       );
     });
 
     isarTest('.isNull()', () async {
       await qEqual(
-        col.where().hashFieldIsNull().tFindAll(),
+        col.where().hashFieldIsNull(),
         [StringModel.init(null)],
       );
       await qEqual(
-        col.where().fieldIsNull().tFindAll(),
+        col.where().fieldIsNull(),
         [StringModel.init(null)],
       );
     });
 
     isarTest('.isNotNull()', () async {
       await qEqualSet(
-        col.where().hashFieldIsNotNull().tFindAll(),
+        col.where().hashFieldIsNotNull(),
         {
           StringModel.init(''),
           StringModel.init('string 0'),
@@ -114,7 +114,7 @@ void main() {
       );
 
       await qEqual(
-        col.where().fieldIsNotNull().tFindAll(),
+        col.where().fieldIsNotNull(),
         [
           StringModel.init(''),
           StringModel.init('string 0'),
@@ -129,7 +129,7 @@ void main() {
 
     isarTest('.notEqualTo()', () async {
       await qEqualSet(
-        col.where().hashFieldNotEqualTo('string 4').tFindAll(),
+        col.where().hashFieldNotEqualTo('string 4'),
         {
           StringModel.init(null),
           StringModel.init(''),
@@ -140,7 +140,7 @@ void main() {
         },
       );
       await qEqualSet(
-        col.where().fieldNotEqualTo('string 4').tFindAll(),
+        col.where().fieldNotEqualTo('string 4'),
         [
           StringModel.init(null),
           StringModel.init(''),
@@ -154,7 +154,7 @@ void main() {
 
     isarTest('.startsWith()', () async {
       await qEqual(
-        col.where().fieldStartsWith('string').tFindAll(),
+        col.where().fieldStartsWith('string'),
         [
           StringModel.init('string 0'),
           StringModel.init('string 1'),
@@ -166,7 +166,7 @@ void main() {
       );
 
       await qEqual(
-        col.where().fieldStartsWith('').tFindAll(),
+        col.where().fieldStartsWith(''),
         [
           StringModel.init(''),
           StringModel.init('string 0'),
@@ -178,7 +178,7 @@ void main() {
         ],
       );
 
-      await qEqual(col.where().fieldStartsWith('S').tFindAll(), []);
+      await qEqual(col.where().fieldStartsWith('S'), []);
     });
   });
 }

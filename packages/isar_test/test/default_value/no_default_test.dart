@@ -91,7 +91,7 @@ void main() {
   group('No default value', () {
     isarTest('scalar', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -111,12 +111,11 @@ void main() {
       expect(obj.stringValue, '');
       expect(obj.embeddedValue, const MyEmbedded());
       expect(obj.enumValue, MyEnum.value1);
-      await isar2.close();
     });
 
     isarTest('scalar property', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -168,12 +167,11 @@ void main() {
         await isar2.noDefaultModels.where().enumValueProperty().tFindFirst(),
         MyEnum.value1,
       );
-      await isar2.close();
     });
 
     isarTest('list', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -191,12 +189,11 @@ void main() {
       expect(obj.stringValue, isEmpty);
       expect(obj.embeddedValue, isEmpty);
       expect(obj.enumValue, isEmpty);
-      await isar2.close();
     });
 
     isarTest('list property', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -270,7 +267,6 @@ void main() {
             .tFindFirst(),
         isEmpty,
       );
-      await isar2.close();
     });
   });
 }

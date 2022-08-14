@@ -58,8 +58,7 @@ void main() {
         );
         expect(ids, [4, 5, 6, 7, 8, 9]);
 
-        final allIds =
-            await isar.implicitNullableIdModels.where().idProperty().tFindAll();
+        final allIds = await isar.implicitNullableIdModels.where().idProperty();
         expect(allIds, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
       });
 
@@ -175,8 +174,7 @@ void main() {
         );
         expect(ids, [3, 4, 5, 6, 7, 8]);
 
-        final allIds =
-            await isar.implicitFinalIdModels.where().idProperty().tFindAll();
+        final allIds = await isar.implicitFinalIdModels.where().idProperty();
         expect(allIds, [1, 2, 3, 4, 5, 6, 7, 8]);
       });
     });
@@ -206,8 +204,7 @@ void main() {
         );
         expect(ids, [4, 5, 6, 7, 8, 9]);
 
-        final allIds =
-            await isar.explicitIdModels.where().idProperty().tFindAll();
+        final allIds = await isar.explicitIdModels.where().idProperty();
         expect(allIds, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
       });
     });

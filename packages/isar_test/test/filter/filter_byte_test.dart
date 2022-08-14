@@ -2,7 +2,6 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
-import '../util/sync_async_helper.dart';
 
 part 'filter_byte_test.g.dart';
 
@@ -48,57 +47,51 @@ void main() {
     });
 
     isarTest('.equalTo()', () async {
-      await qEqual(col.filter().fieldEqualTo(0).tFindAll(), [objMin]);
-      await qEqual(col.filter().fieldEqualTo(1).tFindAll(), [obj1, obj3]);
+      await qEqual(col.filter().fieldEqualTo(0), [objMin]);
+      await qEqual(col.filter().fieldEqualTo(1), [obj1, obj3]);
     });
 
     isarTest('.greaterThan()', () async {
       await qEqual(
-        col.filter().fieldGreaterThan(0).tFindAll(),
+        col.filter().fieldGreaterThan(0),
         [obj1, obj2, obj3, objMax],
       );
       await qEqual(
-        col.filter().fieldGreaterThan(0, include: true).tFindAll(),
+        col.filter().fieldGreaterThan(0, include: true),
         [objMin, obj1, obj2, obj3, objMax],
       );
-      await qEqual(col.filter().fieldGreaterThan(255).tFindAll(), []);
+      await qEqual(col.filter().fieldGreaterThan(255), []);
       await qEqual(
-        col.filter().fieldGreaterThan(255, include: true).tFindAll(),
+        col.filter().fieldGreaterThan(255, include: true),
         [objMax],
       );
     });
 
     isarTest('.lessThan()', () async {
+      await qEqual(col.filter().fieldLessThan(255), [objMin, obj1, obj2, obj3]);
       await qEqual(
-        col.filter().fieldLessThan(255).tFindAll(),
-        [objMin, obj1, obj2, obj3],
-      );
-      await qEqual(
-        col.filter().fieldLessThan(255, include: true).tFindAll(),
+        col.filter().fieldLessThan(255, include: true),
         [objMin, obj1, obj2, obj3, objMax],
       );
-      await qEqual(col.filter().fieldLessThan(0).tFindAll(), []);
-      await qEqual(
-        col.filter().fieldLessThan(0, include: true).tFindAll(),
-        [objMin],
-      );
+      await qEqual(col.filter().fieldLessThan(0), []);
+      await qEqual(col.filter().fieldLessThan(0, include: true), [objMin]);
     });
 
     isarTest('.between()', () async {
       await qEqual(
-        col.filter().fieldBetween(0, 255).tFindAll(),
+        col.filter().fieldBetween(0, 255),
         [objMin, obj1, obj2, obj3, objMax],
       );
       await qEqual(
-        col.filter().fieldBetween(0, 255, includeLower: false).tFindAll(),
+        col.filter().fieldBetween(0, 255, includeLower: false),
         [obj1, obj2, obj3, objMax],
       );
       await qEqual(
-        col.filter().fieldBetween(0, 255, includeUpper: false).tFindAll(),
+        col.filter().fieldBetween(0, 255, includeUpper: false),
         [objMin, obj1, obj2, obj3],
       );
-      await qEqual(col.filter().fieldBetween(255, 0).tFindAll(), []);
-      await qEqual(col.filter().fieldBetween(100, 110).tFindAll(), []);
+      await qEqual(col.filter().fieldBetween(255, 0), []);
+      await qEqual(col.filter().fieldBetween(100, 110), []);
     });
   });
 }

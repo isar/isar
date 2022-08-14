@@ -128,7 +128,7 @@ void main() {
       });
 
       await qEqual(
-        isar.emptyConstructorModels.where().tFindAll(),
+        isar.emptyConstructorModels.where(),
         [obj1, obj2],
       );
     });
@@ -141,7 +141,7 @@ void main() {
       });
 
       await qEqual(
-        isar.namedConstructorModels.where().tFindAll(),
+        isar.namedConstructorModels.where(),
         [obj1, obj2],
       );
     });
@@ -155,7 +155,7 @@ void main() {
       });
 
       await qEqual(
-        isar.positionalConstructorModels.where().tFindAll(),
+        isar.positionalConstructorModels.where(),
         [obj1, obj2, obj3],
       );
     });
@@ -170,7 +170,7 @@ void main() {
       });
 
       await qEqual(
-        isar.optionalConstructorModels.where().tFindAll(),
+        isar.optionalConstructorModels.where(),
         [obj1WithId, obj2, obj3],
       );
     });
@@ -183,7 +183,7 @@ void main() {
       });
 
       await qEqual(
-        isar.positionalNamedConstructorModels.where().tFindAll(),
+        isar.positionalNamedConstructorModels.where(),
         [obj1, obj2],
       );
     });

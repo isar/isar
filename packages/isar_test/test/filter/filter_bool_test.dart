@@ -46,16 +46,16 @@ void main() {
     });
 
     isarTest('.equalTo()', () async {
-      await qEqual(col.filter().fieldEqualTo(true).tFindAll(), [objTrue]);
+      await qEqual(col.filter().fieldEqualTo(true), [objTrue]);
       await qEqualSet(
-        col.filter().fieldEqualTo(false).tFindAll(),
+        col.filter().fieldEqualTo(false),
         [objFalse, objFalse2],
       );
-      await qEqual(col.filter().fieldEqualTo(null).tFindAll(), [objNull]);
+      await qEqual(col.filter().fieldEqualTo(null), [objNull]);
     });
 
     isarTest('.isNull()', () async {
-      await qEqualSet(col.where().filter().fieldIsNull().tFindAll(), [objNull]);
+      await qEqualSet(col.where().filter().fieldIsNull(), [objNull]);
     });
   });
 }

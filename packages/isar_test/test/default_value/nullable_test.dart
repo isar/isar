@@ -88,7 +88,7 @@ void main() {
   group('Nullable value', () {
     isarTest('scalar', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -104,12 +104,11 @@ void main() {
       expect(obj.stringValue, null);
       expect(obj.embeddedValue, null);
       expect(obj.enumValue, null);
-      await isar2.close();
     });
 
     isarTest('scalar property', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -151,12 +150,11 @@ void main() {
         await isar2.nullableModels.where().enumValueProperty().tFindFirst(),
         null,
       );
-      await isar2.close();
     });
 
     isarTest('list', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -173,12 +171,11 @@ void main() {
       expect(obj.stringValue, null);
       expect(obj.embeddedValue, null);
       expect(obj.enumValue, null);
-      await isar2.close();
     });
 
     isarTest('list property', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -239,7 +236,6 @@ void main() {
         await isar2.nullableListModels.where().enumValueProperty().tFindFirst(),
         null,
       );
-      await isar2.close();
     });
   });
 }

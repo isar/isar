@@ -212,7 +212,7 @@ void main() {
           value: DateTime(1980),
         ),
         sortBy: const [SortProperty(property: 'birthdate', sort: Sort.desc)],
-      ).tFindAll();
+      );
 
       expect(objs, [account15, account10, account3, account0, account14]);
     });
@@ -269,7 +269,7 @@ void main() {
           SortProperty(property: 'firstname', sort: Sort.asc),
           SortProperty(property: 'lastname', sort: Sort.desc),
         ],
-      ).tFindAll();
+      );
 
       expect(objs, [account0, account14, account2, account3]);
     });
@@ -308,7 +308,7 @@ void main() {
           ),
         ),
         sortBy: const [SortProperty(property: 'userId', sort: Sort.asc)],
-      ).tFindAll();
+      );
 
       expect(objs, [account5, account11]);
     });
@@ -333,7 +333,7 @@ void main() {
           ]),
         ]),
         sortBy: const [SortProperty(property: 'firstname', sort: Sort.desc)],
-      ).tFindAll();
+      );
 
       expect(objs, [account5, account2]);
     });
@@ -367,7 +367,7 @@ void main() {
         ),
         property: 'firstname',
         sortBy: const [SortProperty(property: 'firstname', sort: Sort.asc)],
-      ).tFindAll();
+      );
 
       expect(firstnames, ['Foo1', 'Foo12', 'Foo13', 'Foo2', 'Foo6', 'Foo8']);
     });
@@ -392,7 +392,7 @@ void main() {
             ]),
         ]),
         sortBy: const [SortProperty(property: 'firstname', sort: Sort.asc)],
-      ).tFindAll();
+      );
 
       expect(objs, [account10, account11, account14, account15]);
     });

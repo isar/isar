@@ -41,14 +41,18 @@ class Col2 {
 
 void main() {
   isarTest('Add field', () async {
-    final isar1 = await openTempIsar([Col1Schema]);
+    final isar1 = await openTempIsar([Col1Schema], autoClose: false);
     await isar1.tWriteTxn(() {
       return isar1.col1s.tPutAll([Col1(1, 'value1'), Col1(2, 'value2')]);
     });
     expect(await isar1.close(), true);
 
-    final isar2 = await openTempIsar([Col2Schema], name: isar1.name);
-    await qEqual(isar2.col2s.where().tFindAll(), [
+    final isar2 = await openTempIsar(
+      [Col2Schema],
+      name: isar1.name,
+      autoClose: false,
+    );
+    await qEqual(isar2.col2s.where(), [
       Col2(1, 'value1', null),
       Col2(2, 'value2', null),
     ]);
@@ -58,7 +62,7 @@ void main() {
         Col2(3, 'value4', [])
       ]);
     });
-    await qEqual(isar2.col2s.where().tFindAll(), [
+    await qEqual(isar2.col2s.where(), [
       Col2(1, 'value3', ['hi']),
       Col2(2, 'value2', null),
       Col2(3, 'value4', []),
@@ -66,16 +70,15 @@ void main() {
     expect(await isar2.close(), true);
 
     final isar3 = await openTempIsar([Col1Schema], name: isar1.name);
-    await qEqual(isar3.col1s.where().tFindAll(), [
+    await qEqual(isar3.col1s.where(), [
       Col1(1, 'value3'),
       Col1(2, 'value2'),
       Col1(3, 'value4'),
     ]);
-    expect(await isar3.close(), true);
   });
 
   isarTest('Remove field', () async {
-    final isar1 = await openTempIsar([Col2Schema]);
+    final isar1 = await openTempIsar([Col2Schema], autoClose: false);
     await isar1.writeTxn(() {
       return isar1.col2s.putAll([
         Col2(1, 'value1', ['hi']),
@@ -85,17 +88,16 @@ void main() {
     expect(await isar1.close(), true);
 
     final isar2 = await openTempIsar([Col1Schema], name: isar1.name);
-    await qEqual(isar2.col1s.where().findAll(), [
+    await qEqual(isar2.col1s.where(), [
       Col1(1, 'value1'),
       Col1(2, 'value2'),
     ]);
     await isar2.writeTxn(() {
       return isar2.col1s.put(Col1(1, 'value3'));
     });
-    await qEqual(isar2.col1s.where().findAll(), [
+    await qEqual(isar2.col1s.where(), [
       Col1(1, 'value3'),
       Col1(2, 'value2'),
     ]);
-    expect(await isar2.close(), true);
   });
 }
