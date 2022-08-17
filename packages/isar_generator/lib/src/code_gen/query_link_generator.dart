@@ -16,7 +16,7 @@ String generateQueryLinks(ObjectInfo oi) {
 
     if (link.isSingle) {
       code += '''
-        QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterFilterCondition> ${link.dartName.decapitalize()}isNull() {
+        QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterFilterCondition> ${link.dartName.decapitalize()}IsNull() {
           return QueryBuilder.apply(this, (query) {
             return query.linkLength(r'${link.isarName}', 0, true, 0, true);
           });
