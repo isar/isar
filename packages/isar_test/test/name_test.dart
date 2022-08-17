@@ -6,7 +6,7 @@ import 'util/sync_async_helper.dart';
 
 part 'name_test.g.dart';
 
-@Collection()
+@collection
 @Name('NameModelN')
 class NameModel {
   @Name('idN')

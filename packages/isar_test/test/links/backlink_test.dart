@@ -6,7 +6,7 @@ import '../util/sync_async_helper.dart';
 
 part 'backlink_test.g.dart';
 
-@Collection()
+@collection
 class LinkModelA {
   LinkModelA(this.name);
 
@@ -33,7 +33,7 @@ class LinkModelA {
   }
 }
 
-@Collection()
+@collection
 class LinkModelB {
   LinkModelB(this.name);
 

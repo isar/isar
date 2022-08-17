@@ -9,7 +9,7 @@ import 'util/common.dart';
 
 part 'schema_test.g.dart';
 
-@Collection()
+@collection
 class SchemaTestModel {
   Id? id;
 
@@ -205,7 +205,7 @@ class SchemaTestModel {
   var otherLinks = IsarLinks<SchemaTestModel>();
 }
 
-@Collection()
+@collection
 class $Dollar$Model {
   Id? $dollar$id;
 

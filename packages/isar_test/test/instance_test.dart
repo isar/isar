@@ -6,7 +6,7 @@ import 'util/sync_async_helper.dart';
 
 part 'instance_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Id? id;
 

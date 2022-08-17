@@ -2,11 +2,10 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
-import '../util/sync_async_helper.dart';
 
 part 'where_float_test.g.dart';
 
-@Collection()
+@collection
 class FloatModel {
   FloatModel();
   Id? id;

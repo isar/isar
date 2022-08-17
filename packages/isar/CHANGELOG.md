@@ -14,6 +14,7 @@ This is the last big feature release before a stable 3.0 version.
 - Added `isar.path` to get the full path of the database file
 - Added `collection.schema` to receive the layout of a collection
 - Added check to verify that linked collections schemas are provided for opening an instance
+- Added `@collection` and `@embedded` alternative to `@Collection()` and `@Embedded()`
 - Apply default values from constructor during deserialization
 - Added `isar.verify()` and `col.verify()` methods for checking database integrity in unit tests
 - An exception is now thrown when a sync write txn is started while an async write txn is active. This prevents deadlock.

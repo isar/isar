@@ -5,7 +5,7 @@ import '../util/common.dart';
 
 part 'composite2_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Model(this.value1, this.value2);
   Id? id;

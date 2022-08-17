@@ -6,7 +6,7 @@ import '../util/sync_async_helper.dart';
 
 part 'add_remove_embedded_field_test.g.dart';
 
-@Collection()
+@collection
 @Name('Col')
 class Col1 {
   Col1(this.id, this.value);
@@ -20,7 +20,7 @@ class Col1 {
       other is Col1 && id == other.id && value == other.value;
 }
 
-@Collection()
+@collection
 @Name('Col')
 class Col2 {
   Col2(this.id, this.value, this.newValues);

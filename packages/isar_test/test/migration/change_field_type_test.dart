@@ -8,7 +8,7 @@ import '../util/sync_async_helper.dart';
 
 part 'change_field_type_test.g.dart';
 
-@Collection()
+@collection
 @Name('Col')
 class Model1 {
   Model1(this.id, this.value, this.str);
@@ -23,7 +23,7 @@ class Model1 {
   String str;
 }
 
-@Collection()
+@collection
 @Name('Col')
 class Model2 {
   Model2(this.id, this.value, this.str);

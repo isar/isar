@@ -11,7 +11,7 @@ enum MyEnum with IsarEnum<String> {
   String get value => name;
 }
 
-@Embedded()
+@embedded
 class MyEmbedded {
   const MyEmbedded([this.test = '']);
 
@@ -23,7 +23,7 @@ class MyEmbedded {
 }
 
 @Name('Col')
-@Collection()
+@collection
 class EmptyModel {
   EmptyModel(this.id);
 

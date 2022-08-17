@@ -7,7 +7,7 @@ import 'util/sync_async_helper.dart';
 
 part 'crud_test.g.dart';
 
-@Collection()
+@collection
 class Message {
   Id? id;
 

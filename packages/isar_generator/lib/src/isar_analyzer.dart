@@ -52,6 +52,7 @@ class IsarAnalyzer {
       isarName: modelClass.isarName,
       accessor: modelClass.collectionAccessor,
       properties: properties,
+      embeddedDartNames: _getEmbeddedDartNames(element),
       indexes: indexes,
       links: links,
     );
@@ -160,6 +161,25 @@ class IsarAnalyzer {
     }
   }
 
+  Map<String, String> _getEmbeddedDartNames(ClassElement element) {
+    void _fillNames(Map<String, String> names, ClassElement element) {
+      for (final property in element.allAccessors) {
+        final type = property.type.scalarType.element! as ClassElement;
+        if (type.embeddedAnnotation != null) {
+          final isarName = type.isarName;
+          if (!names.containsKey(isarName)) {
+            names[type.isarName] = type.displayName;
+            _fillNames(names, type);
+          }
+        }
+      }
+    }
+
+    final names = <String, String>{};
+    _fillNames(names, element);
+    return names;
+  }
+
   ObjectProperty analyzeObjectProperty(
     PropertyInducingElement property,
     ConstructorElement constructor,
@@ -174,16 +194,8 @@ class IsarAnalyzer {
     }
 
     final nullable = dartType.nullabilitySuffix != NullabilitySuffix.none;
-    var elementNullable = false;
-    DartType? elementType;
-    if (dartType is ParameterizedType) {
-      final typeArguments = dartType.typeArguments;
-      if (typeArguments.isNotEmpty) {
-        elementType = typeArguments[0];
-        elementNullable =
-            elementType.nullabilitySuffix != NullabilitySuffix.none;
-      }
-    }
+    final elementNullable = isarType.isList &&
+        dartType.scalarType.nullabilitySuffix != NullabilitySuffix.none;
 
     if ((isarType == IsarType.byte && nullable) ||
         (isarType == IsarType.byteList && elementNullable)) {
@@ -218,7 +230,7 @@ class IsarAnalyzer {
     return ObjectProperty(
       dartName: property.displayName,
       isarName: property.isarName,
-      typeClassName: elementType?.element!.name ?? dartType.element!.name!,
+      typeClassName: dartType.scalarType.element!.name!,
       isarType: isarType,
       isId: dartType.isIsarId,
       enumConsts: enumConsts,
@@ -246,7 +258,7 @@ class IsarAnalyzer {
 
     final targetCol = linkType.element! as ClassElement;
     if (targetCol.collectionAnnotation == null) {
-      err('Link target is not annotated with @Collection()');
+      err('Link target is not annotated with @collection');
     }
 
     final backlinkAnn = property.backlinkAnnotation;

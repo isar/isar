@@ -115,8 +115,12 @@ String getRandomName() {
 }
 
 String? testTempPath;
-Future<Isar> openTempIsar(List<CollectionSchema<dynamic>> schemas,
-    {String? name, String? directory, bool autoClose = true}) async {
+Future<Isar> openTempIsar(
+  List<CollectionSchema<dynamic>> schemas, {
+  String? name,
+  String? directory,
+  bool autoClose = true,
+}) async {
   await _prepareTest();
   if (!kIsWeb && testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');

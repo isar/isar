@@ -7,7 +7,7 @@ import '../util/common.dart';
 
 part 'any_of_all_of_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Model(this.id, this.value);
   final Id id;

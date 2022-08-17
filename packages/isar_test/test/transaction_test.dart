@@ -7,7 +7,7 @@ import 'util/common.dart';
 
 part 'transaction_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Id? id;
 }

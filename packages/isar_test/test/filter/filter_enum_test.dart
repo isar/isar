@@ -5,7 +5,7 @@ import '../util/common.dart';
 
 part 'filter_enum_test.g.dart';
 
-@Collection()
+@collection
 class EnumModel {
   EnumModel(this.strField);
 

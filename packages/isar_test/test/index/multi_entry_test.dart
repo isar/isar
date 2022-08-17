@@ -6,7 +6,7 @@ import '../util/sync_async_helper.dart';
 
 part 'multi_entry_test.g.dart';
 
-@Collection()
+@collection
 class MultiEntryIndexModel {
   MultiEntryIndexModel({
     required this.bools,
@@ -57,7 +57,7 @@ class MultiEntryIndexModel {
           listEquals(stringsInsensitive, other.stringsInsensitive);
 }
 
-@Collection()
+@collection
 class MultiEntryNullableIndexModel {
   MultiEntryNullableIndexModel({
     required this.bools,

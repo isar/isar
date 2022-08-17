@@ -5,7 +5,7 @@ import '../util/common.dart';
 
 part 'get_by_delete_by_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Model({required this.id, required this.guid, required this.content});
   final Id? id;

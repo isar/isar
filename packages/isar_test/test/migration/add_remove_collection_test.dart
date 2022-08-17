@@ -6,7 +6,7 @@ import '../util/sync_async_helper.dart';
 
 part 'add_remove_collection_test.g.dart';
 
-@Collection()
+@collection
 class Model1 {
   Model1(this.id, this.value);
 
@@ -23,7 +23,7 @@ class Model1 {
       other is Model1 && id == other.id && value == other.value;
 }
 
-@Collection()
+@collection
 class Model2 {
   Model2(this.id, this.value);
 

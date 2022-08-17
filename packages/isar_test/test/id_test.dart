@@ -6,17 +6,17 @@ import 'util/sync_async_helper.dart';
 
 part 'id_test.g.dart';
 
-@Collection()
+@collection
 class ImplicitNullableIdModel {
   Id? id;
 }
 
-@Collection()
+@collection
 class ImplicitFinalIdModel {
   final Id id = Isar.autoIncrement;
 }
 
-@Collection()
+@collection
 class ExplicitIdModel {
   Id? id;
 }
@@ -58,7 +58,7 @@ void main() {
         );
         expect(ids, [4, 5, 6, 7, 8, 9]);
 
-        final allIds = await isar.implicitNullableIdModels.where().idProperty();
+        final allIds = isar.implicitNullableIdModels.where().idProperty();
         expect(allIds, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
       });
 
@@ -174,7 +174,7 @@ void main() {
         );
         expect(ids, [3, 4, 5, 6, 7, 8]);
 
-        final allIds = await isar.implicitFinalIdModels.where().idProperty();
+        final allIds = isar.implicitFinalIdModels.where().idProperty();
         expect(allIds, [1, 2, 3, 4, 5, 6, 7, 8]);
       });
     });
@@ -204,7 +204,7 @@ void main() {
         );
         expect(ids, [4, 5, 6, 7, 8, 9]);
 
-        final allIds = await isar.explicitIdModels.where().idProperty();
+        final allIds = isar.explicitIdModels.where().idProperty();
         expect(allIds, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
       });
     });

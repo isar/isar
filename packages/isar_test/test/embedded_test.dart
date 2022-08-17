@@ -8,7 +8,7 @@ import 'util/sync_async_helper.dart';
 
 part 'embedded_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Model(this.id, this.embedded, this.nested, this.nestedList);
 
@@ -38,7 +38,7 @@ class Model {
   }
 }
 
-@Embedded()
+@embedded
 class EModel {
   EModel([this.value = '']);
 
@@ -54,7 +54,7 @@ class EModel {
   }
 }
 
-@Embedded()
+@embedded
 class NModel {
   NModel([this.embedded, this.nested, this.nestedList]);
 

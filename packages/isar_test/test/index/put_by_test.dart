@@ -7,7 +7,7 @@ import '../util/sync_future.dart';
 
 part 'put_by_test.g.dart';
 
-@Collection()
+@collection
 class BoolIndexModel {
   BoolIndexModel({
     required this.value,
@@ -37,7 +37,7 @@ class BoolIndexModel {
           index == other.index;
 }
 
-@Collection()
+@collection
 class IntIndexModel {
   IntIndexModel({
     required this.value,
@@ -67,7 +67,7 @@ class IntIndexModel {
           index == other.index;
 }
 
-@Collection()
+@collection
 class DoubleIndexModel {
   DoubleIndexModel({
     required this.value,
@@ -97,7 +97,7 @@ class DoubleIndexModel {
           index == other.index;
 }
 
-@Collection()
+@collection
 class StringValueIndexModel {
   StringValueIndexModel({
     required this.value,
@@ -127,7 +127,7 @@ class StringValueIndexModel {
           index == other.index;
 }
 
-@Collection()
+@collection
 class StringHashIndexModel {
   StringHashIndexModel({
     required this.value,
@@ -157,7 +157,7 @@ class StringHashIndexModel {
           index == other.index;
 }
 
-@Collection()
+@collection
 class StringInsensitiveIndexModel {
   StringInsensitiveIndexModel({
     required this.value,

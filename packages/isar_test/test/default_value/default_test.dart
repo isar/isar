@@ -8,7 +8,7 @@ import 'common.dart';
 part 'default_test.g.dart';
 
 @Name('Col')
-@Collection()
+@collection
 class DefaultModel {
   DefaultModel(
     this.id, [
@@ -42,7 +42,7 @@ class DefaultModel {
 }
 
 @Name('Col')
-@Collection()
+@collection
 class DefaultListModel {
   DefaultListModel(
     this.id, [

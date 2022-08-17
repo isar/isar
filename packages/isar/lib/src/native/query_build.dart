@@ -352,7 +352,7 @@ Object _prepareValue(Object? value, Allocator alloc, IsarType type) {
         return minStr;
       case IsarType.object:
       case IsarType.objectList:
-        throw IsarError('Objects cannot be filtered');
+        return 0; // objects only support "isNull"
     }
   } else {
     return value;

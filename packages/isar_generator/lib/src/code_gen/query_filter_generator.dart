@@ -19,31 +19,25 @@ class FilterGenerator {
       }
 
       if (!property.isarType.containsFloat &&
-          property.isarType != IsarType.object &&
-          property.isarType != IsarType.objectList) {
+          !property.isarType.containsObject) {
         code += generateEqualTo(property);
       }
 
-      if (property.isarType != IsarType.bool &&
-          property.isarType != IsarType.boolList &&
-          property.isarType != IsarType.object &&
-          property.isarType != IsarType.objectList) {
+      if (!property.isarType.containsBool &&
+          !property.isarType.containsObject) {
         code += generateGreaterThan(property);
         code += generateLessThan(property);
         code += generateBetween(property);
       }
 
-      if (property.isarType == IsarType.string ||
-          property.isarType == IsarType.stringList) {
+      if (property.isarType.containsString) {
         code += generateStringStartsWith(property);
         code += generateStringEndsWith(property);
         code += generateStringContains(property);
         code += generateStringMatches(property);
       }
 
-      if (property.isarType.isList &&
-          property.isarType != IsarType.object &&
-          property.isarType != IsarType.objectList) {
+      if (property.isarType.isList) {
         code += generateListLength(property);
       }
     }

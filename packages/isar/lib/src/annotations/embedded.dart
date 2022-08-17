@@ -1,5 +1,7 @@
 part of isar;
 
+const embedded = Embedded();
+
 /// Annotation to nest objects of this type in collections.
 @Target({TargetKind.classType})
 class Embedded {

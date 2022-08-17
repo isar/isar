@@ -2,11 +2,10 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
-import '../util/sync_async_helper.dart';
 
 part 'filter_date_time_test.g.dart';
 
-@Collection()
+@collection
 class DateTimeModel {
   DateTimeModel(this.field);
   Id? id;
@@ -16,7 +15,9 @@ class DateTimeModel {
   @override
   // ignore: hash_and_equals
   bool operator ==(Object other) =>
-      other is DateTimeModel && other.field?.toUtc() == field?.toUtc();
+      other is DateTimeModel &&
+      id == other.id &&
+      other.field?.toUtc() == field?.toUtc();
 
   @override
   String toString() => '{id: $id, field: $field}';
@@ -95,7 +96,9 @@ void main() {
 
     isarTest('.between()', () async {
       await qEqual(
-          col.filter().fieldBetween(null, local(2010)), [obj1, obj3, objNull]);
+        col.filter().fieldBetween(null, local(2010)),
+        [obj1, obj3, objNull],
+      );
       await qEqual(
         col.filter().fieldBetween(null, local(2020), includeLower: false),
         [obj1, obj2, obj3],

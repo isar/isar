@@ -6,7 +6,7 @@ import '../util/sync_async_helper.dart';
 
 part 'build_test.g.dart';
 
-@Collection()
+@collection
 class Account {
   Account();
 
@@ -206,7 +206,7 @@ void main() {
     });
 
     isarTest('Simple filter with sort', () async {
-      final objs = await isar.accounts.buildQuery<Account>(
+      final objs = isar.accounts.buildQuery<Account>(
         filter: FilterCondition.lessThan(
           property: 'birthdate',
           value: DateTime(1980),
@@ -225,7 +225,7 @@ void main() {
       //    ||
       //    (birthdate <= 1970-01-01 && userId.startsWith("oauth2"))
       // )
-      final objs = await isar.accounts.buildQuery<Account>(
+      final objs = isar.accounts.buildQuery<Account>(
         filter: FilterGroup.and([
           FilterGroup.not(
             const FilterCondition.isNull(property: 'userId'),
@@ -277,7 +277,7 @@ void main() {
     isarTest('Nested not filters', () async {
       // !!(!userId.startsWith('password') && !((!(birthdate >= 1997-01-01 &&
       // birthdate <= 2003-01-01)))
-      final objs = await isar.accounts.buildQuery<Account>(
+      final objs = isar.accounts.buildQuery<Account>(
         filter: FilterGroup.not(
           FilterGroup.not(
             FilterGroup.and([
@@ -314,7 +314,7 @@ void main() {
     });
 
     isarTest('Empty filter groups', () async {
-      final objs = await isar.accounts.buildQuery<Account>(
+      final objs = isar.accounts.buildQuery<Account>(
         filter: FilterGroup.and([
           FilterGroup.not(
             FilterGroup.and([
@@ -360,7 +360,7 @@ void main() {
     });
 
     isarTest('String property', () async {
-      final firstnames = await isar.accounts.buildQuery<String>(
+      final firstnames = isar.accounts.buildQuery<String>(
         filter: const FilterCondition.startsWith(
           property: 'userId',
           value: 'password',
@@ -379,7 +379,7 @@ void main() {
       final searchTokens = searchQuery.split(' ');
 
       // Must match every token to at least one column
-      final objs = await isar.accounts.buildQuery<Account>(
+      final objs = isar.accounts.buildQuery<Account>(
         filter: FilterGroup.and([
           for (final searchToken in searchTokens)
             FilterGroup.or([

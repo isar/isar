@@ -6,7 +6,7 @@ import '../util/sync_async_helper.dart';
 
 part 'change_field_embedded_test.g.dart';
 
-@Collection()
+@collection
 @Name('Col')
 class Model1 {
   Model1(this.id, this.value);
@@ -21,7 +21,7 @@ class Model1 {
       other is Model1 && other.id == id && other.value == value;
 }
 
-@Collection()
+@collection
 @Name('Col')
 class Model2 {
   Model2(this.id, this.value);
@@ -36,14 +36,14 @@ class Model2 {
       other is Model2 && other.id == id && other.value == value;
 }
 
-@Embedded()
+@embedded
 class Embedded1 {
   Embedded1([this.value]);
 
   String? value;
 }
 
-@Embedded()
+@embedded
 class Embedded2 {
   Embedded2([this.value]);
 

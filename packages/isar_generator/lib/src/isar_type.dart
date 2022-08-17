@@ -111,9 +111,17 @@ extension DartTypeX on DartType {
 }
 
 extension IsarTypeX on IsarType {
+  bool get containsBool => this == IsarType.bool || this == IsarType.boolList;
+
   bool get containsFloat =>
       this == IsarType.float ||
       this == IsarType.floatList ||
       this == IsarType.double ||
       this == IsarType.doubleList;
+
+  bool get containsString =>
+      this == IsarType.string || this == IsarType.stringList;
+
+  bool get containsObject =>
+      this == IsarType.object || this == IsarType.objectList;
 }

@@ -38,11 +38,8 @@ String generateSchema(ObjectInfo object) {
     final links = object.links
         .map((e) => "r'${e.isarName}': ${_generateLinkSchema(object, e)}")
         .join(',');
-    final embeddedSchemas = object.properties
-        .where((e) =>
-            e.isarType == IsarType.object || e.isarType == IsarType.objectList)
-        .distinctBy((e) => e.targetSchema)
-        .map((e) => "r'${e.typeClassName}': ${e.targetSchema}")
+    final embeddedSchemas = object.embeddedDartNames.entries
+        .map((e) => "r'${e.key}': ${e.value.capitalize()}Schema")
         .join(',');
 
     code += '''

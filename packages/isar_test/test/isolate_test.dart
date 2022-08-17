@@ -10,7 +10,7 @@ import 'util/sync_async_helper.dart';
 
 part 'isolate_test.g.dart';
 
-@Collection()
+@collection
 class TestModel {
   Id? id;
 

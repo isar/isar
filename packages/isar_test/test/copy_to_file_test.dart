@@ -9,7 +9,7 @@ import 'util/sync_async_helper.dart';
 
 part 'copy_to_file_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Id id = Isar.autoIncrement;
 

@@ -2,7 +2,7 @@
 
 import 'package:isar/isar.dart';
 
-@Collection()
+@collection
 class Model {
   // ignore: avoid_unused_constructor_parameters
   Model(int prop1);

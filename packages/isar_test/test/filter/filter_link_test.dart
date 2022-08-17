@@ -5,7 +5,7 @@ import '../util/common.dart';
 
 part 'filter_link_test.g.dart';
 
-@Collection()
+@collection
 class LinkModelA {
   LinkModelA(this.name);
   Id? id;
@@ -23,7 +23,7 @@ class LinkModelA {
   }
 }
 
-@Collection()
+@collection
 class LinkModelB {
   LinkModelB(this.name);
   Id? id;

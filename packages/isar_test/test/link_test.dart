@@ -6,7 +6,7 @@ import 'util/sync_async_helper.dart';
 
 part 'link_test.g.dart';
 
-@Collection()
+@collection
 class LinkModelA {
   LinkModelA();
 
@@ -42,7 +42,7 @@ class LinkModelA {
   }
 }
 
-@Collection()
+@collection
 class LinkModelB {
   LinkModelB();
 

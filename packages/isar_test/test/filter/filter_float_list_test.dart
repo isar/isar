@@ -2,11 +2,10 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
-import '../util/sync_async_helper.dart';
 
 part 'filter_float_list_test.g.dart';
 
-@Collection()
+@collection
 class FloatModel {
   FloatModel(this.list);
   Id? id;
@@ -21,7 +20,9 @@ class FloatModel {
   @override
   // ignore: hash_and_equals
   bool operator ==(Object other) =>
-      other is FloatModel && doubleListEquals(other.list, list);
+      other is FloatModel &&
+      id == other.id &&
+      doubleListEquals(other.list, list);
 }
 
 void main() {

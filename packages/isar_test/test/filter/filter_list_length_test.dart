@@ -6,7 +6,7 @@ import '../util/sync_async_helper.dart';
 
 part 'filter_list_length_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Model({
     required this.bools,

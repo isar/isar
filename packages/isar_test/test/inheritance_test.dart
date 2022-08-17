@@ -30,7 +30,7 @@ abstract class BaseModel {
   final link = IsarLink<InheritingModel>();
 }
 
-@Collection()
+@collection
 class InheritingModel extends BaseModel {
   InheritingModel({
     required super.name,

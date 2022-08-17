@@ -2,11 +2,10 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
-import '../util/sync_async_helper.dart';
 
 part 'filter_int_test.g.dart';
 
-@Collection()
+@collection
 class IntModel {
   IntModel(this.field);
 
@@ -17,7 +16,7 @@ class IntModel {
   @override
   // ignore: hash_and_equals
   bool operator ==(Object other) {
-    return other is IntModel && other.field == field;
+    return other is IntModel && id == other.id && other.field == field;
   }
 }
 

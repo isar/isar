@@ -5,7 +5,7 @@ import '../util/common.dart';
 
 part 'filter_byte_list_test.g.dart';
 
-@Collection()
+@collection
 class ByteModel {
   ByteModel(this.list);
 

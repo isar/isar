@@ -5,7 +5,7 @@ import '../util/common.dart';
 
 part 'filter_date_time_list_test.g.dart';
 
-@Collection()
+@collection
 class DateTimeModel {
   DateTimeModel(this.list);
   Id? id;
@@ -16,6 +16,7 @@ class DateTimeModel {
   // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is DateTimeModel &&
+      id == other.id &&
       listEquals(
         list?.map((e) => e?.toUtc()).toList(),
         other.list?.map((e) => e?.toUtc()).toList(),

@@ -2,14 +2,14 @@
 
 import 'package:isar/isar.dart';
 
-@Collection()
+@collection
 class Model {
   Id? id;
 
   late IsarLink<Model2> link;
 }
 
-@Collection()
+@collection
 class Model2 {
   Id? id;
 }

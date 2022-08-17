@@ -8,7 +8,7 @@ import 'common.dart';
 part 'no_default_test.g.dart';
 
 @Name('Col')
-@Collection()
+@collection
 class NoDefaultModel {
   NoDefaultModel(
     this.id,
@@ -48,7 +48,7 @@ class NoDefaultModel {
 }
 
 @Name('Col')
-@Collection()
+@collection
 class NoDefaultListModel {
   NoDefaultListModel(
     this.id,

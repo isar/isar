@@ -2,11 +2,10 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
-import '../util/sync_async_helper.dart';
 
 part 'where_int_test.g.dart';
 
-@Collection()
+@collection
 class IntModel {
   IntModel(this.field);
   Id? id;

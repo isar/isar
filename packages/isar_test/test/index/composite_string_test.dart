@@ -8,7 +8,7 @@ import '../util/sync_async_helper.dart';
 
 part 'composite_string_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Model(this.value1, this.value2);
 

@@ -9,7 +9,7 @@ import 'util/sync_async_helper.dart';
 
 part 'watcher_test.g.dart';
 
-@Collection()
+@collection
 class Value {
   Value(this.id, this.value);
   Id? id;

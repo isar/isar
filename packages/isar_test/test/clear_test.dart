@@ -6,12 +6,12 @@ import 'util/sync_async_helper.dart';
 
 part 'clear_test.g.dart';
 
-@Collection()
+@collection
 class ModelA {
   Id? id;
 }
 
-@Collection()
+@collection
 class ModelB {
   Id? id;
 }

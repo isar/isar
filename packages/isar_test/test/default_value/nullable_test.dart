@@ -8,7 +8,7 @@ import 'common.dart';
 part 'nullable_test.g.dart';
 
 @Name('Col')
-@Collection()
+@collection
 class NullableModel {
   NullableModel(
     this.id,
@@ -45,7 +45,7 @@ class NullableModel {
 }
 
 @Name('Col')
-@Collection()
+@collection
 class NullableListModel {
   NullableListModel(
     this.id,
