@@ -114,6 +114,7 @@ String? testTempPath;
 Future<Isar> openTempIsar(
   List<CollectionSchema<dynamic>> schemas, {
   String? name,
+  CompactCondition? compactOnLaunch,
 }) async {
   await _prepareTest();
   if (!kIsWeb && testTempPath == null) {
@@ -126,6 +127,7 @@ Future<Isar> openTempIsar(
     schemas: schemas,
     name: name ?? getRandomName(),
     directory: kIsWeb ? '' : testTempPath!,
+    compactOnLaunch: compactOnLaunch,
   );
 
   await isar.verify();
