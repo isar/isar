@@ -1,0 +1,12 @@
+{
+  "name": "docs",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@vuepress/plugin-shiki": "^2.0.0-beta.42",
+    "vuepress": "^2.0.0-beta.42"
+  },
+  "scripts": {
+    "dev": "vuepress dev docs",
+    "build": "vuepress build docs"
+  }
+}

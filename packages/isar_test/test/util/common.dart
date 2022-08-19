@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 
@@ -47,13 +48,56 @@ Future<void> qEqualSync<T>(List<T> actual, List<T> target) async {
 final testErrors = <String>[];
 int testCount = 0;
 
+String _getRustTarget() {
+  switch (Abi.current()) {
+    case Abi.macosArm64:
+      return 'aarch64-apple-darwin';
+    case Abi.macosX64:
+      return 'x86_64-apple-darwin';
+    case Abi.linuxArm64:
+      return 'aarch64-unknown-linux-gnu';
+    case Abi.linuxX64:
+      return 'x86_64-unknown-linux-gnu';
+    case Abi.windowsX64:
+      return 'x86_64-pc-windows-gnu';
+    case Abi.windowsIA32:
+      return 'i686-pc-windows-gnu';
+    default:
+      throw UnsupportedError('Unsupported ABI: ${Abi.current()}');
+  }
+}
+
+var _setUp = false;
 Future<void> _prepareTest() async {
-  if (!kIsWeb) {
-    try {
-      await Isar.initializeIsarCore(download: true);
-    } catch (e) {
-      // ignore. maybe this is an instrumentation test
+  if (!kIsWeb && !_setUp) {
+    if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
+      try {
+        final parentDir = path.dirname(Directory.current.absolute.path);
+        final coreFFi = path.join(parentDir, 'isar_core_ffi');
+        final target = _getRustTarget();
+
+        await Process.run(
+          'cargo',
+          ['build', '--target', target],
+          workingDirectory: coreFFi,
+        );
+        final binaryName = Platform.isWindows
+            ? 'isar.dll'
+            : Platform.isMacOS
+                ? 'libisar.dylib'
+                : 'libisar.so';
+        await Isar.initializeIsarCore(
+          libraries: {
+            Abi.current():
+                path.join(coreFFi, 'target', target, 'debug', binaryName),
+          },
+        );
+      } catch (e) {
+        // ignore. maybe this is an instrumentation test
+      }
     }
+
+    _setUp = true;
   }
 }
 
@@ -86,7 +130,7 @@ void isarTest(
           },
         );
       },
-      timeout: timeout,
+      timeout: timeout ?? const Timeout(Duration(minutes: 5)),
     );
   }
 

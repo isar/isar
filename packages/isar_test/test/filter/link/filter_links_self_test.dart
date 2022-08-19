@@ -6,7 +6,7 @@ import '../../util/sync_async_helper.dart';
 
 part 'filter_links_self_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Model(this.name);
 
@@ -77,66 +77,42 @@ void main() {
 
     isarTest('.selfLinks()', () async {
       await qEqualSet(
-        isar.models
-            .filter()
-            .selfLinks((q) => q.nameStartsWith('obj'))
-            .tFindAll(),
+        isar.models.filter().selfLinks((q) => q.nameStartsWith('obj')),
         [obj1, obj2, obj3, obj4, obj5, obj6],
       );
 
       await qEqualSet(
-        isar.models
-            .filter()
-            .selfLinks((q) => q.nameEqualTo('obj 1'))
-            .tFindAll(),
+        isar.models.filter().selfLinks((q) => q.nameEqualTo('obj 1')),
         [obj1, obj2, obj3, obj4],
       );
 
       await qEqualSet(
-        isar.models
-            .filter()
-            .selfLinks((q) => q.nameEqualTo('obj 2'))
-            .tFindAll(),
+        isar.models.filter().selfLinks((q) => q.nameEqualTo('obj 2')),
         [obj2, obj3, obj6],
       );
 
       await qEqualSet(
-        isar.models
-            .filter()
-            .selfLinks((q) => q.nameEqualTo('obj 3'))
-            .tFindAll(),
+        isar.models.filter().selfLinks((q) => q.nameEqualTo('obj 3')),
         [obj3],
       );
 
       await qEqualSet(
-        isar.models
-            .filter()
-            .selfLinks((q) => q.nameEqualTo('obj 4'))
-            .tFindAll(),
+        isar.models.filter().selfLinks((q) => q.nameEqualTo('obj 4')),
         [obj4],
       );
 
       await qEqualSet(
-        isar.models
-            .filter()
-            .selfLinks((q) => q.nameEqualTo('obj 5'))
-            .tFindAll(),
+        isar.models.filter().selfLinks((q) => q.nameEqualTo('obj 5')),
         [obj4],
       );
 
       await qEqualSet(
-        isar.models
-            .filter()
-            .selfLinks((q) => q.nameEqualTo('obj 6'))
-            .tFindAll(),
+        isar.models.filter().selfLinks((q) => q.nameEqualTo('obj 6')),
         [obj5, obj6],
       );
 
       await qEqualSet(
-        isar.models
-            .filter()
-            .selfLinks((q) => q.nameEqualTo('non existing'))
-            .tFindAll(),
+        isar.models.filter().selfLinks((q) => q.nameEqualTo('non existing')),
         [],
       );
     });
@@ -146,64 +122,55 @@ void main() {
       await qEqualSet(
         isar.models
             .filter()
-            .selfLinks((q) => q.selfLinks((q) => q.nameStartsWith('obj')))
-            .tFindAll(),
+            .selfLinks((q) => q.selfLinks((q) => q.nameStartsWith('obj'))),
         [obj1, obj2, obj3, obj4, obj5, obj6],
       );
 
       await qEqualSet(
         isar.models
             .filter()
-            .selfLinks((q) => q.selfLinks((q) => q.nameEqualTo('obj 1')))
-            .tFindAll(),
+            .selfLinks((q) => q.selfLinks((q) => q.nameEqualTo('obj 1'))),
         [obj1, obj2, obj3, obj4, obj6],
       );
 
       await qEqualSet(
         isar.models
             .filter()
-            .selfLinks((q) => q.selfLinks((q) => q.nameEqualTo('obj 2')))
-            .tFindAll(),
+            .selfLinks((q) => q.selfLinks((q) => q.nameEqualTo('obj 2'))),
         [obj2, obj3, obj5, obj6],
       );
 
       await qEqualSet(
         isar.models
             .filter()
-            .selfLinks((q) => q.selfLinks((q) => q.nameEqualTo('obj 3')))
-            .tFindAll(),
+            .selfLinks((q) => q.selfLinks((q) => q.nameEqualTo('obj 3'))),
         [obj3],
       );
 
       await qEqualSet(
         isar.models
             .filter()
-            .selfLinks((q) => q.selfLinks((q) => q.nameEqualTo('obj 4')))
-            .tFindAll(),
+            .selfLinks((q) => q.selfLinks((q) => q.nameEqualTo('obj 4'))),
         [obj4],
       );
 
       await qEqualSet(
         isar.models
             .filter()
-            .selfLinks((q) => q.selfLinks((q) => q.nameEqualTo('obj 5')))
-            .tFindAll(),
+            .selfLinks((q) => q.selfLinks((q) => q.nameEqualTo('obj 5'))),
         [obj4],
       );
 
       await qEqualSet(
         isar.models
             .filter()
-            .selfLinks((q) => q.selfLinks((q) => q.nameEqualTo('obj 6')))
-            .tFindAll(),
+            .selfLinks((q) => q.selfLinks((q) => q.nameEqualTo('obj 6'))),
         [obj4, obj6],
       );
 
       await qEqualSet(
-        isar.models
-            .filter()
-            .selfLinks((q) => q.selfLinks((q) => q.nameEqualTo('non existing')))
-            .tFindAll(),
+        isar.models.filter().selfLinks(
+            (q) => q.selfLinks((q) => q.nameEqualTo('non existing'))),
         [],
       );
     });

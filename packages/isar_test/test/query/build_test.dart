@@ -206,7 +206,7 @@ void main() {
     });
 
     isarTest('Simple filter with sort', () async {
-      final objs = isar.accounts.buildQuery<Account>(
+      final q = isar.accounts.buildQuery<Account>(
         filter: FilterCondition.lessThan(
           property: 'birthdate',
           value: DateTime(1980),
@@ -214,7 +214,10 @@ void main() {
         sortBy: const [SortProperty(property: 'birthdate', sort: Sort.desc)],
       );
 
-      expect(objs, [account15, account10, account3, account0, account14]);
+      expect(
+        await q.tFindAll(),
+        [account15, account10, account3, account0, account14],
+      );
     });
 
     isarTest('Nested filter groups', () async {
@@ -225,7 +228,7 @@ void main() {
       //    ||
       //    (birthdate <= 1970-01-01 && userId.startsWith("oauth2"))
       // )
-      final objs = isar.accounts.buildQuery<Account>(
+      final q = isar.accounts.buildQuery<Account>(
         filter: FilterGroup.and([
           FilterGroup.not(
             const FilterCondition.isNull(property: 'userId'),
@@ -271,13 +274,13 @@ void main() {
         ],
       );
 
-      expect(objs, [account0, account14, account2, account3]);
+      expect(await q.tFindAll(), [account0, account14, account2, account3]);
     });
 
     isarTest('Nested not filters', () async {
       // !!(!userId.startsWith('password') && !((!(birthdate >= 1997-01-01 &&
       // birthdate <= 2003-01-01)))
-      final objs = isar.accounts.buildQuery<Account>(
+      final q = isar.accounts.buildQuery<Account>(
         filter: FilterGroup.not(
           FilterGroup.not(
             FilterGroup.and([
@@ -310,11 +313,11 @@ void main() {
         sortBy: const [SortProperty(property: 'userId', sort: Sort.asc)],
       );
 
-      expect(objs, [account5, account11]);
+      expect(await q.tFindAll(), [account5, account11]);
     });
 
     isarTest('Empty filter groups', () async {
-      final objs = isar.accounts.buildQuery<Account>(
+      final q = isar.accounts.buildQuery<Account>(
         filter: FilterGroup.and([
           FilterGroup.not(
             FilterGroup.and([
@@ -335,32 +338,32 @@ void main() {
         sortBy: const [SortProperty(property: 'firstname', sort: Sort.desc)],
       );
 
-      expect(objs, [account5, account2]);
+      expect(await q.tFindAll(), [account5, account2]);
     });
 
     isarTest('Distinct by', () async {
-      final count = await isar.accounts.buildQuery<Account>(
+      final q = isar.accounts.buildQuery<Account>(
         distinctBy: const [DistinctProperty(property: 'lastname')],
-      ).tCount();
+      );
 
-      expect(count, 2);
+      expect(await q.tCount(), 2);
     });
 
     isarTest('Distinct by with filter', () async {
-      final count = await isar.accounts.buildQuery<Account>(
+      final q = isar.accounts.buildQuery<Account>(
         filter: const FilterCondition.equalTo(
           property: 'lastname',
           value: 'bar',
           caseSensitive: false,
         ),
         distinctBy: const [DistinctProperty(property: 'lastname')],
-      ).tCount();
+      );
 
-      expect(count, 1);
+      expect(await q.tCount(), 1);
     });
 
     isarTest('String property', () async {
-      final firstnames = isar.accounts.buildQuery<String>(
+      final q = isar.accounts.buildQuery<String>(
         filter: const FilterCondition.startsWith(
           property: 'userId',
           value: 'password',
@@ -369,7 +372,10 @@ void main() {
         sortBy: const [SortProperty(property: 'firstname', sort: Sort.asc)],
       );
 
-      expect(firstnames, ['Foo1', 'Foo12', 'Foo13', 'Foo2', 'Foo6', 'Foo8']);
+      expect(
+        await q.tFindAll(),
+        ['Foo1', 'Foo12', 'Foo13', 'Foo2', 'Foo6', 'Foo8'],
+      );
     });
 
     isarTest('Search query', () async {
@@ -379,7 +385,7 @@ void main() {
       final searchTokens = searchQuery.split(' ');
 
       // Must match every token to at least one column
-      final objs = isar.accounts.buildQuery<Account>(
+      final q = isar.accounts.buildQuery<Account>(
         filter: FilterGroup.and([
           for (final searchToken in searchTokens)
             FilterGroup.or([
@@ -394,7 +400,7 @@ void main() {
         sortBy: const [SortProperty(property: 'firstname', sort: Sort.asc)],
       );
 
-      expect(objs, [account10, account11, account14, account15]);
+      expect(await q.tFindAll(), [account10, account11, account14, account15]);
     });
   });
 }

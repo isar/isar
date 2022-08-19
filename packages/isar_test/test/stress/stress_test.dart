@@ -35,7 +35,7 @@ void main() async {
     late Isar isar;
     late IsarCollection<Tweet> col;
 
-    setUp(() async {
+    /*setUp(() async {
       isar = await openTempIsar(
         [TweetSchema],
         name: '776524265_tmp',
@@ -83,6 +83,7 @@ void main() async {
         print(favs.first.favoriteCount);
       },
       timeout: const Timeout(Duration(minutes: 10)),
-    );
+      skip: true,
+    );*/
   });
 }

@@ -58,8 +58,10 @@ void main() {
         );
         expect(ids, [4, 5, 6, 7, 8, 9]);
 
-        final allIds = isar.implicitNullableIdModels.where().idProperty();
-        expect(allIds, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        await qEqual(
+          isar.implicitNullableIdModels.where().idProperty(),
+          [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        );
       });
 
       isarTest('Auto increment should reset', () async {
@@ -91,9 +93,10 @@ void main() {
         );
         expect(newIds, [2, 3, 4, 5, 6]);
 
-        final ids2 =
-            await isar.implicitNullableIdModels.where().idProperty().findAll();
-        expect(ids2, [1, 2, 3, 4, 5, 6]);
+        await qEqual(
+          isar.implicitNullableIdModels.where().idProperty(),
+          [1, 2, 3, 4, 5, 6],
+        );
       });
 
       isarTest('Negative id', () async {
@@ -174,8 +177,10 @@ void main() {
         );
         expect(ids, [3, 4, 5, 6, 7, 8]);
 
-        final allIds = isar.implicitFinalIdModels.where().idProperty();
-        expect(allIds, [1, 2, 3, 4, 5, 6, 7, 8]);
+        await qEqual(
+          isar.implicitFinalIdModels.where().idProperty(),
+          [1, 2, 3, 4, 5, 6, 7, 8],
+        );
       });
     });
 
@@ -204,8 +209,10 @@ void main() {
         );
         expect(ids, [4, 5, 6, 7, 8, 9]);
 
-        final allIds = isar.explicitIdModels.where().idProperty();
-        expect(allIds, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        await qEqual(
+          isar.explicitIdModels.where().idProperty(),
+          [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        );
       });
     });
   });

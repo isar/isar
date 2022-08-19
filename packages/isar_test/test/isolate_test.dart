@@ -34,9 +34,10 @@ final TestModel _obj3 = TestModel()
   ..value = 'Model 3';
 
 Future<void> _isolateFunc(SendPort port) async {
-  final isar = Isar.openSync(
+  final isar = await openTempIsar(
     [TestModelSchema],
     name: 'test',
+    autoClose: false,
   );
 
   final current = isar.testModels.where().findAllSync();

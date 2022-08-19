@@ -16,17 +16,23 @@ class ObjectModel {
   @override
   // ignore: hash_and_equals
   bool operator ==(Object other) =>
-      other is ObjectModel &&
-      other.id == id &&
-      (field == null) == (other.field == null) &&
-      field?.value == other.field?.value;
+      other is ObjectModel && other.id == id && field == other.field;
 }
 
 @embedded
 class EmbeddedModel {
-  EmbeddedModel([this.value]);
+  EmbeddedModel([this.value, this.embedded]);
 
   String? value;
+
+  EmbeddedModel? embedded;
+
+  @override
+  // ignore: hash_and_equals
+  bool operator ==(Object other) =>
+      other is EmbeddedModel &&
+      other.value == value &&
+      embedded == other.embedded;
 }
 
 void main() {
@@ -37,7 +43,9 @@ void main() {
     late ObjectModel obj0;
     late ObjectModel obj1;
     late ObjectModel obj2;
-    late ObjectModel obj3;
+    late ObjectModel objE0;
+    late ObjectModel objE1;
+    late ObjectModel objE2;
     late ObjectModel objENull;
     late ObjectModel objNull;
 
@@ -46,16 +54,45 @@ void main() {
       col = isar.objectModels;
 
       objNull = ObjectModel(null);
-      objENull = ObjectModel(EmbeddedModel(null));
+      objENull = ObjectModel(EmbeddedModel());
       obj0 = ObjectModel(EmbeddedModel('test'));
       obj1 = ObjectModel(EmbeddedModel('test1'));
-      obj2 = ObjectModel(EmbeddedModel('test3'));
-      obj3 = ObjectModel(EmbeddedModel('hello'));
+      obj2 = ObjectModel(EmbeddedModel('test2'));
+      objE0 = ObjectModel(EmbeddedModel('embedded', EmbeddedModel('test')));
+      objE1 = ObjectModel(EmbeddedModel('embedded1', EmbeddedModel('test1')));
+      objE2 = ObjectModel(EmbeddedModel('embedded2', EmbeddedModel('test2')));
 
       await isar.writeTxn(() async {
         await isar.objectModels
-            .putAll([obj0, obj1, obj2, obj3, objENull, objNull]);
+            .putAll([obj0, obj1, obj2, objE0, objE1, objE2, objENull, objNull]);
       });
+    });
+
+    isarTest('simple conditions', () async {
+      await qEqual(
+        col.filter().field((q) => q.valueContains('test')),
+        [obj0, obj1, obj2],
+      );
+      await qEqual(
+        col.filter().field((q) => q.not().valueContains('test')),
+        [obj3, objENull],
+      );
+      await qEqual(col.filter().field((q) => q.valueIsNull()), [objENull]);
+      await qEqual(col.filter().field((q) => q.valueEndsWith('4')), []);
+    });
+
+    isarTest('multiple conditions', () async {
+      await qEqual(
+        col
+            .filter()
+            .field((q) => q.valueContains('test'))
+            .field((q) => q.not().valueContains('1')),
+        [obj0, obj2],
+      );
+    });
+
+    isarTest('.isNull()', () async {
+      await qEqual(col.filter().fieldIsNull(), [objNull]);
     });
   });
 }

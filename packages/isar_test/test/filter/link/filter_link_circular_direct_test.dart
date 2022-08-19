@@ -6,7 +6,7 @@ import '../../util/sync_async_helper.dart';
 
 part 'filter_link_circular_direct_test.g.dart';
 
-@Collection()
+@collection
 class ModelA {
   ModelA(this.name);
 
@@ -31,7 +31,7 @@ class ModelA {
   }
 }
 
-@Collection()
+@collection
 class ModelB {
   ModelB(this.name);
 
@@ -129,63 +129,42 @@ void main() {
     group('From ModelA', () {
       isarTest('.bLinks()', () async {
         await qEqualSet(
-          isar.modelAs.filter().bLinks((q) => q.nameStartsWith('b')).tFindAll(),
+          isar.modelAs.filter().bLinks((q) => q.nameStartsWith('b')),
           [a1, a2, a3, a4, a5],
         );
 
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks((q) => q.nameStartsWith('b 1'))
-              .tFindAll(),
+          isar.modelAs.filter().bLinks((q) => q.nameStartsWith('b 1')),
           [a1, a2, a3],
         );
 
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks((q) => q.nameStartsWith('b 2'))
-              .tFindAll(),
+          isar.modelAs.filter().bLinks((q) => q.nameStartsWith('b 2')),
           [a2, a3],
         );
 
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks((q) => q.nameStartsWith('b 3'))
-              .tFindAll(),
+          isar.modelAs.filter().bLinks((q) => q.nameStartsWith('b 3')),
           [a3, a4],
         );
 
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks((q) => q.nameStartsWith('b 4'))
-              .tFindAll(),
+          isar.modelAs.filter().bLinks((q) => q.nameStartsWith('b 4')),
           [a4],
         );
 
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks((q) => q.nameStartsWith('b 5'))
-              .tFindAll(),
+          isar.modelAs.filter().bLinks((q) => q.nameStartsWith('b 5')),
           [a5],
         );
 
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks((q) => q.nameStartsWith('b 6'))
-              .tFindAll(),
+          isar.modelAs.filter().bLinks((q) => q.nameStartsWith('b 6')),
           [],
         );
 
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks((q) => q.nameStartsWith('non existing'))
-              .tFindAll(),
+          isar.modelAs.filter().bLinks((q) => q.nameStartsWith('non existing')),
           [],
         );
       });
@@ -195,64 +174,56 @@ void main() {
         await qEqualSet(
           isar.modelAs
               .filter()
-              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a')))
-              .tFindAll(),
+              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a'))),
           [a1, a2, a3, a4, a5],
         );
 
         await qEqualSet(
           isar.modelAs
               .filter()
-              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a 1')))
-              .tFindAll(),
+              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a 1'))),
           [a1, a2, a3, a4],
         );
 
         await qEqualSet(
           isar.modelAs
               .filter()
-              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a 2')))
-              .tFindAll(),
+              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a 2'))),
           [a2, a3, a4],
         );
 
         await qEqualSet(
           isar.modelAs
               .filter()
-              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a 3')))
-              .tFindAll(),
+              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a 3'))),
           [a3, a4],
         );
 
         await qEqualSet(
           isar.modelAs
               .filter()
-              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a 4')))
-              .tFindAll(),
+              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a 4'))),
           [a4],
         );
 
         await qEqualSet(
           isar.modelAs
               .filter()
-              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a 5')))
-              .tFindAll(),
+              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a 5'))),
           [],
         );
 
         await qEqualSet(
           isar.modelAs
               .filter()
-              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a 6')))
-              .tFindAll(),
+              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a 6'))),
           [],
         );
 
         await qEqualSet(
           isar.modelAs
               .filter()
-              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('non existing')))
-              .tFindAll(),
+              .bLinks((q) => q.aLinks((q) => q.nameStartsWith('non existing'))),
           [],
         );
       });
@@ -260,114 +231,90 @@ void main() {
       // FIXME: Nested filter link (see filter_link_nested_test.dart)
       isarTest('.bLinks() then .aLinks() then .bLinks()', () async {
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks(
+          isar.modelAs.filter().bLinks(
                 (q) => q.aLinks(
                   (q) => q.bLinks(
                     (q) => q.nameStartsWith('b'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [a1, a2, a3, a4],
         );
 
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks(
+          isar.modelAs.filter().bLinks(
                 (q) => q.aLinks(
                   (q) => q.bLinks(
                     (q) => q.nameStartsWith('b 1'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [a1, a2, a3, a4],
         );
 
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks(
+          isar.modelAs.filter().bLinks(
                 (q) => q.aLinks(
                   (q) => q.bLinks(
                     (q) => q.nameStartsWith('b 2'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [a2, a3, a4],
         );
 
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks(
+          isar.modelAs.filter().bLinks(
                 (q) => q.aLinks(
                   (q) => q.bLinks(
                     (q) => q.nameStartsWith('b 3'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [a3, a4],
         );
 
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks(
+          isar.modelAs.filter().bLinks(
                 (q) => q.aLinks(
                   (q) => q.bLinks(
                     (q) => q.nameStartsWith('b 4'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [a4],
         );
 
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks(
+          isar.modelAs.filter().bLinks(
                 (q) => q.aLinks(
                   (q) => q.bLinks(
                     (q) => q.nameStartsWith('b 5'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [],
         );
 
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks(
+          isar.modelAs.filter().bLinks(
                 (q) => q.aLinks(
                   (q) => q.bLinks(
                     (q) => q.nameStartsWith('b 6'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [],
         );
 
         await qEqualSet(
-          isar.modelAs
-              .filter()
-              .bLinks(
+          isar.modelAs.filter().bLinks(
                 (q) => q.aLinks(
                   (q) => q.bLinks(
                     (q) => q.nameStartsWith('non existing'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [],
         );
       });
@@ -376,63 +323,42 @@ void main() {
     group('From ModelB', () {
       isarTest('.aLinks()', () async {
         await qEqualSet(
-          isar.modelBs.filter().aLinks((q) => q.nameStartsWith('a')).tFindAll(),
+          isar.modelBs.filter().aLinks((q) => q.nameStartsWith('a')),
           [b1, b2, b3, b4, b6],
         );
 
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks((q) => q.nameStartsWith('a 1'))
-              .tFindAll(),
+          isar.modelBs.filter().aLinks((q) => q.nameStartsWith('a 1')),
           [b1, b2, b3],
         );
 
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks((q) => q.nameStartsWith('a 2'))
-              .tFindAll(),
+          isar.modelBs.filter().aLinks((q) => q.nameStartsWith('a 2')),
           [b2, b3],
         );
 
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks((q) => q.nameStartsWith('a 3'))
-              .tFindAll(),
+          isar.modelBs.filter().aLinks((q) => q.nameStartsWith('a 3')),
           [b3, b4],
         );
 
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks((q) => q.nameStartsWith('a 4'))
-              .tFindAll(),
+          isar.modelBs.filter().aLinks((q) => q.nameStartsWith('a 4')),
           [b4],
         );
 
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks((q) => q.nameStartsWith('a 5'))
-              .tFindAll(),
+          isar.modelBs.filter().aLinks((q) => q.nameStartsWith('a 5')),
           [],
         );
 
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks((q) => q.nameStartsWith('a 6'))
-              .tFindAll(),
+          isar.modelBs.filter().aLinks((q) => q.nameStartsWith('a 6')),
           [b6],
         );
 
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks((q) => q.nameStartsWith('non existing'))
-              .tFindAll(),
+          isar.modelBs.filter().aLinks((q) => q.nameStartsWith('non existing')),
           [],
         );
       });
@@ -442,64 +368,56 @@ void main() {
         await qEqualSet(
           isar.modelBs
               .filter()
-              .aLinks((q) => q.bLinks((q) => q.nameStartsWith('b')))
-              .tFindAll(),
+              .aLinks((q) => q.bLinks((q) => q.nameStartsWith('b'))),
           [b1, b2, b3, b4],
         );
 
         await qEqualSet(
           isar.modelBs
               .filter()
-              .aLinks((q) => q.bLinks((q) => q.nameEqualTo('b 1')))
-              .tFindAll(),
+              .aLinks((q) => q.bLinks((q) => q.nameEqualTo('b 1'))),
           [b1, b2, b3, b4],
         );
 
         await qEqualSet(
           isar.modelBs
               .filter()
-              .aLinks((q) => q.bLinks((q) => q.nameEqualTo('b 2')))
-              .tFindAll(),
+              .aLinks((q) => q.bLinks((q) => q.nameEqualTo('b 2'))),
           [b2, b3, b4],
         );
 
         await qEqualSet(
           isar.modelBs
               .filter()
-              .aLinks((q) => q.bLinks((q) => q.nameEqualTo('b 3')))
-              .tFindAll(),
+              .aLinks((q) => q.bLinks((q) => q.nameEqualTo('b 3'))),
           [b3, b4],
         );
 
         await qEqualSet(
           isar.modelBs
               .filter()
-              .aLinks((q) => q.bLinks((q) => q.nameEqualTo('b 4')))
-              .tFindAll(),
+              .aLinks((q) => q.bLinks((q) => q.nameEqualTo('b 4'))),
           [b4],
         );
 
         await qEqualSet(
           isar.modelBs
               .filter()
-              .aLinks((q) => q.bLinks((q) => q.nameEqualTo('b 5')))
-              .tFindAll(),
+              .aLinks((q) => q.bLinks((q) => q.nameEqualTo('b 5'))),
           [],
         );
 
         await qEqualSet(
           isar.modelBs
               .filter()
-              .aLinks((q) => q.bLinks((q) => q.nameEqualTo('b 6')))
-              .tFindAll(),
+              .aLinks((q) => q.bLinks((q) => q.nameEqualTo('b 6'))),
           [],
         );
 
         await qEqualSet(
           isar.modelBs
               .filter()
-              .aLinks((q) => q.bLinks((q) => q.nameEqualTo('non existing')))
-              .tFindAll(),
+              .aLinks((q) => q.bLinks((q) => q.nameEqualTo('non existing'))),
           [],
         );
       });
@@ -507,114 +425,90 @@ void main() {
       // FIXME: Nested filter link (see filter_link_nested_test.dart)
       isarTest('.aLinks() then .bLinks() then .aLinks()', () async {
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks(
+          isar.modelBs.filter().aLinks(
                 (q) => q.bLinks(
                   (q) => q.aLinks(
                     (q) => q.nameStartsWith('a'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [b1, b2, b3, b4],
         );
 
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks(
+          isar.modelBs.filter().aLinks(
                 (q) => q.bLinks(
                   (q) => q.aLinks(
                     (q) => q.nameStartsWith('a 1'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [b1, b2, b3, b4],
         );
 
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks(
+          isar.modelBs.filter().aLinks(
                 (q) => q.bLinks(
                   (q) => q.aLinks(
                     (q) => q.nameStartsWith('a 2'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [b2, b3, b4],
         );
 
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks(
+          isar.modelBs.filter().aLinks(
                 (q) => q.bLinks(
                   (q) => q.aLinks(
                     (q) => q.nameStartsWith('a 3'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [b3, b4],
         );
 
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks(
+          isar.modelBs.filter().aLinks(
                 (q) => q.bLinks(
                   (q) => q.aLinks(
                     (q) => q.nameStartsWith('a 4'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [b4],
         );
 
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks(
+          isar.modelBs.filter().aLinks(
                 (q) => q.bLinks(
                   (q) => q.aLinks(
                     (q) => q.nameStartsWith('a 5'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [],
         );
 
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks(
+          isar.modelBs.filter().aLinks(
                 (q) => q.bLinks(
                   (q) => q.aLinks(
                     (q) => q.nameStartsWith('a 6'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [],
         );
 
         await qEqualSet(
-          isar.modelBs
-              .filter()
-              .aLinks(
+          isar.modelBs.filter().aLinks(
                 (q) => q.bLinks(
                   (q) => q.aLinks(
                     (q) => q.nameStartsWith('non existing'),
                   ),
                 ),
-              )
-              .tFindAll(),
+              ),
           [],
         );
       });

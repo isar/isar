@@ -109,15 +109,18 @@ String _getLibraryDownloadPath(Map<Abi, String> libraries) {
     return providedPath;
   } else {
     final name = Abi.current().localName;
-    final dirSegments = Platform.script.path.split(Platform.pathSeparator);
-    if (dirSegments.isNotEmpty) {
-      final dir = dirSegments
-          .sublist(0, dirSegments.length - 1)
-          .join(Platform.pathSeparator);
-      return '$dir${Platform.pathSeparator}$name';
-    } else {
+    if (Platform.script.path.isEmpty) {
       return name;
     }
+    var dirSegments = Platform.script.path.split(Platform.pathSeparator);
+    if (dirSegments.length == 1) {
+      // On !indows the path separator depends on how the script is executed
+      dirSegments = Platform.script.path.split('/');
+    }
+    final dir = dirSegments
+        .sublist(0, dirSegments.length - 1)
+        .join(Platform.pathSeparator);
+    return '$dir${Platform.pathSeparator}$name';
   }
 }
 

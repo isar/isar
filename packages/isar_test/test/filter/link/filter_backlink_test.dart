@@ -6,7 +6,7 @@ import '../../util/sync_async_helper.dart';
 
 part 'filter_backlink_test.g.dart';
 
-@Collection()
+@collection
 class SourceModel {
   SourceModel(this.name);
 
@@ -31,7 +31,7 @@ class SourceModel {
   }
 }
 
-@Collection()
+@collection
 class TargetModel {
   Id id = Isar.autoIncrement;
 
@@ -125,58 +125,39 @@ void main() {
 
     isarTest('.backlink()', () async {
       await qEqualSet(
-        isar.targetModels
-            .filter()
-            .backlink((q) => q.nameEqualTo('source 1'))
-            .tFindAll(),
+        isar.targetModels.filter().backlink((q) => q.nameEqualTo('source 1')),
         [target1],
       );
 
       await qEqualSet(
-        isar.targetModels
-            .filter()
-            .backlink((q) => q.nameEqualTo('source 2'))
-            .tFindAll(),
+        isar.targetModels.filter().backlink((q) => q.nameEqualTo('source 2')),
         [target2],
       );
 
       await qEqualSet(
-        isar.targetModels
-            .filter()
-            .backlink((q) => q.nameEqualTo('source 3'))
-            .tFindAll(),
+        isar.targetModels.filter().backlink((q) => q.nameEqualTo('source 3')),
         [target3],
       );
 
       await qEqualSet(
-        isar.targetModels
-            .filter()
-            .backlink((q) => q.nameEqualTo('source 4'))
-            .tFindAll(),
+        isar.targetModels.filter().backlink((q) => q.nameEqualTo('source 4')),
         [target4],
       );
 
       await qEqualSet(
-        isar.targetModels
-            .filter()
-            .backlink((q) => q.nameEqualTo('source 5'))
-            .tFindAll(),
+        isar.targetModels.filter().backlink((q) => q.nameEqualTo('source 5')),
+        [],
+      );
+
+      await qEqualSet(
+        isar.targetModels.filter().backlink((q) => q.nameEqualTo('source 6')),
         [],
       );
 
       await qEqualSet(
         isar.targetModels
             .filter()
-            .backlink((q) => q.nameEqualTo('source 6'))
-            .tFindAll(),
-        [],
-      );
-
-      await qEqualSet(
-        isar.targetModels
-            .filter()
-            .backlink((q) => q.nameEqualTo('non existing'))
-            .tFindAll(),
+            .backlink((q) => q.nameEqualTo('non existing')),
         [],
       );
 
@@ -185,22 +166,21 @@ void main() {
             .filter()
             .backlink((q) => q.nameEqualTo('source 1'))
             .or()
-            .backlink((q) => q.nameEqualTo('source 4'))
-            .tFindAll(),
+            .backlink((q) => q.nameEqualTo('source 4')),
         [target1, target4],
       );
     });
 
     isarTest('.backlinkIsNull()', () async {
       await qEqualSet(
-        isar.targetModels.filter().backlinkIsNull().tFindAll(),
+        isar.targetModels.filter().backlinkIsNull(),
         [target5, target6],
       );
 
       await isar.tWriteTxn(() => target1.backlink.tReset());
 
       await qEqualSet(
-        isar.targetModels.filter().backlinkIsNull().tFindAll(),
+        isar.targetModels.filter().backlinkIsNull(),
         [target1, target5, target6],
       );
 
@@ -208,14 +188,14 @@ void main() {
       await isar.tWriteTxn(() => source6.link.tSave());
 
       await qEqualSet(
-        isar.targetModels.filter().backlinkIsNull().tFindAll(),
+        isar.targetModels.filter().backlinkIsNull(),
         [target1, target5],
       );
 
       await isar.tWriteTxn(() => isar.sourceModels.where().tDeleteAll());
 
       await qEqualSet(
-        isar.targetModels.filter().backlinkIsNull().tFindAll(),
+        isar.targetModels.filter().backlinkIsNull(),
         [target1, target2, target3, target4, target5, target6],
       );
     });
