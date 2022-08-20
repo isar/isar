@@ -16,7 +16,6 @@ dependencies:
   isar: any
   isar_flutter_libs: any
   json_annotation: ^4.2.0
-  meta: any
   path_provider: ^2.0.10
 
 dev_dependencies:

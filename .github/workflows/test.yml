@@ -75,6 +75,11 @@ jobs:
           dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
         working-directory: packages/isar_test
+      - name: Add packages
+        run: |
+          flutter pub add json_annotation
+          flutter pub add intl
+        working-directory: packages/isar
       - name: Collect isar Coverage
         run: |
           flutter test --coverage
