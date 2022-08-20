@@ -88,7 +88,7 @@ Future<void> _prepareTest() async {
           binaryName,
         );
 
-        if (File(binaryPath).existsSync()) {
+        if (!File(binaryPath).existsSync()) {
           Process.runSync(
             'cargo',
             ['build', '--target', target],
