@@ -179,9 +179,9 @@ void main() {
     });
 
     isarTest('.backlinksLengthEqualTo()', () async {
-      await qEqualSet(
-        isar.targetModels.filter().backlinksLengthEqualTo(-1),
-        [],
+      expect(
+        () => isar.targetModels.filter().backlinksLengthEqualTo(-1),
+        throwsAssertionError,
       );
 
       await qEqualSet(
@@ -216,9 +216,9 @@ void main() {
     });
 
     isarTest('.backlinksLengthGreaterThan()', () async {
-      await qEqualSet(
-        isar.targetModels.filter().backlinksLengthGreaterThan(-1),
-        [target1, target2, target3, target4, target5, target6],
+      expect(
+        () => isar.targetModels.filter().backlinksLengthGreaterThan(-2),
+        throwsAssertionError,
       );
 
       await qEqualSet(
@@ -343,19 +343,12 @@ void main() {
         [target5, target6],
       );
 
-      // FIXME: IsarError: Cannot perform this operation from within an active
-      // transaction.
-      // Are we suppose to a able to reset backlinks?
-      //
-      // It seems that a sync method is called in an async transaction
-      // Also seems to only happen on `.reset()` of backlinks
+      await isar.tWriteTxn(() => target1.backlinks.tReset());
 
-      // await isar.tWriteTxn(() => target1.backlinks.tReset());
-
-      // await qEqualSet(
-      //   isar.targetModels.filter().backlinksIsEmpty(),
-      //   [target1, target5, target6],
-      // );
+      await qEqualSet(
+        isar.targetModels.filter().backlinksIsEmpty(),
+        [target1, target5, target6],
+      );
 
       await isar.tWriteTxn(() => isar.sourceModels.where().tDeleteAll());
 

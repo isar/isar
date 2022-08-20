@@ -205,4 +205,11 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
       isValidKey: (o) => o is OBJ && getId(o) != null,
     )..addAll(_loadedObjects.values);
   }
+
+  @override
+  void clear() {
+    _objects.clear();
+    addedObjects.clear();
+    removedObjects.clear();
+  }
 }

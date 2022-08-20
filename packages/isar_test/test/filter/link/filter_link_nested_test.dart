@@ -189,6 +189,7 @@ void main() {
           target2.nestedLinks.tSave(),
           target3.nestedLinks.tSave(),
           target4.nestedLinks.tSave(),
+          target6.nestedLinks.tSave(),
         ]),
       );
     });
@@ -328,8 +329,6 @@ void main() {
         );
       });
 
-      // FIXME(severe): Nested links filters returns all values
-      // Seems that the nested query is completely ignored
       isarTest('.links() with .nestedLinkIsEmpty()', () async {
         await qEqualSet(
           isar.sourceModels.filter().links((q) => q.nestedLinksIsEmpty()),
@@ -340,17 +339,17 @@ void main() {
 
         await qEqualSet(
           isar.sourceModels.filter().links((q) => q.nestedLinksIsEmpty()),
-          [source1, source5],
+          [source1, source2, source3, source5],
         );
 
-        /*await isar.tWriteTxn(
+        await isar.tWriteTxn(
           () => isar.nestedTargetModels.where().tDeleteAll(),
         );
 
         await qEqualSet(
           isar.sourceModels.filter().links((q) => q.nestedLinksIsEmpty()),
           [source1, source2, source3, source4, source5],
-        );*/
+        );
       });
     });
 
@@ -408,7 +407,7 @@ void main() {
           isar.nestedTargetModels
               .filter()
               .nestedLinksBacklinks((q) => q.nameStartsWith('target 6')),
-          [],
+          [nestedTarget5],
         );
 
         await qEqualSet(
@@ -419,8 +418,6 @@ void main() {
         );
       });
 
-      // FIXME(severe): Nested links filters returns all values
-      // Seems that the nested query is completely ignored
       isarTest('.nestedLinksBackLinks', () async {
         await qEqualSet(
           isar.nestedTargetModels.filter().nestedLinksBacklinks(
@@ -491,8 +488,6 @@ void main() {
         );
       });
 
-      // FIXME(severe): Nested links filters returns all values
-      // Seems that the nested query is completely ignored
       isarTest(
         '.nestedLinksBacklinks() with .linksBacklinksLengthEqualTo()',
         () async {
@@ -548,8 +543,6 @@ void main() {
       );
     });
 
-    // FIXME(severe): Nested links filters returns all values
-    // Seems that the nested query is completely ignored
     isarTest(
       '.nestedLinksBacklinks() with .linksBacklinksIsEmpty()',
       () async {
@@ -560,13 +553,6 @@ void main() {
           [nestedTarget5],
         );
 
-        return;
-        // FIXME: IsarError: Cannot perform this operation from within an active
-        // transaction.
-        // Are we suppose to a able to reset backlinks?
-        //
-        // It seems that a sync method is called in an async transaction
-        // Also seems to only happen on `.reset()` of backlinks
         await isar.tWriteTxn(() => target1.linksBacklinks.tReset());
 
         await qEqualSet(

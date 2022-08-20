@@ -68,6 +68,6 @@ void main() {
 
     await qEqual(isar.testModels.where(), [_obj1, _obj3]);
 
-    expect(await isar.close(), true);
+    expect(await isar.close(deleteFromDisk: true), true);
   });
 }

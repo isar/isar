@@ -9,10 +9,7 @@ import 'util.dart';
 
 part 'tweet.g.dart';
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @collection
 class Tweet {
   Tweet();
@@ -75,14 +72,9 @@ class Tweet {
   String? fullText;
 
   List<int>? displayTextRange;
-
-  Map<String, dynamic> toJson() => _$TweetToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class CurrentUserRetweet {
   CurrentUserRetweet();
@@ -91,14 +83,9 @@ class CurrentUserRetweet {
       _$CurrentUserRetweetFromJson(json);
 
   String? idStr;
-
-  Map<String, dynamic> toJson() => _$CurrentUserRetweetToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class QuotedStatusPermalink {
   QuotedStatusPermalink();
@@ -111,6 +98,4 @@ class QuotedStatusPermalink {
   String? expanded;
 
   String? display;
-
-  Map<String, dynamic> toJson() => _$QuotedStatusPermalinkToJson(this);
 }

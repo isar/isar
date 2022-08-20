@@ -3,10 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'media.g.dart';
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class Media {
   Media();
@@ -36,14 +33,9 @@ class Media {
   VideoInfo? videoInfo;
 
   AdditionalMediaInfo? additionalMediaInfo;
-
-  Map<String, dynamic> toJson() => _$MediaToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class Sizes {
   Sizes();
@@ -57,14 +49,9 @@ class Sizes {
   Size? small;
 
   Size? large;
-
-  Map<String, dynamic> toJson() => _$SizesToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class Size {
   Size();
@@ -76,14 +63,9 @@ class Size {
   int? h;
 
   String? resize;
-
-  Map<String, dynamic> toJson() => _$SizeToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class AdditionalMediaInfo {
   AdditionalMediaInfo();
@@ -98,14 +80,9 @@ class AdditionalMediaInfo {
   bool? embeddable;
 
   bool? monetizable;
-
-  Map<String, dynamic> toJson() => _$AdditionalMediaInfoToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class VideoInfo {
   VideoInfo();
@@ -118,14 +95,9 @@ class VideoInfo {
   int? durationMillis;
 
   List<Variant>? variants;
-
-  Map<String, dynamic> toJson() => _$VideoInfoToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class Variant {
   Variant();
@@ -138,6 +110,4 @@ class Variant {
   String? contentType;
 
   String? url;
-
-  Map<String, dynamic> toJson() => _$VariantToJson(this);
 }

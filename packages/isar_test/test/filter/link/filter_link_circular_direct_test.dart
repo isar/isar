@@ -169,13 +169,12 @@ void main() {
         );
       });
 
-      // FIXME: Nested filter link (see filter_link_nested_test.dart)
       isarTest('.bLinks() then .aLinks()', () async {
         await qEqualSet(
           isar.modelAs
               .filter()
               .bLinks((q) => q.aLinks((q) => q.nameStartsWith('a'))),
-          [a1, a2, a3, a4, a5],
+          [a1, a2, a3, a4],
         );
 
         await qEqualSet(
@@ -228,7 +227,6 @@ void main() {
         );
       });
 
-      // FIXME: Nested filter link (see filter_link_nested_test.dart)
       isarTest('.bLinks() then .aLinks() then .bLinks()', () async {
         await qEqualSet(
           isar.modelAs.filter().bLinks(
@@ -363,7 +361,6 @@ void main() {
         );
       });
 
-      // FIXME: Nested filter link (see filter_link_nested_test.dart)
       isarTest('.aLinks() then .bLinks()', () async {
         await qEqualSet(
           isar.modelBs
@@ -422,7 +419,6 @@ void main() {
         );
       });
 
-      // FIXME: Nested filter link (see filter_link_nested_test.dart)
       isarTest('.aLinks() then .bLinks() then .aLinks()', () async {
         await qEqualSet(
           isar.modelBs.filter().aLinks(

@@ -6,10 +6,7 @@ import 'util.dart';
 
 part 'entities.g.dart';
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class Entities {
   Entities();
@@ -28,14 +25,9 @@ class Entities {
   List<Symbol>? symbols;
 
   List<Poll>? polls;
-
-  Map<String, dynamic> toJson() => _$EntitiesToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class Hashtag {
   Hashtag();
@@ -46,14 +38,9 @@ class Hashtag {
   List<int>? indices;
 
   String? text;
-
-  Map<String, dynamic> toJson() => _$HashtagToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class Poll {
   Poll();
@@ -66,14 +53,9 @@ class Poll {
   DateTime? endDatetime;
 
   String? durationMinutes;
-
-  Map<String, dynamic> toJson() => _$PollToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class Option {
   Option();
@@ -83,14 +65,9 @@ class Option {
   int? position;
 
   String? text;
-
-  Map<String, dynamic> toJson() => _$OptionToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class Symbol {
   Symbol();
@@ -100,14 +77,9 @@ class Symbol {
   List<int>? indices;
 
   String? text;
-
-  Map<String, dynamic> toJson() => _$SymbolToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class Url {
   Url();
@@ -121,14 +93,9 @@ class Url {
   List<int>? indices;
 
   String? url;
-
-  Map<String, dynamic> toJson() => _$UrlToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class UserMention {
   UserMention();
@@ -143,6 +110,4 @@ class UserMention {
   String? name;
 
   String? screenName;
-
-  Map<String, dynamic> toJson() => _$UserMentionToJson(this);
 }

@@ -75,27 +75,27 @@ Future<void> _prepareTest() async {
       try {
         final packagesDir = path.dirname(Directory.current.absolute.path);
         final target = _getRustTarget();
-        Process.runSync(
-          'cargo',
-          ['build', '--target', target],
-          workingDirectory: path.join(packagesDir, 'isar_core_ffi'),
-        );
         final binaryName = Platform.isWindows
             ? 'isar.dll'
             : Platform.isMacOS
                 ? 'libisar.dylib'
                 : 'libisar.so';
-        await Isar.initializeIsarCore(
-          libraries: {
-            Abi.current(): path.join(
-              path.dirname(packagesDir),
-              'target',
-              target,
-              'debug',
-              binaryName,
-            ),
-          },
+        final binaryPath = path.join(
+          path.dirname(packagesDir),
+          'target',
+          target,
+          'debug',
+          binaryName,
         );
+
+        if (File(binaryPath).existsSync()) {
+          Process.runSync(
+            'cargo',
+            ['build', '--target', target],
+            workingDirectory: path.join(packagesDir, 'isar_core_ffi'),
+          );
+        }
+        await Isar.initializeIsarCore(libraries: {Abi.current(): binaryPath});
       } catch (e) {
         // ignore. maybe this is an instrumentation test
         print(e);

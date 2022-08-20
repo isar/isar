@@ -140,11 +140,6 @@ class QueryBuilderInternal<OBJ> {
     int upper,
     bool includeUpper,
   ) {
-    assert(lower >= 0, 'Lower bound must be positive.');
-    assert(
-      upper >= lower,
-      'Upper bound must be positive and may no be less than lower bound.',
-    );
     if (!includeLower) {
       lower += 1;
     }

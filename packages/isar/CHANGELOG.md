@@ -26,6 +26,7 @@ This is the last big feature release before a stable 3.0 version.
 
 ### Fixes
 
+- Fixed nested link queries
 - Minor fixes for query edge cases
 - Memory is now always initialized before it gets stored
 - An exception is now thrown when a sync write txn is started while an async write txn is active. This prevents deadlock.

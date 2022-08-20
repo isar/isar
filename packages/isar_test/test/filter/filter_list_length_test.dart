@@ -136,7 +136,7 @@ void main() {
       );
       await qEqual(
         isar.models.filter().stringsLengthLessThan(42),
-        [obj2, obj3, obj4, obj4, obj5],
+        [obj2, obj3, obj4, obj5],
       );
       await qEqual(isar.models.filter().stringsLengthLessThan(2), []);
     });

@@ -6,10 +6,7 @@ import 'util.dart';
 
 part 'user.g.dart';
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class User {
   User();
@@ -58,14 +55,9 @@ class User {
   List<String>? withheldInCountries;
 
   String? withheldScope;
-
-  Map<String, dynamic> toJson() => _$UserToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class UserEntities {
   UserEntities();
@@ -76,14 +68,9 @@ class UserEntities {
   UserEntityUrl? url;
 
   UserEntityUrl? description;
-
-  Map<String, dynamic> toJson() => _$UserEntitiesToJson(this);
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  fieldRename: FieldRename.snake,
-)
+@JsonSerializable(fieldRename: FieldRename.snake)
 @embedded
 class UserEntityUrl {
   UserEntityUrl();
@@ -92,6 +79,4 @@ class UserEntityUrl {
       _$UserEntityUrlFromJson(json);
 
   List<Url>? urls;
-
-  Map<String, dynamic> toJson() => _$UserEntityUrlToJson(this);
 }

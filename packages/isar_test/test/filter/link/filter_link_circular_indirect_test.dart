@@ -123,12 +123,12 @@ void main() {
       b5 = ModelB('b 5');
       b6 = ModelB('b 6');
 
-      c1 = ModelC('a 1');
-      c2 = ModelC('a 2');
-      c3 = ModelC('a 3');
-      c4 = ModelC('a 4');
-      c5 = ModelC('a 5');
-      c6 = ModelC('a 6');
+      c1 = ModelC('c 1');
+      c2 = ModelC('c 2');
+      c3 = ModelC('c 3');
+      c4 = ModelC('c 4');
+      c5 = ModelC('c 5');
+      c6 = ModelC('c 6');
 
       await isar.tWriteTxn(
         () => Future.wait([
@@ -177,7 +177,6 @@ void main() {
       );
     });
 
-    // FIXME: Nested filter link (see filter_link_nested_test.dart)
     isarTest('.bLinks() then .cLinks() then .aLinks()', () async {
       await qEqualSet(
         isar.modelAs.filter().bLinks(
@@ -268,7 +267,6 @@ void main() {
       );
     });
 
-    // FIXME: Nested filter link (see filter_link_nested_test.dart)
     isarTest('.cLinks() then .aLinks() then .bLinks()', () async {
       await qEqualSet(
         isar.modelBs.filter().cLinks(
@@ -359,7 +357,6 @@ void main() {
       );
     });
 
-    // FIXME: Nested filter link (see filter_link_nested_test.dart)
     isarTest('.aLinks() then .bLinks() then .cLinks()', () async {
       await qEqualSet(
         isar.modelCs.filter().aLinks(

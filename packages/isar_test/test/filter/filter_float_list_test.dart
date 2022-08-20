@@ -19,6 +19,12 @@ class FloatModel {
       other is FloatModel &&
       id == other.id &&
       doubleListEquals(other.list, list);
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return 'FloatModel{id: $id, list: $list}';
+  }
 }
 
 void main() {
@@ -83,7 +89,9 @@ void main() {
       );
       await qEqual(col.filter().listElementLessThan(null), []);
       await qEqual(
-          col.filter().listElementLessThan(null, include: true), [objNull]);
+        col.filter().listElementLessThan(null, include: true),
+        [obj2, obj3],
+      );
     });
 
     isarTest('.anyBetween()', () async {
