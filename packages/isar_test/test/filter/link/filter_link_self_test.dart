@@ -117,7 +117,6 @@ void main() {
       );
     });
 
-    // FIXME: Nested filter link (see filter_link_nested_test.dart)
     isarTest('Nested .selfLink()', () async {
       await qEqualSet(
         isar.models

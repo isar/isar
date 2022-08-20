@@ -57,7 +57,7 @@ class Col2 {
 
 void main() {
   isarTest('Regression 235 Rename field', () async {
-    final isar1 = await openTempIsar([Col1Schema], autoClose: false);
+    final isar1 = await openTempIsar([Col1Schema]);
     await isar1.tWriteTxn(() {
       return isar1.col1s.tPut(Col1(id: 5));
     });

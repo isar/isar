@@ -56,7 +56,7 @@ class Embedded2 {
 
 void main() {
   isarTest('Change field embedded', () async {
-    final isar1 = await openTempIsar([Model1Schema], autoClose: false);
+    final isar1 = await openTempIsar([Model1Schema]);
     await isar1.tWriteTxn(() {
       return isar1.model1s.tPutAll([
         Model1(1, Embedded1('a')),
@@ -65,11 +65,7 @@ void main() {
     });
     expect(await isar1.close(), true);
 
-    final isar2 = await openTempIsar(
-      [Model2Schema],
-      name: isar1.name,
-      autoClose: false,
-    );
+    final isar2 = await openTempIsar([Model2Schema], name: isar1.name);
     await qEqual(isar2.model2s.where(), [
       Model2(1, null),
       Model2(2, null),

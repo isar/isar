@@ -212,7 +212,7 @@ void main() {
         await isar.boolIndexModels.tPutByValue(obj2);
       });
 
-      await qEqual(isar.boolIndexModels.where(), [obj1, obj2]);
+      await qEqual(isar.boolIndexModels.where(), [obj2, obj1]);
       expect(obj0.id, obj2.id);
 
       await isar.tWriteTxn(() => isar.boolIndexModels.tPutByValue(obj0));
@@ -232,7 +232,7 @@ void main() {
       await qEqual(isar.intIndexModels.where(), [obj0, obj1, obj3]);
 
       await isar.tWriteTxn(() => isar.intIndexModels.tPutByValue(obj2));
-      await qEqual(isar.intIndexModels.where(), [obj1, obj2, obj3]);
+      await qEqual(isar.intIndexModels.where(), [obj2, obj1, obj3]);
       expect(obj0.id, obj2.id);
     });
 
@@ -265,7 +265,7 @@ void main() {
       await isar.tWriteTxn(
         () => isar.stringValueIndexModels.tPutAllByValue([obj2, obj3]),
       );
-      await qEqual(isar.stringValueIndexModels.where(), [obj1, obj2, obj3]);
+      await qEqual(isar.stringValueIndexModels.where(), [obj2, obj1, obj3]);
       expect(obj0.id, obj2.id);
 
       await isar.tWriteTxn(() => isar.stringValueIndexModels.tPutByValue(obj0));
@@ -288,14 +288,14 @@ void main() {
       await isar.tWriteTxn(
         () => isar.stringHashIndexModels.tPutAllByValue([obj3, obj4]),
       );
-      await qEqual(isar.stringHashIndexModels.where(), [obj2, obj3, obj4]);
+      await qEqual(isar.stringHashIndexModels.where(), [obj4, obj3, obj2]);
       expect(obj0.id, obj4.id);
       expect(obj1.id, obj3.id);
 
       await isar.tWriteTxn(
         () => isar.stringHashIndexModels.tPutByValue(obj0),
       );
-      await qEqual(isar.stringHashIndexModels.where(), [obj0, obj2, obj3]);
+      await qEqual(isar.stringHashIndexModels.where(), [obj0, obj3, obj2]);
       expect(obj0.id, obj4.id);
     });
 
@@ -322,7 +322,7 @@ void main() {
       );
       await qEqual(
         isar.stringInsensitiveIndexModels.where(),
-        [obj0, obj3, obj5],
+        [obj0, obj5, obj3],
       );
 
       await isar.tWriteTxn(
@@ -331,7 +331,7 @@ void main() {
       );
       await qEqual(
         isar.stringInsensitiveIndexModels.where(),
-        [obj3, obj4, obj5],
+        [obj4, obj5, obj3],
       );
 
       await isar.tWriteTxn(
@@ -339,7 +339,7 @@ void main() {
       );
       await qEqual(
         isar.stringInsensitiveIndexModels.where(),
-        [obj1, obj3, obj4],
+        [obj4, obj1, obj3],
       );
     });
 

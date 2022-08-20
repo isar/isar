@@ -40,7 +40,7 @@ class Model2 {
 
 void main() {
   isarTest('Change field type', () async {
-    final isar1 = await openTempIsar([Model1Schema], autoClose: false);
+    final isar1 = await openTempIsar([Model1Schema]);
     final obj1A = Model1(1, 'a', 'OBJ1');
     final obj1B = Model1(2, 'bbb', 'OBJ2');
     await isar1.tWriteTxn(() {

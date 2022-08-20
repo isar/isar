@@ -39,7 +39,7 @@ void main() async {
       isar = await openTempIsar(
         [TweetSchema],
         name: '776524265_tmp',
-        autoClose: false,
+        
       );
       col = isar.collection<Tweet>();
       /*for (var i = 0; i < 100; i++) {

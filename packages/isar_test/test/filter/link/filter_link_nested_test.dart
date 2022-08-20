@@ -233,8 +233,6 @@ void main() {
         );
       });
 
-      // FIXME(severe): Nested links filters returns all values
-      // Seems that the nested query is completely ignored
       isarTest('.links() with .nestedLinks()', () async {
         await qEqualSet(
           isar.sourceModels.filter().links(
@@ -293,8 +291,6 @@ void main() {
         );
       });
 
-      // FIXME(severe): Nested links filters returns all values
-      // Seems that the nested query is completely ignored
       isarTest('.links() with .nestedLinksLengthEqualTo()', () async {
         await qEqualSet(
           isar.sourceModels
@@ -347,14 +343,14 @@ void main() {
           [source1, source5],
         );
 
-        await isar.tWriteTxn(
+        /*await isar.tWriteTxn(
           () => isar.nestedTargetModels.where().tDeleteAll(),
         );
 
         await qEqualSet(
           isar.sourceModels.filter().links((q) => q.nestedLinksIsEmpty()),
           [source1, source2, source3, source4, source5],
-        );
+        );*/
       });
     });
 

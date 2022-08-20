@@ -7,6 +7,7 @@ import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
+import 'package:test_api/src/backend/invoker.dart';
 
 import 'sync_async_helper.dart';
 
@@ -167,7 +168,6 @@ Future<Isar> openTempIsar(
   List<CollectionSchema<dynamic>> schemas, {
   String? name,
   String? directory,
-  bool autoClose = true,
   CompactCondition? compactOnLaunch,
 }) async {
   await _prepareTest();
@@ -184,8 +184,12 @@ Future<Isar> openTempIsar(
     compactOnLaunch: compactOnLaunch,
   );
 
-  if (autoClose) {
-    addTearDown(() => isar.close(deleteFromDisk: true));
+  if (Invoker.current != null) {
+    addTearDown(() async {
+      if (isar.isOpen) {
+        await isar.close(deleteFromDisk: true);
+      }
+    });
   }
 
   await isar.verify();
@@ -227,6 +231,8 @@ Matcher isIsarError([String? contains]) {
 Matcher throwsIsarError([String? contains]) {
   return throwsA(isIsarError(contains));
 }
+
+final Matcher throwsAssertionError = throwsA(isA<AssertionError>());
 
 bool listEquals<T>(List<T>? a, List<T>? b) {
   if (a == null) {

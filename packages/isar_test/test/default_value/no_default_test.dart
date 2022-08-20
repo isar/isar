@@ -91,7 +91,7 @@ void main() {
   group('No default value', () {
     isarTest('scalar', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
+      final isar1 = await openTempIsar([EmptyModelSchema]);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -115,7 +115,7 @@ void main() {
 
     isarTest('scalar property', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
+      final isar1 = await openTempIsar([EmptyModelSchema]);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -171,7 +171,7 @@ void main() {
 
     isarTest('list', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
+      final isar1 = await openTempIsar([EmptyModelSchema]);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();
@@ -193,7 +193,7 @@ void main() {
 
     isarTest('list property', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema], autoClose: false);
+      final isar1 = await openTempIsar([EmptyModelSchema]);
       await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
       final isarName = isar1.name;
       await isar1.close();

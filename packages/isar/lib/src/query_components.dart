@@ -393,6 +393,7 @@ class FilterCondition extends FilterOperation {
         include2 = true,
         caseSensitive = false,
         epsilon = Query.epsilon,
+        assert(lower >= 0 && upper >= 0, 'List length must be positive.'),
         super._();
 
   /// Type of the filter condition.
@@ -547,6 +548,7 @@ class LinkFilter extends FilterOperation {
   })  : filter = null,
         lower = lower,
         upper = upper,
+        assert(lower >= 0 && upper >= 0, 'Link length must be positive.'),
         super._();
 
   /// Isar name of the link.

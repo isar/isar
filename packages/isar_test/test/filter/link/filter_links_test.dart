@@ -174,9 +174,9 @@ void main() {
     });
 
     isarTest('.linksLengthEqualTo()', () async {
-      await qEqualSet(
-        isar.sourceModels.filter().linksLengthEqualTo(-1),
-        [],
+      expect(
+        () => isar.sourceModels.filter().linksLengthEqualTo(-1),
+        throwsAssertionError,
       );
 
       await qEqualSet(
@@ -211,15 +211,9 @@ void main() {
     });
 
     isarTest('.linksLengthGreaterThan()', () async {
-      // FIXME: .linksLengthGreaterThan(X) where X <= -2 returns no values
-      // await qEqualSet(
-      //   isar.sourceModels.filter().linksLengthGreaterThan(-2),
-      //   [source1, source2, source3, source4, source5, source6],
-      // );
-
-      await qEqualSet(
-        isar.sourceModels.filter().linksLengthGreaterThan(-1),
-        [source1, source2, source3, source4, source5, source6],
+      expect(
+        () => isar.sourceModels.filter().linksLengthGreaterThan(-2),
+        throwsAssertionError,
       );
 
       await qEqualSet(
@@ -257,19 +251,14 @@ void main() {
         isar.sourceModels.filter().linksLengthGreaterThan(3, include: true),
         [source2],
       );
-
-      // FIXME: (minor) .linksLengthGreaterThan(X) where X == max i64 returns
-      // all values
-      // await qEqualSet(
-      //   isar.sourceModels
-      //       .filter()
-      //       .linksLengthGreaterThan(9223372036854775807)
-      //       ,
-      //   [],
-      // );
     });
 
     isarTest('.linksLengthLessThan()', () async {
+      expect(
+        () => isar.sourceModels.filter().linksLengthLessThan(-1),
+        throwsAssertionError,
+      );
+
       await qEqualSet(
         isar.sourceModels.filter().linksLengthLessThan(0),
         [],
@@ -305,12 +294,6 @@ void main() {
         isar.sourceModels.filter().linksLengthLessThan(3, include: true),
         [source1, source2, source3, source4, source5, source6],
       );
-
-      // FIXME: .linksLengthLessThan(X) where X < 0 returns all values
-      // await qEqualSet(
-      //   isar.sourceModels.filter().linksLengthLessThan(-1),
-      //   [],
-      // );
 
       await qEqualSet(
         isar.sourceModels.filter().linksLengthLessThan(9223372036854775807),

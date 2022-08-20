@@ -820,7 +820,7 @@ impl Condition for AnyLinkCond {
             self.link
                 .iter(cursors, id, |id, object| {
                     self.filter
-                        .evaluate(id, object, None)
+                        .evaluate(id, object, Some(cursors))
                         .map(|matches| !matches)
                 })
                 .map(|none_matches| !none_matches)

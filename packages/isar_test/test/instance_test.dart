@@ -28,7 +28,7 @@ class Model {
 void main() {
   group('Instance test', () {
     isarTest('persists auto increment', () async {
-      var isar = await openTempIsar([ModelSchema], autoClose: false);
+      var isar = await openTempIsar([ModelSchema]);
       final isarName = isar.name;
 
       final obj1 = Model()..value = 'M1';
@@ -42,7 +42,6 @@ void main() {
       isar = await openTempIsar(
         [ModelSchema],
         name: isarName,
-        autoClose: false,
       );
 
       final obj2 = Model()..value = 'M2';
@@ -69,7 +68,7 @@ void main() {
     });
 
     isarTest('Prevents usage of closed collection', () async {
-      final isar = await openTempIsar([ModelSchema], autoClose: false);
+      final isar = await openTempIsar([ModelSchema]);
 
       expect(await isar.close(), true);
 

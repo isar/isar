@@ -34,7 +34,7 @@ class Col2 {
 
 void main() {
   isarTest('Add remove link', () async {
-    final isar1 = await openTempIsar([Col1Schema], autoClose: false);
+    final isar1 = await openTempIsar([Col1Schema]);
     await isar1.tWriteTxn(() async {
       final linkedObj = Col1(2);
       final obj = Col1(1);
@@ -45,11 +45,7 @@ void main() {
     });
     expect(await isar1.close(), true);
 
-    final isar2 = await openTempIsar(
-      [Col2Schema],
-      name: isar1.name,
-      autoClose: false,
-    );
+    final isar2 = await openTempIsar([Col2Schema], name: isar1.name);
     final obj = await isar2.col2s.tGet(1);
     await obj!.link.tLoad();
     expect(obj.link, {Col2(2)});

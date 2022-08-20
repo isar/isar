@@ -41,17 +41,13 @@ class Col2 {
 
 void main() {
   isarTest('Add field', () async {
-    final isar1 = await openTempIsar([Col1Schema], autoClose: false);
+    final isar1 = await openTempIsar([Col1Schema]);
     await isar1.tWriteTxn(() {
       return isar1.col1s.tPutAll([Col1(1, 'value1'), Col1(2, 'value2')]);
     });
     expect(await isar1.close(), true);
 
-    final isar2 = await openTempIsar(
-      [Col2Schema],
-      name: isar1.name,
-      autoClose: false,
-    );
+    final isar2 = await openTempIsar([Col2Schema], name: isar1.name);
     await qEqual(isar2.col2s.where(), [
       Col2(1, 'value1', null),
       Col2(2, 'value2', null),
@@ -78,7 +74,7 @@ void main() {
   });
 
   isarTest('Remove field', () async {
-    final isar1 = await openTempIsar([Col2Schema], autoClose: false);
+    final isar1 = await openTempIsar([Col2Schema]);
     await isar1.writeTxn(() {
       return isar1.col2s.putAll([
         Col2(1, 'value1', ['hi']),

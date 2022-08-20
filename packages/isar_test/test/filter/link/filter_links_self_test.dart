@@ -117,7 +117,6 @@ void main() {
       );
     });
 
-    // FIXME: Nested filter link (see filter_link_nested_test.dart)
     isarTest('Nested .selfLinks()', () async {
       await qEqualSet(
         isar.models
@@ -165,12 +164,13 @@ void main() {
         isar.models
             .filter()
             .selfLinks((q) => q.selfLinks((q) => q.nameEqualTo('obj 6'))),
-        [obj4, obj6],
+        [obj4, obj5, obj6],
       );
 
       await qEqualSet(
         isar.models.filter().selfLinks(
-            (q) => q.selfLinks((q) => q.nameEqualTo('non existing'))),
+              (q) => q.selfLinks((q) => q.nameEqualTo('non existing')),
+            ),
         [],
       );
     });
