@@ -112,6 +112,7 @@ void main() {
           '$copiedDbFilename2.isar',
         ),
       );
+      await isarCopy1.copyToFile(copiedDbFile2.path);
 
       expect(copiedDbFile2.lengthSync(), greaterThan(0));
       expect(

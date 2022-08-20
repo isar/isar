@@ -395,10 +395,11 @@ Pointer<CFilter> _buildCondition(
         colPtr: col.ptr,
         filterPtr: filterPtr,
         embeddedColId: embeddedCol?.id,
-        property: property,
+        propertyId: property?.id,
         val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
+        epsilon: condition.epsilon,
       );
       break;
     case FilterConditionType.between:
@@ -412,6 +413,7 @@ Pointer<CFilter> _buildCondition(
         upper: value2,
         includeUpper: condition.include2,
         caseSensitive: condition.caseSensitive,
+        epsilon: condition.epsilon,
       );
       break;
     case FilterConditionType.lessThan:
@@ -423,6 +425,7 @@ Pointer<CFilter> _buildCondition(
         val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
+        epsilon: condition.epsilon,
       );
       break;
     case FilterConditionType.greaterThan:
@@ -434,6 +437,7 @@ Pointer<CFilter> _buildCondition(
         val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
+        epsilon: condition.epsilon,
       );
       break;
     case FilterConditionType.startsWith:
@@ -490,13 +494,14 @@ void _buildConditionEqual({
   required Pointer<CIsarCollection> colPtr,
   required Pointer<Pointer<CFilter>> filterPtr,
   required int? embeddedColId,
-  required PropertySchema? property,
+  required int? propertyId,
   required Object val,
   required bool include,
   required bool caseSensitive,
+  required double epsilon,
 }) {
   if (val is int) {
-    if (property == null) {
+    if (propertyId == null) {
       IC.isar_filter_id(filterPtr, val, true, val, true);
     } else {
       nCall(
@@ -508,7 +513,34 @@ void _buildConditionEqual({
           val,
           true,
           embeddedColId ?? 0,
-          property.id,
+          propertyId,
+        ),
+      );
+    }
+  } else if (val is double) {
+    final lower = adjustFloatBound(
+      value: val,
+      lowerBound: true,
+      include: include,
+      epsilon: epsilon,
+    );
+    final upper = adjustFloatBound(
+      value: val,
+      lowerBound: false,
+      include: include,
+      epsilon: epsilon,
+    );
+    if (lower == null || upper == null) {
+      IC.isar_filter_static(filterPtr, false);
+    } else {
+      nCall(
+        IC.isar_filter_double(
+          colPtr,
+          filterPtr,
+          lower,
+          upper,
+          embeddedColId ?? 0,
+          propertyId!,
         ),
       );
     }
@@ -523,7 +555,7 @@ void _buildConditionEqual({
         true,
         caseSensitive,
         embeddedColId ?? 0,
-        property!.id,
+        propertyId!,
       ),
     );
   } else {
@@ -541,6 +573,7 @@ void _buildConditionBetween({
   required Object upper,
   required bool includeUpper,
   required bool caseSensitive,
+  required double epsilon,
 }) {
   if (lower is int && upper is int) {
     if (propertyId == null) {
@@ -560,16 +593,32 @@ void _buildConditionBetween({
       );
     }
   } else if (lower is double && upper is double) {
-    nCall(
-      IC.isar_filter_double(
-        colPtr,
-        filterPtr,
-        lower,
-        upper,
-        embeddedColId ?? 0,
-        propertyId!,
-      ),
+    final adjustedLower = adjustFloatBound(
+      value: lower,
+      lowerBound: true,
+      include: includeLower,
+      epsilon: epsilon,
     );
+    final adjustedUpper = adjustFloatBound(
+      value: upper,
+      lowerBound: false,
+      include: includeUpper,
+      epsilon: epsilon,
+    );
+    if (adjustedLower == null || adjustedUpper == null) {
+      IC.isar_filter_static(filterPtr, false);
+    } else {
+      nCall(
+        IC.isar_filter_double(
+          colPtr,
+          filterPtr,
+          adjustedLower,
+          adjustedUpper,
+          embeddedColId ?? 0,
+          propertyId!,
+        ),
+      );
+    }
   } else if (lower is Pointer<Char> && upper is Pointer<Char>) {
     nCall(
       IC.isar_filter_string(
@@ -597,6 +646,7 @@ void _buildConditionLessThan({
   required Object val,
   required bool include,
   required bool caseSensitive,
+  required double epsilon,
 }) {
   if (val is int) {
     if (propertyId == null) {
@@ -616,16 +666,26 @@ void _buildConditionLessThan({
       );
     }
   } else if (val is double) {
-    nCall(
-      IC.isar_filter_double(
-        colPtr,
-        filterPtr,
-        minDouble,
-        val,
-        embeddedColId ?? 0,
-        propertyId!,
-      ),
+    final upper = adjustFloatBound(
+      value: val,
+      lowerBound: false,
+      include: include,
+      epsilon: epsilon,
     );
+    if (upper == null) {
+      IC.isar_filter_static(filterPtr, false);
+    } else {
+      nCall(
+        IC.isar_filter_double(
+          colPtr,
+          filterPtr,
+          minDouble,
+          upper,
+          embeddedColId ?? 0,
+          propertyId!,
+        ),
+      );
+    }
   } else if (val is Pointer<Char>) {
     nCall(
       IC.isar_filter_string(
@@ -653,6 +713,7 @@ void _buildConditionGreaterThan({
   required Object val,
   required bool include,
   required bool caseSensitive,
+  required double epsilon,
 }) {
   if (val is int) {
     if (propertyId == null) {
@@ -672,16 +733,26 @@ void _buildConditionGreaterThan({
       );
     }
   } else if (val is double) {
-    nCall(
-      IC.isar_filter_double(
-        colPtr,
-        filterPtr,
-        val,
-        maxDouble,
-        embeddedColId ?? 0,
-        propertyId!,
-      ),
+    final lower = adjustFloatBound(
+      value: val,
+      lowerBound: true,
+      include: include,
+      epsilon: epsilon,
     );
+    if (lower == null) {
+      IC.isar_filter_static(filterPtr, false);
+    } else {
+      nCall(
+        IC.isar_filter_double(
+          colPtr,
+          filterPtr,
+          lower,
+          maxDouble,
+          embeddedColId ?? 0,
+          propertyId!,
+        ),
+      );
+    }
   } else if (val is Pointer<Char>) {
     nCall(
       IC.isar_filter_string(

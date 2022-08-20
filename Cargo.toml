@@ -1,0 +1,12 @@
+[workspace]
+members = [
+    "packages/isar_core",
+    "packages/isar_core_ffi",
+    "packages/mdbx_sys"
+]
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"

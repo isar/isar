@@ -2,6 +2,9 @@ part of isar;
 
 /// Querying is how you find records that match certain conditions.
 abstract class Query<T> {
+  /// The default precision for floating point number queries.
+  static const double epsilon = 0.00001;
+
   /// The corresponding Isar instance.
   Isar get isar;
 

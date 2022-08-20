@@ -72,14 +72,12 @@ Future<void> _prepareTest() async {
   if (!kIsWeb && !_setUp) {
     if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
       try {
-        final parentDir = path.dirname(Directory.current.absolute.path);
-        final coreFFi = path.join(parentDir, 'isar_core_ffi');
+        final packagesDir = path.dirname(Directory.current.absolute.path);
         final target = _getRustTarget();
-
-        await Process.run(
+        Process.runSync(
           'cargo',
           ['build', '--target', target],
-          workingDirectory: coreFFi,
+          workingDirectory: path.join(packagesDir, 'isar_core_ffi'),
         );
         final binaryName = Platform.isWindows
             ? 'isar.dll'
@@ -88,12 +86,18 @@ Future<void> _prepareTest() async {
                 : 'libisar.so';
         await Isar.initializeIsarCore(
           libraries: {
-            Abi.current():
-                path.join(coreFFi, 'target', target, 'debug', binaryName),
+            Abi.current(): path.join(
+              path.dirname(packagesDir),
+              'target',
+              target,
+              'debug',
+              binaryName,
+            ),
           },
         );
       } catch (e) {
         // ignore. maybe this is an instrumentation test
+        print(e);
       }
     }
 

@@ -37,8 +37,13 @@ pub extern "C" fn isar_key_add_long(key: &mut IndexKey, value: i64) {
 }
 
 #[no_mangle]
-pub extern "C" fn isar_key_add_float(key: &mut IndexKey, value: f32) {
-    key.add_float(value);
+pub extern "C" fn isar_key_add_float(key: &mut IndexKey, value: f64) {
+    let value = if value.is_finite() {
+        value.clamp(f32::MIN as f64, f32::MAX as f64)
+    } else {
+        value
+    };
+    key.add_float(value as f32);
 }
 
 #[no_mangle]

@@ -18,10 +18,7 @@ class FilterGenerator {
         code += generateIsNull(property);
       }
 
-      if (!property.isarType.containsFloat &&
-          !property.isarType.containsObject) {
-        code += generateEqualTo(property);
-      }
+      code += generateEqualTo(property);
 
       if (!property.isarType.containsBool &&
           !property.isarType.containsObject) {
@@ -46,22 +43,6 @@ class FilterGenerator {
   }''';
   }
 
-  String caseSensitiveProperty(ObjectProperty p) {
-    if (p.isarType == IsarType.string || p.isarType == IsarType.stringList) {
-      return 'bool caseSensitive = true,';
-    } else {
-      return '';
-    }
-  }
-
-  String caseSensitiveValue(ObjectProperty p) {
-    if (p.isarType == IsarType.string || p.isarType == IsarType.stringList) {
-      return 'caseSensitive: caseSensitive,';
-    } else {
-      return '';
-    }
-  }
-
   String mPrefix(ObjectProperty p, [bool listAny = true]) {
     final any = listAny && p.isarType.isList ? 'Element' : '';
     return 'QueryBuilder<$objName, $objName, QAfterFilterCondition> '
@@ -69,66 +50,81 @@ class FilterGenerator {
   }
 
   String generateEqualTo(ObjectProperty p) {
-    final optional = caseSensitiveProperty(p);
+    final optional = [
+      if (p.isarType.containsString) 'bool caseSensitive = true',
+      if (p.isarType.containsFloat) 'double epsilon = Query.epsilon',
+    ].join(',');
     return '''
-    ${mPrefix(p)}EqualTo(${p.nScalarDartType} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
+    ${mPrefix(p)}EqualTo(${p.nScalarDartType} value ${optional.isNotBlank ? ', {$optional,}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.equalTo(
           property: r'${p.isarName}',
           value: value,
-          ${caseSensitiveValue(p)}
+          ${p.isarType.containsString ? 'caseSensitive: caseSensitive,' : ''}
+          ${p.isarType.containsFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }''';
   }
 
   String generateGreaterThan(ObjectProperty p) {
-    final include = !p.isarType.containsFloat ? 'bool include = false,' : '';
-    final optional = '${caseSensitiveProperty(p)} $include';
+    final optional = [
+      'bool include = false',
+      if (p.isarType.containsString) 'bool caseSensitive = true',
+      if (p.isarType.containsFloat) 'double epsilon = Query.epsilon',
+    ].join(',');
     return '''
-    ${mPrefix(p)}GreaterThan(${p.nScalarDartType} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
+    ${mPrefix(p)}GreaterThan(${p.nScalarDartType} value, {$optional,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.greaterThan(
-          ${!p.isarType.containsFloat ? 'include: include,' : ''}
+          include: include,
           property: r'${p.isarName}',
           value: value,
-          ${caseSensitiveValue(p)}
+          ${p.isarType.containsString ? 'caseSensitive: caseSensitive,' : ''}
+          ${p.isarType.containsFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }''';
   }
 
   String generateLessThan(ObjectProperty p) {
-    final include = !p.isarType.containsFloat ? 'bool include = false,' : '';
-    final optional = '${caseSensitiveProperty(p)} $include';
+    final optional = [
+      'bool include = false',
+      if (p.isarType.containsString) 'bool caseSensitive = true',
+      if (p.isarType.containsFloat) 'double epsilon = Query.epsilon',
+    ].join(',');
     return '''
-    ${mPrefix(p)}LessThan(${p.nScalarDartType} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
+    ${mPrefix(p)}LessThan(${p.nScalarDartType} value, {$optional,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.lessThan(
-          ${!p.isarType.containsFloat ? 'include: include,' : ''}
+          include: include,
           property: r'${p.isarName}',
           value: value,
-          ${caseSensitiveValue(p)}
+          ${p.isarType.containsString ? 'caseSensitive: caseSensitive,' : ''}
+          ${p.isarType.containsFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }''';
   }
 
   String generateBetween(ObjectProperty p) {
-    final include = !p.isarType.containsFloat
-        ? 'bool includeLower = true, bool includeUpper = true,'
-        : '';
-    final optional = '${caseSensitiveProperty(p)} $include';
+    final optional = [
+      'bool includeLower = true',
+      'bool includeUpper = true',
+      if (p.isarType.containsString) 'bool caseSensitive = true',
+      if (p.isarType.containsFloat) 'double epsilon = Query.epsilon',
+    ].join(',');
     return '''
-    ${mPrefix(p)}Between(${p.nScalarDartType} lower, ${p.nScalarDartType} upper ${optional.isNotBlank ? ', {$optional}' : ''}) {
+    ${mPrefix(p)}Between(${p.nScalarDartType} lower, ${p.nScalarDartType} upper, {$optional,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.between(
           property: r'${p.isarName}',
           lower: lower,
-          includeLower: ${!p.isarType.containsFloat ? 'includeLower' : 'false'},
+          includeLower: includeLower,
           upper: upper,
-          includeUpper: ${!p.isarType.containsFloat ? 'includeUpper' : 'false'},
-          ${caseSensitiveValue(p)}
+          includeUpper: includeUpper,
+          ${p.isarType.containsString ? 'caseSensitive: caseSensitive,' : ''}
+          ${p.isarType.containsFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }''';

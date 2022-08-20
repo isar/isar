@@ -222,3 +222,51 @@ void _freeStr(Pointer<Char> strPtr) {
     malloc.free(strPtr);
   }
 }
+
+double? adjustFloatBound({
+  required double? value,
+  required bool lowerBound,
+  required bool include,
+  required double epsilon,
+}) {
+  value ??= double.nan;
+
+  if (lowerBound) {
+    if (include) {
+      if (value.isFinite) {
+        return value - epsilon;
+      }
+    } else {
+      if (value.isNaN) {
+        return double.negativeInfinity;
+      } else if (value == double.negativeInfinity) {
+        return -double.maxFinite;
+      } else if (value == double.maxFinite) {
+        return double.infinity;
+      } else if (value == double.infinity) {
+        return null;
+      } else {
+        return value + epsilon;
+      }
+    }
+  } else {
+    if (include) {
+      if (value.isFinite) {
+        return value + epsilon;
+      }
+    } else {
+      if (value.isNaN) {
+        return null;
+      } else if (value == double.negativeInfinity) {
+        return double.nan;
+      } else if (value == -double.maxFinite) {
+        return double.negativeInfinity;
+      } else if (value == double.infinity) {
+        return double.maxFinite;
+      } else {
+        return value - epsilon;
+      }
+    }
+  }
+  return value;
+}

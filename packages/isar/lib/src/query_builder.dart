@@ -127,7 +127,8 @@ class QueryBuilderInternal<OBJ> {
 
   /// @nodoc
   QueryBuilderInternal<OBJ> group(FilterQuery<OBJ> q) {
-    final qb = q(const QueryBuilder(QueryBuilderInternal()));
+    // ignore: prefer_const_constructors
+    final qb = q(QueryBuilder(QueryBuilderInternal()));
     return addFilterCondition(qb._query.filter);
   }
 
@@ -168,7 +169,8 @@ class QueryBuilderInternal<OBJ> {
     FilterQuery<E> q,
     String property,
   ) {
-    final qb = q(const QueryBuilder(QueryBuilderInternal()));
+    // ignore: prefer_const_constructors
+    final qb = q(QueryBuilder(QueryBuilderInternal()));
     return addFilterCondition(
       ObjectFilter(filter: qb._query.filter, property: property),
     );
@@ -179,7 +181,8 @@ class QueryBuilderInternal<OBJ> {
     FilterQuery<E> q,
     String linkName,
   ) {
-    final qb = q(const QueryBuilder(QueryBuilderInternal()));
+    // ignore: prefer_const_constructors
+    final qb = q(QueryBuilder(QueryBuilderInternal()));
     return addFilterCondition(
       LinkFilter(filter: qb._query.filter, linkName: linkName),
     );

@@ -91,15 +91,15 @@ void main() {
       });
 
       isarTest('.notEqualTo()', () async {
-        await qEqual(
+        await qEqualSet(
           col.where().value1NotEqualToAnyValue2('a'),
           [obj0, obj1, obj6],
         );
-        await qEqual(
+        await qEqualSet(
           col.where().value1NotEqualToAnyValue2(''),
           [obj0, obj2, obj3, obj4, obj5, obj6],
         );
-        await qEqual(
+        await qEqualSet(
           col.where().value1NotEqualToAnyValue2('c'),
           [obj0, obj1, obj2, obj3, obj4, obj5, obj6],
         );
@@ -110,7 +110,7 @@ void main() {
       });
 
       isarTest('.isNotNull()', () async {
-        await qEqual(
+        await qEqualSet(
           col.where().value1IsNotNullAnyValue2(),
           [obj1, obj2, obj3, obj4, obj5, obj6],
         );

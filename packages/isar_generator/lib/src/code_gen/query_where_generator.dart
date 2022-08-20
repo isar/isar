@@ -45,10 +45,8 @@ class WhereGenerator {
           code += generateWhereIsNotNull(index, n + 1);
         }
 
-        if (!property.isarType.containsFloat) {
-          code += generateWhereEqualTo(index, n + 1);
-          code += generateWhereNotEqualTo(index, n + 1);
-        }
+        code += generateWhereEqualTo(index, n + 1);
+        code += generateWhereNotEqualTo(index, n + 1);
 
         if (indexProperty.type != IndexType.hash) {
           if (property.isarType != IsarType.bool &&
@@ -187,7 +185,7 @@ class WhereGenerator {
     final values = joinToValues(properties);
     final params = joinToParams(properties);
     return '''
-    $mPrefix $name($params) {
+    $mPrefix $name($params ${properties.containsFloat ? ', {double epsilon = Query.epsilon,}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IndexWhereClause.equalTo(
           indexName: r'${index.name}',
@@ -239,7 +237,7 @@ class WhereGenerator {
     }
 
     return '''
-    $mPrefix $name($params) {
+    $mPrefix $name($params ${properties.containsFloat ? ', {double epsilon = Query.epsilon,}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         if (query.whereSort == Sort.asc) {
           return query.addWhereClause(IndexWhereClause.between(
@@ -327,10 +325,12 @@ class WhereGenerator {
     }
 
     final properties = index.properties.takeFirst(propertyCount);
-    final include =
-        !properties.containsFloat ? ', {bool include = false,}' : '';
+    final optional = [
+      'bool include = false',
+      if (properties.containsFloat) 'double epsilon = Query.epsilon',
+    ].join(',');
     return '''
-    $mPrefix $name(${joinToParams(properties)} $include) {
+    $mPrefix $name(${joinToParams(properties)}, {$optional,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IndexWhereClause.between(
           indexName: r'${index.name}',

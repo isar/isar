@@ -244,9 +244,17 @@ pub unsafe extern "C" fn isar_filter_double(
 ) -> i64 {
     isar_try! {
         let property = get_property(collection, embedded_col_id, property_id)?;
-        let query_filter = if upper.is_nan() {
-            Filter::stat(false)
-        } else if property.data_type == DataType::Float || property.data_type == DataType::FloatList {
+        let query_filter = if property.data_type == DataType::Float || property.data_type == DataType::FloatList {
+            let lower = if lower.is_finite() {
+                lower.clamp(f32::MIN as f64, f32::MAX as f64)
+            } else {
+                lower
+            };
+            let upper = if upper.is_finite() {
+                upper.clamp(f32::MIN as f64, f32::MAX as f64)
+            } else {
+                upper
+            };
             Filter::float(property, lower as f32, upper as f32)?
         } else {
             Filter::double(property, lower, upper)?

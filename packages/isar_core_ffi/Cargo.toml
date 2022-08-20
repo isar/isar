@@ -28,9 +28,3 @@ dirs = "4.0.0"
 
 [lib]
 crate-type=["staticlib", "cdylib"]
-
-[profile.release]
-lto = true
-codegen-units = 1
-panic = "abort"
-strip = "symbols"

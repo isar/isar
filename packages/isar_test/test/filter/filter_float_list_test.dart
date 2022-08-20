@@ -8,14 +8,10 @@ part 'filter_float_list_test.g.dart';
 @collection
 class FloatModel {
   FloatModel(this.list);
+
   Id? id;
 
   List<float?>? list;
-
-  @override
-  String toString() {
-    return '{id: $id, list: $list}';
-  }
 
   @override
   // ignore: hash_and_equals
@@ -51,25 +47,70 @@ void main() {
       });
     });
 
+    isarTest('.elementEqualTo()', () async {
+      await qEqual(col.filter().listElementEqualTo(1.1), [obj1]);
+      await qEqual(col.filter().listElementEqualTo(4), []);
+      await qEqual(col.filter().listElementEqualTo(null), [obj2, obj3]);
+    });
+
     isarTest('.elementGreaterThan()', () async {
-      await qEqual(col.filter().listElementGreaterThan(1.1), [obj1]);
+      await qEqual(col.filter().listElementGreaterThan(3.3), []);
+      await qEqual(
+        col.filter().listElementGreaterThan(3.3, include: true),
+        [obj1],
+      );
+      await qEqual(
+        col.filter().listElementGreaterThan(3.4, include: true, epsilon: 0.2),
+        [obj1],
+      );
       await qEqual(col.filter().listElementGreaterThan(4), []);
       await qEqual(col.filter().listElementGreaterThan(null), [obj1, obj3]);
+      await qEqual(
+        col.filter().listElementGreaterThan(null, include: true),
+        [obj1, obj2, obj3],
+      );
     });
 
     isarTest('.elementLessThan()', () async {
       await qEqual(col.filter().listElementLessThan(1.1), [obj2, obj3]);
+      await qEqual(
+        col.filter().listElementLessThan(1.1, include: true),
+        [obj1, obj2, obj3],
+      );
+      await qEqual(
+        col.filter().listElementLessThan(1, include: true, epsilon: 0.2),
+        [obj1, obj2, obj3],
+      );
       await qEqual(col.filter().listElementLessThan(null), []);
+      await qEqual(
+          col.filter().listElementLessThan(null, include: true), [objNull]);
     });
 
     isarTest('.anyBetween()', () async {
       await qEqual(col.filter().listElementBetween(1, 5), [obj1]);
-      await qEqual(col.filter().listElementBetween(5, 10), []);
-      await qEqual(col.filter().listElementBetween(null, null), [obj2, obj3]);
       await qEqual(
-        col.filter().listElementBetween(null, 1.2),
+        col.filter().listElementBetween(null, 1.1),
         [obj1, obj2, obj3],
       );
+      await qEqual(
+        col.filter().listElementBetween(null, 1.1, includeLower: false),
+        [obj1, obj3],
+      );
+      await qEqual(
+        col.filter().listElementBetween(null, 1.1, includeUpper: false),
+        [obj2, obj3],
+      );
+      await qEqual(
+        col.filter().listElementBetween(
+              null,
+              1.1,
+              includeLower: false,
+              includeUpper: false,
+            ),
+        [obj3],
+      );
+      await qEqual(col.filter().listElementBetween(5, 10), []);
+      await qEqual(col.filter().listElementBetween(null, null), [obj2, obj3]);
     });
 
     isarTest('.elementIsNull()', () async {

@@ -17,6 +17,7 @@ This is the last big feature release before a stable 3.0 version.
 - Added `@collection` and `@embedded` alternative to `@Collection()` and `@Embedded()`
 - Apply default values from constructor during deserialization
 - Added `isar.verify()` and `col.verify()` methods for checking database integrity in unit tests
+- Added missing float and double queries and an `epsilon` parameter
 
 ### Breaking
 

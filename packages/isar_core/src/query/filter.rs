@@ -436,8 +436,8 @@ macro_rules! float_filter_between {
     };
 
     (eval $val:expr, $lower:expr, $upper:expr) => {{
-        ($lower < $val || $lower.is_nan()) &&
-        ($upper > $val || $val.is_nan() || ($upper.is_infinite() && $upper.is_sign_positive()))
+        ($lower <= $val || $lower.is_nan()) &&
+        ($upper >= $val || $val.is_nan() || ($upper.is_infinite() && $upper.is_sign_positive()))
     }};
 }
 
