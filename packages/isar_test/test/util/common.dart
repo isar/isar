@@ -168,6 +168,7 @@ Future<Isar> openTempIsar(
   String? name,
   String? directory,
   bool autoClose = true,
+  CompactCondition? compactOnLaunch,
 }) async {
   await _prepareTest();
   if (!kIsWeb && testTempPath == null) {
@@ -180,6 +181,7 @@ Future<Isar> openTempIsar(
     schemas: schemas,
     name: name ?? getRandomName(),
     directory: kIsWeb ? '' : testTempPath!,
+    compactOnLaunch: compactOnLaunch,
   );
 
   if (autoClose) {
