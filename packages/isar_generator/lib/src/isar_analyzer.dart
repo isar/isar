@@ -227,6 +227,14 @@ class IsarAnalyzer {
         ? (dartType.scalarType.element! as ClassElement).enumConsts
         : null;
 
+    if (enumConsts != null) {
+      if (isarType.containsFloat) {
+        err('Enums do not support floating point values.');
+      } else if (isarType.containsObject) {
+        err('Enums do not support object values.');
+      }
+    }
+
     return ObjectProperty(
       dartName: property.displayName,
       isarName: property.isarName,

@@ -114,5 +114,9 @@ void main() {
     isarTest('.isNull()', () async {
       await qEqual(col.filter().fieldIsNull(), [objNull]);
     });
+
+    isarTest('.isNotNull()', () async {
+      await qEqual(col.filter().fieldIsNotNull(), [obj1, obj2, obj3, obj4]);
+    });
   });
 }

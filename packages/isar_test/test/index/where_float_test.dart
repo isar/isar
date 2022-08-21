@@ -17,6 +17,12 @@ class FloatModel {
   // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is FloatModel && doubleEquals(field, other.field);
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return '{id: $id, field: $field}';
+  }
 }
 
 void main() {

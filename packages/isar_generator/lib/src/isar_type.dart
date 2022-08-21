@@ -44,9 +44,7 @@ extension DartTypeX on DartType {
           NullabilitySuffix.none) {
         final type = isarEnum.typeArguments[0];
         final isarType = type.isarType;
-        if (!type.isIsarEnum &&
-            isarType != IsarType.object &&
-            isarType != IsarType.objectList) {
+        if (isarType != null && !type.isIsarEnum && !isarType.isList) {
           return isarType;
         }
       }

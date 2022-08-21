@@ -16,6 +16,7 @@ class FilterGenerator {
     for (final property in object.properties) {
       if (property.nullable) {
         code += generateIsNull(property);
+        code += generateIsNotNull(property);
       }
 
       code += generateEqualTo(property);
@@ -139,11 +140,38 @@ class FilterGenerator {
         ));
       });
     }''';
+
     if (p.isarType.isList && p.isarType != IsarType.byteList) {
       code += '''
       ${mPrefix(p)}IsNull() {
         return QueryBuilder.apply(this, (query) {
           return query.addFilterCondition(const FilterCondition.equalTo(
+            property: r'${p.isarName}',
+            value: null,
+          ));
+        });
+      }''';
+    }
+    return code;
+  }
+
+  String generateIsNotNull(ObjectProperty p) {
+    var code = '''
+    ${mPrefix(p, false)}IsNotNull() {
+      return QueryBuilder.apply(this, (query) {
+        return query
+          .copyWith(filterNot: !query.filterNot)
+          .addFilterCondition(const FilterCondition.isNull(
+            property: r'${p.isarName}',
+          ));
+      });
+    }''';
+
+    if (p.isarType.isList && p.isarType != IsarType.byteList) {
+      code += '''
+      ${mPrefix(p)}IsNotNull() {
+        return QueryBuilder.apply(this, (query) {
+          return query.addFilterCondition(FilterCondition.greaterThan(
             property: r'${p.isarName}',
             value: null,
           ));

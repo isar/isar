@@ -70,7 +70,7 @@ void main() {
     isarTest('Prevents usage of closed collection', () async {
       final isar = await openTempIsar([ModelSchema]);
 
-      expect(await isar.close(), true);
+      expect(await isar.close(deleteFromDisk: true), true);
 
       await expectLater(
         () => isar.models.tGet(1),

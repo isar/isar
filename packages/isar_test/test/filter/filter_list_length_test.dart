@@ -180,5 +180,24 @@ void main() {
       await qEqual(isar.models.filter().doublesIsEmpty(), [obj5]);
       await qEqual(isar.models.filter().stringsIsEmpty(), []);
     });
+
+    isarTest('.isNotEmpty()', () async {
+      await qEqual(
+        isar.models.filter().boolsIsNotEmpty(),
+        [obj2, obj3, obj4, obj5],
+      );
+      await qEqual(
+        isar.models.filter().intsIsNotEmpty(),
+        [obj1, obj2, obj3, obj4],
+      );
+      await qEqual(
+        isar.models.filter().doublesIsNotEmpty(),
+        [obj1, obj2, obj3, obj4],
+      );
+      await qEqual(
+        isar.models.filter().stringsIsNotEmpty(),
+        [obj2, obj3, obj4, obj5],
+      );
+    });
   });
 }

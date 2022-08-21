@@ -56,5 +56,12 @@ void main() {
     isarTest('.isNull()', () async {
       await qEqualSet(col.where().filter().fieldIsNull(), [objNull]);
     });
+
+    isarTest('.isNotNull()', () async {
+      await qEqualSet(
+        col.where().filter().fieldIsNotNull(),
+        [objFalse, objTrue, objFalse2],
+      );
+    });
   });
 }

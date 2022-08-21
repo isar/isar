@@ -19,12 +19,6 @@ class FloatModel {
       other is FloatModel &&
       id == other.id &&
       doubleListEquals(other.list, list);
-
-  @override
-  String toString() {
-    // TODO: implement toString
-    return 'FloatModel{id: $id, list: $list}';
-  }
 }
 
 void main() {
@@ -123,6 +117,18 @@ void main() {
 
     isarTest('.elementIsNull()', () async {
       await qEqual(col.filter().listElementIsNull(), [obj2, obj3]);
+    });
+
+    isarTest('.elementIsNotNull()', () async {
+      await qEqual(col.filter().listElementIsNotNull(), [obj1, obj3]);
+    });
+
+    isarTest('.isNull()', () async {
+      await qEqual(col.filter().listIsNull(), [objNull]);
+    });
+
+    isarTest('.isNotNull()', () async {
+      await qEqual(col.filter().listIsNotNull(), [objEmpty, obj1, obj2, obj3]);
     });
   });
 }

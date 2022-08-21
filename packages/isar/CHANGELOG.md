@@ -7,8 +7,9 @@ This is the last big feature release before a stable 3.0 version.
 - Support for embedded objects using `@Embedded()`
 - Support for enums using `IsarEnum` mixin
 - Improved `put()` performance by about 50% (yes, that is insane)
-- Added `linksLengthEqualTo()`, `linksIsEmpty()`, `linksLengthGreaterThan()`, `linksLengthLessThan()`, `linksLengthBetween()` and `linkIsNull()` filters
-- Added `listLengthEqualTo()`, `listIsEmpty()`, `listLengthGreaterThan()`, `listLengthLessThan()`, `listLengthBetween()` filters
+- Added `linksLengthEqualTo()`, `linksIsEmpty()`, `linksIsNotEmpty()`, `linksLengthGreaterThan()`, `linksLengthLessThan()`, `linksLengthBetween()` and `linkIsNull()` filters
+- Added `listLengthEqualTo()`, `listIsEmpty()`, `listIsNotEmpty()`, `listLengthGreaterThan()`, `listLengthLessThan()`, `listLengthBetween()` filters
+- Added `isNotNull()` filters
 - Added `compactOnLaunch` conditions to `Isar.open()` for automatic database compaction
 - Added `isar.copyToFile()` which copies a compacted version of the database to a path
 - Added `isar.path` to get the full path of the database file

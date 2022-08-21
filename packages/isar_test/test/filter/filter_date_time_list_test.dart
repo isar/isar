@@ -131,8 +131,19 @@ void main() {
         await qEqual(col.filter().listElementIsNull(), [obj1]);
       });
 
+      isarTest('.elementIsNotNull()', () async {
+        await qEqual(col.filter().listElementIsNotNull(), [obj2, obj4, obj3]);
+      });
+
       isarTest('.isNull()', () async {
         await qEqual(col.filter().listIsNull(), [objNull]);
+      });
+
+      isarTest('.isNotNull()', () async {
+        await qEqual(
+          col.filter().listIsNotNull(),
+          [obj2, obj4, obj3, objEmpty, obj1],
+        );
       });
     });
   });

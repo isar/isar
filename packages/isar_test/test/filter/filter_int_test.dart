@@ -98,8 +98,12 @@ void main() {
       await qEqual(col.filter().fieldBetween(5, 6), []);
     });
 
-    isarTest('.isNull() / .isNotNull()', () async {
+    isarTest('.isNull()', () async {
       await qEqual(col.filter().fieldIsNull(), [objNull]);
+    });
+
+    isarTest('.isNotNull()', () async {
+      await qEqual(col.filter().fieldIsNotNull(), [obj0, obj1, obj2, obj3]);
     });
   });
 }

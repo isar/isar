@@ -365,8 +365,6 @@ class FilterCondition extends FilterOperation {
         super._();
 
   /// Filters the results to only include objects where the property is null.
-  ///
-  /// Lists match if they are null.
   const FilterCondition.isNull({
     required this.property,
   })  : type = FilterConditionType.isNull,
@@ -379,7 +377,7 @@ class FilterCondition extends FilterOperation {
         super._();
 
   /// Filters the results to only include objects where the length of
-  /// [property] is between [lower] and [upper].
+  /// [property] is between [lower] (included) and [upper] (included).
   ///
   /// Only list properties are supported.
   const FilterCondition.listLength({

@@ -30,6 +30,7 @@ void main() {
     late BoolModel obj1;
     late BoolModel obj2;
     late BoolModel obj3;
+    late BoolModel obj4;
     late BoolModel objNull;
 
     setUp(() async {
@@ -40,24 +41,39 @@ void main() {
       obj1 = BoolModel([true]);
       obj2 = BoolModel([null, false]);
       obj3 = BoolModel([true, false, true]);
+      obj4 = BoolModel([null]);
       objNull = BoolModel(null);
 
       await isar.writeTxn(() async {
-        await col.putAll([objEmpty, obj1, obj2, obj3, objNull]);
+        await col.putAll([objEmpty, obj1, obj2, obj3, obj4, objNull]);
       });
     });
 
     isarTest('.elementEqualTo()', () async {
       await qEqual(col.filter().listElementEqualTo(true), [obj1, obj3]);
-      await qEqual(col.filter().listElementEqualTo(null), [obj2]);
+      await qEqual(col.filter().listElementEqualTo(null), [obj2, obj4]);
     });
 
     isarTest('.elementIsNull()', () async {
-      await qEqual(col.where().filter().listElementIsNull(), [obj2]);
+      await qEqual(col.where().filter().listElementIsNull(), [obj2, obj4]);
+    });
+
+    isarTest('.elementIsNotNull()', () async {
+      await qEqual(
+        col.where().filter().listElementIsNotNull(),
+        [obj1, obj2, obj3],
+      );
     });
 
     isarTest('.isNull()', () async {
       await qEqual(col.where().filter().listIsNull(), [objNull]);
+    });
+
+    isarTest('.isNotNull()', () async {
+      await qEqual(
+        col.where().filter().listIsNotNull(),
+        [objEmpty, obj1, obj2, obj3, obj4],
+      );
     });
   });
 }
