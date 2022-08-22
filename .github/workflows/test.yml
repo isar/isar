@@ -121,11 +121,6 @@ jobs:
         with:
           model: ${{ matrix.device }}
       - uses: subosito/flutter-action@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          override: true
-          components: rustfmt, rust-src
       - name: Build Isar Core
         run: |
           bash tool/build_ios.sh
@@ -186,11 +181,6 @@ jobs:
       - name: Install Linux requirements
         run: sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
         if: matrix.os == 'ubuntu-latest'
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          override: true
-          components: rustfmt, rust-src
       - name: Build Isar Core macOS
         if: matrix.os == 'macos-latest'
         run: |
