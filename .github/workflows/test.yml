@@ -50,21 +50,12 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-latest, ubuntu-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v1
-        if: matrix.os == 'windows-latest'
-        with:
-          version: "11.0"
-          directory: ${{ runner.temp }}/llvm
-      - name: Set LIBCLANG_PATH
-        if: matrix.os == 'windows-latest'
-        run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
       - name: Run Flutter Unit tests
         run: |
           flutter pub get
