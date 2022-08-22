@@ -3,6 +3,7 @@ import 'package:test/test.dart';
 
 import '../user_model.dart';
 import '../util/common.dart';
+import '../util/matchers.dart';
 
 void main() {
   group('Filter Groups', () {

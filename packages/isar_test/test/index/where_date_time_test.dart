@@ -2,6 +2,7 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
+import '../util/matchers.dart';
 
 part 'where_date_time_test.g.dart';
 

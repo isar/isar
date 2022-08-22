@@ -3,6 +3,7 @@ import 'package:test/test.dart';
 
 import '../mutli_type_model.dart';
 import '../util/common.dart';
+import '../util/matchers.dart';
 import '../util/sync_async_helper.dart';
 
 void main() {

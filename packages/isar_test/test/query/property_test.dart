@@ -5,6 +5,7 @@ import 'package:test/test.dart';
 
 import '../type_models.dart';
 import '../util/common.dart';
+import '../util/matchers.dart';
 import '../util/sync_async_helper.dart';
 
 void main() {

@@ -5,6 +5,7 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import 'util/common.dart';
+import 'util/matchers.dart';
 import 'util/sync_async_helper.dart';
 
 part 'copy_to_file_test.g.dart';
@@ -50,6 +51,7 @@ void main() {
 
       expect(copiedDbFile.existsSync(), true);
       expect(copiedDbFile.lengthSync(), greaterThan(0));
+      await copiedDbFile.delete();
     });
 
     isarTestVm('.copyToFile() should keep the same content', () async {
@@ -74,6 +76,7 @@ void main() {
         copiedIsar.models.where(),
         originalObjs,
       );
+      await copiedDbFile.delete();
     });
 
     isarTestVm('.copyToFile() should compact copied file', () async {
@@ -119,6 +122,7 @@ void main() {
         copiedDbFile2.lengthSync(),
         lessThan(copiedDbFile1.lengthSync()),
       );
+      await copiedDbFile2.delete();
     });
 
     isarTestVm('Copies should be the same size', () async {
@@ -142,6 +146,7 @@ void main() {
       await isar.copyToFile(copiedDbFile2.path);
 
       expect(copiedDbFile1.lengthSync(), copiedDbFile2.lengthSync());
+      await copiedDbFile2.delete();
 
       final isarCopy = await openTempIsar(
         [ModelSchema],
@@ -160,6 +165,7 @@ void main() {
       await isarCopy.copyToFile(copiedDbFile3.path);
 
       expect(copiedDbFile3.lengthSync(), copiedDbFile1.lengthSync());
+      await copiedDbFile3.delete();
     });
   });
 }
