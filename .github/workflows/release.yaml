@@ -14,7 +14,7 @@ jobs:
     - name: Verify release version
       run: |
         dart pub get
-        dart tool/verify_release_version.dart
+        dart tool/verify_release_version.dart ${{ github.ref_name }}
       working-directory: packages/isar
 
   build_and_upload:
@@ -72,7 +72,7 @@ jobs:
         override: true
         components: rustfmt, rust-src
     - name: Set env
-      run: echo "ISAR_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      run: echo "ISAR_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
     - name: Build binary
       run: bash tool/${{ matrix.script }}
     - name: Upload binary
