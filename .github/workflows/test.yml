@@ -56,6 +56,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+      - name: Build Isar Core
+        run: |
+          cargo build
+        working-directory: packages/isar_core_ffi
       - name: Run Flutter Unit tests
         run: |
           flutter pub get
@@ -69,6 +73,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+      - name: Build Isar Core
+        run: |
+          cargo build
+        working-directory: packages/isar_core_ffi
       - name: Prepare Unit tests
         run: |
           flutter pub get
