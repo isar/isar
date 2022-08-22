@@ -123,7 +123,7 @@ jobs:
       - uses: subosito/flutter-action@v2
       - name: Build Isar Core
         run: |
-          bash tool/build_ios.sh
+          bash tools/build_ios.sh
           mv libisar.a ../isar_flutter_libs/ios/libisar.a
         working-directory: packages/isar_core_ffi
       - name: Run Flutter Driver tests
@@ -185,7 +185,7 @@ jobs:
       - name: Build Isar Core macOS
         if: matrix.os == 'macos-latest'
         run: |
-          bash tool/build_macos.sh
+          bash tools/build_macos.sh
           mv libisar.dylib ../isar_flutter_libs/macos/libisar.dylib
         working-directory: packages/isar_core_ffi
       - name: Run Flutter Driver tests
