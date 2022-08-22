@@ -10,7 +10,7 @@ void main() {
       .replaceAll('intModels', 'longModels');
   File('test/filter/filter_long_test.dart').writeAsStringSync(longTest);
 
-  final intListTestFile = File('test/filter/filter_int_list_test.dart');
+  /*final intListTestFile = File('test/filter/filter_int_list_test.dart');
   final intListTest = intListTestFile.readAsStringSync();
   final longListTest = intListTest
       .replaceAll('Int', 'Long')
@@ -18,7 +18,7 @@ void main() {
       .replaceAll('filter_int_test', 'filter_long_test')
       .replaceAll('intModels', 'longModels');
   File('test/filter/filter_long_list_test.dart')
-      .writeAsStringSync(longListTest);
+      .writeAsStringSync(longListTest);*/
 
   final floatTestFile = File('test/filter/filter_float_test.dart');
   final floatTest = floatTestFile.readAsStringSync();
@@ -49,7 +49,7 @@ void main() {
       .replaceAll('intModels', 'longModels');
   File('test/index/where_long_test.dart').writeAsStringSync(whereLongTest);
 
-  final whereIntListTestFile = File('test/index/where_int_list_test.dart');
+  /*final whereIntListTestFile = File('test/index/where_int_list_test.dart');
   final whereIntListTest = whereIntListTestFile.readAsStringSync();
   final whereLongListTest = whereIntListTest
       .replaceAll('Int', 'Long')
@@ -57,7 +57,7 @@ void main() {
       .replaceAll('where_int_test', 'where_long_test')
       .replaceAll('intModels', 'longModels');
   File('test/index/where_long_list_test.dart')
-      .writeAsStringSync(whereLongListTest);
+      .writeAsStringSync(whereLongListTest);*/
 
   final whereFloatTestFile = File('test/index/where_float_test.dart');
   final whereFloatTest = whereFloatTestFile.readAsStringSync();
