@@ -79,6 +79,6 @@ jobs:
       uses: svenstaro/upload-release-action@v1-release
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: dart-ffi/${{ matrix.artifact_name }}
+        file: ${{ matrix.artifact_name }}
         asset_name: ${{ matrix.artifact_name }}
         tag: ${{ github.ref }}
