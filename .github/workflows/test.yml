@@ -129,7 +129,7 @@ jobs:
       - name: Build Isar Core
         run: |
           bash tool/build_ios.sh
-          mv libisar.a packages/isar_flutter_libs/ios/libisar.a
+          mv libisar_ios.a packages/isar_flutter_libs/ios/libisar.a
       - name: Run Flutter Driver tests
         run: |
           flutter pub get
@@ -195,7 +195,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           bash tool/build_macos.sh
-          mv libisar.dylib packages/isar_flutter_libs/macos/libisar.dylib
+          mv libisar_macos.dylib packages/isar_flutter_libs/macos/libisar.dylib
       - name: Run Flutter Driver tests
         run: |
           flutter pub get
