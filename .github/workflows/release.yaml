@@ -10,10 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - uses: dart-lang/setup-dart@v1
     - name: Verify release version
-      run: dart packages/isar/tool/verify_release_version.dart
+      run: |
+        dart pub get
+        dart tool/verify_release_version.dart
+      working-directory: packages/isar
 
   build_and_upload:
+    needs: verify_version
     name: Build and upload
     strategy:
       fail-fast: false
@@ -69,7 +74,7 @@ jobs:
     - name: Set env
       run: echo "ISAR_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
     - name: Build binary
-      run: bash tools/${{ matrix.script }}
+      run: bash tool/${{ matrix.script }}
     - name: Upload binary
       uses: svenstaro/upload-release-action@v1-release
       with:
