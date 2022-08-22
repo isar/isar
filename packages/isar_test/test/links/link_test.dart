@@ -6,7 +6,7 @@ import '../util/sync_async_helper.dart';
 
 part 'link_test.g.dart';
 
-@Collection()
+@collection
 class LinkModelA {
   LinkModelA(this.name);
 
@@ -28,7 +28,7 @@ class LinkModelA {
   }
 }
 
-@Collection()
+@collection
 class LinkModelB {
   LinkModelB(this.name);
 
@@ -64,8 +64,6 @@ void main() {
       b1 = LinkModelB('modelB1');
       b2 = LinkModelB('modelB2');
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.isAttached .isLoaded .isChanged', () async {
       void verify(bool attached, bool loaded, bool changed) {

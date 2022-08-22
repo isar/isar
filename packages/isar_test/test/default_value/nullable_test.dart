@@ -8,7 +8,7 @@ import 'common.dart';
 part 'nullable_test.g.dart';
 
 @Name('Col')
-@Collection()
+@collection
 class NullableModel {
   NullableModel(
     this.id,
@@ -45,7 +45,7 @@ class NullableModel {
 }
 
 @Name('Col')
-@Collection()
+@collection
 class NullableListModel {
   NullableListModel(
     this.id,
@@ -104,7 +104,6 @@ void main() {
       expect(obj.stringValue, null);
       expect(obj.embeddedValue, null);
       expect(obj.enumValue, null);
-      await isar2.close();
     });
 
     isarTest('scalar property', () async {
@@ -151,7 +150,6 @@ void main() {
         await isar2.nullableModels.where().enumValueProperty().tFindFirst(),
         null,
       );
-      await isar2.close();
     });
 
     isarTest('list', () async {
@@ -173,7 +171,6 @@ void main() {
       expect(obj.stringValue, null);
       expect(obj.embeddedValue, null);
       expect(obj.enumValue, null);
-      await isar2.close();
     });
 
     isarTest('list property', () async {
@@ -239,7 +236,6 @@ void main() {
         await isar2.nullableListModels.where().enumValueProperty().tFindFirst(),
         null,
       );
-      await isar2.close();
     });
   });
 }

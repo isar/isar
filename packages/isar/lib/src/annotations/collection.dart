@@ -1,6 +1,9 @@
 part of isar;
 
 /// Annotation to create an Isar collection.
+const collection = Collection();
+
+/// Annotation to create an Isar collection.
 @Target({TargetKind.classType})
 class Collection {
   /// Annotation to create an Isar collection.

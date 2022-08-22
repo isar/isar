@@ -8,7 +8,6 @@ import 'dart:typed_data';
 import 'package:isar/src/isar_connect_api.dart';
 import 'package:isar/src/native/isar_native.dart'
     if (dart.library.html) 'src/web/isar_web.dart';
-import 'package:isar/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:meta/meta_meta.dart';
 

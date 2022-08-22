@@ -6,7 +6,7 @@ import '../util/sync_async_helper.dart';
 
 part 'issue_235_rename_field_test.g.dart';
 
-@Collection()
+@collection
 @Name('Collection')
 class Col1 {
   Col1({
@@ -25,7 +25,7 @@ class Col1 {
   String numberText1;
 }
 
-@Collection()
+@collection
 @Name('Collection')
 class Col2 {
   Col2({
@@ -86,6 +86,5 @@ void main() {
       return isar2.col2s.tPut(newObj);
     });
     expect(await isar2.col2s.tGet(5), newObj);
-    expect(await isar2.close(), true);
   });
 }

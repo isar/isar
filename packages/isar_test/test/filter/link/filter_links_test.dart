@@ -6,7 +6,7 @@ import '../../util/sync_async_helper.dart';
 
 part 'filter_links_test.g.dart';
 
-@Collection()
+@collection
 class SourceModel {
   Id id = Isar.autoIncrement;
 
@@ -26,7 +26,7 @@ class SourceModel {
   }
 }
 
-@Collection()
+@collection
 class TargetModel {
   TargetModel(this.name);
 
@@ -122,66 +122,42 @@ void main() {
 
     isarTest('.links()', () async {
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .links((q) => q.nameStartsWith('target'))
-            .tFindAll(),
+        isar.sourceModels.filter().links((q) => q.nameStartsWith('target')),
         [source1, source2, source3, source4],
       );
 
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .links((q) => q.nameEqualTo('target 1'))
-            .tFindAll(),
+        isar.sourceModels.filter().links((q) => q.nameEqualTo('target 1')),
         [source1, source2],
       );
 
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .links((q) => q.nameEqualTo('target 2'))
-            .tFindAll(),
+        isar.sourceModels.filter().links((q) => q.nameEqualTo('target 2')),
         [source2, source3, source4],
       );
 
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .links((q) => q.nameEqualTo('target 3'))
-            .tFindAll(),
+        isar.sourceModels.filter().links((q) => q.nameEqualTo('target 3')),
         [source2],
       );
 
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .links((q) => q.nameEqualTo('target 4'))
-            .tFindAll(),
+        isar.sourceModels.filter().links((q) => q.nameEqualTo('target 4')),
         [source4],
       );
 
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .links((q) => q.nameEqualTo('target 5'))
-            .tFindAll(),
+        isar.sourceModels.filter().links((q) => q.nameEqualTo('target 5')),
         [],
       );
 
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .links((q) => q.nameEqualTo('target 6'))
-            .tFindAll(),
+        isar.sourceModels.filter().links((q) => q.nameEqualTo('target 6')),
         [],
       );
 
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .links((q) => q.nameEqualTo('non existing'))
-            .tFindAll(),
+        isar.sourceModels.filter().links((q) => q.nameEqualTo('non existing')),
         [],
       );
 
@@ -192,264 +168,195 @@ void main() {
               (q) => q.nameEqualTo('target 1').or().nameEqualTo('target 2'),
             )
             .and()
-            .links((q) => q.nameEqualTo('target 1'))
-            .tFindAll(),
+            .links((q) => q.nameEqualTo('target 1')),
         [source1, source2],
       );
     });
 
     isarTest('.linksLengthEqualTo()', () async {
-      await qEqualSet(
-        isar.sourceModels.filter().linksLengthEqualTo(-1).tFindAll(),
-        [],
+      expect(
+        () => isar.sourceModels.filter().linksLengthEqualTo(-1),
+        throwsAssertionError,
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthEqualTo(0).tFindAll(),
+        isar.sourceModels.filter().linksLengthEqualTo(0),
         [source5, source6],
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthEqualTo(1).tFindAll(),
+        isar.sourceModels.filter().linksLengthEqualTo(1),
         [source1, source3],
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthEqualTo(2).tFindAll(),
+        isar.sourceModels.filter().linksLengthEqualTo(2),
         [source4],
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthEqualTo(3).tFindAll(),
+        isar.sourceModels.filter().linksLengthEqualTo(3),
         [source2],
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthEqualTo(4).tFindAll(),
+        isar.sourceModels.filter().linksLengthEqualTo(4),
         [],
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthEqualTo(5).tFindAll(),
+        isar.sourceModels.filter().linksLengthEqualTo(5),
         [],
       );
     });
 
     isarTest('.linksLengthGreaterThan()', () async {
-      // FIXME: .linksLengthGreaterThan(X) where X <= -2 returns no values
-      // await qEqualSet(
-      //   isar.sourceModels.filter().linksLengthGreaterThan(-2).tFindAll(),
-      //   [source1, source2, source3, source4, source5, source6],
-      // );
-
-      await qEqualSet(
-        isar.sourceModels.filter().linksLengthGreaterThan(-1).tFindAll(),
-        [source1, source2, source3, source4, source5, source6],
+      expect(
+        () => isar.sourceModels.filter().linksLengthGreaterThan(-2),
+        throwsAssertionError,
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthGreaterThan(0).tFindAll(),
+        isar.sourceModels.filter().linksLengthGreaterThan(0),
         [source1, source2, source3, source4],
       );
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .linksLengthGreaterThan(0, include: true)
-            .tFindAll(),
+        isar.sourceModels.filter().linksLengthGreaterThan(0, include: true),
         [source1, source2, source3, source4, source5, source6],
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthGreaterThan(1).tFindAll(),
+        isar.sourceModels.filter().linksLengthGreaterThan(1),
         [source2, source4],
       );
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .linksLengthGreaterThan(1, include: true)
-            .tFindAll(),
+        isar.sourceModels.filter().linksLengthGreaterThan(1, include: true),
         [source1, source2, source3, source4],
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthGreaterThan(2).tFindAll(),
+        isar.sourceModels.filter().linksLengthGreaterThan(2),
         [source2],
       );
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .linksLengthGreaterThan(2, include: true)
-            .tFindAll(),
+        isar.sourceModels.filter().linksLengthGreaterThan(2, include: true),
         [source2, source4],
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthGreaterThan(3).tFindAll(),
+        isar.sourceModels.filter().linksLengthGreaterThan(3),
         [],
       );
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .linksLengthGreaterThan(3, include: true)
-            .tFindAll(),
+        isar.sourceModels.filter().linksLengthGreaterThan(3, include: true),
         [source2],
       );
-
-      // FIXME: (minor) .linksLengthGreaterThan(X) where X == max i64 returns
-      // all values
-      // await qEqualSet(
-      //   isar.sourceModels
-      //       .filter()
-      //       .linksLengthGreaterThan(9223372036854775807)
-      //       .tFindAll(),
-      //   [],
-      // );
     });
 
     isarTest('.linksLengthLessThan()', () async {
+      expect(
+        () => isar.sourceModels.filter().linksLengthLessThan(-1),
+        throwsAssertionError,
+      );
+
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthLessThan(0).tFindAll(),
+        isar.sourceModels.filter().linksLengthLessThan(0),
         [],
       );
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .linksLengthLessThan(0, include: true)
-            .tFindAll(),
+        isar.sourceModels.filter().linksLengthLessThan(0, include: true),
         [source5, source6],
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthLessThan(1).tFindAll(),
+        isar.sourceModels.filter().linksLengthLessThan(1),
         [source5, source6],
       );
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .linksLengthLessThan(1, include: true)
-            .tFindAll(),
+        isar.sourceModels.filter().linksLengthLessThan(1, include: true),
         [source1, source3, source5, source6],
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthLessThan(2).tFindAll(),
+        isar.sourceModels.filter().linksLengthLessThan(2),
         [source1, source3, source5, source6],
       );
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .linksLengthLessThan(2, include: true)
-            .tFindAll(),
+        isar.sourceModels.filter().linksLengthLessThan(2, include: true),
         [source1, source3, source4, source5, source6],
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthLessThan(3).tFindAll(),
+        isar.sourceModels.filter().linksLengthLessThan(3),
         [source1, source3, source4, source5, source6],
       );
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .linksLengthLessThan(3, include: true)
-            .tFindAll(),
+        isar.sourceModels.filter().linksLengthLessThan(3, include: true),
         [source1, source2, source3, source4, source5, source6],
       );
 
-      // FIXME: .linksLengthLessThan(X) where X < 0 returns all values
-      // await qEqualSet(
-      //   isar.sourceModels.filter().linksLengthLessThan(-1).tFindAll(),
-      //   [],
-      // );
-
       await qEqualSet(
-        isar.sourceModels
-            .filter()
-            .linksLengthLessThan(9223372036854775807)
-            .tFindAll(),
+        isar.sourceModels.filter().linksLengthLessThan(9223372036854775807),
         [source1, source2, source3, source4, source5, source6],
       );
     });
 
     isarTest('.linksLengthBetween()', () async {
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthBetween(0, 3).tFindAll(),
+        isar.sourceModels.filter().linksLengthBetween(0, 3),
         [source1, source2, source3, source4, source5, source6],
       );
 
       await qEqualSet(
         isar.sourceModels
             .filter()
-            .linksLengthBetween(0, 3, includeLower: false)
-            .tFindAll(),
+            .linksLengthBetween(0, 3, includeLower: false),
         [source1, source2, source3, source4],
       );
 
       await qEqualSet(
         isar.sourceModels
             .filter()
-            .linksLengthBetween(0, 3, includeUpper: false)
-            .tFindAll(),
+            .linksLengthBetween(0, 3, includeUpper: false),
         [source1, source3, source4, source5, source6],
       );
 
       await qEqualSet(
         isar.sourceModels
             .filter()
-            .linksLengthBetween(0, 3, includeLower: false, includeUpper: false)
-            .tFindAll(),
+            .linksLengthBetween(0, 3, includeLower: false, includeUpper: false),
         [source1, source3, source4],
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthBetween(1, 2).tFindAll(),
+        isar.sourceModels.filter().linksLengthBetween(1, 2),
         [source1, source3, source4],
       );
 
       await qEqualSet(
-        isar.sourceModels.filter().linksLengthBetween(3, 42).tFindAll(),
+        isar.sourceModels.filter().linksLengthBetween(3, 42),
         [source2],
       );
     });
 
     isarTest('.linksIsEmpty', () async {
       await qEqualSet(
-        isar.sourceModels.filter().linksIsEmpty().tFindAll(),
+        isar.sourceModels.filter().linksIsEmpty(),
         [source5, source6],
       );
 
       await isar.tWriteTxn(() => source1.links.tReset());
 
       await qEqualSet(
-        isar.sourceModels.filter().linksIsEmpty().tFindAll(),
+        isar.sourceModels.filter().linksIsEmpty(),
         [source1, source5, source6],
       );
 
       await isar.tWriteTxn(() => isar.targetModels.where().tDeleteAll());
 
       await qEqualSet(
-        isar.sourceModels.filter().linksIsEmpty().tFindAll(),
+        isar.sourceModels.filter().linksIsEmpty(),
         [source1, source2, source3, source4, source5, source6],
-      );
-    });
-
-    isarTest('.linksIsNotEmpty()', () async {
-      await qEqualSet(
-        isar.sourceModels.filter().linksIsNotEmpty().tFindAll(),
-        [source1, source2, source3, source4],
-      );
-
-      await isar.tWriteTxn(() => source1.links.tReset());
-
-      await qEqualSet(
-        isar.sourceModels.filter().linksIsNotEmpty().tFindAll(),
-        [source2, source3, source4],
-      );
-
-      await isar.tWriteTxn(() => isar.targetModels.where().tDeleteAll());
-
-      await qEqualSet(
-        isar.sourceModels.filter().linksIsNotEmpty().tFindAll(),
-        [],
       );
     });
   });

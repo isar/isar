@@ -77,7 +77,7 @@ dev_dependencies:
 ```dart
 part 'email.g.dart';
 
-@Collection()
+@collection
 class Email {
   Id id = Isar.autoIncrement;
 
@@ -88,7 +88,7 @@ class Email {
   Status? status;
 }
 
-@Embedded()
+@embedded
 class Recipient {
   String? name;
 
@@ -101,7 +101,7 @@ enum Status with IsarEnum<String> {
   sent;
 
   @override
-  String get isarValue => name;
+  String get value => name;
 }
 ```
 
@@ -173,7 +173,7 @@ final usersLivingInMunich = isar.users
 You can easily define relationships between objects. In Isar they are called links and backlinks:
 
 ```dart
-@Collection()
+@collection
 class Teacher {
   Id? id;
 
@@ -183,7 +183,7 @@ class Teacher {
   final students = IsarLinks<Student>();
 }
 
-@Collection()
+@collection
 class Student {
   Id? id;
 

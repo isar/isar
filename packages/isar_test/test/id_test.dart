@@ -6,17 +6,17 @@ import 'util/sync_async_helper.dart';
 
 part 'id_test.g.dart';
 
-@Collection()
+@collection
 class ImplicitNullableIdModel {
   Id? id;
 }
 
-@Collection()
+@collection
 class ImplicitFinalIdModel {
   final Id id = Isar.autoIncrement;
 }
 
-@Collection()
+@collection
 class ExplicitIdModel {
   Id? id;
 }
@@ -32,8 +32,6 @@ void main() {
         ExplicitIdModelSchema,
       ]);
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     group('Implicit nullable id', () {
       isarTest('Id should auto increment', () async {
@@ -60,9 +58,10 @@ void main() {
         );
         expect(ids, [4, 5, 6, 7, 8, 9]);
 
-        final allIds =
-            await isar.implicitNullableIdModels.where().idProperty().tFindAll();
-        expect(allIds, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        await qEqual(
+          isar.implicitNullableIdModels.where().idProperty(),
+          [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        );
       });
 
       isarTest('Auto increment should reset', () async {
@@ -94,9 +93,10 @@ void main() {
         );
         expect(newIds, [2, 3, 4, 5, 6]);
 
-        final ids2 =
-            await isar.implicitNullableIdModels.where().idProperty().findAll();
-        expect(ids2, [1, 2, 3, 4, 5, 6]);
+        await qEqual(
+          isar.implicitNullableIdModels.where().idProperty(),
+          [1, 2, 3, 4, 5, 6],
+        );
       });
 
       isarTest('Negative id', () async {
@@ -177,9 +177,10 @@ void main() {
         );
         expect(ids, [3, 4, 5, 6, 7, 8]);
 
-        final allIds =
-            await isar.implicitFinalIdModels.where().idProperty().tFindAll();
-        expect(allIds, [1, 2, 3, 4, 5, 6, 7, 8]);
+        await qEqual(
+          isar.implicitFinalIdModels.where().idProperty(),
+          [1, 2, 3, 4, 5, 6, 7, 8],
+        );
       });
     });
 
@@ -208,9 +209,10 @@ void main() {
         );
         expect(ids, [4, 5, 6, 7, 8, 9]);
 
-        final allIds =
-            await isar.explicitIdModels.where().idProperty().tFindAll();
-        expect(allIds, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        await qEqual(
+          isar.explicitIdModels.where().idProperty(),
+          [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        );
       });
     });
   });

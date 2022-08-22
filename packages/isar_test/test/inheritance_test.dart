@@ -30,7 +30,7 @@ abstract class BaseModel {
   final link = IsarLink<InheritingModel>();
 }
 
-@Collection()
+@collection
 class InheritingModel extends BaseModel {
   InheritingModel({
     required super.name,
@@ -172,8 +172,6 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     /*test('Validate inheritance model properties', () {
       expect(InheritingModelSchema.idName, 'identifier');
       expect(InheritingModelSchema.propertyIds.containsKey('nameHash'), true);
@@ -218,12 +216,7 @@ void main() {
 
     isarTest('Query model with inheritance', () async {
       await qEqualSet(
-        isar.inheritingModels
-            .filter()
-            .nameContains('1')
-            .or()
-            .nameContains('4')
-            .tFindAll(),
+        isar.inheritingModels.filter().nameContains('1').or().nameContains('4'),
         {inheritingObj1, inheritingObj4},
       );
 
@@ -232,29 +225,26 @@ void main() {
             .filter()
             .nicknameContains('3')
             .or()
-            .nicknameContains('0')
-            .tFindAll(),
+            .nicknameContains('0'),
         {inheritingObj3, inheritingObj0},
       );
 
       await qEqualSet(
-        isar.inheritingModels.filter().ageLessThan(40).tFindAll(),
+        isar.inheritingModels.filter().ageLessThan(40),
         {inheritingObj1, inheritingObj2, inheritingObj4, inheritingObj5},
       );
 
       await qEqualSet(
         isar.inheritingModels
             .filter()
-            .link((q) => q.nameEqualTo(inheritingObj3.name))
-            .tFindAll(),
+            .link((q) => q.nameEqualTo(inheritingObj3.name)),
         {inheritingObj5},
       );
 
       await qEqualSet(
         isar.inheritingModels
             .filter()
-            .link((q) => q.nameEqualTo(inheritingObj4.name))
-            .tFindAll(),
+            .link((q) => q.nameEqualTo(inheritingObj4.name)),
         {},
       );
     });
@@ -265,8 +255,7 @@ void main() {
             .where()
             .nameHashEqualTo(inheritingObj1.name.hashCode)
             .or()
-            .nameHashEqualTo(inheritingObj0.name.hashCode)
-            .tFindAll(),
+            .nameHashEqualTo(inheritingObj0.name.hashCode),
         {inheritingObj1, inheritingObj0},
       );
 
@@ -274,8 +263,7 @@ void main() {
         isar.inheritingModels
             .where()
             .nameHashNotEqualTo(inheritingObj1.nameHash)
-            .nameHashProperty()
-            .tFindAll(),
+            .nameHashProperty(),
         {
           inheritingObj0.nameHash,
           inheritingObj2.nameHash,
@@ -286,7 +274,7 @@ void main() {
       );
 
       await qEqualSet(
-        isar.inheritingModels.where().anyNameHash().tFindAll(),
+        isar.inheritingModels.where().anyNameHash(),
         {
           inheritingObj0,
           inheritingObj1,
@@ -300,7 +288,7 @@ void main() {
 
     isarTest('Query model without inheritance', () async {
       await qEqualSet(
-        isar.nonInheritingModels.filter().ageBetween(30, 60).tFindAll(),
+        isar.nonInheritingModels.filter().ageBetween(30, 60),
         {nonInheritingObj1},
       );
 
@@ -309,13 +297,12 @@ void main() {
             .filter()
             .nicknameContains('obj1')
             .or()
-            .nicknameContains('obj0')
-            .tFindAll(),
+            .nicknameContains('obj0'),
         {nonInheritingObj1, nonInheritingObj0},
       );
 
       await qEqualSet(
-        isar.nonInheritingModels.filter().idGreaterThan(1).tFindAll(),
+        isar.nonInheritingModels.filter().idGreaterThan(1),
         {nonInheritingObj1, nonInheritingObj2},
       );
     });

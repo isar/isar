@@ -6,7 +6,7 @@ import 'util/sync_async_helper.dart';
 
 part 'name_test.g.dart';
 
-@Collection()
+@collection
 @Name('NameModelN')
 class NameModel {
   @Name('idN')
@@ -35,8 +35,6 @@ void main() {
     setUp(() async {
       isar = await openTempIsar([NameModelSchema]);
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('json', () async {
       await isar.tWriteTxn(

@@ -6,7 +6,7 @@ import 'util/sync_async_helper.dart';
 
 part 'constructor_test.g.dart';
 
-@Collection()
+@collection
 class EmptyConstructorModel {
   EmptyConstructorModel();
   Id? id;
@@ -22,7 +22,7 @@ class EmptyConstructorModel {
   }
 }
 
-@Collection()
+@collection
 class NamedConstructorModel {
   NamedConstructorModel({required this.name});
   Id? id;
@@ -38,7 +38,7 @@ class NamedConstructorModel {
   }
 }
 
-@Collection()
+@collection
 class PositionalConstructorModel {
   PositionalConstructorModel(this.id, this.name);
   final Id? id;
@@ -54,7 +54,7 @@ class PositionalConstructorModel {
   }
 }
 
-@Collection()
+@collection
 class OptionalConstructorModel {
   OptionalConstructorModel(this.name, [this.id]);
   final Id? id;
@@ -73,7 +73,7 @@ class OptionalConstructorModel {
   }
 }
 
-@Collection()
+@collection
 class PositionalNamedConstructorModel {
   PositionalNamedConstructorModel(this.name, {required this.id});
   final Id id;
@@ -89,7 +89,7 @@ class PositionalNamedConstructorModel {
   }
 }
 
-@Collection()
+@collection
 class SerializeOnlyModel {
   SerializeOnlyModel(this.id);
   final Id? id;
@@ -120,8 +120,6 @@ void main() {
       ]);
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('EmptyConstructorModel', () async {
       final obj1 = EmptyConstructorModel()..name = 'obj1';
       final obj2 = EmptyConstructorModel()..name = 'obj2';
@@ -130,7 +128,7 @@ void main() {
       });
 
       await qEqual(
-        isar.emptyConstructorModels.where().tFindAll(),
+        isar.emptyConstructorModels.where(),
         [obj1, obj2],
       );
     });
@@ -143,7 +141,7 @@ void main() {
       });
 
       await qEqual(
-        isar.namedConstructorModels.where().tFindAll(),
+        isar.namedConstructorModels.where(),
         [obj1, obj2],
       );
     });
@@ -157,7 +155,7 @@ void main() {
       });
 
       await qEqual(
-        isar.positionalConstructorModels.where().tFindAll(),
+        isar.positionalConstructorModels.where(),
         [obj1, obj2, obj3],
       );
     });
@@ -172,7 +170,7 @@ void main() {
       });
 
       await qEqual(
-        isar.optionalConstructorModels.where().tFindAll(),
+        isar.optionalConstructorModels.where(),
         [obj1WithId, obj2, obj3],
       );
     });
@@ -185,7 +183,7 @@ void main() {
       });
 
       await qEqual(
-        isar.positionalNamedConstructorModels.where().tFindAll(),
+        isar.positionalNamedConstructorModels.where(),
         [obj1, obj2],
       );
     });

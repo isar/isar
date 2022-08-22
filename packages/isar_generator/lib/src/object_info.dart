@@ -12,6 +12,7 @@ class ObjectInfo {
     required this.isarName,
     this.accessor,
     required List<ObjectProperty> properties,
+    this.embeddedDartNames = const {},
     this.indexes = const [],
     this.links = const [],
   }) {
@@ -22,6 +23,7 @@ class ObjectInfo {
   final String isarName;
   final String? accessor;
   late final List<ObjectProperty> properties;
+  final Map<String, String> embeddedDartNames;
   final List<ObjectIndex> indexes;
   final List<ObjectLink> links;
 
@@ -138,8 +140,8 @@ class ObjectProperty {
 
   String get defaultEnum => '$typeClassName.${enumConsts!.first}';
 
-  String enumValues(ObjectInfo object) {
-    return '_${object.dartName}${scalarDartType}Values';
+  String enumMap(ObjectInfo object) {
+    return '_${object.dartName}${scalarDartType}Map';
   }
 }
 

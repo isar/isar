@@ -8,7 +8,7 @@ import 'common.dart';
 part 'default_test.g.dart';
 
 @Name('Col')
-@Collection()
+@collection
 class DefaultModel {
   DefaultModel(
     this.id, [
@@ -42,7 +42,7 @@ class DefaultModel {
 }
 
 @Name('Col')
-@Collection()
+@collection
 class DefaultListModel {
   DefaultListModel(
     this.id, [
@@ -94,7 +94,6 @@ void main() {
       expect(obj.doubleValue, 10.10);
       expect(obj.stringValue, 'hello');
       expect(obj.embeddedValue, const MyEmbedded('abc'));
-      await isar2.close();
     });
 
     isarTest('scalar property', () async {
@@ -137,7 +136,6 @@ void main() {
         await isar2.defaultModels.where().embeddedValueProperty().tFindFirst(),
         const MyEmbedded('abc'),
       );
-      await isar2.close();
     });
 
     isarTest('list', () async {
@@ -158,7 +156,6 @@ void main() {
       expect(obj.doubleValue, [null, 10.10]);
       expect(obj.stringValue, ['abc', null, 'def']);
       expect(obj.embeddedValue, [null, const MyEmbedded('test')]);
-      await isar2.close();
     });
 
     isarTest('list property', () async {
@@ -211,7 +208,6 @@ void main() {
             .tFindFirst(),
         [null, const MyEmbedded('test')],
       );
-      await isar2.close();
     });
   });
 }

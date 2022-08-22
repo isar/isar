@@ -89,12 +89,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   ) {
     final keysPtrPtr = alloc<Pointer<CIndexKey>>(keys.length);
     for (var i = 0; i < keys.length; i++) {
-      keysPtrPtr[i] = buildIndexKey(
-        schema,
-        indexName,
-        keys[i],
-        requireFullKey: true,
-      )!;
+      keysPtrPtr[i] = buildIndexKey(schema, schema.index(indexName), keys[i]);
     }
     return keysPtrPtr;
   }
@@ -218,12 +213,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
 
       final objects = List<OBJ?>.filled(keys.length, null);
       for (var i = 0; i < keys.length; i++) {
-        final keyPtr = buildIndexKey(
-          schema,
-          indexName,
-          keys[i],
-          requireFullKey: true,
-        )!;
+        final keyPtr = buildIndexKey(schema, index, keys[i]);
         nCall(IC.isar_get_by_index(ptr, txn.ptr, index.id, keyPtr, cObjPtr));
         objects[i] = deserializeObjectOrNull(cObj);
       }

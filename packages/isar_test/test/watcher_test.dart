@@ -9,7 +9,7 @@ import 'util/sync_async_helper.dart';
 
 part 'watcher_test.g.dart';
 
-@Collection()
+@collection
 class Value {
   Value(this.id, this.value);
   Id? id;
@@ -40,8 +40,6 @@ void main() {
       obj2 = Value(2, 'Hi');
       obj3 = Value(3, 'Test');
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     group('Collection', () {
       isarTest('.put()', () async {

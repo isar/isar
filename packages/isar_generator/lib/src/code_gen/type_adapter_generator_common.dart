@@ -73,16 +73,16 @@ String generateAttach(ObjectInfo object) {
   return '$code}';
 }
 
-String generateEnumValues(ObjectInfo object) {
+String generateEnumMap(ObjectInfo object) {
   final completedEnums = <String>{};
 
   var code = '';
   for (final property in object.properties) {
     final enumName = property.typeClassName;
     if (property.isEnum && completedEnums.add(enumName)) {
-      code += 'final ${property.enumValues(object)} = {';
+      code += 'final ${property.enumMap(object)} = {';
       for (final c in property.enumConsts!) {
-        code += '$enumName.$c.isarValue: $enumName.$c,';
+        code += '$enumName.$c.value: $enumName.$c,';
       }
       code += '};';
     }

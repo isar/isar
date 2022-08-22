@@ -2,7 +2,7 @@ import 'package:isar/isar.dart';
 
 part 'type_models.g.dart';
 
-@Collection()
+@collection
 class BoolModel {
   Id? id;
 
@@ -15,7 +15,7 @@ class BoolModel {
   List<bool>? nList;
 }
 
-@Collection()
+@collection
 class ByteModel {
   Id? id;
 
@@ -26,7 +26,7 @@ class ByteModel {
   List<byte>? nList;
 }
 
-@Collection()
+@collection
 class ShortModel {
   Id? id;
 
@@ -39,7 +39,7 @@ class ShortModel {
   List<short>? nList;
 }
 
-@Collection()
+@collection
 class IntModel {
   Id? id;
 
@@ -52,7 +52,7 @@ class IntModel {
   List<int>? nList;
 }
 
-@Collection()
+@collection
 class FloatModel {
   Id? id;
 
@@ -65,7 +65,7 @@ class FloatModel {
   List<float>? nList;
 }
 
-@Collection()
+@collection
 class DoubleModel {
   Id? id;
 
@@ -78,7 +78,7 @@ class DoubleModel {
   List<double>? nList;
 }
 
-@Collection()
+@collection
 class DateTimeModel {
   Id? id;
 
@@ -91,7 +91,7 @@ class DateTimeModel {
   List<DateTime>? nList;
 }
 
-@Collection()
+@collection
 class StringModel {
   Id? id;
 
@@ -104,7 +104,7 @@ class StringModel {
   List<String>? nList;
 }
 
-@Embedded()
+@embedded
 class EmbeddedModel {
   EmbeddedModel([this.value]);
 
@@ -116,7 +116,7 @@ class EmbeddedModel {
       other is EmbeddedModel && other.value == value;
 }
 
-@Collection()
+@collection
 class ObjectModel {
   Id? id;
 
@@ -135,10 +135,10 @@ enum TestEnum with IsarEnum<String> {
   option3;
 
   @override
-  String get isarValue => name;
+  String get value => name;
 }
 
-@Collection()
+@collection
 class EnumModel {
   Id? id;
 

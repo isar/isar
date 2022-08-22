@@ -1,0 +1,134 @@
+:root {
+  --c-brand: #4799fc;
+  --c-brand-light: #67abfd;
+
+  --c-text: rgb(30, 30, 30); // normal text
+  --c-text-light: rgb(30, 30, 30);
+  --c-text-lighter: rgb(30, 30, 30); // code block text
+  --c-text-lightest: rgba(30, 30, 30, 0.7);
+
+  .custom-container.tip {
+    color: rgb(57, 146, 255) !important;
+    border-color: rgb(57, 146, 255) !important;
+    background-color: rgba(57, 146, 255, 0.1) !important;
+  }
+
+  .custom-container.warning {
+    color: rgb(39, 31, 6) !important;
+    border-color: rgb(39, 31, 6) !important;
+    background-color: rgba(131, 122, 11, 0.15) !important;
+  }
+
+  .custom-container.danger {
+    color: rgb(170, 37, 58) !important;
+    border-color: rgb(170, 37, 58) !important;
+    background-color: rgba(170, 37, 58, 0.1) !important;
+  }
+}
+
+html.dark {
+  --c-brand: #67abfd;
+  --c-brand-light: #4799fc;
+
+  --c-bg: rgb(18, 18, 18);
+  --c-bg-light: rgb(30, 30, 30); // code block background
+  --code-bg-color: #1e1e1e; // code background
+
+  --c-text: rgb(183, 188, 190); // normal text
+  --c-text-light: rgba(183, 188, 190);
+  --c-text-lighter: rgb(183, 188, 190); // code block text
+  --c-text-lightest: rgba(183, 188, 190, 0.7);
+
+  --c-border: rgb(45, 45, 45);
+  --c-border-dark: rgb(60, 60, 60);
+
+  .custom-container.tip {
+    color: rgb(57, 146, 255) !important;
+    border-color: rgb(57, 146, 255) !important;
+    background-color: rgba(57, 146, 255, 0.1) !important;
+  }
+
+  .custom-container.warning {
+    color: rgb(248, 239, 159) !important;
+    border-color: rgb(248, 239, 159) !important;
+    background-color: rgba(131, 122, 11, 0.15) !important;
+  }
+
+  .custom-container.danger {
+    color: rgb(240, 158, 183) !important;
+    border-color: rgb(240, 158, 183) !important;
+    background-color: rgba(240, 158, 183, 0.1) !important;
+  }
+}
+
+h1 {
+  font-family: "Montserrat", sans-serif;
+
+  font-size: 38px;
+  @media (min-width: 750px) {
+    font-size: 55px;
+  }
+}
+
+h2 {
+  font-family: "Montserrat", sans-serif;
+  font-size: 27px;
+  @media (min-width: 750px) {
+    font-size: 38px;
+  }
+}
+
+h3 {
+  font-family: "Montserrat", sans-serif;
+  font-size: 20px;
+  @media (min-width: 750px) {
+    font-size: 27px;
+  }
+}
+
+h4 {
+  font-family: "Montserrat", sans-serif;
+  font-size: 16px;
+}
+
+mark {
+  padding: 2px;
+}
+
+.action-button.primary {
+  font-weight: 800;
+}
+
+summary {
+  cursor: pointer;
+}
+
+details[open] summary {
+  margin-bottom: 0.5rem;
+}
+
+.custom-container {
+  border-radius: 10px;
+  border-left-width: 0.25rem !important;
+  border-left-style: solid;
+  border-right-style: solid;
+  border-right-width: 0.25rem;
+}
+
+.custom-container-title {
+  display: none;
+}
+
+.video-block {
+  position: relative; 
+  padding-bottom: 56.25%; /* 16:9 */
+  height: 0;
+  overflow: hidden;
+  width: 100%; height: auto;
+}
+
+.video-block iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+}

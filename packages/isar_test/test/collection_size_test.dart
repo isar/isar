@@ -6,7 +6,7 @@ import 'util/sync_async_helper.dart';
 
 part 'collection_size_test.g.dart';
 
-@Collection()
+@collection
 class ModelA {
   ModelA({
     required this.name,
@@ -25,7 +25,7 @@ class ModelA {
   final List<int> randomBuffer = List.filled(64000, 42);
 }
 
-@Collection()
+@collection
 class ModelB {
   Id id = Isar.autoIncrement;
 
@@ -67,9 +67,6 @@ void main() {
       objB4 = ModelB();
       objB5 = ModelB();
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
-    ;
 
     isarTest('Size should start at 0', () async {
       expect(await isar.modelAs.tGetSize(), 0);

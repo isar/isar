@@ -6,7 +6,7 @@ import '../util/sync_async_helper.dart';
 
 part 'add_remove_collection_test.g.dart';
 
-@Collection()
+@collection
 class Model1 {
   Model1(this.id, this.value);
 
@@ -23,7 +23,7 @@ class Model1 {
       other is Model1 && id == other.id && value == other.value;
 }
 
-@Collection()
+@collection
 class Model2 {
   Model2(this.id, this.value);
 
@@ -60,7 +60,6 @@ void main() {
       return isar2.model2s.tPut(obj2);
     });
     await isar2.model2s.verify([obj2]);
-    expect(await isar2.close(), true);
   });
 
   isarTest('Remove collection', () async {
@@ -90,12 +89,13 @@ void main() {
     await isar2.model1s.verifyLink('link', [obj1A.id!], [obj1B.id!]);
     expect(await isar2.close(), true);
 
-    final isar3 =
-        await openTempIsar([Model1Schema, Model2Schema], name: isar1.name);
+    final isar3 = await openTempIsar(
+      [Model1Schema, Model2Schema],
+      name: isar1.name,
+    );
     await isar3.model1s.verify([obj1A, obj1B]);
     await isar3.model1s.verifyLink('link', [obj1A.id!], [obj1B.id!]);
     await isar3.model2s.verify([]);
     await isar3.model2s.verifyLink('link', [], []);
-    expect(await isar3.close(), true);
   });
 }

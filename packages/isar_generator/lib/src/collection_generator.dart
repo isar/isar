@@ -8,6 +8,7 @@ import 'package:isar_generator/src/code_gen/collection_schema_generator.dart';
 import 'package:isar_generator/src/code_gen/query_distinct_by_generator.dart';
 import 'package:isar_generator/src/code_gen/query_filter_generator.dart';
 import 'package:isar_generator/src/code_gen/query_link_generator.dart';
+import 'package:isar_generator/src/code_gen/query_object_generator.dart';
 import 'package:isar_generator/src/code_gen/query_property_generator.dart';
 import 'package:isar_generator/src/code_gen/query_sort_by_generator.dart';
 import 'package:isar_generator/src/code_gen/query_where_generator.dart';
@@ -47,7 +48,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       // ignore_for_file: ${ignoreLints.join(', ')}
 
       extension Get${object.dartName}Collection on Isar {
-        IsarCollection<${object.dartName}> get ${object.accessor} => collection();
+        IsarCollection<${object.dartName}> get ${object.accessor} => this.collection();
       }
 
       ${generateSchema(object)}
@@ -61,7 +62,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       ${generateDeserializeWeb(object)}
       ${generateDeserializePropWeb(object)}
 
-      ${generateEnumValues(object)}
+      ${generateEnumMap(object)}
 
       ${generateGetId(object)}
       ${generateGetLinks(object)}
@@ -70,6 +71,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       ${generateByIndexExtension(object)}
       ${WhereGenerator(object).generate()}
       ${FilterGenerator(object).generate()}
+      ${generateQueryObjects(object)}
       ${generateQueryLinks(object)}
       ${generateSortBy(object)}
       ${generateDistinctBy(object)}
@@ -101,7 +103,10 @@ class IsarEmbeddedGenerator extends GeneratorForAnnotation<Embedded> {
       ${generateDeserializeWeb(object)}
       ${generateDeserializePropWeb(object)}
 
-      ${generateEnumValues(object)}
+      ${generateEnumMap(object)}
+
+      ${FilterGenerator(object).generate()}
+      ${generateQueryObjects(object)}
     ''';
   }
 }

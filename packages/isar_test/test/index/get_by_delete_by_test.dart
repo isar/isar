@@ -5,7 +5,7 @@ import '../util/common.dart';
 
 part 'get_by_delete_by_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Model({required this.id, required this.guid, required this.content});
   final Id? id;
@@ -52,8 +52,6 @@ void main() {
         await col.putAll([obj1, obj2, obj3]);
       });
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('getBy', () async {
       expect(await col.getByGuid(obj1.guid), obj1);
@@ -107,20 +105,20 @@ void main() {
         expect(await col.deleteByGuid(obj1.guid), true);
         expect(await col.deleteByGuid('SOMETHING'), false);
       });
-      await qEqual(col.where().findAll(), [obj2, obj3]);
+      await qEqual(col.where(), [obj2, obj3]);
 
       await isar.writeTxn(() async {
         expect(await col.deleteByContentGuid('B', obj2.guid), true);
         expect(await col.deleteByContentGuid('D', obj3.guid), false);
       });
-      await qEqual(col.where().findAll(), [obj3]);
+      await qEqual(col.where(), [obj3]);
     });
 
     isarTest('deleteAllBy', () async {
       await isar.writeTxn(() async {
         expect(await col.deleteAllByGuid([obj3.guid, obj1.guid, 'AAA']), 2);
       });
-      await qEqual(col.where().findAll(), [obj2]);
+      await qEqual(col.where(), [obj2]);
     });
 
     isarTest('deleteAllBy composite', () async {
@@ -133,7 +131,7 @@ void main() {
           2,
         );
       });
-      await qEqual(col.where().findAll(), [obj2]);
+      await qEqual(col.where(), [obj2]);
     });
 
     isarTestVm('deleteBySync', () {

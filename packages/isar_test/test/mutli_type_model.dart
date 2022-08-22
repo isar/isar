@@ -4,7 +4,7 @@ import 'package:isar/isar.dart';
 
 part 'mutli_type_model.g.dart';
 
-@Collection()
+@collection
 class MultiTypeModel {
   Id? id;
 

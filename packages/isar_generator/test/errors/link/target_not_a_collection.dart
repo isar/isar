@@ -1,8 +1,8 @@
-// link target is not annotated with @collection()
+// link target is not annotated with @collection
 
 import 'package:isar/isar.dart';
 
-@Collection()
+@collection
 class Model {
   Id? id;
 

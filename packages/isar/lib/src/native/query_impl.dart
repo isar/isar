@@ -6,7 +6,6 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
-
 import 'package:isar/src/native/bindings.dart';
 import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_collection_impl.dart';

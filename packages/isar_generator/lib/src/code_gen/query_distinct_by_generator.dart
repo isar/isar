@@ -1,5 +1,6 @@
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
+import 'package:isar_generator/src/isar_type.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 String generateDistinctBy(ObjectInfo oi) {
@@ -13,7 +14,7 @@ String generateDistinctBy(ObjectInfo oi) {
             return query.addDistinctBy(r'${property.isarName}', caseSensitive: caseSensitive);
           });
         }''';
-    } else {
+    } else if (!property.isarType.containsObject) {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}() {
           return QueryBuilder.apply(this, (query) {

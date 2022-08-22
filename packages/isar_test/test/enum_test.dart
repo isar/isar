@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:isar/isar.dart';
+import 'package:test/test.dart';
 
 import 'util/common.dart';
 
@@ -10,10 +10,10 @@ enum ByteEnum with IsarEnum<byte> {
   byte2;
 
   @override
-  byte get isarValue => index;
+  byte get value => index;
 }
 
-@Collection()
+@collection
 class ByteEnumModel {
   Id? id;
 
@@ -31,7 +31,7 @@ enum StringEnum with IsarEnum<String> {
   option3;
 
   @override
-  String get isarValue => name;
+  String get value => name;
 }
 
 enum StringEnum2 with IsarEnum<String> {
@@ -39,10 +39,10 @@ enum StringEnum2 with IsarEnum<String> {
   option3;
 
   @override
-  String get isarValue => name;
+  String get value => name;
 }
 
-@Collection()
+@collection
 class StringEnumModel {
   Id? id;
 
@@ -59,7 +59,7 @@ class StringEnumModel {
       other.nValue == nValue;
 }
 
-@Collection()
+@collection
 @Name('StringEnumModel')
 class StringEnumModel2 {
   Id? id;
@@ -83,10 +83,10 @@ enum DateTimeEnum with IsarEnum<DateTime> {
   option3;
 
   @override
-  DateTime get isarValue => DateTime(2000 + index);
+  DateTime get value => DateTime(2000 + index);
 }
 
-@Collection()
+@collection
 class DateEnumModel {
   Id? id;
 

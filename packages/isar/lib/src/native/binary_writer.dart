@@ -16,6 +16,11 @@ class BinaryWriter {
         _buffer = buffer,
         _byteData = ByteData.view(buffer.buffer, buffer.offsetInBytes) {
     _byteData.setUint16(0, staticSize, Endian.little);
+
+    // Required because we don't want to persist uninitialized memory.
+    for (var i = 2; i < staticSize; i++) {
+      _buffer[i] = 0;
+    }
   }
 
   final Uint8List _buffer;

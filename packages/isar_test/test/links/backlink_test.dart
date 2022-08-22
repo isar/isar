@@ -6,7 +6,7 @@ import '../util/sync_async_helper.dart';
 
 part 'backlink_test.g.dart';
 
-@Collection()
+@collection
 class LinkModelA {
   LinkModelA(this.name);
 
@@ -33,7 +33,7 @@ class LinkModelA {
   }
 }
 
-@Collection()
+@collection
 class LinkModelB {
   LinkModelB(this.name);
 
@@ -81,8 +81,6 @@ void main() {
         await isar.linkModelBs.putAll([b1, b2, b3]);
       });
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     test('otherlinks', () async {
       await isar.tWriteTxn(() async {

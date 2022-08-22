@@ -44,9 +44,7 @@ extension DartTypeX on DartType {
           NullabilitySuffix.none) {
         final type = isarEnum.typeArguments[0];
         final isarType = type.isarType;
-        if (!type.isIsarEnum &&
-            isarType != IsarType.object &&
-            isarType != IsarType.objectList) {
+        if (isarType != null && !type.isIsarEnum && !isarType.isList) {
           return isarType;
         }
       }
@@ -111,9 +109,17 @@ extension DartTypeX on DartType {
 }
 
 extension IsarTypeX on IsarType {
+  bool get containsBool => this == IsarType.bool || this == IsarType.boolList;
+
   bool get containsFloat =>
       this == IsarType.float ||
       this == IsarType.floatList ||
       this == IsarType.double ||
       this == IsarType.doubleList;
+
+  bool get containsString =>
+      this == IsarType.string || this == IsarType.stringList;
+
+  bool get containsObject =>
+      this == IsarType.object || this == IsarType.objectList;
 }

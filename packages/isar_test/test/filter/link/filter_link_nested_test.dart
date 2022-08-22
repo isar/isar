@@ -6,7 +6,7 @@ import '../../util/sync_async_helper.dart';
 
 part 'filter_link_nested_test.g.dart';
 
-@Collection()
+@collection
 class SourceModel {
   SourceModel(this.name);
 
@@ -30,7 +30,7 @@ class SourceModel {
   }
 }
 
-@Collection()
+@collection
 class TargetModel {
   TargetModel(this.name);
 
@@ -58,7 +58,7 @@ class TargetModel {
   }
 }
 
-@Collection()
+@collection
 class NestedTargetModel {
   NestedTargetModel(this.name);
 
@@ -189,6 +189,7 @@ void main() {
           target2.nestedLinks.tSave(),
           target3.nestedLinks.tSave(),
           target4.nestedLinks.tSave(),
+          target6.nestedLinks.tSave(),
         ]),
       );
     });
@@ -196,209 +197,149 @@ void main() {
     group('Links', () {
       isarTest('.links()', () async {
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links((q) => q.nameStartsWith('target'))
-              .tFindAll(),
+          isar.sourceModels.filter().links((q) => q.nameStartsWith('target')),
           [source1, source2, source3, source4, source5],
         );
 
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links((q) => q.nameEqualTo('target 1'))
-              .tFindAll(),
+          isar.sourceModels.filter().links((q) => q.nameEqualTo('target 1')),
           [source1, source2, source3],
         );
 
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links((q) => q.nameEqualTo('target 2'))
-              .tFindAll(),
+          isar.sourceModels.filter().links((q) => q.nameEqualTo('target 2')),
           [source2, source3],
         );
 
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links((q) => q.nameEqualTo('target 3'))
-              .tFindAll(),
+          isar.sourceModels.filter().links((q) => q.nameEqualTo('target 3')),
           [source3, source4],
         );
 
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links((q) => q.nameEqualTo('target 4'))
-              .tFindAll(),
+          isar.sourceModels.filter().links((q) => q.nameEqualTo('target 4')),
           [source4],
         );
 
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links((q) => q.nameEqualTo('target 5'))
-              .tFindAll(),
+          isar.sourceModels.filter().links((q) => q.nameEqualTo('target 5')),
           [source5],
         );
 
         await qEqualSet(
           isar.sourceModels
               .filter()
-              .links((q) => q.nameEqualTo('non existing'))
-              .tFindAll(),
+              .links((q) => q.nameEqualTo('non existing')),
           [],
         );
       });
 
-      // FIXME(severe): Nested links filters returns all values
-      // Seems that the nested query is completely ignored
       isarTest('.links() with .nestedLinks()', () async {
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links(
+          isar.sourceModels.filter().links(
                 (q) => q.nestedLinks((q) => q.nameStartsWith('nested target')),
-              )
-              .tFindAll(),
+              ),
           [source1, source2, source3, source4],
         );
 
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links(
+          isar.sourceModels.filter().links(
                 (q) => q.nestedLinks((q) => q.nameEqualTo('nested target 1')),
-              )
-              .tFindAll(),
+              ),
           [source1, source2, source3, source4],
         );
 
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links(
+          isar.sourceModels.filter().links(
                 (q) => q.nestedLinks((q) => q.nameEqualTo('nested target 2')),
-              )
-              .tFindAll(),
+              ),
           [source2, source3, source4],
         );
 
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links(
+          isar.sourceModels.filter().links(
                 (q) => q.nestedLinks((q) => q.nameEqualTo('nested target 3')),
-              )
-              .tFindAll(),
+              ),
           [source3, source4],
         );
 
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links(
+          isar.sourceModels.filter().links(
                 (q) => q.nestedLinks((q) => q.nameEqualTo('nested target 4')),
-              )
-              .tFindAll(),
+              ),
           [source4],
         );
 
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links(
+          isar.sourceModels.filter().links(
                 (q) => q.nestedLinks((q) => q.nameEqualTo('nested target 5')),
-              )
-              .tFindAll(),
+              ),
           [source4],
         );
 
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links(
+          isar.sourceModels.filter().links(
                 (q) => q.nestedLinks((q) => q.nameEqualTo('nested target 6')),
-              )
-              .tFindAll(),
+              ),
           [],
         );
 
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links(
+          isar.sourceModels.filter().links(
                 (q) => q.nestedLinks((q) => q.nameEqualTo('non existing')),
-              )
-              .tFindAll(),
+              ),
           [],
         );
       });
 
-      // FIXME(severe): Nested links filters returns all values
-      // Seems that the nested query is completely ignored
       isarTest('.links() with .nestedLinksLengthEqualTo()', () async {
         await qEqualSet(
           isar.sourceModels
               .filter()
-              .links((q) => q.nestedLinksLengthEqualTo(0))
-              .tFindAll(),
+              .links((q) => q.nestedLinksLengthEqualTo(0)),
           [source5],
         );
 
         await qEqualSet(
           isar.sourceModels
               .filter()
-              .links((q) => q.nestedLinksLengthEqualTo(1))
-              .tFindAll(),
+              .links((q) => q.nestedLinksLengthEqualTo(1)),
           [source1, source2, source3],
         );
 
         await qEqualSet(
           isar.sourceModels
               .filter()
-              .links((q) => q.nestedLinksLengthEqualTo(2))
-              .tFindAll(),
+              .links((q) => q.nestedLinksLengthEqualTo(2)),
           [source2, source3],
         );
 
         await qEqualSet(
           isar.sourceModels
               .filter()
-              .links((q) => q.nestedLinksLengthEqualTo(3))
-              .tFindAll(),
+              .links((q) => q.nestedLinksLengthEqualTo(3)),
           [source3, source4],
         );
 
         await qEqualSet(
           isar.sourceModels
               .filter()
-              .links((q) => q.nestedLinksLengthEqualTo(4))
-              .tFindAll(),
+              .links((q) => q.nestedLinksLengthEqualTo(4)),
           [],
         );
       });
 
-      // FIXME(severe): Nested links filters returns all values
-      // Seems that the nested query is completely ignored
       isarTest('.links() with .nestedLinkIsEmpty()', () async {
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links((q) => q.nestedLinksIsEmpty())
-              .tFindAll(),
+          isar.sourceModels.filter().links((q) => q.nestedLinksIsEmpty()),
           [source5],
         );
 
         await isar.tWriteTxn(() => target1.nestedLinks.tReset());
 
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links((q) => q.nestedLinksIsEmpty())
-              .tFindAll(),
-          [source1, source5],
+          isar.sourceModels.filter().links((q) => q.nestedLinksIsEmpty()),
+          [source1, source2, source3, source5],
         );
 
         await isar.tWriteTxn(
@@ -406,10 +347,7 @@ void main() {
         );
 
         await qEqualSet(
-          isar.sourceModels
-              .filter()
-              .links((q) => q.nestedLinksIsEmpty())
-              .tFindAll(),
+          isar.sourceModels.filter().links((q) => q.nestedLinksIsEmpty()),
           [source1, source2, source3, source4, source5],
         );
       });
@@ -420,8 +358,7 @@ void main() {
         await qEqualSet(
           isar.nestedTargetModels
               .filter()
-              .nestedLinksBacklinks((q) => q.nameStartsWith('target'))
-              .tFindAll(),
+              .nestedLinksBacklinks((q) => q.nameStartsWith('target')),
           [
             nestedTarget1,
             nestedTarget2,
@@ -434,70 +371,58 @@ void main() {
         await qEqualSet(
           isar.nestedTargetModels
               .filter()
-              .nestedLinksBacklinks((q) => q.nameStartsWith('target 1'))
-              .tFindAll(),
+              .nestedLinksBacklinks((q) => q.nameStartsWith('target 1')),
           [nestedTarget1],
         );
 
         await qEqualSet(
           isar.nestedTargetModels
               .filter()
-              .nestedLinksBacklinks((q) => q.nameStartsWith('target 2'))
-              .tFindAll(),
+              .nestedLinksBacklinks((q) => q.nameStartsWith('target 2')),
           [nestedTarget1, nestedTarget2],
         );
 
         await qEqualSet(
           isar.nestedTargetModels
               .filter()
-              .nestedLinksBacklinks((q) => q.nameStartsWith('target 3'))
-              .tFindAll(),
+              .nestedLinksBacklinks((q) => q.nameStartsWith('target 3')),
           [nestedTarget1, nestedTarget2, nestedTarget3],
         );
 
         await qEqualSet(
           isar.nestedTargetModels
               .filter()
-              .nestedLinksBacklinks((q) => q.nameStartsWith('target 4'))
-              .tFindAll(),
+              .nestedLinksBacklinks((q) => q.nameStartsWith('target 4')),
           [nestedTarget3, nestedTarget4, nestedTarget5],
         );
 
         await qEqualSet(
           isar.nestedTargetModels
               .filter()
-              .nestedLinksBacklinks((q) => q.nameStartsWith('target 5'))
-              .tFindAll(),
+              .nestedLinksBacklinks((q) => q.nameStartsWith('target 5')),
           [],
         );
 
         await qEqualSet(
           isar.nestedTargetModels
               .filter()
-              .nestedLinksBacklinks((q) => q.nameStartsWith('target 6'))
-              .tFindAll(),
-          [],
+              .nestedLinksBacklinks((q) => q.nameStartsWith('target 6')),
+          [nestedTarget5],
         );
 
         await qEqualSet(
           isar.nestedTargetModels
               .filter()
-              .nestedLinksBacklinks((q) => q.nameStartsWith('non existing'))
-              .tFindAll(),
+              .nestedLinksBacklinks((q) => q.nameStartsWith('non existing')),
           [],
         );
       });
 
-      // FIXME(severe): Nested links filters returns all values
-      // Seems that the nested query is completely ignored
       isarTest('.nestedLinksBackLinks', () async {
         await qEqualSet(
-          isar.nestedTargetModels
-              .filter()
-              .nestedLinksBacklinks(
+          isar.nestedTargetModels.filter().nestedLinksBacklinks(
                 (q) => q.linksBacklinks((q) => q.nameStartsWith('source')),
-              )
-              .tFindAll(),
+              ),
           [
             nestedTarget1,
             nestedTarget2,
@@ -508,42 +433,30 @@ void main() {
         );
 
         await qEqualSet(
-          isar.nestedTargetModels
-              .filter()
-              .nestedLinksBacklinks(
+          isar.nestedTargetModels.filter().nestedLinksBacklinks(
                 (q) => q.linksBacklinks((q) => q.nameEqualTo('source 1')),
-              )
-              .tFindAll(),
+              ),
           [nestedTarget1],
         );
 
         await qEqualSet(
-          isar.nestedTargetModels
-              .filter()
-              .nestedLinksBacklinks(
+          isar.nestedTargetModels.filter().nestedLinksBacklinks(
                 (q) => q.linksBacklinks((q) => q.nameEqualTo('source 2')),
-              )
-              .tFindAll(),
+              ),
           [nestedTarget1, nestedTarget2],
         );
 
         await qEqualSet(
-          isar.nestedTargetModels
-              .filter()
-              .nestedLinksBacklinks(
+          isar.nestedTargetModels.filter().nestedLinksBacklinks(
                 (q) => q.linksBacklinks((q) => q.nameEqualTo('source 3')),
-              )
-              .tFindAll(),
+              ),
           [nestedTarget1, nestedTarget2, nestedTarget3],
         );
 
         await qEqualSet(
-          isar.nestedTargetModels
-              .filter()
-              .nestedLinksBacklinks(
+          isar.nestedTargetModels.filter().nestedLinksBacklinks(
                 (q) => q.linksBacklinks((q) => q.nameEqualTo('source 4')),
-              )
-              .tFindAll(),
+              ),
           [
             nestedTarget1,
             nestedTarget2,
@@ -554,127 +467,98 @@ void main() {
         );
 
         await qEqualSet(
-          isar.nestedTargetModels
-              .filter()
-              .nestedLinksBacklinks(
+          isar.nestedTargetModels.filter().nestedLinksBacklinks(
                 (q) => q.linksBacklinks((q) => q.nameEqualTo('source 5')),
-              )
-              .tFindAll(),
+              ),
           [],
         );
 
         await qEqualSet(
-          isar.nestedTargetModels
-              .filter()
-              .nestedLinksBacklinks(
+          isar.nestedTargetModels.filter().nestedLinksBacklinks(
                 (q) => q.linksBacklinks((q) => q.nameEqualTo('source 6')),
-              )
-              .tFindAll(),
+              ),
           [],
         );
 
         await qEqualSet(
-          isar.nestedTargetModels
-              .filter()
-              .nestedLinksBacklinks(
+          isar.nestedTargetModels.filter().nestedLinksBacklinks(
                 (q) => q.linksBacklinks((q) => q.nameEqualTo('non existing')),
-              )
-              .tFindAll(),
+              ),
           [],
         );
       });
 
-      // FIXME(severe): Nested links filters returns all values
-      // Seems that the nested query is completely ignored
       isarTest(
         '.nestedLinksBacklinks() with .linksBacklinksLengthEqualTo()',
         () async {
           await qEqualSet(
             isar.nestedTargetModels
                 .filter()
-                .nestedLinksBacklinks((q) => q.linksBacklinksLengthEqualTo(0))
-                .tFindAll(),
+                .nestedLinksBacklinks((q) => q.linksBacklinksLengthEqualTo(0)),
             [nestedTarget5],
           );
 
           await qEqualSet(
             isar.nestedTargetModels
                 .filter()
-                .nestedLinksBacklinks((q) => q.linksBacklinksLengthEqualTo(1))
-                .tFindAll(),
+                .nestedLinksBacklinks((q) => q.linksBacklinksLengthEqualTo(1)),
             [nestedTarget3, nestedTarget4, nestedTarget5],
           );
 
           await qEqualSet(
             isar.nestedTargetModels
                 .filter()
-                .nestedLinksBacklinks((q) => q.linksBacklinksLengthEqualTo(2))
-                .tFindAll(),
+                .nestedLinksBacklinks((q) => q.linksBacklinksLengthEqualTo(2)),
             [nestedTarget1, nestedTarget2, nestedTarget3],
           );
 
           await qEqualSet(
             isar.nestedTargetModels
                 .filter()
-                .nestedLinksBacklinks((q) => q.linksBacklinksLengthEqualTo(3))
-                .tFindAll(),
+                .nestedLinksBacklinks((q) => q.linksBacklinksLengthEqualTo(3)),
             [nestedTarget1],
           );
 
           await qEqualSet(
             isar.nestedTargetModels
                 .filter()
-                .nestedLinksBacklinks((q) => q.linksBacklinksLengthEqualTo(4))
-                .tFindAll(),
+                .nestedLinksBacklinks((q) => q.linksBacklinksLengthEqualTo(4)),
             [],
           );
 
           await qEqualSet(
             isar.nestedTargetModels
                 .filter()
-                .nestedLinksBacklinks((q) => q.linksBacklinksLengthEqualTo(5))
-                .tFindAll(),
+                .nestedLinksBacklinks((q) => q.linksBacklinksLengthEqualTo(5)),
             [],
           );
 
           await qEqualSet(
             isar.nestedTargetModels
                 .filter()
-                .nestedLinksBacklinks((q) => q.linksBacklinksLengthEqualTo(6))
-                .tFindAll(),
+                .nestedLinksBacklinks((q) => q.linksBacklinksLengthEqualTo(6)),
             [],
           );
         },
       );
     });
 
-    // FIXME(severe): Nested links filters returns all values
-    // Seems that the nested query is completely ignored
     isarTest(
       '.nestedLinksBacklinks() with .linksBacklinksIsEmpty()',
       () async {
         await qEqualSet(
           isar.nestedTargetModels
               .filter()
-              .nestedLinksBacklinks((q) => q.linksBacklinksIsEmpty())
-              .tFindAll(),
+              .nestedLinksBacklinks((q) => q.linksBacklinksIsEmpty()),
           [nestedTarget5],
         );
 
-        return;
-        // FIXME: IsarError: Cannot perform this operation from within an active
-        // transaction.
-        // Are we suppose to a able to reset backlinks?
-        //
-        // It seems that a sync method is called in an async transaction
-        // Also seems to only happen on `.reset()` of backlinks
         await isar.tWriteTxn(() => target1.linksBacklinks.tReset());
 
         await qEqualSet(
           isar.nestedTargetModels
               .filter()
-              .nestedLinksBacklinks((q) => q.linksBacklinksIsEmpty())
-              .tFindAll(),
+              .nestedLinksBacklinks((q) => q.linksBacklinksIsEmpty()),
           [nestedTarget1, nestedTarget5],
         );
 
@@ -683,8 +567,7 @@ void main() {
         await qEqualSet(
           isar.nestedTargetModels
               .filter()
-              .nestedLinksBacklinks((q) => q.linksBacklinksIsEmpty())
-              .tFindAll(),
+              .nestedLinksBacklinks((q) => q.linksBacklinksIsEmpty()),
           [
             nestedTarget1,
             nestedTarget2,

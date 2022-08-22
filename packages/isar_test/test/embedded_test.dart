@@ -8,7 +8,7 @@ import 'util/sync_async_helper.dart';
 
 part 'embedded_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Model(this.id, this.embedded, this.nested, this.nestedList);
 
@@ -38,7 +38,7 @@ class Model {
   }
 }
 
-@Embedded()
+@embedded
 class EModel {
   EModel([this.value = '']);
 
@@ -54,7 +54,7 @@ class EModel {
   }
 }
 
-@Embedded()
+@embedded
 class NModel {
   NModel([this.embedded, this.nested, this.nestedList]);
 
@@ -137,8 +137,6 @@ void main() {
       );
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.put() .get()', () async {
       await isar.tWriteTxn(() async {
         await isar.models.tPutAll([allNull, simple, nested]);
@@ -146,7 +144,7 @@ void main() {
 
       await isar.models.verify([allNull, simple, nested]);
 
-      await qEqual(isar.models.where().findAll(), [allNull, simple, nested]);
+      await qEqual(isar.models.where(), [allNull, simple, nested]);
     });
 
     isarTest('.importJson()', () async {
@@ -166,8 +164,8 @@ void main() {
         await isar.models.tPutAll([allNull, simple, nested]);
       });
 
-      await qEqual(
-        isar.models.where().exportJson(),
+      expect(
+        await isar.models.where().exportJson(),
         [
           allNull.toJson(),
           simple.toJson(),

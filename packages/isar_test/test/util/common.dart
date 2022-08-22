@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 
@@ -6,20 +7,25 @@ import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
+import 'package:test_api/src/backend/invoker.dart';
 
 import 'sync_async_helper.dart';
 
 const bool kIsWeb = identical(0, 0.0);
 
 Future<void> qEqualSet<T>(
-  Future<Iterable<T>> actual,
+  QueryBuilder<dynamic, T, QQueryOperations> query,
   Iterable<T> target,
 ) async {
-  expect((await actual).toSet(), target.toSet());
+  final results = (await query.tFindAll()).toList();
+  expect(results.toSet(), target.toSet());
 }
 
-Future<void> qEqual<T>(Future<Iterable<T>> actual, List<T> target) async {
-  final results = (await actual).toList();
+Future<void> qEqual<T>(
+  QueryBuilder<dynamic, T, QQueryOperations> query,
+  List<T> target,
+) async {
+  final results = (await query.tFindAll()).toList();
   await qEqualSync(results, target);
 }
 
@@ -43,13 +49,61 @@ Future<void> qEqualSync<T>(List<T> actual, List<T> target) async {
 final testErrors = <String>[];
 int testCount = 0;
 
+String _getRustTarget() {
+  switch (Abi.current()) {
+    case Abi.macosArm64:
+      return 'aarch64-apple-darwin';
+    case Abi.macosX64:
+      return 'x86_64-apple-darwin';
+    case Abi.linuxArm64:
+      return 'aarch64-unknown-linux-gnu';
+    case Abi.linuxX64:
+      return 'x86_64-unknown-linux-gnu';
+    case Abi.windowsX64:
+      return 'x86_64-pc-windows-gnu';
+    case Abi.windowsIA32:
+      return 'i686-pc-windows-gnu';
+    default:
+      throw UnsupportedError('Unsupported ABI: ${Abi.current()}');
+  }
+}
+
+var _setUp = false;
 Future<void> _prepareTest() async {
-  if (!kIsWeb) {
-    try {
-      await Isar.initializeIsarCore(download: true);
-    } catch (e) {
-      // ignore. maybe this is an instrumentation test
+  if (!kIsWeb && !_setUp) {
+    if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
+      try {
+        final packagesDir = path.dirname(Directory.current.absolute.path);
+        final target = _getRustTarget();
+        final binaryName = Platform.isWindows
+            ? 'isar.dll'
+            : Platform.isMacOS
+                ? 'libisar.dylib'
+                : 'libisar.so';
+        final binaryPath = path.join(
+          path.dirname(packagesDir),
+          'target',
+          target,
+          'debug',
+          binaryName,
+        );
+
+        if (!File(binaryPath).existsSync()) {
+          Process.runSync(
+            'cargo',
+            ['build', '--target', target],
+            workingDirectory: path.join(packagesDir, 'isar_core_ffi'),
+          );
+        }
+        await Isar.initializeIsarCore(libraries: {Abi.current(): binaryPath});
+      } catch (e) {
+        // ignore. maybe this is an instrumentation test
+        // ignore: avoid_print
+        print(e);
+      }
     }
+
+    _setUp = true;
   }
 }
 
@@ -82,7 +136,7 @@ void isarTest(
           },
         );
       },
-      timeout: timeout,
+      timeout: timeout ?? const Timeout(Duration(minutes: 5)),
     );
   }
 
@@ -114,12 +168,13 @@ String? testTempPath;
 Future<Isar> openTempIsar(
   List<CollectionSchema<dynamic>> schemas, {
   String? name,
+  String? directory,
   CompactCondition? compactOnLaunch,
 }) async {
   await _prepareTest();
   if (!kIsWeb && testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
-    testTempPath = path.join(dartToolDir, 'test', 'tmp');
+    testTempPath = directory ?? path.join(dartToolDir, 'test', 'tmp');
     await Directory(testTempPath!).create(recursive: true);
   }
 
@@ -129,6 +184,14 @@ Future<Isar> openTempIsar(
     directory: kIsWeb ? '' : testTempPath!,
     compactOnLaunch: compactOnLaunch,
   );
+
+  if (Invoker.current != null) {
+    addTearDown(() async {
+      if (isar.isOpen) {
+        await isar.close(deleteFromDisk: true);
+      }
+    });
+  }
 
   await isar.verify();
   return isar;
@@ -169,6 +232,8 @@ Matcher isIsarError([String? contains]) {
 Matcher throwsIsarError([String? contains]) {
   return throwsA(isIsarError(contains));
 }
+
+final Matcher throwsAssertionError = throwsA(isA<AssertionError>());
 
 bool listEquals<T>(List<T>? a, List<T>? b) {
   if (a == null) {

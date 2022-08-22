@@ -8,7 +8,7 @@ import 'common.dart';
 part 'no_default_test.g.dart';
 
 @Name('Col')
-@Collection()
+@collection
 class NoDefaultModel {
   NoDefaultModel(
     this.id,
@@ -48,7 +48,7 @@ class NoDefaultModel {
 }
 
 @Name('Col')
-@Collection()
+@collection
 class NoDefaultListModel {
   NoDefaultListModel(
     this.id,
@@ -111,7 +111,6 @@ void main() {
       expect(obj.stringValue, '');
       expect(obj.embeddedValue, const MyEmbedded());
       expect(obj.enumValue, MyEnum.value1);
-      await isar2.close();
     });
 
     isarTest('scalar property', () async {
@@ -168,7 +167,6 @@ void main() {
         await isar2.noDefaultModels.where().enumValueProperty().tFindFirst(),
         MyEnum.value1,
       );
-      await isar2.close();
     });
 
     isarTest('list', () async {
@@ -191,7 +189,6 @@ void main() {
       expect(obj.stringValue, isEmpty);
       expect(obj.embeddedValue, isEmpty);
       expect(obj.enumValue, isEmpty);
-      await isar2.close();
     });
 
     isarTest('list property', () async {
@@ -270,7 +267,6 @@ void main() {
             .tFindFirst(),
         isEmpty,
       );
-      await isar2.close();
     });
   });
 }

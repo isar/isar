@@ -2,7 +2,6 @@
 
 // ignore_for_file: constant_identifier_names
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -10,30 +9,15 @@ import 'dart:typed_data';
 import 'package:isar/src/native/binary_reader.dart';
 import 'package:isar/src/native/binary_writer.dart';
 import 'package:isar/src/native/isar_core.dart';
-import 'package:isar/src/version.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Golden Binary', () {
-    List<Map<String, dynamic>>? json;
-    late final tests = json!.map(BinaryTest.fromJson).toList();
-
-    setUp(() async {
-      final uri = Uri.parse(
-        'https://raw.githubusercontent.com/isar/isar-core/'
-        '$isarCoreVersion/tests/binary_golden.json',
-      );
-      final request = await HttpClient().getUrl(uri);
-      final response = await request.close();
-      final completer = Completer<void>();
-      final contents = StringBuffer();
-      response
-          .transform(utf8.decoder)
-          .listen(contents.write, onDone: completer.complete);
-      await completer.future;
-      final jsonStr = contents.toString();
-      json = (jsonDecode(jsonStr) as List).cast();
-    });
+    late final json =
+        File('../isar_core/tests/binary_golden.json').readAsStringSync();
+    late final tests = (jsonDecode(json) as List<dynamic>)
+        .map((e) => BinaryTest.fromJson(e as Map<String, dynamic>))
+        .toList();
 
     test('BinaryReader', () {
       var t = 0;

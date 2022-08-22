@@ -6,7 +6,7 @@ import '../util/sync_async_helper.dart';
 
 part 'add_remove_link_test.g.dart';
 
-@Collection()
+@collection
 @Name('Col')
 class Col1 {
   Col1(this.id);
@@ -19,7 +19,7 @@ class Col1 {
   bool operator ==(Object other) => other is Col1 && id == other.id;
 }
 
-@Collection()
+@collection
 @Name('Col')
 class Col2 {
   Col2(this.id);
@@ -67,6 +67,5 @@ void main() {
     final obj1 = await isar3.col1s.tGet(1);
     await obj1!.link.tLoad();
     expect(obj1.link.value, Col1(2));
-    expect(await isar3.close(), true);
   });
 }

@@ -2,7 +2,7 @@ import 'package:isar/isar.dart';
 
 part 'user_model.g.dart';
 
-@Collection()
+@collection
 class UserModel {
   UserModel();
 

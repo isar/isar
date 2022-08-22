@@ -15,8 +15,6 @@ void main() {
       col = isar.multiTypeModels;
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     group('int', () {
       setUp(() async {
         await isar.writeTxn(

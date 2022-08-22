@@ -4,7 +4,6 @@
 import 'package:isar/isar.dart';
 
 enum ConnectAction {
-  getVersion('ext.isar.getVersion'),
   getSchema('ext.isar.getSchema'),
   listInstances('ext.isar.listInstances'),
   watchInstance('ext.isar.watchInstance'),

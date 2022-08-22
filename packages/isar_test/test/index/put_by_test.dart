@@ -7,7 +7,7 @@ import '../util/sync_future.dart';
 
 part 'put_by_test.g.dart';
 
-@Collection()
+@collection
 class BoolIndexModel {
   BoolIndexModel({
     required this.value,
@@ -37,7 +37,7 @@ class BoolIndexModel {
           index == other.index;
 }
 
-@Collection()
+@collection
 class IntIndexModel {
   IntIndexModel({
     required this.value,
@@ -67,7 +67,7 @@ class IntIndexModel {
           index == other.index;
 }
 
-@Collection()
+@collection
 class DoubleIndexModel {
   DoubleIndexModel({
     required this.value,
@@ -97,7 +97,7 @@ class DoubleIndexModel {
           index == other.index;
 }
 
-@Collection()
+@collection
 class StringValueIndexModel {
   StringValueIndexModel({
     required this.value,
@@ -127,7 +127,7 @@ class StringValueIndexModel {
           index == other.index;
 }
 
-@Collection()
+@collection
 class StringHashIndexModel {
   StringHashIndexModel({
     required this.value,
@@ -157,7 +157,7 @@ class StringHashIndexModel {
           index == other.index;
 }
 
-@Collection()
+@collection
 class StringInsensitiveIndexModel {
   StringInsensitiveIndexModel({
     required this.value,
@@ -202,8 +202,6 @@ void main() {
       ]);
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('Put by bool index', () async {
       final obj0 = BoolIndexModel(value: true, index: 0);
       final obj1 = BoolIndexModel(value: false, index: 1);
@@ -214,17 +212,11 @@ void main() {
         await isar.boolIndexModels.tPutByValue(obj2);
       });
 
-      await qEqualSet(
-        isar.boolIndexModels.where().tFindAll(),
-        [obj1, obj2],
-      );
+      await qEqual(isar.boolIndexModels.where(), [obj2, obj1]);
       expect(obj0.id, obj2.id);
 
       await isar.tWriteTxn(() => isar.boolIndexModels.tPutByValue(obj0));
-      await qEqualSet(
-        isar.boolIndexModels.where().tFindAll(),
-        [obj0, obj1],
-      );
+      await qEqual(isar.boolIndexModels.where(), [obj0, obj1]);
       expect(obj0.id, obj2.id);
     });
 
@@ -237,16 +229,10 @@ void main() {
       await isar.tWriteTxn(
         () => isar.intIndexModels.tPutAllByValue([obj0, obj1, obj3]),
       );
-      await qEqualSet(
-        isar.intIndexModels.where().tFindAll(),
-        [obj0, obj1, obj3],
-      );
+      await qEqual(isar.intIndexModels.where(), [obj0, obj1, obj3]);
 
       await isar.tWriteTxn(() => isar.intIndexModels.tPutByValue(obj2));
-      await qEqualSet(
-        isar.intIndexModels.where().tFindAll(),
-        [obj1, obj2, obj3],
-      );
+      await qEqual(isar.intIndexModels.where(), [obj2, obj1, obj3]);
       expect(obj0.id, obj2.id);
     });
 
@@ -260,10 +246,7 @@ void main() {
         () => isar.doubleIndexModels.tPutAllByValue([obj0, obj1, obj2, obj3]),
       );
 
-      await qEqualSet(
-        isar.doubleIndexModels.where().tFindAll(),
-        [obj2, obj3],
-      );
+      await qEqual(isar.doubleIndexModels.where(), [obj2, obj3]);
       expect(obj0.id, obj1.id);
       expect(obj0.id, obj2.id);
     });
@@ -277,27 +260,16 @@ void main() {
       await isar.tWriteTxn(
         () => isar.stringValueIndexModels.tPutAllByValue([obj0, obj1]),
       );
-      await qEqualSet(
-        isar.stringValueIndexModels.where().tFindAll(),
-        [obj0, obj1],
-      );
+      await qEqual(isar.stringValueIndexModels.where(), [obj0, obj1]);
 
       await isar.tWriteTxn(
         () => isar.stringValueIndexModels.tPutAllByValue([obj2, obj3]),
       );
-      await qEqualSet(
-        isar.stringValueIndexModels.where().tFindAll(),
-        [obj1, obj2, obj3],
-      );
+      await qEqual(isar.stringValueIndexModels.where(), [obj2, obj1, obj3]);
       expect(obj0.id, obj2.id);
 
-      await isar.tWriteTxn(
-        () => isar.stringValueIndexModels.tPutByValue(obj0),
-      );
-      await qEqualSet(
-        isar.stringValueIndexModels.where().tFindAll(),
-        [obj0, obj1, obj3],
-      );
+      await isar.tWriteTxn(() => isar.stringValueIndexModels.tPutByValue(obj0));
+      await qEqual(isar.stringValueIndexModels.where(), [obj0, obj1, obj3]);
       expect(obj0.id, obj2.id);
     });
 
@@ -311,28 +283,19 @@ void main() {
       await isar.tWriteTxn(
         () => isar.stringHashIndexModels.tPutAllByValue([obj0, obj1, obj2]),
       );
-      await qEqualSet(
-        isar.stringHashIndexModels.where().tFindAll(),
-        [obj0, obj1, obj2],
-      );
+      await qEqual(isar.stringHashIndexModels.where(), [obj0, obj1, obj2]);
 
       await isar.tWriteTxn(
         () => isar.stringHashIndexModels.tPutAllByValue([obj3, obj4]),
       );
-      await qEqualSet(
-        isar.stringHashIndexModels.where().tFindAll(),
-        [obj2, obj3, obj4],
-      );
+      await qEqual(isar.stringHashIndexModels.where(), [obj4, obj3, obj2]);
       expect(obj0.id, obj4.id);
       expect(obj1.id, obj3.id);
 
       await isar.tWriteTxn(
         () => isar.stringHashIndexModels.tPutByValue(obj0),
       );
-      await qEqualSet(
-        isar.stringHashIndexModels.where().tFindAll(),
-        [obj0, obj2, obj3],
-      );
+      await qEqual(isar.stringHashIndexModels.where(), [obj0, obj3, obj2]);
       expect(obj0.id, obj4.id);
     });
 
@@ -345,47 +308,38 @@ void main() {
       final obj5 = StringInsensitiveIndexModel(value: 'Bar', index: 5);
 
       await isar.tWriteTxn(
-        () => isar.stringInsensitiveIndexModels.tPutAllByValue([
-          obj0,
-          obj1,
-          obj3,
-        ]),
+        () => isar.stringInsensitiveIndexModels
+            .tPutAllByValue([obj0, obj1, obj3]),
       );
-      await qEqualSet(
-        isar.stringInsensitiveIndexModels.where().tFindAll(),
+      await qEqual(
+        isar.stringInsensitiveIndexModels.where(),
         [obj0, obj1, obj3],
       );
 
       await isar.tWriteTxn(
-        () => isar.stringInsensitiveIndexModels.tPutAllByValue([
-          obj0,
-          obj3,
-          obj5,
-        ]),
+        () => isar.stringInsensitiveIndexModels
+            .tPutAllByValue([obj0, obj3, obj5]),
       );
-      await qEqualSet(
-        isar.stringInsensitiveIndexModels.where().tFindAll(),
-        [obj0, obj3, obj5],
+      await qEqual(
+        isar.stringInsensitiveIndexModels.where(),
+        [obj0, obj5, obj3],
       );
 
       await isar.tWriteTxn(
-        () => isar.stringInsensitiveIndexModels.tPutAllByValue([
-          obj2,
-          obj4,
-          obj5,
-        ]),
+        () => isar.stringInsensitiveIndexModels
+            .tPutAllByValue([obj2, obj4, obj5]),
       );
-      await qEqualSet(
-        isar.stringInsensitiveIndexModels.where().tFindAll(),
-        [obj3, obj4, obj5],
+      await qEqual(
+        isar.stringInsensitiveIndexModels.where(),
+        [obj4, obj5, obj3],
       );
 
       await isar.tWriteTxn(
         () => isar.stringInsensitiveIndexModels.tPutByValue(obj1),
       );
-      await qEqualSet(
-        isar.stringInsensitiveIndexModels.where().tFindAll(),
-        [obj1, obj3, obj4],
+      await qEqual(
+        isar.stringInsensitiveIndexModels.where(),
+        [obj4, obj1, obj3],
       );
     });
 
@@ -393,36 +347,17 @@ void main() {
       final obj0 = BoolIndexModel(value: true, index: 0);
       final obj1 = BoolIndexModel(value: true, index: 1);
 
-      await isar.tWriteTxn(
-        () => isar.boolIndexModels.tPutAllByValue([]),
-      );
-      await qEqualSet(
-        isar.boolIndexModels.where().tFindAll(),
-        [],
-      );
+      await isar.tWriteTxn(() => isar.boolIndexModels.tPutAllByValue([]));
+      await qEqual(isar.boolIndexModels.where(), []);
 
-      await isar.tWriteTxn(
-        () => isar.boolIndexModels.tPut(obj0),
-      );
-      await qEqualSet(
-        isar.boolIndexModels.where().tFindAll(),
-        [obj0],
-      );
+      await isar.tWriteTxn(() => isar.boolIndexModels.tPut(obj0));
+      await qEqual(isar.boolIndexModels.where(), [obj0]);
 
-      await isar.tWriteTxn(
-        () => isar.boolIndexModels.tPutAllByValue([]),
-      );
-      await isar.tWriteTxn(
-        () => isar.boolIndexModels.tPutAllByValue([obj1]),
-      );
-      await isar.tWriteTxn(
-        () => isar.boolIndexModels.tPutAllByValue([]),
-      );
+      await isar.tWriteTxn(() => isar.boolIndexModels.tPutAllByValue([]));
+      await isar.tWriteTxn(() => isar.boolIndexModels.tPutAllByValue([obj1]));
+      await isar.tWriteTxn(() => isar.boolIndexModels.tPutAllByValue([]));
 
-      await qEqualSet(
-        isar.boolIndexModels.where().tFindAll(),
-        [obj1],
-      );
+      await qEqual(isar.boolIndexModels.where(), [obj1]);
     });
   });
 }

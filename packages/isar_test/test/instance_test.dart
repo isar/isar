@@ -6,7 +6,7 @@ import 'util/sync_async_helper.dart';
 
 part 'instance_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Id? id;
 
@@ -39,7 +39,10 @@ void main() {
       expect(await isar.models.tGet(obj1.id!), obj1);
 
       expect(await isar.close(), true);
-      isar = await openTempIsar([ModelSchema], name: isarName);
+      isar = await openTempIsar(
+        [ModelSchema],
+        name: isarName,
+      );
 
       final obj2 = Model()..value = 'M2';
       final obj3 = Model()
@@ -61,15 +64,13 @@ void main() {
         await isar.models.tPut(obj4);
       });
       expect(obj4.id, 21);
-      await qEqual(isar.models.where().tFindAll(), [obj1, obj2, obj3, obj4]);
-
-      await isar.close();
+      await qEqual(isar.models.where(), [obj1, obj2, obj3, obj4]);
     });
 
     isarTest('Prevents usage of closed collection', () async {
       final isar = await openTempIsar([ModelSchema]);
 
-      expect(await isar.close(), true);
+      expect(await isar.close(deleteFromDisk: true), true);
 
       await expectLater(
         () => isar.models.tGet(1),

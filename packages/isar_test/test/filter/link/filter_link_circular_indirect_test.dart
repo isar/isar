@@ -6,7 +6,7 @@ import '../../util/sync_async_helper.dart';
 
 part 'filter_link_circular_indirect_test.g.dart';
 
-@Collection()
+@collection
 class ModelA {
   ModelA(this.name);
 
@@ -31,7 +31,7 @@ class ModelA {
   }
 }
 
-@Collection()
+@collection
 class ModelB {
   ModelB(this.name);
 
@@ -56,7 +56,7 @@ class ModelB {
   }
 }
 
-@Collection()
+@collection
 class ModelC {
   ModelC(this.name);
 
@@ -123,12 +123,12 @@ void main() {
       b5 = ModelB('b 5');
       b6 = ModelB('b 6');
 
-      c1 = ModelC('a 1');
-      c2 = ModelC('a 2');
-      c3 = ModelC('a 3');
-      c4 = ModelC('a 4');
-      c5 = ModelC('a 5');
-      c6 = ModelC('a 6');
+      c1 = ModelC('c 1');
+      c2 = ModelC('c 2');
+      c3 = ModelC('c 3');
+      c4 = ModelC('c 4');
+      c5 = ModelC('c 5');
+      c6 = ModelC('c 6');
 
       await isar.tWriteTxn(
         () => Future.wait([
@@ -177,347 +177,272 @@ void main() {
       );
     });
 
-    // FIXME: Nested filter link (see filter_link_nested_test.dart)
     isarTest('.bLinks() then .cLinks() then .aLinks()', () async {
       await qEqualSet(
-        isar.modelAs
-            .filter()
-            .bLinks(
+        isar.modelAs.filter().bLinks(
               (q) => q.cLinks(
                 (q) => q.aLinks(
                   (q) => q.nameStartsWith('a'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [a1, a2, a3, a4],
       );
 
       await qEqualSet(
-        isar.modelAs
-            .filter()
-            .bLinks(
+        isar.modelAs.filter().bLinks(
               (q) => q.cLinks(
                 (q) => q.aLinks(
                   (q) => q.nameEqualTo('a 1'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [a1, a2, a3, a4],
       );
 
       await qEqualSet(
-        isar.modelAs
-            .filter()
-            .bLinks(
+        isar.modelAs.filter().bLinks(
               (q) => q.cLinks(
                 (q) => q.aLinks(
                   (q) => q.nameEqualTo('a 2'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [a2, a3, a4],
       );
 
       await qEqualSet(
-        isar.modelAs
-            .filter()
-            .bLinks(
+        isar.modelAs.filter().bLinks(
               (q) => q.cLinks(
                 (q) => q.aLinks(
                   (q) => q.nameEqualTo('a 3'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [a3, a4],
       );
 
       await qEqualSet(
-        isar.modelAs
-            .filter()
-            .bLinks(
+        isar.modelAs.filter().bLinks(
               (q) => q.cLinks(
                 (q) => q.aLinks(
                   (q) => q.nameEqualTo('a 4'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [a4],
       );
 
       await qEqualSet(
-        isar.modelAs
-            .filter()
-            .bLinks(
+        isar.modelAs.filter().bLinks(
               (q) => q.cLinks(
                 (q) => q.aLinks(
                   (q) => q.nameEqualTo('a 5'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [],
       );
 
       await qEqualSet(
-        isar.modelAs
-            .filter()
-            .bLinks(
+        isar.modelAs.filter().bLinks(
               (q) => q.cLinks(
                 (q) => q.aLinks(
                   (q) => q.nameEqualTo('a 6'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [],
       );
 
       await qEqualSet(
-        isar.modelAs
-            .filter()
-            .bLinks(
+        isar.modelAs.filter().bLinks(
               (q) => q.cLinks(
                 (q) => q.aLinks(
                   (q) => q.nameEqualTo('non existing'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [],
       );
     });
 
-    // FIXME: Nested filter link (see filter_link_nested_test.dart)
     isarTest('.cLinks() then .aLinks() then .bLinks()', () async {
       await qEqualSet(
-        isar.modelBs
-            .filter()
-            .cLinks(
+        isar.modelBs.filter().cLinks(
               (q) => q.aLinks(
                 (q) => q.bLinks(
                   (q) => q.nameStartsWith('b'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [b1, b2, b3, b4],
       );
 
       await qEqualSet(
-        isar.modelBs
-            .filter()
-            .cLinks(
+        isar.modelBs.filter().cLinks(
               (q) => q.aLinks(
                 (q) => q.bLinks(
                   (q) => q.nameEqualTo('b 1'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [b1, b2, b3, b4],
       );
 
       await qEqualSet(
-        isar.modelBs
-            .filter()
-            .cLinks(
+        isar.modelBs.filter().cLinks(
               (q) => q.aLinks(
                 (q) => q.bLinks(
                   (q) => q.nameEqualTo('b 2'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [b2, b3, b4],
       );
 
       await qEqualSet(
-        isar.modelBs
-            .filter()
-            .cLinks(
+        isar.modelBs.filter().cLinks(
               (q) => q.aLinks(
                 (q) => q.bLinks(
                   (q) => q.nameEqualTo('b 3'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [b3, b4],
       );
 
       await qEqualSet(
-        isar.modelBs
-            .filter()
-            .cLinks(
+        isar.modelBs.filter().cLinks(
               (q) => q.aLinks(
                 (q) => q.bLinks(
                   (q) => q.nameEqualTo('b 4'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [b4],
       );
 
       await qEqualSet(
-        isar.modelBs
-            .filter()
-            .cLinks(
+        isar.modelBs.filter().cLinks(
               (q) => q.aLinks(
                 (q) => q.bLinks(
                   (q) => q.nameEqualTo('b 5'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [],
       );
 
       await qEqualSet(
-        isar.modelBs
-            .filter()
-            .cLinks(
+        isar.modelBs.filter().cLinks(
               (q) => q.aLinks(
                 (q) => q.bLinks(
                   (q) => q.nameEqualTo('b 6'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [],
       );
 
       await qEqualSet(
-        isar.modelBs
-            .filter()
-            .cLinks(
+        isar.modelBs.filter().cLinks(
               (q) => q.aLinks(
                 (q) => q.bLinks(
                   (q) => q.nameEqualTo('non existing'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [],
       );
     });
 
-    // FIXME: Nested filter link (see filter_link_nested_test.dart)
     isarTest('.aLinks() then .bLinks() then .cLinks()', () async {
       await qEqualSet(
-        isar.modelCs
-            .filter()
-            .aLinks(
+        isar.modelCs.filter().aLinks(
               (q) => q.bLinks(
                 (q) => q.cLinks(
                   (q) => q.nameStartsWith('c'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [c1, c2, c3, c4],
       );
 
       await qEqualSet(
-        isar.modelCs
-            .filter()
-            .aLinks(
+        isar.modelCs.filter().aLinks(
               (q) => q.bLinks(
                 (q) => q.cLinks(
                   (q) => q.nameEqualTo('c 1'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [c1, c2, c3, c4],
       );
 
       await qEqualSet(
-        isar.modelCs
-            .filter()
-            .aLinks(
+        isar.modelCs.filter().aLinks(
               (q) => q.bLinks(
                 (q) => q.cLinks(
                   (q) => q.nameEqualTo('c 2'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [c2, c3, c4],
       );
 
       await qEqualSet(
-        isar.modelCs
-            .filter()
-            .aLinks(
+        isar.modelCs.filter().aLinks(
               (q) => q.bLinks(
                 (q) => q.cLinks(
                   (q) => q.nameEqualTo('c 3'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [c3, c4],
       );
 
       await qEqualSet(
-        isar.modelCs
-            .filter()
-            .aLinks(
+        isar.modelCs.filter().aLinks(
               (q) => q.bLinks(
                 (q) => q.cLinks(
                   (q) => q.nameEqualTo('c 4'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [c4],
       );
 
       await qEqualSet(
-        isar.modelCs
-            .filter()
-            .aLinks(
+        isar.modelCs.filter().aLinks(
               (q) => q.bLinks(
                 (q) => q.cLinks(
                   (q) => q.nameEqualTo('c 5'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [],
       );
 
       await qEqualSet(
-        isar.modelCs
-            .filter()
-            .aLinks(
+        isar.modelCs.filter().aLinks(
               (q) => q.bLinks(
                 (q) => q.cLinks(
                   (q) => q.nameEqualTo('c 6'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [],
       );
 
       await qEqualSet(
-        isar.modelCs
-            .filter()
-            .aLinks(
+        isar.modelCs.filter().aLinks(
               (q) => q.bLinks(
                 (q) => q.cLinks(
                   (q) => q.nameEqualTo('non existing'),
                 ),
               ),
-            )
-            .tFindAll(),
+            ),
         [],
       );
     });

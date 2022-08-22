@@ -6,7 +6,7 @@ import '../util/sync_async_helper.dart';
 
 part 'filter_list_length_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Model({
     required this.bools,
@@ -92,256 +92,111 @@ void main() {
       );
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.lengthEqualTo()', () async {
-      await qEqualSet(
-        isar.models.filter().boolsLengthEqualTo(1).tFindAll(),
-        [obj3],
-      );
-
-      await qEqualSet(
-        isar.models.filter().intsLengthEqualTo(2).tFindAll(),
-        [obj3, obj4],
-      );
-
-      await qEqualSet(
-        isar.models.filter().doublesLengthEqualTo(6).tFindAll(),
-        [obj1],
-      );
-
-      await qEqualSet(
-        isar.models.filter().doublesLengthEqualTo(42).tFindAll(),
-        [],
-      );
-
-      await qEqualSet(
-        isar.models
-            .filter()
-            .doublesLengthEqualTo(9223372036854775807)
-            .tFindAll(),
+      await qEqual(isar.models.filter().boolsLengthEqualTo(1), [obj3]);
+      await qEqual(isar.models.filter().intsLengthEqualTo(2), [obj3, obj4]);
+      await qEqual(isar.models.filter().doublesLengthEqualTo(6), [obj1]);
+      await qEqual(isar.models.filter().doublesLengthEqualTo(42), []);
+      await qEqual(
+        isar.models.filter().doublesLengthEqualTo(9223372036854775807),
         [],
       );
     });
 
     isarTest('.lengthGreaterThan()', () async {
-      await qEqualSet(
-        isar.models.filter().boolsLengthGreaterThan(3).tFindAll(),
+      await qEqual(
+        isar.models.filter().boolsLengthGreaterThan(3),
         [obj4, obj5],
       );
-
-      await qEqualSet(
-        isar.models.filter().boolsLengthGreaterThan(4).tFindAll(),
+      await qEqual(
+        isar.models.filter().boolsLengthGreaterThan(4),
         [obj5],
       );
-
-      await qEqualSet(
-        isar.models
-            .filter()
-            .boolsLengthGreaterThan(4, include: true)
-            .tFindAll(),
+      await qEqual(
+        isar.models.filter().boolsLengthGreaterThan(4, include: true),
         [obj4, obj5],
       );
-
-      await qEqualSet(
-        isar.models.filter().intsLengthGreaterThan(3).tFindAll(),
-        [],
-      );
-
-      await qEqualSet(
-        isar.models.filter().boolsLengthGreaterThan(0).tFindAll(),
+      await qEqual(isar.models.filter().intsLengthGreaterThan(3), []);
+      await qEqual(
+        isar.models.filter().boolsLengthGreaterThan(0),
         [obj2, obj3, obj4, obj5],
       );
-
-      // FIXME: length of max i64 returns values with any length
-      // The problem seems to be that since greaterThan are includeLower: false
-      // by default, the lower becomes `lower += 1`, which overflows to min i64
-      // await qEqualSet(
-      //   isar.models
-      //       .filter()
-      //       .stringsLengthGreaterThan(9223372036854775807)
-      //       .tFindAll(),
-      //   [],
-      // );
     });
 
     isarTest('.lengthLessThan()', () async {
-      await qEqualSet(
-        isar.models.filter().boolsLengthLessThan(3).tFindAll(),
-        [obj1, obj3],
-      );
-
-      await qEqualSet(
-        isar.models.filter().boolsLengthLessThan(3, include: true).tFindAll(),
+      await qEqual(isar.models.filter().boolsLengthLessThan(3), [obj1, obj3]);
+      await qEqual(
+        isar.models.filter().boolsLengthLessThan(3, include: true),
         [obj1, obj2, obj3],
       );
-
-      await qEqualSet(
-        isar.models.filter().intsLengthLessThan(2).tFindAll(),
-        [obj2, obj5],
-      );
-
-      await qEqualSet(
-        isar.models.filter().doublesLengthLessThan(0, include: true).tFindAll(),
+      await qEqual(isar.models.filter().intsLengthLessThan(2), [obj2, obj5]);
+      await qEqual(
+        isar.models.filter().doublesLengthLessThan(0, include: true),
         [obj5],
       );
-
-      await qEqualSet(
-        isar.models.filter().stringsLengthLessThan(42).tFindAll(),
-        [obj2, obj3, obj4, obj4, obj5],
+      await qEqual(
+        isar.models.filter().stringsLengthLessThan(42),
+        [obj2, obj3, obj4, obj5],
       );
-
-      await qEqualSet(
-        isar.models.filter().stringsLengthLessThan(2).tFindAll(),
-        [],
-      );
+      await qEqual(isar.models.filter().stringsLengthLessThan(2), []);
     });
 
     isarTest('.lengthBetween()', () async {
-      await qEqualSet(
-        isar.models.filter().boolsLengthBetween(2, 6).tFindAll(),
+      await qEqual(
+        isar.models.filter().boolsLengthBetween(2, 6),
         [obj2, obj4, obj5],
       );
-
-      await qEqualSet(
-        isar.models
-            .filter()
-            .boolsLengthBetween(2, 6, includeUpper: false)
-            .tFindAll(),
+      await qEqual(
+        isar.models.filter().boolsLengthBetween(2, 6, includeUpper: false),
         [obj2, obj4],
       );
-
-      await qEqualSet(
-        isar.models.filter().intsLengthBetween(0, 42).tFindAll(),
+      await qEqual(
+        isar.models.filter().intsLengthBetween(0, 42),
         [obj1, obj2, obj3, obj4, obj5],
       );
-
-      await qEqualSet(
-        isar.models
-            .filter()
-            .intsLengthBetween(0, 42, includeLower: false)
-            .tFindAll(),
+      await qEqual(
+        isar.models.filter().intsLengthBetween(0, 42, includeLower: false),
         [obj1, obj2, obj3, obj4],
       );
-
-      await qEqualSet(
-        isar.models.filter().doublesLengthBetween(2, 3).tFindAll(),
+      await qEqual(
+        isar.models.filter().doublesLengthBetween(2, 3),
         [obj3, obj4],
       );
-
-      await qEqualSet(
-        isar.models.filter().doublesLengthBetween(0, 0).tFindAll(),
-        [obj5],
-      );
-
-      await qEqualSet(
-        isar.models
-            .filter()
-            .doublesLengthBetween(
+      await qEqual(isar.models.filter().doublesLengthBetween(0, 0), [obj5]);
+      await qEqual(
+        isar.models.filter().doublesLengthBetween(
               0,
               1,
               includeLower: false,
-            )
-            .tFindAll(),
+            ),
         [obj2],
       );
-
-      await qEqualSet(
-        isar.models.filter().stringsLengthLessThan(3).tFindAll(),
-        [obj2, obj5],
-      );
+      await qEqual(isar.models.filter().stringsLengthLessThan(3), [obj2, obj5]);
     });
 
-    isarTest('.isEmpty() / .isNotEmpty()', () async {
-      await qEqualSet(
-        isar.models.filter().boolsIsEmpty().tFindAll(),
-        [obj1],
-      );
-
-      await qEqualSet(
-        isar.models.filter().boolsIsNotEmpty().tFindAll(),
-        [obj2, obj3, obj4, obj5],
-      );
-
-      await qEqualSet(
-        isar.models.filter().intsIsEmpty().tFindAll(),
-        [obj5],
-      );
-
-      await qEqualSet(
-        isar.models.filter().intsIsNotEmpty().tFindAll(),
-        [obj1, obj2, obj3, obj4],
-      );
-
-      await qEqualSet(
-        isar.models.filter().doublesIsEmpty().tFindAll(),
-        [obj5],
-      );
-
-      await qEqualSet(
-        isar.models.filter().doublesIsNotEmpty().tFindAll(),
-        [obj1, obj2, obj3, obj4],
-      );
-
-      await qEqualSet(
-        isar.models.filter().stringsIsEmpty().tFindAll(),
-        [],
-      );
-
-      await qEqualSet(
-        isar.models.filter().stringsIsNotEmpty().tFindAll(),
-        [obj2, obj3, obj4, obj5],
-      );
+    isarTest('.isEmpty()', () async {
+      await qEqual(isar.models.filter().boolsIsEmpty(), [obj1]);
+      await qEqual(isar.models.filter().intsIsEmpty(), [obj5]);
+      await qEqual(isar.models.filter().doublesIsEmpty(), [obj5]);
+      await qEqual(isar.models.filter().stringsIsEmpty(), []);
     });
 
-    isarTest('Grouped length filters', () async {
-      await qEqualSet(
-        isar.models
-            .filter()
-            .boolsIsEmpty()
-            .and()
-            .intsLengthGreaterThan(1)
-            .tFindAll(),
-        [obj1],
+    isarTest('.isNotEmpty()', () async {
+      await qEqual(
+        isar.models.filter().boolsIsNotEmpty(),
+        [obj2, obj3, obj4, obj5],
       );
-
-      await qEqualSet(
-        isar.models.filter().boolsIsEmpty().and().boolsIsNotEmpty().tFindAll(),
-        [],
+      await qEqual(
+        isar.models.filter().intsIsNotEmpty(),
+        [obj1, obj2, obj3, obj4],
       );
-
-      await qEqualSet(
-        isar.models
-            .filter()
-            .doublesLengthLessThan(5)
-            .and()
-            .doublesLengthGreaterThan(2)
-            .tFindAll(),
-        [obj3, obj4],
+      await qEqual(
+        isar.models.filter().doublesIsNotEmpty(),
+        [obj1, obj2, obj3, obj4],
       );
-
-      await qEqualSet(
-        isar.models
-            .filter()
-            .boolsIsNotEmpty()
-            .and()
-            .intsIsNotEmpty()
-            .and()
-            .doublesIsNotEmpty()
-            .and()
-            .stringsIsNotEmpty()
-            .tFindAll(),
-        [obj2, obj3, obj4],
-      );
-
-      await qEqualSet(
-        isar.models
-            .filter()
-            .boolsLengthBetween(3, 5)
-            .or()
-            .intsIsEmpty()
-            .tFindAll(),
-        [obj2, obj4, obj5],
+      await qEqual(
+        isar.models.filter().stringsIsNotEmpty(),
+        [obj2, obj3, obj4, obj5],
       );
     });
   });

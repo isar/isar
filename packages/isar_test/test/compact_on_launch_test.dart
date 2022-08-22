@@ -43,8 +43,6 @@ void main() {
       );
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTestVm('No compact on launch', () async {
       await isar.close();
       final size1 = file.lengthSync();
