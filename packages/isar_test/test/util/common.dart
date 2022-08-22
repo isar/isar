@@ -174,14 +174,14 @@ Future<Isar> openTempIsar(
   await _prepareTest();
   if (!kIsWeb && testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
-    testTempPath = directory ?? path.join(dartToolDir, 'test', 'tmp');
+    testTempPath = path.join(dartToolDir, 'test', 'tmp');
     await Directory(testTempPath!).create(recursive: true);
   }
 
   final isar = await tOpen(
     schemas: schemas,
     name: name ?? getRandomName(),
-    directory: kIsWeb ? '' : testTempPath!,
+    directory: directory ?? testTempPath,
     compactOnLaunch: compactOnLaunch,
   );
 

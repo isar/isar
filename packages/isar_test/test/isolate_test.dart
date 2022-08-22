@@ -34,7 +34,11 @@ final TestModel _obj3 = TestModel()
   ..value = 'Model 3';
 
 Future<void> _isolateFunc(SendPort port) async {
-  final isar = await openTempIsar([TestModelSchema], name: 'test');
+  final isar = await openTempIsar(
+    [TestModelSchema],
+    name: 'test',
+    directory: '',
+  );
 
   final current = isar.testModels.where().findAllSync();
   assert(current[0] == _obj1 && current[1] == _obj2, 'Did not find objects');
