@@ -56,10 +56,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
-      - name: Build Isar Core
-        run: |
-          cargo build
-        working-directory: packages/isar_core_ffi
       - name: Run Flutter Unit tests
         run: |
           flutter pub get
@@ -73,10 +69,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
-      - name: Build Isar Core
-        run: |
-          cargo build
-        working-directory: packages/isar_core_ffi
       - name: Prepare Unit tests
         run: |
           flutter pub get
@@ -129,9 +121,11 @@ jobs:
         with:
           model: ${{ matrix.device }}
       - uses: subosito/flutter-action@v2
-      - name: Download binaries
-        run: bash tool/download_binaries.sh
-        working-directory: packages/isar_flutter_libs
+      - name: Build Isar Core
+        run: |
+          bash tool/build_ios.sh
+          mv libisar.a ../isar_flutter_libs/ios/libisar.a
+        working-directory: packages/isar_core_ffi
       - name: Run Flutter Driver tests
         run: |
           flutter pub get
@@ -188,9 +182,12 @@ jobs:
       - name: Install Linux requirements
         run: sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
         if: matrix.os == 'ubuntu-latest'
-      - name: Download binaries
-        run: bash tool/download_binaries.sh
-        working-directory: packages/isar_flutter_libs
+      - name: Build Isar Core macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          bash tool/build_macos.sh
+          mv libisar.dylib ../isar_flutter_libs/macos/libisar.dylib
+        working-directory: packages/isar_core_ffi
       - name: Run Flutter Driver tests
         run: |
           flutter pub get

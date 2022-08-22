@@ -136,7 +136,7 @@ void isarTest(
           },
         );
       },
-      timeout: timeout ?? const Timeout(Duration(minutes: 5)),
+      timeout: timeout ?? const Timeout(Duration(minutes: 10)),
     );
   }
 
