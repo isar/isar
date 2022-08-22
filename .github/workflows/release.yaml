@@ -24,24 +24,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-latest
+          - os: ubuntu-latest
             artifact_name: libisar_android_arm64.so
             script: build_android.sh
-          - os: macos-latest
+          - os: ubuntu-latest
             artifact_name: libisar_android_armv7.so
             script: build_android.sh armv7
-          - os: macos-latest
+          - os: ubuntu-latest
             artifact_name: libisar_android_x64.so
             script: build_android.sh x64
-          - os: macos-latest
+          - os: ubuntu-latest
             artifact_name: libisar_android_x86.so
             script: build_android.sh x86
           - os: macos-latest
             artifact_name: libisar_ios.a
             script: build_ios.sh
-         #- os: ubuntu-latest
-         #  artifact_name: libisar_linux_arm64.so
-         #  script: build_linux.sh
           - os: ubuntu-20.04 # use older linux for glibc compatibility see #288
             artifact_name: libisar_linux_x64.so
             script: build_linux.sh x64
@@ -68,7 +65,7 @@ jobs:
       if: matrix.os == 'windows-latest'
     # See https://github.com/godot-rust/godot-rust/pull/920
     - name: "Workaround Android NDK due to Rust bug"
-      if: matrix.os == 'macos-latest'
+      if: matrix.os == 'ubuntu-latest'
       run: >
         find -L $ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION -name libunwind.a
         -execdir sh -c 'echo "INPUT(-lunwind)" > libgcc.a' \;
