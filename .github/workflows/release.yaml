@@ -1,0 +1,79 @@
+name: Isar release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  verify_version:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Verify release version
+      run: dart packages/isar/tool/verify_release_version.dart
+
+  build_and_upload:
+    name: Build and upload
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            artifact_name: libisar_android_arm64.so
+            script: build_android.sh
+          - os: macos-latest
+            artifact_name: libisar_android_armv7.so
+            script: build_android.sh armv7
+          - os: macos-latest
+            artifact_name: libisar_android_x64.so
+            script: build_android.sh x64
+          - os: macos-latest
+            artifact_name: libisar_android_x86.so
+            script: build_android.sh x86
+          - os: macos-latest
+            artifact_name: libisar_ios.a
+            script: build_ios.sh
+         #- os: ubuntu-latest
+         #  artifact_name: libisar_linux_arm64.so
+         #  script: build_linux.sh
+          - os: ubuntu-18.04 # use older linux for glibc compatibility see #288
+            artifact_name: libisar_linux_x64.so
+            script: build_linux.sh x64
+          - os: macos-latest
+            artifact_name: libisar_macos.dylib
+            script: build_macos.sh
+          - os: windows-latest
+            artifact_name: isar_windows_arm64.dll
+            script: build_windows.sh
+          - os: windows-latest
+            artifact_name: isar_windows_x64.dll
+            script: build_windows.sh x64
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install LLVM and Clang
+      uses: KyleMayes/install-llvm-action@v1
+      if: matrix.os == 'windows-latest'
+      with:
+        version: "11.0"
+        directory: ${{ runner.temp }}/llvm
+    - name: Set LIBCLANG_PATH
+      run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
+      if: matrix.os == 'windows-latest'
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        override: true
+        components: rustfmt, rust-src
+    - name: Set env
+      run: echo "ISAR_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+    - name: Build binary
+      run: bash tools/${{ matrix.script }}
+    - name: Upload binary
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: dart-ffi/${{ matrix.artifact_name }}
+        asset_name: ${{ matrix.artifact_name }}
+        tag: ${{ github.ref }}

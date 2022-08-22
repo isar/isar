@@ -128,9 +128,8 @@ jobs:
           components: rustfmt, rust-src
       - name: Build Isar Core
         run: |
-          bash tools/build_ios.sh
-          mv libisar.a ../isar_flutter_libs/ios/libisar.a
-        working-directory: packages/isar_core_ffi
+          bash tool/build_ios.sh
+          mv libisar.a packages/isar_flutter_libs/ios/libisar.a
       - name: Run Flutter Driver tests
         run: |
           flutter pub get
@@ -195,9 +194,8 @@ jobs:
       - name: Build Isar Core macOS
         if: matrix.os == 'macos-latest'
         run: |
-          bash tools/build_macos.sh
-          mv libisar.dylib ../isar_flutter_libs/macos/libisar.dylib
-        working-directory: packages/isar_core_ffi
+          bash tool/build_macos.sh
+          mv libisar.dylib packages/isar_flutter_libs/macos/libisar.dylib
       - name: Run Flutter Driver tests
         run: |
           flutter pub get
