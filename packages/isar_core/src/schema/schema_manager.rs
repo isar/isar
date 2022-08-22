@@ -36,7 +36,7 @@ pub(crate) struct SchemaManager {
 }
 
 impl SchemaManager {
-    pub const ISAR_VERSION: u8 = 2;
+    pub const ISAR_FILE_VERSION: u8 = 2;
 
     pub fn create(instance_id: u64, txn: &Txn) -> Result<Self> {
         let info_db = Db::open(txn, Some("_info"), false, false, false)?;
@@ -203,7 +203,7 @@ impl SchemaManager {
         let added_indexes = if let Some(existing_schema) = &mut existing_schema {
             if existing_schema.version == 1 {
                 migrate_v1(txn, existing_schema)?
-            } else if existing_schema.version != Self::ISAR_VERSION {
+            } else if existing_schema.version != Self::ISAR_FILE_VERSION {
                 return Err(IsarError::VersionError {});
             }
             Self::perform_migration(txn, &mut schema, existing_schema)?
@@ -211,7 +211,7 @@ impl SchemaManager {
             vec![]
         };
         let mut info_cursor = cursors.get_cursor(self.info_db)?;
-        schema.version = Self::ISAR_VERSION;
+        schema.version = Self::ISAR_FILE_VERSION;
         Self::save_schema(&mut info_cursor, &schema)?;
         let schema = schema; // no longer mutable beyond this point
 

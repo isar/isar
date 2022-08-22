@@ -317,13 +317,6 @@ void main() {
             .doublesElementGreaterThan(123.456),
         [obj3, obj5],
       );
-
-      await qEqualSet(
-        isar.multiEntryIndexModels
-            .where()
-            .doublesElementBetween(0.0000001, 0.0002),
-        [],
-      );
     });
 
     isarTest('DateTimes query', () async {

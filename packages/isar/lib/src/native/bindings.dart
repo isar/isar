@@ -1124,7 +1124,7 @@ class IsarCoreBindings {
   late final _isar_key_add_floatPtr = _lookup<
       ffi.NativeFunction<
           ffi.Void Function(
-              ffi.Pointer<CIndexKey>, ffi.Float)>>('isar_key_add_float');
+              ffi.Pointer<CIndexKey>, ffi.Double)>>('isar_key_add_float');
   late final _isar_key_add_float = _isar_key_add_floatPtr
       .asFunction<void Function(ffi.Pointer<CIndexKey>, double)>();
 
@@ -1270,13 +1270,15 @@ class IsarCoreBindings {
       _isar_key_add_long_list_hashPtr.asFunction<
           void Function(ffi.Pointer<CIndexKey>, ffi.Pointer<ffi.Int64>, int)>();
 
-  int isar_version() {
+  ffi.Pointer<ffi.Char> isar_version() {
     return _isar_version();
   }
 
   late final _isar_versionPtr =
-      _lookup<ffi.NativeFunction<ffi.Int64 Function()>>('isar_version');
-  late final _isar_version = _isar_versionPtr.asFunction<int Function()>();
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'isar_version');
+  late final _isar_version =
+      _isar_versionPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
 
   int isar_instance_create(
     ffi.Pointer<ffi.Pointer<CIsarInstance>> isar,
@@ -2228,4 +2230,4 @@ const int IsarObject_NULL_LONG = -9223372036854775808;
 
 const int IsarObject_MAX_SIZE = 33554432;
 
-const int SchemaManager_ISAR_VERSION = 2;
+const int SchemaManager_ISAR_FILE_VERSION = 2;

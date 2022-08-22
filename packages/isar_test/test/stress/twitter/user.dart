@@ -6,7 +6,7 @@ import 'util.dart';
 
 part 'user.g.dart';
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class User {
   User();
@@ -57,7 +57,7 @@ class User {
   String? withheldScope;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class UserEntities {
   UserEntities();
@@ -70,7 +70,7 @@ class UserEntities {
   UserEntityUrl? description;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class UserEntityUrl {
   UserEntityUrl();

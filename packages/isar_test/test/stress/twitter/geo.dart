@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'geo.g.dart';
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class Place {
   Place();
@@ -36,7 +36,7 @@ enum PlaceType with IsarEnum<String> {
   String get value => name;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class Coordinates {
   Coordinates();

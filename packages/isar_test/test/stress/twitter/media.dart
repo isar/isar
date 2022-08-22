@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'media.g.dart';
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class Media {
   Media();
@@ -35,7 +35,7 @@ class Media {
   AdditionalMediaInfo? additionalMediaInfo;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class Sizes {
   Sizes();
@@ -51,7 +51,7 @@ class Sizes {
   Size? large;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class Size {
   Size();
@@ -65,7 +65,7 @@ class Size {
   String? resize;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class AdditionalMediaInfo {
   AdditionalMediaInfo();
@@ -82,7 +82,7 @@ class AdditionalMediaInfo {
   bool? monetizable;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class VideoInfo {
   VideoInfo();
@@ -97,7 +97,7 @@ class VideoInfo {
   List<Variant>? variants;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class Variant {
   Variant();

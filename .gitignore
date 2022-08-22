@@ -21,6 +21,7 @@ target/
 *.so
 *.dylib
 *.dll
+isar-dart.h
 
 # Android related
 **/android/**/gradle-wrapper.jar

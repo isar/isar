@@ -6,7 +6,7 @@ import 'util.dart';
 
 part 'entities.g.dart';
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class Entities {
   Entities();
@@ -27,7 +27,7 @@ class Entities {
   List<Poll>? polls;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class Hashtag {
   Hashtag();
@@ -40,7 +40,7 @@ class Hashtag {
   String? text;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class Poll {
   Poll();
@@ -55,7 +55,7 @@ class Poll {
   String? durationMinutes;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class Option {
   Option();
@@ -67,7 +67,7 @@ class Option {
   String? text;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class Symbol {
   Symbol();
@@ -79,7 +79,7 @@ class Symbol {
   String? text;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class Url {
   Url();
@@ -95,7 +95,7 @@ class Url {
   String? url;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class UserMention {
   UserMention();

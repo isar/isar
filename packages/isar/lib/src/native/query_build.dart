@@ -3,7 +3,6 @@
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-
 import 'package:isar/isar.dart';
 import 'package:isar/src/native/binary_writer.dart';
 import 'package:isar/src/native/bindings.dart';
@@ -115,6 +114,81 @@ void _addIdWhereClause(
   );
 }
 
+Pointer<CIndexKey>? _buildLowerIndexBound(
+  CollectionSchema<dynamic> schema,
+  IndexSchema index,
+  IndexWhereClause wc,
+) {
+  if (wc.lower == null) {
+    return buildLowerUnboundedIndexKey();
+  }
+
+  final firstVal = wc.lower!.length == 1 ? wc.lower!.first : null;
+  if (firstVal is double) {
+    final adjusted = adjustFloatBound(
+      value: firstVal,
+      lowerBound: true,
+      include: wc.includeLower,
+      epsilon: wc.epsilon,
+    );
+    if (adjusted == null) {
+      return null;
+    }
+
+    return buildIndexKey(schema, index, [adjusted]);
+  } else {
+    final lowerPtr = buildIndexKey(schema, index, wc.lower!);
+
+    if (!wc.includeLower) {
+      if (!IC.isar_key_increase(lowerPtr)) {
+        return null;
+      }
+    }
+
+    return lowerPtr;
+  }
+}
+
+Pointer<CIndexKey>? _buildUpperIndexBound(
+  CollectionSchema<dynamic> schema,
+  IndexSchema index,
+  IndexWhereClause wc,
+) {
+  if (wc.upper == null) {
+    return buildUpperUnboundedIndexKey();
+  }
+
+  final firstVal = wc.upper!.length == 1 ? wc.upper!.first : null;
+  if (firstVal is double) {
+    final adjusted = adjustFloatBound(
+      value: firstVal,
+      lowerBound: false,
+      include: wc.includeUpper,
+      epsilon: wc.epsilon,
+    );
+    if (adjusted == null) {
+      return null;
+    } else {
+      return buildIndexKey(schema, index, [adjusted]);
+    }
+  } else {
+    final upperPtr = buildIndexKey(schema, index, wc.upper!);
+
+    if (!wc.includeUpper) {
+      if (!IC.isar_key_decrease(upperPtr)) {
+        return null;
+      }
+    }
+
+    // Also include composite indexes for upper keys
+    if (index.properties.length > wc.upper!.length) {
+      IC.isar_key_add_long(upperPtr, maxLong);
+    }
+
+    return upperPtr;
+  }
+}
+
 void _addIndexWhereClause(
   CollectionSchema<dynamic> schema,
   Pointer<CQueryBuilder> qbPtr,
@@ -122,30 +196,9 @@ void _addIndexWhereClause(
   bool distinct,
   Sort sort,
 ) {
-  Pointer<CIndexKey>? lowerPtr;
-  if (wc.lower != null) {
-    lowerPtr = buildIndexKey(
-      schema,
-      wc.indexName,
-      wc.lower!,
-      increase: !wc.includeLower,
-    );
-  } else {
-    lowerPtr = buildLowerUnboundedIndexKey();
-  }
-
-  Pointer<CIndexKey>? upperPtr;
-  if (wc.upper != null) {
-    upperPtr = buildIndexKey(
-      schema,
-      wc.indexName,
-      wc.upper!,
-      addMaxComposite: true,
-      decrease: !wc.includeUpper,
-    );
-  } else {
-    upperPtr = buildUpperUnboundedIndexKey();
-  }
+  final index = schema.index(wc.indexName);
+  final lowerPtr = _buildLowerIndexBound(schema, index, wc);
+  final upperPtr = _buildUpperIndexBound(schema, index, wc);
 
   if (lowerPtr != null && upperPtr != null) {
     nCall(
@@ -159,6 +212,7 @@ void _addIndexWhereClause(
       ),
     );
   } else {
+    // this where clause does not match any objects
     nCall(
       IC.isar_qb_add_id_where_clause(
         qbPtr,

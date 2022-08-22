@@ -9,7 +9,7 @@ import 'util.dart';
 
 part 'tweet.g.dart';
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @collection
 class Tweet {
   Tweet();
@@ -74,7 +74,7 @@ class Tweet {
   List<int>? displayTextRange;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class CurrentUserRetweet {
   CurrentUserRetweet();
@@ -85,7 +85,7 @@ class CurrentUserRetweet {
   String? idStr;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 @embedded
 class QuotedStatusPermalink {
   QuotedStatusPermalink();

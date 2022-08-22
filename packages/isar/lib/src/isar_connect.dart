@@ -7,7 +7,6 @@ part of isar;
 abstract class _IsarConnect {
   static const Map<ConnectAction,
       Future<dynamic> Function(Map<String, dynamic> _)> _handlers = {
-    ConnectAction.getVersion: _getVersion,
     ConnectAction.getSchema: _getSchema,
     ConnectAction.listInstances: _listInstances,
     ConnectAction.watchInstance: _watchInstance,
@@ -82,13 +81,9 @@ abstract class _IsarConnect {
       print('║ Open the link in Chrome to connect to the    ║');
       print('║ Isar Inspector while this build is running.  ║');
       print('╟──────────────────────────────────────────────╢');
-      print('║ https://inspect.isar.dev/#/$port$path ║');
+      print('║ https://inspect.isar.dev/${Isar.version}/#/$port$path ║');
       print('╚══════════════════════════════════════════════╝');
     });
-  }
-
-  static Future<dynamic> _getVersion(Map<String, dynamic> _) async {
-    return isarCoreVersion;
   }
 
   static Future<dynamic> _getSchema(Map<String, dynamic> _) async {

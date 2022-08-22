@@ -11,19 +11,13 @@ import 'package:isar/src/native/isar_core.dart';
 
 final _keyPtrPtr = malloc<Pointer<CIndexKey>>();
 
-Pointer<CIndexKey>? buildIndexKey(
+Pointer<CIndexKey> buildIndexKey(
   CollectionSchema<dynamic> schema,
-  String indexName,
-  IndexKey key, {
-  bool addMaxComposite = false,
-  bool requireFullKey = false,
-  bool increase = false,
-  bool decrease = false,
-}) {
-  final index = schema.index(indexName);
-  if (key.length > index.properties.length ||
-      (requireFullKey && key.length != index.properties.length)) {
-    throw IsarError('Invalid values for index $indexName.');
+  IndexSchema index,
+  IndexKey key,
+) {
+  if (key.length > index.properties.length) {
+    throw IsarError('Invalid number of values for index ${index.name}.');
   }
 
   IC.isar_key_create(_keyPtrPtr);
@@ -38,23 +32,6 @@ Pointer<CIndexKey>? buildIndexKey(
       indexProperty.type,
       indexProperty.caseSensitive,
     );
-  }
-
-  if (increase) {
-    if (!IC.isar_key_increase(keyPtr)) {
-      return null;
-    }
-  }
-
-  if (decrease) {
-    if (!IC.isar_key_decrease(keyPtr)) {
-      return null;
-    }
-  }
-
-  // Also include composite indexes for upper keys
-  if (addMaxComposite && index.properties.length > key.length) {
-    IC.isar_key_add_long(keyPtr, maxLong);
   }
 
   return keyPtr;

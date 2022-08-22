@@ -98,6 +98,7 @@ Future<void> _prepareTest() async {
         await Isar.initializeIsarCore(libraries: {Abi.current(): binaryPath});
       } catch (e) {
         // ignore. maybe this is an instrumentation test
+        // ignore: avoid_print
         print(e);
       }
     }

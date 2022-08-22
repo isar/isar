@@ -20,8 +20,8 @@ struct IsarInstanceSend(*mut *const IsarInstance);
 unsafe impl Send for IsarInstanceSend {}
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_version() -> i64 {
-    ISAR_VERSION as i64
+pub unsafe extern "C" fn isar_version() -> *const c_char {
+    ISAR_VERSION.as_ptr() as *const c_char
 }
 
 #[no_mangle]

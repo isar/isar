@@ -42,7 +42,7 @@ impl CollectionSchema {
             properties,
             indexes,
             links,
-            version: SchemaManager::ISAR_VERSION,
+            version: SchemaManager::ISAR_FILE_VERSION,
         }
     }
 
