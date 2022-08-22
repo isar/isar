@@ -1,3 +1,7 @@
+## 3.0.0-dev.10
+
+Hotfix: Missing symbols on Android.
+
 ## 3.0.0-dev.9
 
 This is the last big feature release before a stable 3.0 version. Unfortunately, this version does not work with the inspector yet. Stay tuned for the next release.
