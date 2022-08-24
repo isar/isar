@@ -16,7 +16,7 @@ enum IndexType {
 }
 
 /// Annotate properties to build an index.
-@Target({TargetKind.field, TargetKind.getter, TargetKind.setter})
+@Target({TargetKind.field, TargetKind.getter})
 class Index {
   /// Annotate properties to build an index.
   const Index({

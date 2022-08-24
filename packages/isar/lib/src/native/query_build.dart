@@ -29,19 +29,19 @@ Query<T> buildNativeQuery<T>(
 ) {
   final qbPtr = IC.isar_qb_create(col.ptr);
 
-  for (final whereClause in whereClauses) {
-    if (whereClause is IdWhereClause) {
-      _addIdWhereClause(qbPtr, whereClause, whereSort);
-    } else if (whereClause is IndexWhereClause) {
+  for (final wc in whereClauses) {
+    if (wc is IdWhereClause) {
+      _addIdWhereClause(qbPtr, wc, whereSort);
+    } else if (wc is IndexWhereClause) {
       _addIndexWhereClause(
         col.schema,
         qbPtr,
-        whereClause,
+        wc,
         whereDistinct,
         whereSort,
       );
     } else {
-      _addLinkWhereClause(col.isar, qbPtr, whereClause as LinkWhereClause);
+      _addLinkWhereClause(col.isar, qbPtr, wc as LinkWhereClause);
     }
   }
 
@@ -372,13 +372,18 @@ Pointer<CFilter>? _buildObject(
   return filterPtrPtr.value;
 }
 
-Object _prepareValue(Object? value, Allocator alloc, IsarType type) {
+Object _prepareValue(
+  Object? value,
+  Allocator alloc,
+  IsarType type,
+  Map<Enum, dynamic>? enumMap,
+) {
   if (value is bool) {
     return value.byteValue;
   } else if (value is DateTime) {
     return value.longValue;
-  } else if (value is IsarEnum) {
-    return _prepareValue(value.value, alloc, type);
+  } else if (value is Enum) {
+    return _prepareValue(enumMap![value], alloc, type, null);
   } else if (value is String) {
     return value.toCString(alloc);
   } else if (value == null) {
@@ -427,11 +432,13 @@ Pointer<CFilter> _buildCondition(
     condition.value1,
     alloc,
     property?.type ?? IsarType.long,
+    property?.enumValueMap,
   );
   final value2 = _prepareValue(
     condition.value2,
     alloc,
     property?.type ?? IsarType.long,
+    property?.enumValueMap,
   );
   final filterPtr = alloc<Pointer<CFilter>>();
 

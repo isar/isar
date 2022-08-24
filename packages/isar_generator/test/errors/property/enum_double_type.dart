@@ -1,4 +1,4 @@
-// enums do not support object values
+// enums do not support floating point values
 
 import 'package:isar/isar.dart';
 
@@ -7,14 +7,11 @@ class Model {
   Id? id;
 
   @Enumerated(EnumType.value, 'value')
-  late MyEnum prop;
+  late MyEnum field;
 }
 
 enum MyEnum {
   optionA;
 
-  final value = EmbeddedModel();
+  final double value = 5.5;
 }
-
-@embedded
-class EmbeddedModel {}

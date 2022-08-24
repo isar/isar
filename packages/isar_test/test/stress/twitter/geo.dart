@@ -14,6 +14,7 @@ class Place {
 
   String? url;
 
+  @Enumerated(EnumType.name)
   PlaceType? placeType;
 
   String? name;
@@ -25,15 +26,12 @@ class Place {
   String? country;
 }
 
-enum PlaceType with IsarEnum<String> {
+enum PlaceType {
   admin,
   country,
   city,
   poi,
   neighborhood;
-
-  @override
-  String get value => name;
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)

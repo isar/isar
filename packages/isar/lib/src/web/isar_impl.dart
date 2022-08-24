@@ -11,7 +11,8 @@ import 'package:isar/src/web/isar_web.dart';
 const Symbol _zoneTxn = #zoneTxn;
 
 class IsarImpl extends Isar {
-  IsarImpl(super.name, super.schema, this.instance);
+  IsarImpl(super.name, this.instance);
+
   final IsarInstanceJs instance;
   final List<Future<void>> _activeAsyncTxns = [];
 
@@ -127,4 +128,7 @@ class IsarImpl extends Isar {
     await instance.close(deleteFromDisk).wait<dynamic>();
     return true;
   }
+
+  @override
+  Future<void> verify() => unsupportedOnWeb();
 }

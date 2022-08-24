@@ -1,4 +1,4 @@
-// unsupported type
+// enums do not support list values
 
 import 'package:isar/isar.dart';
 
@@ -6,12 +6,12 @@ import 'package:isar/isar.dart';
 class Model {
   Id? id;
 
+  @Enumerated(EnumType.value, 'value')
   late MyEnum prop;
 }
 
-enum MyEnum with IsarEnum<List<String>> {
+enum MyEnum {
   optionA;
 
-  @override
-  List<String> get value => [];
+  final List<String> value = [];
 }

@@ -57,10 +57,10 @@ void _addKeyValue(
   IndexType type,
   bool caseSensitive,
 ) {
-  if (value is IsarEnum) {
-    value = value.value;
-  } else if (value is List<IsarEnum?>) {
-    value = value.map((e) => e?.value).toList();
+  if (value is Enum) {
+    value = property.enumValueMap![value];
+  } else if (value is List<Enum?>) {
+    value = value.map((e) => property.enumValueMap![value]).toList();
   }
 
   final isarType =

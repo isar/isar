@@ -1,3 +1,13 @@
+## 3.0.0-dev.11
+
+### Enhancements
+
+Small performance improvements across the board.
+
+### Breaking
+
+Removed `IsarEnum` in favor of the `@enumerated` and `@Enumerated()` annotations. Check [#583](https://github.com/isar/isar/issues/583#issuecomment-1225376959) for more details.
+
 ## 3.0.0-dev.10
 
 Hotfix: Missing symbols on Android.

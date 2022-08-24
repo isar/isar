@@ -1,4 +1,4 @@
-// enums do not support object values
+// null values are not supported
 
 import 'package:isar/isar.dart';
 
@@ -13,8 +13,5 @@ class Model {
 enum MyEnum {
   optionA;
 
-  final value = EmbeddedModel();
+  final String? value = null;
 }
-
-@embedded
-class EmbeddedModel {}

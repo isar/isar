@@ -50,7 +50,7 @@ Isar can do much more (and we are just getting started)
 - 📱 **Multiplatform**. iOS, Android, Desktop and FULL WEB SUPPORT!
 - 🧪 **ACID semantics**. Rely on database consistency
 - 💃 **Static typing**. Compile-time checked and autocompleted queries
-- ✨ **Beautiful documentation**. Readable, easy to understand and ever improving
+- ✨ **Beautiful documentation**. Readable, easy to understand and ever-improving
 
 Join the [Telegram group](https://t.me/isardb) for discussion and check out the [CONTRIBUTING.md](https://github.com/isar/isar/blob/main/CONTRIBUTING.md) doc.
 
@@ -65,10 +65,10 @@ Holy smokes you're here! Let's get started on using the coolest Flutter database
 ```yaml
 dependencies:
   isar: 3.0.0-dev.8
-  isar_flutter_libs: 3.0.0-dev.8 # contains Isar Core
+  isar_flutter_libs: 3.0.0-dev.11 # contains Isar Core
 
 dev_dependencies:
-  isar_generator: 3.0.0-dev.8
+  isar_generator: 3.0.0-dev.11
   build_runner: any
 ```
 
@@ -85,7 +85,8 @@ class Email {
 
   List<Recipient>? recipients;
 
-  Status? status;
+  @enumerated
+  Status status = Status.pending;
 }
 
 @embedded
@@ -95,13 +96,10 @@ class Recipient {
   String? address;
 }
 
-enum Status with IsarEnum<String> {
+enum Status {
   draft,
   sending,
-  sent;
-
-  @override
-  String get value => name;
+  sent,
 }
 ```
 
@@ -123,7 +121,7 @@ final emails = await isar.emails.filter()
 
 ## Isar Inspector
 
-The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to inspect the Isar instances & collections of your app in real time. You can execute queries, switch between instances and sort the data.
+The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to inspect the Isar instances & collections of your app in real-time. You can execute queries, switch between instances and sort the data.
 
 <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/isar-inspector.png?sanitize=true">
 
@@ -228,7 +226,7 @@ Make sure to use `flutter test -j 1` to avoid tests running in parallel. This wo
 
 ## Contributors ✨
 
-Thanks goes to these wonderful people:
+Thanks go to these wonderful people:
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -248,7 +246,7 @@ Thanks goes to these wonderful people:
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind are welcome!
 
 ### License
 

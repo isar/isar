@@ -2,107 +2,108 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import 'util/common.dart';
+import 'util/matchers.dart';
+import 'util/sync_async_helper.dart';
 
 part 'enum_test.g.dart';
 
-enum ByteEnum with IsarEnum<byte> {
-  byte1,
-  byte2;
+enum TestEnum {
+  option1(1, 1, 1, 'test1'),
+  option2(2, 2, 2, 'test2'),
+  option3(3, 3, 3, 'test3');
 
-  @override
-  byte get value => index;
+  const TestEnum(
+    this.byteVal,
+    this.shortVal,
+    this.intVal,
+    this.stringVal,
+  );
+
+  final byte byteVal;
+  final short shortVal;
+  final int intVal;
+  final String stringVal;
 }
 
 @collection
-class ByteEnumModel {
-  Id? id;
+class EnumModel {
+  EnumModel(
+    this.id,
+    this.ordinalEnum,
+    this.nameEnum,
+    this.byteEnum,
+    this.shortEnum,
+    this.intEnum,
+    this.stringEnum,
+  );
 
-  late ByteEnum value;
+  EnumModel.test(TestEnum value)
+      : id = Isar.autoIncrement,
+        ordinalEnum = value,
+        nameEnum = value,
+        byteEnum = value,
+        shortEnum = value,
+        intEnum = value,
+        stringEnum = value;
+
+  static final model1 = EnumModel.test(TestEnum.option1);
+  static final model2 = EnumModel.test(TestEnum.option2);
+  static final model3 = EnumModel.test(TestEnum.option3);
+
+  final Id id;
+
+  @enumerated
+  final TestEnum ordinalEnum;
+
+  @Enumerated(EnumType.name)
+  final TestEnum nameEnum;
+
+  @Enumerated(EnumType.value, 'byteVal')
+  final TestEnum byteEnum;
+
+  @Enumerated(EnumType.value, 'shortVal')
+  final TestEnum shortEnum;
+
+  @Enumerated(EnumType.value, 'intVal')
+  final TestEnum intEnum;
+
+  @Enumerated(EnumType.value, 'stringVal')
+  final TestEnum stringEnum;
 
   @override
   // ignore: hash_and_equals
   bool operator ==(Object other) =>
-      other is ByteEnumModel && other.id == id && other.value == value;
-}
-
-enum StringEnum with IsarEnum<String> {
-  option1,
-  option2,
-  option3;
-
-  @override
-  String get value => name;
-}
-
-enum StringEnum2 with IsarEnum<String> {
-  option1,
-  option3;
+      other is EnumModel &&
+      other.ordinalEnum == ordinalEnum &&
+      other.nameEnum == nameEnum &&
+      other.byteEnum == byteEnum &&
+      other.shortEnum == shortEnum &&
+      other.intEnum == intEnum &&
+      other.stringEnum == stringEnum;
 
   @override
-  String get value => name;
-}
-
-@collection
-class StringEnumModel {
-  Id? id;
-
-  late StringEnum value;
-
-  StringEnum? nValue;
-
-  @override
-  // ignore: hash_and_equals
-  bool operator ==(Object other) =>
-      other is StringEnumModel &&
-      other.id == id &&
-      other.value == value &&
-      other.nValue == nValue;
-}
-
-@collection
-@Name('StringEnumModel')
-class StringEnumModel2 {
-  Id? id;
-
-  late StringEnum value;
-
-  StringEnum? nValue;
-
-  @override
-  // ignore: hash_and_equals
-  bool operator ==(Object other) =>
-      other is StringEnumModel2 &&
-      other.id == id &&
-      other.value == value &&
-      other.nValue == nValue;
-}
-
-enum DateTimeEnum with IsarEnum<DateTime> {
-  option1,
-  option2,
-  option3;
-
-  @override
-  DateTime get value => DateTime(2000 + index);
-}
-
-@collection
-class DateEnumModel {
-  Id? id;
-
-  DateTimeEnum? value;
-
-  @override
-  // ignore: hash_and_equals
-  bool operator ==(Object other) =>
-      other is DateEnumModel && other.id == id && other.value == value;
+  String toString() {
+    // TODO: implement toString
+    return 'EnumModel{ordinalEnum: $ordinalEnum, nameEnum: $nameEnum, byteEnum: $byteEnum, shortEnum: $shortEnum, intEnum: $intEnum, stringEnum: $stringEnum}';
+  }
 }
 
 void main() {
   group('Enum', () {
-    isarTest('Byte Enum', () {});
+    isarTest('Verify property types', () {});
 
-    isarTest('String Enum', () {});
+    isarTest('.get() / .put()', () async {
+      final isar = await openTempIsar([EnumModelSchema]);
+      await isar.tWriteTxn(() async {
+        await isar.enumModels
+            .tPutAll([EnumModel.model1, EnumModel.model2, EnumModel.model3]);
+      });
+
+      await qEqual(
+        isar.enumModels.where(),
+        [EnumModel.model1, EnumModel.model2, EnumModel.model3],
+      );
+    });
 
     isarTest('DateTime Enum', () {});
 

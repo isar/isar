@@ -1,5 +1,6 @@
 import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
+import 'package:isar_generator/src/isar_type.dart';
 
 import 'package:isar_generator/src/object_info.dart';
 
@@ -13,7 +14,7 @@ String generateSchema(ObjectInfo object) {
 
   final properties = object.objectProperties
       .mapIndexed(
-        (i, e) => "r'${e.isarName}': ${_generatePropertySchema(i, e)}",
+        (i, e) => "r'${e.isarName}': ${_generatePropertySchema(object, i)}",
       )
       .join(',');
 
@@ -58,10 +59,16 @@ String generateSchema(ObjectInfo object) {
   return '$code);';
 }
 
-String _generatePropertySchema(int index, ObjectProperty property) {
+String _generatePropertySchema(ObjectInfo object, int index) {
+  final property = object.objectProperties[index];
+  var enumMaps = '';
+  if (property.isEnum) {
+    enumMaps = '''
+      enumValueMap: ${property.enumValueMapName(object)},
+      valueEnumMap: ${property.valueEnumMapName(object)},''';
+  }
   var target = '';
-  if (property.isarType == IsarType.object ||
-      property.isarType == IsarType.objectList) {
+  if (property.isarType.containsObject) {
     target = "target: r'${property.scalarDartType}',";
   }
   return '''
@@ -69,6 +76,7 @@ String _generatePropertySchema(int index, ObjectProperty property) {
     id: $index,
     name: r'${property.isarName}',
     type: IsarType.${property.isarType.name},
+    $enumMaps
     $target
   )
   ''';

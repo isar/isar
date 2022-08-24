@@ -6,9 +6,5 @@ import 'package:isar/isar.dart';
 class Model {
   Id? id;
 
-  late MyEnum? prop;
-}
-
-enum MyEnum {
-  a;
+  late Set<String>? prop;
 }

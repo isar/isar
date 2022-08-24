@@ -8,6 +8,8 @@ class PropertySchema {
     required this.id,
     required this.name,
     required this.type,
+    this.enumValueMap,
+    this.valueEnumMap,
     this.target,
   });
 
@@ -19,6 +21,10 @@ class PropertySchema {
 
   /// Isar type of the property
   final IsarType type;
+
+  final Map<Enum, dynamic>? enumValueMap;
+
+  final Map<dynamic, Enum>? valueEnumMap;
 
   /// For embedded objects: Name of the target schema
   final String? target;
@@ -123,6 +129,33 @@ extension IsarTypeX on IsarType {
         return IsarType.string;
       case IsarType.objectList:
         return IsarType.object;
+      // ignore: no_default_cases
+      default:
+        return this;
+    }
+  }
+
+  /// @nodoc
+  IsarType get listType {
+    switch (this) {
+      case IsarType.bool:
+        return IsarType.boolList;
+      case IsarType.byte:
+        return IsarType.byteList;
+      case IsarType.int:
+        return IsarType.intList;
+      case IsarType.float:
+        return IsarType.floatList;
+      case IsarType.long:
+        return IsarType.longList;
+      case IsarType.double:
+        return IsarType.doubleList;
+      case IsarType.dateTime:
+        return IsarType.dateTimeList;
+      case IsarType.string:
+        return IsarType.stringList;
+      case IsarType.object:
+        return IsarType.objectList;
       // ignore: no_default_cases
       default:
         return this;

@@ -30,6 +30,7 @@ const ignoreLints = [
   'inference_failure_on_function_invocation',
   'unnecessary_parenthesis',
   'unnecessary_raw_strings',
+  'unnecessary_null_checks',
   'join_return_with_assignment',
   'avoid_js_rounded_ints',
   'prefer_final_locals',
@@ -62,7 +63,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       ${generateDeserializeWeb(object)}
       ${generateDeserializePropWeb(object)}
 
-      ${generateEnumMap(object)}
+      ${generateEnumMaps(object)}
 
       ${generateGetId(object)}
       ${generateGetLinks(object)}
@@ -103,7 +104,7 @@ class IsarEmbeddedGenerator extends GeneratorForAnnotation<Embedded> {
       ${generateDeserializeWeb(object)}
       ${generateDeserializePropWeb(object)}
 
-      ${generateEnumMap(object)}
+      ${generateEnumMaps(object)}
 
       ${FilterGenerator(object).generate()}
       ${generateQueryObjects(object)}

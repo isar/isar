@@ -1,4 +1,4 @@
-// enums do not support floating point values
+// has duplicate values
 
 import 'package:isar/isar.dart';
 
@@ -11,7 +11,11 @@ class Model {
 }
 
 enum MyEnum {
-  optionA;
+  option1(1),
+  option2(2),
+  option3(1);
 
-  final float value = 5.5;
+  const MyEnum(this.value);
+
+  final int value;
 }

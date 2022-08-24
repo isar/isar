@@ -45,6 +45,7 @@ class NoDefaultModel {
 
   final MyEmbedded embeddedValue;
 
+  @Enumerated(EnumType.name)
   final MyEnum enumValue;
 }
 
@@ -85,6 +86,7 @@ class NoDefaultListModel {
 
   final List<MyEmbedded?> embeddedValue;
 
+  @Enumerated(EnumType.name)
   final List<MyEnum?> enumValue;
 }
 

@@ -101,8 +101,8 @@ class IsarAnalyzer {
 
   ConstructorElement _checkValidClass(Element modelClass) {
     if (modelClass is! ClassElement ||
-        modelClass.isEnum ||
-        modelClass.isMixin) {
+        modelClass is EnumElement ||
+        modelClass is MixinElement) {
       err(
         'Only classes may be annotated with @Collection or @Embedded.',
         modelClass,
@@ -124,8 +124,8 @@ class IsarAnalyzer {
     }
 
     final hasCollectionSupertype = modelClass.allSupertypes.any((type) {
-      return type.element.collectionAnnotation != null ||
-          type.element.embeddedAnnotation != null;
+      return type.element2.collectionAnnotation != null ||
+          type.element2.embeddedAnnotation != null;
     });
     if (hasCollectionSupertype) {
       err(
@@ -146,7 +146,7 @@ class IsarAnalyzer {
         properties.length) {
       err(
         'Two or more properties have the same name.',
-        constructor.enclosingElement,
+        constructor.enclosingElement3,
       );
     }
 
@@ -164,7 +164,7 @@ class IsarAnalyzer {
   Map<String, String> _getEmbeddedDartNames(ClassElement element) {
     void _fillNames(Map<String, String> names, ClassElement element) {
       for (final property in element.allAccessors) {
-        final type = property.type.scalarType.element! as ClassElement;
+        final type = property.type.scalarType.element2! as ClassElement;
         if (type.embeddedAnnotation != null) {
           final isarName = type.isarName;
           if (!names.containsKey(isarName)) {
@@ -185,12 +185,100 @@ class IsarAnalyzer {
     ConstructorElement constructor,
   ) {
     final dartType = property.type;
-    final isarType = dartType.isarType;
-    if (isarType == null) {
-      err(
-        'Unsupported type. Please annotate the property with @ignore.',
-        property,
-      );
+    final scalarDartType = dartType.scalarType;
+    Map<String, dynamic>? enumMap;
+    String? enumPropertyName;
+    String? defaultEnumElement;
+
+    late final IsarType isarType;
+    if (scalarDartType.element2 is EnumElement) {
+      final enumeratedAnn = property.enumeratedAnnotation;
+      if (enumeratedAnn == null) {
+        err('Enum property must be annotated with @enumerated.', property);
+      }
+
+      final enumClass = scalarDartType.element2! as EnumElement;
+      final enumElements =
+          enumClass.fields.where((f) => f.isEnumConstant).toList();
+      defaultEnumElement = '${enumClass.name}.${enumElements.first.name}';
+
+      if (enumeratedAnn.type == EnumType.ordinal) {
+        isarType = dartType.isDartCoreList ? IsarType.byteList : IsarType.byte;
+        enumMap = {
+          for (var i = 0; i < enumElements.length; i++) enumElements[i].name: i,
+        };
+        enumPropertyName = 'index';
+      } else if (enumeratedAnn.type == EnumType.name) {
+        isarType =
+            dartType.isDartCoreList ? IsarType.stringList : IsarType.string;
+        enumMap = {
+          for (final value in enumElements) value.name: value.name,
+        };
+        enumPropertyName = 'name';
+      } else {
+        enumPropertyName = enumeratedAnn.property;
+        if (enumPropertyName == null) {
+          err(
+            'Enums with type EnumType.value must specify which property '
+            'should be used.',
+            property,
+          );
+        }
+        final enumProperty = enumClass.getField(enumPropertyName);
+        if (enumProperty == null || enumProperty.isEnumConstant) {
+          err('Enum property "$enumProperty" does not exist.', property);
+        } else if (enumProperty.nonSynthetic is PropertyAccessorElement) {
+          err('Only fields are supported for enum properties', enumProperty);
+        }
+
+        final enumIsarType = enumProperty.type.isarType;
+        if (enumIsarType == null) {
+          err('Unsupported enum property type.', enumProperty);
+        } else if (enumIsarType.containsBool) {
+          err('Enums do not support bool values.', enumProperty);
+        } else if (enumIsarType.containsFloat) {
+          err('Enums do not support floating point values.', enumProperty);
+        } else if (enumIsarType.containsObject) {
+          err('Enums do not support object values.', enumProperty);
+        } else if (enumIsarType.isList) {
+          err('Enums do not support list values.', enumProperty);
+        }
+
+        isarType =
+            dartType.isDartCoreList ? enumIsarType.listType : enumIsarType;
+        enumMap = {};
+        for (final element in enumElements) {
+          final property =
+              element.computeConstantValue()!.getField(enumPropertyName)!;
+          final propertyValue = property.toBoolValue() ??
+              property.toIntValue() ??
+              property.toDoubleValue() ??
+              property.toStringValue();
+          if (propertyValue == null) {
+            err(
+              'Null values are not supported for enum properties.',
+              enumProperty,
+            );
+          }
+
+          if (enumMap.values.contains(propertyValue)) {
+            err(
+              'Enum property has duplicate values.',
+              enumProperty,
+            );
+          }
+          enumMap[element.name] = propertyValue;
+        }
+      }
+    } else {
+      if (dartType.isarType != null) {
+        isarType = dartType.isarType!;
+      } else {
+        err(
+          'Unsupported type. Please annotate the property with @ignore.',
+          property,
+        );
+      }
     }
 
     final nullable = dartType.nullabilitySuffix != NullabilitySuffix.none;
@@ -223,25 +311,15 @@ class IsarAnalyzer {
           property.setter == null ? PropertyDeser.none : PropertyDeser.assign;
     }
 
-    final enumConsts = dartType.scalarType.isIsarEnum
-        ? (dartType.scalarType.element! as ClassElement).enumConsts
-        : null;
-
-    if (enumConsts != null) {
-      if (isarType.containsFloat) {
-        err('Enums do not support floating point values.');
-      } else if (isarType.containsObject) {
-        err('Enums do not support object values.');
-      }
-    }
-
     return ObjectProperty(
       dartName: property.displayName,
       isarName: property.isarName,
-      typeClassName: dartType.scalarType.element!.name!,
+      typeClassName: dartType.scalarType.element2!.name!,
       isarType: isarType,
       isId: dartType.isIsarId,
-      enumConsts: enumConsts,
+      enumMap: enumMap,
+      enumProperty: enumPropertyName,
+      defaultEnumElement: defaultEnumElement,
       nullable: nullable,
       elementNullable: elementNullable,
       userDefaultValue: constructorParameter?.defaultValueCode,
@@ -264,7 +342,7 @@ class IsarAnalyzer {
       err('Links type must not be nullable.', property);
     }
 
-    final targetCol = linkType.element! as ClassElement;
+    final targetCol = linkType.element2! as ClassElement;
     if (targetCol.collectionAnnotation == null) {
       err('Link target is not annotated with @collection');
     }
@@ -292,7 +370,7 @@ class IsarAnalyzer {
       dartName: property.displayName,
       isarName: property.isarName,
       targetLinkIsarName: targetLinkIsarName,
-      targetCollectionDartName: linkType.element!.name!,
+      targetCollectionDartName: linkType.element2!.name!,
       targetCollectionIsarName: targetCol.isarName,
       isSingle: property.isLink,
     );

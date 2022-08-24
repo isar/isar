@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: public_member_api_docs, invalid_use_of_protected_member
 
 import 'dart:async';
 import 'dart:convert';
@@ -19,17 +19,16 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     required this.native,
     required this.schema,
   });
+
   @override
   final IsarImpl isar;
   final IsarCollectionJs native;
 
+  @override
   final CollectionSchema<OBJ> schema;
 
   @override
   String get name => schema.name;
-
-  @override
-  String get idName => schema.idName;
 
   @tryInline
   OBJ? deserializeObject(Object? object) {
@@ -246,4 +245,15 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       property,
     );
   }
+
+  @override
+  Future<void> verify(List<OBJ> objects) => unsupportedOnWeb();
+
+  @override
+  Future<void> verifyLink(
+    String linkName,
+    List<int> sourceIds,
+    List<int> targetIds,
+  ) =>
+      unsupportedOnWeb();
 }

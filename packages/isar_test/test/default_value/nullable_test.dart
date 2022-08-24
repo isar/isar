@@ -42,6 +42,7 @@ class NullableModel {
 
   final MyEmbedded? embeddedValue;
 
+  @Enumerated(EnumType.name)
   final MyEnum? enumValue;
 }
 
@@ -82,6 +83,7 @@ class NullableListModel {
 
   final List<MyEmbedded>? embeddedValue;
 
+  @enumerated
   final List<MyEnum>? enumValue;
 }
 

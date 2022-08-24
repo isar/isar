@@ -74,7 +74,7 @@ String generateDeserializePropWeb(ObjectInfo object) {
 
 String _defaultVal(ObjectProperty property) {
   if (property.isEnum) {
-    return property.defaultEnum;
+    return property.defaultEnumElement!;
   }
   switch (property.isarType) {
     case IsarType.byte:

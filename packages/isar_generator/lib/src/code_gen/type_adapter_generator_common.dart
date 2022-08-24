@@ -73,16 +73,30 @@ String generateAttach(ObjectInfo object) {
   return '$code}';
 }
 
-String generateEnumMap(ObjectInfo object) {
-  final completedEnums = <String>{};
-
+String generateEnumMaps(ObjectInfo object) {
   var code = '';
   for (final property in object.properties) {
     final enumName = property.typeClassName;
-    if (property.isEnum && completedEnums.add(enumName)) {
-      code += 'final ${property.enumMap(object)} = {';
-      for (final c in property.enumConsts!) {
-        code += '$enumName.$c.value: $enumName.$c,';
+    if (property.isEnum) {
+      code += 'const ${property.enumValueMapName(object)} = {';
+      for (final enumElementName in property.enumMap!.keys) {
+        final value = property.enumMap![enumElementName];
+        if (value is String) {
+          code += "$enumName.$enumElementName: r'$value',";
+        } else {
+          code += '$enumName.$enumElementName: $value,';
+        }
+      }
+      code += '};';
+
+      code += 'const ${property.valueEnumMapName(object)} = {';
+      for (final enumElementName in property.enumMap!.keys) {
+        final value = property.enumMap![enumElementName];
+        if (value is String) {
+          code += "r'$value': $enumName.$enumElementName,";
+        } else {
+          code += '$value: $enumName.$enumElementName,';
+        }
       }
       code += '};';
     }

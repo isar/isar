@@ -2,13 +2,10 @@ import 'package:isar/isar.dart';
 
 part 'common.g.dart';
 
-enum MyEnum with IsarEnum<String> {
+enum MyEnum {
   value1,
   value2,
   value3;
-
-  @override
-  String get value => name;
 }
 
 @embedded

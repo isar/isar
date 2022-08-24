@@ -1,11 +1,10 @@
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: public_member_api_docs, invalid_use_of_protected_member
 
-import 'dart:convert';
 import 'dart:html';
 import 'dart:js_util';
 
 import 'package:isar/isar.dart';
-import 'package:isar/src/version.dart';
+import 'package:isar/src/common/schemas.dart';
 
 import 'package:isar/src/web/bindings.dart';
 import 'package:isar/src/web/isar_collection_impl.dart';
@@ -21,7 +20,7 @@ Future<void> initializeIsarWeb() async {
   final script = ScriptElement();
   script.type = 'text/javascript';
   // ignore: unsafe_html
-  script.src = 'https://unpkg.com/isar@$isarWebVersion/dist/index.js';
+  script.src = 'https://unpkg.com/isar@${Isar.version}/dist/index.js';
   script.async = true;
   document.head!.append(script);
   await script.onLoad.first.timeout(
@@ -38,11 +37,11 @@ Future<Isar> openIsar({
   required List<CollectionSchema<dynamic>> schemas,
 }) async {
   await initializeIsarWeb();
-  final schema = '[${schemas.map((e) => e.schema).join(',')}]';
-  final schemasJs = jsify(schemasJson) as List<dynamic>;
+  final schemasJson = getSchemas(schemas).map((e) => e.toSchemaJson());
+  final schemasJs = jsify(schemasJson.toList()) as List<dynamic>;
   final instance = await openIsarJs(name, schemasJs, relaxedDurability)
       .wait<IsarInstanceJs>();
-  final isar = IsarImpl(name, schemaStr, instance);
+  final isar = IsarImpl(name, instance);
   final cols = <Type, IsarCollection<dynamic>>{};
   for (final schema in schemas) {
     final col = instance.getCollection(schema.name);
@@ -56,7 +55,6 @@ Future<Isar> openIsar({
     });
   }
 
-  // ignore: invalid_use_of_protected_member
   isar.attachCollections(cols);
   return isar;
 }

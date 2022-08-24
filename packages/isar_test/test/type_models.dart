@@ -129,24 +129,25 @@ class ObjectModel {
   List<EmbeddedModel>? nList;
 }
 
-enum TestEnum with IsarEnum<String> {
+enum TestEnum {
   option1,
   option2,
   option3;
-
-  @override
-  String get value => name;
 }
 
 @collection
 class EnumModel {
   Id? id;
 
+  @Enumerated(EnumType.name)
   TestEnum value = TestEnum.option1;
 
+  @Enumerated(EnumType.name)
   TestEnum? nValue;
 
+  @Enumerated(EnumType.name)
   List<TestEnum> list = [];
 
+  @Enumerated(EnumType.name)
   List<TestEnum>? nList;
 }
