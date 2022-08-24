@@ -50,7 +50,7 @@ impl ParseCallbacks for Callbacks {
 }
 
 const LIBMDBX_REPO: &str = "https://github.com/isar/libmdbx.git";
-const LIBMDBX_TAG: &str = "v0.11.10";
+const LIBMDBX_TAG: &str = "v0.12.1";
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
@@ -81,6 +81,10 @@ fn main() {
     let core_path = mdbx.join("mdbx.c");
     let core = fs::read_to_string(core_path.as_path()).unwrap();
     let core = core.replace("CharToOemBuffA(buf, buf, size)", "false");
+    let core = core.replace(
+        "#ifdef scan4seq",
+        "#ifdef scan4seq\n#elif defined(__APPLE__)\n#define scan4seq scan4seq_default\n",
+    );
     fs::write(core_path.as_path(), core).unwrap();
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
