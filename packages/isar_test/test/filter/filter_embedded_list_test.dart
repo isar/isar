@@ -194,14 +194,7 @@ void main() {
       );
 
       await isar.tWriteTxn(
-        () => isar.models.tPutAll([
-          obj1,
-          obj2,
-          obj3,
-          obj4,
-          obj5,
-          obj6,
-        ]),
+        () => isar.models.tPutAll([obj1, obj2, obj3, obj4, obj5, obj6]),
       );
     });
 
@@ -403,8 +396,29 @@ void main() {
       );
     });
 
-    isarTest('.embeddedIsEmpty()', () async {});
-    isarTest('.embeddedIsNotEmpty()', () async {});
+    isarTest('.embeddedIsEmpty()', () async {
+      await qEqualSet(
+        isar.models.filter().embeddedAsIsEmpty(),
+        [obj4],
+      );
+
+      await qEqualSet(
+        isar.models.filter().embeddedBsIsEmpty(),
+        [obj4],
+      );
+    });
+
+    isarTest('.embeddedIsNotEmpty()', () async {
+      await qEqualSet(
+        isar.models.filter().embeddedAsIsNotEmpty(),
+        [obj1, obj2, obj3, obj5, obj6],
+      );
+
+      await qEqualSet(
+        isar.models.filter().embeddedBsIsNotEmpty(),
+        [obj1, obj2, obj5, obj6],
+      );
+    });
 
     // FIXME: IsarError: Unsupported type for condition
     isarTest('.embeddedElementEqualTo()', () async {
@@ -621,21 +635,209 @@ void main() {
       );
     });
 
-    isarTest('.embeddedElement() then .embeddedIsNull()', () async {});
-    isarTest('.embeddedElement() then .embeddedIsNotNull()', () async {});
-    isarTest('.embeddedElement() then .embeddedLengthEqualTo()', () async {});
-    isarTest('.embeddedElement() then .embeddedLengthLessThan()', () async {});
-    isarTest(
-        '.embeddedElement() then .embeddedLengthGreaterThan()', () async {});
-    isarTest('.embeddedElement() then .embeddedLengthBetween()', () async {});
-    isarTest('.embeddedElement() then .embeddedLengthIsEmpty()', () async {});
-    isarTest(
-        '.embeddedElement() then .embeddedLengthIsNotEmpty()', () async {});
-    isarTest('.embeddedElement() then .embeddedElementIsNull()', () async {});
-    isarTest(
-        '.embeddedElement() then .embeddedElementIsNotNull()', () async {});
-    isarTest('.embeddedElement() then .embeddedElement()', () async {});
-    isarTest('.embeddedElement() then .embeddedElement()', () async {});
+    isarTest('.embeddedElement() then .embeddedIsNull()', () async {
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement((q) => q.embeddedBsIsNull()),
+        [obj1, obj2],
+      );
+    });
+
+    isarTest('.embeddedElement() then .embeddedIsNotNull()', () async {
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement((q) => q.embeddedBsIsNotNull()),
+        [obj1, obj3, obj5, obj6],
+      );
+    });
+
+    isarTest('.embeddedElement() then .embeddedLengthEqualTo()', () async {
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthEqualTo(0)),
+        [],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthEqualTo(1)),
+        [],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthEqualTo(2)),
+        [obj1, obj3],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthEqualTo(3)),
+        [obj1],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthEqualTo(4)),
+        [obj6],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthEqualTo(5)),
+        [obj5],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthEqualTo(6)),
+        [],
+      );
+    });
+
+    isarTest('.embeddedElement() then .embeddedLengthLessThan()', () async {
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthLessThan(0)),
+        [],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthLessThan(1)),
+        [],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthLessThan(2)),
+        [],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthLessThan(3)),
+        [obj1, obj3],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthLessThan(4)),
+        [obj1, obj3],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthLessThan(5)),
+        [obj1, obj3, obj6],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthLessThan(6)),
+        [obj1, obj3, obj5, obj6],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthLessThan(7)),
+        [obj1, obj3, obj5, obj6],
+      );
+    });
+
+    isarTest('.embeddedElement() then .embeddedLengthGreaterThan()', () async {
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthGreaterThan(0)),
+        [obj1, obj3, obj5, obj6],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthGreaterThan(1)),
+        [obj1, obj3, obj5, obj6],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthGreaterThan(2)),
+        [obj1, obj5, obj6],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthGreaterThan(3)),
+        [obj5, obj6],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthGreaterThan(4)),
+        [obj5],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthGreaterThan(5)),
+        [],
+      );
+    });
+
+    isarTest('.embeddedElement() then .embeddedLengthBetween()', () async {
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthBetween(2, 4)),
+        [obj1, obj3, obj6],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthBetween(3, 4)),
+        [obj1, obj6],
+      );
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsLengthBetween(5, 42)),
+        [obj5],
+      );
+    });
+
+    isarTest('.embeddedElement() then .embeddedIsEmpty()', () async {
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement((q) => q.embeddedBsIsEmpty()),
+        [],
+      );
+    });
+
+    isarTest('.embeddedElement() then .embeddedIsNotEmpty()', () async {
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement((q) => q.embeddedBsIsNotEmpty()),
+        [obj1, obj3, obj5, obj6],
+      );
+    });
+
+    // FIXME: IsarError: IllegalArg: Property does not support this filter..
+    isarTest('.embeddedElement() then .embeddedElementIsNull()', () async {
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsElementIsNull()),
+        [obj1, obj3, obj6],
+      );
+    });
+
+    // FIXME: IsarError: IllegalArg: Property does not support this filter..
+    isarTest('.embeddedElement() then .embeddedElementIsNotNull()', () async {
+      await qEqualSet(
+        isar.models
+            .filter()
+            .embeddedAsElement((q) => q.embeddedBsElementIsNotNull()),
+        [obj1, obj3, obj5, obj6],
+      );
+    });
 
     // FIXME: IsarError: Unsupported type for condition
     isarTest('.embeddedElement() then .embeddedElementEqualTo()', () async {
@@ -663,6 +865,7 @@ void main() {
             ),
         [obj1],
       );
+
       await qEqualSet(
         isar.models.filter().embeddedAsElement(
               (q) => q.embeddedBsElementEqualTo(
@@ -671,6 +874,7 @@ void main() {
             ),
         [obj3],
       );
+
       await qEqualSet(
         isar.models.filter().embeddedAsElement(
               (q) => q.embeddedBsElementEqualTo(
@@ -711,14 +915,7 @@ void main() {
             ),
         [obj5],
       );
-      await qEqualSet(
-        isar.models.filter().embeddedAsElement(
-              (q) => q.embeddedBsElementEqualTo(
-                obj5.embeddedAs[0].embeddedBs![5],
-              ),
-            ),
-        [obj5],
-      );
+
       await qEqualSet(
         isar.models.filter().embeddedAsElement(
               (q) => q.embeddedBsElementEqualTo(
@@ -727,10 +924,118 @@ void main() {
             ),
         [obj6],
       );
+
       await qEqualSet(
         isar.models.filter().embeddedAsElement(
               (q) => q.embeddedBsElementEqualTo(
                 EmbeddedB(name: 'non existing'),
+              ),
+            ),
+        [],
+      );
+    });
+
+    // FIXME(severe): panic
+    // Shell: thread 'isarworker' panicked at 'range end index 6450588 out of
+    // range for slice of length 26', library/core/src/slice/index.rs:73:5
+    isarTest('.embeddedElement() then .embeddedElement()', () async {
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement(
+              (q) => q.embeddedBsElement(
+                (q) => q.nameStartsWith('embedded'),
+              ),
+            ),
+        [obj1, obj3, obj5, obj6],
+      );
+
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement(
+              (q) => q.embeddedBsElement(
+                (q) => q.nameEqualTo('embedded a1 b1 - 1'),
+              ),
+            ),
+        [obj1],
+      );
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement(
+              (q) => q.embeddedBsElement(
+                (q) => q.nameEqualTo('embedded a1 b1 - 2'),
+              ),
+            ),
+        [obj1],
+      );
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement(
+              (q) => q.embeddedBsElement(
+                (q) => q.nameEqualTo('embedded a1 b1 - 3'),
+              ),
+            ),
+        [obj1],
+      );
+
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement(
+              (q) => q.embeddedBsElement(
+                (q) => q.nameEqualTo('embedded a3 b3 - 1'),
+              ),
+            ),
+        [obj3],
+      );
+
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement(
+              (q) => q.embeddedBsElement(
+                (q) => q.nameEqualTo('embedded a5 b5 - 1'),
+              ),
+            ),
+        [obj5],
+      );
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement(
+              (q) => q.embeddedBsElement(
+                (q) => q.nameEqualTo('embedded a5 b5 - 2'),
+              ),
+            ),
+        [obj5],
+      );
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement(
+              (q) => q.embeddedBsElement(
+                (q) => q.nameEqualTo('embedded a5 b5 - 3'),
+              ),
+            ),
+        [obj5],
+      );
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement(
+              (q) => q.embeddedBsElement(
+                (q) => q.nameEqualTo('embedded a5 b5 - 4'),
+              ),
+            ),
+        [obj5],
+      );
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement(
+              (q) => q.embeddedBsElement(
+                (q) => q.nameEqualTo('embedded a5 b5 - 5'),
+              ),
+            ),
+        [obj5],
+      );
+
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement(
+              (q) => q.embeddedBsElement(
+                (q) => q.nameEqualTo('embedded a6 b6 - 1'),
+              ),
+            ),
+        [obj6],
+      );
+
+      await qEqualSet(
+        isar.models.filter().embeddedAsElement(
+              (q) => q.embeddedBsElement(
+                (q) => q.nameEqualTo('non existing'),
               ),
             ),
         [],

@@ -144,14 +144,7 @@ void main() {
       );
 
       await isar.tWriteTxn(
-        () => isar.models.tPutAll([
-          obj1,
-          obj2,
-          obj3,
-          obj4,
-          obj5,
-          obj6,
-        ]),
+        () => isar.models.tPutAll([obj1, obj2, obj3, obj4, obj5, obj6]),
       );
     });
 
@@ -182,11 +175,9 @@ void main() {
         [obj6],
       );
       await qEqualSet(
-        isar.models.filter().embeddedAEqualTo(
-              const EmbeddedModelA(
-                name: 'non existing',
-              ),
-            ),
+        isar.models
+            .filter()
+            .embeddedAEqualTo(const EmbeddedModelA(name: 'non existing')),
         [],
       );
 
@@ -207,11 +198,9 @@ void main() {
         [obj5],
       );
       await qEqualSet(
-        isar.models.filter().embeddedBEqualTo(
-              const EmbeddedModelB(
-                name: 'non existing',
-              ),
-            ),
+        isar.models
+            .filter()
+            .embeddedBEqualTo(const EmbeddedModelB(name: 'non existing')),
         [],
       );
     });
