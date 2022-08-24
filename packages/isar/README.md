@@ -52,7 +52,7 @@ Isar can do much more (and we are just getting started)
 - 💃 **Static typing**. Compile-time checked and autocompleted queries
 - ✨ **Beautiful documentation**. Readable, easy to understand and ever-improving
 
-Join the [Telegram group](https://t.me/isardb) for discussion and check out the [CONTRIBUTING.md](https://github.com/isar/isar/blob/main/CONTRIBUTING.md) doc.
+Join the [Telegram group](https://t.me/isardb) for discussion and sneak peaks of new versions.
 
 If you want to say thank you, star us on GitHub and like us on pub.dev 🙌💙
 
