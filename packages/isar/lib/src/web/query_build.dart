@@ -230,8 +230,9 @@ String _buildCondition(
     }
   }
 
-  final isListOp = condition.type != FilterConditionType.isNull &&condition.type != FilterConditionType.listLength &&
-      schema.property(condition.property).;
+  final isListOp = condition.type != FilterConditionType.isNull &&
+      condition.type != FilterConditionType.listLength &&
+      schema.property(condition.property);
   final accessor =
       condition.property == schema.idName ? 'id' : 'obj.${condition.property}';
   final variable = isListOp ? 'e' : accessor;
