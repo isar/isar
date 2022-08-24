@@ -4,6 +4,7 @@
 *.log
 .DS_Store
 .vscode/
+.idea
 
 # Dart related
 .dart_tool/
