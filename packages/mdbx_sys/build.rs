@@ -83,7 +83,7 @@ fn main() {
     let core = core.replace("CharToOemBuffA(buf, buf, size)", "false");
     let core = core.replace(
         "#ifdef scan4seq",
-        "#ifdef scan4seq\n#elif defined(__APPLE__)\n#define scan4seq scan4seq_default\n",
+        "#ifdef scan4seq\n#elif defined(__APPLE__) || defined(__ANDROID_API__)\n#define scan4seq scan4seq_default\n",
     );
     fs::write(core_path.as_path(), core).unwrap();
 
@@ -138,11 +138,8 @@ fn main() {
             "cargo:rustc-link-search=native={}",
             dst.join("lib").display()
         );
-
-        if cfg!(windows) {
-            println!(r"cargo:rustc-link-lib=ntdll");
-            println!(r"cargo:rustc-link-search=C:\windows\system32");
-        }
+        println!(r"cargo:rustc-link-lib=ntdll");
+        println!(r"cargo:rustc-link-search=C:\windows\system32");
     } else {
         cc_builder
             .define("MDBX_BUILD_FLAGS", flags.as_str())
