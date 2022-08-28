@@ -44,6 +44,28 @@ abstract class Query<T> {
   /// {@macro query_count}
   int countSync() => aggregateSync<int>(AggregationOp.count)!;
 
+  /// {@template query_is_empty}
+  /// Returns `true` if there are no objects that match this query.
+  ///
+  /// This operation is faster than using `count() == 0`.
+  /// {@endtemplate}
+  Future<bool> isEmpty() =>
+      aggregate<int>(AggregationOp.isEmpty).then((value) => value == 1);
+
+  /// {@macro query_is_empty}
+  bool isEmptySync() => aggregateSync<int>(AggregationOp.isEmpty) == 1;
+
+  /// {@template query_is_not_empty}
+  /// Returns `true` if there are objects that match this query.
+  ///
+  /// This operation is faster than using `count() > 0`.
+  /// {@endtemplate}
+  Future<bool> isNotEmpty() =>
+      aggregate<int>(AggregationOp.isEmpty).then((value) => value == 0);
+
+  /// {@macro query_is_not_empty}
+  bool isNotEmptySync() => aggregateSync<int>(AggregationOp.isEmpty) == 0;
+
   /// {@template query_delete_first}
   /// Delete the first object that matches this query. Returns whether a object
   /// has been deleted.
@@ -124,6 +146,9 @@ enum AggregationOp {
 
   /// Counts all values.
   count,
+
+  /// Returns `true` if the query has no results.
+  isEmpty,
 }
 
 /// Extension for Queries

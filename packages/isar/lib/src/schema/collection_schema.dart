@@ -24,13 +24,10 @@ class CollectionSchema<OBJ> extends Schema<OBJ> {
     required this.attach,
     required this.version,
   }) : assert(
-          generatorVersion == version,
-          'Incompatible generated code. Please re-run code '
+          Isar.version == version,
+          'Outdated generated code. Please re-run code '
           'generation using the latest generator.',
         );
-
-  /// @nodoc
-  static const int generatorVersion = 5;
 
   /// Name of the id property
   final String idName;
@@ -57,7 +54,7 @@ class CollectionSchema<OBJ> extends Schema<OBJ> {
   final Attach<OBJ> attach;
 
   /// @nodoc
-  final int version;
+  final String version;
 
   /// @nodoc
   void toCollection(void Function<OBJ>() callback) => callback<OBJ>();
@@ -105,7 +102,7 @@ class CollectionSchema<OBJ> extends Schema<OBJ> {
 
 /// @nodoc
 @protected
-typedef GetId<T> = int? Function(T object);
+typedef GetId<T> = Id Function(T object);
 
 /// @nodoc
 @protected
@@ -113,4 +110,4 @@ typedef GetLinks<T> = List<IsarLinkBase<dynamic>> Function(T object);
 
 /// @nodoc
 @protected
-typedef Attach<T> = void Function(IsarCollection<T> col, int id, T object);
+typedef Attach<T> = void Function(IsarCollection<T> col, Id id, T object);

@@ -56,11 +56,14 @@ Future<void> _prepareTest() async {
         );
 
         if (!File(binaryPath).existsSync()) {
-          Process.runSync(
+          final result = Process.runSync(
             'cargo',
             ['build', '--target', target],
             workingDirectory: path.join(packagesDir, 'isar_core_ffi'),
           );
+          if (result.exitCode != 0) {
+            throw Exception('Cargo build failed: ${result.stderr}');
+          }
         }
         await Isar.initializeIsarCore(libraries: {Abi.current(): binaryPath});
       } catch (e) {

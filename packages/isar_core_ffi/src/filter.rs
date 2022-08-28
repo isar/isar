@@ -77,8 +77,12 @@ pub unsafe extern "C" fn isar_filter_object(
 ) -> i64 {
     isar_try! {
         let property = get_property(collection, embedded_col_id, property_id)?;
-        let condition = *Box::from_raw(condition);
-        let query_filter = Filter::object(property, Some(condition))?;
+        let condition = if !condition.is_null() {
+            Some(*Box::from_raw(condition))
+        } else {
+            None
+        };
+        let query_filter = Filter::object(property, condition)?;
         let ptr = Box::into_raw(Box::new(query_filter));
         filter.write(ptr);
     }

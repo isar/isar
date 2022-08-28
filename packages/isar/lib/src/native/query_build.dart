@@ -12,7 +12,6 @@ import 'package:isar/src/native/isar_collection_impl.dart';
 import 'package:isar/src/native/isar_core.dart';
 import 'package:isar/src/native/query_impl.dart';
 
-final Pointer<Char> minStr = Pointer<Char>.fromAddress(0);
 final Pointer<Char> maxStr = '\u{FFFFF}'.toNativeUtf8().cast<Char>();
 
 Query<T> buildNativeQuery<T>(
@@ -408,10 +407,9 @@ Object _prepareValue(
         return minDouble;
       case IsarType.string:
       case IsarType.stringList:
-        return minStr;
       case IsarType.object:
       case IsarType.objectList:
-        return 0; // objects only support "isNull"
+        return nullptr;
     }
   } else {
     return value;
@@ -432,25 +430,17 @@ Pointer<CFilter> _buildCondition(
     condition.value1,
     alloc,
     property?.type ?? IsarType.long,
-    property?.enumValueMap,
+    property?.enumMap,
   );
   final value2 = _prepareValue(
     condition.value2,
     alloc,
     property?.type ?? IsarType.long,
-    property?.enumValueMap,
+    property?.enumMap,
   );
   final filterPtr = alloc<Pointer<CFilter>>();
 
   switch (condition.type) {
-    case FilterConditionType.isNull:
-      _buildConditionIsNull(
-        colPtr: col.ptr,
-        filterPtr: filterPtr,
-        embeddedColId: embeddedCol?.id,
-        propertyId: property?.id,
-      );
-      break;
     case FilterConditionType.equalTo:
       _buildConditionEqual(
         colPtr: col.ptr,
@@ -458,7 +448,6 @@ Pointer<CFilter> _buildCondition(
         embeddedColId: embeddedCol?.id,
         propertyId: property?.id,
         val: value1,
-        include: condition.include1,
         caseSensitive: condition.caseSensitive,
         epsilon: condition.epsilon,
       );
@@ -516,6 +505,44 @@ Pointer<CFilter> _buildCondition(
         caseSensitive: condition.caseSensitive,
       );
       break;
+    case FilterConditionType.isNull:
+      _buildConditionIsNull(
+        colPtr: col.ptr,
+        filterPtr: filterPtr,
+        embeddedColId: embeddedCol?.id,
+        propertyId: property?.id,
+      );
+      break;
+    case FilterConditionType.isNotNull:
+      _buildConditionIsNotNull(
+        colPtr: col.ptr,
+        filterPtr: filterPtr,
+        embeddedColId: embeddedCol?.id,
+        propertyId: property?.id,
+        alloc: alloc,
+      );
+      break;
+    case FilterConditionType.elementIsNull:
+      _buildConditionElementIsNull(
+        colPtr: col.ptr,
+        filterPtr: filterPtr,
+        embeddedColId: embeddedCol?.id,
+        propertyId: property?.id,
+        isObjectList: property?.type == IsarType.objectList,
+        nullValue: value1,
+      );
+      break;
+    case FilterConditionType.elementIsNotNull:
+      _buildConditionElementIsNotNull(
+        colPtr: col.ptr,
+        filterPtr: filterPtr,
+        embeddedColId: embeddedCol?.id,
+        propertyId: property?.id,
+        isObjectList: property?.type == IsarType.objectList,
+        nullValue: value1,
+        alloc: alloc,
+      );
+      break;
     case FilterConditionType.listLength:
       _buildListLength(
         colPtr: col.ptr,
@@ -551,13 +578,97 @@ void _buildConditionIsNull({
   }
 }
 
+void _buildConditionIsNotNull({
+  required Pointer<CIsarCollection> colPtr,
+  required Pointer<Pointer<CFilter>> filterPtr,
+  required int? embeddedColId,
+  required int? propertyId,
+  required Allocator alloc,
+}) {
+  if (propertyId != null) {
+    final conditionPtr = alloc<Pointer<CFilter>>();
+    nCall(
+      IC.isar_filter_null(
+        colPtr,
+        conditionPtr,
+        embeddedColId ?? 0,
+        propertyId,
+      ),
+    );
+    IC.isar_filter_not(filterPtr, conditionPtr.value);
+  } else {
+    IC.isar_filter_static(filterPtr, true);
+  }
+}
+
+void _buildConditionElementIsNull({
+  required Pointer<CIsarCollection> colPtr,
+  required Pointer<Pointer<CFilter>> filterPtr,
+  required int? embeddedColId,
+  required int? propertyId,
+  required bool isObjectList,
+  required Object nullValue,
+}) {
+  if (isObjectList) {
+    IC.isar_filter_object(
+      colPtr,
+      filterPtr,
+      nullptr,
+      embeddedColId ?? 0,
+      propertyId ?? 0,
+    );
+  } else {
+    _buildConditionEqual(
+      colPtr: colPtr,
+      filterPtr: filterPtr,
+      embeddedColId: embeddedColId,
+      propertyId: propertyId,
+      val: nullValue,
+      epsilon: 0,
+      caseSensitive: true,
+    );
+  }
+}
+
+void _buildConditionElementIsNotNull({
+  required Pointer<CIsarCollection> colPtr,
+  required Pointer<Pointer<CFilter>> filterPtr,
+  required int? embeddedColId,
+  required int? propertyId,
+  required bool isObjectList,
+  required Object nullValue,
+  required Allocator alloc,
+}) {
+  if (isObjectList) {
+    final objFilterPtrPtr = alloc<Pointer<CFilter>>();
+    IC.isar_filter_static(objFilterPtrPtr, true);
+    IC.isar_filter_object(
+      colPtr,
+      filterPtr,
+      objFilterPtrPtr.value,
+      embeddedColId ?? 0,
+      propertyId ?? 0,
+    );
+  } else {
+    _buildConditionGreaterThan(
+      colPtr: colPtr,
+      filterPtr: filterPtr,
+      embeddedColId: embeddedColId,
+      propertyId: propertyId,
+      val: nullValue,
+      include: false,
+      epsilon: 0,
+      caseSensitive: true,
+    );
+  }
+}
+
 void _buildConditionEqual({
   required Pointer<CIsarCollection> colPtr,
   required Pointer<Pointer<CFilter>> filterPtr,
   required int? embeddedColId,
   required int? propertyId,
   required Object val,
-  required bool include,
   required bool caseSensitive,
   required double epsilon,
 }) {
@@ -582,13 +693,13 @@ void _buildConditionEqual({
     final lower = adjustFloatBound(
       value: val,
       lowerBound: true,
-      include: include,
+      include: true,
       epsilon: epsilon,
     );
     final upper = adjustFloatBound(
       value: val,
       lowerBound: false,
-      include: include,
+      include: true,
       epsilon: epsilon,
     );
     if (lower == null || upper == null) {
@@ -752,7 +863,7 @@ void _buildConditionLessThan({
       IC.isar_filter_string(
         colPtr,
         filterPtr,
-        minStr,
+        nullptr,
         true,
         val,
         include,

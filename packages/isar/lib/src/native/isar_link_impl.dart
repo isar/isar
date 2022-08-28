@@ -2,11 +2,13 @@
 
 import 'dart:ffi';
 
+import 'package:isar/isar.dart';
 import 'package:isar/src/common/isar_link_base_impl.dart';
 import 'package:isar/src/common/isar_link_common.dart';
 import 'package:isar/src/common/isar_links_common.dart';
 import 'package:isar/src/native/isar_collection_impl.dart';
 import 'package:isar/src/native/isar_core.dart';
+import 'package:isar/src/native/txn.dart';
 
 mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   @override
@@ -32,7 +34,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
     final unlinkList = unlink.toList();
 
     final containingId = requireAttached();
-    return targetCollection.isar.getTxn(true, (txn) {
+    return targetCollection.isar.getTxn(true, (Txn txn) {
       final count = linkList.length + unlinkList.length;
       final idsPtr = txn.alloc<Int64>(count);
       final ids = idsPtr.asTypedList(count);
@@ -65,7 +67,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
     bool reset = false,
   }) {
     final containingId = requireAttached();
-    targetCollection.isar.getTxnSync(true, (txn) {
+    targetCollection.isar.getTxnSync(true, (Txn txn) {
       if (reset) {
         nCall(
           IC.isar_link_unlink_all(
@@ -78,11 +80,13 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
       }
 
       for (final object in link) {
-        final id = getId(object) ??
-            targetCollection.putByIndexSyncInternal(
-              txn: txn,
-              object: object,
-            );
+        var id = getId(object);
+        if (id == Isar.autoIncrement) {
+          id = targetCollection.putByIndexSyncInternal(
+            txn: txn,
+            object: object,
+          );
+        }
 
         nCall(
           IC.isar_link(

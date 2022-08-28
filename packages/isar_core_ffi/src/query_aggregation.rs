@@ -23,6 +23,7 @@ pub enum AggregationOp {
     Sum,
     Average,
     Count,
+    IsEmpty,
 }
 
 impl AggregationOp {
@@ -33,10 +34,18 @@ impl AggregationOp {
             2 => AggregationOp::Sum,
             3 => AggregationOp::Average,
             4 => AggregationOp::Count,
+            5 => AggregationOp::IsEmpty,
             _ => unreachable!(),
         }
     }
 }
+
+const EMPTY_PROP: &Property = &Property {
+    name: String::new(),
+    data_type: DataType::Bool,
+    offset: 0,
+    target_id: None,
+};
 
 fn aggregate(
     query: &Query,
@@ -60,56 +69,63 @@ fn aggregate(
         Ordering::Less
     };
 
+    let property = property.unwrap_or(EMPTY_PROP);
+
     query.find_while(txn, |_, obj| {
-        if op == AggregationOp::Count {
-            count += 1;
-            return true;
-        }
-
-        let property = property.unwrap();
-        if obj.is_null(property.offset, property.data_type) {
-            return true;
-        }
-
-        count += 1;
         match op {
-            AggregationOp::Min | AggregationOp::Max => match property.data_type {
-                DataType::Int | DataType::Long => {
-                    let value = if property.data_type == DataType::Int {
-                        obj.read_int(property.offset) as i64
-                    } else {
-                        obj.read_long(property.offset)
-                    };
-                    if value.cmp(&long_value) == min_max_cmp {
-                        long_value = value;
+            AggregationOp::Min | AggregationOp::Max => {
+                if obj.is_null(property.offset, property.data_type) {
+                    return true;
+                }
+                match property.data_type {
+                    DataType::Int | DataType::Long => {
+                        let value = if property.data_type == DataType::Int {
+                            obj.read_int(property.offset) as i64
+                        } else {
+                            obj.read_long(property.offset)
+                        };
+                        if value.cmp(&long_value) == min_max_cmp {
+                            long_value = value;
+                        }
                     }
-                }
-                DataType::Float | DataType::Double => {
-                    let value = if property.data_type == DataType::Float {
-                        obj.read_float(property.offset) as f64
-                    } else {
-                        obj.read_double(property.offset)
-                    };
-                    if value > double_value && min_max_cmp == Ordering::Greater {
-                        double_value = value;
-                    } else if value < double_value && min_max_cmp == Ordering::Less {
-                        double_value = value;
+                    DataType::Float | DataType::Double => {
+                        let value = if property.data_type == DataType::Float {
+                            obj.read_float(property.offset) as f64
+                        } else {
+                            obj.read_double(property.offset)
+                        };
+                        if value.total_cmp(&double_value) == min_max_cmp {
+                            double_value = value;
+                        }
                     }
+                    _ => unreachable!(),
                 }
-                _ => unreachable!(),
-            },
-            AggregationOp::Sum | AggregationOp::Average => match property.data_type {
-                DataType::Int => {
-                    long_value = long_value.saturating_add(obj.read_int(property.offset) as i64)
+            }
+            AggregationOp::Sum | AggregationOp::Average => {
+                if obj.is_null(property.offset, property.data_type) {
+                    return true;
                 }
-                DataType::Long => {
-                    long_value = long_value.saturating_add(obj.read_long(property.offset))
+
+                count += 1;
+                match property.data_type {
+                    DataType::Int => {
+                        long_value = long_value.saturating_add(obj.read_int(property.offset) as i64)
+                    }
+                    DataType::Long => {
+                        long_value = long_value.saturating_add(obj.read_long(property.offset))
+                    }
+                    DataType::Float => double_value += obj.read_float(property.offset) as f64,
+                    DataType::Double => double_value += obj.read_double(property.offset),
+                    _ => unreachable!(),
                 }
-                DataType::Float => double_value += obj.read_float(property.offset) as f64,
-                DataType::Double => double_value += obj.read_double(property.offset),
-                _ => unreachable!(),
-            },
-            _ => unreachable!(),
+            }
+            AggregationOp::Count => {
+                count += 1;
+            }
+            AggregationOp::IsEmpty => {
+                count += 1;
+                return false;
+            }
         }
         true
     })?;
@@ -125,7 +141,7 @@ fn aggregate(
 
     let result = match op {
         AggregationOp::Average => {
-            let result = match property.unwrap().data_type {
+            let result = match property.data_type {
                 DataType::Int | DataType::Long => (long_value as f64) / (count as f64),
                 DataType::Float | DataType::Double => double_value / (count as f64),
                 _ => unreachable!(),
@@ -133,7 +149,8 @@ fn aggregate(
             AggregationResult::Double(result)
         }
         AggregationOp::Count => AggregationResult::Long(count as i64),
-        _ => match property.unwrap().data_type {
+        AggregationOp::IsEmpty => AggregationResult::Long(if count > 0 { 0 } else { 1 }),
+        _ => match property.data_type {
             DataType::Int | DataType::Long => AggregationResult::Long(long_value),
             DataType::Float | DataType::Double => AggregationResult::Double(double_value),
             _ => unreachable!(),

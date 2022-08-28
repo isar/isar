@@ -34,7 +34,7 @@
 > #### Isar [ee-zahr]:
 >
 > 1. River in Bavaria, Germany.
-> 2. [Crazy fast](#benchmarks) database that is a joy to use.
+> 2. [Crazy fast](#benchmarks) NoSQL database that is a joy to use.
 
 ## Features
 
@@ -44,7 +44,7 @@
 - ⏱ **Asynchronous**. Parallel query operations & multi-isolate support by default
 - 🦄 **Open source**. Everything is open source and free forever!
 
-Isar can do much more (and we are just getting started)
+Isar database can do much more (and we are just getting started)
 
 - 🕵️ **Full-text search**. Make searching fast and fun
 - 📱 **Multiplatform**. iOS, Android, Desktop and FULL WEB SUPPORT!
@@ -52,7 +52,7 @@ Isar can do much more (and we are just getting started)
 - 💃 **Static typing**. Compile-time checked and autocompleted queries
 - ✨ **Beautiful documentation**. Readable, easy to understand and ever-improving
 
-Join the [Telegram group](https://t.me/isardb) for discussion and sneak peaks of new versions.
+Join the [Telegram group](https://t.me/isardb) for discussion and sneak peaks of new versions of the db.
 
 If you want to say thank you, star us on GitHub and like us on pub.dev 🙌💙
 
@@ -79,7 +79,7 @@ part 'email.g.dart';
 
 @collection
 class Email {
-  Id id = Isar.autoIncrement;
+  Id id = Isar.autoIncrement; // you can also use id = null to auto increment
 
   String? title;
 
@@ -119,7 +119,7 @@ final emails = await isar.emails.filter()
   .findAll();
 ```
 
-## Isar Inspector
+## Isar Database Inspector
 
 The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to inspect the Isar instances & collections of your app in real-time. You can execute queries, switch between instances and sort the data.
 
@@ -127,7 +127,7 @@ The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to
 
 ## CRUD operations
 
-All basic crud operations are available via the IsarCollection.
+All basic crud operations are available via the `IsarCollection`.
 
 ```dart
 final newPost = Post()..title = 'Amazing new database';
@@ -143,9 +143,9 @@ await isar.writeTxn(() {
 });
 ```
 
-## Queries
+## Database Queries
 
-Isar has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()`, `or()` and `.xor()` groups, query links and sort the results.
+Isar database has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()`, `or()` and `.xor()` groups, query links and sort the results.
 
 ```dart
 final usersWithPrefix = isar.users
@@ -168,7 +168,7 @@ final usersLivingInMunich = isar.users
 
 ## Links
 
-You can easily define relationships between objects. In Isar they are called links and backlinks:
+You can easily define relationships between objects. In Isar database they are called links and backlinks:
 
 ```dart
 @collection
@@ -191,9 +191,9 @@ class Student {
 }
 ```
 
-## Watchers
+## Database Watchers
 
-With Isar database, you can watch Collections, Objects, or Queries. A watcher is notified after a transaction commits successfully and the target actually changes.
+With Isar database, you can watch collections, objects, or queries. A watcher is notified after a transaction commits successfully and the target actually changes.
 Watchers can be lazy and not reload the data or they can be non-lazy and fetch new results in the background.
 
 ```dart
@@ -206,9 +206,9 @@ queryStream.listen((newResult) {
 })
 ```
 
-## Benchmarks
+## Isar Database Benchmarks
 
-Benchmarks only give a rough idea of the performance of a database but as you can see, Isar database is quite fast 😇
+Benchmarks only give a rough idea of the performance of a database but as you can see, Isar NoSQL database is quite fast 😇
 
 <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/benchmarks/insert.png" width="100%" /> | <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/benchmarks/query.png" width="100%" />
 --- | ---
@@ -220,7 +220,7 @@ If you are interested in more benchmarks or want to check how Isar performs on y
 
 If you want to use Isar database in unit tests or Dart code, call `await Isar.initializeIsarCore(download: true)` before using Isar in your tests.
 
-Isar will automatically download the correct binary for your platform. You can also pass a `libraries` map to adjust the download location for each platform.
+Isar NoSQL database will automatically download the correct binary for your platform. You can also pass a `libraries` map to adjust the download location for each platform.
 
 Make sure to use `flutter test -j 1` to avoid tests running in parallel. This would break the automatic download.
 
@@ -246,7 +246,7 @@ Thanks go to these wonderful people:
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind are welcome!
+This database project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind are welcome!
 
 ### License
 

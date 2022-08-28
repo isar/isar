@@ -8,8 +8,7 @@ class PropertySchema {
     required this.id,
     required this.name,
     required this.type,
-    this.enumValueMap,
-    this.valueEnumMap,
+    this.enumMap,
     this.target,
   });
 
@@ -22,9 +21,8 @@ class PropertySchema {
   /// Isar type of the property
   final IsarType type;
 
-  final Map<Enum, dynamic>? enumValueMap;
-
-  final Map<dynamic, Enum>? valueEnumMap;
+  /// Maps enum values to database values
+  final Map<Enum, dynamic>? enumMap;
 
   /// For embedded objects: Name of the target schema
   final String? target;

@@ -9,10 +9,22 @@ import 'package:isar/src/web/open.dart';
 import 'package:meta/dart2js.dart';
 import 'package:meta/meta.dart';
 
-const Id isarMinId = -9007199254740991;
-const Id isarMaxId = 9007199254740991;
-final Id isarAutoIncrementId = double.negativeInfinity as int;
+/// Type to specify the id property of a collection.
+typedef Id = num;
 
+/// @nodoc
+@protected
+const Id isarMinId = -9007199254740991;
+
+/// @nodoc
+@protected
+const Id isarMaxId = 9007199254740991;
+
+/// @nodoc
+@protected
+const Id isarAutoIncrementId = double.negativeInfinity;
+
+/// @nodoc
 Never unsupportedOnWeb() {
   throw UnsupportedError('This operation is not supported for Isar web');
 }

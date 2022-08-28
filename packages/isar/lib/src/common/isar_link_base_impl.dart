@@ -60,13 +60,13 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
   }
 
   /// Returns the id of a linked object.
-  int? Function(OBJ obj) get getId;
+  Id Function(OBJ obj) get getId;
 
   /// Returns the id of a linked object or throws an exception if the id is
   /// `null` or set to `Isar.autoIncrement`.
-  int requireGetId(OBJ object) {
+  Id requireGetId(OBJ object) {
     final id = getId(object);
-    if (id != null) {
+    if (id != Isar.autoIncrement) {
       return id;
     } else {
       throw IsarError(

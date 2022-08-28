@@ -1,3 +1,18 @@
+## 3.0.0-dev.13
+
+### Enhancements
+- Added `stringIsEmpty()` and `stringIsNotEmpty()` filters
+- Added `query.isEmpty()`, `query.isEmptySync()`, `query.isNotEmpty()` and `query.isNotEmptySync()` operations
+- Improved aggregation performance
+- The Id type changed from `int` to `num` on web
+- `Isar.autoIncrement` is now const
+
+
+### Fixes
+- Removed incorrectly generated embedded filters
+- Fixed remaining embedded filters
+- Fixed issue with 
+
 ## 3.0.0-dev.12
 
 ### Enhancements

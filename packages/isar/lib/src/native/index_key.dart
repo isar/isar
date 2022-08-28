@@ -58,9 +58,9 @@ void _addKeyValue(
   bool caseSensitive,
 ) {
   if (value is Enum) {
-    value = property.enumValueMap![value];
+    value = property.enumMap![value];
   } else if (value is List<Enum?>) {
-    value = value.map((e) => property.enumValueMap![value]).toList();
+    value = value.map((e) => property.enumMap![value]).toList();
   }
 
   final isarType =
