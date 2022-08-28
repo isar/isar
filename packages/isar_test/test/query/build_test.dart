@@ -2,7 +2,6 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
-import '../util/matchers.dart';
 import '../util/sync_async_helper.dart';
 
 part 'build_test.g.dart';

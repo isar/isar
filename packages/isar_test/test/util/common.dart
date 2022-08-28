@@ -40,26 +40,21 @@ Future<void> _prepareTest() async {
   if (!kIsWeb && !_setUp) {
     if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
       try {
-        final packagesDir = path.dirname(Directory.current.absolute.path);
+        final rootDir = path.dirname(path.dirname(Directory.current.path));
         final target = _getRustTarget();
         final binaryName = Platform.isWindows
             ? 'isar.dll'
             : Platform.isMacOS
                 ? 'libisar.dylib'
                 : 'libisar.so';
-        final binaryPath = path.join(
-          path.dirname(packagesDir),
-          'target',
-          target,
-          'debug',
-          binaryName,
-        );
-
+        final binaryPath =
+            path.join(rootDir, 'target', target, 'debug', binaryName);
         if (!File(binaryPath).existsSync()) {
-          final result = Process.runSync(
+          final result = await Process.run(
             'cargo',
             ['build', '--target', target],
-            workingDirectory: path.join(packagesDir, 'isar_core_ffi'),
+            runInShell: true,
+            workingDirectory: rootDir,
           );
           if (result.exitCode != 0) {
             throw Exception('Cargo build failed: ${result.stderr}');
@@ -69,7 +64,7 @@ Future<void> _prepareTest() async {
       } catch (e) {
         // ignore. maybe this is an instrumentation test
         // ignore: avoid_print
-        print(e);
+        print('EE: $e');
       }
     }
 

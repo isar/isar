@@ -385,6 +385,8 @@ class FilterCondition extends FilterOperation {
         epsilon = Query.epsilon,
         super._();
 
+  /// Filters the results to only include objects where the property is not
+  /// null.
   const FilterCondition.isNotNull({
     required this.property,
   })  : type = FilterConditionType.isNotNull,
@@ -396,6 +398,7 @@ class FilterCondition extends FilterOperation {
         epsilon = Query.epsilon,
         super._();
 
+  /// Filters the results to only include lists that contain `null`.
   const FilterCondition.elementIsNull({
     required this.property,
   })  : type = FilterConditionType.elementIsNull,
@@ -407,6 +410,7 @@ class FilterCondition extends FilterOperation {
         epsilon = Query.epsilon,
         super._();
 
+  /// Filters the results to only include lists that do not contain `null`.
   const FilterCondition.elementIsNotNull({
     required this.property,
   })  : type = FilterConditionType.elementIsNotNull,

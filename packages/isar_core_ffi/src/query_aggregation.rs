@@ -77,6 +77,8 @@ fn aggregate(
                 if obj.is_null(property.offset, property.data_type) {
                     return true;
                 }
+
+                count += 1;
                 match property.data_type {
                     DataType::Int | DataType::Long => {
                         let value = if property.data_type == DataType::Int {
