@@ -76,6 +76,7 @@ class IndexWhereClause extends WhereClause {
         upper = null,
         includeLower = true,
         includeUpper = true,
+        epsilon = Query.epsilon,
         super._();
 
   /// Where clause that matches all index values greater than the given [lower]
@@ -87,6 +88,7 @@ class IndexWhereClause extends WhereClause {
     required this.indexName,
     required IndexKey lower,
     this.includeLower = true,
+    this.epsilon = Query.epsilon,
   })  : lower = lower,
         upper = null,
         includeUpper = true,
@@ -101,6 +103,7 @@ class IndexWhereClause extends WhereClause {
     required this.indexName,
     required IndexKey upper,
     this.includeUpper = true,
+    this.epsilon = Query.epsilon,
   })  : upper = upper,
         lower = null,
         includeLower = true,
@@ -110,6 +113,7 @@ class IndexWhereClause extends WhereClause {
   const IndexWhereClause.equalTo({
     required this.indexName,
     required IndexKey value,
+    this.epsilon = Query.epsilon,
   })  : lower = value,
         upper = value,
         includeLower = true,
@@ -127,6 +131,7 @@ class IndexWhereClause extends WhereClause {
     this.includeLower = true,
     required IndexKey upper,
     this.includeUpper = true,
+    this.epsilon = Query.epsilon,
   })  : lower = lower,
         upper = upper,
         super._();
@@ -147,6 +152,9 @@ class IndexWhereClause extends WhereClause {
   /// Whether the upper bound should be included in the results. Double values
   /// are never included.
   final bool includeUpper;
+
+  /// The precision to use for floating point values.
+  final double epsilon;
 }
 
 /// A where clause traversing objects linked to the specified object.
@@ -219,6 +227,7 @@ class FilterCondition extends FilterOperation {
     required this.include1,
     required this.include2,
     required this.caseSensitive,
+    this.epsilon = Query.epsilon,
   }) : super._();
 
   /// Filters the results to only include objects where the property equals
@@ -229,6 +238,7 @@ class FilterCondition extends FilterOperation {
     required String property,
     required Object? value,
     this.caseSensitive = true,
+    this.epsilon = Query.epsilon,
   })  : type = FilterConditionType.equalTo,
         property = property,
         value1 = value,
@@ -246,6 +256,7 @@ class FilterCondition extends FilterOperation {
     required Object? value,
     bool include = false,
     this.caseSensitive = true,
+    this.epsilon = Query.epsilon,
   })  : type = FilterConditionType.greaterThan,
         value1 = value,
         include1 = include,
@@ -262,6 +273,7 @@ class FilterCondition extends FilterOperation {
     required Object? value,
     bool include = false,
     this.caseSensitive = true,
+    this.epsilon = Query.epsilon,
   })  : type = FilterConditionType.lessThan,
         value1 = value,
         include1 = include,
@@ -280,6 +292,7 @@ class FilterCondition extends FilterOperation {
     Object? upper,
     bool includeUpper = true,
     this.caseSensitive = true,
+    this.epsilon = Query.epsilon,
   })  : value1 = lower,
         include1 = includeLower,
         value2 = upper,
@@ -300,6 +313,7 @@ class FilterCondition extends FilterOperation {
         include1 = true,
         value2 = null,
         include2 = false,
+        epsilon = Query.epsilon,
         super._();
 
   /// Filters the results to only include objects where the property ends with
@@ -315,6 +329,7 @@ class FilterCondition extends FilterOperation {
         include1 = true,
         value2 = null,
         include2 = false,
+        epsilon = Query.epsilon,
         super._();
 
   /// Filters the results to only include objects where the property contains
@@ -330,6 +345,7 @@ class FilterCondition extends FilterOperation {
         include1 = true,
         value2 = null,
         include2 = false,
+        epsilon = Query.epsilon,
         super._();
 
   /// Filters the results to only include objects where the property matches
@@ -345,11 +361,10 @@ class FilterCondition extends FilterOperation {
         include1 = true,
         value2 = null,
         include2 = false,
+        epsilon = Query.epsilon,
         super._();
 
   /// Filters the results to only include objects where the property is null.
-  ///
-  /// Lists match if they are null.
   const FilterCondition.isNull({
     required this.property,
   })  : type = FilterConditionType.isNull,
@@ -358,10 +373,11 @@ class FilterCondition extends FilterOperation {
         value2 = null,
         include2 = false,
         caseSensitive = false,
+        epsilon = Query.epsilon,
         super._();
 
   /// Filters the results to only include objects where the length of
-  /// [property] is between [lower] and [upper].
+  /// [property] is between [lower] (included) and [upper] (included).
   ///
   /// Only list properties are supported.
   const FilterCondition.listLength({
@@ -374,6 +390,8 @@ class FilterCondition extends FilterOperation {
         value2 = upper,
         include2 = true,
         caseSensitive = false,
+        epsilon = Query.epsilon,
+        assert(lower >= 0 && upper >= 0, 'List length must be positive.'),
         super._();
 
   /// Type of the filter condition.
@@ -396,6 +414,9 @@ class FilterCondition extends FilterOperation {
 
   /// Are string operations case sensitive.
   final bool caseSensitive;
+
+  /// The precision to use for floating point values.
+  final double epsilon;
 }
 
 /// The type of filter groups.
@@ -525,6 +546,7 @@ class LinkFilter extends FilterOperation {
   })  : filter = null,
         lower = lower,
         upper = upper,
+        assert(lower >= 0 && upper >= 0, 'Link length must be positive.'),
         super._();
 
   /// Isar name of the link.

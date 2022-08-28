@@ -3,7 +3,6 @@
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-
 import 'package:isar/isar.dart';
 import 'package:isar/src/native/binary_writer.dart';
 import 'package:isar/src/native/bindings.dart';
@@ -30,19 +29,19 @@ Query<T> buildNativeQuery<T>(
 ) {
   final qbPtr = IC.isar_qb_create(col.ptr);
 
-  for (final whereClause in whereClauses) {
-    if (whereClause is IdWhereClause) {
-      _addIdWhereClause(qbPtr, whereClause, whereSort);
-    } else if (whereClause is IndexWhereClause) {
+  for (final wc in whereClauses) {
+    if (wc is IdWhereClause) {
+      _addIdWhereClause(qbPtr, wc, whereSort);
+    } else if (wc is IndexWhereClause) {
       _addIndexWhereClause(
         col.schema,
         qbPtr,
-        whereClause,
+        wc,
         whereDistinct,
         whereSort,
       );
     } else {
-      _addLinkWhereClause(col.isar, qbPtr, whereClause as LinkWhereClause);
+      _addLinkWhereClause(col.isar, qbPtr, wc as LinkWhereClause);
     }
   }
 
@@ -115,6 +114,81 @@ void _addIdWhereClause(
   );
 }
 
+Pointer<CIndexKey>? _buildLowerIndexBound(
+  CollectionSchema<dynamic> schema,
+  IndexSchema index,
+  IndexWhereClause wc,
+) {
+  if (wc.lower == null) {
+    return buildLowerUnboundedIndexKey();
+  }
+
+  final firstVal = wc.lower!.length == 1 ? wc.lower!.first : null;
+  if (firstVal is double) {
+    final adjusted = adjustFloatBound(
+      value: firstVal,
+      lowerBound: true,
+      include: wc.includeLower,
+      epsilon: wc.epsilon,
+    );
+    if (adjusted == null) {
+      return null;
+    }
+
+    return buildIndexKey(schema, index, [adjusted]);
+  } else {
+    final lowerPtr = buildIndexKey(schema, index, wc.lower!);
+
+    if (!wc.includeLower) {
+      if (!IC.isar_key_increase(lowerPtr)) {
+        return null;
+      }
+    }
+
+    return lowerPtr;
+  }
+}
+
+Pointer<CIndexKey>? _buildUpperIndexBound(
+  CollectionSchema<dynamic> schema,
+  IndexSchema index,
+  IndexWhereClause wc,
+) {
+  if (wc.upper == null) {
+    return buildUpperUnboundedIndexKey();
+  }
+
+  final firstVal = wc.upper!.length == 1 ? wc.upper!.first : null;
+  if (firstVal is double) {
+    final adjusted = adjustFloatBound(
+      value: firstVal,
+      lowerBound: false,
+      include: wc.includeUpper,
+      epsilon: wc.epsilon,
+    );
+    if (adjusted == null) {
+      return null;
+    } else {
+      return buildIndexKey(schema, index, [adjusted]);
+    }
+  } else {
+    final upperPtr = buildIndexKey(schema, index, wc.upper!);
+
+    if (!wc.includeUpper) {
+      if (!IC.isar_key_decrease(upperPtr)) {
+        return null;
+      }
+    }
+
+    // Also include composite indexes for upper keys
+    if (index.properties.length > wc.upper!.length) {
+      IC.isar_key_add_long(upperPtr, maxLong);
+    }
+
+    return upperPtr;
+  }
+}
+
 void _addIndexWhereClause(
   CollectionSchema<dynamic> schema,
   Pointer<CQueryBuilder> qbPtr,
@@ -122,30 +196,9 @@ void _addIndexWhereClause(
   bool distinct,
   Sort sort,
 ) {
-  Pointer<CIndexKey>? lowerPtr;
-  if (wc.lower != null) {
-    lowerPtr = buildIndexKey(
-      schema,
-      wc.indexName,
-      wc.lower!,
-      increase: !wc.includeLower,
-    );
-  } else {
-    lowerPtr = buildLowerUnboundedIndexKey();
-  }
-
-  Pointer<CIndexKey>? upperPtr;
-  if (wc.upper != null) {
-    upperPtr = buildIndexKey(
-      schema,
-      wc.indexName,
-      wc.upper!,
-      addMaxComposite: true,
-      decrease: !wc.includeUpper,
-    );
-  } else {
-    upperPtr = buildUpperUnboundedIndexKey();
-  }
+  final index = schema.index(wc.indexName);
+  final lowerPtr = _buildLowerIndexBound(schema, index, wc);
+  final upperPtr = _buildUpperIndexBound(schema, index, wc);
 
   if (lowerPtr != null && upperPtr != null) {
     nCall(
@@ -159,6 +212,7 @@ void _addIndexWhereClause(
       ),
     );
   } else {
+    // this where clause does not match any objects
     nCall(
       IC.isar_qb_add_id_where_clause(
         qbPtr,
@@ -318,13 +372,47 @@ Pointer<CFilter>? _buildObject(
   return filterPtrPtr.value;
 }
 
-dynamic _prepareValue(dynamic value) {
+Object _prepareValue(
+  Object? value,
+  Allocator alloc,
+  IsarType type,
+  Map<Enum, dynamic>? enumMap,
+) {
   if (value is bool) {
     return value.byteValue;
   } else if (value is DateTime) {
     return value.longValue;
-  } else if (value is IsarEnum) {
-    return _prepareValue(value.isarValue);
+  } else if (value is Enum) {
+    return _prepareValue(enumMap![value], alloc, type, null);
+  } else if (value is String) {
+    return value.toCString(alloc);
+  } else if (value == null) {
+    switch (type) {
+      case IsarType.bool:
+      case IsarType.byte:
+      case IsarType.boolList:
+      case IsarType.byteList:
+        return minByte;
+      case IsarType.int:
+      case IsarType.intList:
+        return minInt;
+      case IsarType.long:
+      case IsarType.longList:
+      case IsarType.dateTime:
+      case IsarType.dateTimeList:
+        return minLong;
+      case IsarType.float:
+      case IsarType.double:
+      case IsarType.floatList:
+      case IsarType.doubleList:
+        return minDouble;
+      case IsarType.string:
+      case IsarType.stringList:
+        return minStr;
+      case IsarType.object:
+      case IsarType.objectList:
+        return 0; // objects only support "isNull"
+    }
   } else {
     return value;
   }
@@ -336,33 +424,49 @@ Pointer<CFilter> _buildCondition(
   FilterCondition condition,
   Allocator alloc,
 ) {
-  final value1 = _prepareValue(condition.value1);
-  final value2 = _prepareValue(condition.value2);
-
   final property = condition.property != col.schema.idName
       ? (embeddedCol ?? col.schema).property(condition.property)
       : null;
+
+  final value1 = _prepareValue(
+    condition.value1,
+    alloc,
+    property?.type ?? IsarType.long,
+    property?.enumValueMap,
+  );
+  final value2 = _prepareValue(
+    condition.value2,
+    alloc,
+    property?.type ?? IsarType.long,
+    property?.enumValueMap,
+  );
+  final filterPtr = alloc<Pointer<CFilter>>();
+
   switch (condition.type) {
     case FilterConditionType.isNull:
-      return _buildConditionIsNull(
+      _buildConditionIsNull(
         colPtr: col.ptr,
+        filterPtr: filterPtr,
         embeddedColId: embeddedCol?.id,
         propertyId: property?.id,
-        alloc: alloc,
       );
+      break;
     case FilterConditionType.equalTo:
-      return _buildConditionEqual(
+      _buildConditionEqual(
         colPtr: col.ptr,
+        filterPtr: filterPtr,
         embeddedColId: embeddedCol?.id,
         propertyId: property?.id,
         val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
-        alloc: alloc,
+        epsilon: condition.epsilon,
       );
+      break;
     case FilterConditionType.between:
-      return _buildConditionBetween(
+      _buildConditionBetween(
         colPtr: col.ptr,
+        filterPtr: filterPtr,
         embeddedColId: embeddedCol?.id,
         propertyId: property?.id,
         lower: value1,
@@ -370,105 +474,101 @@ Pointer<CFilter> _buildCondition(
         upper: value2,
         includeUpper: condition.include2,
         caseSensitive: condition.caseSensitive,
-        alloc: alloc,
+        epsilon: condition.epsilon,
       );
+      break;
     case FilterConditionType.lessThan:
-      return _buildConditionLessThan(
+      _buildConditionLessThan(
         colPtr: col.ptr,
+        filterPtr: filterPtr,
         embeddedColId: embeddedCol?.id,
         propertyId: property?.id,
         val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
-        alloc: alloc,
+        epsilon: condition.epsilon,
       );
+      break;
     case FilterConditionType.greaterThan:
-      return _buildConditionGreaterThan(
+      _buildConditionGreaterThan(
         colPtr: col.ptr,
+        filterPtr: filterPtr,
         embeddedColId: embeddedCol?.id,
         propertyId: property?.id,
         val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
-        alloc: alloc,
+        epsilon: condition.epsilon,
       );
+      break;
     case FilterConditionType.startsWith:
     case FilterConditionType.endsWith:
     case FilterConditionType.contains:
     case FilterConditionType.matches:
-      return _buildConditionStringOp(
+      _buildConditionStringOp(
         colPtr: col.ptr,
+        filterPtr: filterPtr,
         conditionType: condition.type,
         embeddedColId: embeddedCol?.id,
         propertyId: property?.id,
         val: value1,
         include: condition.include1,
         caseSensitive: condition.caseSensitive,
-        alloc: alloc,
       );
+      break;
     case FilterConditionType.listLength:
-      return _buildListLength(
+      _buildListLength(
         colPtr: col.ptr,
+        filterPtr: filterPtr,
         embeddedColId: embeddedCol?.id,
         propertyId: property?.id,
-        lower: value1 as int,
-        upper: value2 as int,
-        alloc: alloc,
+        lower: value1,
+        upper: value2,
       );
+      break;
   }
+
+  return filterPtr.value;
 }
 
-Pointer<CFilter> _buildConditionIsNull({
+void _buildConditionIsNull({
   required Pointer<CIsarCollection> colPtr,
+  required Pointer<Pointer<CFilter>> filterPtr,
   required int? embeddedColId,
   required int? propertyId,
-  required Allocator alloc,
 }) {
-  final filterPtrPtr = alloc<Pointer<CFilter>>();
   if (propertyId != null) {
     nCall(
       IC.isar_filter_null(
         colPtr,
-        filterPtrPtr,
-        false,
+        filterPtr,
         embeddedColId ?? 0,
         propertyId,
       ),
     );
   } else {
-    IC.isar_filter_static(filterPtrPtr, false);
+    IC.isar_filter_static(filterPtr, false);
   }
-  return filterPtrPtr.value;
 }
 
-Pointer<CFilter> _buildConditionEqual({
+void _buildConditionEqual({
   required Pointer<CIsarCollection> colPtr,
+  required Pointer<Pointer<CFilter>> filterPtr,
   required int? embeddedColId,
   required int? propertyId,
-  required Object? val,
+  required Object val,
   required bool include,
   required bool caseSensitive,
-  required Allocator alloc,
+  required double epsilon,
 }) {
-  final filterPtrPtr = alloc<Pointer<CFilter>>();
-  if (val == null) {
-    nCall(
-      IC.isar_filter_null(
-        colPtr,
-        filterPtrPtr,
-        true,
-        embeddedColId ?? 0,
-        propertyId!,
-      ),
-    );
-  } else if (val is int) {
+  if (val is int) {
     if (propertyId == null) {
-      IC.isar_filter_id(filterPtrPtr, val, true, val, true);
+      IC.isar_filter_id(filterPtr, val, true, val, true);
     } else {
       nCall(
         IC.isar_filter_long(
           colPtr,
-          filterPtrPtr,
+          filterPtr,
           val,
           true,
           val,
@@ -478,15 +578,41 @@ Pointer<CFilter> _buildConditionEqual({
         ),
       );
     }
-  } else if (val is String) {
-    final strPtr = val.toCString(alloc);
+  } else if (val is double) {
+    final lower = adjustFloatBound(
+      value: val,
+      lowerBound: true,
+      include: include,
+      epsilon: epsilon,
+    );
+    final upper = adjustFloatBound(
+      value: val,
+      lowerBound: false,
+      include: include,
+      epsilon: epsilon,
+    );
+    if (lower == null || upper == null) {
+      IC.isar_filter_static(filterPtr, false);
+    } else {
+      nCall(
+        IC.isar_filter_double(
+          colPtr,
+          filterPtr,
+          lower,
+          upper,
+          embeddedColId ?? 0,
+          propertyId!,
+        ),
+      );
+    }
+  } else if (val is Pointer<Char>) {
     nCall(
       IC.isar_filter_string(
         colPtr,
-        filterPtrPtr,
-        strPtr,
+        filterPtr,
+        val,
         true,
-        strPtr,
+        val,
         true,
         caseSensitive,
         embeddedColId ?? 0,
@@ -496,75 +622,72 @@ Pointer<CFilter> _buildConditionEqual({
   } else {
     throw IsarError('Unsupported type for condition');
   }
-  return filterPtrPtr.value;
 }
 
-Pointer<CFilter> _buildConditionBetween({
+void _buildConditionBetween({
   required Pointer<CIsarCollection> colPtr,
+  required Pointer<Pointer<CFilter>> filterPtr,
   required int? embeddedColId,
   required int? propertyId,
-  required Object? lower,
+  required Object lower,
   required bool includeLower,
-  required Object? upper,
+  required Object upper,
   required bool includeUpper,
   required bool caseSensitive,
-  required Allocator alloc,
+  required double epsilon,
 }) {
-  final filterPtrPtr = alloc<Pointer<CFilter>>();
-  if (lower == null && upper == null) {
-    nCall(
-      IC.isar_filter_null(
-        colPtr,
-        filterPtrPtr,
-        true,
-        embeddedColId ?? 0,
-        propertyId!,
-      ),
-    );
-  } else if ((lower is int?) && upper is int?) {
+  if (lower is int && upper is int) {
     if (propertyId == null) {
-      IC.isar_filter_id(
-        filterPtrPtr,
-        lower ?? nullLong,
-        includeLower,
-        upper ?? maxLong,
-        includeUpper,
-      );
+      IC.isar_filter_id(filterPtr, lower, includeLower, upper, includeUpper);
     } else {
       nCall(
         IC.isar_filter_long(
           colPtr,
-          filterPtrPtr,
-          lower ?? nullLong,
+          filterPtr,
+          lower,
           includeLower,
-          upper ?? maxLong,
+          upper,
           includeUpper,
           embeddedColId ?? 0,
           propertyId,
         ),
       );
     }
-  } else if ((lower is double?) && upper is double?) {
-    nCall(
-      IC.isar_filter_double(
-        colPtr,
-        filterPtrPtr,
-        lower ?? nullDouble,
-        upper ?? maxDouble,
-        embeddedColId ?? 0,
-        propertyId!,
-      ),
+  } else if (lower is double && upper is double) {
+    final adjustedLower = adjustFloatBound(
+      value: lower,
+      lowerBound: true,
+      include: includeLower,
+      epsilon: epsilon,
     );
-  } else if ((lower is String?) && upper is String?) {
-    final lowerPtr = lower?.toCString(alloc) ?? minStr;
-    final upperPtr = upper?.toCString(alloc) ?? maxStr;
+    final adjustedUpper = adjustFloatBound(
+      value: upper,
+      lowerBound: false,
+      include: includeUpper,
+      epsilon: epsilon,
+    );
+    if (adjustedLower == null || adjustedUpper == null) {
+      IC.isar_filter_static(filterPtr, false);
+    } else {
+      nCall(
+        IC.isar_filter_double(
+          colPtr,
+          filterPtr,
+          adjustedLower,
+          adjustedUpper,
+          embeddedColId ?? 0,
+          propertyId!,
+        ),
+      );
+    }
+  } else if (lower is Pointer<Char> && upper is Pointer<Char>) {
     nCall(
       IC.isar_filter_string(
         colPtr,
-        filterPtrPtr,
-        lowerPtr,
+        filterPtr,
+        lower,
         includeLower,
-        upperPtr,
+        upper,
         includeUpper,
         caseSensitive,
         embeddedColId ?? 0,
@@ -574,41 +697,26 @@ Pointer<CFilter> _buildConditionBetween({
   } else {
     throw IsarError('Unsupported type for condition');
   }
-  return filterPtrPtr.value;
 }
 
-Pointer<CFilter> _buildConditionLessThan({
+void _buildConditionLessThan({
   required Pointer<CIsarCollection> colPtr,
+  required Pointer<Pointer<CFilter>> filterPtr,
   required int? embeddedColId,
   required int? propertyId,
-  required Object? val,
+  required Object val,
   required bool include,
   required bool caseSensitive,
-  required Allocator alloc,
+  required double epsilon,
 }) {
-  final filterPtrPtr = alloc<Pointer<CFilter>>();
-  if (val == null) {
-    if (include) {
-      nCall(
-        IC.isar_filter_null(
-          colPtr,
-          filterPtrPtr,
-          true,
-          embeddedColId ?? 0,
-          propertyId!,
-        ),
-      );
-    } else {
-      IC.isar_filter_static(filterPtrPtr, false);
-    }
-  } else if (val is int) {
+  if (val is int) {
     if (propertyId == null) {
-      IC.isar_filter_id(filterPtrPtr, minLong, true, val, include);
+      IC.isar_filter_id(filterPtr, minLong, true, val, include);
     } else {
       nCall(
         IC.isar_filter_long(
           colPtr,
-          filterPtrPtr,
+          filterPtr,
           minLong,
           true,
           val,
@@ -619,25 +727,34 @@ Pointer<CFilter> _buildConditionLessThan({
       );
     }
   } else if (val is double) {
-    nCall(
-      IC.isar_filter_double(
-        colPtr,
-        filterPtrPtr,
-        minDouble,
-        val,
-        embeddedColId ?? 0,
-        propertyId!,
-      ),
+    final upper = adjustFloatBound(
+      value: val,
+      lowerBound: false,
+      include: include,
+      epsilon: epsilon,
     );
-  } else if (val is String) {
-    final value = val.toCString(alloc);
+    if (upper == null) {
+      IC.isar_filter_static(filterPtr, false);
+    } else {
+      nCall(
+        IC.isar_filter_double(
+          colPtr,
+          filterPtr,
+          minDouble,
+          upper,
+          embeddedColId ?? 0,
+          propertyId!,
+        ),
+      );
+    }
+  } else if (val is Pointer<Char>) {
     nCall(
       IC.isar_filter_string(
         colPtr,
-        filterPtrPtr,
+        filterPtr,
         minStr,
         true,
-        value,
+        val,
         include,
         caseSensitive,
         embeddedColId ?? 0,
@@ -647,42 +764,26 @@ Pointer<CFilter> _buildConditionLessThan({
   } else {
     throw IsarError('Unsupported type for condition');
   }
-  return filterPtrPtr.value;
 }
 
-Pointer<CFilter> _buildConditionGreaterThan({
+void _buildConditionGreaterThan({
   required Pointer<CIsarCollection> colPtr,
+  required Pointer<Pointer<CFilter>> filterPtr,
   required int? embeddedColId,
   required int? propertyId,
-  required Object? val,
+  required Object val,
   required bool include,
   required bool caseSensitive,
-  required Allocator alloc,
+  required double epsilon,
 }) {
-  final filterPtrPtr = alloc<Pointer<CFilter>>();
-  if (val == null) {
-    if (include) {
-      IC.isar_filter_static(filterPtrPtr, true);
-    } else {
-      nCall(
-        IC.isar_filter_null(
-          colPtr,
-          filterPtrPtr,
-          true,
-          embeddedColId ?? 0,
-          propertyId!,
-        ),
-      );
-      IC.isar_filter_not(filterPtrPtr, filterPtrPtr.value);
-    }
-  } else if (val is int) {
+  if (val is int) {
     if (propertyId == null) {
-      IC.isar_filter_id(filterPtrPtr, val, include, maxLong, true);
+      IC.isar_filter_id(filterPtr, val, include, maxLong, true);
     } else {
       nCall(
         IC.isar_filter_long(
           colPtr,
-          filterPtrPtr,
+          filterPtr,
           val,
           include,
           maxLong,
@@ -693,23 +794,32 @@ Pointer<CFilter> _buildConditionGreaterThan({
       );
     }
   } else if (val is double) {
-    nCall(
-      IC.isar_filter_double(
-        colPtr,
-        filterPtrPtr,
-        val,
-        maxDouble,
-        embeddedColId ?? 0,
-        propertyId!,
-      ),
+    final lower = adjustFloatBound(
+      value: val,
+      lowerBound: true,
+      include: include,
+      epsilon: epsilon,
     );
-  } else if (val is String) {
-    final value = val.toCString(alloc);
+    if (lower == null) {
+      IC.isar_filter_static(filterPtr, false);
+    } else {
+      nCall(
+        IC.isar_filter_double(
+          colPtr,
+          filterPtr,
+          lower,
+          maxDouble,
+          embeddedColId ?? 0,
+          propertyId!,
+        ),
+      );
+    }
+  } else if (val is Pointer<Char>) {
     nCall(
       IC.isar_filter_string(
         colPtr,
-        filterPtrPtr,
-        value,
+        filterPtr,
+        val,
         include,
         maxStr,
         true,
@@ -721,29 +831,27 @@ Pointer<CFilter> _buildConditionGreaterThan({
   } else {
     throw IsarError('Unsupported type for condition');
   }
-  return filterPtrPtr.value;
 }
 
-Pointer<CFilter> _buildConditionStringOp({
+void _buildConditionStringOp({
   required Pointer<CIsarCollection> colPtr,
+  required Pointer<Pointer<CFilter>> filterPtr,
   required FilterConditionType conditionType,
   required int? embeddedColId,
   required int? propertyId,
-  required Object? val,
+  required Object val,
   required bool include,
   required bool caseSensitive,
-  required Allocator alloc,
 }) {
-  final filterPtrPtr = alloc<Pointer<CFilter>>();
-  if (val is String) {
-    final strPtr = val.toCString(alloc);
+  if (val is Pointer<Char>) {
+    // ignore: missing_enum_constant_in_switch
     switch (conditionType) {
       case FilterConditionType.startsWith:
         nCall(
           IC.isar_filter_string_starts_with(
             colPtr,
-            filterPtrPtr,
-            strPtr,
+            filterPtr,
+            val,
             caseSensitive,
             embeddedColId ?? 0,
             propertyId!,
@@ -754,8 +862,8 @@ Pointer<CFilter> _buildConditionStringOp({
         nCall(
           IC.isar_filter_string_ends_with(
             colPtr,
-            filterPtrPtr,
-            strPtr,
+            filterPtr,
+            val,
             caseSensitive,
             embeddedColId ?? 0,
             propertyId!,
@@ -766,8 +874,8 @@ Pointer<CFilter> _buildConditionStringOp({
         nCall(
           IC.isar_filter_string_contains(
             colPtr,
-            filterPtrPtr,
-            strPtr,
+            filterPtr,
+            val,
             caseSensitive,
             embeddedColId ?? 0,
             propertyId!,
@@ -778,43 +886,40 @@ Pointer<CFilter> _buildConditionStringOp({
         nCall(
           IC.isar_filter_string_matches(
             colPtr,
-            filterPtrPtr,
-            strPtr,
+            filterPtr,
+            val,
             caseSensitive,
             embeddedColId ?? 0,
             propertyId!,
           ),
         );
         break;
-      // ignore: no_default_cases
-      default:
-        throw IsarError('Unsupported condition type');
     }
   } else {
     throw IsarError('Unsupported type for condition');
   }
-
-  return filterPtrPtr.value;
 }
 
-Pointer<CFilter> _buildListLength({
+void _buildListLength({
   required Pointer<CIsarCollection> colPtr,
+  required Pointer<Pointer<CFilter>> filterPtr,
   required int? embeddedColId,
   required int? propertyId,
-  required int lower,
-  required int upper,
-  required Allocator alloc,
+  required Object? lower,
+  required Object? upper,
 }) {
-  final filterPtrPtr = alloc<Pointer<CFilter>>();
-  nCall(
-    IC.isar_filter_list_length(
-      colPtr,
-      filterPtrPtr,
-      lower,
-      upper,
-      embeddedColId ?? 0,
-      propertyId!,
-    ),
-  );
-  return filterPtrPtr.value;
+  if (lower is int && upper is int) {
+    nCall(
+      IC.isar_filter_list_length(
+        colPtr,
+        filterPtr,
+        lower,
+        upper,
+        embeddedColId ?? 0,
+        propertyId!,
+      ),
+    );
+  } else {
+    throw IsarError('Unsupported type for condition');
+  }
 }

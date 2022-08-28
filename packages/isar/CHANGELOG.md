@@ -1,25 +1,51 @@
+## 3.0.0-dev.12
+
+### Enhancements
+
+Small performance improvements across the board.
+
+### Breaking
+
+Removed `IsarEnum` in favor of the `@enumerated` and `@Enumerated()` annotations. Check [#583](https://github.com/isar/isar/issues/583#issuecomment-1225376959) for more details.
+
+## 3.0.0-dev.10
+
+Hotfix: Missing symbols on Android.
+
 ## 3.0.0-dev.9
+
+This is the last big feature release before a stable 3.0 version. Unfortunately, this version does not work with the inspector yet. Stay tuned for the next release.
 
 ### Enhancements
 
 - Support for embedded objects using `@Embedded()`
-- Support for enums
+- Support for enums using `IsarEnum` mixin
 - Improved `put()` performance by about 50% (yes, that is insane)
 - Added `linksLengthEqualTo()`, `linksIsEmpty()`, `linksIsNotEmpty()`, `linksLengthGreaterThan()`, `linksLengthLessThan()`, `linksLengthBetween()` and `linkIsNull()` filters
 - Added `listLengthEqualTo()`, `listIsEmpty()`, `listIsNotEmpty()`, `listLengthGreaterThan()`, `listLengthLessThan()`, `listLengthBetween()` filters
+- Added `isNotNull()` filters
 - Added `compactOnLaunch` conditions to `Isar.open()` for automatic database compaction
 - Added `isar.copyToFile()` which copies a compacted version of the database to a path
 - Added `isar.path` to get the full path of the database file
 - Added `collection.schema` to receive the layout of a collection
 - Added check to verify that linked collections schemas are provided for opening an instance
+- Added `@collection` and `@embedded` alternative to `@Collection()` and `@Embedded()`
 - Apply default values from constructor during deserialization
 - Added `isar.verify()` and `col.verify()` methods for checking database integrity in unit tests
-- An exception is now thrown when a sync write txn is started while an async write txn is active. This prevents deadlock.
+- Added missing float and double queries and an `epsilon` parameter
 
 ### Breaking
 
 - Renamed `isar.path` to `isar.directory`
 - Removed support for type converters
+
+### Fixes
+
+- Fixed nested link queries
+- Minor fixes for query edge cases
+- Memory is now always initialized before it gets stored
+- An exception is now thrown when a sync write txn is started while an async write txn is active. This prevents deadlock.
+- Fixed download directory on Windows
 
 ## 3.0.0-dev.8
 

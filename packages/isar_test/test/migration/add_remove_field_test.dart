@@ -2,11 +2,12 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
+import '../util/matchers.dart';
 import '../util/sync_async_helper.dart';
 
 part 'add_remove_field_test.g.dart';
 
-@Collection()
+@collection
 @Name('Col')
 class Col1 {
   Col1(this.id, this.value);
@@ -20,7 +21,7 @@ class Col1 {
       other is Col1 && id == other.id && value == other.value;
 }
 
-@Collection()
+@collection
 @Name('Col')
 class Col2 {
   Col2(this.id, this.value, this.newValues);
@@ -48,7 +49,7 @@ void main() {
     expect(await isar1.close(), true);
 
     final isar2 = await openTempIsar([Col2Schema], name: isar1.name);
-    await qEqual(isar2.col2s.where().tFindAll(), [
+    await qEqual(isar2.col2s.where(), [
       Col2(1, 'value1', null),
       Col2(2, 'value2', null),
     ]);
@@ -58,7 +59,7 @@ void main() {
         Col2(3, 'value4', [])
       ]);
     });
-    await qEqual(isar2.col2s.where().tFindAll(), [
+    await qEqual(isar2.col2s.where(), [
       Col2(1, 'value3', ['hi']),
       Col2(2, 'value2', null),
       Col2(3, 'value4', []),
@@ -66,12 +67,11 @@ void main() {
     expect(await isar2.close(), true);
 
     final isar3 = await openTempIsar([Col1Schema], name: isar1.name);
-    await qEqual(isar3.col1s.where().tFindAll(), [
+    await qEqual(isar3.col1s.where(), [
       Col1(1, 'value3'),
       Col1(2, 'value2'),
       Col1(3, 'value4'),
     ]);
-    expect(await isar3.close(), true);
   });
 
   isarTest('Remove field', () async {
@@ -85,17 +85,16 @@ void main() {
     expect(await isar1.close(), true);
 
     final isar2 = await openTempIsar([Col1Schema], name: isar1.name);
-    await qEqual(isar2.col1s.where().findAll(), [
+    await qEqual(isar2.col1s.where(), [
       Col1(1, 'value1'),
       Col1(2, 'value2'),
     ]);
     await isar2.writeTxn(() {
       return isar2.col1s.put(Col1(1, 'value3'));
     });
-    await qEqual(isar2.col1s.where().findAll(), [
+    await qEqual(isar2.col1s.where(), [
       Col1(1, 'value3'),
       Col1(2, 'value2'),
     ]);
-    expect(await isar2.close(), true);
   });
 }

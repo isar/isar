@@ -2,7 +2,7 @@
 
 import 'package:isar/isar.dart';
 
-@Collection()
+@collection
 class Test {
   late int id;
 

@@ -2,7 +2,7 @@
 
 import 'package:isar/isar.dart';
 
-@Collection()
+@collection
 class Model {
   Id? id;
 
@@ -12,7 +12,7 @@ class Model {
   final IsarLinks<Model2> prop2 = IsarLinks();
 }
 
-@Collection()
+@collection
 class Model2 {
   Id? id;
 }

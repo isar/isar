@@ -2,11 +2,12 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
+import '../util/matchers.dart';
 import '../util/sync_async_helper.dart';
 
 part 'links_test.g.dart';
 
-@Collection()
+@collection
 class LinkModelA {
   LinkModelA(this.name);
 
@@ -28,7 +29,7 @@ class LinkModelA {
   }
 }
 
-@Collection()
+@collection
 class LinkModelB {
   LinkModelB(this.name);
 
@@ -64,8 +65,6 @@ void main() {
       b1 = LinkModelB('modelB1');
       b2 = LinkModelB('modelB2');
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('.tSave() / .load() manually', () async {
       await isar.tWriteTxn(() async {
@@ -434,10 +433,10 @@ void main() {
         await a1.links.tSave();
       });
 
-      await qEqualSet(a1.links.filter().findAll(), [b1, b2]);
-      await qEqual(a1.links.filter().sortByNameDesc().findAll(), [b2, b1]);
-      await qEqualSet(a1.links.filter().idEqualTo(b2.id!).findAll(), [b2]);
-      await qEqualSet(a1.links.filter().idEqualTo(5).findAll(), []);
+      await qEqualSet(a1.links.filter(), [b1, b2]);
+      await qEqual(a1.links.filter().sortByNameDesc(), [b2, b1]);
+      await qEqualSet(a1.links.filter().idEqualTo(b2.id), [b2]);
+      await qEqualSet(a1.links.filter().idEqualTo(5), []);
     });
 
     isarTest('.reset()', () async {

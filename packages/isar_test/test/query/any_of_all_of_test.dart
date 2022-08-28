@@ -4,10 +4,11 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
+import '../util/matchers.dart';
 
 part 'any_of_all_of_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Model(this.id, this.value);
   final Id id;
@@ -42,14 +43,12 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     group('where anyOf', () {
       isarTest('zero elements', () async {
         final one = isar.models.where().anyOf(
           <int>[],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, [model0, model1, model2, model3]);
       });
 
@@ -57,7 +56,7 @@ void main() {
         final one = isar.models.where().anyOf(
           [2],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, [model2]);
       });
 
@@ -65,7 +64,7 @@ void main() {
         final one = isar.models.where().anyOf(
           [5],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, []);
       });
 
@@ -73,7 +72,7 @@ void main() {
         final one = isar.models.where().anyOf(
           [7, 3],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, [model3]);
       });
 
@@ -81,7 +80,7 @@ void main() {
         final one = isar.models.where().anyOf(
           [5],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, []);
       });
     });
@@ -91,7 +90,7 @@ void main() {
         final one = isar.models.filter().anyOf(
           <int>[],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, [model0, model1, model2, model3]);
       });
 
@@ -99,7 +98,7 @@ void main() {
         final one = isar.models.filter().anyOf(
           [2],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, [model2]);
       });
 
@@ -107,7 +106,7 @@ void main() {
         final one = isar.models.filter().anyOf(
           [5],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, []);
       });
 
@@ -115,7 +114,7 @@ void main() {
         final one = isar.models.filter().anyOf(
           [7, 3],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, [model3]);
       });
 
@@ -123,7 +122,7 @@ void main() {
         final one = isar.models.filter().anyOf(
           [5],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, []);
       });
     });
@@ -133,7 +132,7 @@ void main() {
         final one = isar.models.filter().allOf(
           <int>[],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, [model0, model1, model2, model3]);
       });
 
@@ -141,7 +140,7 @@ void main() {
         final one = isar.models.filter().allOf(
           [2],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, [model2]);
       });
 
@@ -149,7 +148,7 @@ void main() {
         final one = isar.models.filter().allOf(
           [5],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, []);
       });
 
@@ -157,7 +156,7 @@ void main() {
         final one = isar.models.filter().allOf(
           [7, 3],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, []);
       });
 
@@ -165,7 +164,7 @@ void main() {
         final one = isar.models.filter().allOf(
           [5],
           (q, int element) => q.valueEqualTo(element),
-        ).findAll();
+        );
         await qEqual(one, []);
       });
     });

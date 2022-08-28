@@ -5,6 +5,7 @@ import 'package:test/test.dart';
 
 import '../type_models.dart';
 import '../util/common.dart';
+import '../util/matchers.dart';
 import '../util/sync_async_helper.dart';
 
 void main() {
@@ -26,8 +27,6 @@ void main() {
       ]);
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('id property', () async {
       await isar.tWriteTxn(
         () => isar.boolModels.tPutAll([
@@ -38,7 +37,7 @@ void main() {
       );
 
       await qEqual(
-        isar.boolModels.where().idProperty().tFindAll(),
+        isar.boolModels.where().idProperty(),
         [1, 2, 3],
       );
     });
@@ -57,12 +56,12 @@ void main() {
       );
 
       await qEqual(
-        isar.boolModels.where().valueProperty().tFindAll(),
+        isar.boolModels.where().valueProperty(),
         [true, false, true],
       );
 
       await qEqual(
-        isar.boolModels.where().nValueProperty().tFindAll(),
+        isar.boolModels.where().nValueProperty(),
         [false, true, null],
       );
     });
@@ -77,7 +76,7 @@ void main() {
       );
 
       await qEqual(
-        isar.byteModels.where().valueProperty().tFindAll(),
+        isar.byteModels.where().valueProperty(),
         [5, 123, 0],
       );
     });
@@ -96,12 +95,12 @@ void main() {
       );
 
       await qEqual(
-        isar.shortModels.where().valueProperty().tFindAll(),
+        isar.shortModels.where().valueProperty(),
         [1234, 444, 321321],
       );
 
       await qEqual(
-        isar.shortModels.where().nValueProperty().tFindAll(),
+        isar.shortModels.where().nValueProperty(),
         [55, null, 1],
       );
     });
@@ -120,12 +119,12 @@ void main() {
       );
 
       await qEqual(
-        isar.intModels.where().valueProperty().tFindAll(),
+        isar.intModels.where().valueProperty(),
         [-5, Isar.autoIncrement, 9999],
       );
 
       await qEqual(
-        isar.intModels.where().nValueProperty().tFindAll(),
+        isar.intModels.where().nValueProperty(),
         [-99999, 0, null],
       );
     });
@@ -144,12 +143,12 @@ void main() {
       );
 
       await qEqual(
-        isar.floatModels.where().valueProperty().tFindAll(),
+        isar.floatModels.where().valueProperty(),
         [-5.5, 70.7, double.nan],
       );
 
       await qEqual(
-        isar.floatModels.where().nValueProperty().tFindAll(),
+        isar.floatModels.where().nValueProperty(),
         [double.infinity, null, double.negativeInfinity],
       );
     });
@@ -168,12 +167,12 @@ void main() {
       );
 
       await qEqual(
-        isar.doubleModels.where().valueProperty().tFindAll(),
+        isar.doubleModels.where().valueProperty(),
         [-5.5, 70.7, double.nan],
       );
 
       await qEqual(
-        isar.doubleModels.where().nValueProperty().tFindAll(),
+        isar.doubleModels.where().nValueProperty(),
         [double.infinity, null, double.negativeInfinity],
       );
     });
@@ -190,12 +189,12 @@ void main() {
       );
 
       await qEqual(
-        isar.dateTimeModels.where().valueProperty().tFindAll(),
+        isar.dateTimeModels.where().valueProperty(),
         [DateTime(2022), DateTime(2020), DateTime(1999)],
       );
 
       await qEqual(
-        isar.dateTimeModels.where().nValueProperty().tFindAll(),
+        isar.dateTimeModels.where().nValueProperty(),
         [null, DateTime(2010), null],
       );
     });
@@ -214,12 +213,12 @@ void main() {
       );
 
       await qEqual(
-        isar.stringModels.where().valueProperty().tFindAll(),
+        isar.stringModels.where().valueProperty(),
         ['Just', 'a', 'test'],
       );
 
       await qEqual(
-        isar.stringModels.where().nValueProperty().tFindAll(),
+        isar.stringModels.where().nValueProperty(),
         ['A', null, 'Z'],
       );
     });
@@ -238,12 +237,12 @@ void main() {
       );
 
       await qEqual(
-        isar.objectModels.where().valueProperty().tFindAll(),
+        isar.objectModels.where().valueProperty(),
         [EmbeddedModel('E1'), EmbeddedModel('E2'), EmbeddedModel('E3')],
       );
 
       await qEqual(
-        isar.objectModels.where().nValueProperty().tFindAll(),
+        isar.objectModels.where().nValueProperty(),
         [EmbeddedModel('XXX'), EmbeddedModel('YYY'), null],
       );
     });
@@ -260,12 +259,12 @@ void main() {
       );
 
       await qEqual(
-        isar.enumModels.where().valueProperty().tFindAll(),
+        isar.enumModels.where().valueProperty(),
         [TestEnum.option2, TestEnum.option3, TestEnum.option2],
       );
 
       await qEqual(
-        isar.enumModels.where().nValueProperty().tFindAll(),
+        isar.enumModels.where().nValueProperty(),
         [null, TestEnum.option3, null],
       );
     });
@@ -283,13 +282,13 @@ void main() {
         ]),
       );
 
-      await qEqual(isar.boolModels.where().listProperty().tFindAll(), [
+      await qEqual(isar.boolModels.where().listProperty(), [
         [true, false, true],
         <bool>[],
         [true]
       ]);
 
-      await qEqual(isar.boolModels.where().nListProperty().tFindAll(), [
+      await qEqual(isar.boolModels.where().nListProperty(), [
         [false],
         null,
         <bool>[],
@@ -308,7 +307,7 @@ void main() {
       );
 
       await qEqual(
-        isar.byteModels.where().listProperty().tFindAll(),
+        isar.byteModels.where().listProperty(),
         [
           Uint8List.fromList([0, 10, 255]),
           Uint8List.fromList([]),
@@ -317,7 +316,7 @@ void main() {
       );
 
       await qEqual(
-        isar.byteModels.where().nListProperty().tFindAll(),
+        isar.byteModels.where().nListProperty(),
         [
           null,
           Uint8List.fromList([1, 2, 3, 4, 5]),
@@ -339,13 +338,13 @@ void main() {
         ]),
       );
 
-      await qEqual(isar.shortModels.where().listProperty().tFindAll(), [
+      await qEqual(isar.shortModels.where().listProperty(), [
         [-5, 70, 999],
         <int>[],
         [0],
       ]);
 
-      await qEqual(isar.shortModels.where().nListProperty().tFindAll(), [
+      await qEqual(isar.shortModels.where().nListProperty(), [
         <int>[],
         [1, 2, 3],
         null,
@@ -365,13 +364,13 @@ void main() {
         ]),
       );
 
-      await qEqual(isar.intModels.where().listProperty().tFindAll(), [
+      await qEqual(isar.intModels.where().listProperty(), [
         [-5, 70, 999],
         <int>[],
         [0],
       ]);
 
-      await qEqual(isar.intModels.where().nListProperty().tFindAll(), [
+      await qEqual(isar.intModels.where().nListProperty(), [
         <int>[],
         [1, 2, 3],
         null,
@@ -391,13 +390,13 @@ void main() {
         ]),
       );
 
-      await qEqual(isar.floatModels.where().listProperty().tFindAll(), [
+      await qEqual(isar.floatModels.where().listProperty(), [
         [-5.5, 70.7, 999.999],
         <double>[],
         [0.0]
       ]);
 
-      await qEqual(isar.floatModels.where().nListProperty().tFindAll(), [
+      await qEqual(isar.floatModels.where().nListProperty(), [
         [double.infinity],
         null,
         [double.maxFinite]
@@ -417,13 +416,13 @@ void main() {
         ]),
       );
 
-      await qEqual(isar.doubleModels.where().listProperty().tFindAll(), [
+      await qEqual(isar.doubleModels.where().listProperty(), [
         [-5.5, 70.7, 999.999],
         <double>[],
         [0.0]
       ]);
 
-      await qEqual(isar.doubleModels.where().nListProperty().tFindAll(), [
+      await qEqual(isar.doubleModels.where().nListProperty(), [
         [double.infinity],
         null,
         [double.maxFinite]
@@ -443,13 +442,13 @@ void main() {
         ]),
       );
 
-      await qEqual(isar.dateTimeModels.where().listProperty().tFindAll(), [
+      await qEqual(isar.dateTimeModels.where().listProperty(), [
         [DateTime(2019), DateTime(2020)],
         [DateTime(2020)],
         <DateTime>[]
       ]);
 
-      await qEqual(isar.dateTimeModels.where().nListProperty().tFindAll(), [
+      await qEqual(isar.dateTimeModels.where().nListProperty(), [
         [DateTime(2000), DateTime(2001)],
         [DateTime(2000)],
         null,
@@ -468,7 +467,7 @@ void main() {
       );
 
       await qEqual(
-        isar.stringModels.where().listProperty().tFindAll(),
+        isar.stringModels.where().listProperty(),
         [
           ['Just', 'a', 'test'],
           <String>[],
@@ -477,7 +476,7 @@ void main() {
       );
 
       await qEqual(
-        isar.stringModels.where().nListProperty().tFindAll(),
+        isar.stringModels.where().nListProperty(),
         [
           null,
           null,
@@ -500,7 +499,7 @@ void main() {
       );
 
       await qEqual(
-        isar.objectModels.where().listProperty().tFindAll(),
+        isar.objectModels.where().listProperty(),
         [
           <EmbeddedModel>[],
           [EmbeddedModel('abc'), EmbeddedModel('def')],
@@ -509,7 +508,7 @@ void main() {
       );
 
       await qEqual(
-        isar.objectModels.where().nListProperty().tFindAll(),
+        isar.objectModels.where().nListProperty(),
         [
           [EmbeddedModel('abc'), EmbeddedModel('def')],
           null,
@@ -530,7 +529,7 @@ void main() {
       );
 
       await qEqual(
-        isar.enumModels.where().listProperty().tFindAll(),
+        isar.enumModels.where().listProperty(),
         [
           [TestEnum.option2],
           [TestEnum.option1],
@@ -539,7 +538,7 @@ void main() {
       );
 
       await qEqual(
-        isar.enumModels.where().nListProperty().tFindAll(),
+        isar.enumModels.where().nListProperty(),
         [
           [TestEnum.option2, TestEnum.option3],
           null,

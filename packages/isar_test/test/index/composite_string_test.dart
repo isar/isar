@@ -4,11 +4,12 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
+import '../util/matchers.dart';
 import '../util/sync_async_helper.dart';
 
 part 'composite_string_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Model(this.value1, this.value2);
 
@@ -72,60 +73,46 @@ void main() {
       );
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('getBy value1 sorted by value2', () async {
       await qEqual(
-        col.where().value1EqualToAnyValue2('a').findAll(),
+        col.where().value1EqualToAnyValue2('a'),
         [obj2, obj3, obj4, obj5],
       );
-      await qEqual(
-        col.where().value1EqualToAnyValue2(null).findAll(),
-        [obj0],
-      );
+      await qEqual(col.where().value1EqualToAnyValue2(null), [obj0]);
     });
 
     group('value1', () {
       isarTest('.equalTo()', () async {
         await qEqual(
-          col.where().value1EqualToAnyValue2('a').findAll(),
+          col.where().value1EqualToAnyValue2('a'),
           [obj2, obj3, obj4, obj5],
         );
-        await qEqual(
-          col.where().value1EqualToAnyValue2(null).findAll(),
-          [obj0],
-        );
-        await qEqual(
-          col.where().value1EqualToAnyValue2('c').findAll(),
-          [],
-        );
+        await qEqual(col.where().value1EqualToAnyValue2(null), [obj0]);
+        await qEqual(col.where().value1EqualToAnyValue2('c'), []);
       });
 
       isarTest('.notEqualTo()', () async {
         await qEqualSet(
-          col.where().value1NotEqualToAnyValue2('a').findAll(),
+          col.where().value1NotEqualToAnyValue2('a'),
           [obj0, obj1, obj6],
         );
         await qEqualSet(
-          col.where().value1NotEqualToAnyValue2('').findAll(),
+          col.where().value1NotEqualToAnyValue2(''),
           [obj0, obj2, obj3, obj4, obj5, obj6],
         );
         await qEqualSet(
-          col.where().value1NotEqualToAnyValue2('c').findAll(),
+          col.where().value1NotEqualToAnyValue2('c'),
           [obj0, obj1, obj2, obj3, obj4, obj5, obj6],
         );
       });
 
       isarTest('.isNull()', () async {
-        await qEqual(
-          col.where().value1IsNullAnyValue2().findAll(),
-          [obj0],
-        );
+        await qEqual(col.where().value1IsNullAnyValue2(), [obj0]);
       });
 
       isarTest('.isNotNull()', () async {
         await qEqualSet(
-          col.where().value1IsNotNullAnyValue2().findAll(),
+          col.where().value1IsNotNullAnyValue2(),
           [obj1, obj2, obj3, obj4, obj5, obj6],
         );
       });
@@ -133,151 +120,101 @@ void main() {
 
     group('value2', () {
       isarTest('.equalTo()', () async {
-        await qEqual(
-          col.where().value1Value2EqualTo(null, null).findAll(),
-          [obj0],
-        );
-        await qEqual(
-          col.where().value1Value2EqualTo('a', null).findAll(),
-          [obj2],
-        );
-        await qEqual(
-          col.where().value1Value2EqualTo('c', null).findAll(),
-          [],
-        );
-        await qEqual(
-          col.where().value1Value2EqualTo('a', 'c').findAll(),
-          [],
-        );
+        await qEqual(col.where().value1Value2EqualTo(null, null), [obj0]);
+        await qEqual(col.where().value1Value2EqualTo('a', null), [obj2]);
+        await qEqual(col.where().value1Value2EqualTo('c', null), []);
+        await qEqual(col.where().value1Value2EqualTo('a', 'c'), []);
       });
 
       isarTest('.notEqualTo()', () async {
         await qEqual(
-          col.where().value1EqualToValue2NotEqualTo('a', null).findAll(),
+          col.where().value1EqualToValue2NotEqualTo('a', null),
           [obj3, obj4, obj5],
         );
         await qEqual(
-          col.where().value1EqualToValue2NotEqualTo('a', 'c').findAll(),
+          col.where().value1EqualToValue2NotEqualTo('a', 'c'),
           [obj2, obj3, obj4, obj5],
         );
-        await qEqual(
-          col.where().value1EqualToValue2NotEqualTo('b', '').findAll(),
-          [],
-        );
+        await qEqual(col.where().value1EqualToValue2NotEqualTo('b', ''), []);
       });
 
       isarTest('.isNull()', () async {
-        await qEqual(
-          col.where().value1EqualToValue2IsNull('a').findAll(),
-          [obj2],
-        );
-        await qEqual(
-          col.where().value1EqualToValue2IsNull(null).findAll(),
-          [obj0],
-        );
-        await qEqual(
-          col.where().value1EqualToValue2IsNull('').findAll(),
-          [],
-        );
+        await qEqual(col.where().value1EqualToValue2IsNull('a'), [obj2]);
+        await qEqual(col.where().value1EqualToValue2IsNull(null), [obj0]);
+        await qEqual(col.where().value1EqualToValue2IsNull(''), []);
       });
 
       isarTest('.isNotNull()', () async {
         await qEqual(
-          col.where().value1EqualToValue2IsNotNull('a').findAll(),
+          col.where().value1EqualToValue2IsNotNull('a'),
           [obj3, obj4, obj5],
         );
-        await qEqual(
-          col.where().value1EqualToValue2IsNotNull(null).findAll(),
-          [],
-        );
+        await qEqual(col.where().value1EqualToValue2IsNotNull(null), []);
       });
 
       isarTest('.greaterThan()', () async {
         await qEqual(
-          col.where().value1EqualToValue2GreaterThan('a', '').findAll(),
+          col.where().value1EqualToValue2GreaterThan('a', ''),
           [obj4, obj5],
         );
         await qEqual(
-          col
-              .where()
-              .value1EqualToValue2GreaterThan('a', '', include: true)
-              .findAll(),
+          col.where().value1EqualToValue2GreaterThan('a', '', include: true),
           [obj3, obj4, obj5],
         );
-        await qEqual(
-          col.where().value1EqualToValue2GreaterThan('a', 'b').findAll(),
-          [],
-        );
+        await qEqual(col.where().value1EqualToValue2GreaterThan('a', 'b'), []);
       });
 
       isarTest('.lessThan()', () async {
         await qEqual(
-          col.where().value1EqualToValue2LessThan('a', 'b').findAll(),
+          col.where().value1EqualToValue2LessThan('a', 'b'),
           [obj2, obj3, obj4],
         );
         await qEqual(
-          col
-              .where()
-              .value1EqualToValue2LessThan('a', 'b', include: true)
-              .findAll(),
+          col.where().value1EqualToValue2LessThan('a', 'b', include: true),
           [obj2, obj3, obj4, obj5],
         );
-        await qEqual(
-          col.where().value1EqualToValue2LessThan('a', null).findAll(),
-          [],
-        );
+        await qEqual(col.where().value1EqualToValue2LessThan('a', null), []);
       });
 
       isarTest('.between()', () async {
         await qEqual(
-          col.where().value1EqualToValue2Between('a', null, 'b').findAll(),
+          col.where().value1EqualToValue2Between('a', null, 'b'),
           [obj2, obj3, obj4, obj5],
         );
         await qEqual(
           col
               .where()
-              .value1EqualToValue2Between('a', null, 'b', includeUpper: false)
-              .findAll(),
+              .value1EqualToValue2Between('a', null, 'b', includeUpper: false),
           [obj2, obj3, obj4],
         );
         await qEqual(
           col
               .where()
-              .value1EqualToValue2Between('a', null, 'b', includeLower: false)
-              .findAll(),
+              .value1EqualToValue2Between('a', null, 'b', includeLower: false),
           [obj3, obj4, obj5],
         );
         await qEqual(
-          col
-              .where()
-              .value1EqualToValue2Between('a', null, 'b',
-                  includeLower: false, includeUpper: false)
-              .findAll(),
+          col.where().value1EqualToValue2Between('a', null, 'b',
+              includeLower: false, includeUpper: false),
           [obj3, obj4],
         );
         await qEqual(
-          col
-              .where()
-              .value1EqualToValue2Between('a', 'a', 'b',
-                  includeLower: false, includeUpper: false)
-              .findAll(),
+          col.where().value1EqualToValue2Between('a', 'a', 'b',
+              includeLower: false, includeUpper: false),
           [],
         );
       });
 
       isarTest('.startsWith()', () async {
         await qEqual(
-          col.where().value1EqualToValue2StartsWith('a', '').findAll(),
+          col.where().value1EqualToValue2StartsWith('a', ''),
           [obj3, obj4, obj5],
         );
         await qEqual(
-          col.where().value1EqualToValue2StartsWith('a', 'a').findAll(),
+          col.where().value1EqualToValue2StartsWith('a', 'a'),
           [obj4],
         );
-        await qEqual(
-          col.where().value1EqualToValue2StartsWith('a', 'c').findAll(),
-          [],
-        );
+        await qEqual(col.where().value1EqualToValue2StartsWith('a', 'c'), []);
       });
     });
   });

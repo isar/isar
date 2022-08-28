@@ -1,8 +1,6 @@
-// ignore_for_file: avoid_relative_lib_imports
-
-import '../lib/src/version.dart';
+import 'package:isar/isar.dart';
 
 void main() {
   // ignore: avoid_print
-  print(isarCoreVersion);
+  print(Isar.version);
 }

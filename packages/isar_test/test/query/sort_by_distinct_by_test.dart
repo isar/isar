@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 import '../user_model.dart';
 import '../util/common.dart';
-import '../util/sync_async_helper.dart';
+import '../util/matchers.dart';
 
 void main() {
   group('Sort By', () {
@@ -26,50 +26,48 @@ void main() {
       );
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.sortBy()', () async {
       await qEqual(
-        users.where().sortByName().nameProperty().tFindAll(),
+        users.where().sortByName().nameProperty(),
         ['a', 'a', 'b', 'b', 'c', 'c'],
       );
 
       await qEqual(
-        users.where().sortByName().thenByNameDesc().nameProperty().tFindAll(),
+        users.where().sortByName().thenByNameDesc().nameProperty(),
         ['a', 'a', 'b', 'b', 'c', 'c'],
       );
 
       await qEqual(
-        users.where().sortByAge().ageProperty().tFindAll(),
+        users.where().sortByAge().ageProperty(),
         [1, 2, 10, 20, 100, 200],
       );
 
       await qEqual(
-        users.where().sortByAdmin().adminProperty().tFindAll(),
+        users.where().sortByAdmin().adminProperty(),
         [false, false, true, true, true, true],
       );
     });
 
     isarTest('.sortByDesc()', () async {
       await qEqual(
-        users.where().sortByNameDesc().nameProperty().tFindAll(),
+        users.where().sortByNameDesc().nameProperty(),
         ['c', 'c', 'b', 'b', 'a', 'a'],
       );
 
       await qEqual(
-        users.where().sortByAgeDesc().ageProperty().tFindAll(),
+        users.where().sortByAgeDesc().ageProperty(),
         [200, 100, 20, 10, 2, 1],
       );
 
       await qEqual(
-        users.where().sortByAdminDesc().adminProperty().tFindAll(),
+        users.where().sortByAdminDesc().adminProperty(),
         [true, true, true, true, false, false],
       );
     });
 
     isarTest('.sortBy().thenBy()', () async {
       await qEqual(
-        users.where().sortByName().thenByAge().tFindAll(),
+        users.where().sortByName().thenByAge(),
         [
           UserModel.fill('a', 100, true),
           UserModel.fill('a', 200, true),
@@ -81,7 +79,7 @@ void main() {
       );
 
       await qEqual(
-        users.where().sortByAge().thenByName().tFindAll(),
+        users.where().sortByAge().thenByName(),
         [
           UserModel.fill('c', 1, false),
           UserModel.fill('c', 2, true),
@@ -93,7 +91,7 @@ void main() {
       );
 
       await qEqual(
-        users.where().sortByAdmin().thenByName().thenByAge().tFindAll(),
+        users.where().sortByAdmin().thenByName().thenByAge(),
         [
           UserModel.fill('b', 20, false),
           UserModel.fill('c', 1, false),

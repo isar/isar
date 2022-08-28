@@ -2,32 +2,25 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
-import '../util/sync_async_helper.dart';
+import '../util/matchers.dart';
 
 part 'filter_date_time_list_test.g.dart';
 
-@Collection()
+@collection
 class DateTimeModel {
-  DateTimeModel(this.list) : hashList = list;
+  DateTimeModel(this.list);
   Id? id;
 
-  @Index(type: IndexType.value)
   List<DateTime?>? list;
-
-  @Index(type: IndexType.hash)
-  List<DateTime?>? hashList;
 
   @override
   // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is DateTimeModel &&
+      id == other.id &&
       listEquals(
         list?.map((e) => e?.toUtc()).toList(),
         other.list?.map((e) => e?.toUtc()).toList(),
-      ) &&
-      listEquals(
-        hashList?.map((e) => e?.toUtc()).toList(),
-        other.hashList?.map((e) => e?.toUtc()).toList(),
       );
 }
 
@@ -40,7 +33,7 @@ DateTime utc(int year, [int month = 1, int day = 1]) {
 }
 
 void main() {
-  group('Date filter', () {
+  group('DateTime list filter', () {
     late Isar isar;
     late IsarCollection<DateTimeModel> col;
 
@@ -48,16 +41,111 @@ void main() {
     late DateTimeModel obj2;
     late DateTimeModel obj3;
     late DateTimeModel obj4;
-    late DateTimeModel obj5;
+    late DateTimeModel objEmpty;
     late DateTimeModel objNull;
 
     setUp(() async {
       isar = await openTempIsar([DateTimeModelSchema]);
       col = isar.dateTimeModels;
+
+      obj1 = DateTimeModel([null]);
+      obj2 = DateTimeModel([local(2020), utc(2030), local(2020)]);
+      obj3 = DateTimeModel([local(2010), utc(2020)]);
+      obj4 = DateTimeModel([utc(2030), local(2050)]);
+      objEmpty = DateTimeModel([]);
+      objNull = DateTimeModel(null);
+
+      await isar.writeTxn(() async {
+        await col.putAll([obj2, obj4, obj3, objEmpty, obj1, objNull]);
+      });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
+    group('DateTime list filter', () {
+      isarTest('.elementGreaterThan()', () async {
+        await qEqual(
+          col.filter().listElementGreaterThan(local(2020)),
+          [obj2, obj4],
+        );
+        await qEqual(
+          col.filter().listElementGreaterThan(utc(2020), include: true),
+          [obj2, obj4, obj3],
+        );
+        await qEqual(
+          col.filter().listElementGreaterThan(null),
+          [obj2, obj4, obj3],
+        );
+        await qEqual(
+          col.filter().listElementGreaterThan(null, include: true),
+          [obj2, obj4, obj3, obj1],
+        );
+      });
 
-    //TODO
+      isarTest('.elementLessThan()', () async {
+        await qEqual(col.filter().listElementLessThan(utc(2020)), [obj3, obj1]);
+        await qEqual(
+          col.filter().listElementLessThan(local(2020), include: true),
+          [obj2, obj3, obj1],
+        );
+        await qEqual(col.filter().listElementLessThan(null), []);
+        await qEqual(
+          col.filter().listElementLessThan(null, include: true),
+          [obj1],
+        );
+      });
+
+      isarTest('.elementBetween()', () async {
+        await qEqual(
+          col.filter().listElementBetween(utc(2010), utc(2020)),
+          [obj2, obj3],
+        );
+        await qEqual(
+          col.filter().listElementBetween(
+                utc(2010),
+                utc(2020),
+                includeUpper: false,
+              ),
+          [obj3],
+        );
+        await qEqual(
+          col.filter().listElementBetween(null, utc(2010)),
+          [obj3, obj1],
+        );
+        await qEqual(
+          col.filter().listElementBetween(
+                null,
+                utc(2010),
+                includeLower: false,
+              ),
+          [obj3],
+        );
+        await qEqual(
+          col.filter().listElementBetween(
+                null,
+                utc(2010),
+                includeUpper: false,
+              ),
+          [obj1],
+        );
+      });
+
+      isarTest('.elementIsNull()', () async {
+        await qEqual(col.filter().listElementIsNull(), [obj1]);
+      });
+
+      isarTest('.elementIsNotNull()', () async {
+        await qEqual(col.filter().listElementIsNotNull(), [obj2, obj4, obj3]);
+      });
+
+      isarTest('.isNull()', () async {
+        await qEqual(col.filter().listIsNull(), [objNull]);
+      });
+
+      isarTest('.isNotNull()', () async {
+        await qEqual(
+          col.filter().listIsNotNull(),
+          [obj2, obj4, obj3, objEmpty, obj1],
+        );
+      });
+    });
   });
 }

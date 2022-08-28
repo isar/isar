@@ -34,7 +34,7 @@
 > #### Isar [ee-zahr]:
 >
 > 1. River in Bavaria, Germany.
-> 2. Database that will make your life easier.
+> 2. [Crazy fast](#benchmarks) database that is a joy to use.
 
 ## Features
 
@@ -48,27 +48,27 @@ Isar can do much more (and we are just getting started)
 
 - 🕵️ **Full-text search**. Make searching fast and fun
 - 📱 **Multiplatform**. iOS, Android, Desktop and FULL WEB SUPPORT!
-- 🧪 **ACID semantics**. Rely on consistency
+- 🧪 **ACID semantics**. Rely on database consistency
 - 💃 **Static typing**. Compile-time checked and autocompleted queries
-- ✨ **Beautiful documentation**. Readable, easy to understand and ever improving
+- ✨ **Beautiful documentation**. Readable, easy to understand and ever-improving
 
-Join the [Telegram group](https://t.me/isardb) for discussion and check out the [CONTRIBUTING.md](https://github.com/isar/isar/blob/main/CONTRIBUTING.md) doc.
+Join the [Telegram group](https://t.me/isardb) for discussion and sneak peaks of new versions.
 
 If you want to say thank you, star us on GitHub and like us on pub.dev 🙌💙
 
 ## Quickstart
 
-Holy smokes you're here! Let's get started...
+Holy smokes you're here! Let's get started on using the coolest Flutter database out there...
 
 ### 1. Add to pubspec.yaml
 
 ```yaml
 dependencies:
-  isar: 3.0.0-dev.8
-  isar_flutter_libs: 3.0.0-dev.8 # contains Isar Core
+  isar: 3.0.0-dev.12
+  isar_flutter_libs: 3.0.0-dev.12 # contains Isar Core
 
 dev_dependencies:
-  isar_generator: 3.0.0-dev.8
+  isar_generator: 3.0.0-dev.12
   build_runner: any
 ```
 
@@ -77,7 +77,7 @@ dev_dependencies:
 ```dart
 part 'email.g.dart';
 
-@Collection()
+@collection
 class Email {
   Id id = Isar.autoIncrement;
 
@@ -85,26 +85,25 @@ class Email {
 
   List<Recipient>? recipients;
 
-  Status? status;
+  @enumerated
+  Status status = Status.pending;
 }
 
-@Embedded()
+@embedded
 class Recipient {
   String? name;
 
   String? address;
 }
 
-enum Status with IsarEnum<String> {
+enum Status {
   draft,
   sending,
-  sent;
-
-  String get isarValue => name;
+  sent,
 }
 ```
 
-### 3. Open an instance
+### 3. Open a database instance
 
 ```dart
 final isar = await Isar.open([EmailSchema]);
@@ -122,7 +121,7 @@ final emails = await isar.emails.filter()
 
 ## Isar Inspector
 
-The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to inspect the Isar instances & collections of your app in real time. You can execute queries, switch between instances and sort the data.
+The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to inspect the Isar instances & collections of your app in real-time. You can execute queries, switch between instances and sort the data.
 
 <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/isar-inspector.png?sanitize=true">
 
@@ -172,7 +171,7 @@ final usersLivingInMunich = isar.users
 You can easily define relationships between objects. In Isar they are called links and backlinks:
 
 ```dart
-@Collection()
+@collection
 class Teacher {
   Id? id;
 
@@ -182,7 +181,7 @@ class Teacher {
   final students = IsarLinks<Student>();
 }
 
-@Collection()
+@collection
 class Student {
   Id? id;
 
@@ -194,7 +193,7 @@ class Student {
 
 ## Watchers
 
-With Isar, you can watch Collections, Objects, or Queries. A watcher is notified after a transaction commits successfully and the target actually changes.
+With Isar database, you can watch Collections, Objects, or Queries. A watcher is notified after a transaction commits successfully and the target actually changes.
 Watchers can be lazy and not reload the data or they can be non-lazy and fetch new results in the background.
 
 ```dart
@@ -209,7 +208,7 @@ queryStream.listen((newResult) {
 
 ## Benchmarks
 
-Benchmarks only give a rough idea of the performance of a database but as you can see, Isar is quite fast 😇
+Benchmarks only give a rough idea of the performance of a database but as you can see, Isar database is quite fast 😇
 
 <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/benchmarks/insert.png" width="100%" /> | <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/benchmarks/query.png" width="100%" />
 --- | ---
@@ -219,7 +218,7 @@ If you are interested in more benchmarks or want to check how Isar performs on y
 
 ## Unit tests
 
-If you want to use Isar in unit tests or Dart code, call `await Isar.initializeIsarCore(download: true)` before using Isar in your tests.
+If you want to use Isar database in unit tests or Dart code, call `await Isar.initializeIsarCore(download: true)` before using Isar in your tests.
 
 Isar will automatically download the correct binary for your platform. You can also pass a `libraries` map to adjust the download location for each platform.
 
@@ -227,7 +226,7 @@ Make sure to use `flutter test -j 1` to avoid tests running in parallel. This wo
 
 ## Contributors ✨
 
-Thanks goes to these wonderful people:
+Thanks go to these wonderful people:
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -247,7 +246,7 @@ Thanks goes to these wonderful people:
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind are welcome!
 
 ### License
 

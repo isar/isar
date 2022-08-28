@@ -6,7 +6,7 @@ import 'util/sync_async_helper.dart';
 
 part 'link_test.g.dart';
 
-@Collection()
+@collection
 class LinkModelA {
   LinkModelA();
 
@@ -42,7 +42,7 @@ class LinkModelA {
   }
 }
 
-@Collection()
+@collection
 class LinkModelB {
   LinkModelB();
 
@@ -97,8 +97,6 @@ void main() {
       objB2 = LinkModelB.name('modelB2');
       objB3 = LinkModelB.name('modelB3');
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     group('self link', () {
       isarTest('save link manually', () async {

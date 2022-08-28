@@ -6,6 +6,7 @@ import 'package:isar/isar.dart';
 import 'package:source_gen/source_gen.dart';
 
 const TypeChecker _collectionChecker = TypeChecker.fromRuntime(Collection);
+const TypeChecker _enumeratedChecker = TypeChecker.fromRuntime(Enumerated);
 const TypeChecker _embeddedChecker = TypeChecker.fromRuntime(Embedded);
 const TypeChecker _ignoreChecker = TypeChecker.fromRuntime(Ignore);
 const TypeChecker _nameChecker = TypeChecker.fromRuntime(Name);
@@ -46,9 +47,21 @@ extension ClassElementX on ClassElement {
 }
 
 extension PropertyElementX on PropertyInducingElement {
-  bool get isLink => type.element!.name == 'IsarLink';
+  bool get isLink => type.element2!.name == 'IsarLink';
 
-  bool get isLinks => type.element!.name == 'IsarLinks';
+  bool get isLinks => type.element2!.name == 'IsarLinks';
+
+  Enumerated? get enumeratedAnnotation {
+    final ann = _enumeratedChecker.firstAnnotationOfExact(nonSynthetic);
+    if (ann == null) {
+      return null;
+    }
+    final typeIndex = ann.getField('type')!.getField('index')!.toIntValue()!;
+    return Enumerated(
+      EnumType.values[typeIndex],
+      ann.getField('property')?.toStringValue(),
+    );
+  }
 
   Backlink? get backlinkAnnotation {
     final ann = _backlinkChecker.firstAnnotationOfExact(nonSynthetic);
@@ -103,7 +116,7 @@ extension PropertyElementX on PropertyInducingElement {
 
     final jsonKey = nonSynthetic.metadata
         .firstOrNullWhere(
-          (e) => e.computeConstantValue()?.type?.element?.name == 'JsonKey',
+          (e) => e.computeConstantValue()?.type?.element2?.name == 'JsonKey',
         )
         ?.computeConstantValue();
 

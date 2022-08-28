@@ -3,12 +3,7 @@ part of isar;
 /// Annotate Isar collections or properties to change their name.
 ///
 /// Can be used to change the name in Dart independently of Isar.
-@Target({
-  TargetKind.classType,
-  TargetKind.field,
-  TargetKind.getter,
-  TargetKind.setter,
-})
+@Target({TargetKind.classType, TargetKind.field, TargetKind.getter})
 class Name {
   /// Annotate Isar collections or properties to change their name.
   const Name(this.name);

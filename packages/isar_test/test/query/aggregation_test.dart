@@ -3,6 +3,7 @@ import 'package:test/test.dart';
 
 import '../mutli_type_model.dart';
 import '../util/common.dart';
+import '../util/matchers.dart';
 import '../util/sync_async_helper.dart';
 
 void main() {
@@ -14,8 +15,6 @@ void main() {
       isar = await openTempIsar([MultiTypeModelSchema]);
       col = isar.multiTypeModels;
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     group('int', () {
       setUp(() async {

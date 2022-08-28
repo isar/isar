@@ -8,7 +8,6 @@ import 'dart:isolate';
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 import 'package:isar/src/native/bindings.dart';
-import 'package:isar/src/version.dart';
 
 const int minByte = 0;
 const int maxByte = 255;
@@ -30,7 +29,7 @@ const nullBool = IsarObject_NULL_BOOL;
 const falseBool = IsarObject_FALSE_BOOL;
 const trueBool = IsarObject_TRUE_BOOL;
 
-const String _githubUrl = 'https://github.com/isar/isar-core/releases/download';
+const String _githubUrl = 'https://github.com/isar/isar/releases/download';
 
 bool _isarInitialized = false;
 bool get isarInitialized => _isarInitialized;
@@ -87,11 +86,12 @@ void _initializePath(String? libraryPath) {
   }
 
   final bindings = IsarCoreBindings(dylib);
-  final binaryVersion = bindings.isar_version();
-  if (binaryVersion != 0 && binaryVersion != isarCoreVersionNumber) {
+
+  final coreVersion = bindings.isar_version().cast<Utf8>().toDartString();
+  if (coreVersion != Isar.version && coreVersion != 'debug') {
     throw IsarError(
-      'Incorrect Isar Core version: Required $isarCoreVersionNumber found '
-      '$binaryVersion. Make sure to use the latest isar_flutter_libs. If you '
+      'Incorrect Isar Core version: Required ${Isar.version} found '
+      '$coreVersion. Make sure to use the latest isar_flutter_libs. If you '
       'have a Dart only project, make sure that old Isar Core binaries are '
       'deleted.',
     );
@@ -109,15 +109,18 @@ String _getLibraryDownloadPath(Map<Abi, String> libraries) {
     return providedPath;
   } else {
     final name = Abi.current().localName;
-    final dirSegments = Platform.script.path.split(Platform.pathSeparator);
-    if (dirSegments.isNotEmpty) {
-      final dir = dirSegments
-          .sublist(0, dirSegments.length - 1)
-          .join(Platform.pathSeparator);
-      return '$dir${Platform.pathSeparator}$name';
-    } else {
+    if (Platform.script.path.isEmpty) {
       return name;
     }
+    var dirSegments = Platform.script.path.split(Platform.pathSeparator);
+    if (dirSegments.length == 1) {
+      // On !indows the path separator depends on how the script is executed
+      dirSegments = Platform.script.path.split('/');
+    }
+    final dir = dirSegments
+        .sublist(0, dirSegments.length - 1)
+        .join(Platform.pathSeparator);
+    return '$dir${Platform.pathSeparator}$name';
   }
 }
 
@@ -128,7 +131,7 @@ Future<void> _downloadIsarCore(String libraryPath) async {
     return;
   }
   final remoteName = Abi.current().remoteName;
-  final uri = Uri.parse('$_githubUrl/$isarCoreVersion/$remoteName');
+  final uri = Uri.parse('$_githubUrl/${Isar.version}/$remoteName');
   final request = await HttpClient().getUrl(uri);
   final response = await request.close();
   if (response.statusCode != 200) {

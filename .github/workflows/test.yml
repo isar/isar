@@ -24,6 +24,7 @@ jobs:
   lint:
     name: Check lints
     runs-on: ubuntu-latest
+    if: ${{ false }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup Flutter
@@ -49,7 +50,7 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-latest, ubuntu-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -74,6 +75,11 @@ jobs:
           dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
         working-directory: packages/isar_test
+      - name: Add packages
+        run: |
+          flutter pub add json_annotation
+          flutter pub add intl
+        working-directory: packages/isar
       - name: Collect isar Coverage
         run: |
           flutter test --coverage
@@ -115,9 +121,10 @@ jobs:
         with:
           model: ${{ matrix.device }}
       - uses: subosito/flutter-action@v2
-      - name: Download binaries
-        run: bash tool/download_binaries.sh
-        working-directory: packages/isar_flutter_libs
+      - name: Build Isar Core
+        run: |
+          bash tool/build_ios.sh
+          mv libisar_ios.a packages/isar_flutter_libs/ios/libisar.a
       - name: Run Flutter Driver tests
         run: |
           flutter pub get
@@ -129,6 +136,7 @@ jobs:
 
   drive_android:
     runs-on: macos-latest
+    if: ${{ false }}
     strategy:
       matrix:
         api-level: [29] #[21, 29]
@@ -173,9 +181,11 @@ jobs:
       - name: Install Linux requirements
         run: sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
         if: matrix.os == 'ubuntu-latest'
-      - name: Download binaries
-        run: bash tool/download_binaries.sh
-        working-directory: packages/isar_flutter_libs
+      - name: Build Isar Core macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          bash tool/build_macos.sh
+          mv libisar_macos.dylib packages/isar_flutter_libs/macos/libisar.dylib
       - name: Run Flutter Driver tests
         run: |
           flutter pub get

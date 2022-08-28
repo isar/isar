@@ -2,13 +2,14 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
+import '../util/matchers.dart';
 import '../util/sync_async_helper.dart';
 import 'common.dart';
 
 part 'nullable_test.g.dart';
 
 @Name('Col')
-@Collection()
+@collection
 class NullableModel {
   NullableModel(
     this.id,
@@ -41,11 +42,12 @@ class NullableModel {
 
   final MyEmbedded? embeddedValue;
 
+  @Enumerated(EnumType.name)
   final MyEnum? enumValue;
 }
 
 @Name('Col')
-@Collection()
+@collection
 class NullableListModel {
   NullableListModel(
     this.id,
@@ -81,6 +83,7 @@ class NullableListModel {
 
   final List<MyEmbedded>? embeddedValue;
 
+  @enumerated
   final List<MyEnum>? enumValue;
 }
 
@@ -104,7 +107,6 @@ void main() {
       expect(obj.stringValue, null);
       expect(obj.embeddedValue, null);
       expect(obj.enumValue, null);
-      await isar2.close();
     });
 
     isarTest('scalar property', () async {
@@ -151,7 +153,6 @@ void main() {
         await isar2.nullableModels.where().enumValueProperty().tFindFirst(),
         null,
       );
-      await isar2.close();
     });
 
     isarTest('list', () async {
@@ -173,7 +174,6 @@ void main() {
       expect(obj.stringValue, null);
       expect(obj.embeddedValue, null);
       expect(obj.enumValue, null);
-      await isar2.close();
     });
 
     isarTest('list property', () async {
@@ -239,7 +239,6 @@ void main() {
         await isar2.nullableListModels.where().enumValueProperty().tFindFirst(),
         null,
       );
-      await isar2.close();
     });
   });
 }

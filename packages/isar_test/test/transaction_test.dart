@@ -4,10 +4,11 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import 'util/common.dart';
+import 'util/matchers.dart';
 
 part 'transaction_test.g.dart';
 
-@Collection()
+@collection
 class Model {
   Id? id;
 }
@@ -19,8 +20,6 @@ void main() {
     setUp(() async {
       isar = await openTempIsar([ModelSchema]);
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('Sync txn cannot be opened in sync txn', () {
       isar.txnSync(() {

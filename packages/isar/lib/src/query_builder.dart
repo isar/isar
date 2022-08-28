@@ -12,7 +12,7 @@ typedef FilterQuery<OBJ> = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>
 class QueryBuilder<OBJ, R, S> {
   /// @nodoc
   @protected
-  QueryBuilder(this._query);
+  const QueryBuilder(this._query);
 
   final QueryBuilderInternal<OBJ> _query;
 
@@ -32,7 +32,7 @@ class QueryBuilder<OBJ, R, S> {
 class QueryBuilderInternal<OBJ> {
   /// @nodoc
   const QueryBuilderInternal({
-    required this.collection,
+    this.collection,
     this.whereClauses = const [],
     this.whereDistinct = false,
     this.whereSort = Sort.asc,
@@ -47,7 +47,7 @@ class QueryBuilderInternal<OBJ> {
   });
 
   /// @nodoc
-  final IsarCollection<OBJ> collection;
+  final IsarCollection<OBJ>? collection;
 
   /// @nodoc
   final List<WhereClause> whereClauses;
@@ -127,8 +127,8 @@ class QueryBuilderInternal<OBJ> {
 
   /// @nodoc
   QueryBuilderInternal<OBJ> group(FilterQuery<OBJ> q) {
-    final internalQb = QueryBuilderInternal(collection: collection);
-    final qb = q(QueryBuilder(internalQb));
+    // ignore: prefer_const_constructors
+    final qb = q(QueryBuilder(QueryBuilderInternal()));
     return addFilterCondition(qb._query.filter);
   }
 
@@ -140,11 +140,6 @@ class QueryBuilderInternal<OBJ> {
     int upper,
     bool includeUpper,
   ) {
-    assert(lower >= 0, 'Lower bound must be positive.');
-    assert(
-      upper >= lower,
-      'Upper bound must be positive and may no be less than lower bound.',
-    );
     if (!includeLower) {
       lower += 1;
     }
@@ -165,13 +160,24 @@ class QueryBuilderInternal<OBJ> {
   }
 
   /// @nodoc
+  QueryBuilderInternal<OBJ> object<E>(
+    FilterQuery<E> q,
+    String property,
+  ) {
+    // ignore: prefer_const_constructors
+    final qb = q(QueryBuilder(QueryBuilderInternal()));
+    return addFilterCondition(
+      ObjectFilter(filter: qb._query.filter, property: property),
+    );
+  }
+
+  /// @nodoc
   QueryBuilderInternal<OBJ> link<E>(
     FilterQuery<E> q,
     String linkName,
   ) {
-    final targetCol = collection.isar.collection<E>();
-    final internalQb = QueryBuilderInternal(collection: targetCol);
-    final qb = q(QueryBuilder(internalQb));
+    // ignore: prefer_const_constructors
+    final qb = q(QueryBuilder(QueryBuilderInternal()));
     return addFilterCondition(
       LinkFilter(filter: qb._query.filter, linkName: linkName),
     );
@@ -272,7 +278,7 @@ class QueryBuilderInternal<OBJ> {
   /// @nodoc
   @protected
   Query<R> build<R>() {
-    return collection.buildQuery(
+    return collection!.buildQuery(
       whereDistinct: whereDistinct,
       whereSort: whereSort,
       whereClauses: whereClauses,

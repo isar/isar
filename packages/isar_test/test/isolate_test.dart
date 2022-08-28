@@ -6,11 +6,12 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import 'util/common.dart';
+import 'util/matchers.dart';
 import 'util/sync_async_helper.dart';
 
 part 'isolate_test.g.dart';
 
-@Collection()
+@collection
 class TestModel {
   Id? id;
 
@@ -34,9 +35,10 @@ final TestModel _obj3 = TestModel()
   ..value = 'Model 3';
 
 Future<void> _isolateFunc(SendPort port) async {
-  final isar = Isar.openSync(
+  final isar = await openTempIsar(
     [TestModelSchema],
     name: 'test',
+    directory: '',
   );
 
   final current = isar.testModels.where().findAllSync();
@@ -69,8 +71,8 @@ void main() {
     final result = await port.first;
     expect(result, true);
 
-    await qEqual(isar.testModels.where().tFindAll(), [_obj1, _obj3]);
+    await qEqual(isar.testModels.where(), [_obj1, _obj3]);
 
-    expect(await isar.close(), true);
+    expect(await isar.close(deleteFromDisk: true), true);
   });
 }

@@ -12,6 +12,7 @@ class ObjectInfo {
     required this.isarName,
     this.accessor,
     required List<ObjectProperty> properties,
+    this.embeddedDartNames = const {},
     this.indexes = const [],
     this.links = const [],
   }) {
@@ -22,6 +23,7 @@ class ObjectInfo {
   final String isarName;
   final String? accessor;
   late final List<ObjectProperty> properties;
+  final Map<String, String> embeddedDartNames;
   final List<ObjectIndex> indexes;
   final List<ObjectLink> links;
 
@@ -66,7 +68,9 @@ class ObjectProperty {
     required this.typeClassName,
     required this.isarType,
     required this.isId,
-    required this.enumConsts,
+    required this.enumMap,
+    required this.enumProperty,
+    required this.defaultEnumElement,
     required this.nullable,
     required this.elementNullable,
     this.userDefaultValue,
@@ -81,7 +85,9 @@ class ObjectProperty {
 
   final bool isId;
   final IsarType isarType;
-  final List<String>? enumConsts;
+  final Map<String, dynamic>? enumMap;
+  final String? enumProperty;
+  final String? defaultEnumElement;
 
   final bool nullable;
   final bool elementNullable;
@@ -91,7 +97,7 @@ class ObjectProperty {
   final bool assignable;
   final int? constructorPosition;
 
-  bool get isEnum => enumConsts != null;
+  bool get isEnum => enumMap != null;
 
   String get scalarDartType {
     if (isEnum) {
@@ -136,10 +142,12 @@ class ObjectProperty {
 
   String get targetSchema => '${scalarDartType.capitalize()}Schema';
 
-  String get defaultEnum => '$typeClassName.${enumConsts!.first}';
+  String enumValueMapName(ObjectInfo object) {
+    return '_${object.dartName}${dartName}EnumValueMap';
+  }
 
-  String enumValues(ObjectInfo object) {
-    return '_${object.dartName}${scalarDartType}Values';
+  String valueEnumMapName(ObjectInfo object) {
+    return '_${object.dartName}${dartName}ValueEnumMap';
   }
 }
 

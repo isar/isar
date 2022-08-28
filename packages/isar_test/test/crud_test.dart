@@ -7,7 +7,7 @@ import 'util/sync_async_helper.dart';
 
 part 'crud_test.g.dart';
 
-@Collection()
+@collection
 class Message {
   Id? id;
 
@@ -41,8 +41,6 @@ void main() {
       messages = isar.messages;
       users = isar.userModels;
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('get() / put() without id', () async {
       final message1 = Message()

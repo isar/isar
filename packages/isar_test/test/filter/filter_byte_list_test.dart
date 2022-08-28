@@ -2,29 +2,22 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
-import '../util/sync_async_helper.dart';
+import '../util/matchers.dart';
 
 part 'filter_byte_list_test.g.dart';
 
-@Collection()
+@collection
 class ByteModel {
-  ByteModel(this.list) : hashList = list;
+  ByteModel(this.list);
 
   Id? id;
 
-  @Index(type: IndexType.value)
   List<byte>? list;
-
-  @Index(type: IndexType.hash)
-  List<byte>? hashList;
 
   @override
   // ignore: hash_and_equals
   bool operator ==(Object other) {
-    return other is ByteModel &&
-        other.id == id &&
-        listEquals(list, other.list) &&
-        listEquals(hashList, other.hashList);
+    return other is ByteModel && other.id == id && listEquals(list, other.list);
   }
 }
 
@@ -56,178 +49,51 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('.elementEqualTo()', () async {
-      // where clauses
-      await qEqualSet(
-        col.where().listElementEqualTo(0).tFindAll(),
+      await qEqual(
+        col.filter().listElementEqualTo(0),
         [obj2, obj4],
       );
-      await qEqualSet(col.where().listElementEqualTo(1).tFindAll(), [obj3]);
-      await qEqualSet(
-        col.where().listElementEqualTo(55).tFindAll(),
-        [],
-      );
-
-      // filters
-      await qEqual(
-        col.filter().listElementEqualTo(0).tFindAll(),
-        [obj2, obj4],
-      );
-      await qEqual(col.filter().listElementEqualTo(1).tFindAll(), [obj3]);
-      await qEqual(
-        col.filter().listElementEqualTo(55).tFindAll(),
-        [],
-      );
-    });
-
-    isarTest('.elementNotEqualTo()', () async {
-      // where clauses
-      await qEqualSet(
-        col.where().listElementNotEqualTo(123).tFindAll(),
-        [obj2, obj3, obj4],
-      );
-      await qEqualSet(
-        col.where().listElementNotEqualTo(0).tFindAll(),
-        [obj1, obj2, obj3, obj4],
-      );
+      await qEqual(col.filter().listElementEqualTo(1), [obj3]);
+      await qEqual(col.filter().listElementEqualTo(55), []);
     });
 
     isarTest('.elementGreaterThan()', () async {
-      // where clauses
-      await qEqualSet(
-        col.where().listElementGreaterThan(123).tFindAll(),
-        [obj2, obj4],
-      );
-      await qEqualSet(
-        col.where().listElementGreaterThan(123, include: true).tFindAll(),
+      await qEqual(col.filter().listElementGreaterThan(123), [obj2, obj4]);
+      await qEqual(
+        col.filter().listElementGreaterThan(123, include: true),
         [obj1, obj2, obj3, obj4],
       );
-      await qEqualSet(
-        col.where().listElementGreaterThan(255).tFindAll(),
-        [],
-      );
-
-      // filters
-      await qEqual(
-        col.filter().listElementGreaterThan(123).tFindAll(),
-        [obj2, obj4],
-      );
-      await qEqual(
-        col.filter().listElementGreaterThan(123, include: true).tFindAll(),
-        [obj1, obj2, obj3, obj4],
-      );
-      await qEqual(col.filter().listElementGreaterThan(255).tFindAll(), []);
+      await qEqual(col.filter().listElementGreaterThan(255), []);
     });
 
     isarTest('.elementLessThan()', () async {
-      // where clauses
-      await qEqualSet(
-        col.where().listElementLessThan(123).tFindAll(),
-        [obj2, obj3, obj4],
-      );
-      await qEqualSet(
-        col.where().listElementLessThan(123, include: true).tFindAll(),
+      await qEqual(col.filter().listElementLessThan(123), [obj2, obj3, obj4]);
+      await qEqual(
+        col.filter().listElementLessThan(123, include: true),
         [obj1, obj2, obj3, obj4],
       );
-      await qEqualSet(col.where().listElementLessThan(0).tFindAll(), []);
-
-      // filters
-      await qEqual(
-        col.filter().listElementLessThan(123).tFindAll(),
-        [obj2, obj3, obj4],
-      );
-      await qEqual(
-        col.filter().listElementLessThan(123, include: true).tFindAll(),
-        [obj1, obj2, obj3, obj4],
-      );
-      await qEqual(col.filter().listElementLessThan(0).tFindAll(), []);
+      await qEqual(col.filter().listElementLessThan(0), []);
     });
 
     isarTest('.elementBetween()', () async {
-      // where clauses
-      await qEqualSet(
-        col.where().listElementBetween(123, 255).tFindAll(),
-        [obj1, obj2, obj3, obj4],
-      );
-      await qEqualSet(
-        col
-            .where()
-            .listElementBetween(123, 255, includeLower: false)
-            .tFindAll(),
-        [obj2, obj4],
-      );
-      await qEqualSet(
-        col
-            .where()
-            .listElementBetween(123, 255, includeUpper: false)
-            .tFindAll(),
-        [obj1, obj3],
-      );
-      await qEqualSet(col.where().listElementBetween(50, 100).tFindAll(), []);
-
-      // filters
       await qEqual(
-        col.filter().listElementBetween(123, 255).tFindAll(),
+        col.filter().listElementBetween(123, 255),
         [obj1, obj2, obj3, obj4],
       );
       await qEqual(
-        col
-            .filter()
-            .listElementBetween(123, 255, includeLower: false)
-            .tFindAll(),
+        col.filter().listElementBetween(123, 255, includeLower: false),
         [obj2, obj4],
       );
       await qEqual(
-        col
-            .filter()
-            .listElementBetween(123, 255, includeUpper: false)
-            .tFindAll(),
+        col.filter().listElementBetween(123, 255, includeUpper: false),
         [obj1, obj3],
       );
-      await qEqual(col.filter().listElementBetween(50, 100).tFindAll(), []);
-    });
-
-    isarTest('.equalTo()', () async {
-      // where clauses
-      await qEqualSet(col.where().hashListEqualTo(null).tFindAll(), [objNull]);
-      await qEqualSet(col.where().hashListEqualTo([]).tFindAll(), [objEmpty]);
-      await qEqualSet(
-        col.where().hashListEqualTo([0, 255]).tFindAll(),
-        [obj2, obj4],
-      );
-    });
-
-    isarTest('.notEqualTo()', () async {
-      // where clauses
-      await qEqualSet(
-        col.where().hashListNotEqualTo([]).tFindAll(),
-        [objNull, obj1, obj2, obj3, obj4],
-      );
-      await qEqualSet(
-        col.where().hashListNotEqualTo([0, 255]).tFindAll(),
-        [objEmpty, obj1, obj3, objNull],
-      );
+      await qEqual(col.filter().listElementBetween(50, 100), []);
     });
 
     isarTest('.isNull()', () async {
-      // where clauses
-      await qEqualSet(col.where().hashListIsNull().tFindAll(), [objNull]);
-
-      // filters
-      await qEqual(
-        col.where().filter().hashListIsNull().tFindAll(),
-        [objNull],
-      );
-    });
-
-    isarTest('.isNotNull()', () async {
-      // where clauses
-      await qEqualSet(
-        col.where().hashListIsNotNull().tFindAll(),
-        [objEmpty, obj1, obj2, obj3, obj4],
-      );
+      await qEqual(col.where().filter().listIsNull(), [objNull]);
     });
   });
 }

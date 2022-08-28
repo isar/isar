@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: public_member_api_docs, invalid_use_of_protected_member
 
 import 'dart:indexed_db';
 
@@ -77,8 +77,8 @@ dynamic _valueToJs(dynamic value) {
 IdWhereClauseJs _buildIdWhereClause(IdWhereClause wc) {
   return IdWhereClauseJs()
     ..range = _buildKeyRange(
-      wc.lower != null ? _valueToJs(wc.lower) : null,
-      wc.upper != null ? _valueToJs(wc.upper) : null,
+      wc.lower,
+      wc.upper,
       wc.includeLower,
       wc.includeUpper,
     );
@@ -88,23 +88,23 @@ IndexWhereClauseJs _buildIndexWhereClause(
   CollectionSchema<dynamic> schema,
   IndexWhereClause wc,
 ) {
-  final keySize = schema.indexValueTypes[wc.indexName]!.length;
+  final index = schema.index(wc.indexName);
 
   final lower = wc.lower?.toList();
   final upper = wc.upper?.toList();
   if (upper != null) {
-    while (keySize > upper.length) {
+    while (index.properties.length > upper.length) {
       upper.add([]);
     }
   }
 
   dynamic lowerUnwrapped = wc.lower;
-  if (keySize == 1 && lower != null) {
+  if (index.properties.length == 1 && lower != null) {
     lowerUnwrapped = lower.isNotEmpty ? lower[0] : null;
   }
 
   dynamic upperUnwrapped = upper;
-  if (keySize == 1 && upper != null) {
+  if (index.properties.length == 1 && upper != null) {
     upperUnwrapped = upper.isNotEmpty ? upper[0] : double.infinity;
   }
 
@@ -122,7 +122,6 @@ LinkWhereClauseJs _buildLinkWhereClause(
   IsarCollectionImpl<dynamic> col,
   LinkWhereClause wc,
 ) {
-  // ignore: invalid_use_of_protected_member
   final linkCol = col.isar.getCollectionByNameInternal(wc.linkCollection)!
       as IsarCollectionImpl;
   final backlinkLinkName = linkCol.schema.backlinkLinkNames[wc.linkName];
@@ -232,7 +231,8 @@ String _buildCondition(
   }
 
   final isListOp = condition.type != FilterConditionType.isNull &&
-      schema.listProperties.contains(condition.property);
+      condition.type != FilterConditionType.listLength &&
+      schema.property(condition.property);
   final accessor =
       condition.property == schema.idName ? 'id' : 'obj.${condition.property}';
   final variable = isListOp ? 'e' : accessor;

@@ -2,7 +2,7 @@
 
 import 'package:isar/isar.dart';
 
-@Collection()
+@collection
 class Model {
   Model.create();
 

@@ -2,11 +2,12 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
+import '../util/matchers.dart';
 import '../util/sync_async_helper.dart';
 
 part 'change_field_nullability_test.g.dart';
 
-@Collection()
+@collection
 @Name('Col')
 class Col1 {
   Col1(this.id, this.value);
@@ -20,7 +21,7 @@ class Col1 {
       other is Col1 && id == other.id && value == other.value;
 }
 
-@Collection()
+@collection
 @Name('Col')
 class Col2 {
   Col2(this.id, this.value);
@@ -43,14 +44,13 @@ void main() {
     expect(await isar1.close(), true);
 
     final isar2 = await openTempIsar([Col2Schema], name: isar1.name);
-    await qEqual(isar2.col2s.where().tFindAll(), [Col2(1, 'a'), Col2(2, '')]);
+    await qEqual(isar2.col2s.where(), [Col2(1, 'a'), Col2(2, '')]);
     await isar2.tWriteTxn(() {
       return isar2.col2s.tPut(Col2(1, 'c'));
     });
     expect(await isar2.close(), true);
 
     final isar3 = await openTempIsar([Col1Schema], name: isar1.name);
-    await qEqual(isar3.col1s.where().tFindAll(), [Col1(1, 'c'), Col1(2, null)]);
-    expect(await isar3.close(), true);
+    await qEqual(isar3.col1s.where(), [Col1(1, 'c'), Col1(2, null)]);
   });
 }

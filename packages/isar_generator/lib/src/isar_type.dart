@@ -1,16 +1,11 @@
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_generator/src/helper.dart';
 import 'package:source_gen/source_gen.dart';
 
 const TypeChecker _dateTimeChecker = TypeChecker.fromRuntime(DateTime);
 bool _isDateTime(Element element) => _dateTimeChecker.isExactly(element);
-
-const TypeChecker _isarEnumChecker = TypeChecker.fromRuntime(IsarEnum);
-bool _isIsarEnum(Element element) => _isarEnumChecker.isAssignableFrom(element);
 
 extension DartTypeX on DartType {
   IsarType? get _primitiveIsarType {
@@ -32,24 +27,10 @@ extension DartTypeX on DartType {
       }
     } else if (isDartCoreString) {
       return IsarType.string;
-    } else if (_isDateTime(element!)) {
+    } else if (_isDateTime(element2!)) {
       return IsarType.dateTime;
-    } else if (element!.embeddedAnnotation != null) {
+    } else if (element2!.embeddedAnnotation != null) {
       return IsarType.object;
-    } else if (isIsarEnum) {
-      final enumElement = element! as ClassElement;
-      final isarEnum =
-          enumElement.allSupertypes.firstWhere((e) => e.isIsarEnum);
-      if (isarEnum.typeArguments.firstOrNull?.nullabilitySuffix ==
-          NullabilitySuffix.none) {
-        final type = isarEnum.typeArguments[0];
-        final isarType = type.isarType;
-        if (!type.isIsarEnum &&
-            isarType != IsarType.object &&
-            isarType != IsarType.objectList) {
-          return isarType;
-        }
-      }
     }
 
     return null;
@@ -57,10 +38,6 @@ extension DartTypeX on DartType {
 
   bool get isIsarId {
     return alias?.element.name == 'Id';
-  }
-
-  bool get isIsarEnum {
-    return _isIsarEnum(element!);
   }
 
   DartType get scalarType {
@@ -111,9 +88,17 @@ extension DartTypeX on DartType {
 }
 
 extension IsarTypeX on IsarType {
+  bool get containsBool => this == IsarType.bool || this == IsarType.boolList;
+
   bool get containsFloat =>
       this == IsarType.float ||
       this == IsarType.floatList ||
       this == IsarType.double ||
       this == IsarType.doubleList;
+
+  bool get containsString =>
+      this == IsarType.string || this == IsarType.stringList;
+
+  bool get containsObject =>
+      this == IsarType.object || this == IsarType.objectList;
 }

@@ -2,13 +2,14 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
+import '../util/matchers.dart';
 import '../util/sync_async_helper.dart';
 import 'common.dart';
 
 part 'no_default_test.g.dart';
 
 @Name('Col')
-@Collection()
+@collection
 class NoDefaultModel {
   NoDefaultModel(
     this.id,
@@ -44,11 +45,12 @@ class NoDefaultModel {
 
   final MyEmbedded embeddedValue;
 
+  @Enumerated(EnumType.name)
   final MyEnum enumValue;
 }
 
 @Name('Col')
-@Collection()
+@collection
 class NoDefaultListModel {
   NoDefaultListModel(
     this.id,
@@ -84,6 +86,7 @@ class NoDefaultListModel {
 
   final List<MyEmbedded?> embeddedValue;
 
+  @Enumerated(EnumType.name)
   final List<MyEnum?> enumValue;
 }
 
@@ -111,7 +114,6 @@ void main() {
       expect(obj.stringValue, '');
       expect(obj.embeddedValue, const MyEmbedded());
       expect(obj.enumValue, MyEnum.value1);
-      await isar2.close();
     });
 
     isarTest('scalar property', () async {
@@ -168,7 +170,6 @@ void main() {
         await isar2.noDefaultModels.where().enumValueProperty().tFindFirst(),
         MyEnum.value1,
       );
-      await isar2.close();
     });
 
     isarTest('list', () async {
@@ -191,7 +192,6 @@ void main() {
       expect(obj.stringValue, isEmpty);
       expect(obj.embeddedValue, isEmpty);
       expect(obj.enumValue, isEmpty);
-      await isar2.close();
     });
 
     isarTest('list property', () async {
@@ -270,7 +270,6 @@ void main() {
             .tFindFirst(),
         isEmpty,
       );
-      await isar2.close();
     });
   });
 }

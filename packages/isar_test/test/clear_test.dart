@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
@@ -6,12 +8,12 @@ import 'util/sync_async_helper.dart';
 
 part 'clear_test.g.dart';
 
-@Collection()
+@collection
 class ModelA {
   Id? id;
 }
 
-@Collection()
+@collection
 class ModelB {
   Id? id;
 }
@@ -23,8 +25,6 @@ void main() {
     setUp(() async {
       isar = await openTempIsar([ModelASchema, ModelBSchema]);
     });
-
-    tearDown(() => isar.close(deleteFromDisk: true));
 
     isarTest('Clear should empty target collection', () async {
       final modelAs = List.generate(100, (_) => ModelA());

@@ -16,56 +16,32 @@ class FilterGenerator {
     for (final property in object.properties) {
       if (property.nullable) {
         code += generateIsNull(property);
+        code += generateIsNotNull(property);
       }
 
-      if (!property.isarType.containsFloat &&
-          property.isarType != IsarType.object &&
-          property.isarType != IsarType.objectList) {
-        code += generateEqualTo(property);
-      }
+      code += generateEqualTo(property);
 
-      if (property.isarType != IsarType.bool &&
-          property.isarType != IsarType.boolList &&
-          property.isarType != IsarType.object &&
-          property.isarType != IsarType.objectList) {
+      if (!property.isarType.containsBool &&
+          !property.isarType.containsObject) {
         code += generateGreaterThan(property);
         code += generateLessThan(property);
         code += generateBetween(property);
       }
 
-      if (property.isarType == IsarType.string ||
-          property.isarType == IsarType.stringList) {
+      if (property.isarType.containsString) {
         code += generateStringStartsWith(property);
         code += generateStringEndsWith(property);
         code += generateStringContains(property);
         code += generateStringMatches(property);
       }
 
-      if (property.isarType.isList &&
-          property.isarType != IsarType.object &&
-          property.isarType != IsarType.objectList) {
+      if (property.isarType.isList) {
         code += generateListLength(property);
       }
     }
     return '''
     $code
   }''';
-  }
-
-  String caseSensitiveProperty(ObjectProperty p) {
-    if (p.isarType == IsarType.string || p.isarType == IsarType.stringList) {
-      return 'bool caseSensitive = true,';
-    } else {
-      return '';
-    }
-  }
-
-  String caseSensitiveValue(ObjectProperty p) {
-    if (p.isarType == IsarType.string || p.isarType == IsarType.stringList) {
-      return 'caseSensitive: caseSensitive,';
-    } else {
-      return '';
-    }
   }
 
   String mPrefix(ObjectProperty p, [bool listAny = true]) {
@@ -75,66 +51,81 @@ class FilterGenerator {
   }
 
   String generateEqualTo(ObjectProperty p) {
-    final optional = caseSensitiveProperty(p);
+    final optional = [
+      if (p.isarType.containsString) 'bool caseSensitive = true',
+      if (p.isarType.containsFloat) 'double epsilon = Query.epsilon',
+    ].join(',');
     return '''
-    ${mPrefix(p)}EqualTo(${p.nScalarDartType} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
+    ${mPrefix(p)}EqualTo(${p.nScalarDartType} value ${optional.isNotBlank ? ', {$optional,}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.equalTo(
           property: r'${p.isarName}',
           value: value,
-          ${caseSensitiveValue(p)}
+          ${p.isarType.containsString ? 'caseSensitive: caseSensitive,' : ''}
+          ${p.isarType.containsFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }''';
   }
 
   String generateGreaterThan(ObjectProperty p) {
-    final include = !p.isarType.containsFloat ? 'bool include = false,' : '';
-    final optional = '${caseSensitiveProperty(p)} $include';
+    final optional = [
+      'bool include = false',
+      if (p.isarType.containsString) 'bool caseSensitive = true',
+      if (p.isarType.containsFloat) 'double epsilon = Query.epsilon',
+    ].join(',');
     return '''
-    ${mPrefix(p)}GreaterThan(${p.nScalarDartType} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
+    ${mPrefix(p)}GreaterThan(${p.nScalarDartType} value, {$optional,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.greaterThan(
-          ${!p.isarType.containsFloat ? 'include: include,' : ''}
+          include: include,
           property: r'${p.isarName}',
           value: value,
-          ${caseSensitiveValue(p)}
+          ${p.isarType.containsString ? 'caseSensitive: caseSensitive,' : ''}
+          ${p.isarType.containsFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }''';
   }
 
   String generateLessThan(ObjectProperty p) {
-    final include = !p.isarType.containsFloat ? 'bool include = false,' : '';
-    final optional = '${caseSensitiveProperty(p)} $include';
+    final optional = [
+      'bool include = false',
+      if (p.isarType.containsString) 'bool caseSensitive = true',
+      if (p.isarType.containsFloat) 'double epsilon = Query.epsilon',
+    ].join(',');
     return '''
-    ${mPrefix(p)}LessThan(${p.nScalarDartType} value ${optional.isNotBlank ? ', {$optional}' : ''}) {
+    ${mPrefix(p)}LessThan(${p.nScalarDartType} value, {$optional,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.lessThan(
-          ${!p.isarType.containsFloat ? 'include: include,' : ''}
+          include: include,
           property: r'${p.isarName}',
           value: value,
-          ${caseSensitiveValue(p)}
+          ${p.isarType.containsString ? 'caseSensitive: caseSensitive,' : ''}
+          ${p.isarType.containsFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }''';
   }
 
   String generateBetween(ObjectProperty p) {
-    final include = !p.isarType.containsFloat
-        ? 'bool includeLower = true, bool includeUpper = true,'
-        : '';
-    final optional = '${caseSensitiveProperty(p)} $include';
+    final optional = [
+      'bool includeLower = true',
+      'bool includeUpper = true',
+      if (p.isarType.containsString) 'bool caseSensitive = true',
+      if (p.isarType.containsFloat) 'double epsilon = Query.epsilon',
+    ].join(',');
     return '''
-    ${mPrefix(p)}Between(${p.nScalarDartType} lower, ${p.nScalarDartType} upper ${optional.isNotBlank ? ', {$optional}' : ''}) {
+    ${mPrefix(p)}Between(${p.nScalarDartType} lower, ${p.nScalarDartType} upper, {$optional,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(FilterCondition.between(
           property: r'${p.isarName}',
           lower: lower,
-          includeLower: ${!p.isarType.containsFloat ? 'includeLower' : 'false'},
+          includeLower: includeLower,
           upper: upper,
-          includeUpper: ${!p.isarType.containsFloat ? 'includeUpper' : 'false'},
-          ${caseSensitiveValue(p)}
+          includeUpper: includeUpper,
+          ${p.isarType.containsString ? 'caseSensitive: caseSensitive,' : ''}
+          ${p.isarType.containsFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }''';
@@ -149,11 +140,38 @@ class FilterGenerator {
         ));
       });
     }''';
+
     if (p.isarType.isList && p.isarType != IsarType.byteList) {
       code += '''
       ${mPrefix(p)}IsNull() {
         return QueryBuilder.apply(this, (query) {
           return query.addFilterCondition(const FilterCondition.equalTo(
+            property: r'${p.isarName}',
+            value: null,
+          ));
+        });
+      }''';
+    }
+    return code;
+  }
+
+  String generateIsNotNull(ObjectProperty p) {
+    var code = '''
+    ${mPrefix(p, false)}IsNotNull() {
+      return QueryBuilder.apply(this, (query) {
+        return query
+          .copyWith(filterNot: !query.filterNot)
+          .addFilterCondition(const FilterCondition.isNull(
+            property: r'${p.isarName}',
+          ));
+      });
+    }''';
+
+    if (p.isarType.isList && p.isarType != IsarType.byteList) {
+      code += '''
+      ${mPrefix(p)}IsNotNull() {
+        return QueryBuilder.apply(this, (query) {
+          return query.addFilterCondition(FilterCondition.greaterThan(
             property: r'${p.isarName}',
             value: null,
           ));

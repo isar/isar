@@ -2,16 +2,13 @@ import 'package:isar/isar.dart';
 
 part 'common.g.dart';
 
-enum MyEnum with IsarEnum<String> {
+enum MyEnum {
   value1,
   value2,
   value3;
-
-  @override
-  String get isarValue => name;
 }
 
-@Embedded()
+@embedded
 class MyEmbedded {
   const MyEmbedded([this.test = '']);
 
@@ -23,7 +20,7 @@ class MyEmbedded {
 }
 
 @Name('Col')
-@Collection()
+@collection
 class EmptyModel {
   EmptyModel(this.id);
 

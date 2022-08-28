@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 import '../user_model.dart';
 import '../util/common.dart';
-import '../util/sync_async_helper.dart';
+import '../util/matchers.dart';
 
 void main() {
   group('Filter Groups', () {
@@ -25,11 +25,9 @@ void main() {
       });
     });
 
-    tearDown(() => isar.close(deleteFromDisk: true));
-
     isarTest('Simple or', () async {
       await qEqualSet(
-        users.where().filter().ageEqualTo(20).or().ageEqualTo(30).tFindAll(),
+        users.where().filter().ageEqualTo(20).or().ageEqualTo(30),
         [
           UserModel.fill('David', 20, false),
           UserModel.fill('Emma', 30, true),
@@ -40,31 +38,19 @@ void main() {
 
     isarTest('Simple and', () async {
       await qEqualSet(
-        users
-            .where()
-            .filter()
-            .ageEqualTo(40)
-            .and()
-            .adminEqualTo(true)
-            .tFindAll(),
+        users.where().filter().ageEqualTo(40).and().adminEqualTo(true),
         [UserModel.fill('Bjorn', 40, true)],
       );
 
       await qEqualSet(
-        users.where().filter().ageEqualTo(40).adminEqualTo(true).tFindAll(),
+        users.where().filter().ageEqualTo(40).adminEqualTo(true),
         [UserModel.fill('Bjorn', 40, true)],
       );
     });
 
     isarTest('Simple xor', () async {
       await qEqualSet(
-        users
-            .where()
-            .filter()
-            .ageGreaterThan(20)
-            .xor()
-            .adminEqualTo(false)
-            .tFindAll(),
+        users.where().filter().ageGreaterThan(20).xor().adminEqualTo(false),
         [
           UserModel.fill('David', 20, false),
           UserModel.fill('Emma', 30, true),
@@ -82,8 +68,7 @@ void main() {
             .or()
             .ageEqualTo(30)
             .and()
-            .nameEqualTo('Emma')
-            .tFindAll(),
+            .nameEqualTo('Emma'),
         [
           UserModel.fill('David', 20, false),
           UserModel.fill('Emma', 30, true),
@@ -100,8 +85,7 @@ void main() {
             .and()
             .nameEqualTo('Simon')
             .or()
-            .ageEqualTo(20)
-            .tFindAll(),
+            .ageEqualTo(20),
         [
           UserModel.fill('David', 20, false),
           UserModel.fill('Simon', 30, false),
@@ -116,8 +100,7 @@ void main() {
             .filter()
             .ageEqualTo(20)
             .or()
-            .group((q) => q.ageEqualTo(30).and().nameEqualTo('Emma'))
-            .tFindAll(),
+            .group((q) => q.ageEqualTo(30).and().nameEqualTo('Emma')),
         [
           UserModel.fill('David', 20, false),
           UserModel.fill('Emma', 30, true),
@@ -132,24 +115,19 @@ void main() {
             .filter()
             .ageEqualTo(30)
             .and()
-            .group((q) => q.nameEqualTo('Simon').or().ageEqualTo(20))
-            .tFindAll(),
+            .group((q) => q.nameEqualTo('Simon').or().ageEqualTo(20)),
         [UserModel.fill('Simon', 30, false)],
       );
     });
 
     isarTest('Nested groups', () async {
       await qEqualSet(
-        users
-            .where()
-            .filter()
-            .group(
+        users.where().filter().group(
               (QueryBuilder<UserModel, UserModel, QFilterCondition> q) => q
                   .nameEqualTo('Simon')
                   .or()
                   .group((q) => q.ageEqualTo(30).or().ageEqualTo(20)),
-            )
-            .tFindAll(),
+            ),
         [
           UserModel.fill('Simon', 30, false),
           UserModel.fill('David', 20, false),

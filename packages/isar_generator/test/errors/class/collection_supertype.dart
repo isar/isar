@@ -2,7 +2,7 @@
 
 import 'package:isar/isar.dart';
 
-@Collection()
+@collection
 class Supertype {
   Id? id;
 }
@@ -12,7 +12,7 @@ class Subtype implements Supertype {
   Id? id;
 }
 
-@Collection()
+@collection
 class Model implements Subtype {
   @override
   Id? id;

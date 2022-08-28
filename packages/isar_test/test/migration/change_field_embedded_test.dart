@@ -2,11 +2,12 @@ import 'package:isar/isar.dart';
 import 'package:test/test.dart';
 
 import '../util/common.dart';
+import '../util/matchers.dart';
 import '../util/sync_async_helper.dart';
 
 part 'change_field_embedded_test.g.dart';
 
-@Collection()
+@collection
 @Name('Col')
 class Model1 {
   Model1(this.id, this.value);
@@ -21,7 +22,7 @@ class Model1 {
       other is Model1 && other.id == id && other.value == value;
 }
 
-@Collection()
+@collection
 @Name('Col')
 class Model2 {
   Model2(this.id, this.value);
@@ -36,14 +37,14 @@ class Model2 {
       other is Model2 && other.id == id && other.value == value;
 }
 
-@Embedded()
+@embedded
 class Embedded1 {
   Embedded1([this.value]);
 
   String? value;
 }
 
-@Embedded()
+@embedded
 class Embedded2 {
   Embedded2([this.value]);
 
@@ -66,7 +67,7 @@ void main() {
     expect(await isar1.close(), true);
 
     final isar2 = await openTempIsar([Model2Schema], name: isar1.name);
-    await qEqual(isar2.model2s.where().tFindAll(), [
+    await qEqual(isar2.model2s.where(), [
       Model2(1, null),
       Model2(2, null),
     ]);
@@ -76,10 +77,9 @@ void main() {
     expect(await isar2.close(), true);
 
     final isar3 = await openTempIsar([Model1Schema], name: isar1.name);
-    await qEqual(isar3.model1s.where().tFindAll(), [
+    await qEqual(isar3.model1s.where(), [
       Model1(1, null),
       Model1(2, null),
     ]);
-    expect(await isar3.close(), true);
   });
 }

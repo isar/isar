@@ -11,19 +11,13 @@ import 'package:isar/src/native/isar_core.dart';
 
 final _keyPtrPtr = malloc<Pointer<CIndexKey>>();
 
-Pointer<CIndexKey>? buildIndexKey(
+Pointer<CIndexKey> buildIndexKey(
   CollectionSchema<dynamic> schema,
-  String indexName,
-  IndexKey key, {
-  bool addMaxComposite = false,
-  bool requireFullKey = false,
-  bool increase = false,
-  bool decrease = false,
-}) {
-  final index = schema.index(indexName);
-  if (key.length > index.properties.length ||
-      (requireFullKey && key.length != index.properties.length)) {
-    throw IsarError('Invalid values for index $indexName.');
+  IndexSchema index,
+  IndexKey key,
+) {
+  if (key.length > index.properties.length) {
+    throw IsarError('Invalid number of values for index ${index.name}.');
   }
 
   IC.isar_key_create(_keyPtrPtr);
@@ -38,23 +32,6 @@ Pointer<CIndexKey>? buildIndexKey(
       indexProperty.type,
       indexProperty.caseSensitive,
     );
-  }
-
-  if (increase) {
-    if (!IC.isar_key_increase(keyPtr)) {
-      return null;
-    }
-  }
-
-  if (decrease) {
-    if (!IC.isar_key_decrease(keyPtr)) {
-      return null;
-    }
-  }
-
-  // Also include composite indexes for upper keys
-  if (addMaxComposite && index.properties.length > key.length) {
-    IC.isar_key_add_long(keyPtr, maxLong);
   }
 
   return keyPtr;
@@ -80,10 +57,10 @@ void _addKeyValue(
   IndexType type,
   bool caseSensitive,
 ) {
-  if (value is IsarEnum) {
-    value = value.isarValue;
-  } else if (value is List<IsarEnum?>) {
-    value = value.map((e) => e?.isarValue).toList();
+  if (value is Enum) {
+    value = property.enumValueMap![value];
+  } else if (value is List<Enum?>) {
+    value = value.map((e) => property.enumValueMap![value]).toList();
   }
 
   final isarType =
@@ -221,4 +198,52 @@ void _freeStr(Pointer<Char> strPtr) {
   if (!strPtr.isNull) {
     malloc.free(strPtr);
   }
+}
+
+double? adjustFloatBound({
+  required double? value,
+  required bool lowerBound,
+  required bool include,
+  required double epsilon,
+}) {
+  value ??= double.nan;
+
+  if (lowerBound) {
+    if (include) {
+      if (value.isFinite) {
+        return value - epsilon;
+      }
+    } else {
+      if (value.isNaN) {
+        return double.negativeInfinity;
+      } else if (value == double.negativeInfinity) {
+        return -double.maxFinite;
+      } else if (value == double.maxFinite) {
+        return double.infinity;
+      } else if (value == double.infinity) {
+        return null;
+      } else {
+        return value + epsilon;
+      }
+    }
+  } else {
+    if (include) {
+      if (value.isFinite) {
+        return value + epsilon;
+      }
+    } else {
+      if (value.isNaN) {
+        return null;
+      } else if (value == double.negativeInfinity) {
+        return double.nan;
+      } else if (value == -double.maxFinite) {
+        return double.negativeInfinity;
+      } else if (value == double.infinity) {
+        return double.maxFinite;
+      } else {
+        return value - epsilon;
+      }
+    }
+  }
+  return value;
 }

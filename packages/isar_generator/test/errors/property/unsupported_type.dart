@@ -2,13 +2,9 @@
 
 import 'package:isar/isar.dart';
 
-@Collection()
+@collection
 class Model {
   Id? id;
 
-  late MyEnum? prop;
-}
-
-enum MyEnum {
-  a;
+  late Set<String>? prop;
 }
