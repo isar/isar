@@ -17,7 +17,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
       super.targetCollection as IsarCollectionImpl<OBJ>;
 
   @override
-  late final int? Function(OBJ) getId = targetCollection.schema.getId;
+  late final Id Function(OBJ) getId = targetCollection.schema.getId;
 
   late final String? backlinkLinkName =
       sourceCollection.schema.link(linkName).linkName;

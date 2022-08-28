@@ -4,13 +4,13 @@
 - Added `stringIsEmpty()` and `stringIsNotEmpty()` filters
 - Added `query.isEmpty()`, `query.isEmptySync()`, `query.isNotEmpty()` and `query.isNotEmptySync()` operations
 - Improved aggregation performance
-- The Id type changed from `int` to `num` on web
+- The `Id` type changed from `int` to `num` on web
 - `Isar.autoIncrement` is now const
-
 
 ### Fixes
 - Removed incorrectly generated embedded filters
 - Fixed remaining embedded filters
+- Fixed schema migration
 
 ### Breaking
 - Due to incompatibilities, Android <= 6.0 now requires you to provide a directory to `Isar.open()`
