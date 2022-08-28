@@ -1,6 +1,6 @@
 name: isar
 description: Extremely fast, easy to use, and fully async NoSQL database for Flutter.
-version: 3.0.0-dev.12
+version: 3.0.0-dev.13
 repository: https://github.com/isar/isar
 homepage: https://isar.dev
 
@@ -13,6 +13,6 @@ dependencies:
   meta: ^1.7.0
 
 dev_dependencies:
-  ffigen: ^6.0.1
+  ffigen: ^6.1.2
   test: ^1.21.1
   very_good_analysis: ^3.0.1
