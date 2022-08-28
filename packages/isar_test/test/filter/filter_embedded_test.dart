@@ -235,10 +235,7 @@ void main() {
       );
     });
 
-    // FIXME(severe): panic
-    // Shell: thread 'isarworker' panicked at 'range start index 6579554 out of
-    // range for slice of length 11', library/core/src/slice/index.rs:52:5
-    /*isarTest('.embedded() then .embedded()', () async {
+    isarTest('.embedded() then .embedded()', () async {
       await qEqualSet(
         isar.models.filter().embeddedA(
               (q) => q.embeddedB(
@@ -247,7 +244,7 @@ void main() {
             ),
         [obj1, obj2, obj4, obj6],
       );
-      /*await qEqualSet(
+      await qEqualSet(
         isar.models.filter().embeddedA(
               (q) => q.embeddedB(
                 (q) => q.nameEqualTo('embedded a1 b1'),
@@ -302,8 +299,8 @@ void main() {
               ),
             ),
         [],
-      );*/
-    });*/
+      );
+    });
 
     isarTest('.embedded() then .embeddedIsNull()', () async {
       await qEqualSet(

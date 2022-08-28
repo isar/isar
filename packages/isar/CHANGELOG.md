@@ -11,7 +11,9 @@
 ### Fixes
 - Removed incorrectly generated embedded filters
 - Fixed remaining embedded filters
-- Fixed issue with 
+
+### Breaking
+- Due to incompatibilities, Android <= 6.0 now requires you to provide a directory to `Isar.open()`
 
 ## 3.0.0-dev.12
 

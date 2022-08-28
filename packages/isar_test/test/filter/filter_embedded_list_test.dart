@@ -760,10 +760,7 @@ void main() {
       );
     });
 
-    // FIXME(severe): panic
-    // Shell: thread 'isarworker' panicked at 'range end index 6450588 out of
-    // range for slice of length 26', library/core/src/slice/index.rs:73:5
-    /*isarTest('.embeddedElement() then .embeddedElement()', () async {
+    isarTest('.embeddedElement() then .embeddedElement()', () async {
       await qEqualSet(
         isar.models.filter().embeddedAsElement(
               (q) => q.embeddedBsElement(
@@ -865,6 +862,6 @@ void main() {
             ),
         [],
       );
-    });*/
+    });
   });
 }

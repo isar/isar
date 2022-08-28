@@ -245,7 +245,7 @@ Pointer<CFilter>? _buildFilter(
   } else if (filter is LinkFilter) {
     return _buildLink(col, filter, alloc);
   } else if (filter is ObjectFilter) {
-    return _buildObject(col, filter, alloc);
+    return _buildObject(col, embeddedCol, filter, alloc);
   } else if (filter is FilterCondition) {
     return _buildCondition(col, embeddedCol, filter, alloc);
   } else {
@@ -341,10 +341,10 @@ Pointer<CFilter>? _buildLink(
 
 Pointer<CFilter>? _buildObject(
   IsarCollectionImpl<dynamic> col,
-  ObjectFilter objectFilter,
-  Allocator alloc, {
   Schema<dynamic>? embeddedCol,
-}) {
+  ObjectFilter objectFilter,
+  Allocator alloc,
+) {
   final property = (embeddedCol ?? col.schema).property(objectFilter.property);
 
   final condition = _buildFilter(
