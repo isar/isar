@@ -10,13 +10,19 @@ import 'package:isar/src/native/open.dart';
 import 'package:isar/src/native/split_words.dart';
 import 'package:meta/meta.dart';
 
+/// Type to specify the id property of a collection.
+typedef Id = int;
+
 /// @nodoc
+@protected
 const Id isarMinId = -9223372036854775807;
 
 /// @nodoc
+@protected
 const Id isarMaxId = 9223372036854775807;
 
 /// @nodoc
+@protected
 const Id isarAutoIncrementId = -9223372036854775808;
 
 /// @nodoc

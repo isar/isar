@@ -15,12 +15,12 @@ abstract class IsarCollection<OBJ> {
   String get name => schema.name;
 
   /// Get a single object by its [id] or `null` if the object does not exist.
-  Future<OBJ?> get(int id) {
+  Future<OBJ?> get(Id id) {
     return getAll([id]).then((List<OBJ?> objects) => objects[0]);
   }
 
   /// Get a single object by its [id] or `null` if the object does not exist.
-  OBJ? getSync(int id) {
+  OBJ? getSync(Id id) {
     return getAllSync([id])[0];
   }
 
@@ -97,14 +97,14 @@ abstract class IsarCollection<OBJ> {
   ///
   /// Returns whether the object has been deleted. Isar web always returns
   /// `true`.
-  Future<bool> delete(int id) {
+  Future<bool> delete(Id id) {
     return deleteAll([id]).then((int count) => count == 1);
   }
 
   /// Delete a single object by its [id].
   ///
   /// Returns whether the object has been deleted.
-  bool deleteSync(int id) {
+  bool deleteSync(Id id) {
     return deleteAllSync([id]) == 1;
   }
 
@@ -222,10 +222,10 @@ abstract class IsarCollection<OBJ> {
   ///
   /// Objects that don't exist (yet) can also be watched. If [initialReturn]
   /// is `true`, the object will be sent to the consumer immediately.
-  Stream<OBJ?> watchObject(int id, {bool initialReturn = false});
+  Stream<OBJ?> watchObject(Id id, {bool initialReturn = false});
 
   /// Watch an object with [id] for changes.
-  Stream<void> watchObjectLazy(int id);
+  Stream<void> watchObjectLazy(Id id);
 
   /// Verifies the integrity of the collection and its indexes.
   ///

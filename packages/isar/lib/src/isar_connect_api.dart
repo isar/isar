@@ -156,7 +156,7 @@ class ConnectEdit {
     return ConnectEdit(
       instance: json['instance'] as String,
       collection: json['collection'] as String,
-      id: json['id'] as int,
+      id: json['id'] as Id,
       index: json['index'] as int?,
       property: json['property'] as String,
       value: json['value'],
@@ -165,7 +165,7 @@ class ConnectEdit {
 
   final String instance;
   final String collection;
-  final int id;
+  final Id id;
   final String property;
   final int? index;
   final dynamic value;

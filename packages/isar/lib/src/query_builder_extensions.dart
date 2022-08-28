@@ -195,6 +195,18 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
   /// {@macro query_count}
   int countSync() => build().countSync();
 
+  /// {@macro query_is_empty}
+  Future<bool> isEmpty() => build().isEmpty();
+
+  /// {@macro query_is_empty}
+  bool isEmptySync() => build().isEmptySync();
+
+  /// {@macro query_is_not_empty}
+  Future<bool> isNotEmpty() => build().isNotEmpty();
+
+  /// {@macro query_is_not_empty}
+  bool isNotEmptySync() => build().isNotEmptySync();
+
   /// {@macro query_delete_first}
   Future<bool> deleteFirst() => build().deleteFirst();
 

@@ -252,7 +252,7 @@ String generateDeserializeNative(ObjectInfo object) {
 
   return '''
     ${object.dartName} ${object.deserializeNativeName}(
-      int id,
+      Id id,
       IsarBinaryReader reader,
       List<int> offsets,
       Map<Type, List<int>> allOffsets,
@@ -265,7 +265,6 @@ String generateDeserializeNative(ObjectInfo object) {
 String generateDeserializePropNative(ObjectInfo object) {
   var code = '''
     P ${object.deserializePropNativeName}<P>(
-      Id id,
       IsarBinaryReader reader,
       int propertyId,
       int offset,

@@ -57,7 +57,7 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
     _objects.clear();
     for (final object in objects) {
       final id = getId(object);
-      if (id != null) {
+      if (id != Isar.autoIncrement) {
         _objects[id] = object;
       }
     }
@@ -75,14 +75,14 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   void _applyAddedRemoved() {
     for (final object in addedObjects) {
       final id = getId(object);
-      if (id != null) {
+      if (id != Isar.autoIncrement) {
         _objects[id] = object;
       }
     }
 
     for (final object in removedObjects) {
       final id = getId(object);
-      if (id != null) {
+      if (id != Isar.autoIncrement) {
         _objects.remove(id);
       }
     }
@@ -132,7 +132,7 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
   bool add(OBJ value) {
     if (isAttached) {
       final id = getId(value);
-      if (id != null) {
+      if (id != Isar.autoIncrement) {
         if (_objects.containsKey(id)) {
           return false;
         }
@@ -150,7 +150,7 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
     if (element is OBJ) {
       final id = getId(element);
-      if (id != null) {
+      if (id != Isar.autoIncrement) {
         return _loadedObjects.containsKey(id);
       }
     }
@@ -169,7 +169,7 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
     if (element is OBJ) {
       final id = getId(element);
-      if (id != null) {
+      if (id != Isar.autoIncrement) {
         return _loadedObjects[id];
       }
     }
@@ -184,7 +184,7 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
     if (isAttached) {
       final id = getId(value);
-      if (id != null) {
+      if (id != Isar.autoIncrement) {
         if (isLoaded && !_objects.containsKey(id)) {
           return false;
         }
@@ -201,8 +201,8 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
     requireAttached();
     return HashSet(
       equals: (o1, o2) => getId(o1) == getId(o2),
-      hashCode: (o) => getId(o)!,
-      isValidKey: (o) => o is OBJ && getId(o) != null,
+      hashCode: (o) => getId(o),
+      isValidKey: (o) => o is OBJ && getId(o) != Isar.autoIncrement,
     )..addAll(_loadedObjects.values);
   }
 

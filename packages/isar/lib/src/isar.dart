@@ -31,7 +31,7 @@ abstract class Isar {
 
   /// Placeholder for an auto-increment id.
   // ignore: prefer_const_declarations
-  static final Id autoIncrement = isarAutoIncrementId;
+  static const Id autoIncrement = isarAutoIncrementId;
 
   static final Map<String, Isar> _instances = <String, Isar>{};
   static final Set<IsarOpenCallback> _openCallbacks = <IsarOpenCallback>{};
@@ -98,7 +98,6 @@ abstract class Isar {
           _IsarConnect.initialize(schemas);
           return true;
         }(),
-        'Remove the Inspector in release mode.',
       );
     }
     return IsarNative.open(
@@ -126,7 +125,6 @@ abstract class Isar {
           _IsarConnect.initialize(schemas);
           return true;
         }(),
-        'Remove the Inspector in release mode.',
       );
     }
     return IsarNative.openSync(

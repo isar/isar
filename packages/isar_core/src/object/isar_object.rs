@@ -332,42 +332,6 @@ impl<'a> IsarObject<'a> {
         }
     }
 
-    fn compare_float(f1: f32, f2: f32) -> Ordering {
-        if !f1.is_nan() {
-            if !f2.is_nan() {
-                if f1 > f2 {
-                    Ordering::Greater
-                } else {
-                    Ordering::Less
-                }
-            } else {
-                Ordering::Greater
-            }
-        } else if !f2.is_nan() {
-            Ordering::Less
-        } else {
-            Ordering::Equal
-        }
-    }
-
-    fn compare_double(f1: f64, f2: f64) -> Ordering {
-        if !f1.is_nan() {
-            if !f2.is_nan() {
-                if f1 > f2 {
-                    Ordering::Greater
-                } else {
-                    Ordering::Less
-                }
-            } else {
-                Ordering::Greater
-            }
-        } else if !f2.is_nan() {
-            Ordering::Less
-        } else {
-            Ordering::Equal
-        }
-    }
-
     pub fn compare_property(
         &self,
         other: &IsarObject,
@@ -377,32 +341,12 @@ impl<'a> IsarObject<'a> {
         match data_type {
             DataType::Bool | DataType::Byte => self.read_byte(offset).cmp(&other.read_byte(offset)),
             DataType::Int => self.read_int(offset).cmp(&other.read_int(offset)),
-            DataType::Float => {
-                let f1 = self.read_float(offset);
-                let f2 = other.read_float(offset);
-                Self::compare_float(f1, f2)
-            }
+            DataType::Float => self.read_float(offset).total_cmp(&other.read_float(offset)),
             DataType::Long => self.read_long(offset).cmp(&other.read_long(offset)),
-            DataType::Double => {
-                let f1 = self.read_double(offset);
-                let f2 = other.read_double(offset);
-                Self::compare_double(f1, f2)
-            }
-            DataType::String => {
-                let s1 = self.read_string(offset);
-                let s2 = other.read_string(offset);
-                if let Some(s1) = s1 {
-                    if let Some(s2) = s2 {
-                        s1.cmp(s2)
-                    } else {
-                        Ordering::Greater
-                    }
-                } else if s2.is_some() {
-                    Ordering::Less
-                } else {
-                    Ordering::Equal
-                }
-            }
+            DataType::Double => self
+                .read_double(offset)
+                .total_cmp(&other.read_double(offset)),
+            DataType::String => self.read_string(offset).cmp(&other.read_string(offset)),
             _ => Ordering::Equal,
         }
     }

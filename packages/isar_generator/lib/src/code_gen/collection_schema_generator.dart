@@ -52,7 +52,7 @@ String generateSchema(ObjectInfo object) {
       getId: ${object.getIdName},
       getLinks: ${object.getLinksName},
       attach: ${object.attachName},
-      version: ${CollectionSchema.generatorVersion},
+      version: '${Isar.version}',
     ''';
   }
 
@@ -61,11 +61,9 @@ String generateSchema(ObjectInfo object) {
 
 String _generatePropertySchema(ObjectInfo object, int index) {
   final property = object.objectProperties[index];
-  var enumMaps = '';
+  var enumMap = '';
   if (property.isEnum) {
-    enumMaps = '''
-      enumValueMap: ${property.enumValueMapName(object)},
-      valueEnumMap: ${property.valueEnumMapName(object)},''';
+    enumMap = 'enumMap: ${property.enumValueMapName(object)},';
   }
   var target = '';
   if (property.isarType.containsObject) {
@@ -76,7 +74,7 @@ String _generatePropertySchema(ObjectInfo object, int index) {
     id: $index,
     name: r'${property.isarName}',
     type: IsarType.${property.isarType.name},
-    $enumMaps
+    $enumMap
     $target
   )
   ''';
