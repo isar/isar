@@ -2,7 +2,6 @@
 
 import 'dart:ffi';
 
-import 'package:isar/isar.dart';
 import 'package:isar/src/common/isar_link_base_impl.dart';
 import 'package:isar/src/common/isar_link_common.dart';
 import 'package:isar/src/common/isar_links_common.dart';
@@ -25,9 +24,9 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   late final getId = targetCollection.schema.getId;
 
   @override
-  Future<void> update({
-    Iterable<OBJ> link = const [],
-    Iterable<OBJ> unlink = const [],
+  Future<void> updateIds({
+    Iterable<int> link = const [],
+    Iterable<int> unlink = const [],
     bool reset = false,
   }) {
     final linkList = link.toList();
@@ -40,10 +39,10 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
       final ids = idsPtr.asTypedList(count);
 
       for (var i = 0; i < linkList.length; i++) {
-        ids[i] = requireGetId(linkList[i]);
+        ids[i] = linkList[i];
       }
       for (var i = 0; i < unlinkList.length; i++) {
-        ids[linkList.length + i] = requireGetId(unlinkList[i]);
+        ids[linkList.length + i] = unlinkList[i];
       }
 
       IC.isar_link_update_all(
@@ -61,9 +60,9 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   }
 
   @override
-  void updateSync({
-    Iterable<OBJ> link = const [],
-    Iterable<OBJ> unlink = const [],
+  void updateIdsSync({
+    Iterable<int> link = const [],
+    Iterable<int> unlink = const [],
     bool reset = false,
   }) {
     final containingId = requireAttached();
@@ -79,15 +78,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
         );
       }
 
-      for (final object in link) {
-        var id = getId(object);
-        if (id == Isar.autoIncrement) {
-          id = targetCollection.putByIndexSyncInternal(
-            txn: txn,
-            object: object,
-          );
-        }
-
+      for (final id in link) {
         nCall(
           IC.isar_link(
             sourceCollection.ptr,
@@ -98,8 +89,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
           ),
         );
       }
-      for (final object in unlink) {
-        final unlinkId = requireGetId(object);
+      for (final unlinkId in unlink) {
         nCall(
           IC.isar_link_unlink(
             sourceCollection.ptr,

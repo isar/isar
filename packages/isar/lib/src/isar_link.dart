@@ -62,6 +62,15 @@ abstract class IsarLink<OBJ> implements IsarLinkBase<OBJ> {
 
   /// The linked object or `null` if no object is linked.
   set value(OBJ? obj);
+
+  /// Has the id of this link been loaded?
+  bool get isIdLoaded;
+
+  /// The ID of the linked object or `null` if no object is linked.
+  int? get valueId;
+
+  /// The ID of the linked object or `null` if no object is linked.
+  set valueId(int? id);
 }
 
 /// Establishes a 1:n relationship with the same or another collection. The

@@ -92,17 +92,41 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
     return QueryBuilder(qb);
   }
 
+  Future<void> updateIds({
+    Iterable<int> link = const [],
+    Iterable<int> unlink = const [],
+    bool reset = false,
+  });
+
+  void updateIdsSync({
+    Iterable<int> link = const [],
+    Iterable<int> unlink = const [],
+    bool reset = false,
+  });
+
   /// See [IsarLinks.update].
   Future<void> update({
     Iterable<OBJ> link = const [],
     Iterable<OBJ> unlink = const [],
     bool reset = false,
-  });
+  }) {
+    return updateIds(
+      link: link.map(getId),
+      unlink: unlink.map(getId),
+      reset: reset,
+    );
+  }
 
   /// See [IsarLinks.updateSync].
   void updateSync({
     Iterable<OBJ> link = const [],
     Iterable<OBJ> unlink = const [],
     bool reset = false,
-  });
+  }) {
+    updateIdsSync(
+      link: link.map(getId),
+      unlink: unlink.map(getId),
+      reset: reset,
+    );
+  }
 }

@@ -27,9 +27,9 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
       : sourceCollection.native.getLink(linkName);
 
   @override
-  Future<void> update({
-    Iterable<OBJ> link = const [],
-    Iterable<OBJ> unlink = const [],
+  Future<void> updateIds({
+    Iterable<int> link = const [],
+    Iterable<int> unlink = const [],
     bool reset = false,
   }) {
     final linkList = link.toList();
@@ -38,15 +38,8 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
     final containingId = requireAttached();
     final backlink = backlinkLinkName != null;
 
-    final linkIds = List.filled(linkList.length, 0);
-    for (var i = 0; i < linkList.length; i++) {
-      linkIds[i] = requireGetId(linkList[i]);
-    }
-
-    final unlinkIds = List.filled(unlinkList.length, 0);
-    for (var i = 0; i < unlinkList.length; i++) {
-      unlinkIds[i] = requireGetId(unlinkList[i]);
-    }
+    final linkIds = linkList.toList(growable: false);
+    final unlinkIds = unlinkList.toList(growable: false);
 
     return targetCollection.isar.getTxn(true, (IsarTxnJs txn) async {
       if (reset) {
@@ -59,9 +52,9 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   }
 
   @override
-  void updateSync({
-    Iterable<OBJ> link = const [],
-    Iterable<OBJ> unlink = const [],
+  void updateIdsSync({
+    Iterable<int> link = const [],
+    Iterable<int> unlink = const [],
     bool reset = false,
   }) =>
       unsupportedOnWeb();
