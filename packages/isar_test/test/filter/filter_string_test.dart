@@ -3,176 +3,166 @@ import 'package:test/test.dart';
 
 import '../util/common.dart';
 import '../util/matchers.dart';
+import '../util/sync_async_helper.dart';
 
 part 'filter_string_test.g.dart';
 
 @collection
 class StringModel {
-  StringModel();
+  StringModel(this.field);
 
-  StringModel.init(this.field);
-  Id? id;
+  Id id = Isar.autoIncrement;
 
-  String? field = '';
+  String? field;
 
   @override
   // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is StringModel && field == other.field;
+
+  @override
+  String toString() {
+    return 'StringModel{id: $id, field: $field}';
+  }
 }
 
 void main() {
   group('String filter', () {
     late Isar isar;
-    late IsarCollection<StringModel> col;
 
     late StringModel objEmpty;
     late StringModel obj1;
     late StringModel obj2;
     late StringModel obj3;
     late StringModel obj4;
+    late StringModel obj5;
+    late StringModel obj6;
     late StringModel objNull;
 
     setUp(() async {
       isar = await openTempIsar([StringModelSchema]);
-      col = isar.stringModels;
 
-      await isar.writeTxn(() async {
-        for (var i = 0; i < 5; i++) {
-          final obj = StringModel.init('string $i');
-          await col.put(obj);
-        }
-        await col.put(StringModel.init(null));
-        await col.put(StringModel.init(''));
-        await col.put(StringModel.init('string 4'));
-      });
+      objEmpty = StringModel('');
+      obj1 = StringModel('string 1');
+      obj2 = StringModel('string 2');
+      obj3 = StringModel('string 3');
+      obj4 = StringModel('string 4');
+      obj5 = StringModel('string 5');
+      obj6 = StringModel('string 5');
+      objNull = StringModel(null);
+
+      await isar.writeTxn(
+        () async => isar.stringModels.tPutAll([
+          objEmpty,
+          obj1,
+          obj2,
+          obj3,
+          obj4,
+          obj5,
+          obj6,
+          objNull,
+        ]),
+      );
     });
 
     isarTest('.equalTo()', () async {
       await qEqual(
-        col.filter().fieldEqualTo('string 2'),
-        [StringModel.init('string 2')],
+        isar.stringModels.filter().fieldEqualTo('string 2'),
+        [obj2],
       );
       await qEqual(
-        col.filter().fieldEqualTo(null),
-        [StringModel.init(null)],
+        isar.stringModels.filter().fieldEqualTo(null),
+        [objNull],
       );
       await qEqual(
-        col.filter().fieldEqualTo('string 5'),
+        isar.stringModels.filter().fieldEqualTo('string 6'),
         [],
       );
       await qEqual(
-        col.filter().fieldEqualTo(''),
-        [StringModel.init('')],
+        isar.stringModels.filter().fieldEqualTo(''),
+        [objEmpty],
       );
     });
 
     isarTest('.isNull()', () async {
       await qEqual(
-        col.filter().fieldIsNull(),
-        [StringModel.init(null)],
+        isar.stringModels.filter().fieldIsNull(),
+        [objNull],
       );
     });
 
     isarTest('.startsWith()', () async {
       await qEqualSet(
-        col.filter().fieldStartsWith('string'),
-        {
-          StringModel.init('string 0'),
-          StringModel.init('string 1'),
-          StringModel.init('string 2'),
-          StringModel.init('string 3'),
-          StringModel.init('string 4'),
-          StringModel.init('string 4'),
-        },
+        isar.stringModels.filter().fieldStartsWith('string'),
+        [obj1, obj2, obj3, obj4, obj5, obj6],
       );
       await qEqualSet(
-        col.filter().fieldStartsWith(''),
-        {
-          StringModel.init(''),
-          StringModel.init('string 0'),
-          StringModel.init('string 1'),
-          StringModel.init('string 2'),
-          StringModel.init('string 3'),
-          StringModel.init('string 4'),
-          StringModel.init('string 4'),
-        },
+        isar.stringModels.filter().fieldStartsWith(''),
+        [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6],
       );
-      await qEqualSet(col.filter().fieldStartsWith('S'), {});
+      await qEqualSet(isar.stringModels.filter().fieldStartsWith('S'), {});
     });
 
     isarTest('.endsWith()', () async {
       await qEqualSet(
-        col.filter().fieldEndsWith('4'),
-        {
-          StringModel.init('string 4'),
-          StringModel.init('string 4'),
-        },
+        isar.stringModels.filter().fieldEndsWith('5'),
+        [obj5, obj6],
       );
       await qEqualSet(
-        col.filter().fieldEndsWith(''),
-        {
-          StringModel.init(''),
-          StringModel.init('string 0'),
-          StringModel.init('string 1'),
-          StringModel.init('string 2'),
-          StringModel.init('string 3'),
-          StringModel.init('string 4'),
-          StringModel.init('string 4'),
-        },
+        isar.stringModels.filter().fieldEndsWith(''),
+        [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6],
       );
-      await qEqualSet(col.filter().fieldEndsWith('8'), {});
+      await qEqualSet(isar.stringModels.filter().fieldEndsWith('8'), []);
     });
 
     isarTest('.contains()', () async {
-      await qEqualSet(col.filter().fieldContains('ing'), {
-        StringModel.init('string 0'),
-        StringModel.init('string 1'),
-        StringModel.init('string 2'),
-        StringModel.init('string 3'),
-        StringModel.init('string 4'),
-        StringModel.init('string 4'),
-      });
       await qEqualSet(
-        col.filter().fieldContains(''),
-        {
-          StringModel.init(''),
-          StringModel.init('string 0'),
-          StringModel.init('string 1'),
-          StringModel.init('string 2'),
-          StringModel.init('string 3'),
-          StringModel.init('string 4'),
-          StringModel.init('string 4'),
-        },
+        isar.stringModels.filter().fieldContains('ing'),
+        [obj1, obj2, obj3, obj4, obj5, obj6],
       );
-      await qEqualSet(col.where().filter().fieldContains('x'), {});
+      await qEqualSet(
+        isar.stringModels.filter().fieldContains(''),
+        [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6],
+      );
+      await qEqualSet(
+        isar.stringModels.where().filter().fieldContains('x'),
+        [],
+      );
     });
 
-    isarTestVm('.matches()', () async {
+    isarTestVm('.matches() VM', () async {
       await qEqualSet(
-        col.filter().fieldMatches('*ng 4'),
-        {
-          StringModel.init('string 4'),
-          StringModel.init('string 4'),
-        },
+        isar.stringModels.filter().fieldMatches('*ng 5'),
+        [obj5, obj6],
       );
       await qEqualSet(
-        col.filter().fieldMatches('????????'),
-        {
-          StringModel.init('string 0'),
-          StringModel.init('string 1'),
-          StringModel.init('string 2'),
-          StringModel.init('string 3'),
-          StringModel.init('string 4'),
-          StringModel.init('string 4'),
-        },
+        isar.stringModels.filter().fieldMatches('????????'),
+        [obj1, obj2, obj3, obj4, obj5, obj6],
       );
-      await qEqualSet(
-        col.filter().fieldMatches(''),
-        {StringModel.init('')},
-      );
+      await qEqualSet(isar.stringModels.filter().fieldMatches(''), [objEmpty]);
 
-      await qEqualSet(col.filter().fieldMatches('*4?'), {});
+      await qEqualSet(isar.stringModels.filter().fieldMatches('*4?'), []);
+    });
+
+    isarTestWeb('.matches() WEB', () async {
+      expect(
+        await isar.stringModels.filter().fieldMatches('*ng 5').tFindAll(),
+        anyOf(throwsUnimplementedError, throwsUnsupportedError),
+      );
+    });
+
+    isarTest('.isEmpty()', () async {
+      await qEqualSet(
+        isar.stringModels.filter().fieldIsEmpty(),
+        [objEmpty],
+      );
+    });
+
+    isarTest('.isNotEmpty()', () async {
+      await qEqualSet(
+        isar.stringModels.filter().fieldIsNotEmpty(),
+        [obj1, obj2, obj3, obj4, obj5, obj6],
+      );
     });
   });
 }
