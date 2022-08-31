@@ -606,11 +606,12 @@ void main() {
     });
 
     // FIXME: .elementLessThan() doesn't seem to be working
-    // (returns either no elements or null elements)
+    // returns either no elements or null elements
+    // also works fine in the index test
     isarTest('.elementLessThan()', () async {
       await qEqualSet(
         isar.stringModels.filter().stringsElementLessThan('strings 3'),
-        [obj1, obj2, obj4],
+        [obj1, obj2, obj4, obj6],
       );
 
       await qEqualSet(
@@ -624,7 +625,7 @@ void main() {
         isar.stringModels
             .filter()
             .stringsNullableElementLessThan('strings nullable 3'),
-        [obj1, obj5],
+        [obj1, obj5, obj6],
       );
 
       await qEqualSet(
