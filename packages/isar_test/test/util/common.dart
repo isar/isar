@@ -102,6 +102,7 @@ void isarTest(
         );
       },
       timeout: timeout ?? const Timeout(Duration(minutes: 10)),
+      skip: skip,
     );
   }
 
@@ -117,6 +118,11 @@ void isarTest(
 @isTest
 void isarTestVm(String name, dynamic Function() body) {
   isarTest(name, body, skip: kIsWeb);
+}
+
+@isTest
+void isarTestWeb(String name, dynamic Function() body) {
+  isarTest(name, body, skip: !kIsWeb);
 }
 
 @isTest
