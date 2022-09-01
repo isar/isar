@@ -112,14 +112,13 @@ String _getLibraryDownloadPath(Map<Abi, String> libraries) {
     if (Platform.script.path.isEmpty) {
       return name;
     }
-    var dirSegments = Platform.script.path.split(Platform.pathSeparator);
-    if (dirSegments.length == 1) {
-      // On !indows the path separator depends on how the script is executed
-      dirSegments = Platform.script.path.split('/');
-    }
-    final dir = dirSegments
-        .sublist(0, dirSegments.length - 1)
+    var dir = Platform.script.pathSegments
+        .sublist(0, Platform.script.pathSegments.length - 1)
         .join(Platform.pathSeparator);
+    if (!Platform.isWindows) {
+      // Not on windows, add leading platform path separator
+      dir = '${Platform.pathSeparator}$dir';
+    }
     return '$dir${Platform.pathSeparator}$name';
   }
 }
