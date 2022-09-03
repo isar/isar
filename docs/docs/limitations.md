@@ -2,9 +2,12 @@
 
 As you know, Isar works on mobile devices and desktops running on the VM as well as Web. Both platforms are very different and have different limitations.
 
+The max object size in Isar is 16MB. (Also 16MB in MongoDB)
+
 ## VM Limitations
 
 - Only the first 1024 bytes of a string can be used for an prefix where clause
+
 
 ## Web Limitations
 

@@ -49,7 +49,7 @@ Once you created a type adapter, the hardest part is done. Using `TypeAdapters` 
 ```dart
 @Collection()
 class Person {
-  int? id;
+  Id? id;
 
   late String name;
 

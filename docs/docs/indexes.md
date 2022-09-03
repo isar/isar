@@ -15,7 +15,7 @@ For example, this `Product` collection is completely unordered.
 ```dart
 @collection
 class Product {
-  int? id;
+  Id? id;
 
   late String name;
 
@@ -50,7 +50,7 @@ To improve the performance of this query we index the `price` property. An index
 ```dart
 @collection
 class Product {
-  int? id;
+  Id? id;
 
   late String name;
 
@@ -140,9 +140,9 @@ Composite indexes are also known as a multiple-column indexes.
 It's probably best to start with an example. We create a person collection and define a composite index on the age and name properties:
 
 ```dart
-@Collection()
+@collection
 class Person {
-  int? id;
+  Id? id;
 
   late String name;
 
@@ -207,9 +207,9 @@ If you index a list using `IndexType.value`, Isar will automatically create a mu
 Useful applications for multi-entry indexes are for example to index a list of tags or to create a full text index.
 
 ```dart
-@Collection()
+@collection
 class Product {
-  int? id;
+  Id? id;
 
   late String description;
 
@@ -255,9 +255,9 @@ Instead of storing the words directly, you can also use the result of a [phonect
 A unique index ensures the index does not contain any duplicate values. It may consist of one or multiple properties. If a unique index has one property, the values in this property will be unique. In case the unique index has multiple properties, the combination of values in these properties is unique.
 
 ```dart
-@Collection()
+@collection
 class User {
-  int? id;
+  Id? id;
 
   @Index(unique: true)
   late String username;
@@ -291,9 +291,9 @@ print(await isar.user.where().findAll()); // -> [user2]
 By default, all indexes on `String` and `List<String>` properties are case-sensitive. This means that the index will only contain entries where the property value is exactly the same as the index value. If you want to create a case-insensitive index, you can use the `caseSensitive` option:
 
 ```dart
-@Collection()
+@collection
 class Person {
-  int? id;
+  Id? id;
 
   @Index(caseSensitive: false)
   late String name;

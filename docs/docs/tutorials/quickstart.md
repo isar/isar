@@ -26,8 +26,9 @@ Replace `$latest` with the latest Isar version.
 
 For non-Flutter projects, you need to manually include the Isar Core binaries.
 
+➡️ Learn more: [Dart](../dart)
 ```dart
-Isar.initializeIsarCore();
+await Isar.initializeIsarCore(download:true);
 ```
 
 ## 2. Annotate classes

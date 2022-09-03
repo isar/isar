@@ -5,6 +5,7 @@ title: Links
 # Links
 
 Links allow you to express relationships between objects — such as the author (User) of a Comment, or the Post the comment belongs to. You can express 1:1, 1:n, n:n relationships with Isar links.
+Think of the link as a separate table that contains the relation. It's very similar to how SQL works but with a different feature set and API.
 
 ## IsarLink
 
@@ -15,16 +16,16 @@ Links are lazy so you need to explicitly tell the `IsarLink` to load or save the
 Let's start by adding an IsarLink to a collection:
 
 ```dart
-@Collection()
+@collection
 class Teacher {
-  int? id;
+  Id? id;
 
   late String subject;
 }
 
-@Collection()
+@collection
 class Student {
-  int? id;
+  Id? id;
 
   late String name;
 
@@ -61,9 +62,9 @@ It would make more sense if the student from the previous example could have mul
 Internally both `IsarLink` and `IsarLinks` are represented in the same way. This allows us to upgrade the `IsarLink<Teacher>` from before to an `IsarLinks<Teacher>` to assign multiple teachers to a single student (without losing data).
 
 ```dart
-@Collection()
+@collection
 class Student {
-  int? id;
+  Id? id;
 
   late String name;
 
@@ -124,3 +125,11 @@ We need to specify the link to which the backlink points. It is possible to have
 When you `put()` your object for the first time, the link gets initialized with source and target collection and you can call methods like `load()` and `save()`. A link starts tracking changes immediately after its creation so you can add and remove relations even before the link is initialized.
 
 It is illegal to move a link to another object and will lead to undefined behavior.
+
+The Args `.add()`/`.remove()` and `.save()`. They work best if you load the link(s) before.
+`.update()` allows you to change the link in the database without loading it first and without changing the IsarLink instance in Dart
+
+You can either use `.save()` if you've made changes to the link object. Alternatively you can use `.update()` if you don't want to use the link object.
+On non-web platforms, `IsarLink` and `IsarLinks` will load automatically
+`.putSync()`, `.putAllSync()` etc. will now save links recursively by default
+ `.put()` and `.putAll()` no longer allow saving links

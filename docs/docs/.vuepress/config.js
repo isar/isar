@@ -83,6 +83,10 @@ module.exports = {
         text: "API",
         link: "https://pub.dev/documentation/isar/latest/isar/isar-library.html",
       },
+      {
+        text: "Telegram",
+        link: "https://t.me/isardb",
+      },
     ],
     sidebarDepth: 1,
     sidebar: [
@@ -112,6 +116,9 @@ module.exports = {
           "/type_converters.md",
           "/limitations.md",
           "/faq.md",
+          "/inspector.md",
+          "/dart.md",
+          "/benchmarks.md",
         ],
       },
       {
@@ -121,6 +128,14 @@ module.exports = {
       {
         text: "Sample Apps",
         link: "https://github.com/isar/samples",
+      },
+      {
+        text: "Changelog",
+        link: "https://pub.dev/packages/isar/versions/3.0.0-dev.13/changelog",
+      },
+      {
+        text: "Contributors",
+        link: ["/contributors.md"],
       },
     ],
   }),
