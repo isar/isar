@@ -39,10 +39,10 @@ When a database operation fails, the transaction is aborted and must no longer b
 :::
 
 ```dart
-@Collection()
+@collection
 class Contact {
-  @Id()
-  int? id;
+  
+  Id id;
 
   late String name;
 }

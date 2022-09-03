@@ -13,7 +13,7 @@ When a collection is unindexed, the order of the rows will likely not be discern
 For example, this `Product` collection is completely unordered.
 
 ```dart
-@Collection()
+@collection
 class Product {
   int? id;
 
@@ -48,7 +48,7 @@ final expensiveProducts = await isar.products..filter()
 To improve the performance of this query we index the `price` property. An index is like a sorted lookup table:
 
 ```dart
-@Collection()
+@collection
 class Product {
   int? id;
 

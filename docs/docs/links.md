@@ -104,9 +104,9 @@ Backlinks do not require additional memory or resources and you can freely add, 
 We want to know which students a specific teacher has so we define a backlink:
 
 ```dart
-@Collection()
+@collection
 class Teacher {
-  int? id;
+  Id id;
 
   late String subject;
 

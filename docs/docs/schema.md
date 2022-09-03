@@ -4,17 +4,17 @@ title: Schema
 
 # Schema
 
-When using Isar, you're dealing with Collections. A collection can only contain a single type of Dart object. To let Isar know which objects you want to store, you need to annotate your classes with `@Collection()`. The Isar code generator will take care of the rest. All the collections combined are called the "database schema".
+When using Isar, you're dealing with Collections. A collection can only contain a single type of Dart object. To let Isar know which objects you want to store, you need to annotate your classes with `@collection`. The Isar code generator will take care of the rest. All the collections combined are called the "database schema".
 
 ## Annotating classes
 
-The Isar generator will find all classes annotated with `@Collection()`.
+The Isar generator will find all classes annotated with `@collection`.
 
 ```dart
-@Collection()
+@collection
 class Contact {
-  @Id()
-  int? id;
+
+  Id id = Isar.autoIncrement;
 
   String firstName;
 
@@ -31,13 +31,13 @@ class Contact {
 
 ### Id
 
-All model classes need to define an id by annotating a property with `@Id()` that uniquely identifies an object. Only `int` properties may be used as id. If a class has a field called `id`, you can omit the `@Id()` annotation.
+All model classes need to define an id by a property with type `Id` that uniquely identifies an object. Only `int` properties may be used as id. If a class has a field called `id`.
 
 ```dart
-@Collection()
+@collection
 class Pet {
-  @Id()
-  int? id; // field is called id so an @Id() annotation is not required
+
+  Id id; // field is called id
 
   String name;
 }
@@ -56,6 +56,7 @@ Isar supports the following data types:
 - `double`
 - `DateTime`
 - `String`
+- `Enumerated`
 - `Uint8List`
 - `List<bool>`
 - `List<int>`
@@ -79,7 +80,7 @@ This behavior allows for nice performance improvements and it allows you to chan
 Web does not support `NaN`. This is an IndexedDB limitation.
 :::
 
-➡️ Use `TypeConverter`s to store unsupported types like enums: [Type Converters](type_converters)
+[//]: <➡️ Use `TypeConverter`s to store unsupported types like enums: [Type Converters](type_converters)>
 
 ### 8-byte and 4-byte numbers
 
@@ -102,12 +103,12 @@ By default, all public fields of a class will be persisted. By annotating a fiel
 You have to be careful when you want to rename a class or field. Most of the time the old class or field will just be dropped and recreated. With the `@Name()` annotation, you can name classes and fields in the database independantly from Dart. The following code will yield the exact same schema as the code above.
 
 ```dart
-@Collection()
+@collection
 @Name("Contact")
 class MyContactClass1 {
-  @Id()
+  
   @Name("id")
-  int? myObjectId;
+  Id myObjectId;
 
   @Name("firstName")
   String theFirstName;

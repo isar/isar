@@ -25,6 +25,15 @@ Isar is extremely fast and has a few unique tricks to allow you to write much fa
 
 Some databases don't even support asynchronous access and require you to either run all operations in a separate isolate or block your UI isolate.
 
+Benchmarks only give a rough idea of the performance of a database but as you can see, Isar NoSQL database is quite fast 😇
+
+<img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/benchmarks/insert.png" width="100%" /> | <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/benchmarks/query.png" width="100%" />
+--- | ---
+<img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/benchmarks/delete.png" width="100%" /> | <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/benchmarks/size.png" width="100%" />
+
+If you are interested in more benchmarks or want to check how Isar performs on your device you can run the [benchmarks](https://github.com/isar/isar_benchmark) yourself.
+
+
 ### Where clauses?!
 
 > Why do **_I_** have to choose which index to use?
