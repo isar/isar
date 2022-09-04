@@ -89,15 +89,16 @@ abstract class Query<T> {
   /// results have (potentially) changed.
   ///
   /// If you don't always use the results, consider using `watchLazy` and rerun
-  /// the query manually. If [initialReturn] is `true`, the results will be
+  /// the query manually. If [fireImmediately] is `true`, the results will be
   /// sent to the consumer immediately.
   /// {@endtemplate}
-  Stream<List<T>> watch({bool initialReturn = false});
+  Stream<List<T>> watch({bool fireImmediately = false});
 
   /// {@template query_watch_lazy}
-  /// Watch the query for changes.
+  /// Watch the query for changes. If [fireImmediately] is `true`, an event will
+  /// be fired immediately.
   /// {@endtemplate}
-  Stream<void> watchLazy();
+  Stream<void> watchLazy({bool fireImmediately = false});
 
   /// {@template query_export_json_raw}
   /// Export the results of this query as json bytes.

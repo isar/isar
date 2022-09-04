@@ -1,0 +1,8 @@
+*.g.dart
+
+android/
+ios/
+window/
+linux/
+macos/
+web/

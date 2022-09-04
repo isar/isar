@@ -220,11 +220,12 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
   int deleteAllSync() => build().deleteAllSync();
 
   /// {@macro query_watch}
-  Stream<List<R>> watch({bool initialReturn = false}) =>
-      build().watch(initialReturn: initialReturn);
+  Stream<List<R>> watch({bool fireImmediately = false}) =>
+      build().watch(fireImmediately: fireImmediately);
 
   /// {@macro query_watch_lazy}
-  Stream<void> watchLazy() => build().watchLazy();
+  Stream<void> watchLazy({bool fireImmediately = false}) =>
+      build().watchLazy(fireImmediately: fireImmediately);
 
   /// {@macro query_export_json_raw}
   Future<T> exportJsonRaw<T>(T Function(Uint8List) callback) =>
