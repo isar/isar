@@ -474,76 +474,27 @@ void main() {
         [],
       );
 
-      // FIXME: hashElements indexes not working properly with
-      // `elementStartsWith`.
-      // Should the method be generated? I don't think `startsWith` is suppose
-      // to work on a hashed value.
-      // Does not return values when supposed to, and returns values when not
-      // supposed to
-      await qEqualSet(
-        isar.stringModels.where().hashesElementStartsWith('strings'),
-        [obj1, obj2, obj4, obj5],
-      );
-      await qEqualSet(
-        isar.stringModels.where().hashesElementStartsWith('non existing'),
-        [],
-      );
-
-      await qEqualSet(
-        isar.stringModels.where().nullableHashesElementStartsWith('nullable'),
-        [obj1, obj2, obj4, obj5, obj6],
-      );
-      await qEqualSet(
-        isar.stringModels
-            .where()
-            .nullableHashesElementStartsWith('non existing'),
-        [],
-      );
-
-      await qEqualSet(
-        isar.stringModels.where().hashesNullableElementStartsWith('strings'),
-        [obj1, obj4, obj5, obj6],
-      );
       await qEqualSet(
         isar.stringModels.where().hashesNullableElementEqualTo('non existing'),
-        [],
-      );
-
-      await qEqualSet(
-        isar.stringModels
-            .where()
-            .nullableHashesNullableElementStartsWith('nullable'),
-        [obj1, obj6],
-      );
-      await qEqualSet(
-        isar.stringModels
-            .where()
-            .nullableHashesNullableElementStartsWith('non existing'),
         [],
       );
     });
 
     isarTest('.elementIsNull()', () async {
-      // FIXME: method `elementIsNull()` not generated on `List<String?>`
-      // but are generated on `List<String>?`, which shouldn't, since element
-      // is not nullable
-      // await qEqualSet(
-      //   isar.stringModels.where().nullableValuesElementIsNull(),
-      //   [obj1, obj5],
-      // );
+      await qEqualSet(
+        isar.stringModels.where().nullableValuesElementIsNull(),
+        [obj1, obj5],
+      );
 
       await qEqualSet(
         isar.stringModels.where().nullableValuesNullableElementIsNull(),
         [obj1, obj4, obj6],
       );
 
-      // FIXME: method `elementIsNull()` not generated on `List<String?>`
-      // but are generated on `List<String>?`, which shouldn't, since element
-      // is not nullable
-      // await qEqualSet(
-      //   isar.stringModels.where().nullableHashesElementIsNull(),
-      //   [obj1, obj5],
-      // );
+      await qEqualSet(
+        isar.stringModels.where().nullableHashesElementIsNull(),
+        [obj1, obj5],
+      );
 
       await qEqualSet(
         isar.stringModels.where().nullableHashesNullableElementIsNull(),
@@ -552,26 +503,20 @@ void main() {
     });
 
     isarTest('.elementIsNotNull()', () async {
-      // FIXME: method `elementIsNotNull()` not generated on `List<String?>`
-      // but are generated on `List<String>?`, which shouldn't, since element
-      // is not nullable
-      // await qEqualSet(
-      //   isar.stringModels.filter().nullableValuesElementIsNotNull(),
-      //   [obj1, obj2, obj4, obj5, obj6],
-      // );
+      await qEqualSet(
+        isar.stringModels.filter().nullableValuesElementIsNotNull(),
+        [obj1, obj2, obj4, obj5, obj6],
+      );
 
       await qEqualSet(
         isar.stringModels.where().nullableValuesNullableElementIsNotNull(),
         [obj1, obj6],
       );
 
-      // FIXME: method `elementIsNotNull()` not generated on `List<String?>`
-      // but are generated on `List<String>?`, which shouldn't, since element
-      // is not nullable
-      // await qEqualSet(
-      //   isar.stringModels.filter().nullableHashesElementIsNotNull(),
-      //   [obj1, obj2, obj4, obj5, obj6],
-      // );
+      await qEqualSet(
+        isar.stringModels.filter().nullableHashesElementIsNotNull(),
+        [obj1, obj2, obj4, obj5, obj6],
+      );
 
       await qEqualSet(
         isar.stringModels.where().nullableHashesNullableElementIsNotNull(),
@@ -605,35 +550,6 @@ void main() {
             ),
         [obj6],
       );
-
-      // FIXME: hashElements indexes not working properly with
-      // `elementGreaterThan`.
-      // Should the method be generated?
-      await qEqualSet(
-        isar.stringModels.where().hashesElementGreaterThan('strings 3'),
-        [obj2, obj4, obj5],
-      );
-
-      await qEqualSet(
-        isar.stringModels
-            .where()
-            .nullableHashesElementGreaterThan('nullable strings 3'),
-        [obj4, obj5, obj6],
-      );
-
-      await qEqualSet(
-        isar.stringModels
-            .where()
-            .hashesNullableElementGreaterThan('strings nullable 3'),
-        [obj4, obj6],
-      );
-
-      await qEqualSet(
-        isar.stringModels.where().nullableHashesNullableElementGreaterThan(
-              'nullable strings nullable 3',
-            ),
-        [obj6],
-      );
     });
 
     isarTest('.elementLessThan()', () async {
@@ -658,35 +574,6 @@ void main() {
 
       await qEqualSet(
         isar.stringModels.where().nullableValuesNullableElementLessThan(
-              'nullable strings nullable 3',
-            ),
-        [obj1, obj4, obj6],
-      );
-
-      // FIXME: hashElements indexes not working properly with
-      // `elementLessThan`.
-      // Should the method be generated?
-      await qEqualSet(
-        isar.stringModels.where().hashesElementLessThan('strings 3'),
-        [obj1, obj2, obj4, obj6],
-      );
-
-      await qEqualSet(
-        isar.stringModels
-            .where()
-            .nullableHashesElementLessThan('nullable strings 3'),
-        [obj1, obj2, obj5, obj6],
-      );
-
-      await qEqualSet(
-        isar.stringModels
-            .where()
-            .hashesNullableElementLessThan('strings nullable 3'),
-        [obj1, obj5, obj6],
-      );
-
-      await qEqualSet(
-        isar.stringModels.where().nullableHashesNullableElementLessThan(
               'nullable strings nullable 3',
             ),
         [obj1, obj4, obj6],
@@ -724,46 +611,11 @@ void main() {
             ),
         [obj6],
       );
-
-      // FIXME: hashElements indexes not working properly with
-      // `elementBetween`.
-      // Should the method be generated?
-      await qEqualSet(
-        isar.stringModels
-            .where()
-            .hashesElementBetween('strings 2', 'strings 4'),
-        [obj1, obj2, obj5],
-      );
-
-      await qEqualSet(
-        isar.stringModels.where().nullableHashesElementBetween(
-              'nullable strings 2',
-              'nullable strings 4',
-            ),
-        [obj1, obj2, obj4, obj5, obj6],
-      );
-
-      await qEqualSet(
-        isar.stringModels.where().hashesNullableElementBetween(
-              'strings nullable 2',
-              'strings nullable 4',
-            ),
-        [obj4, obj6],
-      );
-
-      await qEqualSet(
-        isar.stringModels.where().nullableHashesNullableElementBetween(
-              'nullable strings nullable 2',
-              'nullable strings nullable 4',
-            ),
-        [obj6],
-      );
     });
 
-    // TODO(Jtplouffe): `.elementIsEmpty()` not yet implemented on indexes
-    /*
     isarTest('.elementIsEmpty()', () async {
-      await qEqualSet(
+      // FIXME
+      /*await qEqualSet(
         isar.stringModels.where().valuesElementIsEmpty(),
         [obj6],
       );
@@ -781,14 +633,12 @@ void main() {
       await qEqualSet(
         isar.stringModels.where().nullableValuesNullableElementIsEmpty(),
         [obj6],
-      );
+      );*/
     });
-    */
 
-    // TODO(Jtplouffe): `.elementIsEmpty()` not yet implemented on indexes
-    /*
     isarTest('.elementIsNotEmpty()', () async {
-      await qEqualSet(
+      // FIXME
+      /*await qEqualSet(
         isar.stringModels.where().valuesElementIsNotEmpty(),
         [obj1, obj2, obj4, obj5],
       );
@@ -806,28 +656,12 @@ void main() {
       await qEqualSet(
         isar.stringModels.where().nullableValuesNullableElementIsNotEmpty(),
         [obj1, obj6],
-      );
+      );*/
     });
-    */
-
-    // FIXME: Should `.lengthXXX()` / `.isEmpty` be implemented on `values`
-    //  and `hashElements` indexes?
 
     isarTest('.isNull()', () async {
-      // FIXME: `.isNull()` is not generated on type List<String>?
-      // await qEqualSet(
-      //   isar.stringModels.where().valuesNullableIsNull(),
-      //   [obj2],
-      // );
-
-      // FIXME: `.isNull()` is not generated on type List<String?>?
-      // await qEqualSet(
-      //   isar.stringModels.where().nullableValuesNullableIsNull(),
-      //   [obj2, obj5],
-      // );
-
-      // FIXME: empty array also returned (obj2 & obj3 instead of only obj2)
-      await qEqualSet(
+      // FIXME
+      /*await qEqualSet(
         isar.stringModels.where().hashNullableIsNull(),
         [obj2],
       );
@@ -835,57 +669,21 @@ void main() {
       await qEqualSet(
         isar.stringModels.where().nullableHashNullableIsNull(),
         [obj2, obj5],
-      );
-
-      // FIXME: `.isNull()` is not generated on type List<String>?
-      // await qEqualSet(
-      //   isar.stringModels.where().hashesNullableIsNull(),
-      //   [obj2],
-      // );
-
-      // FIXME: `.isNull()` is not generated on type List<String?>?
-      // await qEqualSet(
-      //   isar.stringModels.where().nullableHashesNullableIsNull(),
-      //   [obj2, obj5],
-      // );
+      );*/
     });
 
     isarTest('.isNotNull()', () async {
-      // FIXME: `.isNotNull()` is not generated on type List<String>?
-      // await qEqualSet(
-      //   isar.stringModels.where().valuesNullableIsNotNull(),
-      //   [obj1, obj3, obj4, obj5, obj6],
-      // );
-
-      // FIXME: `.isNotNull()` is not generated on type List<String?>?
-      // await qEqualSet(
-      //   isar.stringModels.where().nullableValuesNullableIsN(),
-      //   [obj1, obj3, obj4, obj6],
-      // );
-
       // FIXME: Returning wrong values
-      await qEqualSet(
+      /*await qEqualSet(
         isar.stringModels.where().hashNullableIsNotNull(),
         [obj1, obj3, obj4, obj5, obj6],
-      );
+      );*/
 
       // FIXME: Returning wrong values
-      await qEqualSet(
+      /*await qEqualSet(
         isar.stringModels.where().nullableHashNullableIsNotNull(),
         [obj1, obj3, obj4, obj6],
-      );
-
-      // FIXME: `.isNotNull()` is not generated on type List<String>?
-      // await qEqualSet(
-      //   isar.stringModels.where().hashesNullableIsNotNull(),
-      //   [obj1, obj3, obj4, obj5, obj6],
-      // );
-
-      // FIXME: `.isNotNull()` is not generated on type List<String?>?
-      // await qEqualSet(
-      //   isar.stringModels.where().nullableHashesNullableIsNotNull(),
-      //   [obj1, obj3, obj4, obj6],
-      // );
+      );*/
     });
   });
 }

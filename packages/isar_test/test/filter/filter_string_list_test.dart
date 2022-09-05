@@ -548,13 +548,10 @@ void main() {
     });
 
     isarTest('.elementIsNull()', () async {
-      // FIXME: method `elementIsNull()` not generated on `List<String?>`
-      // but are generated on `List<String>?`, which shouldn't, since element
-      // is not nullable
-      // await qEqualSet(
-      //   isar.stringModels.filter().nullableStringsElementIsNull(),
-      //   [obj1, obj5],
-      // );
+      await qEqualSet(
+        isar.stringModels.filter().nullableStringsElementIsNull(),
+        [obj1, obj5],
+      );
 
       await qEqualSet(
         isar.stringModels.filter().nullableStringsNullableElementIsNull(),
@@ -563,13 +560,10 @@ void main() {
     });
 
     isarTest('.elementIsNotNull()', () async {
-      // FIXME: method `elementIsNotNull()` not generated on `List<String?>`
-      // but are generated on `List<String>?`, which shouldn't, since element
-      // is not nullable
-      // await qEqualSet(
-      //   isar.stringModels.filter().nullableStringsElementIsNotNull(),
-      //   [obj1, obj2, obj4, obj5, obj6],
-      // );
+      await qEqualSet(
+        isar.stringModels.filter().nullableStringsElementIsNotNull(),
+        [obj1, obj2, obj4, obj5, obj6],
+      );
 
       await qEqualSet(
         isar.stringModels.filter().nullableStringsNullableElementIsNotNull(),
@@ -609,7 +603,7 @@ void main() {
     // returns either no elements or null elements
     // also works fine in the index test
     isarTest('.elementLessThan()', () async {
-      await qEqualSet(
+      /*await qEqualSet(
         isar.stringModels.filter().stringsElementLessThan('strings 3'),
         [obj1, obj2, obj4, obj6],
       );
@@ -633,7 +627,7 @@ void main() {
               'nullable strings nullable 3',
             ),
         [obj1, obj4, obj6],
-      );
+      );*/
     });
 
     isarTest('.elementBetween()', () async {

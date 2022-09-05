@@ -12,11 +12,11 @@
   <a href="https://github.com/isar/isar/actions/workflows/test.yml">
     <img src="https://img.shields.io/github/workflow/status/isar/isar/Dart%20CI/main?label=tests&labelColor=333940&logo=github">
   </a>
+  <a href="https://app.codecov.io/gh/isar/isar">
+    <img src="https://img.shields.io/codecov/c/github/isar/isar?logo=codecov&logoColor=fff&labelColor=333940">
+  </a>
   <a href="https://t.me/isardb">
     <img src="https://img.shields.io/static/v1?label=join&message=isardb&labelColor=333940&logo=telegram&logoColor=white&color=229ED9">
-  </a>
-  <a href="https://github.com/isar/isar/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/isar/isar?color=%23007A88&labelColor=333940&logo=apache">
   </a>
   <a href="https://twitter.com/simonleier">
     <img src="https://img.shields.io/twitter/follow/simonleier?style=flat&label=Follow&color=1DA1F2&labelColor=333940&logo=twitter&logoColor=fff">
