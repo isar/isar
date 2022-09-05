@@ -233,6 +233,7 @@ Thanks go to these wonderful people:
 <!-- markdownlint-disable -->
 <table>
   <tr>
+    <td align="center"><a href="https://github.com/Frostedfox"><img src="https://avatars.githubusercontent.com/u/84601232?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Frostedfox</b></sub></a><br /><a href="https://github.com/isar/isar/commits?author=Frostedfox" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/h1376h"><img src="https://avatars.githubusercontent.com/u/3498335?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Hamed H.</b></sub></a><br /><a href="https://github.com/isar/isar/commits?author=h1376h" title="Code">💻</a> <a href="#maintenance-h1376h" title="Maintenance">🚧</a></td>
     <td align="center"><a href="https://github.com/Jtplouffe"><img src="https://avatars.githubusercontent.com/u/32107801?v=4?s=100" width="100px;" alt=""/><br /><sub><b>JT</b></sub></a><br /><a href="https://github.com/isar/isar/commits?author=Jtplouffe" title="Tests">⚠️</a> <a href="https://github.com/isar/isar/issues?q=author%3AJtplouffe" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/Moseco"><img src="https://avatars.githubusercontent.com/u/10720298?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Moseco</b></sub></a><br /><a href="https://github.com/isar/isar/issues?q=author%3AMoseco" title="Bug reports">🐛</a></td>
