@@ -18,6 +18,10 @@ class FilterGenerator {
         code += generateIsNull(property);
         code += generateIsNotNull(property);
       }
+      if (property.elementNullable) {
+        code += generateElementIsNull(property);
+        code += generateElementIsNotNull(property);
+      }
 
       if (!property.isarType.containsObject) {
         code += generateEqualTo(property);
@@ -47,8 +51,8 @@ class FilterGenerator {
   }''';
   }
 
-  String mPrefix(ObjectProperty p, [bool listAny = true]) {
-    final any = listAny && p.isarType.isList ? 'Element' : '';
+  String mPrefix(ObjectProperty p, [bool listElement = true]) {
+    final any = listElement && p.isarType.isList ? 'Element' : '';
     return 'QueryBuilder<$objName, $objName, QAfterFilterCondition> '
         '${p.dartName.decapitalize()}$any';
   }
@@ -135,17 +139,18 @@ class FilterGenerator {
   }
 
   String generateIsNull(ObjectProperty p) {
-    var code = '''
-    ${mPrefix(p, false)}IsNull() {
-      return QueryBuilder.apply(this, (query) {
-        return query.addFilterCondition(const FilterCondition.isNull(
-          property: r'${p.isarName}',
-        ));
-      });
-    }''';
+    return '''
+      ${mPrefix(p, false)}IsNull() {
+        return QueryBuilder.apply(this, (query) {
+          return query.addFilterCondition(const FilterCondition.isNull(
+            property: r'${p.isarName}',
+          ));
+        });
+      }''';
+  }
 
-    if (p.isarType.isList && p.isarType != IsarType.byteList) {
-      code += '''
+  String generateElementIsNull(ObjectProperty p) {
+    return '''
       ${mPrefix(p)}IsNull() {
         return QueryBuilder.apply(this, (query) {
           return query.addFilterCondition(const FilterCondition.elementIsNull(
@@ -153,32 +158,30 @@ class FilterGenerator {
           ));
         });
       }''';
-    }
-    return code;
   }
 
   String generateIsNotNull(ObjectProperty p) {
-    var code = '''
-    ${mPrefix(p, false)}IsNotNull() {
-      return QueryBuilder.apply(this, (query) {
-        return query
-          .addFilterCondition(const FilterCondition.isNotNull(
-            property: r'${p.isarName}',
-          ));
-      });
-    }''';
-
-    if (p.isarType.isList && p.isarType != IsarType.byteList) {
-      code += '''
-      ${mPrefix(p)}IsNotNull() {
+    return '''
+      ${mPrefix(p, false)}IsNotNull() {
         return QueryBuilder.apply(this, (query) {
-          return query.addFilterCondition(FilterCondition.elementIsNotNull(
-            property: r'${p.isarName}',
-          ));
+          return query
+            .addFilterCondition(const FilterCondition.isNotNull(
+              property: r'${p.isarName}',
+            ));
         });
       }''';
-    }
-    return code;
+  }
+
+  String generateElementIsNotNull(ObjectProperty p) {
+    return '''
+      ${mPrefix(p)}IsNotNull() {
+        return QueryBuilder.apply(this, (query) {
+          return query
+            .addFilterCondition(const FilterCondition.elementIsNotNull(
+              property: r'${p.isarName}',
+            ));
+        });
+      }''';
   }
 
   String generateStringStartsWith(ObjectProperty p) {
