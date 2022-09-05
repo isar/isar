@@ -451,13 +451,10 @@ void main() {
     });
 
     isarTest('.elementIsNull()', () async {
-      // FIXME: method `elementIsNull()` not generated on `List<DateTime?>`
-      // but are generated on `List<DateTime>?`, which shouldn't, since element
-      // is not nullable
-      // await qEqualSet(
-      //   isar.dateTimeModels.where().nullableValuesElementIsNull(),
-      //   [obj1, obj5],
-      // );
+      await qEqualSet(
+        isar.dateTimeModels.where().nullableValuesElementIsNull(),
+        [obj1, obj5],
+      );
 
       await qEqualSet(
         isar.dateTimeModels.where().nullableValuesNullableElementIsNull(),
@@ -466,13 +463,10 @@ void main() {
     });
 
     isarTest('.elementIsNotNull()', () async {
-      // FIXME: method `elementIsNotNull()` not generated on `List<DateTime?>`
-      // but are generated on `List<DateTime>?`, which shouldn't, since element
-      // is not nullable
-      // await qEqualSet(
-      //   isar.dateTimeModels.where().nullableValuesElementIsNotNull(),
-      //   [obj1, obj2, obj4, obj5, obj6],
-      // );
+      await qEqualSet(
+        isar.dateTimeModels.where().nullableValuesElementIsNotNull(),
+        [obj1, obj2, obj4, obj5, obj6],
+      );
 
       await qEqualSet(
         isar.dateTimeModels.where().nullableValuesNullableElementIsNotNull(),
@@ -567,7 +561,8 @@ void main() {
       );
     });
 
-    // FIXME: Should `.lengthXXX()` / `.isEmpty` be implemented on `values` indexes?
+    // FIXME/TODO: Should `.lengthXXX()` / `.isEmpty` be implemented on
+    // `values` indexes?
 
     isarTest('.isNull()', () async {
       // FIXME: `.isNull()` is not generated on `List<DateTime>?`
