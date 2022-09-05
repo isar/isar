@@ -19,13 +19,14 @@ class FilterGenerator {
         code += generateIsNotNull(property);
       }
 
-      code += generateEqualTo(property);
+      if (!property.isarType.containsObject) {
+        code += generateEqualTo(property);
 
-      if (!property.isarType.containsBool &&
-          !property.isarType.containsObject) {
-        code += generateGreaterThan(property);
-        code += generateLessThan(property);
-        code += generateBetween(property);
+        if (!property.isarType.containsBool) {
+          code += generateGreaterThan(property);
+          code += generateLessThan(property);
+          code += generateBetween(property);
+        }
       }
 
       if (property.isarType.containsString) {
@@ -33,6 +34,8 @@ class FilterGenerator {
         code += generateStringEndsWith(property);
         code += generateStringContains(property);
         code += generateStringMatches(property);
+        code += generateStringIsEmpty(property);
+        code += generateStringIsNotEmpty(property);
       }
 
       if (property.isarType.isList) {
@@ -145,9 +148,8 @@ class FilterGenerator {
       code += '''
       ${mPrefix(p)}IsNull() {
         return QueryBuilder.apply(this, (query) {
-          return query.addFilterCondition(const FilterCondition.equalTo(
+          return query.addFilterCondition(const FilterCondition.elementIsNull(
             property: r'${p.isarName}',
-            value: null,
           ));
         });
       }''';
@@ -160,8 +162,7 @@ class FilterGenerator {
     ${mPrefix(p, false)}IsNotNull() {
       return QueryBuilder.apply(this, (query) {
         return query
-          .copyWith(filterNot: !query.filterNot)
-          .addFilterCondition(const FilterCondition.isNull(
+          .addFilterCondition(const FilterCondition.isNotNull(
             property: r'${p.isarName}',
           ));
       });
@@ -171,9 +172,8 @@ class FilterGenerator {
       code += '''
       ${mPrefix(p)}IsNotNull() {
         return QueryBuilder.apply(this, (query) {
-          return query.addFilterCondition(FilterCondition.greaterThan(
+          return query.addFilterCondition(FilterCondition.elementIsNotNull(
             property: r'${p.isarName}',
-            value: null,
           ));
         });
       }''';
@@ -228,6 +228,30 @@ class FilterGenerator {
           property: r'${p.isarName}',
           wildcard: pattern,
           caseSensitive: caseSensitive,
+        ));
+      });
+    }''';
+  }
+
+  String generateStringIsEmpty(ObjectProperty p) {
+    return '''
+    ${mPrefix(p)}IsEmpty() {
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(FilterCondition.equalTo(
+          property: r'${p.isarName}',
+          value: '',
+        ));
+      });
+    }''';
+  }
+
+  String generateStringIsNotEmpty(ObjectProperty p) {
+    return '''
+    ${mPrefix(p)}IsNotEmpty() {
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(FilterCondition.greaterThan(
+          property: r'${p.isarName}',
+          value: '',
         ));
       });
     }''';

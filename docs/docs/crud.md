@@ -8,7 +8,7 @@ When you have your Collections defined, learn how to manipulate them!
 
 ## Opening Isar
 
-Before you can do anything, you have to open an Isar instance. Each instance needs a directory with write permission.
+Before you can do anything, you have to open an Isar instance. Each instance needs a directory with write permission. 
 
 ```dart
 final isar = await Isar.open(

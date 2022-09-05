@@ -12,6 +12,7 @@ use super::schema_manager::SchemaManager;
 #[derive(Serialize, Deserialize, Clone, Eq)]
 pub struct CollectionSchema {
     pub(crate) name: String,
+    #[serde(default)]
     pub(crate) embedded: bool,
     pub(crate) properties: Vec<PropertySchema>,
     #[serde(default)]

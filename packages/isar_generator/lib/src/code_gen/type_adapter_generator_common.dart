@@ -34,13 +34,10 @@ String deserializeMethodBody(
 }
 
 String generateGetId(ObjectInfo object) {
+  final defaultVal = object.idProperty.nullable ? '?? Isar.autoIncrement' : '';
   return '''
-    int? ${object.getIdName}(${object.dartName} object) {
-      if (object.${object.idProperty.dartName} == Isar.autoIncrement) {
-        return null;
-      } else {
-        return object.${object.idProperty.dartName};
-      }
+    Id ${object.getIdName}(${object.dartName} object) {
+      return object.${object.idProperty.dartName} $defaultVal;
     }
   ''';
 }

@@ -2,9 +2,6 @@
 
 part of isar;
 
-/// Type to specify the id property of a collection.
-typedef Id = int;
-
 /// Type to mark an [int] property or List as 8-bit sized.
 ///
 /// You may only store values between 0 and 255 in such a property.

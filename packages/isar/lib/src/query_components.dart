@@ -173,7 +173,7 @@ class LinkWhereClause extends WhereClause {
   final String linkName;
 
   /// The id of the source object.
-  final int id;
+  final Id id;
 }
 
 /// @nodoc
@@ -210,6 +210,15 @@ enum FilterConditionType {
 
   /// Filter matching values that are `null`.
   isNull,
+
+  /// Filter matching values that are not `null`.
+  isNotNull,
+
+  /// Filter matching lists that contain `null`.
+  elementIsNull,
+
+  /// Filter matching lists that contain an element that is not `null`.
+  elementIsNotNull,
 
   /// Filter matching the length of a list.
   listLength,
@@ -303,7 +312,7 @@ class FilterCondition extends FilterOperation {
   /// Filters the results to only include objects where the property starts
   /// with [value].
   ///
-  /// For lists, at least one of the values in the list has to match.
+  /// For String lists, at least one of the values in the list has to match.
   const FilterCondition.startsWith({
     required this.property,
     required String value,
@@ -319,7 +328,7 @@ class FilterCondition extends FilterOperation {
   /// Filters the results to only include objects where the property ends with
   /// [value].
   ///
-  /// For lists, at least one of the values in the list has to match.
+  /// For String lists, at least one of the values in the list has to match.
   const FilterCondition.endsWith({
     required this.property,
     required String value,
@@ -332,10 +341,10 @@ class FilterCondition extends FilterOperation {
         epsilon = Query.epsilon,
         super._();
 
-  /// Filters the results to only include objects where the property contains
-  /// [value].
+  /// Filters the results to only include objects where the String property
+  /// contains [value].
   ///
-  /// For lists, at least one of the values in the list has to match.
+  /// For String lists, at least one of the values in the list has to match.
   const FilterCondition.contains({
     required this.property,
     required String value,
@@ -351,7 +360,7 @@ class FilterCondition extends FilterOperation {
   /// Filters the results to only include objects where the property matches
   /// the [wildcard].
   ///
-  /// For lists, at least one of the values in the list has to match.
+  /// For String lists, at least one of the values in the list has to match.
   const FilterCondition.matches({
     required this.property,
     required String wildcard,
@@ -368,6 +377,43 @@ class FilterCondition extends FilterOperation {
   const FilterCondition.isNull({
     required this.property,
   })  : type = FilterConditionType.isNull,
+        value1 = null,
+        include1 = false,
+        value2 = null,
+        include2 = false,
+        caseSensitive = false,
+        epsilon = Query.epsilon,
+        super._();
+
+  /// Filters the results to only include objects where the property is not
+  /// null.
+  const FilterCondition.isNotNull({
+    required this.property,
+  })  : type = FilterConditionType.isNotNull,
+        value1 = null,
+        include1 = false,
+        value2 = null,
+        include2 = false,
+        caseSensitive = false,
+        epsilon = Query.epsilon,
+        super._();
+
+  /// Filters the results to only include lists that contain `null`.
+  const FilterCondition.elementIsNull({
+    required this.property,
+  })  : type = FilterConditionType.elementIsNull,
+        value1 = null,
+        include1 = false,
+        value2 = null,
+        include2 = false,
+        caseSensitive = false,
+        epsilon = Query.epsilon,
+        super._();
+
+  /// Filters the results to only include lists that do not contain `null`.
+  const FilterCondition.elementIsNotNull({
+    required this.property,
+  })  : type = FilterConditionType.elementIsNotNull,
         value1 = null,
         include1 = false,
         value2 = null,

@@ -113,7 +113,7 @@ class QueryImpl<T> extends Query<T> {
   int deleteAllSync() => unsupportedOnWeb();
 
   @override
-  Stream<List<T>> watch({bool initialReturn = false}) {
+  Stream<List<T>> watch({bool fireImmediately = false}) {
     JsFunction? stop;
     final controller = StreamController<List<T>>(
       onCancel: () {
@@ -121,7 +121,7 @@ class QueryImpl<T> extends Query<T> {
       },
     );
 
-    if (initialReturn) {
+    if (fireImmediately) {
       findAll().then(controller.add);
     }
 

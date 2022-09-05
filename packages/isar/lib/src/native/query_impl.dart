@@ -10,7 +10,7 @@ import 'package:isar/src/native/bindings.dart';
 import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_collection_impl.dart';
 import 'package:isar/src/native/isar_core.dart';
-import 'package:isar/src/native/isar_impl.dart';
+import 'package:isar/src/native/txn.dart';
 
 typedef QueryDeserialize<T> = List<T> Function(CObjectSet);
 
@@ -69,8 +69,8 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
   List<T> findAllSync() => findSyncInternal(maxLimit);
 
   List<T> findSyncInternal(int limit) {
-    return col.isar.getTxnSync(false, (SyncTxn txn) {
-      final resultsPtr = txn.allocCObjectsSet();
+    return col.isar.getTxnSync(false, (Txn txn) {
+      final resultsPtr = txn.getCObjectsSet();
       try {
         nCall(IC.isar_q_find(queryPtr, txn.ptr, resultsPtr, limit));
         return deserialize(resultsPtr.ref).cast();
@@ -103,7 +103,7 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
   int deleteAllSync() => deleteSyncInternal(maxLimit);
 
   int deleteSyncInternal(int limit) {
-    return col.isar.getTxnSync(false, (SyncTxn txn) {
+    return col.isar.getTxnSync(false, (Txn txn) {
       final countPtr = txn.alloc<Uint32>();
       nCall(IC.isar_q_delete(queryPtr, col.ptr, txn.ptr, limit, countPtr));
       return countPtr.value;
@@ -111,13 +111,13 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
   }
 
   @override
-  Stream<List<T>> watch({bool initialReturn = false}) {
-    return watchLazy(initialReturn: initialReturn)
+  Stream<List<T>> watch({bool fireImmediately = false}) {
+    return watchLazy(fireImmediately: fireImmediately)
         .asyncMap((event) => findAll());
   }
 
   @override
-  Stream<void> watchLazy({bool initialReturn = false}) {
+  Stream<void> watchLazy({bool fireImmediately = false}) {
     final port = ReceivePort();
     final handle = IC.isar_watch_query(
       col.isar.ptr,
@@ -132,7 +132,7 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
       },
     );
 
-    if (initialReturn) {
+    if (fireImmediately) {
       controller.add(null);
     }
 
@@ -170,7 +170,7 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
 
   @override
   R exportJsonRawSync<R>(R Function(Uint8List) callback) {
-    return col.isar.getTxnSync(false, (SyncTxn txn) {
+    return col.isar.getTxnSync(false, (Txn txn) {
       final bytesPtrPtr = txn.alloc<Pointer<Uint8>>();
       final lengthPtr = txn.alloc<Uint32>();
       final idNamePtr = col.schema.idName.toCString(txn.alloc);
@@ -215,7 +215,7 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
 
   @override
   R? aggregateSync<R>(AggregationOp op) {
-    return col.isar.getTxnSync(false, (SyncTxn txn) {
+    return col.isar.getTxnSync(false, (Txn txn) {
       final resultPtrPtr = txn.alloc<Pointer<CAggregationResult>>();
 
       nCall(

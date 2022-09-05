@@ -23,6 +23,8 @@ extension ClassElementX on ClassElement {
   }
 
   List<PropertyInducingElement> get allAccessors {
+    final ignoreFields =
+        collectionAnnotation?.ignore ?? embeddedAnnotation!.ignore;
     return [
       ...accessors.mapNotNull((e) => e.variable),
       if (collectionAnnotation?.inheritance ?? embeddedAnnotation!.inheritance)
@@ -35,7 +37,8 @@ extension ClassElementX on ClassElement {
           (PropertyInducingElement e) =>
               e.isPublic &&
               !e.isStatic &&
-              !_ignoreChecker.hasAnnotationOf(e.nonSynthetic),
+              !_ignoreChecker.hasAnnotationOf(e.nonSynthetic) &&
+              !ignoreFields.contains(e.name),
         )
         .distinctBy((e) => e.name)
         .toList();
@@ -109,29 +112,6 @@ extension PropertyElementX on PropertyInducingElement {
       );
     }).toList();
   }
-
-  bool get shouldIgnore {
-    if (!isPublic || isStatic) return true;
-    if (_ignoreChecker.hasAnnotationOf(nonSynthetic)) return true;
-
-    final jsonKey = nonSynthetic.metadata
-        .firstOrNullWhere(
-          (e) => e.computeConstantValue()?.type?.element2?.name == 'JsonKey',
-        )
-        ?.computeConstantValue();
-
-    if (jsonKey != null) {
-      if (jsonKey.getField('ignore')?.toBoolValue() == true) {
-        return true;
-      }
-    }
-
-    if (name == 'copyWith') {
-      return true;
-    }
-
-    return false;
-  }
 }
 
 extension ElementX on Element {
@@ -155,6 +135,11 @@ extension ElementX on Element {
     return Collection(
       inheritance: ann.getField('inheritance')!.toBoolValue()!,
       accessor: ann.getField('accessor')!.toStringValue(),
+      ignore: ann
+          .getField('ignore')!
+          .toSetValue()!
+          .map((e) => e.toStringValue()!)
+          .toSet(),
     );
   }
 
@@ -179,6 +164,11 @@ extension ElementX on Element {
     }
     return Embedded(
       inheritance: ann.getField('inheritance')!.toBoolValue()!,
+      ignore: ann
+          .getField('ignore')!
+          .toSetValue()!
+          .map((e) => e.toStringValue()!)
+          .toSet(),
     );
   }
 }

@@ -185,6 +185,22 @@ extension QueryBuilderExecute<OBJ, R>
     }
   }
 
+  Future<bool> tIsEmpty() {
+    if (syncTest) {
+      return SynchronousFuture(isEmptySync());
+    } else {
+      return isEmpty();
+    }
+  }
+
+  Future<bool> tIsNotEmpty() {
+    if (syncTest) {
+      return SynchronousFuture(isNotEmptySync());
+    } else {
+      return isNotEmpty();
+    }
+  }
+
   Future<bool> tDeleteFirst() {
     if (syncTest) {
       return SynchronousFuture(deleteFirstSync());

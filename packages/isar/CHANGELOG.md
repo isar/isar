@@ -1,3 +1,29 @@
+## 3.0.0-dev.14
+
+### Enhancements
+- Added `ignore` parameter to `@Collection()` and `@Enum()`
+- Added `fireImmediately` to `collection.watchLazy()` and `query.watchLazy()`
+
+### Breaking
+- Renamed the `initialReturn` parameter to `fireImmediately`
+
+## 3.0.0-dev.13
+
+### Enhancements
+- Added `stringIsEmpty()` and `stringIsNotEmpty()` filters
+- Added `query.isEmpty()`, `query.isEmptySync()`, `query.isNotEmpty()` and `query.isNotEmptySync()` operations
+- Improved aggregation performance
+- The `Id` type changed from `int` to `num` on web
+- `Isar.autoIncrement` is now const
+
+### Fixes
+- Removed incorrectly generated embedded filters
+- Fixed remaining embedded filters
+- Fixed schema migration
+
+### Breaking
+- Due to incompatibilities, Android <= 6.0 now requires you to provide a directory to `Isar.open()`
+
 ## 3.0.0-dev.12
 
 ### Enhancements

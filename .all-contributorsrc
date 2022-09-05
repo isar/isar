@@ -56,6 +56,15 @@
       "contributions": [
         "maintenance"
       ]
+    },
+    {
+      "login": "Moseco",
+      "name": "Moseco",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10720298?v=4",
+      "profile": "https://github.com/Moseco",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

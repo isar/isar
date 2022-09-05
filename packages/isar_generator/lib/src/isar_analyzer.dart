@@ -471,6 +471,12 @@ class IsarAnalyzer {
           );
         }
       }
+      if (property.isarType.containsObject) {
+        err(
+          'Embedded objects may not be indexed.',
+          element,
+        );
+      }
       if (property.type != IndexType.value) {
         if (!property.isarType.isList && property.isarType != IsarType.string) {
           err('Only Strings and Lists may be hashed.', element);

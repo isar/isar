@@ -105,7 +105,7 @@ typedef SerializeNative<T> = int Function(
 /// @nodoc
 @protected
 typedef DeserializeNative<T> = T Function(
-  int id,
+  Id id,
   IsarBinaryReader reader,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
@@ -114,7 +114,6 @@ typedef DeserializeNative<T> = T Function(
 /// @nodoc
 @protected
 typedef DeserializePropNative = dynamic Function(
-  int id,
   IsarBinaryReader reader,
   int propertyId,
   int offset,

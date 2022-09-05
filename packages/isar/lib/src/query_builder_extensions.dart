@@ -195,6 +195,18 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
   /// {@macro query_count}
   int countSync() => build().countSync();
 
+  /// {@macro query_is_empty}
+  Future<bool> isEmpty() => build().isEmpty();
+
+  /// {@macro query_is_empty}
+  bool isEmptySync() => build().isEmptySync();
+
+  /// {@macro query_is_not_empty}
+  Future<bool> isNotEmpty() => build().isNotEmpty();
+
+  /// {@macro query_is_not_empty}
+  bool isNotEmptySync() => build().isNotEmptySync();
+
   /// {@macro query_delete_first}
   Future<bool> deleteFirst() => build().deleteFirst();
 
@@ -208,11 +220,12 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
   int deleteAllSync() => build().deleteAllSync();
 
   /// {@macro query_watch}
-  Stream<List<R>> watch({bool initialReturn = false}) =>
-      build().watch(initialReturn: initialReturn);
+  Stream<List<R>> watch({bool fireImmediately = false}) =>
+      build().watch(fireImmediately: fireImmediately);
 
   /// {@macro query_watch_lazy}
-  Stream<void> watchLazy() => build().watchLazy();
+  Stream<void> watchLazy({bool fireImmediately = false}) =>
+      build().watchLazy(fireImmediately: fireImmediately);
 
   /// {@macro query_export_json_raw}
   Future<T> exportJsonRaw<T>(T Function(Uint8List) callback) =>

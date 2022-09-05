@@ -420,82 +420,6 @@ void main() {
       );
     });
 
-    // FIXME: IsarError: Unsupported type for condition
-    isarTest('.embeddedElementEqualTo()', () async {
-      await qEqualSet(
-        isar.models.filter().embeddedAsElementEqualTo(obj1.embeddedAs[0]),
-        [obj1],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedAsElementEqualTo(obj1.embeddedAs[1]),
-        [obj1],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedAsElementEqualTo(obj1.embeddedAs[2]),
-        [obj1],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedAsElementEqualTo(obj2.embeddedAs[0]),
-        [obj2],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedAsElementEqualTo(obj3.embeddedAs[0]),
-        [obj3],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedAsElementEqualTo(obj5.embeddedAs[0]),
-        [obj5],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedAsElementEqualTo(obj6.embeddedAs[0]),
-        [obj6],
-      );
-      await qEqualSet(
-        isar.models
-            .filter()
-            .embeddedAsElementEqualTo(EmbeddedA(name: 'non existing')),
-        [],
-      );
-
-      await qEqualSet(
-        isar.models.filter().embeddedBsElementEqualTo(obj1.embeddedBs![0]),
-        [obj1],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedBsElementEqualTo(obj1.embeddedBs![1]),
-        [obj1],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedBsElementEqualTo(obj1.embeddedBs![2]),
-        [obj1],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedBsElementEqualTo(obj5.embeddedBs![0]),
-        [obj5],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedBsElementEqualTo(obj5.embeddedBs![1]),
-        [obj5],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedBsElementEqualTo(obj5.embeddedBs![2]),
-        [obj5],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedBsElementEqualTo(obj5.embeddedBs![3]),
-        [obj5],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedBsElementEqualTo(obj5.embeddedBs![4]),
-        [obj5],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedBsElementEqualTo(obj6.embeddedBs![1]),
-        [obj6],
-      );
-    });
-
-    // FIXME: IsarError: IllegalArg: Property does not support this filter..
     isarTest('.embeddedElementIsNull()', () async {
       await qEqualSet(
         isar.models.filter().embeddedBsElementIsNull(),
@@ -503,7 +427,6 @@ void main() {
       );
     });
 
-    // FIXME: IsarError: IllegalArg: Property does not support this filter..
     isarTest('.embeddedElementIsNotNull()', () async {
       await qEqualSet(
         isar.models.filter().embeddedBsElementIsNotNull(),
@@ -819,7 +742,6 @@ void main() {
       );
     });
 
-    // FIXME: IsarError: IllegalArg: Property does not support this filter..
     isarTest('.embeddedElement() then .embeddedElementIsNull()', () async {
       await qEqualSet(
         isar.models
@@ -829,7 +751,6 @@ void main() {
       );
     });
 
-    // FIXME: IsarError: IllegalArg: Property does not support this filter..
     isarTest('.embeddedElement() then .embeddedElementIsNotNull()', () async {
       await qEqualSet(
         isar.models
@@ -839,105 +760,6 @@ void main() {
       );
     });
 
-    // FIXME: IsarError: Unsupported type for condition
-    isarTest('.embeddedElement() then .embeddedElementEqualTo()', () async {
-      await qEqualSet(
-        isar.models.filter().embeddedAsElement(
-              (q) => q.embeddedBsElementEqualTo(
-                obj1.embeddedAs[2].embeddedBs![0],
-              ),
-            ),
-        [obj1],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedAsElement(
-              (q) => q.embeddedBsElementEqualTo(
-                obj1.embeddedAs[2].embeddedBs![1],
-              ),
-            ),
-        [obj1],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedAsElement(
-              (q) => q.embeddedBsElementEqualTo(
-                obj1.embeddedAs[2].embeddedBs![2],
-              ),
-            ),
-        [obj1],
-      );
-
-      await qEqualSet(
-        isar.models.filter().embeddedAsElement(
-              (q) => q.embeddedBsElementEqualTo(
-                obj3.embeddedAs[0].embeddedBs![1],
-              ),
-            ),
-        [obj3],
-      );
-
-      await qEqualSet(
-        isar.models.filter().embeddedAsElement(
-              (q) => q.embeddedBsElementEqualTo(
-                obj5.embeddedAs[0].embeddedBs![0],
-              ),
-            ),
-        [obj5],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedAsElement(
-              (q) => q.embeddedBsElementEqualTo(
-                obj5.embeddedAs[0].embeddedBs![1],
-              ),
-            ),
-        [obj5],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedAsElement(
-              (q) => q.embeddedBsElementEqualTo(
-                obj5.embeddedAs[0].embeddedBs![2],
-              ),
-            ),
-        [obj5],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedAsElement(
-              (q) => q.embeddedBsElementEqualTo(
-                obj5.embeddedAs[0].embeddedBs![3],
-              ),
-            ),
-        [obj5],
-      );
-      await qEqualSet(
-        isar.models.filter().embeddedAsElement(
-              (q) => q.embeddedBsElementEqualTo(
-                obj5.embeddedAs[0].embeddedBs![4],
-              ),
-            ),
-        [obj5],
-      );
-
-      await qEqualSet(
-        isar.models.filter().embeddedAsElement(
-              (q) => q.embeddedBsElementEqualTo(
-                obj6.embeddedAs[0].embeddedBs![0],
-              ),
-            ),
-        [obj6],
-      );
-
-      await qEqualSet(
-        isar.models.filter().embeddedAsElement(
-              (q) => q.embeddedBsElementEqualTo(
-                EmbeddedB(name: 'non existing'),
-              ),
-            ),
-        [],
-      );
-    });
-
-    // FIXME(severe): panic
-    // Shell: thread 'isarworker' panicked at 'range end index 6450588 out of
-    // range for slice of length 26', library/core/src/slice/index.rs:73:5
     isarTest('.embeddedElement() then .embeddedElement()', () async {
       await qEqualSet(
         isar.models.filter().embeddedAsElement(
