@@ -65,6 +65,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "nohli",
+      "name": "Joachim Nohl",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43643339?v=4",
+      "profile": "http://achim.io",
+      "contributions": [
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7,
