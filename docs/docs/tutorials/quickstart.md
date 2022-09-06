@@ -4,7 +4,9 @@ title: Quickstart
 
 # Quickstart
 
-Holy smokes you're here! Let's do this. We're going to be short on words and quick on code in this quickstart.
+Holy smokes you're here! Let's get started on using the coolest Flutter database out there...
+
+We're going to be short on words and quick on code in this quickstart.
 
 ## 1. Add dependencies
 
@@ -24,20 +26,43 @@ Replace `$latest` with the latest Isar version.
 
 For non-Flutter projects, you need to manually include the Isar Core binaries.
 
+➡️ Learn more: [Dart](../dart)
+```dart
+await Isar.initializeIsarCore(download:true);
+```
+
 ## 2. Annotate classes
 
-Annotate your classes with `@Collection` and choose an id field.
+Annotate your classes with `@collection` and choose an id field.
 
 ```dart
-part 'contact.g.dart';
+part 'email.g.dart';
 
-@Collection()
-class Contact {
-  @Id()
-  int? id;
+@collection
+class Email {
+  Id id = Isar.autoIncrement; // you can also use id = null to auto increment
 
-  late String name;
+  String? title;
+
+  List<Recipient>? recipients;
+
+  @enumerated
+  Status status = Status.pending;
 }
+
+@embedded
+class Recipient {
+  String? name;
+
+  String? address;
+}
+
+enum Status {
+  draft,
+  sending,
+  sent,
+}
+
 ```
 
 ## 3. Run code generator
@@ -62,8 +87,9 @@ This opens an Isar instance at a valid location.
 final dir = await getApplicationSupportDirectory();
 
 final isar = await Isar.open(
-  schemas: [ContactSchema],
+  schemas: [EmailSchema],
   directory: dir.path,
+  inspector:true,
 );
 ```
 
@@ -71,15 +97,20 @@ final isar = await Isar.open(
 
 Once your instance is open, you can start using the database.
 
-```dart
-final contact = Contact()
-  ..name = "My first contact";
+All basic crud operations are available via the `IsarCollection`.
 
-await isar.writeTxn((isar) async {
-  contact.id = await isar.contacts.put(contact);
+```dart
+final newPost = Post()..title = 'Amazing new database';
+
+await isar.writeTxn(() {
+  newPost.id = await isar.posts.put(newPost); // insert & update
 });
 
-final allContacts = await isar.contacts.where().findAll();
+final existingPost = await isar.posts.get(newPost.id!); // get
+
+await isar.writeTxn(() {
+  await isar.posts.delete(existingPost.id!); // delete
+});
 ```
 
 ## Other resources
@@ -88,4 +119,8 @@ You're a visual learner? Check out this great series to get started with Isar:
 
 <div class="video-block">
   <iframe max-width=100% height=auto src="https://www.youtube.com/embed/videoseries?list=PLKKf8l1ne4_hMBtRykh9GCC4MMyteUTyf" title="Isar Database" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+<br>
+<div class="video-block">
+  <iframe max-width=100% height=auto src="https://www.youtube.com/embed/pdKb8HLCXOA " title="Isar Database" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>

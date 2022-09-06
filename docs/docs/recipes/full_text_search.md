@@ -24,7 +24,7 @@ Let's create the most basic full-text index:
 
 ```dart
 class Post {
-    int? id;
+    Id? id;
 
     late String title;
 
@@ -67,7 +67,7 @@ Easy peasy! We can change our index to also support prefix matching and case-ins
 
 ```dart
 class Post {
-    int? id;
+    Id? id;
 
     late String title;
 
@@ -95,7 +95,7 @@ Sure thing! We will use a trick to achieve `.endsWith()` matching:
 
 ```dart
 class Post {
-    int? id;
+    Id? id;
 
     late String title;
 

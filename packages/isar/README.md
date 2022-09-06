@@ -12,11 +12,11 @@
   <a href="https://github.com/isar/isar/actions/workflows/test.yml">
     <img src="https://img.shields.io/github/workflow/status/isar/isar/Dart%20CI/main?label=tests&labelColor=333940&logo=github">
   </a>
+  <a href="https://app.codecov.io/gh/isar/isar">
+    <img src="https://img.shields.io/codecov/c/github/isar/isar?logo=codecov&logoColor=fff&labelColor=333940">
+  </a>
   <a href="https://t.me/isardb">
     <img src="https://img.shields.io/static/v1?label=join&message=isardb&labelColor=333940&logo=telegram&logoColor=white&color=229ED9">
-  </a>
-  <a href="https://github.com/isar/isar/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/isar/isar?color=%23007A88&labelColor=333940&logo=apache">
   </a>
   <a href="https://twitter.com/simonleier">
     <img src="https://img.shields.io/twitter/follow/simonleier?style=flat&label=Follow&color=1DA1F2&labelColor=333940&logo=twitter&logoColor=fff">
@@ -236,6 +236,7 @@ Thanks go to these wonderful people:
     <td align="center"><a href="https://github.com/Frostedfox"><img src="https://avatars.githubusercontent.com/u/84601232?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Frostedfox</b></sub></a><br /><a href="https://github.com/isar/isar/commits?author=Frostedfox" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/h1376h"><img src="https://avatars.githubusercontent.com/u/3498335?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Hamed H.</b></sub></a><br /><a href="https://github.com/isar/isar/commits?author=h1376h" title="Code">💻</a> <a href="#maintenance-h1376h" title="Maintenance">🚧</a></td>
     <td align="center"><a href="https://github.com/Jtplouffe"><img src="https://avatars.githubusercontent.com/u/32107801?v=4?s=100" width="100px;" alt=""/><br /><sub><b>JT</b></sub></a><br /><a href="https://github.com/isar/isar/commits?author=Jtplouffe" title="Tests">⚠️</a> <a href="https://github.com/isar/isar/issues?q=author%3AJtplouffe" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="http://achim.io"><img src="https://avatars.githubusercontent.com/u/43643339?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Joachim Nohl</b></sub></a><br /><a href="#maintenance-nohli" title="Maintenance">🚧</a></td>
     <td align="center"><a href="https://github.com/Moseco"><img src="https://avatars.githubusercontent.com/u/10720298?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Moseco</b></sub></a><br /><a href="https://github.com/isar/isar/issues?q=author%3AMoseco" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/Viper-Bit"><img src="https://avatars.githubusercontent.com/u/24822764?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Peyman</b></sub></a><br /><a href="https://github.com/isar/isar/issues?q=author%3AViper-Bit" title="Bug reports">🐛</a> <a href="https://github.com/isar/isar/commits?author=Viper-Bit" title="Code">💻</a></td>
     <td align="center"><a href="https://www.linkedin.com/in/simon-leier/"><img src="https://avatars.githubusercontent.com/u/13610195?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Simon Leier</b></sub></a><br /><a href="https://github.com/isar/isar/issues?q=author%3Aleisim" title="Bug reports">🐛</a> <a href="https://github.com/isar/isar/commits?author=leisim" title="Code">💻</a> <a href="https://github.com/isar/isar/commits?author=leisim" title="Documentation">📖</a> <a href="https://github.com/isar/isar/commits?author=leisim" title="Tests">⚠️</a> <a href="#example-leisim" title="Examples">💡</a></td>

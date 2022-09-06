@@ -2,6 +2,10 @@
 title: Type Converters
 ---
 
+:::warning
+Type Converters were deprecated since `3.0.0-dev.9`.
+:::
+
 # Type Converters
 
 Isar only supports storing basic `database types` like numbers and lists but you can use type converters to use other `Dart types` like Enums with Isar.
@@ -45,7 +49,7 @@ Once you created a type adapter, the hardest part is done. Using `TypeAdapters` 
 ```dart
 @Collection()
 class Person {
-  int? id;
+  Id? id;
 
   late String name;
 
