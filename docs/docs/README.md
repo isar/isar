@@ -10,7 +10,7 @@ features:
   - title: 💙 Made for Flutter
     details: Minimal setup, Easy to use, no config, no boilerplate. Just add a few lines of code to get started.
   - title: 🚀 Highly scalable
-    details: Store hundreds of thousands of records in a single NOSQL database and query them efficiently and asynchronously.
+    details: Store hundreds of thousands of records in a single NoSQL database and query them efficiently and asynchronously.
   - title: 🍭 Feature-rich
     details: Isar has a rich set of features to help you manage your data. Composite & multi-entry indexes, query modifiers, JSON support and more.
   - title: 🔎 Full-text search
@@ -22,7 +22,7 @@ features:
   - title: 📱 Multiplatform
     details: iOS, Android, Desktop and FULL WEB SUPPORT!
   - title: ⏱ Asynchronous
-    details: Parallel query operations & multi-isolate support by default
+    details: Parallel query operations & multi-isolate support out of the box
   - title: 🦄 Open Source
     details: Everything is open source and free forever!
 

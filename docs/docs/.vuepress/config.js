@@ -127,15 +127,15 @@ module.exports = {
       },
       {
         text: "Sample Apps",
-        link: "https://github.com/isar/samples",
+        link: "https://github.com/isar/isar/tree/main/examples/pub",
       },
       {
         text: "Changelog",
-        link: "https://pub.dev/packages/isar/versions/3.0.0-dev.13/changelog",
+        link: "https://github.com/isar/isar/blob/main/packages/isar/CHANGELOG.md",
       },
       {
         text: "Contributors",
-        link: ["/contributors.md"],
+        link: "https://github.com/isar/isar#contributors-",
       },
     ],
   }),
