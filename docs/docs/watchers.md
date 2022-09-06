@@ -35,7 +35,7 @@ await isar.users.delete(5);
 
 As you can see in the example above, the object does not need to exist yet. The watcher will be notified when it is created.
 
-There is an additional parameter `initialReturn`. If you set it to `true`, Isar will immediately add the current value of the object to the stream.
+There is an additional parameter `fireImmediately`. If you set it to `true`, Isar will immediately add the current value of the object to the stream.
 
 ### Lazy watching
 
@@ -76,7 +76,7 @@ Query<User> usersWithA = isar.users.filter()
     .nameStartsWith('A')
     .build();
 
-Stream<List<User>> queryChanged = usersWithA.watch(initialReturn: true);
+Stream<List<User>> queryChanged = usersWithA.watch(fireImmediately: true);
 queryChanged.listen((users) {
   print('Users with A are: $users');
 });

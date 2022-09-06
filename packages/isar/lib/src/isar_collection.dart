@@ -216,16 +216,20 @@ abstract class IsarCollection<OBJ> {
   int getSizeSync({bool includeIndexes = false, bool includeLinks = false});
 
   /// Watch the collection for changes.
-  Stream<void> watchLazy();
+  ///
+  /// If [fireImmediately] is `true`, an event will be fired immediately.
+  Stream<void> watchLazy({bool fireImmediately = false});
 
   /// Watch an object with [id] for changes.
   ///
-  /// Objects that don't exist (yet) can also be watched. If [initialReturn]
+  /// Objects that don't exist (yet) can also be watched. If [fireImmediately]
   /// is `true`, the object will be sent to the consumer immediately.
-  Stream<OBJ?> watchObject(Id id, {bool initialReturn = false});
+  Stream<OBJ?> watchObject(Id id, {bool fireImmediately = false});
 
   /// Watch an object with [id] for changes.
-  Stream<void> watchObjectLazy(Id id);
+  ///
+  /// If [fireImmediately] is `true`, an event will be fired immediately.
+  Stream<void> watchObjectLazy(Id id, {bool fireImmediately = false});
 
   /// Verifies the integrity of the collection and its indexes.
   ///

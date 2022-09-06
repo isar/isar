@@ -111,13 +111,13 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
   }
 
   @override
-  Stream<List<T>> watch({bool initialReturn = false}) {
-    return watchLazy(initialReturn: initialReturn)
+  Stream<List<T>> watch({bool fireImmediately = false}) {
+    return watchLazy(fireImmediately: fireImmediately)
         .asyncMap((event) => findAll());
   }
 
   @override
-  Stream<void> watchLazy({bool initialReturn = false}) {
+  Stream<void> watchLazy({bool fireImmediately = false}) {
     final port = ReceivePort();
     final handle = IC.isar_watch_query(
       col.isar.ptr,
@@ -132,7 +132,7 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
       },
     );
 
-    if (initialReturn) {
+    if (fireImmediately) {
       controller.add(null);
     }
 

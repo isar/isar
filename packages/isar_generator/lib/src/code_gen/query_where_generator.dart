@@ -39,7 +39,8 @@ class WhereGenerator {
         final indexProperty = index.properties[n];
         final property = indexProperty.property;
 
-        if (property.nullable) {
+        if ((property.nullable && !indexProperty.isMultiEntry) ||
+            (property.elementNullable && indexProperty.isMultiEntry)) {
           code += generateWhereIsNull(index, n + 1);
           code += generateWhereIsNotNull(index, n + 1);
         }
@@ -47,7 +48,7 @@ class WhereGenerator {
         code += generateWhereEqualTo(index, n + 1);
         code += generateWhereNotEqualTo(index, n + 1);
 
-        if (indexProperty.type != IndexType.hash) {
+        if (indexProperty.type == IndexType.value) {
           if (property.isarType != IsarType.bool &&
               property.isarType != IsarType.boolList) {
             code += generateWhereGreaterThan(index, n + 1);
@@ -58,6 +59,8 @@ class WhereGenerator {
           if (property.isarType == IsarType.string ||
               property.isarType == IsarType.stringList) {
             code += generateWhereStartsWith(index, n + 1);
+            code += generateStringIsEmpty(index, n + 1);
+            code += generateStringIsNotEmpty(index, n + 1);
           }
         }
       }
@@ -189,6 +192,7 @@ class WhereGenerator {
         return query.addWhereClause(IndexWhereClause.equalTo(
           indexName: r'${index.name}',
           value: [$values],
+          ${properties.containsFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }
@@ -244,11 +248,13 @@ class WhereGenerator {
             lower: [$equalValues],
             upper: [$equalValues $notEqualValue],
             includeUpper: false,
+            ${properties.containsFloat ? 'epsilon: epsilon,' : ''}
           )).addWhereClause(IndexWhereClause.between(
             indexName: r'${index.name}',
             lower: [$equalValues $notEqualValue],
             includeLower: false,
             upper: [$equalValues],
+            ${properties.containsFloat ? 'epsilon: epsilon,' : ''}
           ));
         } else {
           return query.addWhereClause(IndexWhereClause.between(
@@ -256,11 +262,13 @@ class WhereGenerator {
             lower: [$equalValues $notEqualValue],
             includeLower: false,
             upper: [$equalValues],
+            ${properties.containsFloat ? 'epsilon: epsilon,' : ''}
           )).addWhereClause(IndexWhereClause.between(
             indexName: r'${index.name}',
             lower: [$equalValues],
             upper: [$equalValues $notEqualValue],
             includeUpper: false,
+            ${properties.containsFloat ? 'epsilon: epsilon,' : ''}
           ));
         }
       });
@@ -288,16 +296,19 @@ class WhereGenerator {
     }
 
     final properties = index.properties.takeFirst(propertyCount);
-    final include =
-        !properties.containsFloat ? ', {bool include = false,}' : '';
+    final optional = [
+      'bool include = false',
+      if (properties.containsFloat) 'double epsilon = Query.epsilon',
+    ].join(',');
     return '''
-    $mPrefix $name(${joinToParams(properties)} $include) {
+    $mPrefix $name(${joinToParams(properties)}, {$optional,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IndexWhereClause.between(
           indexName: r'${index.name}',
           lower: [${joinToValues(properties)}],
-          includeLower: ${!properties.containsFloat ? 'include' : 'false'},
+          includeLower: include,
           upper: [${joinToValues(properties.dropLast(1))}],
+          ${properties.containsFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }
@@ -335,7 +346,8 @@ class WhereGenerator {
           indexName: r'${index.name}',
           lower: [${joinToValues(properties.dropLast(1))}],
           upper: [${joinToValues(properties)}],
-          includeUpper: ${!properties.containsFloat ? 'include' : 'false'},
+          includeUpper: include,
+          ${properties.containsFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }
@@ -384,18 +396,21 @@ class WhereGenerator {
       values += ',';
     }
 
-    final float = properties.containsFloat;
-    final include =
-        !float ? ', {bool includeLower = true, bool includeUpper = true,}' : '';
+    final optional = [
+      'bool includeLower = true',
+      'bool includeUpper = true',
+      if (properties.containsFloat) 'double epsilon = Query.epsilon',
+    ].join(',');
     return '''
-    $mPrefix $name($params $include) {
+    $mPrefix $name($params, {$optional,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IndexWhereClause.between(
           indexName: r'${index.name}',
           lower: [$values $lowerName],
-          includeLower: ${!float ? 'includeLower' : 'false'},
+          includeLower: includeLower,
           upper: [$values $upperName],
-          includeUpper: ${!float ? 'includeUpper' : 'false'},
+          includeUpper: includeUpper,
+          ${properties.containsFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }
@@ -483,6 +498,67 @@ class WhereGenerator {
       });
     }
     ''';
+  }
+
+  String generateStringIsEmpty(ObjectIndex index, int propertyCount) {
+    final name = getMethodName(index, propertyCount, 'IsEmpty');
+    if (!existing.add(name)) {
+      return '';
+    }
+
+    final properties = index.properties.dropLast(1);
+    var values = joinToValues(properties);
+    if (values.isNotEmpty) {
+      values += ',';
+    }
+    final params = joinToParams(properties);
+
+    return '''
+    $mPrefix $name($params) {
+      return QueryBuilder.apply(this, (query) {
+        return query.addWhereClause(IndexWhereClause.equalTo(
+          indexName: r'${index.name}',
+          value: [$values ''],
+        ));
+      });
+    }''';
+  }
+
+  String generateStringIsNotEmpty(ObjectIndex index, int propertyCount) {
+    final name = getMethodName(index, propertyCount, 'IsNotEmpty');
+    if (!existing.add(name)) {
+      return '';
+    }
+
+    final properties = index.properties.dropLast(1);
+    var values = joinToValues(properties);
+    if (values.isNotEmpty) {
+      values += ',';
+    }
+    final params = joinToParams(properties);
+
+    return '''
+    $mPrefix $name($params) {
+      return QueryBuilder.apply(this, (query) {
+        if (query.whereSort == Sort.asc) {
+          return query.addWhereClause(IndexWhereClause.lessThan(
+            indexName: r'${index.name}',
+            upper: [''],
+          )).addWhereClause(IndexWhereClause.greaterThan(
+            indexName: r'${index.name}',
+            lower: [''],
+          ));
+        } else {
+          return query.addWhereClause(IndexWhereClause.greaterThan(
+            indexName: r'${index.name}',
+            lower: [''],
+          )).addWhereClause(IndexWhereClause.lessThan(
+            indexName: r'${index.name}',
+            upper: [''],
+          ));
+        }
+      });
+    }''';
   }
 }
 

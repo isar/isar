@@ -530,7 +530,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   }
 
   @override
-  Stream<void> watchLazy() {
+  Stream<void> watchLazy({bool fireImmediately = false}) {
     isar.requireOpen();
     final port = ReceivePort();
     final handle =
@@ -540,18 +540,23 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         IC.isar_stop_watching(handle);
       },
     );
+
+    if (fireImmediately) {
+      controller.add(null);
+    }
+
     controller.addStream(port);
     return controller.stream;
   }
 
   @override
-  Stream<OBJ?> watchObject(Id id, {bool initialReturn = false}) {
-    return watchObjectLazy(id, initialReturn: initialReturn)
+  Stream<OBJ?> watchObject(Id id, {bool fireImmediately = false}) {
+    return watchObjectLazy(id, fireImmediately: fireImmediately)
         .asyncMap((event) => get(id));
   }
 
   @override
-  Stream<void> watchObjectLazy(Id id, {bool initialReturn = false}) {
+  Stream<void> watchObjectLazy(Id id, {bool fireImmediately = false}) {
     isar.requireOpen();
     final cObjPtr = malloc<CObject>();
 
@@ -566,7 +571,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
       },
     );
 
-    if (initialReturn) {
+    if (fireImmediately) {
       controller.add(null);
     }
 

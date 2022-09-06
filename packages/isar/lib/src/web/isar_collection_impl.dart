@@ -198,7 +198,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   Stream<OBJ?> watchObject(
     int id, {
-    bool initialReturn = false,
+    bool fireImmediately = false,
     bool deserialize = true,
   }) {
     JsFunction? stop;

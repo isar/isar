@@ -1,3 +1,12 @@
+## 3.0.0-dev.14
+
+### Enhancements
+- Added `ignore` parameter to `@Collection()` and `@Enum()`
+- Added `fireImmediately` to `collection.watchLazy()` and `query.watchLazy()`
+
+### Breaking
+- Renamed the `initialReturn` parameter to `fireImmediately`
+
 ## 3.0.0-dev.13
 
 ### Enhancements
