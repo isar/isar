@@ -8,12 +8,13 @@ When you have your Collections defined, learn how to manipulate them!
 
 ## Opening Isar
 
-Before you can do anything, you have to open an Isar instance. Each instance needs a directory with write permission. 
+Before you can do anything, you have to open an Isar instance. Each instance needs a directory with write permission.
 
 ```dart
 final isar = await Isar.open(
   schemas: [ContactSchema],
   directory: 'some/directory',
+  inspector:true,
 );
 ```
 
@@ -21,7 +22,7 @@ You can use the default config or provide some of the following parameters.
 
 | Config              | Description                                                                                                                                                                                                                      |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`              | You can open multiple instances with distinct names. By default, `"isar"` is used.                                                                                                                                               |
+| `name`              | You can open multiple instances with distinct names. By default, `"default"` is used.                                                                                                                                            |
 | `schemas`           | A list of all collection schemas you want to use. All instances need to use the same schemas.                                                                                                                                    |
 | `directory`         | The storage location for this instance. You can pass a relative or absolute path. By default, `NSDocumentDirectory` is used for iOS and `getDataDirectory` for Android. The final location is `path/name`. Not required for web. |
 | `relaxedDurability` | Relaxes the durability guarantee to increase write performance. In case of a system crash (not app crash), it is possible to lose the last committed transaction. Corruption is not possible                                     |

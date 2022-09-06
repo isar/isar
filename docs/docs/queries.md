@@ -23,9 +23,9 @@ Filters work by evaluating an expression for every object in the collection bein
 We'll use the following model for the examples below:
 
 ```dart
-@Collection()
+@collection
 class Shoe {
-  int? id;
+  Id? id;
 
   int? size;
 
@@ -73,6 +73,7 @@ You can composit predicates using the following logical operators:
 | ---------- | ---------------------------------------------------------------------------- |
 | `.and()`   | Evaluates to `true` if both left-hand and right-hand expressions are `true`. |
 | `.or()`    | Evaluates to `true` if either expression returns `true`.                     |
+| `.xor()`   | Evaluates to `true` if either expression returns different results.          |
 | `.not()`   | Negates the result of the following expression.                              |
 | `.group()` | Group conditions and allow to specify order of evaluation.                   |
 
@@ -161,7 +162,7 @@ Modifiers can be combined however you like. Every part of a query can be optiona
 In this example we build a method that can find shoes with an optional filter:
 
 ```dart
-Future<List<Shoe>> findShoes(int? sizeFilter) {
+Future<List<Shoe>> findShoes(Id? sizeFilter) {
   return isar.shoes.filter()
     .optional(
       sizeFilter != null, // only apply filter if sizeFilter != null
@@ -198,16 +199,16 @@ Query modifiers are especially useful when you want to build dynamic queries.
 If your model contains [links or backlinks](links) you filter your query based on the linked objects.
 
 ```dart
-@Collection()
+@collection
 class Teacher {
-    int? id;
+    Id? id;
 
     late String subject;
 }
 
-@Collection()
+@collection
 class Student {
-    int? id;
+    Id? id;
 
     late String name;
 
@@ -242,12 +243,12 @@ You can combine where clauses using logical **or**.
 Let's add indexes to the shoe collection:
 
 ```dart
-@Collection()
+@collection
 class Shoe with IsarObject {
-  int? id;
+  Id? id;
 
   @Index()
-  int? size;
+  Id? size;
 
   late String model;
 
