@@ -31,7 +31,7 @@ class StringModel {
 }
 
 void main() {
-  group('String filter', () {
+  group('Where String', () {
     late Isar isar;
 
     late StringModel objEmpty;
