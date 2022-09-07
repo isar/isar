@@ -81,7 +81,10 @@ flutter pub get
 
 ### 2. Annotate a Collection
 
+inside the `lib` directory (or a directory inside it), add this to an `email.dart` file
 ```dart
+import 'package:isar/isar.dart';
+
 part 'email.g.dart';
 
 @collection
@@ -108,6 +111,10 @@ enum Status {
   sending,
   sent,
 }
+```
+then run the following command:  
+```console
+flutter pub run build_runner build
 ```
 
 ### 3. Open a database instance
