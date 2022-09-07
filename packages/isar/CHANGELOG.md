@@ -4,6 +4,10 @@
 - Added `ignore` parameter to `@Collection()` and `@Enum()`
 - Added `fireImmediately` to `collection.watchLazy()` and `query.watchLazy()`
 
+### Fixes
+- Fixed incorrectly generated String list filters
+- Fixed failing version migration
+
 ### Breaking
 - Renamed the `initialReturn` parameter to `fireImmediately`
 

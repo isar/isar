@@ -4,7 +4,7 @@ use super::link_schema::LinkSchema;
 use super::Schema;
 use crate::collection::IsarCollection;
 use crate::cursor::IsarCursors;
-use crate::error::{IsarError, Result};
+use crate::error::{schema_error, IsarError, Result};
 use crate::index::index_key::IndexKey;
 use crate::index::IsarIndex;
 use crate::link::IsarLink;
@@ -56,17 +56,20 @@ impl SchemaManager {
     fn migrate_old_info(info_cursor: &mut Cursor) -> Result<()> {
         let version = info_cursor.move_to(OLD_INFO_VERSION_KEY.deref())?;
         if let Some((_, version)) = version {
-            info_cursor.delete_current()?;
-
             let version_num = u64::from_le_bytes(version.try_into().unwrap());
-            let schema_bytes = info_cursor.move_to(OLD_INFO_SCHEMA_KEY.deref())?;
             info_cursor.delete_current()?;
 
+            let schema_bytes = info_cursor.move_to(OLD_INFO_SCHEMA_KEY.deref())?;
             let mut schema = if let Some((_, schema_bytes)) = schema_bytes {
-                Schema::from_json(schema_bytes)
+                if let Ok(schema) = serde_json::from_slice::<Schema>(schema_bytes) {
+                    Ok(schema)
+                } else {
+                    schema_error("Could not deserialize schema JSON")
+                }
             } else {
                 Schema::new(vec![])
             }?;
+            info_cursor.delete_current()?;
 
             for col in &mut schema.collections {
                 col.version = version_num as u8;
