@@ -122,6 +122,11 @@ flutter pub run build_runner build
 ```dart
 final isar = await Isar.open([EmailSchema]);
 ```
+> **Note:** make sure it's in an `async` function or alternatively use the synchronous option instead:  
+> ```dart
+> final isar = Isar.openSync([EmailSchema]);
+> ```  
+
 
 ### 4. Query the database
 
