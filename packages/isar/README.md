@@ -146,13 +146,13 @@ All basic crud operations are available via the `IsarCollection`.
 ```dart
 final newPost = Post()..title = 'Amazing new database';
 
-await isar.writeTxn(() {
+await isar.writeTxn(() async {
   newPost.id = await isar.posts.put(newPost); // insert & update
 });
 
 final existingPost = await isar.posts.get(newPost.id!); // get
 
-await isar.writeTxn(() {
+await isar.writeTxn(() async {
   await isar.posts.delete(existingPost.id!); // delete
 });
 ```
