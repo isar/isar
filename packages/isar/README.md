@@ -72,6 +72,13 @@ dev_dependencies:
   build_runner: any
 ```
 
+or through the command line using flutter (or dart):
+```console
+flutter pub add isar:3.0.0-dev.13 isar_flutter_libs:3.0.0-dev.13
+flutter pub add --dev isar_generator:3.0.0-dev.13 build_runner
+flutter pub get
+```
+
 ### 2. Annotate a Collection
 
 ```dart
