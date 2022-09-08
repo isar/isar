@@ -614,8 +614,7 @@ void main() {
     });
 
     isarTest('.elementIsEmpty()', () async {
-      // FIXME
-      /*await qEqualSet(
+      await qEqualSet(
         isar.stringModels.where().valuesElementIsEmpty(),
         [obj6],
       );
@@ -633,7 +632,7 @@ void main() {
       await qEqualSet(
         isar.stringModels.where().nullableValuesNullableElementIsEmpty(),
         [obj6],
-      );*/
+      );
     });
 
     isarTest('.elementIsNotEmpty()', () async {
