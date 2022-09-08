@@ -91,3 +91,16 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
   }
   return true;
 }
+
+bool dateTimeListEquals(List<dynamic>? a, List<dynamic>? b) {
+  assert(
+    (a == null || a.every((e) => e == null || e is DateTime)) &&
+        (b == null || b.every((e) => e == null || e is DateTime)),
+    'Parameters must be lists of `DateTime` or `DateTime?`',
+  );
+
+  return listEquals(
+    a?.cast<DateTime?>().map((e) => e?.toUtc()).toList(),
+    b?.cast<DateTime?>().map((e) => e?.toUtc()).toList(),
+  );
+}

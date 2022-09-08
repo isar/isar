@@ -83,8 +83,7 @@ class EnumModel {
 
   @override
   String toString() {
-    // TODO: implement toString
-    return 'EnumModel{ordinalEnum: $ordinalEnum, nameEnum: $nameEnum, byteEnum: $byteEnum, shortEnum: $shortEnum, intEnum: $intEnum, stringEnum: $stringEnum}';
+    return '''EnumModel{ordinalEnum: $ordinalEnum, nameEnum: $nameEnum, byteEnum: $byteEnum, shortEnum: $shortEnum, intEnum: $intEnum, stringEnum: $stringEnum}''';
   }
 }
 
