@@ -29,15 +29,22 @@ class _EditPopupState extends State<EditPopup> {
     if (widget.type == IsarType.bool) {
       _boolValue = widget.value == null || widget.value as bool;
     } else {
-      _controller.text = widget.value == null ? '' : widget.value.toString();
+      if (widget.type == IsarType.dateTime) {
+        _controller.text = widget.value == null
+            ? ''
+            : DateTime.fromMicrosecondsSinceEpoch(widget.value as int)
+                .toIso8601String();
+      } else {
+        _controller.text = widget.value == null ? '' : widget.value.toString();
+        if (widget.type != IsarType.string) {
+          _inputFormatter = CustomTextInputFormatter(widget.type);
+        }
+      }
+
       _controller.selection = TextSelection(
         baseOffset: 0,
         extentOffset: _controller.text.length,
       );
-
-      if (widget.type != IsarType.string) {
-        _inputFormatter = CustomTextInputFormatter(widget.type);
-      }
 
       _focus.requestFocus();
     }
@@ -101,6 +108,12 @@ class _EditPopupState extends State<EditPopup> {
                     if (val < 0 || val > 255) {
                       return 'Byte values must between 0-255';
                     }
+                  } else if (widget.type == IsarType.dateTime) {
+                    try {
+                      DateTime.parse(value!);
+                    } catch (_) {
+                      return 'Wrong date time format';
+                    }
                   }
                   return null;
                 },
@@ -135,6 +148,10 @@ class _EditPopupState extends State<EditPopup> {
           case IsarType.float:
           case IsarType.double:
             value = double.tryParse(_controller.text) ?? 0.0;
+            break;
+
+          case IsarType.dateTime:
+            value = DateTime.parse(_controller.text).microsecondsSinceEpoch;
             break;
 
           case IsarType.byte:

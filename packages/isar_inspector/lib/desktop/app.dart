@@ -14,7 +14,7 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   final _textController = TextEditingController();
-  final urlRE = RegExp(r'^https:\/\/inspect\.isar\.dev\/#\/(\d+)\/([\w-]+)$');
+  final urlRE = RegExp(r'^https:\/\/inspect\.isar\.dev\/[\w.-]+\/#\/(\d+)\/([\w-]+)$');
   String? _port;
   String? _secret;
   String? _error;

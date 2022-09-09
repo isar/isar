@@ -132,8 +132,6 @@ class IsarConnectStateNotifier
     ref.refresh(queryResultsPod);
   }
 
-  Future<int> getVersion() => _call(ConnectAction.getVersion);
-
   Future<List<dynamic>> getSchema() => _call(ConnectAction.getSchema);
 
   Future<List<String>> listInstances() async {

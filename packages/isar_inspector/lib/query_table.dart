@@ -17,6 +17,7 @@ import 'package:isar_inspector/state/query_state.dart';
 const _stringColor = Color(0xFF6A8759);
 const _numberColor = Color(0xFF6897BB);
 const _boolColor = Color(0xFFCC7832);
+const _dateColor = Color(0xFFFFC66D);
 const _disableColor = Colors.grey;
 
 typedef Editor = void Function(
@@ -37,13 +38,15 @@ class QueryTable extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final collection = ref.watch(selectedCollectionPod).value!;
-    final objects = ref.watch(queryResultsPod).value?.objects ?? [];
+    final queryResults = ref.watch(queryResultsPod).value;
 
-    if (objects.isEmpty ||
-        collection.allProperties.length + collection.links.length !=
-            objects[0].data.length) {
+    if (queryResults == null ||
+        queryResults.objects.isEmpty ||
+        queryResults.collectionName != collection.name) {
       return Container();
     }
+
+    final objects = queryResults.objects;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -236,23 +239,75 @@ class _TableBlockState extends State<TableBlock> {
     required Map<String, dynamic> data,
     String prefixKey = '',
     bool subLink = false,
+    List<IObject>? embeddedObjects,
   }) {
+    embeddedObjects = embeddedObjects ?? widget.collection.objects;
     return properties.map((property) {
+      final children = <Node<TreeViewHelper>>[];
+      final value = data[property.name];
 
-      if ([IsarType.dateTime, IsarType.dateTimeList, IsarType.object, IsarType.objectList].contains(property.type)) {
+      if (property.type == IsarType.object) {
         return Node<TreeViewHelper>(
           key: '$prefixKey${property.name}',
           label: '',
+          expanded: _isExpanded('$prefixKey${property.name}'),
+          children: _createProperties(
+            properties: embeddedObjects!
+                .firstWhere((e) => e.name == property.target)
+                .properties,
+            data: value as Map<String, dynamic>,
+            prefixKey: '${property.name}_',
+            subLink: subLink,
+            embeddedObjects: embeddedObjects,
+          ),
           data: PropertyHelper(
-            property: IProperty(name: property.name, type: IsarType.string),
-            value: 'TODO',
-            subLink: false,
+            property: property,
+            value: value,
+            subLink: subLink,
           ),
         );
       }
 
-      final children = <Node<TreeViewHelper>>[];
-      final value = data[property.name];
+      if (property.type == IsarType.objectList) {
+        final list = value as List<dynamic>;
+        return Node<TreeViewHelper>(
+          key: '$prefixKey${property.name}',
+          label: '',
+          expanded: _isExpanded('$prefixKey${property.name}'),
+          children: [
+            for (var index = 0; index < list.length; ++index)
+              Node<TreeViewHelper>(
+                key: '$prefixKey${property.name}_$index',
+                label: '',
+                expanded: _isExpanded('$prefixKey${property.name}_$index'),
+                children: _createProperties(
+                  properties: embeddedObjects!
+                      .firstWhere((e) => e.name == property.target)
+                      .properties,
+                  data: list[index] as Map<String, dynamic>,
+                  prefixKey: '$prefixKey${property.name}_$index',
+                  subLink: subLink,
+                  embeddedObjects: embeddedObjects,
+                ),
+                data: PropertyHelper(
+                  property: IProperty(
+                    name: property.name,
+                    type: property.type.scalarType,
+                    target: property.target,
+                  ),
+                  value: list[index],
+                  subLink: subLink,
+                  index: index,
+                ),
+              )
+          ],
+          data: PropertyHelper(
+            property: property,
+            value: list,
+            subLink: subLink,
+          ),
+        );
+      }
 
       if (property.type.isList && value != null) {
         final list = value as List<dynamic>;
@@ -304,6 +359,7 @@ class _TableBlockState extends State<TableBlock> {
               data: value as Map<String, dynamic>,
               prefixKey: '${link.name}_',
               subLink: true,
+              embeddedObjects: link.target.objects,
             ),
           );
         }
@@ -321,6 +377,7 @@ class _TableBlockState extends State<TableBlock> {
                 data: list[index] as Map<String, dynamic>,
                 prefixKey: '${link.name}_${index}_',
                 subLink: true,
+                embeddedObjects: link.target.objects,
               ),
               data: LinkHelper(
                 link: link,
@@ -745,6 +802,18 @@ class _TableItemState extends State<TableItem> {
             color = _boolColor;
             break;
 
+          case IsarType.dateTime:
+            value =
+                DateTime.fromMicrosecondsSinceEpoch(widget.data.value as int)
+                    .toIso8601String();
+            color = _dateColor;
+            break;
+
+          case IsarType.object:
+            value = prop.target!;
+            color = _disableColor;
+            break;
+
           case IsarType.byte:
           case IsarType.int:
           case IsarType.float:
@@ -766,7 +835,17 @@ class _TableItemState extends State<TableItem> {
           case IsarType.doubleList:
           case IsarType.stringList:
           case IsarType.boolList:
-            value = '${prop.type.name} [';
+          case IsarType.dateTimeList:
+            value = 'List<${prop.type.scalarType.name[0].toUpperCase()}'
+                '${prop.type.scalarType.name.substring(1)}> [';
+            value += widget.data.value == null
+                ? 'null]'
+                : '${(widget.data.value as List).length.toString()}]';
+            color = _disableColor;
+            break;
+
+          case IsarType.objectList:
+            value = 'List<${prop.target}> [';
             value += widget.data.value == null
                 ? 'null]'
                 : '${(widget.data.value as List).length.toString()}]';

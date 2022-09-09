@@ -25,10 +25,12 @@ class QueryResult {
   QueryResult({
     required this.objects,
     required this.count,
+    required this.collectionName,
   });
 
   final List<QueryObject> objects;
   final int count;
+  final String collectionName;
 }
 
 final queryResultsPod = FutureProvider<QueryResult>((ref) async {
@@ -59,5 +61,6 @@ final queryResultsPod = FutureProvider<QueryResult>((ref) async {
   return QueryResult(
     objects: objects,
     count: result['count']! as int,
+    collectionName: selectedCollection.name,
   );
 });

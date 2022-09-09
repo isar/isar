@@ -87,7 +87,13 @@ abstract class _IsarConnect {
   }
 
   static Future<dynamic> _getSchema(Map<String, dynamic> _) async {
-    return [..._schemas!.map((e) => e.toSchemaJson())];
+    return [
+      ..._schemas!.map(
+        (e) => e.toSchemaJson()
+          ..['objects'] =
+              e.embeddedSchemas.values.map((e) => e.toSchemaJson()).toList(),
+      )
+    ];
   }
 
   static Future<dynamic> _listInstances(Map<String, dynamic> _) async {
@@ -192,9 +198,9 @@ abstract class _IsarConnect {
             results[index][link.name] =
                 await q.findFirst() == null ? null : (await q.exportJson())[0];
           } else {
-          results[index][link.name] =
-          await QueryBuilder<dynamic, dynamic, QAfterFilterCondition>(qb)
-              .exportJson();
+            results[index][link.name] =
+                await QueryBuilder<dynamic, dynamic, QAfterFilterCondition>(qb)
+                    .exportJson();
           }
         }
       }
