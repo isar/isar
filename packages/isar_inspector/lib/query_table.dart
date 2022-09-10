@@ -20,14 +20,7 @@ const _boolColor = Color(0xFFCC7832);
 const _dateColor = Color(0xFFFFC66D);
 const _disableColor = Colors.grey;
 
-typedef Editor = void Function(
-  int id,
-  String property,
-  int? index,
-  dynamic value,
-  EditorType editing,
-);
-
+typedef Editor = void Function(ConnectEdit edit, EditorType type);
 typedef Aggregate = Future<num?> Function(String property, AggregationOp op);
 
 enum EditorType { add, edit, remove }
@@ -65,18 +58,15 @@ class QueryTable extends ConsumerWidget {
                     ),
                     collection: collection,
                     object: objects[index],
-                    editor: (id, property, index, value, editing) {
-                      final edit = ConnectEdit(
-                        instance: ref.read(selectedInstancePod).value!,
-                        collection: collection.name,
-                        id: id,
-                        property: property,
-                        index: index,
-                        value: value,
+                    editor: (ConnectEdit edit, type) {
+                      edit = edit.copyWith(
+                        instance: ref.read(selectedInstancePod).value,
+                        collection:
+                            edit.collection == '' ? collection.name : null,
                       );
 
                       final pod = ref.read(isarConnectPod.notifier);
-                      switch (editing) {
+                      switch (type) {
                         case EditorType.add:
                           pod.addInList(edit);
                           break;
@@ -192,9 +182,11 @@ class _TableBlockState extends State<TableBlock> {
         nodeBuilder: (context, node) {
           return TableItem(
             data: node.data as TreeViewHelper,
+            nodeKey: node.key,
             editor: widget.editor,
             objectId: _id,
             aggregate: widget.aggregate,
+            treeViewController: _treeViewController,
           );
         },
         onExpansionChanged: (key, expanded) {
@@ -213,7 +205,12 @@ class _TableBlockState extends State<TableBlock> {
       _treeViewController = _treeViewController.copyWith(
         children: _treeViewController.updateNode(
           node.key,
-          node.copyWith(expanded: expanded),
+          node.copyWith(
+            expanded: expanded,
+            children: !expanded
+                ? _treeViewController.collapseAll(parent: node)
+                : null,
+          ),
         ),
       );
     });
@@ -237,57 +234,67 @@ class _TableBlockState extends State<TableBlock> {
   List<Node<TreeViewHelper>> _createProperties({
     required List<IProperty> properties,
     required Map<String, dynamic> data,
-    String prefixKey = '',
-    bool subLink = false,
+    String prefixPath = '',
+    String? realPrefixPath,
+    String linkKey = '',
     List<IObject>? embeddedObjects,
   }) {
     embeddedObjects = embeddedObjects ?? widget.collection.objects;
+    prefixPath = prefixPath.isNotEmpty ? '$prefixPath.' : '';
+    realPrefixPath = realPrefixPath == null
+        ? prefixPath
+        : (realPrefixPath.isNotEmpty ? '$realPrefixPath.' : '');
+
     return properties.map((property) {
+      final path = '$realPrefixPath${property.name}';
+      final key = '$prefixPath${property.name}';
       final children = <Node<TreeViewHelper>>[];
       final value = data[property.name];
 
       if (property.type == IsarType.object) {
         return Node<TreeViewHelper>(
-          key: '$prefixKey${property.name}',
+          key: key,
           label: '',
-          expanded: _isExpanded('$prefixKey${property.name}'),
+          expanded: _isExpanded(key),
           children: _createProperties(
             properties: embeddedObjects!
                 .firstWhere((e) => e.name == property.target)
                 .properties,
             data: value as Map<String, dynamic>,
-            prefixKey: '${property.name}_',
-            subLink: subLink,
+            linkKey: linkKey,
             embeddedObjects: embeddedObjects,
+            prefixPath: path,
           ),
           data: PropertyHelper(
             property: property,
             value: value,
-            subLink: subLink,
+            linkKey: linkKey,
+            path: path,
           ),
         );
       }
 
       if (property.type == IsarType.objectList) {
         final list = value as List<dynamic>;
+
         return Node<TreeViewHelper>(
-          key: '$prefixKey${property.name}',
+          key: key,
           label: '',
-          expanded: _isExpanded('$prefixKey${property.name}'),
+          expanded: _isExpanded(key),
           children: [
             for (var index = 0; index < list.length; ++index)
               Node<TreeViewHelper>(
-                key: '$prefixKey${property.name}_$index',
+                key: '$key.$index',
                 label: '',
-                expanded: _isExpanded('$prefixKey${property.name}_$index'),
+                expanded: _isExpanded('$key.$index'),
                 children: _createProperties(
                   properties: embeddedObjects!
                       .firstWhere((e) => e.name == property.target)
                       .properties,
                   data: list[index] as Map<String, dynamic>,
-                  prefixKey: '$prefixKey${property.name}_$index',
-                  subLink: subLink,
+                  linkKey: linkKey,
                   embeddedObjects: embeddedObjects,
+                  prefixPath: '$path.$index',
                 ),
                 data: PropertyHelper(
                   property: IProperty(
@@ -296,15 +303,17 @@ class _TableBlockState extends State<TableBlock> {
                     target: property.target,
                   ),
                   value: list[index],
-                  subLink: subLink,
+                  linkKey: linkKey,
                   index: index,
+                  path: '$path.$index',
                 ),
               )
           ],
           data: PropertyHelper(
             property: property,
             value: list,
-            subLink: subLink,
+            linkKey: linkKey,
+            path: path,
           ),
         );
       }
@@ -315,9 +324,9 @@ class _TableBlockState extends State<TableBlock> {
         for (var index = 0; index < list.length; index++) {
           children.add(
             Node(
-              key: '$prefixKey${property.name}_$index',
+              key: '$key.$index',
               label: '',
-              expanded: _isExpanded('$prefixKey${property.name}_$index'),
+              expanded: _isExpanded('$key.$index'),
               data: PropertyHelper(
                 property: IProperty(
                   name: property.name,
@@ -325,7 +334,8 @@ class _TableBlockState extends State<TableBlock> {
                 ),
                 value: list[index],
                 index: index,
-                subLink: subLink,
+                linkKey: linkKey,
+                path: '$path.$index',
               ),
             ),
           );
@@ -333,14 +343,15 @@ class _TableBlockState extends State<TableBlock> {
       }
 
       return Node<TreeViewHelper>(
-        key: '$prefixKey${property.name}',
+        key: key,
         label: '',
-        expanded: _isExpanded('$prefixKey${property.name}'),
+        expanded: _isExpanded(key),
         children: children,
         data: PropertyHelper(
           property: property,
           value: value,
-          subLink: subLink,
+          linkKey: linkKey,
+          path: path,
         ),
       );
     }).toList();
@@ -357,8 +368,9 @@ class _TableBlockState extends State<TableBlock> {
             _createProperties(
               properties: link.target.allProperties,
               data: value as Map<String, dynamic>,
-              prefixKey: '${link.name}_',
-              subLink: true,
+              prefixPath: link.name,
+              realPrefixPath: '',
+              linkKey: link.name,
               embeddedObjects: link.target.objects,
             ),
           );
@@ -369,14 +381,15 @@ class _TableBlockState extends State<TableBlock> {
         for (var index = 0; index < list.length; index++) {
           children.add(
             Node<TreeViewHelper>(
-              key: '${link.name}_$index',
+              key: '${link.name}.$index',
               label: '',
-              expanded: _isExpanded('${link.name}_$index'),
+              expanded: _isExpanded('${link.name}.$index'),
               children: _createProperties(
                 properties: link.target.allProperties,
                 data: list[index] as Map<String, dynamic>,
-                prefixKey: '${link.name}_${index}_',
-                subLink: true,
+                prefixPath: '${link.name}.$index',
+                realPrefixPath: '',
+                linkKey: '${link.name}.$index',
                 embeddedObjects: link.target.objects,
               ),
               data: LinkHelper(
@@ -411,15 +424,19 @@ class TableItem extends StatefulWidget {
   const TableItem({
     super.key,
     required this.data,
+    required this.nodeKey,
     required this.editor,
     required this.objectId,
     required this.aggregate,
+    required this.treeViewController,
   });
 
   final TreeViewHelper data;
+  final String nodeKey;
   final int objectId;
   final Editor editor;
   final Aggregate aggregate;
+  final TreeViewController treeViewController;
 
   @override
   State<TableItem> createState() => _TableItemState();
@@ -428,167 +445,166 @@ class TableItem extends StatefulWidget {
 class _TableItemState extends State<TableItem> {
   bool _entered = false;
 
-  late final _options = <PopupMenuEntry<dynamic>>[
-    if (widget.data is LinkHelper && widget.data.value != null)
-      PopupMenuItem<dynamic>(
-        onTap: () => _copy(true),
-        child: const PopUpMenuRow(
-          icon: Icon(Icons.copy, size: PopUpMenuRow.iconSize),
-          text: 'Copy Id',
-        ),
-      ),
-    PopupMenuItem<dynamic>(
-      onTap: _copy,
-      child: const PopUpMenuRow(
-        icon: Icon(Icons.copy, size: PopUpMenuRow.iconSize),
-        text: 'Copy to clipboard',
-      ),
-    ),
-    if (widget.data is PropertyHelper &&
-        !(widget.data as PropertyHelper).subLink &&
-        !(widget.data as PropertyHelper).property.isId &&
-        !(widget.data as PropertyHelper).property.type.isList)
-      PopupMenuItem<dynamic>(
-        onTap: () {
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => _edit(),
-          );
-        },
-        child: PopUpMenuRow(
-          icon: const Icon(
-            Icons.edit,
-            size: PopUpMenuRow.iconSize,
+  List<PopupMenuEntry<dynamic>> get _options => [
+        if (widget.data is LinkHelper && widget.data.value != null)
+          PopupMenuItem<dynamic>(
+            onTap: () => _copy(true),
+            child: const PopUpMenuRow(
+              icon: Icon(Icons.copy, size: PopUpMenuRow.iconSize),
+              text: 'Copy Id',
+            ),
           ),
-          text: widget.data.index != null
-              ? 'Edit item ${widget.data.index!}'
-              : 'Edit property',
-        ),
-      ),
-    if (widget.data is PropertyHelper &&
-        !(widget.data as PropertyHelper).subLink &&
-        widget.data.index != null)
-      PopupMenuItem<dynamic>(
-        onTap: _removeListItem,
-        child: PopUpMenuRow(
-          icon: const Icon(
-            Icons.delete,
-            size: PopUpMenuRow.iconSize,
+        PopupMenuItem<dynamic>(
+          onTap: _copy,
+          child: const PopUpMenuRow(
+            icon: Icon(Icons.copy, size: PopUpMenuRow.iconSize),
+            text: 'Copy to clipboard',
           ),
-          text: 'Remove item ${widget.data.index!}',
         ),
-      ),
-    if (widget.data is PropertyHelper &&
-        !(widget.data as PropertyHelper).subLink &&
-        (widget.data as PropertyHelper).property.type.isList &&
-        widget.data.value != null)
-      PopupMenuItem<dynamic>(
-        onTap: () {
-          WidgetsBinding.instance.addPostFrameCallback((_) => _addInList(null));
-        },
-        child: const PopUpMenuRow(
-          icon: Icon(Icons.add, size: PopUpMenuRow.iconSize),
-          text: 'Add item',
-        ),
-      ),
-    if (widget.data is PropertyHelper &&
-        !(widget.data as PropertyHelper).subLink &&
-        widget.data.index != null) ...[
-      PopupMenuItem<dynamic>(
-        onTap: () {
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => _addInList(widget.data.index),
-          );
-        },
-        child: PopUpMenuRow(
-          icon: const Icon(
-            Icons.add,
-            size: PopUpMenuRow.iconSize,
+        if (widget.data is PropertyHelper &&
+            !(widget.data as PropertyHelper).property.isId &&
+            !(widget.data as PropertyHelper).property.type.isList &&
+            (widget.data as PropertyHelper).property.type != IsarType.object)
+          PopupMenuItem<dynamic>(
+            onTap: () {
+              WidgetsBinding.instance.addPostFrameCallback(
+                (_) => _edit(),
+              );
+            },
+            child: PopUpMenuRow(
+              icon: const Icon(
+                Icons.edit,
+                size: PopUpMenuRow.iconSize,
+              ),
+              text: widget.data.index != null
+                  ? 'Edit item ${widget.data.index!}'
+                  : 'Edit property',
+            ),
           ),
-          text: 'Add item before ${widget.data.index!}',
-        ),
-      ),
-      PopupMenuItem<dynamic>(
-        onTap: () {
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => _addInList(widget.data.index! + 1),
-          );
-        },
-        child: PopUpMenuRow(
-          icon: const Icon(
-            Icons.add,
-            size: PopUpMenuRow.iconSize,
+        if (widget.data is PropertyHelper && widget.data.index != null)
+          PopupMenuItem<dynamic>(
+            onTap: _removeListItem,
+            child: PopUpMenuRow(
+              icon: const Icon(
+                Icons.delete,
+                size: PopUpMenuRow.iconSize,
+              ),
+              text: 'Remove item ${widget.data.index!}',
+            ),
           ),
-          text: 'Add item after ${widget.data.index!}',
-        ),
-      ),
-    ],
-    if (widget.data is PropertyHelper &&
-        !(widget.data as PropertyHelper).subLink &&
-        (widget.data as PropertyHelper).property.type.isList)
-      PopupMenuItem<dynamic>(
-        onTap: () => _setValue(<dynamic>[]),
-        child: const PopUpMenuRow(
-          text: 'Clear list',
-        ),
-      ),
-    if (widget.data is PropertyHelper &&
-        !(widget.data as PropertyHelper).subLink &&
-        !(widget.data as PropertyHelper).property.isId &&
-        widget.data.value != null)
-      PopupMenuItem<dynamic>(
-        onTap: () => _setValue(null),
-        child: const PopUpMenuRow(
-          text: 'Set value to null',
-        ),
-      ),
-    if (widget.data is PropertyHelper &&
-        !(widget.data as PropertyHelper).subLink &&
-        (widget.data as PropertyHelper).index == null &&
-        (widget.data as PropertyHelper).property.type.isNum)
-      PopupMenuItem(
-        padding: EdgeInsets.zero,
-        child: PopupMenuButton(
-          position: PopupMenuPosition.under,
-          tooltip: '',
-          onCanceled: () {
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
-            }
-          },
-          itemBuilder: (BuildContext context) => [
-            PopupMenuItem<dynamic>(
-              onTap: () => _aggregate(AggregationOp.min),
-              child: const PopUpMenuRow(text: 'Min'),
+        if (widget.data is PropertyHelper &&
+            (widget.data as PropertyHelper).property.type.isList &&
+            widget.data.value != null &&
+            (widget.data as PropertyHelper).property.type !=
+                IsarType.objectList)
+          PopupMenuItem<dynamic>(
+            onTap: () {
+              WidgetsBinding.instance
+                  .addPostFrameCallback((_) => _addInList(null));
+            },
+            child: const PopUpMenuRow(
+              icon: Icon(Icons.add, size: PopUpMenuRow.iconSize),
+              text: 'Add item',
             ),
-            PopupMenuItem<dynamic>(
-              onTap: () => _aggregate(AggregationOp.max),
-              child: const PopUpMenuRow(text: 'Max'),
+          ),
+        if (widget.data is PropertyHelper &&
+            widget.data.index != null &&
+            (widget.data as PropertyHelper).property.type !=
+                IsarType.object) ...[
+          PopupMenuItem<dynamic>(
+            onTap: () {
+              WidgetsBinding.instance.addPostFrameCallback(
+                (_) => _addInList(widget.data.index),
+              );
+            },
+            child: PopUpMenuRow(
+              icon: const Icon(
+                Icons.add,
+                size: PopUpMenuRow.iconSize,
+              ),
+              text: 'Add item before ${widget.data.index}',
             ),
-            PopupMenuItem<dynamic>(
-              onTap: () => _aggregate(AggregationOp.sum),
-              child: const PopUpMenuRow(text: 'Sum'),
+          ),
+          PopupMenuItem<dynamic>(
+            onTap: () {
+              WidgetsBinding.instance.addPostFrameCallback(
+                (_) => _addInList(widget.data.index! + 1),
+              );
+            },
+            child: PopUpMenuRow(
+              icon: const Icon(
+                Icons.add,
+                size: PopUpMenuRow.iconSize,
+              ),
+              text: 'Add item after ${widget.data.index}',
             ),
-            PopupMenuItem<dynamic>(
-              onTap: () => _aggregate(AggregationOp.average),
-              child: const PopUpMenuRow(text: 'Average'),
+          ),
+        ],
+        if (widget.data is PropertyHelper &&
+            (widget.data as PropertyHelper).property.type.isList)
+          PopupMenuItem<dynamic>(
+            onTap: () => _setValue(<dynamic>[]),
+            child: const PopUpMenuRow(
+              text: 'Empty list',
             ),
-          ],
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            constraints: const BoxConstraints(
-              minHeight: kMinInteractiveDimension,
+          ),
+        if (widget.data is PropertyHelper &&
+            !(widget.data as PropertyHelper).property.isId &&
+            widget.data.value != null)
+          PopupMenuItem<dynamic>(
+            onTap: () => _setValue(null),
+            child: const PopUpMenuRow(
+              text: 'Set value to null',
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                PopUpMenuRow(text: 'Aggregation'),
-                Icon(Icons.arrow_right),
+          ),
+        if (widget.data is PropertyHelper &&
+            (widget.data as PropertyHelper).linkKey.isEmpty &&
+            (widget.data as PropertyHelper).index == null &&
+            (widget.data as PropertyHelper).property.type.isNum)
+          PopupMenuItem(
+            padding: EdgeInsets.zero,
+            child: PopupMenuButton(
+              position: PopupMenuPosition.under,
+              tooltip: '',
+              onCanceled: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+              },
+              itemBuilder: (BuildContext context) => [
+                PopupMenuItem<dynamic>(
+                  onTap: () => _aggregate(AggregationOp.min),
+                  child: const PopUpMenuRow(text: 'Min'),
+                ),
+                PopupMenuItem<dynamic>(
+                  onTap: () => _aggregate(AggregationOp.max),
+                  child: const PopUpMenuRow(text: 'Max'),
+                ),
+                PopupMenuItem<dynamic>(
+                  onTap: () => _aggregate(AggregationOp.sum),
+                  child: const PopUpMenuRow(text: 'Sum'),
+                ),
+                PopupMenuItem<dynamic>(
+                  onTap: () => _aggregate(AggregationOp.average),
+                  child: const PopUpMenuRow(text: 'Average'),
+                ),
               ],
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                constraints: const BoxConstraints(
+                  minHeight: kMinInteractiveDimension,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    PopUpMenuRow(text: 'Aggregation'),
+                    Icon(Icons.arrow_right),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-  ];
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -618,50 +634,6 @@ class _TableItemState extends State<TableItem> {
         ),
       ),
     );
-  }
-
-  Future<void> _edit() async {
-    final result = await showDialog<Map<String, dynamic>?>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          content: EditPopup(
-            type: (widget.data as PropertyHelper).property.type,
-            value: widget.data.value,
-          ),
-        );
-      },
-    );
-
-    if (result != null) {
-      await _setValue(result['value']);
-    }
-  }
-
-  Future<void> _addInList(int? index) async {
-    final property = (widget.data as PropertyHelper).property;
-    final result = await showDialog<Map<String, dynamic>?>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          content: EditPopup(
-            type:
-                property.type.isList ? property.type.scalarType : property.type,
-            value: null,
-          ),
-        );
-      },
-    );
-
-    if (result != null) {
-      widget.editor(
-        widget.objectId,
-        property.name,
-        index,
-        result['value'],
-        EditorType.add,
-      );
-    }
   }
 
   Future<void> _copy([bool linkId = false]) async {
@@ -708,22 +680,95 @@ class _TableItemState extends State<TableItem> {
     }
   }
 
+  Future<void> _edit() async {
+    final result = await showDialog<Map<String, dynamic>?>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: EditPopup(
+            type: (widget.data as PropertyHelper).property.type,
+            value: widget.data.value,
+          ),
+        );
+      },
+    );
+
+    if (result != null) {
+      await _setValue(result['value']);
+    }
+  }
+
+  Future<void> _addInList(int? index) async {
+    final helper = widget.data as PropertyHelper;
+    final result = await showDialog<Map<String, dynamic>?>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: EditPopup(
+            type: helper.property.type.isList
+                ? helper.property.type.scalarType
+                : helper.property.type,
+            value: null,
+          ),
+        );
+      },
+    );
+
+    if (result != null) {
+      final objectInfo = _objectInfo(helper);
+      if (objectInfo == null) {
+        return;
+      }
+
+      widget.editor(
+        ConnectEdit(
+          instance: '',
+          collection: objectInfo['collectionName'] as String,
+          id: objectInfo['objectId'] as int,
+          path: index == null ? helper.path : _parentPath(),
+          listIndex: index,
+          value: result['value'],
+        ),
+        EditorType.add,
+      );
+    }
+  }
+
   Future<void> _setValue(dynamic value) async {
+    final helper = widget.data as PropertyHelper;
+    final objectInfo = _objectInfo(helper);
+    if (objectInfo == null) {
+      return;
+    }
+
     widget.editor(
-      widget.objectId,
-      (widget.data as PropertyHelper).property.name,
-      widget.data.index,
-      value,
+      ConnectEdit(
+        instance: '',
+        collection: objectInfo['collectionName'] as String,
+        id: objectInfo['objectId'] as int,
+        path: helper.path,
+        listIndex: widget.data.index,
+        value: value,
+      ),
       EditorType.edit,
     );
   }
 
   Future<void> _removeListItem() async {
+    final objectInfo = _objectInfo();
+    if (objectInfo == null) {
+      return;
+    }
+
     widget.editor(
-      widget.objectId,
-      (widget.data as PropertyHelper).property.name,
-      widget.data.index,
-      null,
+      ConnectEdit(
+        instance: '',
+        collection: objectInfo['collectionName'] as String,
+        id: objectInfo['objectId'] as int,
+        path: _parentPath(),
+        listIndex: widget.data.index,
+        value: null,
+      ),
       EditorType.remove,
     );
   }
@@ -758,6 +803,31 @@ class _TableItemState extends State<TableItem> {
         ),
       );
     }
+  }
+
+  Map<String, dynamic>? _objectInfo([PropertyHelper? helper]) {
+    helper = helper ?? widget.data as PropertyHelper;
+
+    if (helper.linkKey.isNotEmpty) {
+      final linkHelper = widget.treeViewController
+          .getNode<TreeViewHelper>(helper.linkKey)
+          ?.data as LinkHelper?;
+      if (linkHelper == null) {
+        return null;
+      }
+      return {
+        'collectionName': linkHelper.link.target.name,
+        'objectId':
+            (linkHelper.value as Map)[linkHelper.link.target.idName] as int,
+      };
+    }
+
+    return {'collectionName': '', 'objectId': widget.objectId};
+  }
+
+  String _parentPath() {
+    final parsedPath = (widget.data as PropertyHelper).path.split('.');
+    return parsedPath.take(parsedPath.length - 1).join('.');
   }
 
   Widget _createText() {
@@ -836,19 +906,16 @@ class _TableItemState extends State<TableItem> {
           case IsarType.stringList:
           case IsarType.boolList:
           case IsarType.dateTimeList:
-            value = 'List<${prop.type.scalarType.name[0].toUpperCase()}'
-                '${prop.type.scalarType.name.substring(1)}> [';
-            value += widget.data.value == null
-                ? 'null]'
-                : '${(widget.data.value as List).length.toString()}]';
-            color = _disableColor;
-            break;
-
           case IsarType.objectList:
-            value = 'List<${prop.target}> [';
+            if (prop.type == IsarType.objectList) {
+              value = 'List<${prop.target}> ';
+            } else {
+              value = 'List<${prop.type.scalarType.name[0].toUpperCase()}'
+                  '${prop.type.scalarType.name.substring(1)}> ';
+            }
             value += widget.data.value == null
-                ? 'null]'
-                : '${(widget.data.value as List).length.toString()}]';
+                ? '[null]'
+                : '[${(widget.data.value as List).length}]';
             color = _disableColor;
             break;
         }
@@ -928,21 +995,23 @@ abstract class TreeViewHelper {
 
 class PropertyHelper extends TreeViewHelper {
   const PropertyHelper({
-    required this.property,
     required super.value,
     super.index,
-    required this.subLink,
+    required this.property,
+    required this.linkKey,
+    required this.path,
   });
 
   final IProperty property;
-  final bool subLink;
+  final String linkKey;
+  final String path;
 }
 
 class LinkHelper extends TreeViewHelper {
   const LinkHelper({
-    required this.link,
     required super.value,
     super.index,
+    required this.link,
   });
 
   final ILink link;
