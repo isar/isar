@@ -182,7 +182,6 @@ class _TableBlockState extends State<TableBlock> {
         nodeBuilder: (context, node) {
           return TableItem(
             data: node.data as TreeViewHelper,
-            nodeKey: node.key,
             editor: widget.editor,
             objectId: _id,
             aggregate: widget.aggregate,
@@ -424,7 +423,6 @@ class TableItem extends StatefulWidget {
   const TableItem({
     super.key,
     required this.data,
-    required this.nodeKey,
     required this.editor,
     required this.objectId,
     required this.aggregate,
@@ -432,7 +430,6 @@ class TableItem extends StatefulWidget {
   });
 
   final TreeViewHelper data;
-  final String nodeKey;
   final int objectId;
   final Editor editor;
   final Aggregate aggregate;
