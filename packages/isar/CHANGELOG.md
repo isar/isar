@@ -1,3 +1,15 @@
+## 3.0.0-dev.15
+
+### Enhancements
+- The web target is fully functional again
+- Isar now allows changing model property types (they get deleted and re-created)
+
+### Fixes
+- Fixed `IsarLink.toString()` and `IsarLinks.toString()`
+
+### Breaking
+- Web databases created with older versions of Isar are no longer supported
+
 ## 3.0.0-dev.14
 
 ### Enhancements

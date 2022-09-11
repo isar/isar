@@ -100,19 +100,19 @@ String generateAllByIndex(ObjectInfo oi, ObjectIndex index) {
 
 String generatePutByIndex(ObjectInfo oi, ObjectIndex index) {
   return '''
-    Future<int> putBy${index.dartName}(${oi.dartName} object) {
+    Future<Id> putBy${index.dartName}(${oi.dartName} object) {
       return putByIndex(r'${index.name}', object);
     }
 
-    int putBy${index.dartName}Sync(${oi.dartName} object, {bool saveLinks = true}) {
+    Id putBy${index.dartName}Sync(${oi.dartName} object, {bool saveLinks = true}) {
       return putByIndexSync(r'${index.name}', object, saveLinks: saveLinks);
     }
 
-    Future<List<int>> putAllBy${index.dartName}(List<${oi.dartName}> objects) {
+    Future<List<Id>> putAllBy${index.dartName}(List<${oi.dartName}> objects) {
       return putAllByIndex(r'${index.name}', objects);
     }
 
-    List<int> putAllBy${index.dartName}Sync(List<${oi.dartName}> objects, {bool saveLinks = true}) {
+    List<Id> putAllBy${index.dartName}Sync(List<${oi.dartName}> objects, {bool saveLinks = true}) {
       return putAllByIndexSync(r'${index.name}', objects, saveLinks: saveLinks);
     }
   ''';

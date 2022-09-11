@@ -20,7 +20,7 @@ class IdWhereClause extends WhereClause {
   /// Where clause that matches all id values greater than the given [lower]
   /// bound.
   const IdWhereClause.greaterThan({
-    required int lower,
+    required Id lower,
     this.includeLower = true,
   })  : lower = lower,
         upper = null,
@@ -30,7 +30,7 @@ class IdWhereClause extends WhereClause {
   /// Where clause that matches all id values less than the given [upper]
   /// bound.
   const IdWhereClause.lessThan({
-    required int upper,
+    required Id upper,
     this.includeUpper = true,
   })  : upper = upper,
         lower = null,
@@ -39,7 +39,7 @@ class IdWhereClause extends WhereClause {
 
   /// Where clause that matches the id value equal to the given [value].
   const IdWhereClause.equalTo({
-    required int value,
+    required Id value,
   })  : lower = value,
         upper = value,
         includeLower = true,
@@ -56,13 +56,13 @@ class IdWhereClause extends WhereClause {
   }) : super._();
 
   /// The lower bound id or `null` for unbounded.
-  final int? lower;
+  final Id? lower;
 
   /// Whether the lower bound should be included in the results.
   final bool includeLower;
 
   /// The upper bound id or `null` for unbounded.
-  final int? upper;
+  final Id? upper;
 
   /// Whether the upper bound should be included in the results.
   final bool includeUpper;

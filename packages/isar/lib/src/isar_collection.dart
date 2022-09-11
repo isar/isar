@@ -26,11 +26,11 @@ abstract class IsarCollection<OBJ> {
 
   /// Get a list of objects by their [ids] or `null` if an object does not
   /// exist.
-  Future<List<OBJ?>> getAll(List<int> ids);
+  Future<List<OBJ?>> getAll(List<Id> ids);
 
   /// Get a list of objects by their [ids] or `null` if an object does not
   /// exist.
-  List<OBJ?> getAllSync(List<int> ids);
+  List<OBJ?> getAllSync(List<Id> ids);
 
   /// @nodoc
   @protected
@@ -54,40 +54,40 @@ abstract class IsarCollection<OBJ> {
   List<OBJ?> getAllByIndexSync(String indexName, List<IndexKey> keys);
 
   /// Insert or update an [object] and returns the assigned id.
-  Future<int> put(OBJ object) {
-    return putAll([object]).then((List<int> ids) => ids[0]);
+  Future<Id> put(OBJ object) {
+    return putAll([object]).then((List<Id> ids) => ids[0]);
   }
 
   /// Insert or update an [object] and returns the assigned id.
-  int putSync(OBJ object, {bool saveLinks = true}) {
+  Id putSync(OBJ object, {bool saveLinks = true}) {
     return putAllSync([object], saveLinks: saveLinks)[0];
   }
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  Future<List<int>> putAll(List<OBJ> objects);
+  Future<List<Id>> putAll(List<OBJ> objects);
 
   /// Insert or update a list of [objects] and returns the list of assigned ids.
-  List<int> putAllSync(List<OBJ> objects, {bool saveLinks = true});
+  List<Id> putAllSync(List<OBJ> objects, {bool saveLinks = true});
 
   /// @nodoc
   @protected
-  Future<int> putByIndex(String indexName, OBJ object) {
-    return putAllByIndex(indexName, [object]).then((List<int> ids) => ids[0]);
+  Future<Id> putByIndex(String indexName, OBJ object) {
+    return putAllByIndex(indexName, [object]).then((List<Id> ids) => ids[0]);
   }
 
   /// @nodoc
   @protected
-  int putByIndexSync(String indexName, OBJ object, {bool saveLinks = true}) {
+  Id putByIndexSync(String indexName, OBJ object, {bool saveLinks = true}) {
     return putAllByIndexSync(indexName, [object])[0];
   }
 
   /// @nodoc
   @protected
-  Future<List<int>> putAllByIndex(String indexName, List<OBJ> objects);
+  Future<List<Id>> putAllByIndex(String indexName, List<OBJ> objects);
 
   /// @nodoc
   @protected
-  List<int> putAllByIndexSync(
+  List<Id> putAllByIndexSync(
     String indexName,
     List<OBJ> objects, {
     bool saveLinks = true,
@@ -112,12 +112,12 @@ abstract class IsarCollection<OBJ> {
   ///
   /// Returns the number of objects that have been deleted. Isar web always
   /// returns `ids.length`.
-  Future<int> deleteAll(List<int> ids);
+  Future<int> deleteAll(List<Id> ids);
 
   /// Delete a list of objects by their [ids].
   ///
   /// Returns the number of objects that have been deleted.
-  int deleteAllSync(List<int> ids);
+  int deleteAllSync(List<Id> ids);
 
   /// @nodoc
   @protected

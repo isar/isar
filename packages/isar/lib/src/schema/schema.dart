@@ -8,13 +8,10 @@ class Schema<OBJ> {
     required this.id,
     required this.name,
     required this.properties,
-    required this.serializeNative,
     required this.estimateSize,
-    required this.deserializeNative,
-    required this.deserializePropNative,
-    required this.serializeWeb,
-    required this.deserializeWeb,
-    required this.deserializePropWeb,
+    required this.serialize,
+    required this.deserialize,
+    required this.deserializeProp,
   });
 
   /// Internal id of this collection or embedded object.
@@ -35,27 +32,15 @@ class Schema<OBJ> {
 
   /// @nodoc
   @protected
-  final SerializeNative<OBJ> serializeNative;
+  final Serialize<OBJ> serialize;
 
   /// @nodoc
   @protected
-  final DeserializeNative<OBJ> deserializeNative;
+  final Deserialize<OBJ> deserialize;
 
   /// @nodoc
   @protected
-  final DeserializePropNative deserializePropNative;
-
-  /// @nodoc
-  @protected
-  final SerializeWeb<OBJ> serializeWeb;
-
-  /// @nodoc
-  @protected
-  final DeserializeWeb<OBJ> deserializeWeb;
-
-  /// @nodoc
-  @protected
-  final DeserializePropWeb deserializePropWeb;
+  final DeserializeProp deserializeProp;
 
   /// Returns a property by its name or throws an error.
   @pragma('vm:prefer-inline')
@@ -95,48 +80,27 @@ typedef EstimateSize<T> = int Function(
 
 /// @nodoc
 @protected
-typedef SerializeNative<T> = int Function(
+typedef Serialize<T> = void Function(
   T object,
-  IsarBinaryWriter writer,
+  IsarWriter writer,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 );
 
 /// @nodoc
 @protected
-typedef DeserializeNative<T> = T Function(
+typedef Deserialize<T> = T Function(
   Id id,
-  IsarBinaryReader reader,
+  IsarReader reader,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 );
 
 /// @nodoc
 @protected
-typedef DeserializePropNative = dynamic Function(
-  IsarBinaryReader reader,
+typedef DeserializeProp = dynamic Function(
+  IsarReader reader,
   int propertyId,
   int offset,
   Map<Type, List<int>> allOffsets,
-);
-
-/// @nodoc
-@protected
-typedef SerializeWeb<T> = Object Function(
-  IsarCollection<T> collection,
-  T object,
-);
-
-/// @nodoc
-@protected
-typedef DeserializeWeb<T> = T Function(
-  IsarCollection<T> collection,
-  Object jsObj,
-);
-
-/// @nodoc
-@protected
-typedef DeserializePropWeb = dynamic Function(
-  Object jsObj,
-  String propertyName,
 );

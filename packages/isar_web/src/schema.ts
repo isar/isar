@@ -2,7 +2,6 @@ import equal from 'fast-deep-equal'
 
 export type Schema = {
   name: string
-  idName: string
   properties: Array<PropertySchema>
   indexes: Array<IndexSchema>
   links: Array<LinkSchema>

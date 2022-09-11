@@ -1,3 +1,5 @@
+import { idName } from "./instance"
+
 export function val2Idb(value: any): any {
   if (value == null || value != value) {
     return -Infinity
@@ -10,7 +12,7 @@ export function val2Idb(value: any): any {
   }
 }
 
-export function obj2Idb(object: any, idName: string): any {
+export function obj2Idb(object: any): any {
   const result: any = Object.create(null, {})
   for (let key of Object.keys(object)) {
     const val = object[key]
@@ -23,7 +25,7 @@ export function obj2Idb(object: any, idName: string): any {
   return result
 }
 
-export function idb2Obj(object: any, boolValues: string[]): any {
+export function idb2Obj(id: number, object: any, boolValues: string[]): any {
   const result: any = {}
   for (let key of Object.keys(object)) {
     const val = object[key]
@@ -47,5 +49,5 @@ export function idb2Obj(object: any, boolValues: string[]): any {
 // Polyfill for older browsers
 
 if (typeof IDBTransaction.prototype.commit !== "function") {
-  IDBTransaction.prototype.commit = function() { }
+  IDBTransaction.prototype.commit = function () { }
 }

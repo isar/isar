@@ -1,9 +1,8 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
 
 import 'user_model.dart';
-import 'util/common.dart';
-import 'util/sync_async_helper.dart';
 
 part 'crud_test.g.dart';
 
@@ -92,7 +91,7 @@ void main() {
         ..id = 9;
       final message3 = Message()..message = 'Message three';
 
-      late List<int> ids;
+      late List<Id> ids;
       await isar.tWriteTxn(() async {
         ids = await messages.tPutAll([message1, message2, message3]);
       });

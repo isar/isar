@@ -135,7 +135,7 @@ class QueryImpl<T> extends Query<T> {
   }
 
   @override
-  Stream<void> watchLazy() {
+  Stream<void> watchLazy({bool fireImmediately = false}) {
     JsFunction? stop;
     final controller = StreamController<void>(
       onCancel: () {

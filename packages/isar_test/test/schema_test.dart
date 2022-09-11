@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:isar/isar.dart';
 import 'package:test/expect.dart';
 
-import 'util/common.dart';
+import 'package:isar_test/isar_test.dart';
 
 part 'schema_test.g.dart';
 

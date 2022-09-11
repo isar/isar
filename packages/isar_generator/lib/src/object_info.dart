@@ -27,7 +27,7 @@ class ObjectInfo {
   final List<ObjectIndex> indexes;
   final List<ObjectLink> links;
 
-  int get id => xxh3(utf8.encode(isarName) as Uint8List);
+  int get id => xxh3(utf8.encode(isarName) as Uint8List) >> 16;
 
   bool get isEmbedded => accessor == null;
 
@@ -40,18 +40,11 @@ class ObjectInfo {
   String get getLinksName => '_${dartName.decapitalize()}GetLinks';
   String get attachName => '_${dartName.decapitalize()}Attach';
 
-  String get estimateSize => '_${dartName.decapitalize()}EstimateSize';
-  String get serializeNativeName =>
-      '_${dartName.decapitalize()}SerializeNative';
-  String get deserializeNativeName =>
-      '_${dartName.decapitalize()}DeserializeNative';
-  String get deserializePropNativeName =>
-      '_${dartName.decapitalize()}DeserializePropNative';
-
-  String get serializeWebName => '_${dartName.decapitalize()}SerializeWeb';
-  String get deserializeWebName => '_${dartName.decapitalize()}DeserializeWeb';
-  String get deserializePropWebName =>
-      '_${dartName.decapitalize()}DeserializePropWeb';
+  String get estimateSizeName => '_${dartName.decapitalize()}EstimateSize';
+  String get serializeName => '_${dartName.decapitalize()}Serialize';
+  String get deserializeName => '_${dartName.decapitalize()}Deserialize';
+  String get deserializePropName =>
+      '_${dartName.decapitalize()}DeserializeProp';
 }
 
 enum PropertyDeser {
@@ -100,7 +93,9 @@ class ObjectProperty {
   bool get isEnum => enumMap != null;
 
   String get scalarDartType {
-    if (isEnum) {
+    if (isId) {
+      return 'Id';
+    } else if (isEnum) {
       return typeClassName;
     }
 
@@ -180,7 +175,7 @@ class ObjectIndex {
   final bool unique;
   final bool replace;
 
-  late final id = xxh3(utf8.encode(name) as Uint8List);
+  late final id = xxh3(utf8.encode(name) as Uint8List) >> 16;
 }
 
 class ObjectLink {
@@ -209,6 +204,6 @@ class ObjectLink {
     final colId = xxh3(utf8.encode(col) as Uint8List, seed: isBacklink ? 1 : 0);
 
     final name = targetLinkIsarName ?? isarName;
-    return xxh3(utf8.encode(name) as Uint8List, seed: colId);
+    return xxh3(utf8.encode(name) as Uint8List, seed: colId) >> 16;
   }
 }

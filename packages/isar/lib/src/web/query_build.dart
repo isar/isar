@@ -49,7 +49,7 @@ Query<T> buildWebQuery<T, OBJ>(
 
   QueryDeserialize<T> deserialize;
   if (property == null) {
-    deserialize = (jsObj) => col.schema.deserializeWeb(col, jsObj) as T;
+    deserialize = (jsObj) => col.schema.deserializeWeb(jsObj) as T;
   } else {
     deserialize =
         (jsObj) => col.schema.deserializePropWeb(jsObj, property) as T;
@@ -124,11 +124,11 @@ LinkWhereClauseJs _buildLinkWhereClause(
 ) {
   final linkCol = col.isar.getCollectionByNameInternal(wc.linkCollection)!
       as IsarCollectionImpl;
-  final backlinkLinkName = linkCol.schema.backlinkLinkNames[wc.linkName];
+  //final backlinkLinkName = linkCol.schema.backlinkLinkNames[wc.linkName];
   return LinkWhereClauseJs()
     ..linkCollection = wc.linkCollection
-    ..linkName = backlinkLinkName ?? wc.linkName
-    ..backlink = backlinkLinkName != null
+    //..linkName = backlinkLinkName ?? wc.linkName
+    //..backlink = backlinkLinkName != null
     ..id = wc.id;
 }
 
@@ -232,7 +232,7 @@ String _buildCondition(
 
   final isListOp = condition.type != FilterConditionType.isNull &&
       condition.type != FilterConditionType.listLength &&
-      schema.property(condition.property);
+      schema.property(condition.property).type.isList;
   final accessor =
       condition.property == schema.idName ? 'id' : 'obj.${condition.property}';
   final variable = isListOp ? 'e' : accessor;

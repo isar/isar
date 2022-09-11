@@ -232,20 +232,15 @@ class IsarAnalyzer {
         }
 
         final enumIsarType = enumProperty.type.isarType;
-        if (enumIsarType == null) {
+        if (enumIsarType != IsarType.byte &&
+            enumIsarType != IsarType.int &&
+            enumIsarType != IsarType.long &&
+            enumIsarType != IsarType.string) {
           err('Unsupported enum property type.', enumProperty);
-        } else if (enumIsarType.containsBool) {
-          err('Enums do not support bool values.', enumProperty);
-        } else if (enumIsarType.containsFloat) {
-          err('Enums do not support floating point values.', enumProperty);
-        } else if (enumIsarType.containsObject) {
-          err('Enums do not support object values.', enumProperty);
-        } else if (enumIsarType.isList) {
-          err('Enums do not support list values.', enumProperty);
         }
 
         isarType =
-            dartType.isDartCoreList ? enumIsarType.listType : enumIsarType;
+            dartType.isDartCoreList ? enumIsarType!.listType : enumIsarType!;
         enumMap = {};
         for (final element in enumElements) {
           final property =

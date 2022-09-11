@@ -4,10 +4,10 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
-import 'package:isar/src/native/binary_writer.dart';
 import 'package:isar/src/native/bindings.dart';
 import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_core.dart';
+import 'package:isar/src/native/isar_writer_impl.dart';
 
 final _keyPtrPtr = malloc<Pointer<CIndexKey>>();
 

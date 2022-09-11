@@ -23,14 +23,10 @@ String generateSchema(ObjectInfo object) {
     id: ${object.id},
     properties: {$properties},
 
-    estimateSize: ${object.estimateSize},
-    serializeNative: ${object.serializeNativeName},
-    deserializeNative: ${object.deserializeNativeName},
-    deserializePropNative: ${object.deserializePropNativeName},
-
-    serializeWeb: ${object.serializeWebName},
-    deserializeWeb: ${object.deserializeWebName},
-    deserializePropWeb: ${object.deserializePropWebName},''';
+    estimateSize: ${object.estimateSizeName},
+    serialize: ${object.serializeName},
+    deserialize: ${object.deserializeName},
+    deserializeProp: ${object.deserializePropName},''';
 
   if (!object.isEmbedded) {
     final indexes = object.indexes

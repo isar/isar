@@ -59,7 +59,6 @@ function performUpgrade(
         return false
       }
       store = txn.db.createObjectStore(schema.name, {
-        keyPath: schema.idName,
         autoIncrement: true,
       })
     } else {

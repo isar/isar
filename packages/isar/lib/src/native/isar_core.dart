@@ -9,6 +9,14 @@ import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 import 'package:isar/src/native/bindings.dart';
 
+const Id isarMinId = -9223372036854775807;
+
+const Id isarMaxId = 9223372036854775807;
+
+const Id isarAutoIncrementId = -9223372036854775808;
+
+typedef IsarAbi = Abi;
+
 const int minByte = 0;
 const int maxByte = 255;
 const int minInt = -2147483648;

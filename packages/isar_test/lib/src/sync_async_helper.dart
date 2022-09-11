@@ -72,7 +72,7 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
     }
   }
 
-  Future<List<OBJ?>> tGetAll(List<int> ids) {
+  Future<List<OBJ?>> tGetAll(List<Id> ids) {
     if (syncTest) {
       return SynchronousFuture(getAllSync(ids));
     } else {
@@ -80,7 +80,7 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
     }
   }
 
-  Future<int> tPut(OBJ object, {bool saveLinks = false}) {
+  Future<Id> tPut(OBJ object, {bool saveLinks = false}) {
     if (syncTest) {
       return SynchronousFuture(putSync(object, saveLinks: saveLinks));
     } else {
@@ -88,7 +88,7 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
     }
   }
 
-  Future<List<int>> tPutAll(List<OBJ> objects, {bool saveLinks = false}) {
+  Future<List<Id>> tPutAll(List<OBJ> objects, {bool saveLinks = false}) {
     if (syncTest) {
       return SynchronousFuture(putAllSync(objects, saveLinks: saveLinks));
     } else {
@@ -104,7 +104,7 @@ extension TIsarCollection<OBJ> on IsarCollection<OBJ> {
     }
   }
 
-  Future<int> tDeleteAll(List<int> ids) {
+  Future<int> tDeleteAll(List<Id> ids) {
     if (syncTest) {
       return SynchronousFuture(deleteAllSync(ids));
     } else {

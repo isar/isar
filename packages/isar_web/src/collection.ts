@@ -1,6 +1,6 @@
 import { bulkDelete, bulkDeleteByIndex } from './bulk-delete'
 import { idb2Obj, obj2Idb, val2Idb } from './helper'
-import { IsarInstance } from './instance'
+import { idName, IsarInstance } from './instance'
 import { IsarLink } from './link'
 import { IndexSchema, IsarType, Schema } from './schema'
 import { IsarTxn } from './txn'
@@ -16,7 +16,6 @@ export type IndexKey = string | number | boolean | IndexKey[]
 export class IsarCollection<OBJ> extends IsarWatchable<OBJ> {
   readonly isar: IsarInstance
   readonly name: string
-  readonly idName: string
   private readonly boolValues: string[]
   private readonly uniqueIndexes: ReadonlyArray<UniqueIndex>
   private readonly links: ReadonlyArray<IsarLink>
@@ -33,7 +32,6 @@ export class IsarCollection<OBJ> extends IsarWatchable<OBJ> {
     super()
     this.isar = isar
     this.name = schema.name
-    this.idName = schema.idName
     this.boolValues = schema.properties
       .filter(p => p.type == IsarType.Bool || p.type == IsarType.BoolList)
       .map(p => p.name)
@@ -59,12 +57,8 @@ export class IsarCollection<OBJ> extends IsarWatchable<OBJ> {
     return this.links.find(l => l.name === name)
   }
 
-  toObject(obj: any): OBJ {
+  toObject(id: number, obj: any): OBJ {
     return idb2Obj(obj, this.boolValues)
-  }
-
-  getId(obj: OBJ): number {
-    return (obj as any)[this.idName]
   }
 
   getIndexKeyPath(indexName: string): string[] {
@@ -87,10 +81,10 @@ export class IsarCollection<OBJ> extends IsarWatchable<OBJ> {
     }
   }
 
-  get(txn: IsarTxn, key: IDBValidKey): Promise<OBJ | undefined> {
+  get(txn: IsarTxn, id: number): Promise<OBJ | undefined> {
     let store = txn.txn.objectStore(this.name)
     return new Promise((resolve, reject) => {
-      let req = store.get(key)
+      let req = store.get(id)
       req.onsuccess = () => {
         const object = req.result ? this.toObject(req.result) : undefined
         resolve(object)
@@ -150,9 +144,9 @@ export class IsarCollection<OBJ> extends IsarWatchable<OBJ> {
       const ids: (number | undefined)[] = []
       const changeSet = txn.getChangeSet(this.name)
       for (let i = 0; i < objects.length; i++) {
-        let object = obj2Idb(objects[i], this.idName)
+        let object = obj2Idb(objects[i])
         const req = store.put(object)
-        const id = this.getId(object)
+        const id = object[idName]
         ids.push(id)
         if (!id) {
           req.onsuccess = () => {
@@ -189,7 +183,7 @@ export class IsarCollection<OBJ> extends IsarWatchable<OBJ> {
     const backlinkPromises = this.backlinkStoreNames.map(storeName => {
       return bulkDeleteByIndex(txn, storeName, IsarLink.BacklinkIndex, keys)
     })
-    return Promise.all([...linkPromises, ...backlinkPromises]).then(() => {})
+    return Promise.all([...linkPromises, ...backlinkPromises]).then(() => { })
   }
 
   deleteAll(txn: IsarTxn, ids: number[]): Promise<void> {
