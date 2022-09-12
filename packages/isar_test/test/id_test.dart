@@ -18,8 +18,10 @@ class ImplicitFinalIdModel {
 }
 
 @collection
-class ExplicitIdModel {
-  Id? id;
+class ManualFinalIdModel {
+  ManualFinalIdModel(this.id);
+
+  final Id id;
 }
 
 void main() {
@@ -30,7 +32,7 @@ void main() {
       isar = await openTempIsar([
         ImplicitNullableIdModelSchema,
         ImplicitFinalIdModelSchema,
-        ExplicitIdModelSchema,
+        ManualFinalIdModelSchema,
       ]);
     });
 
@@ -63,6 +65,42 @@ void main() {
           isar.implicitNullableIdModels.where().idProperty(),
           [1, 2, 3, 4, 5, 6, 7, 8, 9],
         );
+      });
+
+      isarTest('Assigned id should be persisted', () async {
+        final id1 = await isar.tWriteTxn(
+          () => isar.implicitNullableIdModels.tPut(ImplicitNullableIdModel()),
+        );
+        expect(id1, 1);
+
+        final id1Obj = await isar.implicitNullableIdModels
+            .where()
+            .idEqualTo(id1)
+            .tFindFirst();
+        expect(id1Obj?.id, id1);
+
+        final model = ImplicitNullableIdModel()..id = 2;
+        final id2 = await isar.tWriteTxn(
+          () => isar.implicitNullableIdModels.tPut(model),
+        );
+        expect(id2, 2);
+
+        final id2Obj = await isar.implicitNullableIdModels
+            .where()
+            .idEqualTo(id2)
+            .tFindFirst();
+        expect(id2Obj?.id, id2);
+
+        final id3 = await isar.tWriteTxn(
+          () => isar.implicitNullableIdModels.tPut(ImplicitNullableIdModel()),
+        );
+        expect(id3, 3);
+
+        final id3Obj = await isar.implicitNullableIdModels
+            .where()
+            .idEqualTo(id3)
+            .tFindFirst();
+        expect(id3Obj?.id, id3);
       });
 
       isarTest('Auto increment should reset', () async {
@@ -183,37 +221,83 @@ void main() {
           [1, 2, 3, 4, 5, 6, 7, 8],
         );
       });
-    });
 
-    group('Explicit id', () {
-      isarTest('Id should auto increment', () async {
+      isarTest('Assigned id should be persisted', () async {
+        // FIXME: final id with value of `Isar.autoIncrement` returns the new
+        // id on save, but when re-querying the object, the id is still
+        // `Isar.autoIncrement`
+
         final id1 = await isar.tWriteTxn(
-          () => isar.explicitIdModels.tPut(ExplicitIdModel()),
+          () => isar.implicitFinalIdModels.tPut(ImplicitFinalIdModel()),
         );
         expect(id1, 1);
 
-        final model = ExplicitIdModel()..id = 2;
+        final id1Obj = await isar.implicitFinalIdModels
+            .where()
+            .idEqualTo(id1)
+            .tFindFirst();
+        expect(id1Obj?.id, id1);
+
         final id2 = await isar.tWriteTxn(
-          () => isar.explicitIdModels.tPut(model),
+          () => isar.implicitFinalIdModels.tPut(ImplicitFinalIdModel()),
         );
         expect(id2, 2);
 
-        final id3 = await isar.tWriteTxn(
-          () => isar.explicitIdModels.tPut(ExplicitIdModel()),
+        final id2Obj = await isar.implicitFinalIdModels
+            .where()
+            .idEqualTo(id2)
+            .tFindFirst();
+        expect(id2Obj?.id, id2);
+      });
+    });
+
+    group('Manual final id', () {
+      isarTest('Manually provide id', () async {
+        final id4 = await isar.tWriteTxn(
+          () => isar.manualFinalIdModels.tPut(ManualFinalIdModel(4)),
         );
-        expect(id3, 3);
+        expect(id4, 4);
+
+        final id2 = await isar.tWriteTxn(
+          () => isar.manualFinalIdModels.tPut(ManualFinalIdModel(2)),
+        );
+        expect(id2, 2);
 
         final ids = await isar.tWriteTxn(
-          () => isar.explicitIdModels.tPutAll(
-            List.generate(6, (_) => ExplicitIdModel()),
+          () => isar.manualFinalIdModels.tPutAll(
+            List.generate(6, (index) => ManualFinalIdModel(index + 100)),
           ),
         );
-        expect(ids, [4, 5, 6, 7, 8, 9]);
+        expect(ids, [100, 101, 102, 103, 104, 105]);
 
         await qEqual(
-          isar.explicitIdModels.where().idProperty(),
-          [1, 2, 3, 4, 5, 6, 7, 8, 9],
+          isar.manualFinalIdModels.where().idProperty(),
+          [2, 4, 100, 101, 102, 103, 104, 105],
         );
+      });
+
+      isarTest('Assigned id should be persisted', () async {
+        final id4 = await isar.tWriteTxn(
+          () => isar.manualFinalIdModels.tPut(ManualFinalIdModel(4)),
+        );
+        expect(id4, 4);
+
+        final id4Obj = await isar.manualFinalIdModels
+            .where()
+            .idEqualTo(id4)
+            .tFindFirst();
+        expect(id4Obj?.id, id4);
+
+        final id2 = await isar.tWriteTxn(
+          () => isar.manualFinalIdModels.tPut(ManualFinalIdModel(2)),
+        );
+        expect(id2, 2);
+
+        final id2Obj = await isar.manualFinalIdModels
+            .where()
+            .idEqualTo(id2)
+            .tFindFirst();
+        expect(id2Obj?.id, id2);
       });
     });
   });
