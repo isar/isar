@@ -104,6 +104,31 @@ class QueryBuilderUI extends StatefulWidget {
       case _ConditionType.isNull:
         ret = FilterCondition.isNull(property: condition.property.name);
         break;
+      case _ConditionType.lengthGreaterThan:
+      case _ConditionType.lengthGreaterOrEqualThan:
+        ret = FilterCondition(
+          type: FilterConditionType.listLength,
+          property: condition.property.name,
+          value1: condition.parsedValue,
+          value2: 9999999,
+          include1: condition.type == _ConditionType.lengthGreaterOrEqualThan,
+          include2: true,
+          caseSensitive: false,
+        );
+        break;
+
+      case _ConditionType.lengthLessThan:
+      case _ConditionType.lengthLessOrEqualThan:
+      ret = FilterCondition(
+        type: FilterConditionType.listLength,
+        property: condition.property.name,
+        value1: 0,
+        value2: condition.parsedValue,
+        include1: true,
+        include2: condition.type == _ConditionType.lengthLessOrEqualThan,
+        caseSensitive: false,
+      );
+      break;
     }
 
     return condition.not ? FilterGroup.not(ret) : ret;
@@ -142,8 +167,9 @@ class _QueryBuilderUIState extends State<QueryBuilderUI> {
       _filter = QueryBuilderUIGroupHelper();
     }
 
-    _sortProps =
-        widget.collection.allProperties.where((p) => !p.type.isList).toList();
+    _sortProps = widget.collection.allProperties
+        .where((p) => !p.type.isList && p.type != IsarType.object)
+        .toList();
   }
 
   @override
@@ -282,6 +308,12 @@ class _GroupUI extends StatefulWidget {
 }
 
 class _GroupUIState extends State<_GroupUI> {
+  //todo: TBA embedded objects
+  List<IProperty> get _properties =>
+      (widget.link?.target.allProperties ?? widget.collection.allProperties)
+          .where((e) => e.type != IsarType.object)
+          .toList();
+
   @override
   Widget build(BuildContext context) {
     return IsarCard(
@@ -355,7 +387,7 @@ class _GroupUIState extends State<_GroupUI> {
                   onPressed: () {
                     setState(() {
                       widget.helper.children.add(
-                        _ConditionHelper(widget.collection.allProperties.first),
+                        _ConditionHelper(_properties.first),
                       );
                     });
                   },
@@ -411,8 +443,7 @@ class _GroupUIState extends State<_GroupUI> {
         children.add(
           _ConditionUI(
             helper: widget.helper.children[index] as _ConditionHelper,
-            collection: widget.collection,
-            link: widget.link,
+            properties: _properties,
             removeItem: _removeItem,
             index: index,
           ),
@@ -458,6 +489,11 @@ class _LinkUI extends StatefulWidget {
 }
 
 class _LinkUIState extends State<_LinkUI> {
+  //todo: TBA embedded objects
+  List<IProperty> get _properties => widget.helper.link.target.allProperties
+      .where((e) => e.type != IsarType.object)
+      .toList();
+
   @override
   Widget build(BuildContext context) {
     return IsarCard(
@@ -586,8 +622,7 @@ class _LinkUIState extends State<_LinkUI> {
         children.add(
           _ConditionUI(
             helper: widget.helper.children[index] as _ConditionHelper,
-            collection: widget.collection,
-            link: widget.helper.link,
+            properties: _properties,
             removeItem: _removeItem,
             index: index,
           ),
@@ -611,24 +646,19 @@ class _ConditionUI extends StatefulWidget {
     required this.helper,
     required this.index,
     required this.removeItem,
-    required this.collection,
-    this.link,
+    required this.properties,
   });
 
   final _ConditionHelper helper;
   final int index;
   final void Function(int index) removeItem;
-  final ICollection collection;
-  final ILink? link;
+  final List<IProperty> properties;
 
   @override
   State<_ConditionUI> createState() => _ConditionUIState();
 }
 
 class _ConditionUIState extends State<_ConditionUI> {
-  late final properties =
-      widget.link?.target.allProperties ?? widget.collection.allProperties;
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -636,7 +666,7 @@ class _ConditionUIState extends State<_ConditionUI> {
         DropdownButtonHideUnderline(
           child: DropdownButton<IProperty>(
             value: widget.helper.property,
-            items: properties
+            items: widget.properties
                 .map((e) => DropdownMenuItem(value: e, child: Text(e.name)))
                 .toList(),
             onChanged: (property) {
@@ -660,12 +690,19 @@ class _ConditionUIState extends State<_ConditionUI> {
         ),
         const SizedBox(width: 20),
         SizedBox(
-          width: 190,
+          width: 150,
           child: DropdownButtonHideUnderline(
             child: DropdownButton<_ConditionType>(
               value: widget.helper.type,
               items: widget.helper.types
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e.name)))
+                  .map(
+                    (e) => DropdownMenuItem(
+                      value: e,
+                      child: Center(
+                        child: Text(e.showName),
+                      ),
+                    ),
+                  )
                   .toList(),
               onChanged: (type) {
                 if (type != null) {
@@ -804,17 +841,26 @@ class QueryBuilderUIGroupHelper extends QueryBuilderUIHelper {
   }
 }
 
+
 enum _ConditionType {
-  equalTo,
-  greaterThan,
-  greaterOrEqualThan,
-  lessThan,
-  lessOrEqualThan,
-  startsWith,
-  endsWith,
-  contains,
-  matches,
-  isNull;
+  equalTo('=='),
+  greaterThan('>'),
+  greaterOrEqualThan('>='),
+  lessThan('<'),
+  lessOrEqualThan('<='),
+  startsWith('startsWith'),
+  endsWith('endsWith'),
+  contains('contains'),
+  matches('matches'),
+  isNull('isNull'),
+  lengthGreaterThan('ListLength >'),
+  lengthGreaterOrEqualThan('ListLength >='),
+  lengthLessThan('ListLength <'),
+  lengthLessOrEqualThan('ListLength <=');
+
+  const _ConditionType(this.showName);
+
+  final String showName;
 }
 
 enum GenericType { int, double, string, bool }
@@ -873,23 +919,43 @@ class _ConditionHelper extends QueryBuilderUIHelper {
       case IsarType.bool:
         return const [_ConditionType.equalTo, _ConditionType.isNull];
 
-        //todo
       case IsarType.object:
-      case IsarType.objectList:
-      case IsarType.dateTime:
-      case IsarType.dateTimeList:
-        return const [_ConditionType.equalTo, _ConditionType.isNull];
+        throw IsarError('unexpected error');
+
+        case IsarType.objectList:
+          return const [
+            _ConditionType.lengthGreaterThan,
+            _ConditionType.lengthGreaterOrEqualThan,
+            _ConditionType.lengthLessThan,
+            _ConditionType.lengthLessOrEqualThan,
+            _ConditionType.isNull,
+          ];
 
       case IsarType.byteList:
       case IsarType.intList:
       case IsarType.floatList:
       case IsarType.longList:
       case IsarType.doubleList:
+      case IsarType.dateTimeList:
+        return const [
+          _ConditionType.equalTo,
+          _ConditionType.greaterThan,
+          _ConditionType.greaterOrEqualThan,
+          _ConditionType.lessThan,
+          _ConditionType.lessOrEqualThan,
+          _ConditionType.lengthGreaterThan,
+          _ConditionType.lengthGreaterOrEqualThan,
+          _ConditionType.lengthLessThan,
+          _ConditionType.lengthLessOrEqualThan,
+          _ConditionType.isNull,
+        ];
+
       case IsarType.int:
       case IsarType.float:
       case IsarType.long:
       case IsarType.byte:
       case IsarType.double:
+      case IsarType.dateTime:
         return const [
           _ConditionType.equalTo,
           _ConditionType.greaterThan,
@@ -900,7 +966,6 @@ class _ConditionHelper extends QueryBuilderUIHelper {
         ];
 
       case IsarType.string:
-      case IsarType.stringList:
         return const [
           _ConditionType.equalTo,
           _ConditionType.contains,
@@ -909,11 +974,28 @@ class _ConditionHelper extends QueryBuilderUIHelper {
           _ConditionType.matches,
           _ConditionType.isNull
         ];
+
+      case IsarType.stringList:
+        return const [
+          _ConditionType.equalTo,
+          _ConditionType.contains,
+          _ConditionType.startsWith,
+          _ConditionType.endsWith,
+          _ConditionType.matches,
+          _ConditionType.lengthGreaterThan,
+          _ConditionType.lengthGreaterOrEqualThan,
+          _ConditionType.lengthLessThan,
+          _ConditionType.lengthLessOrEqualThan,
+          _ConditionType.isNull
+        ];
     }
   }
 
   CustomTextInputFormatter? get textFormatter {
     switch (property.type) {
+      case IsarType.object:
+        throw IsarError('unexpected error');
+
       case IsarType.string:
       case IsarType.stringList:
       case IsarType.boolList:
@@ -922,8 +1004,11 @@ class _ConditionHelper extends QueryBuilderUIHelper {
 
       case IsarType.intList:
       case IsarType.longList:
+      case IsarType.dateTimeList:
+      case IsarType.objectList:
       case IsarType.int:
       case IsarType.long:
+      case IsarType.dateTime:
         return CustomTextInputFormatter(IsarType.int);
 
       case IsarType.byteList:
@@ -940,8 +1025,9 @@ class _ConditionHelper extends QueryBuilderUIHelper {
 
   GenericType get generic {
     switch (property.type) {
-      //todo
       case IsarType.object:
+        throw IsarError('unexpected error');
+
       case IsarType.dateTime:
       case IsarType.objectList:
       case IsarType.dateTimeList:
