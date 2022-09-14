@@ -72,31 +72,28 @@ export namespace LinkSchema {
 
 export enum IsarType {
   Bool = 'Bool',
+  Byte = 'Byte',
   Int = 'Int',
   Float = 'Float',
   Long = 'Long',
   Double = 'Double',
+  DateTime = 'DateTime',
   String = 'String',
-  ByteList = 'ByteList',
+  Object = 'Object',
   BoolList = 'BoolList',
+  ByteList = 'ByteList',
   IntList = 'IntList',
   FloatList = 'FloatList',
   LongList = 'LongList',
   DoubleList = 'DoubleList',
+  DateTimeList = 'DateTimeList',
   StringList = 'StringList',
+  ObjectList = 'ObjectList',
 }
 
 export namespace IsarType {
   export function isList(type: IsarType): boolean {
-    return [
-      IsarType.ByteList,
-      IsarType.BoolList,
-      IsarType.IntList,
-      IsarType.FloatList,
-      IsarType.LongList,
-      IsarType.DoubleList,
-      IsarType.StringList,
-    ].includes(type)
+    return type.endsWith('List')
   }
 }
 

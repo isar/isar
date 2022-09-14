@@ -1,5 +1,4 @@
 import { bulkDelete, bulkDeleteByIndex } from './bulk-delete'
-import { idb2Obj, obj2Idb, val2Idb } from './helper'
 import { idName, IsarInstance } from './instance'
 import { IsarLink } from './link'
 import { IndexSchema, IsarType, Schema } from './schema'
@@ -11,12 +10,11 @@ interface UniqueIndex {
   readonly accessors: string[]
 }
 
-export type IndexKey = string | number | boolean | IndexKey[]
+export type IndexKey = string | number | IndexKey[]
 
 export class IsarCollection<OBJ> extends IsarWatchable<OBJ> {
   readonly isar: IsarInstance
   readonly name: string
-  private readonly boolValues: string[]
   private readonly uniqueIndexes: ReadonlyArray<UniqueIndex>
   private readonly links: ReadonlyArray<IsarLink>
   // only backlinks that don't target this collection
@@ -32,9 +30,6 @@ export class IsarCollection<OBJ> extends IsarWatchable<OBJ> {
     super()
     this.isar = isar
     this.name = schema.name
-    this.boolValues = schema.properties
-      .filter(p => p.type == IsarType.Bool || p.type == IsarType.BoolList)
-      .map(p => p.name)
     this.uniqueIndexes = schema.indexes
       .filter(i => i.unique)
       .map(i => ({
@@ -57,10 +52,6 @@ export class IsarCollection<OBJ> extends IsarWatchable<OBJ> {
     return this.links.find(l => l.name === name)
   }
 
-  toObject(id: number, obj: any): OBJ {
-    return idb2Obj(obj, this.boolValues)
-  }
-
   getIndexKeyPath(indexName: string): string[] {
     return this.indexKeyPaths.get(indexName)!
   }
@@ -69,24 +60,15 @@ export class IsarCollection<OBJ> extends IsarWatchable<OBJ> {
     return this.multiEntryIndexes.includes(indexName)
   }
 
-  private prepareKey(key: IndexKey): IDBValidKey {
-    if (Array.isArray(key)) {
-      if (key.length == 1) {
-        return val2Idb(key[0])
-      } else {
-        return key.map(val2Idb)
-      }
-    } else {
-      return val2Idb(key)
-    }
-  }
-
   get(txn: IsarTxn, id: number): Promise<OBJ | undefined> {
     let store = txn.txn.objectStore(this.name)
     return new Promise((resolve, reject) => {
       let req = store.get(id)
       req.onsuccess = () => {
-        const object = req.result ? this.toObject(req.result) : undefined
+        const object = req.result
+        if (object) {
+          object[idName] = id
+        }
         resolve(object)
       }
       req.onerror = () => {
@@ -95,26 +77,20 @@ export class IsarCollection<OBJ> extends IsarWatchable<OBJ> {
     })
   }
 
-  getAllInternal(
-    txn: IsarTxn,
-    keys: IDBValidKey[],
-    includeUndefined: boolean,
-    indexName?: string,
-  ): Promise<(OBJ | undefined)[]> {
+  getAll(txn: IsarTxn, ids: number[]): Promise<(OBJ | undefined)[]> {
     return new Promise((resolve, reject) => {
       const store = txn.txn.objectStore(this.name)
-      const source = indexName ? store.index(indexName) : store
       const results: (OBJ | undefined)[] = []
-      for (let i = 0; i < keys.length; i++) {
-        let req = source.get(keys[i])
+      for (let i = 0; i < ids.length; i++) {
+        const id = ids[i]
+        const req = store.get(id)
         req.onsuccess = () => {
-          const result = req.result
-          if (result) {
-            results.push(this.toObject(result))
-          } else if (includeUndefined) {
-            results.push(undefined)
+          const object = req.result
+          if (object) {
+            object[idName] = id
           }
-          if (results.length == keys.length) {
+          results.push(object)
+          if (results.length == ids.length) {
             resolve(results)
           }
         }
@@ -125,17 +101,45 @@ export class IsarCollection<OBJ> extends IsarWatchable<OBJ> {
     })
   }
 
-  getAll(txn: IsarTxn, ids: number[]): Promise<(OBJ | undefined)[]> {
-    return this.getAllInternal(txn, ids, true)
-  }
-
   getAllByIndex(
     txn: IsarTxn,
     indexName: string,
     keys: IndexKey[],
   ): Promise<(OBJ | undefined)[]> {
-    const idbKeys = keys.map(this.prepareKey)
-    return this.getAllInternal(txn, idbKeys, true, indexName)
+    if (keys.length === 0) {
+      return Promise.resolve([])
+    }
+
+    keys.sort(indexedDB.cmp)
+    return new Promise((resolve, reject) => {
+      const store = txn.txn.objectStore(this.name)
+      const results: (OBJ | undefined)[] = []
+      const cursorReq = store.index(indexName).openCursor()
+      cursorReq.onsuccess = () => {
+        const cursor = cursorReq.result
+        if (cursor) {
+          const object = cursor.value
+          if (results.length > 0 || cursor.key === keys[0]) {
+            if (object) {
+              object[idName] = cursor.primaryKey
+              results.push(object)
+            } else {
+              results.push(undefined)
+            }
+          }
+          if (results.length == keys.length) {
+            resolve(results)
+          } else {
+            cursor.continue(keys[results.length])
+          }
+        } else {
+          resolve([])
+        }
+      }
+      cursorReq.onerror = e => {
+        reject(e)
+      }
+    })
   }
 
   putAll(txn: IsarTxn, objects: OBJ[]): Promise<number[]> {
@@ -144,9 +148,12 @@ export class IsarCollection<OBJ> extends IsarWatchable<OBJ> {
       const ids: (number | undefined)[] = []
       const changeSet = txn.getChangeSet(this.name)
       for (let i = 0; i < objects.length; i++) {
-        let object = obj2Idb(objects[i])
-        const req = store.put(object)
+        const object = objects[i] as any
         const id = object[idName]
+
+        const req = store.put(object)
+        delete object[idName]
+
         ids.push(id)
         if (!id) {
           req.onsuccess = () => {
@@ -201,8 +208,7 @@ export class IsarCollection<OBJ> extends IsarWatchable<OBJ> {
     indexName: string,
     keys: IndexKey[],
   ): Promise<number> {
-    const idbKeys = keys.map(this.prepareKey)
-    return bulkDeleteByIndex(txn, this.name, indexName, idbKeys).then(ids => {
+    return bulkDeleteByIndex(txn, this.name, indexName, keys).then(ids => {
       const changeSet = txn.getChangeSet(this.name)
       for (let id of ids as number[]) {
         changeSet.registerChange(id)

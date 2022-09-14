@@ -9,7 +9,9 @@ import 'dart:typed_data';
 import 'package:isar/isar.dart';
 import 'package:isar/src/web/bindings.dart';
 import 'package:isar/src/web/isar_impl.dart';
+import 'package:isar/src/web/isar_reader_impl.dart';
 import 'package:isar/src/web/isar_web.dart';
+import 'package:isar/src/web/isar_writer_impl.dart';
 import 'package:isar/src/web/query_build.dart';
 import 'package:meta/dart2js.dart';
 
@@ -30,9 +32,13 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @override
   String get name => schema.name;
 
+  late final _offsets = isar.offsets[OBJ]!;
+
   @tryInline
-  OBJ? deserializeObject(Object? object) {
-    return object != null ? schema.deserializeWeb(object) : null;
+  OBJ deserializeObject(Object object) {
+    final id = getProperty<int>(object, idName);
+    final reader = IsarReaderImpl(object);
+    return schema.deserialize(id, reader, _offsets, isar.offsets);
   }
 
   @tryInline
@@ -40,7 +46,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     final list = objects as List;
     final results = <OBJ?>[];
     for (final object in list) {
-      results.add(deserializeObject(object));
+      results.add(object is Object ? deserializeObject(object) : null);
     }
     return results;
   }
@@ -84,7 +90,11 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     return isar.getTxn(true, (IsarTxnJs txn) async {
       final serialized = <Object>[];
       for (final object in objects) {
-        serialized.add(schema.serializeWeb(object));
+        final jsObj = newObject<Object>();
+        final writer = IsarWriterImpl(jsObj);
+        schema.serialize(object, writer, _offsets, isar.offsets);
+        setProperty(jsObj, idName, schema.getId(object));
+        serialized.add(jsObj);
       }
       final ids = await native.putAll(txn, serialized).wait<List<dynamic>>();
       for (var i = 0; i < objects.length; i++) {
@@ -205,7 +215,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     );
 
     final Null Function(Object? obj) callback = allowInterop((Object? obj) {
-      final object = deserialize ? deserializeObject(obj) : null;
+      final object = deserialize && obj != null ? deserializeObject(obj) : null;
       controller.add(object);
     });
     stop = native.watchObject(id, callback);

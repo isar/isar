@@ -1,7 +1,12 @@
 import equal from 'fast-deep-equal'
 import { IsarInstance } from './instance'
 import { IsarLink } from './link'
-import { IndexSchema, LinkSchema, Schema } from './schema'
+import { IndexSchema, IsarType, LinkSchema, Schema } from './schema'
+
+// Polyfill for older browsers
+if (typeof IDBTransaction.prototype.commit !== "function") {
+  IDBTransaction.prototype.commit = function () { }
+}
 
 export function openIsar(
   name: string,
@@ -49,7 +54,7 @@ function performUpgrade(
   schemas: Schema[],
 ): boolean {
   const schemaStoreNames: string[] = []
-  for (let schema of schemas) {
+  for (const schema of schemas) {
     schemaStoreNames.push(schema.name)
     const schemaIndexNames: string[] = []
 
@@ -141,4 +146,16 @@ function performUpgrade(
   }
 
   return true
+}
+
+type CollectionInfo = {
+  properties: {
+    [key: string]: CollectionProperty
+  }
+  nextId: number
+}
+
+type CollectionProperty = {
+  id: number
+  type: IsarType
 }

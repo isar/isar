@@ -70,6 +70,9 @@ class QueryImpl<T> extends Query<T> {
         case AggregationOp.count:
           result = await queryJs.count(txn).wait();
           break;
+        // ignore: no_default_cases
+        default:
+          throw UnimplementedError();
       }
 
       if (result == null) {

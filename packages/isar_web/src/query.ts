@@ -1,5 +1,6 @@
 import { IsarCollection } from './collection'
 import { useCursor } from './cursor'
+import { idName } from './instance'
 import { IsarLink } from './link'
 import { IsarTxn } from './txn'
 
@@ -109,6 +110,7 @@ export class IsarQuery<OBJ> {
           distinctSet.add(value)
         }
       }
+      object[idName] = id
       results.push(object)
       if (results.length < unsortedLimit) {
         next()
@@ -181,23 +183,19 @@ export class IsarQuery<OBJ> {
 
   findFirst(txn: IsarTxn): Promise<OBJ | undefined> {
     return this.findInternal(txn, 1).then(results => {
-      return results.length > 0
-        ? this.collection.toObject(results[0])
-        : undefined
+      return results.length > 0 ? results[0] : undefined
     })
   }
 
   findAll(txn: IsarTxn): Promise<OBJ[]> {
-    return this.findInternal(txn, this.limit ?? Infinity).then(results => {
-      return results.map(o => this.collection.toObject(o))
-    })
+    return this.findInternal(txn, this.limit ?? Infinity)
   }
 
   deleteFirst(txn: IsarTxn): Promise<boolean> {
     return this.findInternal(txn, 1).then(result => {
       if (result.length !== 0) {
         return this.collection
-          .deleteAll(txn, [this.collection.getId(result[0])])
+          .deleteAll(txn, [result[0][idName]])
           .then(() => true)
       } else {
         return false
@@ -208,7 +206,7 @@ export class IsarQuery<OBJ> {
   deleteAll(txn: IsarTxn): Promise<number> {
     return this.findInternal(txn, this.limit).then(result => {
       return this.collection
-        .deleteAll(txn, result.map(this.collection.getId))
+        .deleteAll(txn, result.map(obj => obj[idName]))
         .then(() => result.length)
     })
   }
@@ -271,13 +269,13 @@ export class IsarQuery<OBJ> {
     return this.findAll(txn).then(result => result.length)
   }
 
-  private whereClauseMatches(id: number, idbObject: OBJ) {
+  private whereClauseMatches(id: number, object: OBJ) {
     for (const whereClause of this.whereClauses) {
       if ('linkName' in whereClause) {
         return true
       } else if ('indexName' in whereClause) {
         if (this.collection.isMultiEntryIndex(whereClause.indexName)) {
-          const values = (idbObject as any)[
+          const values = (object as any)[
             this.collection.getIndexKeyPath(whereClause.indexName!)[0]
           ]
           for (let value of values) {
@@ -289,7 +287,7 @@ export class IsarQuery<OBJ> {
           let value = this.collection
             .getIndexKeyPath(whereClause.indexName!)
             .map(p =>
-              p === this.collection.idName ? id : (idbObject as any)[p],
+              p === this.collection.idName ? id : (object as any)[p],
             )
           if (value.length === 1) {
             value = value[0]

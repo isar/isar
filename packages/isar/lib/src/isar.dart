@@ -300,8 +300,8 @@ abstract class Isar {
   static Future<void> initializeIsarCore({
     Map<IsarAbi, String> libraries = const {},
     bool download = false,
-  }) {
-    return initializeIsarCore(
+  }) async {
+    await initializeCoreBinary(
       libraries: libraries,
       download: download,
     );

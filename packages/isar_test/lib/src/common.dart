@@ -113,7 +113,7 @@ Future<Isar> openTempIsar(
   if (Invoker.current != null) {
     addTearDown(() async {
       if (isar.isOpen) {
-        //await isar.close(deleteFromDisk: true);
+        await isar.close(deleteFromDisk: true);
       }
     });
   }

@@ -48,12 +48,11 @@ Query<T> buildWebQuery<T, OBJ>(
   );
 
   QueryDeserialize<T> deserialize;
-  if (property == null) {
-    deserialize = (jsObj) => col.schema.deserializeWeb(jsObj) as T;
-  } else {
-    deserialize =
-        (jsObj) => col.schema.deserializePropWeb(jsObj, property) as T;
-  }
+  //if (property == null) {
+  deserialize = col.deserializeObject as T Function(Object);
+  /*} else {
+    deserialize = (jsObj) => col.schema.deserializeProp(jsObj, property) as T;
+  }*/
 
   return QueryImpl<T>(col, queryJs, deserialize, property);
 }
@@ -348,6 +347,9 @@ String _buildConditionInternal({
       throw UnimplementedError();
     case FilterConditionType.isNull:
       return isNull;
+    // ignore: no_default_cases
+    default:
+      throw UnimplementedError();
   }
   return isNull; // TOCO fix
 }
