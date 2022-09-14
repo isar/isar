@@ -90,6 +90,7 @@ class CollectionSchema<OBJ> extends Schema<OBJ> {
   Map<String, dynamic> toSchemaJson() {
     return {
       ...super.toSchemaJson(),
+      'idName': idName,
       'indexes': [
         for (final index in indexes.values) index.toSchemaJson(),
       ],

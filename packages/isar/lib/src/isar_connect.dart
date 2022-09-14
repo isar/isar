@@ -87,7 +87,13 @@ abstract class _IsarConnect {
   }
 
   static Future<dynamic> _getSchema(Map<String, dynamic> _) async {
-    return [..._schemas!.map((e) => e.toSchemaJson())];
+    return [
+      ..._schemas!.map(
+        (e) => e.toSchemaJson()
+          ..['objects'] =
+              e.embeddedSchemas.values.map((e) => e.toSchemaJson()).toList(),
+      )
+    ];
   }
 
   static Future<dynamic> _listInstances(Map<String, dynamic> _) async {
@@ -151,14 +157,9 @@ abstract class _IsarConnect {
     }
 
     final cQuery = ConnectQuery.fromJson(params);
-    final schema =
-        <dynamic>[]; //TODO fix jsonDecode(Isar.schema!) as List<dynamic>;
 
-    //ignore: avoid_dynamic_calls
-    final links = schema.firstWhere(
-      //ignore: avoid_dynamic_calls
-      (e) => e['name'] as String == cQuery.collection,
-    )['links'] as List<dynamic>;
+    final links =
+        _schemas!.firstWhere((e) => e.name == cQuery.collection).links;
 
     final query = _getQuery(cQuery);
     params.remove('limit');
@@ -174,10 +175,9 @@ abstract class _IsarConnect {
       final source = Isar.getInstance(cQuery.instance)!
           .getCollectionByNameInternal(cQuery.collection)!;
       for (var index = 0; index < results.length; index++) {
-        for (final link in links) {
+        for (final link in links.values) {
           final target = Isar.getInstance(cQuery.instance)!
-              //ignore: avoid_dynamic_calls
-              .getCollectionByNameInternal(link['target'] as String)!;
+              .getCollectionByNameInternal(link.target)!;
 
           _querySubscription.add(target.watchLazy().listen(listener));
 
@@ -186,8 +186,7 @@ abstract class _IsarConnect {
             whereClauses: [
               LinkWhereClause(
                 linkCollection: source.name,
-                //ignore: avoid_dynamic_calls
-                linkName: link['name'] as String,
+                linkName: link.name,
                 id: results[index][source.schema.idName] as int,
               ),
             ],
@@ -195,14 +194,11 @@ abstract class _IsarConnect {
 
           final q = QueryBuilder<dynamic, dynamic, QAfterFilterCondition>(qb);
 
-          //ignore: avoid_dynamic_calls
-          if (link['single'] as bool) {
-            //ignore: avoid_dynamic_calls
-            results[index][link['name'] as String] =
+          if (link.isSingle) {
+            results[index][link.name] =
                 await q.findFirst() == null ? null : (await q.exportJson())[0];
           } else {
-            //ignore: avoid_dynamic_calls
-            results[index][link['name'] as String] =
+            results[index][link.name] =
                 await QueryBuilder<dynamic, dynamic, QAfterFilterCondition>(qb)
                     .exportJson();
           }
@@ -238,15 +234,9 @@ abstract class _IsarConnect {
 
     final objects = await query.exportJson();
 
-    if (objects.isEmpty || !objects[0].containsKey(cEdit.property)) {
+    if (objects.isEmpty ||
+        objects[0].setByPath(cEdit.path, cEdit.value) == null) {
       throw IsarError('Cant get object or property is wrong for edit');
-    }
-
-    if (cEdit.index == null) {
-      objects[0][cEdit.property] = cEdit.value;
-    } else {
-      //ignore: avoid_dynamic_calls
-      objects[0][cEdit.property][cEdit.index] = cEdit.value;
     }
 
     await collection.isar.writeTxn(() async => collection.importJson(objects));
@@ -262,18 +252,17 @@ abstract class _IsarConnect {
     );
 
     final objects = await query.exportJson();
+    dynamic list;
 
     if (objects.isEmpty ||
-        !objects[0].containsKey(cEdit.property) ||
-        objects[0][cEdit.property] is! List) {
+        ((list = objects[0].getByPath(cEdit.path)) == null) ||
+        list is! List) {
       throw IsarError('Cant get object or property is wrong for add');
     }
 
-    if (cEdit.index == null) {
-      (objects[0][cEdit.property] as List).add(cEdit.value);
-    } else {
-      (objects[0][cEdit.property] as List).insert(cEdit.index!, cEdit.value);
-    }
+    cEdit.listIndex == null
+        ? list.add(cEdit.value)
+        : list.insert(cEdit.listIndex!, cEdit.value);
 
     await collection.isar.writeTxn(() async => collection.importJson(objects));
   }
@@ -288,14 +277,15 @@ abstract class _IsarConnect {
     );
 
     final objects = await query.exportJson();
+    dynamic list;
 
     if (objects.isEmpty ||
-        !objects[0].containsKey(cEdit.property) ||
-        objects[0][cEdit.property] is! List) {
+        ((list = objects[0].getByPath(cEdit.path)) == null) ||
+        list is! List) {
       throw IsarError('Cant get object or property is wrong for remove');
     }
 
-    (objects[0][cEdit.property] as List).removeAt(cEdit.index!);
+    list.removeAt(cEdit.listIndex!);
     await collection.isar.writeTxn(() async => collection.importJson(objects));
   }
 
@@ -333,5 +323,39 @@ abstract class _IsarConnect {
       sortBy: [if (sortProperty != null) sortProperty],
       property: query.property,
     );
+  }
+}
+
+extension _MapPath on Map<String, dynamic> {
+  Map<String, dynamic>? setByPath(String path, dynamic value) {
+    final keys = path.split('.');
+    dynamic subData = this;
+
+    try {
+      for (final key in keys.take(keys.length - 1)) {
+        //ignore: avoid_dynamic_calls
+        subData = subData[subData is List ? int.parse(key) : key];
+      }
+      //ignore: avoid_dynamic_calls
+      subData[subData is List ? int.parse(keys.last) : keys.last] = value;
+    } catch (_) {
+      return null;
+    }
+    return this;
+  }
+
+  dynamic getByPath(String path) {
+    final keys = path.split('.');
+    dynamic subData = this;
+
+    try {
+      for (final key in keys) {
+        //ignore: avoid_dynamic_calls
+        subData = subData[subData is List ? int.parse(key) : key];
+      }
+      return subData;
+    } catch (_) {
+      return null;
+    }
   }
 }

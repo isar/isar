@@ -59,7 +59,7 @@ enum IsarType {
   double('Double'),
 
   /// DateTime
-  dateTime('Long'),
+  dateTime('DateTime'),
 
   /// String
   string('String'),
@@ -86,7 +86,7 @@ enum IsarType {
   doubleList('DoubleList'),
 
   /// DateTime list
-  dateTimeList('LongList'),
+  dateTimeList('DateTimeList'),
 
   /// String list
   stringList('StringList'),

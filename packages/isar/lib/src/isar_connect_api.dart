@@ -147,8 +147,8 @@ class ConnectEdit {
     required this.instance,
     required this.collection,
     required this.id,
-    required this.property,
-    this.index,
+    required this.path,
+    this.listIndex,
     required this.value,
   });
 
@@ -157,8 +157,8 @@ class ConnectEdit {
       instance: json['instance'] as String,
       collection: json['collection'] as String,
       id: json['id'] as Id,
-      index: json['index'] as int?,
-      property: json['property'] as String,
+      path: json['path'] as String,
+      listIndex: json['listIndex'] as int?,
       value: json['value'],
     );
   }
@@ -166,8 +166,8 @@ class ConnectEdit {
   final String instance;
   final String collection;
   final Id id;
-  final String property;
-  final int? index;
+  final String path;
+  final int? listIndex;
   final dynamic value;
 
   Map<String, dynamic> toJson() {
@@ -175,10 +175,21 @@ class ConnectEdit {
       'instance': instance,
       'collection': collection,
       'id': id,
-      'index': index,
-      'property': property,
+      'path': path,
+      'listIndex': listIndex,
       'value': value,
     };
+  }
+
+  ConnectEdit copyWith({String? instance, String? collection}) {
+    return ConnectEdit(
+      instance: instance ?? this.instance,
+      collection: collection ?? this.collection,
+      id: id,
+      path: path,
+      listIndex: listIndex,
+      value: value,
+    );
   }
 }
 
