@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:isar_test/src/rust_target.dart';
@@ -18,7 +19,7 @@ void main() {
     throw Exception('Cargo build failed: ${rustResult.stderr}');
   }
 
-  print('Building Isar Web');
+  /*print('Building Isar Web');
   final webDir = path.join(rootDir, 'packages', 'isar_web');
   final npmResult = Process.runSync(
     'npm',
@@ -26,6 +27,7 @@ void main() {
     runInShell: true,
     workingDirectory: webDir,
   );
+  print(webDir);
   if (npmResult.exitCode != 0) {
     throw Exception('Npm build failed: ${npmResult.stderr}');
   }
@@ -48,5 +50,5 @@ void main() {
   File('lib/src/isar_web_src.dart').writeAsStringSync(
     '// ignore_for_file: unnecessary_string_escapes\n'
     "const isarWebSrc = '''\n$escaped''';",
-  );
+  );*/
 }

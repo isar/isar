@@ -31,6 +31,7 @@ const ignoreLints = [
   'unnecessary_null_checks',
   'join_return_with_assignment',
   'prefer_final_locals',
+  'avoid_js_rounded_ints',
 ];
 
 class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
