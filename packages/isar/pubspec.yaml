@@ -11,7 +11,7 @@ environment:
 dependencies:
   ffi: '>=2.0.0 <3.0.0'
   js: ^0.6.4
-  meta: ^1.7.0
+  meta: ^1.8.0
 
 dev_dependencies:
   ffigen: ^6.1.2

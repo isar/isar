@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'package:isar/isar.dart';
 import 'package:js/js_util.dart';
 import 'package:meta/dart2js.dart';

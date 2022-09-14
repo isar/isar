@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field, public_member_api_docs
+
 import 'dart:async';
 
 import 'package:isar/isar.dart';

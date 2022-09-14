@@ -121,6 +121,7 @@ LinkWhereClauseJs _buildLinkWhereClause(
   IsarCollectionImpl<dynamic> col,
   LinkWhereClause wc,
 ) {
+  // ignore: unused_local_variable
   final linkCol = col.isar.getCollectionByNameInternal(wc.linkCollection)!
       as IsarCollectionImpl;
   //final backlinkLinkName = linkCol.schema.backlinkLinkNames[wc.linkName];
@@ -351,7 +352,6 @@ String _buildConditionInternal({
     default:
       throw UnimplementedError();
   }
-  return isNull; // TOCO fix
 }
 
 SortCmpJs _buildSort(List<SortProperty> properties) {
