@@ -554,7 +554,9 @@ class _TableItemState extends State<TableItem> {
               text: 'Set value to null',
             ),
           ),
-        if (widget.data is PropertyHelper &&
+        // todo: TBA we need to filter object's properties.
+        /*
+        if ( widget.data is PropertyHelper &&
             (widget.data as PropertyHelper).linkKey.isEmpty &&
             (widget.data as PropertyHelper).index == null &&
             (widget.data as PropertyHelper).property.type.isNum)
@@ -601,6 +603,7 @@ class _TableItemState extends State<TableItem> {
               ),
             ),
           ),
+          */
       ];
 
   @override
@@ -770,6 +773,8 @@ class _TableItemState extends State<TableItem> {
     );
   }
 
+  // todo: query aggregation.
+  /*
   Future<void> _aggregate(AggregationOp op) async {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     final property = (widget.data as PropertyHelper).property;
@@ -801,6 +806,7 @@ class _TableItemState extends State<TableItem> {
       );
     }
   }
+  */
 
   Map<String, dynamic>? _objectInfo([PropertyHelper? helper]) {
     helper = helper ?? widget.data as PropertyHelper;
