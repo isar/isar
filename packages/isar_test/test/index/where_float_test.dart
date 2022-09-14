@@ -19,7 +19,6 @@ class FloatModel {
 
   @override
   String toString() {
-    // TODO: implement toString
     return '{id: $id, field: $field}';
   }
 }
