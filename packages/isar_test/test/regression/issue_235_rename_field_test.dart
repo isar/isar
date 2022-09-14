@@ -1,8 +1,6 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
-
-import '../util/common.dart';
-import '../util/sync_async_helper.dart';
 
 part 'issue_235_rename_field_test.g.dart';
 

@@ -6,9 +6,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:isar/src/native/binary_reader.dart';
-import 'package:isar/src/native/binary_writer.dart';
+import 'package:isar/isar.dart';
 import 'package:isar/src/native/isar_core.dart';
+import 'package:isar/src/native/isar_reader_impl.dart';
+import 'package:isar/src/native/isar_writer_impl.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -19,10 +20,10 @@ void main() {
         .map((e) => BinaryTest.fromJson(e as Map<String, dynamic>))
         .toList();
 
-    test('BinaryReader', () {
+    test('IsarReader', () {
       var t = 0;
       for (final test in tests) {
-        final reader = BinaryReader(Uint8List.fromList(test.bytes));
+        final reader = IsarReaderImpl(Uint8List.fromList(test.bytes));
         var offset = 2;
         for (var i = 0; i < test.types.length; i++) {
           final type = test.types[i];
@@ -37,14 +38,14 @@ void main() {
       }
     });
 
-    test('BinaryWriter', () {
+    test('IsarWriter', () {
       for (final test in tests) {
         final buffer = Uint8List(10000);
         final size =
             test.types.fold<int>(0, (sum, type) => sum + type.size) + 2;
 
         final bufferView = buffer.buffer.asUint8List(0, test.bytes.length);
-        final writer = BinaryWriter(bufferView, size);
+        final writer = IsarWriterImpl(bufferView, size);
         var offset = 2;
         for (var i = 0; i < test.types.length; i++) {
           final type = test.types[i];
@@ -79,8 +80,8 @@ enum Type {
 
   final int size;
   final dynamic nullValue;
-  final dynamic Function(BinaryReader reader, int offset, bool nullable) read;
-  final void Function(BinaryWriter reader, int offset, dynamic value) write;
+  final dynamic Function(IsarReader reader, int offset, bool nullable) read;
+  final void Function(IsarWriter reader, int offset, dynamic value) write;
 }
 
 class BinaryTest {
@@ -123,7 +124,7 @@ void _expectIgnoreNull(
   }
 }
 
-bool? _readBool(BinaryReader reader, int offset, bool nullable) {
+bool? _readBool(IsarReader reader, int offset, bool nullable) {
   if (nullable) {
     return reader.readBoolOrNull(offset);
   } else {
@@ -131,19 +132,19 @@ bool? _readBool(BinaryReader reader, int offset, bool nullable) {
   }
 }
 
-void _writeBool(BinaryWriter writer, int offset, dynamic value) {
+void _writeBool(IsarWriter writer, int offset, dynamic value) {
   writer.writeBool(offset, value as bool?);
 }
 
-int? _readByte(BinaryReader reader, int offset, bool nullable) {
+int? _readByte(IsarReader reader, int offset, bool nullable) {
   return reader.readByte(offset);
 }
 
-void _writeByte(BinaryWriter writer, int offset, dynamic value) {
+void _writeByte(IsarWriter writer, int offset, dynamic value) {
   writer.writeByte(offset, value as int);
 }
 
-int? _readInt(BinaryReader reader, int offset, bool nullable) {
+int? _readInt(IsarReader reader, int offset, bool nullable) {
   if (nullable) {
     return reader.readIntOrNull(offset);
   } else {
@@ -151,11 +152,11 @@ int? _readInt(BinaryReader reader, int offset, bool nullable) {
   }
 }
 
-void _writeInt(BinaryWriter writer, int offset, dynamic value) {
+void _writeInt(IsarWriter writer, int offset, dynamic value) {
   writer.writeInt(offset, value as int?);
 }
 
-double? _readFloat(BinaryReader reader, int offset, bool nullable) {
+double? _readFloat(IsarReader reader, int offset, bool nullable) {
   if (nullable) {
     return reader.readFloatOrNull(offset);
   } else {
@@ -163,11 +164,11 @@ double? _readFloat(BinaryReader reader, int offset, bool nullable) {
   }
 }
 
-void _writeFloat(BinaryWriter writer, int offset, dynamic value) {
+void _writeFloat(IsarWriter writer, int offset, dynamic value) {
   writer.writeFloat(offset, value as double?);
 }
 
-int? _readLong(BinaryReader reader, int offset, bool nullable) {
+int? _readLong(IsarReader reader, int offset, bool nullable) {
   if (nullable) {
     return reader.readLongOrNull(offset);
   } else {
@@ -175,11 +176,11 @@ int? _readLong(BinaryReader reader, int offset, bool nullable) {
   }
 }
 
-void _writeLong(BinaryWriter writer, int offset, dynamic value) {
+void _writeLong(IsarWriter writer, int offset, dynamic value) {
   writer.writeLong(offset, value as int?);
 }
 
-double? _readDouble(BinaryReader reader, int offset, bool nullable) {
+double? _readDouble(IsarReader reader, int offset, bool nullable) {
   if (nullable) {
     return reader.readDoubleOrNull(offset);
   } else {
@@ -187,11 +188,11 @@ double? _readDouble(BinaryReader reader, int offset, bool nullable) {
   }
 }
 
-void _writeDouble(BinaryWriter writer, int offset, dynamic value) {
+void _writeDouble(IsarWriter writer, int offset, dynamic value) {
   writer.writeDouble(offset, value as double?);
 }
 
-String? _readString(BinaryReader reader, int offset, bool nullable) {
+String? _readString(IsarReader reader, int offset, bool nullable) {
   if (nullable) {
     return reader.readStringOrNull(offset);
   } else {
@@ -199,12 +200,12 @@ String? _readString(BinaryReader reader, int offset, bool nullable) {
   }
 }
 
-void _writeString(BinaryWriter writer, int offset, dynamic value) {
+void _writeString(IsarWriter writer, int offset, dynamic value) {
   final bytes = value is String ? utf8.encode(value) as Uint8List : null;
   writer.writeByteList(offset, bytes);
 }
 
-List<bool?>? _readBoolList(BinaryReader reader, int offset, bool nullable) {
+List<bool?>? _readBoolList(IsarReader reader, int offset, bool nullable) {
   if (nullable) {
     return reader.readBoolOrNullList(offset);
   } else {
@@ -212,20 +213,20 @@ List<bool?>? _readBoolList(BinaryReader reader, int offset, bool nullable) {
   }
 }
 
-void _writeBoolList(BinaryWriter writer, int offset, dynamic value) {
+void _writeBoolList(IsarWriter writer, int offset, dynamic value) {
   writer.writeBoolList(offset, (value as List?)?.cast());
 }
 
-List<int>? _readByteList(BinaryReader reader, int offset, bool nullable) {
+List<int>? _readByteList(IsarReader reader, int offset, bool nullable) {
   return reader.readByteList(offset);
 }
 
-void _writeByteList(BinaryWriter writer, int offset, dynamic value) {
+void _writeByteList(IsarWriter writer, int offset, dynamic value) {
   final bytes = value is List ? Uint8List.fromList(value.cast()) : null;
   writer.writeByteList(offset, bytes);
 }
 
-List<int?>? _readIntList(BinaryReader reader, int offset, bool nullable) {
+List<int?>? _readIntList(IsarReader reader, int offset, bool nullable) {
   if (nullable) {
     return reader.readIntOrNullList(offset);
   } else {
@@ -233,11 +234,11 @@ List<int?>? _readIntList(BinaryReader reader, int offset, bool nullable) {
   }
 }
 
-void _writeIntList(BinaryWriter writer, int offset, dynamic value) {
+void _writeIntList(IsarWriter writer, int offset, dynamic value) {
   writer.writeIntList(offset, (value as List?)?.cast());
 }
 
-List<double?>? _readFloatList(BinaryReader reader, int offset, bool nullable) {
+List<double?>? _readFloatList(IsarReader reader, int offset, bool nullable) {
   if (nullable) {
     return reader.readFloatOrNullList(offset);
   } else {
@@ -245,11 +246,11 @@ List<double?>? _readFloatList(BinaryReader reader, int offset, bool nullable) {
   }
 }
 
-void _writeFloatList(BinaryWriter writer, int offset, dynamic value) {
+void _writeFloatList(IsarWriter writer, int offset, dynamic value) {
   writer.writeFloatList(offset, (value as List?)?.cast());
 }
 
-List<int?>? _readLongList(BinaryReader reader, int offset, bool nullable) {
+List<int?>? _readLongList(IsarReader reader, int offset, bool nullable) {
   if (nullable) {
     return reader.readLongOrNullList(offset);
   } else {
@@ -257,11 +258,11 @@ List<int?>? _readLongList(BinaryReader reader, int offset, bool nullable) {
   }
 }
 
-void _writeLongList(BinaryWriter writer, int offset, dynamic value) {
+void _writeLongList(IsarWriter writer, int offset, dynamic value) {
   writer.writeLongList(offset, (value as List?)?.cast());
 }
 
-List<double?>? _readDoubleList(BinaryReader reader, int offset, bool nullable) {
+List<double?>? _readDoubleList(IsarReader reader, int offset, bool nullable) {
   if (nullable) {
     return reader.readDoubleOrNullList(offset);
   } else {
@@ -269,11 +270,11 @@ List<double?>? _readDoubleList(BinaryReader reader, int offset, bool nullable) {
   }
 }
 
-void _writeDoubleList(BinaryWriter writer, int offset, dynamic value) {
+void _writeDoubleList(IsarWriter writer, int offset, dynamic value) {
   writer.writeDoubleList(offset, (value as List?)?.cast());
 }
 
-List<String?>? _readStringList(BinaryReader reader, int offset, bool nullable) {
+List<String?>? _readStringList(IsarReader reader, int offset, bool nullable) {
   if (nullable) {
     return reader.readStringOrNullList(offset);
   } else {
@@ -281,6 +282,6 @@ List<String?>? _readStringList(BinaryReader reader, int offset, bool nullable) {
   }
 }
 
-void _writeStringList(BinaryWriter writer, int offset, dynamic value) {
+void _writeStringList(IsarWriter writer, int offset, dynamic value) {
   writer.writeStringList(offset, (value as List?)?.cast());
 }

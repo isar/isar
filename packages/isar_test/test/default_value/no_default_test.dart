@@ -1,8 +1,7 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
 
-import '../util/common.dart';
-import '../util/sync_async_helper.dart';
 import 'common.dart';
 
 part 'no_default_test.g.dart';

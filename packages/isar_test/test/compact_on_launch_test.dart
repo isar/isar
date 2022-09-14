@@ -1,11 +1,8 @@
 import 'dart:io';
 
 import 'package:isar/isar.dart';
+import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
-
-import 'util/common.dart';
-import 'util/matchers.dart';
-import 'util/sync_async_helper.dart';
 
 part 'compact_on_launch_test.g.dart';
 

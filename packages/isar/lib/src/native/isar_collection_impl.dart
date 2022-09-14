@@ -7,15 +7,14 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
-
 import 'package:isar/isar.dart';
-import 'package:isar/src/native/binary_reader.dart';
-import 'package:isar/src/native/binary_writer.dart';
 import 'package:isar/src/native/bindings.dart';
 import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/index_key.dart';
 import 'package:isar/src/native/isar_core.dart';
 import 'package:isar/src/native/isar_impl.dart';
+import 'package:isar/src/native/isar_reader_impl.dart';
+import 'package:isar/src/native/isar_writer_impl.dart';
 import 'package:isar/src/native/query_build.dart';
 import 'package:isar/src/native/txn.dart';
 
@@ -39,8 +38,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
   @pragma('vm:prefer-inline')
   OBJ deserializeObject(CObject cObj) {
     final buffer = cObj.buffer.asTypedList(cObj.buffer_length);
-    final reader = BinaryReader(buffer);
-    final object = schema.deserializeNative(
+    final reader = IsarReaderImpl(buffer);
+    final object = schema.deserialize(
       cObj.id,
       reader,
       _offsets,
@@ -103,8 +102,8 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
         final cObj = objectSet.objects.elementAt(i).ref;
         final buffer = cObj.buffer.asTypedList(cObj.buffer_length);
         values.add(
-          schema.deserializePropNative(
-            BinaryReader(buffer),
+          schema.deserializeProp(
+            IsarReaderImpl(buffer),
             propertyId,
             propertyOffset,
             isar.offsets,
@@ -136,15 +135,16 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     var writtenBytes = 0;
     for (var i = 0; i < objects.length; i++) {
       final objBuffer = buffer.asUint8List(writtenBytes);
-      final binaryWriter = BinaryWriter(objBuffer, _staticSize);
+      final binaryWriter = IsarWriterImpl(objBuffer, _staticSize);
 
       final object = objects[i];
-      final size = schema.serializeNative(
+      schema.serialize(
         object,
         binaryWriter,
         _offsets,
         isar.offsets,
       );
+      final size = binaryWriter.usedBytes;
 
       final cObj = objectsPtr.elementAt(i).ref;
       cObj.id = schema.getId(object);
@@ -258,13 +258,14 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     cObj.buffer = txn.getBuffer(estimatedSize);
     final buffer = cObj.buffer.asTypedList(estimatedSize);
 
-    final writer = BinaryWriter(buffer, _staticSize);
-    cObj.buffer_length = schema.serializeNative(
+    final writer = IsarWriterImpl(buffer, _staticSize);
+    schema.serialize(
       object,
       writer,
       _offsets,
       isar.offsets,
     );
+    cObj.buffer_length = writer.usedBytes;
 
     cObj.id = schema.getId(object);
 
@@ -277,7 +278,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     final id = cObj.id;
     schema.attach(this, id, object);
 
-    if (schema.hasLinks && saveLinks) {
+    if (saveLinks) {
       for (final link in schema.getLinks(object)) {
         link.saveSync();
       }

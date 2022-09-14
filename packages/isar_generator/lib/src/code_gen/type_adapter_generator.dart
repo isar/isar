@@ -1,5 +1,5 @@
+import 'package:dartx/dartx.dart';
 import 'package:isar/isar.dart';
-import 'package:isar_generator/src/code_gen/type_adapter_generator_common.dart';
 import 'package:isar_generator/src/object_info.dart';
 
 String _prepareSerialize(
@@ -57,9 +57,9 @@ String _prepareSerializeList(
   return code;
 }
 
-String generateEstimateSerializeNative(ObjectInfo object) {
+String generateEstimateSerialize(ObjectInfo object) {
   var code = '''
-    int ${object.estimateSize}(
+    int ${object.estimateSizeName}(
       ${object.dartName} object,
       List<int> offsets,
       Map<Type, List<int>> allOffsets,
@@ -148,11 +148,11 @@ String generateEstimateSerializeNative(ObjectInfo object) {
     }''';
 }
 
-String generateSerializeNative(ObjectInfo object) {
+String generateSerialize(ObjectInfo object) {
   var code = '''
-  int ${object.serializeNativeName}(
+  void ${object.serializeName}(
     ${object.dartName} object, 
-    IsarBinaryWriter writer,
+    IsarWriter writer,
     List<int> offsets, 
     Map<Type, List<int>> allOffsets,
   ) {''';
@@ -198,7 +198,7 @@ String generateSerializeNative(ObjectInfo object) {
           writer.writeObject<${property.typeClassName}>(
             offsets[$i],
             allOffsets,
-            ${property.targetSchema}.serializeNative,
+            ${property.targetSchema}.serialize,
             $value,
           );''';
         break;
@@ -231,41 +231,63 @@ String generateSerializeNative(ObjectInfo object) {
           writer.writeObjectList<${property.typeClassName}>(
             offsets[$i],
             allOffsets,
-            ${property.targetSchema}.serializeNative,
+            ${property.targetSchema}.serialize,
             $value,
           );''';
         break;
     }
   }
 
-  return '''
-    $code
-    return writer.usedBytes;
-  }''';
+  return '$code}';
 }
 
-String generateDeserializeNative(ObjectInfo object) {
-  String deserProp(ObjectProperty p) {
-    final index = object.objectProperties.indexOf(p);
-    return _deserializeProperty(object, p, 'offsets[$index]');
-  }
-
-  return '''
-    ${object.dartName} ${object.deserializeNativeName}(
+String generateDeserialize(ObjectInfo object) {
+  var code = '''
+    ${object.dartName} ${object.deserializeName}(
       Id id,
-      IsarBinaryReader reader,
+      IsarReader reader,
       List<int> offsets,
       Map<Type, List<int>> allOffsets,
     ) {
-      ${deserializeMethodBody(object, deserProp)}
-      return object;
-    }''';
+      final object = ${object.dartName}(''';
+
+  final propertiesByMode =
+      object.properties.groupBy((ObjectProperty p) => p.deserialize);
+  final positional = propertiesByMode[PropertyDeser.positionalParam] ?? [];
+  final sortedPositional =
+      positional.sortedBy((ObjectProperty p) => p.constructorPosition!);
+  for (final p in sortedPositional) {
+    final index = object.objectProperties.indexOf(p);
+    final deser = _deserializeProperty(object, p, 'offsets[$index]');
+    code += '$deser,';
+  }
+
+  final named = propertiesByMode[PropertyDeser.namedParam] ?? [];
+  for (final p in named) {
+    final index = object.objectProperties.indexOf(p);
+    final deser = _deserializeProperty(object, p, 'offsets[$index]');
+    code += '${p.dartName}: $deser,';
+  }
+
+  code += ');';
+
+  final assign = propertiesByMode[PropertyDeser.assign] ?? [];
+  for (final p in assign) {
+    final index = object.objectProperties.indexOf(p);
+    final deser = _deserializeProperty(object, p, 'offsets[$index]');
+    code += 'object.${p.dartName} = $deser;';
+  }
+
+  return '''
+    $code
+    return object;
+  }''';
 }
 
-String generateDeserializePropNative(ObjectInfo object) {
+String generateDeserializeProp(ObjectInfo object) {
   var code = '''
-    P ${object.deserializePropNativeName}<P>(
-      IsarBinaryReader reader,
+    P ${object.deserializePropName}<P>(
+      IsarReader reader,
       int propertyId,
       int offset,
       Map<Type,
@@ -354,7 +376,7 @@ String _deserialize(ObjectProperty property, String propertyOffset) {
       return '''
         reader.readObjectOrNull<${property.typeClassName}>(
           $propertyOffset,
-          ${property.targetSchema}.deserializeNative,
+          ${property.targetSchema}.deserialize,
           allOffsets,
         )''';
     case IsarType.boolList:
@@ -377,9 +399,78 @@ String _deserialize(ObjectProperty property, String propertyOffset) {
       return '''
         reader.readObject${orElNull}List<${property.typeClassName}>(
           $propertyOffset,
-          ${property.targetSchema}.deserializeNative,
+          ${property.targetSchema}.deserialize,
           allOffsets,
           ${!property.elementNullable ? '${property.typeClassName}(),' : ''}
         )''';
   }
+}
+
+String generateGetId(ObjectInfo object) {
+  final defaultVal = object.idProperty.nullable ? '?? Isar.autoIncrement' : '';
+  return '''
+    Id ${object.getIdName}(${object.dartName} object) {
+      return object.${object.idProperty.dartName} $defaultVal;
+    }
+  ''';
+}
+
+String generateGetLinks(ObjectInfo object) {
+  return '''
+    List<IsarLinkBase<dynamic>> ${object.getLinksName}(${object.dartName} object) {
+      return [${object.links.map((e) => 'object.${e.dartName}').join(',')}];
+    }
+  ''';
+}
+
+String generateAttach(ObjectInfo object) {
+  var code = '''
+  void ${object.attachName}(IsarCollection<dynamic> col, Id id, ${object.dartName} object) {''';
+
+  if (object.idProperty.assignable) {
+    code += 'object.${object.idProperty.dartName} = id;';
+  }
+
+  for (final link in object.links) {
+    // ignore: leading_newlines_in_multiline_strings
+    code += '''object.${link.dartName}.attach(
+      col,
+      col.isar.collection<${link.targetCollectionDartName}>(),
+      r'${link.isarName}',
+      id
+    );''';
+  }
+  return '$code}';
+}
+
+String generateEnumMaps(ObjectInfo object) {
+  var code = '';
+  for (final property in object.properties) {
+    final enumName = property.typeClassName;
+    if (property.isEnum) {
+      code += 'const ${property.enumValueMapName(object)} = {';
+      for (final enumElementName in property.enumMap!.keys) {
+        final value = property.enumMap![enumElementName];
+        if (value is String) {
+          code += "$enumName.$enumElementName: r'$value',";
+        } else {
+          code += '$enumName.$enumElementName: $value,';
+        }
+      }
+      code += '};';
+
+      code += 'const ${property.valueEnumMapName(object)} = {';
+      for (final enumElementName in property.enumMap!.keys) {
+        final value = property.enumMap![enumElementName];
+        if (value is String) {
+          code += "r'$value': $enumName.$enumElementName,";
+        } else {
+          code += '$value: $enumName.$enumElementName,';
+        }
+      }
+      code += '};';
+    }
+  }
+
+  return code;
 }

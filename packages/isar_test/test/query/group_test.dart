@@ -1,9 +1,8 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
 
 import '../user_model.dart';
-import '../util/common.dart';
-import '../util/matchers.dart';
 
 void main() {
   group('Filter Groups', () {

@@ -46,7 +46,7 @@ abstract class IsarLinkBase<OBJ> {
     IsarCollection<dynamic> sourceCollection,
     IsarCollection<OBJ> targetCollection,
     String linkName,
-    int? objectId,
+    Id? objectId,
   );
 }
 
@@ -55,7 +55,7 @@ abstract class IsarLinkBase<OBJ> {
 abstract class IsarLink<OBJ> implements IsarLinkBase<OBJ> {
   /// Create an empty, unattached link. Make sure to provide the correct
   /// generic argument.
-  factory IsarLink() => IsarNative.newLink();
+  factory IsarLink() => IsarLinkImpl();
 
   /// The linked object or `null` if no object is linked.
   OBJ? get value;
@@ -69,7 +69,7 @@ abstract class IsarLink<OBJ> implements IsarLinkBase<OBJ> {
 abstract class IsarLinks<OBJ> implements IsarLinkBase<OBJ>, Set<OBJ> {
   /// Create an empty, unattached link. Make sure to provide the correct
   /// generic argument.
-  factory IsarLinks() => IsarNative.newLinks();
+  factory IsarLinks() => IsarLinksImpl();
 
   @override
   Future<void> load({bool overrideChanges = true});

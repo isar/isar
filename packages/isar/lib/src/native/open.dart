@@ -77,8 +77,8 @@ void _initializeInstance(
 Future<Isar> openIsar({
   required List<CollectionSchema<dynamic>> schemas,
   String? directory,
-  String name = 'isar',
-  bool relaxedDurability = true,
+  required String name,
+  required bool relaxedDurability,
   CompactCondition? compactOnLaunch,
 }) async {
   initializeCoreBinary();

@@ -1,5 +1,6 @@
 *.g.dart
 *.freezed.dart
+isar_web_src.dart
 all_tests.dart
 
 filter_long_test.dart

@@ -96,6 +96,9 @@ extension IsarTypeX on IsarType {
       this == IsarType.double ||
       this == IsarType.doubleList;
 
+  bool get containsDate =>
+      this == IsarType.dateTime || this == IsarType.dateTimeList;
+
   bool get containsString =>
       this == IsarType.string || this == IsarType.stringList;
 

@@ -1,3 +1,8 @@
+## 3.0.0-dev.15
+
+### Fixes
+- Fixed `IsarLink.toString()` and `IsarLinks.toString()`
+
 ## 3.0.0-dev.14
 
 ### Enhancements

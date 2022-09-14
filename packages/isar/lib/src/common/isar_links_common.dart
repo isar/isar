@@ -34,7 +34,7 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
     IsarCollection<dynamic> sourceCollection,
     IsarCollection<OBJ> targetCollection,
     String linkName,
-    int? objectId,
+    Id? objectId,
   ) {
     super.attach(sourceCollection, targetCollection, linkName, objectId);
 
@@ -201,7 +201,8 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
     requireAttached();
     return HashSet(
       equals: (o1, o2) => getId(o1) == getId(o2),
-      hashCode: (o) => getId(o),
+      // ignore: noop_primitive_operations
+      hashCode: (o) => getId(o).toInt(),
       isValidKey: (o) => o is OBJ && getId(o) != Isar.autoIncrement,
     )..addAll(_loadedObjects.values);
   }
@@ -211,5 +212,12 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
     _objects.clear();
     addedObjects.clear();
     removedObjects.clear();
+  }
+
+  @override
+  String toString() {
+    final content =
+        IterableBase.iterableToFullString(_objects.values, '{', '}');
+    return 'IsarLinks($content)';
   }
 }

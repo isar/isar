@@ -60,6 +60,7 @@ jobs:
         run: |
           flutter pub get
           dart tool/generate_long_double_test.dart
+          dart tool/generate_prepare_test.dart
           flutter pub run build_runner build
           flutter test -j 1
         working-directory: packages/isar_test
@@ -73,6 +74,7 @@ jobs:
         run: |
           flutter pub get
           dart tool/generate_long_double_test.dart
+          dart tool/generate_prepare_test.dart
           flutter pub run build_runner build
         working-directory: packages/isar_test
       - name: Add packages

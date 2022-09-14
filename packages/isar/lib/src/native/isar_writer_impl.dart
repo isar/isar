@@ -10,8 +10,8 @@ import 'package:meta/meta.dart';
 
 /// @nodoc
 @protected
-class BinaryWriter {
-  BinaryWriter(Uint8List buffer, int staticSize)
+class IsarWriterImpl implements IsarWriter {
+  IsarWriterImpl(Uint8List buffer, int staticSize)
       : _dynamicOffset = staticSize,
         _buffer = buffer,
         _byteData = ByteData.view(buffer.buffer, buffer.offsetInBytes) {
@@ -31,17 +31,20 @@ class BinaryWriter {
 
   int get usedBytes => _dynamicOffset;
 
+  @override
   @pragma('vm:prefer-inline')
   void writeBool(int offset, bool? value) {
     _buffer[offset] = value.byteValue;
   }
 
+  @override
   @pragma('vm:prefer-inline')
   void writeByte(int offset, int value) {
     assert(value >= minByte && value <= maxByte);
     _buffer[offset] = value;
   }
 
+  @override
   @pragma('vm:prefer-inline')
   void writeInt(int offset, int? value) {
     value ??= nullInt;
@@ -49,21 +52,25 @@ class BinaryWriter {
     _byteData.setInt32(offset, value, Endian.little);
   }
 
+  @override
   @pragma('vm:prefer-inline')
   void writeFloat(int offset, double? value) {
     _byteData.setFloat32(offset, value ?? double.nan, Endian.little);
   }
 
+  @override
   @pragma('vm:prefer-inline')
   void writeLong(int offset, int? value) {
     _byteData.setInt64(offset, value ?? nullLong, Endian.little);
   }
 
+  @override
   @pragma('vm:prefer-inline')
   void writeDouble(int offset, double? value) {
     _byteData.setFloat64(offset, value ?? double.nan, Endian.little);
   }
 
+  @override
   @pragma('vm:prefer-inline')
   void writeDateTime(int offset, DateTime? value) {
     writeLong(offset, value?.toUtc().microsecondsSinceEpoch);
@@ -76,6 +83,7 @@ class BinaryWriter {
     _buffer[offset + 2] = value >> 16;
   }
 
+  @override
   @pragma('vm:prefer-inline')
   void writeString(int offset, String? value) {
     if (value != null) {
@@ -88,18 +96,20 @@ class BinaryWriter {
     }
   }
 
+  @override
   @pragma('vm:prefer-inline')
   void writeObject<T>(
     int offset,
     Map<Type, List<int>> allOffsets,
-    SerializeNative<T> serialize,
+    Serialize<T> serialize,
     T? value,
   ) {
     if (value != null) {
       final buffer = Uint8List.sublistView(_buffer, _dynamicOffset + 3);
       final offsets = allOffsets[T]!;
-      final binaryWriter = BinaryWriter(buffer, offsets.last);
-      final byteCount = serialize(value, binaryWriter, offsets, allOffsets);
+      final binaryWriter = IsarWriterImpl(buffer, offsets.last);
+      serialize(value, binaryWriter, offsets, allOffsets);
+      final byteCount = binaryWriter.usedBytes;
       _writeUint24(offset, _dynamicOffset);
       _writeUint24(_dynamicOffset, byteCount);
       _dynamicOffset += byteCount + 3;
@@ -119,6 +129,7 @@ class BinaryWriter {
     }
   }
 
+  @override
   @pragma('vm:prefer-inline')
   void writeByteList(int offset, List<int>? values) {
     _writeListOffset(offset, values?.length);
@@ -130,6 +141,7 @@ class BinaryWriter {
     }
   }
 
+  @override
   void writeBoolList(int offset, List<bool?>? values) {
     _writeListOffset(offset, values?.length);
 
@@ -140,6 +152,7 @@ class BinaryWriter {
     }
   }
 
+  @override
   void writeIntList(int offset, List<int?>? values) {
     _writeListOffset(offset, values?.length);
 
@@ -153,6 +166,7 @@ class BinaryWriter {
     }
   }
 
+  @override
   void writeFloatList(int offset, List<double?>? values) {
     _writeListOffset(offset, values?.length);
 
@@ -168,6 +182,7 @@ class BinaryWriter {
     }
   }
 
+  @override
   void writeLongList(int offset, List<int?>? values) {
     _writeListOffset(offset, values?.length);
 
@@ -183,6 +198,7 @@ class BinaryWriter {
     }
   }
 
+  @override
   void writeDoubleList(int offset, List<double?>? values) {
     _writeListOffset(offset, values?.length);
 
@@ -198,11 +214,13 @@ class BinaryWriter {
     }
   }
 
+  @override
   void writeDateTimeList(int offset, List<DateTime?>? values) {
     final longList = values?.map((e) => e.longValue).toList();
     writeLongList(offset, longList);
   }
 
+  @override
   void writeStringList(int offset, List<String?>? values) {
     _writeListOffset(offset, values?.length);
 
@@ -222,10 +240,11 @@ class BinaryWriter {
     }
   }
 
+  @override
   void writeObjectList<T>(
     int offset,
     Map<Type, List<int>> allOffsets,
-    SerializeNative<T> serialize,
+    Serialize<T> serialize,
     List<T?>? values,
   ) {
     _writeListOffset(offset, values?.length);
@@ -240,8 +259,9 @@ class BinaryWriter {
         final value = values[i];
         if (value != null) {
           final buffer = Uint8List.sublistView(_buffer, _dynamicOffset);
-          final binaryWriter = BinaryWriter(buffer, staticSize);
-          final byteCount = serialize(value, binaryWriter, offsets, allOffsets);
+          final binaryWriter = IsarWriterImpl(buffer, staticSize);
+          serialize(value, binaryWriter, offsets, allOffsets);
+          final byteCount = binaryWriter.usedBytes;
           _writeUint24(offsetListOffset + i * 3, byteCount + 1);
           _dynamicOffset += byteCount;
         } else {

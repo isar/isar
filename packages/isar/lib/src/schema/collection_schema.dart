@@ -8,13 +8,10 @@ class CollectionSchema<OBJ> extends Schema<OBJ> {
     required super.id,
     required super.name,
     required super.properties,
-    required super.serializeNative,
     required super.estimateSize,
-    required super.deserializeNative,
-    required super.deserializePropNative,
-    required super.serializeWeb,
-    required super.deserializeWeb,
-    required super.deserializePropWeb,
+    required super.serialize,
+    required super.deserialize,
+    required super.deserializeProp,
     required this.idName,
     required this.indexes,
     required this.links,
@@ -58,9 +55,6 @@ class CollectionSchema<OBJ> extends Schema<OBJ> {
 
   /// @nodoc
   void toCollection(void Function<OBJ>() callback) => callback<OBJ>();
-
-  /// Whether this collection has links
-  bool get hasLinks => links.isNotEmpty;
 
   /// @nodoc
   @pragma('vm:prefer-inline')

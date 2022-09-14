@@ -4,7 +4,7 @@ import 'package:isar/isar.dart';
 abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
   var _initialized = false;
 
-  int? _objectId;
+  Id? _objectId;
 
   /// The isar name of the link
   late final String linkName;
@@ -25,7 +25,7 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
     IsarCollection<dynamic> sourceCollection,
     IsarCollection<OBJ> targetCollection,
     String linkName,
-    int? objectId,
+    Id? objectId,
   ) {
     if (_initialized) {
       if (linkName != this.linkName ||
@@ -48,7 +48,7 @@ abstract class IsarLinkBaseImpl<OBJ> implements IsarLinkBase<OBJ> {
 
   /// Returns the containing object's id or throws an exception if this link has
   /// not been attached to an object yet.
-  int requireAttached() {
+  Id requireAttached() {
     if (_objectId == null) {
       throw IsarError(
         'Containing object needs to be managed by Isar to use this method. '

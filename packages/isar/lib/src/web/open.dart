@@ -9,9 +9,11 @@ import 'package:isar/src/common/schemas.dart';
 import 'package:isar/src/web/bindings.dart';
 import 'package:isar/src/web/isar_collection_impl.dart';
 import 'package:isar/src/web/isar_impl.dart';
+import 'package:isar/src/web/isar_web.dart';
+import 'package:meta/meta.dart';
 
 bool _loaded = false;
-Future<void> initializeIsarWeb() async {
+Future<void> initializeIsarWeb([String? jsUrl]) async {
   if (_loaded) {
     return;
   }
@@ -31,10 +33,17 @@ Future<void> initializeIsarWeb() async {
   );
 }
 
+@visibleForTesting
+void doNotInitializeIsarWeb() {
+  _loaded = true;
+}
+
 Future<Isar> openIsar({
+  required List<CollectionSchema<dynamic>> schemas,
+  String? directory,
   required String name,
   required bool relaxedDurability,
-  required List<CollectionSchema<dynamic>> schemas,
+  CompactCondition? compactOnLaunch,
 }) async {
   await initializeIsarWeb();
   final schemasJson = getSchemas(schemas).map((e) => e.toSchemaJson());
@@ -58,3 +67,12 @@ Future<Isar> openIsar({
   isar.attachCollections(cols);
   return isar;
 }
+
+Isar openIsarSync({
+  required List<CollectionSchema<dynamic>> schemas,
+  String? directory,
+  required String name,
+  required bool relaxedDurability,
+  CompactCondition? compactOnLaunch,
+}) =>
+    unsupportedOnWeb();

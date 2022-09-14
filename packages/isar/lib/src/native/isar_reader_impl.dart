@@ -9,8 +9,8 @@ import 'package:meta/meta.dart';
 
 /// @nodoc
 @protected
-class BinaryReader {
-  BinaryReader(this._buffer)
+class IsarReaderImpl implements IsarReader {
+  IsarReaderImpl(this._buffer)
       : _byteData = ByteData.view(_buffer.buffer, _buffer.offsetInBytes) {
     _staticSize = _byteData.getUint16(0, Endian.little);
   }
@@ -32,6 +32,7 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   bool readBool(int offset) {
     if (offset >= _staticSize) {
       return false;
@@ -52,6 +53,7 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   bool? readBoolOrNull(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -60,6 +62,7 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   int readByte(int offset) {
     if (offset >= _staticSize) {
       return 0;
@@ -68,6 +71,7 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   int? readByteOrNull(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -76,6 +80,7 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   int readInt(int offset) {
     if (offset >= _staticSize) {
       return nullInt;
@@ -94,6 +99,7 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   int? readIntOrNull(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -102,6 +108,7 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   double readFloat(int offset) {
     if (offset >= _staticSize) {
       return nullDouble;
@@ -120,6 +127,7 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   double? readFloatOrNull(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -128,6 +136,7 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   int readLong(int offset) {
     if (offset >= _staticSize) {
       return nullLong;
@@ -146,6 +155,7 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   int? readLongOrNull(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -154,6 +164,7 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   double readDouble(int offset) {
     if (offset >= _staticSize) {
       return nullDouble;
@@ -172,6 +183,7 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   double? readDoubleOrNull(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -180,6 +192,7 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   DateTime readDateTime(int offset) {
     final time = readLongOrNull(offset);
     return time != null
@@ -188,6 +201,7 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   DateTime? readDateTimeOrNull(int offset) {
     final time = readLongOrNull(offset);
     if (time != null) {
@@ -205,11 +219,13 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   String readString(int offset) {
     return readStringOrNull(offset) ?? '';
   }
 
   @pragma('vm:prefer-inline')
+  @override
   String? readStringOrNull(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -227,9 +243,10 @@ class BinaryReader {
   }
 
   @pragma('vm:prefer-inline')
+  @override
   T? readObjectOrNull<T>(
     int offset,
-    DeserializeNative<T> deserialize,
+    Deserialize<T> deserialize,
     Map<Type, List<int>> allOffsets,
   ) {
     if (offset >= _staticSize) {
@@ -246,11 +263,12 @@ class BinaryReader {
 
     final buffer =
         Uint8List.sublistView(_buffer, bytesOffset, bytesOffset + length);
-    final reader = BinaryReader(buffer);
+    final reader = IsarReaderImpl(buffer);
     final offsets = allOffsets[T]!;
     return deserialize(0, reader, offsets, allOffsets);
   }
 
+  @override
   List<bool>? readBoolList(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -271,6 +289,7 @@ class BinaryReader {
     return list;
   }
 
+  @override
   List<bool?>? readBoolOrNullList(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -291,6 +310,7 @@ class BinaryReader {
     return list;
   }
 
+  @override
   List<int>? readByteList(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -307,6 +327,7 @@ class BinaryReader {
     return _buffer.sublist(listOffset, listOffset + length);
   }
 
+  @override
   List<int>? readIntList(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -327,6 +348,7 @@ class BinaryReader {
     return list;
   }
 
+  @override
   List<int?>? readIntOrNullList(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -347,6 +369,7 @@ class BinaryReader {
     return list;
   }
 
+  @override
   List<double>? readFloatList(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -367,6 +390,7 @@ class BinaryReader {
     return list;
   }
 
+  @override
   List<double?>? readFloatOrNullList(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -387,6 +411,7 @@ class BinaryReader {
     return list;
   }
 
+  @override
   List<int>? readLongList(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -407,6 +432,7 @@ class BinaryReader {
     return list;
   }
 
+  @override
   List<int?>? readLongOrNullList(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -427,6 +453,7 @@ class BinaryReader {
     return list;
   }
 
+  @override
   List<double>? readDoubleList(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -447,6 +474,7 @@ class BinaryReader {
     return list;
   }
 
+  @override
   List<double?>? readDoubleOrNullList(int offset) {
     if (offset >= _staticSize) {
       return null;
@@ -467,6 +495,7 @@ class BinaryReader {
     return list;
   }
 
+  @override
   List<DateTime>? readDateTimeList(int offset) {
     return readLongOrNullList(offset)?.map((e) {
       if (e != null) {
@@ -477,6 +506,7 @@ class BinaryReader {
     }).toList();
   }
 
+  @override
   List<DateTime?>? readDateTimeOrNullList(int offset) {
     return readLongOrNullList(offset)?.map((e) {
       if (e != null) {
@@ -516,41 +546,45 @@ class BinaryReader {
     return list;
   }
 
+  @override
   List<String>? readStringList(int offset) {
     return readDynamicList(offset, '', (startOffset, endOffset) {
       return utf8Decoder.convert(_buffer, startOffset, endOffset);
     });
   }
 
+  @override
   List<String?>? readStringOrNullList(int offset) {
     return readDynamicList(offset, null, (startOffset, endOffset) {
       return utf8Decoder.convert(_buffer, startOffset, endOffset);
     });
   }
 
+  @override
   List<T>? readObjectList<T>(
     int offset,
-    DeserializeNative<T> deserialize,
+    Deserialize<T> deserialize,
     Map<Type, List<int>> allOffsets,
     T defaultValue,
   ) {
     final offsets = allOffsets[T]!;
     return readDynamicList(offset, defaultValue, (startOffset, endOffset) {
       final buffer = Uint8List.sublistView(_buffer, startOffset, endOffset);
-      final reader = BinaryReader(buffer);
+      final reader = IsarReaderImpl(buffer);
       return deserialize(0, reader, offsets, allOffsets);
     });
   }
 
+  @override
   List<T?>? readObjectOrNullList<T>(
     int offset,
-    DeserializeNative<T> deserialize,
+    Deserialize<T> deserialize,
     Map<Type, List<int>> allOffsets,
   ) {
     final offsets = allOffsets[T]!;
     return readDynamicList(offset, null, (startOffset, endOffset) {
       final buffer = Uint8List.sublistView(_buffer, startOffset, endOffset);
-      final reader = BinaryReader(buffer);
+      final reader = IsarReaderImpl(buffer);
       return deserialize(0, reader, offsets, allOffsets);
     });
   }

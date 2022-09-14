@@ -166,7 +166,7 @@ class WhereGenerator {
   String generateWhereIdEqualTo() {
     final idName = id.dartName.decapitalize();
     return '''
-    $mPrefix ${idName}EqualTo(int $idName) {
+    $mPrefix ${idName}EqualTo(Id $idName) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IdWhereClause.between(
           lower: $idName,
@@ -202,7 +202,7 @@ class WhereGenerator {
   String generateWhereIdNotEqualTo() {
     final idName = id.dartName.decapitalize();
     return '''
-    $mPrefix ${idName}NotEqualTo(int $idName) {
+    $mPrefix ${idName}NotEqualTo(Id $idName) {
       return QueryBuilder.apply(this, (query) {
         if (query.whereSort == Sort.asc) {
           return query.addWhereClause(
@@ -279,7 +279,7 @@ class WhereGenerator {
   String generateWhereIdGreaterThan() {
     final idName = id.dartName.decapitalize();
     return '''
-    $mPrefix ${idName}GreaterThan(int $idName, {bool include = false}) {
+    $mPrefix ${idName}GreaterThan(Id $idName, {bool include = false}) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(
           IdWhereClause.greaterThan(lower: $idName, includeLower: include),
@@ -318,7 +318,7 @@ class WhereGenerator {
   String generateWhereIdLessThan() {
     final idName = id.dartName.decapitalize();
     return '''
-    $mPrefix ${idName}LessThan(int $idName, {bool include = false}) {
+    $mPrefix ${idName}LessThan(Id $idName, {bool include = false}) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(
           IdWhereClause.lessThan(upper: $idName, includeUpper: include),
@@ -359,7 +359,7 @@ class WhereGenerator {
     final lowerName = 'lower${id.dartName.capitalize()}';
     final upperName = 'upper${id.dartName.capitalize()}';
     return '''
-    $mPrefix ${idName}Between(int $lowerName, int $upperName, {bool includeLower = true, bool includeUpper = true,}) {
+    $mPrefix ${idName}Between(Id $lowerName, Id $upperName, {bool includeLower = true, bool includeUpper = true,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addWhereClause(IdWhereClause.between(
           lower: $lowerName,

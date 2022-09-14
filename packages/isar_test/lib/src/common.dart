@@ -1,73 +1,27 @@
+// ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member
+
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:isar/isar.dart';
+import 'package:isar_test/src/init_native.dart'
+    if (dart.library.html) 'package:isar_test/src/init_web.dart';
+import 'package:isar_test/src/sync_async_helper.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:test_api/src/backend/invoker.dart';
-
-import 'sync_async_helper.dart';
 
 const bool kIsWeb = identical(0, 0.0);
 
 final testErrors = <String>[];
 int testCount = 0;
 
-String _getRustTarget() {
-  switch (Abi.current()) {
-    case Abi.macosArm64:
-      return 'aarch64-apple-darwin';
-    case Abi.macosX64:
-      return 'x86_64-apple-darwin';
-    case Abi.linuxArm64:
-      return 'aarch64-unknown-linux-gnu';
-    case Abi.linuxX64:
-      return 'x86_64-unknown-linux-gnu';
-    case Abi.windowsX64:
-      return 'x86_64-pc-windows-gnu';
-    case Abi.windowsIA32:
-      return 'i686-pc-windows-gnu';
-    default:
-      throw UnsupportedError('Unsupported ABI: ${Abi.current()}');
-  }
-}
-
 var _setUp = false;
 Future<void> _prepareTest() async {
-  if (!kIsWeb && !_setUp) {
-    if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
-      try {
-        final rootDir = path.dirname(path.dirname(Directory.current.path));
-        final target = _getRustTarget();
-        final binaryName = Platform.isWindows
-            ? 'isar.dll'
-            : Platform.isMacOS
-                ? 'libisar.dylib'
-                : 'libisar.so';
-        final binaryPath =
-            path.join(rootDir, 'target', target, 'debug', binaryName);
-        if (!File(binaryPath).existsSync()) {
-          final result = await Process.run(
-            'cargo',
-            ['build', '--target', target],
-            runInShell: true,
-            workingDirectory: rootDir,
-          );
-          if (result.exitCode != 0) {
-            throw Exception('Cargo build failed: ${result.stderr}');
-          }
-        }
-        await Isar.initializeIsarCore(libraries: {Abi.current(): binaryPath});
-      } catch (e) {
-        // ignore. maybe this is an instrumentation test
-        // ignore: avoid_print
-        print('EE: $e');
-      }
-    }
-
+  if (!_setUp) {
+    await init();
     _setUp = true;
   }
 }
@@ -164,6 +118,6 @@ Future<Isar> openTempIsar(
     });
   }
 
-  await isar.verify();
+  if (!kIsWeb) await isar.verify();
   return isar;
 }

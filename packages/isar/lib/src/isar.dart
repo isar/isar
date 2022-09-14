@@ -100,7 +100,7 @@ abstract class Isar {
         }(),
       );
     }
-    return IsarNative.open(
+    return openIsar(
       schemas: schemas,
       directory: directory,
       name: name,
@@ -127,7 +127,7 @@ abstract class Isar {
         }(),
       );
     }
-    return IsarNative.openSync(
+    return openIsarSync(
       schemas: schemas,
       directory: directory,
       name: name,
@@ -300,8 +300,8 @@ abstract class Isar {
   static Future<void> initializeIsarCore({
     Map<IsarAbi, String> libraries = const {},
     bool download = false,
-  }) {
-    return IsarNative.initializeIsarCore(
+  }) async {
+    await initializeCoreBinary(
       libraries: libraries,
       download: download,
     );
@@ -309,7 +309,7 @@ abstract class Isar {
 
   /// Split a String into words according to Unicode Annex #29. Only words
   /// containing at least one alphanumeric character will be included.
-  static List<String> splitWords(String input) => IsarNative.splitWords(input);
+  static List<String> splitWords(String input) => isarSplitWords(input);
 }
 
 /// Isar databases can contain unused space that will be reused for later

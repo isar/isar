@@ -48,12 +48,11 @@ Query<T> buildWebQuery<T, OBJ>(
   );
 
   QueryDeserialize<T> deserialize;
-  if (property == null) {
-    deserialize = (jsObj) => col.schema.deserializeWeb(col, jsObj) as T;
-  } else {
-    deserialize =
-        (jsObj) => col.schema.deserializePropWeb(jsObj, property) as T;
-  }
+  //if (property == null) {
+  deserialize = col.deserializeObject as T Function(Object);
+  /*} else {
+    deserialize = (jsObj) => col.schema.deserializeProp(jsObj, property) as T;
+  }*/
 
   return QueryImpl<T>(col, queryJs, deserialize, property);
 }
@@ -122,13 +121,14 @@ LinkWhereClauseJs _buildLinkWhereClause(
   IsarCollectionImpl<dynamic> col,
   LinkWhereClause wc,
 ) {
+  // ignore: unused_local_variable
   final linkCol = col.isar.getCollectionByNameInternal(wc.linkCollection)!
       as IsarCollectionImpl;
-  final backlinkLinkName = linkCol.schema.backlinkLinkNames[wc.linkName];
+  //final backlinkLinkName = linkCol.schema.backlinkLinkNames[wc.linkName];
   return LinkWhereClauseJs()
     ..linkCollection = wc.linkCollection
-    ..linkName = backlinkLinkName ?? wc.linkName
-    ..backlink = backlinkLinkName != null
+    //..linkName = backlinkLinkName ?? wc.linkName
+    //..backlink = backlinkLinkName != null
     ..id = wc.id;
 }
 
@@ -232,7 +232,7 @@ String _buildCondition(
 
   final isListOp = condition.type != FilterConditionType.isNull &&
       condition.type != FilterConditionType.listLength &&
-      schema.property(condition.property);
+      schema.property(condition.property).type.isList;
   final accessor =
       condition.property == schema.idName ? 'id' : 'obj.${condition.property}';
   final variable = isListOp ? 'e' : accessor;
@@ -348,8 +348,10 @@ String _buildConditionInternal({
       throw UnimplementedError();
     case FilterConditionType.isNull:
       return isNull;
+    // ignore: no_default_cases
+    default:
+      throw UnimplementedError();
   }
-  return isNull; // TOCO fix
 }
 
 SortCmpJs _buildSort(List<SortProperty> properties) {

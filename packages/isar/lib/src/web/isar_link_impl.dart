@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs
 
+import 'package:isar/isar.dart';
 import 'package:isar/src/common/isar_link_base_impl.dart';
 import 'package:isar/src/common/isar_link_common.dart';
 import 'package:isar/src/common/isar_links_common.dart';
@@ -38,12 +39,12 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
     final containingId = requireAttached();
     final backlink = backlinkLinkName != null;
 
-    final linkIds = List.filled(linkList.length, 0);
+    final linkIds = List<Id>.filled(linkList.length, 0);
     for (var i = 0; i < linkList.length; i++) {
       linkIds[i] = requireGetId(linkList[i]);
     }
 
-    final unlinkIds = List.filled(unlinkList.length, 0);
+    final unlinkIds = List<Id>.filled(unlinkList.length, 0);
     for (var i = 0; i < unlinkList.length; i++) {
       unlinkIds[i] = requireGetId(unlinkList[i]);
     }

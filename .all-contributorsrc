@@ -85,6 +85,7 @@
       ]
     }
   ],
+  "contributorTemplate": "<a href=\"https://github.com/<%= contributor.login %>\"><img src=\"<%= contributor.avatar_url %>\" width=\"<%= options.imageSize %>px;\" alt=\"\"/><br /><sub><b><%= contributor.name %></b></sub></a>",
   "contributorsPerLine": 7,
   "contributorsSortAlphabetically": true,
   "projectName": "isar",
