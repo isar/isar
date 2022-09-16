@@ -47,7 +47,7 @@ class LinkModelB {
 }
 
 void main() {
-  group('Link', () {
+  group('Links', () {
     late Isar isar;
     late LinkModelA a1;
     late LinkModelA a2;

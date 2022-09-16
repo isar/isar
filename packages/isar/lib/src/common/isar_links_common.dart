@@ -96,6 +96,13 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
 
     await update(link: addedObjects, unlink: removedObjects);
 
+    for (final object in addedObjects) {
+      final id = getId(object);
+      if (id != Isar.autoIncrement) {
+        _objects[id] = object;
+      }
+    }
+
     addedObjects.clear();
     removedObjects.clear();
     isLoaded = true;
@@ -108,6 +115,13 @@ abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
     }
 
     updateSync(link: addedObjects, unlink: removedObjects);
+
+    for (final object in addedObjects) {
+      final id = getId(object);
+      if (id != Isar.autoIncrement) {
+        _objects[id] = object;
+      }
+    }
 
     addedObjects.clear();
     removedObjects.clear();
