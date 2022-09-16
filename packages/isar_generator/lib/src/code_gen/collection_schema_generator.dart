@@ -106,7 +106,7 @@ String _generateLinkSchema(ObjectInfo object, ObjectLink link) {
       id: ${link.id(object.isarName)},
       name: r'${link.isarName}',
       target: r'${link.targetCollectionIsarName}',
-      isSingle: ${link.isSingle},
+      single: ${link.isSingle},
       $linkName
     )''';
 }

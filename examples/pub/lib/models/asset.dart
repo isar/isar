@@ -11,7 +11,7 @@ class Asset {
     required this.content,
   }) : id = Isar.autoIncrement;
 
-  final Id id;
+  Id id;
 
   @Index(
     unique: true,
@@ -29,6 +29,8 @@ class Asset {
   final AssetKind kind;
 
   final String content;
+
+  final testLink = IsarLinks<Asset>();
 }
 
 enum AssetKind { readme, changelog }

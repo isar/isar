@@ -100,7 +100,7 @@ fn aggregate(
                             double_value = value;
                         }
                     }
-                    _ => unreachable!(),
+                    _ => {}
                 }
             }
             AggregationOp::Sum | AggregationOp::Average => {
@@ -118,7 +118,7 @@ fn aggregate(
                     }
                     DataType::Float => double_value += obj.read_float(property.offset) as f64,
                     DataType::Double => double_value += obj.read_double(property.offset),
-                    _ => unreachable!(),
+                    _ => {}
                 }
             }
             AggregationOp::Count => {
@@ -142,20 +142,21 @@ fn aggregate(
     }
 
     let result = match op {
-        AggregationOp::Average => {
-            let result = match property.data_type {
-                DataType::Int | DataType::Long => (long_value as f64) / (count as f64),
-                DataType::Float | DataType::Double => double_value / (count as f64),
-                _ => unreachable!(),
-            };
-            AggregationResult::Double(result)
-        }
+        AggregationOp::Average => match property.data_type {
+            DataType::Int | DataType::Long => {
+                AggregationResult::Double((long_value as f64) / (count as f64))
+            }
+            DataType::Float | DataType::Double => {
+                AggregationResult::Double(double_value / (count as f64))
+            }
+            _ => AggregationResult::Null,
+        },
         AggregationOp::Count => AggregationResult::Long(count as i64),
         AggregationOp::IsEmpty => AggregationResult::Long(if count > 0 { 0 } else { 1 }),
         _ => match property.data_type {
             DataType::Int | DataType::Long => AggregationResult::Long(long_value),
             DataType::Float | DataType::Double => AggregationResult::Double(double_value),
-            _ => unreachable!(),
+            _ => AggregationResult::Null,
         },
     };
 

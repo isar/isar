@@ -278,7 +278,7 @@ void main() {
 
     isarTest('.isNotEmpty()', () async {
       // FIXME: returns every values + 2 times the empty value
-      // returns [objNull, objEmpty, objEmpty, obj1, obj2, obj3, obj4, obj5, obj6]
+      // returns [objNull, objEmpty, objEmpty, obj1, obj2, obj3, obj4, obj5]
       // await qEqualSet(
       //   isar.stringModels.where().valueIsNotEmpty(),
       //   [obj1, obj2, obj3, obj4, obj5, obj6],

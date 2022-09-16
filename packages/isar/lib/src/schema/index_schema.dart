@@ -12,6 +12,20 @@ class IndexSchema {
     required this.properties,
   });
 
+  /// @nodoc
+  @protected
+  factory IndexSchema.fromJson(Map<String, dynamic> json) {
+    return IndexSchema(
+      id: -1,
+      name: json['name'] as String,
+      unique: json['unique'] as bool,
+      replace: json['replace'] as bool,
+      properties: (json['properties'] as List<dynamic>)
+          .map((e) => IndexPropertySchema.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
   /// Internal id of this index.
   final int id;
 
@@ -28,15 +42,18 @@ class IndexSchema {
   final List<IndexPropertySchema> properties;
 
   /// @nodoc
-  Map<String, dynamic> toSchemaJson() {
-    return {
+  @protected
+  Map<String, dynamic> toJson() {
+    final json = {
       'name': name,
       'unique': unique,
       'replace': replace,
       'properties': [
-        for (final property in properties) property.toSchemaJson(),
+        for (final property in properties) property.toJson(),
       ],
     };
+
+    return json;
   }
 }
 
@@ -50,6 +67,16 @@ class IndexPropertySchema {
     required this.caseSensitive,
   });
 
+  /// @nodoc
+  @protected
+  factory IndexPropertySchema.fromJson(Map<String, dynamic> json) {
+    return IndexPropertySchema(
+      name: json['name'] as String,
+      type: IndexType.values.firstWhere((e) => _typeName[e] == json['type']),
+      caseSensitive: json['caseSensitive'] as bool,
+    );
+  }
+
   /// Isar name of the property.
   final String name;
 
@@ -60,7 +87,8 @@ class IndexPropertySchema {
   final bool caseSensitive;
 
   /// @nodoc
-  Map<String, dynamic> toSchemaJson() {
+  @protected
+  Map<String, dynamic> toJson() {
     return {
       'name': name,
       'type': _typeName[type],

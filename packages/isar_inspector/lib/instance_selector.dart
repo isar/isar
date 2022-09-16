@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:isar_inspector/common.dart';
 
-import 'package:isar_inspector/state/instances_state.dart';
+class InstanceSelector extends StatefulWidget {
+  const InstanceSelector({
+    super.key,
+    required this.instances,
+    required this.selectedInstance,
+    required this.onSelected,
+  });
 
-class InstanceSelector extends ConsumerStatefulWidget {
-  const InstanceSelector({super.key});
+  final List<String> instances;
+  final String selectedInstance;
+  final void Function(String instance) onSelected;
 
   @override
-  ConsumerState<InstanceSelector> createState() => _InstanceSelectorState();
+  State<InstanceSelector> createState() => _InstanceSelectorState();
 }
 
-class _InstanceSelectorState extends ConsumerState<InstanceSelector>
+class _InstanceSelectorState extends State<InstanceSelector>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     duration: const Duration(milliseconds: 500),
@@ -40,9 +45,7 @@ class _InstanceSelectorState extends ConsumerState<InstanceSelector>
 
   @override
   Widget build(BuildContext context) {
-    final instances = ref.watch(instancesPod).value!;
-    final selectedInstance = ref.watch(selectedInstancePod).value!;
-
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -51,9 +54,9 @@ class _InstanceSelectorState extends ConsumerState<InstanceSelector>
           children: [
             Padding(
               padding: const EdgeInsets.all(1),
-              child: IsarCard(
-                color: const Color(0xff31343f),
-                radius: BorderRadius.circular(15),
+              child: Card(
+                margin: const EdgeInsets.all(10),
+                color: theme.colorScheme.secondaryContainer,
                 child: SizeTransition(
                   sizeFactor: _animation,
                   axisAlignment: -1,
@@ -62,12 +65,12 @@ class _InstanceSelectorState extends ConsumerState<InstanceSelector>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const SizedBox(height: 15),
-                      for (var instance in instances)
-                        if (instance != selectedInstance)
+                      for (var instance in widget.instances)
+                        if (instance != widget.selectedInstance)
                           InstanceButton(
                             instance: instance,
                             onTap: () {
-                              selectInstance(ref, instance);
+                              widget.onSelected(instance);
                               _controller.reverse();
                             },
                           ),
@@ -78,8 +81,8 @@ class _InstanceSelectorState extends ConsumerState<InstanceSelector>
               ),
             ),
             SelectedInstanceButton(
-              instance: selectedInstance,
-              hasMultiple: instances.length > 1,
+              instance: widget.selectedInstance,
+              hasMultiple: widget.instances.length > 1,
               color: _animation.status != AnimationStatus.dismissed
                   ? Colors.blue
                   : null,
@@ -111,9 +114,9 @@ class InstanceButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: IsarCard(
+      child: Card(
         color: Colors.transparent,
-        onTap: onTap,
+        //onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Center(
@@ -148,20 +151,22 @@ class SelectedInstanceButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 65,
-      child: IsarCard(
-        color: color,
-        radius: BorderRadius.circular(15),
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.all(10),
+      color: theme.colorScheme.secondaryContainer,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
         onTap: hasMultiple ? onTap : null,
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   FontAwesomeIcons.database,
                   size: 25,
+                  color: theme.colorScheme.onSecondaryContainer,
                 ),
                 const SizedBox(width: 10),
                 Column(
@@ -170,12 +175,18 @@ class SelectedInstanceButton extends StatelessWidget {
                   children: [
                     Text(
                       instance,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        color: theme.colorScheme.onSecondaryContainer,
                       ),
                     ),
-                    const Text('Isar Instance')
+                    Text(
+                      'Isar Instance',
+                      style: theme.textTheme.bodyMedium!.copyWith(
+                        color: theme.colorScheme.onSecondaryContainer,
+                      ),
+                    )
                   ],
                 ),
                 const Spacer(),

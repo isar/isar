@@ -1,25 +1,58 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'package:isar_inspector/filter_field.dart';
-import 'package:isar_inspector/query_table.dart';
+import 'package:isar/isar.dart';
+import 'package:isar_inspector/connect_client.dart';
 import 'package:isar_inspector/sidebar.dart';
-import 'package:isar_inspector/state/instances_state.dart';
-import 'package:isar_inspector/state/isar_connect_state_notifier.dart';
+import 'package:isar_inspector/table/collection_area.dart';
 
-class ConnectedLayout extends ConsumerStatefulWidget {
-  const ConnectedLayout({super.key});
+class ConnectedLayout extends StatefulWidget {
+  const ConnectedLayout({
+    super.key,
+    required this.client,
+    required this.instances,
+    required this.collections,
+  });
+
+  final ConnectClient client;
+  final List<String> instances;
+  final List<CollectionSchema<dynamic>> collections;
 
   @override
-  ConsumerState<ConnectedLayout> createState() => _ConnectedLayoutState();
+  State<ConnectedLayout> createState() => _ConnectedLayoutState();
 }
 
-class _ConnectedLayoutState extends ConsumerState<ConnectedLayout> {
+class _ConnectedLayoutState extends State<ConnectedLayout> {
+  late String selectedInstance;
+  late String selectedCollection = widget.collections.first.name;
+  late StreamSubscription<void> infoSubscription;
+
   @override
   void initState() {
-    final instance = ref.read(selectedInstancePod).value!;
-    ref.read(isarConnectPod.notifier).watchInstance(instance);
+    _selectInstance(widget.instances.first);
+    infoSubscription = widget.client.collectionInfoChanged.listen((_) {
+      setState(() {});
+    });
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant ConnectedLayout oldWidget) {
+    if (!widget.instances.contains(selectedInstance)) {
+      _selectInstance(widget.instances.first);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    infoSubscription.cancel();
+    super.dispose();
+  }
+
+  void _selectInstance(String instance) {
+    selectedInstance = instance;
+    widget.client.watchInstance(instance);
   }
 
   @override
@@ -29,19 +62,40 @@ class _ConnectedLayoutState extends ConsumerState<ConnectedLayout> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(
-            width: 300,
-            child: Sidebar(),
+          SizedBox(
+            width: 320,
+            child: Sidebar(
+              instances: widget.instances,
+              selectedInstance: selectedInstance,
+              onInstanceSelected: (instance) {
+                setState(() {
+                  _selectInstance(instance);
+                });
+              },
+              collections: widget.collections,
+              collectionInfo: widget.client.collectionInfo,
+              selectedCollection: selectedCollection,
+              onCollectionSelected: (collection) {
+                setState(() {
+                  selectedCollection = collection;
+                });
+              },
+            ),
           ),
           const SizedBox(width: 25),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: const [
-                FilterField(),
-                SizedBox(height: 25),
-                Expanded(child: QueryTable()),
-              ],
+            child: CollectionArea(
+              instance: selectedInstance,
+              collection: selectedCollection,
+              client: widget.client,
+              schemas: {
+                for (final schema in widget.collections) ...{
+                  schema.name: schema,
+                  for (final embedded in schema.embeddedSchemas.values) ...{
+                    embedded.name: embedded,
+                  }
+                }
+              },
             ),
           )
         ],

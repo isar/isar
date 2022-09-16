@@ -1,4 +1,4 @@
-// ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member
+// ignore_for_file: implementation_imports
 
 import 'dart:async';
 import 'dart:io';
@@ -118,6 +118,7 @@ Future<Isar> openTempIsar(
     });
   }
 
+  // ignore: invalid_use_of_visible_for_testing_member
   if (!kIsWeb) await isar.verify();
   return isar;
 }

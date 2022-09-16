@@ -46,7 +46,7 @@ Future<Isar> openIsar({
   CompactCondition? compactOnLaunch,
 }) async {
   await initializeIsarWeb();
-  final schemasJson = getSchemas(schemas).map((e) => e.toSchemaJson());
+  final schemasJson = getSchemas(schemas).map((e) => e.toJson());
   final schemasJs = jsify(schemasJson.toList()) as List<dynamic>;
   final instance = await openIsarJs(name, schemasJs, relaxedDurability)
       .wait<IsarInstanceJs>();

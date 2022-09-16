@@ -1,5 +1,8 @@
+// ignore_for_file: public_member_api_docs
+
 part of isar;
 
+@protected
 abstract class IsarWriter {
   void writeBool(int offset, bool? value);
 

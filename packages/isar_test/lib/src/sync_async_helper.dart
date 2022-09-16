@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
-
-import 'sync_future.dart';
+import 'package:isar_test/src/sync_future.dart';
 
 bool get syncTest => Zone.current[#syncTest] as bool? ?? false;
 

@@ -32,6 +32,7 @@ const ignoreLints = [
   'join_return_with_assignment',
   'prefer_final_locals',
   'avoid_js_rounded_ints',
+  'avoid_positional_boolean_parameters',
 ];
 
 class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
@@ -85,7 +86,7 @@ class IsarEmbeddedGenerator extends GeneratorForAnnotation<Embedded> {
     final object = IsarAnalyzer().analyzeEmbedded(element);
     return '''
       // coverage:ignore-file
-      // ignore_for_file: ${ignoreLints.join(', ')}å
+      // ignore_for_file: ${ignoreLints.join(', ')}
 
       ${generateSchema(object)}
 

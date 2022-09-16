@@ -1,4 +1,4 @@
-// ignore_for_file: invalid_use_of_visible_for_testing_member, implementation_imports, avoid_web_libraries_in_flutter
+// ignore_for_file: avoid_web_libraries_in_flutter, implementation_imports
 
 import 'dart:js' as js;
 
@@ -7,5 +7,6 @@ import 'package:isar_test/src/isar_web_src.dart';
 
 Future<void> init() async {
   js.context.callMethod('eval', [isarWebSrc]);
+  // ignore: invalid_use_of_visible_for_testing_member
   isar_web.doNotInitializeIsarWeb();
 }

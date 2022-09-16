@@ -14,9 +14,6 @@ abstract class _IsarConnect {
     ConnectAction.removeQuery: _removeQuery,
     ConnectAction.exportJson: _exportJson,
     ConnectAction.editProperty: _editProperty,
-    ConnectAction.addInList: _addInList,
-    ConnectAction.removeFromList: _removeFromList,
-    ConnectAction.aggregation: _aggregation,
   };
 
   static List<CollectionSchema<dynamic>>? _schemas;
@@ -87,13 +84,7 @@ abstract class _IsarConnect {
   }
 
   static Future<dynamic> _getSchema(Map<String, dynamic> _) async {
-    return [
-      ..._schemas!.map(
-        (e) => e.toSchemaJson()
-          ..['objects'] =
-              e.embeddedSchemas.values.map((e) => e.toSchemaJson()).toList(),
-      )
-    ];
+    return _schemas!.map((e) => e.toJson()).toList();
   }
 
   static Future<dynamic> _listInstances(Map<String, dynamic> _) async {
@@ -145,81 +136,76 @@ abstract class _IsarConnect {
   static Future<Map<String, dynamic>> _executeQuery(
     Map<String, dynamic> params,
   ) async {
-    if (_querySubscription.isNotEmpty) {
-      for (final sub in _querySubscription) {
-        unawaited(sub.cancel());
-      }
-      _querySubscription.clear();
+    for (final sub in _querySubscription) {
+      unawaited(sub.cancel());
     }
-
-    void listener(event) {
-      postEvent(ConnectEvent.queryChanged.event, {});
-    }
+    _querySubscription.clear();
 
     final cQuery = ConnectQuery.fromJson(params);
+    final instance = Isar.getInstance(cQuery.instance)!;
 
     final links =
-        _schemas!.firstWhere((e) => e.name == cQuery.collection).links;
+        _schemas!.firstWhere((e) => e.name == cQuery.collection).links.values;
 
-    final query = _getQuery(cQuery);
+    final query = cQuery.toQuery();
     params.remove('limit');
     params.remove('offset');
-    final countQuery = _getQuery(ConnectQuery.fromJson(params));
+    final countQuery = ConnectQuery.fromJson(params).toQuery();
 
-    final stream = query.watchLazy();
-    _querySubscription.add(stream.listen(listener));
+    _querySubscription.add(
+      query.watchLazy().listen((_) {
+        postEvent(ConnectEvent.queryChanged.event, {});
+      }),
+    );
+    for (final link in links) {
+      final target = instance.getCollectionByNameInternal(link.target)!;
+      _querySubscription.add(
+        target.watchLazy().listen((_) {
+          postEvent(ConnectEvent.queryChanged.event, {});
+        }),
+      );
+    }
 
-    final results = await query.exportJson();
-
+    final objects = await query.exportJson();
     if (links.isNotEmpty) {
-      final source = Isar.getInstance(cQuery.instance)!
-          .getCollectionByNameInternal(cQuery.collection)!;
-      for (var index = 0; index < results.length; index++) {
-        for (final link in links.values) {
-          final target = Isar.getInstance(cQuery.instance)!
-              .getCollectionByNameInternal(link.target)!;
-
-          _querySubscription.add(target.watchLazy().listen(listener));
-
-          final qb = QueryBuilderInternal<dynamic>(
-            collection: target,
+      final source = instance.getCollectionByNameInternal(cQuery.collection)!;
+      for (final object in objects) {
+        for (final link in links) {
+          final target = instance.getCollectionByNameInternal(link.target)!;
+          final links = await target.buildQuery<dynamic>(
             whereClauses: [
               LinkWhereClause(
                 linkCollection: source.name,
                 linkName: link.name,
-                id: results[index][source.schema.idName] as int,
+                id: object[source.schema.idName] as int,
               ),
             ],
-          );
+            limit: link.single ? 1 : null,
+          ).exportJson();
 
-          final q = QueryBuilder<dynamic, dynamic, QAfterFilterCondition>(qb);
-
-          if (link.isSingle) {
-            results[index][link.name] =
-                await q.findFirst() == null ? null : (await q.exportJson())[0];
+          if (link.single) {
+            object[link.name] = links.isEmpty ? null : links.first;
           } else {
-            results[index][link.name] =
-                await QueryBuilder<dynamic, dynamic, QAfterFilterCondition>(qb)
-                    .exportJson();
+            object[link.name] = links;
           }
         }
       }
     }
 
     return {
-      'results': results,
+      'objects': objects,
       'count': await countQuery.count(),
     };
   }
 
   static Future<bool> _removeQuery(Map<String, dynamic> params) async {
-    final query = _getQuery(ConnectQuery.fromJson(params));
+    final query = ConnectQuery.fromJson(params).toQuery();
     await query.isar.writeTxn(query.deleteAll);
     return true;
   }
 
   static Future<List<dynamic>> _exportJson(Map<String, dynamic> params) async {
-    final query = _getQuery(ConnectQuery.fromJson(params));
+    final query = ConnectQuery.fromJson(params).toQuery();
     return query.exportJson();
   }
 
@@ -240,89 +226,6 @@ abstract class _IsarConnect {
     }
 
     await collection.isar.writeTxn(() async => collection.importJson(objects));
-  }
-
-  static Future<void> _addInList(Map<String, dynamic> params) async {
-    final cEdit = ConnectEdit.fromJson(params);
-    final collection = Isar.getInstance(cEdit.instance)!
-        .getCollectionByNameInternal(cEdit.collection)!;
-
-    final query = collection.buildQuery<dynamic>(
-      whereClauses: [IdWhereClause.equalTo(value: cEdit.id)],
-    );
-
-    final objects = await query.exportJson();
-    dynamic list;
-
-    if (objects.isEmpty ||
-        ((list = objects[0].getByPath(cEdit.path)) == null) ||
-        list is! List) {
-      throw IsarError('Cant get object or property is wrong for add');
-    }
-
-    cEdit.listIndex == null
-        ? list.add(cEdit.value)
-        : list.insert(cEdit.listIndex!, cEdit.value);
-
-    await collection.isar.writeTxn(() async => collection.importJson(objects));
-  }
-
-  static Future<void> _removeFromList(Map<String, dynamic> params) async {
-    final cEdit = ConnectEdit.fromJson(params);
-    final collection = Isar.getInstance(cEdit.instance)!
-        .getCollectionByNameInternal(cEdit.collection)!;
-
-    final query = collection.buildQuery<dynamic>(
-      whereClauses: [IdWhereClause.equalTo(value: cEdit.id)],
-    );
-
-    final objects = await query.exportJson();
-    dynamic list;
-
-    if (objects.isEmpty ||
-        ((list = objects[0].getByPath(cEdit.path)) == null) ||
-        list is! List) {
-      throw IsarError('Cant get object or property is wrong for remove');
-    }
-
-    list.removeAt(cEdit.listIndex!);
-    await collection.isar.writeTxn(() async => collection.importJson(objects));
-  }
-
-  static Future<num?> _aggregation(Map<String, dynamic> params) async {
-    final cQuery = ConnectQuery.fromJson(
-      params['query'] as Map<String, dynamic>,
-    );
-
-    final query = _getQuery(cQuery);
-    return query.aggregate<num>(AggregationOp.values[params['op'] as int]);
-  }
-
-  static Query<dynamic> _getQuery(ConnectQuery query) {
-    final collection = Isar.getInstance(query.instance)!
-        .getCollectionByNameInternal(query.collection)!;
-    WhereClause? whereClause;
-    var whereSort = Sort.asc;
-    SortProperty? sortProperty;
-
-    final qSort = query.sortProperty;
-    if (qSort != null) {
-      if (qSort.property == collection.schema.idName) {
-        whereClause = const IdWhereClause.any();
-        whereSort = qSort.sort;
-      } else {
-        sortProperty = qSort;
-      }
-    }
-    return collection.buildQuery(
-      whereClauses: [if (whereClause != null) whereClause],
-      whereSort: whereSort,
-      filter: query.filter,
-      offset: query.offset,
-      limit: query.limit,
-      sortBy: [if (sortProperty != null) sortProperty],
-      property: query.property,
-    );
   }
 }
 

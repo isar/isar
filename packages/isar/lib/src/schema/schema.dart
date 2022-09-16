@@ -14,6 +14,24 @@ class Schema<OBJ> {
     required this.deserializeProp,
   });
 
+  /// @nodoc
+  @protected
+  factory Schema.fromJson(Map<String, dynamic> json) {
+    return Schema(
+      id: -1,
+      name: json['name'] as String,
+      properties: {
+        for (final property in json['properties'] as List<dynamic>)
+          (property as Map<String, dynamic>)['name'] as String:
+              PropertySchema.fromJson(property),
+      },
+      estimateSize: (_, __, ___) => throw UnimplementedError(),
+      serialize: (_, __, ___, ____) => throw UnimplementedError(),
+      deserialize: (_, __, ___, ____) => throw UnimplementedError(),
+      deserializeProp: (_, __, ___, ____) => throw UnimplementedError(),
+    );
+  }
+
   /// Internal id of this collection or embedded object.
   final int id;
 
@@ -55,14 +73,16 @@ class Schema<OBJ> {
 
   /// @nodoc
   @protected
-  Map<String, dynamic> toSchemaJson() {
-    return {
+  Map<String, dynamic> toJson() {
+    final json = {
       'name': name,
       'embedded': embedded,
       'properties': [
-        for (final property in properties.values) property.toSchemaJson(),
+        for (final property in properties.values) property.toJson(),
       ],
     };
+
+    return json;
   }
 
   /// @nodoc

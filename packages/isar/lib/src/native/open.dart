@@ -88,7 +88,7 @@ Future<Isar> openIsar({
     final namePtr = name.toCString(alloc);
     final dirPtr = directory?.toCString(alloc) ?? nullptr;
 
-    final schemasJson = getSchemas(schemas).map((e) => e.toSchemaJson());
+    final schemasJson = getSchemas(schemas).map((e) => e.toJson());
     final schemaStrPtr = jsonEncode(schemasJson.toList()).toCString(alloc);
 
     final compactMinFileSize = compactOnLaunch?.minFileSize;
@@ -132,7 +132,7 @@ Isar openIsarSync({
     final namePtr = name.toCString(alloc);
     final dirPtr = directory?.toCString(alloc) ?? nullptr;
 
-    final schemasJson = getSchemas(schemas).map((e) => e.toSchemaJson());
+    final schemasJson = getSchemas(schemas).map((e) => e.toJson());
     final schemaStrPtr = jsonEncode(schemasJson.toList()).toCString(alloc);
 
     final compactMinFileSize = compactOnLaunch?.minFileSize;

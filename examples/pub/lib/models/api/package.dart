@@ -3,7 +3,7 @@ import 'package:pubspec/pubspec.dart';
 
 part 'package.g.dart';
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 class ApiPackage {
   ApiPackage({
     required this.name,
@@ -21,7 +21,7 @@ class ApiPackage {
   final List<ApiPackageVersion> versions;
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 class ApiPackageVersion {
   ApiPackageVersion({
     required this.version,

@@ -452,9 +452,9 @@ String generateEnumMaps(ObjectInfo object) {
       for (final enumElementName in property.enumMap!.keys) {
         final value = property.enumMap![enumElementName];
         if (value is String) {
-          code += "$enumName.$enumElementName: r'$value',";
+          code += "r'$enumElementName': r'$value',";
         } else {
-          code += '$enumName.$enumElementName: $value,';
+          code += "'$enumElementName': $value,";
         }
       }
       code += '};';

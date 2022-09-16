@@ -1,7 +1,6 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/src/sync_async_helper.dart';
 import 'package:test/test.dart';
-
-import 'sync_async_helper.dart';
 
 Future<void> qEqualSet<T>(
   QueryBuilder<dynamic, T, QQueryOperations> query,

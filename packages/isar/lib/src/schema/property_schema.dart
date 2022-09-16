@@ -12,6 +12,18 @@ class PropertySchema {
     this.target,
   });
 
+  /// @nodoc
+  @protected
+  factory PropertySchema.fromJson(Map<String, dynamic> json) {
+    return PropertySchema(
+      id: -1,
+      name: json['name'] as String,
+      type: IsarType.values.firstWhere((e) => e.schemaName == json['type']),
+      enumMap: json['enumMap'] as Map<String, dynamic>?,
+      target: json['target'] as String?,
+    );
+  }
+
   /// Internal id of this property.
   final int id;
 
@@ -21,20 +33,29 @@ class PropertySchema {
   /// Isar type of the property
   final IsarType type;
 
-  /// Maps enum values to database values
-  final Map<Enum, dynamic>? enumMap;
+  /// Maps enum names to database values
+  final Map<String, dynamic>? enumMap;
 
   /// For embedded objects: Name of the target schema
   final String? target;
 
   /// @nodoc
   @protected
-  Map<String, dynamic> toSchemaJson() {
-    return {
+  Map<String, dynamic> toJson() {
+    final json = <String, dynamic>{
       'name': name,
       'type': type.schemaName,
       if (target != null) 'target': target,
     };
+
+    assert(() {
+      if (enumMap != null) {
+        json['enumMap'] = enumMap;
+      }
+      return true;
+    }());
+
+    return json;
   }
 }
 

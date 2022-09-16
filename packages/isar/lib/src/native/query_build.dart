@@ -4,12 +4,12 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
-import 'package:isar/src/native/isar_writer_impl.dart';
 import 'package:isar/src/native/bindings.dart';
 import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/index_key.dart';
 import 'package:isar/src/native/isar_collection_impl.dart';
 import 'package:isar/src/native/isar_core.dart';
+import 'package:isar/src/native/isar_writer_impl.dart';
 import 'package:isar/src/native/query_impl.dart';
 
 final Pointer<Char> maxStr = '\u{FFFFF}'.toNativeUtf8().cast<Char>();
@@ -375,14 +375,14 @@ Object _prepareValue(
   Object? value,
   Allocator alloc,
   IsarType type,
-  Map<Enum, dynamic>? enumMap,
+  Map<String, dynamic>? enumMap,
 ) {
   if (value is bool) {
     return value.byteValue;
   } else if (value is DateTime) {
     return value.longValue;
   } else if (value is Enum) {
-    return _prepareValue(enumMap![value], alloc, type, null);
+    return _prepareValue(enumMap![value.name], alloc, type, null);
   } else if (value is String) {
     return value.toCString(alloc);
   } else if (value == null) {
