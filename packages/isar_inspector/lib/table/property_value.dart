@@ -32,29 +32,31 @@ class PropertyValue extends StatelessWidget {
         },
       ).key;
       return GestureDetector(
-        onTapDown: (TapDownDetails details) async {
-          final newValue = await showMenu(
-            context: context,
-            position: RelativeRect.fromLTRB(
-              details.globalPosition.dx,
-              details.globalPosition.dy,
-              100000,
-              0,
-            ),
-            items: [
-              if (type != IsarType.byte && type != IsarType.byteList)
-                const PopupMenuItem<dynamic>(
-                  child: Text('null'),
-                ),
-              for (final enumName in enumMap!.keys)
-                PopupMenuItem(
-                  value: enumMap![enumName],
-                  child: Text(enumName),
-                ),
-            ],
-          );
-          onUpdate?.call(newValue);
-        },
+        onTapDown: onUpdate == null
+            ? null
+            : (TapDownDetails details) async {
+                final newValue = await showMenu(
+                  context: context,
+                  position: RelativeRect.fromLTRB(
+                    details.globalPosition.dx,
+                    details.globalPosition.dy,
+                    100000,
+                    0,
+                  ),
+                  items: [
+                    if (type != IsarType.byte && type != IsarType.byteList)
+                      const PopupMenuItem<dynamic>(
+                        child: Text('null'),
+                      ),
+                    for (final enumName in enumMap!.keys)
+                      PopupMenuItem(
+                        value: enumMap![enumName],
+                        child: Text(enumName),
+                      ),
+                  ],
+                );
+                onUpdate?.call(newValue);
+              },
         child: Text(
           enumName,
           style: GoogleFonts.jetBrainsMono(
@@ -69,31 +71,33 @@ class PropertyValue extends StatelessWidget {
       case IsarType.bool:
       case IsarType.boolList:
         return GestureDetector(
-          onTapDown: (TapDownDetails details) async {
-            final newValue = await showMenu(
-              context: context,
-              position: RelativeRect.fromLTRB(
-                details.globalPosition.dx,
-                details.globalPosition.dy,
-                100000,
-                0,
-              ),
-              items: const [
-                PopupMenuItem<bool?>(
-                  child: Text('null'),
-                ),
-                PopupMenuItem(
-                  value: true,
-                  child: Text('true'),
-                ),
-                PopupMenuItem(
-                  value: false,
-                  child: Text('false'),
-                ),
-              ],
-            );
-            onUpdate?.call(newValue);
-          },
+          onTapDown: onUpdate == null
+              ? null
+              : (TapDownDetails details) async {
+                  final newValue = await showMenu(
+                    context: context,
+                    position: RelativeRect.fromLTRB(
+                      details.globalPosition.dx,
+                      details.globalPosition.dy,
+                      100000,
+                      0,
+                    ),
+                    items: const [
+                      PopupMenuItem<bool?>(
+                        child: Text('null'),
+                      ),
+                      PopupMenuItem(
+                        value: true,
+                        child: Text('true'),
+                      ),
+                      PopupMenuItem(
+                        value: false,
+                        child: Text('false'),
+                      ),
+                    ],
+                  );
+                  onUpdate?.call(newValue);
+                },
           child: Text(
             '$value',
             style: GoogleFonts.jetBrainsMono(
@@ -138,6 +142,7 @@ class PropertyValue extends StatelessWidget {
         return TextField(
           controller: numController,
           focusNode: numFocus,
+          enabled: onUpdate != null,
           decoration: InputDecoration.collapsed(
             hintText: 'null',
             hintStyle: GoogleFonts.jetBrainsMono(
@@ -158,15 +163,17 @@ class PropertyValue extends StatelessWidget {
             ? DateTime.fromMicrosecondsSinceEpoch(value as int)
             : null;
         return GestureDetector(
-          onTap: () async {
-            final newDate = await showDatePicker(
-              context: context,
-              initialDate: date ?? DateTime.now(),
-              firstDate: DateTime(1970),
-              lastDate: DateTime(2050),
-            );
-            onUpdate?.call(newDate?.microsecondsSinceEpoch);
-          },
+          onTap: onUpdate == null
+              ? null
+              : () async {
+                  final newDate = await showDatePicker(
+                    context: context,
+                    initialDate: date ?? DateTime.now(),
+                    firstDate: DateTime(1970),
+                    lastDate: DateTime(2050),
+                  );
+                  onUpdate?.call(newDate?.microsecondsSinceEpoch);
+                },
           child: Text(
             date?.toIso8601String() ?? 'null',
             style: GoogleFonts.jetBrainsMono(
@@ -197,6 +204,7 @@ class PropertyValue extends StatelessWidget {
         return TextField(
           controller: strController,
           focusNode: strFocus,
+          enabled: onUpdate != null,
           decoration: InputDecoration.collapsed(
             hintText: 'null',
             hintStyle: GoogleFonts.jetBrainsMono(

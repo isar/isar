@@ -4,7 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:isar_inspector/connection_screen.dart';
 
 void main() async {
-  runApp(const App());
+  runApp(
+    DarkMode(
+      notifier: DarkModeNotifier(),
+      child: const App(),
+    ),
+  );
 }
 
 final _router = GoRouter(
@@ -43,15 +48,8 @@ final _router = GoRouter(
   ],
 );
 
-class App extends StatefulWidget {
+class App extends StatelessWidget {
   const App({super.key});
-
-  @override
-  State<App> createState() => _AppState();
-}
-
-class _AppState extends State<App> {
-  var darkMode = true;
 
   @override
   Widget build(BuildContext context) {
@@ -63,10 +61,35 @@ class _AppState extends State<App> {
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF9FC9FF),
-          brightness: darkMode ? Brightness.dark : Brightness.light,
+          brightness: DarkMode.of(context).darkMode
+              ? Brightness.dark
+              : Brightness.light,
         ),
         useMaterial3: true,
       ),
     );
+  }
+}
+
+class DarkMode extends InheritedNotifier<DarkModeNotifier> {
+  const DarkMode({
+    super.key,
+    super.notifier,
+    required super.child,
+  });
+
+  static DarkModeNotifier of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<DarkMode>()!.notifier!;
+  }
+}
+
+class DarkModeNotifier extends ChangeNotifier {
+  var _darkMode = true;
+
+  bool get darkMode => _darkMode;
+
+  void toggle() {
+    _darkMode = !_darkMode;
+    notifyListeners();
   }
 }

@@ -79,7 +79,7 @@ extension DartTypeX on DartType {
           return IsarType.objectList;
         // ignore: no_default_cases
         default:
-          throw UnimplementedError();
+          return null;
       }
     }
 

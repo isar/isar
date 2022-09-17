@@ -20,6 +20,7 @@ class QueryGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const NeverScrollableScrollPhysics(),
@@ -43,6 +44,17 @@ class QueryGroup extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 10),
+                    if (group.filters.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Text(
+                          'Add a filter or nested group to limit the results',
+                          style: TextStyle(
+                            color: theme.colorScheme.onPrimaryContainer
+                                .withOpacity(0.5),
+                          ),
+                        ),
+                      ),
                     for (final filter in group.filters) ...[
                       if (filter is FilterGroup)
                         QueryGroup(

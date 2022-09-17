@@ -13,6 +13,7 @@ class ObjectsListSliver extends StatelessWidget {
     required this.collection,
     required this.schemas,
     required this.objects,
+    required this.onUpdate,
     required this.onDelete,
   });
 
@@ -20,6 +21,12 @@ class ObjectsListSliver extends StatelessWidget {
   final String collection;
   final Map<String, Schema<dynamic>> schemas;
   final List<IsarObject> objects;
+  final void Function(
+    String collection,
+    int id,
+    String path,
+    dynamic value,
+  ) onUpdate;
   final void Function(int id) onDelete;
 
   @override
@@ -32,6 +39,7 @@ class ObjectsListSliver extends StatelessWidget {
         (BuildContext context, int index) {
           final object = objects[index];
           return Card(
+            key: Key('object ${object.getValue(collectionSchema.idName)}'),
             child: Padding(
               padding: const EdgeInsets.all(5),
               child: Stack(
@@ -43,6 +51,9 @@ class ObjectsListSliver extends StatelessWidget {
                       schemas: schemas,
                       object: object,
                       root: true,
+                      onUpdate: (collection, id, path, value) {
+                        onUpdate(collection, id!, path, value);
+                      },
                     ),
                   ),
                   Positioned(

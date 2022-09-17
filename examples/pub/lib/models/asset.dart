@@ -29,8 +29,6 @@ class Asset {
   final AssetKind kind;
 
   final String content;
-
-  final testLink = IsarLinks<Asset>();
 }
 
 enum AssetKind { readme, changelog }

@@ -11,11 +11,13 @@ class LinkPropertyView extends StatelessWidget {
     required this.link,
     required this.schemas,
     required this.object,
+    required this.onUpdate,
   });
 
   final LinkSchema link;
   final Map<String, Schema<dynamic>> schemas;
   final IsarObject object;
+  final void Function(int id, String path, dynamic value) onUpdate;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +36,9 @@ class LinkPropertyView extends StatelessWidget {
               schemaName: link.target,
               schemas: schemas,
               object: child,
+              onUpdate: (_, id, path, value) {
+                onUpdate(id!, path, value);
+              },
             ),
         ],
       );
@@ -45,7 +50,7 @@ class LinkPropertyView extends StatelessWidget {
       final childrenLength = children != null ? '(${children.length})' : '';
       return PropertyBuilder(
         property: link.name,
-        type: 'IsarLinks<${link.target}>> $childrenLength',
+        type: 'IsarLinks<${link.target}> $childrenLength',
         value: children == null ? const NullValue() : null,
         children: [
           for (var i = 0; i < (children?.length ?? 0); i++)
@@ -59,6 +64,9 @@ class LinkPropertyView extends StatelessWidget {
                     schemaName: link.target,
                     schemas: schemas,
                     object: children[i]!,
+                    onUpdate: (_, id, path, value) {
+                      onUpdate(id!, path, value);
+                    },
                   ),
               ],
             ),

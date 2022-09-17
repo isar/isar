@@ -1,5 +1,6 @@
 // ignore_for_file: type_annotate_public_apis, avoid_web_libraries_in_flutter
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
 
@@ -39,6 +40,8 @@ class CollectionArea extends StatefulWidget {
 
 class _CollectionAreaState extends State<CollectionArea> {
   final controller = ScrollController();
+  late final StreamSubscription<void> querySubscription;
+
   var page = 0;
   var filter = const FilterGroup.and([]);
   late var sortProperty = widget.collectionSchema.idName;
@@ -48,22 +51,17 @@ class _CollectionAreaState extends State<CollectionArea> {
 
   @override
   void initState() {
+    querySubscription = widget.client.queryChanged.listen((_) {
+      _runQuery();
+    });
     _runQuery();
     super.initState();
   }
 
   @override
-  void didUpdateWidget(covariant CollectionArea oldWidget) {
-    if (oldWidget.instance != widget.instance ||
-        oldWidget.collection != widget.collection) {
-      controller.jumpTo(0);
-      page = 1;
-      filter = const FilterGroup.and([]);
-      sortProperty = widget.collectionSchema.idName;
-      sortAsc = true;
-      _runQuery();
-    }
-    super.didUpdateWidget(oldWidget);
+  void dispose() {
+    querySubscription.cancel();
+    super.dispose();
   }
 
   Future<void> _runQuery() async {
@@ -78,12 +76,7 @@ class _CollectionAreaState extends State<CollectionArea> {
     );
     final result = await widget.client.executeQuery(query);
     final objects = (result['objects']! as List)
-        .map(
-          (e) => IsarObject(
-            collection: widget.collection,
-            data: e as Map<String, dynamic>,
-          ),
-        )
+        .map((e) => IsarObject(e as Map<String, dynamic>))
         .toList();
 
     if (mounted) {
@@ -125,7 +118,8 @@ class _CollectionAreaState extends State<CollectionArea> {
                     collection: widget.collection,
                     schemas: widget.schemas,
                     objects: objects,
-                    onDelete: onDelte,
+                    onUpdate: _onUpdate,
+                    onDelete: _onDelete,
                   ),
                 ],
               );
@@ -172,7 +166,7 @@ class _CollectionAreaState extends State<CollectionArea> {
                         color: theme.colorScheme.onBackground,
                       ),
                       tooltip: 'Delete All',
-                      onPressed: _onDelete,
+                      onPressed: _onDeleteAll,
                     ),
                     const SizedBox(width: 10),
                     IconButton(
@@ -193,7 +187,19 @@ class _CollectionAreaState extends State<CollectionArea> {
     );
   }
 
-  Future<void> onDelte(int id) async {
+  void _onUpdate(String collection, int id, String path, dynamic value) {
+    print('new value: $value');
+    final edit = ConnectEdit(
+      instance: widget.instance,
+      collection: collection,
+      id: id,
+      path: path,
+      value: value,
+    );
+    widget.client.editProperty(edit);
+  }
+
+  void _onDelete(int id) {
     final query = ConnectQuery(
       instance: widget.instance,
       collection: widget.collection,
@@ -202,10 +208,16 @@ class _CollectionAreaState extends State<CollectionArea> {
         value: id,
       ),
     );
-    await widget.client.removeQuery(query);
-    if (mounted) {
-      await _runQuery();
-    }
+    widget.client.removeQuery(query);
+  }
+
+  void _onDeleteAll() {
+    final query = ConnectQuery(
+      instance: widget.instance,
+      collection: widget.collection,
+      filter: filter,
+    );
+    widget.client.removeQuery(query);
   }
 
   Future<void> _onDownload() async {
@@ -226,15 +238,5 @@ class _CollectionAreaState extends State<CollectionArea> {
       anchor.click();
       anchor.remove();
     } catch (_) {}
-  }
-
-  Future<void> _onDelete() async {
-    final query = ConnectQuery(
-      instance: widget.instance,
-      collection: widget.collection,
-      filter: filter,
-    );
-    await widget.client.removeQuery(query);
-    await _runQuery();
   }
 }

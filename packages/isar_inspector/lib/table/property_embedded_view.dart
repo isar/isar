@@ -11,11 +11,13 @@ class EmbeddedPropertyView extends StatelessWidget {
     required this.property,
     required this.schemas,
     required this.object,
+    required this.onUpdate,
   });
 
   final PropertySchema property;
   final Map<String, Schema<dynamic>> schemas;
   final IsarObject object;
+  final void Function(int? id, String path, dynamic value) onUpdate;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +33,9 @@ class EmbeddedPropertyView extends StatelessWidget {
               schemaName: property.target!,
               schemas: schemas,
               object: child,
+              onUpdate: (_, id, path, value) {
+                onUpdate(id, path, value);
+              },
             ),
         ],
       );
@@ -39,7 +44,7 @@ class EmbeddedPropertyView extends StatelessWidget {
       final childrenLength = children != null ? '(${children.length})' : '';
       return PropertyBuilder(
         property: property.name,
-        type: 'List<${property.target}>> $childrenLength',
+        type: 'List<${property.target}> $childrenLength',
         value: children == null ? const NullValue() : null,
         children: [
           for (var i = 0; i < (children?.length ?? 0); i++)
@@ -53,6 +58,9 @@ class EmbeddedPropertyView extends StatelessWidget {
                     schemaName: property.target!,
                     schemas: schemas,
                     object: children[i]!,
+                    onUpdate: (_, id, path, value) {
+                      onUpdate(id, '$i.$path', value);
+                    },
                   ),
               ],
             ),

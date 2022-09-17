@@ -1,9 +1,8 @@
 // coverage:ignore-file
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, avoid_dynamic_calls
 
 part of isar;
 
-// ignore: avoid_classes_with_only_static_members
 abstract class _IsarConnect {
   static const Map<ConnectAction,
       Future<dynamic> Function(Map<String, dynamic> _)> _handlers = {
@@ -72,14 +71,22 @@ abstract class _IsarConnect {
       if (path.endsWith('=')) {
         path = path.substring(0, path.length - 1);
       }
-      print('╔══════════════════════════════════════════════╗');
-      print('║             ISAR CONNECT STARTED             ║');
-      print('╟──────────────────────────────────────────────╢');
-      print('║ Open the link in Chrome to connect to the    ║');
-      print('║ Isar Inspector while this build is running.  ║');
-      print('╟──────────────────────────────────────────────╢');
-      print('║ https://inspect.isar.dev/${Isar.version}/#/$port$path ║');
-      print('╚══════════════════════════════════════════════╝');
+      final url = ' https://inspect.isar.dev/${Isar.version}/#/$port$path ';
+      String line(String text, String fill) {
+        final fillCount = url.length - text.length;
+        final left = List.filled(fillCount ~/ 2, fill);
+        final right = List.filled(fillCount - left.length, fill);
+        return left.join() + text + right.join();
+      }
+
+      print('╔${line('', '═')}╗');
+      print('║${line('ISAR CONNECT STARTED', ' ')}║');
+      print('╟${line('', '─')}╢');
+      print('║${line('Open the link in Chrome to connect to the', ' ')}║');
+      print('║${line('Isar Inspector while this build is running.', ' ')}║');
+      print('╟${line('', '─')}╢');
+      print('║$url║');
+      print('╚${line('', '═')}╝');
     });
   }
 
@@ -105,8 +112,7 @@ abstract class _IsarConnect {
     final instance = Isar.getInstance(instanceName)!;
 
     for (final collection in instance._collections.values) {
-      _sendCollectionInfo(collection);
-      final sub = collection.watchLazy().listen((_) {
+      final sub = collection.watchLazy(fireImmediately: true).listen((_) {
         _sendCollectionInfo(collection);
       });
       _collectionSubscriptions.add(sub);
@@ -157,13 +163,16 @@ abstract class _IsarConnect {
         postEvent(ConnectEvent.queryChanged.event, {});
       }),
     );
+    final subscribed = {cQuery.collection};
     for (final link in links) {
-      final target = instance.getCollectionByNameInternal(link.target)!;
-      _querySubscription.add(
-        target.watchLazy().listen((_) {
-          postEvent(ConnectEvent.queryChanged.event, {});
-        }),
-      );
+      if (subscribed.add(link.target)) {
+        final target = instance.getCollectionByNameInternal(link.target)!;
+        _querySubscription.add(
+          target.watchLazy().listen((_) {
+            postEvent(ConnectEvent.queryChanged.event, {});
+          }),
+        );
+      }
     }
 
     final objects = await query.exportJson();
@@ -211,54 +220,33 @@ abstract class _IsarConnect {
 
   static Future<void> _editProperty(Map<String, dynamic> params) async {
     final cEdit = ConnectEdit.fromJson(params);
-    final collection = Isar.getInstance(cEdit.instance)!
-        .getCollectionByNameInternal(cEdit.collection)!;
+    final isar = Isar.getInstance(cEdit.instance)!;
+    final collection = isar.getCollectionByNameInternal(cEdit.collection)!;
+    final keys = cEdit.path.split('.');
+    print(cEdit.path);
 
     final query = collection.buildQuery<dynamic>(
       whereClauses: [IdWhereClause.equalTo(value: cEdit.id)],
     );
 
     final objects = await query.exportJson();
-
-    if (objects.isEmpty ||
-        objects[0].setByPath(cEdit.path, cEdit.value) == null) {
-      throw IsarError('Cant get object or property is wrong for edit');
-    }
-
-    await collection.isar.writeTxn(() async => collection.importJson(objects));
-  }
-}
-
-extension _MapPath on Map<String, dynamic> {
-  Map<String, dynamic>? setByPath(String path, dynamic value) {
-    final keys = path.split('.');
-    dynamic subData = this;
-
-    try {
-      for (final key in keys.take(keys.length - 1)) {
-        //ignore: avoid_dynamic_calls
-        subData = subData[subData is List ? int.parse(key) : key];
+    if (objects.isNotEmpty) {
+      dynamic object = objects.first;
+      for (var i = 0; i < keys.length; i++) {
+        final key = object is List ? int.parse(keys[i]) : keys[i];
+        if (i == keys.length - 1) {
+          object[key] = cEdit.value;
+        } else {
+          object = object[key];
+        }
       }
-      //ignore: avoid_dynamic_calls
-      subData[subData is List ? int.parse(keys.last) : keys.last] = value;
-    } catch (_) {
-      return null;
-    }
-    return this;
-  }
-
-  dynamic getByPath(String path) {
-    final keys = path.split('.');
-    dynamic subData = this;
-
-    try {
-      for (final key in keys) {
-        //ignore: avoid_dynamic_calls
-        subData = subData[subData is List ? int.parse(key) : key];
+      try {
+        await isar.writeTxn(() async {
+          await collection.importJson(objects);
+        });
+      } catch (e) {
+        print(e);
       }
-      return subData;
-    } catch (_) {
-      return null;
     }
   }
 }

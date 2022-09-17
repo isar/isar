@@ -17,9 +17,9 @@ jobs:
         dart tool/verify_release_version.dart ${{ github.ref_name }}
       working-directory: packages/isar
 
-  build_and_upload:
+  build_binaries:
+    name: Build Binaries
     needs: verify_version
-    name: Build and upload
     strategy:
       fail-fast: false
       matrix:
@@ -80,3 +80,39 @@ jobs:
         file: ${{ matrix.artifact_name }}
         asset_name: ${{ matrix.artifact_name }}
         tag: ${{ github.ref }}
+
+  build_inspector:
+    name: Build Inspector
+    needs: build_binaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - name: Build
+        working-directory: packages/isar_inspector
+        run: flutter build web --base-href ${{ github.ref_name }}
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: packages/isar_inspector/build/web
+          repository-name: isar/inspector
+          token: ${{ secrets.TOKEN }}
+          target-folder: ${{ github.ref_name }}
+          clean: false
+
+  build_docs:
+    name: Build Docs
+    needs: build_binaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build
+        working-directory: docs
+        run: |
+          npm install
+          npm run build
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: docs
+          token: ${{ secrets.TOKEN }}

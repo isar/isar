@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
+import 'package:isar_inspector/app.dart';
 import 'package:isar_inspector/collections_list.dart';
 import 'package:isar_inspector/connect_client.dart';
 import 'package:isar_inspector/instance_selector.dart';
@@ -55,10 +56,12 @@ class Sidebar extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text('Inspector',
-                          style: theme.textTheme.titleMedium!.copyWith(
-                            fontWeight: FontWeight.bold,
-                          )),
+                      Text(
+                        'Inspector',
+                        style: theme.textTheme.titleMedium!.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                   const Spacer(),
@@ -69,7 +72,7 @@ class Sidebar extends StatelessWidget {
                           ? Icons.dark_mode_rounded
                           : Icons.light_mode_rounded,
                     ),
-                    onPressed: () {},
+                    onPressed: DarkMode.of(context).toggle,
                   )
                 ],
               ),

@@ -118,8 +118,9 @@ class ConnectQuery {
   }
 
   Query<dynamic> toQuery() {
-    final collection = Isar.getInstance(instance)!
-        .getCollectionByNameInternal(this.collection)!;
+    final isar = Isar.getInstance(instance)!;
+    // ignore: invalid_use_of_protected_member
+    final collection = isar.getCollectionByNameInternal(this.collection)!;
     WhereClause? whereClause;
     var whereSort = Sort.asc;
 
@@ -152,7 +153,6 @@ class ConnectEdit {
     required this.collection,
     required this.id,
     required this.path,
-    this.listIndex,
     required this.value,
   });
 
@@ -162,7 +162,6 @@ class ConnectEdit {
       collection: json['collection'] as String,
       id: json['id'] as Id,
       path: json['path'] as String,
-      listIndex: json['listIndex'] as int?,
       value: json['value'],
     );
   }
@@ -171,7 +170,6 @@ class ConnectEdit {
   final String collection;
   final Id id;
   final String path;
-  final int? listIndex;
   final dynamic value;
 
   Map<String, dynamic> toJson() {
@@ -180,20 +178,8 @@ class ConnectEdit {
       'collection': collection,
       'id': id,
       'path': path,
-      'listIndex': listIndex,
       'value': value,
     };
-  }
-
-  ConnectEdit copyWith({String? instance, String? collection}) {
-    return ConnectEdit(
-      instance: instance ?? this.instance,
-      collection: collection ?? this.collection,
-      id: id,
-      path: path,
-      listIndex: listIndex,
-      value: value,
-    );
   }
 }
 

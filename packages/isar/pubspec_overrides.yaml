@@ -1,0 +1,3 @@
+dev_dependencies:
+  isar_test: 
+    path: ../isar_test

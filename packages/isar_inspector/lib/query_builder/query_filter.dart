@@ -19,7 +19,8 @@ class QueryFilter extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final property = collection.propertyOrId(condition.property);
-    return DecoratedBox(
+    return Container(
+      height: 60,
       decoration: BoxDecoration(
         border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
         borderRadius: BorderRadius.circular(16),

@@ -1,7 +1,11 @@
 ## 3.0.0-dev.15
 
+### Enhancements
+- Improved the Inspector and re-enabled it
+
 ### Fixes
 - Fixed `IsarLink.toString()` and `IsarLinks.toString()`
+- Isar generator threw an exception for unknown List types
 
 ## 3.0.0-dev.14
 

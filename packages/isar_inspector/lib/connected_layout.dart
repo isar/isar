@@ -85,6 +85,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
           const SizedBox(width: 25),
           Expanded(
             child: CollectionArea(
+              key: Key('$selectedInstance.$selectedCollection'),
               instance: selectedInstance,
               collection: selectedCollection,
               client: widget.client,

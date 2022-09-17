@@ -31,7 +31,9 @@ class _ConnectionPageState extends State<ConnectionScreen> {
 
   @override
   void didUpdateWidget(covariant ConnectionScreen oldWidget) {
-    clientFuture = ConnectClient.connect(widget.port, widget.secret);
+    if (oldWidget.port != widget.port || oldWidget.secret != widget.secret) {
+      clientFuture = ConnectClient.connect(widget.port, widget.secret);
+    }
     super.didUpdateWidget(oldWidget);
   }
 

@@ -63,12 +63,6 @@ Future<void> loadAssets(PackageAndVersion p) async {
         if (readme != null) readme,
         if (changelog != null) changelog,
       ]);
-      if (changelog != null && readme != null) {
-        changelog.testLink.add(readme);
-        changelog.testLink.saveSync();
-        readme.testLink.add(changelog);
-        readme.testLink.saveSync();
-      }
     });
   }
 }

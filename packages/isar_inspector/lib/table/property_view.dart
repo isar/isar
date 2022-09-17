@@ -8,19 +8,21 @@ class PropertyView extends StatelessWidget {
   const PropertyView({
     super.key,
     required this.property,
-    required this.object,
+    required this.value,
     required this.isId,
     required this.isIndexed,
+    required this.onUpdate,
   });
 
   final PropertySchema property;
-  final IsarObject object;
+  final dynamic value;
   final bool isId;
   final bool isIndexed;
+  final void Function(dynamic value) onUpdate;
 
   @override
   Widget build(BuildContext context) {
-    final value = object.getValue(property.name);
+    final value = this.value;
     final valueLength =
         // ignore: avoid_dynamic_calls
         value is String || value is List ? '(${value.length})' : '';
@@ -36,7 +38,7 @@ class PropertyView extends StatelessWidget {
                   value,
                   type: property.type,
                   enumMap: property.enumMap,
-                  onUpdate: (newValue) => _onUpdate(newValue),
+                  onUpdate: isId ? null : onUpdate,
                 ),
       children: [
         if (value is List)
@@ -48,15 +50,11 @@ class PropertyView extends StatelessWidget {
                 value[i],
                 type: property.type,
                 enumMap: property.enumMap,
-                onUpdate: (newValue) => _onUpdate(newValue),
+                onUpdate: onUpdate,
               ),
             ),
       ],
     );
-  }
-
-  void _onUpdate(dynamic value) {
-    print('UPDATE: $value');
   }
 }
 
