@@ -188,7 +188,6 @@ class _CollectionAreaState extends State<CollectionArea> {
   }
 
   void _onUpdate(String collection, int id, String path, dynamic value) {
-    print('new value: $value');
     final edit = ConnectEdit(
       instance: widget.instance,
       collection: collection,

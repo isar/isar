@@ -1,4 +1,4 @@
-// enums do not support floating point values
+// unsupported enum property type
 
 import 'package:isar/isar.dart';
 

@@ -1,4 +1,4 @@
-// enums do not support bool values
+// unsupported enum property type
 
 import 'package:isar/isar.dart';
 
