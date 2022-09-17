@@ -17,13 +17,13 @@ String getBinaryPath() {
 }
 
 Future<void> init() async {
-  final isFlutterTest = Platform.environment.containsKey('FLUTTER_TEST');
-  if (isFlutterTest) {
-    return;
-  }
   if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
-    await Isar.initializeIsarCore(
-      libraries: {Abi.current(): getBinaryPath()},
-    );
+    try {
+      await Isar.initializeIsarCore();
+    } catch (e) {
+      await Isar.initializeIsarCore(
+        libraries: {Abi.current(): getBinaryPath()},
+      );
+    }
   }
 }
