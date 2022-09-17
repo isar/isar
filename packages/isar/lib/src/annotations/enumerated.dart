@@ -18,9 +18,12 @@ class Enumerated {
 
 /// Enum type for enum values.
 enum EnumType {
-  /// Stores the position of the enum value. The first enum value is 1. 0 is
-  /// used to represent `null`.
+  /// Stores the index of the enum as a byte value.
   ordinal,
+
+  /// Stores the index of the enum as a 4-byte value. Use this type if your enum
+  /// has more than 256 values or needs to be nullable.
+  ordinal32,
 
   /// Uses the name of the enum value.
   name,

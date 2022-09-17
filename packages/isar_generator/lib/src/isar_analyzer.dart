@@ -208,6 +208,13 @@ class IsarAnalyzer {
           for (var i = 0; i < enumElements.length; i++) enumElements[i].name: i,
         };
         enumPropertyName = 'index';
+      } else if (enumeratedAnn.type == EnumType.ordinal32) {
+        isarType = dartType.isDartCoreList ? IsarType.intList : IsarType.int;
+
+        enumMap = {
+          for (var i = 0; i < enumElements.length; i++) enumElements[i].name: i,
+        };
+        enumPropertyName = 'index';
       } else if (enumeratedAnn.type == EnumType.name) {
         isarType =
             dartType.isDartCoreList ? IsarType.stringList : IsarType.string;

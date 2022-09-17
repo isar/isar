@@ -121,9 +121,9 @@ final emails = await isar.emails.filter()
 
 ## Isar Database Inspector
 
-The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to inspect the Isar instances & collections of your app in real-time. You can execute queries, switch between instances and sort the data.
+The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to inspect the Isar instances & collections of your app in real-time. You can execute queries edit properties, switch between instances and sort the data.
 
-<img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/isar-inspector.png?sanitize=true">
+<img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/inspector.gif">
 
 ## CRUD operations
 
@@ -166,30 +166,6 @@ final usersLivingInMunich = isar.users
   .findAll()
 ```
 
-## Links
-
-You can easily define relationships between objects. In Isar database they are called links and backlinks:
-
-```dart
-@collection
-class Teacher {
-  Id? id;
-
-  late String subject;
-
-  @Backlink(to: 'teacher')
-  final students = IsarLinks<Student>();
-}
-
-@collection
-class Student {
-  Id? id;
-
-  late String name;
-
-  final teacher = IsarLink<Teacher>();
-}
-```
 
 ## Database Watchers
 

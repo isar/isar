@@ -177,8 +177,13 @@ abstract class IsarCollection<OBJ> {
 
   /// Build a query dynamically. Can be used to build a custom query language.
   ///
+  /// It is highly discouraged to use this method. Only in very special cases
+  /// should it be used. If you open an issue please always mention that you
+  /// used this method.
+  ///
   /// The type argument [R] needs to be equal to [OBJ] if no [property] is
   /// specified. Otherwise it should be the type of the property.
+  @experimental
   Query<R> buildQuery<R>({
     List<WhereClause> whereClauses = const [],
     bool whereDistinct = false,

@@ -955,6 +955,10 @@ void _buildConditionStringOp({
   required bool caseSensitive,
 }) {
   if (val is Pointer<Char>) {
+    if (val.isNull) {
+      throw IsarError('String operation value must not be null');
+    }
+
     // ignore: missing_enum_constant_in_switch
     switch (conditionType) {
       case FilterConditionType.startsWith:
