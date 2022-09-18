@@ -5,7 +5,8 @@ repository: https://github.com/isar/isar/tree/main/packages/isar
 homepage: https://github.com/isar/isar
 issue_tracker: https://github.com/isar/isar/issues
 documentation: https://isar.dev
-funding: https://github.com/sponsors/leisim/
+funding:
+  - https://github.com/sponsors/leisim/
 
 environment:
   sdk: ">=2.17.0 <3.0.0"

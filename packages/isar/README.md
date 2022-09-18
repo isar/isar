@@ -64,11 +64,11 @@ Holy smokes you're here! Let's get started on using the coolest Flutter database
 
 ```yaml
 dependencies:
-  isar: 3.0.0-dev.14
-  isar_flutter_libs: 3.0.0-dev.14 # contains Isar Core
+  isar: 3.0.0
+  isar_flutter_libs: 3.0.0 # contains Isar Core
 
 dev_dependencies:
-  isar_generator: 3.0.0-dev.14
+  isar_generator: 3.0.0
   build_runner: any
 ```
 
