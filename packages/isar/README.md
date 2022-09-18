@@ -81,6 +81,7 @@ part 'email.g.dart';
 class Email {
   Id id = Isar.autoIncrement; // you can also use id = null to auto increment
 
+  @Index(type: IndexType.value)
   String? title;
 
   List<Recipient>? recipients;
@@ -114,14 +115,14 @@ final isar = await Isar.open([EmailSchema]);
 ```dart
 final emails = await isar.emails.filter()
   .titleContains('awesome', caseSensitive: false)
-  .sortByDateDesc()
+  .sortByStatusDesc()
   .limit(10)
   .findAll();
 ```
 
 ## Isar Database Inspector
 
-The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to inspect the Isar instances & collections of your app in real-time. You can execute queries edit properties, switch between instances and sort the data.
+The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to inspect the Isar instances & collections of your app in real-time. You can execute queries, edit properties, switch between instances and sort the data.
 
 <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/inspector.gif">
 
@@ -130,16 +131,16 @@ The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to
 All basic crud operations are available via the `IsarCollection`.
 
 ```dart
-final newPost = Post()..title = 'Amazing new database';
+final newEmail = Email()..title = 'Amazing new database';
 
 await isar.writeTxn(() {
-  newPost.id = await isar.posts.put(newPost); // insert & update
+  await isar.emails.put(newEmail); // insert & update
 });
 
-final existingPost = await isar.posts.get(newPost.id!); // get
+final existingEmail = await isar.emails.get(newEmail.id!); // get
 
 await isar.writeTxn(() {
-  await isar.posts.delete(existingPost.id!); // delete
+  await isar.emails.delete(existingEmail.id!); // delete
 });
 ```
 
@@ -148,21 +149,17 @@ await isar.writeTxn(() {
 Isar database has a powerful query language that allows you to make use of your indexes, filter distinct objects, use complex `and()`, `or()` and `.xor()` groups, query links and sort the results.
 
 ```dart
-final usersWithPrefix = isar.users
+final importantEmails = isar.emails
   .where()
-  .nameStartsWith('dan') // use index
+  .titleStartsWith('Important') // use index
   .limit(10)
   .findAll()
 
-final usersLivingInMunich = isar.users
+final specificEmails = isar.emails
   .filter()
-  .ageGreaterThan(32)
+  .recipient((q) => q.nameEqualTo('David')) // query embedded objects
   .or()
-  .addressMatches('*Munich*', caseSensitive: false) // address containing 'munich' (case insensitive)
-  .optional(
-    shouldSort, // only apply if shouldSort == true
-    (q) => q.sortedByAge(),
-  )
+  .titleMatches('*university*', caseSensitive: false) // title containing 'university' (case insensitive)
   .findAll()
 ```
 
@@ -173,16 +170,16 @@ With Isar database, you can watch collections, objects, or queries. A watcher is
 Watchers can be lazy and not reload the data or they can be non-lazy and fetch new results in the background.
 
 ```dart
-Stream<void> collectionStream = isar.posts.watchLazy;
+Stream<void> collectionStream = isar.emails.watchLazy();
 
-Stream<List<Post>> queryStream = databasePosts.watch();
+Stream<List<Post>> queryStream = importantEmails.watch();
 
 queryStream.listen((newResult) {
   // do UI updates
 })
 ```
 
-## Isar Database Benchmarks
+## Benchmarks
 
 Benchmarks only give a rough idea of the performance of a database but as you can see, Isar NoSQL database is quite fast 😇
 

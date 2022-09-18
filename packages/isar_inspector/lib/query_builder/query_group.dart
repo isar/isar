@@ -48,7 +48,8 @@ class QueryGroup extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: Text(
-                          'Add a filter or nested group to limit the results',
+                          'Add a filter or nested group to limit the results.\n'
+                          'Click the group type to change it.',
                           style: TextStyle(
                             color: theme.colorScheme.onPrimaryContainer
                                 .withOpacity(0.5),

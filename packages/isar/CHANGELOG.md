@@ -1,243 +1,79 @@
-## 3.0.0-dev.15
+## 3.0.0
 
-### Enhancements
-- Improved the Inspector and re-enabled it
+This release has been a lot of work! Thanks to everyone who contributed and joined the countless discussions. You are really awesome!
 
-### Fixes
-- Fixed `IsarLink.toString()` and `IsarLinks.toString()`
-- Isar generator threw an exception for unknown List types
+Special thanks to [@Jtplouffe](https://github.com/Jtplouffe) and [@Peyman](https://github.com/Viper-Bit) for their incredible work.
 
-## 3.0.0-dev.14
+### Web support
 
-### Enhancements
-- Added `ignore` parameter to `@Collection()` and `@Enum()`
-- Added `fireImmediately` to `collection.watchLazy()` and `query.watchLazy()`
-
-### Fixes
-- Fixed incorrectly generated String list filters
-- Fixed failing version migration
-
-### Breaking
-- Renamed the `initialReturn` parameter to `fireImmediately`
-
-## 3.0.0-dev.13
-
-### Enhancements
-- Added `stringIsEmpty()` and `stringIsNotEmpty()` filters
-- Added `query.isEmpty()`, `query.isEmptySync()`, `query.isNotEmpty()` and `query.isNotEmptySync()` operations
-- Improved aggregation performance
-- The `Id` type changed from `int` to `num` on web
-- `Isar.autoIncrement` is now const
-
-### Fixes
-- Removed incorrectly generated embedded filters
-- Fixed remaining embedded filters
-- Fixed schema migration
-
-### Breaking
-- Due to incompatibilities, Android <= 6.0 now requires you to provide a directory to `Isar.open()`
-
-## 3.0.0-dev.12
+This version does not support the web target yet. It will be back in the next version. Please continue using 2.5.0 if you need web support.
 
 ### Enhancements
 
-Small performance improvements across the board.
-
-### Breaking
-
-Removed `IsarEnum` in favor of the `@enumerated` and `@Enumerated()` annotations. Check [#583](https://github.com/isar/isar/issues/583#issuecomment-1225376959) for more details.
-
-## 3.0.0-dev.10
-
-Hotfix: Missing symbols on Android.
-
-## 3.0.0-dev.9
-
-This is the last big feature release before a stable 3.0 version. Unfortunately, this version does not work with the inspector yet. Stay tuned for the next release.
-
-### Enhancements
-
-- Support for embedded objects using `@Embedded()`
-- Support for enums using `IsarEnum` mixin
-- Improved `put()` performance by about 50% (yes, that is insane)
+- Completely new Isar inspector that does not need to be installed anymore
+- Extreme performance improvements for almost all operations (up to 50%)
+- Support for embedded objects using `@embedded`
+- Support for enums using `@enumerated`
+- Vastly improved Isar binary format space efficiency resulting in about 20% smaller databases
+- Added `id`, `byte`, `short` and `float` typedefs
+- `IsarLinks` now support all `Set` methods based on the Isar `Id` of objects
+- Added `download` option to `Isar.initializeIsarCore()` to download binaries automatically
+- Added `replace` option for indexes
+- Added verification for correct Isar binary version
+- Added `collection.getSize()` and `collection.getSizeSync()`
+- Added `query.anyOf()` and `query.allOf()` query modifiers
+- Support for much more complex composite index queries
+- Support for logical XOR and the `.oneOf()` query modifier
+- Made providing a path optional
+- The default Isar name is now `default` and stored in `dir/name.isar` and `dir/name.isar.lock`
+- On non-web platforms, `IsarLink` and `IsarLinks` will load automatically
+- `.putSync()`, `.putAllSync()` etc. will now save links recursively by default
+- Added `isar.getSize()` and `isar.getSizeSync()`
 - Added `linksLengthEqualTo()`, `linksIsEmpty()`, `linksIsNotEmpty()`, `linksLengthGreaterThan()`, `linksLengthLessThan()`, `linksLengthBetween()` and `linkIsNull()` filters
 - Added `listLengthEqualTo()`, `listIsEmpty()`, `listIsNotEmpty()`, `listLengthGreaterThan()`, `listLengthLessThan()`, `listLengthBetween()` filters
 - Added `isNotNull()` filters
 - Added `compactOnLaunch` conditions to `Isar.open()` for automatic database compaction
 - Added `isar.copyToFile()` which copies a compacted version of the database to a path
-- Added `isar.path` to get the full path of the database file
-- Added `collection.schema` to receive the layout of a collection
 - Added check to verify that linked collections schemas are provided for opening an instance
-- Added `@collection` and `@embedded` alternative to `@Collection()` and `@Embedded()`
 - Apply default values from constructor during deserialization
 - Added `isar.verify()` and `col.verify()` methods for checking database integrity in unit tests
 - Added missing float and double queries and an `epsilon` parameter
 
-### Breaking
+### Breaking changes
 
-- Renamed `isar.path` to `isar.directory`
-- Removed support for type converters
-
-### Fixes
-
-- Fixed nested link queries
-- Minor fixes for query edge cases
-- Memory is now always initialized before it gets stored
-- An exception is now thrown when a sync write txn is started while an async write txn is active. This prevents deadlock.
-- Fixed download directory on Windows
-
-## 3.0.0-dev.8
-
-### Enhancements
-
-- Really cool new Inspector
-- Much improved consistency of `IsarLinks` behavior
-- `IsarLinks` now support all `Set` methods based on the Isar `Id` rather the `identity()` of objects
-- A lot of new unit tests to make links bulletproof
-
-### Fixes
-
-- Fixed issues with edge cases in `IsarLink` and `IsarLinks`
-- Fixed link queries and filters
-
-## 3.0.0-dev.7
-
-Small hotfix: existing bool properties were rejected in schema migration.
-
-## 3.0.0-dev.6
-
-**⚠️ BE CAREFUL ⚠️** This version of Isar uses an experimental binary format does not allow downgrading.
-
-### Enhancements
-
-- Vastly improved Isar binary format space efficiency resulting in up to 20% smaller databases
-- Slightly improved String index space efficiency saving two bytes per string
-- On non-web platforms, `IsarLink` and `IsarLinks` will load automatically
-- `.putSync()`, `.putAllSync()` etc. will now save links recursively by default
-- Improved `.putSync()` and `.putIndexedSync()` performance
-- Added `isar.getSize()` and `isar.getSizeSync()`
-- Reintroduced option to disable the inspector
-- Slightly improved default collection accessor naming
-- Id property queries now always return a `List<int>` even if the id is nullable
-- Added `id`, `byte`, `short` and `float` typedefs
-- `Uint8List` properties now support multi-entry indexes
-
-### Breaking
-
-- Removed `@Id()` and `@Size32()` annotations
+- Removed `TypeConverter` support in favor of `@embedded` and `@enumerated`
+- Removed `@Id()` and `@Size32()` annotations in favor of the `Id` and `short` types
+- Changed the `schemas` parameter from named to positional
+- The maximum size of objects is now 16MB
+- Removed `replaceOnConflict` and `saveLinks` parameter from `collection.put()` and `collection.putAll()`
+- Removed `isar` parameter from `Isar.txn()`, `Isar.writeTxn()`, `Isar.txnSync()` and `Isar.writeTxnSync()`
+- Removed `query.repeat()`
+- Removed `query.sortById()` and `query.distinctById()`
+- Fixed `.or()` instead of `.and()` being used implicitly when combining filters
+- Renamed multi-entry where clauses from `.yourListAnyEqualTo()` to `.yourListElementEqualTo()` to avoid confusion
+- Isar will no longer create the provided directory. Make sure it exists before opening an Isar Instance.
 - Changed the default index type for all `List`s to `IndexType.hash`
 - Renamed `isar.getCollection()` to `isar.collection()`
-- The maximum size of objects is now 16MB
 - It is no longer allowed to extend or implement another collection
 - Unsupported properties will no longer be ignored by default
+- Renamed the `initialReturn` parameter to `fireImmediately`
+- Renamed `Isar.initializeLibraries()` to `Isar.initializeIsarCore()`
 
 ### Fixes
 
+There are too many fixes to list them all.
+
+- A lot of link fixes and a slight behavior change to make them super reliable
+- Fixed missing symbols on older Android phones
+- Fixed composite queries
+- Fixed various generator issues
+- Fixed error retrieving the id property in a query
 - Fixed missing symbols on 32-bit Android 5 & 6 devices
 - Fixed inconsistent `null` handling in json export
 - Fixed default directory issue on Android
 - Fixed different where clauses returning duplicate results
 - Fixed hash index issue where multiple list values resulted in the same hash
 - Fixed edge case where creating a new index failed
-
-## 3.0.0-dev.5
-
-### Fixes
-
-- Fixed dropped database on hot restart
-
-## 3.0.0-dev.4
-
-### Fixes
-
-- Allow more ffi versions
-- Another Inspector fix
-
-## 3.0.0-dev.3
-
-### Enhancements
-
-- Made providing a path optional
-- Added `isar.path` property
-- The default Isar name is now `default`. On non-web targets, migration will happen automatically.
-- The isar database file is now stored in the location `dir/name.isar` the lock file in `dir/name.isar.lock`. Migration will happen automatically.
-
-### Breaking
-
-- Changed the `schemas` parameter from named to positional
-- Isar will no longer create the provided directory. Make sure it exists before opening an Isar Instance.
-
-### Fixes
-
-- Fixed an Isar Inspector issue with non-default instance names
-
-## 3.0.0-dev.2
-
-### Enhancements
-
-- Support for much more complex composite index queries
-- Support for logical XOR and the `.oneOf()` query modifier
-- Internal query methods not longer appear in auto complete results
-- A lot more unit tests especially for where clauses
-
-### Breaking
-
-- Fixed `.or()` instead of `.and()` being used implicitly when combining filters
-- Renamed multi-entry where clauses from `.yourListAnyEqualTo()` to `.yourListElementEqualTo()` to avoid confusion
-
-### Fixes
-
-- More link fixes
-- Fixed composite query issues
-- Fixed crash caused by empty and/or filter
-- Fixed incorrect analyzer dependency
-
-## 3.0.0-dev.1
-
-### Breaking
-
-- `collection.put()` and `collection.putAll()` no longer allow saving links
-
-### Enhancements
-
-- Vastly improved `collection.count()` and `collection.countSync()` performance
-- Vastly improved `collection.put()` and `collection.putAll()` performance for objects containing links
-- Added `collection.getSize()` and `collection.getSizeSync()`
-- Added `query.anyOf()` and `query.allOf()` query modifiers
-- Added `query.isar` getter to retrieve the `isar` instance of a query
-- Support `strict-casts: true`
-
-### Breaking
-
-- Removed `isar` parameter from `Isar.txn()`, `Isar.writeTxn()`, `Isar.txnSync()` and `Isar.writeTxnSync()`
-- Removed `query.repeat()`
-- Removed `query.sortById()` and `query.distinctById()` (these were generated by mistake)
-- Removed `saveLinks` parameter from `collection.put()` and `collection.putAll()` (links are saved by default)
-- Removed `inspector` parameter from `Isar.open()` it is now always active for debug builds
-- `IsarLinks` no longer save new objects
-
-### Fixes
-
-- Fixed error retrieving the id property in a query
-- Links are now handled correctly in `collection.put()` and `collection.putAll()`
-
-## 3.0.0-dev.0
-
-### Enhancements
-
-- Added `download` option to `Isar.initializeIsarCore()` to download binaries automatically. This is useful for unit tests
-- Added `replace` option for indexes
-- Added verification for correct Isar binary version
-
-### Breaking
-
-- Renamed `Isar.initializeLibraries()` to `Isar.initializeIsarCore()`
-- Removed `replaceOnConflict` parameter from `collection.put()` and `collection.putAll()`
-
-### Fixes
-
-- Fixed issues with binaries of the previous version
-- Providing a path is now optional in isolates
 
 ## 2.5.0
 
