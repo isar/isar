@@ -18,11 +18,11 @@ features:
   - title: 🧪 ACID semantics
     details: Isar is ACID compliant and transactions are handled automatically and all changes are rolled back if an error occurs.
   - title: 💃 Static typing
-    details: The unique query syntax is very powerful and statically typed. No need to worry about runtime errors. Compile-time checked and autocompleted queries
+    details: Isar's queries are statically typed and compile-time checked. No need to worry about runtime errors. 
   - title: 📱 Multiplatform
     details: iOS, Android, Desktop and FULL WEB SUPPORT!
   - title: ⏱ Asynchronous
-    details: Parallel query operations & multi-isolate support out of the box
+    details: Parallel query operations & multi-isolate support out-of-the-box
   - title: 🦄 Open Source
     details: Everything is open source and free forever!
 

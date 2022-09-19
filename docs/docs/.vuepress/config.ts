@@ -93,16 +93,7 @@ export default defineUserConfig({
         sidebar: [
             {
                 text: "TUTORIALS",
-                children: [
-                    {
-                        text: "Quickstart",
-                        link: "/tutorials/quickstart.md",
-                    },
-                    {
-                        text: "Contacts App",
-                        link: "/tutorials/contacts_app.md",
-                    },
-                ],
+                children: ["/tutorials/quickstart.md"],
             },
             {
                 text: "CONCEPTS",
@@ -114,21 +105,22 @@ export default defineUserConfig({
                     "/indexes.md",
                     "/links.md",
                     "/watchers.md",
-                    "/type_converters.md",
                     "/limitations.md",
                     "/faq.md",
-                    "/inspector.md",
                     "/dart.md",
-                    "/benchmarks.md",
                 ],
             },
             {
                 text: "RECIPES",
-                children: ["/recipes/full_text_search.md", "/recipes/multi_isolate.md"],
+                children: [
+                    "/recipes/full_text_search.md",
+                    "/recipes/multi_isolate.md",
+                    "/recipes/string_ids.md"
+                ],
             },
             {
                 text: "Sample Apps",
-                link: "https://github.com/isar/isar/tree/main/examples/pub",
+                link: "https://github.com/isar/isar/tree/main/examples",
             },
             {
                 text: "Changelog",

@@ -8,7 +8,7 @@ Querying is how you find records that match certain conditions, for example:
 
 - Find all starred contacts
 - Find distinct first names in contacts
-- Delete all contacts that don't have a last name defined
+- Delete all contacts that don't have the last name defined
 
 Because queries are executed on the database, and not in Dart, they're really fast. When you cleverly use indexes, you can improve the query performance even further. In the following, you'll learn how to write queries and how you can make them as fast as possible.
 
@@ -18,7 +18,7 @@ There are two different methods of filtering your records: Filters and where cla
 
 Filters are easy to use and understand. Depending on the type of your properties, there are different filter operations available most of which have self-explanatory names.
 
-Filters work by evaluating an expression for every object in the collection being filtered. If the expression resolves to `true`, Isar includes the object in the results. Filters have no effect on the ordering of the results.
+Filters work by evaluating an expression for every object in the collection being filtered. If the expression resolves to `true`, Isar includes the object in the results. Filters do not affect the ordering of the results.
 
 We'll use the following model for the examples below:
 
@@ -37,17 +37,19 @@ class Shoe {
 
 ### Query conditions
 
-Depending on the type of a field, there are different conditions available.
+Depending on the type of field, there are different conditions available.
 
-| Condition                | Description                                                                                                                                     |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.equalTo(value)`        | Matches values that are equal to the specified `value`.                                                                                         |
-| `.between(lower, upper)` | Matches values that are between `lower` and `upper`.                                                                                            |
-| `.greaterThan(bound)`    | Matches values that are greater than `bound`.                                                                                                   |
-| `.lessThan(bound)`       | Matches values that are less than `bound`. `null` values will be included by default because `null` is considered smaller than any other value. |
-| `.isNull()`              | Matches values that are `null`.                                                                                                                 |
+| Condition | Description |
+| ----------| ------------|
+| `.equalTo(value)` | Matches values that are equal to the specified `value`. |
+| `.between(lower, upper)` | Matches values that are between `lower` and `upper`. |
+| `.greaterThan(bound)` | Matches values that are greater than `bound`. |
+| `.lessThan(bound)` | Matches values that are less than `bound`. `null` values will be included by default because `null` is considered smaller than any other value. |
+| `.isNull()` | Matches values that are `null`.|
+| `.isNotNull()` | Matches values that are not `null`.|
+| `.length()` | List, String and link length queries filter objects based on the number of elements in a list or link. |
 
-Let's assume the database contains four shoes with sizes 39, 40, 46 and one with unset (`null`) size. Unless you perform sorting, the values will be returned sorted by id.
+Let's assume the database contains four shoes with sizes 39, 40, 46 and one with an un-set (`null`) size. Unless you perform sorting, the values will be returned sorted by id.
 
 ```dart
 
@@ -67,17 +69,17 @@ isar.shoes.filter()
 
 ### Logical operators
 
-You can composit predicates using the following logical operators:
+You can composite predicates using the following logical operators:
 
-| Operator   | Description                                                                  |
-| ---------- | ---------------------------------------------------------------------------- |
-| `.and()`   | Evaluates to `true` if both left-hand and right-hand expressions are `true`. |
-| `.or()`    | Evaluates to `true` if either expression returns `true`.                     |
-| `.xor()`   | Evaluates to `true` if either expression returns different results.          |
-| `.not()`   | Negates the result of the following expression.                              |
-| `.group()` | Group conditions and allow to specify order of evaluation.                   |
+| Operator   | Description |
+| ---------- | ----------- |
+| `.and()`   | Evaluates to `true` if both left-hand and right-hand expressions evaluate to `true`. |
+| `.or()`    | Evaluates to `true` if either expression evaluates to `true`. |
+| `.xor()`   | Evaluates to `true` if exactly one expression evaluates to `true`. |
+| `.not()`   | Negates the result of the following expression. |
+| `.group()` | Group conditions and allow to specify order of evaluation. |
 
-If you want to find all shoes with size 46, you can use the following query:
+If you want to find all shoes in size 46, you can use the following query:
 
 ```dart
 final result = await isar.shoes.filter()
@@ -85,7 +87,7 @@ final result = await isar.shoes.filter()
   .findAll();
 ```
 
-If you want to use more than one condition, you can combine multiple filters using logical **and** `.and()` and logical **or** `.or()`:
+If you want to use more than one condition, you can combine multiple filters using logical **and** `.and()`, logical **or** `.or()` and logical **xor** `.xor()`.
 
 ```dart
 final result = await isar.shoes.filter()
@@ -127,7 +129,7 @@ This query is equivalent to `size != 46 && isUnisex != true`.
 
 ### String conditions
 
-You can compare string values using these string operators. Regex-like wildcards allow more flexibility in search.
+In addition to the query conditions above, String values offer a few more conditions you can use. Regex-like wildcards for example allow more flexibility in search.
 
 | Condition            | Description                                                       |
 | -------------------- | ----------------------------------------------------------------- |
@@ -150,14 +152,11 @@ A [wildcard string expression](https://en.wikipedia.org/wiki/Wildcard_character)
 
 Sometimes it is necessary to build a query based on some conditions or for different values. Isar has a very powerful tool to build conditional queries:
 
-| Modifier                             | Description                                          |
-| ------------------------------------ | ---------------------------------------------------- |
-| `.optional(condition, queryBuilder)` | Extends the query only if the `condition` is `true`. |
-| `.repeat(values, queryBuilder)`      | Extends the query for each value in `values`.        |
-
-:::tip
-Modifiers can be combined however you like. Every part of a query can be optional or repeated but it does not always make sense. Repeatedly applying a limit for example will effectively only use the limit applied last.
-:::
+| Modifier              | Description                                          |
+| --------------------- | ---------------------------------------------------- |
+| `.optional(cond, qb)` | Extends the query only if the `condition` is `true`. This can be used almost anywhere in a query for example to conditionally sort or limit it. |
+| `.anyOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **or**. |
+| `.allOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **and**. |
 
 In this example we build a method that can find shoes with an optional filter:
 
@@ -171,48 +170,124 @@ Future<List<Shoe>> findShoes(Id? sizeFilter) {
 }
 ```
 
-If you want to find all shoes that have one of multiple shoe sizes you can either write a conventional query or use the `repeat()` modifier:
+If you want to find all shoes that have one of multiple shoe sizes you can either write a conventional query or use the `anyOf()` modifier:
 
 ```dart
-
 final shoes1 = await isar.shoes.filter()
-    .sizeEqualTo(38)
-    .or()
-    .sizeEqualTo(40)
-    .or()
-    .sizeEqualTo(42)
-    .findAll();
+  .sizeEqualTo(38)
+  .or()
+  .sizeEqualTo(40)
+  .or()
+  .sizeEqualTo(42)
+  .findAll();
 
 final shoes2 = await isar.shoes.filter()
-    .repeat(
-      [38, 40, 42],
-      (q, int size) => q.sizeEqualTo(size).or()
-    ).findAll();
+  .anyOf(
+    [38, 40, 42],
+    (q, int size) => q.sizeEqualTo(size)
+  ).findAll();
 
 // shoes1 == shoes2
 ```
 
 Query modifiers are especially useful when you want to build dynamic queries.
 
+### Lists
+
+Even lists can be used in queries.
+
+```dart
+class Tweet {
+  Id? id;
+
+  String? text;
+
+  List<String> hashtags = [];
+}
+```
+
+You can query based on the list length:
+
+```dart
+final tweetsWithoutHashtags = await isar.tweets.filter()
+  .hashtagsIsEmpty()
+  .findAll();
+
+final tweetsWithManyHashtags = await isar.tweets.filter()
+  .hashtagsLengthGreaterThan(5)
+  .findAll();
+```
+
+These are equivalent to the Dart code `tweets.where((t) => t.hashtags.isEmpty);` and `tweets.where((t) => t.hashtags.length > 5);`. You can also query based on the list elements:
+
+```dart
+final flutterTweets = await isar.tweets.filter()
+  .hashtagsElementEqualTo('flutter')
+  .findAll();
+```
+
+This is equivalent to the Dart code `tweets.where((t) => t.hashtags.contains('flutter'));`.
+
+### Embedded objects
+
+Embedded objects can be queried using the same conditions as top-level objects. Let's assume we have the following model:
+
+```dart
+@collection
+class Car {
+  Id? id;
+
+  Brand? brand;
+}
+
+@embedded
+class Brand {
+  String? name;
+
+  String? country;
+}
+```
+
+We want to query all cars that have a brand with the name `"BMW"` and the country `"Germany"`. We can do this using the following query:
+
+```dart
+final germanCars = await isar.cars.filter()
+  .brand((q) => q
+    .nameEqualTo('BMW')
+    .and()
+    .countryEqualTo('Germany')
+  ).findAll();
+```
+
+Always try to group nested queries. The above query is more efficient than the following even though the result is the same:
+
+```dart
+final germanCars = await isar.cars.filter()
+  .brand((q) => q.nameEqualTo('BMW'))
+  .and()
+  .brand((q) => q.countryEqualTo('Germany'))
+  .findAll();
+```
+
 ### Links
 
-If your model contains [links or backlinks](links) you filter your query based on the linked objects.
+If your model contains [links or backlinks](links) you can filter your query based on the linked objects or the number of linked objects.
 
 ```dart
 @collection
 class Teacher {
-    Id? id;
+  Id? id;
 
-    late String subject;
+  late String subject;
 }
 
 @collection
 class Student {
-    Id? id;
+  Id? id;
 
-    late String name;
+  late String name;
 
-    final teachers = IsarLinks<Teacher>();
+  final teachers = IsarLinks<Teacher>();
 }
 ```
 
@@ -220,19 +295,33 @@ We can for example find all students that have a math or English teacher:
 
 ```dart
 final result = await isar.students.filter()
-  .teachers((q) => q.subjectEqualTo('Math')
-    .or()
-    .subjectEqualTo('English')
-  ).findAll()
+  .teachers((q) {
+    return q.subjectEqualTo('Math')
+      .or()
+      .subjectEqualTo('English');
+  }).findAll();
+```
+Link filters evaluate to `true` if at least one linked object matches the conditions.
+
+Let's search for all students that have no teachers:
+  
+```dart
+final result = await isar.students.filter().teachersLengthEqualTo(0).findAll();
 ```
 
-Link filters evaluate to `true` if at least one linked object matches the conditions.
+or alternatively:
+
+```dart
+final result = await isar.students.filter().teachersIsEmpty().findAll();
+```
 
 ## Where clauses
 
 Where clauses are a very powerful tool but it can be a little difficult to get them right.
 
-In contrast to filters where clauses use the indexes you defined in the schema. Querying an index is a lot faster than filtering each record individually.
+In contrast to filters where clauses use the indexes, you defined in the schema to check the query conditions. Querying an index is a lot faster than filtering each record individually.
+
+➡️ Learn more: [Indexes](indexes)
 
 :::tip
 As a basic rule, you should always try to reduce the records as much as possible using where clauses and do the remaining filtering using filters.
@@ -257,7 +346,7 @@ class Shoe with IsarObject {
 }
 ```
 
-There are two indexes. The index on `size` allows us to use where clauses like `.sizeEqualTo()`. The composite index on `isUnisex` allows where clauses like `isUnisexSizeEqualTo()`. But also `isUnisexEqualTo()` because you can also use any prefix of an index.
+There are two indexes. The index on `size` allows us to use where clauses like `.sizeEqualTo()`. The composite index on `isUnisex` allows where clauses like `isUnisexSizeEqualTo()`. But also `isUnisexEqualTo()` because you can always use any prefix of an index.
 
 We can now rewrite the query from before that finds unisex shoes in size 46 using the composite index. This query will be a lot faster than the previous one:
 
@@ -296,11 +385,11 @@ final sortedShoes = isar.shoes.filter()
   .findAll();
 ```
 
-Sorting a lot of results can be an expensive operation. Luckily, we can again use indexes an make our query lighning fast even if we need to sort a million objects.
+Sorting a lot of results can be an expensive operation. Especially since sorting happens before offset and limit. The sorting methods above never make use of indexes. Luckily, we can again use where clause sorting and make our query lightning fast even if we need to sort a million objects.
 
 ### Where clause sorting
 
-If you use a **single** index in your query, the results are already sorted by the index. That's a big deal!
+If you use a **single** where clause in your query, the results are already sorted by the index. That's a big deal!
 
 Let's assume we have shoes in sizes `[43, 39, 48, 40, 42, 45]` and we want to find all shoes with a size greater than `42` and also have them sorted by size:
 
@@ -357,10 +446,8 @@ Only the first result of each distinct combination is returned so you can use wh
 
 ### Where clause distinct
 
-If you have a non-unique index, you may want to get all of its distinct values. You could use the `distinctBy` operation but it's performed after sorting and filters so there is some overhead to it.  
+If you have a non-unique index, you may want to get all of its distinct values. You could use the `distinctBy` operation from the previous section but it's performed after sorting and filters so there is some overhead to it.  
 If you only use a single where clause you can instead rely on the index to perform the distinct operation.
-
-Another great advantages of indexes is that you get "free" sorting. When you query results using a **single** where clause, the results are sorted by the index. For composite indexes, the result are sorted by all fields in the index.
 
 ```dart
 final shoes = await isar.shoes.where(distinct: true)
@@ -369,7 +456,7 @@ final shoes = await isar.shoes.where(distinct: true)
 ```
 
 :::tip
-You can even use multiple where clause for sorting and distinct. The only restriction is that those where clauses are not overlapping and use the same index. For correct sorting they also need to be applied in sort-order. Be very careful if you rely on this!
+You can even use multiple where clause for sorting and distinct. The only restriction is that those where clauses are not overlapping and use the same index. For correct sorting, they also need to be applied in sort order. Be very careful if you rely on this!
 :::
 
 ## Offset & Limit
@@ -391,6 +478,8 @@ final firstTenShoes = await isar.shoes.where()
   .findAll();
 ```
 
+Since instantiating Dart objects is often the most expensive part of executing a query, it is a good idea to only load the objects you need.
+
 ## Execution order
 
 Isar queries are always executed in the same order:
@@ -404,7 +493,7 @@ Isar queries are always executed in the same order:
 
 ## Query operations
 
-In the previous examples we used `.findAll()` to retrieve all matching objects. There are more operations available however:
+In the previous examples, we used `.findAll()` to retrieve all matching objects. There are more operations available, however:
 
 | Operation        | Description                                                                                                         |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -429,7 +518,7 @@ List<int> sizes = await isar.shoes.where()
   .findAll();
 ```
 
-Using only a single property saves time during deserialization.
+Using only a single property saves time during deserialization. Property queries also work for embedded objects and lists.
 
 ## Aggregation
 
@@ -447,10 +536,10 @@ Using aggregations is vastly faster than finding all matching objects and perfor
 ## Dynamic queries
 
 :::warning
-This section is most likely not relevant to you. You should skip it for now and come back later.
+This section is most likely not relevant to you. It is discouraged to use dynamic queries unless you absolutely need to (and you rarely do).
 :::
 
-All of the examples above used the QueryBuilder and the generated static extension methods. Maybe you want to create very dynamic queries or even a custom query language (like the Isar Inspector). In that case you can use the `buildQuery()` method:
+All of the examples above used the QueryBuilder and the generated static extension methods. Maybe you want to create very dynamic queries or even a custom query language (like the Isar Inspector). In that case, you can use the `buildQuery()` method:
 
 | Parameter       | Description                                                                                 |
 | --------------- | ------------------------------------------------------------------------------------------- |

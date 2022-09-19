@@ -4,11 +4,11 @@ title: Indexes
 
 # Indexes
 
-Indexes are Isars most powerful feature. Many embedded databases offer "normal" indexes (if at all). Understanding how indexes work is essential to optimize query performance. Isar lets you choose which index you want to use and how you want to use it. We'll start with a quick introduction what indexes are.
+Indexes are Isars most powerful feature. Many embedded databases offer "normal" indexes (if at all) but Isar also has composite and multi-entry indexes. Understanding how indexes work is essential to optimize query performance. Isar lets you choose which index you want to use and how you want to use it. We'll start with a quick introduction to what indexes are.
 
 ## What are indexes?
 
-When a collection is unindexed, the order of the rows will likely not be discernible by the query as optimized in any way, and your query will therefore have to search through the objects linearly. In other words, the query will have to search through every object to find the ones matching the conditions. As you can imagine, that can take a long time. Looking through every single object is not very efficient.
+When a collection is unindexed, the order of the rows will likely not be discernible by the query as optimized in any way, and your query will therefore have to search through the objects linearly. In other words, the query will have to search through every object to find the ones matching the conditions. As you can imagine, that can take some time. Looking through every single object is not very efficient.
 
 For example, this `Product` collection is completely unordered.
 
@@ -37,10 +37,10 @@ class Product {
 | 8   | Computer  | 650   |
 | 9   | Soap      | 2     |
 
-A query that tries to find all products that cost more than €30 has to search through all nine rows. That's not an issue for nine rows but it will become a problem for 100k rows.
+A query that tries to find all products that cost more than €30 has to search through all nine rows. That's not an issue for nine rows but it might become a problem for 100k rows.
 
 ```dart
-final expensiveProducts = await isar.products..filter()
+final expensiveProducts = await isar.products.filter()
   .priceGreaterThan(30)
   .findAll();
 ```
@@ -73,7 +73,7 @@ class Product {
 | <mark>**60**</mark>  | <mark>**6**</mark> |
 | <mark>**650**</mark> | <mark>**8**</mark> |
 
-Now the query can be executed a lot faster. The executer can directly jump to the last three index rows and find the corresponding objects by their id.
+Now the query can be executed a lot faster. The executor can directly jump to the last three index rows and find the corresponding objects by their id.
 
 ### Sorting
 
@@ -88,9 +88,9 @@ final cheapest = await isar.products.filter()
   .findAll();
 ```
 
-In this example the database would have to load all (!) objects, sort them by price and return the four products with the lowest price.
+In this example, the database would have to load all (!) objects, sort them by price and return the four products with the lowest price.
 
-As you can probably imagine, this can be done a lot more efficient with the index from before. The database takes the first four rows of the index and returns the corresponding objects since they are already in the correct order.
+As you can probably imagine, this can be done a lot more efficiently with the index from before. The database takes the first four rows of the index and returns the corresponding objects since they are already in the correct order.
 
 To use the index for sorting we would write the query like this:
 
@@ -103,13 +103,126 @@ final cheapestFast = await isar.products.where()
 
 The `.anyX()` where clause tells Isar to use an index just for sorting. You can also use a where clause like `.priceGreaterThan()` and still get sorted results.
 
+## Unique indexes
+
+A unique index ensures the index does not contain any duplicate values. It may consist of one or multiple properties. If a unique index has one property, the values in this property will be unique. In case the unique index has multiple properties, the combination of values in these properties is unique.
+
+```dart
+@collection
+class User {
+  Id? id;
+
+  @Index(unique: true)
+  late String username;
+
+  late int age;
+}
+```
+
+Any attempt to insert or update data into the unique index that causes a duplicate will result in an error:
+
+```dart
+final user1 = User()
+  ..id = 1
+  ..username = 'user1'
+  ..age = 25;
+
+await isar.users.put(user1); // -> ok
+
+final user2 = User()
+  ..id = 2;
+  ..username = 'user1'
+  ..age = 30;
+
+// try to insert user with same username
+await isar.users.put(user2); // -> error: unique constraint violated
+print(await isar.user.where().findAll());
+// > [{id: 1, username: 'user1', age: 25}]
+```
+
+## Replace indexes
+
+It is sometimes not preferable to throw an error if a unique constraint is violated. Instead, you may want to replace the existing object with the new one. This can be achieved by setting the `replace` property of the index to `true`.
+
+```dart
+@collection
+class User {
+  Id? id;
+
+  @Index(unique: true, replace: true)
+  late String username;
+}
+```
+
+Now when we try to insert a user with a username that already exists, the existing user will be replaced with the new one.
+
+```dart
+final user1 = User()
+  ..id = 1
+  ..username = 'user1'
+  ..age = 25;
+
+await isar.users.put(user1);
+print(await isar.user.where().findAll());
+// > [{id: 1, username: 'user1', age: 25}]
+
+final user2 = User()
+  ..id = 2;
+  ..username = 'user1'
+  ..age = 30;
+
+await isar.users.put(user2);
+print(await isar.user.where().findAll());
+// > [{id: 2, username: 'user1' age: 30}]
+```
+
+Replace indexes also generate `putBy()` methods that allow you to update objects instead of replacing them. The existing id is reused and links are still populated.
+
+```dart
+final user1 = User()
+  ..id = 1
+  ..username = 'user1'
+  ..age = 25;
+
+// user does not exist so this is the same as put()
+await isar.users.putByUsername(user1); 
+await isar.user.where().findAll(); // -> [{id: 1, username: 'user1', age: 25}]
+
+final user2 = User()
+  ..id = 2;
+  ..username = 'user1'
+  ..age = 30;
+
+await isar.users.put(user2);
+await isar.user.where().findAll(); // -> [{id: 1, username: 'user1' age: 30}]
+```
+
+As you can see, the id of the first inserted user is reused.
+
+## Case-insensitive indexes
+
+By default, all indexes on `String` and `List<String>` properties are case-sensitive. This means that the index will only contain entries where the property value is the same as the index value. If you want to create a case-insensitive index, you can use the `caseSensitive` option:
+
+```dart
+@collection
+class Person {
+  Id? id;
+
+  @Index(caseSensitive: false)
+  late String name;
+
+  @Index(caseSensitive: false)
+  late List<String> tags;
+}
+```
+
 ## Index type
 
-There are different types of indexes. Most of the time you'll want to use a `IndexType.value` index.
+There are different types of indexes. Most of the time you'll want to use a `IndexType.value` index but hash indexes are more efficient.
 
 ### Value index
 
-This is the default type and also the only allowed type for all properties that don't hold Strings or Lists. Property values are used to build the index. In case of lists, the elements of the list are used. It is the most flexible but also space consuming of the three index types.
+This is the default type and also the only allowed type for all properties that don't hold Strings or Lists. Property values are used to build the index. In case of lists, the elements of the list are used. It is the most flexible but also space-consuming of the three index types.
 
 :::tip
 Use `IndexType.value` for primitives, Strings where you need `startsWith` where clauses and Lists if you want to search for individual elements.
@@ -117,10 +230,10 @@ Use `IndexType.value` for primitives, Strings where you need `startsWith` where 
 
 ### Hash index
 
-Strings and Lists can be hashed to reduce the storage required by the index. The disadvantage of hash indexes is that they can't be used for prefix scans (`startsWith` where clauses).
+Strings and Lists can be hashed to greatly reduce the storage required by the index. The disadvantage of hash indexes is that they can't be used for prefix scans (`startsWith` where clauses).
 
 :::tip
-Use `IndexType.hash` for Strings and lists if you don't need `startsWith` and `anyEqualTo` where clauses.
+Use `IndexType.hash` for Strings and Lists if you don't need `startsWith` and `elementEqualTo` where clauses.
 :::
 
 ### HashElements index
@@ -128,14 +241,14 @@ Use `IndexType.hash` for Strings and lists if you don't need `startsWith` and `a
 String lists can either be hashed completely (using `IndexType.hash`) or the elements of the list can be hashed (using `IndexType.hashElements`) effectively creating a multi-entry index with hashed elements.
 
 :::tip
-Use `IndexType.hashElements` for `List<String>` where you need `anyEqualTo` where clauses.
+Use `IndexType.hashElements` for `List<String>` where you need `elementEqualTo` where clauses.
 :::
 
 ## Composite indexes
 
 A composite index is an index on multiple properties. Isar allows you to create composite indexes that consist of up to three properties.
 
-Composite indexes are also known as a multiple-column indexes.
+Composite indexes are also known as multiple-column indexes.
 
 It's probably best to start with an example. We create a person collection and define a composite index on the age and name properties:
 
@@ -181,9 +294,7 @@ class Person {
 
 The generated composite index contains all persons sorted by their age and then by their name.
 
-Obviously composite indexes are great if you want to create efficient queries that are sorted by multiple properties.
-
-But composite indexes also allow advanced where clauses with multiple properties:
+Composite indexes are great if you want to create efficient queries that are sorted by multiple properties. They also enable advanced where clauses with multiple properties:
 
 ```dart
 final result = await isar.where()
@@ -204,7 +315,7 @@ final result = await isar.where()
 
 If you index a list using `IndexType.value`, Isar will automatically create a multi-entry index and each item in the array is indexed towards the object. It works for all types of lists.
 
-Useful applications for multi-entry indexes are for example to index a list of tags or to create a full text index.
+Useful applications for multi-entry indexes are for example indexing a list of tags or creating a full-text index.
 
 ```dart
 @collection
@@ -244,61 +355,8 @@ Entries with duplicate words only appear once in the index.
 | super            | 4         |
 | t-shirt          | [1, 3]    |
 
-This index can now be used for prefix (or equality) where clauses on the individual words of the description.
+This index can now be used for prefix (or equality) where clauses of the individual words of the description.
 
 :::tip
-Instead of storing the words directly, you can also use the result of a [phonectic algorithm](https://en.wikipedia.org/wiki/Phonetic_algorithm) like [Soundex](https://en.wikipedia.org/wiki/Soundex).
+Instead of storing the words directly, also consider using the result of a [phonectic algorithm](https://en.wikipedia.org/wiki/Phonetic_algorithm) like [Soundex](https://en.wikipedia.org/wiki/Soundex).
 :::
-
-## Unique indexes
-
-A unique index ensures the index does not contain any duplicate values. It may consist of one or multiple properties. If a unique index has one property, the values in this property will be unique. In case the unique index has multiple properties, the combination of values in these properties is unique.
-
-```dart
-@collection
-class User {
-  Id? id;
-
-  @Index(unique: true)
-  late String username;
-}
-```
-
-Any attempt to insert or update data into the unique index that causes a duplicate will result in an error. There is an option however to replace existing entries instead of failing:
-
-```dart
-final user1 = User()
-  ..id = 1
-  ..username = 'user1';
-
-await isar.users.put(user1); // -> ok
-
-final user2 = User()
-  ..id = 2;
-  ..username = 'user1';
-
-// try to insert user with same username
-await isar.users.put(user2); // -> error: unique constraint violated
-print(await isar.user.where().findAll()); // -> [user1]
-
-// replace user1 with user2
-await isar.users.put(user2, replaceOnConflict: true); // -> ok
-print(await isar.user.where().findAll()); // -> [user2]
-```
-
-## Case-insensitive indexes
-
-By default, all indexes on `String` and `List<String>` properties are case-sensitive. This means that the index will only contain entries where the property value is exactly the same as the index value. If you want to create a case-insensitive index, you can use the `caseSensitive` option:
-
-```dart
-@collection
-class Person {
-  Id? id;
-
-  @Index(caseSensitive: false)
-  late String name;
-
-  @Index(caseSensitive: false)
-  late List<String> tags;
-}
-```

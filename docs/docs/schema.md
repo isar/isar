@@ -13,14 +13,13 @@ The Isar generator will find all classes annotated with `@collection`.
 ```dart
 @collection
 class Contact {
+  Id? id;
 
-  Id id = Isar.autoIncrement;
+  late String firstName;
 
-  String firstName;
+  late String lastName;
 
-  String lastName;
-
-  bool isStarred;
+  late bool isStarred;
 }
 ```
 
@@ -28,132 +27,40 @@ class Contact {
 | ------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `inheritance` | Control whether fields of parent classes and mixins will be stored in Isar. Enabled by default.                  |
 | `accessor`    | Allows you to rename the default collection accessor (for example `isar.contacts` for the `Contact` collection). |
+| `ignore`      | Allows ignoring certain properties. These are also respected for super classes.                                  |
 
-### Id
+### Isar Id
 
-All model classes need to define an id by a property with type `Id` that uniquely identifies an object. Only `int` properties may be used as id. If a class has a field called `id`.
+All model classes need to define an id property with type `Id` that uniquely identifies an object. `Id` is just an alias for `int` that allows the Isar Generator to recognize the id property.
 
 ```dart
 @collection
-class Pet {
+class Contact {
+  Id? id;
 
-  Id id; // field is called id
+  String? firstName;
 
-  String name;
+  String? lastName;
+
+  bool? isStarred;
 }
 ```
 
 Isar automatically indexes id fields, which allows you to efficiently read and modify objects based on their id.
 
-You can either set ids yourself or request Isar to assign an auto-increment id. If the `id` field is `null`, Isar will use an auto-increment id. You can also assign `Isar.autoIncrement` to the id field to request an auto-increment id.
-
-The default isar auto incremented value is -9223372036854775808. Isar assigns the id during the write txn. so if the  id type is final then it can not assign the auto incremented id. If you want to make the id final for whatever reason you should manually create a new object with the actual id returned by the put operation
-:::tip
-Auto increment ids are not reused when an object is deleted. That's how most databases do it.
-:::
-
-### Supported types
-
-Isar supports the following data types:
-
-- `bool`
-- `int`
-- `double`
-- `DateTime`
-- `String`
-- `Enumerated`
-- `Uint8List`
-- `List<bool>`
-- `List<int>`
-- `List<double>`
-- `List<DateTime>`
-- `List<String>`
-
-It is important to understand how nullability works in Isar:
-Number types do **NOT** have a dedicated `null`-representation. Instead a specific value will be used:
-
-|            | VM            | Web         |
-| ---------- | ------------- | ----------- |
-| **int**    |  `int.MIN`    | `-Infinity` |
-| **double** |  `double.NaN` | `-Infinity` |
-
-`bool`, `String` and `List` have a separate `null` representation.
-
-This behavior allows for nice performance improvements and it allows you to change the nullability of your fields freely without requiring migration or special code to handle `null`s.
-
-:::warning
-Web does not support `NaN`. This is an IndexedDB limitation.
-:::
-
-[//]: <➡️ Use `TypeConverter`s to store unsupported types like enums: [Type Converters](type_converters)>
-
-### 8-byte and 4-byte numbers
-
-`int` and `double` (64-bit) have an 8-byte representation in Dart. By default, this is also true for Isar. You can however change numbers to a 4-byte representation to save disk space by typing number fields with `short` and `float` (32-bit) respectively. `byte` is a 8-bit representation to save even more space. It is your responsibility to make sure that you do not store a number that requires larger space in `short`, `float` & `byte` fields.
-
-Since JavaScript only supports 64-bit floating point numbers `short`, `byte` and `float` has no effect on web.
-
-### DateTime
-
-Isar does not store timezone information of your dates. Instead it converts `DateTime`s to UTC before storing them. Isar returns all dates in local time.
-
-`DateTime`s are stored with microsecond precision. In browsers, only millisecond precision is supported because of JavaScript limitations.
-
-### @embedded
-
-Embedded objects can be added to collections or other embedded objects without using links. They allow you to store and query a deeply nested structure in Isar. Link is just a reference of an object in isar. But Embedded object is totally a separate object that lives inside the parent object.
-
-You can link collections with each other. All it does is create an index containing the ids of both linked objects. You can update or delete the objects individually.
-To query linked objects Isar needs a separate lookup. If you delete a linked object, the other one still exists.
-
-Embedded objects don't live on their own. They are stored together with their parent so they cannot be updated independent of their parent. They don't have their own id, cannot contain links or indexes and when their parent is deleted, so are the embedded objects.
-You don't need to load() embedded objects.
+You can either set ids yourself or request Isar to assign an auto-increment id. If the `id` field is `null` and not `final`, Isar will assign an auto-increment id. If you want a non-nullable auto-increment id, you can use `Isar.autoIncrement` instead of `null`.
 
 :::tip
-An embedded object can't annotated as a collection and can't be indexed. But you can create a common superclass to overcome this.
+Auto increment ids are not reused when an object is deleted. The only way to reset auto-increment ids is to clear the database.
 :::
-
-```dart
-part 'email.g.dart';
-
-@collection
-class Email {
-  Id id = Isar.autoIncrement; // you can also use id = null to auto increment
-
-  String? title;
-
-  List<Recipient>? recipients;
-
-  @enumerated
-  Status status = Status.pending;
-}
-
-@embedded
-class Recipient {
-  String? name;
-
-  String? address;
-}
-
-enum Status {
-  draft,
-  sending,
-  sent,
-}
-
-```
-
-### @enumerated
-
-Annotate your `enum` variables with '@enumerated` and That's it. Isar takes care of the rest.
 
 ### Ignoring fields
 
-By default, all public fields of a class will be persisted. By annotating a field with `@Ignore()`, you can exclude it from persistence. Keep in mind that it is not good practice to store information in your Isar objects that is not persisted.
+By default, all public fields of a class will be persisted. By annotating a property or getter with `@ignore`, you can exclude it from persistence. Keep in mind that it is not good practice to store information in Isar objects that are not persisted.
 
 ### Renaming classes and fields
 
-You have to be careful when you want to rename a class or field. Most of the time the old class or field will just be dropped and recreated. With the `@Name()` annotation, you can name classes and fields in the database independantly from Dart. The following code will yield the exact same schema as the code above.
+Sometimes it is useful to store classes or fields with a different name than the Dart class or field name. This can be achieved by annotating the class or field with `@Name`. The following collection is stored the same as the `Contact` class above.
 
 ```dart
 @collection
@@ -173,32 +80,157 @@ class MyContactClass1 {
 }
 ```
 
-## Schema migration
+Especially if you want to rename fields or classes that are already stored in the database, you should consider using the `@Name` annotation. Otherwise, the database will just delete and re-create the field or collection.
 
-It is possible to change the schema between releases of your app (for example by adding collections) but it is very important to follow the rules of schema migration.
+## Supported types
 
-You are allowed to do the following modifications:
+Isar supports the following data types:
 
-- Add & remove collections
-- Add & remove fields
-- Change the nullability of a field (e.g. `int` -> `Id?` or `List<String?>?` -> `List<String>`)
-- Add & remove indexes
-- Add & remove links
-- Change between `Link<MyCol>` and `Links<MyCol>` (no data will be lost)
+- `bool`
+- `int`
+- `double`
+- `DateTime`
+- `String`
+- `List<bool>`
+- `List<int>`
+- `List<double>`
+- `List<DateTime>`
+- `List<String>`
+
+Additionally, embedded objects and enums are supported. We'll cover those below.
+
+## byte, short, float
+
+For many use cases, you don't need the full range of a 64-bit integer or double. Isar supports additional types that allow you to save space and memory when storing smaller numbers.
+
+| Type       | Size in bytes | Range                                                   |
+| ---------- |-------------- | ------------------------------------------------------- |
+| **byte**   | 1             | 0 to 255                                                |
+| **short**  | 4             | -2,147,483,647 to 2,147,483,647                         |
+| **int**    | 8             | -9,223,372,036,854,775,807 to 9,223,372,036,854,775,807 |
+| **float**  | 4             | -3.4e38 to 3.4e38                                       |
+| **double** | 8             | -1.7e308 to 1.7e308                                     |
+
+The additional number types are just aliases for the native Dart types so using a `short` for example works the same as using an `int`.
+
+Here is an example collection containing all of the above types:
+
+```dart
+@collection
+class TestCollection {
+  Id? id;
+
+  late byte byteValue;
+
+  short? shortValue;
+
+  int? intValue;
+
+  float? floatValue;
+
+  double? doubleValue;
+}
+```
+
+All of these types can also be used in lists. For example, for storing bytes you should use `List<byte>`.
+
+## Nullable types
+
+It is important to understand how nullability works in Isar:
+Number types do **NOT** have a dedicated `null` representation. Instead, a specific value will be used:
+
+| Type       | VM            |
+| ---------- | ------------- |
+| **short**  | `-2147483648` | 
+| **int**    |  `int.MIN`    |
+| **float**  | `double.NaN` |
+| **double** |  `double.NaN` |
+
+`bool`, `String` and `List` have a separate `null` representation.
+
+This behavior enables performance improvements and it allows you to change the nullability of your fields freely without requiring migration or special code to handle `null` values.
 
 :::warning
-
-#### BE CAREFUL
-
-If you rename a field or collection that is not annotated with `@Name()`, the field or collection will be dropped and recreated.
+The `byte` type does not support null values.
 :::
 
-Deleted fields will still remain in the database. You are not allowed to recreate deleted fields with a different type.
+## DateTime
 
-:::danger
+Isar does not store timezone information of your dates. Instead it converts `DateTime`s to UTC before storing them. Isar returns all dates in local time.
 
-#### ILLEGAL MODIFICATIONS
+`DateTime`s are stored with microsecond precision. In browsers, only millisecond precision is supported because of JavaScript limitations.
 
-- Changing the type of fields in existing collections (even previously deleted ones)
-- Creating a unique index for a property with duplicate values
-  :::
+## Enum
+
+Isar allows storing and using enums like other Isar types. You have to choose however how the enum should be represented on the disk. Isar supports four different strategies:
+
+| EnumType    | Description 
+| ----------- | -----------
+| `ordinal`   | The index of the enum is stored as `byte`. This is very efficient but does not allow nullable enums |
+| `ordinal32` | The index of the enum is stored as `short` (4-byte integer).                                        |
+| `name`      | The enum name is stored as `String`.                                                                |
+| `value`     | A custom property is used to retrieve the enum value.                                               |
+
+:::warning
+`ordinal` and `ordinal32` depend on the order of the enum values. If you change the order, existing databases will return incorrect values.
+:::
+
+Let's check out an example for each strategy.
+
+```dart
+@collection
+class EnumCollection {
+  Id? id;
+
+  @enumerated // same as EnumType.ordinal
+  late TestEnum byteIndex; // cannot be nullable
+
+  @Enumerated(EnumType.ordinal)
+  late TestEnum byteIndex2; // cannot be nullable
+
+  @Enumerated(EnumType.ordinal32)
+  TestEnum? shortIndex;
+
+  @Enumerated(EnumType.name)
+  TestEnum? name;
+
+  @Enumerated(EnumType.value, 'myValue')
+  TestEnum? myValue;
+}
+
+enum TestEnum {
+  first(10),
+  second(100),
+  third(1000);
+
+  const TestEnum(this.myValue);
+
+  final short myValue;
+}
+```
+
+Of course, Enums can also be used in lists.
+
+## Embedded objects
+
+It's often useful to have nested objects in your collection model. There is no limit to how deep you can nest objects. Keep in mind however that updating a deeply nested object will require writing the whole object tree to the database.
+  
+```dart
+@collection
+class Email {
+  Id? id;
+
+  String? title;
+
+  Recepient? recipient;
+}
+
+@embedded
+class Recepient {
+  String? name;
+
+  String? address;
+}
+```
+
+Embedded objects can be nullable and extend other objects. The only requirement is that they are annotated with `@embedded` and have a default constructor without required parameters.

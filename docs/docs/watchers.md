@@ -9,7 +9,6 @@ Isar allows you to subscribe to changes in the database. You can either "watch" 
 Watchers enable you to efficiently react to changes in the database. You can for example rebuild your UI when a contact is added, send a network request when a document is updated etc.
 
 A watcher is notified after a transaction commits successfully and the target actually changes.
-Watchers can be lazy and not reload the data or they can be non-lazy and fetch new results in the background.
 
 ## Watching Objects
 
@@ -96,7 +95,7 @@ awaited isar.users.put(User()..name = 'Antonia');
 If you use offset & limit or distinct queries, Isar will also notify you when objects matching the filter but outside the query results change.
 :::
 
-Just like `watchObject()`, you can use `watchLazy()` to get notified when the query results change but not actually fetch the results.
+Just like `watchObject()`, you can use `watchLazy()` to get notified when the query results change but not fetch the results.
 
 :::danger
 Rerunning queries for every change is very inefficient. You should use a lazy collection watcher instead.

@@ -8,28 +8,26 @@ When you have your Collections defined, learn how to manipulate them!
 
 ## Opening Isar
 
-Before you can do anything, you have to open an Isar instance. Each instance needs a directory with write permission.
+Before you can do anything, you have to open an Isar instance. Each instance needs a directory with write permission. If you don't specify a directory, Isar will find a suitable default directory for the current platform.
 
 ```dart
-final isar = await Isar.open(
-  schemas: [ContactSchema],
-  directory: 'some/directory',
-  inspector:true,
-);
+final isar = await Isar.open([ContactSchema]);
 ```
 
 You can use the default config or provide some of the following parameters.
 
-| Config              | Description                                                                                                                                                                                                                      |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`              | You can open multiple instances with distinct names. By default, `"default"` is used.                                                                                                                                            |
-| `schemas`           | A list of all collection schemas you want to use. All instances need to use the same schemas.                                                                                                                                    |
-| `directory`         | The storage location for this instance. You can pass a relative or absolute path. By default, `NSDocumentDirectory` is used for iOS and `getDataDirectory` for Android. The final location is `path/name`. Not required for web. |
-| `relaxedDurability` | Relaxes the durability guarantee to increase write performance. In case of a system crash (not app crash), it is possible to lose the last committed transaction. Corruption is not possible                                     |
+| Config |  Description |
+| -------| -------------|
+| `name` | You can open multiple instances with distinct names. By default, `"default"` is used. |
+| `schemas` | A list of all collection schemas you want to use. All instances need to use the same schemas. |
+| `directory` | The storage location for this instance. You can pass a relative or absolute path. By default, `NSDocumentDirectory` is used for iOS and `getDataDirectory` for Android. The final location is `path/name.isar`. Not required for web. |
+| `relaxedDurability` | Relaxes the durability guarantee to increase write performance. In case of a system crash (not app crash), it is possible to lose the last committed transaction. Corruption is not possible |
+| `compactOnLaunch` | Conditions to check whether the database should be compacted when the instance is opened. |
+| `inspector` | Enabled the Inspector for debug builds. For profile and release builds this option is ignored. |
 
 You can either store the Isar instance in a global variable or use your favorite dependency injection package to manage it.
 
-If an instance is already open, calling `Isar.open()` will yield the existing instance regardless of the specified parameters. That's useful for using isar in an isolate.
+If an instance is already open, calling `Isar.open()` will yield the existing instance regardless of the specified parameters. That's useful for using Isar in an isolate.
 
 :::tip
 Consider using the [path_provider](https://pub.dev/packages/path_provider) package to get a valid path on all platforms.
@@ -41,7 +39,7 @@ The Collection object is how you find, query, and create new records of a given 
 
 ### Get a collection
 
-All your collections live in the Isar instance. Remember the `Contact` class we annotated before with `@Collection()`. You can get the contacts collection with:
+All your collections live in the Isar instance. Remember the `Contact` class we annotated before with `@collection`. You can get the contacts collection with:
 
 ```dart
 final contacts = isar.contacts;
@@ -62,7 +60,7 @@ final contact = contacts.getSync(someId);
 ```
 
 :::tip
-It is recommended to use the asynchronous version of the method in your UI isolate. Since Isar is very fast, it is often fine to use the synchronous version.
+It is recommended to use the asynchronous version of the method in your UI isolate. Since Isar is very fast, it is often fine however to use the synchronous version.
 :::
 
 ### Query records
@@ -98,7 +96,7 @@ await isar.writeTxn(() async {
 
 ### Create a new record
 
-When an object is not yet managed by Isar, you need to `.put()` it into a collection. If the id field is `null`, Isar will use an auto-increment id.
+When an object is not yet managed by Isar, you need to `.put()` it into a collection. If the id field is `null` or `Isar.autoIncrement`, Isar will use an auto-increment id.
 
 ```dart
 final newContact = Contact()
@@ -110,11 +108,11 @@ await isar.writeTxn(() async {
 })
 ```
 
-Isar will automatically assign the new id to the object if the `id` field is not read-only.
+Isar will automatically assign the new id to the object if the `id` field is non-final.
 
 ### Update a record
 
-Both creating and updating works with `yourCollection.put(yourObject)`. If the id is null (or does not exist), the object is inserted, otherwise it is updated.
+Both creating and updating works with `yourCollection.put(yourObject)`. If the id is null (or does not exist), the object is inserted, otherwise, it is updated.
 
 ### Delete records
 

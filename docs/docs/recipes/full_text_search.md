@@ -13,7 +13,7 @@ An index works like a lookup table that allows the query engine to quickly find 
 You can easily search text using filters. There are various string operations for example `.startsWith()`, `.contains()` and `.matches()`. The problem with filters is that their runtime is `O(n)` where `n` is the number of records in the collection. String operations like `.matches()` are especially expensive.
 
 :::tip
-Full-text search is much faster than filters but indexes have some limitations. In this recipe we will explore how to work around these limitations.
+Full-text search is much faster than filters but indexes have some limitations. In this recipe, we will explore how to work around these limitations.
 :::
 
 ## Basic example
@@ -24,12 +24,12 @@ Let's create the most basic full-text index:
 
 ```dart
 class Post {
-    Id? id;
+  Id? id;
 
-    late String title;
+  late String title;
 
-    @Index()
-    List<String> get titleWords => title.split(' ');
+  @Index()
+  List<String> get titleWords => title.split(' ');
 }
 ```
 
@@ -45,7 +45,7 @@ final posts = await isar.posts
 This query is super fast but there are some problems:
 
 1. We can only search for entire words
-2. We do not consider punctation
+2. We do not consider punctuation
 3. We do not support other whitespace characters
 
 ## Splitting text the right way
@@ -67,16 +67,16 @@ Easy peasy! We can change our index to also support prefix matching and case-ins
 
 ```dart
 class Post {
-    Id? id;
+  Id? id;
 
-    late String title;
+  late String title;
 
-    @Index(type: IndexType.value, caseSensitive: false)
-    List<String> get titleWords => title.split(' ');
+  @Index(type: IndexType.value, caseSensitive: false)
+  List<String> get titleWords => title.split(' ');
 }
 ```
 
-By default Isar will store the words as hashed values. This is a good thing because it is faster and more space efficient. But hashes can't be used for prefix matching. By using `IndexType.value`, we can change the index to use the words directly instead. It gives us the `.titleWordsAnyStartsWith()` where clause:
+By default, Isar will store the words as hashed values. This is a good thing because it is faster and more space efficient. But hashes can't be used for prefix matching. By using `IndexType.value`, we can change the index to use the words directly instead. It gives us the `.titleWordsAnyStartsWith()` where clause:
 
 ```dart
 final posts = await isar.posts
@@ -117,9 +117,9 @@ final posts = await isar.posts
 
 ## Stemming algorithms
 
-Unfortunately indexes do not support contains matching (this is true for other databases as well). But there are a few alternatives that are worth exploring. It highly depends on your use case which one you choose. You can for example index word stems instead of the full word.
+Unfortunately, indexes do not support `.contains()` matching (this is true for other databases as well). But there are a few alternatives that are worth exploring. It highly depends on your use case which one you choose. You can for example index word stems instead of the full word.
 
-A stemming algorithm is a process of linguistic normalisation, in which the variant forms of a word are reduced to a common form, for example,
+A stemming algorithm is a process of linguistic normalization, in which the variant forms of a word are reduced to a common form, for example,
 
 ```
 connection
@@ -135,7 +135,7 @@ There are also more advanced forms like [lemmatization](https://en.wikipedia.org
 
 ## Phonetic algorithms
 
-A [phonetic algorithm](https://en.wikipedia.org/wiki/Phonetic_algorithm) is an algorithm for indexing of words by their pronunciation. In other words, it allows you to find words that sound similar to the one you are looking for.
+A [phonetic algorithm](https://en.wikipedia.org/wiki/Phonetic_algorithm) is an algorithm for indexing words by their pronunciation. In other words, it allows you to find words that sound similar to the ones you are looking for.
 
 :::warning
 Most phonetic algorithms only support a single language.
@@ -149,6 +149,6 @@ Using this algorithm, both `"Robert"` and `"Rupert"` return the same string `"R1
 
 ### Double Metaphone
 
-The [Double Metaphone](https://en.wikipedia.org/wiki/Metaphone) phonetic encoding algorithm is the second generation of this algorithm. It makes a number of fundamental design improvements over the original Metaphone algorithm.
+The [Double Metaphone](https://en.wikipedia.org/wiki/Metaphone) phonetic encoding algorithm is the second generation of this algorithm. It makes several fundamental design improvements over the original Metaphone algorithm.
 
 Double Metaphone tries to account for myriad irregularities in English of Slavic, Germanic, Celtic, Greek, French, Italian, Spanish, Chinese, and other origins.

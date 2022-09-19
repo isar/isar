@@ -100,21 +100,3 @@ jobs:
           token: ${{ secrets.TOKEN }}
           target-folder: ${{ github.ref_name }}
           clean: false
-
-  build_docs:
-    name: Build Docs
-    needs: build_binaries
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build
-        working-directory: docs
-        run: |
-          npm install
-          npm run build
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: docs/docs/.vuepress/dist
-          branch: docs
-          token: ${{ secrets.TOKEN }}

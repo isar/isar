@@ -13,56 +13,32 @@ We're going to be short on words and quick on code in this quickstart.
 First, add Isar to your project. Add the following packages to your `pubspec.yaml`. Always use the latest version.
 
 ```yaml
+isar_version: &isar_version 3.0.0 # define the version to be used
+
 dependencies:
-  isar: $latest
-  isar_flutter_libs: $latest # contains the binaries (not required for web)
+  isar: *isar_version
+  isar_flutter_libs: *isar_version # contains Isar Core
 
 dev_dependencies:
-  isar_generator: $latest
+  isar_generator: *isar_version
   build_runner: any
-```
-
-Replace `$latest` with the latest Isar version.
-
-For non-Flutter projects, you need to manually include the Isar Core binaries.
-
-➡️ Learn more: [Dart](../dart)
-```dart
-await Isar.initializeIsarCore(download:true);
 ```
 
 ## 2. Annotate classes
 
-Annotate your classes with `@collection` and choose an id field.
+Annotate your classes with `@collection` and choose an `Id` field.
 
 ```dart
 part 'email.g.dart';
 
 @collection
-class Email {
+class User {
   Id id = Isar.autoIncrement; // you can also use id = null to auto increment
 
-  String? title;
-
-  List<Recipient>? recipients;
-
-  @enumerated
-  Status status = Status.pending;
-}
-
-@embedded
-class Recipient {
   String? name;
 
-  String? address;
+  int? age;
 }
-
-enum Status {
-  draft,
-  sending,
-  sent,
-}
-
 ```
 
 ## 3. Run code generator
@@ -73,7 +49,7 @@ Execute the following command to start the `build_runner`:
 dart run build_runner build
 ```
 
-If you are using Flutter, try:
+If you are using Flutter, use:
 
 ```
 flutter pub run build_runner build
@@ -81,42 +57,39 @@ flutter pub run build_runner build
 
 ## 4. Open Isar instance
 
-This opens an Isar instance at a valid location.
+Open a new Isar instance and pass all of your collection schemas. Optionally you can specify an instance name and directory.
 
 ```dart
-final dir = await getApplicationSupportDirectory();
-
-final isar = await Isar.open(
-  schemas: [EmailSchema],
-  directory: dir.path,
-  inspector:true,
-);
+final isar = await Isar.open([EmailSchema]);
 ```
 
-## 5. Write and read from database
+## 5. Write and read
 
-Once your instance is open, you can start using the database.
+Once your instance is open, you can start using the collections.
 
-All basic crud operations are available via the `IsarCollection`.
+All basic CRUD operations are available via the `IsarCollection`.
 
 ```dart
-final newPost = Post()..title = 'Amazing new database';
+final newUser = User()..name = 'Jane Doe'..age = 36;
 
-await isar.writeTxn(() {
-  newPost.id = await isar.posts.put(newPost); // insert & update
+await isar.writeTxn(() async {
+  await isar.users.put(newUser); // insert & update
 });
 
-final existingPost = await isar.posts.get(newPost.id!); // get
+final existingUser = await isar.users.get(newUser.id); // get
 
-await isar.writeTxn(() {
-  await isar.posts.delete(existingPost.id!); // delete
+await isar.writeTxn(() async {
+  await isar.users.delete(existingUser.id!); // delete
 });
 ```
 
 ## Other resources
 
-You're a visual learner? Check out this great series to get started with Isar:
-
+You're a visual learner? Check out these videos to get started with Isar:
+<div class="video-block">
+  <iframe max-width=100% height=auto src="https://www.youtube.com/embed/CwC9-a9hJv4" title="Isar Database" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+<br>
 <div class="video-block">
   <iframe max-width=100% height=auto src="https://www.youtube.com/embed/videoseries?list=PLKKf8l1ne4_hMBtRykh9GCC4MMyteUTyf" title="Isar Database" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
