@@ -63,12 +63,13 @@ Holy smokes you're here! Let's get started on using the coolest Flutter database
 ### 1. Add to pubspec.yaml
 
 ```yaml
+isar_version : &isar_version 3.0.0 # define the version to be used
 dependencies:
-  isar: 3.0.0
-  isar_flutter_libs: 3.0.0 # contains Isar Core
+  isar: *isar_version
+  isar_flutter_libs: *isar_version # contains Isar Core
 
 dev_dependencies:
-  isar_generator: 3.0.0
+  isar_generator: *isarversion
   build_runner: any
 ```
 
