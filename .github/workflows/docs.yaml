@@ -28,6 +28,7 @@ jobs:
         run: |
           npm install
           npm run build
+          touch docs/.vuepress/dist/.nojekyll
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact
