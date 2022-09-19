@@ -75,7 +75,7 @@ jobs:
     - name: Build binary
       run: bash tool/${{ matrix.script }}
     - name: Upload binary
-      uses: svenstaro/upload-release-action@v1-release
+      uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: ${{ matrix.artifact_name }}
