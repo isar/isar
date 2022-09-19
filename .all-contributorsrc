@@ -83,6 +83,15 @@
       "contributions": [
         "maintenance"
       ]
+    },
+    {
+      "login": "VoidxHoshi",
+      "name": "LaLucid",
+      "avatar_url": "https://avatars.githubusercontent.com/u/55886143?v=4",
+      "profile": "https://github.com/VoidxHoshi",
+      "contributions": [
+        "maintenance"
+      ]
     }
   ],
   "contributorTemplate": "<a href=\"https://github.com/<%= contributor.login %>\"><img src=\"<%= contributor.avatar_url %>\" width=\"<%= options.imageSize %>px;\" alt=\"\"/><br /><sub><b><%= contributor.name %></b></sub></a>",
