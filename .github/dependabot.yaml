@@ -7,6 +7,12 @@ updates:
       interval: "weekly"
     reviewers:
       - "leisim"
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "leisim"
   - package-ecosystem: "pub"
     directory: "/packages/isar"
     schedule:
@@ -31,14 +37,38 @@ updates:
       interval: "weekly"
     reviewers:
       - "leisim"
-  - package-ecosystem: gradle
+  - package-ecosystem: "pub"
+    directory: "/packages/isar_test"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "leisim"
+  - package-ecosystem: "pub"
+    directory: "/examples/pub"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "leisim"
+  - package-ecosystem: "gradle"
     directory: "/packages/isar_flutter_libs/android"
     schedule:
       interval: "weekly"
     reviewers:
       - "leisim"
-  - package-ecosystem: gradle
+  - package-ecosystem: "gradle"
     directory: "/packages/isar_test/android"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "leisim"
+  - package-ecosystem: "npm"
+    directory: "/docs"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "leisim"
+  - package-ecosystem: "npm"
+    directory: "/packages/isar_web"
     schedule:
       interval: "weekly"
     reviewers:
