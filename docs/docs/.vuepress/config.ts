@@ -107,7 +107,6 @@ export default defineUserConfig({
                     "/watchers.md",
                     "/limitations.md",
                     "/faq.md",
-                    "/dart.md",
                 ],
             },
             {
