@@ -12,9 +12,7 @@ import 'package:isar_generator/src/code_gen/query_object_generator.dart';
 import 'package:isar_generator/src/code_gen/query_property_generator.dart';
 import 'package:isar_generator/src/code_gen/query_sort_by_generator.dart';
 import 'package:isar_generator/src/code_gen/query_where_generator.dart';
-import 'package:isar_generator/src/code_gen/type_adapter_generator_common.dart';
-import 'package:isar_generator/src/code_gen/type_adapter_generator_native.dart';
-import 'package:isar_generator/src/code_gen/type_adapter_generator_web.dart';
+import 'package:isar_generator/src/code_gen/type_adapter_generator.dart';
 import 'package:isar_generator/src/isar_analyzer.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -32,8 +30,9 @@ const ignoreLints = [
   'unnecessary_raw_strings',
   'unnecessary_null_checks',
   'join_return_with_assignment',
-  'avoid_js_rounded_ints',
   'prefer_final_locals',
+  'avoid_js_rounded_ints',
+  'avoid_positional_boolean_parameters',
 ];
 
 class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
@@ -54,14 +53,10 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
 
       ${generateSchema(object)}
 
-      ${generateEstimateSerializeNative(object)}
-      ${generateSerializeNative(object)}
-      ${generateDeserializeNative(object)}
-      ${generateDeserializePropNative(object)}
-
-      ${generateSerializeWeb(object)}
-      ${generateDeserializeWeb(object)}
-      ${generateDeserializePropWeb(object)}
+      ${generateEstimateSerialize(object)}
+      ${generateSerialize(object)}
+      ${generateDeserialize(object)}
+      ${generateDeserializeProp(object)}
 
       ${generateEnumMaps(object)}
 
@@ -91,18 +86,14 @@ class IsarEmbeddedGenerator extends GeneratorForAnnotation<Embedded> {
     final object = IsarAnalyzer().analyzeEmbedded(element);
     return '''
       // coverage:ignore-file
-      // ignore_for_file: ${ignoreLints.join(', ')}å
+      // ignore_for_file: ${ignoreLints.join(', ')}
 
       ${generateSchema(object)}
 
-      ${generateEstimateSerializeNative(object)}
-      ${generateSerializeNative(object)}
-      ${generateDeserializeNative(object)}
-      ${generateDeserializePropNative(object)}
-
-      ${generateSerializeWeb(object)}
-      ${generateDeserializeWeb(object)}
-      ${generateDeserializePropWeb(object)}
+      ${generateEstimateSerialize(object)}
+      ${generateSerialize(object)}
+      ${generateDeserialize(object)}
+      ${generateDeserializeProp(object)}
 
       ${generateEnumMaps(object)}
 

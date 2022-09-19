@@ -16,5 +16,3 @@ pub mod query;
 pub mod schema;
 pub mod txn;
 pub mod watch;
-
-// todo check missing property in isarobject

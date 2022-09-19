@@ -1,4 +1,4 @@
-// enums do not support list values
+// unsupported enum property type
 
 import 'package:isar/isar.dart';
 

@@ -40,18 +40,11 @@ class ObjectInfo {
   String get getLinksName => '_${dartName.decapitalize()}GetLinks';
   String get attachName => '_${dartName.decapitalize()}Attach';
 
-  String get estimateSize => '_${dartName.decapitalize()}EstimateSize';
-  String get serializeNativeName =>
-      '_${dartName.decapitalize()}SerializeNative';
-  String get deserializeNativeName =>
-      '_${dartName.decapitalize()}DeserializeNative';
-  String get deserializePropNativeName =>
-      '_${dartName.decapitalize()}DeserializePropNative';
-
-  String get serializeWebName => '_${dartName.decapitalize()}SerializeWeb';
-  String get deserializeWebName => '_${dartName.decapitalize()}DeserializeWeb';
-  String get deserializePropWebName =>
-      '_${dartName.decapitalize()}DeserializePropWeb';
+  String get estimateSizeName => '_${dartName.decapitalize()}EstimateSize';
+  String get serializeName => '_${dartName.decapitalize()}Serialize';
+  String get deserializeName => '_${dartName.decapitalize()}Deserialize';
+  String get deserializePropName =>
+      '_${dartName.decapitalize()}DeserializeProp';
 }
 
 enum PropertyDeser {
@@ -100,7 +93,9 @@ class ObjectProperty {
   bool get isEnum => enumMap != null;
 
   String get scalarDartType {
-    if (isEnum) {
+    if (isId) {
+      return 'Id';
+    } else if (isEnum) {
       return typeClassName;
     }
 

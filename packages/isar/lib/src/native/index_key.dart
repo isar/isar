@@ -4,10 +4,10 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
-import 'package:isar/src/native/binary_writer.dart';
 import 'package:isar/src/native/bindings.dart';
 import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_core.dart';
+import 'package:isar/src/native/isar_writer_impl.dart';
 
 final _keyPtrPtr = malloc<Pointer<CIndexKey>>();
 
@@ -57,10 +57,18 @@ void _addKeyValue(
   IndexType type,
   bool caseSensitive,
 ) {
-  if (value is Enum) {
-    value = property.enumMap![value];
-  } else if (value is List<Enum?>) {
-    value = value.map((e) => property.enumMap![value]).toList();
+  if (property.enumMap != null) {
+    if (value is Enum) {
+      value = property.enumMap![value.name];
+    } else if (value is List) {
+      value = value.map((e) {
+        if (e is Enum) {
+          return property.enumMap![e.name];
+        } else {
+          return e;
+        }
+      }).toList();
+    }
   }
 
   final isarType =
@@ -70,7 +78,7 @@ void _addKeyValue(
       IC.isar_key_add_byte(keyPtr, (value as bool?).byteValue);
       break;
     case IsarType.byte:
-      IC.isar_key_add_byte(keyPtr, value! as int);
+      IC.isar_key_add_byte(keyPtr, (value ?? 0) as int);
       break;
     case IsarType.int:
       IC.isar_key_add_int(keyPtr, (value as int?) ?? nullInt);

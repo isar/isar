@@ -1,9 +1,8 @@
 // coverage:ignore-file
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, avoid_dynamic_calls
 
 part of isar;
 
-// ignore: avoid_classes_with_only_static_members
 abstract class _IsarConnect {
   static const Map<ConnectAction,
       Future<dynamic> Function(Map<String, dynamic> _)> _handlers = {
@@ -14,9 +13,6 @@ abstract class _IsarConnect {
     ConnectAction.removeQuery: _removeQuery,
     ConnectAction.exportJson: _exportJson,
     ConnectAction.editProperty: _editProperty,
-    ConnectAction.addInList: _addInList,
-    ConnectAction.removeFromList: _removeFromList,
-    ConnectAction.aggregation: _aggregation,
   };
 
   static List<CollectionSchema<dynamic>>? _schemas;
@@ -75,19 +71,27 @@ abstract class _IsarConnect {
       if (path.endsWith('=')) {
         path = path.substring(0, path.length - 1);
       }
-      print('╔══════════════════════════════════════════════╗');
-      print('║             ISAR CONNECT STARTED             ║');
-      print('╟──────────────────────────────────────────────╢');
-      print('║ Open the link in Chrome to connect to the    ║');
-      print('║ Isar Inspector while this build is running.  ║');
-      print('╟──────────────────────────────────────────────╢');
-      print('║ https://inspect.isar.dev/${Isar.version}/#/$port$path ║');
-      print('╚══════════════════════════════════════════════╝');
+      final url = ' https://inspect.isar.dev/${Isar.version}/#/$port$path ';
+      String line(String text, String fill) {
+        final fillCount = url.length - text.length;
+        final left = List.filled(fillCount ~/ 2, fill);
+        final right = List.filled(fillCount - left.length, fill);
+        return left.join() + text + right.join();
+      }
+
+      print('╔${line('', '═')}╗');
+      print('║${line('ISAR CONNECT STARTED', ' ')}║');
+      print('╟${line('', '─')}╢');
+      print('║${line('Open the link in Chrome to connect to the', ' ')}║');
+      print('║${line('Isar Inspector while this build is running.', ' ')}║');
+      print('╟${line('', '─')}╢');
+      print('║$url║');
+      print('╚${line('', '═')}╝');
     });
   }
 
   static Future<dynamic> _getSchema(Map<String, dynamic> _) async {
-    return [..._schemas!.map((e) => e.toSchemaJson())];
+    return _schemas!.map((e) => e.toJson()).toList();
   }
 
   static Future<dynamic> _listInstances(Map<String, dynamic> _) async {
@@ -108,8 +112,7 @@ abstract class _IsarConnect {
     final instance = Isar.getInstance(instanceName)!;
 
     for (final collection in instance._collections.values) {
-      _sendCollectionInfo(collection);
-      final sub = collection.watchLazy().listen((_) {
+      final sub = collection.watchLazy(fireImmediately: true).listen((_) {
         _sendCollectionInfo(collection);
       });
       _collectionSubscriptions.add(sub);
@@ -139,199 +142,111 @@ abstract class _IsarConnect {
   static Future<Map<String, dynamic>> _executeQuery(
     Map<String, dynamic> params,
   ) async {
-    if (_querySubscription.isNotEmpty) {
-      for (final sub in _querySubscription) {
-        unawaited(sub.cancel());
-      }
-      _querySubscription.clear();
+    for (final sub in _querySubscription) {
+      unawaited(sub.cancel());
     }
-
-    void listener(event) {
-      postEvent(ConnectEvent.queryChanged.event, {});
-    }
+    _querySubscription.clear();
 
     final cQuery = ConnectQuery.fromJson(params);
-    final schema =
-        <dynamic>[]; //TODO fix jsonDecode(Isar.schema!) as List<dynamic>;
+    final instance = Isar.getInstance(cQuery.instance)!;
 
-    //ignore: avoid_dynamic_calls
-    final links = schema.firstWhere(
-      //ignore: avoid_dynamic_calls
-      (e) => e['name'] as String == cQuery.collection,
-    )['links'] as List<dynamic>;
+    final links =
+        _schemas!.firstWhere((e) => e.name == cQuery.collection).links.values;
 
-    final query = _getQuery(cQuery);
+    final query = cQuery.toQuery();
     params.remove('limit');
     params.remove('offset');
-    final countQuery = _getQuery(ConnectQuery.fromJson(params));
+    final countQuery = ConnectQuery.fromJson(params).toQuery();
 
-    final stream = query.watchLazy();
-    _querySubscription.add(stream.listen(listener));
+    _querySubscription.add(
+      query.watchLazy().listen((_) {
+        postEvent(ConnectEvent.queryChanged.event, {});
+      }),
+    );
+    final subscribed = {cQuery.collection};
+    for (final link in links) {
+      if (subscribed.add(link.target)) {
+        final target = instance.getCollectionByNameInternal(link.target)!;
+        _querySubscription.add(
+          target.watchLazy().listen((_) {
+            postEvent(ConnectEvent.queryChanged.event, {});
+          }),
+        );
+      }
+    }
 
-    final results = await query.exportJson();
-
+    final objects = await query.exportJson();
     if (links.isNotEmpty) {
-      final source = Isar.getInstance(cQuery.instance)!
-          .getCollectionByNameInternal(cQuery.collection)!;
-      for (var index = 0; index < results.length; index++) {
+      final source = instance.getCollectionByNameInternal(cQuery.collection)!;
+      for (final object in objects) {
         for (final link in links) {
-          final target = Isar.getInstance(cQuery.instance)!
-              //ignore: avoid_dynamic_calls
-              .getCollectionByNameInternal(link['target'] as String)!;
-
-          _querySubscription.add(target.watchLazy().listen(listener));
-
-          final qb = QueryBuilderInternal<dynamic>(
-            collection: target,
+          final target = instance.getCollectionByNameInternal(link.target)!;
+          final links = await target.buildQuery<dynamic>(
             whereClauses: [
               LinkWhereClause(
                 linkCollection: source.name,
-                //ignore: avoid_dynamic_calls
-                linkName: link['name'] as String,
-                id: results[index][source.schema.idName] as int,
+                linkName: link.name,
+                id: object[source.schema.idName] as int,
               ),
             ],
-          );
+            limit: link.single ? 1 : null,
+          ).exportJson();
 
-          final q = QueryBuilder<dynamic, dynamic, QAfterFilterCondition>(qb);
-
-          //ignore: avoid_dynamic_calls
-          if (link['single'] as bool) {
-            //ignore: avoid_dynamic_calls
-            results[index][link['name'] as String] =
-                await q.findFirst() == null ? null : (await q.exportJson())[0];
+          if (link.single) {
+            object[link.name] = links.isEmpty ? null : links.first;
           } else {
-            //ignore: avoid_dynamic_calls
-            results[index][link['name'] as String] =
-                await QueryBuilder<dynamic, dynamic, QAfterFilterCondition>(qb)
-                    .exportJson();
+            object[link.name] = links;
           }
         }
       }
     }
 
     return {
-      'results': results,
+      'objects': objects,
       'count': await countQuery.count(),
     };
   }
 
   static Future<bool> _removeQuery(Map<String, dynamic> params) async {
-    final query = _getQuery(ConnectQuery.fromJson(params));
+    final query = ConnectQuery.fromJson(params).toQuery();
     await query.isar.writeTxn(query.deleteAll);
     return true;
   }
 
   static Future<List<dynamic>> _exportJson(Map<String, dynamic> params) async {
-    final query = _getQuery(ConnectQuery.fromJson(params));
+    final query = ConnectQuery.fromJson(params).toQuery();
     return query.exportJson();
   }
 
   static Future<void> _editProperty(Map<String, dynamic> params) async {
     final cEdit = ConnectEdit.fromJson(params);
-    final collection = Isar.getInstance(cEdit.instance)!
-        .getCollectionByNameInternal(cEdit.collection)!;
+    final isar = Isar.getInstance(cEdit.instance)!;
+    final collection = isar.getCollectionByNameInternal(cEdit.collection)!;
+    final keys = cEdit.path.split('.');
+    print(cEdit.path);
 
     final query = collection.buildQuery<dynamic>(
       whereClauses: [IdWhereClause.equalTo(value: cEdit.id)],
     );
 
     final objects = await query.exportJson();
-
-    if (objects.isEmpty || !objects[0].containsKey(cEdit.property)) {
-      throw IsarError('Cant get object or property is wrong for edit');
-    }
-
-    if (cEdit.index == null) {
-      objects[0][cEdit.property] = cEdit.value;
-    } else {
-      //ignore: avoid_dynamic_calls
-      objects[0][cEdit.property][cEdit.index] = cEdit.value;
-    }
-
-    await collection.isar.writeTxn(() async => collection.importJson(objects));
-  }
-
-  static Future<void> _addInList(Map<String, dynamic> params) async {
-    final cEdit = ConnectEdit.fromJson(params);
-    final collection = Isar.getInstance(cEdit.instance)!
-        .getCollectionByNameInternal(cEdit.collection)!;
-
-    final query = collection.buildQuery<dynamic>(
-      whereClauses: [IdWhereClause.equalTo(value: cEdit.id)],
-    );
-
-    final objects = await query.exportJson();
-
-    if (objects.isEmpty ||
-        !objects[0].containsKey(cEdit.property) ||
-        objects[0][cEdit.property] is! List) {
-      throw IsarError('Cant get object or property is wrong for add');
-    }
-
-    if (cEdit.index == null) {
-      (objects[0][cEdit.property] as List).add(cEdit.value);
-    } else {
-      (objects[0][cEdit.property] as List).insert(cEdit.index!, cEdit.value);
-    }
-
-    await collection.isar.writeTxn(() async => collection.importJson(objects));
-  }
-
-  static Future<void> _removeFromList(Map<String, dynamic> params) async {
-    final cEdit = ConnectEdit.fromJson(params);
-    final collection = Isar.getInstance(cEdit.instance)!
-        .getCollectionByNameInternal(cEdit.collection)!;
-
-    final query = collection.buildQuery<dynamic>(
-      whereClauses: [IdWhereClause.equalTo(value: cEdit.id)],
-    );
-
-    final objects = await query.exportJson();
-
-    if (objects.isEmpty ||
-        !objects[0].containsKey(cEdit.property) ||
-        objects[0][cEdit.property] is! List) {
-      throw IsarError('Cant get object or property is wrong for remove');
-    }
-
-    (objects[0][cEdit.property] as List).removeAt(cEdit.index!);
-    await collection.isar.writeTxn(() async => collection.importJson(objects));
-  }
-
-  static Future<num?> _aggregation(Map<String, dynamic> params) async {
-    final cQuery = ConnectQuery.fromJson(
-      params['query'] as Map<String, dynamic>,
-    );
-
-    final query = _getQuery(cQuery);
-    return query.aggregate<num>(AggregationOp.values[params['op'] as int]);
-  }
-
-  static Query<dynamic> _getQuery(ConnectQuery query) {
-    final collection = Isar.getInstance(query.instance)!
-        .getCollectionByNameInternal(query.collection)!;
-    WhereClause? whereClause;
-    var whereSort = Sort.asc;
-    SortProperty? sortProperty;
-
-    final qSort = query.sortProperty;
-    if (qSort != null) {
-      if (qSort.property == collection.schema.idName) {
-        whereClause = const IdWhereClause.any();
-        whereSort = qSort.sort;
-      } else {
-        sortProperty = qSort;
+    if (objects.isNotEmpty) {
+      dynamic object = objects.first;
+      for (var i = 0; i < keys.length; i++) {
+        final key = object is List ? int.parse(keys[i]) : keys[i];
+        if (i == keys.length - 1) {
+          object[key] = cEdit.value;
+        } else {
+          object = object[key];
+        }
+      }
+      try {
+        await isar.writeTxn(() async {
+          await collection.importJson(objects);
+        });
+      } catch (e) {
+        print(e);
       }
     }
-    return collection.buildQuery(
-      whereClauses: [if (whereClause != null) whereClause],
-      whereSort: whereSort,
-      filter: query.filter,
-      offset: query.offset,
-      limit: query.limit,
-      sortBy: [if (sortProperty != null) sortProperty],
-      property: query.property,
-    );
   }
 }

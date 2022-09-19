@@ -1,9 +1,6 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
-
-import 'util/common.dart';
-import 'util/matchers.dart';
-import 'util/sync_async_helper.dart';
 
 part 'enum_test.g.dart';
 
@@ -83,8 +80,7 @@ class EnumModel {
 
   @override
   String toString() {
-    // TODO: implement toString
-    return 'EnumModel{ordinalEnum: $ordinalEnum, nameEnum: $nameEnum, byteEnum: $byteEnum, shortEnum: $shortEnum, intEnum: $intEnum, stringEnum: $stringEnum}';
+    return '''EnumModel{ordinalEnum: $ordinalEnum, nameEnum: $nameEnum, byteEnum: $byteEnum, shortEnum: $shortEnum, intEnum: $intEnum, stringEnum: $stringEnum}''';
   }
 }
 

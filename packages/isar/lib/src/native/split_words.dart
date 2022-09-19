@@ -1,12 +1,12 @@
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-import 'package:isar/src/native/binary_reader.dart';
 import 'package:isar/src/native/encode_string.dart';
 import 'package:isar/src/native/isar_core.dart';
+import 'package:isar/src/native/isar_reader_impl.dart';
 
 // ignore: public_member_api_docs
-List<String> splitWordsCore(String input) {
+List<String> isarSplitWords(String input) {
   initializeCoreBinary();
 
   final bytesPtr = malloc<Uint8>(input.length * 3);
@@ -22,7 +22,7 @@ List<String> splitWordsCore(String input) {
   final words = <String>[];
   for (var i = 0; i < wordCount * 2; i++) {
     final wordBytes = bytes.sublist(boundaries[i++], boundaries[i]);
-    words.add(BinaryReader.utf8Decoder.convert(wordBytes));
+    words.add(IsarReaderImpl.utf8Decoder.convert(wordBytes));
   }
 
   IC.isar_free_word_boundaries(boundariesPtr, wordCount);

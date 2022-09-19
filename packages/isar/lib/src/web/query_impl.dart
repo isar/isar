@@ -70,6 +70,9 @@ class QueryImpl<T> extends Query<T> {
         case AggregationOp.count:
           result = await queryJs.count(txn).wait();
           break;
+        // ignore: no_default_cases
+        default:
+          throw UnimplementedError();
       }
 
       if (result == null) {
@@ -135,7 +138,7 @@ class QueryImpl<T> extends Query<T> {
   }
 
   @override
-  Stream<void> watchLazy() {
+  Stream<void> watchLazy({bool fireImmediately = false}) {
     JsFunction? stop;
     final controller = StreamController<void>(
       onCancel: () {

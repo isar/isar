@@ -77,8 +77,8 @@ void _initializeInstance(
 Future<Isar> openIsar({
   required List<CollectionSchema<dynamic>> schemas,
   String? directory,
-  String name = 'isar',
-  bool relaxedDurability = true,
+  required String name,
+  required bool relaxedDurability,
   CompactCondition? compactOnLaunch,
 }) async {
   initializeCoreBinary();
@@ -88,7 +88,7 @@ Future<Isar> openIsar({
     final namePtr = name.toCString(alloc);
     final dirPtr = directory?.toCString(alloc) ?? nullptr;
 
-    final schemasJson = getSchemas(schemas).map((e) => e.toSchemaJson());
+    final schemasJson = getSchemas(schemas).map((e) => e.toJson());
     final schemaStrPtr = jsonEncode(schemasJson.toList()).toCString(alloc);
 
     final compactMinFileSize = compactOnLaunch?.minFileSize;
@@ -132,7 +132,7 @@ Isar openIsarSync({
     final namePtr = name.toCString(alloc);
     final dirPtr = directory?.toCString(alloc) ?? nullptr;
 
-    final schemasJson = getSchemas(schemas).map((e) => e.toSchemaJson());
+    final schemasJson = getSchemas(schemas).map((e) => e.toJson());
     final schemaStrPtr = jsonEncode(schemasJson.toList()).toCString(alloc);
 
     final compactMinFileSize = compactOnLaunch?.minFileSize;

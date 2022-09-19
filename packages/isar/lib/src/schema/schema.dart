@@ -8,14 +8,29 @@ class Schema<OBJ> {
     required this.id,
     required this.name,
     required this.properties,
-    required this.serializeNative,
     required this.estimateSize,
-    required this.deserializeNative,
-    required this.deserializePropNative,
-    required this.serializeWeb,
-    required this.deserializeWeb,
-    required this.deserializePropWeb,
+    required this.serialize,
+    required this.deserialize,
+    required this.deserializeProp,
   });
+
+  /// @nodoc
+  @protected
+  factory Schema.fromJson(Map<String, dynamic> json) {
+    return Schema(
+      id: -1,
+      name: json['name'] as String,
+      properties: {
+        for (final property in json['properties'] as List<dynamic>)
+          (property as Map<String, dynamic>)['name'] as String:
+              PropertySchema.fromJson(property),
+      },
+      estimateSize: (_, __, ___) => throw UnimplementedError(),
+      serialize: (_, __, ___, ____) => throw UnimplementedError(),
+      deserialize: (_, __, ___, ____) => throw UnimplementedError(),
+      deserializeProp: (_, __, ___, ____) => throw UnimplementedError(),
+    );
+  }
 
   /// Internal id of this collection or embedded object.
   final int id;
@@ -35,27 +50,15 @@ class Schema<OBJ> {
 
   /// @nodoc
   @protected
-  final SerializeNative<OBJ> serializeNative;
+  final Serialize<OBJ> serialize;
 
   /// @nodoc
   @protected
-  final DeserializeNative<OBJ> deserializeNative;
+  final Deserialize<OBJ> deserialize;
 
   /// @nodoc
   @protected
-  final DeserializePropNative deserializePropNative;
-
-  /// @nodoc
-  @protected
-  final SerializeWeb<OBJ> serializeWeb;
-
-  /// @nodoc
-  @protected
-  final DeserializeWeb<OBJ> deserializeWeb;
-
-  /// @nodoc
-  @protected
-  final DeserializePropWeb deserializePropWeb;
+  final DeserializeProp deserializeProp;
 
   /// Returns a property by its name or throws an error.
   @pragma('vm:prefer-inline')
@@ -70,14 +73,16 @@ class Schema<OBJ> {
 
   /// @nodoc
   @protected
-  Map<String, dynamic> toSchemaJson() {
-    return {
+  Map<String, dynamic> toJson() {
+    final json = {
       'name': name,
       'embedded': embedded,
       'properties': [
-        for (final property in properties.values) property.toSchemaJson(),
+        for (final property in properties.values) property.toJson(),
       ],
     };
+
+    return json;
   }
 
   /// @nodoc
@@ -95,48 +100,27 @@ typedef EstimateSize<T> = int Function(
 
 /// @nodoc
 @protected
-typedef SerializeNative<T> = int Function(
+typedef Serialize<T> = void Function(
   T object,
-  IsarBinaryWriter writer,
+  IsarWriter writer,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 );
 
 /// @nodoc
 @protected
-typedef DeserializeNative<T> = T Function(
+typedef Deserialize<T> = T Function(
   Id id,
-  IsarBinaryReader reader,
+  IsarReader reader,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 );
 
 /// @nodoc
 @protected
-typedef DeserializePropNative = dynamic Function(
-  IsarBinaryReader reader,
+typedef DeserializeProp = dynamic Function(
+  IsarReader reader,
   int propertyId,
   int offset,
   Map<Type, List<int>> allOffsets,
-);
-
-/// @nodoc
-@protected
-typedef SerializeWeb<T> = Object Function(
-  IsarCollection<T> collection,
-  T object,
-);
-
-/// @nodoc
-@protected
-typedef DeserializeWeb<T> = T Function(
-  IsarCollection<T> collection,
-  Object jsObj,
-);
-
-/// @nodoc
-@protected
-typedef DeserializePropWeb = dynamic Function(
-  Object jsObj,
-  String propertyName,
 );

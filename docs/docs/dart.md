@@ -7,7 +7,6 @@ title: Dart
 If you want to use Isar database in unit tests or Dart code, call
 
 ````dart
-
 await Isar.initializeIsarCore(
     download: true,
     libraries: const {
@@ -15,7 +14,9 @@ await Isar.initializeIsarCore(
         }
 );
 
-``` before using Isar in your tests.
+```
+
+before using Isar in your tests.
 
 Isar NoSQL database will automatically download the correct binary for your platform. You can also pass a `libraries` map to adjust the download location for each platform.
 

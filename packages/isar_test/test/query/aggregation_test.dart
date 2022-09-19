@@ -1,9 +1,8 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
 
 import '../mutli_type_model.dart';
-import '../util/common.dart';
-import '../util/sync_async_helper.dart';
 
 void main() {
   group('Aggregation', () {

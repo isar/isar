@@ -8,13 +8,10 @@ class CollectionSchema<OBJ> extends Schema<OBJ> {
     required super.id,
     required super.name,
     required super.properties,
-    required super.serializeNative,
     required super.estimateSize,
-    required super.deserializeNative,
-    required super.deserializePropNative,
-    required super.serializeWeb,
-    required super.deserializeWeb,
-    required super.deserializePropWeb,
+    required super.serialize,
+    required super.deserialize,
+    required super.deserializeProp,
     required this.idName,
     required this.indexes,
     required this.links,
@@ -28,6 +25,41 @@ class CollectionSchema<OBJ> extends Schema<OBJ> {
           'Outdated generated code. Please re-run code '
           'generation using the latest generator.',
         );
+
+  /// @nodoc
+  @protected
+  factory CollectionSchema.fromJson(Map<String, dynamic> json) {
+    final collection = Schema<dynamic>.fromJson(json);
+    return CollectionSchema(
+      id: collection.id,
+      name: collection.name,
+      properties: collection.properties,
+      idName: json['idName'] as String,
+      indexes: {
+        for (final index in json['indexes'] as List<dynamic>)
+          (index as Map<String, dynamic>)['name'] as String:
+              IndexSchema.fromJson(index),
+      },
+      links: {
+        for (final link in json['links'] as List<dynamic>)
+          (link as Map<String, dynamic>)['name'] as String:
+              LinkSchema.fromJson(link),
+      },
+      embeddedSchemas: {
+        for (final schema in json['embeddedSchemas'] as List<dynamic>)
+          (schema as Map<String, dynamic>)['name'] as String:
+              Schema.fromJson(schema),
+      },
+      estimateSize: (_, __, ___) => throw UnimplementedError(),
+      serialize: (_, __, ___, ____) => throw UnimplementedError(),
+      deserialize: (_, __, ___, ____) => throw UnimplementedError(),
+      deserializeProp: (_, __, ___, ____) => throw UnimplementedError(),
+      getId: (_) => throw UnimplementedError(),
+      getLinks: (_) => throw UnimplementedError(),
+      attach: (_, __, ___) => throw UnimplementedError(),
+      version: Isar.version,
+    );
+  }
 
   /// Name of the id property
   final String idName;
@@ -59,9 +91,6 @@ class CollectionSchema<OBJ> extends Schema<OBJ> {
   /// @nodoc
   void toCollection(void Function<OBJ>() callback) => callback<OBJ>();
 
-  /// Whether this collection has links
-  bool get hasLinks => links.isNotEmpty;
-
   /// @nodoc
   @pragma('vm:prefer-inline')
   IndexSchema index(String indexName) {
@@ -87,16 +116,26 @@ class CollectionSchema<OBJ> extends Schema<OBJ> {
   /// @nodoc
   @protected
   @override
-  Map<String, dynamic> toSchemaJson() {
-    return {
-      ...super.toSchemaJson(),
+  Map<String, dynamic> toJson() {
+    final json = {
+      ...super.toJson(),
+      'idName': idName,
       'indexes': [
-        for (final index in indexes.values) index.toSchemaJson(),
+        for (final index in indexes.values) index.toJson(),
       ],
       'links': [
-        for (final link in links.values) link.toSchemaJson(),
+        for (final link in links.values) link.toJson(),
       ],
     };
+
+    assert(() {
+      json['embeddedSchemas'] = [
+        for (final schema in embeddedSchemas.values) schema.toJson(),
+      ];
+      return true;
+    }());
+
+    return json;
   }
 }
 

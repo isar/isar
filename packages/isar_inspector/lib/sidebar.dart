@@ -1,62 +1,101 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:isar_inspector/collections.dart';
-import 'package:isar_inspector/common.dart';
+import 'package:isar/isar.dart';
+import 'package:isar_inspector/collections_list.dart';
+import 'package:isar_inspector/connect_client.dart';
 import 'package:isar_inspector/instance_selector.dart';
+import 'package:isar_inspector/main.dart';
 
 class Sidebar extends StatelessWidget {
-  const Sidebar({super.key});
+  const Sidebar({
+    super.key,
+    required this.instances,
+    required this.selectedInstance,
+    required this.onInstanceSelected,
+    required this.collections,
+    required this.collectionInfo,
+    required this.selectedCollection,
+    required this.onCollectionSelected,
+  });
+
+  final List<String> instances;
+  final String selectedInstance;
+  final void Function(String instance) onInstanceSelected;
+
+  final List<CollectionSchema<dynamic>> collections;
+  final Map<String, ConnectCollectionInfo?> collectionInfo;
+  final String? selectedCollection;
+  final void Function(String instance) onCollectionSelected;
 
   @override
   Widget build(BuildContext context) {
-    return IsarCard(
-      radius: BorderRadius.circular(15),
+    final theme = Theme.of(context);
+    return Card(
+      margin: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
             height: 80,
-            child: IsarCard(
-              radius: BorderRadius.circular(15),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    SvgPicture.asset(
-                      'assets/logo.svg',
-                      width: 40,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Image.asset(
+                    'assets/logo.png',
+                    width: 40,
+                  ),
+                  const SizedBox(width: 15),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Isar',
+                        style: theme.textTheme.titleMedium!.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Inspector',
+                        style: theme.textTheme.titleMedium!.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    padding: const EdgeInsets.all(20),
+                    icon: Icon(
+                      theme.brightness == Brightness.light
+                          ? Icons.dark_mode_rounded
+                          : Icons.light_mode_rounded,
                     ),
-                    const SizedBox(width: 15),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Isar',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Inspector',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
+                    onPressed: DarkMode.of(context).toggle,
+                  )
+                ],
               ),
             ),
           ),
           const SizedBox(height: 20),
-          const Expanded(
+          Expanded(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              child: CollectionsList(),
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: CollectionsList(
+                collections: collections,
+                collectionInfo: collectionInfo,
+                selectedCollection: selectedCollection,
+                onSelected: onCollectionSelected,
+              ),
             ),
           ),
           const SizedBox(height: 12),
-          const InstanceSelector(),
+          InstanceSelector(
+            instances: instances,
+            selectedInstance: selectedInstance,
+            onSelected: onInstanceSelected,
+          ),
         ],
       ),
     );

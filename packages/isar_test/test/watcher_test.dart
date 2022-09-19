@@ -1,11 +1,8 @@
 import 'dart:async';
 
 import 'package:isar/isar.dart';
+import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
-
-import 'util/common.dart';
-import 'util/listener.dart';
-import 'util/sync_async_helper.dart';
 
 part 'watcher_test.g.dart';
 

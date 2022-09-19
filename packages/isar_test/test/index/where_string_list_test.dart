@@ -1,9 +1,6 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
-
-import '../util/common.dart';
-import '../util/matchers.dart';
-import '../util/sync_async_helper.dart';
 
 part 'where_string_list_test.g.dart';
 
@@ -614,8 +611,7 @@ void main() {
     });
 
     isarTest('.elementIsEmpty()', () async {
-      // FIXME
-      /*await qEqualSet(
+      await qEqualSet(
         isar.stringModels.where().valuesElementIsEmpty(),
         [obj6],
       );
@@ -633,7 +629,7 @@ void main() {
       await qEqualSet(
         isar.stringModels.where().nullableValuesNullableElementIsEmpty(),
         [obj6],
-      );*/
+      );
     });
 
     isarTest('.elementIsNotEmpty()', () async {

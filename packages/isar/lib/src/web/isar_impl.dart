@@ -14,6 +14,7 @@ class IsarImpl extends Isar {
   IsarImpl(super.name, this.instance);
 
   final IsarInstanceJs instance;
+  final offsets = <Type, List<int>>{};
   final List<Future<void>> _activeAsyncTxns = [];
 
   @override

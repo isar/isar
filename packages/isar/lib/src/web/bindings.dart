@@ -3,6 +3,7 @@
 import 'dart:indexed_db';
 import 'dart:js';
 
+import 'package:isar/isar.dart';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 
@@ -68,7 +69,7 @@ typedef StopWatchingJs = JsFunction;
 class IsarCollectionJs {
   external IsarLinkJs getLink(String name);
 
-  external Promise getAll(IsarTxnJs txn, List<int> ids);
+  external Promise getAll(IsarTxnJs txn, List<Id> ids);
 
   external Promise getAllByIndex(
     IsarTxnJs txn,
@@ -78,7 +79,7 @@ class IsarCollectionJs {
 
   external Promise putAll(IsarTxnJs txn, List<dynamic> objects);
 
-  external Promise deleteAll(IsarTxnJs txn, List<int> ids);
+  external Promise deleteAll(IsarTxnJs txn, List<Id> ids);
 
   external Promise deleteAllByIndex(
     IsarTxnJs txn,
@@ -90,7 +91,7 @@ class IsarCollectionJs {
 
   external StopWatchingJs watchLazy(ChangeCallbackJs callback);
 
-  external StopWatchingJs watchObject(int id, ObjectChangeCallbackJs callback);
+  external StopWatchingJs watchObject(Id id, ObjectChangeCallbackJs callback);
 
   external StopWatchingJs watchQuery(
     QueryJs query,
@@ -108,12 +109,12 @@ class IsarLinkJs {
   external Promise update(
     IsarTxnJs txn,
     bool backlink,
-    int id,
-    List<int> addedTargets,
-    List<int> deletedTargets,
+    Id id,
+    List<Id> addedTargets,
+    List<Id> deletedTargets,
   );
 
-  external Promise clear(IsarTxnJs txn, int id, bool backlink);
+  external Promise clear(IsarTxnJs txn, Id id, bool backlink);
 }
 
 @JS('IdWhereClause')
@@ -135,7 +136,7 @@ class LinkWhereClauseJs {
   external String linkCollection;
   external String linkName;
   external bool backlink;
-  external int id;
+  external Id id;
 }
 
 @JS('Function')

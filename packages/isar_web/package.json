@@ -11,8 +11,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "rm -rf ./out && tsc && npx ava",
-    "build": "rm -rf ./out && tsc"
+    "build": "rm -rf ./out && npx tsc"
   },
   "devDependencies": {
     "ts-loader": "^9.2.6",

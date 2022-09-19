@@ -11,7 +11,7 @@ class Asset {
     required this.content,
   }) : id = Isar.autoIncrement;
 
-  final Id id;
+  Id id;
 
   @Index(
     unique: true,

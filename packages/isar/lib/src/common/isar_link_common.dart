@@ -84,4 +84,9 @@ abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
     isChanged = false;
     isLoaded = true;
   }
+
+  @override
+  String toString() {
+    return 'IsarLink($_value)';
+  }
 }

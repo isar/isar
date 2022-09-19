@@ -1,11 +1,8 @@
 // ignore_for_file: type_annotate_public_apis
 
-import 'dart:convert';
 import 'dart:typed_data';
-import 'package:isar/isar.dart';
-import 'package:test/expect.dart';
 
-import 'util/common.dart';
+import 'package:isar/isar.dart';
 
 part 'schema_test.g.dart';
 

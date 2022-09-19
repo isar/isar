@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup Flutter
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ secrets.FLUTTER_VERSION }}
       - name: Check formatting
@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup Flutter
-        uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ secrets.FLUTTER_VERSION }}
       - run: flutter pub get
@@ -60,6 +60,7 @@ jobs:
         run: |
           flutter pub get
           dart tool/generate_long_double_test.dart
+          dart tool/generate_prepare_test.dart
           flutter pub run build_runner build
           flutter test -j 1
         working-directory: packages/isar_test
@@ -73,12 +74,14 @@ jobs:
         run: |
           flutter pub get
           dart tool/generate_long_double_test.dart
+          dart tool/generate_prepare_test.dart
           flutter pub run build_runner build
         working-directory: packages/isar_test
       - name: Add packages
         run: |
           flutter pub add json_annotation
           flutter pub add intl
+          flutter pub add isar_test --path ../isar_test
         working-directory: packages/isar
       - name: Collect isar Coverage
         run: |

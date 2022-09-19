@@ -31,7 +31,7 @@ extension QueryWhere<OBJ, R> on QueryBuilder<OBJ, R, QWhereClause> {
 }
 
 /// Extension for QueryBuilders.
-extension QueryFilter<OBJ, R> on QueryBuilder<OBJ, R, QFilter> {
+extension QueryFilters<OBJ, R> on QueryBuilder<OBJ, R, QFilter> {
   /// Start using filter conditions.
   QueryBuilder<OBJ, R, QFilterCondition> filter() {
     return QueryBuilder(_query);

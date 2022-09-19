@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'metrics.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class ApiPackageMetrics {
   ApiPackageMetrics({
     required this.grantedPoints,

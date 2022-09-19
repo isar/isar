@@ -11,10 +11,7 @@ enum ConnectAction {
   removeQuery('ext.isar.removeQuery'),
   exportQuery('ext.isar.exportQuery'),
   exportJson('ext.isar.exportJson'),
-  editProperty('ext.isar.editProperty'),
-  addInList('ext.isar.addInList'),
-  removeFromList('ext.isar.removeFromList'),
-  aggregation('ext.isar.aggregation');
+  editProperty('ext.isar.editProperty');
 
   const ConnectAction(this.method);
 
@@ -39,7 +36,7 @@ class ConnectQuery {
     this.offset,
     this.limit,
     this.sortProperty,
-    this.property,
+    this.sortAsc,
   });
 
   factory ConnectQuery.fromJson(Map<String, dynamic> json) {
@@ -49,15 +46,8 @@ class ConnectQuery {
       filter: _filterFromJson(json['filter'] as Map<String, dynamic>?),
       offset: json['offset'] as int?,
       limit: json['limit'] as int?,
-      sortProperty: json.containsKey('sortProperty')
-          ? SortProperty(
-              // ignore: avoid_dynamic_calls
-              property: json['sortProperty']['property'] as String,
-              // ignore: avoid_dynamic_calls
-              sort: Sort.values[json['sortProperty']['sort'] as int],
-            )
-          : null,
-      property: json['property'] as String?,
+      sortProperty: json['sortProperty'] as String?,
+      sortAsc: json['sortAsc'] as bool?,
     );
   }
 
@@ -66,8 +56,8 @@ class ConnectQuery {
   final FilterOperation? filter;
   final int? offset;
   final int? limit;
-  final SortProperty? sortProperty;
-  final String? property;
+  final String? sortProperty;
+  final bool? sortAsc;
 
   Map<String, dynamic> toJson() {
     return {
@@ -76,12 +66,8 @@ class ConnectQuery {
       if (filter != null) 'filter': _filterToJson(filter!),
       if (offset != null) 'offset': offset,
       if (limit != null) 'limit': limit,
-      if (sortProperty != null)
-        'sortProperty': {
-          'property': sortProperty!.property,
-          'sort': sortProperty!.sort.index,
-        },
-      if (property != null) 'property': property
+      if (sortProperty != null) 'sortProperty': sortProperty,
+      if (sortAsc != null) 'sortAsc': sortAsc,
     };
   }
 
@@ -96,11 +82,6 @@ class ConnectQuery {
       return FilterGroup(
         type: FilterGroupType.values[json['type'] as int],
         filters: filters,
-      );
-    } else if (json.containsKey('linkName')) {
-      return LinkFilter(
-        filter: _filterFromJson(json['filter'] as Map<String, dynamic>)!,
-        linkName: json['linkName'] as String,
       );
     } else {
       return FilterCondition(
@@ -131,14 +112,38 @@ class ConnectQuery {
         'type': filter.type.index,
         'filters': filter.filters.map(_filterToJson).toList(),
       };
-    } else if (filter is LinkFilter) {
-      return {
-        'filter': _filterToJson(filter.filter!),
-        'linkName': filter.linkName,
-      };
     } else {
       throw UnimplementedError();
     }
+  }
+
+  Query<dynamic> toQuery() {
+    final isar = Isar.getInstance(instance)!;
+    // ignore: invalid_use_of_protected_member
+    final collection = isar.getCollectionByNameInternal(this.collection)!;
+    WhereClause? whereClause;
+    var whereSort = Sort.asc;
+
+    SortProperty? sortProperty;
+    if (this.sortProperty != null) {
+      if (this.sortProperty == collection.schema.idName) {
+        whereClause = const IdWhereClause.any();
+        whereSort = sortAsc == true ? Sort.asc : Sort.desc;
+      } else {
+        sortProperty = SortProperty(
+          property: this.sortProperty!,
+          sort: sortAsc == true ? Sort.asc : Sort.desc,
+        );
+      }
+    }
+    return collection.buildQuery(
+      whereClauses: [if (whereClause != null) whereClause],
+      whereSort: whereSort,
+      filter: filter,
+      offset: offset,
+      limit: limit,
+      sortBy: [if (sortProperty != null) sortProperty],
+    );
   }
 }
 
@@ -147,8 +152,7 @@ class ConnectEdit {
     required this.instance,
     required this.collection,
     required this.id,
-    required this.property,
-    this.index,
+    required this.path,
     required this.value,
   });
 
@@ -157,8 +161,7 @@ class ConnectEdit {
       instance: json['instance'] as String,
       collection: json['collection'] as String,
       id: json['id'] as Id,
-      index: json['index'] as int?,
-      property: json['property'] as String,
+      path: json['path'] as String,
       value: json['value'],
     );
   }
@@ -166,8 +169,7 @@ class ConnectEdit {
   final String instance;
   final String collection;
   final Id id;
-  final String property;
-  final int? index;
+  final String path;
   final dynamic value;
 
   Map<String, dynamic> toJson() {
@@ -175,8 +177,7 @@ class ConnectEdit {
       'instance': instance,
       'collection': collection,
       'id': id,
-      'index': index,
-      'property': property,
+      'path': path,
       'value': value,
     };
   }

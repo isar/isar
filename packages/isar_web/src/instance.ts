@@ -4,6 +4,8 @@ import { IsarTxn } from './txn'
 import { ChangeSet } from './watcher'
 import { BroadcastChannel } from 'broadcast-channel'
 
+export const idName = '_id';
+
 export class IsarInstance {
   private static readonly bc = new BroadcastChannel('ISAR_CHANNEL')
 

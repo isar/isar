@@ -1,9 +1,6 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
-
-import '../util/common.dart';
-import '../util/matchers.dart';
-import '../util/sync_async_helper.dart';
 
 part 'filter_string_test.g.dart';
 
@@ -125,9 +122,105 @@ void main() {
         [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6],
       );
       await qEqualSet(
-        isar.stringModels.where().filter().fieldContains('x'),
+        isar.stringModels.filter().fieldContains('x'),
         [],
       );
+    });
+
+    isarTest('.greaterThan()', () async {
+      await qEqualSet(
+        isar.stringModels.filter().fieldGreaterThan('string 0'),
+        [obj1, obj2, obj3, obj4, obj5, obj6],
+      );
+
+      await qEqualSet(
+        isar.stringModels.filter().fieldGreaterThan('string 1'),
+        [obj2, obj3, obj4, obj5, obj6],
+      );
+
+      await qEqualSet(
+        isar.stringModels.filter().fieldGreaterThan('string 2'),
+        [obj3, obj4, obj5, obj6],
+      );
+
+      await qEqualSet(
+        isar.stringModels.filter().fieldGreaterThan('string 3'),
+        [obj4, obj5, obj6],
+      );
+
+      await qEqualSet(
+        isar.stringModels.filter().fieldGreaterThan('string 4'),
+        [obj5, obj6],
+      );
+
+      await qEqualSet(
+        isar.stringModels.filter().fieldGreaterThan('string 5'),
+        [],
+      );
+    });
+
+    isarTest('.lessThan()', () async {
+      /* FIXME: lessThan not working
+      await qEqualSet(
+        isar.stringModels.filter().fieldLessThan('string 0'),
+        [objEmpty, objNull],
+      );
+
+      await qEqualSet(
+        isar.stringModels.filter().fieldLessThan('string 1'),
+        [objEmpty, objNull],
+      );
+
+      await qEqualSet(
+        isar.stringModels.filter().fieldLessThan('string 2'),
+        [objEmpty, objNull, obj1],
+      );
+
+      await qEqualSet(
+        isar.stringModels.filter().fieldLessThan('string 3'),
+        [objEmpty, objNull, obj1, obj2],
+      );
+
+      await qEqualSet(
+        isar.stringModels.filter().fieldLessThan('string 4'),
+        [objEmpty, objNull, obj1, obj2, obj3],
+      );
+
+      await qEqualSet(
+        isar.stringModels.filter().fieldLessThan('string 5'),
+        [objEmpty, objNull, obj1, obj2, obj3, obj4],
+      );
+
+      await qEqualSet(
+        isar.stringModels.filter().fieldLessThan('string 6'),
+        [objEmpty, objNull, obj1, obj2, obj3, obj4, obj5, obj6],
+      );
+      */
+    });
+
+    isarTest('.between()', () async {
+      await qEqualSet(
+        isar.stringModels.filter().fieldBetween('string 2', 'string 4'),
+        [obj2, obj3, obj4],
+      );
+
+      await qEqualSet(
+        isar.stringModels.filter().fieldBetween('', 'string 2'),
+        [objEmpty, obj1, obj2],
+      );
+
+      /* FIXME: Something seems to be wrong when
+          between has `includeLower: false`
+      await qEqualSet(
+        isar.stringModels.filter().fieldBetween(
+              '',
+              'string 2',
+              includeLower: false,
+              includeUpper: false,
+            ),
+        [obj1],
+      );
+      */
     });
 
     isarTestVm('.matches() VM', () async {
