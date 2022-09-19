@@ -7,6 +7,12 @@ updates:
       interval: "weekly"
     reviewers:
       - "leisim"
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "leisim"
   - package-ecosystem: "pub"
     directory: "/packages/isar"
     schedule:
