@@ -95,6 +95,7 @@ Future<Isar> openTempIsar(
   String? name,
   String? directory,
   CompactCondition? compactOnLaunch,
+  bool closeAutomatically = true,
 }) async {
   await _prepareTest();
   if (!kIsWeb && directory == null && testTempPath == null) {
@@ -110,7 +111,7 @@ Future<Isar> openTempIsar(
     compactOnLaunch: compactOnLaunch,
   );
 
-  if (Invoker.current != null) {
+  if (Invoker.current != null && closeAutomatically) {
     addTearDown(() async {
       if (isar.isOpen) {
         await isar.close(deleteFromDisk: true);

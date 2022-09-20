@@ -30,26 +30,47 @@ Future<List<Tweet>> downloadTweets(String dir, int index) async {
 }
 
 void main() async {
-  group('Stress', () {
-    late Isar isar;
-    late IsarCollection<Tweet> col;
+  group(
+    'Twitter Stress',
+    () {
+      late Isar isar;
+      late IsarCollection<Tweet> col;
 
-    setUp(() async {
-      isar = await openTempIsar([TweetSchema]);
-      col = isar.collection<Tweet>();
-      for (var i = 0; i < 100; i++) {
-        final tweets = await downloadTweets(isar.directory!, i);
-        await isar.tWriteTxn(() async {
-          await col.tPutAll(tweets);
-        });
-      }
-    });
+      setUpAll(() async {
+        isar = await openTempIsar(
+          [TweetSchema],
+          closeAutomatically: false,
+        );
+        col = isar.collection<Tweet>();
 
-    isarTest(
-      'Query',
-      () async {
+        for (var i = 0; i < 100; i++) {
+          final tweets = await downloadTweets(isar.directory!, i);
+          await isar.tWriteTxn(() async {
+            await col.tPutAll(tweets);
+          });
+        }
+      });
+
+      tearDownAll(() => isar.close(deleteFromDisk: true));
+
+      isarTest('Aggregation', () async {
         expect(await col.where().tCount(), 500000);
+        expect(await col.where().favoriteCountProperty().tSum(), 307278);
+        expect(await col.where().favoriteCountProperty().tAverage(), 0.614556);
+        expect(await col.where().favoriteCountProperty().tMin(), 0);
+        expect(await col.where().favoriteCountProperty().tMax(), 2317);
 
+        expect(
+          await col.where().createdAtProperty().tMin(),
+          DateTime(2015, 4, 23, 11, 10, 58),
+        );
+        expect(
+          await col.where().createdAtProperty().tMax(),
+          DateTime(2015, 6, 18, 12, 1, 57),
+        );
+      });
+
+      isarTest('Distinct', () async {
         await qEqualSet(col.where().distinctByLang().langProperty(), [
           'en', 'it', 'de', 'fr', 'pt', 'und', 'es', 'qme', 'qht', //
           'hu', 'ja', 'et', 'tl', 'eu', 'pl', 'ht', 'in', 'lt', 'ar', //
@@ -57,7 +78,20 @@ void main() async {
           'fi', 'zh', 'tr', 'cs', 'lv', 'hi', 'is', 'da', 'bg', 'vi', //
           'ko', 'fa', 'th', 'sr', 'ne', 'ur', 'iw'
         ]);
+      });
 
+      isarTest('Sort by', () async {
+        final query = col
+            .where()
+            .sortByFavoriteCount()
+            .thenByLang()
+            .thenByFullText()
+            .limit(5)
+            .isarIdProperty();
+        await qEqual(query, [458669, 441027, 368275, 222021, 368289]);
+      });
+
+      isarTest('Query', () async {
         final complexQuery = col
             .filter()
             .not()
@@ -85,18 +119,20 @@ void main() async {
           '597445810696126464',
           '602584278883553280'
         ]);
+      });
 
-        expect(
-          await col
-              .filter()
-              .idStrEqualTo(tweetJson['idStr']! as String)
-              .exportJson(),
-          [tweetJson],
-        );
-      },
-      timeout: const Timeout(Duration(minutes: 10)),
-    );
-  });
+      isarTest('Import Export Json', () async {
+        final isar = await openTempIsar([TweetSchema]);
+
+        await isar.tWriteTxn(() async {
+          await isar.tweets.importJson([tweetJson]);
+        });
+
+        expect(await isar.tweets.where().exportJson(), [tweetJson]);
+      });
+    },
+    timeout: const Timeout(Duration(minutes: 10)),
+  );
 }
 
 const tweetJson = {
