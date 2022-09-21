@@ -17,12 +17,12 @@ Pod::Spec.new do |s|
   s.pod_target_xcconfig = { 
     'DEFINES_MODULE' => 'YES',
     'ENABLE_BITCODE' => 'NO',
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386 arm64',
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386',
     'EXCLUDED_ARCHS[sdk=iphoneos*]' => 'armv7',
     'OTHER_LDFLAGS' => '-force_load $(PODS_TARGET_SRCROOT)/libisar.a'
   }
   s.user_target_xcconfig = { 
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386 arm64',
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386',
     'EXCLUDED_ARCHS[sdk=iphoneos*]' => 'armv7'
   }
   s.swift_version = '5.0'
