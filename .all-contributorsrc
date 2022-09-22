@@ -92,6 +92,15 @@
       "contributions": [
         "maintenance"
       ]
+    },
+    {
+      "login": "vothvovo",
+      "name": "Johnson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20894472?v=4",
+      "profile": "https://github.com/vothvovo",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorTemplate": "<a href=\"https://github.com/<%= contributor.login %>\"><img src=\"<%= contributor.avatar_url %>\" width=\"<%= options.imageSize %>px;\" alt=\"\"/><br /><sub><b><%= contributor.name %></b></sub></a>",
