@@ -61,12 +61,12 @@ void main() async {
         expect(await col.where().favoriteCountProperty().tMax(), 2317);
 
         expect(
-          await col.where().createdAtProperty().tMin(),
-          DateTime(2015, 4, 23, 11, 10, 58),
+          (await col.where().createdAtProperty().tMin())!.toUtc(),
+          DateTime.utc(2015, 4, 23, 9, 10, 58),
         );
         expect(
-          await col.where().createdAtProperty().tMax(),
-          DateTime(2015, 6, 18, 12, 1, 57),
+          (await col.where().createdAtProperty().tMax())!.toUtc(),
+          DateTime.utc(2015, 6, 18, 10, 1, 57),
         );
       });
 
