@@ -125,7 +125,7 @@ void main() async {
         final isar = await openTempIsar([TweetSchema]);
 
         await isar.tWriteTxn(() async {
-          await isar.tweets.importJson([tweetJson]);
+          await isar.tweets.tImportJson([tweetJson]);
         });
 
         expect(await isar.tweets.where().exportJson(), [tweetJson]);
