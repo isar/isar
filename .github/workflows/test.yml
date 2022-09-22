@@ -85,18 +85,20 @@ jobs:
         working-directory: packages/isar
       - name: Collect isar Coverage
         run: |
-          flutter test --coverage
+          flutter test --coverage --coverage-path lcov_isar.info
         working-directory: packages/isar
-      - uses: codecov/codecov-action@v3
-        with:
-          files: packages/isar/coverage/lcov.info
       - name: Collect isar_test Coverage
         run: |
-          flutter test --coverage ../isar_test/test
+          flutter test --coverage ../isar_test/test --coverage-path lcov_isar_test.info
         working-directory: packages/isar
-      - uses: codecov/codecov-action@v3
+      - name: Upload isar Coverage
+        uses: codecov/codecov-action@v3
         with:
-          files: packages/isar/coverage/lcov.info
+          files: packages/isar/lcov_isar.info
+      - name: Upload isar_test Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: packages/isar/lcov_isar_test.info
 
   test_generator:
     runs-on: ubuntu-latest
