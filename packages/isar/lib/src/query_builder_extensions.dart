@@ -18,6 +18,8 @@ extension QueryWhere<OBJ, R> on QueryBuilder<OBJ, R, QWhereClause> {
   /// Joins the results of the [modifier] for each item in [items] using logical
   /// OR. So an object will be included if it matches at least one of the
   /// resulting where clauses.
+  ///
+  /// If [items] is empty, this is a no-op.
   QueryBuilder<OBJ, R, QAfterWhereClause> anyOf<E, RS>(
     Iterable<E> items,
     WhereRepeatModifier<OBJ, R, E> modifier,
@@ -86,34 +88,48 @@ extension QueryFilterNot<OBJ, R> on QueryBuilder<OBJ, R, QFilterCondition> {
   /// Joins the results of the [modifier] for each item in [items] using logical
   /// OR. So an object will be included if it matches at least one of the
   /// resulting filters.
+  ///
+  /// If [items] is empty, this is a no-op.
   QueryBuilder<OBJ, R, QAfterFilterCondition> anyOf<E, RS>(
     Iterable<E> items,
-    FilterRepeatModifier<OBJ, R, E> modifier,
+    FilterRepeatModifier<OBJ, OBJ, E> modifier,
   ) {
-    QueryBuilder<OBJ, R, QAfterFilterCondition>? q;
-    for (final e in items) {
-      q = modifier(q?.or() ?? QueryBuilder(_query), e);
-    }
-    return q ?? QueryBuilder(_query);
+    return QueryBuilder.apply(this, (query) {
+      return query.group((q) {
+        var q2 = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>(q._query);
+        for (final e in items) {
+          q2 = modifier(q2.or(), e);
+        }
+        return q2;
+      });
+    });
   }
 
   /// Joins the results of the [modifier] for each item in [items] using logical
   /// AND. So an object will be included if it matches all of the resulting
   /// filters.
+  ///
+  /// If [items] is empty, this is a no-op.
   QueryBuilder<OBJ, R, QAfterFilterCondition> allOf<E, RS>(
     Iterable<E> items,
-    FilterRepeatModifier<OBJ, R, E> modifier,
+    FilterRepeatModifier<OBJ, OBJ, E> modifier,
   ) {
-    QueryBuilder<OBJ, R, QAfterFilterCondition>? q;
-    for (final e in items) {
-      q = modifier(q?.and() ?? QueryBuilder(_query), e);
-    }
-    return q ?? QueryBuilder(_query);
+    return QueryBuilder.apply(this, (query) {
+      return query.group((q) {
+        var q2 = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>(q._query);
+        for (final e in items) {
+          q2 = modifier(q2.and(), e);
+        }
+        return q2;
+      });
+    });
   }
 
   /// Joins the results of the [modifier] for each item in [items] using logical
   /// XOR. So an object will be included if it matches exactly one of the
   /// resulting filters.
+  ///
+  /// If [items] is empty, this is a no-op.
   QueryBuilder<OBJ, R, QAfterFilterCondition> oneOf<E, RS>(
     Iterable<E> items,
     FilterRepeatModifier<OBJ, R, E> modifier,

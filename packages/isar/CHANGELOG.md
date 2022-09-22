@@ -1,3 +1,9 @@
+## 3.0.1
+
+### Fixes
+
+- Fixed issue where `.anyOf()`, `.allOf()`, and `.oneOf()` could not be negated
+
 ## 3.0.0
 
 This release has been a lot of work! Thanks to everyone who contributed and joined the countless discussions. You are really awesome!
