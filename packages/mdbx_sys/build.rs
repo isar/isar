@@ -54,6 +54,7 @@ const LIBMDBX_TAG: &str = "v0.12.1";
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
+    env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "11.0");
 
     let _ = fs::remove_dir_all("libmdbx");
 
@@ -112,9 +113,7 @@ fn main() {
 
     let mut cc_builder = cc::Build::new();
     let flags = format!("{:?}", cc_builder.get_compiler().cflags_env());
-    cc_builder
-        .flag_if_supported("-Wno-everything")
-        .flag_if_supported("-miphoneos-version-min=10.0");
+    cc_builder.flag_if_supported("-Wno-everything");
 
     if cfg!(windows) {
         let dst = cmake::Config::new(&mdbx)

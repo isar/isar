@@ -11,19 +11,8 @@ Pod::Spec.new do |s|
   s.public_header_files = 'Classes/**/*.h'
 
   s.dependency 'Flutter'
-  s.platform = :ios, '8.0'
+  s.platform = :ios, '11.0'
 
-  s.vendored_libraries  = 'libisar.a'
-  s.pod_target_xcconfig = { 
-    'DEFINES_MODULE' => 'YES',
-    'ENABLE_BITCODE' => 'NO',
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386 arm64',
-    'EXCLUDED_ARCHS[sdk=iphoneos*]' => 'armv7',
-    'OTHER_LDFLAGS' => '-force_load $(PODS_TARGET_SRCROOT)/libisar.a'
-  }
-  s.user_target_xcconfig = { 
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386 arm64',
-    'EXCLUDED_ARCHS[sdk=iphoneos*]' => 'armv7'
-  }
+  s.vendored_frameworks = 'isar.xcframework'
   s.swift_version = '5.0'
 end

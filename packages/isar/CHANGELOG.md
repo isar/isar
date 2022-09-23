@@ -1,8 +1,13 @@
 ## 3.0.1
 
+### Enhancements
+
+- Support for arm64 iOS Simulators
+
 ### Fixes
 
 - Fixed issue where `.anyOf()`, `.allOf()`, and `.oneOf()` could not be negated
+- Fixed error during macOS App Store build
 
 ## 3.0.0
 

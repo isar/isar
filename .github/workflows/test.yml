@@ -129,7 +129,7 @@ jobs:
       - name: Build Isar Core
         run: |
           bash tool/build_ios.sh
-          mv libisar_ios.a packages/isar_flutter_libs/ios/libisar.a
+          unzip isar_ios.xcframework.zip -d packages/isar_flutter_libs/ios
       - name: Run Flutter Driver tests
         run: |
           flutter pub get
@@ -154,9 +154,10 @@ jobs:
           java-version: '11'
           distribution: 'zulu'
       - uses: subosito/flutter-action@v2
-      - name: Download binaries
-        run: bash tool/download_binaries.sh
-        working-directory: packages/isar_flutter_libs
+      - name: Build Isar Core
+        run: |
+          bash tool/build_android.sh x64
+          mv libisar_android_x64.so packages/isar_flutter_libs/android/src/main/jniLibs/x86_64/libisar.so
       - name: Run isar_generator
         run: |
           flutter pub get
@@ -190,6 +191,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           bash tool/build_macos.sh
+          install_name_tool -id @rpath/libisar.dylib libisar_macos.dylib
           mv libisar_macos.dylib packages/isar_flutter_libs/macos/libisar.dylib
       - name: Run Flutter Driver tests
         run: |
