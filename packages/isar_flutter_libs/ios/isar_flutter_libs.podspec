@@ -12,7 +12,5 @@ Pod::Spec.new do |s|
 
   s.dependency 'Flutter'
   s.platform = :ios, '11.0'
-
   s.vendored_frameworks = 'isar.xcframework'
-  s.swift_version = '5.0'
 end

@@ -7,6 +7,7 @@
 ### Fixes
 
 - Fixed issue where `.anyOf()`, `.allOf()`, and `.oneOf()` could not be negated
+- Fixed too low min-iOS version. The minimum supported is 11.0
 - Fixed error during macOS App Store build
 
 ## 3.0.0
