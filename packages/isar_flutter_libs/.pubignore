@@ -2,3 +2,4 @@
 !*.a
 !*.dylib
 !*.dll
+!*.xcframework/

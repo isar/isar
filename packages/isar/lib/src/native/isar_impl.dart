@@ -57,14 +57,15 @@ class IsarImpl extends IsarCommon implements Finalizable {
       port.sendPort.nativePort,
     );
 
-    await portStream.first;
-    return Txn(txnPtrPtr.value, write, portStream);
+    final txn = Txn.async(txnPtrPtr.value, write, portStream);
+    await txn.wait();
+    return txn;
   }
 
   @override
   Transaction beginTxnSync(bool write, bool silent) {
     nCall(IC.isar_txn_begin(ptr, _syncTxnPtrPtr, true, write, silent, 0));
-    return Txn(_syncTxnPtrPtr.value, write, null);
+    return Txn.sync(_syncTxnPtrPtr.value, write);
   }
 
   @override

@@ -23,6 +23,7 @@ target/
 *.dylib
 *.dll
 *.zip
+*.xcframework/
 isar-dart.h
 
 # Android related

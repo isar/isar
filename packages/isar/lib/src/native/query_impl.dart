@@ -129,6 +129,7 @@ class QueryImpl<T> extends Query<T> implements Finalizable {
     final controller = StreamController<void>(
       onCancel: () {
         IC.isar_stop_watching(handle);
+        port.close();
       },
     );
 

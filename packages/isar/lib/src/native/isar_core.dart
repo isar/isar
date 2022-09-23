@@ -177,18 +177,15 @@ void nCall(int result) {
 }
 
 Stream<void> wrapIsarPort(ReceivePort port) {
-  final portStreamController = StreamController<void>.broadcast();
-  port.listen(
-    (event) {
-      if (event == 0) {
-        portStreamController.add(null);
-      } else {
-        final error = isarErrorFromResult(event as int);
-        portStreamController.addError(error!);
-      }
-    },
-    onDone: portStreamController.close,
-  );
+  final portStreamController = StreamController<void>(onCancel: port.close);
+  port.listen((event) {
+    if (event == 0) {
+      portStreamController.add(null);
+    } else {
+      final error = isarErrorFromResult(event as int);
+      portStreamController.addError(error!);
+    }
+  });
   return portStreamController.stream;
 }
 

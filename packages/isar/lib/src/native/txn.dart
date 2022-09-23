@@ -10,15 +10,15 @@ import 'package:isar/src/native/isar_core.dart';
 /// @nodoc
 class Txn extends Transaction {
   /// @nodoc
-  Txn(this.ptr, bool write, Stream<void>? stream)
-      : super(stream == null, write) {
-    if (stream != null) {
-      _completers = Queue();
-      stream.listen(
-        (_) => _completers.removeFirst().complete(),
-        onError: (Object e) => _completers.removeFirst().completeError(e),
-      );
-    }
+  Txn.sync(this.ptr, bool write) : super(true, write);
+
+  /// @nodoc
+  Txn.async(this.ptr, bool write, Stream<void> stream) : super(false, write) {
+    _completers = Queue();
+    stream.listen(
+      (_) => _completers.removeFirst().complete(),
+      onError: (Object e) => _completers.removeFirst().completeError(e),
+    );
   }
 
   /// An arena allocator that has the same lifetime as this transaction.

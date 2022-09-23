@@ -539,6 +539,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     final controller = StreamController<void>(
       onCancel: () {
         IC.isar_stop_watching(handle);
+        port.close();
       },
     );
 
@@ -569,6 +570,7 @@ class IsarCollectionImpl<OBJ> extends IsarCollection<OBJ> {
     final controller = StreamController<void>(
       onCancel: () {
         IC.isar_stop_watching(handle);
+        port.close();
       },
     );
 
