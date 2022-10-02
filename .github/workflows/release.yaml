@@ -40,6 +40,9 @@ jobs:
           - os: macos-latest
             artifact_name: isar_ios.xcframework.zip
             script: build_ios.sh
+          - os: ubuntu-18.04 # use older linux for glibc compatibility see #288
+            artifact_name: libisar_linux_x64.so
+            script: build_linux.sh x64
           - os: macos-latest
             artifact_name: libisar_macos.dylib
             script: build_macos.sh
@@ -77,30 +80,6 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: ${{ matrix.artifact_name }}
         asset_name: ${{ matrix.artifact_name }}
-        tag: ${{ github.ref }}
-
-  build_linux_binary:
-    name: Build Linux Binary
-    needs: verify_version
-    runs-on: ubuntu-latest
-    container:
-      image: corallab/ubuntu:16.04-clang-6.0-cmake-3.12-ninja-1.8.2
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set env
-      run: echo "ISAR_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
-    - name: Setup Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-    - name: Build binary
-      run: bash tool/build_linux.sh x64
-    - name: Upload binary
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: libisar_linux_x64.so
-        asset_name: libisar_linux_x64.so
         tag: ${{ github.ref }}
 
   build_inspector:
