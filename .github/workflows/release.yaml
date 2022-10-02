@@ -82,6 +82,7 @@ jobs:
   build_linux_binary:
     name: Build Linux Binary
     needs: verify_version
+    runs-on: ubuntu-latest
     container:
       image: quay.io/pypa/manylinux2014_x86_64
     steps:
