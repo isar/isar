@@ -63,7 +63,7 @@ Holy smokes you're here! Let's get started on using the coolest Flutter database
 ### 1. Add to pubspec.yaml
 
 ```yaml
-isar_version: &isar_version 3.0.1 # define the version to be used
+isar_version: &isar_version 3.0.2 # define the version to be used
 
 dependencies:
   isar: *isar_version

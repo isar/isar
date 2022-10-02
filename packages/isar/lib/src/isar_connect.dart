@@ -123,8 +123,6 @@ abstract class _IsarConnect {
   }
 
   static void _sendCollectionInfo(IsarCollection<dynamic> collection) {
-    print("COL ISAR ${collection.isar.name} ${collection.name}");
-    print(collection.countSync());
     final count = collection.countSync();
     final size = collection.getSizeSync(
       includeIndexes: true,
@@ -236,7 +234,6 @@ abstract class _IsarConnect {
     final isar = Isar.getInstance(cEdit.instance)!;
     final collection = isar.getCollectionByNameInternal(cEdit.collection)!;
     final keys = cEdit.path.split('.');
-    print(cEdit.path);
 
     final query = collection.buildQuery<dynamic>(
       whereClauses: [IdWhereClause.equalTo(value: cEdit.id)],
