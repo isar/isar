@@ -247,8 +247,15 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
   Future<T> exportJsonRaw<T>(T Function(Uint8List) callback) =>
       build().exportJsonRaw(callback);
 
+  /// {@macro query_export_json_raw}
+  T exportJsonRawSync<T>(T Function(Uint8List) callback) =>
+      build().exportJsonRawSync(callback);
+
   /// {@macro query_export_json}
   Future<List<Map<String, dynamic>>> exportJson() => build().exportJson();
+
+  /// {@macro query_export_json}
+  List<Map<String, dynamic>> exportJsonSync() => build().exportJsonSync();
 }
 
 /// Extension for QueryBuilders

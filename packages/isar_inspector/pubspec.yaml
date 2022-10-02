@@ -9,7 +9,6 @@ dependencies:
   clickup_fading_scroll:
     git:
       url: https://github.com/clickup/clickup_fading_scroll
-  dartx: ^1.0.0
   flutter:
     sdk: flutter
   flutter_svg: any

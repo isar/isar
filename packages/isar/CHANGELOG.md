@@ -1,8 +1,19 @@
 ## 3.0.2
 
+### Enhancements
+
+- The Inspector now supports creating objects and importing JSON
+- Added Inspector check to make sure Chrome is used
+
 ### Fixes
 
+- Added support for the latest analyzer
 - Fixed native ports that were not closed correctly in some cases
+- Added support for Ubuntu 18.04 and older
+- Fixed issue with aborting transactions
+- Fixed crash when invalid JSON was provided to `importJsonRaw()`
+- Added missing `exportJsonSync()` and `exportJsonRawSync()`
+- Fixed issue where secondary instance could not be selected in the Inspector
 
 ## 3.0.1
 

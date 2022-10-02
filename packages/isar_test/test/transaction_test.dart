@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+
 import 'dart:async';
 
 import 'package:isar/isar.dart';
@@ -8,7 +10,13 @@ part 'transaction_test.g.dart';
 
 @collection
 class Model {
+  Model([this.id = Isar.autoIncrement]);
+
   Id? id;
+
+  @override
+  // ignore: hash_and_equals
+  bool operator ==(Object other) => other is Model && id == other.id;
 }
 
 void main() {
@@ -190,6 +198,28 @@ void main() {
           throwsIsarError('require an explicit transaction'),
         );
       });
+    });
+
+    isarTest('gets reverted on error', () async {
+      await isar.tWriteTxn(() => isar.models.tPut(Model()));
+      await qEqual(isar.models.where(), [Model(1)]);
+
+      Future<void> errorTxn() async {
+        await isar.tWriteTxn(() async {
+          await isar.models.tPut(Model(5));
+          await qEqual(isar.models.where(), [Model(1), Model(5)]);
+          throw UnsupportedError('test');
+        });
+      }
+
+      await expectLater(errorTxn(), throwsUnsupportedError);
+      await qEqual(isar.models.where(), [Model(1)]);
+
+      await expectLater(errorTxn(), throwsUnsupportedError);
+      await qEqual(isar.models.where(), [Model(1)]);
+
+      await isar.tWriteTxn(() => isar.models.tPut(Model(5)));
+      await qEqual(isar.models.where(), [Model(1), Model(5)]);
     });
   });
 }

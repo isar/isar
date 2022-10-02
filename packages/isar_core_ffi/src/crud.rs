@@ -3,6 +3,7 @@ use crate::txn::CIsarTxn;
 use crate::{from_c_str, BoolSend, UintSend};
 use intmap::IntMap;
 use isar_core::collection::IsarCollection;
+use isar_core::error::IsarError;
 use isar_core::index::index_key::IndexKey;
 use serde_json::Value;
 use std::os::raw::c_char;
@@ -244,8 +245,8 @@ pub unsafe extern "C" fn isar_json_import(
 ) -> i64 {
     let id_name = from_c_str(id_name).unwrap();
     let bytes = std::slice::from_raw_parts(json_bytes, json_length as usize);
-    let json: Value = serde_json::from_slice(bytes).unwrap();
     isar_try_txn!(txn, move |txn| {
+        let json: Value = serde_json::from_slice(bytes).map_err(|_| IsarError::InvalidJson {})?;
         collection.import_json(txn, id_name, json)
     })
 }

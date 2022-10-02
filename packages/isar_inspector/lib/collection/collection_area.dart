@@ -3,9 +3,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
+import 'dart:math';
 
 import 'package:clickup_fading_scroll/clickup_fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_inspector/collection/button_prev_next.dart';
 import 'package:isar_inspector/collection/button_sort.dart';
@@ -162,13 +164,24 @@ class _CollectionAreaState extends State<CollectionArea> {
                   children: [
                     IconButton(
                       icon: Icon(
-                        Icons.delete_forever_rounded,
+                        Icons.add_rounded,
                         color: theme.colorScheme.onBackground,
                       ),
-                      tooltip: 'Delete All',
-                      onPressed: _onDeleteAll,
+                      iconSize: 26,
+                      tooltip: 'Create Object',
+                      onPressed: _onCreate,
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 5),
+                    IconButton(
+                      icon: Icon(
+                        Icons.paste_rounded,
+                        color: theme.colorScheme.onBackground,
+                      ),
+                      iconSize: 20,
+                      tooltip: 'Import JSON from clipboard',
+                      onPressed: _onImport,
+                    ),
+                    const SizedBox(width: 5),
                     IconButton(
                       icon: Icon(
                         Icons.download_rounded,
@@ -176,7 +189,16 @@ class _CollectionAreaState extends State<CollectionArea> {
                       ),
                       tooltip: 'Download All',
                       onPressed: _onDownload,
-                    )
+                    ),
+                    const SizedBox(width: 5),
+                    IconButton(
+                      icon: Icon(
+                        Icons.delete_forever_rounded,
+                        color: theme.colorScheme.onBackground,
+                      ),
+                      tooltip: 'Delete All',
+                      onPressed: _onDeleteAll,
+                    ),
                   ],
                 )
               ],
@@ -208,6 +230,48 @@ class _CollectionAreaState extends State<CollectionArea> {
       ),
     );
     widget.client.removeQuery(query);
+  }
+
+  Future<void> _onCreate() async {
+    final idName = widget.collectionSchema.idName;
+    final randomId = Random().nextInt(100000000);
+    await widget.client.importJson(
+      widget.instance,
+      widget.collection,
+      [
+        {idName: randomId}
+      ],
+    );
+    if (!mounted) return;
+
+    setState(() {
+      filter = FilterGroup.and([
+        FilterCondition.equalTo(
+          property: idName,
+          value: randomId,
+        ),
+      ]);
+    });
+    await _runQuery();
+  }
+
+  Future<void> _onImport() async {
+    try {
+      final jsonStr = await Clipboard.getData(Clipboard.kTextPlain);
+      var json = jsonDecode(jsonStr!.text!);
+      if (json is! List) {
+        json = [json];
+      }
+      await widget.client.importJson(widget.instance, widget.collection, json);
+    } on PlatformException {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not access clipboard.')),
+      );
+    } on FormatException {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid JSON in clipboard.')),
+      );
+    }
   }
 
   void _onDeleteAll() {

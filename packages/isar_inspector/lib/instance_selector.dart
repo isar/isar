@@ -52,31 +52,28 @@ class _InstanceSelectorState extends State<InstanceSelector>
         Stack(
           alignment: Alignment.bottomCenter,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(1),
-              child: Card(
-                margin: const EdgeInsets.all(10),
-                color: theme.colorScheme.secondaryContainer,
-                child: SizeTransition(
-                  sizeFactor: _animation,
-                  axisAlignment: -1,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: 15),
-                      for (var instance in widget.instances)
-                        if (instance != widget.selectedInstance)
-                          InstanceButton(
-                            instance: instance,
-                            onTap: () {
-                              widget.onSelected(instance);
-                              _controller.reverse();
-                            },
-                          ),
-                      const SizedBox(height: 80),
-                    ],
-                  ),
+            Card(
+              margin: const EdgeInsets.all(10),
+              color: theme.colorScheme.secondaryContainer,
+              child: SizeTransition(
+                sizeFactor: _animation,
+                axisAlignment: -1,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 10),
+                    for (var instance in widget.instances)
+                      if (instance != widget.selectedInstance)
+                        InstanceButton(
+                          instance: instance,
+                          onTap: () {
+                            widget.onSelected(instance);
+                            _controller.reverse();
+                          },
+                        ),
+                    const SizedBox(height: 75),
+                  ],
                 ),
               ),
             ),
@@ -107,26 +104,31 @@ class InstanceButton extends StatelessWidget {
     required this.instance,
     required this.onTap,
   });
+
   final String instance;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Card(
+        margin: EdgeInsets.zero,
         color: Colors.transparent,
-        //onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Center(
-            child: Text(
-              instance,
-              textAlign: TextAlign.start,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Center(
+              child: Text(
+                instance,
+                textAlign: TextAlign.start,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -144,6 +146,7 @@ class SelectedInstanceButton extends StatelessWidget {
     required this.hasMultiple,
     required this.color,
   });
+
   final String instance;
   final VoidCallback onTap;
   final bool hasMultiple;

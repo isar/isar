@@ -12,7 +12,7 @@ abstract class IsarCommon extends Isar {
   IsarCommon(super.name);
 
   final List<Future<void>> _activeAsyncTxns = [];
-  var _asyncWriteTxnActive = false;
+  var _asyncWriteTxnsActive = 0;
 
   Transaction? _currentTxnSync;
 
@@ -40,7 +40,7 @@ abstract class IsarCommon extends Isar {
 
     try {
       if (write) {
-        _asyncWriteTxnActive = true;
+        _asyncWriteTxnsActive++;
       }
 
       final txn = await beginTxn(write, silent);
@@ -54,7 +54,7 @@ abstract class IsarCommon extends Isar {
         result = await zone.run(callback);
         await txn.commit();
       } catch (e) {
-        txn.abort();
+        await txn.abort();
         rethrow;
       } finally {
         txn.free();
@@ -64,7 +64,7 @@ abstract class IsarCommon extends Isar {
       completer.complete();
       _activeAsyncTxns.remove(completer.future);
       if (write) {
-        _asyncWriteTxnActive = false;
+        _asyncWriteTxnsActive--;
       }
     }
   }
@@ -108,7 +108,7 @@ abstract class IsarCommon extends Isar {
     requireOpen();
     _requireNotInTxn();
 
-    if (write && _asyncWriteTxnActive) {
+    if (write && _asyncWriteTxnsActive > 0) {
       throw IsarError(
         'An async write transaction is already in progress in this isolate.',
       );
@@ -193,7 +193,10 @@ abstract class Transaction {
   void commitSync();
 
   /// @nodoc
-  void abort();
+  Future<void> abort();
+
+  /// @nodoc
+  void abortSync();
 
   /// @nodoc
   void free() {}

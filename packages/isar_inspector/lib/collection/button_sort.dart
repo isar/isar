@@ -20,23 +20,26 @@ class SortButtons extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            isDense: true,
-            items: [
-              for (final property in properties)
-                if (property.type != IsarType.object && !property.type.isList)
-                  DropdownMenuItem(
-                    value: property.name,
-                    child: Text(property.name),
-                  ),
-            ],
-            value: property,
-            onChanged: (value) {
-              if (value != null) {
-                onChanged(value, asc);
-              }
-            },
+        Tooltip(
+          message: 'Sort results by this property',
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              isDense: true,
+              items: [
+                for (final property in properties)
+                  if (property.type != IsarType.object && !property.type.isList)
+                    DropdownMenuItem(
+                      value: property.name,
+                      child: Text(property.name),
+                    ),
+              ],
+              value: property,
+              onChanged: (value) {
+                if (value != null) {
+                  onChanged(value, asc);
+                }
+              },
+            ),
           ),
         ),
         const SizedBox(width: 10),
@@ -45,6 +48,7 @@ class SortButtons extends StatelessWidget {
           onPressed: () {
             onChanged(property, !asc);
           },
+          tooltip: 'Toggle sort order',
         ),
       ],
     );

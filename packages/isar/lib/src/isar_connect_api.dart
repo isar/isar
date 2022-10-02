@@ -9,7 +9,7 @@ enum ConnectAction {
   watchInstance('ext.isar.watchInstance'),
   executeQuery('ext.isar.executeQuery'),
   removeQuery('ext.isar.removeQuery'),
-  exportQuery('ext.isar.exportQuery'),
+  importJson('ext.isar.importJson'),
   exportJson('ext.isar.exportJson'),
   editProperty('ext.isar.editProperty');
 

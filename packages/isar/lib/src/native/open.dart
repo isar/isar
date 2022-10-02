@@ -36,7 +36,8 @@ void _initializeInstance(
 ) {
   final maxProperties = schemas.map((e) => e.properties.length).reduce(max);
 
-  final colPtrPtr = alloc<Pointer<CIsarCollection>>();
+  // TODO find a way to reproduce this flutter bug. alloc should work here
+  final colPtrPtr = malloc<Pointer<CIsarCollection>>();
   final offsetsPtr = alloc<Uint32>(maxProperties);
 
   final cols = <Type, IsarCollection<dynamic>>{};
@@ -127,7 +128,6 @@ Isar openIsarSync({
 }) {
   initializeCoreBinary();
   IC.isar_connect_dart_api(NativeApi.postCObject.cast());
-
   return using((Arena alloc) {
     final namePtr = name.toCString(alloc);
     final dirPtr = directory?.toCString(alloc) ?? nullptr;

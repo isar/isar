@@ -40,7 +40,6 @@ const trueBool = IsarObject_TRUE_BOOL;
 const String _githubUrl = 'https://github.com/isar/isar/releases/download';
 
 bool _isarInitialized = false;
-bool get isarInitialized => _isarInitialized;
 
 // ignore: non_constant_identifier_names
 late final IsarCoreBindings IC;

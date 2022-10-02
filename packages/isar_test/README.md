@@ -12,5 +12,5 @@ dart test
 ### Integration tests
 
 ```
-flutter drive --driver=test_driver/isar_test.dart --target=test_driver/isar.dart
+flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart
 ```

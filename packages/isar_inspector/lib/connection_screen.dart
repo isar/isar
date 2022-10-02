@@ -45,15 +45,7 @@ class _ConnectionPageState extends State<ConnectionScreen> {
         if (snapshot.hasData) {
           return _SchemaLoader(client: snapshot.data!);
         } else if (snapshot.hasError) {
-          return ErrorScreen(
-            message: 'Disconnected',
-            retry: () {
-              setState(() {
-                clientFuture =
-                    ConnectClient.connect(widget.port, widget.secret);
-              });
-            },
-          );
+          return const ErrorScreen();
         } else {
           return const Loading();
         }
@@ -113,15 +105,7 @@ class _SchemaLoaderState extends State<_SchemaLoader> {
             collections: snapshot.data![1] as List<CollectionSchema<dynamic>>,
           );
         } else if (snapshot.hasError) {
-          return ErrorScreen(
-            message: 'Disconnected',
-            retry: () {
-              setState(() {
-                instancesFuture = widget.client.listInstances();
-                collectionsFuture = widget.client.getSchema();
-              });
-            },
-          );
+          return const ErrorScreen();
         } else {
           return const Loading();
         }

@@ -1,15 +1,49 @@
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:isar_inspector/connection_screen.dart';
 
 void main() async {
-  runApp(
-    DarkMode(
-      notifier: DarkModeNotifier(),
-      child: const App(),
-    ),
-  );
+  if (window.navigator.userAgent.toLowerCase().contains('chrome')) {
+    runApp(
+      DarkMode(
+        notifier: DarkModeNotifier(),
+        child: const App(),
+      ),
+    );
+  } else {
+    runApp(const UnsupportedBrowser());
+  }
+}
+
+class UnsupportedBrowser extends StatelessWidget {
+  const UnsupportedBrowser({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Isar Inspector',
+      theme: ThemeData.from(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF9FC9FF),
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
+      home: const Scaffold(
+        body: Center(
+          child: Text(
+            'This browser is not supported. Please use a Chrome based browser.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 final _router = GoRouter(
@@ -36,10 +70,12 @@ final _router = GoRouter(
           onTap: () {
             FocusScope.of(context).requestFocus(FocusNode());
           },
-          child: Material(
-            child: ConnectionScreen(
-              port: state.params['port']!,
-              secret: state.params['secret']!,
+          child: Scaffold(
+            body: Material(
+              child: ConnectionScreen(
+                port: state.params['port']!,
+                secret: state.params['secret']!,
+              ),
             ),
           ),
         );

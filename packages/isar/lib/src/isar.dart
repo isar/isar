@@ -43,8 +43,8 @@ abstract class Isar {
   /// The directory containing the database file or `null` on the web.
   String? get directory;
 
-  /// The full path of the database file is `path/name.isar` and the lockfile
-  /// `path/name.isar.lock`.
+  /// The full path of the database file is `directory/name.isar` and the lock
+  /// file `directory/name.isar.lock`.
   String? get path => directory != null ? '$directory/$name.isar' : null;
 
   late final Map<Type, IsarCollection<dynamic>> _collections;
@@ -92,14 +92,15 @@ abstract class Isar {
     bool inspector = true,
   }) {
     _checkOpen(name, schemas);
-    if (!_kIsWeb && inspector) {
-      assert(
-        () {
-          _IsarConnect.initialize(schemas);
-          return true;
-        }(),
-      );
-    }
+
+    /// Tree shake the inspector for profile and release builds.
+    assert(() {
+      if (!_kIsWeb && inspector) {
+        _IsarConnect.initialize(schemas);
+      }
+      return true;
+    }());
+
     return openIsar(
       schemas: schemas,
       directory: directory,
@@ -119,14 +120,15 @@ abstract class Isar {
     bool inspector = true,
   }) {
     _checkOpen(name, schemas);
-    if (!_kIsWeb && inspector) {
-      assert(
-        () {
-          _IsarConnect.initialize(schemas);
-          return true;
-        }(),
-      );
-    }
+
+    /// Tree shake the inspector for profile and release builds.
+    assert(() {
+      if (!_kIsWeb && inspector) {
+        _IsarConnect.initialize(schemas);
+      }
+      return true;
+    }());
+
     return openIsarSync(
       schemas: schemas,
       directory: directory,

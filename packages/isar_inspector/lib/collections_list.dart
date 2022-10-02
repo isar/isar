@@ -64,7 +64,7 @@ class CollectionsList extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        info?.count.toString() ?? 'unknown',
+                        info?.count.toString() ?? 'loading',
                         style: const TextStyle(
                           fontSize: 12,
                         ),

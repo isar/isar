@@ -103,6 +103,7 @@ class ConnectClient {
   }
 
   Future<void> watchInstance(String instance) async {
+    collectionInfo.clear();
     await _call<dynamic>(
       ConnectAction.watchInstance,
       args: {'instance': instance},
@@ -122,6 +123,21 @@ class ConnectClient {
       ConnectAction.removeQuery,
       args: query.toJson(),
       timeout: kLongTimeout,
+    );
+  }
+
+  Future<void> importJson(
+    String instance,
+    String collection,
+    List<dynamic> objects,
+  ) async {
+    await _call<dynamic>(
+      ConnectAction.importJson,
+      args: {
+        'instance': instance,
+        'collection': collection,
+        'objects': objects,
+      },
     );
   }
 

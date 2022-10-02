@@ -84,8 +84,14 @@ class Txn extends Transaction {
   }
 
   @override
-  void abort() {
+  Future<void> abort() {
     IC.isar_txn_finish(ptr, false);
+    return wait();
+  }
+
+  @override
+  void abortSync() {
+    nCall(IC.isar_txn_finish(ptr, false));
   }
 
   @override

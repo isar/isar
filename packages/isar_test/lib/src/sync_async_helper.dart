@@ -215,50 +215,6 @@ extension QueryBuilderExecute<OBJ, R>
       return deleteAll();
     }
   }
-}
-
-/// Extension for Queries
-/// Same as [QueryBuilderExecute], but for [Query] instead of [QueryBuilder].
-extension QueryExecute<R> on Query<R> {
-  Future<R?> tFindFirst() {
-    if (syncTest) {
-      return SynchronousFuture(findFirstSync());
-    } else {
-      return findFirst();
-    }
-  }
-
-  Future<List<R>> tFindAll() {
-    if (syncTest) {
-      return SynchronousFuture(findAllSync());
-    } else {
-      return findAll();
-    }
-  }
-
-  Future<int> tCount() {
-    if (syncTest) {
-      return SynchronousFuture(countSync());
-    } else {
-      return count();
-    }
-  }
-
-  Future<bool> tDeleteFirst() {
-    if (syncTest) {
-      return SynchronousFuture(deleteFirstSync());
-    } else {
-      return deleteFirst();
-    }
-  }
-
-  Future<int> tDeleteAll() {
-    if (syncTest) {
-      return SynchronousFuture(deleteAllSync());
-    } else {
-      return deleteAll();
-    }
-  }
 
   Future<M> tExportJsonRaw<M>(M Function(Uint8List) callback) {
     if (syncTest) {

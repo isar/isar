@@ -11,6 +11,7 @@ abstract class _IsarConnect {
     ConnectAction.watchInstance: _watchInstance,
     ConnectAction.executeQuery: _executeQuery,
     ConnectAction.removeQuery: _removeQuery,
+    ConnectAction.importJson: _importJson,
     ConnectAction.exportJson: _exportJson,
     ConnectAction.editProperty: _editProperty,
   };
@@ -82,8 +83,8 @@ abstract class _IsarConnect {
       print('╔${line('', '═')}╗');
       print('║${line('ISAR CONNECT STARTED', ' ')}║');
       print('╟${line('', '─')}╢');
-      print('║${line('Open the link in Chrome to connect to the', ' ')}║');
-      print('║${line('Isar Inspector while this build is running.', ' ')}║');
+      print('║${line('Open the link to connect to the Isar', ' ')}║');
+      print('║${line('Inspector while this build is running.', ' ')}║');
       print('╟${line('', '─')}╢');
       print('║$url║');
       print('╚${line('', '═')}╝');
@@ -122,6 +123,8 @@ abstract class _IsarConnect {
   }
 
   static void _sendCollectionInfo(IsarCollection<dynamic> collection) {
+    print("COL ISAR ${collection.isar.name} ${collection.name}");
+    print(collection.countSync());
     final count = collection.countSync();
     final size = collection.getSizeSync(
       includeIndexes: true,
@@ -211,6 +214,16 @@ abstract class _IsarConnect {
     final query = ConnectQuery.fromJson(params).toQuery();
     await query.isar.writeTxn(query.deleteAll);
     return true;
+  }
+
+  static Future<void> _importJson(Map<String, dynamic> params) async {
+    final instance = Isar.getInstance(params['instance'] as String)!;
+    final collection =
+        instance.getCollectionByNameInternal(params['collection'] as String)!;
+    final objects = (params['objects'] as List).cast<Map<String, dynamic>>();
+    await instance.writeTxn(() async {
+      await collection.importJson(objects);
+    });
   }
 
   static Future<List<dynamic>> _exportJson(Map<String, dynamic> params) async {

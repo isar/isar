@@ -30,24 +30,34 @@ class PrevNextButtons extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        TextButton(
-          onPressed: page > 0 ? () => onChanged(page - 1) : null,
-          child: const Text('Prev'),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          '$from',
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        Text(
-          ' - ',
-          style: TextStyle(
-            color: theme.colorScheme.onBackground.withOpacity(0.7),
+        Tooltip(
+          message: 'Previous page',
+          child: TextButton(
+            onPressed: page > 0 ? () => onChanged(page - 1) : null,
+            child: const Text('Prev'),
           ),
         ),
-        Text(
-          '$to',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        const SizedBox(width: 10),
+        Tooltip(
+          message: 'Current page',
+          child: Row(
+            children: [
+              Text(
+                '$from',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                ' - ',
+                style: TextStyle(
+                  color: theme.colorScheme.onBackground.withOpacity(0.7),
+                ),
+              ),
+              Text(
+                '$to',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
         ),
         Text(
           ' of ',
@@ -55,14 +65,20 @@ class PrevNextButtons extends StatelessWidget {
             color: theme.colorScheme.onBackground.withOpacity(0.7),
           ),
         ),
-        Text(
-          '$count',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        Tooltip(
+          message: 'Total number of objects',
+          child: Text(
+            '$count',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
         const SizedBox(width: 10),
-        TextButton(
-          onPressed: to == count ? null : () => onChanged(page + 1),
-          child: const Text('Next'),
+        Tooltip(
+          message: 'Next page',
+          child: TextButton(
+            onPressed: to == count ? null : () => onChanged(page + 1),
+            child: const Text('Next'),
+          ),
         ),
       ],
     );
