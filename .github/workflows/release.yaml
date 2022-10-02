@@ -69,8 +69,6 @@ jobs:
         -execdir sh -c 'echo "INPUT(-lunwind)" > libgcc.a' \;
     - name: Set env
       run: echo "ISAR_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
-    - name: Setup Rust
-      uses: actions-rs/toolchain@v1
     - name: Build binary
       run: bash tool/${{ matrix.script }}
     - name: Upload binary
@@ -93,6 +91,7 @@ jobs:
       run: echo "ISAR_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
     - name: Setup Rust
       uses: actions-rs/toolchain@v1
+      toolchain: stable
     - name: Build binary
       run: bash tool/build_linux.sh x64
     - name: Upload binary
