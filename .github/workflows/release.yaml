@@ -84,7 +84,7 @@ jobs:
 
   build_inspector:
     name: Build Inspector
-    needs: [build_binaries, build_linux_binary]
+    needs: build_binaries
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
