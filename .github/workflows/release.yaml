@@ -84,7 +84,7 @@ jobs:
     needs: verify_version
     runs-on: ubuntu-latest
     container:
-      image: quay.io/pypa/manylinux2014_x86_64
+      image: corallab/ubuntu:16.04-clang-6.0-cmake-3.12-ninja-1.8.2
     steps:
     - uses: actions/checkout@v3
     - name: Set env
