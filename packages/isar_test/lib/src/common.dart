@@ -32,41 +32,63 @@ void isarTest(
   dynamic Function() body, {
   Timeout? timeout,
   bool skip = false,
-  bool syncOnly = false,
 }) {
-  void runTest(bool syncTest) {
-    final testName = syncTest ? '$name SYNC' : name;
-    test(
-      testName,
-      () async {
-        await runZoned(
-          () async {
-            try {
-              await _prepareTest();
-              await body();
-              testCount++;
-            } catch (e) {
-              testErrors.add('$testName: $e');
-              rethrow;
-            }
-          },
-          zoneValues: {
-            #syncTest: syncTest,
-          },
-        );
-      },
-      timeout: timeout ?? const Timeout(Duration(minutes: 10)),
-      skip: skip,
-    );
-  }
+  isarTestSync(name, body, timeout: timeout, skip: skip);
+  isarTestAsync(name, body, timeout: timeout, skip: skip);
+}
 
-  if (!syncOnly) {
-    runTest(false);
-  }
-
+@isTest
+void isarTestSync(
+  String name,
+  dynamic Function() body, {
+  Timeout? timeout,
+  bool skip = false,
+}) {
   if (!kIsWeb) {
-    runTest(true);
+    _isarTest(name, true, body, timeout: timeout, skip: skip);
   }
+}
+
+@isTest
+void isarTestAsync(
+  String name,
+  dynamic Function() body, {
+  Timeout? timeout,
+  bool skip = false,
+}) {
+  _isarTest(name, false, body, timeout: timeout, skip: skip);
+}
+
+void _isarTest(
+  String name,
+  bool syncTest,
+  dynamic Function() body, {
+  Timeout? timeout,
+  bool skip = false,
+}) {
+  final testName = syncTest ? '$name SYNC' : name;
+  test(
+    testName,
+    () async {
+      await runZoned(
+        () async {
+          try {
+            await _prepareTest();
+            await body();
+            testCount++;
+          } catch (e) {
+            testErrors.add('$testName: $e');
+            rethrow;
+          }
+        },
+        zoneValues: {
+          #syncTest: syncTest,
+        },
+      );
+    },
+    timeout: timeout ?? const Timeout(Duration(minutes: 10)),
+    skip: skip,
+  );
 }
 
 @isTest
@@ -77,11 +99,6 @@ void isarTestVm(String name, dynamic Function() body) {
 @isTest
 void isarTestWeb(String name, dynamic Function() body) {
   isarTest(name, body, skip: !kIsWeb);
-}
-
-@isTest
-void isarTestSync(String name, void Function() body) {
-  isarTest(name, body, skip: kIsWeb, syncOnly: true);
 }
 
 String getRandomName() {

@@ -122,7 +122,7 @@ abstract class IsarCommon extends Isar {
       result = callback();
       txn.commitSync();
     } catch (e) {
-      txn.abort();
+      txn.abortSync();
       rethrow;
     } finally {
       _currentTxnSync = null;
