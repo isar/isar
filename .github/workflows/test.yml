@@ -50,7 +50,7 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -112,19 +112,11 @@ jobs:
         working-directory: packages/isar_generator
 
   drive_ios:
-    strategy:
-      matrix:
-        device:
-          - "iPhone 8"
-          - "iPhone 11 Pro Max"
-      fail-fast: false
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - name: Start simulator
         uses: futureware-tech/simulator-action@v1
-        with:
-          model: ${{ matrix.device }}
       - uses: subosito/flutter-action@v2
       - name: Build Isar Core
         run: |
