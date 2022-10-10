@@ -2,6 +2,8 @@
 title: Maps
 ---
 
+# Maps
+
 Isar does not support maps out of the box but it's easy to make use of embedded objects to achieve the same result.
 
 There are multiple ways to implement maps. You could either create an embedded object with a list of keys and a list of values. In this case, we want to support values of different types so we store the map as JSON string instead.
