@@ -114,7 +114,8 @@ export default defineUserConfig({
                 children: [
                     "/recipes/full_text_search.md",
                     "/recipes/multi_isolate.md",
-                    "/recipes/string_ids.md"
+                    "/recipes/string_ids.md",
+                    "/recipes/maps.md"
                 ],
             },
             {
