@@ -54,7 +54,7 @@ void main() async {
   runApp(MyApp(isar: isar));
 }
 
-Future<void> performMigrationIfNecessary(Isar isar) async {
+Future<void> performMigrationIfNeeded(Isar isar) async {
   final prefs = await SharedPreferences.getInstance();
   final currentVersion = prefs.getInt('version') ?? 2;
   switch(currentVersion) {
