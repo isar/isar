@@ -115,7 +115,6 @@ export default defineUserConfig({
                     "/recipes/full_text_search.md",
                     "/recipes/multi_isolate.md",
                     "/recipes/string_ids.md",
-                    "/recipes/maps.md",
                     "/recipes/data_migration.md",
                 ],
             },
