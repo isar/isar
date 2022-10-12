@@ -376,7 +376,7 @@ The where clause is applied first to reduce the number of records to be filtered
 
 You can define how the results should be sorted when executing the query using the `.sortBy()`, `.sortByDesc()`, `.thenBy()` and `.thenByDesc()` methods.
 
-To find all shoes sorted by model name in acending order and size in descending order without using an index:
+To find all shoes sorted by model name in ascending order and size in descending order without using an index:
 
 ```dart
 final sortedShoes = isar.shoes.filter()
