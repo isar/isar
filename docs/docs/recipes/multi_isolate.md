@@ -30,43 +30,43 @@ Make sure to provide the same schemas as in the main isolate. Otherwise, you wil
 void main() {
   // Open Isar in the UI isolate
   final isar = await Isar.open(
-    [PostSchema]
+    [MessageSchema]
     name: 'myInstance',
   );
 
   // listen to changes in the database
-  isar.posts.watchLazy(() {
-    print('omg the posts changed!');
+  isar.messages.watchLazy(() {
+    print('omg the messages changed!');
   });
 
-  // start a new isolate and create 10000 posts
-  compute(createDummyPosts, 10000).then(() {
+  // start a new isolate and create 10000 messages
+  compute(createDummyMessages, 10000).then(() {
     print('isolate finished');
   });
 
   // after some time:
-  // > omg the posts changed!
+  // > omg the messages changed!
   // > isolate finished
 }
 
 // function that will be executed in the new isolate
-Future createDummyPosts(int count) async {
+Future createDummyMessages(int count) async {
   // we don't need the path here because the instance is already open
   final isar = await Isar.open(
     [PostSchema],
     name: 'myInstance',
   );
 
-  final posts = List.generate(count, (i) => Post()..title = 'Post $i');
+  final messages = List.generate(count, (i) => Message()..content = 'Message $i');
   // we use a synchronous transactions in isolates
   isar.writeTxnSync(() {
-    isar.posts.insertAllSync(posts);
+    isar.messages.insertAllSync(messages);
   });
 }
 ```
 
 There are a few interesting things to note in the example above:
 
-- `isar.posts.watchLazy()` is called in the UI isolate and is notified of changes from another isolate.
+- `isar.messages.watchLazy()` is called in the UI isolate and is notified of changes from another isolate.
 - Instances are referenced by name. The default name is `default`, but in this example, we set it to `myInstance`.
-- We used a synchronous transaction to create the posts. Blocking our new isolate is no problem and synchronous transactions are a little faster.
+- We used a synchronous transaction to create the mesasges. Blocking our new isolate is no problem, and synchronous transactions are a little faster.
