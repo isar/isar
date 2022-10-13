@@ -1,9 +1,85 @@
 import { shikiPlugin } from '@vuepress/plugin-shiki'
-import { defineUserConfig } from 'vuepress'
+import { DefaultThemeLocaleData, defineUserConfig, LocaleConfig, SiteLocaleConfig, } from 'vuepress'
 import { defaultTheme } from 'vuepress'
 import { viteBundler } from 'vuepress'
+import { getLocalePath, locales } from './locales'
+import * as path from 'path'
+import * as fs from 'fs'
+
+
+
+const vueLocales: SiteLocaleConfig = {}
+for (const locale of locales) {
+    vueLocales[getLocalePath(locale.locale)] = {
+        lang: locale.language,
+        title: locale.dbName,
+        description: locale.dbDescription,
+    }
+}
+
+const themeLocales: LocaleConfig<DefaultThemeLocaleData> = {}
+for (const locale of locales) {
+    themeLocales[getLocalePath(locale.locale)] = {
+        selectLanguageName: locale.language,
+        selectLanguageText: locale.selectLanguage,
+        editLinkText: locale.editPage,
+        lastUpdatedText: locale.lastUpdated,
+        tip: locale.tip,
+        warning: locale.warning,
+        danger: locale.danger,
+        notFound: locale.notFound,
+        backToHome: locale.backToHome,
+        sidebar: getSidebar({
+            locale: locale.locale,
+            tutorials: locale.tutorials,
+            concepts: locale.concepts,
+            recipes: locale.recipes,
+            sampleApps: locale.sampleApps,
+            chnagelog: locale.changelog,
+            contributors: locale.contributors,
+        }),
+    }
+}
 
 export default defineUserConfig({
+    locales: vueLocales,
+    bundler: viteBundler({}),
+    theme: defaultTheme({
+        logo: "/isar.svg",
+        repo: "isar/isar",
+        docsRepo: "isar/isar",
+        docsDir: "docs/docs",
+        contributors: true,
+        locales: themeLocales,
+        navbar: [
+            {
+                text: "pub.dev",
+                link: "https://pub.dev/packages/isar",
+            },
+            {
+                text: "API",
+                link: "https://pub.dev/documentation/isar/latest/isar/isar-library.html",
+            },
+            {
+                text: "Telegram",
+                link: "https://t.me/isardb",
+            },
+        ],
+        sidebarDepth: 1,
+
+    }),
+    markdown: {
+        code: {
+            lineNumbers: false,
+        },
+    },
+    plugins: [
+        [
+            shikiPlugin({
+                theme: "one-dark-pro",
+            }),
+        ],
+    ],
     head: [
         [
             "link",
@@ -61,87 +137,69 @@ export default defineUserConfig({
           })(window, document, "clarity", "script", "ciawnmxjdh");`,
         ],
     ],
-    locales: {
-        "/": {
-            lang: "en-US",
-            title: "Isar Database",
-            description: "Super Fast Cross Platform Database for Flutter",
-        },
-    },
-    bundler: viteBundler({}),
-    theme: defaultTheme({
-        logo: "/isar.svg",
-        repo: "isar/isar",
-        docsRepo: "isar/docs",
-        docsDir: "docs",
-        contributors: true,
-        navbar: [
-            {
-                text: "pub.dev",
-                link: "https://pub.dev/packages/isar",
-            },
-            {
-                text: "API",
-                link: "https://pub.dev/documentation/isar/latest/isar/isar-library.html",
-            },
-            {
-                text: "Telegram",
-                link: "https://t.me/isardb",
-            },
-        ],
-        sidebarDepth: 1,
-        sidebar: [
-            {
-                text: "TUTORIALS",
-                children: ["/tutorials/quickstart.md"],
-            },
-            {
-                text: "CONCEPTS",
-                children: [
-                    "/schema.md",
-                    "/crud.md",
-                    "/queries.md",
-                    "/transactions.md",
-                    "/indexes.md",
-                    "/links.md",
-                    "/watchers.md",
-                    "/limitations.md",
-                    "/faq.md",
-                ],
-            },
-            {
-                text: "RECIPES",
-                children: [
-                    "/recipes/full_text_search.md",
-                    "/recipes/multi_isolate.md",
-                    "/recipes/string_ids.md",
-                    "/recipes/data_migration.md",
-                ],
-            },
-            {
-                text: "Sample Apps",
-                link: "https://github.com/isar/isar/tree/main/examples",
-            },
-            {
-                text: "Changelog",
-                link: "https://github.com/isar/isar/blob/main/packages/isar/CHANGELOG.md",
-            },
-            {
-                text: "Contributors",
-                link: "https://github.com/isar/isar#contributors-",
-            },
-        ],
-    }),
-    markdown: {
-        code: {
-            lineNumbers: false,
-        },
-    },
-    plugins: [
-        [
-            shikiPlugin({
-                theme: "one-dark-pro",
-            }),
-        ],
-    ],
 })
+
+function getSidebar({ locale, tutorials, concepts, recipes, sampleApps, chnagelog, contributors }) {
+    return [
+        {
+            text: tutorials,
+            children: getSidebarChildren(locale, ["tutorials/quickstart.md"])
+        },
+        {
+            text: concepts,
+            children: getSidebarChildren(
+                locale,
+                [
+                    "schema.md",
+                    "crud.md",
+                    "queries.md",
+                    "transactions.md",
+                    "indexes.md",
+                    "links.md",
+                    "watchers.md",
+                    "limitations.md",
+                    "faq.md",
+                ],
+            ),
+        },
+        {
+            text: recipes,
+            children: getSidebarChildren(
+                locale,
+                [
+                    "recipes/full_text_search.md",
+                    "recipes/multi_isolate.md",
+                    "recipes/string_ids.md",
+                    "recipes/data_migration.md",
+                ]
+            ),
+        },
+        {
+            text: sampleApps,
+            link: "https://github.com/isar/isar/tree/main/examples",
+        },
+        {
+            text: chnagelog,
+            link: "https://github.com/isar/isar/blob/main/packages/isar/CHANGELOG.md",
+        },
+        {
+            text: contributors,
+            link: "https://github.com/isar/isar#contributors-",
+        },
+    ]
+}
+
+function getSidebarChildren(locale: string, children: string[]) {
+    const localePath = getLocalePath(locale)
+    return children.map((child) => {
+        if (locale === "en-US") {
+            return '/' + child
+        }
+        const file = path.resolve(__dirname, '../', localePath.substring(1), child)
+        if (fs.existsSync(file)) {
+            return localePath + child
+        } else {
+            return '/' + child
+        }
+    });
+}

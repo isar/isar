@@ -1,32 +1,29 @@
 ---
-title: Quickstart
+title: Schnellstart
 ---
 
-# Quickstart
+# Schnellstart
 
-Holy smokes, you're here! Let's get started on using the coolest Flutter database out there...
+Holla, die Waldfee! Du bist bestimmt hier um mit der coolsten Flutter-Datenbank zu starten...
 
-We're going to be short on words and quick on code in this quickstart.
+Dieser Schnellstart wird wenig um den heißen Brei herumreden und direkt mit dem coden beginnen.
 
-## 1. Add dependencies
+## 1. Abhängigkeiten hinzufügen
 
-Before the fun begins, we need to add a few packages to the `pubspec.yaml`. We can use pub to do the heavy lifting for us.
+Bevor es losgeht, müssen wir ein paar Pakete zur `pubspec.yaml` hinzufügen. Damit es schneller geht lassen wir pub das für uns erledigen.
 
 ```bash
 flutter pub add isar isar_flutter_libs
 flutter pub add -d isar_generator build_runner
 ```
 
-## 2. Annotate classes
+## 2. Klassen annotieren
 
-Annotate your collection classes with `@collection` and choose an `Id` field.
+Annotiere deine Collection-Klassen mit `@collection` und wähle ein `Id`-Feld.
 
 ```dart
-part 'email.g.dart';
-
-@collection
-class User {
-  Id id = Isar.autoIncrement; // you can also use id = null to auto increment
+part 'email.g.dart'
+  Id id = Isar.autoIncrement; // Für auto-increment kannst du auch id = null zuweisen 
 
   String? name;
 
@@ -34,35 +31,35 @@ class User {
 }
 ```
 
-Ids uniquely identify objects in a collection and allow you to find them again later.
+Ids identifizieren Objekte in einer Collection eindeutig und erlauben es dir, sie später wiederzufinden.
 
-## 3. Run code generator
+## 3. Code-Generator ausführen
 
-Execute the following command to start the `build_runner`:
+Führe den folgenden Befehl aus, um den `build_runner` zu starten:
 
 ```
 dart run build_runner build
 ```
 
-If you are using Flutter, use the following:
+Wenn du Flutter verwendest:
 
 ```
 flutter pub run build_runner build
 ```
 
-## 4. Open Isar instance
+## 4. Isar-Instanz öffnen
 
-Open a new Isar instance and pass all of your collection schemas. Optionally you can specify an instance name and directory.
+Öffne eine neue Isar-Instanz und übergebe alle Collection-Schemata. Optional kannst du einen Instanznamen und ein Verzeichnis angeben.
 
 ```dart
 final isar = await Isar.open([EmailSchema]);
 ```
 
-## 5. Write and read
+## 5. Schreiben und lesen
 
-Once your instance is open, you can start using the collections.
+Wenn deine Instanz geöffnet ist, hast du Zugriff auf die Collections.
 
-All basic CRUD operations are available via the `IsarCollection`.
+Alle grundlegenden CRUD-Operationen sind über die `IsarCollection` verfügbar .
 
 ```dart
 final newUser = User()..name = 'Jane Doe'..age = 36;
@@ -78,9 +75,10 @@ await isar.writeTxn(() async {
 });
 ```
 
-## Other resources
+## Weitere Ressourcen
 
-Are you a visual learner? Check out these videos to get started with Isar:
+Du lernst am besten visuell? Schau dir diese Videos an, um mit Isar zu starten:
+
 <div class="video-block">
   <iframe max-width=100% height=auto src="https://www.youtube.com/embed/CwC9-a9hJv4" title="Isar Database" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>

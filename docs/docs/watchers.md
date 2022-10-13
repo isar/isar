@@ -4,9 +4,9 @@ title: Watchers
 
 # Watchers
 
-Isar allows you to subscribe to changes in the database. You can either "watch" for changes in a specific object, an entire collection, or a query.
+Isar allows you to subscribe to changes in the database. You can "watch" for changes in a specific object, an entire collection, or a query.
 
-Watchers enable you to efficiently react to changes in the database. You can for example rebuild your UI when a contact is added, send a network request when a document is updated etc.
+Watchers enable you to react to changes in the database efficiently. You can for example rebuild your UI when a contact is added, send a network request when a document is updated, etc.
 
 A watcher is notified after a transaction commits successfully and the target actually changes.
 
@@ -34,7 +34,7 @@ await isar.users.delete(5);
 
 As you can see in the example above, the object does not need to exist yet. The watcher will be notified when it is created.
 
-There is an additional parameter `fireImmediately`. If you set it to `true`, Isar will immediately add the current value of the object to the stream.
+There is an additional parameter `fireImmediately`. If you set it to `true`, Isar will immediately add the object's current value to the stream.
 
 ### Lazy watching
 
@@ -53,7 +53,7 @@ await isar.users.put(user);
 
 ## Watching Collections
 
-Instead of watching a single object, you can watch an entire collection and get notified when any object is added, updated or deleted:
+Instead of watching a single object, you can watch an entire collection and get notified when any object is added, updated, or deleted:
 
 ```dart
 Stream<void> userChanged = isar.users.watchLazy();
@@ -68,7 +68,7 @@ await isar.users.put(user);
 
 ## Watching Queries
 
-It is even possible to watch entire queries. Isar does its best to only notify you when the query results actually change. You will however not be notified if links cause the query to change. Use a collection watcher if you need to be notified about that.
+It is even possible to watch entire queries. Isar does its best to only notify you when the query results actually change. You will not be notified if links cause the query to change. Use a collection watcher if you need to be notified about link changes.
 
 ```dart
 Query<User> usersWithA = isar.users.filter()
@@ -92,11 +92,11 @@ awaited isar.users.put(User()..name = 'Antonia');
 ```
 
 :::warning
-If you use offset & limit or distinct queries, Isar will also notify you when objects matching the filter but outside the query results change.
+If you use offset & limit or distinct queries, Isar will also notify you when objects match the filter but outside the query, results change.
 :::
 
 Just like `watchObject()`, you can use `watchLazy()` to get notified when the query results change but not fetch the results.
 
 :::danger
-Rerunning queries for every change is very inefficient. You should use a lazy collection watcher instead.
+Rerunning queries for every change is very inefficient. It would be best if you used a lazy collection watcher instead.
 :::

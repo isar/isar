@@ -4,9 +4,9 @@ title: Multi-Isolate usage
 
 # Multi-Isolate usage
 
-Instead of threads, all Dart code runs inside of isolates. Each isolate has its own memory heap, ensuring that none of the state in an isolate is accessible from any other isolate.
+Instead of threads, all Dart code runs inside isolates. Each isolate has its own memory heap, ensuring that none of the state in an isolate is accessible from any other isolate.
 
-Isar can be accessed from multiple isolates at the same time and even watchers work across isolates. In this recipe, we will check out how to use Isar in a multi-isolate environment.
+Isar can be accessed from multiple isolates at the same time, and even watchers work across isolates. In this recipe, we will check out how to use Isar in a multi-isolate environment.
 
 ## When to use multiple isolates
 
@@ -14,11 +14,15 @@ Isar transactions are executed in parallel even if they run in the same isolate.
 
 The reason is that Isar spends quite some time encoding and decoding data from and to Dart objects. You can think of it as encoding and decoding JSON (just more efficient). These operations run inside the isolate from which the data is accessed and naturally block other code in the isolate. In other words: Isar performs some of the work in your Dart isolate.
 
-If you only need to read or write a few hundred objects at once, it is fine to do it in the UI isolate. But if you have huge transactions or the UI thread is already busy, you should consider using a separate isolate.
+If you only need to read or write a few hundred objects at once, doing it in the UI isolate is not a problem. But for huge transactions or if the UI thread is already busy, you should consider using a separate isolate.
 
 ## Example
 
 The first thing we need to do is to open Isar in the new isolate. Since the instance of Isar is already open in the main isolate, `Isar.open()` will return the same instance.
+
+:::warning
+Make sure to provide the same schemas as in the main isolate. Otherwise, you will get an error.
+:::
 
 `compute()` starts a new isolate in Flutter and runs the given function in it.
 
@@ -63,6 +67,6 @@ Future createDummyPosts(int count) async {
 
 There are a few interesting things to note in the example above:
 
-- `isar.posts.watchLazy()` is called in the UI isolate and is notified even if the posts are changed in another isolate.
-- Instances are referenced by name. The default name is `default` but in this example, we set it to `myInstance`.
+- `isar.posts.watchLazy()` is called in the UI isolate and is notified of changes from another isolate.
+- Instances are referenced by name. The default name is `default`, but in this example, we set it to `myInstance`.
 - We used a synchronous transaction to create the posts. Blocking our new isolate is no problem and synchronous transactions are a little faster.

@@ -4,11 +4,11 @@ title: String ids
 
 # String ids
 
-This is one of the most frequent requests I get so I decided to write a tutorial on how to use String ids.
+This is one of the most frequent requests I get, so here is a tutorial on using String ids.
 
-Isar does not natively support String ids and there is a good reason for it: integer ids are much more efficient and faster. Especially for links, the overhead of a String id is too big.
+Isar does not natively support String ids, and there is a good reason for it: integer ids are much more efficient and faster. Especially for links, the overhead of a String id is too significant.
 
-I understand that sometimes you have to store external data that uses UUIDs for example. I recommend storing the String id as a property in your object and using a fast hash implementation to generate a 64-bit int that can be used as Id.
+I understand that sometimes you have to store external data that uses UUIDs or other non-integer ids. I recommend storing the String id as a property in your object and using a fast hash implementation to generate a 64-bit int that can be used as Id.
 
 ```dart
 @collection
@@ -47,7 +47,7 @@ int fastHash(String string) {
 }
 ```
 
-If you choose a different hash function, make sure it returns a 64-bit int and avoid using a cryptographic hash function because they are much slower.
+If you choose a different hash function, ensure it returns a 64-bit int and avoid using a cryptographic hash function because they are much slower.
 
 :::warning
 Avoid using `string.hashCode` because it is not guaranteed to be stable across different platforms and versions of Dart.

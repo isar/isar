@@ -10,11 +10,11 @@ A random collection of frequently asked questions about Isar and Flutter databas
 
 > I store my data in a backend database, why do I need Isar?.
 
-Even today, it is very common to have no data connection, if you are in a subway or a plane, or if you visit your grandma who has no WiFi and very bad cell signal. You shouldn't let bad connection cripple your app!
+Even today, it is very common to have no data connection if you are in a subway or a plane or if you visit your grandma, who has no WiFi and a very bad cell signal. You shouldn't let bad connection cripple your app!
 
 ### Isar vs Hive
 
-The answer to this one is easy: Isar was [started as a replacement for Hive](https://github.com/hivedb/hive/issues/246) and is now at a state where I recommend to always use Isar over Hive.
+The answer is easy: Isar was [started as a replacement for Hive](https://github.com/hivedb/hive/issues/246) and is now at a state where I recommend always using Isar over Hive.
 
 ### Where clauses?!
 
@@ -28,10 +28,14 @@ Nobody knows your data better than you, the developer. So you can choose the opt
 
 Nope! Isar is most likely fast enough if you only rely on filters.
 
+### Is Isar fast enough?
+
+Isar is among the fastest databases for mobile, so it should be fast enough for most use cases. If you run into performance issues, chances are that you are doing something wrong.
+
 ### Does Isar increase the size of my app?
 
 A little bit, yes. Isar will increase the download size of your app by about 1 - 1.5 MB. Isar Web adds only a few KB.
 
 ### The docs are incorrect / there is a typo.
 
-Oh no, sorry. Please [open an issue](https://github.com/isar/isar/issues/new/choose) or even better a PR to fix it 💪.
+Oh no, sorry. Please [open an issue](https://github.com/isar/isar/issues/new/choose) or, even better, a PR to fix it 💪.

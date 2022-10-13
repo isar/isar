@@ -4,15 +4,15 @@ title: Data migration
 
 # Data Migration
 
-Isar automatically migrates your database schemas if you for example add or remove collections, fields or indexes. Sometimes you might want to migrate your data as well. Isar does not offer a built-in solution for this because it would put arbitrary restrictions on the migration process. It is easy to implement your own migration logic that fits your needs.
+Isar automatically migrates your database schemas if you add or remove collections, fields, or indexes. Sometimes you might want to migrate your data as well. Isar does not offer a built-in solution because it would impose arbitrary migration restrictions. It is easy to implement migration logic that fits your needs.
 
-In this example, we want to use a single version for the entire database. We use shared preferences to store the current version and compare it to the version we want to migrate to. If the versions do not match, we migrate the data and update the version.
+We want to use a single version for the entire database in this example. We use shared preferences to store the current version and compare it to the version we want to migrate to. If the versions do not match, we migrate the data and update the version.
 
 :::tip
 You could also give each collection its own version and migrate them individually.
 :::
 
-Imagine we have a user collection with a birthday field. In version 2 of our app, we need an additional birth year field to query users based on their age.
+Imagine we have a user collection with a birthday field. In version 2 of our app, we need an additional birth year field to query users based on age.
 
 Version 1:
 ```dart
@@ -87,5 +87,5 @@ Future<void> migrateV1ToV2(Isar isar) async {
 ```
 
 :::warning
-If you have to migrate a lot of data consider using a background isolate. This will prevent strain on the UI thread.
+If you have to migrate a lot of data, consider using a background isolate to prevent strain on the UI thread.
 :::

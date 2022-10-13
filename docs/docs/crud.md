@@ -4,28 +4,27 @@ title: Create, Read, Update, Delete
 
 # Create, Read, Update, Delete
 
-When you have your Collections defined, learn how to manipulate them!
+When you have your collections defined, learn how to manipulate them!
 
 ## Opening Isar
 
-Before you can do anything, you have to open an Isar instance. Each instance needs a directory with write permission. If you don't specify a directory, Isar will find a suitable default directory for the current platform.
+Before you can do anything, we need an Isar instance. Each instance requires a directory with write permission where the database file can be stored. If you don't specify a directory, Isar will find a suitable default directory for the current platform.
+
+Provide all the schemas you want to use with the Isar instance. If you open multiple instances, you still have to provide the same schemas to each instance.
 
 ```dart
 final isar = await Isar.open([ContactSchema]);
 ```
 
-You can use the default config or provide some of the following parameters.
+You can use the default config or provide some of the following parameters:
 
 | Config |  Description |
 | -------| -------------|
-| `name` | You can open multiple instances with distinct names. By default, `"default"` is used. |
-| `schemas` | A list of all collection schemas you want to use. All instances need to use the same schemas. |
-| `directory` | The storage location for this instance. You can pass a relative or absolute path. By default, `NSDocumentDirectory` is used for iOS and `getDataDirectory` for Android. The final location is `path/name.isar`. Not required for web. |
+| `name` | Open multiple instances with distinct names. By default, `"default"` is used. |
+| `directory` | The storage location for this instance. You can pass a relative or absolute path. By default, `NSDocumentDirectory` is used for iOS and `getDataDirectory` for Android. Not required for web. |
 | `relaxedDurability` | Relaxes the durability guarantee to increase write performance. In case of a system crash (not app crash), it is possible to lose the last committed transaction. Corruption is not possible |
 | `compactOnLaunch` | Conditions to check whether the database should be compacted when the instance is opened. |
 | `inspector` | Enabled the Inspector for debug builds. For profile and release builds this option is ignored. |
-
-You can either store the Isar instance in a global variable or use your favorite dependency injection package to manage it.
 
 If an instance is already open, calling `Isar.open()` will yield the existing instance regardless of the specified parameters. That's useful for using Isar in an isolate.
 
@@ -33,45 +32,74 @@ If an instance is already open, calling `Isar.open()` will yield the existing in
 Consider using the [path_provider](https://pub.dev/packages/path_provider) package to get a valid path on all platforms.
 :::
 
-## Collections
+The storage location of the database file is `directory/name.isar`
 
-The Collection object is how you find, query, and create new records of a given type.
+## Reading from the database
+
+Use `IsarCollection` instances to find, query, and create new objects of a given type in Isar.
+
+For the examples below, we assume that we have a collection `Recipe` defined as follows:
+
+```dart
+@collection
+class Recipe {
+  Id? id;
+
+  String? name;
+
+  DateTime? lastCooked;
+
+  bool? isFavorite;
+}
+```
 
 ### Get a collection
 
-All your collections live in the Isar instance. Remember the `Contact` class we annotated before with `@collection`. You can get the contacts collection with:
+All your collections live in the Isar instance. You can get the recipes collection with:
 
 ```dart
-final contacts = isar.contacts;
+final recipes = isar.recipes;
 ```
 
-That was easy!
-
-### Get a record (by id)
+That was easy! If you don't want to use collection accessors, you can also use the `collection()` method:
 
 ```dart
-final contact = await contacts.get(someId);
+final recipes = isar.collection<Recipe>();
 ```
 
-`get()` returns a `Future`. All Isar operations are asynchronous by default. Most operations have a synchronous counterpart:
+### Get an object (by id)
+
+We don't have data in the collection yet but let's pretend we do so we can get an imaginary object by the id `123`
 
 ```dart
-final contact = contacts.getSync(someId);
+final recipe = await recipes.get(123);
 ```
 
-:::tip
-It is recommended to use the asynchronous version of the method in your UI isolate. Since Isar is very fast, it is often fine however to use the synchronous version.
+`get()` returns a `Future` with either the object or `null` if it does not exist. All Isar operations are asynchronous by default, and most of them have a synchronous counterpart:
+
+```dart
+final recipe = recipes.getSync(123);
+```
+
+:::warning
+You should default to the asynchronous version of methods in your UI isolate. Since Isar is very fast, it is often acceptable to use the synchronous version.
 :::
 
-### Query records
-
-Find a list of records matching given conditions using `.where()` and `.filter()`:
+If you want to get multiple objects at once, use `getAll()` or `getAllSync()`:
 
 ```dart
-final allContacts = await contacts.where().findAll();
+final recipe = await recipes.getAll([1, 2]);
+```
 
-final starredContacts = await contacts.filter()
-  .isStarredEqualTo(true)
+### Query objects
+
+Instead of getting objects by id you can also query a list of objects matching certain conditions using `.where()` and `.filter()`:
+
+```dart
+final allRecipes = await recipes.where().findAll();
+
+final favouires = await recipes.filter()
+  .isFavoriteEqualTo(true)
   .findAll();
 ```
 
@@ -79,58 +107,88 @@ final starredContacts = await contacts.filter()
 
 ## Modifying the database
 
-To create, update, or delete records, use the respective operations wrapped in a write transaction:
+It's finally time to modify our collection! To create, update, or delete objetcs, use the respective operations wrapped in a write transaction:
 
 ```dart
 await isar.writeTxn(() async {
-  final contact = await contacts.get(someId)
+  final recipe = await recipes.get(123)
 
-  contact.isStarred = false;
-  await contacts.put(contact); // perform update operations
+  recipe.isFavorite = false;
+  await recipes.put(recipe); // perform update operations
 
-  await contacts.delete(contact.id); // or delete operations
+  await recipes.delete(123); // or delete operations
 });
 ```
 
 ➡️ Learn more: [Transactions](transactions)
 
-### Create a new record
+### Insert object
 
-When an object is not yet managed by Isar, you need to `.put()` it into a collection. If the id field is `null` or `Isar.autoIncrement`, Isar will use an auto-increment id.
+To persist an object in Isar, insert it into a collection. Isar's `put()` method will either insert or update the object depending on whether it already exists in the collection.
+
+If the id field is `null` or `Isar.autoIncrement`, Isar will use an auto-increment id.
 
 ```dart
-final newContact = Contact()
-  ..firstName = "Albert"
-  ..lastName = "Einstein"
-  ..isStarred = true;
+final pancakes = Recipe()
+  ..name = 'Pancakes'
+  ..lastCooked = DateTime.now()
+  ..isFavorite = true;
+
 await isar.writeTxn(() async {
-  await contacts.put(newContact);
+  await recipes.put(pancakes);
 })
 ```
 
-Isar will automatically assign the new id to the object if the `id` field is non-final.
+Isar will automatically assign the id to the object if the `id` field is non-final.
 
-### Update a record
-
-Both creating and updating works with `yourCollection.put(yourObject)`. If the id is null (or does not exist), the object is inserted, otherwise, it is updated.
-
-### Delete records
+Inserting multiple objects at once is just as easy:
 
 ```dart
 await isar.writeTxn(() async {
-  contacts.delete(contact.id);
+  await recipes.putAll([pancakes, pizza]);
+})
+```
+
+### Update object
+
+Both creating and updating works with `collection.put(object)`. If the id is `null` (or does not exist), the object is inserted; otherwise, it is updated.
+
+So if we want to unfavorite our pancakes, we can do the following:
+
+```dart
+await isar.writeTxn(() async {
+  pancakes.isFavorite = false;
+  await recipes.put(recipe);
 });
 ```
 
-or:
+### Delete object
+
+Want to get rid of an object in Isar? Use `collection.delete(id)`. The delete method returns whether an object with the specified id was found and deleted. If you want to delete the object with id `123`, for example, you can do:
 
 ```dart
 await isar.writeTxn(() async {
-  final idsOfUnstarredContacts = await contacts.filter()
-    .isStarredEqualTo(false)
-    .idProperty()
-    .findAll();
+  final success = await recipes.delete(123);
+  print('Recipe deleted: $success');
+});
+```
 
-  contacts.deleteAll(idsOfUnstarredContacts);
+Similarly to get and put, there is also a bulk delete operation that returns the number of deleted objects:
+
+```dart
+await isar.writeTxn(() async {
+  final count = await recipes.deleteAll([1, 2, 3]);
+  print('We deleted $count recipes');
+});
+```
+
+If you don't know the ids of the objects you want to delete, you can use a query:
+
+```dart
+await isar.writeTxn(() async {
+  final count = await recipes.filter()
+    .isFavoriteEqualTo(false)
+    .deleteAll();
+  print('We deleted $count recipes');
 });
 ```

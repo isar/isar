@@ -4,24 +4,32 @@ title: Schema
 
 # Schema
 
-When using Isar, you're dealing with Collections. A collection can only contain a single type of Dart object. To let Isar know which objects you want to store, you need to annotate your classes with `@collection`. The Isar code generator will take care of the rest. All the collections combined are called the "database schema".
+When you use Isar to store your app's data, you're dealing with collections. A collection is like a database table in the associated Isar database and can only contain a single type of Dart object. Each collection object represents a row of data in the corresponding collection.
 
-## Annotating classes
+A collection definition is called "schema". The Isar Generator will do the heavy lifting for you and generate most of the code you need to use the collection.
 
-The Isar generator will find all classes annotated with `@collection`.
+## Anatomy of a collection
+
+You define each Isar collection by annotating a class with `@collection` or `@Collection()`. An Isar collection includes fields for each column in the corresponding table in the database, including one that comprises the primary key.
+
+The following code is an example of a simple collection that defines a `User` table with columns for ID, first name, and last name:
 
 ```dart
 @collection
-class Contact {
+class User {
   Id? id;
 
-  late String firstName;
+  String? firstName;
 
-  late String lastName;
-
-  late bool isStarred;
+  String? lastName;
 }
 ```
+
+:::tip
+To persist a field, Isar must have access to it. You can ensure Isar has access to a field by making it public or by providing getter and setter methods.
+:::
+
+There are a few optional parameters to customize the collection:
 
 | Config        | Description                                                                                                      |
 | ------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -31,41 +39,24 @@ class Contact {
 
 ### Isar Id
 
-All model classes need to define an id property with type `Id` that uniquely identifies an object. `Id` is just an alias for `int` that allows the Isar Generator to recognize the id property.
+Each collection class has to define an id property with the type `Id` uniquely identifying an object. `Id` is just an alias for `int` that allows the Isar Generator to recognize the id property.
 
-```dart
-@collection
-class Contact {
-  Id? id;
+Isar automatically indexes id fields, which allows you to get and modify objects based on their id efficiently.
 
-  String? firstName;
-
-  String? lastName;
-
-  bool? isStarred;
-}
-```
-
-Isar automatically indexes id fields, which allows you to efficiently read and modify objects based on their id.
-
-You can either set ids yourself or request Isar to assign an auto-increment id. If the `id` field is `null` and not `final`, Isar will assign an auto-increment id. If you want a non-nullable auto-increment id, you can use `Isar.autoIncrement` instead of `null`.
+You can either set ids yourself or ask Isar to assign an auto-increment id. If the `id` field is `null` and not `final`, Isar will assign an auto-increment id. If you want a non-nullable auto-increment id, you can use `Isar.autoIncrement` instead of `null`.
 
 :::tip
 Auto increment ids are not reused when an object is deleted. The only way to reset auto-increment ids is to clear the database.
 :::
 
-### Ignoring fields
+### Renaming collections and fields
 
-By default, all public fields of a class will be persisted. By annotating a property or getter with `@ignore`, you can exclude it from persistence. Keep in mind that it is not good practice to store information in Isar objects that are not persisted.
-
-### Renaming classes and fields
-
-Sometimes it is useful to store classes or fields with a different name than the Dart class or field name. This can be achieved by annotating the class or field with `@Name`. The following collection is stored the same as the `Contact` class above.
+By default, Isar uses the class name as the collection name. Similarly, Isar uses field names as column names in the database. If you want a collection or field to have a different name, add the `@Name` annotation. The following example demonstrates custom names for collection and fields:
 
 ```dart
 @collection
-@Name("Contact")
-class MyContactClass1 {
+@Name("User")
+class MyUserClass1 {
 
   @Name("id")
   Id myObjectId;
@@ -75,12 +66,52 @@ class MyContactClass1 {
 
   @Name("lastName")
   String familyNameOrWhatever;
-
-  bool isStarred;
 }
 ```
 
-Especially if you want to rename fields or classes that are already stored in the database, you should consider using the `@Name` annotation. Otherwise, the database will just delete and re-create the field or collection.
+Especially if you want to rename Dart fields or classes that are already stored in the database, you should consider using the `@Name` annotation. Otherwise, the database will delete and re-create the field or collection.
+
+### Ignoring fields
+
+Isar persists all public fields of a collection class. By annotating a property or getter with `@ignore`, you can exclude it from persistence, as shown in the following code snippet:
+
+```dart
+@collection
+class User {
+  Id? id;
+
+  String? firstName;
+
+  String? lastName;
+
+  @ignore
+  String? password;
+}
+```
+
+In cases where a collection inherits fields from a parent collection, it's usually easier to use the `ignore` property of the `@Collection` annotation:
+
+```dart
+@collection
+class User {
+  Image? profilePicture;
+}
+
+@Collection(ignore: {'profilePicture'})
+class Member extends User {
+  Id? id;
+
+  String? firstName;
+
+  String? lastName;
+}
+```
+
+If a collection contains a field with a type that is not supported by Isar, you have to ignore the field.
+
+:::warning
+Keep in mind that it is not good practice to store information in Isar objects that are not persisted.
+:::
 
 ## Supported types
 
@@ -111,7 +142,7 @@ For many use cases, you don't need the full range of a 64-bit integer or double.
 | **float**  | 4             | -3.4e38 to 3.4e38                                       |
 | **double** | 8             | -1.7e308 to 1.7e308                                     |
 
-The additional number types are just aliases for the native Dart types so using a `short` for example works the same as using an `int`.
+The additional number types are just aliases for the native Dart types, so using `short`, for example, works the same as using `int`.
 
 Here is an example collection containing all of the above types:
 
@@ -132,12 +163,11 @@ class TestCollection {
 }
 ```
 
-All of these types can also be used in lists. For example, for storing bytes you should use `List<byte>`.
+All number types can also be used in lists. For storing bytes, you should use `List<byte>`.
 
 ## Nullable types
 
-It is important to understand how nullability works in Isar:
-Number types do **NOT** have a dedicated `null` representation. Instead, a specific value will be used:
+Understanding how nullability works in Isar is essential: Number types do **NOT** have a dedicated `null` representation. Instead, a specific value is used:
 
 | Type       | VM            |
 | ---------- | ------------- |
@@ -146,9 +176,9 @@ Number types do **NOT** have a dedicated `null` representation. Instead, a speci
 | **float**  | `double.NaN` |
 | **double** |  `double.NaN` |
 
-`bool`, `String` and `List` have a separate `null` representation.
+`bool, `String`, and `List` have a separate `null` representation.
 
-This behavior enables performance improvements and it allows you to change the nullability of your fields freely without requiring migration or special code to handle `null` values.
+This behavior enables performance improvements, and it allows you to change the nullability of your fields freely without requiring migration or special code to handle `null` values.
 
 :::warning
 The `byte` type does not support null values.
@@ -156,13 +186,13 @@ The `byte` type does not support null values.
 
 ## DateTime
 
-Isar does not store timezone information of your dates. Instead it converts `DateTime`s to UTC before storing them. Isar returns all dates in local time.
+Isar does not store timezone information of your dates. Instead, it converts `DateTime`s to UTC before storing them. Isar returns all dates in local time.
 
 `DateTime`s are stored with microsecond precision. In browsers, only millisecond precision is supported because of JavaScript limitations.
 
 ## Enum
 
-Isar allows storing and using enums like other Isar types. You have to choose however how the enum should be represented on the disk. Isar supports four different strategies:
+Isar allows storing and using enums like other Isar types. You have to choose, however, how Isar should represent the enum on the disk. Isar supports four different strategies:
 
 | EnumType    | Description 
 | ----------- | -----------
@@ -213,7 +243,7 @@ Of course, Enums can also be used in lists.
 
 ## Embedded objects
 
-It's often useful to have nested objects in your collection model. There is no limit to how deep you can nest objects. Keep in mind however that updating a deeply nested object will require writing the whole object tree to the database.
+It's often helpful to have nested objects in your collection model. There is no limit to how deep you can nest objects. Keep in mind, however, that updating a deeply nested object will require writing the whole object tree to the database.
   
 ```dart
 @collection

@@ -10,7 +10,7 @@ Querying is how you find records that match certain conditions, for example:
 - Find distinct first names in contacts
 - Delete all contacts that don't have the last name defined
 
-Because queries are executed on the database, and not in Dart, they're really fast. When you cleverly use indexes, you can improve the query performance even further. In the following, you'll learn how to write queries and how you can make them as fast as possible.
+Because queries are executed on the database and not in Dart, they're really fast. When you cleverly use indexes, you can improve the query performance even further. In the following, you'll learn how to write queries and how you can make them as fast as possible.
 
 There are two different methods of filtering your records: Filters and where clauses. We'll start by taking a look at how filters work.
 
@@ -129,7 +129,7 @@ This query is equivalent to `size != 46 && isUnisex != true`.
 
 ### String conditions
 
-In addition to the query conditions above, String values offer a few more conditions you can use. Regex-like wildcards for example allow more flexibility in search.
+In addition to the query conditions above, String values offer a few more conditions you can use. Regex-like wildcards, for example, allow more flexibility in search.
 
 | Condition            | Description                                                       |
 | -------------------- | ----------------------------------------------------------------- |
@@ -150,7 +150,7 @@ A [wildcard string expression](https://en.wikipedia.org/wiki/Wildcard_character)
 
 ### Query modifiers
 
-Sometimes it is necessary to build a query based on some conditions or for different values. Isar has a very powerful tool to build conditional queries:
+Sometimes it is necessary to build a query based on some conditions or for different values. Isar has a very powerful tool for building conditional queries:
 
 | Modifier              | Description                                          |
 | --------------------- | ---------------------------------------------------- |
@@ -158,7 +158,7 @@ Sometimes it is necessary to build a query based on some conditions or for diffe
 | `.anyOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **or**. |
 | `.allOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **and**. |
 
-In this example we build a method that can find shoes with an optional filter:
+In this example, we build a method that can find shoes with an optional filter:
 
 ```dart
 Future<List<Shoe>> findShoes(Id? sizeFilter) {
@@ -170,7 +170,7 @@ Future<List<Shoe>> findShoes(Id? sizeFilter) {
 }
 ```
 
-If you want to find all shoes that have one of multiple shoe sizes you can either write a conventional query or use the `anyOf()` modifier:
+If you want to find all shoes that have one of multiple shoe sizes, you can either write a conventional query or use the `anyOf()` modifier:
 
 ```dart
 final shoes1 = await isar.shoes.filter()
@@ -194,7 +194,7 @@ Query modifiers are especially useful when you want to build dynamic queries.
 
 ### Lists
 
-Even lists can be used in queries.
+Even lists can be queried:
 
 ```dart
 class Tweet {
@@ -218,7 +218,7 @@ final tweetsWithManyHashtags = await isar.tweets.filter()
   .findAll();
 ```
 
-These are equivalent to the Dart code `tweets.where((t) => t.hashtags.isEmpty);` and `tweets.where((t) => t.hashtags.length > 5);`. You can also query based on the list elements:
+These are equivalent to the Dart code `tweets.where((t) => t.hashtags.isEmpty);` and `tweets.where((t) => t.hashtags.length > 5);`. You can also query based on list elements:
 
 ```dart
 final flutterTweets = await isar.tweets.filter()
@@ -230,7 +230,7 @@ This is equivalent to the Dart code `tweets.where((t) => t.hashtags.contains('fl
 
 ### Embedded objects
 
-Embedded objects can be queried using the same conditions as top-level objects. Let's assume we have the following model:
+Embedded objects are one of Isar's most useful features. They can be queried very efficiently using the same conditions available for top-level objects. Let's assume we have the following model:
 
 ```dart
 @collection
@@ -259,7 +259,7 @@ final germanCars = await isar.cars.filter()
   ).findAll();
 ```
 
-Always try to group nested queries. The above query is more efficient than the following even though the result is the same:
+Always try to group nested queries. The above query is more efficient than the following one. Even though the result is the same:
 
 ```dart
 final germanCars = await isar.cars.filter()
@@ -272,6 +272,10 @@ final germanCars = await isar.cars.filter()
 ### Links
 
 If your model contains [links or backlinks](links) you can filter your query based on the linked objects or the number of linked objects.
+
+:::warning
+Keep in mind that link queries can be expensive because Isar needs to look up linked objects. Consider using embedded objects instead.
+:::
 
 ```dart
 @collection
@@ -291,7 +295,7 @@ class Student {
 }
 ```
 
-We can for example find all students that have a math or English teacher:
+We want to find all students that have a math or English teacher:
 
 ```dart
 final result = await isar.students.filter()
@@ -301,6 +305,7 @@ final result = await isar.students.filter()
       .subjectEqualTo('English');
   }).findAll();
 ```
+
 Link filters evaluate to `true` if at least one linked object matches the conditions.
 
 Let's search for all students that have no teachers:
@@ -317,9 +322,9 @@ final result = await isar.students.filter().teachersIsEmpty().findAll();
 
 ## Where clauses
 
-Where clauses are a very powerful tool but it can be a little difficult to get them right.
+Where clauses are a very powerful tool, but it can be a little challenging to get them right.
 
-In contrast to filters where clauses use the indexes, you defined in the schema to check the query conditions. Querying an index is a lot faster than filtering each record individually.
+In contrast to filters where clauses use the indexes you defined in the schema to check the query conditions. Querying an index is a lot faster than filtering each record individually.
 
 ➡️ Learn more: [Indexes](indexes)
 
@@ -327,7 +332,7 @@ In contrast to filters where clauses use the indexes, you defined in the schema 
 As a basic rule, you should always try to reduce the records as much as possible using where clauses and do the remaining filtering using filters.
 :::
 
-You can combine where clauses using logical **or**.
+You can only combine where clauses using logical **or**. In other words, you can sum multiple where clauses together, but you can't query the intersection of multiple where clauses.
 
 Let's add indexes to the shoe collection:
 
@@ -370,7 +375,7 @@ final result = isar.shoes.where()
   .findAll();
 ```
 
-The where clause is applied first to reduce the number of records to be filtered. Then the filter is applied to the remaining records.
+The where clause is applied first to reduce the number of objetcs to be filtered. Then the filter is applied to the remaining objetcs.
 
 ## Sorting
 
@@ -385,7 +390,7 @@ final sortedShoes = isar.shoes.filter()
   .findAll();
 ```
 
-Sorting a lot of results can be an expensive operation. Especially since sorting happens before offset and limit. The sorting methods above never make use of indexes. Luckily, we can again use where clause sorting and make our query lightning fast even if we need to sort a million objects.
+Sorting many results can be expensive, especially since sorting happens before offset and limit. The sorting methods above never make use of indexes. Luckily, we can again use where clause sorting and make our query lightning-fast even if we need to sort a million objects.
 
 ### Where clause sorting
 
@@ -399,7 +404,7 @@ final bigShoes = isar.shoes.where()
   .findAll(); // -> [43, 45, 48]
 ```
 
-As you can see, the result is sorted by the `size` index. If you want to reverse the sort order, you can set `sort` to `Sort.desc`:
+As you can see, the result is sorted by the `size` index. If you want to reverse the where clause sort order, you can set `sort` to `Sort.desc`:
 
 ```dart
 final bigShoesDesc = await isar.shoes.where(sort: Sort.desc)
@@ -433,7 +438,7 @@ final shoes = await isar.shoes.filter()
   .findAll();
 ```
 
-You can also chain multiple distinct conditions for example to find all shoes with distinct model-size combinations:
+You can also chain multiple distinct conditions to find all shoes with distinct model-size combinations:
 
 ```dart
 final shoes = await isar.shoes.filter()
@@ -442,12 +447,12 @@ final shoes = await isar.shoes.filter()
   .findAll();
 ```
 
-Only the first result of each distinct combination is returned so you can use where clauses and sort operations to control it.
+Only the first result of each distinct combination is returned. You can use where clauses and sort operations to control it.
 
 ### Where clause distinct
 
-If you have a non-unique index, you may want to get all of its distinct values. You could use the `distinctBy` operation from the previous section but it's performed after sorting and filters so there is some overhead to it.  
-If you only use a single where clause you can instead rely on the index to perform the distinct operation.
+If you have a non-unique index, you may want to get all of its distinct values. You could use the `distinctBy` operation from the previous section, but it's performed after sorting and filters, so there is some overhead.  
+If you only use a single where clause, you can instead rely on the index to perform the distinct operation.
 
 ```dart
 final shoes = await isar.shoes.where(distinct: true)
@@ -456,12 +461,12 @@ final shoes = await isar.shoes.where(distinct: true)
 ```
 
 :::tip
-You can even use multiple where clause for sorting and distinct. The only restriction is that those where clauses are not overlapping and use the same index. For correct sorting, they also need to be applied in sort order. Be very careful if you rely on this!
+In theory, you could even use multiple where clauses for sorting and distinct. The only restriction is that those where clauses are not overlapping and use the same index. For correct sorting, they also need to be applied in sort order. Be very careful if you rely on this!
 :::
 
 ## Offset & Limit
 
-It's often a good idea to limit the number of results from a query for example for lazy list views. You can do so by setting a `limit()`:
+It's often a good idea to limit the number of results from a query for lazy list views. You can do so by setting a `limit()`:
 
 ```dart
 final firstTenShoes = await isar.shoes.where()
@@ -478,11 +483,11 @@ final firstTenShoes = await isar.shoes.where()
   .findAll();
 ```
 
-Since instantiating Dart objects is often the most expensive part of executing a query, it is a good idea to only load the objects you need.
+Since instantiating Dart objects is often the most expensive part of executing a query, it is a good idea only to load the objects you need.
 
 ## Execution order
 
-Isar queries are always executed in the same order:
+Isar executes queries always in the same order:
 
 1. Traverse primary or secondary index to find objects (apply where clauses)
 2. Filter objects
@@ -506,7 +511,7 @@ In the previous examples, we used `.findAll()` to retrieve all matching objects.
 
 ## Property queries
 
-If you are only interested in the values of a single property, you can use a property query. Just build a normal query and select a property:
+If you are only interested in the values of a single property, you can use a property query. Just build a regular query and select a property:
 
 ```dart
 List<String> models = await isar.shoes.where()
@@ -522,7 +527,7 @@ Using only a single property saves time during deserialization. Property queries
 
 ## Aggregation
 
-You can also aggregate the values of a property query. The following aggregation operations are available:
+Isar supports aggregating the values of a property query. The following aggregation operations are available:
 
 | Operation    | Description                                                    |
 | ------------ | -------------------------------------------------------------- |
@@ -535,11 +540,11 @@ Using aggregations is vastly faster than finding all matching objects and perfor
 
 ## Dynamic queries
 
-:::warning
+:::danger
 This section is most likely not relevant to you. It is discouraged to use dynamic queries unless you absolutely need to (and you rarely do).
 :::
 
-All of the examples above used the QueryBuilder and the generated static extension methods. Maybe you want to create very dynamic queries or even a custom query language (like the Isar Inspector). In that case, you can use the `buildQuery()` method:
+All the examples above used the QueryBuilder and the generated static extension methods. Maybe you want to create dynamic queries or a custom query language (like the Isar Inspector). In that case, you can use the `buildQuery()` method:
 
 | Parameter       | Description                                                                                 |
 | --------------- | ------------------------------------------------------------------------------------------- |
