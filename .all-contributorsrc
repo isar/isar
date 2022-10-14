@@ -101,6 +101,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "ika020202",
+      "name": "Ura",
+      "avatar_url": "https://avatars.githubusercontent.com/u/42883378?v=4",
+      "profile": "https://zenn.dev/urasan",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorTemplate": "<a href=\"https://github.com/<%= contributor.login %>\"><img src=\"<%= contributor.avatar_url %>\" width=\"<%= options.imageSize %>px;\" alt=\"\"/><br /><sub><b><%= contributor.name %></b></sub></a>",
@@ -110,5 +119,6 @@
   "projectOwner": "isar",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "skipCi": true
+  "skipCi": true,
+  "commitConvention": "angular"
 }
