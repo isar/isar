@@ -176,7 +176,7 @@ Understanding how nullability works in Isar is essential: Number types do **NOT*
 | **float**  | `double.NaN` |
 | **double** |  `double.NaN` |
 
-`bool, `String`, and `List` have a separate `null` representation.
+`bool`, `String`, and `List` have a separate `null` representation.
 
 This behavior enables performance improvements, and it allows you to change the nullability of your fields freely without requiring migration or special code to handle `null` values.
 
