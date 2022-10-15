@@ -51,7 +51,7 @@ Gli ID di incremento automatico non vengono riutilizzati quando un oggetto viene
 
 ### Rinominare raccolte e campi
 
-Per impostazione predefinita, Isar utilizza il nome della classe come nome della raccolta. Allo stesso modo, Isar utilizza i nomi dei campi come nomi di colonne nel database. Se desideri che una raccolta o un campo abbia un nome diverso, aggiungi l'annotazione `@Nome`. L'esempio seguente mostra i nomi personalizzati per la raccolta e i campi:
+Per impostazione predefinita, Isar utilizza il nome della classe come nome della raccolta. Allo stesso modo, Isar utilizza i nomi dei campi come nomi di colonne nel database. Se desideri che una raccolta o un campo abbia un nome diverso, aggiungi l'annotazione `@Name`. L'esempio seguente mostra i nomi personalizzati per la raccolta e i campi:
 
 ```dart
 @collection
