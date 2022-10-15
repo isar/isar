@@ -1,18 +1,18 @@
 ---
-title: Transazioni
+title: Transactions
 ---
 
-# Transazioni
+# Transactions
 
-In Isar, le transazioni combinano più operazioni di database in un'unica unità di lavoro. La maggior parte delle interazioni con Isar utilizza implicitamente le transazioni. L'accesso in lettura e scrittura in Isar è conforme a [ACID](http://en.wikipedia.org/wiki/ACID). Le transazioni vengono automaticamente annullate se si verifica un errore.
+In Isar, transactions combine multiple database operations in a single unit of work. Most interactions with Isar implicitly use transactions. Read & write access in Isar is [ACID](http://en.wikipedia.org/wiki/ACID) compliant. Transactions are automatically rolled back if an error occurs.
 
-## Transazioni esplicite
+## Explicit transactions
 
-In una transazione esplicita, ottieni uno snapshot coerente del database. Cerca di ridurre al minimo la durata delle transazioni. È vietato effettuare chiamate di rete o altre operazioni di lunga durata in una transazione.
+In an explicit transaction, you get a consistent snapshot of the database. Try to minimize the duration of transactions. It is forbidden to do network calls or other long-running operations in a transaction.
 
-Le transazioni (in particolare le transazioni di scrittura) hanno un costo e dovresti sempre provare a raggruppare le operazioni successive in un'unica transazione.
+Transactions (especially write transactions) do have a cost, and you should always try to group successive operations into a single transaction.
 
-Le transazioni possono essere sincrone o asincrone. Nelle transazioni sincrone è possibile utilizzare solo operazioni sincrone. Nelle transazioni asincrone, solo operazioni asincrone.
+Transactions can either be synchronous or asynchronous. In synchronous transactions, you may only use synchronous operations. In asynchronous transactions, only async operations.
 
 |              | Read         | Read & Write       |
 |--------------|--------------|--------------------|
@@ -20,22 +20,22 @@ Le transazioni possono essere sincrone o asincrone. Nelle transazioni sincrone �
 | Asynchronous | `.txn()`     | `.writeTxn()`      |
 
 
-### Transazioni di lettura
+### Read transactions
 
-Le transazioni di lettura esplicita sono facoltative, ma consentono di eseguire letture atomiche e fare affidamento su uno stato coerente del database all'interno della transazione. Internamente Isar utilizza sempre transazioni di lettura implicita per tutte le operazioni di lettura.
+Explicit read transactions are optional, but they allow you to do atomic reads and rely on a consistent state of the database inside the transaction. Internally Isar always uses implicit read transactions for all read operations.
 
 :::tip
-Le transazioni di lettura asincrone vengono eseguite in parallelo ad altre transazioni di lettura e scrittura. Abbastanza bello, vero?
+Async read transactions run in parallel to other read and write transactions. Pretty cool, right?
 :::
 
-### Transazioni di scrittura
+### Write transactions
 
-A differenza delle operazioni di lettura, le operazioni di scrittura in Isar devono essere racchiuse in una transazione esplicita.
+Unlike read operations, write operations in Isar must be wrapped in an explicit transaction.
 
-Quando una transazione di scrittura viene completata correttamente, viene automaticamente salvata e tutte le modifiche vengono scritte su disco. Se si verifica un errore, la transazione viene interrotta e tutte le modifiche vengono annullate. Le transazioni sono "tutto o niente": o tutte le scritture all'interno di una transazione hanno esito positivo o nessuna di esse ha effetto per garantire la coerenza dei dati.
+When a write transaction finishes successfully, it is automatically committed, and all changes are written to disk. If an error occurs, the transaction is aborted, and all the changes are rolled back. Transactions are “all or nothing”: either all the writes within a transaction succeed, or none of them take effect to guarantee data consistency.
 
 :::warning
-Quando un'operazione di database ha esito negativo, la transazione viene interrotta e non deve più essere utilizzata. Anche se catturi l'errore in Dart.
+When a database operation fails, the transaction is aborted and must no longer be used. Even if you catch the error in Dart.
 :::
 
 ```dart
