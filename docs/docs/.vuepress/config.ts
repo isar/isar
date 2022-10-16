@@ -24,6 +24,7 @@ for (const locale of locales) {
         selectLanguageText: locale.selectLanguage,
         editLinkText: locale.editPage,
         lastUpdatedText: locale.lastUpdated,
+        contributorsText: locale.contributors,
         tip: locale.tip,
         warning: locale.warning,
         danger: locale.danger,
