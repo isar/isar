@@ -114,7 +114,7 @@ export const locales: LocalConfig[] = [
   },
   {
     locale: "es-AR",
-    language: "Spanish",
+    language: "Español",
     selectLanguage: "Seleccionar Idioma",
     editPage: "Editar Página",
     lastUpdated: "Última actualización",
