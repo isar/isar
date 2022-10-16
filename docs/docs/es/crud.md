@@ -1,8 +1,8 @@
 ---
-title: Create, Read, Update, Delete
+title: Crear, Leer, Actualizar, Eliminar
 ---
 
-# Crea, Lee, Actualiza, Elimina
+# Crear, Leer, Actualizar, Eliminar (CRUD)
 
 Cuando ya has definido tus colecciones, aprende cómo manipularlas!
 
