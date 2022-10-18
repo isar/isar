@@ -128,6 +128,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "McCrafterIV",
+      "name": "McCrafterIV",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38863733?v=4",
+      "profile": "https://github.com/McCrafterIV",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorTemplate": "<a href=\"https://github.com/<%= contributor.login %>\"><img src=\"<%= contributor.avatar_url %>\" width=\"<%= options.imageSize %>px;\" alt=\"\"/><br /><sub><b><%= contributor.name %></b></sub></a>",
