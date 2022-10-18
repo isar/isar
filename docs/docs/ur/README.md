@@ -3,7 +3,7 @@ home: true
 title: ہوم
 heroImage: /isar.svg
 actions:
-  - text:  آئیے شروع کریں!
+  - text:  آئیے شروع کریں۔
     link: /tutorials/quickstart.html
     type: primary
 features:
