@@ -107,7 +107,7 @@ final favouires = await isar.recipes.filter()
 
 ## Modifying the database
 
-It's finally time to modify our collection! To create, update, or delete objetcs, use the respective operations wrapped in a write transaction:
+It's finally time to modify our collection! To create, update, or delete objects, use the respective operations wrapped in a write transaction:
 
 ```dart
 await isar.writeTxn(() async {
