@@ -1,18 +1,18 @@
 ---
-title: Transactions
+title: Transações
 ---
 
-# Transactions
+# Transações
 
-In Isar, transactions combine multiple database operations in a single unit of work. Most interactions with Isar implicitly use transactions. Read & write access in Isar is [ACID](http://en.wikipedia.org/wiki/ACID) compliant. Transactions are automatically rolled back if an error occurs.
+No Isar, as transações combinam várias operações de banco de dados em uma única unidade de trabalho. A maioria das interações com Isar usa transações implicitamente. O acesso de leitura e gravação no Isar é compatível com [ACID](http://en.wikipedia.org/wiki/ACID). As transações são revertidas automaticamente se ocorrer um erro.
 
-## Explicit transactions
+## Transações explicitas
 
-In an explicit transaction, you get a consistent snapshot of the database. Try to minimize the duration of transactions. It is forbidden to do network calls or other long-running operations in a transaction.
+Em uma transação explícita, você obtém um snapShot consistente do banco de dados. Tente minimizar a duração das transações. É proibido fazer chamadas de rede ou outras operações de longa duração em uma transação.
 
-Transactions (especially write transactions) do have a cost, and you should always try to group successive operations into a single transaction.
+As transações (especialmente transações de gravação) têm um custo e você deve sempre tentar agrupar operações sucessivas em uma única transação.
 
-Transactions can either be synchronous or asynchronous. In synchronous transactions, you may only use synchronous operations. In asynchronous transactions, only async operations.
+As transações podem ser síncronas ou assíncronas. Em transações síncronas, você só pode usar operações síncronas. Em transações assíncronas, apenas operações assíncronas.
 
 |              | Read         | Read & Write       |
 |--------------|--------------|--------------------|
@@ -20,22 +20,22 @@ Transactions can either be synchronous or asynchronous. In synchronous transacti
 | Asynchronous | `.txn()`     | `.writeTxn()`      |
 
 
-### Read transactions
+### Transações de leitura
 
-Explicit read transactions are optional, but they allow you to do atomic reads and rely on a consistent state of the database inside the transaction. Internally Isar always uses implicit read transactions for all read operations.
+As transações de leitura explícita são opcionais, mas permitem que você faça leituras atômicas e dependa de um estado consistente do banco de dados dentro da transação. Internamente, o Isar sempre usa transações de leitura implícitas para todas as operações de leitura.
 
 :::tip
-Async read transactions run in parallel to other read and write transactions. Pretty cool, right?
+As transações de leitura assíncrona são executadas em paralelo com outras transações de leitura e gravação. Bem fixe, certo?
 :::
 
-### Write transactions
+### Transações de escrita
 
-Unlike read operations, write operations in Isar must be wrapped in an explicit transaction.
+Ao contrário das operações de leitura, as operações de gravação em Isar devem ser agrupadas em uma transação explícita.
 
-When a write transaction finishes successfully, it is automatically committed, and all changes are written to disk. If an error occurs, the transaction is aborted, and all the changes are rolled back. Transactions are “all or nothing”: either all the writes within a transaction succeed, or none of them take effect to guarantee data consistency.
+Quando uma transação de gravação é concluída com êxito, ela é confirmada automaticamente e todas as alterações são gravadas no disco. Se ocorrer um erro, a transação será abortada e todas as alterações serão revertidas. As transações são “tudo ou nada”: ou todas as gravações em uma transação são bem-sucedidas ou nenhuma delas entra em vigor para garantir a consistência dos dados.
 
 :::warning
-When a database operation fails, the transaction is aborted and must no longer be used. Even if you catch the error in Dart.
+Quando uma operação de banco de dados falha, a transação é abortada e não deve mais ser usada. Mesmo se você pegar o erro no Dart.
 :::
 
 ```dart
