@@ -4,7 +4,7 @@ title: Home
 heroImage: /isar.svg
 actions:
   - text: Vamos Começar!
-    link: /tutorials/quickstart.html
+    link: /pt/tutorials/quickstart.html
     type: primary
 features:
   - title: 💙 Feito para Flutter
