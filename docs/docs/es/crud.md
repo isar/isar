@@ -103,7 +103,7 @@ final favouires = await recipes.filter()
   .findAll();
 ```
 
-➡️ Ver más en: [Queries](queries)
+➡️ Ver más en: [Consultas](queries)
 
 ## Modificando los datos
 
@@ -120,7 +120,7 @@ await isar.writeTxn(() async {
 });
 ```
 
-➡️ Ver más en: [Transactions](transactions)
+➡️ Ver más en: [Transacciones](transactions)
 
 ### Insertar objectos
 
