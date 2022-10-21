@@ -137,6 +137,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "inkomomutane",
+      "name": "Nelson  Mutane",
+      "avatar_url": "https://avatars.githubusercontent.com/u/57417802?v=4",
+      "profile": "https://github.com/inkomomutane",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorTemplate": "<a href=\"https://github.com/<%= contributor.login %>\"><img src=\"<%= contributor.avatar_url %>\" width=\"<%= options.imageSize %>px;\" alt=\"\"/><br /><sub><b><%= contributor.name %></b></sub></a>",
