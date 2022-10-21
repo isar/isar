@@ -61,7 +61,7 @@ class Recipe {
 final recipes = isar.recipes;
 ```
 
-簡単だったでしょう！ コレクションアクセサを使いたくない場合は、`collection()` メソッドを使うこともできます:
+簡単ですよね？ コレクションアクセサを使いたくない場合は、`collection()` メソッドを使うこともできます:
 
 ```dart
 final recipes = isar.collection<Recipe>();
@@ -82,7 +82,7 @@ final recipe = recipes.getSync(123);
 ```
 
 :::warning
-UIアイソレートでは、メソッドの非同期版をデフォルトで使用する必要があります。また、Isarは非常に高速なので、多くの場合、同期バージョンを使用しても問題ありません。
+UIアイソレートでは、非同期バージョンのメソッドをデフォルトで使用する必要があります。ちなみに、Isarは非常に高速なので、多くの場合において同期バージョンを使用しても問題ありません。
 :::
 
 複数のオブジェクトを一度に取得したい場合は、 `getAll()` または `getAllSync()` を使用してください：
@@ -103,9 +103,9 @@ final favouires = await recipes.filter()
   .findAll();
 ```
 
-➡️ 詳しくはこちら: [Queries](queries)
+➡️ 詳しくはこちら: [クエリ](queries)
 
-## データベースの修正
+## データベースの書き換え
 
 いよいよコレクションを書き換えるときがやってきました！ オブジェクトを作成、更新、削除するには、それぞれの操作をWriteトランザクション内でラップして使用します:
 
@@ -120,15 +120,15 @@ await isar.writeTxn(() async {
 });
 ```
 
-➡️ 詳しくはこちら: [Transactions](transactions)
+➡️ 詳しくはこちら: [トランザクション](transactions)
 
 ### オブジェクトの挿入
 
-Isar でオブジェクトを永続化するには、コレクションにオブジェクトを挿入します。
+Isar でオブジェクトを永続化するには、コレクションにオブジェクトを挿入(put)します。
 
 Isar の `put()` メソッドは、そのオブジェクトが既にコレクションに存在するかどうかに応じて、オブジェクトの挿入もしくは更新を行います。
 
-id フィールドが `null` または `Isar.autoIncrement` の場合、Isar はオートインクリメントの id を使用します。
+この時、id フィールドが `null` または `Isar.autoIncrement` の場合、Isar はオートインクリメントの id を使用します。
 
 ```dart
 final pancakes = Recipe()
