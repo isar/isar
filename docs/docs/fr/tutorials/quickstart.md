@@ -4,7 +4,7 @@ title: Démarrage rapide
 
 # Démarrage rapide
 
-Vous revoilà ! Commençons à utiliser la base de données Flutter la plus cool qui soit...
+Vous revoilà! Commençons à utiliser la base de données Flutter la plus cool qui soit...
 
 Nous allons être brefs en mots et rapides en code dans ce démarrage rapide.
 
@@ -50,7 +50,7 @@ Si vous utilisez Flutter:
 flutter pub run build_runner build
 ```
 
-## 4. Ouvrir l'instance Isar
+## 4. Ouverture l'instance Isar
 
 Ouvrez une nouvelle instance d'Isar et passez tous vos schémas de collection. En option, vous pouvez spécifier un nom d'instance et un dossier.
 

@@ -4,7 +4,7 @@ title: Liens
 
 # Liens
 
-Les liens vous permettent d'exprimer des relations entre des objets, comme l'auteur d'un commentaire (User). Vous pouvez modéliser des relations `1:1`, `1:n`, et `n:n` avec des liens Isar. L'utilisation de liens est moins ergonomique que l'utilisation d'objets embarqués. Il est donc préférable d'utiliser des objets embarqués lorsque possible.
+Les liens nous permettent d'exprimer des relations entre objets, comme l'auteur d'un commentaire (`User`). Nous pouvons modéliser des relations `1:1`, `1:n`, et `n:n` avec les liens Isar. L'utilisation de liens est moins ergonomique que l'utilisation d'objets embarqués. Il est donc préférable d'utiliser des objets embarqués lorsque possible.
 
 Considérez le lien comme une table séparée qui contient la relation. Elle est similaire aux relations SQL, mais possède un ensemble de fonctionnalités et une API différente.
 
@@ -18,7 +18,7 @@ Les liens ne sont pas chargés par default. Vous devez donc dire à `IsarLink` d
 La propriété `id` des collections source et cible d'un lien doit être non finale.
 :::
 
-Pour les plateformes autres que web, les liens sont chargés automatiquement lorsque vous les utilisez pour la première fois. Commençons par ajouter un IsarLink à une collection:
+Pour les plateformes autres que web, les liens sont chargés automatiquement lorsque vous les utilisez pour la première fois. Commençons par ajouter un `IsarLink` à une collection:
 
 ```dart
 @collection
@@ -84,7 +84,7 @@ Il serait plus logique que l'étudiant de l'exemple précédent puisse avoir plu
 
 `IsarLinks<T>` implémente `Set<T>` et expose toutes les méthodes qui sont autorisées pour les ensembles.
 
-`IsarLinks` se comporte comme `IsarLink` et n'est également pas changé par défaut. Pour charger tous les objets liés, appelez `linkProperty.load()`. Pour persister les changements, appelez `linkProperty.save()`.
+`IsarLinks` se comporte comme `IsarLink` et n'est également pas changé par défaut. Pour charger tous les objets liés, nous devons utiliser `linkProperty.load()`. Pour persister les changements, `linkProperty.save()`.
 
 La représentation interne de `IsarLink` et `IsarLinks` est la même. Nous pouvons faire évoluer le `IsarLink<Teacher>` d'avant en un `IsarLinks<Teacher>` pour assigner plusieurs professeurs à un seul étudiant (sans perdre de données).
 
@@ -122,13 +122,13 @@ print(linda.teachers); // {Teacher('Math'), Teacher('Biology')}
 
 ## Backlinks
 
-Je vous entends demander : "Et si nous voulons exprimer des relations inverses?". Ne vous inquiétez pas, nous allons maintenant introduire les `Backlinks`.
+Je vous entends demander: "Et si nous voulions exprimer des relations inverses?". Ne vous inquiétez pas, nous allons maintenant introduire les `Backlinks`.
 
-Les backlinks sont des liens en sens inverse. Chaque lien a toujours un backlink implicite. Vous pouvez le rendre disponible à votre application en annotant un `IsarLink` ou un `IsarLinks` avec `@Backlink()`.
+Les backlinks sont des liens en sens inverse. Chaque lien a toujours un backlink implicite. Nous pouvons le rendre disponible à notre application en annotant un `IsarLink` ou un `IsarLinks` avec `@Backlink()`.
 
-Les backlinks ne nécessitent pas de mémoire ou de ressources supplémentaires; vous pouvez librement les ajouter, les supprimer et les renommer sans perdre de données.
+Les backlinks ne nécessitent pas de mémoire ou de ressources supplémentaires; nous pouvons librement les ajouter, les supprimer et les renommer sans perdre de données.
 
-Pour savoir quels sont les étudiants d'un enseignant spécifique, nous définissons donc un lien retour :
+Pour savoir quels sont les étudiants d'un enseignant spécifique, nous définissons donc un lien retour:
 
 ```dart
 @collection
@@ -148,7 +148,7 @@ Il faut préciser le lien vers lequel pointe le backlink. Il est possible d'avoi
 
 `IsarLink` et `IsarLinks` ont un constructeur sans argument, qui devrait être utilisé pour assigner la propriété de lien quand l'objet est créé. C'est une bonne pratique de rendre les propriétés de lien `final`.
 
-Lorsque vous sauvegardez (`put()`) votre objet pour la première fois, le lien est initialisé avec la collection source et cible, et vous pouvez appeler des méthodes comme `load()` et `save()`. Un lien commence à suivre les changements immédiatement après sa création, donc vous pouvez ajouter et supprimer des relations avant même que le lien soit initialisé.
+Lorsque nous sauvegardons (`put()`) notre objet pour la première fois, le lien est initialisé avec la collection source et cible, et nous pouvons appeler des méthodes comme `load()` et `save()`. Un lien commence à suivre les changements immédiatement après sa création, donc nous pouvons ajouter et supprimer des relations avant même que le lien soit initialisé.
 
 :::danger
 Il est illégal de déplacer un lien vers un autre objet.

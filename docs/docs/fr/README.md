@@ -20,11 +20,11 @@ features:
   - title: 💃 Types statiques
     details: Les requêtes d'Isar sont typées statiquement et vérifiées à la compilation. Pas besoin de se soucier des erreurs d'exécution.
   - title: 📱 Multiplatforme
-    details: Support pour iOS, Android, Desktop et WEB !
+    details: Support pour iOS, Android, Desktop et WEB!
   - title: ⏱ Asynchrone
     details: Opérations de requête parallèles et support multi-Isolate prêts à l'emploi.
   - title: 🦄 Open Source
-    details: Tout est open source et gratuit pour toujours !
+    details: Tout est open source et gratuit pour toujours!
 
 footer: Apache Licensed | Copyright © 2022 Simon Leier
 ---

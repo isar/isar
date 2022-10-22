@@ -4,11 +4,11 @@ title: Indices
 
 # Indices
 
-Les index sont la fonctionnalité la plus puissante d'Isar. De nombreuses bases de données embarquées proposent des index "normaux" (voire aucun), mais Isar dispose également d'index composites et à entrées multiples. Il est essentiel de comprendre le fonctionnement des index pour optimiser les performances des requêtes. Isar vous permet de choisir l'index que vous voulez utiliser et comment vous voulez l'utiliser. Nous allons commencer par une introduction rapide à ce que sont les index.
+Les indices (`index`) sont la fonctionnalité la plus puissante d'Isar. De nombreuses bases de données embarquées proposent des index "normaux" (voire aucun), mais Isar dispose également d'index composés et à entrées multiples. Il est essentiel de comprendre le fonctionnement des index pour optimiser les performances des requêtes. Isar vous permet de choisir l'index que vous voulez utiliser et comment vous voulez l'utiliser. Nous allons commencer par une introduction rapide à ce que sont les index.
 
 ## Que sont les indices?
 
-Lorsqu'une collection n'est pas indexée, l'ordre des lignes ne pourra probablement pas être discerné par la requête comme étant optimisé de quelconques manières, et votre requête devra donc rechercher les objets de manière linéaire. En d'autres termes, la requête devra parcourir chaque objet pour trouver ceux qui correspondent aux conditions. Comme vous pouvez l'imaginer, cela peut prendre du temps. La recherche dans chaque objet n'est pas très efficace.
+Lorsqu'une collection n'est pas indexée, l'ordre des lignes ne pourra probablement pas être discerné par la requête comme étant optimisé de quelconques manières, et votre requête devra donc rechercher les objets de façon linéaire. En d'autres termes, la requête devra parcourir chaque objet pour trouver ceux qui correspondent aux conditions. Comme vous pouvez l'imaginer, cela peut prendre du temps. La recherche dans chaque objet n'est pas très efficace.
 
 Par exemple, cette collection `Product` est entièrement non ordonnée.
 
@@ -77,7 +77,7 @@ Maintenant, la requête peut être exécutée beaucoup plus rapidement. L'exécu
 
 ### Triage
 
-Autre point intéressant : les index peuvent effectuer des tris très rapides. Les requêtes triées sont coûteuses, car la base de données doit charger tous les résultats en mémoire avant de les trier. Même si vous spécifiez un décalage ou une limite, ils sont appliqués après le tri.
+Autre point intéressant: les index peuvent effectuer des tris très rapides. Les requêtes triées sont coûteuses, car la base de données doit charger tous les résultats en mémoire avant de les trier. Même si vous spécifiez un décalage ou une limite, ils sont appliqués après le tri.
 
 Imaginons que nous voulions trouver les quatre produits les moins chers. Nous pourrions utiliser la requête suivante:
 
@@ -101,7 +101,7 @@ final cheapestFast = await isar.products.where()
   .findAll();
 ```
 
-La clause `where` `.anyX()` indique à Isar d'utiliser un index uniquement pour le tri. Vous pouvez également utiliser une clause `where` comme `.priceGreaterThan()` et obtenir des résultats triés.
+La clause `where` `.anyX()` indique à Isar d'utiliser un index uniquement pour le tri. Nous pouvons également utiliser une clause `where` comme `.priceGreaterThan()` et obtenir des résultats triés.
 
 ## Indices uniques
 
@@ -134,7 +134,7 @@ final user2 = User()
   ..username = 'user1'
   ..age = 30;
 
-// try to insert user with same username
+// Essayons d'insérer un utilisateur avec le même nom d'utilisateur
 await isar.users.put(user2); // -> error: unique constraint violated
 print(await isar.user.where().findAll());
 // > [{id: 1, username: 'user1', age: 25}]
@@ -142,7 +142,7 @@ print(await isar.user.where().findAll());
 
 ## Remplacement d'indices
 
-Il n'est parfois pas préférable d'envoyer une erreur si une contrainte unique est violée. Au lieu de cela, vous pouvez vouloir remplacer l'objet existant par le nouvel objet. Pour cela, il suffit de mettre la propriété `replace` de l'index à `true`.
+Il n'est parfois pas préférable d'envoyer une erreur si une contrainte unique n'est pas respectée. Au lieu de cela, nous pouvons vouloir remplacer l'objet existant par le nouvel objet. Pour cela, il suffit de mettre la propriété `replace` de l'index à `true`.
 
 ```dart
 @collection
@@ -154,7 +154,7 @@ class User {
 }
 ```
 
-Maintenant, lorsque nous essayons d'insérer un utilisateur avec un nom d'utilisateur existant, Isar va remplacer l'utilisateur existant par le nouveau.
+Maintenant, lorsque nous essayons d'insérer un utilisateur avec un nom déjà existant, Isar va remplacer l'utilisateur existant par le nouveau.
 
 ```dart
 final user1 = User()
@@ -176,7 +176,7 @@ print(await isar.user.where().findAll());
 // > [{id: 2, username: 'user1' age: 30}]
 ```
 
-Les indices de remplacement génèrent également des méthodes `putBy()` qui vous permettent de mettre à jour les objets au lieu de les remplacer. L'identifiant existant est réutilisé, et les liens sont toujours présents.
+Les indices de remplacement génèrent également des méthodes `putBy()` qui nous permettent de mettre à jour les objets au lieu de les remplacer. L'identifiant existant est réutilisé, et les liens sont toujours présents.
 
 ```dart
 final user1 = User()
@@ -184,7 +184,7 @@ final user1 = User()
   ..username = 'user1'
   ..age = 25;
 
-// l'utilisateur n'existe pas, donc c'est la même chose que put()
+// L'utilisateur n'existe pas, donc c'est la même chose que put()
 await isar.users.putByUsername(user1); 
 await isar.user.where().findAll(); // -> [{id: 1, username: 'user1', age: 25}]
 
@@ -197,11 +197,11 @@ await isar.users.put(user2);
 await isar.user.where().findAll(); // -> [{id: 1, username: 'user1' age: 30}]
 ```
 
-Comme vous pouvez le voir, l'identifiant du premier utilisateur inséré est réutilisé.
+Comme nous pouvons le constater, l'identifiant du premier utilisateur inséré est réutilisé.
 
 ## Index insensibles à la casse
 
-Tous les index sur les propriétés `String` et `List<String>` sont sensibles à la casse par défaut. Si vous voulez créer un index insensible à la casse, vous pouvez utiliser l'option `caseSensitive`:
+Tous les index sur les propriétés `String` et `List<String>` sont sensibles à la casse par défaut. Si nous voulons créer un index insensible à la casse, nous pouvons utiliser l'option `caseSensitive`:
 
 ```dart
 @collection
@@ -218,7 +218,7 @@ class Person {
 
 ## Type d'indice
 
-Il existe différents types d'index. La plupart du temps, vous voudrez utiliser un index `IndexType.value`, mais les index de hachage sont plus efficaces.
+Il existe différents types d'index. La plupart du temps, nous voudrons utiliser un index `IndexType.value`, mais les index de hachage sont plus efficaces.
 
 ### Index `value`
 
@@ -230,10 +230,10 @@ Utilisez `IndexType.value` pour les types primitifs, les chaînes de caractères
 
 ### Index `hash`
 
-Les chaînes de caractères et les listes peuvent être hachées pour réduire de manière significative le stockage requis par l'index. L'inconvénient des index de hachage est qu'ils ne peuvent pas être utilisés pour les scans de préfixe (clauses `startsWith` `where`).
+Les chaînes de caractères et les listes peuvent être hachées pour réduire de manière significative le stockage requis par l'index. L'inconvénient des index de hachage est qu'ils ne peuvent pas être utilisés pour les scans de préfixe (clauses `where` `startsWith`).
 
 :::tip
-Utilisez `IndexType.hash` pour les chaînes de caractères et les listes si vous n'avez pas besoin des clauses where `startsWith` et `elementEqualTo`.
+Utilisez `IndexType.hash` pour les chaînes de caractères et les listes si vous n'avez pas besoin des clauses `where` `startsWith` et `elementEqualTo`.
 :::
 
 ### Index `hashElements`
@@ -244,13 +244,13 @@ Les listes de chaînes peuvent être hachées dans leur ensemble (à l'aide de `
 Utilisez `IndexType.hashElements` pour les `List<String>` où vous avez besoin de clauses `where` `elementEqualTo`.
 :::
 
-## Indices composites
+## Indices composés
 
-Un index composite est un index sur plusieurs propriétés. Isar vous permet de créer des index composites sur un maximum de trois propriétés.
+Un index composite est un index sur plusieurs propriétés. Isar nous permet de créer des index composites sur un maximum de trois propriétés.
 
-Les index composites sont également connus sous le nom d'index à colonnes multiples.
+Les index composés sont également connus sous le nom d'index à colonnes multiples.
 
-Il est probablement préférable de commencer par un exemple. Nous créons une collection de personnes et définissons un index composite sur les propriétés âge et nom :
+Il est probablement préférable de commencer par un exemple. Nous créons une collection de personnes et définissons un index composé sur les propriétés âge et nom:
 
 ```dart
 @collection
@@ -269,7 +269,7 @@ class Person {
 #### Données:
 
 | id  | name   | age | hometown  |
-| --- | ------ | --- | --------- |
+|-----|--------|-----|-----------|
 | 1   | Daniel | 20  | Berlin    |
 | 2   | Anne   | 20  | Paris     |
 | 3   | Carl   | 24  | San Diego |
@@ -282,7 +282,7 @@ class Person {
 #### Index généré
 
 | age | name   | id  |
-| --- | ------ | --- |
+|-----|--------|-----|
 | 20  | Anne   | 2   |
 | 20  | Daniel | 1   |
 | 20  | David  | 5   |
@@ -294,7 +294,7 @@ class Person {
 
 L'indice composé généré contient toutes les personnes triées par leur âge et leur nom.
 
-Les index composés sont parfaits si vous souhaitez créer des requêtes efficaces triées par plusieurs propriétés. Ils permettent également d'utiliser des clauses `where` avancées avec plusieurs propriétés :
+Les index composés sont parfaits si nous souhaitons créer des requêtes efficaces triées par plusieurs propriétés. Ils permettent également d'utiliser des clauses `where` avancées avec plusieurs propriétés :
 
 ```dart
 final result = await isar.where()
@@ -313,7 +313,7 @@ final result = await isar.where()
 
 ## Indices à entrées multiples
 
-Si vous indexez une liste en utilisant `IndexType.value`, Isar va automatiquement créer un index à entrées multiples, et chaque élément de la liste est indexé vers l'objet. Cela fonctionne pour tous les types de listes.
+Si nous indexons une liste en utilisant `IndexType.value`, Isar va automatiquement créer un index à entrées multiples, et chaque élément de la liste est indexé vers l'objet. Cela fonctionne pour tous les types de listes.
 
 Les applications pratiques des index à entrées multiples comprennent l'indexation d'une liste de balises ou la création d'un index en texte intégral.
 

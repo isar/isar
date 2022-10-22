@@ -10,7 +10,7 @@ Une compilation de questions fréquemment posées sur les bases de données Isar
 
 > Je stocke mes données dans une base de données backend, pourquoi ai-je besoin d'Isar?
 
-Aujourd'hui encore, il est très courant de ne pas avoir de connexion internet si vous êtes dans le métro ou dans l'avion ou si vous rendez visite à votre grand-mère, qui n'a pas de WiFi et un très mauvais signal cellulaire. Vous ne devez pas laisser une mauvaise connexion paralyser votre application!
+Aujourd'hui encore, il est très courant de ne pas avoir de connexion internet si vous êtes dans le métro, dans l'avion, ou si vous rendez visite à votre grand-mère, qui n'a pas de WiFi et un très mauvais signal cellulaire. Vous ne devez pas laisser une mauvaise connexion paralyser votre application!
 
 ### Isar vs Hive
 

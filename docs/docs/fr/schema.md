@@ -6,11 +6,11 @@ title: Schéma
 
 Lorsque vous utilisez Isar pour stocker les données de votre application, vous devez utiliser des collections. Une collection est comme une table de base de données, et ne peut contenir qu'un seul type d'objet Dart. Chaque objet de collection représente une entrée de données dans la collection correspondante.
 
-La définition d'une collection s'appelle "schéma". Le générateur Isar fera le gros du travail pour vous et générera la plupart du code dont vous avez besoin pour utiliser la collection.
+La définition d'une collection s'appelle "schéma". Le générateur Isar fera le gros du travail pour nous et générera la plupart du code dont nous avons besoin pour utiliser la collection.
 
 ## Anatomie d'une collection
 
-Vous définissez chaque collection Isar en annotant une classe avec `@collection` ou `@Collection()`. Une collection Isar comprend des champs pour chaque colonne de la table correspondante dans la base de données, y compris un champ qui comprend la clé primaire.
+Nous définissons chaque collection Isar en annotant une classe avec `@collection` ou `@Collection()`. Une collection Isar comprend des champs pour chaque colonne de la table correspondante dans la base de données, y compris un champ qui comprend la clé primaire.
 
 Le code suivant est un exemple d'une collection simple qui définit une table `User` avec des colonnes pour l'ID, le prénom et le nom :
 
@@ -26,22 +26,22 @@ class User {
 ```
 
 :::tip
-Pour faire persister un champ, Isar doit y avoir accès. Vous pouvez vous assurer que Isar y a accès en le rendant public ou en fournissant des méthodes getter et setter.
+Pour faire persister un champ, Isar doit y avoir accès. Vous pouvez vous assurer que Isar y a accès en le rendant public ou en fournissant des méthodes `getter` et `setter`.
 :::
 
 Il existe quelques paramètres facultatifs permettant de personnaliser la collection:
 
-| Config        | Description                                                                                                      |
-| ------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `inheritance` | Contrôle si les champs des classes parentes et des mixins seront stockés dans Isar. Activé par défaut.            |
+| Config        | Description                                                                                                         |
+|---------------|---------------------------------------------------------------------------------------------------------------------|
+| `inheritance` | Contrôle si les champs des classes parentes et des mixins seront stockés dans Isar. Activé par défaut.              |
 | `accessor`    | Permet de renommer l'accesseur de collection par défaut (par exemple `isar.contacts` pour la collection `Contact`). |
-| `ignore`      | Permet d'ignorer certaines propriétés de la classe. Celles-ci sont également respectées pour les super classes.    |
+| `ignore`      | Permet d'ignorer certaines propriétés de la classe. Celles-ci sont également respectées pour les classes parentes.  |
 
 ### Id Isar
 
 Chaque classe de collection doit définir une propriété id de type `Id`, qui identifie de façon unique un objet. `Id` est un alias pour `int` qui permet au générateur Isar de reconnaître la propriété id.
 
-Isar indexe automatiquement les champs id, ce qui vous permet d'obtenir et de modifier les objets en fonction de leur id de manière efficace.
+Isar indexe automatiquement les champs id, ce qui nous permet d'obtenir et de modifier les objets en fonction de leur id de manière efficace.
 
 Vous pouvez soit définir les ids vous-même, soit demander à Isar d'attribuer un id auto-incrémenté. Si le champ `id` est `null` et non `final`, Isar assignera un id auto-incrémenté. Si vous voulez un identifiant auto-incrémenté non nul, vous pouvez utiliser `Isar.autoIncrement` au lieu de `null`.
 
@@ -71,9 +71,9 @@ class MyUserClass1 {
 
 Vous devriez envisager d'utiliser l'annotation `@Name()` si vous voulez renommer des champs ou des classes Dart qui sont déjà stockés dans la base de données. Sinon, la base de données supprimera et recréera le champ ou la collection.
 
-### Ignoring fields
+### Ignorer des champs
 
-Isar persiste tous les champs publics d'une classe de collection. En annotant une propriété ou un getter avec `@ignore`, vous pouvez l'exclure de la persistance, comme le montre l'extrait de code suivant:
+Isar persiste tous les champs publics d'une classe de collection. En annotant une propriété ou un `getter` avec `@ignore`, vous pouvez l'exclure de la persistance, comme le montre l'extrait de code suivant:
 
 ```dart
 @collection
@@ -186,7 +186,7 @@ Le type `byte` ne supporte pas les valeurs nulles.
 
 ## DateTime
 
-Isar ne stocke pas les informations de fuseau horaire de vos dates. A la place, il les convertit en UTC avant de les stocker. Isar retourne toutes les dates en heure locale.
+Isar ne stocke pas les informations de fuseau horaire de vos dates. À la place, il les convertit en UTC avant de les stocker. Isar retourne toutes les dates en heure locale.
 
 Les `DateTime` sont stockés avec une précision de l'ordre de la microseconde. Dans les navigateurs, seule la précision de la milliseconde est supportée en raison des limitations de JavaScript.
 
@@ -194,11 +194,11 @@ Les `DateTime` sont stockés avec une précision de l'ordre de la microseconde. 
 
 Isar permet de stocker et d'utiliser les enums comme tous les autres types Isar. Vous devez cependant choisir comment Isar doit représenter l'enum sur disque. Isar supporte quatre stratégies différentes :
 
-| EnumType    | Description |
-| ----------- | ----------- |
+| EnumType    | Description                                                                                      |
+|-------------|--------------------------------------------------------------------------------------------------|
 | `ordinal`   | L'index de l'enum est stocké comme `byte`. Très efficace mais ne permet pas les enums nullables. |
 | `ordinal32` | L'index de l'enum est stocké comme `short` (entier de 4 octets).                                 |
-| `name`      | Le nom de l'enum est stocké comme `String`..                                                     |
+| `name`      | Le nom de l'enum est stocké comme `String`.                                                      |
 | `value`     | Une propriété personnalisée est utilisée pour récupérer la valeur de l'enum.                     |
 
 :::warning
@@ -239,7 +239,7 @@ enum TestEnum {
 }
 ```
 
-Bien entendu, les Enums peuvent également être utilisés dans des listes.
+Bien entendu, les enums peuvent également être utilisés dans des listes.
 
 ## Objets embarqués
 
@@ -263,4 +263,4 @@ class Recepient {
 }
 ```
 
-Les objets incorporés peuvent être nullables et hériter d'autres objets. La seule condition est qu'ils soient annotés avec `@embedded` et qu'ils aient un constructeur par défaut sans paramètres requis.
+Les objets embarqués peuvent être nullables et hériter d'autres objets. La seule condition est qu'ils soient annotés avec `@embedded` et qu'ils aient un constructeur par défaut sans paramètres requis.

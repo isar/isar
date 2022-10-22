@@ -4,27 +4,27 @@ title: Création, lecture, modification, suppression
 
 # Création, lecture, modification, suppression
 
-Maintenant que vous avez défini vos collections, apprenez à les manipuler!
+Maintenant que nous avons défini nos collections, apprenons à les manipuler!
 
-## Opening Isar
+## Ouverture de Isar
 
-Avant de pouvoir faire quoi que ce soit, nous avons besoin d'une instance Isar. Chaque instance nécessite un répertoire avec droits d'écriture où le fichier de la base de données peut être stocké. Si vous ne spécifiez pas de répertoire, Isar trouvera un répertoire par défaut selon la plate-forme actuelle.
+Avant de pouvoir faire quoi que ce soit, nous avons besoin d'une instance Isar. Chaque instance nécessite un répertoire avec droits d'écriture où le fichier de la base de données peut être stocké. Si vous ne spécifiez pas de répertoire, Isar trouvera un répertoire par défaut selon la plateforme actuelle.
 
-Fournissez tous les schémas que vous souhaitez utiliser avec l'instance Isar. Si vous ouvrez plusieurs instances, vous devez toujours fournir les mêmes schémas à chaque instance.
+Fournissez tous les schémas que vous souhaitez utiliser avec l'instance Isar. Si nous ouvrons plusieurs instances, nous devons toujours fournir les mêmes schémas à chaque instance.
 
 ```dart
 final isar = await Isar.open([ContactSchema]);
 ```
 
-Vous pouvez utiliser la configuration par défaut ou fournir certains des paramètres suivants:
+Nous pouvons utiliser la configuration par défaut ou fournir certains des paramètres suivants:
 
-| Config |  Description |
-| -------| -------------|
-| `name` | Ouvrez plusieurs instances avec des noms distincts. Par défaut, `"default"` est utilisé. |
-| `directory` | L'emplacement de stockage de cette instance. Vous pouvez passer un chemin relatif ou absolu. Par défaut, `NSDocumentDirectory` est utilisé pour iOS et `getDataDirectory` pour Android. Non requis pour Web. |
+| Config              | Description                                                                                                                                                                                                                              |
+|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `name`              | Ouvrez plusieurs instances avec des noms distincts. Par défaut, `"default"` est utilisé.                                                                                                                                                 |
+| `directory`         | L'emplacement de stockage de cette instance. Nous pouvons passer un chemin relatif ou absolu. Par défaut, `NSDocumentDirectory` est utilisé pour iOS et `getDataDirectory` pour Android. Non requis pour Web.                            |
 | `relaxedDurability` | Assouplit la garantie de durabilité pour augmenter les performances d'écriture. En cas de crash du système (pas de crash de l'application), il est possible de perdre la dernière transaction validée. La corruption n'est pas possible. |
-| `compactOnLaunch` | Conditions pour vérifier si la base de données doit être compactée lors de l'ouverture de l'instance. |
-| `inspector` | Active l'inspecteur en mode debug. Cette option est ignorée en mode profile et release. |
+| `compactOnLaunch`   | Conditions pour vérifier si la base de données doit être compactée lors de l'ouverture de l'instance.                                                                                                                                    |
+| `inspector`         | Active l'inspecteur en mode debug. Cette option est ignorée en mode profile et release.                                                                                                                                                  |
 
 Si une instance est déjà ouverte, l'appel à `Isar.open()` donnera l'instance existante sans tenir compte des paramètres spécifiés. Utile pour utiliser Isar dans un isolat.
 
@@ -36,7 +36,7 @@ L'emplacement de stockage du fichier de la base de données est `répertoire/nom
 
 ## Lecture de la base de données
 
-Utilisez les instances de `IsarCollection` pour trouver, interroger et créer de nouveaux objets d'un type donné dans Isar.
+Utilisez les instances de `IsarCollection` pour trouver, filtrer et créer de nouveaux objets d'un type donné dans Isar.
 
 Pour les exemples ci-dessous, nous supposons que nous avons une collection `Recipe` définie comme suit:
 
@@ -55,7 +55,7 @@ class Recipe {
 
 ### Obtenir une collection
 
-Toutes vos collections vivent dans l'instance Isar. Vous pouvez obtenir la collection avec:
+Toutes nos collections vivent dans l'instance Isar. Nous pouvons obtenir la collection avec:
 
 ```dart
 final recipes = isar.recipes;
@@ -83,10 +83,10 @@ final recipe = recipes.getSync(123);
 ```
 
 :::warning
-Vous devriez utiliser la version asynchrone des méthodes par défaut dans votre isolate d'interface utilisateur. Comme Isar est très rapide, il est souvent acceptable d'utiliser la version synchrone.
+Vous devriez utiliser la version asynchrone des méthodes par défaut dans votre isolat d'interface utilisateur. Comme Isar est très rapide, il est souvent acceptable d'utiliser la version synchrone.
 :::
 
-Si vous voulez récupérer plusieurs objets à la fois, utilisez `getAll()` ou `getAllSync()`:
+Si nous voulons récupérer plusieurs objets à la fois, nous pouvons utiliser `getAll()` ou `getAllSync()`:
 
 ```dart
 final recipe = await recipes.getAll([1, 2]);
@@ -94,7 +94,7 @@ final recipe = await recipes.getAll([1, 2]);
 
 ### Recherche d'objets
 
-Au lieu de récupérer les objets par leur identifiant, vous pouvez également obtenir une liste d'objets répondant à certaines conditions en utilisant `.where()` et `.filter()`:
+Au lieu de récupérer les objets par leur identifiant, nous pouvons également obtenir une liste d'objets répondant à certaines conditions en utilisant `.where()` et `.filter()`:
 
 ```dart
 final allRecipes = await recipes.where().findAll();
@@ -104,7 +104,7 @@ final favouires = await recipes.filter()
   .findAll();
 ```
 
-➡️ En savoir plus: [Queries](queries)
+➡️ En savoir plus: [Requêtes](queries)
 
 ## Modifier la base de données
 
@@ -115,9 +115,9 @@ await isar.writeTxn(() async {
   final recipe = await recipes.get(123)
 
   recipe.isFavorite = false;
-  await recipes.put(recipe); // effectuer des opérations de mise à jour
+  await recipes.put(recipe); // Effectuer des opérations de mise à jour
 
-  await recipes.delete(123); // ou des opérations de suppression
+  await recipes.delete(123); // Ou des opérations de suppression
 });
 ```
 
@@ -125,7 +125,7 @@ await isar.writeTxn(() async {
 
 ### Insertion d'objets
 
-Pour faire persister un objet dans Isar, insérez-le dans une collection. La méthode `put()` d'Isar va soit insérer, soit mettre à jour l'objet selon s'il existe déjà dans la collection.
+Pour faire persister un objet dans Isar, insérons-le dans une collection. La méthode `put()` d'Isar va soit insérer, soit mettre à jour l'objet selon s'il existe déjà dans la collection ou non.
 
 Si le champ id est `null` ou `Isar.autoIncrement`, Isar utilisera un id auto-incrémenté.
 
@@ -152,7 +152,7 @@ await isar.writeTxn(() async {
 
 ### Mise à jour d'objets
 
-La création et la mise à jour fonctionnent toutes deux avec `collection.put(object)`. Si l'id est `null` (ou n'existe pas), l'objet est inséré; sinon, il est mis à jour.
+La création et la mise à jour fonctionnent toutes deux avec `collection.put(object)`. Si l'id est `null` (ou n'existe pas), l'objet est créé; sinon, il est mis à jour.
 
 Donc si nous voulons défavoriser nos crêpes, nous pouvons faire ce qui suit:
 
@@ -165,7 +165,7 @@ await isar.writeTxn(() async {
 
 ### Suppression d'objets
 
-Vous voulez vous débarrasser d'un objet dans Isar ? Utilisez `collection.delete(id)`. La méthode `delete` retourne si un objet avec l'identifiant spécifié a été trouvé et supprimé. Si vous désirez supprimer l'objet avec l'identifiant `123`, par exemple, vous pouvez le faire:
+Vous voulez vous débarrasser d'un objet dans Isar ? Utilisez `collection.delete(id)`. La méthode `delete` retourne si un objet avec l'identifiant spécifié a été trouvé et supprimé. Si nous désirons supprimer l'objet avec l'identifiant `123`, par exemple, nous pouvons faire:
 
 ```dart
 await isar.writeTxn(() async {
@@ -183,7 +183,7 @@ await isar.writeTxn(() async {
 });
 ```
 
-Si vous ne connaissez pas les identifiants des objets que vous voulez supprimer, vous pouvez utiliser une requête:
+Si nous ne connaissons pas les identifiants des objets que nous voulons supprimer, nous pouvons utiliser une requête:
 
 ```dart
 await isar.writeTxn(() async {
