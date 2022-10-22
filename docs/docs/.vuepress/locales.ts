@@ -217,5 +217,31 @@ export const locales: LocalConfig[] = [
     sampleApps: 'نمونہ ایپس',
     changelog: 'چینج لاگ',
     contributors: 'شراکت دار',
+  },
+  {
+    locale: 'fr-FR',
+    language: 'Français',
+    selectLanguage: 'Sélectionner la langue',
+    editPage: 'Modifier la page',
+    lastUpdated: 'Dernière modification',
+    tip: 'Conseil',
+    warning: 'Avertissement',
+    danger: 'Danger',
+    notFound: [
+      'Il n\'y a rien a voir ici.',
+      'Comment en sommes-nous arrivés là ?',
+      'Ceci est un quatre-cent-quatre...',
+      'Il semble que nous avons un lien brisé.'
+    ],
+    backToHome: 'Retour à l\'acceuil',
+    translationOutdated: 'Translation is outdated. Please help us update it!',
+    dbName: 'Base de données Isar',
+    dbDescription: 'Base de données multiplateforme super rapide pour Flutter',
+    tutorials: 'TUTORIELS',
+    concepts: 'CONCEPTS',
+    recipes: 'RECETTES',
+    sampleApps: 'Exemples d\'applications',
+    changelog: 'Changements',
+    contributors: 'Contributeurs',
   }
 ];
