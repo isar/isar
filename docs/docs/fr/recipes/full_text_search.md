@@ -4,7 +4,7 @@ title: Recherche plein texte
 
 # Recherche plein texte
 
-La recherche plein texte est un moyen puissant de rechercher du texte dans la base de données. Vous devriez déjà être familiarisé avec le fonctionnement des [index](/index), mais passons en revue les principes de base.
+La recherche plein texte est un moyen puissant de rechercher du texte dans la base de données. Vous devriez déjà être familiarisé avec le fonctionnement des [indices](../indexes), mais passons en revue les principes de base.
 
 Un index fonctionne comme une table de recherche, permettant au moteur de recherche de trouver rapidement les enregistrements ayant une valeur donnée. Par exemple, si nous avons un champ "titre" dans notre objet, nous pouvons créer un index sur ce champ afin de trouver plus rapidement les objets ayant un titre donné.
 

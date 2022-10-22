@@ -110,6 +110,42 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "mnkeis",
+      "name": "mnkeis",
+      "avatar_url": "https://avatars.githubusercontent.com/u/41247357?v=4",
+      "profile": "https://github.com/mnkeis",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "CarloDotLog",
+      "name": "Carlo Loguercio",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13763473?v=4",
+      "profile": "https://github.com/CarloDotLog",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "hafeezrana",
+      "name": "Hafeez Rana",
+      "avatar_url": "https://avatars.githubusercontent.com/u/87476445?v=4",
+      "profile": "https://g.dev/hafeezrana",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "inkomomutane",
+      "name": "Nelson  Mutane",
+      "avatar_url": "https://avatars.githubusercontent.com/u/57417802?v=4",
+      "profile": "https://github.com/inkomomutane",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorTemplate": "<a href=\"https://github.com/<%= contributor.login %>\"><img src=\"<%= contributor.avatar_url %>\" width=\"<%= options.imageSize %>px;\" alt=\"\"/><br /><sub><b><%= contributor.name %></b></sub></a>",

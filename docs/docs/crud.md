@@ -13,7 +13,7 @@ Before you can do anything, we need an Isar instance. Each instance requires a d
 Provide all the schemas you want to use with the Isar instance. If you open multiple instances, you still have to provide the same schemas to each instance.
 
 ```dart
-final isar = await Isar.open([ContactSchema]);
+final isar = await Isar.open([RecipeSchema]);
 ```
 
 You can use the default config or provide some of the following parameters:
@@ -21,7 +21,7 @@ You can use the default config or provide some of the following parameters:
 | Config |  Description |
 | -------| -------------|
 | `name` | Open multiple instances with distinct names. By default, `"default"` is used. |
-| `directory` | The storage location for this instance. You can pass a relative or absolute path. By default, `NSDocumentDirectory` is used for iOS and `getDataDirectory` for Android. Not required for web. |
+| `directory` | The storage location for this instance. By default, `NSDocumentDirectory` is used for iOS and `getDataDirectory` for Android. Not required for web. |
 | `relaxedDurability` | Relaxes the durability guarantee to increase write performance. In case of a system crash (not app crash), it is possible to lose the last committed transaction. Corruption is not possible |
 | `compactOnLaunch` | Conditions to check whether the database should be compacted when the instance is opened. |
 | `inspector` | Enabled the Inspector for debug builds. For profile and release builds this option is ignored. |
@@ -72,13 +72,13 @@ final recipes = isar.collection<Recipe>();
 We don't have data in the collection yet but let's pretend we do so we can get an imaginary object by the id `123`
 
 ```dart
-final recipe = await recipes.get(123);
+final recipe = await isar.recipes.get(123);
 ```
 
 `get()` returns a `Future` with either the object or `null` if it does not exist. All Isar operations are asynchronous by default, and most of them have a synchronous counterpart:
 
 ```dart
-final recipe = recipes.getSync(123);
+final recipe = isar.recipes.getSync(123);
 ```
 
 :::warning
@@ -88,7 +88,7 @@ You should default to the asynchronous version of methods in your UI isolate. Si
 If you want to get multiple objects at once, use `getAll()` or `getAllSync()`:
 
 ```dart
-final recipe = await recipes.getAll([1, 2]);
+final recipe = await isar.recipes.getAll([1, 2]);
 ```
 
 ### Query objects
@@ -96,9 +96,9 @@ final recipe = await recipes.getAll([1, 2]);
 Instead of getting objects by id you can also query a list of objects matching certain conditions using `.where()` and `.filter()`:
 
 ```dart
-final allRecipes = await recipes.where().findAll();
+final allRecipes = await isar.recipes.where().findAll();
 
-final favouires = await recipes.filter()
+final favouires = await isar.recipes.filter()
   .isFavoriteEqualTo(true)
   .findAll();
 ```
@@ -107,16 +107,16 @@ final favouires = await recipes.filter()
 
 ## Modifying the database
 
-It's finally time to modify our collection! To create, update, or delete objetcs, use the respective operations wrapped in a write transaction:
+It's finally time to modify our collection! To create, update, or delete objects, use the respective operations wrapped in a write transaction:
 
 ```dart
 await isar.writeTxn(() async {
-  final recipe = await recipes.get(123)
+  final recipe = await isar.recipes.get(123)
 
   recipe.isFavorite = false;
-  await recipes.put(recipe); // perform update operations
+  await isar.recipes.put(recipe); // perform update operations
 
-  await recipes.delete(123); // or delete operations
+  await isar.recipes.delete(123); // or delete operations
 });
 ```
 
@@ -135,7 +135,7 @@ final pancakes = Recipe()
   ..isFavorite = true;
 
 await isar.writeTxn(() async {
-  await recipes.put(pancakes);
+  await isar.recipes.put(pancakes);
 })
 ```
 
@@ -145,7 +145,7 @@ Inserting multiple objects at once is just as easy:
 
 ```dart
 await isar.writeTxn(() async {
-  await recipes.putAll([pancakes, pizza]);
+  await isar.recipes.putAll([pancakes, pizza]);
 })
 ```
 
@@ -158,7 +158,7 @@ So if we want to unfavorite our pancakes, we can do the following:
 ```dart
 await isar.writeTxn(() async {
   pancakes.isFavorite = false;
-  await recipes.put(recipe);
+  await isar.recipes.put(recipe);
 });
 ```
 
@@ -168,7 +168,7 @@ Want to get rid of an object in Isar? Use `collection.delete(id)`. The delete me
 
 ```dart
 await isar.writeTxn(() async {
-  final success = await recipes.delete(123);
+  final success = await isar.recipes.delete(123);
   print('Recipe deleted: $success');
 });
 ```
@@ -177,7 +177,7 @@ Similarly to get and put, there is also a bulk delete operation that returns the
 
 ```dart
 await isar.writeTxn(() async {
-  final count = await recipes.deleteAll([1, 2, 3]);
+  final count = await isar.recipes.deleteAll([1, 2, 3]);
   print('We deleted $count recipes');
 });
 ```
@@ -186,7 +186,7 @@ If you don't know the ids of the objects you want to delete, you can use a query
 
 ```dart
 await isar.writeTxn(() async {
-  final count = await recipes.filter()
+  final count = await isar.recipes.filter()
     .isFavoriteEqualTo(false)
     .deleteAll();
   print('We deleted $count recipes');

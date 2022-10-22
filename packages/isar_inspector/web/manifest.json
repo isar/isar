@@ -3,9 +3,9 @@
     "short_name": "Isar Inspector",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
+    "background_color": "#1a1c1e",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Inspector for the Isar database.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
