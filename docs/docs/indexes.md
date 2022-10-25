@@ -4,7 +4,7 @@ title: Indexes
 
 # Indexes
 
-Indexes are Isars most powerful feature. Many embedded databases offer "normal" indexes (if at all), but Isar also has composite and multi-entry indexes. Understanding how indexes work is essential to optimize query performance. Isar lets you choose which index you want to use and how you want to use it. We'll start with a quick introduction to what indexes are.
+Indexes are Isar's most powerful feature. Many embedded databases offer "normal" indexes (if at all), but Isar also has composite and multi-entry indexes. Understanding how indexes work is essential to optimize query performance. Isar lets you choose which index you want to use and how you want to use it. We'll start with a quick introduction to what indexes are.
 
 ## What are indexes?
 
@@ -358,5 +358,5 @@ Entries with duplicate words only appear once in the index.
 This index can now be used for prefix (or equality) where clauses of the individual words of the description.
 
 :::tip
-Instead of storing the words directly, also consider using the result of a [phonectic algorithm](https://en.wikipedia.org/wiki/Phonetic_algorithm) like [Soundex](https://en.wikipedia.org/wiki/Soundex).
+Instead of storing the words directly, also consider using the result of a [phonetic algorithm](https://en.wikipedia.org/wiki/Phonetic_algorithm) like [Soundex](https://en.wikipedia.org/wiki/Soundex).
 :::
