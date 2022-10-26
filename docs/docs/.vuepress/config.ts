@@ -6,11 +6,9 @@ import { getLocalePath, locales } from './locales'
 import * as path from 'path'
 import * as fs from 'fs'
 
-
-
 const vueLocales: SiteLocaleConfig = {}
 for (const locale of locales) {
-    vueLocales[getLocalePath(locale.locale)] = {
+    vueLocales[getLocalePath(locale.code)] = {
         lang: locale.language,
         title: locale.dbName,
         description: locale.dbDescription,
@@ -19,7 +17,7 @@ for (const locale of locales) {
 
 const themeLocales: LocaleConfig<DefaultThemeLocaleData> = {}
 for (const locale of locales) {
-    themeLocales[getLocalePath(locale.locale)] = {
+    themeLocales[getLocalePath(locale.code)] = {
         selectLanguageName: locale.language,
         selectLanguageText: locale.selectLanguage,
         editLinkText: locale.editPage,
@@ -31,7 +29,7 @@ for (const locale of locales) {
         notFound: locale.notFound,
         backToHome: locale.backToHome,
         sidebar: getSidebar({
-            locale: locale.locale,
+            locale: locale.code,
             tutorials: locale.tutorials,
             concepts: locale.concepts,
             recipes: locale.recipes,
@@ -79,6 +77,10 @@ export default defineUserConfig({
             shikiPlugin({
                 theme: "one-dark-pro",
             }),
+            {
+                name: 'redirect-locale',
+                clientConfigFile: path.resolve(__dirname, 'redirect.ts'),
+            },
         ],
     ],
     head: [
@@ -193,7 +195,7 @@ function getSidebar({ locale, tutorials, concepts, recipes, sampleApps, chnagelo
 function getSidebarChildren(locale: string, children: string[]) {
     const localePath = getLocalePath(locale)
     return children.map((child) => {
-        if (locale === "en-US") {
+        if (locale === "en") {
             return '/' + child
         }
         const file = path.resolve(__dirname, '../', localePath.substring(1), child)
