@@ -4,7 +4,7 @@ title: Links
 
 # Links
 
-Links allow you to express relationships between objects, such as a comment's author (User). You can model `1:1`, `1:n`, and `n:n` relationships with Isar links. Using links is less ergonomic than using embedded objects and you should use embedded objects whenever possible.
+Links allow you to express relationships between objects, such as a comment's author (User). You can model `1:1`, `1:n`, and `n:n` relationships with Isar links. Using links is less ergonomic than using embedded objects, and you should use embedded objects whenever possible.
 
 Think of the link as a separate table that contains the relation. It's similar to SQL relations but has a different feature set and API.
 

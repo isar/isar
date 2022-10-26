@@ -375,7 +375,7 @@ final result = isar.shoes.where()
   .findAll();
 ```
 
-The where clause is applied first to reduce the number of objetcs to be filtered. Then the filter is applied to the remaining objetcs.
+The where clause is applied first to reduce the number of objects to be filtered. Then the filter is applied to the remaining objects.
 
 ## Sorting
 
@@ -502,8 +502,8 @@ In the previous examples, we used `.findAll()` to retrieve all matching objects.
 
 | Operation        | Description                                                                                                         |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `.findFirst()`   | Retreive only the first matching object or `null` if none matches.                                                  |
-| `.findAll()`     | Retreive all matching objects.                                                                                      |
+| `.findFirst()`   | Retrieve only the first matching object or `null` if none matches.                                                  |
+| `.findAll()`     | Retrieve all matching objects.                                                                                      |
 | `.count()`       | Count how many objects match the query.                                                                             |
 | `.deleteFirst()` | Delete the first matching object from the collection.                                                               |
 | `.deleteAll()`   | Delete all matching objects from the collection.                                                                    |
