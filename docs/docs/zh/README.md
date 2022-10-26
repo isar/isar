@@ -4,7 +4,7 @@ title: 主页
 heroImage: /isar.svg
 actions:
   - text: 让我们开始吧
-    link: /tutorials/quickstart.html
+    link: /zh/tutorials/quickstart.html
     type: primary
 features:
   - title: 💙 专门为 Flutter 打造
