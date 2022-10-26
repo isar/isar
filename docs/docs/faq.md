@@ -10,7 +10,7 @@ A random collection of frequently asked questions about Isar and Flutter databas
 
 > I store my data in a backend database, why do I need Isar?.
 
-Even today, it is very common to have no data connection if you are in a subway or a plane or if you visit your grandma, who has no WiFi and a very bad cell signal. You shouldn't let bad connection cripple your app!
+Even today, it is very common to have no data connection if you are in a subway or a plane or if you visit your grandma, who has no Wi-Fi and a very bad cell signal. You shouldn't let bad connection cripple your app!
 
 ### Isar vs Hive
 
