@@ -10,7 +10,7 @@ export default defineClientConfig({
             // Whether the home page is about to be displayed
             let isHome = to.fullPath == "/"
 
-            if (isFirstStart && isHome) {
+            if (typeof navigator != 'undefined' && isFirstStart && isHome) {
                 const lang = navigator.language.split("-")[0].toLowerCase()
 
                 if (lang != "en" && locales.some((l) => l.code === lang)) {
