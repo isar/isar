@@ -1,5 +1,5 @@
 export interface LocalConfig {
-  locale: string;
+  code: string;
   language: string;
   selectLanguage: string;
   editPage: string;
@@ -22,18 +22,17 @@ export interface LocalConfig {
   contributors: string;
 }
 
-export function getLocalePath(locale: string): string {
-  const localeName = locale.split("-")[0];
-  if (localeName === "en") {
+export function getLocalePath(code: string): string {
+  if (code === "en") {
     return "/";
   } else {
-    return "/" + localeName + "/";
+    return "/" + code + "/";
   }
 }
 
 export const locales: LocalConfig[] = [
   {
-    locale: "en-US",
+    code: "en",
     language: "English",
     selectLanguage: "Select Language",
     editPage: "Edit Page",
@@ -59,7 +58,7 @@ export const locales: LocalConfig[] = [
     contributors: "Contributors",
   },
   {
-    locale: "de-DE",
+    code: "de",
     language: "Deutsch",
     selectLanguage: "Sprache wählen",
     editPage: "Seite bearbeiten",
@@ -86,7 +85,7 @@ export const locales: LocalConfig[] = [
     contributors: "Mitwirkende",
   },
   {
-    locale: "ja-JP",
+    code: "ja",
     language: "日本語",
     selectLanguage: "言語の選択",
     editPage: "編集ページ",
@@ -113,7 +112,7 @@ export const locales: LocalConfig[] = [
     contributors: "貢献者の方々",
   },
   {
-    locale: "es-AR",
+    code: "es",
     language: "Español",
     selectLanguage: "Seleccionar Idioma",
     editPage: "Editar Página",
@@ -140,7 +139,7 @@ export const locales: LocalConfig[] = [
     contributors: "Colaboradores",
   },
   {
-    locale: "it-IT",
+    code: "it",
     language: "Italiano",
     selectLanguage: "Seleziona Lingua",
     editPage: "Modifica Pagina",
@@ -167,7 +166,7 @@ export const locales: LocalConfig[] = [
     contributors: "Contributori",
   },
   {
-    locale: "pt",
+    code: "pt",
     language: "Português",
     selectLanguage: "Selecione o idioma",
     editPage: "Editar página",
@@ -182,8 +181,7 @@ export const locales: LocalConfig[] = [
       "Parece que temos um link inválido.",
     ],
     backToHome: "Voltar para Início",
-    translationOutdated:
-      "A tradução está desatualizada. Por favor, ajude-nos a atualizá-lo!",
+    translationOutdated: "A tradução está desatualizada. Por favor, ajude-nos a atualizá-lo!",
     dbName: "Isar Database",
     dbDescription: "Banco de dados multiplataforma super rápido para Flutter",
     tutorials: "TUTORIAIS",
@@ -194,7 +192,7 @@ export const locales: LocalConfig[] = [
     contributors: "Contribuidores",
   },
   {
-    locale: "ur-PK",
+    code: "ur",
     language: "اردو",
     selectLanguage: "زبان منتخب کریں",
     editPage: "صفحہ میں ترمیم کریں",
@@ -209,8 +207,7 @@ export const locales: LocalConfig[] = [
       "لگتا ہے ہمارے پاس کوئی ٹوٹا ہوا لنک ہے۔",
     ],
     backToHome: "گھر پر واپس",
-    translationOutdated:
-      "ترجمہ پرانا ہے۔ براہ کرم اسے تروتازہ کرنے میں ہماری مدد کریں!",
+    translationOutdated: "ترجمہ پرانا ہے۔ براہ کرم اسے تروتازہ کرنے میں ہماری مدد کریں!",
     dbName: "Isar Database",
     dbDescription: "  ڈیٹا بیس کے لیے سپر فاسٹ کراس پلیٹ فارم Flutter",
     tutorials: "اسباق",
@@ -221,7 +218,7 @@ export const locales: LocalConfig[] = [
     contributors: "شراکت دار",
   },
   {
-    locale: "fr-FR",
+    code: "fr",
     language: "Français",
     selectLanguage: "Sélectionner la langue",
     editPage: "Modifier la page",
@@ -230,10 +227,10 @@ export const locales: LocalConfig[] = [
     warning: "Avertissement",
     danger: "Danger",
     notFound: [
-      "Il n'y a rien a voir ici.",
+      "Il n\"y a rien a voir ici.",
       "Comment en sommes-nous arrivés là ?",
       "Ceci est un quatre-cent-quatre...",
-      "Il semble que nous avons un lien brisé.",
+      "Il semble que nous avons un lien brisé."
     ],
     backToHome: "Retour à l'acceuil",
     translationOutdated: "Translation is outdated. Please help us update it!",
@@ -247,7 +244,7 @@ export const locales: LocalConfig[] = [
     contributors: "Contributeurs",
   },
   {
-    locale: "zh-Hans",
+    locale: "zh",
     language: "简体中文",
     selectLanguage: "选择语言",
     editPage: "编辑页面",
