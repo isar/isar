@@ -311,7 +311,7 @@ final result = await isar.where()
   .findAll() // -> [Daniel, David]
 ```
 
-## ïndices multi-entrada
+## Índices multi-entrada
 
 Si indexas una lista usando `IndexType.value`, Isar automáticamente creará un índice multi-entrada, y cada elemento en la lista será indexado hacia el objeto, Funciona para cualquier tipo de lista.
 
