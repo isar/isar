@@ -1,5 +1,5 @@
 export interface LocalConfig {
-  locale: string;
+  code: string;
   language: string;
   selectLanguage: string;
   editPage: string;
@@ -22,18 +22,17 @@ export interface LocalConfig {
   contributors: string;
 }
 
-export function getLocalePath(locale: string): string {
-  const localeName = locale.split("-")[0];
-  if (localeName === "en") {
+export function getLocalePath(code: string): string {
+  if (code === "en") {
     return "/";
   } else {
-    return "/" + localeName + "/";
+    return "/" + code + "/";
   }
 }
 
 export const locales: LocalConfig[] = [
   {
-    locale: "en-US",
+    code: "en",
     language: "English",
     selectLanguage: "Select Language",
     editPage: "Edit Page",
@@ -59,7 +58,7 @@ export const locales: LocalConfig[] = [
     contributors: "Contributors",
   },
   {
-    locale: "de-DE",
+    code: "de",
     language: "Deutsch",
     selectLanguage: "Sprache wählen",
     editPage: "Seite bearbeiten",
@@ -86,7 +85,7 @@ export const locales: LocalConfig[] = [
     contributors: "Mitwirkende",
   },
   {
-    locale: "ja-JP",
+    code: "ja",
     language: "日本語",
     selectLanguage: "言語の選択",
     editPage: "編集ページ",
@@ -113,7 +112,7 @@ export const locales: LocalConfig[] = [
     contributors: "貢献者の方々",
   },
   {
-    locale: "es-AR",
+    code: "es",
     language: "Español",
     selectLanguage: "Seleccionar Idioma",
     editPage: "Editar Página",
@@ -140,7 +139,7 @@ export const locales: LocalConfig[] = [
     contributors: "Colaboradores",
   },
   {
-    locale: "it-IT",
+    code: "it",
     language: "Italiano",
     selectLanguage: "Seleziona Lingua",
     editPage: "Modifica Pagina",
@@ -167,7 +166,7 @@ export const locales: LocalConfig[] = [
     contributors: "Contributori",
   },
   {
-    locale: "pt",
+    code: "pt",
     language: "Português",
     selectLanguage: "Selecione o idioma",
     editPage: "Editar página",
@@ -193,55 +192,55 @@ export const locales: LocalConfig[] = [
     contributors: "Contribuidores",
   },
   {
-    locale: 'ur-PK',
-    language: 'اردو',
-    selectLanguage: 'زبان منتخب کریں',
-    editPage: 'صفحہ میں ترمیم کریں',
-    lastUpdated: 'آخری تازہ کاری',
-    tip: 'ٹپ',
-    warning: 'انتباہ',
-    danger: 'خطرہ',
+    code: "ur",
+    language: "اردو",
+    selectLanguage: "زبان منتخب کریں",
+    editPage: "صفحہ میں ترمیم کریں",
+    lastUpdated: "آخری تازہ کاری",
+    tip: "ٹپ",
+    warning: "انتباہ",
+    danger: "خطرہ",
     notFound: [
-        'یہاں دیکھنے کے لیے کچھ نہیں ہے۔',
-        'ہم یہاں کیسے پہنچے؟',
-        ' یہ چار اوہ چار ہے۔۔۔',
-        'لگتا ہے ہمارے پاس کوئی ٹوٹا ہوا لنک ہے۔',
+      "یہاں دیکھنے کے لیے کچھ نہیں ہے۔",
+      "ہم یہاں کیسے پہنچے؟",
+      " یہ چار اوہ چار ہے۔۔۔",
+      "لگتا ہے ہمارے پاس کوئی ٹوٹا ہوا لنک ہے۔",
     ],
-    backToHome: 'گھر پر واپس',
-    translationOutdated: 'ترجمہ پرانا ہے۔ براہ کرم اسے تروتازہ کرنے میں ہماری مدد کریں!',
-    dbName: 'Isar Database',
-    dbDescription: '  ڈیٹا بیس کے لیے سپر فاسٹ کراس پلیٹ فارم Flutter',
-    tutorials: 'اسباق',
-    concepts: 'تصورات',
-    recipes: 'تراکیب',
-    sampleApps: 'نمونہ ایپس',
-    changelog: 'چینج لاگ',
-    contributors: 'شراکت دار',
+    backToHome: "گھر پر واپس",
+    translationOutdated: "ترجمہ پرانا ہے۔ براہ کرم اسے تروتازہ کرنے میں ہماری مدد کریں!",
+    dbName: "Isar Database",
+    dbDescription: "  ڈیٹا بیس کے لیے سپر فاسٹ کراس پلیٹ فارم Flutter",
+    tutorials: "اسباق",
+    concepts: "تصورات",
+    recipes: "تراکیب",
+    sampleApps: "نمونہ ایپس",
+    changelog: "چینج لاگ",
+    contributors: "شراکت دار",
   },
   {
-    locale: 'fr-FR',
-    language: 'Français',
-    selectLanguage: 'Sélectionner la langue',
-    editPage: 'Modifier la page',
-    lastUpdated: 'Dernière modification',
-    tip: 'Conseil',
-    warning: 'Avertissement',
-    danger: 'Danger',
+    code: "fr",
+    language: "Français",
+    selectLanguage: "Sélectionner la langue",
+    editPage: "Modifier la page",
+    lastUpdated: "Dernière modification",
+    tip: "Conseil",
+    warning: "Avertissement",
+    danger: "Danger",
     notFound: [
-      'Il n\'y a rien a voir ici.',
-      'Comment en sommes-nous arrivés là ?',
-      'Ceci est un quatre-cent-quatre...',
-      'Il semble que nous avons un lien brisé.'
+      "Il n\"y a rien a voir ici.",
+      "Comment en sommes-nous arrivés là ?",
+      "Ceci est un quatre-cent-quatre...",
+      "Il semble que nous avons un lien brisé."
     ],
-    backToHome: 'Retour à l\'acceuil',
-    translationOutdated: 'Translation is outdated. Please help us update it!',
-    dbName: 'Base de données Isar',
-    dbDescription: 'Base de données multiplateforme super rapide pour Flutter',
-    tutorials: 'TUTORIELS',
-    concepts: 'CONCEPTS',
-    recipes: 'RECETTES',
-    sampleApps: 'Exemples d\'applications',
-    changelog: 'Changements',
-    contributors: 'Contributeurs',
+    backToHome: "Retour à l'acceuil",
+    translationOutdated: "Translation is outdated. Please help us update it!",
+    dbName: "Base de données Isar",
+    dbDescription: "Base de données multiplateforme super rapide pour Flutter",
+    tutorials: "TUTORIELS",
+    concepts: "CONCEPTS",
+    recipes: "RECETTES",
+    sampleApps: "Exemples d'applications",
+    changelog: "Changements",
+    contributors: "Contributeurs",
   }
 ];

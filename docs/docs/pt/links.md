@@ -4,21 +4,20 @@ title: Links
 
 # Links
 
-Links allow you to express relationships between objects, such as a comment's author (User). You can model `1:1`, `1:n`, and `n:n` relationships with Isar links. Using links is less ergonomic than using embedded objects and you should use embedded objects whenever possible.
+Os links permitem que você expresse relacionamentos entre objetos, como o autor de um comentário (Usuário). Você pode modelar relacionamentos `1:1`, `1:n` e `n:n` com links Isar. Usar links é menos ergonômico do que usar objetos incorporados e você deve usar objetos incorporados sempre que possível.
 
-Think of the link as a separate table that contains the relation. It's similar to SQL relations but has a different feature set and API.
+Pense no link como uma tabela separada que contém a relação. É semelhante às relações SQL, mas possui um conjunto de recursos e API diferentes.
 
 ## IsarLink
 
-`IsarLink<T>` can contain no or one related object, and it can be used to express a to-one relationship. `IsarLink` has a single property called `value` which holds the linked object.
-
-Links are lazy, so you need to tell the `IsarLink` to load or save the `value` explicitly. You can do this by calling `linkProperty.load()` and `linkProperty.save()`.
+`IsarLink<T>` pode conter nenhum ou um objeto relacionado e pode ser usado para expressar um relacionamento de um para um. `IsarLink` tem uma única propriedade chamada `value` que contém o objeto vinculado.
+Os links são preguiçosos, então você precisa dizer ao `IsarLink` para carregar ou salvar o `valor` explicitamente. Você pode fazer isso chamando `linkProperty.load()` e `linkProperty.save()`.
 
 :::tip
-The id property of the source and target collections of a link should be non-final.
+A propriedade id das coleções de origem e destino de um link não deve ser final.
 :::
 
-For non-web targets, links get loaded automatically when you use them for the first time. Let's start by adding an IsarLink to a collection:
+Para destinos não Web, os links são carregados automaticamente quando você os usa pela primeira vez. Vamos começar adicionando um IsarLink a uma coleção:
 
 ```dart
 @collection
@@ -38,9 +37,9 @@ class Student {
 }
 ```
 
-We defined a link between teachers and students. Every student can have exactly one teacher in this example.
+Definimos um vínculo entre teachers e students. Cada student pode ter exatamente um teacher neste exemplo.
 
-First, we create the teacher and assign it to a student. We have to `.put()` the teacher and save the link manually.
+Primeiro, criamos o teacher e o atribuímos a um student. Temos que fazer o `.put()` do teacher e salvar o link manualmente.
 
 ```dart
 final mathTeacher = Teacher()..subject = 'Math';
@@ -56,7 +55,7 @@ await isar.writeTxn(() async {
 });
 ```
 
-We can now use the link:
+Agora podemos usar o link:
 
 ```dart
 final linda = await isar.students.where().nameEqualTo('Linda').findFirst();
@@ -64,7 +63,7 @@ final linda = await isar.students.where().nameEqualTo('Linda').findFirst();
 final teacher = linda.teacher.value; // > Teacher(subject: 'Math')
 ```
 
-Let's try the same thing with synchronous code. We don't need to save the link manually because `.putSync()` automatically saves all links. It even creates the teacher for us.
+Vamos tentar a mesma coisa com código síncrono. Não precisamos salvar o link manualmente porque `.putSync()` salva automaticamente todos os links. Até cria o professor para nós.
 
 ```dart
 final englishTeacher = Teacher()..subject = 'English';
@@ -80,13 +79,13 @@ isar.writeTxnSync(() {
 
 ## IsarLinks
 
-It would make more sense if the student from the previous example could have multiple teachers. Fortunately, Isar has `IsarLinks<T>`, which can contain multiple related objects and express a to-many relationship.
+Faria mais sentido se o aluno do exemplo anterior pudesse ter vários professores. Felizmente, Isar tem `IsarLinks<T>`, que pode conter vários objetos relacionados e expressar um relacionamento para muitos.
 
-`IsarLinks<T>` extends `Set<T>` and exposes all the methods that are allowed for sets.
+`IsarLinks<T>` estende `Set<T>` e expõe todos os métodos permitidos para sets.
 
-`IsarLinks` behaves much like `IsarLink` and is also lazy. To load all linked object call `linkProperty.load()`. To persist the changes, call `linkProperty.save()`.
+`IsarLinks` se comporta muito como `IsarLink` e também é preguiçoso. Para carregar todos os objetos vinculados, chame `linkProperty.load()`. Para persistir as alterações, chame `linkProperty.save()`.
 
-Internally both `IsarLink` and `IsarLinks` are represented in the same way. We can upgrade the `IsarLink<Teacher>` from before to an `IsarLinks<Teacher>` to assign multiple teachers to a single student (without losing data).
+Internamente, `IsarLink` e `IsarLinks` são representados da mesma maneira. Podemos atualizar o `IsarLink<Teacher>` de antes para um `IsarLinks<Teacher>` para atribuir vários professores a um único aluno (sem perder dados).
 
 ```dart
 @collection
@@ -99,7 +98,7 @@ class Student {
 }
 ```
 
-This works because we did not change the name of the link (`teacher`), so Isar remembers it from before.
+Isso funciona porque não mudamos o nome do link (`professor`), então Isar se lembra de antes.
 
 ```dart
 final biologyTeacher = Teacher()..subject = 'Biology';
@@ -122,13 +121,13 @@ print(linda.teachers); // {Teacher('Math'), Teacher('Biology')}
 
 ## Backlinks
 
-I hear you ask, "What if we want to express reverse relationships?". Don't worry; we'll now introduce backlinks.
+Eu ouço você perguntar: "E se quisermos expressar relacionamentos reversos?". Não se preocupe; agora vamos apresentar backlinks.
 
-Backlinks are links in the reverse direction. Each link always has an implicit backlink. You can make it available to your app by annotating an `IsarLink` or `IsarLinks` with `@Backlink()`.
+Backlinks são links na direção inversa. Cada link sempre tem um backlink implícito. Você pode disponibilizá-lo para seu aplicativo anotando um `IsarLink` ou `IsarLinks` com `@Backlink()`.
 
-Backlinks do not require additional memory or resources; you can freely add, remove and rename them without losing data.
+Backlinks não requerem memória ou recursos adicionais; você pode adicionar, remover e renomeá-los livremente sem perder dados.
 
-We want to know which students a specific teacher has, so we define a backlink:
+Queremos saber quais students um teacher específico tem, então definimos um backlink:
 
 ```dart
 @collection
@@ -142,14 +141,14 @@ class Teacher {
 }
 ```
 
-We need to specify the link to which the backlink points. It is possible to have multiple different links between two objects.
+Precisamos especificar o link para o qual o backlink aponta. É possível ter vários links diferentes entre dois objetos.
 
-## Initialize links
+## Inicializar links
 
-`IsarLink` and `IsarLinks` have a zero-arg constructor, which should be used to assign the link property when the object is created. It is good practice to make link properties `final`.
+`IsarLink` e `IsarLinks` possuem um construtor sem argumentos, que deve ser usado para atribuir a propriedade link quando o objeto for criado. É uma boa prática tornar as propriedades do link `final`.
 
-When you `put()` your object for the first time, the link gets initialized with source and target collection, and you can call methods like `load()` and `save()`. A link starts tracking changes immediately after its creation, so you can add and remove relations even before the link is initialized.
+Quando você faz o `put()` do seu objeto pela primeira vez, o link é inicializado com a coleção de origem e destino, e você pode chamar métodos como `load()` e `save()`. Um link começa a rastrear as alterações imediatamente após sua criação, para que você possa adicionar e remover relações antes mesmo de o link ser inicializado.
 
 :::danger
-It is illegal to move a link to another object.
+É ilegal mover um link para outro objeto.
 :::
