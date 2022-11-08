@@ -155,6 +155,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "ritksm",
+      "name": "Jack Rivers",
+      "avatar_url": "https://avatars.githubusercontent.com/u/111809?v=4",
+      "profile": "http://blog.jackrivers.me/",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorTemplate": "<a href=\"https://github.com/<%= contributor.login %>\"><img src=\"<%= contributor.avatar_url %>\" width=\"<%= options.imageSize %>px;\" alt=\"\"/><br /><sub><b><%= contributor.name %></b></sub></a>",
