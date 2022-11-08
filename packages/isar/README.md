@@ -219,14 +219,15 @@ Big thanks go to these wonderful people:
     </tr>
     <tr>
       <td align="center"><a href="https://github.com/VoidxHoshi"><img src="https://avatars.githubusercontent.com/u/55886143?v=4" width="100px;" alt=""/><br /><sub><b>LaLucid</b></sub></a></td>
+      <td align="center"><a href="https://github.com/lodisy"><img src="https://avatars.githubusercontent.com/u/8101584?v=4" width="100px;" alt=""/><br /><sub><b>Michael</b></sub></a></td>
       <td align="center"><a href="https://github.com/Moseco"><img src="https://avatars.githubusercontent.com/u/10720298?v=4" width="100px;" alt=""/><br /><sub><b>Moseco</b></sub></a></td>
       <td align="center"><a href="https://github.com/inkomomutane"><img src="https://avatars.githubusercontent.com/u/57417802?v=4" width="100px;" alt=""/><br /><sub><b>Nelson  Mutane</b></sub></a></td>
       <td align="center"><a href="https://github.com/Viper-Bit"><img src="https://avatars.githubusercontent.com/u/24822764?v=4" width="100px;" alt=""/><br /><sub><b>Peyman</b></sub></a></td>
       <td align="center"><a href="https://github.com/leisim"><img src="https://avatars.githubusercontent.com/u/13610195?v=4" width="100px;" alt=""/><br /><sub><b>Simon Leier</b></sub></a></td>
       <td align="center"><a href="https://github.com/ika020202"><img src="https://avatars.githubusercontent.com/u/42883378?v=4" width="100px;" alt=""/><br /><sub><b>Ura</b></sub></a></td>
-      <td align="center"><a href="https://github.com/blendthink"><img src="https://avatars.githubusercontent.com/u/32213113?v=4" width="100px;" alt=""/><br /><sub><b>blendthink</b></sub></a></td>
     </tr>
     <tr>
+      <td align="center"><a href="https://github.com/blendthink"><img src="https://avatars.githubusercontent.com/u/32213113?v=4" width="100px;" alt=""/><br /><sub><b>blendthink</b></sub></a></td>
       <td align="center"><a href="https://github.com/mnkeis"><img src="https://avatars.githubusercontent.com/u/41247357?v=4" width="100px;" alt=""/><br /><sub><b>mnkeis</b></sub></a></td>
     </tr>
   </tbody>
