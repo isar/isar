@@ -1,3 +1,10 @@
+# 3.0.3
+
+### Fixes
+
+- Fixed a native port that was not closed correctly in some cases
+- Added swift version to podspec
+
 ## 3.0.2
 
 ### Enhancements

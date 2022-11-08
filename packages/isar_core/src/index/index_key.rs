@@ -16,7 +16,7 @@ impl IndexKey {
     }
 
     pub fn from_bytes(bytes: Vec<u8>) -> Self {
-        IndexKey { bytes: bytes }
+        IndexKey { bytes }
     }
 
     pub fn add_byte(&mut self, value: u8) {

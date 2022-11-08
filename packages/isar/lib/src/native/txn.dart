@@ -15,7 +15,7 @@ class Txn extends Transaction {
   /// @nodoc
   Txn.async(this.ptr, bool write, Stream<void> stream) : super(false, write) {
     _completers = Queue();
-    stream.listen(
+    _portSubscription = stream.listen(
       (_) => _completers.removeFirst().complete(),
       onError: (Object e) => _completers.removeFirst().completeError(e),
     );
@@ -33,6 +33,7 @@ class Txn extends Transaction {
   int _bufferLen = -1;
 
   late final Queue<Completer<void>> _completers;
+  late final StreamSubscription<void>? _portSubscription;
 
   /// Get a shared CObject pointer
   Pointer<CObject> getCObject() {
@@ -73,9 +74,10 @@ class Txn extends Transaction {
   }
 
   @override
-  Future<void> commit() {
+  Future<void> commit() async {
     IC.isar_txn_finish(ptr, true);
-    return wait();
+    await wait();
+    unawaited(_portSubscription!.cancel());
   }
 
   @override
@@ -84,9 +86,10 @@ class Txn extends Transaction {
   }
 
   @override
-  Future<void> abort() {
+  Future<void> abort() async {
     IC.isar_txn_finish(ptr, false);
-    return wait();
+    await wait();
+    unawaited(_portSubscription!.cancel());
   }
 
   @override
