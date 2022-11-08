@@ -14,7 +14,7 @@ Dado que Isar Web confía en IndexedDB, hay más limitaciones pero apenas son no
 - No hay soporte para métodos síncronos
 - Actualmente, los filtros `Isar.splitWords()` y `.matches()` aún no están implementados
 - Los cambios en los esquemas no son estrechamente verificados como en la VM entonces sé cuidadoso de cumplir con las reglas
-- Todos los tipos numéricos se almacenan como `double` (el único tipo num;erico de js) por lo tanto `@Size32` no tiene efecto
+- Todos los tipos numéricos se almacenan como `double` (el único tipo numérico de js) por lo tanto `@Size32` no tiene efecto
 - Lo índices se representan de forma diferente entonces los índices hash no usan menos espacio (pero funcionan de la misma manera)
 - `col.delete()` y `col.deleteAll()` funcionan correctamente pero el valor retornado es incorrecto
 - `col.clear()` no resetea el valor de auto incrementado

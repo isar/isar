@@ -4,7 +4,7 @@ title: Watchers
 
 # Watchers
 
-Isar te permite suscribirte a los cambios en la base de dtaos. Puedes "observar" los cambios en un objeto específico, una colección entera, o una consulta.
+Isar te permite suscribirte a los cambios en la base de datos. Puedes "observar" los cambios en un objeto específico, una colección entera, o una consulta.
 
 Los watchers te permiten reaccionar a los cambios en la base de datos de manera eficiente. Puedes por ejemplo refrescar la interfaz de usuario cuando se agrega un contacto, enviar una consulta de red cuando un documento se actualiza, etc.
 
