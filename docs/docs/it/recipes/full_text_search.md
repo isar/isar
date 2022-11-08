@@ -4,7 +4,7 @@ title: Ricerca full-text
 
 # Ricerca full-text
 
-La ricerca full-text è un modo efficace per cercare il testo nel database. Dovresti già avere familiarità con il funzionamento degli [indici](/indexes), ma andiamo oltre le basi.
+La ricerca full-text è un modo efficace per cercare il testo nel database. Dovresti già avere familiarità con il funzionamento degli [indici](../indexes.md), ma andiamo oltre le basi.
 
 Un indice funziona come una tabella di ricerca, consentendo al motore di query di trovare rapidamente i record con un determinato valore. Ad esempio, se hai un campo `title` nel tuo oggetto, puoi creare un indice su quel campo per rendere più veloce la ricerca di oggetti con un determinato titolo.
 
