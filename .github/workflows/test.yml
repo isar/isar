@@ -164,6 +164,7 @@ jobs:
       - name: Build Isar Core
         run: |
           bash tool/build_android.sh x64
+          mkdir -p packages/isar_flutter_libs/android/src/main/jniLibs/x86_64
           mv libisar_android_x64.so packages/isar_flutter_libs/android/src/main/jniLibs/x86_64/libisar.so
       - name: Run isar_generator
         run: |
