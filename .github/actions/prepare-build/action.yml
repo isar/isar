@@ -13,6 +13,9 @@ runs:
       if: runner.os == 'Windows'
       shell: bash
       run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
+    - name: Install Linux requirements
+      if: runner.os == 'Linux'
+	    run: sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
     # See https://github.com/godot-rust/godot-rust/pull/920
     - name: "Workaround Android NDK due to Rust bug"
       if: runner.os == 'Linux'
