@@ -194,6 +194,7 @@ jobs:
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
+      - run: rustup target list
       - name: Build Isar Core macOS
         if: matrix.os == 'macos-latest'
         run: |
