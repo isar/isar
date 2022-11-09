@@ -58,6 +58,14 @@ jobs:
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
+      - name: Prepare Unit tests
+        run: |
+          flutter pub get
+          dart tool/generate_long_double_test.dart
+          dart tool/generate_prepare_test.dart
+          flutter pub run build_runner build
+          flutter test -j 1
+        working-directory: packages/isar_test
       - name: Run Flutter Unit tests
         run: |
           flutter pub get
@@ -76,13 +84,17 @@ jobs:
         uses: ./.github/actions/prepare-build
       - name: Install valgrind and llvm
         run: sudo apt update && sudo apt install -y valgrind libclang-dev
-      - name: Run Valgrind
+      - name: Prepare Unit tests
         run: |
           flutter pub get
           dart tool/generate_long_double_test.dart
           dart tool/generate_prepare_test.dart
+          dart tool/generate_all_tests.dart
           flutter pub run build_runner build
           dart compile exe integration_test/all_tests.dart
+        working-directory: packages/isar_test
+      - name: Run Valgrind
+        run: |
           valgrind \
             --leak-check=full \
             --error-exitcode=1 \
@@ -140,7 +152,7 @@ jobs:
           dart test
         working-directory: packages/isar_generator
 
-  test_ios:
+  integration_test_ios:
     strategy:
       matrix:
         device:
@@ -165,12 +177,12 @@ jobs:
         run: |
           flutter pub get
           dart tool/generate_long_double_test.dart
-          flutter pub run build_runner build
           dart tool/generate_all_tests.dart
+          flutter pub run build_runner build
           flutter test integration_test/integration_test.dart
         working-directory: packages/isar_test
 
-  test_android:
+  integration_test_android:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -195,8 +207,8 @@ jobs:
         run: |
           flutter pub get
           dart tool/generate_long_double_test.dart
-          flutter pub run build_runner build
           dart tool/generate_all_tests.dart
+          flutter pub run build_runner build
         working-directory: packages/isar_test
       - name: Run Flutter Integration tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -208,7 +220,7 @@ jobs:
           working-directory: packages/isar_test
           script: "flutter test integration_test/integration_test.dart"
 
-  test_macos:
+  integration_test_macos:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -224,13 +236,13 @@ jobs:
         run: |
           flutter pub get
           dart tool/generate_long_double_test.dart
-          flutter pub run build_runner build
           dart tool/generate_all_tests.dart
+          flutter pub run build_runner build
           flutter config --enable-macos-desktop 
           flutter test -d macos integration_test/integration_test.dart
         working-directory: packages/isar_test
 
-  test_linux:
+  integration_test_linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -249,13 +261,13 @@ jobs:
         run: |
           flutter pub get
           dart tool/generate_long_double_test.dart
-          flutter pub run build_runner build
           dart tool/generate_all_tests.dart
+          flutter pub run build_runner build
           flutter config --enable-linux-desktop 
           flutter test -d linux integration_test/integration_test.dart
         working-directory: packages/isar_test
 
-  test_windows:
+  integration_test_windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -270,8 +282,8 @@ jobs:
         run: |
           flutter pub get
           dart tool/generate_long_double_test.dart
-          flutter pub run build_runner build
           dart tool/generate_all_tests.dart
+          flutter pub run build_runner build
           flutter config --enable-windows-desktop 
           flutter test -d windows integration_test/integration_test.dart
         working-directory: packages/isar_test
@@ -290,8 +302,8 @@ jobs:
         run: |
           flutter pub get
           dart tool/generate_long_double_test.dart
-          flutter pub run build_runner build
           dart tool/generate_all_tests.dart
+          flutter pub run build_runner build
           flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart -d web-server --browser-name chrome
         working-directory: packages/isar_test
 

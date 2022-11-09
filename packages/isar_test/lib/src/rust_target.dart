@@ -11,7 +11,7 @@ String getRustTarget() {
     case Abi.linuxX64:
       return 'x86_64-unknown-linux-gnu';
     case Abi.windowsX64:
-      return 'x86_64-pc-windows-gnu';
+      return 'x86_64-pc-windows-msvc';
     default:
       throw UnsupportedError('Unsupported ABI: ${Abi.current()}');
   }
