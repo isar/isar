@@ -11,7 +11,7 @@ void main() {
   final imports = files.map((String e) {
     final dartPath = e.replaceAll(p.separator, '/');
     final name = e.split('.')[0].replaceAll(p.separator, '_');
-    return "import '$dartPath' as $name};";
+    return "import '../$dartPath' as $name;";
   }).join('\n');
 
   final calls = files.map((String e) {
@@ -35,5 +35,6 @@ void main() {
     }
 """;
 
-  File('all_tests.dart').writeAsStringSync(code);
+  Directory('integration_test').createSync();
+  File('integration_test${p.separator}all_tests.dart').writeAsStringSync(code);
 }

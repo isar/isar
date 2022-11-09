@@ -111,7 +111,7 @@ jobs:
           dart test
         working-directory: packages/isar_generator
 
-  drive_ios:
+  test_ios:
     strategy:
       matrix:
         device:
@@ -136,10 +136,10 @@ jobs:
           dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
           dart tool/generate_all_tests.dart
-          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart
+          flutter test integration_test/integration_test.dart
         working-directory: packages/isar_test
 
-  drive_android:
+  test_android:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -176,9 +176,9 @@ jobs:
           arch: x86_64
           profile: Nexus 6
           working-directory: packages/isar_test
-          script: "flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart"
+          script: "flutter test integration_test/integration_test.dart"
 
-  drive_desktop:
+  test_desktop:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
@@ -216,7 +216,7 @@ jobs:
           flutter config --enable-macos-desktop 
           flutter config --enable-linux-desktop 
           flutter config --enable-windows-desktop 
-          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart
+          flutter test integration_test/integration_test.dart
         working-directory: packages/isar_test
 
   drive_chrome:
