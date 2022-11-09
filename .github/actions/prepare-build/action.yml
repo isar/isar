@@ -16,7 +16,7 @@ runs:
     - name: Install Linux requirements
       if: runner.os == 'Linux'
       shell: bash
-	    run: sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
+      run: sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
     # See https://github.com/godot-rust/godot-rust/pull/920
     - name: "Workaround Android NDK due to Rust bug"
       if: runner.os == 'Linux'
