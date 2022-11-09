@@ -149,7 +149,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        api-level: [21, 24, 33]
+        api-level: [21, 24, 32]
         target: [default]
       fail-fast: false
     steps:
@@ -190,11 +190,12 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
+      - run: rustup show
+      - run: rustup target list
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
-      - run: rustup target list
       - name: Build Isar Core macOS
         if: matrix.os == 'macos-latest'
         run: |
