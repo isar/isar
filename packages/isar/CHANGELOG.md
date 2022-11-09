@@ -1,9 +1,15 @@
-# 3.0.3
+## 3.0.3
+
+### Enhancements
+
+- Improved performance for all operations
+- Significantly reduced native library size
 
 ### Fixes
 
 - Fixed a native port that was not closed correctly in some cases
 - Added swift version to podspec
+- Fixed crash on Windows
 
 ## 3.0.2
 
