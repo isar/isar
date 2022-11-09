@@ -203,12 +203,12 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           bash tool/build_linux.sh x64
-          mv libisar_linux.so packages/isar_flutter_libs/linux/libisar.so
+          mv libisar_linux_x64.so packages/isar_flutter_libs/linux/libisar.so
       - name: Build Isar Core Windows
         if: matrix.os == 'windows-latest'
         run: |
           bash tool/build_windows.sh x64
-          mv libisar_windows.dll packages/isar_flutter_libs/windows/libisar.dll
+          mv isar_windows_x64.dll packages/isar_flutter_libs/windows/libisar.dll
       - name: Run Flutter Driver tests
         run: |
           flutter pub get
