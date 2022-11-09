@@ -183,51 +183,72 @@ jobs:
           working-directory: packages/isar_test
           script: "flutter test integration_test/integration_test.dart"
 
-  test_desktop:
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+  test_macos:
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
-      - name: Build Isar Core macOS
-        if: runner.os == 'macOS'
+      - name: Build Isar Core
         run: |
           bash tool/build_macos.sh
           install_name_tool -id @rpath/libisar.dylib libisar_macos.dylib
           mv libisar_macos.dylib packages/isar_flutter_libs/macos/libisar.dylib
-      - name: Install Linux requirements
-        if: runner.os == 'Linux'
-        run: sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
-      - name: Build Isar Core Linux
-        if: runner.os == 'Linux'
-        run: |
-          bash tool/build_linux.sh x64
-          mv libisar_linux_x64.so packages/isar_flutter_libs/linux/libisar.so
-      - name: Build Isar Core Windows
-        if: runner.os == 'Windows'
-        run: |
-          bash tool/build_windows.sh x64
-          mv isar_windows_x64.dll packages/isar_flutter_libs/windows/libisar.dll
-      - name: Install Windows 10 SDK
-        if: runner.os == 'Windows'
-        uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.8
-      - run: flutter doctor -v
       - name: Run Flutter Driver tests
         run: |
           flutter pub get
           dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
           dart tool/generate_all_tests.dart
-          flutter config --no-enable-web
           flutter config --enable-macos-desktop 
+          flutter test -d macos integration_test/integration_test.dart
+        working-directory: packages/isar_test
+
+  test_linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Install Linux requirements
+        run: sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
+      - name: Setup headless display
+        uses: pyvista/setup-headless-display-action@v1
+      - name: Build Isar Core
+        run: |
+          bash tool/build_linux.sh x64
+          mv libisar_linux_x64.so packages/isar_flutter_libs/linux/libisar.so
+      - name: Run Flutter Driver tests
+        run: |
+          flutter pub get
+          dart tool/generate_long_double_test.dart
+          flutter pub run build_runner build
+          dart tool/generate_all_tests.dart
           flutter config --enable-linux-desktop 
+          flutter test -d linux integration_test/integration_test.dart
+        working-directory: packages/isar_test
+
+  test_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core
+        run: |
+          bash tool/build_windows.sh x64
+          mv isar_windows_x64.dll packages/isar_flutter_libs/windows/libisar.dll
+      - name: Run Flutter Driver tests
+        run: |
+          flutter pub get
+          dart tool/generate_long_double_test.dart
+          flutter pub run build_runner build
+          dart tool/generate_all_tests.dart
           flutter config --enable-windows-desktop 
-          flutter test integration_test/integration_test.dart
+          flutter test -d windows integration_test/integration_test.dart
         working-directory: packages/isar_test
 
   drive_chrome:
