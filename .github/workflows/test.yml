@@ -67,6 +67,29 @@ jobs:
           flutter test -j 1
         working-directory: packages/isar_test
 
+  valgrind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Run Valgrind
+        run: |
+          flutter pub get
+          dart tool/generate_long_double_test.dart
+          dart tool/generate_prepare_test.dart
+          flutter pub run build_runner build
+          dart compile exe integration_test/all_tests.dart
+          valgrind \
+            --leak-check=full \
+            --error-exitcode=1 \
+            --show-mismatched-frees=no \
+            --show-possibly-lost=no \
+            --errors-for-leak-kinds=definite \
+            integration_test/all_tests.exe
+        working-directory: packages/isar_test
+
   coverage:
     runs-on: ubuntu-latest
     steps:
@@ -179,7 +202,7 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: x86_64
-          profile: Nexus 6
+          profile: pixel
           working-directory: packages/isar_test
           script: "flutter test integration_test/integration_test.dart"
 
