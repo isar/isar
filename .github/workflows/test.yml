@@ -190,8 +190,6 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
-      - run: rustup show
-      - run: rustup target list
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
@@ -212,6 +210,9 @@ jobs:
         run: |
           bash tool/build_windows.sh x64
           mv isar_windows_x64.dll packages/isar_flutter_libs/windows/libisar.dll
+      - name: Install Windows 10 SDK
+        if: matrix.os == 'windows-latest'
+      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.8
       - name: Run Flutter Driver tests
         run: |
           flutter pub get
