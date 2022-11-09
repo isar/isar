@@ -140,7 +140,7 @@ jobs:
         working-directory: packages/isar_test
 
   drive_android:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         api-level: [21, 24, 33]
