@@ -136,6 +136,7 @@ fn main() {
             .define("MDBX_LOCK_SUFFIX", "\".lock\"")
             .define("MDBX_TXN_CHECKOWNER", "0")
             .define("MDBX_OSX_SPEED_INSTEADOF_DURABILITY", "1")
+            .define("MDBX_HAVE_BUILTIN_CPU_SUPPORTS", "0")
             .define("NDEBUG", "1")
             .file(mdbx.join("mdbx.c"))
             .compile("libmdbx.a");
