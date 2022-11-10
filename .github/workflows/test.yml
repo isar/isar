@@ -138,19 +138,13 @@ jobs:
         working-directory: packages/isar_generator
 
   integration_test_ios:
-    strategy:
-      matrix:
-        device:
-          - "iPhone 8"
-          - "iPhone 11 Pro Max"
-      fail-fast: false
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - name: Start simulator
         uses: futureware-tech/simulator-action@v2
         with:
-          model: ${{ matrix.device }}
+          model: iPhone 13
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
@@ -165,12 +159,7 @@ jobs:
         working-directory: packages/isar_test
 
   integration_test_android:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        api-level: [21, 24, 29]
-        target: [default]
-      fail-fast: false
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
@@ -190,7 +179,7 @@ jobs:
       - name: Run Flutter Integration tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: ${{ matrix.api-level }}
+          api-level: 29
           arch: x86_64
           profile: pixel
           working-directory: packages/isar_test
