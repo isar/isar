@@ -164,6 +164,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "buraktabn",
+      "name": "Burak",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49204989?v=4",
+      "profile": "http://buraktaban.ca",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorTemplate": "<a href=\"https://github.com/<%= contributor.login %>\"><img src=\"<%= contributor.avatar_url %>\" width=\"<%= options.imageSize %>px;\" alt=\"\"/><br /><sub><b><%= contributor.name %></b></sub></a>",
