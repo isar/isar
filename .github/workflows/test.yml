@@ -187,7 +187,6 @@ jobs:
           mv libisar_android_x64.so packages/isar_flutter_libs/android/src/main/jniLibs/x86_64/libisar.so
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
-        working-directory: packages/isar_test
       - name: Run Flutter Integration tests
         uses: reactivecircus/android-emulator-runner@v2
         with:

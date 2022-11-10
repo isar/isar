@@ -71,7 +71,17 @@ Matcher throwsIsarError([String? contains]) {
   return throwsA(isIsarError(contains));
 }
 
-final Matcher throwsAssertionError = throwsA(isA<AssertionError>());
+Matcher get throwsAssertionError {
+  var matcher = anything;
+  assert(
+    () {
+      matcher = throwsA(isA<AssertionError>());
+      return true;
+    }(),
+    'only in debug mode',
+  );
+  return matcher;
+}
 
 bool listEquals<T>(List<T>? a, List<T>? b) {
   if (a == null) {
