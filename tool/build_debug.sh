@@ -1,5 +1,5 @@
 arch=$(uname -m)
-
+echo "$OSTYPE"
 case "$OSTYPE" in
   darwin*)
     if [[ $arch == x86_64* ]]; then
