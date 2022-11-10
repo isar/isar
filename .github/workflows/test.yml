@@ -50,7 +50,7 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-latest, ubuntu-latest, windows-2019]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -82,7 +82,7 @@ jobs:
         run: sh tool/prepare_tests.sh
       - name: Run Valgrind
         run: |
-          dart compile exe --enable-asserts integration_test/all_tests.dart 
+          dart compile exe integration_test/all_tests.dart 
           valgrind \
             --leak-check=full \
             --error-exitcode=1 \
