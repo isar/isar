@@ -168,7 +168,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        api-level: [21, 24, 32]
+        api-level: [21, 24, 29]
         target: [default]
       fail-fast: false
     steps:
@@ -191,11 +191,10 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
           arch: x86_64
           profile: pixel
           working-directory: packages/isar_test
-          script: "flutter test integration_test/integration_test.dart"
+          script: "flutter test integration_test/integration_test.dart --verbose"
 
   integration_test_macos:
     runs-on: macos-latest
