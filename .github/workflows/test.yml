@@ -82,7 +82,7 @@ jobs:
         run: sh tool/prepare_tests.sh
       - name: Run Valgrind
         run: |
-          dart compile exe integration_test/all_tests.dart 
+          dart compile exe integration_test/all_tests.dart --dart-define STRESS=false
           valgrind \
             --leak-check=full \
             --error-exitcode=1 \

@@ -13,7 +13,7 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:test_api/src/backend/invoker.dart';
 
-const bool kIsWeb = identical(0, 0.0);
+const kIsWeb = identical(0, 0.0);
 
 final testErrors = <String>[];
 int testCount = 0;

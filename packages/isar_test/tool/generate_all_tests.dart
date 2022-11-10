@@ -16,7 +16,10 @@ void main() {
 
   final calls = files.map((String e) {
     final content = File(e).readAsStringSync();
-    final call = "${e.split('.')[0].replaceAll(p.separator, '_')}.main();";
+    var call = "${e.split('.')[0].replaceAll(p.separator, '_')}.main();";
+    if (e.contains('stress')) {
+      call = 'if (stress) $call';
+    }
     if (content.startsWith("@TestOn('vm')")) {
       return 'if (!kIsWeb) $call';
     } else {
@@ -31,6 +34,7 @@ void main() {
     $imports
 
     void main() {
+      const stress = bool.fromEnvironment('STRESS', defaultValue: true);
       $calls
     }
 """;
