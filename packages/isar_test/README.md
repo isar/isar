@@ -6,7 +6,7 @@ Use the following commands to run the tests on a connected device:
 
 ```
 sh tool/prepare_tests.sh
-sh tool/build_debug.sh
+sh tool/build.sh
 dart test
 ```
 
@@ -14,6 +14,6 @@ dart test
 
 ```
 sh tool/prepare_tests.sh
-sh tool/build_debug.sh
+sh tool/build.sh
 flutter test integration_test/integration_test.dart
 ```

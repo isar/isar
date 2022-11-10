@@ -60,7 +60,7 @@ jobs:
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
-        run: sh tool/build_debug.sh
+        run: sh tool/build.sh
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
       - name: Run Flutter Unit tests
@@ -77,7 +77,7 @@ jobs:
       - name: Install valgrind and llvm
         run: sudo apt update && sudo apt install -y valgrind libclang-dev
       - name: Build Isar Core
-        run: sh tool/build_debug.sh
+        run: sh tool/build.sh
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
       - name: Run Valgrind
@@ -100,7 +100,7 @@ jobs:
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
-        run: sh tool/build_debug.sh
+        run: sh tool/build.sh
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
       - name: Add packages
