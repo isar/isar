@@ -54,6 +54,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
+      - run: echo "$OSTYPE"
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
