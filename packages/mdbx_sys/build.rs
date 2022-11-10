@@ -50,7 +50,7 @@ impl ParseCallbacks for Callbacks {
 }
 
 const LIBMDBX_REPO: &str = "https://github.com/isar/libmdbx.git";
-const LIBMDBX_TAG: &str = "v0.12.2";
+const LIBMDBX_TAG: &str = "v0.12.1";
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
@@ -77,6 +77,16 @@ fn main() {
     let mut mdbx = PathBuf::from(&env::var("CARGO_MANIFEST_DIR").unwrap());
     mdbx.push("libmdbx");
     mdbx.push("dist");
+
+    // Remove CharToOemBuffA
+    let core_path = mdbx.join("mdbx.c");
+    let core = fs::read_to_string(core_path.as_path()).unwrap();
+    let core = core.replace("CharToOemBuffA(buf, buf, size)", "false");
+    let core = core.replace(
+        "#ifdef scan4seq",
+        "#ifdef scan4seq\n#elif defined(__APPLE__) || defined(__ANDROID_API__)\n#define scan4seq scan4seq_default\n",
+    );
+    fs::write(core_path.as_path(), core).unwrap();
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
@@ -113,9 +123,11 @@ fn main() {
             .define("MDBX_BUILD_SHARED_LIBRARY", "0")
             .define("MDBX_LOCK_SUFFIX", "\".lock\"")
             .define("MDBX_TXN_CHECKOWNER", "0")
+            .define("MDBX_ENV_CHECKPID", "0")
+            .define("MDBX_DISABLE_PAGECHECKS", "1")
+            .define("MDBX_ENABLE_PGOP_STAT", "0")
             // Setting HAVE_LIBM=1 is necessary to override issues with `pow` detection on Windows
             .define("HAVE_LIBM", "1")
-            .define("NDEBUG", "1")
             .cflag("/w")
             .init_c_cfg(cc_builder)
             .build();
@@ -135,9 +147,10 @@ fn main() {
             .define("MDBX_BUILD_SHARED_LIBRARY", "0")
             .define("MDBX_LOCK_SUFFIX", "\".lock\"")
             .define("MDBX_TXN_CHECKOWNER", "0")
+            .define("MDBX_ENV_CHECKPID", "0")
             .define("MDBX_OSX_SPEED_INSTEADOF_DURABILITY", "1")
-            .define("MDBX_HAVE_BUILTIN_CPU_SUPPORTS", "0")
-            .define("NDEBUG", "1")
+            .define("MDBX_DISABLE_PAGECHECKS", "1")
+            .define("MDBX_ENABLE_PGOP_STAT", "0")
             .file(mdbx.join("mdbx.c"))
             .compile("libmdbx.a");
     }
