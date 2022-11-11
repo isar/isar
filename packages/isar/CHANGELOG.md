@@ -7,6 +7,7 @@
 - Significantly reduced native library size
 - With the help of the community, the docs have been translated to a range of languages
 - Improved API docs
+- Added integration tests for more platforms to ensure high quality releases
 
 ### Fixes
 

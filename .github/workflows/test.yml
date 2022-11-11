@@ -170,10 +170,14 @@ jobs:
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Setup old NDK
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r22b
-          add-to-path: true
+        run: |
+          ANDROID_HOME=$HOME/Library/Android/sdk
+          SDKMANAGER=$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
+          echo y | $SDKMANAGER "ndk;21.4.7075529"
+          ln -sfn $ANDROID_HOME/ndk/21.4.7075529 $ANDROID_HOME/ndk-bundle
+      - run: echo "$ANDROID_NDK_HOME"
+      - run: echo "$ANDROID_NDK_ROOT"
+      - run: echo "$ANDROID_SDK_ROOT"
       - name: Build Isar Core
         run: |
           bash tool/build_android.sh x64
