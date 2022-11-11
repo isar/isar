@@ -34,7 +34,7 @@ void main() {
     $imports
 
     void main() {
-      const stress = bool.fromEnvironment('STRESS', defaultValue: true);
+      const stress = bool.fromEnvironment('STRESS');
       $calls
     }
 """;
