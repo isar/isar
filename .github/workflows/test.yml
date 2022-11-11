@@ -224,7 +224,7 @@ jobs:
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
       - name: Build dummy APK
-        run: flutter build apk
+        run: flutter build apk integration_test/integration_test.dart
         working-directory: packages/isar_test
       - name: Build APKs
         run: |
