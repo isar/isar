@@ -48,6 +48,7 @@ jobs:
         run: flutter analyze
 
   test:
+    name: Dart Test
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest]
@@ -68,6 +69,7 @@ jobs:
         working-directory: packages/isar_test
 
   valgrind:
+    name: Valgrind
     runs-on: ubuntu-latest
     if: ${{ false }}
     steps:
@@ -94,6 +96,7 @@ jobs:
         working-directory: packages/isar_test
 
   coverage:
+    name: Code Coverage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -128,6 +131,7 @@ jobs:
           files: packages/isar/lcov_isar_test.info
 
   test_generator:
+    name: Generator Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -139,6 +143,7 @@ jobs:
         working-directory: packages/isar_generator
 
   integration_test_ios:
+    name: Integration Test iOS
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -160,6 +165,7 @@ jobs:
         working-directory: packages/isar_test
 
   integration_test_android:
+    name: Integration Test Android
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -233,6 +239,7 @@ jobs:
             --test android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 
   integration_test_macos:
+    name: Integration Test macOS
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -253,6 +260,7 @@ jobs:
         working-directory: packages/isar_test
 
   integration_test_linux:
+    name: Integration Test Linux
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -276,6 +284,7 @@ jobs:
         working-directory: packages/isar_test
 
   integration_test_windows:
+    name: Integration Test Windows
     runs-on: windows-2019
     if: ${{ false }}
     steps:
