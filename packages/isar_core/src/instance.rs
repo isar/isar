@@ -47,6 +47,7 @@ impl IsarInstance {
         name: &str,
         dir: Option<&str>,
         mut schema: Schema,
+        max_size_mib: usize,
         relaxed_durability: bool,
         compact_condition: Option<CompactCondition>,
     ) -> Result<Arc<Self>> {
@@ -65,6 +66,7 @@ impl IsarInstance {
                     dir,
                     instance_id,
                     schema,
+                    max_size_mib,
                     relaxed_durability,
                     compact_condition,
                 )?;
@@ -107,6 +109,7 @@ impl IsarInstance {
         dir: &str,
         instance_id: u64,
         mut schema: Schema,
+        max_size_mib: usize,
         relaxed_durability: bool,
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self> {
@@ -115,8 +118,13 @@ impl IsarInstance {
         Self::move_old_database(name, dir, &isar_file);
 
         let db_count = schema.count_dbs() as u64 + 3;
-        let env = Env::create(&isar_file, db_count, relaxed_durability)
-            .map_err(|e| IsarError::EnvError { error: Box::new(e) })?;
+        let env = Env::create(
+            &isar_file,
+            db_count,
+            max_size_mib.max(1),
+            relaxed_durability,
+        )
+        .map_err(|e| IsarError::EnvError { error: Box::new(e) })?;
 
         let txn = env.txn(true)?;
         let mut manager = SchemaManager::create(instance_id, &txn)?;
@@ -154,7 +162,15 @@ impl IsarInstance {
             if let Some(instance) = instance {
                 Ok(instance)
             } else {
-                Self::open_internal(name, dir, instance_id, schema, relaxed_durability, None)
+                Self::open_internal(
+                    name,
+                    dir,
+                    instance_id,
+                    schema,
+                    max_size_mib,
+                    relaxed_durability,
+                    None,
+                )
             }
         } else {
             Ok(instance)

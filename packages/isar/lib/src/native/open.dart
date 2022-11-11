@@ -79,6 +79,7 @@ Future<Isar> openIsar({
   required List<CollectionSchema<dynamic>> schemas,
   String? directory,
   required String name,
+  required int maxSizeMiB,
   required bool relaxedDurability,
   CompactCondition? compactOnLaunch,
 }) async {
@@ -100,11 +101,13 @@ Future<Isar> openIsar({
     final receivePort = ReceivePort();
     final nativePort = receivePort.sendPort.nativePort;
     final stream = wrapIsarPort(receivePort);
+    print(maxSizeMiB);
     IC.isar_instance_create_async(
       _isarPtrPtr,
       namePtr,
       dirPtr,
       schemaStrPtr,
+      maxSizeMiB,
       relaxedDurability,
       compactMinFileSize ?? 0,
       compactMinBytes ?? 0,
@@ -122,8 +125,9 @@ Future<Isar> openIsar({
 Isar openIsarSync({
   required List<CollectionSchema<dynamic>> schemas,
   String? directory,
-  String name = 'isar',
-  bool relaxedDurability = true,
+  required String name,
+  required int maxSizeMiB,
+  required bool relaxedDurability,
   CompactCondition? compactOnLaunch,
 }) {
   initializeCoreBinary();
@@ -146,6 +150,7 @@ Isar openIsarSync({
         namePtr,
         dirPtr,
         schemaStrPtr,
+        maxSizeMiB,
         relaxedDurability,
         compactMinFileSize ?? 0,
         compactMinBytes ?? 0,

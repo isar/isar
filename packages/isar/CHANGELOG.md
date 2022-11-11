@@ -3,13 +3,17 @@
 ### Enhancements
 
 - Improved performance for all operations
+- Added `maxSizeMiB` option to `Isar.open()` to specify the maximum size of the database file
 - Significantly reduced native library size
+- With the help of the community, the docs have been translated to a range of languages
+- Improved API docs
 
 ### Fixes
 
 - Fixed a native port that was not closed correctly in some cases
 - Added swift version to podspec
 - Fixed crash on Windows
+- Fixed "IndexNotFound" error
 
 ## 3.0.2
 

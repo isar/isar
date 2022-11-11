@@ -2,6 +2,7 @@
 
 part of isar;
 
+/// @nodoc
 @protected
 abstract class IsarReader {
   bool readBool(int offset);

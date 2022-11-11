@@ -169,6 +169,11 @@ jobs:
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
+      - name: Setup old NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r22b
+          add-to-path: true
       - name: Build Isar Core
         run: |
           bash tool/build_android.sh x64

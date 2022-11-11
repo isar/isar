@@ -10,6 +10,7 @@ Future<Isar> tOpen({
   required List<CollectionSchema<dynamic>> schemas,
   String? directory,
   String name = Isar.defaultName,
+  int maxSizeMiB = Isar.defaultMaxSizeMiB,
   bool relaxedDurability = true,
   CompactCondition? compactOnLaunch,
 }) {
@@ -18,6 +19,7 @@ Future<Isar> tOpen({
       schemas,
       directory: directory,
       name: name,
+      maxSizeMiB: maxSizeMiB,
       relaxedDurability: relaxedDurability,
       compactOnLaunch: compactOnLaunch,
       inspector: false,
@@ -28,6 +30,7 @@ Future<Isar> tOpen({
       schemas,
       directory: directory,
       name: name,
+      maxSizeMiB: maxSizeMiB,
       relaxedDurability: relaxedDurability,
       compactOnLaunch: compactOnLaunch,
       inspector: false,

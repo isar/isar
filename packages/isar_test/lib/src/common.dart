@@ -111,6 +111,7 @@ Future<Isar> openTempIsar(
   List<CollectionSchema<dynamic>> schemas, {
   String? name,
   String? directory,
+  int maxSizeMiB = Isar.defaultMaxSizeMiB,
   CompactCondition? compactOnLaunch,
   bool closeAutomatically = true,
 }) async {
@@ -124,6 +125,7 @@ Future<Isar> openTempIsar(
   final isar = await tOpen(
     schemas: schemas,
     name: name ?? getRandomName(),
+    maxSizeMiB: maxSizeMiB,
     directory: directory ?? testTempPath,
     compactOnLaunch: compactOnLaunch,
   );

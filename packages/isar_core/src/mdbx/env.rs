@@ -11,10 +11,15 @@ pub struct Env {
 unsafe impl Sync for Env {}
 unsafe impl Send for Env {}
 
-const MB: isize = 1 << 20;
+const MIB: isize = 1 << 20;
 
 impl Env {
-    pub fn create(path: &str, max_dbs: u64, relaxed_durability: bool) -> Result<Env> {
+    pub fn create(
+        path: &str,
+        max_dbs: u64,
+        max_size_mib: usize,
+        relaxed_durability: bool,
+    ) -> Result<Env> {
         let path = CString::new(path.as_bytes()).unwrap();
         let mut env: *mut ffi::MDBX_env = ptr::null_mut();
         unsafe {
@@ -31,15 +36,17 @@ impl Env {
                 flags |= ffi::MDBX_NOMETASYNC;
             }
 
+            let max_size = (max_size_mib as isize).saturating_mul(MIB);
+
             let mut err_code = 0;
             for i in 0..9 {
                 mdbx_result(ffi::mdbx_env_set_geometry(
                     env,
-                    MB,
+                    MIB,
                     0,
-                    (2000 - i * 200) * MB,
-                    5 * MB,
-                    20 * MB,
+                    max_size - i * max_size / 10,
+                    5 * MIB,
+                    20 * MIB,
                     -1,
                 ))?;
 
@@ -95,23 +102,5 @@ impl Drop for Env {
             }
             self.env = ptr::null_mut();
         }
-    }
-}
-
-#[cfg(test)]
-pub mod tests {
-
-    use super::*;
-
-    #[test]
-    fn test_create() {
-        get_env();
-    }
-
-    pub fn get_env() -> Env {
-        let mut dir = std::env::temp_dir();
-        let r: u64 = rand::random();
-        dir.push(&r.to_string());
-        Env::create(dir.to_str().unwrap(), 50, false).unwrap()
     }
 }

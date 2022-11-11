@@ -185,7 +185,7 @@ final user1 = User()
   ..age = 25;
 
 // user does not exist so this is the same as put()
-await isar.users.putByUsername(user1); 
+await isar.users.putByUsername(user1);
 await isar.user.where().findAll(); // -> [{id: 1, username: 'user1', age: 25}]
 
 final user2 = User()

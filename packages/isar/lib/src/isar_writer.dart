@@ -2,6 +2,7 @@
 
 part of isar;
 
+/// @nodoc
 @protected
 abstract class IsarWriter {
   void writeBool(int offset, bool? value);

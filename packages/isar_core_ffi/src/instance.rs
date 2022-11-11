@@ -30,6 +30,7 @@ pub unsafe extern "C" fn isar_instance_create(
     name: *const c_char,
     path: *const c_char,
     schema_json: *const c_char,
+    max_size_mib: i64,
     relaxed_durability: bool,
     compact_min_file_size: u32,
     compact_min_bytes: u32,
@@ -51,8 +52,14 @@ pub unsafe extern "C" fn isar_instance_create(
             })
         };
 
-        let instance =
-            IsarInstance::open(name, path, schema, relaxed_durability, compact_condition)?;
+        let instance = IsarInstance::open(
+            name,
+            path,
+            schema,
+            max_size_mib as usize,
+            relaxed_durability,
+            compact_condition,
+        )?;
         isar.write(Arc::into_raw(instance));
         Ok(())
     };
@@ -66,6 +73,7 @@ pub unsafe extern "C" fn isar_instance_create_async(
     name: *const c_char,
     path: *const c_char,
     schema_json: *const c_char,
+    max_size_mib: i64,
     relaxed_durability: bool,
     compact_min_file_size: u32,
     compact_min_bytes: u32,
@@ -86,6 +94,7 @@ pub unsafe extern "C" fn isar_instance_create_async(
             name.0,
             path.0,
             schema_json.0,
+            max_size_mib,
             relaxed_durability,
             compact_min_file_size,
             compact_min_bytes,
