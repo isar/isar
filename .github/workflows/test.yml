@@ -229,7 +229,7 @@ jobs:
       - name: Build APKs
         run: |
           ./gradlew app:assembleAndroidTest
-          ./gradlew app:assembleDebug -Ptarget=../integration_test/integration_test.dart
+          ./gradlew app:assembleDebug -Ptarget=integration_test/integration_test.dart
         working-directory: packages/isar_test/android
       - name: Run tests
         run: |
