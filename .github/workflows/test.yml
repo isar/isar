@@ -83,7 +83,7 @@ jobs:
         run: sh tool/prepare_tests.sh
       - name: Run Valgrind
         run: |
-          dart compile exe integration_test/all_tests.dart --define STRESS=false
+          dart compile exe integration_test/all_tests.dart
           valgrind \
             --leak-check=full \
             --error-exitcode=1 \
@@ -156,7 +156,7 @@ jobs:
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
       - name: Run Flutter Integration tests
-        run: flutter test integration_test/integration_test.dart
+        run: flutter test integration_test/integration_test.dart --define STRESS=true
         working-directory: packages/isar_test
 
   integration_test_android:
@@ -194,7 +194,43 @@ jobs:
             arch: x86_64
             profile: pixel
             working-directory: packages/isar_test
-            script: "flutter test integration_test/integration_test.dart --verbose"
+            script: flutter test integration_test/integration_test.dart --define STRESS=true
+
+  firebase_testlab_android:
+    name: Firebase Testlab Android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - id: "auth"
+        uses: "google-github-actions/auth@v1"
+        with:
+          credentials_json: "${{ secrets.FIREBASE_JSON }}"
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v1"
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core
+        run: |
+          bash tool/build_android.sh arm64
+          mkdir -p packages/isar_flutter_libs/android/src/main/jniLibs/arm64-v8a
+          mv libisar_android_arm64.so packages/isar_flutter_libs/android/src/main/jniLibs/arm64-v8a/libisar.so
+      - name: Prepare Tests
+        run: sh tool/prepare_tests.sh
+      - name: Build APKs
+        run: |
+          flutter pub get
+          flutter build apk integration_test/integration_test.dart
+          cd android
+          ./gradlew app:assembleAndroidTest
+          ./gradlew app:assembleDebug -Ptarget=../integration_test/integration_test.dart
+      - name: Run tests
+        run: |
+          gcloud firebase test android run \
+            --project honeyy \
+            --type instrumentation \
+            --app android/app/build/outputs/apk/debug/app-debug.apk \
+            --test android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 
   integration_test_macos:
     runs-on: macos-latest
