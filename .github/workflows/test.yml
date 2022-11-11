@@ -214,6 +214,7 @@ jobs:
       - name: "Set up Cloud SDK"
         uses: "google-github-actions/setup-gcloud@v1"
       - run: gcloud info
+        working-directory: packages/isar_test
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
