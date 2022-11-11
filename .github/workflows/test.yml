@@ -207,13 +207,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v2
       - id: "auth"
         uses: "google-github-actions/auth@v1"
         with:
           credentials_json: "${{ secrets.FIREBASE_JSON }}"
       - name: "Set up Cloud SDK"
         uses: "google-github-actions/setup-gcloud@v1"
+      - run: gcloud info
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
@@ -221,6 +221,7 @@ jobs:
           bash tool/build_android.sh arm64
           mkdir -p packages/isar_flutter_libs/android/src/main/jniLibs/arm64-v8a
           mv libisar_android_arm64.so packages/isar_flutter_libs/android/src/main/jniLibs/arm64-v8a/libisar.so
+      - uses: subosito/flutter-action@v2
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
       - name: Build dummy APK
