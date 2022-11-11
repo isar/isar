@@ -50,7 +50,7 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-2019]
+        os: [macos-latest, ubuntu-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -69,6 +69,7 @@ jobs:
 
   valgrind:
     runs-on: ubuntu-latest
+    if: ${{ false }}
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
@@ -175,9 +176,6 @@ jobs:
           ln -sfn $ANDROID_HOME/ndk/21.4.7075529 $ANDROID_HOME/ndk-bundle
       - name: Update ANDROID_NDK_HOME
         run: echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/21.4.7075529" >> $GITHUB_ENV
-      - run: echo "$ANDROID_NDK_HOME"
-      - run: echo "$ANDROID_NDK_ROOT"
-      - run: echo "$ANDROID_SDK_ROOT"
       - name: Build Isar Core
         run: |
           bash tool/build_android.sh x64
@@ -186,13 +184,17 @@ jobs:
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
       - name: Run Flutter Integration tests
-        uses: reactivecircus/android-emulator-runner@v2
+        continue-on-error: true
+        timeout-minutes: ${{ inputs.timeout_minutes }}
+        uses: Wandalen/wretry.action@v1.0.25
         with:
-          api-level: 29
-          arch: x86_64
-          profile: pixel
-          working-directory: packages/isar_test
-          script: "flutter test integration_test/integration_test.dart --verbose"
+          action: reactivecircus/android-emulator-runner@v2
+          with: |
+            api-level: 29
+            arch: x86_64
+            profile: pixel
+            working-directory: packages/isar_test
+            script: "flutter test integration_test/integration_test.dart --verbose"
 
   integration_test_macos:
     runs-on: macos-latest
@@ -239,6 +241,7 @@ jobs:
 
   integration_test_windows:
     runs-on: windows-2019
+    if: ${{ false }}
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2

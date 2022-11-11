@@ -101,7 +101,6 @@ Future<Isar> openIsar({
     final receivePort = ReceivePort();
     final nativePort = receivePort.sendPort.nativePort;
     final stream = wrapIsarPort(receivePort);
-    print(maxSizeMiB);
     IC.isar_instance_create_async(
       _isarPtrPtr,
       namePtr,
