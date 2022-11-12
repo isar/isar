@@ -50,7 +50,7 @@ impl ParseCallbacks for Callbacks {
 }
 
 const LIBMDBX_REPO: &str = "https://github.com/isar/libmdbx.git";
-const LIBMDBX_TAG: &str = "v0.11.13";
+const LIBMDBX_TAG: &str = "v0.12.2";
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
@@ -66,13 +66,13 @@ fn main() {
         .output()
         .unwrap();
 
-    /*Command::new("git")
-    .current_dir("libmdbx")
-    .arg("revert")
-    .arg("-n")
-    .arg("fe20de")
-    .output()
-    .unwrap();*/
+    Command::new("git")
+        .current_dir("libmdbx")
+        .arg("revert")
+        .arg("-n")
+        .arg("fe20de")
+        .output()
+        .unwrap();
 
     Command::new("make")
         .arg("release-assets")
