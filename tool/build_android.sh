@@ -45,7 +45,7 @@ elif [ "$1" = "x64" ]; then
   mv "target/x86_64-linux-android/release/libisar.so" "libisar_android_x64.so"
 elif [ "$1" = "armv7" ]; then
   rustup target add armv7-linux-androideabi
-  cargo build --target armv7-linux-androideabi --debug
+  cargo build --target armv7-linux-androideabi
   mv "target/armv7-linux-androideabi/debug/libisar.so" "libisar_android_armv7.so"
 else
   rustup target add aarch64-linux-android
