@@ -61,14 +61,18 @@ fn main() {
     Command::new("git")
         .arg("clone")
         .arg(LIBMDBX_REPO)
-        .arg("--depth")
-        .arg("1")
         .arg("--branch")
         .arg(LIBMDBX_TAG)
         .output()
         .unwrap();
 
-    Command::new("git").arg("revert").arg("-no").arg("fe20de");
+    Command::new("git")
+        .current_dir("libmdbx")
+        .arg("revert")
+        .arg("-n")
+        .arg("fe20de")
+        .output()
+        .unwrap();
 
     Command::new("make")
         .arg("release-assets")
