@@ -21,12 +21,12 @@ void main() {
       });
     });
 
-    test('1MB', () async {
-      final isar = await openTempIsar([ModelSchema], maxSizeMiB: 1);
+    test('10MB', () async {
+      final isar = await openTempIsar([ModelSchema], maxSizeMiB: 10);
 
       expect(
         isar.writeTxn(() async {
-          await isar.models.putAll(List.filled(100, Model()));
+          await isar.models.putAll(List.filled(1000, Model()));
         }),
         throwsIsarError('The database is full'),
       );
