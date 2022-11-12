@@ -33,7 +33,7 @@ void main() {
     late Isar isar;
 
     setUp(() async {
-      isar = await openTempIsar([ModelSchema]);
+      isar = await openTempIsar([ModelSchema], maxSizeMiB: 20);
 
       await isar.tWriteTxn(
         () => isar.models.tPutAll(List.filled(100, Model())),
@@ -63,6 +63,7 @@ void main() {
         [ModelSchema],
         directory: isar.directory,
         name: copiedDbFilename,
+        maxSizeMiB: 20,
       );
 
       final originalObjs = await isar.models.where().tFindAll();
@@ -89,6 +90,7 @@ void main() {
         [ModelSchema],
         directory: isar.directory,
         name: copiedDbFilename1,
+        maxSizeMiB: 20,
       );
 
       expect(copiedDbFile1.lengthSync(), greaterThan(0));
@@ -145,6 +147,7 @@ void main() {
         [ModelSchema],
         directory: isar.directory,
         name: copiedDbFilename1,
+        maxSizeMiB: 20,
       );
 
       final copiedDbFilename3 = getRandomName();

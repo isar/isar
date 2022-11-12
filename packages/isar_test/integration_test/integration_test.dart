@@ -13,6 +13,7 @@ import 'all_tests.dart' as tests;
 void main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   final completer = Completer<void>();
+
   group('Integration test', () {
     setUpAll(() async {
       if (!kIsWeb) {
@@ -20,13 +21,15 @@ void main() async {
         testTempPath = dir.path;
       }
     });
-    tearDownAll(completer.complete);
+    tearDownAll(() {
+      print('Isar test done');
+      completer.complete();
+    });
 
     tests.main();
   });
 
-  testWidgets('Isar', (WidgetTester tester) async {
-    await tester.pumpWidget(Container());
+  testWidgets('Isar', (t) async {
     await completer.future;
     expect(testCount > 0, true);
     expect(testErrors, isEmpty);

@@ -30,7 +30,7 @@ abstract class Isar {
   static const String defaultName = 'default';
 
   /// The default max Isar size.
-  static const int defaultMaxSizeMiB = 2048;
+  static const int defaultMaxSizeMiB = 1024;
 
   /// Placeholder for an auto-increment id.
   static const Id autoIncrement = isarAutoIncrementId;

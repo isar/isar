@@ -40,11 +40,12 @@ impl Env {
 
             let mut err_code = 0;
             for i in 0..9 {
+                let max_size_i = (max_size - i * (max_size / 10)).clamp(10 * MIB, isize::MAX);
                 mdbx_result(ffi::mdbx_env_set_geometry(
                     env,
                     MIB,
                     0,
-                    max_size - i * max_size / 10,
+                    max_size_i,
                     5 * MIB,
                     20 * MIB,
                     -1,
