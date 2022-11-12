@@ -15,17 +15,6 @@ unsafe impl Send for Env {}
 
 const MIB: isize = 1 << 20;
 
-unsafe extern "C" fn lg(
-    level: i32,
-    flags: *const i8,
-    line: i32,
-    msg: *const i8,
-    args: ffi::va_list,
-) {
-    let msg = CString::from_raw(msg as *mut i8);
-    println!("mdbx: {}:{}:{}", level, line, msg.to_str().unwrap(),);
-}
-
 impl Env {
     pub fn create(
         path: &str,
@@ -37,7 +26,7 @@ impl Env {
             ffi::mdbx_setup_debug(
                 MDBX_LOG_VERBOSE,
                 MDBX_DBG_ASSERT,
-                std::mem::transmute(-1i64),
+                std::mem::transmute(-1isize),
             );
         }
         let path = CString::new(path.as_bytes()).unwrap();
