@@ -4,14 +4,16 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pub_app/models/asset.dart';
 import 'package:pub_app/models/package.dart';
 import 'package:pub_app/package_manager.dart';
 import 'package:pub_app/repository.dart';
 import 'package:riverpod/riverpod.dart';
 
-final isarPod = FutureProvider((ref) {
-  return Isar.open([PackageSchema, AssetSchema]);
+final isarPod = FutureProvider((ref) async {
+  final dir = await getApplicationDocumentsDirectory();
+  return Isar.open([PackageSchema, AssetSchema], directory: dir.path);
 });
 
 final repositoryPod = Provider((ref) {

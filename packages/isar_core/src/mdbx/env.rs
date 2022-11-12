@@ -1,5 +1,3 @@
-use ffi::{MDBX_DBG_ASSERT, MDBX_LOG_VERBOSE};
-
 use crate::error::{IsarError, Result};
 use crate::mdbx::mdbx_result;
 use crate::mdbx::txn::Txn;
@@ -22,13 +20,6 @@ impl Env {
         max_size_mib: usize,
         relaxed_durability: bool,
     ) -> Result<Env> {
-        unsafe {
-            ffi::mdbx_setup_debug(
-                MDBX_LOG_VERBOSE,
-                MDBX_DBG_ASSERT,
-                std::mem::transmute(-1isize),
-            );
-        }
         let path = CString::new(path.as_bytes()).unwrap();
         let mut env: *mut ffi::MDBX_env = ptr::null_mut();
         unsafe {
@@ -49,7 +40,6 @@ impl Env {
 
             let mut err_code = 0;
             for i in 0..9 {
-                eprintln!("mdbx_env_open try: {}", i);
                 mdbx_result(ffi::mdbx_env_set_geometry(
                     env,
                     MIB,
