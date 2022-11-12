@@ -50,7 +50,7 @@ impl ParseCallbacks for Callbacks {
 }
 
 const LIBMDBX_REPO: &str = "https://github.com/isar/libmdbx.git";
-const LIBMDBX_TAG: &str = "v0.12.2";
+const LIBMDBX_TAG: &str = "v0.11.12";
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
@@ -143,7 +143,7 @@ fn main() {
             .define("MDBX_TXN_CHECKOWNER", "0")
             .define("MDBX_OSX_SPEED_INSTEADOF_DURABILITY", "1")
             .define("MDBX_HAVE_BUILTIN_CPU_SUPPORTS", "0")
-            //.define("MDX_DEBUG", "7")
+            .define("MDX_DEBUG", "7")
             .file(mdbx.join("mdbx.c"))
             .compile("libmdbx.a");
     }
