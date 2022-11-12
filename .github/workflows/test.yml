@@ -239,9 +239,9 @@ jobs:
           gcloud firebase test android run \
             --project honeyy \
             --type instrumentation \
-            --device model=Nexus5,version=23  \
-            --device model=SM-G960U1,version=26 \
-            --device model=Pixel 7 Pro,version=33 \
+            --device model=hammerhead,version=23  \
+            --device model=starqlteue,version=26 \
+            --device model=cheetah,version=33 \
             --app build/app/outputs/apk/debug/app-debug.apk \
             --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk\
         working-directory: packages/isar_test
