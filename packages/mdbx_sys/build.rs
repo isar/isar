@@ -68,6 +68,8 @@ fn main() {
         .output()
         .unwrap();
 
+    Command::new("git").arg("revert").arg("-no").arg("fe20de");
+
     Command::new("make")
         .arg("release-assets")
         .current_dir("libmdbx")
@@ -77,11 +79,6 @@ fn main() {
     let mut mdbx = PathBuf::from(&env::var("CARGO_MANIFEST_DIR").unwrap());
     mdbx.push("libmdbx");
     mdbx.push("dist");
-
-    let core_path = mdbx.join("mdbx.c");
-    let core = fs::read_to_string(core_path.as_path()).unwrap();
-    let core = core.replace("unlikely(linux_kernel_version < 0x04000000)", "false");
-    fs::write(core_path.as_path(), core).unwrap();
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
