@@ -78,6 +78,11 @@ fn main() {
     mdbx.push("libmdbx");
     mdbx.push("dist");
 
+    let core_path = mdbx.join("mdbx.c");
+    let core = fs::read_to_string(core_path.as_path()).unwrap();
+    let core = core.replace("unlikely(linux_kernel_version < 0x04000000)", "false");
+    fs::write(core_path.as_path(), core).unwrap();
+
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
     let bindings = bindgen::Builder::default()

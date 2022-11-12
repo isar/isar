@@ -40,6 +40,7 @@ impl Env {
 
             let mut err_code = 0;
             for i in 0..9 {
+                eprintln!("mdbx_env_open try: {}", i);
                 mdbx_result(ffi::mdbx_env_set_geometry(
                     env,
                     MIB,
