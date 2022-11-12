@@ -18,13 +18,14 @@ final isar = await Isar.open([RecipeSchema]);
 
 You can use the default config or provide some of the following parameters:
 
-| Config |  Description |
-| -------| -------------|
-| `name` | Open multiple instances with distinct names. By default, `"default"` is used. |
-| `directory` | The storage location for this instance. By default, `NSDocumentDirectory` is used for iOS and `getDataDirectory` for Android. Not required for web. |
-| `relaxedDurability` | Relaxes the durability guarantee to increase write performance. In case of a system crash (not app crash), it is possible to lose the last committed transaction. Corruption is not possible |
-| `compactOnLaunch` | Conditions to check whether the database should be compacted when the instance is opened. |
-| `inspector` | Enabled the Inspector for debug builds. For profile and release builds this option is ignored. |
+| Config              | Description                                                                                                                                                                                                                                                                                  |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`              | Open multiple instances with distinct names. By default, `"default"` is used.                                                                                                                                                                                                                |
+| `directory`         | The storage location for this instance. By default, `NSDocumentDirectory` is used for iOS and `getDataDirectory` for Android. Not required for web.                                                                                                                                          |
+| `maxSizeMib`        | The maximum size of the database file in MiB. Isar uses virtual memory which is not an endless resource so be mindful with the value here. If you open multiple instances they share the available virtual memory so each instance should have a smaller `maxSizeMib` . The default is 2048. |
+| `relaxedDurability` | Relaxes the durability guarantee to increase write performance. In case of a system crash (not app crash), it is possible to lose the last committed transaction. Corruption is not possible                                                                                                 |
+| `compactOnLaunch`   | Conditions to check whether the database should be compacted when the instance is opened.                                                                                                                                                                                                    |
+| `inspector`         | Enabled the Inspector for debug builds. For profile and release builds this option is ignored.                                                                                                                                                                                               |
 
 If an instance is already open, calling `Isar.open()` will yield the existing instance regardless of the specified parameters. That's useful for using Isar in an isolate.
 

@@ -54,10 +54,7 @@ void main() {
     isarTestVm('.copyToFile() should keep the same content', () async {
       final copiedDbFilename = getRandomName();
       final copiedDbFile = File(
-        path.join(
-          isar.directory!,
-          '$copiedDbFilename.isar',
-        ),
+        path.join(isar.directory!, '$copiedDbFilename.isar'),
       );
 
       await isar.copyToFile(copiedDbFile.path);
@@ -73,7 +70,6 @@ void main() {
         copiedIsar.models.where(),
         originalObjs,
       );
-      await copiedDbFile.delete();
     });
 
     isarTestVm('.copyToFile() should compact copied file', () async {

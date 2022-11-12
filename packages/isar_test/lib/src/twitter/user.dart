@@ -1,8 +1,7 @@
 import 'package:isar/isar.dart';
+import 'package:isar_test/src/twitter/entities.dart';
+import 'package:isar_test/src/twitter/util.dart';
 import 'package:json_annotation/json_annotation.dart';
-
-import 'entities.dart';
-import 'util.dart';
 
 part 'user.g.dart';
 

@@ -3,10 +3,10 @@ name: Dart CI
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
     branches:
-    - main
+      - main
 
 jobs:
   format:
@@ -48,35 +48,65 @@ jobs:
         run: flutter analyze
 
   test:
+    name: Dart Test
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
+      - run: echo "$OSTYPE"
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core
+        run: sh tool/build.sh
+      - name: Prepare Tests
+        run: sh tool/prepare_tests.sh
       - name: Run Flutter Unit tests
+        run: flutter test -j 1
+        working-directory: packages/isar_test
+
+  valgrind:
+    name: Valgrind
+    runs-on: ubuntu-latest
+    if: ${{ false }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Install valgrind and llvm
+        run: sudo apt update && sudo apt install -y valgrind libclang-dev
+      - name: Build Isar Core
+        run: sh tool/build.sh
+      - name: Prepare Tests
+        run: sh tool/prepare_tests.sh
+      - name: Run Valgrind
         run: |
-          flutter pub get
-          dart tool/generate_long_double_test.dart
-          dart tool/generate_prepare_test.dart
-          flutter pub run build_runner build
-          flutter test -j 1
+          dart compile exe integration_test/all_tests.dart
+          valgrind \
+            --leak-check=full \
+            --error-exitcode=1 \
+            --show-mismatched-frees=no \
+            --show-possibly-lost=no \
+            --errors-for-leak-kinds=definite \
+            integration_test/all_tests.exe
         working-directory: packages/isar_test
 
   coverage:
+    name: Code Coverage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
-      - name: Prepare Unit tests
-        run: |
-          flutter pub get
-          dart tool/generate_long_double_test.dart
-          dart tool/generate_prepare_test.dart
-          flutter pub run build_runner build
-        working-directory: packages/isar_test
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core
+        run: sh tool/build.sh
+      - name: Prepare Tests
+        run: sh tool/prepare_tests.sh
       - name: Add packages
         run: |
           flutter pub add json_annotation
@@ -101,6 +131,7 @@ jobs:
           files: packages/isar/lcov_isar_test.info
 
   test_generator:
+    name: Generator Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -111,99 +142,178 @@ jobs:
           dart test
         working-directory: packages/isar_generator
 
-  drive_ios:
-    strategy:
-      matrix:
-        device:
-          - "iPhone 8"
-          - "iPhone 11 Pro Max"
-      fail-fast: false
+  integration_test_ios:
+    name: Integration Test iOS
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - name: Start simulator
         uses: futureware-tech/simulator-action@v2
         with:
-          model: ${{ matrix.device }}
+          model: iPhone 13
       - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
       - name: Build Isar Core
         run: |
           bash tool/build_ios.sh
           unzip isar_ios.xcframework.zip -d packages/isar_flutter_libs/ios
-      - name: Run Flutter Driver tests
-        run: |
-          flutter pub get
-          dart tool/generate_long_double_test.dart
-          flutter pub run build_runner build
-          dart tool/generate_all_tests.dart
-          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart
+      - name: Prepare Tests
+        run: sh tool/prepare_tests.sh
+      - name: Run Flutter Integration tests
+        run: flutter test integration_test/integration_test.dart --dart-define STRESS=true
         working-directory: packages/isar_test
 
-  drive_android:
+  integration_test_android:
+    name: Integration Test Android
     runs-on: macos-latest
-    if: ${{ false }}
-    strategy:
-      matrix:
-        api-level: [29] #[21, 29]
-        target: [default]
-      fail-fast: false
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
         with:
-          java-version: '11'
-          distribution: 'zulu'
+          java-version: "11"
+          distribution: "zulu"
       - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Setup old NDK
+        run: |
+          echo y | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;21.4.7075529"
+          ln -sfn $ANDROID_HOME/ndk/21.4.7075529 $ANDROID_HOME/ndk-bundle
+      - name: Update ANDROID_NDK_HOME
+        run: echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/21.4.7075529" >> $GITHUB_ENV
       - name: Build Isar Core
         run: |
           bash tool/build_android.sh x64
+          mkdir -p packages/isar_flutter_libs/android/src/main/jniLibs/x86_64
           mv libisar_android_x64.so packages/isar_flutter_libs/android/src/main/jniLibs/x86_64/libisar.so
-      - name: Run isar_generator
-        run: |
-          flutter pub get
-          dart tool/generate_long_double_test.dart
-          flutter pub run build_runner build
-          dart tool/generate_all_tests.dart
-        working-directory: packages/isar_test
-      - name: Run Flutter Driver tests
-        uses: reactivecircus/android-emulator-runner@v2
+      - name: Prepare Tests
+        run: sh tool/prepare_tests.sh
+      - name: Run Flutter Integration tests
+        continue-on-error: true
+        timeout-minutes: ${{ inputs.timeout_minutes }}
+        uses: Wandalen/wretry.action@v1.0.25
         with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          arch: x86_64
-          profile: Nexus 6
-          working-directory: packages/isar_test
-          script: "flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart"
+          action: reactivecircus/android-emulator-runner@v2
+          with: |
+            api-level: 29
+            arch: x86_64
+            profile: pixel
+            working-directory: packages/isar_test
+            script: flutter test integration_test/integration_test.dart --dart-define STRESS=true
 
-  drive_desktop:
-    strategy:
-      matrix:
-        os: [macos-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+  firebase_testlab_android:
+    name: Firebase Testlab Android
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
-      - name: Install Linux requirements
-        run: sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
-        if: matrix.os == 'ubuntu-latest'
-      - name: Build Isar Core macOS
-        if: matrix.os == 'macos-latest'
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core arm64
+        run: |
+          bash tool/build_android.sh arm64
+          mkdir -p packages/isar_flutter_libs/android/src/main/jniLibs/arm64-v8a
+          mv libisar_android_arm64.so packages/isar_flutter_libs/android/src/main/jniLibs/arm64-v8a/libisar.so
+      - name: Build Isar Core armv7
+        run: |
+          bash tool/build_android.sh armv7
+          mkdir -p packages/isar_flutter_libs/android/src/main/jniLibs/armeabi-v7a
+          mv libisar_android_armv7.so packages/isar_flutter_libs/android/src/main/jniLibs/armeabi-v7a/libisar.so
+      - name: Prepare Tests
+        run: sh tool/prepare_tests.sh
+      - name: Build dummy APK
+        run: flutter build apk integration_test/integration_test.dart
+        working-directory: packages/isar_test
+      - name: Build APKs
+        run: |
+          ./gradlew app:assembleAndroidTest
+          ./gradlew app:assembleDebug -Ptarget=integration_test/integration_test.dart
+        working-directory: packages/isar_test/android
+      - name: Login to Google Cloud
+        uses: "google-github-actions/auth@v1"
+        with:
+          credentials_json: "${{ secrets.FIREBASE_JSON }}"
+      - name: Run tests
+        run: |
+          gcloud firebase test android run \
+            --project honeyy \
+            --type instrumentation \
+            --device model=hammerhead,version=23  \
+            --device model=starqlteue,version=26 \
+            --device model=cheetah,version=33 \
+            --device model=1610,version=23 \
+            --device model=griffin,version=24 \
+            --device model=harpia,version=23 \
+            --device model=sailfish,version=25 \
+            --app build/app/outputs/apk/debug/app-debug.apk \
+            --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk\
+        working-directory: packages/isar_test
+
+  integration_test_macos:
+    name: Integration Test macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core
         run: |
           bash tool/build_macos.sh
           install_name_tool -id @rpath/libisar.dylib libisar_macos.dylib
           mv libisar_macos.dylib packages/isar_flutter_libs/macos/libisar.dylib
+      - name: Prepare Tests
+        run: sh tool/prepare_tests.sh
       - name: Run Flutter Driver tests
         run: |
-          flutter pub get
-          dart tool/generate_long_double_test.dart
-          flutter pub run build_runner build
-          dart tool/generate_all_tests.dart
-          flutter config --no-enable-web
           flutter config --enable-macos-desktop 
+          flutter test -d macos integration_test/integration_test.dart --dart-define STRESS=true
+        working-directory: packages/isar_test
+
+  integration_test_linux:
+    name: Integration Test Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Install Linux requirements
+        run: sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev
+      - name: Setup headless display
+        uses: pyvista/setup-headless-display-action@v1
+      - name: Build Isar Core
+        run: |
+          bash tool/build_linux.sh x64
+          mv libisar_linux_x64.so packages/isar_flutter_libs/linux/libisar.so
+      - name: Prepare Tests
+        run: sh tool/prepare_tests.sh
+      - name: Run Flutter Driver tests
+        run: |
           flutter config --enable-linux-desktop 
+          flutter test -d linux integration_test/integration_test.dart --dart-define STRESS=true
+        working-directory: packages/isar_test
+
+  integration_test_windows:
+    name: Integration Test Windows
+    runs-on: windows-2019
+    if: ${{ false }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core
+        run: |
+          bash tool/build_windows.sh x64
+          mv isar_windows_x64.dll packages/isar_flutter_libs/windows/libisar.dll
+      - name: Prepare Tests
+        run: sh tool/prepare_tests.sh
+      - name: Run Flutter Driver tests
+        run: |
           flutter config --enable-windows-desktop 
-          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart
+          flutter test -d windows integration_test/integration_test.dart --dart-define STRESS=true
         working-directory: packages/isar_test
 
   drive_chrome:
@@ -220,8 +330,8 @@ jobs:
         run: |
           flutter pub get
           dart tool/generate_long_double_test.dart
-          flutter pub run build_runner build
           dart tool/generate_all_tests.dart
+          flutter pub run build_runner build
           flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart -d web-server --browser-name chrome
         working-directory: packages/isar_test
 

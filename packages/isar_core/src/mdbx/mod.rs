@@ -47,7 +47,10 @@ pub fn mdbx_result(err_code: c_int) -> Result<()> {
             let err = CStr::from_ptr(err_raw);
             Err(IsarError::MdbxError {
                 code: other,
-                message: err.to_str().unwrap().to_string(),
+                message: err
+                    .to_str()
+                    .unwrap_or("Cannot decode error message")
+                    .to_string(),
             })
         },
     }

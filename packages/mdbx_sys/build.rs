@@ -50,7 +50,7 @@ impl ParseCallbacks for Callbacks {
 }
 
 const LIBMDBX_REPO: &str = "https://github.com/isar/libmdbx.git";
-const LIBMDBX_TAG: &str = "v0.12.2";
+const LIBMDBX_TAG: &str = "v0.11.2";
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
@@ -61,12 +61,18 @@ fn main() {
     Command::new("git")
         .arg("clone")
         .arg(LIBMDBX_REPO)
-        .arg("--depth")
-        .arg("1")
         .arg("--branch")
         .arg(LIBMDBX_TAG)
         .output()
         .unwrap();
+
+    /*Command::new("git")
+    .current_dir("libmdbx")
+    .arg("revert")
+    .arg("-n")
+    .arg("fe20de")
+    .output()
+    .unwrap();*/
 
     Command::new("make")
         .arg("release-assets")
@@ -136,7 +142,8 @@ fn main() {
             .define("MDBX_LOCK_SUFFIX", "\".lock\"")
             .define("MDBX_TXN_CHECKOWNER", "0")
             .define("MDBX_OSX_SPEED_INSTEADOF_DURABILITY", "1")
-            .define("NDEBUG", "1")
+            .define("MDBX_HAVE_BUILTIN_CPU_SUPPORTS", "0")
+            //.define("MDX_DEBUG", "7")
             .file(mdbx.join("mdbx.c"))
             .compile("libmdbx.a");
     }

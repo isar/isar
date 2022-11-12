@@ -1,11 +1,9 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
-
-import 'twitter/tweet.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('JSON', () {

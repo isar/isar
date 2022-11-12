@@ -29,8 +29,10 @@ abstract class Isar {
   /// The default Isar instance name.
   static const String defaultName = 'default';
 
+  /// The default max Isar size.
+  static const int defaultMaxSizeMiB = 2048;
+
   /// Placeholder for an auto-increment id.
-  // ignore: prefer_const_declarations
   static const Id autoIncrement = isarAutoIncrementId;
 
   static final Map<String, Isar> _instances = <String, Isar>{};
@@ -87,6 +89,7 @@ abstract class Isar {
     List<CollectionSchema<dynamic>> schemas, {
     String? directory,
     String name = defaultName,
+    int maxSizeMiB = Isar.defaultMaxSizeMiB,
     bool relaxedDurability = true,
     CompactCondition? compactOnLaunch,
     bool inspector = true,
@@ -105,6 +108,7 @@ abstract class Isar {
       schemas: schemas,
       directory: directory,
       name: name,
+      maxSizeMiB: maxSizeMiB,
       relaxedDurability: relaxedDurability,
       compactOnLaunch: compactOnLaunch,
     );
@@ -115,6 +119,7 @@ abstract class Isar {
     List<CollectionSchema<dynamic>> schemas, {
     String? directory,
     String name = defaultName,
+    int maxSizeMiB = Isar.defaultMaxSizeMiB,
     bool relaxedDurability = true,
     CompactCondition? compactOnLaunch,
     bool inspector = true,
@@ -133,6 +138,7 @@ abstract class Isar {
       schemas: schemas,
       directory: directory,
       name: name,
+      maxSizeMiB: maxSizeMiB,
       relaxedDurability: relaxedDurability,
       compactOnLaunch: compactOnLaunch,
     );

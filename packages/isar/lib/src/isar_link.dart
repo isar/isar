@@ -1,7 +1,7 @@
 part of isar;
 
 /// @nodoc
-@protected
+@sealed
 abstract class IsarLinkBase<OBJ> {
   /// Is the containing object managed by Isar?
   bool get isAttached;
@@ -12,32 +12,33 @@ abstract class IsarLinkBase<OBJ> {
   /// Has this link been loaded?
   bool get isLoaded;
 
+  /// {@template link_load}
   /// Loads the linked object(s) from the database
+  /// {@endtemplate}
   Future<void> load();
 
-  /// Loads the linked object(s) from the database
+  /// {@macro link_load}
   void loadSync();
 
+  /// {@template link_save}
   /// Saves the linked object(s) to the database if there are changes.
   ///
   /// Also puts new objects into the database that have id set to `null` or
   /// `Isar.autoIncrement`.
+  /// {@endtemplate}
   Future<void> save();
 
-  /// Saves the linked object(s) to the database if there are changes.
-  ///
-  /// Also puts new objects into the database that have id set to `null` or
-  /// `Isar.autoIncrement`.
+  /// {@macro link_save}
   void saveSync();
 
+  /// {@template link_reset}
   /// Unlinks all linked object(s).
   ///
   /// You can even call this method on links that have not been loaded yet.
+  /// {@endtemplate}
   Future<void> reset();
 
-  /// Unlinks all linked object(s).
-  ///
-  /// You can even call this method on links that have not been loaded yet.
+  /// {@macro link_reset}
   void resetSync();
 
   /// @nodoc
@@ -77,20 +78,19 @@ abstract class IsarLinks<OBJ> implements IsarLinkBase<OBJ>, Set<OBJ> {
   @override
   void loadSync({bool overrideChanges = true});
 
+  /// {@template links_update}
   /// Creates and removes the specified links in the database.
   ///
   /// This operation does not alter the state of the local copy of this link
   /// and it can even be used without loading the link.
+  /// {@endtemplate}
   Future<void> update({
     Iterable<OBJ> link = const [],
     Iterable<OBJ> unlink = const [],
     bool reset = false,
   });
 
-  /// Creates and removes the specified links in the database.
-  ///
-  /// This operation does not alter the state of the local copy of this link
-  /// and it can even be used without loading the link.
+  /// {@macro links_update}
   void updateSync({
     Iterable<OBJ> link = const [],
     Iterable<OBJ> unlink = const [],
@@ -100,15 +100,14 @@ abstract class IsarLinks<OBJ> implements IsarLinkBase<OBJ>, Set<OBJ> {
   /// Starts a query for linked objects.
   QueryBuilder<OBJ, OBJ, QAfterFilterCondition> filter();
 
+  /// {@template links_count}
   /// Counts the linked objects in the database.
   ///
   /// It does not take the local state into account and can even be used
   /// without loading the link.
+  /// {@endtemplate}
   Future<int> count() => filter().count();
 
-  /// Counts the linked objects in the database.
-  ///
-  /// It does not take the local state into account and can even be used
-  /// without loading the link.
+  /// {@macro links_count}
   int countSync() => filter().countSync();
 }

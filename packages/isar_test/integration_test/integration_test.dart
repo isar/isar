@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, depend_on_referenced_packages
 
 import 'dart:async';
 
@@ -12,21 +12,7 @@ import 'all_tests.dart' as tests;
 
 void main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
-  final completer = Completer<List<String>>();
-  executeTests(completer);
-
-  testWidgets('Isar', (WidgetTester tester) async {
-    await tester.pumpWidget(Container());
-    final errors = await completer.future;
-    for (final err in errors) {
-      print(err);
-    }
-    expect(errors.isEmpty, true);
-  });
-}
-
-void executeTests(Completer<List<String>> completer) {
+  final completer = Completer<void>();
   group('Integration test', () {
     setUpAll(() async {
       if (!kIsWeb) {
@@ -34,11 +20,15 @@ void executeTests(Completer<List<String>> completer) {
         testTempPath = dir.path;
       }
     });
-    tearDownAll(() {
-      final result = testCount == 0 ? ['No tests were executed'] : testErrors;
-      completer.complete(result);
-    });
+    tearDownAll(completer.complete);
 
     tests.main();
+  });
+
+  testWidgets('Isar', (WidgetTester tester) async {
+    await tester.pumpWidget(Container());
+    await completer.future;
+    expect(testCount > 0, true);
+    expect(testErrors, isEmpty);
   });
 }

@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_initializing_formals
-
 part of isar;
 
 /// A where clause to traverse an Isar index.
@@ -20,20 +18,18 @@ class IdWhereClause extends WhereClause {
   /// Where clause that matches all id values greater than the given [lower]
   /// bound.
   const IdWhereClause.greaterThan({
-    required Id lower,
+    required Id this.lower,
     this.includeLower = true,
-  })  : lower = lower,
-        upper = null,
+  })  : upper = null,
         includeUpper = true,
         super._();
 
   /// Where clause that matches all id values less than the given [upper]
   /// bound.
   const IdWhereClause.lessThan({
-    required Id upper,
+    required Id this.upper,
     this.includeUpper = true,
-  })  : upper = upper,
-        lower = null,
+  })  : lower = null,
         includeLower = true,
         super._();
 
@@ -86,11 +82,10 @@ class IndexWhereClause extends WhereClause {
   /// for equality.
   const IndexWhereClause.greaterThan({
     required this.indexName,
-    required IndexKey lower,
+    required IndexKey this.lower,
     this.includeLower = true,
     this.epsilon = Query.epsilon,
-  })  : lower = lower,
-        upper = null,
+  })  : upper = null,
         includeUpper = true,
         super._();
 
@@ -101,11 +96,10 @@ class IndexWhereClause extends WhereClause {
   /// for equality.
   const IndexWhereClause.lessThan({
     required this.indexName,
-    required IndexKey upper,
+    required IndexKey this.upper,
     this.includeUpper = true,
     this.epsilon = Query.epsilon,
-  })  : upper = upper,
-        lower = null,
+  })  : lower = null,
         includeLower = true,
         super._();
 
@@ -127,14 +121,12 @@ class IndexWhereClause extends WhereClause {
   /// are checked for equality.
   const IndexWhereClause.between({
     required this.indexName,
-    required IndexKey lower,
+    required IndexKey this.lower,
     this.includeLower = true,
-    required IndexKey upper,
+    required IndexKey this.upper,
     this.includeUpper = true,
     this.epsilon = Query.epsilon,
-  })  : lower = lower,
-        upper = upper,
-        super._();
+  }) : super._();
 
   /// The Isar name of the index to be used.
   final String indexName;
@@ -244,12 +236,11 @@ class FilterCondition extends FilterOperation {
   ///
   /// For lists, at least one of the values in the list has to match.
   const FilterCondition.equalTo({
-    required String property,
+    required this.property,
     required Object? value,
     this.caseSensitive = true,
     this.epsilon = Query.epsilon,
   })  : type = FilterConditionType.equalTo,
-        property = property,
         value1 = value,
         include1 = true,
         value2 = null,
@@ -578,20 +569,17 @@ class LinkFilter extends FilterOperation {
   /// Create a filter condition based on a link.
   const LinkFilter({
     required this.linkName,
-    required FilterOperation filter,
-  })  : filter = filter,
-        lower = null,
+    required FilterOperation this.filter,
+  })  : lower = null,
         upper = null,
         super._();
 
   /// Create a filter condition based on the number of linked objects.
   const LinkFilter.length({
     required this.linkName,
-    required int lower,
-    required int upper,
+    required int this.lower,
+    required int this.upper,
   })  : filter = null,
-        lower = lower,
-        upper = upper,
         assert(lower >= 0 && upper >= 0, 'Link length must be positive.'),
         super._();
 

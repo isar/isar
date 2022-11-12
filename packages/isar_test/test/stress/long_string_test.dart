@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
+import 'package:test/test.dart';
 
 part 'long_string_test.g.dart';
 
@@ -37,49 +37,51 @@ String _randomStr(int length) {
 }
 
 void main() {
-  late Isar isar;
+  group('Long String', () {
+    late Isar isar;
 
-  setUp(() async {
-    isar = await openTempIsar([StringModelSchema]);
-  });
-
-  isarTest('Long String', () async {
-    final models = <StringModel>[
-      for (var i = 0; i < 100; i++)
-        StringModel(
-          string: '${_randomStr(50000)}test$i${_randomStr(50000)}',
-        ),
-    ];
-    await isar.tWriteTxn(() async {
-      await isar.stringModels.tPutAll(models);
+    setUp(() async {
+      isar = await openTempIsar([StringModelSchema]);
     });
 
-    await qEqual(isar.stringModels.where(), models);
+    isarTest('Single', () async {
+      final models = <StringModel>[
+        for (var i = 0; i < 100; i++)
+          StringModel(
+            string: '${_randomStr(50000)}test$i${_randomStr(50000)}',
+          ),
+      ];
+      await isar.tWriteTxn(() async {
+        await isar.stringModels.tPutAll(models);
+      });
 
-    await qEqual(
-      isar.stringModels.filter().stringContains('test75'),
-      [models[75]],
-    );
-    await qEqual(
-      isar.stringModels.filter().stringMatches('*test66*'),
-      [models[66]],
-    );
-  });
+      await qEqual(isar.stringModels.where(), models);
 
-  isarTest('Long String List', () async {
-    final models = <StringModel>[
-      for (var i = 0; i < 10; i++)
-        StringModel(
-          stringList: [
-            for (var j = 0; j < 100; j++)
-              '${_randomStr(10000)}test${i}_$j${_randomStr(10000)}',
-          ],
-        ),
-    ];
-    await isar.tWriteTxn(() async {
-      await isar.stringModels.tPutAll(models);
+      await qEqual(
+        isar.stringModels.filter().stringContains('test75'),
+        [models[75]],
+      );
+      await qEqual(
+        isar.stringModels.filter().stringMatches('*test66*'),
+        [models[66]],
+      );
     });
 
-    await qEqual(isar.stringModels.where(), models);
+    isarTest('List', () async {
+      final models = <StringModel>[
+        for (var i = 0; i < 10; i++)
+          StringModel(
+            stringList: [
+              for (var j = 0; j < 100; j++)
+                '${_randomStr(10000)}test${i}_$j${_randomStr(10000)}',
+            ],
+          ),
+      ];
+      await isar.tWriteTxn(() async {
+        await isar.stringModels.tPutAll(models);
+      });
+
+      await qEqual(isar.stringModels.where(), models);
+    });
   });
 }

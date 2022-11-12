@@ -48,7 +48,7 @@ class PubAppBar extends ConsumerWidget implements PreferredSizeWidget {
             darkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
           ),
           onPressed: () {
-            ref.read(darkModePod.state).state = !darkMode;
+            ref.read(darkModePod.notifier).state = !darkMode;
           },
         ),
       ],

@@ -5,9 +5,6 @@ import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
 
-import 'twitter/entities.dart';
-import 'twitter/tweet.dart';
-
 Future<List<Tweet>> downloadTweets(String dir, int index) async {
   final i = index < 10 ? '0$index' : '$index';
   final file = File('$dir/tweets$i.json');

@@ -13,7 +13,7 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:test_api/src/backend/invoker.dart';
 
-const bool kIsWeb = identical(0, 0.0);
+const kIsWeb = identical(0, 0.0);
 
 final testErrors = <String>[];
 int testCount = 0;
@@ -111,6 +111,7 @@ Future<Isar> openTempIsar(
   List<CollectionSchema<dynamic>> schemas, {
   String? name,
   String? directory,
+  int maxSizeMiB = Isar.defaultMaxSizeMiB,
   CompactCondition? compactOnLaunch,
   bool closeAutomatically = true,
 }) async {
@@ -124,6 +125,7 @@ Future<Isar> openTempIsar(
   final isar = await tOpen(
     schemas: schemas,
     name: name ?? getRandomName(),
+    maxSizeMiB: maxSizeMiB,
     directory: directory ?? testTempPath,
     compactOnLaunch: compactOnLaunch,
   );

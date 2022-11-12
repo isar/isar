@@ -1,5 +1,5 @@
 // coverage:ignore-file
-// ignore_for_file: avoid_print, avoid_dynamic_calls
+// ignore_for_file: avoid_print
 
 part of isar;
 
@@ -243,11 +243,12 @@ abstract class _IsarConnect {
     if (objects.isNotEmpty) {
       dynamic object = objects.first;
       for (var i = 0; i < keys.length; i++) {
-        final key = object is List ? int.parse(keys[i]) : keys[i];
-        if (i == keys.length - 1) {
-          object[key] = cEdit.value;
-        } else {
-          object = object[key];
+        if (i == keys.length - 1 && object is Map) {
+          object[keys[i]] = cEdit.value;
+        } else if (object is Map) {
+          object = object[keys[i]];
+        } else if (object is List) {
+          object = object[int.parse(keys[i])];
         }
       }
       try {

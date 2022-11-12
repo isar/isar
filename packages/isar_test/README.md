@@ -5,12 +5,15 @@ Use the following commands to run the tests on a connected device:
 ### Unit tests
 
 ```
-sh tool/setup_tests.sh
+sh tool/prepare_tests.sh
+sh tool/build.sh
 dart test
 ```
 
 ### Integration tests
 
 ```
-flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart
+sh tool/prepare_tests.sh
+sh tool/build.sh
+flutter test integration_test/integration_test.dart
 ```

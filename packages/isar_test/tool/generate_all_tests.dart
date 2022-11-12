@@ -9,12 +9,17 @@ void main() {
       .toList();
 
   final imports = files.map((String e) {
-    return "import '$e' as ${e.split('.')[0].replaceAll(p.separator, '_')};";
+    final dartPath = e.replaceAll(p.separator, '/');
+    final name = e.split('.')[0].replaceAll(p.separator, '_');
+    return "import '../$dartPath' as $name;";
   }).join('\n');
 
   final calls = files.map((String e) {
     final content = File(e).readAsStringSync();
-    final call = "${e.split('.')[0].replaceAll(p.separator, '_')}.main();";
+    var call = "${e.split('.')[0].replaceAll(p.separator, '_')}.main();";
+    if (e.contains('stress')) {
+      call = 'if (stress) $call';
+    }
     if (content.startsWith("@TestOn('vm')")) {
       return 'if (!kIsWeb) $call';
     } else {
@@ -29,9 +34,11 @@ void main() {
     $imports
 
     void main() {
+      const stress = bool.fromEnvironment('STRESS');
       $calls
     }
 """;
 
-  File('all_tests.dart').writeAsStringSync(code);
+  Directory('integration_test').createSync();
+  File('integration_test${p.separator}all_tests.dart').writeAsStringSync(code);
 }

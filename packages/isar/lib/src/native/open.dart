@@ -79,6 +79,7 @@ Future<Isar> openIsar({
   required List<CollectionSchema<dynamic>> schemas,
   String? directory,
   required String name,
+  required int maxSizeMiB,
   required bool relaxedDurability,
   CompactCondition? compactOnLaunch,
 }) async {
@@ -105,6 +106,7 @@ Future<Isar> openIsar({
       namePtr,
       dirPtr,
       schemaStrPtr,
+      maxSizeMiB,
       relaxedDurability,
       compactMinFileSize ?? 0,
       compactMinBytes ?? 0,
@@ -122,8 +124,9 @@ Future<Isar> openIsar({
 Isar openIsarSync({
   required List<CollectionSchema<dynamic>> schemas,
   String? directory,
-  String name = 'isar',
-  bool relaxedDurability = true,
+  required String name,
+  required int maxSizeMiB,
+  required bool relaxedDurability,
   CompactCondition? compactOnLaunch,
 }) {
   initializeCoreBinary();
@@ -146,6 +149,7 @@ Isar openIsarSync({
         namePtr,
         dirPtr,
         schemaStrPtr,
+        maxSizeMiB,
         relaxedDurability,
         compactMinFileSize ?? 0,
         compactMinBytes ?? 0,
