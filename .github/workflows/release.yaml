@@ -71,7 +71,7 @@ jobs:
 
   testlab:
     needs: build_binaries
-    uses: ./.github/workflows/testlab.yml
+    uses: ./.github/workflows/testlab.yaml
     secrets: inherit
 
   build_inspector:
