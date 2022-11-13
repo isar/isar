@@ -10,7 +10,7 @@ curl "${github}/libisar_android_x64.so" -o packages/isar_flutter_libs/android/sr
 curl "${github}/libisar_android_x86.so" -o packages/isar_flutter_libs/android/src/main/jniLibs/x86/libisar.so --create-dirs -L -f
 
 curl "${github}/isar_ios.xcframework.zip" -o packages/isar_flutter_libs/ios/isar_ios.xcframework.zip --create-dirs -L -f
-unzip packages/isar_flutter_libs/ios/isar_ios.xcframework.zip -d packages/isar_flutter_libs/ios
+unzip -o packages/isar_flutter_libs/ios/isar_ios.xcframework.zip -d packages/isar_flutter_libs/ios
 rm packages/isar_flutter_libs/ios/isar_ios.xcframework.zip
 
 curl "${github}/libisar_macos.dylib" -o packages/isar_flutter_libs/macos/libisar.dylib --create-dirs -L -f

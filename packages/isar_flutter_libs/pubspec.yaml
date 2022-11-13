@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  isar: 3.0.2
+  isar: 3.0.3
 
 flutter:
   plugin:
