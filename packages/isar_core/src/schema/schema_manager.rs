@@ -174,7 +174,7 @@ impl SchemaManager {
                 Self::delete_index(txn, existing_schema, existing_index)?;
             }
 
-            if changed_property {
+            if !removed_index && changed_property {
                 let index_id = xxh3_64(existing_index.name.as_bytes());
                 added_indexes.insert(index_id, ());
             }

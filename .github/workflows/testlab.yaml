@@ -1,0 +1,47 @@
+on: workflow_call
+
+jobs:
+  firebase_testlab_android:
+    name: Firebase Testlab Android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core arm64
+        run: |
+          bash tool/build_android.sh arm64
+          mkdir -p packages/isar_flutter_libs/android/src/main/jniLibs/arm64-v8a
+          mv libisar_android_arm64.so packages/isar_flutter_libs/android/src/main/jniLibs/arm64-v8a/libisar.so
+      - name: Build Isar Core armv7
+        run: |
+          bash tool/build_android.sh armv7
+          mkdir -p packages/isar_flutter_libs/android/src/main/jniLibs/armeabi-v7a
+          mv libisar_android_armv7.so packages/isar_flutter_libs/android/src/main/jniLibs/armeabi-v7a/libisar.so
+      - name: Prepare Tests
+        run: sh tool/prepare_tests.sh
+      - name: Build dummy APK
+        run: flutter build apk integration_test/integration_test.dart
+        working-directory: packages/isar_test
+      - name: Build APKs
+        run: |
+          ./gradlew app:assembleAndroidTest
+          ./gradlew app:assembleDebug -Ptarget=integration_test/integration_test.dart
+        working-directory: packages/isar_test/android
+      - name: Login to Google Cloud
+        uses: "google-github-actions/auth@v1"
+        with:
+          credentials_json: "${{ secrets.FIREBASE_JSON }}"
+      - name: Run tests
+        run: |
+          gcloud firebase test android run \
+            --project honeyy \
+            --type instrumentation \
+            --timeout 5m \
+            --device model=hammerhead,version=23  \
+            --device model=starqlteue,version=26 \
+            --device model=cheetah,version=33 \
+            --app build/app/outputs/apk/debug/app-debug.apk \
+            --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+        working-directory: packages/isar_test

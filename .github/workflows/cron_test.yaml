@@ -1,0 +1,10 @@
+name: Dart CI Cron
+
+on:
+  schedule:
+    - cron: "0 18 * * *"
+
+jobs:
+  testlab:
+    uses: ./.github/workflows/testlab.yaml
+    secrets: inherit

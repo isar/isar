@@ -5,9 +5,9 @@
 - Improved performance for all operations
 - Added `maxSizeMiB` option to `Isar.open()` to specify the maximum size of the database file
 - Significantly reduced native library size
-- With the help of the community, the docs have been translated to a range of languages
+- With the help of the community, the docs have been translated into a range of languages
 - Improved API docs
-- Added integration tests for more platforms to ensure high quality releases
+- Added integration tests for more platforms to ensure high-quality releases
 
 ### Fixes
 

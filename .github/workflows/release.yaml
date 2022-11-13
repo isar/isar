@@ -69,9 +69,14 @@ jobs:
           asset_name: ${{ matrix.artifact_name }}
           tag: ${{ github.ref }}
 
+  testlab:
+    needs: build_binaries
+    uses: ./.github/workflows/testlab.yml
+    secrets: inherit
+
   build_inspector:
     name: Build Inspector
-    needs: build_binaries
+    needs: testlab
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
