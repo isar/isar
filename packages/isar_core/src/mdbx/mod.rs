@@ -61,3 +61,53 @@ pub trait Key {
 
     fn cmp_bytes(&self, other: &[u8]) -> Ordering;
 }
+
+#[cfg(target_os = "windows")]
+pub(crate) mod osal {
+    use super::*;
+    use widestring::U16CString;
+
+    pub fn str_to_os(str: &str) -> Result<U16CString> {
+        U16CString::from_str(str).map_err(|_| IsarError::IllegalArg {
+            message: "Invalid String provided".to_string(),
+        })
+    }
+
+    pub const ENV_OPEN: unsafe extern "C" fn(
+        *mut ffi::MDBX_env,
+        *const u16,
+        ffi::MDBX_env_flags_t,
+        ffi::mdbx_mode_t,
+    ) -> i32 = ffi::mdbx_env_openW;
+
+    pub const ENV_COPY: unsafe extern "C" fn(
+        *mut ffi::MDBX_env,
+        *const u16,
+        ffi::MDBX_copy_flags_t,
+    ) -> i32 = ffi::mdbx_env_copyW;
+}
+
+#[cfg(not(target_os = "windows"))]
+pub(crate) mod osal {
+    use super::*;
+    use std::ffi::CString;
+
+    pub fn str_to_os(str: &str) -> Result<CString> {
+        CString::new(str.as_bytes()).map_err(|_| IsarError::IllegalArg {
+            message: "Invalid String provided".to_string(),
+        })
+    }
+
+    pub const ENV_OPEN: unsafe extern "C" fn(
+        *mut ffi::MDBX_env,
+        *const i8,
+        ffi::MDBX_env_flags_t,
+        ffi::mdbx_mode_t,
+    ) -> i32 = ffi::mdbx_env_open;
+
+    pub const ENV_COPY: unsafe extern "C" fn(
+        *mut ffi::MDBX_env,
+        *const i8,
+        ffi::MDBX_copy_flags_t,
+    ) -> i32 = ffi::mdbx_env_copy;
+}
