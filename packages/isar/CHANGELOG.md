@@ -1,3 +1,10 @@
+## 3.0.4
+
+### Fixes
+
+- Fixed issue on Windows
+- Support for unicode paths on Windows
+
 ## 3.0.3
 
 ### Enhancements
