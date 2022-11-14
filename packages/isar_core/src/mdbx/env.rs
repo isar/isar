@@ -1,8 +1,8 @@
+use super::osal::*;
 use crate::error::{IsarError, Result};
 use crate::mdbx::mdbx_result;
 use crate::mdbx::txn::Txn;
 use core::ptr;
-use std::ffi::CString;
 
 pub struct Env {
     env: *mut ffi::MDBX_env,
@@ -20,7 +20,7 @@ impl Env {
         max_size_mib: usize,
         relaxed_durability: bool,
     ) -> Result<Env> {
-        let path = CString::new(path.as_bytes()).unwrap();
+        let path = str_to_os(path)?;
         let mut env: *mut ffi::MDBX_env = ptr::null_mut();
         unsafe {
             mdbx_result(ffi::mdbx_env_create(&mut env))?;
@@ -30,8 +30,7 @@ impl Env {
                 max_dbs,
             ))?;
 
-            let mut flags =
-                ffi::MDBX_NOTLS | ffi::MDBX_EXCLUSIVE | ffi::MDBX_COALESCE | ffi::MDBX_NOSUBDIR;
+            let mut flags = ffi::MDBX_NOTLS | ffi::MDBX_COALESCE | ffi::MDBX_NOSUBDIR;
             if relaxed_durability {
                 flags |= ffi::MDBX_NOMETASYNC;
             }
@@ -51,7 +50,7 @@ impl Env {
                     -1,
                 ))?;
 
-                err_code = ffi::mdbx_env_open(env, path.as_ptr(), flags, 0o600);
+                err_code = ENV_OPEN(env, path.as_ptr(), flags, 0o600);
                 if err_code == ffi::MDBX_SUCCESS {
                     break;
                 }
@@ -84,14 +83,8 @@ impl Env {
     }
 
     pub fn copy(&self, path: &str) -> Result<()> {
-        let path = CString::new(path.as_bytes()).unwrap();
-        unsafe {
-            mdbx_result(ffi::mdbx_env_copy(
-                self.env,
-                path.as_ptr(),
-                ffi::MDBX_CP_COMPACT,
-            ))
-        }
+        let path = str_to_os(path)?;
+        unsafe { mdbx_result(ENV_COPY(self.env, path.as_ptr(), ffi::MDBX_CP_COMPACT)) }
     }
 }
 

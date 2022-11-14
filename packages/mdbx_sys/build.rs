@@ -85,11 +85,14 @@ fn main() {
     mdbx.push("dist");
 
     let core_path = mdbx.join("mdbx.c");
-    let core = fs::read_to_string(core_path.as_path()).unwrap();
-    let core = core.replace(
-        "memset(ior, -1, sizeof(osal_ioring_t))",
-        "memset(ior, 0, sizeof(osal_ioring_t))",
-    );
+    let mut core = fs::read_to_string(core_path.as_path()).unwrap();
+    core = core.replace("!CharToOemBuffA(buf, buf, size)", "false");
+    if cfg!(android) {
+        core = core.replace(
+            "memset(ior, -1, sizeof(osal_ioring_t))",
+            "memset(ior, 0, sizeof(osal_ioring_t))",
+        );
+    }
     fs::write(core_path.as_path(), core).unwrap();
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
@@ -127,7 +130,9 @@ fn main() {
             .define("MDBX_BUILD_SHARED_LIBRARY", "0")
             .define("MDBX_LOCK_SUFFIX", "\".lock\"")
             .define("MDBX_TXN_CHECKOWNER", "0")
+            .define("MDBX_WITHOUT_MSVC_CRT", "1")
             // Setting HAVE_LIBM=1 is necessary to override issues with `pow` detection on Windows
+            .define("UNICODE", "1")
             .define("HAVE_LIBM", "1")
             .define("NDEBUG", "1")
             .cflag("/w")
