@@ -100,14 +100,14 @@ pub(crate) mod osal {
 
     pub const ENV_OPEN: unsafe extern "C" fn(
         *mut ffi::MDBX_env,
-        *const i8,
+        *const libc::c_char,
         ffi::MDBX_env_flags_t,
         ffi::mdbx_mode_t,
     ) -> i32 = ffi::mdbx_env_open;
 
     pub const ENV_COPY: unsafe extern "C" fn(
         *mut ffi::MDBX_env,
-        *const i8,
+        *const libc::c_char,
         ffi::MDBX_copy_flags_t,
     ) -> i32 = ffi::mdbx_env_copy;
 }
