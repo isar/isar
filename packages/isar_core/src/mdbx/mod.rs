@@ -73,11 +73,18 @@ pub(crate) mod osal {
         })
     }
 
-    pub const ENV_OPEN: unsafe extern "C" fn(*mut ffi::MDBX_env, *const u16, i32, u16) -> i32 =
-        ffi::mdbx_env_openW;
+    pub const ENV_OPEN: unsafe extern "C" fn(
+        *mut ffi::MDBX_env,
+        *const u16,
+        ffi::MDBX_env_flags_t,
+        ffi::mdbx_mode_t,
+    ) -> i32 = ffi::mdbx_env_openW;
 
-    pub const ENV_COPY: unsafe extern "C" fn(*mut ffi::MDBX_env, *const u16, i32) -> i32 =
-        ffi::mdbx_env_copyW;
+    pub const ENV_COPY: unsafe extern "C" fn(
+        *mut ffi::MDBX_env,
+        *const u16,
+        ffi::MDBX_copy_flags_t,
+    ) -> i32 = ffi::mdbx_env_copyW;
 }
 
 #[cfg(not(target_os = "windows"))]
@@ -91,9 +98,16 @@ pub(crate) mod osal {
         })
     }
 
-    pub const ENV_OPEN: unsafe extern "C" fn(*mut ffi::MDBX_env, *const i8, i32, u16) -> i32 =
-        ffi::mdbx_env_open;
+    pub const ENV_OPEN: unsafe extern "C" fn(
+        *mut ffi::MDBX_env,
+        *const i8,
+        ffi::MDBX_env_flags_t,
+        ffi::mdbx_mode_t,
+    ) -> i32 = ffi::mdbx_env_open;
 
-    pub const ENV_COPY: unsafe extern "C" fn(*mut ffi::MDBX_env, *const i8, i32) -> i32 =
-        ffi::mdbx_env_copy;
+    pub const ENV_COPY: unsafe extern "C" fn(
+        *mut ffi::MDBX_env,
+        *const i8,
+        ffi::MDBX_copy_flags_t,
+    ) -> i32 = ffi::mdbx_env_copy;
 }
