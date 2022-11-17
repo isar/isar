@@ -1,18 +1,5 @@
 ## 3.0.5
 
-### Fixes
-
-- Fixed crash while opening Isar
-
-## 3.0.4
-
-### Fixes
-
-- Fixed issue on Windows
-- Support for unicode paths on Windows
-
-## 3.0.3
-
 ### Enhancements
 
 - Improved performance for all operations
@@ -21,13 +8,24 @@
 - With the help of the community, the docs have been translated into a range of languages
 - Improved API docs
 - Added integration tests for more platforms to ensure high-quality releases
+- Support for unicode paths on Windows
 
 ### Fixes
 
+- Fixed crash while opening Isar
+- Fixed crash on older Android devices
 - Fixed a native port that was not closed correctly in some cases
 - Added swift version to podspec
 - Fixed crash on Windows
 - Fixed "IndexNotFound" error
+
+## 3.0.4
+
+REDACTED.
+
+## 3.0.3
+
+REDACTED.
 
 ## 3.0.2
 
