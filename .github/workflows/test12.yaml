@@ -5,7 +5,6 @@ on: push
 jobs:
   build_binaries:
     name: Build Binaries
-    needs: verify_version
     strategy:
       fail-fast: false
       matrix:
