@@ -1,3 +1,9 @@
+## 3.0.5
+
+### Fixes
+
+- Fixed crash while opening Isar
+
 ## 3.0.4
 
 ### Fixes

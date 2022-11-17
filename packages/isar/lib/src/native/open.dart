@@ -3,7 +3,6 @@
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:isolate';
-import 'dart:math';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
@@ -19,40 +18,34 @@ final Pointer<Pointer<CIsarInstance>> _isarPtrPtr =
 
 List<int> _getOffsets(
   Pointer<CIsarCollection> colPtr,
-  Pointer<Uint32> offsetsPtr,
   int propertiesCount,
   int embeddedColId,
 ) {
+  final offsetsPtr = malloc<Uint32>(propertiesCount);
   final staticSize = IC.isar_get_offsets(colPtr, embeddedColId, offsetsPtr);
   final offsets = offsetsPtr.asTypedList(propertiesCount).toList();
   offsets.add(staticSize);
+  malloc.free(offsetsPtr);
   return offsets;
 }
 
 void _initializeInstance(
-  Allocator alloc,
   IsarImpl isar,
   List<CollectionSchema<dynamic>> schemas,
 ) {
-  final maxProperties = schemas.map((e) => e.properties.length).reduce(max);
-
-  // TODO find a way to reproduce this flutter bug. alloc should work here
   final colPtrPtr = malloc<Pointer<CIsarCollection>>();
-  final offsetsPtr = alloc<Uint32>(maxProperties);
 
   final cols = <Type, IsarCollection<dynamic>>{};
   for (final schema in schemas) {
     nCall(IC.isar_instance_get_collection(isar.ptr, colPtrPtr, schema.id));
 
-    final offsets =
-        _getOffsets(colPtrPtr.value, offsetsPtr, schema.properties.length, 0);
+    final offsets = _getOffsets(colPtrPtr.value, schema.properties.length, 0);
 
     for (final embeddedSchema in schema.embeddedSchemas.values) {
       final embeddedType = embeddedSchema.type;
       if (!isar.offsets.containsKey(embeddedType)) {
         final offsets = _getOffsets(
           colPtrPtr.value,
-          offsetsPtr,
           embeddedSchema.properties.length,
           embeddedSchema.id,
         );
@@ -71,6 +64,8 @@ void _initializeInstance(
       );
     });
   }
+
+  malloc.free(colPtrPtr);
 
   isar.attachCollections(cols);
 }
@@ -116,7 +111,7 @@ Future<Isar> openIsar({
     await stream.first;
 
     final isar = IsarImpl(name, _isarPtrPtr.value);
-    _initializeInstance(alloc, isar, schemas);
+    _initializeInstance(isar, schemas);
     return isar;
   });
 }
@@ -158,7 +153,7 @@ Isar openIsarSync({
     );
 
     final isar = IsarImpl(name, _isarPtrPtr.value);
-    _initializeInstance(alloc, isar, schemas);
+    _initializeInstance(isar, schemas);
     return isar;
   });
 }
