@@ -56,6 +56,8 @@ fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "11.0");
 
+    let is_android = env::var("CARGO_CFG_TARGET_OS").unwrap() == "android";
+
     let _ = fs::remove_dir_all("libmdbx");
 
     Command::new("git")
@@ -87,7 +89,7 @@ fn main() {
     let core_path = mdbx.join("mdbx.c");
     let mut core = fs::read_to_string(core_path.as_path()).unwrap();
     core = core.replace("!CharToOemBuffA(buf, buf, size)", "false");
-    if cfg!(android) {
+    if is_android {
         core = core.replace(
             "memset(ior, -1, sizeof(osal_ioring_t))",
             "memset(ior, 0, sizeof(osal_ioring_t))",
