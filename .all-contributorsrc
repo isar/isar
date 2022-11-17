@@ -173,6 +173,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "AlexisL61",
+      "name": "Alexis",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30233189?v=4",
+      "profile": "https://github.com/AlexisL61",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorTemplate": "<a href=\"https://github.com/<%= contributor.login %>\"><img src=\"<%= contributor.avatar_url %>\" width=\"<%= options.imageSize %>px;\" alt=\"\"/><br /><sub><b><%= contributor.name %></b></sub></a>",
