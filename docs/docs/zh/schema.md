@@ -118,12 +118,18 @@ class Member extends User {
 Isar 支持以下数据类型：
 
 - `bool`
+- `byte`
+- `short`
 - `int`
+- `float`
 - `double`
 - `DateTime`
 - `String`
 - `List<bool>`
+- `List<byte>`
+- `List<short>`
 - `List<int>`
+- `List<float>`
 - `List<double>`
 - `List<DateTime>`
 - `List<String>`

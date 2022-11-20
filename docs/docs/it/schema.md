@@ -31,11 +31,11 @@ Per rendere permanente un campo, Isar deve avervi accesso. Puoi assicurarti che 
 
 Ci sono alcuni parametri opzionali per personalizzare la collezione:
 
-| Config        | Description                                                                                                      |
-| ------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `inheritance` | Controlla se i campi delle classi padre e dei mixin verranno archiviati in Isar. Abilitato per impostazione predefinita.                  |
+| Config        | Description                                                                                                                      |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `inheritance` | Controlla se i campi delle classi padre e dei mixin verranno archiviati in Isar. Abilitato per impostazione predefinita.         |
 | `accessor`    | Consente di rinominare la funzione di accesso predefinita della raccolta (ad esempio `isar.contacts` per la raccolta `Contact`). |
-| `ignore`      | Consente di ignorare determinate proprietà. Questi sono anche rispettati per le super classi.                                  |
+| `ignore`      | Consente di ignorare determinate proprietà. Questi sono anche rispettati per le super classi.                                    |
 
 ### Isar ID
 
@@ -118,12 +118,18 @@ Tieni presente che non è buona norma memorizzare informazioni in oggetti Isar c
 Isar supporta i seguenti tipi di dati:
 
 - `bool`
+- `byte`
+- `short`
 - `int`
+- `float`
 - `double`
 - `DateTime`
 - `String`
 - `List<bool>`
+- `List<byte>`
+- `List<short>`
 - `List<int>`
+- `List<float>`
 - `List<double>`
 - `List<DateTime>`
 - `List<String>`
@@ -135,7 +141,7 @@ Inoltre, sono supportati oggetti incorporati ed enumerazioni. Tratteremo quelli 
 Per molti casi d'uso, non è necessario l'intero intervallo di un intero o doppio a 64 bit. Isar supporta tipi aggiuntivi che consentono di risparmiare spazio e memoria durante la memorizzazione di numeri più piccoli.
 
 | Tipo       | Dim. in bytes | Range                                                   |
-| ---------- |-------------- | ------------------------------------------------------- |
+| ---------- | ------------- | ------------------------------------------------------- |
 | **byte**   | 1             | 0 to 255                                                |
 | **short**  | 4             | -2,147,483,647 to 2,147,483,647                         |
 | **int**    | 8             | -9,223,372,036,854,775,807 to 9,223,372,036,854,775,807 |
@@ -171,9 +177,9 @@ Comprendere come funziona l'annullamento dei valori in Isar è essenziale: i tip
 
 | Type       | VM            |
 | ---------- | ------------- |
-| **short**  | `-2147483648` | 
+| **short**  | `-2147483648` |
 | **int**    |  `int.MIN`    |
-| **float**  | `double.NaN` |
+| **float**  | `double.NaN`  |
 | **double** |  `double.NaN` |
 
 `bool`, `String` e `List` hanno una rappresentazione `null` separata.
@@ -194,12 +200,12 @@ I `DateTime`s vengono archiviati con una precisione di microsecondi. Nei browser
 
 Isar consente di archiviare e utilizzare le enumerazioni come altri tipi di Isar. Devi scegliere, tuttavia, come Isar deve rappresentare le enumerazioni sul disco. Isar supporta quattro diverse strategie:
 
-| EnumType    | Descrizione 
-| ----------- | -----------
+| EnumType    | Descrizione                                                                                                    |
+| ----------- | -------------------------------------------------------------------------------------------------------------- |
 | `ordinal`   | TL'indice dell'enum è memorizzato come `byte`. Questo è molto efficiente ma non consente enumerazioni nullable |
-| `ordinal32` | L'indice dell'enumerazione viene archiviato come `short` (4-byte integer).                                        |
-| `name`      | Il nome dell'enumerazione viene memorizzato come `String`.                                                                |
-| `value`     | Per recuperare il valore dell'enumerazioni viene utilizzata una proprietà personalizzata.                                               |
+| `ordinal32` | L'indice dell'enumerazione viene archiviato come `short` (4-byte integer).                                     |
+| `name`      | Il nome dell'enumerazione viene memorizzato come `String`.                                                     |
+| `value`     | Per recuperare il valore dell'enumerazioni viene utilizzata una proprietà personalizzata.                      |
 
 :::warning
 `ordinal` e `ordinal32` dipendono dall'ordine dei valori dell'enumerazione. Se modifichi l'ordine, i database esistenti restituiranno valori errati.
@@ -244,7 +250,7 @@ Naturalmente, Enums può essere utilizzato anche nelle liste.
 ## Oggetti incorporati
 
 Spesso è utile avere oggetti nidificati nel modello di raccolta. Non c'è limite a quanto in profondità puoi annidare gli oggetti. Tieni presente, tuttavia, che l'aggiornamento di un oggetto profondamente nidificato richiederà la scrittura dell'intero albero degli oggetti nel database.
-  
+
 ```dart
 @collection
 class Email {

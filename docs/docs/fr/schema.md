@@ -32,7 +32,7 @@ Pour faire persister un champ, Isar doit y avoir accès. Vous pouvez vous assure
 Il existe quelques paramètres facultatifs permettant de personnaliser la collection:
 
 | Config        | Description                                                                                                         |
-|---------------|---------------------------------------------------------------------------------------------------------------------|
+| ------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `inheritance` | Contrôle si les champs des classes parentes et des mixins seront stockés dans Isar. Activé par défaut.              |
 | `accessor`    | Permet de renommer l'accesseur de collection par défaut (par exemple `isar.contacts` pour la collection `Contact`). |
 | `ignore`      | Permet d'ignorer certaines propriétés de la classe. Celles-ci sont également respectées pour les classes parentes.  |
@@ -118,12 +118,18 @@ Gardez en tête qu'il n'est pas recommandé de stocker des informations dans des
 Isar supporte les types de données suivants :
 
 - `bool`
+- `byte`
+- `short`
 - `int`
+- `float`
 - `double`
 - `DateTime`
 - `String`
 - `List<bool>`
+- `List<byte>`
+- `List<short>`
 - `List<int>`
+- `List<float>`
 - `List<double>`
 - `List<DateTime>`
 - `List<String>`
@@ -134,13 +140,13 @@ De plus, les objets embarqués (`embedded`) et les enums sont supportés. Nous l
 
 Pour de nombreux cas d'utilisation, vous n'avez pas besoin de l'étendue complète d'un nombre entier ou double de 64 bits. Isar supporte des types supplémentaires qui vous permettent d'économiser de l'espace et de la mémoire lorsque vous stockez des nombres plus petits.
 
-| Type       | Size in bytes | Range                                           |
-| ---------- |-------------- | ----------------------------------------------- |
-| **byte**   | 1             | 0 à 255                                          |
-| **short**  | 4             | -2,147,483,647 à 2,147,483,647                   |
+| Type       | Size in bytes | Range                                                  |
+| ---------- | ------------- | ------------------------------------------------------ |
+| **byte**   | 1             | 0 à 255                                                |
+| **short**  | 4             | -2,147,483,647 à 2,147,483,647                         |
 | **int**    | 8             | -9,223,372,036,854,775,807 à 9,223,372,036,854,775,807 |
-| **float**  | 4             | -3.4e38 à 3.4e38                                 |
-| **double** | 8             | -1.7e308 à 1.7e308                               |
+| **float**  | 4             | -3.4e38 à 3.4e38                                       |
+| **double** | 8             | -1.7e308 à 1.7e308                                     |
 
 Les types supplémentaires sont simplement des alias pour les types natifs de Dart, donc utiliser `short`, par exemple, fonctionne de la même manière que `int`.
 
@@ -169,12 +175,12 @@ Tous les types de nombres peuvent également être utilisés dans des listes. Po
 
 Il est essentiel de comprendre comment la nullité fonctionne dans Isar: Les types de nombres n'ont **PAS** de représentation `null` dédiée. À la place, une valeur spécifique est utilisée:
 
-| Type       | VM           |
-| ---------- | ------------ |
+| Type       | VM            |
+| ---------- | ------------- |
 | **short**  | `-2147483648` |
-| **int**    | `int.MIN`    |
-| **float**  | `double.NaN` |
-| **double** | `double.NaN` |
+| **int**    | `int.MIN`     |
+| **float**  | `double.NaN`  |
+| **double** | `double.NaN`  |
 
 `bool`, `String`, et `List` ont une représentation `null` séparée.
 
@@ -195,7 +201,7 @@ Les `DateTime` sont stockés avec une précision de l'ordre de la microseconde. 
 Isar permet de stocker et d'utiliser les enums comme tous les autres types Isar. Vous devez cependant choisir comment Isar doit représenter l'enum sur disque. Isar supporte quatre stratégies différentes :
 
 | EnumType    | Description                                                                                      |
-|-------------|--------------------------------------------------------------------------------------------------|
+| ----------- | ------------------------------------------------------------------------------------------------ |
 | `ordinal`   | L'index de l'enum est stocké comme `byte`. Très efficace mais ne permet pas les enums nullables. |
 | `ordinal32` | L'index de l'enum est stocké comme `short` (entier de 4 octets).                                 |
 | `name`      | Le nom de l'enum est stocké comme `String`.                                                      |

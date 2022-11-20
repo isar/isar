@@ -118,12 +118,18 @@ Ten en cuenta que no es una buena práctica guardar información en objectos Isa
 Isar soporta los siguientes tipos de datos:
 
 - `bool`
+- `byte`
+- `short`
 - `int`
+- `float`
 - `double`
 - `DateTime`
 - `String`
 - `List<bool>`
+- `List<byte>`
+- `List<short>`
 - `List<int>`
+- `List<float>`
 - `List<double>`
 - `List<DateTime>`
 - `List<String>`

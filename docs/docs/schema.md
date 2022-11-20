@@ -118,12 +118,18 @@ Keep in mind that it is not good practice to store information in Isar objects t
 Isar supports the following data types:
 
 - `bool`
+- `byte`
+- `short`
 - `int`
+- `float`
 - `double`
 - `DateTime`
 - `String`
 - `List<bool>`
+- `List<byte>`
+- `List<short>`
 - `List<int>`
+- `List<float>`
 - `List<double>`
 - `List<DateTime>`
 - `List<String>`
@@ -135,7 +141,7 @@ Additionally, embedded objects and enums are supported. We'll cover those below.
 For many use cases, you don't need the full range of a 64-bit integer or double. Isar supports additional types that allow you to save space and memory when storing smaller numbers.
 
 | Type       | Size in bytes | Range                                                   |
-| ---------- |-------------- | ------------------------------------------------------- |
+| ---------- | ------------- | ------------------------------------------------------- |
 | **byte**   | 1             | 0 to 255                                                |
 | **short**  | 4             | -2,147,483,647 to 2,147,483,647                         |
 | **int**    | 8             | -9,223,372,036,854,775,807 to 9,223,372,036,854,775,807 |
@@ -171,9 +177,9 @@ Understanding how nullability works in Isar is essential: Number types do **NOT*
 
 | Type       | VM            |
 | ---------- | ------------- |
-| **short**  | `-2147483648` | 
+| **short**  | `-2147483648` |
 | **int**    |  `int.MIN`    |
-| **float**  | `double.NaN` |
+| **float**  | `double.NaN`  |
 | **double** |  `double.NaN` |
 
 `bool`, `String`, and `List` have a separate `null` representation.
@@ -194,8 +200,8 @@ Isar does not store timezone information of your dates. Instead, it converts `Da
 
 Isar allows storing and using enums like other Isar types. You have to choose, however, how Isar should represent the enum on the disk. Isar supports four different strategies:
 
-| EnumType    | Description 
-| ----------- | -----------
+| EnumType    | Description                                                                                         |
+| ----------- | --------------------------------------------------------------------------------------------------- |
 | `ordinal`   | The index of the enum is stored as `byte`. This is very efficient but does not allow nullable enums |
 | `ordinal32` | The index of the enum is stored as `short` (4-byte integer).                                        |
 | `name`      | The enum name is stored as `String`.                                                                |
@@ -244,7 +250,7 @@ Of course, Enums can also be used in lists.
 ## Embedded objects
 
 It's often helpful to have nested objects in your collection model. There is no limit to how deep you can nest objects. Keep in mind, however, that updating a deeply nested object will require writing the whole object tree to the database.
-  
+
 ```dart
 @collection
 class Email {
