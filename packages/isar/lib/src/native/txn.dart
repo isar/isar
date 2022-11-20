@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
+import 'package:isar/isar.dart';
 import 'package:isar/src/common/isar_common.dart';
 import 'package:isar/src/native/bindings.dart';
 import 'package:isar/src/native/isar_core.dart';
@@ -10,10 +11,11 @@ import 'package:isar/src/native/isar_core.dart';
 /// @nodoc
 class Txn extends Transaction {
   /// @nodoc
-  Txn.sync(this.ptr, bool write) : super(true, write);
+  Txn.sync(Isar isar, this.ptr, bool write) : super(isar, true, write);
 
   /// @nodoc
-  Txn.async(this.ptr, bool write, Stream<void> stream) : super(false, write) {
+  Txn.async(Isar isar, this.ptr, bool write, Stream<void> stream)
+      : super(isar, false, write) {
     _completers = Queue();
     _portSubscription = stream.listen(
       (_) => _completers.removeFirst().complete(),

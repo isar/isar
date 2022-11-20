@@ -90,6 +90,8 @@ abstract class IsarCommon extends Isar {
         throw IsarError(
           'Operation cannot be performed within a read transaction.',
         );
+      } else if (currentTxn.isar != this) {
+        throw IsarError('Transaction does not match Isar instance.');
       }
       return callback(currentTxn);
     } else if (!write) {
@@ -178,7 +180,10 @@ abstract class IsarCommon extends Isar {
 /// @nodoc
 abstract class Transaction {
   /// @nodoc
-  Transaction(this.sync, this.write);
+  Transaction(this.isar, this.sync, this.write);
+
+  /// @nodoc
+  final Isar isar;
 
   /// @nodoc
   final bool sync;

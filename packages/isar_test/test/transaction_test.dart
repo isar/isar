@@ -200,6 +200,23 @@ void main() {
       });
     });
 
+    isarTest('Nested async transactions of different instances', () async {
+      final isar2 = await openTempIsar([ModelSchema]);
+
+      expect(
+        () => isar.txn(() async {
+          await isar2.models.where().findAll();
+        }),
+        throwsIsarError('transaction does not match'),
+      );
+
+      expect(
+        () => isar.writeTxn(() async {
+          await isar2.models.where().findAll();
+        }),
+        throwsIsarError('transaction does not match'),
+      );
+    });
     isarTestAsync('gets reverted on error', () async {
       await isar.writeTxn(() => isar.models.put(Model()));
       await qEqual(isar.models.where(), [Model(1)]);

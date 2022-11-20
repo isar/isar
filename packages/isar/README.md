@@ -52,7 +52,7 @@ Isar database can do much more (and we are just getting started)
 - 💃 **Static typing**. Compile-time checked and autocompleted queries
 - ✨ **Beautiful documentation**. Readable, easy to understand and ever-improving
 
-Join the [Telegram group](https://t.me/isardb) for discussion and sneak peaks of new versions of the db.
+Join the [Telegram group](https://t.me/isardb) for discussion and sneak peeks of new versions of the DB.
 
 If you want to say thank you, star us on GitHub and like us on pub.dev 🙌💙
 
@@ -124,9 +124,11 @@ final emails = await isar.emails.filter()
 
 ## Isar Database Inspector
 
-The [Isar Inspector](https://github.com/isar/isar/releases/latest) allows you to inspect the Isar instances & collections of your app in real-time. You can execute queries, edit properties, switch between instances and sort the data.
+The Isar Inspector allows you to inspect the Isar instances & collections of your app in real-time. You can execute queries, edit properties, switch between instances and sort the data.
 
 <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/inspector.gif">
+
+To launch the inspector, just run your Isar app in debug mode and open the Inspector link in the logs.
 
 ## CRUD operations
 
@@ -239,8 +241,6 @@ Big thanks go to these wonderful people:
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This database project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind are welcome!
 
 ### License
 
