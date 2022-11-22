@@ -1,3 +1,10 @@
+## 3.0.6-dev.0
+
+### Fixes
+
+- Add check to verify transactions are used for correct instance
+- Fix upstream issue with opening databases
+
 ## 3.0.5
 
 ### Enhancements
