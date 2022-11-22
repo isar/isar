@@ -68,14 +68,6 @@ fn main() {
         .output()
         .unwrap();
 
-    Command::new("git")
-        .current_dir("libmdbx")
-        .arg("revert")
-        .arg("-n")
-        .arg("fe20de")
-        .output()
-        .unwrap();
-
     Command::new("make")
         .arg("release-assets")
         .current_dir("libmdbx")
@@ -93,6 +85,12 @@ fn main() {
         core = core.replace(
             "memset(ior, -1, sizeof(osal_ioring_t))",
             "memset(ior, 0, sizeof(osal_ioring_t))",
+        );
+        core = core.replace("unlikely(linux_kernel_version < 0x04000000)", "false");
+        core = core.replace(
+            "assert(linux_kernel_version >= 0x03060000);",
+            "if (linux_kernel_version >= 0x03060000) return MDBX_SUCCESS;
+            __fallthrough",
         );
     }
     fs::write(core_path.as_path(), core).unwrap();
