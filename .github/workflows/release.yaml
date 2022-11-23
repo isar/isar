@@ -105,24 +105,16 @@ jobs:
         working-directory: packages/isar
       - name: Download Binaries
         run: sh tool/download_binaries.sh
+      - name: pub.dev credentials
+        run: |
+          mkdir -p $HOME/.config/dart
+          echo '${{ secrets.PUB_JSON }}' >> $HOME/.config/dart/pub-credentials.json
       - name: Publish isar
-        uses: sakebook/actions-flutter-pub-publisher@v1.4.1
-        with:
-          credential: ${{ secrets.PUB_JSON }}
-          flutter_package: false
-          package_directory: packages/isar
-          skip_test: true
+        run: dart pub publish --force
+        working-directory: packages/isar
       - name: Publish isar_generator
-        uses: sakebook/actions-flutter-pub-publisher@v1.4.1
-        with:
-          credential: ${{ secrets.PUB_JSON }}
-          flutter_package: false
-          package_directory: packages/isar_generator
-          skip_test: true
+        run: dart pub publish --force
+        working-directory: packages/isar_generator
       - name: Publish isar_flutter_libs
-        uses: sakebook/actions-flutter-pub-publisher@v1.4.1
-        with:
-          credential: ${{ secrets.PUB_JSON }}
-          flutter_package: false
-          package_directory: packages/isar_flutter_libs
-          skip_test: true
+        run: dart pub publish --force
+        working-directory: packages/isar_flutter_libs
