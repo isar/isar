@@ -99,7 +99,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
+      - name: pub get
+        run: dart pub get
+        working-directory: packages/isar
       - name: Download Binaries
         run: sh tool/download_binaries.sh
       - name: Publish isar
