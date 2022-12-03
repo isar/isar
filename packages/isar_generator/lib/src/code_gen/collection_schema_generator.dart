@@ -20,7 +20,7 @@ String generateSchema(ObjectInfo object) {
 
   code += '''
     name: r'${object.isarName}',
-    id: ${object.id},
+    id: ${BigInt.parse(object.id.toString()).toUnsigned(48)},
     properties: {$properties},
 
     estimateSize: ${object.estimateSizeName},
