@@ -23,6 +23,9 @@ Annotiere deine Collection-Klassen mit `@collection` und wähle ein `Id`-Feld.
 
 ```dart
 part 'email.g.dart'
+
+@collection
+class User {
   Id id = Isar.autoIncrement; // Für auto-increment kannst du auch id = null zuweisen 
 
   String? name;
