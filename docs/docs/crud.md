@@ -159,7 +159,7 @@ So if we want to unfavorite our pancakes, we can do the following:
 ```dart
 await isar.writeTxn(() async {
   pancakes.isFavorite = false;
-  await isar.recipes.put(recipe);
+  await isar.recipes.put(pancakes);
 });
 ```
 
