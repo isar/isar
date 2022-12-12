@@ -25,7 +25,7 @@ widestring = "1.0"
 [dev-dependencies]
 rand = "0.8.5"
 cfg-if = "1"
-float_next_after = "0.1"
+float_next_after = "1.0"
 
 [dev-dependencies.serde_json]
 version = "*"
