@@ -101,7 +101,7 @@ final cheapestFast = await isar.products.where()
   .findAll();
 ```
 
-这个 `.anyX()` Where 子句告诉 Isar 索引只是用来排序。你同样也可以使用如 `.priceGreaterThan()` 这样的 Where 子句来获取相同结果。
+这个 `.anyX()` Where 子句告诉 Isar 索引只是用来排序。你同样也可以使用如 `.priceGreaterThan()` 这样的 Where 子句来获得排序后的相同结果。
 
 ## 唯一索引
 
@@ -250,7 +250,7 @@ class Person {
 
 组合索引也就是所谓的多列索引。
 
-让我们从示例学习组合索引。我们先创建了一个 Person Collection，然后基于 age 和 name 属性定义了一个组合索引：
+让我们从示例学习组合索引。我们先创建了一个 Person Collection，然后根据 age 和 name 属性定义了一个组合索引：
 
 ```dart
 @collection
@@ -358,5 +358,5 @@ class Product {
 现在这个索引可以使用每个单词的前缀匹配（或等同比较）的 Where 子句了。
 
 :::tip
-你应该也要考虑使用[语音算法](https://en.wikipedia.org/wiki/Phonetic_algorithm)如 [Soundex](https://en.wikipedia.org/wiki/Soundex) 返回的结果，而不是直接存储单词。
+你应该也要考虑使用 [语音算法](https://en.wikipedia.org/wiki/Phonetic_algorithm) 如 [Soundex](https://en.wikipedia.org/wiki/Soundex) 返回的结果，而不是直接存储单词。
 :::

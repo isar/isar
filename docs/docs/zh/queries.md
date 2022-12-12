@@ -97,7 +97,7 @@ final result = await isar.shoes.filter()
   .findAll();
 ```
 
-上述查询条件等同于： `size == 46 && isUnisex == true`。
+上述查询条件等同于：`size == 46 && isUnisex == true`。
 
 你也可以通过 `.group()` 对其进行分组：
 
@@ -129,7 +129,7 @@ final result = await isar.shoes.filter()
 
 ### 字符串条件
 
-除了上述查询条件，还有下表若干个针对字符串查询的条件表达式可供使用。 例如，类似正则的通配符在搜索时提供了更多灵活性。
+除了上述查询条件，还有下表若干个针对字符串查询的条件表达式可供使用。例如，类似正则的通配符在搜索时提供了更多灵活性。
 
 | 条件                 | 描述                               |
 | -------------------- | ---------------------------------- |
@@ -142,7 +142,7 @@ final result = await isar.shoes.filter()
 所有字符串操作都有一个可选的参数 `caseSensitive`，默认情况下为 `true`。
 
 **通配符：**  
-一个[通配符字符串表达式](https://en.wikipedia.org/wiki/Wildcard_character)是指一段使用了两个特殊通配符的普通字符串：
+一个 [通配符字符串表达式](https://en.wikipedia.org/wiki/Wildcard_character) 是指一段使用了两个特殊通配符的普通字符串：
 
 - `*` 通配符匹配零个或多个任意字符。
 - `?` 通配符匹配任意一个字符。
@@ -271,9 +271,9 @@ final germanCars = await isar.cars.filter()
 
 ### 关联（Link）
 
-如果你的数据模型含有[关联或反向关联](links)，你可以根据被关联的对象或被关联对象的数量来进行查询。
+如果你的数据模型含有 [关联或反向关联](links)，你可以根据被关联的对象或被关联对象的数量来进行查询。
 
-:::tip
+:::warning
 记住，关联查询的效率相对更低。因为 Isar 需要查询相关联的对象。考虑尽量使用嵌套对象来代替关联。
 :::
 

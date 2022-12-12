@@ -81,7 +81,7 @@ final recipe = await isar.recipes.get(123);
 final recipe = isar.recipes.getSync(123);
 ```
 
-:::tip
+:::warning
 因为 Isar 已经足够快了，所以你应该在 UI isolate 中尽可能使用默认的异步方法。当然使用对应的同步方法也是可接受的。
 :::
 
@@ -93,7 +93,7 @@ final recipe = await isar.recipes.getAll([1, 2]);
 
 ### 查询对象
 
-除了通过 Id 来获取对象数据，你也可以通过 `.where()` 和 `.filter()` 来查询匹配指定条件的多个对象，其返回的是数组 List:
+除了通过 Id 来获取对象数据，你也可以通过 `.where()` 和 `.filter()` 来查询匹配指定条件的多个对象，其返回的是对象数组 List:
 
 ```dart
 final allRecipes = await isar.recipes.where().findAll();
@@ -124,7 +124,7 @@ await isar.writeTxn(() async {
 
 ### 插入对象
 
-通过插入对象到 Collection，即可保存其数据到 Isar 数据库中。 Isar 的`put()` 方法会创建或者覆盖对象数据，取决于该对象是否已经存在于数据库里。
+通过插入对象到 Collection，即可保存其数据到 Isar 数据库中。 Isar 的 `put()` 方法会创建或者覆盖对象数据，这取决于该对象是否已经存在于数据库里。
 
 如果一个字段是 `null` 或 `Isar.autoIncrement`，Isar 则会分配一个自增 Id 来表示。
 

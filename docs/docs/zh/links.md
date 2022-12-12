@@ -10,7 +10,7 @@ title: 关联
 
 ## IsarLink
 
-`IsarLink<T>` 可以包含最多一个被关联对象，它经常被用于表达对一的关系。 `IsarLink` 有一个叫做 `value` 的属性，它负责存放被关联对象。
+`IsarLink<T>` 可以包含最多一个被关联对象，它经常被用于表达对一的关系。`IsarLink` 有一个叫做 `value` 的属性，它负责存放被关联对象。
 
 关联是懒加载的，因此你需要显式告诉 `IsarLink` 加载并保存 `value` 的值。你可以分别调用 `linkProperty.load()` 和 `linkProperty.save()` 方法。
 

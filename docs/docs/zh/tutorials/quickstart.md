@@ -52,7 +52,7 @@ flutter pub run build_runner build
 
 ## 4. 创建一个 Isar 实例
 
-创建一个新的 Isar 实例，并将你想保存到 Isar 的所有 collection 的 schema（它在上一步由 Isar Generator 根据你定义的 collection 自动生成） 作为参数传入。你还可以指定实例的名称以及它所存储数据的文件路径。
+创建一个新的 Isar 实例，并将你想保存到 Isar 的所有 Collection 的 Schema（它在上一步由 Isar Generator 根据你定义的 Collection 自动生成） 作为参数传入。你还可以指定实例的名称以及它所存储数据的文件路径。
 
 ```dart
 final isar = await Isar.open([EmailSchema]);
