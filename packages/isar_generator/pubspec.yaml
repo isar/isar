@@ -13,7 +13,11 @@ dependencies:
   dart_style: ^2.2.3
   dartx: ^1.1.0
   glob: ^2.0.2
-  isar: 3.0.5
+  isar:
+    git:
+      url: https://github.com/Mravuri96/isar.git
+      ref: arm64
+      path: packages/isar/
   path: ^1.8.1
   source_gen: ^1.2.2
   xxh3: ^1.0.1
