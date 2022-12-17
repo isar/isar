@@ -206,6 +206,8 @@ extension on Abi {
         return 'libisar.dylib';
       case Abi.linuxX64:
         return 'libisar.so';
+      case Abi.linuxArm64:
+        return 'libisar_linux_arm64.so';
       case Abi.windowsArm64:
       case Abi.windowsX64:
         return 'isar.dll';
