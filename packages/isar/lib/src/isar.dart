@@ -187,14 +187,11 @@ abstract class Isar {
   /// You should use the generated extension methods instead.
   IsarCollection<T> collection<T>() {
     requireOpen();
-    return _collections[T]! as IsarCollection<T>;
-  }
-
-  /// @nodoc
-  @protected
-  IsarCollection<T> getCollectionInternal<T>() {
-    requireOpen();
-    return _collections[T]! as IsarCollection<T>;
+    final collection = _collections[T];
+    if (collection == null) {
+      throw IsarError('Missing ${T.runtimeType}Schema in Isar.open');
+    }
+    return collection as IsarCollection<T>;
   }
 
   /// @nodoc
