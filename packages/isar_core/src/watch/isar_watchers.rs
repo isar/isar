@@ -1,26 +1,28 @@
-use crate::query::Query;
-use crate::watch::watcher::{Watcher, WatcherCallback};
+use crate::{
+    core::query::IsarQuery,
+    watch::watcher::{Watcher, WatcherCallback},
+};
 use crossbeam_channel::Receiver;
 use intmap::IntMap;
 use itertools::Itertools;
 use std::sync::Arc;
 
-pub(crate) type WatcherModifier = Box<dyn FnOnce(&mut IsarWatchers) + Send + 'static>;
+pub(crate) type WatcherModifier<Q> = Box<dyn FnOnce(&mut IsarWatchers<Q>) + Send + 'static>;
 
-pub(crate) struct IsarWatchers {
-    modifiers: Receiver<WatcherModifier>,
-    collection_watchers: IntMap<IsarCollectionWatchers>,
+pub(crate) struct IsarWatchers<Q: IsarQuery> {
+    modifiers: Receiver<WatcherModifier<Q>>,
+    collection_watchers: IntMap<IsarCollectionWatchers<Q>>,
 }
 
-impl IsarWatchers {
-    pub fn new(modifiers: Receiver<WatcherModifier>) -> Self {
+impl<Q: IsarQuery> IsarWatchers<Q> {
+    pub fn new(modifiers: Receiver<WatcherModifier<Q>>) -> Self {
         IsarWatchers {
             modifiers,
             collection_watchers: IntMap::new(),
         }
     }
 
-    pub(crate) fn get_col_watchers(&mut self, col_id: u64) -> &mut IsarCollectionWatchers {
+    pub(crate) fn get_col_watchers(&mut self, col_id: u64) -> &mut IsarCollectionWatchers<Q> {
         if !self.collection_watchers.contains_key(col_id) {
             self.collection_watchers
                 .insert(col_id, IsarCollectionWatchers::new());
@@ -36,13 +38,13 @@ impl IsarWatchers {
     }
 }
 
-pub struct IsarCollectionWatchers {
+pub struct IsarCollectionWatchers<Q: IsarQuery> {
     pub(super) watchers: Vec<Arc<Watcher>>,
     pub(super) object_watchers: IntMap<Vec<Arc<Watcher>>>,
-    pub(super) query_watchers: Vec<(Query, Arc<Watcher>)>,
+    pub(super) query_watchers: Vec<(Q, Arc<Watcher>)>,
 }
 
-impl IsarCollectionWatchers {
+impl<Q: IsarQuery> IsarCollectionWatchers<Q> {
     fn new() -> Self {
         IsarCollectionWatchers {
             watchers: Vec::new(),
@@ -83,7 +85,7 @@ impl IsarCollectionWatchers {
         watchers.remove(position);
     }
 
-    pub fn add_query_watcher(&mut self, watcher_id: u64, query: Query, callback: WatcherCallback) {
+    pub fn add_query_watcher(&mut self, watcher_id: u64, query: Q, callback: WatcherCallback) {
         let watcher = Arc::new(Watcher::new(watcher_id, callback));
         self.query_watchers.push((query, watcher));
     }

@@ -12,8 +12,8 @@ pub enum IsarError {
     ))]
     PathError {},
 
-    #[snafu(display("Cannot open Environment: {}", error))]
-    EnvError { error: Box<IsarError> },
+    #[snafu(display("Cannot open database connection: {}", error))]
+    ConnError { error: Box<IsarError> },
 
     #[snafu(display("The database is full."))]
     DbFull {},
@@ -26,12 +26,6 @@ pub enum IsarError {
 
     #[snafu(display("Auto increment id cannot be generated because the limit is reached."))]
     AutoIncrementOverflow {},
-
-    #[snafu(display("The provided ObjectId does not match the collection."))]
-    InvalidObjectId {},
-
-    #[snafu(display("The provided object is invalid."))]
-    InvalidObject {},
 
     #[snafu(display("Transaction closed."))]
     TransactionClosed {},
@@ -57,8 +51,8 @@ pub enum IsarError {
     #[snafu(display("InstanceMismatch: The transaction is from a different instance."))]
     InstanceMismatch {},
 
-    #[snafu(display("MdbxError ({}): {}", code, message))]
-    MdbxError { code: i32, message: String },
+    #[snafu(display("DbError ({}): {}", code, message))]
+    DbError { code: i32, message: String },
 }
 
 pub fn illegal_arg<T>(msg: &str) -> Result<T> {

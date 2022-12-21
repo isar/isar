@@ -1,16 +1,16 @@
-use crate::object::isar_object::IsarObject;
+use crate::core::query::IsarQuery;
 use crate::watch::isar_watchers::IsarWatchers;
 use crate::watch::watcher::Watcher;
 use intmap::IntMap;
 use std::sync::{Arc, MutexGuard};
 
-pub(crate) struct ChangeSet<'a> {
-    watchers: MutexGuard<'a, IsarWatchers>,
+pub(crate) struct ChangeSet<'a, Q: IsarQuery> {
+    watchers: MutexGuard<'a, IsarWatchers<Q>>,
     changed_watchers: IntMap<Arc<Watcher>>,
 }
 
-impl<'a> ChangeSet<'a> {
-    pub fn new(watchers: MutexGuard<'a, IsarWatchers>) -> Self {
+impl<'a, Q: IsarQuery> ChangeSet<'a, Q> {
+    pub fn new(watchers: MutexGuard<'a, IsarWatchers<Q>>) -> Self {
         ChangeSet {
             watchers,
             changed_watchers: IntMap::new(),
@@ -28,7 +28,7 @@ impl<'a> ChangeSet<'a> {
         }
     }
 
-    pub fn register_change(&mut self, col_id: u64, id: i64, object: IsarObject) {
+    pub fn register_change(&mut self, col_id: u64, id: i64, object: &Q::Object<'_>) {
         let cw = self.watchers.get_col_watchers(col_id);
         Self::register_watchers(&mut self.changed_watchers, &cw.watchers);
         if let Some(object_watchers) = cw.object_watchers.get(id as u64) {
@@ -36,9 +36,7 @@ impl<'a> ChangeSet<'a> {
         }
 
         for (q, w) in &cw.query_watchers {
-            if !self.changed_watchers.contains_key(w.get_id())
-                && q.maybe_matches_wc_filter(id, object)
-            {
+            if !self.changed_watchers.contains_key(w.get_id()) && q.maybe_matches(id, object) {
                 self.changed_watchers.insert(w.get_id(), w.clone());
             }
         }
