@@ -200,6 +200,22 @@ void main() {
       });
     });
 
+    isarTest('Async txn is still active', () async {
+      final completer = Completer<void>();
+      final stream = StreamController<Model>.broadcast();
+      await isar.writeTxn(
+        () async => stream.stream.listen((e) {
+          expect(
+            () => isar.models.put(Model()),
+            throwsIsarError('not active anymore'),
+          );
+          completer.complete();
+        }),
+      );
+      stream.add(Model());
+      await completer.future;
+    });
+
     isarTest('Nested async transactions of different instances', () async {
       final isar2 = await openTempIsar([ModelSchema]);
 

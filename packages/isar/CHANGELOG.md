@@ -1,8 +1,9 @@
-## 3.0.6-dev.0
+## 3.0.6
 
 ### Fixes
 
 - Add check to verify transactions are used for correct instance
+- Add check to verify that async transactions are still active
 - Fix upstream issue with opening databases
 
 ## 3.0.5

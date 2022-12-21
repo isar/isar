@@ -23,6 +23,9 @@ class Txn extends Transaction {
     );
   }
 
+  @override
+  bool active = true;
+
   /// An arena allocator that has the same lifetime as this transaction.
   final alloc = Arena(malloc);
 
@@ -77,6 +80,7 @@ class Txn extends Transaction {
 
   @override
   Future<void> commit() async {
+    active = false;
     IC.isar_txn_finish(ptr, true);
     await wait();
     unawaited(_portSubscription!.cancel());
@@ -84,11 +88,13 @@ class Txn extends Transaction {
 
   @override
   void commitSync() {
+    active = false;
     nCall(IC.isar_txn_finish(ptr, true));
   }
 
   @override
   Future<void> abort() async {
+    active = false;
     IC.isar_txn_finish(ptr, false);
     await wait();
     unawaited(_portSubscription!.cancel());
@@ -96,6 +102,7 @@ class Txn extends Transaction {
 
   @override
   void abortSync() {
+    active = false;
     nCall(IC.isar_txn_finish(ptr, false));
   }
 

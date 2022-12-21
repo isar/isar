@@ -19,7 +19,8 @@ abstract class IsarCommon extends Isar {
   void _requireNotInTxn() {
     if (_currentTxnSync != null || Zone.current[_zoneTxn] != null) {
       throw IsarError(
-        'Cannot perform this operation from within an active transaction.',
+        'Cannot perform this operation from within an active transaction. '
+        'Isar does not support nesting transactions.',
       );
     }
   }
@@ -86,12 +87,16 @@ abstract class IsarCommon extends Isar {
   ) {
     final currentTxn = Zone.current[_zoneTxn] as T?;
     if (currentTxn != null) {
-      if (write && !currentTxn.write) {
-        throw IsarError(
-          'Operation cannot be performed within a read transaction.',
-        );
+      if (!currentTxn.active) {
+        throw IsarError('Transaction is not active anymore. Make sure to await '
+            'all your asynchronous code within transactions to prevent it from '
+            'being closed prematurely.');
+      } else if (write && !currentTxn.write) {
+        throw IsarError('Operation cannot be performed within a read '
+            'transaction. Use isar.writeTxn() instead.');
       } else if (currentTxn.isar != this) {
-        throw IsarError('Transaction does not match Isar instance.');
+        throw IsarError('Transaction does not match Isar instance. '
+            'Make sure to use transactions from the same Isar instance.');
       }
       return callback(currentTxn);
     } else if (!write) {
@@ -99,7 +104,8 @@ abstract class IsarCommon extends Isar {
         return callback(Zone.current[_zoneTxn] as T);
       });
     } else {
-      throw IsarError('Write operations require an explicit transaction.');
+      throw IsarError('Write operations require an explicit transaction. '
+          'Wrap your code in isar.writeTxn()');
     }
   }
 
@@ -112,7 +118,10 @@ abstract class IsarCommon extends Isar {
 
     if (write && _asyncWriteTxnsActive > 0) {
       throw IsarError(
-        'An async write transaction is already in progress in this isolate.',
+        'An async write transaction is already in progress in this isolate. '
+        'You cannot begin a sync write transaction until it is finished. '
+        'Use asynchroneous transactions if you want to queue multiple write '
+        'transactions.',
       );
     }
 
@@ -152,14 +161,16 @@ abstract class IsarCommon extends Isar {
     if (_currentTxnSync != null) {
       if (write && !_currentTxnSync!.write) {
         throw IsarError(
-          'Operation cannot be performed within a read transaction.',
+          'Operation cannot be performed within a read transaction. '
+          'Use isar.writeTxnSync() instead.',
         );
       }
       return callback(_currentTxnSync! as T);
     } else if (!write) {
       return _beginTxnSync(false, false, () => callback(_currentTxnSync! as T));
     } else {
-      throw IsarError('Write operations require an explicit transaction.');
+      throw IsarError('Write operations require an explicit transaction. '
+          'Wrap your code in isar.writeTxnSync()');
     }
   }
 
@@ -190,6 +201,9 @@ abstract class Transaction {
 
   /// @nodoc
   final bool write;
+
+  /// @nodoc
+  bool get active;
 
   /// @nodoc
   Future<void> commit();
