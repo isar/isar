@@ -113,9 +113,9 @@ Wenn eine Ansammlung ein Feld mit einem Typen enthält, der nicht von Isar unter
 Beachte, dass es keine gute Vorgehensweise ist, Informationen in Isar-Objekten zu speichern, die nicht erhalten bleiben.
 :::
 
-## Supported types
+## Unterstützte Typen
 
-Isar supports the following data types:
+Isar unterstützt die folgenden Datentypen:
 
 - `bool`
 - `byte`
@@ -134,23 +134,23 @@ Isar supports the following data types:
 - `List<DateTime>`
 - `List<String>`
 
-Additionally, embedded objects and enums are supported. We'll cover those below.
+Zusätzlich sind eingebettete Objekte und Enums unterstützt. Wir behandeln diese weiter unten.
 
 ## byte, short, float
 
-For many use cases, you don't need the full range of a 64-bit integer or double. Isar supports additional types that allow you to save space and memory when storing smaller numbers.
+In vielen Fällen benötigst du nicht den gesamten Bereich eines 64-bit Integers oder Doubles. Isar unterstützt zusätzliche Typen, die es dir erlauben Speicher beim speichern kleinerer Zahlen zu sparen.
 
-| Type       | Size in bytes | Range                                                   |
-| ---------- | ------------- | ------------------------------------------------------- |
-| **byte**   | 1             | 0 to 255                                                |
-| **short**  | 4             | -2,147,483,647 to 2,147,483,647                         |
-| **int**    | 8             | -9,223,372,036,854,775,807 to 9,223,372,036,854,775,807 |
-| **float**  | 4             | -3.4e38 to 3.4e38                                       |
-| **double** | 8             | -1.7e308 to 1.7e308                                     |
+| Typ        | Größe in bytes | Bereich                                                  |
+| ---------- | -------------- | -------------------------------------------------------- |
+| **byte**   | 1              | 0 bis 255                                                |
+| **short**  | 4              | -2.147.483.647 bis 2.147.483.647                         |
+| **int**    | 8              | -9.223.372.036.854.775.807 bis 9.223.372.036.854.775.807 |
+| **float**  | 4              | -3,4e38 bis 3,4e38                                       |
+| **double** | 8              | -1,7e308 bis 1,7e308                                     |
 
-The additional number types are just aliases for the native Dart types, so using `short`, for example, works the same as using `int`.
+Die zusätzlichen Zahl-Typen sind nur Aliase für die nativen Dart-Typen, also beispielsweise `short` zu benutzen funktioniert genauso wie wenn du `int` nutzen würdest.
 
-Here is an example collection containing all of the above types:
+Hier ist eine Beispiel-Ansammlung, welche alle der eben genannten Typen enthält:
 
 ```dart
 @collection
@@ -169,7 +169,7 @@ class TestCollection {
 }
 ```
 
-All number types can also be used in lists. For storing bytes, you should use `List<byte>`.
+Alle Zahlen-Typen können auch in Listen verwendet werden. Um Bytes zu speichern solltest du `List<byte>` benutzen.
 
 ## Nullable types
 
