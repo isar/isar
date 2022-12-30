@@ -1,8 +1,8 @@
 ---
-title: Create, Read, Update, Delete
+title: Erstellen, Lesen, Aktualisieren und Löschen
 ---
 
-# Erstellen, Lesen, Updaten und Löschen
+# Erstellen, Lesen, Aktualisieren und Löschen
 
 Lerne wie du Collections in Isar nutzt nachdem du sie definiert hast.
 
@@ -112,9 +112,9 @@ await isar.writeTxn(() async {
   final recipe = await recipes.get(123)
 
   recipe.isFavorite = false;
-  await recipes.put(recipe); // perform update operations
+  await recipes.put(recipe); // Aktualisierungsoperationen
 
-  await recipes.delete(123); // or delete operations
+  await recipes.delete(123); // oder Löschoperationen durchführen
 });
 ```
 
