@@ -171,30 +171,30 @@ class TestCollection {
 
 Alle Zahlen-Typen können auch in Listen verwendet werden. Um Bytes zu speichern solltest du `List<byte>` benutzen.
 
-## Nullable types
+## Null-bare Typen
 
-Understanding how nullability works in Isar is essential: Number types do **NOT** have a dedicated `null` representation. Instead, a specific value is used:
+Zu verstehen wie Null-barkeit in Isar funktioniert ist essentiell: Zahl-typen haben keine bestimmte `null`-Darstellung. Stattdessen wird ein bestimmter Wert genutzt:
 
-| Type       | VM            |
+| Typ        | VM            |
 | ---------- | ------------- |
 | **short**  | `-2147483648` |
-| **int**    |  `int.MIN`    |
+| **int**    | `int.MIN`     |
 | **float**  | `double.NaN`  |
-| **double** |  `double.NaN` |
+| **double** | `double.NaN`  |
 
-`bool`, `String`, and `List` have a separate `null` representation.
+`bool`, `String`, und `List`  haben eine seperate `null`-Darstellung.
 
-This behavior enables performance improvements, and it allows you to change the nullability of your fields freely without requiring migration or special code to handle `null` values.
+Dieses Verhalten erlaubt Leistungsverbesserungen, und ermöglicht es die Null-narkeit deiner Felder frei zu ändern, ohne eine Migration oder speziellen Code zum handhaben von `null`-Werten zu benötigen.
 
 :::warning
-The `byte` type does not support null values.
+Der `byte`-Typ unterstützt keine Null-Werte.
 :::
 
 ## DateTime
 
-Isar does not store timezone information of your dates. Instead, it converts `DateTime`s to UTC before storing them. Isar returns all dates in local time.
+Isar speichert keine Zeitzoneninformationen von deinen Daten. Stattdessen wandelt es `DateTime`s zu UTC um, bervor es diese speichert. Isar gibt alle Daten in die lokale  Zeit umgewandelt zurück.
 
-`DateTime`s are stored with microsecond precision. In browsers, only millisecond precision is supported because of JavaScript limitations.
+`DateTime`s werden mit Mikrosekunden-Präzision gespeichert. In Browsern ist, aufgrund von JavaScript-Limitationen, nur Millisekunden-Präzision möglich.
 
 ## Enum
 
