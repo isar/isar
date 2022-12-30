@@ -118,7 +118,7 @@ await isar.writeTxn(() async {
 });
 ```
 
-➡️ Lerne mehr: [Vorgänge](transactions)
+➡️ Lerne mehr: [Transaktionen](transactions)
 
 ### Objekt erstellen
 

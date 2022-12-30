@@ -1,8 +1,8 @@
 ---
-title: Vorgänge
+title: Transaktionen
 ---
 
-# Vorgänge
+# Transaktionen
 
 In Isar, transactions combine multiple database operations in a single unit of work. Most interactions with Isar implicitly use transactions. Read & write access in Isar is [ACID](http://en.wikipedia.org/wiki/ACID) compliant. Transactions are automatically rolled back if an error occurs.
 
