@@ -52,7 +52,7 @@ flutter pub run build_runner build
    ایک نیا ای زار مثال کھولیں اور اپنے تمام کلیکشن اسکیموں کو پاس کریں۔ اختیاری طور پر آپ مثال کا نام اور ڈائریکٹری بتا سکتے ہیں۔
 
 ```dart
-final isar = await Isar.open([EmailSchema]);
+final isar = await Isar.open([UserSchema]);
 ```
 
 ## 5. لکھیں اور پڑھیں

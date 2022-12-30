@@ -55,7 +55,7 @@ flutter pub run build_runner build
 Öffne eine neue Isar-Instanz und übergebe alle Collection-Schemata. Optional kannst du einen Instanznamen und ein Verzeichnis angeben.
 
 ```dart
-final isar = await Isar.open([EmailSchema]);
+final isar = await Isar.open([UserSchema]);
 ```
 
 ## 5. Schreiben und lesen

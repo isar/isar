@@ -55,7 +55,7 @@ flutter pub run build_runner build
 Open a new Isar instance and pass all of your collection schemas. Optionally you can specify an instance name and directory.
 
 ```dart
-final isar = await Isar.open([EmailSchema]);
+final isar = await Isar.open([UserSchema]);
 ```
 
 ## 5. Write and read
