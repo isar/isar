@@ -20,7 +20,7 @@ flutter pub add -d isar_generator build_runner
 اپنی کلیکشن کلاسز کو "کلیکشن@" کے ساتھ تشریح کریں اورایک "آئی ڈی@" فیلڈ کا انتخاب کریں۔
 
 ```dart
-part 'email.g.dart';
+part 'user.g.dart';
 
 @collection
 class User {

@@ -22,7 +22,7 @@ flutter pub add -d isar_generator build_runner
 Annotez vos classes de collection avec `@collection` et choisissez un champ `Id`.
 
 ```dart
-part 'email.g.dart';
+part 'user.g.dart';
 
 @collection
 class User {

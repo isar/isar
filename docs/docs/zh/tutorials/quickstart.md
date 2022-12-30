@@ -22,7 +22,7 @@ flutter pub add -d isar_generator build_runner
 用 `@collection` 给你的 Collection 类添加注解，并指定一个 `Id` 字段。
 
 ```dart
-part 'email.g.dart';
+part 'user.g.dart';
 
 @collection
 class User {

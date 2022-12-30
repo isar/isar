@@ -23,7 +23,7 @@ flutter pub add -d isar_generator build_runner
 あなたの使用するコレクションクラスに `@collection` でアノテーションを付け、`Id` フィールドを設定します。
 
 ```dart
-part 'email.g.dart';
+part 'user.g.dart';
 
 @collection
 class User {
