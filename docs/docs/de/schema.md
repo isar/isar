@@ -269,4 +269,4 @@ class Recepient {
 }
 ```
 
-Eingebettete Objekte können Null-bar sein und andere Objekte erweitern. Die einzige Voraussetzung ist, dass sie mit `@embedded` vermerkt werden und einen Standardkonstruktor ohne erforderliche Parameter hat.
+Eingebettete Objekte können Null-bar sein und andere Objekte erweitern. Die einzige Voraussetzung ist, dass sie mit `@embedded` vermerkt werden und einen Standardkonstruktor ohne erforderliche Parameter haben.
