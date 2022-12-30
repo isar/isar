@@ -192,7 +192,7 @@ Der `byte`-Typ unterstützt keine Null-Werte.
 
 ## DateTime
 
-Isar speichert keine Zeitzoneninformationen von deinen Daten. Stattdessen wandelt es `DateTime`s zu UTC um, bervor es diese speichert. Isar gibt alle Daten in die lokale  Zeit umgewandelt zurück.
+Isar speichert keine Zeitzoneninformationen von deinen Daten. Stattdessen wandelt es `DateTime`s zu UTC um, bervor es diese speichert. Isar gibt alle Daten in lokaler Zeit zurück.
 
 `DateTime`s werden mit Mikrosekunden-Präzision gespeichert. In Browsern ist, aufgrund von JavaScript-Limitationen, nur Millisekunden-Präzision möglich.
 
