@@ -49,9 +49,9 @@ Du kannst eintweder IDs selbst zuweisen oder Isar fragen eine sich automatisch e
 Automatisch inkrementierende IDs werden nicht wiederverwendet, wenn ein Objekt gelöscht wird. Der einzige Weg automatisch-inkrementierende IDs zurückzusetzen ist die Datenbank zu leeren.
 :::
 
-### Renaming collections and fields
+### Ansammlungen und Felder umbenennen
 
-By default, Isar uses the class name as the collection name. Similarly, Isar uses field names as column names in the database. If you want a collection or field to have a different name, add the `@Name` annotation. The following example demonstrates custom names for collection and fields:
+Isar benutzt standardmäßig den Klassennamen als Ansammlungsnamen. Genauso verwendet Isar in der Datenbank Feldnamen als Spaltennamen. Wenn du willst, dass eine Ansamlung oder ein Feld einen anderen Namen hat, dann füge die Anmerkung `@Name` hinzu. Das folgende Beispiel demonstriert angepasste Namen für Ansammlungen und Felder:
 
 ```dart
 @collection
@@ -69,11 +69,11 @@ class MyUserClass1 {
 }
 ```
 
-Especially if you want to rename Dart fields or classes that are already stored in the database, you should consider using the `@Name` annotation. Otherwise, the database will delete and re-create the field or collection.
+Du solltest besonders dann, wenn du Dart Felder oder Klassen umbenennen willst, überlegen die `@Name`-Anmerkung zu verwenden. Sonst wird die Datenbank das Feld oder die Ansammlung löschen und neu erzeugen.
 
-### Ignoring fields
+### Felder ignorieren
 
-Isar persists all public fields of a collection class. By annotating a property or getter with `@ignore`, you can exclude it from persistence, as shown in the following code snippet:
+Isar sichert/erhält alle öffentlichen Felder einer Ansammlungs-Klasse. Wenn du eine Eigenschaft oder einen Getter mit `@ignore` markierst, kannst du diese von der Sicherung ausschließen, wie im folgenden Code-Schnipsel gezeigt:
 
 ```dart
 @collection
@@ -89,7 +89,7 @@ class User {
 }
 ```
 
-In cases where a collection inherits fields from a parent collection, it's usually easier to use the `ignore` property of the `@Collection` annotation:
+In Fällen, in denen die Ansammlung Felder von der Elternansammlung erhält, ist es meist leichter die `ignore`-Eigenschaft der `@Collection`-Anmerkung zu verwenden:
 
 ```dart
 @collection
@@ -107,10 +107,10 @@ class Member extends User {
 }
 ```
 
-If a collection contains a field with a type that is not supported by Isar, you have to ignore the field.
+Wenn eine Ansammlung ein Feld mit einem Typen enthält, der nicht von Isar unterstützt wird, musst du das Feld ignorieren.
 
 :::warning
-Keep in mind that it is not good practice to store information in Isar objects that are not persisted.
+Beachte, dass es keine gute Vorgehensweise ist, Informationen in Isar-Objekten zu speichern, die nicht erhalten bleiben.
 :::
 
 ## Supported types
