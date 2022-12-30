@@ -4,15 +4,15 @@ title: Schema
 
 # Schema
 
-Wenn du Isar benutzt, um deine App-Daten zu speichern, dann hast du mit Ansammlungen zu tun. Eine Ansammlung ist wie die Tabelle einer Datenbank in der angeschlossenen Isar Datenbank und kann nur einen einzigen Typen von Dart Objekt enthalten. Jedes Ansammlungs-Objekt repräsentiert eine Zeile mit Daten in der zugehörigen Ansammlung.
+Wenn du Isar benutzt, um deine App-Daten zu speichern, dann hast du mit Collections zu tun. Eine Collection ist wie die Tabelle einer Datenbank in der angeschlossenen Isar Datenbank und kann nur einen einzigen Typen von Dart Objekt enthalten. Jedes Collection-Objekt repräsentiert eine Zeile mit Daten in der zugehörigen Collection.
 
-Die Definition einer Ansammlung wird "Schema" genannt. Der Isar-Generator macht die meiste Arbeit für dich und generiert den Großteil des Codes den du benötigst, um die Ansammlung zu benutzen.
+Die Definition einer Collection wird "Schema" genannt. Der Isar-Generator macht die meiste Arbeit für dich und generiert den Großteil des Codes den du benötigst, um die Collection zu benutzen.
 
-## Aufbau einer Ansammlung
+## Aufbau einer Collection
 
-Jede Ansammlung in Isar wird über die Anmerkung `@collection` oder `@Collection()` an einer Klasse definiert. Eine Isar-Ansammlung enthält Felder für jede Spalte in der zugehörigen Tabelle der Datenbank, auch eine, die dem Primär-Schlüssel entspricht.
+Jede Collection in Isar wird über die Anmerkung `@collection` oder `@Collection()` an einer Klasse definiert. Eine Isar-Collection enthält Felder für jede Spalte in der zugehörigen Tabelle der Datenbank, auch eine, die dem Primär-Schlüssel entspricht.
 
-Der folgende Code ist ein Beispiel einer simplen Ansammlung, welche eine `User`-Tabelle mit den Spalten ID, Vorname und Nachname definiert:
+Der folgende Code ist ein Beispiel einer simplen Collection, welche eine `User`-Tabelle mit den Spalten ID, Vorname und Nachname definiert:
 
 ```dart
 @collection
@@ -29,17 +29,17 @@ class User {
 Um ein Feld persistent zu machen, muss Isar Zugriff auf das Feld haben. Du kannst sicherstellen, dass Isar Zugriff auf ein Feld hat, indem du es öffentlich machst, oder indem du Getter- und Setter-Methoden definierst.
 :::
 
-Es gibt ein paar optionale Parameter, um die Ansammlung anzupassen:
+Es gibt ein paar optionale Parameter, um die Collection anzupassen:
 
 | Konfiguration | Beschreibung                                                                                                                  |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | `inheritance` | Steuert, ob Felder von Elternklassen und Mixins in Isar gespeichert werden. Standardmäßig aktiviert.                          |
-| `accessor`    | Erlaubt dir den Standard des Ansammlungszugriffs umzubenennen (zum Beispiel zu `isar.contacts` für die `Contact`-Ansammlung). |
+| `accessor`    | Erlaubt dir den Standard des Collectionzugriffs umzubenennen (zum Beispiel zu `isar.contacts` für die `Contact`-Collection). |
 | `ignore`      | Erlaubt es bestimmte Eigenschaften zu ignorieren. Diese werden auch bei Super-Klassen angewendet.                             |
 
 ### Isar ID
 
-Jede Ansammlungs-Klasse muss eine ID-Eigenschaft vom Typen `Id` definieren, die ein Objekt eindeutig identifiziert. `Id` ist eigentlich nur ein Alias für `int`, der es dem Isar Generator ermöglicht die ID-Eigenschaft zu erkennen.
+Jede Collection-Klasse muss eine ID-Eigenschaft vom Typen `Id` definieren, die ein Objekt eindeutig identifiziert. `Id` ist eigentlich nur ein Alias für `int`, der es dem Isar Generator ermöglicht die ID-Eigenschaft zu erkennen.
 
 Isar indiziert ID Felder automatisch, was dir ermöglicht Objekte effizient anhand ihrer ID zu erhalten und modifizieren.
 
@@ -49,9 +49,9 @@ Du kannst eintweder IDs selbst zuweisen oder Isar fragen eine sich automatisch e
 Automatisch inkrementierende IDs werden nicht wiederverwendet, wenn ein Objekt gelöscht wird. Der einzige Weg automatisch-inkrementierende IDs zurückzusetzen ist die Datenbank zu leeren.
 :::
 
-### Ansammlungen und Felder umbenennen
+### Collections und Felder umbenennen
 
-Isar benutzt standardmäßig den Klassennamen als Ansammlungsnamen. Genauso verwendet Isar in der Datenbank Feldnamen als Spaltennamen. Wenn du willst, dass eine Ansamlung oder ein Feld einen anderen Namen hat, dann füge die Anmerkung `@Name` hinzu. Das folgende Beispiel demonstriert angepasste Namen für Ansammlungen und Felder:
+Isar benutzt standardmäßig den Klassennamen als Collectionnamen. Genauso verwendet Isar in der Datenbank Feldnamen als Spaltennamen. Wenn du willst, dass eine Collection oder ein Feld einen anderen Namen hat, dann füge die Anmerkung `@Name` hinzu. Das folgende Beispiel demonstriert angepasste Namen für Collections und Felder:
 
 ```dart
 @collection
@@ -69,11 +69,11 @@ class MyUserClass1 {
 }
 ```
 
-Du solltest besonders dann, wenn du Dart Felder oder Klassen umbenennen willst, überlegen die `@Name`-Anmerkung zu verwenden. Sonst wird die Datenbank das Feld oder die Ansammlung löschen und neu erzeugen.
+Du solltest besonders dann, wenn du Dart Felder oder Klassen umbenennen willst, überlegen die `@Name`-Anmerkung zu verwenden. Sonst wird die Datenbank das Feld oder die Collection löschen und neu erzeugen.
 
 ### Felder ignorieren
 
-Isar sichert/erhält alle öffentlichen Felder einer Ansammlungs-Klasse. Wenn du eine Eigenschaft oder einen Getter mit `@ignore` markierst, kannst du diese von der Sicherung ausschließen, wie im folgenden Code-Schnipsel gezeigt:
+Isar sichert/erhält alle öffentlichen Felder einer Collecion-Klasse. Wenn du eine Eigenschaft oder einen Getter mit `@ignore` markierst, kannst du diese von der Sicherung ausschließen, wie im folgenden Code-Schnipsel gezeigt:
 
 ```dart
 @collection
@@ -89,7 +89,7 @@ class User {
 }
 ```
 
-In Fällen, in denen die Ansammlung Felder von der Elternansammlung erhält, ist es meist leichter die `ignore`-Eigenschaft der `@Collection`-Anmerkung zu verwenden:
+In Fällen, in denen die Collection Felder von der Eltern-Collection erhält, ist es meist leichter die `ignore`-Eigenschaft der `@Collection`-Anmerkung zu verwenden:
 
 ```dart
 @collection
@@ -107,7 +107,7 @@ class Member extends User {
 }
 ```
 
-Wenn eine Ansammlung ein Feld mit einem Typen enthält, der nicht von Isar unterstützt wird, musst du das Feld ignorieren.
+Wenn eine Collection ein Feld mit einem Typen enthält, der nicht von Isar unterstützt wird, musst du das Feld ignorieren.
 
 :::warning
 Beachte, dass es keine gute Vorgehensweise ist, Informationen in Isar-Objekten zu speichern, die nicht erhalten bleiben.
@@ -150,7 +150,7 @@ In vielen Fällen benötigst du nicht den gesamten Bereich eines 64-bit Integers
 
 Die zusätzlichen Zahl-Typen sind nur Aliase für die nativen Dart-Typen, also beispielsweise `short` zu benutzen funktioniert genauso wie wenn du `int` nutzen würdest.
 
-Hier ist eine Beispiel-Ansammlung, welche alle der eben genannten Typen enthält:
+Hier ist eine Beispiel-Collection, welche alle der eben genannten Typen enthält:
 
 ```dart
 @collection
@@ -173,7 +173,7 @@ Alle Zahlen-Typen können auch in Listen verwendet werden. Um Bytes zu speichern
 
 ## Null-bare Typen
 
-Zu verstehen wie Null-barkeit in Isar funktioniert ist essentiell: Zahl-typen haben keine bestimmte `null`-Darstellung. Stattdessen wird ein bestimmter Wert genutzt:
+Zu verstehen wie Null-barkeit in Isar funktioniert ist essentiell: Zahl-typen haben **KEINE** gemeinsame festgelegte `null`-Darstellung. Stattdessen wird ein bestimmter Wert genutzt:
 
 | Typ        | VM            |
 | ---------- | ------------- |
@@ -249,7 +249,7 @@ Natürlich können Enums auch in Listen benutzt werden.
 
 ## Eingebettete Objekte
 
-Es ist oft hilfreich verschachtelte Objete in deinem Ansammlungs-Modell zu haben. Daher gibt es keine Begrenzung, wie tief die Verschachtelung von Objekten sein kann. Beachte jedoch, dass der gesamte Objekt-Baum in die Datenbank geschrieben werden muss, um ein sehr tief verachachteltes Objekt zu aktualisieren.
+Es ist oft hilfreich verschachtelte Objekte in deinem Collection-Modell zu haben. Daher gibt es keine Begrenzung, wie tief die Verschachtelung von Objekten sein kann. Beachte jedoch, dass der gesamte Objekt-Baum in die Datenbank geschrieben werden muss, um ein sehr tief verachachteltes Objekt zu aktualisieren.
 
 ```dart
 @collection
