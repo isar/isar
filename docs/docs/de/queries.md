@@ -4,23 +4,24 @@ title: Abfragen
 
 # Abfragen
 
-Querying is how you find records that match certain conditions, for example:
+Mit Abfragen kannst du Einträge finden, die bestimmten Bedinungen entsprechen, zum Beispiel:
 
-- Find all starred contacts
-- Find distinct first names in contacts
-- Delete all contacts that don't have the last name defined
+- Finde alle markierten Kontakte
+- Finde unterscheidbare Vornamen in den Kontakten
+- Lösche alle Kontakte, die keinen Nachnamen definiert haben
 
-Because queries are executed on the database and not in Dart, they're really fast. When you cleverly use indexes, you can improve the query performance even further. In the following, you'll learn how to write queries and how you can make them as fast as possible.
+Weil Abfragen auf der Datenbank ausgeführt werden, und nicht in Dart, sind sie sehr schnell. Wenn du Indizes sinnvoll benutzt, dann kannst du deine Abfrageleistung sogar weiter verbessern. Als nächstes lernst du, wie man Abragen schreibt und wie du sie so schnell wie möglich machen kannst.
 
-There are two different methods of filtering your records: Filters and where clauses. We'll start by taking a look at how filters work.
+Es gibt zwei verschiedene Methoden, Einträge zu filtern: Filter und Where-Bedingungen<!--where clauses-->. Wir starten indem wir uns die Funktionsweise von Filtern ansehen.
 
-## Filters
+## Filter
 
-Filters are easy to use and understand. Depending on the type of your properties, there are different filter operations available most of which have self-explanatory names.
+Filter sind leicht zu benutzen und zu verstehen. Abhängig von den Typen deiner Eigenschaften gibt es verschiedene verfügbare Filteroperationen mit größtenteils selbsterklärenden Namen.
 
-Filters work by evaluating an expression for every object in the collection being filtered. If the expression resolves to `true`, Isar includes the object in the results. Filters do not affect the ordering of the results.
+Filter funktionieren, indem sie einen Ausdruck für jedes Objekt der zu filternded Collection evaluieren. Wenn der Ausdruck zu `true` aufgelöst wird, dann fügt Isar das Objekt zu den Ergebnissen hinzu.
+Filter haben keinen Einfluss auf die Reihenfolge der Ergebnisse.
 
-We'll use the following model for the examples below:
+Wir benutzen das folgende Modell für die Beispiele witer unten:
 
 ```dart
 @collection
@@ -35,11 +36,11 @@ class Shoe {
 }
 ```
 
-### Query conditions
+### Abfragebedingungen
 
-Depending on the type of field, there are different conditions available.
+Abhängig vom Feld-Typen gibt es verschiedene mögliche Bedingungen.
 
-| Condition                | Description                                                                                                                                     |
+| Bedingung                | Beschreibung                                                                                                                                    |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `.equalTo(value)`        | Matches values that are equal to the specified `value`.                                                                                         |
 | `.between(lower, upper)` | Matches values that are between `lower` and `upper`.                                                                                            |
