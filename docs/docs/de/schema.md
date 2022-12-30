@@ -198,31 +198,31 @@ Isar speichert keine Zeitzoneninformationen von deinen Daten. Stattdessen wandel
 
 ## Enum
 
-Isar allows storing and using enums like other Isar types. You have to choose, however, how Isar should represent the enum on the disk. Isar supports four different strategies:
+Isar ermöglicht es Enums wie andere Isar-Typen zu nutzen und zu speichern. Du musst aber wählen, wie Isar den Enum auf de Datenträger abbilden soll. Isar unterstützt vier verschiedene Strategien:
 
-| EnumType    | Description                                                                                         |
-| ----------- | --------------------------------------------------------------------------------------------------- |
-| `ordinal`   | The index of the enum is stored as `byte`. This is very efficient but does not allow nullable enums |
-| `ordinal32` | The index of the enum is stored as `short` (4-byte integer).                                        |
-| `name`      | The enum name is stored as `String`.                                                                |
-| `value`     | A custom property is used to retrieve the enum value.                                               |
+| EnumTyp     | Beschreibung                                                                                                   |
+| ----------- | -------------------------------------------------------------------------------------------------------------- |
+| `ordinal`   | Der Index des Enums wird als `byte` gespeichert. Das ist sehr effizienzt, aber erlaubt keine Null-baren Enums. |
+| `ordinal32` | Der Index des Enums wird als `short` (4-Byte-Integer) gespeichert.                                             |
+| `name`      | Der Name des Enums wird als `String` gespeichert.                                                              |
+| `value`     | Eine angepasste Eigenschaft wird genutzt, um den Enum-Wert abzurufen.                                          |
 
 :::warning
-`ordinal` and `ordinal32` depend on the order of the enum values. If you change the order, existing databases will return incorrect values.
+`ordinal` und `ordinal32` basieren auf der Reihenfolge der Enum-Werte. Wenn du die Reihenfolge änderst, werden existierende Datenbanken falsche Werte zurückgeben.
 :::
 
-Let's check out an example for each strategy.
+Schauen wir uns ein Beispiel für jede Strategie an.
 
 ```dart
 @collection
 class EnumCollection {
   Id? id;
 
-  @enumerated // same as EnumType.ordinal
-  late TestEnum byteIndex; // cannot be nullable
+  @enumerated // entspricht EnumType.ordinal
+  late TestEnum byteIndex; // ist nicht Null-bar
 
   @Enumerated(EnumType.ordinal)
-  late TestEnum byteIndex2; // cannot be nullable
+  late TestEnum byteIndex2; // ist nicht Null-bar
 
   @Enumerated(EnumType.ordinal32)
   TestEnum? shortIndex;
@@ -245,11 +245,11 @@ enum TestEnum {
 }
 ```
 
-Of course, Enums can also be used in lists.
+Natürlich können Enums auch in Listen benutzt werden.
 
-## Embedded objects
+## Eingebettete Objekte
 
-It's often helpful to have nested objects in your collection model. There is no limit to how deep you can nest objects. Keep in mind, however, that updating a deeply nested object will require writing the whole object tree to the database.
+Es ist oft hilfreich verschachtelte Objete in deinem Ansammlungs-Modell zu haben. Daher gibt es keine Begrenzung, wie tief die Verschachtelung von Objekten sein kann. Beachte jedoch, dass der gesamte Objekt-Baum in die Datenbank geschrieben werden muss, um ein sehr tief verachachteltes Objekt zu aktualisieren.
 
 ```dart
 @collection
@@ -269,4 +269,4 @@ class Recepient {
 }
 ```
 
-Embedded objects can be nullable and extend other objects. The only requirement is that they are annotated with `@embedded` and have a default constructor without required parameters.
+Eingebettete Objekte können Null-bar sein und andere Objekte erweitern. Die einzige Voraussetzung ist, dass sie mit `@embedded` vermerkt werden und einen Standardkonstruktor ohne erforderliche Parameter hat.
