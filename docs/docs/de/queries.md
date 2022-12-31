@@ -40,17 +40,17 @@ class Shoe {
 
 Abhängig vom Feld-Typen gibt es verschiedene mögliche Bedingungen.
 
-| Bedingung                | Beschreibung                                                                                                                                    |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.equalTo(value)`        | Matches values that are equal to the specified `value`.                                                                                         |
-| `.between(lower, upper)` | Matches values that are between `lower` and `upper`.                                                                                            |
-| `.greaterThan(bound)`    | Matches values that are greater than `bound`.                                                                                                   |
-| `.lessThan(bound)`       | Matches values that are less than `bound`. `null` values will be included by default because `null` is considered smaller than any other value. |
-| `.isNull()`              | Matches values that are `null`.                                                                                                                 |
-| `.isNotNull()`           | Matches values that are not `null`.                                                                                                             |
-| `.length()`              | List, String and link length queries filter objects based on the number of elements in a list or link.                                          |
+| Bedingung                | Beschreibung                                                                                                                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.equalTo(value)`        | Trifft auf Werte zu, die mit dem angegebenen `value` übereinstimmen.                                                                                |
+| `.between(lower, upper)` | Trifft auf Werte zu, die zwischen `lower` und `upper` liegen.                                                                                       |
+| `.greaterThan(bound)`    | Trifft auf Werte zu, de größer als `bound` sind.                                                                                                    |
+| `.lessThan(bound)`       | Trifft auf Werte zu, die kleiner als `bound` sind. `null`-Werte werden eingeschlossen, da `null` als kleiner als jeder andere Wert betrachtet wird. |
+| `.isNull()`              | Trifft auf Werte zu, die `null` sind.                                                                                                               |
+| `.isNotNull()`           | Trifft auf Werte zu, die nicht `null` sind.                                                                                                         |
+| `.length()`              | Abfragen nach Längen von Listen, Strings und Links filtern Objekte basierend auf der Anzahl der Elemente in einer Liste oder in einem Link.         |
 
-Let's assume the database contains four shoes with sizes 39, 40, 46 and one with an un-set (`null`) size. Unless you perform sorting, the values will be returned sorted by id.
+Nehmen wir an, dass die Datenbank vier Schuhe mit den Gößen 39, 40, 46 und einen mit einer nicht festgelegten Größe (`null`). Wenn du keinen Sortierung durchführst, werden die Werte nach ID sortiert zurückgegeben.
 
 ```dart
 
@@ -68,19 +68,19 @@ isar.shoes.filter()
 
 ```
 
-### Logical operators
+### Logische Operatoren
 
-You can composite predicates using the following logical operators:
+Du kannst Aussagen zusammensetzen, indem du die folgenden logischen Operatoren verwendest:
 
-| Operator   | Description                                                                          |
+| Operator   | Beschreibung                                                                         |
 | ---------- | ------------------------------------------------------------------------------------ |
-| `.and()`   | Evaluates to `true` if both left-hand and right-hand expressions evaluate to `true`. |
-| `.or()`    | Evaluates to `true` if either expression evaluates to `true`.                        |
-| `.xor()`   | Evaluates to `true` if exactly one expression evaluates to `true`.                   |
-| `.not()`   | Negates the result of the following expression.                                      |
-| `.group()` | Group conditions and allow to specify order of evaluation.                           |
+| `.and()`   | Ergibt `true`, wenn von linkem und rechtem Ausdruck beide `true` ergeben.            |
+| `.or()`    | Ergibt `true`, wenn mindestens einer von beiden Ausdrücken `true` ergibt.            |
+| `.xor()`   | Ergibt `true`, wenn genau einer von beiden Ausdrücken `true` ergibt.                 |
+| `.not()`   | Negiert das Ergebnis des folgenden Ausdrucks.                                        |
+| `.group()` | Gruppiert Bedingungen und ermöglicht es eine Reihenfolge des Auswertens festzulegen. |
 
-If you want to find all shoes in size 46, you can use the following query:
+Wenn du alle Schuhe mit der Größe 46 finden möchstes, kannst du die folgende Abfrage verwenden:
 
 ```dart
 final result = await isar.shoes.filter()
@@ -88,19 +88,19 @@ final result = await isar.shoes.filter()
   .findAll();
 ```
 
-If you want to use more than one condition, you can combine multiple filters using logical **and** `.and()`, logical **or** `.or()` and logical **xor** `.xor()`.
+Wenn du mehr als eine Bedingung angeben möchtest, kannst du mehrere Filter verbinden, indem du sie mit logischem **und** `.and()`, logischem **oder** `.or()` und logischem **exklusiven oder** `.xor()` verbindest.
 
 ```dart
 final result = await isar.shoes.filter()
   .sizeEqualTo(46)
-  .and() // Optional. Filters are implicitly combined with logical and.
+  .and() // Optional. Filter werden implizit mit einem logischen UND verbunden.
   .isUnisexEqualTo(true)
   .findAll();
 ```
 
-This query is equivalent to: `size == 46 && isUnisex == true`.
+Diese Abfrage ist äquivalent zu: `size == 46 && isUnisex == true`.
 
-You can also group conditions using `.group()`:
+Du kannst auch Bedinungen gruppieren, indem du `.group()` benutzt:
 
 ```dart
 final result = await isar.shoes.filter()
@@ -114,9 +114,9 @@ final result = await isar.shoes.filter()
   .findAll()
 ```
 
-This query is equivalent to `size >= 43 && size <= 46 && (modelName.contains('Nike') || isUnisex == false)`.
+Diese Abfrage ist äquivalent zu: `size >= 43 && size <= 46 && (modelName.contains('Nike') || isUnisex == false)`.
 
-To negate a condition or group, use logical **not** `.not()`:
+Um eine Bedingung oder Gruppe zu negieren kannst du das logische **oder** `.not()` verwenden:
 
 ```dart
 final result = await isar.shoes.filter()
@@ -126,7 +126,7 @@ final result = await isar.shoes.filter()
   .findAll();
 ```
 
-This query is equivalent to `size != 46 && isUnisex != true`.
+Diese Abfrage ist äquivalent zu: `size != 46 && isUnisex != true`.
 
 ### String conditions
 
