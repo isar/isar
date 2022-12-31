@@ -128,32 +128,32 @@ final result = await isar.shoes.filter()
 
 Diese Abfrage ist äquivalent zu: `size != 46 && isUnisex != true`.
 
-### String conditions
+### String-Bedingungen
 
-In addition to the query conditions above, String values offer a few more conditions you can use. Regex-like wildcards, for example, allow more flexibility in search.
+Zusätzlich zu den vorher genannten Abfragebedingungen bieten String-Werte ein paar mehr Bedingungen, die du benutzen kannst. Platzhalter, ähnlich zu beispielsweise Regex, erlauben mehr Flexibilität beim Suchen.
 
-| Condition            | Description                                                       |
-| -------------------- | ----------------------------------------------------------------- |
-| `.startsWith(value)` | Matches string values that begins with provided `value`.          |
-| `.contains(value)`   | Matches string values that contain the provided `value`.          |
-| `.endsWith(value)`   | Matches string values that end with the provided `value`.         |
-| `.matches(wildcard)` | Matches string values that match the provided `wildcard` pattern. |
+| Bedingung            | Beschreibung                                                                   |
+| -------------------- | ------------------------------------------------------------------------------ |
+| `.startsWith(value)` | Trifft auf String-Werte zu, die mit dem angegebenen `value` beginnen.          |
+| `.contains(value)`   | Trifft auf String-Werte zu, die das angegebene `value` enthalten.              |
+| `.endsWith(value)`   | Trifft auf String-Werte zu, die mit dem angegebenen `value` enden.             |
+| `.matches(wildcard)` | Trifft auf String-Werte zu, die dem angegebenen `wildcard`-Muster entsprechen. |
 
-**Case sensitivity**  
-All string operations have an optional `caseSensitive` parameter that defaults to `true`.
+**Groß-/Kleinschreibung**  
+Alle String-Operationen haben eine optionalen `caseSensitive`-Eigenschaft, die standardmäßig `true` ist.
 
-**Wildcards:**  
-A [wildcard string expression](https://en.wikipedia.org/wiki/Wildcard_character) is a string that uses normal characters with two special wildcard characters:
+**Platzhalter**  
+Der [Ausdruck eine Platzhalter-Strings](https://de.wikipedia.org/wiki/Wildcard_(Informatik)) ist ein String der normale Zeichen mit zwei speziellen Platzhalter-Zeichen verwendet:
 
-- The `*` wildcard matches zero or more of any character
-- The `?` wildcard matches any character.
-  For example, the wildcard string `"d?g"` matches `"dog"`, `"dig"`, and `"dug"`, but not `"ding"`, `"dg"`, or `"a dog"`.
+- Der `*` Platzhalter trifft auf keines oder mehr von jedem Zeichen zu.
+- Der `?` Platzhalter trifft auf jedes Einzelzeichen zu.  
+  Zum Beispiel trifft der Platzhalter-String `"d?g"` auf `"dog"`, `"dig"` und `"dug"` zu, nicht aber auf `"ding"`, `"dg"` oder `"a dog"`.
 
-### Query modifiers
+### Abfragemodifizierungen
 
-Sometimes it is necessary to build a query based on some conditions or for different values. Isar has a very powerful tool for building conditional queries:
+Manchmal ist es notwendig eine Abfrage auf Bedingungen aufzubauen oder für verschiedene Werte zu bauen. Isar hat ein sehr mächtiges Werkzeug um bedingte Abfragen zu bauen:
 
-| Modifier              | Description                                                                                                                                     |
+| Modifikator           | Beschreibung                                                                                                                                    |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `.optional(cond, qb)` | Extends the query only if the `condition` is `true`. This can be used almost anywhere in a query for example to conditionally sort or limit it. |
 | `.anyOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **or**.                                                  |
