@@ -149,29 +149,29 @@ Der [Ausdruck eine Platzhalter-Strings](https://de.wikipedia.org/wiki/Wildcard_(
 - Der `?` Platzhalter trifft auf jedes Einzelzeichen zu.  
   Zum Beispiel trifft der Platzhalter-String `"d?g"` auf `"dog"`, `"dig"` und `"dug"` zu, nicht aber auf `"ding"`, `"dg"` oder `"a dog"`.
 
-### Abfragemodifizierungen
+### Abfragemodifikatoren
 
 Manchmal ist es notwendig eine Abfrage auf Bedingungen aufzubauen oder für verschiedene Werte zu bauen. Isar hat ein sehr mächtiges Werkzeug um bedingte Abfragen zu bauen:
 
-| Modifikator           | Beschreibung                                                                                                                                    |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.optional(cond, qb)` | Extends the query only if the `condition` is `true`. This can be used almost anywhere in a query for example to conditionally sort or limit it. |
-| `.anyOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **or**.                                                  |
-| `.allOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **and**.                                                 |
+| Modifikator           | Beschreibung                                                                                                                                                                                     |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `.optional(cond, qb)` | Erweitert die Abfrage nur, wenn die Bedinung `cond`, `true` ist. Das kann fast überall in einer Abfrage verwendet werden, beispielsweise um sie über eine Bedingung zu sortieren oder begrenzen. |
+| `.anyOf(list, qb)`    | Erweitert die Abfrage für jeden Wert in `values` und verbindet die Bedingungen mit einem logischen **oder**.                                                                                     |
+| `.allOf(list, qb)`    | Erweitert die Abfrage für jeden Wert in `values` und verbindet die Bedingungen mit einem logischen **und**.                                                                                      |
 
-In this example, we build a method that can find shoes with an optional filter:
+In diesem Beispiel bauen wir eine Methode, die Schuhe mit einem optionale Filter finden kann:
 
 ```dart
 Future<List<Shoe>> findShoes(Id? sizeFilter) {
   return isar.shoes.filter()
     .optional(
-      sizeFilter != null, // only apply filter if sizeFilter != null
+      sizeFilter != null, // Wendet den Filter nur an, wenn sizeFilter != null
       (q) => q.sizeEqualTo(sizeFilter!),
     ).findAll();
 }
 ```
 
-If you want to find all shoes that have one of multiple shoe sizes, you can either write a conventional query or use the `anyOf()` modifier:
+Wenn du alle Schuhe finden möchtest, die eine von mehreren Schugrößen haben, kannst du entweder eine konventionelle Abfrage schreiben oder den `anyOf()` Modifikator verwenden:
 
 ```dart
 final shoes1 = await isar.shoes.filter()
@@ -191,11 +191,11 @@ final shoes2 = await isar.shoes.filter()
 // shoes1 == shoes2
 ```
 
-Query modifiers are especially useful when you want to build dynamic queries.
+Abfragemodifikatoren sind besonders dann sinnvoll, wenn du dynamische Abfragen bauen möchtest.
 
-### Lists
+### Listen
 
-Even lists can be queried:
+Abfragen können sogar auf Listen gestellt werden:
 
 ```dart
 class Tweet {
@@ -207,7 +207,7 @@ class Tweet {
 }
 ```
 
-You can query based on the list length:
+Du kannst eine Abfrage auf Basis der Listenlänge bauen:
 
 ```dart
 final tweetsWithoutHashtags = await isar.tweets.filter()
@@ -219,7 +219,7 @@ final tweetsWithManyHashtags = await isar.tweets.filter()
   .findAll();
 ```
 
-These are equivalent to the Dart code `tweets.where((t) => t.hashtags.isEmpty);` and `tweets.where((t) => t.hashtags.length > 5);`. You can also query based on list elements:
+Diese sind aquivalent zu dem Dart Code `tweets.where((t) => t.hashtags.isEmpty);` und `tweets.where((t) => t.hashtags.length > 5);`. Du kannst auch Abfragen basierend auf Listenelementen stellen:
 
 ```dart
 final flutterTweets = await isar.tweets.filter()
@@ -227,7 +227,7 @@ final flutterTweets = await isar.tweets.filter()
   .findAll();
 ```
 
-This is equivalent to the Dart code `tweets.where((t) => t.hashtags.contains('flutter'));`.
+Das ist äquivalent zum Dart Code `tweets.where((t) => t.hashtags.contains('flutter'));`.
 
 ### Embedded objects
 
