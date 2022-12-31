@@ -145,7 +145,7 @@ All string operations have an optional `caseSensitive` parameter that defaults t
 A [wildcard string expression](https://en.wikipedia.org/wiki/Wildcard_character) is a string that uses normal characters with two special wildcard characters:
 
 - The `*` wildcard matches zero or more of any character
-- The `?` wildcard matches any character.
+- The `?` wildcard matches any character.  
   For example, the wildcard string `"d?g"` matches `"dog"`, `"dig"`, and `"dug"`, but not `"ding"`, `"dg"`, or `"a dog"`.
 
 ### Query modifiers
