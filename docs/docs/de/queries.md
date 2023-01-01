@@ -429,9 +429,9 @@ Für den Fall, dass deine Ergebnisse sortiert sein müssen, versuche einen Index
 
 Manchmal ist es nicht möglich oder sinnvoll einen Index zur Sortierung zu nutzen. Für solche Fälle solltest du Indizes benutzen, um die Anzahl an zu sortierenden Einträgen so weit wie möglich zu verringern.
 
-## Unique values
+## Eindeutige Werte
 
-To return only entries with unique values, use the distinct predicate. For example, to find out how many different shoe models you have in your Isar database:
+Um nur Einträge mit eindeutigen Werten zurückzubekommen, kannst du das Unterscheidbarkeitsprädikat verwenden. Zum Beispiel, um herauszufinden, wie viele unterscheidbare Schuhmodelle es in deiner Isar-Datenbank gibt:
 
 ```dart
 final shoes = await isar.shoes.filter()
@@ -439,7 +439,7 @@ final shoes = await isar.shoes.filter()
   .findAll();
 ```
 
-You can also chain multiple distinct conditions to find all shoes with distinct model-size combinations:
+Du kannst auch mehrere Unterscheidbarkeitsbedingungen verketten, um alle Schuhe mit unterscheidbaren Modell-Größe-Kombinationen zu finden:
 
 ```dart
 final shoes = await isar.shoes.filter()
@@ -448,12 +448,12 @@ final shoes = await isar.shoes.filter()
   .findAll();
 ```
 
-Only the first result of each distinct combination is returned. You can use where clauses and sort operations to control it.
+Nur das erste Ergebnis jeder Unterscheidbarkeitskombination wird zurückgegeben. Um das zu kontrollieren kannst du Where-Klauseln und Sortieroperationen verwenden.
 
-### Where clause distinct
+### Unterscheidbare Where-Klauseln
 
-If you have a non-unique index, you may want to get all of its distinct values. You could use the `distinctBy` operation from the previous section, but it's performed after sorting and filters, so there is some overhead.  
-If you only use a single where clause, you can instead rely on the index to perform the distinct operation.
+Wenn du einen uneindeutigen Index hast, kann es sein, dass du alle seine unterscheidbaren Werte haben möchtest. Du könntest die `distinctBy`-Operation des vorherigen Abschnitts verwenden, aber sie wird erst nach dem Sortieren und Filtern angewandt, sodass ein bisschen Overhead entsteht.
+Wenn du nur eine einzelne Where-Klausel verwendest, kannst du stattdessen dem Index vertrauen die Unterscheidbarkeitsoperation durchzuführen.
 
 ```dart
 final shoes = await isar.shoes.where(distinct: true)
@@ -462,7 +462,8 @@ final shoes = await isar.shoes.where(distinct: true)
 ```
 
 :::tip
-In theory, you could even use multiple where clauses for sorting and distinct. The only restriction is that those where clauses are not overlapping and use the same index. For correct sorting, they also need to be applied in sort order. Be very careful if you rely on this!
+Theoretisch könntest du sogar mehrere Where-Klauseln für Sortierung und Unterscheidbarkeit nutzen. Die einzige Einschränkung besteht darin, dass sich diese Where-Klauseln nicht überschneiden und denselben Index verwenden dürfen.<!--Check if you should use 'same' or 'different' index, also fix for english docs-->
+Für die richtige Sortierung müssen sie auch in Sortierreihenfolge angewandt werden. Sei sehr vorsichtig, wenn du dich darauf verlässt.
 :::
 
 ## Offset & Limit
