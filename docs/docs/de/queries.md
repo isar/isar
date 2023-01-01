@@ -498,22 +498,22 @@ Isar führt Abfragen immer in der gleichen Reihenfolge aus:
 5. Offset & Limit auf Ergebnisse anwenden
 6. Ergebnisse zurückgeben
 
-## Query operations
+## Abfrageoperationen
 
-In the previous examples, we used `.findAll()` to retrieve all matching objects. There are more operations available, however:
+In den vorangegangenen Beispielen haben wir `.findAll()` verwendet, um alle passenden Objekte zu erhalten. Es sind jedoch mehr Operationen verfügbar:
 
-| Operation        | Description                                                                                                         |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `.findFirst()`   | Retrieve only the first matching object or `null` if none matches.                                                  |
-| `.findAll()`     | Retrieve all matching objects.                                                                                      |
-| `.count()`       | Count how many objects match the query.                                                                             |
-| `.deleteFirst()` | Delete the first matching object from the collection.                                                               |
-| `.deleteAll()`   | Delete all matching objects from the collection.                                                                    |
-| `.build()`       | Compile the query to reuse it later. This saves the cost to build a query if you want to execute it multiple times. |
+| Operation        | Beschreibung                                                                                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `.findFirst()`   | Erhalte nur das erste passende Objekt oder `null` wenn kein passendes gefunden wird.                                                                   |
+| `.findAll()`     | Erhalte alle passenden Objekte.                                                                                                                        |
+| `.count()`       | Zählt, wieviele Objekte der Abfrage entsprechen.                                                                                                       |
+| `.deleteFirst()` | Löscht das erste passende Objekt aus der Collection.                                                                                                   |
+| `.deleteAll()`   | Löscht alle passenden Objekte aus der Collection.                                                                                                      |
+| `.build()`       | Konstruiert eine Abfrage um sie später wiederzuverwenden. Das erspart die Kosten, eine Abfrage erneut zu bauen, wenn du sie mehrfach ausführen willst. |
 
-## Property queries
+## Abfragen auf Eigenschaften
 
-If you are only interested in the values of a single property, you can use a property query. Just build a regular query and select a property:
+Wenn du nur an den Werten einer bestimmten Eigenschaft interessiert bist, kannst du Abfragen auf Eigenschaften machen. Baue einfach eine normale Abfrage und wähle eine Eigenschaft:
 
 ```dart
 List<String> models = await isar.shoes.where()
@@ -525,42 +525,42 @@ List<int> sizes = await isar.shoes.where()
   .findAll();
 ```
 
-Using only a single property saves time during deserialization. Property queries also work for embedded objects and lists.
+Nur eine einzige Eigenschaft zu nutzen erspart Zeit bei der Deserialisierung. Abfragen auf Eigenschaften funktionieren auch bei eingebetteten Objekten und Listen.
 
 ## Aggregation
 
-Isar supports aggregating the values of a property query. The following aggregation operations are available:
+Isar unterstützt die Aggregation der Werte einer Abfrage auf Eigenschaften. Die folgenden Aggregatoroperationen sind verfügbar:
 
-| Operation    | Description                                                    |
-| ------------ | -------------------------------------------------------------- |
-| `.min()`     | Finds the minimum value or `null` if none matches.             |
-| `.max()`     | Finds the maximum value or `null` if none matches.             |
-| `.sum()`     | Sums all values.                                               |
-| `.average()` | Calculates the average of all values or `NaN` if none matches. |
+| Operation    | Beschreibung                                                         |
+| ------------ | -------------------------------------------------------------------- |
+| `.min()`     | Findet den minimalen Wert oder `null`, wenn keiner passt.            |
+| `.max()`     | Findet den maximalen Wert oder `null`, wenn keiner passt.            |
+| `.sum()`     | Addiert alle Werte.                                                  |
+| `.average()` | Berechnet den Durchschnitt aller Werte oder `NaN` wenn keiner passt. |
 
-Using aggregations is vastly faster than finding all matching objects and performing the aggregation manually.
+Aggregatoren zu nutzen ist deutlich schneller, als alle passenden Objekte zu finden und die Aggregation manuell durchzuführen.
 
-## Dynamic queries
+## Dynamische Abfragen
 
 :::danger
-This section is most likely not relevant to you. It is discouraged to use dynamic queries unless you absolutely need to (and you rarely do).
+Dieser Abschnitt ist höchstwahrscheinlich nicht wichtig für dich. Es ist davon abzuraten dynamische Abfragen zu nutzen, es sei denn du benötigst sie wirklich (was selten vorkommt).
 :::
 
-All the examples above used the QueryBuilder and the generated static extension methods. Maybe you want to create dynamic queries or a custom query language (like the Isar Inspector). In that case, you can use the `buildQuery()` method:
+Alle der vorherigen Beispiele haben den QueryBuilder und die statischen Erweiterungsmethoden genutzt. Vielleicht möchtest du dynamische Abfragen oder eine benutzerdefinierte Abfragesprache (wie den Isar Inspektor) bauen. In dem Fall kannst du die Methode `buildQuery()` verwenden:
 
-| Parameter       | Description                                                                                 |
-| --------------- | ------------------------------------------------------------------------------------------- |
-| `whereClauses`  | The where clauses of the query.                                                             |
-| `whereDistinct` | Whether where clauses should return distinct values (only useful for single where clauses). |
-| `whereSort`     | The traverse order of the where clauses (only useful for single where clauses).             |
-| `filter`        | The filter to apply to the results.                                                         |
-| `sortBy`        | A list of properties to sort by.                                                            |
-| `distinctBy`    | A list of properties to distinct by.                                                        |
-| `offset`        | The offset of the results.                                                                  |
-| `limit`         | The maximum number of results to return.                                                    |
-| `property`      | If non-null, only the values of this property are returned.                                 |
+| Parameter       | Beschreibung                                                                                               |
+| --------------- | ---------------------------------------------------------------------------------------------------------- |
+| `whereClauses`  | Die Where-Klauseln der Abfrage.                                                                            |
+| `whereDistinct` | Ob Where-Klauseln nur unterscheidbare Werte zurückgeben sollen (nur sinnvoll für einzelne Where-Klauseln). |
+| `whereSort`     | Die Durchlaufreihenfolge der Where-Klauseln (nur sinnvoll für einzelne Where-Klauseln).                    |
+| `filter`        | Die Filter, die auf die Ergebnisse angewendet werden sollen.                                               |
+| `sortBy`        | Eine Liste an Eigenschaften nach denen sortiert werden soll.                                               |
+| `distinctBy`    | Eine Liste an Eigenschaften, an denen die Unterscheidbarkeit festgemacht wird.                             |
+| `offset`        | Der Offset der Ergebnisse.                                                                                 |
+| `limit`         | Die maximale Anzahl an Ergebnissen, die zurückgegeben werden.                                              |
+| `property`      | Wenn nicht-null, werden nur die Werte dieser Eigenschaft zurückgegeben.                                    |
 
-Let's create a dynamic query:
+Bauen wir eine dynamische Abfrage:
 
 ```dart
 final shoes = await isar.shoes.buildQuery(
@@ -600,7 +600,7 @@ final shoes = await isar.shoes.buildQuery(
 ).findAll();
 ```
 
-The following query is equivalent:
+Die folgende Abfrage ist äquivalent:
 
 ```dart
 final shoes = await isar.shoes.where()
