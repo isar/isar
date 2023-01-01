@@ -351,7 +351,7 @@ class Shoe with IsarObject {
 }
 ```
 
-There are two indexes. The index on `size` allows us to use where clauses like `.sizeEqualTo()`. The composite index on `isUnisex` allows where clauses like `isUnisexSizeEqualTo()`. But also `isUnisexEqualTo()` because you can always use any prefix of an index.
+There are two indexes. The index on `size` allows us to use where clauses like `.sizeEqualTo()`. The composite index on `isUnisex` allows where clauses like `.isUnisexSizeEqualTo()`. But also `.isUnisexEqualTo()` because you can always use any prefix of an index.
 
 We can now rewrite the query from before that finds unisex shoes in size 46 using the composite index. This query will be a lot faster than the previous one:
 
