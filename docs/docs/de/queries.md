@@ -229,9 +229,9 @@ final flutterTweets = await isar.tweets.filter()
 
 Das ist äquivalent zum Dart Code `tweets.where((t) => t.hashtags.contains('flutter'));`.
 
-### Embedded objects
+### Eingebettete Objekte
 
-Embedded objects are one of Isar's most useful features. They can be queried very efficiently using the same conditions available for top-level objects. Let's assume we have the following model:
+Eingebettete Objekte sind eines von Isars nützlichsten Features. Sie können sehr einfach abgefragt werden mit gleichen Bedingungen für Objekte der obersten Ebene. Nehmen wir an, dass wir das folgende Modell haben:
 
 ```dart
 @collection
@@ -249,7 +249,7 @@ class Brand {
 }
 ```
 
-We want to query all cars that have a brand with the name `"BMW"` and the country `"Germany"`. We can do this using the following query:
+Wir wollen alle Autos abfragen, die eine Marke mit dem Namen `"BMW"` und dem Land `"Germany"` haben. Wir können das mit der folgenden Abfrage machen:
 
 ```dart
 final germanCars = await isar.cars.filter()
@@ -260,7 +260,7 @@ final germanCars = await isar.cars.filter()
   ).findAll();
 ```
 
-Always try to group nested queries. The above query is more efficient than the following one. Even though the result is the same:
+Versuche immer verschachtelte Abfragen zu gruppieren. Die vorherige Abfrage ist effizienter als die nächste, auch wenn das Ergebnis das gleiche ist:
 
 ```dart
 final germanCars = await isar.cars.filter()
@@ -272,10 +272,10 @@ final germanCars = await isar.cars.filter()
 
 ### Links
 
-If your model contains [links or backlinks](links) you can filter your query based on the linked objects or the number of linked objects.
+Wenn dein Modell [Links oder Rückverlinkungen](links) enthält, kannst du deine Abfrage auf Basis der verlinkten Objekte oder der Anzahl an verlinkten Objekten filtern.
 
 :::warning
-Keep in mind that link queries can be expensive because Isar needs to look up linked objects. Consider using embedded objects instead.
+Beachte, dass Link-Abfragen teuer sein können, weil Isar die verlinkten Objekte abrufen muss. Versuche stattdessen eingebettete Objekte zu verwenden.
 :::
 
 ```dart
@@ -296,7 +296,7 @@ class Student {
 }
 ```
 
-We want to find all students that have a math or English teacher:
+Wir wollen alle Schüler finden, die einen Mathe- oder Englischlehrer haben:
 
 ```dart
 final result = await isar.students.filter()
@@ -307,15 +307,15 @@ final result = await isar.students.filter()
   }).findAll();
 ```
 
-Link filters evaluate to `true` if at least one linked object matches the conditions.
+Link-Filter resultieren zu `true`, wenn mindestens eines der verlinkten Objekte den Bedingungen entspricht.
 
-Let's search for all students that have no teachers:
+Suchen wir nach allen Schülern, die keine Lehrer haben:
 
 ```dart
 final result = await isar.students.filter().teachersLengthEqualTo(0).findAll();
 ```
 
-or alternatively:
+oder alternativ:
 
 ```dart
 final result = await isar.students.filter().teachersIsEmpty().findAll();
