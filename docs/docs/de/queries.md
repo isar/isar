@@ -466,9 +466,9 @@ Theoretisch könntest du sogar mehrere Where-Klauseln für Sortierung und Unters
 Für die richtige Sortierung müssen sie auch in Sortierreihenfolge angewandt werden. Sei sehr vorsichtig, wenn du dich darauf verlässt.
 :::
 
-## Offset & Limit
+## Offset & Limitierung
 
-It's often a good idea to limit the number of results from a query for lazy list views. You can do so by setting a `limit()`:
+Es ist oft eine gute Idee die Anzahl an Ergebnissen einer Abfrage zu beschränken, für beispielsweise träge Listenansichten. Du kannst das bekommen, indem du ein `limit()` setzt:
 
 ```dart
 final firstTenShoes = await isar.shoes.where()
@@ -476,7 +476,7 @@ final firstTenShoes = await isar.shoes.where()
   .findAll();
 ```
 
-By setting an `offset()` you can also paginate the results of your query.
+Indem du ein `offset()` setzt, kannst du die Ergebnisse deiner Abfrage in mehrere Auflistungen aufteilen.
 
 ```dart
 final firstTenShoes = await isar.shoes.where()
@@ -485,18 +485,18 @@ final firstTenShoes = await isar.shoes.where()
   .findAll();
 ```
 
-Since instantiating Dart objects is often the most expensive part of executing a query, it is a good idea only to load the objects you need.
+Weil das instanziieren eines Dart-Objekts meistens der teuerste Teil beim Ausführen einer Abfrage ist, ist es eine gute Idee nur die Objekte zu laden, die du benötigst.
 
-## Execution order
+## Reihenfolge der Ausführung
 
-Isar executes queries always in the same order:
+Isar führt Abfragen immer in der gleichen Reihenfolge aus:
 
-1. Traverse primary or secondary index to find objects (apply where clauses)
-2. Filter objects
-3. Sort results
-4. Apply distinct operation
-5. Offset & limit results
-6. Return results
+1. Primär- oder Sekundärindex durchlaufen, um Objekte zu finden (Where-Klauseln anwenden)
+2. Objekte filtern
+3. Ergebnisse sortieren
+4. Unterscheidbarkeitsoperation durchführen
+5. Offset & Limit auf Ergebnisse anwenden
+6. Ergebnisse zurückgeben
 
 ## Query operations
 
