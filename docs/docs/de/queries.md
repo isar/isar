@@ -378,11 +378,11 @@ final result = isar.shoes.where()
 
 Die Where-Klausel wird zuerst angewendet, um die Anzahl an Objekten die gefiltert werden müssen zu reduzieren. Dann wird der Filter auf die übrig gebliebenen Objekte angewendet.
 
-## Sorting
+## Sortierung
 
-You can define how the results should be sorted when executing the query using the `.sortBy()`, `.sortByDesc()`, `.thenBy()` and `.thenByDesc()` methods.
+Du kannst definieren, wie Ergebnisse deiner Abfrage sortiert werden sollen, indem du die Methoden `.sortBy()`, `.sortByDesc()`, `.thenBy()` und `.thenByDesc()` nutzt.
 
-To find all shoes sorted by model name in ascending order and size in descending order without using an index:
+Um alle Schuhe nach Modellnamen in aufsteigender und nach der Größe in absteigender Reihenfolge sortiert zu bekommen, ohne einen Index zu benutzen:
 
 ```dart
 final sortedShoes = isar.shoes.filter()
@@ -391,21 +391,21 @@ final sortedShoes = isar.shoes.filter()
   .findAll();
 ```
 
-Sorting many results can be expensive, especially since sorting happens before offset and limit. The sorting methods above never make use of indexes. Luckily, we can again use where clause sorting and make our query lightning-fast even if we need to sort a million objects.
+Viele Ergebnisse zu sortieren kann teuer sein, besonders, weil das Sortieren vor dem Offset und vor der Limitierung stattfindet. Die Sortiermethoden benutzen niemals Indizes. Glücklicherweise können wir wieder Sortierung mit Where-Klauseln verwenden und so unsere Abfrage blitzschnell machen, auch wenn wir eine Million Objekte sortieren müssen.
 
-### Where clause sorting
+### Sortierung mit Where-Klauseln
 
-If you use a **single** where clause in your query, the results are already sorted by the index. That's a big deal!
+Wenn du eine **einzige** Where-Klausel in deiner Abfrage nutzt, sind die Ergebnisse schon nach dem Index sortiert. Das ist eine große Sache!
 
-Let's assume we have shoes in sizes `[43, 39, 48, 40, 42, 45]` and we want to find all shoes with a size greater than `42` and also have them sorted by size:
+Nehmen wir an, wir haben Schuhe in den Größen `[43, 39, 48, 40, 42, 45]` und wir wollen alle Schuhe mit einer Größe größer als `42` haben und sie auch nach Größe sortiert haben:
 
 ```dart
 final bigShoes = isar.shoes.where()
-  .sizeGreaterThan(42) // also sorts the results by size
+  .sizeGreaterThan(42) // Sortiert die Ergebnisse auch nach Größe
   .findAll(); // -> [43, 45, 48]
 ```
 
-As you can see, the result is sorted by the `size` index. If you want to reverse the where clause sort order, you can set `sort` to `Sort.desc`:
+Wie du sehen kannst, sind die Ergebnisse nach dem `size`-Index sortiert. Wenn du die Reihenfolge der Where-Klausel umkehren möchtest, kannst du `sort` auf `Sort.desc` setzen:
 
 ```dart
 final bigShoesDesc = await isar.shoes.where(sort: Sort.desc)
@@ -413,7 +413,7 @@ final bigShoesDesc = await isar.shoes.where(sort: Sort.desc)
   .findAll(); // -> [48, 45, 43]
 ```
 
-Sometimes you don't want to use a where clause but still benefit from the implicit sorting. You can use the `any` where clause:
+Manchmal willst du keine Where-Klausel verwenden, aber trotzdem von der impliziten Sortierung profitieren. Dann kannst du die Where-Klausel `any` verwenden:
 
 ```dart
 final shoes = await isar.shoes.where()
@@ -421,13 +421,13 @@ final shoes = await isar.shoes.where()
   .findAll(); // -> [39, 40, 42, 43, 45, 48]
 ```
 
-If you use a composite index, the results are sorted by all fields in the index.
+Wenn du einen verbundenen Index verwendest, werden die Ergebnisse nach allen Feldern des Indexes sortiert.
 
 :::tip
-If you need the results to be sorted, consider using an index for that purpose. Especially if you work with `offset()` and `limit()`.
+Für den Fall, dass deine Ergebnisse sortiert sein müssen, versuche einen Index zu benutzen. Besonders wenn du mit `offset()` oder `limit()` arbeitest:
 :::
 
-Sometimes it's not possible or useful to use an index for sorting. For such cases, you should use indexes to reduce the number of resulting entries as much as possible.
+Manchmal ist es nicht möglich oder sinnvoll einen Index zur Sortierung zu nutzen. Für solche Fälle solltest du Indizes benutzen, um die Anzahl an zu sortierenden Einträgen so weit wie möglich zu verringern.
 
 ## Unique values
 
