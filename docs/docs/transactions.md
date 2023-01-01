@@ -19,7 +19,6 @@ Transactions can either be synchronous or asynchronous. In synchronous transacti
 | Synchronous  | `.txnSync()` | `.writeTxnSync()`  |
 | Asynchronous | `.txn()`     | `.writeTxn()`      |
 
-
 ### Read transactions
 
 Explicit read transactions are optional, but they allow you to do atomic reads and rely on a consistent state of the database inside the transaction. Internally Isar always uses implicit read transactions for all read operations.
