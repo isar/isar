@@ -321,21 +321,21 @@ oder alternativ:
 final result = await isar.students.filter().teachersIsEmpty().findAll();
 ```
 
-## Where clauses
+## Where-Klauseln
 
-Where clauses are a very powerful tool, but it can be a little challenging to get them right.
+Where-Klauseln sind eine sehr mächtiges Werkzeug, aber es kann ein bisschen herausfordernd sein sie zu meistern.
 
-In contrast to filters where clauses use the indexes you defined in the schema to check the query conditions. Querying an index is a lot faster than filtering each record individually.
+Im Gegensatz zu Filtern nutzen Where-Klauseln die Indizes, die du im Schema definiert hast, um die Abfragebedingungen zu überprüfen. Einen Index abzufragen ist deutlich schneller als jeden Eintrag individuell zu filtern.
 
-➡️ Learn more: [Indexes](indexes)
+➡️ Lerne mehr: [Indizes](indexes)
 
 :::tip
-As a basic rule, you should always try to reduce the records as much as possible using where clauses and do the remaining filtering using filters.
+Als eine einfache Regel solltest du immer versuchen die Einträge so weit wie möglich mit Where-Klauseln einzugrenzen und das restliche Filtern mit Filtern machen.
 :::
 
-You can only combine where clauses using logical **or**. In other words, you can sum multiple where clauses together, but you can't query the intersection of multiple where clauses.
+Du kannst Where-Klauseln nur mit logischem **oder** verbinden. In anderen Worten, du kannst mehrere Where-Klauseln zusammenfügen, aber du kannst nicht die Überschneidung mehrerer Where-Klauseln abfragen.
 
-Let's add indexes to the shoe collection:
+Lass uns Indizes zu der Schuh-Collection hinzufügen:
 
 ```dart
 @collection
@@ -352,9 +352,9 @@ class Shoe with IsarObject {
 }
 ```
 
-There are two indexes. The index on `size` allows us to use where clauses like `.sizeEqualTo()`. The composite index on `isUnisex` allows where clauses like `isUnisexSizeEqualTo()`. But also `isUnisexEqualTo()` because you can always use any prefix of an index.
+Hier gibt es zwei Indizes. Der Index auf `size` erlaubt es uns Where-Klauseln wie `.sizeEqualTo()` zu verwenden. Der zusammengesetzte Index auf `isUnisex` erlaubt es uns Whereö-Klauseln wie `.isUnisexSizeEqualTo()` zu nutzen. Aber auch `.isUnisexEqualTo()` ist möglich, weil du immer jedes Präfix eines Indexes benutzen kannst.
 
-We can now rewrite the query from before that finds unisex shoes in size 46 using the composite index. This query will be a lot faster than the previous one:
+Wir können unsere Abfrage von vorher, die Unisex-Schuhe der Größe 46 findet, also mithilfe des zusammengesetzten Indizes umschreiben. Diese Abfrage sollte deutlich schneller sein, als die vorherige:
 
 ```dart
 final result = isar.shoes.where()
@@ -362,11 +362,11 @@ final result = isar.shoes.where()
   .findAll();
 ```
 
-Where clauses have two more superpowers: They give you "free" sorting and a super fast distinct operation.
+Where-Klauseln haben zwei weitere Superkräfte: Sie geben dir "kostenloses" Sortieren und eine superschnelle Eindeutigkeitsoperation.
 
-### Combining where clauses and filters
+### Where-Klauseln und Filter verbinden
 
-Remember the `shoes.filter()` queries? It's actually just a shortcut for `shoes.where().filter()`. You can (and should) combine where clauses and filters in the same query to use the benefits of both:
+Erinnerst du dich an die `shoes.filter()`-Abfragen? Das ist in Wirklichkeit nur eine Kurzform für `shoes.where().filter()`. Du kannst (und solltest) Where-Klauseln und Filter in der gleichen Abfrage verbinden, um die Vorteile beider zu nutzen:
 
 ```dart
 final result = isar.shoes.where()
@@ -376,7 +376,7 @@ final result = isar.shoes.where()
   .findAll();
 ```
 
-The where clause is applied first to reduce the number of objects to be filtered. Then the filter is applied to the remaining objects.
+Die Where-Klausel wird zuerst angewendet, um die Anzahl an Objekten die gefiltert werden müssen zu reduzieren. Dann wird der Filter auf die übrig gebliebenen Objekte angewendet.
 
 ## Sorting
 
