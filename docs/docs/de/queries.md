@@ -462,7 +462,7 @@ final shoes = await isar.shoes.where(distinct: true)
 ```
 
 :::tip
-Theoretisch könntest du sogar mehrere Where-Klauseln für Sortierung und Unterscheidbarkeit nutzen. Die einzige Einschränkung besteht darin, dass sich diese Where-Klauseln nicht überschneiden und denselben Index verwenden dürfen.<!--Check if you should use 'same' or 'different' index, also fix for english docs-->
+Theoretisch könntest du sogar mehrere Where-Klauseln für Sortierung und Unterscheidbarkeit nutzen. Die einzige Einschränkung besteht darin, dass sich diese Where-Klauseln nicht überschneiden und denselben Index verwenden dürfen.<!--TODO: Check if you should use 'same' or 'different' index in case of using multiple where clauses-->
 Für die richtige Sortierung müssen sie auch in Sortierreihenfolge angewandt werden. Sei sehr vorsichtig, wenn du dich darauf verlässt.
 :::
 
