@@ -358,5 +358,5 @@ Einträge mit doppelten Worten tauchen nur einmal im Index auf.
 Dieser Index kann nun für (Gleichheits- oder) Präfix-Where-Klauseln der individuellen Worte der Beschreibung verwendet werden.
 
 :::tip
-Statt Worte direkt zu speichern kannst du auch in Betracht ziehen das Ergebnis einer [Phonetischen Suche](https://de.wikipedia.org/wiki/Phonetische_Suche) wie [Soundex](https://de.wikipedia.org/wiki/Soundex) zu verwenden.
+Statt Worte direkt zu speichern kannst du auch in Betracht ziehen das Ergebnis einer [Phonetischen Suche](https://de.wikipedia.org/wiki/Phonetische_Suche) wie von dem Algorithmus [Soundex](https://de.wikipedia.org/wiki/Soundex) zu verwenden.
 :::
