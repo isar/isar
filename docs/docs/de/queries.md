@@ -4,24 +4,24 @@ title: Abfragen
 
 # Abfragen
 
-Mit Abfragen kannst du Einträge finden, die bestimmten Bedinungen entsprechen, zum Beispiel:
+Mit Abfragen kannst du Einträge finden, die bestimmten Bedingungen entsprechen, zum Beispiel:
 
 - Finde alle markierten Kontakte
-- Finde unterscheidbare Vornamen in den Kontakten
+- Finde eindeutige Vornamen in den Kontakten
 - Lösche alle Kontakte, die keinen Nachnamen definiert haben
 
-Weil Abfragen auf der Datenbank ausgeführt werden, und nicht in Dart, sind sie sehr schnell. Wenn du Indizes sinnvoll benutzt, dann kannst du deine Abfrageleistung sogar weiter verbessern. Als nächstes lernst du, wie man Abragen schreibt und wie du sie so schnell wie möglich machen kannst.
+Weil Abfragen nicht in Dart, sondern auf der Datenbank ausgeführt werden, sind sie sehr schnell. Wenn du Indizes sinnvoll benutzt, kannst du deine Abfrageleistung sogar weiter steigern. Als nächstes lernst du, wie man Abfragen schreibt und wie du sie so schnell wie möglich machen kannst.
 
-Es gibt zwei verschiedene Methoden, Einträge zu filtern: Filter und Where-Bedingungen<!--where clauses-->. Wir starten indem wir uns die Funktionsweise von Filtern ansehen.
+Es gibt zwei verschiedene Methoden um Einträge zu filtern: Filter und Where-Klauseln. Wir beginnen indem wir uns die Funktionsweise von Filtern ansehen.
 
 ## Filter
 
 Filter sind leicht zu benutzen und zu verstehen. Abhängig von den Typen deiner Eigenschaften gibt es verschiedene verfügbare Filteroperationen mit größtenteils selbsterklärenden Namen.
 
-Filter funktionieren, indem sie einen Ausdruck für jedes Objekt der zu filternded Collection evaluieren. Wenn der Ausdruck zu `true` aufgelöst wird, dann fügt Isar das Objekt zu den Ergebnissen hinzu.
+Filter funktionieren, indem sie einen Ausdruck für jedes Objekt der zu filternden Collection auswerten. Wenn der Ausdruck `true` ergibt, fügt Isar das Objekt zu den Ergebnissen hinzu.
 Filter haben keinen Einfluss auf die Reihenfolge der Ergebnisse.
 
-Wir benutzen das folgende Modell für die Beispiele witer unten:
+Wir benutzen das folgende Modell für die Beispiele weiter unten:
 
 ```dart
 @collection
@@ -50,7 +50,7 @@ Abhängig vom Feld-Typen gibt es verschiedene mögliche Bedingungen.
 | `.isNotNull()`           | Trifft auf Werte zu, die nicht `null` sind.                                                                                                         |
 | `.length()`              | Abfragen nach Längen von Listen, Strings und Links filtern Objekte basierend auf der Anzahl der Elemente in einer Liste oder in einem Link.         |
 
-Nehmen wir an, dass die Datenbank vier Schuhe mit den Gößen 39, 40, 46 und einen mit einer nicht festgelegten Größe (`null`). Wenn du keinen Sortierung durchführst, werden die Werte nach ID sortiert zurückgegeben.
+Nehmen wir an, dass die Datenbank vier Schuhe mit den Gößen 39, 40, 46 und einen mit einer nicht festgelegten Größe (`null`) hat. Wenn du keine Sortierung durchführst, werden die Werte nach ID geordnet zurückgegeben.
 
 ```dart
 
@@ -70,17 +70,17 @@ isar.shoes.filter()
 
 ### Logische Operatoren
 
-Du kannst Aussagen zusammensetzen, indem du die folgenden logischen Operatoren verwendest:
+Du kannst Bedingungen verbinden, indem du die folgenden logischen Operatoren verwendest:
 
 | Operator   | Beschreibung                                                                         |
 | ---------- | ------------------------------------------------------------------------------------ |
 | `.and()`   | Ergibt `true`, wenn von linkem und rechtem Ausdruck beide `true` ergeben.            |
 | `.or()`    | Ergibt `true`, wenn mindestens einer von beiden Ausdrücken `true` ergibt.            |
 | `.xor()`   | Ergibt `true`, wenn genau einer von beiden Ausdrücken `true` ergibt.                 |
-| `.not()`   | Negiert das Ergebnis des folgenden Ausdrucks.                                        |
-| `.group()` | Gruppiert Bedingungen und ermöglicht es eine Reihenfolge des Auswertens festzulegen. |
+| `.not()`   | Negiert das Ergebnis des nachfolgenden Ausdrucks.                                    |
+| `.group()` | Gruppiert Bedingungen und ermöglicht es eine Reihenfolge der Auswertung festzulegen. |
 
-Wenn du alle Schuhe mit der Größe 46 finden möchstes, kannst du die folgende Abfrage verwenden:
+Wenn du alle Schuhe mit der Größe 46 finden möchstest, kannst du die folgende Abfrage verwenden:
 
 ```dart
 final result = await isar.shoes.filter()
@@ -88,7 +88,7 @@ final result = await isar.shoes.filter()
   .findAll();
 ```
 
-Wenn du mehr als eine Bedingung angeben möchtest, kannst du mehrere Filter verbinden, indem du sie mit logischem **und** `.and()`, logischem **oder** `.or()` und logischem **exklusiven oder** `.xor()` verbindest.
+Wenn du mehr als eine Bedingung angeben möchtest, kannst du mehrere Filter verbinden, indem du sie mit logischem **und** `.and()`, logischem **oder** `.or()` oder logischem **exklusiven oder** `.xor()` verbindest.
 
 ```dart
 final result = await isar.shoes.filter()
@@ -100,7 +100,7 @@ final result = await isar.shoes.filter()
 
 Diese Abfrage ist äquivalent zu: `size == 46 && isUnisex == true`.
 
-Du kannst auch Bedinungen gruppieren, indem du `.group()` benutzt:
+Du kannst auch Bedingungen gruppieren, indem du `.group()` benutzt:
 
 ```dart
 final result = await isar.shoes.filter()
@@ -130,7 +130,7 @@ Diese Abfrage ist äquivalent zu: `size != 46 && isUnisex != true`.
 
 ### String-Bedingungen
 
-Zusätzlich zu den vorher genannten Abfragebedingungen bieten String-Werte ein paar mehr Bedingungen, die du benutzen kannst. Platzhalter, ähnlich zu beispielsweise Regex, erlauben mehr Flexibilität beim Suchen.
+Zusätzlich zu den vorher genannten Abfragebedingungen, bieten String-Werte ein paar mehr Bedingungen. Platzhalter, ähnlich zu beispielsweise Regex, erlauben mehr Flexibilität beim Suchen.
 
 | Bedingung            | Beschreibung                                                                   |
 | -------------------- | ------------------------------------------------------------------------------ |
@@ -140,10 +140,10 @@ Zusätzlich zu den vorher genannten Abfragebedingungen bieten String-Werte ein p
 | `.matches(wildcard)` | Trifft auf String-Werte zu, die dem angegebenen `wildcard`-Muster entsprechen. |
 
 **Groß-/Kleinschreibung**  
-Alle String-Operationen haben eine optionalen `caseSensitive`-Eigenschaft, die standardmäßig `true` ist.
+Alle String-Operationen haben eine optionale `caseSensitive`-Eigenschaft, die standardmäßig `true` ist.
 
 **Platzhalter**  
-Der [Ausdruck eine Platzhalter-Strings](https://de.wikipedia.org/wiki/Wildcard_(Informatik)) ist ein String der normale Zeichen mit zwei speziellen Platzhalter-Zeichen verwendet:
+Der [Ausdruck eines Platzhalter-Strings](https://de.wikipedia.org/wiki/Wildcard_(Informatik)) ist ein String, der normale Zeichen mit zwei speziellen Platzhalter-Zeichen verwendet:
 
 - Der `*` Platzhalter trifft auf keines oder mehr von jedem Zeichen zu.
 - Der `?` Platzhalter trifft auf jedes Einzelzeichen zu.  
@@ -153,11 +153,11 @@ Der [Ausdruck eine Platzhalter-Strings](https://de.wikipedia.org/wiki/Wildcard_(
 
 Manchmal ist es notwendig eine Abfrage auf Bedingungen aufzubauen oder für verschiedene Werte zu bauen. Isar hat ein sehr mächtiges Werkzeug um bedingte Abfragen zu bauen:
 
-| Modifikator           | Beschreibung                                                                                                                                                                                     |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `.optional(cond, qb)` | Erweitert die Abfrage nur, wenn die Bedinung `cond`, `true` ist. Das kann fast überall in einer Abfrage verwendet werden, beispielsweise um sie über eine Bedingung zu sortieren oder begrenzen. |
-| `.anyOf(list, qb)`    | Erweitert die Abfrage für jeden Wert in `values` und verbindet die Bedingungen mit einem logischen **oder**.                                                                                     |
-| `.allOf(list, qb)`    | Erweitert die Abfrage für jeden Wert in `values` und verbindet die Bedingungen mit einem logischen **und**.                                                                                      |
+| Modifikator           | Beschreibung                                                                                                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.optional(cond, qb)` | Erweitert die Abfrage nur, wenn die Bedingung `cond`, `true` ist. Das kann fast überall in einer Abfrage verwendet werden, beispielsweise um sie über eine Bedingung zu sortieren oder begrenzen. |
+| `.anyOf(list, qb)`    | Erweitert die Abfrage für jeden Wert in `values` und verbindet die Bedingungen mit einem logischen **oder**.                                                                                      |
+| `.allOf(list, qb)`    | Erweitert die Abfrage für jeden Wert in `values` und verbindet die Bedingungen mit einem logischen **und**.                                                                                       |
 
 In diesem Beispiel bauen wir eine Methode, die Schuhe mit einem optionale Filter finden kann:
 
@@ -165,13 +165,13 @@ In diesem Beispiel bauen wir eine Methode, die Schuhe mit einem optionale Filter
 Future<List<Shoe>> findShoes(Id? sizeFilter) {
   return isar.shoes.filter()
     .optional(
-      sizeFilter != null, // Wendet den Filter nur an, wenn sizeFilter != null
+      sizeFilter != null, // Wendet den Filter nur an, wenn sizeFilter != null ist
       (q) => q.sizeEqualTo(sizeFilter!),
     ).findAll();
 }
 ```
 
-Wenn du alle Schuhe finden möchtest, die eine von mehreren Schugrößen haben, kannst du entweder eine konventionelle Abfrage schreiben oder den `anyOf()` Modifikator verwenden:
+Wenn du alle Schuhe finden möchtest, die eine von mehreren Schuhgrößen haben, kannst du entweder eine konventionelle Abfrage schreiben oder den `anyOf()` Modifikator verwenden:
 
 ```dart
 final shoes1 = await isar.shoes.filter()
@@ -219,7 +219,7 @@ final tweetsWithManyHashtags = await isar.tweets.filter()
   .findAll();
 ```
 
-Diese sind aquivalent zu dem Dart Code `tweets.where((t) => t.hashtags.isEmpty);` und `tweets.where((t) => t.hashtags.length > 5);`. Du kannst auch Abfragen basierend auf Listenelementen stellen:
+Diese sind äquivalent zu dem Dart-Code `tweets.where((t) => t.hashtags.isEmpty);` und `tweets.where((t) => t.hashtags.length > 5);`. Du kannst auch Abfragen basierend auf Listenelementen stellen:
 
 ```dart
 final flutterTweets = await isar.tweets.filter()
@@ -227,7 +227,7 @@ final flutterTweets = await isar.tweets.filter()
   .findAll();
 ```
 
-Das ist äquivalent zum Dart Code `tweets.where((t) => t.hashtags.contains('flutter'));`.
+Das ist äquivalent zum Dart-Code `tweets.where((t) => t.hashtags.contains('flutter'));`.
 
 ### Eingebettete Objekte
 
@@ -249,7 +249,7 @@ class Brand {
 }
 ```
 
-Wir wollen alle Autos abfragen, die eine Marke mit dem Namen `"BMW"` und dem Land `"Germany"` haben. Wir können das mit der folgenden Abfrage machen:
+Wir wollen alle Autos abfragen, die eine Marke mit dem Namen `"BMW"` und dem Land `"Germany"` haben. Wir können das mit der folgenden Abfrage erreichen:
 
 ```dart
 final germanCars = await isar.cars.filter()
@@ -260,7 +260,7 @@ final germanCars = await isar.cars.filter()
   ).findAll();
 ```
 
-Versuche immer verschachtelte Abfragen zu gruppieren. Die vorherige Abfrage ist effizienter als die nächste, auch wenn das Ergebnis das gleiche ist:
+Versuche immer verschachtelte Abfragen zu gruppieren. Die vorherige Abfrage ist effizienter als die folgende, auch wenn das Ergebnis gleich ist:
 
 ```dart
 final germanCars = await isar.cars.filter()
@@ -307,7 +307,7 @@ final result = await isar.students.filter()
   }).findAll();
 ```
 
-Link-Filter resultieren zu `true`, wenn mindestens eines der verlinkten Objekte den Bedingungen entspricht.
+Link-Filter resultieren in `true`, wenn mindestens eines der verlinkten Objekte den Bedingungen entspricht.
 
 Suchen wir nach allen Schülern, die keine Lehrer haben:
 
@@ -325,7 +325,7 @@ final result = await isar.students.filter().teachersIsEmpty().findAll();
 
 Where-Klauseln sind eine sehr mächtiges Werkzeug, aber es kann ein bisschen herausfordernd sein sie zu meistern.
 
-Im Gegensatz zu Filtern nutzen Where-Klauseln die Indizes, die du im Schema definiert hast, um die Abfragebedingungen zu überprüfen. Einen Index abzufragen ist deutlich schneller als jeden Eintrag individuell zu filtern.
+Im Gegensatz zu Filtern nutzen Where-Klauseln die Indizes, die du im Schema definiert hast, um die Abfragebedingungen zu überprüfen. Einen Index abzufragen ist deutlich schneller als jeden Eintrag einzeln zu filtern.
 
 ➡️ Lerne mehr: [Indizes](indexes)
 
@@ -333,7 +333,7 @@ Im Gegensatz zu Filtern nutzen Where-Klauseln die Indizes, die du im Schema defi
 Als eine einfache Regel solltest du immer versuchen die Einträge so weit wie möglich mit Where-Klauseln einzugrenzen und das restliche Filtern mit Filtern machen.
 :::
 
-Du kannst Where-Klauseln nur mit logischem **oder** verbinden. In anderen Worten, du kannst mehrere Where-Klauseln zusammenfügen, aber du kannst nicht die Überschneidung mehrerer Where-Klauseln abfragen.
+Du kannst Where-Klauseln nur mit logischem **oder** verbinden. In anderen Worten, kannst du mehrere Where-Klauseln zusammenfügen, aber nicht die Überschneidung mehrerer Where-Klauseln abfragen.
 
 Lass uns Indizes zu der Schuh-Collection hinzufügen:
 
@@ -352,9 +352,9 @@ class Shoe with IsarObject {
 }
 ```
 
-Hier gibt es zwei Indizes. Der Index auf `size` erlaubt es uns Where-Klauseln wie `.sizeEqualTo()` zu verwenden. Der zusammengesetzte Index auf `isUnisex` erlaubt es uns Whereö-Klauseln wie `.isUnisexSizeEqualTo()` zu nutzen. Aber auch `.isUnisexEqualTo()` ist möglich, weil du immer jedes Präfix eines Indexes benutzen kannst.
+Hier gibt es zwei Indizes. Der Index auf `size` erlaubt es uns Where-Klauseln wie `.sizeEqualTo()` zu verwenden. Der zusammengesetzte Index auf `isUnisex` erlaubt es uns Where-Klauseln wie `.isUnisexSizeEqualTo()` zu nutzen. Aber auch `.isUnisexEqualTo()` ist möglich, weil du immer jedes Präfix eines Indexes benutzen kannst.
 
-Wir können unsere Abfrage von vorher, die Unisex-Schuhe der Größe 46 findet, also mithilfe des zusammengesetzten Indizes umschreiben. Diese Abfrage sollte deutlich schneller sein, als die vorherige:
+Wir können unsere Abfrage von vorher, die Unisex-Schuhe der Größe 46 findet, also mithilfe des zusammengesetzten Indexes umschreiben. Diese Abfrage sollte deutlich schneller sein, als die vorherige:
 
 ```dart
 final result = isar.shoes.where()
@@ -376,13 +376,13 @@ final result = isar.shoes.where()
   .findAll();
 ```
 
-Die Where-Klausel wird zuerst angewendet, um die Anzahl an Objekten die gefiltert werden müssen zu reduzieren. Dann wird der Filter auf die übrig gebliebenen Objekte angewendet.
+Die Where-Klausel wird zuerst angewendet, um die Anzahl an Objekten, die gefiltert werden müssen, zu reduzieren. Dann wird der Filter auf die übrig gebliebenen Objekte angewendet.
 
 ## Sortierung
 
 Du kannst definieren, wie Ergebnisse deiner Abfrage sortiert werden sollen, indem du die Methoden `.sortBy()`, `.sortByDesc()`, `.thenBy()` und `.thenByDesc()` nutzt.
 
-Um alle Schuhe nach Modellnamen in aufsteigender und nach der Größe in absteigender Reihenfolge sortiert zu bekommen, ohne einen Index zu benutzen:
+Um alle Schuhe nach Modellnamen in aufsteigender und nach der Größe in absteigender Reihenfolge sortiert zu bekommen, ohne einen Index zu benutzen, aknnst du die folgende Abfrage stellen:
 
 ```dart
 final sortedShoes = isar.shoes.filter()
@@ -421,13 +421,13 @@ final shoes = await isar.shoes.where()
   .findAll(); // -> [39, 40, 42, 43, 45, 48]
 ```
 
-Wenn du einen verbundenen Index verwendest, werden die Ergebnisse nach allen Feldern des Indexes sortiert.
+Wenn du einen Komposit-Index verwendest, werden die Ergebnisse nach allen Feldern des Indexes sortiert.
 
 :::tip
 Für den Fall, dass deine Ergebnisse sortiert sein müssen, versuche einen Index zu benutzen. Besonders wenn du mit `offset()` oder `limit()` arbeitest:
 :::
 
-Manchmal ist es nicht möglich oder sinnvoll einen Index zur Sortierung zu nutzen. Für solche Fälle solltest du Indizes benutzen, um die Anzahl an zu sortierenden Einträgen so weit wie möglich zu verringern.
+Manchmal ist es nicht möglich oder sinnvoll einen Index zum Sortieren zu nutzen. Für solche Fälle solltest du Indizes benutzen, um zumindest die Anzahl an zu sortierenden Einträgen so weit wie möglich einzugrenzen.
 
 ## Eindeutige Werte
 
@@ -448,11 +448,11 @@ final shoes = await isar.shoes.filter()
   .findAll();
 ```
 
-Nur das erste Ergebnis jeder Unterscheidbarkeitskombination wird zurückgegeben. Um das zu kontrollieren kannst du Where-Klauseln und Sortieroperationen verwenden.
+Nur das erste Ergebnis jeder Unterscheidbarkeitskombination wird zurückgegeben. Um das zu überprüfen kannst du Where-Klauseln und Sortieroperationen verwenden.
 
 ### Unterscheidbare Where-Klauseln
 
-Wenn du einen uneindeutigen Index hast, kann es sein, dass du alle seine unterscheidbaren Werte haben möchtest. Du könntest die `distinctBy`-Operation des vorherigen Abschnitts verwenden, aber sie wird erst nach dem Sortieren und Filtern angewandt, sodass ein bisschen Overhead entsteht.
+Wenn du einen nicht eindeutigen Index hast, kann es sein, dass du alle seine unterscheidbaren Werte haben möchtest. Du könntest die `distinctBy`-Operation des vorherigen Abschnitts verwenden, aber sie wird erst nach dem Sortieren und Filtern angewandt, sodass ein bisschen Overhead entsteht.
 Wenn du nur eine einzelne Where-Klausel verwendest, kannst du stattdessen dem Index vertrauen die Unterscheidbarkeitsoperation durchzuführen.
 
 ```dart
@@ -462,13 +462,13 @@ final shoes = await isar.shoes.where(distinct: true)
 ```
 
 :::tip
-Theoretisch könntest du sogar mehrere Where-Klauseln für Sortierung und Unterscheidbarkeit nutzen. Die einzige Einschränkung besteht darin, dass sich diese Where-Klauseln nicht überschneiden und denselben Index verwenden dürfen.<!--TODO: Check if you should use 'same' or 'different' index in case of using multiple where clauses-->
+Theoretisch könntest du sogar mehrere Where-Klauseln für Sortierung und Unterscheidbarkeit nutzen. Die einzige Einschränkung besteht darin, dass sich diese Where-Klauseln nicht überschneiden, also nicht denselben Index verwenden dürfen.<!--TODO: Check if you should use 'same' or 'different' index in case of using multiple where clauses-->
 Für die richtige Sortierung müssen sie auch in Sortierreihenfolge angewandt werden. Sei sehr vorsichtig, wenn du dich darauf verlässt.
 :::
 
 ## Offset & Limitierung
 
-Es ist oft eine gute Idee die Anzahl an Ergebnissen einer Abfrage zu beschränken, für beispielsweise träge Listenansichten. Du kannst das bekommen, indem du ein `limit()` setzt:
+Es ist oft eine gute Idee die Anzahl an Ergebnissen einer Abfrage zu beschränken, für beispielsweise lazy Listenansichten. Du kannst das erreichen, indem du ein `limit()` setzt:
 
 ```dart
 final firstTenShoes = await isar.shoes.where()
@@ -546,7 +546,7 @@ Aggregatoren zu nutzen ist deutlich schneller, als alle passenden Objekte zu fin
 Dieser Abschnitt ist höchstwahrscheinlich nicht wichtig für dich. Es ist davon abzuraten dynamische Abfragen zu nutzen, es sei denn du benötigst sie wirklich (was selten vorkommt).
 :::
 
-Alle der vorherigen Beispiele haben den QueryBuilder und die statischen Erweiterungsmethoden genutzt. Vielleicht möchtest du dynamische Abfragen oder eine benutzerdefinierte Abfragesprache (wie den Isar Inspektor) bauen. In dem Fall kannst du die Methode `buildQuery()` verwenden:
+Alle der vorherigen Beispiele haben den QueryBuilder und seine statischen Erweiterungsmethoden genutzt. Vielleicht möchtest du dynamische Abfragen oder eine benutzerdefinierte Abfragesprache (wie den Isar Inspektor) bauen. In dem Fall kannst du die Methode `buildQuery()` verwenden:
 
 | Parameter       | Beschreibung                                                                                               |
 | --------------- | ---------------------------------------------------------------------------------------------------------- |

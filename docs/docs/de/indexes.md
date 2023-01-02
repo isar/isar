@@ -4,7 +4,7 @@ title: Indizes
 
 # Indizes
 
-Indizes sind Isars mächtigstes Feature. Viele eingebettete Datenbanken bieten "normale" Indizes (wenn überhaupt), aber Isar hat auch verbundene und Mehr-Eintrags-Indizes. Zu verstehen, wie Indizes funktionieren ist grundlegend um die Abfrageleistung zu optimieren. Isar lässt dich wählen welchen Index du verwenden möchtest und wie du ihn benutzen willst. Wir beginnen mit einer schnellen Einführung was Indizes sind.
+Indizes sind Isars mächtigstes Feature. Viele eingebettete Datenbanken bieten "normale" Indizes (wenn überhaupt), aber Isar hat auch Komposit- und Mehrfach-Indizes. Zu verstehen, wie Indizes funktionieren ist grundlegend um die Abfrageleistung zu optimieren. Isar lässt dich wählen welchen Index du verwenden möchtest und wie du ihn benutzen willst. Wir beginnen mit einer schnellen Einführung was Indizes sind.
 
 ## Was sind Indizes?
 
@@ -244,11 +244,11 @@ Stringlisten können als Ganzes gehasht werden (indem man `IndexType.hash` verwe
 Nutze `IndexType.hashElements` für `List<String>` bei denen du `elementEqualTo`-Where-Klauseln benötigst.
 :::
 
-## Zusammengesetzte Indizes
+## Komposit-Indizes
 
-Ein zusammengesetzter Index ist ein Index auf mehrere Eigenschaften. Isar erlaubt es dir zusammengesetzte Indizes mit bis zu drei Eigenschaften zu erstellen.
+Ein Komposit-Index ist ein Index auf mehrere Eigenschaften. Isar erlaubt es dir zusammengesetzte Indizes mit bis zu drei Eigenschaften zu erstellen.
 
-Zusammengesetzte Indizes sind auch als Mehr-Spalten-Indizes bekannt.
+Komposit-Indizes sind auch als Mehr-Spalten-Indizes bekannt.
 
 Es ist vermutlich am besten mit einem Beispiel zu starten. Wir erstellen eine Personen-Collection und definieren einen zusammengesetzten Index auf die Alters- und Namenseigenschaften:
 
@@ -294,7 +294,7 @@ class Person {
 
 Der generierte zusammengesetzte Index enthält alle Personen sortiert nach ihrem Alter und ihrem Namen.
 
-Zusammengesetzte Indizes sind super, wenn du effiziente Abfragen, sortiert nach mehreren Eigenschaften, stellen willst. Sie erlauben auch anspruchsvolle Where-Klauseln mit mehreren Eigenschaften:
+Komposit-Indizes sind super, wenn du effiziente Abfragen, sortiert nach mehreren Eigenschaften, stellen willst. Sie erlauben auch anspruchsvolle Where-Klauseln mit mehreren Eigenschaften:
 
 ```dart
 final result = await isar.where()
@@ -311,11 +311,11 @@ final result = await isar.where()
   .findAll() // -> [Daniel, David]
 ```
 
-## Mehr-Eintrags-Indizes
+## Mehrfach-Indizes
 
-Wenn du eine Liste mit `IndexType.value` indizierst, wird Isar automatische einen Mehr-Eintrags-Index erzeugen und jeder Eintrag in der Liste wird mit dem Objekt indiziert. Das funktioniert für alle Listentypen.
+Wenn du eine Liste mit `IndexType.value` indizierst, wird Isar automatische einen Mehrfach-Index erzeugen und jeder Eintrag in der Liste wird mit dem Objekt indiziert. Das funktioniert für alle Listentypen.
 
-Zu sinnvollen Anwendungen für Mehr-Eintrags-Indizes zählen das Indizieren einer Liste an Tags oder einen Volltext-Index zu erstellen.
+Zu sinnvollen Anwendungen für Mehrfach-Indizes zählen das Indizieren einer Liste an Tags oder einen Volltext-Index zu erstellen.
 
 ```dart
 @collection
