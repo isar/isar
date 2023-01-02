@@ -4,13 +4,13 @@ title: Indizes
 
 # Indizes
 
-Indexes are Isar's most powerful feature. Many embedded databases offer "normal" indexes (if at all), but Isar also has composite and multi-entry indexes. Understanding how indexes work is essential to optimize query performance. Isar lets you choose which index you want to use and how you want to use it. We'll start with a quick introduction to what indexes are.
+Indizes sind Isars mächtigstes Feature. Viele eingebettete Datenbanken bieten "normale" Indizes (wenn überhaupt), aber Isar hat auch verbundene und Mehr-Eintrags-Indizes. Zu verstehen, wie Indizes funktionieren ist grundlegend um die Abfrageleistung zu optimieren. Isar lässt dich wählen welchen Index du verwenden möchtest und wie du ihn benutzen willst. Wir beginnen mit einer schnellen Einführung was Indizes sind.
 
-## What are indexes?
+## Was sind Indizes?
 
-When a collection is unindexed, the order of the rows will likely not be discernible by the query as optimized in any way, and your query will therefore have to search through the objects linearly. In other words, the query will have to search through every object to find the ones matching the conditions. As you can imagine, that can take some time. Looking through every single object is not very efficient.
+Wenn eine Collection nicht indiziert ist, wird die Reihenfolge der Zeilen von der Abfrage aus sicherlich nicht als in irgendeiner Weise optimiert erkennbar sein. Daher muss die Abfrage linear alle Objekte durchsuchen. In anderen Worten, die Abfrage muss alle Objekte durchsuchen, um diejenigen zu finden, die zu den Bedingungen passen. Wie du dir bestimmt vorstellen kannst, kann das seine Zeit dauern. Durch jedes einzelne Objekt zu gucken ist nicht sehr effizient.
 
-For example, this `Product` collection is entirely unordered.
+Zum Beispiel ist diese `Product`-Collection komplett unsortiert.
 
 ```dart
 @collection
@@ -23,7 +23,7 @@ class Product {
 }
 ```
 
-**Data:**
+**Daten:**
 
 | id  | name      | price |
 | --- | --------- | ----- |
@@ -37,7 +37,7 @@ class Product {
 | 8   | Computer  | 650   |
 | 9   | Soap      | 2     |
 
-A query that tries to find all products that cost more than €30 has to search through all nine rows. That's not an issue for nine rows, but it might become a problem for 100k rows.
+Eine Abfrage, die versucht alle Produkte zu finden, die mehr als 30€ kosten, muss alle neun Zeilen durchsuchen. Das ist kein Problem für nur neun Zeilen, aber könnte ein Problem für 100k Zeilen werden.
 
 ```dart
 final expensiveProducts = await isar.products.filter()
@@ -45,7 +45,7 @@ final expensiveProducts = await isar.products.filter()
   .findAll();
 ```
 
-To improve the performance of this query, we index the `price` property. An index is like a sorted lookup table:
+Um die Leistung dieser Abfrage zu verbessern, indizieren wir die Eigenschaft `price`. Ein Index ist wie eine sortierte Nachschlagetabelle.
 
 ```dart
 @collection
@@ -59,7 +59,7 @@ class Product {
 }
 ```
 
-**Generated index:**
+**Generierter Index:**
 
 | price                | id                 |
 | -------------------- | ------------------ |
@@ -73,13 +73,13 @@ class Product {
 | <mark>**60**</mark>  | <mark>**6**</mark> |
 | <mark>**650**</mark> | <mark>**8**</mark> |
 
-Now, the query can be executed a lot faster. The executor can directly jump to the last three index rows and find the corresponding objects by their id.
+Jetzt kann die Abfrage deutlich schneller durchgeführt werden. Der Ausführende<!--TODO: use better fitting word--> kann direkt zu den letzten drei Indexzeilen springen und die entsprechenden Objekte anhand ihrer ID finden.
 
-### Sorting
+### Sortierung
 
-Another cool thing: indexes can do super fast sorting. Sorted queries are costly because the database has to load all results in memory before sorting them. Even if you specify an offset or limit, they are applied after sorting.
+Eine andere coole Sache: Indizes können superschnell sortieren. Sortierte Abfragen sind kostenintensiv, weil die Datenbank alle Ergebnisse in den Speicher laden muss, bevor sie sortiert werden. Sogar wenn du einen Offset oder eine Limitierung angibst, werden diese erst nach dem Sortieren angewandt.
 
-Let's imagine we want to find the four cheapest products. We could use the following query:
+Stell dir vor, wir wollten die vier günstigsten Produkte finden. Wir könnten die folgende Abfrage verwenden:
 
 ```dart
 final cheapest = await isar.products.filter()
@@ -88,11 +88,11 @@ final cheapest = await isar.products.filter()
   .findAll();
 ```
 
-In this example, the database would have to load all (!) objects, sort them by price, and return the four products with the lowest price.
+In diesem Beispiel müsste die Datenbank alle (!) Objekte laden, sie nach dem Preis sortieren und die vier Produkte mit dem niedrigsten Preis zurückgeben.
 
-As you can probably imagine, this can be done much more efficiently with the previous index. The database takes the first four rows of the index and returns the corresponding objects since they are already in the correct order.
+Wie du dir vermutlich vorstellen kannst, kann das mit dem vorherigen Index sehr viel effizienter gemacht werden. Die Datenbank nimmt die ersten vier Zeilen des Indexes und gibt die zugehörigen Objekte zurück, da sie schon in der korrekten Reihenfolge sind.
 
-To use the index for sorting, we would write the query like this:
+Um einen Index zum Sortieren zu verwenden würden wir die Abfrage so schreiben:
 
 ```dart
 final cheapestFast = await isar.products.where()
@@ -101,11 +101,11 @@ final cheapestFast = await isar.products.where()
   .findAll();
 ```
 
-The `.anyX()` where clause tells Isar to use an index just for sorting. You can also use a where clause like `.priceGreaterThan()` and get sorted results.
+Die `.anyX()` Where-Klausel teilt Isar mit, einen Index nur zum Sortieren zu verwenden. Du kannst also eine Where-Klausel wie `.priceGreaterThan()` benutzen und sortierte Ergenisse erhalten.
 
-## Unique indexes
+## Eindeutige Indizes
 
-A unique index ensures the index does not contain any duplicate values. It may consist of one or multiple properties. If a unique index has one property, the values in this property will be unique. If the unique index has more than one property, the combination of values in these properties is unique.
+Ein eindeutiger Index stellt sicher, dass der Index keine doppelten Werte enthält. Er kann aus einem oder mehreren Eigenschaften bestehen. Wenn ein eindeutiger Index eine Eigenschaft hat, sind die Werte dieser Eigenschaft eindeutig. Wenn ein eindeutiger Index mehr als eine Eigenschaft hat, dann ist die Kombination der Werte dieser Eigenschaften eindeutig.
 
 ```dart
 @collection
@@ -119,7 +119,7 @@ class User {
 }
 ```
 
-Any attempt to insert or update data into the unique index that causes a duplicate will result in an error:
+Jeder Versuch Daten in einen eindeutigen Index einzufügen oder zu aktualisieren, die ein Dukplikat verursachen würden, resultieren in einem Fehler:
 
 ```dart
 final user1 = User()
@@ -127,22 +127,22 @@ final user1 = User()
   ..username = 'user1'
   ..age = 25;
 
-await isar.users.put(user1); // -> ok
+await isar.users.put(user1); // -> Ok
 
 final user2 = User()
   ..id = 2;
   ..username = 'user1'
   ..age = 30;
 
-// try to insert user with same username
-await isar.users.put(user2); // -> error: unique constraint violated
+// Versucht einen Benutzer mit dem gleichen Benutzernamen einzufügen
+await isar.users.put(user2); // -> Fehler: Eindeutigkeitsbeschränkung verletzt
 print(await isar.user.where().findAll());
 // > [{id: 1, username: 'user1', age: 25}]
 ```
 
-## Replace indexes
+## Indizes ersetzen
 
-It is sometimes not preferable to throw an error if a unique constraint is violated. Instead, you may want to replace the existing object with the new one. This can be achieved by setting the `replace` property of the index to `true`.
+Manchmal ist es nicht von Vorteil einen Fehler zu verursachen, wenn eine Eindeutigkeitsbeschränkung verletzt wird. Stattdessen möchtest du vielleicht das vorhandene Objekt mit dem Neuen ersetzen. Das kann erreicht werden, indem die Eigenschaft `replace` des Indexes auf `true` gesetzt wird.
 
 ```dart
 @collection
@@ -154,7 +154,7 @@ class User {
 }
 ```
 
-Now when we try to insert a user with an existing username, Isar will replace the existing user with the new one.
+Jetzt, wenn wir versuchen einen Benutzer mit einem vorhandenen Benutzernamen einzufügen, wird Isar den Vorhandenen mit dem neuen Benutzer ersetzen.
 
 ```dart
 final user1 = User()
@@ -176,7 +176,7 @@ print(await isar.user.where().findAll());
 // > [{id: 2, username: 'user1' age: 30}]
 ```
 
-Replace indexes also generate `putBy()` methods that allow you to update objects instead of replacing them. The existing id is reused, and links are still populated.
+Ersetzbare Indizes generieren auch `putBy()`-Methoden, die es dir ermöglichen Objekte zu aktualisieren statt sie zu ersetzen. Die vorhandene ID wird wiederverwendet und Links bleiben erhalten.
 
 ```dart
 final user1 = User()
@@ -184,7 +184,7 @@ final user1 = User()
   ..username = 'user1'
   ..age = 25;
 
-// user does not exist so this is the same as put()
+// Nutzer existiert nicht, also ist es das gleiche wie put()
 await isar.users.putByUsername(user1);
 await isar.user.where().findAll(); // -> [{id: 1, username: 'user1', age: 25}]
 
@@ -197,11 +197,11 @@ await isar.users.put(user2);
 await isar.user.where().findAll(); // -> [{id: 1, username: 'user1' age: 30}]
 ```
 
-As you can see, the id of the first inserted user is reused.
+Wie du sehen kannst, wird die ID des zuerst eingefügten Benutzers wiederverwendet.
 
-## Case-insensitive indexes
+## Indizes ohne Berücksichtigung auf Groß-/Kleinschreibung
 
-All indexes on `String` and `List<String>` properties are case-sensitive by default. If you want to create a case-insensitive index, you can use the `caseSensitive` option:
+Alle Indizes auf `String`- und `List<String>`-Eigenschaften beachten standardmäßig die Groß-/Kleinschreibung. Wenn du einen Index erstellen willst, der die Groß-/Kleinschreibung nicht berücksichtigt, kannst du die `caseSensitive`-Option verwenden:
 
 ```dart
 @collection
@@ -216,41 +216,41 @@ class Person {
 }
 ```
 
-## Index type
+## Index-Typen
 
-There are different types of indexes. Most of the time, you'll want to use an `IndexType.value` index, but hash indexes are more efficient.
+Es gibt verschiedene Typen von Indizes. Meistens wirst du einen `IndexType.value`-Index verwenden wollen, aber Hash-Indizes sind effizienter.
 
-### Value index
+### Wert-Index
 
-Value indexes are the default type and the only one allowed for all properties that don't hold Strings or Lists. Property values are used to build the index. In the case of lists, the elements of the list are used. It is the most flexible but also space-consuming of the three index types.
-
-:::tip
-Use `IndexType.value` for primitives, Strings where you need `startsWith()` where clauses, and Lists if you want to search for individual elements.
-:::
-
-### Hash index
-
-Strings and Lists can be hashed to reduce the storage required by the index significantly. The disadvantage of hash indexes is that they can't be used for prefix scans (`startsWith` where clauses).
+Wert-Indizes sind der Standardtyp und der Einzige, der für alle Eigenschaften erlaubt ist, die nicht Strings oder Listen enthalten. Eigenschaftswerte werden verwendet, um den Index zu erstellen. Im Fall von Listen, werden die Elemente der Liste verwendet. Es ist der flexibelste, aber auch platzraubendste der drei Index-Typen.
 
 :::tip
-Use `IndexType.hash` for Strings and Lists if you don't need `startsWith`, and `elementEqualTo` where clauses.
+Benutze `IndexType.value` für Primitives, Strings, wenn du `startsWith()`-Where-Klauseln brauchst, und Listen, wenn du nach einzelnen Elementen suchst.
 :::
 
-### HashElements index
+### Hash-Index
 
-String lists can be hashed as a whole (using `IndexType.hash`), or the elements of the list can be hashed separately (using `IndexType.hashElements`), effectively creating a multi-entry index with hashed elements.
+Strings und Listen können gehasht werden um den für den Index benötigten Speicher drastisch zu verringern. Der Nachteil eines Hash-Indexes ist, dass sie nicht für Präfixsuchen (`startsWith()`-Where-Klauseln) verwendet werden können.
 
 :::tip
-Use `IndexType.hashElements` for `List<String>` where you need `elementEqualTo` where clauses.
+Verwende `IndexType.hash` für Strings und Listen, wenn du die `startsWith`- und `elementEqualTo`-Where-Klauseln nicht benötigst.
 :::
 
-## Composite indexes
+### HashElements-Index
 
-A composite index is an index on multiple properties. Isar allows you to create composite indexes of up to three properties.
+Stringlisten können als Ganzes gehasht werden (indem man `IndexType.hash` verwendet) oder die Elemente der Liste können seperat gehasht werden (indem man `IndexType.hashElements` nutzt) wodurch ein Mehreintragsindex mit gehashten Elementen erzeugt wird.
 
-Composite indexes are also known as multiple-column indexes.
+:::tip
+Nutze `IndexType.hashElements` für `List<String>` bei denen du `elementEqualTo`-Where-Klauseln benötigst.
+:::
 
-It's probably best to start with an example. We create a person collection and define a composite index on the age and name properties:
+## Zusammengesetzte Indizes
+
+Ein zusammengesetzter Index ist ein Index auf mehrere Eigenschaften. Isar erlaubt es dir zusammengesetzte Indizes mit bis zu drei Eigenschaften zu erstellen.
+
+Zusammengesetzte Indizes sind auch als Mehr-Spalten-Indizes bekannt.
+
+Es ist vermutlich am besten mit einem Beispiel zu starten. Wir erstellen eine Personen-Collection und definieren einen zusammengesetzten Index auf die Alters- und Namenseigenschaften:
 
 ```dart
 @collection
@@ -266,7 +266,7 @@ class Person {
 }
 ```
 
-**Data:**
+**Daten:**
 
 | id  | name   | age | hometown  |
 | --- | ------ | --- | --------- |
@@ -279,7 +279,7 @@ class Person {
 | 7   | Audrey | 30  | Prague    |
 | 8   | Anne   | 24  | Paris     |
 
-**Generated index:**
+**Generierter Index:**
 
 | age | name   | id  |
 | --- | ------ | --- |
@@ -292,9 +292,9 @@ class Person {
 | 24  | Simon  | 4   |
 | 30  | Audrey | 7   |
 
-The generated composite index contains all persons sorted by their age their name.
+Der generierte zusammengesetzte Index enthält alle Personen sortiert nach ihrem Alter und ihrem Namen.
 
-Composite indexes are great if you want to create efficient queries sorted by multiple properties. They also enable advanced where clauses with multiple properties:
+Zusammengesetzte Indizes sind super, wenn du effiziente Abfragen, sortiert nach mehreren Eigenschaften, stellen willst. Sie erlauben auch anspruchsvolle Where-Klauseln mit mehreren Eigenschaften:
 
 ```dart
 final result = await isar.where()
@@ -303,7 +303,7 @@ final result = await isar.where()
   .findAll() // -> ['San Diego', 'London']
 ```
 
-The last property of a composite index also supports conditions like `startsWith()` or `lessThan()`:
+Die letzte Eigenschaft eines zusammengesetzten Index unterstützt auch Bedingungen wie `startsWith()` oder `lessThan()`:
 
 ```dart
 final result = await isar.where()
@@ -311,11 +311,11 @@ final result = await isar.where()
   .findAll() // -> [Daniel, David]
 ```
 
-## Multi-entry indexes
+## Mehr-Eintrags-Indizes
 
-If you index a list using `IndexType.value`, Isar will automatically create a multi-entry index, and each item in the list is indexed toward the object. It works for all types of lists.
+Wenn du eine Liste mit `IndexType.value` indizierst, wird Isar automatische einen Mehr-Eintrags-Index erzeugen und jeder Eintrag in der Liste wird mit dem Objekt indiziert. Das funktioniert für alle Listentypen.
 
-Practical applications for multi-entry indexes include indexing a list of tags or creating a full-text index.
+Zu sinnvollen Anwendungen für Mehr-Eintrags-Indizes zählen das Indizieren einer Liste an Tags oder einen Volltext-Index zu erstellen.
 
 ```dart
 @collection
@@ -329,9 +329,9 @@ class Product {
 }
 ```
 
-`Isar.splitWords()` splits a string into words according to the [Unicode Annex #29](https://unicode.org/reports/tr29/) specification, so it works for almost all languages correctly.
+`Isar.splitWords()` trennt einen String nach der [Unicode Annex #29](https://unicode.org/reports/tr29/)-Spezifikation in Worte, sodass es für fast alle Sprachen richtig funktioniert.
 
-**Data:**
+**Daten:**
 
 | id  | description                  | descriptionWords             |
 | --- | ---------------------------- | ---------------------------- |
@@ -340,9 +340,9 @@ class Product {
 | 3   | plain red t-shirt            | [plain, red, t-shirt]        |
 | 4   | red necktie (super red)      | [red, necktie, super, red]   |
 
-Entries with duplicate words only appear once in the index.
+Einträge mit doppelten Worten tauchen nur einmal im Index auf.
 
-**Generated index:**
+**Generierter Index:**
 
 | descriptionWords | id        |
 | ---------------- | --------- |
@@ -355,8 +355,8 @@ Entries with duplicate words only appear once in the index.
 | super            | 4         |
 | t-shirt          | [1, 3]    |
 
-This index can now be used for prefix (or equality) where clauses of the individual words of the description.
+Dieser Index kann nun für (Gleichheits- oder) Präfix-Where-Klauseln der individuellen Worte der Beschreibung verwendet werden.
 
 :::tip
-Instead of storing the words directly, also consider using the result of a [phonetic algorithm](https://en.wikipedia.org/wiki/Phonetic_algorithm) like [Soundex](https://en.wikipedia.org/wiki/Soundex).
+Statt Worte direkt zu speichern kannst du auch in Betracht ziehen das Ergebnis einer [Phonetischen Suche](https://de.wikipedia.org/wiki/Phonetische_Suche) wie [Soundex](https://de.wikipedia.org/wiki/Soundex) zu verwenden.
 :::
