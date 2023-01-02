@@ -4,7 +4,7 @@ title: Transaktionen
 
 # Transaktionen
 
-In Isar verbinden Transaktionen mehrere Datenbankoperationen in einen einzigen Arbeitsvorgang. Die meisten Interaktionen mit Isar nutzen implizit Transaktionen. Lese- & Schreibzugriff ist in Isar [ACID](https://de.wikipedia.org/wiki/ACID)-konform. Transaktionen werden automatisch zurückgesetzt, wenn ein Fehler stattfindet.
+In Isar verbinden Transaktionen mehrere Datenbankoperationen in einen einzigen Arbeitsvorgang. Die meisten Interaktionen mit Isar nutzen implizit Transaktionen. Lese- & Schreibzugriff ist in Isar [ACID](https://de.wikipedia.org/wiki/ACID)-konform. Transaktionen werden automatisch zurückgesetzt, wenn ein Fehler auftritt.
 
 ## Explizite Transaktionen
 
@@ -31,7 +31,7 @@ Asynchrone Lese-Transaktionen laufen parallel zu anderen Lese- und Schreib-Trans
 
 Anders als Lese-Operationen müssen Schreib-Operationen in Isar in einer expliziten Transaktion ausgeführt werden.
 
-Wenn eine Schreib-Transaktion erfolgreich beendet wird, wird sie automatisch festgesetzt und alle Änderungen werden auf den Datenträger geschrieben. Wenn ein Fehler stattfindet, wird die Transaktion abgebrochen und alle Änderungen werden zurückgesetzt. Transaktionen sind „Alles oder Nichts”: Entweder sind alle Schreibvorgänge in der Transaktion erfolgreich oder keine von ihnen findet statt. Somit ist sichergestellt, dass die Daten konsistent sind.
+Wenn eine Schreib-Transaktion erfolgreich beendet wird, wird sie automatisch festgesetzt und alle Änderungen werden auf den Datenträger geschrieben. Wenn ein Fehler auftritt, wird die Transaktion abgebrochen und alle Änderungen werden zurückgesetzt. Transaktionen sind „Alles oder Nichts”: Entweder sind alle Schreibvorgänge in der Transaktion erfolgreich oder keine von ihnen findet statt. Somit ist sichergestellt, dass die Daten konsistent sind.
 
 :::warning
 Wenn eine Datenbankoperation fehlschlägt, wird die Transaktion abgeborchen und darf nicht mehr verwendet werden, auch wenn der Fehler in Dart aufgefangen wird.
