@@ -23,7 +23,7 @@ class Product {
 }
 ```
 
-#### Data:
+**Data:**
 
 | id  | name      | price |
 | --- | --------- | ----- |
@@ -59,7 +59,7 @@ class Product {
 }
 ```
 
-#### Generated index:
+**Generated index:**
 
 | price                | id                 |
 | -------------------- | ------------------ |
@@ -266,7 +266,7 @@ class Person {
 }
 ```
 
-#### Data:
+**Data:**
 
 | id  | name   | age | hometown  |
 | --- | ------ | --- | --------- |
@@ -279,7 +279,7 @@ class Person {
 | 7   | Audrey | 30  | Prague    |
 | 8   | Anne   | 24  | Paris     |
 
-#### Generated index
+**Generated index:**
 
 | age | name   | id  |
 | --- | ------ | --- |
@@ -331,7 +331,7 @@ class Product {
 
 `Isar.splitWords()` splits a string into words according to the [Unicode Annex #29](https://unicode.org/reports/tr29/) specification, so it works for almost all languages correctly.
 
-#### Data:
+**Data:**
 
 | id  | description                  | descriptionWords             |
 | --- | ---------------------------- | ---------------------------- |
@@ -342,7 +342,7 @@ class Product {
 
 Entries with duplicate words only appear once in the index.
 
-#### Generated index
+**Generated index:**
 
 | descriptionWords | id        |
 | ---------------- | --------- |

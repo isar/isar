@@ -23,7 +23,7 @@ class Product {
 }
 ```
 
-#### Données:
+**Données:**
 
 | id  | name      | price |
 |-----|-----------|-------|
@@ -59,7 +59,7 @@ class Product {
 }
 ```
 
-#### Index généré:
+**Index généré:**
 
 | price                | id                 |
 | -------------------- | ------------------ |
@@ -266,7 +266,7 @@ class Person {
 }
 ```
 
-#### Données:
+**Données:**
 
 | id  | name   | age | hometown  |
 |-----|--------|-----|-----------|
@@ -279,7 +279,7 @@ class Person {
 | 7   | Audrey | 30  | Prague    |
 | 8   | Anne   | 24  | Paris     |
 
-#### Index généré
+**Index généré:**
 
 | age | name   | id  |
 |-----|--------|-----|
@@ -331,7 +331,7 @@ class Product {
 
 `Isar.splitWords()` divise une chaîne de caractères en mots selon la spécification [Unicode Annex #29](https://unicode.org/reports/tr29/), ce qui fait qu'il fonctionne correctement pour presque toutes les langues.
 
-#### Data:
+**Data:**
 
 | id  | description                  | descriptionWords             |
 | --- | ---------------------------- | ---------------------------- |
@@ -342,7 +342,7 @@ class Product {
 
 Les entrées comportant des mots en double n'apparaissent qu'une seule fois dans l'index.
 
-#### Index généré
+**Index généré:**
 
 | descriptionWords | id        |
 | ---------------- | --------- |
