@@ -4,37 +4,37 @@ title: Transaktionen
 
 # Transaktionen
 
-In Isar, transactions combine multiple database operations in a single unit of work. Most interactions with Isar implicitly use transactions. Read & write access in Isar is [ACID](http://en.wikipedia.org/wiki/ACID) compliant. Transactions are automatically rolled back if an error occurs.
+In Isar verbinden Transaktionen mehrere Datenbankoperationen in einen einzigen Arbeitsvorgang. Die meisten Interaktionen mit Isar nutzen implizit Transaktionen. Lese- & Schreibzugriff ist in Isar [ACID](https://de.wikipedia.org/wiki/ACID)-konform. Transaktionen werden automatisch zurückgesetzt, wenn ein Fehler stattfindet.
 
-## Explicit transactions
+## Explizite Transaktionen
 
-In an explicit transaction, you get a consistent snapshot of the database. Try to minimize the duration of transactions. It is forbidden to do network calls or other long-running operations in a transaction.
+In einer expliziten Transaktion kannst du einen konsistenten Schnappschuss der Datenbank erhalten. Versuche die Dauer einer Transaktion zu minimieren. Es ist verboten Netzwerkabfragen oder andere lang andauernde Operationen in einer Transaktion zu machen.
 
-Transactions (especially write transactions) do have a cost, and you should always try to group successive operations into a single transaction.
+Transaktionen (besonders Schreib-Transaktionen) sind sehr teuer. Du solltest immer versuchen aufeinander folgende Operationen in eine einzelne Transaktion zu vereinen.
 
-Transactions can either be synchronous or asynchronous. In synchronous transactions, you may only use synchronous operations. In asynchronous transactions, only async operations.
+Transaktionen können entweder synchron oder asynchron sein. In synchronen Transaktionen kannst du nur synchrone Operationen verwenden. In asynchronen Transaktionen sind nur asynchrone Operationen möglich.
 
-|              | Read         | Read & Write       |
-|--------------|--------------|--------------------|
-| Synchronous  | `.txnSync()` | `.writeTxnSync()`  |
-| Asynchronous | `.txn()`     | `.writeTxn()`      |
+|           | Lesen        | Lesen & Schreiben |
+| --------- | ------------ | ----------------- |
+| Synchron  | `.txnSync()` | `.writeTxnSync()` |
+| Asynchron | `.txn()`     | `.writeTxn()`     |
 
-### Read transactions
+### Lese-Transaktionen
 
-Explicit read transactions are optional, but they allow you to do atomic reads and rely on a consistent state of the database inside the transaction. Internally Isar always uses implicit read transactions for all read operations.
+Explizite Lese-Transaktionen sind optional, aber sie erlauben es atomare Lesevorgänge durchzuführen und auf einem konsistenten Status der Datenbank innerhalb der Transaktion zu arbeiten. Intern nutzt Isar für alle Lese-Operationen immer Lese-Transaktionen.
 
 :::tip
-Async read transactions run in parallel to other read and write transactions. Pretty cool, right?
+Asynchrone Lese-Transaktionen laufen parallel zu anderen Lese- und Schreib-Transaktionen. Ziemlich cool, oder?
 :::
 
-### Write transactions
+### Schreib-Transaktionen
 
-Unlike read operations, write operations in Isar must be wrapped in an explicit transaction.
+Anders als Lese-Operationen müssen Schreib-Operationen in Isar in einer expliziten Transaktion ausgeführt werden.
 
-When a write transaction finishes successfully, it is automatically committed, and all changes are written to disk. If an error occurs, the transaction is aborted, and all the changes are rolled back. Transactions are “all or nothing”: either all the writes within a transaction succeed, or none of them take effect to guarantee data consistency.
+Wenn eine Schreib-Transaktion erfolgreich beendet wird, wird sie automatisch festgesetzt und alle Änderungen werden auf den Datenträger geschrieben. Wenn ein Fehler stattfindet, wird die Transaktion abgebrochen und alle Änderungen werden zurückgesetzt. Transaktionen sind „Alles oder Nichts”: Entweder sind alle Schreibvorgänge in der Transaktion erfolgreich oder keine von ihnen findet statt. Somit ist sichergestellt, dass die Daten konsistent sind.
 
 :::warning
-When a database operation fails, the transaction is aborted and must no longer be used. Even if you catch the error in Dart.
+Wenn eine Datenbankoperation fehlschlägt, wird die Transaktion abgeborchen und darf nicht mehr verwendet werden, auch wenn der Fehler in Dart aufgefangen wird.
 :::
 
 ```dart
@@ -45,14 +45,14 @@ class Contact {
   String? name;
 }
 
-// GOOD
+// GUT
 await isar.writeTxn(() async {
   for (var contact in getContacts()) {
     await isar.contacts.put(contact);
   }
 });
 
-// BAD: move loop inside transaction
+// SCHLECHT: Bewege die Schleife in die Transaktion
 for (var contact in getContacts()) {
   await isar.writeTxn(() async {
     await isar.contacts.put(contact);
