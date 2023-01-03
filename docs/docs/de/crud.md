@@ -10,7 +10,7 @@ Lerne wie du Collections in Isar nutzt nachdem du sie definiert hast.
 
 Als Erstes benötigen wir eine Isar Instanz. Jede Instanz erfordert einen Ordner mit Schreibrechten, in dem die Datenbankdatei gespeichert werden kann. Wenn du keinen Ordner angibst, wird Isar einen geeigneten Standardordner für die aktuelle Plattform finden.
 
-Gib alle Schemas an, die du mit der Isar-Instanz verwenden möchtest. Wenn du mehrere Instanzen öffnest, müsst du trotzdem jeder Instanz die gleichen Schemas mitgeben.
+Gib alle Schemas an, die du mit der Isar-Instanz verwenden möchtest. Wenn du mehrere Instanzen öffnest, musst du trotzdem jeder Instanz die gleichen Schemas mitgeben.
 
 ```dart
 final isar = await Isar.open([RecipeSchema]);
