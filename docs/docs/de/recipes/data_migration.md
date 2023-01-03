@@ -1,18 +1,18 @@
 ---
-title: Data migration
+title: Migration von Daten
 ---
 
-# Data Migration
+# Migration vron Daten
 
-Isar automatically migrates your database schemas if you add or remove collections, fields, or indexes. Sometimes you might want to migrate your data as well. Isar does not offer a built-in solution because it would impose arbitrary migration restrictions. It is easy to implement migration logic that fits your needs.
+Isar migriert deine Datenbankschemas automatisch, wenn du Collections, Felder oder Indizes hinzufügst oder entfernst. Manchmal möchtest du möglicherweise auch deine Daten migrieren. Isar liefert keine eingebaute Lösung, weil das willkürliche Migrationsbeschränkungen festlegen würde. Es ist leicht eine passende Migrationslogik zu implementieren.
 
-We want to use a single version for the entire database in this example. We use shared preferences to store the current version and compare it to the version we want to migrate to. If the versions do not match, we migrate the data and update the version.
+Wir wollen in diesem Beispiel eine einzige Version für die gesamte Datenbank verwenden. Wir benutzen Shared Preferences um die derzeitige Version zu speichern und vergleichen diese mit der Version zu der wir unsere Daten migrieren wollen. Wenn die Versionen nicht übereinstimmen, migrieren wir die Daten und aktualisieren die Version.
 
 :::tip
-You could also give each collection its own version and migrate them individually.
+Du kannst auch jeder Collection seine eigene Version zuweisen und sie individuell migrieren.
 :::
 
-Imagine we have a user collection with a birthday field. In version 2 of our app, we need an additional birth year field to query users based on age.
+Stell dir vor, wie haben eine Benutzer-Collection mit einem Feld Geburtstag. In Version 2 unserer App benötigen wir ein zusätzliches Feld Geburtsjahr um Benutzer anhand des Alters abzufragen.
 
 Version 1:
 ```dart
@@ -40,7 +40,7 @@ class User {
 }
 ```
 
-The problem is the existing user models will have an empty `birthYear` field because it did not exist in version 1. We need to migrate the data to set the `birthYear` field.
+Das Problem ist, dass vorhandene Benutzermodelle ein leeres `birthYear`-Feld haben werden, weil es in Version 1 nicht existiert hat. Wir müssen die Daten migrieren, um das `birthYear`-Feld zu setzen.
 
 ```dart
 import 'package:isar/isar.dart';
@@ -62,24 +62,24 @@ Future<void> performMigrationIfNeeded(Isar isar) async {
       await migrateV1ToV2(isar);
       break;
     case 2:
-      // If the version is not set (new installation) or already 2, we do not need to migrate
+      // Wenn die Version nicht gesetzt (neue Installation), oder schon 2 ist, müssen wir nicht migrieren
       return;
     default:
       throw Exception('Unknown version: $currentVersion');
   }
 
-  // Update version
+  // Version aktualisieren
   await prefs.setInt('version', 2);
 }
 
 Future<void> migrateV1ToV2(Isar isar) async {
   final userCount = await isar.users.count();
 
-  // We paginate through the users to avoid loading all users into memory at once
+  // Wir paginieren durch die Benutzer, um zu vermeiden, dass wir alle Benutzer gleichzeitig in den Speicher laden
   for (var i = 0; i < userCount; i += 50) {
     final users = await isar.users.where().offset(i).limit(50).findAll();
     await isar.writeTxn((isar) async {
-      // We don't need to update anything since the birthYear getter is used
+      // Wir müssen nichts aktualisieren, weil der birthYear-Getter verwendet wird
       await isar.users.putAll(users);
     });
   }
@@ -87,5 +87,5 @@ Future<void> migrateV1ToV2(Isar isar) async {
 ```
 
 :::warning
-If you have to migrate a lot of data, consider using a background isolate to prevent strain on the UI thread.
+Wenn du viele Daten migrieren musst, solltest du überlegen einen Hintergrund-Isolate zu verwenden, um eine Belastung des UI-Threads zu verhindern.
 :::
