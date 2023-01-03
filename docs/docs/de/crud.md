@@ -137,7 +137,7 @@ await isar.writeTxn(() async {
 })
 ```
 
-Ist das ID-Feld nicht final, weist Isar die generierte ID automatisch dem Objekt zu.
+Ist das ID-Feld nicht-final, weist Isar die generierte ID automatisch dem Objekt zu.
 
 Das Erstellen von mehreren Objekten auf einmal ist genauso einfach:
 
