@@ -1,14 +1,14 @@
 ---
-title: String ids
+title: String-IDs
 ---
 
-# String ids
+# String-IDs
 
-This is one of the most frequent requests I get, so here is a tutorial on using String ids.
+Das hier ist eine der häufigsten Anfragen, die ich erhalte, daher ist hier ein Tutorial zur Verwendung von String-IDs.
 
-Isar does not natively support String ids, and there is a good reason for it: integer ids are much more efficient and faster. Especially for links, the overhead of a String id is too significant.
+Isar unterstützt String-IDs nicht nativ, was einen guten Grund hat: Integer-IDs sind viel effizienter und schneller. Besonders bei Links ist der Overhead einer String-ID zu signifikant.
 
-I understand that sometimes you have to store external data that uses UUIDs or other non-integer ids. I recommend storing the String id as a property in your object and using a fast hash implementation to generate a 64-bit int that can be used as Id.
+Ich verstehe, dass du manchmal externe Daten speichern musst, die UUIDs oder andere nicht-Integer-IDs verwenden. Ich empfehle, die String-ID als Eigenschaft in deinem Objekt zu speichern und eine schnelle Hash-Implementation um 64-bit Integer zu generieren und als ID zu verwenden.
 
 ```dart
 @collection
@@ -23,14 +23,14 @@ class User {
 }
 ```
 
-With this approach, you get the best of both worlds: Efficient integer ids for links and the ability to use String ids.
+Mit diesem Ansatz bekommst du das Beste aus beiden Welten: Effiziente Integer-IDs für Links und die Fähigkeit String-IDs zu nutzen.
 
-## Fast hash function
+## Schnelle Hash-Funktion
 
-Ideally, your hash function should have high quality (you don't want collisions) and be fast. I recommend using the following implementation:
+Idealerweise sollte deine Hash-Funktion eine hohe Qualität haben (du willst keine Kollisionen) und schnell sein. Ich empfehle die folgende Implementation:
 
 ```dart
-/// FNV-1a 64bit hash algorithm optimized for Dart Strings
+/// FNV-1a 64bit Hash-Algorithmus optimiert für Dart-Strings
 int fastHash(String string) {
   var hash = 0xcbf29ce484222325;
 
@@ -47,8 +47,8 @@ int fastHash(String string) {
 }
 ```
 
-If you choose a different hash function, ensure it returns a 64-bit int and avoid using a cryptographic hash function because they are much slower.
+Wenn du eine andere Hash-Funktion wählst, stelle sicher, dass sie einen 64-bit Integer zurückgibt und vermeide kryptographische Hash-Funktionen, weil die sehr viel langsamer sind.
 
 :::warning
-Avoid using `string.hashCode` because it is not guaranteed to be stable across different platforms and versions of Dart.
+Vermeide es `string.hashCode` zu verwenden, weil nicht garantiert werden kann, dass die Methode über verschiedenen Plattformen und Versionen von Dart hinweg stabil ist.
 :::
