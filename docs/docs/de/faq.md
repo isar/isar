@@ -2,40 +2,40 @@
 title: FAQ
 ---
 
-# Frequently Asked Questions
+# Häufig gestellte Fragen
 
-A random collection of frequently asked questions about Isar and Flutter databases.
+Eine zufällige Zusammenstellung an häufig gestellten Fragen zu Isar und Flutter-Datenbanken.
 
-### Why do I need a database?
+### Warum brauche ich eine Datenbank?
 
-> I store my data in a backend database, why do I need Isar?.
+> Ich speichere meine Daten in einer Backend-Datenbank, warum benötige ich Isar?
 
-Even today, it is very common to have no data connection if you are in a subway or a plane or if you visit your grandma, who has no Wi-Fi and a very bad cell signal. You shouldn't let bad connection cripple your app!
+Sogar heute kommt es vor, dass du keine Internetverbindung hast, wenn du in einer U-Bahn, einem Flugzeug oder zu Besuch bei deiner Oma bist, die kein WLAN und einen sehr schlechten Mobilfunkempfang hat. Du solltest deine App nicht durch schlechte Verbindung lahmlegen lassen.
 
 ### Isar vs Hive
 
-The answer is easy: Isar was [started as a replacement for Hive](https://github.com/hivedb/hive/issues/246) and is now at a state where I recommend always using Isar over Hive.
+Die Antwort ist leicht: Isar wurde [als Ersatz für Hive begonnen](https://github.com/hivedb/hive/issues/246) und ist nun an einem Punkt, wo ich immer empfehlen würde, Isar statt Hive zu benutzen.
 
-### Where clauses?!
+### Where-Klauseln?!
 
-> Why do **_I_** have to choose which index to use?
+> Warum muss **_ich_** wählen, welcher Index genutzt wird?
 
-There are multiple reasons. Many databases use heuristics to choose the best index for a given query. The database needs to collect additional usage data (-> overhead) and might still choose the wrong index. It also makes creating a query slower.
+Es gibt mehrere Gründe. Viele Datenbanken benutzen Heuristik um den besten Index für eine bestimmte Abfrage zu nutzen. Die Datenbank muss zusätzliche Nutzungsdaten sammeln (-> Overhead) und verwendet möglicherweise immer noch den falschen Index. Es dauert dadurch auch länger eine Abfrage zu starten.
 
-Nobody knows your data better than you, the developer. So you can choose the optimal index and decide for example whether you want to use an index for querying or sorting.
+Niemand kennt deine Daten besser, als du, der Entwickler. Also kannst du den besten Index wählen und z.B. entscheiden, ob du einen Index zum Abfragen oder Sortieren verwenden willst.
 
-### Do I have to use indexes / where clauses?
+### Muss ich Indizes / Where-Klauseln benutzen?
 
-Nope! Isar is most likely fast enough if you only rely on filters.
+Nö! Isar ist vermutlich schnell genug, auch wenn du nur Filter verwendest.
 
-### Is Isar fast enough?
+### Ist Isar schnell genug?
 
-Isar is among the fastest databases for mobile, so it should be fast enough for most use cases. If you run into performance issues, chances are that you are doing something wrong.
+Isar ist unter den schnellsten Datenbanken für Mobilgeräte, also sollte es in den meisten Fällen schnellgenug sein. Wenn du auf Leistungsprobleme stößt, besteht die Möglichkeit, dass du was falschmachst.
 
-### Does Isar increase the size of my app?
+### Steigert Isar die Größe meiner App?
 
-A little bit, yes. Isar will increase the download size of your app by about 1 - 1.5 MB. Isar Web adds only a few KB.
+Ja, ein bisschen. Isar wird die Download-Größe deiner App um 1 - 1,5 MB erhöhen. Isar Web fügt nur wenige KB hinzu.
 
-### The docs are incorrect / there is a typo.
+### Die Docs sind falsch / Da ist ein Tippfehler
 
-Oh no, sorry. Please [open an issue](https://github.com/isar/isar/issues/new/choose) or, even better, a PR to fix it 💪.
+Oh nein, sorry. Bitte [öffne ein Issue](https://github.com/isar/isar/issues/new/choose), oder noch besser, mach einen PR um den Fehler zu beheben 💪.
