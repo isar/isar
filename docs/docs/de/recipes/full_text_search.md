@@ -1,26 +1,26 @@
 ---
-title: Full-text search
+title: Volltextsuche
 ---
 
-# Full-text search
+# Volltextsuche
 
-Full-text search is a powerful way to search text in the database. You should already be familiar with how [indexes](/indexes) work, but let's go over the basics.
+Volltextsuche ist ein mächtiges Werkzeug um Text in der Datenbank zu suchen. Du solltest schon damit vertraut sein, wie [Indizes](/indexes) funktionieren, aber wir schauen uns die Grundlagen an.
 
-An index works like a lookup table, allowing the query engine to find records with a given value quickly. For example, if you have a `title` field in your object, you can create an index on that field to make it faster to find objects with a given title.
+Ein Index funktioniert wie eine Nachschlagetabelle, die es der Abfrage-Engine ermöglicht Einträge mit einem bestimmten Wert schnell zu finden. Zum Beispiel, wenn du ein `title`-Feld in deinem Objekt hast, kannst du einen Index auf das Feld anlegen, um die Geschwindigkeit zu erhöhen, ein Objekt mit bestimmtem Titel zu finden.
 
-## Why is full-text search useful?
+## Warum ist Volltextsuche sinnvoll?
 
-You can easily search text using filters. There are various string operations for example `.startsWith()`, `.contains()` and `.matches()`. The problem with filters is that their runtime is `O(n)` where `n` is the number of records in the collection. String operations like `.matches()` are especially expensive.
+Du kannst Text leicht durchsuchen, indem du Filter verwendest. Es gibt mehrere unterschiedliche String-Operationen, zum Beispiel `.startsWith()`, `.contains()` und `.matches()`. Das Problem mit Filtern ist, dass ihre Laufzeit `O(n)` ist, wobei `n` die Anzahl der Einträge in der Collection ist. String-Operationen wie `.matches()` sind besonders teuer.
 
 :::tip
-Full-text search is much faster than filters, but indexes have some limitations. In this recipe, we will explore how to work around these limitations.
+Volltextsuche ist deutlich schneller als Filter, aber Indizes haben ein paar Einschränkungen. In diesem Rezept wollen wir uns angucken, wie man diese Limitationen umgeht.
 :::
 
-## Basic example
+## Grundlegendes Beispiel
 
-The idea is always the same: Instead of indexing the whole text, we index the words in the text so we can search for them individually.
+Die Idee ist immer die Gleiche: Anstatt den ganzen Text zu indizieren, indizieren wir die Worte im Text, sodass wir individuell nach ihnen suchen können.
 
-Let's create the most basic full-text index:
+Bauen wir den grundlegendsten Volltext-Index:
 
 ```dart
 class Message {
@@ -33,7 +33,7 @@ class Message {
 }
 ```
 
-We can now search for messages with specific words in the content:
+Wir können jetzt nach Nachrichten suchen, die spezifische Worte enthalten:
 
 ```dart
 final posts = await isar.messages
@@ -42,17 +42,17 @@ final posts = await isar.messages
   .findAll();
 ```
 
-This query is super fast, but there are some problems:
+Diese Abfrage ist superschnell, aber es gibt ein paar Probleme:
 
-1. We can only search for entire words
-2. We do not consider punctuation
-3. We do not support other whitespace characters
+1. Wir können nur nach ganzen Worten suchen
+2. Wir missachten Zeichensetzung
+3. Wir unterstützen keine anderen Leerzeichen
 
-## Splitting text the right way
+## Text richtig trennen
 
-Let's try to improve the previous example. We could try to develop a complicated regex to fix word splitting, but it will likely be slow and wrong for edge cases.
+Versuchen wir das vorherige Beispiel zu verbessern. Wir könnten versuchen einen komplizierten Regex zu entwickeln, um Worte zu trennen, aber das ist vermutlich langsam und in Grenzfällen falsch.
 
-The [Unicode Annex #29](https://unicode.org/reports/tr29/) defines how to split text into words correctly for almost all languages. It is quite complicated, but fortunately, Isar does the heavy lifting for us:
+Der [Unicode Annex #29](https://unicode.org/reports/tr29/) definiert wie man, für fast alle Sprachen, Text richtig in Worte trennt. Das ist ziemlich kompliziert, aber glücklicherweise macht Isar den schwierigsten Teil der Arbeit für uns:
 
 ```dart
 Isar.splitWords('hello world'); // -> ['hello', 'world']
@@ -61,9 +61,9 @@ Isar.splitWords('The quick (“brown”) fox can’t jump 32.3 feet, right?');
 // -> ['The', 'quick', 'brown', 'fox', 'can’t', 'jump', '32.3', 'feet', 'right']
 ```
 
-## I want more control
+## Ich will mehr Kontrolle
 
-Easy peasy! We can change our index also to support prefix matching and case-insensitive matching:
+Das ist kinderleicht! Wir können unseren Index so ändern, dass er auch Präfixe findet und Groß-/Kleinschreibung ignoriert:
 
 ```dart
 class Post {
@@ -76,7 +76,7 @@ class Post {
 }
 ```
 
-By default, Isar will store the words as hashed values which is fast and space efficient. But hashes can't be used for prefix matching. Using `IndexType.value`, we can change the index to use the words directly instead. It gives us the `.titleWordsAnyStartsWith()` where clause:
+Isar speichert die Worte standardmäßig als gehashte Werte, was schnell und platzsparend ist. Aber Hashes können nicht für die Präfixüberprüfung verwendet werden. Wenn wir `IndexType.value` verwenden, können wir den Index ändern, um direkt Worte zu benutzen. Das ermöglicht uns die `.titleWordsAnyStartsWith()`-Where-Klausel benutzen zu können:
 
 ```dart
 final posts = await isar.posts
@@ -89,9 +89,9 @@ final posts = await isar.posts
   .findAll();
 ```
 
-## I also need `.endsWith()`
+## Ich brauche auch `.endsWith()`
 
-Sure thing! We will use a trick to achieve `.endsWith()` matching:
+Klar! Wir werden einen Trick verwenden, um `.endsWith()` verwenden zu können:
 
 ```dart
 class Post {
@@ -108,7 +108,7 @@ class Post {
 }
 ```
 
-Don't forget reversing the ending you want to search for:
+Vergiss nicht das Wortende umzukehren nach dem du suchen willst:
 
 ```dart
 final posts = await isar.posts
@@ -117,11 +117,11 @@ final posts = await isar.posts
   .findAll();
 ```
 
-## Stemming algorithms
+## Abstammungsalgorithmen
 
-Unfortunately, indexes do not support `.contains()` matching (this is true for other databases as well). But there are a few alternatives that are worth exploring. The choice highly depends on your use. One example is indexing word stems instead of the whole word.
+Leider unterstützen Indizes nicht die `.contains()`-Methode (das stimmt auch für andere Datenbanken). Aber es gibt ein paar Alternativen, die es wert sind, erkundet zu werden. Eine Wahl hängt stark von deinem Verwendungszweck ab. Ein Beispiel ist, den Ursprung von Worten, statt ganzer Worte, zu indizieren.
 
-A stemming algorithm is a process of linguistic normalization in which the variant forms of a word are reduced to a common form:
+Ein Abstammungsalgorithmus ist der Prozess einer linguistischen Normalisierung, bei dem die Varianten eines Wortes in eine gleichmäßige Form reduziert werden:
 
 ```
 connection
@@ -131,26 +131,26 @@ connected
 connecting
 ```
 
-Popular algorithms are the [Porter stemming algorithm](https://tartarus.org/martin/PorterStemmer/) and the [Snowball stemming algorithms](https://snowballstem.org/algorithms/).
+Beliebte Algorithmen sind der [Porter stemming algorithm](https://tartarus.org/martin/PorterStemmer/) und der [Snowball stemming algorithms](https://snowballstem.org/algorithms/).
 
-There are also more advanced forms like [lemmatization](https://en.wikipedia.org/wiki/Lemmatisation).
+Es gibt auch fortgeschrittenere Formen wie der [Lemmatisierung](https://de.wikipedia.org/wiki/Lemma_(Lexikographie)#Lemmatisierung).
 
-## Phonetic algorithms
+## Phonetische Suche
 
-A [phonetic algorithm](https://en.wikipedia.org/wiki/Phonetic_algorithm) is an algorithm for indexing words by their pronunciation. In other words, it allows you to find words that sound similar to the ones you are looking for.
+Eine [Phonetische Suche](https://de.wikipedia.org/wiki/Phonetische_Suche) ist ein Algorithmus, um Worte nach ihrer Aussprache zu indizieren. Anders augedrückt, erlaubt es dir Worte zu finden, die ähnlich zu den Gesuchten klingen.
 
 :::warning
-Most phonetic algorithms only support a single language.
+Die meisten phonetischen Algorithmen unterstützen nur eine einzige Sprache.
 :::
 
 ### Soundex
 
-[Soundex](https://en.wikipedia.org/wiki/Soundex) is a phonetic algorithm for indexing names by sound, as pronounced in English. The goal is for homophones to be encoded to the same representation so they can be matched despite minor differences in spelling. It is a straightforward algorithm, and there are multiple improved versions.
+[Soundex](https://de.wikipedia.org/wiki/Soundex) ist ein phonetischer Algorithmus um Namen danach zu indizieren, wie sie im Englischen ausgesprochen werden. Das Ziel ist es Homophone in die gleiche Repräsentation zu übertragen, sodass sie gefunden werden, trotz der kleinen Unterschiede in der Rechtschreibung. Es ist ein unkomplizierter Algorithmus, von dem es mehrere verbesserte Versionen gibt.
 
-Using this algorithm, both `"Robert"` and `"Rupert"` return the string `"R163"` while `"Rubin"` yields `"R150"`. `"Ashcraft"` and `"Ashcroft"` both yield `"A261"`.
+Wenn du diesen Algorithmus verwendest, wegeben `"Robert"` und `"Rupert"` beide den String `"R163"`, während `"Rubin"` `"R150"` ergibt. `"Ashcraft"` und `"Ashcroft"` erzeugen beide `"A261"`.
 
 ### Double Metaphone
 
-The [Double Metaphone](https://en.wikipedia.org/wiki/Metaphone) phonetic encoding algorithm is the second generation of this algorithm. It makes several fundamental design improvements over the original Metaphone algorithm.
+Der phonetische Umwandlungsalgorithmus [Double Metaphone](https://en.wikipedia.org/wiki/Metaphone) ist die zweite Generation dieses Algorithmus. Er macht mehrere fundamentale Designverbesserungen gegenüber dem originalen Metaphone-Algorithmus.
 
-Double Metaphone accounts for various irregularities in English of Slavic, Germanic, Celtic, Greek, French, Italian, Spanish, Chinese, and other origins.
+Double Metaphone klärt verschiedene Unregelmäßigkeiten im Englischen aufgrund von slawischer, germanischer, keltischer, griechischer, französischer, italienischer, spanischer, chinesischer und anderer Herkunft.
