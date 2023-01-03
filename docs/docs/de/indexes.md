@@ -73,7 +73,7 @@ class Product {
 | <mark>**60**</mark>  | <mark>**6**</mark> |
 | <mark>**650**</mark> | <mark>**8**</mark> |
 
-Jetzt kann die Abfrage deutlich schneller durchgeführt werden. Der Ausführende<!--TODO: use better fitting word--> kann direkt zu den letzten drei Indexzeilen springen und die entsprechenden Objekte anhand ihrer ID finden.
+Jetzt kann die Abfrage deutlich schneller durchgeführt werden. Es kann direkt zu den letzten drei Indexzeilen gesprungen werden und die entsprechenden Objekte anhand ihrer ID gefunden werden.
 
 ### Sortierung
 
