@@ -36,7 +36,7 @@ Wie du im eben gezeigten Beispiel sehen kannst, muss das Objekt noch nicht exist
 
 Es gibt den zusätzlichen Parameter `fireImmediately`. Wenn du ihn auf `true` gesetzt hast, wird Isar sofort die Werte des aktuellen Objekts in den Stream geben.
 
-### Lazy Beobachten
+### Lazy Beobachtung
 
 Vielleicht möchtest du gar nicht den neuen Wert erhalten, sondern nur über die Änderungen informiert werden. Das erspart es Isar die Objekte abrufen zu müssen:
 
