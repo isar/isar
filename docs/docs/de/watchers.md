@@ -1,18 +1,18 @@
 ---
-title: Watchers
+title: Watcher
 ---
 
-# Watchers
+# Watcher
 
-Isar allows you to subscribe to changes in the database. You can "watch" for changes in a specific object, an entire collection, or a query.
+Isar ermöglicht es dir zu Änderungen in der Datenbank zu abbonieren. Du kannst Änderungen in einem Objekt, einer ganzen Collection oder einer Abfrage "beobachten".
 
-Watchers enable you to react to changes in the database efficiently. You can for example rebuild your UI when a contact is added, send a network request when a document is updated, etc.
+Watcher erlauben es dir auf Änderungen in der Datenbank effizient zu reagieren. Du kannst z.B. dein UI neuladen, wenn ein Kontakt hinzugefügt wurde, eine Netzwerkabfrage machen, wenn ein Dokument aktualisiert wurde, etc.
 
-A watcher is notified after a transaction commits successfully and the target actually changes.
+Ein Watcher wird benachrichtigt, wenn eine Transaktion efolgreich stattfindet, und das Ziel sich wirklich ändert.
 
-## Watching Objects
+## Objekte beobachten
 
-If you want to be notified when a specific object is created, updated or deleted, you should watch an object:
+Wenn du benachrichtigt werden möchtest, wenn ein spezifisches Objekt erstellt, aktualisiert oder gelöscht wird, solltest du ein Objekt beobachten:
 
 ```dart
 Stream<User> userChanged = isar.users.watchObject(5);
@@ -22,23 +22,23 @@ userChanged.listen((newUser) {
 
 final user = User(id: 5)..name = 'David';
 await isar.users.put(user);
-// prints: User changed: David
+// Ausgabe: User changed: David
 
 final user2 = User(id: 5)..name = 'Mark';
 await isar.users.put(user);
-// prints: User changed: Mark
+// Ausgabe: User changed: Mark
 
 await isar.users.delete(5);
-// prints: User changed: null
+// Ausgabe: User changed: null
 ```
 
-As you can see in the example above, the object does not need to exist yet. The watcher will be notified when it is created.
+Wie du im eben gezeigten Beispiel sehen kannst, muss das Objekt noch nicht existieren. Der Watcher wird benachrichtigt, wenn es erzeugt wird.
 
-There is an additional parameter `fireImmediately`. If you set it to `true`, Isar will immediately add the object's current value to the stream.
+Es gibt den zusätzlichen Parameter `fireImmediately`. Wenn du ihn auf `true` gesetzt hast, wird Isar sofort die Werte des aktuellen Objekts in den Stream geben.
 
-### Lazy watching
+### Lazy Beobachten
 
-Maybe you don't need to receive the new value but only be notified about the change. That saves Isar from having to fetch the object:
+Vielleicht möchtest du gar nicht den neuen Wert erhalten, sondern nur über die Änderungen informiert werden. Das erspart es Isar die Objekte abrufen zu müssen:
 
 ```dart
 Stream<void> userChanged = isar.users.watchObjectLazy(5);
@@ -48,12 +48,12 @@ userChanged.listen(() {
 
 final user = User(id: 5)..name = 'David';
 await isar.users.put(user);
-// prints: User 5 changed
+// Ausgabe: User 5 changed
 ```
 
-## Watching Collections
+## Collections beobachten
 
-Instead of watching a single object, you can watch an entire collection and get notified when any object is added, updated, or deleted:
+Statt ein einzelnes Objekt zu beobachten kannst du auch eine ganze Collection beobachten und benachrichtigt werden, wenn irgendein Objekt hinzugefügt, geändert oder gelöscht wird:
 
 ```dart
 Stream<void> userChanged = isar.users.watchLazy();
@@ -63,12 +63,12 @@ userChanged.listen(() {
 
 final user = User()..name = 'David';
 await isar.users.put(user);
-// prints: A User changed
+// Ausgabe: A User changed
 ```
 
-## Watching Queries
+## Abfragen beobachten
 
-It is even possible to watch entire queries. Isar does its best to only notify you when the query results actually change. You will not be notified if links cause the query to change. Use a collection watcher if you need to be notified about link changes.
+Es ist sogar möglich ganze Abfragen zu beobachten. Isar versucht sein Bestes dich nur zu benachrichtigen, wenn das Abfrageergebnis sich wirklich ändert. Du wirst nicht informiert, wenn Links darin resultieren, dass deine Abfrageergebnisse sich ändern. Benutze einen Collection-Watcher, wenn du über Linkänderungen benachrichtigt werden willst.
 
 ```dart
 Query<User> usersWithA = isar.users.filter()
@@ -79,24 +79,24 @@ Stream<List<User>> queryChanged = usersWithA.watch(fireImmediately: true);
 queryChanged.listen((users) {
   print('Users with A are: $users');
 });
-// prints: Users with A are: []
+// Ausgabe: Users with A are: []
 
 await isar.users.put(User()..name = 'Albert');
-// prints: Users with A are: [User(name: Albert)]
+// Ausgabe: Users with A are: [User(name: Albert)]
 
 await isar.users.put(User()..name = 'Monika');
-// no print
+// keine Ausgabe
 
 awaited isar.users.put(User()..name = 'Antonia');
-// prints: Users with A are: [User(name: Albert), User(name: Antonia)]
+// Ausgabe: Users with A are: [User(name: Albert), User(name: Antonia)]
 ```
 
 :::warning
-If you use offset & limit or distinct queries, Isar will also notify you when objects match the filter but outside the query, results change.
+Wenn du einen Offset mit Limitierung oder Eindeutigkeitsabfragen benutzt, wird Isar dich auch informieren, wenn Ergebnisse innerhalb der Abfrage, aber außerhalb der Abfragegrenzen stattfinden.
 :::
 
-Just like `watchObject()`, you can use `watchLazy()` to get notified when the query results change but not fetch the results.
+Genau wie bei `watchObject()` kannst du `watchLazy()` verwenden, um über Änderungen in den Abfrageergebnissen benachrichtigt zu werden, ohne die Ergebnisse zu erhalten.
 
 :::danger
-Rerunning queries for every change is very inefficient. It would be best if you used a lazy collection watcher instead.
+Abfragen für jede Änderung erneut ablaufen zu lassen ist sehr ineffizient. Es wäre besser, wenn du stattdessen einen lazy Collection-Watcher verwenden würdest.
 :::
