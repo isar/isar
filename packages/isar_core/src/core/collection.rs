@@ -4,41 +4,26 @@ use serde_json::Value;
 use crate::core::error::Result;
 
 use super::object::IsarObject;
+use super::object_builder::IsarObjectBuilder;
 use super::property::IsarProperty;
-use super::txn::IsarTxn;
 
 pub trait IsarCollection {
-    type Txn<'txn>: IsarTxn<'txn>;
-    type Object<'txn>: IsarObject<'txn>;
+    type Txn;
+    type ObjectBuilder<'txn>: IsarObjectBuilder<'txn>;
 
     fn name(&self) -> &str;
 
     fn id(&self) -> u64;
 
-    fn properties(&self) -> &[IsarProperty];
-
-    fn embedded_properties(&self) -> &IntMap<Vec<IsarProperty>>;
-
     //fn new_query_builder(&self) -> QueryBuilder;
 
-    fn get<'txn>(
+    fn prepare_put<'txn>(
         &self,
-        txn: &'txn mut Self::Txn<'txn>,
-        id: i64,
-    ) -> Result<Option<Self::Object<'txn>>>;
+        txn: &'txn mut Self::Txn,
+        count: usize,
+    ) -> Result<Self::ObjectBuilder<'txn>>;
 
-    fn put<'a>(
-        &self,
-        txn: &mut Self::Txn<'_>,
-        id: Option<i64>,
-        object: &impl IsarObject<'a>,
-    ) -> Result<i64>;
-
-    fn put_all<'a>(
-        &self,
-        txn: &mut Self::Txn<'_>,
-        objects: &[(Option<i64>, &impl IsarObject<'a>)],
-    ) -> Result<Vec<i64>>;
+    fn put<'a>(&self, txn: &mut Self::Txn, builder: Self::ObjectBuilder<'_>) -> Result<()>;
 
     /*fn get_by_index<'txn>(
         &self,

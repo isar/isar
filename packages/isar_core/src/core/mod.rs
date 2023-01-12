@@ -3,7 +3,7 @@ pub mod data_type;
 pub mod error;
 pub mod instance;
 pub mod object;
+pub mod object_builder;
 pub mod property;
 pub mod query;
 pub mod schema;
-pub mod txn;

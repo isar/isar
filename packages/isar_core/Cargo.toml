@@ -18,8 +18,8 @@ byteorder = "1"
 paste = "1.0"
 intmap = "2.0.0"
 snafu = "0.7.0"
-rusqlite = "0.28.0"
-deadpool = { version = "0.9.0", features = ["unmanaged"] }
+thread_local = "1.1.4"
+libsqlite3-sys = { version="0.25.2", features=["bundled"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 widestring = "1.0"

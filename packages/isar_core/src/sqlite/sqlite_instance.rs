@@ -1,10 +1,10 @@
+use std::cell::RefCell;
 use std::path::PathBuf;
 use std::sync::{Arc, RwLock};
 
-use deadpool::unmanaged::Pool;
 use intmap::IntMap;
 use once_cell::sync::Lazy;
-use rusqlite::Connection;
+use thread_local::ThreadLocal;
 
 use crate::common::instance::{get_isar_path, get_or_open_instance};
 use crate::common::schema::hash_schema;
@@ -13,12 +13,16 @@ use crate::core::instance::{CompactCondition, IsarInstance};
 use crate::core::schema::IsarSchema;
 
 use super::sql::create_table::sql_create_table;
+use super::sqlite3::SQLite3;
+use super::sqlite_txn::SQLiteTxn;
 
 static INSTANCES: Lazy<RwLock<IntMap<Arc<SqliteInstance>>>> =
     Lazy::new(|| RwLock::new(IntMap::new()));
 
 pub struct SqliteInstance {
-    con_pool: Pool<Connection>,
+    path: String,
+    instance_id: u64,
+    sqlite: ThreadLocal<RefCell<Option<SQLite3>>>,
     schema_hash: u64,
 }
 
@@ -38,21 +42,20 @@ impl SqliteInstance {
             let mut path_buf = PathBuf::from(dir);
             path_buf.push(format!("{}.sqlite", name));
             let path = path_buf.as_path().to_str().unwrap().to_string();
-            let con = Connection::open(path).unwrap();
+            let sqlite = SQLite3::open(&path).unwrap();
 
             let col = schema.collections.first().unwrap();
             let create_sql = sql_create_table(col);
             println!("{}", create_sql);
-            let txn = con.unchecked_transaction().unwrap();
             {
-                let mut stmt = txn.prepare(&create_sql).unwrap();
-                stmt.raw_execute().unwrap();
+                let mut stmt = sqlite.prepare(&create_sql).unwrap();
+                stmt.step().unwrap();
             }
-            txn.commit().unwrap();
-            let pool = Pool::new(10);
             //pool.add(con);
             Ok(Self {
-                con_pool: pool,
+                path,
+                instance_id: 0,
+                sqlite: ThreadLocal::new(),
                 schema_hash,
             })
         } else {
@@ -64,6 +67,8 @@ impl SqliteInstance {
 }
 
 impl IsarInstance for SqliteInstance {
+    type Txn = SQLiteTxn;
+
     fn open(
         name: &str,
         dir: Option<&str>,
@@ -79,6 +84,32 @@ impl IsarInstance for SqliteInstance {
 
     fn schema_hash(&self) -> u64 {
         self.schema_hash
+    }
+
+    fn begin_txn(&self, write: bool) -> Result<Self::Txn> {
+        /*let con = self
+        .conn
+        .get_or_try(|| {
+            let con = Connection::open(&self.path)?;
+            Ok(RefCell::new(Some(con)))
+        })
+        .unwrap()
+        .take();*/
+        /*if let Some(con) = con {
+            Ok(SQLiteTxn::new(self.instance_id, write, con))
+        } else {*/
+        Err(IsarError::IllegalArg {
+            message: "Connection is already in use.".to_string(),
+        })
+        //}
+    }
+
+    fn commit_txn(&self, txn: Self::Txn) -> Result<()> {
+        todo!()
+    }
+
+    fn abort_txn(&self, txn: Self::Txn) {
+        todo!()
     }
 }
 

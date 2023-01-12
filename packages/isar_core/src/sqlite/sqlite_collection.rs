@@ -1,14 +1,11 @@
 use intmap::IntMap;
 
-use crate::core::collection::IsarCollection;
-use crate::core::error::{IsarError, Result};
-use crate::core::object::IsarObject;
-use crate::core::property::IsarProperty;
-use crate::core::txn::IsarTxn;
-use crate::sqlite::sqlite_object::SQLiteObject;
-use crate::sqlite::sqlite_txn::SQLiteTxn;
-
 use super::sql::insert::sql_insert_bulk;
+use super::sqlite_object_builder::SQLiteObjectBuilder;
+use crate::core::collection::IsarCollection;
+use crate::core::error::Result;
+use crate::core::property::IsarProperty;
+use crate::sqlite::sqlite_txn::SQLiteTxn;
 
 pub struct SQLiteCollection {
     instance_id: u64,
@@ -19,9 +16,9 @@ pub struct SQLiteCollection {
 }
 
 impl IsarCollection for SQLiteCollection {
-    type Txn<'txn> = SQLiteTxn<'txn>;
+    type Txn = SQLiteTxn;
 
-    type Object<'txn> = SQLiteObject<'txn>;
+    type ObjectBuilder<'txn> = SQLiteObjectBuilder<'txn>;
 
     fn name(&self) -> &str {
         &self.name
@@ -31,35 +28,53 @@ impl IsarCollection for SQLiteCollection {
         self.id
     }
 
-    fn properties(&self) -> &[IsarProperty] {
-        &self.properties
-    }
-
-    fn embedded_properties(&self) -> &IntMap<Vec<IsarProperty>> {
-        &self.embedded_properties
-    }
-
-    fn get<'txn>(
+    fn prepare_put<'txn>(
         &self,
-        txn: &'txn mut SQLiteTxn<'txn>,
-        id: i64,
-    ) -> Result<Option<SQLiteObject<'txn>>> {
-        todo!()
+        txn: &'txn mut Self::Txn,
+        count: usize,
+    ) -> Result<Self::ObjectBuilder<'txn>> {
+        let sqlite = txn.get_sqlite(self.instance_id, true)?;
+        let sql = sql_insert_bulk(&self.name, &self.properties, count);
+        let stmt = sqlite.prepare(&sql)?;
+        let builder = SQLiteObjectBuilder::new(stmt);
+        Ok(builder)
     }
 
-    fn put<'a>(
+    fn put(&self, txn: &mut Self::Txn, builder: Self::ObjectBuilder<'_>) -> Result<()> {
+        txn.guard(|| {
+            let mut stmt = builder.finalize();
+            stmt.step()?;
+            Ok(())
+        })
+    }
+
+    /*fn get<'txn>(&self, txn: &'txn mut SQLiteTxn<'txn>, id: i64) -> Result<Option<SQLiteObject>> {
+        txn.read(self.instance_id, |txn| {
+            let mut stmt =
+                txn.prepare_cached(&format!("SELECT * FROM {} WHERE _id = {}", self.name(), id))?;
+            let mut rows = stmt.raw_query();
+            if let Some(row) = rows.next()? {
+                let obj = SQLiteObject::from_row(row, stmt.column_count())?;
+                Ok(Some(obj))
+            } else {
+                Ok(None)
+            }
+        })
+    }*/
+
+    /*fn put(
         &self,
         txn: &mut SQLiteTxn<'_>,
         id: Option<i64>,
-        object: &impl IsarObject<'a>,
+        object: &Self::Object<'_>,
     ) -> Result<i64> {
         self.put_all(txn, &[(id, object)]).map(|ids| ids[0])
     }
 
-    fn put_all<'a>(
+    fn put_all(
         &self,
         txn: &mut SQLiteTxn<'_>,
-        objects: &[(Option<i64>, &impl IsarObject<'a>)],
+        objects: &[(Option<i64>, &Self::Object<'_>)],
     ) -> Result<Vec<i64>> {
         txn.write(self.instance_id, |txn, change_set| {
             let mut ids = Vec::with_capacity(objects.len());
@@ -79,5 +94,5 @@ impl IsarCollection for SQLiteCollection {
 
             Ok(ids)
         })
-    }
+    }*/
 }

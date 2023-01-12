@@ -1,22 +1,31 @@
+use enum_dispatch::enum_dispatch;
+
 use super::data_type::DataType;
 use std::cmp::Ordering;
 
+pub const NULL_BOOL: u8 = 0;
+pub const FALSE_BOOL: u8 = 1;
+pub const TRUE_BOOL: u8 = 2;
+const NULL_INT: i32 = i32::MIN;
+const NULL_LONG: i64 = i64::MIN;
+
+#[enum_dispatch]
 pub trait IsarObject<'a> {
-    fn is_null(&self, offset: usize, data_type: DataType) -> bool;
+    fn is_null(&self, col: usize, data_type: DataType) -> bool;
 
-    fn read_byte(&self, offset: usize) -> u8;
+    fn read_byte(&self, col: usize) -> u8;
 
-    fn read_bool(&self, offset: usize) -> Option<bool>;
+    fn read_bool(&self, col: usize) -> Option<bool>;
 
-    /*fn read_int(&self, offset: usize) -> i32;
+    fn read_int(&self, col: usize) -> i32;
 
-    fn read_float(&self, offset: usize) -> f32;
+    fn read_float(&self, col: usize) -> f32;
 
-    fn read_long(&self, offset: usize) -> i64;
+    fn read_long(&self, col: usize) -> i64;
 
-    fn read_double(&self, offset: usize) -> f64;
+    fn read_double(&self, col: usize) -> f64;
 
-    fn read_byte_list(&self, offset: usize) -> Option<&'a [u8]>;
+    /*fn read_byte_list(&self, offset: usize) -> Option<&'a [u8]>;
 
     fn read_string(&self, offset: usize) -> Option<&'a str>;
 

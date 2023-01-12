@@ -3,19 +3,14 @@ use serde_json::Value;
 
 pub trait IsarQuery {
     type Txn<'txn>;
-    type Object<'txn>;
     type Collection;
+    type Cursor<'txn>: IsarQueryCursor<'txn>;
 
-    fn find_while<'txn, F>(&self, txn: &'txn mut Self::Txn<'_>, callback: F) -> Result<()>
-    where
-        F: FnMut(i64, Self::Object<'txn>) -> bool;
-
-    fn find_all_vec<'txn>(
-        &self,
-        txn: &'txn mut Self::Txn<'_>,
-    ) -> Result<Vec<(i64, Self::Object<'txn>)>>;
+    fn cursor<'txn>(&self, txn: &'txn mut Self::Txn<'_>) -> Result<Self::Cursor<'txn>>;
 
     fn count(&self, txn: &mut Self::Txn<'_>) -> Result<u32>;
+
+    fn delete(&self, txn: &mut Self::Txn<'_>) -> Result<u32>;
 
     fn export_json(
         &self,
@@ -24,6 +19,10 @@ pub trait IsarQuery {
         id_name: Option<&str>,
         primitive_null: bool,
     ) -> Result<Value>;
+}
 
-    fn maybe_matches(&self, id: i64, object: &Self::Object<'_>) -> bool;
+pub trait IsarQueryCursor<'txn> {
+    type Object;
+
+    fn next(&mut self) -> Result<Option<Self::Object>>;
 }

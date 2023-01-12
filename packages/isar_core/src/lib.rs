@@ -20,4 +20,3 @@ pub mod watch;*/
 pub mod common;
 pub mod core;
 pub mod sqlite;
-pub mod watch;

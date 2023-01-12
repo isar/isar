@@ -1,10 +1,8 @@
 use std::sync::atomic::AtomicU64;
 use std::sync::Arc;
 
-use super::collection::IsarCollection;
 use super::error::Result;
 use super::schema::IsarSchema;
-use super::txn::IsarTxn;
 
 //static INSTANCES: Lazy<RwLock<IntMap<Arc<IsarInstance>>>> = Lazy::new(|| RwLock::new(IntMap::new()));
 
@@ -17,6 +15,8 @@ pub struct CompactCondition {
 }
 
 pub trait IsarInstance {
+    type Txn;
+
     fn open(
         name: &str,
         dir: Option<&str>,
@@ -27,6 +27,12 @@ pub trait IsarInstance {
     ) -> Result<Arc<Self>>;
 
     fn schema_hash(&self) -> u64;
+
+    fn begin_txn(&self, write: bool) -> Result<Self::Txn>;
+
+    fn commit_txn(&self, txn: Self::Txn) -> Result<()>;
+
+    fn abort_txn(&self, txn: Self::Txn);
 
     /*fn name(&self) -> &str;
 
