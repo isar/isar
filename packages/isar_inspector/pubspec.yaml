@@ -17,7 +17,7 @@ dependencies:
   google_fonts: ^3.0.1
   isar:
     path: ../isar
-  vm_service: ^9.0.0
+  vm_service: ^10.0.0
   web_socket_channel: ^2.2.0
 
 dev_dependencies:
