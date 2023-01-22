@@ -1,9 +1,10 @@
-pub mod collection;
 pub mod data_type;
 pub mod error;
+pub mod filter;
+pub mod insert;
 pub mod instance;
-pub mod property;
 pub mod query;
+pub mod query_builder;
 pub mod reader;
 pub mod schema;
 pub mod writer;

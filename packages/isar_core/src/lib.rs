@@ -19,4 +19,5 @@ pub mod watch;*/
 
 pub mod common;
 pub mod core;
+pub mod native;
 pub mod sqlite;

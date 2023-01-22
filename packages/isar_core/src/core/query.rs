@@ -1,28 +1,32 @@
 use super::error::Result;
-use serde_json::Value;
+use super::reader::IsarReader;
 
 pub trait IsarQuery {
-    type Txn<'txn>;
-    type Collection;
-    type Cursor<'txn>: IsarQueryCursor<'txn>;
+    type Txn;
 
-    fn cursor<'txn>(&self, txn: &'txn mut Self::Txn<'_>) -> Result<Self::Cursor<'txn>>;
+    type Cursor<'b>: IsarCursor
+    where
+        Self: 'b;
 
-    fn count(&self, txn: &mut Self::Txn<'_>) -> Result<u32>;
+    fn cursor<'c>(&'c self, txn: &'c mut Self::Txn) -> Result<Self::Cursor<'c>>;
 
-    fn delete(&self, txn: &mut Self::Txn<'_>) -> Result<u32>;
+    fn count(&self, txn: &mut Self::Txn) -> Result<u32>;
 
-    fn export_json(
+    fn delete(&self, txn: &mut Self::Txn) -> Result<u32>;
+
+    /*fn export_json(
         &self,
         txn: &mut Self::Txn<'_>,
         collection: &Self::Collection,
         id_name: Option<&str>,
         primitive_null: bool,
-    ) -> Result<Value>;
+    ) -> Result<Value>;*/
 }
 
-pub trait IsarQueryCursor<'txn> {
-    type Object;
+pub trait IsarCursor {
+    type Reader<'b>: IsarReader
+    where
+        Self: 'b;
 
-    fn next(&mut self) -> Result<Option<Self::Object>>;
+    fn next(&mut self) -> Result<Option<Self::Reader<'_>>>;
 }

@@ -1,12 +1,8 @@
-use std::sync::atomic::AtomicU64;
-use std::sync::Arc;
-
 use super::error::Result;
+use super::insert::IsarInsert;
+use super::query_builder::IsarQueryBuilder;
 use super::schema::IsarSchema;
-
-//static INSTANCES: Lazy<RwLock<IntMap<Arc<IsarInstance>>>> = Lazy::new(|| RwLock::new(IntMap::new()));
-
-static WATCHER_ID: AtomicU64 = AtomicU64::new(0);
+use std::sync::Arc;
 
 pub struct CompactCondition {
     pub min_file_size: u64,
@@ -16,6 +12,14 @@ pub struct CompactCondition {
 
 pub trait IsarInstance {
     type Txn;
+
+    type Insert<'a>: IsarInsert<'a>
+    where
+        Self: 'a;
+
+    type QueryBuilder<'a>: IsarQueryBuilder
+    where
+        Self: 'a;
 
     fn open(
         name: &str,
@@ -28,11 +32,22 @@ pub trait IsarInstance {
 
     fn schema_hash(&self) -> u64;
 
+    fn collection_id(&self, index: usize) -> Option<u64>;
+
     fn begin_txn(&self, write: bool) -> Result<Self::Txn>;
 
     fn commit_txn(&self, txn: Self::Txn) -> Result<()>;
 
     fn abort_txn(&self, txn: Self::Txn);
+
+    fn query(&self, collection_id: u64) -> Result<Self::QueryBuilder<'_>>;
+
+    fn insert<'a>(
+        &'a self,
+        txn: &'a mut Self::Txn,
+        collection_id: u64,
+        count: usize,
+    ) -> Result<Self::Insert<'a>>;
 
     /*fn name(&self) -> &str;
 

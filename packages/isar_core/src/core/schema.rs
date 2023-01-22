@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use xxhash_rust::xxh3::xxh3_64;
 
 use super::data_type::DataType;
 
@@ -40,6 +41,10 @@ impl CollectionSchema {
             version: 0,
         }
     }
+
+    pub fn get_id(&self) -> u64 {
+        xxh3_64(self.name.as_bytes())
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Eq, PartialEq, Hash)]
@@ -59,6 +64,10 @@ impl PropertySchema {
             data_type,
             target_col: target_col.map(|col| col.to_string()),
         }
+    }
+
+    pub fn get_target_id(&self) -> Option<u64> {
+        self.target_col.as_ref().map(|col| xxh3_64(col.as_bytes()))
     }
 }
 

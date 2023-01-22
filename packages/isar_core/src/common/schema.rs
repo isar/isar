@@ -20,8 +20,6 @@ fn verify_name(name: &str) -> Result<()> {
         schema_error("Names must not begin with an underscore.")
     } else if name.starts_with("sqlite_") {
         schema_error("Names must not begin with 'sqlite_'.")
-    } else if name == "rowid" {
-        schema_error("Names must not be 'rowid'.")
     } else {
         Ok(())
     }

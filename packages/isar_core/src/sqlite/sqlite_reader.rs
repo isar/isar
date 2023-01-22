@@ -1,5 +1,5 @@
 use super::sqlite3::SQLiteStatement;
-use crate::core::property::IsarProperty;
+use super::sqlite_collection::SQLiteCollection;
 use crate::core::reader::IsarReader;
 use intmap::IntMap;
 use serde_json::{Map, Value};
@@ -7,31 +7,35 @@ use std::borrow::Cow;
 
 pub struct SQLiteReader<'a> {
     stmt: &'a SQLiteStatement<'a>,
-    properties: &'a [IsarProperty],
-    all_properties: &'a IntMap<Vec<IsarProperty>>,
+    collection: &'a SQLiteCollection,
+    all_collections: &'a IntMap<SQLiteCollection>,
 }
 
 impl<'a> SQLiteReader<'a> {
     pub fn new(
         stmt: &'a SQLiteStatement<'a>,
-        properties: &'a [IsarProperty],
-        all_properties: &'a IntMap<Vec<IsarProperty>>,
+        collection: &'a SQLiteCollection,
+        all_collections: &'a IntMap<SQLiteCollection>,
     ) -> Self {
         Self {
             stmt,
-            properties,
-            all_properties,
+            collection,
+            all_collections,
         }
     }
 }
 
-impl<'a> IsarReader<'a> for SQLiteReader<'a> {
+impl<'a> IsarReader for SQLiteReader<'a> {
     type ObjectReader<'b> = SQLiteObjectReader<'b> where 'a: 'b;
 
     type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
 
     fn is_null(&self, index: usize) -> bool {
         self.stmt.is_null(index)
+    }
+
+    fn read_id(&self) -> i64 {
+        self.stmt.get_long(0)
     }
 
     fn read_byte(&self, index: usize) -> u8 {
@@ -88,12 +92,12 @@ impl<'a> IsarReader<'a> for SQLiteReader<'a> {
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'a>> {
         let text = self.stmt.get_text(index);
         if let Ok(Value::Object(object)) = serde_json::from_str(text) {
-            let target_id = self.properties[index].target_id.unwrap();
-            let properties = self.all_properties.get(target_id).unwrap();
+            let target_id = self.collection.properties[index].target_id.unwrap();
+            let collection = self.all_collections.get(target_id).unwrap();
             return Some(SQLiteObjectReader {
                 object: Cow::Owned(object),
-                properties: properties,
-                all_properties: self.all_properties,
+                collection,
+                all_collections: self.all_collections,
             });
         }
         None
@@ -102,11 +106,11 @@ impl<'a> IsarReader<'a> for SQLiteReader<'a> {
     fn read_list(&self, index: usize) -> Option<Self::ListReader<'a>> {
         let text = self.stmt.get_text(index);
         if let Ok(Value::Array(list)) = serde_json::from_str(text) {
-            let target_id = self.properties[index].target_id;
+            let target_id = self.collection.properties[index].target_id;
             return Some(SQLiteListReader {
                 list: Cow::Owned(list),
                 target_id: target_id,
-                all_properties: self.all_properties,
+                all_collections: self.all_collections,
             });
         }
         None
@@ -115,17 +119,17 @@ impl<'a> IsarReader<'a> for SQLiteReader<'a> {
 
 pub struct SQLiteObjectReader<'a> {
     object: Cow<'a, Map<String, Value>>,
-    properties: &'a [IsarProperty],
-    all_properties: &'a IntMap<Vec<IsarProperty>>,
+    collection: &'a SQLiteCollection,
+    all_collections: &'a IntMap<SQLiteCollection>,
 }
 
-impl<'a> IsarReader<'a> for SQLiteObjectReader<'a> {
+impl<'a> IsarReader for SQLiteObjectReader<'a> {
     type ObjectReader<'b> = SQLiteObjectReader<'b> where 'a: 'b;
 
     type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
 
     fn is_null(&self, index: usize) -> bool {
-        let property = &self.properties[index];
+        let property = &self.collection.properties[index];
         let value = self.object.get(&property.name);
         if let Some(Value::Null) = value {
             true
@@ -134,8 +138,12 @@ impl<'a> IsarReader<'a> for SQLiteObjectReader<'a> {
         }
     }
 
+    fn read_id(&self) -> i64 {
+        panic!("Embedded objects don't have an id");
+    }
+
     fn read_byte(&self, index: usize) -> u8 {
-        let property = &self.properties[index];
+        let property = &self.collection.properties[index];
         let value = self.object.get(&property.name);
         if let Some(Value::Number(num)) = value {
             if let Some(val) = num.as_u64() {
@@ -146,7 +154,7 @@ impl<'a> IsarReader<'a> for SQLiteObjectReader<'a> {
     }
 
     fn read_bool(&self, index: usize) -> Option<bool> {
-        let property = &self.properties[index];
+        let property = &self.collection.properties[index];
         let value = self.object.get(&property.name);
         match value {
             Some(Value::Bool(val)) => Some(*val),
@@ -170,7 +178,7 @@ impl<'a> IsarReader<'a> for SQLiteObjectReader<'a> {
     }
 
     fn read_long(&self, index: usize) -> i64 {
-        let property = &self.properties[index];
+        let property = &self.collection.properties[index];
         let value = self.object.get(&property.name);
         if let Some(Value::Number(num)) = value {
             if let Some(val) = num.as_i64() {
@@ -181,7 +189,7 @@ impl<'a> IsarReader<'a> for SQLiteObjectReader<'a> {
     }
 
     fn read_double(&self, index: usize) -> f64 {
-        let property = &self.properties[index];
+        let property = &self.collection.properties[index];
         let value = self.object.get(&property.name);
         if let Some(Value::Number(num)) = value {
             if let Some(val) = num.as_f64() {
@@ -192,7 +200,7 @@ impl<'a> IsarReader<'a> for SQLiteObjectReader<'a> {
     }
 
     fn read_string(&self, index: usize) -> Option<&str> {
-        let property = &self.properties[index];
+        let property = &self.collection.properties[index];
         let value = self.object.get(&property.name);
         if let Some(Value::String(val)) = value {
             Some(val)
@@ -202,15 +210,15 @@ impl<'a> IsarReader<'a> for SQLiteObjectReader<'a> {
     }
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>> {
-        let property = &self.properties[index];
+        let property = &self.collection.properties[index];
         let value = self.object.get(&property.name);
         if let Some(Value::Object(object)) = value {
             let target_id = property.target_id.unwrap();
-            let properties = self.all_properties.get(target_id).unwrap();
+            let collection = self.all_collections.get(target_id).unwrap();
             Some(SQLiteObjectReader {
                 object: Cow::Borrowed(object),
-                properties: properties,
-                all_properties: self.all_properties,
+                collection,
+                all_collections: self.all_collections,
             })
         } else {
             None
@@ -218,13 +226,13 @@ impl<'a> IsarReader<'a> for SQLiteObjectReader<'a> {
     }
 
     fn read_list(&self, index: usize) -> Option<Self::ListReader<'_>> {
-        let property = &self.properties[index];
+        let property = &self.collection.properties[index];
         let value = self.object.get(&property.name);
         if let Some(Value::Array(list)) = value {
             Some(SQLiteListReader {
                 list: Cow::Borrowed(list),
                 target_id: property.target_id,
-                all_properties: self.all_properties,
+                all_collections: self.all_collections,
             })
         } else {
             None
@@ -235,10 +243,10 @@ impl<'a> IsarReader<'a> for SQLiteObjectReader<'a> {
 pub struct SQLiteListReader<'a> {
     list: Cow<'a, Vec<Value>>,
     target_id: Option<u64>,
-    all_properties: &'a IntMap<Vec<IsarProperty>>,
+    all_collections: &'a IntMap<SQLiteCollection>,
 }
 
-impl<'a> IsarReader<'a> for SQLiteListReader<'a> {
+impl<'a> IsarReader for SQLiteListReader<'a> {
     type ObjectReader<'b> = SQLiteObjectReader<'b> where 'a: 'b;
 
     type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
@@ -249,6 +257,10 @@ impl<'a> IsarReader<'a> for SQLiteListReader<'a> {
         } else {
             false
         }
+    }
+
+    fn read_id(&self) -> i64 {
+        panic!("Lists don't have an id");
     }
 
     fn read_byte(&self, index: usize) -> u8 {
@@ -310,11 +322,12 @@ impl<'a> IsarReader<'a> for SQLiteListReader<'a> {
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>> {
         if let Some(Value::Object(object)) = self.list.get(index) {
-            let properties = self.all_properties.get(self.target_id.unwrap()).unwrap();
+            let target_id = self.target_id.unwrap();
+            let collection = self.all_collections.get(target_id).unwrap();
             Some(SQLiteObjectReader {
                 object: Cow::Borrowed(object),
-                properties: properties,
-                all_properties: self.all_properties,
+                collection,
+                all_collections: self.all_collections,
             })
         } else {
             None

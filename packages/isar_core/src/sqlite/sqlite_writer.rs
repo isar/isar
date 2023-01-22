@@ -9,7 +9,6 @@ pub struct SQLiteWriter<'a> {
     collection: &'a SQLiteCollection,
     all_collections: &'a IntMap<SQLiteCollection>,
     property: usize,
-    offset: usize,
     count: usize,
     buffer: Option<Vec<u8>>,
 }
@@ -27,15 +26,15 @@ impl<'a> SQLiteWriter<'a> {
             collection,
             all_collections,
             property: 0,
-            offset: 0,
             count,
             buffer: Some(buffer.unwrap_or(Vec::new())),
         }
     }
 
-    pub fn next(&mut self) -> bool {
-        if self.offset / self.collection.properties.len() < self.count {
-            self.property = 0;
+    pub fn next(&self) -> bool {
+        let properties_and_id = self.collection.properties.len() + 1;
+        assert!(self.property % properties_and_id == 0);
+        if self.property < self.count * properties_and_id {
             true
         } else {
             false
@@ -52,6 +51,11 @@ impl<'a> IsarWriter<'a> for SQLiteWriter<'a> {
     type ObjectWriter = SQLiteObjectWriter<'a>;
 
     type ListWriter = SQLiteListWriter<'a>;
+
+    fn write_id(&mut self, id: i64) {
+        let _ = self.stmt.bind_long(self.property, id);
+        self.property += 1;
+    }
 
     fn write_null(&mut self) {
         let _ = self.stmt.bind_null(self.property);
@@ -116,7 +120,8 @@ impl<'a> IsarWriter<'a> for SQLiteWriter<'a> {
     }
 
     fn begin_object<'b>(&mut self) -> Self::ObjectWriter {
-        let property = &self.collection.properties[self.property];
+        let property_index = self.property % (self.collection.properties.len() + 1);
+        let property = &self.collection.properties[property_index - 1];
         let target_id = property.target_id.unwrap();
         let target_collection = self.all_collections.get(target_id).unwrap();
 
@@ -136,7 +141,8 @@ impl<'a> IsarWriter<'a> for SQLiteWriter<'a> {
     }
 
     fn begin_list(&mut self) -> Self::ListWriter {
-        let property = &self.collection.properties[self.property];
+        let property_index = self.property % (self.collection.properties.len() + 1);
+        let property = &self.collection.properties[property_index - 1];
 
         if let Some(mut buffer) = self.buffer.take() {
             buffer.clear();
@@ -189,6 +195,7 @@ impl<'a> SQLiteObjectWriter<'a> {
                 .unwrap();
             CompactFormatter.end_string(buffer).unwrap();
             CompactFormatter.end_object_key(buffer).unwrap();
+            CompactFormatter.begin_object_value(buffer).unwrap();
             self.first = false;
             buffer
         } else {
@@ -211,6 +218,10 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
     type ObjectWriter = SQLiteObjectWriter<'a>;
 
     type ListWriter = SQLiteListWriter<'a>;
+
+    fn write_id(&mut self, _: i64) {
+        panic!("Embedded objects cannot have an id")
+    }
 
     fn write_null(&mut self) {
         self.property += 1;
@@ -368,6 +379,10 @@ impl<'a> IsarWriter<'a> for SQLiteListWriter<'a> {
     type ObjectWriter = SQLiteObjectWriter<'a>;
 
     type ListWriter = SQLiteListWriter<'a>;
+
+    fn write_id(&mut self, _: i64) {
+        panic!("Id cannot be written to a list");
+    }
 
     fn write_null(&mut self) {
         let buffer = self.write_value();

@@ -69,7 +69,10 @@ impl<'a> SQLiteSchemaManager<'a> {
         for prop in &collection.properties {
             if let Some(prop_name) = &prop.name {
                 if !col_names.contains(prop_name) {
-                    let sql = format!("ALTER TABLE {} ADD COLUMN {}", collection.name, prop_name);
+                    let sql = format!(
+                        "ALTER TABLE {} ADD COLUMN {} ANY",
+                        collection.name, prop_name
+                    );
                     self.sqlite.execute(&sql)?;
                 }
             }

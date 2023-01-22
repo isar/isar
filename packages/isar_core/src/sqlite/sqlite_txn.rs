@@ -4,17 +4,15 @@ use super::sqlite3::SQLite3;
 use crate::core::error::{IsarError, Result};
 
 pub struct SQLiteTxn {
-    instance_id: u64,
     write: bool,
     active: RefCell<bool>,
     sqlite: SQLite3,
 }
 
 impl SQLiteTxn {
-    pub(crate) fn new(instance_id: u64, write: bool, sqlite: SQLite3) -> Result<SQLiteTxn> {
+    pub(crate) fn new(sqlite: SQLite3, write: bool) -> Result<SQLiteTxn> {
         sqlite.prepare("BEGIN")?.step()?;
         let txn = SQLiteTxn {
-            instance_id,
             write,
             active: RefCell::new(true),
             sqlite,
@@ -24,14 +22,6 @@ impl SQLiteTxn {
 }
 
 impl SQLiteTxn {
-    fn verify_instance_id(&self, instance_id: u64) -> Result<()> {
-        if self.instance_id != instance_id {
-            Err(IsarError::InstanceMismatch {})
-        } else {
-            Ok(())
-        }
-    }
-
     pub(crate) fn get_sqlite(&self, write: bool) -> Result<&SQLite3> {
         if write && !self.write {
             return Err(IsarError::WriteTxnRequired {});

@@ -1,20 +1,16 @@
-use std::path::PathBuf;
-use std::sync::{Arc, RwLock};
-
-use intmap::IntMap;
-use once_cell::sync::Lazy;
-use xxhash_rust::xxh3::xxh3_64;
-
+use super::schema::hash_schema;
 use crate::core::error::{IsarError, Result};
 use crate::core::instance::IsarInstance;
 use crate::core::schema::IsarSchema;
-
-use super::schema::hash_schema;
+use intmap::IntMap;
+use once_cell::sync::Lazy;
+use std::sync::{Arc, RwLock};
+use xxhash_rust::xxh3::xxh3_64;
 
 pub(crate) fn get_or_open_instance<T: IsarInstance>(
     instances: &Lazy<RwLock<IntMap<Arc<T>>>>,
     name: &str,
-    mut schema: IsarSchema,
+    schema: IsarSchema,
     open_instance: impl FnOnce(IsarSchema) -> Result<T>,
 ) -> Result<Arc<T>> {
     let mut lock = instances.write().unwrap();
@@ -31,13 +27,4 @@ pub(crate) fn get_or_open_instance<T: IsarInstance>(
         lock.insert(instance_id, new_instance.clone());
         Ok(new_instance)
     }
-}
-
-pub(crate) fn get_isar_path(name: &str, dir: &str) -> String {
-    let mut file_name = name.to_string();
-    file_name.push_str(".isar");
-
-    let mut path_buf = PathBuf::from(dir);
-    path_buf.push(file_name);
-    path_buf.as_path().to_str().unwrap().to_string()
 }

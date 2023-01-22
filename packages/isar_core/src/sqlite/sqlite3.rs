@@ -1,4 +1,5 @@
 use crate::core::error::{IsarError, Result};
+use libc::c_void;
 use libsqlite3_sys as ffi;
 use std::{
     ffi::{c_char, c_int, CStr, CString},
@@ -206,11 +207,24 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
     }
 
     pub fn bind_text(&mut self, col: usize, value: &str) -> Result<()> {
-        self.bind_blob(col, value.as_bytes())
+        unsafe {
+            let r = ffi::sqlite3_bind_text(
+                self.stmt,
+                col as i32 + 1,
+                value.as_ptr() as *const c_char,
+                value.len() as i32,
+                None,
+            );
+            if r == ffi::SQLITE_OK {
+                Ok(())
+            } else {
+                Err(sqlite_err(self.sqlite.db, r))
+            }
+        }
     }
 
     pub fn bind_blob(&mut self, col: usize, value: &[u8]) -> Result<()> {
-        /*unsafe {
+        unsafe {
             let r = ffi::sqlite3_bind_blob(
                 self.stmt,
                 col as i32 + 1,
@@ -223,8 +237,11 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
             } else {
                 Err(sqlite_err(self.sqlite.db, r))
             }
-        }*/
-        Ok(())
+        }
+    }
+
+    pub fn count_changes(&self) -> i32 {
+        unsafe { ffi::sqlite3_changes(self.sqlite.db) }
     }
 }
 

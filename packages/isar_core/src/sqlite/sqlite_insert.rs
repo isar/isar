@@ -1,17 +1,16 @@
 use super::sqlite_collection::SQLiteCollection;
 use super::sqlite_txn::SQLiteTxn;
 use super::sqlite_writer::SQLiteWriter;
-use crate::core::collection::BulkInsert;
 use crate::core::error::{IsarError, Result};
+use crate::core::insert::IsarInsert;
 use intmap::IntMap;
 
-struct SQLiteInsert<'a> {
+pub struct SQLiteInsert<'a> {
     txn: &'a SQLiteTxn,
     collection: &'a SQLiteCollection,
     all_collections: &'a IntMap<SQLiteCollection>,
     inserted_count: usize,
     count: usize,
-    replace: bool,
 }
 
 impl<'a> SQLiteInsert<'a> {
@@ -20,7 +19,6 @@ impl<'a> SQLiteInsert<'a> {
         collection: &'a SQLiteCollection,
         all_collections: &'a IntMap<SQLiteCollection>,
         count: usize,
-        replace: bool,
     ) -> Self {
         Self {
             txn,
@@ -28,7 +26,6 @@ impl<'a> SQLiteInsert<'a> {
             all_collections,
             inserted_count: 0,
             count: count,
-            replace,
         }
     }
 
@@ -40,17 +37,13 @@ impl<'a> SQLiteInsert<'a> {
         }
 
         let mut sql = String::new();
-        sql.push_str("INSERT INTO ");
-        if self.replace {
-            sql.push_str("OR REPLACE ");
-        }
+        sql.push_str("INSERT OR REPLACE INTO ");
         sql.push_str(&self.collection.name);
-        sql.push_str(" (");
-        sql.push_str("_id");
+        sql.push_str(" (_rowid_");
 
         for property in &self.collection.properties {
-            sql.push_str(", c");
-            sql.push_str(&property.offset.to_string());
+            sql.push_str(", ");
+            sql.push_str(&property.name);
         }
 
         sql.push_str(") VALUES ");
@@ -81,14 +74,14 @@ impl<'a> SQLiteInsert<'a> {
     }
 }
 
-impl<'a> BulkInsert<'a> for SQLiteInsert<'a> {
+impl<'a> IsarInsert<'a> for SQLiteInsert<'a> {
     type Writer = SQLiteWriter<'a>;
 
     fn get_writer(&self) -> Result<Self::Writer> {
         self.get_writer_with_buffer(None)
     }
 
-    fn insert(&mut self, mut writer: Self::Writer) -> Result<Option<Self::Writer>> {
+    fn insert(&mut self, writer: Self::Writer) -> Result<Option<Self::Writer>> {
         if writer.next() {
             Ok(Some(writer))
         } else {
@@ -97,7 +90,7 @@ impl<'a> BulkInsert<'a> for SQLiteInsert<'a> {
                 stmt.step()?;
                 Ok(())
             })?;
-            self.count += count;
+            self.inserted_count += count;
 
             if self.inserted_count < self.count {
                 let new_writer = self.get_writer_with_buffer(Some(buffer))?;
