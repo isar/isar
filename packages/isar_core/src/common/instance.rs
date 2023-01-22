@@ -20,7 +20,7 @@ pub(crate) fn get_or_open_instance<T: IsarInstance>(
     let mut lock = instances.write().unwrap();
     let instance_id = xxh3_64(name.as_bytes());
     if let Some(instance) = lock.get(instance_id) {
-        if instance.schema_hash() == hash_schema(&mut schema) {
+        if instance.schema_hash() == hash_schema(schema.clone()) {
             Ok(instance.clone())
         } else {
             Err(IsarError::SchemaMismatch {})

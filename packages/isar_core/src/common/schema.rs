@@ -1,7 +1,7 @@
 use crate::core::data_type::DataType;
 use crate::core::error::schema_error;
 use crate::core::error::Result;
-use crate::core::schema::{CollectionSchema, IndexType, IsarSchema};
+use crate::core::schema::{CollectionSchema, IsarSchema};
 use itertools::Itertools;
 use std::hash::{Hash, Hasher};
 use xxhash_rust::xxh3::Xxh3;
@@ -18,6 +18,10 @@ fn verify_name(name: &str) -> Result<()> {
         schema_error("Empty names are not allowed.")
     } else if name.starts_with('_') {
         schema_error("Names must not begin with an underscore.")
+    } else if name.starts_with("sqlite_") {
+        schema_error("Names must not begin with 'sqlite_'.")
+    } else if name == "rowid" {
+        schema_error("Names must not be 'rowid'.")
     } else {
         Ok(())
     }
@@ -26,8 +30,8 @@ fn verify_name(name: &str) -> Result<()> {
 fn verify_collection(col: &CollectionSchema, collections: &[CollectionSchema]) -> Result<()> {
     verify_name(&col.name)?;
 
-    if col.embedded && (!col.links.is_empty() || !col.indexes.is_empty()) {
-        schema_error("Embedded objects must not have Links or Indexes.")?;
+    if col.embedded && !col.indexes.is_empty() {
+        schema_error("Embedded objects must not have indexes.")?;
     }
 
     let verify_target_col_exists = |col: &str, embedded: bool| -> Result<()> {
@@ -58,11 +62,6 @@ fn verify_collection(col: &CollectionSchema, collections: &[CollectionSchema]) -
         }
     }
 
-    for link in &col.links {
-        verify_name(&link.name)?;
-        verify_target_col_exists(&link.target_col, false)?;
-    }
-
     let property_names = col
         .properties
         .iter()
@@ -76,11 +75,6 @@ fn verify_collection(col: &CollectionSchema, collections: &[CollectionSchema]) -
         schema_error("Duplicate index name")?;
     }
 
-    let link_names = col.links.iter().unique_by(|l| l.name.as_str());
-    if link_names.count() != col.links.len() {
-        schema_error("Duplicate link name")?;
-    }
-
     for index in &col.indexes {
         if index.properties.is_empty() {
             schema_error("At least one property needs to be added to a valid index")?;
@@ -88,15 +82,11 @@ fn verify_collection(col: &CollectionSchema, collections: &[CollectionSchema]) -
             schema_error("No more than three properties may be used as a composite index")?;
         }
 
-        if !index.unique && index.replace {
-            schema_error("Only unique indexes can replace")?;
-        }
-
         for (i, index_property) in index.properties.iter().enumerate() {
             let property = col
                 .properties
                 .iter()
-                .find(|p| p.name.as_ref() == Some(&index_property.name));
+                .find(|p| p.name.as_ref() == Some(&index_property));
             if property.is_none() {
                 schema_error("IsarIndex property does not exist")?;
             }
@@ -112,42 +102,15 @@ fn verify_collection(col: &CollectionSchema, collections: &[CollectionSchema]) -
                 || property.data_type == DataType::FloatList
                 || property.data_type == DataType::DoubleList
             {
-                if index_property.index_type == IndexType::Hash {
-                    schema_error("Float values cannot be hashed.")?;
-                } else if i != index.properties.len() - 1 {
+                if i != index.properties.len() - 1 {
                     schema_error("Float indexes must only be at the end of a composite index.")?;
                 }
             }
 
             if property.data_type.get_element_type().is_some() {
-                if index.properties.len() > 1 && index_property.index_type != IndexType::Hash {
+                if index.properties.len() > 1 {
                     schema_error("Composite list indexes are not supported.")?;
                 }
-            } else if property.data_type == DataType::String
-                && i != index.properties.len() - 1
-                && index_property.index_type != IndexType::Hash
-            {
-                schema_error(
-                    "Non-hashed string indexes must only be at the end of a composite index.",
-                )?;
-            }
-
-            if property.data_type != DataType::String
-                && property.data_type.get_element_type().is_none()
-                && index_property.index_type == IndexType::Hash
-            {
-                schema_error("Only string and list indexes may be hashed")?;
-            }
-            if property.data_type != DataType::StringList
-                && index_property.index_type == IndexType::HashElements
-            {
-                schema_error("Only string list indexes may be use hash elements")?;
-            }
-            if property.data_type != DataType::String
-                && property.data_type != DataType::StringList
-                && index_property.case_sensitive
-            {
-                schema_error("Only String and StringList indexes may be case sensitive.")?;
             }
         }
     }
@@ -155,11 +118,10 @@ fn verify_collection(col: &CollectionSchema, collections: &[CollectionSchema]) -
     Ok(())
 }
 
-pub fn hash_schema(schema: &mut IsarSchema) -> u64 {
+pub fn hash_schema(mut schema: IsarSchema) -> u64 {
     for col in &mut schema.collections {
         col.properties.sort_by(|a, b| a.name.cmp(&b.name));
         col.indexes.sort_by(|a, b| a.name.cmp(&b.name));
-        col.links.sort_by(|a, b| a.name.cmp(&b.name));
     }
     schema.collections.sort_by(|a, b| a.name.cmp(&b.name));
     let mut hasher = Xxh3::new();

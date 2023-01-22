@@ -1,12 +1,19 @@
 use crate::core::collection::IsarCollection;
 use crate::core::property::IsarProperty;
-use crate::sqlite::sqlite_collection::SQLiteCollection;
 
 const MAX_SQLITE_VARIABLES: usize = 999;
 
-pub fn sql_insert_bulk(collection: &str, properties: &[IsarProperty], count: usize) -> String {
+pub fn sql_insert_bulk(
+    collection: &str,
+    properties: &[IsarProperty],
+    count: usize,
+    replace: bool,
+) -> String {
     let mut sql = String::new();
     sql.push_str("INSERT INTO ");
+    if replace {
+        sql.push_str("OR REPLACE ");
+    }
     sql.push_str(collection);
     sql.push_str(" (");
     sql.push_str("_id");

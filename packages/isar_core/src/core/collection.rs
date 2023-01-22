@@ -3,17 +3,22 @@ use serde_json::Value;
 
 use crate::core::error::Result;
 
-use super::object::IsarObject;
-use super::object_builder::IsarObjectBuilder;
 use super::property::IsarProperty;
+use super::writer::IsarWriter;
+
+pub trait BulkInsert<'txn> {
+    type Writer: IsarWriter<'txn>;
+
+    fn get_writer(&self) -> Result<Self::Writer>;
+
+    fn insert(&mut self, writer: Self::Writer) -> Result<Option<Self::Writer>>;
+}
 
 pub trait IsarCollection {
     type Txn;
-    type ObjectBuilder<'txn>: IsarObjectBuilder<'txn>;
+    type Writer<'txn>: IsarWriter<'txn>;
 
     fn name(&self) -> &str;
-
-    fn id(&self) -> u64;
 
     //fn new_query_builder(&self) -> QueryBuilder;
 
@@ -21,9 +26,10 @@ pub trait IsarCollection {
         &self,
         txn: &'txn mut Self::Txn,
         count: usize,
-    ) -> Result<Self::ObjectBuilder<'txn>>;
+        replace: bool,
+    ) -> Result<Self::Writer<'txn>>;
 
-    fn put<'a>(&self, txn: &mut Self::Txn, builder: Self::ObjectBuilder<'_>) -> Result<()>;
+    fn put<'a>(&self, txn: &mut Self::Txn, builder: Self::Writer<'_>) -> Result<()>;
 
     /*fn get_by_index<'txn>(
         &self,

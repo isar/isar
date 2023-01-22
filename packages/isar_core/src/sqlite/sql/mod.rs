@@ -1,6 +1,5 @@
 use crate::core::data_type::DataType;
 
-pub mod create_table;
 pub mod insert;
 
 trait SqlExt {

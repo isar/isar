@@ -48,6 +48,57 @@ impl SQLite3 {
             }
         }
     }
+
+    pub fn execute(&self, sql: &str) -> Result<()> {
+        self.prepare(sql)?.step()?;
+        Ok(())
+    }
+
+    pub fn get_table_names(&self) -> Result<Vec<String>> {
+        let mut stmt = self.prepare("PRAGMA table_list")?;
+        let mut names = vec![];
+        while stmt.step()? {
+            let table_type = stmt.get_text(2);
+            if table_type == "table" {
+                let name = stmt.get_text(1);
+                if !name.starts_with("sqlite_") {
+                    names.push(name.to_string());
+                }
+            }
+        }
+        Ok(names)
+    }
+
+    pub fn get_table_columns(&self, table_name: &str) -> Result<Vec<String>> {
+        let mut stmt = self.prepare(&format!("PRAGMA table_info({})", table_name))?;
+        let mut cols = vec![];
+        while stmt.step()? {
+            cols.push(stmt.get_text(1).to_string());
+        }
+        Ok(cols)
+    }
+
+    pub fn get_table_indexes(&self, table_name: &str) -> Result<Vec<(String, bool, Vec<String>)>> {
+        let mut stmt = self.prepare(&format!("PRAGMA index_list({})", table_name))?;
+        let mut index_names_unique = vec![];
+        while stmt.step()? {
+            let name = stmt.get_text(1);
+            if !name.starts_with("sqlite_") {
+                let unique = stmt.get_int(2) == 1;
+                index_names_unique.push((name.to_string(), unique));
+            }
+        }
+        let mut indexes = vec![];
+        for (index_name, unique) in index_names_unique {
+            let mut stmt = self.prepare(&format!("PRAGMA index_info({})", index_name))?;
+            let mut cols = vec![];
+            while stmt.step()? {
+                cols.push(stmt.get_text(2).to_string());
+            }
+            indexes.push((index_name, unique, cols));
+        }
+        Ok(indexes)
+    }
 }
 
 impl Drop for SQLite3 {
@@ -93,6 +144,23 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
         unsafe { ffi::sqlite3_column_double(self.stmt, col as i32) }
     }
 
+    pub fn get_text(&self, col: usize) -> &str {
+        let bytes = self.get_blob(col);
+        if let Ok(str) = std::str::from_utf8(bytes) {
+            str
+        } else {
+            ""
+        }
+    }
+
+    pub fn get_blob(&self, col: usize) -> &[u8] {
+        unsafe {
+            let blob = ffi::sqlite3_column_blob(self.stmt, col as i32);
+            let num = ffi::sqlite3_column_bytes(self.stmt, col as i32);
+            std::slice::from_raw_parts(blob as *const u8, num as usize)
+        }
+    }
+
     pub fn bind_null(&mut self, col: usize) -> Result<()> {
         unsafe {
             let r = ffi::sqlite3_bind_null(self.stmt, col as i32 + 1);
@@ -135,6 +203,28 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
                 Err(sqlite_err(self.sqlite.db, r))
             }
         }
+    }
+
+    pub fn bind_text(&mut self, col: usize, value: &str) -> Result<()> {
+        self.bind_blob(col, value.as_bytes())
+    }
+
+    pub fn bind_blob(&mut self, col: usize, value: &[u8]) -> Result<()> {
+        /*unsafe {
+            let r = ffi::sqlite3_bind_blob(
+                self.stmt,
+                col as i32 + 1,
+                value.as_ptr() as *const c_void,
+                value.len() as i32,
+                None,
+            );
+            if r == ffi::SQLITE_OK {
+                Ok(())
+            } else {
+                Err(sqlite_err(self.sqlite.db, r))
+            }
+        }*/
+        Ok(())
     }
 }
 

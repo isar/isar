@@ -22,8 +22,6 @@ pub struct CollectionSchema {
     #[serde(default)]
     pub indexes: Vec<IndexSchema>,
     #[serde(default)]
-    pub links: Vec<LinkSchema>,
-    #[serde(default)]
     pub(crate) version: usize,
 }
 
@@ -32,7 +30,6 @@ impl CollectionSchema {
         name: &str,
         properties: Vec<PropertySchema>,
         indexes: Vec<IndexSchema>,
-        links: Vec<LinkSchema>,
         embedded: bool,
     ) -> CollectionSchema {
         CollectionSchema {
@@ -40,7 +37,6 @@ impl CollectionSchema {
             embedded,
             properties,
             indexes,
-            links,
             version: 0,
         }
     }
@@ -66,69 +62,19 @@ impl PropertySchema {
     }
 }
 
-#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Hash)]
-pub enum IndexType {
-    Value,
-    Hash,
-    HashElements,
-}
-
-#[derive(Serialize, Deserialize, Clone, Eq, PartialEq, Hash)]
-pub struct IndexPropertySchema {
-    pub name: String,
-    #[serde(rename = "type")]
-    pub index_type: IndexType,
-    #[serde(rename = "caseSensitive")]
-    pub case_sensitive: bool,
-}
-
-impl IndexPropertySchema {
-    pub fn new(name: &str, index_type: IndexType, case_sensitive: bool) -> IndexPropertySchema {
-        IndexPropertySchema {
-            name: name.to_string(),
-            index_type,
-            case_sensitive,
-        }
-    }
-}
-
 #[derive(Serialize, Deserialize, Clone, Eq, PartialEq, Hash)]
 pub struct IndexSchema {
     pub name: String,
-    pub properties: Vec<IndexPropertySchema>,
+    pub properties: Vec<String>,
     pub unique: bool,
-    #[serde(default)]
-    pub replace: bool,
 }
 
 impl IndexSchema {
-    pub fn new(
-        name: &str,
-        properties: Vec<IndexPropertySchema>,
-        unique: bool,
-        replace: bool,
-    ) -> IndexSchema {
+    pub fn new(name: &str, properties: Vec<&str>, unique: bool) -> IndexSchema {
         IndexSchema {
             name: name.to_string(),
-            properties,
+            properties: properties.iter().map(|p| p.to_string()).collect(),
             unique,
-            replace,
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, Eq, PartialEq, Hash)]
-pub struct LinkSchema {
-    pub name: String,
-    #[serde(rename = "target")]
-    pub target_col: String,
-}
-
-impl LinkSchema {
-    pub fn new(name: &str, target_col: &str) -> LinkSchema {
-        LinkSchema {
-            name: name.to_string(),
-            target_col: target_col.to_string(),
         }
     }
 }

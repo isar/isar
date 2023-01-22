@@ -1,0 +1,35 @@
+pub const NULL_BOOL: u8 = 0;
+pub const FALSE_BOOL: u8 = 1;
+pub const TRUE_BOOL: u8 = 2;
+pub const NULL_INT: i32 = i32::MIN;
+pub const NULL_LONG: i64 = i64::MIN;
+
+pub trait IsarReader<'a> {
+    type ObjectReader<'b>: IsarReader<'b>
+    where
+        Self: 'b;
+
+    type ListReader<'b>: IsarReader<'b>
+    where
+        Self: 'b;
+
+    fn is_null(&self, index: usize) -> bool;
+
+    fn read_byte(&self, index: usize) -> u8;
+
+    fn read_bool(&self, index: usize) -> Option<bool>;
+
+    fn read_int(&self, index: usize) -> i32;
+
+    fn read_float(&self, index: usize) -> f32;
+
+    fn read_long(&self, index: usize) -> i64;
+
+    fn read_double(&self, index: usize) -> f64;
+
+    fn read_string(&self, index: usize) -> Option<&str>;
+
+    fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>>;
+
+    fn read_list(&self, index: usize) -> Option<Self::ListReader<'_>>;
+}
