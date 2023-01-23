@@ -96,7 +96,7 @@ Anstatt Objekte über die ID zu erhalten, kannst du mittels `.where()` und `.fil
 ```dart
 final allRecipes = await recipes.where().findAll();
 
-final favouires = await recipes.filter()
+final favourites = await recipes.filter()
   .isFavoriteEqualTo(true)
   .findAll();
 ```
