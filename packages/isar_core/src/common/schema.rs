@@ -48,13 +48,13 @@ fn verify_collection(col: &CollectionSchema, collections: &[CollectionSchema]) -
         }
 
         if property.data_type == DataType::Object || property.data_type == DataType::ObjectList {
-            if let Some(target_col) = &property.target_col {
+            if let Some(target_col) = &property.collection {
                 verify_target_col_exists(target_col, true)?;
             } else {
                 schema_error("Object property must have a target collection.")?;
             }
         } else {
-            if property.target_col.is_some() {
+            if property.collection.is_some() {
                 schema_error("Target collection can only be set for object properties.")?;
             }
         }

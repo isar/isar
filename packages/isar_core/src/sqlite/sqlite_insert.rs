@@ -3,21 +3,20 @@ use super::sqlite_txn::SQLiteTxn;
 use super::sqlite_writer::SQLiteWriter;
 use crate::core::error::{IsarError, Result};
 use crate::core::insert::IsarInsert;
-use intmap::IntMap;
 
 pub struct SQLiteInsert<'a> {
-    txn: &'a SQLiteTxn,
+    txn: &'a SQLiteTxn<'a>,
     collection: &'a SQLiteCollection,
-    all_collections: &'a IntMap<SQLiteCollection>,
+    all_collections: &'a Vec<SQLiteCollection>,
     inserted_count: usize,
     count: usize,
 }
 
 impl<'a> SQLiteInsert<'a> {
     pub fn new(
-        txn: &'a SQLiteTxn,
+        txn: &'a SQLiteTxn<'a>,
         collection: &'a SQLiteCollection,
-        all_collections: &'a IntMap<SQLiteCollection>,
+        all_collections: &'a Vec<SQLiteCollection>,
         count: usize,
     ) -> Self {
         Self {

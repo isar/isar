@@ -27,6 +27,10 @@ impl DataType {
         self.get_element_type().is_none()
     }
 
+    pub fn is_list(&self) -> bool {
+        self.get_element_type().is_some()
+    }
+
     pub fn get_element_type(&self) -> Option<DataType> {
         match self {
             DataType::BoolList => Some(DataType::Bool),

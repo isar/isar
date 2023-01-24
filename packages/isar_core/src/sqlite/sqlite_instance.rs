@@ -22,9 +22,8 @@ static INSTANCES: Lazy<RwLock<IntMap<Arc<SQLiteInstance>>>> =
 
 pub struct SQLiteInstance {
     path: String,
-    sqlite: ThreadLocal<RefCell<Option<SQLite3>>>,
-    collections: IntMap<SQLiteCollection>,
-    collection_ids: Vec<u64>,
+    sqlite: ThreadLocal<SQLite3>,
+    collections: Vec<SQLiteCollection>,
     schema_hash: u64,
 }
 
@@ -33,7 +32,7 @@ impl SQLiteInstance {
         name: &str,
         dir: Option<&str>,
         schema: IsarSchema,
-        relaxed_durability: bool,
+        _relaxed_durability: bool,
     ) -> Result<Self> {
         if let Some(dir) = dir {
             verify_schema(&schema)?;
@@ -47,13 +46,12 @@ impl SQLiteInstance {
             let schema_manager = SQLiteSchemaManager::new(&sqlite);
             schema_manager.perform_migration(&schema)?;
 
-            let (collections, collection_ids) = Self::get_collections(&schema);
+            let collections = Self::get_collections(&schema);
 
             Ok(Self {
                 path,
                 sqlite: ThreadLocal::new(),
                 collections: collections,
-                collection_ids: collection_ids,
                 schema_hash,
             })
         } else {
@@ -63,16 +61,22 @@ impl SQLiteInstance {
         }
     }
 
-    fn get_collections(schema: &IsarSchema) -> (IntMap<SQLiteCollection>, Vec<u64>) {
-        let mut collections = IntMap::new();
-        let mut collection_ids = Vec::new();
+    fn get_collections(schema: &IsarSchema) -> Vec<SQLiteCollection> {
+        let mut collections = Vec::new();
         for collection_schema in &schema.collections {
             let properties = collection_schema
                 .properties
                 .iter()
                 .filter_map(|p| {
                     if let Some(name) = &p.name {
-                        let prop = SQLiteProperty::new(name, p.data_type, p.get_target_id());
+                        let target_collection_index = p.collection.as_deref().map(|c| {
+                            schema
+                                .collections
+                                .iter()
+                                .position(|c2| c2.name == c)
+                                .unwrap()
+                        });
+                        let prop = SQLiteProperty::new(name, p.data_type, target_collection_index);
                         Some(prop)
                     } else {
                         None
@@ -80,16 +84,14 @@ impl SQLiteInstance {
                 })
                 .collect_vec();
             let collection = SQLiteCollection::new(collection_schema.name.clone(), properties);
-            let collection_id = collection_schema.get_id();
-            collections.insert(collection_id, collection);
-            collection_ids.push(collection_id);
+            collections.push(collection);
         }
-        (collections, collection_ids)
+        collections
     }
 }
 
 impl IsarInstance for SQLiteInstance {
-    type Txn = SQLiteTxn;
+    type Txn<'a> = SQLiteTxn<'a>;
 
     type Insert<'a> = SQLiteInsert<'a>;
 
@@ -112,66 +114,30 @@ impl IsarInstance for SQLiteInstance {
         self.schema_hash
     }
 
-    fn collection_id(&self, index: usize) -> Option<u64> {
-        self.collection_ids.get(index).copied()
-    }
-
-    fn begin_txn(&self, write: bool) -> Result<Self::Txn> {
+    fn txn(&self, write: bool) -> Result<Self::Txn<'_>> {
         let sqlite = self
             .sqlite
-            .get_or_try(|| -> Result<RefCell<Option<SQLite3>>> {
+            .get_or_try(|| -> Result<SQLite3> {
                 let sqlite = SQLite3::open(&self.path)?;
-                Ok(RefCell::new(Some(sqlite)))
+                Ok(sqlite)
             })
-            .unwrap()
-            .take();
-        let sqlite = if let Some(sqlite) = sqlite {
-            sqlite
-        } else {
-            SQLite3::open(&self.path)?
-        };
+            .unwrap();
         SQLiteTxn::new(sqlite, write)
     }
 
-    fn commit_txn(&self, txn: Self::Txn) -> Result<()> {
-        let sqlite = txn.commit()?;
-        if let Some(cell) = self.sqlite.get() {
-            cell.replace(Some(sqlite));
-        }
-        Ok(())
-    }
-
-    fn abort_txn(&self, txn: Self::Txn) {
-        if let Ok(sqlite) = txn.abort() {
-            if let Some(cell) = self.sqlite.get() {
-                cell.replace(Some(sqlite));
-            }
-        }
-    }
-
-    fn query<'a>(&'a self, collection_id: u64) -> Result<Self::QueryBuilder<'a>> {
-        let collection = self
-            .collections
-            .get(collection_id)
-            .ok_or(IsarError::IllegalArg {
-                message: "Invalid collection id.".to_string(),
-            })?;
+    fn query<'a>(&'a self, collection_index: usize) -> Result<Self::QueryBuilder<'a>> {
+        let collection = &self.collections[collection_index];
         let query_builder = SQLiteQueryBuilder::new(collection, &self.collections);
         Ok(query_builder)
     }
 
     fn insert<'a>(
         &'a self,
-        txn: &'a mut Self::Txn,
-        collection_id: u64,
+        txn: &'a mut Self::Txn<'a>,
+        collection_index: usize,
         count: usize,
     ) -> Result<Self::Insert<'a>> {
-        let collection = self
-            .collections
-            .get(collection_id)
-            .ok_or(IsarError::IllegalArg {
-                message: "Invalid collection id.".to_string(),
-            })?;
+        let collection = &self.collections[collection_index];
         let insert = SQLiteInsert::new(txn, collection, &self.collections, count);
         Ok(insert)
     }
@@ -189,6 +155,7 @@ mod test {
     use crate::core::query_builder::IsarQueryBuilder;
     use crate::core::reader::IsarReader;
     use crate::core::schema::{CollectionSchema, IndexSchema, IsarSchema, PropertySchema};
+    use crate::core::txn::IsarTxn;
     use crate::core::writer::IsarWriter;
     use crate::sqlite::sqlite_filter::*;
     use crate::sqlite::sqlite_query_builder::SQLiteQueryBuilder;
@@ -199,7 +166,7 @@ mod test {
             "Test",
             vec![
                 PropertySchema::new("prop1", DataType::String, None),
-                PropertySchema::new("prop2", DataType::String, None),
+                PropertySchema::new("prop2", DataType::Long, None),
             ],
             vec![IndexSchema::new("myindex", vec!["prop1"], false)],
             false,
@@ -214,18 +181,19 @@ mod test {
         )
         .unwrap();
 
-        let col_id = instance.collection_ids[0];
-        let mut txn = instance.begin_txn(true).unwrap();
-        let mut insert = instance.insert(&mut txn, col_id, 2).unwrap();
-        let mut writer = insert.get_writer().unwrap();
-        writer.write_id(997);
-        writer.write_string(Some("val1"));
-        writer.write_string(Some("vala"));
-        let mut writer = insert.insert(writer).unwrap().unwrap();
-        writer.write_id(998);
-        writer.write_string(Some("val2"));
-        writer.write_string(Some("valb"));
-        insert.insert(writer).unwrap();
+        let mut txn = instance.txn(true).unwrap();
+        {
+            let mut insert = instance.insert(&mut txn, 0, 2).unwrap();
+            let mut writer = insert.get_writer().unwrap();
+            writer.write_id(999);
+            writer.write_string(Some("val1"));
+            writer.write_long(2);
+            let mut writer = insert.insert(writer).unwrap().unwrap();
+            writer.write_id(9999);
+            writer.write_string(Some("val2"));
+            writer.write_long(4);
+            insert.insert(writer).unwrap();
+        }
         /*writer.write_id(998);
         writer.write_string(Some("val3"));
         writer.write_string(Some("val4"));
@@ -234,10 +202,10 @@ mod test {
         writer.write_string(Some("val5"));
         writer.write_string(Some("val6"));
         insert.insert(writer).unwrap();*/
-        instance.commit_txn(txn).unwrap();
+        txn.commit().unwrap();
 
-        let mut txn = instance.begin_txn(false).unwrap();
-        let mut qb = instance.query(col_id).unwrap();
+        let mut txn = instance.txn(false).unwrap();
+        let mut qb = instance.query(0).unwrap();
         let filter = qb.not_null(1);
         qb.set_filter(filter);
         let q = qb.build();

@@ -70,11 +70,13 @@ impl SQLite3 {
         Ok(names)
     }
 
-    pub fn get_table_columns(&self, table_name: &str) -> Result<Vec<String>> {
+    pub fn get_table_columns(&self, table_name: &str) -> Result<Vec<(String, String)>> {
         let mut stmt = self.prepare(&format!("PRAGMA table_info({})", table_name))?;
         let mut cols = vec![];
         while stmt.step()? {
-            cols.push(stmt.get_text(1).to_string());
+            let name = stmt.get_text(1).to_string();
+            let type_ = stmt.get_text(2).to_uppercase();
+            cols.push((name, type_));
         }
         Ok(cols)
     }

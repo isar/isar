@@ -1,10 +1,17 @@
 use super::error::Result;
+use super::txn::IsarTxn;
 use super::writer::IsarWriter;
 
-pub trait IsarInsert<'txn> {
-    type Writer: IsarWriter<'txn>;
+pub trait IsarInsert {
+    type Txn<'a>: IsarTxn;
 
-    fn get_writer(&self) -> Result<Self::Writer>;
+    type Writer<'a>: IsarWriter<'a>;
 
-    fn insert(&mut self, writer: Self::Writer) -> Result<Option<Self::Writer>>;
+    fn get_writer<'a>(&'a self, txn: &mut Self::Txn<'a>) -> Result<Self::Writer<'a>>;
+
+    fn insert<'a>(
+        &'a mut self,
+        txn: &'a mut Self::Txn<'a>,
+        writer: Self::Writer<'_>,
+    ) -> Result<Option<Self::Writer<'a>>>;
 }

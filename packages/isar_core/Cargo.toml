@@ -13,13 +13,12 @@ xxhash-rust = { version = "0.8.5", features = ["xxh3"] }
 serde =  { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 once_cell = "1.10.0"
-crossbeam-channel = "0.5.4"
 byteorder = "1"
-paste = "1.0"
 intmap = "2.0.0"
 snafu = "0.7.0"
 thread_local = "1.1.4"
 libsqlite3-sys = { version="0.25.2", features=["bundled"] }
+ouroboros = "0.15.5"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 widestring = "1.0"

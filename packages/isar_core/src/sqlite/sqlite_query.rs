@@ -1,5 +1,3 @@
-use intmap::IntMap;
-
 use super::sqlite3::SQLiteStatement;
 use super::sqlite_collection::SQLiteCollection;
 use super::sqlite_reader::SQLiteReader;
@@ -10,14 +8,14 @@ use crate::core::query::{IsarCursor, IsarQuery};
 pub struct SQLiteQuery<'a> {
     query: String,
     collection: &'a SQLiteCollection,
-    all_collections: &'a IntMap<SQLiteCollection>,
+    all_collections: &'a Vec<SQLiteCollection>,
 }
 
 impl<'a> SQLiteQuery<'a> {
     pub fn new(
         query: String,
         collection: &'a SQLiteCollection,
-        all_collections: &'a IntMap<SQLiteCollection>,
+        all_collections: &'a Vec<SQLiteCollection>,
     ) -> Self {
         Self {
             query,
@@ -28,7 +26,7 @@ impl<'a> SQLiteQuery<'a> {
 }
 
 impl<'a> IsarQuery for SQLiteQuery<'a> {
-    type Txn = SQLiteTxn;
+    type Txn = SQLiteTxn<'a>;
 
     type Cursor<'b> = SQLiteCursor<'b> where Self: 'b;
 
@@ -75,7 +73,7 @@ impl<'a> IsarQuery for SQLiteQuery<'a> {
 pub struct SQLiteCursor<'a> {
     stmt: SQLiteStatement<'a>,
     collection: &'a SQLiteCollection,
-    all_collections: &'a IntMap<SQLiteCollection>,
+    all_collections: &'a Vec<SQLiteCollection>,
 }
 
 impl<'a> IsarCursor for SQLiteCursor<'a> {

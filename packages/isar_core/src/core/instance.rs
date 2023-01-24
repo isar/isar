@@ -2,6 +2,7 @@ use super::error::Result;
 use super::insert::IsarInsert;
 use super::query_builder::IsarQueryBuilder;
 use super::schema::IsarSchema;
+use super::txn::IsarTxn;
 use std::sync::Arc;
 
 pub struct CompactCondition {
@@ -11,9 +12,11 @@ pub struct CompactCondition {
 }
 
 pub trait IsarInstance {
-    type Txn;
+    type Txn<'a>: IsarTxn
+    where
+        Self: 'a;
 
-    type Insert<'a>: IsarInsert<'a>
+    type Insert<'a>: IsarInsert
     where
         Self: 'a;
 
@@ -32,65 +35,9 @@ pub trait IsarInstance {
 
     fn schema_hash(&self) -> u64;
 
-    fn collection_id(&self, index: usize) -> Option<u64>;
+    fn txn(&self, write: bool) -> Result<Self::Txn<'_>>;
 
-    fn begin_txn(&self, write: bool) -> Result<Self::Txn>;
+    fn query(&self, collection_index: usize) -> Result<Self::QueryBuilder<'_>>;
 
-    fn commit_txn(&self, txn: Self::Txn) -> Result<()>;
-
-    fn abort_txn(&self, txn: Self::Txn);
-
-    fn query(&self, collection_id: u64) -> Result<Self::QueryBuilder<'_>>;
-
-    fn insert<'a>(
-        &'a self,
-        txn: &'a mut Self::Txn,
-        collection_id: u64,
-        count: usize,
-    ) -> Result<Self::Insert<'a>>;
-
-    /*fn name(&self) -> &str;
-
-    fn dir(&self) -> Option<&str>;
-
-    fn collection(&self, name: &str) -> Option<&impl IsarCollection>;
-
-    fn begin_txn(&self, write: bool, silent: bool) -> Result<impl IsarTxn>;
-
-    fn get_size(
-        &self,
-        txn: &mut impl IsarTxn,
-        include_indexes: bool,
-        include_links: bool,
-    ) -> Result<u64>;
-
-    fn copy_to_file(&self, path: &str) -> Result<()>;
-
-    fn new_watcher(&self, start: WatcherModifier, stop: WatcherModifier) -> WatchHandle;
-
-    fn watch_collection(
-        &self,
-        collection: &IsarCollection,
-        callback: WatcherCallback,
-    ) -> WatchHandle;
-
-    fn watch_object(
-        &self,
-        collection: &IsarCollection,
-        oid: i64,
-        callback: WatcherCallback,
-    ) -> WatchHandle;
-
-    fn watch_query(
-        &self,
-        collection: &IsarCollection,
-        query: Query,
-        callback: WatcherCallback,
-    ) -> WatchHandle;
-
-    fn close(self: Arc<Self>) -> bool;
-
-    fn close_and_delete(self: Arc<Self>) -> bool;
-
-    fn verify(&self, txn: &mut impl IsarTxn) -> Result<()>;*/
+    fn insert(&self, collection_index: usize, count: usize) -> Result<Self::Insert<'_>>;
 }

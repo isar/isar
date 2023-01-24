@@ -1,13 +1,12 @@
 use super::sqlite3::SQLiteStatement;
 use super::sqlite_collection::SQLiteCollection;
 use crate::core::writer::IsarWriter;
-use intmap::IntMap;
 use serde_json::ser::{CompactFormatter, Formatter};
 
 pub struct SQLiteWriter<'a> {
     stmt: SQLiteStatement<'a>,
     collection: &'a SQLiteCollection,
-    all_collections: &'a IntMap<SQLiteCollection>,
+    all_collections: &'a Vec<SQLiteCollection>,
     property: usize,
     count: usize,
     buffer: Option<Vec<u8>>,
@@ -18,7 +17,7 @@ impl<'a> SQLiteWriter<'a> {
         stmt: SQLiteStatement<'a>,
         count: usize,
         collection: &'a SQLiteCollection,
-        all_collections: &'a IntMap<SQLiteCollection>,
+        all_collections: &'a Vec<SQLiteCollection>,
         buffer: Option<Vec<u8>>,
     ) -> SQLiteWriter<'a> {
         SQLiteWriter {
@@ -100,6 +99,7 @@ impl<'a> IsarWriter<'a> for SQLiteWriter<'a> {
         } else {
             let _ = self.stmt.bind_null(self.property);
         }
+        self.property += 1;
     }
 
     fn write_double(&mut self, value: f64) {
@@ -108,6 +108,7 @@ impl<'a> IsarWriter<'a> for SQLiteWriter<'a> {
         } else {
             let _ = self.stmt.bind_null(self.property);
         }
+        self.property += 1;
     }
 
     fn write_string(&mut self, value: Option<&str>) {
@@ -122,8 +123,8 @@ impl<'a> IsarWriter<'a> for SQLiteWriter<'a> {
     fn begin_object<'b>(&mut self) -> Self::ObjectWriter {
         let property_index = self.property % (self.collection.properties.len() + 1);
         let property = &self.collection.properties[property_index - 1];
-        let target_id = property.target_id.unwrap();
-        let target_collection = self.all_collections.get(target_id).unwrap();
+        let collection_index = property.collection_index.unwrap();
+        let target_collection = &self.all_collections[collection_index];
 
         if let Some(mut buffer) = self.buffer.take() {
             buffer.clear();
@@ -140,13 +141,13 @@ impl<'a> IsarWriter<'a> for SQLiteWriter<'a> {
         self.property += 1;
     }
 
-    fn begin_list(&mut self) -> Self::ListWriter {
+    fn begin_list(&mut self, _size: usize) -> Self::ListWriter {
         let property_index = self.property % (self.collection.properties.len() + 1);
         let property = &self.collection.properties[property_index - 1];
 
         if let Some(mut buffer) = self.buffer.take() {
             buffer.clear();
-            SQLiteListWriter::new(property.target_id, self.all_collections, buffer)
+            SQLiteListWriter::new(property.collection_index, self.all_collections, buffer)
         } else {
             panic!("Buffer is already borrowed");
         }
@@ -162,7 +163,7 @@ impl<'a> IsarWriter<'a> for SQLiteWriter<'a> {
 
 pub struct SQLiteObjectWriter<'a> {
     collection: &'a SQLiteCollection,
-    all_collections: &'a IntMap<SQLiteCollection>,
+    all_collections: &'a Vec<SQLiteCollection>,
     property: usize,
     first: bool,
     buffer: Option<Vec<u8>>,
@@ -171,7 +172,7 @@ pub struct SQLiteObjectWriter<'a> {
 impl<'a> SQLiteObjectWriter<'a> {
     fn new(
         collection: &'a SQLiteCollection,
-        all_collections: &'a IntMap<SQLiteCollection>,
+        all_collections: &'a Vec<SQLiteCollection>,
         mut buffer: Vec<u8>,
     ) -> Self {
         CompactFormatter.begin_object(&mut buffer).unwrap();
@@ -304,8 +305,8 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
         let property = &self.collection.properties[self.property];
         self.write_property_name(&property.name);
 
-        let target_id = property.target_id.unwrap();
-        let target_collection = self.all_collections.get(target_id).unwrap();
+        let collection_index = property.collection_index.unwrap();
+        let target_collection = &self.all_collections[collection_index];
 
         let buffer = self.buffer.take().unwrap();
         SQLiteObjectWriter::new(target_collection, self.all_collections, buffer)
@@ -317,12 +318,12 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
         self.property += 1;
     }
 
-    fn begin_list(&mut self) -> Self::ListWriter {
+    fn begin_list(&mut self, _size: usize) -> Self::ListWriter {
         let property = &self.collection.properties[self.property];
         self.write_property_name(&property.name);
 
         let buffer = self.buffer.take().unwrap();
-        SQLiteListWriter::new(property.target_id, self.all_collections, buffer)
+        SQLiteListWriter::new(property.collection_index, self.all_collections, buffer)
     }
 
     fn end_list<'b>(&'b mut self, writer: Self::ListWriter) {
@@ -333,21 +334,21 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
 }
 
 pub struct SQLiteListWriter<'a> {
-    target_id: Option<u64>,
-    all_collections: &'a IntMap<SQLiteCollection>,
+    collection_index: Option<usize>,
+    all_collections: &'a Vec<SQLiteCollection>,
     first: bool,
     buffer: Option<Vec<u8>>,
 }
 
 impl<'a> SQLiteListWriter<'a> {
     fn new(
-        target_id: Option<u64>,
-        all_collections: &'a IntMap<SQLiteCollection>,
+        collection_index: Option<usize>,
+        all_collections: &'a Vec<SQLiteCollection>,
         mut buffer: Vec<u8>,
     ) -> Self {
         CompactFormatter.begin_array(&mut buffer).unwrap();
         Self {
-            target_id,
+            collection_index,
             all_collections,
             first: true,
             buffer: Some(buffer),
@@ -453,8 +454,8 @@ impl<'a> IsarWriter<'a> for SQLiteListWriter<'a> {
     }
 
     fn begin_object(&mut self) -> Self::ObjectWriter {
-        let target_id = self.target_id.unwrap();
-        let target_collection = self.all_collections.get(target_id).unwrap();
+        let collection_index = self.collection_index.unwrap();
+        let target_collection = &self.all_collections[collection_index];
 
         let buffer = self.buffer.take().unwrap();
         SQLiteObjectWriter::new(target_collection, self.all_collections, buffer)
@@ -465,7 +466,7 @@ impl<'a> IsarWriter<'a> for SQLiteListWriter<'a> {
         self.buffer = Some(buffer);
     }
 
-    fn begin_list(&mut self) -> Self::ListWriter {
+    fn begin_list(&mut self, _size: usize) -> Self::ListWriter {
         panic!("Nested lists are not supported");
     }
 

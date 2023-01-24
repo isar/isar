@@ -1,56 +1,69 @@
+use super::sqlite3::SQLite3;
+use crate::core::{
+    error::{IsarError, Result},
+    txn::IsarTxn,
+};
 use std::cell::RefCell;
 
-use super::sqlite3::SQLite3;
-use crate::core::error::{IsarError, Result};
-
-pub struct SQLiteTxn {
+pub struct SQLiteTxn<'conn> {
     write: bool,
-    active: RefCell<bool>,
-    sqlite: SQLite3,
+    sqlite: RefCell<Option<&'conn SQLite3>>,
 }
 
-impl SQLiteTxn {
-    pub(crate) fn new(sqlite: SQLite3, write: bool) -> Result<SQLiteTxn> {
+impl<'conn> SQLiteTxn<'conn> {
+    pub(crate) fn new(sqlite: &'conn SQLite3, write: bool) -> Result<SQLiteTxn<'conn>> {
         sqlite.prepare("BEGIN")?.step()?;
         let txn = SQLiteTxn {
             write,
-            active: RefCell::new(true),
-            sqlite,
+            sqlite: RefCell::new(Some(sqlite)),
         };
         Ok(txn)
     }
-}
 
-impl SQLiteTxn {
     pub(crate) fn get_sqlite(&self, write: bool) -> Result<&SQLite3> {
-        if write && !self.write {
-            return Err(IsarError::WriteTxnRequired {});
+        if let Some(sqlite) = self.sqlite.borrow().as_ref() {
+            if write && !self.write {
+                return Err(IsarError::WriteTxnRequired {});
+            }
+            Ok(sqlite)
+        } else {
+            Err(IsarError::TransactionClosed {})
         }
-        if !*self.active.borrow() {
-            return Err(IsarError::TransactionClosed {});
-        }
-
-        Ok(&self.sqlite)
     }
 
     pub(crate) fn guard<T, F>(&self, job: F) -> Result<T>
     where
         F: FnOnce() -> Result<T>,
     {
-        let result = job();
-        if !result.is_ok() {
-            self.active.replace(false);
+        if let Some(sqlite) = self.sqlite.borrow().as_ref() {
+            let result = job();
+            if !result.is_ok() {
+                sqlite.prepare("ROLLBACK")?.step()?;
+                self.sqlite.replace(None);
+            }
+            result
+        } else {
+            Err(IsarError::TransactionClosed {})
         }
-        result
+    }
+}
+
+impl<'conn> IsarTxn for SQLiteTxn<'conn> {
+    fn commit(self) -> Result<()> {
+        if let Some(sqlite) = self.sqlite.take() {
+            sqlite.prepare("COMMIT")?.step()?;
+            Ok(())
+        } else {
+            Err(IsarError::TransactionClosed {})
+        }
     }
 
-    pub(crate) fn commit(self) -> Result<SQLite3> {
-        self.sqlite.prepare("COMMIT")?.step()?;
-        Ok(self.sqlite)
-    }
-
-    pub(crate) fn abort(self) -> Result<SQLite3> {
-        self.sqlite.prepare("ROLLBACK")?.step()?;
-        Ok(self.sqlite)
+    fn abort(self) {
+        if let Some(sqlite) = self.sqlite.take() {
+            let stmt = sqlite.prepare("ROLLBACK");
+            if let Ok(mut stmt) = stmt {
+                let _ = stmt.step();
+            }
+        }
     }
 }

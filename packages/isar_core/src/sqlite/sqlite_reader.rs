@@ -1,21 +1,20 @@
 use super::sqlite3::SQLiteStatement;
 use super::sqlite_collection::SQLiteCollection;
 use crate::core::reader::IsarReader;
-use intmap::IntMap;
 use serde_json::{Map, Value};
 use std::borrow::Cow;
 
 pub struct SQLiteReader<'a> {
     stmt: &'a SQLiteStatement<'a>,
     collection: &'a SQLiteCollection,
-    all_collections: &'a IntMap<SQLiteCollection>,
+    all_collections: &'a Vec<SQLiteCollection>,
 }
 
 impl<'a> SQLiteReader<'a> {
     pub fn new(
         stmt: &'a SQLiteStatement<'a>,
         collection: &'a SQLiteCollection,
-        all_collections: &'a IntMap<SQLiteCollection>,
+        all_collections: &'a Vec<SQLiteCollection>,
     ) -> Self {
         Self {
             stmt,
@@ -92,8 +91,8 @@ impl<'a> IsarReader for SQLiteReader<'a> {
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'a>> {
         let text = self.stmt.get_text(index);
         if let Ok(Value::Object(object)) = serde_json::from_str(text) {
-            let target_id = self.collection.properties[index].target_id.unwrap();
-            let collection = self.all_collections.get(target_id).unwrap();
+            let collection_index = self.collection.properties[index].collection_index.unwrap();
+            let collection = &self.all_collections[collection_index];
             return Some(SQLiteObjectReader {
                 object: Cow::Owned(object),
                 collection,
@@ -103,15 +102,17 @@ impl<'a> IsarReader for SQLiteReader<'a> {
         None
     }
 
-    fn read_list(&self, index: usize) -> Option<Self::ListReader<'a>> {
+    fn read_list(&self, index: usize) -> Option<(Self::ListReader<'a>, usize)> {
         let text = self.stmt.get_text(index);
         if let Ok(Value::Array(list)) = serde_json::from_str(text) {
-            let target_id = self.collection.properties[index].target_id;
-            return Some(SQLiteListReader {
+            let list_length = list.len();
+            let collection_index = self.collection.properties[index].collection_index;
+            let list_reader = SQLiteListReader {
                 list: Cow::Owned(list),
-                target_id: target_id,
+                collection_index,
                 all_collections: self.all_collections,
-            });
+            };
+            return Some((list_reader, list_length));
         }
         None
     }
@@ -120,7 +121,7 @@ impl<'a> IsarReader for SQLiteReader<'a> {
 pub struct SQLiteObjectReader<'a> {
     object: Cow<'a, Map<String, Value>>,
     collection: &'a SQLiteCollection,
-    all_collections: &'a IntMap<SQLiteCollection>,
+    all_collections: &'a Vec<SQLiteCollection>,
 }
 
 impl<'a> IsarReader for SQLiteObjectReader<'a> {
@@ -213,8 +214,8 @@ impl<'a> IsarReader for SQLiteObjectReader<'a> {
         let property = &self.collection.properties[index];
         let value = self.object.get(&property.name);
         if let Some(Value::Object(object)) = value {
-            let target_id = property.target_id.unwrap();
-            let collection = self.all_collections.get(target_id).unwrap();
+            let collection_index = property.collection_index.unwrap();
+            let collection = &self.all_collections[collection_index];
             Some(SQLiteObjectReader {
                 object: Cow::Borrowed(object),
                 collection,
@@ -225,15 +226,16 @@ impl<'a> IsarReader for SQLiteObjectReader<'a> {
         }
     }
 
-    fn read_list(&self, index: usize) -> Option<Self::ListReader<'_>> {
+    fn read_list(&self, index: usize) -> Option<(Self::ListReader<'_>, usize)> {
         let property = &self.collection.properties[index];
         let value = self.object.get(&property.name);
         if let Some(Value::Array(list)) = value {
-            Some(SQLiteListReader {
+            let list_reader = SQLiteListReader {
                 list: Cow::Borrowed(list),
-                target_id: property.target_id,
+                collection_index: property.collection_index,
                 all_collections: self.all_collections,
-            })
+            };
+            Some((list_reader, list.len()))
         } else {
             None
         }
@@ -242,8 +244,8 @@ impl<'a> IsarReader for SQLiteObjectReader<'a> {
 
 pub struct SQLiteListReader<'a> {
     list: Cow<'a, Vec<Value>>,
-    target_id: Option<u64>,
-    all_collections: &'a IntMap<SQLiteCollection>,
+    collection_index: Option<usize>,
+    all_collections: &'a Vec<SQLiteCollection>,
 }
 
 impl<'a> IsarReader for SQLiteListReader<'a> {
@@ -322,8 +324,8 @@ impl<'a> IsarReader for SQLiteListReader<'a> {
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>> {
         if let Some(Value::Object(object)) = self.list.get(index) {
-            let target_id = self.target_id.unwrap();
-            let collection = self.all_collections.get(target_id).unwrap();
+            let collection_index = self.collection_index.unwrap();
+            let collection = &self.all_collections[collection_index];
             Some(SQLiteObjectReader {
                 object: Cow::Borrowed(object),
                 collection,
@@ -334,7 +336,7 @@ impl<'a> IsarReader for SQLiteListReader<'a> {
         }
     }
 
-    fn read_list(&self, _: usize) -> Option<Self::ListReader<'_>> {
+    fn read_list(&self, _: usize) -> Option<(Self::ListReader<'_>, usize)> {
         panic!("Nested lists are not supported")
     }
 }

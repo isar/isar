@@ -1,7 +1,7 @@
-pub trait IsarWriter {
-    type ObjectWriter<'a>: IsarWriter;
+pub trait IsarWriter<'a> {
+    type ObjectWriter: IsarWriter<'a>;
 
-    type ListWriter<'a>: IsarWriter;
+    type ListWriter: IsarWriter<'a>;
 
     fn write_id(&mut self, id: i64);
 
@@ -21,11 +21,11 @@ pub trait IsarWriter {
 
     fn write_string(&mut self, value: Option<&str>);
 
-    fn begin_object<'a>(&mut self) -> Self::ObjectWriter<'a>;
+    fn begin_object(&mut self) -> Self::ObjectWriter;
 
     fn end_object(&mut self, writer: Self::ObjectWriter);
 
-    fn begin_list(&mut self) -> Self::ListWriter;
+    fn begin_list(&mut self, size: usize) -> Self::ListWriter;
 
     fn end_list(&mut self, writer: Self::ListWriter);
 }

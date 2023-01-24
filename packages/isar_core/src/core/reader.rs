@@ -33,5 +33,5 @@ pub trait IsarReader {
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>>;
 
-    fn read_list(&self, index: usize) -> Option<Self::ListReader<'_>>;
+    fn read_list(&self, index: usize) -> Option<(Self::ListReader<'_>, usize)>;
 }

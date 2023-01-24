@@ -1,7 +1,5 @@
-use serde::{Deserialize, Serialize};
-use xxhash_rust::xxh3::xxh3_64;
-
 use super::data_type::DataType;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Hash)]
 pub struct IsarSchema {
@@ -41,10 +39,6 @@ impl CollectionSchema {
             version: 0,
         }
     }
-
-    pub fn get_id(&self) -> u64 {
-        xxh3_64(self.name.as_bytes())
-    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Eq, PartialEq, Hash)]
@@ -54,20 +48,16 @@ pub struct PropertySchema {
     pub data_type: DataType,
     #[serde(default)]
     #[serde(rename = "target")]
-    pub target_col: Option<String>,
+    pub collection: Option<String>,
 }
 
 impl PropertySchema {
-    pub fn new(name: &str, data_type: DataType, target_col: Option<&str>) -> PropertySchema {
+    pub fn new(name: &str, data_type: DataType, collection: Option<&str>) -> PropertySchema {
         PropertySchema {
             name: Some(name.to_string()),
             data_type,
-            target_col: target_col.map(|col| col.to_string()),
+            collection: collection.map(|col| col.to_string()),
         }
-    }
-
-    pub fn get_target_id(&self) -> Option<u64> {
-        self.target_col.as_ref().map(|col| xxh3_64(col.as_bytes()))
     }
 }
 

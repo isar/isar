@@ -2,12 +2,11 @@ use super::sqlite_collection::SQLiteCollection;
 use super::sqlite_filter::SQLiteFilter;
 use super::sqlite_query::SQLiteQuery;
 use crate::core::query_builder::{IsarQueryBuilder, Sort};
-use intmap::IntMap;
 use itertools::Itertools;
 
 pub struct SQLiteQueryBuilder<'a> {
     pub(crate) collection: &'a SQLiteCollection,
-    pub(crate) all_collections: &'a IntMap<SQLiteCollection>,
+    pub(crate) all_collections: &'a Vec<SQLiteCollection>,
     filter: Option<SQLiteFilter>,
     sort: Vec<(&'a str, Sort)>,
     offset: Option<usize>,
@@ -17,7 +16,7 @@ pub struct SQLiteQueryBuilder<'a> {
 impl SQLiteQueryBuilder<'_> {
     pub fn new<'a>(
         collection: &'a SQLiteCollection,
-        all_collections: &'a IntMap<SQLiteCollection>,
+        all_collections: &'a Vec<SQLiteCollection>,
     ) -> SQLiteQueryBuilder<'a> {
         SQLiteQueryBuilder {
             collection,
