@@ -52,3 +52,32 @@ If you choose a different hash function, ensure it returns a 64-bit int and avoi
 :::warning
 Avoid using `string.hashCode` because it is not guaranteed to be stable across different platforms and versions of Dart.
 :::
+
+## SafeIntId
+
+You may also find that you don't need String id - you just cannot use auto-increment int id, e.g. when a user creates new objects on multiple devices in an offline-first app which syncs in the background.
+
+In this case please consider using [SafeIntId](https://pub.dev/packages/safe_int_id) designed for Isar.
+
+* [Check](https://pub.dev/packages/safe_int_id#design-and-usage) if it fits your case.
+* [Install and import](https://pub.dev/packages/safe_int_id/install) it.
+* Configure your collection id to be `int`, neither `null` nor `Isar.autoIncrement`:
+    * Isar 3:
+        ```dart
+        @collection
+        class Item {
+          late Id id;
+        }
+        ```
+    * Isar 2.5.0:
+        ```dart
+        @Collection()
+        class Item {
+          @Id()
+          late int id;
+        }
+        ```
+* Create an object and set its id:
+    ```dart
+    final newItem = Item()..id = safeIntId.getId();
+    ```
