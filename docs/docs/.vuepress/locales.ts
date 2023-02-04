@@ -128,7 +128,7 @@ export const locales: LocalConfig[] = [
     ],
     backToHome: "홈으로 돌아가기",
     translationOutdated: "번역이 낡았습니다. 업데이트 도와주세요!",
-    dbName: "Isar Database",
+    dbName: "Isar 데이터베이스",
     dbDescription: "플러터를 위한 초고속 크로스 플랫폼 데이터베이스",
     tutorials: "튜토리얼",
     concepts: "개념",
