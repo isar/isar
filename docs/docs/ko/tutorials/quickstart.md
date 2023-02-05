@@ -1,32 +1,32 @@
 ---
-title: Quickstart
+title: 빠른 시작
 ---
 
-# Quickstart
+# 빠른 시작
 
-Holy smokes, you're here! Let's get started on using the coolest Flutter database out there...
+세상에, 이제야 왔군요! 가장 멋진 플러터 데이터베이스를 사용해 보겠습니다...
 
-We're going to be short on words and quick on code in this quickstart.
+이 빠른 시작에서는 말은 줄이고 바로 코드를 보겠습니다.
 
-## 1. Add dependencies
+## 1. 의존성 추가하기
 
-Before the fun begins, we need to add a few packages to the `pubspec.yaml`. We can use pub to do the heavy lifting for us.
+재미있는 부분을 보기 전에 `pubspec.yaml` 에 몇 개의 패키지를 추가해야 합니다. 우리는 펍을 이용해서 힘든 일을 쉽게 할 수 있습니다.
 
 ```bash
 flutter pub add isar isar_flutter_libs
 flutter pub add -d isar_generator build_runner
 ```
 
-## 2. Annotate classes
+## 2. 클래스에 주석 추가(어노테이션)
 
-Annotate your collection classes with `@collection` and choose an `Id` field.
+컬렉션 클래스에 `@collection` 으로 주석을 달고 `Id` 필드를 선택합니다.
 
 ```dart
 part 'email.g.dart';
 
 @collection
 class User {
-  Id id = Isar.autoIncrement; // you can also use id = null to auto increment
+  Id id = Isar.autoIncrement; // id = null 을 사용해도 자동 증분할 수 있습니다.
 
   String? name;
 
@@ -34,52 +34,53 @@ class User {
 }
 ```
 
-Ids uniquely identify objects in a collection and allow you to find them again later.
+Id는 컬렉션에서 개체를 고유하게 식별하고 나중에 개체를 다시 찾을 수 있도록 합니다.
 
-## 3. Run code generator
+## 3. 코드 생성기를 실행하기
 
-Execute the following command to start the `build_runner`:
+다음 명령을 실행하여 `build_runner` 를 시작합니다:
 
 ```
 dart run build_runner build
 ```
 
-If you are using Flutter, use the following:
+플러터를 사용하고 있다면, 다음 명령을 사용합니다.
 
 ```
 flutter pub run build_runner build
 ```
 
-## 4. Open Isar instance
+## 4. Isar 인스턴스 열기
 
-Open a new Isar instance and pass all of your collection schemas. Optionally you can specify an instance name and directory.
+새 Isar 인스턴스를 열고 모든 컬렉션 스키마를 전달합니다. 선택적으로 인스턴스 이름과 디렉토리를 지정할 수도 있습니다.
 
 ```dart
 final isar = await Isar.open([EmailSchema]);
 ```
 
-## 5. Write and read
+## 5. 읽기와 쓰기
 
-Once your instance is open, you can start using the collections.
+한번 인스턴스를 열면, 콜렉션들을 사용할 수 있습니다.
 
-All basic CRUD operations are available via the `IsarCollection`.
+모든 기본적인 CRUD 작업은 `IsarCollection` 을 통해서 이루어집니다.
 
 ```dart
 final newUser = User()..name = 'Jane Doe'..age = 36;
 
 await isar.writeTxn(() async {
-  await isar.users.put(newUser); // insert & update
+  await isar.users.put(newUser); // 삽입 & 업데이트
 });
 
-final existingUser = await isar.users.get(newUser.id); // get
+final existingUser = await isar.users.get(newUser.id); // 가져오기
 
 await isar.writeTxn(() async {
-  await isar.users.delete(existingUser.id!); // delete
+  await isar.users.delete(existingUser.id!); // 삭제
 });
 ```
 
-## Other resources
+## 다른 자료들
 
+혹시 영상으로 공부를 하는 것이 더 좋나요? 다음 영상으로 Isar를 시작해보세요:
 Are you a visual learner? Check out these videos to get started with Isar:
 
 <div class="video-block">
