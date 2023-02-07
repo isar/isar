@@ -1,45 +1,45 @@
 ---
-title: Create, Read, Update, Delete
+title: CRUD 조작
 ---
 
-# Create, Read, Update, Delete
+# CRUD 조작
 
-When you have your collections defined, learn how to manipulate them!
+컬렉션이 정의되었다면, 이제 조작하는 방법을 배워봅시다!
 
-## Opening Isar
+## Isar 열기
 
-Before you can do anything, we need an Isar instance. Each instance requires a directory with write permission where the database file can be stored. If you don't specify a directory, Isar will find a suitable default directory for the current platform.
+무엇을 하든 우선 Isar 인스턴스가 필요합니다. 각 인스턴스에는 데이터베이스 파일을 저장할 수 있도록 쓰기 권한이 있는 디렉토리가 필요합니다. 디렉토리를 지정하지 않는 경우 Isar는 현재 플랫폼에 적합한 기본 디렉토리를 찾습니다.
 
-Provide all the schemas you want to use with the Isar instance. If you open multiple instances, you still have to provide the same schemas to each instance.
+Isar 인스턴스에서 사용하고 싶은 모든 스키마를 지정합니다. 여러 인스턴스를 열고 있는 경우에도 각각의 인스턴스에 동일한 스키마를 부여해야 합니다.
 
 ```dart
 final isar = await Isar.open([RecipeSchema]);
 ```
 
-You can use the default config or provide some of the following parameters:
+기본 구성을 사용하거나 다음 매개 변수 중 일부를 제공할 수 있습니다:
 
-| Config              | Description                                                                                                                                                                                                                                                                                  |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`              | Open multiple instances with distinct names. By default, `"default"` is used.                                                                                                                                                                                                                |
-| `directory`         | The storage location for this instance. By default, `NSDocumentDirectory` is used for iOS and `getDataDirectory` for Android. Not required for web.                                                                                                                                          |
-| `maxSizeMib`        | The maximum size of the database file in MiB. Isar uses virtual memory which is not an endless resource so be mindful with the value here. If you open multiple instances they share the available virtual memory so each instance should have a smaller `maxSizeMib` . The default is 2048. |
-| `relaxedDurability` | Relaxes the durability guarantee to increase write performance. In case of a system crash (not app crash), it is possible to lose the last committed transaction. Corruption is not possible                                                                                                 |
-| `compactOnLaunch`   | Conditions to check whether the database should be compacted when the instance is opened.                                                                                                                                                                                                    |
-| `inspector`         | Enabled the Inspector for debug builds. For profile and release builds this option is ignored.                                                                                                                                                                                               |
+| Config              | Description                                                                                                                                                                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`              | 여러 인스턴스를 다른 이름으로 엽니다. 기본적으로 `"default"`가 사용됩니다.                                                                                                                                                                 |
+| `directory`         | 이 인스턴스의 저장 장소 입니다. 상대 경로 또는 절대 경로를 전달할 수 있습니다. 기본값으로, iOS 에서는 `NSDocumentDirectory`, Android 에서는 `getDataDirectory` 가 사용됩니다. 웹에서는 필요하지 않습니다.                                  |
+| `maxSizeMib`        | 데이터베이스 파일의 최대 크기(MiB)입니다. Isar는 무한하지 않은 가상 메모리를 사용하므로 여기 값을 명심하세요. 여러 인스턴스를 열면 사용 가능한 가상 메모리가 공유되므로 각 인스턴스의 `maxSizeMib` 가 더 작아집니다. 기본값은 2048 입니다. |
+| `relaxedDurability` | 내구성 보장을 완화하여 쓰기 성능을 향상 시킵니다. 시스템 충돌(앱 충돌이 아닌) 의 경우 마지막으로 커밋된 트랜잭션이 손실될 수 있습니다. 완전히 파손(Corruption)될 가능성은 없습니다.                                                        |
+| `compactOnLaunch`   | 인스턴스를 열 때 데이터베이스를 압축해야 하는지 여부를 확인하는 조건입니다.                                                                                                                                                                |
+| `inspector`         | 디버그 빌드에 대해서 Inspector 를 사용하도록 설정합니다. 프로파일이나 릴리즈 빌드에서는 이 옵션이 무시됩니다.                                                                                                                              |
 
-If an instance is already open, calling `Isar.open()` will yield the existing instance regardless of the specified parameters. That's useful for using Isar in an isolate.
+인스턴스가 이미 열려 있는 경우 `Isar.open()` 을 호출하면 지정된 매개 변수에 관계없이 기존 인스턴스가 생성됩니다. isolate 안에서 Isar 를 사용할 때 유용합니다.
 
 :::tip
-Consider using the [path_provider](https://pub.dev/packages/path_provider) package to get a valid path on all platforms.
+모든 플랫폼에서 유효한 저장 경로를 얻기 위해서 [path_provider](https://pub.dev/packages/path_provider) 패키지를 사용하는 것을 고려해보세요.
 :::
 
-The storage location of the database file is `directory/name.isar`
+데이터베이스 파일의 저장 위치는 `directory/name.isar` 입니다.
 
-## Reading from the database
+## 데이터베이스에서 읽기
 
-Use `IsarCollection` instances to find, query, and create new objects of a given type in Isar.
+Isar 에서 지정된 타입의 새로운 객체를 찾고 쿼리하고 생성할 때 `IsarCollection` 인스턴스를 사용합니다.
 
-For the examples below, we assume that we have a collection `Recipe` defined as follows:
+밑에 나올 예시들에서, 우리는 다음과 같이 정의된 `Recipe` 컬렉션이 있다고 가정합니다.
 
 ```dart
 @collection
@@ -54,47 +54,47 @@ class Recipe {
 }
 ```
 
-### Get a collection
+### 컬렉션을 가져오기
 
-All your collections live in the Isar instance. You can get the recipes collection with:
+모든 컬렉션들은 Isar 인스턴스 안에 있습니다. 레시피 컬렉션은 다음 방법으로 가져옵니다:
 
 ```dart
 final recipes = isar.recipes;
 ```
 
-That was easy! If you don't want to use collection accessors, you can also use the `collection()` method:
+너무 쉽죠! 컬렉션 접근자를 사용하기 싫다면, `collection()` 메서드를 사용해도 됩니다.
 
 ```dart
 final recipes = isar.collection<Recipe>();
 ```
 
-### Get an object (by id)
+### 객체 얻기 (id를 이용)
 
-We don't have data in the collection yet but let's pretend we do so we can get an imaginary object by the id `123`
+아직 컬렉션에 데이터가 들어있지 않지만, 아이디 `123` 의 가상의 객체가 있다고 가정하고 가져오겠습니다.
 
 ```dart
 final recipe = await isar.recipes.get(123);
 ```
 
-`get()` returns a `Future` with either the object or `null` if it does not exist. All Isar operations are asynchronous by default, and most of them have a synchronous counterpart:
+`get()` 은 객체를 `Future` 로 반환하고, 해당 객체가 존재하지 않는 경우에는 `null` 을 반환합니다. 모든 Isar 작업들은 기본적으로 비동기적으로 작동합니다. 대부분의 경우는 동기적인 방법도 가지고 있습니다.
 
 ```dart
 final recipe = isar.recipes.getSync(123);
 ```
 
 :::warning
-You should default to the asynchronous version of methods in your UI isolate. Since Isar is very fast, it is often acceptable to use the synchronous version.
+UI isolate 에서는 비동기 버전을 기본적으로 사용해야 합니다. 하지만 Isar 는 매우 빠르기 때문에, 동기식으로 사용하는 것도 종종 허용됩니다.
 :::
 
-If you want to get multiple objects at once, use `getAll()` or `getAllSync()`:
+한 번에 여러 객체를 가져오려면 `getAll()` 또는 `getAllSync()` 를 사용하세요:
 
 ```dart
 final recipe = await isar.recipes.getAll([1, 2]);
 ```
 
-### Query objects
+### 객체 쿼리
 
-Instead of getting objects by id you can also query a list of objects matching certain conditions using `.where()` and `.filter()`:
+id를 이용해서 객체를 가져오는 대신, `.where()` 과 `.filter()` 를 사용해서 특정 조건에 맞는 객체 목록을 쿼리할 수 있습니다:
 
 ```dart
 final allRecipes = await isar.recipes.where().findAll();
@@ -104,30 +104,30 @@ final favouires = await isar.recipes.filter()
   .findAll();
 ```
 
-➡️ Learn more: [Queries](queries)
+➡️ 더 알아보기: [Queries](queries)
 
-## Modifying the database
+## 데이터베이스 수정하기
 
-It's finally time to modify our collection! To create, update, or delete objects, use the respective operations wrapped in a write transaction:
+드디어 컬렉션을 수정할 때가 됐습니다! 객체를 생성, 갱신, 삭제하려면 쓰기 트랜잭션 안에서 각각의 작업들을 수행하세요.
 
 ```dart
 await isar.writeTxn(() async {
   final recipe = await isar.recipes.get(123)
 
   recipe.isFavorite = false;
-  await isar.recipes.put(recipe); // perform update operations
+  await isar.recipes.put(recipe); // 갱신 작업을 수행합니다.
 
-  await isar.recipes.delete(123); // or delete operations
+  await isar.recipes.delete(123); // 또는 삭제 작업
 });
 ```
 
-➡️ Learn more: [Transactions](transactions)
+➡️ 더 알아보기: [Transactions](transactions)
 
-### Insert object
+### 객체 삽입
 
-To persist an object in Isar, insert it into a collection. Isar's `put()` method will either insert or update the object depending on whether it already exists in the collection.
+Isar 에 객체를 보존하기 위해서, 컬렉션에 집어넣어야 합니다. 컬렉션에 객체를 삽입할 때는 Isar의 `put()` 메소드를 이용합니다. 만약 이미 들어있는 객체라면 갱신을 합니다.
 
-If the id field is `null` or `Isar.autoIncrement`, Isar will use an auto-increment id.
+id 필드가 `null` 이나 `Isar.autoIncrement` 라면, Isar 는 자동 증분 아이디를 사용합니다.
 
 ```dart
 final pancakes = Recipe()
@@ -140,9 +140,9 @@ await isar.writeTxn(() async {
 })
 ```
 
-Isar will automatically assign the id to the object if the `id` field is non-final.
+`id` 필드가 final 이 아닌 경우에 Isar 가 id를 객체에 자동으로 할당합니다.
 
-Inserting multiple objects at once is just as easy:
+여러 객체를 한 번에 삽입하는 것도 쉽습니다:
 
 ```dart
 await isar.writeTxn(() async {
@@ -150,11 +150,11 @@ await isar.writeTxn(() async {
 })
 ```
 
-### Update object
+### 객체 갱신
 
-Both creating and updating works with `collection.put(object)`. If the id is `null` (or does not exist), the object is inserted; otherwise, it is updated.
+`collection.put(object)` 를 이용해서 만들고 갱신하는 동작을 모두 할 수 있습니다. id가 `null`(또는 존재하지 않는 경우) 이라면, 객체는 추가됩니다. 그 이외의 경우에는 갱신됩니다.
 
-So if we want to unfavorite our pancakes, we can do the following:
+만약 팬케익에 즐겨찾기를 해제하는 경우, 이렇게 할 수 있습니다.
 
 ```dart
 await isar.writeTxn(() async {
@@ -163,9 +163,9 @@ await isar.writeTxn(() async {
 });
 ```
 
-### Delete object
+### 객체 삭제
 
-Want to get rid of an object in Isar? Use `collection.delete(id)`. The delete method returns whether an object with the specified id was found and deleted. If you want to delete the object with id `123`, for example, you can do:
+Isar 에 있는 것을 없애고 싶나요? `collection.delete(id)` 를 사용하세요. delete 메소드는 주어진 id 를 가진 객체를 찾아서 삭제합니다. id `123` 을 가지는 객체를 삭제하는 예시 입니다:
 
 ```dart
 await isar.writeTxn(() async {
@@ -174,7 +174,7 @@ await isar.writeTxn(() async {
 });
 ```
 
-Similarly to get and put, there is also a bulk delete operation that returns the number of deleted objects:
+get 과 put 과 마찬가지로 delete 에도 여러개를 한꺼번에 삭제하는 방법이 있습니다. 삭제된 객체의 수를 반환합니다.
 
 ```dart
 await isar.writeTxn(() async {
@@ -183,7 +183,7 @@ await isar.writeTxn(() async {
 });
 ```
 
-If you don't know the ids of the objects you want to delete, you can use a query:
+만약 삭제할 객체의 id 를 모른다면 query 를 사용할 수 있습니다.
 
 ```dart
 await isar.writeTxn(() async {
