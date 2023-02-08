@@ -1,41 +1,41 @@
 ---
-title: FAQ
+title: 자주 묻는 질문들
 ---
 
-# Frequently Asked Questions
+# 자주 묻는 질문들
 
-A random collection of frequently asked questions about Isar and Flutter databases.
+Isar 와 Flutter 데이터베이스에 대해서 자주 물어보는 질문들을 랜덤으로 뽑아봤습니다.
 
-### Why do I need a database?
+### 데이터베이스가 왜 필요하죠?
 
-> I store my data in a backend database, why do I need Isar?.
+> 저는 백엔드 데이터베이스에 데이터를 보관해요. 왜 Isar 가 필요하죠?
 
-Even today, it is very common to have no data connection if you are in a subway or a plane or if you visit your grandma, who has no Wi-Fi and a very bad cell signal. You shouldn't let bad connection cripple your app!
+심지어 요즘에도, 지하철이나 비행기 안에 있거나 와이파이가 없는 할머니 집을 갈 때는 데이터 연결이 없는 경우가 흔하게 있습니다. 나쁜 연결로 인해서 앱이 먹통이 되는 일이 없어야 합니다!
 
 ### Isar vs Hive
 
-The answer is easy: Isar was [started as a replacement for Hive](https://github.com/hivedb/hive/issues/246) and is now at a state where I recommend always using Isar over Hive.
+답은 간단합니다: Isar 는 [Hive의 대체재로 시작](https://github.com/hivedb/hive/issues/246) 했었고 지금은 저는 항상 Hive보다 Isar 를 사용하는 것을 추천합니다.
 
-### Where clauses?!
+### Where 절?!
 
-> Why do **_I_** have to choose which index to use?
+> 왜 **_내_** 가 어떤 인덱스를 사용할 지 선택해야 합니까?
 
-There are multiple reasons. Many databases use heuristics to choose the best index for a given query. The database needs to collect additional usage data (-> overhead) and might still choose the wrong index. It also makes creating a query slower.
+여러 이유가 있습니다. 대부분의 데이터베이스는 휴리스틱을 사용해서 주어진 쿼리에 가장 적합한 인덱스를 선택합니다. 데이터베이스가 추가 사용량 데이터(-> 오버헤드) 를 수집해야 하지만 여전히 잘못된 인덱스를 선택할 수 있습니다. 또한 쿼리를 작성하는 속도가 느려지게 됩니다.
 
-Nobody knows your data better than you, the developer. So you can choose the optimal index and decide for example whether you want to use an index for querying or sorting.
+개발자인 여러분보다 당신의 데이터를 잘 아는 사람은 아무도 없습니다. 따라서 최적의 인덱스를 선택하고 쿼리나 정렬에 사용할 인덱스를 결정할 수 있습니다.
 
-### Do I have to use indexes / where clauses?
+### 인덱스 / where 절을 사용해야 합니까?
 
-Nope! Isar is most likely fast enough if you only rely on filters.
+아뇨! 필터에만 의존해도 Isar 는 충분히 빠릅니다.
 
-### Is Isar fast enough?
+### Isar 가 충분히 빠른가요?
 
-Isar is among the fastest databases for mobile, so it should be fast enough for most use cases. If you run into performance issues, chances are that you are doing something wrong.
+Isar는 모바일용 데이터베이스 중 가장 빠르기 때문에 대부분의 사용 사례에서 충분히 빠릅니다. 성능 문제가 발생하면 뭔가를 잘못했을 가능성이 높습니다.
 
-### Does Isar increase the size of my app?
+### Isar 가 제 앱의 크기를 늘리나요?
 
-A little bit, yes. Isar will increase the download size of your app by about 1 - 1.5 MB. Isar Web adds only a few KB.
+조금은 그렇죠. Isar는 다운로드 크기를 1 - 1.5 MB 정도 늘릴 겁니다. Isar Web 은 몇 KB 만 추가합니다.
 
-### The docs are incorrect / there is a typo.
+### 문서가 잘못됐네요 / 오타가 있어요.
 
-Oh no, sorry. Please [open an issue](https://github.com/isar/isar/issues/new/choose) or, even better, a PR to fix it 💪.
+이런, 죄송해요. [이슈 열기](https://github.com/isar/isar/issues/new/choose) 또는 PR 을 통해서 고쳐주세요. 💪.
