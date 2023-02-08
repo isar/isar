@@ -1,41 +1,39 @@
 ---
-title: Transactions
+title: 트랜잭션
 ---
 
-# Transactions
+# 트랜잭션 (Transactions)
 
-In Isar, transactions combine multiple database operations in a single unit of work. Most interactions with Isar implicitly use transactions. Read & write access in Isar is [ACID](http://en.wikipedia.org/wiki/ACID) compliant. Transactions are automatically rolled back if an error occurs.
+Isar 에서 트랜잭션은 단일 작업 단위 안에서 여러 데이터베이스 작업들을 합치게 됩니다. Isar 와의 대부분의 상호작용은 암묵적으로 트랜잭션을 사용합니다. Isar 의 읽기 및 쓰기 접근은 [ACID](http://en.wikipedia.org/wiki/ACID) 를 준수합니다. 오류가 발생하면 트랜잭션은 자동으로 롤백됩니다.
+## 명시적 트랜잭션
 
-## Explicit transactions
+명시적 트랜잭션에서는 데이터베이스의 일관된 스냅샷을 얻을 수 있습니다. 트랜잭션 시간을 최소화하려고 노력하세요. 트랜잭션 내부에서 네트워크 호출 및 기타 장기적인 작업들은 금지됩니다.
 
-In an explicit transaction, you get a consistent snapshot of the database. Try to minimize the duration of transactions. It is forbidden to do network calls or other long-running operations in a transaction.
+트랜잭션 (특히 쓰기 트랜잭션) 은 비용이 많이 들기 때문에 항상 연속적인 작업들을 단일 트랜잭션으로 그룹화해야 합니다.
 
-Transactions (especially write transactions) do have a cost, and you should always try to group successive operations into a single transaction.
+트랜잭션은 동기식이나 비동기식일 수 있습니다. 동기적인 트랜잭션에서는 동기 연산만 수행할 수 있습니다. 비동기식 트랜잭션에서는 비동기 연산만 수행할 수 있습니다.
 
-Transactions can either be synchronous or asynchronous. In synchronous transactions, you may only use synchronous operations. In asynchronous transactions, only async operations.
+|        | 읽기         | 읽기 & 쓰기       |
+| ------ | ------------ | ----------------- |
+| 동기   | `.txnSync()` | `.writeTxnSync()` |
+| 비동기 | `.txn()`     | `.writeTxn()`     |
 
-|              | Read         | Read & Write       |
-|--------------|--------------|--------------------|
-| Synchronous  | `.txnSync()` | `.writeTxnSync()`  |
-| Asynchronous | `.txn()`     | `.writeTxn()`      |
+### 읽기 트랜잭션
 
-
-### Read transactions
-
-Explicit read transactions are optional, but they allow you to do atomic reads and rely on a consistent state of the database inside the transaction. Internally Isar always uses implicit read transactions for all read operations.
+명시적 읽기 트랜잭션은 선택 사항이지만, 원자적 읽기(atomic reads) 를 수행하고 트랜잭션 내부의 데이터베이스의 일관된 상태에 의존할 수 있게 해줍니다. 내부적으로 Isar 는 모든 읽기 작업에 항상 암시적 읽기 트랜잭션을 사용합니다.
 
 :::tip
-Async read transactions run in parallel to other read and write transactions. Pretty cool, right?
+비동기 읽기 트랜잭션은 다른 읽기 및 쓰기 트랜잭션과 병렬로 실행됩니다. 꽤 멋있지 않나요?
 :::
 
-### Write transactions
+### 쓰기 트랜잭션
 
-Unlike read operations, write operations in Isar must be wrapped in an explicit transaction.
+읽기 연산과 달리, Isar 에서 쓰기 연산은 반드시 명시적 트랜잭션으로 감싸야 합니다.
 
-When a write transaction finishes successfully, it is automatically committed, and all changes are written to disk. If an error occurs, the transaction is aborted, and all the changes are rolled back. Transactions are “all or nothing”: either all the writes within a transaction succeed, or none of them take effect to guarantee data consistency.
+쓰기 트랜잭션이 성공적으로 완료되면 자동으로 커밋되고 모든 변경사항이 디스크에 기록됩니다. 오류가 발생하면 트랜잭션이 중단되고 모든 변경 사항이 롤백됩니다. 트랜잭션은 "전부가 아니면 아무것도 없다(all or nothing)" 입니다. 트랜잭션 내의 모든 쓰기가 성공하거나, 아니면 데이터 일관성을 보장하기 위해서 모두 무효가 되거나 입니다.
 
 :::warning
-When a database operation fails, the transaction is aborted and must no longer be used. Even if you catch the error in Dart.
+데이터베이스 연산이 실패하면, 그 트랜잭션은 중단되므로 더 이상 사용할 수 없습니다. 다트에서 그 오류를 캐치(catch) 하더라도요.
 :::
 
 ```dart
@@ -53,7 +51,7 @@ await isar.writeTxn(() async {
   }
 });
 
-// BAD: move loop inside transaction
+// BAD: 트랜잭션 안으로 for 루프를 이동시키세요.
 for (var contact in getContacts()) {
   await isar.writeTxn(() async {
     await isar.contacts.put(contact);
