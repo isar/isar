@@ -1,16 +1,16 @@
 ---
-title: Indexes
+title: 인덱스
 ---
 
-# Indexes
+# 인덱스
 
-Indexes are Isar's most powerful feature. Many embedded databases offer "normal" indexes (if at all), but Isar also has composite and multi-entry indexes. Understanding how indexes work is essential to optimize query performance. Isar lets you choose which index you want to use and how you want to use it. We'll start with a quick introduction to what indexes are.
+인덱스는 Isar 의 가장 강력한 기능입니다. 대부분의 내장 데이터베이스는 "일반적인" 인덱스만을 제공하지만(인덱스가 있다면요), Isar 에는 복합 및 다중 항목 인덱스도 있습니다. 쿼리 성능을 최적화하려면 인덱스 작동 방식을 이해하는 것이 필수적입니다. Isar 를 사용하면 사용할 인덱스와 인덱스 사용 방법을 선택할 수 있습니다. 인덱스가 무엇인지에 대한 간단한 소개로 시작하겠습니다.
 
-## What are indexes?
+## 인덱스가 뭔가요?
 
-When a collection is unindexed, the order of the rows will likely not be discernible by the query as optimized in any way, and your query will therefore have to search through the objects linearly. In other words, the query will have to search through every object to find the ones matching the conditions. As you can imagine, that can take some time. Looking through every single object is not very efficient.
+컬렉션이 인덱싱되지 않은 경우, 쿼리 입장에서는 행의 순서가 전혀 최적화 되지 않은 것으로 식별되지 않을 수 있습니다. 그래서 쿼리는 객체를 선형으로 검색해야만 합니다. 즉, 쿼리는 조건과 일치하는 객체를 찾기 위해서 모든 객체를 검색해야 합니다. 예상한대로, 그건 시간이 오래 걸립니다. 모든 객체를 하나하나 훑어보는 것은 그다지 효율적이지 않습니다.
 
-For example, this `Product` collection is entirely unordered.
+예를 들어 이 `Product` 컬렉션에는 전혀 순서가 없습니다.
 
 ```dart
 @collection
@@ -23,7 +23,7 @@ class Product {
 }
 ```
 
-#### Data:
+#### 데이터:
 
 | id  | name      | price |
 | --- | --------- | ----- |
@@ -37,7 +37,7 @@ class Product {
 | 8   | Computer  | 650   |
 | 9   | Soap      | 2     |
 
-A query that tries to find all products that cost more than €30 has to search through all nine rows. That's not an issue for nine rows, but it might become a problem for 100k rows.
+가격이 30 유로 이상인 모든 제품을 찾는 쿼리는 9개 행을 모두 검색해야 합니다. 9개 행은 문제가 없지만, 10만 행이 되면 문제가 될 수 있습니다.
 
 ```dart
 final expensiveProducts = await isar.products.filter()
@@ -45,7 +45,7 @@ final expensiveProducts = await isar.products.filter()
   .findAll();
 ```
 
-To improve the performance of this query, we index the `price` property. An index is like a sorted lookup table:
+이 쿼리 성능을 개선하기 위해서 우리는 `price` 속성을 인덱스해야 합니다. 인덱스는 정렬된 룩업 테이블과 같습니다.
 
 ```dart
 @collection
@@ -59,7 +59,7 @@ class Product {
 }
 ```
 
-#### Generated index:
+#### 생선된 인덱스:
 
 | price                | id                 |
 | -------------------- | ------------------ |
@@ -73,13 +73,13 @@ class Product {
 | <mark>**60**</mark>  | <mark>**6**</mark> |
 | <mark>**650**</mark> | <mark>**8**</mark> |
 
-Now, the query can be executed a lot faster. The executor can directly jump to the last three index rows and find the corresponding objects by their id.
+이제 쿼리는 훨씬 빠르게 실행할 수 있습니다. 실행자(executor) 는 마지막 3 개의 인덱스 행으로 바로 이동해서 ID 로 해당 객체를 찾을 수 있습니다.
 
-### Sorting
+### 정렬
 
-Another cool thing: indexes can do super fast sorting. Sorted queries are costly because the database has to load all results in memory before sorting them. Even if you specify an offset or limit, they are applied after sorting.
+또 다른 멋진 점은 인덱스가 매우 빠른 정렬을 할 수 있다는 것입니다. 정렬된 쿼리는 정렬하기 전에 데이터베이스가 모든 결과를 메모리에 로드해야 하므로 비용이 많이 듭니다. 오프셋이나 제한을 지정하더라도 정렬 이후에 적용됩니다.
 
-Let's imagine we want to find the four cheapest products. We could use the following query:
+가장 싼 4개의 제품을 찾고 싶다고 가정해 보겠습니다. 다음 쿼리를 사용할 수 있습니다.
 
 ```dart
 final cheapest = await isar.products.filter()
@@ -88,11 +88,11 @@ final cheapest = await isar.products.filter()
   .findAll();
 ```
 
-In this example, the database would have to load all (!) objects, sort them by price, and return the four products with the lowest price.
+이 예에서 데이터베이스는 모든 (!) 객체를 로드하고 가격별로 정렬한 다음 가장 낮은 가격으로 4개의 제품을 반환해야 합니다.
 
-As you can probably imagine, this can be done much more efficiently with the previous index. The database takes the first four rows of the index and returns the corresponding objects since they are already in the correct order.
+예상대로, 전의 인덱스를 사용하면 훨씬 효율적으로 작업을 수행할 수 있습니다. 데이터베이스는 인덱스의 처음 4개 행을 사용하고 해당 객체가 이미 올바른 순서에 있으므로 해당 객체를 반환합니다.
 
-To use the index for sorting, we would write the query like this:
+정렬에 인덱스를 사용하려면 다음과 같이 쿼리를 작성합니다.
 
 ```dart
 final cheapestFast = await isar.products.where()
@@ -101,11 +101,11 @@ final cheapestFast = await isar.products.where()
   .findAll();
 ```
 
-The `.anyX()` where clause tells Isar to use an index just for sorting. You can also use a where clause like `.priceGreaterThan()` and get sorted results.
+`.anyX()` 여기서 절은 Isar 에 정렬에만 인덱스를 사용하도록 지시합니다. `.priceGreaterThan()` 과 같은 where 절을 사용해서 정렬된 결과를 얻을 수도 있습니다.
 
-## Unique indexes
+## 고유 인덱스(Unique indexes)
 
-A unique index ensures the index does not contain any duplicate values. It may consist of one or multiple properties. If a unique index has one property, the values in this property will be unique. If the unique index has more than one property, the combination of values in these properties is unique.
+고유 인덱스는 인덱스에 중복된 값이 포함되지 않게 합니다. 고유 인덱스는 하나 이상의 속성으로 이루어 집니다. 고유한 인덱스에 속성이 하나 있으면 이 속성의 값이 고유하게 됩니다(중복이 허용되지 않게 됩니다). 고유 인덱스에 둘 이상의 속성이 있는 경우 이러한 속성의 값 조합은 고유합니다.
 
 ```dart
 @collection
@@ -119,7 +119,7 @@ class User {
 }
 ```
 
-Any attempt to insert or update data into the unique index that causes a duplicate will result in an error:
+중복을 유발하는 데이터 삽입이나 업데이트를 시도하면 오류가 발생합니다:
 
 ```dart
 final user1 = User()
@@ -127,22 +127,22 @@ final user1 = User()
   ..username = 'user1'
   ..age = 25;
 
-await isar.users.put(user1); // -> ok
+await isar.users.put(user1); // -> 괜찮습니다.
 
 final user2 = User()
   ..id = 2;
   ..username = 'user1'
   ..age = 30;
 
-// try to insert user with same username
-await isar.users.put(user2); // -> error: unique constraint violated
+// 같은 유저 이름으로 유저 삽입을 시도
+await isar.users.put(user2); // -> 에러: 고유 제약조건 위반
 print(await isar.user.where().findAll());
 // > [{id: 1, username: 'user1', age: 25}]
 ```
 
-## Replace indexes
+## 인덱스 대체 (replace indexes)
 
-It is sometimes not preferable to throw an error if a unique constraint is violated. Instead, you may want to replace the existing object with the new one. This can be achieved by setting the `replace` property of the index to `true`.
+고유 제약조건을 위반할 경우에 에러가 발생하는 것이 좋지 않을 수도 있습니다. 대신에 기존 객체를 새로운 객체로 대체할 수 있습니다. 이는 인덱스의 `replace` 속성을 `true` 로 설정해서 수행할 수 있습니다.
 
 ```dart
 @collection
@@ -154,7 +154,7 @@ class User {
 }
 ```
 
-Now when we try to insert a user with an existing username, Isar will replace the existing user with the new one.
+이제 기존 사용자 이름을 가진 사용자를 삽입하려고 하면 Isar 가 기존 사용자를 새 사용자로 대체합니다.
 
 ```dart
 final user1 = User()
@@ -176,7 +176,7 @@ print(await isar.user.where().findAll());
 // > [{id: 2, username: 'user1' age: 30}]
 ```
 
-Replace indexes also generate `putBy()` methods that allow you to update objects instead of replacing them. The existing id is reused, and links are still populated.
+인덱스 대체는 객체를 바꾸는 대신 업데이트할 수 있는 `putBy()` 메서드를 생성합니다. 기존 ID 는 재사용되고 링크는 여전히 채워집니다.
 
 ```dart
 final user1 = User()
