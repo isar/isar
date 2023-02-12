@@ -81,7 +81,6 @@ await isar.writeTxn(() async {
 ## 다른 자료들
 
 혹시 영상으로 공부를 하는 것이 더 좋나요? 다음 영상으로 Isar를 시작해보세요:
-Are you a visual learner? Check out these videos to get started with Isar:
 
 <div class="video-block">
   <iframe max-width=100% height=auto src="https://www.youtube.com/embed/CwC9-a9hJv4" title="Isar Database" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
