@@ -216,7 +216,7 @@ class Person {
 }
 ```
 
-## Index type
+## 인덱스 유형
 
 There are different types of indexes. Most of the time, you'll want to use an `IndexType.value` index, but hash indexes are more efficient.
 
