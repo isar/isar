@@ -1,10 +1,10 @@
 ---
-title: Multi-Isolate usage
+title: 다중-Isolate 사용법
 ---
 
-# Multi-Isolate usage
+# 다중-Isolate 사용법
 
-Instead of threads, all Dart code runs inside isolates. Each isolate has its own memory heap, ensuring that none of the state in an isolate is accessible from any other isolate.
+스레드 대신, 모든 다트 코드는 isolate 안에서 돌아갑니다. 각 isolate 에는 고유한 메모리 힙이 있으므로, isolate 의 어떤 상태도 다른 isolate 에서 접근할 수 없습니다.
 
 Isar can be accessed from multiple isolates at the same time, and even watchers work across isolates. In this recipe, we will check out how to use Isar in a multi-isolate environment.
 
