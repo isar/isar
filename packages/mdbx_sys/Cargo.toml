@@ -12,4 +12,4 @@ libc = "0.2"
 [build-dependencies]
 cmake = "0.1"
 cc = "1.0"
-bindgen = { version = "0.63", default-features = false, features = ["runtime"] }
+bindgen = { version = "0.64", default-features = false, features = ["runtime"] }
