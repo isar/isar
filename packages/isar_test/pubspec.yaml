@@ -28,7 +28,7 @@ dev_dependencies:
     sdk: flutter
   isar_generator: any
   json_serializable: ^6.3.1
-  very_good_analysis: ^3.0.1
+  very_good_analysis: ^4.0.0+1
 
 dependency_overrides:
   isar:
