@@ -44,7 +44,7 @@ Execute o seguinte comando para iniciar o `build_runner`:
 dart run build_runner build
 ```
 
-If you are using Flutter, use the following:
+Se você estiver usando o Flutter, use o seguinte:
 
 ```
 flutter pub run build_runner build
