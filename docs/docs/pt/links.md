@@ -51,7 +51,7 @@ final linda = Student()
 await isar.writeTxn(() async {
   await isar.students.put(linda);
   await isar.teachers.put(mathTeacher);
-  await linda.teachers.save();
+  await linda.teacher.save();
 });
 ```
 
@@ -94,7 +94,7 @@ class Student {
 
   late String name;
 
-  final teacher = IsarLinks<Teacher>();
+  final teachers = IsarLinks<Teacher>();
 }
 ```
 
