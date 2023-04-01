@@ -8,21 +8,24 @@ use crate::core::query::{IsarCursor, IsarQuery};
 pub struct NativeQuery {}
 
 impl IsarQuery for NativeQuery {
-    type Txn = NativeTxn;
+    type Txn<'a> = NativeTxn<'a>;
 
     type Cursor<'b> = NativeCursor
     where
         Self: 'b;
 
-    fn cursor<'c>(&'c self, txn: &'c mut Self::Txn) -> Result<Self::Cursor<'c>> {
+    fn cursor<'txn, 'a>(&'a self, txn: Self::Txn<'txn>) -> Result<Self::Cursor<'a>>
+    where
+        'txn: 'a,
+    {
         todo!()
     }
 
-    fn count(&self, txn: &mut Self::Txn) -> Result<u32> {
+    fn count(&self, txn: &Self::Txn<'_>) -> Result<u32> {
         todo!()
     }
 
-    fn delete(&self, txn: &mut Self::Txn) -> Result<u32> {
+    fn delete(&self, txn: &Self::Txn<'_>) -> Result<u32> {
         todo!()
     }
 }
@@ -35,6 +38,10 @@ impl IsarCursor for NativeCursor {
         Self: 'b;
 
     fn next(&mut self) -> Result<Option<Self::Reader<'_>>> {
+        todo!()
+    }
+
+    fn close(self) -> Result<()> {
         todo!()
     }
 }

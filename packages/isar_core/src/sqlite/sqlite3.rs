@@ -1,10 +1,8 @@
 use crate::core::error::{IsarError, Result};
 use libc::c_void;
 use libsqlite3_sys as ffi;
-use std::{
-    ffi::{c_char, c_int, CStr, CString},
-    ptr,
-};
+use std::ffi::{c_char, c_int, CStr, CString};
+use std::ptr;
 
 pub struct SQLite3 {
     db: *mut ffi::sqlite3,
@@ -61,9 +59,9 @@ impl SQLite3 {
         while stmt.step()? {
             let table_type = stmt.get_text(2);
             if table_type == "table" {
-                let name = stmt.get_text(1);
-                if !name.starts_with("sqlite_") {
-                    names.push(name.to_string());
+                let name = stmt.get_text(1).to_uppercase();
+                if !name.starts_with("SQLITE_") {
+                    names.push(name);
                 }
             }
         }
@@ -74,7 +72,7 @@ impl SQLite3 {
         let mut stmt = self.prepare(&format!("PRAGMA table_info({})", table_name))?;
         let mut cols = vec![];
         while stmt.step()? {
-            let name = stmt.get_text(1).to_string();
+            let name = stmt.get_text(1).to_uppercase();
             let type_ = stmt.get_text(2).to_uppercase();
             cols.push((name, type_));
         }
@@ -85,10 +83,10 @@ impl SQLite3 {
         let mut stmt = self.prepare(&format!("PRAGMA index_list({})", table_name))?;
         let mut index_names_unique = vec![];
         while stmt.step()? {
-            let name = stmt.get_text(1);
-            if !name.starts_with("sqlite_") {
+            let name = stmt.get_text(1).to_uppercase();
+            if !name.starts_with("SQLITE_") {
                 let unique = stmt.get_int(2) == 1;
-                index_names_unique.push((name.to_string(), unique));
+                index_names_unique.push((name, unique));
             }
         }
         let mut indexes = vec![];
@@ -96,7 +94,7 @@ impl SQLite3 {
             let mut stmt = self.prepare(&format!("PRAGMA index_info({})", index_name))?;
             let mut cols = vec![];
             while stmt.step()? {
-                cols.push(stmt.get_text(2).to_string());
+                cols.push(stmt.get_text(2).to_uppercase());
             }
             indexes.push((index_name, unique, cols));
         }

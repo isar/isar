@@ -1,84 +1,40 @@
-use crate::cursor::IsarCursors;
-use crate::error::{IsarError, Result};
-use crate::index::index_key::IndexKey;
-use crate::index::index_key_builder::IndexKeyBuilder;
-use crate::mdbx::db::Db;
-use crate::object::id::{BytesToId, IdToBytes};
-use crate::object::isar_object::IsarObject;
-use crate::object::property::Property;
-use crate::schema::index_schema::IndexType;
 use intmap::IntMap;
 use xxhash_rust::xxh3::xxh3_64;
+
+use crate::core::error::IsarError;
+
+use super::{mdbx::db::Db, native_collection::NativeProperty, native_reader::NativeReader};
 
 pub mod index_key;
 pub(crate) mod index_key_builder;
 
 #[derive(Clone, Eq, PartialEq)]
-pub struct IndexProperty {
-    pub property: Property,
-    pub index_type: IndexType,
-    pub case_sensitive: bool,
-}
-
-impl IndexProperty {
-    pub(crate) fn new(property: Property, index_type: IndexType, case_sensitive: bool) -> Self {
-        IndexProperty {
-            property,
-            index_type,
-            case_sensitive,
-        }
-    }
-
-    pub fn get_string_with_case(&self, object: IsarObject) -> Option<String> {
-        object.read_string(self.property.offset).map(|str| {
-            if self.case_sensitive {
-                str.to_string()
-            } else {
-                str.to_lowercase()
-            }
-        })
-    }
-
-    fn is_multi_entry(&self) -> bool {
-        self.property.data_type.get_element_type().is_some() && self.index_type != IndexType::Hash
-    }
-}
-
-#[derive(Clone, Eq, PartialEq)]
-pub(crate) struct IsarIndex {
+pub(crate) struct NativeIndex {
     pub name: String,
     pub id: u64,
-    pub properties: Vec<IndexProperty>,
+    pub properties: Vec<NativeProperty>,
     pub unique: bool,
-    pub replace: bool,
     pub multi_entry: bool,
     db: Db,
 }
 
-impl IsarIndex {
+impl NativeIndex {
     pub const MAX_STRING_INDEX_SIZE: usize = 1024;
 
-    pub fn new(
-        name: &str,
-        db: Db,
-        properties: Vec<IndexProperty>,
-        unique: bool,
-        replace: bool,
-    ) -> Self {
+    pub fn new(name: &str, db: Db, properties: Vec<NativeProperty>, unique: bool) -> Self {
         let id = xxh3_64(name.as_bytes());
-        let multi_entry = properties.first().unwrap().is_multi_entry();
-        IsarIndex {
+        let multi_entry = properties.first().unwrap().data_type.is_list();
+        NativeIndex {
             name: name.to_string(),
             id,
             properties,
             unique,
-            replace,
             multi_entry,
             db,
         }
     }
 
-    pub fn create_for_object<F>(
+    /*pub fn create_for_object<F>(
         &self,
         cursors: &IsarCursors,
         id: i64,
@@ -201,5 +157,5 @@ impl IsarIndex {
         } else {
             Ok(())
         }
-    }
+    }*/
 }

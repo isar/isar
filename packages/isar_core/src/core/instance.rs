@@ -2,8 +2,6 @@ use super::error::Result;
 use super::insert::IsarInsert;
 use super::query_builder::IsarQueryBuilder;
 use super::schema::IsarSchema;
-use super::txn::IsarTxn;
-use std::sync::Arc;
 
 pub struct CompactCondition {
     pub min_file_size: u64,
@@ -12,11 +10,9 @@ pub struct CompactCondition {
 }
 
 pub trait IsarInstance {
-    type Txn<'a>: IsarTxn
-    where
-        Self: 'a;
+    type Txn<'a>;
 
-    type Insert<'a>: IsarInsert
+    type Insert<'a>: IsarInsert<'a>
     where
         Self: 'a;
 
@@ -24,20 +20,32 @@ pub trait IsarInstance {
     where
         Self: 'a;
 
+    type Instance;
+
+    fn get(instance_id: u64) -> Option<Self::Instance>;
+
     fn open(
+        instance_id: u64,
         name: &str,
-        dir: Option<&str>,
+        dir: &str,
         schema: IsarSchema,
         max_size_mib: usize,
         relaxed_durability: bool,
         compact_condition: Option<CompactCondition>,
-    ) -> Result<Arc<Self>>;
+    ) -> Result<Self::Instance>;
 
-    fn schema_hash(&self) -> u64;
+    fn begin_txn(&self, write: bool) -> Result<Self::Txn<'_>>;
 
-    fn txn(&self, write: bool) -> Result<Self::Txn<'_>>;
+    fn commit_txn(&self, txn: Self::Txn<'_>) -> Result<()>;
+
+    fn abort_txn(&self, txn: Self::Txn<'_>);
 
     fn query(&self, collection_index: usize) -> Result<Self::QueryBuilder<'_>>;
 
-    fn insert(&self, collection_index: usize, count: usize) -> Result<Self::Insert<'_>>;
+    fn insert<'a>(
+        &'a self,
+        txn: Self::Txn<'a>,
+        collection_index: usize,
+        count: usize,
+    ) -> Result<Self::Insert<'a>>;
 }

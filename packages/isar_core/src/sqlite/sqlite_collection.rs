@@ -3,11 +3,12 @@ use crate::core::data_type::DataType;
 pub struct SQLiteProperty {
     pub name: String,
     pub data_type: DataType,
-    pub collection_index: Option<usize>,
+    // for embedded objects
+    pub collection_index: Option<u16>,
 }
 
 impl SQLiteProperty {
-    pub fn new(name: &str, data_type: DataType, collection_index: Option<usize>) -> Self {
+    pub fn new(name: &str, data_type: DataType, collection_index: Option<u16>) -> Self {
         SQLiteProperty {
             name: name.to_string(),
             data_type,

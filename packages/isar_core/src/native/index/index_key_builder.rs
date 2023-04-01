@@ -1,11 +1,6 @@
-use crate::error::Result;
-use crate::index::index_key::IndexKey;
-use crate::index::IndexProperty;
-use crate::object::data_type::DataType;
-use crate::object::isar_object::IsarObject;
-use crate::schema::index_schema::IndexType;
+use crate::core::data_type::DataType;
 
-pub(crate) struct IndexKeyBuilder<'a> {
+/*pub(crate) struct IndexKeyBuilder<'a> {
     properties: &'a [IndexProperty],
 }
 
@@ -142,3 +137,4 @@ impl<'a> IndexKeyBuilder<'a> {
 
 #[cfg(test)]
 mod tests {}
+*/

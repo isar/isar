@@ -7,5 +7,4 @@ pub mod query;
 pub mod query_builder;
 pub mod reader;
 pub mod schema;
-pub mod txn;
 pub mod writer;

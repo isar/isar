@@ -26,12 +26,16 @@ impl<'a> SQLiteQuery<'a> {
 }
 
 impl<'a> IsarQuery for SQLiteQuery<'a> {
-    type Txn = SQLiteTxn<'a>;
+    type Txn<'t> = SQLiteTxn;
 
     type Cursor<'b> = SQLiteCursor<'b> where Self: 'b;
 
-    fn cursor<'b>(&'b self, txn: &'b mut Self::Txn) -> Result<Self::Cursor<'b>> {
-        let mut sql = String::new();
+    fn cursor<'txn, 'b>(&'b self, txn: SQLiteTxn) -> Result<Self::Cursor<'b>>
+    where
+        'txn: 'b,
+    {
+        todo!()
+        /*let mut sql = String::new();
         sql.push_str("SELECT _rowid_");
         for prop in &self.collection.properties {
             sql.push(',');
@@ -46,25 +50,25 @@ impl<'a> IsarQuery for SQLiteQuery<'a> {
             stmt,
             collection: self.collection,
             all_collections: self.all_collections,
-        })
+        })*/
     }
 
-    fn count(&self, txn: &mut Self::Txn) -> Result<u32> {
+    fn count(&self, txn: &SQLiteTxn) -> Result<u32> {
         let sql = format!("SELECT COUNT(*) {}", self.query);
         eprintln!("SQL: {}", sql);
 
         let sqlite = txn.get_sqlite(false)?;
         let mut stmt = sqlite.prepare(&sql)?;
-        stmt.step()?;
+        txn.guard(|| stmt.step())?;
         let count = stmt.get_long(0);
         Ok(count as u32)
     }
 
-    fn delete(&self, txn: &mut Self::Txn) -> Result<u32> {
+    fn delete(&self, txn: &SQLiteTxn) -> Result<u32> {
         let sql = format!("DELETE {}", self.query);
         let sqlite = txn.get_sqlite(true)?;
         let mut stmt = sqlite.prepare(&sql)?;
-        stmt.step()?;
+        txn.guard(|| stmt.step())?;
         let count = stmt.count_changes();
         Ok(count as u32)
     }
@@ -87,5 +91,9 @@ impl<'a> IsarCursor for SQLiteCursor<'a> {
         } else {
             Ok(None)
         }
+    }
+
+    fn close(self) -> Result<()> {
+        todo!()
     }
 }

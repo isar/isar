@@ -1,38 +1,25 @@
-use super::mdbx::cursor::UnboundCursor;
-use super::mdbx::env::Env;
+use super::mdbx::cursor::{Cursor, UnboundCursor};
+use super::mdbx::db::Db;
 use super::mdbx::txn::Txn;
 use crate::core::error::{IsarError, Result};
-use ouroboros::self_referencing;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
+use std::ops::{Deref, DerefMut};
 
-#[self_referencing]
-struct TxnEnv {
-    env: Env,
-    #[borrows(env)]
-    #[covariant]
-    txn: Option<Txn<'this>>,
-}
-
-pub struct NativeTxn {
+pub struct NativeTxn<'env> {
     instance_id: u64,
-    txn_env: TxnEnv,
-    write: bool,
-    unbound_cursors: RefCell<Option<Vec<UnboundCursor>>>,
+    txn: Txn<'env>,
+    active: Cell<bool>,
+    unbound_cursors: RefCell<Vec<UnboundCursor>>,
 }
 
-impl NativeTxn {
-    fn new(instance_id: u64, env: Env, write: bool) -> Result<Self> {
-        let txn_env = TxnEnv::try_new(env, |env| {
-            let txn = env.txn(write)?;
-            Ok(Some(txn))
-        })?;
-        let unbound_cursors = RefCell::new(Some(Vec::new()));
-        Ok(Self {
+impl<'env> NativeTxn<'env> {
+    pub(crate) fn new(instance_id: u64, txn: Txn<'env>) -> Self {
+        Self {
             instance_id,
-            txn_env,
-            write,
-            unbound_cursors,
-        })
+            txn,
+            active: Cell::new(true),
+            unbound_cursors: RefCell::new(Vec::new()),
+        }
     }
 
     pub(crate) fn verify_instance_id(&self, instance_id: u64) -> Result<()> {
@@ -43,24 +30,90 @@ impl NativeTxn {
         }
     }
 
-    pub(crate) fn commit(&mut self, instance_id: u64) -> Result<()> {
-        let txn = self.txn_env.with_txn_mut(|txn| txn.take());
-        if let Some(txn) = txn {
-            txn.commit()?;
-            Ok(())
-        } else {
-            Err(IsarError::TransactionClosed {})
-        }
+    pub(crate) fn get_cursor<'txn>(&'txn self, db: Db) -> Result<NativeCursor<'txn>>
+    where
+        'env: 'txn,
+    {
+        let unbound = self
+            .unbound_cursors
+            .borrow_mut()
+            .pop()
+            .unwrap_or_else(UnboundCursor::new);
+        let cursor = unbound.bind(&self.txn, db)?;
+
+        Ok(NativeCursor {
+            txn: self,
+            cursor: Some(cursor),
+        })
     }
 
-    pub(crate) fn abort(&mut self, instance_id: u64) {
-        let txn = self.txn_env.with_txn_mut(|txn| txn.take());
-        if let Some(txn) = txn {
-            txn.abort();
+    pub(crate) fn guard<T, F>(&self, job: F) -> Result<T>
+    where
+        F: FnOnce() -> Result<T>,
+    {
+        if !self.active.get() {
+            return Err(IsarError::TransactionClosed {});
         }
+        let result = job();
+        if !result.is_ok() {
+            self.active.replace(false);
+        }
+        result
     }
 
-    pub(crate) fn finalize(self) -> Env {
-        self.txn_env.into_heads().env
+    pub fn open_db(&self, name: &str, int_key: bool, dup: bool) -> Result<Db> {
+        if !self.active.get() {
+            return Err(IsarError::TransactionClosed {});
+        }
+        Db::open(&self.txn, name, int_key, dup)
+    }
+
+    pub fn drop_db(&self, db: Db) -> Result<()> {
+        if !self.active.get() {
+            return Err(IsarError::TransactionClosed {});
+        }
+        db.drop(&self.txn)
+    }
+
+    pub(crate) fn commit(self, instance_id: u64) -> Result<()> {
+        self.verify_instance_id(instance_id)?;
+        if !self.active.get() {
+            return Err(IsarError::TransactionClosed {});
+        }
+        self.txn.commit()
+    }
+
+    pub(crate) fn abort(self, instance_id: u64) {
+        if self.active.get() && self.verify_instance_id(instance_id).is_ok() {
+            self.txn.abort()
+        }
+    }
+}
+
+pub(crate) struct NativeCursor<'txn> {
+    txn: &'txn NativeTxn<'txn>,
+    cursor: Option<Cursor<'txn>>,
+}
+
+impl<'txn> Deref for NativeCursor<'txn> {
+    type Target = Cursor<'txn>;
+
+    fn deref(&self) -> &Self::Target {
+        self.cursor.as_ref().unwrap()
+    }
+}
+
+impl<'txn> DerefMut for NativeCursor<'txn> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.cursor.as_mut().unwrap()
+    }
+}
+
+impl<'txn> Drop for NativeCursor<'txn> {
+    fn drop(&mut self) {
+        let cursor = self.cursor.take().unwrap();
+        if self.txn.unbound_cursors.borrow().len() < 3 {
+            self.txn.unbound_cursors.borrow_mut().push(cursor.unbind());
+        }
     }
 }

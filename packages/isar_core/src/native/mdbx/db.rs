@@ -16,34 +16,19 @@ impl Db {
         self.dbi as u64
     }
 
-    pub fn open(
-        txn: &Txn,
-        name: Option<&str>,
-        int_key: bool,
-        dup: bool,
-        int_dup: bool,
-    ) -> Result<Self> {
+    pub fn open(txn: &Txn, name: &str, int_key: bool, dup: bool) -> Result<Self> {
         let mut flags = ffi::MDBX_CREATE;
         if int_key {
             flags |= ffi::MDBX_INTEGERKEY;
         }
         if dup {
             flags |= ffi::MDBX_DUPSORT;
-            if int_dup {
-                flags |= ffi::MDBX_INTEGERDUP | ffi::MDBX_DUPFIXED;
-            }
         }
 
         let mut dbi: ffi::MDBX_dbi = 0;
-        if let Some(name) = name {
-            let name = CString::new(name.as_bytes()).unwrap();
-            unsafe {
-                mdbx_result(ffi::mdbx_dbi_open(txn.txn, name.as_ptr(), flags, &mut dbi))?;
-            }
-        } else {
-            unsafe {
-                mdbx_result(ffi::mdbx_dbi_open(txn.txn, ptr::null(), flags, &mut dbi))?;
-            }
+        let name = CString::new(name.as_bytes()).unwrap();
+        unsafe {
+            mdbx_result(ffi::mdbx_dbi_open(txn.txn, name.as_ptr(), flags, &mut dbi))?;
         }
 
         Ok(Self { dbi, dup })

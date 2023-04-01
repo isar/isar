@@ -5,7 +5,7 @@ use crate::core::error::{IsarError, Result};
 use crate::core::insert::IsarInsert;
 
 pub struct SQLiteInsert<'a> {
-    txn: &'a SQLiteTxn<'a>,
+    txn: SQLiteTxn,
     collection: &'a SQLiteCollection,
     all_collections: &'a Vec<SQLiteCollection>,
     inserted_count: usize,
@@ -14,7 +14,7 @@ pub struct SQLiteInsert<'a> {
 
 impl<'a> SQLiteInsert<'a> {
     pub fn new(
-        txn: &'a SQLiteTxn<'a>,
+        txn: SQLiteTxn,
         collection: &'a SQLiteCollection,
         all_collections: &'a Vec<SQLiteCollection>,
         count: usize,
@@ -28,7 +28,7 @@ impl<'a> SQLiteInsert<'a> {
         }
     }
 
-    fn get_writer_with_buffer(&self, buffer: Option<Vec<u8>>) -> Result<SQLiteWriter<'a>> {
+    fn get_writer_with_buffer(&'a self, buffer: Option<Vec<u8>>) -> Result<SQLiteWriter<'a>> {
         if self.inserted_count >= self.count {
             return Err(IsarError::IllegalArg {
                 message: "No more objects to insert".to_string(),
@@ -76,11 +76,13 @@ impl<'a> SQLiteInsert<'a> {
 impl<'a> IsarInsert<'a> for SQLiteInsert<'a> {
     type Writer = SQLiteWriter<'a>;
 
-    fn get_writer(&self) -> Result<Self::Writer> {
+    type Txn<'txn> = SQLiteTxn;
+
+    fn get_writer(&'a self) -> Result<Self::Writer> {
         self.get_writer_with_buffer(None)
     }
 
-    fn insert(&mut self, writer: Self::Writer) -> Result<Option<Self::Writer>> {
+    fn insert(&'a mut self, writer: Self::Writer) -> Result<Option<Self::Writer>> {
         if writer.next() {
             Ok(Some(writer))
         } else {
@@ -98,5 +100,9 @@ impl<'a> IsarInsert<'a> for SQLiteInsert<'a> {
                 Ok(None)
             }
         }
+    }
+
+    fn finish(self) -> Result<Self::Txn<'a>> {
+        Ok(self.txn)
     }
 }

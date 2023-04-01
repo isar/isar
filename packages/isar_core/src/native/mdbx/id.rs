@@ -1,6 +1,6 @@
 use std::{borrow::Cow, cmp::Ordering};
 
-use crate::mdbx::Key;
+use super::Key;
 
 pub trait BytesToId {
     fn to_id(&self) -> i64;

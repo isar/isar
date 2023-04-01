@@ -1,9 +1,11 @@
-use crate::index::IsarIndex;
-use crate::mdbx::Key;
 use std::borrow::Cow;
 use std::cmp;
 use std::cmp::Ordering;
 use xxhash_rust::xxh3::xxh3_64;
+
+use crate::native::mdbx::Key;
+
+use super::NativeIndex;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct IndexKey {
@@ -71,8 +73,8 @@ impl IndexKey {
                 value.to_lowercase()
             };
             let bytes = value.as_bytes();
-            if bytes.len() >= IsarIndex::MAX_STRING_INDEX_SIZE {
-                let index_bytes = &bytes[0..IsarIndex::MAX_STRING_INDEX_SIZE];
+            if bytes.len() >= NativeIndex::MAX_STRING_INDEX_SIZE {
+                let index_bytes = &bytes[0..NativeIndex::MAX_STRING_INDEX_SIZE];
                 self.bytes.extend_from_slice(index_bytes);
                 let hash = xxh3_64(bytes);
                 self.bytes.extend_from_slice(&u64::to_le_bytes(hash));
@@ -161,7 +163,7 @@ impl Ord for IndexKey {
 
 #[cfg(test)]
 mod tests {
-    use crate::object::isar_object::IsarObject;
+    use crate::native::native_reader::NativeReader;
 
     use super::*;
     use float_next_after::NextAfter;
@@ -169,7 +171,7 @@ mod tests {
     #[test]
     fn test_add_byte() {
         let pairs = vec![
-            (IsarObject::NULL_BYTE, vec![123, 0]),
+            //(NativeReader::NULL_BYTE, vec![123, 0]),
             (123, vec![123, 123]),
             (255, vec![123, 255]),
         ];

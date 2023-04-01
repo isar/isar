@@ -16,7 +16,7 @@ const MIB: isize = 1 << 20;
 impl Env {
     pub fn create(
         path: &str,
-        max_dbs: u64,
+        max_dbs: usize,
         max_size_mib: usize,
         relaxed_durability: bool,
     ) -> Result<Env> {
@@ -27,7 +27,7 @@ impl Env {
             mdbx_result(ffi::mdbx_env_set_option(
                 env,
                 ffi::MDBX_option_t::MDBX_opt_max_db,
-                max_dbs,
+                max_dbs as u64,
             ))?;
 
             let mut flags = ffi::MDBX_NOTLS | ffi::MDBX_COALESCE | ffi::MDBX_NOSUBDIR;

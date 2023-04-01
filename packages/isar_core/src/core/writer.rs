@@ -1,3 +1,11 @@
+pub trait IsarInsert<'a>: IsarWriter<'a> {
+    type Txn<'txn>;
+
+    fn next(self) -> Result<Option<Self>>;
+
+    fn finish(self) -> Result<Self::Txn<'a>>;
+}
+
 pub trait IsarWriter<'a> {
     type ObjectWriter: IsarWriter<'a>;
 

@@ -115,14 +115,3 @@ fn verify_collection(col: &CollectionSchema, collections: &[CollectionSchema]) -
 
     Ok(())
 }
-
-pub fn hash_schema(mut schema: IsarSchema) -> u64 {
-    for col in &mut schema.collections {
-        col.properties.sort_by(|a, b| a.name.cmp(&b.name));
-        col.indexes.sort_by(|a, b| a.name.cmp(&b.name));
-    }
-    schema.collections.sort_by(|a, b| a.name.cmp(&b.name));
-    let mut hasher = Xxh3::new();
-    schema.hash(&mut hasher);
-    hasher.finish()
-}

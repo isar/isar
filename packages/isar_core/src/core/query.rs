@@ -2,17 +2,19 @@ use super::error::Result;
 use super::reader::IsarReader;
 
 pub trait IsarQuery {
-    type Txn;
+    type Txn<'a>;
 
-    type Cursor<'b>: IsarCursor
+    type Cursor<'a>: IsarCursor
     where
-        Self: 'b;
+        Self: 'a;
 
-    fn cursor<'c>(&'c self, txn: &'c mut Self::Txn) -> Result<Self::Cursor<'c>>;
+    fn cursor<'txn, 'a>(&'a self, txn: Self::Txn<'txn>) -> Result<Self::Cursor<'a>>
+    where
+        'txn: 'a;
 
-    fn count(&self, txn: &mut Self::Txn) -> Result<u32>;
+    fn count(&self, txn: &Self::Txn<'_>) -> Result<u32>;
 
-    fn delete(&self, txn: &mut Self::Txn) -> Result<u32>;
+    fn delete(&self, txn: &Self::Txn<'_>) -> Result<u32>;
 
     /*fn export_json(
         &self,
@@ -29,4 +31,6 @@ pub trait IsarCursor {
         Self: 'b;
 
     fn next(&mut self) -> Result<Option<Self::Reader<'_>>>;
+
+    fn close(self) -> Result<()>;
 }

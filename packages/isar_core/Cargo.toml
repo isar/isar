@@ -18,7 +18,7 @@ intmap = "2.0.0"
 snafu = "0.7.0"
 thread_local = "1.1.4"
 libsqlite3-sys = { version="0.25.2", features=["bundled"] }
-ouroboros = "0.15.5"
+ouroboros = "0.15.6"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 widestring = "1.0"

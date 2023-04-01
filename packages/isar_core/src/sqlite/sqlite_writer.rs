@@ -124,7 +124,7 @@ impl<'a> IsarWriter<'a> for SQLiteWriter<'a> {
         let property_index = self.property % (self.collection.properties.len() + 1);
         let property = &self.collection.properties[property_index - 1];
         let collection_index = property.collection_index.unwrap();
-        let target_collection = &self.all_collections[collection_index];
+        let target_collection = &self.all_collections[collection_index as usize];
 
         if let Some(mut buffer) = self.buffer.take() {
             buffer.clear();
@@ -306,7 +306,7 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
         self.write_property_name(&property.name);
 
         let collection_index = property.collection_index.unwrap();
-        let target_collection = &self.all_collections[collection_index];
+        let target_collection = &self.all_collections[collection_index as usize];
 
         let buffer = self.buffer.take().unwrap();
         SQLiteObjectWriter::new(target_collection, self.all_collections, buffer)
@@ -334,7 +334,7 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
 }
 
 pub struct SQLiteListWriter<'a> {
-    collection_index: Option<usize>,
+    collection_index: Option<u16>,
     all_collections: &'a Vec<SQLiteCollection>,
     first: bool,
     buffer: Option<Vec<u8>>,
@@ -342,7 +342,7 @@ pub struct SQLiteListWriter<'a> {
 
 impl<'a> SQLiteListWriter<'a> {
     fn new(
-        collection_index: Option<usize>,
+        collection_index: Option<u16>,
         all_collections: &'a Vec<SQLiteCollection>,
         mut buffer: Vec<u8>,
     ) -> Self {
@@ -455,7 +455,7 @@ impl<'a> IsarWriter<'a> for SQLiteListWriter<'a> {
 
     fn begin_object(&mut self) -> Self::ObjectWriter {
         let collection_index = self.collection_index.unwrap();
-        let target_collection = &self.all_collections[collection_index];
+        let target_collection = &self.all_collections[collection_index as usize];
 
         let buffer = self.buffer.take().unwrap();
         SQLiteObjectWriter::new(target_collection, self.all_collections, buffer)

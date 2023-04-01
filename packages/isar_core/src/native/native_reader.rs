@@ -17,7 +17,8 @@ impl<'a> IsarReader for NativeReader<'a> {
 
     fn is_null(&self, index: usize) -> bool {
         let property = &self.collection.properties[index];
-        self.object.is_null(property.offset, property.data_type)
+        self.object
+            .is_null(property.offset as usize, property.data_type)
     }
 
     fn read_id(&self) -> i64 {
@@ -26,45 +27,45 @@ impl<'a> IsarReader for NativeReader<'a> {
 
     fn read_byte(&self, index: usize) -> u8 {
         let property = &self.collection.properties[index];
-        self.object.read_byte(property.offset)
+        self.object.read_byte(property.offset as usize)
     }
 
     fn read_bool(&self, index: usize) -> Option<bool> {
         let property = &self.collection.properties[index];
-        self.object.read_bool(property.offset)
+        self.object.read_bool(property.offset as usize)
     }
 
     fn read_int(&self, index: usize) -> i32 {
         let property = &self.collection.properties[index];
-        self.object.read_int(property.offset)
+        self.object.read_int(property.offset as usize)
     }
 
     fn read_float(&self, index: usize) -> f32 {
         let property = &self.collection.properties[index];
-        self.object.read_float(property.offset)
+        self.object.read_float(property.offset as usize)
     }
 
     fn read_long(&self, index: usize) -> i64 {
         let property = &self.collection.properties[index];
-        self.object.read_long(property.offset)
+        self.object.read_long(property.offset as usize)
     }
 
     fn read_double(&self, index: usize) -> f64 {
         let property = &self.collection.properties[index];
-        self.object.read_double(property.offset)
+        self.object.read_double(property.offset as usize)
     }
 
     fn read_string(&self, index: usize) -> Option<&str> {
         let property = &self.collection.properties[index];
-        self.object.read_string(property.offset)
+        self.object.read_string(property.offset as usize)
     }
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>> {
         let property = &self.collection.properties[index];
-        let object = self.object.read_object(property.offset)?;
+        let object = self.object.read_object(property.offset as usize)?;
 
         let collection_index = property.collection_index.unwrap();
-        let collection = &self.all_collections[collection_index];
+        let collection = &self.all_collections[collection_index as usize];
         Some(NativeReader {
             id: i64::MIN,
             object,
@@ -82,7 +83,9 @@ impl<'a> IsarReader for NativeReader<'a> {
             DataType::StringList | DataType::ObjectList => 6,
             _ => panic!("Invalid list type"),
         };
-        let (object, length) = self.object.read_list(property.offset, element_size)?;
+        let (object, length) = self
+            .object
+            .read_list(property.offset as usize, element_size)?;
         Some((
             NativeListReader {
                 object,
@@ -144,7 +147,7 @@ impl<'a> IsarReader for NativeListReader<'a> {
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>> {
         let object = self.object.read_object(index * 6)?;
         let collection_index = self.property.collection_index.unwrap();
-        let collection = &self.all_collections[collection_index];
+        let collection = &self.all_collections[collection_index as usize];
         Some(NativeReader {
             id: i64::MIN,
             object,

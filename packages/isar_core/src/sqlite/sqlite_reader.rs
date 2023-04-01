@@ -92,7 +92,7 @@ impl<'a> IsarReader for SQLiteReader<'a> {
         let text = self.stmt.get_text(index);
         if let Ok(Value::Object(object)) = serde_json::from_str(text) {
             let collection_index = self.collection.properties[index].collection_index.unwrap();
-            let collection = &self.all_collections[collection_index];
+            let collection = &self.all_collections[collection_index as usize];
             return Some(SQLiteObjectReader {
                 object: Cow::Owned(object),
                 collection,
@@ -215,7 +215,7 @@ impl<'a> IsarReader for SQLiteObjectReader<'a> {
         let value = self.object.get(&property.name);
         if let Some(Value::Object(object)) = value {
             let collection_index = property.collection_index.unwrap();
-            let collection = &self.all_collections[collection_index];
+            let collection = &self.all_collections[collection_index as usize];
             Some(SQLiteObjectReader {
                 object: Cow::Borrowed(object),
                 collection,
@@ -244,7 +244,7 @@ impl<'a> IsarReader for SQLiteObjectReader<'a> {
 
 pub struct SQLiteListReader<'a> {
     list: Cow<'a, Vec<Value>>,
-    collection_index: Option<usize>,
+    collection_index: Option<u16>,
     all_collections: &'a Vec<SQLiteCollection>,
 }
 
@@ -325,7 +325,7 @@ impl<'a> IsarReader for SQLiteListReader<'a> {
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>> {
         if let Some(Value::Object(object)) = self.list.get(index) {
             let collection_index = self.collection_index.unwrap();
-            let collection = &self.all_collections[collection_index];
+            let collection = &self.all_collections[collection_index as usize];
             Some(SQLiteObjectReader {
                 object: Cow::Borrowed(object),
                 collection,
