@@ -1,3 +1,5 @@
+use serde_json::Value;
+
 pub const NULL_BOOL: u8 = 0;
 pub const FALSE_BOOL: u8 = 1;
 pub const TRUE_BOOL: u8 = 2;
@@ -30,6 +32,8 @@ pub trait IsarReader {
     fn read_double(&self, index: usize) -> f64;
 
     fn read_string(&self, index: usize) -> Option<&str>;
+
+    fn read_any(&self, index: usize) -> Option<Value>;
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>>;
 

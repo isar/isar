@@ -1,60 +1,17 @@
-use super::sqlite3::SQLiteStatement;
+use std::cell::Cell;
+
 use super::sqlite_collection::SQLiteCollection;
+use super::sqlite_insert::SQLiteInsert;
 use crate::core::writer::IsarWriter;
-use serde_json::ser::{CompactFormatter, Formatter};
+use serde_json::{
+    ser::{CompactFormatter, Formatter},
+    Value,
+};
 
-pub struct SQLiteWriter<'a> {
-    stmt: SQLiteStatement<'a>,
-    collection: &'a SQLiteCollection,
-    all_collections: &'a Vec<SQLiteCollection>,
-    property: usize,
-    count: usize,
-    buffer: Option<Vec<u8>>,
-}
-
-impl<'a> SQLiteWriter<'a> {
-    pub fn new(
-        stmt: SQLiteStatement<'a>,
-        count: usize,
-        collection: &'a SQLiteCollection,
-        all_collections: &'a Vec<SQLiteCollection>,
-        buffer: Option<Vec<u8>>,
-    ) -> SQLiteWriter<'a> {
-        SQLiteWriter {
-            stmt,
-            collection,
-            all_collections,
-            property: 0,
-            count,
-            buffer: Some(buffer.unwrap_or(Vec::new())),
-        }
-    }
-
-    pub fn next(&self) -> bool {
-        let properties_and_id = self.collection.properties.len() + 1;
-        assert!(self.property % properties_and_id == 0);
-        if self.property < self.count * properties_and_id {
-            true
-        } else {
-            false
-        }
-    }
-
-    pub fn finalize(self) -> (SQLiteStatement<'a>, usize, Vec<u8>) {
-        let buffer = self.buffer.unwrap();
-        (self.stmt, self.count, buffer)
-    }
-}
-
-impl<'a> IsarWriter<'a> for SQLiteWriter<'a> {
+impl<'a> IsarWriter<'a> for SQLiteInsert<'a> {
     type ObjectWriter = SQLiteObjectWriter<'a>;
 
     type ListWriter = SQLiteListWriter<'a>;
-
-    fn write_id(&mut self, id: i64) {
-        let _ = self.stmt.bind_long(self.property, id);
-        self.property += 1;
-    }
 
     fn write_null(&mut self) {
         let _ = self.stmt.bind_null(self.property);
@@ -66,12 +23,9 @@ impl<'a> IsarWriter<'a> for SQLiteWriter<'a> {
         self.property += 1;
     }
 
-    fn write_bool(&mut self, value: Option<bool>) {
-        if let Some(value) = value {
-            let _ = self.stmt.bind_int(self.property, value as i32);
-        } else {
-            let _ = self.stmt.bind_null(self.property);
-        }
+    fn write_bool(&mut self, value: bool) {
+        let value = if value { 1 } else { 0 };
+        let _ = self.stmt.bind_int(self.property, value);
         self.property += 1;
     }
 
@@ -111,13 +65,13 @@ impl<'a> IsarWriter<'a> for SQLiteWriter<'a> {
         self.property += 1;
     }
 
-    fn write_string(&mut self, value: Option<&str>) {
-        if let Some(value) = value {
-            let _ = self.stmt.bind_text(self.property, value);
-        } else {
-            let _ = self.stmt.bind_null(self.property);
-        }
+    fn write_string(&mut self, value: &str) {
+        let _ = self.stmt.bind_text(self.property, value);
         self.property += 1;
+    }
+
+    fn write_any(&mut self, value: &Value) {
+        todo!()
     }
 
     fn begin_object<'b>(&mut self) -> Self::ObjectWriter {
@@ -141,7 +95,7 @@ impl<'a> IsarWriter<'a> for SQLiteWriter<'a> {
         self.property += 1;
     }
 
-    fn begin_list(&mut self, _size: usize) -> Self::ListWriter {
+    fn begin_list(&mut self) -> Self::ListWriter {
         let property_index = self.property % (self.collection.properties.len() + 1);
         let property = &self.collection.properties[property_index - 1];
 
@@ -159,6 +113,10 @@ impl<'a> IsarWriter<'a> for SQLiteWriter<'a> {
         self.buffer = Some(buffer);
         self.property += 1;
     }
+
+    fn write_bytes(&mut self, value: &[u8]) {
+        todo!()
+    }
 }
 
 pub struct SQLiteObjectWriter<'a> {
@@ -166,7 +124,7 @@ pub struct SQLiteObjectWriter<'a> {
     all_collections: &'a Vec<SQLiteCollection>,
     property: usize,
     first: bool,
-    buffer: Option<Vec<u8>>,
+    buffer: Cell<Vec<u8>>,
 }
 
 impl<'a> SQLiteObjectWriter<'a> {
@@ -181,37 +139,30 @@ impl<'a> SQLiteObjectWriter<'a> {
             all_collections,
             property: 0,
             first: true,
-            buffer: Some(buffer),
+            buffer: Cell::new(buffer),
         }
     }
 
-    fn write_property_name(&mut self, name: &str) -> &mut Vec<u8> {
-        if let Some(buffer) = self.buffer.as_mut() {
-            CompactFormatter
-                .begin_object_key(buffer, self.first)
-                .unwrap();
-            CompactFormatter.begin_string(buffer).unwrap();
-            CompactFormatter
-                .write_string_fragment(buffer, name)
-                .unwrap();
-            CompactFormatter.end_string(buffer).unwrap();
-            CompactFormatter.end_object_key(buffer).unwrap();
-            CompactFormatter.begin_object_value(buffer).unwrap();
-            self.first = false;
-            buffer
-        } else {
-            panic!("Buffer is already borrowed");
-        }
+    fn write_property_name(&mut self, name: &str) {
+        let buffer = self.buffer.get_mut();
+        CompactFormatter
+            .begin_object_key(buffer, self.first)
+            .unwrap();
+        CompactFormatter.begin_string(buffer).unwrap();
+        CompactFormatter
+            .write_string_fragment(buffer, name)
+            .unwrap();
+        CompactFormatter.end_string(buffer).unwrap();
+        CompactFormatter.end_object_key(buffer).unwrap();
+        CompactFormatter.begin_object_value(buffer).unwrap();
+        self.first = false;
     }
 
     fn finalize(mut self) -> Vec<u8> {
         assert!(self.property == self.collection.properties.len());
-        if let Some(mut buffer) = self.buffer.take() {
-            CompactFormatter.end_object(&mut buffer).unwrap();
-            buffer
-        } else {
-            panic!("A nested object or list is unfinished");
-        }
+        let mut buffer = self.buffer.take();
+        CompactFormatter.end_object(&mut buffer).unwrap();
+        buffer
     }
 }
 
@@ -220,29 +171,27 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
 
     type ListWriter = SQLiteListWriter<'a>;
 
-    fn write_id(&mut self, _: i64) {
-        panic!("Embedded objects cannot have an id")
-    }
-
     fn write_null(&mut self) {
         self.property += 1;
     }
 
     fn write_byte(&mut self, value: u8) {
         let property = &self.collection.properties[self.property];
-        let buffer = self.write_property_name(&property.name);
+        self.write_property_name(&property.name);
 
-        CompactFormatter.write_u8(buffer, value).unwrap();
+        CompactFormatter
+            .write_u8(self.buffer.get_mut(), value)
+            .unwrap();
 
         self.property += 1;
     }
 
-    fn write_bool(&mut self, value: Option<bool>) {
-        if let Some(value) = value {
-            let property = &self.collection.properties[self.property];
-            let buffer = self.write_property_name(&property.name);
-            CompactFormatter.write_bool(buffer, value).unwrap();
-        }
+    fn write_bool(&mut self, value: bool) {
+        let property = &self.collection.properties[self.property];
+        self.write_property_name(&property.name);
+        CompactFormatter
+            .write_bool(self.buffer.get_mut(), value)
+            .unwrap();
 
         self.property += 1;
     }
@@ -250,8 +199,10 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
     fn write_int(&mut self, value: i32) {
         if value != i32::MIN {
             let property = &self.collection.properties[self.property];
-            let buffer = self.write_property_name(&property.name);
-            CompactFormatter.write_i32(buffer, value).unwrap();
+            self.write_property_name(&property.name);
+            CompactFormatter
+                .write_i32(self.buffer.get_mut(), value)
+                .unwrap();
         }
 
         self.property += 1;
@@ -260,8 +211,10 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
     fn write_float(&mut self, value: f32) {
         if !value.is_nan() {
             let property = &self.collection.properties[self.property];
-            let buffer = self.write_property_name(&property.name);
-            CompactFormatter.write_f32(buffer, value).unwrap();
+            self.write_property_name(&property.name);
+            CompactFormatter
+                .write_f32(self.buffer.get_mut(), value)
+                .unwrap();
         }
 
         self.property += 1;
@@ -270,8 +223,10 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
     fn write_long(&mut self, value: i64) {
         if value != i64::MIN {
             let property = &self.collection.properties[self.property];
-            let buffer = self.write_property_name(&property.name);
-            CompactFormatter.write_i64(buffer, value).unwrap();
+            self.write_property_name(&property.name);
+            CompactFormatter
+                .write_i64(self.buffer.get_mut(), value)
+                .unwrap();
         }
 
         self.property += 1;
@@ -280,25 +235,31 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
     fn write_double(&mut self, value: f64) {
         if !value.is_nan() {
             let property = &self.collection.properties[self.property];
-            let buffer = self.write_property_name(&property.name);
-            CompactFormatter.write_f64(buffer, value).unwrap();
+            self.write_property_name(&property.name);
+            CompactFormatter
+                .write_f64(self.buffer.get_mut(), value)
+                .unwrap();
         }
 
         self.property += 1;
     }
 
-    fn write_string(&mut self, value: Option<&str>) {
-        if let Some(value) = value {
-            let property = &self.collection.properties[self.property];
-            let buffer = self.write_property_name(&property.name);
-            CompactFormatter.begin_string(buffer).unwrap();
-            CompactFormatter
-                .write_string_fragment(buffer, value)
-                .unwrap();
-            CompactFormatter.end_string(buffer).unwrap();
-        }
+    fn write_string(&mut self, value: &str) {
+        let property = &self.collection.properties[self.property];
+        self.write_property_name(&property.name);
+
+        let buffer = self.buffer.get_mut();
+        CompactFormatter.begin_string(buffer).unwrap();
+        CompactFormatter
+            .write_string_fragment(buffer, value)
+            .unwrap();
+        CompactFormatter.end_string(buffer).unwrap();
 
         self.property += 1;
+    }
+
+    fn write_any(&mut self, value: &Value) {
+        todo!()
     }
 
     fn begin_object(&mut self) -> Self::ObjectWriter {
@@ -308,28 +269,32 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
         let collection_index = property.collection_index.unwrap();
         let target_collection = &self.all_collections[collection_index as usize];
 
-        let buffer = self.buffer.take().unwrap();
-        SQLiteObjectWriter::new(target_collection, self.all_collections, buffer)
+        SQLiteObjectWriter::new(target_collection, self.all_collections, self.buffer.take())
     }
 
     fn end_object<'b>(&'b mut self, writer: Self::ObjectWriter) {
-        let buffer = writer.finalize();
-        self.buffer = Some(buffer);
+        self.buffer.replace(writer.finalize());
         self.property += 1;
     }
 
-    fn begin_list(&mut self, _size: usize) -> Self::ListWriter {
+    fn begin_list(&mut self) -> Self::ListWriter {
         let property = &self.collection.properties[self.property];
         self.write_property_name(&property.name);
 
-        let buffer = self.buffer.take().unwrap();
-        SQLiteListWriter::new(property.collection_index, self.all_collections, buffer)
+        SQLiteListWriter::new(
+            property.collection_index,
+            self.all_collections,
+            self.buffer.take(),
+        )
     }
 
     fn end_list<'b>(&'b mut self, writer: Self::ListWriter) {
-        let buffer = writer.finalize();
-        self.buffer = Some(buffer);
+        self.buffer.replace(writer.finalize());
         self.property += 1;
+    }
+
+    fn write_bytes(&mut self, value: &[u8]) {
+        todo!()
     }
 }
 
@@ -337,7 +302,7 @@ pub struct SQLiteListWriter<'a> {
     collection_index: Option<u16>,
     all_collections: &'a Vec<SQLiteCollection>,
     first: bool,
-    buffer: Option<Vec<u8>>,
+    buffer: Cell<Vec<u8>>,
 }
 
 impl<'a> SQLiteListWriter<'a> {
@@ -351,28 +316,20 @@ impl<'a> SQLiteListWriter<'a> {
             collection_index,
             all_collections,
             first: true,
-            buffer: Some(buffer),
+            buffer: Cell::new(buffer),
         }
     }
 
-    fn write_value(&mut self) -> &mut Vec<u8> {
-        if let Some(buffer) = self.buffer.as_mut() {
-            CompactFormatter
-                .begin_array_value(buffer, self.first)
-                .unwrap();
-            buffer
-        } else {
-            panic!("Buffer is already borrowed");
-        }
+    fn prepare_value(&mut self) {
+        CompactFormatter
+            .begin_array_value(self.buffer.get_mut(), self.first)
+            .unwrap();
+        self.first = false;
     }
 
     fn finalize(mut self) -> Vec<u8> {
-        if let Some(mut buffer) = self.buffer.take() {
-            CompactFormatter.end_array(&mut buffer).unwrap();
-            buffer
-        } else {
-            panic!("A nested object or list is unfinished");
-        }
+        CompactFormatter.end_array(self.buffer.get_mut()).unwrap();
+        self.buffer.take()
     }
 }
 
@@ -381,96 +338,103 @@ impl<'a> IsarWriter<'a> for SQLiteListWriter<'a> {
 
     type ListWriter = SQLiteListWriter<'a>;
 
-    fn write_id(&mut self, _: i64) {
-        panic!("Id cannot be written to a list");
-    }
-
     fn write_null(&mut self) {
-        let buffer = self.write_value();
-        CompactFormatter.write_null(buffer).unwrap();
+        self.prepare_value();
+        CompactFormatter.write_null(self.buffer.get_mut()).unwrap();
     }
 
     fn write_byte(&mut self, value: u8) {
-        let buffer = self.write_value();
-        CompactFormatter.write_u8(buffer, value).unwrap();
+        self.prepare_value();
+        CompactFormatter
+            .write_u8(self.buffer.get_mut(), value)
+            .unwrap();
     }
 
-    fn write_bool(&mut self, value: Option<bool>) {
-        let buffer = self.write_value();
-        if let Some(value) = value {
-            CompactFormatter.write_bool(buffer, value).unwrap();
-        } else {
-            CompactFormatter.write_null(buffer).unwrap();
-        }
+    fn write_bool(&mut self, value: bool) {
+        self.prepare_value();
+        CompactFormatter
+            .write_bool(self.buffer.get_mut(), value)
+            .unwrap();
     }
 
     fn write_int(&mut self, value: i32) {
-        let buffer = self.write_value();
+        self.prepare_value();
         if value != i32::MIN {
-            CompactFormatter.write_i32(buffer, value).unwrap();
+            CompactFormatter
+                .write_i32(self.buffer.get_mut(), value)
+                .unwrap();
         } else {
-            CompactFormatter.write_i64(buffer, i64::MIN).unwrap();
+            CompactFormatter.write_null(self.buffer.get_mut()).unwrap();
         }
     }
 
     fn write_float(&mut self, value: f32) {
-        let buffer = self.write_value();
+        self.prepare_value();
         if !value.is_nan() {
-            CompactFormatter.write_f32(buffer, value).unwrap();
+            CompactFormatter
+                .write_f32(self.buffer.get_mut(), value)
+                .unwrap();
         } else {
-            CompactFormatter.write_f64(buffer, f64::NAN).unwrap();
+            CompactFormatter.write_null(self.buffer.get_mut()).unwrap();
         }
     }
 
     fn write_long(&mut self, value: i64) {
-        let buffer = self.write_value();
+        self.prepare_value();
         if value != i64::MIN {
-            CompactFormatter.write_i64(buffer, value).unwrap();
+            CompactFormatter
+                .write_i64(self.buffer.get_mut(), value)
+                .unwrap();
         } else {
-            CompactFormatter.write_i64(buffer, i64::MIN).unwrap();
+            CompactFormatter.write_null(self.buffer.get_mut()).unwrap();
         }
     }
 
     fn write_double(&mut self, value: f64) {
-        let buffer = self.write_value();
+        self.prepare_value();
         if !value.is_nan() {
-            CompactFormatter.write_f64(buffer, value).unwrap();
+            CompactFormatter
+                .write_f64(self.buffer.get_mut(), value)
+                .unwrap();
         } else {
-            CompactFormatter.write_f64(buffer, f64::NAN).unwrap();
+            CompactFormatter.write_null(self.buffer.get_mut()).unwrap();
         }
     }
 
-    fn write_string(&mut self, value: Option<&str>) {
-        let buffer = self.write_value();
-        if let Some(value) = value {
-            CompactFormatter.begin_string(buffer).unwrap();
-            CompactFormatter
-                .write_string_fragment(buffer, value)
-                .unwrap();
-            CompactFormatter.end_string(buffer).unwrap();
-        } else {
-            CompactFormatter.write_null(buffer).unwrap();
-        }
+    fn write_string(&mut self, value: &str) {
+        self.prepare_value();
+        let buffer = self.buffer.get_mut();
+        CompactFormatter.begin_string(buffer).unwrap();
+        CompactFormatter
+            .write_string_fragment(buffer, value)
+            .unwrap();
+        CompactFormatter.end_string(buffer).unwrap();
+    }
+
+    fn write_any(&mut self, value: &Value) {
+        todo!()
     }
 
     fn begin_object(&mut self) -> Self::ObjectWriter {
         let collection_index = self.collection_index.unwrap();
         let target_collection = &self.all_collections[collection_index as usize];
 
-        let buffer = self.buffer.take().unwrap();
-        SQLiteObjectWriter::new(target_collection, self.all_collections, buffer)
+        SQLiteObjectWriter::new(target_collection, self.all_collections, self.buffer.take())
     }
 
     fn end_object<'b>(&'b mut self, writer: Self::ObjectWriter) {
-        let buffer = writer.finalize();
-        self.buffer = Some(buffer);
+        self.buffer.replace(writer.finalize());
     }
 
-    fn begin_list(&mut self, _size: usize) -> Self::ListWriter {
+    fn begin_list(&mut self) -> Self::ListWriter {
         panic!("Nested lists are not supported");
     }
 
     fn end_list<'b>(&'b mut self, _: Self::ListWriter) {
         panic!("Nested lists are not supported");
+    }
+
+    fn write_bytes(&mut self, value: &[u8]) {
+        todo!()
     }
 }

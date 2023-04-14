@@ -207,6 +207,7 @@ mod test {
         data_type::DataType,
         insert::IsarInsert,
         schema::{CollectionSchema, PropertySchema},
+        writer::IsarWriter,
     };
 
     use super::*;
@@ -231,10 +232,12 @@ mod test {
         .unwrap();
 
         let txn = i.begin_txn(true).unwrap();
-        let txn = {
-            let insert = i.insert(txn, 0, 1000).unwrap();
-            insert.finish().unwrap()
-        };
+        let mut insert = i.insert(txn, 0, 1000000).unwrap();
+        for i in 0..1000000 {
+            insert.write_int(0);
+            insert = insert.insert(Some(i as i64)).unwrap();
+        }
+        let txn = insert.finish().unwrap();
         i.commit_txn(txn).unwrap();
         i.clone();
         println!("hello");

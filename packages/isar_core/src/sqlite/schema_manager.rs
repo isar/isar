@@ -7,7 +7,7 @@ use itertools::Itertools;
 use std::borrow::Cow;
 
 pub fn perform_migration(txn: &SQLiteTxn, schema: &IsarSchema) -> Result<()> {
-    txn.guard(|| {
+    /*txn.guard(|| {
         let sqlite = txn.get_sqlite(true)?;
         let table_names = sqlite.get_table_names()?;
         for collection in &schema.collections {
@@ -37,7 +37,8 @@ pub fn perform_migration(txn: &SQLiteTxn, schema: &IsarSchema) -> Result<()> {
         }
 
         Ok(())
-    })
+    })*/
+    todo!()
 }
 
 fn create_table_sql(collection: &CollectionSchema) -> String {
@@ -130,6 +131,7 @@ fn update_table(sqlite: &SQLite3, collection: &CollectionSchema) -> Result<()> {
 
 fn get_sqlite_type(property: &PropertySchema) -> Cow<str> {
     match property.data_type {
+        DataType::Any => Cow::Borrowed("_ANY"),
         DataType::Bool => Cow::Borrowed("_U1"),
         DataType::Byte => Cow::Borrowed("_U8"),
         DataType::Int => Cow::Borrowed("_I32"),
@@ -154,6 +156,7 @@ fn get_sqlite_type(property: &PropertySchema) -> Cow<str> {
 
 fn get_data_type(sqlite_type: &str) -> (DataType, Option<&str>) {
     match sqlite_type {
+        "_ANY" => (DataType::Any, None),
         "_U1" => (DataType::Bool, None),
         "_U8" => (DataType::Byte, None),
         "_I32" => (DataType::Int, None),

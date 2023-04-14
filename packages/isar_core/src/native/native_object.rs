@@ -1,5 +1,6 @@
 use crate::core::data_type::DataType;
 use byteorder::{ByteOrder, LittleEndian};
+use serde_json::Value;
 use std::str::from_utf8_unchecked;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -115,6 +116,12 @@ impl<'a> NativeObject<'a> {
         let bytes = &self.bytes[offset..offset + length];
         let str = unsafe { from_utf8_unchecked(bytes) };
         Some(str)
+    }
+
+    pub fn read_any(&'a self, offset: usize) -> Option<Value> {
+        let (offset, length) = self.get_offset_length(offset)?;
+        let bytes = &self.bytes[offset..offset + length];
+        serde_json::from_slice(bytes).ok()
     }
 
     pub fn read_object(&self, offset: usize) -> Option<NativeObject<'a>> {

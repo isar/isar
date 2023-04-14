@@ -1,14 +1,10 @@
-use super::error::Result;
 use super::writer::IsarWriter;
+use crate::core::error::Result;
 
-pub trait IsarInsert<'a> {
-    type Writer: IsarWriter<'a>;
-
+pub trait IsarInsert<'a>: IsarWriter<'a> + Sized {
     type Txn<'txn>;
 
-    fn get_writer(&'a self) -> Result<Self::Writer>;
-
-    fn insert(&'a mut self, writer: Self::Writer) -> Result<Option<Self::Writer>>;
+    fn insert(self, id: Option<i64>) -> Result<Self>;
 
     fn finish(self) -> Result<Self::Txn<'a>>;
 }

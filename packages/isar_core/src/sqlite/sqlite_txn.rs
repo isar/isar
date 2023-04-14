@@ -2,24 +2,24 @@ use super::sqlite3::SQLite3;
 use crate::core::error::{IsarError, Result};
 use std::cell::Cell;
 
-pub struct SQLiteTxn {
+pub struct SQLiteTxn<'sqlite> {
     write: bool,
+    sqlite: &'sqlite SQLite3,
     active: Cell<bool>,
-    sqlite: SQLite3,
 }
 
-impl SQLiteTxn {
-    pub(crate) fn new(sqlite: SQLite3, write: bool) -> Result<SQLiteTxn> {
+impl<'sqlite> SQLiteTxn<'sqlite> {
+    pub(crate) fn new(sqlite: &SQLite3, write: bool) -> Result<SQLiteTxn> {
         sqlite.prepare("BEGIN")?.step()?;
         let txn = SQLiteTxn {
             write,
+            sqlite: sqlite,
             active: Cell::new(true),
-            sqlite,
         };
         Ok(txn)
     }
 
-    pub(crate) fn get_sqlite(&self, write: bool) -> Result<&SQLite3> {
+    pub(crate) fn get_sqlite(&self, write: bool) -> Result<&'sqlite SQLite3> {
         if !self.active.get() {
             return Err(IsarError::TransactionClosed {});
         }
@@ -44,7 +44,7 @@ impl SQLiteTxn {
         result
     }
 
-    pub fn commit(&self) -> Result<()> {
+    pub fn commit(self) -> Result<()> {
         if !self.active.get() {
             return Err(IsarError::TransactionClosed {});
         }
@@ -59,9 +59,5 @@ impl SQLiteTxn {
                 let _ = stmt.step();
             }
         }
-    }
-
-    pub fn finalize(self) -> SQLite3 {
-        self.sqlite
     }
 }

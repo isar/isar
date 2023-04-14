@@ -1,105 +1,87 @@
-use super::sqlite_collection::SQLiteCollection;
+use super::sqlite3::SQLiteStatement;
+use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
 use super::sqlite_txn::SQLiteTxn;
-use super::sqlite_writer::SQLiteWriter;
-use crate::core::error::{IsarError, Result};
+use crate::core::error::Result;
 use crate::core::insert::IsarInsert;
 
+fn get_insert_sql(name: &str, properties: &[SQLiteProperty], count: usize) -> String {
+    let mut sql = String::new();
+    sql.push_str("INSERT OR REPLACE INTO ");
+    sql.push_str(name);
+    sql.push_str(" (_rowid_");
+
+    for property in properties {
+        sql.push_str(", ");
+        sql.push_str(&property.name);
+    }
+
+    sql.push_str(") VALUES ");
+
+    let mut batch = String::new();
+    batch.push_str("(?");
+    for _ in 0..properties.len() {
+        batch.push_str(",?");
+    }
+    batch.push_str(")");
+
+    sql.push_str(&batch);
+    for _ in 1..count {
+        sql.push_str(",");
+        sql.push_str(&batch);
+    }
+
+    sql
+}
+
 pub struct SQLiteInsert<'a> {
-    txn: SQLiteTxn,
-    collection: &'a SQLiteCollection,
-    all_collections: &'a Vec<SQLiteCollection>,
-    inserted_count: usize,
-    count: usize,
+    pub(crate) collection: &'a SQLiteCollection,
+    pub(crate) all_collections: &'a Vec<SQLiteCollection>,
+
+    txn: SQLiteTxn<'a>,
+    pub(crate) stmt: SQLiteStatement<'a>,
+
+    remaining: usize,
+    batch_remaining: usize,
+
+    pub(crate) buffer: Option<Vec<u8>>,
+    pub(crate) property: usize,
 }
 
 impl<'a> SQLiteInsert<'a> {
     pub fn new(
-        txn: SQLiteTxn,
+        txn: SQLiteTxn<'a>,
         collection: &'a SQLiteCollection,
         all_collections: &'a Vec<SQLiteCollection>,
         count: usize,
     ) -> Self {
+        let sql = get_insert_sql(&collection.name, &collection.properties, count);
+        let stmt = txn.get_sqlite(true).unwrap().prepare(&sql).unwrap();
         Self {
-            txn,
             collection,
             all_collections,
-            inserted_count: 0,
-            count: count,
+            txn,
+            stmt,
+            remaining: 0,
+            batch_remaining: count,
+            buffer: Some(Vec::new()),
+            property: 0,
         }
-    }
-
-    fn get_writer_with_buffer(&'a self, buffer: Option<Vec<u8>>) -> Result<SQLiteWriter<'a>> {
-        if self.inserted_count >= self.count {
-            return Err(IsarError::IllegalArg {
-                message: "No more objects to insert".to_string(),
-            });
-        }
-
-        let mut sql = String::new();
-        sql.push_str("INSERT OR REPLACE INTO ");
-        sql.push_str(&self.collection.name);
-        sql.push_str(" (_rowid_");
-
-        for property in &self.collection.properties {
-            sql.push_str(", ");
-            sql.push_str(&property.name);
-        }
-
-        sql.push_str(") VALUES ");
-
-        let mut batch = String::new();
-        batch.push_str("(?");
-        for _ in 0..self.collection.properties.len() {
-            batch.push_str(",?");
-        }
-        batch.push_str(")");
-
-        let remaining = self.count - self.inserted_count;
-        sql.push_str(&batch);
-        for _ in 1..remaining {
-            sql.push_str(",");
-            sql.push_str(&batch);
-        }
-
-        let statement = self.txn.get_sqlite(true)?.prepare(&sql)?;
-        let writer = SQLiteWriter::new(
-            statement,
-            remaining,
-            self.collection,
-            self.all_collections,
-            buffer,
-        );
-        Ok(writer)
     }
 }
 
 impl<'a> IsarInsert<'a> for SQLiteInsert<'a> {
-    type Writer = SQLiteWriter<'a>;
+    type Txn<'txn> = SQLiteTxn<'txn>;
+    fn insert(mut self, id: Option<i64>) -> Result<Self> {
+        self.batch_remaining -= 1;
 
-    type Txn<'txn> = SQLiteTxn;
-
-    fn get_writer(&'a self) -> Result<Self::Writer> {
-        self.get_writer_with_buffer(None)
-    }
-
-    fn insert(&'a mut self, writer: Self::Writer) -> Result<Option<Self::Writer>> {
-        if writer.next() {
-            Ok(Some(writer))
-        } else {
-            let (mut stmt, count, buffer) = writer.finalize();
+        if self.batch_remaining == 0 {
             self.txn.guard(|| {
-                stmt.step()?;
+                self.stmt.step()?;
                 Ok(())
             })?;
-            self.inserted_count += count;
-
-            if self.inserted_count < self.count {
-                let new_writer = self.get_writer_with_buffer(Some(buffer))?;
-                Ok(Some(new_writer))
-            } else {
-                Ok(None)
-            }
         }
+
+        Ok(self)
     }
 
     fn finish(self) -> Result<Self::Txn<'a>> {

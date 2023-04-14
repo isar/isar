@@ -26,15 +26,21 @@ impl NativeProperty {
 pub struct NativeCollection {
     pub(crate) properties: Vec<NativeProperty>,
     pub(crate) indexes: Vec<NativeIndex>,
+    pub(crate) static_size: usize,
     pub(crate) db: Db,
     auto_increment: Cell<i64>,
 }
 
 impl NativeCollection {
     pub(crate) fn new(properties: Vec<NativeProperty>, indexes: Vec<NativeIndex>, db: Db) -> Self {
+        let static_size = properties
+            .iter()
+            .max_by_key(|p| p.offset)
+            .map_or(0, |p| p.offset + data_type_static_size(p.data_type));
         Self {
             properties,
             indexes,
+            static_size: static_size as usize,
             db,
             auto_increment: Cell::new(0),
         }

@@ -26,7 +26,7 @@ impl<'a> SQLiteQuery<'a> {
 }
 
 impl<'a> IsarQuery for SQLiteQuery<'a> {
-    type Txn<'t> = SQLiteTxn;
+    type Txn<'t> = SQLiteTxn<'t>;
 
     type Cursor<'b> = SQLiteCursor<'b> where Self: 'b;
 

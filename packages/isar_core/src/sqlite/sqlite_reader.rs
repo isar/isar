@@ -12,7 +12,7 @@ pub struct SQLiteReader<'a> {
 
 impl<'a> SQLiteReader<'a> {
     pub fn new(
-        stmt: &'a SQLiteStatement<'a>,
+        stmt: &'a SQLiteStatement,
         collection: &'a SQLiteCollection,
         all_collections: &'a Vec<SQLiteCollection>,
     ) -> Self {
@@ -86,6 +86,10 @@ impl<'a> IsarReader for SQLiteReader<'a> {
         } else {
             Some(self.stmt.get_text(index))
         }
+    }
+
+    fn read_any(&self, index: usize) -> Option<Value> {
+        todo!()
     }
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'a>> {
@@ -210,6 +214,10 @@ impl<'a> IsarReader for SQLiteObjectReader<'a> {
         }
     }
 
+    fn read_any(&self, index: usize) -> Option<Value> {
+        todo!()
+    }
+
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>> {
         let property = &self.collection.properties[index];
         let value = self.object.get(&property.name);
@@ -320,6 +328,10 @@ impl<'a> IsarReader for SQLiteListReader<'a> {
         } else {
             None
         }
+    }
+
+    fn read_any(&self, index: usize) -> Option<Value> {
+        todo!()
     }
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>> {

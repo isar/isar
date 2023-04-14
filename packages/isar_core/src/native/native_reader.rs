@@ -1,3 +1,5 @@
+use serde_json::Value;
+
 use super::native_collection::{NativeCollection, NativeProperty};
 use super::native_object::NativeObject;
 use crate::core::data_type::DataType;
@@ -58,6 +60,11 @@ impl<'a> IsarReader for NativeReader<'a> {
     fn read_string(&self, index: usize) -> Option<&str> {
         let property = &self.collection.properties[index];
         self.object.read_string(property.offset as usize)
+    }
+
+    fn read_any(&self, index: usize) -> Option<Value> {
+        let property = &self.collection.properties[index];
+        self.object.read_any(property.offset as usize)
     }
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>> {
@@ -142,6 +149,10 @@ impl<'a> IsarReader for NativeListReader<'a> {
 
     fn read_string(&self, index: usize) -> Option<&str> {
         self.object.read_string(index * 6)
+    }
+
+    fn read_any(&self, index: usize) -> Option<Value> {
+        self.object.read_any(index * 6)
     }
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>> {

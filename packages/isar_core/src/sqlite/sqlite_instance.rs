@@ -29,7 +29,8 @@ struct SQLiteInstanceInfo {
 
 pub struct SQLiteInstance {
     info: Arc<SQLiteInstanceInfo>,
-    sqlite: Cell<Option<SQLite3>>,
+    sqlite: SQLite3,
+    txn_active: Cell<bool>,
 }
 
 impl SQLiteInstance {
@@ -46,10 +47,9 @@ impl SQLiteInstance {
         let path = path_buf.as_path().to_str().unwrap().to_string();
 
         let sqlite = SQLite3::open(&path).unwrap();
-        let txn = SQLiteTxn::new(sqlite, true)?;
+        let txn = SQLiteTxn::new(&sqlite, true)?;
         perform_migration(&txn, &schema)?;
         txn.commit()?;
-        let sqlite = txn.finalize();
 
         let collections = Self::get_collections(&schema);
         let instance_info = SQLiteInstanceInfo { path, collections };
@@ -87,7 +87,7 @@ impl SQLiteInstance {
 }
 
 impl IsarInstance for SQLiteInstance {
-    type Txn<'a> = SQLiteTxn;
+    type Txn<'a> = SQLiteTxn<'a>;
 
     type Insert<'a> = SQLiteInsert<'a>;
 
@@ -105,7 +105,8 @@ impl IsarInstance for SQLiteInstance {
             if let Some(sqlite) = sqlite {
                 Some(Self {
                     info: connections.info.clone(),
-                    sqlite: Cell::new(Some(sqlite)),
+                    sqlite: sqlite,
+                    txn_active: Cell::new(false),
                 })
             } else {
                 None
@@ -138,31 +139,29 @@ impl IsarInstance for SQLiteInstance {
         let sqlite = connections.sqlite.pop().unwrap();
         Ok(Self {
             info: connections.info.clone(),
-            sqlite: Cell::new(Some(sqlite)),
+            sqlite: sqlite,
+            txn_active: Cell::new(false),
         })
     }
 
     fn begin_txn(&self, write: bool) -> Result<SQLiteTxn> {
-        if let Some(sqlite) = self.sqlite.take() {
-            SQLiteTxn::new(sqlite, write)
-        } else {
+        if self.txn_active.replace(true) {
             Err(IsarError::IllegalArg {
-                message: "Cannot begin transaction. Instance is closed.".to_string(),
+                message: "A transaction is already active.".to_string(),
             })
+        } else {
+            SQLiteTxn::new(&self.sqlite, write)
         }
     }
 
     fn commit_txn(&self, txn: SQLiteTxn) -> Result<()> {
-        let result = txn.commit();
-        let sqlite = txn.finalize();
-        self.sqlite.replace(Some(sqlite));
-        result
+        self.txn_active.replace(false);
+        txn.commit()
     }
 
     fn abort_txn(&self, txn: SQLiteTxn) {
+        self.txn_active.replace(false);
         txn.abort();
-        let sqlite = txn.finalize();
-        self.sqlite.replace(Some(sqlite));
     }
 
     fn query<'a>(&'a self, collection_index: usize) -> Result<Self::QueryBuilder<'a>> {
@@ -171,12 +170,12 @@ impl IsarInstance for SQLiteInstance {
         Ok(query_builder)
     }
 
-    fn insert(
-        &self,
-        txn: SQLiteTxn,
+    fn insert<'a>(
+        &'a self,
+        txn: SQLiteTxn<'a>,
         collection_index: usize,
         count: usize,
-    ) -> Result<Self::Insert<'_>> {
+    ) -> Result<Self::Insert<'a>> {
         let collection = &self.info.collections[collection_index];
         let insert = SQLiteInsert::new(txn, collection, &self.info.collections, count);
         Ok(insert)
@@ -187,7 +186,6 @@ mod test {
     use super::SQLiteInstance;
     use crate::core::data_type::DataType;
     use crate::core::filter::IsarFilterBuilder;
-    use crate::core::filter::IsarValue;
     use crate::core::insert::IsarInsert;
     use crate::core::instance::IsarInstance;
     use crate::core::query::IsarCursor;
@@ -225,22 +223,16 @@ mod test {
         let txn = instance.begin_txn(true).unwrap();
         let txn = {
             let mut insert = instance.insert(txn, 0, 1).unwrap();
-            let mut writer = insert.get_writer().unwrap();
-            writer.write_id(999);
-            writer.write_string(Some("val1"));
-            writer.write_long(2);
-            insert.insert(writer).unwrap();
-            insert.finish().unwrap()
+            insert.write_string("val1");
+            insert.write_long(2);
+            insert.insert(Some(999)).unwrap().finish().unwrap()
         };
 
         let txn = {
             let mut insert = instance.insert(txn, 0, 1).unwrap();
-            let mut writer = insert.get_writer().unwrap();
-            writer.write_id(9999);
-            writer.write_string(Some("val2"));
-            writer.write_long(4);
-            insert.insert(writer).unwrap();
-            insert.finish().unwrap()
+            insert.write_string("val2");
+            insert.write_long(4);
+            insert.insert(Some(9999)).unwrap().finish().unwrap()
         };
 
         instance.commit_txn(txn).unwrap();
