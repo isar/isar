@@ -42,7 +42,7 @@ impl Db {
             }
         } else {
             unsafe {
-                mdbx_result(ffi::mdbx_dbi_open(txn.txn, ptr::null(), flags, &mut dbi))?;
+                mdbx_result(ffi::mdbx_dbi_open(txn.txn, ptr::null(), 0, &mut dbi))?;
             }
         }
 
