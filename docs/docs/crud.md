@@ -99,7 +99,7 @@ Instead of getting objects by id you can also query a list of objects matching c
 ```dart
 final allRecipes = await isar.recipes.where().findAll();
 
-final favouires = await isar.recipes.filter()
+final favorites = await isar.recipes.filter()
   .isFavoriteEqualTo(true)
   .findAll();
 ```
