@@ -69,4 +69,4 @@ There are a few interesting things to note in the example above:
 
 - `isar.messages.watchLazy()` is called in the UI isolate and is notified of changes from another isolate.
 - Instances are referenced by name. The default name is `default`, but in this example, we set it to `myInstance`.
-- We used a synchronous transaction to create the mesasges. Blocking our new isolate is no problem, and synchronous transactions are a little faster.
+- We used a synchronous transaction to create the messages. Blocking our new isolate is no problem, and synchronous transactions are a little faster.
