@@ -22,7 +22,7 @@ flutter pub add -d isar_generator build_runner
 Annotiere deine Collection-Klassen mit `@collection` und wähle ein `Id`-Feld.
 
 ```dart
-part 'email.g.dart'
+part 'user.g.dart';
 
 @collection
 class User {
@@ -55,7 +55,7 @@ flutter pub run build_runner build
 Öffne eine neue Isar-Instanz und übergebe alle Collection-Schemata. Optional kannst du einen Instanznamen und ein Verzeichnis angeben.
 
 ```dart
-final isar = await Isar.open([EmailSchema]);
+final isar = await Isar.open([UserSchema]);
 ```
 
 ## 5. Schreiben und lesen
