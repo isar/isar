@@ -6,7 +6,7 @@ title: Schnellstart
 
 Holla, die Waldfee! Du bist bestimmt hier um mit der coolsten Flutter-Datenbank zu starten...
 
-Dieser Schnellstart wird wenig um den heißen Brei herumreden und direkt mit dem coden beginnen.
+Dieser Schnellstart wird wenig um den heißen Brei herumreden und direkt mit dem Coden beginnen.
 
 ## 1. Abhängigkeiten hinzufügen
 
@@ -34,7 +34,7 @@ class User {
 }
 ```
 
-Ids identifizieren Objekte in einer Collection eindeutig und erlauben es dir, sie später wiederzufinden.
+IDs identifizieren Objekte in einer Collection eindeutig und erlauben es dir, sie später wiederzufinden.
 
 ## 3. Code-Generator ausführen
 
@@ -68,13 +68,13 @@ Alle grundlegenden CRUD-Operationen sind über die `IsarCollection` verfügbar .
 final newUser = User()..name = 'Jane Doe'..age = 36;
 
 await isar.writeTxn(() async {
-  await isar.users.put(newUser); // insert & update
+  await isar.users.put(newUser); // Einfügen & akualisieren
 });
 
-final existingUser = await isar.users.get(newUser.id); // get
+final existingUser = await isar.users.get(newUser.id); // Erhalten
 
 await isar.writeTxn(() async {
-  await isar.users.delete(existingUser.id!); // delete
+  await isar.users.delete(existingUser.id!); // Löschen
 });
 ```
 

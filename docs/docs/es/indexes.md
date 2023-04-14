@@ -23,7 +23,7 @@ class Product {
 }
 ```
 
-#### Datos:
+**Datos:**
 
 | id  | name      | price |
 | --- | --------- | ----- |
@@ -59,7 +59,7 @@ class Product {
 }
 ```
 
-#### Índices generados:
+**Índices generados:**
 
 | price                | id                 |
 | -------------------- | ------------------ |
@@ -266,7 +266,7 @@ class Person {
 }
 ```
 
-#### Datos:
+**Datos:**
 
 | id  | name   | age | hometown  |
 | --- | ------ | --- | --------- |
@@ -279,7 +279,7 @@ class Person {
 | 7   | Audrey | 30  | Prague    |
 | 8   | Anne   | 24  | Paris     |
 
-#### Índice generado
+**Índice generado:**
 
 | age | name   | id  |
 | --- | ------ | --- |
@@ -331,7 +331,7 @@ class Product {
 
 `Isar.splitWords()` divide la cadena en palabras de acuerdo con la especificación [Unicode Annex #29](https://unicode.org/reports/tr29/), por lo tanto funciona correctamente para cualquier idioma.
 
-#### Data:
+**Data:**
 
 | id  | description                  | descriptionWords             |
 | --- | ---------------------------- | ---------------------------- |
@@ -342,7 +342,7 @@ class Product {
 
 Entradas con palabras duplicadas paraecen sólo una vez en el índice.
 
-#### Índice generado
+**Índice generado:**
 
 | descriptionWords | id        |
 | ---------------- | --------- |
