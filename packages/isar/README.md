@@ -210,29 +210,30 @@ Big thanks go to these wonderful people:
 <table>
   <tbody>
     <tr>
-      <td align="center"><a href="https://github.com/AlexisL61"><img src="https://avatars.githubusercontent.com/u/30233189?v=4" width="100px;" alt=""/><br /><sub><b>Alexis</b></sub></a></td>
-      <td align="center"><a href="https://github.com/buraktabn"><img src="https://avatars.githubusercontent.com/u/49204989?v=4" width="100px;" alt=""/><br /><sub><b>Burak</b></sub></a></td>
-      <td align="center"><a href="https://github.com/CarloDotLog"><img src="https://avatars.githubusercontent.com/u/13763473?v=4" width="100px;" alt=""/><br /><sub><b>Carlo Loguercio</b></sub></a></td>
-      <td align="center"><a href="https://github.com/Frostedfox"><img src="https://avatars.githubusercontent.com/u/84601232?v=4" width="100px;" alt=""/><br /><sub><b>Frostedfox</b></sub></a></td>
-      <td align="center"><a href="https://github.com/hafeezrana"><img src="https://avatars.githubusercontent.com/u/87476445?v=4" width="100px;" alt=""/><br /><sub><b>Hafeez Rana</b></sub></a></td>
-      <td align="center"><a href="https://github.com/h1376h"><img src="https://avatars.githubusercontent.com/u/3498335?v=4" width="100px;" alt=""/><br /><sub><b>Hamed H.</b></sub></a></td>
-      <td align="center"><a href="https://github.com/Jtplouffe"><img src="https://avatars.githubusercontent.com/u/32107801?v=4" width="100px;" alt=""/><br /><sub><b>JT</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/AlexisL61"><img src="https://avatars.githubusercontent.com/u/30233189?v=4" width="100px;" alt=""/><br /><sub><b>Alexis</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/buraktabn"><img src="https://avatars.githubusercontent.com/u/49204989?v=4" width="100px;" alt=""/><br /><sub><b>Burak</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/CarloDotLog"><img src="https://avatars.githubusercontent.com/u/13763473?v=4" width="100px;" alt=""/><br /><sub><b>Carlo Loguercio</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Frostedfox"><img src="https://avatars.githubusercontent.com/u/84601232?v=4" width="100px;" alt=""/><br /><sub><b>Frostedfox</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hafeezrana"><img src="https://avatars.githubusercontent.com/u/87476445?v=4" width="100px;" alt=""/><br /><sub><b>Hafeez Rana</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/h1376h"><img src="https://avatars.githubusercontent.com/u/3498335?v=4" width="100px;" alt=""/><br /><sub><b>Hamed H.</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Jtplouffe"><img src="https://avatars.githubusercontent.com/u/32107801?v=4" width="100px;" alt=""/><br /><sub><b>JT</b></sub></a></td>
     </tr>
     <tr>
-      <td align="center"><a href="https://github.com/ritksm"><img src="https://avatars.githubusercontent.com/u/111809?v=4" width="100px;" alt=""/><br /><sub><b>Jack Rivers</b></sub></a></td>
-      <td align="center"><a href="https://github.com/nohli"><img src="https://avatars.githubusercontent.com/u/43643339?v=4" width="100px;" alt=""/><br /><sub><b>Joachim Nohl</b></sub></a></td>
-      <td align="center"><a href="https://github.com/vothvovo"><img src="https://avatars.githubusercontent.com/u/20894472?v=4" width="100px;" alt=""/><br /><sub><b>Johnson</b></sub></a></td>
-      <td align="center"><a href="https://github.com/VoidxHoshi"><img src="https://avatars.githubusercontent.com/u/55886143?v=4" width="100px;" alt=""/><br /><sub><b>LaLucid</b></sub></a></td>
-      <td align="center"><a href="https://github.com/lodisy"><img src="https://avatars.githubusercontent.com/u/8101584?v=4" width="100px;" alt=""/><br /><sub><b>Michael</b></sub></a></td>
-      <td align="center"><a href="https://github.com/Moseco"><img src="https://avatars.githubusercontent.com/u/10720298?v=4" width="100px;" alt=""/><br /><sub><b>Moseco</b></sub></a></td>
-      <td align="center"><a href="https://github.com/inkomomutane"><img src="https://avatars.githubusercontent.com/u/57417802?v=4" width="100px;" alt=""/><br /><sub><b>Nelson  Mutane</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ritksm"><img src="https://avatars.githubusercontent.com/u/111809?v=4" width="100px;" alt=""/><br /><sub><b>Jack Rivers</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/nohli"><img src="https://avatars.githubusercontent.com/u/43643339?v=4" width="100px;" alt=""/><br /><sub><b>Joachim Nohl</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/vothvovo"><img src="https://avatars.githubusercontent.com/u/20894472?v=4" width="100px;" alt=""/><br /><sub><b>Johnson</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/VoidxHoshi"><img src="https://avatars.githubusercontent.com/u/55886143?v=4" width="100px;" alt=""/><br /><sub><b>LaLucid</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/letyletylety"><img src="https://avatars.githubusercontent.com/u/16468579?v=4" width="100px;" alt=""/><br /><sub><b>Lety</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/lodisy"><img src="https://avatars.githubusercontent.com/u/8101584?v=4" width="100px;" alt=""/><br /><sub><b>Michael</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Moseco"><img src="https://avatars.githubusercontent.com/u/10720298?v=4" width="100px;" alt=""/><br /><sub><b>Moseco</b></sub></a></td>
     </tr>
     <tr>
-      <td align="center"><a href="https://github.com/Viper-Bit"><img src="https://avatars.githubusercontent.com/u/24822764?v=4" width="100px;" alt=""/><br /><sub><b>Peyman</b></sub></a></td>
-      <td align="center"><a href="https://github.com/leisim"><img src="https://avatars.githubusercontent.com/u/13610195?v=4" width="100px;" alt=""/><br /><sub><b>Simon Leier</b></sub></a></td>
-      <td align="center"><a href="https://github.com/ika020202"><img src="https://avatars.githubusercontent.com/u/42883378?v=4" width="100px;" alt=""/><br /><sub><b>Ura</b></sub></a></td>
-      <td align="center"><a href="https://github.com/blendthink"><img src="https://avatars.githubusercontent.com/u/32213113?v=4" width="100px;" alt=""/><br /><sub><b>blendthink</b></sub></a></td>
-      <td align="center"><a href="https://github.com/mnkeis"><img src="https://avatars.githubusercontent.com/u/41247357?v=4" width="100px;" alt=""/><br /><sub><b>mnkeis</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/inkomomutane"><img src="https://avatars.githubusercontent.com/u/57417802?v=4" width="100px;" alt=""/><br /><sub><b>Nelson  Mutane</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Viper-Bit"><img src="https://avatars.githubusercontent.com/u/24822764?v=4" width="100px;" alt=""/><br /><sub><b>Peyman</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/leisim"><img src="https://avatars.githubusercontent.com/u/13610195?v=4" width="100px;" alt=""/><br /><sub><b>Simon Leier</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ika020202"><img src="https://avatars.githubusercontent.com/u/42883378?v=4" width="100px;" alt=""/><br /><sub><b>Ura</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/blendthink"><img src="https://avatars.githubusercontent.com/u/32213113?v=4" width="100px;" alt=""/><br /><sub><b>blendthink</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mnkeis"><img src="https://avatars.githubusercontent.com/u/41247357?v=4" width="100px;" alt=""/><br /><sub><b>mnkeis</b></sub></a></td>
     </tr>
   </tbody>
 </table>
