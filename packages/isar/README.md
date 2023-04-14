@@ -47,7 +47,7 @@
 Isar database can do much more (and we are just getting started)
 
 - 🕵️ **Full-text search**. Make searching fast and fun
-- 📱 **Multiplatform**. iOS, Android, Desktop and FULL WEB SUPPORT!
+- 📱 **Multiplatform**. iOS, Android, Desktop
 - 🧪 **ACID semantics**. Rely on database consistency
 - 💃 **Static typing**. Compile-time checked and autocompleted queries
 - ✨ **Beautiful documentation**. Readable, easy to understand and ever-improving
@@ -63,7 +63,7 @@ Holy smokes you're here! Let's get started on using the coolest Flutter database
 ### 1. Add to pubspec.yaml
 
 ```yaml
-isar_version: &isar_version 3.0.4 # define the version to be used
+isar_version: &isar_version 3.1.0 # define the version to be used
 
 dependencies:
   isar: *isar_version
@@ -109,7 +109,11 @@ enum Status {
 ### 3. Open a database instance
 
 ```dart
-final isar = await Isar.open([EmailSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [EmailSchema],
+  directory: dir,
+);
 ```
 
 ### 4. Query the database
