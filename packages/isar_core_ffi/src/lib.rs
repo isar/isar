@@ -10,7 +10,6 @@ use unicode_segmentation::UnicodeSegmentation;
 #[macro_use]
 mod error;
 
-pub mod app_dir;
 pub mod c_object_set;
 pub mod crud;
 mod dart;

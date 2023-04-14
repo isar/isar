@@ -1,4 +1,3 @@
-use crate::app_dir::get_app_dir;
 use crate::dart::{dart_post_int, DartPort};
 use crate::error::DartErrCode;
 use crate::from_c_str;
@@ -38,7 +37,7 @@ pub unsafe extern "C" fn isar_instance_create(
 ) -> i64 {
     let open = || -> Result<()> {
         let name = from_c_str(name).unwrap().unwrap();
-        let path = from_c_str(path).unwrap().or_else(get_app_dir);
+        let path = from_c_str(path).unwrap();
         let schema_json = from_c_str(schema_json).unwrap().unwrap();
         let schema = Schema::from_json(schema_json.as_bytes())?;
 

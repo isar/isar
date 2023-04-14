@@ -126,7 +126,7 @@ Future<Isar> openTempIsar(
     schemas: schemas,
     name: name ?? getRandomName(),
     maxSizeMiB: maxSizeMiB,
-    directory: directory ?? testTempPath,
+    directory: testTempPath ?? '',
     compactOnLaunch: compactOnLaunch,
   );
 

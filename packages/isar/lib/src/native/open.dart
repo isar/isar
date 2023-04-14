@@ -72,7 +72,7 @@ void _initializeInstance(
 
 Future<Isar> openIsar({
   required List<CollectionSchema<dynamic>> schemas,
-  String? directory,
+  required String directory,
   required String name,
   required int maxSizeMiB,
   required bool relaxedDurability,
@@ -83,7 +83,7 @@ Future<Isar> openIsar({
 
   return using((Arena alloc) async {
     final namePtr = name.toCString(alloc);
-    final dirPtr = directory?.toCString(alloc) ?? nullptr;
+    final dirPtr = directory.toCString(alloc);
 
     final schemasJson = getSchemas(schemas).map((e) => e.toJson());
     final schemaStrPtr = jsonEncode(schemasJson.toList()).toCString(alloc);
@@ -118,7 +118,7 @@ Future<Isar> openIsar({
 
 Isar openIsarSync({
   required List<CollectionSchema<dynamic>> schemas,
-  String? directory,
+  required String directory,
   required String name,
   required int maxSizeMiB,
   required bool relaxedDurability,
@@ -128,7 +128,7 @@ Isar openIsarSync({
   IC.isar_connect_dart_api(NativeApi.postCObject.cast());
   return using((Arena alloc) {
     final namePtr = name.toCString(alloc);
-    final dirPtr = directory?.toCString(alloc) ?? nullptr;
+    final dirPtr = directory.toCString(alloc);
 
     final schemasJson = getSchemas(schemas).map((e) => e.toJson());
     final schemaStrPtr = jsonEncode(schemasJson.toList()).toCString(alloc);
