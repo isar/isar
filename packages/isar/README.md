@@ -19,7 +19,7 @@
     <img src="https://img.shields.io/static/v1?label=join&message=isardb&labelColor=333940&logo=telegram&logoColor=white&color=229ED9">
   </a>
   <a href="https://twitter.com/simonleier">
-    <img src="https://img.shields.io/twitter/follow/simonleier?style=flat&label=Follow&color=1DA1F2&labelColor=333940&logo=twitter&logoColor=fff">
+    <img src="https://img.shields.io/twitter/follow/simcdev?style=social">
   </a>
 </p>
 

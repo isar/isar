@@ -189,34 +189,44 @@ impl SchemaManager {
         Ok(added_indexes.keys().copied().collect())
     }
 
+    pub fn migrate_schema(&mut self, txn: &Txn, schemas: &mut Schema) -> Result<IntMap<Vec<u64>>> {
+        let cursors = IsarCursors::new(txn, vec![]);
+
+        let mut added_indexes = IntMap::new();
+        for col_schema in &mut schemas.collections {
+            let mut existing_schema = self
+                .schemas
+                .iter()
+                .position(|s| s.name == col_schema.name)
+                .map(|index| self.schemas.remove(index));
+
+            if let Some(existing_schema) = &mut existing_schema {
+                if existing_schema.version == 1 {
+                    migrate_v1(txn, existing_schema)?;
+                } else if existing_schema.version != Self::ISAR_FILE_VERSION {
+                    return Err(IsarError::VersionError {});
+                }
+                let ai = Self::perform_migration(txn, col_schema, existing_schema)?;
+                if !ai.is_empty() {
+                    added_indexes.insert(xxh3_64(col_schema.name.as_bytes()), ai);
+                }
+            }
+
+            let mut info_cursor = cursors.get_cursor(self.info_db)?;
+            col_schema.version = Self::ISAR_FILE_VERSION;
+            Self::save_schema(&mut info_cursor, &col_schema)?;
+        }
+        Ok(added_indexes)
+    }
+
     pub fn open_collection(
         &mut self,
         txn: &Txn,
-        mut schema: CollectionSchema,
+        schema: &CollectionSchema,
         schemas: &Schema,
+        added_indexes: &[u64],
     ) -> Result<IsarCollection> {
         let cursors = IsarCursors::new(txn, vec![]);
-
-        let mut existing_schema = self
-            .schemas
-            .iter()
-            .position(|s| s.name == schema.name)
-            .map(|index| self.schemas.remove(index));
-
-        let added_indexes = if let Some(existing_schema) = &mut existing_schema {
-            if existing_schema.version == 1 {
-                migrate_v1(txn, existing_schema)?
-            } else if existing_schema.version != Self::ISAR_FILE_VERSION {
-                return Err(IsarError::VersionError {});
-            }
-            Self::perform_migration(txn, &mut schema, existing_schema)?
-        } else {
-            vec![]
-        };
-        let mut info_cursor = cursors.get_cursor(self.info_db)?;
-        schema.version = Self::ISAR_FILE_VERSION;
-        Self::save_schema(&mut info_cursor, &schema)?;
-        let schema = schema; // no longer mutable beyond this point
 
         let db = Self::open_collection_db(txn, &schema)?;
         let properties = schema.get_properties();

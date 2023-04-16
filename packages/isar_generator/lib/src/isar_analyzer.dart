@@ -124,8 +124,8 @@ class IsarAnalyzer {
     }
 
     final hasCollectionSupertype = modelClass.allSupertypes.any((type) {
-      return type.element2.collectionAnnotation != null ||
-          type.element2.embeddedAnnotation != null;
+      return type.element.collectionAnnotation != null ||
+          type.element.embeddedAnnotation != null;
     });
     if (hasCollectionSupertype) {
       err(
@@ -146,7 +146,7 @@ class IsarAnalyzer {
         properties.length) {
       err(
         'Two or more properties have the same name.',
-        constructor.enclosingElement3,
+        constructor.enclosingElement,
       );
     }
 
@@ -164,7 +164,7 @@ class IsarAnalyzer {
   Map<String, String> _getEmbeddedDartNames(ClassElement element) {
     void _fillNames(Map<String, String> names, ClassElement element) {
       for (final property in element.allAccessors) {
-        final type = property.type.scalarType.element2;
+        final type = property.type.scalarType.element;
         if (type is ClassElement && type.embeddedAnnotation != null) {
           final isarName = type.isarName;
           if (!names.containsKey(isarName)) {
@@ -191,13 +191,13 @@ class IsarAnalyzer {
     String? defaultEnumElement;
 
     late final IsarType isarType;
-    if (scalarDartType.element2 is EnumElement) {
+    if (scalarDartType.element is EnumElement) {
       final enumeratedAnn = property.enumeratedAnnotation;
       if (enumeratedAnn == null) {
         err('Enum property must be annotated with @enumerated.', property);
       }
 
-      final enumClass = scalarDartType.element2! as EnumElement;
+      final enumClass = scalarDartType.element! as EnumElement;
       final enumElements =
           enumClass.fields.where((f) => f.isEnumConstant).toList();
       defaultEnumElement = '${enumClass.name}.${enumElements.first.name}';
@@ -316,7 +316,10 @@ class IsarAnalyzer {
     return ObjectProperty(
       dartName: property.displayName,
       isarName: property.isarName,
-      typeClassName: dartType.scalarType.element2!.name!,
+      typeClassName: dartType.scalarType.element!.name!,
+      targetIsarName: isarType.containsObject
+          ? dartType.scalarType.element!.isarName
+          : null,
       isarType: isarType,
       isId: dartType.isIsarId,
       enumMap: enumMap,
@@ -344,7 +347,7 @@ class IsarAnalyzer {
       err('Links type must not be nullable.', property);
     }
 
-    final targetCol = linkType.element2! as ClassElement;
+    final targetCol = linkType.element! as ClassElement;
     if (targetCol.collectionAnnotation == null) {
       err('Link target is not annotated with @collection');
     }
@@ -372,7 +375,7 @@ class IsarAnalyzer {
       dartName: property.displayName,
       isarName: property.isarName,
       targetLinkIsarName: targetLinkIsarName,
-      targetCollectionDartName: linkType.element2!.name!,
+      targetCollectionDartName: linkType.element!.name!,
       targetCollectionIsarName: targetCol.isarName,
       isSingle: property.isLink,
     );

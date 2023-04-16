@@ -35,7 +35,6 @@ pub struct IsarInstance {
     pub dir: String,
     pub collections: Vec<IsarCollection>,
     pub(crate) instance_id: u64,
-    pub(crate) schema_hash: u64,
 
     env: Env,
     watchers: Mutex<IsarWatchers>,
@@ -46,7 +45,7 @@ impl IsarInstance {
     pub fn open(
         name: &str,
         dir: Option<&str>,
-        mut schema: Schema,
+        schema: Schema,
         max_size_mib: usize,
         relaxed_durability: bool,
         compact_condition: Option<CompactCondition>,
@@ -54,11 +53,7 @@ impl IsarInstance {
         let mut lock = INSTANCES.write().unwrap();
         let instance_id = xxh3_64(name.as_bytes());
         if let Some(instance) = lock.get(instance_id) {
-            if instance.schema_hash == schema.hash() {
-                Ok(instance.clone())
-            } else {
-                Err(IsarError::SchemaMismatch {})
-            }
+            Ok(instance.clone())
         } else {
             if let Some(dir) = dir {
                 let new_instance = Self::open_internal(
@@ -130,10 +125,19 @@ impl IsarInstance {
         let mut manager = SchemaManager::create(instance_id, &txn)?;
         txn.commit()?;
 
+        let txn = env.txn(true)?;
+        let added_indexes = manager.migrate_schema(&txn, &mut schema)?;
+        txn.commit()?;
+
         let mut collections = vec![];
         for col_schema in &schema.collections {
             let txn = env.txn(true)?;
-            let col = manager.open_collection(&txn, col_schema.clone(), &schema)?;
+            let col_id = xxh3_64(col_schema.name.as_bytes());
+            let added_indexes = added_indexes
+                .get(col_id)
+                .map(|v| v.as_slice())
+                .unwrap_or_default();
+            let col = manager.open_collection(&txn, col_schema, &schema, added_indexes)?;
             collections.push(col);
             txn.commit()?;
         }
@@ -152,7 +156,6 @@ impl IsarInstance {
             dir: dir.to_string(),
             collections,
             instance_id,
-            schema_hash: schema.hash(),
             watchers: Mutex::new(IsarWatchers::new(rx)),
             watcher_modifier_sender: tx,
         };

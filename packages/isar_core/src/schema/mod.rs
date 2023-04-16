@@ -53,13 +53,6 @@ impl Schema {
         }
         count
     }
-
-    pub(crate) fn hash(&mut self) -> u64 {
-        self.collections.sort_by(|a, b| a.name.cmp(&b.name));
-        self.collections
-            .iter()
-            .fold(0, |seed, col| xxh3_64_with_seed(col.name.as_bytes(), seed))
-    }
 }
 
 /*#[cfg(test)]

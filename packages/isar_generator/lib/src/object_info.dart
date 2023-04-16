@@ -59,6 +59,7 @@ class ObjectProperty {
     required this.dartName,
     required this.isarName,
     required this.typeClassName,
+    this.targetIsarName,
     required this.isarType,
     required this.isId,
     required this.enumMap,
@@ -75,6 +76,7 @@ class ObjectProperty {
   final String dartName;
   final String isarName;
   final String typeClassName;
+  final String? targetIsarName;
 
   final bool isId;
   final IsarType isarType;

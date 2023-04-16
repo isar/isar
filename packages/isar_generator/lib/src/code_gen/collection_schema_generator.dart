@@ -62,8 +62,8 @@ String _generatePropertySchema(ObjectInfo object, int index) {
     enumMap = 'enumMap: ${property.enumValueMapName(object)},';
   }
   var target = '';
-  if (property.isarType.containsObject) {
-    target = "target: r'${property.scalarDartType}',";
+  if (property.targetIsarName != null) {
+    target = "target: r'${property.targetIsarName}',";
   }
   return '''
   PropertySchema(
