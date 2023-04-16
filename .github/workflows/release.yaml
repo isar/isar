@@ -40,7 +40,7 @@ jobs:
           - os: macos-latest
             artifact_name: isar_ios.xcframework.zip
             script: build_ios.sh
-          - os: ubuntu-18.04 # use older linux for glibc compatibility see #288
+          - os: ubuntu-20.04
             artifact_name: libisar_linux_x64.so
             script: build_linux.sh x64
           - os: macos-latest
