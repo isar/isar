@@ -10,6 +10,12 @@ Sorry for this breaking change. Unfortunately, it was necessary to fix stability
 
 - Fixed a crash that occasionally occurred when opening Isar
 - Fixed a schema migration issue
+- Fixed an issue where embedded class renaming didn't work correctly
+
+### Enhancements
+
+- Many internal improvements
+- Performance improvements
 
 ## 3.0.6
 
