@@ -13,7 +13,11 @@ title: بنائیں، پڑھیں، اپ ڈیٹ کریں، حذف کریں
 وہ تمام اسکیمے فراہم کریں جو آپ ای زار مثال کے ساتھ استعمال کرنا چاہتے ہیں۔ اگر آپ متعدد مثالوں کو کھولتے ہیں، تو آپ کو اب بھی ہر ایک مثال کے لیے ایک ہی اسکیما فراہم کرنا ہوں گی۔
 
 ```dart
-final isar = await Isar.open([RecipeSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [RecipeSchema],
+  directory: dir.path,
+);
 ```
 آپ پہلے سے طے شدہ تشکیل استعمال کرسکتے ہیں یا درج ذیل میں سے کچھ پیرامیٹرز فراہم کرسکتے ہیں۔
 

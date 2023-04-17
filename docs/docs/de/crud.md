@@ -13,7 +13,11 @@ Als Erstes benötigen wir eine Isar Instanz. Jede Instanz erfordert einen Ordner
 Gib alle Schemas an, die du mit der Isar-Instanz verwenden möchtest. Wenn du mehrere Instanzen öffnest, musst du trotzdem jeder Instanz die gleichen Schemas mitgeben.
 
 ```dart
-final isar = await Isar.open([RecipeSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [RecipeSchema],
+  directory: dir.path,
+);
 ```
 
 Du kannst die Standardkonfiguration verwenden oder einige der folgenden Parameter setzen:

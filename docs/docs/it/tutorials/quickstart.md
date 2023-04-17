@@ -55,7 +55,11 @@ flutter pub run build_runner build
 Apri una nuova istanza Isar e passa tutti i tuoi schemi di raccolte. Facoltativamente, puoi specificare un nome di istanza e una directory.
 
 ```dart
-final isar = await Isar.open([UserSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [UserSchema],
+  directory: dir.path,
+);
 ```
 
 ## 5. Scrivi e leggi

@@ -29,8 +29,11 @@ Stelle sicher, dass du die gleichen Schemas wie im zentralen Isolate zur Verfüg
 ```dart
 void main() {
   // Isar im UI-Isolate öffnen
+  final dir = await getApplicationDocumentsDirectory();
+
   final isar = await Isar.open(
-    [MessageSchema]
+    [MessageSchema],
+    directory: dir.path,
     name: 'myInstance',
   );
 
@@ -52,8 +55,11 @@ void main() {
 // Funktion, die im neuen Isolate ausgeführt werden soll
 Future createDummyMessages(int count) async {
   // Wir benötigen hier keinen Pfad, weil die Instanz schon offen ist
+  final dir = await getApplicationDocumentsDirectory();
+  
   final isar = await Isar.open(
     [PostSchema],
+    directory: dir.path,
     name: 'myInstance',
   );
 

@@ -55,7 +55,11 @@ flutter pub run build_runner build
 Abre una nueva instalcia Isar y pásale todos los esquemas de tu colección. Opcionalmente puedes especificar un nombre para la instancia y un directorio.
 
 ```dart
-final isar = await Isar.open([UserSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [UserSchema],
+  directory: dir.path,
+);
 ```
 
 ## 5. Lee y escribe

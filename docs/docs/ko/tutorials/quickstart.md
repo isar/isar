@@ -55,7 +55,11 @@ flutter pub run build_runner build
 새 Isar 인스턴스를 열고 모든 컬렉션 스키마를 전달합니다. 선택적으로 인스턴스 이름과 디렉토리를 지정할 수도 있습니다.
 
 ```dart
-final isar = await Isar.open([EmailSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [EmailSchema],
+  directory: dir.path,
+);
 ```
 
 ## 5. 읽기와 쓰기

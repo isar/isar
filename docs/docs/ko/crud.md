@@ -13,7 +13,11 @@ title: CRUD 조작
 Isar 인스턴스에서 사용하고 싶은 모든 스키마를 지정합니다. 여러 인스턴스를 열고 있는 경우에도 각각의 인스턴스에 동일한 스키마를 부여해야 합니다.
 
 ```dart
-final isar = await Isar.open([RecipeSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [RecipeSchema],
+  directory: dir.path,
+);
 ```
 
 기본 구성을 사용하거나 다음 매개 변수 중 일부를 제공할 수 있습니다:
