@@ -19,7 +19,7 @@ objc = "0.2.7"
 objc-foundation = "0.1.1"
 
 [target.'cfg(target_os = "android")'.dependencies]
-jni = "0.20.0"
+jni = "0.21.1"
 ndk-context = "0.1.1"
 once_cell = "1.10.0"
 
