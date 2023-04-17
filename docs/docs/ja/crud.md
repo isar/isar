@@ -13,7 +13,11 @@ title: CRUD操作
 Isarインスタンスで使用したいすべてのスキーマを指定します。複数のインスタンスを開いている場合でも、それぞれのインスタンスに同じスキーマを与える必要があります。
 
 ```dart
-final isar = await Isar.open([ContactSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [ContactSchema],
+  directory: dir.path,
+);
 ```
 
 加えて、デフォルト設定を使用するか、もしくは以下のいくつかのパラメータを指定することができます:

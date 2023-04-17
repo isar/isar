@@ -52,7 +52,11 @@ flutter pub run build_runner build
    ایک نیا ای زار مثال کھولیں اور اپنے تمام کلیکشن اسکیموں کو پاس کریں۔ اختیاری طور پر آپ مثال کا نام اور ڈائریکٹری بتا سکتے ہیں۔
 
 ```dart
-final isar = await Isar.open([UserSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [UserSchema],
+  directory: dir.path,
+);
 ```
 
 ## 5. لکھیں اور پڑھیں

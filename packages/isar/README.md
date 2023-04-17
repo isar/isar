@@ -112,7 +112,7 @@ enum Status {
 final dir = await getApplicationDocumentsDirectory();
 final isar = await Isar.open(
   [EmailSchema],
-  directory: dir,
+  directory: dir.path,
 );
 ```
 

@@ -13,7 +13,11 @@ Avant de pouvoir faire quoi que ce soit, nous avons besoin d'une instance Isar. 
 Fournissez tous les schémas que vous souhaitez utiliser avec l'instance Isar. Si nous ouvrons plusieurs instances, nous devons toujours fournir les mêmes schémas à chaque instance.
 
 ```dart
-final isar = await Isar.open([ContactSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [ContactSchema],
+  directory: dir.path,
+);
 ```
 
 Nous pouvons utiliser la configuration par défaut ou fournir certains des paramètres suivants:

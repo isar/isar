@@ -13,7 +13,11 @@ Before you can do anything, we need an Isar instance. Each instance requires a d
 Provide all the schemas you want to use with the Isar instance. If you open multiple instances, you still have to provide the same schemas to each instance.
 
 ```dart
-final isar = await Isar.open([RecipeSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [RecipeSchema],
+  directory: dir.path,
+);
 ```
 
 You can use the default config or provide some of the following parameters:

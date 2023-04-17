@@ -13,7 +13,11 @@ Antes de hacer nada, necesitamos una instancia Isar. Cada instancia requiere un 
 Provee todos los esquemas que quieras usar con la instancia Isar. Si abres múltiples instancias, aún tienes que proveer todos los esquemas a cada instancia.
 
 ```dart
-final isar = await Isar.open([ContactSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [ContactSchema],
+  directory: dir.path,
+);
 ```
 
 Puedes usar la configuración por defecto o proveer algunos de los siguientes parámetros:

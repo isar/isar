@@ -29,8 +29,11 @@ Asegúrate de proveer los mismos esquemas que en el isolate principal. De lo con
 ```dart
 void main() {
   // Open Isar in the UI isolate
+  final dir = await getApplicationDocumentsDirectory();
+  
   final isar = await Isar.open(
-    [MessageSchema]
+    [MessageSchema],
+    directory: dir.path,
     name: 'myInstance',
   );
 
@@ -52,8 +55,11 @@ void main() {
 // function that will be executed in the new isolate
 Future createDummyMessages(int count) async {
   // we don't need the path here because the instance is already open
+  final dir = await getApplicationDocumentsDirectory();
+  
   final isar = await Isar.open(
     [PostSchema],
+    directory: dir.path,
     name: 'myInstance',
   );
 

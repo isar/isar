@@ -13,7 +13,11 @@ title: 增删改查
 将你想要使用的所有 Collection 的 Schema 作为参数传入到创建实例的方法中。如果你有多个实例，你仍然需要给每个实例配置相同的 Schema（即各个实例的 Schema 必须一致）。
 
 ```dart
-final isar = await Isar.open([RecipeSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [RecipeSchema],
+  directory: dir.path,
+);
 ```
 
 你可以使用默认配置，也可以根据下表修改参数：
