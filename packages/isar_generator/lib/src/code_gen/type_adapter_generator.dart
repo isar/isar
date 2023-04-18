@@ -242,6 +242,10 @@ String generateSerialize(ObjectInfo object) {
 }
 
 String generateDeserialize(ObjectInfo object) {
+  final constructor = (object.constructor != null && object.constructor!.isNotEmpty)
+      ? '${object.dartName}.${object.constructor!}'
+      : object.dartName;
+
   var code = '''
     ${object.dartName} ${object.deserializeName}(
       Id id,
@@ -249,7 +253,7 @@ String generateDeserialize(ObjectInfo object) {
       List<int> offsets,
       Map<Type, List<int>> allOffsets,
     ) {
-      final object = ${object.dartName}(''';
+      final object = $constructor(''';
 
   final propertiesByMode =
       object.properties.groupBy((ObjectProperty p) => p.deserialize);

@@ -140,6 +140,7 @@ extension ElementX on Element {
           .toSetValue()!
           .map((e) => e.toStringValue()!)
           .toSet(),
+      constructor: ann.getField('constructor')!.toStringValue()
     );
   }
 
@@ -171,6 +172,8 @@ extension ElementX on Element {
           .toSet(),
     );
   }
+
+  String? get collectionConstructor => collectionAnnotation?.constructor;
 }
 
 void checkIsarName(String name, Element element) {

@@ -55,6 +55,7 @@ class IsarAnalyzer {
       embeddedDartNames: _getEmbeddedDartNames(element),
       indexes: indexes,
       links: links,
+      constructor: constructor.name,
     );
   }
 
@@ -117,10 +118,21 @@ class IsarAnalyzer {
       err('Class must be public.', modelClass);
     }
 
-    final constructor = modelClass.constructors
-        .firstOrNullWhere((ConstructorElement c) => c.periodOffset == null);
-    if (constructor == null) {
-      err('Class needs an unnamed constructor.', modelClass);
+    final customConstructorName = modelClass.collectionConstructor;
+    
+    final ConstructorElement? constructor;
+    if(customConstructorName == null){
+      constructor = modelClass.constructors
+          .firstOrNullWhere((ConstructorElement c) => c.periodOffset == null);
+      if (constructor == null) {
+        err('Class needs an unnamed constructor.', modelClass);
+      }
+    }else{
+      constructor = modelClass.constructors
+          .firstOrNullWhere((ConstructorElement c) => c.displayName == customConstructorName);
+      if (constructor == null) {
+        err('Class needs a constructor with name $customConstructorName, as specified by the @Collection annotation.', modelClass);
+      }
     }
 
     final hasCollectionSupertype = modelClass.allSupertypes.any((type) {

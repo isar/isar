@@ -15,6 +15,7 @@ class ObjectInfo {
     this.embeddedDartNames = const {},
     this.indexes = const [],
     this.links = const [],
+    this.constructor,
   }) {
     this.properties = properties.sortedBy((e) => e.isarName).toList();
   }
@@ -22,6 +23,7 @@ class ObjectInfo {
   final String dartName;
   final String isarName;
   final String? accessor;
+  final String? constructor;
   late final List<ObjectProperty> properties;
   final Map<String, String> embeddedDartNames;
   final List<ObjectIndex> indexes;

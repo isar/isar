@@ -11,6 +11,7 @@ class Collection {
     this.inheritance = true,
     this.accessor,
     this.ignore = const {},
+    this.constructor,
   });
 
   /// Should properties and accessors of parent classes and mixins be included?
@@ -31,4 +32,8 @@ class Collection {
 
   /// A list of properties or getter names that Isar should ignore.
   final Set<String> ignore;
+
+  /// The name for the constructor that Isar should use.
+  /// If null, the first unnamed constructor will be used.
+  final String? constructor;
 }
