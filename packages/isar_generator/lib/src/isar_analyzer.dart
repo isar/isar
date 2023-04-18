@@ -129,7 +129,7 @@ class IsarAnalyzer {
       }
     }else{
       constructor = modelClass.constructors
-          .firstOrNullWhere((ConstructorElement c) => c.displayName == customConstructorName);
+          .firstOrNullWhere((ConstructorElement c) => c.name == customConstructorName);
       if (constructor == null) {
         err('Class needs a constructor with name $customConstructorName, as specified by the @Collection annotation.', modelClass);
       }
