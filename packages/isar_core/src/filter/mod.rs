@@ -40,7 +40,7 @@ impl Filter {
     ///
     /// Remove conditions that are guaranteed to be true or false:
     /// AND(A > 5, A < 3)           =>  false
-    /// OR(A == 5, B == 7, B != 7)  =>  A == 5
+    /// OR(A == 5, B == 7, B != 7)  =>  true
     pub fn optimize(self) -> Self {
         let mut filter = self;
 
