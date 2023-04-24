@@ -137,26 +137,32 @@ mod tests {
         Filter::Condition(FilterCondition::new_false())
     }
 
+    macro_rules! opt {
+        ($filter:expr, $result:expr) => {
+            assert_eq!($filter.optimize(), $result);
+        };
+    }
+
     #[test]
     fn test_optimize_remove_redundant_conditions() {
-        assert_eq!(and!(gt(10), gt(20), lt(30)).optimize(), between(21, 29));
-        assert_eq!(and!(gt(10), lt(10)).optimize(), f());
-        assert_eq!(or!(gt(10), gt(20)).optimize(), gt(10));
-        assert_eq!(or!(gt(10), gt(20), lt(30)).optimize(), t());
+        opt!(and!(gt(10), gt(20), lt(30)), between(21, 29));
+        opt!(and!(gt(10), lt(10)), f());
+        opt!(or!(gt(10), gt(20)), gt(10));
+        opt!(or!(gt(10), gt(20), lt(30)), t());
     }
 
     #[test]
     fn test_optimize_remove_nested_and_or_groups() {
-        assert_eq!(
-            and!(and!(gt(10), lt(30)), or!(eq(15), eq(20))).optimize(),
+        opt!(
+            and!(and!(gt(10), lt(30)), or!(eq(15), eq(20))),
             and!(between(11, 29), or!(eq(15), eq(20)))
         );
     }
 
     #[test]
     fn test_optimize_remove_nested_not_groups() {
-        assert_eq!(not(not(gt(10))).optimize(), gt(10));
-        assert_eq!(not(not(not(gt(10)))).optimize(), lt(11));
-        assert_eq!(not(not(not(eq(10)))).optimize(), or!(lt(10), gt(10)));
+        opt!(not(not(gt(10))), gt(10));
+        opt!(not(not(not(gt(10)))), lt(11));
+        opt!(not(not(not(eq(10)))), or!(lt(10), gt(10)));
     }
 }
