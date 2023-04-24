@@ -105,7 +105,7 @@ fn verify_collection(col: &CollectionSchema, collections: &[CollectionSchema]) -
                 }
             }
 
-            if property.data_type.get_element_type().is_some() {
+            if property.data_type.is_list() {
                 if index.properties.len() > 1 {
                     schema_error("Composite list indexes are not supported.")?;
                 }

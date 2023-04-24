@@ -21,15 +21,15 @@ pub trait IsarWriter<'a> {
 
     fn write_string(&mut self, value: &str);
 
-    fn write_bytes(&mut self, value: &[u8]);
+    fn write_blob(&mut self, value: &[u8]);
 
-    fn write_any(&mut self, value: &Value);
+    fn write_json(&mut self, value: &Value);
 
     fn begin_object(&mut self) -> Self::ObjectWriter;
 
     fn end_object(&mut self, writer: Self::ObjectWriter);
 
-    fn begin_list(&mut self) -> Self::ListWriter;
+    fn begin_list(&mut self, length: usize) -> Self::ListWriter;
 
     fn end_list(&mut self, writer: Self::ListWriter);
 }

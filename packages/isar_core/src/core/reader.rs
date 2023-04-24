@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use serde_json::Value;
 
 pub const NULL_BOOL: u8 = 0;
@@ -33,7 +35,9 @@ pub trait IsarReader {
 
     fn read_string(&self, index: usize) -> Option<&str>;
 
-    fn read_any(&self, index: usize) -> Option<Value>;
+    fn read_blob(&self, index: usize) -> Option<Cow<'_, [u8]>>;
+
+    fn read_json(&self, index: usize) -> Option<Cow<'_, Value>>;
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>>;
 

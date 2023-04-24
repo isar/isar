@@ -3,6 +3,7 @@ use std::cell::Cell;
 use super::sqlite_collection::SQLiteCollection;
 use super::sqlite_insert::SQLiteInsert;
 use crate::core::writer::IsarWriter;
+use base64::{encoded_len, engine::general_purpose, Engine};
 use serde_json::{
     ser::{CompactFormatter, Formatter},
     Value,
@@ -70,8 +71,34 @@ impl<'a> IsarWriter<'a> for SQLiteInsert<'a> {
         self.property += 1;
     }
 
-    fn write_any(&mut self, value: &Value) {
-        todo!()
+    fn write_blob(&mut self, value: &[u8]) {
+        let _ = self.stmt.bind_blob(self.property, value);
+        self.property += 1;
+    }
+
+    fn write_json(&mut self, value: &Value) {
+        match value {
+            Value::Null => self.write_null(),
+            Value::Bool(value) => self.write_bool(*value),
+            Value::Number(value) => {
+                if let Some(value) = value.as_i64() {
+                    self.write_long(value);
+                } else if let Some(value) = value.as_f64() {
+                    self.write_double(value);
+                } else {
+                    self.write_null();
+                }
+            }
+            Value::String(value) => self.write_string(value),
+            _ => {
+                let bytes = serde_json::to_vec(value);
+                if let Ok(bytes) = bytes {
+                    self.write_blob(bytes.as_slice());
+                } else {
+                    self.write_null();
+                }
+            }
+        }
     }
 
     fn begin_object<'b>(&mut self) -> Self::ObjectWriter {
@@ -90,12 +117,11 @@ impl<'a> IsarWriter<'a> for SQLiteInsert<'a> {
 
     fn end_object<'b>(&'b mut self, writer: Self::ObjectWriter) {
         let buffer = writer.finalize();
-        let _ = self.stmt.bind_blob(self.property, &buffer);
+        self.write_blob(buffer.as_slice());
         self.buffer = Some(buffer);
-        self.property += 1;
     }
 
-    fn begin_list(&mut self) -> Self::ListWriter {
+    fn begin_list(&mut self, _: usize) -> Self::ListWriter {
         let property_index = self.property % (self.collection.properties.len() + 1);
         let property = &self.collection.properties[property_index - 1];
 
@@ -109,13 +135,8 @@ impl<'a> IsarWriter<'a> for SQLiteInsert<'a> {
 
     fn end_list<'b>(&'b mut self, writer: Self::ListWriter) {
         let buffer = writer.finalize();
-        let _ = self.stmt.bind_blob(self.property, &buffer);
+        self.write_blob(buffer.as_slice());
         self.buffer = Some(buffer);
-        self.property += 1;
-    }
-
-    fn write_bytes(&mut self, value: &[u8]) {
-        todo!()
     }
 }
 
@@ -158,7 +179,7 @@ impl<'a> SQLiteObjectWriter<'a> {
         self.first = false;
     }
 
-    fn finalize(mut self) -> Vec<u8> {
+    fn finalize(self) -> Vec<u8> {
         assert!(self.property == self.collection.properties.len());
         let mut buffer = self.buffer.take();
         CompactFormatter.end_object(&mut buffer).unwrap();
@@ -258,8 +279,29 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
         self.property += 1;
     }
 
-    fn write_any(&mut self, value: &Value) {
-        todo!()
+    fn write_blob(&mut self, value: &[u8]) {
+        let property = &self.collection.properties[self.property];
+        self.write_property_name(&property.name);
+
+        let buffer = self.buffer.get_mut();
+        CompactFormatter.begin_string(buffer);
+
+        let offset = buffer.len();
+        let base64_len = encoded_len(value.len(), false).unwrap();
+        buffer.resize(offset + base64_len, 0);
+        general_purpose::STANDARD_NO_PAD.encode_slice(value, &mut buffer[offset..]);
+        CompactFormatter.end_string(buffer).unwrap();
+
+        self.property += 1;
+    }
+
+    fn write_json(&mut self, value: &Value) {
+        let property = &self.collection.properties[self.property];
+        self.write_property_name(&property.name);
+
+        let buffer = self.buffer.get_mut();
+        serde_json::to_writer(buffer, value);
+        self.property += 1;
     }
 
     fn begin_object(&mut self) -> Self::ObjectWriter {
@@ -277,7 +319,7 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
         self.property += 1;
     }
 
-    fn begin_list(&mut self) -> Self::ListWriter {
+    fn begin_list(&mut self, _length: usize) -> Self::ListWriter {
         let property = &self.collection.properties[self.property];
         self.write_property_name(&property.name);
 
@@ -291,10 +333,6 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
     fn end_list<'b>(&'b mut self, writer: Self::ListWriter) {
         self.buffer.replace(writer.finalize());
         self.property += 1;
-    }
-
-    fn write_bytes(&mut self, value: &[u8]) {
-        todo!()
     }
 }
 
@@ -411,7 +449,11 @@ impl<'a> IsarWriter<'a> for SQLiteListWriter<'a> {
         CompactFormatter.end_string(buffer).unwrap();
     }
 
-    fn write_any(&mut self, value: &Value) {
+    fn write_blob(&mut self, _value: &[u8]) {
+        panic!("Nested lists are not supported");
+    }
+
+    fn write_json(&mut self, value: &Value) {
         todo!()
     }
 
@@ -426,15 +468,11 @@ impl<'a> IsarWriter<'a> for SQLiteListWriter<'a> {
         self.buffer.replace(writer.finalize());
     }
 
-    fn begin_list(&mut self) -> Self::ListWriter {
+    fn begin_list(&mut self, _length: usize) -> Self::ListWriter {
         panic!("Nested lists are not supported");
     }
 
     fn end_list<'b>(&'b mut self, _: Self::ListWriter) {
         panic!("Nested lists are not supported");
-    }
-
-    fn write_bytes(&mut self, value: &[u8]) {
-        todo!()
     }
 }

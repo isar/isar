@@ -1,6 +1,5 @@
 pub mod data_type;
 pub mod error;
-pub mod filter;
 pub mod insert;
 pub mod instance;
 pub mod query;

@@ -185,7 +185,7 @@ impl IsarInstance for SQLiteInstance {
 mod test {
     use super::SQLiteInstance;
     use crate::core::data_type::DataType;
-    use crate::core::filter::IsarFilterBuilder;
+    //use crate::core::filter::IsarFilterBuilder;
     use crate::core::insert::IsarInsert;
     use crate::core::instance::IsarInstance;
     use crate::core::query::IsarCursor;
@@ -248,8 +248,8 @@ mod test {
 
         let mut txn = instance.begin_txn(false).unwrap();
         let mut qb = instance.query(0).unwrap();
-        let filter = qb.not_null(1);
-        qb.set_filter(filter);
+        /*let filter = qb.not_null(1);
+        qb.set_filter(filter);*/
         let q = qb.build();
         let mut cur = q.cursor(txn).unwrap();
         let next = cur.next().unwrap().unwrap();

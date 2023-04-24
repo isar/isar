@@ -1,0 +1,146 @@
+use self::filter_condition::FilterCondition;
+use self::filter_group::FilterGroup;
+use self::filter_nested::FilterNested;
+
+pub(crate) mod condition_merge;
+pub mod filter_condition;
+pub mod filter_group;
+pub mod filter_nested;
+pub mod filter_value;
+
+#[derive(PartialEq, Clone, Debug)]
+pub enum Filter {
+    Condition(FilterCondition),
+    Group(FilterGroup),
+    Nested(FilterNested),
+}
+
+impl Filter {
+    // This methods optimizes the filter tree by removing unnecessary filters and conditions:
+    // - Remove redundant conditions, for example, two Greater conditions on the same property, or one Greater and Equal condition.
+    // - Remove nested And or Or groups of the same type.
+    // - Remove nested Not groups.
+    // - Remove And and Or groups with a single condition.
+    // - Replace Not groups with a single condition with the inverted condition if possible.
+    // - Remove contradictory conditions.
+    // - Merge conditions with the same property and condition type within an And group, even if they are not adjacent (e.g., merge InList conditions' value lists and remove duplicates, intersect Between conditions' ranges).
+    // - Remove conditions that are guaranteed to be true or false within an Or or And group, respectively.
+    pub fn optimize(self) -> Self {
+        let mut filter = self;
+
+        loop {
+            let (new_filter, changed) = filter.simplify();
+
+            if !changed {
+                return new_filter;
+            }
+            filter = new_filter;
+        }
+    }
+
+    fn simplify(self) -> (Filter, bool) {
+        if let Filter::Group(group) = self {
+            group.simplify()
+        } else {
+            (self, false)
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        filter_condition::FilterCondition,
+        filter_group::{FilterGroup, GroupType},
+        filter_value::FilterValue,
+        Filter,
+    };
+
+    fn gt(value: i64) -> Filter {
+        Filter::Condition(FilterCondition::new_greater_than(
+            0,
+            FilterValue::Integer(value),
+            false,
+        ))
+    }
+
+    fn lt(value: i64) -> Filter {
+        Filter::Condition(FilterCondition::new_less_than(
+            0,
+            FilterValue::Integer(value),
+            false,
+        ))
+    }
+
+    fn eq(value: i64) -> Filter {
+        Filter::Condition(FilterCondition::new_equal_to(
+            0,
+            FilterValue::Integer(value),
+            false,
+        ))
+    }
+
+    fn between(lower: i64, upper: i64) -> Filter {
+        Filter::Condition(FilterCondition::new_between(
+            0,
+            FilterValue::Integer(lower),
+            FilterValue::Integer(upper),
+            false,
+        ))
+    }
+
+    macro_rules! and {
+        ($($x:expr),*) => {
+            {
+                let mut filters = Vec::new();
+                $(filters.push($x);)*
+                Filter::Group(FilterGroup::new(GroupType::And, filters))
+            }
+        };
+    }
+
+    macro_rules! or {
+        ($($x:expr),*) => {
+            {
+                let mut filters = Vec::new();
+                $(filters.push($x);)*
+                Filter::Group(FilterGroup::new(GroupType::Or, filters))
+            }
+        };
+    }
+
+    fn not(filter: Filter) -> Filter {
+        Filter::Group(FilterGroup::new(GroupType::Not, vec![filter]))
+    }
+
+    fn t() -> Filter {
+        Filter::Condition(FilterCondition::new_true())
+    }
+
+    fn f() -> Filter {
+        Filter::Condition(FilterCondition::new_false())
+    }
+
+    #[test]
+    fn test_optimize_remove_redundant_conditions() {
+        assert_eq!(and!(gt(10), gt(20), lt(30)).optimize(), between(21, 29));
+        assert_eq!(and!(gt(10), lt(10)).optimize(), f());
+        assert_eq!(or!(gt(10), gt(20)).optimize(), gt(10));
+        assert_eq!(or!(gt(10), gt(20), lt(30)).optimize(), t());
+    }
+
+    #[test]
+    fn test_optimize_remove_nested_and_or_groups() {
+        assert_eq!(
+            and!(and!(gt(10), lt(30)), or!(eq(15), eq(20))).optimize(),
+            and!(between(11, 29), or!(eq(15), eq(20)))
+        );
+    }
+
+    #[test]
+    fn test_optimize_remove_nested_not_groups() {
+        assert_eq!(not(not(gt(10))).optimize(), gt(10));
+        assert_eq!(not(not(not(gt(10)))).optimize(), lt(11));
+        assert_eq!(not(not(not(eq(10)))).optimize(), or!(lt(10), gt(10)));
+    }
+}

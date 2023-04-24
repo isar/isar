@@ -1,7 +1,10 @@
 use super::sqlite_collection::SQLiteCollection;
 use super::sqlite_filter::SQLiteFilter;
 use super::sqlite_query::SQLiteQuery;
-use crate::core::query_builder::{IsarQueryBuilder, Sort};
+use crate::{
+    core::query_builder::{IsarQueryBuilder, Sort},
+    filter::Filter,
+};
 use itertools::Itertools;
 
 pub struct SQLiteQueryBuilder<'a> {
@@ -30,12 +33,10 @@ impl SQLiteQueryBuilder<'_> {
 }
 
 impl<'a> IsarQueryBuilder for SQLiteQueryBuilder<'a> {
-    type Filter = SQLiteFilter;
-
     type Query = SQLiteQuery<'a>;
 
-    fn set_filter(&mut self, filter: Self::Filter) {
-        self.filter = Some(filter);
+    fn set_filter(&mut self, filter: Filter) {
+        //self.filter = Some(filter);
     }
 
     fn add_sort(&mut self, property_index: usize, sort: Sort) {
@@ -61,7 +62,7 @@ impl<'a> IsarQueryBuilder for SQLiteQueryBuilder<'a> {
         sql.push_str(&self.collection.name);
         if let Some(filter) = self.filter {
             sql.push_str(" WHERE ");
-            sql.push_str(&filter.sql);
+            //sql.push_str(&filter.sql);
         }
         if !self.sort.is_empty() {
             sql.push_str(" ORDER BY ");

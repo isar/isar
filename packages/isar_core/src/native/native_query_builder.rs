@@ -1,15 +1,17 @@
-use super::native_filter::NativeFilter;
 use super::native_query::NativeQuery;
-use crate::core::query_builder::{IsarQueryBuilder, Sort};
+use crate::{
+    core::query_builder::{IsarQueryBuilder, Sort},
+    filter::Filter,
+};
 
 pub struct NativeQueryBuilder {}
 
-impl IsarQueryBuilder for NativeQueryBuilder {
-    type Filter = NativeFilter;
+pub struct NativeFilter {}
 
+impl IsarQueryBuilder for NativeQueryBuilder {
     type Query = NativeQuery;
 
-    fn set_filter(&mut self, filter: Self::Filter) {
+    fn set_filter(&mut self, filter: Filter) {
         todo!()
     }
 

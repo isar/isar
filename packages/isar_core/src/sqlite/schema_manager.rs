@@ -131,17 +131,17 @@ fn update_table(sqlite: &SQLite3, collection: &CollectionSchema) -> Result<()> {
 
 fn get_sqlite_type(property: &PropertySchema) -> Cow<str> {
     match property.data_type {
-        DataType::Any => Cow::Borrowed("_ANY"),
-        DataType::Bool => Cow::Borrowed("_U1"),
-        DataType::Byte => Cow::Borrowed("_U8"),
+        DataType::Bool => Cow::Borrowed("_BOOL"),
+        DataType::Byte => Cow::Borrowed("_BYTE"),
         DataType::Int => Cow::Borrowed("_I32"),
         DataType::Float => Cow::Borrowed("_F32"),
         DataType::Long => Cow::Borrowed("_I64"),
         DataType::Double => Cow::Borrowed("_F64"),
         DataType::String => Cow::Borrowed("_STR"),
+        DataType::Blob => Cow::Borrowed("_BLOB"),
+        DataType::Json => Cow::Borrowed("_JSON"),
         DataType::Object => Cow::Borrowed(property.collection.as_ref().unwrap()),
-        DataType::BoolList => Cow::Borrowed("_U1[]"),
-        DataType::ByteList => Cow::Borrowed("_U8[]"),
+        DataType::BoolList => Cow::Borrowed("_BOOL[]"),
         DataType::IntList => Cow::Borrowed("_I32[]"),
         DataType::FloatList => Cow::Borrowed("_F32[]"),
         DataType::LongList => Cow::Borrowed("_I64[]"),
@@ -156,16 +156,16 @@ fn get_sqlite_type(property: &PropertySchema) -> Cow<str> {
 
 fn get_data_type(sqlite_type: &str) -> (DataType, Option<&str>) {
     match sqlite_type {
-        "_ANY" => (DataType::Any, None),
-        "_U1" => (DataType::Bool, None),
-        "_U8" => (DataType::Byte, None),
+        "_BOOL" => (DataType::Bool, None),
+        "_BYTE" => (DataType::Byte, None),
         "_I32" => (DataType::Int, None),
         "_F32" => (DataType::Float, None),
         "_I64" => (DataType::Long, None),
         "_F64" => (DataType::Double, None),
         "_STR" => (DataType::String, None),
+        "_BLOB" => (DataType::Blob, None),
+        "_JSON" => (DataType::Json, None),
         "_U1[]" => (DataType::BoolList, None),
-        "_U8[]" => (DataType::ByteList, None),
         "_I32[]" => (DataType::IntList, None),
         "_F32[]" => (DataType::FloatList, None),
         "_I64[]" => (DataType::LongList, None),

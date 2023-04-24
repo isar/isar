@@ -31,7 +31,7 @@ impl<'a> NativeObject<'a> {
     }
 
     #[inline]
-    pub(crate) fn contains_offset(&self, offset: usize) -> bool {
+    fn contains_offset(&self, offset: usize) -> bool {
         self.static_size > offset
     }
 
@@ -111,14 +111,20 @@ impl<'a> NativeObject<'a> {
         None
     }
 
-    pub fn read_string(&'a self, offset: usize) -> Option<&'a str> {
+    pub fn read_string(&self, offset: usize) -> Option<&'a str> {
         let (offset, length) = self.get_offset_length(offset)?;
         let bytes = &self.bytes[offset..offset + length];
         let str = unsafe { from_utf8_unchecked(bytes) };
         Some(str)
     }
 
-    pub fn read_any(&'a self, offset: usize) -> Option<Value> {
+    pub fn read_bytes(&self, offset: usize) -> Option<&'a [u8]> {
+        let (offset, length) = self.get_offset_length(offset)?;
+        let bytes = &self.bytes[offset..offset + length];
+        Some(bytes)
+    }
+
+    pub fn read_json(&self, offset: usize) -> Option<Value> {
         let (offset, length) = self.get_offset_length(offset)?;
         let bytes = &self.bytes[offset..offset + length];
         serde_json::from_slice(bytes).ok()

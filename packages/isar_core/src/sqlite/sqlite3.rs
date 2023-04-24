@@ -18,7 +18,9 @@ impl SQLite3 {
         unsafe {
             let r = ffi::sqlite3_open_v2(c_path.as_ptr(), &mut db, flags, ptr::null());
             if r == ffi::SQLITE_OK {
-                Ok(SQLite3 { db })
+                let sqlite = SQLite3 { db };
+                sqlite.initialize()?;
+                Ok(sqlite)
             } else {
                 let err = sqlite_err(db, r);
                 if !db.is_null() {
@@ -27,6 +29,11 @@ impl SQLite3 {
                 Err(err)
             }
         }
+    }
+
+    fn initialize(&self) -> Result<()> {
+        self.execute("PRAGMA case_sensitive_like = true")?;
+        Ok(())
     }
 
     pub fn prepare(&self, sql: &str) -> Result<SQLiteStatement> {

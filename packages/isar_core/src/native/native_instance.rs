@@ -214,12 +214,27 @@ mod test {
 
     #[test]
     fn test_exec() {
-        let schema = IsarSchema::new(vec![CollectionSchema::new(
-            "test",
-            vec![PropertySchema::new("propa", DataType::Int, None)],
-            vec![],
-            false,
-        )]);
+        let schema = IsarSchema::new(vec![
+            CollectionSchema::new(
+                "test",
+                vec![PropertySchema::new(
+                    "propa",
+                    DataType::Object,
+                    Some("test2"),
+                )],
+                vec![],
+                false,
+            ),
+            CollectionSchema::new(
+                "test2",
+                vec![
+                    PropertySchema::new("str", DataType::String, None),
+                    PropertySchema::new("str2", DataType::String, None),
+                ],
+                vec![],
+                false,
+            ),
+        ]);
         let i = NativeInstance::open(
             0,
             "test",
@@ -232,9 +247,13 @@ mod test {
         .unwrap();
 
         let txn = i.begin_txn(true).unwrap();
-        let mut insert = i.insert(txn, 0, 1000000).unwrap();
-        for i in 0..1000000 {
-            insert.write_int(0);
+        let mut insert = i.insert(txn, 0, 100).unwrap();
+        for i in 0..100 {
+            let mut obj_writer = insert.begin_object();
+            obj_writer.write_string("STR1!!!");
+            //obj_writer.write_string("STR2!!!");
+            insert.end_object(obj_writer);
+            eprintln!("inserted {}", i);
             insert = insert.insert(Some(i as i64)).unwrap();
         }
         let txn = insert.finish().unwrap();

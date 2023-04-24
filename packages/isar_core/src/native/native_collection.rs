@@ -7,13 +7,13 @@ use super::{index::NativeIndex, mdbx::db::Db};
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
 pub struct NativeProperty {
     pub data_type: DataType,
-    pub offset: u32,
+    pub offset: usize,
     // for embedded objects
     pub collection_index: Option<u16>,
 }
 
 impl NativeProperty {
-    pub fn new(data_type: DataType, offset: u32, collection_index: Option<u16>) -> Self {
+    pub fn new(data_type: DataType, offset: usize, collection_index: Option<u16>) -> Self {
         NativeProperty {
             data_type,
             offset,
@@ -50,7 +50,7 @@ impl NativeCollection {
 unsafe impl Send for NativeCollection {}
 unsafe impl Sync for NativeCollection {}
 
-pub fn data_type_static_size(data_type: DataType) -> u32 {
+pub fn data_type_static_size(data_type: DataType) -> usize {
     match data_type {
         DataType::Bool | DataType::Byte => 1,
         DataType::Int | DataType::Float => 4,

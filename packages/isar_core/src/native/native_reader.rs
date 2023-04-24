@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use serde_json::Value;
 
 use super::native_collection::{NativeCollection, NativeProperty};
@@ -57,14 +59,22 @@ impl<'a> IsarReader for NativeReader<'a> {
         self.object.read_double(property.offset as usize)
     }
 
-    fn read_string(&self, index: usize) -> Option<&str> {
+    fn read_string(&self, index: usize) -> Option<&'a str> {
         let property = &self.collection.properties[index];
         self.object.read_string(property.offset as usize)
     }
 
-    fn read_any(&self, index: usize) -> Option<Value> {
+    fn read_blob(&self, index: usize) -> Option<Cow<'a, [u8]>> {
         let property = &self.collection.properties[index];
-        self.object.read_any(property.offset as usize)
+        self.object
+            .read_bytes(property.offset as usize)
+            .map(Cow::Borrowed)
+    }
+
+    fn read_json(&self, index: usize) -> Option<Cow<'a, Value>> {
+        let property = &self.collection.properties[index];
+        let value = self.object.read_json(property.offset as usize);
+        value.map(Cow::Owned)
     }
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>> {
@@ -84,7 +94,7 @@ impl<'a> IsarReader for NativeReader<'a> {
     fn read_list(&self, index: usize) -> Option<(Self::ListReader<'_>, usize)> {
         let property = self.collection.properties[index];
         let element_size = match property.data_type {
-            DataType::BoolList | DataType::ByteList => 1,
+            DataType::BoolList => 1,
             DataType::IntList | DataType::FloatList => 4,
             DataType::LongList | DataType::DoubleList => 8,
             DataType::StringList | DataType::ObjectList => 6,
@@ -147,12 +157,17 @@ impl<'a> IsarReader for NativeListReader<'a> {
         self.object.read_double(index * 8)
     }
 
-    fn read_string(&self, index: usize) -> Option<&str> {
+    fn read_string(&self, index: usize) -> Option<&'a str> {
         self.object.read_string(index * 6)
     }
 
-    fn read_any(&self, index: usize) -> Option<Value> {
-        self.object.read_any(index * 6)
+    fn read_blob(&self, _index: usize) -> Option<Cow<'_, [u8]>> {
+        panic!("Nested lists are not supported")
+    }
+
+    fn read_json(&self, index: usize) -> Option<Cow<'a, Value>> {
+        let valye = self.object.read_json(index * 6);
+        valye.map(Cow::Owned)
     }
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>> {

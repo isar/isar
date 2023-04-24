@@ -29,6 +29,7 @@ impl<'a> NativeInsert<'a> {
         count: usize,
     ) -> Self {
         let mut buffer = Vec::with_capacity(collection.static_size * 2);
+        buffer.resize(collection.static_size, 0);
         LittleEndian::write_u16(&mut buffer, collection.static_size as u16);
 
         Self {
@@ -53,9 +54,7 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
         }
 
         let buffer = self.buffer.get_mut();
-        if buffer.len() < 2 {
-            illegal_arg("No properties have been written")?;
-        } else if buffer.len() > MAX_OBJ_SIZE as usize {
+        if buffer.len() > MAX_OBJ_SIZE as usize {
             illegal_arg("Object is bigger than 16MB")?;
         }
 
@@ -69,7 +68,8 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
         if self.inserted_count < self.count {
             self.id = id.unwrap_or(0);
             self.property = 0;
-            buffer.truncate(2);
+            buffer.truncate(2); // leave only the static size
+            buffer.resize(self.collection.static_size, 0);
         }
 
         Ok(self)

@@ -1,6 +1,7 @@
 use super::sqlite3::SQLiteStatement;
 use super::sqlite_collection::SQLiteCollection;
 use crate::core::reader::IsarReader;
+use base64::{engine::general_purpose, Engine as _};
 use serde_json::{Map, Value};
 use std::borrow::Cow;
 
@@ -88,8 +89,13 @@ impl<'a> IsarReader for SQLiteReader<'a> {
         }
     }
 
-    fn read_any(&self, index: usize) -> Option<Value> {
-        todo!()
+    fn read_blob(&self, index: usize) -> Option<Cow<'a, [u8]>> {
+        if self.is_null(index) {
+            None
+        } else {
+            let bytes = self.stmt.get_blob(index);
+            Some(Cow::Borrowed(bytes))
+        }
     }
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'a>> {
@@ -102,6 +108,14 @@ impl<'a> IsarReader for SQLiteReader<'a> {
                 collection,
                 all_collections: self.all_collections,
             });
+        }
+        None
+    }
+
+    fn read_json(&self, index: usize) -> Option<Cow<'a, Value>> {
+        let text = self.stmt.get_text(index);
+        if let Ok(value) = serde_json::from_str(text) {
+            return Some(Cow::Owned(value));
         }
         None
     }
@@ -214,8 +228,15 @@ impl<'a> IsarReader for SQLiteObjectReader<'a> {
         }
     }
 
-    fn read_any(&self, index: usize) -> Option<Value> {
-        todo!()
+    fn read_blob(&self, index: usize) -> Option<Cow<'a, [u8]>> {
+        let property = &self.collection.properties[index];
+        let value = self.object.get(&property.name);
+        if let Some(Value::String(val)) = value {
+            if let Ok(bytes) = general_purpose::STANDARD_NO_PAD.decode(val) {
+                return Some(Cow::Owned(bytes));
+            }
+        }
+        None
     }
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>> {
@@ -232,6 +253,11 @@ impl<'a> IsarReader for SQLiteObjectReader<'a> {
         } else {
             None
         }
+    }
+
+    fn read_json(&self, index: usize) -> Option<Cow<'_, Value>> {
+        let property = &self.collection.properties[index];
+        self.object.get(&property.name).map(Cow::Borrowed)
     }
 
     fn read_list(&self, index: usize) -> Option<(Self::ListReader<'_>, usize)> {
@@ -330,8 +356,8 @@ impl<'a> IsarReader for SQLiteListReader<'a> {
         }
     }
 
-    fn read_any(&self, index: usize) -> Option<Value> {
-        todo!()
+    fn read_blob(&self, index: usize) -> Option<Cow<'a, [u8]>> {
+        panic!("Nested lists are not supported")
     }
 
     fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>> {
@@ -346,6 +372,10 @@ impl<'a> IsarReader for SQLiteListReader<'a> {
         } else {
             None
         }
+    }
+
+    fn read_json(&self, index: usize) -> Option<Cow<'_, Value>> {
+        self.list.get(index).map(Cow::Borrowed)
     }
 
     fn read_list(&self, _: usize) -> Option<(Self::ListReader<'_>, usize)> {
