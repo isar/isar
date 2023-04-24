@@ -16,15 +16,31 @@ pub enum Filter {
 }
 
 impl Filter {
-    // This methods optimizes the filter tree by removing unnecessary filters and conditions:
-    // - Remove redundant conditions, for example, two Greater conditions on the same property, or one Greater and Equal condition.
-    // - Remove nested And or Or groups of the same type.
-    // - Remove nested Not groups.
-    // - Remove And and Or groups with a single condition.
-    // - Replace Not groups with a single condition with the inverted condition if possible.
-    // - Remove contradictory conditions.
-    // - Merge conditions with the same property and condition type within an And group, even if they are not adjacent (e.g., merge InList conditions' value lists and remove duplicates, intersect Between conditions' ranges).
-    // - Remove conditions that are guaranteed to be true or false within an Or or And group, respectively.
+    /// This methods optimizes the filter tree by removing unnecessary filters
+    /// and conditions. It does not change the order of conditions.
+    ///
+    /// The following optimizations are performed:
+    ///
+    /// Remove redundant conditions on the same property:
+    /// AND(A > 5, A > 3)                         =>  A > 5
+    /// AND(A <= 7, A >= 7)                       =>  A == 7
+    /// AND(BETWEEN(A, 5, 7), BETWEEN(A, 8, 10))  =>  BETWEEN(A, 5, 10)
+    ///
+    /// Remove nested And or Or groups of the same type:
+    /// AND(AND(A > 5, B < 10), C == 7)  =>  AND(A > 5, B < 10, C == 7)
+    ///
+    /// Remove And and Or groups with a single condition:
+    /// AND(A > 5, AND(B < 10))  =>  AND(A > 5, B < 10)
+    ///
+    /// Remove nested Not groups:
+    /// NOT(NOT(STARTS_WITH(A, "prefix")))  =>  STARTS_WITH(A, "prefix")
+    ///
+    /// Try to remove Not groups by inverting the condition:
+    /// NOT(A > 5)  =>  A <= 5
+    ///
+    /// Remove conditions that are guaranteed to be true or false:
+    /// AND(A > 5, A < 3)           =>  false
+    /// OR(A == 5, B == 7, B != 7)  =>  A == 5
     pub fn optimize(self) -> Self {
         let mut filter = self;
 
