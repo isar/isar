@@ -1,3 +1,9 @@
+## 3.1.0+1
+
+### Fixes
+
+- Fixed error building MacOS library
+
 ## 3.1.0
 
 ### Breaking
