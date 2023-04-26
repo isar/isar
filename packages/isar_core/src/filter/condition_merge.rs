@@ -392,7 +392,7 @@ mod tests {
                         ),
                     ),
                 ),
-            )
+            );
         }
 
         #[test]
@@ -422,7 +422,7 @@ mod tests {
 
         #[test]
         fn test_try_invert_between_lower_min_upper_integer() {
-            assert_eq!(b(i64::MIN, 10).try_invert(), Some(Filter::Condition(gt(10))))
+            assert_eq!(b(i64::MIN, 10).try_invert(), Some(Filter::Condition(gt(10))));
         }
 
         #[test]
@@ -444,23 +444,23 @@ mod tests {
                             ),
                         ),
                     ),
-                )
+                );
             }
         }
 
         #[test]
         fn test_try_invert_between_lower_integer_upper_max() {
-            assert_eq!(b(10, i64::MAX).try_invert(), Some(Filter::Condition(lt(10))))
+            assert_eq!(b(10, i64::MAX).try_invert(), Some(Filter::Condition(lt(10))));
         }
 
         #[test]
         fn test_try_invert_between_min_max_bounds() {
-            assert_eq!(b(i64::MIN, i64::MAX).try_invert(), Some(Filter::Condition(f())))
+            assert_eq!(b(i64::MIN, i64::MAX).try_invert(), Some(Filter::Condition(f())));
         }
 
         #[test]
         fn test_try_invert_between_lower_gt_upper_integer() {
-            assert_eq!(b(20, 10).try_invert(), Some(Filter::Condition(t())))
+            assert_eq!(b(20, 10).try_invert(), Some(Filter::Condition(t())));
         }
 
         #[test]
@@ -474,18 +474,18 @@ mod tests {
                         case_insensitive,
                     ).try_invert(),
                     Some(Filter::Condition(t())),
-                )
+                );
             }
         }
 
         #[test]
         fn test_try_invert_true() {
-            assert_eq!(t().try_invert(), Some(Filter::Condition(f())))
+            assert_eq!(t().try_invert(), Some(Filter::Condition(f())));
         }
 
         #[test]
         fn test_try_invert_false() {
-            assert_eq!(f().try_invert(), Some(Filter::Condition(t())))
+            assert_eq!(f().try_invert(), Some(Filter::Condition(t())));
         }
     }
 }
