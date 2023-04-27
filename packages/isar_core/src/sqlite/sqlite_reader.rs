@@ -23,6 +23,10 @@ impl<'a> SQLiteReader<'a> {
             all_collections,
         }
     }
+
+    fn is_null(&self, index: usize) -> bool {
+        self.stmt.is_null(index)
+    }
 }
 
 impl<'a> IsarReader for SQLiteReader<'a> {
@@ -30,24 +34,12 @@ impl<'a> IsarReader for SQLiteReader<'a> {
 
     type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
 
-    fn is_null(&self, index: usize) -> bool {
-        self.stmt.is_null(index)
-    }
-
     fn read_id(&self) -> i64 {
         self.stmt.get_long(0)
     }
 
     fn read_byte(&self, index: usize) -> u8 {
         self.stmt.get_int(index) as u8
-    }
-
-    fn read_bool(&self, index: usize) -> Option<bool> {
-        if self.is_null(index) {
-            None
-        } else {
-            Some(self.stmt.get_int(index) != 0)
-        }
     }
 
     fn read_int(&self, index: usize) -> i32 {
@@ -147,16 +139,6 @@ impl<'a> IsarReader for SQLiteObjectReader<'a> {
 
     type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
 
-    fn is_null(&self, index: usize) -> bool {
-        let property = &self.collection.properties[index];
-        let value = self.object.get(&property.name);
-        if let Some(Value::Null) = value {
-            true
-        } else {
-            false
-        }
-    }
-
     fn read_id(&self) -> i64 {
         panic!("Embedded objects don't have an id");
     }
@@ -170,22 +152,6 @@ impl<'a> IsarReader for SQLiteObjectReader<'a> {
             }
         }
         0
-    }
-
-    fn read_bool(&self, index: usize) -> Option<bool> {
-        let property = &self.collection.properties[index];
-        let value = self.object.get(&property.name);
-        match value {
-            Some(Value::Bool(val)) => Some(*val),
-            Some(Value::Number(num)) => {
-                if let Some(val) = num.as_u64() {
-                    Some(val != 0)
-                } else {
-                    None
-                }
-            }
-            _ => None,
-        }
     }
 
     fn read_int(&self, index: usize) -> i32 {
@@ -287,14 +253,6 @@ impl<'a> IsarReader for SQLiteListReader<'a> {
 
     type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
 
-    fn is_null(&self, index: usize) -> bool {
-        if let Some(Value::Null) = self.list.get(index) {
-            true
-        } else {
-            false
-        }
-    }
-
     fn read_id(&self) -> i64 {
         panic!("Lists don't have an id");
     }
@@ -306,20 +264,6 @@ impl<'a> IsarReader for SQLiteListReader<'a> {
             }
         }
         0
-    }
-
-    fn read_bool(&self, index: usize) -> Option<bool> {
-        match self.list.get(index) {
-            Some(Value::Bool(val)) => Some(*val),
-            Some(Value::Number(num)) => {
-                if let Some(val) = num.as_u64() {
-                    Some(val != 0)
-                } else {
-                    None
-                }
-            }
-            _ => None,
-        }
     }
 
     fn read_int(&self, index: usize) -> i32 {

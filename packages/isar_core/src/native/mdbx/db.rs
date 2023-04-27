@@ -3,7 +3,6 @@ use super::txn::Txn;
 use crate::core::error::Result;
 use std::ffi::CString;
 use std::mem::size_of;
-use std::ptr;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Db {

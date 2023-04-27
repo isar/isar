@@ -37,7 +37,7 @@ pub struct SQLiteInsert<'a> {
     pub(crate) collection: &'a SQLiteCollection,
     pub(crate) all_collections: &'a Vec<SQLiteCollection>,
 
-    txn: SQLiteTxn<'a>,
+    txn: SQLiteTxn,
     pub(crate) stmt: SQLiteStatement<'a>,
 
     remaining: usize,
@@ -49,14 +49,14 @@ pub struct SQLiteInsert<'a> {
 
 impl<'a> SQLiteInsert<'a> {
     pub fn new(
-        txn: SQLiteTxn<'a>,
+        txn: SQLiteTxn,
         collection: &'a SQLiteCollection,
         all_collections: &'a Vec<SQLiteCollection>,
         count: usize,
     ) -> Self {
         let sql = get_insert_sql(&collection.name, &collection.properties, count);
         let stmt = txn.get_sqlite(true).unwrap().prepare(&sql).unwrap();
-        Self {
+        /*Self {
             collection,
             all_collections,
             txn,
@@ -65,12 +65,14 @@ impl<'a> SQLiteInsert<'a> {
             batch_remaining: count,
             buffer: Some(Vec::new()),
             property: 0,
-        }
+        }*/
+        todo!()
     }
 }
 
 impl<'a> IsarInsert<'a> for SQLiteInsert<'a> {
-    type Txn<'txn> = SQLiteTxn<'txn>;
+    type Txn = SQLiteTxn;
+
     fn insert(mut self, id: Option<i64>) -> Result<Self> {
         self.batch_remaining -= 1;
 
@@ -84,7 +86,7 @@ impl<'a> IsarInsert<'a> for SQLiteInsert<'a> {
         Ok(self)
     }
 
-    fn finish(self) -> Result<Self::Txn<'a>> {
+    fn finish(self) -> Result<Self::Txn> {
         Ok(self.txn)
     }
 }

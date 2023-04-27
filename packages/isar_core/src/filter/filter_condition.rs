@@ -4,9 +4,9 @@ use std::cmp::Ordering;
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum ConditionType {
     Between, // values[0] <= property <= values[1]
-    EndsWith,
-    Contains,
-    Matches,
+    StringEndsWith,
+    StringContains,
+    StringMatches,
     True,
     False,
 }
@@ -76,7 +76,7 @@ impl FilterCondition {
         }
     }
 
-    pub fn new_starts_with(property: usize, value: &str, case_insensitive: bool) -> Self {
+    pub fn new_string_starts_with(property: usize, value: &str, case_insensitive: bool) -> Self {
         let lower = value.to_string();
         let upper = format!("{}{}", value, '\u{10FFFF}');
         FilterCondition {
@@ -90,28 +90,28 @@ impl FilterCondition {
         }
     }
 
-    pub fn new_ends_with(property: usize, value: &str, case_insensitive: bool) -> Self {
+    pub fn new_string_ends_with(property: usize, value: &str, case_insensitive: bool) -> Self {
         FilterCondition {
             property,
-            condition_type: ConditionType::EndsWith,
+            condition_type: ConditionType::StringEndsWith,
             values: vec![FilterValue::String(Some(value.to_string()))],
             case_insensitive,
         }
     }
 
-    pub fn new_contains(property: usize, value: &str, case_insensitive: bool) -> Self {
+    pub fn new_string_contains(property: usize, value: &str, case_insensitive: bool) -> Self {
         FilterCondition {
             property,
-            condition_type: ConditionType::Contains,
+            condition_type: ConditionType::StringContains,
             values: vec![FilterValue::String(Some(value.to_string()))],
             case_insensitive,
         }
     }
 
-    pub fn new_matches(property: usize, value: &str, case_insensitive: bool) -> Self {
+    pub fn new_string_matches(property: usize, value: &str, case_insensitive: bool) -> Self {
         FilterCondition {
             property,
-            condition_type: ConditionType::Matches,
+            condition_type: ConditionType::StringMatches,
             values: vec![FilterValue::String(Some(value.to_string()))],
             case_insensitive,
         }

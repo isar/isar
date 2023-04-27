@@ -2,7 +2,7 @@ use snafu::Snafu;
 
 pub type Result<T> = std::result::Result<T, IsarError>;
 
-#[derive(Debug, Snafu, Eq, PartialEq)]
+#[derive(Clone, Debug, Snafu, Eq, PartialEq)]
 pub enum IsarError {
     #[snafu(display("Isar version of the file is too new or too old to be used."))]
     VersionError {},

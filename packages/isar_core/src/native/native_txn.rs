@@ -1,39 +1,34 @@
 use super::mdbx::cursor::{Cursor, UnboundCursor};
+use super::mdbx::cursor_iterator::{CursorBetweenIterator, CursorIterator};
 use super::mdbx::db::Db;
+use super::mdbx::env::Env;
 use super::mdbx::txn::Txn;
+use super::mdbx::Key;
 use crate::core::error::{IsarError, Result};
 use std::cell::{Cell, RefCell};
 use std::ops::{Deref, DerefMut};
+use std::sync::Arc;
 
-pub struct NativeTxn<'env> {
-    instance_id: u64,
-    txn: Txn<'env>,
+pub struct NativeTxn {
+    pub(crate) instance_id: u64,
+    txn: Txn,
     active: Cell<bool>,
     unbound_cursors: RefCell<Vec<UnboundCursor>>,
 }
 
-impl<'env> NativeTxn<'env> {
-    pub(crate) fn new(instance_id: u64, txn: Txn<'env>) -> Self {
-        Self {
+impl NativeTxn {
+    pub(crate) fn new(instance_id: u64, env: &Arc<Env>, write: bool) -> Result<Self> {
+        let txn = env.txn(write)?;
+        let txn = Self {
             instance_id,
             txn,
             active: Cell::new(true),
             unbound_cursors: RefCell::new(Vec::new()),
-        }
+        };
+        Ok(txn)
     }
 
-    pub(crate) fn verify_instance_id(&self, instance_id: u64) -> Result<()> {
-        if self.instance_id != instance_id {
-            Err(IsarError::InstanceMismatch {})
-        } else {
-            Ok(())
-        }
-    }
-
-    pub(crate) fn get_cursor<'txn>(&'txn self, db: Db) -> Result<NativeCursor<'txn>>
-    where
-        'env: 'txn,
-    {
+    pub(crate) fn get_cursor<'txn>(&'txn self, db: Db) -> Result<TxnCursor<'txn>> {
         let unbound = self
             .unbound_cursors
             .borrow_mut()
@@ -41,12 +36,13 @@ impl<'env> NativeTxn<'env> {
             .unwrap_or_else(UnboundCursor::new);
         let cursor = unbound.bind(&self.txn, db)?;
 
-        Ok(NativeCursor {
+        Ok(TxnCursor {
             txn: self,
             cursor: Some(cursor),
         })
     }
 
+    #[inline]
     pub(crate) fn guard<T, F>(&self, job: F) -> Result<T>
     where
         F: FnOnce() -> Result<T>,
@@ -75,27 +71,42 @@ impl<'env> NativeTxn<'env> {
         db.drop(&self.txn)
     }
 
-    pub(crate) fn commit(self, instance_id: u64) -> Result<()> {
-        self.verify_instance_id(instance_id)?;
+    pub(crate) fn commit(self) -> Result<()> {
         if !self.active.get() {
             return Err(IsarError::TransactionClosed {});
         }
         self.txn.commit()
     }
 
-    pub(crate) fn abort(self, instance_id: u64) {
-        if self.active.get() && self.verify_instance_id(instance_id).is_ok() {
+    pub(crate) fn abort(self) {
+        if self.active.get() {
             self.txn.abort()
         }
     }
 }
 
-pub(crate) struct NativeCursor<'txn> {
-    txn: &'txn NativeTxn<'txn>,
+pub(crate) struct TxnCursor<'txn> {
+    txn: &'txn NativeTxn,
     cursor: Option<Cursor<'txn>>,
 }
 
-impl<'txn> Deref for NativeCursor<'txn> {
+impl<'txn> TxnCursor<'txn> {
+    pub fn iter(self, ascending: bool) -> Result<CursorIterator<'txn, Self>> {
+        CursorIterator::new(self, ascending)
+    }
+
+    pub fn iter_between<K: Key>(
+        self,
+        lower_key: K,
+        upper_key: K,
+        duplicates: bool,
+        skip_duplicates: bool,
+    ) -> Result<CursorBetweenIterator<'txn, Self, K>> {
+        CursorBetweenIterator::new(self, lower_key, upper_key, duplicates, skip_duplicates)
+    }
+}
+
+impl<'txn> Deref for TxnCursor<'txn> {
     type Target = Cursor<'txn>;
 
     fn deref(&self) -> &Self::Target {
@@ -103,13 +114,19 @@ impl<'txn> Deref for NativeCursor<'txn> {
     }
 }
 
-impl<'txn> DerefMut for NativeCursor<'txn> {
+impl<'txn> DerefMut for TxnCursor<'txn> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.cursor.as_mut().unwrap()
     }
 }
 
-impl<'txn> Drop for NativeCursor<'txn> {
+impl<'txn> AsMut<Cursor<'txn>> for TxnCursor<'txn> {
+    fn as_mut(&mut self) -> &mut Cursor<'txn> {
+        self.cursor.as_mut().unwrap()
+    }
+}
+
+impl<'txn> Drop for TxnCursor<'txn> {
     fn drop(&mut self) {
         let cursor = self.cursor.take().unwrap();
         if self.txn.unbound_cursors.borrow().len() < 3 {

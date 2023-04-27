@@ -9,8 +9,6 @@ pub trait IsarWriter<'a> {
 
     fn write_byte(&mut self, value: u8);
 
-    fn write_bool(&mut self, value: bool);
-
     fn write_int(&mut self, value: i32);
 
     fn write_float(&mut self, value: f32);
@@ -21,9 +19,9 @@ pub trait IsarWriter<'a> {
 
     fn write_string(&mut self, value: &str);
 
-    fn write_blob(&mut self, value: &[u8]);
-
     fn write_json(&mut self, value: &Value);
+
+    fn write_byte_list(&mut self, value: &[u8]);
 
     fn begin_object(&mut self) -> Self::ObjectWriter;
 

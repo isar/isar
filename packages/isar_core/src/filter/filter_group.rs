@@ -26,6 +26,14 @@ impl FilterGroup {
         }
     }
 
+    pub fn get_group_type(&self) -> GroupType {
+        self.group_type
+    }
+
+    pub fn get_filters(&self) -> &[Filter] {
+        &self.filters
+    }
+
     pub(crate) fn simplify(self) -> (Filter, bool) {
         let (simplified_group, simplified) = self.simplify_nested();
         let (merged_group, merged) = simplified_group.merge_conditions();

@@ -98,7 +98,7 @@ impl SQLite3 {
         }
         let mut indexes = vec![];
         for (index_name, unique) in index_names_unique {
-            let mut stmt = self.prepare(&format!("PRAGMA index_info({})", index_name))?;
+            let mut stmt = self.prepare(&format!("PRAGMA schema.index_xinfo({})", index_name))?;
             let mut cols = vec![];
             while stmt.step()? {
                 cols.push(stmt.get_text(2).to_uppercase());

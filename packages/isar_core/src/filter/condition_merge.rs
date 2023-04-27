@@ -1,6 +1,6 @@
-use super::Filter;
 use super::filter_condition::{ConditionType, FilterCondition};
 use super::filter_group::{FilterGroup, GroupType};
+use super::Filter;
 
 impl FilterCondition {
     pub(crate) fn try_merge_and(&self, other: &Self) -> Option<Self> {
@@ -136,7 +136,7 @@ impl FilterCondition {
 mod tests {
     use crate::filter::filter_value::FilterValue;
 
-    use super::{*, FilterCondition as C};
+    use super::{FilterCondition as C, *};
 
     fn b(lower: i64, upper: i64) -> FilterCondition {
         C::new_between(
@@ -148,19 +148,11 @@ mod tests {
     }
 
     fn gt(than: i64) -> FilterCondition {
-        C::new_greater_than(
-            0,
-            FilterValue::Integer(than),
-            false,
-        )
+        C::new_greater_than(0, FilterValue::Integer(than), false)
     }
 
     fn lt(than: i64) -> FilterCondition {
-        C::new_less_than(
-            0,
-            FilterValue::Integer(than),
-            false,
-        )
+        C::new_less_than(0, FilterValue::Integer(than), false)
     }
 
     fn t() -> FilterCondition {
@@ -286,19 +278,13 @@ mod tests {
         #[test]
         fn test_try_merge_or_non_intersecting_ranges_reals() {
             assert_eq!(
-                C::new_between(
-                    0,
-                    FilterValue::Real(1.0),
-                    FilterValue::Real(5.0),
-                    false,
-                ).try_merge_or(
-                    &C::new_between(
+                C::new_between(0, FilterValue::Real(1.0), FilterValue::Real(5.0), false,)
+                    .try_merge_or(&C::new_between(
                         0,
                         FilterValue::Real(6.0),
                         FilterValue::Real(10.0),
                         false,
-                    ),
-                ),
+                    ),),
                 None,
             );
         }
@@ -338,17 +324,10 @@ mod tests {
         fn test_try_invert_between_integers() {
             assert_eq!(
                 b(10, 20).try_invert(),
-                Some(
-                    Filter::Group(
-                        FilterGroup::new(
-                            GroupType::Or,
-                            vec![
-                                Filter::Condition(lt(10)),
-                                Filter::Condition(gt(20)),
-                            ],
-                        ),
-                    ),
-                ),
+                Some(Filter::Group(FilterGroup::new(
+                    GroupType::Or,
+                    vec![Filter::Condition(lt(10)), Filter::Condition(gt(20)),],
+                ),),),
             );
         }
 
@@ -361,18 +340,23 @@ mod tests {
                         FilterValue::String(Some("a".to_string())),
                         FilterValue::String(Some("e".to_string())),
                         case_insensitive,
-                    ).try_invert(),
-                    Some(
-                        Filter::Group(
-                            FilterGroup::new(
-                                GroupType::Or,
-                                vec![
-                                    Filter::Condition(FilterCondition::new_less_than(0, FilterValue::String(Some("a".to_string())), case_insensitive)),
-                                    Filter::Condition(FilterCondition::new_greater_than(0, FilterValue::String(Some("e".to_string())), case_insensitive)),
-                                ],
-                            ),
-                        ),
-                    ),
+                    )
+                    .try_invert(),
+                    Some(Filter::Group(FilterGroup::new(
+                        GroupType::Or,
+                        vec![
+                            Filter::Condition(FilterCondition::new_less_than(
+                                0,
+                                FilterValue::String(Some("a".to_string())),
+                                case_insensitive
+                            )),
+                            Filter::Condition(FilterCondition::new_greater_than(
+                                0,
+                                FilterValue::String(Some("e".to_string())),
+                                case_insensitive
+                            )),
+                        ],
+                    ),),),
                 );
             }
         }
@@ -381,17 +365,10 @@ mod tests {
         fn test_try_invert_between_same_integer_bounds() {
             assert_eq!(
                 b(10, 10).try_invert(),
-                Some(
-                    Filter::Group(
-                        FilterGroup::new(
-                            GroupType::Or,
-                            vec![
-                                Filter::Condition(lt(10)),
-                                Filter::Condition(gt(10)),
-                            ],
-                        ),
-                    ),
-                ),
+                Some(Filter::Group(FilterGroup::new(
+                    GroupType::Or,
+                    vec![Filter::Condition(lt(10)), Filter::Condition(gt(10)),],
+                ),),),
             );
         }
 
@@ -404,25 +381,33 @@ mod tests {
                         FilterValue::String(Some("b".to_string())),
                         FilterValue::String(Some("b".to_string())),
                         case_insensitive,
-                    ).try_invert(),
-                    Some(
-                        Filter::Group(
-                            FilterGroup::new(
-                                GroupType::Or,
-                                vec![
-                                    Filter::Condition(FilterCondition::new_less_than(0, FilterValue::String(Some("b".to_string())), case_insensitive)),
-                                    Filter::Condition(FilterCondition::new_greater_than(0, FilterValue::String(Some("b".to_string())), case_insensitive)),
-                                ],
-                            ),
-                        ),
-                    ),
+                    )
+                    .try_invert(),
+                    Some(Filter::Group(FilterGroup::new(
+                        GroupType::Or,
+                        vec![
+                            Filter::Condition(FilterCondition::new_less_than(
+                                0,
+                                FilterValue::String(Some("b".to_string())),
+                                case_insensitive
+                            )),
+                            Filter::Condition(FilterCondition::new_greater_than(
+                                0,
+                                FilterValue::String(Some("b".to_string())),
+                                case_insensitive
+                            )),
+                        ],
+                    ),),),
                 );
             }
         }
 
         #[test]
         fn test_try_invert_between_lower_min_upper_integer() {
-            assert_eq!(b(i64::MIN, 10).try_invert(), Some(Filter::Condition(gt(10))));
+            assert_eq!(
+                b(i64::MIN, 10).try_invert(),
+                Some(Filter::Condition(gt(10)))
+            );
         }
 
         #[test]
@@ -434,28 +419,31 @@ mod tests {
                         FilterValue::String(None),
                         FilterValue::String(Some("b".to_string())),
                         case_insensitive,
-                    ).try_invert(),
-                    Some(
-                        Filter::Condition(
-                            FilterCondition::new_greater_than(
-                                0,
-                                FilterValue::String(Some("b".to_string())),
-                                case_insensitive,
-                            ),
-                        ),
-                    ),
+                    )
+                    .try_invert(),
+                    Some(Filter::Condition(FilterCondition::new_greater_than(
+                        0,
+                        FilterValue::String(Some("b".to_string())),
+                        case_insensitive,
+                    ),),),
                 );
             }
         }
 
         #[test]
         fn test_try_invert_between_lower_integer_upper_max() {
-            assert_eq!(b(10, i64::MAX).try_invert(), Some(Filter::Condition(lt(10))));
+            assert_eq!(
+                b(10, i64::MAX).try_invert(),
+                Some(Filter::Condition(lt(10)))
+            );
         }
 
         #[test]
         fn test_try_invert_between_min_max_bounds() {
-            assert_eq!(b(i64::MIN, i64::MAX).try_invert(), Some(Filter::Condition(f())));
+            assert_eq!(
+                b(i64::MIN, i64::MAX).try_invert(),
+                Some(Filter::Condition(f()))
+            );
         }
 
         #[test]
@@ -472,7 +460,8 @@ mod tests {
                         FilterValue::String(Some("c".to_string())),
                         FilterValue::String(Some("a".to_string())),
                         case_insensitive,
-                    ).try_invert(),
+                    )
+                    .try_invert(),
                     Some(Filter::Condition(t())),
                 );
             }

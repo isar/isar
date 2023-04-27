@@ -8,9 +8,9 @@ use std::cmp::Ordering;
 use std::ffi::{c_void, CStr};
 
 pub mod cursor;
+pub mod cursor_iterator;
 pub mod db;
 pub mod env;
-pub mod id;
 pub mod txn;
 
 pub type KeyVal<'txn> = (&'txn [u8], &'txn [u8]);

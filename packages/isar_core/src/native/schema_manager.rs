@@ -1,25 +1,21 @@
+use super::index::index_key::IndexKey;
+use super::mdbx::cursor::Cursor;
+use super::mdbx::db::Db;
+use super::native_collection::{NativeCollection, NativeProperty};
+use super::native_txn::{NativeTxn, TxnCursor};
+use crate::core::error::{IsarError, Result};
+use crate::core::schema::{CollectionSchema, IsarSchema, PropertySchema};
+use itertools::Itertools;
 use std::borrow::Cow;
 use std::ops::{Deref, DerefMut};
-
-use super::index::index_key::IndexKey;
-use super::mdbx::cursor::{Cursor, UnboundCursor};
-use super::mdbx::db::Db;
-use super::mdbx::txn::Txn;
-use super::native_collection::{data_type_static_size, NativeCollection, NativeProperty};
-use super::native_txn::NativeTxn;
-use crate::core::error::{IsarError, Result};
-use crate::core::schema::{CollectionSchema, IndexSchema, IsarSchema, PropertySchema};
-use intmap::IntMap;
-use itertools::Itertools;
-use xxhash_rust::xxh3::xxh3_64;
 
 const ISAR_FILE_VERSION: u8 = 2;
 
 pub fn perform_migration(txn: &NativeTxn, schema: &IsarSchema) -> Result<Vec<NativeCollection>> {
     let info_db = txn.open_db("_info", false, false)?;
-    let mut info_cursor = txn.get_cursor(info_db)?;
-    let existing_schemas = get_schemas(info_cursor.deref_mut())?;
+    let existing_schemas = get_schemas(txn.get_cursor(info_db)?)?;
 
+    let mut info_cursor = txn.get_cursor(info_db)?;
     let mut collections = vec![];
     for col_schema in schema.collections.iter() {
         let existing_schema_index = existing_schemas
@@ -36,24 +32,28 @@ pub fn perform_migration(txn: &NativeTxn, schema: &IsarSchema) -> Result<Vec<Nat
             Cow::Borrowed(col_schema)
         };
 
-        let collection = open_collection(txn, updated_schema.deref(), &schema.collections)?;
+        let collection = open_collection(
+            txn,
+            collections.len(),
+            updated_schema.deref(),
+            &schema.collections,
+        )?;
         collections.push(collection);
     }
 
     Ok(collections)
 }
 
-fn get_schemas(info_cursor: &mut Cursor) -> Result<Vec<CollectionSchema>> {
+fn get_schemas(info_cursor: TxnCursor) -> Result<Vec<CollectionSchema>> {
     let mut schemas = vec![];
-    info_cursor.iter_all(false, true, |_, _, bytes| {
+    for (_, bytes) in info_cursor.iter(true)? {
         let col = serde_json::from_slice::<CollectionSchema>(bytes).map_err(|_| {
             IsarError::DbCorrupted {
                 message: "Could not deserialize existing schema.".to_string(),
             }
         })?;
         schemas.push(col);
-        Ok(true)
-    })?;
+    }
     Ok(schemas)
 }
 
@@ -123,6 +123,7 @@ fn migrate_collection(
 
 fn open_collection(
     txn: &NativeTxn,
+    collection_index: usize,
     schema: &CollectionSchema,
     all_schemas: &[CollectionSchema],
 ) -> Result<NativeCollection> {
@@ -130,26 +131,33 @@ fn open_collection(
     let mut offset = 2;
     for property_schema in &schema.properties {
         if let Some(name) = &property_schema.name {
-            let collection_index = if let Some(collection) = &property_schema.collection {
+            let embedded_collection_index = if let Some(collection) = &property_schema.collection {
                 let index = all_schemas
                     .iter()
                     .position(|c| c.name == *collection)
                     .unwrap();
-                Some(index as u16)
+                Some(index)
             } else {
                 None
             };
-            let property = NativeProperty::new(property_schema.data_type, offset, collection_index);
+            let property =
+                NativeProperty::new(property_schema.data_type, offset, embedded_collection_index);
             properties.push((property, name));
         }
-        offset += data_type_static_size(property_schema.data_type);
+        offset += property_schema.data_type.static_size();
     }
 
     properties.sort_by(|(_, a), (_, b)| a.cmp(&b));
     let properties = properties.iter().map(|(p, _)| p.clone()).collect_vec();
 
-    let db = txn.open_db(&schema.name, true, false)?;
-    let col = NativeCollection::new(properties, vec![], db);
+    let db = if !schema.embedded {
+        Some(txn.open_db(&schema.name, true, false)?)
+    } else {
+        None
+    };
+
+    let col = NativeCollection::new(collection_index, properties, vec![], schema.embedded, db);
+    col.init_auto_increment(txn)?;
 
     Ok(col)
 }

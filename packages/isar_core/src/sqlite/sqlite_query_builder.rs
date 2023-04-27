@@ -33,7 +33,7 @@ impl SQLiteQueryBuilder<'_> {
 }
 
 impl<'a> IsarQueryBuilder for SQLiteQueryBuilder<'a> {
-    type Query = SQLiteQuery<'a>;
+    type Query = SQLiteQuery;
 
     fn set_filter(&mut self, filter: Filter) {
         //self.filter = Some(filter);
@@ -86,6 +86,6 @@ impl<'a> IsarQueryBuilder for SQLiteQueryBuilder<'a> {
             sql.push_str(&limit.to_string());
         }
 
-        SQLiteQuery::new(sql, self.collection, self.all_collections)
+        SQLiteQuery::new(sql)
     }
 }

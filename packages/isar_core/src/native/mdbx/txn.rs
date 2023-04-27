@@ -1,20 +1,20 @@
-use super::mdbx_result;
+use super::{env::Env, mdbx_result};
 use crate::core::error::Result;
 use core::ptr;
-use std::marker::PhantomData;
+use std::sync::Arc;
 
-pub struct Txn<'env> {
+pub struct Txn {
     pub(crate) txn: *mut ffi::MDBX_txn,
     pub write: bool,
-    _marker: PhantomData<&'env ()>,
+    _env: Arc<Env>,
 }
 
-impl<'env> Txn<'env> {
-    pub(crate) fn new(txn: *mut ffi::MDBX_txn, write: bool) -> Self {
+impl Txn {
+    pub(crate) fn new(env: Arc<Env>, txn: *mut ffi::MDBX_txn, write: bool) -> Self {
         Txn {
             txn,
             write,
-            _marker: PhantomData::default(),
+            _env: env,
         }
     }
 
@@ -28,7 +28,7 @@ impl<'env> Txn<'env> {
     pub fn abort(self) {}
 }
 
-impl<'a> Drop for Txn<'a> {
+impl Drop for Txn {
     fn drop(&mut self) {
         if !self.txn.is_null() {
             unsafe {

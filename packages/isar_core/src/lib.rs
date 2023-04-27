@@ -8,5 +8,5 @@ pub mod common;
 pub mod core;
 pub mod filter;
 pub mod native;
-pub mod sqlite;
+//pub mod sqlite;
 mod util;

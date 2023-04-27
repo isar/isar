@@ -32,7 +32,7 @@ impl CollectionSchema {
         embedded: bool,
     ) -> CollectionSchema {
         CollectionSchema {
-            name: name.to_uppercase(),
+            name: name.to_lowercase(),
             embedded,
             properties,
             indexes,
@@ -121,9 +121,9 @@ pub struct PropertySchema {
 impl PropertySchema {
     pub fn new(name: &str, data_type: DataType, collection: Option<&str>) -> PropertySchema {
         PropertySchema {
-            name: Some(name.to_uppercase()),
+            name: Some(name.to_lowercase()),
             data_type,
-            collection: collection.map(|col| col.to_uppercase()),
+            collection: collection.map(|col| col.to_lowercase()),
         }
     }
 }
@@ -132,15 +132,26 @@ impl PropertySchema {
 pub struct IndexSchema {
     pub name: String,
     pub properties: Vec<String>,
+    #[serde(rename = "caseInsensitive")]
+    pub case_insensitive: bool,
     pub unique: bool,
+    pub hash: bool,
 }
 
 impl IndexSchema {
-    pub fn new(name: &str, properties: Vec<&str>, unique: bool) -> IndexSchema {
+    pub fn new(
+        name: &str,
+        properties: Vec<&str>,
+        case_insensitive: bool,
+        unique: bool,
+        hash: bool,
+    ) -> IndexSchema {
         IndexSchema {
-            name: name.to_uppercase(),
-            properties: properties.iter().map(|p| p.to_uppercase()).collect(),
+            name: name.to_lowercase(),
+            properties: properties.iter().map(|p| p.to_lowercase()).collect(),
+            case_insensitive,
             unique,
+            hash,
         }
     }
 }

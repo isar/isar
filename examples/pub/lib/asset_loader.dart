@@ -18,6 +18,7 @@ class PackageAndVersion {
 Future<void> loadAssets(PackageAndVersion p) async {
   final isar = Isar.openSync(
     [PackageSchema, AssetSchema],
+    directory: '',
     inspector: false,
   );
 

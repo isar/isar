@@ -1,15 +1,13 @@
-use intmap::IntMap;
+use super::mdbx::db::Db;
+use super::native_collection::NativeProperty;
 use xxhash_rust::xxh3::xxh3_64;
 
-use crate::core::error::IsarError;
-
-use super::{mdbx::db::Db, native_collection::NativeProperty, native_reader::NativeReader};
-
+pub mod id_key;
 pub mod index_key;
 pub(crate) mod index_key_builder;
 
 #[derive(Clone, Eq, PartialEq)]
-pub(crate) struct NativeIndex {
+pub struct NativeIndex {
     pub name: String,
     pub id: u64,
     pub properties: Vec<NativeProperty>,

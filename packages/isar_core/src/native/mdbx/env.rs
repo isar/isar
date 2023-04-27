@@ -3,6 +3,7 @@ use super::osal::*;
 use super::txn::Txn;
 use crate::core::error::{IsarError, Result};
 use core::ptr;
+use std::sync::Arc;
 
 pub struct Env {
     env: *mut ffi::MDBX_env,
@@ -19,7 +20,7 @@ impl Env {
         max_dbs: usize,
         max_size_mib: usize,
         relaxed_durability: bool,
-    ) -> Result<Env> {
+    ) -> Result<Arc<Env>> {
         let path = str_to_os(path)?;
         let mut env: *mut ffi::MDBX_env = ptr::null_mut();
         unsafe {
@@ -57,7 +58,7 @@ impl Env {
             }
 
             match err_code {
-                ffi::MDBX_SUCCESS => Ok(Env { env }),
+                ffi::MDBX_SUCCESS => Ok(Arc::new(Env { env })),
                 ffi::MDBX_EPERM | ffi::MDBX_ENOFILE => Err(IsarError::PathError {}),
                 e => {
                     mdbx_result(e)?;
@@ -67,7 +68,7 @@ impl Env {
         }
     }
 
-    pub fn txn(&self, write: bool) -> Result<Txn> {
+    pub fn txn(self: &Arc<Self>, write: bool) -> Result<Txn> {
         let flags = if write { 0 } else { ffi::MDBX_TXN_RDONLY };
         let mut txn: *mut ffi::MDBX_txn = ptr::null_mut();
         unsafe {
@@ -79,7 +80,7 @@ impl Env {
                 ptr::null_mut(),
             ))?;
         }
-        Ok(Txn::new(txn, write))
+        Ok(Txn::new(self.clone(), txn, write))
     }
 
     pub fn copy(&self, path: &str) -> Result<()> {

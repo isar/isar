@@ -1,8 +1,6 @@
 use super::native_collection::{NativeCollection, NativeProperty};
 use super::native_insert::NativeInsert;
-use super::{
-    FALSE_BOOL, NULL_BOOL, NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG, TRUE_BOOL,
-};
+use super::{NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
 use crate::core::data_type::DataType;
 use crate::core::writer::IsarWriter;
 use byteorder::{ByteOrder, LittleEndian};
@@ -47,7 +45,6 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
     fn write_null(&mut self) {
         let property = self.next_property();
         match property.data_type {
-            DataType::Bool => self.write(property.offset as usize, &[NULL_BOOL]),
             DataType::Byte => self.write_byte(NULL_BYTE),
             DataType::Int => self.write_int(NULL_INT),
             DataType::Float => self.write_float(NULL_FLOAT),
@@ -60,13 +57,6 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
     fn write_byte(&mut self, value: u8) {
         let property = self.next_property();
         assert_eq!(property.data_type, DataType::Byte);
-        self.write(property.offset, &[value]);
-    }
-
-    fn write_bool(&mut self, value: bool) {
-        let property = self.next_property();
-        assert_eq!(property.data_type, DataType::Bool);
-        let value = if value { TRUE_BOOL } else { FALSE_BOOL };
         self.write(property.offset, &[value]);
     }
 
@@ -104,16 +94,6 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
         self.append(value.as_bytes());
     }
 
-    fn write_blob(&mut self, value: &[u8]) {
-        let property = self.next_property();
-        assert_eq!(property.data_type, DataType::Blob);
-
-        let offset = self.get_buffer().len() as u32;
-        self.write_u24(property.offset, offset);
-        self.append_u24(value.len() as u32);
-        self.append(value);
-    }
-
     fn write_json(&mut self, value: &Value) {
         let property = self.next_property();
         assert_eq!(property.data_type, DataType::Json);
@@ -128,6 +108,16 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
         }
     }
 
+    fn write_byte_list(&mut self, value: &[u8]) {
+        let property = self.next_property();
+        assert_eq!(property.data_type, DataType::ByteList);
+
+        let offset = self.get_buffer().len() as u32;
+        self.write_u24(property.offset, offset);
+        self.append_u24(value.len() as u32);
+        self.append(value);
+    }
+
     fn begin_object(&mut self) -> Self::ObjectWriter {
         let property = self.next_property();
         assert_eq!(property.data_type, DataType::Object);
@@ -137,7 +127,7 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
 
         self.append_u24(0); // length unknown
 
-        let collection_index = property.collection_index.unwrap() as usize;
+        let collection_index = property.embedded_collection_index.unwrap();
         let collections = self.get_collections();
         NativeObjectWriter::new(
             &collections[collection_index],
@@ -267,7 +257,7 @@ impl<'a> Drop for NativeObjectWriter<'a> {
 pub struct NativeListWriter<'a> {
     data_type: DataType,
     element_size: usize,
-    collection_index: Option<u16>,
+    embedded_collection_index: Option<usize>,
     all_collections: &'a [NativeCollection],
     buffer: Cell<Vec<u8>>,
     offset: usize,
@@ -283,7 +273,7 @@ impl<'a> NativeListWriter<'a> {
     ) -> Self {
         let initial_len = buffer.len();
         let element_size = match property.data_type {
-            DataType::BoolList => 1,
+            DataType::ByteList => 1,
             DataType::IntList | DataType::FloatList => 4,
             DataType::LongList | DataType::DoubleList => 8,
             DataType::StringList | DataType::Object => 3,
@@ -292,7 +282,7 @@ impl<'a> NativeListWriter<'a> {
         Self {
             data_type: property.data_type,
             element_size: element_size,
-            collection_index: property.collection_index,
+            embedded_collection_index: property.embedded_collection_index,
             all_collections,
             buffer: Cell::new(buffer),
             offset: initial_len,
@@ -309,7 +299,7 @@ impl<'a> WriterImpl<'a> for NativeListWriter<'a> {
 
         let property = NativeProperty {
             data_type: self.data_type,
-            collection_index: self.collection_index,
+            embedded_collection_index: self.embedded_collection_index,
             offset: self.offset,
         };
         self.offset += self.element_size;

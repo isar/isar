@@ -3,6 +3,7 @@ use super::native_collection::NativeCollection;
 use super::native_insert::NativeInsert;
 use super::native_query_builder::NativeQueryBuilder;
 use super::native_txn::NativeTxn;
+use super::query::{Query, QueryCursor};
 use super::schema_manager::perform_migration;
 use crate::core::error::{IsarError, Result};
 use crate::core::instance::{CompactCondition, IsarInstance};
@@ -21,21 +22,27 @@ struct NativeInstance {
     name: String,
     instance_id: u64,
     collections: Vec<NativeCollection>,
-    env: Env,
+    env: Arc<Env>,
 }
 
 impl IsarInstance for NativeInstance {
-    type Txn<'a> = NativeTxn<'a>;
+    type Instance = Arc<Self>;
+
+    type Txn = NativeTxn;
 
     type Insert<'a> = NativeInsert<'a>
     where
         Self: 'a;
 
-    type QueryBuilder<'a> = NativeQueryBuilder
+    type QueryBuilder<'a> = NativeQueryBuilder<'a>
     where
         Self: 'a;
 
-    type Instance = Arc<Self>;
+    type Query = Query;
+
+    type Cursor<'a> = QueryCursor<'a>
+    where
+        Self: 'a;
 
     fn get(instance_id: u64) -> Option<Self::Instance> {
         let mut lock = INSTANCES.lock().unwrap();
@@ -74,35 +81,68 @@ impl IsarInstance for NativeInstance {
         }
     }
 
-    fn begin_txn(&self, write: bool) -> Result<Self::Txn<'_>> {
-        let txn = self.env.txn(write)?;
-        Ok(NativeTxn::new(self.instance_id, txn))
+    fn begin_txn(&self, write: bool) -> Result<Self::Txn> {
+        NativeTxn::new(self.instance_id, &self.env, write)
     }
 
-    fn commit_txn(&self, txn: Self::Txn<'_>) -> Result<()> {
-        txn.commit(self.instance_id)
+    fn commit_txn(&self, txn: Self::Txn) -> Result<()> {
+        self.verify_instance_id(txn.instance_id)?;
+        txn.commit()
     }
 
-    fn abort_txn(&self, txn: Self::Txn<'_>) {
-        txn.abort(self.instance_id)
-    }
-
-    fn query(&self, collection_index: usize) -> Result<Self::QueryBuilder<'_>> {
-        todo!()
+    fn abort_txn(&self, txn: Self::Txn) {
+        if self.verify_instance_id(txn.instance_id).is_ok() {
+            txn.abort()
+        }
     }
 
     fn insert<'a>(
         &'a self,
-        txn: NativeTxn<'a>,
+        txn: NativeTxn,
         collection_index: usize,
         count: usize,
     ) -> Result<NativeInsert<'a>> {
+        self.verify_instance_id(txn.instance_id)?;
         let collection = &self.collections[collection_index];
         Ok(NativeInsert::new(txn, collection, &self.collections, count))
+    }
+
+    fn build_query(&self, collection_index: usize) -> Result<Self::QueryBuilder<'_>> {
+        let collection = &self.collections[collection_index];
+        Ok(NativeQueryBuilder::new(
+            self.instance_id,
+            collection,
+            &self.collections,
+        ))
+    }
+
+    fn query<'a>(&'a self, txn: &'a Self::Txn, query: &'a Self::Query) -> Result<Self::Cursor<'a>> {
+        self.verify_instance_id(txn.instance_id)?;
+        self.verify_instance_id(query.instance_id)?;
+        query.cursor(txn, &self.collections)
+    }
+
+    fn count(&self, txn: &Self::Txn, query: &Self::Query) -> Result<usize> {
+        self.verify_instance_id(txn.instance_id)?;
+        query.count(txn, &self.collections)
+    }
+
+    fn delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<usize> {
+        self.verify_instance_id(txn.instance_id)?;
+        let collection = &self.collections[query.collection_index];
+        query.delete(txn, collection)
     }
 }
 
 impl NativeInstance {
+    pub(crate) fn verify_instance_id(&self, instance_id: u64) -> Result<()> {
+        if self.instance_id != instance_id {
+            Err(IsarError::InstanceMismatch {})
+        } else {
+            Ok(())
+        }
+    }
+
     fn get_isar_path(name: &str, dir: &str) -> String {
         let mut file_name = name.to_string();
         file_name.push_str(".isar");
@@ -136,10 +176,9 @@ impl NativeInstance {
             relaxed_durability,
         )?;
 
-        let txn = env.txn(true)?;
-        let native_txn = NativeTxn::new(instance_id, txn);
-        let collections = perform_migration(&native_txn, &schema)?;
-        native_txn.commit(instance_id)?;
+        let txn = NativeTxn::new(instance_id, &env, true)?;
+        let collections = perform_migration(&txn, &schema)?;
+        txn.commit()?;
 
         let instance = NativeInstance {
             env,
@@ -170,9 +209,9 @@ impl NativeInstance {
     }
 
     fn compact(self, compact_condition: CompactCondition) -> Result<Option<Self>> {
-        let mut txn = self.begin_txn(false)?;
+        let txn = self.begin_txn(false)?;
         let instance_size = 0; //self.get_size(&mut txn, true, true)?;
-        txn.abort(self.instance_id);
+        txn.abort();
 
         let isar_file = Self::get_isar_path(&self.name, &self.dir);
         let file_size = fs::metadata(&isar_file)
@@ -203,38 +242,30 @@ impl NativeInstance {
 }
 
 mod test {
-    use crate::core::{
-        data_type::DataType,
-        insert::IsarInsert,
-        schema::{CollectionSchema, PropertySchema},
-        writer::IsarWriter,
+    use crate::{
+        core::{
+            data_type::DataType,
+            insert::IsarInsert,
+            query_builder::IsarQueryBuilder,
+            schema::{CollectionSchema, PropertySchema},
+            writer::IsarWriter,
+        },
+        filter::{filter_condition::FilterCondition, filter_value::FilterValue, Filter},
     };
 
     use super::*;
 
     #[test]
     fn test_exec() {
-        let schema = IsarSchema::new(vec![
-            CollectionSchema::new(
-                "test",
-                vec![PropertySchema::new(
-                    "propa",
-                    DataType::Object,
-                    Some("test2"),
-                )],
-                vec![],
-                false,
-            ),
-            CollectionSchema::new(
-                "test2",
-                vec![
-                    PropertySchema::new("str", DataType::String, None),
-                    PropertySchema::new("str2", DataType::String, None),
-                ],
-                vec![],
-                false,
-            ),
-        ]);
+        let schema = IsarSchema::new(vec![CollectionSchema::new(
+            "test2",
+            vec![
+                PropertySchema::new("str", DataType::String, None),
+                PropertySchema::new("str2", DataType::String, None),
+            ],
+            vec![],
+            false,
+        )]);
         let i = NativeInstance::open(
             0,
             "test",
@@ -247,16 +278,20 @@ mod test {
         .unwrap();
 
         let txn = i.begin_txn(true).unwrap();
-        let mut insert = i.insert(txn, 0, 100).unwrap();
-        for i in 0..100 {
-            let mut obj_writer = insert.begin_object();
-            obj_writer.write_string("STR1!!!");
-            //obj_writer.write_string("STR2!!!");
-            insert.end_object(obj_writer);
-            eprintln!("inserted {}", i);
+        /*let mut insert = i.insert(txn, 0, 10000000).unwrap();
+        for i in 0..10000000 {
+            insert.write_string(&format!("STR{}", i));
+            insert.write_string("STR2!!!");
             insert = insert.insert(Some(i as i64)).unwrap();
         }
-        let txn = insert.finish().unwrap();
+        let txn = insert.finish().unwrap();*/
+
+        let mut builder = i.build_query(0).unwrap();
+        builder.set_filter(Filter::Condition(FilterCondition::new_string_contains(
+            0, "1", false,
+        )));
+        let q = builder.build();
+        eprintln!("{:?}", i.count(&txn, &q));
         i.commit_txn(txn).unwrap();
         i.clone();
         println!("hello");

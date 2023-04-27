@@ -2,6 +2,7 @@ use super::schema_manager::perform_migration;
 use super::sqlite3::SQLite3;
 use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
 use super::sqlite_insert::SQLiteInsert;
+use super::sqlite_query::{SQLiteCursor, SQLiteQuery};
 use super::sqlite_query_builder::SQLiteQueryBuilder;
 use super::sqlite_txn::SQLiteTxn;
 use crate::common::schema::verify_schema;
@@ -29,7 +30,7 @@ struct SQLiteInstanceInfo {
 
 pub struct SQLiteInstance {
     info: Arc<SQLiteInstanceInfo>,
-    sqlite: SQLite3,
+    sqlite: Arc<SQLite3>,
     txn_active: Cell<bool>,
 }
 
@@ -39,7 +40,7 @@ impl SQLiteInstance {
         dir: &str,
         schema: IsarSchema,
         _relaxed_durability: bool,
-    ) -> Result<(SQLiteInstanceInfo, SQLite3)> {
+    ) -> Result<(SQLiteInstanceInfo, Arc<SQLite3>)> {
         verify_schema(&schema)?;
 
         let mut path_buf = PathBuf::from(dir);
@@ -47,7 +48,8 @@ impl SQLiteInstance {
         let path = path_buf.as_path().to_str().unwrap().to_string();
 
         let sqlite = SQLite3::open(&path).unwrap();
-        let txn = SQLiteTxn::new(&sqlite, true)?;
+        let sqlite = Arc::new(sqlite);
+        let txn = SQLiteTxn::new(sqlite.clone(), true)?;
         perform_migration(&txn, &schema)?;
         txn.commit()?;
 
@@ -87,13 +89,19 @@ impl SQLiteInstance {
 }
 
 impl IsarInstance for SQLiteInstance {
-    type Txn<'a> = SQLiteTxn<'a>;
+    type Instance = Self;
+
+    type Txn = SQLiteTxn;
 
     type Insert<'a> = SQLiteInsert<'a>;
 
     type QueryBuilder<'a> = SQLiteQueryBuilder<'a>;
 
-    type Instance = Self;
+    type Query = SQLiteQuery;
+
+    type Cursor<'a> = SQLiteCursor<'a>
+    where
+        Self: 'a;
 
     fn get(schema_hash: u64) -> Option<Self::Instance> {
         let mut lock = INSTANCES.lock().unwrap();
@@ -105,7 +113,7 @@ impl IsarInstance for SQLiteInstance {
             if let Some(sqlite) = sqlite {
                 Some(Self {
                     info: connections.info.clone(),
-                    sqlite: sqlite,
+                    sqlite: Arc::new(sqlite),
                     txn_active: Cell::new(false),
                 })
             } else {
@@ -130,7 +138,7 @@ impl IsarInstance for SQLiteInstance {
             let (info, sqlite) = Self::open_instance(name, dir, schema, relaxed_durability)?;
             let connections = Connections {
                 info: Arc::new(info),
-                sqlite: vec![sqlite],
+                sqlite: vec![],
             };
             lock.insert(instance_id, connections);
         }
@@ -139,7 +147,7 @@ impl IsarInstance for SQLiteInstance {
         let sqlite = connections.sqlite.pop().unwrap();
         Ok(Self {
             info: connections.info.clone(),
-            sqlite: sqlite,
+            sqlite: Arc::new(sqlite),
             txn_active: Cell::new(false),
         })
     }
@@ -150,7 +158,7 @@ impl IsarInstance for SQLiteInstance {
                 message: "A transaction is already active.".to_string(),
             })
         } else {
-            SQLiteTxn::new(&self.sqlite, write)
+            SQLiteTxn::new(self.sqlite.clone(), write)
         }
     }
 
@@ -164,15 +172,9 @@ impl IsarInstance for SQLiteInstance {
         txn.abort();
     }
 
-    fn query<'a>(&'a self, collection_index: usize) -> Result<Self::QueryBuilder<'a>> {
-        let collection = &self.info.collections[collection_index];
-        let query_builder = SQLiteQueryBuilder::new(collection, &self.info.collections);
-        Ok(query_builder)
-    }
-
     fn insert<'a>(
         &'a self,
-        txn: SQLiteTxn<'a>,
+        txn: SQLiteTxn,
         collection_index: usize,
         count: usize,
     ) -> Result<Self::Insert<'a>> {
@@ -180,16 +182,33 @@ impl IsarInstance for SQLiteInstance {
         let insert = SQLiteInsert::new(txn, collection, &self.info.collections, count);
         Ok(insert)
     }
+
+    fn build_query(&self, collection_index: usize) -> Result<Self::QueryBuilder<'_>> {
+        let collection = &self.info.collections[collection_index];
+        let query_builder = SQLiteQueryBuilder::new(collection, &self.info.collections);
+        Ok(query_builder)
+    }
+
+    fn query<'a>(&'a self, txn: &'a Self::Txn, query: &'a Self::Query) -> Result<Self::Cursor<'_>> {
+        query.cursor(txn)
+    }
+
+    fn count(&self, txn: &Self::Txn, query: &Self::Query) -> Result<usize> {
+        query.count(txn)
+    }
+
+    fn delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<usize> {
+        query.delete(txn)
+    }
 }
 
 mod test {
     use super::SQLiteInstance;
+    use crate::core::cursor::IsarCursor;
     use crate::core::data_type::DataType;
     //use crate::core::filter::IsarFilterBuilder;
     use crate::core::insert::IsarInsert;
     use crate::core::instance::IsarInstance;
-    use crate::core::query::IsarCursor;
-    use crate::core::query::IsarQuery;
     use crate::core::query_builder::IsarQueryBuilder;
     use crate::core::reader::IsarReader;
     use crate::core::schema::{CollectionSchema, IndexSchema, IsarSchema, PropertySchema};
@@ -247,15 +266,15 @@ mod test {
         //txn.commit().unwrap();
 
         let mut txn = instance.begin_txn(false).unwrap();
-        let mut qb = instance.query(0).unwrap();
+        let mut qb = instance.build_query(0).unwrap();
         /*let filter = qb.not_null(1);
         qb.set_filter(filter);*/
         let q = qb.build();
-        let mut cur = q.cursor(txn).unwrap();
-        let next = cur.next().unwrap().unwrap();
+        let mut cur = instance.query(&txn, &q).unwrap();
+        let next = cur.next().unwrap();
         eprintln!("{:?}", next.read_id());
         eprintln!("{:?}", next.read_string(1));
-        let next = cur.next().unwrap().unwrap();
+        let next = cur.next().unwrap();
         eprintln!("{:?}", next.read_id());
         eprintln!("{:?}", next.read_string(1));
     }

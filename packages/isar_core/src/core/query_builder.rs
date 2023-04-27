@@ -1,5 +1,6 @@
 use crate::filter::Filter;
 
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Sort {
     Asc,
     Desc,

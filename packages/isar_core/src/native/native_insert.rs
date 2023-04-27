@@ -9,7 +9,7 @@ use crate::core::error::{illegal_arg, Result};
 use crate::core::insert::IsarInsert;
 
 pub struct NativeInsert<'a> {
-    txn: NativeTxn<'a>,
+    txn: NativeTxn,
     pub(crate) collection: &'a NativeCollection,
     pub(crate) all_collections: &'a Vec<NativeCollection>,
 
@@ -23,7 +23,7 @@ pub struct NativeInsert<'a> {
 
 impl<'a> NativeInsert<'a> {
     pub fn new(
-        txn: NativeTxn<'a>,
+        txn: NativeTxn,
         collection: &'a NativeCollection,
         all_collections: &'a Vec<NativeCollection>,
         count: usize,
@@ -46,7 +46,7 @@ impl<'a> NativeInsert<'a> {
 }
 
 impl<'a> IsarInsert<'a> for NativeInsert<'a> {
-    type Txn<'txn> = NativeTxn<'txn>;
+    type Txn = NativeTxn;
 
     fn insert(mut self, id: Option<i64>) -> Result<Self> {
         if self.property != self.collection.properties.len() {
@@ -59,14 +59,22 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
         }
 
         {
-            let mut cursor = self.txn.get_cursor(self.collection.db)?;
-            cursor.put(&self.id, &buffer)?;
+            self.txn.guard(|| {
+                // TODO: avoid opening a new cursor for every insert
+                let mut cursor = self.txn.get_cursor(self.collection.get_db()?)?;
+                cursor.put(&self.id, &buffer)
+            })?;
         }
 
         self.inserted_count += 1;
 
         if self.inserted_count < self.count {
-            self.id = id.unwrap_or(0);
+            self.id = if let Some(id) = id {
+                id
+            } else {
+                self.collection.auto_increment()?
+            };
+
             self.property = 0;
             buffer.truncate(2); // leave only the static size
             buffer.resize(self.collection.static_size, 0);
@@ -75,7 +83,7 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
         Ok(self)
     }
 
-    fn finish(self) -> Result<Self::Txn<'a>> {
+    fn finish(self) -> Result<Self::Txn> {
         if self.inserted_count < self.count {
             illegal_arg("Not all objects have been inserted")?;
         }

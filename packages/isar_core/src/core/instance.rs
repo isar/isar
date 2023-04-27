@@ -1,3 +1,4 @@
+use super::cursor::IsarCursor;
 use super::error::Result;
 use super::insert::IsarInsert;
 use super::query_builder::IsarQueryBuilder;
@@ -10,17 +11,23 @@ pub struct CompactCondition {
 }
 
 pub trait IsarInstance {
-    type Txn<'a>;
-
-    type Insert<'a>: IsarInsert<'a>
-    where
-        Self: 'a;
-
-    type QueryBuilder<'a>: IsarQueryBuilder
-    where
-        Self: 'a;
-
     type Instance;
+
+    type Txn;
+
+    type Insert<'a>: IsarInsert<'a, Txn = Self::Txn>
+    where
+        Self: 'a;
+
+    type QueryBuilder<'a>: IsarQueryBuilder<Query = Self::Query>
+    where
+        Self: 'a;
+
+    type Query;
+
+    type Cursor<'a>: IsarCursor
+    where
+        Self: 'a;
 
     fn get(instance_id: u64) -> Option<Self::Instance>;
 
@@ -34,18 +41,24 @@ pub trait IsarInstance {
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self::Instance>;
 
-    fn begin_txn(&self, write: bool) -> Result<Self::Txn<'_>>;
+    fn begin_txn(&self, write: bool) -> Result<Self::Txn>;
 
-    fn commit_txn(&self, txn: Self::Txn<'_>) -> Result<()>;
+    fn commit_txn(&self, txn: Self::Txn) -> Result<()>;
 
-    fn abort_txn(&self, txn: Self::Txn<'_>);
+    fn abort_txn(&self, txn: Self::Txn);
 
-    fn query(&self, collection_index: usize) -> Result<Self::QueryBuilder<'_>>;
-
-    fn insert<'a>(
-        &'a self,
-        txn: Self::Txn<'a>,
+    fn insert(
+        &self,
+        txn: Self::Txn,
         collection_index: usize,
         count: usize,
-    ) -> Result<Self::Insert<'a>>;
+    ) -> Result<Self::Insert<'_>>;
+
+    fn build_query(&self, collection_index: usize) -> Result<Self::QueryBuilder<'_>>;
+
+    fn query<'a>(&'a self, txn: &'a Self::Txn, query: &'a Self::Query) -> Result<Self::Cursor<'_>>;
+
+    fn count(&self, txn: &Self::Txn, query: &Self::Query) -> Result<usize>;
+
+    fn delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<usize>;
 }
