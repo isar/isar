@@ -206,7 +206,7 @@ mod tests {
         }
 
         #[test]
-        fn test_partial_ord() {
+        fn test_partial_cmp() {
             for left in [None, Some(false), Some(true)] {
                 for right in [None, Some(false), Some(true)] {
                     assert_eq!(
@@ -305,7 +305,7 @@ mod tests {
         }
 
         #[test]
-        fn test_partial_ord() {
+        fn test_partial_cmp() {
             let values = [i64::MIN, i64::MIN + 1, -1, 0, 1, 42, i64::MAX - 1, i64::MAX];
 
             for left in values {
@@ -512,7 +512,7 @@ mod tests {
         }
 
         #[test]
-        fn test_partial_ord() {
+        fn test_partial_cmp() {
             let values = [
                 -f64::NAN,
                 f64::NEG_INFINITY,
@@ -797,7 +797,7 @@ mod tests {
         }
 
         #[test]
-        fn test_partial_ord() {
+        fn test_partial_cmp() {
             let values = [
                 None,
                 Some("".to_string()),
