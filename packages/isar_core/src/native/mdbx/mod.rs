@@ -69,9 +69,7 @@ pub(crate) mod osal {
     use widestring::U16CString;
 
     pub fn str_to_os(str: &str) -> Result<U16CString> {
-        U16CString::from_str(str).map_err(|_| IsarError::IllegalArg {
-            message: "Invalid String provided".to_string(),
-        })
+        U16CString::from_str(str).map_err(|_| IsarError::IllegalString {})
     }
 
     pub const ENV_OPEN: unsafe extern "C" fn(
@@ -94,9 +92,7 @@ pub(crate) mod osal {
     use std::ffi::CString;
 
     pub fn str_to_os(str: &str) -> Result<CString> {
-        CString::new(str.as_bytes()).map_err(|_| IsarError::IllegalArg {
-            message: "Invalid String provided".to_string(),
-        })
+        CString::new(str.as_bytes()).map_err(|_| IsarError::IllegalString {})
     }
 
     pub const ENV_OPEN: unsafe extern "C" fn(

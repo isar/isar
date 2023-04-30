@@ -1,78 +1,92 @@
 #![allow(clippy::missing_safety_doc)]
 
-use isar_core::error::{illegal_arg, Result};
+use core::slice;
+use isar_core::core::cursor::IsarCursor;
+use isar_core::core::error::IsarError;
+use isar_core::core::error::Result;
+use isar_core::core::instance::IsarInstance;
+use isar_core::core::reader::IsarReader;
+use isar_core::core::writer::IsarWriter;
+use isar_core::native::native_instance::NativeInstance;
 use std::ffi::CStr;
-use std::ffi::CString;
-use std::mem;
 use std::os::raw::c_char;
-use unicode_segmentation::UnicodeSegmentation;
 
 #[macro_use]
 mod error;
-
-pub mod app_dir;
-pub mod c_object_set;
-pub mod crud;
-mod dart;
+pub mod cursor;
 pub mod filter;
-pub mod index_key;
+pub mod insert;
 pub mod instance;
-pub mod link;
-pub mod query;
-pub mod query_aggregation;
-pub mod txn;
-pub mod watchers;
+pub mod query_builder;
+pub mod reader;
+pub mod writer;
 
-pub unsafe fn from_c_str<'a>(str: *const c_char) -> Result<Option<&'a str>> {
+type NInstance = <NativeInstance as IsarInstance>::Instance;
+type NTxn = <NativeInstance as IsarInstance>::Txn;
+
+type NInsert<'a> = <NativeInstance as IsarInstance>::Insert<'a>;
+type NObjectWriter<'a> = <NInsert<'a> as IsarWriter<'a>>::ObjectWriter;
+type NListWriter<'a> = <NInsert<'a> as IsarWriter<'a>>::ListWriter;
+
+type NCursor<'a> = <NativeInstance as IsarInstance>::Cursor<'a>;
+type NReader<'a> = <NCursor<'a> as IsarCursor>::Reader<'a>;
+type NListReader<'a> = <NReader<'a> as IsarReader>::ListReader<'a>;
+
+type NQueryBuilder<'a> = <NativeInstance as IsarInstance>::QueryBuilder<'a>;
+type NQuery = <NativeInstance as IsarInstance>::Query;
+
+pub enum CIsarInstance {
+    Native(NInstance),
+}
+
+pub enum CIsarTxn {
+    Native(NTxn),
+}
+
+pub enum CIsarInsert<'a> {
+    Native(NInsert<'a>),
+}
+
+pub enum CIsarWriter<'a> {
+    Native(NInsert<'a>),
+    NativeObject(NObjectWriter<'a>),
+    NativeList(NListWriter<'a>),
+}
+
+pub enum CIsarReader<'a> {
+    Native(NReader<'a>),
+    NativeList(NListReader<'a>),
+}
+
+pub enum CIsarQueryBuilder<'a> {
+    Native(NQueryBuilder<'a>),
+}
+
+pub enum CIsarQuery {
+    Native(NQuery),
+}
+
+pub enum CIsarCursor<'a> {
+    Native(NCursor<'a>),
+}
+
+pub(crate) unsafe fn require_from_c_str<'a>(str: *const c_char) -> Result<&'a str> {
     if !str.is_null() {
         match CStr::from_ptr(str).to_str() {
-            Ok(str) => Ok(Some(str)),
-            Err(_) => illegal_arg("The provided String is not valid."),
+            Ok(str) => Ok(str),
+            Err(_) => Err(IsarError::IllegalString {}),
         }
     } else {
-        Ok(None)
+        Err(IsarError::IllegalString {})
     }
 }
 
-pub struct UintSend(&'static mut u32);
-
-unsafe impl Send for UintSend {}
-
-pub struct BoolSend(&'static mut bool);
-
-unsafe impl Send for BoolSend {}
-
-pub struct CharsSend(*const c_char);
-
-unsafe impl Send for CharsSend {}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_find_word_boundaries(
-    input_bytes: *const u8,
-    length: u32,
-    number_words: *mut u32,
-) -> *mut u32 {
-    let bytes = std::slice::from_raw_parts(input_bytes, length as usize);
-    let str = std::str::from_utf8_unchecked(bytes);
-    let mut result = vec![];
-    for (offset, word) in str.unicode_word_indices() {
-        result.push(offset as u32);
-        result.push((offset + word.len()) as u32);
+pub(crate) unsafe fn from_utf16<'a>(str: *const u16, length: u32) -> Option<String> {
+    if str.is_null() {
+        None
+    } else {
+        let chars = slice::from_raw_parts(str, length as usize);
+        let value = String::from_utf16_lossy(chars);
+        Some(value)
     }
-    result.shrink_to_fit();
-    number_words.write((result.len() / 2) as u32);
-    let result_ptr = result.as_mut_ptr();
-    mem::forget(result);
-    result_ptr
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_free_word_boundaries(boundaries: *mut u32, word_count: u32) {
-    let len = (word_count * 2) as usize;
-    Vec::from_raw_parts(boundaries, len, len);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_free_string(string: *mut c_char) {
-    let _ = CString::from_raw(string);
 }

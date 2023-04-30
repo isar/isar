@@ -5,10 +5,8 @@ class Schema<OBJ> {
   /// @nodoc
   @protected
   const Schema({
-    required this.id,
     required this.name,
     required this.properties,
-    required this.estimateSize,
     required this.serialize,
     required this.deserialize,
     required this.deserializeProp,
@@ -18,22 +16,17 @@ class Schema<OBJ> {
   @protected
   factory Schema.fromJson(Map<String, dynamic> json) {
     return Schema(
-      id: -1,
       name: json['name'] as String,
       properties: {
         for (final property in json['properties'] as List<dynamic>)
           (property as Map<String, dynamic>)['name'] as String:
               PropertySchema.fromJson(property),
       },
-      estimateSize: (_, __, ___) => throw UnimplementedError(),
       serialize: (_, __, ___, ____) => throw UnimplementedError(),
       deserialize: (_, __, ___, ____) => throw UnimplementedError(),
       deserializeProp: (_, __, ___, ____) => throw UnimplementedError(),
     );
   }
-
-  /// Internal id of this collection or embedded object.
-  final int id;
 
   /// Name of the collection or embedded object
   final String name;
@@ -43,10 +36,6 @@ class Schema<OBJ> {
 
   /// A map of name -> property pairs
   final Map<String, PropertySchema> properties;
-
-  /// @nodoc
-  @protected
-  final EstimateSize<OBJ> estimateSize;
 
   /// @nodoc
   @protected
@@ -102,7 +91,7 @@ typedef EstimateSize<T> = int Function(
 @protected
 typedef Serialize<T> = void Function(
   T object,
-  IsarWriter writer,
+  CIsarWriter writer,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 );

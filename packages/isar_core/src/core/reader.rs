@@ -13,23 +13,27 @@ pub trait IsarReader {
 
     fn read_id(&self) -> i64;
 
-    fn read_byte(&self, index: usize) -> u8;
+    fn is_null(&self, index: u32) -> bool;
 
-    fn read_int(&self, index: usize) -> i32;
+    fn read_byte(&self, index: u32) -> u8;
 
-    fn read_float(&self, index: usize) -> f32;
+    fn read_bool(&self, index: u32) -> Option<bool>;
 
-    fn read_long(&self, index: usize) -> i64;
+    fn read_int(&self, index: u32) -> i32;
 
-    fn read_double(&self, index: usize) -> f64;
+    fn read_float(&self, index: u32) -> f32;
 
-    fn read_string(&self, index: usize) -> Option<&str>;
+    fn read_long(&self, index: u32) -> i64;
 
-    fn read_blob(&self, index: usize) -> Option<Cow<'_, [u8]>>;
+    fn read_double(&self, index: u32) -> f64;
 
-    fn read_json(&self, index: usize) -> Option<Cow<'_, Value>>;
+    fn read_string(&self, index: u32) -> Option<&str>;
 
-    fn read_object(&self, index: usize) -> Option<Self::ObjectReader<'_>>;
+    fn read_blob(&self, index: u32) -> Option<Cow<'_, [u8]>>;
 
-    fn read_list(&self, index: usize) -> Option<(Self::ListReader<'_>, usize)>;
+    fn read_json(&self, index: u32) -> Option<Cow<'_, Value>>;
+
+    fn read_object(&self, index: u32) -> Option<Self::ObjectReader<'_>>;
+
+    fn read_list(&self, index: u32) -> Option<(Self::ListReader<'_>, u32)>;
 }

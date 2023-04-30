@@ -17,8 +17,8 @@ const MIB: isize = 1 << 20;
 impl Env {
     pub fn create(
         path: &str,
-        max_dbs: usize,
-        max_size_mib: usize,
+        max_dbs: u32,
+        max_size_mib: u32,
         relaxed_durability: bool,
     ) -> Result<Arc<Env>> {
         let path = str_to_os(path)?;

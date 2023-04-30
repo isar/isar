@@ -20,26 +20,26 @@ pub(crate) enum QueryIndex {
 }
 
 pub struct Query {
-    pub(crate) instance_id: u64,
+    pub(crate) instance_id: u32,
     pub(crate) collection_index: usize,
     pub(self) indexes: Vec<QueryIndex>,
     pub(self) filter: NativeFilter,
     pub(self) sort: Vec<(NativeProperty, Sort)>,
     pub(self) distinct: Vec<(NativeProperty, bool)>,
-    pub(self) offset: usize,
-    pub(self) limit: usize,
+    pub(self) offset: u32,
+    pub(self) limit: u32,
 }
 
 impl Query {
     pub(crate) fn new(
-        instance_id: u64,
+        instance_id: u32,
         collection_index: usize,
         indexes: Vec<QueryIndex>,
         filter: NativeFilter,
         sort: Vec<(NativeProperty, Sort)>,
         distinct: Vec<(NativeProperty, bool)>,
-        offset: usize,
-        limit: usize,
+        offset: u32,
+        limit: u32,
     ) -> Self {
         Self {
             instance_id,
@@ -67,25 +67,25 @@ impl Query {
         &self,
         txn: &NativeTxn,
         all_collections: &[NativeCollection],
-    ) -> Result<usize> {
+    ) -> Result<u32> {
         let collection = &all_collections[self.collection_index];
         let iterator = QueryIterator::new(txn, collection, self, true)?;
-        Ok(iterator.count())
+        Ok(iterator.count() as u32)
     }
 
-    pub(crate) fn delete(&self, txn: &NativeTxn, collection: &NativeCollection) -> Result<usize> {
+    pub(crate) fn delete(&self, txn: &NativeTxn, collection: &NativeCollection) -> Result<u32> {
         todo!()
     }
 }
 
-pub(crate) struct QueryCursor<'a> {
+pub struct QueryCursor<'a> {
     iterator: QueryIterator<'a>,
     collection: &'a NativeCollection,
     all_collections: &'a [NativeCollection],
 }
 
 impl<'a> QueryCursor<'a> {
-    pub fn new(
+    pub(crate) fn new(
         iterator: QueryIterator<'a>,
         collection: &'a NativeCollection,
         all_collections: &'a [NativeCollection],

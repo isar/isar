@@ -136,7 +136,7 @@ fn open_collection(
                     .iter()
                     .position(|c| c.name == *collection)
                     .unwrap();
-                Some(index)
+                Some(index as u16)
             } else {
                 None
             };
@@ -144,7 +144,7 @@ fn open_collection(
                 NativeProperty::new(property_schema.data_type, offset, embedded_collection_index);
             properties.push((property, name));
         }
-        offset += property_schema.data_type.static_size();
+        offset += property_schema.data_type.static_size() as u32;
     }
 
     properties.sort_by(|(_, a), (_, b)| a.cmp(&b));

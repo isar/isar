@@ -1,5 +1,4 @@
-use std::ops::Index;
-
+use super::bool_to_byte;
 use super::native_collection::NativeCollection;
 use super::native_filter::NativeFilter;
 use super::query::{Query, QueryIndex};
@@ -12,18 +11,18 @@ use crate::filter::Filter;
 use itertools::Itertools;
 
 pub struct NativeQueryBuilder<'a> {
-    instance_id: u64,
+    instance_id: u32,
     collection: &'a NativeCollection,
     all_collections: &'a [NativeCollection],
     filter: Option<Filter>,
-    sort: Vec<(usize, Sort)>,
-    offset: Option<usize>,
-    limit: Option<usize>,
+    sort: Vec<(u16, Sort)>,
+    offset: Option<u32>,
+    limit: Option<u32>,
 }
 
 impl<'a> NativeQueryBuilder<'a> {
     pub fn new(
-        instance_id: u64,
+        instance_id: u32,
         collection: &'a NativeCollection,
         all_collections: &'a [NativeCollection],
     ) -> Self {
@@ -46,15 +45,15 @@ impl<'a> IsarQueryBuilder for NativeQueryBuilder<'a> {
         self.filter = Some(filter);
     }
 
-    fn add_sort(&mut self, property_index: usize, sort: Sort) {
+    fn add_sort(&mut self, property_index: u16, sort: Sort) {
         self.sort.push((property_index, sort));
     }
 
-    fn set_offset(&mut self, offset: usize) {
+    fn set_offset(&mut self, offset: u32) {
         self.offset = Some(offset);
     }
 
-    fn set_limit(&mut self, limit: usize) {
+    fn set_limit(&mut self, limit: u32) {
         self.limit = Some(limit);
     }
 
@@ -71,7 +70,7 @@ impl<'a> IsarQueryBuilder for NativeQueryBuilder<'a> {
             vec![],
             vec![],
             self.offset.unwrap_or(0),
-            self.limit.unwrap_or(usize::MAX),
+            self.limit.unwrap_or(u32::MAX),
         )
     }
 }
@@ -124,8 +123,12 @@ impl FilterGroup {
 impl FilterCondition {
     fn to_native_filter(&self, collection: &NativeCollection) -> NativeFilter {
         match self.get_condition_type() {
+            ConditionType::IsNull => {
+                let property = collection.properties[self.get_property() as usize];
+                NativeFilter::is_null(property)
+            }
             ConditionType::Between => {
-                let property = collection.properties[self.get_property()];
+                let property = collection.properties[self.get_property() as usize];
                 match property.data_type {
                     DataType::Byte | DataType::ByteList => {
                         if let (FilterValue::Integer(lower), FilterValue::Integer(upper)) =
@@ -135,6 +138,14 @@ impl FilterCondition {
                                 property,
                                 (*lower).clamp(u8::MIN as i64, u8::MAX as i64) as u8,
                                 (*upper).clamp(u8::MIN as i64, u8::MAX as i64) as u8,
+                            );
+                        } else if let (FilterValue::Bool(lower), FilterValue::Bool(upper)) =
+                            self.get_lower_upper()
+                        {
+                            return NativeFilter::byte(
+                                property,
+                                bool_to_byte(*lower),
+                                bool_to_byte(*upper),
                             );
                         }
                     }
@@ -178,7 +189,7 @@ impl FilterCondition {
                                 property,
                                 lower.as_deref(),
                                 upper.as_deref(),
-                                self.get_case_insensitive(),
+                                self.get_case_sensitive(),
                             );
                         }
                     }
@@ -187,14 +198,14 @@ impl FilterCondition {
                 NativeFilter::stat(false)
             }
             ConditionType::StringEndsWith => {
-                let property = collection.properties[self.get_property()];
+                let property = collection.properties[self.get_property() as usize];
                 if let FilterValue::String(Some(value)) = self.get_value() {
                     match property.data_type {
                         DataType::String | DataType::StringList => {
                             return NativeFilter::string_ends_with(
                                 property,
                                 value,
-                                self.get_case_insensitive(),
+                                self.get_case_sensitive(),
                             )
                         }
                         _ => {}
@@ -203,14 +214,14 @@ impl FilterCondition {
                 NativeFilter::stat(false)
             }
             ConditionType::StringContains => {
-                let property = collection.properties[self.get_property()];
+                let property = collection.properties[self.get_property() as usize];
                 if let FilterValue::String(Some(value)) = self.get_value() {
                     match property.data_type {
                         DataType::String | DataType::StringList => {
                             return NativeFilter::string_contains(
                                 property,
                                 value,
-                                self.get_case_insensitive(),
+                                self.get_case_sensitive(),
                             )
                         }
                         _ => {}
@@ -219,14 +230,14 @@ impl FilterCondition {
                 NativeFilter::stat(false)
             }
             ConditionType::StringMatches => {
-                let property = collection.properties[self.get_property()];
+                let property = collection.properties[self.get_property() as usize];
                 if let FilterValue::String(Some(value)) = self.get_value() {
                     match property.data_type {
                         DataType::String | DataType::StringList => {
                             return NativeFilter::string_matches(
                                 property,
                                 value,
-                                self.get_case_insensitive(),
+                                self.get_case_sensitive(),
                             )
                         }
                         _ => {}

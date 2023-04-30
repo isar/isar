@@ -15,6 +15,6 @@ fn main() {
         version
     });
 
-    write!(&mut f, "const ISAR_VERSION: &str = \"{version}\0\";").unwrap();
+    write!(&mut f, "pub const ISAR_VERSION: &str = \"{version}\0\";").unwrap();
     println!("cargo:rerun-if-env-changed=ISAR_VERSION");
 }

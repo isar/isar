@@ -21,10 +21,6 @@ enum EnumType {
   /// Stores the index of the enum as a byte value.
   ordinal,
 
-  /// Stores the index of the enum as a 4-byte value. Use this type if your enum
-  /// has more than 256 values or needs to be nullable.
-  ordinal32,
-
   /// Uses the name of the enum value.
   name,
 

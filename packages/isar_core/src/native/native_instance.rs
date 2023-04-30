@@ -17,10 +17,10 @@ use std::sync::{Arc, Mutex};
 static INSTANCES: Lazy<Mutex<IntMap<Arc<NativeInstance>>>> =
     Lazy::new(|| Mutex::new(IntMap::new()));
 
-struct NativeInstance {
+pub struct NativeInstance {
     dir: String,
     name: String,
-    instance_id: u64,
+    instance_id: u32,
     collections: Vec<NativeCollection>,
     env: Arc<Env>,
 }
@@ -44,9 +44,9 @@ impl IsarInstance for NativeInstance {
     where
         Self: 'a;
 
-    fn get(instance_id: u64) -> Option<Self::Instance> {
+    fn get(instance_id: u32) -> Option<Self::Instance> {
         let mut lock = INSTANCES.lock().unwrap();
-        if let Some(instance) = lock.get_mut(instance_id) {
+        if let Some(instance) = lock.get_mut(instance_id as u64) {
             Some(Arc::clone(&instance))
         } else {
             None
@@ -54,16 +54,16 @@ impl IsarInstance for NativeInstance {
     }
 
     fn open(
-        instance_id: u64,
+        instance_id: u32,
         name: &str,
         dir: &str,
         schema: IsarSchema,
-        max_size_mib: usize,
+        max_size_mib: u32,
         relaxed_durability: bool,
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self::Instance> {
         let mut lock = INSTANCES.lock().unwrap();
-        if let Some(instance) = lock.get(instance_id) {
+        if let Some(instance) = lock.get(instance_id as u64) {
             Ok(instance.clone())
         } else {
             let new_instance = Self::open_internal(
@@ -76,7 +76,7 @@ impl IsarInstance for NativeInstance {
                 compact_condition,
             )?;
             let new_instance = Arc::new(new_instance);
-            lock.insert(instance_id, new_instance.clone());
+            lock.insert(instance_id as u64, new_instance.clone());
             Ok(new_instance)
         }
     }
@@ -99,16 +99,16 @@ impl IsarInstance for NativeInstance {
     fn insert<'a>(
         &'a self,
         txn: NativeTxn,
-        collection_index: usize,
-        count: usize,
+        collection_index: u16,
+        count: u32,
     ) -> Result<NativeInsert<'a>> {
         self.verify_instance_id(txn.instance_id)?;
-        let collection = &self.collections[collection_index];
+        let collection = &self.collections[collection_index as usize];
         Ok(NativeInsert::new(txn, collection, &self.collections, count))
     }
 
-    fn build_query(&self, collection_index: usize) -> Result<Self::QueryBuilder<'_>> {
-        let collection = &self.collections[collection_index];
+    fn build_query(&self, collection_index: u16) -> Result<Self::QueryBuilder<'_>> {
+        let collection = &self.collections[collection_index as usize];
         Ok(NativeQueryBuilder::new(
             self.instance_id,
             collection,
@@ -122,12 +122,12 @@ impl IsarInstance for NativeInstance {
         query.cursor(txn, &self.collections)
     }
 
-    fn count(&self, txn: &Self::Txn, query: &Self::Query) -> Result<usize> {
+    fn count(&self, txn: &Self::Txn, query: &Self::Query) -> Result<u32> {
         self.verify_instance_id(txn.instance_id)?;
         query.count(txn, &self.collections)
     }
 
-    fn delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<usize> {
+    fn delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<u32> {
         self.verify_instance_id(txn.instance_id)?;
         let collection = &self.collections[query.collection_index];
         query.delete(txn, collection)
@@ -135,7 +135,7 @@ impl IsarInstance for NativeInstance {
 }
 
 impl NativeInstance {
-    pub(crate) fn verify_instance_id(&self, instance_id: u64) -> Result<()> {
+    pub(crate) fn verify_instance_id(&self, instance_id: u32) -> Result<()> {
         if self.instance_id != instance_id {
             Err(IsarError::InstanceMismatch {})
         } else {
@@ -155,19 +155,19 @@ impl NativeInstance {
     fn open_internal(
         name: &str,
         dir: &str,
-        instance_id: u64,
+        instance_id: u32,
         schema: IsarSchema,
-        max_size_mib: usize,
+        max_size_mib: u32,
         relaxed_durability: bool,
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self> {
         let isar_file = Self::get_isar_path(name, dir);
 
-        let db_count: usize = schema
+        let db_count = schema
             .collections
             .iter()
-            .map(|c| c.indexes.len() + 1)
-            .sum::<usize>()
+            .map(|c| c.indexes.len() as u32 + 1)
+            .sum::<u32>()
             + 3;
         let env = Env::create(
             &isar_file,
@@ -224,9 +224,9 @@ impl NativeInstance {
         } else {
             (file_size as f64) / (instance_size as f64)
         };
-        let should_compact = file_size >= compact_condition.min_file_size
-            && compact_bytes >= compact_condition.min_bytes
-            && compact_ratio >= compact_condition.min_ratio;
+        let should_compact = file_size >= compact_condition.min_file_size as u64
+            && compact_bytes >= compact_condition.min_bytes as u64
+            && compact_ratio >= compact_condition.min_ratio as f64;
 
         if should_compact {
             let compact_file = format!("{}.compact", &isar_file);

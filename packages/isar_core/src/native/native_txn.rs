@@ -10,14 +10,14 @@ use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
 
 pub struct NativeTxn {
-    pub(crate) instance_id: u64,
+    pub(crate) instance_id: u32,
     txn: Txn,
     active: Cell<bool>,
     unbound_cursors: RefCell<Vec<UnboundCursor>>,
 }
 
 impl NativeTxn {
-    pub(crate) fn new(instance_id: u64, env: &Arc<Env>, write: bool) -> Result<Self> {
+    pub(crate) fn new(instance_id: u32, env: &Arc<Env>, write: bool) -> Result<Self> {
         let txn = env.txn(write)?;
         let txn = Self {
             instance_id,
@@ -57,14 +57,14 @@ impl NativeTxn {
         result
     }
 
-    pub fn open_db(&self, name: &str, int_key: bool, dup: bool) -> Result<Db> {
+    pub(crate) fn open_db(&self, name: &str, int_key: bool, dup: bool) -> Result<Db> {
         if !self.active.get() {
             return Err(IsarError::TransactionClosed {});
         }
         Db::open(&self.txn, name, int_key, dup)
     }
 
-    pub fn drop_db(&self, db: Db) -> Result<()> {
+    pub(crate) fn drop_db(&self, db: Db) -> Result<()> {
         if !self.active.get() {
             return Err(IsarError::TransactionClosed {});
         }

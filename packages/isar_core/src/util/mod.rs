@@ -1,1 +1,1 @@
-pub mod fast_wild_match;
+pub(crate) mod fast_wild_match;

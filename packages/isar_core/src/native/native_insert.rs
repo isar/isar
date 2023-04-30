@@ -5,7 +5,7 @@ use byteorder::{ByteOrder, LittleEndian};
 use super::native_collection::NativeCollection;
 use super::native_txn::NativeTxn;
 use super::MAX_OBJ_SIZE;
-use crate::core::error::{illegal_arg, Result};
+use crate::core::error::{IsarError, Result};
 use crate::core::insert::IsarInsert;
 
 pub struct NativeInsert<'a> {
@@ -13,8 +13,8 @@ pub struct NativeInsert<'a> {
     pub(crate) collection: &'a NativeCollection,
     pub(crate) all_collections: &'a Vec<NativeCollection>,
 
-    inserted_count: usize,
-    count: usize,
+    inserted_count: u32,
+    count: u32,
 
     pub(crate) buffer: Cell<Vec<u8>>,
     pub(crate) property: usize,
@@ -26,10 +26,10 @@ impl<'a> NativeInsert<'a> {
         txn: NativeTxn,
         collection: &'a NativeCollection,
         all_collections: &'a Vec<NativeCollection>,
-        count: usize,
+        count: u32,
     ) -> Self {
-        let mut buffer = Vec::with_capacity(collection.static_size * 2);
-        buffer.resize(collection.static_size, 0);
+        let mut buffer = Vec::with_capacity(collection.static_size as usize * 2);
+        buffer.resize(collection.static_size as usize, 0);
         LittleEndian::write_u16(&mut buffer, collection.static_size as u16);
 
         Self {
@@ -48,14 +48,14 @@ impl<'a> NativeInsert<'a> {
 impl<'a> IsarInsert<'a> for NativeInsert<'a> {
     type Txn = NativeTxn;
 
-    fn insert(mut self, id: Option<i64>) -> Result<Self> {
+    fn save(mut self, id: Option<i64>) -> Result<Self> {
         if self.property != self.collection.properties.len() {
-            illegal_arg("Not all properties have been written ")?;
+            return Result::Err(IsarError::InsertIncomplete {});
         }
 
         let buffer = self.buffer.get_mut();
         if buffer.len() > MAX_OBJ_SIZE as usize {
-            illegal_arg("Object is bigger than 16MB")?;
+            return Result::Err(IsarError::ObjectLimitReached {});
         }
 
         {
@@ -77,7 +77,7 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
 
             self.property = 0;
             buffer.truncate(2); // leave only the static size
-            buffer.resize(self.collection.static_size, 0);
+            buffer.resize(self.collection.static_size as usize, 0);
         }
 
         Ok(self)
@@ -85,7 +85,7 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
 
     fn finish(self) -> Result<Self::Txn> {
         if self.inserted_count < self.count {
-            illegal_arg("Not all objects have been inserted")?;
+            return Result::Err(IsarError::InsertIncomplete {});
         }
         Ok(self.txn)
     }

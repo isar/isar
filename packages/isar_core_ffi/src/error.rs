@@ -1,18 +1,18 @@
-use isar_core::error::Result;
+use isar_core::core::error::Result;
 use once_cell::sync::Lazy;
 use std::ffi::CString;
 use std::os::raw::c_char;
 use std::sync::Mutex;
 
-type ErrCounter = (Vec<(i64, String)>, i64);
+type ErrCounter = (Vec<(u8, String)>, u8);
 static ERRORS: Lazy<Mutex<ErrCounter>> = Lazy::new(|| Mutex::new((vec![], 1)));
 
 pub trait DartErrCode {
-    fn into_dart_result_code(self) -> i64;
+    fn into_dart_result_code(self) -> u8;
 }
 
 impl DartErrCode for Result<()> {
-    fn into_dart_result_code(self) -> i64 {
+    fn into_dart_result_code(self) -> u8 {
         if let Err(err) = self {
             let mut lock = ERRORS.lock().unwrap();
             let (errors, counter) = &mut (*lock);
@@ -37,8 +37,8 @@ macro_rules! isar_try {
     { $($token:tt)* } => {{
         use crate::error::DartErrCode;
         #[allow(unused_mut)] {
-            let mut l = || -> isar_core::error::Result<()> {
-                $($token)*
+            let mut l = || -> isar_core::core::error::Result<()> {
+                {$($token)*}
                 Ok(())
             };
             l().into_dart_result_code()
@@ -56,7 +56,7 @@ macro_rules! isar_try_txn {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_get_error(err_code: i64) -> *mut c_char {
+pub unsafe extern "C" fn isar_get_error(err_code: u8) -> *mut c_char {
     let lock = ERRORS.lock().unwrap();
     let error = lock.0.iter().find(|(code, _)| *code == err_code);
     if let Some((_, err_msg)) = error {

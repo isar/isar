@@ -9,6 +9,8 @@ pub trait IsarWriter<'a> {
 
     fn write_byte(&mut self, value: u8);
 
+    fn write_bool(&mut self, value: Option<bool>);
+
     fn write_int(&mut self, value: i32);
 
     fn write_float(&mut self, value: f32);
@@ -27,7 +29,7 @@ pub trait IsarWriter<'a> {
 
     fn end_object(&mut self, writer: Self::ObjectWriter);
 
-    fn begin_list(&mut self, length: usize) -> Self::ListWriter;
+    fn begin_list(&mut self, length: u32) -> Self::ListWriter;
 
     fn end_list(&mut self, writer: Self::ListWriter);
 }

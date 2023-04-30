@@ -1,23 +1,14 @@
-use crate::app_dir::get_app_dir;
-use crate::dart::{dart_post_int, DartPort};
-use crate::error::DartErrCode;
-use crate::from_c_str;
-use crate::txn::run_async;
-use crate::txn::CIsarTxn;
-use crate::CharsSend;
-use isar_core::collection::IsarCollection;
-use isar_core::error::{illegal_arg, Result};
-use isar_core::instance::{CompactCondition, IsarInstance};
-use isar_core::schema::Schema;
-use std::ffi::CString;
+use crate::{
+    require_from_c_str, CIsarCursor, CIsarInsert, CIsarInstance, CIsarQuery, CIsarQueryBuilder,
+    CIsarTxn,
+};
+use isar_core::core::instance::{CompactCondition, IsarInstance};
+use isar_core::core::schema::IsarSchema;
+use isar_core::native::native_instance::NativeInstance;
 use std::os::raw::c_char;
-use std::sync::Arc;
+use std::ptr;
 
 include!(concat!(env!("OUT_DIR"), "/version.rs"));
-
-struct IsarInstanceSend(*mut *const IsarInstance);
-
-unsafe impl Send for IsarInstanceSend {}
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_version() -> *const c_char {
@@ -25,170 +16,181 @@ pub unsafe extern "C" fn isar_version() -> *const c_char {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_instance_create(
-    isar: *mut *const IsarInstance,
+pub unsafe extern "C" fn isar_get(instance_id: u32) -> *const CIsarInstance {
+    if let Some(instance) = NativeInstance::get(instance_id) {
+        Box::into_raw(Box::new(CIsarInstance::Native(instance)))
+    } else {
+        ptr::null()
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_create(
+    isar: *mut *const CIsarInstance,
+    instance_id: u32,
     name: *const c_char,
     path: *const c_char,
     schema_json: *const c_char,
-    max_size_mib: i64,
+    max_size_mib: u32,
     relaxed_durability: bool,
     compact_min_file_size: u32,
     compact_min_bytes: u32,
-    compact_min_ratio: f64,
-) -> i64 {
-    let open = || -> Result<()> {
-        let name = from_c_str(name).unwrap().unwrap();
-        let path = from_c_str(path).unwrap().or_else(get_app_dir);
-        let schema_json = from_c_str(schema_json).unwrap().unwrap();
-        let schema = Schema::from_json(schema_json.as_bytes())?;
+    compact_min_ratio: f32,
+) -> u8 {
+    isar_try! {
+        let name = require_from_c_str(name)?;
+        let path = require_from_c_str(path)?;
+        let schema_json = require_from_c_str(schema_json)?;
+        let schema = IsarSchema::from_json(schema_json.as_bytes())?;
 
         let compact_condition = if compact_min_ratio.is_nan() {
             None
         } else {
             Some(CompactCondition {
-                min_file_size: compact_min_file_size as u64,
-                min_bytes: compact_min_bytes as u64,
+                min_file_size: compact_min_file_size ,
+                min_bytes: compact_min_bytes,
                 min_ratio: compact_min_ratio,
             })
         };
 
-        let instance = IsarInstance::open(
+        let native_instance = NativeInstance::open(
+            instance_id ,
             name,
             path,
             schema,
-            max_size_mib as usize,
+            max_size_mib,
             relaxed_durability,
             compact_condition,
         )?;
-        isar.write(Arc::into_raw(instance));
-        Ok(())
-    };
-
-    open().into_dart_result_code()
+        let new_isar = CIsarInstance::Native(native_instance);
+        *isar = Box::into_raw(Box::new(new_isar));
+    }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_instance_create_async(
-    isar: *mut *const IsarInstance,
-    name: *const c_char,
-    path: *const c_char,
-    schema_json: *const c_char,
-    max_size_mib: i64,
-    relaxed_durability: bool,
-    compact_min_file_size: u32,
-    compact_min_bytes: u32,
-    compact_min_ratio: f64,
-    port: DartPort,
-) {
-    let isar = IsarInstanceSend(isar);
-    let name = CharsSend(name);
-    let path = CharsSend(path);
-    let schema_json = CharsSend(schema_json);
-    run_async(move || {
-        let isar = isar;
-        let name = name;
-        let path = path;
-        let schema_json = schema_json;
-        let result = isar_instance_create(
-            isar.0,
-            name.0,
-            path.0,
-            schema_json.0,
-            max_size_mib,
-            relaxed_durability,
-            compact_min_file_size,
-            compact_min_bytes,
-            compact_min_ratio,
-        );
-        dart_post_int(port, result);
-    });
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_instance_close(isar: *const IsarInstance) -> bool {
-    let isar = Arc::from_raw(isar);
-    isar.close()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_instance_close_and_delete(isar: *const IsarInstance) -> bool {
-    let isar = Arc::from_raw(isar);
-    isar.close_and_delete()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_instance_get_path(isar: &'static IsarInstance) -> *mut c_char {
-    CString::new(isar.dir.as_str()).unwrap().into_raw()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_instance_get_collection<'a>(
-    isar: &'a IsarInstance,
-    collection: *mut &'a IsarCollection,
-    collection_id: u64,
-) -> i64 {
+pub unsafe extern "C" fn isar_txn_begin(
+    isar: &'static CIsarInstance,
+    txn: *mut *const CIsarTxn,
+    write: bool,
+) -> u8 {
     isar_try! {
-        let new_collection = isar.collections.iter().find(|c| c.id == collection_id);
-        if let Some(new_collection) = new_collection {
-            collection.write(new_collection);
-        } else {
-            illegal_arg("Collection id is invalid.")?;
+        let new_txn = match isar {
+            CIsarInstance::Native(isar) =>{
+                let txn = isar.begin_txn(write)?;
+                CIsarTxn::Native(txn)
+            },
+        };
+        *txn = Box::into_raw(Box::new(new_txn));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_txn_commit(isar: &'static CIsarInstance, txn: *mut CIsarTxn) -> u8 {
+    isar_try! {
+        let txn = *Box::from_raw(txn);
+        match (isar, txn) {
+           (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
+                isar.commit_txn(txn)?;
+            }
         }
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_instance_get_size(
-    instance: &'static IsarInstance,
-    txn: &mut CIsarTxn,
-    include_indexes: bool,
-    include_links: bool,
-    size: &'static mut i64,
-) -> i64 {
-    isar_try_txn!(txn, move |txn| {
-        *size = instance.get_size(txn, include_indexes, include_links)? as i64;
-        Ok(())
-    })
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_instance_copy_to_file(
-    instance: &'static IsarInstance,
-    path: *const c_char,
-    port: DartPort,
-) {
-    let path = CharsSend(path);
-    run_async(move || {
-        let path = path;
-        let path = from_c_str(path.0).unwrap().unwrap();
-        let result = instance.copy_to_file(path);
-        dart_post_int(port, result.into_dart_result_code());
-    });
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_instance_verify(
-    instance: &'static IsarInstance,
-    txn: &mut CIsarTxn,
-) -> i64 {
-    isar_try_txn!(txn, move |txn| { instance.verify(txn) })
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_get_offsets(
-    collection: &IsarCollection,
-    embedded_col_id: u64,
-    offsets: *mut u32,
-) -> u32 {
-    let properties = if embedded_col_id == 0 {
-        &collection.properties
-    } else {
-        collection.embedded_properties.get(embedded_col_id).unwrap()
-    };
-    let offsets = std::slice::from_raw_parts_mut(offsets, properties.len());
-    for (i, p) in properties.iter().enumerate() {
-        offsets[i] = p.offset as u32;
+pub unsafe extern "C" fn isar_txn_abort(isar: &'static CIsarInstance, txn: *mut CIsarTxn) {
+    let txn = *Box::from_raw(txn);
+    match (isar, txn) {
+        (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
+            isar.abort_txn(txn);
+        }
     }
-    let property = properties.iter().max_by_key(|p| p.offset);
-    property.map_or(2, |p| p.offset + p.data_type.static_size()) as u32
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_insert(
+    isar: &'static CIsarInstance,
+    txn: *mut CIsarTxn,
+    insert: *mut *const CIsarInsert,
+    collection_index: u16,
+    count: u32,
+) -> u8 {
+    isar_try! {
+        let txn = *Box::from_raw(txn);
+        let new_insert = match (isar, txn) {
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
+                let insert = isar.insert(txn, collection_index, count)?;
+                CIsarInsert::Native(insert)
+            }
+        };
+        *insert = Box::into_raw(Box::new(new_insert));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_build_query(
+    isar: &'static CIsarInstance,
+    query_builder: *mut *const CIsarQueryBuilder,
+    collection_index: u16,
+) -> u8 {
+    isar_try! {
+        let new_query_builder = match isar {
+            CIsarInstance::Native(isar) => {
+                let query_builder = isar.build_query(collection_index)?;
+                CIsarQueryBuilder::Native(query_builder)
+            }
+        };
+        *query_builder = Box::into_raw(Box::new(new_query_builder));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_query(
+    isar: &'static CIsarInstance,
+    txn: &'static CIsarTxn,
+    query: &'static CIsarQuery,
+    cursor: *mut *const CIsarCursor,
+) -> u8 {
+    isar_try! {
+        let new_cursor = match (isar,txn,query) {
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn),CIsarQuery::Native(query)) => {
+                let cursor = isar.query(txn,query)?;
+                CIsarCursor::Native(cursor)
+            }
+        };
+        *cursor = Box::into_raw(Box::new(new_cursor));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_query_count(
+    isar: &'static CIsarInstance,
+    txn: &'static CIsarTxn,
+    query: &'static CIsarQuery,
+    count: *mut u32,
+) -> u8 {
+    isar_try! {
+        let new_count = match (isar,txn,query) {
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn),CIsarQuery::Native(query)) => {
+                isar.count(txn,query)?
+            }
+        };
+        *count = new_count;
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_query_delete(
+    isar: &'static CIsarInstance,
+    txn: &'static CIsarTxn,
+    query: &'static CIsarQuery,
+    count: *mut u32,
+) -> u8 {
+    isar_try! {
+        let new_count = match (isar,txn,query) {
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn),CIsarQuery::Native(query)) => {
+                isar.delete(txn,query)?
+            }
+        };
+        *count = new_count;
+    }
 }

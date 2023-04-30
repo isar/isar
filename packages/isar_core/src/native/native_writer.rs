@@ -1,6 +1,6 @@
 use super::native_collection::{NativeCollection, NativeProperty};
 use super::native_insert::NativeInsert;
-use super::{NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
+use super::{bool_to_byte, NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
 use crate::core::data_type::DataType;
 use crate::core::writer::IsarWriter;
 use byteorder::{ByteOrder, LittleEndian};
@@ -18,12 +18,12 @@ trait WriterImpl<'a> {
 
     fn replace_buffer(&mut self, buffer: Vec<u8>);
 
-    fn write(&mut self, offset: usize, bytes: &[u8]) {
-        self.get_buffer()[offset..offset + bytes.len()].copy_from_slice(bytes);
+    fn write(&mut self, offset: u32, bytes: &[u8]) {
+        self.get_buffer()[offset as usize..offset as usize + bytes.len()].copy_from_slice(bytes);
     }
 
-    fn write_u24(&mut self, offset: usize, value: u32) {
-        LittleEndian::write_u24(&mut self.get_buffer()[offset..], value);
+    fn write_u24(&mut self, offset: u32, value: u32) {
+        LittleEndian::write_u24(&mut self.get_buffer()[offset as usize..], value);
     }
 
     fn append(&mut self, bytes: &[u8]) {
@@ -58,6 +58,12 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
         let property = self.next_property();
         assert_eq!(property.data_type, DataType::Byte);
         self.write(property.offset, &[value]);
+    }
+
+    fn write_bool(&mut self, value: Option<bool>) {
+        let property = self.next_property();
+        assert_eq!(property.data_type, DataType::Byte);
+        self.write(property.offset, &[bool_to_byte(value)]);
     }
 
     fn write_int(&mut self, value: i32) {
@@ -130,7 +136,7 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
         let collection_index = property.embedded_collection_index.unwrap();
         let collections = self.get_collections();
         NativeObjectWriter::new(
-            &collections[collection_index],
+            &collections[collection_index as usize],
             collections,
             self.take_buffer(),
         )
@@ -142,13 +148,13 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
         }
 
         let buffer = writer.buffer.take();
-        let length = buffer.len() - writer.intial_offset;
+        let length = buffer.len() as u32 - writer.intial_offset;
 
         self.replace_buffer(buffer);
-        self.write_u24(writer.intial_offset, length as u32);
+        self.write_u24(writer.intial_offset, length);
     }
 
-    fn begin_list(&mut self, length: usize) -> Self::ListWriter {
+    fn begin_list(&mut self, length: u32) -> Self::ListWriter {
         let property = self.next_property();
         assert!(property.data_type.is_list());
 
@@ -198,7 +204,7 @@ pub struct NativeObjectWriter<'a> {
     collection: &'a NativeCollection,
     all_collections: &'a [NativeCollection],
     buffer: Cell<Vec<u8>>,
-    intial_offset: usize,
+    intial_offset: u32,
     property: usize,
 }
 
@@ -208,9 +214,13 @@ impl<'a> NativeObjectWriter<'a> {
         all_collections: &'a [NativeCollection],
         mut buffer: Vec<u8>,
     ) -> Self {
-        let initial_len = buffer.len();
-        buffer.resize(initial_len + collection.static_size, 0);
-        LittleEndian::write_u16(&mut buffer[initial_len..], collection.static_size as u16);
+        let initial_len = buffer.len() as u32;
+        let new_len = initial_len + collection.static_size as u32;
+        buffer.resize(new_len as usize, 0);
+        LittleEndian::write_u16(
+            &mut buffer[initial_len as usize..],
+            collection.static_size as u16,
+        );
         Self {
             collection,
             all_collections,
@@ -256,12 +266,12 @@ impl<'a> Drop for NativeObjectWriter<'a> {
 
 pub struct NativeListWriter<'a> {
     data_type: DataType,
-    element_size: usize,
-    embedded_collection_index: Option<usize>,
+    element_size: u8,
+    embedded_collection_index: Option<u16>,
     all_collections: &'a [NativeCollection],
     buffer: Cell<Vec<u8>>,
-    offset: usize,
-    max_offset: usize,
+    offset: u32,
+    max_offset: u32,
 }
 
 impl<'a> NativeListWriter<'a> {
@@ -269,9 +279,9 @@ impl<'a> NativeListWriter<'a> {
         property: NativeProperty,
         all_collections: &'a [NativeCollection],
         buffer: Vec<u8>,
-        length: usize,
+        length: u32,
     ) -> Self {
-        let initial_len = buffer.len();
+        let initial_len = buffer.len() as u32;
         let element_size = match property.data_type {
             DataType::ByteList => 1,
             DataType::IntList | DataType::FloatList => 4,
@@ -286,7 +296,7 @@ impl<'a> NativeListWriter<'a> {
             all_collections,
             buffer: Cell::new(buffer),
             offset: initial_len,
-            max_offset: initial_len + (length - 1) * element_size,
+            max_offset: initial_len + (length - 1) * element_size as u32,
         }
     }
 }
@@ -302,7 +312,7 @@ impl<'a> WriterImpl<'a> for NativeListWriter<'a> {
             embedded_collection_index: self.embedded_collection_index,
             offset: self.offset,
         };
-        self.offset += self.element_size;
+        self.offset += self.element_size as u32;
         property
     }
 

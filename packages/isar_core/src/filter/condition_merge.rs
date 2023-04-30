@@ -11,7 +11,7 @@ impl FilterCondition {
             (_, ConditionType::False) => Self::new_false(),
             (ConditionType::Between, ConditionType::Between) => {
                 if self.get_property() != other.get_property()
-                    || self.get_case_insensitive() != other.get_case_insensitive()
+                    || self.get_case_sensitive() != other.get_case_sensitive()
                 {
                     return None;
                 }
@@ -23,7 +23,7 @@ impl FilterCondition {
                     self.get_property(),
                     new_lower.clone(),
                     new_upper.clone(),
-                    self.get_case_insensitive(),
+                    self.get_case_sensitive(),
                 )
             }
             _ => {
@@ -41,7 +41,7 @@ impl FilterCondition {
             (_, ConditionType::False) => self.clone(),
             (ConditionType::Between, ConditionType::Between) => {
                 if self.get_property() != other.get_property()
-                    || self.get_case_insensitive() != other.get_case_insensitive()
+                    || self.get_case_sensitive() != other.get_case_sensitive()
                 {
                     return None;
                 }
@@ -53,7 +53,7 @@ impl FilterCondition {
                         self.get_property(),
                         lower1.clone(),
                         upper.clone(),
-                        self.get_case_insensitive(),
+                        self.get_case_sensitive(),
                     )
                 } else if lower2 <= lower1 && upper2 >= lower1 {
                     let upper = if upper1 > upper2 { upper1 } else { upper2 };
@@ -61,21 +61,21 @@ impl FilterCondition {
                         self.get_property(),
                         lower2.clone(),
                         upper.clone(),
-                        self.get_case_insensitive(),
+                        self.get_case_sensitive(),
                     )
                 } else if &upper1.try_increment()? == lower2 {
                     Self::new_between(
                         self.get_property(),
                         lower1.clone(),
                         upper2.clone(),
-                        self.get_case_insensitive(),
+                        self.get_case_sensitive(),
                     )
                 } else if &upper2.try_increment()? == lower1 {
                     Self::new_between(
                         self.get_property(),
                         lower2.clone(),
                         upper1.clone(),
-                        self.get_case_insensitive(),
+                        self.get_case_sensitive(),
                     )
                 } else {
                     return None;
@@ -96,24 +96,24 @@ impl FilterCondition {
                     Self::new_greater_than(
                         self.get_property(),
                         upper.clone(),
-                        self.get_case_insensitive(),
+                        self.get_case_sensitive(),
                     )
                 } else if upper.is_max() {
                     Self::new_less_than(
                         self.get_property(),
                         lower.clone(),
-                        self.get_case_insensitive(),
+                        self.get_case_sensitive(),
                     )
                 } else {
                     let lower = Self::new_less_than(
                         self.get_property(),
                         lower.clone(),
-                        self.get_case_insensitive(),
+                        self.get_case_sensitive(),
                     );
                     let upper = Self::new_greater_than(
                         self.get_property(),
                         upper.clone(),
-                        self.get_case_insensitive(),
+                        self.get_case_sensitive(),
                     );
                     let group = FilterGroup::new(
                         GroupType::Or,
@@ -333,13 +333,13 @@ mod tests {
 
         #[test]
         fn test_try_invert_between_strings() {
-            for &case_insensitive in &[false, true] {
+            for &case_sensitive in &[true, false] {
                 assert_eq!(
                     C::new_between(
                         0,
                         FilterValue::String(Some("a".to_string())),
                         FilterValue::String(Some("e".to_string())),
-                        case_insensitive,
+                        case_sensitive,
                     )
                     .try_invert(),
                     Some(Filter::Group(FilterGroup::new(
@@ -348,12 +348,12 @@ mod tests {
                             Filter::Condition(FilterCondition::new_less_than(
                                 0,
                                 FilterValue::String(Some("a".to_string())),
-                                case_insensitive
+                                case_sensitive
                             )),
                             Filter::Condition(FilterCondition::new_greater_than(
                                 0,
                                 FilterValue::String(Some("e".to_string())),
-                                case_insensitive
+                                case_sensitive
                             )),
                         ],
                     ),),),
@@ -374,13 +374,13 @@ mod tests {
 
         #[test]
         fn test_try_invert_between_same_string_bounds() {
-            for &case_insensitive in &[false, true] {
+            for &case_sensitive in &[true, false] {
                 assert_eq!(
                     C::new_between(
                         0,
                         FilterValue::String(Some("b".to_string())),
                         FilterValue::String(Some("b".to_string())),
-                        case_insensitive,
+                        case_sensitive,
                     )
                     .try_invert(),
                     Some(Filter::Group(FilterGroup::new(
@@ -389,12 +389,12 @@ mod tests {
                             Filter::Condition(FilterCondition::new_less_than(
                                 0,
                                 FilterValue::String(Some("b".to_string())),
-                                case_insensitive
+                                case_sensitive
                             )),
                             Filter::Condition(FilterCondition::new_greater_than(
                                 0,
                                 FilterValue::String(Some("b".to_string())),
-                                case_insensitive
+                                case_sensitive
                             )),
                         ],
                     ),),),
@@ -412,19 +412,19 @@ mod tests {
 
         #[test]
         fn test_try_invert_between_lower_null_upper_string() {
-            for &case_insensitive in &[false, true] {
+            for &case_sensitive in &[true, false] {
                 assert_eq!(
                     C::new_between(
                         0,
                         FilterValue::String(None),
                         FilterValue::String(Some("b".to_string())),
-                        case_insensitive,
+                        case_sensitive,
                     )
                     .try_invert(),
                     Some(Filter::Condition(FilterCondition::new_greater_than(
                         0,
                         FilterValue::String(Some("b".to_string())),
-                        case_insensitive,
+                        case_sensitive,
                     ),),),
                 );
             }
@@ -453,13 +453,13 @@ mod tests {
 
         #[test]
         fn test_try_invert_between_lower_gt_upper_string() {
-            for &case_insensitive in &[false, true] {
+            for &case_sensitive in &[true, false] {
                 assert_eq!(
                     C::new_between(
                         0,
                         FilterValue::String(Some("c".to_string())),
                         FilterValue::String(Some("a".to_string())),
-                        case_insensitive,
+                        case_sensitive,
                     )
                     .try_invert(),
                     Some(Filter::Condition(t())),

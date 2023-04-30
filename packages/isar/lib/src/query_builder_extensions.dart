@@ -1,38 +1,6 @@
 part of isar;
 
 /// Extension for QueryBuilders.
-extension QueryWhereOr<OBJ, R> on QueryBuilder<OBJ, R, QWhereOr> {
-  /// Union of two where clauses.
-  QueryBuilder<OBJ, R, QWhereClause> or() {
-    return QueryBuilder(_query);
-  }
-}
-
-/// @nodoc
-@protected
-typedef WhereRepeatModifier<OBJ, R, E> = QueryBuilder<OBJ, R, QAfterWhereClause>
-    Function(QueryBuilder<OBJ, R, QWhereClause> q, E element);
-
-/// Extension for QueryBuilders.
-extension QueryWhere<OBJ, R> on QueryBuilder<OBJ, R, QWhereClause> {
-  /// Joins the results of the [modifier] for each item in [items] using logical
-  /// OR. So an object will be included if it matches at least one of the
-  /// resulting where clauses.
-  ///
-  /// If [items] is empty, this is a no-op.
-  QueryBuilder<OBJ, R, QAfterWhereClause> anyOf<E, RS>(
-    Iterable<E> items,
-    WhereRepeatModifier<OBJ, R, E> modifier,
-  ) {
-    QueryBuilder<OBJ, R, QAfterWhereClause>? q;
-    for (final e in items) {
-      q = modifier(q?.or() ?? QueryBuilder(_query), e);
-    }
-    return q ?? QueryBuilder(_query);
-  }
-}
-
-/// Extension for QueryBuilders.
 extension QueryFilters<OBJ, R> on QueryBuilder<OBJ, R, QFilter> {
   /// Start using filter conditions.
   QueryBuilder<OBJ, R, QFilterCondition> filter() {
@@ -63,14 +31,6 @@ extension QueryFilterAndOr<OBJ, R> on QueryBuilder<OBJ, R, QFilterOperator> {
     return QueryBuilder.apply(
       this,
       (q) => q.copyWith(filterGroupType: FilterGroupType.or),
-    );
-  }
-
-  /// Logical XOR of two filter conditions.
-  QueryBuilder<OBJ, R, QFilterCondition> xor() {
-    return QueryBuilder.apply(
-      this,
-      (q) => q.copyWith(filterGroupType: FilterGroupType.xor),
     );
   }
 }
@@ -123,22 +83,6 @@ extension QueryFilterNot<OBJ, R> on QueryBuilder<OBJ, R, QFilterCondition> {
         return q2;
       });
     });
-  }
-
-  /// Joins the results of the [modifier] for each item in [items] using logical
-  /// XOR. So an object will be included if it matches exactly one of the
-  /// resulting filters.
-  ///
-  /// If [items] is empty, this is a no-op.
-  QueryBuilder<OBJ, R, QAfterFilterCondition> oneOf<E, RS>(
-    Iterable<E> items,
-    FilterRepeatModifier<OBJ, R, E> modifier,
-  ) {
-    QueryBuilder<OBJ, R, QAfterFilterCondition>? q;
-    for (final e in items) {
-      q = modifier(q?.xor() ?? QueryBuilder(_query), e);
-    }
-    return q ?? QueryBuilder(_query);
   }
 }
 

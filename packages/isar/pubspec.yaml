@@ -9,7 +9,7 @@ funding:
   - https://github.com/sponsors/leisim/
 
 environment:
-  sdk: ">=2.17.0 <3.0.0"
+  sdk: ">=2.19.0 <3.0.0"
 
 dependencies:
   ffi: ">=2.0.0 <3.0.0"
@@ -17,6 +17,6 @@ dependencies:
   meta: ^1.7.0
 
 dev_dependencies:
-  ffigen: ">=6.1.2 <8.0.0"
+  ffigen: ^7.2.11
   test: ^1.21.1
   very_good_analysis: ^3.0.1

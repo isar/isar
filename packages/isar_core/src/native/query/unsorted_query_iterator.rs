@@ -10,8 +10,8 @@ pub(crate) struct UnsortedQueryIterator<'txn> {
     collection_iterators: Flatten<IntoIter<CollectionIterator<'txn>>>,
     returned_ids: Option<IntMap<()>>,
     filter: NativeFilter,
-    skip: usize,
-    take: usize,
+    skip: u32,
+    take: u32,
 }
 
 impl<'txn> UnsortedQueryIterator<'txn> {
@@ -19,8 +19,8 @@ impl<'txn> UnsortedQueryIterator<'txn> {
         collection_iterators: Vec<CollectionIterator<'txn>>,
         has_duplicates: bool,
         filter: NativeFilter,
-        offset: usize,
-        limit: usize,
+        offset: u32,
+        limit: u32,
     ) -> UnsortedQueryIterator<'txn> {
         let returned_ids = if has_duplicates {
             Some(IntMap::new())

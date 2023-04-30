@@ -35,25 +35,25 @@ macro_rules! primitive_create {
 
 #[macro_export]
 macro_rules! string_filter_create {
-    ($name:ident, $property:expr, $value:expr, $case_insensitive:expr) => {
+    ($name:ident, $property:expr, $value:expr, $case_sensitive:expr) => {
         paste! {
             {
-                let value = if $case_insensitive {
-                    $value.to_lowercase()
-                } else {
+                let value = if $case_sensitive {
                     $value.to_string()
+                } else {
+                    $value.to_lowercase()
                 };
                 let filter = if $property.data_type == DataType::String {
                     Filter::[<String $name>]([<String $name Cond>] {
                         offset: $property.offset,
                         value,
-                        $case_insensitive,
+                        $case_sensitive,
                     })
                 } else if $property.data_type == DataType::StringList {
                     Filter::[<AnyString $name>]([<AnyString $name Cond>] {
                         offset: $property.offset,
                         value,
-                        $case_insensitive,
+                        $case_sensitive,
                     })
                 } else {
                     panic!("Property does not support this filter.")
@@ -68,6 +68,14 @@ macro_rules! string_filter_create {
 pub struct NativeFilter(Filter);
 
 impl NativeFilter {
+    pub fn is_null(property: NativeProperty) -> NativeFilter {
+        let filter = Filter::IsNull(IsNullCond {
+            offset: property.offset,
+            data_type: property.data_type,
+        });
+        NativeFilter(filter)
+    }
+
     pub fn id(lower: i64, upper: i64) -> NativeFilter {
         let filter = Filter::IdBetween(IdBetweenCond { lower, upper });
         NativeFilter(filter)
@@ -93,11 +101,11 @@ impl NativeFilter {
         primitive_create!(Double, property, lower, upper)
     }
 
-    pub fn string_to_bytes(str: Option<&str>, case_insensitive: bool) -> Option<Vec<u8>> {
-        if case_insensitive {
-            str.map(|s| s.to_lowercase().as_bytes().to_vec())
-        } else {
+    pub fn string_to_bytes(str: Option<&str>, case_sensitive: bool) -> Option<Vec<u8>> {
+        if case_sensitive {
             str.map(|s| s.as_bytes().to_vec())
+        } else {
+            str.map(|s| s.to_lowercase().as_bytes().to_vec())
         }
     }
 
@@ -105,23 +113,23 @@ impl NativeFilter {
         property: NativeProperty,
         lower: Option<&str>,
         upper: Option<&str>,
-        case_insensitive: bool,
+        case_sensitive: bool,
     ) -> NativeFilter {
-        let lower = Self::string_to_bytes(lower, case_insensitive);
-        let upper = Self::string_to_bytes(upper, case_insensitive);
+        let lower = Self::string_to_bytes(lower, case_sensitive);
+        let upper = Self::string_to_bytes(upper, case_sensitive);
         let filter = if property.data_type == DataType::String {
             Filter::StringBetween(StringBetweenCond {
                 offset: property.offset,
                 lower,
                 upper,
-                case_insensitive,
+                case_sensitive,
             })
         } else if property.data_type == DataType::StringList {
             Filter::AnyStringBetween(AnyStringBetweenCond {
                 offset: property.offset,
                 lower,
                 upper,
-                case_insensitive,
+                case_sensitive,
             })
         } else {
             panic!("Property does not support this filter.")
@@ -132,28 +140,28 @@ impl NativeFilter {
     pub fn string_ends_with(
         property: NativeProperty,
         value: &str,
-        case_insensitive: bool,
+        case_sensitive: bool,
     ) -> NativeFilter {
-        string_filter_create!(EndsWith, property, value, case_insensitive)
+        string_filter_create!(EndsWith, property, value, case_sensitive)
     }
 
     pub fn string_contains(
         property: NativeProperty,
         value: &str,
-        case_insensitive: bool,
+        case_sensitive: bool,
     ) -> NativeFilter {
-        string_filter_create!(Contains, property, value, case_insensitive)
+        string_filter_create!(Contains, property, value, case_sensitive)
     }
 
     pub fn string_matches(
         property: NativeProperty,
         value: &str,
-        case_insensitive: bool,
+        case_sensitive: bool,
     ) -> NativeFilter {
-        string_filter_create!(Matches, property, value, case_insensitive)
+        string_filter_create!(Matches, property, value, case_sensitive)
     }
 
-    pub fn list_length(property: NativeProperty, lower: usize, upper: usize) -> NativeFilter {
+    pub fn list_length(property: NativeProperty, lower: u32, upper: u32) -> NativeFilter {
         let filter_cond = if property.data_type.is_list() {
             Filter::ListLength(ListLengthCond {
                 offset: property.offset,
@@ -198,6 +206,8 @@ impl NativeFilter {
 #[enum_dispatch]
 #[derive(Clone)]
 enum Filter {
+    IsNull(IsNullCond),
+
     IdBetween(IdBetweenCond),
     ByteBetween(ByteBetweenCond),
     IntBetween(IntBetweenCond),
@@ -235,6 +245,18 @@ trait Condition {
 }
 
 #[derive(Clone)]
+struct IsNullCond {
+    offset: u32,
+    data_type: DataType,
+}
+
+impl Condition for IsNullCond {
+    fn evaluate(&self, _id: i64, object: NativeObject) -> bool {
+        object.is_null(self.offset, self.data_type)
+    }
+}
+
+#[derive(Clone)]
 struct IdBetweenCond {
     lower: i64,
     upper: i64,
@@ -254,7 +276,7 @@ macro_rules! filter_between {
             struct [<$data_type BetweenCond>] {
                 upper: $type,
                 lower: $type,
-                offset: usize,
+                offset: u32,
             }
 
 
@@ -269,7 +291,7 @@ macro_rules! filter_between {
             struct [<Any $data_type BetweenCond>] {
                 upper: $type,
                 lower: $type,
-                offset: usize,
+                offset: u32,
             }
 
 
@@ -277,7 +299,7 @@ macro_rules! filter_between {
                 fn evaluate(&self, _id: i64, object: NativeObject) -> bool {
                     if let Some((list, length)) = object.read_list(self.offset, DataType::$data_type) {
                         for i in 0..length {
-                            let val = list.$prop_accessor(i * DataType::$data_type.static_size());
+                            let val = list.$prop_accessor(i * DataType::$data_type.static_size() as u32);
                             if filter_between!(eval val, self, $data_type) {
                                 return true;
                             }
@@ -312,12 +334,11 @@ fn string_between(
     value: Option<&str>,
     lower: Option<&[u8]>,
     upper: Option<&[u8]>,
-    case_insensitive: bool,
+    case_sensitive: bool,
 ) -> bool {
     if let Some(obj_str) = value {
         let mut matches = true;
-        if case_insensitive {
-            let obj_str = obj_str.to_lowercase();
+        if case_sensitive {
             if let Some(lower) = lower {
                 matches = lower <= obj_str.as_bytes();
             }
@@ -327,6 +348,7 @@ fn string_between(
                 false
             };
         } else {
+            let obj_str = obj_str.to_lowercase();
             if let Some(lower) = lower {
                 matches = lower <= obj_str.as_bytes();
             }
@@ -346,8 +368,8 @@ fn string_between(
 struct StringBetweenCond {
     upper: Option<Vec<u8>>,
     lower: Option<Vec<u8>>,
-    offset: usize,
-    case_insensitive: bool,
+    offset: u32,
+    case_sensitive: bool,
 }
 
 impl Condition for StringBetweenCond {
@@ -357,7 +379,7 @@ impl Condition for StringBetweenCond {
             value,
             self.lower.as_deref(),
             self.upper.as_deref(),
-            self.case_insensitive,
+            self.case_sensitive,
         )
     }
 }
@@ -366,20 +388,20 @@ impl Condition for StringBetweenCond {
 struct AnyStringBetweenCond {
     upper: Option<Vec<u8>>,
     lower: Option<Vec<u8>>,
-    offset: usize,
-    case_insensitive: bool,
+    offset: u32,
+    case_sensitive: bool,
 }
 
 impl Condition for AnyStringBetweenCond {
     fn evaluate(&self, _id: i64, object: NativeObject) -> bool {
         if let Some((list, length)) = object.read_list(self.offset, DataType::String) {
             for i in 0..length {
-                let value = list.read_string(i * DataType::String.static_size());
+                let value = list.read_string(i * DataType::String.static_size() as u32);
                 let result = string_between(
                     value,
                     self.lower.as_deref(),
                     self.upper.as_deref(),
-                    self.case_insensitive,
+                    self.case_sensitive,
                 );
                 if result {
                     return true;
@@ -396,9 +418,9 @@ macro_rules! string_filter_struct {
         paste! {
             #[derive(Clone)]
             struct [<$name Cond>] {
-                offset: usize,
+                offset: u32,
                 value: String,
-                case_insensitive: bool,
+                case_sensitive: bool,
             }
         }
     };
@@ -421,7 +443,7 @@ macro_rules! string_filter {
                 fn evaluate(&self, _id: i64, object: NativeObject) -> bool {
                     if let Some((list, length)) = object.read_list(self.offset, DataType::String) {
                         for i in 0..length {
-                            let value = list.read_string(i * DataType::String.static_size());
+                            let value = list.read_string(i * DataType::String.static_size() as u32);
                             if string_filter!(eval $name, self, value) {
                                 return true;
                             }
@@ -435,12 +457,12 @@ macro_rules! string_filter {
 
     (eval $name:tt, $filter:expr, $value:expr) => {
         if let Some(other_str) = $value {
-            if $filter.case_insensitive {
+            if $filter.case_sensitive {
+                string_filter!($name & $filter.value, other_str)
+            } else {
                 let lowercase_string = other_str.to_lowercase();
                 let lowercase_str = &lowercase_string;
                 string_filter!($name & $filter.value, lowercase_str)
-            } else {
-                string_filter!($name & $filter.value, other_str)
             }
         } else {
             false
@@ -466,9 +488,9 @@ string_filter!(StringMatches);
 
 #[derive(Clone)]
 struct ListLengthCond {
-    offset: usize,
-    lower: usize,
-    upper: usize,
+    offset: u32,
+    lower: u32,
+    upper: u32,
 }
 
 impl Condition for ListLengthCond {

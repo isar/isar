@@ -33,9 +33,6 @@ class QueryBuilderInternal<OBJ> {
   /// @nodoc
   const QueryBuilderInternal({
     this.collection,
-    this.whereClauses = const [],
-    this.whereDistinct = false,
-    this.whereSort = Sort.asc,
     this.filter = const FilterGroup.and([]),
     this.filterGroupType = FilterGroupType.and,
     this.filterNot = false,
@@ -48,15 +45,6 @@ class QueryBuilderInternal<OBJ> {
 
   /// @nodoc
   final IsarCollection<OBJ>? collection;
-
-  /// @nodoc
-  final List<WhereClause> whereClauses;
-
-  /// @nodoc
-  final bool whereDistinct;
-
-  /// @nodoc
-  final Sort whereSort;
 
   /// @nodoc
   final FilterGroup filter;
@@ -83,7 +71,7 @@ class QueryBuilderInternal<OBJ> {
   final String? propertyName;
 
   /// @nodoc
-  QueryBuilderInternal<OBJ> addFilterCondition(FilterOperation cond) {
+  QueryBuilderInternal<OBJ> addFilterCondition(Filter cond) {
     if (filterNot) {
       cond = FilterGroup.not(cond);
     }
@@ -118,11 +106,6 @@ class QueryBuilderInternal<OBJ> {
       filterGroupType: FilterGroupType.and,
       filterNot: false,
     );
-  }
-
-  /// @nodoc
-  QueryBuilderInternal<OBJ> addWhereClause(WhereClause where) {
-    return copyWith(whereClauses: [...whereClauses, where]);
   }
 
   /// @nodoc
@@ -171,44 +154,7 @@ class QueryBuilderInternal<OBJ> {
     );
   }
 
-  /// @nodoc
-  QueryBuilderInternal<OBJ> link<E>(
-    FilterQuery<E> q,
-    String linkName,
-  ) {
-    // ignore: prefer_const_constructors
-    final qb = q(QueryBuilder(QueryBuilderInternal()));
-    return addFilterCondition(
-      LinkFilter(filter: qb._query.filter, linkName: linkName),
-    );
-  }
-
-  /// @nodoc
-  QueryBuilderInternal<OBJ> linkLength<E>(
-    String linkName,
-    int lower,
-    bool includeLower,
-    int upper,
-    bool includeUpper,
-  ) {
-    if (!includeLower) {
-      lower += 1;
-    }
-    if (!includeUpper) {
-      if (upper == 0) {
-        lower = 1;
-      } else {
-        upper -= 1;
-      }
-    }
-    return addFilterCondition(
-      LinkFilter.length(
-        lower: lower,
-        upper: upper,
-        linkName: linkName,
-      ),
-    );
-  }
+  ///
 
   /// @nodoc
   QueryBuilderInternal<OBJ> addSortBy(String propertyName, Sort sort) {
@@ -243,7 +189,6 @@ class QueryBuilderInternal<OBJ> {
 
   /// @nodoc
   QueryBuilderInternal<OBJ> copyWith({
-    List<WhereClause>? whereClauses,
     FilterGroup? filter,
     bool? filterIsGrouped,
     FilterGroupType? filterGroupType,
@@ -259,9 +204,6 @@ class QueryBuilderInternal<OBJ> {
     assert(limit == null || limit >= 0, 'Invalid limit');
     return QueryBuilderInternal(
       collection: collection,
-      whereClauses: whereClauses ?? List.unmodifiable(this.whereClauses),
-      whereDistinct: whereDistinct,
-      whereSort: whereSort,
       filter: filter ?? this.filter,
       filterGroupType: filterGroupType ?? this.filterGroupType,
       filterNot: filterNot ?? this.filterNot,
@@ -279,9 +221,6 @@ class QueryBuilderInternal<OBJ> {
   @protected
   Query<R> build<R>() {
     return collection!.buildQuery(
-      whereDistinct: whereDistinct,
-      whereSort: whereSort,
-      whereClauses: whereClauses,
       filter: filter,
       sortBy: sortByProperties,
       distinctBy: distinctByProperties,
@@ -296,46 +235,7 @@ class QueryBuilderInternal<OBJ> {
 ///
 /// Right after query starts
 @protected
-class QWhere
-    implements
-        QWhereClause,
-        QFilter,
-        QSortBy,
-        QDistinct,
-        QOffset,
-        QLimit,
-        QQueryProperty {}
-
-/// @nodoc
-///
-/// No more where conditions are allowed
-@protected
-class QAfterWhere
-    implements QFilter, QSortBy, QDistinct, QOffset, QLimit, QQueryProperty {}
-
-/// @nodoc
-@protected
-class QWhereClause {}
-
-/// @nodoc
-@protected
-class QAfterWhereClause
-    implements
-        QWhereOr,
-        QFilter,
-        QSortBy,
-        QDistinct,
-        QOffset,
-        QLimit,
-        QQueryProperty {}
-
-/// @nodoc
-@protected
-class QWhereOr {}
-
-/// @nodoc
-@protected
-class QFilter {}
+class QFilter implements QSortBy, QDistinct, QOffset, QLimit, QQueryProperty {}
 
 /// @nodoc
 @protected

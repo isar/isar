@@ -12,8 +12,8 @@ pub(crate) struct UnsortedDistinctQueryIterator<'txn> {
     filter: NativeFilter,
     properties: Vec<(NativeProperty, bool)>,
     hashes: IntMap<()>,
-    skip: usize,
-    take: usize,
+    skip: u32,
+    take: u32,
 }
 
 impl<'txn> UnsortedDistinctQueryIterator<'txn> {
@@ -21,8 +21,8 @@ impl<'txn> UnsortedDistinctQueryIterator<'txn> {
         collection_iterators: Vec<CollectionIterator<'txn>>,
         filter: NativeFilter,
         properties: Vec<(NativeProperty, bool)>,
-        offset: usize,
-        limit: usize,
+        offset: u32,
+        limit: u32,
     ) -> UnsortedDistinctQueryIterator<'txn> {
         UnsortedDistinctQueryIterator {
             collection_iterators: collection_iterators.into_iter().flatten(),
@@ -45,11 +45,11 @@ impl<'txn> Iterator for UnsortedDistinctQueryIterator<'txn> {
                 let hash = self
                     .properties
                     .iter()
-                    .fold(0, |hash, (property, case_insensitive)| {
+                    .fold(0, |hash, (property, case_sensitive)| {
                         object.hash_property(
                             property.offset,
                             property.data_type,
-                            *case_insensitive,
+                            *case_sensitive,
                             hash,
                         )
                     });
