@@ -4,6 +4,10 @@ use super::Filter;
 
 impl FilterCondition {
     pub(crate) fn try_merge_and(&self, other: &Self) -> Option<Self> {
+        if self == other {
+            return Some(self.clone());
+        }
+
         let merged = match (self.get_condition_type(), other.get_condition_type()) {
             (ConditionType::True, _) => other.clone(),
             (_, ConditionType::True) => self.clone(),
@@ -34,6 +38,10 @@ impl FilterCondition {
     }
 
     pub(crate) fn try_merge_or(&self, other: &Self) -> Option<Self> {
+        if self == other {
+            return Some(self.clone());
+        }
+
         let merged = match (self.get_condition_type(), other.get_condition_type()) {
             (ConditionType::True, _) => Self::new_true(),
             (_, ConditionType::True) => Self::new_true(),

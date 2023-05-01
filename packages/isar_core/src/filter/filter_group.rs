@@ -1,5 +1,6 @@
-use super::Filter;
 use itertools::Itertools;
+
+use super::Filter;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum GroupType {
@@ -136,5 +137,98 @@ impl FilterGroup {
 
         let group = FilterGroup::new(self.group_type, new_filters);
         (Filter::Group(group), has_changed)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::Filter;
+    use super::super::FilterCondition;
+    use super::{FilterGroup, GroupType};
+
+    macro_rules! and {
+        ($($filters:expr),*) => {
+            FilterGroup::new(GroupType::And, vec![$($filters),*])
+        };
+    }
+
+    macro_rules! or {
+        ($($filters:expr),*) => {
+            FilterGroup::new(GroupType::Or, vec![$($filters),*])
+        };
+    }
+
+    macro_rules! not {
+        ($filter:expr) => {
+            FilterGroup::new(GroupTYpe::Not, vec![$filter])
+        };
+    }
+
+    macro_rules! is_null {
+        ($property:expr) => {
+            Filter::Condition(FilterCondition::new_is_null($property))
+        };
+    }
+
+    macro_rules! eq {
+        ($property:expr, $value:expr) => {
+            Filter::Condition(FilterCondition::new_equal_to($property, $value, false))
+        };
+    }
+
+    macro_rules! gt {
+        ($property:expr, $value:expr) => {
+            Filter::Condition(FilterCondition::new_greater_than($property, $value, false))
+        };
+    }
+
+    macro_rules! gte {
+        ($property:expr, $value:expr) => {
+            Filter::Condition(FilterCondition::new_greater_than_equal(
+                $property, $value, false,
+            ))
+        };
+    }
+
+    mod simple_and {
+        use super::*;
+
+        #[test]
+        fn test_get_group_type() {
+            assert_eq!(and!().get_group_type(), GroupType::And);
+        }
+
+        #[test]
+        fn test_get_filters() {
+            assert_eq!(
+                and!(is_null!(0), is_null!(1)).get_filters(),
+                vec![is_null!(0), is_null!(1)]
+            );
+            assert_eq!(and!().get_filters(), vec![]);
+        }
+
+        #[test]
+        fn test_merge_conditions() {
+            /*assert_eq!(and!().merge_conditions(), (and!(), false));
+            assert_eq!(
+                and!(is_null!(0)).merge_conditions(),
+                (and!(is_null!(0)), false)
+            );*/
+            assert_eq!(
+                and!(is_null!(0), is_null!(0)).merge_conditions(),
+                (and!(is_null!(0)), true)
+            );
+            return;
+            assert_eq!(
+                and!(Filter::Group(and!())).merge_conditions(),
+                (and!(Filter::Group(and!())), false)
+            );
+        }
+
+        #[test]
+        fn test_simplify_nested() {}
+
+        #[test]
+        fn test_flatten() {}
     }
 }
