@@ -24,7 +24,7 @@ ndk-context = "0.1.1"
 once_cell = "1.10.0"
 
 [target.'cfg(not(any(target_os = "ios", target_os = "macos", target_os = "android")))'.dependencies]
-dirs = "4.0.0"
+dirs = "5.0.1"
 
 [lib]
 crate-type=["staticlib", "cdylib"]
