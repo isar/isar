@@ -14,7 +14,10 @@ impl FilterValue {
             FilterValue::Bool(value) => *value == Some(true),
             FilterValue::Integer(value) => *value == i64::MAX,
             FilterValue::Real(value) => value.is_infinite() && value.is_sign_positive(),
-            FilterValue::String(_) => false,
+            FilterValue::String(maybe_value) => match maybe_value {
+                Some(value) => value == "\u{10ffff}",
+                None => false,
+            },
         }
     }
 
@@ -574,6 +577,7 @@ mod tests {
             assert!(!string!(Some("Z".to_string())).is_max());
             assert!(!string!(Some("ZZZZZZZZZZZZZ".to_string())).is_max());
             assert!(!string!(Some(LOREM.to_string())).is_max());
+            assert!(string!(Some("\u{10ffff}".to_string())).is_max());
         }
 
         #[test]
@@ -598,6 +602,7 @@ mod tests {
             assert_eq!(string!(Some("Z".to_string())).get_max(), max);
             assert_eq!(string!(Some("ZZZZZZZZZZZZZ".to_string())).get_max(), max);
             assert_eq!(string!(Some(LOREM.to_string())).get_max(), max);
+            assert_eq!(string!(Some("\u{10ffff}".to_string())).get_max(), max);
         }
 
         #[test]
@@ -620,6 +625,7 @@ mod tests {
             assert!(!string!(Some("Z".to_string())).is_null());
             assert!(!string!(Some("ZZZZZZZZZZZZZ".to_string())).is_null());
             assert!(!string!(Some(LOREM.to_string())).is_null());
+            assert!(!string!(Some("\u{10ffff}".to_string())).is_null());
         }
 
         #[test]
@@ -644,6 +650,7 @@ mod tests {
             assert_eq!(string!(Some("Z".to_string())).get_null(), null);
             assert_eq!(string!(Some("ZZZZZZZZZZZZZ".to_string())).get_null(), null);
             assert_eq!(string!(Some(LOREM.to_string())).get_null(), null);
+            assert_eq!(string!(Some("\u{10ffff}".to_string())).get_null(), null);
         }
 
         #[test]
@@ -721,6 +728,10 @@ mod tests {
                     char::from_u32(LOREM.chars().last().unwrap_or('\0') as u32 + 1).unwrap()
                 ))))
             );
+            assert_eq!(
+                string!(Some("\u{10ffff}".to_string())).try_increment(),
+                None,
+            );
         }
 
         #[test]
@@ -794,6 +805,10 @@ mod tests {
                     char::from_u32(LOREM.chars().last().unwrap_or('\0') as u32 - 1).unwrap()
                 ))))
             );
+            assert_eq!(
+                string!(Some("\u{10ffff}".to_string())).try_decrement(),
+                Some(string!(Some("\u{10fffe}".to_string())))
+            );
         }
 
         #[test]
@@ -817,6 +832,7 @@ mod tests {
                 Some("Z".to_string()),
                 Some("ZZZZZZZZZZZZZ".to_string()),
                 Some(LOREM.to_string()),
+                Some("\u{10ffff}".to_string()),
             ];
 
             for left in &values {
