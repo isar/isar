@@ -1,5 +1,6 @@
-use super::filter_value::FilterValue;
 use std::cmp::Ordering;
+
+use super::filter_value::FilterValue;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum ConditionType {
@@ -42,37 +43,37 @@ impl FilterCondition {
     pub fn new_greater_than(property: u16, value: FilterValue, case_sensitive: bool) -> Self {
         if let Some(value) = value.try_increment() {
             let max = value.get_max();
-            return FilterCondition {
+            FilterCondition {
                 property,
                 condition_type: ConditionType::Between,
                 values: vec![value, max],
                 case_sensitive,
-            };
+            }
         } else {
-            return Self::new_true();
+            Self::new_true()
         }
     }
 
     pub fn new_greater_than_equal(property: u16, value: FilterValue, case_sensitive: bool) -> Self {
         let max = value.get_max();
-        return FilterCondition {
+        FilterCondition {
             property,
             condition_type: ConditionType::Between,
             values: vec![value, max],
             case_sensitive,
-        };
+        }
     }
 
     pub fn new_less_than(property: u16, value: FilterValue, case_sensitive: bool) -> Self {
         if let Some(value) = value.try_decrement() {
-            return FilterCondition {
+            FilterCondition {
                 property,
                 condition_type: ConditionType::Between,
                 values: vec![value.get_null(), value],
                 case_sensitive,
-            };
+            }
         } else {
-            return Self::new_true();
+            Self::new_true()
         }
     }
 
