@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, vec};
+use std::cmp::Ordering;
 
 use super::filter_value::FilterValue;
 
