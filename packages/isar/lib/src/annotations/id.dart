@@ -1,11 +1,14 @@
 part of isar;
 
-/// Annotate a property or accessor in an Isar collection to ignore it.
+/// Annotate the property or accessor in an Isar collection that should be used
+/// as the primary key.
 const id = Id();
 
-/// Annotate a property or accessor in an Isar collection to ignore it.
+/// Annotate the property or accessor in an Isar collection that should be used
+/// as the primary key.
 @Target({TargetKind.field, TargetKind.getter})
 class Id {
-  /// Annotate a property or accessor in an Isar collection to ignore it.
+  /// Annotate the property or accessor in an Isar collection that should be used
+  /// as the primary key.
   const Id();
 }

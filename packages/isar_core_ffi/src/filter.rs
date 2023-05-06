@@ -5,8 +5,6 @@ use isar_core::filter::filter_value::FilterValue;
 use isar_core::filter::Filter;
 use itertools::Itertools;
 
-use crate::from_utf16;
-
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_value_bool(value: bool, null: bool) -> *const FilterValue {
     let filter = if null {
@@ -28,11 +26,13 @@ pub unsafe extern "C" fn isar_filter_value_real(value: f64) -> *const FilterValu
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_filter_value_string(
-    value: *const u16,
-    length: u32,
-) -> *const FilterValue {
-    let filter_value = FilterValue::String(from_utf16(value, length));
+pub unsafe extern "C" fn isar_filter_value_string(value: *mut String) -> *const FilterValue {
+    let value = if value.is_null() {
+        None
+    } else {
+        Some(*Box::from_raw(value))
+    };
+    let filter_value = FilterValue::String(value);
     Box::into_raw(Box::new(filter_value))
 }
 

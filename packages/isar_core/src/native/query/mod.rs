@@ -26,8 +26,6 @@ pub struct Query {
     pub(self) filter: NativeFilter,
     pub(self) sort: Vec<(NativeProperty, Sort)>,
     pub(self) distinct: Vec<(NativeProperty, bool)>,
-    pub(self) offset: u32,
-    pub(self) limit: u32,
 }
 
 impl Query {
@@ -38,8 +36,6 @@ impl Query {
         filter: NativeFilter,
         sort: Vec<(NativeProperty, Sort)>,
         distinct: Vec<(NativeProperty, bool)>,
-        offset: u32,
-        limit: u32,
     ) -> Self {
         Self {
             instance_id,
@@ -48,8 +44,6 @@ impl Query {
             filter,
             sort,
             distinct,
-            offset,
-            limit,
         }
     }
 
@@ -57,9 +51,18 @@ impl Query {
         &'a self,
         txn: &'a NativeTxn,
         all_collections: &'a [NativeCollection],
+        offset: Option<u32>,
+        limit: Option<u32>,
     ) -> Result<QueryCursor<'a>> {
         let collection = &all_collections[self.collection_index];
-        let iterator = QueryIterator::new(txn, collection, self, false)?;
+        let iterator = QueryIterator::new(
+            txn,
+            collection,
+            self,
+            false,
+            offset.unwrap_or(0),
+            limit.unwrap_or(u32::MAX),
+        )?;
         Ok(QueryCursor::new(iterator, collection, all_collections))
     }
 
@@ -69,7 +72,7 @@ impl Query {
         all_collections: &[NativeCollection],
     ) -> Result<u32> {
         let collection = &all_collections[self.collection_index];
-        let iterator = QueryIterator::new(txn, collection, self, true)?;
+        let iterator = QueryIterator::new(txn, collection, self, true, 0, u32::MAX)?;
         Ok(iterator.count() as u32)
     }
 

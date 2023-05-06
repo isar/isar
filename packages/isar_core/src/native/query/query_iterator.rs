@@ -19,6 +19,8 @@ impl<'a> QueryIterator<'a> {
         collection: &NativeCollection,
         query: &Query,
         ignore_sort: bool,
+        offset: u32,
+        limit: u32,
     ) -> Result<Self> {
         let collection_iterators = query
             .indexes
@@ -32,8 +34,8 @@ impl<'a> QueryIterator<'a> {
                 collection_iterators,
                 query.filter.clone(),
                 query.distinct.clone(),
-                query.offset,
-                query.limit,
+                offset,
+                limit,
             ));
             Ok(iterator)
         } else {
@@ -41,8 +43,8 @@ impl<'a> QueryIterator<'a> {
                 collection_iterators,
                 false,
                 query.filter.clone(),
-                query.offset,
-                query.limit,
+                offset,
+                limit,
             ));
             Ok(iterator)
         }

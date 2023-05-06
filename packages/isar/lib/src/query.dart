@@ -5,8 +5,7 @@ abstract class Query<T> {
 
   List<T> findAll();
 
-  @protected
-  R? aggregate<R>(AggregationOp op);
+  bool deleteFirst();
 
   int deleteAll();
 }

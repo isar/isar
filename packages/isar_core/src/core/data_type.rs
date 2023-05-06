@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Copy, Hash, Debug)]
 pub enum DataType {
-    #[serde(alias = "Bool")]
+    Bool,
     Byte,
     Int,
     Float,
@@ -12,7 +12,7 @@ pub enum DataType {
     String,
     Object,
     Json,
-    #[serde(alias = "BoolList")]
+    BoolList,
     ByteList,
     IntList,
     FloatList,
@@ -26,7 +26,8 @@ pub enum DataType {
 impl DataType {
     pub fn is_list(&self) -> bool {
         match self {
-            DataType::ByteList
+            DataType::BoolList
+            | DataType::ByteList
             | DataType::IntList
             | DataType::FloatList
             | DataType::LongList

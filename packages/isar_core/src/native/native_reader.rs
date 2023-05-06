@@ -1,5 +1,6 @@
 use super::native_collection::{NativeCollection, NativeProperty};
 use super::native_object::NativeObject;
+use super::NULL_LONG;
 use crate::core::data_type::DataType;
 use crate::core::reader::IsarReader;
 use serde_json::Value;
@@ -42,14 +43,14 @@ impl<'a> IsarReader for NativeReader<'a> {
         self.object.is_null(property.offset, property.data_type)
     }
 
-    fn read_byte(&self, index: u32) -> u8 {
-        let property = &self.collection.properties[index as usize];
-        self.object.read_byte(property.offset)
-    }
-
     fn read_bool(&self, index: u32) -> Option<bool> {
         let property = &self.collection.properties[index as usize];
         self.object.read_bool(property.offset)
+    }
+
+    fn read_byte(&self, index: u32) -> u8 {
+        let property = &self.collection.properties[index as usize];
+        self.object.read_byte(property.offset)
     }
 
     fn read_int(&self, index: u32) -> i32 {
@@ -128,7 +129,7 @@ impl<'a> IsarReader for NativeListReader<'a> {
     type ListReader<'b> = NativeListReader<'b> where 'a: 'b;
 
     fn read_id(&self) -> i64 {
-        panic!("Cannot read id from list")
+        NULL_LONG
     }
 
     fn is_null(&self, index: u32) -> bool {
@@ -174,7 +175,7 @@ impl<'a> IsarReader for NativeListReader<'a> {
     }
 
     fn read_blob(&self, _index: u32) -> Option<Cow<'_, [u8]>> {
-        panic!("Nested lists are not supported")
+        None // nested lists are not supported
     }
 
     fn read_json(&self, index: u32) -> Option<Cow<'a, Value>> {
@@ -197,6 +198,6 @@ impl<'a> IsarReader for NativeListReader<'a> {
     }
 
     fn read_list(&self, _index: u32) -> Option<(Self::ListReader<'_>, u32)> {
-        panic!("Nested lists are not supported")
+        None // nested lists are not supported
     }
 }

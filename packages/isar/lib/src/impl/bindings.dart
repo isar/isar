@@ -21,19 +21,56 @@ class IsarCoreBindings {
           lookup)
       : _lookup = lookup;
 
-  ffi.Pointer<ffi.Char> isar_get_error(
-    int err_code,
+  ffi.Pointer<CString> isar_string(
+    ffi.Pointer<ffi.Uint16> chars,
+    int length,
   ) {
-    return _isar_get_error(
-      err_code,
+    return _isar_string(
+      chars,
+      length,
     );
   }
 
-  late final _isar_get_errorPtr =
-      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function(ffi.Uint8)>>(
-          'isar_get_error');
-  late final _isar_get_error =
-      _isar_get_errorPtr.asFunction<ffi.Pointer<ffi.Char> Function(int)>();
+  late final _isar_stringPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<CString> Function(
+              ffi.Pointer<ffi.Uint16>, ffi.Uint32)>>('isar_string');
+  late final _isar_string = _isar_stringPtr.asFunction<
+      ffi.Pointer<CString> Function(ffi.Pointer<ffi.Uint16>, int)>();
+
+  void isar_free_string(
+    ffi.Pointer<ffi.Uint16> value,
+    int length,
+  ) {
+    return _isar_free_string(
+      value,
+      length,
+    );
+  }
+
+  late final _isar_free_stringPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Pointer<ffi.Uint16>, ffi.Uint32)>>('isar_free_string');
+  late final _isar_free_string = _isar_free_stringPtr
+      .asFunction<void Function(ffi.Pointer<ffi.Uint16>, int)>();
+
+  int isar_get_error(
+    int err_code,
+    ffi.Pointer<ffi.Pointer<ffi.Uint16>> value,
+  ) {
+    return _isar_get_error(
+      err_code,
+      value,
+    );
+  }
+
+  late final _isar_get_errorPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Uint32 Function(ffi.Uint8,
+              ffi.Pointer<ffi.Pointer<ffi.Uint16>>)>>('isar_get_error');
+  late final _isar_get_error = _isar_get_errorPtr
+      .asFunction<int Function(int, ffi.Pointer<ffi.Pointer<ffi.Uint16>>)>();
 
   ffi.Pointer<CIsarReader> isar_cursor_next(
     ffi.Pointer<CIsarCursor> cursor,
@@ -55,17 +92,20 @@ class IsarCoreBindings {
 
   void isar_cursor_free(
     ffi.Pointer<CIsarCursor> cursor,
+    ffi.Pointer<CIsarReader> old_reader,
   ) {
     return _isar_cursor_free(
       cursor,
+      old_reader,
     );
   }
 
-  late final _isar_cursor_freePtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<CIsarCursor>)>>(
-          'isar_cursor_free');
-  late final _isar_cursor_free = _isar_cursor_freePtr
-      .asFunction<void Function(ffi.Pointer<CIsarCursor>)>();
+  late final _isar_cursor_freePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Pointer<CIsarCursor>,
+              ffi.Pointer<CIsarReader>)>>('isar_cursor_free');
+  late final _isar_cursor_free = _isar_cursor_freePtr.asFunction<
+      void Function(ffi.Pointer<CIsarCursor>, ffi.Pointer<CIsarReader>)>();
 
   ffi.Pointer<CFilterValue> isar_filter_value_bool(
     bool value,
@@ -113,22 +153,19 @@ class IsarCoreBindings {
       .asFunction<ffi.Pointer<CFilterValue> Function(double)>();
 
   ffi.Pointer<CFilterValue> isar_filter_value_string(
-    ffi.Pointer<ffi.Uint16> value,
-    int length,
+    ffi.Pointer<CString> value,
   ) {
     return _isar_filter_value_string(
       value,
-      length,
     );
   }
 
   late final _isar_filter_value_stringPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Pointer<CFilterValue> Function(ffi.Pointer<ffi.Uint16>,
-              ffi.Uint32)>>('isar_filter_value_string');
-  late final _isar_filter_value_string =
-      _isar_filter_value_stringPtr.asFunction<
-          ffi.Pointer<CFilterValue> Function(ffi.Pointer<ffi.Uint16>, int)>();
+          ffi.Pointer<CFilterValue> Function(
+              ffi.Pointer<CString>)>>('isar_filter_value_string');
+  late final _isar_filter_value_string = _isar_filter_value_stringPtr
+      .asFunction<ffi.Pointer<CFilterValue> Function(ffi.Pointer<CString>)>();
 
   ffi.Pointer<CFilter> isar_filter_is_null(
     int property,
@@ -390,22 +427,22 @@ class IsarCoreBindings {
       .asFunction<int Function(ffi.Pointer<ffi.Pointer<CIsarInsert>>, int)>();
 
   int isar_insert_finish(
-    ffi.Pointer<ffi.Pointer<CIsarTxn>> txn,
     ffi.Pointer<CIsarInsert> insert,
+    ffi.Pointer<ffi.Pointer<CIsarTxn>> txn,
   ) {
     return _isar_insert_finish(
-      txn,
       insert,
+      txn,
     );
   }
 
   late final _isar_insert_finishPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Uint8 Function(ffi.Pointer<ffi.Pointer<CIsarTxn>>,
-              ffi.Pointer<CIsarInsert>)>>('isar_insert_finish');
+          ffi.Uint8 Function(ffi.Pointer<CIsarInsert>,
+              ffi.Pointer<ffi.Pointer<CIsarTxn>>)>>('isar_insert_finish');
   late final _isar_insert_finish = _isar_insert_finishPtr.asFunction<
       int Function(
-          ffi.Pointer<ffi.Pointer<CIsarTxn>>, ffi.Pointer<CIsarInsert>)>();
+          ffi.Pointer<CIsarInsert>, ffi.Pointer<ffi.Pointer<CIsarTxn>>)>();
 
   ffi.Pointer<ffi.Char> isar_version() {
     return _isar_version();
@@ -431,19 +468,19 @@ class IsarCoreBindings {
   late final _isar_get =
       _isar_getPtr.asFunction<ffi.Pointer<CIsarInstance> Function(int)>();
 
-  int isar_create(
+  int isar_open(
     ffi.Pointer<ffi.Pointer<CIsarInstance>> isar,
     int instance_id,
-    ffi.Pointer<ffi.Char> name,
-    ffi.Pointer<ffi.Char> path,
-    ffi.Pointer<ffi.Char> schema_json,
+    ffi.Pointer<CString> name,
+    ffi.Pointer<CString> path,
+    ffi.Pointer<CString> schema_json,
     int max_size_mib,
     bool relaxed_durability,
     int compact_min_file_size,
     int compact_min_bytes,
     double compact_min_ratio,
   ) {
-    return _isar_create(
+    return _isar_open(
       isar,
       instance_id,
       name,
@@ -457,26 +494,26 @@ class IsarCoreBindings {
     );
   }
 
-  late final _isar_createPtr = _lookup<
+  late final _isar_openPtr = _lookup<
       ffi.NativeFunction<
           ffi.Uint8 Function(
               ffi.Pointer<ffi.Pointer<CIsarInstance>>,
               ffi.Uint32,
-              ffi.Pointer<ffi.Char>,
-              ffi.Pointer<ffi.Char>,
-              ffi.Pointer<ffi.Char>,
+              ffi.Pointer<CString>,
+              ffi.Pointer<CString>,
+              ffi.Pointer<CString>,
               ffi.Uint32,
               ffi.Bool,
               ffi.Uint32,
               ffi.Uint32,
-              ffi.Float)>>('isar_create');
-  late final _isar_create = _isar_createPtr.asFunction<
+              ffi.Float)>>('isar_open');
+  late final _isar_open = _isar_openPtr.asFunction<
       int Function(
           ffi.Pointer<ffi.Pointer<CIsarInstance>>,
           int,
-          ffi.Pointer<ffi.Char>,
-          ffi.Pointer<ffi.Char>,
-          ffi.Pointer<ffi.Char>,
+          ffi.Pointer<CString>,
+          ffi.Pointer<CString>,
+          ffi.Pointer<CString>,
           int,
           bool,
           int,
@@ -540,16 +577,16 @@ class IsarCoreBindings {
   int isar_insert(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
-    ffi.Pointer<ffi.Pointer<CIsarInsert>> insert,
     int collection_index,
     int count,
+    ffi.Pointer<ffi.Pointer<CIsarInsert>> insert,
   ) {
     return _isar_insert(
       isar,
       txn,
-      insert,
       collection_index,
       count,
+      insert,
     );
   }
 
@@ -558,84 +595,191 @@ class IsarCoreBindings {
           ffi.Uint8 Function(
               ffi.Pointer<CIsarInstance>,
               ffi.Pointer<CIsarTxn>,
-              ffi.Pointer<ffi.Pointer<CIsarInsert>>,
               ffi.Uint16,
-              ffi.Uint32)>>('isar_insert');
+              ffi.Uint32,
+              ffi.Pointer<ffi.Pointer<CIsarInsert>>)>>('isar_insert');
   late final _isar_insert = _isar_insertPtr.asFunction<
-      int Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>,
-          ffi.Pointer<ffi.Pointer<CIsarInsert>>, int, int)>();
+      int Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>, int, int,
+          ffi.Pointer<ffi.Pointer<CIsarInsert>>)>();
 
-  int isar_build_query(
+  int isar_count(
     ffi.Pointer<CIsarInstance> isar,
-    ffi.Pointer<ffi.Pointer<CIsarQueryBuilder>> query_builder,
+    ffi.Pointer<CIsarTxn> txn,
     int collection_index,
-  ) {
-    return _isar_build_query(
-      isar,
-      query_builder,
-      collection_index,
-    );
-  }
-
-  late final _isar_build_queryPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Uint8 Function(
-              ffi.Pointer<CIsarInstance>,
-              ffi.Pointer<ffi.Pointer<CIsarQueryBuilder>>,
-              ffi.Uint16)>>('isar_build_query');
-  late final _isar_build_query = _isar_build_queryPtr.asFunction<
-      int Function(ffi.Pointer<CIsarInstance>,
-          ffi.Pointer<ffi.Pointer<CIsarQueryBuilder>>, int)>();
-
-  int isar_query(
-    ffi.Pointer<CIsarInstance> isar,
-    ffi.Pointer<CIsarTxn> txn,
-    ffi.Pointer<CIsarQuery> query,
-    ffi.Pointer<ffi.Pointer<CIsarCursor>> cursor,
-  ) {
-    return _isar_query(
-      isar,
-      txn,
-      query,
-      cursor,
-    );
-  }
-
-  late final _isar_queryPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Uint8 Function(
-              ffi.Pointer<CIsarInstance>,
-              ffi.Pointer<CIsarTxn>,
-              ffi.Pointer<CIsarQuery>,
-              ffi.Pointer<ffi.Pointer<CIsarCursor>>)>>('isar_query');
-  late final _isar_query = _isar_queryPtr.asFunction<
-      int Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>,
-          ffi.Pointer<CIsarQuery>, ffi.Pointer<ffi.Pointer<CIsarCursor>>)>();
-
-  int isar_query_count(
-    ffi.Pointer<CIsarInstance> isar,
-    ffi.Pointer<CIsarTxn> txn,
-    ffi.Pointer<CIsarQuery> query,
     ffi.Pointer<ffi.Uint32> count,
   ) {
-    return _isar_query_count(
+    return _isar_count(
       isar,
       txn,
-      query,
+      collection_index,
       count,
     );
   }
 
-  late final _isar_query_countPtr = _lookup<
+  late final _isar_countPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>,
+              ffi.Uint16, ffi.Pointer<ffi.Uint32>)>>('isar_count');
+  late final _isar_count = _isar_countPtr.asFunction<
+      int Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>, int,
+          ffi.Pointer<ffi.Uint32>)>();
+
+  int isar_query_new(
+    ffi.Pointer<CIsarInstance> isar,
+    int collection_index,
+    ffi.Pointer<ffi.Pointer<CIsarQueryBuilder>> query_builder,
+  ) {
+    return _isar_query_new(
+      isar,
+      collection_index,
+      query_builder,
+    );
+  }
+
+  late final _isar_query_newPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Uint16,
+              ffi.Pointer<ffi.Pointer<CIsarQueryBuilder>>)>>('isar_query_new');
+  late final _isar_query_new = _isar_query_newPtr.asFunction<
+      int Function(ffi.Pointer<CIsarInstance>, int,
+          ffi.Pointer<ffi.Pointer<CIsarQueryBuilder>>)>();
+
+  int isar_query_new_id(
+    ffi.Pointer<CIsarInstance> isar,
+    int collection_index,
+    int id,
+    ffi.Pointer<ffi.Pointer<CIsarQuery>> query,
+  ) {
+    return _isar_query_new_id(
+      isar,
+      collection_index,
+      id,
+      query,
+    );
+  }
+
+  late final _isar_query_new_idPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Uint16, ffi.Int64,
+              ffi.Pointer<ffi.Pointer<CIsarQuery>>)>>('isar_query_new_id');
+  late final _isar_query_new_id = _isar_query_new_idPtr.asFunction<
+      int Function(ffi.Pointer<CIsarInstance>, int, int,
+          ffi.Pointer<ffi.Pointer<CIsarQuery>>)>();
+
+  int isar_query_new_ids(
+    ffi.Pointer<CIsarInstance> isar,
+    int collection_index,
+    ffi.Pointer<ffi.Int64> ids,
+    int length,
+    ffi.Pointer<ffi.Pointer<CIsarQuery>> query,
+  ) {
+    return _isar_query_new_ids(
+      isar,
+      collection_index,
+      ids,
+      length,
+      query,
+    );
+  }
+
+  late final _isar_query_new_idsPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Uint8 Function(
+              ffi.Pointer<CIsarInstance>,
+              ffi.Uint16,
+              ffi.Pointer<ffi.Int64>,
+              ffi.Uint32,
+              ffi.Pointer<ffi.Pointer<CIsarQuery>>)>>('isar_query_new_ids');
+  late final _isar_query_new_ids = _isar_query_new_idsPtr.asFunction<
+      int Function(ffi.Pointer<CIsarInstance>, int, ffi.Pointer<ffi.Int64>, int,
+          ffi.Pointer<ffi.Pointer<CIsarQuery>>)>();
+
+  void isar_query_set_filter(
+    ffi.Pointer<CIsarQueryBuilder> builder,
+    ffi.Pointer<CFilter> filter,
+  ) {
+    return _isar_query_set_filter(
+      builder,
+      filter,
+    );
+  }
+
+  late final _isar_query_set_filterPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Pointer<CIsarQueryBuilder>,
+              ffi.Pointer<CFilter>)>>('isar_query_set_filter');
+  late final _isar_query_set_filter = _isar_query_set_filterPtr.asFunction<
+      void Function(ffi.Pointer<CIsarQueryBuilder>, ffi.Pointer<CFilter>)>();
+
+  void isar_query_add_sort(
+    ffi.Pointer<CIsarQueryBuilder> builder,
+    int property_index,
+    bool ascending,
+  ) {
+    return _isar_query_add_sort(
+      builder,
+      property_index,
+      ascending,
+    );
+  }
+
+  late final _isar_query_add_sortPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Pointer<CIsarQueryBuilder>, ffi.Uint16,
+              ffi.Bool)>>('isar_query_add_sort');
+  late final _isar_query_add_sort = _isar_query_add_sortPtr
+      .asFunction<void Function(ffi.Pointer<CIsarQueryBuilder>, int, bool)>();
+
+  ffi.Pointer<CIsarQuery> isar_query_build(
+    ffi.Pointer<CIsarQueryBuilder> builder,
+  ) {
+    return _isar_query_build(
+      builder,
+    );
+  }
+
+  late final _isar_query_buildPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<CIsarQuery> Function(
+              ffi.Pointer<CIsarQueryBuilder>)>>('isar_query_build');
+  late final _isar_query_build = _isar_query_buildPtr.asFunction<
+      ffi.Pointer<CIsarQuery> Function(ffi.Pointer<CIsarQueryBuilder>)>();
+
+  int isar_query_cursor(
+    ffi.Pointer<CIsarInstance> isar,
+    ffi.Pointer<CIsarTxn> txn,
+    ffi.Pointer<CIsarQuery> query,
+    ffi.Pointer<ffi.Pointer<CIsarCursor>> cursor,
+    int offset,
+    int limit,
+  ) {
+    return _isar_query_cursor(
+      isar,
+      txn,
+      query,
+      cursor,
+      offset,
+      limit,
+    );
+  }
+
+  late final _isar_query_cursorPtr = _lookup<
       ffi.NativeFunction<
           ffi.Uint8 Function(
               ffi.Pointer<CIsarInstance>,
               ffi.Pointer<CIsarTxn>,
               ffi.Pointer<CIsarQuery>,
-              ffi.Pointer<ffi.Uint32>)>>('isar_query_count');
-  late final _isar_query_count = _isar_query_countPtr.asFunction<
-      int Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>,
-          ffi.Pointer<CIsarQuery>, ffi.Pointer<ffi.Uint32>)>();
+              ffi.Pointer<ffi.Pointer<CIsarCursor>>,
+              ffi.Int64,
+              ffi.Int64)>>('isar_query_cursor');
+  late final _isar_query_cursor = _isar_query_cursorPtr.asFunction<
+      int Function(
+          ffi.Pointer<CIsarInstance>,
+          ffi.Pointer<CIsarTxn>,
+          ffi.Pointer<CIsarQuery>,
+          ffi.Pointer<ffi.Pointer<CIsarCursor>>,
+          int,
+          int)>();
 
   int isar_query_delete(
     ffi.Pointer<CIsarInstance> isar,
@@ -662,93 +806,19 @@ class IsarCoreBindings {
       int Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>,
           ffi.Pointer<CIsarQuery>, ffi.Pointer<ffi.Uint32>)>();
 
-  void isar_query_builder_set_filter(
-    ffi.Pointer<CIsarQueryBuilder> builder,
-    ffi.Pointer<CFilter> filter,
+  void isar_query_free(
+    ffi.Pointer<CIsarQuery> query,
   ) {
-    return _isar_query_builder_set_filter(
-      builder,
-      filter,
+    return _isar_query_free(
+      query,
     );
   }
 
-  late final _isar_query_builder_set_filterPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(ffi.Pointer<CIsarQueryBuilder>,
-              ffi.Pointer<CFilter>)>>('isar_query_builder_set_filter');
-  late final _isar_query_builder_set_filter =
-      _isar_query_builder_set_filterPtr.asFunction<
-          void Function(
-              ffi.Pointer<CIsarQueryBuilder>, ffi.Pointer<CFilter>)>();
-
-  void isar_query_builder_set_offset(
-    ffi.Pointer<CIsarQueryBuilder> builder,
-    int offset,
-  ) {
-    return _isar_query_builder_set_offset(
-      builder,
-      offset,
-    );
-  }
-
-  late final _isar_query_builder_set_offsetPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(ffi.Pointer<CIsarQueryBuilder>,
-              ffi.Uint32)>>('isar_query_builder_set_offset');
-  late final _isar_query_builder_set_offset = _isar_query_builder_set_offsetPtr
-      .asFunction<void Function(ffi.Pointer<CIsarQueryBuilder>, int)>();
-
-  void isar_query_builder_set_limit(
-    ffi.Pointer<CIsarQueryBuilder> builder,
-    int limit,
-  ) {
-    return _isar_query_builder_set_limit(
-      builder,
-      limit,
-    );
-  }
-
-  late final _isar_query_builder_set_limitPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(ffi.Pointer<CIsarQueryBuilder>,
-              ffi.Uint32)>>('isar_query_builder_set_limit');
-  late final _isar_query_builder_set_limit = _isar_query_builder_set_limitPtr
-      .asFunction<void Function(ffi.Pointer<CIsarQueryBuilder>, int)>();
-
-  void isar_query_builder_add_sort(
-    ffi.Pointer<CIsarQueryBuilder> builder,
-    int property_index,
-    bool ascending,
-  ) {
-    return _isar_query_builder_add_sort(
-      builder,
-      property_index,
-      ascending,
-    );
-  }
-
-  late final _isar_query_builder_add_sortPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(ffi.Pointer<CIsarQueryBuilder>, ffi.Uint16,
-              ffi.Bool)>>('isar_query_builder_add_sort');
-  late final _isar_query_builder_add_sort = _isar_query_builder_add_sortPtr
-      .asFunction<void Function(ffi.Pointer<CIsarQueryBuilder>, int, bool)>();
-
-  ffi.Pointer<CIsarQuery> isar_query_builder_build(
-    ffi.Pointer<CIsarQueryBuilder> builder,
-  ) {
-    return _isar_query_builder_build(
-      builder,
-    );
-  }
-
-  late final _isar_query_builder_buildPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Pointer<CIsarQuery> Function(
-              ffi.Pointer<CIsarQueryBuilder>)>>('isar_query_builder_build');
-  late final _isar_query_builder_build =
-      _isar_query_builder_buildPtr.asFunction<
-          ffi.Pointer<CIsarQuery> Function(ffi.Pointer<CIsarQueryBuilder>)>();
+  late final _isar_query_freePtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<CIsarQuery>)>>(
+          'isar_query_free');
+  late final _isar_query_free =
+      _isar_query_freePtr.asFunction<void Function(ffi.Pointer<CIsarQuery>)>();
 
   int isar_read_id(
     ffi.Pointer<CIsarReader> reader,
@@ -763,6 +833,23 @@ class IsarCoreBindings {
           'isar_read_id');
   late final _isar_read_id =
       _isar_read_idPtr.asFunction<int Function(ffi.Pointer<CIsarReader>)>();
+
+  int isar_read_bool(
+    ffi.Pointer<CIsarReader> reader,
+    int index,
+  ) {
+    return _isar_read_bool(
+      reader,
+      index,
+    );
+  }
+
+  late final _isar_read_boolPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Uint8 Function(
+              ffi.Pointer<CIsarReader>, ffi.Uint32)>>('isar_read_bool');
+  late final _isar_read_bool = _isar_read_boolPtr
+      .asFunction<int Function(ffi.Pointer<CIsarReader>, int)>();
 
   int isar_read_byte(
     ffi.Pointer<CIsarReader> reader,
@@ -849,6 +936,26 @@ class IsarCoreBindings {
   late final _isar_read_double = _isar_read_doublePtr
       .asFunction<double Function(ffi.Pointer<CIsarReader>, int)>();
 
+  int isar_read_string(
+    ffi.Pointer<CIsarReader> reader,
+    int index,
+    ffi.Pointer<ffi.Pointer<ffi.Uint16>> value,
+  ) {
+    return _isar_read_string(
+      reader,
+      index,
+      value,
+    );
+  }
+
+  late final _isar_read_stringPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Uint32 Function(ffi.Pointer<CIsarReader>, ffi.Uint32,
+              ffi.Pointer<ffi.Pointer<ffi.Uint16>>)>>('isar_read_string');
+  late final _isar_read_string = _isar_read_stringPtr.asFunction<
+      int Function(ffi.Pointer<CIsarReader>, int,
+          ffi.Pointer<ffi.Pointer<ffi.Uint16>>)>();
+
   ffi.Pointer<CIsarReader> isar_read_object(
     ffi.Pointer<CIsarReader> reader,
     int index,
@@ -899,6 +1006,23 @@ class IsarCoreBindings {
           'isar_write_null');
   late final _isar_write_null =
       _isar_write_nullPtr.asFunction<void Function(ffi.Pointer<CIsarWriter>)>();
+
+  void isar_write_bool(
+    ffi.Pointer<CIsarWriter> writer,
+    bool value,
+  ) {
+    return _isar_write_bool(
+      writer,
+      value,
+    );
+  }
+
+  late final _isar_write_boolPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Pointer<CIsarWriter>, ffi.Bool)>>('isar_write_bool');
+  late final _isar_write_bool = _isar_write_boolPtr
+      .asFunction<void Function(ffi.Pointer<CIsarWriter>, bool)>();
 
   void isar_write_byte(
     ffi.Pointer<CIsarWriter> writer,
@@ -987,22 +1111,20 @@ class IsarCoreBindings {
 
   void isar_write_string(
     ffi.Pointer<CIsarWriter> writer,
-    ffi.Pointer<ffi.Uint16> value,
-    int length,
+    ffi.Pointer<CString> value,
   ) {
     return _isar_write_string(
       writer,
       value,
-      length,
     );
   }
 
   late final _isar_write_stringPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Pointer<ffi.Uint16>,
-              ffi.Uint32)>>('isar_write_string');
+          ffi.Void Function(ffi.Pointer<CIsarWriter>,
+              ffi.Pointer<CString>)>>('isar_write_string');
   late final _isar_write_string = _isar_write_stringPtr.asFunction<
-      void Function(ffi.Pointer<CIsarWriter>, ffi.Pointer<ffi.Uint16>, int)>();
+      void Function(ffi.Pointer<CIsarWriter>, ffi.Pointer<CString>)>();
 
   void isar_write_json(
     ffi.Pointer<CIsarWriter> writer,
@@ -1109,24 +1231,26 @@ class IsarCoreBindings {
       void Function(ffi.Pointer<CIsarWriter>, ffi.Pointer<CIsarWriter>)>();
 }
 
-class CIsarCursor extends ffi.Opaque {}
+final class CIsarCursor extends ffi.Opaque {}
 
-class CIsarInsert extends ffi.Opaque {}
+final class CIsarInsert extends ffi.Opaque {}
 
-class CIsarInstance extends ffi.Opaque {}
+final class CIsarInstance extends ffi.Opaque {}
 
-class CIsarQuery extends ffi.Opaque {}
+final class CIsarQuery extends ffi.Opaque {}
 
-class CIsarQueryBuilder extends ffi.Opaque {}
+final class CIsarQueryBuilder extends ffi.Opaque {}
 
-class CIsarReader extends ffi.Opaque {}
+final class CIsarReader extends ffi.Opaque {}
 
-class CIsarTxn extends ffi.Opaque {}
+final class CIsarTxn extends ffi.Opaque {}
 
-class CIsarWriter extends ffi.Opaque {}
+final class CIsarWriter extends ffi.Opaque {}
 
-class CFilter extends ffi.Opaque {}
+final class CFilter extends ffi.Opaque {}
 
-class CFilterValue extends ffi.Opaque {}
+final class CFilterValue extends ffi.Opaque {}
+
+final class CString extends ffi.Opaque {}
 
 const int NativeIndex_MAX_STRING_INDEX_SIZE = 1024;

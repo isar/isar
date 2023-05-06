@@ -10,4 +10,4 @@ dart pub get
 dart run ffigen --config ffigen.yaml
 rm isar-dart.h
 
-dart format --fix lib/src/native/bindings.dart
+dart format --fix lib/src/impl/bindings.dart

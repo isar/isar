@@ -25,8 +25,8 @@ pub unsafe extern "C" fn isar_insert_save(insert: *mut *mut CIsarInsert<'static>
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_insert_finish(
-    txn: *mut *const CIsarTxn,
     insert: *mut CIsarInsert,
+    txn: *mut *const CIsarTxn,
 ) -> u8 {
     isar_try! {
         let insert = *Box::from_raw(insert);

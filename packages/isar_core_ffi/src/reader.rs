@@ -1,12 +1,30 @@
 use crate::CIsarReader;
 use isar_core::core::reader::IsarReader;
-use std::ptr;
+use itertools::Itertools;
+use std::{mem, ptr};
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_read_id(reader: &'static CIsarReader) -> i64 {
     match reader {
         CIsarReader::Native(reader) => reader.read_id(),
         CIsarReader::NativeList(reader) => reader.read_id(),
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_read_bool(reader: &'static CIsarReader, index: u32) -> u8 {
+    let value = match reader {
+        CIsarReader::Native(reader) => reader.read_bool(index),
+        CIsarReader::NativeList(reader) => reader.read_bool(index),
+    };
+    if let Some(value) = value {
+        if value {
+            2
+        } else {
+            1
+        }
+    } else {
+        0
     }
 }
 
@@ -50,11 +68,29 @@ pub unsafe extern "C" fn isar_read_double(reader: &'static CIsarReader, index: u
     }
 }
 
-/*#[no_mangle]
-pub unsafe extern "C" fn isar_read_string(reader: &'static CIsarReader, index: u32)
-    -> Option<&str>;
-
 #[no_mangle]
+pub unsafe extern "C" fn isar_read_string(
+    reader: &'static CIsarReader,
+    index: u32,
+    value: *mut *const u16,
+) -> u32 {
+    let str = match reader {
+        CIsarReader::Native(reader) => reader.read_string(index),
+        CIsarReader::NativeList(reader) => reader.read_string(index),
+    };
+    if let Some(str) = str {
+        let mut encoded = str.encode_utf16().collect_vec();
+        encoded.shrink_to_fit();
+        *value = encoded.as_ptr();
+        let len = encoded.len();
+        mem::forget(encoded);
+        len as u32
+    } else {
+        0
+    }
+}
+
+/*#[no_mangle]
 pub unsafe extern "C" fn isar_read_blob(
     reader: &'static CIsarReader,
     index: u32,

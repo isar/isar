@@ -1,8 +1,8 @@
 use isar_core::core::error::Result;
+use itertools::Itertools;
 use once_cell::sync::Lazy;
-use std::ffi::CString;
-use std::os::raw::c_char;
 use std::sync::Mutex;
+use std::{mem, ptr};
 
 type ErrCounter = (Vec<(u8, String)>, u8);
 static ERRORS: Lazy<Mutex<ErrCounter>> = Lazy::new(|| Mutex::new((vec![], 1)));
@@ -56,12 +56,18 @@ macro_rules! isar_try_txn {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_get_error(err_code: u8) -> *mut c_char {
+pub unsafe extern "C" fn isar_get_error(err_code: u8, value: *mut *const u16) -> u32 {
     let lock = ERRORS.lock().unwrap();
     let error = lock.0.iter().find(|(code, _)| *code == err_code);
     if let Some((_, err_msg)) = error {
-        CString::new(err_msg.as_str()).unwrap().into_raw()
+        let mut encoded = err_msg.encode_utf16().collect_vec();
+        encoded.shrink_to_fit();
+        *value = encoded.as_ptr();
+        let len = encoded.len();
+        mem::forget(encoded);
+        len as u32
     } else {
-        std::ptr::null_mut()
+        *value = ptr::null();
+        0
     }
 }

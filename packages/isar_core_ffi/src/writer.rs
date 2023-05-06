@@ -12,6 +12,15 @@ pub unsafe extern "C" fn isar_write_null(writer: &'static mut CIsarWriter) {
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn isar_write_bool(writer: &'static mut CIsarWriter, value: bool) {
+    match writer {
+        CIsarWriter::Native(writer) => writer.write_bool(Some(value)),
+        CIsarWriter::NativeObject(writer) => writer.write_bool(Some(value)),
+        CIsarWriter::NativeList(writer) => writer.write_bool(Some(value)),
+    }
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn isar_write_byte(writer: &'static mut CIsarWriter, value: u8) {
     match writer {
         CIsarWriter::Native(writer) => writer.write_byte(value),
@@ -57,13 +66,8 @@ pub unsafe extern "C" fn isar_write_double(writer: &'static mut CIsarWriter, val
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_write_string(
-    writer: &'static mut CIsarWriter,
-    value: *const u16,
-    length: u32,
-) {
-    let chars = slice::from_raw_parts(value, length as usize);
-    let value = String::from_utf16_lossy(chars);
+pub unsafe extern "C" fn isar_write_string(writer: &'static mut CIsarWriter, value: *mut String) {
+    let value = *Box::from_raw(value);
     match writer {
         CIsarWriter::Native(writer) => writer.write_string(&value),
         CIsarWriter::NativeObject(writer) => writer.write_string(&value),

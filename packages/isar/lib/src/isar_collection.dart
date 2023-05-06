@@ -1,13 +1,17 @@
 part of isar;
 
-abstract class IsarCollection<OBJ> {
-  CollectionSchema<OBJ> get schema;
+abstract class IsarCollection<ID, OBJ> {
+  OBJ? get(ID id);
 
-  Object? get(int id);
+  List<OBJ> getAll(List<ID> ids);
 
-  int put(OBJ object);
+  void put(OBJ object);
 
-  bool delete(int id);
+  void putAll(List<OBJ> objects);
+
+  bool delete(ID id);
+
+  int deleteAll(List<ID> id);
 
   QueryBuilder<OBJ, OBJ, QFilter> where();
 
@@ -19,8 +23,6 @@ abstract class IsarCollection<OBJ> {
     Filter? filter,
     List<SortProperty> sortBy = const [],
     List<DistinctProperty> distinctBy = const [],
-    int? offset,
-    int? limit,
-    String? property,
+    int? property,
   });
 }

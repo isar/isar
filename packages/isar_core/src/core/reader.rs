@@ -15,9 +15,9 @@ pub trait IsarReader {
 
     fn is_null(&self, index: u32) -> bool;
 
-    fn read_byte(&self, index: u32) -> u8;
-
     fn read_bool(&self, index: u32) -> Option<bool>;
+
+    fn read_byte(&self, index: u32) -> u8;
 
     fn read_int(&self, index: u32) -> i32;
 

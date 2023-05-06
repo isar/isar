@@ -7,9 +7,9 @@ pub trait IsarWriter<'a> {
 
     fn write_null(&mut self);
 
-    fn write_byte(&mut self, value: u8);
-
     fn write_bool(&mut self, value: Option<bool>);
+
+    fn write_byte(&mut self, value: u8);
 
     fn write_int(&mut self, value: i32);
 

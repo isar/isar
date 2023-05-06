@@ -1,9 +1,0 @@
-include: package:very_good_analysis/analysis_options.yaml
-
-analyzer:
-  errors:
-    cascade_invocations: ignore
-    avoid_positional_boolean_parameters: ignore
-    parameter_assignments: ignore
-    public_member_api_docs: ignore
-    use_string_buffers: ignore

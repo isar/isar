@@ -71,6 +71,10 @@ impl NativeTxn {
         db.drop(&self.txn)
     }
 
+    pub(crate) fn stat(&self, db: Db) -> Result<(u64, u64)> {
+        db.stat(&self.txn)
+    }
+
     pub(crate) fn commit(self) -> Result<()> {
         if !self.active.get() {
             return Err(IsarError::TransactionClosed {});

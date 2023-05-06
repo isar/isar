@@ -22,7 +22,7 @@ extension QueryFilterAndOr<OBJ, R> on QueryBuilder<OBJ, R, QFilterOperator> {
   QueryBuilder<OBJ, R, QFilterCondition> and() {
     return QueryBuilder.apply(
       this,
-      (q) => q.copyWith(filterGroupType: FilterGroupType.and),
+      (q) => q.copyWith(filterGroupAnd: true),
     );
   }
 
@@ -30,7 +30,7 @@ extension QueryFilterAndOr<OBJ, R> on QueryBuilder<OBJ, R, QFilterOperator> {
   QueryBuilder<OBJ, R, QFilterCondition> or() {
     return QueryBuilder.apply(
       this,
-      (q) => q.copyWith(filterGroupType: FilterGroupType.or),
+      (q) => q.copyWith(filterGroupAnd: false),
     );
   }
 }
@@ -95,22 +95,6 @@ extension QueryFilterNoGroups<OBJ, R>
   }
 }
 
-/// Extension for QueryBuilders.
-extension QueryOffset<OBJ, R> on QueryBuilder<OBJ, R, QOffset> {
-  /// Offset the query results by a static number.
-  QueryBuilder<OBJ, R, QAfterOffset> offset(int offset) {
-    return QueryBuilder.apply(this, (q) => q.copyWith(offset: offset));
-  }
-}
-
-/// Extension for QueryBuilders.
-extension QueryLimit<OBJ, R> on QueryBuilder<OBJ, R, QLimit> {
-  /// Limit the maximum number of query results.
-  QueryBuilder<OBJ, R, QAfterLimit> limit(int limit) {
-    return QueryBuilder.apply(this, (q) => q.copyWith(limit: limit));
-  }
-}
-
 /// @nodoc
 @protected
 typedef QueryOption<OBJ, S, RS> = QueryBuilder<OBJ, OBJ, RS> Function(
@@ -133,7 +117,7 @@ extension QueryModifier<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
 }
 
 /// Extension for QueryBuilders
-extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
+/*extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
   /// Create a query from this query builder.
   Query<R> build() => _query.build();
 
@@ -245,3 +229,4 @@ extension QueryExecuteDateAggregation<OBJ>
   /// {@macro aggregation_max}
   DateTime? maxSync() => build().maxSync();
 }
+*/

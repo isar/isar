@@ -16,8 +16,6 @@ pub struct NativeQueryBuilder<'a> {
     all_collections: &'a [NativeCollection],
     filter: Option<Filter>,
     sort: Vec<(u16, Sort)>,
-    offset: Option<u32>,
-    limit: Option<u32>,
 }
 
 impl<'a> NativeQueryBuilder<'a> {
@@ -32,8 +30,6 @@ impl<'a> NativeQueryBuilder<'a> {
             all_collections,
             filter: None,
             sort: Vec::new(),
-            offset: None,
-            limit: None,
         }
     }
 }
@@ -49,14 +45,6 @@ impl<'a> IsarQueryBuilder for NativeQueryBuilder<'a> {
         self.sort.push((property_index, sort));
     }
 
-    fn set_offset(&mut self, offset: u32) {
-        self.offset = Some(offset);
-    }
-
-    fn set_limit(&mut self, limit: u32) {
-        self.limit = Some(limit);
-    }
-
     fn build(self) -> Self::Query {
         let filter = self
             .filter
@@ -69,8 +57,6 @@ impl<'a> IsarQueryBuilder for NativeQueryBuilder<'a> {
             filter,
             vec![],
             vec![],
-            self.offset.unwrap_or(0),
-            self.limit.unwrap_or(u32::MAX),
         )
     }
 }

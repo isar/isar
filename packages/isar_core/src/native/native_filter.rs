@@ -209,6 +209,7 @@ enum Filter {
     IsNull(IsNullCond),
 
     IdBetween(IdBetweenCond),
+    BoolBetween(BoolBetweenCond),
     ByteBetween(ByteBetweenCond),
     IntBetween(IntBetweenCond),
     LongBetween(LongBetweenCond),
@@ -324,6 +325,7 @@ macro_rules! filter_between {
     };
 }
 
+filter_between!(Option<bool>, Bool, read_bool);
 filter_between!(u8, Byte, read_byte);
 filter_between!(i32, Int, read_int);
 filter_between!(i64, Long, read_long);

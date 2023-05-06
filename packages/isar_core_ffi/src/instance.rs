@@ -1,7 +1,4 @@
-use crate::{
-    require_from_c_str, CIsarCursor, CIsarInsert, CIsarInstance, CIsarQuery, CIsarQueryBuilder,
-    CIsarTxn,
-};
+use crate::{CIsarInsert, CIsarInstance, CIsarTxn};
 use isar_core::core::instance::{CompactCondition, IsarInstance};
 use isar_core::core::schema::IsarSchema;
 use isar_core::native::native_instance::NativeInstance;
@@ -25,12 +22,12 @@ pub unsafe extern "C" fn isar_get(instance_id: u32) -> *const CIsarInstance {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_create(
+pub unsafe extern "C" fn isar_open(
     isar: *mut *const CIsarInstance,
     instance_id: u32,
-    name: *const c_char,
-    path: *const c_char,
-    schema_json: *const c_char,
+    name: *mut String,
+    path: *mut String,
+    schema_json: *mut String,
     max_size_mib: u32,
     relaxed_durability: bool,
     compact_min_file_size: u32,
@@ -38,9 +35,9 @@ pub unsafe extern "C" fn isar_create(
     compact_min_ratio: f32,
 ) -> u8 {
     isar_try! {
-        let name = require_from_c_str(name)?;
-        let path = require_from_c_str(path)?;
-        let schema_json = require_from_c_str(schema_json)?;
+        let name = *Box::from_raw(name);
+        let path = *Box::from_raw(path);
+        let schema_json = *Box::from_raw(schema_json);
         let schema = IsarSchema::from_json(schema_json.as_bytes())?;
 
         let compact_condition = if compact_min_ratio.is_nan() {
@@ -55,8 +52,8 @@ pub unsafe extern "C" fn isar_create(
 
         let native_instance = NativeInstance::open(
             instance_id ,
-            name,
-            path,
+            &name,
+            &path,
             schema,
             max_size_mib,
             relaxed_durability,
@@ -110,9 +107,9 @@ pub unsafe extern "C" fn isar_txn_abort(isar: &'static CIsarInstance, txn: *mut 
 pub unsafe extern "C" fn isar_insert(
     isar: &'static CIsarInstance,
     txn: *mut CIsarTxn,
-    insert: *mut *const CIsarInsert,
     collection_index: u16,
     count: u32,
+    insert: *mut *const CIsarInsert,
 ) -> u8 {
     isar_try! {
         let txn = *Box::from_raw(txn);
@@ -127,68 +124,16 @@ pub unsafe extern "C" fn isar_insert(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_build_query(
+pub unsafe extern "C" fn isar_count(
     isar: &'static CIsarInstance,
-    query_builder: *mut *const CIsarQueryBuilder,
+    txn: &'static CIsarTxn,
     collection_index: u16,
-) -> u8 {
-    isar_try! {
-        let new_query_builder = match isar {
-            CIsarInstance::Native(isar) => {
-                let query_builder = isar.build_query(collection_index)?;
-                CIsarQueryBuilder::Native(query_builder)
-            }
-        };
-        *query_builder = Box::into_raw(Box::new(new_query_builder));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_query(
-    isar: &'static CIsarInstance,
-    txn: &'static CIsarTxn,
-    query: &'static CIsarQuery,
-    cursor: *mut *const CIsarCursor,
-) -> u8 {
-    isar_try! {
-        let new_cursor = match (isar,txn,query) {
-            (CIsarInstance::Native(isar), CIsarTxn::Native(txn),CIsarQuery::Native(query)) => {
-                let cursor = isar.query(txn,query)?;
-                CIsarCursor::Native(cursor)
-            }
-        };
-        *cursor = Box::into_raw(Box::new(new_cursor));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_query_count(
-    isar: &'static CIsarInstance,
-    txn: &'static CIsarTxn,
-    query: &'static CIsarQuery,
     count: *mut u32,
 ) -> u8 {
     isar_try! {
-        let new_count = match (isar,txn,query) {
-            (CIsarInstance::Native(isar), CIsarTxn::Native(txn),CIsarQuery::Native(query)) => {
-                isar.count(txn,query)?
-            }
-        };
-        *count = new_count;
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_query_delete(
-    isar: &'static CIsarInstance,
-    txn: &'static CIsarTxn,
-    query: &'static CIsarQuery,
-    count: *mut u32,
-) -> u8 {
-    isar_try! {
-        let new_count = match (isar,txn,query) {
-            (CIsarInstance::Native(isar), CIsarTxn::Native(txn),CIsarQuery::Native(query)) => {
-                isar.delete(txn,query)?
+        let new_count = match (isar,txn) {
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
+                isar.count(txn, collection_index)?
             }
         };
         *count = new_count;

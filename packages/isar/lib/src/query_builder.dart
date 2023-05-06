@@ -33,24 +33,22 @@ class QueryBuilderInternal<OBJ> {
   /// @nodoc
   const QueryBuilderInternal({
     this.collection,
-    this.filter = const FilterGroup.and([]),
-    this.filterGroupType = FilterGroupType.and,
+    this.filter = const AndGroup([]),
+    this.filterGroupAnd = true,
     this.filterNot = false,
     this.distinctByProperties = const [],
     this.sortByProperties = const [],
-    this.offset,
-    this.limit,
-    this.propertyName,
+    this.property,
   });
 
   /// @nodoc
-  final IsarCollection<OBJ>? collection;
+  final IsarCollection<dynamic, OBJ>? collection;
 
   /// @nodoc
-  final FilterGroup filter;
+  final Filter filter;
 
   /// @nodoc
-  final FilterGroupType filterGroupType;
+  final bool filterGroupAnd;
 
   /// @nodoc
   final bool filterNot;
@@ -62,48 +60,42 @@ class QueryBuilderInternal<OBJ> {
   final List<SortProperty> sortByProperties;
 
   /// @nodoc
-  final int? offset;
-
-  /// @nodoc
-  final int? limit;
-
-  /// @nodoc
-  final String? propertyName;
+  final int? property;
 
   /// @nodoc
   QueryBuilderInternal<OBJ> addFilterCondition(Filter cond) {
     if (filterNot) {
-      cond = FilterGroup.not(cond);
+      cond = NotGroup(cond);
     }
 
-    late FilterGroup filterGroup;
+    late Filter newFilter;
 
-    if (filter.type == filterGroupType || filter.filters.length <= 1) {
-      filterGroup = FilterGroup(
-        type: filterGroupType,
-        filters: [...filter.filters, cond],
-      );
-    } else if (filterGroupType == FilterGroupType.and) {
-      filterGroup = FilterGroup(
-        type: filter.type,
-        filters: [
+    final filter = this.filter;
+    if (filterGroupAnd) {
+      if (filter is AndGroup) {
+        newFilter = AndGroup([...filter.filters, cond]);
+      } else if (filter is OrGroup) {
+        newFilter = OrGroup([
           ...filter.filters.sublist(0, filter.filters.length - 1),
-          FilterGroup(
-            type: filterGroupType,
-            filters: [filter.filters.last, cond],
-          ),
-        ],
-      );
+          AndGroup([
+            filter.filters.last,
+            cond,
+          ]),
+        ]);
+      } else {
+        newFilter = AndGroup([filter, cond]);
+      }
     } else {
-      filterGroup = FilterGroup(
-        type: filterGroupType,
-        filters: [filter, cond],
-      );
+      if (filter is OrGroup) {
+        newFilter = OrGroup([...filter.filters, cond]);
+      } else {
+        newFilter = OrGroup([filter, cond]);
+      }
     }
 
     return copyWith(
-      filter: filterGroup,
-      filterGroupType: FilterGroupType.and,
+      filter: newFilter,
+      filterGroupAnd: true,
       filterNot: false,
     );
   }
@@ -117,7 +109,7 @@ class QueryBuilderInternal<OBJ> {
 
   /// @nodoc
   QueryBuilderInternal<OBJ> listLength<E>(
-    String property,
+    int property,
     int lower,
     bool includeLower,
     int upper,
@@ -134,7 +126,7 @@ class QueryBuilderInternal<OBJ> {
       }
     }
     return addFilterCondition(
-      FilterCondition.listLength(
+      ListLengthCondition(
         property: property,
         lower: lower,
         upper: upper,
@@ -143,39 +135,31 @@ class QueryBuilderInternal<OBJ> {
   }
 
   /// @nodoc
-  QueryBuilderInternal<OBJ> object<E>(
+  /*QueryBuilderInternal<OBJ> object<E>(
     FilterQuery<E> q,
-    String property,
+    int property,
   ) {
     // ignore: prefer_const_constructors
     final qb = q(QueryBuilder(QueryBuilderInternal()));
     return addFilterCondition(
       ObjectFilter(filter: qb._query.filter, property: property),
     );
-  }
+  }*/
 
   ///
 
   /// @nodoc
-  QueryBuilderInternal<OBJ> addSortBy(String propertyName, Sort sort) {
+  QueryBuilderInternal<OBJ> addSortBy(
+    int property, {
+    Sort sort = Sort.asc,
+    bool caseSensitive = true,
+  }) {
     return copyWith(
       sortByProperties: [
         ...sortByProperties,
-        SortProperty(property: propertyName, sort: sort),
-      ],
-    );
-  }
-
-  /// @nodoc
-  QueryBuilderInternal<OBJ> addDistinctBy(
-    String propertyName, {
-    bool? caseSensitive,
-  }) {
-    return copyWith(
-      distinctByProperties: [
-        ...distinctByProperties,
-        DistinctProperty(
-          property: propertyName,
+        SortProperty(
+          property: property,
+          sort: sort,
           caseSensitive: caseSensitive,
         ),
       ],
@@ -183,37 +167,46 @@ class QueryBuilderInternal<OBJ> {
   }
 
   /// @nodoc
-  QueryBuilderInternal<OBJ> addPropertyName<E>(String propertyName) {
-    return copyWith(propertyName: propertyName);
+  QueryBuilderInternal<OBJ> addDistinctBy(
+    int property, {
+    bool caseSensitive = true,
+  }) {
+    return copyWith(
+      distinctByProperties: [
+        ...distinctByProperties,
+        DistinctProperty(
+          property: property,
+          caseSensitive: caseSensitive,
+        ),
+      ],
+    );
+  }
+
+  /// @nodoc
+  QueryBuilderInternal<OBJ> addProperty<E>(int property) {
+    return copyWith(property: property);
   }
 
   /// @nodoc
   QueryBuilderInternal<OBJ> copyWith({
-    FilterGroup? filter,
+    Filter? filter,
     bool? filterIsGrouped,
-    FilterGroupType? filterGroupType,
+    bool? filterGroupAnd,
     bool? filterNot,
-    List<FilterGroup>? parentFilters,
     List<DistinctProperty>? distinctByProperties,
     List<SortProperty>? sortByProperties,
-    int? offset,
-    int? limit,
-    String? propertyName,
+    int? property,
   }) {
-    assert(offset == null || offset >= 0, 'Invalid offset');
-    assert(limit == null || limit >= 0, 'Invalid limit');
     return QueryBuilderInternal(
       collection: collection,
       filter: filter ?? this.filter,
-      filterGroupType: filterGroupType ?? this.filterGroupType,
+      filterGroupAnd: filterGroupAnd ?? this.filterGroupAnd,
       filterNot: filterNot ?? this.filterNot,
       distinctByProperties:
           distinctByProperties ?? List.unmodifiable(this.distinctByProperties),
       sortByProperties:
           sortByProperties ?? List.unmodifiable(this.sortByProperties),
-      offset: offset ?? this.offset,
-      limit: limit ?? this.limit,
-      propertyName: propertyName ?? this.propertyName,
+      property: property ?? this.property,
     );
   }
 
@@ -224,9 +217,7 @@ class QueryBuilderInternal<OBJ> {
       filter: filter,
       sortBy: sortByProperties,
       distinctBy: distinctByProperties,
-      offset: offset,
-      limit: limit,
-      property: propertyName,
+      property: property,
     );
   }
 }
@@ -235,69 +226,50 @@ class QueryBuilderInternal<OBJ> {
 ///
 /// Right after query starts
 @protected
-class QFilter implements QSortBy, QDistinct, QOffset, QLimit, QQueryProperty {}
+sealed class QFilter implements QSortBy, QDistinct, QQueryProperty {}
 
 /// @nodoc
 @protected
-class QFilterCondition {}
+sealed class QFilterCondition {}
 
 /// @nodoc
 @protected
-class QAfterFilterCondition
+sealed class QAfterFilterCondition
     implements
         QFilterCondition,
         QFilterOperator,
         QSortBy,
         QDistinct,
-        QOffset,
-        QLimit,
         QQueryProperty {}
 
 /// @nodoc
 @protected
-class QFilterOperator {}
+sealed class QFilterOperator {}
 
 /// @nodoc
 @protected
-class QAfterFilterOperator implements QFilterCondition {}
+sealed class QAfterFilterOperator implements QFilterCondition {}
 
 /// @nodoc
 @protected
-class QSortBy {}
+sealed class QSortBy {}
 
 /// @nodoc
 @protected
-class QAfterSortBy
-    implements QSortThenBy, QDistinct, QOffset, QLimit, QQueryProperty {}
+sealed class QAfterSortBy implements QSortThenBy, QDistinct, QQueryProperty {}
 
 /// @nodoc
 @protected
-class QSortThenBy {}
+sealed class QSortThenBy {}
 
 /// @nodoc
 @protected
-class QDistinct implements QOffset, QLimit, QQueryProperty {}
+sealed class QDistinct implements QQueryProperty {}
 
 /// @nodoc
 @protected
-class QOffset {}
+sealed class QQueryProperty implements QQueryOperations {}
 
 /// @nodoc
 @protected
-class QAfterOffset implements QLimit, QQueryProperty {}
-
-/// @nodoc
-@protected
-class QLimit {}
-
-/// @nodoc
-@protected
-class QAfterLimit implements QQueryProperty {}
-
-/// @nodoc
-@protected
-class QQueryProperty implements QQueryOperations {}
-
-/// @nodoc
-@protected
-class QQueryOperations {}
+sealed class QQueryOperations {}

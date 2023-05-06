@@ -1,6 +1,6 @@
 use super::native_collection::{NativeCollection, NativeProperty};
 use super::native_insert::NativeInsert;
-use super::{bool_to_byte, NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
+use super::{bool_to_byte, NULL_BOOL, NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
 use crate::core::data_type::DataType;
 use crate::core::writer::IsarWriter;
 use byteorder::{ByteOrder, LittleEndian};
@@ -45,6 +45,7 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
     fn write_null(&mut self) {
         let property = self.next_property();
         match property.data_type {
+            DataType::Bool => self.write_byte(NULL_BOOL),
             DataType::Byte => self.write_byte(NULL_BYTE),
             DataType::Int => self.write_int(NULL_INT),
             DataType::Float => self.write_float(NULL_FLOAT),
@@ -54,16 +55,16 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
         }
     }
 
+    fn write_bool(&mut self, value: Option<bool>) {
+        let property = self.next_property();
+        assert_eq!(property.data_type, DataType::Bool);
+        self.write(property.offset, &[bool_to_byte(value)]);
+    }
+
     fn write_byte(&mut self, value: u8) {
         let property = self.next_property();
         assert_eq!(property.data_type, DataType::Byte);
         self.write(property.offset, &[value]);
-    }
-
-    fn write_bool(&mut self, value: Option<bool>) {
-        let property = self.next_property();
-        assert_eq!(property.data_type, DataType::Byte);
-        self.write(property.offset, &[bool_to_byte(value)]);
     }
 
     fn write_int(&mut self, value: i32) {
@@ -283,7 +284,7 @@ impl<'a> NativeListWriter<'a> {
     ) -> Self {
         let initial_len = buffer.len() as u32;
         let element_size = match property.data_type {
-            DataType::ByteList => 1,
+            DataType::BoolList | DataType::ByteList => 1,
             DataType::IntList | DataType::FloatList => 4,
             DataType::LongList | DataType::DoubleList => 8,
             DataType::StringList | DataType::Object => 3,

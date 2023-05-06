@@ -1,4 +1,4 @@
-use super::{byte_to_bool, NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
+use super::{byte_to_bool, NULL_BOOL, NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
 use crate::core::data_type::DataType;
 use byteorder::{ByteOrder, LittleEndian};
 use serde_json::Value;
@@ -30,6 +30,7 @@ impl<'a> NativeObject<'a> {
     #[inline]
     pub fn is_null(&self, offset: u32, data_type: DataType) -> bool {
         match data_type {
+            DataType::Bool => self.read_byte(offset) == NULL_BOOL,
             DataType::Byte => self.read_byte(offset) == NULL_BYTE,
             DataType::Int => self.read_int(offset) == NULL_INT,
             DataType::Float => self.read_float(offset) == NULL_FLOAT,
@@ -40,20 +41,20 @@ impl<'a> NativeObject<'a> {
     }
 
     #[inline]
-    pub fn read_byte(&self, offset: u32) -> u8 {
-        if self.contains_offset(offset) {
-            self.bytes[offset as usize]
-        } else {
-            NULL_BYTE
-        }
-    }
-
-    #[inline]
     pub fn read_bool(&self, offset: u32) -> Option<bool> {
         if self.contains_offset(offset) {
             byte_to_bool(self.bytes[offset as usize])
         } else {
             None
+        }
+    }
+
+    #[inline]
+    pub fn read_byte(&self, offset: u32) -> u8 {
+        if self.contains_offset(offset) {
+            self.bytes[offset as usize]
+        } else {
+            NULL_BYTE
         }
     }
 

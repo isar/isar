@@ -12,10 +12,10 @@ mod native_writer;
 mod query;
 mod schema_manager;
 
-pub(crate) const NULL_BYTE: u8 = 0;
 pub(crate) const NULL_BOOL: u8 = 0;
 pub(crate) const FALSE_BOOL: u8 = 1;
 pub(crate) const TRUE_BOOL: u8 = 2;
+pub(crate) const NULL_BYTE: u8 = 0;
 pub(crate) const NULL_INT: i32 = i32::MIN;
 pub(crate) const NULL_LONG: i64 = i64::MIN;
 pub(crate) const NULL_FLOAT: f32 = f32::NAN;

@@ -50,11 +50,17 @@ pub trait IsarInstance {
     fn insert(&self, txn: Self::Txn, collection_index: u16, count: u32)
         -> Result<Self::Insert<'_>>;
 
-    fn build_query(&self, collection_index: u16) -> Result<Self::QueryBuilder<'_>>;
+    fn count(&self, txn: &Self::Txn, collection_index: u16) -> Result<u32>;
 
-    fn query<'a>(&'a self, txn: &'a Self::Txn, query: &'a Self::Query) -> Result<Self::Cursor<'_>>;
+    fn query(&self, collection_index: u16) -> Result<Self::QueryBuilder<'_>>;
 
-    fn count(&self, txn: &Self::Txn, query: &Self::Query) -> Result<u32>;
+    fn cursor<'a>(
+        &'a self,
+        txn: &'a Self::Txn,
+        query: &'a Self::Query,
+        offset: Option<u32>,
+        limit: Option<u32>,
+    ) -> Result<Self::Cursor<'_>>;
 
     fn delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<u32>;
 }

@@ -107,7 +107,14 @@ impl IsarInstance for NativeInstance {
         Ok(NativeInsert::new(txn, collection, &self.collections, count))
     }
 
-    fn build_query(&self, collection_index: u16) -> Result<Self::QueryBuilder<'_>> {
+    fn count(&self, txn: &Self::Txn, collection_index: u16) -> Result<u32> {
+        self.verify_instance_id(txn.instance_id)?;
+        let collection = &self.collections[collection_index as usize];
+        let (count, _) = txn.stat(collection.get_db()?)?;
+        Ok(count as u32)
+    }
+
+    fn query(&self, collection_index: u16) -> Result<Self::QueryBuilder<'_>> {
         let collection = &self.collections[collection_index as usize];
         Ok(NativeQueryBuilder::new(
             self.instance_id,
@@ -116,15 +123,16 @@ impl IsarInstance for NativeInstance {
         ))
     }
 
-    fn query<'a>(&'a self, txn: &'a Self::Txn, query: &'a Self::Query) -> Result<Self::Cursor<'a>> {
+    fn cursor<'a>(
+        &'a self,
+        txn: &'a Self::Txn,
+        query: &'a Self::Query,
+        offset: Option<u32>,
+        limit: Option<u32>,
+    ) -> Result<Self::Cursor<'a>> {
         self.verify_instance_id(txn.instance_id)?;
         self.verify_instance_id(query.instance_id)?;
-        query.cursor(txn, &self.collections)
-    }
-
-    fn count(&self, txn: &Self::Txn, query: &Self::Query) -> Result<u32> {
-        self.verify_instance_id(txn.instance_id)?;
-        query.count(txn, &self.collections)
+        query.cursor(txn, &self.collections, offset, limit)
     }
 
     fn delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<u32> {
@@ -286,12 +294,12 @@ mod test {
         }
         let txn = insert.finish().unwrap();*/
 
-        let mut builder = i.build_query(0).unwrap();
+        let mut builder = i.query(0).unwrap();
         builder.set_filter(Filter::Condition(FilterCondition::new_string_contains(
             0, "1", false,
         )));
         let q = builder.build();
-        eprintln!("{:?}", i.count(&txn, &q));
+        //eprintln!("{:?}", i.count(&txn, &q));
         i.commit_txn(txn).unwrap();
         i.clone();
         println!("hello");

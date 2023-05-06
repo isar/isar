@@ -13,9 +13,5 @@ pub trait IsarQueryBuilder {
 
     fn add_sort(&mut self, property_index: u16, sort: Sort);
 
-    fn set_offset(&mut self, offset: u32);
-
-    fn set_limit(&mut self, limit: u32);
-
     fn build(self) -> Self::Query;
 }

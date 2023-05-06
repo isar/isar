@@ -24,6 +24,9 @@ pub unsafe extern "C" fn isar_cursor_next(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_cursor_free(cursor: *mut CIsarCursor) {
+pub unsafe extern "C" fn isar_cursor_free(cursor: *mut CIsarCursor, old_reader: *mut CIsarReader) {
+    if !old_reader.is_null() {
+        drop(Box::from_raw(old_reader));
+    }
     drop(Box::from_raw(cursor));
 }

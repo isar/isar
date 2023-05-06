@@ -2,14 +2,13 @@
 
 use core::slice;
 use isar_core::core::cursor::IsarCursor;
-use isar_core::core::error::IsarError;
 use isar_core::core::error::Result;
 use isar_core::core::instance::IsarInstance;
 use isar_core::core::reader::IsarReader;
 use isar_core::core::writer::IsarWriter;
 use isar_core::native::native_instance::NativeInstance;
-use std::ffi::CStr;
-use std::os::raw::c_char;
+use std::cell::Cell;
+use std::ptr;
 
 #[macro_use]
 mod error;
@@ -17,7 +16,7 @@ pub mod cursor;
 pub mod filter;
 pub mod insert;
 pub mod instance;
-pub mod query_builder;
+pub mod query;
 pub mod reader;
 pub mod writer;
 
@@ -70,23 +69,20 @@ pub enum CIsarCursor<'a> {
     Native(NCursor<'a>),
 }
 
-pub(crate) unsafe fn require_from_c_str<'a>(str: *const c_char) -> Result<&'a str> {
-    if !str.is_null() {
-        match CStr::from_ptr(str).to_str() {
-            Ok(str) => Ok(str),
-            Err(_) => Err(IsarError::IllegalString {}),
-        }
+#[no_mangle]
+pub unsafe extern "C" fn isar_string(chars: *const u16, length: u32) -> *const String {
+    if chars.is_null() {
+        ptr::null()
     } else {
-        Err(IsarError::IllegalString {})
+        let chars = slice::from_raw_parts(chars, length as usize);
+        let value = String::from_utf16_lossy(chars);
+        Box::into_raw(Box::new(value))
     }
 }
 
-pub(crate) unsafe fn from_utf16<'a>(str: *const u16, length: u32) -> Option<String> {
-    if str.is_null() {
-        None
-    } else {
-        let chars = slice::from_raw_parts(str, length as usize);
-        let value = String::from_utf16_lossy(chars);
-        Some(value)
+#[no_mangle]
+pub unsafe extern "C" fn isar_free_string(value: *const u16, length: u32) {
+    if !value.is_null() {
+        let _ = Vec::from_raw_parts(value as *mut u16, length as usize, length as usize);
     }
 }
