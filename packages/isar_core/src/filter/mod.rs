@@ -106,20 +106,20 @@ mod tests {
     }
 
     macro_rules! and {
-        ($($x:expr),*) => {
+        ($($x:expr),+) => {
             {
                 let mut filters = Vec::new();
-                $(filters.push($x);)*
+                $(filters.push($x);)+
                 Filter::Group(FilterGroup::new(GroupType::And, filters))
             }
         };
     }
 
     macro_rules! or {
-        ($($x:expr),*) => {
+        ($($x:expr),+) => {
             {
                 let mut filters = Vec::new();
-                $(filters.push($x);)*
+                $(filters.push($x);)+
                 Filter::Group(FilterGroup::new(GroupType::Or, filters))
             }
         };
@@ -164,5 +164,37 @@ mod tests {
         opt!(not(not(gt(10))), gt(10));
         opt!(not(not(not(gt(10)))), lt(11));
         opt!(not(not(not(eq(10)))), or!(lt(10), gt(10)));
+    }
+
+    #[test]
+    fn test_optimize_combine_adjacent_conditions() {
+        opt!(and!(gt(10), lt(20), gt(15), lt(25)), between(16, 19));
+        opt!(or!(gt(10), lt(20), gt(15), lt(25)), t());
+        opt!(and!(gt(10), lt(20), eq(15)), eq(15));
+        opt!(or!(gt(10), lt(20), eq(15)), t());
+    }
+
+    #[test]
+    fn test_optimize_nested_groups() {
+        opt!(
+            and!(
+                and!(and!(gt(10), lt(30)), or!(eq(15), eq(20))),
+                or!(gt(5), lt(40))
+            ),
+            and!(between(11, 29), or!(eq(15), eq(20)))
+        );
+        opt!(
+            or!(
+                or!(or!(gt(10), lt(20)), and!(eq(15), eq(20))),
+                and!(gt(5), lt(40))
+            ),
+            t()
+        );
+    }
+
+    #[test]
+    fn test_optimize_global_not() {
+        opt!(not(and!(gt(10), lt(20))), or!(lt(11), gt(19)));
+        opt!(not(or!(gt(10), lt(20))), f());
     }
 }
