@@ -1,5 +1,3 @@
-use crate::filter::filter_value::FilterValue;
-
 use super::filter_condition::{ConditionType, FilterCondition};
 use super::filter_group::{FilterGroup, GroupType};
 use super::Filter;

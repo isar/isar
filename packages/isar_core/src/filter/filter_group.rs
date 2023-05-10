@@ -21,6 +21,10 @@ impl FilterGroup {
             group_type != GroupType::Not || filters.len() == 1,
             "Not groups must contain exactly one filter"
         );
+        assert!(
+            !(group_type == GroupType::And || group_type == GroupType::Or) || !filters.is_empty(),
+            "And / Or groups must contain at least one filter"
+        );
         FilterGroup {
             group_type,
             filters,
@@ -149,14 +153,14 @@ mod tests {
     use super::{FilterGroup, GroupType};
 
     macro_rules! and {
-        ($($filters:expr),*) => {
-            FilterGroup::new(GroupType::And, vec![$($filters),*])
+        ($($filters:expr),+) => {
+            FilterGroup::new(GroupType::And, vec![$($filters),+])
         };
     }
 
     macro_rules! or {
-        ($($filters:expr),*) => {
-            FilterGroup::new(GroupType::Or, vec![$($filters),*])
+        ($($filters:expr),+) => {
+            FilterGroup::new(GroupType::Or, vec![$($filters),+])
         };
     }
 
@@ -184,8 +188,14 @@ mod tests {
         use super::*;
 
         #[test]
+        #[should_panic(expected = "And / Or groups must contain at least one filter")]
+        fn test_new_assert() {
+            FilterGroup::new(GroupType::And, vec![]);
+        }
+
+        #[test]
         fn test_get_group_type() {
-            assert_eq!(and!().get_group_type(), GroupType::And);
+            assert_eq!(and!(is_null!(0)).get_group_type(), GroupType::And);
         }
 
         #[test]
@@ -194,12 +204,14 @@ mod tests {
                 and!(is_null!(0), is_null!(1)).get_filters(),
                 vec![is_null!(0), is_null!(1)]
             );
-            assert_eq!(and!().get_filters(), vec![]);
+            assert_eq!(
+                and!(group!(and!(is_null!(0)))).get_filters(),
+                vec![group!(and!(is_null!(0)))]
+            );
         }
 
         #[test]
         fn test_merge_conditions() {
-            assert_eq!(and!().merge_conditions(), (and!(), false));
             assert_eq!(
                 and!(is_null!(0)).merge_conditions(),
                 (and!(is_null!(0)), false)
@@ -256,36 +268,43 @@ mod tests {
                 )
             );
             assert_eq!(
-                and!(group!(and!())).merge_conditions(),
-                (and!(group!(and!())), false)
+                and!(is_null!(0), group!(and!(is_null!(1)))).merge_conditions(),
+                (and!(is_null!(0), group!(and!(is_null!(1)))), false)
             );
             assert_eq!(
-                and!(is_null!(0), group!(and!())).merge_conditions(),
-                (and!(is_null!(0), group!(and!())), false)
-            );
-            assert_eq!(
-                and!(group!(and!()), is_null!(0)).merge_conditions(),
-                (and!(group!(and!()), is_null!(0)), false)
-            );
-            assert_eq!(
-                and!(is_null!(0), group!(and!()), is_null!(0), group!(or!())).merge_conditions(),
-                (and!(group!(or!()), is_null!(0), group!(and!())), true)
+                and!(group!(and!(is_null!(1))), is_null!(0)).merge_conditions(),
+                (and!(group!(and!(is_null!(1))), is_null!(0)), false)
             );
             assert_eq!(
                 and!(
                     is_null!(0),
-                    group!(and!()),
+                    group!(and!(is_null!(1))),
+                    is_null!(0),
+                    group!(or!(is_null!(2), is_null!(0)))
+                )
+                .merge_conditions(),
+                (
+                    and!(
+                        group!(or!(is_null!(2), is_null!(0))),
+                        is_null!(0),
+                        group!(and!(is_null!(1)))
+                    ),
+                    true
+                )
+            );
+            assert_eq!(
+                and!(
+                    is_null!(0),
                     Filter::Nested(FilterNested::new(0, is_null!(0))),
-                    group!(or!()),
+                    group!(or!(is_null!(1), is_null!(2))),
                     is_null!(2)
                 )
                 .merge_conditions(),
                 (
                     and!(
                         is_null!(0),
-                        group!(and!()),
                         Filter::Nested(FilterNested::new(0, is_null!(0))),
-                        group!(or!()),
+                        group!(or!(is_null!(1), is_null!(2))),
                         is_null!(2)
                     ),
                     false
@@ -295,8 +314,11 @@ mod tests {
 
         #[test]
         fn test_flatten() {
-            assert_eq!(and!().flatten(), (group!(and!()), false));
-            assert_eq!(and!(group!(and!())).flatten(), (group!(and!()), true));
+            assert_eq!(and!(is_null!(0)).flatten(), (is_null!(0), true));
+            assert_eq!(
+                and!(group!(and!(is_null!(0)))).flatten(),
+                (group!(and!(is_null!(0))), true)
+            );
             assert_eq!(
                 and!(group!(and!(is_null!(0)))).flatten(),
                 (group!(and!(is_null!(0))), true)
@@ -306,15 +328,18 @@ mod tests {
                 (group!(and!(is_null!(0), is_null!(1))), true)
             );
             assert_eq!(
-                and!(group!(and!(group!(and!(group!(and!())))))).flatten(),
-                (group!(and!(group!(and!(group!(and!()))))), true),
+                and!(group!(and!(group!(and!(group!(and!(is_null!(1)))))))).flatten(),
+                (group!(and!(group!(and!(group!(and!(is_null!(1))))))), true),
             );
             assert_eq!(
-                and!(group!(and!(group!(and!())))).flatten(),
-                (group!(and!(group!(and!()))), true),
+                and!(group!(and!(group!(and!(is_null!(1)))))).flatten(),
+                (group!(and!(group!(and!(is_null!(1))))), true),
             );
-            assert_eq!(and!(group!(and!())).flatten(), (group!(and!()), true));
-            assert_eq!(and!().flatten(), (group!(and!()), false));
+            assert_eq!(
+                and!(group!(and!(is_null!(1)))).flatten(),
+                (group!(and!(is_null!(1))), true)
+            );
+            assert_eq!(and!(is_null!(1)).flatten(), (is_null!(1), true));
             assert_eq!(
                 and!(group!(and!(is_null!(0), is_null!(1)))).flatten(),
                 (group!(and!(is_null!(0), is_null!(1))), true)
@@ -323,7 +348,10 @@ mod tests {
                 and!(is_null!(0), group!(and!(is_null!(1), is_null!(2)))).flatten(),
                 (group!(and!(is_null!(0), is_null!(1), is_null!(2))), true),
             );
-            assert_eq!(and!(group!(or!())).flatten(), (group!(or!()), true));
+            assert_eq!(
+                and!(group!(or!(is_null!(0)))).flatten(),
+                (group!(or!(is_null!(0))), true)
+            );
             assert_eq!(
                 and!(group!(or!(is_null!(0)))).flatten(),
                 (group!(or!(is_null!(0))), true)
@@ -332,10 +360,16 @@ mod tests {
 
         #[test]
         fn simplify() {
-            assert_eq!(and!().simplify(), (group!(and!()), false));
             assert_eq!(
-                and!(group!(and!(group!(and!(group!(and!(group!(and!())))))))).simplify(),
-                (group!(and!()), true)
+                and!(is_null!(1), is_null!(2)).simplify(),
+                (group!(and!(is_null!(1), is_null!(2))), false)
+            );
+            assert_eq!(
+                and!(group!(and!(group!(and!(group!(and!(group!(and!(
+                    is_null!(0)
+                )))))))))
+                .simplify(),
+                (is_null!(0), true)
             );
             assert_eq!(
                 and!(group!(and!(group!(and!(group!(and!(group!(and!(
@@ -387,8 +421,14 @@ mod tests {
         use super::*;
 
         #[test]
+        #[should_panic(expected = "And / Or groups must contain at least one filter")]
+        fn test_new_assert() {
+            FilterGroup::new(GroupType::Or, vec![]);
+        }
+
+        #[test]
         fn test_get_group_type() {
-            assert_eq!(or!().get_group_type(), GroupType::Or);
+            assert_eq!(or!(is_null!(0)).get_group_type(), GroupType::Or);
         }
 
         #[test]
@@ -397,12 +437,15 @@ mod tests {
                 or!(is_null!(0), is_null!(1)).get_filters(),
                 vec![is_null!(0), is_null!(1)]
             );
-            assert_eq!(or!().get_filters(), vec![]);
+            assert_eq!(or!(is_null!(0)).get_filters(), vec![is_null!(0)]);
         }
 
         #[test]
         fn test_merge_conditions() {
-            assert_eq!(or!().merge_conditions(), (or!(), false));
+            assert_eq!(
+                or!(is_null!(0)).merge_conditions(),
+                (or!(is_null!(0)), false)
+            );
             assert_eq!(
                 or!(is_null!(0)).merge_conditions(),
                 (or!(is_null!(0)), false)
@@ -459,48 +502,59 @@ mod tests {
                 )
             );
             assert_eq!(
-                or!(group!(or!())).merge_conditions(),
-                (or!(group!(or!())), false)
+                or!(group!(or!(is_null!(0)))).merge_conditions(),
+                (or!(group!(or!(is_null!(0)))), false)
             );
             assert_eq!(
-                or!(is_null!(0), group!(or!())).merge_conditions(),
-                (or!(is_null!(0), group!(or!())), false)
+                or!(is_null!(0), group!(or!(is_null!(1)))).merge_conditions(),
+                (or!(is_null!(0), group!(or!(is_null!(1)))), false)
             );
             assert_eq!(
-                or!(group!(or!()), is_null!(0)).merge_conditions(),
-                (or!(group!(or!()), is_null!(0)), false)
+                or!(group!(or!(is_null!(1))), is_null!(0)).merge_conditions(),
+                (or!(group!(or!(is_null!(1))), is_null!(0)), false)
             );
             assert_eq!(
-                or!(group!(and!())).merge_conditions(),
-                (or!(group!(and!())), false)
+                or!(group!(and!(is_null!(0)))).merge_conditions(),
+                (or!(group!(and!(is_null!(0)))), false)
             );
             assert_eq!(
-                or!(is_null!(0), group!(and!())).merge_conditions(),
-                (or!(is_null!(0), group!(and!())), false)
+                or!(is_null!(0), group!(and!(is_null!(1)))).merge_conditions(),
+                (or!(is_null!(0), group!(and!(is_null!(1)))), false)
             );
             assert_eq!(
-                or!(group!(and!()), is_null!(0)).merge_conditions(),
-                (or!(group!(and!()), is_null!(0)), false)
-            );
-            assert_eq!(
-                or!(is_null!(0), group!(and!()), is_null!(0), group!(or!())).merge_conditions(),
-                (or!(group!(or!()), is_null!(0), group!(and!())), true)
+                or!(group!(and!(is_null!(1))), is_null!(0)).merge_conditions(),
+                (or!(group!(and!(is_null!(1))), is_null!(0)), false)
             );
             assert_eq!(
                 or!(
                     is_null!(0),
-                    group!(and!()),
+                    group!(and!(is_null!(1))),
+                    is_null!(0),
+                    group!(or!(is_null!(2), is_null!(0)))
+                )
+                .merge_conditions(),
+                (
+                    or!(
+                        group!(or!(is_null!(2), is_null!(0))),
+                        is_null!(0),
+                        group!(and!(is_null!(1)))
+                    ),
+                    true
+                )
+            );
+            assert_eq!(
+                or!(
+                    is_null!(0),
                     Filter::Nested(FilterNested::new(0, is_null!(0))),
-                    group!(or!()),
+                    group!(or!(is_null!(1), is_null!(2))),
                     is_null!(2)
                 )
                 .merge_conditions(),
                 (
                     or!(
                         is_null!(0),
-                        group!(and!()),
                         Filter::Nested(FilterNested::new(0, is_null!(0))),
-                        group!(or!()),
+                        group!(or!(is_null!(1), is_null!(2))),
                         is_null!(2)
                     ),
                     false
@@ -510,8 +564,11 @@ mod tests {
 
         #[test]
         fn test_flatten() {
-            assert_eq!(or!().flatten(), (group!(or!()), false));
-            assert_eq!(or!(group!(or!())).flatten(), (group!(or!()), true));
+            assert_eq!(or!(is_null!(0)).flatten(), (is_null!(0), true));
+            assert_eq!(
+                or!(group!(or!(is_null!(0)))).flatten(),
+                (group!(or!(is_null!(0))), true)
+            );
             assert_eq!(
                 or!(group!(or!(is_null!(0)))).flatten(),
                 (group!(or!(is_null!(0))), true)
@@ -521,15 +578,17 @@ mod tests {
                 (group!(or!(is_null!(0), is_null!(1))), true)
             );
             assert_eq!(
-                or!(group!(or!(group!(or!(group!(or!())))))).flatten(),
-                (group!(or!(group!(or!(group!(or!()))))), true),
+                or!(group!(or!(group!(or!(group!(or!(is_null!(1)))))))).flatten(),
+                (group!(or!(group!(or!(group!(or!(is_null!(1))))))), true),
             );
             assert_eq!(
-                or!(group!(or!(group!(or!())))).flatten(),
-                (group!(or!(group!(or!()))), true),
+                or!(group!(or!(group!(or!(is_null!(1)))))).flatten(),
+                (group!(or!(group!(or!(is_null!(1))))), true),
             );
-            assert_eq!(or!(group!(or!())).flatten(), (group!(or!()), true));
-            assert_eq!(or!().flatten(), (group!(or!()), false));
+            assert_eq!(
+                or!(group!(or!(is_null!(1)))).flatten(),
+                (group!(or!(is_null!(1))), true)
+            );
             assert_eq!(
                 or!(group!(or!(is_null!(0), is_null!(1)))).flatten(),
                 (group!(or!(is_null!(0), is_null!(1))), true)
@@ -538,7 +597,10 @@ mod tests {
                 or!(is_null!(0), group!(or!(is_null!(1), is_null!(2)))).flatten(),
                 (group!(or!(is_null!(0), is_null!(1), is_null!(2))), true),
             );
-            assert_eq!(or!(group!(and!())).flatten(), (group!(and!()), true));
+            assert_eq!(
+                or!(group!(and!(is_null!(0)))).flatten(),
+                (group!(and!(is_null!(0))), true)
+            );
             assert_eq!(
                 or!(group!(and!(is_null!(0)))).flatten(),
                 (group!(and!(is_null!(0))), true)
@@ -547,10 +609,16 @@ mod tests {
 
         #[test]
         fn simplify() {
-            assert_eq!(or!().simplify(), (group!(or!()), false));
             assert_eq!(
-                or!(group!(or!(group!(or!(group!(or!(group!(or!())))))))).simplify(),
-                (group!(or!()), true)
+                or!(is_null!(1), is_null!(2)).simplify(),
+                (group!(or!(is_null!(1), is_null!(2))), false)
+            );
+            assert_eq!(
+                or!(group!(or!(group!(or!(group!(or!(group!(or!(
+                    is_null!(0)
+                )))))))))
+                .simplify(),
+                (is_null!(0), true)
             );
             assert_eq!(
                 or!(group!(or!(group!(or!(group!(or!(group!(or!(
@@ -600,6 +668,18 @@ mod tests {
         use super::*;
 
         #[test]
+        #[should_panic(expected = "Not groups must contain exactly one filter")]
+        fn test_new_asserts_no_empty_filters() {
+            FilterGroup::new(GroupType::Not, vec![]);
+        }
+
+        #[test]
+        #[should_panic(expected = "Not groups must contain exactly one filter")]
+        fn test_new_asserts_no_multiple_filters() {
+            FilterGroup::new(GroupType::Not, vec![is_null!(0), is_null!(1)]);
+        }
+
+        #[test]
         fn test_get_group_type() {
             assert_eq!(not!(is_null!(0)).get_group_type(), GroupType::Not);
         }
@@ -607,7 +687,10 @@ mod tests {
         #[test]
         fn test_get_filters() {
             assert_eq!(not!(is_null!(0)).get_filters(), vec![is_null!(0)]);
-            assert_eq!(not!(group!(and!())).get_filters(), vec![group!(and!())]);
+            assert_eq!(
+                not!(group!(and!(is_null!(1)))).get_filters(),
+                vec![group!(and!(is_null!(1)))]
+            );
         }
 
         #[test]
@@ -619,8 +702,8 @@ mod tests {
                 (not![is_null!(0)], false)
             );
             assert_eq!(
-                not!(group!(and!())).merge_conditions(),
-                (not!(group!(and!())), false)
+                not!(group!(and!(is_null!(1)))).merge_conditions(),
+                (not!(group!(and!(is_null!(1)))), false)
             );
         }
 
@@ -638,10 +721,6 @@ mod tests {
                 not!(group!(not!(group!(not!(is_null!(0)))))).flatten(),
                 (group!(not!(is_null!(0))), true)
             );
-            assert_eq!(
-                and!(group!(not!(group!(not!(is_null!(0)))))).simplify(),
-                (is_null!(0), true)
-            );
         }
 
         #[test]
@@ -651,8 +730,8 @@ mod tests {
                 (group!(not!(is_null!(0))), false)
             );
             assert_eq!(
-                and!(group!(not!(group!(not!(group!(and!())))))).simplify(),
-                (group!(and!()), true)
+                and!(group!(not!(group!(not!(group!(and!(is_null!(0)))))))).simplify(),
+                (is_null!(0), true)
             );
             assert_eq!(
                 not!(group!(not!(group!(not!(group!(not!(group!(and!(
@@ -693,17 +772,17 @@ mod tests {
             );
             assert_eq!(
                 not!(group!(not!(group!(or!(group!(or!(group!(not!(
-                    group!(not!(group!(and!())))
+                    group!(not!(group!(and!(is_null!(1)))))
                 )))))))))
                 .simplify(),
-                (group!(and!()), true)
+                (is_null!(1), true)
             );
             assert_eq!(
                 not!(group!(not!(group!(or!(group!(and!(group!(not!(
-                    group!(not!(group!(or!())))
+                    group!(not!(group!(or!(is_null!(0), is_null!(1)))))
                 )))))))))
                 .simplify(),
-                (group!(or!()), true)
+                (group!(or!(is_null!(0), is_null!(1))), true)
             );
         }
     }
