@@ -1,9 +1,9 @@
 use intmap::IntMap;
 
 use super::collection_iterator::CollectionIterator;
+use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::native_collection::NativeProperty;
 use crate::native::native_filter::NativeFilter;
-use crate::native::native_object::NativeObject;
 use std::iter::Flatten;
 use std::vec::IntoIter;
 
@@ -36,7 +36,7 @@ impl<'txn> UnsortedDistinctQueryIterator<'txn> {
 }
 
 impl<'txn> Iterator for UnsortedDistinctQueryIterator<'txn> {
-    type Item = (i64, NativeObject<'txn>);
+    type Item = (i64, IsarDeserializer<'txn>);
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {

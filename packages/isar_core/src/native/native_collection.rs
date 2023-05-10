@@ -26,10 +26,10 @@ impl NativeProperty {
 #[derive(Clone)]
 pub struct NativeCollection {
     pub(crate) collection_index: usize,
-    pub(crate) properties: Vec<NativeProperty>,
+    properties: Vec<NativeProperty>,
     pub(crate) indexes: Vec<NativeIndex>,
     pub(crate) embedded: bool,
-    pub(crate) static_size: u16,
+    pub(crate) static_size: u32,
     db: Option<Db>,
     auto_increment: Cell<i64>,
 }
@@ -51,13 +51,13 @@ impl NativeCollection {
             properties,
             indexes,
             embedded,
-            static_size: static_size as u16,
+            static_size: static_size,
             db,
             auto_increment: Cell::new(i64::MIN),
         }
     }
 
-    pub fn init_auto_increment(&self, txn: &NativeTxn) -> Result<()> {
+    pub fn init_largest_id(&self, txn: &NativeTxn) -> Result<()> {
         if let Some(db) = self.db {
             let mut cursor = txn.get_cursor(db)?;
             if let Some((key, _)) = cursor.move_to_last()? {
@@ -68,13 +68,14 @@ impl NativeCollection {
         Ok(())
     }
 
-    pub fn auto_increment(&self) -> Result<i64> {
+    pub fn get_largest_id(&self) -> i64 {
+        self.auto_increment.get()
+    }
+
+    pub fn update_largest_id(&self, id: i64) {
         let last = self.auto_increment.get();
-        if last < i64::MAX {
-            self.auto_increment.set(last + 1);
-            Ok(last + 1)
-        } else {
-            Err(IsarError::AutoIncrementOverflow {})
+        if last < id {
+            self.auto_increment.set(last);
         }
     }
 
@@ -82,6 +83,15 @@ impl NativeCollection {
         self.db.ok_or(IsarError::UnsupportedOperation {
             message: "Operation not supported for embedded collections".to_string(),
         })
+    }
+
+    #[inline]
+    pub fn get_property(&self, property_index: u32) -> Option<NativeProperty> {
+        if property_index != 0 {
+            self.properties.get(property_index as usize - 1).copied()
+        } else {
+            None
+        }
     }
 }
 

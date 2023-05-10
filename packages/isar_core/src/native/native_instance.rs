@@ -10,7 +10,7 @@ use crate::core::instance::{CompactCondition, IsarInstance};
 use crate::core::schema::IsarSchema;
 use intmap::IntMap;
 use once_cell::sync::Lazy;
-use std::fs::{self};
+use std::fs::{self, remove_file};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
@@ -96,6 +96,11 @@ impl IsarInstance for NativeInstance {
         }
     }
 
+    fn get_largest_id(&self, collection_index: u16) -> Result<i64> {
+        let collection = &self.collections[collection_index as usize];
+        Ok(collection.get_largest_id())
+    }
+
     fn insert<'a>(
         &'a self,
         txn: NativeTxn,
@@ -112,6 +117,15 @@ impl IsarInstance for NativeInstance {
         let collection = &self.collections[collection_index as usize];
         let (count, _) = txn.stat(collection.get_db()?)?;
         Ok(count as u32)
+    }
+
+    fn get_size(
+        &self,
+        collection_index: Option<u16>,
+        include_indexes: bool,
+        include_links: bool,
+    ) -> Result<u32> {
+        panic!()
     }
 
     fn query(&self, collection_index: u16) -> Result<Self::QueryBuilder<'_>> {
@@ -139,6 +153,27 @@ impl IsarInstance for NativeInstance {
         self.verify_instance_id(txn.instance_id)?;
         let collection = &self.collections[query.collection_index];
         query.delete(txn, collection)
+    }
+
+    fn close(instance: Arc<Self>, delete: bool) -> bool {
+        // Check whether all other references are gone
+        if Arc::strong_count(&instance) == 2 {
+            let mut lock = INSTANCES.lock().unwrap();
+            // Check again to make sure there are no new references
+            if Arc::strong_count(&instance) == 2 {
+                lock.remove(instance.instance_id as u64);
+
+                if delete {
+                    let mut path = Self::get_isar_path(&instance.name, &instance.dir);
+                    drop(instance);
+                    let _ = remove_file(&path);
+                    path.push_str(".lock");
+                    let _ = remove_file(&path);
+                }
+                return true;
+            }
+        }
+        false
     }
 }
 
@@ -174,9 +209,10 @@ impl NativeInstance {
         let db_count = schema
             .collections
             .iter()
+            .filter(|c| !c.embedded)
             .map(|c| c.indexes.len() as u32 + 1)
             .sum::<u32>()
-            + 3;
+            + 1;
         let env = Env::create(
             &isar_file,
             db_count,

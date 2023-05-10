@@ -5,11 +5,6 @@ use std::ptr::null_mut;
 #[no_mangle]
 pub unsafe extern "C" fn isar_insert_save(insert: *mut *mut CIsarInsert<'static>, id: i64) -> u8 {
     isar_try! {
-        let id = if id != i64::MIN {
-            Some(id)
-        } else {
-            None
-        };
         let old_insert = *Box::from_raw(*insert);
         insert.write(null_mut());
         let new_insert = match old_insert {

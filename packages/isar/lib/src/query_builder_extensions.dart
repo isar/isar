@@ -1,13 +1,5 @@
 part of isar;
 
-/// Extension for QueryBuilders.
-extension QueryFilters<OBJ, R> on QueryBuilder<OBJ, R, QFilter> {
-  /// Start using filter conditions.
-  QueryBuilder<OBJ, R, QFilterCondition> filter() {
-    return QueryBuilder(_query);
-  }
-}
-
 /// @nodoc
 @protected
 typedef FilterRepeatModifier<OBJ, R, E>

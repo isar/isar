@@ -25,11 +25,11 @@ pub trait IsarWriter<'a> {
 
     fn write_byte_list(&mut self, value: &[u8]);
 
-    fn begin_object(&mut self) -> Self::ObjectWriter;
+    fn begin_object(&mut self) -> Option<Self::ObjectWriter>;
 
     fn end_object(&mut self, writer: Self::ObjectWriter);
 
-    fn begin_list(&mut self, length: u32) -> Self::ListWriter;
+    fn begin_list(&mut self, length: u32) -> Option<Self::ListWriter>;
 
     fn end_list(&mut self, writer: Self::ListWriter);
 }

@@ -8,7 +8,7 @@ String generatePropertyQuery(ObjectInfo oi) {
     code += '''
       QueryBuilder<${oi.dartName}, ${property.dartType}, QQueryOperations>${property.dartName}Property() {
         return QueryBuilder.apply(this, (query) {
-          return query.addPropertyName(r'${property.isarName}');
+          return query.addProperty(${property.index});
         });
       }''';
   }

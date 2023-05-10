@@ -24,17 +24,21 @@ pub enum DataType {
 }
 
 impl DataType {
-    pub fn is_list(&self) -> bool {
+    pub const fn is_list(&self) -> bool {
+        self.element_type().is_some()
+    }
+
+    pub const fn element_type(&self) -> Option<DataType> {
         match self {
-            DataType::BoolList
-            | DataType::ByteList
-            | DataType::IntList
-            | DataType::FloatList
-            | DataType::LongList
-            | DataType::DoubleList
-            | DataType::StringList
-            | DataType::ObjectList => true,
-            _ => false,
+            DataType::BoolList => Some(DataType::Bool),
+            DataType::ByteList => Some(DataType::Byte),
+            DataType::IntList => Some(DataType::Int),
+            DataType::FloatList => Some(DataType::Float),
+            DataType::LongList => Some(DataType::Long),
+            DataType::DoubleList => Some(DataType::Double),
+            DataType::StringList => Some(DataType::String),
+            DataType::ObjectList => Some(DataType::Object),
+            _ => None,
         }
     }
 }

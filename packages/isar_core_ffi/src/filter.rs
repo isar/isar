@@ -37,20 +37,20 @@ pub unsafe extern "C" fn isar_filter_value_string(value: *mut String) -> *const 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_filter_is_null(property: u16) -> *const Filter {
-    let filter = Filter::Condition(FilterCondition::new_is_null(property));
+pub unsafe extern "C" fn isar_filter_is_null(property_index: u32) -> *const Filter {
+    let filter = Filter::Condition(FilterCondition::new_is_null(property_index));
     Box::into_raw(Box::new(filter))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_equal_to(
-    property: u16,
+    property_index: u32,
     value: *mut FilterValue,
     case_sensitive: bool,
 ) -> *const Filter {
     let value = *Box::from_raw(value);
     let filter = Filter::Condition(FilterCondition::new_equal_to(
-        property,
+        property_index,
         value,
         case_sensitive,
     ));
@@ -59,7 +59,7 @@ pub unsafe extern "C" fn isar_filter_equal_to(
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_greater_than(
-    property: u16,
+    property_index: u32,
     value: *mut FilterValue,
     include: bool,
     case_sensitive: bool,
@@ -67,14 +67,14 @@ pub unsafe extern "C" fn isar_filter_greater_than(
     let value = *Box::from_raw(value);
     let filter = if !include {
         Filter::Condition(FilterCondition::new_greater_than(
-            property,
+            property_index,
             value,
             case_sensitive,
         ))
     } else {
         let upper = value.get_max();
         Filter::Condition(FilterCondition::new_between(
-            property,
+            property_index,
             value,
             upper,
             case_sensitive,
@@ -85,7 +85,7 @@ pub unsafe extern "C" fn isar_filter_greater_than(
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_less_than(
-    property: u16,
+    property_index: u32,
     value: *mut FilterValue,
     include: bool,
     case_sensitive: bool,
@@ -93,14 +93,14 @@ pub unsafe extern "C" fn isar_filter_less_than(
     let value = *Box::from_raw(value);
     let filter = if !include {
         Filter::Condition(FilterCondition::new_less_than(
-            property,
+            property_index,
             value,
             case_sensitive,
         ))
     } else {
         let lower = value.get_null();
         Filter::Condition(FilterCondition::new_between(
-            property,
+            property_index,
             lower,
             value,
             case_sensitive,
@@ -111,7 +111,7 @@ pub unsafe extern "C" fn isar_filter_less_than(
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_between(
-    property: u16,
+    property_index: u32,
     lower: *mut FilterValue,
     include_lower: bool,
     upper: *mut FilterValue,
@@ -135,7 +135,7 @@ pub unsafe extern "C" fn isar_filter_between(
         }
     }
     let filter = Filter::Condition(FilterCondition::new_between(
-        property,
+        property_index,
         lower,
         upper,
         case_sensitive,
@@ -145,14 +145,14 @@ pub unsafe extern "C" fn isar_filter_between(
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_string_starts_with(
-    property: u16,
+    property_index: u32,
     value: *mut FilterValue,
     case_sensitive: bool,
 ) -> *const Filter {
     let value = *Box::from_raw(value);
     let filter = if let FilterValue::String(Some(value)) = value {
         Filter::Condition(FilterCondition::new_string_starts_with(
-            property,
+            property_index,
             &value,
             case_sensitive,
         ))
@@ -164,14 +164,14 @@ pub unsafe extern "C" fn isar_filter_string_starts_with(
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_string_ends_with(
-    property: u16,
+    property_index: u32,
     value: *mut FilterValue,
     case_sensitive: bool,
 ) -> *const Filter {
     let value = *Box::from_raw(value);
     let filter = if let FilterValue::String(Some(value)) = value {
         Filter::Condition(FilterCondition::new_string_ends_with(
-            property,
+            property_index,
             &value,
             case_sensitive,
         ))
@@ -183,14 +183,14 @@ pub unsafe extern "C" fn isar_filter_string_ends_with(
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_string_contains(
-    property: u16,
+    property_index: u32,
     value: *mut FilterValue,
     case_sensitive: bool,
 ) -> *const Filter {
     let value = *Box::from_raw(value);
     let filter = if let FilterValue::String(Some(value)) = value {
         Filter::Condition(FilterCondition::new_string_contains(
-            property,
+            property_index,
             &value,
             case_sensitive,
         ))
@@ -202,14 +202,14 @@ pub unsafe extern "C" fn isar_filter_string_contains(
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_string_matches(
-    property: u16,
+    property_index: u32,
     value: *mut FilterValue,
     case_sensitive: bool,
 ) -> *const Filter {
     let value = *Box::from_raw(value);
     let filter = if let FilterValue::String(Some(value)) = value {
         Filter::Condition(FilterCondition::new_string_matches(
-            property,
+            property_index,
             &value,
             case_sensitive,
         ))

@@ -1,8 +1,12 @@
+// ignore_for_file: use_string_buffers
+
 import 'package:isar/src/generator/helper.dart';
 import 'package:isar/src/generator/isar_type.dart';
 import 'package:isar/src/generator/object_info.dart';
 
 String generateSortBy(ObjectInfo oi) {
+  final prefix = 'QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>';
+
   var code = '''
   extension ${oi.dartName}QuerySortBy on QueryBuilder<${oi.dartName}, ${oi.dartName}, QSortBy> {''';
 
@@ -11,16 +15,21 @@ String generateSortBy(ObjectInfo oi) {
       continue;
     }
 
+    final caseSensitiveParam =
+        property.type.isString ? '{bool caseSensitive = true}' : '';
+    final caseSensitiveArg =
+        property.type.isString ? ', caseSensitive: caseSensitive,' : '';
+
     code += '''
-    QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>sortBy${property.dartName.capitalize()}() {
+    ${prefix}sortBy${property.dartName.capitalize()}($caseSensitiveParam) {
       return QueryBuilder.apply(this, (query) {
-        return query.addSortBy(r'${property.isarName}', Sort.asc);
+        return query.addSortBy(${property.index} $caseSensitiveArg);
       });
     }
     
-    QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>sortBy${property.dartName.capitalize()}Desc() {
+    ${prefix}sortBy${property.dartName.capitalize()}Desc($caseSensitiveParam) {
       return QueryBuilder.apply(this, (query) {
-        return query.addSortBy(r'${property.isarName}', Sort.desc);
+        return query.addSortBy(${property.index}, sort: Sort.desc $caseSensitiveArg);
       });
     }''';
   }
@@ -35,16 +44,21 @@ String generateSortBy(ObjectInfo oi) {
       continue;
     }
 
+    final caseSensitiveParam =
+        property.type.isString ? '{bool caseSensitive = true}' : '';
+    final caseSensitiveArg =
+        property.type.isString ? ', caseSensitive: caseSensitive' : '';
+
     code += '''
-    QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>thenBy${property.dartName.capitalize()}() {
+    ${prefix}thenBy${property.dartName.capitalize()}($caseSensitiveParam) {
       return QueryBuilder.apply(this, (query) {
-        return query.addSortBy(r'${property.isarName}', Sort.asc);
+        return query.addSortBy(${property.index} $caseSensitiveArg);
       });
     }
     
-    QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterSortBy>thenBy${property.dartName.capitalize()}Desc() {
+    ${prefix}thenBy${property.dartName.capitalize()}Desc($caseSensitiveParam) {
       return QueryBuilder.apply(this, (query) {
-        return query.addSortBy(r'${property.isarName}', Sort.desc);
+        return query.addSortBy(${property.index}, sort: Sort.desc $caseSensitiveArg);
       });
     }''';
   }

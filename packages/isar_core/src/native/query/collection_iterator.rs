@@ -3,9 +3,9 @@ use super::QueryIndex;
 use crate::core::error::Result;
 use crate::core::query_builder::Sort;
 use crate::native::index::id_key::BytesToId;
+use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::mdbx::cursor_iterator::{CursorBetweenIterator, CursorIterator};
 use crate::native::native_collection::NativeCollection;
-use crate::native::native_object::NativeObject;
 use crate::native::native_txn::{NativeTxn, TxnCursor};
 
 pub(crate) enum CollectionIterator<'txn> {
@@ -43,19 +43,19 @@ impl<'txn> CollectionIterator<'txn> {
 }
 
 impl<'txn> Iterator for CollectionIterator<'txn> {
-    type Item = (i64, NativeObject<'txn>);
+    type Item = (i64, IsarDeserializer<'txn>);
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         match self {
             CollectionIterator::Full(iterator) => {
                 let (key, value) = iterator.next()?;
-                Some((key.to_id(), NativeObject::from_bytes(value)))
+                Some((key.to_id(), IsarDeserializer::from_bytes(value)))
             }
             CollectionIterator::Ids(iterator) => iterator.next(),
             CollectionIterator::IdsBetween(iterator) => {
                 let (key, value) = iterator.next()?;
-                Some((key.to_id(), NativeObject::from_bytes(value)))
+                Some((key.to_id(), IsarDeserializer::from_bytes(value)))
             }
             CollectionIterator::IndexBetween(_) => todo!(),
         }

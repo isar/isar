@@ -14,7 +14,7 @@ impl FilterCondition {
             (ConditionType::False, _) => Self::new_false(),
             (_, ConditionType::False) => Self::new_false(),
             (ConditionType::Between, ConditionType::Between) => {
-                if self.get_property() != other.get_property()
+                if self.get_property_index() != other.get_property_index()
                     || self.get_case_sensitive() != other.get_case_sensitive()
                 {
                     return None;
@@ -24,7 +24,7 @@ impl FilterCondition {
                 let new_lower = if lower1 > lower2 { lower1 } else { lower2 };
                 let new_upper = if upper1 < upper2 { upper1 } else { upper2 };
                 Self::new_between(
-                    self.get_property(),
+                    self.get_property_index(),
                     new_lower.clone(),
                     new_upper.clone(),
                     self.get_case_sensitive(),
@@ -48,7 +48,7 @@ impl FilterCondition {
             (ConditionType::False, _) => other.clone(),
             (_, ConditionType::False) => self.clone(),
             (ConditionType::Between, ConditionType::Between) => {
-                if self.get_property() != other.get_property()
+                if self.get_property_index() != other.get_property_index()
                     || self.get_case_sensitive() != other.get_case_sensitive()
                 {
                     return None;
@@ -58,7 +58,7 @@ impl FilterCondition {
                 if lower1 <= lower2 && upper1 >= lower2 {
                     let upper = if upper1 > upper2 { upper1 } else { upper2 };
                     Self::new_between(
-                        self.get_property(),
+                        self.get_property_index(),
                         lower1.clone(),
                         upper.clone(),
                         self.get_case_sensitive(),
@@ -66,21 +66,21 @@ impl FilterCondition {
                 } else if lower2 <= lower1 && upper2 >= lower1 {
                     let upper = if upper1 > upper2 { upper1 } else { upper2 };
                     Self::new_between(
-                        self.get_property(),
+                        self.get_property_index(),
                         lower2.clone(),
                         upper.clone(),
                         self.get_case_sensitive(),
                     )
                 } else if &upper1.try_increment()? == lower2 {
                     Self::new_between(
-                        self.get_property(),
+                        self.get_property_index(),
                         lower1.clone(),
                         upper2.clone(),
                         self.get_case_sensitive(),
                     )
                 } else if &upper2.try_increment()? == lower1 {
                     Self::new_between(
-                        self.get_property(),
+                        self.get_property_index(),
                         lower2.clone(),
                         upper1.clone(),
                         self.get_case_sensitive(),
@@ -102,24 +102,24 @@ impl FilterCondition {
                 let (lower, upper) = self.get_lower_upper();
                 if lower.is_null() {
                     Self::new_greater_than(
-                        self.get_property(),
+                        self.get_property_index(),
                         upper.clone(),
                         self.get_case_sensitive(),
                     )
                 } else if upper.is_max() {
                     Self::new_less_than(
-                        self.get_property(),
+                        self.get_property_index(),
                         lower.clone(),
                         self.get_case_sensitive(),
                     )
                 } else {
                     let lower = Self::new_less_than(
-                        self.get_property(),
+                        self.get_property_index(),
                         lower.clone(),
                         self.get_case_sensitive(),
                     );
                     let upper = Self::new_greater_than(
-                        self.get_property(),
+                        self.get_property_index(),
                         upper.clone(),
                         self.get_case_sensitive(),
                     );

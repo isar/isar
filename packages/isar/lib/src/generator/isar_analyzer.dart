@@ -13,9 +13,13 @@ class IsarAnalyzer {
     final modelClass = element as ClassElement;
 
     final properties = <PropertyInfo>[];
+    var index = 1;
     for (final propertyElement in modelClass.allAccessors) {
-      final property = analyzePropertyInfo(propertyElement, constructor);
+      final property = analyzePropertyInfo(propertyElement, constructor, index);
       properties.add(property);
+      if (!property.isId || property.type == PropertyType.string) {
+        index++;
+      }
     }
     _checkValidPropertiesConstructor(properties, constructor);
 
@@ -50,8 +54,9 @@ class IsarAnalyzer {
     }
 
     final properties = <PropertyInfo>[];
-    for (final propertyElement in modelClass.allAccessors) {
-      final property = analyzePropertyInfo(propertyElement, constructor);
+    for (var i = 0; i < modelClass.allAccessors.length; i++) {
+      final propertyElement = modelClass.allAccessors[i];
+      final property = analyzePropertyInfo(propertyElement, constructor, i);
       properties.add(property);
     }
     _checkValidPropertiesConstructor(properties, constructor);
@@ -158,6 +163,7 @@ class IsarAnalyzer {
   PropertyInfo analyzePropertyInfo(
     PropertyInducingElement property,
     ConstructorElement constructor,
+    int propertyIndex,
   ) {
     final dartType = property.type;
     final scalarDartType = dartType.scalarType;
@@ -289,6 +295,7 @@ class IsarAnalyzer {
     }
 
     return PropertyInfo(
+      index: isId && type == PropertyType.long ? 0 : propertyIndex,
       dartName: property.displayName,
       isarName: property.isarName,
       typeClassName: dartType.scalarType.element!.name!,

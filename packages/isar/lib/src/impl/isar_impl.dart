@@ -1,7 +1,7 @@
 part of isar;
 
 class _IsarImpl implements Isar {
-  _IsarImpl._(this.ptr, this.converters) {
+  _IsarImpl._(Pointer<CIsarInstance> ptr, this.converters) : _ptr = ptr {
     for (var i = 0; i < converters.length; i++) {
       final converter = converters[i];
       collections[converter.type] = converters[i].withType(
@@ -12,11 +12,10 @@ class _IsarImpl implements Isar {
     }
   }
 
-  final Pointer<CIsarInstance> ptr;
   final List<ObjectConverter<dynamic, dynamic>> converters;
-
   final collections = <Type, _IsarCollectionImpl<dynamic, dynamic>>{};
 
+  Pointer<CIsarInstance>? _ptr;
   Pointer<CIsarTxn>? _txnPtr;
   bool _txnWrite = false;
 
@@ -74,17 +73,35 @@ class _IsarImpl implements Isar {
     return _IsarImpl._(isarPtrPtr.value, converters);
   }
 
-  T getTxn<T>(T Function(Pointer<CIsarTxn> txnPtr) callback) {
+  @pragma('vm:prefer-inline')
+  Pointer<CIsarInstance> getPtr() {
+    final ptr = _ptr;
+    if (ptr == null) {
+      throw IsarError('Isar instance has already been closed');
+    } else {
+      return ptr;
+    }
+  }
+
+  T getTxn<T>(
+    T Function(
+      Pointer<CIsarInstance> isarPtr,
+      Pointer<CIsarTxn> txnPtr,
+    ) callback,
+  ) {
     final txnPtr = _txnPtr;
     if (txnPtr != null) {
-      return callback(txnPtr);
+      return callback(_ptr!, txnPtr);
     } else {
-      return _txn(write: false, (isar) => callback(_txnPtr!));
+      return _txn(write: false, (isar) => callback(_ptr!, _txnPtr!));
     }
   }
 
   T getWriteTxn<T>(
-    (T, Pointer<CIsarTxn>?) Function(Pointer<CIsarTxn> txnPtr) callback, {
+    (T, Pointer<CIsarTxn>?) Function(
+      Pointer<CIsarInstance> isarPtr,
+      Pointer<CIsarTxn> txnPtr,
+    ) callback, {
     bool consume = false,
   }) {
     final txnPtr = _txnPtr;
@@ -93,7 +110,7 @@ class _IsarImpl implements Isar {
         if (consume) {
           _txnPtr = null;
         }
-        final (result, returnedPtr) = callback(txnPtr);
+        final (result, returnedPtr) = callback(_ptr!, txnPtr);
         _txnPtr = returnedPtr;
         return result;
       } else {
@@ -109,6 +126,7 @@ class _IsarImpl implements Isar {
       throw 'Nested transactions are not supported';
     }
 
+    final ptr = getPtr();
     final txnPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarTxn>>();
     IsarCore.isar_txn_begin(ptr, txnPtrPtr, write).checkNoError();
     try {
@@ -127,6 +145,9 @@ class _IsarImpl implements Isar {
       _txnPtr = null;
     }
   }
+
+  @override
+  bool get isOpen => _ptr != null;
 
   @override
   IsarCollection<ID, OBJ> collection<ID, OBJ>() {
@@ -151,5 +172,12 @@ class _IsarImpl implements Isar {
   @override
   void clear() {
     // TODO: implement clear
+  }
+
+  @override
+  bool close({bool deleteFromDisk = false}) {
+    final closed = IsarCore.isar_close(_ptr!, deleteFromDisk);
+    _ptr = null;
+    return closed;
   }
 }

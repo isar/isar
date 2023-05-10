@@ -226,7 +226,8 @@ class QueryBuilderInternal<OBJ> {
 ///
 /// Right after query starts
 @protected
-sealed class QFilter implements QSortBy, QDistinct, QQueryProperty {}
+interface class QStart
+    implements QFilterCondition, QSortBy, QDistinct, QQueryProperty {}
 
 /// @nodoc
 @protected
@@ -234,7 +235,7 @@ sealed class QFilterCondition {}
 
 /// @nodoc
 @protected
-sealed class QAfterFilterCondition
+interface class QAfterFilterCondition
     implements
         QFilterCondition,
         QFilterOperator,
@@ -244,32 +245,33 @@ sealed class QAfterFilterCondition
 
 /// @nodoc
 @protected
-sealed class QFilterOperator {}
+interface class QFilterOperator {}
 
 /// @nodoc
 @protected
-sealed class QAfterFilterOperator implements QFilterCondition {}
+interface class QAfterFilterOperator implements QFilterCondition {}
 
 /// @nodoc
 @protected
-sealed class QSortBy {}
+interface class QSortBy {}
 
 /// @nodoc
 @protected
-sealed class QAfterSortBy implements QSortThenBy, QDistinct, QQueryProperty {}
+interface class QAfterSortBy
+    implements QSortThenBy, QDistinct, QQueryProperty {}
 
 /// @nodoc
 @protected
-sealed class QSortThenBy {}
+interface class QSortThenBy {}
 
 /// @nodoc
 @protected
-sealed class QDistinct implements QQueryProperty {}
+interface class QDistinct implements QQueryProperty {}
 
 /// @nodoc
 @protected
-sealed class QQueryProperty implements QQueryOperations {}
+interface class QQueryProperty implements QQueryOperations {}
 
 /// @nodoc
 @protected
-sealed class QQueryOperations {}
+interface class QQueryOperations {}

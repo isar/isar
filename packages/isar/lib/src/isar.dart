@@ -41,6 +41,8 @@ abstract class Isar {
 
   static const String version = '4.0.0';
 
+  bool get isOpen;
+
   IsarCollection<ID, OBJ> collection<ID, OBJ>();
 
   T txn<T>(T Function(Isar isar) callback);
@@ -48,6 +50,8 @@ abstract class Isar {
   T writeTxn<T>(T Function(Isar isar) callback);
 
   void clear();
+
+  bool close({bool deleteFromDisk = false});
 
   /// Initialize Isar Core manually. You need to provide Isar Core libraries
   /// for every platform your app will run on.

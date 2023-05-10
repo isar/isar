@@ -82,8 +82,9 @@ pub unsafe extern "C" fn isar_query_set_filter(
     filter: *mut Filter,
 ) {
     let filter = *Box::from_raw(filter);
+    let optimized = filter.optimize();
     match builder {
-        CIsarQueryBuilder::Native(builder) => builder.set_filter(filter),
+        CIsarQueryBuilder::Native(builder) => builder.set_filter(optimized),
     }
 }
 
@@ -92,10 +93,24 @@ pub unsafe extern "C" fn isar_query_add_sort(
     builder: &'static mut CIsarQueryBuilder,
     property_index: u16,
     ascending: bool,
+    case_sensitive: bool,
 ) {
     let sort = if ascending { Sort::Asc } else { Sort::Desc };
     match builder {
-        CIsarQueryBuilder::Native(builder) => builder.add_sort(property_index, sort),
+        CIsarQueryBuilder::Native(builder) => {
+            builder.add_sort(property_index, sort, case_sensitive)
+        }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_query_add_distinct(
+    builder: &'static mut CIsarQueryBuilder,
+    property_index: u16,
+    case_sensitive: bool,
+) {
+    match builder {
+        CIsarQueryBuilder::Native(builder) => builder.add_distinct(property_index, case_sensitive),
     }
 }
 

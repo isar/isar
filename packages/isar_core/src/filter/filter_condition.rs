@@ -15,36 +15,36 @@ pub enum ConditionType {
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct FilterCondition {
-    property: u16,
+    property_index: u32,
     condition_type: ConditionType,
     values: Vec<FilterValue>,
     case_sensitive: bool,
 }
 
 impl FilterCondition {
-    pub fn new_is_null(property: u16) -> Self {
+    pub fn new_is_null(property_index: u32) -> Self {
         FilterCondition {
-            property,
+            property_index,
             condition_type: ConditionType::IsNull,
             values: Vec::new(),
             case_sensitive: false,
         }
     }
 
-    pub fn new_equal_to(property: u16, value: FilterValue, case_sensitive: bool) -> Self {
+    pub fn new_equal_to(property_index: u32, value: FilterValue, case_sensitive: bool) -> Self {
         FilterCondition {
-            property,
+            property_index,
             condition_type: ConditionType::Between,
             values: vec![value.clone(), value],
             case_sensitive,
         }
     }
 
-    pub fn new_greater_than(property: u16, value: FilterValue, case_sensitive: bool) -> Self {
+    pub fn new_greater_than(property_index: u32, value: FilterValue, case_sensitive: bool) -> Self {
         if let Some(value) = value.try_increment() {
             let max = value.get_max();
             FilterCondition {
-                property,
+                property_index,
                 condition_type: ConditionType::Between,
                 values: vec![value, max],
                 case_sensitive,
@@ -54,13 +54,17 @@ impl FilterCondition {
         }
     }
 
-    pub fn new_greater_than_equal(property: u16, value: FilterValue, case_sensitive: bool) -> Self {
+    pub fn new_greater_than_equal(
+        property_index: u32,
+        value: FilterValue,
+        case_sensitive: bool,
+    ) -> Self {
         if value.is_null() {
             Self::new_true()
         } else {
             let max = value.get_max();
             FilterCondition {
-                property,
+                property_index,
                 condition_type: ConditionType::Between,
                 values: vec![value, max],
                 case_sensitive,
@@ -68,10 +72,10 @@ impl FilterCondition {
         }
     }
 
-    pub fn new_less_than(property: u16, value: FilterValue, case_sensitive: bool) -> Self {
+    pub fn new_less_than(property_index: u32, value: FilterValue, case_sensitive: bool) -> Self {
         if let Some(value) = value.try_decrement() {
             FilterCondition {
-                property,
+                property_index,
                 condition_type: ConditionType::Between,
                 values: vec![value.get_null(), value],
                 case_sensitive,
@@ -81,12 +85,16 @@ impl FilterCondition {
         }
     }
 
-    pub fn new_less_than_equal(property: u16, value: FilterValue, case_sensitive: bool) -> Self {
+    pub fn new_less_than_equal(
+        property_index: u32,
+        value: FilterValue,
+        case_sensitive: bool,
+    ) -> Self {
         if value.is_max() {
             Self::new_true()
         } else {
             FilterCondition {
-                property,
+                property_index,
                 condition_type: ConditionType::Between,
                 values: vec![value.get_null(), value],
                 case_sensitive,
@@ -95,7 +103,7 @@ impl FilterCondition {
     }
 
     pub fn new_between(
-        property: u16,
+        property_index: u32,
         lower: FilterValue,
         upper: FilterValue,
         case_sensitive: bool,
@@ -105,7 +113,7 @@ impl FilterCondition {
         }
         match lower.partial_cmp(&upper) {
             Some(Ordering::Less | Ordering::Equal) => FilterCondition {
-                property,
+                property_index,
                 condition_type: ConditionType::Between,
                 values: vec![lower, upper],
                 case_sensitive,
@@ -114,11 +122,11 @@ impl FilterCondition {
         }
     }
 
-    pub fn new_string_starts_with(property: u16, value: &str, case_sensitive: bool) -> Self {
+    pub fn new_string_starts_with(property_index: u32, value: &str, case_sensitive: bool) -> Self {
         let lower = value.to_string();
         let upper = format!("{}{}", value, '\u{10FFFF}');
         FilterCondition {
-            property,
+            property_index,
             condition_type: ConditionType::Between,
             values: vec![
                 FilterValue::String(Some(lower)),
@@ -128,27 +136,27 @@ impl FilterCondition {
         }
     }
 
-    pub fn new_string_ends_with(property: u16, value: &str, case_sensitive: bool) -> Self {
+    pub fn new_string_ends_with(property_index: u32, value: &str, case_sensitive: bool) -> Self {
         FilterCondition {
-            property,
+            property_index,
             condition_type: ConditionType::StringEndsWith,
             values: vec![FilterValue::String(Some(value.to_string()))],
             case_sensitive,
         }
     }
 
-    pub fn new_string_contains(property: u16, value: &str, case_sensitive: bool) -> Self {
+    pub fn new_string_contains(property_index: u32, value: &str, case_sensitive: bool) -> Self {
         FilterCondition {
-            property,
+            property_index,
             condition_type: ConditionType::StringContains,
             values: vec![FilterValue::String(Some(value.to_string()))],
             case_sensitive,
         }
     }
 
-    pub fn new_string_matches(property: u16, value: &str, case_sensitive: bool) -> Self {
+    pub fn new_string_matches(property_index: u32, value: &str, case_sensitive: bool) -> Self {
         FilterCondition {
-            property,
+            property_index,
             condition_type: ConditionType::StringMatches,
             values: vec![FilterValue::String(Some(value.to_string()))],
             case_sensitive,
@@ -157,7 +165,7 @@ impl FilterCondition {
 
     pub fn new_true() -> Self {
         FilterCondition {
-            property: u16::MAX,
+            property_index: u32::MAX,
             condition_type: ConditionType::True,
             values: Vec::new(),
             case_sensitive: false,
@@ -166,15 +174,15 @@ impl FilterCondition {
 
     pub fn new_false() -> Self {
         FilterCondition {
-            property: u16::MAX,
+            property_index: u32::MAX,
             condition_type: ConditionType::False,
             values: Vec::new(),
             case_sensitive: false,
         }
     }
 
-    pub fn get_property(&self) -> u16 {
-        self.property
+    pub fn get_property_index(&self) -> u32 {
+        self.property_index
     }
 
     pub fn get_condition_type(&self) -> ConditionType {
@@ -210,7 +218,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_is_null(0),
                 FilterCondition {
-                    property: 0,
+                    property_index: 0,
                     condition_type: ConditionType::IsNull,
                     values: vec![],
                     case_sensitive: false,
@@ -219,7 +227,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_is_null(1),
                 FilterCondition {
-                    property: 1,
+                    property_index: 1,
                     condition_type: ConditionType::IsNull,
                     values: vec![],
                     case_sensitive: false,
@@ -228,7 +236,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_is_null(42),
                 FilterCondition {
-                    property: 42,
+                    property_index: 42,
                     condition_type: ConditionType::IsNull,
                     values: vec![],
                     case_sensitive: false,
@@ -238,9 +246,9 @@ mod tests {
 
         #[test]
         fn test_get_property() {
-            assert_eq!(FilterCondition::new_is_null(0).get_property(), 0);
-            assert_eq!(FilterCondition::new_is_null(1).get_property(), 1);
-            assert_eq!(FilterCondition::new_is_null(42).get_property(), 42);
+            assert_eq!(FilterCondition::new_is_null(0).get_property_index(), 0);
+            assert_eq!(FilterCondition::new_is_null(1).get_property_index(), 1);
+            assert_eq!(FilterCondition::new_is_null(42).get_property_index(), 42);
         }
 
         #[test]
@@ -282,7 +290,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_equal_to(0, FilterValue::Bool(Some(true)), false),
                 FilterCondition {
-                    property: 0,
+                    property_index: 0,
                     condition_type: ConditionType::Between,
                     values: vec![FilterValue::Bool(Some(true)); 2],
                     case_sensitive: false,
@@ -291,7 +299,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_equal_to(1, FilterValue::Integer(2), false),
                 FilterCondition {
-                    property: 1,
+                    property_index: 1,
                     condition_type: ConditionType::Between,
                     values: vec![FilterValue::Integer(2); 2],
                     case_sensitive: false,
@@ -304,7 +312,7 @@ mod tests {
                     true
                 ),
                 FilterCondition {
-                    property: 42,
+                    property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![FilterValue::String(Some("foo".to_string())); 2],
                     case_sensitive: true,
@@ -316,11 +324,12 @@ mod tests {
         fn test_get_property() {
             assert_eq!(
                 FilterCondition::new_equal_to(0, FilterValue::Bool(Some(true)), false)
-                    .get_property(),
+                    .get_property_index(),
                 0
             );
             assert_eq!(
-                FilterCondition::new_equal_to(1, FilterValue::Integer(2), false).get_property(),
+                FilterCondition::new_equal_to(1, FilterValue::Integer(2), false)
+                    .get_property_index(),
                 1
             );
             assert_eq!(
@@ -329,7 +338,7 @@ mod tests {
                     FilterValue::String(Some("foo".to_string())),
                     true
                 )
-                .get_property(),
+                .get_property_index(),
                 42
             );
         }
@@ -454,7 +463,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_greater_than(1, FilterValue::Integer(2), false),
                 FilterCondition {
-                    property: 1,
+                    property_index: 1,
                     condition_type: ConditionType::Between,
                     values: vec![FilterValue::Integer(3), FilterValue::Integer(i64::MAX)],
                     case_sensitive: false,
@@ -471,7 +480,7 @@ mod tests {
                     true
                 ),
                 FilterCondition {
-                    property: 42,
+                    property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
                         FilterValue::String(Some("fop".to_string())),
@@ -487,7 +496,7 @@ mod tests {
                     false
                 ),
                 FilterCondition {
-                    property: 42,
+                    property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
                         FilterValue::String(Some("fop".to_string())),
@@ -502,17 +511,18 @@ mod tests {
         fn test_get_property() {
             assert_eq!(
                 FilterCondition::new_greater_than(0, FilterValue::Bool(Some(true)), false)
-                    .get_property(),
-                u16::MAX
+                    .get_property_index(),
+                u32::MAX
             );
             assert_eq!(
-                FilterCondition::new_greater_than(1, FilterValue::Integer(2), false).get_property(),
+                FilterCondition::new_greater_than(1, FilterValue::Integer(2), false)
+                    .get_property_index(),
                 1
             );
             assert_eq!(
                 FilterCondition::new_greater_than(2, FilterValue::Integer(i64::MAX), false)
-                    .get_property(),
-                u16::MAX
+                    .get_property_index(),
+                u32::MAX
             );
             assert_eq!(
                 FilterCondition::new_greater_than(
@@ -520,7 +530,7 @@ mod tests {
                     FilterValue::String(Some("foo".to_string())),
                     true
                 )
-                .get_property(),
+                .get_property_index(),
                 42
             );
         }
@@ -666,7 +676,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_greater_than_equal(0, FilterValue::Bool(Some(true)), false),
                 FilterCondition {
-                    property: 0,
+                    property_index: 0,
                     condition_type: ConditionType::Between,
                     values: vec![FilterValue::Bool(Some(true)); 2],
                     case_sensitive: false,
@@ -679,7 +689,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_greater_than_equal(1, FilterValue::Integer(2), false),
                 FilterCondition {
-                    property: 1,
+                    property_index: 1,
                     condition_type: ConditionType::Between,
                     values: vec![FilterValue::Integer(2), FilterValue::Integer(i64::MAX)],
                     case_sensitive: false,
@@ -688,7 +698,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_greater_than_equal(2, FilterValue::Integer(i64::MAX), false),
                 FilterCondition {
-                    property: 2,
+                    property_index: 2,
                     condition_type: ConditionType::Between,
                     values: vec![FilterValue::Integer(i64::MAX); 2],
                     case_sensitive: false,
@@ -701,7 +711,7 @@ mod tests {
                     true
                 ),
                 FilterCondition {
-                    property: 42,
+                    property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
                         FilterValue::String(Some("foo".to_string())),
@@ -717,7 +727,7 @@ mod tests {
                     false
                 ),
                 FilterCondition {
-                    property: 42,
+                    property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
                         FilterValue::String(Some("foo".to_string())),
@@ -732,17 +742,17 @@ mod tests {
         fn test_get_property() {
             assert_eq!(
                 FilterCondition::new_greater_than_equal(0, FilterValue::Bool(Some(true)), false)
-                    .get_property(),
+                    .get_property_index(),
                 0
             );
             assert_eq!(
                 FilterCondition::new_greater_than_equal(1, FilterValue::Integer(2), false)
-                    .get_property(),
+                    .get_property_index(),
                 1
             );
             assert_eq!(
                 FilterCondition::new_greater_than_equal(1, FilterValue::Integer(i64::MAX), false)
-                    .get_property(),
+                    .get_property_index(),
                 1
             );
             assert_eq!(
@@ -751,7 +761,7 @@ mod tests {
                     FilterValue::String(Some("foo".to_string())),
                     true
                 )
-                .get_property(),
+                .get_property_index(),
                 42
             );
         }
@@ -902,7 +912,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_less_than(0, FilterValue::Bool(Some(true)), false),
                 FilterCondition {
-                    property: 0,
+                    property_index: 0,
                     condition_type: ConditionType::Between,
                     values: vec![FilterValue::Bool(None), FilterValue::Bool(Some(false))],
                     case_sensitive: false,
@@ -915,7 +925,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_less_than(1, FilterValue::Integer(2), false),
                 FilterCondition {
-                    property: 1,
+                    property_index: 1,
                     condition_type: ConditionType::Between,
                     values: vec![FilterValue::Integer(i64::MIN), FilterValue::Integer(1)],
                     case_sensitive: false,
@@ -932,7 +942,7 @@ mod tests {
                     true
                 ),
                 FilterCondition {
-                    property: 42,
+                    property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
                         FilterValue::String(None),
@@ -948,7 +958,7 @@ mod tests {
                     false
                 ),
                 FilterCondition {
-                    property: 42,
+                    property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
                         FilterValue::String(None),
@@ -963,20 +973,22 @@ mod tests {
         fn test_get_property() {
             assert_eq!(
                 FilterCondition::new_less_than(0, FilterValue::Bool(Some(true)), false)
-                    .get_property(),
+                    .get_property_index(),
                 0
             );
             assert_eq!(
-                FilterCondition::new_less_than(0, FilterValue::Bool(None), false).get_property(),
-                u16::MAX
+                FilterCondition::new_less_than(0, FilterValue::Bool(None), false)
+                    .get_property_index(),
+                u32::MAX
             );
             assert_eq!(
-                FilterCondition::new_less_than(1, FilterValue::Integer(2), false).get_property(),
+                FilterCondition::new_less_than(1, FilterValue::Integer(2), false)
+                    .get_property_index(),
                 1
             );
             assert_eq!(
                 FilterCondition::new_less_than(2, FilterValue::Integer(i64::MAX), false)
-                    .get_property(),
+                    .get_property_index(),
                 2
             );
             assert_eq!(
@@ -985,7 +997,7 @@ mod tests {
                     FilterValue::String(Some("foo".to_string())),
                     true
                 )
-                .get_property(),
+                .get_property_index(),
                 42
             );
         }
@@ -1148,7 +1160,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_less_than_equal(0, FilterValue::Bool(None), false),
                 FilterCondition {
-                    property: 0,
+                    property_index: 0,
                     condition_type: ConditionType::Between,
                     values: vec![FilterValue::Bool(None); 2],
                     case_sensitive: false,
@@ -1157,7 +1169,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_less_than_equal(1, FilterValue::Integer(2), false),
                 FilterCondition {
-                    property: 1,
+                    property_index: 1,
                     condition_type: ConditionType::Between,
                     values: vec![FilterValue::Integer(i64::MIN), FilterValue::Integer(2)],
                     case_sensitive: false,
@@ -1166,7 +1178,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_less_than_equal(2, FilterValue::Integer(i64::MIN), false),
                 FilterCondition {
-                    property: 2,
+                    property_index: 2,
                     condition_type: ConditionType::Between,
                     values: vec![FilterValue::Integer(i64::MIN); 2],
                     case_sensitive: false,
@@ -1179,7 +1191,7 @@ mod tests {
                     true
                 ),
                 FilterCondition {
-                    property: 42,
+                    property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
                         FilterValue::String(None),
@@ -1195,7 +1207,7 @@ mod tests {
                     false
                 ),
                 FilterCondition {
-                    property: 42,
+                    property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
                         FilterValue::String(None),
@@ -1210,23 +1222,23 @@ mod tests {
         fn test_get_property() {
             assert_eq!(
                 FilterCondition::new_less_than_equal(0, FilterValue::Bool(Some(true)), false)
-                    .get_property(),
-                u16::MAX
+                    .get_property_index(),
+                u32::MAX
             );
             assert_eq!(
                 FilterCondition::new_less_than_equal(0, FilterValue::Bool(None), false)
-                    .get_property(),
+                    .get_property_index(),
                 0
             );
             assert_eq!(
                 FilterCondition::new_less_than_equal(1, FilterValue::Integer(2), false)
-                    .get_property(),
+                    .get_property_index(),
                 1
             );
             assert_eq!(
                 FilterCondition::new_less_than_equal(2, FilterValue::Integer(i64::MAX), false)
-                    .get_property(),
-                u16::MAX
+                    .get_property_index(),
+                u32::MAX
             );
             assert_eq!(
                 FilterCondition::new_less_than_equal(
@@ -1234,7 +1246,7 @@ mod tests {
                     FilterValue::String(Some("foo".to_string())),
                     true
                 )
-                .get_property(),
+                .get_property_index(),
                 42
             );
         }
@@ -1398,7 +1410,7 @@ mod tests {
                     false
                 ),
                 FilterCondition {
-                    property: 0,
+                    property_index: 0,
                     condition_type: ConditionType::Between,
                     values: vec![
                         FilterValue::Bool(Some(false)),
@@ -1415,7 +1427,7 @@ mod tests {
                     false
                 ),
                 FilterCondition {
-                    property: 1,
+                    property_index: 1,
                     condition_type: ConditionType::Between,
                     values: vec![FilterValue::Integer(1), FilterValue::Integer(2)],
                     case_sensitive: false,
@@ -1447,7 +1459,7 @@ mod tests {
                     false
                 ),
                 FilterCondition {
-                    property: 2,
+                    property_index: 2,
                     condition_type: ConditionType::Between,
                     values: vec![
                         FilterValue::Integer(i64::MIN + 1),
@@ -1464,7 +1476,7 @@ mod tests {
                     false
                 ),
                 FilterCondition {
-                    property: 3,
+                    property_index: 3,
                     condition_type: ConditionType::Between,
                     values: vec![
                         FilterValue::String(Some("bar".to_string())),
@@ -1502,7 +1514,7 @@ mod tests {
                     FilterValue::Bool(Some(true)),
                     false
                 )
-                .get_property(),
+                .get_property_index(),
                 0
             );
             assert_eq!(
@@ -1512,7 +1524,7 @@ mod tests {
                     FilterValue::Integer(2),
                     false
                 )
-                .get_property(),
+                .get_property_index(),
                 1
             );
             assert_eq!(
@@ -1522,8 +1534,8 @@ mod tests {
                     FilterValue::Integer(i64::MAX),
                     false
                 )
-                .get_property(),
-                u16::MAX
+                .get_property_index(),
+                u32::MAX
             );
             assert_eq!(
                 FilterCondition::new_between(
@@ -1532,7 +1544,7 @@ mod tests {
                     FilterValue::Integer(i64::MAX),
                     false
                 )
-                .get_property(),
+                .get_property_index(),
                 2
             );
             assert_eq!(
@@ -1542,7 +1554,7 @@ mod tests {
                     FilterValue::String(Some("foo".to_string())),
                     false
                 )
-                .get_property(),
+                .get_property_index(),
                 3
             );
         }
@@ -1770,7 +1782,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_string_starts_with(0, "foo", true),
                 FilterCondition {
-                    property: 0,
+                    property_index: 0,
                     condition_type: ConditionType::Between,
                     values: vec![
                         FilterValue::String(Some("foo".to_string())),
@@ -1782,7 +1794,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_string_starts_with(1, "bar", false),
                 FilterCondition {
-                    property: 1,
+                    property_index: 1,
                     condition_type: ConditionType::Between,
                     values: vec![
                         FilterValue::String(Some("bar".to_string())),
@@ -1794,7 +1806,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_string_starts_with(2, "", false),
                 FilterCondition {
-                    property: 2,
+                    property_index: 2,
                     condition_type: ConditionType::Between,
                     values: vec![
                         FilterValue::String(Some("".to_string())),
@@ -1808,15 +1820,15 @@ mod tests {
         #[test]
         fn test_get_property() {
             assert_eq!(
-                FilterCondition::new_string_starts_with(0, "foo", true).get_property(),
+                FilterCondition::new_string_starts_with(0, "foo", true).get_property_index(),
                 0
             );
             assert_eq!(
-                FilterCondition::new_string_starts_with(1, "bar", false).get_property(),
+                FilterCondition::new_string_starts_with(1, "bar", false).get_property_index(),
                 1
             );
             assert_eq!(
-                FilterCondition::new_string_starts_with(2, "", false).get_property(),
+                FilterCondition::new_string_starts_with(2, "", false).get_property_index(),
                 2
             );
         }
@@ -1912,7 +1924,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_string_ends_with(0, "foo", true),
                 FilterCondition {
-                    property: 0,
+                    property_index: 0,
                     condition_type: ConditionType::StringEndsWith,
                     values: vec![FilterValue::String(Some("foo".to_string())),],
                     case_sensitive: true,
@@ -1921,7 +1933,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_string_ends_with(1, "bar", false),
                 FilterCondition {
-                    property: 1,
+                    property_index: 1,
                     condition_type: ConditionType::StringEndsWith,
                     values: vec![FilterValue::String(Some("bar".to_string())),],
                     case_sensitive: false,
@@ -1930,7 +1942,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_string_ends_with(2, "", false),
                 FilterCondition {
-                    property: 2,
+                    property_index: 2,
                     condition_type: ConditionType::StringEndsWith,
                     values: vec![FilterValue::String(Some("".to_string())),],
                     case_sensitive: false,
@@ -1941,15 +1953,15 @@ mod tests {
         #[test]
         fn test_get_property() {
             assert_eq!(
-                FilterCondition::new_string_ends_with(0, "foo", true).get_property(),
+                FilterCondition::new_string_ends_with(0, "foo", true).get_property_index(),
                 0
             );
             assert_eq!(
-                FilterCondition::new_string_ends_with(1, "bar", false).get_property(),
+                FilterCondition::new_string_ends_with(1, "bar", false).get_property_index(),
                 1
             );
             assert_eq!(
-                FilterCondition::new_string_ends_with(2, "", false).get_property(),
+                FilterCondition::new_string_ends_with(2, "", false).get_property_index(),
                 2
             );
         }
@@ -2027,7 +2039,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_string_contains(0, "foo", true),
                 FilterCondition {
-                    property: 0,
+                    property_index: 0,
                     condition_type: ConditionType::StringContains,
                     values: vec![FilterValue::String(Some("foo".to_string())),],
                     case_sensitive: true,
@@ -2036,7 +2048,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_string_contains(1, "bar", false),
                 FilterCondition {
-                    property: 1,
+                    property_index: 1,
                     condition_type: ConditionType::StringContains,
                     values: vec![FilterValue::String(Some("bar".to_string())),],
                     case_sensitive: false,
@@ -2045,7 +2057,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_string_contains(2, "", false),
                 FilterCondition {
-                    property: 2,
+                    property_index: 2,
                     condition_type: ConditionType::StringContains,
                     values: vec![FilterValue::String(Some("".to_string())),],
                     case_sensitive: false,
@@ -2056,15 +2068,15 @@ mod tests {
         #[test]
         fn test_get_property() {
             assert_eq!(
-                FilterCondition::new_string_contains(0, "foo", true).get_property(),
+                FilterCondition::new_string_contains(0, "foo", true).get_property_index(),
                 0
             );
             assert_eq!(
-                FilterCondition::new_string_contains(1, "bar", false).get_property(),
+                FilterCondition::new_string_contains(1, "bar", false).get_property_index(),
                 1
             );
             assert_eq!(
-                FilterCondition::new_string_contains(2, "", false).get_property(),
+                FilterCondition::new_string_contains(2, "", false).get_property_index(),
                 2
             );
         }
@@ -2142,7 +2154,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_string_matches(0, "foo", true),
                 FilterCondition {
-                    property: 0,
+                    property_index: 0,
                     condition_type: ConditionType::StringMatches,
                     values: vec![FilterValue::String(Some("foo".to_string())),],
                     case_sensitive: true,
@@ -2151,7 +2163,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_string_matches(1, "bar", false),
                 FilterCondition {
-                    property: 1,
+                    property_index: 1,
                     condition_type: ConditionType::StringMatches,
                     values: vec![FilterValue::String(Some("bar".to_string())),],
                     case_sensitive: false,
@@ -2160,7 +2172,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_string_matches(2, "", false),
                 FilterCondition {
-                    property: 2,
+                    property_index: 2,
                     condition_type: ConditionType::StringMatches,
                     values: vec![FilterValue::String(Some("".to_string())),],
                     case_sensitive: false,
@@ -2171,15 +2183,15 @@ mod tests {
         #[test]
         fn test_get_property() {
             assert_eq!(
-                FilterCondition::new_string_matches(0, "foo", true).get_property(),
+                FilterCondition::new_string_matches(0, "foo", true).get_property_index(),
                 0
             );
             assert_eq!(
-                FilterCondition::new_string_matches(1, "bar", false).get_property(),
+                FilterCondition::new_string_matches(1, "bar", false).get_property_index(),
                 1
             );
             assert_eq!(
-                FilterCondition::new_string_matches(2, "", false).get_property(),
+                FilterCondition::new_string_matches(2, "", false).get_property_index(),
                 2
             );
         }
@@ -2257,7 +2269,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_true(),
                 FilterCondition {
-                    property: u16::MAX,
+                    property_index: u32::MAX,
                     condition_type: ConditionType::True,
                     values: vec![],
                     case_sensitive: false,
@@ -2267,7 +2279,7 @@ mod tests {
 
         #[test]
         fn test_get_property() {
-            assert_eq!(FilterCondition::new_true().get_property(), u16::MAX);
+            assert_eq!(FilterCondition::new_true().get_property_index(), u32::MAX);
         }
 
         #[test]
@@ -2297,7 +2309,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_false(),
                 FilterCondition {
-                    property: u16::MAX,
+                    property_index: u32::MAX,
                     condition_type: ConditionType::False,
                     values: vec![],
                     case_sensitive: false,
@@ -2307,7 +2319,7 @@ mod tests {
 
         #[test]
         fn test_get_property() {
-            assert_eq!(FilterCondition::new_false().get_property(), u16::MAX);
+            assert_eq!(FilterCondition::new_false().get_property_index(), u32::MAX);
         }
 
         #[test]

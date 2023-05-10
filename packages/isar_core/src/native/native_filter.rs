@@ -1,5 +1,5 @@
+use super::isar_deserializer::IsarDeserializer;
 use super::native_collection::NativeProperty;
-use super::native_object::NativeObject;
 use crate::core::data_type::DataType;
 use crate::util::fast_wild_match::fast_wild_match;
 use enum_dispatch::enum_dispatch;
@@ -162,9 +162,10 @@ impl NativeFilter {
     }
 
     pub fn list_length(property: NativeProperty, lower: u32, upper: u32) -> NativeFilter {
-        let filter_cond = if property.data_type.is_list() {
+        let filter_cond = if let Some(element_type) = property.data_type.element_type() {
             Filter::ListLength(ListLengthCond {
                 offset: property.offset,
+                element_type,
                 lower,
                 upper,
             })
@@ -198,7 +199,7 @@ impl NativeFilter {
         NativeFilter(filter_cond)
     }
 
-    pub(crate) fn evaluate(&self, id: i64, object: NativeObject) -> bool {
+    pub(crate) fn evaluate(&self, id: i64, object: IsarDeserializer) -> bool {
         self.0.evaluate(id, object)
     }
 }
@@ -242,7 +243,7 @@ enum Filter {
 
 #[enum_dispatch(Filter)]
 trait Condition {
-    fn evaluate(&self, id: i64, object: NativeObject) -> bool;
+    fn evaluate(&self, id: i64, object: IsarDeserializer) -> bool;
 }
 
 #[derive(Clone)]
@@ -252,7 +253,7 @@ struct IsNullCond {
 }
 
 impl Condition for IsNullCond {
-    fn evaluate(&self, _id: i64, object: NativeObject) -> bool {
+    fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
         object.is_null(self.offset, self.data_type)
     }
 }
@@ -264,7 +265,7 @@ struct IdBetweenCond {
 }
 
 impl Condition for IdBetweenCond {
-    fn evaluate(&self, id: i64, _object: NativeObject) -> bool {
+    fn evaluate(&self, id: i64, _object: IsarDeserializer) -> bool {
         self.lower <= id && self.upper >= id
     }
 }
@@ -282,7 +283,7 @@ macro_rules! filter_between {
 
 
             impl Condition for [<$data_type BetweenCond>] {
-                fn evaluate(&self, _id: i64, object: NativeObject) -> bool {
+                fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
                     let val = object.$prop_accessor(self.offset);
                     filter_between!(eval val, self, $data_type)
                 }
@@ -297,7 +298,7 @@ macro_rules! filter_between {
 
 
             impl Condition for [<Any $data_type BetweenCond>] {
-                fn evaluate(&self, _id: i64, object: NativeObject) -> bool {
+                fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
                     if let Some((list, length)) = object.read_list(self.offset, DataType::$data_type) {
                         for i in 0..length {
                             let val = list.$prop_accessor(i * DataType::$data_type.static_size() as u32);
@@ -375,7 +376,7 @@ struct StringBetweenCond {
 }
 
 impl Condition for StringBetweenCond {
-    fn evaluate(&self, _id: i64, object: NativeObject) -> bool {
+    fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
         let value = object.read_string(self.offset);
         string_between(
             value,
@@ -395,7 +396,7 @@ struct AnyStringBetweenCond {
 }
 
 impl Condition for AnyStringBetweenCond {
-    fn evaluate(&self, _id: i64, object: NativeObject) -> bool {
+    fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
         if let Some((list, length)) = object.read_list(self.offset, DataType::String) {
             for i in 0..length {
                 let value = list.read_string(i * DataType::String.static_size() as u32);
@@ -434,7 +435,7 @@ macro_rules! string_filter {
         paste! {
             string_filter_struct!($name);
             impl Condition for [<$name Cond>] {
-                fn evaluate(&self, _id: i64, object: NativeObject) -> bool {
+                fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
                     let other_str = object.read_string(self.offset);
                     string_filter!(eval $name, self, other_str)
                 }
@@ -442,7 +443,7 @@ macro_rules! string_filter {
 
             string_filter_struct!([<Any $name>]);
             impl Condition for [<Any $name Cond>] {
-                fn evaluate(&self, _id: i64, object: NativeObject) -> bool {
+                fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
                     if let Some((list, length)) = object.read_list(self.offset, DataType::String) {
                         for i in 0..length {
                             let value = list.read_string(i * DataType::String.static_size() as u32);
@@ -491,13 +492,14 @@ string_filter!(StringMatches);
 #[derive(Clone)]
 struct ListLengthCond {
     offset: u32,
+    element_type: DataType,
     lower: u32,
     upper: u32,
 }
 
 impl Condition for ListLengthCond {
-    fn evaluate(&self, _id: i64, object: NativeObject) -> bool {
-        if let Some(len) = object.read_list_length(self.offset) {
+    fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
+        if let Some((_, len)) = object.read_list(self.offset, self.element_type) {
             self.lower <= len && self.upper >= len
         } else {
             false
@@ -511,7 +513,7 @@ struct AndCond {
 }
 
 impl Condition for AndCond {
-    fn evaluate(&self, id: i64, object: NativeObject) -> bool {
+    fn evaluate(&self, id: i64, object: IsarDeserializer) -> bool {
         for filter in &self.filters {
             if !filter.evaluate(id, object) {
                 false;
@@ -527,7 +529,7 @@ struct OrCond {
 }
 
 impl Condition for OrCond {
-    fn evaluate(&self, id: i64, object: NativeObject) -> bool {
+    fn evaluate(&self, id: i64, object: IsarDeserializer) -> bool {
         for filter in &self.filters {
             if filter.evaluate(id, object) {
                 return true;
@@ -543,7 +545,7 @@ struct NotCond {
 }
 
 impl Condition for NotCond {
-    fn evaluate(&self, id: i64, object: NativeObject) -> bool {
+    fn evaluate(&self, id: i64, object: IsarDeserializer) -> bool {
         !self.filter.evaluate(id, object)
     }
 }
@@ -554,7 +556,7 @@ struct StaticCond {
 }
 
 impl Condition for StaticCond {
-    fn evaluate(&self, _id: i64, _: NativeObject) -> bool {
+    fn evaluate(&self, _id: i64, _: IsarDeserializer) -> bool {
         self.value
     }
 }

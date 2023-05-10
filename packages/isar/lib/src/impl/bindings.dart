@@ -574,6 +574,23 @@ class IsarCoreBindings {
   late final _isar_txn_abort = _isar_txn_abortPtr.asFunction<
       void Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>)>();
 
+  int isar_get_largest_id(
+    ffi.Pointer<CIsarInstance> isar,
+    int collection_index,
+  ) {
+    return _isar_get_largest_id(
+      isar,
+      collection_index,
+    );
+  }
+
+  late final _isar_get_largest_idPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int64 Function(
+              ffi.Pointer<CIsarInstance>, ffi.Uint16)>>('isar_get_largest_id');
+  late final _isar_get_largest_id = _isar_get_largest_idPtr
+      .asFunction<int Function(ffi.Pointer<CIsarInstance>, int)>();
+
   int isar_insert(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
@@ -623,6 +640,23 @@ class IsarCoreBindings {
   late final _isar_count = _isar_countPtr.asFunction<
       int Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>, int,
           ffi.Pointer<ffi.Uint32>)>();
+
+  bool isar_close(
+    ffi.Pointer<CIsarInstance> isar,
+    bool delete_,
+  ) {
+    return _isar_close(
+      isar,
+      delete_,
+    );
+  }
+
+  late final _isar_closePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Bool Function(
+              ffi.Pointer<CIsarInstance>, ffi.Bool)>>('isar_close');
+  late final _isar_close = _isar_closePtr
+      .asFunction<bool Function(ffi.Pointer<CIsarInstance>, bool)>();
 
   int isar_query_new(
     ffi.Pointer<CIsarInstance> isar,

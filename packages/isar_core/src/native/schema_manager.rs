@@ -128,7 +128,7 @@ fn open_collection(
     all_schemas: &[CollectionSchema],
 ) -> Result<NativeCollection> {
     let mut properties = vec![];
-    let mut offset = 2;
+    let mut offset = 0;
     for property_schema in &schema.properties {
         if let Some(name) = &property_schema.name {
             let embedded_collection_index = if let Some(collection) = &property_schema.collection {
@@ -148,7 +148,7 @@ fn open_collection(
     }
 
     properties.sort_by(|(_, a), (_, b)| a.cmp(&b));
-    let properties = properties.iter().map(|(p, _)| p.clone()).collect_vec();
+    let properties = properties.iter().map(|(p, _)| p).copied().collect_vec();
 
     let db = if !schema.embedded {
         Some(txn.open_db(&schema.name, true, false)?)
@@ -157,7 +157,7 @@ fn open_collection(
     };
 
     let col = NativeCollection::new(collection_index, properties, vec![], schema.embedded, db);
-    col.init_auto_increment(txn)?;
+    col.init_largest_id(txn)?;
 
     Ok(col)
 }

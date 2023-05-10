@@ -1,5 +1,5 @@
 use crate::native::index::id_key::BytesToId;
-use crate::native::native_object::NativeObject;
+use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::native_txn::TxnCursor;
 
 pub struct IdsIterator<'txn> {
@@ -15,14 +15,14 @@ impl<'txn> IdsIterator<'txn> {
 }
 
 impl<'txn> Iterator for IdsIterator<'txn> {
-    type Item = (i64, NativeObject<'txn>);
+    type Item = (i64, IsarDeserializer<'txn>);
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(id) = self.ids.pop() {
             match self.cursor.move_to(&id) {
                 Ok(Some((key, value))) => {
-                    return Some((key.to_id(), NativeObject::from_bytes(value)))
+                    return Some((key.to_id(), IsarDeserializer::from_bytes(value)))
                 }
                 Ok(None) => continue,
                 Err(_) => return None,

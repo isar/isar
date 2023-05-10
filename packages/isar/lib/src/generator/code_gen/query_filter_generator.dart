@@ -63,7 +63,7 @@ class FilterGenerator {
     ${mPrefix(p)}EqualTo(${p.scalarDartType} value ${optional.isNotEmpty ? ', {$optional,}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(EqualToCondition(
-          property: r'${p.isarName}',
+          property: ${p.index},
           value: value,
           ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
         ));
@@ -81,7 +81,7 @@ class FilterGenerator {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(GreaterThanCondition(
           include: include,
-          property: r'${p.isarName}',
+          property: ${p.index},
           value: value,
           ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
         ));
@@ -99,7 +99,7 @@ class FilterGenerator {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(LessThanCondition(
           include: include,
-          property: r'${p.isarName}',
+          property: ${p.index},
           value: value,
           ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
         ));
@@ -117,7 +117,7 @@ class FilterGenerator {
     ${mPrefix(p)}Between(${p.scalarDartType} lower, ${p.scalarDartType} upper, {$optional,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(BetweenCondition(
-          property: r'${p.isarName}',
+          property: ${p.index},
           lower: lower,
           includeLower: includeLower,
           upper: upper,
@@ -133,7 +133,7 @@ class FilterGenerator {
       ${mPrefix(p, false)}IsNull() {
         return QueryBuilder.apply(this, (query) {
           return query.addFilterCondition(const FilterCondition.isNull(
-            property: r'${p.isarName}',
+            property: ${p.index},
           ));
         });
       }''';
@@ -144,7 +144,7 @@ class FilterGenerator {
       ${mPrefix(p)}IsNull() {
         return QueryBuilder.apply(this, (query) {
           return query.addFilterCondition(const FilterCondition.elementIsNull(
-            property: r'${p.isarName}',
+            property: ${p.index},
           ));
         });
       }''';
@@ -156,7 +156,7 @@ class FilterGenerator {
         return QueryBuilder.apply(this, (query) {
           return query
             .addFilterCondition(const FilterCondition.isNotNull(
-              property: r'${p.isarName}',
+              property: ${p.index},
             ));
         });
       }''';
@@ -168,7 +168,7 @@ class FilterGenerator {
         return QueryBuilder.apply(this, (query) {
           return query
             .addFilterCondition(const FilterCondition.elementIsNotNull(
-              property: r'${p.isarName}',
+              property: ${p.index},
             ));
         });
       }''';
@@ -179,7 +179,7 @@ class FilterGenerator {
     ${mPrefix(p)}StartsWith(String value, {bool caseSensitive = true,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(StartsWithCondition(
-          property: r'${p.isarName}',
+          property: ${p.index},
           value: value,
           caseSensitive: caseSensitive,
         ));
@@ -192,7 +192,7 @@ class FilterGenerator {
     ${mPrefix(p)}EndsWith(String value, {bool caseSensitive = true,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(EndsWithCondition(
-          property: r'${p.isarName}',
+          property: ${p.index},
           value: value,
           caseSensitive: caseSensitive,
         ));
@@ -205,7 +205,7 @@ class FilterGenerator {
     ${mPrefix(p)}Contains(String value, {bool caseSensitive = true}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(ContainsCondition(
-          property: r'${p.isarName}',
+          property: ${p.index},
           value: value,
           caseSensitive: caseSensitive,
         ));
@@ -218,7 +218,7 @@ class FilterGenerator {
     ${mPrefix(p)}Matches(String pattern, {bool caseSensitive = true}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(MatchesCondition(
-          property: r'${p.isarName}',
+          property: ${p.index},
           wildcard: pattern,
           caseSensitive: caseSensitive,
         ));
@@ -231,7 +231,7 @@ class FilterGenerator {
     ${mPrefix(p)}IsEmpty() {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(EqualToCondition(
-          property: r'${p.isarName}',
+          property: ${p.index},
           value: '',
         ));
       });
@@ -243,7 +243,7 @@ class FilterGenerator {
     ${mPrefix(p)}IsNotEmpty() {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(GreaterThanCondition(
-          property: r'${p.isarName}',
+          property: ${p.index},
           value: '',
         ));
       });

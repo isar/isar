@@ -10,14 +10,14 @@ String generateDistinctBy(ObjectInfo oi) {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}({bool caseSensitive = true}) {
           return QueryBuilder.apply(this, (query) {
-            return query.addDistinctBy(r'${property.isarName}', caseSensitive: caseSensitive);
+            return query.addDistinctBy(${property.index}, caseSensitive: caseSensitive);
           });
         }''';
     } else if (!property.type.isObject) {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}() {
           return QueryBuilder.apply(this, (query) {
-            return query.addDistinctBy(r'${property.isarName}');
+            return query.addDistinctBy(${property.index});
           });
         }''';
     }

@@ -2,12 +2,10 @@
 
 use core::slice;
 use isar_core::core::cursor::IsarCursor;
-use isar_core::core::error::Result;
 use isar_core::core::instance::IsarInstance;
 use isar_core::core::reader::IsarReader;
 use isar_core::core::writer::IsarWriter;
 use isar_core::native::native_instance::NativeInstance;
-use std::cell::Cell;
 use std::ptr;
 
 #[macro_use]

@@ -104,6 +104,16 @@ pub unsafe extern "C" fn isar_txn_abort(isar: &'static CIsarInstance, txn: *mut 
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn isar_get_largest_id(
+    isar: &'static CIsarInstance,
+    collection_index: u16,
+) -> i64 {
+    match isar {
+        CIsarInstance::Native(isar) => isar.get_largest_id(collection_index).unwrap_or(i64::MIN),
+    }
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn isar_insert(
     isar: &'static CIsarInstance,
     txn: *mut CIsarTxn,
@@ -137,5 +147,13 @@ pub unsafe extern "C" fn isar_count(
             }
         };
         *count = new_count;
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_close(isar: *mut CIsarInstance, delete: bool) -> bool {
+    let isar = *Box::from_raw(isar);
+    match isar {
+        CIsarInstance::Native(isar) => NativeInstance::close(isar, delete),
     }
 }

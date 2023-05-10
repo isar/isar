@@ -113,9 +113,13 @@ pub unsafe extern "C" fn isar_begin_object(
     writer: &'static mut CIsarWriter,
 ) -> *mut CIsarWriter<'static> {
     let writer = match writer {
-        CIsarWriter::Native(writer) => CIsarWriter::NativeObject(writer.begin_object()),
-        CIsarWriter::NativeObject(writer) => CIsarWriter::NativeObject(writer.begin_object()),
-        CIsarWriter::NativeList(writer) => CIsarWriter::NativeObject(writer.begin_object()),
+        CIsarWriter::Native(writer) => CIsarWriter::NativeObject(writer.begin_object().unwrap()),
+        CIsarWriter::NativeObject(writer) => {
+            CIsarWriter::NativeObject(writer.begin_object().unwrap())
+        }
+        CIsarWriter::NativeList(writer) => {
+            CIsarWriter::NativeObject(writer.begin_object().unwrap())
+        }
     };
     Box::into_raw(Box::new(writer))
 }
@@ -146,9 +150,13 @@ pub unsafe extern "C" fn isar_begin_list(
     length: u32,
 ) -> *mut CIsarWriter<'static> {
     let writer = match writer {
-        CIsarWriter::Native(writer) => CIsarWriter::NativeList(writer.begin_list(length)),
-        CIsarWriter::NativeObject(writer) => CIsarWriter::NativeList(writer.begin_list(length)),
-        CIsarWriter::NativeList(writer) => CIsarWriter::NativeList(writer.begin_list(length)),
+        CIsarWriter::Native(writer) => CIsarWriter::NativeList(writer.begin_list(length).unwrap()),
+        CIsarWriter::NativeObject(writer) => {
+            CIsarWriter::NativeList(writer.begin_list(length).unwrap())
+        }
+        CIsarWriter::NativeList(writer) => {
+            CIsarWriter::NativeList(writer.begin_list(length).unwrap())
+        }
     };
     Box::into_raw(Box::new(writer))
 }

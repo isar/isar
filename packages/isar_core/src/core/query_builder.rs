@@ -11,7 +11,9 @@ pub trait IsarQueryBuilder {
 
     fn set_filter(&mut self, filter: Filter);
 
-    fn add_sort(&mut self, property_index: u16, sort: Sort);
+    fn add_sort(&mut self, property_index: u16, sort: Sort, case_sensitive: bool);
+
+    fn add_distinct(&mut self, property_index: u16, case_sensitive: bool);
 
     fn build(self) -> Self::Query;
 }

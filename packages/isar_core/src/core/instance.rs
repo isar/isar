@@ -47,10 +47,19 @@ pub trait IsarInstance {
 
     fn abort_txn(&self, txn: Self::Txn);
 
+    fn get_largest_id(&self, collection_index: u16) -> Result<i64>;
+
     fn insert(&self, txn: Self::Txn, collection_index: u16, count: u32)
         -> Result<Self::Insert<'_>>;
 
     fn count(&self, txn: &Self::Txn, collection_index: u16) -> Result<u32>;
+
+    fn get_size(
+        &self,
+        collection_index: Option<u16>,
+        include_indexes: bool,
+        include_links: bool,
+    ) -> Result<u32>;
 
     fn query(&self, collection_index: u16) -> Result<Self::QueryBuilder<'_>>;
 
@@ -63,4 +72,6 @@ pub trait IsarInstance {
     ) -> Result<Self::Cursor<'_>>;
 
     fn delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<u32>;
+
+    fn close(instance: Self::Instance, delete: bool) -> bool;
 }

@@ -3,8 +3,8 @@ use super::unsorted_distinct_query_iterator::UnsortedDistinctQueryIterator;
 use super::unsorted_query_iterator::UnsortedQueryIterator;
 use super::Query;
 use crate::core::error::Result;
+use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::native_collection::NativeCollection;
-use crate::native::native_object::NativeObject;
 use crate::native::native_txn::NativeTxn;
 
 pub(crate) enum QueryIterator<'a> {
@@ -52,7 +52,7 @@ impl<'a> QueryIterator<'a> {
 }
 
 impl<'txn> Iterator for QueryIterator<'txn> {
-    type Item = (i64, NativeObject<'txn>);
+    type Item = (i64, IsarDeserializer<'txn>);
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {

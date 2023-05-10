@@ -1,11 +1,13 @@
 part of isar;
 
 abstract class IsarCollection<ID, OBJ> {
+  int get largestId;
+
   OBJ? get(ID id);
 
   List<OBJ> getAll(List<ID> ids);
 
-  void put(OBJ object);
+  void put(OBJ object) => putAll([object]);
 
   void putAll(List<OBJ> objects);
 
@@ -13,7 +15,7 @@ abstract class IsarCollection<ID, OBJ> {
 
   int deleteAll(List<ID> id);
 
-  QueryBuilder<OBJ, OBJ, QFilter> where();
+  QueryBuilder<OBJ, OBJ, QStart> where();
 
   int count();
 

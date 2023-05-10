@@ -7,10 +7,15 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
   final int collectionIndex;
   final ObjectConverter<ID, OBJ> converter;
 
-  Pointer<CIsarQuery> _idQuery(ID id) {
+  @override
+  int get largestId {
+    return IsarCore.isar_get_largest_id(isar.getPtr(), collectionIndex);
+  }
+
+  Pointer<CIsarQuery> _idQuery(Pointer<CIsarInstance> isarPtr, ID id) {
     final queryPtr = IsarCore.ptrPtr.cast<Pointer<CIsarQuery>>();
     IsarCore.isar_query_new_id(
-      isar.ptr,
+      isarPtr,
       collectionIndex,
       _idToInt(id),
       queryPtr,
@@ -18,14 +23,14 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
     return queryPtr.value;
   }
 
-  Pointer<CIsarQuery> _idsQuery(List<ID> ids) {
+  Pointer<CIsarQuery> _idsQuery(Pointer<CIsarInstance> isarPtr, List<ID> ids) {
     final queryPtr = IsarCore.ptrPtr.cast<Pointer<CIsarQuery>>();
     final idsPtr = malloc<Int64>(ids.length);
     for (var i = 0; i < ids.length; i++) {
       idsPtr[i] = _idToInt(ids[i]);
     }
     final result = IsarCore.isar_query_new_ids(
-      isar.ptr,
+      isarPtr,
       collectionIndex,
       idsPtr,
       ids.length,
@@ -39,10 +44,10 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
 
   @override
   OBJ? get(ID id) {
-    return isar.getTxn((txnPtr) {
-      final queryPtr = _idQuery(id);
+    return isar.getTxn((isarPtr, txnPtr) {
+      final queryPtr = _idQuery(isarPtr, id);
       final cursor = _RawCursor(
-        isarPtr: isar.ptr,
+        isarPtr: isarPtr,
         txnPtr: txnPtr,
         queryPtr: queryPtr,
         deserialize: converter.deserialize,
@@ -55,10 +60,10 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
 
   @override
   List<OBJ> getAll(List<ID> ids) {
-    return isar.getTxn((txnPtr) {
-      final queryPtr = _idsQuery(ids);
+    return isar.getTxn((isarPtr, txnPtr) {
+      final queryPtr = _idsQuery(isarPtr, ids);
       final cursor = _RawCursor(
-        isarPtr: isar.ptr,
+        isarPtr: isarPtr,
         txnPtr: txnPtr,
         queryPtr: queryPtr,
         deserialize: converter.deserialize,
@@ -76,10 +81,10 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
 
   @override
   void putAll(List<OBJ> objects) {
-    return isar.getWriteTxn(consume: true, (txnPtr) {
+    return isar.getWriteTxn(consume: true, (isarPtr, txnPtr) {
       final insertPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarInsert>>();
       IsarCore.isar_insert(
-        isar.ptr,
+        isarPtr,
         txnPtr,
         collectionIndex,
         objects.length,
@@ -112,14 +117,14 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
   }
 
   @override
-  QueryBuilder<OBJ, OBJ, QFilter> where() {
+  QueryBuilder<OBJ, OBJ, QStart> where() {
     throw UnimplementedError();
   }
 
   @override
   int count() {
-    return isar.getTxn((txnPtr) {
-      IsarCore.isar_count(isar.ptr, txnPtr, collectionIndex, IsarCore.countPtr);
+    return isar.getTxn((isarPtr, txnPtr) {
+      IsarCore.isar_count(isarPtr, txnPtr, collectionIndex, IsarCore.countPtr);
       return IsarCore.countPtr.value;
     });
   }
@@ -136,7 +141,7 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
   }) {
     final alloc = Arena(malloc);
     final builderPtrPtr = alloc<Pointer<CIsarQueryBuilder>>();
-    IsarCore.isar_query_new(isar.ptr, collectionIndex, builderPtrPtr)
+    IsarCore.isar_query_new(isar.getPtr(), collectionIndex, builderPtrPtr)
         .checkNoError();
 
     final builderPtr = builderPtrPtr.value;

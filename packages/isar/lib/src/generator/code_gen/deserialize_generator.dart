@@ -24,19 +24,21 @@ String generateDeserialize(ObjectInfo object) {
   final named = propertiesByMode[DeserializeMode.namedParam]!;
 
   for (final p in [...positional, ...named]) {
-    code += 'final ${p.dartType} ${p.dartName};{';
+    code += 'final ${p.dartType} ${p.dartName};';
     code += _deserialize(
-      p.type,
-      p.type.scalarType,
-      p.defaultValue,
-      p.elementDefaultValue,
-      p.scalarDartType,
-      object.properties.indexOf(p).toString(),
-      (value) {
+      isId: p.isId,
+      type: p.type,
+      elementType: p.type.scalarType,
+      elementDartType: p.scalarDartType,
+      nullable: p.nullable,
+      elementNullable: p.elementNullable,
+      defaultValue: p.defaultValue,
+      elementDefaultValue: p.elementDefaultValue,
+      index: p.index.toString(),
+      result: (value) {
         return '${p.dartName} = $value;';
       },
     );
-    code += '}';
   }
 
   code += 'final object = ${object.dartName}(';
@@ -53,19 +55,20 @@ String generateDeserialize(ObjectInfo object) {
 
   final assign = propertiesByMode[DeserializeMode.assign]!;
   for (final p in assign) {
-    code += '{';
     code += _deserialize(
-      p.type,
-      p.type.scalarType,
-      p.defaultValue,
-      p.elementDefaultValue,
-      p.scalarDartType,
-      object.properties.indexOf(p).toString(),
-      (value) {
+      isId: p.isId,
+      type: p.type,
+      elementType: p.type.scalarType,
+      elementDartType: p.scalarDartType,
+      nullable: p.nullable,
+      elementNullable: p.elementNullable,
+      defaultValue: p.defaultValue,
+      elementDefaultValue: p.elementDefaultValue,
+      index: p.index.toString(),
+      result: (value) {
         return 'object.${p.dartName} = $value;';
       },
     );
-    code += '}';
   }
 
   return '''
@@ -78,20 +81,22 @@ String generateDeserializeProp(ObjectInfo object) {
   var code = '''
     P ${object.deserializePropName}<P>(IsarReader reader, int property) {
       switch (property) {''';
-  for (var i = 0; i < object.properties.length; i++) {
-    final property = object.properties[i];
+  for (final p in object.properties) {
     final deser = _deserialize(
-      property.type,
-      property.type.scalarType,
-      property.defaultValue,
-      property.elementDefaultValue,
-      property.scalarDartType,
-      i.toString(),
-      (value) {
+      isId: p.isId,
+      type: p.type,
+      elementType: p.type.scalarType,
+      elementDartType: p.scalarDartType,
+      nullable: p.nullable,
+      elementNullable: p.elementNullable,
+      defaultValue: p.defaultValue,
+      elementDefaultValue: p.elementDefaultValue,
+      index: p.index.toString(),
+      result: (value) {
         return 'return ($value) as P;';
       },
     );
-    code += 'case $i: $deser';
+    code += 'case ${p.index}: $deser';
   }
 
   return '''
@@ -103,86 +108,139 @@ String generateDeserializeProp(ObjectInfo object) {
     ''';
 }
 
-String _deserialize(
-  PropertyType type,
+String _deserialize({
+  required bool isId,
+  required PropertyType type,
   PropertyType? elementType,
-  String defaultValue,
-  String? elementDefaultValue,
   String? elementDartType,
-  String index,
-  String Function(String? value) result,
-) {
+  required bool nullable,
+  bool? elementNullable,
+  required String defaultValue,
+  String? elementDefaultValue,
+  required String index,
+  required String Function(String value) result,
+}) {
   switch (type) {
     case PropertyType.bool:
-      return '''
-      final value = IsarCore.isar_read_bool(reader, $index);
-      if (value == $nullBool) {
-        ${result(defaultValue)}
+      if (nullable) {
+        return '''
+        {
+          final value = IsarCore.isar_read_bool(reader, $index);
+          if (value == $nullBool) {
+            ${result(defaultValue)}
+          } else {
+            ${result('value == $falseBool')}
+          }
+        }''';
       } else {
-        ${result('value == $falseBool')}
-      }''';
+        return result('IsarCore.isar_read_bool(reader, $index) == $trueBool');
+      }
     case PropertyType.byte:
-      return '''
-      final value = IsarCore.isar_read_byte(reader, $index);
-      if (value == $nullByte) {
-        ${result(defaultValue)}
+      if (nullable) {
+        return '''
+        {
+          final value = IsarCore.isar_read_byte(reader, $index);
+          if (value == $nullByte) {
+            ${result(defaultValue)}
+          } else {
+            ${result('value')}
+          }
+        }''';
       } else {
-        ${result('value')}
-      }''';
+        return result('IsarCore.isar_read_byte(reader, $index)');
+      }
     case PropertyType.int:
-      return '''
-      final value = IsarCore.isar_read_int(reader, $index);
-      if (value == $nullInt) {
-        ${result(defaultValue)}
+      if (nullable) {
+        return '''
+        {
+          final value = IsarCore.isar_read_int(reader, $index);
+          if (value == $nullInt) {
+            ${result(defaultValue)}
+          } else {
+            ${result('value')}
+          }
+        }''';
       } else {
-        ${result('value')}
-      }''';
+        return result('IsarCore.isar_read_int(reader, $index)');
+      }
     case PropertyType.float:
-      return '''
-      final value = IsarCore.isar_read_float(reader, $index);
-      if (value.isNaN) {
-        ${result(defaultValue)}
+      if (nullable) {
+        return '''
+        {
+          final value = IsarCore.isar_read_float(reader, $index);
+          if (value.isNaN) {
+            ${result(defaultValue)}
+          } else {
+            ${result('value')}
+          }
+        }''';
       } else {
-        ${result('value')}
-      }''';
+        return result('IsarCore.isar_read_float(reader, $index)');
+      }
     case PropertyType.long:
-      return '''
-      final value = IsarCore.isar_read_long(reader, $index);
-      if (value == $nullLong) {
-        ${result(defaultValue)}
+      if (isId) {
+        return result('IsarCore.isar_read_id(reader)');
+      } else if (nullable) {
+        return '''
+        {
+          final value = IsarCore.isar_read_long(reader, $index);
+          if (value == $nullLong) {
+            ${result(defaultValue)}
+          } else {
+            ${result('value')}
+          }
+        }''';
       } else {
-        ${result('value')}
-      }''';
+        return result('IsarCore.isar_read_long(reader, $index)');
+      }
     case PropertyType.double:
-      return '''
-      final value = IsarCore.isar_read_double(reader, $index);
-      if (value.isNaN) {
-        ${result(defaultValue)}
+      if (nullable) {
+        return '''
+        {
+          final value = IsarCore.isar_read_double(reader, $index);
+          if (value.isNaN) {
+            ${result(defaultValue)}
+          } else {
+            ${result('value')}
+          }
+        }''';
       } else {
-        ${result('value')}
-      }''';
+        return result('IsarCore.isar_read_double(reader, $index)');
+      }
     case PropertyType.string:
       return '''
-      final length = IsarCore.isar_read_string(reader, $index, IsarCore.stringPtrPtr);
-      final value = IsarCore.fromNativeString(IsarCore.stringPtr, length);
-      IsarCore.isar_free_string(IsarCore.stringPtr, length);
-      if (value == null) {
-        ${result(defaultValue)}
-      } else {
-        ${result('value')}
+      {
+        final length = IsarCore.isar_read_string(reader, $index, IsarCore.stringPtrPtr);
+        final value = IsarCore.fromNativeString(IsarCore.stringPtr, length);
+        IsarCore.isar_free_string(IsarCore.stringPtr, length);
+        if (value == null) {
+          ${result(defaultValue)}
+        } else {
+          ${result('value')}
+        }
       }''';
     default:
+      final deser = _deserialize(
+        isId: false,
+        type: elementType!,
+        nullable: elementNullable!,
+        defaultValue: elementDefaultValue!,
+        index: 'i',
+        result: (value) => 'list.add($value);',
+      );
       return '''
-      final length = IsarCore.isar_read_list(reader, $index, IsarCore.readerPtrPtr);
-      final listReader = IsarCore.readerPtr;
-      if (listReader.isNull) {
-        ${result(defaultValue)}
-      } else {
-        final list = <$elementDartType>[];
-        for (var i = 0; i < length; i++) {
-          ${_deserialize(elementType!, null, elementDefaultValue!, null, null, 'i', (value) => 'list.add($value);')}
+      {
+        final length = IsarCore.isar_read_list(reader, $index, IsarCore.readerPtrPtr);
+        final listReader = IsarCore.readerPtr;
+        if (listReader.isNull) {
+          ${result(defaultValue)}
+        } else {
+          final list = <$elementDartType>[];
+          for (var i = 0; i < length; i++) {
+            $deser
+          }
+          ${result('list')}
         }
-        ${result('list')}
       }''';
   }
 }

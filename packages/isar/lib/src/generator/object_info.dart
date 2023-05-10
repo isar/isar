@@ -32,6 +32,7 @@ enum DeserializeMode {
 
 class PropertyInfo {
   PropertyInfo({
+    required this.index,
     required this.dartName,
     required this.isarName,
     required this.typeClassName,
@@ -48,6 +49,8 @@ class PropertyInfo {
     required this.assignable,
     required this.constructorPosition,
   });
+
+  final int index;
 
   final String dartName;
   final String isarName;
