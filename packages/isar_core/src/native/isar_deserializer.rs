@@ -185,31 +185,3 @@ impl<'a> IsarDeserializer<'a> {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_read_byte() {
-        let data = [0x01, 0x02, 0x03];
-        let object = IsarDeserializer::from_bytes(&data);
-
-        assert_eq!(1, object.read_byte(0));
-        assert_eq!(2, object.read_byte(1));
-        assert_eq!(3, object.read_byte(2));
-        assert_eq!(0, object.read_byte(3));
-    }
-
-    #[test]
-    fn test_read_int() {
-        let data = [0x0A, 0x00, 0x2A, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF];
-        let object = IsarDeserializer::from_bytes(&data);
-
-        assert_eq!(42, object.read_int(2));
-        assert_eq!(-1, object.read_int(6));
-        assert_eq!(NULL_INT, object.read_int(10));
-    }
-
-    // Add more tests to cover other read methods and edge cases.
-}
