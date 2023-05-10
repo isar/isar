@@ -11,12 +11,11 @@ pub struct IsarSerializer {
 
 impl IsarSerializer {
     pub fn new(mut buffer: Vec<u8>, offset: u32, static_size: u32) -> Self {
-        let min_buffer_size = (offset + static_size) as usize;
+        let min_buffer_size = (offset + static_size + 3) as usize;
         if min_buffer_size > buffer.len() {
             buffer.resize(min_buffer_size, 0);
         }
-        LittleEndian::write_u24(&mut buffer[offset as usize + 3..], static_size);
-
+        LittleEndian::write_u24(&mut buffer[offset as usize..], static_size);
         Self {
             buffer: Cell::new(buffer),
             offset: offset + 3,
@@ -35,18 +34,6 @@ impl IsarSerializer {
             &mut self.buffer.get_mut()[(offset + self.offset) as usize..],
             value,
         );
-    }
-
-    #[inline]
-    fn append(&mut self, bytes: &[u8]) {
-        self.buffer.get_mut().extend_from_slice(bytes);
-    }
-
-    #[inline]
-    fn append_u24(&mut self, value: u32) {
-        let mut bytes = [0u8; 3];
-        LittleEndian::write_u24(&mut bytes, value);
-        self.append(&bytes);
     }
 
     #[inline]
@@ -95,9 +82,14 @@ impl IsarSerializer {
     #[inline]
     pub fn write_dynamic(&mut self, offset: u32, value: &[u8]) {
         let buffer_len = self.buffer.get_mut().len() as u32;
-        self.write_u24(offset, buffer_len - self.offset);
-        self.append_u24(value.len() as u32);
-        self.append(value);
+        let dynamic_offset = buffer_len - self.offset;
+        self.write_u24(offset, dynamic_offset);
+
+        self.buffer
+            .get_mut()
+            .resize(buffer_len as usize + value.len() + 3, 0);
+        self.write_u24(dynamic_offset, value.len() as u32);
+        self.write(dynamic_offset + 3, value);
     }
 
     pub fn begin_nested(&mut self, offset: u32, static_size: u32) -> Self {
