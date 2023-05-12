@@ -185,3 +185,57 @@ impl<'a> IsarDeserializer<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::IsarDeserializer;
+    use byteorder::{ByteOrder, LittleEndian};
+
+    #[test]
+    fn from_bytes_basic() {
+        let data = vec![0, 1, 0, 1, 2, 3, 4, 5];
+        let deserializer = IsarDeserializer::from_bytes(&data);
+
+        assert_eq!(deserializer.bytes, &data[3..]);
+        assert_eq!(
+            deserializer.static_size,
+            LittleEndian::read_u24(&data[0..3])
+        );
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "assertion failed: 1 <= nbytes && nbytes <= 8 && nbytes <= buf.len()"
+    )]
+    fn from_bytes_empty() {
+        let data = vec![];
+        let deserializer = IsarDeserializer::from_bytes(&data);
+
+        assert_eq!(deserializer.bytes, &data[3..]);
+        assert_eq!(deserializer.static_size, 0);
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "assertion failed: 1 <= nbytes && nbytes <= 8 && nbytes <= buf.len()"
+    )]
+    fn from_bytes_small_input() {
+        let data = vec![1];
+        let deserializer = IsarDeserializer::from_bytes(&data);
+
+        assert_eq!(deserializer.bytes, &data[3..]);
+        assert_eq!(deserializer.static_size, 1);
+    }
+
+    #[test]
+    fn from_bytes_large_input() {
+        let data = vec![0; 10000];
+        let deserializer = IsarDeserializer::from_bytes(&data);
+
+        assert_eq!(deserializer.bytes, &data[3..]);
+        assert_eq!(
+            deserializer.static_size,
+            LittleEndian::read_u24(&data[0..3])
+        );
+    }
+}
