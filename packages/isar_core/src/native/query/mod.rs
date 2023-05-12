@@ -21,7 +21,7 @@ pub(crate) enum QueryIndex {
 
 pub struct Query {
     pub(crate) instance_id: u32,
-    pub(crate) collection_index: usize,
+    pub(crate) collection_index: u16,
     pub(self) indexes: Vec<QueryIndex>,
     pub(self) filter: NativeFilter,
     pub(self) sort: Vec<(NativeProperty, Sort)>,
@@ -31,7 +31,7 @@ pub struct Query {
 impl Query {
     pub(crate) fn new(
         instance_id: u32,
-        collection_index: usize,
+        collection_index: u16,
         indexes: Vec<QueryIndex>,
         filter: NativeFilter,
         sort: Vec<(NativeProperty, Sort)>,
@@ -54,7 +54,7 @@ impl Query {
         offset: Option<u32>,
         limit: Option<u32>,
     ) -> Result<QueryCursor<'a>> {
-        let collection = &all_collections[self.collection_index];
+        let collection = &all_collections[self.collection_index as usize];
         let iterator = QueryIterator::new(
             txn,
             collection,
@@ -71,7 +71,7 @@ impl Query {
         txn: &NativeTxn,
         all_collections: &[NativeCollection],
     ) -> Result<u32> {
-        let collection = &all_collections[self.collection_index];
+        let collection = &all_collections[self.collection_index as usize];
         let iterator = QueryIterator::new(txn, collection, self, true, 0, u32::MAX)?;
         Ok(iterator.count() as u32)
     }

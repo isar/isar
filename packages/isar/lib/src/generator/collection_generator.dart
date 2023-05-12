@@ -55,14 +55,21 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       }
 
       ${generateSchema(object)}
+
       ${generateSerialize(object)}
+
       ${generateDeserialize(object)}
+
       ${generateDeserializeProp(object)}
+
       ${generateEnumMaps(object)}
 
       ${FilterGenerator(object).generate()}
+
       ${generateSortBy(object)}
+
       ${generateDistinctBy(object)}
+      
       ${generatePropertyQuery(object)}
     ''';
     print(c);

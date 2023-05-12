@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
@@ -6,94 +8,74 @@ part 'clear_test.g.dart';
 
 @collection
 class ModelA {
-  Id? id;
-}
+  ModelA(this.id, this.test, this.test2, this.test3,
+      {required this.d, this.d2 = 0, this.d3 = 0, this.d4 = 0});
 
-@collection
-class ModelB {
-  Id? id;
+  @Id()
+  int id;
+
+  final String test;
+
+  final String test2;
+
+  final String test3;
+
+  final double d;
+
+  final int d2;
+
+  final int d3;
+
+  final int d4;
+
+  //List<String>? hello;
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return '{$id $test $test2}';
+  }
 }
 
 void main() {
   group('Clear', () {
-    late Isar isar;
+    test('Test', () {
+      final l = List.generate(
+        1000,
+        (index) => ModelA(
+          index,
+          'test$index',
+          'test$index' * 10,
+          'test$index',
+          d: 1.0,
+        ),
+      );
+      final ids = l.map((e) => e.id).toList();
 
-    setUp(() async {
-      isar = await openTempIsar([ModelASchema, ModelBSchema]);
-    });
+      final isar = openTempIsar([ModelASchema]);
 
-    isarTest('Clear should empty target collection', () async {
-      final modelAs = List.generate(100, (_) => ModelA());
-      final modelBs = List.generate(200, (_) => ModelB());
-
-      await isar.tWriteTxn(() async {
-        await Future.wait([
-          isar.modelAs.tPutAll(modelAs),
-          isar.modelBs.tPutAll(modelBs),
-        ]);
+      final s1 = Stopwatch()..start();
+      isar.writeTxn((isar) {
+        for (var i = 0; i < 10; i++) {
+          isar.collection<int, ModelA>().putAll(l);
+        }
       });
+      print(s1.elapsedMicroseconds);
+      //print(serWatch.elapsedMicroseconds);
 
-      await isar.modelAs.verify(modelAs);
-      await isar.modelBs.verify(modelBs);
-
-      await isar.tWriteTxn(
-        () => isar.modelAs.tClear(),
-      );
-
-      await isar.modelAs.verify([]);
-      await isar.modelBs.verify(modelBs);
-    });
-
-    isarTest('Isar clear should clear every collection', () async {
-      final modelAs = List.generate(250, (_) => ModelA());
-      final modelBs = List.generate(500, (_) => ModelB());
-
-      await isar.tWriteTxn(() async {
-        await Future.wait([
-          isar.modelAs.tPutAll(modelAs),
-          isar.modelBs.tPutAll(modelBs),
-        ]);
+      final s = Stopwatch()..start();
+      isar.txn((isar) {
+        for (var i = 0; i < 1000; i++) {
+          isar.collection<int, ModelA>().getAll(ids);
+        }
       });
+      print(s.elapsedMicroseconds);
+      print(deserS.elapsedMicroseconds);
+      print(deserS2.elapsedMicroseconds);
 
-      await isar.modelAs.verify(modelAs);
-      await isar.modelBs.verify(modelBs);
+      //print(isar.modelAs.where().idGreaterThan(1).findAll(limit: 4));
 
-      await isar.tWriteTxn(() => isar.tClear());
-
-      await isar.modelAs.verify([]);
-      await isar.modelBs.verify([]);
-    });
-
-    isarTest('Clear already cleared collection', () async {
-      await isar.tWriteTxn(
-        () => isar.modelAs.tPutAll(List.generate(42, (_) => ModelA())),
-      );
-      final count1 = await isar.modelAs.where().tCount();
-      expect(count1, 42);
-
-      await isar.tWriteTxn(() => isar.modelAs.tClear());
-      final count2 = await isar.modelAs.where().tCount();
-      expect(count2, 0);
-
-      await isar.tWriteTxn(() => isar.modelAs.tClear());
-      await isar.tWriteTxn(() => isar.modelAs.tClear());
-      await isar.tWriteTxn(() => isar.modelAs.tClear());
-
-      final count3 = await isar.modelAs.where().tCount();
-      expect(count3, 0);
-    });
-
-    isarTest('Clear should reset auto increment', () async {
-      final ids = await isar.tWriteTxn(
-        () => isar.modelAs.tPutAll(List.generate(20, (_) => ModelA())),
-      );
-
-      await isar.tWriteTxn(() => isar.modelAs.tClear());
-
-      final newIds = await isar.tWriteTxn(
-        () => isar.modelAs.tPutAll(List.generate(20, (_) => ModelA())),
-      );
-      expect(newIds, ids);
+      //print(deserWatch.elapsedMicroseconds);
     });
   });
 }

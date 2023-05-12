@@ -1,4 +1,4 @@
-use crate::{CIsarInsert, CIsarInstance, CIsarTxn};
+use crate::{CIsarInsert, CIsarInstance, CIsarReader, CIsarTxn};
 use isar_core::core::instance::{CompactCondition, IsarInstance};
 use isar_core::core::schema::IsarSchema;
 use isar_core::native::native_instance::NativeInstance;
@@ -13,8 +13,8 @@ pub unsafe extern "C" fn isar_version() -> *const c_char {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_get(instance_id: u32) -> *const CIsarInstance {
-    if let Some(instance) = NativeInstance::get(instance_id) {
+pub unsafe extern "C" fn isar_get_instance(instance_id: u32) -> *const CIsarInstance {
+    if let Some(instance) = NativeInstance::get_instance(instance_id) {
         Box::into_raw(Box::new(CIsarInstance::Native(instance)))
     } else {
         ptr::null()
@@ -22,7 +22,7 @@ pub unsafe extern "C" fn isar_get(instance_id: u32) -> *const CIsarInstance {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_open(
+pub unsafe extern "C" fn isar_open_instance(
     isar: *mut *const CIsarInstance,
     instance_id: u32,
     name: *mut String,
@@ -50,7 +50,7 @@ pub unsafe extern "C" fn isar_open(
             })
         };
 
-        let native_instance = NativeInstance::open(
+        let native_instance = NativeInstance::open_instance(
             instance_id ,
             &name,
             &path,
@@ -114,6 +114,28 @@ pub unsafe extern "C" fn isar_get_largest_id(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn isar_get(
+    isar: &'static CIsarInstance,
+    txn: &'static CIsarTxn,
+    collection_index: u16,
+    id: i64,
+    reader: *mut *const CIsarReader,
+) -> u8 {
+    isar_try! {
+        let new_reader = match (isar, txn) {
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
+                isar.get(txn, collection_index, id)?
+            }
+        };
+        if let Some(new_reader) = new_reader {
+            *reader = Box::into_raw(Box::new(CIsarReader::Native(new_reader)));
+        } else {
+            *reader = ptr::null();
+        }
+    }
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn isar_insert(
     isar: &'static CIsarInstance,
     txn: *mut CIsarTxn,
@@ -130,6 +152,23 @@ pub unsafe extern "C" fn isar_insert(
             }
         };
         *insert = Box::into_raw(Box::new(new_insert));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_delete(
+    isar: &'static CIsarInstance,
+    txn: &'static CIsarTxn,
+    collection_index: u16,
+    id: i64,
+    deleted: *mut bool,
+) -> u8 {
+    isar_try! {
+        *deleted = match (isar, txn) {
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
+                isar.delete(txn, collection_index, id)?
+            }
+        };
     }
 }
 

@@ -1,17 +1,10 @@
-// ignore_for_file: implementation_imports
-
-import 'dart:async';
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:isar/isar.dart';
-import 'package:isar_test/src/init_native.dart'
-    if (dart.library.html) 'package:isar_test/src/init_web.dart';
-import 'package:isar_test/src/sync_async_helper.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
-import 'package:test_api/src/backend/invoker.dart';
 
 const kIsWeb = identical(0, 0.0);
 
@@ -19,86 +12,63 @@ final testErrors = <String>[];
 int testCount = 0;
 
 var _setUp = false;
-Future<void> _prepareTest() async {
+void prepareTest() {
   if (!_setUp) {
-    await init();
-    _setUp = true;
-  }
-}
-
-@isTest
-void isarTest(
-  String name,
-  dynamic Function() body, {
-  Timeout? timeout,
-  bool skip = false,
-}) {
-  isarTestSync(name, body, timeout: timeout, skip: skip);
-  isarTestAsync(name, body, timeout: timeout, skip: skip);
-}
-
-@isTest
-void isarTestSync(
-  String name,
-  dynamic Function() body, {
-  Timeout? timeout,
-  bool skip = false,
-}) {
-  if (!kIsWeb) {
-    _isarTest(name, true, body, timeout: timeout, skip: skip);
-  }
-}
-
-@isTest
-void isarTestAsync(
-  String name,
-  dynamic Function() body, {
-  Timeout? timeout,
-  bool skip = false,
-}) {
-  _isarTest(name, false, body, timeout: timeout, skip: skip);
-}
-
-void _isarTest(
-  String name,
-  bool syncTest,
-  dynamic Function() body, {
-  Timeout? timeout,
-  bool skip = false,
-}) {
-  final testName = syncTest ? '$name SYNC' : name;
-  test(
-    testName,
-    () async {
-      await runZoned(
-        () async {
-          try {
-            await _prepareTest();
-            await body();
-            testCount++;
-          } catch (e) {
-            testErrors.add('$testName: $e');
-            rethrow;
-          }
-        },
-        zoneValues: {
-          #syncTest: syncTest,
+    if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
+      final rootDir = path.dirname(path.dirname(Directory.current.path));
+      final binaryName = Platform.isWindows
+          ? 'isar.dll'
+          : Platform.isMacOS
+              ? 'libisar.dylib'
+              : 'libisar.so';
+      /*try {
+        Isar.initializeIsarCore();
+      } catch (e) {*/
+      Isar.initializeIsarCore(
+        libraries: {
+          Abi.macosArm64: path.join(
+            rootDir,
+            'target',
+            /*
+              'aarch64-apple-darwin',
+              'release',*/
+            'release',
+            binaryName,
+          ),
+          Abi.macosX64: path.join(
+            rootDir,
+            'target',
+            'x86_64-apple-darwin',
+            'release',
+            binaryName,
+          ),
+          Abi.linuxArm64: path.join(
+            rootDir,
+            'target',
+            'aarch64-unknown-linux-gnu',
+            'release',
+            binaryName,
+          ),
+          Abi.linuxX64: path.join(
+            rootDir,
+            'target',
+            'x86_64-unknown-linux-gnu',
+            'release',
+            binaryName,
+          ),
+          Abi.windowsX64: path.join(
+            rootDir,
+            'target',
+            'x86_64-pc-windows-msvc',
+            'release',
+            binaryName,
+          ),
         },
       );
-    },
-    timeout: timeout ?? const Timeout(Duration(minutes: 10)),
-    skip: skip,
-  );
-}
-
-@isTest
-void isarTestVm(String name, dynamic Function() body) {
-  isarTest(name, body, skip: kIsWeb);
-}
-
-@isTest
-void isarTestWeb(String name, dynamic Function() body) {
-  isarTest(name, body, skip: !kIsWeb);
+      //}
+    }
+    _setUp = true;
+  }
 }
 
 String getRandomName() {
@@ -107,38 +77,36 @@ String getRandomName() {
 }
 
 String? testTempPath;
-Future<Isar> openTempIsar(
-  List<CollectionSchema<dynamic>> schemas, {
+Isar openTempIsar(
+  List<CollectionSchema> schemas, {
   String? name,
   String? directory,
   int maxSizeMiB = Isar.defaultMaxSizeMiB,
   CompactCondition? compactOnLaunch,
   bool closeAutomatically = true,
-}) async {
-  await _prepareTest();
-  if (!kIsWeb && directory == null && testTempPath == null) {
+}) {
+  prepareTest();
+  if (directory == null && testTempPath == null) {
     final dartToolDir = path.join(Directory.current.path, '.dart_tool');
     testTempPath = path.join(dartToolDir, 'test', 'tmp');
-    await Directory(testTempPath!).create(recursive: true);
+    Directory(testTempPath!).createSync(recursive: true);
   }
 
-  final isar = await tOpen(
+  final isar = Isar.open(
     schemas: schemas,
     name: name ?? getRandomName(),
     maxSizeMiB: maxSizeMiB,
-    directory: directory ?? testTempPath,
+    directory: directory ?? testTempPath!,
     compactOnLaunch: compactOnLaunch,
   );
 
-  if (Invoker.current != null && closeAutomatically) {
+  if (closeAutomatically) {
     addTearDown(() async {
       if (isar.isOpen) {
-        await isar.close(deleteFromDisk: true);
+        isar.close(deleteFromDisk: true);
       }
     });
   }
 
-  // ignore: invalid_use_of_visible_for_testing_member
-  if (!kIsWeb) await isar.verify();
   return isar;
 }

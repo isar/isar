@@ -5,7 +5,7 @@ abstract class IsarCollection<ID, OBJ> {
 
   OBJ? get(ID id);
 
-  List<OBJ> getAll(List<ID> ids);
+  List<OBJ?> getAll(List<ID> ids);
 
   void put(OBJ object) => putAll([object]);
 

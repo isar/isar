@@ -3,6 +3,7 @@ library isar;
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/src/impl/bindings.dart';
@@ -19,10 +20,10 @@ part 'src/annotations/index.dart';
 part 'src/annotations/name.dart';
 part 'src/annotations/type.dart';
 
+part 'src/impl/async.dart';
 part 'src/impl/isar_collection_impl.dart';
 part 'src/impl/isar_impl.dart';
 part 'src/impl/query_impl.dart';
-part 'src/impl/raw_cursor.dart';
 
 part 'src/isar_core.dart';
 part 'src/isar.dart';
@@ -30,6 +31,6 @@ part 'src/isar_collection.dart';
 part 'src/isar_error.dart';
 part 'src/query.dart';
 part 'src/query_builder.dart';
-part 'src/query_builder_extensions.dart';
+part 'src/query_extensions.dart';
 part 'src/query_components.dart';
 part 'src/schema.dart';

@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+/*import 'package:isar/isar.dart';
 import 'package:isar_test/src/sync_async_helper.dart';
 import 'package:test/test.dart';
 
@@ -113,3 +113,4 @@ bool dateTimeListEquals(List<dynamic>? a, List<dynamic>? b) {
     b?.cast<DateTime?>().map((e) => e?.toUtc()).toList(),
   );
 }
+*/

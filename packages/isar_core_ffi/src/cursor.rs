@@ -1,8 +1,6 @@
-use std::ptr;
-
-use isar_core::core::cursor::IsarCursor;
-
 use crate::{CIsarCursor, CIsarReader};
+use isar_core::core::cursor::IsarCursor;
+use std::ptr;
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_cursor_next(
@@ -21,12 +19,4 @@ pub unsafe extern "C" fn isar_cursor_next(
     } else {
         ptr::null()
     }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_cursor_free(cursor: *mut CIsarCursor, old_reader: *mut CIsarReader) {
-    if !old_reader.is_null() {
-        drop(Box::from_raw(old_reader));
-    }
-    drop(Box::from_raw(cursor));
 }

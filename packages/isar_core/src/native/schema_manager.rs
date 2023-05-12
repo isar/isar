@@ -34,7 +34,7 @@ pub fn perform_migration(txn: &NativeTxn, schema: &IsarSchema) -> Result<Vec<Nat
 
         let collection = open_collection(
             txn,
-            collections.len(),
+            collections.len() as u16,
             updated_schema.deref(),
             &schema.collections,
         )?;
@@ -86,7 +86,7 @@ fn open_index_db(
 
 fn migrate_collection(
     txn: &NativeTxn,
-    schema: &mut CollectionSchema,
+    schema: &CollectionSchema,
     existing_schema: &CollectionSchema,
 ) -> Result<Vec<PropertySchema>> {
     if existing_schema.version != ISAR_FILE_VERSION {
@@ -123,7 +123,7 @@ fn migrate_collection(
 
 fn open_collection(
     txn: &NativeTxn,
-    collection_index: usize,
+    collection_index: u16,
     schema: &CollectionSchema,
     all_schemas: &[CollectionSchema],
 ) -> Result<NativeCollection> {
@@ -142,13 +142,10 @@ fn open_collection(
             };
             let property =
                 NativeProperty::new(property_schema.data_type, offset, embedded_collection_index);
-            properties.push((property, name));
+            properties.push(property);
         }
         offset += property_schema.data_type.static_size() as u32;
     }
-
-    properties.sort_by(|(_, a), (_, b)| a.cmp(&b));
-    let properties = properties.iter().map(|(p, _)| p).copied().collect_vec();
 
     let db = if !schema.embedded {
         Some(txn.open_db(&schema.name, true, false)?)
@@ -156,7 +153,7 @@ fn open_collection(
         None
     };
 
-    let col = NativeCollection::new(collection_index, properties, vec![], schema.embedded, db);
+    let col = NativeCollection::new(collection_index, properties, vec![], db);
     col.init_largest_id(txn)?;
 
     Ok(col)

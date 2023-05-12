@@ -1,13 +1,24 @@
 part of isar;
 
 abstract class Query<T> {
-  T? findFirst();
+  T? findFirst() => findAll(limit: 1).firstOrNull;
 
-  List<T> findAll();
+  List<T> findAll({int? offset, int? limit});
 
-  bool deleteFirst();
+  bool deleteFirst() => deleteAll(limit: 1) > 0;
 
-  int deleteAll();
+  int deleteAll({int? offset, int? limit});
+
+  int count();
+
+  bool isEmpty() => aggregate(AggregationOp.isEmpty)!;
+
+  bool isNotEmpty() => !isEmpty();
+
+  @protected
+  R? aggregate<R>(AggregationOp op);
+
+  void close();
 }
 
 /// @nodoc

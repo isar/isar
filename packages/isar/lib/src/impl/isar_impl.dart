@@ -1,17 +1,23 @@
 part of isar;
 
 class _IsarImpl implements Isar {
-  _IsarImpl._(Pointer<CIsarInstance> ptr, this.converters) : _ptr = ptr {
+  _IsarImpl._(this.instanceId, Pointer<CIsarInstance> ptr, this.converters)
+      : _ptr = ptr {
     for (var i = 0; i < converters.length; i++) {
       final converter = converters[i];
       collections[converter.type] = converters[i].withType(
-        <ID, OBJ>(ObjectConverter<ID, OBJ> converter) {
+        <ID, OBJ>(converter) {
           return _IsarCollectionImpl<ID, OBJ>(this, i, converter);
         },
       );
     }
+
+    _instances[instanceId] = this;
   }
 
+  static final _instances = <int, _IsarImpl>{};
+
+  final int instanceId;
   final List<ObjectConverter<dynamic, dynamic>> converters;
   final collections = <Type, _IsarCollectionImpl<dynamic, dynamic>>{};
 
@@ -20,16 +26,21 @@ class _IsarImpl implements Isar {
   bool _txnWrite = false;
 
   factory _IsarImpl.get({
+    required int instanceId,
     required List<ObjectConverter<dynamic, dynamic>> converters,
-    required String name,
   }) {
-    final instance = IsarCore.isar_get(Isar.fastHash(name));
-    if (instance.isNull) {
-      throw IsarError('Instance $name has not been opened yet. Make sure to '
+    final instance = _instances[instanceId];
+    if (instance != null) {
+      return instance;
+    }
+
+    final ptr = isar_get_instance(instanceId);
+    if (ptr.isNull) {
+      throw IsarError('Instance has not been opened yet. Make sure to '
           'call Isar.open() before calling Isar.get().');
     }
 
-    return _IsarImpl._(instance, converters);
+    return _IsarImpl._(instanceId, ptr, converters);
   }
 
   factory _IsarImpl.open({
@@ -56,7 +67,7 @@ class _IsarImpl implements Isar {
     final schemaPtr = IsarCore.toNativeString(schemaJson);
 
     final isarPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarInstance>>();
-    IsarCore.isar_open(
+    isar_open_instance(
       isarPtrPtr,
       instanceId,
       namePtr,
@@ -70,7 +81,15 @@ class _IsarImpl implements Isar {
     ).checkNoError();
 
     final converters = schemas.map((e) => e.converter).toList();
-    return _IsarImpl._(isarPtrPtr.value, converters);
+    return _IsarImpl._(instanceId, isarPtrPtr.value, converters);
+  }
+
+  static _IsarImpl getInstance(int instanceId) {
+    final instance = _instances[instanceId];
+    if (instance == null) {
+      throw IsarError('Instance has not been opened yet in this isolate.');
+    }
+    return instance;
   }
 
   @pragma('vm:prefer-inline')
@@ -83,6 +102,7 @@ class _IsarImpl implements Isar {
     }
   }
 
+  @pragma('vm:prefer-inline')
   T getTxn<T>(
     T Function(
       Pointer<CIsarInstance> isarPtr,
@@ -97,6 +117,7 @@ class _IsarImpl implements Isar {
     }
   }
 
+  @pragma('vm:prefer-inline')
   T getWriteTxn<T>(
     (T, Pointer<CIsarTxn>?) Function(
       Pointer<CIsarInstance> isarPtr,
@@ -128,17 +149,17 @@ class _IsarImpl implements Isar {
 
     final ptr = getPtr();
     final txnPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarTxn>>();
-    IsarCore.isar_txn_begin(ptr, txnPtrPtr, write).checkNoError();
+    isar_txn_begin(ptr, txnPtrPtr, write).checkNoError();
     try {
       _txnPtr = txnPtrPtr.value;
       _txnWrite = write;
       final result = callback(this);
-      IsarCore.isar_txn_commit(ptr, _txnPtr!).checkNoError();
+      isar_txn_commit(ptr, _txnPtr!).checkNoError();
       return result;
     } catch (_) {
       final txnPtr = _txnPtr;
       if (txnPtr != null) {
-        IsarCore.isar_txn_abort(ptr, txnPtr);
+        isar_txn_abort(ptr, txnPtr);
       }
       rethrow;
     } finally {
@@ -171,12 +192,22 @@ class _IsarImpl implements Isar {
 
   @override
   void clear() {
-    // TODO: implement clear
+    for (final collection in collections.values) {
+      collection.clear();
+    }
   }
 
   @override
+  int getSize({bool includeIndexes = false}) {
+    return 0;
+  }
+
+  @override
+  void copyToFile(String targetFilePath) {}
+
+  @override
   bool close({bool deleteFromDisk = false}) {
-    final closed = IsarCore.isar_close(_ptr!, deleteFromDisk);
+    final closed = isar_close(_ptr!, deleteFromDisk);
     _ptr = null;
     return closed;
   }

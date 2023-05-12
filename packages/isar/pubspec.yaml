@@ -9,7 +9,7 @@ funding:
   - https://github.com/sponsors/simc/
 
 environment:
-  sdk: ">=3.0.0-417.3.beta <4.0.0"
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   analyzer: ">=4.6.0 <6.0.0"
@@ -19,6 +19,6 @@ dependencies:
   source_gen: ^1.2.7
 
 dev_dependencies:
-  ffigen: ^8.0.0-dev.0
+  ffigen: ^8.0.0
   test: any
   very_good_analysis: ^3.0.1

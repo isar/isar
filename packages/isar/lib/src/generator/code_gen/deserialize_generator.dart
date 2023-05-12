@@ -125,7 +125,7 @@ String _deserialize({
       if (nullable) {
         return '''
         {
-          final value = IsarCore.isar_read_bool(reader, $index);
+          final value = IsarCore.isarReadBool(reader, $index);
           if (value == $nullBool) {
             ${result(defaultValue)}
           } else {
@@ -133,13 +133,13 @@ String _deserialize({
           }
         }''';
       } else {
-        return result('IsarCore.isar_read_bool(reader, $index) == $trueBool');
+        return result('IsarCore.isarReadBool(reader, $index) == $trueBool');
       }
     case PropertyType.byte:
       if (nullable) {
         return '''
         {
-          final value = IsarCore.isar_read_byte(reader, $index);
+          final value = IsarCore.isarReadByte(reader, $index);
           if (value == $nullByte) {
             ${result(defaultValue)}
           } else {
@@ -147,13 +147,13 @@ String _deserialize({
           }
         }''';
       } else {
-        return result('IsarCore.isar_read_byte(reader, $index)');
+        return result('IsarCore.isarReadByte(reader, $index)');
       }
     case PropertyType.int:
       if (nullable) {
         return '''
         {
-          final value = IsarCore.isar_read_int(reader, $index);
+          final value = IsarCore.isarReadInt(reader, $index);
           if (value == $nullInt) {
             ${result(defaultValue)}
           } else {
@@ -161,13 +161,13 @@ String _deserialize({
           }
         }''';
       } else {
-        return result('IsarCore.isar_read_int(reader, $index)');
+        return result('IsarCore.isarReadInt(reader, $index)');
       }
     case PropertyType.float:
       if (nullable) {
         return '''
         {
-          final value = IsarCore.isar_read_float(reader, $index);
+          final value = IsarCore.isarReadFloat(reader, $index);
           if (value.isNaN) {
             ${result(defaultValue)}
           } else {
@@ -175,15 +175,15 @@ String _deserialize({
           }
         }''';
       } else {
-        return result('IsarCore.isar_read_float(reader, $index)');
+        return result('IsarCore.isarReadFloat(reader, $index)');
       }
     case PropertyType.long:
       if (isId) {
-        return result('IsarCore.isar_read_id(reader)');
+        return result('IsarCore.isarReadId(reader)');
       } else if (nullable) {
         return '''
         {
-          final value = IsarCore.isar_read_long(reader, $index);
+          final value = IsarCore.isarReadLong(reader, $index);
           if (value == $nullLong) {
             ${result(defaultValue)}
           } else {
@@ -191,13 +191,13 @@ String _deserialize({
           }
         }''';
       } else {
-        return result('IsarCore.isar_read_long(reader, $index)');
+        return result('IsarCore.isarReadLong(reader, $index)');
       }
     case PropertyType.double:
       if (nullable) {
         return '''
         {
-          final value = IsarCore.isar_read_double(reader, $index);
+          final value = IsarCore.isarReadDouble(reader, $index);
           if (value.isNaN) {
             ${result(defaultValue)}
           } else {
@@ -205,14 +205,14 @@ String _deserialize({
           }
         }''';
       } else {
-        return result('IsarCore.isar_read_double(reader, $index)');
+        return result('IsarCore.isarReadDouble(reader, $index)');
       }
     case PropertyType.string:
       return '''
       {
-        final length = IsarCore.isar_read_string(reader, $index, IsarCore.stringPtrPtr);
+        final length = IsarCore.isarReadString(reader, $index, IsarCore.stringPtrPtr);
         final value = IsarCore.fromNativeString(IsarCore.stringPtr, length);
-        IsarCore.isar_free_string(IsarCore.stringPtr, length);
+        IsarCore.isarFreeString(IsarCore.stringPtr, length);
         if (value == null) {
           ${result(defaultValue)}
         } else {
@@ -230,7 +230,7 @@ String _deserialize({
       );
       return '''
       {
-        final length = IsarCore.isar_read_list(reader, $index, IsarCore.readerPtrPtr);
+        final length = IsarCore.isarReadList(reader, $index, IsarCore.readerPtrPtr);
         final listReader = IsarCore.readerPtr;
         if (listReader.isNull) {
           ${result(defaultValue)}

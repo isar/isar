@@ -72,20 +72,20 @@ pub unsafe extern "C" fn isar_read_double(reader: &'static CIsarReader, index: u
 pub unsafe extern "C" fn isar_read_string(
     reader: &'static CIsarReader,
     index: u32,
-    value: *mut *const u16,
+    value: *mut *const u8,
 ) -> u32 {
     let str = match reader {
         CIsarReader::Native(reader) => reader.read_string(index),
         CIsarReader::NativeList(reader) => reader.read_string(index),
     };
     if let Some(str) = str {
-        let mut encoded = str.encode_utf16().collect_vec();
-        encoded.shrink_to_fit();
-        *value = encoded.as_ptr();
-        let len = encoded.len();
-        mem::forget(encoded);
+        let len = str.len();
+        let ptr = str.as_ptr();
+        mem::forget(str);
+        *value = ptr;
         len as u32
     } else {
+        *value = ptr::null();
         0
     }
 }

@@ -2,6 +2,7 @@ use super::cursor::IsarCursor;
 use super::error::Result;
 use super::insert::IsarInsert;
 use super::query_builder::IsarQueryBuilder;
+use super::reader::IsarReader;
 use super::schema::IsarSchema;
 
 pub struct CompactCondition {
@@ -15,6 +16,10 @@ pub trait IsarInstance {
 
     type Txn;
 
+    type Reader<'a>: IsarReader
+    where
+        Self: 'a;
+
     type Insert<'a>: IsarInsert<'a, Txn = Self::Txn>
     where
         Self: 'a;
@@ -25,13 +30,13 @@ pub trait IsarInstance {
 
     type Query;
 
-    type Cursor<'a>: IsarCursor
+    type Cursor<'a>: IsarCursor<Reader<'a> = Self::Reader<'a>>
     where
         Self: 'a;
 
-    fn get(instance_id: u32) -> Option<Self::Instance>;
+    fn get_instance(instance_id: u32) -> Option<Self::Instance>;
 
-    fn open(
+    fn open_instance(
         instance_id: u32,
         name: &str,
         dir: &str,
@@ -49,8 +54,17 @@ pub trait IsarInstance {
 
     fn get_largest_id(&self, collection_index: u16) -> Result<i64>;
 
+    fn get<'a>(
+        &'a self,
+        txn: &'a Self::Txn,
+        collection_index: u16,
+        id: i64,
+    ) -> Result<Option<Self::Reader<'a>>>;
+
     fn insert(&self, txn: Self::Txn, collection_index: u16, count: u32)
         -> Result<Self::Insert<'_>>;
+
+    fn delete<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16, id: i64) -> Result<bool>;
 
     fn count(&self, txn: &Self::Txn, collection_index: u16) -> Result<u32>;
 
@@ -63,7 +77,7 @@ pub trait IsarInstance {
 
     fn query(&self, collection_index: u16) -> Result<Self::QueryBuilder<'_>>;
 
-    fn cursor<'a>(
+    fn query_cursor<'a>(
         &'a self,
         txn: &'a Self::Txn,
         query: &'a Self::Query,
@@ -71,7 +85,7 @@ pub trait IsarInstance {
         limit: Option<u32>,
     ) -> Result<Self::Cursor<'_>>;
 
-    fn delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<u32>;
+    fn query_delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<u32>;
 
     fn close(instance: Self::Instance, delete: bool) -> bool;
 }

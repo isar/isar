@@ -45,6 +45,9 @@ pub enum IsarError {
     #[snafu(display("Illegal String."))]
     IllegalString {},
 
+    #[snafu(display("Illegal Argument."))]
+    IllegalArgument {},
+
     #[snafu(display("The database is full."))]
     DbFull {},
 

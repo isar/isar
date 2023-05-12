@@ -81,6 +81,31 @@ pub unsafe extern "C" fn isar_string(chars: *const u16, length: u32) -> *const S
 #[no_mangle]
 pub unsafe extern "C" fn isar_free_string(value: *const u16, length: u32) {
     if !value.is_null() {
-        let _ = Vec::from_raw_parts(value as *mut u16, length as usize, length as usize);
+        drop(Vec::from_raw_parts(
+            value as *mut u16,
+            length as usize,
+            length as usize,
+        ));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_free_reader(reader: *const CIsarReader) {
+    if !reader.is_null() {
+        drop(Box::from_raw(reader as *mut CIsarReader));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_free_query(query: *mut CIsarQuery) {
+    if !query.is_null() {
+        drop(Box::from_raw(query));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_free_cursor(cursor: *mut CIsarCursor) {
+    if !cursor.is_null() {
+        drop(Box::from_raw(cursor));
     }
 }

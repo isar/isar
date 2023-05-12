@@ -12,26 +12,23 @@ typedef FilterQuery<OBJ> = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>
 class QueryBuilder<OBJ, R, S> {
   /// @nodoc
   @protected
-  const QueryBuilder(this._query);
+  const QueryBuilder._(this._query);
 
-  final QueryBuilderInternal<OBJ> _query;
+  final _QueryBuilder<OBJ> _query;
 
   /// @nodoc
   @protected
   static QueryBuilder<OBJ, R, S> apply<OBJ, R, S>(
     QueryBuilder<OBJ, dynamic, dynamic> qb,
-    QueryBuilderInternal<OBJ> Function(QueryBuilderInternal<OBJ> query)
-        transform,
+    _QueryBuilder<OBJ> Function(_QueryBuilder<OBJ> query) transform,
   ) {
-    return QueryBuilder(transform(qb._query));
+    return QueryBuilder._(transform(qb._query));
   }
 }
 
-/// @nodoc
-@protected
-class QueryBuilderInternal<OBJ> {
+class _QueryBuilder<OBJ> {
   /// @nodoc
-  const QueryBuilderInternal({
+  const _QueryBuilder({
     this.collection,
     this.filter = const AndGroup([]),
     this.filterGroupAnd = true,
@@ -63,7 +60,7 @@ class QueryBuilderInternal<OBJ> {
   final int? property;
 
   /// @nodoc
-  QueryBuilderInternal<OBJ> addFilterCondition(Filter cond) {
+  _QueryBuilder<OBJ> addFilterCondition(Filter cond) {
     if (filterNot) {
       cond = NotGroup(cond);
     }
@@ -101,14 +98,14 @@ class QueryBuilderInternal<OBJ> {
   }
 
   /// @nodoc
-  QueryBuilderInternal<OBJ> group(FilterQuery<OBJ> q) {
+  _QueryBuilder<OBJ> group(FilterQuery<OBJ> q) {
     // ignore: prefer_const_constructors
-    final qb = q(QueryBuilder(QueryBuilderInternal()));
+    final qb = q(QueryBuilder._(_QueryBuilder()));
     return addFilterCondition(qb._query.filter);
   }
 
   /// @nodoc
-  QueryBuilderInternal<OBJ> listLength<E>(
+  _QueryBuilder<OBJ> listLength<E>(
     int property,
     int lower,
     bool includeLower,
@@ -135,12 +132,12 @@ class QueryBuilderInternal<OBJ> {
   }
 
   /// @nodoc
-  /*QueryBuilderInternal<OBJ> object<E>(
+  /*_QueryBuilder<OBJ> object<E>(
     FilterQuery<E> q,
     int property,
   ) {
     // ignore: prefer_const_constructors
-    final qb = q(QueryBuilder(QueryBuilderInternal()));
+    final qb = q(QueryBuilder(_QueryBuilder()));
     return addFilterCondition(
       ObjectFilter(filter: qb._query.filter, property: property),
     );
@@ -149,7 +146,7 @@ class QueryBuilderInternal<OBJ> {
   ///
 
   /// @nodoc
-  QueryBuilderInternal<OBJ> addSortBy(
+  _QueryBuilder<OBJ> addSortBy(
     int property, {
     Sort sort = Sort.asc,
     bool caseSensitive = true,
@@ -167,7 +164,7 @@ class QueryBuilderInternal<OBJ> {
   }
 
   /// @nodoc
-  QueryBuilderInternal<OBJ> addDistinctBy(
+  _QueryBuilder<OBJ> addDistinctBy(
     int property, {
     bool caseSensitive = true,
   }) {
@@ -183,12 +180,12 @@ class QueryBuilderInternal<OBJ> {
   }
 
   /// @nodoc
-  QueryBuilderInternal<OBJ> addProperty<E>(int property) {
+  _QueryBuilder<OBJ> addProperty<E>(int property) {
     return copyWith(property: property);
   }
 
   /// @nodoc
-  QueryBuilderInternal<OBJ> copyWith({
+  _QueryBuilder<OBJ> copyWith({
     Filter? filter,
     bool? filterIsGrouped,
     bool? filterGroupAnd,
@@ -197,7 +194,7 @@ class QueryBuilderInternal<OBJ> {
     List<SortProperty>? sortByProperties,
     int? property,
   }) {
-    return QueryBuilderInternal(
+    return _QueryBuilder(
       collection: collection,
       filter: filter ?? this.filter,
       filterGroupAnd: filterGroupAnd ?? this.filterGroupAnd,

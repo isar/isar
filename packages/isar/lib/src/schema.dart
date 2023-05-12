@@ -39,14 +39,10 @@ final class CollectionSchema extends Schema {
 final class ObjectConverter<ID, OBJ> {
   /// @nodoc
   const ObjectConverter({
-    required this.getId,
     required this.serialize,
     required this.deserialize,
     required this.deserializeProp,
   });
-
-  /// @nodoc
-  final GetId<OBJ> getId;
 
   /// @nodoc
   final Serialize<OBJ> serialize;

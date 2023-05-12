@@ -3,11 +3,8 @@ import 'package:isar/src/generator/isar_type.dart';
 import 'package:isar/src/generator/object_info.dart';
 
 String generateSerialize(ObjectInfo object) {
-  var code = '''
-  int ${object.serializeName}(
-    ${object.dartName} object, 
-    IsarWriter writer,
-  ) {''';
+  var code =
+      'int ${object.serializeName}(${object.dartName} object, IsarWriter writer) {';
 
   for (final property in object.properties) {
     if (property.isId && property.type == PropertyType.long) {
@@ -49,32 +46,32 @@ String _writeProperty({
   switch (type) {
     case PropertyType.bool:
       if (nullable) {
-        return 'IsarCore.isar_write_bool($writer, $value ?? false, $value == null);';
+        return 'IsarCore.isarWriteBool($writer, $value ?? false, $value == null);';
       } else {
-        return 'IsarCore.isar_write_bool($writer, $value, false);';
+        return 'IsarCore.isarWriteBool($writer, $value, false);';
       }
     case PropertyType.byte:
       final orNull = nullable ? '?? $nullByte' : '';
-      return 'IsarCore.isar_write_byte($writer, $value $orNull);';
+      return 'IsarCore.isarWriteByte($writer, $value $orNull);';
     case PropertyType.int:
       final orNull = nullable ? '?? $nullInt' : '';
-      return 'IsarCore.isar_write_int($writer, $value $orNull);';
+      return 'IsarCore.isarWriteInt($writer, $value $orNull);';
     case PropertyType.float:
       final orNull = nullable ? '?? $nullFloat' : '';
-      return 'IsarCore.isar_write_float($writer, $value $orNull);';
+      return 'IsarCore.isarWriteFloat($writer, $value $orNull);';
     case PropertyType.long:
       final orNull = nullable ? '?? $nullLong' : '';
-      return 'IsarCore.isar_write_long($writer, $value $orNull);';
+      return 'IsarCore.isarWriteLong($writer, $value $orNull);';
     case PropertyType.dateTime:
       final converted = nullable
           ? '$value?.toUtc().microsecondsSinceEpoch ?? $nullLong'
           : '$value.toUtc().microsecondsSinceEpoch';
-      return 'IsarCore.isar_write_long($writer, $converted);';
+      return 'IsarCore.isarWriteLong($writer, $converted);';
     case PropertyType.double:
       final orNull = nullable ? '?? $nullDouble' : '';
-      return 'IsarCore.isar_write_double($writer, $value $orNull);';
+      return 'IsarCore.isarWriteDouble($writer, $value $orNull);';
     case PropertyType.string:
-      return 'IsarCore.isar_write_string($writer, IsarCore.toNativeString($value));';
+      return 'IsarCore.isarWriteString($writer, IsarCore.toNativeString($value));';
     case PropertyType.object:
       var code = '''
       {
@@ -82,13 +79,13 @@ String _writeProperty({
       if (nullable) {
         code += '''
         if (value == null) {
-          IsarCore.isar_write_null($writer);
+          IsarCore.isarWriteNull($writer);
         } else {''';
       }
       code += '''
-      final objectWriter = IsarCore.isar_begin_object($writer);
+      final objectWriter = IsarCore.isarBeginObject($writer);
       serialize$typeClassName(objectWriter, value);
-      IsarCore.isar_end_object($writer, objectWriter);''';
+      IsarCore.isarEndObject($writer, objectWriter);''';
       if (nullable) {
         code += '}';
       }
@@ -100,11 +97,11 @@ String _writeProperty({
       if (nullable) {
         code += '''
         if (value == null) {
-          IsarCore.isar_write_null($writer);
+          IsarCore.isarWriteNull($writer);
         } else {''';
       }
       code += '''
-      final listWriter = IsarCore.isar_begin_list(writer, value.length);
+      final listWriter = IsarCore.isarBeginList(writer, value.length);
       for (final item in value) {
         ${_writeProperty(
         writer: 'listWriter',
@@ -114,7 +111,7 @@ String _writeProperty({
         value: 'item',
       )}
       }
-      IsarCore.isar_end_list(writer, listWriter);
+      IsarCore.isarEndList(writer, listWriter);
       ''';
       if (nullable) {
         code += '}';

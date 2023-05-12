@@ -1,7 +1,9 @@
+use super::isar_deserializer::IsarDeserializer;
 use super::mdbx::env::Env;
 use super::native_collection::NativeCollection;
 use super::native_insert::NativeInsert;
 use super::native_query_builder::NativeQueryBuilder;
+use super::native_reader::NativeReader;
 use super::native_txn::NativeTxn;
 use super::query::{Query, QueryCursor};
 use super::schema_manager::perform_migration;
@@ -30,6 +32,10 @@ impl IsarInstance for NativeInstance {
 
     type Txn = NativeTxn;
 
+    type Reader<'a> = NativeReader<'a>
+    where
+        Self: 'a;
+
     type Insert<'a> = NativeInsert<'a>
     where
         Self: 'a;
@@ -44,7 +50,7 @@ impl IsarInstance for NativeInstance {
     where
         Self: 'a;
 
-    fn get(instance_id: u32) -> Option<Self::Instance> {
+    fn get_instance(instance_id: u32) -> Option<Self::Instance> {
         let mut lock = INSTANCES.lock().unwrap();
         if let Some(instance) = lock.get_mut(instance_id as u64) {
             Some(Arc::clone(&instance))
@@ -53,7 +59,7 @@ impl IsarInstance for NativeInstance {
         }
     }
 
-    fn open(
+    fn open_instance(
         instance_id: u32,
         name: &str,
         dir: &str,
@@ -101,6 +107,24 @@ impl IsarInstance for NativeInstance {
         Ok(collection.get_largest_id())
     }
 
+    fn get<'a>(
+        &'a self,
+        txn: &'a Self::Txn,
+        collection_index: u16,
+        id: i64,
+    ) -> Result<Option<Self::Reader<'a>>> {
+        self.verify_instance_id(txn.instance_id)?;
+        let collection = self.get_collection(collection_index)?;
+        let mut cursor = txn.get_cursor(collection.get_db()?)?;
+        let result = if let Some((_, bytes)) = cursor.move_to(&id)? {
+            let object = IsarDeserializer::from_bytes(bytes);
+            Some(NativeReader::new(id, object, collection, &self.collections))
+        } else {
+            None
+        };
+        Ok(result)
+    }
+
     fn insert<'a>(
         &'a self,
         txn: NativeTxn,
@@ -108,13 +132,25 @@ impl IsarInstance for NativeInstance {
         count: u32,
     ) -> Result<NativeInsert<'a>> {
         self.verify_instance_id(txn.instance_id)?;
-        let collection = &self.collections[collection_index as usize];
+        let collection = self.get_collection(collection_index)?;
         Ok(NativeInsert::new(txn, collection, &self.collections, count))
+    }
+
+    fn delete<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16, id: i64) -> Result<bool> {
+        self.verify_instance_id(txn.instance_id)?;
+        let collection = self.get_collection(collection_index)?;
+        let mut cursor = txn.get_cursor(collection.get_db()?)?;
+        if cursor.move_to(&id)?.is_some() {
+            cursor.delete_current()?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
     }
 
     fn count(&self, txn: &Self::Txn, collection_index: u16) -> Result<u32> {
         self.verify_instance_id(txn.instance_id)?;
-        let collection = &self.collections[collection_index as usize];
+        let collection = self.get_collection(collection_index)?;
         let (count, _) = txn.stat(collection.get_db()?)?;
         Ok(count as u32)
     }
@@ -129,7 +165,7 @@ impl IsarInstance for NativeInstance {
     }
 
     fn query(&self, collection_index: u16) -> Result<Self::QueryBuilder<'_>> {
-        let collection = &self.collections[collection_index as usize];
+        let collection = self.get_collection(collection_index)?;
         Ok(NativeQueryBuilder::new(
             self.instance_id,
             collection,
@@ -137,7 +173,7 @@ impl IsarInstance for NativeInstance {
         ))
     }
 
-    fn cursor<'a>(
+    fn query_cursor<'a>(
         &'a self,
         txn: &'a Self::Txn,
         query: &'a Self::Query,
@@ -149,9 +185,9 @@ impl IsarInstance for NativeInstance {
         query.cursor(txn, &self.collections, offset, limit)
     }
 
-    fn delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<u32> {
+    fn query_delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<u32> {
         self.verify_instance_id(txn.instance_id)?;
-        let collection = &self.collections[query.collection_index];
+        let collection = self.get_collection(query.collection_index)?;
         query.delete(txn, collection)
     }
 
@@ -283,6 +319,14 @@ impl NativeInstance {
             Ok(Some(self))
         }
     }
+
+    fn get_collection(&self, collection_index: u16) -> Result<&NativeCollection> {
+        if let Some(collection) = self.collections.get(collection_index as usize) {
+            Ok(collection)
+        } else {
+            Err(IsarError::IllegalArgument {})
+        }
+    }
 }
 
 mod test {
@@ -310,7 +354,7 @@ mod test {
             vec![],
             false,
         )]);
-        let i = NativeInstance::open(
+        let i = NativeInstance::open_instance(
             0,
             "test",
             "/Users/simon/Documents/GitHub/isar/packages/isar_core/tests",

@@ -6,7 +6,7 @@ use crate::core::data_type::DataType;
 use crate::core::error::{IsarError, Result};
 use std::cell::Cell;
 
-#[derive(Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct NativeProperty {
     pub data_type: DataType,
     pub offset: u32,
@@ -25,10 +25,9 @@ impl NativeProperty {
 
 #[derive(Clone)]
 pub struct NativeCollection {
-    pub(crate) collection_index: usize,
+    pub(crate) collection_index: u16,
     properties: Vec<NativeProperty>,
     pub(crate) indexes: Vec<NativeIndex>,
-    pub(crate) embedded: bool,
     pub(crate) static_size: u32,
     db: Option<Db>,
     auto_increment: Cell<i64>,
@@ -36,10 +35,9 @@ pub struct NativeCollection {
 
 impl NativeCollection {
     pub fn new(
-        collection_index: usize,
+        collection_index: u16,
         properties: Vec<NativeProperty>,
         indexes: Vec<NativeIndex>,
-        embedded: bool,
         db: Option<Db>,
     ) -> Self {
         let static_size = properties
@@ -50,7 +48,6 @@ impl NativeCollection {
             collection_index,
             properties,
             indexes,
-            embedded,
             static_size: static_size,
             db,
             auto_increment: Cell::new(i64::MIN),

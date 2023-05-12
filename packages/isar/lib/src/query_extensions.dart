@@ -48,7 +48,7 @@ extension QueryFilterNot<OBJ, R> on QueryBuilder<OBJ, R, QFilterCondition> {
   ) {
     return QueryBuilder.apply(this, (query) {
       return query.group((q) {
-        var q2 = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>(q._query);
+        var q2 = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>._(q._query);
         for (final e in items) {
           q2 = modifier(q2.or(), e);
         }
@@ -68,7 +68,7 @@ extension QueryFilterNot<OBJ, R> on QueryBuilder<OBJ, R, QFilterCondition> {
   ) {
     return QueryBuilder.apply(this, (query) {
       return query.group((q) {
-        var q2 = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>(q._query);
+        var q2 = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>._(q._query);
         for (final e in items) {
           q2 = modifier(q2.and(), e);
         }
@@ -103,122 +103,82 @@ extension QueryModifier<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
     if (enabled) {
       return option(this);
     } else {
-      return QueryBuilder(_query);
+      return QueryBuilder._(_query);
     }
   }
 }
 
+extension QueryAggregation<T extends num> on Query<T?> {
+  T? min() => aggregate<T>(AggregationOp.min);
+
+  T? max() => aggregate<T>(AggregationOp.max);
+
+  double average() => aggregate<double>(AggregationOp.average)!;
+
+  T sum() => aggregate<T>(AggregationOp.sum)!;
+}
+
+extension QueryDateAggregation<T extends DateTime?> on Query<T> {
+  DateTime? min() => aggregate<DateTime>(AggregationOp.min);
+
+  DateTime? max() => aggregate<DateTime>(AggregationOp.max);
+}
+
 /// Extension for QueryBuilders
-/*extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
+extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
   /// Create a query from this query builder.
   Query<R> build() => _query.build();
 
   /// {@macro query_find_first}
-  Future<R?> findFirst() => build().findFirst();
-
-  /// {@macro query_find_first}
-  R? findFirstSync() => build().findFirstSync();
+  R? findFirst() => build().findFirst();
 
   /// {@macro query_find_all}
-  Future<List<R>> findAll() => build().findAll();
-
-  /// {@macro query_find_all}
-  List<R> findAllSync() => build().findAllSync();
-
-  /// {@macro query_count}
-  Future<int> count() => build().count();
+  List<R> findAll({int? offset, int? limit}) => build().findAll(
+        offset: offset,
+        limit: limit,
+      );
 
   /// {@macro query_count}
-  int countSync() => build().countSync();
+  int count() => build().count();
 
   /// {@macro query_is_empty}
-  Future<bool> isEmpty() => build().isEmpty();
-
-  /// {@macro query_is_empty}
-  bool isEmptySync() => build().isEmptySync();
+  bool isEmpty() => build().isEmpty();
 
   /// {@macro query_is_not_empty}
-  Future<bool> isNotEmpty() => build().isNotEmpty();
-
-  /// {@macro query_is_not_empty}
-  bool isNotEmptySync() => build().isNotEmptySync();
+  bool isNotEmpty() => build().isNotEmpty();
 
   /// {@macro query_delete_first}
-  Future<bool> deleteFirst() => build().deleteFirst();
-
-  /// {@macro query_delete_first}
-  bool deleteFirstSync() => build().deleteFirstSync();
+  bool deleteFirst() => build().deleteFirst();
 
   /// {@macro query_delete_all}
-  Future<int> deleteAll() => build().deleteAll();
-
-  /// {@macro query_delete_all}
-  int deleteAllSync() => build().deleteAllSync();
-
-  /// {@macro query_watch}
-  Stream<List<R>> watch({bool fireImmediately = false}) =>
-      build().watch(fireImmediately: fireImmediately);
-
-  /// {@macro query_watch_lazy}
-  Stream<void> watchLazy({bool fireImmediately = false}) =>
-      build().watchLazy(fireImmediately: fireImmediately);
-
-  /// {@macro query_export_json_raw}
-  Future<T> exportJsonRaw<T>(T Function(Uint8List) callback) =>
-      build().exportJsonRaw(callback);
-
-  /// {@macro query_export_json_raw}
-  T exportJsonRawSync<T>(T Function(Uint8List) callback) =>
-      build().exportJsonRawSync(callback);
-
-  /// {@macro query_export_json}
-  Future<List<Map<String, dynamic>>> exportJson() => build().exportJson();
-
-  /// {@macro query_export_json}
-  List<Map<String, dynamic>> exportJsonSync() => build().exportJsonSync();
+  int deleteAll({int? offset, int? limit}) => build().deleteAll(
+        offset: offset,
+        limit: limit,
+      );
 }
 
 /// Extension for QueryBuilders
 extension QueryExecuteAggregation<OBJ, T extends num>
     on QueryBuilder<OBJ, T?, QQueryOperations> {
   /// {@macro aggregation_min}
-  Future<T?> min() => build().min();
-
-  /// {@macro aggregation_min}
-  T? minSync() => build().minSync();
+  T? min() => build().min();
 
   /// {@macro aggregation_max}
-  Future<T?> max() => build().max();
-
-  /// {@macro aggregation_max}
-  T? maxSync() => build().maxSync();
+  T? max() => build().max();
 
   /// {@macro aggregation_average}
-  Future<double> average() => build().average();
-
-  /// {@macro aggregation_average}
-  double averageSync() => build().averageSync();
+  double average() => build().average();
 
   /// {@macro aggregation_sum}
-  Future<T> sum() => build().sum();
-
-  /// {@macro aggregation_sum}
-  T sumSync() => build().sumSync();
+  T sum() => build().sum();
 }
 
 /// Extension for QueryBuilders
 extension QueryExecuteDateAggregation<OBJ>
     on QueryBuilder<OBJ, DateTime?, QQueryOperations> {
   /// {@macro aggregation_min}
-  Future<DateTime?> min() => build().min();
-
-  /// {@macro aggregation_min}
-  DateTime? minSync() => build().minSync();
+  DateTime? min() => build().min();
 
   /// {@macro aggregation_max}
-  Future<DateTime?> max() => build().max();
-
-  /// {@macro aggregation_max}
-  DateTime? maxSync() => build().maxSync();
+  DateTime? max() => build().max();
 }
-*/

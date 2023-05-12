@@ -7,8 +7,8 @@ abstract class Isar {
   }) {
     Isar.initializeIsarCore();
     return _IsarImpl.get(
+      instanceId: Isar.fastHash(name),
       converters: schemas.map((e) => e.converter).toList(),
-      name: name,
     );
   }
 
@@ -37,7 +37,7 @@ abstract class Isar {
   static const String defaultName = 'default';
 
   /// The default max Isar size.
-  static const int defaultMaxSizeMiB = 1024;
+  static const int defaultMaxSizeMiB = 256;
 
   static const String version = '4.0.0';
 
@@ -51,6 +51,10 @@ abstract class Isar {
 
   void clear();
 
+  int getSize({bool includeIndexes = false});
+
+  void copyToFile(String targetFilePath);
+
   bool close({bool deleteFromDisk = false});
 
   /// Initialize Isar Core manually. You need to provide Isar Core libraries
@@ -58,7 +62,7 @@ abstract class Isar {
   ///
   /// Only use this method for non-Flutter code or unit tests.
   static void initializeIsarCore({Map<Abi, String> libraries = const {}}) {
-    _initializeIsarCore(libraries: libraries);
+    IsarCore._initialize(libraries: libraries);
   }
 
   /// FNV-1a 64bit hash algorithm optimized for Dart Strings

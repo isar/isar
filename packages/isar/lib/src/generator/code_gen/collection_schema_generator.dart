@@ -20,7 +20,6 @@ String generateSchema(ObjectInfo object) {
   code += '''
     schema: '${_generateSchemaJson(object)}',
     converter: ObjectConverter<${object.idProperty!.dartType}, ${object.dartName}>(
-      getId: ${object.getIdName},
       serialize: ${object.serializeName},
       deserialize: ${object.deserializeName},
       deserializeProp: ${object.deserializePropName},
@@ -41,20 +40,7 @@ String generateSchema(ObjectInfo object) {
     ''';
   }
 
-  code += '''
-  );
-
-  int ${object.getIdName}(${object.dartName} object) {''';
-
-  if (object.isEmbedded) {
-    code += 'throw UnsupportedError();';
-  } else if (object.idProperty!.type == PropertyType.long) {
-    code += 'return object.${object.idProperty!.dartName};';
-  } else {
-    code += 'Isar.fastHash(object.${object.idProperty!.dartName});';
-  }
-
-  return '$code}';
+  return '$code);';
 }
 
 String _generateSchemaJson(ObjectInfo object) {

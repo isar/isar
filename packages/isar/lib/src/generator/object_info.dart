@@ -118,7 +118,6 @@ class PropertyInfo {
 extension ObjectInfoX on ObjectInfo {
   String get schemaHashName => '${dartName.decapitalize()}SchemaHash';
   String get schemaName => '${dartName.capitalize()}Schema';
-  String get getIdName => '_get${dartName.capitalize()}Id';
   String get serializeName => '_serialize${dartName.capitalize()}';
   String get deserializeName => '_deserialize${dartName.capitalize()}';
   String get deserializePropName => '_deserialize${dartName.capitalize()}Prop';

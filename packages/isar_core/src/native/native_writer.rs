@@ -164,7 +164,9 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
 impl<'a> WriterImpl<'a> for NativeInsert<'a> {
     #[inline]
     fn next_property(&mut self) -> Option<NativeProperty> {
-        self.collection.get_property(self.property_index)
+        let property = self.collection.get_property(self.property_index)?;
+        self.property_index += 1;
+        Some(property)
     }
 
     #[inline]
