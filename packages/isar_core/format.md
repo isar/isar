@@ -52,7 +52,7 @@ The static section contains primitive values (Bool, Byte, Int, Long, Float, Doub
 
 ### Dynamic Section
 
-The dynamic section contains the actual data for all nested objects. Nested objects have the same structure as the top-level object, with a static section followed by am optional dynamic section.
+The dynamic section contains the actual data for all nested objects. Nested objects have the same structure as the top-level object, with a static section followed by an optional dynamic section.
 
 Lists are stored like an object with n properties, where n is the number of elements in the list.
 

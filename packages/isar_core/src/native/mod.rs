@@ -25,14 +25,10 @@ pub(crate) const MAX_OBJ_SIZE: u32 = 2 << 24;
 
 #[inline]
 pub(crate) fn bool_to_byte(value: Option<bool>) -> u8 {
-    if let Some(value) = value {
-        if value {
-            TRUE_BOOL
-        } else {
-            FALSE_BOOL
-        }
-    } else {
-        NULL_BOOL
+    match value {
+        Some(true) => TRUE_BOOL,
+        Some(false) => FALSE_BOOL,
+        None => NULL_BOOL,
     }
 }
 
