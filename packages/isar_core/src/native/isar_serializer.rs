@@ -1398,6 +1398,54 @@ mod tests {
 
         #[test]
         #[should_panic(
+            expected = "Tried to write 3 byte(s) at offset 3 into static section of 3 byte(s)"
+        )]
+        fn test_write_dynamic_outside_bounds_1() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(
+                0,
+                &[0x0, 0x1, 0x2, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x5, 0x5],
+            );
+            serializer.write_dynamic(3, &[0x0]);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 3 byte(s) at offset 4 into static section of 6 byte(s)"
+        )]
+        fn test_write_dynamic_outside_bounds_2() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 6);
+            serializer.write_dynamic(0, &[0x0, 0x1, 0x2, 0x3, 0x4]);
+            serializer.write_dynamic(3, &[0x0; 30]);
+            serializer.write_dynamic(4, &[0x1, 0x2, 0x3, 0x0, 0x5]);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 3 byte(s) at offset 1 into static section of 3 byte(s)"
+        )]
+        fn test_write_nested_outside_bounds_1() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(
+                0,
+                &[0x0, 0x1, 0x2, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x5, 0x5],
+            );
+            serializer.begin_nested(1, 1);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 3 byte(s) at offset 4 into static section of 6 byte(s)"
+        )]
+        fn test_write_nested_outside_bounds_2() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 6);
+            serializer.write_dynamic(0, &[0x0, 0x1, 0x2, 0x3, 0x4]);
+            serializer.write_dynamic(3, &[0x0; 30]);
+            serializer.begin_nested(4, 5);
+        }
+
+        #[test]
+        #[should_panic(
             expected = "Tried to write 1 byte(s) at offset 3 into static section of 3 byte(s)"
         )]
         fn test_write_null_bool_outside_bounds() {
@@ -1472,6 +1520,19 @@ mod tests {
                 &[0x0, 0x1, 0x2, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x5, 0x5],
             );
             serializer.write_null(0, DataType::Double);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 3 byte(s) at offset 4 into static section of 3 byte(s)"
+        )]
+        fn test_write_null_dynamic_outside_bounds() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(
+                0,
+                &[0x0, 0x1, 0x2, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x5, 0x5],
+            );
+            serializer.write_null(4, DataType::Json);
         }
     }
 }
