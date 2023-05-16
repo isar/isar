@@ -9,6 +9,7 @@ use super::{NULL_BOOL, NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
 pub struct IsarSerializer {
     buffer: Cell<Vec<u8>>,
     offset: u32,
+    static_size: u32,
 }
 
 impl IsarSerializer {
@@ -21,6 +22,7 @@ impl IsarSerializer {
         Self {
             buffer: Cell::new(buffer),
             offset: offset + 3,
+            static_size,
         }
     }
 
@@ -39,6 +41,27 @@ impl IsarSerializer {
     }
 
     #[inline]
+    fn assert_static_size_offset(&self, offset: u32, len: u32) {
+        assert!(
+            offset + len <= self.static_size,
+            "Tried to write {len} byte(s) at offset {offset} into static section of {} byte(s)",
+            self.static_size
+        );
+    }
+
+    #[inline]
+    fn write_static_checked(&mut self, offset: u32, bytes: &[u8]) {
+        self.assert_static_size_offset(offset, bytes.len() as u32);
+        self.write(offset, bytes);
+    }
+
+    #[inline]
+    fn write_u24_static_checked(&mut self, offset: u32, value: u32) {
+        self.assert_static_size_offset(offset, 3);
+        self.write_u24(offset, value);
+    }
+
+    #[inline]
     pub fn write_null(&mut self, offset: u32, data_type: DataType) {
         match data_type {
             DataType::Bool => self.write_byte(offset, NULL_BOOL),
@@ -47,45 +70,45 @@ impl IsarSerializer {
             DataType::Float => self.write_float(offset, NULL_FLOAT),
             DataType::Long => self.write_long(offset, NULL_LONG),
             DataType::Double => self.write_double(offset, NULL_DOUBLE),
-            _ => self.write_u24(offset, 0),
+            _ => self.write_u24_static_checked(offset, 0),
         }
     }
 
     #[inline]
     pub fn write_bool(&mut self, offset: u32, value: Option<bool>) {
-        self.write(offset, &[bool_to_byte(value)]);
+        self.write_static_checked(offset, &[bool_to_byte(value)]);
     }
 
     #[inline]
     pub fn write_byte(&mut self, offset: u32, value: u8) {
-        self.write(offset, &[value]);
+        self.write_static_checked(offset, &[value]);
     }
 
     #[inline]
     pub fn write_int(&mut self, offset: u32, value: i32) {
-        self.write(offset, &value.to_le_bytes());
+        self.write_static_checked(offset, &value.to_le_bytes());
     }
 
     #[inline]
     pub fn write_float(&mut self, offset: u32, value: f32) {
-        self.write(offset, &value.to_le_bytes());
+        self.write_static_checked(offset, &value.to_le_bytes());
     }
 
     #[inline]
     pub fn write_long(&mut self, offset: u32, value: i64) {
-        self.write(offset, &value.to_le_bytes());
+        self.write_static_checked(offset, &value.to_le_bytes());
     }
 
     #[inline]
     pub fn write_double(&mut self, offset: u32, value: f64) {
-        self.write(offset, &value.to_le_bytes());
+        self.write_static_checked(offset, &value.to_le_bytes());
     }
 
     #[inline]
     pub fn write_dynamic(&mut self, offset: u32, value: &[u8]) {
         let buffer_len = self.buffer.get_mut().len() as u32;
         let dynamic_offset = buffer_len - self.offset;
-        self.write_u24(offset, dynamic_offset);
+        self.write_u24_static_checked(offset, dynamic_offset);
 
         self.buffer
             .get_mut()
@@ -96,7 +119,7 @@ impl IsarSerializer {
 
     pub fn begin_nested(&mut self, offset: u32, static_size: u32) -> Self {
         let nested_offset = self.buffer.get_mut().len() as u32;
-        self.write_u24(offset, nested_offset - self.offset);
+        self.write_u24_static_checked(offset, nested_offset - self.offset);
         Self::new(self.buffer.take(), nested_offset, static_size)
     }
 
@@ -1235,6 +1258,220 @@ mod tests {
                     concat!([0x6, 0x0, 0x0], [0x0, 0x0, 0x1, 0xff, 0xff, 0x0])  // Second dynamic
                 )
             );
+        }
+    }
+
+    mod static_write_offset_assertions {
+        use super::*;
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 1 byte(s) at offset 3 into static section of 3 byte(s)"
+        )]
+        fn test_write_bool_outside_bounds_1() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(0, &[0x0, 0x1, 0x2, 0x3, 0x4]);
+            serializer.write_bool(3, Some(true));
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 1 byte(s) at offset 10 into static section of 6 byte(s)"
+        )]
+        fn test_write_bool_outside_bounds_2() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 6);
+            serializer.write_dynamic(0, &[0x0, 0x1, 0x2, 0x3, 0x4]);
+            serializer.write_dynamic(3, &[0x0, 0x0, 0x0]);
+            serializer.write_bool(10, Some(false));
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 1 byte(s) at offset 3 into static section of 3 byte(s)"
+        )]
+        fn test_write_byte_outside_bounds_1() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(0, &[0x0, 0x1, 0x2, 0x3, 0x4]);
+            serializer.write_byte(3, 1);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 1 byte(s) at offset 10 into static section of 6 byte(s)"
+        )]
+        fn test_write_byte_outside_bounds_2() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 6);
+            serializer.write_dynamic(0, &[0x0, 0x1, 0x2, 0x3, 0x4]);
+            serializer.write_dynamic(3, &[0x0, 0x0, 0x0]);
+            serializer.write_byte(10, 42);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 4 byte(s) at offset 3 into static section of 3 byte(s)"
+        )]
+        fn test_write_int_outside_bounds_1() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(0, &[0x0, 0x1, 0x2, 0x3, 0x4]);
+            serializer.write_int(3, 50);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 4 byte(s) at offset 10 into static section of 6 byte(s)"
+        )]
+        fn test_write_int_outside_bounds_2() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 6);
+            serializer.write_dynamic(0, &[0x0, 0x1, 0x2, 0x3, 0x4]);
+            serializer.write_dynamic(3, &[0x0, 0x0, 0x0]);
+            serializer.write_int(10, -50);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 4 byte(s) at offset 3 into static section of 3 byte(s)"
+        )]
+        fn test_write_float_outside_bounds_1() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(0, &[0x0, 0x1, 0x2, 0x3, 0x4]);
+            serializer.write_float(3, -12_345.679);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 4 byte(s) at offset 10 into static section of 6 byte(s)"
+        )]
+        fn test_write_float_outside_bounds_2() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 6);
+            serializer.write_dynamic(0, &[0x0, 0x1, 0x2, 0x3, 0x4]);
+            serializer.write_dynamic(3, &[0x0, 0x0, 0x0]);
+            serializer.write_float(10, 5.5);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 8 byte(s) at offset 1 into static section of 3 byte(s)"
+        )]
+        fn test_write_long_outside_bounds_1() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(
+                0,
+                &[0x0, 0x1, 0x2, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x5, 0x5],
+            );
+            serializer.write_long(1, 128);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 8 byte(s) at offset 20 into static section of 6 byte(s)"
+        )]
+        fn test_write_long_outside_bounds_2() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 6);
+            serializer.write_dynamic(0, &[0x0, 0x1, 0x2, 0x3, 0x4]);
+            serializer.write_dynamic(3, &[0x0; 30]);
+            serializer.write_long(20, 1024);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 8 byte(s) at offset 1 into static section of 3 byte(s)"
+        )]
+        fn test_write_double_outside_bounds_1() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(
+                0,
+                &[0x0, 0x1, 0x2, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x5, 0x5],
+            );
+            serializer.write_double(1, 10.123);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 8 byte(s) at offset 20 into static section of 6 byte(s)"
+        )]
+        fn test_write_double_outside_bounds_2() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 6);
+            serializer.write_dynamic(0, &[0x0, 0x1, 0x2, 0x3, 0x4]);
+            serializer.write_dynamic(3, &[0x0; 30]);
+            serializer.write_double(20, -0.01);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 1 byte(s) at offset 3 into static section of 3 byte(s)"
+        )]
+        fn test_write_null_bool_outside_bounds() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(
+                0,
+                &[0x0, 0x1, 0x2, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x5, 0x5],
+            );
+            serializer.write_null(3, DataType::Bool);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 1 byte(s) at offset 3 into static section of 3 byte(s)"
+        )]
+        fn test_write_null_byte_outside_bounds() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(
+                0,
+                &[0x0, 0x1, 0x2, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x5, 0x5],
+            );
+            serializer.write_null(3, DataType::Byte);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 4 byte(s) at offset 0 into static section of 3 byte(s)"
+        )]
+        fn test_write_null_int_outside_bounds() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(
+                0,
+                &[0x0, 0x1, 0x2, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x5, 0x5],
+            );
+            serializer.write_null(0, DataType::Int);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 4 byte(s) at offset 2 into static section of 3 byte(s)"
+        )]
+        fn test_write_null_float_outside_bounds() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(
+                0,
+                &[0x0, 0x1, 0x2, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x5, 0x5],
+            );
+            serializer.write_null(2, DataType::Float);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 8 byte(s) at offset 4 into static section of 3 byte(s)"
+        )]
+        fn test_write_null_long_outside_bounds() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(
+                0,
+                &[0x0, 0x1, 0x2, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x5, 0x5],
+            );
+            serializer.write_null(4, DataType::Long);
+        }
+
+        #[test]
+        #[should_panic(
+            expected = "Tried to write 8 byte(s) at offset 0 into static section of 3 byte(s)"
+        )]
+        fn test_write_null_double_outside_bounds() {
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
+            serializer.write_dynamic(
+                0,
+                &[0x0, 0x1, 0x2, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x5, 0x5],
+            );
+            serializer.write_null(0, DataType::Double);
         }
     }
 }
