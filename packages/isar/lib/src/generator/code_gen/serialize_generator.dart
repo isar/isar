@@ -3,8 +3,9 @@ import 'package:isar/src/generator/isar_type.dart';
 import 'package:isar/src/generator/object_info.dart';
 
 String generateSerialize(ObjectInfo object) {
-  var code =
-      'int ${object.serializeName}(${object.dartName} object, IsarWriter writer) {';
+  var code = '''
+  @isarProtected
+  int serialize${object.dartName}(IsarWriter writer, ${object.dartName} object) {''';
 
   for (final property in object.properties) {
     if (property.isId && property.type == PropertyType.long) {
@@ -18,6 +19,7 @@ String generateSerialize(ObjectInfo object) {
       elementNullable: property.elementNullable,
       typeClassName: property.typeClassName,
       value: value,
+      enumProperty: property.enumProperty,
     );
   }
 
@@ -26,7 +28,7 @@ String generateSerialize(ObjectInfo object) {
     if (idProp.type == PropertyType.long) {
       code += 'return object.${idProp.dartName};';
     } else {
-      code += 'return IsarContext.fastHash(object.${idProp.dartName});';
+      code += 'return Isar.fastHash(object.${idProp.dartName});';
     }
   } else {
     code += 'return 0;';
@@ -42,36 +44,62 @@ String _writeProperty({
   bool? elementNullable,
   required String typeClassName,
   required String value,
+  required String? enumProperty,
 }) {
+  final enumGetter = enumProperty != null
+      ? nullable
+          ? '?.$enumProperty'
+          : '.$enumProperty'
+      : '';
   switch (type) {
     case PropertyType.bool:
       if (nullable) {
-        return 'IsarCore.isarWriteBool($writer, $value ?? false, $value == null);';
+        return '''
+        {
+          final value = $value$enumGetter;
+          if (value == null) {
+            IsarCore.isarWriteNull($writer);
+          } else {
+            IsarCore.isarWriteBool($writer, value);
+          }
+        }''';
       } else {
-        return 'IsarCore.isarWriteBool($writer, $value, false);';
+        return 'IsarCore.isarWriteBool($writer, $value$enumGetter);';
       }
     case PropertyType.byte:
       final orNull = nullable ? '?? $nullByte' : '';
-      return 'IsarCore.isarWriteByte($writer, $value $orNull);';
+      return 'IsarCore.isarWriteByte($writer, $value$enumGetter $orNull);';
     case PropertyType.int:
       final orNull = nullable ? '?? $nullInt' : '';
-      return 'IsarCore.isarWriteInt($writer, $value $orNull);';
+      return 'IsarCore.isarWriteInt($writer, $value$enumGetter $orNull);';
     case PropertyType.float:
-      final orNull = nullable ? '?? $nullFloat' : '';
-      return 'IsarCore.isarWriteFloat($writer, $value $orNull);';
+      final orNull = nullable ? '?? double.nan' : '';
+      return 'IsarCore.isarWriteFloat($writer, $value$enumGetter $orNull);';
     case PropertyType.long:
       final orNull = nullable ? '?? $nullLong' : '';
-      return 'IsarCore.isarWriteLong($writer, $value $orNull);';
+      return 'IsarCore.isarWriteLong($writer, $value$enumGetter $orNull);';
     case PropertyType.dateTime:
       final converted = nullable
-          ? '$value?.toUtc().microsecondsSinceEpoch ?? $nullLong'
-          : '$value.toUtc().microsecondsSinceEpoch';
+          ? '$value$enumGetter?.toUtc().microsecondsSinceEpoch ?? $nullLong'
+          : '$value$enumGetter.toUtc().microsecondsSinceEpoch';
       return 'IsarCore.isarWriteLong($writer, $converted);';
     case PropertyType.double:
-      final orNull = nullable ? '?? $nullDouble' : '';
-      return 'IsarCore.isarWriteDouble($writer, $value $orNull);';
+      final orNull = nullable ? '?? double.nan' : '';
+      return 'IsarCore.isarWriteDouble($writer, $value$enumGetter $orNull);';
     case PropertyType.string:
-      return 'IsarCore.isarWriteString($writer, IsarCore.toNativeString($value));';
+      if (nullable) {
+        return '''
+        {
+          final value = $value$enumGetter;
+          if (value == null) {
+            IsarCore.isarWriteNull($writer);
+          } else {
+            IsarCore.isarWriteString($writer, IsarCore.toNativeString(value));
+          }
+        }''';
+      } else {
+        return 'IsarCore.isarWriteString($writer, IsarCore.toNativeString($value$enumGetter));';
+      }
     case PropertyType.object:
       var code = '''
       {
@@ -109,6 +137,7 @@ String _writeProperty({
         nullable: elementNullable!,
         typeClassName: typeClassName,
         value: 'item',
+        enumProperty: enumProperty,
       )}
       }
       IsarCore.isarEndList(writer, listWriter);

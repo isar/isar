@@ -108,77 +108,158 @@ extension QueryModifier<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
   }
 }
 
-extension QueryAggregation<T extends num> on Query<T?> {
-  T? min() => aggregate<T>(AggregationOp.min);
+extension QueryAggregation<T> on Query<T> {
+  int count() => aggregate(Aggregation.count) ?? 0;
 
-  T? max() => aggregate<T>(AggregationOp.max);
+  bool isEmpty() => aggregate(Aggregation.isEmpty) ?? true;
 
-  double average() => aggregate<double>(AggregationOp.average)!;
+  bool isNotEmpty() => !isEmpty();
+}
 
-  T sum() => aggregate<T>(AggregationOp.sum)!;
+extension QueryNumAggregation<T extends num?> on Query<T?> {
+  T? min() => aggregate(Aggregation.min);
+
+  Future<T?> minAsync() => aggregateAsync(Aggregation.min);
+
+  T? max() => aggregate(Aggregation.max);
+
+  Future<T?> maxAsync() => aggregateAsync(Aggregation.max);
+
+  double average() => aggregate(Aggregation.average) ?? double.nan;
+
+  Future<double> averageAsync() => aggregateAsync<double>(Aggregation.average)
+      .then((value) => value ?? double.nan);
+
+  T sum() => aggregate(Aggregation.sum)!;
+
+  Future<T> sumAsync() =>
+      aggregateAsync<T>(Aggregation.sum).then((value) => value!);
 }
 
 extension QueryDateAggregation<T extends DateTime?> on Query<T> {
-  DateTime? min() => aggregate<DateTime>(AggregationOp.min);
+  DateTime? min() => aggregate(Aggregation.min);
 
-  DateTime? max() => aggregate<DateTime>(AggregationOp.max);
+  Future<DateTime?> minAsync() => aggregateAsync(Aggregation.min);
+
+  DateTime? max() => aggregate(Aggregation.max);
+
+  Future<DateTime?> maxAsync() => aggregateAsync(Aggregation.max);
+}
+
+extension QueryStringAggregation<T extends String?> on Query<T?> {
+  T? min() => aggregate(Aggregation.min);
+
+  Future<T?> minAsync() => aggregateAsync(Aggregation.min);
+
+  T? max() => aggregate(Aggregation.max);
+
+  Future<T?> maxAsync() => aggregateAsync(Aggregation.max);
 }
 
 /// Extension for QueryBuilders
-extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QQueryOperations> {
+extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QOperations> {
   /// Create a query from this query builder.
   Query<R> build() => _query.build();
 
+  T _withQuery<T>(T Function(Query<R> q) f) {
+    final q = build();
+    try {
+      return f(q);
+    } finally {
+      q.close();
+    }
+  }
+
   /// {@macro query_find_first}
-  R? findFirst() => build().findFirst();
+  R? findFirst() => _withQuery((q) => q.findFirst());
 
   /// {@macro query_find_all}
-  List<R> findAll({int? offset, int? limit}) => build().findAll(
-        offset: offset,
-        limit: limit,
-      );
-
-  /// {@macro query_count}
-  int count() => build().count();
-
-  /// {@macro query_is_empty}
-  bool isEmpty() => build().isEmpty();
-
-  /// {@macro query_is_not_empty}
-  bool isNotEmpty() => build().isNotEmpty();
+  List<R> findAll({int? offset, int? limit}) =>
+      _withQuery((q) => q.findAll(offset: offset, limit: limit));
 
   /// {@macro query_delete_first}
-  bool deleteFirst() => build().deleteFirst();
+  bool deleteFirst() => _withQuery((q) => q.deleteFirst());
 
   /// {@macro query_delete_all}
-  int deleteAll({int? offset, int? limit}) => build().deleteAll(
-        offset: offset,
-        limit: limit,
-      );
+  int deleteAll({int? offset, int? limit}) =>
+      _withQuery((q) => q.deleteAll(offset: offset, limit: limit));
+
+  Future<T> _withQueryAsync<T>(Future<T> Function(Query<R> q) f) async {
+    final q = build();
+    try {
+      return await f(q);
+    } finally {
+      q.close();
+    }
+  }
+
+  Future<R?> findFirstAsync() => _withQueryAsync((q) => q.findFirstAsync());
+
+  Future<List<R>> findAllAsync({int? offset, int? limit}) =>
+      _withQueryAsync((q) => q.findAllAsync(offset: offset, limit: limit));
+}
+
+extension QueryExecuteAggregation<OBJ, T>
+    on QueryBuilder<OBJ, T?, QOperations> {
+  int count() => _withQuery((q) => q.count());
+
+  bool isEmpty() => _withQuery((q) => q.isEmpty());
+
+  bool isNotEmpty() => _withQuery((q) => q.isNotEmpty());
+
+  Future<int> countAsync() => _withQueryAsync((q) => q.countAsync());
+
+  Future<bool> isEmptyAsync() => _withQueryAsync((q) => q.isEmptyAsync());
+
+  Future<bool> isNotEmptyAsync() => _withQueryAsync((q) => q.isNotEmptyAsync());
 }
 
 /// Extension for QueryBuilders
-extension QueryExecuteAggregation<OBJ, T extends num>
-    on QueryBuilder<OBJ, T?, QQueryOperations> {
+extension QueryExecuteNumAggregation<OBJ, T extends num>
+    on QueryBuilder<OBJ, T?, QAfterProperty> {
   /// {@macro aggregation_min}
-  T? min() => build().min();
+  T? min() => _withQuery((q) => q.min());
 
   /// {@macro aggregation_max}
-  T? max() => build().max();
+  T? max() => _withQuery((q) => q.max());
 
   /// {@macro aggregation_average}
-  double average() => build().average();
+  double average() => _withQuery((q) => q.average());
 
   /// {@macro aggregation_sum}
-  T sum() => build().sum();
+  T sum() => _withQuery((q) => q.sum());
+
+  Future<T?> minAsync() => _withQueryAsync((q) => q.minAsync());
+
+  Future<T?> maxAsync() => _withQueryAsync((q) => q.maxAsync());
+
+  Future<double> averageAsync() => _withQueryAsync((q) => q.averageAsync());
+
+  Future<T> sumAsync() => _withQueryAsync((q) => q.sumAsync());
 }
 
 /// Extension for QueryBuilders
 extension QueryExecuteDateAggregation<OBJ>
-    on QueryBuilder<OBJ, DateTime?, QQueryOperations> {
+    on QueryBuilder<OBJ, DateTime?, QAfterProperty> {
   /// {@macro aggregation_min}
-  DateTime? min() => build().min();
+  DateTime? min() => _withQuery((q) => q.min());
 
   /// {@macro aggregation_max}
-  DateTime? max() => build().max();
+  DateTime? max() => _withQuery((q) => q.max());
+
+  Future<DateTime?> minAsync() => _withQueryAsync((q) => q.minAsync());
+
+  /// {@macro aggregation_max}
+  Future<DateTime?> maxAsync() => _withQueryAsync((q) => q.maxAsync());
+}
+
+extension QueryExecuteStringAggregation<OBJ>
+    on QueryBuilder<OBJ, String?, QAfterProperty> {
+  String? min() => _withQuery((q) => q.min());
+
+  String? max() => _withQuery((q) => q.max());
+
+  Future<String?> minAsync() => _withQueryAsync((q) => q.minAsync());
+
+  Future<String?> maxAsync() => _withQueryAsync((q) => q.maxAsync());
 }

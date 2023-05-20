@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:isar/isar.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -32,7 +33,7 @@ void prepareTest() {
             /*
               'aarch64-apple-darwin',
               'release',*/
-            'release',
+            'debug',
             binaryName,
           ),
           Abi.macosX64: path.join(
@@ -109,4 +110,27 @@ Isar openTempIsar(
   }
 
   return isar;
+}
+
+@isTest
+void isarTest(
+  String name,
+  dynamic Function() body, {
+  Timeout? timeout,
+  bool skip = false,
+}) {
+  testCount++;
+  test(
+    name,
+    () async {
+      try {
+        await body();
+      } catch (e, s) {
+        testErrors.add('$name: $e\n$s');
+        rethrow;
+      }
+    },
+    timeout: timeout,
+    skip: skip,
+  );
 }

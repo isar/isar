@@ -142,25 +142,25 @@ impl FilterCondition {
 
 #[cfg(test)]
 mod tests {
-    use crate::filter::filter_value::FilterValue;
+    use crate::core::value::IsarValue;
 
     use super::{FilterCondition as C, *};
 
     fn b(lower: i64, upper: i64) -> FilterCondition {
         C::new_between(
             0,
-            FilterValue::Integer(lower),
-            FilterValue::Integer(upper),
+            IsarValue::Integer(lower),
+            IsarValue::Integer(upper),
             false,
         )
     }
 
     fn gt(than: i64) -> FilterCondition {
-        C::new_greater_than(0, FilterValue::Integer(than), false)
+        C::new_greater_than(0, IsarValue::Integer(than), false)
     }
 
     fn lt(than: i64) -> FilterCondition {
-        C::new_less_than(0, FilterValue::Integer(than), false)
+        C::new_less_than(0, IsarValue::Integer(than), false)
     }
 
     fn t() -> FilterCondition {
@@ -232,15 +232,15 @@ mod tests {
 
         #[test]
         fn test_try_merge_and_different_properties() {
-            let b1 = C::new_between(0, FilterValue::Integer(1), FilterValue::Integer(5), false);
-            let b2 = C::new_between(1, FilterValue::Integer(1), FilterValue::Integer(5), false);
+            let b1 = C::new_between(0, IsarValue::Integer(1), IsarValue::Integer(5), false);
+            let b2 = C::new_between(1, IsarValue::Integer(1), IsarValue::Integer(5), false);
             assert_eq!(b1.try_merge_and(&b2), None);
         }
 
         #[test]
         fn test_try_merge_and_different_case_sensitivity() {
-            let b1 = C::new_between(0, FilterValue::Integer(1), FilterValue::Integer(5), false);
-            let b2 = C::new_between(0, FilterValue::Integer(1), FilterValue::Integer(5), true);
+            let b1 = C::new_between(0, IsarValue::Integer(1), IsarValue::Integer(5), false);
+            let b2 = C::new_between(0, IsarValue::Integer(1), IsarValue::Integer(5), true);
             assert_eq!(b1.try_merge_and(&b2), None);
         }
     }
@@ -286,13 +286,9 @@ mod tests {
         #[test]
         fn test_try_merge_or_non_intersecting_ranges_reals() {
             assert_eq!(
-                C::new_between(0, FilterValue::Real(1.0), FilterValue::Real(5.0), false,)
-                    .try_merge_or(&C::new_between(
-                        0,
-                        FilterValue::Real(6.0),
-                        FilterValue::Real(10.0),
-                        false,
-                    ),),
+                C::new_between(0, IsarValue::Real(1.0), IsarValue::Real(5.0), false,).try_merge_or(
+                    &C::new_between(0, IsarValue::Real(6.0), IsarValue::Real(10.0), false,),
+                ),
                 None,
             );
         }
@@ -345,8 +341,8 @@ mod tests {
                 assert_eq!(
                     C::new_between(
                         0,
-                        FilterValue::String(Some("a".to_string())),
-                        FilterValue::String(Some("e".to_string())),
+                        IsarValue::String(Some("a".to_string())),
+                        IsarValue::String(Some("e".to_string())),
                         case_sensitive,
                     )
                     .try_invert(),
@@ -355,12 +351,12 @@ mod tests {
                         vec![
                             Filter::Condition(FilterCondition::new_less_than(
                                 0,
-                                FilterValue::String(Some("a".to_string())),
+                                IsarValue::String(Some("a".to_string())),
                                 case_sensitive
                             )),
                             Filter::Condition(FilterCondition::new_greater_than(
                                 0,
-                                FilterValue::String(Some("e".to_string())),
+                                IsarValue::String(Some("e".to_string())),
                                 case_sensitive
                             )),
                         ],
@@ -386,8 +382,8 @@ mod tests {
                 assert_eq!(
                     C::new_between(
                         0,
-                        FilterValue::String(Some("b".to_string())),
-                        FilterValue::String(Some("b".to_string())),
+                        IsarValue::String(Some("b".to_string())),
+                        IsarValue::String(Some("b".to_string())),
                         case_sensitive,
                     )
                     .try_invert(),
@@ -396,12 +392,12 @@ mod tests {
                         vec![
                             Filter::Condition(FilterCondition::new_less_than(
                                 0,
-                                FilterValue::String(Some("b".to_string())),
+                                IsarValue::String(Some("b".to_string())),
                                 case_sensitive
                             )),
                             Filter::Condition(FilterCondition::new_greater_than(
                                 0,
-                                FilterValue::String(Some("b".to_string())),
+                                IsarValue::String(Some("b".to_string())),
                                 case_sensitive
                             )),
                         ],
@@ -424,14 +420,14 @@ mod tests {
                 assert_eq!(
                     C::new_between(
                         0,
-                        FilterValue::String(None),
-                        FilterValue::String(Some("b".to_string())),
+                        IsarValue::String(None),
+                        IsarValue::String(Some("b".to_string())),
                         case_sensitive,
                     )
                     .try_invert(),
                     Some(Filter::Condition(FilterCondition::new_greater_than(
                         0,
-                        FilterValue::String(Some("b".to_string())),
+                        IsarValue::String(Some("b".to_string())),
                         case_sensitive,
                     ),),),
                 );
@@ -465,8 +461,8 @@ mod tests {
                 assert_eq!(
                     C::new_between(
                         0,
-                        FilterValue::String(Some("c".to_string())),
-                        FilterValue::String(Some("a".to_string())),
+                        IsarValue::String(Some("c".to_string())),
+                        IsarValue::String(Some("a".to_string())),
                         case_sensitive,
                     )
                     .try_invert(),

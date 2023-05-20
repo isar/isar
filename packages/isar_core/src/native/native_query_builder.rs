@@ -1,14 +1,14 @@
-use super::bool_to_byte;
 use super::native_collection::NativeCollection;
 use super::native_filter::NativeFilter;
 use super::query::{Query, QueryIndex};
 use crate::core::data_type::DataType;
 use crate::core::query_builder::{IsarQueryBuilder, Sort};
+use crate::core::value::IsarValue;
 use crate::filter::filter_condition::{ConditionType, FilterCondition};
 use crate::filter::filter_group::{FilterGroup, GroupType};
-use crate::filter::filter_value::FilterValue;
 use crate::filter::Filter;
 use itertools::Itertools;
+use std::hint::black_box;
 
 pub struct NativeQueryBuilder<'a> {
     instance_id: u32,
@@ -59,7 +59,7 @@ impl<'a> IsarQueryBuilder for NativeQueryBuilder<'a> {
         Query::new(
             self.instance_id,
             self.collection.collection_index,
-            vec![QueryIndex::Full(Sort::Asc)],
+            black_box(vec![QueryIndex::Full(Sort::Asc)]),
             filter,
             vec![],
             vec![],
@@ -115,7 +115,6 @@ impl FilterGroup {
 impl FilterCondition {
     fn to_native_filter(&self, collection: &NativeCollection) -> NativeFilter {
         let property = collection.get_property(self.get_property_index());
-
         match self.get_condition_type() {
             ConditionType::IsNull => {
                 if let Some(property) = property {
@@ -127,59 +126,90 @@ impl FilterCondition {
             ConditionType::Between => {
                 if let Some(property) = property {
                     match property.data_type {
+                        DataType::Bool | DataType::BoolList => {
+                            if let (IsarValue::Bool(lower), IsarValue::Bool(upper)) =
+                                self.get_lower_upper()
+                            {
+                                return NativeFilter::bool(property, *lower, *upper);
+                            }
+                        }
                         DataType::Byte | DataType::ByteList => {
-                            if let (FilterValue::Integer(lower), FilterValue::Integer(upper)) =
+                            if let (IsarValue::Integer(lower), IsarValue::Integer(upper)) =
                                 self.get_lower_upper()
                             {
-                                return NativeFilter::byte(
-                                    property,
-                                    (*lower).clamp(u8::MIN as i64, u8::MAX as i64) as u8,
-                                    (*upper).clamp(u8::MIN as i64, u8::MAX as i64) as u8,
-                                );
-                            } else if let (FilterValue::Bool(lower), FilterValue::Bool(upper)) =
-                                self.get_lower_upper()
-                            {
-                                return NativeFilter::byte(
-                                    property,
-                                    bool_to_byte(*lower),
-                                    bool_to_byte(*upper),
-                                );
+                                let lower = if *lower == i64::MIN {
+                                    u8::MIN as i64
+                                } else if *lower == i64::MIN + 1 {
+                                    u8::MIN as i64 + 1
+                                } else {
+                                    *lower
+                                };
+                                let upper = if *upper == i64::MIN {
+                                    u8::MIN as i64
+                                } else if *upper == i64::MIN + 1 {
+                                    u8::MIN as i64 + 1
+                                } else {
+                                    *upper
+                                };
+                                if lower <= u8::MAX as i64 && upper >= u8::MIN as i64 {
+                                    return NativeFilter::byte(
+                                        property,
+                                        lower.clamp(u8::MIN as i64, u8::MAX as i64) as u8,
+                                        upper.clamp(u8::MIN as i64, u8::MAX as i64) as u8,
+                                    );
+                                }
                             }
                         }
                         DataType::Int | DataType::IntList => {
-                            if let (FilterValue::Integer(lower), FilterValue::Integer(upper)) =
+                            if let (IsarValue::Integer(lower), IsarValue::Integer(upper)) =
                                 self.get_lower_upper()
                             {
-                                return NativeFilter::int(
-                                    property,
-                                    (*lower).clamp(i32::MIN as i64, i32::MAX as i64) as i32,
-                                    (*upper).clamp(i32::MIN as i64, i32::MAX as i64) as i32,
-                                );
+                                let lower = if *lower == i64::MIN {
+                                    i32::MIN as i64
+                                } else if *lower == i64::MIN + 1 {
+                                    i32::MIN as i64 + 1
+                                } else {
+                                    *lower
+                                };
+                                let upper = if *upper == i64::MIN {
+                                    i32::MIN as i64
+                                } else if *upper == i64::MIN + 1 {
+                                    i32::MIN as i64 + 1
+                                } else {
+                                    *upper
+                                };
+                                if lower <= i32::MAX as i64 && upper >= i32::MIN as i64 {
+                                    return NativeFilter::int(
+                                        property,
+                                        lower.clamp(i32::MIN as i64, i32::MAX as i64) as i32,
+                                        upper.clamp(i32::MIN as i64, i32::MAX as i64) as i32,
+                                    );
+                                }
                             }
                         }
                         DataType::Float | DataType::FloatList => {
-                            if let (FilterValue::Real(lower), FilterValue::Real(upper)) =
+                            if let (IsarValue::Real(lower), IsarValue::Real(upper)) =
                                 self.get_lower_upper()
                             {
                                 return NativeFilter::float(property, *lower as f32, *upper as f32);
                             }
                         }
                         DataType::Long | DataType::LongList => {
-                            if let (FilterValue::Integer(lower), FilterValue::Integer(upper)) =
+                            if let (IsarValue::Integer(lower), IsarValue::Integer(upper)) =
                                 self.get_lower_upper()
                             {
                                 return NativeFilter::long(property, *lower, *upper);
                             }
                         }
                         DataType::Double | DataType::DoubleList => {
-                            if let (FilterValue::Real(lower), FilterValue::Real(upper)) =
+                            if let (IsarValue::Real(lower), IsarValue::Real(upper)) =
                                 self.get_lower_upper()
                             {
                                 return NativeFilter::double(property, *lower, *upper);
                             }
                         }
                         DataType::String | DataType::StringList => {
-                            if let (FilterValue::String(lower), FilterValue::String(upper)) =
+                            if let (IsarValue::String(lower), IsarValue::String(upper)) =
                                 self.get_lower_upper()
                             {
                                 return NativeFilter::string(
@@ -193,7 +223,7 @@ impl FilterCondition {
                         _ => {}
                     }
                 } else {
-                    if let (FilterValue::Integer(lower), FilterValue::Integer(upper)) =
+                    if let (IsarValue::Integer(lower), IsarValue::Integer(upper)) =
                         self.get_lower_upper()
                     {
                         return NativeFilter::id(*lower, *upper);
@@ -203,7 +233,7 @@ impl FilterCondition {
             }
             ConditionType::StringEndsWith => {
                 if let Some(property) = property {
-                    if let FilterValue::String(Some(value)) = self.get_value() {
+                    if let IsarValue::String(Some(value)) = self.get_value() {
                         match property.data_type {
                             DataType::String | DataType::StringList => {
                                 return NativeFilter::string_ends_with(
@@ -220,7 +250,7 @@ impl FilterCondition {
             }
             ConditionType::StringContains => {
                 if let Some(property) = property {
-                    if let FilterValue::String(Some(value)) = self.get_value() {
+                    if let IsarValue::String(Some(value)) = self.get_value() {
                         match property.data_type {
                             DataType::String | DataType::StringList => {
                                 return NativeFilter::string_contains(
@@ -237,7 +267,7 @@ impl FilterCondition {
             }
             ConditionType::StringMatches => {
                 if let Some(property) = property {
-                    if let FilterValue::String(Some(value)) = self.get_value() {
+                    if let IsarValue::String(Some(value)) = self.get_value() {
                         match property.data_type {
                             DataType::String | DataType::StringList => {
                                 return NativeFilter::string_matches(

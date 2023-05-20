@@ -1,73 +1,63 @@
-use isar_core::core::error::Result;
-use itertools::Itertools;
-use once_cell::sync::Lazy;
-use std::sync::Mutex;
-use std::{mem, ptr};
+use isar_core::core::error::IsarError;
+use std::cell::RefCell;
 
-type ErrCounter = (Vec<(u8, String)>, u8);
-static ERRORS: Lazy<Mutex<ErrCounter>> = Lazy::new(|| Mutex::new((vec![], 1)));
-
-pub trait DartErrCode {
-    fn into_dart_result_code(self) -> u8;
-}
-
-impl DartErrCode for Result<()> {
-    fn into_dart_result_code(self) -> u8 {
-        if let Err(err) = self {
-            let mut lock = ERRORS.lock().unwrap();
-            let (errors, counter) = &mut (*lock);
-            if errors.len() > 10 {
-                errors.remove(0);
-            }
-            let err_code = *counter;
-            errors.push((err_code, err.to_string()));
-            *counter = counter.wrapping_add(1);
-            if *counter == 0 {
-                *counter = 1
-            }
-            err_code
-        } else {
-            0
-        }
-    }
+thread_local! {
+    pub static ERROR: RefCell<Option<String>> = RefCell::new(None);
 }
 
 #[macro_export]
 macro_rules! isar_try {
     { $($token:tt)* } => {{
-        use crate::error::DartErrCode;
         #[allow(unused_mut)] {
             let mut l = || -> isar_core::core::error::Result<()> {
                 {$($token)*}
                 Ok(())
             };
-            l().into_dart_result_code()
+            if let Err(err) = l() {
+                if let Some(code) = crate::error::error_code(&err) {
+                    crate::error::ERROR.replace(None);
+                    code
+                } else {
+                    crate::error::ERROR.replace(Some(err.to_string()));
+                    255
+                }
+            } else {
+                0
+            }
         }
     }}
 }
 
-#[macro_export]
-macro_rules! isar_try_txn {
-    { $txn:expr, $closure:expr } => {
-        isar_try! {
-            $txn.exec(Box::new($closure))?;
-        }
-    }
+pub const fn error_code(err: &IsarError) -> Option<u8> {
+    let code = match err {
+        IsarError::PathError {} => ERROR_PATH,
+        IsarError::UniqueViolated {} => ERROR_UNIQUE_VIOLATED,
+        IsarError::WriteTxnRequired {} => ERROR_WRITE_TXN_REQUIRED,
+        IsarError::VersionError {} => ERROR_VERSION,
+        IsarError::ObjectLimitReached {} => ERROR_OBJECT_LIMIT_REACHED,
+        IsarError::InstanceMismatch {} => ERROR_INSTANCE_MISMATCH,
+        IsarError::DbFull {} => ERROR_DB_FULL,
+        _ => return None,
+    };
+    Some(code)
 }
 
+pub const ERROR_PATH: u8 = 1;
+pub const ERROR_UNIQUE_VIOLATED: u8 = 2;
+pub const ERROR_WRITE_TXN_REQUIRED: u8 = 3;
+pub const ERROR_VERSION: u8 = 4;
+pub const ERROR_OBJECT_LIMIT_REACHED: u8 = 5;
+pub const ERROR_INSTANCE_MISMATCH: u8 = 6;
+pub const ERROR_DB_FULL: u8 = 7;
+
 #[no_mangle]
-pub unsafe extern "C" fn isar_get_error(err_code: u8, value: *mut *const u16) -> u32 {
-    let lock = ERRORS.lock().unwrap();
-    let error = lock.0.iter().find(|(code, _)| *code == err_code);
-    if let Some((_, err_msg)) = error {
-        let mut encoded = err_msg.encode_utf16().collect_vec();
-        encoded.shrink_to_fit();
-        *value = encoded.as_ptr();
-        let len = encoded.len();
-        mem::forget(encoded);
-        len as u32
-    } else {
-        *value = ptr::null();
-        0
-    }
+pub unsafe extern "C" fn isar_get_error(value: *mut *const u8) -> u32 {
+    ERROR.with_borrow(|e| {
+        if let Some(msg) = e.as_ref() {
+            *value = msg.as_ptr();
+            msg.len() as u32
+        } else {
+            0
+        }
+    })
 }

@@ -14,7 +14,7 @@ pub struct NativeReader<'a> {
 }
 
 impl<'a> NativeReader<'a> {
-    pub fn new(
+    pub(crate) fn new(
         id: i64,
         object: IsarDeserializer<'a>,
         collection: &'a NativeCollection,
@@ -125,12 +125,11 @@ impl<'a> IsarReader for NativeReader<'a> {
 
     fn read_list(&self, index: u32) -> Option<(Self::ListReader<'_>, u32)> {
         let property = self.collection.get_property(index)?;
-        let (list, length) = self
-            .object
-            .read_list(property.offset, property.data_type.element_type()?)?;
+        let element_type = property.data_type.element_type()?;
+        let (list, length) = self.object.read_list(property.offset, element_type)?;
         let reader = NativeListReader {
             list,
-            data_type: property.data_type,
+            data_type: element_type,
             embedded_collection_index: property.embedded_collection_index,
             all_collections: self.all_collections,
         };

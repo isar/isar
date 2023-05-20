@@ -13,13 +13,6 @@ external ffi.Pointer<CString> isar_string(
   int length,
 );
 
-@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Uint16>, ffi.Uint32)>(
-    symbol: 'isar_free_string')
-external void isar_free_string(
-  ffi.Pointer<ffi.Uint16> value,
-  int length,
-);
-
 @ffi.Native<ffi.Void Function(ffi.Pointer<CIsarReader>)>(
     symbol: 'isar_free_reader')
 external void isar_free_reader(
@@ -38,12 +31,16 @@ external void isar_free_cursor(
   ffi.Pointer<CIsarCursor> cursor,
 );
 
-@ffi.Native<
-        ffi.Uint32 Function(ffi.Uint8, ffi.Pointer<ffi.Pointer<ffi.Uint16>>)>(
+@ffi.Native<ffi.Void Function(ffi.Pointer<CIsarValue>)>(
+    symbol: 'isar_free_value')
+external void isar_free_value(
+  ffi.Pointer<CIsarValue> value,
+);
+
+@ffi.Native<ffi.Uint32 Function(ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>(
     symbol: 'isar_get_error')
 external int isar_get_error(
-  int err_code,
-  ffi.Pointer<ffi.Pointer<ffi.Uint16>> value,
+  ffi.Pointer<ffi.Pointer<ffi.Uint8>> value,
 );
 
 @ffi.Native<
@@ -54,31 +51,6 @@ external ffi.Pointer<CIsarReader> isar_cursor_next(
   ffi.Pointer<CIsarReader> old_reader,
 );
 
-@ffi.Native<ffi.Pointer<CFilterValue> Function(ffi.Bool, ffi.Bool)>(
-    symbol: 'isar_filter_value_bool')
-external ffi.Pointer<CFilterValue> isar_filter_value_bool(
-  bool value,
-  bool null1,
-);
-
-@ffi.Native<ffi.Pointer<CFilterValue> Function(ffi.Int64)>(
-    symbol: 'isar_filter_value_integer')
-external ffi.Pointer<CFilterValue> isar_filter_value_integer(
-  int value,
-);
-
-@ffi.Native<ffi.Pointer<CFilterValue> Function(ffi.Double)>(
-    symbol: 'isar_filter_value_real')
-external ffi.Pointer<CFilterValue> isar_filter_value_real(
-  double value,
-);
-
-@ffi.Native<ffi.Pointer<CFilterValue> Function(ffi.Pointer<CString>)>(
-    symbol: 'isar_filter_value_string')
-external ffi.Pointer<CFilterValue> isar_filter_value_string(
-  ffi.Pointer<CString> value,
-);
-
 @ffi.Native<ffi.Pointer<CFilter> Function(ffi.Uint32)>(
     symbol: 'isar_filter_is_null')
 external ffi.Pointer<CFilter> isar_filter_is_null(
@@ -86,30 +58,30 @@ external ffi.Pointer<CFilter> isar_filter_is_null(
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CFilterValue>,
+    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>,
         ffi.Bool)>(symbol: 'isar_filter_equal_to')
 external ffi.Pointer<CFilter> isar_filter_equal_to(
   int property_index,
-  ffi.Pointer<CFilterValue> value,
+  ffi.Pointer<CIsarValue> value,
   bool case_sensitive,
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CFilterValue>,
-        ffi.Bool, ffi.Bool)>(symbol: 'isar_filter_greater_than')
+    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>, ffi.Bool,
+        ffi.Bool)>(symbol: 'isar_filter_greater_than')
 external ffi.Pointer<CFilter> isar_filter_greater_than(
   int property_index,
-  ffi.Pointer<CFilterValue> value,
+  ffi.Pointer<CIsarValue> value,
   bool include,
   bool case_sensitive,
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CFilterValue>,
-        ffi.Bool, ffi.Bool)>(symbol: 'isar_filter_less_than')
+    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>, ffi.Bool,
+        ffi.Bool)>(symbol: 'isar_filter_less_than')
 external ffi.Pointer<CFilter> isar_filter_less_than(
   int property_index,
-  ffi.Pointer<CFilterValue> value,
+  ffi.Pointer<CIsarValue> value,
   bool include,
   bool case_sensitive,
 );
@@ -117,53 +89,53 @@ external ffi.Pointer<CFilter> isar_filter_less_than(
 @ffi.Native<
     ffi.Pointer<CFilter> Function(
         ffi.Uint32,
-        ffi.Pointer<CFilterValue>,
+        ffi.Pointer<CIsarValue>,
         ffi.Bool,
-        ffi.Pointer<CFilterValue>,
+        ffi.Pointer<CIsarValue>,
         ffi.Bool,
         ffi.Bool)>(symbol: 'isar_filter_between')
 external ffi.Pointer<CFilter> isar_filter_between(
   int property_index,
-  ffi.Pointer<CFilterValue> lower,
+  ffi.Pointer<CIsarValue> lower,
   bool include_lower,
-  ffi.Pointer<CFilterValue> upper,
+  ffi.Pointer<CIsarValue> upper,
   bool include_upper,
   bool case_sensitive,
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CFilterValue>,
+    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>,
         ffi.Bool)>(symbol: 'isar_filter_string_starts_with')
 external ffi.Pointer<CFilter> isar_filter_string_starts_with(
   int property_index,
-  ffi.Pointer<CFilterValue> value,
+  ffi.Pointer<CIsarValue> value,
   bool case_sensitive,
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CFilterValue>,
+    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>,
         ffi.Bool)>(symbol: 'isar_filter_string_ends_with')
 external ffi.Pointer<CFilter> isar_filter_string_ends_with(
   int property_index,
-  ffi.Pointer<CFilterValue> value,
+  ffi.Pointer<CIsarValue> value,
   bool case_sensitive,
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CFilterValue>,
+    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>,
         ffi.Bool)>(symbol: 'isar_filter_string_contains')
 external ffi.Pointer<CFilter> isar_filter_string_contains(
   int property_index,
-  ffi.Pointer<CFilterValue> value,
+  ffi.Pointer<CIsarValue> value,
   bool case_sensitive,
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CFilterValue>,
+    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>,
         ffi.Bool)>(symbol: 'isar_filter_string_matches')
 external ffi.Pointer<CFilter> isar_filter_string_matches(
   int property_index,
-  ffi.Pointer<CFilterValue> value,
+  ffi.Pointer<CIsarValue> value,
   bool case_sensitive,
 );
 
@@ -222,7 +194,6 @@ external ffi.Pointer<CIsarInstance> isar_get_instance(
         ffi.Pointer<CString>,
         ffi.Pointer<CString>,
         ffi.Uint32,
-        ffi.Bool,
         ffi.Uint32,
         ffi.Uint32,
         ffi.Float)>(symbol: 'isar_open_instance')
@@ -233,10 +204,25 @@ external int isar_open_instance(
   ffi.Pointer<CString> path,
   ffi.Pointer<CString> schema_json,
   int max_size_mib,
-  bool relaxed_durability,
   int compact_min_file_size,
   int compact_min_bytes,
   double compact_min_ratio,
+);
+
+@ffi.Native<
+    ffi.Uint32 Function(ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>(symbol: 'isar_get_name')
+external int isar_get_name(
+  ffi.Pointer<CIsarInstance> isar,
+  ffi.Pointer<ffi.Pointer<ffi.Uint8>> name,
+);
+
+@ffi.Native<
+    ffi.Uint32 Function(ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>(symbol: 'isar_get_dir')
+external int isar_get_dir(
+  ffi.Pointer<CIsarInstance> isar,
+  ffi.Pointer<ffi.Pointer<ffi.Uint8>> dir,
 );
 
 @ffi.Native<
@@ -322,6 +308,33 @@ external int isar_count(
   ffi.Pointer<ffi.Uint32> count,
 );
 
+@ffi.Native<
+    ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>,
+        ffi.Uint16)>(symbol: 'isar_clear')
+external int isar_clear(
+  ffi.Pointer<CIsarInstance> isar,
+  ffi.Pointer<CIsarTxn> txn,
+  int collection_index,
+);
+
+@ffi.Native<
+    ffi.Int64 Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>,
+        ffi.Uint16, ffi.Bool)>(symbol: 'isar_get_size')
+external int isar_get_size(
+  ffi.Pointer<CIsarInstance> isar,
+  ffi.Pointer<CIsarTxn> txn,
+  int collection_index,
+  bool include_indexes,
+);
+
+@ffi.Native<
+    ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>, ffi.Pointer<CString>)>(symbol: 'isar_copy')
+external int isar_copy(
+  ffi.Pointer<CIsarInstance> isar,
+  ffi.Pointer<CString> path,
+);
+
 @ffi.Native<ffi.Bool Function(ffi.Pointer<CIsarInstance>, ffi.Bool)>(
     symbol: 'isar_close')
 external bool isar_close(
@@ -393,6 +406,23 @@ external int isar_query_cursor(
         ffi.Pointer<CIsarInstance>,
         ffi.Pointer<CIsarTxn>,
         ffi.Pointer<CIsarQuery>,
+        ffi.Uint8,
+        ffi.Uint16,
+        ffi.Pointer<ffi.Pointer<CIsarValue>>)>(symbol: 'isar_query_aggregate')
+external int isar_query_aggregate(
+  ffi.Pointer<CIsarInstance> isar,
+  ffi.Pointer<CIsarTxn> txn,
+  ffi.Pointer<CIsarQuery> query,
+  int aggregation,
+  int property_index,
+  ffi.Pointer<ffi.Pointer<CIsarValue>> value,
+);
+
+@ffi.Native<
+    ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarTxn>,
+        ffi.Pointer<CIsarQuery>,
         ffi.Pointer<ffi.Uint32>)>(symbol: 'isar_query_delete')
 external int isar_query_delete(
   ffi.Pointer<CIsarInstance> isar,
@@ -407,9 +437,16 @@ external int isar_read_id(
   ffi.Pointer<CIsarReader> reader,
 );
 
-@ffi.Native<ffi.Uint8 Function(ffi.Pointer<CIsarReader>, ffi.Uint32)>(
+@ffi.Native<ffi.Bool Function(ffi.Pointer<CIsarReader>, ffi.Uint32)>(
+    symbol: 'isar_read_null')
+external bool isar_read_null(
+  ffi.Pointer<CIsarReader> reader,
+  int index,
+);
+
+@ffi.Native<ffi.Bool Function(ffi.Pointer<CIsarReader>, ffi.Uint32)>(
     symbol: 'isar_read_bool')
-external int isar_read_bool(
+external bool isar_read_bool(
   ffi.Pointer<CIsarReader> reader,
   int index,
 );
@@ -451,11 +488,11 @@ external double isar_read_double(
 
 @ffi.Native<
     ffi.Uint32 Function(ffi.Pointer<CIsarReader>, ffi.Uint32,
-        ffi.Pointer<ffi.Pointer<ffi.Uint16>>)>(symbol: 'isar_read_string')
+        ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>(symbol: 'isar_read_string')
 external int isar_read_string(
   ffi.Pointer<CIsarReader> reader,
   int index,
-  ffi.Pointer<ffi.Pointer<ffi.Uint16>> value,
+  ffi.Pointer<ffi.Pointer<ffi.Uint8>> value,
 );
 
 @ffi.Native<
@@ -473,6 +510,63 @@ external int isar_read_list(
   ffi.Pointer<CIsarReader> reader,
   int index,
   ffi.Pointer<ffi.Pointer<CIsarReader>> list_reader,
+);
+
+@ffi.Native<ffi.Pointer<CIsarValue> Function(ffi.Bool, ffi.Bool)>(
+    symbol: 'isar_value_bool')
+external ffi.Pointer<CIsarValue> isar_value_bool(
+  bool value,
+  bool null1,
+);
+
+@ffi.Native<ffi.Pointer<CIsarValue> Function(ffi.Int64)>(
+    symbol: 'isar_value_integer')
+external ffi.Pointer<CIsarValue> isar_value_integer(
+  int value,
+);
+
+@ffi.Native<ffi.Pointer<CIsarValue> Function(ffi.Double)>(
+    symbol: 'isar_value_real')
+external ffi.Pointer<CIsarValue> isar_value_real(
+  double value,
+);
+
+@ffi.Native<ffi.Pointer<CIsarValue> Function(ffi.Pointer<CString>)>(
+    symbol: 'isar_value_string')
+external ffi.Pointer<CIsarValue> isar_value_string(
+  ffi.Pointer<CString> value,
+);
+
+@ffi.Native<ffi.Bool Function(ffi.Pointer<CIsarValue>)>(
+    symbol: 'isar_value_is_null')
+external bool isar_value_is_null(
+  ffi.Pointer<CIsarValue> value,
+);
+
+@ffi.Native<ffi.Bool Function(ffi.Pointer<CIsarValue>)>(
+    symbol: 'isar_value_get_bool')
+external bool isar_value_get_bool(
+  ffi.Pointer<CIsarValue> value,
+);
+
+@ffi.Native<ffi.Int64 Function(ffi.Pointer<CIsarValue>)>(
+    symbol: 'isar_value_get_integer')
+external int isar_value_get_integer(
+  ffi.Pointer<CIsarValue> value,
+);
+
+@ffi.Native<ffi.Double Function(ffi.Pointer<CIsarValue>)>(
+    symbol: 'isar_value_get_real')
+external double isar_value_get_real(
+  ffi.Pointer<CIsarValue> value,
+);
+
+@ffi.Native<
+    ffi.Uint32 Function(ffi.Pointer<CIsarValue>,
+        ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>(symbol: 'isar_value_get_string')
+external int isar_value_get_string(
+  ffi.Pointer<CIsarValue> value,
+  ffi.Pointer<ffi.Pointer<ffi.Uint8>> str,
 );
 
 @ffi.Native<ffi.Void Function(ffi.Pointer<CIsarWriter>)>(
@@ -596,8 +690,32 @@ final class CIsarWriter extends ffi.Opaque {}
 
 final class CFilter extends ffi.Opaque {}
 
-final class CFilterValue extends ffi.Opaque {}
+final class CIsarValue extends ffi.Opaque {}
 
 final class CString extends ffi.Opaque {}
 
-const int NativeIndex_MAX_STRING_INDEX_SIZE = 1024;
+const int ERROR_PATH = 1;
+
+const int ERROR_UNIQUE_VIOLATED = 2;
+
+const int ERROR_WRITE_TXN_REQUIRED = 3;
+
+const int ERROR_VERSION = 4;
+
+const int ERROR_OBJECT_LIMIT_REACHED = 5;
+
+const int ERROR_INSTANCE_MISMATCH = 6;
+
+const int ERROR_DB_FULL = 7;
+
+const int AGGREGATION_COUNT = 0;
+
+const int AGGREGATION_IS_EMPTY = 1;
+
+const int AGGREGATION_MIN = 2;
+
+const int AGGREGATION_MAX = 3;
+
+const int AGGREGATION_SUM = 4;
+
+const int AGGREGATION_AVERAGE = 5;

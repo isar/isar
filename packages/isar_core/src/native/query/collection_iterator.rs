@@ -1,4 +1,4 @@
-use super::ids_iterator::IdsIterator;
+use super::index_iterator::IndexIterator;
 use super::QueryIndex;
 use crate::core::error::Result;
 use crate::core::query_builder::Sort;
@@ -10,9 +10,8 @@ use crate::native::native_txn::{NativeTxn, TxnCursor};
 
 pub(crate) enum CollectionIterator<'txn> {
     Full(CursorIterator<'txn, TxnCursor<'txn>>),
-    Ids(IdsIterator<'txn>),
     IdsBetween(CursorBetweenIterator<'txn, TxnCursor<'txn>, i64>),
-    IndexBetween((usize, usize)),
+    IndexBetween(IndexIterator<'txn>),
 }
 
 impl<'txn> CollectionIterator<'txn> {
@@ -28,15 +27,14 @@ impl<'txn> CollectionIterator<'txn> {
                 let iterator = cursor.iter(ascending)?;
                 Ok(CollectionIterator::Full(iterator))
             }
-            QueryIndex::Ids(ids) => {
-                let cursor = txn.get_cursor(collection.get_db()?)?;
-                let iterator = IdsIterator::new(cursor, ids.clone());
-                Ok(CollectionIterator::Ids(iterator))
-            }
             QueryIndex::IdsBetween(lower, upper) => {
                 let cursor = txn.get_cursor(collection.get_db()?)?;
                 let iterator = cursor.iter_between(*lower, *upper, false, false)?;
                 Ok(CollectionIterator::IdsBetween(iterator))
+            }
+            QueryIndex::IndexBetween(lower, upper) => {
+                let iterator = IndexIterator::new();
+                Ok(CollectionIterator::IndexBetween(iterator))
             }
         }
     }
@@ -52,12 +50,11 @@ impl<'txn> Iterator for CollectionIterator<'txn> {
                 let (key, value) = iterator.next()?;
                 Some((key.to_id(), IsarDeserializer::from_bytes(value)))
             }
-            CollectionIterator::Ids(iterator) => iterator.next(),
             CollectionIterator::IdsBetween(iterator) => {
                 let (key, value) = iterator.next()?;
                 Some((key.to_id(), IsarDeserializer::from_bytes(value)))
             }
-            CollectionIterator::IndexBetween(_) => todo!(),
+            CollectionIterator::IndexBetween(iterator) => iterator.next(),
         }
     }
 }

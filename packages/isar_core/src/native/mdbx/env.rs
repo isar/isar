@@ -15,12 +15,7 @@ unsafe impl Send for Env {}
 const MIB: isize = 1 << 20;
 
 impl Env {
-    pub fn create(
-        path: &str,
-        max_dbs: u32,
-        max_size_mib: u32,
-        relaxed_durability: bool,
-    ) -> Result<Arc<Env>> {
+    pub fn create(path: &str, max_dbs: u32, max_size_mib: u32) -> Result<Arc<Env>> {
         let path = str_to_os(path)?;
         let mut env: *mut ffi::MDBX_env = ptr::null_mut();
         unsafe {
@@ -31,11 +26,8 @@ impl Env {
                 max_dbs as u64,
             ))?;
 
-            let mut flags = ffi::MDBX_NOTLS | ffi::MDBX_COALESCE | ffi::MDBX_NOSUBDIR;
-            if relaxed_durability {
-                flags |= ffi::MDBX_NOMETASYNC;
-            }
-
+            let flags =
+                ffi::MDBX_NOTLS | ffi::MDBX_COALESCE | ffi::MDBX_NOSUBDIR | ffi::MDBX_NOMETASYNC;
             let max_size = (max_size_mib as isize).saturating_mul(MIB);
 
             let mut err_code = 0;

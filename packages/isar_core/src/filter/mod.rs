@@ -6,7 +6,6 @@ pub(crate) mod condition_merge;
 pub mod filter_condition;
 pub mod filter_group;
 pub mod filter_nested;
-pub mod filter_value;
 
 #[derive(PartialEq, Clone, Debug)]
 pub enum Filter {
@@ -68,14 +67,14 @@ mod tests {
     use super::{
         filter_condition::FilterCondition,
         filter_group::{FilterGroup, GroupType},
-        filter_value::FilterValue,
         Filter,
     };
+    use crate::core::value::IsarValue;
 
     fn gt(value: i64) -> Filter {
         Filter::Condition(FilterCondition::new_greater_than(
             0,
-            FilterValue::Integer(value),
+            IsarValue::Integer(value),
             false,
         ))
     }
@@ -83,7 +82,7 @@ mod tests {
     fn lt(value: i64) -> Filter {
         Filter::Condition(FilterCondition::new_less_than(
             0,
-            FilterValue::Integer(value),
+            IsarValue::Integer(value),
             false,
         ))
     }
@@ -91,7 +90,7 @@ mod tests {
     fn eq(value: i64) -> Filter {
         Filter::Condition(FilterCondition::new_equal_to(
             0,
-            FilterValue::Integer(value),
+            IsarValue::Integer(value),
             false,
         ))
     }
@@ -99,8 +98,8 @@ mod tests {
     fn between(lower: i64, upper: i64) -> Filter {
         Filter::Condition(FilterCondition::new_between(
             0,
-            FilterValue::Integer(lower),
-            FilterValue::Integer(upper),
+            IsarValue::Integer(lower),
+            IsarValue::Integer(upper),
             false,
         ))
     }

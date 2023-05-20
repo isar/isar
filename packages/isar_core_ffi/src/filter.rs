@@ -1,40 +1,9 @@
 use core::slice;
+use isar_core::core::value::IsarValue;
 use isar_core::filter::filter_condition::FilterCondition;
 use isar_core::filter::filter_group::{FilterGroup, GroupType};
-use isar_core::filter::filter_value::FilterValue;
 use isar_core::filter::Filter;
 use itertools::Itertools;
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_filter_value_bool(value: bool, null: bool) -> *const FilterValue {
-    let filter = if null {
-        FilterValue::Bool(None)
-    } else {
-        FilterValue::Bool(Some(value))
-    };
-    Box::into_raw(Box::new(filter))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_filter_value_integer(value: i64) -> *const FilterValue {
-    Box::into_raw(Box::new(FilterValue::Integer(value)))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_filter_value_real(value: f64) -> *const FilterValue {
-    Box::into_raw(Box::new(FilterValue::Real(value)))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_filter_value_string(value: *mut String) -> *const FilterValue {
-    let value = if value.is_null() {
-        None
-    } else {
-        Some(*Box::from_raw(value))
-    };
-    let filter_value = FilterValue::String(value);
-    Box::into_raw(Box::new(filter_value))
-}
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_is_null(property_index: u32) -> *const Filter {
@@ -45,7 +14,7 @@ pub unsafe extern "C" fn isar_filter_is_null(property_index: u32) -> *const Filt
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_equal_to(
     property_index: u32,
-    value: *mut FilterValue,
+    value: *mut IsarValue,
     case_sensitive: bool,
 ) -> *const Filter {
     let value = *Box::from_raw(value);
@@ -60,7 +29,7 @@ pub unsafe extern "C" fn isar_filter_equal_to(
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_greater_than(
     property_index: u32,
-    value: *mut FilterValue,
+    value: *mut IsarValue,
     include: bool,
     case_sensitive: bool,
 ) -> *const Filter {
@@ -86,7 +55,7 @@ pub unsafe extern "C" fn isar_filter_greater_than(
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_less_than(
     property_index: u32,
-    value: *mut FilterValue,
+    value: *mut IsarValue,
     include: bool,
     case_sensitive: bool,
 ) -> *const Filter {
@@ -112,9 +81,9 @@ pub unsafe extern "C" fn isar_filter_less_than(
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_between(
     property_index: u32,
-    lower: *mut FilterValue,
+    lower: *mut IsarValue,
     include_lower: bool,
-    upper: *mut FilterValue,
+    upper: *mut IsarValue,
     include_upper: bool,
     case_sensitive: bool,
 ) -> *const Filter {
@@ -146,11 +115,11 @@ pub unsafe extern "C" fn isar_filter_between(
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_string_starts_with(
     property_index: u32,
-    value: *mut FilterValue,
+    value: *mut IsarValue,
     case_sensitive: bool,
 ) -> *const Filter {
     let value = *Box::from_raw(value);
-    let filter = if let FilterValue::String(Some(value)) = value {
+    let filter = if let IsarValue::String(Some(value)) = value {
         Filter::Condition(FilterCondition::new_string_starts_with(
             property_index,
             &value,
@@ -165,11 +134,11 @@ pub unsafe extern "C" fn isar_filter_string_starts_with(
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_string_ends_with(
     property_index: u32,
-    value: *mut FilterValue,
+    value: *mut IsarValue,
     case_sensitive: bool,
 ) -> *const Filter {
     let value = *Box::from_raw(value);
-    let filter = if let FilterValue::String(Some(value)) = value {
+    let filter = if let IsarValue::String(Some(value)) = value {
         Filter::Condition(FilterCondition::new_string_ends_with(
             property_index,
             &value,
@@ -184,11 +153,11 @@ pub unsafe extern "C" fn isar_filter_string_ends_with(
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_string_contains(
     property_index: u32,
-    value: *mut FilterValue,
+    value: *mut IsarValue,
     case_sensitive: bool,
 ) -> *const Filter {
     let value = *Box::from_raw(value);
-    let filter = if let FilterValue::String(Some(value)) = value {
+    let filter = if let IsarValue::String(Some(value)) = value {
         Filter::Condition(FilterCondition::new_string_contains(
             property_index,
             &value,
@@ -203,11 +172,11 @@ pub unsafe extern "C" fn isar_filter_string_contains(
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_string_matches(
     property_index: u32,
-    value: *mut FilterValue,
+    value: *mut IsarValue,
     case_sensitive: bool,
 ) -> *const Filter {
     let value = *Box::from_raw(value);
-    let filter = if let FilterValue::String(Some(value)) = value {
+    let filter = if let IsarValue::String(Some(value)) = value {
         Filter::Condition(FilterCondition::new_string_matches(
             property_index,
             &value,

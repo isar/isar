@@ -46,7 +46,7 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
     final object = IsarAnalyzer().analyzeCollection(element);
     final idType =
         object.idProperty!.type == PropertyType.string ? 'String' : 'int';
-    final c = '''
+    return '''
       // coverage:ignore-file
       // ignore_for_file: ${ignoreLints.join(', ')}
 
@@ -72,8 +72,6 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       
       ${generatePropertyQuery(object)}
     ''';
-    print(c);
-    return c;
   }
 }
 
@@ -89,20 +87,13 @@ class IsarEmbeddedGenerator extends GeneratorForAnnotation<Embedded> {
       // coverage:ignore-file
       // ignore_for_file: ${ignoreLints.join(', ')}
 
-      
-    ''';
-
-    /*
-    ${generateSchema(object)}
+      ${generateSchema(object)}
 
       ${generateSerialize(object)}
+
       ${generateDeserialize(object)}
-      ${generateDeserializeProp(object)}
 
       ${generateEnumMaps(object)}
-
-      ${FilterGenerator(object).generate()}
-      ${generateQueryObjects(object)}
-      */
+    ''';
   }
 }

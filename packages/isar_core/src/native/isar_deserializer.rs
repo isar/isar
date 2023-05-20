@@ -7,7 +7,7 @@ use xxhash_rust::xxh3::xxh3_64_with_seed;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct IsarDeserializer<'a> {
-    bytes: &'a [u8],
+    pub bytes: &'a [u8],
     static_size: u32,
 }
 
@@ -32,9 +32,9 @@ impl<'a> IsarDeserializer<'a> {
             DataType::Bool => self.read_byte(offset) == NULL_BOOL,
             DataType::Byte => self.read_byte(offset) == NULL_BYTE,
             DataType::Int => self.read_int(offset) == NULL_INT,
-            DataType::Float => self.read_float(offset) == NULL_FLOAT,
+            DataType::Float => self.read_float(offset).is_nan(),
             DataType::Long => self.read_long(offset) == NULL_LONG,
-            DataType::Double => self.read_double(offset) == NULL_DOUBLE,
+            DataType::Double => self.read_double(offset).is_nan(),
             _ => self.get_offset_length(offset).is_none(),
         }
     }

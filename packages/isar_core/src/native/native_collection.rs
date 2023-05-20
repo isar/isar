@@ -72,23 +72,47 @@ impl NativeCollection {
     pub fn update_largest_id(&self, id: i64) {
         let last = self.auto_increment.get();
         if last < id {
-            self.auto_increment.set(last);
+            self.auto_increment.set(id);
         }
     }
 
     pub fn get_db(&self) -> Result<Db> {
-        self.db.ok_or(IsarError::UnsupportedOperation {
-            message: "Operation not supported for embedded collections".to_string(),
-        })
+        self.db.ok_or(IsarError::UnsupportedOperation {})
     }
 
     #[inline]
-    pub fn get_property(&self, property_index: u32) -> Option<NativeProperty> {
+    pub fn get_property(&self, property_index: u32) -> Option<&NativeProperty> {
         if property_index != 0 {
-            self.properties.get(property_index as usize - 1).copied()
+            self.properties.get(property_index as usize - 1)
         } else {
             None
         }
+    }
+
+    pub fn get_size(&self, txn: &NativeTxn, include_indexes: bool) -> Result<u64> {
+        let size = txn.stat(self.get_db()?)?.1;
+
+        if include_indexes {
+            for index in &self.indexes {
+                //size += index.get_size(cursors)?;
+            }
+        }
+
+        Ok(size)
+    }
+
+    pub fn delete(&self, txn: &NativeTxn, id: i64) -> Result<bool> {
+        let mut cursor = txn.get_cursor(self.get_db()?)?;
+        if cursor.move_to(&id)?.is_some() {
+            cursor.delete_current()?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
+    pub fn clear(&self, txn: &NativeTxn) -> Result<()> {
+        txn.clear_db(self.get_db()?)
     }
 }
 
@@ -98,7 +122,7 @@ unsafe impl Sync for NativeCollection {}
 impl DataType {
     pub const fn static_size(&self) -> u8 {
         match self {
-            DataType::Byte => 1,
+            DataType::Bool | DataType::Byte => 1,
             DataType::Int | DataType::Float => 4,
             DataType::Long | DataType::Double => 8,
             _ => 3,

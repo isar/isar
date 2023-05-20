@@ -20,7 +20,7 @@ structs:
     - CIsarQueryBuilder
     - CIsarQuery
     - CIsarCursor
-    - FilterValue
+    - IsarValue
     - Filter
   rename:
     "^(?!C)(.*)": "C$1"

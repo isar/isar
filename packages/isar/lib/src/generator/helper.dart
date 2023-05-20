@@ -28,7 +28,8 @@ extension ClassElementX on ClassElement {
           e.isPublic &&
           !e.isStatic &&
           !_ignoreChecker.hasAnnotationOf(e.nonSynthetic) &&
-          !ignoreFields.contains(e.name),
+          !ignoreFields.contains(e.name) &&
+          e.name != 'hashCode',
     );
 
     final uniqueAccessors = <String, PropertyInducingElement>{};
@@ -67,7 +68,7 @@ extension ElementX on Element {
     final ann = _nameChecker.firstAnnotationOfExact(nonSynthetic);
     late String name;
     if (ann == null) {
-      name = displayName;
+      name = this.name!;
     } else {
       name = ann.getField('name')!.toStringValue()!;
     }

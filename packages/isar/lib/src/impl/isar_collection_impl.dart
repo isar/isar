@@ -1,15 +1,21 @@
 part of isar;
 
-class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
-  const _IsarCollectionImpl(this.isar, this.collectionIndex, this.converter);
+class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
+  _IsarCollectionImpl(this.isar, this.collectionIndex, this.converter);
 
+  @override
   final _IsarImpl isar;
+
   final int collectionIndex;
   final ObjectConverter<ID, OBJ> converter;
 
   @override
   int get largestId {
-    return isar_get_largest_id(isar.getPtr(), collectionIndex);
+    if (ID == int) {
+      return isar_get_largest_id(isar.getPtr(), collectionIndex);
+    } else {
+      throw UnsupportedError('Only int ids are supported');
+    }
   }
 
   @override
@@ -17,13 +23,8 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
     return isar.getTxn((isarPtr, txnPtr) {
       final readerPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarReader>>();
 
-      isar_get(
-        isarPtr,
-        txnPtr,
-        collectionIndex,
-        _idToInt(id),
-        readerPtrPtr,
-      ).checkNoError();
+      isar_get(isarPtr, txnPtr, collectionIndex, _idToInt(id), readerPtrPtr)
+          .checkNoError();
 
       final readerPtr = readerPtrPtr.value;
       if (!readerPtr.isNull) {
@@ -43,13 +44,11 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
       final readerPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarReader>>();
 
       for (var i = 0; i < ids.length; i++) {
-        final id = ids[i];
-
         isar_get(
           isarPtr,
           txnPtr,
           collectionIndex,
-          _idToInt(id),
+          _idToInt(ids[i]),
           readerPtrPtr,
         ).checkNoError();
 
@@ -65,12 +64,9 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
   }
 
   @override
-  void put(OBJ object) {
-    putAll([object]);
-  }
-
-  @override
   void putAll(List<OBJ> objects) {
+    if (objects.isEmpty) return;
+
     return isar.getWriteTxn(consume: true, (isarPtr, txnPtr) {
       final insertPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarInsert>>();
       isar_insert(
@@ -83,7 +79,7 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
 
       final writerPtrPtr = insertPtrPtr.cast<Pointer<CIsarWriter>>();
       for (final object in objects) {
-        final id = converter.serialize(object, writerPtrPtr.value);
+        final id = converter.serialize(writerPtrPtr.value, object);
         isar_insert_save(insertPtrPtr, id).checkNoError();
       }
 
@@ -105,12 +101,14 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
         IsarCore.boolPtr,
       ).checkNoError();
 
-      return (IsarCore.boolPtr.value, null);
+      return (IsarCore.boolPtr.value, txnPtr);
     });
   }
 
   @override
   int deleteAll(List<ID> ids) {
+    if (ids.isEmpty) return 0;
+
     return isar.getWriteTxn((isarPtr, txnPtr) {
       var count = 0;
       for (final id in ids) {
@@ -127,7 +125,7 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
         }
       }
 
-      return (count, null);
+      return (count, txnPtr);
     });
   }
 
@@ -145,17 +143,46 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
   }
 
   @override
+  int getSize({bool includeIndexes = false}) {
+    return isar.getTxn((isarPtr, txnPtr) {
+      return isar_get_size(isarPtr, txnPtr, collectionIndex, includeIndexes);
+    });
+  }
+
+  @override
+  void importJson(List<Map<String, dynamic>> json) {
+    importJsonBytes(const Utf8Encoder().convert(jsonEncode(json)));
+  }
+
+  @override
+  void importJsonBytes(Uint8List jsonBytes) {
+    // TODO: implement importJsonBytes
+  }
+
+  @override
+  void importJsonFile(String path) {
+    // TODO: implement importJsonFile
+  }
+
+  @override
   void clear() {
-    //where().deleteAll();
+    return isar.getWriteTxn((isarPtr, txnPtr) {
+      isar_clear(isarPtr, txnPtr, collectionIndex);
+      return (null, txnPtr);
+    });
   }
 
   @override
   Query<R> buildQuery<R>({
     Filter? filter,
-    List<SortProperty> sortBy = const [],
-    List<DistinctProperty> distinctBy = const [],
-    int? property,
+    List<SortProperty>? sortBy,
+    List<DistinctProperty>? distinctBy,
+    List<int>? properties,
   }) {
+    if (properties != null && properties.length > 3) {
+      throw ArgumentError('Only up to 3 properties are supported');
+    }
+
     final alloc = Arena(malloc);
     final builderPtrPtr = alloc<Pointer<CIsarQueryBuilder>>();
     isar_query_new(isar.getPtr(), collectionIndex, builderPtrPtr)
@@ -163,24 +190,64 @@ class _IsarCollectionImpl<ID, OBJ> implements IsarCollection<ID, OBJ> {
 
     final builderPtr = builderPtrPtr.value;
     if (filter != null) {
-      final filterPtr = buildFilter(alloc, filter);
-      isar_query_set_filter(builderPtr, filterPtr);
+      isar_query_set_filter(builderPtr, _buildFilter(alloc, filter));
     }
 
-    for (final sort in sortBy) {
-      isar_query_add_sort(
-        builderPtr,
-        sort.property,
-        sort.sort == Sort.asc,
-        sort.caseSensitive,
-      );
+    if (sortBy != null) {
+      for (final sort in sortBy) {
+        isar_query_add_sort(
+          builderPtr,
+          sort.property,
+          sort.sort == Sort.asc,
+          sort.caseSensitive,
+        );
+      }
+    }
+
+    if (distinctBy != null) {
+      for (final distinct in distinctBy) {
+        isar_query_add_distinct(
+          builderPtr,
+          distinct.property,
+          distinct.caseSensitive,
+        );
+      }
+    }
+
+    late final R Function(Pointer<CIsarReader>) deserialize;
+    switch (properties?.length ?? 0) {
+      case 0:
+        deserialize = converter.deserialize as R Function(Pointer<CIsarReader>);
+      case 1:
+        final property = properties![0];
+        final deserializeProp = converter.deserializeProperty!;
+        deserialize = (reader) => deserializeProp(reader, property) as R;
+      case 2:
+        final property1 = properties![0];
+        final property2 = properties[1];
+        final deserializeProp = converter.deserializeProperty!;
+        deserialize = (reader) => (
+              deserializeProp(reader, property1),
+              deserializeProp(reader, property2)
+            ) as R;
+      case 3:
+        final property1 = properties![0];
+        final property2 = properties[1];
+        final property3 = properties[2];
+        final deserializeProp = converter.deserializeProperty!;
+        deserialize = (reader) => (
+              deserializeProp(reader, property1),
+              deserializeProp(reader, property2),
+              deserializeProp(reader, property3),
+            ) as R;
     }
 
     final query = isar_query_build(builderPtr);
     return _QueryImpl(
       instanceId: isar.instanceId,
       ptrAddress: query.address,
-      deserialize: converter.deserialize as R Function(Pointer<CIsarReader>),
+      properties: properties,
+      deserialize: deserialize,
     );
   }
 }
@@ -192,6 +259,8 @@ int _idToInt<OBJ>(OBJ id) {
   } else if (id is String) {
     return Isar.fastHash(id);
   } else {
-    throw 'Unsupported id type';
+    throw UnsupportedError('Unsupported id type. This should never happen.');
   }
 }
+
+class X<T extends (A, B), A, B> {}

@@ -1,6 +1,8 @@
 part of isar;
 
 abstract class Query<T> {
+  Isar get isar;
+
   T? findFirst() => findAll(limit: 1).firstOrNull;
 
   List<T> findAll({int? offset, int? limit});
@@ -9,21 +11,36 @@ abstract class Query<T> {
 
   int deleteAll({int? offset, int? limit});
 
-  int count();
+  List<Map<String, dynamic>> exportJson({int? offset, int? limit}) {
+    return exportJsonBytes(offset: offset, limit: limit, (jsonBytes) {
+      final list = jsonDecode(utf8.decode(jsonBytes)) as List<dynamic>;
+      return list.cast();
+    });
+  }
 
-  bool isEmpty() => aggregate(AggregationOp.isEmpty)!;
+  R exportJsonBytes<R>(
+    R Function(Uint8List jsonBytes) callback, {
+    int? offset,
+    int? limit,
+  });
 
-  bool isNotEmpty() => !isEmpty();
+  void exportJsonFile(String path, {int? offset, int? limit});
 
   @protected
-  R? aggregate<R>(AggregationOp op);
+  R? aggregate<R>(Aggregation op);
 
   void close();
 }
 
 /// @nodoc
 @protected
-enum AggregationOp {
+enum Aggregation {
+  /// Counts all values.
+  count,
+
+  /// Returns `true` if the query has no results.
+  isEmpty,
+
   /// Finds the smallest value.
   min,
 
@@ -35,10 +52,4 @@ enum AggregationOp {
 
   /// Calculates the average of all values.
   average,
-
-  /// Counts all values.
-  count,
-
-  /// Returns `true` if the query has no results.
-  isEmpty,
 }

@@ -29,7 +29,6 @@ pub unsafe extern "C" fn isar_open_instance(
     path: *mut String,
     schema_json: *mut String,
     max_size_mib: u32,
-    relaxed_durability: bool,
     compact_min_file_size: u32,
     compact_min_bytes: u32,
     compact_min_ratio: f32,
@@ -56,12 +55,29 @@ pub unsafe extern "C" fn isar_open_instance(
             &path,
             schema,
             max_size_mib,
-            relaxed_durability,
             compact_condition,
         )?;
         let new_isar = CIsarInstance::Native(native_instance);
         *isar = Box::into_raw(Box::new(new_isar));
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_get_name(isar: &'static CIsarInstance, name: *mut *const u8) -> u32 {
+    let value = match isar {
+        CIsarInstance::Native(isar) => isar.get_name(),
+    };
+    *name = value.as_ptr();
+    value.len() as u32
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_get_dir(isar: &'static CIsarInstance, dir: *mut *const u8) -> u32 {
+    let value = match isar {
+        CIsarInstance::Native(isar) => isar.get_dir(),
+    };
+    *dir = value.as_ptr();
+    value.len() as u32
 }
 
 #[no_mangle]
@@ -109,7 +125,7 @@ pub unsafe extern "C" fn isar_get_largest_id(
     collection_index: u16,
 ) -> i64 {
     match isar {
-        CIsarInstance::Native(isar) => isar.get_largest_id(collection_index).unwrap_or(i64::MIN),
+        CIsarInstance::Native(isar) => isar.get_largest_id(collection_index).unwrap(),
     }
 }
 
@@ -186,6 +202,43 @@ pub unsafe extern "C" fn isar_count(
             }
         };
         *count = new_count;
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_clear(
+    isar: &'static CIsarInstance,
+    txn: &'static CIsarTxn,
+    collection_index: u16,
+) -> u8 {
+    isar_try! {
+        match (isar,txn) {
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => isar.clear(txn, collection_index)?,
+        };
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_get_size(
+    isar: &'static CIsarInstance,
+    txn: &'static CIsarTxn,
+    collection_index: u16,
+    include_indexes: bool,
+) -> i64 {
+    match (isar, txn) {
+        (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => isar
+            .get_size(txn, collection_index, include_indexes)
+            .unwrap_or(0) as i64,
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_copy(isar: &'static CIsarInstance, path: *mut String) -> u8 {
+    isar_try! {
+        let path = *Box::from_raw(path);
+        match isar {
+            CIsarInstance::Native(isar) => isar.copy(&path)?,
+        }
     }
 }
 

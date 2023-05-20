@@ -5,7 +5,6 @@ use super::native_collection::{NativeCollection, NativeProperty};
 use super::native_txn::{NativeTxn, TxnCursor};
 use crate::core::error::{IsarError, Result};
 use crate::core::schema::{CollectionSchema, IsarSchema, PropertySchema};
-use itertools::Itertools;
 use std::borrow::Cow;
 use std::ops::{Deref, DerefMut};
 
@@ -48,7 +47,7 @@ fn get_schemas(info_cursor: TxnCursor) -> Result<Vec<CollectionSchema>> {
     let mut schemas = vec![];
     for (_, bytes) in info_cursor.iter(true)? {
         let col = serde_json::from_slice::<CollectionSchema>(bytes).map_err(|_| {
-            IsarError::DbCorrupted {
+            IsarError::SchemaError {
                 message: "Could not deserialize existing schema.".to_string(),
             }
         })?;

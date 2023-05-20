@@ -73,7 +73,7 @@ class PropertyInfo {
 
   bool get isEnum => enumMap != null;
 
-  String get _scalarDartType {
+  String get scalarDartTypeNotNull {
     if (isEnum) {
       return typeClassName;
     }
@@ -107,25 +107,15 @@ class PropertyInfo {
   }
 
   String get scalarDartType => type.isList
-      ? '$_scalarDartType${elementNullable! ? '?' : ''}'
-      : '$_scalarDartType${nullable ? '?' : ''}';
+      ? '$scalarDartTypeNotNull${elementNullable! ? '?' : ''}'
+      : '$scalarDartTypeNotNull${nullable ? '?' : ''}';
 
   String get dartType => type.isList
       ? 'List<$scalarDartType>${nullable ? '?' : ''}'
       : scalarDartType;
 }
 
-extension ObjectInfoX on ObjectInfo {
-  String get schemaHashName => '${dartName.decapitalize()}SchemaHash';
-  String get schemaName => '${dartName.capitalize()}Schema';
-  String get serializeName => '_serialize${dartName.capitalize()}';
-  String get deserializeName => '_deserialize${dartName.capitalize()}';
-  String get deserializePropName => '_deserialize${dartName.capitalize()}Prop';
-}
-
 extension PropX on PropertyInfo {
-  String enumValueMapName(ObjectInfo object) =>
-      '_${object.dartName.decapitalize()}${dartName.capitalize()}Values';
-  String valueEnumMapName(ObjectInfo object) =>
-      '_${object.dartName.decapitalize()}${dartName.capitalize()}Enums';
+  String enumMapName(ObjectInfo object) =>
+      '_${object.dartName.decapitalize()}${dartName.capitalize()}';
 }

@@ -15,11 +15,6 @@ export PATH="$COMPILER_DIR:$PATH"
 
 echo "$COMPILER_DIR"
 
-export CC_i686_linux_android=$COMPILER_DIR/i686-linux-android21-clang
-export AR_i686_linux_android=$COMPILER_DIR/llvm-ar
-export CARGO_TARGET_I686_LINUX_ANDROID_LINKER=$COMPILER_DIR/i686-linux-android21-clang
-export CARGO_TARGET_I686_LINUX_ANDROID_AR=$COMPILER_DIR/llvm-ar
-
 export CC_x86_64_linux_android=$COMPILER_DIR/x86_64-linux-android21-clang
 export AR_x86_64_linux_android=$COMPILER_DIR/llvm-ar
 export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER=$COMPILER_DIR/x86_64-linux-android21-clang
@@ -35,11 +30,7 @@ export AR_aarch64_linux_android=$COMPILER_DIR/llvm-ar
 export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$COMPILER_DIR/aarch64-linux-android21-clang
 export CARGO_TARGET_AARCH64_LINUX_ANDROID_AR=$COMPILER_DIR/llvm-ar
 
-if [ "$1" = "x86" ]; then
-  rustup target add i686-linux-android
-  cargo build --target i686-linux-android --release
-  mv "target/i686-linux-android/release/libisar.so" "libisar_android_x86.so"
-elif [ "$1" = "x64" ]; then
+if [ "$1" = "x64" ]; then
   rustup target add x86_64-linux-android
   cargo build --target x86_64-linux-android --release
   mv "target/x86_64-linux-android/release/libisar.so" "libisar_android_x64.so"

@@ -3,6 +3,7 @@ use snafu::Snafu;
 pub type Result<T> = std::result::Result<T, IsarError>;
 
 #[derive(Clone, Debug, Snafu, Eq, PartialEq)]
+#[repr(u8)]
 pub enum IsarError {
     #[snafu(display(
         "No such file or directory. Please make sure that the provided path is valid."
@@ -21,19 +22,13 @@ pub enum IsarError {
     #[snafu(display("Isar version of the file is too new or too old to be used."))]
     VersionError {},
 
-    #[snafu(display("Database corrupted: {}", message))]
-    DbCorrupted { message: String },
-
-    #[snafu(display("Database corrupted: {}", message))]
-    UnsupportedOperation { message: String },
-
-    #[snafu(display("Auto increment id cannot be generated because the limit is reached."))]
-    AutoIncrementOverflow {},
+    #[snafu()]
+    UnsupportedOperation {},
 
     #[snafu(display("Object limit reached."))]
     ObjectLimitReached {},
 
-    #[snafu(display("Not all objects or properties inserted."))]
+    #[snafu(display("Not all objects inserted."))]
     InsertIncomplete {},
 
     #[snafu(display("Instance mismatch. Make sure to use resources with the correct instance."))]

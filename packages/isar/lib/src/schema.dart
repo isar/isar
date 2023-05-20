@@ -41,7 +41,7 @@ final class ObjectConverter<ID, OBJ> {
   const ObjectConverter({
     required this.serialize,
     required this.deserialize,
-    required this.deserializeProp,
+    this.deserializeProperty,
   });
 
   /// @nodoc
@@ -51,7 +51,7 @@ final class ObjectConverter<ID, OBJ> {
   final Deserialize<OBJ> deserialize;
 
   /// @nodoc
-  final DeserializeProp deserializeProp;
+  final DeserializeProp? deserializeProperty;
 
   /// @nodoc
   Type get type => OBJ;
@@ -71,7 +71,7 @@ typedef IsarWriter = Pointer<CIsarWriter>;
 typedef IsarReader = Pointer<CIsarReader>;
 
 /// @nodoc
-typedef Serialize<T> = int Function(T object, IsarWriter writer);
+typedef Serialize<T> = int Function(IsarWriter writer, T object);
 
 /// @nodoc
 typedef Deserialize<T> = T Function(IsarReader reader);

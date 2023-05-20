@@ -1,13 +1,14 @@
 library isar;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/src/impl/bindings.dart';
-import 'package:isar/src/impl/filter_builder.dart';
 import 'package:meta/meta.dart';
 import 'package:meta/meta_meta.dart';
 
@@ -21,6 +22,7 @@ part 'src/annotations/name.dart';
 part 'src/annotations/type.dart';
 
 part 'src/impl/async.dart';
+part 'src/impl/filter_builder.dart';
 part 'src/impl/isar_collection_impl.dart';
 part 'src/impl/isar_impl.dart';
 part 'src/impl/query_impl.dart';
@@ -34,3 +36,7 @@ part 'src/query_builder.dart';
 part 'src/query_extensions.dart';
 part 'src/query_components.dart';
 part 'src/schema.dart';
+
+/// @nodoc
+@protected
+const isarProtected = protected;

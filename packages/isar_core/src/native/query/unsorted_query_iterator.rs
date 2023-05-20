@@ -6,22 +6,22 @@ use crate::native::native_filter::NativeFilter;
 use std::iter::Flatten;
 use std::vec::IntoIter;
 
-pub(crate) struct UnsortedQueryIterator<'txn> {
-    collection_iterators: Flatten<IntoIter<CollectionIterator<'txn>>>,
+pub(crate) struct UnsortedQueryIterator<'a> {
+    collection_iterators: Flatten<IntoIter<CollectionIterator<'a>>>,
     returned_ids: Option<IntMap<()>>,
-    filter: NativeFilter,
+    filter: &'a NativeFilter,
     skip: u32,
     take: u32,
 }
 
-impl<'txn> UnsortedQueryIterator<'txn> {
+impl<'a> UnsortedQueryIterator<'a> {
     pub fn new(
-        collection_iterators: Vec<CollectionIterator<'txn>>,
+        collection_iterators: Vec<CollectionIterator<'a>>,
         has_duplicates: bool,
-        filter: NativeFilter,
+        filter: &'a NativeFilter,
         offset: u32,
         limit: u32,
-    ) -> UnsortedQueryIterator<'txn> {
+    ) -> UnsortedQueryIterator<'a> {
         let returned_ids = if has_duplicates {
             Some(IntMap::new())
         } else {
@@ -37,8 +37,8 @@ impl<'txn> UnsortedQueryIterator<'txn> {
     }
 }
 
-impl<'txn> Iterator for UnsortedQueryIterator<'txn> {
-    type Item = (i64, IsarDeserializer<'txn>);
+impl<'a> Iterator for UnsortedQueryIterator<'a> {
+    type Item = (i64, IsarDeserializer<'a>);
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {

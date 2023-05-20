@@ -68,7 +68,7 @@ macro_rules! string_filter_create {
 pub struct NativeFilter(Filter);
 
 impl NativeFilter {
-    pub fn is_null(property: NativeProperty) -> NativeFilter {
+    pub fn is_null(property: &NativeProperty) -> NativeFilter {
         let filter = Filter::IsNull(IsNullCond {
             offset: property.offset,
             data_type: property.data_type,
@@ -81,23 +81,31 @@ impl NativeFilter {
         NativeFilter(filter)
     }
 
-    pub fn byte(property: NativeProperty, lower: u8, upper: u8) -> NativeFilter {
+    pub fn bool(
+        property: &NativeProperty,
+        lower: Option<bool>,
+        upper: Option<bool>,
+    ) -> NativeFilter {
+        primitive_create!(Bool, property, lower, upper)
+    }
+
+    pub fn byte(property: &NativeProperty, lower: u8, upper: u8) -> NativeFilter {
         primitive_create!(Byte, property, lower, upper)
     }
 
-    pub fn int(property: NativeProperty, lower: i32, upper: i32) -> NativeFilter {
+    pub fn int(property: &NativeProperty, lower: i32, upper: i32) -> NativeFilter {
         primitive_create!(Int, property, lower, upper)
     }
 
-    pub fn long(property: NativeProperty, lower: i64, upper: i64) -> NativeFilter {
+    pub fn long(property: &NativeProperty, lower: i64, upper: i64) -> NativeFilter {
         primitive_create!(Long, property, lower, upper)
     }
 
-    pub fn float(property: NativeProperty, lower: f32, upper: f32) -> NativeFilter {
+    pub fn float(property: &NativeProperty, lower: f32, upper: f32) -> NativeFilter {
         primitive_create!(Float, property, lower, upper)
     }
 
-    pub fn double(property: NativeProperty, lower: f64, upper: f64) -> NativeFilter {
+    pub fn double(property: &NativeProperty, lower: f64, upper: f64) -> NativeFilter {
         primitive_create!(Double, property, lower, upper)
     }
 
@@ -110,7 +118,7 @@ impl NativeFilter {
     }
 
     pub fn string(
-        property: NativeProperty,
+        property: &NativeProperty,
         lower: Option<&str>,
         upper: Option<&str>,
         case_sensitive: bool,
@@ -138,7 +146,7 @@ impl NativeFilter {
     }
 
     pub fn string_ends_with(
-        property: NativeProperty,
+        property: &NativeProperty,
         value: &str,
         case_sensitive: bool,
     ) -> NativeFilter {
@@ -146,7 +154,7 @@ impl NativeFilter {
     }
 
     pub fn string_contains(
-        property: NativeProperty,
+        property: &NativeProperty,
         value: &str,
         case_sensitive: bool,
     ) -> NativeFilter {
@@ -154,14 +162,14 @@ impl NativeFilter {
     }
 
     pub fn string_matches(
-        property: NativeProperty,
+        property: &NativeProperty,
         value: &str,
         case_sensitive: bool,
     ) -> NativeFilter {
         string_filter_create!(Matches, property, value, case_sensitive)
     }
 
-    pub fn list_length(property: NativeProperty, lower: u32, upper: u32) -> NativeFilter {
+    pub fn list_length(property: &NativeProperty, lower: u32, upper: u32) -> NativeFilter {
         let filter_cond = if let Some(element_type) = property.data_type.element_type() {
             Filter::ListLength(ListLengthCond {
                 offset: property.offset,
@@ -223,6 +231,7 @@ enum Filter {
     StringMatches(StringMatchesCond),
 
     AnyByteBetween(AnyByteBetweenCond),
+    AnyBoolBetween(AnyBoolBetweenCond),
     AnyIntBetween(AnyIntBetweenCond),
     AnyLongBetween(AnyLongBetweenCond),
     AnyFloatBetween(AnyFloatBetweenCond),
@@ -285,7 +294,8 @@ macro_rules! filter_between {
             impl Condition for [<$data_type BetweenCond>] {
                 fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
                     let val = object.$prop_accessor(self.offset);
-                    filter_between!(eval val, self, $data_type)
+                    let result = filter_between!(eval val, self, $data_type);
+                    result
                 }
             }
 

@@ -1,6 +1,6 @@
 part of isar;
 
-class _IsarImpl implements Isar {
+class _IsarImpl extends Isar {
   _IsarImpl._(this.instanceId, Pointer<CIsarInstance> ptr, this.converters)
       : _ptr = ptr {
     for (var i = 0; i < converters.length; i++) {
@@ -25,7 +25,7 @@ class _IsarImpl implements Isar {
   Pointer<CIsarTxn>? _txnPtr;
   bool _txnWrite = false;
 
-  factory _IsarImpl.get({
+  static _IsarImpl get({
     required int instanceId,
     required List<ObjectConverter<dynamic, dynamic>> converters,
   }) {
@@ -36,19 +36,18 @@ class _IsarImpl implements Isar {
 
     final ptr = isar_get_instance(instanceId);
     if (ptr.isNull) {
-      throw IsarError('Instance has not been opened yet. Make sure to '
-          'call Isar.open() before calling Isar.get().');
+      throw IsarNotReadyError('Instance has not been opened yet. Make sure to '
+          'call Isar.open() before using Isar.get().');
     }
 
     return _IsarImpl._(instanceId, ptr, converters);
   }
 
-  factory _IsarImpl.open({
+  static _IsarImpl open({
     required List<CollectionSchema> schemas,
     required String directory,
     required String name,
     required int maxSizeMiB,
-    required bool relaxedDurability,
     required CompactCondition? compactOnLaunch,
     required bool inspector,
   }) {
@@ -74,7 +73,6 @@ class _IsarImpl implements Isar {
       directoryPtr,
       schemaPtr,
       maxSizeMiB,
-      relaxedDurability,
       compactOnLaunch?.minFileSize ?? -1,
       compactOnLaunch?.minBytes ?? -1,
       compactOnLaunch?.minRatio ?? double.nan,
@@ -87,7 +85,11 @@ class _IsarImpl implements Isar {
   static _IsarImpl getInstance(int instanceId) {
     final instance = _instances[instanceId];
     if (instance == null) {
-      throw IsarError('Instance has not been opened yet in this isolate.');
+      throw IsarNotReadyError(
+        'Isar instance has not been opened yet in this isolate. Call '
+        'Isar.get() or Isar.open() before trying to access Isar for the first '
+        'time in a new isolate.',
+      );
     }
     return instance;
   }
@@ -96,11 +98,23 @@ class _IsarImpl implements Isar {
   Pointer<CIsarInstance> getPtr() {
     final ptr = _ptr;
     if (ptr == null) {
-      throw IsarError('Isar instance has already been closed');
+      throw IsarNotReadyError('Isar instance has already been closed.');
     } else {
       return ptr;
     }
   }
+
+  @override
+  late final String name = () {
+    final length = isar_get_name(getPtr(), IsarCore.stringPtrPtr);
+    return utf8.decode(IsarCore.stringPtr.asTypedList(length));
+  }();
+
+  @override
+  late final String directory = () {
+    final length = isar_get_dir(getPtr(), IsarCore.stringPtrPtr);
+    return utf8.decode(IsarCore.stringPtr.asTypedList(length));
+  }();
 
   @pragma('vm:prefer-inline')
   T getTxn<T>(
@@ -134,17 +148,14 @@ class _IsarImpl implements Isar {
         final (result, returnedPtr) = callback(_ptr!, txnPtr);
         _txnPtr = returnedPtr;
         return result;
-      } else {
-        throw 'Write txn required';
       }
-    } else {
-      throw 'Explicit write transaction required';
     }
+    throw WriteTxnRequiredError();
   }
 
   T _txn<T>(T Function(Isar isar) callback, {required bool write}) {
     if (_txnPtr != null) {
-      throw 'Nested transactions are not supported';
+      throw UnsupportedError('Nested transactions are not supported');
     }
 
     final ptr = getPtr();
@@ -176,7 +187,7 @@ class _IsarImpl implements Isar {
     if (collection is _IsarCollectionImpl<ID, OBJ>) {
       return collection;
     } else {
-      throw IsarError('Collection for type $OBJ not found');
+      throw ArgumentError('Collection for type $OBJ not found');
     }
   }
 
@@ -191,6 +202,42 @@ class _IsarImpl implements Isar {
   }
 
   @override
+  int getSize({bool includeIndexes = false}) {
+    var size = 0;
+    for (final collection in collections.values) {
+      size += collection.getSize(includeIndexes: includeIndexes);
+    }
+    return size;
+  }
+
+  @override
+  void importJsonBytes(Uint8List jsonBytes) {
+    // TODO: implement importJsonBytes
+  }
+
+  @override
+  void importJsonFile(String path) {
+    // TODO: implement importJsonFile
+  }
+
+  @override
+  R exportJsonBytes<R>(R Function(Uint8List jsonBytes) callback) {
+    // TODO: implement exportJsonBytes
+    throw UnimplementedError();
+  }
+
+  @override
+  void exportJsonFile(String path) {
+    // TODO: implement exportJsonFile
+  }
+
+  @override
+  void copyToFile(String path) {
+    final string = IsarCore.toNativeString(path);
+    isar_copy(getPtr(), string).checkNoError();
+  }
+
+  @override
   void clear() {
     for (final collection in collections.values) {
       collection.clear();
@@ -198,16 +245,8 @@ class _IsarImpl implements Isar {
   }
 
   @override
-  int getSize({bool includeIndexes = false}) {
-    return 0;
-  }
-
-  @override
-  void copyToFile(String targetFilePath) {}
-
-  @override
   bool close({bool deleteFromDisk = false}) {
-    final closed = isar_close(_ptr!, deleteFromDisk);
+    final closed = isar_close(getPtr(), deleteFromDisk);
     _ptr = null;
     return closed;
   }

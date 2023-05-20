@@ -8,8 +8,9 @@ use super::native_txn::NativeTxn;
 use super::query::{Query, QueryCursor};
 use super::schema_manager::perform_migration;
 use crate::core::error::{IsarError, Result};
-use crate::core::instance::{CompactCondition, IsarInstance};
+use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
 use crate::core::schema::IsarSchema;
+use crate::core::value::IsarValue;
 use intmap::IntMap;
 use once_cell::sync::Lazy;
 use std::fs::{self, remove_file};
@@ -59,13 +60,20 @@ impl IsarInstance for NativeInstance {
         }
     }
 
+    fn get_name(&self) -> &str {
+        &self.name
+    }
+
+    fn get_dir(&self) -> &str {
+        &self.dir
+    }
+
     fn open_instance(
         instance_id: u32,
         name: &str,
         dir: &str,
         schema: IsarSchema,
         max_size_mib: u32,
-        relaxed_durability: bool,
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self::Instance> {
         let mut lock = INSTANCES.lock().unwrap();
@@ -78,7 +86,6 @@ impl IsarInstance for NativeInstance {
                 instance_id,
                 schema,
                 max_size_mib,
-                relaxed_durability,
                 compact_condition,
             )?;
             let new_instance = Arc::new(new_instance);
@@ -103,7 +110,7 @@ impl IsarInstance for NativeInstance {
     }
 
     fn get_largest_id(&self, collection_index: u16) -> Result<i64> {
-        let collection = &self.collections[collection_index as usize];
+        let collection = self.get_collection(collection_index)?;
         Ok(collection.get_largest_id())
     }
 
@@ -139,13 +146,7 @@ impl IsarInstance for NativeInstance {
     fn delete<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16, id: i64) -> Result<bool> {
         self.verify_instance_id(txn.instance_id)?;
         let collection = self.get_collection(collection_index)?;
-        let mut cursor = txn.get_cursor(collection.get_db()?)?;
-        if cursor.move_to(&id)?.is_some() {
-            cursor.delete_current()?;
-            Ok(true)
-        } else {
-            Ok(false)
-        }
+        collection.delete(txn, id)
     }
 
     fn count(&self, txn: &Self::Txn, collection_index: u16) -> Result<u32> {
@@ -155,13 +156,21 @@ impl IsarInstance for NativeInstance {
         Ok(count as u32)
     }
 
+    fn clear(&self, txn: &Self::Txn, collection_index: u16) -> Result<()> {
+        self.verify_instance_id(txn.instance_id)?;
+        let collection = self.get_collection(collection_index)?;
+        collection.clear(txn)
+    }
+
     fn get_size(
         &self,
-        collection_index: Option<u16>,
+        txn: &Self::Txn,
+        collection_index: u16,
         include_indexes: bool,
-        include_links: bool,
-    ) -> Result<u32> {
-        panic!()
+    ) -> Result<u64> {
+        self.verify_instance_id(txn.instance_id)?;
+        let collection = self.get_collection(collection_index)?;
+        collection.get_size(txn, include_indexes)
     }
 
     fn query(&self, collection_index: u16) -> Result<Self::QueryBuilder<'_>> {
@@ -185,10 +194,26 @@ impl IsarInstance for NativeInstance {
         query.cursor(txn, &self.collections, offset, limit)
     }
 
+    fn query_aggregate<'a>(
+        &'a self,
+        txn: &'a Self::Txn,
+        query: &'a Self::Query,
+        aggregation: Aggregation,
+        property_index: Option<u16>,
+    ) -> Result<Option<IsarValue>> {
+        self.verify_instance_id(txn.instance_id)?;
+        self.verify_instance_id(query.instance_id)?;
+        query.aggregate(txn, &self.collections, aggregation, property_index)
+    }
+
     fn query_delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<u32> {
         self.verify_instance_id(txn.instance_id)?;
         let collection = self.get_collection(query.collection_index)?;
         query.delete(txn, collection)
+    }
+
+    fn copy(&self, path: &str) -> Result<()> {
+        self.env.copy(path)
     }
 
     fn close(instance: Arc<Self>, delete: bool) -> bool {
@@ -237,7 +262,6 @@ impl NativeInstance {
         instance_id: u32,
         schema: IsarSchema,
         max_size_mib: u32,
-        relaxed_durability: bool,
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self> {
         let isar_file = Self::get_isar_path(name, dir);
@@ -249,12 +273,7 @@ impl NativeInstance {
             .map(|c| c.indexes.len() as u32 + 1)
             .sum::<u32>()
             + 1;
-        let env = Env::create(
-            &isar_file,
-            db_count,
-            max_size_mib.max(1),
-            relaxed_durability,
-        )?;
+        let env = Env::create(&isar_file, db_count, max_size_mib)?;
 
         let txn = NativeTxn::new(instance_id, &env, true)?;
         let collections = perform_migration(&txn, &schema)?;
@@ -273,15 +292,7 @@ impl NativeInstance {
             if let Some(instance) = instance {
                 Ok(instance)
             } else {
-                Self::open_internal(
-                    name,
-                    dir,
-                    instance_id,
-                    schema,
-                    max_size_mib,
-                    relaxed_durability,
-                    None,
-                )
+                Self::open_internal(name, dir, instance_id, schema, max_size_mib, None)
             }
         } else {
             Ok(instance)
@@ -338,7 +349,7 @@ mod test {
             schema::{CollectionSchema, PropertySchema},
             writer::IsarWriter,
         },
-        filter::{filter_condition::FilterCondition, filter_value::FilterValue, Filter},
+        filter::{filter_condition::FilterCondition, Filter},
     };
 
     use super::*;
@@ -360,7 +371,6 @@ mod test {
             "/Users/simon/Documents/GitHub/isar/packages/isar_core/tests",
             schema,
             1000,
-            true,
             None,
         )
         .unwrap();

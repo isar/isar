@@ -7,23 +7,23 @@ use crate::native::native_filter::NativeFilter;
 use std::iter::Flatten;
 use std::vec::IntoIter;
 
-pub(crate) struct UnsortedDistinctQueryIterator<'txn> {
-    collection_iterators: Flatten<IntoIter<CollectionIterator<'txn>>>,
-    filter: NativeFilter,
-    properties: Vec<(NativeProperty, bool)>,
+pub(crate) struct UnsortedDistinctQueryIterator<'a> {
+    collection_iterators: Flatten<IntoIter<CollectionIterator<'a>>>,
+    filter: &'a NativeFilter,
+    properties: &'a [(NativeProperty, bool)],
     hashes: IntMap<()>,
     skip: u32,
     take: u32,
 }
 
-impl<'txn> UnsortedDistinctQueryIterator<'txn> {
+impl<'a> UnsortedDistinctQueryIterator<'a> {
     pub fn new(
-        collection_iterators: Vec<CollectionIterator<'txn>>,
-        filter: NativeFilter,
-        properties: Vec<(NativeProperty, bool)>,
+        collection_iterators: Vec<CollectionIterator<'a>>,
+        filter: &'a NativeFilter,
+        properties: &'a [(NativeProperty, bool)],
         offset: u32,
         limit: u32,
-    ) -> UnsortedDistinctQueryIterator<'txn> {
+    ) -> UnsortedDistinctQueryIterator<'a> {
         UnsortedDistinctQueryIterator {
             collection_iterators: collection_iterators.into_iter().flatten(),
             filter,
@@ -35,8 +35,8 @@ impl<'txn> UnsortedDistinctQueryIterator<'txn> {
     }
 }
 
-impl<'txn> Iterator for UnsortedDistinctQueryIterator<'txn> {
-    type Item = (i64, IsarDeserializer<'txn>);
+impl<'a> Iterator for UnsortedDistinctQueryIterator<'a> {
+    type Item = (i64, IsarDeserializer<'a>);
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
