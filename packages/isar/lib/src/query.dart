@@ -26,6 +26,12 @@ abstract class Query<T> {
 
   void exportJsonFile(String path, {int? offset, int? limit});
 
+  int count() => aggregate(Aggregation.count) ?? 0;
+
+  bool isEmpty() => aggregate(Aggregation.isEmpty) ?? true;
+
+  bool isNotEmpty() => !isEmpty();
+
   @protected
   R? aggregate<R>(Aggregation op);
 

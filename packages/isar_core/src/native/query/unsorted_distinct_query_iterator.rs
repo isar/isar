@@ -1,14 +1,11 @@
-use intmap::IntMap;
-
-use super::collection_iterator::CollectionIterator;
+use super::index_iterator::IndexIterator;
 use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::native_collection::NativeProperty;
 use crate::native::native_filter::NativeFilter;
-use std::iter::Flatten;
-use std::vec::IntoIter;
+use intmap::IntMap;
 
 pub(crate) struct UnsortedDistinctQueryIterator<'a> {
-    collection_iterators: Flatten<IntoIter<CollectionIterator<'a>>>,
+    iterator: IndexIterator<'a>,
     filter: &'a NativeFilter,
     properties: &'a [(NativeProperty, bool)],
     hashes: IntMap<()>,
@@ -18,14 +15,14 @@ pub(crate) struct UnsortedDistinctQueryIterator<'a> {
 
 impl<'a> UnsortedDistinctQueryIterator<'a> {
     pub fn new(
-        collection_iterators: Vec<CollectionIterator<'a>>,
+        iterator: IndexIterator<'a>,
         filter: &'a NativeFilter,
         properties: &'a [(NativeProperty, bool)],
         offset: u32,
         limit: u32,
     ) -> UnsortedDistinctQueryIterator<'a> {
         UnsortedDistinctQueryIterator {
-            collection_iterators: collection_iterators.into_iter().flatten(),
+            iterator,
             filter,
             properties,
             hashes: IntMap::new(),
@@ -40,7 +37,7 @@ impl<'a> Iterator for UnsortedDistinctQueryIterator<'a> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some((id, object)) = self.collection_iterators.next() {
+        while let Some((id, object)) = self.iterator.next() {
             if self.filter.evaluate(id, object) {
                 let hash = self
                     .properties

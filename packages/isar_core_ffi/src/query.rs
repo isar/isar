@@ -141,12 +141,24 @@ pub unsafe extern "C" fn isar_query_delete(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
     query: &'static CIsarQuery,
+    offset: i64,
+    limit: i64,
     count: *mut u32,
 ) -> u8 {
+    let offset = if offset < 0 {
+        None
+    } else {
+        Some(offset.clamp(0, u32::MAX as i64) as u32)
+    };
+    let limit = if limit < 0 {
+        None
+    } else {
+        Some(limit.clamp(0, u32::MAX as i64) as u32)
+    };
     isar_try! {
         let new_count = match (isar, txn, query) {
-            (CIsarInstance::Native(isar), CIsarTxn::Native(txn),CIsarQuery::Native(query)) => {
-                isar.query_delete(txn,query)?
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn), CIsarQuery::Native(query)) => {
+                isar.query_delete(txn, query, offset, limit)?
             }
         };
         *count = new_count;

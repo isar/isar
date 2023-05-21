@@ -108,14 +108,6 @@ extension QueryModifier<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
   }
 }
 
-extension QueryAggregation<T> on Query<T> {
-  int count() => aggregate(Aggregation.count) ?? 0;
-
-  bool isEmpty() => aggregate(Aggregation.isEmpty) ?? true;
-
-  bool isNotEmpty() => !isEmpty();
-}
-
 extension QueryNumAggregation<T extends num?> on Query<T?> {
   T? min() => aggregate(Aggregation.min);
 

@@ -1,3 +1,4 @@
+use super::index::id_key::IdToBytes;
 use super::isar_deserializer::IsarDeserializer;
 use super::mdbx::env::Env;
 use super::native_collection::NativeCollection;
@@ -123,7 +124,7 @@ impl IsarInstance for NativeInstance {
         self.verify_instance_id(txn.instance_id)?;
         let collection = self.get_collection(collection_index)?;
         let mut cursor = txn.get_cursor(collection.get_db()?)?;
-        let result = if let Some((_, bytes)) = cursor.move_to(&id)? {
+        let result = if let Some((_, bytes)) = cursor.move_to(&id.to_id_bytes())? {
             let object = IsarDeserializer::from_bytes(bytes);
             Some(NativeReader::new(id, object, collection, &self.collections))
         } else {
@@ -191,7 +192,8 @@ impl IsarInstance for NativeInstance {
     ) -> Result<Self::Cursor<'a>> {
         self.verify_instance_id(txn.instance_id)?;
         self.verify_instance_id(query.instance_id)?;
-        query.cursor(txn, &self.collections, offset, limit)
+        let result = query.cursor(txn, &self.collections, offset, limit);
+        Ok(result)
     }
 
     fn query_aggregate<'a>(
@@ -203,13 +205,21 @@ impl IsarInstance for NativeInstance {
     ) -> Result<Option<IsarValue>> {
         self.verify_instance_id(txn.instance_id)?;
         self.verify_instance_id(query.instance_id)?;
-        query.aggregate(txn, &self.collections, aggregation, property_index)
+        let result = query.aggregate(txn, &self.collections, aggregation, property_index);
+        Ok(result)
     }
 
-    fn query_delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<u32> {
+    fn query_delete(
+        &self,
+        txn: &Self::Txn,
+        query: &Self::Query,
+        offset: Option<u32>,
+        limit: Option<u32>,
+    ) -> Result<u32> {
         self.verify_instance_id(txn.instance_id)?;
+        self.verify_instance_id(query.instance_id)?;
         let collection = self.get_collection(query.collection_index)?;
-        query.delete(txn, collection)
+        query.delete(txn, collection, offset, limit)
     }
 
     fn copy(&self, path: &str) -> Result<()> {
@@ -301,7 +311,10 @@ impl NativeInstance {
 
     fn compact(self, compact_condition: CompactCondition) -> Result<Option<Self>> {
         let txn = self.begin_txn(false)?;
-        let instance_size = 0; //self.get_size(&mut txn, true, true)?;
+        let mut instance_size = 0;
+        for collection_index in 0..self.collections.len() {
+            instance_size += self.get_size(&txn, collection_index as u16, true)?;
+        }
         txn.abort();
 
         let isar_file = Self::get_isar_path(&self.name, &self.dir);
@@ -337,61 +350,5 @@ impl NativeInstance {
         } else {
             Err(IsarError::IllegalArgument {})
         }
-    }
-}
-
-mod test {
-    use crate::{
-        core::{
-            data_type::DataType,
-            insert::IsarInsert,
-            query_builder::IsarQueryBuilder,
-            schema::{CollectionSchema, PropertySchema},
-            writer::IsarWriter,
-        },
-        filter::{filter_condition::FilterCondition, Filter},
-    };
-
-    use super::*;
-
-    #[test]
-    fn test_exec() {
-        let schema = IsarSchema::new(vec![CollectionSchema::new(
-            "test2",
-            vec![
-                PropertySchema::new("str", DataType::String, None),
-                PropertySchema::new("str2", DataType::String, None),
-            ],
-            vec![],
-            false,
-        )]);
-        let i = NativeInstance::open_instance(
-            0,
-            "test",
-            "/Users/simon/Documents/GitHub/isar/packages/isar_core/tests",
-            schema,
-            1000,
-            None,
-        )
-        .unwrap();
-
-        let txn = i.begin_txn(true).unwrap();
-        /*let mut insert = i.insert(txn, 0, 10000000).unwrap();
-        for i in 0..10000000 {
-            insert.write_string(&format!("STR{}", i));
-            insert.write_string("STR2!!!");
-            insert = insert.insert(Some(i as i64)).unwrap();
-        }
-        let txn = insert.finish().unwrap();*/
-
-        let mut builder = i.query(0).unwrap();
-        builder.set_filter(Filter::Condition(FilterCondition::new_string_contains(
-            0, "1", false,
-        )));
-        let q = builder.build();
-        //eprintln!("{:?}", i.count(&txn, &q));
-        i.commit_txn(txn).unwrap();
-        i.clone();
-        println!("hello");
     }
 }

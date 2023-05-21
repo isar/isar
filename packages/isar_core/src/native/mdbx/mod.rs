@@ -3,9 +3,9 @@
 use crate::core::error::{IsarError, Result};
 use core::slice;
 use libc::c_int;
-use std::borrow::Cow;
-use std::cmp::Ordering;
+use std::cmp::{self, Ordering};
 use std::ffi::{c_void, CStr};
+use std::mem;
 
 pub mod cursor;
 pub mod cursor_iterator;
@@ -57,10 +57,21 @@ pub fn mdbx_result(err_code: c_int) -> Result<()> {
     }
 }
 
-pub trait Key {
-    fn as_bytes(&self) -> Cow<[u8]>;
-
-    fn cmp_bytes(&self, other: &[u8]) -> Ordering;
+#[inline]
+pub fn compare_keys(integer_key: bool, key1: &[u8], key2: &[u8]) -> Ordering {
+    if integer_key {
+        let key1 = unsafe { mem::transmute::<&[u8], &[u64]>(key1) };
+        let key2 = unsafe { mem::transmute::<&[u8], &[u64]>(key2) };
+        key1[0].cmp(&key2[0])
+    } else {
+        let len = cmp::min(key1.len(), key2.len());
+        let cmp = key1[0..len].cmp(&key2[0..len]);
+        if cmp == Ordering::Equal {
+            key1.len().cmp(&key2.len())
+        } else {
+            cmp
+        }
+    }
 }
 
 #[cfg(target_os = "windows")]

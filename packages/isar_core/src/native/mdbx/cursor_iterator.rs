@@ -1,72 +1,31 @@
-use super::{cursor::Cursor, Key, KeyVal};
+use super::{compare_keys, cursor::Cursor, KeyVal};
 use crate::core::error::Result;
 use std::cmp::Ordering;
 
 pub struct CursorIterator<'txn, C: AsMut<Cursor<'txn>>> {
     cursor: C,
-    op: ffi::MDBX_cursor_op,
-    next: Option<KeyVal<'txn>>,
-}
-
-impl<'txn, C: AsMut<Cursor<'txn>>> CursorIterator<'txn, C> {
-    pub fn new(mut cursor: C, ascending: bool) -> Result<Self> {
-        let first = if ascending {
-            cursor.as_mut().move_to_first()?
-        } else {
-            cursor.as_mut().move_to_last()?
-        };
-        let op = if ascending {
-            ffi::MDBX_cursor_op::MDBX_NEXT
-        } else {
-            ffi::MDBX_cursor_op::MDBX_PREV
-        };
-        let iterator = Self {
-            cursor,
-            op,
-            next: first,
-        };
-        Ok(iterator)
-    }
-}
-
-impl<'txn, C: AsMut<Cursor<'txn>>> Iterator for CursorIterator<'txn, C> {
-    type Item = KeyVal<'txn>;
-
-    #[inline]
-    fn next(&mut self) -> Option<Self::Item> {
-        let value = self.next;
-        self.next = self
-            .cursor
-            .as_mut()
-            .op_get(self.op, None, None)
-            .ok()
-            .flatten();
-        value
-    }
-}
-
-pub struct CursorBetweenIterator<'txn, C: AsMut<Cursor<'txn>>, K: Key> {
-    cursor: C,
-    lower_key: K,
-    upper_key: K,
+    lower_key: Vec<u8>,
+    upper_key: Vec<u8>,
+    integer_key: bool,
     ascending: bool,
     op: ffi::MDBX_cursor_op,
     next: Option<KeyVal<'txn>>,
 }
 
-impl<'txn, C: AsMut<Cursor<'txn>>, K: Key> CursorBetweenIterator<'txn, C, K> {
+impl<'txn, C: AsMut<Cursor<'txn>>> CursorIterator<'txn, C> {
     pub fn new(
         cursor: C,
-        lower_key: K,
-        upper_key: K,
+        start_key: Vec<u8>,
+        end_key: Vec<u8>,
+        integer_key: bool,
         duplicates: bool,
         skip_duplicates: bool,
     ) -> Result<Self> {
-        let ascending = lower_key.cmp_bytes(&upper_key.as_bytes()) != Ordering::Greater;
+        let ascending = compare_keys(integer_key, &start_key, &end_key) != Ordering::Greater;
         let (lower_key, upper_key) = if ascending {
-            (lower_key, upper_key)
+            (start_key, end_key)
         } else {
-            (upper_key, lower_key)
+            (end_key, start_key)
         };
         let op: ffi::MDBX_cursor_op = match (ascending, skip_duplicates) {
             (true, true) => ffi::MDBX_cursor_op::MDBX_NEXT_NODUP,
@@ -78,6 +37,7 @@ impl<'txn, C: AsMut<Cursor<'txn>>, K: Key> CursorBetweenIterator<'txn, C, K> {
             cursor,
             lower_key,
             upper_key,
+            integer_key,
             ascending,
             op,
             next: None,
@@ -99,7 +59,7 @@ impl<'txn, C: AsMut<Cursor<'txn>>, K: Key> CursorBetweenIterator<'txn, C, K> {
                 }
             } else if let Some(last) = self.cursor.as_mut().move_to_last()? {
                 // If some key between upper_key and lower_key happens to be the last key in the db
-                if self.lower_key.cmp_bytes(&last.0) != Ordering::Greater {
+                if compare_keys(self.integer_key, &self.lower_key, &last.0) != Ordering::Greater {
                     Some(last)
                 } else {
                     None
@@ -112,10 +72,12 @@ impl<'txn, C: AsMut<Cursor<'txn>>, K: Key> CursorBetweenIterator<'txn, C, K> {
         };
 
         if let Some(first_entry) = first_entry {
-            if self.upper_key.cmp_bytes(&first_entry.0) == Ordering::Less {
+            if compare_keys(self.integer_key, &self.upper_key, &first_entry.0) == Ordering::Less {
                 if !self.ascending {
                     if let Some(prev) = self.cursor.as_mut().move_to_prev_no_dup()? {
-                        if self.lower_key.cmp_bytes(&prev.0) != Ordering::Greater {
+                        if compare_keys(self.integer_key, &self.lower_key, &prev.0)
+                            != Ordering::Greater
+                        {
                             self.next = Some(prev);
                             return Ok(());
                         }
@@ -133,11 +95,17 @@ impl<'txn, C: AsMut<Cursor<'txn>>, K: Key> CursorBetweenIterator<'txn, C, K> {
 
     #[inline]
     fn find_next(&mut self) {
-        if let Some((key, value)) = self.cursor.as_mut().op_get(self.op, None, None).unwrap() {
+        let next = self
+            .cursor
+            .as_mut()
+            .op_get(self.op, None, None)
+            .ok()
+            .flatten();
+        if let Some((key, value)) = next {
             let abort = if self.ascending {
-                self.upper_key.cmp_bytes(&key) == Ordering::Less
+                compare_keys(self.integer_key, &self.upper_key, &key) == Ordering::Less
             } else {
-                self.lower_key.cmp_bytes(&key) == Ordering::Greater
+                compare_keys(self.integer_key, &self.lower_key, &key) == Ordering::Greater
             };
             if !abort {
                 self.next = Some((key, value));
@@ -146,9 +114,13 @@ impl<'txn, C: AsMut<Cursor<'txn>>, K: Key> CursorBetweenIterator<'txn, C, K> {
         }
         self.next = None;
     }
+
+    pub fn close(self) -> C {
+        self.cursor
+    }
 }
 
-impl<'txn, C: AsMut<Cursor<'txn>>, K: Key> Iterator for CursorBetweenIterator<'txn, C, K> {
+impl<'txn, C: AsMut<Cursor<'txn>>> Iterator for CursorIterator<'txn, C> {
     type Item = KeyVal<'txn>;
 
     #[inline]

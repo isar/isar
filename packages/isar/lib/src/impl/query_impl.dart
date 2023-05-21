@@ -60,8 +60,17 @@ class _QueryImpl<T> extends Query<T> {
 
   @override
   int deleteAll({int? offset, int? limit}) {
-    // TODO: implement deleteAll
-    throw UnimplementedError();
+    return isar.getTxn((isarPtr, txnPtr) {
+      isar_query_delete(
+        isarPtr,
+        txnPtr,
+        _ptr,
+        offset ?? -1,
+        limit ?? -1,
+        IsarCore.countPtr,
+      ).checkNoError();
+      return IsarCore.countPtr.value;
+    });
   }
 
   @override
@@ -81,10 +90,6 @@ class _QueryImpl<T> extends Query<T> {
 
   @override
   R? aggregate<R>(Aggregation op) {
-    if (_properties?.length != 1) {
-      throw QueryError('Aggregations only work on queries with one property.');
-    }
-
     final aggregation = switch (op) {
       Aggregation.count => AGGREGATION_COUNT,
       Aggregation.isEmpty => AGGREGATION_IS_EMPTY,
@@ -101,7 +106,7 @@ class _QueryImpl<T> extends Query<T> {
         txnPtr,
         _ptr,
         aggregation,
-        _properties![0],
+        _properties?.firstOrNull ?? 0,
         valuePtr,
       );
 

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
@@ -9,7 +8,9 @@ part 'compact_on_launch_test.g.dart';
 
 @Collection()
 class Model {
-  int id = Random().nextInt(999999);
+  Model(this.id);
+
+  final int id;
 
   List<int> buffer = List.filled(16000, 42);
 
@@ -31,26 +32,29 @@ class Model {
 void main() {
   group('Compact on launch', () {
     late Isar isar;
+    late final isarName = getRandomName();
     late File file;
 
     setUp(() {
-      isar = openTempIsar([ModelSchema]);
-      file = File('${isar.directory}/${isar.name}.isar');
+      isar = openTempIsar([ModelSchema], name: isarName);
+      file = File('${isar.directory}/$isarName.isar');
 
-      isar.writeTxn((isar) => isar.models.putAll(List.filled(100, Model())));
+      isar.writeTxn(
+        (isar) => isar.models.putAll(List.generate(100, Model.new)),
+      );
     });
 
     isarTest('No compact on launch', () {
       isar.close();
       final size1 = file.lengthSync();
 
-      isar = openTempIsar([ModelSchema], name: isar.name);
+      isar = openTempIsar([ModelSchema], name: isarName);
       isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 50));
       isar.close();
 
       final size2 = file.lengthSync();
 
-      isar = openTempIsar([ModelSchema], name: isar.name);
+      isar = openTempIsar([ModelSchema], name: isarName);
 
       expect(size1, size2);
     });
@@ -59,13 +63,13 @@ void main() {
       isar.close();
       final size1 = file.lengthSync();
 
-      isar = openTempIsar([ModelSchema], name: isar.name);
+      isar = openTempIsar([ModelSchema], name: isarName);
       isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 50));
       isar.close();
 
       isar = openTempIsar(
         [ModelSchema],
-        name: isar.name,
+        name: isarName,
         compactOnLaunch: CompactCondition(minFileSize: size1 * 2),
       );
       isar.close();
@@ -74,7 +78,7 @@ void main() {
 
       isar = openTempIsar(
         [ModelSchema],
-        name: isar.name,
+        name: isarName,
         compactOnLaunch: CompactCondition(minFileSize: size1 ~/ 2),
       );
       final size3 = file.lengthSync();
@@ -85,13 +89,13 @@ void main() {
       isar.close();
       final size1 = file.lengthSync();
 
-      isar = openTempIsar([ModelSchema], name: isar.name);
+      isar = openTempIsar([ModelSchema], name: isarName);
       isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 10));
       isar.close();
 
       isar = openTempIsar(
         [ModelSchema],
-        name: isar.name,
+        name: isarName,
         compactOnLaunch: CompactCondition(minBytes: size1 ~/ 2),
       );
       isar.close();
@@ -100,7 +104,7 @@ void main() {
 
       isar = openTempIsar(
         [ModelSchema],
-        name: isar.name,
+        name: isarName,
         compactOnLaunch: CompactCondition(minBytes: size1 ~/ 2),
       );
       isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 90));
@@ -110,7 +114,7 @@ void main() {
 
       isar = openTempIsar(
         [ModelSchema],
-        name: isar.name,
+        name: isarName,
         compactOnLaunch: CompactCondition(minBytes: size1 ~/ 2),
       );
       final size4 = file.lengthSync();
@@ -121,13 +125,13 @@ void main() {
       isar.close();
       final size1 = file.lengthSync();
 
-      isar = openTempIsar([ModelSchema], name: isar.name);
+      isar = openTempIsar([ModelSchema], name: isarName);
       isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 10));
       isar.close();
 
       isar = openTempIsar(
         [ModelSchema],
-        name: isar.name,
+        name: isarName,
         compactOnLaunch: const CompactCondition(minRatio: 2),
       );
       isar.close();
@@ -136,7 +140,7 @@ void main() {
 
       isar = openTempIsar(
         [ModelSchema],
-        name: isar.name,
+        name: isarName,
         compactOnLaunch: const CompactCondition(minRatio: 2),
       );
       isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 80));
@@ -146,7 +150,7 @@ void main() {
 
       isar = openTempIsar(
         [ModelSchema],
-        name: isar.name,
+        name: isarName,
         compactOnLaunch: const CompactCondition(minRatio: 2),
       );
       final size4 = file.lengthSync();

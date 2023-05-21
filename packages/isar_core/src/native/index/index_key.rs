@@ -1,11 +1,7 @@
-use std::borrow::Cow;
-use std::cmp;
+use super::NativeIndex;
+use crate::native::mdbx::compare_keys;
 use std::cmp::Ordering;
 use xxhash_rust::xxh3::xxh3_64;
-
-use crate::native::mdbx::Key;
-
-use super::NativeIndex;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct IndexKey {
@@ -131,21 +127,9 @@ impl IndexKey {
         }
         decreased
     }
-}
 
-impl Key for IndexKey {
-    fn as_bytes(&self) -> Cow<[u8]> {
-        Cow::Borrowed(&self.bytes)
-    }
-
-    fn cmp_bytes(&self, other: &[u8]) -> Ordering {
-        let len = cmp::min(self.bytes.len(), other.len());
-        let cmp = (&self.bytes[0..len]).cmp(&other[0..len]);
-        if cmp == Ordering::Equal {
-            self.bytes.len().cmp(&other.len())
-        } else {
-            cmp
-        }
+    pub fn to_bytes(&self) -> &[u8] {
+        &self.bytes
     }
 }
 
@@ -157,14 +141,12 @@ impl PartialOrd<Self> for IndexKey {
 
 impl Ord for IndexKey {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.cmp_bytes(&other.bytes)
+        compare_keys(false, &self.bytes, &other.bytes)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::native::native_reader::NativeReader;
-
     use super::*;
     use float_next_after::NextAfter;
 

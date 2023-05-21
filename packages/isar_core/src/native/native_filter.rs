@@ -64,7 +64,7 @@ macro_rules! string_filter_create {
     };
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NativeFilter(Filter);
 
 impl NativeFilter {
@@ -213,7 +213,7 @@ impl NativeFilter {
 }
 
 #[enum_dispatch]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 enum Filter {
     IsNull(IsNullCond),
 
@@ -255,7 +255,7 @@ trait Condition {
     fn evaluate(&self, id: i64, object: IsarDeserializer) -> bool;
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct IsNullCond {
     offset: u32,
     data_type: DataType,
@@ -267,7 +267,7 @@ impl Condition for IsNullCond {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct IdBetweenCond {
     lower: i64,
     upper: i64,
@@ -283,7 +283,7 @@ impl Condition for IdBetweenCond {
 macro_rules! filter_between {
     ($type:ty, $data_type:ident, $prop_accessor:ident) => {
         paste! {
-            #[derive(Clone)]
+            #[derive(Clone, Debug)]
             struct [<$data_type BetweenCond>] {
                 upper: $type,
                 lower: $type,
@@ -299,7 +299,7 @@ macro_rules! filter_between {
                 }
             }
 
-            #[derive(Clone)]
+            #[derive(Clone, Debug)]
             struct [<Any $data_type BetweenCond>] {
                 upper: $type,
                 lower: $type,
@@ -377,7 +377,7 @@ fn string_between(
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct StringBetweenCond {
     upper: Option<Vec<u8>>,
     lower: Option<Vec<u8>>,
@@ -397,7 +397,7 @@ impl Condition for StringBetweenCond {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct AnyStringBetweenCond {
     upper: Option<Vec<u8>>,
     lower: Option<Vec<u8>>,
@@ -429,7 +429,7 @@ impl Condition for AnyStringBetweenCond {
 macro_rules! string_filter_struct {
     ($name:ident) => {
         paste! {
-            #[derive(Clone)]
+            #[derive(Clone, Debug)]
             struct [<$name Cond>] {
                 offset: u32,
                 value: String,
@@ -499,7 +499,7 @@ string_filter!(StringEndsWith);
 string_filter!(StringContains);
 string_filter!(StringMatches);
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct ListLengthCond {
     offset: u32,
     element_type: DataType,
@@ -517,7 +517,7 @@ impl Condition for ListLengthCond {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct AndCond {
     filters: Vec<Filter>,
 }
@@ -526,14 +526,14 @@ impl Condition for AndCond {
     fn evaluate(&self, id: i64, object: IsarDeserializer) -> bool {
         for filter in &self.filters {
             if !filter.evaluate(id, object) {
-                false;
+                return false;
             }
         }
         true
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct OrCond {
     filters: Vec<Filter>,
 }
@@ -549,7 +549,7 @@ impl Condition for OrCond {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct NotCond {
     filter: Box<Filter>,
 }
@@ -560,7 +560,7 @@ impl Condition for NotCond {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct StaticCond {
     value: bool,
 }

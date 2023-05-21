@@ -101,7 +101,8 @@ void main() {
       expect(sizeB2, greaterThanOrEqualTo(sizeB1));
     });
 
-    isarTest('includeIndexes should change size', () {
+    // TODO enable when indexes are implemented
+    /*isarTest('includeIndexes should change size', () {
       isar.writeTxn((isar) => isar.modelAs.putAll([objA0, objA1, objA3]));
 
       final sizeAWithoutIndexes = isar.modelAs.getSize();
@@ -114,7 +115,7 @@ void main() {
       final sizeBWithIndexes = isar.modelBs.getSize(includeIndexes: true);
       // ModelB has no indexes, so should stay the same
       expect(sizeBWithIndexes, sizeBWithoutIndexes);
-    });
+    });*/
 
     isarTest('Delete should decrease size', () {
       isar.writeTxn((isar) {

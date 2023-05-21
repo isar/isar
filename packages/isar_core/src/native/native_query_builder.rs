@@ -1,4 +1,4 @@
-use super::native_collection::NativeCollection;
+use super::native_collection::{NativeCollection, NativeProperty};
 use super::native_filter::NativeFilter;
 use super::query::{Query, QueryIndex};
 use crate::core::data_type::DataType;
@@ -15,8 +15,8 @@ pub struct NativeQueryBuilder<'a> {
     collection: &'a NativeCollection,
     all_collections: &'a [NativeCollection],
     filter: Option<Filter>,
-    sort: Vec<(u16, Sort, bool)>,
-    distinct: Vec<(u16, bool)>,
+    sort: Vec<(Option<NativeProperty>, Sort, bool)>,
+    distinct: Vec<(NativeProperty, bool)>,
 }
 
 impl<'a> NativeQueryBuilder<'a> {
@@ -44,11 +44,15 @@ impl<'a> IsarQueryBuilder for NativeQueryBuilder<'a> {
     }
 
     fn add_sort(&mut self, property_index: u16, sort: Sort, case_sensitive: bool) {
-        self.sort.push((property_index, sort, case_sensitive));
+        let property = self.collection.get_property(property_index as u32);
+        self.sort.push((property.copied(), sort, case_sensitive));
     }
 
     fn add_distinct(&mut self, property_index: u16, case_sensitive: bool) {
-        self.distinct.push((property_index, case_sensitive));
+        let property = self.collection.get_property(property_index as u32);
+        if let Some(property) = property {
+            self.distinct.push((*property, case_sensitive));
+        }
     }
 
     fn build(self) -> Self::Query {
@@ -56,14 +60,14 @@ impl<'a> IsarQueryBuilder for NativeQueryBuilder<'a> {
             .filter
             .map(|f| f.to_native_filter(self.collection, self.all_collections))
             .unwrap_or(NativeFilter::stat(true));
-        Query::new(
+        black_box(Query::new(
             self.instance_id,
             self.collection.collection_index,
-            black_box(vec![QueryIndex::Full(Sort::Asc)]),
+            vec![QueryIndex::Primary(i64::MIN, i64::MAX)],
             filter,
-            vec![],
-            vec![],
-        )
+            self.sort,
+            self.distinct,
+        ))
     }
 }
 

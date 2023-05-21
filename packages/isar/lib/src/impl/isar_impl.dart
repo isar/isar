@@ -73,9 +73,9 @@ class _IsarImpl extends Isar {
       directoryPtr,
       schemaPtr,
       maxSizeMiB,
-      compactOnLaunch?.minFileSize ?? -1,
-      compactOnLaunch?.minBytes ?? -1,
-      compactOnLaunch?.minRatio ?? double.nan,
+      compactOnLaunch != null ? compactOnLaunch.minFileSize ?? 0 : -1,
+      compactOnLaunch != null ? compactOnLaunch.minBytes ?? 0 : -1,
+      compactOnLaunch != null ? compactOnLaunch.minRatio ?? 0 : double.nan,
     ).checkNoError();
 
     final converters = schemas.map((e) => e.converter).toList();

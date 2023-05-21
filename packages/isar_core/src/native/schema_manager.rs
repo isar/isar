@@ -45,7 +45,10 @@ pub fn perform_migration(txn: &NativeTxn, schema: &IsarSchema) -> Result<Vec<Nat
 
 fn get_schemas(info_cursor: TxnCursor) -> Result<Vec<CollectionSchema>> {
     let mut schemas = vec![];
-    for (_, bytes) in info_cursor.iter(true)? {
+    let start = IndexKey::new();
+    let mut end = IndexKey::new();
+    end.add_long(i64::MAX);
+    for (_, bytes) in info_cursor.iter_between(&start, &end, false, false)? {
         let col = serde_json::from_slice::<CollectionSchema>(bytes).map_err(|_| {
             IsarError::SchemaError {
                 message: "Could not deserialize existing schema.".to_string(),
@@ -57,17 +60,15 @@ fn get_schemas(info_cursor: TxnCursor) -> Result<Vec<CollectionSchema>> {
 }
 
 fn save_schema(info_cursor: &mut Cursor, schema: &CollectionSchema) -> Result<()> {
-    let key = IndexKey::from_bytes(schema.name.as_bytes().to_vec());
     let bytes = serde_json::to_vec(schema).map_err(|_| IsarError::SchemaError {
         message: "Could not serialize schema.".to_string(),
     })?;
-    info_cursor.put(&key, &bytes)?;
+    info_cursor.put(&schema.name.as_bytes(), &bytes)?;
     Ok(())
 }
 
 fn delete_schema(info_cursor: &mut Cursor, schema: &CollectionSchema) -> Result<()> {
-    let key = IndexKey::from_bytes(schema.name.as_bytes().to_vec());
-    if info_cursor.move_to(&key)?.is_some() {
+    if info_cursor.move_to(schema.name.as_bytes())?.is_some() {
         info_cursor.delete_current()?;
     }
     Ok(())

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
@@ -10,7 +9,9 @@ part 'copy_to_file_test.g.dart';
 
 @collection
 class Model {
-  int id = Random().nextInt(99999);
+  Model(this.id);
+
+  final int id;
 
   List<int> buffer = List.filled(16000, 42);
 
@@ -31,7 +32,9 @@ void main() {
     setUp(() {
       isar = openTempIsar([ModelSchema], maxSizeMiB: 20);
 
-      isar.writeTxn((isar) => isar.models.putAll(List.filled(100, Model())));
+      isar.writeTxn(
+        (isar) => isar.models.putAll(List.generate(100, Model.new)),
+      );
     });
 
     isarTest('.copyToFile() should create a new file', () {

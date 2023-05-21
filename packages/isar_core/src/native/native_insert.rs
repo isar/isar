@@ -1,3 +1,4 @@
+use super::index::id_key::IdToBytes;
 use super::isar_serializer::IsarSerializer;
 use super::native_collection::NativeCollection;
 use super::native_txn::NativeTxn;
@@ -52,7 +53,7 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
             self.txn.guard(|| {
                 // TODO: avoid opening a new cursor for every insert
                 let mut cursor = self.txn.get_cursor(self.collection.get_db()?)?;
-                cursor.put(&id, &buffer)
+                cursor.put(&id.to_id_bytes(), &buffer)
             })?;
         }
 

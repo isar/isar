@@ -423,11 +423,15 @@ external int isar_query_aggregate(
         ffi.Pointer<CIsarInstance>,
         ffi.Pointer<CIsarTxn>,
         ffi.Pointer<CIsarQuery>,
+        ffi.Int64,
+        ffi.Int64,
         ffi.Pointer<ffi.Uint32>)>(symbol: 'isar_query_delete')
 external int isar_query_delete(
   ffi.Pointer<CIsarInstance> isar,
   ffi.Pointer<CIsarTxn> txn,
   ffi.Pointer<CIsarQuery> query,
+  int offset,
+  int limit,
   ffi.Pointer<ffi.Uint32> count,
 );
 

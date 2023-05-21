@@ -2,7 +2,7 @@ import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
 
-part 'inheritance_test.g.dart';
+part '../test/inheritance_test.g.dart';
 
 abstract class BaseModel {
   BaseModel({

@@ -42,13 +42,6 @@ void main() {
       isar.writeTxn((isar) {
         col.putAll([objA, objA2, objB, objC, objC2]);
       });
-
-      print(isar.models.where().valueProperty().findAll());
-      print(isar.models.where().valueProperty().count());
-      print(isar.models.where().valueProperty().isEmpty());
-      print(isar.models.where().valueProperty().isNotEmpty());
-      print(isar.models.where().valueProperty().min());
-      print(isar.models.where().valueProperty().max());
     });
 
     isarTest('0 offset', () {

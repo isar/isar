@@ -1,13 +1,10 @@
-use intmap::IntMap;
-
-use super::collection_iterator::CollectionIterator;
+use super::index_iterator::IndexIterator;
 use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::native_filter::NativeFilter;
-use std::iter::Flatten;
-use std::vec::IntoIter;
+use intmap::IntMap;
 
 pub(crate) struct UnsortedQueryIterator<'a> {
-    collection_iterators: Flatten<IntoIter<CollectionIterator<'a>>>,
+    iterator: IndexIterator<'a>,
     returned_ids: Option<IntMap<()>>,
     filter: &'a NativeFilter,
     skip: u32,
@@ -16,7 +13,7 @@ pub(crate) struct UnsortedQueryIterator<'a> {
 
 impl<'a> UnsortedQueryIterator<'a> {
     pub fn new(
-        collection_iterators: Vec<CollectionIterator<'a>>,
+        iterator: IndexIterator<'a>,
         has_duplicates: bool,
         filter: &'a NativeFilter,
         offset: u32,
@@ -28,7 +25,7 @@ impl<'a> UnsortedQueryIterator<'a> {
             None
         };
         UnsortedQueryIterator {
-            collection_iterators: collection_iterators.into_iter().flatten(),
+            iterator,
             returned_ids,
             filter,
             skip: offset,
@@ -42,7 +39,7 @@ impl<'a> Iterator for UnsortedQueryIterator<'a> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some((id, object)) = self.collection_iterators.next() {
+        while let Some((id, object)) = self.iterator.next() {
             if let Some(returned_ids) = &mut self.returned_ids {
                 if returned_ids.insert(id as u64, ()).is_some() {
                     continue;

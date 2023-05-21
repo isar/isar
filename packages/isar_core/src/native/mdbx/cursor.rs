@@ -1,6 +1,6 @@
 use super::db::Db;
 use super::txn::Txn;
-use super::{from_mdb_val, to_mdb_val, Key, KeyVal, EMPTY_KEY, EMPTY_VAL};
+use super::{from_mdb_val, to_mdb_val, KeyVal, EMPTY_KEY, EMPTY_VAL};
 use crate::core::error::Result;
 use crate::native::mdbx::mdbx_result;
 use core::ptr;
@@ -77,28 +77,16 @@ impl<'txn> Cursor<'txn> {
         }
     }
 
-    pub fn move_to<K: Key>(&mut self, key: &K) -> Result<Option<KeyVal<'txn>>> {
-        self.op_get(
-            ffi::MDBX_cursor_op::MDBX_SET_KEY,
-            Some(&key.as_bytes()),
-            None,
-        )
+    pub fn move_to(&mut self, key: &[u8]) -> Result<Option<KeyVal<'txn>>> {
+        self.op_get(ffi::MDBX_cursor_op::MDBX_SET_KEY, Some(key), None)
     }
 
-    pub fn move_to_key_val<K: Key>(&mut self, key: &K, val: &[u8]) -> Result<Option<KeyVal<'txn>>> {
-        self.op_get(
-            ffi::MDBX_cursor_op::MDBX_GET_BOTH,
-            Some(&key.as_bytes()),
-            Some(val),
-        )
+    pub fn move_to_key_val(&mut self, key: &[u8], val: &[u8]) -> Result<Option<KeyVal<'txn>>> {
+        self.op_get(ffi::MDBX_cursor_op::MDBX_GET_BOTH, Some(key), Some(val))
     }
 
-    pub(crate) fn move_to_gte<K: Key>(&mut self, key: &K) -> Result<Option<KeyVal<'txn>>> {
-        self.op_get(
-            ffi::MDBX_cursor_op::MDBX_SET_RANGE,
-            Some(&key.as_bytes()),
-            None,
-        )
+    pub(crate) fn move_to_gte(&mut self, key: &[u8]) -> Result<Option<KeyVal<'txn>>> {
+        self.op_get(ffi::MDBX_cursor_op::MDBX_SET_RANGE, Some(key), None)
     }
 
     fn move_to_next_dup(&mut self) -> Result<Option<KeyVal<'txn>>> {
@@ -125,11 +113,9 @@ impl<'txn> Cursor<'txn> {
         self.op_get(ffi::MDBX_cursor_op::MDBX_LAST, None, None)
     }
 
-    pub fn put<K: Key>(&mut self, key: &K, data: &[u8]) -> Result<()> {
+    pub fn put(&mut self, key: &[u8], data: &[u8]) -> Result<()> {
         unsafe {
-            // make sure that bytes are not dropped before the call to mdbx_cursor_put
-            let bytes = &key.as_bytes();
-            let key = to_mdb_val(bytes);
+            let key = to_mdb_val(key);
             let mut data = to_mdb_val(data);
             mdbx_result(ffi::mdbx_cursor_put(self.cursor.cursor, &key, &mut data, 0))?;
         }

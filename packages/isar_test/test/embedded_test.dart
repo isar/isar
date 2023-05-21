@@ -31,7 +31,7 @@ class Model {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'embedded': embedded?.toJson(),
+      'embedded': embedded.toJson(),
       'nested': nested?.toJson(),
       'nestedList': nestedList?.map((e) => e.toJson()).toList(),
     };

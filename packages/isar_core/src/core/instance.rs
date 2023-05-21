@@ -99,7 +99,13 @@ pub trait IsarInstance {
         property_index: Option<u16>,
     ) -> Result<Option<IsarValue>>;
 
-    fn query_delete(&self, txn: &Self::Txn, query: &Self::Query) -> Result<u32>;
+    fn query_delete(
+        &self,
+        txn: &Self::Txn,
+        query: &Self::Query,
+        offset: Option<u32>,
+        limit: Option<u32>,
+    ) -> Result<u32>;
 
     fn copy(&self, path: &str) -> Result<()>;
 

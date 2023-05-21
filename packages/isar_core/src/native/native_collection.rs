@@ -1,4 +1,4 @@
-use super::index::id_key::BytesToId;
+use super::index::id_key::{BytesToId, IdToBytes};
 use super::index::NativeIndex;
 use super::mdbx::db::Db;
 use super::native_txn::NativeTxn;
@@ -103,7 +103,7 @@ impl NativeCollection {
 
     pub fn delete(&self, txn: &NativeTxn, id: i64) -> Result<bool> {
         let mut cursor = txn.get_cursor(self.get_db()?)?;
-        if cursor.move_to(&id)?.is_some() {
+        if cursor.move_to(&id.to_id_bytes())?.is_some() {
             cursor.delete_current()?;
             Ok(true)
         } else {

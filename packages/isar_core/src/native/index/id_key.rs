@@ -1,12 +1,9 @@
-use std::{borrow::Cow, cmp::Ordering};
-
-use crate::native::mdbx::Key;
-
 pub trait BytesToId {
     fn to_id(&self) -> i64;
 }
 
 impl BytesToId for &[u8] {
+    #[inline]
     fn to_id(&self) -> i64 {
         let unsigned = u64::from_le_bytes((**self).try_into().unwrap());
         let signed: i64 = unsigned as i64;
@@ -22,18 +19,6 @@ impl IdToBytes for i64 {
     fn to_id_bytes(&self) -> [u8; 8] {
         let unsigned = *self as u64;
         (unsigned ^ 1 << 63).to_le_bytes()
-    }
-}
-
-impl Key for i64 {
-    fn as_bytes(&self) -> Cow<[u8]> {
-        let bytes = self.to_id_bytes();
-        Cow::Owned(bytes.to_vec())
-    }
-
-    fn cmp_bytes(&self, other: &[u8]) -> Ordering {
-        let other_id = other.to_id();
-        self.cmp(&other_id)
     }
 }
 

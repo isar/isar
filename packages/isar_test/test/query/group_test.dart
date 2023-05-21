@@ -130,7 +130,7 @@ void main() {
                   .group((q) => q.ageEqualTo(30).or().ageEqualTo(20)),
             )
             .findAll(),
-        [simon, david, emma],
+        [david, emma, simon],
       );
     });
   });

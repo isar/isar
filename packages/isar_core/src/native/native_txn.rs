@@ -1,9 +1,10 @@
+use super::index::id_key::IdToBytes;
+use super::index::index_key::IndexKey;
 use super::mdbx::cursor::{Cursor, UnboundCursor};
-use super::mdbx::cursor_iterator::{CursorBetweenIterator, CursorIterator};
+use super::mdbx::cursor_iterator::CursorIterator;
 use super::mdbx::db::Db;
 use super::mdbx::env::Env;
 use super::mdbx::txn::Txn;
-use super::mdbx::Key;
 use crate::core::error::{IsarError, Result};
 use std::cell::{Cell, RefCell};
 use std::ops::{Deref, DerefMut};
@@ -109,18 +110,38 @@ pub(crate) struct TxnCursor<'txn> {
 }
 
 impl<'txn> TxnCursor<'txn> {
-    pub fn iter(self, ascending: bool) -> Result<CursorIterator<'txn, Self>> {
-        CursorIterator::new(self, ascending)
-    }
-
-    pub fn iter_between<K: Key>(
+    pub fn iter_between_ids(
         self,
-        lower_key: K,
-        upper_key: K,
+        start_id: i64,
+        end_id: i64,
         duplicates: bool,
         skip_duplicates: bool,
-    ) -> Result<CursorBetweenIterator<'txn, Self, K>> {
-        CursorBetweenIterator::new(self, lower_key, upper_key, duplicates, skip_duplicates)
+    ) -> Result<CursorIterator<'txn, Self>> {
+        CursorIterator::new(
+            self,
+            start_id.to_id_bytes().to_vec(),
+            end_id.to_id_bytes().to_vec(),
+            true,
+            duplicates,
+            skip_duplicates,
+        )
+    }
+
+    pub fn iter_between(
+        self,
+        start_key: &IndexKey,
+        end_key: &IndexKey,
+        duplicates: bool,
+        skip_duplicates: bool,
+    ) -> Result<CursorIterator<'txn, Self>> {
+        CursorIterator::new(
+            self,
+            start_key.to_bytes().to_vec(),
+            end_key.to_bytes().to_vec(),
+            false,
+            duplicates,
+            skip_duplicates,
+        )
     }
 }
 
