@@ -23,7 +23,7 @@ flutter pub add -d isar_generator build_runner
 あなたの使用するコレクションクラスに `@collection` でアノテーションを付け、`Id` フィールドを設定します。
 
 ```dart
-part 'email.g.dart';
+part 'user.g.dart';
 
 @collection
 class User {
@@ -56,7 +56,11 @@ flutter pub run build_runner build
 新規のIsarインスタンスを開き、コレクションのスキーマを渡します。必要に応じて、インスタンス名とディレクトリを指定することができます。
 
 ```dart
-final isar = await Isar.open([EmailSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [UserSchema],
+  directory: dir.path,
+);
 ```
 
 ## 5. 書き込みと読み込み

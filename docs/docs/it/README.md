@@ -10,7 +10,7 @@ features:
   - title: 💙 Creato per Flutter
     details: Setup minimo, facile da usare, nessuna configurazione, niente codice boilerplate. Basta aggiungere poche linee di codice per iniziare.
   - title: 🚀 Altamente scalabile
-    details: Salva centianaia di miagliaia di records in un singolo NoSQL database ed interrogalo in maniera efficiente ed asincrona.
+    details: Salva centinaia di migliaia di records in un singolo NoSQL database ed interrogalo in maniera efficiente ed asincrona.
   - title: 🍭 Ricco di funzionalità
     details: Isa ha un insieme ricco di funzionalità per aiutare nella gestione dei tuoi dati. Indici composti & multi-entry, modificatori di query, supporto al JSON, e molto altro. 
   - title: 🔎 Ricerca full-text

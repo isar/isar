@@ -22,7 +22,7 @@ flutter pub add -d isar_generator build_runner
 Anote suas coleções de classes com `@collection` e escolha um campo 'Id'.
 
 ```dart
-part 'email.g.dart';
+part 'user.g.dart';
 
 @collection
 class User {
@@ -44,7 +44,7 @@ Execute o seguinte comando para iniciar o `build_runner`:
 dart run build_runner build
 ```
 
-If you are using Flutter, use the following:
+Se você estiver usando o Flutter, use o seguinte:
 
 ```
 flutter pub run build_runner build
@@ -55,7 +55,11 @@ flutter pub run build_runner build
 Abra uma nova instância Isar e passe todos os seus esquemas de coleção. Opcionalmente, você pode especificar um nome de instância e um diretório.
 
 ```dart
-final isar = await Isar.open([EmailSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [UserSchema],
+  directory: dir.path,
+);
 ```
 
 ## 5. Escrever e ler

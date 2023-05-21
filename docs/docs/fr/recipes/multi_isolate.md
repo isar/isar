@@ -29,8 +29,11 @@ Assurez-vous de fournir les mêmes schémas que dans l'isolat principal. Sinon, 
 ```dart
 void main() {
   // Ouvre Isar dans l'isolat de l'interface utilisateur
+  final dir = await getApplicationDocumentsDirectory();
+  
   final isar = await Isar.open(
-    [MessageSchema]
+    [MessageSchema],
+    directory: dir.path,
     name: 'myInstance',
   );
 
@@ -52,8 +55,11 @@ void main() {
 // Fonction qui sera exécutée dans le nouvel isolat
 Future createDummyMessages(int count) async {
   // Nous n'avons pas besoin du chemin du dossier ici étant donné que l'instance est déjà ouverte.
+  final dir = await getApplicationDocumentsDirectory();
+  
   final isar = await Isar.open(
     [PostSchema],
+    directory: dir.path,
     name: 'myInstance',
   );
 

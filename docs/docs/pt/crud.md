@@ -13,7 +13,11 @@ Antes que você possa fazer qualquer coisa, precisamos de uma instância Isar. C
 Forneça todos os esquemas que deseja usar com a instância Isar. Se você abrir várias instâncias, ainda precisará fornecer os mesmos esquemas para cada instância.
 
 ```dart
-final isar = await Isar.open([RecipeSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [RecipeSchema],
+  directory: dir.path,
+);
 ```
 
 Você pode usar a configuração padrão ou fornecer alguns dos seguintes parâmetros:

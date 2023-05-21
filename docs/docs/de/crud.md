@@ -1,8 +1,8 @@
 ---
-title: Create, Read, Update, Delete
+title: Erstellen, Lesen, Aktualisieren und Löschen
 ---
 
-# Erstellen, Lesen, Updaten und Löschen
+# Erstellen, Lesen, Aktualisieren und Löschen
 
 Lerne wie du Collections in Isar nutzt nachdem du sie definiert hast.
 
@@ -10,33 +10,37 @@ Lerne wie du Collections in Isar nutzt nachdem du sie definiert hast.
 
 Als Erstes benötigen wir eine Isar Instanz. Jede Instanz erfordert einen Ordner mit Schreibrechten, in dem die Datenbankdatei gespeichert werden kann. Wenn du keinen Ordner angibst, wird Isar einen geeigneten Standardordner für die aktuelle Plattform finden.
 
-Gib alle Schemas an, die du mit der Isar-Instanz verwenden möchtest. Wenn du mehrere Instanzen öffnest, musst du den gleichen Schemas auch jeder Instanz mitgeben.
+Gib alle Schemas an, die du mit der Isar-Instanz verwenden möchtest. Wenn du mehrere Instanzen öffnest, musst du trotzdem jeder Instanz die gleichen Schemas mitgeben.
 
 ```dart
-final isar = await Isar.open([RecipeSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [RecipeSchema],
+  directory: dir.path,
+);
 ```
 
 Du kannst die Standardkonfiguration verwenden oder einige der folgenden Parameter setzen:
 
-| Konfiguration |  Beschreibung |
-| -------| -------------|
-| `name` | Öffne mehrere Instanzen mit unterschiedlichen Namen. Standardmäßig wird `"default"` verwendet. |
-| `directory` | Der Speicherort für diese Instanz. Standardmäßig wird `NSDocumentDirectory` für iOS und `getDataDirectory` für Android verwendet. Nicht erforderlich für Web. |
-| `relaxedDurability` | Entspannt die durability-Garantie, um die Schreibleistung zu erhöhen. Im Falle eines Systemabsturzes (nicht App-Absturz) ist es möglich, die letzte Transaktion zu verlieren. Datenbank Korruption ist nicht möglich |
+| Konfiguration       | Beschreibung                                                                                                                                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`              | Öffne mehrere Instanzen mit unterschiedlichen Namen. Standardmäßig wird `"default"` verwendet.                                                                                                                      |
+| `directory`         | Der Speicherort für diese Instanz. Standardmäßig wird `NSDocumentDirectory` für iOS und `getDataDirectory` für Android verwendet. Nicht erforderlich für Web.                                                       |
+| `relaxedDurability` | Entspannt die durability-Garantie, um die Schreibleistung zu erhöhen. Im Falle eines Systemabsturzes (nicht App-Absturz) ist es möglich, die letzte Transaktion zu verlieren. Datenbankkorruption ist nicht möglich |
 
 Wenn eine Instanz bereits geöffnet ist, wird `Isar.open()` die vorhandene Instanz unabhängig von den angegebenen Parametern zurückgeben. Das ist nützlich, um Isar in einem Isolate zu verwenden.
 
 :::tip
-Verwende das [path_provider](https://pub.dev/packages/path_provider) Paket, um einen gültigen Pfad auf allen Plattformen zu erhalten.
+Verwende das [path_provider](https://pub.dev/packages/path_provider)-Paket, um einen gültigen Pfad auf allen Plattformen zu erhalten.
 :::
 
 Der Speicherort der Datenbankdatei ist `directory/name.isar`
 
 ## Aus der Datenbank lesen
 
-Verwende `IsarCollection` Instanzen um Objekte eines bestimmten Typs in Isar zu finden, abzufragen und neu zu erstellen.
+Verwende `IsarCollection`-Instanzen um Objekte eines bestimmten Typs in Isar zu finden, abzufragen und neu zu erstellen.
 
-Den folgenden Beispielen liegt die Collection `Recipe` zu Grunde, die wie folgt definiert ist:
+Den folgenden Beispielen liegt die Collection `Recipe` zugrunde, die wie folgt definiert ist:
 
 ```dart
 @collection
@@ -53,13 +57,13 @@ class Recipe {
 
 ### Eine Collection erhalten
 
-Alle deine Collections leben in der Isar Instanz. Erhalte die Recipes Collection über den Accessor:
+Alle deine Collections befinden sich in der Isar Instanz. Erhalte die Recipes-Collection über den Accessor:
 
 ```dart
 final recipes = isar.recipes;
 ```
 
-Das war einfach! Wenn du keine Collection Accessoren verwenden möchtest, ist alternativ die `collection()` Methode verfügbar:
+Das war einfach! Wenn du keine Collection-Accessors verwenden möchtest, ist alternativ die `collection()`-Methode verfügbar:
 
 ```dart
 final recipes = isar.collection<Recipe>();
@@ -69,11 +73,11 @@ final recipes = isar.collection<Recipe>();
 
 Wir haben noch keine Daten in der Collection, aber wir nehmen an, dass bereits ein Objekt mit der ID `123` existiert.
 
-```dart 
+```dart
 final recipe = await recipes.get(123);
 ```
 
-Die `get()` Methode gibt ein `Future` zurück, das entweder das Objekt oder `null` enthält, wenn die ID nicht existiert. Alle Isar-Operationen sind standardmäßig asynchron und die meisten haben jedoch einen synchronen Gegenpart:
+Die `get()`-Methode gibt ein `Future` zurück, das entweder das Objekt enthält, oder `null`, wenn die ID nicht existiert. Alle Isar-Operationen sind standardmäßig asynchron, auch wenn die meisten ein synchrones Gegenstück haben:
 
 ```dart
 final recipe = recipes.getSync(123);
@@ -89,14 +93,14 @@ Wenn du mehrere Objekte auf einmal abrufen möchtest, kannst du `getAll()` oder 
 final recipe = await recipes.getAll([1, 2]);
 ```
 
-### Abfrage von Objekten
+### Abfragen von Objekten
 
 Anstatt Objekte über die ID zu erhalten, kannst du mittels `.where()` und `.filter()` auch eine Liste von Objekten abfragen, die bestimmten Bedingungen entsprechen:
 
 ```dart
 final allRecipes = await recipes.where().findAll();
 
-final favouires = await recipes.filter()
+final favourites = await recipes.filter()
   .isFavoriteEqualTo(true)
   .findAll();
 ```
@@ -112,19 +116,19 @@ await isar.writeTxn(() async {
   final recipe = await recipes.get(123)
 
   recipe.isFavorite = false;
-  await recipes.put(recipe); // perform update operations
+  await recipes.put(recipe); // Aktualisierungsoperationen
 
-  await recipes.delete(123); // or delete operations
+  await recipes.delete(123); // oder Löschoperationen durchführen
 });
 ```
 
-➡️ Lerne mehr: [Vorgänge](transactions)
+➡️ Lerne mehr: [Transaktionen](transactions)
 
 ### Objekt erstellen
 
-Erstelle ein Objekt in einer Collection um es in Isar zu speichern. Die `put()` -Methode von Isar erstellt das Objekt entweder oder aktualisiert es, je nachdem, ob es bereits in der Collection existiert.
+Erstelle ein Objekt in einer Collection um es in Isar zu speichern. Die `put()`-Methode von Isar erstellt das Objekt entweder oder aktualisiert es, je nachdem, ob es bereits in der Collection existiert.
 
-Wenn das ID-Feld `null` oder `Isar.autoIncrement` ist verwendet Isar eine automatisch generierte ID.
+Wenn das ID-Feld `null` oder `Isar.autoIncrement` ist, verwendet Isar eine automatisch generierte ID.
 
 ```dart
 final pancakes = Recipe()
@@ -162,7 +166,7 @@ await isar.writeTxn(() async {
 
 ### Objekt löschen
 
-Willst du ein Objekt in Isar loswerden? Verwende `collection.delete(id)`. Die delete-Methode gibt zurück, ob ein Objekt mit der angegebenen ID gefunden und gelöscht wurde. Lass uns z.B. das Objekt mit der id `123` löschen:
+Willst du ein Objekt in Isar loswerden? Verwende `collection.delete(id)`. Die delete-Methode gibt zurück, ob ein Objekt mit der angegebenen ID gefunden und gelöscht wurde. Lass uns z.B. das Objekt mit der ID `123` löschen:
 
 ```dart
 await isar.writeTxn(() async {

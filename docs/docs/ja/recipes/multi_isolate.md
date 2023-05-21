@@ -29,8 +29,11 @@ Isarのトランザクションは、同じアイソレートで実行されて�
 ```dart
 void main() {
   // UIアイソレートでIsarを開く
+  final dir = await getApplicationDocumentsDirectory();
+  
   final isar = await Isar.open(
-    [MessageSchema]
+    [MessageSchema],
+    directory: dir.path,
     name: 'myInstance',
   );
 
@@ -52,8 +55,11 @@ void main() {
 // 新しいアイソレート内で実行される関数
 Future createDummyMessages(int count) async {
   // インスタンスはすでに開かれているので、ここではPathは必要ありません。
+  final dir = await getApplicationDocumentsDirectory();
+  
   final isar = await Isar.open(
     [PostSchema],
+    directory: dir.path,
     name: 'myInstance',
   );
 

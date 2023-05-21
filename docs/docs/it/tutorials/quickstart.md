@@ -22,7 +22,10 @@ flutter pub add -d isar_generator build_runner
 Annota le tue classi collection con `@collection` e scegli un campo `Id`.
 
 ```dart
-part 'email.g.dart'
+part 'user.g.dart';
+
+@collection
+class User {
   Id id = Isar.autoIncrement; // puoi anche usare id = null per incrementare automaticamente
 
   String? name;
@@ -52,7 +55,11 @@ flutter pub run build_runner build
 Apri una nuova istanza Isar e passa tutti i tuoi schemi di raccolte. Facoltativamente, puoi specificare un nome di istanza e una directory.
 
 ```dart
-final isar = await Isar.open([EmailSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [UserSchema],
+  directory: dir.path,
+);
 ```
 
 ## 5. Scrivi e leggi

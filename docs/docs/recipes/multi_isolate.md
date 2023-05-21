@@ -29,8 +29,11 @@ Make sure to provide the same schemas as in the main isolate. Otherwise, you wil
 ```dart
 void main() {
   // Open Isar in the UI isolate
+  final dir = await getApplicationDocumentsDirectory();
+  
   final isar = await Isar.open(
-    [MessageSchema]
+    [MessageSchema],
+    directory: dir.path,
     name: 'myInstance',
   );
 
@@ -52,13 +55,16 @@ void main() {
 // function that will be executed in the new isolate
 Future createDummyMessages(int count) async {
   // we don't need the path here because the instance is already open
+  final dir = await getApplicationDocumentsDirectory();
+  
   final isar = await Isar.open(
     [PostSchema],
+    directory: dir.path,
     name: 'myInstance',
   );
 
   final messages = List.generate(count, (i) => Message()..content = 'Message $i');
-  // we use a synchronous transactions in isolates
+  // we use synchronous transactions in isolates
   isar.writeTxnSync(() {
     isar.messages.insertAllSync(messages);
   });
@@ -69,4 +75,4 @@ There are a few interesting things to note in the example above:
 
 - `isar.messages.watchLazy()` is called in the UI isolate and is notified of changes from another isolate.
 - Instances are referenced by name. The default name is `default`, but in this example, we set it to `myInstance`.
-- We used a synchronous transaction to create the mesasges. Blocking our new isolate is no problem, and synchronous transactions are a little faster.
+- We used a synchronous transaction to create the messages. Blocking our new isolate is no problem, and synchronous transactions are a little faster.

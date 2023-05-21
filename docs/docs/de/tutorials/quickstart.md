@@ -6,7 +6,7 @@ title: Schnellstart
 
 Holla, die Waldfee! Du bist bestimmt hier um mit der coolsten Flutter-Datenbank zu starten...
 
-Dieser Schnellstart wird wenig um den heißen Brei herumreden und direkt mit dem coden beginnen.
+Dieser Schnellstart wird wenig um den heißen Brei herumreden und direkt mit dem Coden beginnen.
 
 ## 1. Abhängigkeiten hinzufügen
 
@@ -22,7 +22,7 @@ flutter pub add -d isar_generator build_runner
 Annotiere deine Collection-Klassen mit `@collection` und wähle ein `Id`-Feld.
 
 ```dart
-part 'email.g.dart'
+part 'user.g.dart';
 
 @collection
 class User {
@@ -34,7 +34,7 @@ class User {
 }
 ```
 
-Ids identifizieren Objekte in einer Collection eindeutig und erlauben es dir, sie später wiederzufinden.
+IDs identifizieren Objekte in einer Collection eindeutig und erlauben es dir, sie später wiederzufinden.
 
 ## 3. Code-Generator ausführen
 
@@ -55,7 +55,11 @@ flutter pub run build_runner build
 Öffne eine neue Isar-Instanz und übergebe alle Collection-Schemata. Optional kannst du einen Instanznamen und ein Verzeichnis angeben.
 
 ```dart
-final isar = await Isar.open([EmailSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [UserSchema],
+  directory: dir.path,
+);
 ```
 
 ## 5. Schreiben und lesen
@@ -68,13 +72,13 @@ Alle grundlegenden CRUD-Operationen sind über die `IsarCollection` verfügbar .
 final newUser = User()..name = 'Jane Doe'..age = 36;
 
 await isar.writeTxn(() async {
-  await isar.users.put(newUser); // insert & update
+  await isar.users.put(newUser); // Einfügen & akualisieren
 });
 
-final existingUser = await isar.users.get(newUser.id); // get
+final existingUser = await isar.users.get(newUser.id); // Erhalten
 
 await isar.writeTxn(() async {
-  await isar.users.delete(existingUser.id!); // delete
+  await isar.users.delete(existingUser.id!); // Löschen
 });
 ```
 

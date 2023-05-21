@@ -182,6 +182,24 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "letyletylety",
+      "name": "Lety",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16468579?v=4",
+      "profile": "https://letyarch.blogspot.com/",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "nobkd",
+      "name": "nobkd",
+      "avatar_url": "https://avatars.githubusercontent.com/u/44443899?v=4",
+      "profile": "https://github.com/nobkd",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorTemplate": "<a href=\"https://github.com/<%= contributor.login %>\"><img src=\"<%= contributor.avatar_url %>\" width=\"<%= options.imageSize %>px;\" alt=\"\"/><br /><sub><b><%= contributor.name %></b></sub></a>",

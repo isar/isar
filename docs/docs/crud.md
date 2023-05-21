@@ -13,7 +13,11 @@ Before you can do anything, we need an Isar instance. Each instance requires a d
 Provide all the schemas you want to use with the Isar instance. If you open multiple instances, you still have to provide the same schemas to each instance.
 
 ```dart
-final isar = await Isar.open([RecipeSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [RecipeSchema],
+  directory: dir.path,
+);
 ```
 
 You can use the default config or provide some of the following parameters:
@@ -21,7 +25,7 @@ You can use the default config or provide some of the following parameters:
 | Config              | Description                                                                                                                                                                                                                                                                                  |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`              | Open multiple instances with distinct names. By default, `"default"` is used.                                                                                                                                                                                                                |
-| `directory`         | The storage location for this instance. By default, `NSDocumentDirectory` is used for iOS and `getDataDirectory` for Android. Not required for web.                                                                                                                                          |
+| `directory`         | The storage location for this instance. Not required for web.                                                                                                                                                                                                                                |
 | `maxSizeMib`        | The maximum size of the database file in MiB. Isar uses virtual memory which is not an endless resource so be mindful with the value here. If you open multiple instances they share the available virtual memory so each instance should have a smaller `maxSizeMib` . The default is 2048. |
 | `relaxedDurability` | Relaxes the durability guarantee to increase write performance. In case of a system crash (not app crash), it is possible to lose the last committed transaction. Corruption is not possible                                                                                                 |
 | `compactOnLaunch`   | Conditions to check whether the database should be compacted when the instance is opened.                                                                                                                                                                                                    |
@@ -99,7 +103,7 @@ Instead of getting objects by id you can also query a list of objects matching c
 ```dart
 final allRecipes = await isar.recipes.where().findAll();
 
-final favouires = await isar.recipes.filter()
+final favorites = await isar.recipes.filter()
   .isFavoriteEqualTo(true)
   .findAll();
 ```

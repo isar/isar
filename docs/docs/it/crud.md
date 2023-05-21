@@ -13,7 +13,11 @@ Prima che tu possa fare qualsiasi cosa, abbiamo bisogno di un'istanza Isar. Ogni
 Fornisci tutti gli schemi che desideri utilizzare con l'istanza Isar. Se apri più istanze, devi comunque fornire gli stessi schemi a ciascuna istanza.
 
 ```dart
-final isar = await Isar.open([ContactSchema]);
+final dir = await getApplicationDocumentsDirectory();
+final isar = await Isar.open(
+  [ContactSchema],
+  directory: dir.path,
+);
 ```
 
 È possibile utilizzare la configurazione predefinita o fornire alcuni dei seguenti parametri:

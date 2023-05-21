@@ -47,7 +47,12 @@ import 'package:isar/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-  final isar = await Isar.open([UserSchema]);
+  final dir = await getApplicationDocumentsDirectory();
+  
+  final isar = await Isar.open(
+    [UserSchema],
+    directory: dir.path,
+  );
 
   await performMigrationIfNeeded(isar);
 

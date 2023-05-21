@@ -1,3 +1,7 @@
+---
+title: Limitations
+---
+
 # Limitations
 
 As you know, Isar works on mobile devices and desktops running on the VM as well as Web. Both platforms are very different and have different limitations.

@@ -1,3 +1,28 @@
+## 3.1.0+1
+
+### Fixes
+
+- Fixed error building MacOS library
+
+## 3.1.0
+
+### Breaking
+
+Sorry for this breaking change. Unfortunately, it was necessary to fix stability issues on Android.
+
+- `directory` is now required for `Isar.open()` and `Isar.openSync()`
+
+### Fixes
+
+- Fixed a crash that occasionally occurred when opening Isar
+- Fixed a schema migration issue
+- Fixed an issue where embedded class renaming didn't work correctly
+
+### Enhancements
+
+- Many internal improvements
+- Performance improvements
+
 ## 3.0.6
 
 ### Fixes
