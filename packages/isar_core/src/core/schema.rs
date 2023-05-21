@@ -242,7 +242,7 @@ fn verify_name(name: &str) -> Result<()> {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct PropertySchema {
     pub name: Option<String>,
     #[serde(rename = "type")]

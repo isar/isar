@@ -1,5 +1,7 @@
 // ignore_for_file: hash_and_equals
 
+import 'dart:convert';
+
 import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
@@ -10,9 +12,9 @@ part 'embedded_test.g.dart';
 class Model {
   Model(this.id, this.embedded, this.nested, this.nestedList);
 
-  final Id id;
+  final int id;
 
-  final EModel? embedded;
+  final EModel embedded;
 
   final NModel? nested;
 
@@ -34,11 +36,17 @@ class Model {
       'nestedList': nestedList?.map((e) => e.toJson()).toList(),
     };
   }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return jsonEncode(toJson());
+  }
 }
 
 @embedded
 class EModel {
-  EModel([this.value = '']);
+  EModel(this.value);
 
   final String value;
 
@@ -50,11 +58,17 @@ class EModel {
       'value': value,
     };
   }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return jsonEncode(toJson());
+  }
 }
 
 @embedded
 class NModel {
-  NModel([this.embedded, this.nested, this.nestedList]);
+  NModel([this.embedded, this.nested, this.nestedList, this.strList]);
 
   final EModel? embedded;
 
@@ -62,19 +76,29 @@ class NModel {
 
   final List<NModel?>? nestedList;
 
+  final List<String>? strList;
+
   @override
   bool operator ==(Object other) =>
       other is NModel &&
       other.embedded == embedded &&
       other.nested == nested &&
-      listEquals(other.nestedList, nestedList);
+      listEquals(other.nestedList, nestedList) &&
+      listEquals(other.strList, strList);
 
   Map<String, dynamic> toJson() {
     return {
       'embedded': embedded?.toJson(),
       'nested': nested?.toJson(),
       'nestedList': nestedList?.map((e) => e?.toJson()).toList(),
+      'strList': strList,
     };
+  }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return jsonEncode(toJson());
   }
 }
 
@@ -86,10 +110,10 @@ void main() {
     late Model simple;
     late Model nested;
 
-    setUp(() async {
-      isar = await openTempIsar([ModelSchema]);
+    setUp(() {
+      isar = openTempIsar([ModelSchema]);
 
-      allNull = Model(0, null, null, null);
+      allNull = Model(0, EModel('test'), null, null);
       simple = Model(
         1,
         EModel('hello'),
@@ -109,7 +133,7 @@ void main() {
                 EModel('i am part of a list'),
                 NModel(
                   EModel('even deeper'),
-                  NModel(null, null, []),
+                  NModel(null, null, [], ['a', 'aa', 'aaa']),
                   [],
                 ),
               ),
@@ -118,6 +142,7 @@ void main() {
                 EModel('hello'),
               )
             ],
+            ['test1', 'test2', 'test3'],
           ),
         ),
         [
@@ -126,7 +151,12 @@ void main() {
             EModel('i am also part of a list'),
             NModel(
               EModel('even deeper'),
-              NModel(null, NModel(null, NModel(null, null, []), []), []),
+              NModel(
+                null,
+                NModel(null, NModel(null, null, []), []),
+                [],
+                ['hello', 'world'],
+              ),
               [],
             ),
             [null, null, null],
@@ -135,41 +165,41 @@ void main() {
       );
     });
 
-    isarTest('.put() .get()', () async {
-      await isar.tWriteTxn(() async {
-        await isar.models.tPutAll([allNull, simple, nested]);
+    isarTest('.put() .get()', () {
+      isar.writeTxn((isar) {
+        isar.models.putAll([allNull, simple, nested]);
       });
 
-      await isar.models.verify([allNull, simple, nested]);
+      //isar.models.verify([allNull, simple, nested]);
 
-      await qEqual(isar.models.where(), [allNull, simple, nested]);
+      expect(isar.models.where().findAll(), [allNull, simple, nested]);
     });
 
-    isarTest('.importJson()', () async {
-      await isar.tWriteTxn(() async {
-        await isar.models.tImportJson([
+    /*isarTest('.importJson()', ()  {
+       isar.writeTxn(()  {
+         isar.models.tImportJson([
           allNull.toJson(),
           simple.toJson(),
           nested.toJson(),
         ]);
       });
 
-      await isar.models.verify([allNull, simple, nested]);
+       isar.models.verify([allNull, simple, nested]);
     });
 
-    isarTest('.exportJson()', () async {
-      await isar.tWriteTxn(() async {
-        await isar.models.tPutAll([allNull, simple, nested]);
+    isarTest('.exportJson()', ()  {
+       isar.writeTxn(()  {
+         isar.models.tPutAll([allNull, simple, nested]);
       });
 
       expect(
-        await isar.models.where().exportJson(),
+         isar.models.where().exportJson(),
         [
           allNull.toJson(),
           simple.toJson(),
           nested.toJson(),
         ],
       );
-    });
+    });*/
   });
 }

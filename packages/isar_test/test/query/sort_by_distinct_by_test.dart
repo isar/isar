@@ -2,16 +2,33 @@ import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
 
-import '../user_model.dart';
+part 'sort_by_distinct_by_test.g.dart';
+
+@collection
+class Model {
+  Model(this.id, this.name, this.active);
+
+  final int id;
+
+  final String name;
+
+  final bool active;
+
+  @override
+  operator ==(other) =>
+      other is Model &&
+      other.name == name &&
+      other.id == id &&
+      other.active == active;
+}
 
 void main() {
   group('Sort By', () {
-    late Isar isar;
-    late IsarCollection<UserModel> users;
+    late IsarCollection<int, Model> col;
 
     setUp(() async {
-      isar = await openTempIsar([UserModelSchema]);
-      users = isar.userModels;
+      final isar = await openTempIsar([ModelSchema]);
+      col = isar.models;
 
       await isar.writeTxn(
         () => users.putAll([

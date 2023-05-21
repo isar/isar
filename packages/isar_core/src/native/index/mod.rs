@@ -17,7 +17,7 @@ pub struct NativeIndex {
 }
 
 impl NativeIndex {
-    pub const MAX_STRING_INDEX_SIZE: usize = 1024;
+    pub(crate) const MAX_STRING_INDEX_SIZE: usize = 1024;
 
     pub fn new(name: &str, db: Db, properties: Vec<NativeProperty>, unique: bool) -> Self {
         let id = xxh3_64(name.as_bytes());

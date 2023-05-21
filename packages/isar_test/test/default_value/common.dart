@@ -24,5 +24,5 @@ class MyEmbedded {
 class EmptyModel {
   EmptyModel(this.id);
 
-  final Id id;
+  final int id;
 }

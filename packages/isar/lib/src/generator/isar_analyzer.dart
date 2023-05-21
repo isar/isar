@@ -1,3 +1,5 @@
+// ignore_for_file: use_string_buffers
+
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
@@ -12,29 +14,43 @@ class IsarAnalyzer {
     final constructor = _checkValidClass(element);
     final modelClass = element as ClassElement;
 
+    final accessors = modelClass.allAccessors;
+    final idProperties = accessors.where((e) => e.hasIdAnnotation).toList();
+    final String idPropertyName;
+    if (idProperties.isEmpty) {
+      if (accessors.any((e) => e.name == 'id')) {
+        idPropertyName = 'id';
+      } else {
+        err(
+          'No id property defined. Annotate one of the properties with @id.',
+          modelClass,
+        );
+      }
+    } else if (idProperties.length == 1) {
+      idPropertyName = idProperties.single.name;
+    } else {
+      err('Two or more properties are annotated with @id.', modelClass);
+    }
+
     final properties = <PropertyInfo>[];
     var index = 1;
     for (final propertyElement in modelClass.allAccessors) {
-      final property = analyzePropertyInfo(propertyElement, constructor, index);
+      final isId = propertyElement.name == idPropertyName;
+      final property = analyzePropertyInfo(
+        propertyElement,
+        constructor,
+        isId && propertyElement.type.isDartCoreInt ? 0 : index,
+        isId,
+      );
       properties.add(property);
-      if (!property.isId || property.type == PropertyType.string) {
+      if (!isId || property.type == PropertyType.string) {
         index++;
       }
     }
     _checkValidPropertiesConstructor(properties, constructor);
 
-    final idProperties = properties.where((it) => it.isId);
-    if (idProperties.isEmpty) {
-      err(
-        'No id property defined. Annotate one of the properties with @id.',
-        modelClass,
-      );
-    } else if (idProperties.length > 1) {
-      err('Two or more properties are annotated with @id.', modelClass);
-    }
-
     return ObjectInfo(
-      dartName: modelClass.displayName,
+      dartName: modelClass.name,
       isarName: modelClass.isarName,
       accessor: modelClass.collectionAccessor,
       properties: properties,
@@ -46,17 +62,11 @@ class IsarAnalyzer {
     final constructor = _checkValidClass(element);
     final modelClass = element as ClassElement;
 
-    if (constructor.parameters.any((e) => e.isRequired)) {
-      err(
-        'Constructors of embedded objects must not have required parameters.',
-        constructor,
-      );
-    }
-
     final properties = <PropertyInfo>[];
     for (var i = 0; i < modelClass.allAccessors.length; i++) {
       final propertyElement = modelClass.allAccessors[i];
-      final property = analyzePropertyInfo(propertyElement, constructor, i);
+      final property =
+          analyzePropertyInfo(propertyElement, constructor, i + 1, false);
       properties.add(property);
     }
     _checkValidPropertiesConstructor(properties, constructor);
@@ -68,12 +78,8 @@ class IsarAnalyzer {
       err('Embedded objects must not have indexes.', modelClass);
     }*/
 
-    if (properties.any((it) => it.isId)) {
-      err('Embedded objects must not define an id.', modelClass);
-    }
-
     return ObjectInfo(
-      dartName: modelClass.displayName,
+      dartName: modelClass.name,
       isarName: modelClass.isarName,
       properties: properties,
     );
@@ -148,7 +154,7 @@ class IsarAnalyzer {
       for (final property in element.allAccessors) {
         final type = property.type.scalarType.element;
         if (type is ClassElement && type.embeddedAnnotation != null) {
-          if (names.add(type.displayName)) {
+          if (names.add(type.name)) {
             fillNames(names, type);
           }
         }
@@ -164,24 +170,22 @@ class IsarAnalyzer {
     PropertyInducingElement property,
     ConstructorElement constructor,
     int propertyIndex,
+    bool isId,
   ) {
     final dartType = property.type;
-    final scalarDartType = dartType.scalarType;
     Map<String, dynamic>? enumMap;
     String? enumPropertyName;
-    String? defaultEnumElement;
 
     late final PropertyType type;
-    if (scalarDartType.element is EnumElement) {
+    if (dartType.scalarType.element is EnumElement) {
       final enumeratedAnn = property.enumeratedAnnotation;
       if (enumeratedAnn == null) {
         err('Enum property must be annotated with @enumerated.', property);
       }
 
-      final enumClass = scalarDartType.element! as EnumElement;
+      final enumClass = dartType.scalarType.element! as EnumElement;
       final enumElements =
           enumClass.fields.where((f) => f.isEnumConstant).toList();
-      defaultEnumElement = '${enumClass.name}.${enumElements.first.name}';
 
       if (enumeratedAnn.type == EnumType.ordinal) {
         type =
@@ -261,8 +265,6 @@ class IsarAnalyzer {
     }
 
     final nullable = dartType.nullabilitySuffix != NullabilitySuffix.none;
-
-    final isId = property.hasIdAnnotation;
     if (isId) {
       if (type != PropertyType.long && type != PropertyType.string) {
         err('Only int and String properties can be used as id.', property);
@@ -295,8 +297,8 @@ class IsarAnalyzer {
     }
 
     return PropertyInfo(
-      index: isId && type == PropertyType.long ? 0 : propertyIndex,
-      dartName: property.displayName,
+      index: propertyIndex,
+      dartName: property.name,
       isarName: property.isarName,
       typeClassName: dartType.scalarType.element!.name!,
       targetIsarName:
@@ -309,9 +311,8 @@ class IsarAnalyzer {
       elementNullable: type.isList
           ? dartType.scalarType.nullabilitySuffix != NullabilitySuffix.none
           : null,
-      defaultValue: defaultEnumElement ??
-          constructorParameter?.defaultValueCode ??
-          _defaultValue(dartType),
+      defaultValue:
+          constructorParameter?.defaultValueCode ?? _defaultValue(dartType),
       elementDefaultValue:
           type.isList ? _defaultValue(dartType.scalarType) : null,
       mode: mode,
@@ -319,26 +320,52 @@ class IsarAnalyzer {
       constructorPosition: constructorPosition,
     );
   }
-}
 
-String _defaultValue(DartType type) {
-  if (type.nullabilitySuffix == NullabilitySuffix.question) {
-    return 'null';
-  } else if (type.isDartCoreInt) {
-    return '$nullInt';
-  } else if (type.isDartCoreDouble) {
-    return 'double.nan';
-  } else if (type.isDartCoreBool) {
-    return 'false';
-  } else if (type.isDartCoreString) {
-    return "''";
-  } else if (type.isDartCoreList) {
-    return 'const []';
-  } else if (type.isDartCoreSet) {
-    return 'const {}';
-  } else if (type.isDartCoreMap) {
-    return 'const {}';
-  } else {
-    return 'null';
+  String _defaultValue(DartType type) {
+    if (type.nullabilitySuffix == NullabilitySuffix.question) {
+      return 'null';
+    } else if (type.isDartCoreInt) {
+      if (type.propertyType == PropertyType.byte) {
+        return '$nullByte';
+      } else if (type.propertyType == PropertyType.int) {
+        return '$nullInt';
+      } else {
+        return '$nullLong';
+      }
+    } else if (type.isDartCoreDouble) {
+      return 'double.nan';
+    } else if (type.isDartCoreBool) {
+      return 'false';
+    } else if (type.isDartCoreString) {
+      return "''";
+    } else if (type.isDartCoreDateTime) {
+      return 'DateTime.fromMillisecondsSinceEpoch(0, isUtc: true).toLocal()';
+    } else if (type.isDartCoreList) {
+      return 'const <${type.scalarType}>[]';
+    } else if (type.isDartCoreSet) {
+      return 'const {}';
+    } else if (type.isDartCoreMap) {
+      return 'const {}';
+    } else {
+      final element = type.element!;
+      if (element is EnumElement) {
+        return '${element.name}.${element.fields.where((f) => f.isEnumConstant).first.name}';
+      } else if (element is ClassElement) {
+        final defaultConstructor = _checkValidClass(element);
+        var code = '${element.name}(';
+        for (final param in defaultConstructor.parameters) {
+          if (!param.isOptional) {
+            if (param.isNamed) {
+              code += '${param.name}: ';
+            }
+            code += _defaultValue(param.type);
+            code += ', ';
+          }
+        }
+        return '$code)';
+      }
+    }
+
+    throw UnimplementedError('This should not happen');
   }
 }

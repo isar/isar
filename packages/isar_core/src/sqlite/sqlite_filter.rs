@@ -1,4 +1,4 @@
-use crate::filter::{filter_value::FilterValue, Filter};
+use crate::filter::{filter_value::IsarValue, Filter};
 
 use super::{sqlite_collection::SQLiteCollection, sqlite_query_builder::SQLiteQueryBuilder};
 use intmap::IntMap;
@@ -29,9 +29,9 @@ pub struct SQLiteFilter {
     }
 }*/
 
-fn value_to_sql(value: FilterValue) -> String {
+fn value_to_sql(value: IsarValue) -> String {
     match value {
-        FilterValue::Bool(b) => {
+        IsarValue::Bool(b) => {
             if let Some(b) = b {
                 if b {
                     "TRUE".to_string()
@@ -42,8 +42,8 @@ fn value_to_sql(value: FilterValue) -> String {
                 "NULL".to_string()
             }
         }
-        FilterValue::Integer(i) => i.to_string(),
-        FilterValue::Real(r) => {
+        IsarValue::Integer(i) => i.to_string(),
+        IsarValue::Real(r) => {
             if r.is_nan() {
                 "NULL".to_string()
             } else if r.is_infinite() {
@@ -56,7 +56,7 @@ fn value_to_sql(value: FilterValue) -> String {
                 r.to_string()
             }
         }
-        FilterValue::String(s) => {
+        IsarValue::String(s) => {
             if let Some(s) = s {
                 let mut escaped = s.replace("'", "''");
                 escaped.insert(0, '\'');
@@ -98,11 +98,11 @@ macro_rules! filter {
         &self,
         collection_index: usize,
         property_index: usize,
-        value: FilterValue,
+        value: IsarValue,
         case_insensitive: bool,
     ) -> Self::Filter {
         let prop = get_prop_name(self, property_index);
-        if let FilterValue::Null = value {
+        if let IsarValue::Null = value {
             filter!("{} IS NOT NULL", prop)
         } else {
             filter!(
@@ -118,10 +118,10 @@ macro_rules! filter {
         &self,
         collection_index: usize,
         property_index: usize,
-        value: FilterValue,
+        value: IsarValue,
         case_insensitive: bool,
     ) -> Self::Filter {
-        if let FilterValue::Null = value {
+        if let IsarValue::Null = value {
             filter!("FALSE")
         } else {
             let prop = get_prop_name(self, property_index);
@@ -138,7 +138,7 @@ macro_rules! filter {
         &self,
         collection_index: usize,
         property_index: usize,
-        value: FilterValue,
+        value: IsarValue,
         case_insensitive: bool,
     ) -> Self::Filter {
         let prop = get_prop_name(self, property_index);
@@ -154,7 +154,7 @@ macro_rules! filter {
         &self,
         collection_index: usize,
         property_index: usize,
-        values: Vec<FilterValue>,
+        values: Vec<IsarValue>,
         case_insensitive: bool,
     ) -> Self::Filter {
         let prop = get_prop_name(self, property_index);

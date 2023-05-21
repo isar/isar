@@ -6,33 +6,34 @@ part 'max_size_test.g.dart';
 
 @collection
 class Model {
-  final Id id = Isar.autoIncrement;
+  Model(this.id);
+
+  final int id;
 
   final value = '123456789' * 1000;
 }
 
 void main() {
   group('Max Size', () {
-    test('default', () async {
-      final isar = await openTempIsar([ModelSchema]);
-      await isar.writeTxn(() async {
-        // TODO: figure out why 10000 doesn't work on armv7 Android
-        await isar.models.putAll(List.filled(1000, Model()));
+    test('default', () {
+      final isar = openTempIsar([ModelSchema]);
+      isar.writeTxn((isar) {
+        isar.models.putAll(List.generate(1000, Model.new));
       });
     });
 
-    test('10MB', () async {
-      final isar = await openTempIsar([ModelSchema], maxSizeMiB: 10);
+    test('10MB', () {
+      final isar = openTempIsar([ModelSchema], maxSizeMiB: 10);
 
       expect(
-        isar.writeTxn(() async {
-          await isar.models.putAll(List.filled(1000, Model()));
+        () => isar.writeTxn((isar) {
+          isar.models.putAll(List.generate(1000, Model.new));
         }),
-        throwsIsarError('The database is full'),
+        throwsA(isA<DatabaseFullError>()),
       );
 
-      await isar.writeTxn(() async {
-        await isar.models.putAll(List.filled(50, Model()));
+      isar.writeTxn((isar) {
+        isar.models.putAll(List.generate(50, Model.new));
       });
     });
   });

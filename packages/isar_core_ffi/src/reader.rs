@@ -1,6 +1,5 @@
 use crate::CIsarReader;
 use isar_core::core::reader::IsarReader;
-use itertools::Itertools;
 use std::{mem, ptr};
 
 #[no_mangle]
@@ -12,20 +11,20 @@ pub unsafe extern "C" fn isar_read_id(reader: &'static CIsarReader) -> i64 {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_read_bool(reader: &'static CIsarReader, index: u32) -> u8 {
+pub unsafe extern "C" fn isar_read_null(reader: &'static CIsarReader, index: u32) -> bool {
+    match reader {
+        CIsarReader::Native(reader) => reader.is_null(index),
+        CIsarReader::NativeList(reader) => reader.is_null(index),
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_read_bool(reader: &'static CIsarReader, index: u32) -> bool {
     let value = match reader {
         CIsarReader::Native(reader) => reader.read_bool(index),
         CIsarReader::NativeList(reader) => reader.read_bool(index),
     };
-    if let Some(value) = value {
-        if value {
-            2
-        } else {
-            1
-        }
-    } else {
-        0
-    }
+    value.unwrap_or(false)
 }
 
 #[no_mangle]
@@ -72,20 +71,20 @@ pub unsafe extern "C" fn isar_read_double(reader: &'static CIsarReader, index: u
 pub unsafe extern "C" fn isar_read_string(
     reader: &'static CIsarReader,
     index: u32,
-    value: *mut *const u16,
+    value: *mut *const u8,
 ) -> u32 {
     let str = match reader {
         CIsarReader::Native(reader) => reader.read_string(index),
         CIsarReader::NativeList(reader) => reader.read_string(index),
     };
     if let Some(str) = str {
-        let mut encoded = str.encode_utf16().collect_vec();
-        encoded.shrink_to_fit();
-        *value = encoded.as_ptr();
-        let len = encoded.len();
-        mem::forget(encoded);
+        let len = str.len();
+        let ptr = str.as_ptr();
+        mem::forget(str);
+        *value = ptr;
         len as u32
     } else {
+        *value = ptr::null();
         0
     }
 }
@@ -131,14 +130,20 @@ pub unsafe extern "C" fn isar_read_list(
                 *list_reader = Box::into_raw(Box::new(CIsarReader::NativeList(reader)));
                 len
             }
-            None => 0,
+            None => {
+                *list_reader = ptr::null_mut();
+                0
+            }
         },
         CIsarReader::NativeList(reader) => match reader.read_list(index) {
             Some((reader, len)) => {
                 *list_reader = Box::into_raw(Box::new(CIsarReader::NativeList(reader)));
                 len
             }
-            None => 0,
+            None => {
+                *list_reader = ptr::null_mut();
+                0
+            }
         },
     }
 }

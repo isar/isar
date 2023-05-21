@@ -1,23 +1,29 @@
 part of isar;
 
 abstract class Isar {
-  factory Isar.get({
+  /// The default Isar instance name.
+  static const String defaultName = 'default';
+
+  /// The default max Isar size.
+  static const int defaultMaxSizeMiB = 256;
+
+  static const String version = '4.0.0';
+
+  static Isar get({
     required List<CollectionSchema> schemas,
     String name = Isar.defaultName,
   }) {
-    Isar.initializeIsarCore();
     return _IsarImpl.get(
+      instanceId: Isar.fastHash(name),
       converters: schemas.map((e) => e.converter).toList(),
-      name: name,
     );
   }
 
-  factory Isar.open({
+  static Isar open({
     required List<CollectionSchema> schemas,
     required String directory,
     String name = Isar.defaultName,
     int maxSizeMiB = Isar.defaultMaxSizeMiB,
-    bool relaxedDurability = true,
     CompactCondition? compactOnLaunch,
     bool inspector = true,
   }) {
@@ -27,27 +33,50 @@ abstract class Isar {
       directory: directory,
       name: name,
       maxSizeMiB: maxSizeMiB,
-      relaxedDurability: relaxedDurability,
       compactOnLaunch: compactOnLaunch,
       inspector: inspector,
     );
   }
 
-  /// The default Isar instance name.
-  static const String defaultName = 'default';
+  /// Name of the instance.
+  String get name;
 
-  /// The default max Isar size.
-  static const int defaultMaxSizeMiB = 1024;
-
-  static const String version = '4.0.0';
+  /// The directory containing the database file or `null` on the web.
+  ///
+  /// The full path of the database file is `directory/name.isar` and the lock
+  /// file `directory/name.isar.lock`.
+  String get directory;
 
   bool get isOpen;
 
+  @protected
   IsarCollection<ID, OBJ> collection<ID, OBJ>();
 
   T txn<T>(T Function(Isar isar) callback);
 
   T writeTxn<T>(T Function(Isar isar) callback);
+
+  int getSize({bool includeIndexes = false});
+
+  void copyToFile(String path);
+
+  void importJson(Map<String, dynamic> json) {
+    importJsonBytes(const Utf8Encoder().convert(jsonEncode(json)));
+  }
+
+  void importJsonBytes(Uint8List jsonBytes);
+
+  void importJsonFile(String path);
+
+  Map<String, dynamic> exportJson() {
+    return exportJsonBytes((jsonBytes) {
+      return jsonDecode(utf8.decode(jsonBytes)) as Map<String, dynamic>;
+    });
+  }
+
+  R exportJsonBytes<R>(R Function(Uint8List jsonBytes) callback);
+
+  void exportJsonFile(String path);
 
   void clear();
 
@@ -58,7 +87,7 @@ abstract class Isar {
   ///
   /// Only use this method for non-Flutter code or unit tests.
   static void initializeIsarCore({Map<Abi, String> libraries = const {}}) {
-    _initializeIsarCore(libraries: libraries);
+    IsarCore._initialize(libraries: libraries);
   }
 
   /// FNV-1a 64bit hash algorithm optimized for Dart Strings

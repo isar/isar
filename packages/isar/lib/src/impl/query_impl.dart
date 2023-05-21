@@ -1,32 +1,146 @@
 part of isar;
 
-class _QueryImpl<T> implements Query<T> {
-  _QueryImpl(this.isar, this.ptr, this.deserialize);
+class _QueryImpl<T> extends Query<T> {
+  _QueryImpl({
+    required int instanceId,
+    required int ptrAddress,
+    List<int>? properties,
+    required Deserialize<T> deserialize,
+  })  : _instanceId = instanceId,
+        _ptrAddress = ptrAddress,
+        _properties = properties,
+        _deserialize = deserialize;
 
-  final _IsarImpl isar;
-  final Pointer<CIsarQuery> ptr;
-  final Deserialize<T> deserialize;
+  final int _instanceId;
+  final List<int>? _properties;
+  final Deserialize<T> _deserialize;
+  int _ptrAddress;
 
-  @override
-  T? findFirst() {
-    return isar.txn((isar) {});
+  Pointer<CIsarQuery> get _ptr {
+    final ptr = Pointer<CIsarQuery>.fromAddress(_ptrAddress);
+    if (ptr.isNull) {
+      throw QueryError('Query has already been closed.');
+    }
+    return ptr;
   }
 
   @override
-  List<T> findAll() {
-    // TODO: implement findAll
-    throw UnimplementedError();
+  _IsarImpl get isar => _IsarImpl.getInstance(_instanceId);
+
+  @override
+  List<T> findAll({int? offset, int? limit}) {
+    return isar.getTxn((isarPtr, txnPtr) {
+      final cursorPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarCursor>>();
+      isar_query_cursor(
+        isarPtr,
+        txnPtr,
+        _ptr,
+        cursorPtrPtr,
+        offset ?? -1,
+        limit ?? -1,
+      ).checkNoError();
+      final cursorPtr = cursorPtrPtr.value;
+
+      Pointer<CIsarReader> readerPtr = nullptr;
+      final values = <T>[];
+      while (true) {
+        readerPtr = isar_cursor_next(cursorPtr, readerPtr);
+        if (!readerPtr.isNull) {
+          values.add(_deserialize(readerPtr));
+        } else {
+          break;
+        }
+      }
+
+      isar_free_reader(readerPtr);
+      isar_free_cursor(cursorPtr);
+      return values;
+    });
   }
 
   @override
-  bool deleteFirst() {
-    // TODO: implement deleteFirst
-    throw UnimplementedError();
-  }
-
-  @override
-  int deleteAll() {
+  int deleteAll({int? offset, int? limit}) {
     // TODO: implement deleteAll
     throw UnimplementedError();
+  }
+
+  @override
+  R exportJsonBytes<R>(
+    R Function(Uint8List jsonBytes) callback, {
+    int? offset,
+    int? limit,
+  }) {
+    // TODO: implement exportJsonBytes
+    throw UnimplementedError();
+  }
+
+  @override
+  void exportJsonFile(String path, {int? offset, int? limit}) {
+    // TODO: implement exportJsonFile
+  }
+
+  @override
+  R? aggregate<R>(Aggregation op) {
+    if (_properties?.length != 1) {
+      throw QueryError('Aggregations only work on queries with one property.');
+    }
+
+    final aggregation = switch (op) {
+      Aggregation.count => AGGREGATION_COUNT,
+      Aggregation.isEmpty => AGGREGATION_IS_EMPTY,
+      Aggregation.min => AGGREGATION_MIN,
+      Aggregation.max => AGGREGATION_MAX,
+      Aggregation.sum => AGGREGATION_SUM,
+      Aggregation.average => AGGREGATION_AVERAGE,
+    };
+
+    return isar.getTxn((isarPtr, txnPtr) {
+      final valuePtr = IsarCore.ptrPtr.cast<Pointer<CIsarValue>>();
+      isar_query_aggregate(
+        isarPtr,
+        txnPtr,
+        _ptr,
+        aggregation,
+        _properties![0],
+        valuePtr,
+      );
+
+      final value = valuePtr.value;
+      if (value.isNull || isar_value_is_null(value)) {
+        return null;
+      }
+
+      try {
+        if (true is R) {
+          return isar_value_get_bool(value) as R;
+        } else if (0.0 is R) {
+          return isar_value_get_real(value) as R;
+        } else if (0 is R) {
+          return isar_value_get_integer(value) as R;
+        } else if (DateTime.now() is R) {
+          return DateTime.fromMillisecondsSinceEpoch(
+            isar_value_get_integer(value),
+            isUtc: true,
+          ).toLocal() as R;
+        } else if ('' is R) {
+          final length = isar_value_get_string(value, IsarCore.stringPtrPtr);
+          if (IsarCore.stringPtr.isNull) {
+            return null;
+          } else {
+            return utf8.decode(IsarCore.stringPtr.asTypedList(length)) as R;
+          }
+        } else {
+          throw ArgumentError('Unsupported aggregation type: $R');
+        }
+      } finally {
+        isar_free_value(value);
+      }
+    });
+  }
+
+  @override
+  void close() {
+    isar_free_query(_ptr);
+    _ptrAddress = 0;
   }
 }

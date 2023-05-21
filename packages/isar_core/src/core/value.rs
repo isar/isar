@@ -1,20 +1,20 @@
 use std::cmp::Ordering;
 
 #[derive(PartialEq, Clone, Debug)]
-pub enum FilterValue {
+pub enum IsarValue {
     Bool(Option<bool>),
     Integer(i64),
     Real(f64),
     String(Option<String>),
 }
 
-impl FilterValue {
+impl IsarValue {
     pub fn is_max(&self) -> bool {
         match self {
-            FilterValue::Bool(value) => *value == Some(true),
-            FilterValue::Integer(value) => *value == i64::MAX,
-            FilterValue::Real(value) => value.is_infinite() && value.is_sign_positive(),
-            FilterValue::String(maybe_value) => match maybe_value {
+            IsarValue::Bool(value) => *value == Some(true),
+            IsarValue::Integer(value) => *value == i64::MAX,
+            IsarValue::Real(value) => value.is_infinite() && value.is_sign_positive(),
+            IsarValue::String(maybe_value) => match maybe_value {
                 Some(value) => value == "\u{10ffff}",
                 None => false,
             },
@@ -23,60 +23,61 @@ impl FilterValue {
 
     pub fn get_max(&self) -> Self {
         match self {
-            FilterValue::Bool(_) => FilterValue::Bool(Some(true)),
-            FilterValue::Integer(_) => FilterValue::Integer(i64::MAX),
-            FilterValue::Real(_) => FilterValue::Real(f64::INFINITY),
-            FilterValue::String(_) => FilterValue::String(Some("\u{10ffff}".to_string())),
+            IsarValue::Bool(_) => IsarValue::Bool(Some(true)),
+            IsarValue::Integer(_) => IsarValue::Integer(i64::MAX),
+            IsarValue::Real(_) => IsarValue::Real(f64::INFINITY),
+            IsarValue::String(_) => IsarValue::String(Some("\u{10ffff}".to_string())),
         }
     }
 
     pub fn is_null(&self) -> bool {
         match self {
-            FilterValue::Bool(value) => value.is_none(),
-            FilterValue::Integer(value) => *value == i64::MIN,
-            FilterValue::Real(value) => value.is_nan(),
-            FilterValue::String(value) => value.is_none(),
+            IsarValue::Bool(value) => value.is_none(),
+            IsarValue::Integer(value) => *value == i64::MIN,
+            IsarValue::Real(value) => value.is_nan(),
+            IsarValue::String(value) => value.is_none(),
         }
     }
 
     pub fn get_null(&self) -> Self {
         match self {
-            FilterValue::Bool(_) => FilterValue::Bool(None),
-            FilterValue::Integer(_) => FilterValue::Integer(i64::MIN),
-            FilterValue::Real(_) => FilterValue::Real(f64::NAN),
-            FilterValue::String(_) => FilterValue::String(None),
+            IsarValue::Bool(_) => IsarValue::Bool(None),
+            IsarValue::Integer(_) => IsarValue::Integer(i64::MIN),
+            IsarValue::Real(_) => IsarValue::Real(f64::NAN),
+            IsarValue::String(_) => IsarValue::String(None),
         }
     }
 
     pub fn try_increment(&self) -> Option<Self> {
         match self {
-            FilterValue::Bool(value) => match value {
+            IsarValue::Bool(value) => match value {
                 Some(true) => None,
-                Some(false) => Some(FilterValue::Bool(Some(true))),
-                None => Some(FilterValue::Bool(Some(false))),
+                Some(false) => Some(IsarValue::Bool(Some(true))),
+                None => Some(IsarValue::Bool(Some(false))),
             },
-            FilterValue::Integer(value) => Some(FilterValue::Integer(value.checked_add(1)?)),
-            FilterValue::Real(value) => {
+            IsarValue::Integer(value) => Some(IsarValue::Integer(value.checked_add(1)?)),
+            IsarValue::Real(value) => {
                 if value.is_nan() {
-                    Some(FilterValue::Real(f64::NEG_INFINITY))
+                    Some(IsarValue::Real(f64::NEG_INFINITY))
                 } else if value.is_infinite() && value.is_sign_positive() {
                     None
                 } else {
-                    Some(FilterValue::Real(value.next_up()))
+                    let next = (*value as f32).next_up() as f64;
+                    Some(IsarValue::Real(next))
                 }
             }
-            FilterValue::String(value) => {
+            IsarValue::String(value) => {
                 if let Some(value) = value {
                     if value.is_empty() {
-                        return Some(FilterValue::String(Some('\u{0}'.to_string())));
+                        return Some(IsarValue::String(Some('\u{0}'.to_string())));
                     }
                     let mut value = value.clone();
                     let last_char = value.pop()?;
                     let new_last_char = char::from_u32((last_char as u32).checked_add(1)?)?;
                     value.push(new_last_char);
-                    Some(FilterValue::String(Some(value)))
+                    Some(IsarValue::String(Some(value)))
                 } else {
-                    Some(FilterValue::String(Some(String::new())))
+                    Some(IsarValue::String(Some(String::new())))
                 }
             }
         }
@@ -84,25 +85,26 @@ impl FilterValue {
 
     pub fn try_decrement(&self) -> Option<Self> {
         match self {
-            FilterValue::Bool(value) => match value {
-                Some(true) => Some(FilterValue::Bool(Some(false))),
-                Some(false) => Some(FilterValue::Bool(None)),
+            IsarValue::Bool(value) => match value {
+                Some(true) => Some(IsarValue::Bool(Some(false))),
+                Some(false) => Some(IsarValue::Bool(None)),
                 None => None,
             },
-            FilterValue::Integer(value) => Some(FilterValue::Integer(value.checked_sub(1)?)),
-            FilterValue::Real(value) => {
+            IsarValue::Integer(value) => Some(IsarValue::Integer(value.checked_sub(1)?)),
+            IsarValue::Real(value) => {
                 if value.is_nan() {
                     None
                 } else if value.is_infinite() && value.is_sign_negative() {
-                    Some(FilterValue::Real(f64::NAN))
+                    Some(IsarValue::Real(f64::NAN))
                 } else {
-                    Some(FilterValue::Real(value.next_down()))
+                    let next = (*value as f32).next_down() as f64;
+                    Some(IsarValue::Real(next))
                 }
             }
-            FilterValue::String(value) => {
+            IsarValue::String(value) => {
                 let value = value.as_ref()?;
                 if value.is_empty() {
-                    return Some(FilterValue::String(None));
+                    return Some(IsarValue::String(None));
                 }
                 let mut value = value.clone();
                 let last_char_code = value.pop()? as u32;
@@ -113,19 +115,31 @@ impl FilterValue {
                     value.push(new_last_char);
                 }
 
-                Some(FilterValue::String(Some(value)))
+                Some(IsarValue::String(Some(value)))
             }
         }
     }
 }
 
-impl PartialOrd for FilterValue {
+impl PartialOrd for IsarValue {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match (self, other) {
-            (FilterValue::Bool(a), FilterValue::Bool(b)) => a.partial_cmp(b),
-            (FilterValue::Integer(a), FilterValue::Integer(b)) => a.partial_cmp(b),
-            (FilterValue::Real(a), FilterValue::Real(b)) => a.partial_cmp(b),
-            (FilterValue::String(a), FilterValue::String(b)) => a.partial_cmp(b),
+            (IsarValue::Bool(a), IsarValue::Bool(b)) => a.partial_cmp(b),
+            (IsarValue::Integer(a), IsarValue::Integer(b)) => a.partial_cmp(b),
+            (IsarValue::Real(a), IsarValue::Real(b)) => {
+                if a.is_nan() {
+                    if b.is_nan() {
+                        Some(Ordering::Equal)
+                    } else {
+                        Some(Ordering::Less)
+                    }
+                } else if b.is_nan() {
+                    Some(Ordering::Greater)
+                } else {
+                    a.partial_cmp(b)
+                }
+            }
+            (IsarValue::String(a), IsarValue::String(b)) => a.partial_cmp(b),
             _ => None,
         }
     }
@@ -137,25 +151,25 @@ mod tests {
 
     macro_rules! bool {
         ($value:expr) => {
-            FilterValue::Bool($value)
+            IsarValue::Bool($value)
         };
     }
 
     macro_rules! int {
         ($value:expr) => {
-            FilterValue::Integer($value)
+            IsarValue::Integer($value)
         };
     }
 
     macro_rules! real {
         ($value:expr) => {
-            FilterValue::Real($value)
+            IsarValue::Real($value)
         };
     }
 
     macro_rules! string {
         ($value:expr) => {
-            FilterValue::String($value)
+            IsarValue::String($value)
         };
     }
 
@@ -411,7 +425,7 @@ mod tests {
                 f64::NAN,
             ] {
                 let null_value = match real!(value).get_null() {
-                    FilterValue::Real(v) => Some(v),
+                    IsarValue::Real(v) => Some(v),
                     _ => None,
                 };
 
@@ -470,7 +484,7 @@ mod tests {
         fn test_try_decrement() {
             assert_eq!(real!(-f64::NAN).try_decrement(), None);
             let val = match real!(f64::NEG_INFINITY).try_decrement() {
-                Some(FilterValue::Real(val)) => Some(val),
+                Some(IsarValue::Real(val)) => Some(val),
                 _ => None,
             };
             assert!(val.is_some());

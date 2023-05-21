@@ -6,10 +6,11 @@ part 'filter_date_time_list_test.g.dart';
 
 @collection
 class DateTimeModel {
-  DateTimeModel(this.list);
-  Id? id;
+  DateTimeModel(this.id, this.list);
 
-  List<DateTime?>? list;
+  final int id;
+
+  final List<DateTime?>? list;
 
   @override
   // ignore: hash_and_equals
@@ -33,115 +34,121 @@ DateTime utc(int year, [int month = 1, int day = 1]) {
 void main() {
   group('DateTime list filter', () {
     late Isar isar;
-    late IsarCollection<DateTimeModel> col;
+    late IsarCollection<int, DateTimeModel> col;
 
+    late DateTimeModel obj5;
     late DateTimeModel obj1;
-    late DateTimeModel obj2;
     late DateTimeModel obj3;
-    late DateTimeModel obj4;
+    late DateTimeModel obj2;
     late DateTimeModel objEmpty;
     late DateTimeModel objNull;
 
-    setUp(() async {
-      isar = await openTempIsar([DateTimeModelSchema]);
+    setUp(() {
+      isar = openTempIsar([DateTimeModelSchema]);
       col = isar.dateTimeModels;
 
-      obj1 = DateTimeModel([null]);
-      obj2 = DateTimeModel([local(2020), utc(2030), local(2020)]);
-      obj3 = DateTimeModel([local(2010), utc(2020)]);
-      obj4 = DateTimeModel([utc(2030), local(2050)]);
-      objEmpty = DateTimeModel([]);
-      objNull = DateTimeModel(null);
+      obj1 = DateTimeModel(1, [local(2020), utc(2030), local(2020)]);
+      obj2 = DateTimeModel(2, [utc(2030), local(2050)]);
+      obj3 = DateTimeModel(3, [local(2010), utc(2020)]);
+      objEmpty = DateTimeModel(4, []);
+      obj5 = DateTimeModel(5, [null]);
+      objNull = DateTimeModel(6, null);
 
-      await isar.writeTxn(() async {
-        await col.putAll([obj2, obj4, obj3, objEmpty, obj1, objNull]);
+      isar.writeTxn((isar) {
+        col.putAll([obj1, obj2, obj3, objEmpty, obj5, objNull]);
       });
     });
 
     group('DateTime list filter', () {
-      isarTest('.elementGreaterThan()', () async {
-        await qEqual(
-          col.filter().listElementGreaterThan(local(2020)),
-          [obj2, obj4],
+      isarTest('.elementGreaterThan()', () {
+        expect(
+          col.where().listElementGreaterThan(local(2020)).findAll(),
+          [obj1, obj2],
         );
-        await qEqual(
-          col.filter().listElementGreaterThan(utc(2020), include: true),
-          [obj2, obj4, obj3],
+        expect(
+          col
+              .where()
+              .listElementGreaterThan(utc(2020), include: true)
+              .findAll(),
+          [obj1, obj2, obj3],
         );
-        await qEqual(
-          col.filter().listElementGreaterThan(null),
-          [obj2, obj4, obj3],
+        expect(
+          col.where().listElementGreaterThan(null).findAll(),
+          [obj1, obj2, obj3],
         );
-        await qEqual(
-          col.filter().listElementGreaterThan(null, include: true),
-          [obj2, obj4, obj3, obj1],
-        );
-      });
-
-      isarTest('.elementLessThan()', () async {
-        await qEqual(col.filter().listElementLessThan(utc(2020)), [obj3, obj1]);
-        await qEqual(
-          col.filter().listElementLessThan(local(2020), include: true),
-          [obj2, obj3, obj1],
-        );
-        await qEqual(col.filter().listElementLessThan(null), []);
-        await qEqual(
-          col.filter().listElementLessThan(null, include: true),
-          [obj1],
+        expect(
+          col.where().listElementGreaterThan(null, include: true).findAll(),
+          [obj1, obj2, obj3, obj5],
         );
       });
 
-      isarTest('.elementBetween()', () async {
-        await qEqual(
-          col.filter().listElementBetween(utc(2010), utc(2020)),
-          [obj2, obj3],
+      isarTest('.elementLessThan()', () {
+        expect(
+          col.where().listElementLessThan(utc(2020)).findAll(),
+          [obj3, obj5],
         );
-        await qEqual(
-          col.filter().listElementBetween(
-                utc(2010),
-                utc(2020),
-                includeUpper: false,
-              ),
+        expect(
+          col.where().listElementLessThan(local(2020), include: true).findAll(),
+          [obj1, obj3, obj5],
+        );
+        expect(col.where().listElementLessThan(null).findAll(), isEmpty);
+        expect(
+          col.where().listElementLessThan(null, include: true).findAll(),
+          [obj5],
+        );
+      });
+
+      isarTest('.elementBetween()', () {
+        expect(
+          col.where().listElementBetween(utc(2010), utc(2020)).findAll(),
+          [obj1, obj3],
+        );
+        expect(
+          col
+              .where()
+              .listElementBetween(utc(2010), utc(2020), includeUpper: false)
+              .findAll(),
           [obj3],
         );
-        await qEqual(
-          col.filter().listElementBetween(null, utc(2010)),
-          [obj3, obj1],
+        expect(
+          col.where().listElementBetween(null, utc(2010)).findAll(),
+          [obj3, obj5],
         );
-        await qEqual(
-          col.filter().listElementBetween(
-                null,
-                utc(2010),
-                includeLower: false,
-              ),
+        expect(
+          col
+              .where()
+              .listElementBetween(null, utc(2010), includeLower: false)
+              .findAll(),
           [obj3],
         );
-        await qEqual(
-          col.filter().listElementBetween(
-                null,
-                utc(2010),
-                includeUpper: false,
-              ),
-          [obj1],
+        expect(
+          col
+              .where()
+              .listElementBetween(null, utc(2010), includeUpper: false)
+              .findAll(),
+          [obj5],
         );
       });
 
-      isarTest('.elementIsNull()', () async {
-        await qEqual(col.filter().listElementIsNull(), [obj1]);
+      isarTest('.elementIsNull()', () {
+        expect(col.where().listElementIsNull().findAll(), [obj5]);
       });
 
-      isarTest('.elementIsNotNull()', () async {
-        await qEqual(col.filter().listElementIsNotNull(), [obj2, obj4, obj3]);
+      isarTest('.elementIsNotNull()', () {
+        expect(
+          col.where().listElementIsNotNull().findAll(),
+          [obj1, obj2, obj3],
+        );
       });
 
-      isarTest('.isNull()', () async {
-        await qEqual(col.filter().listIsNull(), [objNull]);
+      isarTest('.isNull()', () {
+        expect(col.where().listIsNull().findAll(), [objNull]);
       });
 
-      isarTest('.isNotNull()', () async {
-        await qEqual(
-          col.filter().listIsNotNull(),
-          [obj2, obj4, obj3, objEmpty, obj1],
+      isarTest('.isNotNull()', () {
+        expect(
+          col.where().listIsNotNull().findAll(),
+          [obj1, obj2, obj3, objEmpty, obj5],
         );
       });
     });

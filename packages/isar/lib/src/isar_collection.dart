@@ -1,11 +1,13 @@
 part of isar;
 
 abstract class IsarCollection<ID, OBJ> {
+  Isar get isar;
+
   int get largestId;
 
   OBJ? get(ID id);
 
-  List<OBJ> getAll(List<ID> ids);
+  List<OBJ?> getAll(List<ID> ids);
 
   void put(OBJ object) => putAll([object]);
 
@@ -19,12 +21,23 @@ abstract class IsarCollection<ID, OBJ> {
 
   int count();
 
+  int getSize({bool includeIndexes = false});
+
+  void importJson(List<Map<String, dynamic>> json) {
+    importJsonBytes(const Utf8Encoder().convert(jsonEncode(json)));
+  }
+
+  void importJsonBytes(Uint8List jsonBytes);
+
+  void importJsonFile(String path);
+
   void clear();
 
+  @experimental
   Query<R> buildQuery<R>({
     Filter? filter,
-    List<SortProperty> sortBy = const [],
-    List<DistinctProperty> distinctBy = const [],
-    int? property,
+    List<SortProperty>? sortBy,
+    List<DistinctProperty>? distinctBy,
+    List<int>? properties,
   });
 }

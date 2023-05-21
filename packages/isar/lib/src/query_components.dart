@@ -5,10 +5,13 @@ part of isar;
 sealed class Filter {
   const Filter();
 
-  static const nullBool = Object();
+  static const nullBool = #nullBool;
   static const nullInt = -9223372036854775808;
+  static const nullDate = -9223372036854775808;
   static const nullDouble = double.nan;
-  static const nullString = Object();
+  static const nullString = #nullString;
+
+  static const epsilon = 0.00001;
 }
 
 /// Filter checking for equality.
@@ -20,11 +23,13 @@ final class EqualToCondition extends Filter {
   const EqualToCondition({
     required this.property,
     required this.value,
+    this.epsilon = Filter.epsilon,
     this.caseSensitive = true,
   });
 
   final int property;
   final Object value;
+  final double epsilon;
   final bool caseSensitive;
 }
 
@@ -38,12 +43,14 @@ final class GreaterThanCondition extends Filter {
     required this.property,
     required this.value,
     this.include = false,
+    this.epsilon = Filter.epsilon,
     this.caseSensitive = true,
   });
 
   final int property;
   final Object value;
   final bool include;
+  final double epsilon;
   final bool caseSensitive;
 }
 
@@ -57,12 +64,14 @@ final class LessThanCondition extends Filter {
     required this.property,
     required this.value,
     this.include = false,
+    this.epsilon = Filter.epsilon,
     this.caseSensitive = true,
   });
 
   final int property;
   final Object value;
   final bool include;
+  final double epsilon;
   final bool caseSensitive;
 }
 
@@ -79,6 +88,7 @@ final class BetweenCondition extends Filter {
     this.includeLower = true,
     required this.upper,
     this.includeUpper = true,
+    this.epsilon = Filter.epsilon,
     this.caseSensitive = true,
   });
 
@@ -87,6 +97,7 @@ final class BetweenCondition extends Filter {
   final bool includeLower;
   final Object upper;
   final bool includeUpper;
+  final double epsilon;
   final bool caseSensitive;
 }
 
@@ -164,9 +175,7 @@ final class MatchesCondition extends Filter {
 
 final class IsNullCondition extends Filter {
   /// Filters the results to only include objects where the property is null.
-  const IsNullCondition({
-    required this.property,
-  });
+  const IsNullCondition({required this.property});
 
   final int property;
 }
@@ -193,7 +202,7 @@ class AndGroup extends Filter {
   /// Create a logical AND filter group.
   ///
   /// Matches when all [filters] match.
-  const AndGroup(this.filters);
+  const AndGroup(this.filters) : assert(filters.length > 0);
 
   /// The filters of this group.
   final List<Filter> filters;
@@ -204,7 +213,7 @@ class OrGroup extends Filter {
   /// Create a logical OR filter group.
   ///
   /// Matches when any of the [filters] matches.
-  const OrGroup(this.filters);
+  const OrGroup(this.filters) : assert(filters.length > 0);
 
   /// The filters of this group.
   final List<Filter> filters;

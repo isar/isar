@@ -1,9 +1,11 @@
 #![allow(clippy::missing_safety_doc)]
+#![feature(local_key_cell_methods)]
 
 use core::slice;
 use isar_core::core::cursor::IsarCursor;
 use isar_core::core::instance::IsarInstance;
 use isar_core::core::reader::IsarReader;
+use isar_core::core::value::IsarValue;
 use isar_core::core::writer::IsarWriter;
 use isar_core::native::native_instance::NativeInstance;
 use std::ptr;
@@ -16,6 +18,7 @@ pub mod insert;
 pub mod instance;
 pub mod query;
 pub mod reader;
+pub mod value;
 pub mod writer;
 
 type NInstance = <NativeInstance as IsarInstance>::Instance;
@@ -79,8 +82,29 @@ pub unsafe extern "C" fn isar_string(chars: *const u16, length: u32) -> *const S
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_free_string(value: *const u16, length: u32) {
+pub unsafe extern "C" fn isar_free_reader(reader: *const CIsarReader) {
+    if !reader.is_null() {
+        drop(Box::from_raw(reader as *mut CIsarReader));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_free_query(query: *mut CIsarQuery) {
+    if !query.is_null() {
+        drop(Box::from_raw(query));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_free_cursor(cursor: *mut CIsarCursor) {
+    if !cursor.is_null() {
+        drop(Box::from_raw(cursor));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_free_value(value: *mut IsarValue) {
     if !value.is_null() {
-        let _ = Vec::from_raw_parts(value as *mut u16, length as usize, length as usize);
+        drop(Box::from_raw(value));
     }
 }

@@ -29,6 +29,10 @@ impl NativeTxn {
     }
 
     pub(crate) fn get_cursor<'txn>(&'txn self, db: Db) -> Result<TxnCursor<'txn>> {
+        if !self.active.get() {
+            return Err(IsarError::TransactionClosed {});
+        }
+
         let unbound = self
             .unbound_cursors
             .borrow_mut()
@@ -64,6 +68,13 @@ impl NativeTxn {
         Db::open(&self.txn, name, int_key, dup)
     }
 
+    pub(crate) fn clear_db(&self, db: Db) -> Result<()> {
+        if !self.active.get() {
+            return Err(IsarError::TransactionClosed {});
+        }
+        db.clear(&self.txn)
+    }
+
     pub(crate) fn drop_db(&self, db: Db) -> Result<()> {
         if !self.active.get() {
             return Err(IsarError::TransactionClosed {});
@@ -72,6 +83,9 @@ impl NativeTxn {
     }
 
     pub(crate) fn stat(&self, db: Db) -> Result<(u64, u64)> {
+        if !self.active.get() {
+            return Err(IsarError::TransactionClosed {});
+        }
         db.stat(&self.txn)
     }
 

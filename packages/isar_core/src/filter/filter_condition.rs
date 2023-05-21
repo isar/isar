@@ -1,6 +1,5 @@
+use crate::core::value::IsarValue;
 use std::cmp::Ordering;
-
-use super::filter_value::FilterValue;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum ConditionType {
@@ -17,7 +16,7 @@ pub enum ConditionType {
 pub struct FilterCondition {
     property_index: u32,
     condition_type: ConditionType,
-    values: Vec<FilterValue>,
+    values: Vec<IsarValue>,
     case_sensitive: bool,
 }
 
@@ -31,7 +30,7 @@ impl FilterCondition {
         }
     }
 
-    pub fn new_equal_to(property_index: u32, value: FilterValue, case_sensitive: bool) -> Self {
+    pub fn new_equal_to(property_index: u32, value: IsarValue, case_sensitive: bool) -> Self {
         FilterCondition {
             property_index,
             condition_type: ConditionType::Between,
@@ -40,7 +39,7 @@ impl FilterCondition {
         }
     }
 
-    pub fn new_greater_than(property_index: u32, value: FilterValue, case_sensitive: bool) -> Self {
+    pub fn new_greater_than(property_index: u32, value: IsarValue, case_sensitive: bool) -> Self {
         if let Some(value) = value.try_increment() {
             let max = value.get_max();
             FilterCondition {
@@ -56,7 +55,7 @@ impl FilterCondition {
 
     pub fn new_greater_than_equal(
         property_index: u32,
-        value: FilterValue,
+        value: IsarValue,
         case_sensitive: bool,
     ) -> Self {
         if value.is_null() {
@@ -72,7 +71,7 @@ impl FilterCondition {
         }
     }
 
-    pub fn new_less_than(property_index: u32, value: FilterValue, case_sensitive: bool) -> Self {
+    pub fn new_less_than(property_index: u32, value: IsarValue, case_sensitive: bool) -> Self {
         if let Some(value) = value.try_decrement() {
             FilterCondition {
                 property_index,
@@ -87,7 +86,7 @@ impl FilterCondition {
 
     pub fn new_less_than_equal(
         property_index: u32,
-        value: FilterValue,
+        value: IsarValue,
         case_sensitive: bool,
     ) -> Self {
         if value.is_max() {
@@ -104,13 +103,10 @@ impl FilterCondition {
 
     pub fn new_between(
         property_index: u32,
-        lower: FilterValue,
-        upper: FilterValue,
+        lower: IsarValue,
+        upper: IsarValue,
         case_sensitive: bool,
     ) -> Self {
-        if lower.is_null() && upper.is_max() {
-            return Self::new_true();
-        }
         match lower.partial_cmp(&upper) {
             Some(Ordering::Less | Ordering::Equal) => FilterCondition {
                 property_index,
@@ -129,8 +125,8 @@ impl FilterCondition {
             property_index,
             condition_type: ConditionType::Between,
             values: vec![
-                FilterValue::String(Some(lower)),
-                FilterValue::String(Some(upper)),
+                IsarValue::String(Some(lower)),
+                IsarValue::String(Some(upper)),
             ],
             case_sensitive,
         }
@@ -140,7 +136,7 @@ impl FilterCondition {
         FilterCondition {
             property_index,
             condition_type: ConditionType::StringEndsWith,
-            values: vec![FilterValue::String(Some(value.to_string()))],
+            values: vec![IsarValue::String(Some(value.to_string()))],
             case_sensitive,
         }
     }
@@ -149,7 +145,7 @@ impl FilterCondition {
         FilterCondition {
             property_index,
             condition_type: ConditionType::StringContains,
-            values: vec![FilterValue::String(Some(value.to_string()))],
+            values: vec![IsarValue::String(Some(value.to_string()))],
             case_sensitive,
         }
     }
@@ -158,7 +154,7 @@ impl FilterCondition {
         FilterCondition {
             property_index,
             condition_type: ConditionType::StringMatches,
-            values: vec![FilterValue::String(Some(value.to_string()))],
+            values: vec![IsarValue::String(Some(value.to_string()))],
             case_sensitive,
         }
     }
@@ -189,15 +185,15 @@ impl FilterCondition {
         self.condition_type
     }
 
-    pub fn get_value(&self) -> &FilterValue {
+    pub fn get_value(&self) -> &IsarValue {
         &self.values[0]
     }
 
-    pub fn get_lower_upper(&self) -> (&FilterValue, &FilterValue) {
+    pub fn get_lower_upper(&self) -> (&IsarValue, &IsarValue) {
         (&self.values[0], &self.values[1])
     }
 
-    pub fn get_values(&self) -> &[FilterValue] {
+    pub fn get_values(&self) -> &[IsarValue] {
         &self.values
     }
 
@@ -208,7 +204,7 @@ impl FilterCondition {
 
 #[cfg(test)]
 mod tests {
-    use super::{ConditionType, FilterCondition, FilterValue};
+    use super::{ConditionType, FilterCondition, IsarValue};
 
     mod is_null {
         use super::*;
@@ -288,33 +284,29 @@ mod tests {
         #[test]
         fn test_new_equal_to() {
             assert_eq!(
-                FilterCondition::new_equal_to(0, FilterValue::Bool(Some(true)), false),
+                FilterCondition::new_equal_to(0, IsarValue::Bool(Some(true)), false),
                 FilterCondition {
                     property_index: 0,
                     condition_type: ConditionType::Between,
-                    values: vec![FilterValue::Bool(Some(true)); 2],
+                    values: vec![IsarValue::Bool(Some(true)); 2],
                     case_sensitive: false,
                 }
             );
             assert_eq!(
-                FilterCondition::new_equal_to(1, FilterValue::Integer(2), false),
+                FilterCondition::new_equal_to(1, IsarValue::Integer(2), false),
                 FilterCondition {
                     property_index: 1,
                     condition_type: ConditionType::Between,
-                    values: vec![FilterValue::Integer(2); 2],
+                    values: vec![IsarValue::Integer(2); 2],
                     case_sensitive: false,
                 }
             );
             assert_eq!(
-                FilterCondition::new_equal_to(
-                    42,
-                    FilterValue::String(Some("foo".to_string())),
-                    true
-                ),
+                FilterCondition::new_equal_to(42, IsarValue::String(Some("foo".to_string())), true),
                 FilterCondition {
                     property_index: 42,
                     condition_type: ConditionType::Between,
-                    values: vec![FilterValue::String(Some("foo".to_string())); 2],
+                    values: vec![IsarValue::String(Some("foo".to_string())); 2],
                     case_sensitive: true,
                 }
             );
@@ -323,22 +315,17 @@ mod tests {
         #[test]
         fn test_get_property() {
             assert_eq!(
-                FilterCondition::new_equal_to(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_equal_to(0, IsarValue::Bool(Some(true)), false)
                     .get_property_index(),
                 0
             );
             assert_eq!(
-                FilterCondition::new_equal_to(1, FilterValue::Integer(2), false)
-                    .get_property_index(),
+                FilterCondition::new_equal_to(1, IsarValue::Integer(2), false).get_property_index(),
                 1
             );
             assert_eq!(
-                FilterCondition::new_equal_to(
-                    42,
-                    FilterValue::String(Some("foo".to_string())),
-                    true
-                )
-                .get_property_index(),
+                FilterCondition::new_equal_to(42, IsarValue::String(Some("foo".to_string())), true)
+                    .get_property_index(),
                 42
             );
         }
@@ -346,22 +333,17 @@ mod tests {
         #[test]
         fn test_get_condition_type() {
             assert_eq!(
-                FilterCondition::new_equal_to(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_equal_to(0, IsarValue::Bool(Some(true)), false)
                     .get_condition_type(),
                 ConditionType::Between
             );
             assert_eq!(
-                FilterCondition::new_equal_to(1, FilterValue::Integer(2), false)
-                    .get_condition_type(),
+                FilterCondition::new_equal_to(1, IsarValue::Integer(2), false).get_condition_type(),
                 ConditionType::Between
             );
             assert_eq!(
-                FilterCondition::new_equal_to(
-                    42,
-                    FilterValue::String(Some("foo".to_string())),
-                    true
-                )
-                .get_condition_type(),
+                FilterCondition::new_equal_to(42, IsarValue::String(Some("foo".to_string())), true)
+                    .get_condition_type(),
                 ConditionType::Between
             );
         }
@@ -369,27 +351,20 @@ mod tests {
         #[test]
         fn test_get_lower_upper() {
             assert_eq!(
-                FilterCondition::new_equal_to(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_equal_to(0, IsarValue::Bool(Some(true)), false)
+                    .get_lower_upper(),
+                (&IsarValue::Bool(Some(true)), &IsarValue::Bool(Some(true)))
+            );
+            assert_eq!(
+                FilterCondition::new_equal_to(1, IsarValue::Integer(2), false).get_lower_upper(),
+                (&IsarValue::Integer(2), &IsarValue::Integer(2))
+            );
+            assert_eq!(
+                FilterCondition::new_equal_to(42, IsarValue::String(Some("foo".to_string())), true)
                     .get_lower_upper(),
                 (
-                    &FilterValue::Bool(Some(true)),
-                    &FilterValue::Bool(Some(true))
-                )
-            );
-            assert_eq!(
-                FilterCondition::new_equal_to(1, FilterValue::Integer(2), false).get_lower_upper(),
-                (&FilterValue::Integer(2), &FilterValue::Integer(2))
-            );
-            assert_eq!(
-                FilterCondition::new_equal_to(
-                    42,
-                    FilterValue::String(Some("foo".to_string())),
-                    true
-                )
-                .get_lower_upper(),
-                (
-                    &FilterValue::String(Some("foo".to_string())),
-                    &FilterValue::String(Some("foo".to_string()))
+                    &IsarValue::String(Some("foo".to_string())),
+                    &IsarValue::String(Some("foo".to_string()))
                 )
             );
         }
@@ -397,23 +372,19 @@ mod tests {
         #[test]
         fn test_get_values() {
             assert_eq!(
-                FilterCondition::new_equal_to(0, FilterValue::Bool(Some(true)), false).get_values(),
-                vec![FilterValue::Bool(Some(true)), FilterValue::Bool(Some(true))]
+                FilterCondition::new_equal_to(0, IsarValue::Bool(Some(true)), false).get_values(),
+                vec![IsarValue::Bool(Some(true)), IsarValue::Bool(Some(true))]
             );
             assert_eq!(
-                FilterCondition::new_equal_to(1, FilterValue::Integer(2), false).get_values(),
-                vec![FilterValue::Integer(2), FilterValue::Integer(2)]
+                FilterCondition::new_equal_to(1, IsarValue::Integer(2), false).get_values(),
+                vec![IsarValue::Integer(2), IsarValue::Integer(2)]
             );
             assert_eq!(
-                FilterCondition::new_equal_to(
-                    42,
-                    FilterValue::String(Some("foo".to_string())),
-                    true
-                )
-                .get_values(),
+                FilterCondition::new_equal_to(42, IsarValue::String(Some("foo".to_string())), true)
+                    .get_values(),
                 vec![
-                    FilterValue::String(Some("foo".to_string())),
-                    FilterValue::String(Some("foo".to_string()))
+                    IsarValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string()))
                 ]
             );
         }
@@ -421,28 +392,23 @@ mod tests {
         #[test]
         fn test_get_case_sensitive() {
             assert_eq!(
-                FilterCondition::new_equal_to(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_equal_to(0, IsarValue::Bool(Some(true)), false)
                     .get_case_sensitive(),
                 false
             );
             assert_eq!(
-                FilterCondition::new_equal_to(1, FilterValue::Integer(2), false)
-                    .get_case_sensitive(),
+                FilterCondition::new_equal_to(1, IsarValue::Integer(2), false).get_case_sensitive(),
                 false
             );
             assert_eq!(
-                FilterCondition::new_equal_to(
-                    42,
-                    FilterValue::String(Some("foo".to_string())),
-                    true
-                )
-                .get_case_sensitive(),
+                FilterCondition::new_equal_to(42, IsarValue::String(Some("foo".to_string())), true)
+                    .get_case_sensitive(),
                 true
             );
             assert_eq!(
                 FilterCondition::new_equal_to(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 )
                 .get_case_sensitive(),
@@ -457,34 +423,34 @@ mod tests {
         #[test]
         fn test_new_greater_than() {
             assert_eq!(
-                FilterCondition::new_greater_than(0, FilterValue::Bool(Some(true)), false),
+                FilterCondition::new_greater_than(0, IsarValue::Bool(Some(true)), false),
                 FilterCondition::new_false()
             );
             assert_eq!(
-                FilterCondition::new_greater_than(1, FilterValue::Integer(2), false),
+                FilterCondition::new_greater_than(1, IsarValue::Integer(2), false),
                 FilterCondition {
                     property_index: 1,
                     condition_type: ConditionType::Between,
-                    values: vec![FilterValue::Integer(3), FilterValue::Integer(i64::MAX)],
+                    values: vec![IsarValue::Integer(3), IsarValue::Integer(i64::MAX)],
                     case_sensitive: false,
                 }
             );
             assert_eq!(
-                FilterCondition::new_greater_than(2, FilterValue::Integer(i64::MAX), false),
+                FilterCondition::new_greater_than(2, IsarValue::Integer(i64::MAX), false),
                 FilterCondition::new_false()
             );
             assert_eq!(
                 FilterCondition::new_greater_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 ),
                 FilterCondition {
                     property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
-                        FilterValue::String(Some("fop".to_string())),
-                        FilterValue::String(Some("\u{10ffff}".to_string()))
+                        IsarValue::String(Some("fop".to_string())),
+                        IsarValue::String(Some("\u{10ffff}".to_string()))
                     ],
                     case_sensitive: true,
                 }
@@ -492,15 +458,15 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_greater_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 ),
                 FilterCondition {
                     property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
-                        FilterValue::String(Some("fop".to_string())),
-                        FilterValue::String(Some("\u{10ffff}".to_string()))
+                        IsarValue::String(Some("fop".to_string())),
+                        IsarValue::String(Some("\u{10ffff}".to_string()))
                     ],
                     case_sensitive: false,
                 }
@@ -510,24 +476,24 @@ mod tests {
         #[test]
         fn test_get_property() {
             assert_eq!(
-                FilterCondition::new_greater_than(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_greater_than(0, IsarValue::Bool(Some(true)), false)
                     .get_property_index(),
                 u32::MAX
             );
             assert_eq!(
-                FilterCondition::new_greater_than(1, FilterValue::Integer(2), false)
+                FilterCondition::new_greater_than(1, IsarValue::Integer(2), false)
                     .get_property_index(),
                 1
             );
             assert_eq!(
-                FilterCondition::new_greater_than(2, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_greater_than(2, IsarValue::Integer(i64::MAX), false)
                     .get_property_index(),
                 u32::MAX
             );
             assert_eq!(
                 FilterCondition::new_greater_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_property_index(),
@@ -538,24 +504,24 @@ mod tests {
         #[test]
         fn test_get_condition_type() {
             assert_eq!(
-                FilterCondition::new_greater_than(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_greater_than(0, IsarValue::Bool(Some(true)), false)
                     .get_condition_type(),
                 ConditionType::False,
             );
             assert_eq!(
-                FilterCondition::new_greater_than(1, FilterValue::Integer(2), false)
+                FilterCondition::new_greater_than(1, IsarValue::Integer(2), false)
                     .get_condition_type(),
                 ConditionType::Between
             );
             assert_eq!(
-                FilterCondition::new_greater_than(2, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_greater_than(2, IsarValue::Integer(i64::MAX), false)
                     .get_condition_type(),
                 ConditionType::False
             );
             assert_eq!(
                 FilterCondition::new_greater_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_condition_type(),
@@ -566,36 +532,30 @@ mod tests {
         #[test]
         fn test_get_lower_upper() {
             assert_eq!(
-                FilterCondition::new_greater_than(0, FilterValue::Bool(Some(false)), false)
+                FilterCondition::new_greater_than(0, IsarValue::Bool(Some(false)), false)
                     .get_lower_upper(),
-                (
-                    &FilterValue::Bool(Some(true)),
-                    &FilterValue::Bool(Some(true)),
-                )
+                (&IsarValue::Bool(Some(true)), &IsarValue::Bool(Some(true)),)
             );
             assert_eq!(
-                FilterCondition::new_greater_than(1, FilterValue::Integer(2), false)
+                FilterCondition::new_greater_than(1, IsarValue::Integer(2), false)
                     .get_lower_upper(),
-                (&FilterValue::Integer(3), &FilterValue::Integer(i64::MAX))
+                (&IsarValue::Integer(3), &IsarValue::Integer(i64::MAX))
             );
             assert_eq!(
-                FilterCondition::new_greater_than(2, FilterValue::Integer(i64::MAX - 1), false)
+                FilterCondition::new_greater_than(2, IsarValue::Integer(i64::MAX - 1), false)
                     .get_lower_upper(),
-                (
-                    &FilterValue::Integer(i64::MAX),
-                    &FilterValue::Integer(i64::MAX),
-                )
+                (&IsarValue::Integer(i64::MAX), &IsarValue::Integer(i64::MAX),)
             );
             assert_eq!(
                 FilterCondition::new_greater_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_lower_upper(),
                 (
-                    &FilterValue::String(Some("fop".to_string())),
-                    &FilterValue::String(Some("\u{10ffff}".to_string())),
+                    &IsarValue::String(Some("fop".to_string())),
+                    &IsarValue::String(Some("\u{10ffff}".to_string())),
                 )
             );
         }
@@ -603,29 +563,29 @@ mod tests {
         #[test]
         fn test_get_values() {
             assert_eq!(
-                FilterCondition::new_greater_than(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_greater_than(0, IsarValue::Bool(Some(true)), false)
                     .get_values(),
                 vec![]
             );
             assert_eq!(
-                FilterCondition::new_greater_than(1, FilterValue::Integer(2), false).get_values(),
-                vec![FilterValue::Integer(3), FilterValue::Integer(i64::MAX)]
+                FilterCondition::new_greater_than(1, IsarValue::Integer(2), false).get_values(),
+                vec![IsarValue::Integer(3), IsarValue::Integer(i64::MAX)]
             );
             assert_eq!(
-                FilterCondition::new_greater_than(2, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_greater_than(2, IsarValue::Integer(i64::MAX), false)
                     .get_values(),
                 vec![]
             );
             assert_eq!(
                 FilterCondition::new_greater_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_values(),
                 vec![
-                    FilterValue::String(Some("fop".to_string())),
-                    FilterValue::String(Some("\u{10ffff}".to_string())),
+                    IsarValue::String(Some("fop".to_string())),
+                    IsarValue::String(Some("\u{10ffff}".to_string())),
                 ]
             );
         }
@@ -633,24 +593,24 @@ mod tests {
         #[test]
         fn test_get_case_sensitive() {
             assert_eq!(
-                FilterCondition::new_greater_than(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_greater_than(0, IsarValue::Bool(Some(true)), false)
                     .get_case_sensitive(),
                 false
             );
             assert_eq!(
-                FilterCondition::new_greater_than(1, FilterValue::Integer(2), false)
+                FilterCondition::new_greater_than(1, IsarValue::Integer(2), false)
                     .get_case_sensitive(),
                 false
             );
             assert_eq!(
-                FilterCondition::new_greater_than(2, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_greater_than(2, IsarValue::Integer(i64::MAX), false)
                     .get_case_sensitive(),
                 false
             );
             assert_eq!(
                 FilterCondition::new_greater_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_case_sensitive(),
@@ -659,7 +619,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_greater_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 )
                 .get_case_sensitive(),
@@ -674,48 +634,48 @@ mod tests {
         #[test]
         fn test_new_greater_than_equal() {
             assert_eq!(
-                FilterCondition::new_greater_than_equal(0, FilterValue::Bool(Some(true)), false),
+                FilterCondition::new_greater_than_equal(0, IsarValue::Bool(Some(true)), false),
                 FilterCondition {
                     property_index: 0,
                     condition_type: ConditionType::Between,
-                    values: vec![FilterValue::Bool(Some(true)); 2],
+                    values: vec![IsarValue::Bool(Some(true)); 2],
                     case_sensitive: false,
                 }
             );
             assert_eq!(
-                FilterCondition::new_greater_than_equal(0, FilterValue::Bool(None), false),
+                FilterCondition::new_greater_than_equal(0, IsarValue::Bool(None), false),
                 FilterCondition::new_true()
             );
             assert_eq!(
-                FilterCondition::new_greater_than_equal(1, FilterValue::Integer(2), false),
+                FilterCondition::new_greater_than_equal(1, IsarValue::Integer(2), false),
                 FilterCondition {
                     property_index: 1,
                     condition_type: ConditionType::Between,
-                    values: vec![FilterValue::Integer(2), FilterValue::Integer(i64::MAX)],
+                    values: vec![IsarValue::Integer(2), IsarValue::Integer(i64::MAX)],
                     case_sensitive: false,
                 }
             );
             assert_eq!(
-                FilterCondition::new_greater_than_equal(2, FilterValue::Integer(i64::MAX), false),
+                FilterCondition::new_greater_than_equal(2, IsarValue::Integer(i64::MAX), false),
                 FilterCondition {
                     property_index: 2,
                     condition_type: ConditionType::Between,
-                    values: vec![FilterValue::Integer(i64::MAX); 2],
+                    values: vec![IsarValue::Integer(i64::MAX); 2],
                     case_sensitive: false,
                 }
             );
             assert_eq!(
                 FilterCondition::new_greater_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 ),
                 FilterCondition {
                     property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
-                        FilterValue::String(Some("foo".to_string())),
-                        FilterValue::String(Some("\u{10ffff}".to_string()))
+                        IsarValue::String(Some("foo".to_string())),
+                        IsarValue::String(Some("\u{10ffff}".to_string()))
                     ],
                     case_sensitive: true,
                 }
@@ -723,15 +683,15 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_greater_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 ),
                 FilterCondition {
                     property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
-                        FilterValue::String(Some("foo".to_string())),
-                        FilterValue::String(Some("\u{10ffff}".to_string()))
+                        IsarValue::String(Some("foo".to_string())),
+                        IsarValue::String(Some("\u{10ffff}".to_string()))
                     ],
                     case_sensitive: false,
                 }
@@ -741,24 +701,24 @@ mod tests {
         #[test]
         fn test_get_property() {
             assert_eq!(
-                FilterCondition::new_greater_than_equal(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_greater_than_equal(0, IsarValue::Bool(Some(true)), false)
                     .get_property_index(),
                 0
             );
             assert_eq!(
-                FilterCondition::new_greater_than_equal(1, FilterValue::Integer(2), false)
+                FilterCondition::new_greater_than_equal(1, IsarValue::Integer(2), false)
                     .get_property_index(),
                 1
             );
             assert_eq!(
-                FilterCondition::new_greater_than_equal(1, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_greater_than_equal(1, IsarValue::Integer(i64::MAX), false)
                     .get_property_index(),
                 1
             );
             assert_eq!(
                 FilterCondition::new_greater_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_property_index(),
@@ -769,24 +729,24 @@ mod tests {
         #[test]
         fn test_get_condition_type() {
             assert_eq!(
-                FilterCondition::new_greater_than_equal(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_greater_than_equal(0, IsarValue::Bool(Some(true)), false)
                     .get_condition_type(),
                 ConditionType::Between
             );
             assert_eq!(
-                FilterCondition::new_greater_than_equal(1, FilterValue::Integer(2), false)
+                FilterCondition::new_greater_than_equal(1, IsarValue::Integer(2), false)
                     .get_condition_type(),
                 ConditionType::Between
             );
             assert_eq!(
-                FilterCondition::new_greater_than_equal(2, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_greater_than_equal(2, IsarValue::Integer(i64::MAX), false)
                     .get_condition_type(),
                 ConditionType::Between
             );
             assert_eq!(
                 FilterCondition::new_greater_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_condition_type(),
@@ -797,40 +757,33 @@ mod tests {
         #[test]
         fn test_get_lower_upper() {
             assert_eq!(
-                FilterCondition::new_greater_than_equal(0, FilterValue::Bool(Some(false)), false)
+                FilterCondition::new_greater_than_equal(0, IsarValue::Bool(Some(false)), false)
                     .get_lower_upper(),
-                (
-                    &FilterValue::Bool(Some(false)),
-                    &FilterValue::Bool(Some(true)),
-                )
+                (&IsarValue::Bool(Some(false)), &IsarValue::Bool(Some(true)),)
             );
             assert_eq!(
-                FilterCondition::new_greater_than_equal(1, FilterValue::Integer(2), false)
+                FilterCondition::new_greater_than_equal(1, IsarValue::Integer(2), false)
                     .get_lower_upper(),
-                (&FilterValue::Integer(2), &FilterValue::Integer(i64::MAX))
+                (&IsarValue::Integer(2), &IsarValue::Integer(i64::MAX))
             );
             assert_eq!(
-                FilterCondition::new_greater_than_equal(
-                    1,
-                    FilterValue::Integer(i64::MAX - 1),
-                    false
-                )
-                .get_lower_upper(),
+                FilterCondition::new_greater_than_equal(1, IsarValue::Integer(i64::MAX - 1), false)
+                    .get_lower_upper(),
                 (
-                    &FilterValue::Integer(i64::MAX - 1),
-                    &FilterValue::Integer(i64::MAX),
+                    &IsarValue::Integer(i64::MAX - 1),
+                    &IsarValue::Integer(i64::MAX),
                 )
             );
             assert_eq!(
                 FilterCondition::new_greater_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_lower_upper(),
                 (
-                    &FilterValue::String(Some("foo".to_string())),
-                    &FilterValue::String(Some("\u{10ffff}".to_string())),
+                    &IsarValue::String(Some("foo".to_string())),
+                    &IsarValue::String(Some("\u{10ffff}".to_string())),
                 )
             );
         }
@@ -838,30 +791,30 @@ mod tests {
         #[test]
         fn test_get_values() {
             assert_eq!(
-                FilterCondition::new_greater_than_equal(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_greater_than_equal(0, IsarValue::Bool(Some(true)), false)
                     .get_values(),
-                vec![FilterValue::Bool(Some(true)); 2]
+                vec![IsarValue::Bool(Some(true)); 2]
             );
             assert_eq!(
-                FilterCondition::new_greater_than_equal(1, FilterValue::Integer(2), false)
+                FilterCondition::new_greater_than_equal(1, IsarValue::Integer(2), false)
                     .get_values(),
-                vec![FilterValue::Integer(2), FilterValue::Integer(i64::MAX)]
+                vec![IsarValue::Integer(2), IsarValue::Integer(i64::MAX)]
             );
             assert_eq!(
-                FilterCondition::new_greater_than_equal(2, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_greater_than_equal(2, IsarValue::Integer(i64::MAX), false)
                     .get_values(),
-                vec![FilterValue::Integer(i64::MAX); 2]
+                vec![IsarValue::Integer(i64::MAX); 2]
             );
             assert_eq!(
                 FilterCondition::new_greater_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_values(),
                 vec![
-                    FilterValue::String(Some("foo".to_string())),
-                    FilterValue::String(Some("\u{10ffff}".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("\u{10ffff}".to_string())),
                 ]
             );
         }
@@ -869,24 +822,24 @@ mod tests {
         #[test]
         fn test_get_case_sensitive() {
             assert_eq!(
-                FilterCondition::new_greater_than_equal(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_greater_than_equal(0, IsarValue::Bool(Some(true)), false)
                     .get_case_sensitive(),
                 false
             );
             assert_eq!(
-                FilterCondition::new_greater_than_equal(1, FilterValue::Integer(2), false)
+                FilterCondition::new_greater_than_equal(1, IsarValue::Integer(2), false)
                     .get_case_sensitive(),
                 false
             );
             assert_eq!(
-                FilterCondition::new_greater_than_equal(2, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_greater_than_equal(2, IsarValue::Integer(i64::MAX), false)
                     .get_case_sensitive(),
                 false
             );
             assert_eq!(
                 FilterCondition::new_greater_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_case_sensitive(),
@@ -895,7 +848,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_greater_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 )
                 .get_case_sensitive(),
@@ -910,43 +863,43 @@ mod tests {
         #[test]
         fn test_new_less_than() {
             assert_eq!(
-                FilterCondition::new_less_than(0, FilterValue::Bool(Some(true)), false),
+                FilterCondition::new_less_than(0, IsarValue::Bool(Some(true)), false),
                 FilterCondition {
                     property_index: 0,
                     condition_type: ConditionType::Between,
-                    values: vec![FilterValue::Bool(None), FilterValue::Bool(Some(false))],
+                    values: vec![IsarValue::Bool(None), IsarValue::Bool(Some(false))],
                     case_sensitive: false,
                 }
             );
             assert_eq!(
-                FilterCondition::new_less_than(0, FilterValue::Bool(None), false),
+                FilterCondition::new_less_than(0, IsarValue::Bool(None), false),
                 FilterCondition::new_false()
             );
             assert_eq!(
-                FilterCondition::new_less_than(1, FilterValue::Integer(2), false),
+                FilterCondition::new_less_than(1, IsarValue::Integer(2), false),
                 FilterCondition {
                     property_index: 1,
                     condition_type: ConditionType::Between,
-                    values: vec![FilterValue::Integer(i64::MIN), FilterValue::Integer(1)],
+                    values: vec![IsarValue::Integer(i64::MIN), IsarValue::Integer(1)],
                     case_sensitive: false,
                 }
             );
             assert_eq!(
-                FilterCondition::new_less_than(2, FilterValue::Integer(i64::MIN), false),
+                FilterCondition::new_less_than(2, IsarValue::Integer(i64::MIN), false),
                 FilterCondition::new_false()
             );
             assert_eq!(
                 FilterCondition::new_less_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 ),
                 FilterCondition {
                     property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
-                        FilterValue::String(None),
-                        FilterValue::String(Some("fon".to_string()))
+                        IsarValue::String(None),
+                        IsarValue::String(Some("fon".to_string()))
                     ],
                     case_sensitive: true,
                 }
@@ -954,15 +907,15 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_less_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 ),
                 FilterCondition {
                     property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
-                        FilterValue::String(None),
-                        FilterValue::String(Some("fon".to_string()))
+                        IsarValue::String(None),
+                        IsarValue::String(Some("fon".to_string()))
                     ],
                     case_sensitive: false,
                 }
@@ -972,29 +925,29 @@ mod tests {
         #[test]
         fn test_get_property() {
             assert_eq!(
-                FilterCondition::new_less_than(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_less_than(0, IsarValue::Bool(Some(true)), false)
                     .get_property_index(),
                 0
             );
             assert_eq!(
-                FilterCondition::new_less_than(0, FilterValue::Bool(None), false)
+                FilterCondition::new_less_than(0, IsarValue::Bool(None), false)
                     .get_property_index(),
                 u32::MAX
             );
             assert_eq!(
-                FilterCondition::new_less_than(1, FilterValue::Integer(2), false)
+                FilterCondition::new_less_than(1, IsarValue::Integer(2), false)
                     .get_property_index(),
                 1
             );
             assert_eq!(
-                FilterCondition::new_less_than(2, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_less_than(2, IsarValue::Integer(i64::MAX), false)
                     .get_property_index(),
                 2
             );
             assert_eq!(
                 FilterCondition::new_less_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_property_index(),
@@ -1005,34 +958,34 @@ mod tests {
         #[test]
         fn test_get_condition_type() {
             assert_eq!(
-                FilterCondition::new_less_than(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_less_than(0, IsarValue::Bool(Some(true)), false)
                     .get_condition_type(),
                 ConditionType::Between
             );
             assert_eq!(
-                FilterCondition::new_less_than(0, FilterValue::Bool(None), false)
+                FilterCondition::new_less_than(0, IsarValue::Bool(None), false)
                     .get_condition_type(),
                 ConditionType::False
             );
             assert_eq!(
-                FilterCondition::new_less_than(1, FilterValue::Integer(2), false)
+                FilterCondition::new_less_than(1, IsarValue::Integer(2), false)
                     .get_condition_type(),
                 ConditionType::Between
             );
             assert_eq!(
-                FilterCondition::new_less_than(2, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_less_than(2, IsarValue::Integer(i64::MAX), false)
                     .get_condition_type(),
                 ConditionType::Between
             );
             assert_eq!(
-                FilterCondition::new_less_than(2, FilterValue::Integer(i64::MIN), false)
+                FilterCondition::new_less_than(2, IsarValue::Integer(i64::MIN), false)
                     .get_condition_type(),
                 ConditionType::False
             );
             assert_eq!(
                 FilterCondition::new_less_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_condition_type(),
@@ -1043,32 +996,29 @@ mod tests {
         #[test]
         fn test_get_lower_upper() {
             assert_eq!(
-                FilterCondition::new_less_than(0, FilterValue::Bool(Some(false)), false)
+                FilterCondition::new_less_than(0, IsarValue::Bool(Some(false)), false)
                     .get_lower_upper(),
-                (&FilterValue::Bool(None), &FilterValue::Bool(None))
+                (&IsarValue::Bool(None), &IsarValue::Bool(None))
             );
             assert_eq!(
-                FilterCondition::new_less_than(1, FilterValue::Integer(2), false).get_lower_upper(),
-                (&FilterValue::Integer(i64::MIN), &FilterValue::Integer(1))
+                FilterCondition::new_less_than(1, IsarValue::Integer(2), false).get_lower_upper(),
+                (&IsarValue::Integer(i64::MIN), &IsarValue::Integer(1))
             );
             assert_eq!(
-                FilterCondition::new_less_than(2, FilterValue::Integer(i64::MIN + 1), false)
+                FilterCondition::new_less_than(2, IsarValue::Integer(i64::MIN + 1), false)
                     .get_lower_upper(),
-                (
-                    &FilterValue::Integer(i64::MIN),
-                    &FilterValue::Integer(i64::MIN),
-                )
+                (&IsarValue::Integer(i64::MIN), &IsarValue::Integer(i64::MIN),)
             );
             assert_eq!(
                 FilterCondition::new_less_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_lower_upper(),
                 (
-                    &FilterValue::String(None),
-                    &FilterValue::String(Some("fon".to_string())),
+                    &IsarValue::String(None),
+                    &IsarValue::String(Some("fon".to_string())),
                 )
             );
         }
@@ -1076,36 +1026,34 @@ mod tests {
         #[test]
         fn test_get_values() {
             assert_eq!(
-                FilterCondition::new_less_than(0, FilterValue::Bool(Some(true)), false)
-                    .get_values(),
-                vec![FilterValue::Bool(None), FilterValue::Bool(Some(false))]
+                FilterCondition::new_less_than(0, IsarValue::Bool(Some(true)), false).get_values(),
+                vec![IsarValue::Bool(None), IsarValue::Bool(Some(false))]
             );
             assert_eq!(
-                FilterCondition::new_less_than(0, FilterValue::Bool(None), false).get_values(),
+                FilterCondition::new_less_than(0, IsarValue::Bool(None), false).get_values(),
                 vec![]
             );
             assert_eq!(
-                FilterCondition::new_less_than(1, FilterValue::Integer(2), false).get_values(),
-                vec![FilterValue::Integer(i64::MIN), FilterValue::Integer(1)]
+                FilterCondition::new_less_than(1, IsarValue::Integer(2), false).get_values(),
+                vec![IsarValue::Integer(i64::MIN), IsarValue::Integer(1)]
             );
             assert_eq!(
-                FilterCondition::new_less_than(2, FilterValue::Integer(i64::MAX), false)
-                    .get_values(),
+                FilterCondition::new_less_than(2, IsarValue::Integer(i64::MAX), false).get_values(),
                 vec![
-                    FilterValue::Integer(i64::MIN),
-                    FilterValue::Integer(i64::MAX - 1),
+                    IsarValue::Integer(i64::MIN),
+                    IsarValue::Integer(i64::MAX - 1),
                 ]
             );
             assert_eq!(
                 FilterCondition::new_less_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_values(),
                 vec![
-                    FilterValue::String(None),
-                    FilterValue::String(Some("fon".to_string())),
+                    IsarValue::String(None),
+                    IsarValue::String(Some("fon".to_string())),
                 ]
             );
         }
@@ -1113,24 +1061,24 @@ mod tests {
         #[test]
         fn test_get_case_sensitive() {
             assert_eq!(
-                FilterCondition::new_less_than(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_less_than(0, IsarValue::Bool(Some(true)), false)
                     .get_case_sensitive(),
                 false
             );
             assert_eq!(
-                FilterCondition::new_less_than(1, FilterValue::Integer(2), false)
+                FilterCondition::new_less_than(1, IsarValue::Integer(2), false)
                     .get_case_sensitive(),
                 false
             );
             assert_eq!(
-                FilterCondition::new_less_than(2, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_less_than(2, IsarValue::Integer(i64::MAX), false)
                     .get_case_sensitive(),
                 false
             );
             assert_eq!(
                 FilterCondition::new_less_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_case_sensitive(),
@@ -1139,7 +1087,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_less_than(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 )
                 .get_case_sensitive(),
@@ -1154,48 +1102,48 @@ mod tests {
         #[test]
         fn test_new_less_than_equal() {
             assert_eq!(
-                FilterCondition::new_less_than_equal(0, FilterValue::Bool(Some(true)), false),
+                FilterCondition::new_less_than_equal(0, IsarValue::Bool(Some(true)), false),
                 FilterCondition::new_true()
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(0, FilterValue::Bool(None), false),
+                FilterCondition::new_less_than_equal(0, IsarValue::Bool(None), false),
                 FilterCondition {
                     property_index: 0,
                     condition_type: ConditionType::Between,
-                    values: vec![FilterValue::Bool(None); 2],
+                    values: vec![IsarValue::Bool(None); 2],
                     case_sensitive: false,
                 }
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(1, FilterValue::Integer(2), false),
+                FilterCondition::new_less_than_equal(1, IsarValue::Integer(2), false),
                 FilterCondition {
                     property_index: 1,
                     condition_type: ConditionType::Between,
-                    values: vec![FilterValue::Integer(i64::MIN), FilterValue::Integer(2)],
+                    values: vec![IsarValue::Integer(i64::MIN), IsarValue::Integer(2)],
                     case_sensitive: false,
                 }
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(2, FilterValue::Integer(i64::MIN), false),
+                FilterCondition::new_less_than_equal(2, IsarValue::Integer(i64::MIN), false),
                 FilterCondition {
                     property_index: 2,
                     condition_type: ConditionType::Between,
-                    values: vec![FilterValue::Integer(i64::MIN); 2],
+                    values: vec![IsarValue::Integer(i64::MIN); 2],
                     case_sensitive: false,
                 }
             );
             assert_eq!(
                 FilterCondition::new_less_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 ),
                 FilterCondition {
                     property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
-                        FilterValue::String(None),
-                        FilterValue::String(Some("foo".to_string())),
+                        IsarValue::String(None),
+                        IsarValue::String(Some("foo".to_string())),
                     ],
                     case_sensitive: true
                 }
@@ -1203,15 +1151,15 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_less_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 ),
                 FilterCondition {
                     property_index: 42,
                     condition_type: ConditionType::Between,
                     values: vec![
-                        FilterValue::String(None),
-                        FilterValue::String(Some("foo".to_string())),
+                        IsarValue::String(None),
+                        IsarValue::String(Some("foo".to_string())),
                     ],
                     case_sensitive: false
                 }
@@ -1221,29 +1169,29 @@ mod tests {
         #[test]
         fn test_get_property() {
             assert_eq!(
-                FilterCondition::new_less_than_equal(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_less_than_equal(0, IsarValue::Bool(Some(true)), false)
                     .get_property_index(),
                 u32::MAX
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(0, FilterValue::Bool(None), false)
+                FilterCondition::new_less_than_equal(0, IsarValue::Bool(None), false)
                     .get_property_index(),
                 0
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(1, FilterValue::Integer(2), false)
+                FilterCondition::new_less_than_equal(1, IsarValue::Integer(2), false)
                     .get_property_index(),
                 1
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(2, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_less_than_equal(2, IsarValue::Integer(i64::MAX), false)
                     .get_property_index(),
                 u32::MAX
             );
             assert_eq!(
                 FilterCondition::new_less_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_property_index(),
@@ -1254,34 +1202,34 @@ mod tests {
         #[test]
         fn test_get_condition_type() {
             assert_eq!(
-                FilterCondition::new_less_than_equal(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_less_than_equal(0, IsarValue::Bool(Some(true)), false)
                     .get_condition_type(),
                 ConditionType::True
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(0, FilterValue::Bool(None), false)
+                FilterCondition::new_less_than_equal(0, IsarValue::Bool(None), false)
                     .get_condition_type(),
                 ConditionType::Between
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(1, FilterValue::Integer(2), false)
+                FilterCondition::new_less_than_equal(1, IsarValue::Integer(2), false)
                     .get_condition_type(),
                 ConditionType::Between
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(2, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_less_than_equal(2, IsarValue::Integer(i64::MAX), false)
                     .get_condition_type(),
                 ConditionType::True
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(2, FilterValue::Integer(i64::MIN), false)
+                FilterCondition::new_less_than_equal(2, IsarValue::Integer(i64::MIN), false)
                     .get_condition_type(),
                 ConditionType::Between
             );
             assert_eq!(
                 FilterCondition::new_less_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_condition_type(),
@@ -1292,33 +1240,33 @@ mod tests {
         #[test]
         fn test_get_lower_upper() {
             assert_eq!(
-                FilterCondition::new_less_than_equal(0, FilterValue::Bool(Some(false)), false)
+                FilterCondition::new_less_than_equal(0, IsarValue::Bool(Some(false)), false)
                     .get_lower_upper(),
-                (&FilterValue::Bool(None), &FilterValue::Bool(Some(false)))
+                (&IsarValue::Bool(None), &IsarValue::Bool(Some(false)))
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(1, FilterValue::Integer(2), false)
+                FilterCondition::new_less_than_equal(1, IsarValue::Integer(2), false)
                     .get_lower_upper(),
-                (&FilterValue::Integer(i64::MIN), &FilterValue::Integer(2))
+                (&IsarValue::Integer(i64::MIN), &IsarValue::Integer(2))
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(2, FilterValue::Integer(i64::MIN + 1), false)
+                FilterCondition::new_less_than_equal(2, IsarValue::Integer(i64::MIN + 1), false)
                     .get_lower_upper(),
                 (
-                    &FilterValue::Integer(i64::MIN),
-                    &FilterValue::Integer(i64::MIN + 1),
+                    &IsarValue::Integer(i64::MIN),
+                    &IsarValue::Integer(i64::MIN + 1),
                 )
             );
             assert_eq!(
                 FilterCondition::new_less_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_lower_upper(),
                 (
-                    &FilterValue::String(None),
-                    &FilterValue::String(Some("foo".to_string())),
+                    &IsarValue::String(None),
+                    &IsarValue::String(Some("foo".to_string())),
                 )
             );
         }
@@ -1326,35 +1274,33 @@ mod tests {
         #[test]
         fn test_get_values() {
             assert_eq!(
-                FilterCondition::new_less_than_equal(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_less_than_equal(0, IsarValue::Bool(Some(true)), false)
                     .get_values(),
                 vec![]
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(0, FilterValue::Bool(None), false)
-                    .get_values(),
-                vec![FilterValue::Bool(None); 2]
+                FilterCondition::new_less_than_equal(0, IsarValue::Bool(None), false).get_values(),
+                vec![IsarValue::Bool(None); 2]
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(1, FilterValue::Integer(2), false)
-                    .get_values(),
-                vec![FilterValue::Integer(i64::MIN), FilterValue::Integer(2)]
+                FilterCondition::new_less_than_equal(1, IsarValue::Integer(2), false).get_values(),
+                vec![IsarValue::Integer(i64::MIN), IsarValue::Integer(2)]
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(2, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_less_than_equal(2, IsarValue::Integer(i64::MAX), false)
                     .get_values(),
                 vec![]
             );
             assert_eq!(
                 FilterCondition::new_less_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_values(),
                 vec![
-                    FilterValue::String(None),
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(None),
+                    IsarValue::String(Some("foo".to_string())),
                 ]
             );
         }
@@ -1362,24 +1308,24 @@ mod tests {
         #[test]
         fn test_get_case_sensitive() {
             assert_eq!(
-                FilterCondition::new_less_than_equal(0, FilterValue::Bool(Some(true)), false)
+                FilterCondition::new_less_than_equal(0, IsarValue::Bool(Some(true)), false)
                     .get_case_sensitive(),
                 false
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(1, FilterValue::Integer(2), false)
+                FilterCondition::new_less_than_equal(1, IsarValue::Integer(2), false)
                     .get_case_sensitive(),
                 false
             );
             assert_eq!(
-                FilterCondition::new_less_than_equal(2, FilterValue::Integer(i64::MAX), false)
+                FilterCondition::new_less_than_equal(2, IsarValue::Integer(i64::MAX), false)
                     .get_case_sensitive(),
                 false
             );
             assert_eq!(
                 FilterCondition::new_less_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     true
                 )
                 .get_case_sensitive(),
@@ -1388,7 +1334,7 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_less_than_equal(
                     42,
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 )
                 .get_case_sensitive(),
@@ -1405,48 +1351,36 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     0,
-                    FilterValue::Bool(Some(false)),
-                    FilterValue::Bool(Some(true)),
+                    IsarValue::Bool(Some(false)),
+                    IsarValue::Bool(Some(true)),
                     false
                 ),
                 FilterCondition {
                     property_index: 0,
                     condition_type: ConditionType::Between,
-                    values: vec![
-                        FilterValue::Bool(Some(false)),
-                        FilterValue::Bool(Some(true)),
-                    ],
+                    values: vec![IsarValue::Bool(Some(false)), IsarValue::Bool(Some(true)),],
                     case_sensitive: false,
                 }
             );
             assert_eq!(
                 FilterCondition::new_between(
                     1,
-                    FilterValue::Integer(1),
-                    FilterValue::Integer(2),
+                    IsarValue::Integer(1),
+                    IsarValue::Integer(2),
                     false
                 ),
                 FilterCondition {
                     property_index: 1,
                     condition_type: ConditionType::Between,
-                    values: vec![FilterValue::Integer(1), FilterValue::Integer(2)],
+                    values: vec![IsarValue::Integer(1), IsarValue::Integer(2)],
                     case_sensitive: false,
                 }
             );
             assert_eq!(
                 FilterCondition::new_between(
                     1,
-                    FilterValue::Integer(i64::MIN),
-                    FilterValue::Integer(i64::MAX),
-                    false
-                ),
-                FilterCondition::new_true()
-            );
-            assert_eq!(
-                FilterCondition::new_between(
-                    1,
-                    FilterValue::Integer(2),
-                    FilterValue::Integer(1),
+                    IsarValue::Integer(2),
+                    IsarValue::Integer(1),
                     false
                 ),
                 FilterCondition::new_false()
@@ -1454,16 +1388,16 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     2,
-                    FilterValue::Integer(i64::MIN + 1),
-                    FilterValue::Integer(i64::MAX),
+                    IsarValue::Integer(i64::MIN + 1),
+                    IsarValue::Integer(i64::MAX),
                     false
                 ),
                 FilterCondition {
                     property_index: 2,
                     condition_type: ConditionType::Between,
                     values: vec![
-                        FilterValue::Integer(i64::MIN + 1),
-                        FilterValue::Integer(i64::MAX)
+                        IsarValue::Integer(i64::MIN + 1),
+                        IsarValue::Integer(i64::MAX)
                     ],
                     case_sensitive: false,
                 }
@@ -1471,16 +1405,16 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     3,
-                    FilterValue::String(Some("bar".to_string())),
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("bar".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 ),
                 FilterCondition {
                     property_index: 3,
                     condition_type: ConditionType::Between,
                     values: vec![
-                        FilterValue::String(Some("bar".to_string())),
-                        FilterValue::String(Some("foo".to_string())),
+                        IsarValue::String(Some("bar".to_string())),
+                        IsarValue::String(Some("foo".to_string())),
                     ],
                     case_sensitive: false,
                 }
@@ -1488,20 +1422,11 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     3,
-                    FilterValue::String(Some("foo".to_string())),
-                    FilterValue::String(Some("bar".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("bar".to_string())),
                     false
                 ),
                 FilterCondition::new_false()
-            );
-            assert_eq!(
-                FilterCondition::new_between(
-                    3,
-                    FilterValue::String(None),
-                    FilterValue::String(Some("\u{10ffff}".to_string())),
-                    false
-                ),
-                FilterCondition::new_true()
             );
         }
 
@@ -1510,8 +1435,8 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     0,
-                    FilterValue::Bool(Some(false)),
-                    FilterValue::Bool(Some(true)),
+                    IsarValue::Bool(Some(false)),
+                    IsarValue::Bool(Some(true)),
                     false
                 )
                 .get_property_index(),
@@ -1520,8 +1445,8 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     1,
-                    FilterValue::Integer(1),
-                    FilterValue::Integer(2),
+                    IsarValue::Integer(1),
+                    IsarValue::Integer(2),
                     false
                 )
                 .get_property_index(),
@@ -1529,19 +1454,9 @@ mod tests {
             );
             assert_eq!(
                 FilterCondition::new_between(
-                    1,
-                    FilterValue::Integer(i64::MIN),
-                    FilterValue::Integer(i64::MAX),
-                    false
-                )
-                .get_property_index(),
-                u32::MAX
-            );
-            assert_eq!(
-                FilterCondition::new_between(
                     2,
-                    FilterValue::Integer(i64::MIN + 1),
-                    FilterValue::Integer(i64::MAX),
+                    IsarValue::Integer(i64::MIN + 1),
+                    IsarValue::Integer(i64::MAX),
                     false
                 )
                 .get_property_index(),
@@ -1550,8 +1465,8 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     3,
-                    FilterValue::String(Some("bar".to_string())),
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("bar".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 )
                 .get_property_index(),
@@ -1564,8 +1479,8 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     0,
-                    FilterValue::Bool(Some(false)),
-                    FilterValue::Bool(Some(true)),
+                    IsarValue::Bool(Some(false)),
+                    IsarValue::Bool(Some(true)),
                     false
                 )
                 .get_condition_type(),
@@ -1574,28 +1489,18 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     1,
-                    FilterValue::Integer(1),
-                    FilterValue::Integer(2),
+                    IsarValue::Integer(1),
+                    IsarValue::Integer(2),
                     false
                 )
                 .get_condition_type(),
                 ConditionType::Between
-            );
-            assert_eq!(
-                FilterCondition::new_between(
-                    1,
-                    FilterValue::Integer(i64::MIN),
-                    FilterValue::Integer(i64::MAX),
-                    false
-                )
-                .get_condition_type(),
-                ConditionType::True
             );
             assert_eq!(
                 FilterCondition::new_between(
                     2,
-                    FilterValue::Integer(i64::MIN + 1),
-                    FilterValue::Integer(i64::MAX),
+                    IsarValue::Integer(i64::MIN + 1),
+                    IsarValue::Integer(i64::MAX),
                     false
                 )
                 .get_condition_type(),
@@ -1604,8 +1509,8 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     3,
-                    FilterValue::String(Some("bar".to_string())),
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("bar".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 )
                 .get_condition_type(),
@@ -1618,50 +1523,47 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     0,
-                    FilterValue::Bool(Some(false)),
-                    FilterValue::Bool(Some(true)),
+                    IsarValue::Bool(Some(false)),
+                    IsarValue::Bool(Some(true)),
                     false
                 )
                 .get_lower_upper(),
-                (
-                    &FilterValue::Bool(Some(false)),
-                    &FilterValue::Bool(Some(true)),
-                )
+                (&IsarValue::Bool(Some(false)), &IsarValue::Bool(Some(true)),)
             );
             assert_eq!(
                 FilterCondition::new_between(
                     1,
-                    FilterValue::Integer(1),
-                    FilterValue::Integer(2),
+                    IsarValue::Integer(1),
+                    IsarValue::Integer(2),
                     false
                 )
                 .get_lower_upper(),
-                (&FilterValue::Integer(1), &FilterValue::Integer(2),)
+                (&IsarValue::Integer(1), &IsarValue::Integer(2),)
             );
             assert_eq!(
                 FilterCondition::new_between(
                     2,
-                    FilterValue::Integer(i64::MIN + 1),
-                    FilterValue::Integer(i64::MAX),
+                    IsarValue::Integer(i64::MIN + 1),
+                    IsarValue::Integer(i64::MAX),
                     false
                 )
                 .get_lower_upper(),
                 (
-                    &FilterValue::Integer(i64::MIN + 1),
-                    &FilterValue::Integer(i64::MAX),
+                    &IsarValue::Integer(i64::MIN + 1),
+                    &IsarValue::Integer(i64::MAX),
                 )
             );
             assert_eq!(
                 FilterCondition::new_between(
                     3,
-                    FilterValue::String(Some("bar".to_string())),
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("bar".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 )
                 .get_lower_upper(),
                 (
-                    &FilterValue::String(Some("bar".to_string())),
-                    &FilterValue::String(Some("foo".to_string())),
+                    &IsarValue::String(Some("bar".to_string())),
+                    &IsarValue::String(Some("foo".to_string())),
                 )
             );
         }
@@ -1671,50 +1573,47 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     0,
-                    FilterValue::Bool(Some(false)),
-                    FilterValue::Bool(Some(true)),
+                    IsarValue::Bool(Some(false)),
+                    IsarValue::Bool(Some(true)),
                     false
                 )
                 .get_values(),
-                vec![
-                    FilterValue::Bool(Some(false)),
-                    FilterValue::Bool(Some(true)),
-                ]
+                vec![IsarValue::Bool(Some(false)), IsarValue::Bool(Some(true)),]
             );
             assert_eq!(
                 FilterCondition::new_between(
                     1,
-                    FilterValue::Integer(1),
-                    FilterValue::Integer(2),
+                    IsarValue::Integer(1),
+                    IsarValue::Integer(2),
                     false
                 )
                 .get_values(),
-                vec![FilterValue::Integer(1), FilterValue::Integer(2)]
+                vec![IsarValue::Integer(1), IsarValue::Integer(2)]
             );
             assert_eq!(
                 FilterCondition::new_between(
                     2,
-                    FilterValue::Integer(i64::MIN + 1),
-                    FilterValue::Integer(i64::MAX),
+                    IsarValue::Integer(i64::MIN + 1),
+                    IsarValue::Integer(i64::MAX),
                     false
                 )
                 .get_values(),
                 vec![
-                    FilterValue::Integer(i64::MIN + 1),
-                    FilterValue::Integer(i64::MAX),
+                    IsarValue::Integer(i64::MIN + 1),
+                    IsarValue::Integer(i64::MAX),
                 ]
             );
             assert_eq!(
                 FilterCondition::new_between(
                     3,
-                    FilterValue::String(Some("bar".to_string())),
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("bar".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 )
                 .get_values(),
                 vec![
-                    FilterValue::String(Some("bar".to_string())),
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("bar".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                 ]
             );
         }
@@ -1724,8 +1623,8 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     0,
-                    FilterValue::Bool(Some(false)),
-                    FilterValue::Bool(Some(true)),
+                    IsarValue::Bool(Some(false)),
+                    IsarValue::Bool(Some(true)),
                     false
                 )
                 .get_case_sensitive(),
@@ -1734,8 +1633,8 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     1,
-                    FilterValue::Integer(1),
-                    FilterValue::Integer(2),
+                    IsarValue::Integer(1),
+                    IsarValue::Integer(2),
                     false
                 )
                 .get_case_sensitive(),
@@ -1744,8 +1643,8 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     2,
-                    FilterValue::Integer(i64::MIN + 1),
-                    FilterValue::Integer(i64::MAX),
+                    IsarValue::Integer(i64::MIN + 1),
+                    IsarValue::Integer(i64::MAX),
                     false
                 )
                 .get_case_sensitive(),
@@ -1754,8 +1653,8 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     3,
-                    FilterValue::String(Some("bar".to_string())),
-                    FilterValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("bar".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
                     false
                 )
                 .get_case_sensitive(),
@@ -1764,8 +1663,8 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_between(
                     3,
-                    FilterValue::String(Some("doe".to_string())),
-                    FilterValue::String(Some("john".to_string())),
+                    IsarValue::String(Some("doe".to_string())),
+                    IsarValue::String(Some("john".to_string())),
                     true
                 )
                 .get_case_sensitive(),
@@ -1785,8 +1684,8 @@ mod tests {
                     property_index: 0,
                     condition_type: ConditionType::Between,
                     values: vec![
-                        FilterValue::String(Some("foo".to_string())),
-                        FilterValue::String(Some("foo\u{10ffff}".to_string()))
+                        IsarValue::String(Some("foo".to_string())),
+                        IsarValue::String(Some("foo\u{10ffff}".to_string()))
                     ],
                     case_sensitive: true,
                 }
@@ -1797,8 +1696,8 @@ mod tests {
                     property_index: 1,
                     condition_type: ConditionType::Between,
                     values: vec![
-                        FilterValue::String(Some("bar".to_string())),
-                        FilterValue::String(Some("bar\u{10ffff}".to_string()))
+                        IsarValue::String(Some("bar".to_string())),
+                        IsarValue::String(Some("bar\u{10ffff}".to_string()))
                     ],
                     case_sensitive: false,
                 }
@@ -1809,8 +1708,8 @@ mod tests {
                     property_index: 2,
                     condition_type: ConditionType::Between,
                     values: vec![
-                        FilterValue::String(Some("".to_string())),
-                        FilterValue::String(Some("\u{10ffff}".to_string()))
+                        IsarValue::String(Some("".to_string())),
+                        IsarValue::String(Some("\u{10ffff}".to_string()))
                     ],
                     case_sensitive: false,
                 }
@@ -1854,22 +1753,22 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_string_starts_with(0, "foo", true).get_lower_upper(),
                 (
-                    &FilterValue::String(Some("foo".to_string())),
-                    &FilterValue::String(Some("foo\u{10ffff}".to_string())),
+                    &IsarValue::String(Some("foo".to_string())),
+                    &IsarValue::String(Some("foo\u{10ffff}".to_string())),
                 )
             );
             assert_eq!(
                 FilterCondition::new_string_starts_with(1, "bar", false).get_lower_upper(),
                 (
-                    &FilterValue::String(Some("bar".to_string())),
-                    &FilterValue::String(Some("bar\u{10ffff}".to_string())),
+                    &IsarValue::String(Some("bar".to_string())),
+                    &IsarValue::String(Some("bar\u{10ffff}".to_string())),
                 )
             );
             assert_eq!(
                 FilterCondition::new_string_starts_with(2, "", false).get_lower_upper(),
                 (
-                    &FilterValue::String(Some("".to_string())),
-                    &FilterValue::String(Some("\u{10ffff}".to_string())),
+                    &IsarValue::String(Some("".to_string())),
+                    &IsarValue::String(Some("\u{10ffff}".to_string())),
                 )
             );
         }
@@ -1879,22 +1778,22 @@ mod tests {
             assert_eq!(
                 FilterCondition::new_string_starts_with(0, "foo", true).get_values(),
                 vec![
-                    FilterValue::String(Some("foo".to_string())),
-                    FilterValue::String(Some("foo\u{10ffff}".to_string())),
+                    IsarValue::String(Some("foo".to_string())),
+                    IsarValue::String(Some("foo\u{10ffff}".to_string())),
                 ]
             );
             assert_eq!(
                 FilterCondition::new_string_starts_with(1, "bar", false).get_values(),
                 vec![
-                    FilterValue::String(Some("bar".to_string())),
-                    FilterValue::String(Some("bar\u{10ffff}".to_string())),
+                    IsarValue::String(Some("bar".to_string())),
+                    IsarValue::String(Some("bar\u{10ffff}".to_string())),
                 ]
             );
             assert_eq!(
                 FilterCondition::new_string_starts_with(2, "", false).get_values(),
                 vec![
-                    FilterValue::String(Some("".to_string())),
-                    FilterValue::String(Some("\u{10ffff}".to_string())),
+                    IsarValue::String(Some("".to_string())),
+                    IsarValue::String(Some("\u{10ffff}".to_string())),
                 ]
             );
         }
@@ -1926,7 +1825,7 @@ mod tests {
                 FilterCondition {
                     property_index: 0,
                     condition_type: ConditionType::StringEndsWith,
-                    values: vec![FilterValue::String(Some("foo".to_string())),],
+                    values: vec![IsarValue::String(Some("foo".to_string())),],
                     case_sensitive: true,
                 }
             );
@@ -1935,7 +1834,7 @@ mod tests {
                 FilterCondition {
                     property_index: 1,
                     condition_type: ConditionType::StringEndsWith,
-                    values: vec![FilterValue::String(Some("bar".to_string())),],
+                    values: vec![IsarValue::String(Some("bar".to_string())),],
                     case_sensitive: false,
                 }
             );
@@ -1944,7 +1843,7 @@ mod tests {
                 FilterCondition {
                     property_index: 2,
                     condition_type: ConditionType::StringEndsWith,
-                    values: vec![FilterValue::String(Some("".to_string())),],
+                    values: vec![IsarValue::String(Some("".to_string())),],
                     case_sensitive: false,
                 }
             );
@@ -1986,15 +1885,15 @@ mod tests {
         fn test_get_value() {
             assert_eq!(
                 FilterCondition::new_string_ends_with(0, "foo", true).get_value(),
-                &FilterValue::String(Some("foo".to_string()))
+                &IsarValue::String(Some("foo".to_string()))
             );
             assert_eq!(
                 FilterCondition::new_string_ends_with(1, "bar", false).get_value(),
-                &FilterValue::String(Some("bar".to_string()))
+                &IsarValue::String(Some("bar".to_string()))
             );
             assert_eq!(
                 FilterCondition::new_string_ends_with(2, "", false).get_value(),
-                &FilterValue::String(Some("".to_string()))
+                &IsarValue::String(Some("".to_string()))
             );
         }
 
@@ -2002,15 +1901,15 @@ mod tests {
         fn test_get_values() {
             assert_eq!(
                 FilterCondition::new_string_ends_with(0, "foo", true).get_values(),
-                vec![FilterValue::String(Some("foo".to_string()))]
+                vec![IsarValue::String(Some("foo".to_string()))]
             );
             assert_eq!(
                 FilterCondition::new_string_ends_with(1, "bar", false).get_values(),
-                vec![FilterValue::String(Some("bar".to_string()))]
+                vec![IsarValue::String(Some("bar".to_string()))]
             );
             assert_eq!(
                 FilterCondition::new_string_ends_with(2, "", false).get_values(),
-                vec![FilterValue::String(Some("".to_string()))]
+                vec![IsarValue::String(Some("".to_string()))]
             );
         }
 
@@ -2041,7 +1940,7 @@ mod tests {
                 FilterCondition {
                     property_index: 0,
                     condition_type: ConditionType::StringContains,
-                    values: vec![FilterValue::String(Some("foo".to_string())),],
+                    values: vec![IsarValue::String(Some("foo".to_string())),],
                     case_sensitive: true,
                 }
             );
@@ -2050,7 +1949,7 @@ mod tests {
                 FilterCondition {
                     property_index: 1,
                     condition_type: ConditionType::StringContains,
-                    values: vec![FilterValue::String(Some("bar".to_string())),],
+                    values: vec![IsarValue::String(Some("bar".to_string())),],
                     case_sensitive: false,
                 }
             );
@@ -2059,7 +1958,7 @@ mod tests {
                 FilterCondition {
                     property_index: 2,
                     condition_type: ConditionType::StringContains,
-                    values: vec![FilterValue::String(Some("".to_string())),],
+                    values: vec![IsarValue::String(Some("".to_string())),],
                     case_sensitive: false,
                 }
             );
@@ -2101,15 +2000,15 @@ mod tests {
         fn test_get_value() {
             assert_eq!(
                 FilterCondition::new_string_contains(0, "foo", true).get_value(),
-                &FilterValue::String(Some("foo".to_string()))
+                &IsarValue::String(Some("foo".to_string()))
             );
             assert_eq!(
                 FilterCondition::new_string_contains(1, "bar", false).get_value(),
-                &FilterValue::String(Some("bar".to_string()))
+                &IsarValue::String(Some("bar".to_string()))
             );
             assert_eq!(
                 FilterCondition::new_string_contains(2, "", false).get_value(),
-                &FilterValue::String(Some("".to_string()))
+                &IsarValue::String(Some("".to_string()))
             );
         }
 
@@ -2117,15 +2016,15 @@ mod tests {
         fn test_get_values() {
             assert_eq!(
                 FilterCondition::new_string_contains(0, "foo", true).get_values(),
-                vec![FilterValue::String(Some("foo".to_string()))]
+                vec![IsarValue::String(Some("foo".to_string()))]
             );
             assert_eq!(
                 FilterCondition::new_string_contains(1, "bar", false).get_values(),
-                vec![FilterValue::String(Some("bar".to_string()))]
+                vec![IsarValue::String(Some("bar".to_string()))]
             );
             assert_eq!(
                 FilterCondition::new_string_contains(2, "", false).get_values(),
-                vec![FilterValue::String(Some("".to_string()))]
+                vec![IsarValue::String(Some("".to_string()))]
             );
         }
 
@@ -2156,7 +2055,7 @@ mod tests {
                 FilterCondition {
                     property_index: 0,
                     condition_type: ConditionType::StringMatches,
-                    values: vec![FilterValue::String(Some("foo".to_string())),],
+                    values: vec![IsarValue::String(Some("foo".to_string())),],
                     case_sensitive: true,
                 }
             );
@@ -2165,7 +2064,7 @@ mod tests {
                 FilterCondition {
                     property_index: 1,
                     condition_type: ConditionType::StringMatches,
-                    values: vec![FilterValue::String(Some("bar".to_string())),],
+                    values: vec![IsarValue::String(Some("bar".to_string())),],
                     case_sensitive: false,
                 }
             );
@@ -2174,7 +2073,7 @@ mod tests {
                 FilterCondition {
                     property_index: 2,
                     condition_type: ConditionType::StringMatches,
-                    values: vec![FilterValue::String(Some("".to_string())),],
+                    values: vec![IsarValue::String(Some("".to_string())),],
                     case_sensitive: false,
                 }
             );
@@ -2216,15 +2115,15 @@ mod tests {
         fn test_get_value() {
             assert_eq!(
                 FilterCondition::new_string_matches(0, "foo", true).get_value(),
-                &FilterValue::String(Some("foo".to_string()))
+                &IsarValue::String(Some("foo".to_string()))
             );
             assert_eq!(
                 FilterCondition::new_string_matches(1, "bar", false).get_value(),
-                &FilterValue::String(Some("bar".to_string()))
+                &IsarValue::String(Some("bar".to_string()))
             );
             assert_eq!(
                 FilterCondition::new_string_matches(2, "", false).get_value(),
-                &FilterValue::String(Some("".to_string()))
+                &IsarValue::String(Some("".to_string()))
             );
         }
 
@@ -2232,15 +2131,15 @@ mod tests {
         fn test_get_values() {
             assert_eq!(
                 FilterCondition::new_string_matches(0, "foo", true).get_values(),
-                vec![FilterValue::String(Some("foo".to_string()))]
+                vec![IsarValue::String(Some("foo".to_string()))]
             );
             assert_eq!(
                 FilterCondition::new_string_matches(1, "bar", false).get_values(),
-                vec![FilterValue::String(Some("bar".to_string()))]
+                vec![IsarValue::String(Some("bar".to_string()))]
             );
             assert_eq!(
                 FilterCondition::new_string_matches(2, "", false).get_values(),
-                vec![FilterValue::String(Some("".to_string()))]
+                vec![IsarValue::String(Some("".to_string()))]
             );
         }
 

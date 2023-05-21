@@ -1,4 +1,5 @@
 name: IsarCoreBindings
+ffi-native:
 output: "lib/src/impl/bindings.dart"
 headers:
   entry-points:
@@ -19,7 +20,7 @@ structs:
     - CIsarQueryBuilder
     - CIsarQuery
     - CIsarCursor
-    - FilterValue
+    - IsarValue
     - Filter
   rename:
     "^(?!C)(.*)": "C$1"

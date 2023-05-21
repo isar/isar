@@ -1,16 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="dev.isar.isar_flutter_libs">
-
-    <application>
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            tools:node="merge"
-            android:authorities="${applicationId}.androidx-startup"
-            android:exported="false">
-            <meta-data
-                android:name="dev.isar.isar_flutter_libs.IsarInitializer"
-                android:value="androidx.startup" />
-        </provider>
-    </application>
 </manifest>

@@ -6,61 +6,9 @@ import 'package:isar/src/generator/isar_type.dart';
 import 'package:isar/src/generator/object_info.dart';
 
 String generateSchema(ObjectInfo object) {
-  final schemaJson = _generateSchemaJson(object);
-
-  var code = 'const ${object.schemaName} = ';
-  if (object.isEmbedded) {
-    code += '''
-    const ${object.dartName.decapitalize()}SchemaHash = ${Isar.fastHash(schemaJson)};
-    Schema(''';
-  } else {
-    code += 'CollectionSchema(';
-  }
-
-  code += '''
-    schema: '${_generateSchemaJson(object)}',
-    converter: ObjectConverter<${object.idProperty!.dartType}, ${object.dartName}>(
-      getId: ${object.getIdName},
-      serialize: ${object.serializeName},
-      deserialize: ${object.deserializeName},
-      deserializeProp: ${object.deserializePropName},
-    ),''';
-
-  if (!object.isEmbedded) {
-    final embeddedSchemas = object.embeddedDartNames
-        .map((e) => '${e.capitalize()}Schema')
-        .join(',');
-    var hash = Isar.fastHash(schemaJson).toString();
-    for (final embedded in object.embeddedDartNames) {
-      hash = '($hash * 31 + ${embedded.decapitalize()}SchemaHash)';
-    }
-
-    code += '''
-      embeddedSchemas: [$embeddedSchemas],
-      hash: $hash,
-    ''';
-  }
-
-  code += '''
-  );
-
-  int ${object.getIdName}(${object.dartName} object) {''';
-
-  if (object.isEmbedded) {
-    code += 'throw UnsupportedError();';
-  } else if (object.idProperty!.type == PropertyType.long) {
-    code += 'return object.${object.idProperty!.dartName};';
-  } else {
-    code += 'Isar.fastHash(object.${object.idProperty!.dartName});';
-  }
-
-  return '$code}';
-}
-
-String _generateSchemaJson(ObjectInfo object) {
   final json = {
     'name': object.isarName,
-    'embedded': object.isEmbedded,
+    if (object.isEmbedded) 'embedded': object.isEmbedded,
     'properties': [
       for (final prop in object.properties)
         if (!prop.isId || prop.type != PropertyType.long)
@@ -71,7 +19,39 @@ String _generateSchemaJson(ObjectInfo object) {
             if (prop.isEnum) 'enumMap': prop.enumMap,
           }
     ],
-    'indexes': <void>[],
+    if (false) 'indexes': <void>[],
   };
-  return jsonEncode(json);
+  final schemaJson = jsonEncode(json);
+
+  if (object.isEmbedded) {
+    return '''
+    const ${object.dartName.decapitalize()}SchemaHash = ${Isar.fastHash(schemaJson)};
+    const ${object.dartName.capitalize()}Schema = Schema(
+      schema: '$schemaJson',
+      converter: ObjectConverter<void, ${object.dartName}>(
+        serialize: serialize${object.dartName},
+        deserialize: deserialize${object.dartName},
+      ),
+    );''';
+  } else {
+    final embeddedSchemas = object.embeddedDartNames
+        .map((e) => '${e.capitalize()}Schema')
+        .join(',');
+    var hash = Isar.fastHash(schemaJson).toString();
+    for (final embedded in object.embeddedDartNames) {
+      hash = '($hash * 31 + ${embedded.decapitalize()}SchemaHash)';
+    }
+
+    return '''
+    const ${object.dartName.capitalize()}Schema = CollectionSchema(
+      schema: '$schemaJson',
+      converter: ObjectConverter<${object.idProperty!.dartType}, ${object.dartName}>(
+        serialize: serialize${object.dartName},
+        deserialize: deserialize${object.dartName},
+        deserializeProperty: deserialize${object.dartName}Prop,
+      ),
+      embeddedSchemas: [$embeddedSchemas],
+      hash: $hash,
+    );''';
+  }
 }

@@ -2,27 +2,38 @@ import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
 
-import 'user_model.dart';
-
 part 'crud_test.g.dart';
 
 @collection
-class Message {
-  Id? id;
+class IntModel {
+  const IntModel(this.id, this.value);
 
-  @Index()
-  String? message;
+  final int id;
 
-  @override
-  String toString() {
-    return '{id: $id, message: $message}';
-  }
+  final String value;
 
   @override
   // ignore: hash_and_equals
   bool operator ==(dynamic other) {
-    if (other is Message) {
-      return other.message == message;
+    if (other is IntModel) {
+      return other.id == id && other.value == value;
+    } else {
+      return false;
+    }
+  }
+}
+
+@collection
+class StringModel {
+  const StringModel(this.id);
+
+  final String id;
+
+  @override
+  // ignore: hash_and_equals
+  bool operator ==(dynamic other) {
+    if (other is StringModel) {
+      return other.id == id;
     } else {
       return false;
     }
@@ -31,94 +42,337 @@ class Message {
 
 void main() {
   group('CRUD', () {
+    const intM1 = IntModel(1, 'This is a new model');
+    const intM2 = IntModel(2, 'This is another new model');
+    const intM3 = IntModel(3, 'Yet another one');
+    const strM1 = StringModel('M1');
+    const strM2 = StringModel('M2');
+    const strM3 = StringModel('M3');
     late Isar isar;
-    late IsarCollection<Message> messages;
-    late IsarCollection<UserModel> users;
 
     setUp(() async {
-      isar = await openTempIsar([MessageSchema, UserModelSchema]);
-      messages = isar.messages;
-      users = isar.userModels;
+      isar = openTempIsar([IntModelSchema, StringModelSchema]);
     });
 
-    isarTest('get() / put() without id', () async {
-      final message1 = Message()
-        ..id = Isar.autoIncrement
-        ..message = 'This is a new message';
-      final message2 = Message()..message = 'This is another new message';
+    group('int id', () {
+      isarTest('get()', () {
+        expect(isar.intModels.get(intM1.id), null);
+        expect(isar.intModels.get(intM2.id), null);
 
-      await isar.tWriteTxn(() async {
-        message1.id = await messages.tPut(message1);
-        message2.id = await messages.tPut(message2);
+        isar.writeTxn((isar) {
+          isar.intModels.put(intM1);
+          expect(isar.intModels.get(intM1.id), intM1);
+          expect(isar.intModels.get(intM2.id), null);
+
+          isar.intModels.put(intM2);
+          expect(isar.intModels.get(intM1.id), intM1);
+          expect(isar.intModels.get(intM2.id), intM2);
+        });
+
+        expect(isar.intModels.get(intM1.id), intM1);
+        expect(isar.intModels.get(intM2.id), intM2);
       });
 
-      expect(message1.id, 1);
-      final newMessage1 = await messages.tGet(message1.id!);
-      expect(message1, newMessage1);
+      isarTest('put()', () {
+        expect(
+          isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+          [null, null, null],
+        );
+        expect(isar.intModels.largestId, -9223372036854775808);
 
-      expect(message2.id, 2);
-      final newMessage2 = await messages.tGet(message2.id!);
-      expect(message2, newMessage2);
+        isar.writeTxn((isar) {
+          isar.intModels.put(intM1);
+          expect(
+            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+            [intM1, null, null],
+          );
+          expect(isar.intModels.largestId, intM1.id);
+
+          isar.intModels.put(intM3);
+          expect(
+            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+            [intM1, null, intM3],
+          );
+          expect(isar.intModels.largestId, intM3.id);
+
+          isar.intModels.put(intM2);
+          expect(
+            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+            [intM1, intM2, intM3],
+          );
+          expect(isar.intModels.largestId, intM3.id);
+        });
+
+        expect(
+          isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+          [intM1, intM2, intM3],
+        );
+      });
+
+      isarTest('getAll()', () {
+        expect(
+          isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+          [null, null, null],
+        );
+
+        isar.writeTxn((isar) {
+          isar.intModels.put(intM1);
+          expect(
+            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+            [intM1, null, null],
+          );
+
+          isar.intModels.put(intM3);
+          expect(
+            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+            [intM1, null, intM3],
+          );
+        });
+
+        expect(
+          isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+          [intM1, null, intM3],
+        );
+      });
+
+      isarTest('putAll()', () {
+        expect(isar.intModels.largestId, -9223372036854775808);
+
+        isar.writeTxn((isar) {
+          isar.intModels.putAll([intM1, intM3, intM1]);
+          expect(
+            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+            [intM1, null, intM3],
+          );
+          expect(isar.intModels.largestId, intM3.id);
+
+          isar.intModels.putAll([intM2, intM2]);
+          expect(
+            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+            [intM1, intM2, intM3],
+          );
+          expect(isar.intModels.largestId, intM3.id);
+
+          isar.intModels.putAll([]);
+          expect(
+            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+            [intM1, intM2, intM3],
+          );
+          expect(isar.intModels.largestId, intM3.id);
+        });
+
+        expect(
+          isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+          [intM1, intM2, intM3],
+        );
+      });
+
+      isarTest('delete()', () {
+        isar.writeTxn((isar) {
+          isar.intModels.putAll([intM1, intM2]);
+          expect(isar.intModels.delete(intM2.id), true);
+          expect(isar.intModels.getAll([intM1.id, intM2.id]), [intM1, null]);
+          expect(isar.intModels.largestId, intM2.id);
+
+          expect(isar.intModels.delete(intM2.id), false);
+          expect(isar.intModels.getAll([intM1.id, intM2.id]), [intM1, null]);
+        });
+
+        expect(isar.intModels.getAll([intM1.id, intM2.id]), [intM1, null]);
+      });
+
+      isarTest('deleteAll()', () {
+        isar.writeTxn((isar) {
+          isar.intModels.putAll([intM1, intM2, intM3]);
+          expect(isar.intModels.deleteAll([intM1.id, intM3.id]), 2);
+          expect(
+            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+            [null, intM2, null],
+          );
+          expect(isar.intModels.largestId, intM3.id);
+
+          expect(isar.intModels.deleteAll([intM1.id, intM2.id]), 1);
+          expect(
+            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+            [null, null, null],
+          );
+        });
+
+        expect(
+          isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
+          [null, null, null],
+        );
+      });
     });
 
-    isarTest('get() / put() with id', () async {
-      final message1 = Message()
-        ..id = 5
-        ..message = 'This is a new message';
-      final message2 = Message()..message = 'This is another new message';
+    group('String id', () {
+      isarTest('get()', () {
+        expect(isar.stringModels.get(strM1.id), null);
+        expect(isar.stringModels.get(strM2.id), null);
 
-      await isar.tWriteTxn(() async {
-        await messages.tPut(message1);
-        await messages.tPut(message2);
+        isar.writeTxn((isar) {
+          isar.stringModels.put(strM1);
+          expect(isar.stringModels.get(strM1.id), strM1);
+          expect(isar.stringModels.get(strM2.id), null);
+
+          isar.stringModels.put(strM2);
+          expect(isar.stringModels.get(strM1.id), strM1);
+          expect(isar.stringModels.get(strM2.id), strM2);
+        });
+
+        expect(isar.stringModels.get(strM1.id), strM1);
+        expect(isar.stringModels.get(strM2.id), strM2);
       });
 
-      final newMessage1 = await messages.tGet(message1.id!);
-      expect(message1.id, 5);
-      expect(newMessage1, message1);
+      isarTest('put()', () {
+        expect(isar.stringModels.getAll([strM1.id, strM2.id]), [null, null]);
 
-      expect(message2.id, 6);
-      final newMessage2 = await messages.tGet(message2.id!);
-      expect(newMessage2, message2);
+        isar.writeTxn((isar) {
+          isar.stringModels.put(strM1);
+          expect(isar.stringModels.getAll([strM1.id, strM2.id]), [strM1, null]);
 
-      final noMessage = await messages.tGet(7);
-      expect(noMessage, null);
+          isar.stringModels.put(strM2);
+          expect(
+              isar.stringModels.getAll([strM1.id, strM2.id]), [strM1, strM2]);
+        });
+
+        expect(isar.stringModels.getAll([strM1.id, strM2.id]), [strM1, strM2]);
+      });
+
+      isarTest('getAll()', () {
+        expect(
+          isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
+          [null, null, null],
+        );
+
+        isar.writeTxn((isar) {
+          isar.stringModels.put(strM1);
+          expect(
+            isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
+            [strM1, null, null],
+          );
+
+          isar.stringModels.put(strM3);
+          expect(
+            isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
+            [strM1, null, strM3],
+          );
+        });
+
+        expect(
+          isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
+          [strM1, null, strM3],
+        );
+      });
+
+      isarTest('putAll()', () {
+        isar.writeTxn((isar) {
+          isar.stringModels.putAll([strM1, strM3, strM1]);
+          expect(
+            isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
+            [strM1, null, strM3],
+          );
+
+          isar.stringModels.putAll([strM2, strM2]);
+          expect(
+            isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
+            [strM1, strM2, strM3],
+          );
+
+          isar.stringModels.putAll([]);
+          expect(
+            isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
+            [strM1, strM2, strM3],
+          );
+        });
+
+        expect(
+          isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
+          [strM1, strM2, strM3],
+        );
+      });
+
+      isarTest('delete()', () {
+        isar.writeTxn((isar) {
+          isar.stringModels.putAll([strM1, strM2]);
+          expect(isar.stringModels.delete(strM2.id), true);
+          expect(isar.stringModels.getAll([strM1.id, strM2.id]), [strM1, null]);
+
+          expect(isar.stringModels.delete(strM2.id), false);
+          expect(isar.stringModels.getAll([strM1.id, strM2.id]), [strM1, null]);
+        });
+
+        expect(isar.stringModels.getAll([strM1.id, strM2.id]), [strM1, null]);
+      });
+
+      isarTest('deleteAll()', () {
+        isar.writeTxn((isar) {
+          isar.stringModels.putAll([strM1, strM2, strM3]);
+          expect(isar.stringModels.deleteAll([strM1.id, strM3.id]), 2);
+          expect(
+            isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
+            [null, strM2, null],
+          );
+
+          expect(isar.stringModels.deleteAll([strM1.id, strM2.id]), 1);
+          expect(
+            isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
+            [null, null, null],
+          );
+        });
+
+        expect(
+          isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
+          [null, null, null],
+        );
+      });
     });
 
-    isarTest('getAll() / putAll()', () async {
-      final message1 = Message()..message = 'Message one';
-      final message2 = Message()
-        ..message = 'Message two'
-        ..id = 9;
-      final message3 = Message()..message = 'Message three';
+    isarTest('count()', () {
+      expect(isar.intModels.count(), 0);
+      expect(isar.stringModels.count(), 0);
 
-      late List<Id> ids;
-      await isar.tWriteTxn(() async {
-        ids = await messages.tPutAll([message1, message2, message3]);
+      isar.writeTxn((isar) {
+        isar.intModels.put(intM1);
+        expect(isar.intModels.count(), 1);
+        expect(isar.stringModels.count(), 0);
+
+        isar.stringModels.put(strM1);
+        expect(isar.intModels.count(), 1);
+        expect(isar.stringModels.count(), 1);
+
+        isar.intModels.put(intM2);
+        expect(isar.intModels.count(), 2);
+        expect(isar.stringModels.count(), 1);
+
+        isar.stringModels.put(strM2);
+        expect(isar.intModels.count(), 2);
+        expect(isar.stringModels.count(), 2);
       });
 
-      expect(ids, [1, 9, 10]);
-      final newMessages = await messages.tGetAll(ids);
-      expect(newMessages, [message1, message2, message3]);
+      expect(isar.intModels.count(), 2);
+      expect(isar.stringModels.count(), 2);
     });
 
-    isarTest('delete()', () async {
-      final user = UserModel()
-        ..name = 'Some User'
-        ..age = 24;
+    isarTest('clear()', () {
+      isar.writeTxn((isar) {
+        isar.intModels.putAll([intM1, intM2]);
+        isar.stringModels.putAll([strM1, strM2]);
+        expect(isar.intModels.count(), 2);
+        expect(isar.stringModels.count(), 2);
 
-      await isar.tWriteTxn(() async {
-        user.id = await users.tPut(user);
+        isar.intModels.clear();
+        expect(isar.intModels.count(), 0);
+        expect(isar.stringModels.count(), 2);
+
+        isar.intModels.putAll([intM1, intM2]);
+        isar.stringModels.clear();
+        expect(isar.intModels.count(), 2);
+        expect(isar.stringModels.count(), 0);
       });
 
-      await isar.tWriteTxn(() async {
-        await users.tDelete(9999);
-      });
-      expect(await users.tGet(user.id!), user);
-
-      await isar.tWriteTxn(() async {
-        await users.tDelete(user.id!);
-      });
-      expect(await users.tGet(user.id!), null);
+      expect(isar.intModels.count(), 2);
+      expect(isar.stringModels.count(), 0);
     });
   });
 }

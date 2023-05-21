@@ -22,7 +22,7 @@ class NullableModel {
     this.enumValue,
   );
 
-  final Id id;
+  final int id;
 
   final bool? boolValue;
 
@@ -61,7 +61,7 @@ class NullableListModel {
     this.enumValue,
   );
 
-  final Id id;
+  final int id;
 
   final List<bool>? boolValue;
 
@@ -87,15 +87,15 @@ class NullableListModel {
 
 void main() {
   group('Nullable value', () {
-    isarTest('scalar', () async {
+    isarTest('scalar', () {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
-      await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
+      final isar1 = openTempIsar([EmptyModelSchema]);
+      isar1.writeTxn((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
-      await isar1.close();
+      isar1.close();
 
-      final isar2 = await openTempIsar([NullableModelSchema], name: isarName);
-      final obj = (await isar2.nullableModels.tGet(0))!;
+      final isar2 = openTempIsar([NullableModelSchema], name: isarName);
+      final obj = isar2.nullableModels.get(0)!;
       expect(obj.boolValue, null);
       expect(obj.shortValue, null);
       expect(obj.intValue, null);
@@ -107,62 +107,61 @@ void main() {
       expect(obj.enumValue, null);
     });
 
-    isarTest('scalar property', () async {
+    isarTest('scalar property', () {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
-      await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
+      final isar1 = openTempIsar([EmptyModelSchema]);
+      isar1.writeTxn((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
-      await isar1.close();
+      isar1.close();
 
-      final isar2 = await openTempIsar([NullableModelSchema], name: isarName);
+      final isar2 = openTempIsar([NullableModelSchema], name: isarName);
       expect(
-        await isar2.nullableModels.where().boolValueProperty().tFindFirst(),
+        isar2.nullableModels.where().boolValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableModels.where().shortValueProperty().tFindFirst(),
+        isar2.nullableModels.where().shortValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableModels.where().intValueProperty().tFindFirst(),
+        isar2.nullableModels.where().intValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableModels.where().floatValueProperty().tFindFirst(),
+        isar2.nullableModels.where().floatValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableModels.where().doubleValueProperty().tFindFirst(),
+        isar2.nullableModels.where().doubleValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableModels.where().dateTimeValueProperty().tFindFirst(),
+        isar2.nullableModels.where().dateTimeValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableModels.where().stringValueProperty().tFindFirst(),
+        isar2.nullableModels.where().stringValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableModels.where().embeddedValueProperty().tFindFirst(),
+        isar2.nullableModels.where().embeddedValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableModels.where().enumValueProperty().tFindFirst(),
+        isar2.nullableModels.where().enumValueProperty().findFirst(),
         null,
       );
     });
 
-    isarTest('list', () async {
+    isarTest('list', () {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
-      await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
+      final isar1 = openTempIsar([EmptyModelSchema]);
+      isar1.writeTxn((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
-      await isar1.close();
+      isar1.close();
 
-      final isar2 =
-          await openTempIsar([NullableListModelSchema], name: isarName);
-      final obj = (await isar2.nullableListModels.tGet(0))!;
+      final isar2 = openTempIsar([NullableListModelSchema], name: isarName);
+      final obj = isar2.nullableListModels.get(0)!;
       expect(obj.boolValue, null);
       expect(obj.shortValue, null);
       expect(obj.intValue, null);
@@ -174,67 +173,48 @@ void main() {
       expect(obj.enumValue, null);
     });
 
-    isarTest('list property', () async {
+    isarTest('list property', () {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
-      await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
+      final isar1 = openTempIsar([EmptyModelSchema]);
+      isar1.writeTxn((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
-      await isar1.close();
+      isar1.close();
 
-      final isar2 =
-          await openTempIsar([NullableListModelSchema], name: isarName);
+      final isar2 = openTempIsar([NullableListModelSchema], name: isarName);
       expect(
-        await isar2.nullableListModels.where().boolValueProperty().tFindFirst(),
+        isar2.nullableListModels.where().boolValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableListModels
-            .where()
-            .shortValueProperty()
-            .tFindFirst(),
+        isar2.nullableListModels.where().shortValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableListModels.where().intValueProperty().tFindFirst(),
+        isar2.nullableListModels.where().intValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableListModels
-            .where()
-            .floatValueProperty()
-            .tFindFirst(),
+        isar2.nullableListModels.where().floatValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableListModels
-            .where()
-            .doubleValueProperty()
-            .tFindFirst(),
+        isar2.nullableListModels.where().doubleValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableListModels
-            .where()
-            .dateTimeValueProperty()
-            .tFindFirst(),
+        isar2.nullableListModels.where().dateTimeValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableListModels
-            .where()
-            .stringValueProperty()
-            .tFindFirst(),
+        isar2.nullableListModels.where().stringValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableListModels
-            .where()
-            .embeddedValueProperty()
-            .tFindFirst(),
+        isar2.nullableListModels.where().embeddedValueProperty().findFirst(),
         null,
       );
       expect(
-        await isar2.nullableListModels.where().enumValueProperty().tFindFirst(),
+        isar2.nullableListModels.where().enumValueProperty().findFirst(),
         null,
       );
     });

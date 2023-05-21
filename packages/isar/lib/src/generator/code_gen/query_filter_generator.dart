@@ -16,7 +16,7 @@ class FilterGenerator {
         code += generateIsNull(property);
         code += generateIsNotNull(property);
       }
-      if (property.nullable) {
+      if ((property.elementNullable ?? false) && !property.type.isObject) {
         code += generateElementIsNull(property);
         code += generateElementIsNotNull(property);
       }
@@ -55,17 +55,49 @@ class FilterGenerator {
         '${p.dartName.decapitalize()}$any';
   }
 
+  String nullValue(PropertyInfo p) {
+    return switch (p.type) {
+      PropertyType.bool || PropertyType.boolList => 'Filter.nullBool',
+      PropertyType.byte ||
+      PropertyType.byteList ||
+      PropertyType.int ||
+      PropertyType.intList ||
+      PropertyType.long ||
+      PropertyType.longList ||
+      PropertyType.dateTime ||
+      PropertyType.dateTimeList =>
+        'Filter.nullInt',
+      PropertyType.float ||
+      PropertyType.floatList ||
+      PropertyType.double ||
+      PropertyType.doubleList =>
+        'Filter.nullDouble',
+      PropertyType.string || PropertyType.stringList => 'Filter.nullString',
+      PropertyType.object || PropertyType.objectList => throw ArgumentError(),
+    };
+  }
+
+  String valOrNull(PropertyInfo p, String value) {
+    if (p.elementNullable ?? p.nullable) {
+      return '$value ?? ${nullValue(p)}';
+    } else {
+      return value;
+    }
+  }
+
   String generateEqualTo(PropertyInfo p) {
     final optional = [
       if (p.type.isString) 'bool caseSensitive = true',
+      if (p.type.isFloat) 'double epsilon = Filter.epsilon',
     ].join(',');
     return '''
     ${mPrefix(p)}EqualTo(${p.scalarDartType} value ${optional.isNotEmpty ? ', {$optional,}' : ''}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(EqualToCondition(
           property: ${p.index},
-          value: value,
+          value: ${valOrNull(p, 'value')},
           ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+          ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }''';
@@ -75,6 +107,7 @@ class FilterGenerator {
     final optional = [
       'bool include = false',
       if (p.type.isString) 'bool caseSensitive = true',
+      if (p.type.isFloat) 'double epsilon = Filter.epsilon',
     ].join(',');
     return '''
     ${mPrefix(p)}GreaterThan(${p.scalarDartType} value, {$optional,}) {
@@ -82,8 +115,9 @@ class FilterGenerator {
         return query.addFilterCondition(GreaterThanCondition(
           include: include,
           property: ${p.index},
-          value: value,
+          value: ${valOrNull(p, 'value')},
           ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+           ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }''';
@@ -93,6 +127,7 @@ class FilterGenerator {
     final optional = [
       'bool include = false',
       if (p.type.isString) 'bool caseSensitive = true',
+      if (p.type.isFloat) 'double epsilon = Filter.epsilon',
     ].join(',');
     return '''
     ${mPrefix(p)}LessThan(${p.scalarDartType} value, {$optional,}) {
@@ -100,8 +135,9 @@ class FilterGenerator {
         return query.addFilterCondition(LessThanCondition(
           include: include,
           property: ${p.index},
-          value: value,
+          value: ${valOrNull(p, 'value')},
           ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+           ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }''';
@@ -112,17 +148,19 @@ class FilterGenerator {
       'bool includeLower = true',
       'bool includeUpper = true',
       if (p.type.isString) 'bool caseSensitive = true',
+      if (p.type.isFloat) 'double epsilon = Filter.epsilon',
     ].join(',');
     return '''
     ${mPrefix(p)}Between(${p.scalarDartType} lower, ${p.scalarDartType} upper, {$optional,}) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(BetweenCondition(
           property: ${p.index},
-          lower: lower,
+          lower: ${valOrNull(p, 'lower')},
           includeLower: includeLower,
-          upper: upper,
+          upper: ${valOrNull(p, 'upper')},
           includeUpper: includeUpper,
           ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+           ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
         ));
       });
     }''';
@@ -132,9 +170,7 @@ class FilterGenerator {
     return '''
       ${mPrefix(p, false)}IsNull() {
         return QueryBuilder.apply(this, (query) {
-          return query.addFilterCondition(const FilterCondition.isNull(
-            property: ${p.index},
-          ));
+          return query.addFilterCondition(const IsNullCondition(property: ${p.index}));
         });
       }''';
   }
@@ -143,8 +179,9 @@ class FilterGenerator {
     return '''
       ${mPrefix(p)}IsNull() {
         return QueryBuilder.apply(this, (query) {
-          return query.addFilterCondition(const FilterCondition.elementIsNull(
+          return query.addFilterCondition(const EqualToCondition(
             property: ${p.index},
+            value: ${nullValue(p)}
           ));
         });
       }''';
@@ -153,11 +190,8 @@ class FilterGenerator {
   String generateIsNotNull(PropertyInfo p) {
     return '''
       ${mPrefix(p, false)}IsNotNull() {
-        return QueryBuilder.apply(this, (query) {
-          return query
-            .addFilterCondition(const FilterCondition.isNotNull(
-              property: ${p.index},
-            ));
+        return QueryBuilder.apply(not(), (query) {
+          return query.addFilterCondition(const IsNullCondition(property: ${p.index}));
         });
       }''';
   }
@@ -165,10 +199,11 @@ class FilterGenerator {
   String generateElementIsNotNull(PropertyInfo p) {
     return '''
       ${mPrefix(p)}IsNotNull() {
-        return QueryBuilder.apply(this, (query) {
+        return QueryBuilder.apply(not(), (query) {
           return query
-            .addFilterCondition(const FilterCondition.elementIsNotNull(
-              property: ${p.index},
+            .addFilterCondition(const EqualToCondition(
+              property: ${p.index}, 
+              value: ${nullValue(p)}
             ));
         });
       }''';

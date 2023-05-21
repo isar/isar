@@ -1,14 +1,15 @@
 // ignore_for_file: public_member_api_docs
 
-import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:isar/src/generator/helper.dart';
 import 'package:source_gen/source_gen.dart';
 
 const TypeChecker _dateTimeChecker = TypeChecker.fromRuntime(DateTime);
-bool _isDateTime(Element element) => _dateTimeChecker.isExactly(element);
 
 extension DartTypeX on DartType {
+  bool get isDartCoreDateTime =>
+      element != null && _dateTimeChecker.isExactly(element!);
+
   PropertyType? get _primitivePropertyType {
     if (isDartCoreBool) {
       return PropertyType.bool;
@@ -28,7 +29,7 @@ extension DartTypeX on DartType {
       }
     } else if (isDartCoreString) {
       return PropertyType.string;
-    } else if (_isDateTime(element!)) {
+    } else if (isDartCoreDateTime) {
       return PropertyType.dateTime;
     } else if (element!.embeddedAnnotation != null) {
       return PropertyType.object;
