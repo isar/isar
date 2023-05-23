@@ -195,38 +195,136 @@ mod tests {
 
     static LOREM: &str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?";
 
-    #[test]
-    fn test_is_null() {
-        let bytes = &[
-            NULL_BYTE,
-            NULL_BOOL,
-            (NULL_INT & 0xFF) as u8,
-            ((NULL_INT >> 8) & 0xFF) as u8,
-            ((NULL_INT >> 16) & 0xFF) as u8,
-            ((NULL_INT >> 24) & 0xFF) as u8,
-            (NULL_LONG & 0xFF) as u8,
-            ((NULL_LONG >> 8) & 0xFF) as u8,
-        ];
+    mod is_null {
+        use super::*;
 
-        let deserializer = IsarDeserializer::from_bytes(bytes);
+        #[test]
+        fn test_is_null_bool() {
+            let header = [0x1, 0x0, 0x0, 0x0];
+            let bytes = &[NULL_BOOL];
 
-        assert_eq!(deserializer.is_null(0, DataType::Bool), true);
+            let mut combined_bytes = Vec::new();
+            combined_bytes.extend_from_slice(&header);
+            combined_bytes.extend_from_slice(bytes);
 
-        assert_eq!(deserializer.is_null(0, DataType::Byte), true);
+            let deserializer = IsarDeserializer::from_bytes(&combined_bytes);
 
-        assert_eq!(deserializer.is_null(0, DataType::Int), true);
+            assert_eq!(deserializer.is_null(0, DataType::Bool), true);
+        }
 
-        assert_eq!(deserializer.is_null(0, DataType::Float), false);
+        #[test]
+        fn test_is_null_byte() {
+            let header = [0x1, 0x0, 0x0, 0x0];
+            let bytes = &[NULL_BYTE];
 
-        assert_eq!(deserializer.is_null(0, DataType::Long), true);
+            let mut combined_bytes = Vec::new();
+            combined_bytes.extend_from_slice(&header);
+            combined_bytes.extend_from_slice(bytes);
 
-        assert_eq!(deserializer.is_null(0, DataType::Double), false);
+            let deserializer = IsarDeserializer::from_bytes(&combined_bytes);
 
-        assert_eq!(
-            deserializer.is_null(0, DataType::String),
-            deserializer.get_offset_length(0).is_none()
-        );
+            assert_eq!(deserializer.is_null(0, DataType::Byte), true);
+        }
+
+        #[test]
+        fn test_is_null_int() {
+            let header = [0x4, 0x0, 0x0];
+            let bytes = &[
+                (NULL_INT & 0xFF) as u8,
+                ((NULL_INT >> 8) & 0xFF) as u8,
+                ((NULL_INT >> 16) & 0xFF) as u8,
+                ((NULL_INT >> 24) & 0xFF) as u8,
+            ];
+
+            let mut combined_bytes = Vec::new();
+            combined_bytes.extend_from_slice(&header);
+            combined_bytes.extend_from_slice(bytes);
+
+            let deserializer = IsarDeserializer::from_bytes(&combined_bytes);
+
+            assert_eq!(deserializer.is_null(0, DataType::Int), true);
+        }
+
+        #[test]
+        fn test_is_null_float() {
+            let header = [0x4, 0x0, 0x0];
+            let bytes = &[
+                (NULL_FLOAT.to_bits() & 0xFF) as u8,
+                ((NULL_FLOAT.to_bits() >> 8) & 0xFF) as u8,
+                ((NULL_FLOAT.to_bits() >> 16) & 0xFF) as u8,
+                ((NULL_FLOAT.to_bits() >> 24) & 0xFF) as u8,
+            ];
+
+            let mut combined_bytes = Vec::new();
+            combined_bytes.extend_from_slice(&header);
+            combined_bytes.extend_from_slice(bytes);
+
+            let deserializer = IsarDeserializer::from_bytes(&combined_bytes);
+
+            assert_eq!(deserializer.is_null(0, DataType::Float), true);
+        }
+
+        #[test]
+        fn test_is_null_long() {
+            let header = [0x8, 0x0, 0x0];
+            let bytes = &[
+                (NULL_LONG & 0xFF) as u8,
+                ((NULL_LONG >> 8) & 0xFF) as u8,
+                ((NULL_LONG >> 16) & 0xFF) as u8,
+                ((NULL_LONG >> 24) & 0xFF) as u8,
+                ((NULL_LONG >> 32) & 0xFF) as u8,
+                ((NULL_LONG >> 40) & 0xFF) as u8,
+                ((NULL_LONG >> 48) & 0xFF) as u8,
+                ((NULL_LONG >> 56) & 0xFF) as u8,
+            ];
+
+            let mut combined_bytes = Vec::new();
+            combined_bytes.extend_from_slice(&header);
+            combined_bytes.extend_from_slice(bytes);
+
+            let deserializer = IsarDeserializer::from_bytes(&combined_bytes);
+
+            assert_eq!(deserializer.is_null(0, DataType::Long), true);
+        }
+
+        #[test]
+        fn test_is_null_double() {
+            let header = [0x8, 0x0, 0x0];
+            let bytes = &[
+                (NULL_DOUBLE.to_bits() & 0xFF) as u8,
+                ((NULL_DOUBLE.to_bits() >> 8) & 0xFF) as u8,
+                ((NULL_DOUBLE.to_bits() >> 16) & 0xFF) as u8,
+                ((NULL_DOUBLE.to_bits() >> 24) & 0xFF) as u8,
+                ((NULL_DOUBLE.to_bits() >> 32) & 0xFF) as u8,
+                ((NULL_DOUBLE.to_bits() >> 40) & 0xFF) as u8,
+                ((NULL_DOUBLE.to_bits() >> 48) & 0xFF) as u8,
+                ((NULL_DOUBLE.to_bits() >> 56) & 0xFF) as u8,
+            ];
+
+            let mut combined_bytes = Vec::new();
+            combined_bytes.extend_from_slice(&header);
+            combined_bytes.extend_from_slice(bytes);
+
+            let deserializer = IsarDeserializer::from_bytes(&combined_bytes);
+
+            assert_eq!(deserializer.is_null(0, DataType::Double), true);
+        }
+
+        #[test]
+        fn test_is_null_other() {
+            let header = [0x0, 0x0, 0x0];
+            let bytes = &[];
+
+            let mut combined_bytes = Vec::new();
+            combined_bytes.extend_from_slice(&header);
+            combined_bytes.extend_from_slice(bytes);
+
+            let deserializer = IsarDeserializer::from_bytes(&combined_bytes);
+
+            assert_eq!(deserializer.is_null(0, DataType::String), true);
+        }
     }
+
     mod read_offset_assertions {
         use super::*;
 
