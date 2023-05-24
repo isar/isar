@@ -1,4 +1,4 @@
-use crate::{CIsarInsert, CIsarInstance, CIsarReader, CIsarTxn};
+use crate::{CIsarInstance, CIsarReader, CIsarTxn, CIsarWriter};
 use isar_core::core::instance::{CompactCondition, IsarInstance};
 use isar_core::core::schema::IsarSchema;
 use isar_core::native::native_instance::NativeInstance;
@@ -157,14 +157,14 @@ pub unsafe extern "C" fn isar_insert(
     txn: *mut CIsarTxn,
     collection_index: u16,
     count: u32,
-    insert: *mut *const CIsarInsert,
+    insert: *mut *const CIsarWriter,
 ) -> u8 {
     isar_try! {
         let txn = *Box::from_raw(txn);
         let new_insert = match (isar, txn) {
             (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
-                let insert = isar.insert(txn, collection_index, count)?;
-                CIsarInsert::Native(insert)
+                let insert = isar.insert(txn, collection_index, count).unwrap();
+                CIsarWriter::Native(insert)
             }
         };
         *insert = Box::into_raw(Box::new(new_insert));

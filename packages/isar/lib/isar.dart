@@ -14,7 +14,7 @@ import 'package:meta/meta_meta.dart';
 
 part 'src/annotations/collection.dart';
 part 'src/annotations/embedded.dart';
-part 'src/annotations/enumerated.dart';
+part 'src/annotations/enum_value.dart';
 part 'src/annotations/id.dart';
 part 'src/annotations/ignore.dart';
 part 'src/annotations/index.dart';
@@ -40,3 +40,11 @@ part 'src/schema.dart';
 /// @nodoc
 @protected
 const isarProtected = protected;
+
+/// @nodoc
+@protected
+const isarJsonEncode = jsonEncode;
+
+/// @nodoc
+@protected
+const isarJsonDecode = jsonDecode;

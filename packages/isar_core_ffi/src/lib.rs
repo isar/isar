@@ -8,7 +8,6 @@ use isar_core::core::reader::IsarReader;
 use isar_core::core::value::IsarValue;
 use isar_core::core::writer::IsarWriter;
 use isar_core::native::native_instance::NativeInstance;
-use std::ptr;
 
 #[macro_use]
 mod error;
@@ -43,10 +42,6 @@ pub enum CIsarTxn {
     Native(NTxn),
 }
 
-pub enum CIsarInsert<'a> {
-    Native(NInsert<'a>),
-}
-
 pub enum CIsarWriter<'a> {
     Native(NInsert<'a>),
     NativeObject(NObjectWriter<'a>),
@@ -72,13 +67,9 @@ pub enum CIsarCursor<'a> {
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_string(chars: *const u16, length: u32) -> *const String {
-    if chars.is_null() {
-        ptr::null()
-    } else {
-        let chars = slice::from_raw_parts(chars, length as usize);
-        let value = String::from_utf16_lossy(chars);
-        Box::into_raw(Box::new(value))
-    }
+    let chars = slice::from_raw_parts(chars, length as usize);
+    let value = String::from_utf16_lossy(chars);
+    Box::into_raw(Box::new(value))
 }
 
 #[no_mangle]

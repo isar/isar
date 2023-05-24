@@ -40,6 +40,7 @@ impl<'a> IsarQueryBuilder for NativeQueryBuilder<'a> {
     type Query = Query;
 
     fn set_filter(&mut self, filter: Filter) {
+        eprintln!("set_filter {:?}", filter);
         self.filter = Some(filter);
     }
 
@@ -281,6 +282,41 @@ impl FilterCondition {
                                 )
                             }
                             _ => {}
+                        }
+                    }
+                }
+                NativeFilter::stat(false)
+            }
+            ConditionType::StringLength => {
+                if let Some(property) = property {
+                    if let (IsarValue::Integer(lower), IsarValue::Integer(upper)) =
+                        self.get_lower_upper()
+                    {
+                        match property.data_type {
+                            DataType::String | DataType::StringList => {
+                                return NativeFilter::list_length(
+                                    property,
+                                    (*lower).clamp(u32::MIN as i64, u32::MAX as i64) as u32,
+                                    (*upper).clamp(u32::MIN as i64, u32::MAX as i64) as u32,
+                                );
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                NativeFilter::stat(false)
+            }
+            ConditionType::ListLength => {
+                if let Some(property) = property {
+                    if let (IsarValue::Integer(lower), IsarValue::Integer(upper)) =
+                        self.get_lower_upper()
+                    {
+                        if property.data_type.is_list() {
+                            return NativeFilter::list_length(
+                                property,
+                                (*lower).clamp(u32::MIN as i64, u32::MAX as i64) as u32,
+                                (*upper).clamp(u32::MIN as i64, u32::MAX as i64) as u32,
+                            );
                         }
                     }
                 }

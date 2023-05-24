@@ -39,7 +39,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
 
   @override
   List<OBJ?> getAll(List<ID> ids) {
-    final objects = List<OBJ?>.filled(ids.length, null);
+    final objects = List<OBJ?>.filled(ids.length, null, growable: true);
     return isar.getTxn((isarPtr, txnPtr) {
       final readerPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarReader>>();
 
@@ -68,23 +68,24 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
     if (objects.isEmpty) return;
 
     return isar.getWriteTxn(consume: true, (isarPtr, txnPtr) {
-      final insertPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarInsert>>();
+      final writerPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarWriter>>();
+
       isar_insert(
         isarPtr,
         txnPtr,
         collectionIndex,
         objects.length,
-        insertPtrPtr,
+        writerPtrPtr,
       ).checkNoError();
 
-      final writerPtrPtr = insertPtrPtr.cast<Pointer<CIsarWriter>>();
+      final insertPtr = writerPtrPtr.value;
       for (final object in objects) {
-        final id = converter.serialize(writerPtrPtr.value, object);
-        isar_insert_save(insertPtrPtr, id).checkNoError();
+        final id = converter.serialize(insertPtr, object);
+        isar_insert_save(insertPtr, id).checkNoError();
       }
 
       final txnPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarTxn>>();
-      isar_insert_finish(insertPtrPtr.value, txnPtrPtr).checkNoError();
+      isar_insert_finish(insertPtr, txnPtrPtr).checkNoError();
 
       return (null, txnPtrPtr.value);
     });

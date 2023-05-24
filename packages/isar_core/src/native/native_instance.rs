@@ -141,7 +141,7 @@ impl IsarInstance for NativeInstance {
     ) -> Result<NativeInsert<'a>> {
         self.verify_instance_id(txn.instance_id)?;
         let collection = self.get_collection(collection_index)?;
-        Ok(NativeInsert::new(txn, collection, &self.collections, count))
+        NativeInsert::new(txn, collection, &self.collections, count)
     }
 
     fn delete<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16, id: i64) -> Result<bool> {

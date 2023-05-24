@@ -1,6 +1,5 @@
 use super::index_iterator::IndexIterator;
 use crate::core::data_type::DataType;
-use crate::core::error::Result;
 use crate::core::query_builder::Sort;
 use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::native_collection::NativeProperty;

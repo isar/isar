@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
+import 'package:isar_test/src/twitter/tweet.dart';
 import 'package:test/test.dart';
 
 Future<List<Tweet>> downloadTweets(String dir, int index) async {
@@ -26,49 +27,48 @@ Future<List<Tweet>> downloadTweets(String dir, int index) async {
   return json.map((e) => Tweet.fromJson(e as Map<String, dynamic>)).toList();
 }
 
-void main() async {
+void main() {
   group(
     'Twitter Stress',
     () {
       late Isar isar;
-      late IsarCollection<Tweet> col;
 
       setUpAll(() async {
-        isar = await openTempIsar(
+        isar = openTempIsar(
           [TweetSchema],
+          maxSizeMiB: 1500,
           closeAutomatically: false,
         );
-        col = isar.collection<Tweet>();
 
         for (var i = 0; i < 100; i++) {
-          final tweets = await downloadTweets(isar.directory!, i);
-          await isar.tWriteTxn(() async {
-            await col.tPutAll(tweets);
+          final tweets = await downloadTweets(isar.directory, i);
+          isar.writeTxn((isar) {
+            isar.tweets.putAll(tweets);
           });
         }
       });
 
       tearDownAll(() => isar.close(deleteFromDisk: true));
 
-      isarTest('Aggregation', () async {
-        expect(await col.where().tCount(), 500000);
-        expect(await col.where().favoriteCountProperty().tSum(), 307278);
-        expect(await col.where().favoriteCountProperty().tAverage(), 0.614556);
-        expect(await col.where().favoriteCountProperty().tMin(), 0);
-        expect(await col.where().favoriteCountProperty().tMax(), 2317);
+      isarTest('Aggregation', () {
+        expect(isar.tweets.where().count(), 500000);
+        expect(isar.tweets.where().favoriteCountProperty().sum(), 307278);
+        expect(isar.tweets.where().favoriteCountProperty().average(), 0.614556);
+        expect(isar.tweets.where().favoriteCountProperty().min(), 0);
+        expect(isar.tweets.where().favoriteCountProperty().max(), 2317);
 
         expect(
-          (await col.where().createdAtProperty().tMin())!.toUtc(),
+          isar.tweets.where().createdAtProperty().min()!.toUtc(),
           DateTime.utc(2015, 4, 23, 9, 10, 58),
         );
         expect(
-          (await col.where().createdAtProperty().tMax())!.toUtc(),
+          isar.tweets.where().createdAtProperty().max()!.toUtc(),
           DateTime.utc(2015, 6, 18, 10, 1, 57),
         );
       });
 
-      isarTest('Distinct', () async {
-        await qEqualSet(col.where().distinctByLang().langProperty(), [
+      isarTest('Distinct', () {
+        expect(isar.tweets.where().distinctByLang().langProperty().findAll(), [
           'en', 'it', 'de', 'fr', 'pt', 'und', 'es', 'qme', 'qht', //
           'hu', 'ja', 'et', 'tl', 'eu', 'pl', 'ht', 'in', 'lt', 'ar', //
           'ca', 'ru', 'el', 'ro', 'uk', 'sl', 'cy', 'no', 'nl', 'sv', //
@@ -77,20 +77,20 @@ void main() async {
         ]);
       });
 
-      isarTest('Sort by', () async {
-        final query = col
+      isarTest('Sort by', () {
+        final query = isar.tweets
             .where()
             .sortByFavoriteCount()
             .thenByLang()
             .thenByFullText()
-            .limit(5)
-            .isarIdProperty();
-        await qEqual(query, [458669, 441027, 368275, 222021, 368289]);
+            .idStrProperty()
+            .findAll(limit: 5);
+        expect(query, [458669, 441027, 368275, 222021, 368289]);
       });
 
-      isarTest('Query', () async {
-        final complexQuery = col
-            .filter()
+      isarTest('Query', () {
+        final complexQuery = isar.tweets
+            .where()
             .not()
             .group(
               (q) => q
@@ -102,15 +102,15 @@ void main() async {
             )
             .not()
             .inReplyToScreenNameIsNull()
-            .entities(
+            /*.entities(
               (q) => q
                   .hashtagsLengthGreaterThan(0)
                   .urlsLengthGreaterThan(0)
                   .mediaLengthGreaterThan(0)
                   .userMentionsLengthGreaterThan(0),
-            )
+            )*/
             .idStrProperty();
-        await qEqual(complexQuery, [
+        expect(complexQuery, [
           '592572613462986752',
           '596576703285174272',
           '597445810696126464',

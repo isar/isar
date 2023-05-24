@@ -3,7 +3,6 @@ use super::native_collection::NativeCollection;
 use super::native_insert::NativeInsert;
 use crate::core::data_type::DataType;
 use crate::core::writer::IsarWriter;
-use serde_json::Value;
 
 pub(crate) trait WriterImpl<'a> {
     fn next_property(&mut self) -> Option<(DataType, u32, Option<u16>)>;
@@ -92,17 +91,6 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
         if let Some((offset, _)) = self.next_property_or_write_null(DataType::String) {
             self.get_serializer()
                 .write_dynamic(offset, value.as_bytes());
-        }
-    }
-
-    #[inline]
-    fn write_json(&mut self, value: &Value) {
-        if let Some((offset, _)) = self.next_property_or_write_null(DataType::Json) {
-            if let Ok(bytes) = serde_json::to_vec(value) {
-                self.get_serializer().write_dynamic(offset, &bytes);
-            } else {
-                self.get_serializer().write_null(offset, DataType::Json);
-            }
         }
     }
 

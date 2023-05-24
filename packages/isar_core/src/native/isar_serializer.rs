@@ -217,7 +217,6 @@ mod tests {
             for dynamic_data_type in [
                 DataType::String,
                 DataType::Object,
-                DataType::Json,
                 DataType::BoolList,
                 DataType::ByteList,
                 DataType::IntList,
@@ -578,7 +577,6 @@ mod tests {
             for dynamic_data_type in [
                 DataType::String,
                 DataType::Object,
-                DataType::Json,
                 DataType::BoolList,
                 DataType::ByteList,
                 DataType::IntList,
@@ -994,7 +992,7 @@ mod tests {
 
         #[test]
         fn test_write_any_type() {
-            let mut serializer = IsarSerializer::new(Vec::new(), 0, 31);
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 28);
             serializer.write_int(0, 65535);
             serializer.write_bool(4, Some(false));
             serializer.write_bool(5, Some(true));
@@ -1002,7 +1000,6 @@ mod tests {
             serializer.write_int(9, -500);
             serializer.write_dynamic(13, &[0x1, 0x10, 0xff]);
             serializer.write_null(16, DataType::Double);
-            serializer.write_null(24, DataType::Json);
             serializer.write_null(27, DataType::ByteList);
             serializer.write_byte(30, 42);
             assert_eq!(
@@ -1017,7 +1014,6 @@ mod tests {
                     [0x29, 0x0, 0x0],
                     NULL_DOUBLE.to_le_bytes(),
                     [0x0, 0x0, 0x0],
-                    [0x0, 0x0, 0x0],
                     42u8.to_le_bytes(),
                     [0x7, 0x0, 0x0],
                     [b'f', b'o', b'o', b' ', b'b', b'a', b'r'],
@@ -1026,12 +1022,11 @@ mod tests {
                 )
             );
 
-            let mut serializer = IsarSerializer::new(Vec::new(), 0, 21);
+            let mut serializer = IsarSerializer::new(Vec::new(), 0, 18);
             serializer.write_dynamic(0, &[0x20, 0x10, 0x0, 0x0, 0x50, 0xff]);
             serializer.write_double(3, 5.25);
             serializer.write_dynamic(11, &[]);
-            serializer.write_null(14, DataType::Json);
-            serializer.write_null(17, DataType::Int);
+            serializer.write_null(14, DataType::Int);
             assert_eq!(
                 serializer.finish(),
                 concat!(
@@ -1039,7 +1034,6 @@ mod tests {
                     [0x15, 0x0, 0x0],
                     5.25f64.to_le_bytes(),
                     [0x1e, 0x0, 0x0],
-                    [0x0, 0x0, 0x0],
                     NULL_INT.to_le_bytes(),
                     [0x6, 0x0, 0x0],
                     [0x20, 0x10, 0x0, 0x0, 0x50, 0xff],
@@ -1532,7 +1526,7 @@ mod tests {
                 0,
                 &[0x0, 0x1, 0x2, 0x3, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x5, 0x5],
             );
-            serializer.write_null(4, DataType::Json);
+            serializer.write_null(4, DataType::String);
         }
     }
 }

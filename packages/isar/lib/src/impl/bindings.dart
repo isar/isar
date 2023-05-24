@@ -161,19 +161,18 @@ external ffi.Pointer<CFilter> isar_filter_not(
   ffi.Pointer<CFilter> filter,
 );
 
-@ffi.Native<
-        ffi.Uint8 Function(ffi.Pointer<ffi.Pointer<CIsarInsert>>, ffi.Int64)>(
+@ffi.Native<ffi.Uint8 Function(ffi.Pointer<CIsarWriter>, ffi.Int64)>(
     symbol: 'isar_insert_save')
 external int isar_insert_save(
-  ffi.Pointer<ffi.Pointer<CIsarInsert>> insert,
+  ffi.Pointer<CIsarWriter> insert,
   int id,
 );
 
 @ffi.Native<
-    ffi.Uint8 Function(ffi.Pointer<CIsarInsert>,
+    ffi.Uint8 Function(ffi.Pointer<CIsarWriter>,
         ffi.Pointer<ffi.Pointer<CIsarTxn>>)>(symbol: 'isar_insert_finish')
 external int isar_insert_finish(
-  ffi.Pointer<CIsarInsert> insert,
+  ffi.Pointer<CIsarWriter> insert,
   ffi.Pointer<ffi.Pointer<CIsarTxn>> txn,
 );
 
@@ -278,13 +277,13 @@ external int isar_get(
         ffi.Pointer<CIsarTxn>,
         ffi.Uint16,
         ffi.Uint32,
-        ffi.Pointer<ffi.Pointer<CIsarInsert>>)>(symbol: 'isar_insert')
+        ffi.Pointer<ffi.Pointer<CIsarWriter>>)>(symbol: 'isar_insert')
 external int isar_insert(
   ffi.Pointer<CIsarInstance> isar,
   ffi.Pointer<CIsarTxn> txn,
   int collection_index,
   int count,
-  ffi.Pointer<ffi.Pointer<CIsarInsert>> insert,
+  ffi.Pointer<ffi.Pointer<CIsarWriter>> insert,
 );
 
 @ffi.Native<
@@ -491,12 +490,16 @@ external double isar_read_double(
 );
 
 @ffi.Native<
-    ffi.Uint32 Function(ffi.Pointer<CIsarReader>, ffi.Uint32,
-        ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>(symbol: 'isar_read_string')
+    ffi.Uint32 Function(
+        ffi.Pointer<CIsarReader>,
+        ffi.Uint32,
+        ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
+        ffi.Pointer<ffi.Bool>)>(symbol: 'isar_read_string')
 external int isar_read_string(
   ffi.Pointer<CIsarReader> reader,
   int index,
   ffi.Pointer<ffi.Pointer<ffi.Uint8>> value,
+  ffi.Pointer<ffi.Bool> is_ascii,
 );
 
 @ffi.Native<
@@ -629,15 +632,6 @@ external void isar_write_string(
 );
 
 @ffi.Native<
-    ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Pointer<ffi.Uint16>,
-        ffi.Uint32)>(symbol: 'isar_write_json')
-external void isar_write_json(
-  ffi.Pointer<CIsarWriter> writer,
-  ffi.Pointer<ffi.Uint16> value,
-  int length,
-);
-
-@ffi.Native<
     ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Pointer<ffi.Uint8>,
         ffi.Uint32)>(symbol: 'isar_write_byte_list')
 external void isar_write_byte_list(
@@ -677,8 +671,6 @@ external void isar_end_list(
 );
 
 final class CIsarCursor extends ffi.Opaque {}
-
-final class CIsarInsert extends ffi.Opaque {}
 
 final class CIsarInstance extends ffi.Opaque {}
 

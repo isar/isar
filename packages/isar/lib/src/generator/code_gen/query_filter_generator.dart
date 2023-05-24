@@ -12,6 +12,10 @@ class FilterGenerator {
         'extension ${objName}QueryFilter on QueryBuilder<$objName, $objName, '
         'QFilterCondition> {';
     for (final property in object.properties) {
+      if (property.type == PropertyType.json) {
+        continue;
+      }
+
       if (property.nullable) {
         code += generateIsNull(property);
         code += generateIsNotNull(property);
@@ -73,7 +77,10 @@ class FilterGenerator {
       PropertyType.doubleList =>
         'Filter.nullDouble',
       PropertyType.string || PropertyType.stringList => 'Filter.nullString',
-      PropertyType.object || PropertyType.objectList => throw ArgumentError(),
+      PropertyType.object ||
+      PropertyType.objectList ||
+      PropertyType.json =>
+        throw ArgumentError(),
     };
   }
 
@@ -93,12 +100,14 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}EqualTo(${p.scalarDartType} value ${optional.isNotEmpty ? ', {$optional,}' : ''}) {
       return QueryBuilder.apply(this, (query) {
-        return query.addFilterCondition(EqualToCondition(
-          property: ${p.index},
-          value: ${valOrNull(p, 'value')},
-          ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
-          ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
-        ));
+        return query.addFilterCondition(
+          EqualToCondition(
+            property: ${p.index},
+            value: ${valOrNull(p, 'value')},
+            ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+            ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
+          ),
+        );
       });
     }''';
   }
@@ -112,13 +121,15 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}GreaterThan(${p.scalarDartType} value, {$optional,}) {
       return QueryBuilder.apply(this, (query) {
-        return query.addFilterCondition(GreaterThanCondition(
-          include: include,
-          property: ${p.index},
-          value: ${valOrNull(p, 'value')},
-          ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
-           ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
-        ));
+        return query.addFilterCondition(
+          GreaterThanCondition(
+            include: include,
+            property: ${p.index},
+            value: ${valOrNull(p, 'value')},
+            ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+            ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
+          ),
+        );
       });
     }''';
   }
@@ -132,13 +143,15 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}LessThan(${p.scalarDartType} value, {$optional,}) {
       return QueryBuilder.apply(this, (query) {
-        return query.addFilterCondition(LessThanCondition(
-          include: include,
-          property: ${p.index},
-          value: ${valOrNull(p, 'value')},
-          ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
-           ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
-        ));
+        return query.addFilterCondition(
+          LessThanCondition(
+            include: include,
+            property: ${p.index},
+            value: ${valOrNull(p, 'value')},
+            ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+            ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
+          ),
+        );
       });
     }''';
   }
@@ -153,15 +166,17 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}Between(${p.scalarDartType} lower, ${p.scalarDartType} upper, {$optional,}) {
       return QueryBuilder.apply(this, (query) {
-        return query.addFilterCondition(BetweenCondition(
-          property: ${p.index},
-          lower: ${valOrNull(p, 'lower')},
-          includeLower: includeLower,
-          upper: ${valOrNull(p, 'upper')},
-          includeUpper: includeUpper,
-          ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
-           ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
-        ));
+        return query.addFilterCondition(
+          BetweenCondition(
+            property: ${p.index},
+            lower: ${valOrNull(p, 'lower')},
+            includeLower: includeLower,
+            upper: ${valOrNull(p, 'upper')},
+            includeUpper: includeUpper,
+            ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+            ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
+          ),
+        );
       });
     }''';
   }
@@ -179,10 +194,12 @@ class FilterGenerator {
     return '''
       ${mPrefix(p)}IsNull() {
         return QueryBuilder.apply(this, (query) {
-          return query.addFilterCondition(const EqualToCondition(
-            property: ${p.index},
-            value: ${nullValue(p)}
-          ));
+          return query.addFilterCondition(
+            const EqualToCondition(
+              property: ${p.index},
+              value: ${nullValue(p)}
+            ),
+          );
         });
       }''';
   }
@@ -201,10 +218,12 @@ class FilterGenerator {
       ${mPrefix(p)}IsNotNull() {
         return QueryBuilder.apply(not(), (query) {
           return query
-            .addFilterCondition(const EqualToCondition(
-              property: ${p.index}, 
-              value: ${nullValue(p)}
-            ));
+            .addFilterCondition(
+              const EqualToCondition(
+                property: ${p.index}, 
+                value: ${nullValue(p)}
+              ),
+            );
         });
       }''';
   }
@@ -213,11 +232,13 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}StartsWith(String value, {bool caseSensitive = true,}) {
       return QueryBuilder.apply(this, (query) {
-        return query.addFilterCondition(StartsWithCondition(
-          property: ${p.index},
-          value: value,
-          caseSensitive: caseSensitive,
-        ));
+        return query.addFilterCondition(
+          StartsWithCondition(
+            property: ${p.index},
+            value: value,
+            caseSensitive: caseSensitive,
+          ),
+        );
       });
     }''';
   }
@@ -226,11 +247,13 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}EndsWith(String value, {bool caseSensitive = true,}) {
       return QueryBuilder.apply(this, (query) {
-        return query.addFilterCondition(EndsWithCondition(
-          property: ${p.index},
-          value: value,
-          caseSensitive: caseSensitive,
-        ));
+        return query.addFilterCondition(
+          EndsWithCondition(
+            property: ${p.index},
+            value: value,
+            caseSensitive: caseSensitive,
+          ),
+        );
       });
     }''';
   }
@@ -239,11 +262,13 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}Contains(String value, {bool caseSensitive = true}) {
       return QueryBuilder.apply(this, (query) {
-        return query.addFilterCondition(ContainsCondition(
-          property: ${p.index},
-          value: value,
-          caseSensitive: caseSensitive,
-        ));
+        return query.addFilterCondition(
+          ContainsCondition(
+            property: ${p.index},
+            value: value,
+            caseSensitive: caseSensitive,
+          ),
+        );
       });
     }''';
   }
@@ -252,11 +277,13 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}Matches(String pattern, {bool caseSensitive = true}) {
       return QueryBuilder.apply(this, (query) {
-        return query.addFilterCondition(MatchesCondition(
-          property: ${p.index},
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ));
+        return query.addFilterCondition(
+          MatchesCondition(
+            property: ${p.index},
+            wildcard: pattern,
+            caseSensitive: caseSensitive,
+          ),
+        );
       });
     }''';
   }
@@ -265,10 +292,12 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}IsEmpty() {
       return QueryBuilder.apply(this, (query) {
-        return query.addFilterCondition(EqualToCondition(
-          property: ${p.index},
-          value: '',
-        ));
+        return query.addFilterCondition(
+          const EqualToCondition(
+            property: ${p.index},
+            value: '',
+          ),
+        );
       });
     }''';
   }
@@ -277,10 +306,12 @@ class FilterGenerator {
     return '''
     ${mPrefix(p)}IsNotEmpty() {
       return QueryBuilder.apply(this, (query) {
-        return query.addFilterCondition(GreaterThanCondition(
-          property: ${p.index},
-          value: '',
-        ));
+        return query.addFilterCondition(
+          const GreaterThanCondition(
+            property: ${p.index},
+            value: '',
+          ),
+        );
       });
     }''';
   }

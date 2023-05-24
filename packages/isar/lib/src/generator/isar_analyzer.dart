@@ -3,7 +3,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:isar/isar.dart';
 import 'package:isar/src/generator/consts.dart';
 import 'package:isar/src/generator/helper.dart';
 import 'package:isar/src/generator/isar_type.dart';
@@ -178,87 +177,68 @@ class IsarAnalyzer {
 
     late final PropertyType type;
     if (dartType.scalarType.element is EnumElement) {
-      final enumeratedAnn = property.enumeratedAnnotation;
-      if (enumeratedAnn == null) {
-        err('Enum property must be annotated with @enumerated.', property);
-      }
-
       final enumClass = dartType.scalarType.element! as EnumElement;
       final enumElements =
           enumClass.fields.where((f) => f.isEnumConstant).toList();
 
-      if (enumeratedAnn.type == EnumType.ordinal) {
-        type =
-            dartType.isDartCoreList ? PropertyType.byteList : PropertyType.byte;
-        enumMap = {
-          for (var i = 0; i < enumElements.length; i++) enumElements[i].name: i,
-        };
-        enumPropertyName = 'index';
-      } else if (enumeratedAnn.type == EnumType.name) {
-        type = dartType.isDartCoreList
-            ? PropertyType.stringList
-            : PropertyType.string;
-        enumMap = {
-          for (final value in enumElements) value.name: value.name,
-        };
-        enumPropertyName = 'name';
-      } else {
-        enumPropertyName = enumeratedAnn.property;
-        if (enumPropertyName == null) {
-          err(
-            'Enums with type EnumType.value must specify which property '
-            'should be used.',
-            property,
-          );
-        }
-        final enumProperty = enumClass.getField(enumPropertyName);
-        if (enumProperty == null || enumProperty.isEnumConstant) {
-          err('Enum property "$enumProperty" does not exist.', property);
-        } else if (enumProperty.nonSynthetic is PropertyAccessorElement) {
-          err('Only fields are supported for enum properties', enumProperty);
-        }
+      final enumProperty = enumClass.enumValueProperty;
+      enumPropertyName = enumProperty?.name ?? 'index';
+      if (enumProperty != null &&
+          enumProperty.nonSynthetic is PropertyAccessorElement) {
+        err('Only fields are supported for enum properties', enumProperty);
+      }
 
-        final enumPropertyType = enumProperty.type.propertyType;
-        if (enumPropertyType != PropertyType.byte &&
-            enumPropertyType != PropertyType.int &&
-            enumPropertyType != PropertyType.long &&
-            enumPropertyType != PropertyType.string) {
-          err('Unsupported enum property type.', enumProperty);
-        }
+      final enumPropertyType = enumProperty == null
+          ? PropertyType.byte
+          : enumProperty.type.propertyType;
+      if (enumPropertyType != PropertyType.byte &&
+          enumPropertyType != PropertyType.int &&
+          enumPropertyType != PropertyType.long &&
+          enumPropertyType != PropertyType.string) {
+        err('Unsupported enum property type.', enumProperty);
+      }
 
-        type = dartType.isDartCoreList
-            ? enumPropertyType!.listType
-            : enumPropertyType!;
-        enumMap = {};
-        for (final element in enumElements) {
+      type = dartType.isDartCoreList
+          ? enumPropertyType!.listType
+          : enumPropertyType!;
+      enumMap = {};
+      for (var i = 0; i < enumElements.length; i++) {
+        final element = enumElements[i];
+        dynamic propertyValue = i;
+        if (enumProperty != null) {
           final property =
-              element.computeConstantValue()!.getField(enumPropertyName)!;
-          final propertyValue = property.toBoolValue() ??
+              element.computeConstantValue()!.getField(enumProperty.name)!;
+          propertyValue = property.toBoolValue() ??
               property.toIntValue() ??
               property.toDoubleValue() ??
               property.toStringValue();
-          if (propertyValue == null) {
-            err(
-              'Null values are not supported for enum properties.',
-              enumProperty,
-            );
-          }
-
-          if (enumMap.values.contains(propertyValue)) {
-            err(
-              'Enum property has duplicate values.',
-              enumProperty,
-            );
-          }
-          enumMap[element.name] = propertyValue;
         }
+
+        if (propertyValue == null) {
+          err(
+            'Null values are not supported for enum properties.',
+            enumProperty,
+          );
+        }
+
+        if (enumMap.values.contains(propertyValue)) {
+          err(
+            'Enum property has duplicate values.',
+            enumProperty,
+          );
+        }
+        enumMap[element.name] = propertyValue;
       }
     } else {
       if (dartType.propertyType != null) {
         type = dartType.propertyType!;
+      } else if (dartType.supportsJsonConversion) {
+        type = PropertyType.json;
       } else {
         err(
-          'Unsupported type. Please annotate the property with @ignore.',
+          'Unsupported type. Please add @embedded to the type or implement '
+          'toJson() and fromJson() methods or annotate the property with '
+          '@ignore let Isar to ignore it.',
           property,
         );
       }
@@ -300,7 +280,9 @@ class IsarAnalyzer {
       index: propertyIndex,
       dartName: property.name,
       isarName: property.isarName,
-      typeClassName: dartType.scalarType.element!.name!,
+      typeClassName: type == PropertyType.json
+          ? dartType.element!.name!
+          : dartType.scalarType.element!.name!,
       targetIsarName:
           type.isObject ? dartType.scalarType.element!.isarName : null,
       type: type,
@@ -322,7 +304,8 @@ class IsarAnalyzer {
   }
 
   String _defaultValue(DartType type) {
-    if (type.nullabilitySuffix == NullabilitySuffix.question) {
+    if (type.nullabilitySuffix == NullabilitySuffix.question ||
+        type is DynamicType) {
       return 'null';
     } else if (type.isDartCoreInt) {
       if (type.propertyType == PropertyType.byte) {
@@ -342,10 +325,8 @@ class IsarAnalyzer {
       return 'DateTime.fromMillisecondsSinceEpoch(0, isUtc: true).toLocal()';
     } else if (type.isDartCoreList) {
       return 'const <${type.scalarType}>[]';
-    } else if (type.isDartCoreSet) {
-      return 'const {}';
     } else if (type.isDartCoreMap) {
-      return 'const {}';
+      return 'const <String, dynamic>{}';
     } else {
       final element = type.element!;
       if (element is EnumElement) {

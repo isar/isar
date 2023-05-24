@@ -8,6 +8,8 @@ pub enum ConditionType {
     StringEndsWith,
     StringContains,
     StringMatches,
+    StringLength,
+    ListLength,
     True,
     False,
 }
@@ -156,6 +158,36 @@ impl FilterCondition {
             condition_type: ConditionType::StringMatches,
             values: vec![IsarValue::String(Some(value.to_string()))],
             case_sensitive,
+        }
+    }
+
+    pub fn new_string_length(property_index: u32, lower: u32, upper: u32) -> Self {
+        match lower.partial_cmp(&upper) {
+            Some(Ordering::Less | Ordering::Equal) => FilterCondition {
+                property_index,
+                condition_type: ConditionType::StringLength,
+                values: vec![
+                    IsarValue::Integer(lower as i64),
+                    IsarValue::Integer(upper as i64),
+                ],
+                case_sensitive: false,
+            },
+            _ => Self::new_false(),
+        }
+    }
+
+    pub fn new_list_length(property_index: u32, lower: u32, upper: u32) -> Self {
+        match lower.partial_cmp(&upper) {
+            Some(Ordering::Less | Ordering::Equal) => FilterCondition {
+                property_index,
+                condition_type: ConditionType::ListLength,
+                values: vec![
+                    IsarValue::Integer(lower as i64),
+                    IsarValue::Integer(upper as i64),
+                ],
+                case_sensitive: false,
+            },
+            _ => Self::new_false(),
         }
     }
 

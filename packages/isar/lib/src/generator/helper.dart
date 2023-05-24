@@ -4,8 +4,8 @@ import 'package:isar/isar.dart';
 import 'package:source_gen/source_gen.dart';
 
 const TypeChecker _collectionChecker = TypeChecker.fromRuntime(Collection);
-const TypeChecker _enumeratedChecker = TypeChecker.fromRuntime(Enumerated);
 const TypeChecker _embeddedChecker = TypeChecker.fromRuntime(Embedded);
+const TypeChecker _enumPropertyChecker = TypeChecker.fromRuntime(EnumValue);
 const TypeChecker _idChecker = TypeChecker.fromRuntime(Id);
 const TypeChecker _ignoreChecker = TypeChecker.fromRuntime(Ignore);
 const TypeChecker _nameChecker = TypeChecker.fromRuntime(Name);
@@ -45,21 +45,23 @@ extension ClassElementX on ClassElement {
 }
 
 extension PropertyElementX on PropertyInducingElement {
-  Enumerated? get enumeratedAnnotation {
-    final ann = _enumeratedChecker.firstAnnotationOfExact(nonSynthetic);
-    if (ann == null) {
-      return null;
-    }
-    final typeIndex = ann.getField('type')!.getField('index')!.toIntValue()!;
-    return Enumerated(
-      EnumType.values[typeIndex],
-      ann.getField('property')?.toStringValue(),
-    );
-  }
-
   bool get hasIdAnnotation {
     final ann = _idChecker.firstAnnotationOfExact(nonSynthetic);
     return ann != null;
+  }
+}
+
+extension EnumElementX on EnumElement {
+  FieldElement? get enumValueProperty {
+    final annotatedProperties = fields
+        .where((e) => !e.isEnumConstant)
+        .where(_enumPropertyChecker.hasAnnotationOfExact)
+        .toList();
+    if (annotatedProperties.length > 1) {
+      err('Only one property can be annotated with @enumProperty', this);
+    } else {
+      return annotatedProperties.firstOrNull;
+    }
   }
 }
 

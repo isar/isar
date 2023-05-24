@@ -159,15 +159,11 @@ class EnumModel {
 
   final int id;
 
-  @Enumerated(EnumType.name)
   TestEnum value = TestEnum.option1;
 
-  @Enumerated(EnumType.name)
   TestEnum? nValue;
 
-  @Enumerated(EnumType.name)
   List<TestEnum> list = [];
 
-  @Enumerated(EnumType.name)
   List<TestEnum>? nList;
 }

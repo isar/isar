@@ -3,7 +3,6 @@ use super::native_collection::NativeCollection;
 use super::{NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
 use crate::core::data_type::DataType;
 use crate::core::reader::IsarReader;
-use serde_json::Value;
 use std::borrow::Cow;
 
 pub struct NativeReader<'a> {
@@ -102,13 +101,6 @@ impl<'a> IsarReader for NativeReader<'a> {
         self.object.read_dynamic(property.offset).map(Cow::Borrowed)
     }
 
-    fn read_json(&self, index: u32) -> Option<Cow<'a, Value>> {
-        let property = self.collection.get_property(index)?;
-        let bytes = self.object.read_dynamic(property.offset)?;
-        let json = serde_json::from_slice(bytes).ok()?;
-        Some(Cow::Owned(json))
-    }
-
     fn read_object(&self, index: u32) -> Option<Self::ObjectReader<'_>> {
         let property = self.collection.get_property(index)?;
         let object = self.object.read_nested(property.offset)?;
@@ -195,14 +187,6 @@ impl<'a> IsarReader for NativeListReader<'a> {
 
     fn read_blob(&self, _index: u32) -> Option<Cow<'_, [u8]>> {
         None // nested lists are not supported
-    }
-
-    fn read_json(&self, index: u32) -> Option<Cow<'a, Value>> {
-        let bytes = self
-            .list
-            .read_dynamic(index * DataType::Json.static_size() as u32)?;
-        let json = serde_json::from_slice(bytes).ok()?;
-        Some(Cow::Owned(json))
     }
 
     fn read_object(&self, index: u32) -> Option<Self::ObjectReader<'_>> {

@@ -26,7 +26,7 @@ impl NativeProperty {
 #[derive(Clone)]
 pub struct NativeCollection {
     pub(crate) collection_index: u16,
-    properties: Vec<NativeProperty>,
+    properties: Vec<(String, NativeProperty)>,
     pub(crate) indexes: Vec<NativeIndex>,
     pub(crate) static_size: u32,
     db: Option<Db>,
@@ -36,14 +36,14 @@ pub struct NativeCollection {
 impl NativeCollection {
     pub fn new(
         collection_index: u16,
-        properties: Vec<NativeProperty>,
+        properties: Vec<(String, NativeProperty)>,
         indexes: Vec<NativeIndex>,
         db: Option<Db>,
     ) -> Self {
         let static_size = properties
             .iter()
-            .max_by_key(|p| p.offset)
-            .map_or(0, |p| p.offset + p.data_type.static_size() as u32);
+            .max_by_key(|(_, p)| p.offset)
+            .map_or(0, |(_, p)| p.offset + p.data_type.static_size() as u32);
         Self {
             collection_index,
             properties,
@@ -83,7 +83,9 @@ impl NativeCollection {
     #[inline]
     pub fn get_property(&self, property_index: u32) -> Option<&NativeProperty> {
         if property_index != 0 {
-            self.properties.get(property_index as usize - 1)
+            self.properties
+                .get(property_index as usize - 1)
+                .map(|(_, p)| p)
         } else {
             None
         }

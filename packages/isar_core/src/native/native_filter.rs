@@ -241,6 +241,7 @@ enum Filter {
     AnyStringEndsWith(AnyStringEndsWithCond),
     AnyStringContains(AnyStringContainsCond),
     AnyStringMatches(AnyStringMatchesCond),
+    AnyStringLength(AnyStringLengthCond),
 
     ListLength(ListLengthCond),
 

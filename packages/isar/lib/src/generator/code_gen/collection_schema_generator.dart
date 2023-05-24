@@ -19,7 +19,7 @@ String generateSchema(ObjectInfo object) {
             if (prop.isEnum) 'enumMap': prop.enumMap,
           }
     ],
-    if (false) 'indexes': <void>[],
+    //'indexes': <void>[],
   };
   final schemaJson = jsonEncode(json);
 

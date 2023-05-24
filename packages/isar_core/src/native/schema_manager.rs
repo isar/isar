@@ -24,7 +24,8 @@ pub fn perform_migration(txn: &NativeTxn, schema: &IsarSchema) -> Result<Vec<Nat
             let existing_schema = &existing_schemas[existing_schema_index];
 
             let mut col_schema = col_schema.clone();
-            migrate_collection(txn, &mut col_schema, existing_schema)?;
+            let merged_properties = migrate_collection(txn, &mut col_schema, existing_schema)?;
+            col_schema.properties = merged_properties;
             save_schema(info_cursor.deref_mut(), &col_schema)?;
             Cow::Owned(col_schema)
         } else {
@@ -118,6 +119,14 @@ fn migrate_collection(
         }
     }
 
+    merged_properties.sort_by_key(|mp| {
+        schema
+            .properties
+            .iter()
+            .position(|p| p.name == mp.name)
+            .unwrap_or(usize::MAX)
+    });
+
     Ok(merged_properties)
 }
 
@@ -142,7 +151,7 @@ fn open_collection(
             };
             let property =
                 NativeProperty::new(property_schema.data_type, offset, embedded_collection_index);
-            properties.push(property);
+            properties.push((name.clone(), property));
         }
         offset += property_schema.data_type.static_size() as u32;
     }

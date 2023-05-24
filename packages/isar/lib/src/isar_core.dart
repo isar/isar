@@ -60,7 +60,7 @@ abstract final class IsarCore {
     malloc.free(countPtr);
     malloc.free(boolPtr);
     if (!_nativeStringPtr.isNull) {
-      //malloc.free(_nativeStringPtr);
+      malloc.free(_nativeStringPtr);
     }
   }
 
@@ -90,11 +90,16 @@ abstract final class IsarCore {
   static const isarReadLong = isar_read_long;
   static const isarReadDouble = isar_read_double;
   static String? isarReadString(Pointer<CIsarReader> reader, int index) {
-    final length = isar_read_string(reader, index, stringPtrPtr);
+    final length = isar_read_string(reader, index, stringPtrPtr, boolPtr);
     if (stringPtr.isNull) {
       return null;
     } else {
-      return utf8.decode(stringPtr.asTypedList(length));
+      final bytes = stringPtr.asTypedList(length);
+      if (boolPtr.value) {
+        return String.fromCharCodes(bytes);
+      } else {
+        return utf8.decode(bytes);
+      }
     }
   }
 
@@ -109,7 +114,6 @@ abstract final class IsarCore {
   static const isarWriteLong = isar_write_long;
   static const isarWriteDouble = isar_write_double;
   static const isarWriteString = isar_write_string;
-  static const isarWriteJson = isar_write_json;
   static const isarBeginObject = isar_begin_object;
   static const isarEndObject = isar_end_object;
   static const isarBeginList = isar_begin_list;

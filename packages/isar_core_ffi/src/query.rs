@@ -29,9 +29,9 @@ pub unsafe extern "C" fn isar_query_set_filter(
     filter: *mut Filter,
 ) {
     let filter = *Box::from_raw(filter);
-    let optimized = filter.optimize();
+    //let optimized = filter.optimize();
     match builder {
-        CIsarQueryBuilder::Native(builder) => builder.set_filter(optimized),
+        CIsarQueryBuilder::Native(builder) => builder.set_filter(filter),
     }
 }
 

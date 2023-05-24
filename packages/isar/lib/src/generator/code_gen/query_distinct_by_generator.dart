@@ -8,14 +8,14 @@ String generateDistinctBy(ObjectInfo oi) {
   for (final property in oi.properties.where((e) => !e.isId)) {
     if (property.type == PropertyType.string) {
       code += '''
-        QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}({bool caseSensitive = true}) {
+        QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterDistinct>distinctBy${property.dartName.capitalize()}({bool caseSensitive = true}) {
           return QueryBuilder.apply(this, (query) {
             return query.addDistinctBy(${property.index}, caseSensitive: caseSensitive);
           });
         }''';
     } else if (!property.type.isObject) {
       code += '''
-        QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct>distinctBy${property.dartName.capitalize()}() {
+        QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterDistinct>distinctBy${property.dartName.capitalize()}() {
           return QueryBuilder.apply(this, (query) {
             return query.addDistinctBy(${property.index});
           });

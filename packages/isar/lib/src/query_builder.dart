@@ -186,7 +186,7 @@ class _QueryBuilder<OBJ> {
   }
 
   /// @nodoc
-  _QueryBuilder<OBJ> addProperty<E>(int property) {
+  _QueryBuilder<OBJ> addProperty(int property) {
     return copyWith(properties: [...properties, property]);
   }
 
@@ -271,6 +271,10 @@ interface class QSortThenBy {}
 /// @nodoc
 @protected
 interface class QDistinct {}
+
+/// @nodoc
+@protected
+interface class QAfterDistinct implements QProperty, QOperations {}
 
 /// @nodoc
 @protected

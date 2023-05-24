@@ -21,15 +21,6 @@ impl IsarValue {
         }
     }
 
-    pub fn get_max(&self) -> Self {
-        match self {
-            IsarValue::Bool(_) => IsarValue::Bool(Some(true)),
-            IsarValue::Integer(_) => IsarValue::Integer(i64::MAX),
-            IsarValue::Real(_) => IsarValue::Real(f64::INFINITY),
-            IsarValue::String(_) => IsarValue::String(Some("\u{10ffff}".to_string())),
-        }
-    }
-
     pub fn is_null(&self) -> bool {
         match self {
             IsarValue::Bool(value) => value.is_none(),

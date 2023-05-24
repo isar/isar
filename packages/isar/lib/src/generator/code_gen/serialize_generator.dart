@@ -1,3 +1,5 @@
+// ignore_for_file: use_string_buffers
+
 import 'package:isar/src/generator/consts.dart';
 import 'package:isar/src/generator/isar_type.dart';
 import 'package:isar/src/generator/object_info.dart';
@@ -12,13 +14,12 @@ String generateSerialize(ObjectInfo object) {
       continue;
     }
 
-    var value = 'object.${property.dartName}';
     code += _writeProperty(
       type: property.type,
       nullable: property.nullable,
       elementNullable: property.elementNullable,
       typeClassName: property.typeClassName,
-      value: value,
+      value: 'object.${property.dartName}',
       enumProperty: property.enumProperty,
     );
   }
@@ -118,7 +119,21 @@ String _writeProperty({
         code += '}';
       }
       return '$code}';
-    default:
+    case PropertyType.json:
+      return '''
+      IsarCore.isarWriteString(
+        $writer,
+        IsarCore.toNativeString(isarJsonEncode($value)),
+      );''';
+    case PropertyType.boolList:
+    case PropertyType.byteList:
+    case PropertyType.intList:
+    case PropertyType.floatList:
+    case PropertyType.longList:
+    case PropertyType.dateTimeList:
+    case PropertyType.doubleList:
+    case PropertyType.stringList:
+    case PropertyType.objectList:
       var code = '''
       {
         final value = $value;''';

@@ -76,25 +76,6 @@ pub unsafe extern "C" fn isar_write_string(writer: &'static mut CIsarWriter, val
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_write_json(
-    writer: &'static mut CIsarWriter,
-    value: *const u16,
-    length: u32,
-) {
-    let chars = slice::from_raw_parts(value, length as usize);
-    let str = String::from_utf16_lossy(chars);
-    if let Ok(json) = serde_json::from_str(&str) {
-        match writer {
-            CIsarWriter::Native(writer) => writer.write_json(&json),
-            CIsarWriter::NativeObject(writer) => writer.write_json(&json),
-            CIsarWriter::NativeList(writer) => writer.write_json(&json),
-        }
-    } else {
-        isar_write_null(writer)
-    }
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn isar_write_byte_list(
     writer: &'static mut CIsarWriter,
     value: *const u8,
@@ -154,9 +135,7 @@ pub unsafe extern "C" fn isar_begin_list(
         CIsarWriter::NativeObject(writer) => {
             CIsarWriter::NativeList(writer.begin_list(length).unwrap())
         }
-        CIsarWriter::NativeList(writer) => {
-            CIsarWriter::NativeList(writer.begin_list(length).unwrap())
-        }
+        _ => panic!("Cannot write nested list"),
     };
     Box::into_raw(Box::new(writer))
 }

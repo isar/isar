@@ -72,6 +72,7 @@ pub unsafe extern "C" fn isar_read_string(
     reader: &'static CIsarReader,
     index: u32,
     value: *mut *const u8,
+    is_ascii: *mut bool,
 ) -> u32 {
     let str = match reader {
         CIsarReader::Native(reader) => reader.read_string(index),
@@ -82,24 +83,13 @@ pub unsafe extern "C" fn isar_read_string(
         let ptr = str.as_ptr();
         mem::forget(str);
         *value = ptr;
+        *is_ascii = str.is_ascii();
         len as u32
     } else {
         *value = ptr::null();
         0
     }
 }
-
-/*#[no_mangle]
-pub unsafe extern "C" fn isar_read_blob(
-    reader: &'static CIsarReader,
-    index: u32,
-) -> Option<Cow<'_, [u8]>>;
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_read_json(
-    reader: &'static CIsarReader,
-    index: u32,
-) -> Option<Cow<'_, Value>>;*/
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_read_object(

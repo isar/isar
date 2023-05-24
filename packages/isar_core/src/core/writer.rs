@@ -1,5 +1,3 @@
-use serde_json::Value;
-
 pub trait IsarWriter<'a> {
     type ObjectWriter: IsarWriter<'a>;
 
@@ -20,8 +18,6 @@ pub trait IsarWriter<'a> {
     fn write_double(&mut self, value: f64);
 
     fn write_string(&mut self, value: &str);
-
-    fn write_json(&mut self, value: &Value);
 
     fn write_byte_list(&mut self, value: &[u8]);
 

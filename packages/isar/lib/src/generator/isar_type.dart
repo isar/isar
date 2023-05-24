@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs
 
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:isar/src/generator/helper.dart';
 import 'package:source_gen/source_gen.dart';
@@ -33,6 +34,8 @@ extension DartTypeX on DartType {
       return PropertyType.dateTime;
     } else if (element!.embeddedAnnotation != null) {
       return PropertyType.object;
+    } else if (this is DynamicType) {
+      return PropertyType.json;
     }
 
     return null;
@@ -75,13 +78,46 @@ extension DartTypeX on DartType {
           return PropertyType.stringList;
         case PropertyType.object:
           return PropertyType.objectList;
+        case PropertyType.json:
+          return PropertyType.json;
         // ignore: no_default_cases
         default:
           return null;
       }
+    } else if (isDartCoreMap) {
+      final keyType = (this as ParameterizedType).typeArguments[0];
+      final valueType = (this as ParameterizedType).typeArguments[1];
+      if (keyType.isDartCoreString && valueType is DynamicType) {
+        return PropertyType.json;
+      }
     }
 
     return null;
+  }
+
+  bool get supportsJsonConversion {
+    final element = this.element;
+    if (element is ClassElement) {
+      // check if the class has a toJson() method returning Map<String,dynamic> and a fromJson factory
+      final toJson = element.getMethod('toJson');
+      final fromJson = element.getNamedConstructor('fromJson');
+      if (toJson != null && fromJson != null) {
+        final toJsonReturnType = toJson.returnType;
+        final fromJsonParameterType = fromJson.parameters.firstOrNull?.type;
+        if (toJsonReturnType.isDartCoreMap &&
+            toJsonReturnType is ParameterizedType &&
+            toJsonReturnType.typeArguments[0].isDartCoreString &&
+            toJsonReturnType.typeArguments[1] is DynamicType &&
+            fromJsonParameterType != null &&
+            fromJsonParameterType.isDartCoreMap &&
+            fromJsonParameterType is ParameterizedType &&
+            fromJsonParameterType.typeArguments[0].isDartCoreString &&
+            fromJsonParameterType.typeArguments[1] is DynamicType) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
 
@@ -95,6 +131,7 @@ enum PropertyType {
   dateTime,
   string,
   object,
+  json,
   boolList,
   byteList,
   intList,
@@ -103,7 +140,7 @@ enum PropertyType {
   doubleList,
   dateTimeList,
   stringList,
-  objectList
+  objectList,
 }
 
 extension PropertyTypeX on PropertyType {
@@ -124,7 +161,7 @@ extension PropertyTypeX on PropertyType {
   bool get isObject =>
       this == PropertyType.object || this == PropertyType.objectList;
 
-  bool get isList => index >= PropertyType.boolList.index;
+  bool get isList => scalarType != this;
 
   /// @nodoc
   PropertyType get scalarType {

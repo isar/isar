@@ -25,7 +25,8 @@ class Collection {
   ///   Id? id;
   /// }
   ///
-  /// // access collection using: isar.col
+  /// // access collection:
+  /// isar.col.where().findAll();
   /// ```
   final String? accessor;
 

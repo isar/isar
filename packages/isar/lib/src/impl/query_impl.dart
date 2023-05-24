@@ -45,11 +45,8 @@ class _QueryImpl<T> extends Query<T> {
       final values = <T>[];
       while (true) {
         readerPtr = isar_cursor_next(cursorPtr, readerPtr);
-        if (!readerPtr.isNull) {
-          values.add(_deserialize(readerPtr));
-        } else {
-          break;
-        }
+        if (readerPtr.isNull) break;
+        values.add(_deserialize(readerPtr));
       }
 
       isar_free_reader(readerPtr);
