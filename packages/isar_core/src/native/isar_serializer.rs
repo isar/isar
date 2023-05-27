@@ -1,10 +1,7 @@
-use std::cell::Cell;
-
-use byteorder::{ByteOrder, LittleEndian};
-
-use crate::{core::data_type::DataType, native::bool_to_byte};
-
 use super::{NULL_BOOL, NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
+use crate::{core::data_type::DataType, native::bool_to_byte};
+use byteorder::{ByteOrder, LittleEndian};
+use std::cell::Cell;
 
 pub struct IsarSerializer {
     buffer: Cell<Vec<u8>>,

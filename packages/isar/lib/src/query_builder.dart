@@ -114,33 +114,6 @@ class _QueryBuilder<OBJ> {
   }
 
   /// @nodoc
-  _QueryBuilder<OBJ> listLength<E>(
-    int property,
-    int lower,
-    bool includeLower,
-    int upper,
-    bool includeUpper,
-  ) {
-    if (!includeLower) {
-      lower += 1;
-    }
-    if (!includeUpper) {
-      if (upper == 0) {
-        lower = 1;
-      } else {
-        upper -= 1;
-      }
-    }
-    return addFilterCondition(
-      ListLengthCondition(
-        property: property,
-        lower: lower,
-        upper: upper,
-      ),
-    );
-  }
-
-  /// @nodoc
   /*_QueryBuilder<OBJ> object<E>(
     FilterQuery<E> q,
     int property,

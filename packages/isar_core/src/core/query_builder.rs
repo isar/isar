@@ -1,4 +1,4 @@
-use crate::filter::Filter;
+use super::filter::Filter;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Sort {

@@ -172,7 +172,6 @@ final class MatchesCondition extends Filter {
 }
 
 /// Filter matching values that are `null`.
-
 final class IsNullCondition extends Filter {
   /// Filters the results to only include objects where the property is null.
   const IsNullCondition({required this.property});
@@ -180,21 +179,17 @@ final class IsNullCondition extends Filter {
   final int property;
 }
 
-/// Filter matching the length of a list.
-final class ListLengthCondition extends Filter {
+/// Filter matching empty lists.
+final class ListIsEmptyCondition extends Filter {
   /// Filters the results to only include objects where the length of
-  /// [property] is between [lower] (included) and [upper] (included).
+  /// [property] is 0.
   ///
   /// Only list properties are supported.
-  const ListLengthCondition({
+  const ListIsEmptyCondition({
     required this.property,
-    required this.lower,
-    required this.upper,
-  }) : assert(lower >= 0 && upper >= 0, 'List length must be positive.');
+  });
 
   final int property;
-  final int lower;
-  final int upper;
 }
 
 /// Logical AND.

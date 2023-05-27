@@ -57,6 +57,12 @@ external ffi.Pointer<CFilter> isar_filter_is_null(
   int property_index,
 );
 
+@ffi.Native<ffi.Pointer<CFilter> Function(ffi.Uint32)>(
+    symbol: 'isar_filter_list_is_empty')
+external ffi.Pointer<CFilter> isar_filter_list_is_empty(
+  int property_index,
+);
+
 @ffi.Native<
     ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>,
         ffi.Bool)>(symbol: 'isar_filter_equal_to')
@@ -542,12 +548,6 @@ external ffi.Pointer<CIsarValue> isar_value_real(
     symbol: 'isar_value_string')
 external ffi.Pointer<CIsarValue> isar_value_string(
   ffi.Pointer<CString> value,
-);
-
-@ffi.Native<ffi.Bool Function(ffi.Pointer<CIsarValue>)>(
-    symbol: 'isar_value_is_null')
-external bool isar_value_is_null(
-  ffi.Pointer<CIsarValue> value,
 );
 
 @ffi.Native<ffi.Bool Function(ffi.Pointer<CIsarValue>)>(

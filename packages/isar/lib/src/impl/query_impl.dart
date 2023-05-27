@@ -108,9 +108,7 @@ class _QueryImpl<T> extends Query<T> {
       );
 
       final value = valuePtr.value;
-      if (value.isNull || isar_value_is_null(value)) {
-        return null;
-      }
+      if (value.isNull) return null;
 
       try {
         if (true is R) {

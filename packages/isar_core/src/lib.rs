@@ -5,7 +5,6 @@
 compile_error!("Only little endian systems are supported.");
 
 pub mod core;
-pub mod filter;
 pub mod native;
 //pub mod sqlite;
 mod util;

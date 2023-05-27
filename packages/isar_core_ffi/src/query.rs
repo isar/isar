@@ -1,10 +1,10 @@
 use std::ptr;
 
 use crate::{CIsarCursor, CIsarInstance, CIsarQuery, CIsarQueryBuilder, CIsarTxn};
+use isar_core::core::filter::Filter;
 use isar_core::core::instance::{Aggregation, IsarInstance};
 use isar_core::core::query_builder::{IsarQueryBuilder, Sort};
 use isar_core::core::value::IsarValue;
-use isar_core::filter::Filter;
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_query_new(

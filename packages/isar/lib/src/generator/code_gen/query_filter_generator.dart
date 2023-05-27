@@ -45,7 +45,8 @@ class FilterGenerator {
       }
 
       if (property.type.isList) {
-        //code += generateListLength(property);
+        code += generateListIsEmpty(property);
+        code += generateListIsNotEmpty(property);
       }
     }
     return '''
@@ -216,14 +217,13 @@ class FilterGenerator {
   String generateElementIsNotNull(PropertyInfo p) {
     return '''
       ${mPrefix(p)}IsNotNull() {
-        return QueryBuilder.apply(not(), (query) {
-          return query
-            .addFilterCondition(
-              const EqualToCondition(
-                property: ${p.index}, 
-                value: ${nullValue(p)}
-              ),
-            );
+        return QueryBuilder.apply(this, (query) {
+          return query.addFilterCondition(
+            const GreaterThanCondition(
+              property: ${p.index},
+              value: ${nullValue(p)},
+            ),
+          );
         });
       }''';
   }
@@ -316,19 +316,25 @@ class FilterGenerator {
     }''';
   }
 
-  /*String generateListLength(PropertyInfo p) {
-    return generateLength(objName, p.dartName,
-        (lower, includeLower, upper, includeUpper) {
-      return '''
-        QueryBuilder.apply(this, (query) {
-          return query.listLength(
-            r'${p.isarName}',
-            $lower,
-            $includeLower,
-            $upper,
-            $includeUpper,
-          );
-        })''';
-    });
-  }*/
+  String generateListIsEmpty(PropertyInfo p) {
+    return '''
+    ${mPrefix(p, false)}IsEmpty() {
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(
+          const ListIsEmptyCondition(property: ${p.index}),
+        );
+      });
+    }''';
+  }
+
+  String generateListIsNotEmpty(PropertyInfo p) {
+    return '''
+    ${mPrefix(p, false)}IsNotEmpty() {
+      return QueryBuilder.apply(not(), (query) {
+        return query.addFilterCondition(
+          const ListIsEmptyCondition(property: ${p.index}),
+        );
+      });
+    }''';
+  }
 }

@@ -97,8 +97,8 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
       );
     case IsNullCondition():
       return isar_filter_is_null(filter.property);
-    case ListLengthCondition():
-      throw UnimplementedError();
+    case ListIsEmptyCondition():
+      return isar_filter_list_is_empty(filter.property);
     case AndGroup():
       if (filter.filters.length == 1) {
         return _buildFilter(alloc, filter.filters[0]);

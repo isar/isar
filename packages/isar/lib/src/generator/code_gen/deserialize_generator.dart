@@ -1,5 +1,7 @@
 // ignore_for_file: use_string_buffers, no_default_cases
 
+import 'dart:typed_data';
+
 import 'package:isar/src/generator/consts.dart';
 import 'package:isar/src/generator/isar_type.dart';
 import 'package:isar/src/generator/object_info.dart';

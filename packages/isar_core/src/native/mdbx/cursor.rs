@@ -51,7 +51,7 @@ impl<'txn> Cursor<'txn> {
         self.cursor
     }
 
-    #[allow(clippy::try_err)]
+    #[inline]
     pub(crate) fn op_get(
         &mut self,
         op: ffi::MDBX_cursor_op,

@@ -104,7 +104,6 @@ class PropertyInfo {
       case PropertyType.stringList:
         return 'String';
       case PropertyType.json:
-        print(typeClassName);
         if (typeClassName == 'List') {
           return 'List<dynamic>';
         } else if (typeClassName == 'Map') {

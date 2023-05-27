@@ -10,24 +10,23 @@ use paste::paste;
 macro_rules! primitive_create {
     ($data_type:ident, $property:expr, $lower:expr, $upper:expr) => {
         paste! {
-            if $property.data_type == DataType::$data_type {
-                NativeFilter(
+            {
+                let filter = if $property.data_type == DataType::$data_type {
                     Filter::[<$data_type Between>]([<$data_type BetweenCond>] {
                         offset: $property.offset,
                         $lower,
                         $upper,
                     })
-                )
-            } else if $property.data_type == DataType::[<$data_type List>] {
-                NativeFilter(
+                } else if $property.data_type == DataType::[<$data_type List>] {
                     Filter::[<Any $data_type Between>]([<Any $data_type BetweenCond>] {
                         offset: $property.offset,
                         $lower,
                         $upper,
                     })
-                )
-            } else {
-                panic!("Property does not support this filter.")
+                } else {
+                    Filter::Static(StaticCond { value: false })
+                };
+                NativeFilter(filter)
             }
         }
     };
@@ -56,7 +55,7 @@ macro_rules! string_filter_create {
                         $case_sensitive,
                     })
                 } else {
-                    panic!("Property does not support this filter.")
+                    Filter::Static(StaticCond { value: false })
                 };
                 NativeFilter(filter)
             }
@@ -140,7 +139,7 @@ impl NativeFilter {
                 case_sensitive,
             })
         } else {
-            panic!("Property does not support this filter.")
+            Filter::Static(StaticCond { value: false })
         };
         NativeFilter(filter)
     }
@@ -169,16 +168,14 @@ impl NativeFilter {
         string_filter_create!(Matches, property, value, case_sensitive)
     }
 
-    pub fn list_length(property: &NativeProperty, lower: u32, upper: u32) -> NativeFilter {
+    pub fn list_is_empty(property: &NativeProperty) -> NativeFilter {
         let filter_cond = if let Some(element_type) = property.data_type.element_type() {
-            Filter::ListLength(ListLengthCond {
+            Filter::IsEmpty(IsEmptyCond {
                 offset: property.offset,
                 element_type,
-                lower,
-                upper,
             })
         } else {
-            panic!("Property does not support this filter.")
+            Filter::Static(StaticCond { value: false })
         };
         NativeFilter(filter_cond)
     }
@@ -216,6 +213,7 @@ impl NativeFilter {
 #[derive(Clone, Debug)]
 enum Filter {
     IsNull(IsNullCond),
+    IsEmpty(IsEmptyCond),
 
     IdBetween(IdBetweenCond),
     BoolBetween(BoolBetweenCond),
@@ -241,9 +239,6 @@ enum Filter {
     AnyStringEndsWith(AnyStringEndsWithCond),
     AnyStringContains(AnyStringContainsCond),
     AnyStringMatches(AnyStringMatchesCond),
-    AnyStringLength(AnyStringLengthCond),
-
-    ListLength(ListLengthCond),
 
     And(AndCond),
     Or(OrCond),
@@ -269,12 +264,29 @@ impl Condition for IsNullCond {
 }
 
 #[derive(Clone, Debug)]
+struct IsEmptyCond {
+    offset: u32,
+    element_type: DataType,
+}
+
+impl Condition for IsEmptyCond {
+    fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
+        if let Some((_, len)) = object.read_list(self.offset, self.element_type) {
+            len == 0
+        } else {
+            false
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 struct IdBetweenCond {
     lower: i64,
     upper: i64,
 }
 
 impl Condition for IdBetweenCond {
+    #[inline]
     fn evaluate(&self, id: i64, _object: IsarDeserializer) -> bool {
         self.lower <= id && self.upper >= id
     }
@@ -293,6 +305,7 @@ macro_rules! filter_between {
 
 
             impl Condition for [<$data_type BetweenCond>] {
+                #[inline]
                 fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
                     let val = object.$prop_accessor(self.offset);
                     let result = filter_between!(eval val, self, $data_type);
@@ -387,6 +400,7 @@ struct StringBetweenCond {
 }
 
 impl Condition for StringBetweenCond {
+    #[inline]
     fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
         let value = object.read_string(self.offset);
         string_between(
@@ -501,29 +515,12 @@ string_filter!(StringContains);
 string_filter!(StringMatches);
 
 #[derive(Clone, Debug)]
-struct ListLengthCond {
-    offset: u32,
-    element_type: DataType,
-    lower: u32,
-    upper: u32,
-}
-
-impl Condition for ListLengthCond {
-    fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
-        if let Some((_, len)) = object.read_list(self.offset, self.element_type) {
-            self.lower <= len && self.upper >= len
-        } else {
-            false
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
 struct AndCond {
     filters: Vec<Filter>,
 }
 
 impl Condition for AndCond {
+    #[inline]
     fn evaluate(&self, id: i64, object: IsarDeserializer) -> bool {
         for filter in &self.filters {
             if !filter.evaluate(id, object) {
@@ -540,6 +537,7 @@ struct OrCond {
 }
 
 impl Condition for OrCond {
+    #[inline]
     fn evaluate(&self, id: i64, object: IsarDeserializer) -> bool {
         for filter in &self.filters {
             if filter.evaluate(id, object) {
@@ -556,6 +554,7 @@ struct NotCond {
 }
 
 impl Condition for NotCond {
+    #[inline]
     fn evaluate(&self, id: i64, object: IsarDeserializer) -> bool {
         !self.filter.evaluate(id, object)
     }

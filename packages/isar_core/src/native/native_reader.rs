@@ -33,6 +33,7 @@ impl<'a> IsarReader for NativeReader<'a> {
 
     type ListReader<'b> = NativeListReader<'b> where 'a: 'b;
 
+    #[inline]
     fn read_id(&self) -> i64 {
         self.id
     }
@@ -46,11 +47,13 @@ impl<'a> IsarReader for NativeReader<'a> {
         }
     }
 
+    #[inline]
     fn read_bool(&self, index: u32) -> Option<bool> {
         let property = self.collection.get_property(index)?;
         self.object.read_bool(property.offset)
     }
 
+    #[inline]
     fn read_byte(&self, index: u32) -> u8 {
         if let Some(property) = self.collection.get_property(index) {
             self.object.read_byte(property.offset)
@@ -59,6 +62,7 @@ impl<'a> IsarReader for NativeReader<'a> {
         }
     }
 
+    #[inline]
     fn read_int(&self, index: u32) -> i32 {
         if let Some(property) = self.collection.get_property(index) {
             self.object.read_int(property.offset)
@@ -67,6 +71,7 @@ impl<'a> IsarReader for NativeReader<'a> {
         }
     }
 
+    #[inline]
     fn read_float(&self, index: u32) -> f32 {
         if let Some(property) = self.collection.get_property(index) {
             self.object.read_float(property.offset)
@@ -75,6 +80,7 @@ impl<'a> IsarReader for NativeReader<'a> {
         }
     }
 
+    #[inline]
     fn read_long(&self, index: u32) -> i64 {
         if let Some(property) = self.collection.get_property(index) {
             self.object.read_long(property.offset)
@@ -83,6 +89,7 @@ impl<'a> IsarReader for NativeReader<'a> {
         }
     }
 
+    #[inline]
     fn read_double(&self, index: u32) -> f64 {
         if let Some(property) = self.collection.get_property(index) {
             self.object.read_double(property.offset)
@@ -91,11 +98,13 @@ impl<'a> IsarReader for NativeReader<'a> {
         }
     }
 
+    #[inline]
     fn read_string(&self, index: u32) -> Option<&'a str> {
         let property = self.collection.get_property(index)?;
         self.object.read_string(property.offset)
     }
 
+    #[inline]
     fn read_blob(&self, index: u32) -> Option<Cow<'a, [u8]>> {
         let property = self.collection.get_property(index)?;
         self.object.read_dynamic(property.offset).map(Cow::Borrowed)
@@ -141,6 +150,7 @@ impl<'a> IsarReader for NativeListReader<'a> {
 
     type ListReader<'b> = NativeListReader<'b> where 'a: 'b;
 
+    #[inline]
     fn read_id(&self) -> i64 {
         NULL_LONG
     }
@@ -150,36 +160,43 @@ impl<'a> IsarReader for NativeListReader<'a> {
             .is_null(index * self.data_type.static_size() as u32, self.data_type)
     }
 
+    #[inline]
     fn read_byte(&self, index: u32) -> u8 {
         self.list
             .read_byte(index * DataType::Byte.static_size() as u32)
     }
 
+    #[inline]
     fn read_bool(&self, index: u32) -> Option<bool> {
         self.list
             .read_bool(index * DataType::Byte.static_size() as u32)
     }
 
+    #[inline]
     fn read_int(&self, index: u32) -> i32 {
         self.list
             .read_int(index * DataType::Int.static_size() as u32)
     }
 
+    #[inline]
     fn read_float(&self, index: u32) -> f32 {
         self.list
             .read_float(index * DataType::Float.static_size() as u32)
     }
 
+    #[inline]
     fn read_long(&self, index: u32) -> i64 {
         self.list
             .read_long(index * DataType::Long.static_size() as u32)
     }
 
+    #[inline]
     fn read_double(&self, index: u32) -> f64 {
         self.list
             .read_double(index * DataType::Double.static_size() as u32)
     }
 
+    #[inline]
     fn read_string(&self, index: u32) -> Option<&'a str> {
         self.list
             .read_string(index * DataType::String.static_size() as u32)
