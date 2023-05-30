@@ -10,15 +10,6 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
   final ObjectConverter<ID, OBJ> converter;
 
   @override
-  int get largestId {
-    if (ID == int) {
-      return isar_get_largest_id(isar.getPtr(), collectionIndex);
-    } else {
-      throw UnsupportedError('Only int ids are supported');
-    }
-  }
-
-  @override
   OBJ? get(ID id) {
     return isar.getTxn((isarPtr, txnPtr) {
       final readerPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarReader>>();
@@ -132,7 +123,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
 
   @override
   QueryBuilder<OBJ, OBJ, QStart> where() {
-    return QueryBuilder._(_QueryBuilder(collection: this));
+    return QueryBuilder(this);
   }
 
   @override
@@ -174,7 +165,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
   }
 
   @override
-  Query<R> buildQuery<R>({
+  IsarQuery<R> buildQuery<R>({
     Filter? filter,
     List<SortProperty>? sortBy,
     List<DistinctProperty>? distinctBy,
@@ -244,7 +235,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
     }
 
     final query = isar_query_build(builderPtr);
-    return _QueryImpl(
+    return _IsarQueryImpl(
       instanceId: isar.instanceId,
       ptrAddress: query.address,
       properties: properties,

@@ -110,11 +110,6 @@ impl IsarInstance for NativeInstance {
         }
     }
 
-    fn get_largest_id(&self, collection_index: u16) -> Result<i64> {
-        let collection = self.get_collection(collection_index)?;
-        Ok(collection.get_largest_id())
-    }
-
     fn get<'a>(
         &'a self,
         txn: &'a Self::Txn,
@@ -147,7 +142,7 @@ impl IsarInstance for NativeInstance {
     fn delete<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16, id: i64) -> Result<bool> {
         self.verify_instance_id(txn.instance_id)?;
         let collection = self.get_collection(collection_index)?;
-        collection.delete(txn, id)
+        txn.guard(|| collection.delete(txn, id))
     }
 
     fn count(&self, txn: &Self::Txn, collection_index: u16) -> Result<u32> {
@@ -160,7 +155,7 @@ impl IsarInstance for NativeInstance {
     fn clear(&self, txn: &Self::Txn, collection_index: u16) -> Result<()> {
         self.verify_instance_id(txn.instance_id)?;
         let collection = self.get_collection(collection_index)?;
-        collection.clear(txn)
+        txn.guard(|| collection.clear(txn))
     }
 
     fn get_size(
@@ -219,7 +214,7 @@ impl IsarInstance for NativeInstance {
         self.verify_instance_id(txn.instance_id)?;
         self.verify_instance_id(query.instance_id)?;
         let collection = self.get_collection(query.collection_index)?;
-        query.delete(txn, collection, offset, limit)
+        txn.guard(|| query.delete(txn, collection, offset, limit))
     }
 
     fn copy(&self, path: &str) -> Result<()> {

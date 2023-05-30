@@ -8,7 +8,7 @@ pub struct CursorIterator<'txn, C: AsMut<Cursor<'txn>>> {
     upper_key: Vec<u8>,
     integer_key: bool,
     ascending: bool,
-    op: ffi::MDBX_cursor_op,
+    op: mdbx_sys::MDBX_cursor_op,
     next: Option<KeyVal<'txn>>,
 }
 
@@ -27,11 +27,11 @@ impl<'txn, C: AsMut<Cursor<'txn>>> CursorIterator<'txn, C> {
         } else {
             (end_key, start_key)
         };
-        let op: ffi::MDBX_cursor_op = match (ascending, skip_duplicates) {
-            (true, true) => ffi::MDBX_cursor_op::MDBX_NEXT_NODUP,
-            (true, false) => ffi::MDBX_cursor_op::MDBX_NEXT,
-            (false, true) => ffi::MDBX_cursor_op::MDBX_PREV_NODUP,
-            (false, false) => ffi::MDBX_cursor_op::MDBX_PREV,
+        let op: mdbx_sys::MDBX_cursor_op = match (ascending, skip_duplicates) {
+            (true, true) => mdbx_sys::MDBX_cursor_op::MDBX_NEXT_NODUP,
+            (true, false) => mdbx_sys::MDBX_cursor_op::MDBX_NEXT,
+            (false, true) => mdbx_sys::MDBX_cursor_op::MDBX_PREV_NODUP,
+            (false, false) => mdbx_sys::MDBX_cursor_op::MDBX_PREV,
         };
         let mut iterator = Self {
             cursor,

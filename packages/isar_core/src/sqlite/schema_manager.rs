@@ -1,18 +1,23 @@
+use super::sql::{create_index_sql, create_table_sql, data_type_sql, sql_data_type};
 use super::sqlite3::SQLite3;
 use super::sqlite_txn::SQLiteTxn;
-use crate::core::data_type::DataType;
-use crate::core::error::Result;
+use crate::core::error::{IsarError, Result};
 use crate::core::schema::{CollectionSchema, IndexSchema, IsarSchema, PropertySchema};
+use crate::sqlite::sqlite_collection::SQLiteProperty;
 use itertools::Itertools;
-use std::borrow::Cow;
 
 pub fn perform_migration(txn: &SQLiteTxn, schema: &IsarSchema) -> Result<()> {
-    /*txn.guard(|| {
+    txn.guard(|| {
         let sqlite = txn.get_sqlite(true)?;
-        let table_names = sqlite.get_table_names()?;
+        let table_names = sqlite
+            .get_table_names()?
+            .iter()
+            .map(|s| s.to_lowercase())
+            .collect_vec();
+
         for collection in &schema.collections {
             if !collection.embedded {
-                if table_names.contains(&collection.name) {
+                if table_names.contains(&collection.name.to_lowercase()) {
                     update_table(sqlite, collection)?;
                 } else {
                     let sql = create_table_sql(collection);
@@ -29,7 +34,7 @@ pub fn perform_migration(txn: &SQLiteTxn, schema: &IsarSchema) -> Result<()> {
             if !schema
                 .collections
                 .iter()
-                .any(|c| c.name == table && !c.embedded)
+                .any(|c| c.name.to_lowercase() == table && !c.embedded)
             {
                 let sql = format!("DROP TABLE {}", table);
                 sqlite.execute(&sql)?;
@@ -37,59 +42,38 @@ pub fn perform_migration(txn: &SQLiteTxn, schema: &IsarSchema) -> Result<()> {
         }
 
         Ok(())
-    })*/
-    todo!()
-}
-
-fn create_table_sql(collection: &CollectionSchema) -> String {
-    format!(
-        "CREATE TABLE {} ({}) ",
-        collection.name,
-        collection
-            .properties
-            .iter()
-            .filter_map(|p| {
-                if let Some(name) = &p.name {
-                    let sql_type = get_sqlite_type(p);
-                    Some(format!("{name} {sql_type}"))
-                } else {
-                    None
-                }
-            })
-            .join(", ")
-    )
-}
-
-fn create_index_sql(table_name: &str, index: &IndexSchema) -> String {
-    let index_name = format!("{}_{}", table_name, index.name);
-    format!(
-        "CREATE {} INDEX {}_{} ON {} ({})",
-        if index.unique { "UNIQUE" } else { "" },
-        index_name,
-        table_name,
-        table_name,
-        index.properties.join(", ")
-    )
+    })
 }
 
 fn read_col_schema(sqlite: &SQLite3, name: &str) -> Result<CollectionSchema> {
     let columns = sqlite.get_table_columns(name)?;
     let indexes = sqlite.get_table_indexes(name)?;
 
-    let properties = columns
+    let mut properties = columns
         .iter()
         .map(|(name, sql_type)| {
-            let (data_type, collection) = get_data_type(sql_type);
+            let (data_type, collection) = sql_data_type(sql_type);
             PropertySchema::new(name, data_type, collection)
         })
-        .collect();
+        .collect_vec();
+
+    let id_prop_index = properties
+        .iter()
+        .position(|p| p.name == Some(SQLiteProperty::ID_NAME.to_string()));
+    if let Some(id_prop_index) = id_prop_index {
+        properties.remove(id_prop_index);
+    } else {
+        return Err(IsarError::SchemaError {
+            message: format!("Table {} has no id column", name),
+        });
+    }
 
     let indexes = indexes
         .iter()
         .map(|(name, unique, cols)| {
             let name = name.split('_').last().unwrap();
             let cols = cols.iter().map(|c| c.as_str()).collect();
-            IndexSchema::new(name, cols, *unique)
+            IndexSchema::new(name, cols, true, *unique, false)
         })
         .collect();
 
@@ -116,7 +100,7 @@ fn update_table(sqlite: &SQLite3, collection: &CollectionSchema) -> Result<()> {
             "ALTER TABLE {} ADD COLUMN {} {}",
             collection.name,
             property.name.as_ref().unwrap(),
-            get_sqlite_type(property)
+            data_type_sql(property)
         );
         sqlite.execute(&sql)?;
     }
@@ -127,52 +111,4 @@ fn update_table(sqlite: &SQLite3, collection: &CollectionSchema) -> Result<()> {
     }
 
     Ok(())
-}
-
-fn get_sqlite_type(property: &PropertySchema) -> Cow<str> {
-    match property.data_type {
-        DataType::Byte => Cow::Borrowed("_BYTE"),
-        DataType::Int => Cow::Borrowed("_I32"),
-        DataType::Float => Cow::Borrowed("_F32"),
-        DataType::Long => Cow::Borrowed("_I64"),
-        DataType::Double => Cow::Borrowed("_F64"),
-        DataType::String => Cow::Borrowed("_STR"),
-        DataType::Json => Cow::Borrowed("_JSON"),
-        DataType::Object => Cow::Borrowed(property.collection.as_ref().unwrap()),
-        DataType::ByteList => Cow::Borrowed("_BYTE[]"),
-        DataType::IntList => Cow::Borrowed("_I32[]"),
-        DataType::FloatList => Cow::Borrowed("_F32[]"),
-        DataType::LongList => Cow::Borrowed("_I64[]"),
-        DataType::DoubleList => Cow::Borrowed("_F64[]"),
-        DataType::StringList => Cow::Borrowed("_STR[]"),
-        DataType::ObjectList => {
-            let target_collection = property.collection.as_ref().unwrap();
-            Cow::Owned(format!("{target_collection}[]"))
-        }
-    }
-}
-
-fn get_data_type(sqlite_type: &str) -> (DataType, Option<&str>) {
-    match sqlite_type {
-        "_BYTE" => (DataType::Byte, None),
-        "_I32" => (DataType::Int, None),
-        "_F32" => (DataType::Float, None),
-        "_I64" => (DataType::Long, None),
-        "_F64" => (DataType::Double, None),
-        "_STR" => (DataType::String, None),
-        "_JSON" => (DataType::Json, None),
-        "_U8[]" => (DataType::ByteList, None),
-        "_I32[]" => (DataType::IntList, None),
-        "_F32[]" => (DataType::FloatList, None),
-        "_I64[]" => (DataType::LongList, None),
-        "_F64[]" => (DataType::DoubleList, None),
-        "_STR[]" => (DataType::StringList, None),
-        _ => {
-            if let Some(target_collection) = sqlite_type.strip_suffix("[]") {
-                (DataType::ObjectList, Some(target_collection))
-            } else {
-                (DataType::Object, Some(sqlite_type))
-            }
-        }
-    }
 }

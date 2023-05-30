@@ -49,7 +49,7 @@ impl CollectionSchema {
         embedded: bool,
     ) -> CollectionSchema {
         CollectionSchema {
-            name: name.to_lowercase(),
+            name: name.to_string(),
             embedded,
             properties,
             indexes,
@@ -72,14 +72,21 @@ impl CollectionSchema {
         let mut drop_indexes = Vec::new();
 
         for old_prop in &old_collection.properties {
-            let prop = self.properties.iter().find(|p| p.name == old_prop.name);
-            if let Some(prop) = prop {
-                if prop.data_type != old_prop.data_type || prop.collection != old_prop.collection {
-                    add_properties.push(prop);
-                    drop_properties.push(prop.name.as_ref().unwrap().clone());
+            if let Some(old_prop_name) = old_prop.name.as_deref() {
+                let prop = self
+                    .properties
+                    .iter()
+                    .find(|p| name_equal(p.name.as_deref(), old_prop_name));
+                if let Some(prop) = prop {
+                    if prop.data_type != old_prop.data_type
+                        || prop.collection != old_prop.collection
+                    {
+                        add_properties.push(prop);
+                        drop_properties.push(prop.name.as_ref().unwrap().clone());
+                    }
+                } else if let Some(old_prop_name) = &old_prop.name {
+                    drop_properties.push(old_prop_name.clone());
                 }
-            } else if let Some(old_prop_name) = &old_prop.name {
-                drop_properties.push(old_prop_name.clone());
             }
         }
 
@@ -88,7 +95,7 @@ impl CollectionSchema {
                 let does_not_exist = !old_collection
                     .properties
                     .iter()
-                    .any(|p| p.name.as_deref() == Some(prop_name));
+                    .any(|p| name_equal(p.name.as_deref(), prop_name));
                 if does_not_exist {
                     add_properties.push(prop);
                 }
@@ -96,7 +103,10 @@ impl CollectionSchema {
         }
 
         for old_index in &old_collection.indexes {
-            let index = self.indexes.iter().find(|i| i.name == old_index.name);
+            let index = self
+                .indexes
+                .iter()
+                .find(|i| name_equal(Some(&i.name), &old_index.name));
             if let Some(index) = index {
                 let property_dropped = index.properties.iter().any(|p| drop_properties.contains(p));
                 if index.unique != old_index.unique
@@ -115,7 +125,7 @@ impl CollectionSchema {
             let does_not_exist = !old_collection
                 .indexes
                 .iter()
-                .any(|old_index| index.name == old_index.name);
+                .any(|old_index| name_equal(Some(&index.name), &old_index.name));
             if does_not_exist {
                 add_indexes.push(index);
             }
@@ -134,7 +144,7 @@ impl CollectionSchema {
         let verify_target_col_exists = |col: &str, embedded: bool| -> Result<()> {
             if !collections
                 .iter()
-                .any(|c| c.name == col && c.embedded == embedded)
+                .any(|c| name_equal(Some(&c.name), &col) && c.embedded == embedded)
             {
                 return schema_error("Target collection does not exist.");
             }
@@ -165,12 +175,13 @@ impl CollectionSchema {
         let property_names = self
             .properties
             .iter()
-            .unique_by(|p| p.name.as_ref().unwrap());
+            .map(|p| p.name.as_deref().unwrap().to_lowercase())
+            .unique();
         if property_names.count() != self.properties.len() {
             return schema_error("Duplicate property name")?;
         }
 
-        let index_names = self.indexes.iter().unique_by(|i| i.name.as_str());
+        let index_names = self.indexes.iter().unique_by(|i| i.name.to_lowercase());
         if index_names.count() != self.indexes.len() {
             return schema_error("Duplicate index name");
         }
@@ -188,7 +199,7 @@ impl CollectionSchema {
                 let property = self
                     .properties
                     .iter()
-                    .find(|p| p.name.as_ref() == Some(&index_property));
+                    .find(|p| name_equal(p.name.as_deref(), &index_property));
                 if property.is_none() {
                     return schema_error("IsarIndex property does not exist");
                 }
@@ -255,9 +266,9 @@ pub struct PropertySchema {
 impl PropertySchema {
     pub fn new(name: &str, data_type: DataType, collection: Option<&str>) -> PropertySchema {
         PropertySchema {
-            name: Some(name.to_lowercase()),
+            name: Some(name.to_string()),
             data_type,
-            collection: collection.map(|col| col.to_lowercase()),
+            collection: collection.map(|col| col.to_string()),
         }
     }
 }
@@ -281,11 +292,15 @@ impl IndexSchema {
         hash: bool,
     ) -> IndexSchema {
         IndexSchema {
-            name: name.to_lowercase(),
-            properties: properties.iter().map(|p| p.to_lowercase()).collect(),
+            name: name.to_string(),
+            properties: properties.iter().map(|p| p.to_string()).collect(),
             case_sensitive,
             unique,
             hash,
         }
     }
+}
+
+pub fn name_equal(name: Option<&str>, other: &str) -> bool {
+    name.map(|n| n.to_lowercase()) == Some(other.to_lowercase())
 }

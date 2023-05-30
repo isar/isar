@@ -41,12 +41,12 @@ impl<'a> IsarQueryBuilder for NativeQueryBuilder<'a> {
     }
 
     fn add_sort(&mut self, property_index: u16, sort: Sort, case_sensitive: bool) {
-        let property = self.collection.get_property(property_index as u32);
+        let property = self.collection.get_property(property_index);
         self.sort.push((property.copied(), sort, case_sensitive));
     }
 
     fn add_distinct(&mut self, property_index: u16, case_sensitive: bool) {
-        let property = self.collection.get_property(property_index as u32);
+        let property = self.collection.get_property(property_index);
         if let Some(property) = property {
             self.distinct.push((*property, case_sensitive));
         }

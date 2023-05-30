@@ -163,7 +163,5 @@ fn open_collection(
     };
 
     let col = NativeCollection::new(collection_index, properties, vec![], db);
-    col.init_largest_id(txn)?;
-
     Ok(col)
 }

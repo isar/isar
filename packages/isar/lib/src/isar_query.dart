@@ -1,6 +1,6 @@
 part of isar;
 
-abstract class Query<T> {
+abstract class IsarQuery<T> {
   Isar get isar;
 
   T? findFirst() => findAll(limit: 1).firstOrNull;

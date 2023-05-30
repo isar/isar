@@ -55,7 +55,7 @@ abstract final class IsarCore {
     _initialized = true;
   }
 
-  static void _free() {
+  static void free() {
     malloc.free(ptrPtr);
     malloc.free(countPtr);
     malloc.free(boolPtr);
@@ -81,15 +81,15 @@ abstract final class IsarCore {
     return isar_string(_nativeStringPtr, str.length);
   }
 
-  static const isarReadId = isar_read_id;
-  static const isarReadNull = isar_read_null;
-  static const isarReadBool = isar_read_bool;
-  static const isarReadByte = isar_read_byte;
-  static const isarReadInt = isar_read_int;
-  static const isarReadFloat = isar_read_float;
-  static const isarReadLong = isar_read_long;
-  static const isarReadDouble = isar_read_double;
-  static String? isarReadString(Pointer<CIsarReader> reader, int index) {
+  static const readId = isar_read_id;
+  static const readNull = isar_read_null;
+  static const readBool = isar_read_bool;
+  static const readByte = isar_read_byte;
+  static const readInt = isar_read_int;
+  static const readFloat = isar_read_float;
+  static const readLong = isar_read_long;
+  static const readDouble = isar_read_double;
+  static String? readString(Pointer<CIsarReader> reader, int index) {
     final length = isar_read_string(reader, index, stringPtrPtr, boolPtr);
     if (stringPtr.isNull) {
       return null;
@@ -103,61 +103,22 @@ abstract final class IsarCore {
     }
   }
 
-  static const isarReadObject = isar_read_object;
-  static const isarReadList = isar_read_list;
+  static const readObject = isar_read_object;
+  static const readList = isar_read_list;
+  static const freeReader = isar_free_reader;
 
-  static const isarWriteNull = isar_write_null;
-  static const isarWriteBool = isar_write_bool;
-  static const isarWriteByte = isar_write_byte;
-  static const isarWriteInt = isar_write_int;
-  static const isarWriteFloat = isar_write_float;
-  static const isarWriteLong = isar_write_long;
-  static const isarWriteDouble = isar_write_double;
-  static const isarWriteString = isar_write_string;
-  static const isarBeginObject = isar_begin_object;
-  static const isarEndObject = isar_end_object;
-  static const isarBeginList = isar_begin_list;
-  static const isarEndList = isar_end_list;
-}
-
-extension _NativeError on int {
-  @pragma('vm:prefer-inline')
-  void checkNoError() {
-    if (this != 0) {
-      throwError();
-    }
-  }
-
-  Never throwError() {
-    switch (this) {
-      case ERROR_PATH:
-        throw PathError();
-      case ERROR_UNIQUE_VIOLATED:
-        throw UniqueViolationError();
-      case ERROR_WRITE_TXN_REQUIRED:
-        throw WriteTxnRequiredError();
-      case ERROR_VERSION:
-        throw VersionError();
-      case ERROR_OBJECT_LIMIT_REACHED:
-        throw ObjectLimitReachedError();
-      case ERROR_INSTANCE_MISMATCH:
-        throw InstanceMismatchError();
-      case ERROR_DB_FULL:
-        throw DatabaseFullError();
-      default:
-        final length = isar_get_error(IsarCore.stringPtrPtr);
-        final ptr = IsarCore.stringPtr;
-        if (length != 0 && !ptr.isNull) {
-          final length = IsarCore.countPtr.value;
-          final error = utf8.decode(ptr.asTypedList(length));
-          throw DatabaseError(error);
-        } else {
-          throw DatabaseError(
-            'There was an error but it could not be loaded from IsarCore.',
-          );
-        }
-    }
-  }
+  static const writeNull = isar_write_null;
+  static const writeBool = isar_write_bool;
+  static const writeByte = isar_write_byte;
+  static const writeInt = isar_write_int;
+  static const writeFloat = isar_write_float;
+  static const writeLong = isar_write_long;
+  static const writeDouble = isar_write_double;
+  static const writeString = isar_write_string;
+  static const beginObject = isar_begin_object;
+  static const endObject = isar_end_object;
+  static const beginList = isar_begin_list;
+  static const endList = isar_end_list;
 }
 
 extension PointerX on Pointer {

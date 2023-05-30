@@ -21,17 +21,19 @@ part 'src/annotations/index.dart';
 part 'src/annotations/name.dart';
 part 'src/annotations/type.dart';
 
-part 'src/impl/async.dart';
 part 'src/impl/filter_builder.dart';
 part 'src/impl/isar_collection_impl.dart';
 part 'src/impl/isar_impl.dart';
-part 'src/impl/query_impl.dart';
+part 'src/impl/isar_query_impl.dart';
+part 'src/impl/native_error.dart';
 
+part 'src/async.dart';
+part 'src/compact_condition.dart';
 part 'src/isar_core.dart';
 part 'src/isar.dart';
 part 'src/isar_collection.dart';
 part 'src/isar_error.dart';
-part 'src/query.dart';
+part 'src/isar_query.dart';
 part 'src/query_builder.dart';
 part 'src/query_extensions.dart';
 part 'src/query_components.dart';

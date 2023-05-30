@@ -18,6 +18,15 @@ impl IsarValue {
         }
     }
 
+    pub fn is_null(&self) -> bool {
+        match self {
+            IsarValue::Bool(value) => value.is_none(),
+            IsarValue::Integer(value) => *value == i64::MIN,
+            IsarValue::Real(value) => value.is_nan(),
+            IsarValue::String(value) => value.is_none(),
+        }
+    }
+
     pub fn get_max(&self) -> Self {
         match self {
             IsarValue::Bool(_) => IsarValue::Bool(Some(true)),

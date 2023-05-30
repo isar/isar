@@ -6,7 +6,7 @@ use std::mem::size_of;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Db {
-    pub(crate) dbi: ffi::MDBX_dbi,
+    pub(crate) dbi: mdbx_sys::MDBX_dbi,
     pub dup: bool,
 }
 
@@ -16,25 +16,30 @@ impl Db {
     }
 
     pub fn open(txn: &Txn, name: &str, int_key: bool, dup: bool) -> Result<Self> {
-        let mut flags = ffi::MDBX_CREATE;
+        let mut flags = mdbx_sys::MDBX_CREATE;
         if int_key {
-            flags |= ffi::MDBX_INTEGERKEY;
+            flags |= mdbx_sys::MDBX_INTEGERKEY;
         }
         if dup {
-            flags |= ffi::MDBX_DUPSORT;
+            flags |= mdbx_sys::MDBX_DUPSORT;
         }
 
-        let mut dbi: ffi::MDBX_dbi = 0;
+        let mut dbi: mdbx_sys::MDBX_dbi = 0;
         let name = CString::new(name.as_bytes()).unwrap();
         unsafe {
-            mdbx_result(ffi::mdbx_dbi_open(txn.txn, name.as_ptr(), flags, &mut dbi))?;
+            mdbx_result(mdbx_sys::mdbx_dbi_open(
+                txn.txn,
+                name.as_ptr(),
+                flags,
+                &mut dbi,
+            ))?;
         }
 
         Ok(Self { dbi, dup })
     }
 
     pub fn stat(&self, txn: &Txn) -> Result<(u64, u64)> {
-        let mut stat = ffi::MDBX_stat {
+        let mut stat = mdbx_sys::MDBX_stat {
             ms_psize: 0,
             ms_depth: 0,
             ms_branch_pages: 0,
@@ -43,13 +48,13 @@ impl Db {
             ms_entries: 0,
             ms_mod_txnid: 0,
         };
-        let stat_ptr = &mut stat as *mut ffi::MDBX_stat;
+        let stat_ptr = &mut stat as *mut mdbx_sys::MDBX_stat;
         unsafe {
-            ffi::mdbx_dbi_stat(
+            mdbx_sys::mdbx_dbi_stat(
                 txn.txn,
                 self.dbi,
                 stat_ptr,
-                size_of::<ffi::MDBX_stat>() as ffi::size_t,
+                size_of::<mdbx_sys::MDBX_stat>() as mdbx_sys::size_t,
             );
         }
         let size = (stat.ms_branch_pages + stat.ms_leaf_pages + stat.ms_overflow_pages)
@@ -58,12 +63,12 @@ impl Db {
     }
 
     pub fn clear(&self, txn: &Txn) -> Result<()> {
-        unsafe { mdbx_result(ffi::mdbx_drop(txn.txn, self.dbi, false)) }?;
+        unsafe { mdbx_result(mdbx_sys::mdbx_drop(txn.txn, self.dbi, false)) }?;
         Ok(())
     }
 
     pub fn drop(self, txn: &Txn) -> Result<()> {
-        unsafe { mdbx_result(ffi::mdbx_drop(txn.txn, self.dbi, true)) }?;
+        unsafe { mdbx_result(mdbx_sys::mdbx_drop(txn.txn, self.dbi, true)) }?;
         Ok(())
     }
 }
@@ -82,8 +87,8 @@ mod tests {
         let flags = vec![
             (false, false, 0),
             (false, true, 0),
-            (true, false, ffi::MDB_DUPSORT),
-            (true, true, ffi::MDB_DUPSORT | ffi::MDB_DUPFIXED),
+            (true, false, mdbx_sys::MDB_DUPSORT),
+            (true, true, mdbx_sys::MDB_DUPSORT | mdbx_sys::MDB_DUPFIXED),
         ];
 
         for (i, (dup, fixed_vals, flags)) in flags.iter().enumerate() {
@@ -94,7 +99,7 @@ mod tests {
             let mut actual_flags: u32 = 0;
             let txn = env.txn(false).unwrap();
             unsafe {
-                ffi::mdb_dbi_flags(txn.txn, db.dbi, &mut actual_flags);
+                mdbx_sys::mdb_dbi_flags(txn.txn, db.dbi, &mut actual_flags);
             }
             txn.abort();
             assert_eq!(*flags, actual_flags);

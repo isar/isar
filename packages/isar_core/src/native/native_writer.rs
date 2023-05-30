@@ -105,7 +105,7 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
         let (offset, collection_index) = self.next_property_or_write_null(DataType::Object)?;
 
         let collections = self.get_collections();
-        let collection = &collections[collection_index.unwrap() as usize];
+        let collection = &collections[collection_index? as usize];
 
         let object = self
             .get_serializer()
@@ -121,23 +121,22 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
 
     fn begin_list(&mut self, length: u32) -> Option<Self::ListWriter> {
         let (data_type, offset, embedded_collection_index) = self.next_property()?;
-        if !data_type.is_list() {
+        if let Some(element_type) = data_type.element_type() {
+            let list = self
+                .get_serializer()
+                .begin_nested(offset, element_type.static_size() as u32 * length);
+            let writer = NativeListWriter::new(
+                element_type,
+                embedded_collection_index,
+                self.get_collections(),
+                list,
+                length,
+            );
+            Some(writer)
+        } else {
             self.get_serializer().write_null(offset, data_type);
-            return None;
+            None
         }
-
-        let element_type = data_type.element_type().unwrap();
-        let list = self
-            .get_serializer()
-            .begin_nested(offset, element_type.static_size() as u32 * length);
-        let writer = NativeListWriter::new(
-            element_type,
-            embedded_collection_index,
-            self.get_collections(),
-            list,
-            length,
-        );
-        Some(writer)
     }
 
     fn end_list(&mut self, mut writer: Self::ListWriter) {
@@ -173,7 +172,7 @@ pub struct NativeObjectWriter<'a> {
     collection: &'a NativeCollection,
     all_collections: &'a [NativeCollection],
     object: IsarSerializer,
-    property_index: u32,
+    property_index: u16,
 }
 
 impl<'a> NativeObjectWriter<'a> {

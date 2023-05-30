@@ -58,7 +58,7 @@ impl Query {
         all_collections: &'a [NativeCollection],
         offset: Option<u32>,
         limit: Option<u32>,
-    ) -> QueryCursor<'a> {
+    ) -> QueryCursor<'_> {
         let collection = &all_collections[self.collection_index as usize];
         let iterator = QueryIterator::new(
             txn,
@@ -71,16 +71,16 @@ impl Query {
         QueryCursor::new(iterator, collection, all_collections)
     }
 
-    pub(crate) fn aggregate<'a>(
-        &'a self,
-        txn: &'a NativeTxn,
-        all_collections: &'a [NativeCollection],
+    pub(crate) fn aggregate(
+        &self,
+        txn: &NativeTxn,
+        all_collections: &[NativeCollection],
         aggregation: Aggregation,
         property_index: Option<u16>,
     ) -> Option<IsarValue> {
         let collection = &all_collections[self.collection_index as usize];
         let property = if let Some(property_index) = property_index {
-            collection.get_property(property_index as u32)
+            collection.get_property(property_index)
         } else {
             None
         };

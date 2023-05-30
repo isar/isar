@@ -3,8 +3,6 @@ part of isar;
 abstract class IsarCollection<ID, OBJ> {
   Isar get isar;
 
-  int get largestId;
-
   OBJ? get(ID id);
 
   List<OBJ?> getAll(List<ID> ids);
@@ -34,7 +32,7 @@ abstract class IsarCollection<ID, OBJ> {
   void clear();
 
   @experimental
-  Query<R> buildQuery<R>({
+  IsarQuery<R> buildQuery<R>({
     Filter? filter,
     List<SortProperty>? sortBy,
     List<DistinctProperty>? distinctBy,

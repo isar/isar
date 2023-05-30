@@ -26,5 +26,5 @@ features:
   - title: 🦄 Open Source
     details: Komplett Open Source und für immer kostenlos!
 
-footer: Apache Licensed | Copyright © 2022 Simon Leier
+footer: Apache Licensed | Copyright © 2022 Simon Choi
 ---

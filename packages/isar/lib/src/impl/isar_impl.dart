@@ -1,8 +1,12 @@
 part of isar;
 
 class _IsarImpl extends Isar {
-  _IsarImpl._(this.instanceId, Pointer<CIsarInstance> ptr, this.converters)
-      : _ptr = ptr {
+  _IsarImpl._(
+    this.instanceId,
+    this.engine,
+    Pointer<CIsarInstance> ptr,
+    this.converters,
+  ) : _ptr = ptr {
     for (var i = 0; i < converters.length; i++) {
       final converter = converters[i];
       collections[converter.type] = converters[i].withType(
@@ -18,6 +22,7 @@ class _IsarImpl extends Isar {
   static final _instances = <int, _IsarImpl>{};
 
   final int instanceId;
+  final StorageEngine engine;
   final List<ObjectConverter<dynamic, dynamic>> converters;
   final collections = <Type, _IsarCollectionImpl<dynamic, dynamic>>{};
 
@@ -25,31 +30,13 @@ class _IsarImpl extends Isar {
   Pointer<CIsarTxn>? _txnPtr;
   bool _txnWrite = false;
 
-  static _IsarImpl get({
-    required int instanceId,
-    required List<ObjectConverter<dynamic, dynamic>> converters,
-  }) {
-    final instance = _instances[instanceId];
-    if (instance != null) {
-      return instance;
-    }
-
-    final ptr = isar_get_instance(instanceId);
-    if (ptr.isNull) {
-      throw IsarNotReadyError('Instance has not been opened yet. Make sure to '
-          'call Isar.open() before using Isar.get().');
-    }
-
-    return _IsarImpl._(instanceId, ptr, converters);
-  }
-
-  static _IsarImpl open({
+  factory _IsarImpl.open({
     required List<CollectionSchema> schemas,
     required String directory,
+    required StorageEngine engine,
     required String name,
     required int maxSizeMiB,
     required CompactCondition? compactOnLaunch,
-    required bool inspector,
   }) {
     final allSchemas = <Schema>{};
     for (final schema in schemas) {
@@ -61,6 +48,11 @@ class _IsarImpl extends Isar {
     final schemaJson = '[${allSchemas.map((e) => e.schema).join(',')}]';
 
     final instanceId = Isar.fastHash(name);
+    final instance = _IsarImpl._instances[instanceId];
+    if (instance != null) {
+      return instance;
+    }
+
     final namePtr = IsarCore.toNativeString(name);
     final directoryPtr = IsarCore.toNativeString(directory);
     final schemaPtr = IsarCore.toNativeString(schemaJson);
@@ -71,6 +63,7 @@ class _IsarImpl extends Isar {
       instanceId,
       namePtr,
       directoryPtr,
+      engine.cEngine,
       schemaPtr,
       maxSizeMiB,
       compactOnLaunch != null ? compactOnLaunch.minFileSize ?? 0 : -1,
@@ -79,10 +72,43 @@ class _IsarImpl extends Isar {
     ).checkNoError();
 
     final converters = schemas.map((e) => e.converter).toList();
-    return _IsarImpl._(instanceId, isarPtrPtr.value, converters);
+    return _IsarImpl._(instanceId, engine, isarPtrPtr.value, converters);
   }
 
-  static _IsarImpl getInstance(int instanceId) {
+  factory _IsarImpl.get({
+    required int instanceId,
+    required List<ObjectConverter<dynamic, dynamic>> converters,
+    required StorageEngine engine,
+  }) {
+    final ptr = isar_get_instance(instanceId, engine.cEngine);
+    if (ptr.isNull) {
+      throw IsarNotReadyError('Instance has not been opened yet. Make sure to '
+          'call Isar.open() before using Isar.get().');
+    }
+
+    return _IsarImpl._(instanceId, engine, ptr, converters);
+  }
+
+  factory _IsarImpl.getByName({
+    required String name,
+    required List<CollectionSchema> schemas,
+    required StorageEngine engine,
+  }) {
+    final instanceId = Isar.fastHash(name);
+    final instance = _IsarImpl._instances[instanceId];
+    if (instance != null) {
+      return instance;
+    }
+
+    final converters = schemas.map((e) => e.converter).toList();
+    return _IsarImpl.get(
+      instanceId: instanceId,
+      converters: converters,
+      engine: engine,
+    );
+  }
+
+  static _IsarImpl instance(int instanceId) {
     final instance = _instances[instanceId];
     if (instance == null) {
       throw IsarNotReadyError(
@@ -202,6 +228,26 @@ class _IsarImpl extends Isar {
   }
 
   @override
+  Future<T> txnAsync<T>(T Function(Isar isar) callback) {
+    final instanceId = this.instanceId;
+    final engine = this.engine;
+    final converters = this.converters;
+    return Isolate.run(
+      () => _isarAsync(instanceId, engine, converters, false, callback),
+    );
+  }
+
+  @override
+  Future<T> writeTxnAsync<T>(T Function(Isar isar) callback) async {
+    final instanceId = this.instanceId;
+    final engine = this.engine;
+    final converters = this.converters;
+    return Isolate.run(
+      () => _isarAsync(instanceId, engine, converters, true, callback),
+    );
+  }
+
+  @override
   int getSize({bool includeIndexes = false}) {
     var size = 0;
     for (final collection in collections.values) {
@@ -248,6 +294,39 @@ class _IsarImpl extends Isar {
   bool close({bool deleteFromDisk = false}) {
     final closed = isar_close(getPtr(), deleteFromDisk);
     _ptr = null;
+    _instances.remove(instanceId);
     return closed;
   }
+}
+
+T _isarAsync<T>(
+  int instanceId,
+  StorageEngine engine,
+  List<ObjectConverter<dynamic, dynamic>> converters,
+  bool write,
+  T Function(Isar isar) callback,
+) {
+  final isar = _IsarImpl.get(
+    instanceId: instanceId,
+    converters: converters,
+    engine: engine,
+  );
+  try {
+    if (write) {
+      return isar.writeTxn(callback);
+    } else {
+      return isar.txn(callback);
+    }
+  } finally {
+    isar.close();
+    IsarCore.free();
+  }
+}
+
+extension on StorageEngine {
+  int get cEngine => switch (this) {
+        StorageEngine.isar => CStorageEngine.Isar,
+        StorageEngine.sqlite => CStorageEngine.SQLite,
+        StorageEngine.sqlcipher => CStorageEngine.SQLCipher,
+      };
 }

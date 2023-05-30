@@ -22,13 +22,15 @@ pub enum IsarError {
     #[snafu(display("Isar version of the file is too new or too old to be used."))]
     VersionError {},
 
-    #[snafu()]
+    #[snafu(display(
+        "Operation not supported. You might need to use a different flavor of Isar."
+    ))]
     UnsupportedOperation {},
 
     #[snafu(display("Object limit reached."))]
     ObjectLimitReached {},
 
-    #[snafu(display("Not all objects inserted."))]
+    #[snafu(display("Object insert incomplete."))]
     InsertIncomplete {},
 
     #[snafu(display("Instance mismatch. Make sure to use resources with the correct instance."))]
@@ -36,6 +38,9 @@ pub enum IsarError {
 
     #[snafu(display("Transaction closed."))]
     TransactionClosed {},
+
+    #[snafu(display("Transaction already active."))]
+    TransactionActive {},
 
     #[snafu(display("Illegal String."))]
     IllegalString {},

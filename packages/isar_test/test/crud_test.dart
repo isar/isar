@@ -78,7 +78,6 @@ void main() {
           isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
           [null, null, null],
         );
-        expect(isar.intModels.largestId, -9223372036854775808);
 
         isar.writeTxn((isar) {
           isar.intModels.put(intM1);
@@ -86,21 +85,18 @@ void main() {
             isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
             [intM1, null, null],
           );
-          expect(isar.intModels.largestId, intM1.id);
 
           isar.intModels.put(intM3);
           expect(
             isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
             [intM1, null, intM3],
           );
-          expect(isar.intModels.largestId, intM3.id);
 
           isar.intModels.put(intM2);
           expect(
             isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
             [intM1, intM2, intM3],
           );
-          expect(isar.intModels.largestId, intM3.id);
         });
 
         expect(
@@ -136,29 +132,24 @@ void main() {
       });
 
       isarTest('putAll()', () {
-        expect(isar.intModels.largestId, -9223372036854775808);
-
         isar.writeTxn((isar) {
           isar.intModels.putAll([intM1, intM3, intM1]);
           expect(
             isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
             [intM1, null, intM3],
           );
-          expect(isar.intModels.largestId, intM3.id);
 
           isar.intModels.putAll([intM2, intM2]);
           expect(
             isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
             [intM1, intM2, intM3],
           );
-          expect(isar.intModels.largestId, intM3.id);
 
           isar.intModels.putAll([]);
           expect(
             isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
             [intM1, intM2, intM3],
           );
-          expect(isar.intModels.largestId, intM3.id);
         });
 
         expect(
@@ -172,7 +163,6 @@ void main() {
           isar.intModels.putAll([intM1, intM2]);
           expect(isar.intModels.delete(intM2.id), true);
           expect(isar.intModels.getAll([intM1.id, intM2.id]), [intM1, null]);
-          expect(isar.intModels.largestId, intM2.id);
 
           expect(isar.intModels.delete(intM2.id), false);
           expect(isar.intModels.getAll([intM1.id, intM2.id]), [intM1, null]);
@@ -189,7 +179,6 @@ void main() {
             isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
             [null, intM2, null],
           );
-          expect(isar.intModels.largestId, intM3.id);
 
           expect(isar.intModels.deleteAll([intM1.id, intM2.id]), 1);
           expect(

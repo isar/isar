@@ -5,6 +5,10 @@
 compile_error!("Only little endian systems are supported.");
 
 pub mod core;
-pub mod native;
-//pub mod sqlite;
 mod util;
+
+#[cfg(feature = "native")]
+pub mod native;
+
+#[cfg(feature = "sqlite")]
+pub mod sqlite;

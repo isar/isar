@@ -39,7 +39,7 @@ pub struct NativeInsert<'a> {
     remaining: u32,
 
     pub(crate) object: IsarSerializer,
-    pub(crate) property_index: u32,
+    pub(crate) property_index: u16,
 }
 
 impl<'a> NativeInsert<'a> {
@@ -67,7 +67,9 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
 
     fn save(&mut self, id: i64) -> Result<()> {
         if self.remaining > 0 {
-            self.write_remaining_null();
+            if self.next_property().is_some() {
+                return Result::Err(IsarError::InsertIncomplete {});
+            }
 
             let mut buffer = self.object.finish();
             if buffer.len() > MAX_OBJ_SIZE as usize {
@@ -76,14 +78,13 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
             self.txn_cursor.put(id, &buffer)?;
 
             self.remaining -= 1;
-            self.collection.update_largest_id(id);
-
             self.property_index = 1; // Skip id
             buffer.clear();
             self.object = IsarSerializer::new(buffer, 0, self.collection.static_size);
+            Ok(())
+        } else {
+            Err(IsarError::UnsupportedOperation {})
         }
-
-        Ok(())
     }
 
     fn finish(self) -> Result<Self::Txn> {

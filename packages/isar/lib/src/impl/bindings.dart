@@ -51,20 +51,20 @@ external ffi.Pointer<CIsarReader> isar_cursor_next(
   ffi.Pointer<CIsarReader> old_reader,
 );
 
-@ffi.Native<ffi.Pointer<CFilter> Function(ffi.Uint32)>(
+@ffi.Native<ffi.Pointer<CFilter> Function(ffi.Uint16)>(
     symbol: 'isar_filter_is_null')
 external ffi.Pointer<CFilter> isar_filter_is_null(
   int property_index,
 );
 
-@ffi.Native<ffi.Pointer<CFilter> Function(ffi.Uint32)>(
+@ffi.Native<ffi.Pointer<CFilter> Function(ffi.Uint16)>(
     symbol: 'isar_filter_list_is_empty')
 external ffi.Pointer<CFilter> isar_filter_list_is_empty(
   int property_index,
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>,
+    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
         ffi.Bool)>(symbol: 'isar_filter_equal_to')
 external ffi.Pointer<CFilter> isar_filter_equal_to(
   int property_index,
@@ -73,7 +73,7 @@ external ffi.Pointer<CFilter> isar_filter_equal_to(
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>, ffi.Bool,
+    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool,
         ffi.Bool)>(symbol: 'isar_filter_greater_than')
 external ffi.Pointer<CFilter> isar_filter_greater_than(
   int property_index,
@@ -83,7 +83,7 @@ external ffi.Pointer<CFilter> isar_filter_greater_than(
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>, ffi.Bool,
+    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool,
         ffi.Bool)>(symbol: 'isar_filter_less_than')
 external ffi.Pointer<CFilter> isar_filter_less_than(
   int property_index,
@@ -94,7 +94,7 @@ external ffi.Pointer<CFilter> isar_filter_less_than(
 
 @ffi.Native<
     ffi.Pointer<CFilter> Function(
-        ffi.Uint32,
+        ffi.Uint16,
         ffi.Pointer<CIsarValue>,
         ffi.Bool,
         ffi.Pointer<CIsarValue>,
@@ -110,7 +110,7 @@ external ffi.Pointer<CFilter> isar_filter_between(
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>,
+    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
         ffi.Bool)>(symbol: 'isar_filter_string_starts_with')
 external ffi.Pointer<CFilter> isar_filter_string_starts_with(
   int property_index,
@@ -119,7 +119,7 @@ external ffi.Pointer<CFilter> isar_filter_string_starts_with(
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>,
+    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
         ffi.Bool)>(symbol: 'isar_filter_string_ends_with')
 external ffi.Pointer<CFilter> isar_filter_string_ends_with(
   int property_index,
@@ -128,7 +128,7 @@ external ffi.Pointer<CFilter> isar_filter_string_ends_with(
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>,
+    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
         ffi.Bool)>(symbol: 'isar_filter_string_contains')
 external ffi.Pointer<CFilter> isar_filter_string_contains(
   int property_index,
@@ -137,7 +137,7 @@ external ffi.Pointer<CFilter> isar_filter_string_contains(
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint32, ffi.Pointer<CIsarValue>,
+    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
         ffi.Bool)>(symbol: 'isar_filter_string_matches')
 external ffi.Pointer<CFilter> isar_filter_string_matches(
   int property_index,
@@ -185,10 +185,11 @@ external int isar_insert_finish(
 @ffi.Native<ffi.Pointer<ffi.Char> Function()>(symbol: 'isar_version')
 external ffi.Pointer<ffi.Char> isar_version();
 
-@ffi.Native<ffi.Pointer<CIsarInstance> Function(ffi.Uint32)>(
+@ffi.Native<ffi.Pointer<CIsarInstance> Function(ffi.Uint32, StorageEngine)>(
     symbol: 'isar_get_instance')
 external ffi.Pointer<CIsarInstance> isar_get_instance(
   int instance_id,
+  int engine,
 );
 
 @ffi.Native<
@@ -197,6 +198,7 @@ external ffi.Pointer<CIsarInstance> isar_get_instance(
         ffi.Uint32,
         ffi.Pointer<CString>,
         ffi.Pointer<CString>,
+        StorageEngine,
         ffi.Pointer<CString>,
         ffi.Uint32,
         ffi.Uint32,
@@ -207,6 +209,7 @@ external int isar_open_instance(
   int instance_id,
   ffi.Pointer<CString> name,
   ffi.Pointer<CString> path,
+  int engine,
   ffi.Pointer<CString> schema_json,
   int max_size_mib,
   int compact_min_file_size,
@@ -253,13 +256,6 @@ external int isar_txn_commit(
 external void isar_txn_abort(
   ffi.Pointer<CIsarInstance> isar,
   ffi.Pointer<CIsarTxn> txn,
-);
-
-@ffi.Native<ffi.Int64 Function(ffi.Pointer<CIsarInstance>, ffi.Uint16)>(
-    symbol: 'isar_get_largest_id')
-external int isar_get_largest_id(
-  ffi.Pointer<CIsarInstance> isar,
-  int collection_index,
 );
 
 @ffi.Native<
@@ -670,6 +666,12 @@ external void isar_end_list(
   ffi.Pointer<CIsarWriter> list_writer,
 );
 
+abstract class CStorageEngine {
+  static const int Isar = 0;
+  static const int SQLite = 1;
+  static const int SQLCipher = 2;
+}
+
 final class CIsarCursor extends ffi.Opaque {}
 
 final class CIsarInstance extends ffi.Opaque {}
@@ -689,6 +691,8 @@ final class CFilter extends ffi.Opaque {}
 final class CIsarValue extends ffi.Opaque {}
 
 final class CString extends ffi.Opaque {}
+
+typedef StorageEngine = ffi.Uint8;
 
 const int ERROR_PATH = 1;
 
@@ -715,3 +719,5 @@ const int AGGREGATION_MAX = 3;
 const int AGGREGATION_SUM = 4;
 
 const int AGGREGATION_AVERAGE = 5;
+
+const int SQLite3_MAX_PARAM_COUNT = 999;

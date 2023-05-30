@@ -7,7 +7,12 @@ use isar_core::core::instance::IsarInstance;
 use isar_core::core::reader::IsarReader;
 use isar_core::core::value::IsarValue;
 use isar_core::core::writer::IsarWriter;
+
+#[cfg(feature = "native")]
 use isar_core::native::native_instance::NativeInstance;
+
+#[cfg(feature = "sqlite")]
+use isar_core::sqlite::sqlite_instance::SQLiteInstance;
 
 #[macro_use]
 mod error;
@@ -20,49 +25,120 @@ pub mod reader;
 pub mod value;
 pub mod writer;
 
+#[cfg(feature = "native")]
 type NInstance = <NativeInstance as IsarInstance>::Instance;
+#[cfg(feature = "sqlite")]
+type SInstance = <SQLiteInstance as IsarInstance>::Instance;
+
+#[cfg(feature = "native")]
 type NTxn = <NativeInstance as IsarInstance>::Txn;
+#[cfg(feature = "sqlite")]
+type STxn = <SQLiteInstance as IsarInstance>::Txn;
 
+#[cfg(feature = "native")]
 type NInsert<'a> = <NativeInstance as IsarInstance>::Insert<'a>;
+#[cfg(feature = "sqlite")]
+type SInsert<'a> = <SQLiteInstance as IsarInstance>::Insert<'a>;
+
+#[cfg(feature = "native")]
 type NObjectWriter<'a> = <NInsert<'a> as IsarWriter<'a>>::ObjectWriter;
+#[cfg(feature = "sqlite")]
+type SObjectWriter<'a> = <SInsert<'a> as IsarWriter<'a>>::ObjectWriter;
+
+#[cfg(feature = "native")]
 type NListWriter<'a> = <NInsert<'a> as IsarWriter<'a>>::ListWriter;
+#[cfg(feature = "sqlite")]
+type SListWriter<'a> = <SInsert<'a> as IsarWriter<'a>>::ListWriter;
 
+#[cfg(feature = "native")]
 type NCursor<'a> = <NativeInstance as IsarInstance>::Cursor<'a>;
-type NReader<'a> = <NCursor<'a> as IsarCursor>::Reader<'a>;
-type NListReader<'a> = <NReader<'a> as IsarReader>::ListReader<'a>;
+#[cfg(feature = "sqlite")]
+type SCursor<'a> = <SQLiteInstance as IsarInstance>::Cursor<'a>;
 
+#[cfg(feature = "native")]
+type NReader<'a> = <NCursor<'a> as IsarCursor>::Reader<'a>;
+#[cfg(feature = "sqlite")]
+type SReader<'a> = <SCursor<'a> as IsarCursor>::Reader<'a>;
+
+#[cfg(feature = "sqlite")]
+type SObjectReader<'a> = <SReader<'a> as IsarReader>::ObjectReader<'a>;
+
+#[cfg(feature = "native")]
+type NListReader<'a> = <NReader<'a> as IsarReader>::ListReader<'a>;
+#[cfg(feature = "sqlite")]
+type SListReader<'a> = <SReader<'a> as IsarReader>::ListReader<'a>;
+
+#[cfg(feature = "native")]
 type NQueryBuilder<'a> = <NativeInstance as IsarInstance>::QueryBuilder<'a>;
+#[cfg(feature = "sqlite")]
+type SQueryBuilder<'a> = <SQLiteInstance as IsarInstance>::QueryBuilder<'a>;
+
+#[cfg(feature = "native")]
 type NQuery = <NativeInstance as IsarInstance>::Query;
+#[cfg(feature = "sqlite")]
+type SQuery = <SQLiteInstance as IsarInstance>::Query;
 
 pub enum CIsarInstance {
+    #[cfg(feature = "native")]
     Native(NInstance),
+    #[cfg(feature = "sqlite")]
+    SQLite(SInstance),
 }
 
 pub enum CIsarTxn {
+    #[cfg(feature = "native")]
     Native(NTxn),
+    #[cfg(feature = "sqlite")]
+    SQLite(STxn),
 }
 
 pub enum CIsarWriter<'a> {
+    #[cfg(feature = "native")]
     Native(NInsert<'a>),
+    #[cfg(feature = "native")]
     NativeObject(NObjectWriter<'a>),
+    #[cfg(feature = "native")]
     NativeList(NListWriter<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLite(SInsert<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLiteObject(SObjectWriter<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLiteList(SListWriter<'a>),
 }
 
 pub enum CIsarReader<'a> {
+    #[cfg(feature = "native")]
     Native(NReader<'a>),
+    #[cfg(feature = "native")]
     NativeList(NListReader<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLite(SReader<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLiteObject(SObjectReader<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLiteList(SListReader<'a>),
 }
 
 pub enum CIsarQueryBuilder<'a> {
+    #[cfg(feature = "native")]
     Native(NQueryBuilder<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLite(SQueryBuilder<'a>),
 }
 
 pub enum CIsarQuery {
+    #[cfg(feature = "native")]
     Native(NQuery),
+    #[cfg(feature = "sqlite")]
+    SQLite(SQuery),
 }
 
 pub enum CIsarCursor<'a> {
+    #[cfg(feature = "native")]
     Native(NCursor<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLite(SCursor<'a>),
 }
 
 #[no_mangle]

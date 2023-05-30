@@ -6,7 +6,7 @@ use core::ptr;
 use std::sync::Arc;
 
 pub struct Env {
-    env: *mut ffi::MDBX_env,
+    env: *mut mdbx_sys::MDBX_env,
 }
 
 unsafe impl Sync for Env {}
@@ -17,23 +17,25 @@ const MIB: isize = 1 << 20;
 impl Env {
     pub fn create(path: &str, max_dbs: u32, max_size_mib: u32) -> Result<Arc<Env>> {
         let path = str_to_os(path)?;
-        let mut env: *mut ffi::MDBX_env = ptr::null_mut();
+        let mut env: *mut mdbx_sys::MDBX_env = ptr::null_mut();
         unsafe {
-            mdbx_result(ffi::mdbx_env_create(&mut env))?;
-            mdbx_result(ffi::mdbx_env_set_option(
+            mdbx_result(mdbx_sys::mdbx_env_create(&mut env))?;
+            mdbx_result(mdbx_sys::mdbx_env_set_option(
                 env,
-                ffi::MDBX_option_t::MDBX_opt_max_db,
+                mdbx_sys::MDBX_option_t::MDBX_opt_max_db,
                 max_dbs as u64,
             ))?;
 
-            let flags =
-                ffi::MDBX_NOTLS | ffi::MDBX_COALESCE | ffi::MDBX_NOSUBDIR | ffi::MDBX_NOMETASYNC;
+            let flags = mdbx_sys::MDBX_NOTLS
+                | mdbx_sys::MDBX_COALESCE
+                | mdbx_sys::MDBX_NOSUBDIR
+                | mdbx_sys::MDBX_NOMETASYNC;
             let max_size = (max_size_mib as isize).saturating_mul(MIB);
 
             let mut err_code = 0;
             for i in 0..9 {
                 let max_size_i = (max_size - i * (max_size / 10)).clamp(10 * MIB, isize::MAX);
-                mdbx_result(ffi::mdbx_env_set_geometry(
+                mdbx_result(mdbx_sys::mdbx_env_set_geometry(
                     env,
                     MIB,
                     0,
@@ -44,14 +46,14 @@ impl Env {
                 ))?;
 
                 err_code = ENV_OPEN(env, path.as_ptr(), flags, 0o600);
-                if err_code == ffi::MDBX_SUCCESS {
+                if err_code == mdbx_sys::MDBX_SUCCESS {
                     break;
                 }
             }
 
             match err_code {
-                ffi::MDBX_SUCCESS => Ok(Arc::new(Env { env })),
-                ffi::MDBX_EPERM | ffi::MDBX_ENOFILE => Err(IsarError::PathError {}),
+                mdbx_sys::MDBX_SUCCESS => Ok(Arc::new(Env { env })),
+                mdbx_sys::MDBX_EPERM | mdbx_sys::MDBX_ENOFILE => Err(IsarError::PathError {}),
                 e => {
                     mdbx_result(e)?;
                     unreachable!()
@@ -61,10 +63,10 @@ impl Env {
     }
 
     pub fn txn(self: &Arc<Self>, write: bool) -> Result<Txn> {
-        let flags = if write { 0 } else { ffi::MDBX_TXN_RDONLY };
-        let mut txn: *mut ffi::MDBX_txn = ptr::null_mut();
+        let flags = if write { 0 } else { mdbx_sys::MDBX_TXN_RDONLY };
+        let mut txn: *mut mdbx_sys::MDBX_txn = ptr::null_mut();
         unsafe {
-            mdbx_result(ffi::mdbx_txn_begin_ex(
+            mdbx_result(mdbx_sys::mdbx_txn_begin_ex(
                 self.env,
                 ptr::null_mut(),
                 flags,
@@ -77,7 +79,7 @@ impl Env {
 
     pub fn copy(&self, path: &str) -> Result<()> {
         let path = str_to_os(path)?;
-        unsafe { mdbx_result(ENV_COPY(self.env, path.as_ptr(), ffi::MDBX_CP_COMPACT)) }
+        unsafe { mdbx_result(ENV_COPY(self.env, path.as_ptr(), mdbx_sys::MDBX_CP_COMPACT)) }
     }
 }
 
@@ -85,7 +87,7 @@ impl Drop for Env {
     fn drop(&mut self) {
         if !self.env.is_null() {
             unsafe {
-                ffi::mdbx_env_close_ex(self.env, false);
+                mdbx_sys::mdbx_env_close_ex(self.env, false);
             }
             self.env = ptr::null_mut();
         }

@@ -108,7 +108,7 @@ extension QueryModifier<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
   }
 }
 
-extension QueryNumAggregation<T extends num?> on Query<T?> {
+extension QueryNumAggregation<T extends num?> on IsarQuery<T?> {
   T? min() => aggregate(Aggregation.min);
 
   Future<T?> minAsync() => aggregateAsync(Aggregation.min);
@@ -128,7 +128,7 @@ extension QueryNumAggregation<T extends num?> on Query<T?> {
       aggregateAsync<T>(Aggregation.sum).then((value) => value!);
 }
 
-extension QueryDateAggregation<T extends DateTime?> on Query<T> {
+extension QueryDateAggregation<T extends DateTime?> on IsarQuery<T> {
   DateTime? min() => aggregate(Aggregation.min);
 
   Future<DateTime?> minAsync() => aggregateAsync(Aggregation.min);
@@ -138,7 +138,7 @@ extension QueryDateAggregation<T extends DateTime?> on Query<T> {
   Future<DateTime?> maxAsync() => aggregateAsync(Aggregation.max);
 }
 
-extension QueryStringAggregation<T extends String?> on Query<T?> {
+extension QueryStringAggregation<T extends String?> on IsarQuery<T?> {
   T? min() => aggregate(Aggregation.min);
 
   Future<T?> minAsync() => aggregateAsync(Aggregation.min);
@@ -151,9 +151,9 @@ extension QueryStringAggregation<T extends String?> on Query<T?> {
 /// Extension for QueryBuilders
 extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QOperations> {
   /// Create a query from this query builder.
-  Query<R> build() => _query.build();
+  IsarQuery<R> build() => _query.build();
 
-  T _withQuery<T>(T Function(Query<R> q) f) {
+  T _withQuery<T>(T Function(IsarQuery<R> q) f) {
     final q = build();
     try {
       return f(q);
@@ -176,7 +176,7 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QOperations> {
   int deleteAll({int? offset, int? limit}) =>
       _withQuery((q) => q.deleteAll(offset: offset, limit: limit));
 
-  Future<T> _withQueryAsync<T>(Future<T> Function(Query<R> q) f) async {
+  Future<T> _withQueryAsync<T>(Future<T> Function(IsarQuery<R> q) f) async {
     final q = build();
     try {
       return await f(q);

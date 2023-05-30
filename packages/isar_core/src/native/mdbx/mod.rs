@@ -15,25 +15,25 @@ pub mod txn;
 
 pub type KeyVal<'txn> = (&'txn [u8], &'txn [u8]);
 
-pub const EMPTY_KEY: ffi::MDBX_val = ffi::MDBX_val {
+pub const EMPTY_KEY: mdbx_sys::MDBX_val = mdbx_sys::MDBX_val {
     iov_len: 0,
     iov_base: 0 as *mut c_void,
 };
 
-pub const EMPTY_VAL: ffi::MDBX_val = ffi::MDBX_val {
+pub const EMPTY_VAL: mdbx_sys::MDBX_val = mdbx_sys::MDBX_val {
     iov_len: 0,
     iov_base: 0 as *mut c_void,
 };
 
 #[inline]
-pub unsafe fn from_mdb_val<'a>(val: &ffi::MDBX_val) -> &'a [u8] {
+pub unsafe fn from_mdb_val<'a>(val: &mdbx_sys::MDBX_val) -> &'a [u8] {
     slice::from_raw_parts(val.iov_base as *const u8, val.iov_len as usize)
 }
 
 #[inline]
-pub unsafe fn to_mdb_val(value: &[u8]) -> ffi::MDBX_val {
-    ffi::MDBX_val {
-        iov_len: value.len() as ffi::size_t,
+pub unsafe fn to_mdb_val(value: &[u8]) -> mdbx_sys::MDBX_val {
+    mdbx_sys::MDBX_val {
+        iov_len: value.len() as mdbx_sys::size_t,
         iov_base: value.as_ptr() as *mut libc::c_void,
     }
 }
@@ -41,10 +41,10 @@ pub unsafe fn to_mdb_val(value: &[u8]) -> ffi::MDBX_val {
 #[inline]
 pub fn mdbx_result(err_code: c_int) -> Result<()> {
     match err_code {
-        ffi::MDBX_SUCCESS | ffi::MDBX_RESULT_TRUE => Ok(()),
-        ffi::MDBX_MAP_FULL => Err(IsarError::DbFull {}),
+        mdbx_sys::MDBX_SUCCESS | mdbx_sys::MDBX_RESULT_TRUE => Ok(()),
+        mdbx_sys::MDBX_MAP_FULL => Err(IsarError::DbFull {}),
         other => unsafe {
-            let err_raw = ffi::mdbx_strerror(other);
+            let err_raw = mdbx_sys::mdbx_strerror(other);
             let err = CStr::from_ptr(err_raw);
             Err(IsarError::DbError {
                 code: other,
@@ -84,17 +84,17 @@ pub(crate) mod osal {
     }
 
     pub const ENV_OPEN: unsafe extern "C" fn(
-        *mut ffi::MDBX_env,
+        *mut mdbx_sys::MDBX_env,
         *const u16,
-        ffi::MDBX_env_flags_t,
-        ffi::mdbx_mode_t,
-    ) -> i32 = ffi::mdbx_env_openW;
+        mdbx_sys::MDBX_env_flags_t,
+        mdbx_sys::mdbx_mode_t,
+    ) -> i32 = mdbx_sys::mdbx_env_openW;
 
     pub const ENV_COPY: unsafe extern "C" fn(
-        *mut ffi::MDBX_env,
+        *mut mdbx_sys::MDBX_env,
         *const u16,
-        ffi::MDBX_copy_flags_t,
-    ) -> i32 = ffi::mdbx_env_copyW;
+        mdbx_sys::MDBX_copy_flags_t,
+    ) -> i32 = mdbx_sys::mdbx_env_copyW;
 }
 
 #[cfg(not(target_os = "windows"))]
@@ -107,15 +107,15 @@ pub(crate) mod osal {
     }
 
     pub const ENV_OPEN: unsafe extern "C" fn(
-        *mut ffi::MDBX_env,
+        *mut mdbx_sys::MDBX_env,
         *const libc::c_char,
-        ffi::MDBX_env_flags_t,
-        ffi::mdbx_mode_t,
-    ) -> i32 = ffi::mdbx_env_open;
+        mdbx_sys::MDBX_env_flags_t,
+        mdbx_sys::mdbx_mode_t,
+    ) -> i32 = mdbx_sys::mdbx_env_open;
 
     pub const ENV_COPY: unsafe extern "C" fn(
-        *mut ffi::MDBX_env,
+        *mut mdbx_sys::MDBX_env,
         *const libc::c_char,
-        ffi::MDBX_copy_flags_t,
-    ) -> i32 = ffi::mdbx_env_copy;
+        mdbx_sys::MDBX_copy_flags_t,
+    ) -> i32 = mdbx_sys::mdbx_env_copy;
 }

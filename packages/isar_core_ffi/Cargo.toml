@@ -1,7 +1,7 @@
 [package]
 name = "isar"
 version = "0.0.0"
-authors = ["Simon Leier <simonleier@gmail.com>"]
+authors = ["Simon Choi <simonleier@gmail.com>"]
 edition = "2021"
 
 [dependencies]
@@ -12,3 +12,8 @@ itertools = "0.10.3"
 
 [lib]
 crate-type=["staticlib", "cdylib"]
+
+[features]
+default = ["sqlite"]
+native = ["isar-core/native"]
+sqlite = ["isar-core/sqlite"]

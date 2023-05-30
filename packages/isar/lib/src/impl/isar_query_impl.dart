@@ -1,7 +1,7 @@
 part of isar;
 
-class _QueryImpl<T> extends Query<T> {
-  _QueryImpl({
+class _IsarQueryImpl<T> extends IsarQuery<T> {
+  _IsarQueryImpl({
     required int instanceId,
     required int ptrAddress,
     List<int>? properties,
@@ -25,7 +25,7 @@ class _QueryImpl<T> extends Query<T> {
   }
 
   @override
-  _IsarImpl get isar => _IsarImpl.getInstance(_instanceId);
+  _IsarImpl get isar => _IsarImpl.instance(_instanceId);
 
   @override
   List<T> findAll({int? offset, int? limit}) {

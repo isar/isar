@@ -39,7 +39,7 @@ impl<'a> IsarReader for NativeReader<'a> {
     }
 
     fn is_null(&self, index: u32) -> bool {
-        let property = self.collection.get_property(index);
+        let property = self.collection.get_property(index as u16);
         if let Some(property) = property {
             self.object.is_null(property.offset, property.data_type)
         } else {
@@ -49,13 +49,13 @@ impl<'a> IsarReader for NativeReader<'a> {
 
     #[inline]
     fn read_bool(&self, index: u32) -> Option<bool> {
-        let property = self.collection.get_property(index)?;
+        let property = self.collection.get_property(index as u16)?;
         self.object.read_bool(property.offset)
     }
 
     #[inline]
     fn read_byte(&self, index: u32) -> u8 {
-        if let Some(property) = self.collection.get_property(index) {
+        if let Some(property) = self.collection.get_property(index as u16) {
             self.object.read_byte(property.offset)
         } else {
             NULL_BYTE
@@ -64,7 +64,7 @@ impl<'a> IsarReader for NativeReader<'a> {
 
     #[inline]
     fn read_int(&self, index: u32) -> i32 {
-        if let Some(property) = self.collection.get_property(index) {
+        if let Some(property) = self.collection.get_property(index as u16) {
             self.object.read_int(property.offset)
         } else {
             NULL_INT
@@ -73,7 +73,7 @@ impl<'a> IsarReader for NativeReader<'a> {
 
     #[inline]
     fn read_float(&self, index: u32) -> f32 {
-        if let Some(property) = self.collection.get_property(index) {
+        if let Some(property) = self.collection.get_property(index as u16) {
             self.object.read_float(property.offset)
         } else {
             NULL_FLOAT
@@ -82,7 +82,7 @@ impl<'a> IsarReader for NativeReader<'a> {
 
     #[inline]
     fn read_long(&self, index: u32) -> i64 {
-        if let Some(property) = self.collection.get_property(index) {
+        if let Some(property) = self.collection.get_property(index as u16) {
             self.object.read_long(property.offset)
         } else {
             NULL_LONG
@@ -91,7 +91,7 @@ impl<'a> IsarReader for NativeReader<'a> {
 
     #[inline]
     fn read_double(&self, index: u32) -> f64 {
-        if let Some(property) = self.collection.get_property(index) {
+        if let Some(property) = self.collection.get_property(index as u16) {
             self.object.read_double(property.offset)
         } else {
             NULL_DOUBLE
@@ -100,21 +100,21 @@ impl<'a> IsarReader for NativeReader<'a> {
 
     #[inline]
     fn read_string(&self, index: u32) -> Option<&'a str> {
-        let property = self.collection.get_property(index)?;
+        let property = self.collection.get_property(index as u16)?;
         self.object.read_string(property.offset)
     }
 
     #[inline]
     fn read_blob(&self, index: u32) -> Option<Cow<'a, [u8]>> {
-        let property = self.collection.get_property(index)?;
+        let property = self.collection.get_property(index as u16)?;
         self.object.read_dynamic(property.offset).map(Cow::Borrowed)
     }
 
     fn read_object(&self, index: u32) -> Option<Self::ObjectReader<'_>> {
-        let property = self.collection.get_property(index)?;
+        let property = self.collection.get_property(index as u16)?;
         let object = self.object.read_nested(property.offset)?;
 
-        let collection_index = property.embedded_collection_index.unwrap();
+        let collection_index = property.embedded_collection_index?;
         let collection = &self.all_collections[collection_index as usize];
         Some(NativeReader {
             id: i64::MIN,
@@ -125,7 +125,7 @@ impl<'a> IsarReader for NativeReader<'a> {
     }
 
     fn read_list(&self, index: u32) -> Option<(Self::ListReader<'_>, u32)> {
-        let property = self.collection.get_property(index)?;
+        let property = self.collection.get_property(index as u16)?;
         let element_type = property.data_type.element_type()?;
         let (list, length) = self.object.read_list(property.offset, element_type)?;
         let reader = NativeListReader {
@@ -210,7 +210,7 @@ impl<'a> IsarReader for NativeListReader<'a> {
         let object = self
             .list
             .read_nested(index * DataType::Object.static_size() as u32)?;
-        let collection_index = self.embedded_collection_index.unwrap();
+        let collection_index = self.embedded_collection_index?;
         let collection = &self.all_collections[collection_index as usize];
         Some(NativeReader {
             id: i64::MIN,

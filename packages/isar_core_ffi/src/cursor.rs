@@ -12,10 +12,13 @@ pub unsafe extern "C" fn isar_cursor_next(
     }
 
     let reader = match cursor {
-        CIsarCursor::Native(cursor) => cursor.next(),
+        #[cfg(feature = "native")]
+        CIsarCursor::Native(cursor) => cursor.next().map(|reader| CIsarReader::Native(reader)),
+        #[cfg(feature = "sqlite")]
+        CIsarCursor::SQLite(cursor) => cursor.next().map(|reader| CIsarReader::SQLite(reader)),
     };
     if let Some(reader) = reader {
-        Box::into_raw(Box::new(CIsarReader::Native(reader)))
+        Box::into_raw(Box::new(reader))
     } else {
         ptr::null()
     }

@@ -167,9 +167,10 @@ impl<'txn> AsMut<Cursor<'txn>> for TxnCursor<'txn> {
 
 impl<'txn> Drop for TxnCursor<'txn> {
     fn drop(&mut self) {
-        let cursor = self.cursor.take().unwrap();
-        if self.txn.unbound_cursors.borrow().len() < 3 {
-            self.txn.unbound_cursors.borrow_mut().push(cursor.unbind());
+        if let Some(cursor) = self.cursor.take() {
+            if self.txn.unbound_cursors.borrow().len() < 3 {
+                self.txn.unbound_cursors.borrow_mut().push(cursor.unbind());
+            }
         }
     }
 }

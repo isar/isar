@@ -12,6 +12,10 @@ typedef FilterQuery<OBJ> = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>
 class QueryBuilder<OBJ, R, S> {
   /// @nodoc
   @protected
+  QueryBuilder(IsarCollection<dynamic, OBJ>? collection)
+      : _query = _QueryBuilder<OBJ>(collection: collection);
+
+  @protected
   const QueryBuilder._(this._query);
 
   final _QueryBuilder<OBJ> _query;
@@ -188,7 +192,7 @@ class _QueryBuilder<OBJ> {
 
   /// @nodoc
   @protected
-  Query<R> build<R>() {
+  IsarQuery<R> build<R>() {
     return collection!.buildQuery(
       filter: filter,
       sortBy: sortByProperties,

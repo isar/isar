@@ -1,6 +1,7 @@
 use std::ptr;
 
 use crate::{CIsarCursor, CIsarInstance, CIsarQuery, CIsarQueryBuilder, CIsarTxn};
+use isar_core::core::error::IsarError;
 use isar_core::core::filter::Filter;
 use isar_core::core::instance::{Aggregation, IsarInstance};
 use isar_core::core::query_builder::{IsarQueryBuilder, Sort};
@@ -14,10 +15,10 @@ pub unsafe extern "C" fn isar_query_new(
 ) -> u8 {
     isar_try! {
         let new_builder = match isar {
-            CIsarInstance::Native(isar) => {
-                let builder = isar.query(collection_index)?;
-                CIsarQueryBuilder::Native(builder)
-            }
+            #[cfg(feature = "native")]
+            CIsarInstance::Native(isar) => CIsarQueryBuilder::Native(isar.query(collection_index)?),
+            #[cfg(feature = "sqlite")]
+            CIsarInstance::SQLite(isar) => CIsarQueryBuilder::SQLite(isar.query(collection_index)?),
         };
         *query_builder = Box::into_raw(Box::new(new_builder));
     }
@@ -29,9 +30,11 @@ pub unsafe extern "C" fn isar_query_set_filter(
     filter: *mut Filter,
 ) {
     let filter = *Box::from_raw(filter);
-    //let optimized = filter.optimize();
     match builder {
+        #[cfg(feature = "native")]
         CIsarQueryBuilder::Native(builder) => builder.set_filter(filter),
+        #[cfg(feature = "sqlite")]
+        CIsarQueryBuilder::SQLite(builder) => builder.set_filter(filter),
     }
 }
 
@@ -44,7 +47,12 @@ pub unsafe extern "C" fn isar_query_add_sort(
 ) {
     let sort = if ascending { Sort::Asc } else { Sort::Desc };
     match builder {
+        #[cfg(feature = "native")]
         CIsarQueryBuilder::Native(builder) => {
+            builder.add_sort(property_index, sort, case_sensitive)
+        }
+        #[cfg(feature = "sqlite")]
+        CIsarQueryBuilder::SQLite(builder) => {
             builder.add_sort(property_index, sort, case_sensitive)
         }
     }
@@ -57,7 +65,10 @@ pub unsafe extern "C" fn isar_query_add_distinct(
     case_sensitive: bool,
 ) {
     match builder {
+        #[cfg(feature = "native")]
         CIsarQueryBuilder::Native(builder) => builder.add_distinct(property_index, case_sensitive),
+        #[cfg(feature = "sqlite")]
+        CIsarQueryBuilder::SQLite(builder) => builder.add_distinct(property_index, case_sensitive),
     }
 }
 
@@ -65,9 +76,15 @@ pub unsafe extern "C" fn isar_query_add_distinct(
 pub unsafe extern "C" fn isar_query_build(builder: *mut CIsarQueryBuilder) -> *mut CIsarQuery {
     let builder = *Box::from_raw(builder);
     match builder {
+        #[cfg(feature = "native")]
         CIsarQueryBuilder::Native(builder) => {
             let query = builder.build();
             Box::into_raw(Box::new(CIsarQuery::Native(query)))
+        }
+        #[cfg(feature = "sqlite")]
+        CIsarQueryBuilder::SQLite(builder) => {
+            let query = builder.build();
+            Box::into_raw(Box::new(CIsarQuery::SQLite(query)))
         }
     }
 }
@@ -81,14 +98,30 @@ pub unsafe extern "C" fn isar_query_cursor(
     offset: i64,
     limit: i64,
 ) -> u8 {
+    let offset = if offset < 0 {
+        None
+    } else {
+        Some(offset.clamp(0, u32::MAX as i64) as u32)
+    };
+    let limit = if limit < 0 {
+        None
+    } else {
+        Some(limit.clamp(0, u32::MAX as i64) as u32)
+    };
+
     isar_try! {
-        let offset = if offset < 0 { None } else { Some(offset.clamp(0, u32::MAX as i64) as u32) };
-        let limit = if limit < 0 { None } else { Some(limit.clamp(0, u32::MAX as i64) as u32) };
-        let new_cursor = match (isar,txn,query) {
+        let new_cursor = match (isar, txn, query) {
+            #[cfg(feature = "native")]
             (CIsarInstance::Native(isar), CIsarTxn::Native(txn), CIsarQuery::Native(query)) => {
                 let cursor = isar.query_cursor(txn, query, offset, limit)?;
                 CIsarCursor::Native(cursor)
             }
+            #[cfg(feature = "sqlite")]
+            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn), CIsarQuery::SQLite(query)) => {
+                let cursor = isar.query_cursor(txn, query, offset, limit)?;
+                CIsarCursor::SQLite(cursor)
+            }
+            _ => return Err(IsarError::IllegalArgument {}),
         };
         *cursor = Box::into_raw(Box::new(new_cursor));
     }
@@ -123,10 +156,16 @@ pub unsafe extern "C" fn isar_query_aggregate(
         }
     };
     isar_try! {
-        let new_value = match (isar,txn,query) {
+        let new_value = match (isar, txn, query) {
+            #[cfg(feature = "native")]
             (CIsarInstance::Native(isar), CIsarTxn::Native(txn), CIsarQuery::Native(query)) => {
                 isar.query_aggregate(txn, query, aggregation, Some(property_index))?
             }
+            #[cfg(feature = "sqlite")]
+            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn), CIsarQuery::SQLite(query)) => {
+                isar.query_aggregate(txn, query, aggregation, Some(property_index))?
+            }
+            _ => return Err(IsarError::IllegalArgument {}),
         };
         if let Some(new_value) = new_value {
             *value = Box::into_raw(Box::new(new_value));
@@ -157,9 +196,15 @@ pub unsafe extern "C" fn isar_query_delete(
     };
     isar_try! {
         let new_count = match (isar, txn, query) {
+            #[cfg(feature = "native")]
             (CIsarInstance::Native(isar), CIsarTxn::Native(txn), CIsarQuery::Native(query)) => {
                 isar.query_delete(txn, query, offset, limit)?
             }
+            #[cfg(feature = "sqlite")]
+            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn), CIsarQuery::SQLite(query)) => {
+                isar.query_delete(txn, query, offset, limit)?
+            }
+            _ => return Err(IsarError::IllegalArgument {}),
         };
         *count = new_count;
     }

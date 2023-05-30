@@ -7,19 +7,19 @@ use core::ptr;
 use std::marker::PhantomData;
 
 pub struct UnboundCursor {
-    cursor: *mut ffi::MDBX_cursor,
+    cursor: *mut mdbx_sys::MDBX_cursor,
 }
 
 impl UnboundCursor {
     pub(crate) fn new() -> Self {
-        let cursor = unsafe { ffi::mdbx_cursor_create(ptr::null_mut()) };
+        let cursor = unsafe { mdbx_sys::mdbx_cursor_create(ptr::null_mut()) };
 
         UnboundCursor { cursor }
     }
 
     pub fn bind<'txn>(self, txn: &'txn Txn, db: Db) -> Result<Cursor<'txn>> {
         unsafe {
-            mdbx_result(ffi::mdbx_cursor_bind(txn.txn, self.cursor, db.dbi))?;
+            mdbx_result(mdbx_sys::mdbx_cursor_bind(txn.txn, self.cursor, db.dbi))?;
         }
 
         Ok(Cursor {
@@ -31,7 +31,7 @@ impl UnboundCursor {
 
 impl Drop for UnboundCursor {
     fn drop(&mut self) {
-        unsafe { ffi::mdbx_cursor_close(self.cursor) }
+        unsafe { mdbx_sys::mdbx_cursor_close(self.cursor) }
     }
 }
 
@@ -54,22 +54,23 @@ impl<'txn> Cursor<'txn> {
     #[inline]
     pub(crate) fn op_get(
         &mut self,
-        op: ffi::MDBX_cursor_op,
+        op: mdbx_sys::MDBX_cursor_op,
         key: Option<&[u8]>,
         val: Option<&[u8]>,
     ) -> Result<Option<KeyVal<'txn>>> {
         let mut key = key.map_or(EMPTY_KEY, |key| unsafe { to_mdb_val(key) });
         let mut data = val.map_or(EMPTY_VAL, |val| unsafe { to_mdb_val(val) });
 
-        let result = unsafe { ffi::mdbx_cursor_get(self.cursor.cursor, &mut key, &mut data, op) };
+        let result =
+            unsafe { mdbx_sys::mdbx_cursor_get(self.cursor.cursor, &mut key, &mut data, op) };
 
         match result {
-            ffi::MDBX_SUCCESS | ffi::MDBX_RESULT_TRUE => {
+            mdbx_sys::MDBX_SUCCESS | mdbx_sys::MDBX_RESULT_TRUE => {
                 let key = unsafe { from_mdb_val(&key) };
                 let data = unsafe { from_mdb_val(&data) };
                 Ok(Some((key, data)))
             }
-            ffi::MDBX_NOTFOUND | ffi::MDBX_ENODATA => Ok(None),
+            mdbx_sys::MDBX_NOTFOUND | mdbx_sys::MDBX_ENODATA => Ok(None),
             e => {
                 mdbx_result(e)?;
                 unreachable!();
@@ -78,53 +79,62 @@ impl<'txn> Cursor<'txn> {
     }
 
     pub fn move_to(&mut self, key: &[u8]) -> Result<Option<KeyVal<'txn>>> {
-        self.op_get(ffi::MDBX_cursor_op::MDBX_SET_KEY, Some(key), None)
+        self.op_get(mdbx_sys::MDBX_cursor_op::MDBX_SET_KEY, Some(key), None)
     }
 
     pub fn move_to_key_val(&mut self, key: &[u8], val: &[u8]) -> Result<Option<KeyVal<'txn>>> {
-        self.op_get(ffi::MDBX_cursor_op::MDBX_GET_BOTH, Some(key), Some(val))
+        self.op_get(
+            mdbx_sys::MDBX_cursor_op::MDBX_GET_BOTH,
+            Some(key),
+            Some(val),
+        )
     }
 
     pub(crate) fn move_to_gte(&mut self, key: &[u8]) -> Result<Option<KeyVal<'txn>>> {
-        self.op_get(ffi::MDBX_cursor_op::MDBX_SET_RANGE, Some(key), None)
+        self.op_get(mdbx_sys::MDBX_cursor_op::MDBX_SET_RANGE, Some(key), None)
     }
 
     fn move_to_next_dup(&mut self) -> Result<Option<KeyVal<'txn>>> {
-        self.op_get(ffi::MDBX_cursor_op::MDBX_NEXT_DUP, None, None)
+        self.op_get(mdbx_sys::MDBX_cursor_op::MDBX_NEXT_DUP, None, None)
     }
 
     pub(crate) fn move_to_last_dup(&mut self) -> Result<Option<KeyVal<'txn>>> {
-        self.op_get(ffi::MDBX_cursor_op::MDBX_LAST_DUP, None, None)
+        self.op_get(mdbx_sys::MDBX_cursor_op::MDBX_LAST_DUP, None, None)
     }
 
     pub(crate) fn move_to_prev_no_dup(&mut self) -> Result<Option<KeyVal<'txn>>> {
-        self.op_get(ffi::MDBX_cursor_op::MDBX_PREV_NODUP, None, None)
+        self.op_get(mdbx_sys::MDBX_cursor_op::MDBX_PREV_NODUP, None, None)
     }
 
     pub fn move_to_next(&mut self) -> Result<Option<KeyVal<'txn>>> {
-        self.op_get(ffi::MDBX_cursor_op::MDBX_NEXT, None, None)
+        self.op_get(mdbx_sys::MDBX_cursor_op::MDBX_NEXT, None, None)
     }
 
     pub fn move_to_first(&mut self) -> Result<Option<KeyVal<'txn>>> {
-        self.op_get(ffi::MDBX_cursor_op::MDBX_FIRST, None, None)
+        self.op_get(mdbx_sys::MDBX_cursor_op::MDBX_FIRST, None, None)
     }
 
     pub fn move_to_last(&mut self) -> Result<Option<KeyVal<'txn>>> {
-        self.op_get(ffi::MDBX_cursor_op::MDBX_LAST, None, None)
+        self.op_get(mdbx_sys::MDBX_cursor_op::MDBX_LAST, None, None)
     }
 
     pub fn put(&mut self, key: &[u8], data: &[u8]) -> Result<()> {
         unsafe {
             let key = to_mdb_val(key);
             let mut data = to_mdb_val(data);
-            mdbx_result(ffi::mdbx_cursor_put(self.cursor.cursor, &key, &mut data, 0))?;
+            mdbx_result(mdbx_sys::mdbx_cursor_put(
+                self.cursor.cursor,
+                &key,
+                &mut data,
+                0,
+            ))?;
         }
         Ok(())
     }
 
     /// Requires the cursor to have a valid position
     pub fn delete_current(&mut self) -> Result<()> {
-        unsafe { mdbx_result(ffi::mdbx_cursor_del(self.cursor.cursor, 0))? };
+        unsafe { mdbx_result(mdbx_sys::mdbx_cursor_del(self.cursor.cursor, 0))? };
 
         Ok(())
     }

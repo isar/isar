@@ -11,6 +11,8 @@ pub struct SQLite3 {
 unsafe impl Send for SQLite3 {}
 
 impl SQLite3 {
+    pub const MAX_PARAM_COUNT: u32 = 999;
+
     pub fn open(path: &str) -> Result<SQLite3> {
         let flags = ffi::SQLITE_OPEN_READWRITE | ffi::SQLITE_OPEN_CREATE | ffi::SQLITE_OPEN_NOMUTEX;
         let c_path = CString::new(path).unwrap();
@@ -37,6 +39,7 @@ impl SQLite3 {
     }
 
     pub fn prepare(&self, sql: &str) -> Result<SQLiteStatement> {
+        eprintln!("prepare: {}", sql);
         let mut stmt: *mut ffi::sqlite3_stmt = ptr::null_mut();
         let mut c_tail = ptr::null();
         unsafe {
@@ -66,9 +69,9 @@ impl SQLite3 {
         while stmt.step()? {
             let table_type = stmt.get_text(2);
             if table_type == "table" {
-                let name = stmt.get_text(1).to_uppercase();
-                if !name.starts_with("SQLITE_") {
-                    names.push(name);
+                let name = stmt.get_text(1);
+                if !name.to_lowercase().starts_with("sqlite_") {
+                    names.push(name.to_string());
                 }
             }
         }
@@ -79,8 +82,8 @@ impl SQLite3 {
         let mut stmt = self.prepare(&format!("PRAGMA table_info({})", table_name))?;
         let mut cols = vec![];
         while stmt.step()? {
-            let name = stmt.get_text(1).to_uppercase();
-            let type_ = stmt.get_text(2).to_uppercase();
+            let name = stmt.get_text(1).to_string();
+            let type_ = stmt.get_text(2).to_string();
             cols.push((name, type_));
         }
         Ok(cols)
@@ -90,8 +93,8 @@ impl SQLite3 {
         let mut stmt = self.prepare(&format!("PRAGMA index_list({})", table_name))?;
         let mut index_names_unique = vec![];
         while stmt.step()? {
-            let name = stmt.get_text(1).to_uppercase();
-            if !name.starts_with("SQLITE_") {
+            let name = stmt.get_text(1).to_string();
+            if name.to_lowercase().starts_with("sqlite_") {
                 let unique = stmt.get_int(2) == 1;
                 index_names_unique.push((name, unique));
             }
@@ -101,11 +104,15 @@ impl SQLite3 {
             let mut stmt = self.prepare(&format!("PRAGMA schema.index_xinfo({})", index_name))?;
             let mut cols = vec![];
             while stmt.step()? {
-                cols.push(stmt.get_text(2).to_uppercase());
+                cols.push(stmt.get_text(2).to_string());
             }
             indexes.push((index_name, unique, cols));
         }
         Ok(indexes)
+    }
+
+    pub fn count_changes(&self) -> i32 {
+        unsafe { ffi::sqlite3_changes(self.db) }
     }
 }
 
@@ -136,32 +143,33 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
         }
     }
 
-    pub fn is_null(&self, col: usize) -> bool {
+    pub fn is_null(&self, col: u32) -> bool {
         unsafe { ffi::sqlite3_column_type(self.stmt, col as i32) == ffi::SQLITE_NULL }
     }
 
-    pub fn get_int(&self, col: usize) -> i32 {
+    pub fn get_int(&self, col: u32) -> i32 {
         unsafe { ffi::sqlite3_column_int(self.stmt, col as i32) }
     }
 
-    pub fn get_long(&self, col: usize) -> i64 {
+    pub fn get_long(&self, col: u32) -> i64 {
         unsafe { ffi::sqlite3_column_int64(self.stmt, col as i32) }
     }
 
-    pub fn get_double(&self, col: usize) -> f64 {
+    pub fn get_double(&self, col: u32) -> f64 {
         unsafe { ffi::sqlite3_column_double(self.stmt, col as i32) }
     }
 
-    pub fn get_text(&self, col: usize) -> &str {
+    pub fn get_text(&self, col: u32) -> &str {
         let bytes = self.get_blob(col);
-        if let Ok(str) = std::str::from_utf8(bytes) {
-            str
-        } else {
-            ""
+        if bytes.len() > 0 {
+            if let Ok(str) = std::str::from_utf8(bytes) {
+                return str;
+            }
         }
+        ""
     }
 
-    pub fn get_blob(&self, col: usize) -> &[u8] {
+    pub fn get_blob(&self, col: u32) -> &[u8] {
         unsafe {
             let blob = ffi::sqlite3_column_blob(self.stmt, col as i32);
             let num = ffi::sqlite3_column_bytes(self.stmt, col as i32);
@@ -169,7 +177,7 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
         }
     }
 
-    pub fn bind_null(&mut self, col: usize) -> Result<()> {
+    pub fn bind_null(&mut self, col: u32) -> Result<()> {
         unsafe {
             let r = ffi::sqlite3_bind_null(self.stmt, col as i32 + 1);
             if r == ffi::SQLITE_OK {
@@ -180,7 +188,7 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
         }
     }
 
-    pub fn bind_int(&mut self, col: usize, value: i32) -> Result<()> {
+    pub fn bind_int(&mut self, col: u32, value: i32) -> Result<()> {
         unsafe {
             let r = ffi::sqlite3_bind_int(self.stmt, col as i32 + 1, value);
             if r == ffi::SQLITE_OK {
@@ -191,7 +199,7 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
         }
     }
 
-    pub fn bind_long(&mut self, col: usize, value: i64) -> Result<()> {
+    pub fn bind_long(&mut self, col: u32, value: i64) -> Result<()> {
         unsafe {
             let r = ffi::sqlite3_bind_int64(self.stmt, col as i32 + 1, value);
             if r == ffi::SQLITE_OK {
@@ -202,7 +210,7 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
         }
     }
 
-    pub fn bind_double(&mut self, col: usize, value: f64) -> Result<()> {
+    pub fn bind_double(&mut self, col: u32, value: f64) -> Result<()> {
         unsafe {
             let r = ffi::sqlite3_bind_double(self.stmt, col as i32 + 1, value);
             if r == ffi::SQLITE_OK {
@@ -213,14 +221,14 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
         }
     }
 
-    pub fn bind_text(&mut self, col: usize, value: &str) -> Result<()> {
+    pub fn bind_text(&mut self, col: u32, value: &str) -> Result<()> {
         unsafe {
             let r = ffi::sqlite3_bind_text(
                 self.stmt,
                 col as i32 + 1,
                 value.as_ptr() as *const c_char,
                 value.len() as i32,
-                None,
+                ffi::SQLITE_TRANSIENT(),
             );
             if r == ffi::SQLITE_OK {
                 Ok(())
@@ -230,14 +238,14 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
         }
     }
 
-    pub fn bind_blob(&mut self, col: usize, value: &[u8]) -> Result<()> {
+    pub fn bind_blob(&mut self, col: u32, value: &[u8]) -> Result<()> {
         unsafe {
             let r = ffi::sqlite3_bind_blob(
                 self.stmt,
                 col as i32 + 1,
                 value.as_ptr() as *const c_void,
                 value.len() as i32,
-                None,
+                ffi::SQLITE_TRANSIENT(),
             );
             if r == ffi::SQLITE_OK {
                 Ok(())
@@ -245,10 +253,6 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
                 Err(sqlite_err(self.sqlite.db, r))
             }
         }
-    }
-
-    pub fn count_changes(&self) -> i32 {
-        unsafe { ffi::sqlite3_changes(self.sqlite.db) }
     }
 }
 
@@ -271,5 +275,13 @@ pub unsafe fn sqlite_err(db: *mut ffi::sqlite3, code: i32) -> IsarError {
     IsarError::DbError {
         code: code,
         message: msg,
+    }
+}
+
+impl<'a> ToOwned for SQLiteStatement<'a> {
+    type Owned = SQLiteStatement<'a>;
+
+    fn to_owned(&self) -> Self::Owned {
+        panic!("SQLiteStatement can't be cloned")
     }
 }

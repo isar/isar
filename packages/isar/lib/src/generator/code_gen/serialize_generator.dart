@@ -59,47 +59,47 @@ String _writeProperty({
         {
           final value = $value$enumGetter;
           if (value == null) {
-            IsarCore.isarWriteNull($writer);
+            IsarCore.writeNull($writer);
           } else {
-            IsarCore.isarWriteBool($writer, value);
+            IsarCore.writeBool($writer, value);
           }
         }''';
       } else {
-        return 'IsarCore.isarWriteBool($writer, $value$enumGetter);';
+        return 'IsarCore.writeBool($writer, $value$enumGetter);';
       }
     case PropertyType.byte:
       final orNull = nullable ? '?? $nullByte' : '';
-      return 'IsarCore.isarWriteByte($writer, $value$enumGetter $orNull);';
+      return 'IsarCore.writeByte($writer, $value$enumGetter $orNull);';
     case PropertyType.int:
       final orNull = nullable ? '?? $nullInt' : '';
-      return 'IsarCore.isarWriteInt($writer, $value$enumGetter $orNull);';
+      return 'IsarCore.writeInt($writer, $value$enumGetter $orNull);';
     case PropertyType.float:
       final orNull = nullable ? '?? double.nan' : '';
-      return 'IsarCore.isarWriteFloat($writer, $value$enumGetter $orNull);';
+      return 'IsarCore.writeFloat($writer, $value$enumGetter $orNull);';
     case PropertyType.long:
       final orNull = nullable ? '?? $nullLong' : '';
-      return 'IsarCore.isarWriteLong($writer, $value$enumGetter $orNull);';
+      return 'IsarCore.writeLong($writer, $value$enumGetter $orNull);';
     case PropertyType.dateTime:
       final converted = nullable
           ? '$value$enumGetter?.toUtc().microsecondsSinceEpoch ?? $nullLong'
           : '$value$enumGetter.toUtc().microsecondsSinceEpoch';
-      return 'IsarCore.isarWriteLong($writer, $converted);';
+      return 'IsarCore.writeLong($writer, $converted);';
     case PropertyType.double:
       final orNull = nullable ? '?? double.nan' : '';
-      return 'IsarCore.isarWriteDouble($writer, $value$enumGetter $orNull);';
+      return 'IsarCore.writeDouble($writer, $value$enumGetter $orNull);';
     case PropertyType.string:
       if (nullable) {
         return '''
         {
           final value = $value$enumGetter;
           if (value == null) {
-            IsarCore.isarWriteNull($writer);
+            IsarCore.writeNull($writer);
           } else {
-            IsarCore.isarWriteString($writer, IsarCore.toNativeString(value));
+            IsarCore.writeString($writer, IsarCore.toNativeString(value));
           }
         }''';
       } else {
-        return 'IsarCore.isarWriteString($writer, IsarCore.toNativeString($value$enumGetter));';
+        return 'IsarCore.writeString($writer, IsarCore.toNativeString($value$enumGetter));';
       }
     case PropertyType.object:
       var code = '''
@@ -108,20 +108,20 @@ String _writeProperty({
       if (nullable) {
         code += '''
         if (value == null) {
-          IsarCore.isarWriteNull($writer);
+          IsarCore.writeNull($writer);
         } else {''';
       }
       code += '''
-      final objectWriter = IsarCore.isarBeginObject($writer);
+      final objectWriter = IsarCore.beginObject($writer);
       serialize$typeClassName(objectWriter, value);
-      IsarCore.isarEndObject($writer, objectWriter);''';
+      IsarCore.endObject($writer, objectWriter);''';
       if (nullable) {
         code += '}';
       }
       return '$code}';
     case PropertyType.json:
       return '''
-      IsarCore.isarWriteString(
+      IsarCore.writeString(
         $writer,
         IsarCore.toNativeString(isarJsonEncode($value)),
       );''';
@@ -140,11 +140,11 @@ String _writeProperty({
       if (nullable) {
         code += '''
         if (value == null) {
-          IsarCore.isarWriteNull($writer);
+          IsarCore.writeNull($writer);
         } else {''';
       }
       code += '''
-      final listWriter = IsarCore.isarBeginList(writer, value.length);
+      final listWriter = IsarCore.beginList(writer, value.length);
       for (final item in value) {
         ${_writeProperty(
         writer: 'listWriter',
@@ -155,7 +155,7 @@ String _writeProperty({
         enumProperty: enumProperty,
       )}
       }
-      IsarCore.isarEndList(writer, listWriter);
+      IsarCore.endList(writer, listWriter);
       ''';
       if (nullable) {
         code += '}';

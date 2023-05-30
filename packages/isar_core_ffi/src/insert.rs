@@ -5,10 +5,11 @@ use isar_core::core::{error::IsarError, insert::IsarInsert};
 pub unsafe extern "C" fn isar_insert_save(insert: &mut CIsarWriter<'static>, id: i64) -> u8 {
     isar_try! {
         match insert {
-            CIsarWriter::Native(insert) => {
-                insert.save(id)?
-            }
-            _ => return Err(IsarError::IllegalArgument {})
+            #[cfg(feature = "native")]
+            CIsarWriter::Native(insert) => insert.save(id)?,
+            #[cfg(feature = "sqlite")]
+            CIsarWriter::SQLite(insert) => insert.save(id)?,
+            _ => return Err(IsarError::IllegalArgument {}),
         };
     }
 }
@@ -21,10 +22,11 @@ pub unsafe extern "C" fn isar_insert_finish(
     isar_try! {
         let insert = *Box::from_raw(insert);
         let new_txn = match insert {
-            CIsarWriter::Native(insert) => {
-                CIsarTxn::Native(insert.finish()?)
-            }
-            _ => return Err(IsarError::IllegalArgument {})
+            #[cfg(feature = "native")]
+            CIsarWriter::Native(insert) => CIsarTxn::Native(insert.finish()?),
+            #[cfg(feature = "sqlite")]
+            CIsarWriter::SQLite(insert) => CIsarTxn::SQLite(insert.finish()?),
+            _ => return Err(IsarError::IllegalArgument {}),
         };
         *txn = Box::into_raw(Box::new(new_txn));
     }

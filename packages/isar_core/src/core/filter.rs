@@ -27,15 +27,15 @@ pub enum ConditionType {
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct FilterCondition {
-    pub property_index: u32,
+    pub property_index: u16,
     pub condition_type: ConditionType,
     pub values: Vec<IsarValue>,
     pub case_sensitive: bool,
 }
 
 impl FilterCondition {
-    pub fn new(
-        property_index: u32,
+    pub const fn new(
+        property_index: u16,
         condition_type: ConditionType,
         values: Vec<IsarValue>,
         case_sensitive: bool,
