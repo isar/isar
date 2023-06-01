@@ -20,7 +20,7 @@ features:
   - title: 💃 Statische Typisierung
     details: Abfragen sind statisch typisiert und werden zur Kompilierzeit überprüft. Laufzeitfehler sind ein Problem von gestern.
   - title: 📱 Multiplatform
-    details: iOS, Android, Desktop und VOLLE WEB UNTERSTÜTZUNG!
+    details: Uterstützt iOS, Android und Desktop!
   - title: ⏱ Asynchron
     details: Parallelle Abfragen und Multi-Isolate-Unterstützung.
   - title: 🦄 Open Source
