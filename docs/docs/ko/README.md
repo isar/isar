@@ -20,7 +20,7 @@ features:
   - title: 💃 정적 타입
     details: Isar의 쿼리는 정적 타입이고, 컴파일 시간에 검사됩니다. 런타임 오류에 대해 걱정할 필요가 없습니다.
   - title: 📱 다중 플랫폼
-    details: iOS, Android, Desktop 및 완전한 웹 지원!
+    details: iOS, Android 및 데스크탑 지원!
   - title: ⏱ 비동기
     details: 병렬 쿼리 작업 및 다중 Isolate 지원을 즉시 사용할 수 있습니다.
   - title: 🦄 오픈 소스입니다.
