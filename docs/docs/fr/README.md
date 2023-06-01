@@ -20,7 +20,7 @@ features:
   - title: 💃 Types statiques
     details: Les requêtes d'Isar sont typées statiquement et vérifiées à la compilation. Pas besoin de se soucier des erreurs d'exécution.
   - title: 📱 Multiplatforme
-    details: Support pour iOS, Android, Desktop et WEB!
+    details: Support pour iOS, Android et Desktop!
   - title: ⏱ Asynchrone
     details: Opérations de requête parallèles et support multi-Isolate prêts à l'emploi.
   - title: 🦄 Open Source
