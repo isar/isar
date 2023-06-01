@@ -20,7 +20,7 @@ features:
   - title: 💃 Staticamente tipizzato
     details: Le query Isar sono tipizzate staticamente e controllate in fase di compilazione. Non è necessario preoccuparsi degli errori di runtime.
   - title: 📱 Multipiattaform
-    details: iOS, Android, Desktop e PIENO SUPPORTO AL WEB!
+    details: iOS, Android e Desktop!
   - title: ⏱ Asincrono
     details: Operazioni di query parallele e supporto per isolamento multiplo pronto all'uso
   - title: 🦄 Open Source
