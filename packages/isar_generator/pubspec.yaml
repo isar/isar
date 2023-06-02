@@ -8,7 +8,7 @@ environment:
   sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
-  analyzer: ">=4.6.0 <6.0.0"
+  analyzer: ">=5.2.0 <6.0.0"
   build: ^2.3.0
   dart_style: ^2.2.3
   dartx: ^1.1.0
