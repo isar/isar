@@ -4,141 +4,135 @@ use isar_core::core::{
     value::IsarValue,
 };
 use itertools::Itertools;
+use std::vec;
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_is_null(property_index: u16) -> *const Filter {
-    let filter = Filter::Condition(FilterCondition::new(
-        property_index,
-        ConditionType::IsNull,
-        vec![],
-        false,
-    ));
-    Box::into_raw(Box::new(filter))
+    let filter = FilterCondition::new(property_index, ConditionType::IsNull, vec![], false);
+    Box::into_raw(Box::new(Filter::Condition(filter)))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_list_is_empty(property_index: u16) -> *const Filter {
-    let filter = Filter::Condition(FilterCondition::new(
-        property_index,
-        ConditionType::ListIsEmpty,
-        vec![],
-        false,
-    ));
-    Box::into_raw(Box::new(filter))
+    let filter = FilterCondition::new(property_index, ConditionType::ListIsEmpty, vec![], false);
+    Box::into_raw(Box::new(Filter::Condition(filter)))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_filter_equal_to(
+pub unsafe extern "C" fn isar_filter_equal(
     property_index: u16,
     value: *mut IsarValue,
     case_sensitive: bool,
 ) -> *const Filter {
     let values = if value.is_null() {
-        vec![]
+        vec![None]
     } else {
-        vec![*Box::from_raw(value)]
+        vec![Some(*Box::from_raw(value))]
     };
-    let filter = Filter::Condition(FilterCondition::new(
+    let filter = FilterCondition::new(property_index, ConditionType::Equal, values, case_sensitive);
+    Box::into_raw(Box::new(Filter::Condition(filter)))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_filter_greater(
+    property_index: u16,
+    value: *mut IsarValue,
+    case_sensitive: bool,
+) -> *const Filter {
+    let values = if value.is_null() {
+        vec![None]
+    } else {
+        vec![Some(*Box::from_raw(value))]
+    };
+    let filter = FilterCondition::new(
         property_index,
-        ConditionType::Equal,
+        ConditionType::Greater,
         values,
         case_sensitive,
-    ));
-    Box::into_raw(Box::new(filter))
+    );
+    Box::into_raw(Box::new(Filter::Condition(filter)))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_filter_greater_than(
+pub unsafe extern "C" fn isar_filter_greater_or_equal(
     property_index: u16,
     value: *mut IsarValue,
-    include: bool,
     case_sensitive: bool,
 ) -> *const Filter {
-    let value = *Box::from_raw(value);
-    let filter = if include {
-        FilterCondition::new(
-            property_index,
-            ConditionType::GreaterOrEqual,
-            vec![value],
-            case_sensitive,
-        )
+    let values = if value.is_null() {
+        vec![None]
     } else {
-        FilterCondition::new(
-            property_index,
-            ConditionType::Greater,
-            vec![value],
-            case_sensitive,
-        )
+        vec![Some(*Box::from_raw(value))]
     };
-    let filter = Filter::Condition(filter);
-    Box::into_raw(Box::new(filter))
+    let filter = FilterCondition::new(
+        property_index,
+        ConditionType::GreaterOrEqual,
+        values,
+        case_sensitive,
+    );
+    Box::into_raw(Box::new(Filter::Condition(filter)))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_filter_less_than(
+pub unsafe extern "C" fn isar_filter_less(
     property_index: u16,
     value: *mut IsarValue,
-    include: bool,
     case_sensitive: bool,
 ) -> *const Filter {
-    let value = *Box::from_raw(value);
-    let filter = if include {
-        FilterCondition::new(
-            property_index,
-            ConditionType::LessOrEqual,
-            vec![value],
-            case_sensitive,
-        )
+    let values = if value.is_null() {
+        vec![None]
     } else {
-        FilterCondition::new(
-            property_index,
-            ConditionType::Less,
-            vec![value],
-            case_sensitive,
-        )
+        vec![Some(*Box::from_raw(value))]
     };
-    let filter = Filter::Condition(filter);
-    Box::into_raw(Box::new(filter))
+    let filter = FilterCondition::new(property_index, ConditionType::Less, values, case_sensitive);
+    Box::into_raw(Box::new(Filter::Condition(filter)))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_filter_less_or_equal(
+    property_index: u16,
+    value: *mut IsarValue,
+    case_sensitive: bool,
+) -> *const Filter {
+    let values = if value.is_null() {
+        vec![None]
+    } else {
+        vec![Some(*Box::from_raw(value))]
+    };
+    let filter = FilterCondition::new(
+        property_index,
+        ConditionType::LessOrEqual,
+        values,
+        case_sensitive,
+    );
+    Box::into_raw(Box::new(Filter::Condition(filter)))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_filter_between(
     property_index: u16,
     lower: *mut IsarValue,
-    include_lower: bool,
     upper: *mut IsarValue,
-    include_upper: bool,
     case_sensitive: bool,
 ) -> *const Filter {
-    let lower = *Box::from_raw(lower);
-    let upper = *Box::from_raw(upper);
-    let adjusted_lower = if include_lower {
-        Some(lower)
+    let mut values = vec![];
+    if lower.is_null() {
+        values.push(None);
     } else {
-        lower.try_increment()
+        values.push(Some(*Box::from_raw(lower)));
     };
-    let adjusted_upper = if include_upper {
-        Some(upper)
+    if upper.is_null() {
+        values.push(None);
     } else {
-        upper.try_decrement()
+        values.push(Some(*Box::from_raw(upper)));
     };
-    let filter = if let (Some(lower), Some(upper)) = (adjusted_lower, adjusted_upper) {
-        FilterCondition::new(
-            property_index,
-            ConditionType::Between,
-            vec![lower, upper],
-            case_sensitive,
-        )
-    } else {
-        FilterCondition::new(
-            property_index,
-            ConditionType::Between,
-            vec![],
-            case_sensitive,
-        )
-    };
-    let filter = Filter::Condition(filter);
-    Box::into_raw(Box::new(filter))
+    let filter = FilterCondition::new(
+        property_index,
+        ConditionType::Between,
+        values,
+        case_sensitive,
+    );
+    Box::into_raw(Box::new(Filter::Condition(filter)))
 }
 
 #[no_mangle]
@@ -151,7 +145,7 @@ pub unsafe extern "C" fn isar_filter_string_starts_with(
     let filter = Filter::Condition(FilterCondition::new(
         property_index,
         ConditionType::StringStartsWith,
-        vec![value],
+        vec![Some(value)],
         case_sensitive,
     ));
     Box::into_raw(Box::new(filter))
@@ -167,7 +161,7 @@ pub unsafe extern "C" fn isar_filter_string_ends_with(
     let filter = Filter::Condition(FilterCondition::new(
         property_index,
         ConditionType::StringEndsWith,
-        vec![value],
+        vec![Some(value)],
         case_sensitive,
     ));
     Box::into_raw(Box::new(filter))
@@ -183,7 +177,7 @@ pub unsafe extern "C" fn isar_filter_string_contains(
     let filter = Filter::Condition(FilterCondition::new(
         property_index,
         ConditionType::StringContains,
-        vec![value],
+        vec![Some(value)],
         case_sensitive,
     ));
     Box::into_raw(Box::new(filter))
@@ -199,7 +193,7 @@ pub unsafe extern "C" fn isar_filter_string_matches(
     let filter = Filter::Condition(FilterCondition::new(
         property_index,
         ConditionType::StringMatches,
-        vec![value],
+        vec![Some(value)],
         case_sensitive,
     ));
     Box::into_raw(Box::new(filter))

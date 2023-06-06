@@ -54,41 +54,44 @@ void main() {
 
     isarTest('.elementGreaterThan()', () {
       expect(col.where().listElementGreaterThan(3.3).findAll(), isEmpty);
+      expect(col.where().listElementGreaterThan(4).findAll(), isEmpty);
+      expect(col.where().listElementGreaterThan(null).findAll(), [obj1, obj3]);
+    });
+
+    isarTest('.elementGreaterThanOrEqualTo()', () {
       expect(
-        col.where().listElementGreaterThan(3.3, include: true).findAll(),
+        col.where().listElementGreaterThanOrEqualTo(3.3).findAll(),
         [obj1],
       );
       expect(
         col
             .where()
-            .listElementGreaterThan(3.4, include: true, epsilon: 0.2)
+            .listElementGreaterThanOrEqualTo(3.4, epsilon: 0.2)
             .findAll(),
         [obj1],
       );
-      expect(col.where().listElementGreaterThan(4).findAll(), isEmpty);
-      expect(col.where().listElementGreaterThan(null).findAll(), [obj1, obj3]);
       expect(
-        col.where().listElementGreaterThan(null, include: true).findAll(),
+        col.where().listElementGreaterThanOrEqualTo(null).findAll(),
         [obj1, obj2, obj3],
       );
     });
 
     isarTest('.elementLessThan()', () {
       expect(col.where().listElementLessThan(1.1).findAll(), [obj2, obj3]);
-      expect(
-        col.where().listElementLessThan(1.1, include: true).findAll(),
-        [obj1, obj2, obj3],
-      );
-      expect(
-        col
-            .where()
-            .listElementLessThan(1, include: true, epsilon: 0.2)
-            .findAll(),
-        [obj1, obj2, obj3],
-      );
       expect(col.where().listElementLessThan(null).findAll(), isEmpty);
+    });
+
+    isarTest('.elementLessThanOrEqualTo()', () {
       expect(
-        col.where().listElementLessThan(null, include: true).findAll(),
+        col.where().listElementLessThanOrEqualTo(1.1).findAll(),
+        [obj1, obj2, obj3],
+      );
+      expect(
+        col.where().listElementLessThanOrEqualTo(1, epsilon: 0.2).findAll(),
+        [obj1, obj2, obj3],
+      );
+      expect(
+        col.where().listElementLessThanOrEqualTo(null).findAll(),
         [obj2, obj3],
       );
     });
@@ -98,32 +101,6 @@ void main() {
       expect(
         col.where().listElementBetween(null, 1.1).findAll(),
         [obj1, obj2, obj3],
-      );
-      expect(
-        col
-            .where()
-            .listElementBetween(null, 1.1, includeLower: false)
-            .findAll(),
-        [obj1, obj3],
-      );
-      expect(
-        col
-            .where()
-            .listElementBetween(null, 1.1, includeUpper: false)
-            .findAll(),
-        [obj2, obj3],
-      );
-      expect(
-        col
-            .where()
-            .listElementBetween(
-              null,
-              1.1,
-              includeLower: false,
-              includeUpper: false,
-            )
-            .findAll(),
-        [obj3],
       );
       expect(col.where().listElementBetween(5, 10).findAll(), isEmpty);
       expect(

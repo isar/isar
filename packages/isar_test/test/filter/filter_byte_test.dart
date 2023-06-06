@@ -55,26 +55,21 @@ void main() {
         col.where().fieldLessThan(255).findAll(),
         [objMin, obj1, obj2, obj3],
       );
+      expect(col.where().fieldLessThan(0).findAll(), isEmpty);
+    });
+
+    isarTest('.lessThanOrEqualTo()', () {
       expect(
-        col.where().fieldLessThan(255, include: true).findAll(),
+        col.where().fieldLessThanOrEqualTo(255).findAll(),
         [objMin, obj1, obj2, obj3, objMax],
       );
-      expect(col.where().fieldLessThan(0).findAll(), isEmpty);
-      expect(col.where().fieldLessThan(0, include: true).findAll(), [objMin]);
+      expect(col.where().fieldLessThanOrEqualTo(0).findAll(), [objMin]);
     });
 
     isarTest('.between()', () {
       expect(
         col.where().fieldBetween(0, 255).findAll(),
         [objMin, obj1, obj2, obj3, objMax],
-      );
-      expect(
-        col.where().fieldBetween(0, 255, includeLower: false).findAll(),
-        [obj1, obj2, obj3, objMax],
-      );
-      expect(
-        col.where().fieldBetween(0, 255, includeUpper: false).findAll(),
-        [objMin, obj1, obj2, obj3],
       );
       expect(col.where().fieldBetween(255, 0).findAll(), isEmpty);
       expect(col.where().fieldBetween(100, 110).findAll(), isEmpty);

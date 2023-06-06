@@ -12,15 +12,24 @@ use crate::core::instance::Aggregation;
 use crate::core::value::IsarValue;
 
 pub struct SQLiteQuery {
-    sql: String,
     collection_index: u16,
+    sql: String,
+    has_sort_distinct: bool,
+    values: Vec<IsarValue>,
 }
 
 impl SQLiteQuery {
-    pub(crate) fn new(sql: String, collection_index: u16) -> Self {
+    pub(crate) fn new(
+        collection_index: u16,
+        sql: String,
+        has_sort_distinct: bool,
+        values: Vec<IsarValue>,
+    ) -> Self {
         Self {
-            sql,
             collection_index,
+            sql,
+            has_sort_distinct,
+            values,
         }
     }
 
@@ -38,7 +47,9 @@ impl SQLiteQuery {
             self.sql,
             offset_limit_sql(offset, limit)
         );
-        let stmt = txn.get_sqlite(false)?.prepare(&sql)?;
+        let mut stmt = txn.get_sqlite(false)?.prepare(&sql)?;
+        self.bind_values(&mut stmt)?;
+
         Ok(SQLiteCursor {
             stmt,
             collection,
@@ -54,65 +65,56 @@ impl SQLiteQuery {
         property_index: Option<u16>,
     ) -> Result<Option<IsarValue>> {
         let collection = &all_collections[self.collection_index as usize];
-        let property = if let Some(property_index) = property_index {
-            collection.get_property(property_index)
-        } else {
-            None
-        };
+        let property_name = collection.get_property_name(property_index.unwrap_or(0));
+        let property_type = collection
+            .get_property(property_index.unwrap_or(0))
+            .map_or(DataType::Long, |p| p.data_type);
+
         let aggregation_sql = match aggregation {
             Aggregation::Count => "COUNT(*)".to_string(),
             Aggregation::IsEmpty => SQLiteProperty::ID_NAME.to_string(),
             Aggregation::Min => {
-                if let Some(property) = property {
-                    format!("MIN({})", property.name)
-                } else {
-                    return Ok(None);
-                }
+                format!("MIN({})", property_name)
             }
             Aggregation::Max => {
-                if let Some(property) = property {
-                    format!("MAX({})", property.name)
-                } else {
-                    return Ok(None);
-                }
+                format!("MAX({})", property_name)
             }
             Aggregation::Sum => {
-                if let Some(property) = property {
-                    format!("SUM({})", property.name)
-                } else {
-                    return Ok(None);
-                }
+                format!("SUM({})", property_name)
             }
             Aggregation::Average => {
-                if let Some(property) = property {
-                    format!("AVG({})", property.name)
-                } else {
-                    return Ok(None);
-                }
+                format!("AVG({})", property_name)
             }
         };
         let sql = format!("SELECT {} {}", aggregation_sql, self.sql);
         let mut stmt = txn.get_sqlite(false)?.prepare(&sql)?;
+        self.bind_values(&mut stmt)?;
 
         let has_next = stmt.step()?;
         let result = match aggregation {
             Aggregation::Count => IsarValue::Integer(stmt.get_long(0)),
-            Aggregation::IsEmpty => IsarValue::Bool(Some(!has_next)),
+            Aggregation::IsEmpty => IsarValue::Bool(!has_next),
             Aggregation::Min | Aggregation::Max | Aggregation::Sum => {
-                if let Some(property) = property {
-                    match property.data_type {
+                if aggregation == Aggregation::Sum || !stmt.is_null(0) {
+                    match property_type {
                         DataType::Byte | DataType::Int | DataType::Long => {
                             IsarValue::Integer(stmt.get_long(0))
                         }
                         DataType::Float | DataType::Double => IsarValue::Real(stmt.get_double(0)),
-                        DataType::String => IsarValue::String(Some(stmt.get_text(0).to_string())),
+                        DataType::String => IsarValue::String(stmt.get_text(0).to_string()),
                         _ => return Ok(None),
                     }
                 } else {
                     return Ok(None);
                 }
             }
-            Aggregation::Average => IsarValue::Real(stmt.get_double(0)),
+            Aggregation::Average => {
+                if !stmt.is_null(0) {
+                    IsarValue::Real(stmt.get_double(0))
+                } else {
+                    return Ok(None);
+                }
+            }
         };
         Ok(Some(result))
     }
@@ -120,15 +122,44 @@ impl SQLiteQuery {
     pub(crate) fn delete(
         &self,
         txn: &SQLiteTxn,
+        all_collections: &[SQLiteCollection],
         offset: Option<u32>,
         limit: Option<u32>,
     ) -> Result<u32> {
-        let sql = format!("DELETE {} {}", self.sql, offset_limit_sql(offset, limit));
+        let sql = if offset.is_some() || limit.is_some() || self.has_sort_distinct {
+            let collection = &all_collections[self.collection_index as usize];
+            format!(
+                "DELETE FROM {} WHERE {} IN (SELECT {} {} {})",
+                collection.name,
+                SQLiteProperty::ID_NAME,
+                SQLiteProperty::ID_NAME,
+                self.sql,
+                offset_limit_sql(offset, limit)
+            )
+        } else {
+            format!("DELETE {} {}", self.sql, offset_limit_sql(offset, limit))
+        };
         let sqlite = txn.get_sqlite(true)?;
         let mut stmt = sqlite.prepare(&sql)?;
+        self.bind_values(&mut stmt)?;
         stmt.step()?;
         let count = sqlite.count_changes();
         Ok(count as u32)
+    }
+
+    fn bind_values(&self, stmt: &mut SQLiteStatement) -> Result<()> {
+        for (i, value) in self.values.iter().enumerate() {
+            match value {
+                IsarValue::Bool(value) => {
+                    let value = if *value { 1 } else { 0 };
+                    stmt.bind_int(i as u32, value)?;
+                }
+                IsarValue::Integer(value) => stmt.bind_long(i as u32, *value)?,
+                IsarValue::Real(value) => stmt.bind_double(i as u32, *value)?,
+                IsarValue::String(value) => stmt.bind_text(i as u32, value)?,
+            }
+        }
+        Ok(())
     }
 }
 pub struct SQLiteCursor<'a> {

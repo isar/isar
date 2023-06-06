@@ -6,6 +6,7 @@ import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
+import 'package:test_api/src/backend/invoker.dart';
 
 const kIsWeb = identical(0, 0.0);
 
@@ -93,9 +94,11 @@ Isar openTempIsar(
     Directory(testTempPath!).createSync(recursive: true);
   }
 
+  final sqlite = Invoker.current!.liveTest.test.name.endsWith('(sqlite)');
   final isar = Isar.open(
     schemas: schemas,
     name: name ?? getRandomName(),
+    engine: sqlite ? StorageEngine.sqlite : StorageEngine.isar,
     maxSizeMiB: maxSizeMiB,
     directory: directory ?? testTempPath!,
     compactOnLaunch: compactOnLaunch,
@@ -112,25 +115,41 @@ Isar openTempIsar(
   return isar;
 }
 
-@isTest
+@isTestGroup
 void isarTest(
   String name,
-  dynamic Function() body, {
+  void Function() body, {
   Timeout? timeout,
   bool skip = false,
 }) {
   testCount++;
-  test(
-    name,
-    () async {
-      try {
-        await body();
-      } catch (e, s) {
-        testErrors.add('$name: $e\n$s');
-        rethrow;
-      }
-    },
-    timeout: timeout,
-    skip: skip,
-  );
+  group(name, () {
+    test(
+      '(isar)',
+      () async {
+        try {
+          body();
+        } catch (e, s) {
+          testErrors.add('$name: $e\n$s');
+          rethrow;
+        }
+      },
+      timeout: timeout,
+      skip: skip,
+    );
+
+    test(
+      '(sqlite)',
+      () {
+        try {
+          body();
+        } catch (e, s) {
+          testErrors.add('$name: $e\n$s');
+          rethrow;
+        }
+      },
+      timeout: timeout,
+      skip: skip,
+    );
+  });
 }

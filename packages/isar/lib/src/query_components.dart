@@ -5,22 +5,16 @@ part of isar;
 sealed class Filter {
   const Filter();
 
-  static const nullBool = #nullBool;
-  static const nullInt = -9223372036854775808;
-  static const nullDate = -9223372036854775808;
-  static const nullDouble = double.nan;
-  static const nullString = #nullString;
-
   static const epsilon = 0.00001;
 }
 
 /// Filter checking for equality.
-final class EqualToCondition extends Filter {
+final class EqualCondition extends Filter {
   /// Filters the results to only include objects where the property equals
   /// [value].
   ///
   /// For lists, at least one of the values in the list has to match.
-  const EqualToCondition({
+  const EqualCondition({
     required this.property,
     required this.value,
     this.epsilon = Filter.epsilon,
@@ -28,55 +22,107 @@ final class EqualToCondition extends Filter {
   });
 
   final int property;
-  final Object value;
+  final Object? value;
+  final double epsilon;
+  final bool caseSensitive;
+}
+
+/// Filter checking for inequality.
+final class NotEqualCondition extends Filter {
+  /// Filters the results to only include objects where the property does not
+  /// equal [value].
+  ///
+  /// For lists, at least one of the values in the list has to match.
+  const NotEqualCondition({
+    required this.property,
+    required this.value,
+    this.epsilon = Filter.epsilon,
+    this.caseSensitive = true,
+  });
+
+  final int property;
+  final Object? value;
   final double epsilon;
   final bool caseSensitive;
 }
 
 /// Filter matching values greater than the bound.
-final class GreaterThanCondition extends Filter {
+final class GreaterCondition extends Filter {
   /// Filters the results to only include objects where the property is greater
   /// than [value].
   ///
   /// For lists, at least one of the values in the list has to match.
-  const GreaterThanCondition({
+  const GreaterCondition({
     required this.property,
     required this.value,
-    this.include = false,
     this.epsilon = Filter.epsilon,
     this.caseSensitive = true,
   });
 
   final int property;
-  final Object value;
-  final bool include;
+  final Object? value;
+  final double epsilon;
+  final bool caseSensitive;
+}
+
+/// Filter matching values greater than of equal to the bound.
+final class GreaterOrEqualCondition extends Filter {
+  /// Filters the results to only include objects where the property is greater
+  /// than or equal to [value].
+  ///
+  /// For lists, at least one of the values in the list has to match.
+  const GreaterOrEqualCondition({
+    required this.property,
+    required this.value,
+    this.epsilon = Filter.epsilon,
+    this.caseSensitive = true,
+  });
+
+  final int property;
+  final Object? value;
   final double epsilon;
   final bool caseSensitive;
 }
 
 /// Filter matching values smaller than the bound.
-final class LessThanCondition extends Filter {
+final class LessCondition extends Filter {
   /// Filters the results to only include objects where the property is less
   /// than [value].
   ///
   /// For lists, at least one of the values in the list has to match.
-  const LessThanCondition({
+  const LessCondition({
     required this.property,
     required this.value,
-    this.include = false,
     this.epsilon = Filter.epsilon,
     this.caseSensitive = true,
   });
 
   final int property;
-  final Object value;
-  final bool include;
+  final Object? value;
+  final double epsilon;
+  final bool caseSensitive;
+}
+
+/// Filter matching values smaller than or equal to the bound.
+final class LessOrEqualCondition extends Filter {
+  /// Filters the results to only include objects where the property is less
+  /// than or equal to [value].
+  ///
+  /// For lists, at least one of the values in the list has to match.
+  const LessOrEqualCondition({
+    required this.property,
+    required this.value,
+    this.epsilon = Filter.epsilon,
+    this.caseSensitive = true,
+  });
+
+  final int property;
+  final Object? value;
   final double epsilon;
   final bool caseSensitive;
 }
 
 /// Filter matching values between the bounds.
-
 final class BetweenCondition extends Filter {
   /// Filters the results to only include objects where the property is
   /// between [lower] and [upper].
@@ -85,18 +131,14 @@ final class BetweenCondition extends Filter {
   const BetweenCondition({
     required this.property,
     required this.lower,
-    this.includeLower = true,
     required this.upper,
-    this.includeUpper = true,
     this.epsilon = Filter.epsilon,
     this.caseSensitive = true,
   });
 
   final int property;
-  final Object lower;
-  final bool includeLower;
-  final Object upper;
-  final bool includeUpper;
+  final Object? lower;
+  final Object? upper;
   final double epsilon;
   final bool caseSensitive;
 }

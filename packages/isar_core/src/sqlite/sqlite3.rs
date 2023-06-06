@@ -4,14 +4,14 @@ use libsqlite3_sys as ffi;
 use std::ffi::{c_char, c_int, CStr, CString};
 use std::ptr;
 
-pub struct SQLite3 {
+pub(crate) struct SQLite3 {
     db: *mut ffi::sqlite3,
 }
 
 unsafe impl Send for SQLite3 {}
 
 impl SQLite3 {
-    pub const MAX_PARAM_COUNT: u32 = 999;
+    pub(crate) const MAX_PARAM_COUNT: u32 = 999;
 
     pub fn open(path: &str) -> Result<SQLite3> {
         let flags = ffi::SQLITE_OPEN_READWRITE | ffi::SQLITE_OPEN_CREATE | ffi::SQLITE_OPEN_NOMUTEX;
@@ -39,7 +39,6 @@ impl SQLite3 {
     }
 
     pub fn prepare(&self, sql: &str) -> Result<SQLiteStatement> {
-        eprintln!("prepare: {}", sql);
         let mut stmt: *mut ffi::sqlite3_stmt = ptr::null_mut();
         let mut c_tail = ptr::null();
         unsafe {

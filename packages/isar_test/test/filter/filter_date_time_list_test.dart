@@ -66,18 +66,18 @@ void main() {
           [obj1, obj2],
         );
         expect(
-          col
-              .where()
-              .listElementGreaterThan(utc(2020), include: true)
-              .findAll(),
-          [obj1, obj2, obj3],
-        );
-        expect(
           col.where().listElementGreaterThan(null).findAll(),
           [obj1, obj2, obj3],
         );
+      });
+
+      isarTest('.elementGreaterThanOrEqualTo()', () {
         expect(
-          col.where().listElementGreaterThan(null, include: true).findAll(),
+          col.where().listElementGreaterThanOrEqualTo(utc(2020)).findAll(),
+          [obj1, obj2, obj3],
+        );
+        expect(
+          col.where().listElementGreaterThanOrEqualTo(null).findAll(),
           [obj1, obj2, obj3, obj5],
         );
       });
@@ -87,13 +87,16 @@ void main() {
           col.where().listElementLessThan(utc(2020)).findAll(),
           [obj3, obj5],
         );
+        expect(col.where().listElementLessThan(null).findAll(), isEmpty);
+      });
+
+      isarTest('.elementLessThanOrEqualTo()', () {
         expect(
-          col.where().listElementLessThan(local(2020), include: true).findAll(),
+          col.where().listElementLessThanOrEqualTo(local(2020)).findAll(),
           [obj1, obj3, obj5],
         );
-        expect(col.where().listElementLessThan(null).findAll(), isEmpty);
         expect(
-          col.where().listElementLessThan(null, include: true).findAll(),
+          col.where().listElementLessThanOrEqualTo(null).findAll(),
           [obj5],
         );
       });
@@ -104,29 +107,8 @@ void main() {
           [obj1, obj3],
         );
         expect(
-          col
-              .where()
-              .listElementBetween(utc(2010), utc(2020), includeUpper: false)
-              .findAll(),
-          [obj3],
-        );
-        expect(
           col.where().listElementBetween(null, utc(2010)).findAll(),
           [obj3, obj5],
-        );
-        expect(
-          col
-              .where()
-              .listElementBetween(null, utc(2010), includeLower: false)
-              .findAll(),
-          [obj3],
-        );
-        expect(
-          col
-              .where()
-              .listElementBetween(null, utc(2010), includeUpper: false)
-              .findAll(),
-          [obj5],
         );
       });
 

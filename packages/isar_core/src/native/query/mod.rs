@@ -1,8 +1,8 @@
 use self::aggregate::{aggregate_min_max, aggregate_sum_average};
+use self::native_filter::NativeFilter;
 use self::query_iterator::QueryIterator;
 use super::index::index_key::IndexKey;
 use super::native_collection::{NativeCollection, NativeProperty};
-use super::native_filter::NativeFilter;
 use super::native_reader::NativeReader;
 use super::native_txn::NativeTxn;
 use crate::core::cursor::IsarCursor;
@@ -13,6 +13,7 @@ use crate::core::value::IsarValue;
 
 mod aggregate;
 mod index_iterator;
+pub(crate) mod native_filter;
 mod query_iterator;
 mod sorted_query_iterator;
 mod unsorted_distinct_query_iterator;
@@ -94,7 +95,7 @@ impl Query {
                 aggregate_sum_average(iterator, property, aggregation == Aggregation::Sum)
             }
             Aggregation::Count => Some(IsarValue::Integer(iterator.count() as i64)),
-            Aggregation::IsEmpty => Some(IsarValue::Bool(Some(iterator.next().is_none()))),
+            Aggregation::IsEmpty => Some(IsarValue::Bool(iterator.next().is_none())),
         }
     }
 

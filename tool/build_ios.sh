@@ -10,6 +10,6 @@ xcodebuild \
     -create-xcframework \
     -library target/aarch64-apple-ios/release/libisar.a \
     -library target/aarch64-apple-ios-sim/libisar.a \
-    -output isar.xcframework 
+    -output packages/isar_flutter_libs/ios/isar.xcframework 
 
 zip -r isar_ios.xcframework.zip isar.xcframework

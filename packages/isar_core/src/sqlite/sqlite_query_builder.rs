@@ -1,3 +1,5 @@
+use std::vec;
+
 use super::sql::filter_sql;
 use super::sqlite_collection::SQLiteCollection;
 use super::sqlite_query::SQLiteQuery;
@@ -51,12 +53,16 @@ impl<'a> IsarQueryBuilder for SQLiteQueryBuilder<'a> {
     }
 
     fn build(self) -> Self::Query {
+        let mut filter_values = vec![];
+
         let mut sql = String::new();
         sql.push_str("FROM ");
         sql.push_str(&self.collection.name);
         if let Some(filter) = self.filter {
             sql.push_str(" WHERE ");
-            sql.push_str(&filter_sql(self.collection, filter));
+            let (filter_sql, values) = filter_sql(self.collection, filter);
+            sql.push_str(&filter_sql);
+            filter_values = values;
         }
         if !self.sort.is_empty() {
             sql.push_str(" ORDER BY ");
@@ -96,6 +102,7 @@ impl<'a> IsarQueryBuilder for SQLiteQueryBuilder<'a> {
             );
         }
 
-        SQLiteQuery::new(sql, self.collection_index)
+        let has_sort_distinct = !self.sort.is_empty() || !self.distinct.is_empty();
+        SQLiteQuery::new(self.collection_index, sql, has_sort_distinct, filter_values)
     }
 }

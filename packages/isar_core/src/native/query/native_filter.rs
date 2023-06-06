@@ -1,6 +1,6 @@
-use super::isar_deserializer::IsarDeserializer;
-use super::native_collection::NativeProperty;
 use crate::core::data_type::DataType;
+use crate::native::isar_deserializer::IsarDeserializer;
+use crate::native::native_collection::NativeProperty;
 use crate::util::fast_wild_match::fast_wild_match;
 use enum_dispatch::enum_dispatch;
 use itertools::Itertools;

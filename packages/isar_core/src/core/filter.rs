@@ -29,7 +29,7 @@ pub enum ConditionType {
 pub struct FilterCondition {
     pub property_index: u16,
     pub condition_type: ConditionType,
-    pub values: Vec<IsarValue>,
+    pub values: Vec<Option<IsarValue>>,
     pub case_sensitive: bool,
 }
 
@@ -37,7 +37,7 @@ impl FilterCondition {
     pub const fn new(
         property_index: u16,
         condition_type: ConditionType,
-        values: Vec<IsarValue>,
+        values: Vec<Option<IsarValue>>,
         case_sensitive: bool,
     ) -> Self {
         Self {

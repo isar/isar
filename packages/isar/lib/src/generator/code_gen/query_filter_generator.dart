@@ -26,11 +26,11 @@ class FilterGenerator {
       }
 
       if (!property.type.isObject) {
-        code += generateEqualTo(property);
+        code += generateEqual(property);
 
         if (!property.type.isBool) {
-          code += generateGreaterThan(property);
-          code += generateLessThan(property);
+          code += generateGreater(property);
+          code += generateLess(property);
           code += generateBetween(property);
         }
       }
@@ -60,51 +60,26 @@ class FilterGenerator {
         '${p.dartName.decapitalize()}$any';
   }
 
-  String nullValue(PropertyInfo p) {
-    return switch (p.type) {
-      PropertyType.bool || PropertyType.boolList => 'Filter.nullBool',
-      PropertyType.byte ||
-      PropertyType.byteList ||
-      PropertyType.int ||
-      PropertyType.intList ||
-      PropertyType.long ||
-      PropertyType.longList ||
-      PropertyType.dateTime ||
-      PropertyType.dateTimeList =>
-        'Filter.nullInt',
-      PropertyType.float ||
-      PropertyType.floatList ||
-      PropertyType.double ||
-      PropertyType.doubleList =>
-        'Filter.nullDouble',
-      PropertyType.string || PropertyType.stringList => 'Filter.nullString',
-      PropertyType.object ||
-      PropertyType.objectList ||
-      PropertyType.json =>
-        throw ArgumentError(),
-    };
-  }
-
-  String valOrNull(PropertyInfo p, String value) {
-    if (p.elementNullable ?? p.nullable) {
-      return '$value ?? ${nullValue(p)}';
+  String optional(List<String> parameters) {
+    if (parameters.isNotEmpty) {
+      return '{${parameters.join(',')},}';
     } else {
-      return value;
+      return '';
     }
   }
 
-  String generateEqualTo(PropertyInfo p) {
-    final optional = [
+  String generateEqual(PropertyInfo p) {
+    final optionalParams = optional([
       if (p.type.isString) 'bool caseSensitive = true',
       if (p.type.isFloat) 'double epsilon = Filter.epsilon',
-    ].join(',');
+    ]);
     return '''
-    ${mPrefix(p)}EqualTo(${p.scalarDartType} value ${optional.isNotEmpty ? ', {$optional,}' : ''}) {
+    ${mPrefix(p)}EqualTo(${p.scalarDartType} value, $optionalParams) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(
-          EqualToCondition(
+          EqualCondition(
             property: ${p.index},
-            value: ${valOrNull(p, 'value')},
+            value: value,
             ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
             ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
           ),
@@ -113,42 +88,65 @@ class FilterGenerator {
     }''';
   }
 
-  String generateGreaterThan(PropertyInfo p) {
-    final optional = [
-      'bool include = false',
+  String generateGreater(PropertyInfo p) {
+    final optionalParams = optional([
       if (p.type.isString) 'bool caseSensitive = true',
       if (p.type.isFloat) 'double epsilon = Filter.epsilon',
-    ].join(',');
+    ]);
     return '''
-    ${mPrefix(p)}GreaterThan(${p.scalarDartType} value, {$optional,}) {
+    ${mPrefix(p)}GreaterThan(${p.scalarDartType} value, $optionalParams) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(
-          GreaterThanCondition(
-            include: include,
+          GreaterCondition(
             property: ${p.index},
-            value: ${valOrNull(p, 'value')},
+            value: value,
             ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
             ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
           ),
         );
       });
-    }''';
-  }
-
-  String generateLessThan(PropertyInfo p) {
-    final optional = [
-      'bool include = false',
-      if (p.type.isString) 'bool caseSensitive = true',
-      if (p.type.isFloat) 'double epsilon = Filter.epsilon',
-    ].join(',');
-    return '''
-    ${mPrefix(p)}LessThan(${p.scalarDartType} value, {$optional,}) {
+    }
+    
+    ${mPrefix(p)}GreaterThanOrEqualTo(${p.scalarDartType} value, $optionalParams) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(
-          LessThanCondition(
-            include: include,
+          GreaterOrEqualCondition(
             property: ${p.index},
-            value: ${valOrNull(p, 'value')},
+            value: value,
+            ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+            ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
+          ),
+        );
+      });
+    }
+    ''';
+  }
+
+  String generateLess(PropertyInfo p) {
+    final optionalParams = optional([
+      if (p.type.isString) 'bool caseSensitive = true',
+      if (p.type.isFloat) 'double epsilon = Filter.epsilon',
+    ]);
+    return '''
+    ${mPrefix(p)}LessThan(${p.scalarDartType} value, $optionalParams) {
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(
+          LessCondition(
+            property: ${p.index},
+            value: value,
+            ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+            ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
+          ),
+        );
+      });
+    }
+    
+    ${mPrefix(p)}LessThanOrEqualTo(${p.scalarDartType} value, $optionalParams) {
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(
+          LessOrEqualCondition(
+            property: ${p.index},
+            value: value,
             ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
             ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
           ),
@@ -158,22 +156,18 @@ class FilterGenerator {
   }
 
   String generateBetween(PropertyInfo p) {
-    final optional = [
-      'bool includeLower = true',
-      'bool includeUpper = true',
+    final optionalParams = optional([
       if (p.type.isString) 'bool caseSensitive = true',
       if (p.type.isFloat) 'double epsilon = Filter.epsilon',
-    ].join(',');
+    ]);
     return '''
-    ${mPrefix(p)}Between(${p.scalarDartType} lower, ${p.scalarDartType} upper, {$optional,}) {
+    ${mPrefix(p)}Between(${p.scalarDartType} lower, ${p.scalarDartType} upper, $optionalParams) {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(
           BetweenCondition(
             property: ${p.index},
-            lower: ${valOrNull(p, 'lower')},
-            includeLower: includeLower,
-            upper: ${valOrNull(p, 'upper')},
-            includeUpper: includeUpper,
+            lower: lower,
+            upper: upper,
             ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
             ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
           ),
@@ -196,9 +190,9 @@ class FilterGenerator {
       ${mPrefix(p)}IsNull() {
         return QueryBuilder.apply(this, (query) {
           return query.addFilterCondition(
-            const EqualToCondition(
+            const EqualCondition(
               property: ${p.index},
-              value: ${nullValue(p)}
+              value: null
             ),
           );
         });
@@ -219,9 +213,9 @@ class FilterGenerator {
       ${mPrefix(p)}IsNotNull() {
         return QueryBuilder.apply(this, (query) {
           return query.addFilterCondition(
-            const GreaterThanCondition(
+            const GreaterCondition(
               property: ${p.index},
-              value: ${nullValue(p)},
+              value: null,
             ),
           );
         });
@@ -293,7 +287,7 @@ class FilterGenerator {
     ${mPrefix(p)}IsEmpty() {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(
-          const EqualToCondition(
+          const EqualCondition(
             property: ${p.index},
             value: '',
           ),
@@ -307,7 +301,7 @@ class FilterGenerator {
     ${mPrefix(p)}IsNotEmpty() {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(
-          const GreaterThanCondition(
+          const GreaterCondition(
             property: ${p.index},
             value: '',
           ),

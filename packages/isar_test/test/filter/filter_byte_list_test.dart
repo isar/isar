@@ -58,35 +58,33 @@ void main() {
 
     isarTest('.elementGreaterThan()', () {
       expect(col.where().listElementGreaterThan(123).findAll(), [obj2, obj4]);
+      expect(col.where().listElementGreaterThan(255).findAll(), isEmpty);
+    });
+
+    isarTest('.elementGreaterThanOrEqualTo()', () {
       expect(
-        col.where().listElementGreaterThan(123, include: true).findAll(),
+        col.where().listElementGreaterThanOrEqualTo(123).findAll(),
         [obj1, obj2, obj3, obj4],
       );
-      expect(col.where().listElementGreaterThan(255).findAll(), isEmpty);
     });
 
     isarTest('.elementLessThan()', () {
       expect(
           col.where().listElementLessThan(123).findAll(), [obj2, obj3, obj4]);
+      expect(col.where().listElementLessThan(0).findAll(), isEmpty);
+    });
+
+    isarTest('.elementLessThanOrEqualTo()', () {
       expect(
-        col.where().listElementLessThan(123, include: true).findAll(),
+        col.where().listElementLessThanOrEqualTo(123).findAll(),
         [obj1, obj2, obj3, obj4],
       );
-      expect(col.where().listElementLessThan(0).findAll(), isEmpty);
     });
 
     isarTest('.elementBetween()', () {
       expect(
         col.where().listElementBetween(123, 255).findAll(),
         [obj1, obj2, obj3, obj4],
-      );
-      expect(
-        col.where().listElementBetween(123, 255, includeLower: false).findAll(),
-        [obj2, obj4],
-      );
-      expect(
-        col.where().listElementBetween(123, 255, includeUpper: false).findAll(),
-        [obj1, obj3],
       );
       expect(col.where().listElementBetween(50, 100).findAll(), isEmpty);
     });

@@ -31,3 +31,8 @@ pub unsafe extern "C" fn isar_insert_finish(
         *txn = Box::into_raw(Box::new(new_txn));
     }
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_insert_abort(insert: *mut CIsarWriter) {
+    let _ = *Box::from_raw(insert);
+}

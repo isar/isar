@@ -1,6 +1,5 @@
-use super::index_iterator::IndexIterator;
+use super::{index_iterator::IndexIterator, native_filter::NativeFilter};
 use crate::native::isar_deserializer::IsarDeserializer;
-use crate::native::native_filter::NativeFilter;
 use intmap::IntMap;
 
 pub(crate) struct UnsortedQueryIterator<'a> {

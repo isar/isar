@@ -1,11 +1,11 @@
-use std::borrow::Cow;
-
 use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
 use crate::core::data_type::DataType;
 use crate::core::filter::{ConditionType, Filter, FilterCondition};
 use crate::core::schema::{CollectionSchema, IndexSchema, PropertySchema};
 use crate::core::value::IsarValue;
 use itertools::Itertools;
+use std::borrow::Cow;
+use std::vec;
 
 pub(crate) fn create_table_sql(collection: &CollectionSchema) -> String {
     format!(
@@ -51,207 +51,176 @@ pub(crate) fn select_properties_sql(collection: &SQLiteCollection) -> String {
 pub(crate) fn offset_limit_sql(offset: Option<u32>, limit: Option<u32>) -> String {
     let mut sql = String::new();
     if let Some(offset) = offset {
-        sql.push_str(" OFFSET ");
-        sql.push_str(&offset.to_string());
-    }
-    if let Some(limit) = limit {
-        sql.push_str(" LIMIT ");
-        sql.push_str(&limit.to_string());
+        sql.push_str(&format!("LIMIT {}, {}", offset, limit.unwrap_or(u32::MAX)));
+    } else if let Some(limit) = limit {
+        sql.push_str(&format!("LIMIT {}", limit));
     }
     sql
 }
 
-fn value_sql(value: &IsarValue) -> String {
-    match value {
-        IsarValue::Bool(b) => {
-            if let Some(b) = b {
-                if *b {
-                    "TRUE".to_string()
-                } else {
-                    "FALSE".to_string()
-                }
-            } else {
-                "NULL".to_string()
-            }
-        }
-        IsarValue::Integer(i) => {
-            if *i != i64::MIN {
-                i.to_string()
-            } else {
-                "NULL".to_string()
-            }
-        }
-        IsarValue::Real(r) => {
-            if r.is_nan() {
-                "NULL".to_string()
-            } else if r.is_infinite() {
-                if r.is_sign_positive() {
-                    "9e999".to_string()
-                } else {
-                    "-9e999".to_string()
-                }
-            } else {
-                r.to_string()
-            }
-        }
-        IsarValue::String(s) => {
-            if let Some(s) = s {
-                let mut escaped = s.replace("'", "''");
-                escaped.insert(0, '\'');
-                escaped.push('\'');
-                escaped
-            } else {
-                "NULL".to_string()
-            }
-        }
-    }
-}
-
-pub fn filter_sql(collection: &SQLiteCollection, filter: Filter) -> String {
+pub fn filter_sql(collection: &SQLiteCollection, filter: Filter) -> (String, Vec<IsarValue>) {
     match filter {
         Filter::Condition(condition) => {
-            condition_sql(collection, &condition).unwrap_or("FALSE".to_string())
+            condition_sql(collection, &condition).unwrap_or(("FALSE".to_string(), vec![]))
         }
         Filter::Nested(_) => todo!(),
         Filter::And(filters) => {
             let mut sql = String::new();
+            let mut values = vec![];
             for filter in filters {
                 if !sql.is_empty() {
                     sql.push_str(" AND ");
                 }
-                sql.push_str(&filter_sql(collection, filter));
+                let (filter_sql, filter_values) = filter_sql(collection, filter);
+                sql.push_str(&filter_sql);
+                values.extend_from_slice(&filter_values);
             }
-            format!("({})", sql)
+            (format!("({})", sql), values)
         }
         Filter::Or(filters) => {
             let mut sql = String::new();
+            let mut values = vec![];
             for filter in filters {
                 if !sql.is_empty() {
                     sql.push_str(" OR ");
                 }
-                sql.push_str(&filter_sql(collection, filter));
+                let (filter_sql, filter_values) = filter_sql(collection, filter);
+                sql.push_str(&filter_sql);
+                values.extend_from_slice(&filter_values);
             }
-            format!("({})", sql)
+            (format!("({})", sql), values)
         }
         Filter::Not(filter) => {
-            let sql = filter_sql(collection, *filter);
-            format!("NOT ({})", sql)
+            let (sql, values) = filter_sql(collection, *filter);
+            (format!("NOT ({})", sql), values)
         }
     }
 }
 
-fn condition_sql(collection: &SQLiteCollection, condition: &FilterCondition) -> Option<String> {
-    let prop_name = collection.get_property_name(condition.property_index);
+fn condition_sql(
+    collection: &SQLiteCollection,
+    condition: &FilterCondition,
+) -> Option<(String, Vec<IsarValue>)> {
+    let property_name = collection.get_property_name(condition.property_index);
     let collate = if condition.case_sensitive {
         ""
     } else {
-        " COLLATE NOCASE"
+        "COLLATE NOCASE"
     };
 
+    let mut values = vec![];
     let sql = match condition.condition_type {
-        ConditionType::IsNull => format!("{} IS NULL", prop_name),
+        ConditionType::IsNull => format!("{} IS NULL", property_name),
         ConditionType::ListIsEmpty => todo!(),
         ConditionType::Equal => {
             let value = condition.values.get(0)?;
-            if value.is_null() {
-                format!("{} IS NULL", prop_name)
+            if let Some(value) = value {
+                values.push(value.clone());
+                format!("{} = ? {}", property_name, collate)
             } else {
-                format!("{} = {}{}", prop_name, value_sql(value), collate)
+                format!("{} IS NULL", property_name)
             }
         }
         ConditionType::Greater => {
             let value = condition.values.get(0)?;
-            if value.is_null() {
-                format!("{} IS NOT NULL", prop_name)
+            if let Some(value) = value {
+                values.push(value.clone());
+                format!("{} > ?", property_name)
             } else {
-                format!("{} > {}", prop_name, value_sql(value))
+                format!("{} IS NOT NULL", property_name)
             }
         }
         ConditionType::GreaterOrEqual => {
             let value = condition.values.get(0)?;
-            if value.is_null() {
-                "TRUE".to_string()
+            if let Some(value) = value {
+                values.push(value.clone());
+                format!("{} >= ?", property_name)
             } else {
-                format!("{} >= {}", prop_name, value_sql(value))
+                "TRUE".to_string()
             }
         }
         ConditionType::Less => {
             let value = condition.values.get(0)?;
-            if value.is_null() {
-                "FALSE".to_string()
+            if let Some(value) = value {
+                values.push(value.clone());
+                format!("{} < ? OR {} IS NULL", property_name, property_name)
             } else {
-                format!(
-                    "{} < {} OR {} IS NULL",
-                    prop_name,
-                    value_sql(value),
-                    prop_name
-                )
+                "FALSE".to_string()
             }
         }
         ConditionType::LessOrEqual => {
             let value = condition.values.get(0)?;
-            if value.is_null() {
-                format!("{} IS NULL", prop_name)
+            if let Some(value) = value {
+                values.push(value.clone());
+                format!("{} <= ? OR {} IS NULL", property_name, property_name)
             } else {
-                format!(
-                    "{} <= {} OR {} IS NULL",
-                    prop_name,
-                    value_sql(value),
-                    prop_name
-                )
+                format!("{} IS NULL", property_name)
             }
         }
         ConditionType::Between => {
             let lower = condition.values.get(0)?;
             let upper = condition.values.get(1)?;
-            if lower.is_null() {
-                if upper.is_null() {
-                    format!("{} IS NULL", prop_name)
+            if let Some(lower) = lower {
+                if let Some(upper) = upper {
+                    values.push(lower.clone());
+                    values.push(upper.clone());
+                    format!("{} BETWEEN ? AND ?", property_name)
                 } else {
-                    format!(
-                        "{} <= {} OR {} IS NULL",
-                        prop_name,
-                        value_sql(upper),
-                        prop_name
-                    )
+                    values.push(lower.clone());
+                    format!("{} >= ?", property_name)
                 }
-            } else if upper.is_null() {
-                format!("{} >= {}", prop_name, value_sql(lower))
+            } else if let Some(upper) = upper {
+                values.push(upper.clone());
+                format!("{} <= ? OR {} IS NULL", property_name, property_name)
             } else {
-                format!(
-                    "{} BETWEEN {} AND {}",
-                    prop_name,
-                    value_sql(lower),
-                    value_sql(upper)
-                )
+                format!("{} IS NULL", property_name)
             }
         }
-        ConditionType::StringStartsWith => format!(
-            "{} LIKE '{}%' {}",
-            prop_name,
-            value_sql(condition.values.get(0)?),
-            collate
-        ),
-        ConditionType::StringEndsWith => format!(
-            "{} LIKE '%{}' {}",
-            prop_name,
-            value_sql(condition.values.get(0)?),
-            collate
-        ),
-        ConditionType::StringContains => format!(
-            "{} LIKE '%{}%' {}",
-            prop_name,
-            value_sql(condition.values.get(0)?),
-            collate
-        ),
-        ConditionType::StringMatches => format!(
-            "{} LIKE {} {}",
-            prop_name,
-            value_sql(condition.values.get(0)?),
-            collate
-        ),
+        ConditionType::StringStartsWith => {
+            if let Some(IsarValue::String(prefix)) = condition.values.get(0)? {
+                values.push(IsarValue::String(format!("{}%", escape_wildcard(prefix))));
+                format!("{} LIKE ? {} ESCAPE '\\'", property_name, collate)
+            } else {
+                "FALSE".to_string()
+            }
+        }
+        ConditionType::StringEndsWith => {
+            if let Some(IsarValue::String(postfix)) = condition.values.get(0)? {
+                values.push(IsarValue::String(format!("%{}", escape_wildcard(postfix))));
+                format!("{} LIKE ? {} ESCAPE '\\'", property_name, collate)
+            } else {
+                "FALSE".to_string()
+            }
+        }
+        ConditionType::StringContains => {
+            if let Some(IsarValue::String(needle)) = condition.values.get(0)? {
+                values.push(IsarValue::String(format!("%{}%", escape_wildcard(needle))));
+                format!("{} LIKE ? {} ESCAPE '\\'", property_name, collate)
+            } else {
+                "FALSE".to_string()
+            }
+        }
+        ConditionType::StringMatches => {
+            if let Some(IsarValue::String(wildcard)) = condition.values.get(0)? {
+                let wildcard = wildcard
+                    .replace("\\", "\\\\")
+                    .replace("*", "%")
+                    .replace("?", "_");
+                values.push(IsarValue::String(wildcard));
+                format!("{} LIKE ? {} ESCAPE '\\'", property_name, collate)
+            } else {
+                "FALSE".to_string()
+            }
+        }
     };
-    Some(sql)
+    Some((sql, values))
+}
+
+fn escape_wildcard(wildcard: &str) -> String {
+    wildcard
+        .replace("\\", "\\\\")
+        .replace("%", "\\%")
+        .replace("_", "\\_")
 }
 
 pub(crate) fn data_type_sql(property: &PropertySchema) -> Cow<str> {

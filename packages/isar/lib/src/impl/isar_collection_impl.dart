@@ -70,9 +70,14 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
       ).checkNoError();
 
       final insertPtr = writerPtrPtr.value;
-      for (final object in objects) {
-        final id = converter.serialize(insertPtr, object);
-        isar_insert_save(insertPtr, id).checkNoError();
+      try {
+        for (final object in objects) {
+          final id = converter.serialize(insertPtr, object);
+          isar_insert_save(insertPtr, id).checkNoError();
+        }
+      } catch (e) {
+        isar_insert_abort(insertPtr);
+        rethrow;
       }
 
       final txnPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarTxn>>();

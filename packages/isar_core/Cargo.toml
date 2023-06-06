@@ -17,7 +17,8 @@ byteorder = "1"
 intmap = "2.0.0"
 snafu = "0.7.0"
 thread_local = "1.1.4"
-libsqlite3-sys = { version="0.25.2", features=["bundled"], optional = true  }
+libsqlite3-sys = { version="0.26", features=["bundled"], optional = true  }
+rusqlite = { version="0.29", features=["bundled"] }
 ouroboros = "0.15.6"
 base64 = "0.21.0"
 paste = "1.0.12"
@@ -35,6 +36,6 @@ version = "*"
 features = ["float_roundtrip"]
 
 [features]
-default = ["sqlite"]
+default = ["sqlite", "native"]
 native = ["mdbx-sys"]
 sqlite = ["libsqlite3-sys"]

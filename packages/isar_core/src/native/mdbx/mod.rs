@@ -43,16 +43,24 @@ pub fn mdbx_result(err_code: c_int) -> Result<()> {
     match err_code {
         mdbx_sys::MDBX_SUCCESS | mdbx_sys::MDBX_RESULT_TRUE => Ok(()),
         mdbx_sys::MDBX_MAP_FULL => Err(IsarError::DbFull {}),
+        other => Err(mdbx_error(other)),
+    }
+}
+
+#[inline]
+pub(crate) fn mdbx_error(err_code: c_int) -> IsarError {
+    match err_code {
+        mdbx_sys::MDBX_MAP_FULL => IsarError::DbFull {},
         other => unsafe {
             let err_raw = mdbx_sys::mdbx_strerror(other);
             let err = CStr::from_ptr(err_raw);
-            Err(IsarError::DbError {
+            IsarError::DbError {
                 code: other,
                 message: err
                     .to_str()
                     .unwrap_or("Cannot decode error message")
                     .to_string(),
-            })
+            }
         },
     }
 }

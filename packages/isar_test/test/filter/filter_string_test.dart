@@ -206,19 +206,6 @@ void main() {
         isar.stringModels.where().fieldBetween('', 'string 2').findAll(),
         [objEmpty, obj1, obj2],
       );
-
-      expect(
-        isar.stringModels
-            .where()
-            .fieldBetween(
-              '',
-              'string 2',
-              includeLower: false,
-              includeUpper: false,
-            )
-            .findAll(),
-        [obj1],
-      );
     });
 
     isarTest('.matches()', () {

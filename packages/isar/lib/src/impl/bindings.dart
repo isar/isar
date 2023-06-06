@@ -65,47 +65,56 @@ external ffi.Pointer<CFilter> isar_filter_list_is_empty(
 
 @ffi.Native<
     ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
-        ffi.Bool)>(symbol: 'isar_filter_equal_to')
-external ffi.Pointer<CFilter> isar_filter_equal_to(
+        ffi.Bool)>(symbol: 'isar_filter_equal')
+external ffi.Pointer<CFilter> isar_filter_equal(
   int property_index,
   ffi.Pointer<CIsarValue> value,
   bool case_sensitive,
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool,
-        ffi.Bool)>(symbol: 'isar_filter_greater_than')
-external ffi.Pointer<CFilter> isar_filter_greater_than(
+    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
+        ffi.Bool)>(symbol: 'isar_filter_greater')
+external ffi.Pointer<CFilter> isar_filter_greater(
   int property_index,
   ffi.Pointer<CIsarValue> value,
-  bool include,
   bool case_sensitive,
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool,
-        ffi.Bool)>(symbol: 'isar_filter_less_than')
-external ffi.Pointer<CFilter> isar_filter_less_than(
+    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
+        ffi.Bool)>(symbol: 'isar_filter_greater_or_equal')
+external ffi.Pointer<CFilter> isar_filter_greater_or_equal(
   int property_index,
   ffi.Pointer<CIsarValue> value,
-  bool include,
   bool case_sensitive,
 );
 
 @ffi.Native<
-    ffi.Pointer<CFilter> Function(
-        ffi.Uint16,
-        ffi.Pointer<CIsarValue>,
-        ffi.Bool,
-        ffi.Pointer<CIsarValue>,
-        ffi.Bool,
-        ffi.Bool)>(symbol: 'isar_filter_between')
+    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
+        ffi.Bool)>(symbol: 'isar_filter_less')
+external ffi.Pointer<CFilter> isar_filter_less(
+  int property_index,
+  ffi.Pointer<CIsarValue> value,
+  bool case_sensitive,
+);
+
+@ffi.Native<
+    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
+        ffi.Bool)>(symbol: 'isar_filter_less_or_equal')
+external ffi.Pointer<CFilter> isar_filter_less_or_equal(
+  int property_index,
+  ffi.Pointer<CIsarValue> value,
+  bool case_sensitive,
+);
+
+@ffi.Native<
+    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
+        ffi.Pointer<CIsarValue>, ffi.Bool)>(symbol: 'isar_filter_between')
 external ffi.Pointer<CFilter> isar_filter_between(
   int property_index,
   ffi.Pointer<CIsarValue> lower,
-  bool include_lower,
   ffi.Pointer<CIsarValue> upper,
-  bool include_upper,
   bool case_sensitive,
 );
 
@@ -180,6 +189,12 @@ external int isar_insert_save(
 external int isar_insert_finish(
   ffi.Pointer<CIsarWriter> insert,
   ffi.Pointer<ffi.Pointer<CIsarTxn>> txn,
+);
+
+@ffi.Native<ffi.Void Function(ffi.Pointer<CIsarWriter>)>(
+    symbol: 'isar_insert_abort')
+external void isar_insert_abort(
+  ffi.Pointer<CIsarWriter> insert,
 );
 
 @ffi.Native<ffi.Pointer<ffi.Char> Function()>(symbol: 'isar_version')
@@ -521,11 +536,10 @@ external int isar_read_list(
   ffi.Pointer<ffi.Pointer<CIsarReader>> list_reader,
 );
 
-@ffi.Native<ffi.Pointer<CIsarValue> Function(ffi.Bool, ffi.Bool)>(
+@ffi.Native<ffi.Pointer<CIsarValue> Function(ffi.Bool)>(
     symbol: 'isar_value_bool')
 external ffi.Pointer<CIsarValue> isar_value_bool(
   bool value,
-  bool null1,
 );
 
 @ffi.Native<ffi.Pointer<CIsarValue> Function(ffi.Int64)>(
@@ -719,5 +733,3 @@ const int AGGREGATION_MAX = 3;
 const int AGGREGATION_SUM = 4;
 
 const int AGGREGATION_AVERAGE = 5;
-
-const int SQLite3_MAX_PARAM_COUNT = 999;

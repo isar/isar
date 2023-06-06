@@ -1,9 +1,9 @@
 use super::index_iterator::IndexIterator;
+use super::native_filter::NativeFilter;
 use crate::core::data_type::DataType;
 use crate::core::query_builder::Sort;
 use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::native_collection::NativeProperty;
-use crate::native::native_filter::NativeFilter;
 use intmap::IntMap;
 use itertools::Itertools;
 use std::cmp::Ordering;

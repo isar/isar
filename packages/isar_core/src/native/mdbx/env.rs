@@ -1,3 +1,4 @@
+use super::mdbx_error;
 use super::mdbx_result;
 use super::osal::*;
 use super::txn::Txn;
@@ -16,15 +17,9 @@ const MIB: isize = 1 << 20;
 
 impl Env {
     pub fn create(path: &str, max_dbs: u32, max_size_mib: u32) -> Result<Arc<Env>> {
-        let path = str_to_os(path)?;
-        let mut env: *mut mdbx_sys::MDBX_env = ptr::null_mut();
         unsafe {
-            mdbx_result(mdbx_sys::mdbx_env_create(&mut env))?;
-            mdbx_result(mdbx_sys::mdbx_env_set_option(
-                env,
-                mdbx_sys::MDBX_option_t::MDBX_opt_max_db,
-                max_dbs as u64,
-            ))?;
+            let path = str_to_os(path)?;
+            let mut env: *mut mdbx_sys::MDBX_env = ptr::null_mut();
 
             let flags = mdbx_sys::MDBX_NOTLS
                 | mdbx_sys::MDBX_COALESCE
@@ -35,6 +30,13 @@ impl Env {
             let mut err_code = 0;
             for i in 0..9 {
                 let max_size_i = (max_size - i * (max_size / 10)).clamp(10 * MIB, isize::MAX);
+
+                mdbx_result(mdbx_sys::mdbx_env_create(&mut env))?;
+                mdbx_result(mdbx_sys::mdbx_env_set_option(
+                    env,
+                    mdbx_sys::MDBX_option_t::MDBX_opt_max_db,
+                    max_dbs as u64,
+                ))?;
                 mdbx_result(mdbx_sys::mdbx_env_set_geometry(
                     env,
                     MIB,
@@ -48,16 +50,16 @@ impl Env {
                 err_code = ENV_OPEN(env, path.as_ptr(), flags, 0o600);
                 if err_code == mdbx_sys::MDBX_SUCCESS {
                     break;
+                } else {
+                    mdbx_sys::mdbx_env_close_ex(env, true);
+                    env = ptr::null_mut();
                 }
             }
 
             match err_code {
                 mdbx_sys::MDBX_SUCCESS => Ok(Arc::new(Env { env })),
                 mdbx_sys::MDBX_EPERM | mdbx_sys::MDBX_ENOFILE => Err(IsarError::PathError {}),
-                e => {
-                    mdbx_result(e)?;
-                    unreachable!()
-                }
+                e => Err(mdbx_error(e)),
             }
         }
     }

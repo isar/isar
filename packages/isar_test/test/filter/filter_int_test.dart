@@ -54,44 +54,34 @@ void main() {
     isarTest('.greaterThan()', () {
       expect(col.where().fieldGreaterThan(1).findAll(), [obj2]);
       expect(
-        col.where().fieldGreaterThan(1, include: true).findAll(),
-        [obj1, obj2, obj3],
-      );
-      expect(
         col.where().fieldGreaterThan(null).findAll(),
         [obj0, obj1, obj2, obj3],
       );
+      expect(col.where().fieldGreaterThan(4).findAll(), isEmpty);
+    });
+
+    isarTest('.greaterThanOrEqualTo()', () {
       expect(
-        col.where().fieldGreaterThan(null, include: true).findAll(),
+        col.where().fieldGreaterThanOrEqualTo(1).findAll(),
+        [obj1, obj2, obj3],
+      );
+      expect(
+        col.where().fieldGreaterThanOrEqualTo(null).findAll(),
         [obj0, obj1, obj2, obj3, objNull],
       );
-      expect(col.where().fieldGreaterThan(4).findAll(), isEmpty);
     });
 
     isarTest('.lessThan()', () {
       expect(col.where().fieldLessThan(1).findAll(), [obj0, objNull]);
       expect(col.where().fieldLessThan(null).findAll(), isEmpty);
-      expect(
-          col.where().fieldLessThan(null, include: true).findAll(), [objNull]);
+    });
+
+    isarTest('.lessThanOrEqualTo()', () {
+      expect(col.where().fieldLessThanOrEqualTo(null).findAll(), [objNull]);
     });
 
     isarTest('.between()', () {
       expect(col.where().fieldBetween(1, 2).findAll(), [obj1, obj2, obj3]);
-      expect(
-        col.where().fieldBetween(1, 2, includeLower: false).findAll(),
-        [obj2],
-      );
-      expect(
-        col.where().fieldBetween(1, 2, includeUpper: false).findAll(),
-        [obj1, obj3],
-      );
-      expect(
-        col
-            .where()
-            .fieldBetween(1, 2, includeLower: false, includeUpper: false)
-            .findAll(),
-        isEmpty,
-      );
       expect(
         col.where().fieldBetween(null, 1).findAll(),
         [obj0, obj1, obj3, objNull],

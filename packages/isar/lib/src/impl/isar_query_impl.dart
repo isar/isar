@@ -105,7 +105,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
         aggregation,
         _properties?.firstOrNull ?? 0,
         valuePtr,
-      );
+      ).checkNoError();
 
       final value = valuePtr.value;
       if (value.isNull) return null;

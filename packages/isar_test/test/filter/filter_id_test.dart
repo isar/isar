@@ -50,36 +50,24 @@ void main() {
 
     isarTest('.greaterThan()', () {
       expect(col.where().idGreaterThan(2).findAll(), [obj3]);
-      expect(
-        col.where().idGreaterThan(2, include: true).findAll(),
-        [obj2, obj3],
-      );
       expect(col.where().idGreaterThan(3).findAll(), isEmpty);
+    });
+
+    isarTest('.greaterThanOrEqualTo()', () {
+      expect(col.where().idGreaterThanOrEqualTo(2).findAll(), [obj2, obj3]);
     });
 
     isarTest('.lessThan()', () {
       expect(col.where().idLessThan(1).findAll(), [obj0]);
-      expect(col.where().idLessThan(1, include: true).findAll(), [obj0, obj1]);
       expect(col.where().idLessThan(0).findAll(), isEmpty);
+    });
+
+    isarTest('.lessThanOrEqualTo()', () {
+      expect(col.where().idLessThanOrEqualTo(1).findAll(), [obj0, obj1]);
     });
 
     isarTest('.between()', () {
       expect(col.where().idBetween(1, 3).findAll(), [obj1, obj2, obj3]);
-      expect(
-        col.where().idBetween(1, 3, includeLower: false).findAll(),
-        [obj2, obj3],
-      );
-      expect(
-        col.where().idBetween(1, 3, includeUpper: false).findAll(),
-        [obj1, obj2],
-      );
-      expect(
-        col
-            .where()
-            .idBetween(1, 3, includeLower: false, includeUpper: false)
-            .findAll(),
-        [obj2],
-      );
       expect(col.where().idBetween(5, 6).findAll(), isEmpty);
     });
   });

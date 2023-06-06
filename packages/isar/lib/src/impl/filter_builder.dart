@@ -2,7 +2,7 @@ part of isar;
 
 Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
   switch (filter) {
-    case EqualToCondition():
+    case EqualCondition():
       final value = filter.value;
       if (value is double) {
         return isar_filter_between(
@@ -10,65 +10,73 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
           _buildFilterValue(
             _adjustLowerFloatBound(value, true, filter.epsilon),
           ),
-          true,
           _buildFilterValue(
             _adjustUpperFloatBound(value, true, filter.epsilon),
           ),
-          true,
           filter.caseSensitive,
         );
       } else {
-        return isar_filter_equal_to(
+        return isar_filter_equal(
           filter.property,
           _buildFilterValue(filter.value),
           filter.caseSensitive,
         );
       }
-    case GreaterThanCondition():
+    case NotEqualCondition():
+      throw UnimplementedError();
+    case GreaterCondition():
       final rawValue = filter.value;
       final value = rawValue is double
-          ? _adjustLowerFloatBound(rawValue, filter.include, filter.epsilon)
+          ? _adjustLowerFloatBound(rawValue, false, filter.epsilon)
           : rawValue;
-      return isar_filter_greater_than(
+      return isar_filter_greater(
         filter.property,
         _buildFilterValue(value),
-        filter.include,
         filter.caseSensitive,
       );
-    case LessThanCondition():
+    case GreaterOrEqualCondition():
       final rawValue = filter.value;
       final value = rawValue is double
-          ? _adjustUpperFloatBound(rawValue, filter.include, filter.epsilon)
+          ? _adjustLowerFloatBound(rawValue, true, filter.epsilon)
           : rawValue;
-      return isar_filter_less_than(
+      return isar_filter_greater_or_equal(
         filter.property,
         _buildFilterValue(value),
-        filter.include,
+        filter.caseSensitive,
+      );
+    case LessCondition():
+      final rawValue = filter.value;
+      final value = rawValue is double
+          ? _adjustUpperFloatBound(rawValue, false, filter.epsilon)
+          : rawValue;
+      return isar_filter_less(
+        filter.property,
+        _buildFilterValue(value),
+        filter.caseSensitive,
+      );
+    case LessOrEqualCondition():
+      final rawValue = filter.value;
+      final value = rawValue is double
+          ? _adjustUpperFloatBound(rawValue, true, filter.epsilon)
+          : rawValue;
+      return isar_filter_less_or_equal(
+        filter.property,
+        _buildFilterValue(value),
         filter.caseSensitive,
       );
     case BetweenCondition():
       final rawLower = filter.lower;
       final lower = rawLower is double
-          ? _adjustLowerFloatBound(
-              rawLower,
-              filter.includeLower,
-              filter.epsilon,
-            )
+          ? _adjustLowerFloatBound(rawLower, true, filter.epsilon)
           : rawLower;
       final rawUpper = filter.upper;
       final upper = rawUpper is double
-          ? _adjustUpperFloatBound(
-              rawUpper,
-              filter.includeUpper,
-              filter.epsilon,
-            )
+          ? _adjustUpperFloatBound(rawUpper, true, filter.epsilon)
           : rawUpper;
       return isar_filter_between(
         filter.property,
         _buildFilterValue(lower),
-        filter.includeLower,
         _buildFilterValue(upper),
-        filter.includeUpper,
         filter.caseSensitive,
       );
     case StartsWithCondition():
@@ -126,17 +134,15 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
   }
 }
 
-Pointer<CIsarValue> _buildFilterValue(Object value) {
-  if (value is int) {
+Pointer<CIsarValue> _buildFilterValue(Object? value) {
+  if (value == null) {
+    return nullptr;
+  } else if (value is int) {
     return isar_value_integer(value);
   } else if (value is String) {
     return isar_value_string(IsarCore.toNativeString(value));
-  } else if (identical(value, Filter.nullString)) {
-    return isar_value_string(nullptr);
   } else if (value is bool) {
-    return isar_value_bool(value, false);
-  } else if (identical(value, Filter.nullBool)) {
-    return isar_value_bool(false, true);
+    return isar_value_bool(value);
   } else if (value is double) {
     return isar_value_real(value);
   } else if (value is DateTime) {

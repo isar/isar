@@ -223,7 +223,7 @@ pub(crate) fn aggregate_min_max<'a>(
                     }
                 }
                 if has_value {
-                    Some(IsarValue::String(Some(min_max)))
+                    Some(IsarValue::String(min_max))
                 } else {
                     None
                 }

@@ -309,7 +309,7 @@ impl IsarInstance for SQLiteInstance {
         offset: Option<u32>,
         limit: Option<u32>,
     ) -> Result<u32> {
-        query.delete(txn, offset, limit)
+        query.delete(txn, &self.info.collections, offset, limit)
     }
 
     fn copy(&self, path: &str) -> Result<()> {
