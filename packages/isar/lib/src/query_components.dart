@@ -221,19 +221,6 @@ final class IsNullCondition extends Filter {
   final int property;
 }
 
-/// Filter matching empty lists.
-final class ListIsEmptyCondition extends Filter {
-  /// Filters the results to only include objects where the length of
-  /// [property] is 0.
-  ///
-  /// Only list properties are supported.
-  const ListIsEmptyCondition({
-    required this.property,
-  });
-
-  final int property;
-}
-
 /// Logical AND.
 class AndGroup extends Filter {
   /// Create a logical AND filter group.

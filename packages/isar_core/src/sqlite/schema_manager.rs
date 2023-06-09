@@ -21,10 +21,10 @@ pub fn perform_migration(txn: &SQLiteTxn, schema: &IsarSchema) -> Result<()> {
                     update_table(sqlite, collection)?;
                 } else {
                     let sql = create_table_sql(collection);
-                    sqlite.execute(&sql)?;
+                    sqlite.prepare(&sql)?.step()?;
                     for index in &collection.indexes {
                         let sql = create_index_sql(&collection.name, index);
-                        sqlite.execute(&sql)?;
+                        sqlite.prepare(&sql)?.step()?;
                     }
                 }
             }
@@ -37,7 +37,7 @@ pub fn perform_migration(txn: &SQLiteTxn, schema: &IsarSchema) -> Result<()> {
                 .any(|c| c.name.to_lowercase() == table && !c.embedded)
             {
                 let sql = format!("DROP TABLE {}", table);
-                sqlite.execute(&sql)?;
+                sqlite.prepare(&sql)?.step()?;
             }
         }
 
@@ -87,12 +87,12 @@ fn update_table(sqlite: &SQLite3, collection: &CollectionSchema) -> Result<()> {
 
     for (index, _) in drop_indexes {
         let sql = format!("DROP INDEX {}_{}", collection.name, index);
-        sqlite.execute(&sql)?;
+        sqlite.prepare(&sql)?.step()?;
     }
 
     for property in &drop_properties {
         let sql = format!("ALTER TABLE {} DROP COLUMN {}", collection.name, property);
-        sqlite.execute(&sql)?;
+        sqlite.prepare(&sql)?.step()?;
     }
 
     for property in &add_properties {
@@ -102,12 +102,12 @@ fn update_table(sqlite: &SQLite3, collection: &CollectionSchema) -> Result<()> {
             property.name.as_ref().unwrap(),
             data_type_sql(property)
         );
-        sqlite.execute(&sql)?;
+        sqlite.prepare(&sql)?.step()?;
     }
 
     for index in &add_indexes {
         let sql = create_index_sql(&collection.name, index);
-        sqlite.execute(&sql)?;
+        sqlite.prepare(&sql)?.step()?;
     }
 
     Ok(())

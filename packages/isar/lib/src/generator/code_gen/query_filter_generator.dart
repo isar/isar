@@ -311,22 +311,30 @@ class FilterGenerator {
   }
 
   String generateListIsEmpty(PropertyInfo p) {
-    return '''
-    ${mPrefix(p, false)}IsEmpty() {
-      return QueryBuilder.apply(this, (query) {
-        return query.addFilterCondition(
-          const ListIsEmptyCondition(property: ${p.index}),
+    final name = p.dartName.decapitalize();
+    if (p.nullable) {
+      return '''
+      ${mPrefix(p, false)}IsEmpty() {
+        return not().group((q) => q
+          .${name}IsNull()
+          .or()
+          .${name}IsNotEmpty(),
         );
-      });
-    }''';
+      }''';
+    } else {
+      return '''
+      ${mPrefix(p, false)}IsEmpty() {
+        return not().${name}IsNotEmpty();
+      }''';
+    }
   }
 
   String generateListIsNotEmpty(PropertyInfo p) {
     return '''
     ${mPrefix(p, false)}IsNotEmpty() {
-      return QueryBuilder.apply(not(), (query) {
+      return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(
-          const ListIsEmptyCondition(property: ${p.index}),
+          const GreaterOrEqualCondition(property: ${p.index}, value: null),
         );
       });
     }''';

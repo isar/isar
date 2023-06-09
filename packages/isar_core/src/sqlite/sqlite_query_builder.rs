@@ -53,16 +53,16 @@ impl<'a> IsarQueryBuilder for SQLiteQueryBuilder<'a> {
     }
 
     fn build(self) -> Self::Query {
-        let mut filter_values = vec![];
+        let mut filter_params = vec![];
 
         let mut sql = String::new();
         sql.push_str("FROM ");
         sql.push_str(&self.collection.name);
         if let Some(filter) = self.filter {
             sql.push_str(" WHERE ");
-            let (filter_sql, values) = filter_sql(self.collection, filter);
+            let (filter_sql, params) = filter_sql(self.collection, filter);
             sql.push_str(&filter_sql);
-            filter_values = values;
+            filter_params = params;
         }
         if !self.sort.is_empty() {
             sql.push_str(" ORDER BY ");
@@ -103,6 +103,6 @@ impl<'a> IsarQueryBuilder for SQLiteQueryBuilder<'a> {
         }
 
         let has_sort_distinct = !self.sort.is_empty() || !self.distinct.is_empty();
-        SQLiteQuery::new(self.collection_index, sql, has_sort_distinct, filter_values)
+        SQLiteQuery::new(self.collection_index, sql, has_sort_distinct, filter_params)
     }
 }

@@ -1,7 +1,7 @@
 use crate::core::data_type::DataType;
+use crate::core::fast_wild_match::fast_wild_match;
 use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::native_collection::NativeProperty;
-use crate::util::fast_wild_match::fast_wild_match;
 use enum_dispatch::enum_dispatch;
 use itertools::Itertools;
 use paste::paste;
@@ -168,18 +168,6 @@ impl NativeFilter {
         string_filter_create!(Matches, property, value, case_sensitive)
     }
 
-    pub fn list_is_empty(property: &NativeProperty) -> NativeFilter {
-        let filter_cond = if let Some(element_type) = property.data_type.element_type() {
-            Filter::IsEmpty(IsEmptyCond {
-                offset: property.offset,
-                element_type,
-            })
-        } else {
-            Filter::Static(StaticCond { value: false })
-        };
-        NativeFilter(filter_cond)
-    }
-
     pub fn and(filters: Vec<NativeFilter>) -> NativeFilter {
         let filters = filters.into_iter().map(|f| f.0).collect_vec();
         let filter_cond = Filter::And(AndCond { filters });
@@ -213,7 +201,6 @@ impl NativeFilter {
 #[derive(Clone, Debug)]
 enum Filter {
     IsNull(IsNullCond),
-    IsEmpty(IsEmptyCond),
 
     IdBetween(IdBetweenCond),
     BoolBetween(BoolBetweenCond),
@@ -260,22 +247,6 @@ struct IsNullCond {
 impl Condition for IsNullCond {
     fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
         object.is_null(self.offset, self.data_type)
-    }
-}
-
-#[derive(Clone, Debug)]
-struct IsEmptyCond {
-    offset: u32,
-    element_type: DataType,
-}
-
-impl Condition for IsEmptyCond {
-    fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
-        if let Some((_, len)) = object.read_list(self.offset, self.element_type) {
-            len == 0
-        } else {
-            false
-        }
     }
 }
 

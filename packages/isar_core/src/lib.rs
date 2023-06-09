@@ -5,7 +5,6 @@
 compile_error!("Only little endian systems are supported.");
 
 pub mod core;
-mod util;
 
 #[cfg(feature = "native")]
 pub mod native;

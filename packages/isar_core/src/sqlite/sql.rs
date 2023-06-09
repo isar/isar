@@ -1,9 +1,13 @@
+use super::sqlite3::SQLiteFnContext;
 use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
+use super::sqlite_query::QueryParam;
 use crate::core::data_type::DataType;
-use crate::core::filter::{ConditionType, Filter, FilterCondition};
+use crate::core::error::Result;
+use crate::core::filter::{ConditionType, Filter, FilterCondition, JsonCondition};
 use crate::core::schema::{CollectionSchema, IndexSchema, PropertySchema};
 use crate::core::value::IsarValue;
 use itertools::Itertools;
+use serde_json::Value;
 use std::borrow::Cow;
 use std::vec;
 
@@ -58,41 +62,61 @@ pub(crate) fn offset_limit_sql(offset: Option<u32>, limit: Option<u32>) -> Strin
     sql
 }
 
-pub fn filter_sql(collection: &SQLiteCollection, filter: Filter) -> (String, Vec<IsarValue>) {
+pub(crate) fn filter_sql(
+    collection: &SQLiteCollection,
+    filter: Filter,
+) -> (String, Vec<QueryParam>) {
     match filter {
         Filter::Condition(condition) => {
-            condition_sql(collection, &condition).unwrap_or(("FALSE".to_string(), vec![]))
+            let is_list = collection
+                .get_property(condition.property_index)
+                .map_or(false, |p| p.data_type.is_list());
+            if is_list {
+                let property_name = collection.get_property_name(condition.property_index);
+                let sql = format!("{}({}, ?)", FN_FILTER_JSON_NAME, property_name);
+                let condition = JsonCondition::new(
+                    vec![],
+                    condition.condition_type,
+                    true,
+                    condition.values,
+                    condition.case_sensitive,
+                );
+                (sql, vec![QueryParam::JsonCondition(condition)])
+            } else {
+                condition_sql(collection, &condition).unwrap_or(("FALSE".to_string(), vec![]))
+            }
         }
+        Filter::Json(_) => todo!(),
         Filter::Nested(_) => todo!(),
         Filter::And(filters) => {
             let mut sql = String::new();
-            let mut values = vec![];
+            let mut params = vec![];
             for filter in filters {
                 if !sql.is_empty() {
                     sql.push_str(" AND ");
                 }
-                let (filter_sql, filter_values) = filter_sql(collection, filter);
+                let (filter_sql, filter_params) = filter_sql(collection, filter);
                 sql.push_str(&filter_sql);
-                values.extend_from_slice(&filter_values);
+                params.extend(filter_params.into_iter());
             }
-            (format!("({})", sql), values)
+            (format!("({})", sql), params)
         }
         Filter::Or(filters) => {
             let mut sql = String::new();
-            let mut values = vec![];
+            let mut params = vec![];
             for filter in filters {
                 if !sql.is_empty() {
                     sql.push_str(" OR ");
                 }
-                let (filter_sql, filter_values) = filter_sql(collection, filter);
+                let (filter_sql, filter_params) = filter_sql(collection, filter);
                 sql.push_str(&filter_sql);
-                values.extend_from_slice(&filter_values);
+                params.extend(filter_params.into_iter());
             }
-            (format!("({})", sql), values)
+            (format!("({})", sql), params)
         }
         Filter::Not(filter) => {
-            let (sql, values) = filter_sql(collection, *filter);
-            (format!("NOT ({})", sql), values)
+            let (sql, params) = filter_sql(collection, *filter);
+            (format!("NOT ({})", sql), params)
         }
     }
 }
@@ -100,7 +124,7 @@ pub fn filter_sql(collection: &SQLiteCollection, filter: Filter) -> (String, Vec
 fn condition_sql(
     collection: &SQLiteCollection,
     condition: &FilterCondition,
-) -> Option<(String, Vec<IsarValue>)> {
+) -> Option<(String, Vec<QueryParam>)> {
     let property_name = collection.get_property_name(condition.property_index);
     let collate = if condition.case_sensitive {
         ""
@@ -111,7 +135,6 @@ fn condition_sql(
     let mut values = vec![];
     let sql = match condition.condition_type {
         ConditionType::IsNull => format!("{} IS NULL", property_name),
-        ConditionType::ListIsEmpty => todo!(),
         ConditionType::Equal => {
             let value = condition.values.get(0)?;
             if let Some(value) = value {
@@ -213,7 +236,9 @@ fn condition_sql(
             }
         }
     };
-    Some((sql, values))
+
+    let params = values.into_iter().map(|v| QueryParam::Value(v)).collect();
+    Some((sql, params))
 }
 
 fn escape_wildcard(wildcard: &str) -> String {
@@ -271,4 +296,20 @@ pub(crate) fn sql_data_type(sqlite_type: &str) -> (DataType, Option<&str>) {
             }
         }
     }
+}
+
+pub(crate) const FN_FILTER_JSON_NAME: &str = "isar_filter_json";
+pub(crate) const FN_FILTER_JSON_COND_PTR_TYPE: &[u8] = b"json_condition_ptr\0";
+pub(crate) fn sql_fn_filter_json(ctx: &mut SQLiteFnContext) -> Result<()> {
+    let json = ctx.get_str(0);
+
+    let value = serde_json::from_str::<Value>(json).unwrap_or(Value::Null);
+    let condition = ctx.get_object::<JsonCondition>(1, FN_FILTER_JSON_COND_PTR_TYPE);
+
+    if let Some(condition) = condition {
+        let result = condition.matches(value);
+        ctx.set_int_result(if result { 1 } else { 0 });
+    }
+
+    Ok(())
 }

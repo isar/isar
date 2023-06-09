@@ -282,7 +282,7 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
             let offset = buffer.len();
             let base64_len = encoded_len(value.len(), false).unwrap();
             buffer.resize(offset + base64_len, 0);
-            general_purpose::STANDARD_NO_PAD.encode_slice(value, &mut buffer[offset..]);
+            let _ = general_purpose::STANDARD_NO_PAD.encode_slice(value, &mut buffer[offset..]);
             let _ = CompactFormatter.end_string(buffer);
         }
 

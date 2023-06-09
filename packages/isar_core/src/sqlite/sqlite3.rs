@@ -2,7 +2,7 @@ use crate::core::error::{IsarError, Result};
 use libc::c_void;
 use libsqlite3_sys as ffi;
 use std::ffi::{c_char, c_int, CStr, CString};
-use std::ptr;
+use std::{ptr, slice};
 
 pub(crate) struct SQLite3 {
     db: *mut ffi::sqlite3,
@@ -34,7 +34,7 @@ impl SQLite3 {
     }
 
     fn initialize(&self) -> Result<()> {
-        self.execute("PRAGMA case_sensitive_like = true")?;
+        self.prepare("PRAGMA case_sensitive_like = true")?.step()?;
         Ok(())
     }
 
@@ -55,11 +55,6 @@ impl SQLite3 {
                 Err(sqlite_err(self.db, r))
             }
         }
-    }
-
-    pub fn execute(&self, sql: &str) -> Result<()> {
-        self.prepare(sql)?.step()?;
-        Ok(())
     }
 
     pub fn get_table_names(&self) -> Result<Vec<String>> {
@@ -113,12 +108,151 @@ impl SQLite3 {
     pub fn count_changes(&self) -> i32 {
         unsafe { ffi::sqlite3_changes(self.db) }
     }
+
+    pub fn create_function<F>(&mut self, name: &str, args: u32, func: F) -> Result<()>
+    where
+        F: FnMut(&mut SQLiteFnContext<'_>) -> Result<()> + Send + 'static,
+    {
+        unsafe extern "C" fn call_boxed_closure<F>(
+            ctx: *mut ffi::sqlite3_context,
+            argc: c_int,
+            argv: *mut *mut ffi::sqlite3_value,
+        ) where
+            F: FnMut(&mut SQLiteFnContext<'_>) -> Result<()>,
+        {
+            let mut fn_ctx = SQLiteFnContext {
+                ctx,
+                args: slice::from_raw_parts(argv, argc as usize),
+            };
+            let boxed_f: *mut F = ffi::sqlite3_user_data(ctx).cast::<F>();
+            let result = (*boxed_f)(&mut fn_ctx);
+            if let Err(err) = result {
+                let err_str = err.to_string();
+                ffi::sqlite3_result_error(
+                    ctx,
+                    err_str.as_ptr() as *const c_char,
+                    err_str.len() as i32,
+                );
+            }
+        }
+
+        let boxed_f: *mut F = Box::into_raw(Box::new(func));
+        let c_name = CString::new(name).unwrap();
+        let r = unsafe {
+            ffi::sqlite3_create_function_v2(
+                self.db,
+                c_name.as_ptr(),
+                args as i32,
+                ffi::SQLITE_UTF8,
+                boxed_f.cast::<c_void>(),
+                Some(call_boxed_closure::<F>),
+                None,
+                None,
+                Some(free_boxed_value::<F>),
+            )
+        };
+
+        if r == ffi::SQLITE_OK {
+            Ok(())
+        } else {
+            Err(sqlite_err(self.db, r))
+        }
+    }
 }
 
 impl Drop for SQLite3 {
     fn drop(&mut self) {
         unsafe {
             ffi::sqlite3_close(self.db);
+        }
+    }
+}
+
+unsafe extern "C" fn free_boxed_value<T>(p: *mut c_void) {
+    drop(Box::from_raw(p.cast::<T>()));
+}
+
+pub struct SQLiteFnContext<'a> {
+    ctx: *mut ffi::sqlite3_context,
+    args: &'a [*mut ffi::sqlite3_value],
+}
+
+impl<'a> SQLiteFnContext<'a> {
+    pub fn get_int(&self, index: usize) -> i64 {
+        unsafe { ffi::sqlite3_value_int64(self.args[index]) }
+    }
+
+    pub fn get_double(&self, index: usize) -> f64 {
+        unsafe { ffi::sqlite3_value_double(self.args[index]) }
+    }
+
+    pub fn get_str(&self, index: usize) -> &'static str {
+        unsafe {
+            let text = ffi::sqlite3_value_text(self.args[index]);
+            let num = ffi::sqlite3_value_bytes(self.args[index]);
+            let bytes = std::slice::from_raw_parts(text as *const u8, num as usize);
+            std::str::from_utf8_unchecked(bytes)
+        }
+    }
+
+    pub fn get_blob(&self, index: usize) -> &'static [u8] {
+        unsafe {
+            let blob = ffi::sqlite3_value_blob(self.args[index]);
+            let num = ffi::sqlite3_value_bytes(self.args[index]);
+            std::slice::from_raw_parts(blob as *const u8, num as usize)
+        }
+    }
+
+    pub fn get_object<T>(&self, index: usize, value_type: &'static [u8]) -> Option<&'a Box<T>> {
+        let ptr = unsafe {
+            ffi::sqlite3_value_pointer(self.args[index], value_type.as_ptr() as *const c_char)
+        };
+        unsafe { ptr.cast::<Box<T>>().as_ref() }
+    }
+
+    pub fn set_int_result(&mut self, value: i64) {
+        unsafe {
+            ffi::sqlite3_result_int64(self.ctx, value);
+        }
+    }
+
+    pub fn set_double_result(&mut self, value: f64) {
+        unsafe {
+            ffi::sqlite3_result_double(self.ctx, value);
+        }
+    }
+
+    pub fn set_str_result(&mut self, value: &str) {
+        unsafe {
+            ffi::sqlite3_result_text(
+                self.ctx,
+                value.as_ptr() as *const c_char,
+                value.len() as i32,
+                ffi::SQLITE_TRANSIENT(),
+            );
+        }
+    }
+
+    pub fn set_blob_result(&mut self, value: &[u8]) {
+        unsafe {
+            ffi::sqlite3_result_blob(
+                self.ctx,
+                value.as_ptr() as *const c_void,
+                value.len() as i32,
+                ffi::SQLITE_TRANSIENT(),
+            );
+        }
+    }
+
+    pub fn set_object_result<T>(&mut self, value: T, value_type: &'static [u8]) {
+        let ptr = Box::into_raw(Box::new(value));
+        unsafe {
+            ffi::sqlite3_result_pointer(
+                self.ctx,
+                ptr as *mut c_void,
+                value_type.as_ptr() as *const c_char,
+                Some(free_boxed_value::<T>),
+            );
         }
     }
 }
@@ -253,6 +387,24 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
             }
         }
     }
+
+    pub fn bind_object<T>(&mut self, col: u32, value: T, value_type: &'static [u8]) -> Result<()> {
+        let ptr = Box::into_raw(Box::new(value));
+        unsafe {
+            let r = ffi::sqlite3_bind_pointer(
+                self.stmt,
+                col as i32 + 1,
+                ptr as *mut c_void,
+                value_type.as_ptr() as *const c_char,
+                Some(free_boxed_value::<T>),
+            );
+            if r == ffi::SQLITE_OK {
+                Ok(())
+            } else {
+                Err(sqlite_err(self.sqlite.db, r))
+            }
+        }
+    }
 }
 
 impl Drop for SQLiteStatement<'_> {
@@ -263,17 +415,19 @@ impl Drop for SQLiteStatement<'_> {
     }
 }
 
-pub unsafe fn sqlite_err(db: *mut ffi::sqlite3, code: i32) -> IsarError {
-    let err_ptr = if db.is_null() {
-        ffi::sqlite3_errstr(code)
-    } else {
-        ffi::sqlite3_errmsg(db)
-    };
-    let c_slice = CStr::from_ptr(err_ptr).to_bytes();
-    let msg = String::from_utf8_lossy(c_slice).into_owned();
-    IsarError::DbError {
-        code: code,
-        message: msg,
+pub fn sqlite_err(db: *mut ffi::sqlite3, code: i32) -> IsarError {
+    unsafe {
+        let err_ptr = if db.is_null() {
+            ffi::sqlite3_errstr(code)
+        } else {
+            ffi::sqlite3_errmsg(db)
+        };
+        let c_slice = CStr::from_ptr(err_ptr).to_bytes();
+        let msg = String::from_utf8_lossy(c_slice).into_owned();
+        IsarError::DbError {
+            code: code,
+            message: msg,
+        }
     }
 }
 

@@ -57,12 +57,6 @@ external ffi.Pointer<CFilter> isar_filter_is_null(
   int property_index,
 );
 
-@ffi.Native<ffi.Pointer<CFilter> Function(ffi.Uint16)>(
-    symbol: 'isar_filter_list_is_empty')
-external ffi.Pointer<CFilter> isar_filter_list_is_empty(
-  int property_index,
-);
-
 @ffi.Native<
     ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
         ffi.Bool)>(symbol: 'isar_filter_equal')

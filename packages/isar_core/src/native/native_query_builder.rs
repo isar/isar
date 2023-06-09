@@ -78,6 +78,7 @@ fn filter_to_native(
         Filter::Condition(condition) => {
             condition_to_native(condition, collection).unwrap_or(NativeFilter::stat(false))
         }
+        Filter::Json(_) => todo!(),
         Filter::Nested(_) => todo!(),
         Filter::And(filters) => {
             let filters = filters
@@ -107,7 +108,6 @@ fn condition_to_native(
     let property = collection.get_property(condition.property_index);
     let filter = match condition.condition_type {
         ConditionType::IsNull => NativeFilter::is_null(property?),
-        ConditionType::ListIsEmpty => NativeFilter::list_is_empty(property?),
         ConditionType::Equal => {
             let value = condition.values.get(0)?;
             native_between_filter(

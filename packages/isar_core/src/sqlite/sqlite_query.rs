@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use super::sql::{offset_limit_sql, select_properties_sql};
+use super::sql::{offset_limit_sql, select_properties_sql, FN_FILTER_JSON_COND_PTR_TYPE};
 use super::sqlite3::SQLiteStatement;
 use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
 use super::sqlite_reader::SQLiteReader;
@@ -8,14 +8,21 @@ use super::sqlite_txn::SQLiteTxn;
 use crate::core::cursor::IsarCursor;
 use crate::core::data_type::DataType;
 use crate::core::error::Result;
+use crate::core::filter::JsonCondition;
 use crate::core::instance::Aggregation;
 use crate::core::value::IsarValue;
+
+#[derive(Debug)]
+pub(crate) enum QueryParam {
+    Value(IsarValue),
+    JsonCondition(JsonCondition),
+}
 
 pub struct SQLiteQuery {
     collection_index: u16,
     sql: String,
     has_sort_distinct: bool,
-    values: Vec<IsarValue>,
+    params: Vec<QueryParam>,
 }
 
 impl SQLiteQuery {
@@ -23,13 +30,13 @@ impl SQLiteQuery {
         collection_index: u16,
         sql: String,
         has_sort_distinct: bool,
-        values: Vec<IsarValue>,
+        params: Vec<QueryParam>,
     ) -> Self {
         Self {
             collection_index,
             sql,
             has_sort_distinct,
-            values,
+            params,
         }
     }
 
@@ -48,7 +55,7 @@ impl SQLiteQuery {
             offset_limit_sql(offset, limit)
         );
         let mut stmt = txn.get_sqlite(false)?.prepare(&sql)?;
-        self.bind_values(&mut stmt)?;
+        self.bind_params(&mut stmt)?;
 
         Ok(SQLiteCursor {
             stmt,
@@ -88,7 +95,7 @@ impl SQLiteQuery {
         };
         let sql = format!("SELECT {} {}", aggregation_sql, self.sql);
         let mut stmt = txn.get_sqlite(false)?.prepare(&sql)?;
-        self.bind_values(&mut stmt)?;
+        self.bind_params(&mut stmt)?;
 
         let has_next = stmt.step()?;
         let result = match aggregation {
@@ -141,22 +148,25 @@ impl SQLiteQuery {
         };
         let sqlite = txn.get_sqlite(true)?;
         let mut stmt = sqlite.prepare(&sql)?;
-        self.bind_values(&mut stmt)?;
+        self.bind_params(&mut stmt)?;
         stmt.step()?;
         let count = sqlite.count_changes();
         Ok(count as u32)
     }
 
-    fn bind_values(&self, stmt: &mut SQLiteStatement) -> Result<()> {
-        for (i, value) in self.values.iter().enumerate() {
-            match value {
-                IsarValue::Bool(value) => {
+    fn bind_params(&self, stmt: &mut SQLiteStatement) -> Result<()> {
+        for (i, params) in self.params.iter().enumerate() {
+            match params {
+                QueryParam::Value(IsarValue::Bool(value)) => {
                     let value = if *value { 1 } else { 0 };
                     stmt.bind_int(i as u32, value)?;
                 }
-                IsarValue::Integer(value) => stmt.bind_long(i as u32, *value)?,
-                IsarValue::Real(value) => stmt.bind_double(i as u32, *value)?,
-                IsarValue::String(value) => stmt.bind_text(i as u32, value)?,
+                QueryParam::Value(IsarValue::Integer(value)) => stmt.bind_long(i as u32, *value)?,
+                QueryParam::Value(IsarValue::Real(value)) => stmt.bind_double(i as u32, *value)?,
+                QueryParam::Value(IsarValue::String(value)) => stmt.bind_text(i as u32, value)?,
+                QueryParam::JsonCondition(cond) => {
+                    stmt.bind_object(i as u32, cond, FN_FILTER_JSON_COND_PTR_TYPE)?
+                }
             }
         }
         Ok(())

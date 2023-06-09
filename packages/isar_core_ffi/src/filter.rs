@@ -13,12 +13,6 @@ pub unsafe extern "C" fn isar_filter_is_null(property_index: u16) -> *const Filt
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_filter_list_is_empty(property_index: u16) -> *const Filter {
-    let filter = FilterCondition::new(property_index, ConditionType::ListIsEmpty, vec![], false);
-    Box::into_raw(Box::new(Filter::Condition(filter)))
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn isar_filter_equal(
     property_index: u16,
     value: *mut IsarValue,

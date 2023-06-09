@@ -1,5 +1,5 @@
 use super::schema_manager::perform_migration;
-use super::sql::select_properties_sql;
+use super::sql::{select_properties_sql, sql_fn_filter_json, FN_FILTER_JSON_NAME};
 use super::sqlite3::SQLite3;
 use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
 use super::sqlite_insert::SQLiteInsert;
@@ -22,6 +22,8 @@ use std::sync::{Arc, Mutex};
 use std::vec;
 
 static INSTANCES: Lazy<Mutex<IntMap<Connections>>> = Lazy::new(|| Mutex::new(IntMap::new()));
+
+const MIB: usize = 1 << 20;
 
 struct Connections {
     info: Arc<SQLiteInstanceInfo>,
@@ -53,7 +55,7 @@ impl SQLiteInstance {
         path_buf.push(format!("{}.sqlite", name));
         let path = path_buf.as_path().to_str().unwrap().to_string();
 
-        let sqlite = SQLite3::open(&path).unwrap();
+        let sqlite = Self::open_conn(&path)?;
         let sqlite = Arc::new(sqlite);
         let txn = SQLiteTxn::new(sqlite.clone(), true)?;
         perform_migration(&txn, &schema)?;
@@ -108,6 +110,12 @@ impl SQLiteInstance {
             Err(IsarError::IllegalArgument {})
         }
     }
+
+    fn open_conn(path: &str) -> Result<SQLite3> {
+        let mut sqlite = SQLite3::open(path)?;
+        sqlite.create_function(FN_FILTER_JSON_NAME, 2, sql_fn_filter_json)?;
+        Ok(sqlite)
+    }
 }
 
 impl IsarInstance for SQLiteInstance {
@@ -133,7 +141,7 @@ impl IsarInstance for SQLiteInstance {
             let sqlite = connections
                 .sqlite
                 .pop()
-                .or_else(|| SQLite3::open(&connections.info.path).ok());
+                .or_else(|| Self::open_conn(&connections.info.path).ok());
             if let Some(sqlite) = sqlite {
                 Some(Self {
                     info: connections.info.clone(),
@@ -161,12 +169,19 @@ impl IsarInstance for SQLiteInstance {
         name: &str,
         dir: &str,
         schema: IsarSchema,
-        _max_size_mib: u32,
+        max_size_mib: u32,
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self> {
         let mut lock = INSTANCES.lock().unwrap();
         if !lock.contains_key(instance_id as u64) {
             let (info, sqlite) = Self::open(name, dir, instance_id, schema)?;
+
+            let max_size = (max_size_mib as usize).saturating_mul(MIB);
+            sqlite
+                .prepare(&format!("PRAGMA mmap_size={}", max_size))?
+                .step()?;
+            sqlite.prepare("PRAGMA journal_mode=WAL")?.step()?;
+
             let connections = Connections {
                 info: Arc::new(info),
                 sqlite: vec![sqlite],
@@ -331,8 +346,10 @@ impl IsarInstance for SQLiteInstance {
                 lock.remove(instance.info.instance_id as u64);
 
                 if delete {
-                    let path = instance.info.path.to_string();
+                    let mut path = instance.info.path.to_string();
                     drop(instance);
+                    let _ = remove_file(&path);
+                    path.push_str("-wal");
                     let _ = remove_file(&path);
                 }
                 return true;

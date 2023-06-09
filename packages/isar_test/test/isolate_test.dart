@@ -34,14 +34,15 @@ final TestModel _obj3 = TestModel()
 
 void main() {
   isarTest('Isolate test', () async {
-    final isar = openTempIsar([TestModelSchema], name: 'test');
+    final name = getRandomName();
+    final isar = openTempIsar([TestModelSchema], name: name);
 
     isar.writeTxn((isar) {
       isar.testModels.putAll([_obj1, _obj2]);
     });
 
     await Isolate.run(() {
-      final isar = Isar.get(schemas: [TestModelSchema], name: 'test');
+      final isar = Isar.get(schemas: [TestModelSchema], name: name);
 
       final current = isar.testModels.where().findAll();
       assert(
