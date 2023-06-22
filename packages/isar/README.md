@@ -63,14 +63,11 @@ Holy smokes you're here! Let's get started on using the coolest Flutter database
 ### 1. Add to pubspec.yaml
 
 ```yaml
-isar_version: &isar_version 3.1.0 # define the version to be used
-
 dependencies:
-  isar: *isar_version
-  isar_flutter_libs: *isar_version # contains Isar Core
+  isar: 4.0.0
+  isar_flutter_libs: 4.0.0 # contains Isar Core
 
 dev_dependencies:
-  isar_generator: *isar_version
   build_runner: any
 ```
 
@@ -81,15 +78,22 @@ part 'email.g.dart';
 
 @collection
 class Email {
-  Id id = Isar.autoIncrement; // you can also use id = null to auto increment
+  Email({
+    this.id,
+    this.title,
+    this.recipients,
+    this.status = Status.pending,
+  });
+
+  final int id;
 
   @Index(type: IndexType.value)
-  String? title;
+  final String? title;
 
-  List<Recipient>? recipients;
+  final List<Recipient>? recipients;
 
   @enumerated
-  Status status = Status.pending;
+  final Status status;
 }
 
 @embedded
@@ -119,7 +123,7 @@ final isar = await Isar.open(
 ### 4. Query the database
 
 ```dart
-final emails = await isar.emails.filter()
+final emails = isar.emails.filter()
   .titleContains('awesome', caseSensitive: false)
   .sortByStatusDesc()
   .limit(10)
@@ -141,14 +145,14 @@ All basic crud operations are available via the `IsarCollection`.
 ```dart
 final newEmail = Email()..title = 'Amazing new database';
 
-await isar.writeTxn(() {
-  await isar.emails.put(newEmail); // insert & update
+await isar.writeTxnAsync(() {
+  isar.emails.put(newEmail); // insert & update
 });
 
-final existingEmail = await isar.emails.get(newEmail.id!); // get
+final existingEmail = isar.emails.get(newEmail.id!); // get
 
-await isar.writeTxn(() {
-  await isar.emails.delete(existingEmail.id!); // delete
+await isar.writeTxnAsync(() {
+  isar.emails.delete(existingEmail.id!); // delete
 });
 ```
 
