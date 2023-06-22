@@ -11,20 +11,7 @@ abstract class IsarQuery<T> {
 
   int deleteAll({int? offset, int? limit});
 
-  List<Map<String, dynamic>> exportJson({int? offset, int? limit}) {
-    return exportJsonBytes(offset: offset, limit: limit, (jsonBytes) {
-      final list = jsonDecode(utf8.decode(jsonBytes)) as List<dynamic>;
-      return list.cast();
-    });
-  }
-
-  R exportJsonBytes<R>(
-    R Function(Uint8List jsonBytes) callback, {
-    int? offset,
-    int? limit,
-  });
-
-  void exportJsonFile(String path, {int? offset, int? limit});
+  List<Map<String, dynamic>> exportJson({int? offset, int? limit});
 
   int count() => aggregate(Aggregation.count) ?? 0;
 

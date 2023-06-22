@@ -1,5 +1,7 @@
-use super::{NULL_BOOL, NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
-use crate::{core::data_type::DataType, native::bool_to_byte};
+use super::{
+    FALSE_BOOL, NULL_BOOL, NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG, TRUE_BOOL,
+};
+use crate::core::data_type::DataType;
 use byteorder::{ByteOrder, LittleEndian};
 use std::cell::Cell;
 
@@ -76,8 +78,12 @@ impl IsarSerializer {
     }
 
     #[inline]
-    pub fn write_bool(&mut self, offset: u32, value: Option<bool>) {
-        self.write_static_checked(offset, &[bool_to_byte(value)]);
+    pub fn write_bool(&mut self, offset: u32, value: bool) {
+        if value {
+            self.write_byte(offset, TRUE_BOOL);
+        } else {
+            self.write_byte(offset, FALSE_BOOL);
+        }
     }
 
     #[inline]
@@ -252,15 +258,11 @@ mod tests {
         #[test]
         fn test_write_single_bool() {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 1);
-            serializer.write_bool(0, None);
-            assert_eq!(serializer.finish(), concat!([0x1, 0x0, 0x0], [0x0]));
-
-            let mut serializer = IsarSerializer::new(Vec::new(), 0, 1);
-            serializer.write_bool(0, Some(false));
+            serializer.write_bool(0, false);
             assert_eq!(serializer.finish(), concat!([0x1, 0x0, 0x0], [0x1]));
 
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 1);
-            serializer.write_bool(0, Some(true));
+            serializer.write_bool(0, true);
             assert_eq!(serializer.finish(), concat!([0x1, 0x0, 0x0], [0x2]));
         }
 
@@ -617,21 +619,21 @@ mod tests {
         #[test]
         fn test_write_multiple_bool() {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
-            serializer.write_bool(0, None);
-            serializer.write_bool(1, Some(false));
-            serializer.write_bool(2, Some(true));
+            serializer.write_null(0, DataType::Bool);
+            serializer.write_bool(1, false);
+            serializer.write_bool(2, true);
             assert_eq!(
                 serializer.finish(),
                 concat!([0x3, 0x0, 0x0], [0x0, 0x1, 0x2])
             );
 
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 6);
-            serializer.write_bool(0, Some(false));
-            serializer.write_bool(1, Some(false));
-            serializer.write_bool(2, None);
-            serializer.write_bool(3, Some(true));
-            serializer.write_bool(4, Some(true));
-            serializer.write_bool(5, Some(false));
+            serializer.write_bool(0, false);
+            serializer.write_bool(1, false);
+            serializer.write_null(2, DataType::Bool);
+            serializer.write_bool(3, true);
+            serializer.write_bool(4, true);
+            serializer.write_bool(5, false);
             assert_eq!(
                 serializer.finish(),
                 concat!([0x6, 0x0, 0x0], [0x1, 0x1, 0x0, 0x2, 0x2, 0x1])
@@ -962,7 +964,7 @@ mod tests {
         #[test]
         fn test_write_primitives() {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 19);
-            serializer.write_bool(0, Some(true));
+            serializer.write_bool(0, true);
             serializer.write_int(1, 123456);
             serializer.write_null(5, DataType::Bool);
             serializer.write_null(6, DataType::Float);
@@ -1008,8 +1010,8 @@ mod tests {
         fn test_write_any_type() {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 28);
             serializer.write_int(0, 65535);
-            serializer.write_bool(4, Some(false));
-            serializer.write_bool(5, Some(true));
+            serializer.write_bool(4, false);
+            serializer.write_bool(5, true);
             serializer.write_dynamic(6, "foo bar".as_bytes());
             serializer.write_int(9, -500);
             serializer.write_dynamic(13, &[0x1, 0x10, 0xff]);
@@ -1097,10 +1099,10 @@ mod tests {
             serializer.write_int(7, i32::MAX);
 
             let mut nested_serializer = serializer.begin_nested(11, 12);
-            nested_serializer.write_bool(0, Some(true));
-            nested_serializer.write_bool(1, Some(true));
-            nested_serializer.write_bool(2, Some(false));
-            nested_serializer.write_bool(3, Some(true));
+            nested_serializer.write_bool(0, true);
+            nested_serializer.write_bool(1, true);
+            nested_serializer.write_bool(2, false);
+            nested_serializer.write_bool(3, true);
             nested_serializer.write_long(4, -500);
             serializer.end_nested(nested_serializer);
 
@@ -1135,12 +1137,12 @@ mod tests {
             serializer.write_dynamic(0, &[0x1, 0x2, 0x3, 0x10, 0x11, 0x12]);
 
             let mut nested_serializer = serializer.begin_nested(3, 11);
-            nested_serializer.write_bool(0, Some(false));
+            nested_serializer.write_bool(0, false);
             nested_serializer.write_int(1, 42);
-            nested_serializer.write_bool(5, Some(false));
+            nested_serializer.write_bool(5, false);
             nested_serializer.write_null(6, DataType::Byte);
             nested_serializer.write_dynamic(7, &[0x0, 0x1, 0x1, 0x0]);
-            nested_serializer.write_bool(10, Some(false));
+            nested_serializer.write_bool(10, false);
             serializer.end_nested(nested_serializer);
 
             serializer.write_dynamic(6, "foo bar".as_bytes());
@@ -1209,11 +1211,11 @@ mod tests {
             serializer.end_nested(nested_serializer);
 
             let mut nested_serializer = serializer.begin_nested(7, 13);
-            nested_serializer.write_bool(0, Some(true));
+            nested_serializer.write_bool(0, true);
             nested_serializer.write_null(1, DataType::Bool);
 
             let mut nested_nested_serializer = nested_serializer.begin_nested(2, 8);
-            nested_nested_serializer.write_bool(0, Some(false));
+            nested_nested_serializer.write_bool(0, false);
             nested_nested_serializer.write_dynamic(1, &[0x5, 0x5, 0x5, 0x8, 0x0]);
             nested_nested_serializer.write_byte(4, 5);
             nested_nested_serializer.write_dynamic(5, &[]);
@@ -1279,7 +1281,7 @@ mod tests {
         fn test_write_bool_outside_bounds_1() {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
             serializer.write_dynamic(0, &[0x0, 0x1, 0x2, 0x3, 0x4]);
-            serializer.write_bool(3, Some(true));
+            serializer.write_bool(3, true);
         }
 
         #[test]
@@ -1290,7 +1292,7 @@ mod tests {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 6);
             serializer.write_dynamic(0, &[0x0, 0x1, 0x2, 0x3, 0x4]);
             serializer.write_dynamic(3, &[0x0, 0x0, 0x0]);
-            serializer.write_bool(10, Some(false));
+            serializer.write_bool(10, false);
         }
 
         #[test]

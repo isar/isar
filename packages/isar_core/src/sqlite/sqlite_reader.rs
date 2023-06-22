@@ -3,7 +3,8 @@ use super::sqlite_collection::SQLiteCollection;
 use crate::core::{data_type::DataType, reader::IsarReader};
 use base64::{engine::general_purpose, Engine as _};
 use serde_json::{Map, Value};
-use std::{borrow::Cow, option::IntoIter};
+use std::borrow::Cow;
+use std::iter::empty;
 
 pub struct SQLiteReader<'a> {
     stmt: Cow<'a, SQLiteStatement<'a>>,
@@ -30,13 +31,15 @@ impl<'a> IsarReader for SQLiteReader<'a> {
 
     type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
 
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
-        Some(
-            self.collection
-                .properties
-                .iter()
-                .map(|p| (p.name.as_str(), p.data_type)),
-        )
+    fn id_name(&self) -> Option<&str> {
+        self.collection.id_name.as_deref()
+    }
+
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
+        self.collection
+            .properties
+            .iter()
+            .map(|p| (p.name.as_str(), p.data_type))
     }
 
     fn read_id(&self) -> i64 {
@@ -157,13 +160,15 @@ impl<'a> IsarReader for SQLiteObjectReader<'a> {
 
     type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
 
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
-        Some(
-            self.collection
-                .properties
-                .iter()
-                .map(|p| (p.name.as_str(), p.data_type)),
-        )
+    fn id_name(&self) -> Option<&str> {
+        None
+    }
+
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
+        self.collection
+            .properties
+            .iter()
+            .map(|p| (p.name.as_str(), p.data_type))
     }
 
     fn read_id(&self) -> i64 {
@@ -295,8 +300,12 @@ impl<'a> IsarReader for SQLiteListReader<'a> {
 
     type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
 
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
-        Option::<IntoIter<(&str, DataType)>>::None
+    fn id_name(&self) -> Option<&str> {
+        None
+    }
+
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
+        empty()
     }
 
     fn read_id(&self) -> i64 {

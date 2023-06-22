@@ -38,14 +38,14 @@ class _IsarImpl extends Isar {
     required int maxSizeMiB,
     required CompactCondition? compactOnLaunch,
   }) {
-    final allSchemas = <IsarSchema>{};
+    final embeddedSchemas = <IsarSchema>{};
     for (final schema in schemas) {
-      allSchemas.add(schema);
       for (final schema in schema.embeddedSchemas) {
-        allSchemas.add(schema);
+        embeddedSchemas.add(schema);
       }
     }
-    final schemaJson = '[${allSchemas.map((e) => e.schema).join(',')}]';
+    final schemaJson =
+        '[${[...schemas, ...embeddedSchemas].map((e) => e.schema).join(',')}]';
 
     final instanceId = Isar.fastHash(name);
     final instance = _IsarImpl._instances[instanceId];
@@ -254,27 +254,6 @@ class _IsarImpl extends Isar {
       size += collection.getSize(includeIndexes: includeIndexes);
     }
     return size;
-  }
-
-  @override
-  void importJsonBytes(Uint8List jsonBytes) {
-    // TODO: implement importJsonBytes
-  }
-
-  @override
-  void importJsonFile(String path) {
-    // TODO: implement importJsonFile
-  }
-
-  @override
-  R exportJsonBytes<R>(R Function(Uint8List jsonBytes) callback) {
-    // TODO: implement exportJsonBytes
-    throw UnimplementedError();
-  }
-
-  @override
-  void exportJsonFile(String path) {
-    // TODO: implement exportJsonFile
   }
 
   @override

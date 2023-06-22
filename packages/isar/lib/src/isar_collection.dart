@@ -25,11 +25,10 @@ abstract class IsarCollection<ID, OBJ> {
 
   int getSize({bool includeIndexes = false});
 
-  void importJson(List<Map<String, dynamic>> json) {
-    importJsonBytes(const Utf8Encoder().convert(jsonEncode(json)));
-  }
+  int importJson(List<Map<String, dynamic>> json) =>
+      importJsonString(jsonEncode(json));
 
-  void importJsonBytes(Uint8List jsonBytes);
+  int importJsonString(String json);
 
   void clear();
 

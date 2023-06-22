@@ -28,6 +28,7 @@ impl NativeProperty {
 pub struct NativeCollection {
     pub(crate) collection_index: u16,
     pub(crate) name: String,
+    pub(crate) id_name: Option<String>,
     pub(crate) properties: Vec<(String, NativeProperty)>,
     pub(crate) indexes: Vec<NativeIndex>,
     pub(crate) static_size: u32,
@@ -38,6 +39,7 @@ impl NativeCollection {
     pub fn new(
         collection_index: u16,
         name: String,
+        id_name: Option<String>,
         properties: Vec<(String, NativeProperty)>,
         indexes: Vec<NativeIndex>,
         db: Option<Db>,
@@ -49,6 +51,7 @@ impl NativeCollection {
         Self {
             collection_index,
             name,
+            id_name,
             properties,
             indexes,
             static_size,
@@ -120,7 +123,7 @@ impl NativeCollection {
             match (value, p.data_type) {
                 (None, _) => object.write_null(p.offset, p.data_type),
                 (Some(IsarValue::Bool(value)), DataType::Bool) => {
-                    object.write_bool(p.offset, Some(*value))
+                    object.write_bool(p.offset, *value)
                 }
                 (Some(IsarValue::Integer(value)), DataType::Byte) => {
                     object.write_byte(p.offset, *value as u8)

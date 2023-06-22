@@ -343,6 +343,21 @@ external int isar_get_size(
 
 @ffi.Native<
     ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<ffi.Pointer<CIsarTxn>>,
+        ffi.Uint16,
+        ffi.Pointer<CString>,
+        ffi.Pointer<ffi.Uint32>)>(symbol: 'isar_import_json')
+external int isar_import_json(
+  ffi.Pointer<CIsarInstance> isar,
+  ffi.Pointer<ffi.Pointer<CIsarTxn>> txn,
+  int collection_index,
+  ffi.Pointer<CString> json,
+  ffi.Pointer<ffi.Uint32> count,
+);
+
+@ffi.Native<
+    ffi.Uint8 Function(
         ffi.Pointer<CIsarInstance>, ffi.Pointer<CString>)>(symbol: 'isar_copy')
 external int isar_copy(
   ffi.Pointer<CIsarInstance> isar,
@@ -543,12 +558,10 @@ external int isar_read_list(
 @ffi.Native<
     ffi.Uint32 Function(
         ffi.Pointer<CIsarReader>,
-        ffi.Pointer<CString>,
         ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
         ffi.Pointer<ffi.Uint32>)>(symbol: 'isar_read_to_json')
 external int isar_read_to_json(
   ffi.Pointer<CIsarReader> reader,
-  ffi.Pointer<CString> id_name,
   ffi.Pointer<ffi.Pointer<ffi.Uint8>> buffer,
   ffi.Pointer<ffi.Uint32> buffer_size,
 );

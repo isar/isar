@@ -1,10 +1,12 @@
 use super::cursor::IsarCursor;
-use super::error::Result;
+use super::de::IsarJsonImportVisitor;
+use super::error::{IsarError, Result};
 use super::insert::IsarInsert;
 use super::query_builder::IsarQueryBuilder;
 use super::reader::IsarReader;
 use super::schema::IsarSchema;
 use super::value::IsarValue;
+use serde::Deserializer;
 
 pub struct CompactCondition {
     pub min_file_size: u32,
@@ -12,7 +14,7 @@ pub struct CompactCondition {
     pub min_ratio: f32,
 }
 
-pub trait IsarInstance {
+pub trait IsarInstance: Sized {
     type Instance;
 
     type Txn;
@@ -123,6 +125,18 @@ pub trait IsarInstance {
         offset: Option<u32>,
         limit: Option<u32>,
     ) -> Result<u32>;
+
+    fn import_json<'a, T: Deserializer<'a>>(
+        &self,
+        txn: Self::Txn,
+        collection_index: u16,
+        deserializer: T,
+    ) -> Result<(Self::Txn, u32)> {
+        let (txn, count) = deserializer
+            .deserialize_seq(IsarJsonImportVisitor::new(self, txn, collection_index))
+            .map_err(|_| IsarError::JsonError {})?;
+        Ok((txn, count))
+    }
 
     fn copy(&self, path: &str) -> Result<()>;
 

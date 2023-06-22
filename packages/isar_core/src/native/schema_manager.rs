@@ -165,6 +165,7 @@ fn open_collection(
     let col = NativeCollection::new(
         collection_index,
         schema.name.clone(),
+        schema.id_name.clone(),
         properties,
         vec![],
         db,

@@ -66,24 +66,6 @@ abstract class Isar {
 
   void copyToFile(String path);
 
-  void importJson(Map<String, dynamic> json) {
-    importJsonBytes(const Utf8Encoder().convert(jsonEncode(json)));
-  }
-
-  void importJsonBytes(Uint8List jsonBytes);
-
-  void importJsonFile(String path);
-
-  Map<String, dynamic> exportJson() {
-    return exportJsonBytes((jsonBytes) {
-      return jsonDecode(utf8.decode(jsonBytes)) as Map<String, dynamic>;
-    });
-  }
-
-  R exportJsonBytes<R>(R Function(Uint8List jsonBytes) callback);
-
-  void exportJsonFile(String path);
-
   void clear();
 
   bool close({bool deleteFromDisk = false});

@@ -8,6 +8,7 @@ import 'package:isar/src/generator/object_info.dart';
 String generateSchema(ObjectInfo object) {
   final json = {
     'name': object.isarName,
+    'idName': object.idProperty?.isarName,
     if (object.isEmbedded) 'embedded': object.isEmbedded,
     'properties': [
       for (final prop in object.properties)

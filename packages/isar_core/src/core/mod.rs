@@ -1,5 +1,6 @@
 pub mod cursor;
 pub mod data_type;
+pub mod de;
 pub mod error;
 pub mod fast_wild_match;
 pub mod filter;
@@ -9,6 +10,6 @@ pub mod instance;
 pub mod query_builder;
 pub mod reader;
 pub mod schema;
-pub mod ser_de;
+mod ser;
 pub mod value;
 pub mod writer;

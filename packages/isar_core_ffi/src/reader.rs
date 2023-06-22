@@ -1,5 +1,5 @@
 use crate::CIsarReader;
-use isar_core::core::{reader::IsarReader, ser_de::IsarObjectSerialize};
+use isar_core::core::reader::IsarReader;
 use std::{mem, ptr, vec};
 
 #[no_mangle]
@@ -235,7 +235,6 @@ pub unsafe extern "C" fn isar_read_list(
 #[no_mangle]
 pub unsafe extern "C" fn isar_read_to_json(
     reader: &'static CIsarReader,
-    id_name: &String,
     buffer: *mut *mut u8,
     buffer_size: *mut u32,
 ) -> u32 {
@@ -244,18 +243,12 @@ pub unsafe extern "C" fn isar_read_to_json(
     } else {
         Vec::from_raw_parts(*buffer, 0, *buffer_size as usize)
     };
-
+    let mut serializer = serde_json::Serializer::new(&mut new_buffer);
     let serialized = match reader {
         #[cfg(feature = "native")]
-        CIsarReader::Native(reader) => {
-            let ser = IsarObjectSerialize::new(Some(id_name), reader);
-            serde_json::to_writer(&mut new_buffer, &ser).is_ok()
-        }
+        CIsarReader::Native(reader) => reader.serialize(&mut serializer).is_ok(),
         #[cfg(feature = "sqlite")]
-        CIsarReader::SQLite(reader) => {
-            let ser = IsarObjectSerialize::new(Some(id_name), reader);
-            serde_json::to_writer(&mut new_buffer, &ser).is_ok()
-        }
+        CIsarReader::SQLite(reader) => reader.serialize(&mut serializer).is_ok(),
         _ => false,
     };
 

@@ -1,12 +1,15 @@
+use std::iter::empty;
+
 use super::isar_serializer::IsarSerializer;
 use super::native_collection::NativeCollection;
 use super::native_insert::NativeInsert;
 use crate::core::data_type::DataType;
 use crate::core::writer::IsarWriter;
-use std::option::IntoIter;
 
 pub(crate) trait WriterImpl<'a> {
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>>;
+    fn id_name(&self) -> Option<&str>;
+
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)>;
 
     fn get_property(&self, index: u32) -> Option<(DataType, u32, Option<u16>)>;
 
@@ -20,8 +23,12 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
 
     type ListWriter = NativeListWriter<'a>;
 
+    fn id_name(&self) -> Option<&str> {
+        self.id_name()
+    }
+
     #[inline]
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
         self.properties()
     }
 
@@ -33,7 +40,7 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
     }
 
     #[inline]
-    fn write_bool(&mut self, index: u32, value: Option<bool>) {
+    fn write_bool(&mut self, index: u32, value: bool) {
         if let Some((data_type, offset, _)) = self.get_property(index) {
             if data_type == DataType::Bool {
                 self.get_serializer().write_bool(offset, value);
@@ -156,13 +163,15 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
 }
 
 impl<'a> WriterImpl<'a> for NativeInsert<'a> {
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
-        Some(
-            self.collection
-                .properties
-                .iter()
-                .map(|(name, p)| (name.as_str(), p.data_type)),
-        )
+    fn id_name(&self) -> Option<&str> {
+        self.collection.id_name.as_deref()
+    }
+
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
+        self.collection
+            .properties
+            .iter()
+            .map(|(name, p)| (name.as_str(), p.data_type))
     }
 
     #[inline]
@@ -207,13 +216,15 @@ impl<'a> NativeObjectWriter<'a> {
 }
 
 impl<'a> WriterImpl<'a> for NativeObjectWriter<'a> {
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
-        Some(
-            self.collection
-                .properties
-                .iter()
-                .map(|(name, p)| (name.as_str(), p.data_type)),
-        )
+    fn id_name(&self) -> Option<&str> {
+        None
+    }
+
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
+        self.collection
+            .properties
+            .iter()
+            .map(|(name, p)| (name.as_str(), p.data_type))
     }
 
     #[inline]
@@ -264,8 +275,12 @@ impl<'a> NativeListWriter<'a> {
 }
 
 impl<'a> WriterImpl<'a> for NativeListWriter<'a> {
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
-        Option::<IntoIter<(&str, DataType)>>::None
+    fn id_name(&self) -> Option<&str> {
+        None
+    }
+
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
+        empty()
     }
 
     #[inline]

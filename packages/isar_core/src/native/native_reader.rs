@@ -4,7 +4,7 @@ use super::{NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
 use crate::core::data_type::DataType;
 use crate::core::reader::IsarReader;
 use std::borrow::Cow;
-use std::option::IntoIter;
+use std::iter::empty;
 
 pub struct NativeReader<'a> {
     id: i64,
@@ -34,13 +34,15 @@ impl<'a> IsarReader for NativeReader<'a> {
 
     type ListReader<'b> = NativeListReader<'b> where 'a: 'b;
 
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
-        Some(
-            self.collection
-                .properties
-                .iter()
-                .map(|(name, property)| (name.as_str(), property.data_type)),
-        )
+    fn id_name(&self) -> Option<&str> {
+        self.collection.id_name.as_deref()
+    }
+
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
+        self.collection
+            .properties
+            .iter()
+            .map(|(name, property)| (name.as_str(), property.data_type))
     }
 
     #[inline]
@@ -171,8 +173,12 @@ impl<'a> IsarReader for NativeListReader<'a> {
 
     type ListReader<'b> = NativeListReader<'b> where 'a: 'b;
 
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
-        Option::<IntoIter<(&str, DataType)>>::None
+    fn id_name(&self) -> Option<&str> {
+        None
+    }
+
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
+        empty()
     }
 
     #[inline]

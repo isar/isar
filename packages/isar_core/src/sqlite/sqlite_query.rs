@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use super::sql::{
     offset_limit_sql, select_properties_sql, update_properties_sql, FN_FILTER_JSON_COND_PTR_TYPE,
 };
@@ -13,6 +11,7 @@ use crate::core::error::Result;
 use crate::core::filter::JsonCondition;
 use crate::core::instance::Aggregation;
 use crate::core::value::IsarValue;
+use std::borrow::Cow;
 
 #[derive(Debug)]
 pub(crate) enum QueryParam {
@@ -21,7 +20,7 @@ pub(crate) enum QueryParam {
 }
 
 pub struct SQLiteQuery {
-    collection_index: u16,
+    pub(crate) collection_index: u16,
     sql: String,
     has_sort_distinct: bool,
     params: Vec<QueryParam>,

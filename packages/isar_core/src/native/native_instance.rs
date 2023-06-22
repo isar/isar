@@ -8,12 +8,14 @@ use super::native_reader::NativeReader;
 use super::native_txn::NativeTxn;
 use super::query::{Query, QueryCursor};
 use super::schema_manager::perform_migration;
+use crate::core::cursor::IsarCursor;
 use crate::core::error::{IsarError, Result};
 use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
 use crate::core::schema::IsarSchema;
 use crate::core::value::IsarValue;
 use intmap::IntMap;
 use once_cell::sync::Lazy;
+use serde::{Deserializer, Serializer};
 use std::fs::{self, remove_file};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -22,8 +24,8 @@ static INSTANCES: Lazy<Mutex<IntMap<Arc<NativeInstance>>>> =
     Lazy::new(|| Mutex::new(IntMap::new()));
 
 pub struct NativeInstance {
-    dir: String,
     name: String,
+    dir: String,
     instance_id: u32,
     collections: Vec<NativeCollection>,
     env: Arc<Env>,

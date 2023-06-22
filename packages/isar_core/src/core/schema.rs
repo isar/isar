@@ -32,6 +32,8 @@ impl IsarSchema {
 #[derive(Serialize, Deserialize, Clone, Hash)]
 pub struct CollectionSchema {
     pub name: String,
+    #[serde(rename = "idName", skip_serializing)]
+    pub id_name: Option<String>,
     #[serde(default)]
     pub embedded: bool,
     pub properties: Vec<PropertySchema>,
@@ -44,12 +46,14 @@ pub struct CollectionSchema {
 impl CollectionSchema {
     pub fn new(
         name: &str,
+        id_name: Option<&str>,
         properties: Vec<PropertySchema>,
         indexes: Vec<IndexSchema>,
         embedded: bool,
     ) -> CollectionSchema {
         CollectionSchema {
             name: name.to_string(),
+            id_name: id_name.map(|s| s.to_string()),
             embedded,
             properties,
             indexes,

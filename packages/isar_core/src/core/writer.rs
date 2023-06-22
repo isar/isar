@@ -5,11 +5,13 @@ pub trait IsarWriter<'a> {
 
     type ListWriter: IsarWriter<'a>;
 
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>>;
+    fn id_name(&self) -> Option<&str>;
+
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)>;
 
     fn write_null(&mut self, index: u32);
 
-    fn write_bool(&mut self, index: u32, value: Option<bool>);
+    fn write_bool(&mut self, index: u32, value: bool);
 
     fn write_byte(&mut self, index: u32, value: u8);
 

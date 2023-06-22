@@ -158,11 +158,3 @@ pub unsafe extern "C" fn isar_string_free(value: *mut String) {
         drop(Box::from_raw(value));
     }
 }
-
-/*#[no_mangle]
-pub unsafe extern "C" fn isar_bytes_free(value: *mut u8, length: u32) {
-    if !value.is_null() {
-        drop(Vec::from_raw_parts(value, length as usize, length as usize));
-    }
-}
-*/

@@ -356,6 +356,35 @@ pub unsafe extern "C" fn isar_get_size(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn isar_import_json(
+    isar: &'static CIsarInstance,
+    txn: *mut *mut CIsarTxn,
+    collection_index: u16,
+    json: *mut String,
+    count: *mut u32,
+) -> u8 {
+    let json = *Box::from_raw(json);
+    let mut deserializer = serde_json::Deserializer::from_str(&json);
+    isar_try! {
+        let (new_txn, new_count) = match (isar, *Box::from_raw(*txn)) {
+            #[cfg(feature = "native")]
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
+                let (txn, count) = isar.import_json(txn, collection_index, &mut deserializer)?;
+                (CIsarTxn::Native(txn), count)
+            }
+            #[cfg(feature = "sqlite")]
+            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn)) => {
+                let (txn, count) = isar.import_json(txn, collection_index, &mut deserializer)?;
+                (CIsarTxn::SQLite(txn), count)
+            }
+            _ => return Err(IsarError::IllegalArgument {}),
+        };
+        *txn = Box::into_raw(Box::new(new_txn));
+        *count = new_count;
+    }
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn isar_copy(isar: &'static CIsarInstance, path: *mut String) -> u8 {
     isar_try! {
         let path = *Box::from_raw(path);

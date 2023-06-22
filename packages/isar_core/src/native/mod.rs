@@ -23,15 +23,6 @@ pub(crate) const NULL_DOUBLE: f64 = f64::NAN;
 pub(crate) const MAX_OBJ_SIZE: u32 = 2 << 24;
 
 #[inline]
-pub(crate) fn bool_to_byte(value: Option<bool>) -> u8 {
-    match value {
-        Some(true) => TRUE_BOOL,
-        Some(false) => FALSE_BOOL,
-        None => NULL_BOOL,
-    }
-}
-
-#[inline]
 pub(crate) fn byte_to_bool(value: u8) -> Option<bool> {
     match value {
         TRUE_BOOL => Some(true),

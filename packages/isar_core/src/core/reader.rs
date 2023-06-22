@@ -1,4 +1,6 @@
-use super::data_type::DataType;
+use super::error::{IsarError, Result};
+use super::{data_type::DataType, ser::IsarObjectSerialize};
+use serde::Serializer;
 use std::borrow::Cow;
 
 pub trait IsarReader {
@@ -10,7 +12,9 @@ pub trait IsarReader {
     where
         Self: 'b;
 
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>>;
+    fn id_name(&self) -> Option<&str>;
+
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)>;
 
     fn read_id(&self) -> i64;
 
@@ -37,4 +41,15 @@ pub trait IsarReader {
     fn read_object(&self, index: u32) -> Option<Self::ObjectReader<'_>>;
 
     fn read_list(&self, index: u32) -> Option<(Self::ListReader<'_>, u32)>;
+
+    fn serialize(&self, serializer: impl Serializer) -> Result<()>
+    where
+        Self: Sized,
+    {
+        let obj = IsarObjectSerialize::new(self);
+        serializer
+            .serialize_some(&obj)
+            .map_err(|_| IsarError::JsonError {})?;
+        Ok(())
+    }
 }

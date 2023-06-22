@@ -3,7 +3,7 @@ use super::sqlite_insert::SQLiteInsert;
 use crate::core::{data_type::DataType, writer::IsarWriter};
 use base64::{engine::general_purpose, Engine};
 use serde_json::{Map, Number, Value};
-use std::option::IntoIter;
+use std::iter::empty;
 
 impl<'a> SQLiteInsert<'a> {
     fn property_index(&self, index: u32) -> u32 {
@@ -17,13 +17,15 @@ impl<'a> IsarWriter<'a> for SQLiteInsert<'a> {
 
     type ListWriter = SQLiteListWriter<'a>;
 
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
-        Some(
-            self.collection
-                .properties
-                .iter()
-                .map(|p| (p.name.as_str(), p.data_type)),
-        )
+    fn id_name(&self) -> Option<&str> {
+        self.collection.id_name.as_deref()
+    }
+
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
+        self.collection
+            .properties
+            .iter()
+            .map(|p| (p.name.as_str(), p.data_type))
     }
 
     fn write_null(&mut self, index: u32) {
@@ -31,15 +33,9 @@ impl<'a> IsarWriter<'a> for SQLiteInsert<'a> {
         let _ = self.with_stmt(|stmt| stmt.bind_null(col));
     }
 
-    fn write_bool(&mut self, index: u32, value: Option<bool>) {
+    fn write_bool(&mut self, index: u32, value: bool) {
         let col = self.property_index(index);
-        let _ = self.with_stmt(|stmt| {
-            if let Some(value) = value {
-                stmt.bind_int(col, value as i32)
-            } else {
-                stmt.bind_null(col)
-            }
-        });
+        let _ = self.with_stmt(|stmt| stmt.bind_int(col, value as i32));
     }
 
     fn write_byte(&mut self, index: u32, value: u8) {
@@ -172,13 +168,15 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
 
     type ListWriter = SQLiteListWriter<'a>;
 
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
-        Some(
-            self.collection
-                .properties
-                .iter()
-                .map(|p| (p.name.as_str(), p.data_type)),
-        )
+    fn id_name(&self) -> Option<&str> {
+        None
+    }
+
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
+        self.collection
+            .properties
+            .iter()
+            .map(|p| (p.name.as_str(), p.data_type))
     }
 
     fn write_null(&mut self, index: u32) {
@@ -187,11 +185,9 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
         }
     }
 
-    fn write_bool(&mut self, index: u32, value: Option<bool>) {
+    fn write_bool(&mut self, index: u32, value: bool) {
         if let Some(property) = self.collection.get_property(index as u16) {
-            if let Some(value) = value {
-                self.map.insert(property.name.clone(), Value::Bool(value));
-            }
+            self.map.insert(property.name.clone(), Value::Bool(value));
         }
     }
 
@@ -326,8 +322,12 @@ impl<'a> IsarWriter<'a> for SQLiteListWriter<'a> {
 
     type ListWriter = SQLiteListWriter<'a>;
 
-    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
-        Option::<IntoIter<(&str, DataType)>>::None
+    fn id_name(&self) -> Option<&str> {
+        None
+    }
+
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
+        empty()
     }
 
     fn write_null(&mut self, index: u32) {
@@ -337,14 +337,10 @@ impl<'a> IsarWriter<'a> for SQLiteListWriter<'a> {
         }
     }
 
-    fn write_bool(&mut self, index: u32, value: Option<bool>) {
+    fn write_bool(&mut self, index: u32, value: bool) {
         let index = index as usize;
         if index < self.list.len() {
-            if let Some(value) = value {
-                self.list[index] = Value::Bool(value);
-            } else {
-                self.list[index] = Value::Null;
-            }
+            self.list[index] = Value::Bool(value);
         }
     }
 

@@ -28,17 +28,17 @@ pub unsafe extern "C" fn isar_write_bool(
 ) {
     match writer {
         #[cfg(feature = "native")]
-        CIsarWriter::Native(writer) => writer.write_bool(index, Some(value)),
+        CIsarWriter::Native(writer) => writer.write_bool(index, value),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeObject(writer) => writer.write_bool(index, Some(value)),
+        CIsarWriter::NativeObject(writer) => writer.write_bool(index, value),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeList(writer) => writer.write_bool(index, Some(value)),
+        CIsarWriter::NativeList(writer) => writer.write_bool(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLite(writer) => writer.write_bool(index, Some(value)),
+        CIsarWriter::SQLite(writer) => writer.write_bool(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteObject(writer) => writer.write_bool(index, Some(value)),
+        CIsarWriter::SQLiteObject(writer) => writer.write_bool(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteList(writer) => writer.write_bool(index, Some(value)),
+        CIsarWriter::SQLiteList(writer) => writer.write_bool(index, value),
     }
 }
 

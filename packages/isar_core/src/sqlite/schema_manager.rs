@@ -77,7 +77,9 @@ fn read_col_schema(sqlite: &SQLite3, name: &str) -> Result<CollectionSchema> {
         })
         .collect();
 
-    Ok(CollectionSchema::new(name, properties, indexes, false))
+    Ok(CollectionSchema::new(
+        name, None, properties, indexes, false,
+    ))
 }
 
 fn update_table(sqlite: &SQLite3, collection: &CollectionSchema) -> Result<()> {

@@ -27,8 +27,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
   @override
   _IsarImpl get isar => _IsarImpl.instance(_instanceId);
 
-  @override
-  List<T> findAll({int? offset, int? limit}) {
+  List<E> _findAll<E>(Deserialize<E> deserialize, {int? offset, int? limit}) {
     return isar.getTxn((isarPtr, txnPtr) {
       final cursorPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarCursor>>();
       isar_query_cursor(
@@ -42,17 +41,22 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
       final cursorPtr = cursorPtrPtr.value;
 
       Pointer<CIsarReader> readerPtr = nullptr;
-      final values = <T>[];
+      final values = <E>[];
       while (true) {
         readerPtr = isar_cursor_next(cursorPtr, readerPtr);
         if (readerPtr.isNull) break;
-        values.add(_deserialize(readerPtr));
+        values.add(deserialize(readerPtr));
       }
 
       isar_read_free(readerPtr);
       isar_cursor_free(cursorPtr);
       return values;
     });
+  }
+
+  @override
+  List<T> findAll({int? offset, int? limit}) {
+    return _findAll(_deserialize, offset: offset, limit: limit);
   }
 
   @override
@@ -71,18 +75,22 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
   }
 
   @override
-  R exportJsonBytes<R>(
-    R Function(Uint8List jsonBytes) callback, {
-    int? offset,
-    int? limit,
-  }) {
-    // TODO: implement exportJsonBytes
-    throw UnimplementedError();
-  }
+  List<Map<String, dynamic>> exportJson({int? offset, int? limit}) {
+    final bufferPtr = malloc<Pointer<Uint8>>();
+    final bufferSizePtr = malloc<Uint32>();
 
-  @override
-  void exportJsonFile(String path, {int? offset, int? limit}) {
-    // TODO: implement exportJsonFile
+    Map<String, dynamic> deserialize(IsarReader reader) {
+      final jsonSize = isar_read_to_json(reader, bufferPtr, bufferSizePtr);
+      final jsonBytes = bufferPtr.value.asTypedList(jsonSize);
+      return jsonDecode(utf8.decode(jsonBytes)) as Map<String, dynamic>;
+    }
+
+    try {
+      return _findAll(deserialize, offset: offset, limit: limit);
+    } finally {
+      malloc.free(bufferPtr);
+      malloc.free(bufferSizePtr);
+    }
   }
 
   @override

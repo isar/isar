@@ -1,7 +1,11 @@
 part of isar;
 
 class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
-  _IsarCollectionImpl(this.isar, this.collectionIndex, this.converter);
+  _IsarCollectionImpl(
+    this.isar,
+    this.collectionIndex,
+    this.converter,
+  );
 
   @override
   final _IsarImpl isar;
@@ -93,12 +97,11 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
 
     final updatePtr = isar_update_new();
     for (final propertyId in changes.keys) {
-      print('Updating property $propertyId to ${changes[propertyId]}');
       final value = _isarValue(changes[propertyId]);
       isar_update_add_value(updatePtr, propertyId, value);
     }
 
-    return isar.getWriteTxn(consume: false, (isarPtr, txnPtr) {
+    return isar.getWriteTxn((isarPtr, txnPtr) {
       try {
         var count = 0;
         final updatedPtr = IsarCore.boolPtr;
@@ -184,8 +187,20 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
   }
 
   @override
-  void importJsonBytes(Uint8List jsonBytes) {
-    // TODO: implement importJsonBytes
+  int importJsonString(String json) {
+    return isar.getWriteTxn(consume: true, (isarPtr, txnPtr) {
+      final txnPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarTxn>>();
+      txnPtrPtr.value = txnPtr;
+      final nativeString = IsarCore.toNativeString(json);
+      isar_import_json(
+        isarPtr,
+        txnPtrPtr,
+        collectionIndex,
+        nativeString,
+        IsarCore.countPtr,
+      ).checkNoError();
+      return (IsarCore.countPtr.value, txnPtrPtr.value);
+    });
   }
 
   @override
@@ -286,5 +301,3 @@ int _idToInt<OBJ>(OBJ id) {
     throw UnsupportedError('Unsupported id type. This should never happen.');
   }
 }
-
-class X<T extends (A, B), A, B> {}

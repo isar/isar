@@ -7,6 +7,7 @@ use super::sqlite_query::{SQLiteCursor, SQLiteQuery};
 use super::sqlite_query_builder::SQLiteQueryBuilder;
 use super::sqlite_reader::SQLiteReader;
 use super::sqlite_txn::SQLiteTxn;
+use crate::core::cursor::IsarCursor;
 use crate::core::error::{IsarError, Result};
 use crate::core::filter::{ConditionType, Filter, FilterCondition};
 use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
@@ -16,6 +17,7 @@ use crate::core::value::IsarValue;
 use intmap::IntMap;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
+use serde::{Deserializer, Serializer};
 use std::borrow::Cow;
 use std::cell::Cell;
 use std::fs::remove_file;
@@ -100,7 +102,11 @@ impl SQLiteInstance {
                     }
                 })
                 .collect_vec();
-            let collection = SQLiteCollection::new(collection_schema.name.clone(), properties);
+            let collection = SQLiteCollection::new(
+                collection_schema.name.clone(),
+                collection_schema.id_name.clone(),
+                properties,
+            );
             collections.push(collection);
         }
         collections

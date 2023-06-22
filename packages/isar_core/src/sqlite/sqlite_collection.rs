@@ -21,12 +21,17 @@ impl SQLiteProperty {
 
 pub struct SQLiteCollection {
     pub name: String,
+    pub id_name: Option<String>,
     pub properties: Vec<SQLiteProperty>,
 }
 
 impl SQLiteCollection {
-    pub fn new(name: String, properties: Vec<SQLiteProperty>) -> Self {
-        Self { name, properties }
+    pub fn new(name: String, id_name: Option<String>, properties: Vec<SQLiteProperty>) -> Self {
+        Self {
+            name,
+            id_name,
+            properties,
+        }
     }
 
     pub fn get_property(&self, property_index: u16) -> Option<&SQLiteProperty> {
