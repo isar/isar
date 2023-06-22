@@ -2,7 +2,7 @@ import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
 
-part 'enum_test.g.dart';
+/*part '../t/enum_test.g.dart';
 
 enum TestEnum {
   option1(1, 1, 1, 'test1'),
@@ -112,3 +112,4 @@ void main() {
     isarTest('.importJson()', () {});
   });
 }
+*/

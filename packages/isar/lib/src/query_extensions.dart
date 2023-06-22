@@ -176,6 +176,10 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QOperations> {
   int deleteAll({int? offset, int? limit}) =>
       _withQuery((q) => q.deleteAll(offset: offset, limit: limit));
 
+  /// {@macro query_find_all}
+  List<Map<String, dynamic>> exportJson({int? offset, int? limit}) =>
+      _withQuery((q) => q.exportJson(offset: offset, limit: limit));
+
   Future<T> _withQueryAsync<T>(Future<T> Function(IsarQuery<R> q) f) async {
     final q = build();
     try {
