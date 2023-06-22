@@ -1,15 +1,15 @@
 use super::sqlite3::SQLite3;
 use crate::core::error::{IsarError, Result};
-use std::{cell::Cell, sync::Arc};
+use std::{cell::Cell, rc::Rc};
 
 pub struct SQLiteTxn {
     write: bool,
-    sqlite: Arc<SQLite3>,
+    sqlite: Rc<SQLite3>,
     active: Cell<bool>,
 }
 
 impl SQLiteTxn {
-    pub(crate) fn new(sqlite: Arc<SQLite3>, write: bool) -> Result<SQLiteTxn> {
+    pub(crate) fn new(sqlite: Rc<SQLite3>, write: bool) -> Result<SQLiteTxn> {
         sqlite.prepare("BEGIN")?.step()?;
         let txn = SQLiteTxn {
             write,

@@ -209,3 +209,10 @@ pub unsafe extern "C" fn isar_query_delete(
         *count = new_count;
     }
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_query_free(query: *mut CIsarQuery) {
+    if !query.is_null() {
+        drop(Box::from_raw(query));
+    }
+}

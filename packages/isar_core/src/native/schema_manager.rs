@@ -162,6 +162,12 @@ fn open_collection(
         None
     };
 
-    let col = NativeCollection::new(collection_index, properties, vec![], db);
+    let col = NativeCollection::new(
+        collection_index,
+        schema.name.clone(),
+        properties,
+        vec![],
+        db,
+    );
     Ok(col)
 }

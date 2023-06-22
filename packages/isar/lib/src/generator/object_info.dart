@@ -45,6 +45,7 @@ class PropertyInfo {
     required this.elementNullable,
     required this.defaultValue,
     required this.elementDefaultValue,
+    required this.utc,
     required this.mode,
     required this.assignable,
     required this.constructorPosition,
@@ -66,6 +67,7 @@ class PropertyInfo {
   final bool? elementNullable;
   final String defaultValue;
   final String? elementDefaultValue;
+  final bool utc;
 
   final DeserializeMode mode;
   final bool assignable;

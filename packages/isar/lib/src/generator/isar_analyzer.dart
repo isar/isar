@@ -297,6 +297,7 @@ class IsarAnalyzer {
           constructorParameter?.defaultValueCode ?? _defaultValue(dartType),
       elementDefaultValue:
           type.isList ? _defaultValue(dartType.scalarType) : null,
+      utc: type.isDate && property.hasUtcAnnotation,
       mode: mode,
       assignable: property.setter != null,
       constructorPosition: constructorPosition,

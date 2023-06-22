@@ -4,6 +4,7 @@ use super::{NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
 use crate::core::data_type::DataType;
 use crate::core::reader::IsarReader;
 use std::borrow::Cow;
+use std::option::IntoIter;
 
 pub struct NativeReader<'a> {
     id: i64,
@@ -32,6 +33,15 @@ impl<'a> IsarReader for NativeReader<'a> {
     type ObjectReader<'b> = NativeReader<'b> where 'a: 'b;
 
     type ListReader<'b> = NativeListReader<'b> where 'a: 'b;
+
+    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
+        Some(
+            self.collection
+                .properties
+                .iter()
+                .map(|(name, property)| (name.as_str(), property.data_type)),
+        )
+    }
 
     #[inline]
     fn read_id(&self) -> i64 {
@@ -99,13 +109,24 @@ impl<'a> IsarReader for NativeReader<'a> {
     }
 
     #[inline]
-    fn read_string(&self, index: u32) -> Option<&'a str> {
+    fn read_string(&self, index: u32) -> Option<&str> {
         let property = self.collection.get_property(index as u16)?;
         self.object.read_string(property.offset)
     }
 
     #[inline]
-    fn read_blob(&self, index: u32) -> Option<Cow<'a, [u8]>> {
+    fn read_json(&self, index: u32) -> &str {
+        let property = self.collection.get_property(index as u16);
+        if let Some(property) = property {
+            if let Some(str) = self.object.read_string(property.offset) {
+                return str;
+            }
+        }
+        "null"
+    }
+
+    #[inline]
+    fn read_blob(&self, index: u32) -> Option<Cow<'_, [u8]>> {
         let property = self.collection.get_property(index as u16)?;
         self.object.read_dynamic(property.offset).map(Cow::Borrowed)
     }
@@ -149,6 +170,10 @@ impl<'a> IsarReader for NativeListReader<'a> {
     type ObjectReader<'b> = NativeReader<'b> where 'a: 'b;
 
     type ListReader<'b> = NativeListReader<'b> where 'a: 'b;
+
+    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
+        Option::<IntoIter<(&str, DataType)>>::None
+    }
 
     #[inline]
     fn read_id(&self) -> i64 {
@@ -200,6 +225,10 @@ impl<'a> IsarReader for NativeListReader<'a> {
     fn read_string(&self, index: u32) -> Option<&'a str> {
         self.list
             .read_string(index * DataType::String.static_size() as u32)
+    }
+
+    fn read_json(&self, index: u32) -> &str {
+        self.read_string(index).unwrap_or("null")
     }
 
     fn read_blob(&self, _index: u32) -> Option<Cow<'_, [u8]>> {

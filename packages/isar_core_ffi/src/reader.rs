@@ -1,6 +1,6 @@
 use crate::CIsarReader;
-use isar_core::core::reader::IsarReader;
-use std::{mem, ptr};
+use isar_core::core::{reader::IsarReader, ser_de::IsarObjectSerialize};
+use std::{mem, ptr, vec};
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_read_id(reader: &'static CIsarReader) -> i64 {
@@ -229,5 +229,51 @@ pub unsafe extern "C" fn isar_read_list(
     } else {
         *list_reader = ptr::null_mut();
         0
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_read_to_json(
+    reader: &'static CIsarReader,
+    id_name: &String,
+    buffer: *mut *mut u8,
+    buffer_size: *mut u32,
+) -> u32 {
+    let mut new_buffer = if buffer.is_null() {
+        vec![]
+    } else {
+        Vec::from_raw_parts(*buffer, 0, *buffer_size as usize)
+    };
+
+    let serialized = match reader {
+        #[cfg(feature = "native")]
+        CIsarReader::Native(reader) => {
+            let ser = IsarObjectSerialize::new(Some(id_name), reader);
+            serde_json::to_writer(&mut new_buffer, &ser).is_ok()
+        }
+        #[cfg(feature = "sqlite")]
+        CIsarReader::SQLite(reader) => {
+            let ser = IsarObjectSerialize::new(Some(id_name), reader);
+            serde_json::to_writer(&mut new_buffer, &ser).is_ok()
+        }
+        _ => false,
+    };
+
+    if serialized {
+        let (ptr, len, cap) = new_buffer.into_raw_parts();
+        *buffer_size = cap as u32;
+        *buffer = ptr;
+        len as u32
+    } else {
+        *buffer_size = 0;
+        *buffer = ptr::null_mut();
+        0
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_read_free(reader: *const CIsarReader) {
+    if !reader.is_null() {
+        drop(Box::from_raw(reader as *mut CIsarReader));
     }
 }

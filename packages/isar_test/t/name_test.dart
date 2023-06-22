@@ -36,7 +36,7 @@ void main() {
 
     isarTest('json', () async {
       await isar.tWriteTxn(
-        () => isar.nameModels.tPut(
+        () => isar.nameModels.put((
           NameModel()
             ..value = 'test'
             ..otherValue = 'test2',

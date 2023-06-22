@@ -9,5 +9,6 @@ pub mod instance;
 pub mod query_builder;
 pub mod reader;
 pub mod schema;
+pub mod ser_de;
 pub mod value;
 pub mod writer;

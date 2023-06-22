@@ -14,6 +14,7 @@ pub struct NativeTxn {
     pub(crate) instance_id: u32,
     txn: Txn,
     active: Cell<bool>,
+    buffer: Cell<Option<Vec<u8>>>,
     unbound_cursors: RefCell<Vec<UnboundCursor>>,
 }
 
@@ -24,6 +25,7 @@ impl NativeTxn {
             instance_id,
             txn,
             active: Cell::new(true),
+            buffer: Cell::new(None),
             unbound_cursors: RefCell::new(Vec::new()),
         };
         Ok(txn)
@@ -101,6 +103,15 @@ impl NativeTxn {
         if self.active.get() {
             self.txn.abort()
         }
+    }
+
+    pub(crate) fn take_buffer(&self) -> Vec<u8> {
+        self.buffer.replace(None).unwrap_or_else(Vec::new)
+    }
+
+    pub(crate) fn put_buffer(&self, mut buffer: Vec<u8>) {
+        buffer.clear();
+        self.buffer.replace(Some(buffer));
     }
 }
 

@@ -57,3 +57,10 @@ pub unsafe extern "C" fn isar_value_get_string(
     }
     0
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_value_free(value: *mut IsarValue) {
+    if !value.is_null() {
+        drop(Box::from_raw(value));
+    }
+}

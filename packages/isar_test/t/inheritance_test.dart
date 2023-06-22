@@ -143,8 +143,8 @@ void main() {
       nonInheritingObj1 = NonInheritingModel(age: 56, nickname: 'non-obj1');
       nonInheritingObj2 = NonInheritingModel(age: 65, nickname: 'non-obj2');
 
-      await isar.tWriteTxn(() async {
-        await isar.inheritingModels.tPutAll([
+      await isar.writeTxn((isar) async {
+        await isar.inheritingModels.putAll([
           inheritingObj0,
           inheritingObj1,
           inheritingObj2,
@@ -152,7 +152,7 @@ void main() {
           inheritingObj4,
           inheritingObj5,
         ]);
-        await isar.nonInheritingModels.tPutAll([
+        await isar.nonInheritingModels.putAll([
           nonInheritingObj0,
           nonInheritingObj1,
           nonInheritingObj2,
@@ -163,7 +163,7 @@ void main() {
       inheritingObj2.link.value = inheritingObj0;
       inheritingObj5.link.value = inheritingObj3;
 
-      await isar.tWriteTxn(() async {
+      await isar.writeTxn((isar) async {
         await inheritingObj0.link.tSave();
         await inheritingObj2.link.tSave();
         await inheritingObj5.link.tSave();

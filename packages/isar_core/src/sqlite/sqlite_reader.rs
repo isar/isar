@@ -1,9 +1,9 @@
 use super::sqlite3::SQLiteStatement;
 use super::sqlite_collection::SQLiteCollection;
-use crate::core::reader::IsarReader;
+use crate::core::{data_type::DataType, reader::IsarReader};
 use base64::{engine::general_purpose, Engine as _};
 use serde_json::{Map, Value};
-use std::borrow::Cow;
+use std::{borrow::Cow, option::IntoIter};
 
 pub struct SQLiteReader<'a> {
     stmt: Cow<'a, SQLiteStatement<'a>>,
@@ -29,6 +29,15 @@ impl<'a> IsarReader for SQLiteReader<'a> {
     type ObjectReader<'b> = SQLiteObjectReader<'b> where 'a: 'b;
 
     type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
+
+    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
+        Some(
+            self.collection
+                .properties
+                .iter()
+                .map(|p| (p.name.as_str(), p.data_type)),
+        )
+    }
 
     fn read_id(&self) -> i64 {
         self.stmt.get_long(0)
@@ -89,6 +98,10 @@ impl<'a> IsarReader for SQLiteReader<'a> {
         }
     }
 
+    fn read_json(&self, index: u32) -> &str {
+        self.read_string(index).unwrap_or("null")
+    }
+
     fn read_blob(&self, index: u32) -> Option<Cow<[u8]>> {
         if self.is_null(index) {
             None
@@ -143,6 +156,15 @@ impl<'a> IsarReader for SQLiteObjectReader<'a> {
     type ObjectReader<'b> = SQLiteObjectReader<'b> where 'a: 'b;
 
     type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
+
+    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
+        Some(
+            self.collection
+                .properties
+                .iter()
+                .map(|p| (p.name.as_str(), p.data_type)),
+        )
+    }
 
     fn read_id(&self) -> i64 {
         i64::MIN
@@ -216,6 +238,10 @@ impl<'a> IsarReader for SQLiteObjectReader<'a> {
         None
     }
 
+    fn read_json(&self, index: u32) -> &str {
+        self.read_string(index).unwrap_or("null")
+    }
+
     fn read_blob(&self, index: u32) -> Option<Cow<'a, [u8]>> {
         if let Some(property) = self.collection.get_property(index as u16) {
             if let Some(Value::String(val)) = self.object.get(&property.name) {
@@ -268,6 +294,10 @@ impl<'a> IsarReader for SQLiteListReader<'a> {
     type ObjectReader<'b> = SQLiteObjectReader<'b> where 'a: 'b;
 
     type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
+
+    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
+        Option::<IntoIter<(&str, DataType)>>::None
+    }
 
     fn read_id(&self) -> i64 {
         i64::MIN
@@ -328,6 +358,10 @@ impl<'a> IsarReader for SQLiteListReader<'a> {
         } else {
             None
         }
+    }
+
+    fn read_json(&self, index: u32) -> &str {
+        self.read_string(index).unwrap_or("null")
     }
 
     fn read_blob(&self, _index: u32) -> Option<Cow<'a, [u8]>> {

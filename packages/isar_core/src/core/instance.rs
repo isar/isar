@@ -41,6 +41,8 @@ pub trait IsarInstance {
 
     fn get_dir(&self) -> &str;
 
+    fn get_collections(&self) -> impl Iterator<Item = &str>;
+
     fn open_instance(
         instance_id: u32,
         name: &str,
@@ -66,7 +68,15 @@ pub trait IsarInstance {
     fn insert(&self, txn: Self::Txn, collection_index: u16, count: u32)
         -> Result<Self::Insert<'_>>;
 
-    fn delete<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16, id: i64) -> Result<bool>;
+    fn update(
+        &self,
+        txn: &Self::Txn,
+        collection_index: u16,
+        id: i64,
+        updates: &[(u16, Option<IsarValue>)],
+    ) -> Result<bool>;
+
+    fn delete(&self, txn: &Self::Txn, collection_index: u16, id: i64) -> Result<bool>;
 
     fn count(&self, txn: &Self::Txn, collection_index: u16) -> Result<u32>;
 
@@ -89,13 +99,22 @@ pub trait IsarInstance {
         limit: Option<u32>,
     ) -> Result<Self::Cursor<'_>>;
 
-    fn query_aggregate<'a>(
-        &'a self,
-        txn: &'a Self::Txn,
-        query: &'a Self::Query,
+    fn query_aggregate(
+        &self,
+        txn: &Self::Txn,
+        query: &Self::Query,
         aggregation: Aggregation,
         property_index: Option<u16>,
     ) -> Result<Option<IsarValue>>;
+
+    fn query_update(
+        &self,
+        txn: &Self::Txn,
+        query: &Self::Query,
+        offset: Option<u32>,
+        limit: Option<u32>,
+        updates: &[(u16, Option<IsarValue>)],
+    ) -> Result<u32>;
 
     fn query_delete(
         &self,

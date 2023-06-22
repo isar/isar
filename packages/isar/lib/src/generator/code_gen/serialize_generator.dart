@@ -15,6 +15,7 @@ String generateSerialize(ObjectInfo object) {
     }
 
     code += _writeProperty(
+      index: property.index.toString(),
       type: property.type,
       nullable: property.nullable,
       elementNullable: property.elementNullable,
@@ -40,6 +41,7 @@ String generateSerialize(ObjectInfo object) {
 
 String _writeProperty({
   String writer = 'writer',
+  required String index,
   required PropertyType type,
   required bool nullable,
   bool? elementNullable,
@@ -59,47 +61,47 @@ String _writeProperty({
         {
           final value = $value$enumGetter;
           if (value == null) {
-            IsarCore.writeNull($writer);
+            IsarCore.writeNull($writer, $index);
           } else {
-            IsarCore.writeBool($writer, value);
+            IsarCore.writeBool($writer, $index, value);
           }
         }''';
       } else {
-        return 'IsarCore.writeBool($writer, $value$enumGetter);';
+        return 'IsarCore.writeBool($writer, $index, $value$enumGetter);';
       }
     case PropertyType.byte:
       final orNull = nullable ? '?? $nullByte' : '';
-      return 'IsarCore.writeByte($writer, $value$enumGetter $orNull);';
+      return 'IsarCore.writeByte($writer, $index, $value$enumGetter $orNull);';
     case PropertyType.int:
       final orNull = nullable ? '?? $nullInt' : '';
-      return 'IsarCore.writeInt($writer, $value$enumGetter $orNull);';
+      return 'IsarCore.writeInt($writer, $index, $value$enumGetter $orNull);';
     case PropertyType.float:
       final orNull = nullable ? '?? double.nan' : '';
-      return 'IsarCore.writeFloat($writer, $value$enumGetter $orNull);';
+      return 'IsarCore.writeFloat($writer, $index, $value$enumGetter $orNull);';
     case PropertyType.long:
       final orNull = nullable ? '?? $nullLong' : '';
-      return 'IsarCore.writeLong($writer, $value$enumGetter $orNull);';
+      return 'IsarCore.writeLong($writer, $index, $value$enumGetter $orNull);';
     case PropertyType.dateTime:
       final converted = nullable
           ? '$value$enumGetter?.toUtc().microsecondsSinceEpoch ?? $nullLong'
           : '$value$enumGetter.toUtc().microsecondsSinceEpoch';
-      return 'IsarCore.writeLong($writer, $converted);';
+      return 'IsarCore.writeLong($writer, $index, $converted);';
     case PropertyType.double:
       final orNull = nullable ? '?? double.nan' : '';
-      return 'IsarCore.writeDouble($writer, $value$enumGetter $orNull);';
+      return 'IsarCore.writeDouble($writer, $index, $value$enumGetter $orNull);';
     case PropertyType.string:
       if (nullable) {
         return '''
         {
           final value = $value$enumGetter;
           if (value == null) {
-            IsarCore.writeNull($writer);
+            IsarCore.writeNull($writer, $index);
           } else {
-            IsarCore.writeString($writer, IsarCore.toNativeString(value));
+            IsarCore.writeString($writer, $index, IsarCore.toNativeString(value));
           }
         }''';
       } else {
-        return 'IsarCore.writeString($writer, IsarCore.toNativeString($value$enumGetter));';
+        return 'IsarCore.writeString($writer, $index, IsarCore.toNativeString($value$enumGetter));';
       }
     case PropertyType.object:
       var code = '''
@@ -108,11 +110,11 @@ String _writeProperty({
       if (nullable) {
         code += '''
         if (value == null) {
-          IsarCore.writeNull($writer);
+          IsarCore.writeNull($writer, $index);
         } else {''';
       }
       code += '''
-      final objectWriter = IsarCore.beginObject($writer);
+      final objectWriter = IsarCore.beginObject($writer, $index);
       serialize$typeClassName(objectWriter, value);
       IsarCore.endObject($writer, objectWriter);''';
       if (nullable) {
@@ -123,6 +125,7 @@ String _writeProperty({
       return '''
       IsarCore.writeString(
         $writer,
+        $index,
         IsarCore.toNativeString(isarJsonEncode($value)),
       );''';
     case PropertyType.boolList:
@@ -136,22 +139,23 @@ String _writeProperty({
     case PropertyType.objectList:
       var code = '''
       {
-        final value = $value;''';
+        final list = $value;''';
       if (nullable) {
         code += '''
-        if (value == null) {
-          IsarCore.writeNull($writer);
+        if (list == null) {
+          IsarCore.writeNull($writer, $index);
         } else {''';
       }
       code += '''
-      final listWriter = IsarCore.beginList(writer, value.length);
-      for (final item in value) {
+      final listWriter = IsarCore.beginList(writer, $index, list.length);
+      for (var i = 0; i < list.length; i++) {
         ${_writeProperty(
         writer: 'listWriter',
+        index: 'i',
         type: type.scalarType,
         nullable: elementNullable!,
         typeClassName: typeClassName,
-        value: 'item',
+        value: 'list[i]',
         enumProperty: enumProperty,
       )}
       }

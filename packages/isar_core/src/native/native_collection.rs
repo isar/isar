@@ -1,9 +1,11 @@
 use super::index::id_key::IdToBytes;
 use super::index::NativeIndex;
+use super::isar_serializer::IsarSerializer;
 use super::mdbx::db::Db;
 use super::native_txn::NativeTxn;
 use crate::core::data_type::DataType;
 use crate::core::error::{IsarError, Result};
+use crate::core::value::IsarValue;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct NativeProperty {
@@ -25,7 +27,8 @@ impl NativeProperty {
 #[derive(Clone)]
 pub struct NativeCollection {
     pub(crate) collection_index: u16,
-    properties: Vec<(String, NativeProperty)>,
+    pub(crate) name: String,
+    pub(crate) properties: Vec<(String, NativeProperty)>,
     pub(crate) indexes: Vec<NativeIndex>,
     pub(crate) static_size: u32,
     db: Option<Db>,
@@ -34,6 +37,7 @@ pub struct NativeCollection {
 impl NativeCollection {
     pub fn new(
         collection_index: u16,
+        name: String,
         properties: Vec<(String, NativeProperty)>,
         indexes: Vec<NativeIndex>,
         db: Option<Db>,
@@ -44,9 +48,10 @@ impl NativeCollection {
             .map_or(0, |(_, p)| p.offset + p.data_type.static_size() as u32);
         Self {
             collection_index,
+            name,
             properties,
             indexes,
-            static_size: static_size,
+            static_size,
             db,
         }
     }
@@ -76,6 +81,72 @@ impl NativeCollection {
         }
 
         Ok(size)
+    }
+
+    pub fn update(
+        &self,
+        txn: &NativeTxn,
+        id: i64,
+        updates: &[(u16, Option<IsarValue>)],
+    ) -> Result<bool> {
+        let mut cursor = txn.get_cursor(self.get_db()?)?;
+        let key = id.to_id_bytes();
+        if let Some((_, object)) = cursor.move_to(&key)? {
+            let mut buffer = txn.take_buffer();
+            buffer.extend_from_slice(&object);
+            let mut object = IsarSerializer::new(buffer, 0, self.static_size);
+
+            for (property_index, value) in updates {
+                self.write_value(&mut object, *property_index as u16, value.as_ref())?;
+            }
+
+            let buffer = object.finish();
+            cursor.put(&key, &buffer)?;
+
+            txn.put_buffer(buffer);
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
+    fn write_value(
+        &self,
+        object: &mut IsarSerializer,
+        property_index: u16,
+        value: Option<&IsarValue>,
+    ) -> Result<()> {
+        if let Some(p) = self.get_property(property_index) {
+            match (value, p.data_type) {
+                (None, _) => object.write_null(p.offset, p.data_type),
+                (Some(IsarValue::Bool(value)), DataType::Bool) => {
+                    object.write_bool(p.offset, Some(*value))
+                }
+                (Some(IsarValue::Integer(value)), DataType::Byte) => {
+                    object.write_byte(p.offset, *value as u8)
+                }
+                (Some(IsarValue::Integer(value)), DataType::Int) => {
+                    object.write_int(p.offset, *value as i32)
+                }
+                (Some(IsarValue::Integer(value)), DataType::Long) => {
+                    object.write_long(p.offset, *value)
+                }
+                (Some(IsarValue::Real(value)), DataType::Float) => {
+                    object.write_float(p.offset, *value as f32)
+                }
+                (Some(IsarValue::Real(value)), DataType::Double) => {
+                    object.write_double(p.offset, *value)
+                }
+                (Some(IsarValue::String(value)), DataType::String)
+                | (Some(IsarValue::String(value)), DataType::Json) => {
+                    object.update_dynamic(p.offset, value.as_bytes())
+                }
+                _ => return Err(IsarError::IllegalArgument {}),
+            }
+            Ok(())
+        } else {
+            return Err(IsarError::IllegalArgument {});
+        }
     }
 
     pub fn delete(&self, txn: &NativeTxn, id: i64) -> Result<bool> {

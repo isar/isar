@@ -105,7 +105,7 @@ abstract final class IsarCore {
 
   static const readObject = isar_read_object;
   static const readList = isar_read_list;
-  static const freeReader = isar_free_reader;
+  static const freeReader = isar_read_free;
 
   static const writeNull = isar_write_null;
   static const writeBool = isar_write_bool;
@@ -115,10 +115,10 @@ abstract final class IsarCore {
   static const writeLong = isar_write_long;
   static const writeDouble = isar_write_double;
   static const writeString = isar_write_string;
-  static const beginObject = isar_begin_object;
-  static const endObject = isar_end_object;
-  static const beginList = isar_begin_list;
-  static const endList = isar_end_list;
+  static const beginObject = isar_write_object;
+  static const endObject = isar_write_object_end;
+  static const beginList = isar_write_list;
+  static const endList = isar_write_list_end;
 }
 
 extension PointerX on Pointer {

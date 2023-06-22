@@ -1,4 +1,4 @@
-use crate::{CIsarInstance, CIsarReader, CIsarTxn, CIsarWriter};
+use crate::{CIsarInstance, CIsarReader, CIsarTxn, CIsarUpdate, CIsarWriter};
 use isar_core::core::error::IsarError;
 use isar_core::core::instance::{CompactCondition, IsarInstance};
 use isar_core::core::schema::IsarSchema;
@@ -241,6 +241,30 @@ pub unsafe extern "C" fn isar_insert(
             _ => return Err(IsarError::IllegalArgument {}),
         };
         *insert = Box::into_raw(Box::new(new_insert));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_update(
+    isar: &'static CIsarInstance,
+    txn: &CIsarTxn,
+    collection_index: u16,
+    id: i64,
+    update: &CIsarUpdate,
+    updated: *mut bool,
+) -> u8 {
+    isar_try! {
+        match (isar, txn) {
+            #[cfg(feature = "native")]
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
+                *updated = isar.update(txn, collection_index, id, &update.0)?;
+            }
+            #[cfg(feature = "sqlite")]
+            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn)) => {
+                *updated = isar.update(txn, collection_index, id, &update.0)?;
+            }
+            _ => return Err(IsarError::IllegalArgument {}),
+        };
     }
 }
 

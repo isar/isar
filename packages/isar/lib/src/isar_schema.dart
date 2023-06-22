@@ -2,9 +2,9 @@ part of isar;
 
 /// @nodoc
 @protected
-final class Schema {
+final class IsarSchema {
   /// @nodoc
-  const Schema({
+  const IsarSchema({
     required this.schema,
     required this.converter,
   });
@@ -13,14 +13,14 @@ final class Schema {
   final String schema;
 
   /// @nodoc
-  final ObjectConverter<dynamic, dynamic> converter;
+  final IsarObjectConverter<dynamic, dynamic> converter;
 }
 
 /// @nodoc
 @protected
-final class CollectionSchema extends Schema {
+final class IsarCollectionSchema extends IsarSchema {
   /// @nodoc
-  const CollectionSchema({
+  const IsarCollectionSchema({
     required super.schema,
     required super.converter,
     required this.embeddedSchemas,
@@ -28,7 +28,7 @@ final class CollectionSchema extends Schema {
   });
 
   /// @nodoc
-  final List<Schema> embeddedSchemas;
+  final List<IsarSchema> embeddedSchemas;
 
   /// @nodoc
   final int hash;
@@ -36,9 +36,9 @@ final class CollectionSchema extends Schema {
 
 /// @nodoc
 @protected
-final class ObjectConverter<ID, OBJ> {
+final class IsarObjectConverter<ID, OBJ> {
   /// @nodoc
-  const ObjectConverter({
+  const IsarObjectConverter({
     required this.serialize,
     required this.deserialize,
     this.deserializeProperty,
@@ -57,7 +57,8 @@ final class ObjectConverter<ID, OBJ> {
   Type get type => OBJ;
 
   /// @nodoc
-  T withType<T>(T Function<ID, OBJ>(ObjectConverter<ID, OBJ> converter) f) =>
+  T withType<T>(
+          T Function<ID, OBJ>(IsarObjectConverter<ID, OBJ> converter) f) =>
       f(this);
 }
 

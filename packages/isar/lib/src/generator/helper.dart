@@ -9,6 +9,7 @@ const TypeChecker _enumPropertyChecker = TypeChecker.fromRuntime(EnumValue);
 const TypeChecker _idChecker = TypeChecker.fromRuntime(Id);
 const TypeChecker _ignoreChecker = TypeChecker.fromRuntime(Ignore);
 const TypeChecker _nameChecker = TypeChecker.fromRuntime(Name);
+const TypeChecker _utcChecker = TypeChecker.fromRuntime(Utc);
 
 extension ClassElementX on ClassElement {
   List<PropertyInducingElement> get allAccessors {
@@ -47,6 +48,11 @@ extension ClassElementX on ClassElement {
 extension PropertyElementX on PropertyInducingElement {
   bool get hasIdAnnotation {
     final ann = _idChecker.firstAnnotationOfExact(nonSynthetic);
+    return ann != null;
+  }
+
+  bool get hasUtcAnnotation {
+    final ann = _utcChecker.firstAnnotationOfExact(nonSynthetic);
     return ann != null;
   }
 }

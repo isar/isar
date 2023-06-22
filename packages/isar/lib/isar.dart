@@ -20,6 +20,7 @@ part 'src/annotations/ignore.dart';
 part 'src/annotations/index.dart';
 part 'src/annotations/name.dart';
 part 'src/annotations/type.dart';
+part 'src/annotations/utc.dart';
 
 part 'src/impl/filter_builder.dart';
 part 'src/impl/isar_collection_impl.dart';
@@ -34,10 +35,10 @@ part 'src/isar.dart';
 part 'src/isar_collection.dart';
 part 'src/isar_error.dart';
 part 'src/isar_query.dart';
+part 'src/isar_schema.dart';
 part 'src/query_builder.dart';
 part 'src/query_extensions.dart';
 part 'src/query_components.dart';
-part 'src/schema.dart';
 
 /// @nodoc
 @protected

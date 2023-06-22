@@ -189,7 +189,7 @@ void main() {
 
     isarTest('.exportJson()', ()  {
        isar.writeTxn(()  {
-         isar.models.tPutAll([allNull, simple, nested]);
+         isar.models.putAll([allNull, simple, nested]);
       });
 
       expect(

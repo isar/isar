@@ -3,7 +3,6 @@ use super::isar_serializer::IsarSerializer;
 use super::mdbx::db::Db;
 use super::native_collection::NativeCollection;
 use super::native_txn::{NativeTxn, TxnCursor};
-use super::native_writer::WriterImpl;
 use super::MAX_OBJ_SIZE;
 use crate::core::error::{IsarError, Result};
 use crate::core::insert::IsarInsert;
@@ -37,9 +36,7 @@ pub struct NativeInsert<'a> {
     pub(crate) all_collections: &'a Vec<NativeCollection>,
 
     remaining: u32,
-
     pub(crate) object: IsarSerializer,
-    pub(crate) property_index: u16,
 }
 
 impl<'a> NativeInsert<'a> {
@@ -49,14 +46,14 @@ impl<'a> NativeInsert<'a> {
         all_collections: &'a Vec<NativeCollection>,
         count: u32,
     ) -> Result<Self> {
+        let buffer = txn.take_buffer();
         let txn_cursor = TxnWithCursor::open(txn, collection.get_db()?)?;
         let insert = Self {
             txn_cursor,
             collection,
             all_collections,
             remaining: count,
-            object: IsarSerializer::new(Vec::new(), 0, collection.static_size),
-            property_index: 1, // Skip id
+            object: IsarSerializer::new(buffer, 0, collection.static_size),
         };
         Ok(insert)
     }
@@ -67,10 +64,6 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
 
     fn save(&mut self, id: i64) -> Result<()> {
         if self.remaining > 0 {
-            if self.next_property().is_some() {
-                return Result::Err(IsarError::InsertIncomplete {});
-            }
-
             let mut buffer = self.object.finish();
             if buffer.len() > MAX_OBJ_SIZE as usize {
                 return Result::Err(IsarError::ObjectLimitReached {});
@@ -78,7 +71,6 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
             self.txn_cursor.put(id, &buffer)?;
 
             self.remaining -= 1;
-            self.property_index = 1; // Skip id
             buffer.clear();
             self.object = IsarSerializer::new(buffer, 0, self.collection.static_size);
             Ok(())
@@ -91,7 +83,9 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
         if self.remaining > 0 {
             Err(IsarError::InsertIncomplete {})
         } else {
-            Ok(self.txn_cursor.close())
+            let txn = self.txn_cursor.close();
+            txn.put_buffer(self.object.finish());
+            Ok(txn)
         }
     }
 }

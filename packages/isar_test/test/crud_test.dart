@@ -21,6 +21,12 @@ class IntModel {
       return false;
     }
   }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return 'IntModel{id: $id, value: $value}';
+  }
 }
 
 @collection

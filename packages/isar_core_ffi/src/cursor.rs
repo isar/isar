@@ -23,3 +23,10 @@ pub unsafe extern "C" fn isar_cursor_next(
         ptr::null()
     }
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_cursor_free(cursor: *mut CIsarCursor) {
+    if !cursor.is_null() {
+        drop(Box::from_raw(cursor));
+    }
+}

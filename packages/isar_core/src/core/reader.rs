@@ -1,3 +1,4 @@
+use super::data_type::DataType;
 use std::borrow::Cow;
 
 pub trait IsarReader {
@@ -8,6 +9,8 @@ pub trait IsarReader {
     type ListReader<'b>: IsarReader
     where
         Self: 'b;
+
+    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>>;
 
     fn read_id(&self) -> i64;
 
@@ -26,6 +29,8 @@ pub trait IsarReader {
     fn read_double(&self, index: u32) -> f64;
 
     fn read_string(&self, index: u32) -> Option<&str>;
+
+    fn read_json(&self, index: u32) -> &str;
 
     fn read_blob(&self, index: u32) -> Option<Cow<'_, [u8]>>;
 

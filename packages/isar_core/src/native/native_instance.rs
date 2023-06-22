@@ -69,6 +69,10 @@ impl IsarInstance for NativeInstance {
         &self.dir
     }
 
+    fn get_collections(&self) -> impl Iterator<Item = &str> {
+        self.collections.iter().map(|c| c.name.as_str())
+    }
+
     fn open_instance(
         instance_id: u32,
         name: &str,
@@ -139,6 +143,18 @@ impl IsarInstance for NativeInstance {
         NativeInsert::new(txn, collection, &self.collections, count)
     }
 
+    fn update(
+        &self,
+        txn: &Self::Txn,
+        collection_index: u16,
+        id: i64,
+        updates: &[(u16, Option<IsarValue>)],
+    ) -> Result<bool> {
+        self.verify_instance_id(txn.instance_id)?;
+        let collection = self.get_collection(collection_index)?;
+        txn.guard(|| collection.update(txn, id, updates))
+    }
+
     fn delete<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16, id: i64) -> Result<bool> {
         self.verify_instance_id(txn.instance_id)?;
         let collection = self.get_collection(collection_index)?;
@@ -191,10 +207,10 @@ impl IsarInstance for NativeInstance {
         Ok(result)
     }
 
-    fn query_aggregate<'a>(
-        &'a self,
-        txn: &'a Self::Txn,
-        query: &'a Self::Query,
+    fn query_aggregate(
+        &self,
+        txn: &Self::Txn,
+        query: &Self::Query,
         aggregation: Aggregation,
         property_index: Option<u16>,
     ) -> Result<Option<IsarValue>> {
@@ -202,6 +218,19 @@ impl IsarInstance for NativeInstance {
         self.verify_instance_id(query.instance_id)?;
         let result = query.aggregate(txn, &self.collections, aggregation, property_index);
         Ok(result)
+    }
+
+    fn query_update(
+        &self,
+        txn: &Self::Txn,
+        query: &Self::Query,
+        offset: Option<u32>,
+        limit: Option<u32>,
+        updates: &[(u16, Option<IsarValue>)],
+    ) -> Result<u32> {
+        self.verify_instance_id(txn.instance_id)?;
+        self.verify_instance_id(query.instance_id)?;
+        todo!()
     }
 
     fn query_delete(

@@ -1,5 +1,6 @@
 part of isar;
 
+@pragma('vm:isolate-unsendable')
 abstract class Isar {
   /// The default Isar instance name.
   static const String defaultName = 'default';
@@ -10,7 +11,7 @@ abstract class Isar {
   static const String version = '4.0.0';
 
   static Isar get({
-    required List<CollectionSchema> schemas,
+    required List<IsarCollectionSchema> schemas,
     StorageEngine engine = StorageEngine.isar,
     String name = Isar.defaultName,
   }) {
@@ -22,7 +23,7 @@ abstract class Isar {
   }
 
   static Isar open({
-    required List<CollectionSchema> schemas,
+    required List<IsarCollectionSchema> schemas,
     required String directory,
     String name = Isar.defaultName,
     StorageEngine engine = StorageEngine.isar,

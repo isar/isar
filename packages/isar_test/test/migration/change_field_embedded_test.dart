@@ -9,7 +9,7 @@ part 'change_field_embedded_test.g.dart';
 class Model1 {
   Model1(this.id, this.value);
 
-  Id? id;
+  int id;
 
   Embedded1? value;
 
@@ -24,7 +24,7 @@ class Model1 {
 class Model2 {
   Model2(this.id, this.value);
 
-  Id? id;
+  int id;
 
   Embedded2? value;
 
@@ -53,28 +53,29 @@ class Embedded2 {
 }
 
 void main() {
-  isarTest('Change field embedded', () async {
-    final isar1 = await openTempIsar([Model1Schema]);
-    await isar1.tWriteTxn(() {
-      return isar1.model1s.tPutAll([
+  isarTest('Change field embedded', () {
+    final isar1 = openTempIsar([Model1Schema]);
+    final isarName = isar1.name;
+    isar1.writeTxn((isar) {
+      return isar1.model1s.putAll([
         Model1(1, Embedded1('a')),
         Model1(2, Embedded1('b')),
       ]);
     });
-    expect(await isar1.close(), true);
+    expect(isar1.close(), true);
 
-    final isar2 = await openTempIsar([Model2Schema], name: isar1.name);
-    await qEqual(isar2.model2s.where(), [
+    final isar2 = openTempIsar([Model2Schema], name: isarName);
+    expect(isar2.model2s.where().findAll(), [
       Model2(1, null),
       Model2(2, null),
     ]);
-    await isar2.tWriteTxn(() {
-      return isar2.model2s.tPut(Model2(1, Embedded2('abc')));
+    isar2.writeTxn((isar) {
+      return isar2.model2s.put(Model2(1, Embedded2('abc')));
     });
-    expect(await isar2.close(), true);
+    expect(isar2.close(), true);
 
-    final isar3 = await openTempIsar([Model1Schema], name: isar1.name);
-    await qEqual(isar3.model1s.where(), [
+    final isar3 = openTempIsar([Model1Schema], name: isarName);
+    expect(isar3.model1s.where().findAll(), [
       Model1(1, null),
       Model1(2, null),
     ]);

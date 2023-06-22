@@ -3,33 +3,16 @@ use super::native_collection::NativeCollection;
 use super::native_insert::NativeInsert;
 use crate::core::data_type::DataType;
 use crate::core::writer::IsarWriter;
+use std::option::IntoIter;
 
 pub(crate) trait WriterImpl<'a> {
-    fn next_property(&mut self) -> Option<(DataType, u32, Option<u16>)>;
+    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>>;
+
+    fn get_property(&self, index: u32) -> Option<(DataType, u32, Option<u16>)>;
 
     fn get_collections(&self) -> &'a [NativeCollection];
 
     fn get_serializer(&mut self) -> &mut IsarSerializer;
-
-    fn next_property_or_write_null(
-        &mut self,
-        required_data_type: DataType,
-    ) -> Option<(u32, Option<u16>)> {
-        if let Some((data_type, offset, embedded_collection_index)) = self.next_property() {
-            if data_type == required_data_type {
-                return Some((offset, embedded_collection_index));
-            } else {
-                self.get_serializer().write_null(offset, data_type)
-            }
-        }
-        None
-    }
-
-    fn write_remaining_null(&mut self) {
-        while let Some((data_type, offset, _)) = self.next_property() {
-            self.get_serializer().write_null(offset, data_type);
-        }
-    }
 }
 
 impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
@@ -38,89 +21,117 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
     type ListWriter = NativeListWriter<'a>;
 
     #[inline]
-    fn write_null(&mut self) {
-        if let Some((data_type, offset, _)) = self.next_property() {
+    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
+        self.properties()
+    }
+
+    #[inline]
+    fn write_null(&mut self, index: u32) {
+        if let Some((data_type, offset, _)) = self.get_property(index) {
             self.get_serializer().write_null(offset, data_type);
         }
     }
 
     #[inline]
-    fn write_bool(&mut self, value: Option<bool>) {
-        if let Some((offset, _)) = self.next_property_or_write_null(DataType::Bool) {
-            self.get_serializer().write_bool(offset, value);
+    fn write_bool(&mut self, index: u32, value: Option<bool>) {
+        if let Some((data_type, offset, _)) = self.get_property(index) {
+            if data_type == DataType::Bool {
+                self.get_serializer().write_bool(offset, value);
+            }
         }
     }
 
     #[inline]
-    fn write_byte(&mut self, value: u8) {
-        if let Some((offset, _)) = self.next_property_or_write_null(DataType::Byte) {
-            self.get_serializer().write_byte(offset, value);
+    fn write_byte(&mut self, index: u32, value: u8) {
+        if let Some((data_type, offset, _)) = self.get_property(index) {
+            if data_type == DataType::Byte {
+                self.get_serializer().write_byte(offset, value);
+            }
         }
     }
 
     #[inline]
-    fn write_int(&mut self, value: i32) {
-        if let Some((offset, _)) = self.next_property_or_write_null(DataType::Int) {
-            self.get_serializer().write_int(offset, value);
+    fn write_int(&mut self, index: u32, value: i32) {
+        if let Some((data_type, offset, _)) = self.get_property(index) {
+            if data_type == DataType::Int {
+                self.get_serializer().write_int(offset, value);
+            }
         }
     }
 
     #[inline]
-    fn write_float(&mut self, value: f32) {
-        if let Some((offset, _)) = self.next_property_or_write_null(DataType::Float) {
-            self.get_serializer().write_float(offset, value);
+    fn write_float(&mut self, index: u32, value: f32) {
+        if let Some((data_type, offset, _)) = self.get_property(index) {
+            if data_type == DataType::Float {
+                self.get_serializer().write_float(offset, value);
+            }
         }
     }
 
     #[inline]
-    fn write_long(&mut self, value: i64) {
-        if let Some((offset, _)) = self.next_property_or_write_null(DataType::Long) {
-            self.get_serializer().write_long(offset, value);
+    fn write_long(&mut self, index: u32, value: i64) {
+        if let Some((data_type, offset, _)) = self.get_property(index) {
+            if data_type == DataType::Long {
+                self.get_serializer().write_long(offset, value);
+            }
         }
     }
 
     #[inline]
-    fn write_double(&mut self, value: f64) {
-        if let Some((offset, _)) = self.next_property_or_write_null(DataType::Double) {
-            self.get_serializer().write_double(offset, value);
+    fn write_double(&mut self, index: u32, value: f64) {
+        if let Some((data_type, offset, _)) = self.get_property(index) {
+            if data_type == DataType::Double {
+                self.get_serializer().write_double(offset, value);
+            }
         }
     }
 
     #[inline]
-    fn write_string(&mut self, value: &str) {
-        if let Some((offset, _)) = self.next_property_or_write_null(DataType::String) {
-            self.get_serializer()
-                .write_dynamic(offset, value.as_bytes());
+    fn write_string(&mut self, index: u32, value: &str) {
+        if let Some((data_type, offset, _)) = self.get_property(index) {
+            if data_type == DataType::String || data_type == DataType::Json {
+                self.get_serializer()
+                    .write_dynamic(offset, value.as_bytes());
+            }
         }
     }
 
     #[inline]
-    fn write_byte_list(&mut self, value: &[u8]) {
-        if let Some((offset, _)) = self.next_property_or_write_null(DataType::ByteList) {
-            self.get_serializer().write_dynamic(offset, value);
+    fn write_json(&mut self, index: u32, value: &str) {
+        self.write_string(index, value)
+    }
+
+    #[inline]
+    fn write_byte_list(&mut self, index: u32, value: &[u8]) {
+        if let Some((data_type, offset, _)) = self.get_property(index) {
+            if data_type == DataType::ByteList {
+                self.get_serializer().write_dynamic(offset, value);
+            }
         }
     }
 
-    fn begin_object(&mut self) -> Option<Self::ObjectWriter> {
-        let (offset, collection_index) = self.next_property_or_write_null(DataType::Object)?;
+    fn begin_object(&mut self, index: u32) -> Option<Self::ObjectWriter> {
+        let (data_type, offset, collection_index) = self.get_property(index)?;
+        if data_type == DataType::Object {
+            let collections = self.get_collections();
+            let collection = &collections[collection_index? as usize];
 
-        let collections = self.get_collections();
-        let collection = &collections[collection_index? as usize];
-
-        let object = self
-            .get_serializer()
-            .begin_nested(offset, collection.static_size);
-        let writer = NativeObjectWriter::new(collection, collections, object);
-        Some(writer)
+            let object = self
+                .get_serializer()
+                .begin_nested(offset, collection.static_size);
+            let writer = NativeObjectWriter::new(collection, collections, object);
+            Some(writer)
+        } else {
+            None
+        }
     }
 
-    fn end_object(&mut self, mut writer: Self::ObjectWriter) {
-        writer.write_remaining_null();
+    fn end_object(&mut self, writer: Self::ObjectWriter) {
         self.get_serializer().end_nested(writer.object);
     }
 
-    fn begin_list(&mut self, length: u32) -> Option<Self::ListWriter> {
-        let (data_type, offset, embedded_collection_index) = self.next_property()?;
+    fn begin_list(&mut self, index: u32, length: u32) -> Option<Self::ListWriter> {
+        let (data_type, offset, embedded_collection_index) = self.get_property(index)?;
         if let Some(element_type) = data_type.element_type() {
             let list = self
                 .get_serializer()
@@ -139,17 +150,24 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
         }
     }
 
-    fn end_list(&mut self, mut writer: Self::ListWriter) {
-        writer.write_remaining_null();
+    fn end_list(&mut self, writer: Self::ListWriter) {
         self.get_serializer().end_nested(writer.list);
     }
 }
 
 impl<'a> WriterImpl<'a> for NativeInsert<'a> {
+    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
+        Some(
+            self.collection
+                .properties
+                .iter()
+                .map(|(name, p)| (name.as_str(), p.data_type)),
+        )
+    }
+
     #[inline]
-    fn next_property(&mut self) -> Option<(DataType, u32, Option<u16>)> {
-        let property = self.collection.get_property(self.property_index)?;
-        self.property_index += 1;
+    fn get_property(&self, index: u32) -> Option<(DataType, u32, Option<u16>)> {
+        let property = self.collection.get_property(index as u16)?;
         Some((
             property.data_type,
             property.offset,
@@ -172,7 +190,6 @@ pub struct NativeObjectWriter<'a> {
     collection: &'a NativeCollection,
     all_collections: &'a [NativeCollection],
     object: IsarSerializer,
-    property_index: u16,
 }
 
 impl<'a> NativeObjectWriter<'a> {
@@ -185,16 +202,23 @@ impl<'a> NativeObjectWriter<'a> {
             collection,
             all_collections,
             object,
-            property_index: 1, // skip id
         }
     }
 }
 
 impl<'a> WriterImpl<'a> for NativeObjectWriter<'a> {
+    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
+        Some(
+            self.collection
+                .properties
+                .iter()
+                .map(|(name, p)| (name.as_str(), p.data_type)),
+        )
+    }
+
     #[inline]
-    fn next_property(&mut self) -> Option<(DataType, u32, Option<u16>)> {
-        let property = self.collection.get_property(self.property_index)?;
-        self.property_index += 1;
+    fn get_property(&self, index: u32) -> Option<(DataType, u32, Option<u16>)> {
+        let property = self.collection.get_property(index as u16)?;
         Some((
             property.data_type,
             property.offset,
@@ -218,7 +242,6 @@ pub struct NativeListWriter<'a> {
     embedded_collection_index: Option<u16>,
     list: IsarSerializer,
     all_collections: &'a [NativeCollection],
-    index: u32,
     length: u32,
 }
 
@@ -235,25 +258,27 @@ impl<'a> NativeListWriter<'a> {
             embedded_collection_index,
             list,
             all_collections,
-            index: 0,
             length,
         }
     }
 }
 
 impl<'a> WriterImpl<'a> for NativeListWriter<'a> {
+    fn properties(&self) -> Option<impl Iterator<Item = (&str, DataType)>> {
+        Option::<IntoIter<(&str, DataType)>>::None
+    }
+
     #[inline]
-    fn next_property(&mut self) -> Option<(DataType, u32, Option<u16>)> {
-        if self.index >= self.length {
+    fn get_property(&self, index: u32) -> Option<(DataType, u32, Option<u16>)> {
+        if index >= self.length {
             return None;
         }
 
         let property = (
             self.element_type,
-            self.index * self.element_type.static_size() as u32,
+            index * self.element_type.static_size() as u32,
             self.embedded_collection_index,
         );
-        self.index += 1;
         Some(property)
     }
 

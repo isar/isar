@@ -30,11 +30,15 @@ impl IsarSerializer {
     }
 
     #[inline]
+    fn read_u24(&mut self, offset: u32) -> u32 {
+        let offset = (offset + self.offset) as usize;
+        LittleEndian::read_u24(&self.buffer.get_mut()[offset..]) as u32
+    }
+
+    #[inline]
     fn write_u24(&mut self, offset: u32, value: u32) {
-        LittleEndian::write_u24(
-            &mut self.buffer.get_mut()[(offset + self.offset) as usize..],
-            value,
-        );
+        let offset = (offset + self.offset) as usize;
+        LittleEndian::write_u24(&mut self.buffer.get_mut()[offset..], value);
     }
 
     #[inline]
@@ -101,7 +105,6 @@ impl IsarSerializer {
         self.write_static_checked(offset, &value.to_le_bytes());
     }
 
-    #[inline]
     pub fn write_dynamic(&mut self, offset: u32, value: &[u8]) {
         let buffer_len = self.buffer.get_mut().len() as u32;
         let dynamic_offset = buffer_len - self.offset;
@@ -112,6 +115,20 @@ impl IsarSerializer {
             .resize(buffer_len as usize + value.len() + 3, 0);
         self.write_u24(dynamic_offset, value.len() as u32);
         self.write(dynamic_offset + 3, value);
+    }
+
+    pub fn update_dynamic(&mut self, offset: u32, value: &[u8]) {
+        let existing_dynamic_offset = self.read_u24(offset);
+        if existing_dynamic_offset != 0 {
+            let existing_dynamic_len = self.read_u24(existing_dynamic_offset);
+            if existing_dynamic_len >= value.len() as u32 {
+                self.write_u24(existing_dynamic_offset, value.len() as u32);
+                self.write(existing_dynamic_offset + 3, value);
+                return;
+            }
+        }
+
+        self.write_dynamic(offset, value);
     }
 
     pub fn begin_nested(&mut self, offset: u32, static_size: u32) -> Self {

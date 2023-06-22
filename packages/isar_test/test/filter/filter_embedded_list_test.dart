@@ -193,7 +193,7 @@ void main() {
       );
 
       isar.tWriteTxn(
-        () => isar.models.tPutAll([obj1, obj2, obj3, obj4, obj5, obj6]),
+        () => isar.models.putAll([obj1, obj2, obj3, obj4, obj5, obj6]),
       );
     });
 

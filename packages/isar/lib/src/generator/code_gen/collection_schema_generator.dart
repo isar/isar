@@ -26,9 +26,9 @@ String generateSchema(ObjectInfo object) {
   if (object.isEmbedded) {
     return '''
     const ${object.dartName.decapitalize()}SchemaHash = ${Isar.fastHash(schemaJson)};
-    const ${object.dartName.capitalize()}Schema = Schema(
+    const ${object.dartName.capitalize()}Schema = IsarSchema(
       schema: '$schemaJson',
-      converter: ObjectConverter<void, ${object.dartName}>(
+      converter: IsarObjectConverter<void, ${object.dartName}>(
         serialize: serialize${object.dartName},
         deserialize: deserialize${object.dartName},
       ),
@@ -43,9 +43,9 @@ String generateSchema(ObjectInfo object) {
     }
 
     return '''
-    const ${object.dartName.capitalize()}Schema = CollectionSchema(
+    const ${object.dartName.capitalize()}Schema = IsarCollectionSchema(
       schema: '$schemaJson',
-      converter: ObjectConverter<${object.idProperty!.dartType}, ${object.dartName}>(
+      converter: IsarObjectConverter<${object.idProperty!.dartType}, ${object.dartName}>(
         serialize: serialize${object.dartName},
         deserialize: deserialize${object.dartName},
         deserializeProperty: deserialize${object.dartName}Prop,

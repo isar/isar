@@ -23,7 +23,7 @@ class _IsarImpl extends Isar {
 
   final int instanceId;
   final StorageEngine engine;
-  final List<ObjectConverter<dynamic, dynamic>> converters;
+  final List<IsarObjectConverter<dynamic, dynamic>> converters;
   final collections = <Type, _IsarCollectionImpl<dynamic, dynamic>>{};
 
   Pointer<CIsarInstance>? _ptr;
@@ -31,14 +31,14 @@ class _IsarImpl extends Isar {
   bool _txnWrite = false;
 
   factory _IsarImpl.open({
-    required List<CollectionSchema> schemas,
+    required List<IsarCollectionSchema> schemas,
     required String directory,
     required StorageEngine engine,
     required String name,
     required int maxSizeMiB,
     required CompactCondition? compactOnLaunch,
   }) {
-    final allSchemas = <Schema>{};
+    final allSchemas = <IsarSchema>{};
     for (final schema in schemas) {
       allSchemas.add(schema);
       for (final schema in schema.embeddedSchemas) {
@@ -77,7 +77,7 @@ class _IsarImpl extends Isar {
 
   factory _IsarImpl.get({
     required int instanceId,
-    required List<ObjectConverter<dynamic, dynamic>> converters,
+    required List<IsarObjectConverter<dynamic, dynamic>> converters,
     required StorageEngine engine,
   }) {
     final ptr = isar_get_instance(instanceId, engine.cEngine);
@@ -91,7 +91,7 @@ class _IsarImpl extends Isar {
 
   factory _IsarImpl.getByName({
     required String name,
-    required List<CollectionSchema> schemas,
+    required List<IsarCollectionSchema> schemas,
     required StorageEngine engine,
   }) {
     final instanceId = Isar.fastHash(name);
@@ -302,7 +302,7 @@ class _IsarImpl extends Isar {
 T _isarAsync<T>(
   int instanceId,
   StorageEngine engine,
-  List<ObjectConverter<dynamic, dynamic>> converters,
+  List<IsarObjectConverter<dynamic, dynamic>> converters,
   bool write,
   T Function(Isar isar) callback,
 ) {

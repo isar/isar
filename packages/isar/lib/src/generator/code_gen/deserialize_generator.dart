@@ -83,13 +83,14 @@ String _deserializeProperty(
   String Function(String value) result,
 ) {
   return _deserialize(
+    index: p.index.toString(),
     isId: p.isId,
     typeClassName: p.typeClassName,
     type: p.type,
     elementDartType: p.scalarDartType,
-    index: p.index.toString(),
     defaultValue: p.defaultValue,
     elementDefaultValue: p.elementDefaultValue,
+    utc: p.utc,
     transform: (value) {
       if (p.isEnum && !p.type.isList) {
         return result(
@@ -110,13 +111,14 @@ String _deserializeProperty(
 }
 
 String _deserialize({
+  required String index,
   required bool isId,
   required String typeClassName,
   required PropertyType type,
   String? elementDartType,
   required String defaultValue,
   String? elementDefaultValue,
-  required String index,
+  required bool utc,
   required String Function(String value) transform,
   String Function(String value)? transformElement,
 }) {
@@ -193,13 +195,14 @@ String _deserialize({
         }''';
       }
     case PropertyType.dateTime:
+      final toLocal = utc ? '' : '.toLocal()';
       return '''
         {
           final value = IsarCore.readLong(reader, $index);
           if (value == $nullLong) {
             ${transform(defaultValue)}
           } else {
-            ${transform('DateTime.fromMicrosecondsSinceEpoch(value, isUtc: true).toLocal()')}
+            ${transform('DateTime.fromMicrosecondsSinceEpoch(value, isUtc: true)$toLocal')}
           }
         }''';
 
@@ -247,11 +250,12 @@ String _deserialize({
     case PropertyType.stringList:
     case PropertyType.objectList:
       final deser = _deserialize(
+        index: 'i',
         isId: false,
         typeClassName: typeClassName,
         type: type.scalarType,
         defaultValue: elementDefaultValue!,
-        index: 'i',
+        utc: utc,
         transform: (value) => 'list[i] = ${transformElement!(value)};',
       );
       return '''

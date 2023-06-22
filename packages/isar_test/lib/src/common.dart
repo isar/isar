@@ -80,7 +80,7 @@ String getRandomName() {
 
 String? testTempPath;
 Isar openTempIsar(
-  List<CollectionSchema> schemas, {
+  List<IsarCollectionSchema> schemas, {
   String? name,
   String? directory,
   int maxSizeMiB = Isar.defaultMaxSizeMiB,

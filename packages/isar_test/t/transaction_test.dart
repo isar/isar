@@ -235,46 +235,46 @@ void main() {
     });
     isarTestAsync('gets reverted on error', () async {
       await isar.writeTxn(() => isar.models.put(Model()));
-      await qEqual(isar.models.where(), [Model(1)]);
+      await expect(isar.models.where(), [Model(1)]);
 
       Future<void> errorTxn() async {
         await isar.writeTxn(() async {
           await isar.models.put(Model(5));
-          await qEqual(isar.models.where(), [Model(1), Model(5)]);
+          await expect(isar.models.where(), [Model(1), Model(5)]);
           throw UnsupportedError('test');
         });
       }
 
       await expectLater(errorTxn(), throwsUnsupportedError);
-      await qEqual(isar.models.where(), [Model(1)]);
+      await expect(isar.models.where(), [Model(1)]);
 
       await expectLater(errorTxn(), throwsUnsupportedError);
-      await qEqual(isar.models.where(), [Model(1)]);
+      await expect(isar.models.where(), [Model(1)]);
 
       await isar.writeTxn(() => isar.models.put(Model(5)));
-      await qEqual(isar.models.where(), [Model(1), Model(5)]);
+      await expect(isar.models.where(), [Model(1), Model(5)]);
     });
 
     isarTestSync('gets reverted on error', () {
       isar.writeTxnSync(() => isar.models.putSync(Model()));
-      qEqual(isar.models.where(), [Model(1)]);
+      expect(isar.models.where(), [Model(1)]);
 
       void errorTxn() {
         isar.writeTxnSync(() {
           isar.models.putSync(Model(5));
-          qEqual(isar.models.where(), [Model(1), Model(5)]);
+          expect(isar.models.where(), [Model(1), Model(5)]);
           throw UnsupportedError('test');
         });
       }
 
       expect(errorTxn, throwsUnsupportedError);
-      qEqual(isar.models.where(), [Model(1)]);
+      expect(isar.models.where(), [Model(1)]);
 
       expectLater(errorTxn, throwsUnsupportedError);
-      qEqual(isar.models.where(), [Model(1)]);
+      expect(isar.models.where(), [Model(1)]);
 
       isar.writeTxnSync(() => isar.models.putSync(Model(5)));
-      qEqual(isar.models.where(), [Model(1), Model(5)]);
+      expect(isar.models.where(), [Model(1), Model(5)]);
     });
   });
 }

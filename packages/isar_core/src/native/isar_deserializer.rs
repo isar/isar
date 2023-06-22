@@ -16,7 +16,7 @@ impl<'a> IsarDeserializer<'a> {
     pub fn from_bytes(bytes: &'a [u8]) -> Self {
         let static_size = LittleEndian::read_u24(bytes);
         Self {
-            bytes: &bytes[3..],
+            bytes: &bytes[3..], // account for static size
             static_size,
         }
     }

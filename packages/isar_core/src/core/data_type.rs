@@ -9,9 +9,9 @@ pub enum DataType {
     #[serde(alias = "DateTime")]
     Long,
     Double,
-    #[serde(alias = "Json")]
     String,
     Object,
+    Json,
     BoolList,
     ByteList,
     IntList,

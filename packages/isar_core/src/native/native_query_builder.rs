@@ -289,7 +289,7 @@ fn native_between_filter(
                 let upper = upper_real(upper, include_upper)?;
                 NativeFilter::double(property, lower, upper)
             }
-            DataType::String | DataType::StringList => {
+            DataType::String | DataType::StringList | DataType::Json => {
                 let lower = if let Some(lower) = lower {
                     let mut lower = lower.string()?.to_string();
                     if !include_lower {
@@ -402,7 +402,7 @@ fn get_max(property: Option<&NativeProperty>) -> Option<IsarValue> {
             DataType::Float | DataType::FloatList => IsarValue::Real(f64::INFINITY),
             DataType::Long | DataType::LongList => IsarValue::Integer(i64::MAX),
             DataType::Double | DataType::DoubleList => IsarValue::Real(f64::INFINITY),
-            DataType::String | DataType::StringList => {
+            DataType::String | DataType::StringList | DataType::Json => {
                 IsarValue::String(IsarValue::MAX_STRING.to_string())
             }
             DataType::Object | DataType::ObjectList => return None,

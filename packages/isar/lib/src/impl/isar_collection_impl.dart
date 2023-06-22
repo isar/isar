@@ -7,7 +7,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
   final _IsarImpl isar;
 
   final int collectionIndex;
-  final ObjectConverter<ID, OBJ> converter;
+  final IsarObjectConverter<ID, OBJ> converter;
 
   @override
   OBJ? get(ID id) {
@@ -20,7 +20,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
       final readerPtr = readerPtrPtr.value;
       if (!readerPtr.isNull) {
         final object = converter.deserialize(readerPtr);
-        isar_free_reader(readerPtr);
+        isar_read_free(readerPtr);
         return object;
       } else {
         return null;
@@ -46,7 +46,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
         final readerPtr = readerPtrPtr.value;
         if (!readerPtr.isNull) {
           objects[i] = converter.deserialize(readerPtr);
-          isar_free_reader(readerPtr);
+          isar_read_free(readerPtr);
         }
       }
 
@@ -84,6 +84,43 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
       isar_insert_finish(insertPtr, txnPtrPtr).checkNoError();
 
       return (null, txnPtrPtr.value);
+    });
+  }
+
+  @override
+  int updateProperties(List<ID> ids, Map<int, dynamic> changes) {
+    if (ids.isEmpty) return 0;
+
+    final updatePtr = isar_update_new();
+    for (final propertyId in changes.keys) {
+      print('Updating property $propertyId to ${changes[propertyId]}');
+      final value = _isarValue(changes[propertyId]);
+      isar_update_add_value(updatePtr, propertyId, value);
+    }
+
+    return isar.getWriteTxn(consume: false, (isarPtr, txnPtr) {
+      try {
+        var count = 0;
+        final updatedPtr = IsarCore.boolPtr;
+        for (final id in ids) {
+          isar_update(
+            isarPtr,
+            txnPtr,
+            collectionIndex,
+            _idToInt(id),
+            updatePtr,
+            updatedPtr,
+          ).checkNoError();
+
+          if (updatedPtr.value) {
+            count++;
+          }
+        }
+
+        return (count, txnPtr);
+      } finally {
+        isar_update_free(updatePtr);
+      }
     });
   }
 
@@ -147,18 +184,8 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
   }
 
   @override
-  void importJson(List<Map<String, dynamic>> json) {
-    importJsonBytes(const Utf8Encoder().convert(jsonEncode(json)));
-  }
-
-  @override
   void importJsonBytes(Uint8List jsonBytes) {
     // TODO: implement importJsonBytes
-  }
-
-  @override
-  void importJsonFile(String path) {
-    // TODO: implement importJsonFile
   }
 
   @override

@@ -1,5 +1,6 @@
 #![allow(clippy::missing_safety_doc)]
 #![feature(local_key_cell_methods)]
+#![feature(vec_into_raw_parts)]
 
 use core::slice;
 use isar_core::core::cursor::IsarCursor;
@@ -22,6 +23,7 @@ pub mod insert;
 pub mod instance;
 pub mod query;
 pub mod reader;
+pub mod update;
 pub mod value;
 pub mod writer;
 
@@ -120,6 +122,8 @@ pub enum CIsarReader<'a> {
     SQLiteList(SListReader<'a>),
 }
 
+pub struct CIsarUpdate(pub(crate) Vec<(u16, Option<IsarValue>)>);
+
 pub enum CIsarQueryBuilder<'a> {
     #[cfg(feature = "native")]
     Native(NQueryBuilder<'a>),
@@ -149,29 +153,16 @@ pub unsafe extern "C" fn isar_string(chars: *const u16, length: u32) -> *const S
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_free_reader(reader: *const CIsarReader) {
-    if !reader.is_null() {
-        drop(Box::from_raw(reader as *mut CIsarReader));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_free_query(query: *mut CIsarQuery) {
-    if !query.is_null() {
-        drop(Box::from_raw(query));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_free_cursor(cursor: *mut CIsarCursor) {
-    if !cursor.is_null() {
-        drop(Box::from_raw(cursor));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_free_value(value: *mut IsarValue) {
+pub unsafe extern "C" fn isar_string_free(value: *mut String) {
     if !value.is_null() {
         drop(Box::from_raw(value));
     }
 }
+
+/*#[no_mangle]
+pub unsafe extern "C" fn isar_bytes_free(value: *mut u8, length: u32) {
+    if !value.is_null() {
+        drop(Vec::from_raw_parts(value, length as usize, length as usize));
+    }
+}
+*/

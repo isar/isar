@@ -30,8 +30,8 @@ void main() {
       final isarName = isar.name;
 
       final obj1 = Model()..value = 'M1';
-      await isar.tWriteTxn(() async {
-        await isar.models.tPut(obj1);
+      await isar.writeTxn((isar) async {
+        await isar.models.put((obj1);
       });
       expect(obj1.id, 1);
       expect(await isar.models.tGet(obj1.id!), obj1);
@@ -46,8 +46,8 @@ void main() {
       final obj3 = Model()
         ..value = 'M3'
         ..id = 20;
-      await isar.tWriteTxn(() async {
-        await isar.models.tPutAll([obj2, obj3]);
+      await isar.writeTxn((isar) async {
+        await isar.models.putAll([obj2, obj3]);
       });
       expect(obj2.id, 2);
       expect(obj3.id, 20);
@@ -58,11 +58,11 @@ void main() {
       isar = await openTempIsar([ModelSchema], name: isarName);
 
       final obj4 = Model()..value = 'M4';
-      await isar.tWriteTxn(() async {
-        await isar.models.tPut(obj4);
+      await isar.writeTxn((isar) async {
+        await isar.models.put((obj4);
       });
       expect(obj4.id, 21);
-      await qEqual(isar.models.where(), [obj1, obj2, obj3, obj4]);
+      await expect(isar.models.where(), [obj1, obj2, obj3, obj4]);
     });
 
     isarTest('Prevents usage of closed collection', () async {

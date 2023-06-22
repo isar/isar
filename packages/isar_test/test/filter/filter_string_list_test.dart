@@ -166,7 +166,7 @@ void main() {
             .where()
             .stringsElementEqualTo('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -216,7 +216,7 @@ void main() {
             .where()
             .nullableStringsElementEqualTo('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -252,7 +252,7 @@ void main() {
             .where()
             .stringsNullableElementEqualTo('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -287,7 +287,7 @@ void main() {
             .where()
             .nullableStringsNullableElementEqualTo('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
     });
 
@@ -301,7 +301,7 @@ void main() {
             .where()
             .stringsElementStartsWith('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -316,7 +316,7 @@ void main() {
             .where()
             .nullableStringsElementStartsWith('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -331,7 +331,7 @@ void main() {
             .where()
             .stringsNullableElementEqualTo('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -346,7 +346,7 @@ void main() {
             .where()
             .nullableStringsNullableElementStartsWith('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
     });
 
@@ -384,7 +384,7 @@ void main() {
             .where()
             .stringsElementEndsWith('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -416,7 +416,7 @@ void main() {
             .where()
             .nullableStringsElementEndsWith('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -440,7 +440,7 @@ void main() {
             .where()
             .stringsNullableElementEndsWith('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -469,7 +469,7 @@ void main() {
             .where()
             .nullableStringsNullableElementEndsWith('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
     });
 
@@ -483,7 +483,7 @@ void main() {
             .where()
             .stringsElementContains('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -498,7 +498,7 @@ void main() {
             .where()
             .nullableStringsElementContains('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -513,7 +513,7 @@ void main() {
             .where()
             .stringsNullableElementContains('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -528,7 +528,7 @@ void main() {
             .where()
             .nullableStringsNullableElementContains('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
     });
 
@@ -542,7 +542,7 @@ void main() {
             .where()
             .stringsElementMatches('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -557,7 +557,7 @@ void main() {
             .where()
             .nullableStringsElementMatches('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -572,7 +572,7 @@ void main() {
             .where()
             .stringsNullableElementMatches('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
 
       expect(
@@ -589,7 +589,7 @@ void main() {
             .where()
             .nullableStringsNullableElementMatches('non existing')
             .findAll(),
-        [],
+        isEmpty,
       );
     });
 

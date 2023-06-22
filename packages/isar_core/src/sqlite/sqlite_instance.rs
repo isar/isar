@@ -8,7 +8,9 @@ use super::sqlite_query_builder::SQLiteQueryBuilder;
 use super::sqlite_reader::SQLiteReader;
 use super::sqlite_txn::SQLiteTxn;
 use crate::core::error::{IsarError, Result};
+use crate::core::filter::{ConditionType, Filter, FilterCondition};
 use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
+use crate::core::query_builder::IsarQueryBuilder;
 use crate::core::schema::IsarSchema;
 use crate::core::value::IsarValue;
 use intmap::IntMap;
@@ -18,6 +20,7 @@ use std::borrow::Cow;
 use std::cell::Cell;
 use std::fs::remove_file;
 use std::path::PathBuf;
+use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::vec;
 
@@ -40,7 +43,7 @@ struct SQLiteInstanceInfo {
 
 pub struct SQLiteInstance {
     info: Arc<SQLiteInstanceInfo>,
-    sqlite: Arc<SQLite3>,
+    sqlite: Rc<SQLite3>,
     txn_active: Cell<bool>,
 }
 
@@ -56,7 +59,7 @@ impl SQLiteInstance {
         let path = path_buf.as_path().to_str().unwrap().to_string();
 
         let sqlite = Self::open_conn(&path)?;
-        let sqlite = Arc::new(sqlite);
+        let sqlite = Rc::new(sqlite);
         let txn = SQLiteTxn::new(sqlite.clone(), true)?;
         perform_migration(&txn, &schema)?;
         txn.commit()?;
@@ -70,7 +73,7 @@ impl SQLiteInstance {
             collections,
         };
 
-        let sqlite = Arc::into_inner(sqlite).unwrap();
+        let sqlite = Rc::into_inner(sqlite).unwrap();
         Ok((instance_info, sqlite))
     }
 
@@ -145,7 +148,7 @@ impl IsarInstance for SQLiteInstance {
             if let Some(sqlite) = sqlite {
                 Some(Self {
                     info: connections.info.clone(),
-                    sqlite: Arc::new(sqlite),
+                    sqlite: Rc::new(sqlite),
                     txn_active: Cell::new(false),
                 })
             } else {
@@ -162,6 +165,10 @@ impl IsarInstance for SQLiteInstance {
 
     fn get_dir(&self) -> &str {
         &self.info.dir
+    }
+
+    fn get_collections(&self) -> impl Iterator<Item = &str> {
+        self.info.collections.iter().map(|c| c.name.as_str())
     }
 
     fn open_instance(
@@ -193,7 +200,7 @@ impl IsarInstance for SQLiteInstance {
         let sqlite = connections.sqlite.pop().unwrap();
         Ok(Self {
             info: connections.info.clone(),
-            sqlite: Arc::new(sqlite),
+            sqlite: Rc::new(sqlite),
             txn_active: Cell::new(false),
         })
     }
@@ -253,6 +260,25 @@ impl IsarInstance for SQLiteInstance {
         SQLiteInsert::new(txn, collection, &self.info.collections, count)
     }
 
+    fn update(
+        &self,
+        txn: &Self::Txn,
+        collection_index: u16,
+        id: i64,
+        updates: &[(u16, Option<IsarValue>)],
+    ) -> Result<bool> {
+        let mut qb = self.query(collection_index)?;
+        qb.set_filter(Filter::Condition(FilterCondition::new(
+            0,
+            ConditionType::Equal,
+            vec![Some(IsarValue::Integer(id))],
+            false,
+        )));
+        let q = qb.build();
+        let count = self.query_update(txn, &q, None, None, updates)?;
+        Ok(count > 0)
+    }
+
     fn delete<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16, id: i64) -> Result<bool> {
         let collection = self.get_collection(collection_index)?;
         let sql = format!(
@@ -307,14 +333,25 @@ impl IsarInstance for SQLiteInstance {
         query.cursor(txn, &self.info.collections, offset, limit)
     }
 
-    fn query_aggregate<'a>(
-        &'a self,
-        txn: &'a Self::Txn,
-        query: &'a Self::Query,
+    fn query_aggregate(
+        &self,
+        txn: &Self::Txn,
+        query: &Self::Query,
         aggregation: Aggregation,
         property_index: Option<u16>,
     ) -> Result<Option<IsarValue>> {
         query.aggregate(txn, &self.info.collections, aggregation, property_index)
+    }
+
+    fn query_update(
+        &self,
+        txn: &Self::Txn,
+        query: &Self::Query,
+        offset: Option<u32>,
+        limit: Option<u32>,
+        updates: &[(u16, Option<IsarValue>)],
+    ) -> Result<u32> {
+        query.update(txn, &self.info.collections, offset, limit, updates)
     }
 
     fn query_delete(
@@ -328,7 +365,7 @@ impl IsarInstance for SQLiteInstance {
     }
 
     fn copy(&self, path: &str) -> Result<()> {
-        if Arc::strong_count(&self.sqlite) > 1 {
+        if Rc::strong_count(&self.sqlite) > 1 {
             return Err(IsarError::UnsupportedOperation {});
         }
 
@@ -357,7 +394,7 @@ impl IsarInstance for SQLiteInstance {
         }
 
         // Return connection to pool
-        if let Some(sqlite) = Arc::into_inner(instance.sqlite) {
+        if let Some(sqlite) = Rc::into_inner(instance.sqlite) {
             let mut lock = INSTANCES.lock().unwrap();
             let connections = lock.get_mut(instance.info.instance_id as u64).unwrap();
             connections.sqlite.push(sqlite);

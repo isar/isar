@@ -1,6 +1,8 @@
 use std::borrow::Cow;
 
-use super::sql::{offset_limit_sql, select_properties_sql, FN_FILTER_JSON_COND_PTR_TYPE};
+use super::sql::{
+    offset_limit_sql, select_properties_sql, update_properties_sql, FN_FILTER_JSON_COND_PTR_TYPE,
+};
 use super::sqlite3::SQLiteStatement;
 use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
 use super::sqlite_reader::SQLiteReader;
@@ -49,13 +51,14 @@ impl SQLiteQuery {
     ) -> Result<SQLiteCursor<'a>> {
         let collection = &all_collections[self.collection_index as usize];
         let sql = format!(
-            "SELECT {} {} {}",
+            "SELECT {} FROM {} {} {}",
             select_properties_sql(collection),
+            collection.name,
             self.sql,
             offset_limit_sql(offset, limit)
         );
         let mut stmt = txn.get_sqlite(false)?.prepare(&sql)?;
-        self.bind_params(&mut stmt)?;
+        Self::bind_params(&mut stmt, &self.params, 0)?;
 
         Ok(SQLiteCursor {
             stmt,
@@ -93,9 +96,12 @@ impl SQLiteQuery {
                 format!("AVG({})", property_name)
             }
         };
-        let sql = format!("SELECT {} {}", aggregation_sql, self.sql);
+        let sql = format!(
+            "SELECT {} FROM {} {}",
+            aggregation_sql, collection.name, self.sql
+        );
         let mut stmt = txn.get_sqlite(false)?.prepare(&sql)?;
-        self.bind_params(&mut stmt)?;
+        Self::bind_params(&mut stmt, &self.params, 0)?;
 
         let has_next = stmt.step()?;
         let result = match aggregation {
@@ -126,6 +132,39 @@ impl SQLiteQuery {
         Ok(Some(result))
     }
 
+    pub(crate) fn update(
+        &self,
+        txn: &SQLiteTxn,
+        all_collections: &[SQLiteCollection],
+        offset: Option<u32>,
+        limit: Option<u32>,
+        updates: &[(u16, Option<IsarValue>)],
+    ) -> Result<u32> {
+        let collection: &SQLiteCollection = &all_collections[self.collection_index as usize];
+        let (update_sql, update_params) = update_properties_sql(collection, updates);
+        let sql = if offset.is_some() || limit.is_some() || self.has_sort_distinct {
+            format!(
+                "UPDATE {} SET {} WHERE {} IN (SELECT {} FROM {} {} {})",
+                collection.name,
+                update_sql,
+                SQLiteProperty::ID_NAME,
+                SQLiteProperty::ID_NAME,
+                collection.name,
+                self.sql,
+                offset_limit_sql(offset, limit)
+            )
+        } else {
+            format!("UPDATE {} SET {} {}", collection.name, update_sql, self.sql)
+        };
+        let sqlite = txn.get_sqlite(true)?;
+        let mut stmt = sqlite.prepare(&sql)?;
+        Self::bind_params(&mut stmt, &update_params, 0)?;
+        Self::bind_params(&mut stmt, &self.params, update_params.len())?;
+        stmt.step()?;
+        let count = sqlite.count_changes();
+        Ok(count as u32)
+    }
+
     pub(crate) fn delete(
         &self,
         txn: &SQLiteTxn,
@@ -133,39 +172,41 @@ impl SQLiteQuery {
         offset: Option<u32>,
         limit: Option<u32>,
     ) -> Result<u32> {
+        let collection = &all_collections[self.collection_index as usize];
         let sql = if offset.is_some() || limit.is_some() || self.has_sort_distinct {
-            let collection = &all_collections[self.collection_index as usize];
             format!(
-                "DELETE FROM {} WHERE {} IN (SELECT {} {} {})",
+                "DELETE FROM {} WHERE {} IN (SELECT {} FROM {} {} {})",
                 collection.name,
                 SQLiteProperty::ID_NAME,
                 SQLiteProperty::ID_NAME,
+                collection.name,
                 self.sql,
                 offset_limit_sql(offset, limit)
             )
         } else {
-            format!("DELETE {} {}", self.sql, offset_limit_sql(offset, limit))
+            format!("DELETE FROM {} {}", collection.name, self.sql)
         };
         let sqlite = txn.get_sqlite(true)?;
         let mut stmt = sqlite.prepare(&sql)?;
-        self.bind_params(&mut stmt)?;
+        Self::bind_params(&mut stmt, &self.params, 0)?;
         stmt.step()?;
         let count = sqlite.count_changes();
         Ok(count as u32)
     }
 
-    fn bind_params(&self, stmt: &mut SQLiteStatement) -> Result<()> {
-        for (i, params) in self.params.iter().enumerate() {
+    fn bind_params(stmt: &mut SQLiteStatement, params: &[QueryParam], offset: usize) -> Result<()> {
+        for (i, params) in params.iter().enumerate() {
+            let col = (i + offset) as u32;
             match params {
                 QueryParam::Value(IsarValue::Bool(value)) => {
                     let value = if *value { 1 } else { 0 };
-                    stmt.bind_int(i as u32, value)?;
+                    stmt.bind_int(col, value)?;
                 }
-                QueryParam::Value(IsarValue::Integer(value)) => stmt.bind_long(i as u32, *value)?,
-                QueryParam::Value(IsarValue::Real(value)) => stmt.bind_double(i as u32, *value)?,
-                QueryParam::Value(IsarValue::String(value)) => stmt.bind_text(i as u32, value)?,
+                QueryParam::Value(IsarValue::Integer(value)) => stmt.bind_long(col, *value)?,
+                QueryParam::Value(IsarValue::Real(value)) => stmt.bind_double(col, *value)?,
+                QueryParam::Value(IsarValue::String(value)) => stmt.bind_text(col, value)?,
                 QueryParam::JsonCondition(cond) => {
-                    stmt.bind_object(i as u32, cond, FN_FILTER_JSON_COND_PTR_TYPE)?
+                    stmt.bind_object(col, cond, FN_FILTER_JSON_COND_PTR_TYPE)?
                 }
             }
         }

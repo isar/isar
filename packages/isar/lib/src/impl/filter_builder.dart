@@ -7,10 +7,10 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
       if (value is double) {
         return isar_filter_between(
           filter.property,
-          _buildFilterValue(
+          _isarValue(
             _adjustLowerFloatBound(value, true, filter.epsilon),
           ),
-          _buildFilterValue(
+          _isarValue(
             _adjustUpperFloatBound(value, true, filter.epsilon),
           ),
           filter.caseSensitive,
@@ -18,7 +18,7 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
       } else {
         return isar_filter_equal(
           filter.property,
-          _buildFilterValue(filter.value),
+          _isarValue(filter.value),
           filter.caseSensitive,
         );
       }
@@ -31,7 +31,7 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
           : rawValue;
       return isar_filter_greater(
         filter.property,
-        _buildFilterValue(value),
+        _isarValue(value),
         filter.caseSensitive,
       );
     case GreaterOrEqualCondition():
@@ -41,7 +41,7 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
           : rawValue;
       return isar_filter_greater_or_equal(
         filter.property,
-        _buildFilterValue(value),
+        _isarValue(value),
         filter.caseSensitive,
       );
     case LessCondition():
@@ -51,7 +51,7 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
           : rawValue;
       return isar_filter_less(
         filter.property,
-        _buildFilterValue(value),
+        _isarValue(value),
         filter.caseSensitive,
       );
     case LessOrEqualCondition():
@@ -61,7 +61,7 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
           : rawValue;
       return isar_filter_less_or_equal(
         filter.property,
-        _buildFilterValue(value),
+        _isarValue(value),
         filter.caseSensitive,
       );
     case BetweenCondition():
@@ -75,32 +75,32 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
           : rawUpper;
       return isar_filter_between(
         filter.property,
-        _buildFilterValue(lower),
-        _buildFilterValue(upper),
+        _isarValue(lower),
+        _isarValue(upper),
         filter.caseSensitive,
       );
     case StartsWithCondition():
       return isar_filter_string_starts_with(
         filter.property,
-        _buildFilterValue(filter.value),
+        _isarValue(filter.value),
         filter.caseSensitive,
       );
     case EndsWithCondition():
       return isar_filter_string_ends_with(
         filter.property,
-        _buildFilterValue(filter.value),
+        _isarValue(filter.value),
         filter.caseSensitive,
       );
     case ContainsCondition():
       return isar_filter_string_contains(
         filter.property,
-        _buildFilterValue(filter.value),
+        _isarValue(filter.value),
         filter.caseSensitive,
       );
     case MatchesCondition():
       return isar_filter_string_matches(
         filter.property,
-        _buildFilterValue(filter.wildcard),
+        _isarValue(filter.wildcard),
         filter.caseSensitive,
       );
     case IsNullCondition():
@@ -132,7 +132,7 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
   }
 }
 
-Pointer<CIsarValue> _buildFilterValue(Object? value) {
+Pointer<CIsarValue> _isarValue(Object? value) {
   if (value == null) {
     return nullptr;
   } else if (value is int) {

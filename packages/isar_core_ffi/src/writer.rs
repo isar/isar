@@ -3,204 +3,249 @@ use isar_core::core::writer::IsarWriter;
 use std::slice;
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_write_null(writer: &'static mut CIsarWriter) {
+pub unsafe extern "C" fn isar_write_null(writer: &'static mut CIsarWriter, index: u32) {
     match writer {
         #[cfg(feature = "native")]
-        CIsarWriter::Native(writer) => writer.write_null(),
+        CIsarWriter::Native(writer) => writer.write_null(index),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeObject(writer) => writer.write_null(),
+        CIsarWriter::NativeObject(writer) => writer.write_null(index),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeList(writer) => writer.write_null(),
+        CIsarWriter::NativeList(writer) => writer.write_null(index),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLite(writer) => writer.write_null(),
+        CIsarWriter::SQLite(writer) => writer.write_null(index),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteObject(writer) => writer.write_null(),
+        CIsarWriter::SQLiteObject(writer) => writer.write_null(index),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteList(writer) => writer.write_null(),
+        CIsarWriter::SQLiteList(writer) => writer.write_null(index),
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_write_bool(writer: &'static mut CIsarWriter, value: bool) {
+pub unsafe extern "C" fn isar_write_bool(
+    writer: &'static mut CIsarWriter,
+    index: u32,
+    value: bool,
+) {
     match writer {
         #[cfg(feature = "native")]
-        CIsarWriter::Native(writer) => writer.write_bool(Some(value)),
+        CIsarWriter::Native(writer) => writer.write_bool(index, Some(value)),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeObject(writer) => writer.write_bool(Some(value)),
+        CIsarWriter::NativeObject(writer) => writer.write_bool(index, Some(value)),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeList(writer) => writer.write_bool(Some(value)),
+        CIsarWriter::NativeList(writer) => writer.write_bool(index, Some(value)),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLite(writer) => writer.write_bool(Some(value)),
+        CIsarWriter::SQLite(writer) => writer.write_bool(index, Some(value)),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteObject(writer) => writer.write_bool(Some(value)),
+        CIsarWriter::SQLiteObject(writer) => writer.write_bool(index, Some(value)),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteList(writer) => writer.write_bool(Some(value)),
+        CIsarWriter::SQLiteList(writer) => writer.write_bool(index, Some(value)),
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_write_byte(writer: &'static mut CIsarWriter, value: u8) {
+pub unsafe extern "C" fn isar_write_byte(writer: &'static mut CIsarWriter, index: u32, value: u8) {
     match writer {
         #[cfg(feature = "native")]
-        CIsarWriter::Native(writer) => writer.write_byte(value),
+        CIsarWriter::Native(writer) => writer.write_byte(index, value),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeObject(writer) => writer.write_byte(value),
+        CIsarWriter::NativeObject(writer) => writer.write_byte(index, value),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeList(writer) => writer.write_byte(value),
+        CIsarWriter::NativeList(writer) => writer.write_byte(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLite(writer) => writer.write_byte(value),
+        CIsarWriter::SQLite(writer) => writer.write_byte(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteObject(writer) => writer.write_byte(value),
+        CIsarWriter::SQLiteObject(writer) => writer.write_byte(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteList(writer) => writer.write_byte(value),
+        CIsarWriter::SQLiteList(writer) => writer.write_byte(index, value),
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_write_int(writer: &'static mut CIsarWriter, value: i32) {
+pub unsafe extern "C" fn isar_write_int(writer: &'static mut CIsarWriter, index: u32, value: i32) {
     match writer {
         #[cfg(feature = "native")]
-        CIsarWriter::Native(writer) => writer.write_int(value),
+        CIsarWriter::Native(writer) => writer.write_int(index, value),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeObject(writer) => writer.write_int(value),
+        CIsarWriter::NativeObject(writer) => writer.write_int(index, value),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeList(writer) => writer.write_int(value),
+        CIsarWriter::NativeList(writer) => writer.write_int(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLite(writer) => writer.write_int(value),
+        CIsarWriter::SQLite(writer) => writer.write_int(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteObject(writer) => writer.write_int(value),
+        CIsarWriter::SQLiteObject(writer) => writer.write_int(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteList(writer) => writer.write_int(value),
+        CIsarWriter::SQLiteList(writer) => writer.write_int(index, value),
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_write_float(writer: &'static mut CIsarWriter, value: f32) {
+pub unsafe extern "C" fn isar_write_float(
+    writer: &'static mut CIsarWriter,
+    index: u32,
+    value: f32,
+) {
     match writer {
         #[cfg(feature = "native")]
-        CIsarWriter::Native(writer) => writer.write_float(value),
+        CIsarWriter::Native(writer) => writer.write_float(index, value),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeObject(writer) => writer.write_float(value),
+        CIsarWriter::NativeObject(writer) => writer.write_float(index, value),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeList(writer) => writer.write_float(value),
+        CIsarWriter::NativeList(writer) => writer.write_float(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLite(writer) => writer.write_float(value),
+        CIsarWriter::SQLite(writer) => writer.write_float(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteObject(writer) => writer.write_float(value),
+        CIsarWriter::SQLiteObject(writer) => writer.write_float(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteList(writer) => writer.write_float(value),
+        CIsarWriter::SQLiteList(writer) => writer.write_float(index, value),
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_write_long(writer: &'static mut CIsarWriter, value: i64) {
+pub unsafe extern "C" fn isar_write_long(writer: &'static mut CIsarWriter, index: u32, value: i64) {
     match writer {
         #[cfg(feature = "native")]
-        CIsarWriter::Native(writer) => writer.write_long(value),
+        CIsarWriter::Native(writer) => writer.write_long(index, value),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeObject(writer) => writer.write_long(value),
+        CIsarWriter::NativeObject(writer) => writer.write_long(index, value),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeList(writer) => writer.write_long(value),
+        CIsarWriter::NativeList(writer) => writer.write_long(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLite(writer) => writer.write_long(value),
+        CIsarWriter::SQLite(writer) => writer.write_long(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteObject(writer) => writer.write_long(value),
+        CIsarWriter::SQLiteObject(writer) => writer.write_long(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteList(writer) => writer.write_long(value),
+        CIsarWriter::SQLiteList(writer) => writer.write_long(index, value),
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_write_double(writer: &'static mut CIsarWriter, value: f64) {
+pub unsafe extern "C" fn isar_write_double(
+    writer: &'static mut CIsarWriter,
+    index: u32,
+    value: f64,
+) {
     match writer {
         #[cfg(feature = "native")]
-        CIsarWriter::Native(writer) => writer.write_double(value),
+        CIsarWriter::Native(writer) => writer.write_double(index, value),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeObject(writer) => writer.write_double(value),
+        CIsarWriter::NativeObject(writer) => writer.write_double(index, value),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeList(writer) => writer.write_double(value),
+        CIsarWriter::NativeList(writer) => writer.write_double(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLite(writer) => writer.write_double(value),
+        CIsarWriter::SQLite(writer) => writer.write_double(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteObject(writer) => writer.write_double(value),
+        CIsarWriter::SQLiteObject(writer) => writer.write_double(index, value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteList(writer) => writer.write_double(value),
+        CIsarWriter::SQLiteList(writer) => writer.write_double(index, value),
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_write_string(writer: &'static mut CIsarWriter, value: *mut String) {
+pub unsafe extern "C" fn isar_write_string(
+    writer: &'static mut CIsarWriter,
+    index: u32,
+    value: *mut String,
+) {
     let value = *Box::from_raw(value);
     match writer {
         #[cfg(feature = "native")]
-        CIsarWriter::Native(writer) => writer.write_string(&value),
+        CIsarWriter::Native(writer) => writer.write_string(index, &value),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeObject(writer) => writer.write_string(&value),
+        CIsarWriter::NativeObject(writer) => writer.write_string(index, &value),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeList(writer) => writer.write_string(&value),
+        CIsarWriter::NativeList(writer) => writer.write_string(index, &value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLite(writer) => writer.write_string(&value),
+        CIsarWriter::SQLite(writer) => writer.write_string(index, &value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteObject(writer) => writer.write_string(&value),
+        CIsarWriter::SQLiteObject(writer) => writer.write_string(index, &value),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteList(writer) => writer.write_string(&value),
+        CIsarWriter::SQLiteList(writer) => writer.write_string(index, &value),
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_write_json(
+    writer: &'static mut CIsarWriter,
+    index: u32,
+    value: *mut String,
+) {
+    let value = *Box::from_raw(value);
+    match writer {
+        #[cfg(feature = "native")]
+        CIsarWriter::Native(writer) => writer.write_string(index, &value),
+        #[cfg(feature = "native")]
+        CIsarWriter::NativeObject(writer) => writer.write_string(index, &value),
+        #[cfg(feature = "native")]
+        CIsarWriter::NativeList(writer) => writer.write_string(index, &value),
+        #[cfg(feature = "sqlite")]
+        CIsarWriter::SQLite(writer) => writer.write_string(index, &value),
+        #[cfg(feature = "sqlite")]
+        CIsarWriter::SQLiteObject(writer) => writer.write_string(index, &value),
+        #[cfg(feature = "sqlite")]
+        CIsarWriter::SQLiteList(writer) => writer.write_string(index, &value),
     }
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_write_byte_list(
     writer: &'static mut CIsarWriter,
+    index: u32,
     value: *const u8,
     length: u32,
 ) {
     let bytes = slice::from_raw_parts(value, length as usize);
     match writer {
         #[cfg(feature = "native")]
-        CIsarWriter::Native(writer) => writer.write_byte_list(bytes),
+        CIsarWriter::Native(writer) => writer.write_byte_list(index, bytes),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeObject(writer) => writer.write_byte_list(bytes),
+        CIsarWriter::NativeObject(writer) => writer.write_byte_list(index, bytes),
         #[cfg(feature = "native")]
-        CIsarWriter::NativeList(writer) => writer.write_byte_list(bytes),
+        CIsarWriter::NativeList(writer) => writer.write_byte_list(index, bytes),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLite(writer) => writer.write_byte_list(bytes),
+        CIsarWriter::SQLite(writer) => writer.write_byte_list(index, bytes),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteObject(writer) => writer.write_byte_list(bytes),
+        CIsarWriter::SQLiteObject(writer) => writer.write_byte_list(index, bytes),
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteList(writer) => writer.write_byte_list(bytes),
+        CIsarWriter::SQLiteList(writer) => writer.write_byte_list(index, bytes),
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_begin_object(
+pub unsafe extern "C" fn isar_write_object(
     writer: &'static mut CIsarWriter,
+    index: u32,
 ) -> *mut CIsarWriter<'static> {
     let writer = match writer {
         #[cfg(feature = "native")]
-        CIsarWriter::Native(writer) => CIsarWriter::NativeObject(writer.begin_object().unwrap()),
+        CIsarWriter::Native(writer) => {
+            CIsarWriter::NativeObject(writer.begin_object(index).unwrap())
+        }
         #[cfg(feature = "native")]
         CIsarWriter::NativeObject(writer) => {
-            CIsarWriter::NativeObject(writer.begin_object().unwrap())
+            CIsarWriter::NativeObject(writer.begin_object(index).unwrap())
         }
         #[cfg(feature = "native")]
         CIsarWriter::NativeList(writer) => {
-            CIsarWriter::NativeObject(writer.begin_object().unwrap())
+            CIsarWriter::NativeObject(writer.begin_object(index).unwrap())
         }
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLite(writer) => CIsarWriter::SQLiteObject(writer.begin_object().unwrap()),
+        CIsarWriter::SQLite(writer) => {
+            CIsarWriter::SQLiteObject(writer.begin_object(index).unwrap())
+        }
         #[cfg(feature = "sqlite")]
         CIsarWriter::SQLiteObject(writer) => {
-            CIsarWriter::SQLiteObject(writer.begin_object().unwrap())
+            CIsarWriter::SQLiteObject(writer.begin_object(index).unwrap())
         }
         #[cfg(feature = "sqlite")]
         CIsarWriter::SQLiteList(writer) => {
-            CIsarWriter::SQLiteObject(writer.begin_object().unwrap())
+            CIsarWriter::SQLiteObject(writer.begin_object(index).unwrap())
         }
     };
     Box::into_raw(Box::new(writer))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_end_object(
+pub unsafe extern "C" fn isar_write_object_end(
     writer: &'static mut CIsarWriter,
     embedded_writer: *mut CIsarWriter<'static>,
 ) {
@@ -235,22 +280,27 @@ pub unsafe extern "C" fn isar_end_object(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_begin_list(
+pub unsafe extern "C" fn isar_write_list(
     writer: &'static mut CIsarWriter,
+    index: u32,
     length: u32,
 ) -> *mut CIsarWriter<'static> {
     let writer = match writer {
         #[cfg(feature = "native")]
-        CIsarWriter::Native(writer) => CIsarWriter::NativeList(writer.begin_list(length).unwrap()),
+        CIsarWriter::Native(writer) => {
+            CIsarWriter::NativeList(writer.begin_list(index, length).unwrap())
+        }
         #[cfg(feature = "native")]
         CIsarWriter::NativeObject(writer) => {
-            CIsarWriter::NativeList(writer.begin_list(length).unwrap())
+            CIsarWriter::NativeList(writer.begin_list(index, length).unwrap())
         }
         #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLite(writer) => CIsarWriter::SQLiteList(writer.begin_list(length).unwrap()),
+        CIsarWriter::SQLite(writer) => {
+            CIsarWriter::SQLiteList(writer.begin_list(index, length).unwrap())
+        }
         #[cfg(feature = "sqlite")]
         CIsarWriter::SQLiteObject(writer) => {
-            CIsarWriter::SQLiteList(writer.begin_list(length).unwrap())
+            CIsarWriter::SQLiteList(writer.begin_list(index, length).unwrap())
         }
         _ => panic!("Cannot write nested list"),
     };
@@ -258,7 +308,7 @@ pub unsafe extern "C" fn isar_begin_list(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_end_list(
+pub unsafe extern "C" fn isar_write_list_end(
     writer: &'static mut CIsarWriter,
     list_writer: *mut CIsarWriter<'static>,
 ) {

@@ -13,7 +13,7 @@ void main() {
     });
 
     test('Import / Export', () async {
-      await isar.tWriteTxn(() async {
+      await isar.writeTxn((isar) async {
         await isar.tweets.tImportJson([tweetJson]);
       });
 
@@ -22,7 +22,7 @@ void main() {
 
     test('Import / Export raw', () async {
       final bytes = JsonUtf8Encoder().convert([tweetJson]);
-      await isar.tWriteTxn(() async {
+      await isar.writeTxn((isar) async {
         await isar.tweets.tImportJsonRaw(Uint8List.fromList(bytes));
       });
 
@@ -32,12 +32,12 @@ void main() {
     });
 
     test('Import raw malformed', () async {
-      final i1 = isar.tWriteTxn(() async {
+      final i1 = isar.writeTxn((isar) async {
         await isar.tweets.tImportJsonRaw(Uint8List(0));
       });
       await expectLater(() => i1, throwsIsarError());
 
-      final i2 = isar.tWriteTxn(() async {
+      final i2 = isar.writeTxn((isar) async {
         final bytes = JsonUtf8Encoder().convert({});
         await isar.tweets.tImportJsonRaw(Uint8List.fromList(bytes));
       });

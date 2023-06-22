@@ -1,5 +1,6 @@
 part of isar;
 
+@pragma('vm:isolate-unsendable')
 abstract class IsarCollection<ID, OBJ> {
   Isar get isar;
 
@@ -10,6 +11,9 @@ abstract class IsarCollection<ID, OBJ> {
   void put(OBJ object) => putAll([object]);
 
   void putAll(List<OBJ> objects);
+
+  @protected
+  int updateProperties(List<ID> ids, Map<int, dynamic> changes);
 
   bool delete(ID id);
 
@@ -26,8 +30,6 @@ abstract class IsarCollection<ID, OBJ> {
   }
 
   void importJsonBytes(Uint8List jsonBytes);
-
-  void importJsonFile(String path);
 
   void clear();
 

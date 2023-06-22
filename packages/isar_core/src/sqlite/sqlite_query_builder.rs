@@ -56,8 +56,6 @@ impl<'a> IsarQueryBuilder for SQLiteQueryBuilder<'a> {
         let mut filter_params = vec![];
 
         let mut sql = String::new();
-        sql.push_str("FROM ");
-        sql.push_str(&self.collection.name);
         if let Some(filter) = self.filter {
             sql.push_str(" WHERE ");
             let (filter_sql, params) = filter_sql(self.collection, filter);

@@ -177,6 +177,7 @@ pub struct SQLiteFnContext<'a> {
     args: &'a [*mut ffi::sqlite3_value],
 }
 
+#[allow(dead_code)]
 impl<'a> SQLiteFnContext<'a> {
     pub fn get_int(&self, index: usize) -> i64 {
         unsafe { ffi::sqlite3_value_int64(self.args[index]) }

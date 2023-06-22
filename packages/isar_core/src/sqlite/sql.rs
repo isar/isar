@@ -1,4 +1,4 @@
-use super::sqlite3::SQLiteFnContext;
+use super::sqlite3::{SQLite3, SQLiteFnContext};
 use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
 use super::sqlite_query::QueryParam;
 use crate::core::data_type::DataType;
@@ -9,6 +9,7 @@ use crate::core::value::IsarValue;
 use itertools::Itertools;
 use serde_json::Value;
 use std::borrow::Cow;
+use std::cmp::min;
 use std::vec;
 
 pub(crate) fn create_table_sql(collection: &CollectionSchema) -> String {
@@ -50,6 +51,62 @@ pub(crate) fn select_properties_sql(collection: &SQLiteCollection) -> String {
         sql.push_str(&prop.name);
     }
     sql
+}
+
+pub(crate) fn insert_sql(name: &str, properties: &[SQLiteProperty], count: u32) -> (u32, String) {
+    let mut sql = String::new();
+    sql.push_str("INSERT OR REPLACE INTO ");
+    sql.push_str(name);
+    sql.push_str(" (_id");
+
+    for property in properties {
+        sql.push_str(", ");
+        sql.push_str(&property.name);
+    }
+
+    sql.push_str(") VALUES ");
+
+    let mut batch = String::new();
+    batch.push_str("(?");
+    for _ in 0..properties.len() {
+        batch.push_str(",?");
+    }
+    batch.push_str(")");
+
+    let batch_size = min(
+        count,
+        SQLite3::MAX_PARAM_COUNT / (properties.len() as u32 + 1),
+    );
+    sql.push_str(&batch);
+    for _ in 1..batch_size {
+        sql.push_str(",");
+        sql.push_str(&batch);
+    }
+
+    (batch_size, sql)
+}
+
+pub(crate) fn update_properties_sql(
+    collection: &SQLiteCollection,
+    updates: &[(u16, Option<IsarValue>)],
+) -> (String, Vec<QueryParam>) {
+    let mut sql = String::new();
+    let mut params = vec![];
+    for (prop, change) in updates.iter() {
+        if let Some(property) = collection.get_property(*prop) {
+            if !sql.is_empty() {
+                sql.push(',');
+            }
+            sql.push_str(&property.name);
+            if let Some(value) = change {
+                sql.push_str("=?");
+                params.push(QueryParam::Value(value.clone()));
+            } else {
+                sql.push_str("=NULL");
+            }
+        }
+    }
+    (sql, params)
 }
 
 pub(crate) fn offset_limit_sql(offset: Option<u32>, limit: Option<u32>) -> String {
@@ -257,6 +314,7 @@ pub(crate) fn data_type_sql(property: &PropertySchema) -> Cow<str> {
         DataType::Long => Cow::Borrowed("i64"),
         DataType::Double => Cow::Borrowed("f64"),
         DataType::String => Cow::Borrowed("str"),
+        DataType::Json => Cow::Borrowed("json"),
         DataType::Object => Cow::Borrowed(property.collection.as_ref().unwrap()),
         DataType::BoolList => Cow::Borrowed("bool[]"),
         DataType::ByteList => Cow::Borrowed("u8[]"),
@@ -281,6 +339,7 @@ pub(crate) fn sql_data_type(sqlite_type: &str) -> (DataType, Option<&str>) {
         "i64" => (DataType::Long, None),
         "f64" => (DataType::Double, None),
         "str" => (DataType::String, None),
+        "json" => (DataType::Json, None),
         "bool[]" => (DataType::BoolList, None),
         "u8[]" => (DataType::ByteList, None),
         "i32[]" => (DataType::IntList, None),

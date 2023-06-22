@@ -49,8 +49,8 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
         values.add(_deserialize(readerPtr));
       }
 
-      isar_free_reader(readerPtr);
-      isar_free_cursor(cursorPtr);
+      isar_read_free(readerPtr);
+      isar_cursor_free(cursorPtr);
       return values;
     });
   }
@@ -133,14 +133,14 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
           throw ArgumentError('Unsupported aggregation type: $R');
         }
       } finally {
-        isar_free_value(value);
+        isar_value_free(value);
       }
     });
   }
 
   @override
   void close() {
-    isar_free_query(_ptr);
+    isar_query_free(_ptr);
     _ptrAddress = 0;
   }
 }

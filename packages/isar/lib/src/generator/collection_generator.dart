@@ -11,6 +11,7 @@ import 'package:isar/src/generator/code_gen/query_filter_generator.dart';
 import 'package:isar/src/generator/code_gen/query_property_generator.dart';
 import 'package:isar/src/generator/code_gen/query_sort_by_generator.dart';
 import 'package:isar/src/generator/code_gen/serialize_generator.dart';
+import 'package:isar/src/generator/code_gen/update_generator.dart';
 import 'package:isar/src/generator/isar_analyzer.dart';
 import 'package:isar/src/generator/isar_type.dart';
 import 'package:source_gen/source_gen.dart';
@@ -26,6 +27,7 @@ const _ignoreLints = [
   'unnecessary_parenthesis',
   'unnecessary_raw_strings',
   'unnecessary_null_in_if_null_operators',
+  'library_private_types_in_public_api',
 ];
 
 class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
@@ -53,6 +55,8 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       ${generateDeserialize(object)}
 
       ${generateDeserializeProp(object)}
+
+      ${generateUpdate(object)}
 
       ${generateEnumMaps(object)}
 

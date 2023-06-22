@@ -39,6 +39,12 @@ pub enum IsarError {
     #[snafu(display("Transaction closed."))]
     TransactionClosed {},
 
+    #[snafu(display("Id not found."))]
+    IdNotFound {},
+
+    #[snafu(display("Unknown propery."))]
+    UnknownProperty {},
+
     #[snafu(display("Transaction already active."))]
     TransactionActive {},
 
