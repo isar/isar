@@ -1,4 +1,6 @@
+use super::sqlite_query::SQLiteQuery;
 use crate::core::data_type::DataType;
+use crate::core::watcher::CollectionWatchers;
 
 pub struct SQLiteProperty {
     pub name: String,
@@ -23,6 +25,7 @@ pub struct SQLiteCollection {
     pub name: String,
     pub id_name: Option<String>,
     pub properties: Vec<SQLiteProperty>,
+    pub watchers: CollectionWatchers<SQLiteQuery>,
 }
 
 impl SQLiteCollection {
@@ -31,6 +34,7 @@ impl SQLiteCollection {
             name,
             id_name,
             properties,
+            watchers: CollectionWatchers::new(),
         }
     }
 

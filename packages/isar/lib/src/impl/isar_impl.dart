@@ -38,6 +38,8 @@ class _IsarImpl extends Isar {
     required int maxSizeMiB,
     required CompactCondition? compactOnLaunch,
   }) {
+    isar_connect_dart_api(NativeApi.postCObject.cast());
+
     final embeddedSchemas = <IsarSchema>{};
     for (final schema in schemas) {
       for (final schema in schema.embeddedSchemas) {

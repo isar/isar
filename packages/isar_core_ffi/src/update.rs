@@ -1,6 +1,31 @@
+use crate::{CIsarInstance, CIsarTxn, CIsarUpdate};
+use isar_core::core::error::IsarError;
+use isar_core::core::instance::IsarInstance;
 use isar_core::core::value::IsarValue;
 
-use crate::CIsarUpdate;
+#[no_mangle]
+pub unsafe extern "C" fn isar_update(
+    isar: &'static CIsarInstance,
+    txn: &CIsarTxn,
+    collection_index: u16,
+    id: i64,
+    update: &CIsarUpdate,
+    updated: *mut bool,
+) -> u8 {
+    isar_try! {
+        match (isar, txn) {
+            #[cfg(feature = "native")]
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
+                *updated = isar.update(txn, collection_index, id, &update.0)?;
+            }
+            #[cfg(feature = "sqlite")]
+            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn)) => {
+                *updated = isar.update(txn, collection_index, id, &update.0)?;
+            }
+            _ => return Err(IsarError::IllegalArgument {}),
+        };
+    }
+}
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_update_new() -> *mut CIsarUpdate {

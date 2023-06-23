@@ -2,6 +2,7 @@ use self::aggregate::{aggregate_min_max, aggregate_sum_average};
 use self::native_filter::NativeFilter;
 use self::query_iterator::QueryIterator;
 use super::index::index_key::IndexKey;
+use super::isar_deserializer::IsarDeserializer;
 use super::native_collection::{NativeCollection, NativeProperty};
 use super::native_reader::NativeReader;
 use super::native_txn::NativeTxn;
@@ -10,6 +11,7 @@ use crate::core::error::Result;
 use crate::core::instance::Aggregation;
 use crate::core::query_builder::Sort;
 use crate::core::value::IsarValue;
+use crate::core::watcher::QueryMatches;
 
 mod aggregate;
 mod index_iterator;
@@ -25,6 +27,7 @@ pub(crate) enum QueryIndex {
     Secondary(IndexKey, IndexKey),
 }
 
+#[derive(Clone)]
 pub struct Query {
     pub(crate) instance_id: u32,
     pub(crate) collection_index: u16,
@@ -120,6 +123,14 @@ impl Query {
             count += 1;
         }
         Ok(count)
+    }
+}
+
+impl QueryMatches for Query {
+    type Object<'a> = IsarDeserializer<'a>;
+
+    fn matches<'a>(&self, id: i64, object: &IsarDeserializer<'a>) -> bool {
+        self.filter.evaluate(id, *object)
     }
 }
 

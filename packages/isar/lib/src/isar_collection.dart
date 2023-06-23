@@ -32,6 +32,23 @@ abstract class IsarCollection<ID, OBJ> {
 
   void clear();
 
+  /// Watch the collection for changes.
+  ///
+  /// If [fireImmediately] is `true`, an event will be fired immediately.
+  Stream<void> watchLazy({bool fireImmediately = false});
+
+  /// Watch the object with [id] for changes. If a change occurs, the new object
+  /// will be returned in the stream.
+  ///
+  /// Objects that don't exist (yet) can also be watched. If [fireImmediately]
+  /// is `true`, the object will be sent to the consumer immediately.
+  Stream<OBJ?> watchObject(ID id, {bool fireImmediately = false});
+
+  /// Watch the object with [id] for changes.
+  ///
+  /// If [fireImmediately] is `true`, an event will be fired immediately.
+  Stream<void> watchObjectLazy(ID id, {bool fireImmediately = false});
+
   @experimental
   IsarQuery<R> buildQuery<R>({
     Filter? filter,

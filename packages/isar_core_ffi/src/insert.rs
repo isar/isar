@@ -1,5 +1,34 @@
-use crate::{CIsarTxn, CIsarWriter};
-use isar_core::core::{error::IsarError, insert::IsarInsert};
+use crate::{CIsarInstance, CIsarTxn, CIsarWriter};
+use isar_core::core::error::IsarError;
+use isar_core::core::insert::IsarInsert;
+use isar_core::core::instance::IsarInstance;
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_insert(
+    isar: &'static CIsarInstance,
+    txn: *mut CIsarTxn,
+    collection_index: u16,
+    count: u32,
+    insert: *mut *const CIsarWriter,
+) -> u8 {
+    isar_try! {
+        let txn = *Box::from_raw(txn);
+        let new_insert = match (isar, txn) {
+            #[cfg(feature = "native")]
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
+                let insert = isar.insert(txn, collection_index, count)?;
+                CIsarWriter::Native(insert)
+            }
+            #[cfg(feature = "sqlite")]
+            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn)) => {
+                let insert = isar.insert(txn, collection_index, count)?;
+                CIsarWriter::SQLite(insert)
+            }
+            _ => return Err(IsarError::IllegalArgument {}),
+        };
+        *insert = Box::into_raw(Box::new(new_insert));
+    }
+}
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_insert_save(insert: &mut CIsarWriter<'static>, id: i64) -> u8 {

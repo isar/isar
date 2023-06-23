@@ -147,6 +147,41 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
   }
 
   @override
+  Stream<List<T>> watch({bool fireImmediately = false}) {
+    return watchLazy(fireImmediately: fireImmediately)
+        .asyncMap((event) => findAllAsync());
+  }
+
+  @override
+  Stream<void> watchLazy({bool fireImmediately = false}) {
+    final port = ReceivePort();
+    final handlePtrPtr = IsarCore.ptrPtr.cast<Pointer<CWatchHandle>>();
+
+    isar_watch_query(
+      isar.getPtr(),
+      _ptr,
+      port.sendPort.nativePort,
+      handlePtrPtr,
+    ).checkNoError();
+
+    final handlePtr = handlePtrPtr.value;
+    final controller = StreamController<void>(
+      onCancel: () {
+        isar.getPtr(); // Make sure Isar is not closed
+        isar_stop_watching(handlePtr);
+        port.close();
+      },
+    );
+
+    if (fireImmediately) {
+      controller.add(null);
+    }
+
+    controller.addStream(port);
+    return controller.stream;
+  }
+
+  @override
   void close() {
     isar_query_free(_ptr);
     _ptrAddress = 0;

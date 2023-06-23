@@ -6,7 +6,8 @@ use super::mdbx::db::Db;
 use super::mdbx::env::Env;
 use super::mdbx::txn::Txn;
 use crate::core::error::{IsarError, Result};
-use std::cell::{Cell, RefCell};
+use crate::core::watcher::ChangeSet;
+use std::cell::{Cell, RefCell, RefMut};
 use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
 
@@ -15,6 +16,7 @@ pub struct NativeTxn {
     txn: Txn,
     active: Cell<bool>,
     buffer: Cell<Option<Vec<u8>>>,
+    change_set: RefCell<ChangeSet>,
     unbound_cursors: RefCell<Vec<UnboundCursor>>,
 }
 
@@ -26,6 +28,7 @@ impl NativeTxn {
             txn,
             active: Cell::new(true),
             buffer: Cell::new(None),
+            change_set: RefCell::new(ChangeSet::new()),
             unbound_cursors: RefCell::new(Vec::new()),
         };
         Ok(txn)
@@ -47,6 +50,10 @@ impl NativeTxn {
             txn: self,
             cursor: Some(cursor),
         })
+    }
+
+    pub(crate) fn get_change_set(&self) -> RefMut<'_, ChangeSet> {
+        self.change_set.borrow_mut()
     }
 
     #[inline]
@@ -96,7 +103,9 @@ impl NativeTxn {
         if !self.active.get() {
             return Err(IsarError::TransactionClosed {});
         }
-        self.txn.commit()
+        self.txn.commit()?;
+        self.change_set.borrow_mut().notify_watchers();
+        Ok(())
     }
 
     pub(crate) fn abort(self) {

@@ -1,11 +1,14 @@
 use super::index::id_key::IdToBytes;
 use super::index::NativeIndex;
+use super::isar_deserializer::IsarDeserializer;
 use super::isar_serializer::IsarSerializer;
 use super::mdbx::db::Db;
 use super::native_txn::NativeTxn;
+use super::query::Query;
 use crate::core::data_type::DataType;
 use crate::core::error::{IsarError, Result};
 use crate::core::value::IsarValue;
+use crate::core::watcher::CollectionWatchers;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct NativeProperty {
@@ -24,7 +27,6 @@ impl NativeProperty {
     }
 }
 
-#[derive(Clone)]
 pub struct NativeCollection {
     pub(crate) collection_index: u16,
     pub(crate) name: String,
@@ -32,6 +34,7 @@ pub struct NativeCollection {
     pub(crate) properties: Vec<(String, NativeProperty)>,
     pub(crate) indexes: Vec<NativeIndex>,
     pub(crate) static_size: u32,
+    pub(crate) watchers: CollectionWatchers<Query>,
     db: Option<Db>,
 }
 
@@ -55,6 +58,7 @@ impl NativeCollection {
             properties,
             indexes,
             static_size,
+            watchers: CollectionWatchers::new(),
             db,
         }
     }
@@ -86,6 +90,15 @@ impl NativeCollection {
         Ok(size)
     }
 
+    pub fn prepare_put(&self, txn: &NativeTxn, id: i64, bytes: &[u8]) -> Result<()> {
+        let mut change_set = txn.get_change_set();
+
+        let object = IsarDeserializer::from_bytes(&bytes);
+        change_set.register_change(&self.watchers, id, &object);
+
+        Ok(())
+    }
+
     pub fn update(
         &self,
         txn: &NativeTxn,
@@ -93,6 +106,8 @@ impl NativeCollection {
         updates: &[(u16, Option<IsarValue>)],
     ) -> Result<bool> {
         let mut cursor = txn.get_cursor(self.get_db()?)?;
+        let mut change_set = txn.get_change_set();
+
         let key = id.to_id_bytes();
         if let Some((_, object)) = cursor.move_to(&key)? {
             let mut buffer = txn.take_buffer();
@@ -105,6 +120,9 @@ impl NativeCollection {
 
             let buffer = object.finish();
             cursor.put(&key, &buffer)?;
+
+            let object = IsarDeserializer::from_bytes(&buffer);
+            change_set.register_change(&self.watchers, id, &object);
 
             txn.put_buffer(buffer);
             Ok(true)
@@ -154,7 +172,13 @@ impl NativeCollection {
 
     pub fn delete(&self, txn: &NativeTxn, id: i64) -> Result<bool> {
         let mut cursor = txn.get_cursor(self.get_db()?)?;
-        if cursor.move_to(&id.to_id_bytes())?.is_some() {
+        let mut change_set = txn.get_change_set();
+
+        let key = id.to_id_bytes();
+        if let Some((_, bytes)) = cursor.move_to(&key)? {
+            let object = IsarDeserializer::from_bytes(&bytes);
+            change_set.register_change(&self.watchers, id, &object);
+
             cursor.delete_current()?;
             Ok(true)
         } else {
@@ -163,6 +187,8 @@ impl NativeCollection {
     }
 
     pub fn clear(&self, txn: &NativeTxn) -> Result<()> {
+        let mut change_set = txn.get_change_set();
+        change_set.register_all(&self.watchers);
         txn.clear_db(self.get_db()?)
     }
 }

@@ -38,6 +38,12 @@ external void isar_cursor_free(
   ffi.Pointer<CIsarCursor> cursor,
 );
 
+@ffi.Native<ffi.Void Function(DartPostCObjectFnType)>(
+    symbol: 'isar_connect_dart_api')
+external void isar_connect_dart_api(
+  DartPostCObjectFnType ptr,
+);
+
 @ffi.Native<ffi.Pointer<CFilter> Function(ffi.Uint16)>(
     symbol: 'isar_filter_is_null')
 external ffi.Pointer<CFilter> isar_filter_is_null(
@@ -157,6 +163,21 @@ external ffi.Pointer<CFilter> isar_filter_not(
   ffi.Pointer<CFilter> filter,
 );
 
+@ffi.Native<
+    ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarTxn>,
+        ffi.Uint16,
+        ffi.Uint32,
+        ffi.Pointer<ffi.Pointer<CIsarWriter>>)>(symbol: 'isar_insert')
+external int isar_insert(
+  ffi.Pointer<CIsarInstance> isar,
+  ffi.Pointer<CIsarTxn> txn,
+  int collection_index,
+  int count,
+  ffi.Pointer<ffi.Pointer<CIsarWriter>> insert,
+);
+
 @ffi.Native<ffi.Uint8 Function(ffi.Pointer<CIsarWriter>, ffi.Int64)>(
     symbol: 'isar_insert_save')
 external int isar_insert_save(
@@ -267,38 +288,6 @@ external int isar_get(
   int collection_index,
   int id,
   ffi.Pointer<ffi.Pointer<CIsarReader>> reader,
-);
-
-@ffi.Native<
-    ffi.Uint8 Function(
-        ffi.Pointer<CIsarInstance>,
-        ffi.Pointer<CIsarTxn>,
-        ffi.Uint16,
-        ffi.Uint32,
-        ffi.Pointer<ffi.Pointer<CIsarWriter>>)>(symbol: 'isar_insert')
-external int isar_insert(
-  ffi.Pointer<CIsarInstance> isar,
-  ffi.Pointer<CIsarTxn> txn,
-  int collection_index,
-  int count,
-  ffi.Pointer<ffi.Pointer<CIsarWriter>> insert,
-);
-
-@ffi.Native<
-    ffi.Uint8 Function(
-        ffi.Pointer<CIsarInstance>,
-        ffi.Pointer<CIsarTxn>,
-        ffi.Uint16,
-        ffi.Int64,
-        ffi.Pointer<CIsarUpdate>,
-        ffi.Pointer<ffi.Bool>)>(symbol: 'isar_update')
-external int isar_update(
-  ffi.Pointer<CIsarInstance> isar,
-  ffi.Pointer<CIsarTxn> txn,
-  int collection_index,
-  int id,
-  ffi.Pointer<CIsarUpdate> update,
-  ffi.Pointer<ffi.Bool> updated,
 );
 
 @ffi.Native<
@@ -572,6 +561,23 @@ external void isar_read_free(
   ffi.Pointer<CIsarReader> reader,
 );
 
+@ffi.Native<
+    ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarTxn>,
+        ffi.Uint16,
+        ffi.Int64,
+        ffi.Pointer<CIsarUpdate>,
+        ffi.Pointer<ffi.Bool>)>(symbol: 'isar_update')
+external int isar_update(
+  ffi.Pointer<CIsarInstance> isar,
+  ffi.Pointer<CIsarTxn> txn,
+  int collection_index,
+  int id,
+  ffi.Pointer<CIsarUpdate> update,
+  ffi.Pointer<ffi.Bool> updated,
+);
+
 @ffi.Native<ffi.Pointer<CIsarUpdate> Function()>(symbol: 'isar_update_new')
 external ffi.Pointer<CIsarUpdate> isar_update_new();
 
@@ -644,6 +650,51 @@ external int isar_value_get_string(
     symbol: 'isar_value_free')
 external void isar_value_free(
   ffi.Pointer<CIsarValue> value,
+);
+
+@ffi.Native<
+        ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Uint16, DartPort,
+            ffi.Pointer<ffi.Pointer<CWatchHandle>>)>(
+    symbol: 'isar_watch_collection')
+external int isar_watch_collection(
+  ffi.Pointer<CIsarInstance> isar,
+  int collection_index,
+  int port,
+  ffi.Pointer<ffi.Pointer<CWatchHandle>> handle,
+);
+
+@ffi.Native<
+    ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Uint16,
+        ffi.Int64,
+        DartPort,
+        ffi.Pointer<ffi.Pointer<CWatchHandle>>)>(symbol: 'isar_watch_object')
+external int isar_watch_object(
+  ffi.Pointer<CIsarInstance> isar,
+  int collection_index,
+  int id,
+  int port,
+  ffi.Pointer<ffi.Pointer<CWatchHandle>> handle,
+);
+
+@ffi.Native<
+    ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarQuery>,
+        DartPort,
+        ffi.Pointer<ffi.Pointer<CWatchHandle>>)>(symbol: 'isar_watch_query')
+external int isar_watch_query(
+  ffi.Pointer<CIsarInstance> isar,
+  ffi.Pointer<CIsarQuery> query,
+  int port,
+  ffi.Pointer<ffi.Pointer<CWatchHandle>> handle,
+);
+
+@ffi.Native<ffi.Void Function(ffi.Pointer<CWatchHandle>)>(
+    symbol: 'isar_stop_watching')
+external void isar_stop_watching(
+  ffi.Pointer<CWatchHandle> handle,
 );
 
 @ffi.Native<ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32)>(
@@ -789,9 +840,19 @@ final class CIsarValue extends ffi.Opaque {}
 
 final class CString extends ffi.Opaque {}
 
+typedef DartPostCObjectFnType = ffi.Pointer<
+    ffi.NativeFunction<
+        ffi.Int8 Function(
+            DartPort port_id, ffi.Pointer<CDartCObject> message)>>;
+typedef DartPort = ffi.Int64;
+
+final class CDartCObject extends ffi.Opaque {}
+
 typedef StorageEngine = ffi.Uint8;
 
 final class CIsarUpdate extends ffi.Opaque {}
+
+final class CWatchHandle extends ffi.Opaque {}
 
 const int ERROR_PATH = 1;
 

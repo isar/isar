@@ -18,6 +18,7 @@ use isar_core::sqlite::sqlite_instance::SQLiteInstance;
 #[macro_use]
 mod error;
 pub mod cursor;
+pub mod dart;
 pub mod filter;
 pub mod insert;
 pub mod instance;
@@ -25,6 +26,7 @@ pub mod query;
 pub mod reader;
 pub mod update;
 pub mod value;
+pub mod watcher;
 pub mod writer;
 
 #[cfg(feature = "native")]

@@ -8,14 +8,13 @@ use super::native_reader::NativeReader;
 use super::native_txn::NativeTxn;
 use super::query::{Query, QueryCursor};
 use super::schema_manager::perform_migration;
-use crate::core::cursor::IsarCursor;
 use crate::core::error::{IsarError, Result};
 use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
 use crate::core::schema::IsarSchema;
 use crate::core::value::IsarValue;
+use crate::core::watcher::{WatchHandle, WatcherCallback};
 use intmap::IntMap;
 use once_cell::sync::Lazy;
-use serde::{Deserializer, Serializer};
 use std::fs::{self, remove_file};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -246,6 +245,30 @@ impl IsarInstance for NativeInstance {
         self.verify_instance_id(query.instance_id)?;
         let collection = self.get_collection(query.collection_index)?;
         txn.guard(|| query.delete(txn, collection, offset, limit))
+    }
+
+    fn watch(&self, collection_index: u16, callback: WatcherCallback) -> Result<WatchHandle> {
+        let collection = self.get_collection(collection_index)?;
+        let handle = collection.watchers.watch(callback);
+        Ok(handle)
+    }
+
+    fn watch_object(
+        &self,
+        collection_index: u16,
+        id: i64,
+        callback: WatcherCallback,
+    ) -> Result<WatchHandle> {
+        let collection = self.get_collection(collection_index)?;
+        let handle = collection.watchers.watch_object(id, callback);
+        Ok(handle)
+    }
+
+    fn watch_query(&self, query: &Self::Query, callback: WatcherCallback) -> Result<WatchHandle> {
+        self.verify_instance_id(query.instance_id)?;
+        let collection = self.get_collection(query.collection_index)?;
+        let handle = collection.watchers.watch_query(query.clone(), callback);
+        Ok(handle)
     }
 
     fn copy(&self, path: &str) -> Result<()> {

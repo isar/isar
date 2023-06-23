@@ -11,14 +11,16 @@ use crate::core::error::Result;
 use crate::core::filter::JsonCondition;
 use crate::core::instance::Aggregation;
 use crate::core::value::IsarValue;
+use crate::core::watcher::QueryMatches;
 use std::borrow::Cow;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) enum QueryParam {
     Value(IsarValue),
     JsonCondition(JsonCondition),
 }
 
+#[derive(Clone)]
 pub struct SQLiteQuery {
     pub(crate) collection_index: u16,
     sql: String,
@@ -212,6 +214,15 @@ impl SQLiteQuery {
         Ok(())
     }
 }
+
+impl QueryMatches for SQLiteQuery {
+    type Object<'a> = ();
+
+    fn matches<'a>(&self, id: i64, object: &()) -> bool {
+        true
+    }
+}
+
 pub struct SQLiteCursor<'a> {
     stmt: SQLiteStatement<'a>,
     collection: &'a SQLiteCollection,

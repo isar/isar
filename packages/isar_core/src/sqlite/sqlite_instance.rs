@@ -14,6 +14,7 @@ use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
 use crate::core::query_builder::IsarQueryBuilder;
 use crate::core::schema::IsarSchema;
 use crate::core::value::IsarValue;
+use crate::core::watcher::{WatchHandle, WatcherCallback};
 use intmap::IntMap;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
@@ -368,6 +369,29 @@ impl IsarInstance for SQLiteInstance {
         limit: Option<u32>,
     ) -> Result<u32> {
         query.delete(txn, &self.info.collections, offset, limit)
+    }
+
+    fn watch(&self, collection_index: u16, callback: WatcherCallback) -> Result<WatchHandle> {
+        let collection = self.get_collection(collection_index)?;
+        let handle = collection.watchers.watch(callback);
+        Ok(handle)
+    }
+
+    fn watch_object(
+        &self,
+        collection_index: u16,
+        id: i64,
+        callback: WatcherCallback,
+    ) -> Result<WatchHandle> {
+        let collection = self.get_collection(collection_index)?;
+        let handle = collection.watchers.watch_object(id, callback);
+        Ok(handle)
+    }
+
+    fn watch_query(&self, query: &Self::Query, callback: WatcherCallback) -> Result<WatchHandle> {
+        let collection = self.get_collection(query.collection_index)?;
+        let handle = collection.watchers.watch_query(query.clone(), callback);
+        Ok(handle)
     }
 
     fn copy(&self, path: &str) -> Result<()> {

@@ -212,6 +212,70 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
   }
 
   @override
+  Stream<void> watchLazy({bool fireImmediately = false}) {
+    final port = ReceivePort();
+    final handlePtrPtr = IsarCore.ptrPtr.cast<Pointer<CWatchHandle>>();
+
+    isar_watch_collection(
+      isar.getPtr(),
+      collectionIndex,
+      port.sendPort.nativePort,
+      handlePtrPtr,
+    ).checkNoError();
+
+    final handlePtr = handlePtrPtr.value;
+    final controller = StreamController<void>(
+      onCancel: () {
+        isar.getPtr(); // Make sure Isar is not closed
+        isar_stop_watching(handlePtr);
+        port.close();
+      },
+    );
+
+    if (fireImmediately) {
+      controller.add(null);
+    }
+
+    controller.addStream(port);
+    return controller.stream;
+  }
+
+  @override
+  Stream<OBJ?> watchObject(ID id, {bool fireImmediately = false}) {
+    return watchObjectLazy(id, fireImmediately: fireImmediately)
+        .asyncMap((event) => getAsync(id));
+  }
+
+  @override
+  Stream<void> watchObjectLazy(ID id, {bool fireImmediately = false}) {
+    final port = ReceivePort();
+    final handlePtrPtr = IsarCore.ptrPtr.cast<Pointer<CWatchHandle>>();
+
+    isar_watch_object(
+      isar.getPtr(),
+      collectionIndex,
+      _idToInt(id),
+      port.sendPort.nativePort,
+      handlePtrPtr,
+    ).checkNoError();
+
+    final handlePtr = handlePtrPtr.value;
+    final controller = StreamController<void>(
+      onCancel: () {
+        isar_stop_watching(handlePtr);
+        port.close();
+      },
+    );
+
+    if (fireImmediately) {
+      controller.add(null);
+    }
+
+    controller.addStream(port);
+    return controller.stream;
+  }
+
+  @override
   IsarQuery<R> buildQuery<R>({
     Filter? filter,
     List<SortProperty>? sortBy,

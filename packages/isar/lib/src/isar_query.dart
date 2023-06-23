@@ -11,8 +11,6 @@ abstract class IsarQuery<T> {
 
   int deleteAll({int? offset, int? limit});
 
-  List<Map<String, dynamic>> exportJson({int? offset, int? limit});
-
   int count() => aggregate(Aggregation.count) ?? 0;
 
   bool isEmpty() => aggregate(Aggregation.isEmpty) ?? true;
@@ -21,6 +19,24 @@ abstract class IsarQuery<T> {
 
   @protected
   R? aggregate<R>(Aggregation op);
+
+  List<Map<String, dynamic>> exportJson({int? offset, int? limit});
+
+  /// {@template query_watch}
+  /// Create a watcher that yields the results of this query whenever its
+  /// results have (potentially) changed.
+  ///
+  /// If you don't always use the results, consider using `watchLazy` and rerun
+  /// the query manually. If [fireImmediately] is `true`, the results will be
+  /// sent to the consumer immediately.
+  /// {@endtemplate}
+  Stream<List<T>> watch({bool fireImmediately = false});
+
+  /// {@template query_watch_lazy}
+  /// Watch the query for changes. If [fireImmediately] is `true`, an event will
+  /// be fired immediately.
+  /// {@endtemplate}
+  Stream<void> watchLazy({bool fireImmediately = false});
 
   void close();
 }

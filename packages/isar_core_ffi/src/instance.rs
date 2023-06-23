@@ -1,4 +1,4 @@
-use crate::{CIsarInstance, CIsarReader, CIsarTxn, CIsarUpdate, CIsarWriter};
+use crate::{CIsarInstance, CIsarReader, CIsarTxn};
 use isar_core::core::error::IsarError;
 use isar_core::core::instance::{CompactCondition, IsarInstance};
 use isar_core::core::schema::IsarSchema;
@@ -214,57 +214,6 @@ pub unsafe extern "C" fn isar_get(
         } else {
             *reader = ptr::null();
         }
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_insert(
-    isar: &'static CIsarInstance,
-    txn: *mut CIsarTxn,
-    collection_index: u16,
-    count: u32,
-    insert: *mut *const CIsarWriter,
-) -> u8 {
-    isar_try! {
-        let txn = *Box::from_raw(txn);
-        let new_insert = match (isar, txn) {
-            #[cfg(feature = "native")]
-            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
-                let insert = isar.insert(txn, collection_index, count)?;
-                CIsarWriter::Native(insert)
-            }
-            #[cfg(feature = "sqlite")]
-            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn)) => {
-                let insert = isar.insert(txn, collection_index, count)?;
-                CIsarWriter::SQLite(insert)
-            }
-            _ => return Err(IsarError::IllegalArgument {}),
-        };
-        *insert = Box::into_raw(Box::new(new_insert));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_update(
-    isar: &'static CIsarInstance,
-    txn: &CIsarTxn,
-    collection_index: u16,
-    id: i64,
-    update: &CIsarUpdate,
-    updated: *mut bool,
-) -> u8 {
-    isar_try! {
-        match (isar, txn) {
-            #[cfg(feature = "native")]
-            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
-                *updated = isar.update(txn, collection_index, id, &update.0)?;
-            }
-            #[cfg(feature = "sqlite")]
-            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn)) => {
-                *updated = isar.update(txn, collection_index, id, &update.0)?;
-            }
-            _ => return Err(IsarError::IllegalArgument {}),
-        };
     }
 }
 

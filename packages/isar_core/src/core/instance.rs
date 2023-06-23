@@ -6,6 +6,7 @@ use super::query_builder::IsarQueryBuilder;
 use super::reader::IsarReader;
 use super::schema::IsarSchema;
 use super::value::IsarValue;
+use super::watcher::{WatchHandle, WatcherCallback};
 use serde::Deserializer;
 
 pub struct CompactCondition {
@@ -137,6 +138,17 @@ pub trait IsarInstance: Sized {
             .map_err(|_| IsarError::JsonError {})?;
         Ok((txn, count))
     }
+
+    fn watch(&self, collection_index: u16, callback: WatcherCallback) -> Result<WatchHandle>;
+
+    fn watch_object(
+        &self,
+        collection_index: u16,
+        id: i64,
+        callback: WatcherCallback,
+    ) -> Result<WatchHandle>;
+
+    fn watch_query(&self, query: &Self::Query, callback: WatcherCallback) -> Result<WatchHandle>;
 
     fn copy(&self, path: &str) -> Result<()>;
 
