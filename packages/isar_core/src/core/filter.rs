@@ -94,14 +94,14 @@ impl JsonCondition {
 
 #[derive(PartialEq, Clone, Debug)]
 pub struct FilterNested {
-    collection_index: u16,
-    filter: Box<Filter>,
+    pub property_index: u16,
+    pub filter: Box<Filter>,
 }
 
 impl FilterNested {
-    pub fn new(collection_index: u16, filter: Filter) -> Self {
+    pub fn new(property_index: u16, filter: Filter) -> Self {
         FilterNested {
-            collection_index,
+            property_index,
             filter: Box::new(filter),
         }
     }

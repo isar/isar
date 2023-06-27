@@ -262,6 +262,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
     final handlePtr = handlePtrPtr.value;
     final controller = StreamController<void>(
       onCancel: () {
+        isar.getPtr(); // Make sure Isar is not closed
         isar_stop_watching(handlePtr);
         port.close();
       },

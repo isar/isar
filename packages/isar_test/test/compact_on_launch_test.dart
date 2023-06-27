@@ -37,7 +37,11 @@ void main() {
 
     setUp(() {
       isar = openTempIsar([ModelSchema], name: isarName);
-      file = File('${isar.directory}/$isarName.isar');
+      if (isSQLite) {
+        file = File('${isar.directory}/$isarName.sqlite');
+      } else {
+        file = File('${isar.directory}/$isarName.isar');
+      }
 
       isar.writeTxn(
         (isar) => isar.models.putAll(List.generate(100, Model.new)),

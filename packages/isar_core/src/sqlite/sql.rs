@@ -57,7 +57,8 @@ pub(crate) fn insert_sql(name: &str, properties: &[SQLiteProperty], count: u32) 
     let mut sql = String::new();
     sql.push_str("INSERT OR REPLACE INTO ");
     sql.push_str(name);
-    sql.push_str(" (_id");
+    sql.push_str(" (");
+    sql.push_str(SQLiteProperty::ID_NAME);
 
     for property in properties {
         sql.push_str(", ");
@@ -120,16 +121,39 @@ pub(crate) fn offset_limit_sql(offset: Option<u32>, limit: Option<u32>) -> Strin
 }
 
 pub(crate) fn filter_sql(
-    collection: &SQLiteCollection,
+    collection_index: u16,
+    all_collections: &[SQLiteCollection],
     filter: Filter,
 ) -> (String, Vec<QueryParam>) {
+    filter_sql_path(collection_index, all_collections, filter, vec![])
+}
+
+fn filter_sql_path(
+    collection_index: u16,
+    all_collections: &[SQLiteCollection],
+    filter: Filter,
+    mut path: Vec<String>,
+) -> (String, Vec<QueryParam>) {
+    let collection = &all_collections[collection_index as usize];
     match filter {
         Filter::Condition(condition) => {
             let is_list = collection
                 .get_property(condition.property_index)
                 .map_or(false, |p| p.data_type.is_list());
-            if is_list {
-                let property_name = collection.get_property_name(condition.property_index);
+            let property_name = collection.get_property_name(condition.property_index);
+            if !path.is_empty() {
+                let first_path_part = path.remove(0);
+                path.push(property_name.to_string());
+                let sql = format!("{}({}, ?)", FN_FILTER_JSON_NAME, first_path_part);
+                let condition = JsonCondition::new(
+                    path,
+                    condition.condition_type,
+                    is_list,
+                    condition.values,
+                    condition.case_sensitive,
+                );
+                (sql, vec![QueryParam::JsonCondition(condition)])
+            } else if is_list {
                 let sql = format!("{}({}, ?)", FN_FILTER_JSON_NAME, property_name);
                 let condition = JsonCondition::new(
                     vec![],
@@ -144,7 +168,19 @@ pub(crate) fn filter_sql(
             }
         }
         Filter::Json(_) => todo!(),
-        Filter::Nested(_) => todo!(),
+        Filter::Nested(nested) => {
+            if let Some(property) = collection.get_property(nested.property_index) {
+                if property.data_type == DataType::Object {
+                    return filter_sql_path(
+                        property.collection_index.unwrap(),
+                        all_collections,
+                        *nested.filter,
+                        vec![property.name.clone()],
+                    );
+                }
+            }
+            ("FALSE".to_string(), vec![])
+        }
         Filter::And(filters) => {
             let mut sql = String::new();
             let mut params = vec![];
@@ -152,7 +188,8 @@ pub(crate) fn filter_sql(
                 if !sql.is_empty() {
                     sql.push_str(" AND ");
                 }
-                let (filter_sql, filter_params) = filter_sql(collection, filter);
+                let (filter_sql, filter_params) =
+                    filter_sql(collection_index, all_collections, filter);
                 sql.push_str(&filter_sql);
                 params.extend(filter_params.into_iter());
             }
@@ -165,14 +202,15 @@ pub(crate) fn filter_sql(
                 if !sql.is_empty() {
                     sql.push_str(" OR ");
                 }
-                let (filter_sql, filter_params) = filter_sql(collection, filter);
+                let (filter_sql, filter_params) =
+                    filter_sql(collection_index, all_collections, filter);
                 sql.push_str(&filter_sql);
                 params.extend(filter_params.into_iter());
             }
             (format!("({})", sql), params)
         }
         Filter::Not(filter) => {
-            let (sql, params) = filter_sql(collection, *filter);
+            let (sql, params) = filter_sql(collection_index, all_collections, *filter);
             (format!("NOT ({})", sql), params)
         }
     }

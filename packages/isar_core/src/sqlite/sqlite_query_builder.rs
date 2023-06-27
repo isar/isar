@@ -8,7 +8,7 @@ use crate::core::query_builder::{IsarQueryBuilder, Sort};
 use itertools::Itertools;
 
 pub struct SQLiteQueryBuilder<'a> {
-    pub(crate) collection: &'a SQLiteCollection,
+    all_collections: &'a [SQLiteCollection],
     collection_index: u16,
     filter: Option<Filter>,
     sort: Vec<(&'a str, Sort, bool)>,
@@ -17,11 +17,11 @@ pub struct SQLiteQueryBuilder<'a> {
 
 impl SQLiteQueryBuilder<'_> {
     pub fn new<'a>(
-        collection: &'a SQLiteCollection,
+        all_collections: &'a [SQLiteCollection],
         collection_index: u16,
     ) -> SQLiteQueryBuilder<'a> {
         SQLiteQueryBuilder {
-            collection,
+            all_collections,
             collection_index,
             filter: None,
             sort: Vec::new(),
@@ -39,7 +39,7 @@ impl<'a> IsarQueryBuilder for SQLiteQueryBuilder<'a> {
 
     fn add_sort(&mut self, property_index: u16, sort: Sort, case_sensitive: bool) {
         self.sort.push((
-            self.collection.get_property_name(property_index),
+            self.all_collections[self.collection_index as usize].get_property_name(property_index),
             sort,
             case_sensitive,
         ));
@@ -47,7 +47,7 @@ impl<'a> IsarQueryBuilder for SQLiteQueryBuilder<'a> {
 
     fn add_distinct(&mut self, property_index: u16, case_sensitive: bool) {
         self.distinct.push((
-            self.collection.get_property_name(property_index),
+            self.all_collections[self.collection_index as usize].get_property_name(property_index),
             case_sensitive,
         ));
     }
@@ -58,7 +58,8 @@ impl<'a> IsarQueryBuilder for SQLiteQueryBuilder<'a> {
         let mut sql = String::new();
         if let Some(filter) = self.filter {
             sql.push_str(" WHERE ");
-            let (filter_sql, params) = filter_sql(self.collection, filter);
+            let (filter_sql, params) =
+                filter_sql(self.collection_index, self.all_collections, filter);
             sql.push_str(&filter_sql);
             filter_params = params;
         }

@@ -118,16 +118,22 @@ class _QueryBuilder<OBJ> {
   }
 
   /// @nodoc
-  /*_QueryBuilder<OBJ> object<E>(
+  _QueryBuilder<OBJ> object<E>(
     FilterQuery<E> q,
     int property,
   ) {
     // ignore: prefer_const_constructors
-    final qb = q(QueryBuilder(_QueryBuilder()));
-    return addFilterCondition(
-      ObjectFilter(filter: qb._query.filter, property: property),
-    );
-  }*/
+    final qb = q(QueryBuilder._(_QueryBuilder()));
+    final filter = qb._query.filter;
+    if (filter != null) {
+      return addFilterCondition(
+        ObjectFilter(property: property, filter: filter),
+      );
+    } else {
+      // ignore: avoid_returning_this
+      return this;
+    }
+  }
 
   ///
 

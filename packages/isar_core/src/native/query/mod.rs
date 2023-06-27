@@ -102,6 +102,30 @@ impl Query {
         }
     }
 
+    pub(crate) fn update(
+        &self,
+        txn: &NativeTxn,
+        collection: &NativeCollection,
+        offset: Option<u32>,
+        limit: Option<u32>,
+        updates: &[(u16, Option<IsarValue>)],
+    ) -> Result<u32> {
+        let iterator = QueryIterator::new(
+            txn,
+            collection,
+            self,
+            false,
+            offset.unwrap_or(0),
+            limit.unwrap_or(u32::MAX),
+        );
+        let mut count = 0;
+        for (id, _) in iterator {
+            collection.update(txn, id, updates)?;
+            count += 1;
+        }
+        Ok(count)
+    }
+
     pub(crate) fn delete(
         &self,
         txn: &NativeTxn,

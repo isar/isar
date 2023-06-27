@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use super::sqlite_query::SQLiteQuery;
 use crate::core::data_type::DataType;
 use crate::core::watcher::CollectionWatchers;
@@ -10,7 +12,7 @@ pub struct SQLiteProperty {
 }
 
 impl SQLiteProperty {
-    pub const ID_NAME: &str = "_id";
+    pub const ID_NAME: &str = "_rowid_";
 
     pub fn new(name: &str, data_type: DataType, collection_index: Option<u16>) -> Self {
         SQLiteProperty {
@@ -25,7 +27,7 @@ pub struct SQLiteCollection {
     pub name: String,
     pub id_name: Option<String>,
     pub properties: Vec<SQLiteProperty>,
-    pub watchers: CollectionWatchers<SQLiteQuery>,
+    pub watchers: Arc<CollectionWatchers<SQLiteQuery>>,
 }
 
 impl SQLiteCollection {

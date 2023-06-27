@@ -254,6 +254,21 @@ class NotGroup extends Filter {
   final Filter filter;
 }
 
+/// Filter condition based on an embedded object.
+class ObjectFilter extends Filter {
+  /// Create a filter condition based on an embedded object.
+  const ObjectFilter({
+    required this.property,
+    required this.filter,
+  });
+
+  /// Index of the property containing the embedded object.
+  final int property;
+
+  /// Filter condition that should be applied
+  final Filter filter;
+}
+
 /// Sort order
 enum Sort {
   /// Ascending sort order.
@@ -292,19 +307,4 @@ class DistinctProperty {
 
   /// Should Strings be case sensitive?
   final bool caseSensitive;
-}
-
-/// Filter condition based on an embedded object.
-class ObjectFilter extends Filter {
-  /// Create a filter condition based on an embedded object.
-  const ObjectFilter({
-    required this.property,
-    required this.filter,
-  });
-
-  /// Index of the property containing the embedded object.
-  final int property;
-
-  /// Filter condition that should be applied
-  final Filter filter;
 }

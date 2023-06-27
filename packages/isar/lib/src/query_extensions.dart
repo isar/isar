@@ -180,11 +180,33 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QOperations> {
   List<Map<String, dynamic>> exportJson({int? offset, int? limit}) =>
       _withQuery((q) => q.exportJson(offset: offset, limit: limit));
 
-  Stream<List<R>> watch({bool fireImmediately = false}) =>
-      _withQuery((q) => q.watch(fireImmediately: fireImmediately));
+  Stream<List<R>> watch({bool fireImmediately = false}) {
+    final q = build();
+    final controller = StreamController<List<R>>();
+    q.watch(fireImmediately: fireImmediately).listen(
+      controller.add,
+      onError: controller.addError,
+      onDone: () {
+        controller.close();
+        q.close();
+      },
+    );
+    return controller.stream;
+  }
 
-  Stream<void> watchLazy({bool fireImmediately = false}) =>
-      _withQuery((q) => q.watchLazy(fireImmediately: fireImmediately));
+  Stream<void> watchLazy({bool fireImmediately = false}) {
+    final q = build();
+    final controller = StreamController<void>();
+    q.watchLazy(fireImmediately: fireImmediately).listen(
+      controller.add,
+      onError: controller.addError,
+      onDone: () {
+        controller.close();
+        q.close();
+      },
+    );
+    return controller.stream;
+  }
 
   Future<T> _withQueryAsync<T>(Future<T> Function(IsarQuery<R> q) f) async {
     final q = build();

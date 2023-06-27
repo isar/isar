@@ -141,6 +141,13 @@ external ffi.Pointer<CFilter> isar_filter_string_matches(
   bool case_sensitive,
 );
 
+@ffi.Native<ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CFilter>)>(
+    symbol: 'isar_filter_nested')
+external ffi.Pointer<CFilter> isar_filter_nested(
+  int property_index,
+  ffi.Pointer<CFilter> filter,
+);
+
 @ffi.Native<
     ffi.Pointer<CFilter> Function(ffi.Pointer<ffi.Pointer<CFilter>>,
         ffi.Uint32)>(symbol: 'isar_filter_and')

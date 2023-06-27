@@ -168,6 +168,18 @@ impl NativeFilter {
         string_filter_create!(Matches, property, value, case_sensitive)
     }
 
+    pub fn nested(property: &NativeProperty, filter: NativeFilter) -> NativeFilter {
+        let filter = if property.data_type == DataType::Object {
+            Filter::Nested(NestedCond {
+                offset: property.offset,
+                filter: Box::new(filter.0),
+            })
+        } else {
+            Filter::Static(StaticCond { value: false })
+        };
+        NativeFilter(filter)
+    }
+
     pub fn and(filters: Vec<NativeFilter>) -> NativeFilter {
         let filters = filters.into_iter().map(|f| f.0).collect_vec();
         let filter_cond = Filter::And(AndCond { filters });
@@ -227,6 +239,7 @@ enum Filter {
     AnyStringContains(AnyStringContainsCond),
     AnyStringMatches(AnyStringMatchesCond),
 
+    Nested(NestedCond),
     And(AndCond),
     Or(OrCond),
     Not(NotCond),
@@ -484,6 +497,22 @@ macro_rules! string_filter {
 string_filter!(StringEndsWith);
 string_filter!(StringContains);
 string_filter!(StringMatches);
+
+#[derive(Clone, Debug)]
+struct NestedCond {
+    offset: u32,
+    filter: Box<Filter>,
+}
+
+impl Condition for NestedCond {
+    fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
+        if let Some(object) = object.read_nested(self.offset) {
+            self.filter.evaluate(i64::MIN, object)
+        } else {
+            false
+        }
+    }
+}
 
 #[derive(Clone, Debug)]
 struct AndCond {

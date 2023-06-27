@@ -1,4 +1,4 @@
-/*import 'dart:math';
+import 'dart:math';
 
 import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
@@ -87,98 +87,16 @@ void main() {
         strings: [null, null],
       );
 
-      isar.tWriteTxn(
-        () => isar.models.putAll([obj1, obj2, obj3, obj4, obj5]),
+      isar.writeTxn(
+        (isar) => isar.models.putAll([obj1, obj2, obj3, obj4, obj5]),
       );
-    });
-
-    isarTest('.lengthEqualTo()', () {
-      expect(isar.models.where().boolsLengthEqualTo(1), [obj3]);
-      expect(isar.models.where().intsLengthEqualTo(2), [obj3, obj4]);
-      expect(isar.models.where().doublesLengthEqualTo(6), [obj1]);
-      expect(isar.models.where().doublesLengthEqualTo(42), []);
-      expect(
-        isar.models.where().doublesLengthEqualTo(9223372036854775807),
-        [],
-      );
-    });
-
-    isarTest('.lengthGreaterThan()', () {
-      expect(
-        isar.models.where().boolsLengthGreaterThan(3),
-        [obj4, obj5],
-      );
-      expect(
-        isar.models.where().boolsLengthGreaterThan(4),
-        [obj5],
-      );
-      expect(
-        isar.models.where().boolsLengthGreaterThan(4, include: true),
-        [obj4, obj5],
-      );
-      expect(isar.models.where().intsLengthGreaterThan(3), []);
-      expect(
-        isar.models.where().boolsLengthGreaterThan(0),
-        [obj2, obj3, obj4, obj5],
-      );
-    });
-
-    isarTest('.lengthLessThan()', () {
-      expect(isar.models.where().boolsLengthLessThan(3), [obj1, obj3]);
-      expect(
-        isar.models.where().boolsLengthLessThan(3, include: true),
-        [obj1, obj2, obj3],
-      );
-      expect(isar.models.where().intsLengthLessThan(2), [obj2, obj5]);
-      expect(
-        isar.models.where().doublesLengthLessThan(0, include: true),
-        [obj5],
-      );
-      expect(
-        isar.models.where().stringsLengthLessThan(42),
-        [obj2, obj3, obj4, obj5],
-      );
-      expect(isar.models.where().stringsLengthLessThan(2), []);
-    });
-
-    isarTest('.lengthBetween()', () {
-      expect(
-        isar.models.where().boolsLengthBetween(2, 6),
-        [obj2, obj4, obj5],
-      );
-      expect(
-        isar.models.where().boolsLengthBetween(2, 6, includeUpper: false),
-        [obj2, obj4],
-      );
-      expect(
-        isar.models.where().intsLengthBetween(0, 42),
-        [obj1, obj2, obj3, obj4, obj5],
-      );
-      expect(
-        isar.models.where().intsLengthBetween(0, 42, includeLower: false),
-        [obj1, obj2, obj3, obj4],
-      );
-      expect(
-        isar.models.where().doublesLengthBetween(2, 3),
-        [obj3, obj4],
-      );
-      expect(isar.models.where().doublesLengthBetween(0, 0), [obj5]);
-      expect(
-        isar.models.where().doublesLengthBetween(
-              0,
-              1,
-              includeLower: false,
-            ),
-        [obj2],
-      );
-      expect(isar.models.where().stringsLengthLessThan(3), [obj2, obj5]);
     });
 
     isarTest('.isEmpty()', () {
       expect(isar.models.where().boolsIsEmpty(), [obj1]);
       expect(isar.models.where().intsIsEmpty(), [obj5]);
       expect(isar.models.where().doublesIsEmpty(), [obj5]);
-      expect(isar.models.where().stringsIsEmpty(), []);
+      expect(isar.models.where().stringsIsEmpty(), isEmpty);
     });
 
     isarTest('.isNotEmpty()', () {
@@ -201,4 +119,3 @@ void main() {
     });
   });
 }
-*/

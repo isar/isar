@@ -128,7 +128,10 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
     case NotGroup():
       return isar_filter_not(_buildFilter(alloc, filter.filter));
     case ObjectFilter():
-      throw UnimplementedError();
+      return isar_filter_nested(
+        filter.property,
+        _buildFilter(alloc, filter.filter),
+      );
   }
 }
 

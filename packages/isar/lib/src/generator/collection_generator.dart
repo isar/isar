@@ -8,6 +8,7 @@ import 'package:isar/src/generator/code_gen/deserialize_generator.dart';
 import 'package:isar/src/generator/code_gen/enum_maps_generator.dart';
 import 'package:isar/src/generator/code_gen/query_distinct_by_generator.dart';
 import 'package:isar/src/generator/code_gen/query_filter_generator.dart';
+import 'package:isar/src/generator/code_gen/query_object_generator.dart';
 import 'package:isar/src/generator/code_gen/query_property_generator.dart';
 import 'package:isar/src/generator/code_gen/query_sort_by_generator.dart';
 import 'package:isar/src/generator/code_gen/serialize_generator.dart';
@@ -62,6 +63,8 @@ class IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
 
       ${FilterGenerator(object).generate()}
 
+      ${generateQueryObjects(object)}
+
       ${generateSortBy(object)}
 
       ${generateDistinctBy(object)}
@@ -90,6 +93,10 @@ class IsarEmbeddedGenerator extends GeneratorForAnnotation<Embedded> {
       ${generateDeserialize(object)}
 
       ${generateEnumMaps(object)}
+
+      ${FilterGenerator(object).generate()}
+
+      ${generateQueryObjects(object)}
     ''';
   }
 }

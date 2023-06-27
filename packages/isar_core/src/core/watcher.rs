@@ -124,33 +124,38 @@ struct RawCollectionWatchers<Q: QueryMatches> {
 }
 
 pub struct CollectionWatchers<Q: QueryMatches> {
-    lock: Arc<RwLock<RawCollectionWatchers<Q>>>,
+    lock: RwLock<RawCollectionWatchers<Q>>,
 }
 
 impl<Q: QueryMatches + 'static> CollectionWatchers<Q> {
-    pub fn new() -> Self {
+    pub fn new() -> Arc<Self> {
         let raw = RawCollectionWatchers {
             watchers: Vec::new(),
             object_watchers: IntMap::new(),
             query_watchers: Vec::new(),
         };
-        CollectionWatchers {
-            lock: Arc::new(RwLock::new(raw)),
-        }
+        let watchers = CollectionWatchers {
+            lock: RwLock::new(raw),
+        };
+        Arc::new(watchers)
     }
 
-    pub fn watch(&self, callback: WatcherCallback) -> WatchHandle {
+    pub fn watch(self: &Arc<Self>, callback: WatcherCallback) -> WatchHandle {
         let watcher = Arc::new(Watcher::new(callback));
         let watcher_id = watcher.get_id();
         self.lock.write().watchers.push(watcher);
 
-        let lock = self.lock.clone();
+        let watchers = self.clone();
         WatchHandle::new(Box::new(move || {
-            lock.write().watchers.retain(|w| w.get_id() != watcher_id);
+            watchers
+                .lock
+                .write()
+                .watchers
+                .retain(|w| w.get_id() != watcher_id);
         }))
     }
 
-    pub fn watch_object(&self, id: i64, callback: WatcherCallback) -> WatchHandle {
+    pub fn watch_object(self: &Arc<Self>, id: i64, callback: WatcherCallback) -> WatchHandle {
         let watcher = Arc::new(Watcher::new(callback));
         let watcher_id = watcher.get_id();
 
@@ -161,25 +166,34 @@ impl<Q: QueryMatches + 'static> CollectionWatchers<Q> {
             lock.object_watchers.insert(id as u64, vec![watcher]);
         }
 
-        let lock = self.lock.clone();
+        let watchers = self.clone();
         WatchHandle::new(Box::new(move || {
-            let mut lock = lock.write();
+            let mut lock = watchers.lock.write();
             if let Some(object_watchers) = lock.object_watchers.get_mut(id as u64) {
                 object_watchers.retain(|w| w.get_id() != watcher_id);
             }
         }))
     }
 
-    pub fn watch_query(&self, query: Q, callback: WatcherCallback) -> WatchHandle {
+    pub fn watch_query(self: &Arc<Self>, query: Q, callback: WatcherCallback) -> WatchHandle {
         let watcher = Arc::new(Watcher::new(callback));
         let watcher_id = watcher.get_id();
         self.lock.write().query_watchers.push((query, watcher));
 
-        let lock = self.lock.clone();
+        let watchers = self.clone();
         WatchHandle::new(Box::new(move || {
-            lock.write()
+            watchers
+                .lock
+                .write()
                 .query_watchers
                 .retain(|(_, w)| w.get_id() != watcher_id);
         }))
+    }
+
+    pub fn has_watchers(&self) -> bool {
+        let lock = self.lock.read();
+        !lock.watchers.is_empty()
+            || !lock.object_watchers.is_empty()
+            || !lock.query_watchers.is_empty()
     }
 }

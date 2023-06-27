@@ -9,17 +9,14 @@ String generateQueryObjects(ObjectInfo oi) {
       'extension ${oi.dartName}QueryObject on QueryBuilder<${oi.dartName}, '
       '${oi.dartName}, QFilterCondition> {';
   for (final property in oi.properties) {
-    if (!property.type.isObject) {
+    if (property.type != PropertyType.object) {
       continue;
     }
-    var name = property.dartName.decapitalize();
-    if (property.type.isList) {
-      name += 'Element';
-    }
+    final name = property.dartName.decapitalize();
     code += '''
       QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterFilterCondition> $name(FilterQuery<${property.typeClassName}> q) {
         return QueryBuilder.apply(this, (query) {
-          return query.object(q, r'${property.isarName}');
+          return query.object(q, ${property.index});
         });
       }''';
   }

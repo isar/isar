@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use super::index::id_key::IdToBytes;
 use super::index::NativeIndex;
 use super::isar_deserializer::IsarDeserializer;
@@ -34,7 +36,7 @@ pub struct NativeCollection {
     pub(crate) properties: Vec<(String, NativeProperty)>,
     pub(crate) indexes: Vec<NativeIndex>,
     pub(crate) static_size: u32,
-    pub(crate) watchers: CollectionWatchers<Query>,
+    pub(crate) watchers: Arc<CollectionWatchers<Query>>,
     db: Option<Db>,
 }
 
@@ -109,20 +111,23 @@ impl NativeCollection {
         let mut change_set = txn.get_change_set();
 
         let key = id.to_id_bytes();
-        if let Some((_, object)) = cursor.move_to(&key)? {
+        if let Some((_, old_object)) = cursor.move_to(&key)? {
+            let deser = IsarDeserializer::from_bytes(&old_object);
+            change_set.register_change(&self.watchers, id, &deser);
+
             let mut buffer = txn.take_buffer();
-            buffer.extend_from_slice(&object);
-            let mut object = IsarSerializer::new(buffer, 0, self.static_size);
+            buffer.extend_from_slice(&old_object);
+            let mut new_object = IsarSerializer::new(buffer, 0, self.static_size);
 
             for (property_index, value) in updates {
-                self.write_value(&mut object, *property_index as u16, value.as_ref())?;
+                self.write_value(&mut new_object, *property_index as u16, value.as_ref())?;
             }
 
-            let buffer = object.finish();
+            let buffer = new_object.finish();
             cursor.put(&key, &buffer)?;
 
-            let object = IsarDeserializer::from_bytes(&buffer);
-            change_set.register_change(&self.watchers, id, &object);
+            let deser = IsarDeserializer::from_bytes(&buffer);
+            change_set.register_change(&self.watchers, id, &deser);
 
             txn.put_buffer(buffer);
             Ok(true)

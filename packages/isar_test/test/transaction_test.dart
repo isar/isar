@@ -27,53 +27,13 @@ void main() {
 
     isarTest('Sync txn cannot be opened in sync txn', () {
       isar.txn((isar) {
-        expect(
-          () => isar.txn((_) {}),
-          throwsIsarError('within an active transaction'),
-        );
-
-        expect(
-          () => isar.writeTxn((_) {}),
-          throwsIsarError('within an active transaction'),
-        );
+        expect(() => isar.txn((_) {}), throwsUnsupportedError);
+        expect(() => isar.writeTxn((_) {}), throwsUnsupportedError);
       });
 
       isar.writeTxn((isar) {
-        expect(
-          () => isar.txn((_) {}),
-          throwsIsarError('within an active transaction'),
-        );
-
-        expect(
-          () => isar.writeTxn((_) {}),
-          throwsIsarError('within an active transaction'),
-        );
-      });
-    });
-
-    isarTest('Sync txn cannot be opened in async txn', () async {
-      await isar.txnAsync((isar) {
-        expect(
-          () => isar.txn((_) {}),
-          throwsIsarError('within an active transaction'),
-        );
-
-        expect(
-          () => isar.writeTxn((_) {}),
-          throwsIsarError('within an active transaction'),
-        );
-      });
-
-      await isar.writeTxnAsync((isar) {
-        expect(
-          () => isar.txn((_) {}),
-          throwsIsarError('within an active transaction'),
-        );
-
-        expect(
-          () => isar.writeTxn((_) {}),
-          throwsIsarError('within an active transaction'),
-        );
+        expect(() => isar.txn((_) {}), throwsUnsupportedError);
+        expect(() => isar.writeTxn((_) {}), throwsUnsupportedError);
       });
     });
 

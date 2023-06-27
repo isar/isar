@@ -7,7 +7,6 @@ use super::sqlite_query::{SQLiteCursor, SQLiteQuery};
 use super::sqlite_query_builder::SQLiteQueryBuilder;
 use super::sqlite_reader::SQLiteReader;
 use super::sqlite_txn::SQLiteTxn;
-use crate::core::cursor::IsarCursor;
 use crate::core::error::{IsarError, Result};
 use crate::core::filter::{ConditionType, Filter, FilterCondition};
 use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
@@ -18,7 +17,6 @@ use crate::core::watcher::{WatchHandle, WatcherCallback};
 use intmap::IntMap;
 use itertools::Itertools;
 use once_cell::sync::Lazy;
-use serde::{Deserializer, Serializer};
 use std::borrow::Cow;
 use std::cell::Cell;
 use std::fs::remove_file;
@@ -264,6 +262,8 @@ impl IsarInstance for SQLiteInstance {
         count: u32,
     ) -> Result<Self::Insert<'a>> {
         let collection = self.get_collection(collection_index)?;
+        txn.monitor_changes(&collection.watchers);
+
         SQLiteInsert::new(txn, collection, &self.info.collections, count)
     }
 
@@ -287,32 +287,31 @@ impl IsarInstance for SQLiteInstance {
     }
 
     fn delete<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16, id: i64) -> Result<bool> {
-        let collection = self.get_collection(collection_index)?;
-        let sql = format!(
-            "DELETE FROM {} WHERE {} = {}",
-            collection.name,
-            SQLiteProperty::ID_NAME,
-            id
-        );
-        let sqlite = txn.get_sqlite(true)?;
-        txn.guard(|| {
-            sqlite.prepare(&sql)?.step()?;
-            Ok(sqlite.count_changes() > 0)
-        })
+        let mut qb = self.query(collection_index)?;
+        qb.set_filter(Filter::Condition(FilterCondition::new(
+            0,
+            ConditionType::Equal,
+            vec![Some(IsarValue::Integer(id))],
+            false,
+        )));
+        let q = qb.build();
+        let count = self.query_delete(txn, &q, None, None)?;
+        Ok(count > 0)
     }
 
     fn count(&self, txn: &Self::Txn, collection_index: u16) -> Result<u32> {
-        let collection = self.get_collection(collection_index)?;
-        let sql = format!("SELECT COUNT(*) FROM {}", collection.name);
-        let mut stmt = txn.get_sqlite(false)?.prepare(&sql)?;
-        stmt.step()?;
-        Ok(stmt.get_int(0) as u32)
+        let q = self.query(collection_index)?.build();
+        let result = self.query_aggregate(txn, &q, Aggregation::Count, None)?;
+        if let Some(IsarValue::Integer(count)) = result {
+            Ok(count as u32)
+        } else {
+            Ok(0)
+        }
     }
 
     fn clear(&self, txn: &Self::Txn, collection_index: u16) -> Result<()> {
-        let collection = self.get_collection(collection_index)?;
-        let sql = format!("DELETE FROM {}", collection.name,);
-        txn.guard(|| txn.get_sqlite(true)?.prepare(&sql)?.step())?;
+        let q = self.query(collection_index)?.build();
+        self.query_delete(txn, &q, None, None)?;
         Ok(())
     }
 
@@ -326,8 +325,11 @@ impl IsarInstance for SQLiteInstance {
     }
 
     fn query(&self, collection_index: u16) -> Result<Self::QueryBuilder<'_>> {
-        let collection = self.get_collection(collection_index)?;
-        Ok(SQLiteQueryBuilder::new(collection, collection_index))
+        self.get_collection(collection_index)?;
+        Ok(SQLiteQueryBuilder::new(
+            &self.info.collections,
+            collection_index,
+        ))
     }
 
     fn query_cursor<'a>(
@@ -358,7 +360,12 @@ impl IsarInstance for SQLiteInstance {
         limit: Option<u32>,
         updates: &[(u16, Option<IsarValue>)],
     ) -> Result<u32> {
-        query.update(txn, &self.info.collections, offset, limit, updates)
+        let collection = self.get_collection(query.collection_index)?;
+        txn.monitor_changes(&collection.watchers);
+        let result =
+            txn.guard(|| query.update(txn, &self.info.collections, offset, limit, updates))?;
+        txn.stop_monitor_changes();
+        Ok(result)
     }
 
     fn query_delete(
@@ -368,7 +375,11 @@ impl IsarInstance for SQLiteInstance {
         offset: Option<u32>,
         limit: Option<u32>,
     ) -> Result<u32> {
-        query.delete(txn, &self.info.collections, offset, limit)
+        let collection = self.get_collection(query.collection_index)?;
+        txn.monitor_changes(&collection.watchers);
+        let result = txn.guard(|| query.delete(txn, &self.info.collections, offset, limit))?;
+        txn.stop_monitor_changes();
+        Ok(result)
     }
 
     fn watch(&self, collection_index: u16, callback: WatcherCallback) -> Result<WatchHandle> {

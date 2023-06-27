@@ -161,9 +161,15 @@ void main() {
 
         isar.writeTxn((isar) => isar.values.put(obj1));
         await listenerLazy.next;
+        if (isSQLite) {
+          expect(await listener.next, isEmpty);
+        }
 
         isar.writeTxn((isar) => isar.values.put(obj2));
         expect(await listener.next, [obj2]);
+        if (isSQLite) {
+          await listenerLazy.next;
+        }
 
         await listenerLazy.done();
         await listener.done();
@@ -180,6 +186,10 @@ void main() {
         expect(await listener.next, [obj1, obj2]);
 
         isar.writeTxn((isar) => isar.values.putAll([obj3]));
+        if (isSQLite) {
+          await listenerLazy.next;
+          expect(await listener.next, [obj1, obj2]);
+        }
 
         await listenerLazy.done();
         await listener.done();
@@ -195,12 +205,12 @@ void main() {
 
         isar.writeTxn((isar) => isar.values.delete(1));
         await listenerLazy.next;
-        if (kIsWeb) {
+        if (isSQLite) {
           expect(await listener.next, [obj2]);
         }
 
         isar.writeTxn((isar) => isar.values.delete(2));
-        if (kIsWeb) {
+        if (isSQLite) {
           await listenerLazy.next;
         }
         expect(await listener.next, <dynamic>[]);
@@ -222,7 +232,7 @@ void main() {
         expect(await listener.next, <dynamic>[]);
 
         isar.writeTxn((isar) => isar.values.deleteAll([3]));
-        if (kIsWeb) {
+        if (isSQLite) {
           await listenerLazy.next;
           expect(await listener.next, <dynamic>[]);
         }

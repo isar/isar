@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
@@ -7,8 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:test_api/src/backend/invoker.dart';
-
-const kIsWeb = identical(0, 0.0);
 
 final testErrors = <String>[];
 int testCount = 0;
@@ -94,11 +93,10 @@ Isar openTempIsar(
     Directory(testTempPath!).createSync(recursive: true);
   }
 
-  final sqlite = Invoker.current!.liveTest.test.name.endsWith('(sqlite)');
   final isar = Isar.open(
     schemas: schemas,
     name: name ?? getRandomName(),
-    engine: sqlite ? StorageEngine.sqlite : StorageEngine.isar,
+    engine: isSQLite ? StorageEngine.sqlite : StorageEngine.isar,
     maxSizeMiB: maxSizeMiB,
     directory: directory ?? testTempPath!,
     compactOnLaunch: compactOnLaunch,
@@ -115,10 +113,12 @@ Isar openTempIsar(
   return isar;
 }
 
+bool get isSQLite => Invoker.current!.liveTest.test.name.endsWith('(sqlite)');
+
 @isTestGroup
 void isarTest(
   String name,
-  void Function() body, {
+  FutureOr<void> Function() body, {
   Timeout? timeout,
   bool skip = false,
 }) {
@@ -128,7 +128,7 @@ void isarTest(
       '(isar)',
       () async {
         try {
-          body();
+          await body();
         } catch (e, s) {
           testErrors.add('$name: $e\n$s');
           rethrow;
@@ -140,9 +140,9 @@ void isarTest(
 
     test(
       '(sqlite)',
-      () {
+      () async {
         try {
-          body();
+          await body();
         } catch (e, s) {
           testErrors.add('$name: $e\n$s');
           rethrow;

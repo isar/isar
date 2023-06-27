@@ -1,6 +1,6 @@
 use core::slice;
 use isar_core::core::{
-    filter::{ConditionType, Filter, FilterCondition},
+    filter::{ConditionType, Filter, FilterCondition, FilterNested},
     value::IsarValue,
 };
 use itertools::Itertools;
@@ -190,6 +190,15 @@ pub unsafe extern "C" fn isar_filter_string_matches(
         vec![Some(value)],
         case_sensitive,
     ));
+    Box::into_raw(Box::new(filter))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_filter_nested(
+    property_index: u16,
+    filter: *mut Filter,
+) -> *const Filter {
+    let filter = Filter::Nested(FilterNested::new(property_index, *Box::from_raw(filter)));
     Box::into_raw(Box::new(filter))
 }
 

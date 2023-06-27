@@ -231,7 +231,8 @@ impl IsarInstance for NativeInstance {
     ) -> Result<u32> {
         self.verify_instance_id(txn.instance_id)?;
         self.verify_instance_id(query.instance_id)?;
-        todo!()
+        let collection = self.get_collection(query.collection_index)?;
+        txn.guard(|| query.update(txn, collection, offset, limit, updates))
     }
 
     fn query_delete(

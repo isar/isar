@@ -1,11 +1,13 @@
 use crate::core::error::{IsarError, Result};
 use libc::c_void;
 use libsqlite3_sys as ffi;
+use std::cell::Cell;
 use std::ffi::{c_char, c_int, CStr, CString};
 use std::{ptr, slice};
 
 pub(crate) struct SQLite3 {
     db: *mut ffi::sqlite3,
+    free_update_hook: Cell<Option<unsafe extern "C" fn(*mut std::os::raw::c_void)>>,
 }
 
 unsafe impl Send for SQLite3 {}
@@ -20,7 +22,10 @@ impl SQLite3 {
         unsafe {
             let r = ffi::sqlite3_open_v2(c_path.as_ptr(), &mut db, flags, ptr::null());
             if r == ffi::SQLITE_OK {
-                let sqlite = SQLite3 { db };
+                let sqlite = SQLite3 {
+                    db,
+                    free_update_hook: Cell::new(None),
+                };
                 sqlite.initialize()?;
                 Ok(sqlite)
             } else {
@@ -124,7 +129,7 @@ impl SQLite3 {
                 ctx,
                 args: slice::from_raw_parts(argv, argc as usize),
             };
-            let boxed_f: *mut F = ffi::sqlite3_user_data(ctx).cast::<F>();
+            let boxed_f = ffi::sqlite3_user_data(ctx).cast::<F>();
             let result = (*boxed_f)(&mut fn_ctx);
             if let Err(err) = result {
                 let err_str = err.to_string();
@@ -136,7 +141,7 @@ impl SQLite3 {
             }
         }
 
-        let boxed_f: *mut F = Box::into_raw(Box::new(func));
+        let boxed_f = Box::into_raw(Box::new(func));
         let c_name = CString::new(name).unwrap();
         let r = unsafe {
             ffi::sqlite3_create_function_v2(
@@ -144,7 +149,7 @@ impl SQLite3 {
                 c_name.as_ptr(),
                 args as i32,
                 ffi::SQLITE_UTF8,
-                boxed_f.cast::<c_void>(),
+                boxed_f.cast(),
                 Some(call_boxed_closure::<F>),
                 None,
                 None,
@@ -156,6 +161,40 @@ impl SQLite3 {
             Ok(())
         } else {
             Err(sqlite_err(self.db, r))
+        }
+    }
+
+    pub fn set_update_hook<F>(&self, func: F)
+    where
+        F: FnMut(i64) + 'static,
+    {
+        unsafe extern "C" fn call_boxed_closure<F>(
+            func: *mut c_void,
+            _: i32,
+            _: *const i8,
+            _: *const i8,
+            id: i64,
+        ) where
+            F: FnMut(i64) -> (),
+        {
+            let boxed_f = func.cast::<F>();
+            (*boxed_f)(id);
+        }
+
+        self.clear_update_hook();
+        let boxed_f = Box::into_raw(Box::new(func));
+        unsafe { ffi::sqlite3_update_hook(self.db, Some(call_boxed_closure::<F>), boxed_f.cast()) };
+        self.free_update_hook.replace(Some(free_boxed_value::<F>));
+    }
+
+    pub fn clear_update_hook(&self) {
+        let prev = unsafe { ffi::sqlite3_update_hook(self.db, None, ptr::null_mut()) };
+        if !prev.is_null() {
+            if let Some(free_update_hook) = self.free_update_hook.take() {
+                unsafe {
+                    free_update_hook(prev);
+                }
+            }
         }
     }
 }
