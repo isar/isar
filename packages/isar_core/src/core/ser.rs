@@ -20,11 +20,15 @@ impl<'a, R: IsarReader> Serialize for IsarObjectSerialize<'a, R> {
         S: serde::Serializer,
     {
         let mut ser = serializer.serialize_map(None)?;
-        if let Some(id_name) = self.reader.id_name() {
-            ser.serialize_entry(id_name, &self.reader.read_id())?;
-        }
+
+        let id_name = self.reader.id_name();
+        let mut id_serialized = false;
 
         for (index, (name, data_type)) in self.reader.properties().enumerate() {
+            if Some(name) == id_name {
+                id_serialized = true;
+            }
+
             match data_type {
                 DataType::Bool => {
                     ser.serialize_entry(name, &self.reader.read_bool(index as u32))?;
@@ -89,6 +93,13 @@ impl<'a, R: IsarReader> Serialize for IsarObjectSerialize<'a, R> {
                 }
             }
         }
+
+        if !id_serialized {
+            if let Some(id_name) = self.reader.id_name() {
+                ser.serialize_entry(id_name, &self.reader.read_id())?;
+            }
+        }
+
         ser.end()
     }
 }

@@ -15,7 +15,7 @@ unsafe impl Send for SQLite3 {}
 impl SQLite3 {
     pub(crate) const MAX_PARAM_COUNT: u32 = 999;
 
-    pub fn open(path: &str) -> Result<SQLite3> {
+    pub fn open(path: &str, encryption_key: Option<&str>) -> Result<SQLite3> {
         let flags = ffi::SQLITE_OPEN_READWRITE | ffi::SQLITE_OPEN_CREATE | ffi::SQLITE_OPEN_NOMUTEX;
         let c_path = CString::new(path).unwrap();
         let mut db: *mut ffi::sqlite3 = ptr::null_mut();
@@ -26,6 +26,11 @@ impl SQLite3 {
                     db,
                     free_update_hook: Cell::new(None),
                 };
+                if let Some(encryption_key) = encryption_key {
+                    sqlite
+                        .key(encryption_key)
+                        .map_err(|_| IsarError::EncryptionError {})?;
+                }
                 sqlite.initialize()?;
                 Ok(sqlite)
             } else {
@@ -36,6 +41,13 @@ impl SQLite3 {
                 Err(err)
             }
         }
+    }
+
+    fn key(&self, encryption_key: &str) -> Result<()> {
+        let sql = format!("PRAGMA key = \"{}\"", encryption_key);
+        self.prepare(&sql)?.step()?;
+        self.prepare("SELECT count(*) FROM sqlite_master")?.step()?; // check if key is correct
+        Ok(())
     }
 
     fn initialize(&self) -> Result<()> {

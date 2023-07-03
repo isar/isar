@@ -36,6 +36,7 @@ pub const fn error_code(err: &IsarError) -> Option<u8> {
         IsarError::VersionError {} => ERROR_VERSION,
         IsarError::ObjectLimitReached {} => ERROR_OBJECT_LIMIT_REACHED,
         IsarError::InstanceMismatch {} => ERROR_INSTANCE_MISMATCH,
+        IsarError::EncryptionError {} => ERROR_ENCRYPTION,
         IsarError::DbFull {} => ERROR_DB_FULL,
         _ => return None,
     };
@@ -48,7 +49,8 @@ pub const ERROR_WRITE_TXN_REQUIRED: u8 = 3;
 pub const ERROR_VERSION: u8 = 4;
 pub const ERROR_OBJECT_LIMIT_REACHED: u8 = 5;
 pub const ERROR_INSTANCE_MISMATCH: u8 = 6;
-pub const ERROR_DB_FULL: u8 = 7;
+pub const ERROR_ENCRYPTION: u8 = 7;
+pub const ERROR_DB_FULL: u8 = 8;
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_get_error(value: *mut *const u8) -> u32 {

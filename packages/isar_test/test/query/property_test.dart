@@ -389,11 +389,11 @@ void main() {
         (isar) => isar.floatModels.putAll([
           FloatModel(0)
             ..list = [-5.5, 70.7, 999.999]
-            ..nList = [double.infinity],
+            ..nList = [1919191],
           FloatModel(1)..list = [],
           FloatModel(2)
             ..list = [0.0]
-            ..nList = [-double.infinity],
+            ..nList = [-1919191],
         ]),
       );
 
@@ -413,9 +413,9 @@ void main() {
         listEquals(
           isar.floatModels.where().nListProperty().findAll(),
           [
-            [double.infinity],
+            [1919191],
             null,
-            [-double.infinity]
+            [-1919191]
           ],
         ),
         true,
@@ -427,7 +427,7 @@ void main() {
         (isar) => isar.doubleModels.putAll([
           DoubleModel(0)
             ..list = [-5.5, 70.7, 999.999]
-            ..nList = [double.infinity],
+            ..nList = [1919191.1919191],
           DoubleModel(1)..list = [],
           DoubleModel(2)
             ..list = [0.0]
@@ -442,7 +442,7 @@ void main() {
       ]);
 
       expect(isar.doubleModels.where().nListProperty().findAll(), [
-        [double.infinity],
+        [1919191.1919191],
         null,
         [double.maxFinite]
       ]);

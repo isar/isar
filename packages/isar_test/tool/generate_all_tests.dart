@@ -15,16 +15,11 @@ void main() {
   }).join('\n');
 
   final calls = files.map((String e) {
-    final content = File(e).readAsStringSync();
     var call = "${e.split('.')[0].replaceAll(p.separator, '_')}.main();";
     if (e.contains('stress')) {
       call = 'if (stress) $call';
     }
-    if (content.startsWith("@TestOn('vm')")) {
-      return 'if (!kIsWeb) $call';
-    } else {
-      return call;
-    }
+    return call;
   }).join('\n');
 
   final code = """

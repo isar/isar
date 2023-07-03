@@ -3,7 +3,7 @@ part of isar;
 class _IsarImpl extends Isar {
   _IsarImpl._(
     this.instanceId,
-    this.engine,
+    this.sqliteEngine,
     Pointer<CIsarInstance> ptr,
     this.converters,
   ) : _ptr = ptr {
@@ -22,7 +22,7 @@ class _IsarImpl extends Isar {
   static final _instances = <int, _IsarImpl>{};
 
   final int instanceId;
-  final StorageEngine engine;
+  final bool sqliteEngine;
   final List<IsarObjectConverter<dynamic, dynamic>> converters;
   final collections = <Type, _IsarCollectionImpl<dynamic, dynamic>>{};
 
@@ -32,13 +32,26 @@ class _IsarImpl extends Isar {
 
   factory _IsarImpl.open({
     required List<IsarCollectionSchema> schemas,
-    required String directory,
-    required StorageEngine engine,
     required String name,
+    required String directory,
+    required bool sqliteEngine,
     required int maxSizeMiB,
-    required CompactCondition? compactOnLaunch,
+    String? encryptionKey,
+    CompactCondition? compactOnLaunch,
   }) {
     isar_connect_dart_api(NativeApi.postCObject.cast());
+
+    if (sqliteEngine) {
+      if (compactOnLaunch != null) {
+        throw UnsupportedError(
+          'SQLite engine does not support compactOnLaunch.',
+        );
+      }
+    } else {
+      if (encryptionKey != null) {
+        throw UnsupportedError('Isar engine does not support encryptionKey.');
+      }
+    }
 
     final embeddedSchemas = <IsarSchema>{};
     for (final schema in schemas) {
@@ -58,6 +71,9 @@ class _IsarImpl extends Isar {
     final namePtr = IsarCore.toNativeString(name);
     final directoryPtr = IsarCore.toNativeString(directory);
     final schemaPtr = IsarCore.toNativeString(schemaJson);
+    final encryptionKeyPtr = encryptionKey != null
+        ? IsarCore.toNativeString(encryptionKey)
+        : nullptr;
 
     final isarPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarInstance>>();
     isar_open_instance(
@@ -65,36 +81,37 @@ class _IsarImpl extends Isar {
       instanceId,
       namePtr,
       directoryPtr,
-      engine.cEngine,
+      sqliteEngine,
       schemaPtr,
       maxSizeMiB,
+      encryptionKeyPtr,
       compactOnLaunch != null ? compactOnLaunch.minFileSize ?? 0 : -1,
       compactOnLaunch != null ? compactOnLaunch.minBytes ?? 0 : -1,
       compactOnLaunch != null ? compactOnLaunch.minRatio ?? 0 : double.nan,
     ).checkNoError();
 
     final converters = schemas.map((e) => e.converter).toList();
-    return _IsarImpl._(instanceId, engine, isarPtrPtr.value, converters);
+    return _IsarImpl._(instanceId, sqliteEngine, isarPtrPtr.value, converters);
   }
 
   factory _IsarImpl.get({
     required int instanceId,
     required List<IsarObjectConverter<dynamic, dynamic>> converters,
-    required StorageEngine engine,
+    required bool sqliteEngine,
   }) {
-    final ptr = isar_get_instance(instanceId, engine.cEngine);
+    final ptr = isar_get_instance(instanceId, sqliteEngine);
     if (ptr.isNull) {
       throw IsarNotReadyError('Instance has not been opened yet. Make sure to '
           'call Isar.open() before using Isar.get().');
     }
 
-    return _IsarImpl._(instanceId, engine, ptr, converters);
+    return _IsarImpl._(instanceId, sqliteEngine, ptr, converters);
   }
 
   factory _IsarImpl.getByName({
     required String name,
     required List<IsarCollectionSchema> schemas,
-    required StorageEngine engine,
+    required bool sqliteEngine,
   }) {
     final instanceId = Isar.fastHash(name);
     final instance = _IsarImpl._instances[instanceId];
@@ -106,7 +123,7 @@ class _IsarImpl extends Isar {
     return _IsarImpl.get(
       instanceId: instanceId,
       converters: converters,
-      engine: engine,
+      sqliteEngine: sqliteEngine,
     );
   }
 
@@ -232,20 +249,20 @@ class _IsarImpl extends Isar {
   @override
   Future<T> txnAsync<T>(T Function(Isar isar) callback) {
     final instanceId = this.instanceId;
-    final engine = this.engine;
+    final sqliteEngine = this.sqliteEngine;
     final converters = this.converters;
     return Isolate.run(
-      () => _isarAsync(instanceId, engine, converters, false, callback),
+      () => _isarAsync(instanceId, sqliteEngine, converters, false, callback),
     );
   }
 
   @override
   Future<T> writeTxnAsync<T>(T Function(Isar isar) callback) async {
     final instanceId = this.instanceId;
-    final engine = this.engine;
+    final sqliteEngine = this.sqliteEngine;
     final converters = this.converters;
     return Isolate.run(
-      () => _isarAsync(instanceId, engine, converters, true, callback),
+      () => _isarAsync(instanceId, sqliteEngine, converters, true, callback),
     );
   }
 
@@ -282,7 +299,7 @@ class _IsarImpl extends Isar {
 
 T _isarAsync<T>(
   int instanceId,
-  StorageEngine engine,
+  bool sqliteEngine,
   List<IsarObjectConverter<dynamic, dynamic>> converters,
   bool write,
   T Function(Isar isar) callback,
@@ -290,7 +307,7 @@ T _isarAsync<T>(
   final isar = _IsarImpl.get(
     instanceId: instanceId,
     converters: converters,
-    engine: engine,
+    sqliteEngine: sqliteEngine,
   );
   try {
     if (write) {
@@ -302,12 +319,4 @@ T _isarAsync<T>(
     isar.close();
     IsarCore.free();
   }
-}
-
-extension on StorageEngine {
-  int get cEngine => switch (this) {
-        StorageEngine.isar => CStorageEngine.Isar,
-        StorageEngine.sqlite => CStorageEngine.SQLite,
-        StorageEngine.sqlcipher => CStorageEngine.SQLCipher,
-      };
 }

@@ -21,7 +21,8 @@ String generateDeserialize(ObjectInfo object) {
 
   final positional = propertiesByMode[DeserializeMode.positionalParam]!;
   positional.sort(
-      (p1, p2) => p1.constructorPosition!.compareTo(p2.constructorPosition!));
+    (p1, p2) => p1.constructorPosition!.compareTo(p2.constructorPosition!),
+  );
   final named = propertiesByMode[DeserializeMode.namedParam]!;
 
   for (final p in [...positional, ...named]) {

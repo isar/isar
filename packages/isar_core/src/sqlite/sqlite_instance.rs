@@ -38,6 +38,7 @@ struct SQLiteInstanceInfo {
     name: String,
     dir: String,
     path: String,
+    encryption_key: Option<String>,
     instance_id: u32,
     collections: Vec<SQLiteCollection>,
 }
@@ -52,6 +53,7 @@ impl SQLiteInstance {
     fn open(
         name: &str,
         dir: &str,
+        encryption_key: Option<&str>,
         instance_id: u32,
         schema: IsarSchema,
     ) -> Result<(SQLiteInstanceInfo, SQLite3)> {
@@ -59,7 +61,7 @@ impl SQLiteInstance {
         path_buf.push(format!("{}.sqlite", name));
         let path = path_buf.as_path().to_str().unwrap().to_string();
 
-        let sqlite = Self::open_conn(&path)?;
+        let sqlite = Self::open_conn(&path, encryption_key)?;
         let sqlite = Rc::new(sqlite);
         let txn = SQLiteTxn::new(sqlite.clone(), true)?;
         perform_migration(&txn, &schema)?;
@@ -69,6 +71,7 @@ impl SQLiteInstance {
         let instance_info = SQLiteInstanceInfo {
             name: name.to_string(),
             dir: dir.to_string(),
+            encryption_key: encryption_key.map(|k| k.to_string()),
             instance_id,
             path,
             collections,
@@ -119,8 +122,8 @@ impl SQLiteInstance {
         }
     }
 
-    fn open_conn(path: &str) -> Result<SQLite3> {
-        let mut sqlite = SQLite3::open(path)?;
+    fn open_conn(path: &str, encryption_key: Option<&str>) -> Result<SQLite3> {
+        let mut sqlite = SQLite3::open(path, encryption_key)?;
         sqlite.create_function(FN_FILTER_JSON_NAME, 2, sql_fn_filter_json)?;
         Ok(sqlite)
     }
@@ -146,10 +149,13 @@ impl IsarInstance for SQLiteInstance {
     fn get_instance(instance_id: u32) -> Option<Self::Instance> {
         let mut lock = INSTANCES.lock().unwrap();
         if let Some(connections) = lock.get_mut(instance_id as u64) {
-            let sqlite = connections
-                .sqlite
-                .pop()
-                .or_else(|| Self::open_conn(&connections.info.path).ok());
+            let sqlite = connections.sqlite.pop().or_else(|| {
+                Self::open_conn(
+                    &connections.info.path,
+                    connections.info.encryption_key.as_deref(),
+                )
+                .ok()
+            });
             if let Some(sqlite) = sqlite {
                 Some(Self {
                     info: connections.info.clone(),
@@ -182,11 +188,19 @@ impl IsarInstance for SQLiteInstance {
         dir: &str,
         schema: IsarSchema,
         max_size_mib: u32,
+        encryption_key: Option<&str>,
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self> {
+        if compact_condition.is_some() {
+            return Err(IsarError::IllegalArgument {});
+        }
+        if !cfg!(feature = "sqlcipher") && encryption_key.is_some() {
+            return Err(IsarError::IllegalArgument {});
+        }
+
         let mut lock = INSTANCES.lock().unwrap();
         if !lock.contains_key(instance_id as u64) {
-            let (info, sqlite) = Self::open(name, dir, instance_id, schema)?;
+            let (info, sqlite) = Self::open(name, dir, encryption_key, instance_id, schema)?;
 
             let max_size = (max_size_mib as usize).saturating_mul(MIB);
             sqlite
@@ -317,11 +331,11 @@ impl IsarInstance for SQLiteInstance {
 
     fn get_size(
         &self,
-        txn: &Self::Txn,
-        collection_index: u16,
-        include_indexes: bool,
+        _txn: &Self::Txn,
+        _collection_index: u16,
+        _include_indexes: bool,
     ) -> Result<u64> {
-        Ok(0)
+        Err(IsarError::UnsupportedOperation {})
     }
 
     fn query(&self, collection_index: u16) -> Result<Self::QueryBuilder<'_>> {
@@ -424,11 +438,11 @@ impl IsarInstance for SQLiteInstance {
                 lock.remove(instance.info.instance_id as u64);
 
                 if delete {
-                    let mut path = instance.info.path.to_string();
+                    let path = instance.info.path.to_string();
                     drop(instance);
                     let _ = remove_file(&path);
-                    path.push_str("-wal");
-                    let _ = remove_file(&path);
+                    let _ = remove_file(&format!("{}-wal", path));
+                    let _ = remove_file(&format!("{}-shm", path));
                 }
                 return true;
             }

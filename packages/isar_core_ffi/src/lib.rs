@@ -160,3 +160,17 @@ pub unsafe extern "C" fn isar_string_free(value: *mut String) {
         drop(Box::from_raw(value));
     }
 }
+
+fn dart_fast_hash(value: &str) -> i64 {
+    let mut hash = 0xcbf29ce484222325;
+
+    let utf16 = value.encode_utf16();
+    for char in utf16 {
+        hash ^= (char >> 8) as u64;
+        hash = hash.wrapping_mul(0x100000001b3);
+        hash ^= (char & 0xFF) as u64;
+        hash = hash.wrapping_mul(0x100000001b3);
+    }
+
+    hash as i64
+}

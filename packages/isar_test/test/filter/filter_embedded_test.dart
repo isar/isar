@@ -38,8 +38,8 @@ class Model {
 @embedded
 class EmbeddedModelA {
   const EmbeddedModelA({
-    this.name = '',
-    this.embeddedB = const EmbeddedModelB(),
+    required this.name,
+    this.embeddedB,
   });
 
   final String name;
@@ -62,9 +62,7 @@ class EmbeddedModelA {
 
 @embedded
 class EmbeddedModelB {
-  const EmbeddedModelB({
-    this.name = '',
-  });
+  const EmbeddedModelB({required this.name});
 
   final String name;
 

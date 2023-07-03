@@ -6,19 +6,29 @@ abstract class Isar {
   static const String defaultName = 'default';
 
   /// The default max Isar size.
-  static const int defaultMaxSizeMiB = 256;
+  static const int defaultMaxSizeMiB = 128;
 
   static const String version = '4.0.0';
 
   static Isar get({
     required List<IsarCollectionSchema> schemas,
-    StorageEngine engine = StorageEngine.isar,
     String name = Isar.defaultName,
   }) {
     return _IsarImpl.getByName(
       name: name,
       schemas: schemas,
-      engine: engine,
+      sqliteEngine: false,
+    );
+  }
+
+  static Isar getSQLite({
+    required List<IsarCollectionSchema> schemas,
+    String name = Isar.defaultName,
+  }) {
+    return _IsarImpl.getByName(
+      name: name,
+      schemas: schemas,
+      sqliteEngine: true,
     );
   }
 
@@ -26,7 +36,6 @@ abstract class Isar {
     required List<IsarCollectionSchema> schemas,
     required String directory,
     String name = Isar.defaultName,
-    StorageEngine engine = StorageEngine.isar,
     int maxSizeMiB = Isar.defaultMaxSizeMiB,
     CompactCondition? compactOnLaunch,
     bool inspector = true,
@@ -35,9 +44,27 @@ abstract class Isar {
       schemas: schemas,
       directory: directory,
       name: name,
-      engine: engine,
+      sqliteEngine: false,
       maxSizeMiB: maxSizeMiB,
       compactOnLaunch: compactOnLaunch,
+    );
+  }
+
+  static Isar openSQLite({
+    required List<IsarCollectionSchema> schemas,
+    required String directory,
+    String name = Isar.defaultName,
+    int maxSizeMiB = Isar.defaultMaxSizeMiB,
+    String? encryptionKey,
+    bool inspector = true,
+  }) {
+    return _IsarImpl.open(
+      schemas: schemas,
+      directory: directory,
+      name: name,
+      sqliteEngine: true,
+      maxSizeMiB: maxSizeMiB,
+      encryptionKey: encryptionKey,
     );
   }
 
@@ -93,10 +120,4 @@ abstract class Isar {
 
     return hash;
   }
-}
-
-enum StorageEngine {
-  isar,
-  sqlite,
-  sqlcipher,
 }

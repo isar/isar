@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
@@ -9,13 +7,14 @@ part 'filter_list_length_test.g.dart';
 @collection
 class Model {
   Model({
+    required this.id,
     required this.bools,
     required this.ints,
     required this.doubles,
     required this.strings,
   });
 
-  int id = Random().nextInt(99999);
+  final int id;
 
   final List<bool> bools;
 
@@ -57,30 +56,35 @@ void main() {
       isar = openTempIsar([ModelSchema]);
 
       obj1 = Model(
+        id: 1,
         bools: [],
         ints: [1, 42, -128],
         doubles: [1.123, 4, 5.333, 1.22, 1.22, 1.22],
         strings: null,
       );
       obj2 = Model(
+        id: 2,
         bools: [true, true, false],
         ints: [4],
         doubles: [null],
         strings: ['Foo', 'bar'],
       );
       obj3 = Model(
+        id: 3,
         bools: [true],
         ints: [0, 123],
         doubles: [3.141592653, null, null],
         strings: ['a', 'b', 'c', 'd'],
       );
       obj4 = Model(
+        id: 4,
         bools: [true, true, false, true],
         ints: [-1, 1],
         doubles: [4, 12.2, 12.43],
         strings: ['', 'abc', null],
       );
       obj5 = Model(
+        id: 5,
         bools: [true, true, true, true, true, false],
         ints: [],
         doubles: [],
@@ -93,27 +97,27 @@ void main() {
     });
 
     isarTest('.isEmpty()', () {
-      expect(isar.models.where().boolsIsEmpty(), [obj1]);
-      expect(isar.models.where().intsIsEmpty(), [obj5]);
-      expect(isar.models.where().doublesIsEmpty(), [obj5]);
-      expect(isar.models.where().stringsIsEmpty(), isEmpty);
+      expect(isar.models.where().boolsIsEmpty().findAll(), [obj1]);
+      expect(isar.models.where().intsIsEmpty().findAll(), [obj5]);
+      expect(isar.models.where().doublesIsEmpty().findAll(), [obj5]);
+      expect(isar.models.where().stringsIsEmpty().findAll(), isEmpty);
     });
 
     isarTest('.isNotEmpty()', () {
       expect(
-        isar.models.where().boolsIsNotEmpty(),
+        isar.models.where().boolsIsNotEmpty().findAll(),
         [obj2, obj3, obj4, obj5],
       );
       expect(
-        isar.models.where().intsIsNotEmpty(),
+        isar.models.where().intsIsNotEmpty().findAll(),
         [obj1, obj2, obj3, obj4],
       );
       expect(
-        isar.models.where().doublesIsNotEmpty(),
+        isar.models.where().doublesIsNotEmpty().findAll(),
         [obj1, obj2, obj3, obj4],
       );
       expect(
-        isar.models.where().stringsIsNotEmpty(),
+        isar.models.where().stringsIsNotEmpty().findAll(),
         [obj2, obj3, obj4, obj5],
       );
     });

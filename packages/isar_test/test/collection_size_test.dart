@@ -65,7 +65,7 @@ void main() {
       objB5 = ModelB();
     });
 
-    isarTest('Size should start at 0', () {
+    isarTest('Size should start at 0', sqlite: false, () {
       expect(isar.modelAs.getSize(), 0);
       expect(isar.modelAs.getSize(), 0);
 
@@ -73,7 +73,7 @@ void main() {
       expect(isar.modelAs.getSize(includeIndexes: true), 0);
     });
 
-    isarTest('Size should increase with more entries', () {
+    isarTest('Size should increase with more entries', sqlite: false, () {
       isar.writeTxn((isar) => isar.modelAs.put(objA0));
       final sizeA0 = isar.modelAs.getSize();
       expect(sizeA0, greaterThan(0));
@@ -117,7 +117,7 @@ void main() {
       expect(sizeBWithIndexes, sizeBWithoutIndexes);
     });*/
 
-    isarTest('Delete should decrease size', () {
+    isarTest('Delete should decrease size', sqlite: false, () {
       isar.writeTxn((isar) {
         isar.modelAs.putAll([objA0, objA1, objA2, objA3]);
         isar.modelBs.putAll([objB0, objB1, objB2, objB3, objB4]);
@@ -148,7 +148,7 @@ void main() {
       expect(sizeB3, greaterThan(0));
     });
 
-    isarTest('Update should change size', () {
+    isarTest('Update should change size', sqlite: false, () {
       isar.writeTxn((isar) {
         isar.modelAs.putAll([objA0, objA1, objA2, objA3]);
         isar.modelBs.putAll([objB0, objB1, objB2, objB3, objB4]);

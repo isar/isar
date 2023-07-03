@@ -22,6 +22,8 @@ extension on int {
         throw ObjectLimitReachedError();
       case ERROR_INSTANCE_MISMATCH:
         throw InstanceMismatchError();
+      case ERROR_ENCRYPTION:
+        throw EncryptionError();
       case ERROR_DB_FULL:
         throw DatabaseFullError();
       default:

@@ -218,7 +218,7 @@ impl SQLiteQuery {
 impl QueryMatches for SQLiteQuery {
     type Object<'a> = ();
 
-    fn matches<'a>(&self, id: i64, object: &()) -> bool {
+    fn matches<'a>(&self, _id: i64, _object: &()) -> bool {
         true
     }
 }

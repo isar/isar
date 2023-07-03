@@ -138,7 +138,7 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
     }
 
     fn begin_list(&mut self, index: u32, length: u32) -> Option<Self::ListWriter> {
-        let (data_type, offset, embedded_collection_index) = self.get_property(index)?;
+        let (data_type, offset, embedded_collection_index) = self.get_property(index).unwrap();
         if let Some(element_type) = data_type.element_type() {
             let list = self
                 .get_serializer()

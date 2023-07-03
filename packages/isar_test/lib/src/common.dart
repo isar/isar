@@ -7,6 +7,7 @@ import 'package:isar/isar.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
+// ignore: implementation_imports
 import 'package:test_api/src/backend/invoker.dart';
 
 final testErrors = <String>[];
@@ -83,6 +84,7 @@ Isar openTempIsar(
   String? name,
   String? directory,
   int maxSizeMiB = Isar.defaultMaxSizeMiB,
+  String? encryptionKey,
   CompactCondition? compactOnLaunch,
   bool closeAutomatically = true,
 }) {
@@ -93,14 +95,24 @@ Isar openTempIsar(
     Directory(testTempPath!).createSync(recursive: true);
   }
 
-  final isar = Isar.open(
-    schemas: schemas,
-    name: name ?? getRandomName(),
-    engine: isSQLite ? StorageEngine.sqlite : StorageEngine.isar,
-    maxSizeMiB: maxSizeMiB,
-    directory: directory ?? testTempPath!,
-    compactOnLaunch: compactOnLaunch,
-  );
+  late final Isar isar;
+  if (isSQLite) {
+    isar = Isar.openSQLite(
+      schemas: schemas,
+      name: name ?? getRandomName(),
+      maxSizeMiB: maxSizeMiB,
+      encryptionKey: encryptionKey,
+      directory: directory ?? testTempPath!,
+    );
+  } else {
+    isar = Isar.open(
+      schemas: schemas,
+      name: name ?? getRandomName(),
+      maxSizeMiB: maxSizeMiB,
+      directory: directory ?? testTempPath!,
+      compactOnLaunch: compactOnLaunch,
+    );
+  }
 
   if (closeAutomatically) {
     addTearDown(() async {
@@ -121,35 +133,41 @@ void isarTest(
   FutureOr<void> Function() body, {
   Timeout? timeout,
   bool skip = false,
+  bool isar = true,
+  bool sqlite = true,
 }) {
   testCount++;
   group(name, () {
-    test(
-      '(isar)',
-      () async {
-        try {
-          await body();
-        } catch (e, s) {
-          testErrors.add('$name: $e\n$s');
-          rethrow;
-        }
-      },
-      timeout: timeout,
-      skip: skip,
-    );
+    if (isar) {
+      test(
+        '(isar)',
+        () async {
+          try {
+            await body();
+          } catch (e, s) {
+            testErrors.add('$name (isar): $e\n$s');
+            rethrow;
+          }
+        },
+        timeout: timeout,
+        skip: skip,
+      );
+    }
 
-    test(
-      '(sqlite)',
-      () async {
-        try {
-          await body();
-        } catch (e, s) {
-          testErrors.add('$name: $e\n$s');
-          rethrow;
-        }
-      },
-      timeout: timeout,
-      skip: skip,
-    );
+    if (sqlite) {
+      test(
+        '(sqlite)',
+        () async {
+          try {
+            await body();
+          } catch (e, s) {
+            testErrors.add('$name (sqlite): $e\n$s');
+            rethrow;
+          }
+        },
+        timeout: timeout,
+        skip: skip,
+      );
+    }
   });
 }

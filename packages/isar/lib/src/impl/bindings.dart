@@ -209,11 +209,11 @@ external void isar_insert_abort(
 @ffi.Native<ffi.Pointer<ffi.Char> Function()>(symbol: 'isar_version')
 external ffi.Pointer<ffi.Char> isar_version();
 
-@ffi.Native<ffi.Pointer<CIsarInstance> Function(ffi.Uint32, StorageEngine)>(
+@ffi.Native<ffi.Pointer<CIsarInstance> Function(ffi.Uint32, ffi.Bool)>(
     symbol: 'isar_get_instance')
 external ffi.Pointer<CIsarInstance> isar_get_instance(
   int instance_id,
-  int engine,
+  bool sqlite,
 );
 
 @ffi.Native<
@@ -222,9 +222,10 @@ external ffi.Pointer<CIsarInstance> isar_get_instance(
         ffi.Uint32,
         ffi.Pointer<CString>,
         ffi.Pointer<CString>,
-        StorageEngine,
+        ffi.Bool,
         ffi.Pointer<CString>,
         ffi.Uint32,
+        ffi.Pointer<CString>,
         ffi.Uint32,
         ffi.Uint32,
         ffi.Float)>(symbol: 'isar_open_instance')
@@ -233,9 +234,10 @@ external int isar_open_instance(
   int instance_id,
   ffi.Pointer<CString> name,
   ffi.Pointer<CString> path,
-  int engine,
+  bool sqlite,
   ffi.Pointer<CString> schema_json,
   int max_size_mib,
+  ffi.Pointer<CString> encryption_key,
   int compact_min_file_size,
   int compact_min_bytes,
   double compact_min_ratio,
@@ -821,12 +823,6 @@ external void isar_write_list_end(
   ffi.Pointer<CIsarWriter> list_writer,
 );
 
-abstract class CStorageEngine {
-  static const int Isar = 0;
-  static const int SQLite = 1;
-  static const int SQLCipher = 2;
-}
-
 final class CIsarCursor extends ffi.Opaque {}
 
 final class CIsarInstance extends ffi.Opaque {}
@@ -855,8 +851,6 @@ typedef DartPort = ffi.Int64;
 
 final class CDartCObject extends ffi.Opaque {}
 
-typedef StorageEngine = ffi.Uint8;
-
 final class CIsarUpdate extends ffi.Opaque {}
 
 final class CWatchHandle extends ffi.Opaque {}
@@ -873,7 +867,9 @@ const int ERROR_OBJECT_LIMIT_REACHED = 5;
 
 const int ERROR_INSTANCE_MISMATCH = 6;
 
-const int ERROR_DB_FULL = 7;
+const int ERROR_ENCRYPTION = 7;
+
+const int ERROR_DB_FULL = 8;
 
 const int AGGREGATION_COUNT = 0;
 

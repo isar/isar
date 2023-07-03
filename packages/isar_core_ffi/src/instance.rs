@@ -1,4 +1,4 @@
-use crate::{CIsarInstance, CIsarReader, CIsarTxn};
+use crate::{dart_fast_hash, CIsarInstance, CIsarReader, CIsarTxn};
 use isar_core::core::error::IsarError;
 use isar_core::core::instance::{CompactCondition, IsarInstance};
 use isar_core::core::schema::IsarSchema;
@@ -13,39 +13,23 @@ use isar_core::sqlite::sqlite_instance::SQLiteInstance;
 
 include!(concat!(env!("OUT_DIR"), "/version.rs"));
 
-#[repr(u8)]
-pub enum StorageEngine {
-    Isar = 0,
-    SQLite = 1,
-    SQLCipher = 2,
-}
-
 #[no_mangle]
 pub unsafe extern "C" fn isar_version() -> *const c_char {
     ISAR_VERSION.as_ptr() as *const c_char
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_get_instance(
-    instance_id: u32,
-    engine: StorageEngine,
-) -> *const CIsarInstance {
-    match engine {
-        StorageEngine::Isar =>
-        {
-            #[cfg(feature = "native")]
-            if let Some(instance) = NativeInstance::get_instance(instance_id) {
-                return Box::into_raw(Box::new(CIsarInstance::Native(instance)));
-            }
+pub unsafe extern "C" fn isar_get_instance(instance_id: u32, sqlite: bool) -> *const CIsarInstance {
+    if sqlite {
+        #[cfg(feature = "sqlite")]
+        if let Some(instance) = SQLiteInstance::get_instance(instance_id) {
+            return Box::into_raw(Box::new(CIsarInstance::SQLite(instance)));
         }
-        StorageEngine::SQLite =>
-        {
-            #[cfg(feature = "sqlite")]
-            if let Some(instance) = SQLiteInstance::get_instance(instance_id) {
-                return Box::into_raw(Box::new(CIsarInstance::SQLite(instance)));
-            }
+    } else {
+        #[cfg(feature = "native")]
+        if let Some(instance) = NativeInstance::get_instance(instance_id) {
+            return Box::into_raw(Box::new(CIsarInstance::Native(instance)));
         }
-        StorageEngine::SQLCipher => todo!(),
     }
     ptr::null()
 }
@@ -56,9 +40,10 @@ pub unsafe extern "C" fn isar_open_instance(
     instance_id: u32,
     name: *mut String,
     path: *mut String,
-    engine: StorageEngine,
+    sqlite: bool,
     schema_json: *mut String,
     max_size_mib: u32,
+    encryption_key: *mut String,
     compact_min_file_size: u32,
     compact_min_bytes: u32,
     compact_min_ratio: f32,
@@ -68,6 +53,12 @@ pub unsafe extern "C" fn isar_open_instance(
         let path = *Box::from_raw(path);
         let schema_json = *Box::from_raw(schema_json);
         let schema = IsarSchema::from_json(schema_json.as_bytes())?;
+
+        let encryption_key = if encryption_key.is_null() {
+            None
+        } else {
+            Some(*Box::from_raw(encryption_key))
+        };
 
         let compact_condition = if compact_min_ratio.is_nan() {
             None
@@ -79,40 +70,42 @@ pub unsafe extern "C" fn isar_open_instance(
             })
         };
 
-        let new_isar = match engine {
-            StorageEngine::Isar => {
-                #[cfg(feature = "native")]
-                {
-                    let instance = NativeInstance::open_instance(
-                        instance_id,
-                        &name,
-                        &path,
-                        schema,
-                        max_size_mib,
-                        compact_condition,
-                    )?;
-                    CIsarInstance::Native(instance)
-                }
-                #[cfg(not(feature = "native"))]
+        let new_isar = if sqlite {
+            #[cfg(feature = "sqlite")]
+            {
+                let instance = SQLiteInstance::open_instance(
+                    instance_id,
+                    &name,
+                    &path,
+                    schema,
+                    max_size_mib,
+                    encryption_key.as_deref(),
+                    compact_condition,
+                )?;
+                CIsarInstance::SQLite(instance)
+            }
+            #[cfg(not(feature = "sqlite"))]
+            {
                 return Err(IsarError::UnsupportedOperation {});
             }
-            StorageEngine::SQLite => {
-                #[cfg(feature = "sqlite")]
-                {
-                    let instance = SQLiteInstance::open_instance(
-                        instance_id,
-                        &name,
-                        &path,
-                        schema,
-                        max_size_mib,
-                        compact_condition,
-                    )?;
-                    CIsarInstance::SQLite(instance)
-                }
-                #[cfg(not(feature = "sqlite"))]
+        } else {
+            #[cfg(feature = "native")]
+            {
+                let instance = NativeInstance::open_instance(
+                    instance_id,
+                    &name,
+                    &path,
+                    schema,
+                    max_size_mib,
+                    encryption_key.as_deref(),
+                    compact_condition,
+                )?;
+                CIsarInstance::Native(instance)
+            }
+            #[cfg(not(feature = "native"))]
+            {
                 return Err(IsarError::UnsupportedOperation {});
             }
-            StorageEngine::SQLCipher => todo!(),
         };
         *isar = Box::into_raw(Box::new(new_isar));
     }
@@ -318,12 +311,12 @@ pub unsafe extern "C" fn isar_import_json(
         let (new_txn, new_count) = match (isar, *Box::from_raw(*txn)) {
             #[cfg(feature = "native")]
             (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
-                let (txn, count) = isar.import_json(txn, collection_index, &mut deserializer)?;
+                let (txn, count) = isar.import_json(txn, collection_index, &mut deserializer, dart_fast_hash)?;
                 (CIsarTxn::Native(txn), count)
             }
             #[cfg(feature = "sqlite")]
             (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn)) => {
-                let (txn, count) = isar.import_json(txn, collection_index, &mut deserializer)?;
+                let (txn, count) = isar.import_json(txn, collection_index, &mut deserializer, dart_fast_hash)?;
                 (CIsarTxn::SQLite(txn), count)
             }
             _ => return Err(IsarError::IllegalArgument {}),

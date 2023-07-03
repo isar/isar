@@ -65,6 +65,16 @@ class InstanceMismatchError extends IsarError {
       'from a different Isar instance.';
 }
 
+class EncryptionError extends IsarError {
+  @override
+  String get name => 'EncryptionError';
+
+  @override
+  String get message => 'Could not encrypt/decrypt the database. Make sure '
+      'that the encryption key is correct and that the database is not '
+      'corrupted.';
+}
+
 class DatabaseFullError extends IsarError {
   @override
   final name = 'DatabaseFullError';
@@ -106,7 +116,7 @@ class DatabaseError extends IsarError {
   DatabaseError(this.message);
 
   @override
-  String get name => 'DatabaseError';
+  String get name => 'IsarError';
 
   @override
   final String message;

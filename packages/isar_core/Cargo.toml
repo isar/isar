@@ -36,6 +36,7 @@ version = "*"
 features = ["float_roundtrip"]
 
 [features]
-default = [ "native"]
+default = ["sqlite", "native"]
 native = ["mdbx-sys"]
 sqlite = ["libsqlite3-sys"]
+sqlcipher = ["sqlite", "libsqlite3-sys/bundled-sqlcipher"]

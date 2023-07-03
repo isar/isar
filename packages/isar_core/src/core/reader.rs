@@ -49,7 +49,9 @@ pub trait IsarReader {
         let obj = IsarObjectSerialize::new(self);
         serializer
             .serialize_some(&obj)
-            .map_err(|_| IsarError::JsonError {})?;
+            .map_err(|e| IsarError::JsonError {
+                message: e.to_string(),
+            })?;
         Ok(())
     }
 }

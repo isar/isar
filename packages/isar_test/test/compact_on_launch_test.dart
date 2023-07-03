@@ -63,7 +63,7 @@ void main() {
       expect(size1, size2);
     });
 
-    isarTest('minFileSize', () {
+    isarTest('minFileSize', sqlite: false, () {
       isar.close();
       final size1 = file.lengthSync();
 
@@ -89,7 +89,7 @@ void main() {
       expect(size3, lessThan(size2));
     });
 
-    isarTest('minBytes', () {
+    isarTest('minBytes', sqlite: false, () {
       isar.close();
       final size1 = file.lengthSync();
 
@@ -125,7 +125,7 @@ void main() {
       expect(size4, lessThan(size3));
     });
 
-    isarTest('minRatio', () {
+    isarTest('minRatio', sqlite: false, () {
       isar.close();
       final size1 = file.lengthSync();
 

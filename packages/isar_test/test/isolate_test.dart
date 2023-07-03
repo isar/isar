@@ -1,5 +1,3 @@
-@TestOn('vm')
-
 import 'dart:isolate';
 
 import 'package:isar/isar.dart';
@@ -41,8 +39,11 @@ void main() {
       isar.testModels.putAll([_obj1, _obj2]);
     });
 
+    final sqlite = isSQLite;
     await Isolate.run(() {
-      final isar = Isar.get(schemas: [TestModelSchema], name: name);
+      final isar = sqlite
+          ? Isar.getSQLite(schemas: [TestModelSchema], name: name)
+          : Isar.get(schemas: [TestModelSchema], name: name);
 
       final current = isar.testModels.where().findAll();
       assert(

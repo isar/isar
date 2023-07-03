@@ -80,8 +80,12 @@ impl IsarInstance for NativeInstance {
         dir: &str,
         schema: IsarSchema,
         max_size_mib: u32,
+        encryption_key: Option<&str>,
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self::Instance> {
+        if encryption_key.is_some() {
+            return Err(IsarError::IllegalArgument {});
+        }
         let mut lock = INSTANCES.lock().unwrap();
         if let Some(instance) = lock.get(instance_id as u64) {
             Ok(instance.clone())

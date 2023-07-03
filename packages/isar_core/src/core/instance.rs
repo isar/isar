@@ -52,6 +52,7 @@ pub trait IsarInstance: Sized {
         dir: &str,
         schema: IsarSchema,
         max_size_mib: u32,
+        encryption_key: Option<&str>,
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self::Instance>;
 
@@ -132,10 +133,18 @@ pub trait IsarInstance: Sized {
         txn: Self::Txn,
         collection_index: u16,
         deserializer: T,
+        str_to_id: impl Fn(&str) -> i64,
     ) -> Result<(Self::Txn, u32)> {
         let (txn, count) = deserializer
-            .deserialize_seq(IsarJsonImportVisitor::new(self, txn, collection_index))
-            .map_err(|_| IsarError::JsonError {})?;
+            .deserialize_seq(IsarJsonImportVisitor::new(
+                self,
+                txn,
+                collection_index,
+                str_to_id,
+            ))
+            .map_err(|e| IsarError::JsonError {
+                message: e.to_string(),
+            })?;
         Ok((txn, count))
     }
 
