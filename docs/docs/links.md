@@ -128,19 +128,19 @@ If you want to update associations, a simple `linda.teachers.add(teacher)` of an
 
 The remove ID's approach is good for when you want to pluck out and remove one by one, or do some sort of comparison.
 ```dart
-await linda.teachers.removeAll([biologyTeacher.id])
-await linda.teachers.remove(biologyTeacher.id)
+await linda.teachers.removeAll([biologyTeacher.id]);
+await linda.teachers.remove(biologyTeacher.id);
 await linda.teachers.removeWhere((teacher) => teacher.id == biologyTeacher.id);
 
-await linda.teachers.save() // Must call save() to save Links
+await linda.teachers.save(); // Must call save() to save Links
 ```
 
 The reset list and reassociate are good for when you have an entire list of new Links you want to associate, and you want to overwrite them. 
 
 ```dart
-await linda.teachers.reset()
-await linda.teachers.addAll([biologyTeach, mathTeacher, literatureTeacher])
-await linda.teachers.save() // Must call save() to save Links
+await linda.teachers.reset();
+await linda.teachers.addAll([biologyTeach, mathTeacher, literatureTeacher]);
+await linda.teachers.save(); // Must call save() to save Links
 ```
 
 Important to note: All IsarLinks that you are associating must be loaded so be sure to use the ones queried from the database
