@@ -146,16 +146,16 @@ await linda.teachers.save() // Must call save() to save Links
 Important to note: All IsarLinks that you are associating must be loaded so be sure to use the ones queried from the database
 
 ```dart
-update(Student updatedStudent,
-      {List<Teachers>? argTeachers}) async {
-// You cannot use argTeachers to associate because they are not loaded
-final teacherIds = argTeachers.map((t) => t.id).toList();
-final loadedTeachers = isar.teachers.getAll(teacherIds);
-
-await updatedStudent.teachers.reset(); // Clear associated teachers
-await updatedStudent.teachers.addAll(loadedTeachers.nonNulls); // Add new teachers
-await isar.students.put(updatedStudent); // Replace the old student for the updated one
-await updatedStudent.teachers.save(); // Save the associations
+update(Student updatedStudent, {List<Teachers>? argTeachers}) async {
+  // You cannot use argTeachers to associate because they are not loaded
+  final teacherIds = argTeachers.map((t) => t.id).toList();
+  final loadedTeachers = isar.teachers.getAll(teacherIds);
+  
+  await updatedStudent.teachers.reset(); // Clear associated teachers
+  await updatedStudent.teachers.addAll(loadedTeachers.nonNulls); // Add new teachers
+  await isar.students.put(updatedStudent); // Replace the old student for the updated one
+  await updatedStudent.teachers.save(); // Save the associations
+}
 ```
 
 ## Backlinks
