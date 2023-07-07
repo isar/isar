@@ -80,13 +80,15 @@ fn filter_to_native(
         }
         Filter::Json(_) => todo!(),
         Filter::Nested(nested) => {
-            let property = collection.get_property(nested.property_index);
-            let filter = filter_to_native(&nested.filter, collection, all_collections);
-            if let Some(property) = property {
-                NativeFilter::nested(property, filter)
-            } else {
-                NativeFilter::stat(false)
+            if let Some(property) = collection.get_property(nested.property_index) {
+                if let Some(embedded_collection_index) = property.embedded_collection_index {
+                    let embedded_collection = &all_collections[embedded_collection_index as usize];
+                    let filter =
+                        filter_to_native(&nested.filter, embedded_collection, all_collections);
+                    return NativeFilter::nested(property, filter);
+                }
             }
+            NativeFilter::stat(false)
         }
         Filter::And(filters) => {
             let filters = filters

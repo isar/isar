@@ -171,11 +171,12 @@ fn filter_sql_path(
         Filter::Nested(nested) => {
             if let Some(property) = collection.get_property(nested.property_index) {
                 if property.data_type == DataType::Object {
+                    path.push(property.name.clone());
                     return filter_sql_path(
                         property.collection_index.unwrap(),
                         all_collections,
                         *nested.filter,
-                        vec![property.name.clone()],
+                        path,
                     );
                 }
             }
@@ -189,7 +190,7 @@ fn filter_sql_path(
                     sql.push_str(" AND ");
                 }
                 let (filter_sql, filter_params) =
-                    filter_sql(collection_index, all_collections, filter);
+                    filter_sql_path(collection_index, all_collections, filter, path.clone());
                 sql.push_str(&filter_sql);
                 params.extend(filter_params.into_iter());
             }
@@ -203,14 +204,14 @@ fn filter_sql_path(
                     sql.push_str(" OR ");
                 }
                 let (filter_sql, filter_params) =
-                    filter_sql(collection_index, all_collections, filter);
+                    filter_sql_path(collection_index, all_collections, filter, path.clone());
                 sql.push_str(&filter_sql);
                 params.extend(filter_params.into_iter());
             }
             (format!("({})", sql), params)
         }
         Filter::Not(filter) => {
-            let (sql, params) = filter_sql(collection_index, all_collections, *filter);
+            let (sql, params) = filter_sql_path(collection_index, all_collections, *filter, path);
             (format!("NOT ({})", sql), params)
         }
     }

@@ -24,7 +24,8 @@ impl<'a, R: IsarReader> Serialize for IsarObjectSerialize<'a, R> {
         let id_name = self.reader.id_name();
         let mut id_serialized = false;
 
-        for (index, (name, data_type)) in self.reader.properties().enumerate() {
+        for (mut index, (name, data_type)) in self.reader.properties().enumerate() {
+            index += 1;
             if Some(name) == id_name {
                 id_serialized = true;
             }

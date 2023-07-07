@@ -4,6 +4,7 @@ use super::sqlite_query::SQLiteQuery;
 use crate::core::data_type::DataType;
 use crate::core::watcher::CollectionWatchers;
 
+#[derive(Debug)]
 pub struct SQLiteProperty {
     pub name: String,
     pub data_type: DataType,

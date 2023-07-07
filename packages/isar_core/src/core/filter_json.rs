@@ -147,12 +147,12 @@ impl JsonCondition {
 
 fn extract_value<'a>(json: &'a Value, path: &[String]) -> Option<&'a Value> {
     let mut value = json;
-    for key in path.iter().rev() {
+    for key in path.iter() {
         match value {
-            Value::Object(map) => value = map.get(key)?,
+            Value::Object(map) => value = map.get(key).unwrap_or(&Value::Null),
             Value::Array(vec) => {
                 let index = key.parse::<usize>().ok()?;
-                value = vec.get(index)?;
+                value = vec.get(index).unwrap_or(&Value::Null);
             }
             _ => return None,
         }
