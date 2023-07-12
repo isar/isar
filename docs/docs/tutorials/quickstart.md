@@ -53,6 +53,7 @@ flutter pub run build_runner build
 ## 4. Open Isar instance
 
 Open a new Isar instance and pass all of your collection schemas. Optionally you can specify an instance name and directory.
+It is important to notice that the `getApplicationDocumentsDirectory()` comes from the package [path_provider](https://pub.dev/packages/path_provider/install)
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
