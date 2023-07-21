@@ -139,7 +139,7 @@ jobs:
         run: |
           dart pub get
           dart test
-        working-directory: packages/isar_generator
+        working-directory: packages/isar
 
   integration_test_ios:
     name: Integration Test iOS
@@ -197,12 +197,10 @@ jobs:
 
   integration_test_macos:
     name: Integration Test macOS
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.3.10" # https://github.com/flutter/flutter/issues/118469
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
