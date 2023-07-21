@@ -42,7 +42,7 @@ void main() {
       obj4 = ByteModel(4, [0, 255]);
       objNull = ByteModel(5, null);
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         col.putAll([objEmpty, obj1, obj2, obj3, obj4, objNull]);
       });
     });

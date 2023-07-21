@@ -42,7 +42,7 @@ void main() {
 
         for (var i = 0; i < 100; i++) {
           final tweets = await downloadTweets(isar.directory, i);
-          isar.writeTxn((isar) {
+          isar.write((isar) {
             isar.tweets.putAll(tweets);
           });
         }

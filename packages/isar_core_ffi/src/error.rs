@@ -11,6 +11,7 @@ macro_rules! isar_try {
         #[allow(unused_mut)] {
             let mut l = || -> isar_core::core::error::Result<()> {
                 {$($token)*}
+                #[allow(unreachable_code)]
                 Ok(())
             };
             if let Err(err) = l() {

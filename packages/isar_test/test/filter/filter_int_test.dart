@@ -40,7 +40,7 @@ void main() {
       obj3 = IntModel(3, 1);
       objNull = IntModel(4, null);
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.intModels.putAll([obj0, obj1, obj2, obj3, objNull]);
       });
     });

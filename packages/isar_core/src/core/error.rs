@@ -17,7 +17,9 @@ pub enum IsarError {
     WriteTxnRequired {},
 
     #[snafu(display("Schema error: {}", message))]
-    SchemaError { message: String },
+    SchemaError {
+        message: String,
+    },
 
     #[snafu(display("Isar version of the file is too new or too old to be used."))]
     VersionError {},
@@ -55,7 +57,9 @@ pub enum IsarError {
     IllegalArgument {},
 
     #[snafu(display("Json Error: {}", message))]
-    JsonError { message: String },
+    JsonError {
+        message: String,
+    },
 
     #[snafu(display("Encryption Error. Please make sure to use the correct encryption key."))]
     EncryptionError {},
@@ -63,6 +67,11 @@ pub enum IsarError {
     #[snafu(display("The database is full."))]
     DbFull {},
 
+    DbCorrupted {},
+
     #[snafu(display("DbError ({}): {}", code, message))]
-    DbError { code: i32, message: String },
+    DbError {
+        code: i32,
+        message: String,
+    },
 }

@@ -69,6 +69,10 @@ impl NativeCollection {
         self.db.ok_or(IsarError::UnsupportedOperation {})
     }
 
+    pub fn is_embedded(&self) -> bool {
+        self.id_name.is_none()
+    }
+
     #[inline]
     pub fn get_property(&self, property_index: u16) -> Option<&NativeProperty> {
         if property_index != 0 {

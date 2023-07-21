@@ -74,42 +74,42 @@ void main() {
     });
 
     isarTest('Size should increase with more entries', sqlite: false, () {
-      isar.writeTxn((isar) => isar.modelAs.put(objA0));
+      isar.write((isar) => isar.modelAs.put(objA0));
       final sizeA0 = isar.modelAs.getSize();
       expect(sizeA0, greaterThan(0));
 
-      isar.writeTxn((isar) => isar.modelAs.putAll([objA1, objA2, objA3]));
+      isar.write((isar) => isar.modelAs.putAll([objA1, objA2, objA3]));
       final sizeA1 = isar.modelAs.getSize();
       expect(sizeA1, greaterThan(sizeA0));
 
-      isar.writeTxn((isar) => isar.modelAs.putAll([objA4, objA5]));
+      isar.write((isar) => isar.modelAs.putAll([objA4, objA5]));
       final sizeA2 = isar.modelAs.getSize();
       expect(sizeA2, greaterThan(sizeA1));
 
       expect(isar.modelBs.getSize(), 0);
 
-      isar.writeTxn((isar) => isar.modelBs.put(objB0));
+      isar.write((isar) => isar.modelBs.put(objB0));
       final sizeB0 = isar.modelBs.getSize();
       expect(sizeB0, greaterThan(0));
 
-      isar.writeTxn((isar) => isar.modelBs.putAll([objB1, objB2, objB3]));
+      isar.write((isar) => isar.modelBs.putAll([objB1, objB2, objB3]));
       final sizeB1 = isar.modelBs.getSize();
       expect(sizeB1, greaterThanOrEqualTo(sizeB0));
 
-      isar.writeTxn((isar) => isar.modelBs.putAll([objB4, objB5]));
+      isar.write((isar) => isar.modelBs.putAll([objB4, objB5]));
       final sizeB2 = isar.modelBs.getSize();
       expect(sizeB2, greaterThanOrEqualTo(sizeB1));
     });
 
     // TODO enable when indexes are implemented
     /*isarTest('includeIndexes should change size', () {
-      isar.writeTxn((isar) => isar.modelAs.putAll([objA0, objA1, objA3]));
+      isar.write((isar) => isar.modelAs.putAll([objA0, objA1, objA3]));
 
       final sizeAWithoutIndexes = isar.modelAs.getSize();
       final sizeAWithIndexes = isar.modelAs.getSize(includeIndexes: true);
       expect(sizeAWithIndexes, greaterThan(sizeAWithoutIndexes));
 
-      isar.writeTxn((isar) => isar.modelBs.putAll([objB0, objB3, objB4]));
+      isar.write((isar) => isar.modelBs.putAll([objB0, objB3, objB4]));
 
       final sizeBWithoutIndexes = isar.modelBs.getSize();
       final sizeBWithIndexes = isar.modelBs.getSize(includeIndexes: true);
@@ -118,30 +118,30 @@ void main() {
     });*/
 
     isarTest('Delete should decrease size', sqlite: false, () {
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.modelAs.putAll([objA0, objA1, objA2, objA3]);
         isar.modelBs.putAll([objB0, objB1, objB2, objB3, objB4]);
       });
 
       final sizeA1 = isar.modelAs.getSize();
 
-      isar.writeTxn((isar) => isar.modelAs.delete(objA0.id));
+      isar.write((isar) => isar.modelAs.delete(objA0.id));
       final sizeA2 = isar.modelAs.getSize();
 
       expect(sizeA2, lessThan(sizeA1));
 
-      isar.writeTxn((isar) => isar.modelAs.clear());
+      isar.write((isar) => isar.modelAs.clear());
       final sizeA3 = isar.modelAs.getSize();
       expect(sizeA3, 0);
 
       final sizeB1 = isar.modelBs.getSize();
 
-      isar.writeTxn((isar) => isar.modelBs.deleteAll([objB0.id, objB1.id]));
+      isar.write((isar) => isar.modelBs.deleteAll([objB0.id, objB1.id]));
       final sizeB2 = isar.modelBs.getSize();
 
       expect(sizeB2, lessThan(sizeB1));
 
-      isar.writeTxn((isar) => isar.modelBs.deleteAll([objB2.id, objB3.id]));
+      isar.write((isar) => isar.modelBs.deleteAll([objB2.id, objB3.id]));
       final sizeB3 = isar.modelBs.getSize();
 
       expect(sizeB3, lessThan(sizeB2));
@@ -149,7 +149,7 @@ void main() {
     });
 
     isarTest('Update should change size', sqlite: false, () {
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.modelAs.putAll([objA0, objA1, objA2, objA3]);
         isar.modelBs.putAll([objB0, objB1, objB2, objB3, objB4]);
       });
@@ -159,7 +159,7 @@ void main() {
 
       objA0.name += String.fromCharCodes(List.filled(64000, 42));
 
-      isar.writeTxn((isar) => isar.modelAs.put(objA0));
+      isar.write((isar) => isar.modelAs.put(objA0));
       final sizeA2 = isar.modelAs.getSize();
       final sizeB2 = isar.modelBs.getSize();
 
@@ -169,7 +169,7 @@ void main() {
       objA0.name += String.fromCharCodes(List.filled(64000, 42));
       objA1.name += String.fromCharCodes(List.filled(64000, 42));
 
-      isar.writeTxn((isar) => isar.modelAs.putAll([objA0, objA1]));
+      isar.write((isar) => isar.modelAs.putAll([objA0, objA1]));
       final sizeA3 = isar.modelAs.getSize();
       final sizeB3 = isar.modelBs.getSize();
 

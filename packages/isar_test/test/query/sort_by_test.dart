@@ -44,7 +44,7 @@ void main() {
       modelC1 = Model(1, 'c', false);
       modelC2 = Model(2, 'c', true);
 
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.models
             .putAll([modelA1, modelA2, modelB1, modelB2, modelC1, modelC2]),
       );

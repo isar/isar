@@ -4,7 +4,7 @@ use super::sqlite_query::QueryParam;
 use crate::core::data_type::DataType;
 use crate::core::error::Result;
 use crate::core::filter::{ConditionType, Filter, FilterCondition, JsonCondition};
-use crate::core::schema::{CollectionSchema, IndexSchema, PropertySchema};
+use crate::core::schema::{IndexSchema, IsarSchema, PropertySchema};
 use crate::core::value::IsarValue;
 use itertools::Itertools;
 use serde_json::Value;
@@ -12,7 +12,7 @@ use std::borrow::Cow;
 use std::cmp::min;
 use std::vec;
 
-pub(crate) fn create_table_sql(collection: &CollectionSchema) -> String {
+pub(crate) fn create_table_sql(collection: &IsarSchema) -> String {
     format!(
         "CREATE TABLE {} ({} INTEGER PRIMARY KEY {}) ",
         collection.name,

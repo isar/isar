@@ -2,11 +2,11 @@ use super::sql::{create_index_sql, create_table_sql, data_type_sql, sql_data_typ
 use super::sqlite3::SQLite3;
 use super::sqlite_txn::SQLiteTxn;
 use crate::core::error::{IsarError, Result};
-use crate::core::schema::{CollectionSchema, IndexSchema, IsarSchema, PropertySchema};
+use crate::core::schema::{IndexSchema, IsarSchema, PropertySchema};
 use crate::sqlite::sqlite_collection::SQLiteProperty;
 use itertools::Itertools;
 
-pub fn perform_migration(txn: &SQLiteTxn, schema: &IsarSchema) -> Result<()> {
+pub fn perform_migration(txn: &SQLiteTxn, schemas: &[IsarSchema]) -> Result<()> {
     txn.guard(|| {
         let sqlite = txn.get_sqlite(true)?;
         let table_names = sqlite
@@ -15,7 +15,7 @@ pub fn perform_migration(txn: &SQLiteTxn, schema: &IsarSchema) -> Result<()> {
             .map(|s| s.to_lowercase())
             .collect_vec();
 
-        for collection in &schema.collections {
+        for collection in schemas {
             if !collection.embedded {
                 if table_names.contains(&collection.name.to_lowercase()) {
                     update_table(sqlite, collection)?;
@@ -31,8 +31,7 @@ pub fn perform_migration(txn: &SQLiteTxn, schema: &IsarSchema) -> Result<()> {
         }
 
         for table in table_names {
-            if !schema
-                .collections
+            if !schemas
                 .iter()
                 .any(|c| c.name.to_lowercase() == table && !c.embedded)
             {
@@ -45,7 +44,7 @@ pub fn perform_migration(txn: &SQLiteTxn, schema: &IsarSchema) -> Result<()> {
     })
 }
 
-fn read_col_schema(sqlite: &SQLite3, name: &str) -> Result<CollectionSchema> {
+fn read_col_schema(sqlite: &SQLite3, name: &str) -> Result<IsarSchema> {
     let columns = sqlite.get_table_columns(name)?;
     let indexes = sqlite.get_table_indexes(name)?;
 
@@ -77,12 +76,10 @@ fn read_col_schema(sqlite: &SQLite3, name: &str) -> Result<CollectionSchema> {
         })
         .collect();
 
-    Ok(CollectionSchema::new(
-        name, None, properties, indexes, false,
-    ))
+    Ok(IsarSchema::new(name, None, properties, indexes, false))
 }
 
-fn update_table(sqlite: &SQLite3, collection: &CollectionSchema) -> Result<()> {
+fn update_table(sqlite: &SQLite3, collection: &IsarSchema) -> Result<()> {
     let existing_schema = read_col_schema(sqlite, &collection.name)?;
     let (add_properties, drop_properties, add_indexes, drop_indexes) =
         collection.find_changes(&existing_schema);

@@ -1,5 +1,6 @@
 part of isar;
 
+/// An Isar database instance.
 @pragma('vm:isolate-unsendable')
 abstract class Isar {
   /// The default Isar instance name.
@@ -8,8 +9,13 @@ abstract class Isar {
   /// The default max Isar size.
   static const int defaultMaxSizeMiB = 128;
 
+  /// The current Isar version.
   static const String version = '4.0.0';
 
+  /// Get an already opened Isar instance by its name.
+  ///
+  /// This method is especially useful to get an Isar instance from an isolate.
+  /// It is much faster than using [open].
   static Isar get({
     required List<IsarCollectionSchema> schemas,
     String name = Isar.defaultName,
@@ -21,6 +27,10 @@ abstract class Isar {
     );
   }
 
+  /// Get an already opened SQLite Isar instance by its name.
+  ///
+  /// This method is especially useful to get an Isar instance from an isolate.
+  /// It is much faster than using [openSQLite].
   static Isar getSQLite({
     required List<IsarCollectionSchema> schemas,
     String name = Isar.defaultName,
@@ -32,6 +42,19 @@ abstract class Isar {
     );
   }
 
+  /// Open a new Isar instance.
+  ///
+  /// You have to provide a list of all collection [schemas] that you want to
+  /// use in this instance as well as a [directory] where the database file
+  /// should be stored.
+  ///
+  /// You can optionally provide a [name] for this instance. This is needed if
+  /// you want to open multiple instances.
+  ///
+  /// [maxSizeMiB] is the maximum size of the database file in MiB. It is
+  /// recommended to set this value as low as possible. Older devices might
+  /// not be able to gran
+  ///
   static Isar open({
     required List<IsarCollectionSchema> schemas,
     required String directory,
@@ -77,25 +100,104 @@ abstract class Isar {
   /// file `directory/name.isar.lock`.
   String get directory;
 
+  /// Whether this instance is open and active.
+  ///
+  /// The instance is open until [close] is called. After that, all operations
+  /// will throw an [IsarNotReadyError].
   bool get isOpen;
 
+  /// Get a collection by its type.
+  ///
+  /// You should use the generated extension methods instead. A collection
+  /// `User` can be accessed with `isar.users`.
   IsarCollection<ID, OBJ> collection<ID, OBJ>();
 
-  T txn<T>(T Function(Isar isar) callback);
+  /// Create a synchroneous read transaction.
+  ///
+  /// Explicit read transactions are optional, but they allow you to do atomic
+  /// reads and rely on a consistent state of the database inside the
+  /// transaction. Internally Isar always uses implicit read transactions for
+  /// all read operations.
+  ///
+  /// It is recommended to use an explicit read transactions when you want to
+  /// perform multiple subsequent read operations.
+  ///
+  /// Example:
+  /// ```dart
+  /// final (user, workspace) = isar.read((isar) {
+  ///   final user = isar.users.where().findFirst();
+  ///   final workspace = isar.workspaces.where().findFirst();
+  ///   return (user, workspace);
+  /// });
+  /// ```
+  T read<T>(T Function(Isar isar) callback);
 
-  T writeTxn<T>(T Function(Isar isar) callback);
+  /// Create a synchroneous read-write transaction.
+  ///
+  /// Unlike read operations, write operations in Isar must be wrapped in an
+  /// explicit transaction.
+  ///
+  /// When a write transaction finishes successfully, it is automatically
+  /// committed, and all changes are written to disk. If an error occurs, the
+  /// transaction is aborted, and all the changes are rolled back. Transactions
+  /// are “all or nothing”: either all the writes within a transaction succeed,
+  /// or none of them take effect to guarantee data consistency.
+  ///
+  /// Example:
+  /// ```dart
+  /// isar.write((isar) {
+  ///   final user = User(name: 'John');
+  ///   isar.users.put(user);
+  /// });
+  /// ```
+  T write<T>(T Function(Isar isar) callback);
 
-  Future<T> txnAsync<T>(T Function(Isar isar) callback);
+  /// Create an asynchroneous read transaction.
+  ///
+  /// The code inside the callback will be executed in a separate isolate.
+  ///
+  /// Check out the [read] method for more information.
+  Future<T> readAsync<T>(T Function(Isar isar) callback);
 
-  Future<T> writeTxnAsync<T>(T Function(Isar isar) callback);
+  /// Create an asynchroneous read-write transaction.
+  ///
+  /// The code inside the callback will be executed in a separate isolate.
+  ///
+  /// Check out the [write] method for more information.
+  Future<T> writeAsync<T>(T Function(Isar isar) callback);
 
+  /// Returns the size of all the collections in bytes.
+  ///
+  /// For the native Isar storage engine this method is extremely fast and
+  /// independent of the number of objects in the instance.
   int getSize({bool includeIndexes = false});
 
+  /// Copy a compacted version of the database to the specified file.
+  ///
+  /// If you want to backup your database, you should always use a compacted
+  /// version. Compacted does not mean compressed.
+  ///
+  /// Do not run this method while other transactions are active to avoid
+  /// unnecessary growth of the database.
   void copyToFile(String path);
 
+  /// Remove all data in this instance.
   void clear();
 
+  /// Releases an Isar instance.
+  ///
+  /// If this is the only isolate that holds a reference to this instance, the
+  /// Isar instance will be closed. [deleteFromDisk] additionally removes all
+  /// database files if enabled.
+  ///
+  /// Returns whether the instance was actually closed.
   bool close({bool deleteFromDisk = false});
+
+  /// Verifies the integrity of the database. This method is not intended to be
+  /// used by end users and should only be used by Isar tests. Never call this
+  /// method on a production database.
+  @visibleForTesting
+  void verify();
 
   /// Initialize Isar Core manually. You need to provide Isar Core libraries
   /// for every platform your app will run on.

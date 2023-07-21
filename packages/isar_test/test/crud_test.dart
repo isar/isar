@@ -65,7 +65,7 @@ void main() {
         expect(isar.intModels.get(intM1.id), null);
         expect(isar.intModels.get(intM2.id), null);
 
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           isar.intModels.put(intM1);
           expect(isar.intModels.get(intM1.id), intM1);
           expect(isar.intModels.get(intM2.id), null);
@@ -85,7 +85,7 @@ void main() {
           [null, null, null],
         );
 
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           isar.intModels.put(intM1);
           expect(
             isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
@@ -117,7 +117,7 @@ void main() {
           [null, null, null],
         );
 
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           isar.intModels.put(intM1);
           expect(
             isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
@@ -138,7 +138,7 @@ void main() {
       });
 
       isarTest('putAll()', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           isar.intModels.putAll([intM1, intM3, intM1]);
           expect(
             isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
@@ -165,7 +165,7 @@ void main() {
       });
 
       isarTest('delete()', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           isar.intModels.putAll([intM1, intM2]);
           expect(isar.intModels.delete(intM2.id), true);
           expect(isar.intModels.getAll([intM1.id, intM2.id]), [intM1, null]);
@@ -178,7 +178,7 @@ void main() {
       });
 
       isarTest('deleteAll()', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           isar.intModels.putAll([intM1, intM2, intM3]);
           expect(isar.intModels.deleteAll([intM1.id, intM3.id]), 2);
           expect(
@@ -205,7 +205,7 @@ void main() {
         expect(isar.stringModels.get(strM1.id), null);
         expect(isar.stringModels.get(strM2.id), null);
 
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           isar.stringModels.put(strM1);
           expect(isar.stringModels.get(strM1.id), strM1);
           expect(isar.stringModels.get(strM2.id), null);
@@ -222,7 +222,7 @@ void main() {
       isarTest('put()', () {
         expect(isar.stringModels.getAll([strM1.id, strM2.id]), [null, null]);
 
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           isar.stringModels.put(strM1);
           expect(isar.stringModels.getAll([strM1.id, strM2.id]), [strM1, null]);
 
@@ -240,7 +240,7 @@ void main() {
           [null, null, null],
         );
 
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           isar.stringModels.put(strM1);
           expect(
             isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
@@ -261,7 +261,7 @@ void main() {
       });
 
       isarTest('putAll()', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           isar.stringModels.putAll([strM1, strM3, strM1]);
           expect(
             isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
@@ -288,7 +288,7 @@ void main() {
       });
 
       isarTest('delete()', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           isar.stringModels.putAll([strM1, strM2]);
           expect(isar.stringModels.delete(strM2.id), true);
           expect(isar.stringModels.getAll([strM1.id, strM2.id]), [strM1, null]);
@@ -301,7 +301,7 @@ void main() {
       });
 
       isarTest('deleteAll()', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           isar.stringModels.putAll([strM1, strM2, strM3]);
           expect(isar.stringModels.deleteAll([strM1.id, strM3.id]), 2);
           expect(
@@ -327,7 +327,7 @@ void main() {
       expect(isar.intModels.count(), 0);
       expect(isar.stringModels.count(), 0);
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.intModels.put(intM1);
         expect(isar.intModels.count(), 1);
         expect(isar.stringModels.count(), 0);
@@ -350,7 +350,7 @@ void main() {
     });
 
     isarTest('clear()', () {
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.intModels.putAll([intM1, intM2]);
         isar.stringModels.putAll([strM1, strM2]);
         expect(isar.intModels.count(), 2);

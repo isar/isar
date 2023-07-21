@@ -166,7 +166,7 @@ void main() {
     });
 
     isarTest('.put() .get()', () {
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.models.putAll([allNull, simple, nested]);
       });
 
@@ -176,7 +176,7 @@ void main() {
     });
 
     /*isarTest('.importJson()', ()  {
-       isar.writeTxn(()  {
+       isar.write(()  {
          isar.models.tImportJson([
           allNull.toJson(),
           simple.toJson(),
@@ -188,7 +188,7 @@ void main() {
     });
 
     isarTest('.exportJson()', ()  {
-       isar.writeTxn(()  {
+       isar.write(()  {
          isar.models.putAll([allNull, simple, nested]);
       });
 

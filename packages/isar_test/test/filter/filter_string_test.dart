@@ -48,7 +48,7 @@ void main() {
       obj6 = StringModel(6, 'string 5');
       objNull = StringModel(7, null);
 
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.stringModels.putAll([
           objEmpty,
           obj1,

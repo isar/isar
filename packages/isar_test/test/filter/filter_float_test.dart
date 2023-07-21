@@ -41,7 +41,7 @@ void main() {
       objNInf = FloatModel(4, double.negativeInfinity);
       objNull = FloatModel(5, null);
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         col.putAll([objInf, obj1, obj2, obj3, objNInf, objNull]);
       });
     });

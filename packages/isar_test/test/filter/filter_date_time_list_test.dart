@@ -54,7 +54,7 @@ void main() {
       obj5 = DateTimeModel(5, [null]);
       objNull = DateTimeModel(6, null);
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         col.putAll([obj1, obj2, obj3, objEmpty, obj5, objNull]);
       });
     });

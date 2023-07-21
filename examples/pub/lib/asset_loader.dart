@@ -59,7 +59,7 @@ Future<void> loadAssets(PackageAndVersion p) async {
   }
 
   if (readme != null || changelog != null) {
-    isar.writeTxnSync(() {
+    isar.writeSync(() {
       isar.assets.putAllSync([
         if (readme != null) readme,
         if (changelog != null) changelog,

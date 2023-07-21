@@ -40,7 +40,7 @@ void main() {
       obj3 = ByteModel(3, 1);
       objMax = ByteModel(4, 255);
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         col.putAll([objMin, obj1, obj2, obj3, objMax]);
       });
     });

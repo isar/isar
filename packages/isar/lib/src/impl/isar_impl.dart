@@ -237,17 +237,17 @@ class _IsarImpl extends Isar {
   }
 
   @override
-  T txn<T>(T Function(Isar isar) callback) {
+  T read<T>(T Function(Isar isar) callback) {
     return _txn(callback, write: false);
   }
 
   @override
-  T writeTxn<T>(T Function(Isar isar) callback) {
+  T write<T>(T Function(Isar isar) callback) {
     return _txn(callback, write: true);
   }
 
   @override
-  Future<T> txnAsync<T>(T Function(Isar isar) callback) {
+  Future<T> readAsync<T>(T Function(Isar isar) callback) {
     final instanceId = this.instanceId;
     final sqliteEngine = this.sqliteEngine;
     final converters = this.converters;
@@ -257,7 +257,7 @@ class _IsarImpl extends Isar {
   }
 
   @override
-  Future<T> writeTxnAsync<T>(T Function(Isar isar) callback) async {
+  Future<T> writeAsync<T>(T Function(Isar isar) callback) async {
     final instanceId = this.instanceId;
     final sqliteEngine = this.sqliteEngine;
     final converters = this.converters;
@@ -295,6 +295,11 @@ class _IsarImpl extends Isar {
     _instances.remove(instanceId);
     return closed;
   }
+
+  @override
+  void verify() {
+    getTxn((isarPtr, txnPtr) => isar_verify(isarPtr, txnPtr).checkNoError());
+  }
 }
 
 T _isarAsync<T>(
@@ -311,9 +316,9 @@ T _isarAsync<T>(
   );
   try {
     if (write) {
-      return isar.writeTxn(callback);
+      return isar.write(callback);
     } else {
-      return isar.txn(callback);
+      return isar.read(callback);
     }
   } finally {
     isar.close();

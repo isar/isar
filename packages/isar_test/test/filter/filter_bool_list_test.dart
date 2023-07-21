@@ -43,7 +43,7 @@ void main() {
       obj4 = BoolModel(4, [null]);
       objNull = BoolModel(5, null);
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         col.putAll([objEmpty, obj1, obj2, obj3, obj4, objNull]);
       });
     });

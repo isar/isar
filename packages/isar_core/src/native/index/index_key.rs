@@ -9,8 +9,14 @@ pub struct IndexKey {
 }
 
 impl IndexKey {
-    pub fn new() -> Self {
+    pub fn min() -> Self {
         IndexKey { bytes: vec![] }
+    }
+
+    pub fn max() -> Self {
+        let mut key = IndexKey { bytes: vec![] };
+        key.add_long(i64::MAX);
+        key
     }
 
     pub fn from_bytes(bytes: Vec<u8>) -> Self {
@@ -159,7 +165,7 @@ mod tests {
         ];
 
         for (val, bytes) in pairs {
-            let mut index_key = IndexKey::new();
+            let mut index_key = IndexKey::min();
             index_key.add_byte(123);
             index_key.add_byte(val);
             assert_eq!(&index_key.bytes, &bytes);
@@ -179,7 +185,7 @@ mod tests {
         ];
 
         for (val, bytes) in pairs {
-            let mut index_key = IndexKey::new();
+            let mut index_key = IndexKey::min();
             index_key.add_byte(123);
             index_key.add_int(val);
             assert_eq!(&index_key.bytes, &bytes);
@@ -202,7 +208,7 @@ mod tests {
         ];
 
         for (val, bytes) in pairs {
-            let mut index_key = IndexKey::new();
+            let mut index_key = IndexKey::min();
             index_key.add_byte(123);
             index_key.add_long(val);
             assert_eq!(&index_key.bytes, &bytes);
@@ -226,7 +232,7 @@ mod tests {
         ];
 
         for (val, bytes) in pairs {
-            let mut index_key = IndexKey::new();
+            let mut index_key = IndexKey::min();
             index_key.add_byte(123);
             index_key.add_float(val);
             assert_eq!(&index_key.bytes, &bytes);
@@ -265,7 +271,7 @@ mod tests {
         ];
 
         for (val, bytes) in pairs {
-            let mut index_key = IndexKey::new();
+            let mut index_key = IndexKey::min();
             index_key.add_byte(123);
             index_key.add_double(val);
             assert_eq!(&index_key.bytes, &bytes);
@@ -302,12 +308,12 @@ mod tests {
         ];
 
         for (str, bytes, bytes_lc) in pairs {
-            let mut index_key = IndexKey::new();
+            let mut index_key = IndexKey::min();
             index_key.add_byte(123);
             index_key.add_string(str, true);
             assert_eq!(index_key.bytes, bytes);
 
-            let mut index_key = IndexKey::new();
+            let mut index_key = IndexKey::min();
             index_key.add_byte(123);
             index_key.add_string(str, false);
             assert_eq!(index_key.bytes, bytes_lc);

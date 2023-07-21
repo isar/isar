@@ -99,7 +99,7 @@ void main() {
     isarTest('EmptyConstructorModel', () {
       final obj1 = EmptyConstructorModel()..name = 'obj1';
       final obj2 = EmptyConstructorModel()..name = 'obj2';
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.emptyConstructorModels.putAll([obj1, obj2]);
       });
 
@@ -112,7 +112,7 @@ void main() {
     isarTest('NamedConstructorModel', () {
       final obj1 = NamedConstructorModel(name: 'obj1');
       final obj2 = NamedConstructorModel(name: 'obj2');
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.namedConstructorModels.putAll([obj1, obj2]);
       });
 
@@ -126,7 +126,7 @@ void main() {
       final obj1 = PositionalConstructorModel('obj1');
       final obj2 = PositionalConstructorModel('obj2');
       final obj3 = PositionalConstructorModel('obj3');
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.positionalConstructorModels.putAll([obj1, obj2, obj3]);
       });
 
@@ -141,7 +141,7 @@ void main() {
       final obj2 = OptionalConstructorModel('obj2')..value2 = 2;
       final obj3 = OptionalConstructorModel()..value2 = 3;
       final obj4 = OptionalConstructorModel('obj4')..value2 = 4;
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.optionalConstructorModels.putAll([obj1, obj2, obj3, obj4]);
       });
 
@@ -154,7 +154,7 @@ void main() {
     isarTest('PositionalNamedConstructorModel', () {
       final obj1 = PositionalNamedConstructorModel('obj1', value2: 'value2');
       final obj2 = PositionalNamedConstructorModel('obj2', value2: 'value2_2');
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.positionalNamedConstructorModels.putAll([obj1, obj2]);
       });
 

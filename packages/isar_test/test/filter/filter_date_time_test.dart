@@ -49,7 +49,7 @@ void main() {
       obj4 = DateTimeModel(4, utc(2040));
       objNull = DateTimeModel(5, null);
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.dateTimeModels.putAll([obj1, obj2, obj3, obj4, objNull]);
       });
     });

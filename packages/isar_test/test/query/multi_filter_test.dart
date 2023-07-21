@@ -38,7 +38,7 @@ void main() {
       model3 = Model(3, 3);
 
       isar = openTempIsar([ModelSchema]);
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         return isar.models.putAll([model0, model1, model2, model3]);
       });
     });

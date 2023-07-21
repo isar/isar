@@ -171,3 +171,11 @@ void isarTest(
     }
   });
 }
+
+extension IsarCollectionX<ID, OBJ> on IsarCollection<ID, OBJ> {
+  void verify(List<OBJ> objects) {
+    // ignore: invalid_use_of_visible_for_testing_member
+    isar.verify();
+    expect(where().findAll(), objects);
+  }
+}

@@ -3,34 +3,8 @@ use super::{data_type::DataType, error::IsarError};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Hash)]
+#[derive(Serialize, Deserialize, Clone, Hash, Debug)]
 pub struct IsarSchema {
-    pub collections: Vec<CollectionSchema>,
-}
-
-impl IsarSchema {
-    pub fn new(collections: Vec<CollectionSchema>) -> Self {
-        IsarSchema { collections }
-    }
-
-    pub fn from_json(json: &[u8]) -> Result<Self> {
-        if let Ok(collections) = serde_json::from_slice::<Vec<CollectionSchema>>(json) {
-            Ok(Self::new(collections))
-        } else {
-            schema_error("Could not deserialize schema JSON")
-        }
-    }
-
-    pub fn verify_schema(&self) -> Result<()> {
-        for col in &self.collections {
-            col.verify(&self.collections)?;
-        }
-        Ok(())
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, Hash)]
-pub struct CollectionSchema {
     pub name: String,
     #[serde(rename = "idName", skip_serializing)]
     pub id_name: Option<String>,
@@ -43,15 +17,15 @@ pub struct CollectionSchema {
     pub(crate) version: u8,
 }
 
-impl CollectionSchema {
+impl IsarSchema {
     pub fn new(
         name: &str,
         id_name: Option<&str>,
         properties: Vec<PropertySchema>,
         indexes: Vec<IndexSchema>,
         embedded: bool,
-    ) -> CollectionSchema {
-        CollectionSchema {
+    ) -> IsarSchema {
+        IsarSchema {
             name: name.to_string(),
             id_name: id_name.map(|s| s.to_string()),
             embedded,
@@ -61,9 +35,24 @@ impl CollectionSchema {
         }
     }
 
+    pub fn from_json(json: &[u8]) -> Result<Vec<Self>> {
+        if let Ok(collections) = serde_json::from_slice::<Vec<IsarSchema>>(json) {
+            Ok(collections)
+        } else {
+            schema_error("Could not deserialize schema JSON")
+        }
+    }
+
+    pub fn verify_schemas(schemas: &[Self]) -> Result<()> {
+        for schema in schemas {
+            schema.verify(schemas)?;
+        }
+        Ok(())
+    }
+
     pub fn find_changes(
         &self,
-        old_collection: &CollectionSchema,
+        old_collection: &IsarSchema,
     ) -> (
         Vec<&'_ PropertySchema>,
         Vec<String>,
@@ -138,7 +127,7 @@ impl CollectionSchema {
         (add_properties, drop_properties, add_indexes, drop_indexes)
     }
 
-    fn verify(&self, collections: &[CollectionSchema]) -> Result<()> {
+    fn verify(&self, collections: &[IsarSchema]) -> Result<()> {
         verify_name(&self.name)?;
 
         if self.embedded && !self.indexes.is_empty() {
@@ -277,7 +266,7 @@ impl PropertySchema {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct IndexSchema {
     pub name: String,
     pub properties: Vec<String>,

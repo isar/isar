@@ -48,7 +48,7 @@ void main() {
       simon = Model(3, 'Simon', 30);
       bjorn = Model(4, 'Bjorn', 40);
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.models.putAll([david, emma, tina, simon, bjorn]);
       });
     });

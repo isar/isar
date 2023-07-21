@@ -75,7 +75,7 @@ impl NativeTxn {
         if !self.active.get() {
             return Err(IsarError::TransactionClosed {});
         }
-        Db::open(&self.txn, name, int_key, dup)
+        Db::open(&self.txn, Some(name), int_key, dup)
     }
 
     pub(crate) fn clear_db(&self, db: Db) -> Result<()> {
@@ -97,6 +97,17 @@ impl NativeTxn {
             return Err(IsarError::TransactionClosed {});
         }
         db.stat(&self.txn)
+    }
+
+    pub(crate) fn db_names(&self) -> Result<Vec<String>> {
+        let unnamed_db = Db::open(&self.txn, None, false, false)?;
+        let cursor = self.get_cursor(unnamed_db)?;
+
+        let names = cursor
+            .iter_between(&IndexKey::min(), &IndexKey::max(), false, false)?
+            .map(|(key, _)| String::from_utf8(key.to_vec()).unwrap())
+            .collect();
+        Ok(names)
     }
 
     pub(crate) fn commit(self) -> Result<()> {

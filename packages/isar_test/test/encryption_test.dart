@@ -26,7 +26,7 @@ void main() {
         name: isarName,
         encryptionKey: 'test',
       );
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.models.putAll([Model('test1'), Model('test2')]);
       });
       expect(isar.close(), true);
@@ -47,7 +47,7 @@ void main() {
         name: isarName,
         encryptionKey: 'test',
       );
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.models.put(Model('test'));
       });
       expect(isar.close(), true);

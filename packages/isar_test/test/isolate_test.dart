@@ -35,7 +35,7 @@ void main() {
     final name = getRandomName();
     final isar = openTempIsar([TestModelSchema], name: name);
 
-    isar.writeTxn((isar) {
+    isar.write((isar) {
       isar.testModels.putAll([_obj1, _obj2]);
     });
 
@@ -51,7 +51,7 @@ void main() {
         'Did not find objects',
       );
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.testModels.delete(2);
         isar.testModels.put(_obj3);
       });

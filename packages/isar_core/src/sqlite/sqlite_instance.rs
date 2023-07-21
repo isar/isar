@@ -55,7 +55,7 @@ impl SQLiteInstance {
         dir: &str,
         encryption_key: Option<&str>,
         instance_id: u32,
-        schema: IsarSchema,
+        schemas: Vec<IsarSchema>,
     ) -> Result<(SQLiteInstanceInfo, SQLite3)> {
         let mut path_buf = PathBuf::from(dir);
         path_buf.push(format!("{}.sqlite", name));
@@ -64,10 +64,10 @@ impl SQLiteInstance {
         let sqlite = Self::open_conn(&path, encryption_key)?;
         let sqlite = Rc::new(sqlite);
         let txn = SQLiteTxn::new(sqlite.clone(), true)?;
-        perform_migration(&txn, &schema)?;
+        perform_migration(&txn, &schemas)?;
         txn.commit()?;
 
-        let collections = Self::get_collections(&schema);
+        let collections = Self::get_collections(&schemas);
         let instance_info = SQLiteInstanceInfo {
             name: name.to_string(),
             dir: dir.to_string(),
@@ -81,20 +81,16 @@ impl SQLiteInstance {
         Ok((instance_info, sqlite))
     }
 
-    fn get_collections(schema: &IsarSchema) -> Vec<SQLiteCollection> {
+    fn get_collections(schemas: &[IsarSchema]) -> Vec<SQLiteCollection> {
         let mut collections = Vec::new();
-        for collection_schema in &schema.collections {
+        for collection_schema in schemas {
             let properties = collection_schema
                 .properties
                 .iter()
                 .filter_map(|p| {
                     if let Some(name) = &p.name {
                         let target_collection_index = p.collection.as_deref().map(|c| {
-                            let position = schema
-                                .collections
-                                .iter()
-                                .position(|c2| c2.name == c)
-                                .unwrap();
+                            let position = schemas.iter().position(|c2| c2.name == c).unwrap();
                             position as u16
                         });
                         let prop = SQLiteProperty::new(name, p.data_type, target_collection_index);
@@ -186,7 +182,7 @@ impl IsarInstance for SQLiteInstance {
         instance_id: u32,
         name: &str,
         dir: &str,
-        schema: IsarSchema,
+        schemas: Vec<IsarSchema>,
         max_size_mib: u32,
         encryption_key: Option<&str>,
         compact_condition: Option<CompactCondition>,
@@ -200,7 +196,7 @@ impl IsarInstance for SQLiteInstance {
 
         let mut lock = INSTANCES.lock().unwrap();
         if !lock.contains_key(instance_id as u64) {
-            let (info, sqlite) = Self::open(name, dir, encryption_key, instance_id, schema)?;
+            let (info, sqlite) = Self::open(name, dir, encryption_key, instance_id, schemas)?;
 
             let max_size = (max_size_mib as usize).saturating_mul(MIB);
             sqlite
@@ -426,6 +422,10 @@ impl IsarInstance for SQLiteInstance {
 
         let sql = format!("VACUUM INTO '{}'", path);
         self.sqlite.prepare(&sql)?.step()?;
+        Ok(())
+    }
+
+    fn verify(&self, txn: &Self::Txn) -> Result<()> {
         Ok(())
     }
 

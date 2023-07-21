@@ -92,7 +92,7 @@ void main() {
 
     isarTest('.get() / .put()', () async {
       final isar = await openTempIsar([EnumModelSchema]);
-      await isar.writeTxn((isar) async {
+      await isar.write((isar) async {
         await isar.enumModels
             .putAll([EnumModel.model1, EnumModel.model2, EnumModel.model3]);
       });

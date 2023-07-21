@@ -3,6 +3,7 @@ use super::txn::Txn;
 use crate::core::error::Result;
 use std::ffi::CString;
 use std::mem::size_of;
+use std::ptr;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Db {
@@ -15,7 +16,7 @@ impl Db {
         self.dbi as u64
     }
 
-    pub fn open(txn: &Txn, name: &str, int_key: bool, dup: bool) -> Result<Self> {
+    pub fn open(txn: &Txn, name: Option<&str>, int_key: bool, dup: bool) -> Result<Self> {
         let mut flags = mdbx_sys::MDBX_CREATE;
         if int_key {
             flags |= mdbx_sys::MDBX_INTEGERKEY;
@@ -25,14 +26,20 @@ impl Db {
         }
 
         let mut dbi: mdbx_sys::MDBX_dbi = 0;
-        let name = CString::new(name.as_bytes()).unwrap();
-        unsafe {
-            mdbx_result(mdbx_sys::mdbx_dbi_open(
-                txn.txn,
-                name.as_ptr(),
-                flags,
-                &mut dbi,
-            ))?;
+        if let Some(name) = name {
+            let name = CString::new(name.as_bytes()).unwrap();
+            unsafe {
+                mdbx_result(mdbx_sys::mdbx_dbi_open(
+                    txn.txn,
+                    name.as_ptr(),
+                    flags,
+                    &mut dbi,
+                ))?;
+            }
+        } else {
+            unsafe {
+                mdbx_result(mdbx_sys::mdbx_dbi_open(txn.txn, ptr::null(), 0, &mut dbi))?;
+            }
         }
 
         Ok(Self { dbi, dup })

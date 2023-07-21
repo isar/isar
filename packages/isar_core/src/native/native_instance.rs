@@ -78,7 +78,7 @@ impl IsarInstance for NativeInstance {
         instance_id: u32,
         name: &str,
         dir: &str,
-        schema: IsarSchema,
+        schemas: Vec<IsarSchema>,
         max_size_mib: u32,
         encryption_key: Option<&str>,
         compact_condition: Option<CompactCondition>,
@@ -94,7 +94,7 @@ impl IsarInstance for NativeInstance {
                 name,
                 dir,
                 instance_id,
-                schema,
+                schemas,
                 max_size_mib,
                 compact_condition,
             )?;
@@ -280,6 +280,29 @@ impl IsarInstance for NativeInstance {
         self.env.copy(path)
     }
 
+    fn verify(&self, txn: &Self::Txn) -> Result<()> {
+        let mut db_names = vec![];
+        db_names.push("_info".to_string());
+        for col in &self.collections {
+            if !col.is_embedded() {
+                db_names.push(col.name.clone());
+                for index in &col.indexes {
+                    db_names.push(format!("_i_{}_{}", col.name, index.name));
+                }
+            }
+        }
+        let mut actual_db_names = txn.db_names()?;
+
+        db_names.sort();
+        actual_db_names.sort();
+
+        if db_names != actual_db_names {
+            Err(IsarError::DbCorrupted {})
+        } else {
+            Ok(())
+        }
+    }
+
     fn close(instance: Arc<Self>, delete: bool) -> bool {
         // Check whether all other references are gone
         if Arc::strong_count(&instance) == 2 {
@@ -324,24 +347,27 @@ impl NativeInstance {
         name: &str,
         dir: &str,
         instance_id: u32,
-        schema: IsarSchema,
+        schemas: Vec<IsarSchema>,
         max_size_mib: u32,
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self> {
         let isar_file = Self::get_isar_path(name, dir);
 
-        let db_count = schema
-            .collections
+        let compact_schemas = if compact_condition.is_some() {
+            Some(schemas.clone())
+        } else {
+            None
+        };
+
+        // _info + collections + indexes + 1 (to delete old dbs)
+        let db_count = schemas
             .iter()
             .filter(|c| !c.embedded)
             .map(|c| c.indexes.len() as u32 + 1)
             .sum::<u32>()
-            + 1;
+            + 2;
         let env = Env::create(&isar_file, db_count, max_size_mib)?;
-
-        let txn = NativeTxn::new(instance_id, &env, true)?;
-        let collections = perform_migration(&txn, &schema)?;
-        txn.commit()?;
+        let collections = perform_migration(instance_id, &env, schemas)?;
 
         let instance = NativeInstance {
             env,
@@ -356,7 +382,14 @@ impl NativeInstance {
             if let Some(instance) = instance {
                 Ok(instance)
             } else {
-                Self::open_internal(name, dir, instance_id, schema, max_size_mib, None)
+                Self::open_internal(
+                    name,
+                    dir,
+                    instance_id,
+                    compact_schemas.unwrap(),
+                    max_size_mib,
+                    None,
+                )
             }
         } else {
             Ok(instance)

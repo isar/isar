@@ -154,7 +154,7 @@ void main() {
       nonInheritingObj2 =
           NonInheritingModel(id: 2, age: 65, nickname: 'non-obj2');
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.inheritingModels.putAll([
           inheritingObj0,
           inheritingObj1,

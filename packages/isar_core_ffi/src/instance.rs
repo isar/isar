@@ -52,7 +52,7 @@ pub unsafe extern "C" fn isar_open_instance(
         let name = *Box::from_raw(name);
         let path = *Box::from_raw(path);
         let schema_json = *Box::from_raw(schema_json);
-        let schema = IsarSchema::from_json(schema_json.as_bytes())?;
+        let schemas = IsarSchema::from_json(schema_json.as_bytes())?;
 
         let encryption_key = if encryption_key.is_null() {
             None
@@ -77,7 +77,7 @@ pub unsafe extern "C" fn isar_open_instance(
                     instance_id,
                     &name,
                     &path,
-                    schema,
+                    schemas,
                     max_size_mib,
                     encryption_key.as_deref(),
                     compact_condition,
@@ -95,7 +95,7 @@ pub unsafe extern "C" fn isar_open_instance(
                     instance_id,
                     &name,
                     &path,
-                    schema,
+                    schemas,
                     max_size_mib,
                     encryption_key.as_deref(),
                     compact_condition,
@@ -335,6 +335,19 @@ pub unsafe extern "C" fn isar_copy(isar: &'static CIsarInstance, path: *mut Stri
             CIsarInstance::Native(isar) => isar.copy(&path)?,
             #[cfg(feature = "sqlite")]
             CIsarInstance::SQLite(isar) => isar.copy(&path)?,
+        }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_verify(isar: &'static CIsarInstance, txn: &'static CIsarTxn) -> u8 {
+    isar_try! {
+        return match (isar, txn) {
+            #[cfg(feature = "native")]
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => isar.verify(txn),
+            #[cfg(feature = "sqlite")]
+            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn)) => isar.verify(txn),
+            _ => Err(IsarError::IllegalArgument {}),
         }
     }
 }

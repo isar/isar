@@ -40,7 +40,7 @@ void main() {
       objTrue = BoolModel(true);
       objFalse2 = BoolModel(false);
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         col.putAll([objNull, objFalse, objTrue, objFalse2]);
       });
     });

@@ -50,7 +50,7 @@ pub trait IsarInstance: Sized {
         instance_id: u32,
         name: &str,
         dir: &str,
-        schema: IsarSchema,
+        schemas: Vec<IsarSchema>,
         max_size_mib: u32,
         encryption_key: Option<&str>,
         compact_condition: Option<CompactCondition>,
@@ -160,6 +160,8 @@ pub trait IsarInstance: Sized {
     fn watch_query(&self, query: &Self::Query, callback: WatcherCallback) -> Result<WatchHandle>;
 
     fn copy(&self, path: &str) -> Result<()>;
+
+    fn verify(&self, txn: &Self::Txn) -> Result<()>;
 
     fn close(instance: Self::Instance, delete: bool) -> bool;
 }

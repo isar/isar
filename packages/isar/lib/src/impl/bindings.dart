@@ -362,6 +362,14 @@ external int isar_copy(
   ffi.Pointer<CString> path,
 );
 
+@ffi.Native<
+        ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>)>(
+    symbol: 'isar_verify')
+external int isar_verify(
+  ffi.Pointer<CIsarInstance> isar,
+  ffi.Pointer<CIsarTxn> txn,
+);
+
 @ffi.Native<ffi.Bool Function(ffi.Pointer<CIsarInstance>, ffi.Bool)>(
     symbol: 'isar_close')
 external bool isar_close(

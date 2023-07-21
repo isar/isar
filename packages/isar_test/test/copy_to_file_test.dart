@@ -32,7 +32,7 @@ void main() {
     setUp(() {
       isar = openTempIsar([ModelSchema], maxSizeMiB: 20);
 
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.models.putAll(List.generate(100, Model.new)),
       );
     });
@@ -69,7 +69,7 @@ void main() {
     });
 
     isarTest('.copyToFile() should compact copied file', () {
-      isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 50));
+      isar.write((isar) => isar.models.where().deleteAll(limit: 50));
 
       final copiedDbFilename1 = getRandomName();
       final copiedDbFile1 = File(
@@ -94,8 +94,7 @@ void main() {
         lessThan(File('${isar.directory}/${isar.name}.isar').lengthSync()),
       );
 
-      isarCopy1
-          .writeTxn((isar) => isarCopy1.models.where().deleteAll(limit: 25));
+      isarCopy1.write((isar) => isarCopy1.models.where().deleteAll(limit: 25));
 
       final copiedDbFilename2 = getRandomName();
       final copiedDbFile2 =

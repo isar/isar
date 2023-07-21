@@ -142,7 +142,7 @@ void main() {
         embeddedB: null,
       );
 
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.models.putAll([obj1, obj2, obj3, obj4, obj5, obj6]),
       );
     });

@@ -43,7 +43,7 @@ void main() {
   isarTest('Add field', () {
     final isar1 = openTempIsar([Col1Schema]);
     final isarName = isar1.name;
-    isar1.writeTxn((isar) {
+    isar1.write((isar) {
       return isar.col1s.putAll([Col1(1, 'value1'), Col1(2, 'value2')]);
     });
     expect(isar1.close(), true);
@@ -53,7 +53,7 @@ void main() {
       Col2(1, 'value1', null),
       Col2(2, 'value2', null),
     ]);
-    isar2.writeTxn((isar) {
+    isar2.write((isar) {
       return isar.col2s.putAll([
         Col2(1, 'value3', ['hi']),
         Col2(3, 'value4', [])
@@ -77,7 +77,7 @@ void main() {
   isarTest('Remove field', () {
     final isar1 = openTempIsar([Col2Schema]);
     final isarName = isar1.name;
-    isar1.writeTxn((isar) {
+    isar1.write((isar) {
       return isar.col2s.putAll([
         Col2(1, 'value1', ['hi']),
         Col2(2, 'value2', ['val2', 'val22']),
@@ -90,7 +90,7 @@ void main() {
       Col1(1, 'value1'),
       Col1(2, 'value2'),
     ]);
-    isar2.writeTxn((isar) {
+    isar2.write((isar) {
       return isar.col1s.put(Col1(1, 'value3'));
     });
     expect(isar2.col1s.where().findAll(), [

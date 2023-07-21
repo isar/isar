@@ -30,7 +30,7 @@ void main() {
     });
 
     isarTest('json', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.nameModels.put(
           NameModel(1)
             ..value = 'test'

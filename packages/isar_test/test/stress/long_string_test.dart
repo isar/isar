@@ -53,7 +53,7 @@ void main() {
             string: '${_randomStr(50000)}test$i${_randomStr(50000)}',
           ),
       ];
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.stringModels.putAll(models);
       });
 
@@ -80,7 +80,7 @@ void main() {
             ],
           ),
       ];
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.stringModels.putAll(models);
       });
 

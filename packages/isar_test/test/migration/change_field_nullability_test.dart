@@ -38,14 +38,14 @@ void main() {
   isarTest('Change field nullability', () {
     final isar1 = openTempIsar([Col1Schema]);
     final isarName = isar1.name;
-    isar1.writeTxn((isar) {
+    isar1.write((isar) {
       return isar1.col1s.putAll([Col1(1, 'a'), Col1(2, null)]);
     });
     expect(isar1.close(), true);
 
     final isar2 = openTempIsar([Col2Schema], name: isarName);
     expect(isar2.col2s.where().findAll(), [Col2(1, 'a'), Col2(2, '')]);
-    isar2.writeTxn((isar) {
+    isar2.write((isar) {
       return isar2.col2s.put(Col2(1, 'c'));
     });
     expect(isar2.close(), true);

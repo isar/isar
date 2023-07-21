@@ -39,7 +39,7 @@ void main() {
       objC = Model(3, 'C');
       objC2 = Model(4, 'C');
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         col.putAll([objA, objA2, objB, objC, objC2]);
       });
     });

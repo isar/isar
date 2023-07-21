@@ -43,7 +43,7 @@ void main() {
         file = File('${isar.directory}/$isarName.isar');
       }
 
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.models.putAll(List.generate(100, Model.new)),
       );
     });
@@ -53,7 +53,7 @@ void main() {
       final size1 = file.lengthSync();
 
       isar = openTempIsar([ModelSchema], name: isarName);
-      isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 50));
+      isar.write((isar) => isar.models.where().deleteAll(limit: 50));
       isar.close();
 
       final size2 = file.lengthSync();
@@ -68,7 +68,7 @@ void main() {
       final size1 = file.lengthSync();
 
       isar = openTempIsar([ModelSchema], name: isarName);
-      isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 50));
+      isar.write((isar) => isar.models.where().deleteAll(limit: 50));
       isar.close();
 
       isar = openTempIsar(
@@ -94,7 +94,7 @@ void main() {
       final size1 = file.lengthSync();
 
       isar = openTempIsar([ModelSchema], name: isarName);
-      isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 10));
+      isar.write((isar) => isar.models.where().deleteAll(limit: 10));
       isar.close();
 
       isar = openTempIsar(
@@ -111,7 +111,7 @@ void main() {
         name: isarName,
         compactOnLaunch: CompactCondition(minBytes: size1 ~/ 2),
       );
-      isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 90));
+      isar.write((isar) => isar.models.where().deleteAll(limit: 90));
       isar.close();
       final size3 = file.lengthSync();
       expect(size3, size2);
@@ -130,7 +130,7 @@ void main() {
       final size1 = file.lengthSync();
 
       isar = openTempIsar([ModelSchema], name: isarName);
-      isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 10));
+      isar.write((isar) => isar.models.where().deleteAll(limit: 10));
       isar.close();
 
       isar = openTempIsar(
@@ -147,7 +147,7 @@ void main() {
         name: isarName,
         compactOnLaunch: const CompactCondition(minRatio: 2),
       );
-      isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 80));
+      isar.write((isar) => isar.models.where().deleteAll(limit: 80));
       isar.close();
       final size3 = file.lengthSync();
       expect(size3, size2);

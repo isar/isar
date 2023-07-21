@@ -26,23 +26,23 @@ void main() {
     });
 
     isarTest('Sync txn cannot be opened in sync txn', () {
-      isar.txn((isar) {
-        expect(() => isar.txn((_) {}), throwsUnsupportedError);
-        expect(() => isar.writeTxn((_) {}), throwsUnsupportedError);
+      isar.read((isar) {
+        expect(() => isar.read((_) {}), throwsUnsupportedError);
+        expect(() => isar.write((_) {}), throwsUnsupportedError);
       });
 
-      isar.writeTxn((isar) {
-        expect(() => isar.txn((_) {}), throwsUnsupportedError);
-        expect(() => isar.writeTxn((_) {}), throwsUnsupportedError);
+      isar.write((isar) {
+        expect(() => isar.read((_) {}), throwsUnsupportedError);
+        expect(() => isar.write((_) {}), throwsUnsupportedError);
       });
     });
 
     isarTest('gets reverted on error', () {
-      isar.writeTxn((isar) => isar.models.put(Model(1)));
+      isar.write((isar) => isar.models.put(Model(1)));
       expect(isar.models.where().findAll(), [Model(1)]);
 
       void errorTxn() {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           isar.models.put(Model(5));
           expect(isar.models.where().findAll(), [Model(1), Model(5)]);
           throw UnsupportedError('test');
@@ -55,7 +55,7 @@ void main() {
       expectLater(errorTxn, throwsUnsupportedError);
       expect(isar.models.where().findAll(), [Model(1)]);
 
-      isar.writeTxn((isar) => isar.models.put(Model(5)));
+      isar.write((isar) => isar.models.put(Model(5)));
       expect(isar.models.where().findAll(), [Model(1), Model(5)]);
     });
   });

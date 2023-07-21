@@ -13,7 +13,7 @@ void main() {
         final isar = openTempIsar([IntModelSchema]);
         col = isar.intModels;
 
-        isar.writeTxn(
+        isar.write(
           (isar) => col.putAll([
             IntModel(-5),
             IntModel(0),
@@ -54,7 +54,7 @@ void main() {
         final isar = openTempIsar([ByteModelSchema]);
         col = isar.byteModels;
 
-        isar.writeTxn(
+        isar.write(
           (isar) => col.putAll([
             ByteModel(0)..value = 1,
             ByteModel(1)..value = 5,
@@ -98,7 +98,7 @@ void main() {
         final isar = openTempIsar([ShortModelSchema]);
         col = isar.shortModels;
 
-        isar.writeTxn(
+        isar.write(
           (isar) => col.putAll([
             ShortModel(0)
               ..value = 3
@@ -151,7 +151,7 @@ void main() {
         final isar = openTempIsar([IntModelSchema]);
         col = isar.intModels;
 
-        isar.writeTxn(
+        isar.write(
           (isar) => col.putAll([
             IntModel(0)
               ..value = 3
@@ -204,7 +204,7 @@ void main() {
         final isar = openTempIsar([FloatModelSchema]);
         col = isar.floatModels;
 
-        isar.writeTxn(
+        isar.write(
           (isar) => col.putAll([
             FloatModel(0)
               ..value = 3
@@ -257,7 +257,7 @@ void main() {
         final isar = openTempIsar([DoubleModelSchema]);
         col = isar.doubleModels;
 
-        isar.writeTxn(
+        isar.write(
           (isar) => col.putAll([
             DoubleModel(0)
               ..value = 3

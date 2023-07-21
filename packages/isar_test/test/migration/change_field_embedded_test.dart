@@ -56,7 +56,7 @@ void main() {
   isarTest('Change field embedded', () {
     final isar1 = openTempIsar([Model1Schema]);
     final isarName = isar1.name;
-    isar1.writeTxn((isar) {
+    isar1.write((isar) {
       return isar1.model1s.putAll([
         Model1(1, Embedded1('a')),
         Model1(2, Embedded1('b')),
@@ -69,7 +69,7 @@ void main() {
       Model2(1, null),
       Model2(2, null),
     ]);
-    isar2.writeTxn((isar) {
+    isar2.write((isar) {
       return isar2.model2s.put(Model2(1, Embedded2('abc')));
     });
     expect(isar2.close(), true);

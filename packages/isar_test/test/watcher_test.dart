@@ -39,10 +39,10 @@ void main() {
       isarTest('.put()', () async {
         final listener = Listener<void>(isar.values.watchLazy());
 
-        isar.writeTxn((isar) => isar.values.put(obj1));
+        isar.write((isar) => isar.values.put(obj1));
         await listener.next;
 
-        isar.writeTxn((isar) => isar.values.put(obj1));
+        isar.write((isar) => isar.values.put(obj1));
         await listener.next;
 
         await listener.done();
@@ -51,38 +51,38 @@ void main() {
       isarTest('.putAll()', () async {
         final listener = Listener<void>(isar.values.watchLazy());
 
-        isar.writeTxn((isar) => isar.values.putAll([obj1, obj2]));
+        isar.write((isar) => isar.values.putAll([obj1, obj2]));
         await listener.next;
 
-        isar.writeTxn((isar) => isar.values.putAll([obj1]));
+        isar.write((isar) => isar.values.putAll([obj1]));
         await listener.next;
 
         await listener.done();
       });
 
       isarTest('.delete()', () async {
-        isar.writeTxn((isar) => isar.values.putAll([obj1, obj2]));
+        isar.write((isar) => isar.values.putAll([obj1, obj2]));
 
         final listener = Listener<void>(isar.values.watchLazy());
 
-        isar.writeTxn((isar) => isar.values.delete(1));
+        isar.write((isar) => isar.values.delete(1));
         await listener.next;
 
-        isar.writeTxn((isar) => isar.values.delete(2));
+        isar.write((isar) => isar.values.delete(2));
         await listener.next;
 
         await listener.done();
       });
 
       isarTest('.deleteAll()', () async {
-        isar.writeTxn((isar) => isar.values.putAll([obj1, obj2]));
+        isar.write((isar) => isar.values.putAll([obj1, obj2]));
 
         final listener = Listener<void>(isar.values.watchLazy());
 
-        isar.writeTxn((isar) => isar.values.deleteAll([1, 3]));
+        isar.write((isar) => isar.values.deleteAll([1, 3]));
         await listener.next;
 
-        isar.writeTxn((isar) => isar.values.deleteAll([2]));
+        isar.write((isar) => isar.values.deleteAll([2]));
         await listener.next;
 
         await listener.done();
@@ -94,10 +94,10 @@ void main() {
         final listenerLazy = Listener<void>(isar.values.watchObjectLazy(1));
         final listener = Listener<Value?>(isar.values.watchObject(2));
 
-        isar.writeTxn((isar) => isar.values.put(obj1));
+        isar.write((isar) => isar.values.put(obj1));
         await listenerLazy.next;
 
-        isar.writeTxn((isar) => isar.values.put(obj2));
+        isar.write((isar) => isar.values.put(obj2));
         expect(await listener.next, obj2);
 
         await listenerLazy.done();
@@ -108,10 +108,10 @@ void main() {
         final listenerLazy = Listener<void>(isar.values.watchObjectLazy(1));
         final listener = Listener<Value?>(isar.values.watchObject(2));
 
-        isar.writeTxn((isar) => isar.values.putAll([obj1, obj3]));
+        isar.write((isar) => isar.values.putAll([obj1, obj3]));
         await listenerLazy.next;
 
-        isar.writeTxn((isar) => isar.values.putAll([obj1, obj2]));
+        isar.write((isar) => isar.values.putAll([obj1, obj2]));
         await listenerLazy.next;
         expect(await listener.next, obj2);
 
@@ -120,15 +120,15 @@ void main() {
       });
 
       isarTest('.delete()', () async {
-        isar.writeTxn((isar) => isar.values.putAll([obj1, obj2, obj3]));
+        isar.write((isar) => isar.values.putAll([obj1, obj2, obj3]));
 
         final listenerLazy = Listener<void>(isar.values.watchObjectLazy(1));
         final listener = Listener<Value?>(isar.values.watchObject(2));
 
-        isar.writeTxn((isar) => isar.values.delete(1));
+        isar.write((isar) => isar.values.delete(1));
         await listenerLazy.next;
 
-        isar.writeTxn((isar) => isar.values.delete(2));
+        isar.write((isar) => isar.values.delete(2));
         expect(await listener.next, null);
 
         await listenerLazy.done();
@@ -136,15 +136,15 @@ void main() {
       });
 
       isarTest('.deleteAll()', () async {
-        isar.writeTxn((isar) => isar.values.putAll([obj1, obj2, obj3]));
+        isar.write((isar) => isar.values.putAll([obj1, obj2, obj3]));
 
         final listenerLazy = Listener<void>(isar.values.watchObjectLazy(1));
         final listener = Listener<Value?>(isar.values.watchObject(2));
 
-        isar.writeTxn((isar) => isar.values.deleteAll([4, 1]));
+        isar.write((isar) => isar.values.deleteAll([4, 1]));
         await listenerLazy.next;
 
-        isar.writeTxn((isar) => isar.values.deleteAll([2, 3]));
+        isar.write((isar) => isar.values.deleteAll([2, 3]));
         expect(await listener.next, null);
 
         await listenerLazy.done();
@@ -159,13 +159,13 @@ void main() {
         final listener =
             Listener(isar.values.where().valueEqualTo('Hi').watch());
 
-        isar.writeTxn((isar) => isar.values.put(obj1));
+        isar.write((isar) => isar.values.put(obj1));
         await listenerLazy.next;
         if (isSQLite) {
           expect(await listener.next, isEmpty);
         }
 
-        isar.writeTxn((isar) => isar.values.put(obj2));
+        isar.write((isar) => isar.values.put(obj2));
         expect(await listener.next, [obj2]);
         if (isSQLite) {
           await listenerLazy.next;
@@ -181,11 +181,11 @@ void main() {
         final listener =
             Listener(isar.values.where().valueContains('H').watch());
 
-        isar.writeTxn((isar) => isar.values.putAll([obj1, obj2]));
+        isar.write((isar) => isar.values.putAll([obj1, obj2]));
         await listenerLazy.next;
         expect(await listener.next, [obj1, obj2]);
 
-        isar.writeTxn((isar) => isar.values.putAll([obj3]));
+        isar.write((isar) => isar.values.putAll([obj3]));
         if (isSQLite) {
           await listenerLazy.next;
           expect(await listener.next, [obj1, obj2]);
@@ -196,20 +196,20 @@ void main() {
       });
 
       isarTest('.delete()', () async {
-        isar.writeTxn((isar) => isar.values.putAll([obj1, obj2, obj3]));
+        isar.write((isar) => isar.values.putAll([obj1, obj2, obj3]));
 
         final listenerLazy =
             Listener(isar.values.where().valueEqualTo('Hello').watchLazy());
         final listener =
             Listener(isar.values.where().valueEqualTo('Hi').watch());
 
-        isar.writeTxn((isar) => isar.values.delete(1));
+        isar.write((isar) => isar.values.delete(1));
         await listenerLazy.next;
         if (isSQLite) {
           expect(await listener.next, [obj2]);
         }
 
-        isar.writeTxn((isar) => isar.values.delete(2));
+        isar.write((isar) => isar.values.delete(2));
         if (isSQLite) {
           await listenerLazy.next;
         }
@@ -220,18 +220,18 @@ void main() {
       });
 
       isarTest('.deleteAll()', () async {
-        isar.writeTxn((isar) => isar.values.putAll([obj1, obj2, obj3]));
+        isar.write((isar) => isar.values.putAll([obj1, obj2, obj3]));
 
         final listenerLazy =
             Listener(isar.values.where().valueContains('H').watchLazy());
         final listener =
             Listener(isar.values.where().valueContains('H').watch());
 
-        isar.writeTxn((isar) => isar.values.deleteAll([1, 2]));
+        isar.write((isar) => isar.values.deleteAll([1, 2]));
         await listenerLazy.next;
         expect(await listener.next, <dynamic>[]);
 
-        isar.writeTxn((isar) => isar.values.deleteAll([3]));
+        isar.write((isar) => isar.values.deleteAll([3]));
         if (isSQLite) {
           await listenerLazy.next;
           expect(await listener.next, <dynamic>[]);

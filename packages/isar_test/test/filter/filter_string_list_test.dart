@@ -126,7 +126,7 @@ void main() {
         ],
       );
 
-      isar.writeTxn(
+      isar.write(
         (isar) =>
             isar.stringModels.putAll([obj1, obj2, obj3, obj4, obj5, obj6]),
       );

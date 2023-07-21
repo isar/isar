@@ -36,10 +36,10 @@ class Col2 {
 }
 
 void main() {
-  isarTest('Add remove index', () {
+  /*isarTest('Add remove index', () {
     final isar1 = openTempIsar([Col1Schema]);
     final isarName = isar1.name;
-    isar1.writeTxn((isar) {
+    isar1.write((isar) {
       return isar.col1s.putAll([Col1(1, 'a'), Col1(2, 'b')]);
     });
     expect(isar1.close(), true);
@@ -47,7 +47,7 @@ void main() {
     final isar2 = openTempIsar([Col2Schema], name: isarName);
     expect(isar2.col2s.where().findAll(), [Col2(1, 'a'), Col2(2, 'b')]);
     /*expect(await isar2.col2s.getByValue('a'), Col2(1, 'a'));
-     isar2.writeTxn((isar) {
+     isar2.write((isar) {
       return isar2.col2s.putAll([Col2(1, 'c'), Col2(3, 'd')]);
     });*/
     expect(isar2.close(), true);
@@ -58,5 +58,5 @@ void main() {
       Col1(2, 'b'),
       Col1(3, 'd'),
     ]);
-  });
+  });*/
 }

@@ -17,7 +17,7 @@ void main() {
   group('Max Size', () {
     test('default', () {
       final isar = openTempIsar([ModelSchema]);
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.models.putAll(List.generate(1000, Model.new));
       });
     });
@@ -26,13 +26,13 @@ void main() {
       final isar = openTempIsar([ModelSchema], maxSizeMiB: 10);
 
       expect(
-        () => isar.writeTxn((isar) {
+        () => isar.write((isar) {
           isar.models.putAll(List.generate(1000, Model.new));
         }),
         throwsA(isA<DatabaseFullError>()),
       );
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.models.putAll(List.generate(50, Model.new));
       });
     });

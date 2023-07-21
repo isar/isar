@@ -26,7 +26,7 @@ void main() {
     });
 
     isarTest('id property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.boolModels.putAll([
           BoolModel(0),
           BoolModel(1),
@@ -41,7 +41,7 @@ void main() {
     });
 
     isarTest('bool property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.boolModels.putAll([
           BoolModel(0)
             ..value = true
@@ -65,7 +65,7 @@ void main() {
     });
 
     isarTest('byte property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.byteModels.putAll([
           ByteModel(0)..value = 5,
           ByteModel(1)..value = 123,
@@ -80,7 +80,7 @@ void main() {
     });
 
     isarTest('short property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.shortModels.putAll([
           ShortModel(0)
             ..value = 1234
@@ -104,7 +104,7 @@ void main() {
     });
 
     isarTest('int property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.intModels.putAll([
           IntModel(0)
             ..value = -5
@@ -128,7 +128,7 @@ void main() {
     });
 
     isarTest('float property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.floatModels.putAll([
           FloatModel(0)
             ..value = -5.5
@@ -158,7 +158,7 @@ void main() {
     });
 
     isarTest('double property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.doubleModels.putAll([
           DoubleModel(0)
             ..value = -5.5
@@ -185,7 +185,7 @@ void main() {
     });
 
     isarTest('DateTime property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.dateTimeModels.putAll([
           DateTimeModel(0)..value = DateTime(2022),
           DateTimeModel(1)
@@ -207,7 +207,7 @@ void main() {
     });
 
     isarTest('String property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.stringModels.putAll([
           StringModel(0)
             ..value = 'Just'
@@ -231,7 +231,7 @@ void main() {
     });
 
     isarTest('Object property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.objectModels.putAll([
           ObjectModel(0)
             ..value = EmbeddedModel('E1')
@@ -255,7 +255,7 @@ void main() {
     });
 
     isarTest('Enum property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.enumModels.putAll([
           EnumModel(0)..value = TestEnum.option2,
           EnumModel(1)
@@ -277,7 +277,7 @@ void main() {
     });
 
     isarTest('bool list property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.boolModels.putAll([
           BoolModel(0)
             ..list = [true, false, true]
@@ -303,7 +303,7 @@ void main() {
     });
 
     isarTest('byte list property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.byteModels.putAll([
           ByteModel(0)..list = Uint8List.fromList([0, 10, 255]),
           ByteModel(1)
@@ -333,7 +333,7 @@ void main() {
     });
 
     isarTest('short list property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.shortModels.putAll([
           ShortModel(0)
             ..list = [-5, 70, 999]
@@ -359,7 +359,7 @@ void main() {
     });
 
     isarTest('int list property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.intModels.putAll([
           IntModel(0)
             ..list = [-5, 70, 999]
@@ -385,7 +385,7 @@ void main() {
     });
 
     isarTest('float list property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.floatModels.putAll([
           FloatModel(0)
             ..list = [-5.5, 70.7, 999.999]
@@ -423,7 +423,7 @@ void main() {
     });
 
     isarTest('double list property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.doubleModels.putAll([
           DoubleModel(0)
             ..list = [-5.5, 70.7, 999.999]
@@ -449,7 +449,7 @@ void main() {
     });
 
     isarTest('DateTime list property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.dateTimeModels.putAll([
           DateTimeModel(0)
             ..list = [DateTime(2019), DateTime(2020)]
@@ -475,7 +475,7 @@ void main() {
     });
 
     isarTest('String list property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.stringModels.putAll([
           StringModel(0)..list = ['Just', 'a', 'test'],
           StringModel(1)..list = [],
@@ -505,7 +505,7 @@ void main() {
     });
 
     isarTest('Object list property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.objectModels.putAll([
           ObjectModel(0)
             ..list = []
@@ -537,7 +537,7 @@ void main() {
     });
 
     isarTest('Enum list property', () {
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.enumModels.putAll([
           EnumModel(0)
             ..list = [TestEnum.option2]

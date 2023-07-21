@@ -91,7 +91,7 @@ void main() {
     isarTest('scalar', () {
       final emptyObj = EmptyModel(0);
       final isar1 = openTempIsar([EmptyModelSchema]);
-      isar1.writeTxn((isar) => isar.emptyModels.put(emptyObj));
+      isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
       isar1.close();
 
@@ -115,7 +115,7 @@ void main() {
     isarTest('scalar property', () {
       final emptyObj = EmptyModel(0);
       final isar1 = openTempIsar([EmptyModelSchema]);
-      isar1.writeTxn((isar) => isar.emptyModels.put(emptyObj));
+      isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
       isar1.close();
 
@@ -165,7 +165,7 @@ void main() {
     isarTest('list', () {
       final emptyObj = EmptyModel(0);
       final isar1 = openTempIsar([EmptyModelSchema]);
-      isar1.writeTxn((isar) => isar.emptyModels.put(emptyObj));
+      isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
       isar1.close();
 
@@ -186,7 +186,7 @@ void main() {
     isarTest('list property', () {
       final emptyObj = EmptyModel(0);
       final isar1 = openTempIsar([EmptyModelSchema]);
-      isar1.writeTxn((isar) => isar.emptyModels.put(emptyObj));
+      isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
       isar1.close();
 

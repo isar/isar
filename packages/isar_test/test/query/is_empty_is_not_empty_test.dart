@@ -20,7 +20,7 @@ void main() {
     setUp(() {
       isar = openTempIsar([ModelSchema]);
 
-      isar.writeTxn(
+      isar.write(
         (isar) => isar.models.putAll(
           List.generate(100, (i) => Model(i, 'model $i')),
         ),
@@ -60,13 +60,13 @@ void main() {
         false,
       );
 
-      isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 99));
+      isar.write((isar) => isar.models.where().deleteAll(limit: 99));
       expect(isar.models.where().isEmpty(), false);
 
-      isar.writeTxn((isar) => isar.models.where().deleteAll());
+      isar.write((isar) => isar.models.where().deleteAll());
       expect(isar.models.where().isEmpty(), true);
 
-      isar.writeTxn((isar) => isar.models.put(Model(0, null)));
+      isar.write((isar) => isar.models.put(Model(0, null)));
       expect(isar.models.where().isEmpty(), false);
     });
 
@@ -103,13 +103,13 @@ void main() {
         true,
       );
 
-      isar.writeTxn((isar) => isar.models.where().deleteAll(limit: 99));
+      isar.write((isar) => isar.models.where().deleteAll(limit: 99));
       expect(isar.models.where().isNotEmpty(), true);
 
-      isar.writeTxn((isar) => isar.models.where().deleteAll());
+      isar.write((isar) => isar.models.where().deleteAll());
       expect(isar.models.where().isNotEmpty(), false);
 
-      isar.writeTxn((isar) => isar.models.put(Model(0, null)));
+      isar.write((isar) => isar.models.put(Model(0, null)));
       expect(isar.models.where().isNotEmpty(), true);
     });
   });

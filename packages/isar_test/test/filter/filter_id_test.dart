@@ -38,7 +38,7 @@ void main() {
       obj3 = IdModel()..id = 3;
       obj1 = IdModel()..id = 1;
 
-      isar.writeTxn((isar) {
+      isar.write((isar) {
         isar.idModels.putAll([obj0, obj2, obj3, obj1]);
       });
     });

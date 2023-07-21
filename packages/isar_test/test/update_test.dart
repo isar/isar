@@ -88,19 +88,19 @@ void main() {
         dateProp:
             DateTime.fromMillisecondsSinceEpoch(200, isUtc: true).toLocal(),
       );
-      isar.writeTxn((isar) => isar.models.put(model));
+      isar.write((isar) => isar.models.put(model));
     });
 
     group('update()', () {
       isarTest('bool change', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           expect(isar.models.update(model.id, boolProp: false), true);
         });
         expect(isar.models.get(model.id), model.copyWith(boolProp: false));
       });
 
       isarTest('bool change to null', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           expect(isar.models.update(model.id, nullableBoolProp: null), true);
         });
         expect(
@@ -110,52 +110,52 @@ void main() {
       });
 
       isarTest('byte change', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           expect(isar.models.update(model.id, byteProp: 2), true);
         });
         expect(isar.models.get(model.id), model.copyWith(byteProp: 2));
       });
 
       isarTest('short change', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           expect(isar.models.update(model.id, shortProp: 3), true);
         });
         expect(isar.models.get(model.id), model.copyWith(shortProp: 3));
       });
 
       isarTest('long change', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           expect(isar.models.update(model.id, longProp: 4), true);
         });
         expect(isar.models.get(model.id), model.copyWith(longProp: 4));
       });
 
       isarTest('float change', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           expect(isar.models.update(model.id, floatProp: 5), true);
         });
         expect(isar.models.get(model.id), model.copyWith(floatProp: 5));
       });
 
       isarTest('double change', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           expect(isar.models.update(model.id, doubleProp: 6), true);
         });
         expect(isar.models.get(model.id), model.copyWith(doubleProp: 6));
       });
 
       isarTest('string change', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           expect(isar.models.update(model.id, stringProp: 'world'), true);
         });
         expect(isar.models.get(model.id), model.copyWith(stringProp: 'world'));
 
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           expect(isar.models.update(model.id, stringProp: ''), true);
         });
         expect(isar.models.get(model.id), model.copyWith(stringProp: ''));
 
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           expect(isar.models.update(model.id, stringProp: 'loooong'), true);
         });
         expect(
@@ -165,7 +165,7 @@ void main() {
       });
 
       isarTest('nullable string change', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           expect(isar.models.update(model.id, nullableStringProp: null), true);
         });
         expect(
@@ -173,7 +173,7 @@ void main() {
           model.copyWith(nullableStringProp: null),
         );
 
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           expect(
             isar.models.update(model.id, nullableStringProp: 'testaaaa'),
             true,
@@ -186,7 +186,7 @@ void main() {
       });
 
       isarTest('date change', () {
-        isar.writeTxn((isar) {
+        isar.write((isar) {
           expect(
             isar.models.update(
               model.id,
