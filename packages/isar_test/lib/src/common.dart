@@ -23,18 +23,14 @@ void prepareTest() {
           : Platform.isMacOS
               ? 'libisar.dylib'
               : 'libisar.so';
-      /*try {
-        Isar.initializeIsarCore();
-      } catch (e) {*/
+
       Isar.initializeIsarCore(
         libraries: {
           Abi.macosArm64: path.join(
             rootDir,
             'target',
-            /*
-              'aarch64-apple-darwin',
-              'release',*/
-            'debug',
+            'aarch64-apple-darwin',
+            'release',
             binaryName,
           ),
           Abi.macosX64: path.join(
@@ -67,7 +63,6 @@ void prepareTest() {
           ),
         },
       );
-      //}
     }
     _setUp = true;
   }

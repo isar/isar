@@ -19,7 +19,7 @@ jobs:
         with:
           flutter-version: ${{ secrets.FLUTTER_VERSION }}
       - name: Check formatting
-        run: flutter format --dry-run . --set-exit-if-changed
+        run: dart format -o none . --set-exit-if-changed
 
   lint:
     name: Check lints

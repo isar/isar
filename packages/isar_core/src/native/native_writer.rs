@@ -1,4 +1,5 @@
 use std::iter::empty;
+use std::marker;
 
 use super::isar_serializer::IsarSerializer;
 use super::native_collection::NativeCollection;
@@ -9,7 +10,7 @@ use crate::core::writer::IsarWriter;
 pub(crate) trait WriterImpl<'a> {
     fn id_name(&self) -> Option<&str>;
 
-    fn properties(&self) -> impl Iterator<Item = (&str, DataType)>;
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> + 'a;
 
     fn get_property(&self, index: u32) -> Option<(DataType, u32, Option<u16>)>;
 
@@ -28,7 +29,7 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
     }
 
     #[inline]
-    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> + 'a {
         self.properties()
     }
 
@@ -167,7 +168,7 @@ impl<'a> WriterImpl<'a> for NativeInsert<'a> {
         self.collection.id_name.as_deref()
     }
 
-    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> + 'a {
         self.collection
             .properties
             .iter()
@@ -220,7 +221,7 @@ impl<'a> WriterImpl<'a> for NativeObjectWriter<'a> {
         None
     }
 
-    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> + 'a {
         self.collection
             .properties
             .iter()
@@ -279,8 +280,8 @@ impl<'a> WriterImpl<'a> for NativeListWriter<'a> {
         None
     }
 
-    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
-        empty()
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> + 'a {
+        empty().map(|_: ()| ("", DataType::Object)) // weird fix
     }
 
     #[inline]
