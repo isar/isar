@@ -25,7 +25,7 @@
 
 <p align="center">
   <a href="https://isar.dev">Quickstart</a> •
-  <a href="https://isar.dev/schema">Documentation</a> •
+  <a href="https://isar.dev/⚠️schema">Documentation</a> •
   <a href="https://github.com/isar/isar/tree/main/examples/">Sample Apps</a> •
   <a href="https://github.com/isar/isar/discussions">Support & Ideas</a> •
   <a href="https://pub.dev/packages/isar">Pub.dev</a>
@@ -35,6 +35,8 @@
 >
 > 1. River in Bavaria, Germany.
 > 2. [Crazy fast](#benchmarks) NoSQL database that is a joy to use.
+
+⚠️ You are looking at Isar version 4. This version is still in development and very unstable. Please only use it for testing. If you want to use Isar in production, please use the stable version 3. ⚠️
 
 ## Features
 
@@ -92,7 +94,6 @@ class Email {
 
   final List<Recipient>? recipients;
 
-  @enumerated
   final Status status;
 }
 
@@ -123,7 +124,7 @@ final isar = await Isar.open(
 ### 4. Query the database
 
 ```dart
-final emails = isar.emails.filter()
+final emails = isar.emails.where()
   .titleContains('awesome', caseSensitive: false)
   .sortByStatusDesc()
   .limit(10)
@@ -145,13 +146,13 @@ All basic crud operations are available via the `IsarCollection`.
 ```dart
 final newEmail = Email()..title = 'Amazing new database';
 
-await isar.writeTxnAsync(() {
+await isar.writeAsync(() {
   isar.emails.put(newEmail); // insert & update
 });
 
 final existingEmail = isar.emails.get(newEmail.id!); // get
 
-await isar.writeTxnAsync(() {
+await isar.writeAsync(() {
   isar.emails.delete(existingEmail.id!); // delete
 });
 ```
@@ -177,7 +178,7 @@ final specificEmails = isar.emails
 
 ## Database Watchers
 
-With Isar database, you can watch collections, objects, or queries. A watcher is notified after a transaction commits successfully and the target actually changes.
+With Isar database, you can watch collections, objects, or queries. A watcher is notified after a transaction commits successfully and the target changes.
 Watchers can be lazy and not reload the data or they can be non-lazy and fetch new results in the background.
 
 ```dart

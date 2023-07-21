@@ -14,6 +14,17 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
   final IsarObjectConverter<ID, OBJ> converter;
 
   @override
+  int autoIncrement() {
+    if (0 is ID) {
+      return isar_auto_increment(isar.getPtr(), collectionIndex);
+    } else {
+      throw UnsupportedError(
+        'Collections with String IDs do not support auto increment.',
+      );
+    }
+  }
+
+  @override
   OBJ? get(ID id) {
     return isar.getTxn((isarPtr, txnPtr) {
       final readerPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarReader>>();

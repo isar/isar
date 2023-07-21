@@ -59,7 +59,6 @@ pub fn perform_migration(
         } else {
             None
         };
-        txn.commit()?;
 
         let col = NativeCollection::new(
             collections.len() as u16,
@@ -69,6 +68,11 @@ pub fn perform_migration(
             vec![],
             db,
         );
+
+        if !col.is_embedded() {
+            col.init_auto_increment(&txn)?;
+        }
+        txn.commit()?;
 
         collections.push(col);
     }

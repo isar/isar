@@ -284,6 +284,13 @@ external void isar_txn_abort(
   ffi.Pointer<CIsarTxn> txn,
 );
 
+@ffi.Native<ffi.Int64 Function(ffi.Pointer<CIsarInstance>, ffi.Uint16)>(
+    symbol: 'isar_auto_increment')
+external int isar_auto_increment(
+  ffi.Pointer<CIsarInstance> isar,
+  int collection_index,
+);
+
 @ffi.Native<
     ffi.Uint8 Function(
         ffi.Pointer<CIsarInstance>,

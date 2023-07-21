@@ -53,8 +53,14 @@ abstract class Isar {
   ///
   /// [maxSizeMiB] is the maximum size of the database file in MiB. It is
   /// recommended to set this value as low as possible. Older devices might
-  /// not be able to gran
+  /// not be able to grant the requested amount of virtual memory. In that case
+  /// Isar will try to use as much memory as possible.
   ///
+  /// [compactOnLaunch] is a condition that triggers a database compaction
+  /// on launch when the specified conditions are met.
+  ///
+  /// [inspector] enables the Isar inspector when the app is running in debug
+  /// mode. In release mode the inspector is always disabled.
   static Isar open({
     required List<IsarCollectionSchema> schemas,
     required String directory,
@@ -73,11 +79,30 @@ abstract class Isar {
     );
   }
 
+  /// Open a new Isar instance with the SQLite storage engine.
+  ///
+  /// You have to provide a list of all collection [schemas] that you want to
+  /// use in this instance as well as a [directory] where the database file
+  /// should be stored.
+  ///
+  /// You can optionally provide a [name] for this instance. This is needed if
+  /// you want to open multiple instances.
+  ///
+  /// [maxSizeMiB] is the maximum size of the database file in MiB. It is
+  /// recommended to set this value as low as possible. If you set it to 0, the
+  /// SQLite will no longer use WAL mode and there will be no size limit.
+  ///
+  /// If [encryptionKey] is provided, the database will be encrypted with the
+  /// provided key. Opening an encrypted database with an incorrect key will
+  /// result in an error.
+  ///
+  /// [inspector] enables the Isar inspector when the app is running in debug
+  /// mode. In release mode the inspector is always disabled.
   static Isar openSQLite({
     required List<IsarCollectionSchema> schemas,
     required String directory,
     String name = Isar.defaultName,
-    int maxSizeMiB = Isar.defaultMaxSizeMiB,
+    int? maxSizeMiB = Isar.defaultMaxSizeMiB,
     String? encryptionKey,
     bool inspector = true,
   }) {
@@ -86,7 +111,7 @@ abstract class Isar {
       directory: directory,
       name: name,
       sqliteEngine: true,
-      maxSizeMiB: maxSizeMiB,
+      maxSizeMiB: maxSizeMiB ?? 0,
       encryptionKey: encryptionKey,
     );
   }
@@ -94,10 +119,7 @@ abstract class Isar {
   /// Name of the instance.
   String get name;
 
-  /// The directory containing the database file or `null` on the web.
-  ///
-  /// The full path of the database file is `directory/name.isar` and the lock
-  /// file `directory/name.isar.lock`.
+  /// The directory containing the database file.
   String get directory;
 
   /// Whether this instance is open and active.
@@ -112,7 +134,7 @@ abstract class Isar {
   /// `User` can be accessed with `isar.users`.
   IsarCollection<ID, OBJ> collection<ID, OBJ>();
 
-  /// Create a synchroneous read transaction.
+  /// Create a synchronous read transaction.
   ///
   /// Explicit read transactions are optional, but they allow you to do atomic
   /// reads and rely on a consistent state of the database inside the
@@ -132,7 +154,7 @@ abstract class Isar {
   /// ```
   T read<T>(T Function(Isar isar) callback);
 
-  /// Create a synchroneous read-write transaction.
+  /// Create a synchronous read-write transaction.
   ///
   /// Unlike read operations, write operations in Isar must be wrapped in an
   /// explicit transaction.
@@ -152,14 +174,14 @@ abstract class Isar {
   /// ```
   T write<T>(T Function(Isar isar) callback);
 
-  /// Create an asynchroneous read transaction.
+  /// Create an asynchronous read transaction.
   ///
   /// The code inside the callback will be executed in a separate isolate.
   ///
   /// Check out the [read] method for more information.
   Future<T> readAsync<T>(T Function(Isar isar) callback);
 
-  /// Create an asynchroneous read-write transaction.
+  /// Create an asynchronous read-write transaction.
   ///
   /// The code inside the callback will be executed in a separate isolate.
   ///

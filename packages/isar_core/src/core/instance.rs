@@ -62,6 +62,8 @@ pub trait IsarInstance: Sized {
 
     fn abort_txn(&self, txn: Self::Txn);
 
+    fn auto_increment(&self, collection_index: u16) -> i64;
+
     fn get<'a>(
         &'a self,
         txn: &'a Self::Txn,

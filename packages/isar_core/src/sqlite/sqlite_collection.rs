@@ -1,7 +1,10 @@
+use std::sync::atomic::{self, AtomicI64};
 use std::sync::Arc;
 
 use super::sqlite_query::SQLiteQuery;
+use super::sqlite_txn::SQLiteTxn;
 use crate::core::data_type::DataType;
+use crate::core::error::Result;
 use crate::core::watcher::CollectionWatchers;
 
 #[derive(Debug)]
@@ -29,6 +32,7 @@ pub struct SQLiteCollection {
     pub id_name: Option<String>,
     pub properties: Vec<SQLiteProperty>,
     pub watchers: Arc<CollectionWatchers<SQLiteQuery>>,
+    auto_increment: AtomicI64,
 }
 
 impl SQLiteCollection {
@@ -38,7 +42,35 @@ impl SQLiteCollection {
             id_name,
             properties,
             watchers: CollectionWatchers::new(),
+            auto_increment: AtomicI64::new(0),
         }
+    }
+
+    pub fn is_embedded(&self) -> bool {
+        self.id_name.is_none()
+    }
+
+    pub fn init_auto_increment(&self, txn: &SQLiteTxn) -> Result<()> {
+        let sqlite = txn.get_sqlite(false)?;
+
+        let sql = format!("SELECT MAX(_rowid_) FROM {}", self.name);
+        let mut stmt = sqlite.prepare(&sql)?;
+        stmt.step()?;
+
+        let next_id = stmt.get_long(0) + 1;
+        self.auto_increment
+            .store(next_id, atomic::Ordering::Release);
+
+        Ok(())
+    }
+
+    pub fn auto_increment(&self) -> i64 {
+        self.auto_increment.fetch_add(1, atomic::Ordering::AcqRel)
+    }
+
+    pub fn update_auto_increment(&self, id: i64) {
+        self.auto_increment
+            .fetch_max(id + 1, atomic::Ordering::AcqRel);
     }
 
     pub fn get_property(&self, property_index: u16) -> Option<&SQLiteProperty> {

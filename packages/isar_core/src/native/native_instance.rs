@@ -119,6 +119,14 @@ impl IsarInstance for NativeInstance {
         }
     }
 
+    fn auto_increment(&self, collection_index: u16) -> i64 {
+        if let Ok(collection) = self.get_collection(collection_index) {
+            collection.auto_increment()
+        } else {
+            0
+        }
+    }
+
     fn get<'a>(
         &'a self,
         txn: &'a Self::Txn,

@@ -183,6 +183,19 @@ pub unsafe extern "C" fn isar_txn_abort(isar: &'static CIsarInstance, txn: *mut 
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn isar_auto_increment(
+    isar: &'static CIsarInstance,
+    collection_index: u16,
+) -> i64 {
+    match isar {
+        #[cfg(feature = "native")]
+        CIsarInstance::Native(isar) => isar.auto_increment(collection_index),
+        #[cfg(feature = "sqlite")]
+        CIsarInstance::SQLite(isar) => isar.auto_increment(collection_index),
+    }
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn isar_get(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,

@@ -51,23 +51,41 @@ pub struct SQLiteInstance {
 
 impl SQLiteInstance {
     fn open(
+        instance_id: u32,
         name: &str,
         dir: &str,
-        encryption_key: Option<&str>,
-        instance_id: u32,
         schemas: Vec<IsarSchema>,
+        max_size_mib: u32,
+        encryption_key: Option<&str>,
     ) -> Result<(SQLiteInstanceInfo, SQLite3)> {
         let mut path_buf = PathBuf::from(dir);
         path_buf.push(format!("{}.sqlite", name));
         let path = path_buf.as_path().to_str().unwrap().to_string();
 
         let sqlite = Self::open_conn(&path, encryption_key)?;
+
+        let max_size = (max_size_mib as usize).saturating_mul(MIB);
+        sqlite
+            .prepare(&format!("PRAGMA mmap_size={}", max_size))?
+            .step()?;
+        sqlite.prepare("PRAGMA journal_mode=WAL")?.step()?;
+
         let sqlite = Rc::new(sqlite);
         let txn = SQLiteTxn::new(sqlite.clone(), true)?;
         perform_migration(&txn, &schemas)?;
         txn.commit()?;
 
         let collections = Self::get_collections(&schemas);
+        {
+            let txn = SQLiteTxn::new(sqlite.clone(), false)?;
+            for collection in &collections {
+                if !collection.is_embedded() {
+                    collection.init_auto_increment(&txn)?;
+                }
+            }
+            txn.abort();
+        }
+
         let instance_info = SQLiteInstanceInfo {
             name: name.to_string(),
             dir: dir.to_string(),
@@ -196,13 +214,14 @@ impl IsarInstance for SQLiteInstance {
 
         let mut lock = INSTANCES.lock().unwrap();
         if !lock.contains_key(instance_id as u64) {
-            let (info, sqlite) = Self::open(name, dir, encryption_key, instance_id, schemas)?;
-
-            let max_size = (max_size_mib as usize).saturating_mul(MIB);
-            sqlite
-                .prepare(&format!("PRAGMA mmap_size={}", max_size))?
-                .step()?;
-            sqlite.prepare("PRAGMA journal_mode=WAL")?.step()?;
+            let (info, sqlite) = Self::open(
+                instance_id,
+                name,
+                dir,
+                schemas,
+                max_size_mib,
+                encryption_key,
+            )?;
 
             let connections = Connections {
                 info: Arc::new(info),
@@ -236,6 +255,14 @@ impl IsarInstance for SQLiteInstance {
     fn abort_txn(&self, txn: SQLiteTxn) {
         self.txn_active.replace(false);
         txn.abort();
+    }
+
+    fn auto_increment(&self, collection_index: u16) -> i64 {
+        if let Ok(collection) = self.get_collection(collection_index) {
+            collection.auto_increment()
+        } else {
+            0
+        }
     }
 
     fn get<'a>(

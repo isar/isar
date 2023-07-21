@@ -4,6 +4,8 @@ part of isar;
 abstract class IsarCollection<ID, OBJ> {
   Isar get isar;
 
+  int autoIncrement();
+
   OBJ? get(ID id);
 
   List<OBJ?> getAll(List<ID> ids);

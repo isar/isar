@@ -1,6 +1,7 @@
+use std::sync::atomic::{self, AtomicI64};
 use std::sync::Arc;
 
-use super::index::id_key::IdToBytes;
+use super::index::id_key::{BytesToId, IdToBytes};
 use super::index::NativeIndex;
 use super::isar_deserializer::IsarDeserializer;
 use super::isar_serializer::IsarSerializer;
@@ -37,6 +38,7 @@ pub struct NativeCollection {
     pub(crate) indexes: Vec<NativeIndex>,
     pub(crate) static_size: u32,
     pub(crate) watchers: Arc<CollectionWatchers<Query>>,
+    auto_increment: AtomicI64,
     db: Option<Db>,
 }
 
@@ -61,6 +63,7 @@ impl NativeCollection {
             indexes,
             static_size,
             watchers: CollectionWatchers::new(),
+            auto_increment: AtomicI64::new(1),
             db,
         }
     }
@@ -71,6 +74,25 @@ impl NativeCollection {
 
     pub fn is_embedded(&self) -> bool {
         self.id_name.is_none()
+    }
+
+    pub fn init_auto_increment(&self, txn: &NativeTxn) -> Result<()> {
+        let mut cursor = txn.get_cursor(self.get_db()?)?;
+        if let Some((key, _)) = cursor.move_to_last()? {
+            let next_id = key.to_id() + 1;
+            self.auto_increment
+                .store(next_id, atomic::Ordering::Release);
+        }
+        Ok(())
+    }
+
+    pub fn auto_increment(&self) -> i64 {
+        self.auto_increment.fetch_add(1, atomic::Ordering::AcqRel)
+    }
+
+    pub fn update_auto_increment(&self, id: i64) {
+        self.auto_increment
+            .fetch_max(id + 1, atomic::Ordering::AcqRel);
     }
 
     #[inline]
@@ -101,6 +123,7 @@ impl NativeCollection {
 
         let object = IsarDeserializer::from_bytes(&bytes);
         change_set.register_change(&self.watchers, id, &object);
+        self.update_auto_increment(id);
 
         Ok(())
     }

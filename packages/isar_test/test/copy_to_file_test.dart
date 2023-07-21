@@ -30,7 +30,8 @@ void main() {
     late Isar isar;
 
     setUp(() {
-      isar = openTempIsar([ModelSchema], maxSizeMiB: 20);
+      // disable WAL for SQLite
+      isar = openTempIsar([ModelSchema], maxSizeMiB: isSQLite ? 0 : 20);
 
       isar.write(
         (isar) => isar.models.putAll(List.generate(100, Model.new)),
@@ -49,16 +50,17 @@ void main() {
     });
 
     isarTest('.copyToFile() should keep the same content', () {
-      final copiedDbFilename = getRandomName();
-      final copiedDbFile =
-          File(path.join(isar.directory, '$copiedDbFilename.isar'));
+      final name = getRandomName();
+      final copiedDbFile = File(
+        path.join(isar.directory, isSQLite ? '$name.sqlite' : '$name.isar'),
+      );
 
       isar.copyToFile(copiedDbFile.path);
 
       final copiedIsar = openTempIsar(
         [ModelSchema],
         directory: isar.directory,
-        name: copiedDbFilename,
+        name: name,
         maxSizeMiB: 20,
       );
 
@@ -69,14 +71,17 @@ void main() {
     });
 
     isarTest('.copyToFile() should compact copied file', () {
-      isar.write((isar) => isar.models.where().deleteAll(limit: 50));
-
-      final copiedDbFilename1 = getRandomName();
-      final copiedDbFile1 = File(
+      final dbFile = File(
         path.join(
           isar.directory,
-          '$copiedDbFilename1.isar',
+          isSQLite ? '${isar.name}.sqlite' : '${isar.name}.isar',
         ),
+      );
+      isar.write((isar) => isar.models.where().deleteAll(limit: 50));
+
+      final name1 = getRandomName();
+      final copiedDbFile1 = File(
+        path.join(isar.directory, isSQLite ? '$name1.sqlite' : '$name1.isar'),
       );
 
       isar.copyToFile(copiedDbFile1.path);
@@ -84,42 +89,35 @@ void main() {
       final isarCopy1 = openTempIsar(
         [ModelSchema],
         directory: isar.directory,
-        name: copiedDbFilename1,
+        name: name1,
         maxSizeMiB: 20,
       );
 
       expect(copiedDbFile1.lengthSync(), greaterThan(0));
-      expect(
-        copiedDbFile1.lengthSync(),
-        lessThan(File('${isar.directory}/${isar.name}.isar').lengthSync()),
-      );
+      expect(copiedDbFile1.lengthSync(), lessThan(dbFile.lengthSync()));
 
       isarCopy1.write((isar) => isarCopy1.models.where().deleteAll(limit: 25));
 
-      final copiedDbFilename2 = getRandomName();
-      final copiedDbFile2 =
-          File(path.join(isar.directory, '$copiedDbFilename2.isar'));
+      final name2 = getRandomName();
+      final copiedDbFile2 = File(
+        path.join(isar.directory, isSQLite ? '$name2.sqlite' : '$name2.isar'),
+      );
       isarCopy1.copyToFile(copiedDbFile2.path);
 
       expect(copiedDbFile2.lengthSync(), greaterThan(0));
-      expect(
-        copiedDbFile2.lengthSync(),
-        lessThan(copiedDbFile1.lengthSync()),
-      );
+      expect(copiedDbFile2.lengthSync(), lessThan(copiedDbFile1.lengthSync()));
       copiedDbFile2.delete();
     });
 
     isarTest('Copies should be the same size', () {
-      final copiedDbFilename1 = getRandomName();
-      final copiedDbFile1 =
-          File(path.join(isar.directory, '$copiedDbFilename1.isar'));
+      final name1 = getRandomName();
+      final copiedDbFile1 = File(
+        path.join(isar.directory, isSQLite ? '$name1.sqlite' : '$name1.isar'),
+      );
 
-      final copiedDbFilename2 = getRandomName();
+      final name2 = getRandomName();
       final copiedDbFile2 = File(
-        path.join(
-          isar.directory,
-          '$copiedDbFilename2.isar',
-        ),
+        path.join(isar.directory, isSQLite ? '$name2.sqlite' : '$name2.isar'),
       );
 
       isar.copyToFile(copiedDbFile1.path);
@@ -131,16 +129,13 @@ void main() {
       final isarCopy = openTempIsar(
         [ModelSchema],
         directory: isar.directory,
-        name: copiedDbFilename1,
+        name: name1,
         maxSizeMiB: 20,
       );
 
-      final copiedDbFilename3 = getRandomName();
+      final name3 = getRandomName();
       final copiedDbFile3 = File(
-        path.join(
-          isar.directory,
-          '$copiedDbFilename3.isar',
-        ),
+        path.join(isar.directory, isSQLite ? '$name3.sqlite' : '$name3.isar'),
       );
 
       isarCopy.copyToFile(copiedDbFile3.path);

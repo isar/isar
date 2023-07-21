@@ -88,6 +88,8 @@ impl<'a> IsarInsert<'a> for SQLiteInsert<'a> {
 
     fn save(&mut self, id: i64) -> Result<()> {
         if self.batch_remaining > 0 {
+            self.collection.update_auto_increment(id);
+
             let id_property = (self.batch_size - self.batch_remaining)
                 * (self.collection.properties.len() as u32 + 1);
             self.with_stmt(|stmt| stmt.bind_long(id_property, id))?;
