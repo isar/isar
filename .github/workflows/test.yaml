@@ -110,7 +110,6 @@ jobs:
       - name: Add packages
         run: |
           flutter pub add json_annotation
-          flutter pub add intl
           flutter pub add isar_test --path ../isar_test
         working-directory: packages/isar
       - name: Collect isar Coverage
