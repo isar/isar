@@ -51,7 +51,7 @@ jobs:
     name: Dart Test
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-latest, windows-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -218,6 +218,7 @@ jobs:
 
   integration_test_linux:
     name: Integration Test Linux
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

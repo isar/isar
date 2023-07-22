@@ -153,7 +153,6 @@ pub unsafe extern "C" fn isar_read_string(
     if let Some(str) = str {
         let len = str.len();
         let ptr = str.as_ptr();
-        mem::forget(str);
         *value = ptr;
         *is_ascii = str.is_ascii();
         len as u32
