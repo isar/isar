@@ -22,7 +22,7 @@ runs:
     - name: Install OpenSSL
       if: runner.os == 'Windows'
       shell: bash
-      run: vcpkg install --triplet=x64-windows-static-md openssl
+      run: choco install openssl
     # See https://github.com/godot-rust/godot-rust/pull/920
     - name: "Workaround Android NDK due to Rust bug"
       if: runner.os == 'Linux' || runner.os == 'macOS'
