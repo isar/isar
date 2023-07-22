@@ -1,5 +1,9 @@
 ## 4.0.0-dev.0
 
+⚠️ ISAR V4 IS NOT READY FOR PRODUCTION USE ⚠️
+
+This version does not support database migration yet and cannot open Isar v3 databases. The stable version will be released in a few weeks and will support migration from v3.
+
 ### Breaking
 
 Changed transactions API:
@@ -16,6 +20,7 @@ Changed transactions API:
 - Enums no longer need to be annotated with `@enumerated` instead there is a new `@enumValue` annotation to specify the value property of an enum
 - Where clauses have been removed in favor of automatic index handling
 - Isar links have been removed in favor of embedded objects
+- The Android minimum SDK version is now 23
 
 ### Enhancements
 
