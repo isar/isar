@@ -1,212 +1,217 @@
-use super::c_object_set::{CObject, CObjectSet};
-use crate::filter::get_property;
-use crate::txn::CIsarTxn;
-use crate::{from_c_str, UintSend};
-use isar_core::collection::IsarCollection;
-use isar_core::index::index_key::IndexKey;
-use isar_core::query::filter::Filter;
-use isar_core::query::query_builder::QueryBuilder;
-use isar_core::query::{Query, Sort};
-use std::os::raw::c_char;
+use crate::{CIsarCursor, CIsarInstance, CIsarQuery, CIsarQueryBuilder, CIsarTxn};
+use isar_core::core::error::IsarError;
+use isar_core::core::filter::Filter;
+use isar_core::core::instance::{Aggregation, IsarInstance};
+use isar_core::core::query_builder::{IsarQueryBuilder, Sort};
+use isar_core::core::value::IsarValue;
+use std::ptr;
 
 #[no_mangle]
-pub extern "C" fn isar_qb_create(collection: &IsarCollection) -> *mut QueryBuilder {
-    let builder = collection.new_query_builder();
-    Box::into_raw(Box::new(builder))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_qb_add_id_where_clause(
-    builder: &mut QueryBuilder,
-    start_id: i64,
-    end_id: i64,
-) -> i64 {
+pub unsafe extern "C" fn isar_query_new(
+    isar: &'static CIsarInstance,
+    collection_index: u16,
+    query_builder: *mut *const CIsarQueryBuilder,
+) -> u8 {
     isar_try! {
-        builder.add_id_where_clause(start_id, end_id)?;
+        let new_builder = match isar {
+            #[cfg(feature = "native")]
+            CIsarInstance::Native(isar) => CIsarQueryBuilder::Native(isar.query(collection_index)?),
+            #[cfg(feature = "sqlite")]
+            CIsarInstance::SQLite(isar) => CIsarQueryBuilder::SQLite(isar.query(collection_index)?),
+        };
+        *query_builder = Box::into_raw(Box::new(new_builder));
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_qb_add_index_where_clause(
-    builder: &mut QueryBuilder,
-    index_id: u64,
-    lower_key: *mut IndexKey,
-    upper_key: *mut IndexKey,
-    sort_asc: bool,
-    skip_duplicates: bool,
-) -> i64 {
-    let lower_key = *Box::from_raw(lower_key);
-    let upper_key = *Box::from_raw(upper_key);
-    let sort = if sort_asc {
-        Sort::Ascending
-    } else {
-        Sort::Descending
-    };
-    isar_try! {
-        builder.add_index_where_clause(
-            index_id ,
-            lower_key,
-            upper_key,
-            sort,
-            skip_duplicates,
-        )?;
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_qb_add_link_where_clause(
-    builder: &mut QueryBuilder,
-    source_collection: &IsarCollection,
-    link_id: u64,
-    id: i64,
-) -> i64 {
-    isar_try! {
-        builder.add_link_where_clause(source_collection, link_id, id)?;
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_qb_set_filter(builder: &mut QueryBuilder, filter: *mut Filter) {
+pub unsafe extern "C" fn isar_query_set_filter(
+    builder: &'static mut CIsarQueryBuilder,
+    filter: *mut Filter,
+) {
     let filter = *Box::from_raw(filter);
-    builder.set_filter(filter);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_qb_add_sort_by(
-    builder: &mut QueryBuilder,
-    property_id: u64,
-    asc: bool,
-) -> i64 {
-    let sort = if asc {
-        Sort::Ascending
-    } else {
-        Sort::Descending
-    };
-    isar_try! {
-        let property = get_property(builder.collection, 0, property_id)?;
-        builder.add_sort(property, sort)?;
+    match builder {
+        #[cfg(feature = "native")]
+        CIsarQueryBuilder::Native(builder) => builder.set_filter(filter),
+        #[cfg(feature = "sqlite")]
+        CIsarQueryBuilder::SQLite(builder) => builder.set_filter(filter),
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_qb_add_distinct_by(
-    builder: &mut QueryBuilder,
-    property_id: u64,
+pub unsafe extern "C" fn isar_query_add_sort(
+    builder: &'static mut CIsarQueryBuilder,
+    property_index: u16,
+    ascending: bool,
     case_sensitive: bool,
-) -> i64 {
-    isar_try! {
-        let property = get_property(builder.collection, 0, property_id)?;
-            builder.add_distinct(property, case_sensitive);
+) {
+    let sort = if ascending { Sort::Asc } else { Sort::Desc };
+    match builder {
+        #[cfg(feature = "native")]
+        CIsarQueryBuilder::Native(builder) => {
+            builder.add_sort(property_index, sort, case_sensitive)
+        }
+        #[cfg(feature = "sqlite")]
+        CIsarQueryBuilder::SQLite(builder) => {
+            builder.add_sort(property_index, sort, case_sensitive)
+        }
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_qb_set_offset_limit(
-    builder: &mut QueryBuilder,
+pub unsafe extern "C" fn isar_query_add_distinct(
+    builder: &'static mut CIsarQueryBuilder,
+    property_index: u16,
+    case_sensitive: bool,
+) {
+    match builder {
+        #[cfg(feature = "native")]
+        CIsarQueryBuilder::Native(builder) => builder.add_distinct(property_index, case_sensitive),
+        #[cfg(feature = "sqlite")]
+        CIsarQueryBuilder::SQLite(builder) => builder.add_distinct(property_index, case_sensitive),
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_query_build(builder: *mut CIsarQueryBuilder) -> *mut CIsarQuery {
+    let builder = *Box::from_raw(builder);
+    match builder {
+        #[cfg(feature = "native")]
+        CIsarQueryBuilder::Native(builder) => {
+            let query = builder.build();
+            Box::into_raw(Box::new(CIsarQuery::Native(query)))
+        }
+        #[cfg(feature = "sqlite")]
+        CIsarQueryBuilder::SQLite(builder) => {
+            let query = builder.build();
+            Box::into_raw(Box::new(CIsarQuery::SQLite(query)))
+        }
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_query_cursor(
+    isar: &'static CIsarInstance,
+    txn: &'static CIsarTxn,
+    query: &'static CIsarQuery,
+    cursor: *mut *const CIsarCursor,
     offset: i64,
     limit: i64,
-) {
-    let offset = if offset < 0 { 0 } else { offset as usize };
-    let limit = if limit < 0 {
-        usize::MAX
+) -> u8 {
+    let offset = if offset < 0 {
+        None
     } else {
-        limit as usize
+        Some(offset.clamp(0, u32::MAX as i64) as u32)
     };
-    builder.set_offset(offset);
-    builder.set_limit(limit);
+    let limit = if limit < 0 {
+        None
+    } else {
+        Some(limit.clamp(0, u32::MAX as i64) as u32)
+    };
+
+    isar_try! {
+        let new_cursor = match (isar, txn, query) {
+            #[cfg(feature = "native")]
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn), CIsarQuery::Native(query)) => {
+                let cursor = isar.query_cursor(txn, query, offset, limit)?;
+                CIsarCursor::Native(cursor)
+            }
+            #[cfg(feature = "sqlite")]
+            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn), CIsarQuery::SQLite(query)) => {
+                let cursor = isar.query_cursor(txn, query, offset, limit)?;
+                CIsarCursor::SQLite(cursor)
+            }
+            _ => return Err(IsarError::IllegalArgument {}),
+        };
+        *cursor = Box::into_raw(Box::new(new_cursor));
+    }
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn isar_qb_build(builder: *mut QueryBuilder) -> *mut Query {
-    let query = Box::from_raw(builder).build();
-    Box::into_raw(Box::new(query))
-}
+pub const AGGREGATION_COUNT: u8 = 0;
+pub const AGGREGATION_IS_EMPTY: u8 = 1;
+pub const AGGREGATION_MIN: u8 = 2;
+pub const AGGREGATION_MAX: u8 = 3;
+pub const AGGREGATION_SUM: u8 = 4;
+pub const AGGREGATION_AVERAGE: u8 = 5;
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_q_free(query: *mut Query) {
-    let _ = Box::from_raw(query);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_q_find(
-    query: &'static Query,
-    txn: &mut CIsarTxn,
-    result: &'static mut CObjectSet,
-    limit: u32,
-) -> i64 {
-    isar_try_txn!(txn, move |txn| {
-        let mut objects = vec![];
-        let mut count = 0;
-        query.find_while(txn, |id, object| {
-            let mut raw_obj = CObject::new();
-            raw_obj.set_id(id);
-            raw_obj.set_object(Some(object));
-            objects.push(raw_obj);
-            count += 1;
-            count < limit
-        })?;
-
-        result.fill_from_vec(objects);
-        Ok(())
-    })
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_q_delete(
-    query: &'static Query,
-    collection: &'static IsarCollection,
-    txn: &mut CIsarTxn,
-    limit: u32,
-    count: &'static mut u32,
-) -> i64 {
-    let limit = limit as usize;
-    let count = UintSend(count);
-    isar_try_txn!(txn, move |txn| {
-        let mut ids_to_delete = vec![];
-        query.find_while(txn, |id, _| {
-            ids_to_delete.push(id);
-            ids_to_delete.len() <= limit
-        })?;
-        *count.0 = ids_to_delete.len() as u32;
-        for id in ids_to_delete {
-            collection.delete(txn, id)?;
+pub unsafe extern "C" fn isar_query_aggregate(
+    isar: &'static CIsarInstance,
+    txn: &'static CIsarTxn,
+    query: &'static CIsarQuery,
+    aggregation: u8,
+    property_index: u16,
+    value: *mut *const IsarValue,
+) -> u8 {
+    let aggregation = match aggregation {
+        AGGREGATION_COUNT => Aggregation::Count,
+        AGGREGATION_IS_EMPTY => Aggregation::IsEmpty,
+        AGGREGATION_MIN => Aggregation::Min,
+        AGGREGATION_MAX => Aggregation::Max,
+        AGGREGATION_SUM => Aggregation::Sum,
+        AGGREGATION_AVERAGE => Aggregation::Average,
+        _ => {
+            *value = ptr::null();
+            return 0;
         }
-        Ok(())
-    })
-}
-
-struct JsonBytes(*mut *mut u8);
-unsafe impl Send for JsonBytes {}
-
-struct JsonLen(*mut u32);
-unsafe impl Send for JsonLen {}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_q_export_json(
-    query: &'static Query,
-    collection: &'static IsarCollection,
-    txn: &mut CIsarTxn,
-    id_name: *const c_char,
-    json_bytes: *mut *mut u8,
-    json_length: *mut u32,
-) -> i64 {
-    let id_name = from_c_str(id_name).unwrap();
-    let json = JsonBytes(json_bytes);
-    let json_length = JsonLen(json_length);
-    isar_try_txn!(txn, move |txn| {
-        let json = json;
-        let json_length = json_length;
-        let exported_json = query.export_json(txn, collection, id_name, true)?;
-        let bytes = serde_json::to_vec(&exported_json).unwrap();
-        let mut bytes = bytes.into_boxed_slice();
-        json_length.0.write(bytes.len() as u32);
-        json.0.write(bytes.as_mut_ptr());
-        std::mem::forget(bytes);
-        Ok(())
-    })
+    };
+    isar_try! {
+        let new_value = match (isar, txn, query) {
+            #[cfg(feature = "native")]
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn), CIsarQuery::Native(query)) => {
+                isar.query_aggregate(txn, query, aggregation, Some(property_index))?
+            }
+            #[cfg(feature = "sqlite")]
+            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn), CIsarQuery::SQLite(query)) => {
+                isar.query_aggregate(txn, query, aggregation, Some(property_index))?
+            }
+            _ => return Err(IsarError::IllegalArgument {}),
+        };
+        if let Some(new_value) = new_value {
+            *value = Box::into_raw(Box::new(new_value));
+        } else {
+            *value = ptr::null();
+        }
+    }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_free_json(json_bytes: *mut u8, json_length: u32) {
-    Vec::from_raw_parts(json_bytes, json_length as usize, json_length as usize);
+pub unsafe extern "C" fn isar_query_delete(
+    isar: &'static CIsarInstance,
+    txn: &'static CIsarTxn,
+    query: &'static CIsarQuery,
+    offset: i64,
+    limit: i64,
+    count: *mut u32,
+) -> u8 {
+    let offset = if offset < 0 {
+        None
+    } else {
+        Some(offset.clamp(0, u32::MAX as i64) as u32)
+    };
+    let limit = if limit < 0 {
+        None
+    } else {
+        Some(limit.clamp(0, u32::MAX as i64) as u32)
+    };
+    isar_try! {
+        let new_count = match (isar, txn, query) {
+            #[cfg(feature = "native")]
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn), CIsarQuery::Native(query)) => {
+                isar.query_delete(txn, query, offset, limit)?
+            }
+            #[cfg(feature = "sqlite")]
+            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn), CIsarQuery::SQLite(query)) => {
+                isar.query_delete(txn, query, offset, limit)?
+            }
+            _ => return Err(IsarError::IllegalArgument {}),
+        };
+        *count = new_count;
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_query_free(query: *mut CIsarQuery) {
+    if !query.is_null() {
+        drop(Box::from_raw(query));
+    }
 }

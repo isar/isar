@@ -4,7 +4,9 @@ part 'type_models.g.dart';
 
 @collection
 class BoolModel {
-  Id? id;
+  BoolModel(this.id);
+
+  final int id;
 
   bool value = false;
 
@@ -17,7 +19,9 @@ class BoolModel {
 
 @collection
 class ByteModel {
-  Id? id;
+  ByteModel(this.id);
+
+  final int id;
 
   byte value = 0;
 
@@ -28,7 +32,9 @@ class ByteModel {
 
 @collection
 class ShortModel {
-  Id? id;
+  ShortModel(this.id);
+
+  final int id;
 
   short value = 0;
 
@@ -41,7 +47,9 @@ class ShortModel {
 
 @collection
 class IntModel {
-  Id? id;
+  IntModel(this.id);
+
+  final int id;
 
   int value = 0;
 
@@ -54,7 +62,9 @@ class IntModel {
 
 @collection
 class FloatModel {
-  Id? id;
+  FloatModel(this.id);
+
+  final int id;
 
   float value = 0;
 
@@ -67,7 +77,9 @@ class FloatModel {
 
 @collection
 class DoubleModel {
-  Id? id;
+  DoubleModel(this.id);
+
+  final int id;
 
   double value = 0;
 
@@ -80,7 +92,9 @@ class DoubleModel {
 
 @collection
 class DateTimeModel {
-  Id? id;
+  DateTimeModel(this.id);
+
+  final int id;
 
   DateTime value = DateTime.fromMillisecondsSinceEpoch(0);
 
@@ -93,7 +107,9 @@ class DateTimeModel {
 
 @collection
 class StringModel {
-  Id? id;
+  StringModel(this.id);
+
+  final int id;
 
   String value = '';
 
@@ -118,7 +134,9 @@ class EmbeddedModel {
 
 @collection
 class ObjectModel {
-  Id? id;
+  ObjectModel(this.id);
+
+  final int id;
 
   EmbeddedModel value = EmbeddedModel();
 
@@ -130,24 +148,27 @@ class ObjectModel {
 }
 
 enum TestEnum {
-  option1,
-  option2,
-  option3;
+  option1(1),
+  option2(2),
+  option3(3);
+
+  const TestEnum(this.value);
+
+  @enumValue
+  final int value;
 }
 
 @collection
 class EnumModel {
-  Id? id;
+  EnumModel(this.id);
 
-  @Enumerated(EnumType.name)
+  final int id;
+
   TestEnum value = TestEnum.option1;
 
-  @Enumerated(EnumType.name)
   TestEnum? nValue;
 
-  @Enumerated(EnumType.name)
   List<TestEnum> list = [];
 
-  @Enumerated(EnumType.name)
   List<TestEnum>? nList;
 }

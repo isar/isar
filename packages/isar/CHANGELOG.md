@@ -1,3 +1,42 @@
+## 4.0.0-dev.0
+
+⚠️ ISAR V4 IS NOT READY FOR PRODUCTION USE ⚠️
+
+This version does not support database migration yet and cannot open Isar v3 databases. The stable version will be released in a few weeks and will support migration from v3.
+
+### Breaking
+
+Changed transactions API:
+| old | new |
+| --- | --- |
+| `writeTxn()` | `writeAsync()` |
+| `writeTxnSync()` | `write()` |
+| `txn()` | `readAsync()` |
+| `txnSync()` | `read()` |
+
+- All operations are now synchronous by default and there are `Async` methods for asynchronous operations.
+- Ids now need to be called `id` or annotated with `@id`
+- Ids can no longer be `nullable`. There is a new `collection.autoIncrement()` function to automatically generate ids.
+- Enums no longer need to be annotated with `@enumerated` instead there is a new `@enumValue` annotation to specify the value property of an enum
+- Where clauses have been removed in favor of automatic index handling
+- Isar links have been removed in favor of embedded objects
+- The Android minimum SDK version is now 23
+
+### Enhancements
+
+- Encrypted databases
+- String ids
+- Fetching multiple properties simultaneously
+- Bulk updates
+- SQLite storage engine support
+- Support for `dynamic`, `List<dynamic>` and `Map<String, dynamic>` properties
+- Required parameters for embedded objects
+- Case insensitive sorting
+- Much faster database initialization
+- Improved performance for all operations
+- Decoding objects no longer blocks the UI isolate
+- New `@utc` annotation to receive `DateTime` objects in UTC
+
 ## 3.1.0+1
 
 ### Fixes

@@ -6,144 +6,111 @@ part 'is_empty_is_not_empty_test.g.dart';
 
 @collection
 class Model {
-  Model(this.value);
+  Model(this.id, this.value);
 
-  Id id = Isar.autoIncrement;
+  final int id;
 
-  String? value;
+  final String? value;
 }
 
 void main() {
   group('Query isEmpty / isNotEmpty', () {
     late Isar isar;
 
-    setUp(() async {
-      isar = await openTempIsar([ModelSchema]);
+    setUp(() {
+      isar = openTempIsar([ModelSchema]);
 
-      await isar.tWriteTxn(
-        () => isar.models.tPutAll(List.generate(100, (i) => Model('model $i'))),
+      isar.write(
+        (isar) => isar.models.putAll(
+          List.generate(100, (i) => Model(i, 'model $i')),
+        ),
       );
     });
 
-    isarTest('.isEmpty()', () async {
-      expect(await isar.models.where().tIsEmpty(), false);
-      expect(await isar.models.where().limit(999999).tIsEmpty(), false);
-      expect(await isar.models.where().limit(1).tIsEmpty(), false);
-      expect(await isar.models.where().limit(0).tIsEmpty(), true);
-
+    isarTest('.isEmpty()', () {
+      expect(isar.models.where().isEmpty(), false);
       expect(
-        await isar.models.filter().valueStartsWith('model').tIsEmpty(),
+        isar.models.where().valueStartsWith('model').isEmpty(),
         false,
       );
       expect(
-        await isar.models.filter().valueEqualTo('model 1').tIsEmpty(),
+        isar.models.where().valueEqualTo('model 1').isEmpty(),
         false,
       );
       expect(
-        await isar.models.filter().valueStartsWith('non existing').tIsEmpty(),
+        isar.models.where().valueStartsWith('non existing').isEmpty(),
         true,
       );
       expect(
-        await isar.models
-            .filter()
+        isar.models
+            .where()
             .valueStartsWith('model 1')
             .and()
             .valueEqualTo('model 2')
-            .tIsEmpty(),
+            .isEmpty(),
         true,
       );
       expect(
-        await isar.models
-            .filter()
+        isar.models
+            .where()
             .valueEqualTo('model 1')
             .or()
             .valueEqualTo('model 2')
-            .tIsEmpty(),
+            .isEmpty(),
         false,
       );
 
-      await isar.tWriteTxn(() => isar.models.where().limit(99).tDeleteAll());
+      isar.write((isar) => isar.models.where().deleteAll(limit: 99));
+      expect(isar.models.where().isEmpty(), false);
 
-      expect(await isar.models.where().tIsEmpty(), false);
-      expect(await isar.models.where().limit(999999).tIsEmpty(), false);
-      expect(await isar.models.where().limit(1).tIsEmpty(), false);
-      expect(await isar.models.where().limit(0).tIsEmpty(), true);
+      isar.write((isar) => isar.models.where().deleteAll());
+      expect(isar.models.where().isEmpty(), true);
 
-      await isar.tWriteTxn(() => isar.models.where().tDeleteAll());
-
-      expect(await isar.models.where().tIsEmpty(), true);
-      expect(await isar.models.where().limit(999999).tIsEmpty(), true);
-      expect(await isar.models.where().limit(1).tIsEmpty(), true);
-      expect(await isar.models.where().limit(0).tIsEmpty(), true);
-
-      await isar.tWriteTxn(() => isar.models.tPut(Model(null)));
-
-      expect(await isar.models.where().tIsEmpty(), false);
-      expect(await isar.models.where().limit(999999).tIsEmpty(), false);
-      expect(await isar.models.where().limit(1).tIsEmpty(), false);
-      expect(await isar.models.where().limit(0).tIsEmpty(), true);
+      isar.write((isar) => isar.models.put(Model(0, null)));
+      expect(isar.models.where().isEmpty(), false);
     });
 
-    isarTest('.isNotEmpty()', () async {
-      expect(await isar.models.where().tIsNotEmpty(), true);
-      expect(await isar.models.where().limit(999999).tIsNotEmpty(), true);
-      expect(await isar.models.where().limit(1).tIsNotEmpty(), true);
-      expect(await isar.models.where().limit(0).tIsNotEmpty(), false);
-
+    isarTest('.isNotEmpty()', () {
+      expect(isar.models.where().isNotEmpty(), true);
       expect(
-        await isar.models.filter().valueStartsWith('model').tIsNotEmpty(),
+        isar.models.where().valueStartsWith('model').isNotEmpty(),
         true,
       );
       expect(
-        await isar.models.filter().valueEqualTo('model 1').tIsNotEmpty(),
+        isar.models.where().valueEqualTo('model 1').isNotEmpty(),
         true,
       );
       expect(
-        await isar.models
-            .filter()
-            .valueStartsWith('non existing')
-            .tIsNotEmpty(),
+        isar.models.where().valueStartsWith('non existing').isNotEmpty(),
         false,
       );
       expect(
-        await isar.models
-            .filter()
+        isar.models
+            .where()
             .valueStartsWith('model 1')
             .and()
             .valueEqualTo('model 2')
-            .tIsNotEmpty(),
+            .isNotEmpty(),
         false,
       );
       expect(
-        await isar.models
-            .filter()
+        isar.models
+            .where()
             .valueEqualTo('model 1')
             .or()
             .valueEqualTo('model 2')
-            .tIsNotEmpty(),
+            .isNotEmpty(),
         true,
       );
 
-      await isar.tWriteTxn(() => isar.models.where().limit(99).tDeleteAll());
+      isar.write((isar) => isar.models.where().deleteAll(limit: 99));
+      expect(isar.models.where().isNotEmpty(), true);
 
-      expect(await isar.models.where().tIsNotEmpty(), true);
-      expect(await isar.models.where().limit(999999).tIsNotEmpty(), true);
-      expect(await isar.models.where().limit(1).tIsNotEmpty(), true);
-      expect(await isar.models.where().limit(0).tIsNotEmpty(), false);
+      isar.write((isar) => isar.models.where().deleteAll());
+      expect(isar.models.where().isNotEmpty(), false);
 
-      await isar.tWriteTxn(() => isar.models.where().tDeleteAll());
-
-      expect(await isar.models.where().tIsNotEmpty(), false);
-      expect(await isar.models.where().limit(999999).tIsNotEmpty(), false);
-      expect(await isar.models.where().limit(1).tIsNotEmpty(), false);
-      expect(await isar.models.where().limit(0).tIsNotEmpty(), false);
-
-      await isar.tWriteTxn(() => isar.models.tPut(Model(null)));
-
-      expect(await isar.models.where().tIsNotEmpty(), true);
-      expect(await isar.models.where().limit(999999).tIsNotEmpty(), true);
-      expect(await isar.models.where().limit(1).tIsNotEmpty(), true);
-      expect(await isar.models.where().limit(0).tIsNotEmpty(), false);
+      isar.write((isar) => isar.models.put(Model(0, null)));
+      expect(isar.models.where().isNotEmpty(), true);
     });
   });
 }

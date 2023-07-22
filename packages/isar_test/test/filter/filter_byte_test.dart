@@ -6,9 +6,9 @@ part 'filter_byte_test.g.dart';
 
 @collection
 class ByteModel {
-  ByteModel(this.field);
+  ByteModel(this.id, this.field);
 
-  Id? id;
+  final int id;
 
   byte field;
 
@@ -22,7 +22,7 @@ class ByteModel {
 void main() {
   group('Byte filter', () {
     late Isar isar;
-    late IsarCollection<ByteModel> col;
+    late IsarCollection<int, ByteModel> col;
 
     late ByteModel objMin;
     late ByteModel obj1;
@@ -30,67 +30,49 @@ void main() {
     late ByteModel obj3;
     late ByteModel objMax;
 
-    setUp(() async {
-      isar = await openTempIsar([ByteModelSchema]);
+    setUp(() {
+      isar = openTempIsar([ByteModelSchema]);
       col = isar.byteModels;
 
-      objMin = ByteModel(0);
-      obj1 = ByteModel(1);
-      obj2 = ByteModel(123);
-      obj3 = ByteModel(1);
-      objMax = ByteModel(255);
+      objMin = ByteModel(0, 0);
+      obj1 = ByteModel(1, 1);
+      obj2 = ByteModel(2, 123);
+      obj3 = ByteModel(3, 1);
+      objMax = ByteModel(4, 255);
 
-      await isar.writeTxn(() async {
-        await col.putAll([objMin, obj1, obj2, obj3, objMax]);
+      isar.write((isar) {
+        col.putAll([objMin, obj1, obj2, obj3, objMax]);
       });
     });
 
-    isarTest('.equalTo()', () async {
-      await qEqual(col.filter().fieldEqualTo(0), [objMin]);
-      await qEqual(col.filter().fieldEqualTo(1), [obj1, obj3]);
+    isarTest('.equalTo()', () {
+      expect(col.where().fieldEqualTo(0).findAll(), [objMin]);
+      expect(col.where().fieldEqualTo(1).findAll(), [obj1, obj3]);
     });
 
-    isarTest('.greaterThan()', () async {
-      await qEqual(
-        col.filter().fieldGreaterThan(0),
-        [obj1, obj2, obj3, objMax],
-      );
-      await qEqual(
-        col.filter().fieldGreaterThan(0, include: true),
-        [objMin, obj1, obj2, obj3, objMax],
-      );
-      await qEqual(col.filter().fieldGreaterThan(255), []);
-      await qEqual(
-        col.filter().fieldGreaterThan(255, include: true),
-        [objMax],
-      );
-    });
-
-    isarTest('.lessThan()', () async {
-      await qEqual(col.filter().fieldLessThan(255), [objMin, obj1, obj2, obj3]);
-      await qEqual(
-        col.filter().fieldLessThan(255, include: true),
-        [objMin, obj1, obj2, obj3, objMax],
-      );
-      await qEqual(col.filter().fieldLessThan(0), []);
-      await qEqual(col.filter().fieldLessThan(0, include: true), [objMin]);
-    });
-
-    isarTest('.between()', () async {
-      await qEqual(
-        col.filter().fieldBetween(0, 255),
-        [objMin, obj1, obj2, obj3, objMax],
-      );
-      await qEqual(
-        col.filter().fieldBetween(0, 255, includeLower: false),
-        [obj1, obj2, obj3, objMax],
-      );
-      await qEqual(
-        col.filter().fieldBetween(0, 255, includeUpper: false),
+    isarTest('.lessThan()', () {
+      expect(
+        col.where().fieldLessThan(255).findAll(),
         [objMin, obj1, obj2, obj3],
       );
-      await qEqual(col.filter().fieldBetween(255, 0), []);
-      await qEqual(col.filter().fieldBetween(100, 110), []);
+      expect(col.where().fieldLessThan(0).findAll(), isEmpty);
+    });
+
+    isarTest('.lessThanOrEqualTo()', () {
+      expect(
+        col.where().fieldLessThanOrEqualTo(255).findAll(),
+        [objMin, obj1, obj2, obj3, objMax],
+      );
+      expect(col.where().fieldLessThanOrEqualTo(0).findAll(), [objMin]);
+    });
+
+    isarTest('.between()', () {
+      expect(
+        col.where().fieldBetween(0, 255).findAll(),
+        [objMin, obj1, obj2, obj3, objMax],
+      );
+      expect(col.where().fieldBetween(255, 0).findAll(), isEmpty);
+      expect(col.where().fieldBetween(100, 110).findAll(), isEmpty);
     });
   });
 }

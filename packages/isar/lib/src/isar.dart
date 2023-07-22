@@ -1,230 +1,198 @@
 part of isar;
 
-/// Callback for a newly opened Isar instance.
-typedef IsarOpenCallback = void Function(Isar isar);
-
-/// Callback for a release Isar instance.
-typedef IsarCloseCallback = void Function(String isarName);
-
-/// An instance of the Isar Database.
+/// An Isar database instance.
+@pragma('vm:isolate-unsendable')
 abstract class Isar {
-  /// @nodoc
-  @protected
-  Isar(this.name) {
-    _instances[name] = this;
-    for (final callback in _openCallbacks) {
-      callback(this);
-    }
-  }
-
-  /// The version of the Isar library.
-  static const version = '3.1.0+1';
-
-  /// Smallest valid id.
-  static const Id minId = isarMinId;
-
-  /// Largest valid id.
-  static const Id maxId = isarMaxId;
-
   /// The default Isar instance name.
   static const String defaultName = 'default';
 
   /// The default max Isar size.
-  static const int defaultMaxSizeMiB = 1024;
+  static const int defaultMaxSizeMiB = 128;
 
-  /// Placeholder for an auto-increment id.
-  static const Id autoIncrement = isarAutoIncrementId;
+  /// The current Isar version.
+  static const String version = '4.0.0';
 
-  static final Map<String, Isar> _instances = <String, Isar>{};
-  static final Set<IsarOpenCallback> _openCallbacks = <IsarOpenCallback>{};
-  static final Set<IsarCloseCallback> _closeCallbacks = <IsarCloseCallback>{};
+  /// Get an already opened Isar instance by its name.
+  ///
+  /// This method is especially useful to get an Isar instance from an isolate.
+  /// It is much faster than using [open].
+  static Isar get({
+    required List<IsarCollectionSchema> schemas,
+    String name = Isar.defaultName,
+  }) {
+    return _IsarImpl.getByName(
+      name: name,
+      schemas: schemas,
+      sqliteEngine: false,
+    );
+  }
+
+  /// Get an already opened SQLite Isar instance by its name.
+  ///
+  /// This method is especially useful to get an Isar instance from an isolate.
+  /// It is much faster than using [openSQLite].
+  static Isar getSQLite({
+    required List<IsarCollectionSchema> schemas,
+    String name = Isar.defaultName,
+  }) {
+    return _IsarImpl.getByName(
+      name: name,
+      schemas: schemas,
+      sqliteEngine: true,
+    );
+  }
+
+  /// Open a new Isar instance.
+  ///
+  /// You have to provide a list of all collection [schemas] that you want to
+  /// use in this instance as well as a [directory] where the database file
+  /// should be stored.
+  ///
+  /// You can optionally provide a [name] for this instance. This is needed if
+  /// you want to open multiple instances.
+  ///
+  /// [maxSizeMiB] is the maximum size of the database file in MiB. It is
+  /// recommended to set this value as low as possible. Older devices might
+  /// not be able to grant the requested amount of virtual memory. In that case
+  /// Isar will try to use as much memory as possible.
+  ///
+  /// [compactOnLaunch] is a condition that triggers a database compaction
+  /// on launch when the specified conditions are met.
+  ///
+  /// [inspector] enables the Isar inspector when the app is running in debug
+  /// mode. In release mode the inspector is always disabled.
+  static Isar open({
+    required List<IsarCollectionSchema> schemas,
+    required String directory,
+    String name = Isar.defaultName,
+    int maxSizeMiB = Isar.defaultMaxSizeMiB,
+    CompactCondition? compactOnLaunch,
+    bool inspector = true,
+  }) {
+    return _IsarImpl.open(
+      schemas: schemas,
+      directory: directory,
+      name: name,
+      sqliteEngine: false,
+      maxSizeMiB: maxSizeMiB,
+      compactOnLaunch: compactOnLaunch,
+    );
+  }
+
+  /// Open a new Isar instance with the SQLite storage engine.
+  ///
+  /// You have to provide a list of all collection [schemas] that you want to
+  /// use in this instance as well as a [directory] where the database file
+  /// should be stored.
+  ///
+  /// You can optionally provide a [name] for this instance. This is needed if
+  /// you want to open multiple instances.
+  ///
+  /// [maxSizeMiB] is the maximum size of the database file in MiB. It is
+  /// recommended to set this value as low as possible. If you set it to 0, the
+  /// SQLite will no longer use WAL mode and there will be no size limit.
+  ///
+  /// If [encryptionKey] is provided, the database will be encrypted with the
+  /// provided key. Opening an encrypted database with an incorrect key will
+  /// result in an error.
+  ///
+  /// [inspector] enables the Isar inspector when the app is running in debug
+  /// mode. In release mode the inspector is always disabled.
+  static Isar openSQLite({
+    required List<IsarCollectionSchema> schemas,
+    required String directory,
+    String name = Isar.defaultName,
+    int? maxSizeMiB = Isar.defaultMaxSizeMiB,
+    String? encryptionKey,
+    bool inspector = true,
+  }) {
+    return _IsarImpl.open(
+      schemas: schemas,
+      directory: directory,
+      name: name,
+      sqliteEngine: true,
+      maxSizeMiB: maxSizeMiB ?? 0,
+      encryptionKey: encryptionKey,
+    );
+  }
 
   /// Name of the instance.
-  final String name;
+  String get name;
 
-  /// The directory containing the database file or `null` on the web.
-  String? get directory;
+  /// The directory containing the database file.
+  String get directory;
 
-  /// The full path of the database file is `directory/name.isar` and the lock
-  /// file `directory/name.isar.lock`.
-  String? get path => directory != null ? '$directory/$name.isar' : null;
-
-  late final Map<Type, IsarCollection<dynamic>> _collections;
-  late final Map<String, IsarCollection<dynamic>> _collectionsByName;
-
-  bool _isOpen = true;
-
-  static void _checkOpen(String name, List<CollectionSchema<dynamic>> schemas) {
-    if (name.isEmpty || name.startsWith('_')) {
-      throw IsarError('Instance names must not be empty or start with "_".');
-    }
-    if (_instances.containsKey(name)) {
-      throw IsarError('Instance has already been opened.');
-    }
-    if (schemas.isEmpty) {
-      throw IsarError('At least one collection needs to be opened.');
-    }
-
-    final schemaNames = <String>{};
-    for (final schema in schemas) {
-      if (!schemaNames.add(schema.name)) {
-        throw IsarError('Duplicate collection ${schema.name}.');
-      }
-    }
-    for (final schema in schemas) {
-      final dependencies = schema.links.values.map((e) => e.target);
-      for (final dependency in dependencies) {
-        if (!schemaNames.contains(dependency)) {
-          throw IsarError(
-            "Collection ${schema.name} depends on $dependency but it's schema "
-            'was not provided.',
-          );
-        }
-      }
-    }
-  }
-
-  /// Open a new Isar instance.
-  static Future<Isar> open(
-    List<CollectionSchema<dynamic>> schemas, {
-    required String directory,
-    String name = defaultName,
-    int maxSizeMiB = Isar.defaultMaxSizeMiB,
-    bool relaxedDurability = true,
-    CompactCondition? compactOnLaunch,
-    bool inspector = true,
-  }) {
-    _checkOpen(name, schemas);
-
-    /// Tree shake the inspector for profile and release builds.
-    assert(() {
-      if (!_kIsWeb && inspector) {
-        _IsarConnect.initialize(schemas);
-      }
-      return true;
-    }());
-
-    return openIsar(
-      schemas: schemas,
-      directory: directory,
-      name: name,
-      maxSizeMiB: maxSizeMiB,
-      relaxedDurability: relaxedDurability,
-      compactOnLaunch: compactOnLaunch,
-    );
-  }
-
-  /// Open a new Isar instance.
-  static Isar openSync(
-    List<CollectionSchema<dynamic>> schemas, {
-    required String directory,
-    String name = defaultName,
-    int maxSizeMiB = Isar.defaultMaxSizeMiB,
-    bool relaxedDurability = true,
-    CompactCondition? compactOnLaunch,
-    bool inspector = true,
-  }) {
-    _checkOpen(name, schemas);
-
-    /// Tree shake the inspector for profile and release builds.
-    assert(() {
-      if (!_kIsWeb && inspector) {
-        _IsarConnect.initialize(schemas);
-      }
-      return true;
-    }());
-
-    return openIsarSync(
-      schemas: schemas,
-      directory: directory,
-      name: name,
-      maxSizeMiB: maxSizeMiB,
-      relaxedDurability: relaxedDurability,
-      compactOnLaunch: compactOnLaunch,
-    );
-  }
-
-  /// Is the instance open?
-  bool get isOpen => _isOpen;
-
-  /// @nodoc
-  @protected
-  void requireOpen() {
-    if (!isOpen) {
-      throw IsarError('Isar instance has already been closed');
-    }
-  }
-
-  /// Executes an asynchronous read-only transaction.
-  Future<T> txn<T>(Future<T> Function() callback);
-
-  /// Executes an asynchronous read-write transaction.
+  /// Whether this instance is open and active.
   ///
-  /// If [silent] is `true`, watchers are not notified about changes in this
-  /// transaction.
-  Future<T> writeTxn<T>(Future<T> Function() callback, {bool silent = false});
-
-  /// Executes a synchronous read-only transaction.
-  T txnSync<T>(T Function() callback);
-
-  /// Executes a synchronous read-write transaction.
-  ///
-  /// If [silent] is `true`, watchers are not notified about changes in this
-  /// transaction.
-  T writeTxnSync<T>(T Function() callback, {bool silent = false});
-
-  /// @nodoc
-  @protected
-  void attachCollections(Map<Type, IsarCollection<dynamic>> collections) {
-    _collections = collections;
-    _collectionsByName = {
-      for (IsarCollection<dynamic> col in collections.values) col.name: col,
-    };
-  }
+  /// The instance is open until [close] is called. After that, all operations
+  /// will throw an [IsarNotReadyError].
+  bool get isOpen;
 
   /// Get a collection by its type.
   ///
-  /// You should use the generated extension methods instead.
-  IsarCollection<T> collection<T>() {
-    requireOpen();
-    final collection = _collections[T];
-    if (collection == null) {
-      throw IsarError('Missing ${T.runtimeType}Schema in Isar.open');
-    }
-    return collection as IsarCollection<T>;
-  }
+  /// You should use the generated extension methods instead. A collection
+  /// `User` can be accessed with `isar.users`.
+  IsarCollection<ID, OBJ> collection<ID, OBJ>();
 
-  /// @nodoc
-  @protected
-  IsarCollection<dynamic>? getCollectionByNameInternal(String name) {
-    return _collectionsByName[name];
-  }
-
-  /// Remove all data in this instance and reset the auto increment values.
-  Future<void> clear() async {
-    for (final col in _collections.values) {
-      await col.clear();
-    }
-  }
-
-  /// Remove all data in this instance and reset the auto increment values.
-  void clearSync() {
-    for (final col in _collections.values) {
-      col.clearSync();
-    }
-  }
-
-  /// Returns the size of all the collections in bytes. Not supported on web.
+  /// Create a synchronous read transaction.
   ///
-  /// This method is extremely fast and independent of the number of objects in
-  /// the instance.
-  Future<int> getSize({bool includeIndexes = false, bool includeLinks = false});
-
-  /// Returns the size of all collections in bytes. Not supported on web.
+  /// Explicit read transactions are optional, but they allow you to do atomic
+  /// reads and rely on a consistent state of the database inside the
+  /// transaction. Internally Isar always uses implicit read transactions for
+  /// all read operations.
   ///
-  /// This method is extremely fast and independent of the number of objects in
-  /// the instance.
-  int getSizeSync({bool includeIndexes = false, bool includeLinks = false});
+  /// It is recommended to use an explicit read transactions when you want to
+  /// perform multiple subsequent read operations.
+  ///
+  /// Example:
+  /// ```dart
+  /// final (user, workspace) = isar.read((isar) {
+  ///   final user = isar.users.where().findFirst();
+  ///   final workspace = isar.workspaces.where().findFirst();
+  ///   return (user, workspace);
+  /// });
+  /// ```
+  T read<T>(T Function(Isar isar) callback);
+
+  /// Create a synchronous read-write transaction.
+  ///
+  /// Unlike read operations, write operations in Isar must be wrapped in an
+  /// explicit transaction.
+  ///
+  /// When a write transaction finishes successfully, it is automatically
+  /// committed, and all changes are written to disk. If an error occurs, the
+  /// transaction is aborted, and all the changes are rolled back. Transactions
+  /// are “all or nothing”: either all the writes within a transaction succeed,
+  /// or none of them take effect to guarantee data consistency.
+  ///
+  /// Example:
+  /// ```dart
+  /// isar.write((isar) {
+  ///   final user = User(name: 'John');
+  ///   isar.users.put(user);
+  /// });
+  /// ```
+  T write<T>(T Function(Isar isar) callback);
+
+  /// Create an asynchronous read transaction.
+  ///
+  /// The code inside the callback will be executed in a separate isolate.
+  ///
+  /// Check out the [read] method for more information.
+  Future<T> readAsync<T>(T Function(Isar isar) callback);
+
+  /// Create an asynchronous read-write transaction.
+  ///
+  /// The code inside the callback will be executed in a separate isolate.
+  ///
+  /// Check out the [write] method for more information.
+  Future<T> writeAsync<T>(T Function(Isar isar) callback);
+
+  /// Returns the size of all the collections in bytes.
+  ///
+  /// For the native Isar storage engine this method is extremely fast and
+  /// independent of the number of objects in the instance.
+  int getSize({bool includeIndexes = false});
 
   /// Copy a compacted version of the database to the specified file.
   ///
@@ -233,7 +201,10 @@ abstract class Isar {
   ///
   /// Do not run this method while other transactions are active to avoid
   /// unnecessary growth of the database.
-  Future<void> copyToFile(String targetPath);
+  void copyToFile(String path);
+
+  /// Remove all data in this instance.
+  void clear();
 
   /// Releases an Isar instance.
   ///
@@ -242,106 +213,35 @@ abstract class Isar {
   /// database files if enabled.
   ///
   /// Returns whether the instance was actually closed.
-  Future<bool> close({bool deleteFromDisk = false}) {
-    requireOpen();
-    _isOpen = false;
-    if (identical(_instances[name], this)) {
-      _instances.remove(name);
-    }
-    for (final callback in _closeCallbacks) {
-      callback(name);
-    }
-    return Future.value(false);
-  }
+  bool close({bool deleteFromDisk = false});
 
-  /// Verifies the integrity of the database file.
-  ///
-  /// Do not use this method in production apps.
+  /// Verifies the integrity of the database. This method is not intended to be
+  /// used by end users and should only be used by Isar tests. Never call this
+  /// method on a production database.
   @visibleForTesting
-  @experimental
-  Future<void> verify();
-
-  /// A list of all Isar instances opened in the current isolate.
-  static Set<String> get instanceNames => _instances.keys.toSet();
-
-  /// Returns an Isar instance opened in the current isolate by its name. If
-  /// no name is provided, the default instance is returned.
-  static Isar? getInstance([String name = defaultName]) {
-    return _instances[name];
-  }
-
-  /// Registers a listener that is called whenever an Isar instance is opened.
-  static void addOpenListener(IsarOpenCallback callback) {
-    _openCallbacks.add(callback);
-  }
-
-  /// Removes a previously registered `IsarOpenCallback`.
-  static void removeOpenListener(IsarOpenCallback callback) {
-    _openCallbacks.remove(callback);
-  }
-
-  /// Registers a listener that is called whenever an Isar instance is
-  /// released.
-  static void addCloseListener(IsarCloseCallback callback) {
-    _closeCallbacks.add(callback);
-  }
-
-  /// Removes a previously registered `IsarOpenCallback`.
-  static void removeCloseListener(IsarCloseCallback callback) {
-    _closeCallbacks.remove(callback);
-  }
+  void verify();
 
   /// Initialize Isar Core manually. You need to provide Isar Core libraries
   /// for every platform your app will run on.
   ///
-  /// If [download] is `true`, Isar will attempt to download the correct
-  /// library and place it in the specified path or the script directory.
-  ///
-  /// Be careful if multiple unit tests try to download the library at the
-  /// same time. Always use `flutter test -j 1` when you rely on auto
-  /// downloading to ensure that only one test is running at a time.
-  ///
   /// Only use this method for non-Flutter code or unit tests.
-  static Future<void> initializeIsarCore({
-    Map<IsarAbi, String> libraries = const {},
-    bool download = false,
-  }) async {
-    await initializeCoreBinary(
-      libraries: libraries,
-      download: download,
-    );
+  static void initializeIsarCore({Map<Abi, String> libraries = const {}}) {
+    IsarCore._initialize(libraries: libraries);
   }
 
-  /// Split a String into words according to Unicode Annex #29. Only words
-  /// containing at least one alphanumeric character will be included.
-  static List<String> splitWords(String input) => isarSplitWords(input);
-}
+  /// FNV-1a 64bit hash algorithm optimized for Dart Strings
+  static int fastHash(String string) {
+    var hash = 0xcbf29ce484222325;
 
-/// Isar databases can contain unused space that will be reused for later
-/// operations. You can specify conditions to trigger manual compaction where
-/// the entire database is copied and unused space freed.
-///
-/// This operation can only be performed while a database is being opened and
-/// should only be used if absolutely necessary.
-class CompactCondition {
-  /// Compaction will happen if all of the specified conditions are true.
-  const CompactCondition({
-    this.minFileSize,
-    this.minBytes,
-    this.minRatio,
-  }) : assert(
-          minFileSize != null || minBytes != null || minRatio != null,
-          'At least one condition needs to be specified.',
-        );
+    var i = 0;
+    while (i < string.length) {
+      final codeUnit = string.codeUnitAt(i++);
+      hash ^= codeUnit >> 8;
+      hash *= 0x100000001b3;
+      hash ^= codeUnit & 0xFF;
+      hash *= 0x100000001b3;
+    }
 
-  /// The minimum size in bytes of the database file to trigger compaction. It
-  /// is highly  discouraged to trigger compaction solely on this condition.
-  final int? minFileSize;
-
-  /// The minimum number of bytes that can be freed with compaction.
-  final int? minBytes;
-
-  /// The minimum compaction ration. For example `2.0` would trigger compaction
-  /// as soon as the file size can be halved.
-  final double? minRatio;
+    return hash;
+  }
 }

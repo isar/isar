@@ -25,7 +25,7 @@
 
 <p align="center">
   <a href="https://isar.dev">Quickstart</a> •
-  <a href="https://isar.dev/schema">Documentation</a> •
+  <a href="https://isar.dev/⚠️schema">Documentation</a> •
   <a href="https://github.com/isar/isar/tree/main/examples/">Sample Apps</a> •
   <a href="https://github.com/isar/isar/discussions">Support & Ideas</a> •
   <a href="https://pub.dev/packages/isar">Pub.dev</a>
@@ -35,6 +35,8 @@
 >
 > 1. River in Bavaria, Germany.
 > 2. [Crazy fast](#benchmarks) NoSQL database that is a joy to use.
+
+⚠️ You are looking at Isar version 4. This version is still in development and very unstable. Please only use it for testing. If you want to use Isar in production, please use the stable version 3. ⚠️
 
 ## Features
 
@@ -63,14 +65,11 @@ Holy smokes you're here! Let's get started on using the coolest Flutter database
 ### 1. Add to pubspec.yaml
 
 ```yaml
-isar_version: &isar_version 3.1.0 # define the version to be used
-
 dependencies:
-  isar: *isar_version
-  isar_flutter_libs: *isar_version # contains Isar Core
+  isar: 4.0.0
+  isar_flutter_libs: 4.0.0 # contains Isar Core
 
 dev_dependencies:
-  isar_generator: *isar_version
   build_runner: any
 ```
 
@@ -81,15 +80,21 @@ part 'email.g.dart';
 
 @collection
 class Email {
-  Id id = Isar.autoIncrement; // you can also use id = null to auto increment
+  Email({
+    this.id,
+    this.title,
+    this.recipients,
+    this.status = Status.pending,
+  });
+
+  final int id;
 
   @Index(type: IndexType.value)
-  String? title;
+  final String? title;
 
-  List<Recipient>? recipients;
+  final List<Recipient>? recipients;
 
-  @enumerated
-  Status status = Status.pending;
+  final Status status;
 }
 
 @embedded
@@ -119,7 +124,7 @@ final isar = await Isar.open(
 ### 4. Query the database
 
 ```dart
-final emails = await isar.emails.filter()
+final emails = isar.emails.where()
   .titleContains('awesome', caseSensitive: false)
   .sortByStatusDesc()
   .limit(10)
@@ -141,14 +146,14 @@ All basic crud operations are available via the `IsarCollection`.
 ```dart
 final newEmail = Email()..title = 'Amazing new database';
 
-await isar.writeTxn(() {
-  await isar.emails.put(newEmail); // insert & update
+await isar.writeAsync(() {
+  isar.emails.put(newEmail); // insert & update
 });
 
-final existingEmail = await isar.emails.get(newEmail.id!); // get
+final existingEmail = isar.emails.get(newEmail.id!); // get
 
-await isar.writeTxn(() {
-  await isar.emails.delete(existingEmail.id!); // delete
+await isar.writeAsync(() {
+  isar.emails.delete(existingEmail.id!); // delete
 });
 ```
 
@@ -173,7 +178,7 @@ final specificEmails = isar.emails
 
 ## Database Watchers
 
-With Isar database, you can watch collections, objects, or queries. A watcher is notified after a transaction commits successfully and the target actually changes.
+With Isar database, you can watch collections, objects, or queries. A watcher is notified after a transaction commits successfully and the target changes.
 Watchers can be lazy and not reload the data or they can be non-lazy and fetch new results in the background.
 
 ```dart
@@ -234,7 +239,7 @@ Big thanks go to these wonderful people:
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/inkomomutane"><img src="https://avatars.githubusercontent.com/u/57417802?v=4" width="100px;" alt=""/><br /><sub><b>Nelson  Mutane</b></sub></a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Viper-Bit"><img src="https://avatars.githubusercontent.com/u/24822764?v=4" width="100px;" alt=""/><br /><sub><b>Peyman</b></sub></a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/leisim"><img src="https://avatars.githubusercontent.com/u/13610195?v=4" width="100px;" alt=""/><br /><sub><b>Simon Leier</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/leisim"><img src="https://avatars.githubusercontent.com/u/13610195?v=4" width="100px;" alt=""/><br /><sub><b>Simon Choi</b></sub></a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ika020202"><img src="https://avatars.githubusercontent.com/u/42883378?v=4" width="100px;" alt=""/><br /><sub><b>Ura</b></sub></a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/blendthink"><img src="https://avatars.githubusercontent.com/u/32213113?v=4" width="100px;" alt=""/><br /><sub><b>blendthink</b></sub></a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/mnkeis"><img src="https://avatars.githubusercontent.com/u/41247357?v=4" width="100px;" alt=""/><br /><sub><b>mnkeis</b></sub></a></td>
@@ -251,7 +256,7 @@ Big thanks go to these wonderful people:
 ### License
 
 ```
-Copyright 2022 Simon Leier
+Copyright 2022 Simon Choi
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

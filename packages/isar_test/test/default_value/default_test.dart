@@ -21,7 +21,7 @@ class DefaultModel {
     this.embeddedValue = const MyEmbedded('abc'),
   ]);
 
-  final Id id;
+  final int id;
 
   final bool boolValue;
 
@@ -55,7 +55,7 @@ class DefaultListModel {
     this.embeddedValue = const [null, MyEmbedded('test')],
   ]);
 
-  final Id id;
+  final int id;
 
   final List<bool?> boolValue;
 
@@ -76,15 +76,15 @@ class DefaultListModel {
 
 void main() {
   group('Default value', () {
-    isarTest('scalar', () async {
+    isarTest('scalar', () {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
-      await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
+      final isar1 = openTempIsar([EmptyModelSchema]);
+      isar1.write((isar) => isar1.emptyModels.put(emptyObj));
       final isarName = isar1.name;
-      await isar1.close();
+      isar1.close();
 
-      final isar2 = await openTempIsar([DefaultModelSchema], name: isarName);
-      final obj = (await isar2.defaultModels.tGet(0))!;
+      final isar2 = openTempIsar([DefaultModelSchema], name: isarName);
+      final obj = isar2.defaultModels.get(0)!;
       expect(obj.boolValue, true);
       expect(obj.byteValue, 55);
       expect(obj.shortValue, 123);
@@ -95,58 +95,57 @@ void main() {
       expect(obj.embeddedValue, const MyEmbedded('abc'));
     });
 
-    isarTest('scalar property', () async {
+    isarTest('scalar property', () {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
-      await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
+      final isar1 = openTempIsar([EmptyModelSchema]);
+      isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
-      await isar1.close();
+      isar1.close();
 
-      final isar2 = await openTempIsar([DefaultModelSchema], name: isarName);
+      final isar2 = openTempIsar([DefaultModelSchema], name: isarName);
       expect(
-        await isar2.defaultModels.where().boolValueProperty().tFindFirst(),
+        isar2.defaultModels.where().boolValueProperty().findFirst(),
         true,
       );
       expect(
-        await isar2.defaultModels.where().byteValueProperty().tFindFirst(),
+        isar2.defaultModels.where().byteValueProperty().findFirst(),
         55,
       );
       expect(
-        await isar2.defaultModels.where().shortValueProperty().tFindFirst(),
+        isar2.defaultModels.where().shortValueProperty().findFirst(),
         123,
       );
       expect(
-        await isar2.defaultModels.where().intValueProperty().tFindFirst(),
+        isar2.defaultModels.where().intValueProperty().findFirst(),
         1234,
       );
       expect(
-        await isar2.defaultModels.where().floatValueProperty().tFindFirst(),
+        isar2.defaultModels.where().floatValueProperty().findFirst(),
         5.2,
       );
       expect(
-        await isar2.defaultModels.where().doubleValueProperty().tFindFirst(),
+        isar2.defaultModels.where().doubleValueProperty().findFirst(),
         10.10,
       );
       expect(
-        await isar2.defaultModels.where().stringValueProperty().tFindFirst(),
+        isar2.defaultModels.where().stringValueProperty().findFirst(),
         'hello',
       );
       expect(
-        await isar2.defaultModels.where().embeddedValueProperty().tFindFirst(),
+        isar2.defaultModels.where().embeddedValueProperty().findFirst(),
         const MyEmbedded('abc'),
       );
     });
 
-    isarTest('list', () async {
+    isarTest('list', () {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
-      await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
+      final isar1 = openTempIsar([EmptyModelSchema]);
+      isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
-      await isar1.close();
+      isar1.close();
 
-      final isar2 =
-          await openTempIsar([DefaultListModelSchema], name: isarName);
-      final obj = (await isar2.defaultListModels.tGet(0))!;
+      final isar2 = openTempIsar([DefaultListModelSchema], name: isarName);
+      final obj = isar2.defaultListModels.get(0)!;
       expect(obj.boolValue, [true, false]);
       expect(obj.byteValue, [1, 3]);
       expect(obj.shortValue, [null, 23, 34]);
@@ -157,54 +156,44 @@ void main() {
       expect(obj.embeddedValue, [null, const MyEmbedded('test')]);
     });
 
-    isarTest('list property', () async {
+    isarTest('list property', () {
       final emptyObj = EmptyModel(0);
-      final isar1 = await openTempIsar([EmptyModelSchema]);
-      await isar1.tWriteTxn(() => isar1.emptyModels.tPut(emptyObj));
+      final isar1 = openTempIsar([EmptyModelSchema]);
+      isar1.write((isar) => isar1.emptyModels.put(emptyObj));
       final isarName = isar1.name;
-      await isar1.close();
+      isar1.close();
 
-      final isar2 =
-          await openTempIsar([DefaultListModelSchema], name: isarName);
+      final isar2 = openTempIsar([DefaultListModelSchema], name: isarName);
       expect(
-        await isar2.defaultListModels.where().boolValueProperty().tFindFirst(),
+        isar2.defaultListModels.where().boolValueProperty().findFirst(),
         [true, false],
       );
       expect(
-        await isar2.defaultListModels.where().byteValueProperty().tFindFirst(),
+        isar2.defaultListModels.where().byteValueProperty().findFirst(),
         [1, 3],
       );
       expect(
-        await isar2.defaultListModels.where().shortValueProperty().tFindFirst(),
+        isar2.defaultListModels.where().shortValueProperty().findFirst(),
         [null, 23, 34],
       );
       expect(
-        await isar2.defaultListModels.where().intValueProperty().tFindFirst(),
+        isar2.defaultListModels.where().intValueProperty().findFirst(),
         [123, 234, null],
       );
       expect(
-        await isar2.defaultListModels.where().floatValueProperty().tFindFirst(),
+        isar2.defaultListModels.where().floatValueProperty().findFirst(),
         [5.5, null],
       );
       expect(
-        await isar2.defaultListModels
-            .where()
-            .doubleValueProperty()
-            .tFindFirst(),
+        isar2.defaultListModels.where().doubleValueProperty().findFirst(),
         [null, 10.10],
       );
       expect(
-        await isar2.defaultListModels
-            .where()
-            .stringValueProperty()
-            .tFindFirst(),
+        isar2.defaultListModels.where().stringValueProperty().findFirst(),
         ['abc', null, 'def'],
       );
       expect(
-        await isar2.defaultListModels
-            .where()
-            .embeddedValueProperty()
-            .tFindFirst(),
+        isar2.defaultListModels.where().embeddedValueProperty().findFirst(),
         [null, const MyEmbedded('test')],
       );
     });

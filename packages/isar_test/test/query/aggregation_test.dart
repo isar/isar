@@ -2,666 +2,303 @@ import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
 
-import '../mutli_type_model.dart';
+import '../type_models.dart';
 
 void main() {
   group('Aggregation', () {
-    late Isar isar;
-    late IsarCollection<MultiTypeModel> col;
+    group('id', () {
+      late IsarCollection<int, IntModel> col;
 
-    setUp(() async {
-      isar = await openTempIsar([MultiTypeModelSchema]);
-      col = isar.multiTypeModels;
-    });
+      setUp(() {
+        final isar = openTempIsar([IntModelSchema]);
+        col = isar.intModels;
 
-    group('int', () {
-      setUp(() async {
-        await isar.writeTxn(
-          () => col.putAll([
-            MultiTypeModel()..intValue = -5,
-            MultiTypeModel()..intValue = 0,
-            MultiTypeModel()
-              ..intValue = 10
-              ..intValueN = 10,
+        isar.write(
+          (isar) => col.putAll([
+            IntModel(-5),
+            IntModel(0),
+            IntModel(10),
           ]),
         );
       });
 
-      isarTest('min', () async {
-        expect(await col.where().intValueProperty().tMin(), -5);
-        expect(await col.where().intValueNProperty().tMin(), 10);
+      isarTest('min', () {
+        expect(col.where().idProperty().min(), -5);
+        expect(col.where().idEqualTo(10).idProperty().min(), 10);
+        expect(col.where().idEqualTo(99).idProperty().min(), null);
+      });
 
-        expect(
-          await col
-              .where()
-              .filter()
-              .intValueEqualTo(10)
-              .intValueProperty()
-              .tMin(),
-          10,
-        );
+      isarTest('max', () {
+        expect(col.where().idProperty().max(), 10);
+        expect(col.where().idEqualTo(10).idProperty().max(), 10);
+        expect(col.where().idEqualTo(99).idProperty().max(), null);
+      });
 
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .intValueProperty()
-              .tMin(),
-          null,
+      isarTest('sum', () {
+        expect(col.where().idProperty().sum(), 5);
+        expect(col.where().idEqualTo(10).idProperty().sum(), 10);
+        expect(col.where().idEqualTo(99).idProperty().sum(), 0);
+      });
+
+      isarTest('average', () {
+        expect(col.where().idProperty().average(), 5.0 / 3);
+        expect(col.where().idEqualTo(10).idProperty().average(), 10);
+        expect(col.where().idEqualTo(99).idProperty().average(), isNaN);
+      });
+    });
+
+    group('byte', () {
+      late IsarCollection<int, ByteModel> col;
+
+      setUp(() {
+        final isar = openTempIsar([ByteModelSchema]);
+        col = isar.byteModels;
+
+        isar.write(
+          (isar) => col.putAll([
+            ByteModel(0)..value = 1,
+            ByteModel(1)..value = 5,
+            ByteModel(2)..value = 2,
+          ]),
         );
       });
 
-      isarTest('max', () async {
-        expect(await col.where().intValueProperty().tMax(), 10);
-        expect(await col.where().intValueNProperty().tMax(), 10);
+      isarTest('min', () {
+        expect(col.where().valueProperty().min(), 1);
+        expect(col.where().valueEqualTo(5).valueProperty().min(), 5);
+        expect(col.where().valueEqualTo(25).valueProperty().min(), null);
+      });
 
+      isarTest('max', () {
+        expect(col.where().valueProperty().max(), 5);
+        expect(col.where().valueEqualTo(2).valueProperty().max(), 2);
+        expect(col.where().valueEqualTo(25).valueProperty().max(), null);
+      });
+
+      isarTest('sum', () {
+        expect(col.where().valueProperty().sum(), 8);
+        expect(col.where().valueEqualTo(2).valueProperty().sum(), 2);
+        expect(col.where().valueEqualTo(25).valueProperty().sum(), 0);
+      });
+
+      isarTest('average', () {
+        expect(col.where().valueProperty().average(), 8.0 / 3);
+        expect(col.where().valueEqualTo(2).valueProperty().average(), 2);
         expect(
-          await col
-              .where()
-              .filter()
-              .intValueEqualTo(-5)
-              .intValueProperty()
-              .tMax(),
-          -5,
+          col.where().valueEqualTo(25).valueProperty().average(),
+          isNaN,
         );
+      });
+    });
 
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .intValueProperty()
-              .tMax(),
-          null,
+    group('short', () {
+      late IsarCollection<int, ShortModel> col;
+
+      setUp(() {
+        final isar = openTempIsar([ShortModelSchema]);
+        col = isar.shortModels;
+
+        isar.write(
+          (isar) => col.putAll([
+            ShortModel(0)
+              ..value = 3
+              ..nValue = -5,
+            ShortModel(1)..nValue = 0,
+            ShortModel(2)
+              ..value = -2
+              ..nValue = 10,
+            ShortModel(3)..nValue = null,
+          ]),
         );
       });
 
-      isarTest('sum', () async {
-        expect(await col.where().intValueProperty().tSum(), 5);
-        expect(await col.where().intValueNProperty().tSum(), 10);
+      isarTest('min', () {
+        expect(col.where().nValueProperty().min(), -5);
+        expect(col.where().valueProperty().min(), -2);
+        expect(col.where().nValueEqualTo(10).nValueProperty().min(), 10);
+        expect(col.where().nValueEqualTo(null).nValueProperty().min(), null);
+      });
 
+      isarTest('max', () {
+        expect(col.where().nValueProperty().max(), 10);
+        expect(col.where().valueProperty().max(), 3);
+        expect(col.where().nValueEqualTo(10).nValueProperty().max(), 10);
+        expect(col.where().nValueEqualTo(null).nValueProperty().max(), null);
+      });
+
+      isarTest('sum', () {
+        expect(col.where().nValueProperty().sum(), 5);
+        expect(col.where().valueProperty().sum(), 1);
+        expect(col.where().nValueEqualTo(10).nValueProperty().sum(), 10);
+        expect(col.where().nValueEqualTo(null).nValueProperty().sum(), 0);
+      });
+
+      isarTest('average', () {
+        expect(col.where().nValueProperty().average(), 5.0 / 3);
+        expect(col.where().valueProperty().average(), 1 / 4);
+        expect(col.where().nValueEqualTo(10).nValueProperty().average(), 10);
         expect(
-          await col
-              .where()
-              .filter()
-              .intValueEqualTo(10)
-              .intValueProperty()
-              .tSum(),
-          10,
+          col.where().nValueEqualTo(null).nValueProperty().average(),
+          isNaN,
         );
+      });
+    });
 
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .intValueProperty()
-              .tSum(),
-          0,
+    group('int', () {
+      late IsarCollection<int, IntModel> col;
+
+      setUp(() {
+        final isar = openTempIsar([IntModelSchema]);
+        col = isar.intModels;
+
+        isar.write(
+          (isar) => col.putAll([
+            IntModel(0)
+              ..value = 3
+              ..nValue = -5,
+            IntModel(1)..nValue = 0,
+            IntModel(2)
+              ..value = -2
+              ..nValue = 10,
+            IntModel(3)..nValue = null,
+          ]),
         );
       });
 
-      isarTest('average', () async {
-        expect(await col.where().intValueProperty().tAverage(), 5 / 3);
-        expect(await col.where().intValueNProperty().tAverage(), 10);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .intValueEqualTo(10)
-              .intValueProperty()
-              .tAverage(),
-          10.0,
-        );
-
-        expect(
-          (await col
-                  .where()
-                  .filter()
-                  .boolValueEqualTo(true)
-                  .intValueProperty()
-                  .tAverage())
-              .isNaN,
-          true,
-        );
+      isarTest('min', () {
+        expect(col.where().nValueProperty().min(), -5);
+        expect(col.where().valueProperty().min(), -2);
+        expect(col.where().nValueEqualTo(10).nValueProperty().min(), 10);
+        expect(col.where().nValueEqualTo(null).nValueProperty().min(), null);
       });
 
-      isarTest('count', () async {
-        expect(await col.where().intValueProperty().tCount(), 3);
-        expect(await col.where().intValueNProperty().tCount(), 3);
+      isarTest('max', () {
+        expect(col.where().nValueProperty().max(), 10);
+        expect(col.where().valueProperty().max(), 3);
+        expect(col.where().nValueEqualTo(10).nValueProperty().max(), 10);
+        expect(col.where().nValueEqualTo(null).nValueProperty().max(), null);
+      });
 
-        expect(
-          await col
-              .where()
-              .filter()
-              .intValueEqualTo(10)
-              .intValueProperty()
-              .tCount(),
-          1,
-        );
+      isarTest('sum', () {
+        expect(col.where().nValueProperty().sum(), 5);
+        expect(col.where().valueProperty().sum(), 1);
+        expect(col.where().nValueEqualTo(10).nValueProperty().sum(), 10);
+        expect(col.where().nValueEqualTo(null).nValueProperty().sum(), 0);
+      });
 
+      isarTest('average', () {
+        expect(col.where().nValueProperty().average(), 5.0 / 3);
+        expect(col.where().valueProperty().average(), 1 / 4);
+        expect(col.where().nValueEqualTo(10).nValueProperty().average(), 10);
         expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .intValueProperty()
-              .tCount(),
-          0,
+          col.where().nValueEqualTo(null).nValueProperty().average(),
+          isNaN,
         );
       });
     });
 
     group('float', () {
-      setUp(() async {
-        await isar.writeTxn(
-          () => col.putAll([
-            MultiTypeModel()..floatValue = -5.0,
-            MultiTypeModel()..floatValue = 0.0,
-            MultiTypeModel()
-              ..floatValue = 10.0
-              ..floatValueN = 10.0,
+      late IsarCollection<int, FloatModel> col;
+
+      setUp(() {
+        final isar = openTempIsar([FloatModelSchema]);
+        col = isar.floatModels;
+
+        isar.write(
+          (isar) => col.putAll([
+            FloatModel(0)
+              ..value = 3
+              ..nValue = -5,
+            FloatModel(1)..nValue = 0,
+            FloatModel(2)
+              ..value = -2
+              ..nValue = 10,
+            FloatModel(3)..nValue = null,
           ]),
         );
       });
 
-      isarTest('min', () async {
-        expect(await col.where().floatValueProperty().tMin(), -5.0);
-        expect(await col.where().floatValueNProperty().tMin(), 10.0);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .floatValueGreaterThan(9)
-              .floatValueProperty()
-              .tMin(),
-          10.0,
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .floatValueProperty()
-              .tMin(),
-          null,
-        );
+      isarTest('min', () {
+        expect(col.where().nValueProperty().min(), -5);
+        expect(col.where().valueProperty().min(), -2);
+        expect(col.where().nValueEqualTo(10).nValueProperty().min(), 10);
+        expect(col.where().nValueEqualTo(null).nValueProperty().min(), null);
       });
 
-      isarTest('max', () async {
-        expect(await col.where().floatValueProperty().tMax(), 10.0);
-        expect(await col.where().floatValueNProperty().tMax(), 10.0);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .floatValueLessThan(-4)
-              .floatValueProperty()
-              .tMax(),
-          -5.0,
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .floatValueProperty()
-              .tMax(),
-          null,
-        );
+      isarTest('max', () {
+        expect(col.where().nValueProperty().max(), 10);
+        expect(col.where().valueProperty().max(), 3);
+        expect(col.where().nValueEqualTo(10).nValueProperty().max(), 10);
+        expect(col.where().nValueEqualTo(null).nValueProperty().max(), null);
       });
 
-      isarTest('sum', () async {
-        expect(await col.where().floatValueProperty().tSum(), 5.0);
-        expect(await col.where().floatValueNProperty().tSum(), 10.0);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .floatValueGreaterThan(9)
-              .floatValueProperty()
-              .tSum(),
-          10.0,
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .floatValueProperty()
-              .tSum(),
-          0,
-        );
+      isarTest('sum', () {
+        expect(col.where().nValueProperty().sum(), 5);
+        expect(col.where().valueProperty().sum(), 1);
+        expect(col.where().nValueEqualTo(10).nValueProperty().sum(), 10);
+        expect(col.where().nValueEqualTo(null).nValueProperty().sum(), 0);
       });
 
-      isarTest('average', () async {
-        expect(await col.where().floatValueProperty().tAverage(), 5 / 3);
-        expect(await col.where().floatValueNProperty().tAverage(), 10.0);
-
+      isarTest('average', () {
+        expect(col.where().nValueProperty().average(), 5.0 / 3);
+        expect(col.where().valueProperty().average(), 1 / 4);
+        expect(col.where().nValueEqualTo(10).nValueProperty().average(), 10);
         expect(
-          await col
-              .where()
-              .filter()
-              .floatValueGreaterThan(9)
-              .floatValueProperty()
-              .tAverage(),
-          10.0,
-        );
-
-        expect(
-          (await col
-                  .where()
-                  .filter()
-                  .boolValueEqualTo(true)
-                  .floatValueProperty()
-                  .tAverage())
-              .isNaN,
-          true,
-        );
-      });
-
-      isarTest('count', () async {
-        expect(await col.where().floatValueProperty().tCount(), 3);
-        expect(await col.where().floatValueNProperty().tCount(), 3);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .floatValueGreaterThan(9)
-              .floatValueProperty()
-              .tCount(),
-          1,
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .floatValueProperty()
-              .tCount(),
-          0,
-        );
-      });
-    });
-
-    group('long', () {
-      setUp(() async {
-        await isar.writeTxn(
-          () => col.putAll([
-            MultiTypeModel()..longValue = -5,
-            MultiTypeModel()..longValue = 0,
-            MultiTypeModel()
-              ..longValue = 10
-              ..longValueN = 10,
-          ]),
-        );
-      });
-
-      isarTest('min', () async {
-        expect(await col.where().longValueProperty().tMin(), -5);
-        expect(await col.where().longValueNProperty().tMin(), 10);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .longValueEqualTo(10)
-              .longValueProperty()
-              .tMin(),
-          10,
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .longValueProperty()
-              .tMin(),
-          null,
-        );
-      });
-
-      isarTest('max', () async {
-        expect(await col.where().longValueProperty().tMax(), 10);
-        expect(await col.where().longValueNProperty().tMax(), 10);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .longValueEqualTo(-5)
-              .longValueProperty()
-              .tMax(),
-          -5,
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .longValueProperty()
-              .tMax(),
-          null,
-        );
-      });
-
-      isarTest('sum', () async {
-        expect(await col.where().longValueProperty().tSum(), 5);
-        expect(await col.where().longValueNProperty().tSum(), 10);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .longValueEqualTo(10)
-              .longValueProperty()
-              .tSum(),
-          10,
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .longValueProperty()
-              .tSum(),
-          0,
-        );
-      });
-
-      isarTest('average', () async {
-        expect(await col.where().longValueProperty().tAverage(), 5 / 3);
-        expect(await col.where().longValueNProperty().tAverage(), 10);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .longValueEqualTo(10)
-              .longValueProperty()
-              .tAverage(),
-          10.0,
-        );
-
-        expect(
-          (await col
-                  .where()
-                  .filter()
-                  .boolValueEqualTo(true)
-                  .longValueProperty()
-                  .tAverage())
-              .isNaN,
-          true,
-        );
-      });
-
-      isarTest('count', () async {
-        expect(await col.where().longValueProperty().tCount(), 3);
-        expect(await col.where().longValueNProperty().tCount(), 3);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .longValueEqualTo(10)
-              .longValueProperty()
-              .tCount(),
-          1,
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .longValueProperty()
-              .tCount(),
-          0,
+          col.where().nValueEqualTo(null).nValueProperty().average(),
+          isNaN,
         );
       });
     });
 
     group('double', () {
-      setUp(() async {
-        await isar.writeTxn(
-          () => col.putAll([
-            MultiTypeModel()..doubleValue = -5.0,
-            MultiTypeModel()..doubleValue = 0.0,
-            MultiTypeModel()
-              ..doubleValue = 10.0
-              ..doubleValueN = 10.0,
+      late IsarCollection<int, DoubleModel> col;
+
+      setUp(() {
+        final isar = openTempIsar([DoubleModelSchema]);
+        col = isar.doubleModels;
+
+        isar.write(
+          (isar) => col.putAll([
+            DoubleModel(0)
+              ..value = 3
+              ..nValue = -5,
+            DoubleModel(1)..nValue = 0,
+            DoubleModel(2)
+              ..value = -2
+              ..nValue = 10,
+            DoubleModel(3)..nValue = null,
           ]),
         );
       });
 
-      isarTest('min', () async {
-        expect(await col.where().doubleValueProperty().tMin(), -5.0);
-        expect(await col.where().doubleValueNProperty().tMin(), 10.0);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .doubleValueGreaterThan(9)
-              .doubleValueProperty()
-              .tMin(),
-          10.0,
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .doubleValueProperty()
-              .tMin(),
-          null,
-        );
+      isarTest('min', () {
+        expect(col.where().nValueProperty().min(), -5);
+        expect(col.where().valueProperty().min(), -2);
+        expect(col.where().nValueEqualTo(10).nValueProperty().min(), 10);
+        expect(col.where().nValueEqualTo(null).nValueProperty().min(), null);
       });
 
-      isarTest('max', () async {
-        expect(await col.where().doubleValueProperty().tMax(), 10.0);
-        expect(await col.where().doubleValueNProperty().tMax(), 10.0);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .doubleValueLessThan(-4)
-              .doubleValueProperty()
-              .tMax(),
-          -5.0,
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .doubleValueProperty()
-              .tMax(),
-          null,
-        );
+      isarTest('max', () {
+        expect(col.where().nValueProperty().max(), 10);
+        expect(col.where().valueProperty().max(), 3);
+        expect(col.where().nValueEqualTo(10).nValueProperty().max(), 10);
+        expect(col.where().nValueEqualTo(null).nValueProperty().max(), null);
       });
 
-      isarTest('sum', () async {
-        expect(await col.where().doubleValueProperty().tSum(), 5.0);
-        expect(await col.where().doubleValueNProperty().tSum(), 10.0);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .doubleValueGreaterThan(9)
-              .doubleValueProperty()
-              .tSum(),
-          10.0,
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .doubleValueProperty()
-              .tSum(),
-          0,
-        );
+      isarTest('sum', () {
+        expect(col.where().nValueProperty().sum(), 5);
+        expect(col.where().valueProperty().sum(), 1);
+        expect(col.where().nValueEqualTo(10).nValueProperty().sum(), 10);
+        expect(col.where().nValueEqualTo(null).nValueProperty().sum(), 0);
       });
 
-      isarTest('average', () async {
-        expect(await col.where().doubleValueProperty().tAverage(), 5 / 3);
-        expect(await col.where().doubleValueNProperty().tAverage(), 10.0);
-
+      isarTest('average', () {
+        expect(col.where().nValueProperty().average(), 5.0 / 3);
+        expect(col.where().valueProperty().average(), 1 / 4);
+        expect(col.where().nValueEqualTo(10).nValueProperty().average(), 10);
         expect(
-          await col
-              .where()
-              .filter()
-              .doubleValueGreaterThan(9)
-              .doubleValueProperty()
-              .tAverage(),
-          10.0,
-        );
-
-        expect(
-          (await col
-                  .where()
-                  .filter()
-                  .boolValueEqualTo(true)
-                  .doubleValueProperty()
-                  .tAverage())
-              .isNaN,
-          true,
-        );
-      });
-
-      isarTest('count', () async {
-        expect(await col.where().doubleValueProperty().tCount(), 3);
-        expect(await col.where().doubleValueNProperty().tCount(), 3);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .doubleValueGreaterThan(9)
-              .doubleValueProperty()
-              .tCount(),
-          1,
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .doubleValueProperty()
-              .tCount(),
-          0,
-        );
-      });
-    });
-
-    group('DateTime', () {
-      DateTime date(int milliseconds) =>
-          DateTime.fromMillisecondsSinceEpoch(milliseconds);
-
-      setUp(() async {
-        await isar.writeTxn(
-          () => col.putAll([
-            MultiTypeModel()..dateTimeValue = date(-5),
-            MultiTypeModel()..dateTimeValue = date(0),
-            MultiTypeModel()
-              ..dateTimeValue = date(10)
-              ..dateTimeValueN = date(10),
-          ]),
-        );
-      });
-
-      isarTest('min', () async {
-        expect(await col.where().dateTimeValueProperty().tMin(), date(-5));
-        expect(await col.where().dateTimeValueNProperty().tMin(), date(10));
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .dateTimeValueEqualTo(date(10))
-              .dateTimeValueProperty()
-              .tMin(),
-          date(10),
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .dateTimeValueProperty()
-              .tMin(),
-          null,
-        );
-      });
-
-      isarTest('max', () async {
-        expect(await col.where().dateTimeValueProperty().tMax(), date(10));
-        expect(await col.where().dateTimeValueNProperty().tMax(), date(10));
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .dateTimeValueEqualTo(date(-5))
-              .dateTimeValueProperty()
-              .tMax(),
-          date(-5),
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .dateTimeValueProperty()
-              .tMax(),
-          null,
-        );
-      });
-
-      isarTest('count', () async {
-        expect(await col.where().dateTimeValueProperty().tCount(), 3);
-        expect(await col.where().dateTimeValueNProperty().tCount(), 3);
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .dateTimeValueEqualTo(date(10))
-              .dateTimeValueProperty()
-              .tCount(),
-          1,
-        );
-
-        expect(
-          await col
-              .where()
-              .filter()
-              .boolValueEqualTo(true)
-              .dateTimeValueProperty()
-              .tCount(),
-          0,
+          col.where().nValueEqualTo(null).nValueProperty().average(),
+          isNaN,
         );
       });
     });

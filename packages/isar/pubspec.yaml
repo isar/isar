@@ -6,17 +6,20 @@ homepage: https://github.com/isar/isar
 issue_tracker: https://github.com/isar/isar/issues
 documentation: https://isar.dev
 funding:
-  - https://github.com/sponsors/leisim/
+  - https://github.com/sponsors/simc/
 
 environment:
-  sdk: ">=2.17.0 <3.0.0"
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
+  analyzer: ">=5.2.0 <6.0.0"
+  build: ^2.3.1
   ffi: ">=2.0.0 <3.0.0"
-  js: ^0.6.4
   meta: ^1.7.0
+  source_gen: ^1.2.7
 
 dev_dependencies:
-  ffigen: ">=6.1.2 <8.0.0"
-  test: ^1.21.1
+  build_test: ^2.2.0
+  ffigen: ^8.0.0
+  test: any
   very_good_analysis: ^3.0.1

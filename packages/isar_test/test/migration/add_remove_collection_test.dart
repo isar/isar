@@ -8,12 +8,10 @@ part 'add_remove_collection_test.g.dart';
 class Model1 {
   Model1(this.id, this.value);
 
-  Id? id;
+  int id;
 
   @Index()
   String? value;
-
-  final link = IsarLink<Model1>();
 
   @override
   // ignore: hash_and_equals
@@ -25,12 +23,10 @@ class Model1 {
 class Model2 {
   Model2(this.id, this.value);
 
-  Id? id;
+  int id;
 
   @Index()
   String? value;
-
-  final link = IsarLink<Model1>();
 
   @override
   // ignore: hash_and_equals
@@ -39,61 +35,48 @@ class Model2 {
 }
 
 void main() {
-  isarTest('Add collection', () async {
-    final isar1 = await openTempIsar([Model1Schema]);
+  isarTest('Add collection', () {
+    final isar1 = openTempIsar([Model1Schema]);
+    final isarName = isar1.name;
     final obj1A = Model1(5, 'col1_a');
     final obj1B = Model1(15, 'col1_b');
-    await isar1.tWriteTxn(() {
-      return isar1.model1s.tPutAll([obj1A, obj1B]);
+    isar1.write((isar) {
+      return isar.model1s.putAll([obj1A, obj1B]);
     });
-    await isar1.model1s.verify([obj1A, obj1B]);
-    expect(await isar1.close(), true);
+    isar1.model1s.verify([obj1A, obj1B]);
+    expect(isar1.close(), true);
 
-    final isar2 =
-        await openTempIsar([Model1Schema, Model2Schema], name: isar1.name);
-    await isar2.model1s.verify([obj1A, obj1B]);
-    await isar2.model2s.verify([]);
-    final obj2 = Model2(null, 'col2_a');
-    await isar2.tWriteTxn(() {
-      return isar2.model2s.tPut(obj2);
+    final isar2 = openTempIsar([Model1Schema, Model2Schema], name: isarName);
+    isar2.model1s.verify([obj1A, obj1B]);
+    isar2.model2s.verify([]);
+    final obj2 = Model2(99, 'col2_a');
+    isar2.write((isar) {
+      return isar.model2s.put(obj2);
     });
-    await isar2.model2s.verify([obj2]);
+    isar2.model2s.verify([obj2]);
   });
 
-  isarTest('Remove collection', () async {
-    final isar1 = await openTempIsar([Model1Schema, Model2Schema]);
-    final obj1A = Model1(5, 'col1_a');
-    final obj1B = Model1(15, 'col1_b');
-    final obj2A = Model2(15, 'col2_a');
-    final obj2B = Model2(15, 'col2_a');
-    await isar1.tWriteTxn(() async {
-      await isar1.model1s.tPutAll([obj1A, obj1B]);
-      await isar1.model2s.tPutAll([obj2A, obj2B]);
-
-      obj1A.link.value = obj1B;
-      await obj1A.link.tSave();
-
-      obj2A.link.value = obj1A;
-      await obj2A.link.tSave();
+  isarTest('Remove collection', () {
+    final isar1 = openTempIsar([Model1Schema, Model2Schema]);
+    final isarName = isar1.name;
+    final obj1A = Model1(1, 'col1_a');
+    final obj1B = Model1(2, 'col1_b');
+    final obj2A = Model2(3, 'col2_a');
+    final obj2B = Model2(4, 'col2_a');
+    isar1.write((isar) {
+      isar.model1s.putAll([obj1A, obj1B]);
+      isar.model2s.putAll([obj2A, obj2B]);
     });
-    await isar1.model1s.verify([obj1A, obj1B]);
-    await isar1.model1s.verifyLink('link', [obj1A.id!], [obj1B.id!]);
-    await isar1.model2s.verify([obj2A, obj2B]);
-    await isar1.model2s.verifyLink('link', [obj2A.id!], [obj1A.id!]);
-    expect(await isar1.close(), true);
+    isar1.model1s.verify([obj1A, obj1B]);
+    isar1.model2s.verify([obj2A, obj2B]);
+    expect(isar1.close(), true);
 
-    final isar2 = await openTempIsar([Model1Schema], name: isar1.name);
-    await isar2.model1s.verify([obj1A, obj1B]);
-    await isar2.model1s.verifyLink('link', [obj1A.id!], [obj1B.id!]);
-    expect(await isar2.close(), true);
+    final isar2 = openTempIsar([Model1Schema], name: isarName);
+    isar2.model1s.verify([obj1A, obj1B]);
+    expect(isar2.close(), true);
 
-    final isar3 = await openTempIsar(
-      [Model1Schema, Model2Schema],
-      name: isar1.name,
-    );
-    await isar3.model1s.verify([obj1A, obj1B]);
-    await isar3.model1s.verifyLink('link', [obj1A.id!], [obj1B.id!]);
-    await isar3.model2s.verify([]);
-    await isar3.model2s.verifyLink('link', [], []);
+    final isar3 = openTempIsar([Model1Schema, Model2Schema], name: isarName);
+    isar3.model1s.verify([obj1A, obj1B]);
+    isar3.model2s.verify([]);
   });
 }

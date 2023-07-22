@@ -25,10 +25,6 @@ android {
     compileSdkVersion 30
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 23
     }
-}
-
-dependencies {
-    implementation "androidx.startup:startup-runtime:1.1.1"
 }

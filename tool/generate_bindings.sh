@@ -7,7 +7,7 @@ cbindgen --config tool/cbindgen.toml --crate isar --output packages/isar/isar-da
 cd packages/isar
 
 dart pub get
-dart run ffigen --config ../../tool/ffigen.yaml
+dart run ffigen --config ffigen.yaml
 rm isar-dart.h
 
-dart format --fix lib/src/native/bindings.dart
+dart format --fix lib/src/impl/bindings.dart

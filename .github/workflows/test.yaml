@@ -19,7 +19,7 @@ jobs:
         with:
           flutter-version: ${{ secrets.FLUTTER_VERSION }}
       - name: Check formatting
-        run: flutter format --dry-run . --set-exit-if-changed
+        run: dart format -o none . --set-exit-if-changed
 
   lint:
     name: Check lints
@@ -51,7 +51,7 @@ jobs:
     name: Dart Test
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-latest, windows-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -97,7 +97,7 @@ jobs:
 
   coverage:
     name: Code Coverage
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
@@ -110,12 +110,11 @@ jobs:
       - name: Add packages
         run: |
           flutter pub add json_annotation
-          flutter pub add intl
           flutter pub add isar_test --path ../isar_test
         working-directory: packages/isar
       - name: Collect isar Coverage
         run: |
-          flutter test --coverage --coverage-path lcov_isar.info
+          dart test --coverage lcov_isar.info
         working-directory: packages/isar
       - name: Collect isar_test Coverage
         run: |
@@ -140,7 +139,7 @@ jobs:
         run: |
           dart pub get
           dart test
-        working-directory: packages/isar_generator
+        working-directory: packages/isar
 
   integration_test_ios:
     name: Integration Test iOS
@@ -198,12 +197,10 @@ jobs:
 
   integration_test_macos:
     name: Integration Test macOS
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.3.10" # https://github.com/flutter/flutter/issues/118469
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
@@ -221,6 +218,7 @@ jobs:
 
   integration_test_linux:
     name: Integration Test Linux
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

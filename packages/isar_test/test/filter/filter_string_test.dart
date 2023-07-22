@@ -6,9 +6,9 @@ part 'filter_string_test.g.dart';
 
 @collection
 class StringModel {
-  StringModel(this.field);
+  StringModel(this.id, this.field);
 
-  Id id = Isar.autoIncrement;
+  final int id;
 
   String? field;
 
@@ -36,20 +36,20 @@ void main() {
     late StringModel obj6;
     late StringModel objNull;
 
-    setUp(() async {
-      isar = await openTempIsar([StringModelSchema]);
+    setUp(() {
+      isar = openTempIsar([StringModelSchema]);
 
-      objEmpty = StringModel('');
-      obj1 = StringModel('string 1');
-      obj2 = StringModel('string 2');
-      obj3 = StringModel('string 3');
-      obj4 = StringModel('string 4');
-      obj5 = StringModel('string 5');
-      obj6 = StringModel('string 5');
-      objNull = StringModel(null);
+      objEmpty = StringModel(0, '');
+      obj1 = StringModel(1, 'string 1');
+      obj2 = StringModel(2, 'string 2');
+      obj3 = StringModel(3, 'string 3');
+      obj4 = StringModel(4, 'string 4');
+      obj5 = StringModel(5, 'string 5');
+      obj6 = StringModel(6, 'string 5');
+      objNull = StringModel(7, null);
 
-      await isar.writeTxn(
-        () async => isar.stringModels.tPutAll([
+      isar.write(
+        (isar) => isar.stringModels.putAll([
           objEmpty,
           obj1,
           obj2,
@@ -62,198 +62,176 @@ void main() {
       );
     });
 
-    isarTest('.equalTo()', () async {
-      await qEqual(
-        isar.stringModels.filter().fieldEqualTo('string 2'),
+    isarTest('.equalTo()', () {
+      expect(
+        isar.stringModels.where().fieldEqualTo('string 2').findAll(),
         [obj2],
       );
-      await qEqual(
-        isar.stringModels.filter().fieldEqualTo(null),
+      expect(
+        isar.stringModels.where().fieldEqualTo(null).findAll(),
         [objNull],
       );
-      await qEqual(
-        isar.stringModels.filter().fieldEqualTo('string 6'),
-        [],
+      expect(
+        isar.stringModels.where().fieldEqualTo('string 6').findAll(),
+        isEmpty,
       );
-      await qEqual(
-        isar.stringModels.filter().fieldEqualTo(''),
+      expect(
+        isar.stringModels.where().fieldEqualTo('').findAll(),
         [objEmpty],
       );
     });
 
-    isarTest('.isNull()', () async {
-      await qEqual(
-        isar.stringModels.filter().fieldIsNull(),
+    isarTest('.isNull()', () {
+      expect(
+        isar.stringModels.where().fieldIsNull().findAll(),
         [objNull],
       );
     });
 
-    isarTest('.startsWith()', () async {
-      await qEqualSet(
-        isar.stringModels.filter().fieldStartsWith('string'),
+    isarTest('.startsWith()', () {
+      expect(
+        isar.stringModels.where().fieldStartsWith('string').findAll(),
         [obj1, obj2, obj3, obj4, obj5, obj6],
       );
-      await qEqualSet(
-        isar.stringModels.filter().fieldStartsWith(''),
+      expect(
+        isar.stringModels.where().fieldStartsWith('').findAll(),
         [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6],
       );
-      await qEqualSet(isar.stringModels.filter().fieldStartsWith('S'), {});
+      expect(isar.stringModels.where().fieldStartsWith('S').findAll(), isEmpty);
     });
 
-    isarTest('.endsWith()', () async {
-      await qEqualSet(
-        isar.stringModels.filter().fieldEndsWith('5'),
+    isarTest('.endsWith()', () {
+      expect(
+        isar.stringModels.where().fieldEndsWith('5').findAll(),
         [obj5, obj6],
       );
-      await qEqualSet(
-        isar.stringModels.filter().fieldEndsWith(''),
+      expect(
+        isar.stringModels.where().fieldEndsWith('').findAll(),
         [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6],
       );
-      await qEqualSet(isar.stringModels.filter().fieldEndsWith('8'), []);
+      expect(isar.stringModels.where().fieldEndsWith('8').findAll(), isEmpty);
     });
 
-    isarTest('.contains()', () async {
-      await qEqualSet(
-        isar.stringModels.filter().fieldContains('ing'),
+    isarTest('.contains()', () {
+      expect(
+        isar.stringModels.where().fieldContains('ing').findAll(),
         [obj1, obj2, obj3, obj4, obj5, obj6],
       );
-      await qEqualSet(
-        isar.stringModels.filter().fieldContains(''),
+      expect(
+        isar.stringModels.where().fieldContains('').findAll(),
         [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6],
       );
-      await qEqualSet(
-        isar.stringModels.filter().fieldContains('x'),
-        [],
-      );
+      expect(isar.stringModels.where().fieldContains('x').findAll(), isEmpty);
     });
 
-    isarTest('.greaterThan()', () async {
-      await qEqualSet(
-        isar.stringModels.filter().fieldGreaterThan('string 0'),
+    isarTest('.greaterThan()', () {
+      expect(
+        isar.stringModels.where().fieldGreaterThan('string 0').findAll(),
         [obj1, obj2, obj3, obj4, obj5, obj6],
       );
 
-      await qEqualSet(
-        isar.stringModels.filter().fieldGreaterThan('string 1'),
+      expect(
+        isar.stringModels.where().fieldGreaterThan('string 1').findAll(),
         [obj2, obj3, obj4, obj5, obj6],
       );
 
-      await qEqualSet(
-        isar.stringModels.filter().fieldGreaterThan('string 2'),
+      expect(
+        isar.stringModels.where().fieldGreaterThan('string 2').findAll(),
         [obj3, obj4, obj5, obj6],
       );
 
-      await qEqualSet(
-        isar.stringModels.filter().fieldGreaterThan('string 3'),
+      expect(
+        isar.stringModels.where().fieldGreaterThan('string 3').findAll(),
         [obj4, obj5, obj6],
       );
 
-      await qEqualSet(
-        isar.stringModels.filter().fieldGreaterThan('string 4'),
+      expect(
+        isar.stringModels.where().fieldGreaterThan('string 4').findAll(),
         [obj5, obj6],
       );
 
-      await qEqualSet(
-        isar.stringModels.filter().fieldGreaterThan('string 5'),
-        [],
+      expect(
+        isar.stringModels.where().fieldGreaterThan('string 5').findAll(),
+        isEmpty,
       );
     });
 
-    isarTest('.lessThan()', () async {
-      /* FIXME: lessThan not working
-      await qEqualSet(
-        isar.stringModels.filter().fieldLessThan('string 0'),
+    isarTest('.lessThan()', () {
+      expect(
+        isar.stringModels.where().fieldLessThan('string 0').findAll(),
         [objEmpty, objNull],
       );
 
-      await qEqualSet(
-        isar.stringModels.filter().fieldLessThan('string 1'),
+      expect(
+        isar.stringModels.where().fieldLessThan('string 1').findAll(),
         [objEmpty, objNull],
       );
 
-      await qEqualSet(
-        isar.stringModels.filter().fieldLessThan('string 2'),
-        [objEmpty, objNull, obj1],
+      expect(
+        isar.stringModels.where().fieldLessThan('string 2').findAll(),
+        [objEmpty, obj1, objNull],
       );
 
-      await qEqualSet(
-        isar.stringModels.filter().fieldLessThan('string 3'),
-        [objEmpty, objNull, obj1, obj2],
+      expect(
+        isar.stringModels.where().fieldLessThan('string 3').findAll(),
+        [objEmpty, obj1, obj2, objNull],
       );
 
-      await qEqualSet(
-        isar.stringModels.filter().fieldLessThan('string 4'),
-        [objEmpty, objNull, obj1, obj2, obj3],
+      expect(
+        isar.stringModels.where().fieldLessThan('string 4').findAll(),
+        [objEmpty, obj1, obj2, obj3, objNull],
       );
 
-      await qEqualSet(
-        isar.stringModels.filter().fieldLessThan('string 5'),
-        [objEmpty, objNull, obj1, obj2, obj3, obj4],
+      expect(
+        isar.stringModels.where().fieldLessThan('string 5').findAll(),
+        [objEmpty, obj1, obj2, obj3, obj4, objNull],
       );
 
-      await qEqualSet(
-        isar.stringModels.filter().fieldLessThan('string 6'),
-        [objEmpty, objNull, obj1, obj2, obj3, obj4, obj5, obj6],
+      expect(
+        isar.stringModels.where().fieldLessThan('string 6').findAll(),
+        [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6, objNull],
       );
-      */
     });
 
-    isarTest('.between()', () async {
-      await qEqualSet(
-        isar.stringModels.filter().fieldBetween('string 2', 'string 4'),
+    isarTest('.between()', () {
+      expect(
+        isar.stringModels
+            .where()
+            .fieldBetween('string 2', 'string 4')
+            .findAll(),
         [obj2, obj3, obj4],
       );
 
-      await qEqualSet(
-        isar.stringModels.filter().fieldBetween('', 'string 2'),
+      expect(
+        isar.stringModels.where().fieldBetween('', 'string 2').findAll(),
         [objEmpty, obj1, obj2],
       );
-
-      /* FIXME: Something seems to be wrong when
-          between has `includeLower: false`
-      await qEqualSet(
-        isar.stringModels.filter().fieldBetween(
-              '',
-              'string 2',
-              includeLower: false,
-              includeUpper: false,
-            ),
-        [obj1],
-      );
-      */
     });
 
-    isarTestVm('.matches() VM', () async {
-      await qEqualSet(
-        isar.stringModels.filter().fieldMatches('*ng 5'),
+    isarTest('.matches()', () {
+      expect(
+        isar.stringModels.where().fieldMatches('*ng 5').findAll(),
         [obj5, obj6],
       );
-      await qEqualSet(
-        isar.stringModels.filter().fieldMatches('????????'),
+      expect(
+        isar.stringModels.where().fieldMatches('????????').findAll(),
         [obj1, obj2, obj3, obj4, obj5, obj6],
       );
-      await qEqualSet(isar.stringModels.filter().fieldMatches(''), [objEmpty]);
+      expect(isar.stringModels.where().fieldMatches('').findAll(), [objEmpty]);
 
-      await qEqualSet(isar.stringModels.filter().fieldMatches('*4?'), []);
+      expect(isar.stringModels.where().fieldMatches('*4?').findAll(), isEmpty);
     });
 
-    isarTestWeb('.matches() WEB', () async {
+    isarTest('.isEmpty()', () {
       expect(
-        await isar.stringModels.filter().fieldMatches('*ng 5').tFindAll(),
-        anyOf(throwsUnimplementedError, throwsUnsupportedError),
-      );
-    });
-
-    isarTest('.isEmpty()', () async {
-      await qEqualSet(
-        isar.stringModels.filter().fieldIsEmpty(),
+        isar.stringModels.where().fieldIsEmpty().findAll(),
         [objEmpty],
       );
     });
 
-    isarTest('.isNotEmpty()', () async {
-      await qEqualSet(
-        isar.stringModels.filter().fieldIsNotEmpty(),
+    isarTest('.isNotEmpty()', () {
+      expect(
+        isar.stringModels.where().fieldIsNotEmpty().findAll(),
         [obj1, obj2, obj3, obj4, obj5, obj6],
       );
     });

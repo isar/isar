@@ -6,11 +6,10 @@ part 'offset_limit_test.g.dart';
 
 @collection
 class Model {
-  Model(this.value);
+  Model(this.id, this.value);
 
-  final Id id = Isar.autoIncrement;
+  final int id;
 
-  @Index(type: IndexType.value)
   final String value;
 
   @override
@@ -22,97 +21,67 @@ class Model {
 void main() {
   group('Offset Limit', () {
     late Isar isar;
-    late IsarCollection<Model> col;
+    late IsarCollection<int, Model> col;
 
-    late List<Model> objects;
-    late List<Model> sorted;
     late Model objA;
     late Model objA2;
     late Model objB;
     late Model objC;
     late Model objC2;
 
-    setUp(() async {
-      isar = await openTempIsar([ModelSchema]);
+    setUp(() {
+      isar = openTempIsar([ModelSchema]);
       col = isar.models;
 
-      objA = Model('A');
-      objA2 = Model('A');
-      objB = Model('B');
-      objC = Model('C');
-      objC2 = Model('C');
-      objects = [objB, objA, objC, objA2, objC2];
-      sorted = [objA, objA2, objB, objC, objC2];
+      objA = Model(0, 'A');
+      objA2 = Model(1, 'A');
+      objB = Model(2, 'B');
+      objC = Model(3, 'C');
+      objC2 = Model(4, 'C');
 
-      await isar.writeTxn(() async {
-        await col.putAll(objects);
+      isar.write((isar) {
+        col.putAll([objA, objA2, objB, objC, objC2]);
       });
     });
 
-    isarTest('0 offset', () async {
-      await qEqual(col.where().offset(0), objects);
-      await qEqual(col.where().anyValue().offset(0), sorted);
-      await qEqual(col.where().sortByValue().offset(0), sorted);
+    isarTest('0 offset', () {
+      expect(col.where().findAll(offset: 0), [objA, objA2, objB, objC, objC2]);
     });
 
-    isarTest('big offset', () async {
-      await qEqual(col.where().offset(99), []);
-      await qEqual(col.where().anyValue().offset(99), []);
-      await qEqual(col.where().sortByValue().offset(99), []);
+    isarTest('big offset', () {
+      expect(col.where().findAll(offset: 99), isEmpty);
     });
 
-    isarTest('offset', () async {
-      await qEqual(col.where().offset(2), objects.sublist(2));
-      await qEqual(col.where().anyValue().offset(2), sorted.sublist(2));
-      await qEqual(col.where().sortByValue().offset(2), sorted.sublist(2));
+    isarTest('offset', () {
+      expect(col.where().findAll(offset: 2), [objB, objC, objC2]);
     });
 
-    isarTest('0 limit', () async {
-      await qEqual(col.where().limit(0), []);
-      await qEqual(col.where().anyValue().limit(0), []);
-      await qEqual(col.where().sortByValue().limit(0), []);
+    isarTest('0 limit', () {
+      expect(col.where().findAll(limit: 0), isEmpty);
     });
 
-    isarTest('big limit', () async {
-      await qEqual(col.where().limit(999999), objects);
-      await qEqual(col.where().anyValue().limit(999999), sorted);
-      await qEqual(col.where().sortByValue().limit(999999), sorted);
-    });
-
-    isarTest('limit', () async {
-      await qEqual(col.where().limit(3), objects.sublist(0, 3));
-      await qEqual(col.where().anyValue().limit(3), sorted.sublist(0, 3));
-      await qEqual(col.where().sortByValue().limit(3), sorted.sublist(0, 3));
-    });
-
-    isarTest('offset and limit', () async {
-      await qEqual(col.where().offset(3).limit(1), objects.sublist(3, 4));
-      await qEqual(
-        col.where().anyValue().offset(3).limit(1),
-        sorted.sublist(3, 4),
-      );
-      await qEqual(
-        col.where().sortByValue().offset(3).limit(1),
-        sorted.sublist(3, 4),
+    isarTest('big limit', () {
+      expect(
+        col.where().findAll(limit: 999999),
+        [objA, objA2, objB, objC, objC2],
       );
     });
 
-    isarTest('offset and big limit', () async {
-      await qEqual(col.where().offset(3).limit(1000), objects.sublist(3));
-      await qEqual(
-        col.where().anyValue().offset(3).limit(1000),
-        sorted.sublist(3),
-      );
-      await qEqual(
-        col.where().sortByValue().offset(3).limit(1000),
-        sorted.sublist(3),
-      );
+    isarTest('limit', () {
+      expect(col.where().findAll(limit: 3), [objA, objA2, objB]);
     });
 
-    isarTest('big offset and limit', () async {
-      await qEqual(col.where().offset(300).limit(5), []);
-      await qEqual(col.where().anyValue().offset(300).limit(5), []);
-      await qEqual(col.where().sortByValue().offset(300).limit(5), []);
+    isarTest('offset and limit', () {
+      expect(col.where().findAll(offset: 3, limit: 1), [objC]);
+      expect(col.where().findAll(offset: 3, limit: 2), [objC, objC2]);
+    });
+
+    isarTest('offset and big limit', () {
+      expect(col.where().findAll(offset: 2, limit: 1000), [objB, objC, objC2]);
+    });
+
+    isarTest('big offset and limit', () {
+      expect(col.where().findAll(offset: 300, limit: 5), isEmpty);
     });
   });
 }

@@ -15,10 +15,8 @@ void main() async {
 
   group('Integration test', () {
     setUpAll(() async {
-      if (!kIsWeb) {
-        final dir = await getTemporaryDirectory();
-        testTempPath = dir.path;
-      }
+      final dir = await getTemporaryDirectory();
+      testTempPath = dir.path;
     });
     tearDownAll(() {
       print('Isar test done');

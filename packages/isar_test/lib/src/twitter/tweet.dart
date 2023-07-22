@@ -15,12 +15,11 @@ class Tweet {
 
   factory Tweet.fromJson(Map<String, dynamic> json) => _$TweetFromJson(json);
 
-  Id? isarId;
-
   @JsonKey(fromJson: convertTwitterDateTime)
   DateTime? createdAt;
 
-  String? idStr;
+  @Id()
+  late String idStr;
 
   String? source;
 

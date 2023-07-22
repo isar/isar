@@ -1,23 +1,28 @@
 [package]
 name = "isar-core"
 version = "0.0.0"
-authors = ["Simon Leier <simonleier@gmail.com>"]
+authors = ["Simon Choi <simonleier@gmail.com>"]
 edition = "2021"
 
 [dependencies]
 itertools = "0.10.3"
 enum_dispatch = "0.3.8"
-ffi = { package = "mdbx-sys", path = "../mdbx_sys" }
+mdbx-sys = { package = "mdbx-sys", path = "../mdbx_sys", optional = true  }
 libc = "0.2"
 xxhash-rust = { version = "0.8.5", features = ["xxh3"] }
 serde =  { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+serde_json = { version = "1.0", features = ["raw_value"] }
 once_cell = "1.10.0"
-crossbeam-channel = "0.5.4"
 byteorder = "1"
-paste = "1.0"
 intmap = "2.0.0"
 snafu = "0.7.0"
+thread_local = "1.1.4"
+libsqlite3-sys = { version="0.26", features=["bundled"], optional = true  }
+ouroboros = "0.15.6"
+base64 = "0.21.0"
+paste = "1.0.12"
+parking_lot = "0.1"
+proc-macro2 = "1.0.66"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 widestring = "1.0"
@@ -30,3 +35,10 @@ float_next_after = "0.1"
 [dev-dependencies.serde_json]
 version = "*"
 features = ["float_roundtrip"]
+
+[features]
+default = ["sqlite", "native"]
+native = ["mdbx-sys"]
+sqlite = ["libsqlite3-sys"]
+sqlcipher = ["sqlite", "libsqlite3-sys/bundled-sqlcipher"]
+sqlcipher-vendored = ["sqlcipher", "libsqlite3-sys/bundled-sqlcipher-vendored-openssl"]

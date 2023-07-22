@@ -2,136 +2,135 @@ import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
 
-import '../user_model.dart';
+part 'group_test.g.dart';
+
+@collection
+class Model {
+  Model(this.id, this.name, this.age);
+
+  final int id;
+
+  String? name;
+
+  int? age = 0;
+
+  @override
+  String toString() {
+    return '{name: $name, age: $age, }';
+  }
+
+  @override
+  // ignore: hash_and_equals
+  bool operator ==(Object other) {
+    // ignore: test_types_in_equals
+    return other is Model && name == other.name && age == other.age;
+  }
+}
 
 void main() {
   group('Filter Groups', () {
     late Isar isar;
-    late IsarCollection<UserModel> users;
+    late IsarCollection<int, Model> users;
 
-    setUp(() async {
-      isar = await openTempIsar([UserModelSchema]);
-      users = isar.userModels;
+    late Model david;
+    late Model emma;
+    late Model tina;
+    late Model simon;
+    late Model bjorn;
 
-      await isar.writeTxn(() async {
-        await users.putAll([
-          UserModel.fill('David', 20, false),
-          UserModel.fill('Emma', 30, true),
-          UserModel.fill('Tina', 40, false),
-          UserModel.fill('Simon', 30, false),
-          UserModel.fill('Bjorn', 40, true),
-        ]);
+    setUp(() {
+      isar = openTempIsar([ModelSchema]);
+      users = isar.models;
+
+      david = Model(0, 'David', 20);
+      emma = Model(1, 'Emma', 30);
+      tina = Model(2, 'Tina', 40);
+      simon = Model(3, 'Simon', 30);
+      bjorn = Model(4, 'Bjorn', 40);
+
+      isar.write((isar) {
+        isar.models.putAll([david, emma, tina, simon, bjorn]);
       });
     });
 
-    isarTest('Simple or', () async {
-      await qEqualSet(
-        users.where().filter().ageEqualTo(20).or().ageEqualTo(30),
-        [
-          UserModel.fill('David', 20, false),
-          UserModel.fill('Emma', 30, true),
-          UserModel.fill('Simon', 30, false),
-        ],
+    isarTest('Simple or', () {
+      expect(
+        users.where().ageEqualTo(20).or().ageEqualTo(30).findAll(),
+        [david, emma, simon],
       );
     });
 
-    isarTest('Simple and', () async {
-      await qEqualSet(
-        users.where().filter().ageEqualTo(40).and().adminEqualTo(true),
-        [UserModel.fill('Bjorn', 40, true)],
-      );
-
-      await qEqualSet(
-        users.where().filter().ageEqualTo(40).adminEqualTo(true),
-        [UserModel.fill('Bjorn', 40, true)],
+    isarTest('Simple and', () {
+      expect(
+        users.where().ageEqualTo(40).and().idEqualTo(4).findAll(),
+        [bjorn],
       );
     });
 
-    isarTest('Simple xor', () async {
-      await qEqualSet(
-        users.where().filter().ageGreaterThan(20).xor().adminEqualTo(false),
-        [
-          UserModel.fill('David', 20, false),
-          UserModel.fill('Emma', 30, true),
-          UserModel.fill('Bjorn', 40, true),
-        ],
-      );
-    });
-
-    isarTest('Or followed by and', () async {
-      await qEqualSet(
+    isarTest('Or followed by and', () {
+      expect(
         users
             .where()
-            .filter()
             .ageEqualTo(20)
             .or()
             .ageEqualTo(30)
             .and()
-            .nameEqualTo('Emma'),
-        [
-          UserModel.fill('David', 20, false),
-          UserModel.fill('Emma', 30, true),
-        ],
+            .nameEqualTo('Emma')
+            .findAll(),
+        [david, emma],
       );
     });
 
-    isarTest('And followed by or', () async {
-      await qEqualSet(
+    isarTest('And followed by or', () {
+      expect(
         users
             .where()
-            .filter()
             .ageEqualTo(30)
             .and()
             .nameEqualTo('Simon')
             .or()
-            .ageEqualTo(20),
-        [
-          UserModel.fill('David', 20, false),
-          UserModel.fill('Simon', 30, false),
-        ],
+            .ageEqualTo(20)
+            .findAll(),
+        [david, simon],
       );
     });
 
-    isarTest('Or followed by group', () async {
-      await qEqualSet(
+    isarTest('Or followed by group', () {
+      expect(
         users
             .where()
-            .filter()
             .ageEqualTo(20)
             .or()
-            .group((q) => q.ageEqualTo(30).and().nameEqualTo('Emma')),
-        [
-          UserModel.fill('David', 20, false),
-          UserModel.fill('Emma', 30, true),
-        ],
+            .group((q) => q.ageEqualTo(30).and().nameEqualTo('Emma'))
+            .findAll(),
+        [david, emma],
       );
     });
 
-    isarTest('And followed by group', () async {
-      await qEqualSet(
+    isarTest('And followed by group', () {
+      expect(
         users
             .where()
-            .filter()
             .ageEqualTo(30)
             .and()
-            .group((q) => q.nameEqualTo('Simon').or().ageEqualTo(20)),
-        [UserModel.fill('Simon', 30, false)],
+            .group((q) => q.nameEqualTo('Simon').or().ageEqualTo(20))
+            .findAll(),
+        [simon],
       );
     });
 
-    isarTest('Nested groups', () async {
-      await qEqualSet(
-        users.where().filter().group(
-              (QueryBuilder<UserModel, UserModel, QFilterCondition> q) => q
+    isarTest('Nested groups', () {
+      expect(
+        users
+            .where()
+            .group(
+              (QueryBuilder<Model, Model, QFilterCondition> q) => q
                   .nameEqualTo('Simon')
                   .or()
                   .group((q) => q.ageEqualTo(30).or().ageEqualTo(20)),
-            ),
-        [
-          UserModel.fill('Simon', 30, false),
-          UserModel.fill('David', 20, false),
-          UserModel.fill('Emma', 30, true),
-        ],
+            )
+            .findAll(),
+        [david, emma, simon],
       );
     });
   });

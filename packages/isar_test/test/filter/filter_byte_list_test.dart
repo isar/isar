@@ -6,11 +6,11 @@ part 'filter_byte_list_test.g.dart';
 
 @collection
 class ByteModel {
-  ByteModel(this.list);
+  ByteModel(this.id, this.list);
 
-  Id? id;
+  final int id;
 
-  List<byte>? list;
+  final List<byte>? list;
 
   @override
   // ignore: hash_and_equals
@@ -22,7 +22,7 @@ class ByteModel {
 void main() {
   group('Byte list filter', () {
     late Isar isar;
-    late IsarCollection<ByteModel> col;
+    late IsarCollection<int, ByteModel> col;
 
     late ByteModel objEmpty;
     late ByteModel obj1;
@@ -31,67 +31,66 @@ void main() {
     late ByteModel obj4;
     late ByteModel objNull;
 
-    setUp(() async {
-      isar = await openTempIsar([ByteModelSchema]);
+    setUp(() {
+      isar = openTempIsar([ByteModelSchema]);
       col = isar.byteModels;
 
-      objEmpty = ByteModel([]);
-      obj1 = ByteModel([123]);
-      obj2 = ByteModel([0, 255]);
-      obj3 = ByteModel([1, 123, 3]);
-      obj4 = ByteModel([0, 255]);
-      objNull = ByteModel(null);
+      objEmpty = ByteModel(0, []);
+      obj1 = ByteModel(1, [123]);
+      obj2 = ByteModel(2, [0, 255]);
+      obj3 = ByteModel(3, [1, 123, 3]);
+      obj4 = ByteModel(4, [0, 255]);
+      objNull = ByteModel(5, null);
 
-      await isar.writeTxn(() async {
-        await col.putAll([objEmpty, obj1, obj2, obj3, obj4, objNull]);
+      isar.write((isar) {
+        col.putAll([objEmpty, obj1, obj2, obj3, obj4, objNull]);
       });
     });
 
-    isarTest('.elementEqualTo()', () async {
-      await qEqual(
-        col.filter().listElementEqualTo(0),
+    isarTest('.elementEqualTo()', () {
+      expect(
+        col.where().listElementEqualTo(0).findAll(),
         [obj2, obj4],
       );
-      await qEqual(col.filter().listElementEqualTo(1), [obj3]);
-      await qEqual(col.filter().listElementEqualTo(55), []);
+      expect(col.where().listElementEqualTo(1).findAll(), [obj3]);
+      expect(col.where().listElementEqualTo(55).findAll(), isEmpty);
     });
 
-    isarTest('.elementGreaterThan()', () async {
-      await qEqual(col.filter().listElementGreaterThan(123), [obj2, obj4]);
-      await qEqual(
-        col.filter().listElementGreaterThan(123, include: true),
+    isarTest('.elementGreaterThan()', () {
+      expect(col.where().listElementGreaterThan(123).findAll(), [obj2, obj4]);
+      expect(col.where().listElementGreaterThan(255).findAll(), isEmpty);
+    });
+
+    isarTest('.elementGreaterThanOrEqualTo()', () {
+      expect(
+        col.where().listElementGreaterThanOrEqualTo(123).findAll(),
         [obj1, obj2, obj3, obj4],
       );
-      await qEqual(col.filter().listElementGreaterThan(255), []);
     });
 
-    isarTest('.elementLessThan()', () async {
-      await qEqual(col.filter().listElementLessThan(123), [obj2, obj3, obj4]);
-      await qEqual(
-        col.filter().listElementLessThan(123, include: true),
+    isarTest('.elementLessThan()', () {
+      expect(
+          col.where().listElementLessThan(123).findAll(), [obj2, obj3, obj4]);
+      expect(col.where().listElementLessThan(0).findAll(), isEmpty);
+    });
+
+    isarTest('.elementLessThanOrEqualTo()', () {
+      expect(
+        col.where().listElementLessThanOrEqualTo(123).findAll(),
         [obj1, obj2, obj3, obj4],
       );
-      await qEqual(col.filter().listElementLessThan(0), []);
     });
 
-    isarTest('.elementBetween()', () async {
-      await qEqual(
-        col.filter().listElementBetween(123, 255),
+    isarTest('.elementBetween()', () {
+      expect(
+        col.where().listElementBetween(123, 255).findAll(),
         [obj1, obj2, obj3, obj4],
       );
-      await qEqual(
-        col.filter().listElementBetween(123, 255, includeLower: false),
-        [obj2, obj4],
-      );
-      await qEqual(
-        col.filter().listElementBetween(123, 255, includeUpper: false),
-        [obj1, obj3],
-      );
-      await qEqual(col.filter().listElementBetween(50, 100), []);
+      expect(col.where().listElementBetween(50, 100).findAll(), isEmpty);
     });
 
-    isarTest('.isNull()', () async {
-      await qEqual(col.where().filter().listIsNull(), [objNull]);
+    isarTest('.isNull()', () {
+      expect(col.where().listIsNull().findAll(), [objNull]);
     });
   });
 }

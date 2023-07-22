@@ -1,77 +1,176 @@
 #![allow(clippy::missing_safety_doc)]
+#![feature(local_key_cell_methods)]
+#![feature(vec_into_raw_parts)]
 
-use isar_core::error::{illegal_arg, Result};
-use std::ffi::CStr;
-use std::ffi::CString;
-use std::mem;
-use std::os::raw::c_char;
-use unicode_segmentation::UnicodeSegmentation;
+use core::slice;
+use isar_core::core::cursor::IsarCursor;
+use isar_core::core::instance::IsarInstance;
+use isar_core::core::reader::IsarReader;
+use isar_core::core::value::IsarValue;
+use isar_core::core::writer::IsarWriter;
+
+#[cfg(feature = "native")]
+use isar_core::native::native_instance::NativeInstance;
+
+#[cfg(feature = "sqlite")]
+use isar_core::sqlite::sqlite_instance::SQLiteInstance;
 
 #[macro_use]
 mod error;
-
-pub mod c_object_set;
-pub mod crud;
-mod dart;
+pub mod cursor;
+pub mod dart;
 pub mod filter;
-pub mod index_key;
+pub mod insert;
 pub mod instance;
-pub mod link;
 pub mod query;
-pub mod query_aggregation;
-pub mod txn;
-pub mod watchers;
+pub mod reader;
+pub mod update;
+pub mod value;
+pub mod watcher;
+pub mod writer;
 
-pub unsafe fn from_c_str<'a>(str: *const c_char) -> Result<Option<&'a str>> {
-    if !str.is_null() {
-        match CStr::from_ptr(str).to_str() {
-            Ok(str) => Ok(Some(str)),
-            Err(_) => illegal_arg("The provided String is not valid."),
-        }
-    } else {
-        Ok(None)
+#[cfg(feature = "native")]
+type NInstance = <NativeInstance as IsarInstance>::Instance;
+#[cfg(feature = "sqlite")]
+type SInstance = <SQLiteInstance as IsarInstance>::Instance;
+
+#[cfg(feature = "native")]
+type NTxn = <NativeInstance as IsarInstance>::Txn;
+#[cfg(feature = "sqlite")]
+type STxn = <SQLiteInstance as IsarInstance>::Txn;
+
+#[cfg(feature = "native")]
+type NInsert<'a> = <NativeInstance as IsarInstance>::Insert<'a>;
+#[cfg(feature = "sqlite")]
+type SInsert<'a> = <SQLiteInstance as IsarInstance>::Insert<'a>;
+
+#[cfg(feature = "native")]
+type NObjectWriter<'a> = <NInsert<'a> as IsarWriter<'a>>::ObjectWriter;
+#[cfg(feature = "sqlite")]
+type SObjectWriter<'a> = <SInsert<'a> as IsarWriter<'a>>::ObjectWriter;
+
+#[cfg(feature = "native")]
+type NListWriter<'a> = <NInsert<'a> as IsarWriter<'a>>::ListWriter;
+#[cfg(feature = "sqlite")]
+type SListWriter<'a> = <SInsert<'a> as IsarWriter<'a>>::ListWriter;
+
+#[cfg(feature = "native")]
+type NCursor<'a> = <NativeInstance as IsarInstance>::Cursor<'a>;
+#[cfg(feature = "sqlite")]
+type SCursor<'a> = <SQLiteInstance as IsarInstance>::Cursor<'a>;
+
+#[cfg(feature = "native")]
+type NReader<'a> = <NCursor<'a> as IsarCursor>::Reader<'a>;
+#[cfg(feature = "sqlite")]
+type SReader<'a> = <SCursor<'a> as IsarCursor>::Reader<'a>;
+
+#[cfg(feature = "sqlite")]
+type SObjectReader<'a> = <SReader<'a> as IsarReader>::ObjectReader<'a>;
+
+#[cfg(feature = "native")]
+type NListReader<'a> = <NReader<'a> as IsarReader>::ListReader<'a>;
+#[cfg(feature = "sqlite")]
+type SListReader<'a> = <SReader<'a> as IsarReader>::ListReader<'a>;
+
+#[cfg(feature = "native")]
+type NQueryBuilder<'a> = <NativeInstance as IsarInstance>::QueryBuilder<'a>;
+#[cfg(feature = "sqlite")]
+type SQueryBuilder<'a> = <SQLiteInstance as IsarInstance>::QueryBuilder<'a>;
+
+#[cfg(feature = "native")]
+type NQuery = <NativeInstance as IsarInstance>::Query;
+#[cfg(feature = "sqlite")]
+type SQuery = <SQLiteInstance as IsarInstance>::Query;
+
+pub enum CIsarInstance {
+    #[cfg(feature = "native")]
+    Native(NInstance),
+    #[cfg(feature = "sqlite")]
+    SQLite(SInstance),
+}
+
+pub enum CIsarTxn {
+    #[cfg(feature = "native")]
+    Native(NTxn),
+    #[cfg(feature = "sqlite")]
+    SQLite(STxn),
+}
+
+pub enum CIsarWriter<'a> {
+    #[cfg(feature = "native")]
+    Native(NInsert<'a>),
+    #[cfg(feature = "native")]
+    NativeObject(NObjectWriter<'a>),
+    #[cfg(feature = "native")]
+    NativeList(NListWriter<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLite(SInsert<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLiteObject(SObjectWriter<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLiteList(SListWriter<'a>),
+}
+
+pub enum CIsarReader<'a> {
+    #[cfg(feature = "native")]
+    Native(NReader<'a>),
+    #[cfg(feature = "native")]
+    NativeList(NListReader<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLite(SReader<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLiteObject(SObjectReader<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLiteList(SListReader<'a>),
+}
+
+pub struct CIsarUpdate(pub(crate) Vec<(u16, Option<IsarValue>)>);
+
+pub enum CIsarQueryBuilder<'a> {
+    #[cfg(feature = "native")]
+    Native(NQueryBuilder<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLite(SQueryBuilder<'a>),
+}
+
+pub enum CIsarQuery {
+    #[cfg(feature = "native")]
+    Native(NQuery),
+    #[cfg(feature = "sqlite")]
+    SQLite(SQuery),
+}
+
+pub enum CIsarCursor<'a> {
+    #[cfg(feature = "native")]
+    Native(NCursor<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLite(SCursor<'a>),
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_string(chars: *const u16, length: u32) -> *const String {
+    let chars = slice::from_raw_parts(chars, length as usize);
+    let value = String::from_utf16_lossy(chars);
+    Box::into_raw(Box::new(value))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn isar_string_free(value: *mut String) {
+    if !value.is_null() {
+        drop(Box::from_raw(value));
     }
 }
 
-pub struct UintSend(&'static mut u32);
+fn dart_fast_hash(value: &str) -> i64 {
+    let mut hash = 0xcbf29ce484222325;
 
-unsafe impl Send for UintSend {}
-
-pub struct BoolSend(&'static mut bool);
-
-unsafe impl Send for BoolSend {}
-
-pub struct CharsSend(*const c_char);
-
-unsafe impl Send for CharsSend {}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_find_word_boundaries(
-    input_bytes: *const u8,
-    length: u32,
-    number_words: *mut u32,
-) -> *mut u32 {
-    let bytes = std::slice::from_raw_parts(input_bytes, length as usize);
-    let str = std::str::from_utf8_unchecked(bytes);
-    let mut result = vec![];
-    for (offset, word) in str.unicode_word_indices() {
-        result.push(offset as u32);
-        result.push((offset + word.len()) as u32);
+    let utf16 = value.encode_utf16();
+    for char in utf16 {
+        hash ^= (char >> 8) as u64;
+        hash = hash.wrapping_mul(0x100000001b3);
+        hash ^= (char & 0xFF) as u64;
+        hash = hash.wrapping_mul(0x100000001b3);
     }
-    result.shrink_to_fit();
-    number_words.write((result.len() / 2) as u32);
-    let result_ptr = result.as_mut_ptr();
-    mem::forget(result);
-    result_ptr
-}
 
-#[no_mangle]
-pub unsafe extern "C" fn isar_free_word_boundaries(boundaries: *mut u32, word_count: u32) {
-    let len = (word_count * 2) as usize;
-    Vec::from_raw_parts(boundaries, len, len);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn isar_free_string(string: *mut c_char) {
-    let _ = CString::from_raw(string);
+    hash as i64
 }

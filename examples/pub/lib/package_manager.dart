@@ -119,7 +119,7 @@ class PackageManager {
           .copyWithMetrics(metrics);
       versionsToAdd.add(package);
     }
-    await isar.writeTxn(() async {
+    await isar.write(() async {
       await isar.packages.putAll(versionsToAdd);
     });
   }
