@@ -1,6 +1,6 @@
-use once_cell::sync::OnceCell;
+use std::sync::OnceLock;
 
-static DART_POST_C_OBJECT: OnceCell<DartPostCObjectFnType> = OnceCell::new();
+static DART_POST_C_OBJECT: OnceLock<DartPostCObjectFnType> = OnceLock::new();
 
 pub fn dart_post_int(port: DartPort, value: i64) {
     let dart_post = DART_POST_C_OBJECT.get().unwrap();

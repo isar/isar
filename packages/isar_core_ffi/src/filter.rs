@@ -3,7 +3,6 @@ use isar_core::core::{
     filter::{ConditionType, Filter, FilterCondition, FilterNested},
     value::IsarValue,
 };
-use itertools::Itertools;
 use std::vec;
 
 #[no_mangle]
@@ -207,7 +206,7 @@ pub unsafe extern "C" fn isar_filter_and(filters: *mut *mut Filter, lenght: u32)
     let filters = slice::from_raw_parts(filters, lenght as usize)
         .iter()
         .map(|f| *Box::from_raw(*f))
-        .collect_vec();
+        .collect();
     let filter = Filter::And(filters);
     Box::into_raw(Box::new(filter))
 }
@@ -217,7 +216,7 @@ pub unsafe extern "C" fn isar_filter_or(filters: *mut *mut Filter, lenght: u32) 
     let filters = slice::from_raw_parts(filters, lenght as usize)
         .iter()
         .map(|f| *Box::from_raw(*f))
-        .collect_vec();
+        .collect();
     let filter = Filter::Or(filters);
     Box::into_raw(Box::new(filter))
 }

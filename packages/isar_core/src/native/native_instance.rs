@@ -14,13 +14,12 @@ use crate::core::schema::IsarSchema;
 use crate::core::value::IsarValue;
 use crate::core::watcher::{WatchHandle, WatcherCallback};
 use intmap::IntMap;
-use once_cell::sync::Lazy;
 use std::fs::{self, remove_file};
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, LazyLock, Mutex};
 
-static INSTANCES: Lazy<Mutex<IntMap<Arc<NativeInstance>>>> =
-    Lazy::new(|| Mutex::new(IntMap::new()));
+static INSTANCES: LazyLock<Mutex<IntMap<Arc<NativeInstance>>>> =
+    LazyLock::new(|| Mutex::new(IntMap::new()));
 
 pub struct NativeInstance {
     name: String,

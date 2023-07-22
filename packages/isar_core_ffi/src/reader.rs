@@ -1,6 +1,6 @@
 use crate::CIsarReader;
 use isar_core::core::reader::IsarReader;
-use std::{mem, ptr, vec};
+use std::{ptr, vec};
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_read_id(reader: &'static CIsarReader) -> i64 {

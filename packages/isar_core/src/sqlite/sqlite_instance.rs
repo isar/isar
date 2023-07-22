@@ -16,16 +16,16 @@ use crate::core::value::IsarValue;
 use crate::core::watcher::{WatchHandle, WatcherCallback};
 use intmap::IntMap;
 use itertools::Itertools;
-use once_cell::sync::Lazy;
 use std::borrow::Cow;
 use std::cell::Cell;
 use std::fs::remove_file;
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, LazyLock, Mutex};
 use std::vec;
 
-static INSTANCES: Lazy<Mutex<IntMap<Connections>>> = Lazy::new(|| Mutex::new(IntMap::new()));
+static INSTANCES: LazyLock<Mutex<IntMap<Connections>>> =
+    LazyLock::new(|| Mutex::new(IntMap::new()));
 
 const MIB: usize = 1 << 20;
 
