@@ -15,6 +15,7 @@ Changed transactions API:
 - Ids can no longer be `nullable`. There is a new `collection.autoIncrement()` function to automatically generate ids.
 - Enums no longer need to be annotated with `@enumerated` instead there is a new `@enumValue` annotation to specify the value property of an enum
 - Where clauses have been removed in favor of automatic index handling
+- Isar links have been removed in favor of embedded objects
 
 ### Enhancements
 
