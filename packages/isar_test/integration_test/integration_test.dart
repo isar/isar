@@ -18,6 +18,7 @@ void main() async {
       final dir = await getTemporaryDirectory();
       testTempPath = dir.path;
     });
+
     tearDownAll(() {
       print('Isar test done');
       completer.complete();

@@ -1,5 +1,4 @@
 name: IsarCoreBindings
-ffi-native:
 output: "lib/src/impl/bindings.dart"
 headers:
   entry-points:

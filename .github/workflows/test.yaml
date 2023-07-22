@@ -51,7 +51,7 @@ jobs:
     name: Dart Test
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -183,17 +183,13 @@ jobs:
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
       - name: Run Flutter Integration tests
-        continue-on-error: true
-        timeout-minutes: ${{ inputs.timeout_minutes }}
-        uses: Wandalen/wretry.action@v1.0.36
-        with:
-          action: reactivecircus/android-emulator-runner@v2
-          with: |
-            api-level: 29
-            arch: x86_64
-            profile: pixel
-            working-directory: packages/isar_test
-            script: flutter test integration_test/integration_test.dart --dart-define STRESS=true
+        uses: reactivecircus/android-emulator-runner@v2
+        with: |
+          api-level: 29
+          arch: x86_64
+          profile: pixel
+          working-directory: packages/isar_test
+          script: flutter test integration_test/integration_test.dart --dart-define STRESS=true
 
   integration_test_macos:
     name: Integration Test macOS
@@ -218,7 +214,6 @@ jobs:
 
   integration_test_linux:
     name: Integration Test Linux
-    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

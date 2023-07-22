@@ -39,7 +39,7 @@ class _IsarImpl extends Isar {
     String? encryptionKey,
     CompactCondition? compactOnLaunch,
   }) {
-    isar_connect_dart_api(NativeApi.postCObject.cast());
+    IsarCore._initialize();
 
     if (sqliteEngine) {
       if (compactOnLaunch != null) {
@@ -76,19 +76,21 @@ class _IsarImpl extends Isar {
         : nullptr;
 
     final isarPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarInstance>>();
-    isar_open_instance(
-      isarPtrPtr,
-      instanceId,
-      namePtr,
-      directoryPtr,
-      sqliteEngine,
-      schemaPtr,
-      maxSizeMiB,
-      encryptionKeyPtr,
-      compactOnLaunch != null ? compactOnLaunch.minFileSize ?? 0 : -1,
-      compactOnLaunch != null ? compactOnLaunch.minBytes ?? 0 : -1,
-      compactOnLaunch != null ? compactOnLaunch.minRatio ?? 0 : double.nan,
-    ).checkNoError();
+    IsarCore.b
+        .isar_open_instance(
+          isarPtrPtr,
+          instanceId,
+          namePtr,
+          directoryPtr,
+          sqliteEngine,
+          schemaPtr,
+          maxSizeMiB,
+          encryptionKeyPtr,
+          compactOnLaunch != null ? compactOnLaunch.minFileSize ?? 0 : -1,
+          compactOnLaunch != null ? compactOnLaunch.minBytes ?? 0 : -1,
+          compactOnLaunch != null ? compactOnLaunch.minRatio ?? 0 : double.nan,
+        )
+        .checkNoError();
 
     final converters = schemas.map((e) => e.converter).toList();
     return _IsarImpl._(instanceId, sqliteEngine, isarPtrPtr.value, converters);
@@ -99,7 +101,8 @@ class _IsarImpl extends Isar {
     required List<IsarObjectConverter<dynamic, dynamic>> converters,
     required bool sqliteEngine,
   }) {
-    final ptr = isar_get_instance(instanceId, sqliteEngine);
+    IsarCore._attach();
+    final ptr = IsarCore.b.isar_get_instance(instanceId, sqliteEngine);
     if (ptr.isNull) {
       throw IsarNotReadyError('Instance has not been opened yet. Make sure to '
           'call Isar.open() before using Isar.get().');
@@ -151,13 +154,13 @@ class _IsarImpl extends Isar {
 
   @override
   late final String name = () {
-    final length = isar_get_name(getPtr(), IsarCore.stringPtrPtr);
+    final length = IsarCore.b.isar_get_name(getPtr(), IsarCore.stringPtrPtr);
     return utf8.decode(IsarCore.stringPtr.asTypedList(length));
   }();
 
   @override
   late final String directory = () {
-    final length = isar_get_dir(getPtr(), IsarCore.stringPtrPtr);
+    final length = IsarCore.b.isar_get_dir(getPtr(), IsarCore.stringPtrPtr);
     return utf8.decode(IsarCore.stringPtr.asTypedList(length));
   }();
 
@@ -205,17 +208,17 @@ class _IsarImpl extends Isar {
 
     final ptr = getPtr();
     final txnPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarTxn>>();
-    isar_txn_begin(ptr, txnPtrPtr, write).checkNoError();
+    IsarCore.b.isar_txn_begin(ptr, txnPtrPtr, write).checkNoError();
     try {
       _txnPtr = txnPtrPtr.value;
       _txnWrite = write;
       final result = callback(this);
-      isar_txn_commit(ptr, _txnPtr!).checkNoError();
+      IsarCore.b.isar_txn_commit(ptr, _txnPtr!).checkNoError();
       return result;
     } catch (_) {
       final txnPtr = _txnPtr;
       if (txnPtr != null) {
-        isar_txn_abort(ptr, txnPtr);
+        IsarCore.b.isar_txn_abort(ptr, txnPtr);
       }
       rethrow;
     } finally {
@@ -278,7 +281,7 @@ class _IsarImpl extends Isar {
   @override
   void copyToFile(String path) {
     final string = IsarCore.toNativeString(path);
-    isar_copy(getPtr(), string).checkNoError();
+    IsarCore.b.isar_copy(getPtr(), string).checkNoError();
   }
 
   @override
@@ -290,7 +293,7 @@ class _IsarImpl extends Isar {
 
   @override
   bool close({bool deleteFromDisk = false}) {
-    final closed = isar_close(getPtr(), deleteFromDisk);
+    final closed = IsarCore.b.isar_close(getPtr(), deleteFromDisk);
     _ptr = null;
     _instances.remove(instanceId);
     return closed;
@@ -298,7 +301,10 @@ class _IsarImpl extends Isar {
 
   @override
   void verify() {
-    getTxn((isarPtr, txnPtr) => isar_verify(isarPtr, txnPtr).checkNoError());
+    getTxn(
+      (isarPtr, txnPtr) =>
+          IsarCore.b.isar_verify(isarPtr, txnPtr).checkNoError(),
+    );
   }
 }
 

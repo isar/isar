@@ -5,7 +5,7 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
     case EqualCondition():
       final value = filter.value;
       if (value is double) {
-        return isar_filter_between(
+        return IsarCore.b.isar_filter_between(
           filter.property,
           _isarValue(
             _adjustLowerFloatBound(value, true, filter.epsilon),
@@ -16,7 +16,7 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
           filter.caseSensitive,
         );
       } else {
-        return isar_filter_equal(
+        return IsarCore.b.isar_filter_equal(
           filter.property,
           _isarValue(filter.value),
           filter.caseSensitive,
@@ -29,7 +29,7 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
       final value = rawValue is double
           ? _adjustLowerFloatBound(rawValue, false, filter.epsilon)
           : rawValue;
-      return isar_filter_greater(
+      return IsarCore.b.isar_filter_greater(
         filter.property,
         _isarValue(value),
         filter.caseSensitive,
@@ -39,7 +39,7 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
       final value = rawValue is double
           ? _adjustLowerFloatBound(rawValue, true, filter.epsilon)
           : rawValue;
-      return isar_filter_greater_or_equal(
+      return IsarCore.b.isar_filter_greater_or_equal(
         filter.property,
         _isarValue(value),
         filter.caseSensitive,
@@ -49,7 +49,7 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
       final value = rawValue is double
           ? _adjustUpperFloatBound(rawValue, false, filter.epsilon)
           : rawValue;
-      return isar_filter_less(
+      return IsarCore.b.isar_filter_less(
         filter.property,
         _isarValue(value),
         filter.caseSensitive,
@@ -59,7 +59,7 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
       final value = rawValue is double
           ? _adjustUpperFloatBound(rawValue, true, filter.epsilon)
           : rawValue;
-      return isar_filter_less_or_equal(
+      return IsarCore.b.isar_filter_less_or_equal(
         filter.property,
         _isarValue(value),
         filter.caseSensitive,
@@ -73,38 +73,38 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
       final upper = rawUpper is double
           ? _adjustUpperFloatBound(rawUpper, true, filter.epsilon)
           : rawUpper;
-      return isar_filter_between(
+      return IsarCore.b.isar_filter_between(
         filter.property,
         _isarValue(lower),
         _isarValue(upper),
         filter.caseSensitive,
       );
     case StartsWithCondition():
-      return isar_filter_string_starts_with(
+      return IsarCore.b.isar_filter_string_starts_with(
         filter.property,
         _isarValue(filter.value),
         filter.caseSensitive,
       );
     case EndsWithCondition():
-      return isar_filter_string_ends_with(
+      return IsarCore.b.isar_filter_string_ends_with(
         filter.property,
         _isarValue(filter.value),
         filter.caseSensitive,
       );
     case ContainsCondition():
-      return isar_filter_string_contains(
+      return IsarCore.b.isar_filter_string_contains(
         filter.property,
         _isarValue(filter.value),
         filter.caseSensitive,
       );
     case MatchesCondition():
-      return isar_filter_string_matches(
+      return IsarCore.b.isar_filter_string_matches(
         filter.property,
         _isarValue(filter.wildcard),
         filter.caseSensitive,
       );
     case IsNullCondition():
-      return isar_filter_is_null(filter.property);
+      return IsarCore.b.isar_filter_is_null(filter.property);
     case AndGroup():
       if (filter.filters.length == 1) {
         return _buildFilter(alloc, filter.filters[0]);
@@ -113,7 +113,7 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
         for (var i = 0; i < filter.filters.length; i++) {
           filters[i] = _buildFilter(alloc, filter.filters[i]);
         }
-        return isar_filter_and(filters, filter.filters.length);
+        return IsarCore.b.isar_filter_and(filters, filter.filters.length);
       }
     case OrGroup():
       if (filter.filters.length == 1) {
@@ -123,12 +123,12 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
         for (var i = 0; i < filter.filters.length; i++) {
           filters[i] = _buildFilter(alloc, filter.filters[i]);
         }
-        return isar_filter_or(filters, filter.filters.length);
+        return IsarCore.b.isar_filter_or(filters, filter.filters.length);
       }
     case NotGroup():
-      return isar_filter_not(_buildFilter(alloc, filter.filter));
+      return IsarCore.b.isar_filter_not(_buildFilter(alloc, filter.filter));
     case ObjectFilter():
-      return isar_filter_nested(
+      return IsarCore.b.isar_filter_nested(
         filter.property,
         _buildFilter(alloc, filter.filter),
       );
@@ -139,15 +139,15 @@ Pointer<CIsarValue> _isarValue(Object? value) {
   if (value == null) {
     return nullptr;
   } else if (value is int) {
-    return isar_value_integer(value);
+    return IsarCore.b.isar_value_integer(value);
   } else if (value is String) {
-    return isar_value_string(IsarCore.toNativeString(value));
+    return IsarCore.b.isar_value_string(IsarCore.toNativeString(value));
   } else if (value is bool) {
-    return isar_value_bool(value);
+    return IsarCore.b.isar_value_bool(value);
   } else if (value is double) {
-    return isar_value_real(value);
+    return IsarCore.b.isar_value_real(value);
   } else if (value is DateTime) {
-    return isar_value_integer(value.toUtc().microsecondsSinceEpoch);
+    return IsarCore.b.isar_value_integer(value.toUtc().microsecondsSinceEpoch);
   } else {
     throw UnimplementedError();
   }

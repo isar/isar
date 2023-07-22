@@ -3,6 +3,8 @@ part of isar;
 abstract final class IsarCore {
   static var _initialized = false;
 
+  static late final IsarCoreBindings b;
+
   static Pointer<Pointer<NativeType>> ptrPtr = malloc<Pointer>();
   static Pointer<Uint32> countPtr = malloc<Uint32>();
   static Pointer<Bool> boolPtr = malloc<Bool>();
@@ -28,9 +30,11 @@ abstract final class IsarCore {
 
     try {
       if (Platform.isIOS) {
-        DynamicLibrary.process();
+        final dylib = DynamicLibrary.process();
+        b = IsarCoreBindings(dylib);
       } else {
-        DynamicLibrary.open(libraryPath!);
+        final dylib = DynamicLibrary.open(libraryPath!);
+        b = IsarCoreBindings(dylib);
       }
     } catch (e) {
       throw IsarNotReadyError(
@@ -42,7 +46,7 @@ abstract final class IsarCore {
       );
     }
 
-    final coreVersion = isar_version().cast<Utf8>().toDartString();
+    final coreVersion = b.isar_version().cast<Utf8>().toDartString();
     if (coreVersion != Isar.version && coreVersion != 'debug') {
       throw IsarNotReadyError(
         'Incorrect Isar Core version: Required ${Isar.version} found '
@@ -52,6 +56,13 @@ abstract final class IsarCore {
       );
     }
 
+    IsarCore.b.isar_connect_dart_api(NativeApi.postCObject.cast());
+
+    _initialized = true;
+  }
+
+  static void _attach() {
+    b = IsarCoreBindings(DynamicLibrary.process());
     _initialized = true;
   }
 
@@ -78,19 +89,19 @@ abstract final class IsarCore {
       list[i] = str.codeUnitAt(i);
     }
 
-    return isar_string(_nativeStringPtr, str.length);
+    return b.isar_string(_nativeStringPtr, str.length);
   }
 
-  static const readId = isar_read_id;
-  static const readNull = isar_read_null;
-  static const readBool = isar_read_bool;
-  static const readByte = isar_read_byte;
-  static const readInt = isar_read_int;
-  static const readFloat = isar_read_float;
-  static const readLong = isar_read_long;
-  static const readDouble = isar_read_double;
+  static late final readId = b.isar_read_id;
+  static late final readNull = b.isar_read_null;
+  static late final readBool = b.isar_read_bool;
+  static late final readByte = b.isar_read_byte;
+  static late final readInt = b.isar_read_int;
+  static late final readFloat = b.isar_read_float;
+  static late final readLong = b.isar_read_long;
+  static late final readDouble = b.isar_read_double;
   static String? readString(Pointer<CIsarReader> reader, int index) {
-    final length = isar_read_string(reader, index, stringPtrPtr, boolPtr);
+    final length = b.isar_read_string(reader, index, stringPtrPtr, boolPtr);
     if (stringPtr.isNull) {
       return null;
     } else {
@@ -103,22 +114,22 @@ abstract final class IsarCore {
     }
   }
 
-  static const readObject = isar_read_object;
-  static const readList = isar_read_list;
-  static const freeReader = isar_read_free;
+  static late final readObject = b.isar_read_object;
+  static late final readList = b.isar_read_list;
+  static late final freeReader = b.isar_read_free;
 
-  static const writeNull = isar_write_null;
-  static const writeBool = isar_write_bool;
-  static const writeByte = isar_write_byte;
-  static const writeInt = isar_write_int;
-  static const writeFloat = isar_write_float;
-  static const writeLong = isar_write_long;
-  static const writeDouble = isar_write_double;
-  static const writeString = isar_write_string;
-  static const beginObject = isar_write_object;
-  static const endObject = isar_write_object_end;
-  static const beginList = isar_write_list;
-  static const endList = isar_write_list_end;
+  static late final writeNull = b.isar_write_null;
+  static late final writeBool = b.isar_write_bool;
+  static late final writeByte = b.isar_write_byte;
+  static late final writeInt = b.isar_write_int;
+  static late final writeFloat = b.isar_write_float;
+  static late final writeLong = b.isar_write_long;
+  static late final writeDouble = b.isar_write_double;
+  static late final writeString = b.isar_write_string;
+  static late final beginObject = b.isar_write_object;
+  static late final endObject = b.isar_write_object_end;
+  static late final beginList = b.isar_write_list;
+  static late final endList = b.isar_write_list_end;
 }
 
 extension PointerX on Pointer {
