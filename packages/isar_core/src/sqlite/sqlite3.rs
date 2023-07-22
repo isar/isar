@@ -183,8 +183,8 @@ impl SQLite3 {
         unsafe extern "C" fn call_boxed_closure<F>(
             func: *mut c_void,
             _: i32,
-            _: *const i8,
-            _: *const i8,
+            _: *const c_char,
+            _: *const c_char,
             id: i64,
         ) where
             F: FnMut(i64) -> (),

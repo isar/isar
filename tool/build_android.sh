@@ -31,14 +31,17 @@ export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$COMPILER_DIR/aarch64-linux-and
 export CARGO_TARGET_AARCH64_LINUX_ANDROID_AR=$COMPILER_DIR/llvm-ar
 
 if [ "$1" = "x64" ]; then
+  ln -s "$AR_x86_64_linux_android" "$COMPILER_DIR/x86_64-linux-android-ranlib"
   rustup target add x86_64-linux-android
   cargo build --target x86_64-linux-android --release
   mv "target/x86_64-linux-android/release/libisar.so" "libisar_android_x64.so"
 elif [ "$1" = "armv7" ]; then
+  ln -s "$AR_armv7_linux_androideabi" "$COMPILER_DIR/armv7-linux-androideabi-ranlib"
   rustup target add armv7-linux-androideabi
   cargo build --target armv7-linux-androideabi  --release
   mv "target/armv7-linux-androideabi/release/libisar.so" "libisar_android_armv7.so"
 else
+  ln -s "$AR_aarch64_linux_android" "$COMPILER_DIR/aarch64-linux-android-ranlib"
   rustup target add aarch64-linux-android
   cargo build --target aarch64-linux-android --release
   mv "target/aarch64-linux-android/release/libisar.so" "libisar_android_arm64.so"
