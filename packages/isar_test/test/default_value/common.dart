@@ -3,9 +3,14 @@ import 'package:isar/isar.dart';
 part 'common.g.dart';
 
 enum MyEnum {
-  value1,
-  value2,
-  value3;
+  value1(1),
+  value2(2),
+  value3(3);
+
+  const MyEnum(this.value);
+
+  @enumValue
+  final int value;
 }
 
 @embedded

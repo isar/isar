@@ -114,7 +114,7 @@ jobs:
         working-directory: packages/isar
       - name: Collect isar Coverage
         run: |
-          flutter test --coverage --coverage-path lcov_isar.info
+          dart test --coverage lcov_isar.info
         working-directory: packages/isar
       - name: Collect isar_test Coverage
         run: |

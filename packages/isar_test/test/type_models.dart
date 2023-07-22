@@ -148,9 +148,14 @@ class ObjectModel {
 }
 
 enum TestEnum {
-  option1,
-  option2,
-  option3;
+  option1(1),
+  option2(2),
+  option3(3);
+
+  const TestEnum(this.value);
+
+  @enumValue
+  final int value;
 }
 
 @collection
