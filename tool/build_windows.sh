@@ -1,5 +1,3 @@
-export OPENSSL_DIR="C:\Program Files\OpenSSL-Win64"
-
 if [ "$1" = "x64" ]; then
   rustup target add x86_64-pc-windows-msvc
   cargo build --target x86_64-pc-windows-msvc --release

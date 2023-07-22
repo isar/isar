@@ -61,7 +61,6 @@ jobs:
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
-        shell: bash
         run: sh tool/build.sh
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
@@ -105,7 +104,6 @@ jobs:
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
-        shell: bash
         run: sh tool/build.sh
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
@@ -253,7 +251,6 @@ jobs:
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
-        shell: bash
         run: |
           bash tool/build_windows.sh x64
           mv isar_windows_x64.dll packages/isar_flutter_libs/windows/libisar.dll
