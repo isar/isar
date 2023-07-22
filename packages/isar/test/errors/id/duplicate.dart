@@ -1,10 +1,12 @@
-// two or more properties with type "Id" defined
+// two or more properties are annotated with @id
 
 import 'package:isar/isar.dart';
 
 @collection
 class Test {
-  Id? id1;
+  @id
+  late int id1;
 
-  Id? id2;
+  @id
+  late int id2;
 }

@@ -4,7 +4,7 @@ import 'package:isar/isar.dart';
 
 @collection
 class Test {
-  late int id;
+  late int notId;
 
   late String name;
 }

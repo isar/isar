@@ -6,5 +6,5 @@ import 'package:isar/isar.dart';
 class Model {
   Model.create();
 
-  Id? id;
+  late int id;
 }

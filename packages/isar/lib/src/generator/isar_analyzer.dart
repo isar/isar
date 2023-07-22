@@ -245,12 +245,20 @@ class IsarAnalyzer {
     }
 
     final nullable = dartType.nullabilitySuffix != NullabilitySuffix.none;
+    final elementNullable = type.isList
+        ? dartType.scalarType.nullabilitySuffix != NullabilitySuffix.none
+        : null;
     if (isId) {
       if (type != PropertyType.long && type != PropertyType.string) {
         err('Only int and String properties can be used as id.', property);
       } else if (nullable) {
         err('Id properties must not be nullable.', property);
       }
+    }
+
+    if ((type == PropertyType.byte && nullable) ||
+        (type == PropertyType.byteList && (elementNullable ?? false))) {
+      err('Bytes must not be nullable.', property);
     }
 
     final constructorParameter = constructor.parameters
@@ -290,9 +298,7 @@ class IsarAnalyzer {
       enumMap: enumMap,
       enumProperty: enumPropertyName,
       nullable: nullable,
-      elementNullable: type.isList
-          ? dartType.scalarType.nullabilitySuffix != NullabilitySuffix.none
-          : null,
+      elementNullable: elementNullable,
       defaultValue:
           constructorParameter?.defaultValueCode ?? _defaultValue(dartType),
       elementDefaultValue:

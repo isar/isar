@@ -4,7 +4,7 @@ import 'package:isar/isar.dart';
 
 @collection
 class Model {
-  Id? id;
+  late int id;
 
   @Name('_prop')
   String? prop;

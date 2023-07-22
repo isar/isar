@@ -7,7 +7,7 @@ class Model {
   // ignore: avoid_unused_constructor_parameters
   Model(int prop1);
 
-  Id? id;
+  late int id;
 
   String prop1 = '5';
 }

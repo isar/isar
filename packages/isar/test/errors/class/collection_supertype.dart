@@ -4,16 +4,16 @@ import 'package:isar/isar.dart';
 
 @collection
 class Supertype {
-  Id? id;
+  late int id;
 }
 
 class Subtype implements Supertype {
   @override
-  Id? id;
+  late int id;
 }
 
 @collection
 class Model implements Subtype {
   @override
-  Id? id;
+  late int id;
 }
