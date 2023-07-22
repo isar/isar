@@ -41,6 +41,4 @@ default = ["sqlite", "native"]
 native = ["mdbx-sys"]
 sqlite = ["libsqlite3-sys"]
 sqlcipher = ["sqlite", "libsqlite3-sys/bundled-sqlcipher"]
-
-[target.'cfg(target_os = "android")'.dependencies.libsqlite3-sys]
-features = ["bundled-sqlcipher-vendored-openssl"]
+sqlcipher-vendored = ["sqlcipher", "libsqlite3-sys/bundled-sqlcipher-vendored-openssl"]
