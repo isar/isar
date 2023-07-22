@@ -25,6 +25,7 @@ runs:
       run: |
         choco install strawberryperl
         echo "C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin" >> $GITHUB_PATH
+        choco install nasm
         choco install openssl
     # See https://github.com/godot-rust/godot-rust/pull/920
     - name: "Workaround Android NDK due to Rust bug"
