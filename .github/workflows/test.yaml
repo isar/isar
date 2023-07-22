@@ -184,7 +184,7 @@ jobs:
         run: sh tool/prepare_tests.sh
       - name: Run Flutter Integration tests
         uses: reactivecircus/android-emulator-runner@v2
-        with: |
+        with:
           api-level: 29
           arch: x86_64
           profile: pixel
