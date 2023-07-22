@@ -110,7 +110,6 @@ fn main() {
         .prepend_enum_name(false)
         .generate_comments(true)
         .disable_header_comment()
-        .rustfmt_bindings(true)
         .generate()
         .expect("Unable to generate bindings");
 
