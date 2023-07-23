@@ -161,6 +161,13 @@ pub unsafe extern "C" fn isar_string_free(value: *mut String) {
     }
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn isar_buffer_free(value: *mut u8, capacity: u32) {
+    if !value.is_null() {
+        drop(Vec::from_raw_parts(value, 0, capacity as usize));
+    }
+}
+
 fn dart_fast_hash(value: &str) -> i64 {
     let mut hash = 0xcbf29ce484222325;
 

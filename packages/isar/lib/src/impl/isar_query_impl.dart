@@ -80,20 +80,25 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
 
   @override
   List<Map<String, dynamic>> exportJson({int? offset, int? limit}) {
-    final bufferPtr = malloc<Pointer<Uint8>>();
+    final bufferPtrPtr = calloc<Pointer<Uint8>>();
     final bufferSizePtr = malloc<Uint32>();
 
     Map<String, dynamic> deserialize(IsarReader reader) {
       final jsonSize =
-          IsarCore.b.isar_read_to_json(reader, bufferPtr, bufferSizePtr);
-      final jsonBytes = bufferPtr.value.asTypedList(jsonSize);
-      return jsonDecode(utf8.decode(jsonBytes)) as Map<String, dynamic>;
+          IsarCore.b.isar_read_to_json(reader, bufferPtrPtr, bufferSizePtr);
+      final bufferPtr = bufferPtrPtr.value;
+      if (bufferPtr.isNull) {
+        throw QueryError('Error while exporting JSON.');
+      } else {
+        final jsonBytes = bufferPtr.asTypedList(jsonSize);
+        return jsonDecode(utf8.decode(jsonBytes)) as Map<String, dynamic>;
+      }
     }
 
     try {
       return _findAll(deserialize, offset: offset, limit: limit);
     } finally {
-      malloc.free(bufferPtr);
+      calloc.free(bufferPtrPtr);
       malloc.free(bufferSizePtr);
     }
   }
