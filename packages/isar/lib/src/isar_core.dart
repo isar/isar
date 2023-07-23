@@ -2,6 +2,7 @@ part of isar;
 
 abstract final class IsarCore {
   static var _initialized = false;
+  static String? _libraryPath;
 
   static late final IsarCoreBindings b;
 
@@ -23,19 +24,14 @@ abstract final class IsarCore {
       return;
     }
 
-    String? libraryPath;
-    if (!Platform.isIOS) {
-      libraryPath = libraries[Abi.current()] ?? Abi.current().localName;
-    }
-
     try {
-      if (Platform.isIOS) {
-        final dylib = DynamicLibrary.process();
-        b = IsarCoreBindings(dylib);
-      } else {
-        final dylib = DynamicLibrary.open(libraryPath!);
-        b = IsarCoreBindings(dylib);
-      }
+      _libraryPath = Platform.isIOS
+          ? null
+          : libraries[Abi.current()] ?? Abi.current().localName;
+      final dylib = Platform.isIOS
+          ? DynamicLibrary.process()
+          : DynamicLibrary.open(_libraryPath!);
+      b = IsarCoreBindings(dylib);
     } catch (e) {
       throw IsarNotReadyError(
         'Could not initialize IsarCore library for processor architecture '
@@ -61,12 +57,22 @@ abstract final class IsarCore {
     _initialized = true;
   }
 
-  static void _attach() {
-    b = IsarCoreBindings(DynamicLibrary.process());
+  static void _attach(String? libraryPath) {
+    if (_initialized) {
+      return;
+    }
+
+    _libraryPath =
+        Platform.isIOS ? null : libraryPath ?? Abi.current().localName;
+
+    final dylib = Platform.isIOS
+        ? DynamicLibrary.process()
+        : DynamicLibrary.open(_libraryPath!);
+    b = IsarCoreBindings(dylib);
     _initialized = true;
   }
 
-  static void free() {
+  static void _free() {
     malloc.free(ptrPtr);
     malloc.free(countPtr);
     malloc.free(boolPtr);

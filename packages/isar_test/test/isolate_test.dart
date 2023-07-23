@@ -41,6 +41,8 @@ void main() {
 
     final sqlite = isSQLite;
     await Isolate.run(() {
+      prepareTest();
+
       final isar = sqlite
           ? Isar.getSQLite(schemas: [TestModelSchema], name: name)
           : Isar.get(schemas: [TestModelSchema], name: name);

@@ -96,12 +96,12 @@ class _IsarImpl extends Isar {
     return _IsarImpl._(instanceId, sqliteEngine, isarPtrPtr.value, converters);
   }
 
-  factory _IsarImpl.get({
-    required int instanceId,
-    required List<IsarObjectConverter<dynamic, dynamic>> converters,
-    required bool sqliteEngine,
-  }) {
-    IsarCore._attach();
+  factory _IsarImpl.get(
+      {required int instanceId,
+      required List<IsarObjectConverter<dynamic, dynamic>> converters,
+      required bool sqliteEngine,
+      String? libraryPath}) {
+    IsarCore._attach(libraryPath);
     final ptr = IsarCore.b.isar_get_instance(instanceId, sqliteEngine);
     if (ptr.isNull) {
       throw IsarNotReadyError('Instance has not been opened yet. Make sure to '
@@ -253,9 +253,17 @@ class _IsarImpl extends Isar {
   Future<T> readAsync<T>(T Function(Isar isar) callback) {
     final instanceId = this.instanceId;
     final sqliteEngine = this.sqliteEngine;
+    final libraryPath = IsarCore._libraryPath;
     final converters = this.converters;
     return Isolate.run(
-      () => _isarAsync(instanceId, sqliteEngine, converters, false, callback),
+      () => _isarAsync(
+        instanceId,
+        sqliteEngine,
+        libraryPath,
+        converters,
+        false,
+        callback,
+      ),
     );
   }
 
@@ -263,9 +271,17 @@ class _IsarImpl extends Isar {
   Future<T> writeAsync<T>(T Function(Isar isar) callback) async {
     final instanceId = this.instanceId;
     final sqliteEngine = this.sqliteEngine;
+    final libraryPath = IsarCore._libraryPath;
     final converters = this.converters;
     return Isolate.run(
-      () => _isarAsync(instanceId, sqliteEngine, converters, true, callback),
+      () => _isarAsync(
+        instanceId,
+        sqliteEngine,
+        libraryPath,
+        converters,
+        true,
+        callback,
+      ),
     );
   }
 
@@ -311,6 +327,7 @@ class _IsarImpl extends Isar {
 T _isarAsync<T>(
   int instanceId,
   bool sqliteEngine,
+  String? libraryPath,
   List<IsarObjectConverter<dynamic, dynamic>> converters,
   bool write,
   T Function(Isar isar) callback,
@@ -319,6 +336,7 @@ T _isarAsync<T>(
     instanceId: instanceId,
     converters: converters,
     sqliteEngine: sqliteEngine,
+    libraryPath: libraryPath,
   );
   try {
     if (write) {
@@ -328,6 +346,6 @@ T _isarAsync<T>(
     }
   } finally {
     isar.close();
-    IsarCore.free();
+    IsarCore._free();
   }
 }
