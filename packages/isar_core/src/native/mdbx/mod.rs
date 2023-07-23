@@ -1,11 +1,11 @@
 #![allow(clippy::missing_safety_doc)]
 
 use crate::core::error::{IsarError, Result};
+use byteorder::{ByteOrder, LittleEndian};
 use core::slice;
 use libc::c_int;
 use std::cmp::{self, Ordering};
 use std::ffi::{c_void, CStr};
-use std::mem;
 
 pub mod cursor;
 pub mod cursor_iterator;
@@ -68,9 +68,9 @@ pub(crate) fn mdbx_error(err_code: c_int) -> IsarError {
 #[inline]
 pub fn compare_keys(integer_key: bool, key1: &[u8], key2: &[u8]) -> Ordering {
     if integer_key {
-        let key1 = unsafe { mem::transmute::<&[u8], &[u64]>(key1) };
-        let key2 = unsafe { mem::transmute::<&[u8], &[u64]>(key2) };
-        key1[0].cmp(&key2[0])
+        let key1 = LittleEndian::read_u64(key1);
+        let key2 = LittleEndian::read_u64(key2);
+        key1.cmp(&key2)
     } else {
         let len = cmp::min(key1.len(), key2.len());
         let cmp = key1[0..len].cmp(&key2[0..len]);
