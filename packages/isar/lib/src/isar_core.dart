@@ -3,16 +3,14 @@ part of isar;
 abstract final class IsarCore {
   static var _initialized = false;
 
-  static late final IsarCoreBindings b;
-
   static Pointer<Pointer<NativeType>> ptrPtr = malloc<Pointer>();
   static Pointer<Uint32> countPtr = malloc<Uint32>();
   static Pointer<Bool> boolPtr = malloc<Bool>();
 
-  static late final Pointer<Pointer<Uint8>> stringPtrPtr = ptrPtr.cast();
+  static final Pointer<Pointer<Uint8>> stringPtrPtr = ptrPtr.cast();
   static Pointer<Uint8> get stringPtr => stringPtrPtr.value;
 
-  static late final Pointer<Pointer<CIsarReader>> readerPtrPtr = ptrPtr.cast();
+  static final Pointer<Pointer<CIsarReader>> readerPtrPtr = ptrPtr.cast();
   static Pointer<CIsarReader> get readerPtr => readerPtrPtr.value;
 
   static Pointer<Uint16> _nativeStringPtr = nullptr;
@@ -23,46 +21,55 @@ abstract final class IsarCore {
       return;
     }
 
-    String? libraryPath;
-    if (!Platform.isIOS) {
-      libraryPath = libraries[Abi.current()] ?? Abi.current().localName;
-    }
+    late final libraryPath =
+        libraries[Abi.current()] ?? Abi.current().localName;
 
     try {
-      if (Platform.isIOS) {
-        final dylib = DynamicLibrary.process();
-        b = IsarCoreBindings(dylib);
-      } else {
-        final dylib = DynamicLibrary.open(libraryPath!);
-        b = IsarCoreBindings(dylib);
+      if (Platform.isLinux || Platform.isAndroid) {
+        using((arena) {
+          final pathPtr = libraryPath.toNativeUtf8(allocator: arena);
+          final lib = _dlopen(pathPtr.cast(), _rtldLazyGlobal);
+          if (lib.isNull) {
+            throw ArgumentError('dlopen failed');
+          }
+          final processSymbol =
+              DynamicLibrary.process().providesSymbol('isar_version');
+          final libSymbol =
+              DynamicLibrary.open(libraryPath).providesSymbol('isar_version');
+          print('OPENING WAS SUCCESSFUL $processSymbol $libSymbol');
+        });
+      } else if (Platform.isWindows || Platform.isMacOS) {
+        DynamicLibrary.open(libraryPath);
       }
-    } catch (e) {
+
+      print('BEFORE CORE VERSION');
+      final coreVersion = isar_version().cast<Utf8>().toDartString();
+      print('CORE VERSION $coreVersion');
+      if (coreVersion != Isar.version && coreVersion != 'debug') {
+        throw IsarNotReadyError(
+          'Incorrect Isar Core version: Required ${Isar.version} found '
+          '$coreVersion. Make sure to use the latest isar_flutter_libs. If you '
+          'have a Dart only project, make sure that old Isar Core binaries are '
+          'deleted.',
+        );
+      }
+      // ignore: avoid_catching_errors
+    } on ArgumentError {
       throw IsarNotReadyError(
         'Could not initialize IsarCore library for processor architecture '
         '"${Abi.current()}". If you create a Flutter app, make sure to add '
         'isar_flutter_libs to your dependencies. For Dart-only apps or unit '
         'tests, make sure to place the correct Isar binary in the correct '
-        'directory.\n$e',
+        'directory.',
       );
     }
 
-    final coreVersion = b.isar_version().cast<Utf8>().toDartString();
-    if (coreVersion != Isar.version && coreVersion != 'debug') {
-      throw IsarNotReadyError(
-        'Incorrect Isar Core version: Required ${Isar.version} found '
-        '$coreVersion. Make sure to use the latest isar_flutter_libs. If you '
-        'have a Dart only project, make sure that old Isar Core binaries are '
-        'deleted.',
-      );
-    }
-
-    IsarCore.b.isar_connect_dart_api(NativeApi.postCObject.cast());
+    isar_connect_dart_api(NativeApi.postCObject.cast());
 
     _initialized = true;
   }
 
   static void _attach() {
-    b = IsarCoreBindings(DynamicLibrary.process());
     _initialized = true;
   }
 
@@ -89,19 +96,19 @@ abstract final class IsarCore {
       list[i] = str.codeUnitAt(i);
     }
 
-    return b.isar_string(_nativeStringPtr, str.length);
+    return isar_string(_nativeStringPtr, str.length);
   }
 
-  static late final readId = b.isar_read_id;
-  static late final readNull = b.isar_read_null;
-  static late final readBool = b.isar_read_bool;
-  static late final readByte = b.isar_read_byte;
-  static late final readInt = b.isar_read_int;
-  static late final readFloat = b.isar_read_float;
-  static late final readLong = b.isar_read_long;
-  static late final readDouble = b.isar_read_double;
+  static const readId = isar_read_id;
+  static const readNull = isar_read_null;
+  static const readBool = isar_read_bool;
+  static const readByte = isar_read_byte;
+  static const readInt = isar_read_int;
+  static const readFloat = isar_read_float;
+  static const readLong = isar_read_long;
+  static const readDouble = isar_read_double;
   static String? readString(Pointer<CIsarReader> reader, int index) {
-    final length = b.isar_read_string(reader, index, stringPtrPtr, boolPtr);
+    final length = isar_read_string(reader, index, stringPtrPtr, boolPtr);
     if (stringPtr.isNull) {
       return null;
     } else {
@@ -114,22 +121,22 @@ abstract final class IsarCore {
     }
   }
 
-  static late final readObject = b.isar_read_object;
-  static late final readList = b.isar_read_list;
-  static late final freeReader = b.isar_read_free;
+  static const readObject = isar_read_object;
+  static const readList = isar_read_list;
+  static const freeReader = isar_read_free;
 
-  static late final writeNull = b.isar_write_null;
-  static late final writeBool = b.isar_write_bool;
-  static late final writeByte = b.isar_write_byte;
-  static late final writeInt = b.isar_write_int;
-  static late final writeFloat = b.isar_write_float;
-  static late final writeLong = b.isar_write_long;
-  static late final writeDouble = b.isar_write_double;
-  static late final writeString = b.isar_write_string;
-  static late final beginObject = b.isar_write_object;
-  static late final endObject = b.isar_write_object_end;
-  static late final beginList = b.isar_write_list;
-  static late final endList = b.isar_write_list_end;
+  static const writeNull = isar_write_null;
+  static const writeBool = isar_write_bool;
+  static const writeByte = isar_write_byte;
+  static const writeInt = isar_write_int;
+  static const writeFloat = isar_write_float;
+  static const writeLong = isar_write_long;
+  static const writeDouble = isar_write_double;
+  static const writeString = isar_write_string;
+  static const beginObject = isar_write_object;
+  static const endObject = isar_write_object_end;
+  static const beginList = isar_write_list;
+  static const endList = isar_write_list_end;
 }
 
 extension PointerX on Pointer {
@@ -166,3 +173,9 @@ extension on Abi {
     }
   }
 }
+
+final _rtldLazyGlobal =
+    0x00001 | (Abi.current() == Abi.androidArm ? 0x00002 : 0x00100);
+
+@Native<Pointer<Void> Function(Pointer<Char>, Int)>(symbol: 'dlopen')
+external Pointer<Void> _dlopen(Pointer<Char> file, int mode);

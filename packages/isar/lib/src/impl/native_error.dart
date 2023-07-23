@@ -27,7 +27,7 @@ extension on int {
       case ERROR_DB_FULL:
         throw DatabaseFullError();
       default:
-        final length = IsarCore.b.isar_get_error(IsarCore.stringPtrPtr);
+        final length = isar_get_error(IsarCore.stringPtrPtr);
         final ptr = IsarCore.stringPtr;
         if (length != 0 && !ptr.isNull) {
           final error = utf8.decode(ptr.asTypedList(length));

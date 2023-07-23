@@ -30,28 +30,26 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
   List<E> _findAll<E>(Deserialize<E> deserialize, {int? offset, int? limit}) {
     return isar.getTxn((isarPtr, txnPtr) {
       final cursorPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarCursor>>();
-      IsarCore.b
-          .isar_query_cursor(
-            isarPtr,
-            txnPtr,
-            _ptr,
-            cursorPtrPtr,
-            offset ?? -1,
-            limit ?? -1,
-          )
-          .checkNoError();
+      isar_query_cursor(
+        isarPtr,
+        txnPtr,
+        _ptr,
+        cursorPtrPtr,
+        offset ?? -1,
+        limit ?? -1,
+      ).checkNoError();
       final cursorPtr = cursorPtrPtr.value;
 
       Pointer<CIsarReader> readerPtr = nullptr;
       final values = <E>[];
       while (true) {
-        readerPtr = IsarCore.b.isar_cursor_next(cursorPtr, readerPtr);
+        readerPtr = isar_cursor_next(cursorPtr, readerPtr);
         if (readerPtr.isNull) break;
         values.add(deserialize(readerPtr));
       }
 
-      IsarCore.b.isar_read_free(readerPtr);
-      IsarCore.b.isar_cursor_free(cursorPtr);
+      isar_read_free(readerPtr);
+      isar_cursor_free(cursorPtr);
       return values;
     });
   }
@@ -64,36 +62,39 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
   @override
   int deleteAll({int? offset, int? limit}) {
     return isar.getTxn((isarPtr, txnPtr) {
-      IsarCore.b
-          .isar_query_delete(
-            isarPtr,
-            txnPtr,
-            _ptr,
-            offset ?? -1,
-            limit ?? -1,
-            IsarCore.countPtr,
-          )
-          .checkNoError();
+      isar_query_delete(
+        isarPtr,
+        txnPtr,
+        _ptr,
+        offset ?? -1,
+        limit ?? -1,
+        IsarCore.countPtr,
+      ).checkNoError();
       return IsarCore.countPtr.value;
     });
   }
 
   @override
   List<Map<String, dynamic>> exportJson({int? offset, int? limit}) {
-    final bufferPtr = malloc<Pointer<Uint8>>();
+    final bufferPtrPtr = calloc<Pointer<Uint8>>();
     final bufferSizePtr = malloc<Uint32>();
 
     Map<String, dynamic> deserialize(IsarReader reader) {
-      final jsonSize =
-          IsarCore.b.isar_read_to_json(reader, bufferPtr, bufferSizePtr);
-      final jsonBytes = bufferPtr.value.asTypedList(jsonSize);
-      return jsonDecode(utf8.decode(jsonBytes)) as Map<String, dynamic>;
+      final jsonSize = isar_read_to_json(reader, bufferPtrPtr, bufferSizePtr);
+      final bufferPtr = bufferPtrPtr.value;
+      if (bufferPtr.isNull) {
+        throw QueryError('Failed to export JSON');
+      } else {
+        final jsonBytes = bufferPtr.asTypedList(jsonSize);
+        return jsonDecode(utf8.decode(jsonBytes)) as Map<String, dynamic>;
+      }
     }
 
     try {
       return _findAll(deserialize, offset: offset, limit: limit);
     } finally {
-      malloc.free(bufferPtr);
+      isar_buffer_free(bufferPtrPtr.value, bufferSizePtr.value);
+      calloc.free(bufferPtrPtr);
       malloc.free(bufferSizePtr);
     }
   }
@@ -111,35 +112,32 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
 
     return isar.getTxn((isarPtr, txnPtr) {
       final valuePtr = IsarCore.ptrPtr.cast<Pointer<CIsarValue>>();
-      IsarCore.b
-          .isar_query_aggregate(
-            isarPtr,
-            txnPtr,
-            _ptr,
-            aggregation,
-            _properties?.firstOrNull ?? 0,
-            valuePtr,
-          )
-          .checkNoError();
+      isar_query_aggregate(
+        isarPtr,
+        txnPtr,
+        _ptr,
+        aggregation,
+        _properties?.firstOrNull ?? 0,
+        valuePtr,
+      ).checkNoError();
 
       final value = valuePtr.value;
       if (value.isNull) return null;
 
       try {
         if (true is R) {
-          return IsarCore.b.isar_value_get_bool(value) as R;
+          return isar_value_get_bool(value) as R;
         } else if (0.0 is R) {
-          return IsarCore.b.isar_value_get_real(value) as R;
+          return isar_value_get_real(value) as R;
         } else if (0 is R) {
-          return IsarCore.b.isar_value_get_integer(value) as R;
+          return isar_value_get_integer(value) as R;
         } else if (DateTime.now() is R) {
           return DateTime.fromMillisecondsSinceEpoch(
-            IsarCore.b.isar_value_get_integer(value),
+            isar_value_get_integer(value),
             isUtc: true,
           ).toLocal() as R;
         } else if ('' is R) {
-          final length =
-              IsarCore.b.isar_value_get_string(value, IsarCore.stringPtrPtr);
+          final length = isar_value_get_string(value, IsarCore.stringPtrPtr);
           if (IsarCore.stringPtr.isNull) {
             return null;
           } else {
@@ -149,7 +147,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
           throw ArgumentError('Unsupported aggregation type: $R');
         }
       } finally {
-        IsarCore.b.isar_value_free(value);
+        isar_value_free(value);
       }
     });
   }
@@ -165,20 +163,18 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
     final port = ReceivePort();
     final handlePtrPtr = IsarCore.ptrPtr.cast<Pointer<CWatchHandle>>();
 
-    IsarCore.b
-        .isar_watch_query(
-          isar.getPtr(),
-          _ptr,
-          port.sendPort.nativePort,
-          handlePtrPtr,
-        )
-        .checkNoError();
+    isar_watch_query(
+      isar.getPtr(),
+      _ptr,
+      port.sendPort.nativePort,
+      handlePtrPtr,
+    ).checkNoError();
 
     final handlePtr = handlePtrPtr.value;
     final controller = StreamController<void>(
       onCancel: () {
         isar.getPtr(); // Make sure Isar is not closed
-        IsarCore.b.isar_stop_watching(handlePtr);
+        isar_stop_watching(handlePtr);
         port.close();
       },
     );
@@ -193,7 +189,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
 
   @override
   void close() {
-    IsarCore.b.isar_query_free(_ptr);
+    isar_query_free(_ptr);
     _ptrAddress = 0;
   }
 }
