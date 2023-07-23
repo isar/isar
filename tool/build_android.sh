@@ -19,29 +19,29 @@ export CC_x86_64_linux_android=$COMPILER_DIR/x86_64-linux-android21-clang
 export AR_x86_64_linux_android=$COMPILER_DIR/llvm-ar
 export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER=$COMPILER_DIR/x86_64-linux-android21-clang
 export CARGO_TARGET_X86_64_LINUX_ANDROID_AR=$COMPILER_DIR/llvm-ar
+ln -s "$AR_x86_64_linux_android" "$COMPILER_DIR/x86_64-linux-android-ranlib"
 
 export CC_armv7_linux_androideabi=$COMPILER_DIR/armv7a-linux-androideabi21-clang
 export AR_armv7_linux_androideabi=$COMPILER_DIR/llvm-ar
 export CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER=$COMPILER_DIR/armv7a-linux-androideabi21-clang
 export CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_AR=$COMPILER_DIR/llvm-ar
+ln -s "$AR_armv7_linux_androideabi" "$COMPILER_DIR/arm-linux-androideabi-ranlib"
 
 export CC_aarch64_linux_android=$COMPILER_DIR/aarch64-linux-android21-clang
 export AR_aarch64_linux_android=$COMPILER_DIR/llvm-ar
 export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$COMPILER_DIR/aarch64-linux-android21-clang
 export CARGO_TARGET_AARCH64_LINUX_ANDROID_AR=$COMPILER_DIR/llvm-ar
+ln -s "$AR_aarch64_linux_android" "$COMPILER_DIR/aarch64-linux-android-ranlib"
 
 if [ "$1" = "x64" ]; then
-  ln -s "$AR_x86_64_linux_android" "$COMPILER_DIR/x86_64-linux-android-ranlib"
   rustup target add x86_64-linux-android
   cargo build --target x86_64-linux-android --features sqlcipher-vendored --release
   mv "target/x86_64-linux-android/release/libisar.so" "libisar_android_x64.so"
 elif [ "$1" = "armv7" ]; then
-  ln -s "$AR_armv7_linux_androideabi" "$COMPILER_DIR/arm-linux-androideabi-ranlib"
   rustup target add armv7-linux-androideabi
   cargo build --target armv7-linux-androideabi --features sqlcipher-vendored --release
   mv "target/armv7-linux-androideabi/release/libisar.so" "libisar_android_armv7.so"
 else
-  ln -s "$AR_aarch64_linux_android" "$COMPILER_DIR/aarch64-linux-android-ranlib"
   rustup target add aarch64-linux-android
   cargo build --target aarch64-linux-android --features sqlcipher-vendored --release
   mv "target/aarch64-linux-android/release/libisar.so" "libisar_android_arm64.so"
