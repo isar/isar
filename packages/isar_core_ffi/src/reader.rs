@@ -237,7 +237,7 @@ pub unsafe extern "C" fn isar_read_to_json(
     buffer: *mut *mut u8,
     buffer_size: *mut u32,
 ) -> u32 {
-    let mut new_buffer = if buffer.is_null() {
+    let mut new_buffer = if (*buffer).is_null() {
         vec![]
     } else {
         Vec::from_raw_parts(*buffer, 0, *buffer_size as usize)
