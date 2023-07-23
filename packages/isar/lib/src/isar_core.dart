@@ -62,10 +62,12 @@ abstract final class IsarCore {
       return;
     }
 
+    _libraryPath =
+        Platform.isIOS ? null : libraryPath ?? Abi.current().localName;
+
     final dylib = Platform.isIOS
         ? DynamicLibrary.process()
-        : DynamicLibrary.open(libraryPath!);
-    _libraryPath = libraryPath;
+        : DynamicLibrary.open(_libraryPath!);
     b = IsarCoreBindings(dylib);
     _initialized = true;
   }
