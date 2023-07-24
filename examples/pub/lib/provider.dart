@@ -13,7 +13,7 @@ import 'package:riverpod/riverpod.dart';
 
 final isarPod = FutureProvider((ref) async {
   final dir = await getApplicationDocumentsDirectory();
-  return Isar.open([PackageSchema, AssetSchema], directory: dir.path);
+  return Isar.open(schemas: [PackageSchema, AssetSchema], directory: dir.path);
 });
 
 final repositoryPod = Provider((ref) {
