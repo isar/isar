@@ -16,7 +16,6 @@ class PackageAndVersion {
 }
 
 Future<void> loadAssets(PackageAndVersion p) async {
-  return;
   final isar = Isar.get(schemas: [PackageSchema, AssetSchema]);
 
   Asset? readme;
