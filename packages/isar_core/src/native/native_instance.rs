@@ -14,9 +14,10 @@ use crate::core::schema::IsarSchema;
 use crate::core::value::IsarValue;
 use crate::core::watcher::{WatchHandle, WatcherCallback};
 use intmap::IntMap;
+use parking_lot::Mutex;
 use std::fs::{self, remove_file};
 use std::path::PathBuf;
-use std::sync::{Arc, LazyLock, Mutex};
+use std::sync::{Arc, LazyLock};
 
 static INSTANCES: LazyLock<Mutex<IntMap<Arc<NativeInstance>>>> =
     LazyLock::new(|| Mutex::new(IntMap::new()));
@@ -53,7 +54,7 @@ impl IsarInstance for NativeInstance {
         Self: 'a;
 
     fn get_instance(instance_id: u32) -> Option<Self::Instance> {
-        let mut lock = INSTANCES.lock().unwrap();
+        let mut lock = INSTANCES.lock();
         if let Some(instance) = lock.get_mut(instance_id as u64) {
             Some(Arc::clone(&instance))
         } else {
@@ -85,7 +86,7 @@ impl IsarInstance for NativeInstance {
         if encryption_key.is_some() {
             return Err(IsarError::IllegalArgument {});
         }
-        let mut lock = INSTANCES.lock().unwrap();
+        let mut lock = INSTANCES.lock();
         if let Some(instance) = lock.get(instance_id as u64) {
             Ok(instance.clone())
         } else {
@@ -313,7 +314,7 @@ impl IsarInstance for NativeInstance {
     fn close(instance: Arc<Self>, delete: bool) -> bool {
         // Check whether all other references are gone
         if Arc::strong_count(&instance) == 2 {
-            let mut lock = INSTANCES.lock().unwrap();
+            let mut lock = INSTANCES.lock();
             // Check again to make sure there are no new references
             if Arc::strong_count(&instance) == 2 {
                 lock.remove(instance.instance_id as u64);

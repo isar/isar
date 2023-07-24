@@ -33,10 +33,5 @@ enums:
   rename:
     "StorageEngine": "CStorageEngine"
 
-functions:
-  leaf:
-    include:
-      - ".*"
-
 preamble: |
   // ignore_for_file: camel_case_types, non_constant_identifier_names
