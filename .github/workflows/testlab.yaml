@@ -40,7 +40,6 @@ jobs:
             --type instrumentation \
             --timeout 5m \
             --device model=hammerhead,version=23  \
-            --device model=starqlteue,version=26 \
             --device model=cheetah,version=33 \
             --app build/app/outputs/apk/debug/app-debug.apk \
             --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk
