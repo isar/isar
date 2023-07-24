@@ -1,4 +1,5 @@
 use crate::core::error::{IsarError, Result};
+use ffi::sqlite3_busy_timeout;
 use libc::c_void;
 use libsqlite3_sys as ffi;
 use std::cell::Cell;
@@ -51,6 +52,9 @@ impl SQLite3 {
     }
 
     fn initialize(&self) -> Result<()> {
+        unsafe {
+            sqlite3_busy_timeout(self.db, 5000);
+        }
         self.prepare("PRAGMA case_sensitive_like = true")?.step()?;
         Ok(())
     }

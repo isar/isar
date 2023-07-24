@@ -179,14 +179,31 @@ abstract class Isar {
   /// The code inside the callback will be executed in a separate isolate.
   ///
   /// Check out the [read] method for more information.
-  Future<T> readAsync<T>(T Function(Isar isar) callback);
+  Future<T> readAsync<T>(T Function(Isar isar) callback, {String? debugName}) =>
+      readAsyncWith(null, (isar, _) => callback(isar), debugName: debugName);
+
+  Future<T> readAsyncWith<T, P>(
+    P param,
+    T Function(Isar isar, P param) callback, {
+    String? debugName,
+  });
 
   /// Create an asynchronous read-write transaction.
   ///
   /// The code inside the callback will be executed in a separate isolate.
   ///
   /// Check out the [write] method for more information.
-  Future<T> writeAsync<T>(T Function(Isar isar) callback);
+  Future<T> writeAsync<T>(
+    T Function(Isar isar) callback, {
+    String? debugName,
+  }) =>
+      writeAsyncWith(null, (isar, _) => callback(isar), debugName: debugName);
+
+  Future<T> writeAsyncWith<T, P>(
+    P param,
+    T Function(Isar isar, P param) callback, {
+    String? debugName,
+  });
 
   /// Returns the size of all the collections in bytes.
   ///

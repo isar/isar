@@ -96,11 +96,12 @@ class _IsarImpl extends Isar {
     return _IsarImpl._(instanceId, sqliteEngine, isarPtrPtr.value, converters);
   }
 
-  factory _IsarImpl.get(
-      {required int instanceId,
-      required List<IsarObjectConverter<dynamic, dynamic>> converters,
-      required bool sqliteEngine,
-      String? libraryPath}) {
+  factory _IsarImpl.get({
+    required int instanceId,
+    required List<IsarObjectConverter<dynamic, dynamic>> converters,
+    required bool sqliteEngine,
+    String? libraryPath,
+  }) {
     IsarCore._attach(libraryPath);
     final ptr = IsarCore.b.isar_get_instance(instanceId, sqliteEngine);
     if (ptr.isNull) {
@@ -250,38 +251,52 @@ class _IsarImpl extends Isar {
   }
 
   @override
-  Future<T> readAsync<T>(T Function(Isar isar) callback) {
+  Future<T> readAsyncWith<T, P>(
+    P param,
+    T Function(Isar isar, P param) callback, {
+    String? debugName,
+  }) {
     final instanceId = this.instanceId;
     final sqliteEngine = this.sqliteEngine;
     final libraryPath = IsarCore._libraryPath;
     final converters = this.converters;
-    return Isolate.run(
+    return _IsolatePool.runIsolate(
       () => _isarAsync(
         instanceId,
         sqliteEngine,
         libraryPath,
         converters,
         false,
+        param,
         callback,
       ),
+      debugName ?? 'Isar async read',
     );
   }
 
   @override
-  Future<T> writeAsync<T>(T Function(Isar isar) callback) async {
+  Future<T> writeAsyncWith<T, P>(
+    P param,
+    T Function(Isar isar, P param) callback, {
+    String? debugName,
+  }) async {
     final instanceId = this.instanceId;
     final sqliteEngine = this.sqliteEngine;
     final libraryPath = IsarCore._libraryPath;
-    final converters = this.converters;
-    return Isolate.run(
-      () => _isarAsync(
-        instanceId,
-        sqliteEngine,
-        libraryPath,
-        converters,
-        true,
-        callback,
-      ),
+    final converters = this.converters.toList();
+    return _IsolatePool.runIsolate(
+      () {
+        return _isarAsync(
+          instanceId,
+          sqliteEngine,
+          libraryPath,
+          converters,
+          true,
+          param,
+          callback,
+        );
+      },
+      debugName ?? 'Isar async write',
     );
   }
 
@@ -324,13 +339,14 @@ class _IsarImpl extends Isar {
   }
 }
 
-T _isarAsync<T>(
+T _isarAsync<T, P>(
   int instanceId,
   bool sqliteEngine,
   String? libraryPath,
   List<IsarObjectConverter<dynamic, dynamic>> converters,
   bool write,
-  T Function(Isar isar) callback,
+  P param,
+  T Function(Isar isar, P param) callback,
 ) {
   final isar = _IsarImpl.get(
     instanceId: instanceId,
@@ -340,9 +356,9 @@ T _isarAsync<T>(
   );
   try {
     if (write) {
-      return isar.write(callback);
+      return isar.write((isar) => callback(isar, param));
     } else {
-      return isar.read(callback);
+      return isar.read((isar) => callback(isar, param));
     }
   } finally {
     isar.close();

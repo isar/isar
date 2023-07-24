@@ -36,6 +36,10 @@ impl SQLiteTxn {
         Ok(&self.sqlite)
     }
 
+    pub(crate) fn is_write(&self) -> bool {
+        self.write
+    }
+
     pub(crate) fn guard<T, F>(&self, job: F) -> Result<T>
     where
         F: FnOnce() -> Result<T>,

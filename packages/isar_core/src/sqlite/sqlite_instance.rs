@@ -16,12 +16,14 @@ use crate::core::value::IsarValue;
 use crate::core::watcher::{WatchHandle, WatcherCallback};
 use intmap::IntMap;
 use itertools::Itertools;
+use parking_lot::lock_api::RawMutex;
+use parking_lot::Mutex;
 use std::borrow::Cow;
 use std::cell::Cell;
 use std::fs::remove_file;
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::sync::{Arc, LazyLock, Mutex};
+use std::sync::{Arc, LazyLock};
 use std::vec;
 
 static INSTANCES: LazyLock<Mutex<IntMap<Connections>>> =
@@ -41,6 +43,7 @@ struct SQLiteInstanceInfo {
     encryption_key: Option<String>,
     instance_id: u32,
     collections: Vec<SQLiteCollection>,
+    write_mutex: parking_lot::RawMutex,
 }
 
 pub struct SQLiteInstance {
@@ -93,6 +96,7 @@ impl SQLiteInstance {
             instance_id,
             path,
             collections,
+            write_mutex: RawMutex::INIT,
         };
 
         let sqlite = Rc::into_inner(sqlite).unwrap();
@@ -161,7 +165,7 @@ impl IsarInstance for SQLiteInstance {
         Self: 'a;
 
     fn get_instance(instance_id: u32) -> Option<Self::Instance> {
-        let mut lock = INSTANCES.lock().unwrap();
+        let mut lock = INSTANCES.lock();
         if let Some(connections) = lock.get_mut(instance_id as u64) {
             let sqlite = connections.sqlite.pop().or_else(|| {
                 Self::open_conn(
@@ -212,7 +216,7 @@ impl IsarInstance for SQLiteInstance {
             return Err(IsarError::IllegalArgument {});
         }
 
-        let mut lock = INSTANCES.lock().unwrap();
+        let mut lock = INSTANCES.lock();
         if !lock.contains_key(instance_id as u64) {
             let (info, sqlite) = Self::open(
                 instance_id,
@@ -231,7 +235,14 @@ impl IsarInstance for SQLiteInstance {
         }
 
         let connections = lock.get_mut(instance_id as u64).unwrap();
-        let sqlite = connections.sqlite.pop().unwrap();
+        let sqlite = if let Some(sqlite) = connections.sqlite.pop() {
+            sqlite
+        } else {
+            Self::open_conn(
+                &connections.info.path,
+                connections.info.encryption_key.as_deref(),
+            )?
+        };
         Ok(Self {
             info: connections.info.clone(),
             sqlite: Rc::new(sqlite),
@@ -240,6 +251,9 @@ impl IsarInstance for SQLiteInstance {
     }
 
     fn begin_txn(&self, write: bool) -> Result<SQLiteTxn> {
+        if write {
+            self.info.write_mutex.lock();
+        }
         if self.txn_active.replace(true) {
             Err(IsarError::TransactionActive {})
         } else {
@@ -249,7 +263,12 @@ impl IsarInstance for SQLiteInstance {
 
     fn commit_txn(&self, txn: SQLiteTxn) -> Result<()> {
         self.txn_active.replace(false);
-        txn.commit()
+        let write = txn.is_write();
+        let result = txn.commit();
+        if write {
+            unsafe { self.info.write_mutex.unlock() };
+        }
+        result
     }
 
     fn abort_txn(&self, txn: SQLiteTxn) {
@@ -459,7 +478,7 @@ impl IsarInstance for SQLiteInstance {
     fn close(instance: Self::Instance, delete: bool) -> bool {
         // Check whether all other references are gone
         if Arc::strong_count(&instance.info) == 2 {
-            let mut lock = INSTANCES.lock().unwrap();
+            let mut lock = INSTANCES.lock();
             // Check again to make sure there are no new references
             if Arc::strong_count(&instance.info) == 2 {
                 lock.remove(instance.info.instance_id as u64);
@@ -477,7 +496,7 @@ impl IsarInstance for SQLiteInstance {
 
         // Return connection to pool
         if let Some(sqlite) = Rc::into_inner(instance.sqlite) {
-            let mut lock = INSTANCES.lock().unwrap();
+            let mut lock = INSTANCES.lock();
             let connections = lock.get_mut(instance.info.instance_id as u64).unwrap();
             connections.sqlite.push(sqlite);
         }

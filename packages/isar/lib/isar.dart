@@ -25,6 +25,7 @@ part 'src/impl/filter_builder.dart';
 part 'src/impl/isar_collection_impl.dart';
 part 'src/impl/isar_impl.dart';
 part 'src/impl/isar_query_impl.dart';
+part 'src/impl/isolate_pool.dart';
 part 'src/impl/native_error.dart';
 
 part 'src/async.dart';
