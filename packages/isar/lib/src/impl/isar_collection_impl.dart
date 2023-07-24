@@ -31,7 +31,12 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
 
       IsarCore.b
           .isar_get(
-              isarPtr, txnPtr, collectionIndex, _idToInt(id), readerPtrPtr)
+            isarPtr,
+            txnPtr,
+            collectionIndex,
+            _idToInt(id),
+            readerPtrPtr,
+          )
           .checkNoError();
 
       final readerPtr = readerPtrPtr.value;
@@ -119,30 +124,26 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
     }
 
     return isar.getWriteTxn((isarPtr, txnPtr) {
-      try {
-        var count = 0;
-        final updatedPtr = IsarCore.boolPtr;
-        for (final id in ids) {
-          IsarCore.b
-              .isar_update(
-                isarPtr,
-                txnPtr,
-                collectionIndex,
-                _idToInt(id),
-                updatePtr,
-                updatedPtr,
-              )
-              .checkNoError();
+      var count = 0;
+      final updatedPtr = IsarCore.boolPtr;
+      for (final id in ids) {
+        IsarCore.b
+            .isar_update(
+              isarPtr,
+              txnPtr,
+              collectionIndex,
+              _idToInt(id),
+              updatePtr,
+              updatedPtr,
+            )
+            .checkNoError();
 
-          if (updatedPtr.value) {
-            count++;
-          }
+        if (updatedPtr.value) {
+          count++;
         }
-
-        return (count, txnPtr);
-      } finally {
-        IsarCore.b.isar_update_free(updatePtr);
       }
+
+      return (count, txnPtr);
     });
   }
 

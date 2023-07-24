@@ -23,19 +23,19 @@ class PackageHeader extends ConsumerWidget {
         const SizedBox(height: 20),
         Text(
           '${package.name} ${package.version}',
-          style: theme.textTheme.headline5,
+          style: theme.textTheme.headlineSmall,
         ),
         const SizedBox(height: 3),
         Wrap(
           children: [
             Text(
               timeago.format(package.published),
-              style: theme.textTheme.subtitle2,
+              style: theme.textTheme.titleSmall,
             ),
             if (package.publisher != null) ...[
               Text(
                 ' • ',
-                style: theme.textTheme.subtitle2,
+                style: theme.textTheme.titleSmall,
               ),
               Publisher(package.publisher!),
             ],
@@ -49,7 +49,7 @@ class PackageHeader extends ConsumerWidget {
           const SizedBox(height: 15),
           Text(
             package.description!.trim(),
-            style: theme.textTheme.bodyText2!.copyWith(
+            style: theme.textTheme.bodyMedium!.copyWith(
               color: theme.colorScheme.onSurface.withOpacity(0.9),
             ),
           ),
@@ -86,7 +86,7 @@ class Platforms extends StatelessWidget {
             ),
             child: Text(
               sdks.join(' • '),
-              style: theme.textTheme.subtitle2!.copyWith(
+              style: theme.textTheme.titleSmall!.copyWith(
                 fontSize: compact ? 9 : 11,
                 color: theme.colorScheme.onPrimaryContainer,
               ),
@@ -101,7 +101,7 @@ class Platforms extends StatelessWidget {
             ),
             child: Text(
               platforms!.join(' • ').toUpperCase(),
-              style: theme.textTheme.subtitle2!.copyWith(
+              style: theme.textTheme.titleSmall!.copyWith(
                 fontSize: compact ? 9 : 11,
                 color: theme.colorScheme.onPrimaryContainer,
               ),

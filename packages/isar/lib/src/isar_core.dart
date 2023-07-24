@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 part of isar;
 
 abstract final class IsarCore {
@@ -10,10 +12,10 @@ abstract final class IsarCore {
   static Pointer<Uint32> countPtr = malloc<Uint32>();
   static Pointer<Bool> boolPtr = malloc<Bool>();
 
-  static late final Pointer<Pointer<Uint8>> stringPtrPtr = ptrPtr.cast();
+  static final Pointer<Pointer<Uint8>> stringPtrPtr = ptrPtr.cast();
   static Pointer<Uint8> get stringPtr => stringPtrPtr.value;
 
-  static late final Pointer<Pointer<CIsarReader>> readerPtrPtr = ptrPtr.cast();
+  static final Pointer<Pointer<CIsarReader>> readerPtrPtr = ptrPtr.cast();
   static Pointer<CIsarReader> get readerPtr => readerPtrPtr.value;
 
   static Pointer<Uint16> _nativeStringPtr = nullptr;
@@ -98,14 +100,14 @@ abstract final class IsarCore {
     return b.isar_string(_nativeStringPtr, str.length);
   }
 
-  static late final readId = b.isar_read_id;
-  static late final readNull = b.isar_read_null;
-  static late final readBool = b.isar_read_bool;
-  static late final readByte = b.isar_read_byte;
-  static late final readInt = b.isar_read_int;
-  static late final readFloat = b.isar_read_float;
-  static late final readLong = b.isar_read_long;
-  static late final readDouble = b.isar_read_double;
+  static final readId = b.isar_read_id;
+  static final readNull = b.isar_read_null;
+  static final readBool = b.isar_read_bool;
+  static final readByte = b.isar_read_byte;
+  static final readInt = b.isar_read_int;
+  static final readFloat = b.isar_read_float;
+  static final readLong = b.isar_read_long;
+  static final readDouble = b.isar_read_double;
   static String? readString(Pointer<CIsarReader> reader, int index) {
     final length = b.isar_read_string(reader, index, stringPtrPtr, boolPtr);
     if (stringPtr.isNull) {
@@ -120,22 +122,22 @@ abstract final class IsarCore {
     }
   }
 
-  static late final readObject = b.isar_read_object;
-  static late final readList = b.isar_read_list;
-  static late final freeReader = b.isar_read_free;
+  static final readObject = b.isar_read_object;
+  static final readList = b.isar_read_list;
+  static final freeReader = b.isar_read_free;
 
-  static late final writeNull = b.isar_write_null;
-  static late final writeBool = b.isar_write_bool;
-  static late final writeByte = b.isar_write_byte;
-  static late final writeInt = b.isar_write_int;
-  static late final writeFloat = b.isar_write_float;
-  static late final writeLong = b.isar_write_long;
-  static late final writeDouble = b.isar_write_double;
-  static late final writeString = b.isar_write_string;
-  static late final beginObject = b.isar_write_object;
-  static late final endObject = b.isar_write_object_end;
-  static late final beginList = b.isar_write_list;
-  static late final endList = b.isar_write_list_end;
+  static final writeNull = b.isar_write_null;
+  static final writeBool = b.isar_write_bool;
+  static final writeByte = b.isar_write_byte;
+  static final writeInt = b.isar_write_int;
+  static final writeFloat = b.isar_write_float;
+  static final writeLong = b.isar_write_long;
+  static final writeDouble = b.isar_write_double;
+  static final writeString = b.isar_write_string;
+  static final beginObject = b.isar_write_object;
+  static final endObject = b.isar_write_object_end;
+  static final beginList = b.isar_write_list;
+  static final endList = b.isar_write_list_end;
 }
 
 extension PointerX on Pointer {

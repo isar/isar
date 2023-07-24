@@ -11,33 +11,39 @@ String generateLength(
   ) codeGen,
 ) {
   return '''
-      QueryBuilder<$objectName, $objectName, QAfterFilterCondition> ${propertyName.decapitalize()}LengthEqualTo(int length) {
+      QueryBuilder<$objectName, $objectName, QAfterFilterCondition> 
+      ${propertyName.decapitalize()}LengthEqualTo(int length) {
         return ${codeGen('length', 'true', 'length', 'true')};
       }
 
-      QueryBuilder<$objectName, $objectName, QAfterFilterCondition> ${propertyName.decapitalize()}IsEmpty() {
+      QueryBuilder<$objectName, $objectName, QAfterFilterCondition> 
+      ${propertyName.decapitalize()}IsEmpty() {
         return ${codeGen('0', 'true', '0', 'true')};
       }
 
-      QueryBuilder<$objectName, $objectName, QAfterFilterCondition> ${propertyName.decapitalize()}IsNotEmpty() {
+      QueryBuilder<$objectName, $objectName, QAfterFilterCondition> 
+      ${propertyName.decapitalize()}IsNotEmpty() {
         return ${codeGen('0', 'false', '999999', 'true')};
       }
 
-      QueryBuilder<$objectName, $objectName, QAfterFilterCondition> ${propertyName.decapitalize()}LengthLessThan(
+      QueryBuilder<$objectName, $objectName, QAfterFilterCondition> 
+      ${propertyName.decapitalize()}LengthLessThan(
         int length, {
         bool include = false,
       }) {
         return ${codeGen('0', 'true', 'length', 'include')};
       }
 
-      QueryBuilder<$objectName, $objectName, QAfterFilterCondition> ${propertyName.decapitalize()}LengthGreaterThan(
+      QueryBuilder<$objectName, $objectName, QAfterFilterCondition> 
+      ${propertyName.decapitalize()}LengthGreaterThan(
         int length, {
         bool include = false,
       }) {
         return ${codeGen('length', 'include', '999999', 'true')};
       }
 
-      QueryBuilder<$objectName, $objectName, QAfterFilterCondition> ${propertyName.decapitalize()}LengthBetween(
+      QueryBuilder<$objectName, $objectName, QAfterFilterCondition> 
+      ${propertyName.decapitalize()}LengthBetween(
         int lower, 
         int upper, {
         bool includeLower = true,

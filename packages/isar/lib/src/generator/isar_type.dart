@@ -1,9 +1,6 @@
 // ignore_for_file: public_member_api_docs
 
-import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
-import 'package:isar/src/generator/helper.dart';
-import 'package:source_gen/source_gen.dart';
+part of isar_generator;
 
 const TypeChecker _dateTimeChecker = TypeChecker.fromRuntime(DateTime);
 
@@ -98,7 +95,8 @@ extension DartTypeX on DartType {
   bool get supportsJsonConversion {
     final element = this.element;
     if (element is ClassElement) {
-      // check if the class has a toJson() method returning Map<String,dynamic> and a fromJson factory
+      // check if the class has a toJson() method returning Map<String,dynamic>
+      // and a fromJson factory
       final toJson = element.getMethod('toJson');
       final fromJson = element.getNamedConstructor('fromJson');
       if (toJson != null && fromJson != null) {

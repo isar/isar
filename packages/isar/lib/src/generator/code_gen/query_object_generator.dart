@@ -1,10 +1,8 @@
 // ignore_for_file: use_string_buffers
 
-import 'package:isar/src/generator/helper.dart';
-import 'package:isar/src/generator/isar_type.dart';
-import 'package:isar/src/generator/object_info.dart';
+part of isar_generator;
 
-String generateQueryObjects(ObjectInfo oi) {
+String _generateQueryObjects(ObjectInfo oi) {
   var code =
       'extension ${oi.dartName}QueryObject on QueryBuilder<${oi.dartName}, '
       '${oi.dartName}, QFilterCondition> {';

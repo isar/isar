@@ -15,7 +15,7 @@ class Model {
   final bool active;
 
   @override
-  operator ==(other) =>
+  bool operator ==(other) =>
       other is Model &&
       other.name == name &&
       other.id == id &&

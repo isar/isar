@@ -1,9 +1,8 @@
-import 'package:isar/src/generator/helper.dart';
-import 'package:isar/src/generator/isar_type.dart';
-import 'package:isar/src/generator/object_info.dart';
+part of isar_generator;
 
-class FilterGenerator {
-  FilterGenerator(this.object) : objName = object.dartName;
+class _FilterGenerator {
+  _FilterGenerator(this.object) : objName = object.dartName;
+
   final ObjectInfo object;
   final String objName;
 

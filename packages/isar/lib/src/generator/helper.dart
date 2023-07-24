@@ -1,7 +1,4 @@
-import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
-import 'package:isar/isar.dart';
-import 'package:source_gen/source_gen.dart';
+part of isar_generator;
 
 const TypeChecker _collectionChecker = TypeChecker.fromRuntime(Collection);
 const TypeChecker _embeddedChecker = TypeChecker.fromRuntime(Embedded);
@@ -11,7 +8,7 @@ const TypeChecker _ignoreChecker = TypeChecker.fromRuntime(Ignore);
 const TypeChecker _nameChecker = TypeChecker.fromRuntime(Name);
 const TypeChecker _utcChecker = TypeChecker.fromRuntime(Utc);
 
-extension ClassElementX on ClassElement {
+extension on ClassElement {
   List<PropertyInducingElement> get allAccessors {
     final ignoreFields =
         collectionAnnotation?.ignore ?? embeddedAnnotation!.ignore;
@@ -39,13 +36,9 @@ extension ClassElementX on ClassElement {
     }
     return uniqueAccessors.values.toList();
   }
-
-  List<String> get enumConsts {
-    return fields.where((e) => e.isEnumConstant).map((e) => e.name).toList();
-  }
 }
 
-extension PropertyElementX on PropertyInducingElement {
+extension on PropertyInducingElement {
   bool get hasIdAnnotation {
     final ann = _idChecker.firstAnnotationOfExact(nonSynthetic);
     return ann != null;
@@ -57,21 +50,21 @@ extension PropertyElementX on PropertyInducingElement {
   }
 }
 
-extension EnumElementX on EnumElement {
+extension on EnumElement {
   FieldElement? get enumValueProperty {
     final annotatedProperties = fields
         .where((e) => !e.isEnumConstant)
         .where(_enumPropertyChecker.hasAnnotationOfExact)
         .toList();
     if (annotatedProperties.length > 1) {
-      err('Only one property can be annotated with @enumProperty', this);
+      _err('Only one property can be annotated with @enumProperty', this);
     } else {
       return annotatedProperties.firstOrNull;
     }
   }
 }
 
-extension ElementX on Element {
+extension on Element {
   String get isarName {
     final ann = _nameChecker.firstAnnotationOfExact(nonSynthetic);
     late String name;
@@ -80,7 +73,7 @@ extension ElementX on Element {
     } else {
       name = ann.getField('name')!.toStringValue()!;
     }
-    checkIsarName(name, this);
+    _checkIsarName(name, this);
     return name;
   }
 
@@ -130,17 +123,17 @@ extension ElementX on Element {
   }
 }
 
-void checkIsarName(String name, Element element) {
+void _checkIsarName(String name, Element element) {
   if (name.isEmpty || name.startsWith('_')) {
-    err('Names must not be blank or start with "_".', element);
+    _err('Names must not be blank or start with "_".', element);
   }
 }
 
-Never err(String msg, [Element? element]) {
+Never _err(String msg, [Element? element]) {
   throw InvalidGenerationSourceError(msg, element: element);
 }
 
-extension StringX on String {
+extension on String {
   String capitalize() {
     switch (length) {
       case 0:

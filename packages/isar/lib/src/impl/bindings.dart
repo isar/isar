@@ -605,14 +605,6 @@ class IsarCoreBindings {
       int Function(
           ffi.Pointer<CIsarInstance>, ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>();
 
-  void isar_sleep() {
-    return _isar_sleep();
-  }
-
-  late final _isar_sleepPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function()>>('isar_sleep');
-  late final _isar_sleep = _isar_sleepPtr.asFunction<void Function()>();
-
   int isar_txn_begin(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<ffi.Pointer<CIsarTxn>> txn,
@@ -1353,6 +1345,46 @@ class IsarCoreBindings {
       int Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>, int, int,
           ffi.Pointer<CIsarUpdate>, ffi.Pointer<ffi.Bool>)>();
 
+  int isar_query_update(
+    ffi.Pointer<CIsarInstance> isar,
+    ffi.Pointer<CIsarTxn> txn,
+    ffi.Pointer<CIsarQuery> query,
+    int offset,
+    int limit,
+    ffi.Pointer<CIsarUpdate> update,
+    ffi.Pointer<ffi.Uint32> updated,
+  ) {
+    return _isar_query_update(
+      isar,
+      txn,
+      query,
+      offset,
+      limit,
+      update,
+      updated,
+    );
+  }
+
+  late final _isar_query_updatePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Uint8 Function(
+              ffi.Pointer<CIsarInstance>,
+              ffi.Pointer<CIsarTxn>,
+              ffi.Pointer<CIsarQuery>,
+              ffi.Int64,
+              ffi.Int64,
+              ffi.Pointer<CIsarUpdate>,
+              ffi.Pointer<ffi.Uint32>)>>('isar_query_update');
+  late final _isar_query_update = _isar_query_updatePtr.asFunction<
+      int Function(
+          ffi.Pointer<CIsarInstance>,
+          ffi.Pointer<CIsarTxn>,
+          ffi.Pointer<CIsarQuery>,
+          int,
+          int,
+          ffi.Pointer<CIsarUpdate>,
+          ffi.Pointer<ffi.Uint32>)>();
+
   ffi.Pointer<CIsarUpdate> isar_update_new() {
     return _isar_update_new();
   }
@@ -1381,20 +1413,6 @@ class IsarCoreBindings {
               ffi.Pointer<CIsarValue>)>>('isar_update_add_value');
   late final _isar_update_add_value = _isar_update_add_valuePtr.asFunction<
       void Function(ffi.Pointer<CIsarUpdate>, int, ffi.Pointer<CIsarValue>)>();
-
-  void isar_update_free(
-    ffi.Pointer<CIsarUpdate> update,
-  ) {
-    return _isar_update_free(
-      update,
-    );
-  }
-
-  late final _isar_update_freePtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<CIsarUpdate>)>>(
-          'isar_update_free');
-  late final _isar_update_free = _isar_update_freePtr
-      .asFunction<void Function(ffi.Pointer<CIsarUpdate>)>();
 
   ffi.Pointer<CIsarValue> isar_value_bool(
     bool value,

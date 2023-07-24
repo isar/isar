@@ -31,7 +31,7 @@ class MarkdownViewer extends ConsumerWidget {
         }
       },
       extensions: [
-        SvgHtmlExtension(),
+        const SvgHtmlExtension(),
         TagExtension(
           tagsToExtend: {'code'},
           builder: (context) {

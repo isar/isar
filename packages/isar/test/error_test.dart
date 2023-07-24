@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:build/build.dart';
 import 'package:build_test/build_test.dart';
-import 'package:isar/isar_generator.dart';
+import 'package:isar/src/generator/isar_generator.dart';
 import 'package:test/test.dart';
 
 void main() {

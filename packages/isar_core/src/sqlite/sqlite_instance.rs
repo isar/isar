@@ -273,7 +273,11 @@ impl IsarInstance for SQLiteInstance {
 
     fn abort_txn(&self, txn: SQLiteTxn) {
         self.txn_active.replace(false);
+        let write = txn.is_write();
         txn.abort();
+        if write {
+            unsafe { self.info.write_mutex.unlock() };
+        }
     }
 
     fn auto_increment(&self, collection_index: u16) -> i64 {

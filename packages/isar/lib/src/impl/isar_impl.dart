@@ -30,6 +30,7 @@ class _IsarImpl extends Isar {
   Pointer<CIsarTxn>? _txnPtr;
   bool _txnWrite = false;
 
+  // ignore: sort_constructors_first
   factory _IsarImpl.open({
     required List<IsarCollectionSchema> schemas,
     required String name,
@@ -96,6 +97,7 @@ class _IsarImpl extends Isar {
     return _IsarImpl._(instanceId, sqliteEngine, isarPtrPtr.value, converters);
   }
 
+  // ignore: sort_constructors_first
   factory _IsarImpl.get({
     required int instanceId,
     required List<IsarObjectConverter<dynamic, dynamic>> converters,
@@ -112,6 +114,7 @@ class _IsarImpl extends Isar {
     return _IsarImpl._(instanceId, sqliteEngine, ptr, converters);
   }
 
+  // ignore: sort_constructors_first
   factory _IsarImpl.getByName({
     required String name,
     required List<IsarCollectionSchema> schemas,

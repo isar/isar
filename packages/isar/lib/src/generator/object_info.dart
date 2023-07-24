@@ -1,7 +1,6 @@
 // ignore_for_file: public_member_api_docs
 
-import 'package:isar/src/generator/helper.dart';
-import 'package:isar/src/generator/isar_type.dart';
+part of isar_generator;
 
 class ObjectInfo {
   const ObjectInfo({

@@ -58,12 +58,6 @@ class Model {
       other.stringProp == stringProp &&
       other.nullableStringProp == nullableStringProp &&
       other.dateProp == dateProp;
-
-  @override
-  String toString() {
-    // TODO: implement toString
-    return 'Model(id: $id, boolProp: $boolProp, nullableBoolProp: $nullableBoolProp, byteProp: $byteProp, shortProp: $shortProp, longProp: $longProp, floatProp: $floatProp, doubleProp: $doubleProp, stringProp: $stringProp, dateProp: $dateProp, nullableStringProp: $nullableStringProp)';
-  }
 }
 
 void main() {
@@ -94,14 +88,17 @@ void main() {
     group('update()', () {
       isarTest('bool change', () {
         isar.write((isar) {
-          expect(isar.models.update(model.id, boolProp: false), true);
+          expect(isar.models.update(id: model.id, boolProp: false), true);
         });
         expect(isar.models.get(model.id), model.copyWith(boolProp: false));
       });
 
       isarTest('bool change to null', () {
         isar.write((isar) {
-          expect(isar.models.update(model.id, nullableBoolProp: null), true);
+          expect(
+            isar.models.update(id: model.id, nullableBoolProp: null),
+            true,
+          );
         });
         expect(
           isar.models.get(model.id),
@@ -111,52 +108,52 @@ void main() {
 
       isarTest('byte change', () {
         isar.write((isar) {
-          expect(isar.models.update(model.id, byteProp: 2), true);
+          expect(isar.models.update(id: model.id, byteProp: 2), true);
         });
         expect(isar.models.get(model.id), model.copyWith(byteProp: 2));
       });
 
       isarTest('short change', () {
         isar.write((isar) {
-          expect(isar.models.update(model.id, shortProp: 3), true);
+          expect(isar.models.update(id: model.id, shortProp: 3), true);
         });
         expect(isar.models.get(model.id), model.copyWith(shortProp: 3));
       });
 
       isarTest('long change', () {
         isar.write((isar) {
-          expect(isar.models.update(model.id, longProp: 4), true);
+          expect(isar.models.update(id: model.id, longProp: 4), true);
         });
         expect(isar.models.get(model.id), model.copyWith(longProp: 4));
       });
 
       isarTest('float change', () {
         isar.write((isar) {
-          expect(isar.models.update(model.id, floatProp: 5), true);
+          expect(isar.models.update(id: model.id, floatProp: 5), true);
         });
         expect(isar.models.get(model.id), model.copyWith(floatProp: 5));
       });
 
       isarTest('double change', () {
         isar.write((isar) {
-          expect(isar.models.update(model.id, doubleProp: 6), true);
+          expect(isar.models.update(id: model.id, doubleProp: 6), true);
         });
         expect(isar.models.get(model.id), model.copyWith(doubleProp: 6));
       });
 
       isarTest('string change', () {
         isar.write((isar) {
-          expect(isar.models.update(model.id, stringProp: 'world'), true);
+          expect(isar.models.update(id: model.id, stringProp: 'world'), true);
         });
         expect(isar.models.get(model.id), model.copyWith(stringProp: 'world'));
 
         isar.write((isar) {
-          expect(isar.models.update(model.id, stringProp: ''), true);
+          expect(isar.models.update(id: model.id, stringProp: ''), true);
         });
         expect(isar.models.get(model.id), model.copyWith(stringProp: ''));
 
         isar.write((isar) {
-          expect(isar.models.update(model.id, stringProp: 'loooong'), true);
+          expect(isar.models.update(id: model.id, stringProp: 'loooong'), true);
         });
         expect(
           isar.models.get(model.id),
@@ -166,7 +163,10 @@ void main() {
 
       isarTest('nullable string change', () {
         isar.write((isar) {
-          expect(isar.models.update(model.id, nullableStringProp: null), true);
+          expect(
+            isar.models.update(id: model.id, nullableStringProp: null),
+            true,
+          );
         });
         expect(
           isar.models.get(model.id),
@@ -175,7 +175,7 @@ void main() {
 
         isar.write((isar) {
           expect(
-            isar.models.update(model.id, nullableStringProp: 'testaaaa'),
+            isar.models.update(id: model.id, nullableStringProp: 'testaaaa'),
             true,
           );
         });
@@ -189,7 +189,7 @@ void main() {
         isar.write((isar) {
           expect(
             isar.models.update(
-              model.id,
+              id: model.id,
               dateProp: DateTime.fromMillisecondsSinceEpoch(300, isUtc: true),
             ),
             true,

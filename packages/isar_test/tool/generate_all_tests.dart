@@ -25,7 +25,6 @@ void main() {
   final code = """
     // ignore_for_file: directives_ordering
 
-    import 'package:isar_test/isar_test.dart';
     $imports
 
     void main() {

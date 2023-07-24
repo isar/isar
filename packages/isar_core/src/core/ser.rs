@@ -1,5 +1,4 @@
 use super::{data_type::DataType, reader::IsarReader};
-use crate::native::{NULL_INT, NULL_LONG};
 use serde::ser::{SerializeMap, SerializeSeq};
 use serde::Serialize;
 use serde_json::Value;
@@ -39,7 +38,7 @@ impl<'a, R: IsarReader> Serialize for IsarObjectSerialize<'a, R> {
                 }
                 DataType::Int => {
                     let value = self.reader.read_int(index as u32);
-                    if value != NULL_INT {
+                    if value != i32::MIN {
                         ser.serialize_entry(name, &value)?;
                     }
                 }
@@ -51,7 +50,7 @@ impl<'a, R: IsarReader> Serialize for IsarObjectSerialize<'a, R> {
                 }
                 DataType::Long => {
                     let value = self.reader.read_long(index as u32);
-                    if value != NULL_LONG {
+                    if value != i64::MIN {
                         ser.serialize_entry(name, &value)?;
                     }
                 }
@@ -141,7 +140,7 @@ impl<'a, R: IsarReader> Serialize for IsarListSerialize<'a, R> {
             DataType::Int => {
                 for i in 0..self.length {
                     let value = self.reader.read_int(i);
-                    if value == NULL_INT {
+                    if value == i32::MIN {
                         ser.serialize_element(&Value::Null)?;
                     } else {
                         ser.serialize_element(&value)?;
@@ -161,7 +160,7 @@ impl<'a, R: IsarReader> Serialize for IsarListSerialize<'a, R> {
             DataType::Long => {
                 for i in 0..self.length {
                     let value = self.reader.read_long(i);
-                    if value == NULL_LONG {
+                    if value == i64::MIN {
                         ser.serialize_element(&Value::Null)?;
                     } else {
                         ser.serialize_element(&value)?;

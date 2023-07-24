@@ -46,8 +46,8 @@ void main() {
     expect(isar1.close(), true);
 
     final isar2 = openTempIsar([Model2Schema], name: isarName);
-    final obj2A = Model2(1, null, 'OBJ1');
-    final obj2B = Model2(2, null, 'OBJ2');
+    //final obj2A = Model2(1, null, 'OBJ1');
+    //final obj2B = Model2(2, null, 'OBJ2');
     //isar2.model2s.verify([obj2A, obj2B]);
     final obj2C = Model2(1, 123, 'OBJ3');
     isar2.write((isar) {

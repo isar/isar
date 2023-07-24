@@ -1,8 +1,8 @@
 // ignore_for_file: use_string_buffers
 
-import 'package:isar/src/generator/object_info.dart';
+part of isar_generator;
 
-String generatePropertyQuery(ObjectInfo oi) {
+String _generatePropertyQuery(ObjectInfo oi) {
   var code = '''
   extension ${oi.dartName}QueryProperty1 on QueryBuilder<${oi.dartName}, ${oi.dartName}, QProperty> {''';
 

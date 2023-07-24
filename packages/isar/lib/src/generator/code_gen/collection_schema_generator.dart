@@ -1,11 +1,6 @@
-import 'dart:convert';
+part of isar_generator;
 
-import 'package:isar/isar.dart';
-import 'package:isar/src/generator/helper.dart';
-import 'package:isar/src/generator/isar_type.dart';
-import 'package:isar/src/generator/object_info.dart';
-
-String generateSchema(ObjectInfo object) {
+String _generateSchema(ObjectInfo object) {
   final json = {
     'name': object.isarName,
     'idName': object.idProperty?.isarName,

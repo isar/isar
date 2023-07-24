@@ -36,7 +36,8 @@
 > 1. River in Bavaria, Germany.
 > 2. [Crazy fast](#benchmarks) NoSQL database that is a joy to use.
 
-⚠️ You are looking at Isar version 4. This version is still in development and very unstable. Please only use it for testing. If you want to use Isar in production, please use the stable version 3. ⚠️
+⚠️ ISAR V4 IS NOT READY FOR PRODUCTION USE ⚠️  
+If you want to use Isar in production, please use the stable version 3. ⚠️
 
 ## Features
 

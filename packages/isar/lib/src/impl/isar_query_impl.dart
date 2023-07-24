@@ -62,6 +62,31 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
   }
 
   @override
+  int updateProperties(Map<int, dynamic> changes, {int? offset, int? limit}) {
+    return isar.getTxn((isarPtr, txnPtr) {
+      final updatePtr = IsarCore.b.isar_update_new();
+      for (final propertyId in changes.keys) {
+        final value = _isarValue(changes[propertyId]);
+        IsarCore.b.isar_update_add_value(updatePtr, propertyId, value);
+      }
+
+      IsarCore.b
+          .isar_query_update(
+            isarPtr,
+            txnPtr,
+            _ptr,
+            offset ?? -1,
+            limit ?? -1,
+            updatePtr,
+            IsarCore.countPtr,
+          )
+          .checkNoError();
+
+      return IsarCore.countPtr.value;
+    });
+  }
+
+  @override
   int deleteAll({int? offset, int? limit}) {
     return isar.getTxn((isarPtr, txnPtr) {
       IsarCore.b

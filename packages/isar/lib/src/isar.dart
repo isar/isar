@@ -10,7 +10,7 @@ abstract class Isar {
   static const int defaultMaxSizeMiB = 128;
 
   /// The current Isar version.
-  static const String version = '4.0.0-dev.0';
+  static const String version = '4.0.0-dev.1';
 
   /// Get an already opened Isar instance by its name.
   ///
@@ -182,6 +182,12 @@ abstract class Isar {
   Future<T> readAsync<T>(T Function(Isar isar) callback, {String? debugName}) =>
       readAsyncWith(null, (isar, _) => callback(isar), debugName: debugName);
 
+  /// Create an asynchronous read transaction and pass a parameter to the
+  /// callback.
+  ///
+  /// The code inside the callback will be executed in a separate isolate.
+  ///
+  /// Check out the [read] method for more information.
   Future<T> readAsyncWith<T, P>(
     P param,
     T Function(Isar isar, P param) callback, {
@@ -199,6 +205,12 @@ abstract class Isar {
   }) =>
       writeAsyncWith(null, (isar, _) => callback(isar), debugName: debugName);
 
+  /// Create an asynchronous read-write transaction and pass a parameter to the
+  /// callback.
+  ///
+  /// The code inside the callback will be executed in a separate isolate.
+  ///
+  /// Check out the [write] method for more information.
   Future<T> writeAsyncWith<T, P>(
     P param,
     T Function(Isar isar, P param) callback, {
@@ -248,6 +260,7 @@ abstract class Isar {
 
   /// FNV-1a 64bit hash algorithm optimized for Dart Strings
   static int fastHash(String string) {
+    // ignore: avoid_js_rounded_ints
     var hash = 0xcbf29ce484222325;
 
     var i = 0;

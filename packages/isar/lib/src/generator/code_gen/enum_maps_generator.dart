@@ -1,8 +1,8 @@
 // ignore_for_file: use_string_buffers
 
-import 'package:isar/src/generator/object_info.dart';
+part of isar_generator;
 
-String generateEnumMaps(ObjectInfo object) {
+String _generateEnumMaps(ObjectInfo object) {
   var code = '';
   for (final property in object.properties.where((e) => e.isEnum)) {
     final enumName = property.typeClassName;

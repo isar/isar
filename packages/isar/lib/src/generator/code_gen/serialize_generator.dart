@@ -1,10 +1,8 @@
 // ignore_for_file: use_string_buffers
 
-import 'package:isar/src/generator/consts.dart';
-import 'package:isar/src/generator/isar_type.dart';
-import 'package:isar/src/generator/object_info.dart';
+part of isar_generator;
 
-String generateSerialize(ObjectInfo object) {
+String _generateSerialize(ObjectInfo object) {
   var code = '''
   @isarProtected
   int serialize${object.dartName}(IsarWriter writer, ${object.dartName} object) {''';
@@ -70,25 +68,25 @@ String _writeProperty({
         return 'IsarCore.writeBool($writer, $index, $value$enumGetter);';
       }
     case PropertyType.byte:
-      final orNull = nullable ? '?? $nullByte' : '';
+      final orNull = nullable ? '?? $_nullByte' : '';
       return 'IsarCore.writeByte($writer, $index, $value$enumGetter $orNull);';
     case PropertyType.int:
-      final orNull = nullable ? '?? $nullInt' : '';
+      final orNull = nullable ? '?? $_nullInt' : '';
       return 'IsarCore.writeInt($writer, $index, $value$enumGetter $orNull);';
     case PropertyType.float:
       final orNull = nullable ? '?? double.nan' : '';
       return 'IsarCore.writeFloat($writer, $index, $value$enumGetter $orNull);';
     case PropertyType.long:
-      final orNull = nullable ? '?? $nullLong' : '';
+      final orNull = nullable ? '?? $_nullLong' : '';
       return 'IsarCore.writeLong($writer, $index, $value$enumGetter $orNull);';
     case PropertyType.dateTime:
       final converted = nullable
-          ? '$value$enumGetter?.toUtc().microsecondsSinceEpoch ?? $nullLong'
+          ? '$value$enumGetter?.toUtc().microsecondsSinceEpoch ?? $_nullLong'
           : '$value$enumGetter.toUtc().microsecondsSinceEpoch';
       return 'IsarCore.writeLong($writer, $index, $converted);';
     case PropertyType.double:
       final orNull = nullable ? '?? double.nan' : '';
-      return 'IsarCore.writeDouble($writer, $index, $value$enumGetter $orNull);';
+      return 'IsarCore.writeDouble($writer, $index, $value$enumGetter$orNull);';
     case PropertyType.string:
       if (nullable) {
         return '''
@@ -101,7 +99,12 @@ String _writeProperty({
           }
         }''';
       } else {
-        return 'IsarCore.writeString($writer, $index, IsarCore.toNativeString($value$enumGetter));';
+        return '''
+        IsarCore.writeString(
+          $writer,
+          $index,
+          IsarCore.toNativeString($value$enumGetter)
+        );''';
       }
     case PropertyType.object:
       var code = '''

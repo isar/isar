@@ -3,8 +3,10 @@ part of isar;
 /// @nodoc
 @protected
 sealed class Filter {
+  /// @nodoc
   const Filter();
 
+  /// The default value for [epsilon].
   static const epsilon = 0.00001;
 }
 
@@ -21,9 +23,17 @@ final class EqualCondition extends Filter {
     this.caseSensitive = true,
   });
 
+  /// Index of the property that should be matched.
   final int property;
+
+  /// The value to match against.
   final Object? value;
+
+  /// The maximum difference between two floating point numbers to be
+  /// considered equal.
   final double epsilon;
+
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -40,9 +50,17 @@ final class NotEqualCondition extends Filter {
     this.caseSensitive = true,
   });
 
+  /// Index of the property that should be matched.
   final int property;
+
+  /// The value to match against.
   final Object? value;
+
+  /// The maximum difference between two floating point numbers to be
+  /// considered equal.
   final double epsilon;
+
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -59,9 +77,17 @@ final class GreaterCondition extends Filter {
     this.caseSensitive = true,
   });
 
+  /// Index of the property that should be matched.
   final int property;
+
+  /// The value to match against.
   final Object? value;
+
+  /// The maximum difference between two floating point numbers to be
+  /// considered equal.
   final double epsilon;
+
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -78,9 +104,17 @@ final class GreaterOrEqualCondition extends Filter {
     this.caseSensitive = true,
   });
 
+  /// Index of the property that should be matched.
   final int property;
+
+  /// The value to match against.
   final Object? value;
+
+  /// The maximum difference between two floating point numbers to be
+  /// considered equal.
   final double epsilon;
+
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -97,9 +131,17 @@ final class LessCondition extends Filter {
     this.caseSensitive = true,
   });
 
+  /// Index of the property that should be matched.
   final int property;
+
+  /// The value to match against.
   final Object? value;
+
+  /// The maximum difference between two floating point numbers to be
+  /// considered equal.
   final double epsilon;
+
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -116,9 +158,17 @@ final class LessOrEqualCondition extends Filter {
     this.caseSensitive = true,
   });
 
+  /// Index of the property that should be matched.
   final int property;
+
+  /// The value to match against.
   final Object? value;
+
+  /// The maximum difference between two floating point numbers to be
+  /// considered equal.
   final double epsilon;
+
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -136,10 +186,20 @@ final class BetweenCondition extends Filter {
     this.caseSensitive = true,
   });
 
+  /// Index of the property that should be matched.
   final int property;
+
+  /// The lower bound.
   final Object? lower;
+
+  /// The upper bound.
   final Object? upper;
+
+  /// The maximum difference between two floating point numbers to be
+  /// considered equal.
   final double epsilon;
+
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -156,8 +216,13 @@ final class StartsWithCondition extends Filter {
     this.caseSensitive = true,
   });
 
+  /// Index of the property that should be matched.
   final int property;
+
+  /// The prefix to match against.
   final String value;
+
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -174,8 +239,13 @@ final class EndsWithCondition extends Filter {
     this.caseSensitive = true,
   });
 
+  /// Index of the property that should be matched.
   final int property;
+
+  /// The suffix to match against.
   final String value;
+
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -191,8 +261,13 @@ final class ContainsCondition extends Filter {
     this.caseSensitive = true,
   });
 
+  /// Index of the property that should be matched.
   final int property;
+
+  /// The String to match against.
   final String value;
+
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -208,8 +283,13 @@ final class MatchesCondition extends Filter {
     this.caseSensitive = true,
   });
 
+  /// Index of the property that should be matched.
   final int property;
+
+  /// The wildcard to match against.
   final String wildcard;
+
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -218,6 +298,7 @@ final class IsNullCondition extends Filter {
   /// Filters the results to only include objects where the property is null.
   const IsNullCondition({required this.property});
 
+  /// Index of the property that should be null.
   final int property;
 }
 

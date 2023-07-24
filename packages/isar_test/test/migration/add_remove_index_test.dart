@@ -1,6 +1,4 @@
 import 'package:isar/isar.dart';
-import 'package:isar_test/isar_test.dart';
-import 'package:test/test.dart';
 
 part 'add_remove_index_test.g.dart';
 

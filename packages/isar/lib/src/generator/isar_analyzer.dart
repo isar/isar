@@ -1,14 +1,8 @@
 // ignore_for_file: use_string_buffers
 
-import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/nullability_suffix.dart';
-import 'package:analyzer/dart/element/type.dart';
-import 'package:isar/src/generator/consts.dart';
-import 'package:isar/src/generator/helper.dart';
-import 'package:isar/src/generator/isar_type.dart';
-import 'package:isar/src/generator/object_info.dart';
+part of isar_generator;
 
-class IsarAnalyzer {
+class _IsarAnalyzer {
   ObjectInfo analyzeCollection(Element element) {
     final constructor = _checkValidClass(element);
     final modelClass = element as ClassElement;
@@ -20,7 +14,7 @@ class IsarAnalyzer {
       if (accessors.any((e) => e.name == 'id')) {
         idPropertyName = 'id';
       } else {
-        err(
+        _err(
           'No id property defined. Annotate one of the properties with @id.',
           modelClass,
         );
@@ -28,14 +22,14 @@ class IsarAnalyzer {
     } else if (idProperties.length == 1) {
       idPropertyName = idProperties.single.name;
     } else {
-      err('Two or more properties are annotated with @id.', modelClass);
+      _err('Two or more properties are annotated with @id.', modelClass);
     }
 
     final properties = <PropertyInfo>[];
     var index = 1;
     for (final propertyElement in modelClass.allAccessors) {
       final isId = propertyElement.name == idPropertyName;
-      final property = analyzePropertyInfo(
+      final property = _analyzePropertyInfo(
         propertyElement,
         constructor,
         isId && propertyElement.type.isDartCoreInt ? 0 : index,
@@ -64,8 +58,12 @@ class IsarAnalyzer {
     final properties = <PropertyInfo>[];
     for (var i = 0; i < modelClass.allAccessors.length; i++) {
       final propertyElement = modelClass.allAccessors[i];
-      final property =
-          analyzePropertyInfo(propertyElement, constructor, i + 1, false);
+      final property = _analyzePropertyInfo(
+        propertyElement,
+        constructor,
+        i + 1,
+        false,
+      );
       properties.add(property);
     }
     _checkValidPropertiesConstructor(properties, constructor);
@@ -74,7 +72,7 @@ class IsarAnalyzer {
       (it) => it.indexAnnotations.isNotEmpty,
     );
     if (hasIndex) {
-      err('Embedded objects must not have indexes.', modelClass);
+      _err('Embedded objects must not have indexes.', modelClass);
     }*/
 
     return ObjectInfo(
@@ -88,25 +86,25 @@ class IsarAnalyzer {
     if (modelClass is! ClassElement ||
         modelClass is EnumElement ||
         modelClass is MixinElement) {
-      err(
+      _err(
         'Only classes may be annotated with @Collection or @Embedded.',
         modelClass,
       );
     }
 
     if (modelClass.isAbstract) {
-      err('Class must not be abstract.', modelClass);
+      _err('Class must not be abstract.', modelClass);
     }
 
     if (!modelClass.isPublic) {
-      err('Class must be public.', modelClass);
+      _err('Class must be public.', modelClass);
     }
 
     final constructor = modelClass.constructors
         .where((c) => c.periodOffset == null)
         .firstOrNull;
     if (constructor == null) {
-      err('Class needs an unnamed constructor.', modelClass);
+      _err('Class needs an unnamed constructor.', modelClass);
     }
 
     final hasCollectionSupertype = modelClass.allSupertypes.any((type) {
@@ -114,7 +112,7 @@ class IsarAnalyzer {
           type.element.embeddedAnnotation != null;
     });
     if (hasCollectionSupertype) {
-      err(
+      _err(
         'Class must not have a supertype annotated with @Collection or '
         '@Embedded.',
         modelClass,
@@ -129,7 +127,7 @@ class IsarAnalyzer {
     ConstructorElement constructor,
   ) {
     if (properties.map((e) => e.isarName).toSet().length != properties.length) {
-      err(
+      _err(
         'Two or more properties have the same name.',
         constructor.enclosingElement,
       );
@@ -141,7 +139,7 @@ class IsarAnalyzer {
         )
         .firstOrNull;
     if (unknownConstructorParameter != null) {
-      err(
+      _err(
         'Constructor parameter does not match a property.',
         unknownConstructorParameter,
       );
@@ -165,7 +163,7 @@ class IsarAnalyzer {
     return names;
   }
 
-  PropertyInfo analyzePropertyInfo(
+  PropertyInfo _analyzePropertyInfo(
     PropertyInducingElement property,
     ConstructorElement constructor,
     int propertyIndex,
@@ -185,7 +183,7 @@ class IsarAnalyzer {
       enumPropertyName = enumProperty?.name ?? 'index';
       if (enumProperty != null &&
           enumProperty.nonSynthetic is PropertyAccessorElement) {
-        err('Only fields are supported for enum properties', enumProperty);
+        _err('Only fields are supported for enum properties', enumProperty);
       }
 
       final enumPropertyType = enumProperty == null
@@ -195,7 +193,7 @@ class IsarAnalyzer {
           enumPropertyType != PropertyType.int &&
           enumPropertyType != PropertyType.long &&
           enumPropertyType != PropertyType.string) {
-        err('Unsupported enum property type.', enumProperty);
+        _err('Unsupported enum property type.', enumProperty);
       }
 
       type = dartType.isDartCoreList
@@ -215,14 +213,14 @@ class IsarAnalyzer {
         }
 
         if (propertyValue == null) {
-          err(
+          _err(
             'Null values are not supported for enum properties.',
             enumProperty,
           );
         }
 
         if (enumMap.values.contains(propertyValue)) {
-          err(
+          _err(
             'Enum property has duplicate values.',
             enumProperty,
           );
@@ -235,7 +233,7 @@ class IsarAnalyzer {
       } else if (dartType.supportsJsonConversion) {
         type = PropertyType.json;
       } else {
-        err(
+        _err(
           'Unsupported type. Please add @embedded to the type or implement '
           'toJson() and fromJson() methods or annotate the property with '
           '@ignore let Isar to ignore it.',
@@ -250,15 +248,15 @@ class IsarAnalyzer {
         : null;
     if (isId) {
       if (type != PropertyType.long && type != PropertyType.string) {
-        err('Only int and String properties can be used as id.', property);
+        _err('Only int and String properties can be used as id.', property);
       } else if (nullable) {
-        err('Id properties must not be nullable.', property);
+        _err('Id properties must not be nullable.', property);
       }
     }
 
     if ((type == PropertyType.byte && nullable) ||
         (type == PropertyType.byteList && (elementNullable ?? false))) {
-      err('Bytes must not be nullable.', property);
+      _err('Bytes must not be nullable.', property);
     }
 
     final constructorParameter = constructor.parameters
@@ -268,7 +266,7 @@ class IsarAnalyzer {
     late DeserializeMode mode;
     if (constructorParameter != null) {
       if (constructorParameter.type != property.type) {
-        err(
+        _err(
           'Constructor parameter type does not match property type',
           constructorParameter,
         );
@@ -316,11 +314,11 @@ class IsarAnalyzer {
       return 'null';
     } else if (type.isDartCoreInt) {
       if (type.propertyType == PropertyType.byte) {
-        return '$nullByte';
+        return '$_nullByte';
       } else if (type.propertyType == PropertyType.int) {
-        return '$nullInt';
+        return '$_nullInt';
       } else {
-        return '$nullLong';
+        return '$_nullLong';
       }
     } else if (type.isDartCoreDouble) {
       return 'double.nan';
@@ -337,7 +335,8 @@ class IsarAnalyzer {
     } else {
       final element = type.element!;
       if (element is EnumElement) {
-        return '${element.name}.${element.fields.where((f) => f.isEnumConstant).first.name}';
+        final firstConst = element.fields.where((f) => f.isEnumConstant).first;
+        return '${element.name}.${firstConst.name}';
       } else if (element is ClassElement) {
         final defaultConstructor = _checkValidClass(element);
         var code = '${element.name}(';

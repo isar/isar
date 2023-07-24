@@ -1,8 +1,6 @@
-import 'package:isar/src/generator/helper.dart';
-import 'package:isar/src/generator/isar_type.dart';
-import 'package:isar/src/generator/object_info.dart';
+part of isar_generator;
 
-String generateDistinctBy(ObjectInfo oi) {
+String _generateDistinctBy(ObjectInfo oi) {
   var code = '''
   extension ${oi.dartName}QueryWhereDistinct on QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct> {''';
   for (final property in oi.properties.where((e) => !e.isId)) {

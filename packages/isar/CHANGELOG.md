@@ -7,12 +7,13 @@ This version does not support database migration yet and cannot open Isar v3 dat
 ### Breaking
 
 Changed transactions API:
-| old | new |
-| --- | --- |
-| `writeTxn()` | `writeAsync()` |
-| `writeTxnSync()` | `write()` |
-| `txn()` | `readAsync()` |
-| `txnSync()` | `read()` |
+
+| old              | new            |
+| ---------------- | -------------- |
+| `writeTxn()`     | `writeAsync()` |
+| `writeTxnSync()` | `write()`      |
+| `txn()`          | `readAsync()`  |
+| `txnSync()`      | `read()`       |
 
 - All operations are now synchronous by default and there are `Async` methods for asynchronous operations.
 - Ids now need to be called `id` or annotated with `@id`
@@ -27,7 +28,7 @@ Changed transactions API:
 - Encrypted databases
 - String ids
 - Fetching multiple properties simultaneously
-- Bulk updates
+- Partial and Bulk updates using `collection.update()` and `query.updateAll()`
 - SQLite storage engine support
 - Support for `dynamic`, `List<dynamic>` and `Map<String, dynamic>` properties
 - Required parameters for embedded objects

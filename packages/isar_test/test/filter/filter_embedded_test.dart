@@ -113,7 +113,6 @@ void main() {
         id: 3,
         embeddedA: const EmbeddedModelA(
           name: 'embedded a3',
-          embeddedB: null,
         ),
         embeddedB: const EmbeddedModelB(name: 'embedded b3'),
       );
@@ -129,7 +128,6 @@ void main() {
         id: 5,
         embeddedA: const EmbeddedModelA(
           name: 'embedded a5',
-          embeddedB: null,
         ),
         embeddedB: const EmbeddedModelB(name: 'embedded b5'),
       );

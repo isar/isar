@@ -1,5 +1,4 @@
-import 'package:isar/src/generator/isar_type.dart';
-import 'package:isar/src/generator/object_info.dart';
+part of isar_generator;
 
 const _updateableTypes = [
   PropertyType.bool,
@@ -12,7 +11,7 @@ const _updateableTypes = [
   PropertyType.string,
 ];
 
-String generateUpdate(ObjectInfo oi) {
+String _generateUpdate(ObjectInfo oi) {
   final updateProperties = oi.properties
       .where((p) => !p.isId && _updateableTypes.contains(p.type))
       .toList();
@@ -23,8 +22,8 @@ String generateUpdate(ObjectInfo oi) {
 
   return '''
   sealed class _${oi.dartName}Update {
-    bool call(
-      ${oi.idProperty!.dartType} ${oi.idProperty!.dartName}, {
+    bool call({
+      required ${oi.idProperty!.dartType} ${oi.idProperty!.dartName},
       ${updateProperties.map((p) => '${p.scalarDartTypeNotNull}? ${p.dartName},').join('\n')}
     });
   }
@@ -35,8 +34,8 @@ String generateUpdate(ObjectInfo oi) {
     final IsarCollection<${oi.idProperty!.dartType}, ${oi.dartName}> collection;
 
     @override
-    bool call(
-      ${oi.idProperty!.dartType} ${oi.idProperty!.dartName}, {
+    bool call({
+      required ${oi.idProperty!.dartType} ${oi.idProperty!.dartName},
       ${updateProperties.map((p) => 'Object? ${p.dartName} = ignore,').join('\n')}
     }) {
       return collection.updateProperties(
@@ -49,8 +48,8 @@ String generateUpdate(ObjectInfo oi) {
   }
 
   sealed class _${oi.dartName}UpdateAll {
-    int call(
-      List<${oi.idProperty!.dartType}> ${oi.idProperty!.dartName}, {
+    int call({
+      required List<${oi.idProperty!.dartType}> ${oi.idProperty!.dartName},
       ${updateProperties.map((p) => '${p.scalarDartTypeNotNull}? ${p.dartName},').join('\n')}
     });
   }
@@ -61,8 +60,8 @@ String generateUpdate(ObjectInfo oi) {
     final IsarCollection<${oi.idProperty!.dartType}, ${oi.dartName}> collection;
 
     @override
-    int call(
-      List<${oi.idProperty!.dartType}> ${oi.idProperty!.dartName}, {
+    int call({
+      required List<${oi.idProperty!.dartType}> ${oi.idProperty!.dartName},
       ${updateProperties.map((p) => 'Object? ${p.dartName} = ignore,').join('\n')}
     }) {
       return collection.updateProperties(
@@ -78,6 +77,37 @@ String generateUpdate(ObjectInfo oi) {
     _${oi.dartName}Update get update => _${oi.dartName}UpdateImpl(this);
 
     _${oi.dartName}UpdateAll get updateAll => _${oi.dartName}UpdateAllImpl(this);
+  }
+
+  sealed class _${oi.dartName}QueryUpdate {
+    int call({
+      ${updateProperties.map((p) => '${p.scalarDartTypeNotNull}? ${p.dartName},').join('\n')}
+    });
+  }
+
+  class _${oi.dartName}QueryUpdateImpl implements _${oi.dartName}QueryUpdate {
+    const _${oi.dartName}QueryUpdateImpl(this.query, {this.limit});
+
+    final IsarQuery<${oi.dartName}> query;
+    final int? limit;
+
+    @override
+    int call({
+      ${updateProperties.map((p) => 'Object? ${p.dartName} = ignore,').join('\n')}
+    }) {
+      return query.updateProperties(
+        limit: limit, 
+        {
+          ${updateProperties.map((p) => 'if (${p.dartName} != ignore) ${p.index}: ${p.dartName} as ${p.scalarDartTypeNotNull}?,').join('\n')}
+        }
+      );
+    }
+  }
+
+  extension ${oi.dartName}QueryUpdate on IsarQuery<${oi.dartName}> {
+    _${oi.dartName}QueryUpdate get updateFirst => _${oi.dartName}QueryUpdateImpl(this, limit: 1);
+
+    _${oi.dartName}QueryUpdate get updateAll => _${oi.dartName}QueryUpdateImpl(this);
   }
   ''';
 }

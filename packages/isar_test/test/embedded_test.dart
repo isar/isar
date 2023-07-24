@@ -1,7 +1,5 @@
 // ignore_for_file: hash_and_equals
 
-import 'dart:convert';
-
 import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
@@ -36,12 +34,6 @@ class Model {
       'nestedList': nestedList?.map((e) => e.toJson()).toList(),
     };
   }
-
-  @override
-  String toString() {
-    // TODO: implement toString
-    return jsonEncode(toJson());
-  }
 }
 
 @embedded
@@ -57,12 +49,6 @@ class EModel {
     return {
       'value': value,
     };
-  }
-
-  @override
-  String toString() {
-    // TODO: implement toString
-    return jsonEncode(toJson());
   }
 }
 
@@ -93,12 +79,6 @@ class NModel {
       'nestedList': nestedList?.map((e) => e?.toJson()).toList(),
       'strList': strList,
     };
-  }
-
-  @override
-  String toString() {
-    // TODO: implement toString
-    return jsonEncode(toJson());
   }
 }
 
