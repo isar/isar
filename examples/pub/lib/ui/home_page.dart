@@ -64,7 +64,7 @@ final randomFavoriteNamesPod = StreamProvider((ref) async* {
             !setEquals(packageNames.toSet(), previousNames))) {
       previousNames = packageNames.toSet();
       packageNames.shuffle();
-      yield packageNames.sublist(0, 10);
+      yield packageNames.take(10).toList();
     }
   }
 });
@@ -84,14 +84,14 @@ class Favorites extends ConsumerWidget {
         children: [
           Text(
             'Flutter Favorites',
-            style: theme.textTheme.headline3!.copyWith(
+            style: theme.textTheme.displaySmall!.copyWith(
               color: theme.colorScheme.primary,
             ),
           ),
           Text(
             'Some of the packages that demonstrate the highest levels '
             'of quality, selected by the Flutter Ecosystem Committee',
-            style: theme.textTheme.subtitle1,
+            style: theme.textTheme.titleMedium,
           ),
           if (favoriteNames != null) ...[
             const SizedBox(height: 15),
@@ -132,7 +132,7 @@ class PackageCard extends ConsumerWidget {
               children: [
                 Text(
                   name,
-                  style: theme.textTheme.headline5!.copyWith(
+                  style: theme.textTheme.headlineSmall!.copyWith(
                     color: theme.colorScheme.onPrimaryContainer,
                   ),
                 ),
@@ -140,7 +140,7 @@ class PackageCard extends ConsumerWidget {
                   const SizedBox(height: 5),
                   Text(
                     package!.description!.trim(),
-                    style: theme.textTheme.bodyText2,
+                    style: theme.textTheme.bodyMedium,
                   ),
                 ],
                 if (package?.publisher != null) ...[
