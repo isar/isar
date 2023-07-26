@@ -8,7 +8,9 @@ import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/src/impl/bindings.dart';
+// ignore: depend_on_referenced_packages
 import 'package:meta/meta.dart';
+// ignore: depend_on_referenced_packages
 import 'package:meta/meta_meta.dart';
 
 part 'src/annotations/collection.dart';

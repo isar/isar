@@ -37,6 +37,7 @@ Changed transactions API:
 - Improved performance for all operations
 - Decoding objects no longer blocks the UI isolate
 - New `@utc` annotation to receive `DateTime` objects in UTC
+- Support for freezed and other code generators
 
 ## 3.1.0+1
 
