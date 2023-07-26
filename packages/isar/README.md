@@ -18,7 +18,7 @@
   <a href="https://t.me/isardb">
     <img src="https://img.shields.io/static/v1?label=join&message=isardb&labelColor=333940&logo=telegram&logoColor=white&color=229ED9">
   </a>
-  <a href="https://twitter.com/simonleier">
+  <a href="https://twitter.com/simcdev">
     <img src="https://img.shields.io/twitter/follow/simcdev?style=social">
   </a>
 </p>
@@ -37,7 +37,7 @@
 > 2. [Crazy fast](#benchmarks) NoSQL database that is a joy to use.
 
 ⚠️ ISAR V4 IS NOT READY FOR PRODUCTION USE ⚠️  
-If you want to use Isar in production, please use the stable version 3. ⚠️
+If you want to use Isar in production, please use the stable version 3.
 
 ## Features
 

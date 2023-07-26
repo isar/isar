@@ -3,8 +3,9 @@ use std::sync::OnceLock;
 static DART_POST_C_OBJECT: OnceLock<DartPostCObjectFnType> = OnceLock::new();
 
 pub fn dart_post_int(port: DartPort, value: i64) {
-    let dart_post = DART_POST_C_OBJECT.get().unwrap();
-    dart_post(port, &mut DartCObject::new(value));
+    if let Some(dart_post) = DART_POST_C_OBJECT.get() {
+        dart_post(port, &mut DartCObject::new(value));
+    }
 }
 
 pub type DartPort = i64;

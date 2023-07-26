@@ -141,8 +141,8 @@ class IsarCoreBindings {
   late final _isar_filter_is_nullPtr =
       _lookup<ffi.NativeFunction<ffi.Pointer<CFilter> Function(ffi.Uint16)>>(
           'isar_filter_is_null');
-  late final _isar_filter_is_null =
-      _isar_filter_is_nullPtr.asFunction<ffi.Pointer<CFilter> Function(int)>();
+  late final _isar_filter_is_null = _isar_filter_is_nullPtr
+      .asFunction<ffi.Pointer<CFilter> Function(int)>(isLeaf: true);
 
   ffi.Pointer<CFilter> isar_filter_equal(
     int property_index,
@@ -161,7 +161,8 @@ class IsarCoreBindings {
           ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
               ffi.Bool)>>('isar_filter_equal');
   late final _isar_filter_equal = _isar_filter_equalPtr.asFunction<
-      ffi.Pointer<CFilter> Function(int, ffi.Pointer<CIsarValue>, bool)>();
+      ffi.Pointer<CFilter> Function(
+          int, ffi.Pointer<CIsarValue>, bool)>(isLeaf: true);
 
   ffi.Pointer<CFilter> isar_filter_greater(
     int property_index,
@@ -180,7 +181,8 @@ class IsarCoreBindings {
           ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
               ffi.Bool)>>('isar_filter_greater');
   late final _isar_filter_greater = _isar_filter_greaterPtr.asFunction<
-      ffi.Pointer<CFilter> Function(int, ffi.Pointer<CIsarValue>, bool)>();
+      ffi.Pointer<CFilter> Function(
+          int, ffi.Pointer<CIsarValue>, bool)>(isLeaf: true);
 
   ffi.Pointer<CFilter> isar_filter_greater_or_equal(
     int property_index,
@@ -200,7 +202,8 @@ class IsarCoreBindings {
               ffi.Bool)>>('isar_filter_greater_or_equal');
   late final _isar_filter_greater_or_equal =
       _isar_filter_greater_or_equalPtr.asFunction<
-          ffi.Pointer<CFilter> Function(int, ffi.Pointer<CIsarValue>, bool)>();
+          ffi.Pointer<CFilter> Function(
+              int, ffi.Pointer<CIsarValue>, bool)>(isLeaf: true);
 
   ffi.Pointer<CFilter> isar_filter_less(
     int property_index,
@@ -219,7 +222,8 @@ class IsarCoreBindings {
           ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
               ffi.Bool)>>('isar_filter_less');
   late final _isar_filter_less = _isar_filter_lessPtr.asFunction<
-      ffi.Pointer<CFilter> Function(int, ffi.Pointer<CIsarValue>, bool)>();
+      ffi.Pointer<CFilter> Function(
+          int, ffi.Pointer<CIsarValue>, bool)>(isLeaf: true);
 
   ffi.Pointer<CFilter> isar_filter_less_or_equal(
     int property_index,
@@ -239,7 +243,8 @@ class IsarCoreBindings {
               ffi.Bool)>>('isar_filter_less_or_equal');
   late final _isar_filter_less_or_equal =
       _isar_filter_less_or_equalPtr.asFunction<
-          ffi.Pointer<CFilter> Function(int, ffi.Pointer<CIsarValue>, bool)>();
+          ffi.Pointer<CFilter> Function(
+              int, ffi.Pointer<CIsarValue>, bool)>(isLeaf: true);
 
   ffi.Pointer<CFilter> isar_filter_between(
     int property_index,
@@ -260,8 +265,8 @@ class IsarCoreBindings {
           ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
               ffi.Pointer<CIsarValue>, ffi.Bool)>>('isar_filter_between');
   late final _isar_filter_between = _isar_filter_betweenPtr.asFunction<
-      ffi.Pointer<CFilter> Function(
-          int, ffi.Pointer<CIsarValue>, ffi.Pointer<CIsarValue>, bool)>();
+      ffi.Pointer<CFilter> Function(int, ffi.Pointer<CIsarValue>,
+          ffi.Pointer<CIsarValue>, bool)>(isLeaf: true);
 
   ffi.Pointer<CFilter> isar_filter_string_starts_with(
     int property_index,
@@ -281,7 +286,8 @@ class IsarCoreBindings {
               ffi.Bool)>>('isar_filter_string_starts_with');
   late final _isar_filter_string_starts_with =
       _isar_filter_string_starts_withPtr.asFunction<
-          ffi.Pointer<CFilter> Function(int, ffi.Pointer<CIsarValue>, bool)>();
+          ffi.Pointer<CFilter> Function(
+              int, ffi.Pointer<CIsarValue>, bool)>(isLeaf: true);
 
   ffi.Pointer<CFilter> isar_filter_string_ends_with(
     int property_index,
@@ -301,7 +307,8 @@ class IsarCoreBindings {
               ffi.Bool)>>('isar_filter_string_ends_with');
   late final _isar_filter_string_ends_with =
       _isar_filter_string_ends_withPtr.asFunction<
-          ffi.Pointer<CFilter> Function(int, ffi.Pointer<CIsarValue>, bool)>();
+          ffi.Pointer<CFilter> Function(
+              int, ffi.Pointer<CIsarValue>, bool)>(isLeaf: true);
 
   ffi.Pointer<CFilter> isar_filter_string_contains(
     int property_index,
@@ -321,7 +328,8 @@ class IsarCoreBindings {
               ffi.Bool)>>('isar_filter_string_contains');
   late final _isar_filter_string_contains =
       _isar_filter_string_containsPtr.asFunction<
-          ffi.Pointer<CFilter> Function(int, ffi.Pointer<CIsarValue>, bool)>();
+          ffi.Pointer<CFilter> Function(
+              int, ffi.Pointer<CIsarValue>, bool)>(isLeaf: true);
 
   ffi.Pointer<CFilter> isar_filter_string_matches(
     int property_index,
@@ -341,7 +349,8 @@ class IsarCoreBindings {
               ffi.Bool)>>('isar_filter_string_matches');
   late final _isar_filter_string_matches =
       _isar_filter_string_matchesPtr.asFunction<
-          ffi.Pointer<CFilter> Function(int, ffi.Pointer<CIsarValue>, bool)>();
+          ffi.Pointer<CFilter> Function(
+              int, ffi.Pointer<CIsarValue>, bool)>(isLeaf: true);
 
   ffi.Pointer<CFilter> isar_filter_nested(
     int property_index,
@@ -358,7 +367,8 @@ class IsarCoreBindings {
           ffi.Pointer<CFilter> Function(
               ffi.Uint16, ffi.Pointer<CFilter>)>>('isar_filter_nested');
   late final _isar_filter_nested = _isar_filter_nestedPtr
-      .asFunction<ffi.Pointer<CFilter> Function(int, ffi.Pointer<CFilter>)>();
+      .asFunction<ffi.Pointer<CFilter> Function(int, ffi.Pointer<CFilter>)>(
+          isLeaf: true);
 
   ffi.Pointer<CFilter> isar_filter_and(
     ffi.Pointer<ffi.Pointer<CFilter>> filters,
@@ -375,7 +385,8 @@ class IsarCoreBindings {
           ffi.Pointer<CFilter> Function(ffi.Pointer<ffi.Pointer<CFilter>>,
               ffi.Uint32)>>('isar_filter_and');
   late final _isar_filter_and = _isar_filter_andPtr.asFunction<
-      ffi.Pointer<CFilter> Function(ffi.Pointer<ffi.Pointer<CFilter>>, int)>();
+      ffi.Pointer<CFilter> Function(
+          ffi.Pointer<ffi.Pointer<CFilter>>, int)>(isLeaf: true);
 
   ffi.Pointer<CFilter> isar_filter_or(
     ffi.Pointer<ffi.Pointer<CFilter>> filters,
@@ -392,7 +403,8 @@ class IsarCoreBindings {
           ffi.Pointer<CFilter> Function(ffi.Pointer<ffi.Pointer<CFilter>>,
               ffi.Uint32)>>('isar_filter_or');
   late final _isar_filter_or = _isar_filter_orPtr.asFunction<
-      ffi.Pointer<CFilter> Function(ffi.Pointer<ffi.Pointer<CFilter>>, int)>();
+      ffi.Pointer<CFilter> Function(
+          ffi.Pointer<ffi.Pointer<CFilter>>, int)>(isLeaf: true);
 
   ffi.Pointer<CFilter> isar_filter_not(
     ffi.Pointer<CFilter> filter,
@@ -407,7 +419,8 @@ class IsarCoreBindings {
           ffi.Pointer<CFilter> Function(
               ffi.Pointer<CFilter>)>>('isar_filter_not');
   late final _isar_filter_not = _isar_filter_notPtr
-      .asFunction<ffi.Pointer<CFilter> Function(ffi.Pointer<CFilter>)>();
+      .asFunction<ffi.Pointer<CFilter> Function(ffi.Pointer<CFilter>)>(
+          isLeaf: true);
 
   int isar_insert(
     ffi.Pointer<CIsarInstance> isar,
@@ -1094,8 +1107,8 @@ class IsarCoreBindings {
   late final _isar_read_idPtr =
       _lookup<ffi.NativeFunction<ffi.Int64 Function(ffi.Pointer<CIsarReader>)>>(
           'isar_read_id');
-  late final _isar_read_id =
-      _isar_read_idPtr.asFunction<int Function(ffi.Pointer<CIsarReader>)>();
+  late final _isar_read_id = _isar_read_idPtr
+      .asFunction<int Function(ffi.Pointer<CIsarReader>)>(isLeaf: true);
 
   bool isar_read_null(
     ffi.Pointer<CIsarReader> reader,
@@ -1112,7 +1125,7 @@ class IsarCoreBindings {
           ffi.Bool Function(
               ffi.Pointer<CIsarReader>, ffi.Uint32)>>('isar_read_null');
   late final _isar_read_null = _isar_read_nullPtr
-      .asFunction<bool Function(ffi.Pointer<CIsarReader>, int)>();
+      .asFunction<bool Function(ffi.Pointer<CIsarReader>, int)>(isLeaf: true);
 
   bool isar_read_bool(
     ffi.Pointer<CIsarReader> reader,
@@ -1129,7 +1142,7 @@ class IsarCoreBindings {
           ffi.Bool Function(
               ffi.Pointer<CIsarReader>, ffi.Uint32)>>('isar_read_bool');
   late final _isar_read_bool = _isar_read_boolPtr
-      .asFunction<bool Function(ffi.Pointer<CIsarReader>, int)>();
+      .asFunction<bool Function(ffi.Pointer<CIsarReader>, int)>(isLeaf: true);
 
   int isar_read_byte(
     ffi.Pointer<CIsarReader> reader,
@@ -1146,7 +1159,7 @@ class IsarCoreBindings {
           ffi.Uint8 Function(
               ffi.Pointer<CIsarReader>, ffi.Uint32)>>('isar_read_byte');
   late final _isar_read_byte = _isar_read_bytePtr
-      .asFunction<int Function(ffi.Pointer<CIsarReader>, int)>();
+      .asFunction<int Function(ffi.Pointer<CIsarReader>, int)>(isLeaf: true);
 
   int isar_read_int(
     ffi.Pointer<CIsarReader> reader,
@@ -1163,7 +1176,7 @@ class IsarCoreBindings {
           ffi.Int32 Function(
               ffi.Pointer<CIsarReader>, ffi.Uint32)>>('isar_read_int');
   late final _isar_read_int = _isar_read_intPtr
-      .asFunction<int Function(ffi.Pointer<CIsarReader>, int)>();
+      .asFunction<int Function(ffi.Pointer<CIsarReader>, int)>(isLeaf: true);
 
   double isar_read_float(
     ffi.Pointer<CIsarReader> reader,
@@ -1180,7 +1193,7 @@ class IsarCoreBindings {
           ffi.Float Function(
               ffi.Pointer<CIsarReader>, ffi.Uint32)>>('isar_read_float');
   late final _isar_read_float = _isar_read_floatPtr
-      .asFunction<double Function(ffi.Pointer<CIsarReader>, int)>();
+      .asFunction<double Function(ffi.Pointer<CIsarReader>, int)>(isLeaf: true);
 
   int isar_read_long(
     ffi.Pointer<CIsarReader> reader,
@@ -1197,7 +1210,7 @@ class IsarCoreBindings {
           ffi.Int64 Function(
               ffi.Pointer<CIsarReader>, ffi.Uint32)>>('isar_read_long');
   late final _isar_read_long = _isar_read_longPtr
-      .asFunction<int Function(ffi.Pointer<CIsarReader>, int)>();
+      .asFunction<int Function(ffi.Pointer<CIsarReader>, int)>(isLeaf: true);
 
   double isar_read_double(
     ffi.Pointer<CIsarReader> reader,
@@ -1214,7 +1227,7 @@ class IsarCoreBindings {
           ffi.Double Function(
               ffi.Pointer<CIsarReader>, ffi.Uint32)>>('isar_read_double');
   late final _isar_read_double = _isar_read_doublePtr
-      .asFunction<double Function(ffi.Pointer<CIsarReader>, int)>();
+      .asFunction<double Function(ffi.Pointer<CIsarReader>, int)>(isLeaf: true);
 
   int isar_read_string(
     ffi.Pointer<CIsarReader> reader,
@@ -1238,8 +1251,11 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
               ffi.Pointer<ffi.Bool>)>>('isar_read_string');
   late final _isar_read_string = _isar_read_stringPtr.asFunction<
-      int Function(ffi.Pointer<CIsarReader>, int,
-          ffi.Pointer<ffi.Pointer<ffi.Uint8>>, ffi.Pointer<ffi.Bool>)>();
+      int Function(
+          ffi.Pointer<CIsarReader>,
+          int,
+          ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
+          ffi.Pointer<ffi.Bool>)>(isLeaf: true);
 
   ffi.Pointer<CIsarReader> isar_read_object(
     ffi.Pointer<CIsarReader> reader,
@@ -1256,7 +1272,8 @@ class IsarCoreBindings {
           ffi.Pointer<CIsarReader> Function(
               ffi.Pointer<CIsarReader>, ffi.Uint32)>>('isar_read_object');
   late final _isar_read_object = _isar_read_objectPtr.asFunction<
-      ffi.Pointer<CIsarReader> Function(ffi.Pointer<CIsarReader>, int)>();
+      ffi.Pointer<CIsarReader> Function(
+          ffi.Pointer<CIsarReader>, int)>(isLeaf: true);
 
   int isar_read_list(
     ffi.Pointer<CIsarReader> reader,
@@ -1276,7 +1293,7 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<CIsarReader>>)>>('isar_read_list');
   late final _isar_read_list = _isar_read_listPtr.asFunction<
       int Function(ffi.Pointer<CIsarReader>, int,
-          ffi.Pointer<ffi.Pointer<CIsarReader>>)>();
+          ffi.Pointer<ffi.Pointer<CIsarReader>>)>(isLeaf: true);
 
   int isar_read_to_json(
     ffi.Pointer<CIsarReader> reader,
@@ -1297,8 +1314,10 @@ class IsarCoreBindings {
               ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
               ffi.Pointer<ffi.Uint32>)>>('isar_read_to_json');
   late final _isar_read_to_json = _isar_read_to_jsonPtr.asFunction<
-      int Function(ffi.Pointer<CIsarReader>,
-          ffi.Pointer<ffi.Pointer<ffi.Uint8>>, ffi.Pointer<ffi.Uint32>)>();
+      int Function(
+          ffi.Pointer<CIsarReader>,
+          ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
+          ffi.Pointer<ffi.Uint32>)>(isLeaf: true);
 
   void isar_read_free(
     ffi.Pointer<CIsarReader> reader,
@@ -1311,8 +1330,8 @@ class IsarCoreBindings {
   late final _isar_read_freePtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<CIsarReader>)>>(
           'isar_read_free');
-  late final _isar_read_free =
-      _isar_read_freePtr.asFunction<void Function(ffi.Pointer<CIsarReader>)>();
+  late final _isar_read_free = _isar_read_freePtr
+      .asFunction<void Function(ffi.Pointer<CIsarReader>)>(isLeaf: true);
 
   int isar_update(
     ffi.Pointer<CIsarInstance> isar,
@@ -1425,8 +1444,8 @@ class IsarCoreBindings {
   late final _isar_value_boolPtr =
       _lookup<ffi.NativeFunction<ffi.Pointer<CIsarValue> Function(ffi.Bool)>>(
           'isar_value_bool');
-  late final _isar_value_bool =
-      _isar_value_boolPtr.asFunction<ffi.Pointer<CIsarValue> Function(bool)>();
+  late final _isar_value_bool = _isar_value_boolPtr
+      .asFunction<ffi.Pointer<CIsarValue> Function(bool)>(isLeaf: true);
 
   ffi.Pointer<CIsarValue> isar_value_integer(
     int value,
@@ -1440,7 +1459,7 @@ class IsarCoreBindings {
       _lookup<ffi.NativeFunction<ffi.Pointer<CIsarValue> Function(ffi.Int64)>>(
           'isar_value_integer');
   late final _isar_value_integer = _isar_value_integerPtr
-      .asFunction<ffi.Pointer<CIsarValue> Function(int)>();
+      .asFunction<ffi.Pointer<CIsarValue> Function(int)>(isLeaf: true);
 
   ffi.Pointer<CIsarValue> isar_value_real(
     double value,
@@ -1454,7 +1473,7 @@ class IsarCoreBindings {
       _lookup<ffi.NativeFunction<ffi.Pointer<CIsarValue> Function(ffi.Double)>>(
           'isar_value_real');
   late final _isar_value_real = _isar_value_realPtr
-      .asFunction<ffi.Pointer<CIsarValue> Function(double)>();
+      .asFunction<ffi.Pointer<CIsarValue> Function(double)>(isLeaf: true);
 
   ffi.Pointer<CIsarValue> isar_value_string(
     ffi.Pointer<CString> value,
@@ -1469,7 +1488,8 @@ class IsarCoreBindings {
           ffi.Pointer<CIsarValue> Function(
               ffi.Pointer<CString>)>>('isar_value_string');
   late final _isar_value_string = _isar_value_stringPtr
-      .asFunction<ffi.Pointer<CIsarValue> Function(ffi.Pointer<CString>)>();
+      .asFunction<ffi.Pointer<CIsarValue> Function(ffi.Pointer<CString>)>(
+          isLeaf: true);
 
   bool isar_value_get_bool(
     ffi.Pointer<CIsarValue> value,
@@ -1483,7 +1503,7 @@ class IsarCoreBindings {
       _lookup<ffi.NativeFunction<ffi.Bool Function(ffi.Pointer<CIsarValue>)>>(
           'isar_value_get_bool');
   late final _isar_value_get_bool = _isar_value_get_boolPtr
-      .asFunction<bool Function(ffi.Pointer<CIsarValue>)>();
+      .asFunction<bool Function(ffi.Pointer<CIsarValue>)>(isLeaf: true);
 
   int isar_value_get_integer(
     ffi.Pointer<CIsarValue> value,
@@ -1497,7 +1517,7 @@ class IsarCoreBindings {
       _lookup<ffi.NativeFunction<ffi.Int64 Function(ffi.Pointer<CIsarValue>)>>(
           'isar_value_get_integer');
   late final _isar_value_get_integer = _isar_value_get_integerPtr
-      .asFunction<int Function(ffi.Pointer<CIsarValue>)>();
+      .asFunction<int Function(ffi.Pointer<CIsarValue>)>(isLeaf: true);
 
   double isar_value_get_real(
     ffi.Pointer<CIsarValue> value,
@@ -1511,7 +1531,7 @@ class IsarCoreBindings {
       _lookup<ffi.NativeFunction<ffi.Double Function(ffi.Pointer<CIsarValue>)>>(
           'isar_value_get_real');
   late final _isar_value_get_real = _isar_value_get_realPtr
-      .asFunction<double Function(ffi.Pointer<CIsarValue>)>();
+      .asFunction<double Function(ffi.Pointer<CIsarValue>)>(isLeaf: true);
 
   int isar_value_get_string(
     ffi.Pointer<CIsarValue> value,
@@ -1528,8 +1548,8 @@ class IsarCoreBindings {
           ffi.Uint32 Function(ffi.Pointer<CIsarValue>,
               ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>>('isar_value_get_string');
   late final _isar_value_get_string = _isar_value_get_stringPtr.asFunction<
-      int Function(
-          ffi.Pointer<CIsarValue>, ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>();
+      int Function(ffi.Pointer<CIsarValue>,
+          ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>(isLeaf: true);
 
   void isar_value_free(
     ffi.Pointer<CIsarValue> value,
@@ -1542,8 +1562,8 @@ class IsarCoreBindings {
   late final _isar_value_freePtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<CIsarValue>)>>(
           'isar_value_free');
-  late final _isar_value_free =
-      _isar_value_freePtr.asFunction<void Function(ffi.Pointer<CIsarValue>)>();
+  late final _isar_value_free = _isar_value_freePtr
+      .asFunction<void Function(ffi.Pointer<CIsarValue>)>(isLeaf: true);
 
   int isar_watch_collection(
     ffi.Pointer<CIsarInstance> isar,
@@ -1650,7 +1670,7 @@ class IsarCoreBindings {
           ffi.Void Function(
               ffi.Pointer<CIsarWriter>, ffi.Uint32)>>('isar_write_null');
   late final _isar_write_null = _isar_write_nullPtr
-      .asFunction<void Function(ffi.Pointer<CIsarWriter>, int)>();
+      .asFunction<void Function(ffi.Pointer<CIsarWriter>, int)>(isLeaf: true);
 
   void isar_write_bool(
     ffi.Pointer<CIsarWriter> writer,
@@ -1669,7 +1689,8 @@ class IsarCoreBindings {
           ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32,
               ffi.Bool)>>('isar_write_bool');
   late final _isar_write_bool = _isar_write_boolPtr
-      .asFunction<void Function(ffi.Pointer<CIsarWriter>, int, bool)>();
+      .asFunction<void Function(ffi.Pointer<CIsarWriter>, int, bool)>(
+          isLeaf: true);
 
   void isar_write_byte(
     ffi.Pointer<CIsarWriter> writer,
@@ -1688,7 +1709,8 @@ class IsarCoreBindings {
           ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32,
               ffi.Uint8)>>('isar_write_byte');
   late final _isar_write_byte = _isar_write_bytePtr
-      .asFunction<void Function(ffi.Pointer<CIsarWriter>, int, int)>();
+      .asFunction<void Function(ffi.Pointer<CIsarWriter>, int, int)>(
+          isLeaf: true);
 
   void isar_write_int(
     ffi.Pointer<CIsarWriter> writer,
@@ -1707,7 +1729,8 @@ class IsarCoreBindings {
           ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32,
               ffi.Int32)>>('isar_write_int');
   late final _isar_write_int = _isar_write_intPtr
-      .asFunction<void Function(ffi.Pointer<CIsarWriter>, int, int)>();
+      .asFunction<void Function(ffi.Pointer<CIsarWriter>, int, int)>(
+          isLeaf: true);
 
   void isar_write_float(
     ffi.Pointer<CIsarWriter> writer,
@@ -1726,7 +1749,8 @@ class IsarCoreBindings {
           ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32,
               ffi.Float)>>('isar_write_float');
   late final _isar_write_float = _isar_write_floatPtr
-      .asFunction<void Function(ffi.Pointer<CIsarWriter>, int, double)>();
+      .asFunction<void Function(ffi.Pointer<CIsarWriter>, int, double)>(
+          isLeaf: true);
 
   void isar_write_long(
     ffi.Pointer<CIsarWriter> writer,
@@ -1745,7 +1769,8 @@ class IsarCoreBindings {
           ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32,
               ffi.Int64)>>('isar_write_long');
   late final _isar_write_long = _isar_write_longPtr
-      .asFunction<void Function(ffi.Pointer<CIsarWriter>, int, int)>();
+      .asFunction<void Function(ffi.Pointer<CIsarWriter>, int, int)>(
+          isLeaf: true);
 
   void isar_write_double(
     ffi.Pointer<CIsarWriter> writer,
@@ -1764,7 +1789,8 @@ class IsarCoreBindings {
           ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32,
               ffi.Double)>>('isar_write_double');
   late final _isar_write_double = _isar_write_doublePtr
-      .asFunction<void Function(ffi.Pointer<CIsarWriter>, int, double)>();
+      .asFunction<void Function(ffi.Pointer<CIsarWriter>, int, double)>(
+          isLeaf: true);
 
   void isar_write_string(
     ffi.Pointer<CIsarWriter> writer,
@@ -1783,7 +1809,8 @@ class IsarCoreBindings {
           ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32,
               ffi.Pointer<CString>)>>('isar_write_string');
   late final _isar_write_string = _isar_write_stringPtr.asFunction<
-      void Function(ffi.Pointer<CIsarWriter>, int, ffi.Pointer<CString>)>();
+      void Function(
+          ffi.Pointer<CIsarWriter>, int, ffi.Pointer<CString>)>(isLeaf: true);
 
   void isar_write_json(
     ffi.Pointer<CIsarWriter> writer,
@@ -1802,7 +1829,8 @@ class IsarCoreBindings {
           ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32,
               ffi.Pointer<CString>)>>('isar_write_json');
   late final _isar_write_json = _isar_write_jsonPtr.asFunction<
-      void Function(ffi.Pointer<CIsarWriter>, int, ffi.Pointer<CString>)>();
+      void Function(
+          ffi.Pointer<CIsarWriter>, int, ffi.Pointer<CString>)>(isLeaf: true);
 
   void isar_write_byte_list(
     ffi.Pointer<CIsarWriter> writer,
@@ -1823,8 +1851,8 @@ class IsarCoreBindings {
           ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32,
               ffi.Pointer<ffi.Uint8>, ffi.Uint32)>>('isar_write_byte_list');
   late final _isar_write_byte_list = _isar_write_byte_listPtr.asFunction<
-      void Function(
-          ffi.Pointer<CIsarWriter>, int, ffi.Pointer<ffi.Uint8>, int)>();
+      void Function(ffi.Pointer<CIsarWriter>, int, ffi.Pointer<ffi.Uint8>,
+          int)>(isLeaf: true);
 
   ffi.Pointer<CIsarWriter> isar_write_object(
     ffi.Pointer<CIsarWriter> writer,
@@ -1841,7 +1869,8 @@ class IsarCoreBindings {
           ffi.Pointer<CIsarWriter> Function(
               ffi.Pointer<CIsarWriter>, ffi.Uint32)>>('isar_write_object');
   late final _isar_write_object = _isar_write_objectPtr.asFunction<
-      ffi.Pointer<CIsarWriter> Function(ffi.Pointer<CIsarWriter>, int)>();
+      ffi.Pointer<CIsarWriter> Function(
+          ffi.Pointer<CIsarWriter>, int)>(isLeaf: true);
 
   void isar_write_object_end(
     ffi.Pointer<CIsarWriter> writer,
@@ -1858,7 +1887,8 @@ class IsarCoreBindings {
           ffi.Void Function(ffi.Pointer<CIsarWriter>,
               ffi.Pointer<CIsarWriter>)>>('isar_write_object_end');
   late final _isar_write_object_end = _isar_write_object_endPtr.asFunction<
-      void Function(ffi.Pointer<CIsarWriter>, ffi.Pointer<CIsarWriter>)>();
+      void Function(
+          ffi.Pointer<CIsarWriter>, ffi.Pointer<CIsarWriter>)>(isLeaf: true);
 
   ffi.Pointer<CIsarWriter> isar_write_list(
     ffi.Pointer<CIsarWriter> writer,
@@ -1877,7 +1907,8 @@ class IsarCoreBindings {
           ffi.Pointer<CIsarWriter> Function(ffi.Pointer<CIsarWriter>,
               ffi.Uint32, ffi.Uint32)>>('isar_write_list');
   late final _isar_write_list = _isar_write_listPtr.asFunction<
-      ffi.Pointer<CIsarWriter> Function(ffi.Pointer<CIsarWriter>, int, int)>();
+      ffi.Pointer<CIsarWriter> Function(
+          ffi.Pointer<CIsarWriter>, int, int)>(isLeaf: true);
 
   void isar_write_list_end(
     ffi.Pointer<CIsarWriter> writer,
@@ -1894,7 +1925,8 @@ class IsarCoreBindings {
           ffi.Void Function(ffi.Pointer<CIsarWriter>,
               ffi.Pointer<CIsarWriter>)>>('isar_write_list_end');
   late final _isar_write_list_end = _isar_write_list_endPtr.asFunction<
-      void Function(ffi.Pointer<CIsarWriter>, ffi.Pointer<CIsarWriter>)>();
+      void Function(
+          ffi.Pointer<CIsarWriter>, ffi.Pointer<CIsarWriter>)>(isLeaf: true);
 }
 
 final class CIsarCursor extends ffi.Opaque {}
