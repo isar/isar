@@ -32,24 +32,26 @@ class _IsarImpl extends Isar {
   factory _IsarImpl.open({
     required List<IsarCollectionSchema> schemas,
     required String name,
+    required IsarEngine engine,
     required String directory,
-    required bool sqliteEngine,
-    required int maxSizeMiB,
-    String? encryptionKey,
-    CompactCondition? compactOnLaunch,
+    required int? maxSizeMiB,
+    required String? encryptionKey,
+    required CompactCondition? compactOnLaunch,
   }) {
     IsarCore._initialize();
 
-    if (sqliteEngine) {
+    if (engine == IsarEngine.isar) {
+      if (encryptionKey != null) {
+        throw UnsupportedError('Isar engine does not support encryptionKey.');
+      }
+      maxSizeMiB ??= Isar.defaultMaxSizeMiB;
+    } else {
       if (compactOnLaunch != null) {
         throw UnsupportedError(
           'SQLite engine does not support compactOnLaunch.',
         );
       }
-    } else {
-      if (encryptionKey != null) {
-        throw UnsupportedError('Isar engine does not support encryptionKey.');
-      }
+      maxSizeMiB ??= 0;
     }
 
     final embeddedSchemas = <IsarSchema>{};
@@ -81,7 +83,7 @@ class _IsarImpl extends Isar {
           instanceId,
           namePtr,
           directoryPtr,
-          sqliteEngine,
+          engine == IsarEngine.sqlite,
           schemaPtr,
           maxSizeMiB,
           encryptionKeyPtr,

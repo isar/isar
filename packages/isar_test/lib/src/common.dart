@@ -91,24 +91,15 @@ Isar openTempIsar(
     Directory(testTempPath!).createSync(recursive: true);
   }
 
-  late final Isar isar;
-  if (isSQLite) {
-    isar = Isar.openSQLite(
-      schemas: schemas,
-      name: name ?? getRandomName(),
-      maxSizeMiB: maxSizeMiB,
-      encryptionKey: encryptionKey,
-      directory: directory ?? testTempPath!,
-    );
-  } else {
-    isar = Isar.open(
-      schemas: schemas,
-      name: name ?? getRandomName(),
-      maxSizeMiB: maxSizeMiB,
-      directory: directory ?? testTempPath!,
-      compactOnLaunch: compactOnLaunch,
-    );
-  }
+  final isar = Isar.open(
+    schemas: schemas,
+    name: name ?? getRandomName(),
+    directory: directory ?? testTempPath!,
+    engine: isSQLite ? IsarEngine.sqlite : IsarEngine.isar,
+    maxSizeMiB: maxSizeMiB,
+    encryptionKey: encryptionKey,
+    compactOnLaunch: compactOnLaunch,
+  );
 
   if (closeAutomatically) {
     addTearDown(() async {

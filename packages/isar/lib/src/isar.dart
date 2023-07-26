@@ -1,5 +1,14 @@
 part of isar;
 
+/// The Isar storage engine.
+enum IsarEngine {
+  /// The native Isar storage engine.
+  isar,
+
+  /// The SQLite storage engine.
+  sqlite
+}
+
 /// An Isar database instance.
 @pragma('vm:isolate-unsendable')
 abstract class Isar {
@@ -33,13 +42,18 @@ abstract class Isar {
   /// You can optionally provide a [name] for this instance. This is needed if
   /// you want to open multiple instances.
   ///
+  /// If [encryptionKey] is provided, the database will be encrypted with the
+  /// provided key. Opening an encrypted database with an incorrect key will
+  /// result in an error. Only the SQLite storage engine supports encryption.
+  ///
   /// [maxSizeMiB] is the maximum size of the database file in MiB. It is
   /// recommended to set this value as low as possible. Older devices might
   /// not be able to grant the requested amount of virtual memory. In that case
   /// Isar will try to use as much memory as possible.
   ///
   /// [compactOnLaunch] is a condition that triggers a database compaction
-  /// on launch when the specified conditions are met.
+  /// on launch when the specified conditions are met. Only the Isar storage
+  /// engine supports compaction.
   ///
   /// [inspector] enables the Isar inspector when the app is running in debug
   /// mode. In release mode the inspector is always disabled.
@@ -48,7 +62,9 @@ abstract class Isar {
     required List<IsarCollectionSchema> schemas,
     required String directory,
     String name = Isar.defaultName,
-    int maxSizeMiB = Isar.defaultMaxSizeMiB,
+    IsarEngine engine = IsarEngine.isar,
+    int? maxSizeMiB = Isar.defaultMaxSizeMiB,
+    String? encryptionKey,
     CompactCondition? compactOnLaunch,
     bool inspector = true,
   }) {
@@ -56,8 +72,9 @@ abstract class Isar {
       schemas: schemas,
       directory: directory,
       name: name,
-      sqliteEngine: false,
+      engine: engine,
       maxSizeMiB: maxSizeMiB,
+      encryptionKey: encryptionKey,
       compactOnLaunch: compactOnLaunch,
     );
   }
@@ -69,7 +86,9 @@ abstract class Isar {
     required List<IsarCollectionSchema> schemas,
     required String directory,
     String name = Isar.defaultName,
-    int maxSizeMiB = Isar.defaultMaxSizeMiB,
+    IsarEngine engine = IsarEngine.isar,
+    int? maxSizeMiB = Isar.defaultMaxSizeMiB,
+    String? encryptionKey,
     CompactCondition? compactOnLaunch,
     bool inspector = true,
   }) async {
@@ -79,68 +98,13 @@ abstract class Isar {
           schemas: schemas,
           directory: directory,
           name: name,
+          engine: engine,
           maxSizeMiB: maxSizeMiB,
           compactOnLaunch: compactOnLaunch,
           inspector: inspector,
         );
       },
       debugName: 'Isar open async',
-    );
-    return Isar.get(schemas: schemas, name: name);
-  }
-
-  /// Open a new Isar instance with the SQLite storage engine.
-  ///
-  /// {@macro isar_open}
-  ///
-  /// If [encryptionKey] is provided, the database will be encrypted with the
-  /// provided key. Opening an encrypted database with an incorrect key will
-  /// result in an error.
-  static Isar openSQLite({
-    required List<IsarCollectionSchema> schemas,
-    required String directory,
-    String name = Isar.defaultName,
-    int? maxSizeMiB = Isar.defaultMaxSizeMiB,
-    String? encryptionKey,
-    bool inspector = true,
-  }) {
-    return _IsarImpl.open(
-      schemas: schemas,
-      directory: directory,
-      name: name,
-      sqliteEngine: true,
-      maxSizeMiB: maxSizeMiB ?? 0,
-      encryptionKey: encryptionKey,
-    );
-  }
-
-  /// Open a new Isar instance with the SQLite storage engine asynchronously.
-  ///
-  /// {@macro isar_open}
-  ///
-  /// If [encryptionKey] is provided, the database will be encrypted with the
-  /// provided key. Opening an encrypted database with an incorrect key will
-  /// result in an error.
-  static Future<Isar> openSQLiteAsync({
-    required List<IsarCollectionSchema> schemas,
-    required String directory,
-    String name = Isar.defaultName,
-    int? maxSizeMiB = Isar.defaultMaxSizeMiB,
-    String? encryptionKey,
-    bool inspector = true,
-  }) async {
-    await Isolate.run(
-      () {
-        Isar.openSQLite(
-          schemas: schemas,
-          directory: directory,
-          name: name,
-          maxSizeMiB: maxSizeMiB,
-          encryptionKey: encryptionKey,
-          inspector: inspector,
-        );
-      },
-      debugName: 'Isar open SQLite async',
     );
     return Isar.get(schemas: schemas, name: name);
   }
