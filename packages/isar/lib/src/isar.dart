@@ -20,26 +20,7 @@ abstract class Isar {
     required List<IsarCollectionSchema> schemas,
     String name = Isar.defaultName,
   }) {
-    return _IsarImpl.getByName(
-      name: name,
-      schemas: schemas,
-      sqliteEngine: false,
-    );
-  }
-
-  /// Get an already opened SQLite Isar instance by its name.
-  ///
-  /// This method is especially useful to get an Isar instance from an isolate.
-  /// It is much faster than using [openSQLite].
-  static Isar getSQLite({
-    required List<IsarCollectionSchema> schemas,
-    String name = Isar.defaultName,
-  }) {
-    return _IsarImpl.getByName(
-      name: name,
-      schemas: schemas,
-      sqliteEngine: true,
-    );
+    return _IsarImpl.getByName(name: name, schemas: schemas);
   }
 
   /// Open a new Isar instance.
@@ -161,7 +142,7 @@ abstract class Isar {
       },
       debugName: 'Isar open SQLite async',
     );
-    return Isar.getSQLite(schemas: schemas, name: name);
+    return Isar.get(schemas: schemas, name: name);
   }
 
   /// Name of the instance.

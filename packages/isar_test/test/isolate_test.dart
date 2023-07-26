@@ -39,13 +39,10 @@ void main() {
       isar.testModels.putAll([_obj1, _obj2]);
     });
 
-    final sqlite = isSQLite;
     await Isolate.run(() {
       prepareTest();
 
-      final isar = sqlite
-          ? Isar.getSQLite(schemas: [TestModelSchema], name: name)
-          : Isar.get(schemas: [TestModelSchema], name: name);
+      final isar = Isar.get(schemas: [TestModelSchema], name: name);
 
       final current = isar.testModels.where().findAll();
       assert(

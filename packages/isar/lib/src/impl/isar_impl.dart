@@ -3,7 +3,6 @@ part of isar;
 class _IsarImpl extends Isar {
   _IsarImpl._(
     this.instanceId,
-    this.sqliteEngine,
     Pointer<CIsarInstance> ptr,
     this.converters,
   ) : _ptr = ptr {
@@ -22,7 +21,6 @@ class _IsarImpl extends Isar {
   static final _instances = <int, _IsarImpl>{};
 
   final int instanceId;
-  final bool sqliteEngine;
   final List<IsarObjectConverter<dynamic, dynamic>> converters;
   final collections = <Type, _IsarCollectionImpl<dynamic, dynamic>>{};
 
@@ -94,31 +92,32 @@ class _IsarImpl extends Isar {
         .checkNoError();
 
     final converters = schemas.map((e) => e.converter).toList();
-    return _IsarImpl._(instanceId, sqliteEngine, isarPtrPtr.value, converters);
+    return _IsarImpl._(instanceId, isarPtrPtr.value, converters);
   }
 
   // ignore: sort_constructors_first
   factory _IsarImpl.get({
     required int instanceId,
     required List<IsarObjectConverter<dynamic, dynamic>> converters,
-    required bool sqliteEngine,
     String? libraryPath,
   }) {
     IsarCore._attach(libraryPath);
-    final ptr = IsarCore.b.isar_get_instance(instanceId, sqliteEngine);
+    var ptr = IsarCore.b.isar_get_instance(instanceId, false);
+    if (ptr.isNull) {
+      ptr = IsarCore.b.isar_get_instance(instanceId, true);
+    }
     if (ptr.isNull) {
       throw IsarNotReadyError('Instance has not been opened yet. Make sure to '
           'call Isar.open() before using Isar.get().');
     }
 
-    return _IsarImpl._(instanceId, sqliteEngine, ptr, converters);
+    return _IsarImpl._(instanceId, ptr, converters);
   }
 
   // ignore: sort_constructors_first
   factory _IsarImpl.getByName({
     required String name,
     required List<IsarCollectionSchema> schemas,
-    required bool sqliteEngine,
   }) {
     final instanceId = Isar.fastHash(name);
     final instance = _IsarImpl._instances[instanceId];
@@ -130,7 +129,6 @@ class _IsarImpl extends Isar {
     return _IsarImpl.get(
       instanceId: instanceId,
       converters: converters,
-      sqliteEngine: sqliteEngine,
     );
   }
 
@@ -260,13 +258,11 @@ class _IsarImpl extends Isar {
     String? debugName,
   }) {
     final instanceId = this.instanceId;
-    final sqliteEngine = this.sqliteEngine;
     final libraryPath = IsarCore._libraryPath;
     final converters = this.converters;
     return _IsolatePool.runIsolate(
       () => _isarAsync(
         instanceId,
-        sqliteEngine,
         libraryPath,
         converters,
         false,
@@ -284,14 +280,12 @@ class _IsarImpl extends Isar {
     String? debugName,
   }) async {
     final instanceId = this.instanceId;
-    final sqliteEngine = this.sqliteEngine;
     final libraryPath = IsarCore._libraryPath;
     final converters = this.converters.toList();
     return _IsolatePool.runIsolate(
       () {
         return _isarAsync(
           instanceId,
-          sqliteEngine,
           libraryPath,
           converters,
           true,
@@ -344,7 +338,6 @@ class _IsarImpl extends Isar {
 
 T _isarAsync<T, P>(
   int instanceId,
-  bool sqliteEngine,
   String? libraryPath,
   List<IsarObjectConverter<dynamic, dynamic>> converters,
   bool write,
@@ -354,7 +347,6 @@ T _isarAsync<T, P>(
   final isar = _IsarImpl.get(
     instanceId: instanceId,
     converters: converters,
-    sqliteEngine: sqliteEngine,
     libraryPath: libraryPath,
   );
   try {
