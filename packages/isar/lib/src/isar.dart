@@ -10,7 +10,7 @@ abstract class Isar {
   static const int defaultMaxSizeMiB = 128;
 
   /// The current Isar version.
-  static const String version = '4.0.0-dev.1';
+  static const String version = '4.0.0-dev.2';
 
   /// Get an already opened Isar instance by its name.
   ///
@@ -44,6 +44,7 @@ abstract class Isar {
 
   /// Open a new Isar instance.
   ///
+  /// {@template isar_open}
   /// You have to provide a list of all collection [schemas] that you want to
   /// use in this instance as well as a [directory] where the database file
   /// should be stored.
@@ -61,6 +62,7 @@ abstract class Isar {
   ///
   /// [inspector] enables the Isar inspector when the app is running in debug
   /// mode. In release mode the inspector is always disabled.
+  /// {@endtemplate}
   static Isar open({
     required List<IsarCollectionSchema> schemas,
     required String directory,
@@ -79,25 +81,40 @@ abstract class Isar {
     );
   }
 
+  /// Open a new Isar instance asynchronously.
+  ///
+  /// {@macro isar_open}
+  static Future<Isar> openAsync({
+    required List<IsarCollectionSchema> schemas,
+    required String directory,
+    String name = Isar.defaultName,
+    int maxSizeMiB = Isar.defaultMaxSizeMiB,
+    CompactCondition? compactOnLaunch,
+    bool inspector = true,
+  }) async {
+    await Isolate.run(
+      () {
+        Isar.open(
+          schemas: schemas,
+          directory: directory,
+          name: name,
+          maxSizeMiB: maxSizeMiB,
+          compactOnLaunch: compactOnLaunch,
+          inspector: inspector,
+        );
+      },
+      debugName: 'Isar open async',
+    );
+    return Isar.get(schemas: schemas, name: name);
+  }
+
   /// Open a new Isar instance with the SQLite storage engine.
   ///
-  /// You have to provide a list of all collection [schemas] that you want to
-  /// use in this instance as well as a [directory] where the database file
-  /// should be stored.
-  ///
-  /// You can optionally provide a [name] for this instance. This is needed if
-  /// you want to open multiple instances.
-  ///
-  /// [maxSizeMiB] is the maximum size of the database file in MiB. It is
-  /// recommended to set this value as low as possible. If you set it to 0, the
-  /// SQLite will no longer use WAL mode and there will be no size limit.
+  /// {@macro isar_open}
   ///
   /// If [encryptionKey] is provided, the database will be encrypted with the
   /// provided key. Opening an encrypted database with an incorrect key will
   /// result in an error.
-  ///
-  /// [inspector] enables the Isar inspector when the app is running in debug
-  /// mode. In release mode the inspector is always disabled.
   static Isar openSQLite({
     required List<IsarCollectionSchema> schemas,
     required String directory,
@@ -114,6 +131,37 @@ abstract class Isar {
       maxSizeMiB: maxSizeMiB ?? 0,
       encryptionKey: encryptionKey,
     );
+  }
+
+  /// Open a new Isar instance with the SQLite storage engine asynchronously.
+  ///
+  /// {@macro isar_open}
+  ///
+  /// If [encryptionKey] is provided, the database will be encrypted with the
+  /// provided key. Opening an encrypted database with an incorrect key will
+  /// result in an error.
+  static Future<Isar> openSQLiteAsync({
+    required List<IsarCollectionSchema> schemas,
+    required String directory,
+    String name = Isar.defaultName,
+    int? maxSizeMiB = Isar.defaultMaxSizeMiB,
+    String? encryptionKey,
+    bool inspector = true,
+  }) async {
+    await Isolate.run(
+      () {
+        Isar.openSQLite(
+          schemas: schemas,
+          directory: directory,
+          name: name,
+          maxSizeMiB: maxSizeMiB,
+          encryptionKey: encryptionKey,
+          inspector: inspector,
+        );
+      },
+      debugName: 'Isar open SQLite async',
+    );
+    return Isar.getSQLite(schemas: schemas, name: name);
   }
 
   /// Name of the instance.

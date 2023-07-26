@@ -21,6 +21,34 @@ void main() async {
       isar = openTempIsar([ModelSchema]);
     });
 
+    // TODO enable once native assets are supported
+    /*isarTest('Open', () async {
+      final isarName = isar.name;
+      final isarDir = isar.directory;
+
+      isar.write((isar) {
+        isar.models.put(const Model(1, 'abc'));
+      });
+      expect(isar.close(), true);
+
+      if (isSQLite) {
+        isar = await Isar.openSQLiteAsync(
+          schemas: [ModelSchema],
+          name: isarName,
+          directory: isarDir,
+        );
+      } else {
+        isar = await Isar.openAsync(
+          schemas: [ModelSchema],
+          name: isarName,
+          directory: isarDir,
+        );
+      }
+
+      expect(isar.models.get(2), const Model(1, 'abc'));
+      expect(isar.close(), true);
+    });*/
+
     isarTest('Bulk insert', () async {
       final futures = List.generate(100, (index) {
         return isar.writeAsyncWith(index, (isar, index) {

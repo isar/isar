@@ -55,7 +55,6 @@ abstract final class IsarCore {
     }
 
     IsarCore.b.isar_connect_dart_api(NativeApi.postCObject.cast());
-
     _initialized = true;
   }
 
@@ -71,6 +70,8 @@ abstract final class IsarCore {
         ? DynamicLibrary.process()
         : DynamicLibrary.open(_libraryPath!);
     b = IsarCoreBindings(dylib);
+
+    IsarCore.b.isar_connect_dart_api(NativeApi.postCObject.cast());
     _initialized = true;
   }
 
