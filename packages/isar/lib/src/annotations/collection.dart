@@ -10,7 +10,7 @@ class Collection {
   const Collection({
     this.inheritance = true,
     this.accessor,
-    this.ignore = const {},
+    this.ignore = const {'copyWith'},
   });
 
   /// Should properties and accessors of parent classes and mixins be included?

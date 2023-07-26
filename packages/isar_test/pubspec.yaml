@@ -12,15 +12,16 @@ dependencies:
   copy_with_extension: ^5.0.3
   flutter:
     sdk: flutter
+  freezed_annotation: ^2.4.1
   integration_test:
     sdk: flutter
-  intl: 0.18.0
+  intl: 0.18.1
   isar: any
   isar_flutter_libs: any
-  json_annotation: ^4.7.0
-  meta: ^1.8.0
-  path: ^1.8.2
-  path_provider: ^2.0.10
+  json_annotation: ^4.8.1
+  meta: ^1.9.1
+  path: ^1.8.3
+  path_provider: ^2.0.15
   test: any
   test_api: any
 
@@ -29,8 +30,9 @@ dev_dependencies:
   copy_with_extension_gen: ^5.0.3
   flutter_test:
     sdk: flutter
-  json_serializable: ^6.3.1
-  very_good_analysis: ^3.0.1
+  freezed: ^2.4.1
+  json_serializable: ^6.7.1
+  very_good_analysis: ^5.0.0+1
 
 dependency_overrides:
   isar:

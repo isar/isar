@@ -42,14 +42,12 @@ class _IsarImpl extends Isar {
 
     if (engine == IsarEngine.isar) {
       if (encryptionKey != null) {
-        throw UnsupportedError('Isar engine does not support encryptionKey.');
+        throw ArgumentError('Isar engine does not support encryption.');
       }
       maxSizeMiB ??= Isar.defaultMaxSizeMiB;
     } else {
       if (compactOnLaunch != null) {
-        throw UnsupportedError(
-          'SQLite engine does not support compactOnLaunch.',
-        );
+        throw ArgumentError('SQLite engine does not support compaction.');
       }
       maxSizeMiB ??= 0;
     }
