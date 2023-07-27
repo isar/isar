@@ -21,12 +21,6 @@ class IntModel {
       return false;
     }
   }
-
-  @override
-  String toString() {
-    // TODO: implement toString
-    return 'IntModel{id: $id, value: $value}';
-  }
 }
 
 @collection
@@ -228,7 +222,9 @@ void main() {
 
           isar.stringModels.put(strM2);
           expect(
-              isar.stringModels.getAll([strM1.id, strM2.id]), [strM1, strM2]);
+            isar.stringModels.getAll([strM1.id, strM2.id]),
+            [strM1, strM2],
+          );
         });
 
         expect(isar.stringModels.getAll([strM1.id, strM2.id]), [strM1, strM2]);

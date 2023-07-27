@@ -57,7 +57,11 @@ abstract class IsarQuery<T> {
   /// the query manually. If [fireImmediately] is `true`, the results will be
   /// sent to the consumer immediately.
   /// {@endtemplate}
-  Stream<List<T>> watch({bool fireImmediately = false});
+  Stream<List<T>> watch({
+    bool fireImmediately = false,
+    int? offset,
+    int? limit,
+  });
 
   /// {@template query_watch_lazy}
   /// Watch the query for changes. If [fireImmediately] is `true`, an event will

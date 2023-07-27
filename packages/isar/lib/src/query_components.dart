@@ -307,7 +307,8 @@ class AndGroup extends Filter {
   /// Create a logical AND filter group.
   ///
   /// Matches when all [filters] match.
-  const AndGroup(this.filters) : assert(filters.length > 0);
+  const AndGroup(this.filters)
+      : assert(filters.length > 0, 'And filters must not be empty');
 
   /// The filters of this group.
   final List<Filter> filters;
@@ -318,7 +319,8 @@ class OrGroup extends Filter {
   /// Create a logical OR filter group.
   ///
   /// Matches when any of the [filters] matches.
-  const OrGroup(this.filters) : assert(filters.length > 0);
+  const OrGroup(this.filters)
+      : assert(filters.length > 0, 'Or filters must not be empty');
 
   /// The filters of this group.
   final List<Filter> filters;

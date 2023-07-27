@@ -14,15 +14,8 @@ class Col1 {
   Embedded1? value;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is Col1 && id == other.id && value == other.value;
-
-  @override
-  String toString() {
-    // TODO: implement toString
-    return 'Col1{id: $id, value: $value}';
-  }
 }
 
 @embedded
@@ -33,14 +26,7 @@ class Embedded1 {
   String? value;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) => other is Embedded1 && value == other.value;
-
-  @override
-  String toString() {
-    // TODO: implement toString
-    return 'Embedded1{value: $value}';
-  }
 }
 
 @collection
@@ -53,15 +39,8 @@ class Col2 {
   Embedded2? value;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is Col2 && id == other.id && value == other.value;
-
-  @override
-  String toString() {
-    // TODO: implement toString
-    return 'Col2{id: $id, value: $value}';
-  }
 }
 
 @embedded
@@ -74,15 +53,8 @@ class Embedded2 {
   String? value;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is Embedded2 && value == other.value && newValue == other.newValue;
-
-  @override
-  String toString() {
-    // TODO: implement toString
-    return 'Embedded2{newValue: $newValue, value: $value}';
-  }
 }
 
 void main() {

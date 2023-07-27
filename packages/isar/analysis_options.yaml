@@ -8,4 +8,4 @@ analyzer:
     cascade_invocations: ignore
     avoid_positional_boolean_parameters: ignore
     parameter_assignments: ignore
-    prefer_asserts_with_message: ignore
+    use_string_in_part_of_directives: ignore

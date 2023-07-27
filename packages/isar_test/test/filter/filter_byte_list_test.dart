@@ -70,7 +70,9 @@ void main() {
 
     isarTest('.elementLessThan()', () {
       expect(
-          col.where().listElementLessThan(123).findAll(), [obj2, obj3, obj4]);
+        col.where().listElementLessThan(123).findAll(),
+        [obj2, obj3, obj4],
+      );
       expect(col.where().listElementLessThan(0).findAll(), isEmpty);
     });
 

@@ -1,4 +1,5 @@
-// ignore_for_file: use_string_buffers, no_default_cases
+// ignore_for_file: use_string_buffers, no_default_cases,
+// ignore_for_file: always_put_required_named_parameters_first
 
 part of isar_generator;
 
@@ -91,7 +92,7 @@ String _deserializeProperty(
     elementDefaultValue: p.elementDefaultValue,
     utc: p.utc,
     transform: (value) {
-      if (p.isEnum && !p.type.isList) {
+      if (p.isEnum && !p.type.isList && value != p.defaultValue) {
         return result(
           '${p.enumMapName(object)}[$value] ?? ${p.defaultValue}',
         );
@@ -100,7 +101,7 @@ String _deserializeProperty(
       }
     },
     transformElement: (value) {
-      if (p.isEnum) {
+      if (p.isEnum && value != p.elementDefaultValue) {
         return '${p.enumMapName(object)}[$value] ?? ${p.elementDefaultValue}';
       } else {
         return value;

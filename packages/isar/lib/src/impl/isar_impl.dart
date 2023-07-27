@@ -203,10 +203,14 @@ class _IsarImpl extends Isar {
     throw WriteTxnRequiredError();
   }
 
-  T _txn<T>(T Function(Isar isar) callback, {required bool write}) {
+  void _checkNotInTxn() {
     if (_txnPtr != null) {
       throw UnsupportedError('Nested transactions are not supported');
     }
+  }
+
+  T _txn<T>(T Function(Isar isar) callback, {required bool write}) {
+    _checkNotInTxn();
 
     final ptr = getPtr();
     final txnPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarTxn>>();
@@ -257,6 +261,8 @@ class _IsarImpl extends Isar {
     T Function(Isar isar, P param) callback, {
     String? debugName,
   }) {
+    _checkNotInTxn();
+
     final instanceId = this.instanceId;
     final libraryPath = IsarCore._libraryPath;
     final converters = this.converters;
@@ -279,6 +285,8 @@ class _IsarImpl extends Isar {
     T Function(Isar isar, P param) callback, {
     String? debugName,
   }) async {
+    _checkNotInTxn();
+
     final instanceId = this.instanceId;
     final libraryPath = IsarCore._libraryPath;
     final converters = this.converters.toList();

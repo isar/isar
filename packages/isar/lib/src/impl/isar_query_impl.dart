@@ -4,8 +4,8 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
   _IsarQueryImpl({
     required int instanceId,
     required int ptrAddress,
-    List<int>? properties,
     required Deserialize<T> deserialize,
+    List<int>? properties,
   })  : _instanceId = instanceId,
         _ptrAddress = ptrAddress,
         _properties = properties,
@@ -185,9 +185,13 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
   }
 
   @override
-  Stream<List<T>> watch({bool fireImmediately = false}) {
+  Stream<List<T>> watch({
+    bool fireImmediately = false,
+    int? offset,
+    int? limit,
+  }) {
     return watchLazy(fireImmediately: fireImmediately)
-        .asyncMap((event) => findAllAsync());
+        .asyncMap((event) => findAllAsync(offset: offset, limit: limit));
   }
 
   @override

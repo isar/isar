@@ -13,7 +13,6 @@ class Model {
   int id;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) => other is Model && id == other.id;
 }
 
@@ -34,6 +33,34 @@ void main() {
       isar.write((isar) {
         expect(() => isar.read((_) {}), throwsUnsupportedError);
         expect(() => isar.write((_) {}), throwsUnsupportedError);
+      });
+    });
+
+    isarTest('Asyc txn cannot be opened in sync txn', () async {
+      isar.read((isar) {
+        expect(() => isar.readAsync((_) {}), throwsUnsupportedError);
+        expect(
+          () => isar.readAsyncWith<void, void>(null, (_, __) {}),
+          throwsUnsupportedError,
+        );
+        expect(() => isar.writeAsync((_) {}), throwsUnsupportedError);
+        expect(
+          () => isar.writeAsyncWith<void, void>(null, (_, __) {}),
+          throwsUnsupportedError,
+        );
+      });
+
+      isar.write((isar) {
+        expect(() => isar.readAsync((_) {}), throwsUnsupportedError);
+        expect(
+          () => isar.readAsyncWith<void, void>(null, (_, __) {}),
+          throwsUnsupportedError,
+        );
+        expect(() => isar.writeAsync((_) {}), throwsUnsupportedError);
+        expect(
+          () => isar.writeAsyncWith<void, void>(null, (_, __) {}),
+          throwsUnsupportedError,
+        );
       });
     });
 

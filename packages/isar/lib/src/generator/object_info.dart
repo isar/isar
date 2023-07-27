@@ -6,8 +6,8 @@ class ObjectInfo {
   const ObjectInfo({
     required this.dartName,
     required this.isarName,
-    this.accessor,
     required this.properties,
+    this.accessor,
     this.embeddedDartNames = const {},
   });
 

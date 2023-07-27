@@ -19,7 +19,7 @@ abstract class Isar {
   static const int defaultMaxSizeMiB = 128;
 
   /// The current Isar version.
-  static const String version = '4.0.0-dev.2';
+  static const String version = '4.0.0-dev.3';
 
   /// Get an already opened Isar instance by its name.
   ///
