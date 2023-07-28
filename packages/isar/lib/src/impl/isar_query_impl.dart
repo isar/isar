@@ -185,9 +185,17 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
   }
 
   @override
-  Stream<List<T>> watch({bool fireImmediately = false}) {
-    return watchLazy(fireImmediately: fireImmediately)
-        .asyncMap((event) => findAllAsync());
+  Stream<List<T>> watch({
+    bool fireImmediately = false,
+    int? offset,
+    int? limit,
+  }) {
+    return watchLazy(fireImmediately: fireImmediately).asyncMap(
+      (event) => findAllAsync(
+        offset: offset,
+        limit: limit,
+      ),
+    );
   }
 
   @override
