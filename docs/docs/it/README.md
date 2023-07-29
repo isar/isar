@@ -26,5 +26,5 @@ features:
   - title: 🦄 Open Source
     details: Tutto è open source e gratuito per sempre!
 
-footer: Apache Licensed | Copyright © 2022 Simon Choi
+footer: Apache Licensed | Copyright © 2023 Simon Choi
 ---

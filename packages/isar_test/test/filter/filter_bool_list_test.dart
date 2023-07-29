@@ -10,7 +10,6 @@ class BoolModel {
 
   final int id;
 
-  @Index(type: IndexType.value)
   final List<bool?>? list;
 
   @override

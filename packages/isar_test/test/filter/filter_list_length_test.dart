@@ -18,7 +18,6 @@ class Model {
 
   final List<bool> bools;
 
-  @Index()
   final List<int>? ints;
 
   final List<double?> doubles;

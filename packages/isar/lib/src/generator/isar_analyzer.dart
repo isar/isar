@@ -42,6 +42,14 @@ class _IsarAnalyzer {
     }
     _checkValidPropertiesConstructor(properties, constructor);
 
+    final indexes = <IndexInfo>[];
+    for (final propertyElement in modelClass.allAccessors) {
+      indexes.addAll(analyzeObjectIndex(properties, propertyElement));
+    }
+    if (indexes.map((e) => e.name).toSet().length != indexes.length) {
+      _err('Two or more indexes have the same name.', modelClass);
+    }
+
     return ObjectInfo(
       dartName: modelClass.name,
       isarName: modelClass.isarName,
@@ -68,12 +76,12 @@ class _IsarAnalyzer {
     }
     _checkValidPropertiesConstructor(properties, constructor);
 
-    /*final hasIndex = modelClass.allAccessors.any(
+    final hasIndex = modelClass.allAccessors.any(
       (it) => it.indexAnnotations.isNotEmpty,
     );
     if (hasIndex) {
       _err('Embedded objects must not have indexes.', modelClass);
-    }*/
+    }
 
     return ObjectInfo(
       dartName: modelClass.name,
@@ -354,5 +362,60 @@ class _IsarAnalyzer {
     }
 
     throw UnimplementedError('This should not happen');
+  }
+
+  Iterable<IndexInfo> analyzeObjectIndex(
+    List<PropertyInfo> properties,
+    PropertyInducingElement element,
+  ) sync* {
+    for (final index in element.indexAnnotations) {
+      final indexProperties = [element.isarName, ...index.composite];
+
+      if (indexProperties.toSet().length != indexProperties.length) {
+        _err('Composite index contains duplicate properties.', element);
+      } else if (indexProperties.length > 3) {
+        _err('Composite indexes cannot have more than 3 properties.', element);
+      }
+
+      for (var i = 0; i < indexProperties.length; i++) {
+        final propertyName = indexProperties[i];
+        final property =
+            properties.where((it) => it.isarName == propertyName).firstOrNull;
+
+        if (property == null) {
+          _err('Property does not exist: "$propertyName".', element);
+        } else if (property.isId) {
+          _err('Ids cannot be indexed', element);
+        } else if (property.type.isFloat) {
+          _err('Double properties cannot be indexed', element);
+        } else if (property.type.isObject) {
+          _err('Embedded object properties cannot be indexed', element);
+        } else if (property.type == PropertyType.json) {
+          _err('JSON properties cannot be indexed', element);
+        } else if (property.type.isList) {
+          _err('List properties cannot be indexed', element);
+        } else if (property.type.isString &&
+            i != properties.length - 1 &&
+            !index.hash) {
+          _err(
+            'Only the last property of a non-hashed composite index can be a '
+            'String.',
+            element,
+          );
+        }
+      }
+
+      final name = index.name ?? indexProperties.join('_');
+      _checkIsarName(name, element);
+
+      final objectIndex = IndexInfo(
+        name: name,
+        properties: indexProperties,
+        unique: index.unique,
+        hash: index.hash,
+      );
+
+      yield objectIndex;
+    }
   }
 }

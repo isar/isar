@@ -26,5 +26,5 @@ features:
   - title: 🦄 开源
     details: 所有一切都是开源并永久免费！
 
-footer: Apache Licensed | Copyright © 2022 Simon Choi
+footer: Apache Licensed | Copyright © 2023 Simon Choi
 ---

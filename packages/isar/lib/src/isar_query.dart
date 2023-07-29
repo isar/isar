@@ -1,6 +1,9 @@
 part of isar;
 
 /// Querying is how you find records that match certain conditions.
+///
+/// It is important to call `close()` when you are done with a query, otherwise
+/// you will leak resources.
 abstract class IsarQuery<T> {
   /// The corresponding Isar instance.
   Isar get isar;

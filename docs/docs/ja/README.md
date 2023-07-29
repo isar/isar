@@ -26,5 +26,5 @@ features:
   - title: 🦄 オープンソース
     details: すべてがオープンソースで、永久に無料！
 
-footer: Apache Licensed | Copyright © 2022 Simon Choi
+footer: Apache Licensed | Copyright © 2023 Simon Choi
 ---

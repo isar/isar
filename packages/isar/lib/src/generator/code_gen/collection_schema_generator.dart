@@ -15,7 +15,16 @@ String _generateSchema(ObjectInfo object) {
             if (prop.isEnum) 'enumMap': prop.enumMap,
           }
     ],
-    //'indexes': <void>[],
+    if (object.indexes.isNotEmpty)
+      'indexes': [
+        for (final index in object.indexes)
+          {
+            'name': index.name,
+            'unique': index.unique,
+            'properties': index.properties,
+            'hash': index.hash,
+          }
+      ],
   };
   final schemaJson = jsonEncode(json);
 
