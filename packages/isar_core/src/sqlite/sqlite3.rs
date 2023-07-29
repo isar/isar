@@ -1,9 +1,8 @@
 use crate::core::error::{IsarError, Result};
 use ffi::sqlite3_busy_timeout;
-use libc::c_void;
 use libsqlite3_sys as ffi;
 use std::cell::Cell;
-use std::ffi::{c_char, c_int, CStr, CString};
+use std::ffi::{c_char, c_int, c_void, CStr, CString};
 use std::{ptr, slice};
 
 pub(crate) struct SQLite3 {

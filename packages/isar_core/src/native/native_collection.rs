@@ -1,17 +1,16 @@
-use std::sync::atomic::{self, AtomicI64};
-use std::sync::Arc;
-
-use super::index::id_key::{BytesToId, IdToBytes};
-use super::index::NativeIndex;
 use super::isar_deserializer::IsarDeserializer;
 use super::isar_serializer::IsarSerializer;
 use super::mdbx::db::Db;
+use super::native_index::NativeIndex;
 use super::native_txn::NativeTxn;
 use super::query::Query;
+use super::{BytesToId, IdToBytes};
 use crate::core::data_type::DataType;
 use crate::core::error::{IsarError, Result};
 use crate::core::value::IsarValue;
 use crate::core::watcher::CollectionWatchers;
+use std::sync::atomic::{self, AtomicI64};
+use std::sync::Arc;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct NativeProperty {
@@ -107,11 +106,11 @@ impl NativeCollection {
     }
 
     pub fn get_size(&self, txn: &NativeTxn, include_indexes: bool) -> Result<u64> {
-        let size = txn.stat(self.get_db()?)?.1;
+        let mut size = txn.stat(self.get_db()?)?.1;
 
         if include_indexes {
             for index in &self.indexes {
-                //size += index.get_size(cursors)?;
+                size += index.get_size(txn)?;
             }
         }
 
@@ -123,7 +122,33 @@ impl NativeCollection {
 
         let object = IsarDeserializer::from_bytes(&bytes);
         change_set.register_change(&self.watchers, id, &object);
+
+        if !self.indexes.is_empty() {
+            let mut buffer = txn.take_buffer();
+            for index in &self.indexes {
+                buffer = index.create_for_object(txn, id, object, buffer)?;
+            }
+            txn.put_buffer(buffer);
+        }
+
         self.update_auto_increment(id);
+
+        Ok(())
+    }
+
+    pub fn prepare_delete(&self, txn: &NativeTxn, id: i64, bytes: &[u8]) -> Result<()> {
+        let mut change_set = txn.get_change_set();
+
+        let object = IsarDeserializer::from_bytes(&bytes);
+        change_set.register_change(&self.watchers, id, &object);
+
+        if !self.indexes.is_empty() {
+            let mut buffer = txn.take_buffer();
+            for index in &self.indexes {
+                buffer = index.delete_for_object(txn, id, object, buffer)?;
+            }
+            txn.put_buffer(buffer);
+        }
 
         Ok(())
     }
@@ -135,13 +160,9 @@ impl NativeCollection {
         updates: &[(u16, Option<IsarValue>)],
     ) -> Result<bool> {
         let mut cursor = txn.get_cursor(self.get_db()?)?;
-        let mut change_set = txn.get_change_set();
 
         let key = id.to_id_bytes();
         if let Some((_, old_object)) = cursor.move_to(&key)? {
-            let deser = IsarDeserializer::from_bytes(&old_object);
-            change_set.register_change(&self.watchers, id, &deser);
-
             let mut buffer = txn.take_buffer();
             buffer.extend_from_slice(&old_object);
             let mut new_object = IsarSerializer::new(buffer, 0, self.static_size);
@@ -153,8 +174,8 @@ impl NativeCollection {
             let buffer = new_object.finish();
             cursor.put(&key, &buffer)?;
 
-            let deser = IsarDeserializer::from_bytes(&buffer);
-            change_set.register_change(&self.watchers, id, &deser);
+            self.prepare_delete(txn, id, old_object)?;
+            self.prepare_put(txn, id, &buffer)?;
 
             txn.put_buffer(buffer);
             Ok(true)
@@ -204,13 +225,10 @@ impl NativeCollection {
 
     pub fn delete(&self, txn: &NativeTxn, id: i64) -> Result<bool> {
         let mut cursor = txn.get_cursor(self.get_db()?)?;
-        let mut change_set = txn.get_change_set();
 
         let key = id.to_id_bytes();
         if let Some((_, bytes)) = cursor.move_to(&key)? {
-            let object = IsarDeserializer::from_bytes(&bytes);
-            change_set.register_change(&self.watchers, id, &object);
-
+            self.prepare_delete(txn, id, bytes)?;
             cursor.delete_current()?;
             Ok(true)
         } else {
@@ -221,7 +239,11 @@ impl NativeCollection {
     pub fn clear(&self, txn: &NativeTxn) -> Result<()> {
         let mut change_set = txn.get_change_set();
         change_set.register_all(&self.watchers);
-        txn.clear_db(self.get_db()?)
+        txn.clear_db(self.get_db()?)?;
+        for index in &self.indexes {
+            index.clear(txn)?;
+        }
+        Ok(())
     }
 }
 

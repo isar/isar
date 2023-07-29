@@ -1,19 +1,7 @@
 part of isar;
 
-/// Specifies how an index is stored in Isar.
-enum IndexType {
-  /// Stores the value as-is in the index.
-  value,
-
-  /// Strings or Lists can be hashed to reduce the storage required by the
-  /// index. The disadvantage of hash indexes is that they can't be used for
-  /// prefix scans (`startsWith()` where clauses). String and list indexes are
-  /// hashed by default.
-  hash,
-
-  /// `List<String>` can hash its elements.
-  hashElements,
-}
+/// Annotate properties to build an index.
+const index = Index();
 
 /// Annotate properties to build an index.
 @Target({TargetKind.field, TargetKind.getter})
@@ -23,8 +11,7 @@ class Index {
     this.name,
     this.composite = const [],
     this.unique = false,
-    this.type,
-    this.caseSensitive,
+    this.hash = true,
   });
 
   /// Name of the index. By default, the names of the properties are
@@ -39,14 +26,11 @@ class Index {
   /// duplicate will result in an error.
   final bool unique;
 
-  /// Specifies how an index is stored in Isar.
+  /// Stores the hash of the value(s) in the index. This saves space and
+  /// increases performance, but only equality queries are supported. You
+  /// should always use this if you only want to guarantee uniqueness.
   ///
-  /// Defaults to:
-  /// - `IndexType.hash` for `String`s and `List`s
-  /// - `IndexType.value` for all other types
-  final IndexType? type;
-
-  /// String or `List<String>` indexes can be case sensitive (default) or case
-  /// insensitive.
-  final bool? caseSensitive;
+  /// SQLite does not support hash indexes so a value index will be used
+  /// instead.
+  final bool hash;
 }

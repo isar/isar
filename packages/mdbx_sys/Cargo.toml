@@ -6,9 +6,6 @@ edition = "2021"
 [lib]
 name = "mdbx_sys"
 
-[dependencies]
-libc = "0.2"
-
 [build-dependencies]
 cmake = "0.1"
 cc = "1.0"

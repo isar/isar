@@ -7,6 +7,7 @@ class ObjectInfo {
     required this.dartName,
     required this.isarName,
     required this.properties,
+    this.indexes = const [],
     this.accessor,
     this.embeddedDartNames = const {},
   });
@@ -15,6 +16,7 @@ class ObjectInfo {
   final String isarName;
   final String? accessor;
   final List<PropertyInfo> properties;
+  final List<IndexInfo> indexes;
   final Set<String> embeddedDartNames;
 
   bool get isEmbedded => accessor == null;
@@ -122,9 +124,21 @@ class PropertyInfo {
   String get dartType => type.isList
       ? 'List<$scalarDartType>${nullable ? '?' : ''}'
       : scalarDartType;
-}
 
-extension PropX on PropertyInfo {
   String enumMapName(ObjectInfo object) =>
       '_${object.dartName.decapitalize()}${dartName.capitalize()}';
+}
+
+class IndexInfo {
+  IndexInfo({
+    required this.name,
+    required this.properties,
+    required this.unique,
+    required this.hash,
+  });
+
+  final String name;
+  final List<String> properties;
+  final bool unique;
+  final bool hash;
 }

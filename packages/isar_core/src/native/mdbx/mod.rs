@@ -3,9 +3,8 @@
 use crate::core::error::{IsarError, Result};
 use byteorder::{ByteOrder, LittleEndian};
 use core::slice;
-use libc::c_int;
 use std::cmp::{self, Ordering};
-use std::ffi::{c_void, CStr};
+use std::ffi::{c_int, c_void, CStr};
 
 pub mod cursor;
 pub mod cursor_iterator;
@@ -34,7 +33,7 @@ pub unsafe fn from_mdb_val<'a>(val: &mdbx_sys::MDBX_val) -> &'a [u8] {
 pub unsafe fn to_mdb_val(value: &[u8]) -> mdbx_sys::MDBX_val {
     mdbx_sys::MDBX_val {
         iov_len: value.len() as mdbx_sys::size_t,
-        iov_base: value.as_ptr() as *mut libc::c_void,
+        iov_base: value.as_ptr() as *mut c_void,
     }
 }
 
@@ -108,7 +107,7 @@ pub(crate) mod osal {
 #[cfg(not(target_os = "windows"))]
 pub(crate) mod osal {
     use super::*;
-    use std::ffi::CString;
+    use std::ffi::{c_char, CString};
 
     pub fn str_to_os(str: &str) -> Result<CString> {
         CString::new(str.as_bytes()).map_err(|_| IsarError::IllegalString {})
@@ -116,14 +115,14 @@ pub(crate) mod osal {
 
     pub const ENV_OPEN: unsafe extern "C" fn(
         *mut mdbx_sys::MDBX_env,
-        *const libc::c_char,
+        *const c_char,
         mdbx_sys::MDBX_env_flags_t,
         mdbx_sys::mdbx_mode_t,
     ) -> i32 = mdbx_sys::mdbx_env_open;
 
     pub const ENV_COPY: unsafe extern "C" fn(
         *mut mdbx_sys::MDBX_env,
-        *const libc::c_char,
+        *const c_char,
         mdbx_sys::MDBX_copy_flags_t,
     ) -> i32 = mdbx_sys::mdbx_env_copy;
 }

@@ -1,5 +1,4 @@
 use std::iter::empty;
-use std::marker;
 
 use super::isar_serializer::IsarSerializer;
 use super::native_collection::NativeCollection;

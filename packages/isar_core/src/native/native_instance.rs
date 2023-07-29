@@ -1,4 +1,3 @@
-use super::index::id_key::IdToBytes;
 use super::isar_deserializer::IsarDeserializer;
 use super::mdbx::env::Env;
 use super::native_collection::NativeCollection;
@@ -8,6 +7,7 @@ use super::native_reader::NativeReader;
 use super::native_txn::NativeTxn;
 use super::query::{Query, QueryCursor};
 use super::schema_manager::perform_migration;
+use super::IdToBytes;
 use crate::core::error::{IsarError, Result};
 use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
 use crate::core::schema::IsarSchema;

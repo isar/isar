@@ -21,19 +21,26 @@ abstract final class IsarCore {
   static Pointer<Uint16> _nativeStringPtr = nullptr;
   static int _nativeStringPtrLength = 0;
 
+  static void _openDylib(String? libraryPath) {
+    _libraryPath =
+        Platform.isIOS ? null : libraryPath ?? Abi.current().localName;
+
+    final dylib = Platform.isIOS
+        ? DynamicLibrary.process()
+        : DynamicLibrary.open(_libraryPath!);
+    close = dylib.lookup('isar_close');
+    b = IsarCoreBindings(dylib);
+
+    IsarCore.b.isar_connect_dart_api(NativeApi.postCObject.cast());
+  }
+
   static void _initialize({Map<Abi, String> libraries = const {}}) {
     if (_initialized) {
       return;
     }
 
     try {
-      _libraryPath = Platform.isIOS
-          ? null
-          : libraries[Abi.current()] ?? Abi.current().localName;
-      final dylib = Platform.isIOS
-          ? DynamicLibrary.process()
-          : DynamicLibrary.open(_libraryPath!);
-      b = IsarCoreBindings(dylib);
+      _openDylib(libraries[Abi.current()] ?? _libraryPath);
     } catch (e) {
       throw IsarNotReadyError(
         'Could not initialize IsarCore library for processor architecture '
@@ -62,16 +69,7 @@ abstract final class IsarCore {
     if (_initialized) {
       return;
     }
-
-    _libraryPath =
-        Platform.isIOS ? null : libraryPath ?? Abi.current().localName;
-
-    final dylib = Platform.isIOS
-        ? DynamicLibrary.process()
-        : DynamicLibrary.open(_libraryPath!);
-    b = IsarCoreBindings(dylib);
-
-    IsarCore.b.isar_connect_dart_api(NativeApi.postCObject.cast());
+    _openDylib(libraryPath);
     _initialized = true;
   }
 
@@ -139,6 +137,8 @@ abstract final class IsarCore {
   static final endObject = b.isar_write_object_end;
   static final beginList = b.isar_write_list;
   static final endList = b.isar_write_list_end;
+
+  static late final Pointer<NativeFinalizerFunction> close;
 }
 
 extension PointerX on Pointer {

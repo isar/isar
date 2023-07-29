@@ -1,6 +1,4 @@
-use super::{
-    FALSE_BOOL, NULL_BOOL, NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG, TRUE_BOOL,
-};
+use super::{FALSE_BOOL, NULL_BOOL, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG, TRUE_BOOL};
 use crate::core::data_type::DataType;
 use byteorder::{ByteOrder, LittleEndian};
 use std::cell::Cell;
@@ -68,7 +66,7 @@ impl IsarSerializer {
     pub fn write_null(&mut self, offset: u32, data_type: DataType) {
         match data_type {
             DataType::Bool => self.write_byte(offset, NULL_BOOL),
-            DataType::Byte => self.write_byte(offset, NULL_BYTE),
+            DataType::Byte => self.write_byte(offset, 0),
             DataType::Int => self.write_int(offset, NULL_INT),
             DataType::Float => self.write_float(offset, NULL_FLOAT),
             DataType::Long => self.write_long(offset, NULL_LONG),
@@ -1000,8 +998,8 @@ mod tests {
                     0i64.to_le_bytes(),
                     NULL_INT.to_le_bytes(),
                     [0x5],
-                    NULL_BYTE.to_le_bytes(),
-                    NULL_BYTE.to_le_bytes()
+                    0u8.to_le_bytes(),
+                    0u8.to_le_bytes()
                 ]
             );
         }
@@ -1175,7 +1173,7 @@ mod tests {
                         [0x1],
                         42i32.to_le_bytes(),
                         [0x1],
-                        NULL_BYTE.to_le_bytes(),
+                        0u8.to_le_bytes(),
                         [0xb, 0x0, 0x0],
                         [0x1],
                         [0x4, 0x0, 0x0],

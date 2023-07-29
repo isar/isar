@@ -1,9 +1,8 @@
-use super::index::id_key::IdToBytes;
 use super::isar_serializer::IsarSerializer;
 use super::mdbx::db::Db;
 use super::native_collection::NativeCollection;
 use super::native_txn::{NativeTxn, TxnCursor};
-use super::MAX_OBJ_SIZE;
+use super::{IdToBytes, MAX_OBJ_SIZE};
 use crate::core::error::{IsarError, Result};
 use crate::core::insert::IsarInsert;
 use ouroboros::self_referencing;
@@ -24,6 +23,9 @@ impl TxnWithCursor {
     fn put(&mut self, collection: &NativeCollection, id: i64, bytes: &[u8]) -> Result<()> {
         self.with_mut(|this| {
             this.txn.guard(|| {
+                if let Some((_, old_bytes)) = this.cursor.move_to(&id.to_id_bytes())? {
+                    collection.prepare_delete(this.txn, id, old_bytes)?;
+                }
                 collection.prepare_put(this.txn, id, bytes)?;
                 this.cursor.put(&id.to_id_bytes(), bytes)
             })

@@ -6,6 +6,7 @@ const TypeChecker _enumPropertyChecker = TypeChecker.fromRuntime(EnumValue);
 const TypeChecker _idChecker = TypeChecker.fromRuntime(Id);
 const TypeChecker _ignoreChecker = TypeChecker.fromRuntime(Ignore);
 const TypeChecker _nameChecker = TypeChecker.fromRuntime(Name);
+const TypeChecker _indexChecker = TypeChecker.fromRuntime(Index);
 const TypeChecker _utcChecker = TypeChecker.fromRuntime(Utc);
 
 extension on ClassElement {
@@ -47,6 +48,21 @@ extension on PropertyInducingElement {
   bool get hasUtcAnnotation {
     final ann = _utcChecker.firstAnnotationOfExact(nonSynthetic);
     return ann != null;
+  }
+
+  List<Index> get indexAnnotations {
+    return _indexChecker.annotationsOfExact(nonSynthetic).map((ann) {
+      return Index(
+        name: ann.getField('name')!.toStringValue(),
+        composite: ann
+            .getField('composite')!
+            .toListValue()!
+            .map((e) => e.toStringValue()!)
+            .toList(),
+        unique: ann.getField('unique')!.toBoolValue()!,
+        hash: ann.getField('hash')!.toBoolValue()!,
+      );
+    }).toList();
   }
 }
 

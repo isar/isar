@@ -34,7 +34,7 @@ class _FilterGenerator {
         }
       }
 
-      if (property.type.isString) {
+      if (property.type.isString && !property.isEnum) {
         code += generateStringStartsWith(property);
         code += generateStringEndsWith(property);
         code += generateStringContains(property);
@@ -67,9 +67,17 @@ class _FilterGenerator {
     }
   }
 
+  String value(String name, PropertyInfo p) {
+    if (p.enumProperty != null) {
+      return '$name${p.elementNullable ?? p.nullable ? '?' : ''}.${p.enumProperty}';
+    } else {
+      return name;
+    }
+  }
+
   String generateEqual(PropertyInfo p) {
     final optionalParams = optional([
-      if (p.type.isString) 'bool caseSensitive = true',
+      if (p.type.isString && !p.isEnum) 'bool caseSensitive = true',
       if (p.type.isFloat) 'double epsilon = Filter.epsilon',
     ]);
     return '''
@@ -78,8 +86,8 @@ class _FilterGenerator {
         return query.addFilterCondition(
           EqualCondition(
             property: ${p.index},
-            value: value,
-            ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+            value: ${value('value', p)},
+            ${p.type.isString && !p.isEnum ? 'caseSensitive: caseSensitive,' : ''}
             ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
           ),
         );
@@ -89,7 +97,7 @@ class _FilterGenerator {
 
   String generateGreater(PropertyInfo p) {
     final optionalParams = optional([
-      if (p.type.isString) 'bool caseSensitive = true',
+      if (p.type.isString && !p.isEnum) 'bool caseSensitive = true',
       if (p.type.isFloat) 'double epsilon = Filter.epsilon',
     ]);
     return '''
@@ -98,8 +106,8 @@ class _FilterGenerator {
         return query.addFilterCondition(
           GreaterCondition(
             property: ${p.index},
-            value: value,
-            ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+            value: ${value('value', p)},
+            ${p.type.isString && !p.isEnum ? 'caseSensitive: caseSensitive,' : ''}
             ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
           ),
         );
@@ -111,8 +119,8 @@ class _FilterGenerator {
         return query.addFilterCondition(
           GreaterOrEqualCondition(
             property: ${p.index},
-            value: value,
-            ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+            value: ${value('value', p)},
+            ${p.type.isString && !p.isEnum ? 'caseSensitive: caseSensitive,' : ''}
             ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
           ),
         );
@@ -123,7 +131,7 @@ class _FilterGenerator {
 
   String generateLess(PropertyInfo p) {
     final optionalParams = optional([
-      if (p.type.isString) 'bool caseSensitive = true',
+      if (p.type.isString && !p.isEnum) 'bool caseSensitive = true',
       if (p.type.isFloat) 'double epsilon = Filter.epsilon',
     ]);
     return '''
@@ -132,8 +140,8 @@ class _FilterGenerator {
         return query.addFilterCondition(
           LessCondition(
             property: ${p.index},
-            value: value,
-            ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+            value: ${value('value', p)},
+            ${p.type.isString && !p.isEnum ? 'caseSensitive: caseSensitive,' : ''}
             ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
           ),
         );
@@ -145,8 +153,8 @@ class _FilterGenerator {
         return query.addFilterCondition(
           LessOrEqualCondition(
             property: ${p.index},
-            value: value,
-            ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+            value: ${value('value', p)},
+            ${p.type.isString && !p.isEnum ? 'caseSensitive: caseSensitive,' : ''}
             ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
           ),
         );
@@ -156,7 +164,7 @@ class _FilterGenerator {
 
   String generateBetween(PropertyInfo p) {
     final optionalParams = optional([
-      if (p.type.isString) 'bool caseSensitive = true',
+      if (p.type.isString && !p.isEnum) 'bool caseSensitive = true',
       if (p.type.isFloat) 'double epsilon = Filter.epsilon',
     ]);
     return '''
@@ -165,9 +173,9 @@ class _FilterGenerator {
         return query.addFilterCondition(
           BetweenCondition(
             property: ${p.index},
-            lower: lower,
-            upper: upper,
-            ${p.type.isString ? 'caseSensitive: caseSensitive,' : ''}
+            lower: ${value('lower', p)},
+            upper: ${value('upper', p)},
+            ${p.type.isString && !p.isEnum ? 'caseSensitive: caseSensitive,' : ''}
             ${p.type.isFloat ? 'epsilon: epsilon,' : ''}
           ),
         );

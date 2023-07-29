@@ -1,11 +1,11 @@
 [package]
 name = "isar"
 version = "0.0.0"
-authors = ["Simon Choi <simonleier@gmail.com>"]
+authors = ["Simon Choi"]
 edition = "2021"
 
 [dependencies]
-isar-core = { path = "../isar_core" }
+isar-core = { path = "../isar_core", default-features = false }
 serde = "1.0"
 serde_json = "1.0"
 

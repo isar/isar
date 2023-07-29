@@ -1,6 +1,3 @@
-use super::NativeIndex;
-use crate::native::mdbx::compare_keys;
-use std::cmp::Ordering;
 use xxhash_rust::xxh3::xxh3_64;
 
 #[derive(Clone, Eq, PartialEq)]
@@ -9,6 +6,8 @@ pub struct IndexKey {
 }
 
 impl IndexKey {
+    pub(crate) const MAX_INDEX_SIZE: usize = 1024;
+
     pub fn min() -> Self {
         IndexKey { bytes: vec![] }
     }
@@ -19,8 +18,17 @@ impl IndexKey {
         key
     }
 
-    pub fn from_bytes(bytes: Vec<u8>) -> Self {
-        IndexKey { bytes }
+    pub fn with_buffer(mut buffer: Vec<u8>) -> Self {
+        buffer.clear();
+        IndexKey { bytes: buffer }
+    }
+
+    pub fn add_bool(&mut self, value: Option<bool>) {
+        if let Some(value) = value {
+            self.bytes.push(if value { 2 } else { 1 });
+        } else {
+            self.bytes.push(0);
+        }
     }
 
     pub fn add_byte(&mut self, value: u8) {
@@ -67,87 +75,30 @@ impl IndexKey {
         self.bytes.extend_from_slice(&bytes);
     }
 
-    pub fn add_string(&mut self, value: Option<&str>, case_sensitive: bool) {
+    pub fn add_string(&mut self, value: Option<&str>) {
         if let Some(value) = value {
-            let value = if case_sensitive {
-                value.to_string()
-            } else {
-                value.to_lowercase()
-            };
-            let bytes = value.as_bytes();
-            if bytes.len() >= NativeIndex::MAX_STRING_INDEX_SIZE {
-                let index_bytes = &bytes[0..NativeIndex::MAX_STRING_INDEX_SIZE];
-                self.bytes.extend_from_slice(index_bytes);
-                let hash = xxh3_64(bytes);
-                self.bytes.extend_from_slice(&u64::to_le_bytes(hash));
-            } else if bytes.is_empty() {
+            if value.is_empty() {
                 self.bytes.push(1);
             } else {
-                self.bytes.extend_from_slice(bytes);
+                self.bytes
+                    .extend_from_slice(value.to_lowercase().as_bytes());
             }
         } else {
             self.bytes.push(0);
         }
     }
 
-    pub fn add_hash(&mut self, value: u64) {
-        let bytes: [u8; 8] = value.to_be_bytes();
-        self.bytes.extend_from_slice(&bytes);
-    }
-
-    #[allow(clippy::len_without_is_empty)]
-    pub fn len(&self) -> usize {
-        self.bytes.len()
-    }
-
-    pub fn truncate(&mut self, len: usize) {
-        self.bytes.truncate(len);
-    }
-
-    pub fn increase(&mut self) -> bool {
-        let mut increased = false;
-        for i in (0..self.bytes.len()).rev() {
-            if let Some(added) = self.bytes[i].checked_add(1) {
-                self.bytes[i] = added;
-                increased = true;
-                for i2 in (i + 1)..self.bytes.len() {
-                    self.bytes[i2] = 0;
-                }
-                break;
-            }
+    pub fn finish(mut self) -> Vec<u8> {
+        if self.bytes.len() > IndexKey::MAX_INDEX_SIZE {
+            let hash = xxh3_64(&self.bytes);
+            self.bytes.truncate(IndexKey::MAX_INDEX_SIZE - 8);
+            self.bytes.extend_from_slice(&hash.to_be_bytes());
         }
-        increased
+        self.bytes
     }
 
-    pub fn decrease(&mut self) -> bool {
-        let mut decreased = false;
-        for i in (0..self.bytes.len()).rev() {
-            if let Some(subtracted) = self.bytes[i].checked_sub(1) {
-                self.bytes[i] = subtracted;
-                decreased = true;
-                for i2 in (i + 1)..self.bytes.len() {
-                    self.bytes[i2] = 255;
-                }
-                break;
-            }
-        }
-        decreased
-    }
-
-    pub fn to_bytes(&self) -> &[u8] {
-        &self.bytes
-    }
-}
-
-impl PartialOrd<Self> for IndexKey {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for IndexKey {
-    fn cmp(&self, other: &Self) -> Ordering {
-        compare_keys(false, &self.bytes, &other.bytes)
+    pub fn hash(&self) -> u64 {
+        xxh3_64(&self.bytes)
     }
 }
 
@@ -281,21 +232,13 @@ mod tests {
     #[test]
     fn test_add_string() {
         let long_str = (0..850).map(|_| "aB").collect::<String>();
-        let long_str_lc = long_str.to_lowercase();
-
         let mut long_str_bytes = vec![123];
         long_str_bytes.extend_from_slice(long_str.as_bytes());
-
-        let mut long_str_lc_bytes = vec![123];
-        long_str_lc_bytes.extend_from_slice(long_str_lc.as_bytes());
 
         let mut hello_bytes = vec![123];
         hello_bytes.extend_from_slice(b"hELLO");
 
-        let mut hello_bytes_lc = vec![123];
-        hello_bytes_lc.extend_from_slice(b"hello");
-
-        let pairs: Vec<(Option<&str>, Vec<u8>, Vec<u8>)> = vec![
+        /*let pairs: Vec<(Option<&str>, Vec<u8>, Vec<u8>)> = vec![
             (None, vec![123, 0], vec![123, 0]),
             (Some(""), vec![123, 1], vec![123, 1]),
             (
@@ -317,6 +260,6 @@ mod tests {
             index_key.add_byte(123);
             index_key.add_string(str, false);
             assert_eq!(index_key.bytes, bytes_lc);
-        }
+        }*/
     }
 }

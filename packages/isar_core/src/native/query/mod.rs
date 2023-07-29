@@ -1,7 +1,7 @@
 use self::aggregate::{aggregate_min_max, aggregate_sum_average};
 use self::native_filter::NativeFilter;
 use self::query_iterator::QueryIterator;
-use super::index::index_key::IndexKey;
+use super::index_key::IndexKey;
 use super::isar_deserializer::IsarDeserializer;
 use super::native_collection::{NativeCollection, NativeProperty};
 use super::native_reader::NativeReader;

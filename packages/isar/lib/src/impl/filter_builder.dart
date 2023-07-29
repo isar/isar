@@ -149,7 +149,7 @@ Pointer<CIsarValue> _isarValue(Object? value) {
   } else if (value is DateTime) {
     return IsarCore.b.isar_value_integer(value.toUtc().microsecondsSinceEpoch);
   } else {
-    throw UnimplementedError();
+    throw ArgumentError('Unsupported filter value type: ${value.runtimeType}');
   }
 }
 
