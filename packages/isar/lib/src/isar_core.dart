@@ -69,7 +69,7 @@ abstract final class IsarCore {
     if (_initialized) {
       return;
     }
-    _openDylib(_libraryPath);
+    _openDylib(libraryPath);
     _initialized = true;
   }
 

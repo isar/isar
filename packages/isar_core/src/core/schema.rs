@@ -165,61 +165,49 @@ impl IsarSchema {
             }
         }
 
-        let property_names = self
+        let unique_properties = self
             .properties
             .iter()
-            .map(|p| p.name.as_deref().unwrap().to_lowercase())
-            .unique();
-        if property_names.count() != self.properties.len() {
+            .unique_by(|i| i.name.as_deref().unwrap_or_default().to_lowercase());
+        if unique_properties.count() != self.properties.len() {
             return schema_error("Duplicate property name")?;
         }
 
-        let index_names = self.indexes.iter().unique_by(|i| i.name.to_lowercase());
-        if index_names.count() != self.indexes.len() {
+        let unique_indexes = self.indexes.iter().unique_by(|i| i.name.to_lowercase());
+        if unique_indexes.count() != self.indexes.len() {
             return schema_error("Duplicate index name");
         }
 
         for index in &self.indexes {
             if index.properties.is_empty() {
                 return schema_error("At least one property needs to be added to a valid index");
-            } else if index.properties.len() > 3 {
-                return schema_error(
-                    "No more than three properties may be used as a composite index",
-                );
             }
 
-            for (i, index_property) in index.properties.iter().enumerate() {
+            for index_property in &index.properties {
                 let property = self
                     .properties
                     .iter()
                     .find(|p| name_equal(p.name.as_deref(), &index_property));
                 if property.is_none() {
-                    return schema_error("IsarIndex property does not exist");
+                    return schema_error("Index property does not exist");
                 }
                 let property = property.unwrap();
 
-                if property.data_type == DataType::Object
-                    || property.data_type == DataType::ObjectList
+                if property.data_type == DataType::Float || property.data_type == DataType::Double {
+                    return schema_error("Float properties cannot be indexed.");
+                } else if property.data_type == DataType::Object {
+                    return schema_error("Object properties cannot be indexed.");
+                } else if property.data_type == DataType::Json {
+                    return schema_error("JSON properties cannot be indexed.");
+                } else if property.data_type.is_list() {
+                    return schema_error("List properties cannot be indexed.");
+                } else if property.data_type == DataType::String
+                    && !index.hash
+                    && index.properties.last() != Some(&index_property)
                 {
-                    return schema_error("Object and ObjectList cannot be indexed.");
-                }
-
-                if property.data_type == DataType::Float
-                    || property.data_type == DataType::Double
-                    || property.data_type == DataType::FloatList
-                    || property.data_type == DataType::DoubleList
-                {
-                    if i != index.properties.len() - 1 {
-                        return schema_error(
-                            "Float indexes must only be at the end of a composite index.",
-                        );
-                    }
-                }
-
-                if property.data_type.is_list() {
-                    if index.properties.len() > 1 {
-                        return schema_error("Composite list indexes are not supported.");
-                    }
+                    return schema_error(
+                        "Only the last property of a non-hashed index can be a String.",
+                    );
                 }
             }
         }
@@ -270,24 +258,15 @@ impl PropertySchema {
 pub struct IndexSchema {
     pub name: String,
     pub properties: Vec<String>,
-    #[serde(rename = "caseSensitive")]
-    pub case_sensitive: bool,
     pub unique: bool,
     pub hash: bool,
 }
 
 impl IndexSchema {
-    pub fn new(
-        name: &str,
-        properties: Vec<&str>,
-        case_sensitive: bool,
-        unique: bool,
-        hash: bool,
-    ) -> IndexSchema {
+    pub fn new(name: &str, properties: Vec<&str>, unique: bool, hash: bool) -> IndexSchema {
         IndexSchema {
             name: name.to_string(),
             properties: properties.iter().map(|p| p.to_string()).collect(),
-            case_sensitive,
             unique,
             hash,
         }

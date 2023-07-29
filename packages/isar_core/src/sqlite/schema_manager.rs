@@ -72,7 +72,7 @@ fn read_col_schema(sqlite: &SQLite3, name: &str) -> Result<IsarSchema> {
         .map(|(name, unique, cols)| {
             let name = name.split('_').last().unwrap();
             let cols = cols.iter().map(|c| c.as_str()).collect();
-            IndexSchema::new(name, cols, true, *unique, false)
+            IndexSchema::new(name, cols, *unique, false)
         })
         .collect();
 

@@ -27,6 +27,12 @@ impl Txn {
     }
 
     pub fn abort(self) {}
+
+    pub fn mark_broken(&self) {
+        unsafe {
+            mdbx_sys::mdbx_txn_break(self.txn);
+        }
+    }
 }
 
 impl Drop for Txn {

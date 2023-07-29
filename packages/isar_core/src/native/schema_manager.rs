@@ -1,12 +1,11 @@
-use itertools::Itertools;
-
-use super::index::index_key::IndexKey;
+use super::index_key::IndexKey;
 use super::mdbx::db::Db;
 use super::mdbx::env::Env;
 use super::native_collection::{NativeCollection, NativeProperty};
 use super::native_txn::NativeTxn;
 use crate::core::error::{IsarError, Result};
 use crate::core::schema::{IsarSchema, PropertySchema};
+use itertools::Itertools;
 use std::borrow::Cow;
 use std::sync::Arc;
 
@@ -91,7 +90,7 @@ pub fn perform_migration(
 fn get_schemas(txn: &NativeTxn, info_db: Db) -> Result<Vec<IsarSchema>> {
     let info_cursor = txn.get_cursor(info_db)?;
     let mut schemas = vec![];
-    for (_, bytes) in info_cursor.iter_between(&IndexKey::min(), &IndexKey::max(), false, false)? {
+    for (_, bytes) in info_cursor.iter_between(IndexKey::min(), IndexKey::max(), false, false)? {
         let col =
             serde_json::from_slice::<IsarSchema>(bytes).map_err(|_| IsarError::SchemaError {
                 message: "Could not deserialize existing schema.".to_string(),

@@ -1,8 +1,7 @@
-use std::str::from_utf8_unchecked;
-
-use super::{byte_to_bool, NULL_BOOL, NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
+use super::{FALSE_BOOL, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG, TRUE_BOOL};
 use crate::core::data_type::DataType;
 use byteorder::{ByteOrder, LittleEndian};
+use std::str::from_utf8_unchecked;
 use xxhash_rust::xxh3::xxh3_64_with_seed;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -29,8 +28,8 @@ impl<'a> IsarDeserializer<'a> {
     #[inline]
     pub fn is_null(&self, offset: u32, data_type: DataType) -> bool {
         match data_type {
-            DataType::Bool => self.read_byte(offset) == NULL_BOOL,
-            DataType::Byte => self.read_byte(offset) == NULL_BYTE,
+            DataType::Bool => self.read_bool(offset).is_none(),
+            DataType::Byte => !self.contains_offset(offset),
             DataType::Int => self.read_int(offset) == NULL_INT,
             DataType::Float => self.read_float(offset).is_nan(),
             DataType::Long => self.read_long(offset) == NULL_LONG,
@@ -42,7 +41,11 @@ impl<'a> IsarDeserializer<'a> {
     #[inline]
     pub fn read_bool(&self, offset: u32) -> Option<bool> {
         if self.contains_offset(offset) {
-            byte_to_bool(self.bytes[offset as usize])
+            match self.bytes[offset as usize] {
+                FALSE_BOOL => Some(false),
+                TRUE_BOOL => Some(true),
+                _ => None,
+            }
         } else {
             None
         }
@@ -53,7 +56,7 @@ impl<'a> IsarDeserializer<'a> {
         if self.contains_offset(offset) {
             self.bytes[offset as usize]
         } else {
-            NULL_BYTE
+            0
         }
     }
 

@@ -1,6 +1,6 @@
 use super::isar_deserializer::IsarDeserializer;
 use super::native_collection::NativeCollection;
-use super::{NULL_BYTE, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
+use super::{NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG};
 use crate::core::data_type::DataType;
 use crate::core::reader::IsarReader;
 use std::borrow::Cow;
@@ -70,7 +70,7 @@ impl<'a> IsarReader for NativeReader<'a> {
         if let Some(property) = self.collection.get_property(index as u16) {
             self.object.read_byte(property.offset)
         } else {
-            NULL_BYTE
+            0
         }
     }
 

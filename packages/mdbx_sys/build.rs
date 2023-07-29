@@ -104,7 +104,7 @@ fn main() {
         .allowlist_function("^(MDBX|mdbx)_.*")
         .rustified_enum("^(MDBX_option_t|MDBX_cursor_op)")
         .size_t_is_usize(false)
-        .ctypes_prefix("::libc")
+        .ctypes_prefix("std::ffi")
         .parse_callbacks(Box::new(Callbacks))
         .layout_tests(false)
         .prepend_enum_name(false)

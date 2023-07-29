@@ -1,9 +1,9 @@
 use super::QueryIndex;
-use crate::native::index::id_key::BytesToId;
 use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::mdbx::cursor_iterator::CursorIterator;
 use crate::native::native_collection::NativeCollection;
 use crate::native::native_txn::{NativeTxn, TxnCursor};
+use crate::native::BytesToId;
 
 pub(crate) struct IndexIterator<'a> {
     txn: &'a NativeTxn,
