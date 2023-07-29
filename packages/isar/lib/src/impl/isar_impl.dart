@@ -1,6 +1,6 @@
 part of isar;
 
-class _IsarImpl extends Isar {
+class _IsarImpl extends Isar implements Finalizable {
   _IsarImpl._(
     this.instanceId,
     Pointer<CIsarInstance> ptr,
@@ -15,6 +15,9 @@ class _IsarImpl extends Isar {
       );
     }
 
+    _finalizer = NativeFinalizer(IsarCore.close);
+    _finalizer.attach(this, ptr.cast(), detach: this);
+
     _instances[instanceId] = this;
   }
 
@@ -24,6 +27,7 @@ class _IsarImpl extends Isar {
   final List<IsarObjectConverter<dynamic, dynamic>> converters;
   final collections = <Type, _IsarCollectionImpl<dynamic, dynamic>>{};
 
+  late final NativeFinalizer _finalizer;
   Pointer<CIsarInstance>? _ptr;
   Pointer<CIsarTxn>? _txnPtr;
   bool _txnWrite = false;
@@ -329,6 +333,7 @@ class _IsarImpl extends Isar {
 
   @override
   bool close({bool deleteFromDisk = false}) {
+    _finalizer.detach(this);
     final closed = IsarCore.b.isar_close(getPtr(), deleteFromDisk);
     _ptr = null;
     _instances.remove(instanceId);
