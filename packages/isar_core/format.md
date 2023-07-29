@@ -19,7 +19,7 @@ The Isar binary format supports the following data types:
 
 ### Number Storage and Null Values
 
-Booleans are stored as single bytes, with `0` representing `null`, `1` representing `false`, and `2` representing `true`.
+Booleans are stored as single bytes, with `0` representing `false`, `1` representing `true`, and every other byte representing `null`.
 
 For numeric data types, `null` values are represented by the minimum value for the corresponding type. For float and double data types, `NaN` is used to represent `null`.
 

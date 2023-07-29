@@ -22,12 +22,14 @@ abstract final class IsarCore {
   static int _nativeStringPtrLength = 0;
 
   static void _openDylib(String? libraryPath) {
-    _libraryPath =
+    libraryPath ??=
         Platform.isIOS ? null : libraryPath ?? Abi.current().localName;
 
     final dylib = Platform.isIOS
         ? DynamicLibrary.process()
-        : DynamicLibrary.open(_libraryPath!);
+        : DynamicLibrary.open(libraryPath!);
+
+    _libraryPath = libraryPath;
     close = dylib.lookup('isar_close');
     b = IsarCoreBindings(dylib);
 
