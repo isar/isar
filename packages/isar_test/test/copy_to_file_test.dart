@@ -1,3 +1,5 @@
+@TestOn('vm')
+
 import 'dart:io';
 
 import 'package:isar/isar.dart';
@@ -29,9 +31,9 @@ void main() {
   group('Copy to file', () {
     late Isar isar;
 
-    setUp(() {
+    setUp(() async {
       // disable WAL for SQLite
-      isar = openTempIsar([ModelSchema], maxSizeMiB: isSQLite ? 0 : 20);
+      isar = await openTempIsar([ModelSchema], maxSizeMiB: isSQLite ? 0 : 20);
 
       isar.write(
         (isar) => isar.models.putAll(List.generate(100, Model.new)),
@@ -49,7 +51,7 @@ void main() {
       copiedDbFile.delete();
     });
 
-    isarTest('.copyToFile() should keep the same content', () {
+    isarTest('.copyToFile() should keep the same content', () async {
       final name = getRandomName();
       final copiedDbFile = File(
         path.join(isar.directory, isSQLite ? '$name.sqlite' : '$name.isar'),
@@ -57,7 +59,7 @@ void main() {
 
       isar.copyToFile(copiedDbFile.path);
 
-      final copiedIsar = openTempIsar(
+      final copiedIsar = await openTempIsar(
         [ModelSchema],
         directory: isar.directory,
         name: name,
@@ -70,7 +72,7 @@ void main() {
       );
     });
 
-    isarTest('.copyToFile() should compact copied file', () {
+    isarTest('.copyToFile() should compact copied file', () async {
       final dbFile = File(
         path.join(
           isar.directory,
@@ -86,7 +88,7 @@ void main() {
 
       isar.copyToFile(copiedDbFile1.path);
 
-      final isarCopy1 = openTempIsar(
+      final isarCopy1 = await openTempIsar(
         [ModelSchema],
         directory: isar.directory,
         name: name1,
@@ -109,7 +111,7 @@ void main() {
       copiedDbFile2.delete();
     });
 
-    isarTest('Copies should be the same size', () {
+    isarTest('Copies should be the same size', () async {
       final name1 = getRandomName();
       final copiedDbFile1 = File(
         path.join(isar.directory, isSQLite ? '$name1.sqlite' : '$name1.isar'),
@@ -126,7 +128,7 @@ void main() {
       expect(copiedDbFile1.lengthSync(), copiedDbFile2.lengthSync());
       copiedDbFile2.delete();
 
-      final isarCopy = openTempIsar(
+      final isarCopy = await openTempIsar(
         [ModelSchema],
         directory: isar.directory,
         name: name1,

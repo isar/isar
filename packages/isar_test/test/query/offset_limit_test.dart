@@ -29,8 +29,8 @@ void main() {
     late Model objC;
     late Model objC2;
 
-    setUp(() {
-      isar = openTempIsar([ModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ModelSchema]);
       col = isar.models;
 
       objA = Model(0, 'A');

@@ -36,8 +36,8 @@ void main() {
     late StringModel obj6;
     late StringModel objNull;
 
-    setUp(() {
-      isar = openTempIsar([StringModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([StringModelSchema]);
 
       objEmpty = StringModel(0, '');
       obj1 = StringModel(1, 'string 1');

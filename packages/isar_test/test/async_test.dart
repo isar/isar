@@ -18,7 +18,7 @@ void main() async {
     late Isar isar;
 
     setUp(() async {
-      isar = openTempIsar([ModelSchema]);
+      isar = await openTempIsar([ModelSchema]);
     });
 
     // TODO enable once native assets are supported

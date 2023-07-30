@@ -94,19 +94,11 @@ pub unsafe extern "C" fn isar_query_cursor(
     txn: &'static CIsarTxn,
     query: &'static CIsarQuery,
     cursor: *mut *const CIsarCursor,
-    offset: i64,
-    limit: i64,
+    offset: u32,
+    limit: u32,
 ) -> u8 {
-    let offset = if offset < 0 {
-        None
-    } else {
-        Some(offset.clamp(0, u32::MAX as i64) as u32)
-    };
-    let limit = if limit < 0 {
-        None
-    } else {
-        Some(limit.clamp(0, u32::MAX as i64) as u32)
-    };
+    let offset = if offset == 0 { None } else { Some(offset) };
+    let limit = if limit == 0 { None } else { Some(limit) };
 
     isar_try! {
         let new_cursor = match (isar, txn, query) {
@@ -179,20 +171,12 @@ pub unsafe extern "C" fn isar_query_delete(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
     query: &'static CIsarQuery,
-    offset: i64,
-    limit: i64,
+    offset: u32,
+    limit: u32,
     count: *mut u32,
 ) -> u8 {
-    let offset = if offset < 0 {
-        None
-    } else {
-        Some(offset.clamp(0, u32::MAX as i64) as u32)
-    };
-    let limit = if limit < 0 {
-        None
-    } else {
-        Some(limit.clamp(0, u32::MAX as i64) as u32)
-    };
+    let offset = if offset == 0 { None } else { Some(offset) };
+    let limit = if limit == 0 { None } else { Some(limit) };
     isar_try! {
         let new_count = match (isar, txn, query) {
             #[cfg(feature = "native")]

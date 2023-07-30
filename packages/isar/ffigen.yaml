@@ -1,5 +1,5 @@
 name: IsarCoreBindings
-output: "lib/src/impl/bindings.dart"
+output: "lib/src/native/bindings.dart"
 headers:
   entry-points:
     - "isar-dart.h"
@@ -28,10 +28,6 @@ unions:
   dependency-only: opaque
   include:
     - "isar*"
-
-enums:
-  rename:
-    "StorageEngine": "CStorageEngine"
 
 preamble: |
   // ignore_for_file: camel_case_types, non_constant_identifier_names

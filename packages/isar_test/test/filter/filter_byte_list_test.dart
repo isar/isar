@@ -31,8 +31,8 @@ void main() {
     late ByteModel obj4;
     late ByteModel objNull;
 
-    setUp(() {
-      isar = openTempIsar([ByteModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ByteModelSchema]);
       col = isar.byteModels;
 
       objEmpty = ByteModel(0, []);

@@ -31,8 +31,8 @@ void main() {
     late FloatModel obj3;
     late FloatModel objNull;
 
-    setUp(() {
-      isar = openTempIsar([FloatModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([FloatModelSchema]);
       col = isar.floatModels;
 
       objEmpty = FloatModel(0, []);

@@ -30,7 +30,7 @@ extension on int {
         final length = IsarCore.b.isar_get_error(IsarCore.stringPtrPtr);
         final ptr = IsarCore.stringPtr;
         if (length != 0 && !ptr.isNull) {
-          final error = utf8.decode(ptr.asTypedList(length));
+          final error = utf8.decode(ptr.asU8List(length));
           throw DatabaseError(error);
         } else {
           throw DatabaseError(

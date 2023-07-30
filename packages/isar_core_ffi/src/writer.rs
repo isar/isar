@@ -1,4 +1,4 @@
-use crate::CIsarWriter;
+use crate::{isar_to_i64, CIsarWriter, IsarI64};
 use isar_core::core::writer::IsarWriter;
 use std::slice;
 
@@ -101,7 +101,12 @@ pub unsafe extern "C" fn isar_write_float(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_write_long(writer: &'static mut CIsarWriter, index: u32, value: i64) {
+pub unsafe extern "C" fn isar_write_long(
+    writer: &'static mut CIsarWriter,
+    index: u32,
+    value: IsarI64,
+) {
+    let value = isar_to_i64(value);
     match writer {
         #[cfg(feature = "native")]
         CIsarWriter::Native(writer) => writer.write_long(index, value),

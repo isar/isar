@@ -47,8 +47,8 @@ void main() {
     late ModelB objB4;
     late ModelB objB5;
 
-    setUp(() {
-      isar = openTempIsar([ModelASchema, ModelBSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ModelASchema, ModelBSchema]);
 
       objA0 = ModelA(name: 'Obj A0');
       objA1 = ModelA(name: 'Obj A1');

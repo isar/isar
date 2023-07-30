@@ -7,8 +7,8 @@ void main() {
   group('JSON', () {
     late Isar isar;
 
-    setUp(() {
-      isar = openTempIsar([TweetSchema]);
+    setUp(() async {
+      isar = await openTempIsar([TweetSchema]);
     });
 
     test('Import', () {

@@ -39,7 +39,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
           )
           .checkNoError();
 
-      final readerPtr = readerPtrPtr.value;
+      final readerPtr = readerPtrPtr.ptrValue;
       if (!readerPtr.isNull) {
         final object = converter.deserialize(readerPtr);
         IsarCore.b.isar_read_free(readerPtr);
@@ -67,7 +67,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
             )
             .checkNoError();
 
-        final readerPtr = readerPtrPtr.value;
+        final readerPtr = readerPtrPtr.ptrValue;
         if (!readerPtr.isNull) {
           objects[i] = converter.deserialize(readerPtr);
           IsarCore.b.isar_read_free(readerPtr);
@@ -95,7 +95,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
           )
           .checkNoError();
 
-      final insertPtr = writerPtrPtr.value;
+      final insertPtr = writerPtrPtr.ptrValue;
       try {
         for (final object in objects) {
           final id = converter.serialize(insertPtr, object);
@@ -109,7 +109,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
       final txnPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarTxn>>();
       IsarCore.b.isar_insert_finish(insertPtr, txnPtrPtr).checkNoError();
 
-      return (null, txnPtrPtr.value);
+      return (null, txnPtrPtr.ptrValue);
     });
   }
 
@@ -138,7 +138,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
             )
             .checkNoError();
 
-        if (updatedPtr.value) {
+        if (updatedPtr.boolValue) {
           count++;
         }
       }
@@ -160,7 +160,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
           )
           .checkNoError();
 
-      return (IsarCore.boolPtr.value, txnPtr);
+      return (IsarCore.boolPtr.boolValue, txnPtr);
     });
   }
 
@@ -181,7 +181,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
             )
             .checkNoError();
 
-        if (IsarCore.boolPtr.value) {
+        if (IsarCore.boolPtr.boolValue) {
           count++;
         }
       }
@@ -200,7 +200,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
     return isar.getTxn((isarPtr, txnPtr) {
       IsarCore.b
           .isar_count(isarPtr, txnPtr, collectionIndex, IsarCore.countPtr);
-      return IsarCore.countPtr.value;
+      return IsarCore.countPtr.u32Value;
     });
   }
 
@@ -216,7 +216,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
   int importJsonString(String json) {
     return isar.getWriteTxn(consume: true, (isarPtr, txnPtr) {
       final txnPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarTxn>>();
-      txnPtrPtr.value = txnPtr;
+      txnPtrPtr.ptrValue = txnPtr;
       final nativeString = IsarCore.toNativeString(json);
       IsarCore.b
           .isar_import_json(
@@ -227,7 +227,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
             IsarCore.countPtr,
           )
           .checkNoError();
-      return (IsarCore.countPtr.value, txnPtrPtr.value);
+      return (IsarCore.countPtr.u32Value, txnPtrPtr.ptrValue);
     });
   }
 
@@ -241,6 +241,10 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
 
   @override
   Stream<void> watchLazy({bool fireImmediately = false}) {
+    if (kIsWeb) {
+      throw UnsupportedError('Watchers are not supported on the web');
+    }
+
     final port = ReceivePort();
     final handlePtrPtr = IsarCore.ptrPtr.cast<Pointer<CWatchHandle>>();
 
@@ -253,7 +257,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
         )
         .checkNoError();
 
-    final handlePtr = handlePtrPtr.value;
+    final handlePtr = handlePtrPtr.ptrValue;
     final controller = StreamController<void>(
       onCancel: () {
         isar.getPtr(); // Make sure Isar is not closed
@@ -278,6 +282,10 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
 
   @override
   Stream<void> watchObjectLazy(ID id, {bool fireImmediately = false}) {
+    if (kIsWeb) {
+      throw UnsupportedError('Watchers are not supported on the web');
+    }
+
     final port = ReceivePort();
     final handlePtrPtr = IsarCore.ptrPtr.cast<Pointer<CWatchHandle>>();
 
@@ -291,7 +299,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
         )
         .checkNoError();
 
-    final handlePtr = handlePtrPtr.value;
+    final handlePtr = handlePtrPtr.ptrValue;
     final controller = StreamController<void>(
       onCancel: () {
         isar.getPtr(); // Make sure Isar is not closed
@@ -319,15 +327,22 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
       throw ArgumentError('Only up to 3 properties are supported');
     }
 
-    final alloc = Arena(malloc);
-    final builderPtrPtr = alloc<Pointer<CIsarQueryBuilder>>();
+    final builderPtrPtr = malloc<Pointer<CIsarQueryBuilder>>();
     IsarCore.b
         .isar_query_new(isar.getPtr(), collectionIndex, builderPtrPtr)
         .checkNoError();
 
-    final builderPtr = builderPtrPtr.value;
+    final builderPtr = builderPtrPtr.ptrValue;
     if (filter != null) {
-      IsarCore.b.isar_query_set_filter(builderPtr, _buildFilter(alloc, filter));
+      final pointers = <Pointer<Never>>[];
+      try {
+        final filterPtr = _buildFilter(filter, pointers);
+        IsarCore.b.isar_query_set_filter(builderPtr, filterPtr);
+      } finally {
+        for (final ptr in pointers) {
+          free(ptr);
+        }
+      }
     }
 
     if (sortBy != null) {
@@ -379,10 +394,10 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
             ) as R;
     }
 
-    final query = IsarCore.b.isar_query_build(builderPtr);
+    final queryPtr = IsarCore.b.isar_query_build(builderPtr);
     return _IsarQueryImpl(
       instanceId: isar.instanceId,
-      ptrAddress: query.address,
+      ptrAddress: queryPtr.address,
       properties: properties,
       deserialize: deserialize,
     );

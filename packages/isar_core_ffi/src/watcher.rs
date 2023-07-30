@@ -1,9 +1,7 @@
 use isar_core::core::{error::IsarError, instance::IsarInstance, watcher::WatchHandle};
 
-use crate::{
-    dart::{dart_post_int, DartPort},
-    CIsarInstance, CIsarQuery,
-};
+use crate::dart::{dart_post_int, DartPort};
+use crate::{CIsarInstance, CIsarQuery};
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_watch_collection(

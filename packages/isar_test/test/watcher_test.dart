@@ -27,8 +27,8 @@ void main() {
     late Value obj2;
     late Value obj3;
 
-    setUp(() {
-      isar = openTempIsar([ValueSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ValueSchema]);
 
       obj1 = Value(1, 'Hello');
       obj2 = Value(2, 'Hi');

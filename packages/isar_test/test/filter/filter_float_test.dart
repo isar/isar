@@ -30,8 +30,8 @@ void main() {
     late FloatModel objInf;
     late FloatModel objNull;
 
-    setUp(() {
-      isar = openTempIsar([FloatModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([FloatModelSchema]);
       col = isar.floatModels;
 
       objInf = FloatModel(0, double.infinity);

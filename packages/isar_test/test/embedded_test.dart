@@ -90,8 +90,8 @@ void main() {
     late Model simple;
     late Model nested;
 
-    setUp(() {
-      isar = openTempIsar([ModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ModelSchema]);
 
       allNull = Model(0, EModel('test'), null, null);
       simple = Model(

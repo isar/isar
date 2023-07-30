@@ -33,8 +33,8 @@ void main() {
     late Model modelC1;
     late Model modelC2;
 
-    setUp(() {
-      final isar = openTempIsar([ModelSchema]);
+    setUp(() async {
+      final isar = await openTempIsar([ModelSchema]);
       col = isar.models;
 
       modelA1 = Model(100, 'a', true);

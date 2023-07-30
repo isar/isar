@@ -88,14 +88,14 @@ class NoDefaultListModel {
 
 void main() {
   group('No default value', () {
-    isarTest('scalar', () {
+    isarTest('scalar', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
       isar1.close();
 
-      final isar2 = openTempIsar([NoDefaultModelSchema], name: isarName);
+      final isar2 = await openTempIsar([NoDefaultModelSchema], name: isarName);
       final obj = isar2.noDefaultModels.get(0)!;
       expect(obj.boolValue, false);
       expect(obj.byteValue, 0);
@@ -112,14 +112,14 @@ void main() {
       expect(obj.enumValue, MyEnum.value1);
     });
 
-    isarTest('scalar property', () {
+    isarTest('scalar property', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
       isar1.close();
 
-      final isar2 = openTempIsar([NoDefaultModelSchema], name: isarName);
+      final isar2 = await openTempIsar([NoDefaultModelSchema], name: isarName);
       expect(
         isar2.noDefaultModels.where().boolValueProperty().findFirst(),
         false,
@@ -162,14 +162,15 @@ void main() {
       );
     });
 
-    isarTest('list', () {
+    isarTest('list', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
       isar1.close();
 
-      final isar2 = openTempIsar([NoDefaultListModelSchema], name: isarName);
+      final isar2 =
+          await openTempIsar([NoDefaultListModelSchema], name: isarName);
       final obj = isar2.noDefaultListModels.get(0)!;
       expect(obj.boolValue, isEmpty);
       expect(obj.byteValue, isEmpty);
@@ -183,14 +184,15 @@ void main() {
       expect(obj.enumValue, isEmpty);
     });
 
-    isarTest('list property', () {
+    isarTest('list property', () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
       isar1.close();
 
-      final isar2 = openTempIsar([NoDefaultListModelSchema], name: isarName);
+      final isar2 =
+          await openTempIsar([NoDefaultListModelSchema], name: isarName);
       expect(
         isar2.noDefaultListModels.where().boolValueProperty().findFirst(),
         isEmpty,

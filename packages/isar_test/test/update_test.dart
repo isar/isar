@@ -67,8 +67,8 @@ void main() {
     late Isar isar;
     late Model model;
 
-    setUp(() {
-      isar = openTempIsar([ModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ModelSchema]);
 
       model = Model(
         id: 12,

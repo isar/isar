@@ -9,10 +9,10 @@ funding:
   - https://github.com/sponsors/simc/
 topics:
   - database
+  - isar
   - sqlite
   - encryption
   - storage
-  - isar
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -21,6 +21,7 @@ dependencies:
   analyzer: ">=5.2.0 <6.0.0"
   build: ^2.3.1
   ffi: ">=2.0.0 <3.0.0"
+  js: ^0.6.7
   meta: ^1.9.1
   source_gen: ^1.4.0
 

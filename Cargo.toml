@@ -2,8 +2,7 @@
 resolver = "2"
 members = [
     "packages/isar_core",
-    "packages/isar_core_ffi",
-    "packages/mdbx_sys"
+    "packages/isar_core_ffi"
 ]
 
 [profile.release]

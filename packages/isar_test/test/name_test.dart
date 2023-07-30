@@ -25,8 +25,8 @@ void main() {
   group('Name', () {
     late Isar isar;
 
-    setUp(() {
-      isar = openTempIsar([NameModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([NameModelSchema]);
     });
 
     isarTest('json', () {

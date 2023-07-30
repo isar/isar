@@ -1,4 +1,6 @@
-use crate::{dart_fast_hash, CIsarInstance, CIsarReader, CIsarTxn};
+use crate::{
+    dart_fast_hash, i64_to_isar, isar_to_i64, CIsarInstance, CIsarReader, CIsarTxn, IsarI64,
+};
 use isar_core::core::error::IsarError;
 use isar_core::core::instance::{CompactCondition, IsarInstance};
 use isar_core::core::schema::IsarSchema;
@@ -186,13 +188,14 @@ pub unsafe extern "C" fn isar_txn_abort(isar: &'static CIsarInstance, txn: *mut 
 pub unsafe extern "C" fn isar_auto_increment(
     isar: &'static CIsarInstance,
     collection_index: u16,
-) -> i64 {
-    match isar {
+) -> IsarI64 {
+    let id = match isar {
         #[cfg(feature = "native")]
         CIsarInstance::Native(isar) => isar.auto_increment(collection_index),
         #[cfg(feature = "sqlite")]
         CIsarInstance::SQLite(isar) => isar.auto_increment(collection_index),
-    }
+    };
+    i64_to_isar(id)
 }
 
 #[no_mangle]
@@ -200,9 +203,10 @@ pub unsafe extern "C" fn isar_get(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
     collection_index: u16,
-    id: i64,
+    id: IsarI64,
     reader: *mut *const CIsarReader,
 ) -> u8 {
+    let id = isar_to_i64(id);
     isar_try! {
         let new_reader = match (isar, txn) {
             #[cfg(feature = "native")]
@@ -228,9 +232,10 @@ pub unsafe extern "C" fn isar_delete(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
     collection_index: u16,
-    id: i64,
+    id: IsarI64,
     deleted: *mut bool,
 ) -> u8 {
+    let id = isar_to_i64(id);
     isar_try! {
         *deleted = match (isar, txn) {
             #[cfg(feature = "native")]
@@ -296,16 +301,16 @@ pub unsafe extern "C" fn isar_get_size(
     txn: &'static CIsarTxn,
     collection_index: u16,
     include_indexes: bool,
-) -> i64 {
+) -> u32 {
     match (isar, txn) {
         #[cfg(feature = "native")]
         (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => isar
             .get_size(txn, collection_index, include_indexes)
-            .unwrap_or(0) as i64,
+            .unwrap_or(0) as u32,
         #[cfg(feature = "sqlite")]
         (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn)) => isar
             .get_size(txn, collection_index, include_indexes)
-            .unwrap_or(0) as i64,
+            .unwrap_or(0) as u32,
         _ => 0,
     }
 }
@@ -366,12 +371,17 @@ pub unsafe extern "C" fn isar_verify(isar: &'static CIsarInstance, txn: &'static
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_close(isar: *mut CIsarInstance, delete: bool) -> bool {
+pub unsafe extern "C" fn isar_close(isar: *mut CIsarInstance, delete: bool) -> u8 {
     let isar = *Box::from_raw(isar);
-    match isar {
+    let closed = match isar {
         #[cfg(feature = "native")]
         CIsarInstance::Native(isar) => NativeInstance::close(isar, delete),
         #[cfg(feature = "sqlite")]
         CIsarInstance::SQLite(isar) => SQLiteInstance::close(isar, delete),
+    };
+    if closed {
+        1
+    } else {
+        0
     }
 }

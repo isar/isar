@@ -1,4 +1,4 @@
-use crate::{CIsarInstance, CIsarTxn, CIsarWriter};
+use crate::{isar_to_i64, CIsarInstance, CIsarTxn, CIsarWriter, IsarI64};
 use isar_core::core::error::IsarError;
 use isar_core::core::insert::IsarInsert;
 use isar_core::core::instance::IsarInstance;
@@ -31,7 +31,8 @@ pub unsafe extern "C" fn isar_insert(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_insert_save(insert: &mut CIsarWriter<'static>, id: i64) -> u8 {
+pub unsafe extern "C" fn isar_insert_save(insert: &mut CIsarWriter<'static>, id: IsarI64) -> u8 {
+    let id = isar_to_i64(id);
     isar_try! {
         match insert {
             #[cfg(feature = "native")]

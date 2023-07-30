@@ -30,7 +30,7 @@ String _generateSchema(ObjectInfo object) {
 
   if (object.isEmbedded) {
     return '''
-    const ${object.dartName.decapitalize()}SchemaHash = ${Isar.fastHash(schemaJson)};
+    //const ${object.dartName.decapitalize()}SchemaHash = ${Isar.fastHash(schemaJson)};
     const ${object.dartName.capitalize()}Schema = IsarSchema(
       schema: '$schemaJson',
       converter: IsarObjectConverter<void, ${object.dartName}>(
@@ -56,7 +56,7 @@ String _generateSchema(ObjectInfo object) {
         deserializeProperty: deserialize${object.dartName}Prop,
       ),
       embeddedSchemas: [$embeddedSchemas],
-      hash: $hash,
+      //hash: $hash,
     );''';
   }
 }

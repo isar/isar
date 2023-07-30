@@ -21,6 +21,14 @@ abstract class Isar {
   /// The current Isar version.
   static const String version = '4.0.0-dev.3';
 
+  /// Initialize Isar manually. This is required if you target web.
+  ///
+  /// On native platforms you can provide a custom path to the Isar Core
+  /// library.
+  static FutureOr<void> initialize({String? libraryPath}) {
+    return IsarCore._initialize(libraryPath);
+  }
+
   /// Get an already opened Isar instance by its name.
   ///
   /// This method is especially useful to get an Isar instance from an isolate.
@@ -92,7 +100,7 @@ abstract class Isar {
     CompactCondition? compactOnLaunch,
     bool inspector = true,
   }) async {
-    await Isolate.run(
+    await scheduleIsolate(
       () {
         Isar.open(
           schemas: schemas,
@@ -243,28 +251,8 @@ abstract class Isar {
   @visibleForTesting
   void verify();
 
-  /// Initialize Isar Core manually. You need to provide Isar Core libraries
-  /// for every platform your app will run on.
-  ///
-  /// Only use this method for non-Flutter code or unit tests.
-  static void initializeIsarCore({Map<Abi, String> libraries = const {}}) {
-    IsarCore._initialize(libraries: libraries);
-  }
-
   /// FNV-1a 64bit hash algorithm optimized for Dart Strings
   static int fastHash(String string) {
-    // ignore: avoid_js_rounded_ints
-    var hash = 0xcbf29ce484222325;
-
-    var i = 0;
-    while (i < string.length) {
-      final codeUnit = string.codeUnitAt(i++);
-      hash ^= codeUnit >> 8;
-      hash *= 0x100000001b3;
-      hash ^= codeUnit & 0xFF;
-      hash *= 0x100000001b3;
-    }
-
-    return hash;
+    return platformFastHash(string);
   }
 }

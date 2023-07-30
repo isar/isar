@@ -29,8 +29,8 @@ void main() {
     late IdModel obj2;
     late IdModel obj3;
 
-    setUp(() {
-      isar = openTempIsar([IdModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([IdModelSchema]);
       col = isar.idModels;
 
       obj0 = IdModel()..id = 0;

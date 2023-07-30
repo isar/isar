@@ -104,8 +104,8 @@ void main() {
     late NonInheritingModel nonInheritingObj1;
     late NonInheritingModel nonInheritingObj2;
 
-    setUp(() {
-      isar = openTempIsar([
+    setUp(() async {
+      isar = await openTempIsar([
         InheritingModelSchema,
         NonInheritingModelSchema,
       ]);

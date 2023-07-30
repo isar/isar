@@ -20,8 +20,8 @@ void main() {
   group('Transaction', () {
     late Isar isar;
 
-    setUp(() {
-      isar = openTempIsar([ModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ModelSchema]);
     });
 
     isarTest('Sync txn cannot be opened in sync txn', () {

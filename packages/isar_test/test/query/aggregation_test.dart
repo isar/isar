@@ -9,8 +9,8 @@ void main() {
     group('id', () {
       late IsarCollection<int, IntModel> col;
 
-      setUp(() {
-        final isar = openTempIsar([IntModelSchema]);
+      setUp(() async {
+        final isar = await openTempIsar([IntModelSchema]);
         col = isar.intModels;
 
         isar.write(
@@ -50,8 +50,8 @@ void main() {
     group('byte', () {
       late IsarCollection<int, ByteModel> col;
 
-      setUp(() {
-        final isar = openTempIsar([ByteModelSchema]);
+      setUp(() async {
+        final isar = await openTempIsar([ByteModelSchema]);
         col = isar.byteModels;
 
         isar.write(
@@ -94,8 +94,8 @@ void main() {
     group('short', () {
       late IsarCollection<int, ShortModel> col;
 
-      setUp(() {
-        final isar = openTempIsar([ShortModelSchema]);
+      setUp(() async {
+        final isar = await openTempIsar([ShortModelSchema]);
         col = isar.shortModels;
 
         isar.write(
@@ -147,8 +147,8 @@ void main() {
     group('int', () {
       late IsarCollection<int, IntModel> col;
 
-      setUp(() {
-        final isar = openTempIsar([IntModelSchema]);
+      setUp(() async {
+        final isar = await openTempIsar([IntModelSchema]);
         col = isar.intModels;
 
         isar.write(
@@ -200,8 +200,8 @@ void main() {
     group('float', () {
       late IsarCollection<int, FloatModel> col;
 
-      setUp(() {
-        final isar = openTempIsar([FloatModelSchema]);
+      setUp(() async {
+        final isar = await openTempIsar([FloatModelSchema]);
         col = isar.floatModels;
 
         isar.write(
@@ -253,8 +253,8 @@ void main() {
     group('double', () {
       late IsarCollection<int, DoubleModel> col;
 
-      setUp(() {
-        final isar = openTempIsar([DoubleModelSchema]);
+      setUp(() async {
+        final isar = await openTempIsar([DoubleModelSchema]);
         col = isar.doubleModels;
 
         isar.write(

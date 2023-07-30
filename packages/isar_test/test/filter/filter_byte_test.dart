@@ -30,8 +30,8 @@ void main() {
     late ByteModel obj3;
     late ByteModel objMax;
 
-    setUp(() {
-      isar = openTempIsar([ByteModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ByteModelSchema]);
       col = isar.byteModels;
 
       objMin = ByteModel(0, 0);
