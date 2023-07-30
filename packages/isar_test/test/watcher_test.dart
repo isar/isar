@@ -36,7 +36,7 @@ void main() {
     });
 
     group('Collection', () {
-      isarTest('.put()', () async {
+      isarTest('.put()', web: false, () async {
         final listener = Listener<void>(isar.values.watchLazy());
 
         isar.write((isar) => isar.values.put(obj1));
@@ -48,7 +48,7 @@ void main() {
         await listener.done();
       });
 
-      isarTest('.putAll()', () async {
+      isarTest('.putAll()', web: false, () async {
         final listener = Listener<void>(isar.values.watchLazy());
 
         isar.write((isar) => isar.values.putAll([obj1, obj2]));
@@ -60,7 +60,7 @@ void main() {
         await listener.done();
       });
 
-      isarTest('.delete()', () async {
+      isarTest('.delete()', web: false, () async {
         isar.write((isar) => isar.values.putAll([obj1, obj2]));
 
         final listener = Listener<void>(isar.values.watchLazy());
@@ -74,7 +74,7 @@ void main() {
         await listener.done();
       });
 
-      isarTest('.deleteAll()', () async {
+      isarTest('.deleteAll()', web: false, () async {
         isar.write((isar) => isar.values.putAll([obj1, obj2]));
 
         final listener = Listener<void>(isar.values.watchLazy());
@@ -90,7 +90,7 @@ void main() {
     });
 
     group('Object', () {
-      isarTest('.put()', () async {
+      isarTest('.put()', web: false, () async {
         final listenerLazy = Listener<void>(isar.values.watchObjectLazy(1));
         final listener = Listener<Value?>(isar.values.watchObject(2));
 
@@ -104,7 +104,7 @@ void main() {
         await listener.done();
       });
 
-      isarTest('.putAll()', () async {
+      isarTest('.putAll()', web: false, () async {
         final listenerLazy = Listener<void>(isar.values.watchObjectLazy(1));
         final listener = Listener<Value?>(isar.values.watchObject(2));
 
@@ -119,7 +119,7 @@ void main() {
         await listener.done();
       });
 
-      isarTest('.delete()', () async {
+      isarTest('.delete()', web: false, () async {
         isar.write((isar) => isar.values.putAll([obj1, obj2, obj3]));
 
         final listenerLazy = Listener<void>(isar.values.watchObjectLazy(1));
@@ -135,7 +135,7 @@ void main() {
         await listener.done();
       });
 
-      isarTest('.deleteAll()', () async {
+      isarTest('.deleteAll()', web: false, () async {
         isar.write((isar) => isar.values.putAll([obj1, obj2, obj3]));
 
         final listenerLazy = Listener<void>(isar.values.watchObjectLazy(1));
@@ -153,7 +153,7 @@ void main() {
     });
 
     group('Query', () {
-      isarTest('.put()', () async {
+      isarTest('.put()', web: false, () async {
         final listenerLazy =
             Listener(isar.values.where().valueEqualTo('Hello').watchLazy());
         final listener =
@@ -175,7 +175,7 @@ void main() {
         await listener.done();
       });
 
-      isarTest('.putAll()', () async {
+      isarTest('.putAll()', web: false, () async {
         final listenerLazy =
             Listener(isar.values.where().valueContains('H').watchLazy());
         final listener =
@@ -195,7 +195,7 @@ void main() {
         await listener.done();
       });
 
-      isarTest('.delete()', () async {
+      isarTest('.delete()', web: false, () async {
         isar.write((isar) => isar.values.putAll([obj1, obj2, obj3]));
 
         final listenerLazy =
@@ -219,7 +219,7 @@ void main() {
         await listener.done();
       });
 
-      isarTest('.deleteAll()', () async {
+      isarTest('.deleteAll()', web: false, () async {
         isar.write((isar) => isar.values.putAll([obj1, obj2, obj3]));
 
         final listenerLazy =

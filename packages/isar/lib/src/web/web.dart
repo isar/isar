@@ -1,14 +1,15 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 import 'dart:html';
-import 'dart:js_interop';
 import 'dart:js_util';
 import 'dart:typed_data';
 
-import 'package:isar/isar.dart';
 import 'package:isar/src/web/interop.dart';
 
 export 'bindings.dart';
 export 'ffi.dart';
+export 'interop.dart';
 
 Future<R> scheduleIsolate<R>(R Function() callback, {String? debugName}) async {
   throw UnimplementedError();
@@ -18,8 +19,7 @@ FutureOr<IsarCoreBindings> initializePlatformBindings(
     [String? libraryPath]) async {
   final w = window as JSWindow;
   // download wasm as Uint8List
-  final response = await window.fetch(
-      'http://localhost:9000/target/wasm32-unknown-unknown/debug/isar.wasm');
+  final response = await window.fetch('http://localhost:9000/isar.wasm');
   final bytes = await response.arrayBuffer();
   ;
   final promise = w.WebAssembly.instantiate(
@@ -38,12 +38,18 @@ class ReceivePort extends Stream<void> {
   final sendPort = SendPort();
 
   @override
-  StreamSubscription<void> listen(void Function(dynamic event)? onData,
-      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
+  StreamSubscription<void> listen(
+    void Function(dynamic event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
     throw UnimplementedError();
   }
 
-  void close() {}
+  void close() {
+    throw UnimplementedError();
+  }
 }
 
 class SendPort {

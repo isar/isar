@@ -82,7 +82,7 @@ void isarTest(
       );
     }
 
-    if (sqlite || (kIsWeb && web)) {
+    if ((!kIsWeb && sqlite) || (kIsWeb && web)) {
       test(
         '(sqlite)',
         () async {

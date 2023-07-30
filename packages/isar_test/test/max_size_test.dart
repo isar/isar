@@ -15,14 +15,14 @@ class Model {
 
 void main() {
   group('Max Size', () {
-    test('default', () async {
+    isarTest('default', () async {
       final isar = await openTempIsar([ModelSchema]);
       isar.write((isar) {
         isar.models.putAll(List.generate(1000, Model.new));
       });
     });
 
-    test('10MB', () async {
+    isarTest('10MB', sqlite: false, web: false, () async {
       final isar = await openTempIsar([ModelSchema], maxSizeMiB: 10);
 
       expect(

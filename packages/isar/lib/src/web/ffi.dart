@@ -1,11 +1,13 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
-import 'package:isar/src/web/interop.dart';
-
-sealed class NativeType {}
+import 'interop.dart';
 
 typedef Pointer<T> = int;
+
+class NativeType {}
 
 @pragma('dart2js:tryInline')
 Pointer<T> newPtr<T>(int addr) => addr;
@@ -49,31 +51,31 @@ class Native<T> {
   const Native({String? symbol});
 }
 
-class Void extends NativeType {}
+class Void {}
 
-class Bool extends NativeType {}
+class Bool {}
 
-class Uint8 extends NativeType {}
+class Uint8 {}
 
-class Int8 extends NativeType {}
+class Int8 {}
 
-class Uint16 extends NativeType {}
+class Uint16 {}
 
-class Uint32 extends NativeType {}
+class Uint32 {}
 
 typedef Char = Uint8;
 
-class Int32 extends NativeType {}
+class Int32 {}
 
-class Int64 extends NativeType {}
+class Int64 {}
 
-class Float extends NativeType {}
+class Float {}
 
-class Double extends NativeType {}
+class Double {}
 
-class Opaque extends NativeType {}
+class Opaque {}
 
-class NativeFunction<T> extends NativeType {}
+class NativeFunction<T> {}
 
 const _sizes = {
   int: 4, // pointer
@@ -94,6 +96,6 @@ Pointer<T> malloc<T>([int length = 1]) {
   return addr;
 }
 
-void free(Pointer<NativeType> ptr) {
+void free(Pointer<void> ptr) {
   IsarCore.b.free(ptr.address);
 }

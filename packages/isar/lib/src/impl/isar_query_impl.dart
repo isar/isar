@@ -28,6 +28,10 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
   _IsarImpl get isar => _IsarImpl.instance(_instanceId);
 
   List<E> _findAll<E>(Deserialize<E> deserialize, {int? offset, int? limit}) {
+    if (limit == 0) {
+      throw ArgumentError('Limit must be greater than 0.');
+    }
+
     return isar.getTxn((isarPtr, txnPtr) {
       final cursorPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarCursor>>();
       IsarCore.b
@@ -63,6 +67,10 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
 
   @override
   int updateProperties(Map<int, dynamic> changes, {int? offset, int? limit}) {
+    if (limit == 0) {
+      throw ArgumentError('Limit must be greater than 0.');
+    }
+
     return isar.getTxn((isarPtr, txnPtr) {
       final updatePtr = IsarCore.b.isar_update_new();
       for (final propertyId in changes.keys) {
@@ -75,8 +83,8 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
             isarPtr,
             txnPtr,
             _ptr,
-            offset ?? -1,
-            limit ?? -1,
+            offset ?? 0,
+            limit ?? 0,
             updatePtr,
             IsarCore.countPtr,
           )
@@ -88,14 +96,18 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
 
   @override
   int deleteAll({int? offset, int? limit}) {
+    if (limit == 0) {
+      throw ArgumentError('Limit must be greater than 0.');
+    }
+
     return isar.getTxn((isarPtr, txnPtr) {
       IsarCore.b
           .isar_query_delete(
             isarPtr,
             txnPtr,
             _ptr,
-            offset ?? -1,
-            limit ?? -1,
+            offset ?? 0,
+            limit ?? 0,
             IsarCore.countPtr,
           )
           .checkNoError();
@@ -159,7 +171,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
       try {
         if (true is R) {
           return (IsarCore.b.isar_value_get_bool(valuePtr) != 0) as R;
-        } else if (0.0 is R) {
+        } else if (0.5 is R) {
           return IsarCore.b.isar_value_get_real(valuePtr) as R;
         } else if (0 is R) {
           return IsarCore.b.isar_value_get_integer(valuePtr) as R;

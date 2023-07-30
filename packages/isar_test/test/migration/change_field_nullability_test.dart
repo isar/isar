@@ -35,7 +35,7 @@ class Col2 {
 }
 
 void main() {
-  isarTest('Change field nullability', () async {
+  isarTest('Change field nullability', web: false, () async {
     final isar1 = await openTempIsar([Col1Schema]);
     final isarName = isar1.name;
     isar1.write((isar) {

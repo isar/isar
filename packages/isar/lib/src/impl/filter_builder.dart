@@ -140,14 +140,14 @@ Pointer<CFilter> _buildFilter(Filter filter, List<Pointer<void>> pointers) {
 Pointer<CIsarValue> _isarValue(Object? value) {
   if (value == null) {
     return nullptr;
+  } else if (value is double) {
+    return IsarCore.b.isar_value_real(value);
   } else if (value is int) {
     return IsarCore.b.isar_value_integer(value);
   } else if (value is String) {
     return IsarCore.b.isar_value_string(IsarCore.toNativeString(value));
   } else if (value is bool) {
     return IsarCore.b.isar_value_bool(value);
-  } else if (value is double) {
-    return IsarCore.b.isar_value_real(value);
   } else if (value is DateTime) {
     return IsarCore.b.isar_value_integer(value.toUtc().microsecondsSinceEpoch);
   } else {

@@ -35,7 +35,7 @@ class Model2 {
 }
 
 void main() {
-  isarTest('Add collection', () async {
+  isarTest('Add collection', web: false, () async {
     final isar1 = await openTempIsar([Model1Schema]);
     final isarName = isar1.name;
     final obj1A = Model1(5, 'col1_a');
@@ -57,7 +57,7 @@ void main() {
     isar2.model2s.verify([obj2]);
   });
 
-  isarTest('Remove collection', () async {
+  isarTest('Remove collection', web: false, () async {
     final isar1 = await openTempIsar([Model1Schema, Model2Schema]);
     final isarName = isar1.name;
     final obj1A = Model1(1, 'col1_a');

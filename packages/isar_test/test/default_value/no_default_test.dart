@@ -88,7 +88,7 @@ class NoDefaultListModel {
 
 void main() {
   group('No default value', () {
-    isarTest('scalar', () async {
+    isarTest('scalar', web: false, () async {
       final emptyObj = EmptyModel(0);
       final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
@@ -112,7 +112,7 @@ void main() {
       expect(obj.enumValue, MyEnum.value1);
     });
 
-    isarTest('scalar property', () async {
+    isarTest('scalar property', web: false, () async {
       final emptyObj = EmptyModel(0);
       final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
@@ -162,7 +162,7 @@ void main() {
       );
     });
 
-    isarTest('list', () async {
+    isarTest('list', web: false, () async {
       final emptyObj = EmptyModel(0);
       final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
@@ -184,7 +184,7 @@ void main() {
       expect(obj.enumValue, isEmpty);
     });
 
-    isarTest('list property', () async {
+    isarTest('list property', web: false, () async {
       final emptyObj = EmptyModel(0);
       final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));

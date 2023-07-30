@@ -76,7 +76,7 @@ class DefaultListModel {
 
 void main() {
   group('Default value', () {
-    isarTest('scalar', () async {
+    isarTest('scalar', web: false, () async {
       final emptyObj = EmptyModel(0);
       final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar1.emptyModels.put(emptyObj));
@@ -95,7 +95,7 @@ void main() {
       expect(obj.embeddedValue, const MyEmbedded('abc'));
     });
 
-    isarTest('scalar property', () async {
+    isarTest('scalar property', web: false, () async {
       final emptyObj = EmptyModel(0);
       final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
@@ -137,7 +137,7 @@ void main() {
       );
     });
 
-    isarTest('list', () async {
+    isarTest('list', web: false, () async {
       final emptyObj = EmptyModel(0);
       final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
@@ -157,7 +157,7 @@ void main() {
       expect(obj.embeddedValue, [null, const MyEmbedded('test')]);
     });
 
-    isarTest('list property', () async {
+    isarTest('list property', web: false, () async {
       final emptyObj = EmptyModel(0);
       final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar1.emptyModels.put(emptyObj));

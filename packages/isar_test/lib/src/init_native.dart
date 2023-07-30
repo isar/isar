@@ -11,7 +11,6 @@ Future<void> prepareTest() async {
     if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
       try {
         await Isar.initialize(libraryPath: getBinaryPath());
-
         if (testTempPath == null) {
           final dartToolDir = path.join(Directory.current.path, '.dart_tool');
           testTempPath = path.join(dartToolDir, 'test', 'tmp');
@@ -34,8 +33,7 @@ String getBinaryPath() {
     Abi.macosArm64 => path.join(
         rootDir,
         'target',
-        'aarch64-apple-darwin',
-        'release',
+        'debug',
         binaryName,
       ),
     Abi.macosX64 => path.join(

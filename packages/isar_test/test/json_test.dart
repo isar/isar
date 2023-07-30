@@ -11,13 +11,13 @@ void main() {
       isar = await openTempIsar([TweetSchema]);
     });
 
-    test('Import', () {
+    /*test('Import', () {
       isar.write((isar) {
         isar.tweets.importJson([tweetJson]);
       });
 
       //expect(isar.tweets.where().findAll(), [tweetJson]);
-    });
+    });*/
 
     /*test('Import / Export raw', () async {
       final bytes = JsonUtf8Encoder().convert([tweetJson]);

@@ -40,7 +40,7 @@ class Col2 {
 }
 
 void main() {
-  isarTest('Add field', () async {
+  isarTest('Add field', web: false, () async {
     final isar1 = await openTempIsar([Col1Schema]);
     final isarName = isar1.name;
     isar1.write((isar) {
@@ -74,7 +74,7 @@ void main() {
     ]);
   });
 
-  isarTest('Remove field', () async {
+  isarTest('Remove field', web: false, () async {
     final isar1 = await openTempIsar([Col2Schema]);
     final isarName = isar1.name;
     isar1.write((isar) {

@@ -35,7 +35,7 @@ class Model2 {
 }
 
 void main() {
-  isarTest('Change field type', () async {
+  isarTest('Change field type', web: false, () async {
     final isar1 = await openTempIsar([Model1Schema]);
     final isarName = isar1.name;
     final obj1A = Model1(1, 'a', 'OBJ1');

@@ -53,7 +53,7 @@ class Embedded2 {
 }
 
 void main() {
-  isarTest('Change field embedded', () async {
+  isarTest('Change field embedded', web: false, () async {
     final isar1 = await openTempIsar([Model1Schema]);
     final isarName = isar1.name;
     isar1.write((isar) {

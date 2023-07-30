@@ -57,7 +57,7 @@ void main() {
     });
 
     isarTest('0 limit', () {
-      expect(col.where().findAll(limit: 0), isEmpty);
+      expect(() => col.where().findAll(limit: 0), throwsArgumentError);
     });
 
     isarTest('big limit', () {

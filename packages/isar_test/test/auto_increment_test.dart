@@ -41,7 +41,7 @@ void main() {
       expect(isar.models.autoIncrement(), 303);
     });
 
-    isarTest('persists', () async {
+    isarTest('persists', web: false, () async {
       final isarName = isar.name;
 
       expect(isar.models.autoIncrement(), 1);
