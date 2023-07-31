@@ -15,5 +15,5 @@ dart test
 ```
 sh tool/prepare_tests.sh
 sh tool/build.sh
-flutter test integration_test/integration_test.dart
+flutter test integration_test.dart
 ```
