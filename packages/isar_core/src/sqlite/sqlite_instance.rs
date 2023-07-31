@@ -61,9 +61,13 @@ impl SQLiteInstance {
         max_size_mib: u32,
         encryption_key: Option<&str>,
     ) -> Result<(SQLiteInstanceInfo, SQLite3)> {
-        let mut path_buf = PathBuf::from(dir);
-        path_buf.push(format!("{}.sqlite", name));
-        let path = path_buf.as_path().to_str().unwrap().to_string();
+        let path = if !dir.is_empty() {
+            let mut path_buf = PathBuf::from(dir);
+            path_buf.push(format!("{}.sqlite", name));
+            path_buf.as_path().to_str().unwrap().to_string()
+        } else {
+            String::new()
+        };
 
         let sqlite = Self::open_conn(&path, encryption_key)?;
 
@@ -213,7 +217,7 @@ impl IsarInstance for SQLiteInstance {
             return Err(IsarError::IllegalArgument {});
         }
         if !cfg!(feature = "sqlcipher") && encryption_key.is_some() {
-            return Err(IsarError::IllegalArgument {});
+            return Err(IsarError::UnsupportedOperation {});
         }
 
         let mut lock = INSTANCES.lock();

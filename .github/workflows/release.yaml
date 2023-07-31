@@ -46,12 +46,15 @@ jobs:
           - os: windows-latest
             artifact_name: isar_windows_x64.dll
             script: build_windows.sh x64
+          - os: ubuntu-latest
+            artifact_name: isar.wasm
+            script: build_wasm.sh
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
-      - name: Set env
+      - name: Set Isar Version
         run: echo "ISAR_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
       - name: Build binary
         run: bash tool/${{ matrix.script }}
@@ -95,15 +98,25 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
       - name: pub get
         run: dart pub get
         working-directory: packages/isar
+      - name: Set Isar Version
+        run: echo "ISAR_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
       - name: Download Binaries
         run: sh tool/download_binaries.sh
+      - name: Adjust Version
+        run: sh tool/adjust_version.sh
       - name: pub.dev credentials
         run: |
           mkdir -p $HOME/.config/dart
           echo '${{ secrets.PUB_JSON }}' >> $HOME/.config/dart/pub-credentials.json
+      - uses: JS-DevTools/npm-publish@v2
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
       - name: Publish isar
         run: dart pub publish --force
         working-directory: packages/isar

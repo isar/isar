@@ -15,8 +15,10 @@ void main() async {
 
   group('Integration test', () {
     setUpAll(() async {
-      final dir = await getTemporaryDirectory();
-      testTempPath = dir.path;
+      if (!kIsWeb) {
+        final dir = await getTemporaryDirectory();
+        testTempPath = dir.path;
+      }
     });
 
     tearDownAll(() {

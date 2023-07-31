@@ -1,73 +1,19 @@
 import 'dart:async';
-import 'dart:ffi';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:isar/isar.dart';
+import 'package:isar_test/src/init_native.dart'
+    if (dart.library.html) 'package:isar_test/src/init_web.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 // ignore: implementation_imports
 import 'package:test_api/src/backend/invoker.dart';
 
+export 'package:isar_test/src/init_native.dart'
+    if (dart.library.html) 'package:isar_test/src/init_web.dart';
+
 final testErrors = <String>[];
 int testCount = 0;
-
-var _setUp = false;
-void prepareTest() {
-  if (!_setUp) {
-    if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
-      final rootDir = path.dirname(path.dirname(Directory.current.path));
-      final binaryName = Platform.isWindows
-          ? 'isar.dll'
-          : Platform.isMacOS
-              ? 'libisar.dylib'
-              : 'libisar.so';
-      try {
-        Isar.initializeIsarCore(
-          libraries: {
-            Abi.macosArm64: path.join(
-              rootDir,
-              'target',
-              'aarch64-apple-darwin',
-              'release',
-              binaryName,
-            ),
-            Abi.macosX64: path.join(
-              rootDir,
-              'target',
-              'x86_64-apple-darwin',
-              'release',
-              binaryName,
-            ),
-            Abi.linuxArm64: path.join(
-              rootDir,
-              'target',
-              'aarch64-unknown-linux-gnu',
-              'release',
-              binaryName,
-            ),
-            Abi.linuxX64: path.join(
-              rootDir,
-              'target',
-              'x86_64-unknown-linux-gnu',
-              'release',
-              binaryName,
-            ),
-            Abi.windowsX64: path.join(
-              rootDir,
-              'target',
-              'x86_64-pc-windows-msvc',
-              'release',
-              binaryName,
-            ),
-          },
-        );
-      } catch (_) {}
-    }
-    _setUp = true;
-  }
-}
 
 String getRandomName() {
   final random = Random().nextInt(pow(2, 32) as int).toString();
@@ -75,7 +21,7 @@ String getRandomName() {
 }
 
 String? testTempPath;
-Isar openTempIsar(
+Future<Isar> openTempIsar(
   List<IsarCollectionSchema> schemas, {
   String? name,
   String? directory,
@@ -83,18 +29,13 @@ Isar openTempIsar(
   String? encryptionKey,
   CompactCondition? compactOnLaunch,
   bool closeAutomatically = true,
-}) {
-  prepareTest();
-  if (directory == null && testTempPath == null) {
-    final dartToolDir = path.join(Directory.current.path, '.dart_tool');
-    testTempPath = path.join(dartToolDir, 'test', 'tmp');
-    Directory(testTempPath!).createSync(recursive: true);
-  }
+}) async {
+  await prepareTest();
 
   final isar = Isar.open(
     schemas: schemas,
     name: name ?? getRandomName(),
-    directory: directory ?? testTempPath!,
+    directory: directory ?? testTempPath ?? '',
     engine: isSQLite ? IsarEngine.sqlite : IsarEngine.isar,
     maxSizeMiB: maxSizeMiB,
     encryptionKey: encryptionKey,
@@ -114,6 +55,8 @@ Isar openTempIsar(
 
 bool get isSQLite => Invoker.current!.liveTest.test.name.endsWith('(sqlite)');
 
+const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
+
 @isTestGroup
 void isarTest(
   String name,
@@ -122,10 +65,11 @@ void isarTest(
   bool skip = false,
   bool isar = true,
   bool sqlite = true,
+  bool web = true,
 }) {
   testCount++;
   group(name, () {
-    if (isar) {
+    if (isar && !kIsWeb) {
       test(
         '(isar)',
         () async {
@@ -141,7 +85,7 @@ void isarTest(
       );
     }
 
-    if (sqlite) {
+    if ((!kIsWeb && sqlite) || (kIsWeb && web)) {
       test(
         '(sqlite)',
         () async {

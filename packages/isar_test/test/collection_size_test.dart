@@ -47,8 +47,8 @@ void main() {
     late ModelB objB4;
     late ModelB objB5;
 
-    setUp(() {
-      isar = openTempIsar([ModelASchema, ModelBSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ModelASchema, ModelBSchema]);
 
       objA0 = ModelA(name: 'Obj A0');
       objA1 = ModelA(name: 'Obj A1');
@@ -65,7 +65,7 @@ void main() {
       objB5 = ModelB();
     });
 
-    isarTest('Size should start at 0', sqlite: false, () {
+    isarTest('Size should start at 0', sqlite: false, web: false, () {
       expect(isar.modelAs.getSize(), 0);
       expect(isar.modelAs.getSize(), 0);
 
@@ -73,7 +73,8 @@ void main() {
       expect(isar.modelAs.getSize(includeIndexes: true), 0);
     });
 
-    isarTest('Size should increase with more entries', sqlite: false, () {
+    isarTest('Size should increase with more entries',
+        sqlite: false, web: false, () {
       isar.write((isar) => isar.modelAs.put(objA0));
       final sizeA0 = isar.modelAs.getSize();
       expect(sizeA0, greaterThan(0));
@@ -117,7 +118,7 @@ void main() {
       expect(sizeBWithIndexes, sizeBWithoutIndexes);
     });*/
 
-    isarTest('Delete should decrease size', sqlite: false, () {
+    isarTest('Delete should decrease size', sqlite: false, web: false, () {
       isar.write((isar) {
         isar.modelAs.putAll([objA0, objA1, objA2, objA3]);
         isar.modelBs.putAll([objB0, objB1, objB2, objB3, objB4]);
@@ -148,7 +149,7 @@ void main() {
       expect(sizeB3, greaterThan(0));
     });
 
-    isarTest('Update should change size', sqlite: false, () {
+    isarTest('Update should change size', sqlite: false, web: false, () {
       isar.write((isar) {
         isar.modelAs.putAll([objA0, objA1, objA2, objA3]);
         isar.modelBs.putAll([objB0, objB1, objB2, objB3, objB4]);

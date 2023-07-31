@@ -15,8 +15,8 @@ void main() {
   group('Auto increment', () {
     late Isar isar;
 
-    setUp(() {
-      isar = openTempIsar([ModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ModelSchema]);
     });
 
     isarTest('increases', () {
@@ -41,7 +41,7 @@ void main() {
       expect(isar.models.autoIncrement(), 303);
     });
 
-    isarTest('persists', () {
+    isarTest('persists', web: false, () async {
       final isarName = isar.name;
 
       expect(isar.models.autoIncrement(), 1);
@@ -50,7 +50,7 @@ void main() {
       });
       expect(isar.close(), true);
 
-      isar = openTempIsar([ModelSchema], name: isarName);
+      isar = await openTempIsar([ModelSchema], name: isarName);
       expect(isar.models.autoIncrement(), 3);
     });
   });

@@ -17,8 +17,8 @@ void main() {
   group('Query isEmpty / isNotEmpty', () {
     late Isar isar;
 
-    setUp(() {
-      isar = openTempIsar([ModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ModelSchema]);
 
       isar.write(
         (isar) => isar.models.putAll(

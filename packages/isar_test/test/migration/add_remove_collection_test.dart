@@ -35,8 +35,8 @@ class Model2 {
 }
 
 void main() {
-  isarTest('Add collection', () {
-    final isar1 = openTempIsar([Model1Schema]);
+  isarTest('Add collection', web: false, () async {
+    final isar1 = await openTempIsar([Model1Schema]);
     final isarName = isar1.name;
     final obj1A = Model1(5, 'col1_a');
     final obj1B = Model1(15, 'col1_b');
@@ -46,7 +46,8 @@ void main() {
     isar1.model1s.verify([obj1A, obj1B]);
     expect(isar1.close(), true);
 
-    final isar2 = openTempIsar([Model1Schema, Model2Schema], name: isarName);
+    final isar2 =
+        await openTempIsar([Model1Schema, Model2Schema], name: isarName);
     isar2.model1s.verify([obj1A, obj1B]);
     isar2.model2s.verify([]);
     final obj2 = Model2(99, 'col2_a');
@@ -56,8 +57,8 @@ void main() {
     isar2.model2s.verify([obj2]);
   });
 
-  isarTest('Remove collection', () {
-    final isar1 = openTempIsar([Model1Schema, Model2Schema]);
+  isarTest('Remove collection', web: false, () async {
+    final isar1 = await openTempIsar([Model1Schema, Model2Schema]);
     final isarName = isar1.name;
     final obj1A = Model1(1, 'col1_a');
     final obj1B = Model1(2, 'col1_b');
@@ -71,11 +72,12 @@ void main() {
     isar1.model2s.verify([obj2A, obj2B]);
     expect(isar1.close(), true);
 
-    final isar2 = openTempIsar([Model1Schema], name: isarName);
+    final isar2 = await openTempIsar([Model1Schema], name: isarName);
     isar2.model1s.verify([obj1A, obj1B]);
     expect(isar2.close(), true);
 
-    final isar3 = openTempIsar([Model1Schema, Model2Schema], name: isarName);
+    final isar3 =
+        await openTempIsar([Model1Schema, Model2Schema], name: isarName);
     isar3.model1s.verify([obj1A, obj1B]);
     isar3.model2s.verify([]);
   });

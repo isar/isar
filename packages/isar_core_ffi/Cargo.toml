@@ -13,7 +13,7 @@ serde_json = "1.0"
 crate-type=["staticlib", "cdylib"]
 
 [features]
-default = ["sqlcipher", "native"]
+default = ["sqlite", "native"]
 native = ["isar-core/native"]
 sqlite = ["isar-core/sqlite"]
 sqlcipher = ["sqlite", "isar-core/sqlcipher"]

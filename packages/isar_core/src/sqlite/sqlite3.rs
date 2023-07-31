@@ -472,12 +472,7 @@ impl Drop for SQLiteStatement<'_> {
 
 pub fn sqlite_err(db: *mut ffi::sqlite3, code: i32) -> IsarError {
     unsafe {
-        let err_ptr = if db.is_null() {
-            ffi::sqlite3_errstr(code)
-        } else {
-            ffi::sqlite3_errmsg(db)
-        };
-        let c_slice = CStr::from_ptr(err_ptr).to_bytes();
+        let c_slice = CStr::from_ptr(ffi::sqlite3_errmsg(db)).to_bytes();
         let msg = String::from_utf8_lossy(c_slice).into_owned();
         IsarError::DbError {
             code: code,

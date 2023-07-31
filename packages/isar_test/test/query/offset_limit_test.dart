@@ -29,8 +29,8 @@ void main() {
     late Model objC;
     late Model objC2;
 
-    setUp(() {
-      isar = openTempIsar([ModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ModelSchema]);
       col = isar.models;
 
       objA = Model(0, 'A');
@@ -57,7 +57,7 @@ void main() {
     });
 
     isarTest('0 limit', () {
-      expect(col.where().findAll(limit: 0), isEmpty);
+      expect(() => col.where().findAll(limit: 0), throwsArgumentError);
     });
 
     isarTest('big limit', () {

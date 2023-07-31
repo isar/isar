@@ -322,7 +322,7 @@ class _IsarAnalyzer {
       return 'null';
     } else if (type.isDartCoreInt) {
       if (type.propertyType == PropertyType.byte) {
-        return '$_nullByte';
+        return '0';
       } else if (type.propertyType == PropertyType.int) {
         return '$_nullInt';
       } else {

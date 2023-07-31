@@ -31,8 +31,8 @@ void main() {
     late BoolModel obj4;
     late BoolModel objNull;
 
-    setUp(() {
-      isar = openTempIsar([BoolModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([BoolModelSchema]);
       col = isar.boolModels;
 
       objEmpty = BoolModel(0, []);

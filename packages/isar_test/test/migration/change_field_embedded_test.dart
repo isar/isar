@@ -53,8 +53,8 @@ class Embedded2 {
 }
 
 void main() {
-  isarTest('Change field embedded', () {
-    final isar1 = openTempIsar([Model1Schema]);
+  isarTest('Change field embedded', web: false, () async {
+    final isar1 = await openTempIsar([Model1Schema]);
     final isarName = isar1.name;
     isar1.write((isar) {
       return isar1.model1s.putAll([
@@ -64,7 +64,7 @@ void main() {
     });
     expect(isar1.close(), true);
 
-    final isar2 = openTempIsar([Model2Schema], name: isarName);
+    final isar2 = await openTempIsar([Model2Schema], name: isarName);
     expect(isar2.model2s.where().findAll(), [
       Model2(1, null),
       Model2(2, null),
@@ -74,7 +74,7 @@ void main() {
     });
     expect(isar2.close(), true);
 
-    final isar3 = openTempIsar([Model1Schema], name: isarName);
+    final isar3 = await openTempIsar([Model1Schema], name: isarName);
     expect(isar3.model1s.where().findAll(), [
       Model1(1, null),
       Model1(2, null),

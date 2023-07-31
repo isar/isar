@@ -7,19 +7,20 @@ edition = "2021"
 [dependencies]
 itertools = "0.11"
 enum_dispatch = "0.3.8"
-mdbx-sys = { package = "mdbx-sys", path = "../mdbx_sys", optional = true  }
 xxhash-rust = { version = "0.8.5", features = ["xxh3"] }
 serde =  { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["raw_value"] }
 byteorder = "1"
 intmap = "2.0.0"
 snafu = "0.7.0"
-libsqlite3-sys = { version="0.26", features=["bundled"], optional = true  }
 ouroboros = "0.17"
 base64 = "0.21.0"
 paste = "1.0.12"
 parking_lot = "0.12"
 proc-macro2 = "1.0.66"
+
+libsqlite3-sys = { git = "https://github.com/isar/rusqlite.git", branch = "wasm", features=["bundled"], optional = true  }
+mdbx-sys = { package = "mdbx-sys", path = "../mdbx_sys", optional = true  }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 widestring = "1.0"
@@ -34,7 +35,7 @@ version = "*"
 features = ["float_roundtrip"]
 
 [features]
-default = ["sqlite", "native"]
+default = ["native", "sqlite"]
 native = ["mdbx-sys"]
 sqlite = ["libsqlite3-sys"]
 sqlcipher = ["sqlite", "libsqlite3-sys/bundled-sqlcipher"]

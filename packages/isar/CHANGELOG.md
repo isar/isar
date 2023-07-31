@@ -1,4 +1,4 @@
-## 4.0.0-dev.3
+## 4.0.0-dev.4
 
 ⚠️ ISAR V4 IS NOT READY FOR PRODUCTION USE ⚠️
 
@@ -25,6 +25,7 @@ Changed transactions API:
 
 ### Enhancements
 
+- Web support is back!!! In-memory only for now (persistence will come soon)
 - Encrypted databases
 - String ids
 - Fetching multiple properties simultaneously

@@ -41,8 +41,8 @@ void main() {
   group('Long String', () {
     late Isar isar;
 
-    setUp(() {
-      isar = openTempIsar([StringModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([StringModelSchema]);
     });
 
     isarTest('Single', () {

@@ -69,8 +69,7 @@ String _writeProperty({
         return 'IsarCore.writeBool($writer, $index, $value$enumGetter);';
       }
     case PropertyType.byte:
-      final orNull = nullable ? '?? $_nullByte' : '';
-      return 'IsarCore.writeByte($writer, $index, $value$enumGetter $orNull);';
+      return 'IsarCore.writeByte($writer, $index, $value$enumGetter);';
     case PropertyType.int:
       final orNull = nullable ? '?? $_nullInt' : '';
       return 'IsarCore.writeInt($writer, $index, $value$enumGetter $orNull);';
@@ -96,16 +95,12 @@ String _writeProperty({
           if (value == null) {
             IsarCore.writeNull($writer, $index);
           } else {
-            IsarCore.writeString($writer, $index, IsarCore.toNativeString(value));
+            IsarCore.writeString($writer, $index, value);
           }
         }''';
       } else {
         return '''
-        IsarCore.writeString(
-          $writer,
-          $index,
-          IsarCore.toNativeString($value$enumGetter)
-        );''';
+        IsarCore.writeString($writer, $index, $value$enumGetter);''';
       }
     case PropertyType.object:
       var code = '''
@@ -126,12 +121,7 @@ String _writeProperty({
       }
       return '$code}';
     case PropertyType.json:
-      return '''
-      IsarCore.writeString(
-        $writer,
-        $index,
-        IsarCore.toNativeString(isarJsonEncode($value)),
-      );''';
+      return 'IsarCore.writeString($writer, $index, isarJsonEncode($value));';
     case PropertyType.boolList:
     case PropertyType.byteList:
     case PropertyType.intList:

@@ -51,7 +51,7 @@ void main() {
     late Isar isar;
 
     setUp(() async {
-      isar = openTempIsar([IntModelSchema, StringModelSchema]);
+      isar = await openTempIsar([IntModelSchema, StringModelSchema]);
     });
 
     group('int id', () {

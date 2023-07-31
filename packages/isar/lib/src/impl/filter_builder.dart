@@ -1,6 +1,6 @@
 part of isar;
 
-Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
+Pointer<CFilter> _buildFilter(Filter filter, List<Pointer<void>> pointers) {
   switch (filter) {
     case EqualCondition():
       final value = filter.value;
@@ -107,30 +107,32 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
       return IsarCore.b.isar_filter_is_null(filter.property);
     case AndGroup():
       if (filter.filters.length == 1) {
-        return _buildFilter(alloc, filter.filters[0]);
+        return _buildFilter(filter.filters[0], pointers);
       } else {
-        final filters = alloc<Pointer<CFilter>>(filter.filters.length);
+        final filtersPtrPtr = malloc<Pointer<CFilter>>(filter.filters.length);
+        pointers.add(filtersPtrPtr);
         for (var i = 0; i < filter.filters.length; i++) {
-          filters[i] = _buildFilter(alloc, filter.filters[i]);
+          filtersPtrPtr.setPtrAt(i, _buildFilter(filter.filters[i], pointers));
         }
-        return IsarCore.b.isar_filter_and(filters, filter.filters.length);
+        return IsarCore.b.isar_filter_and(filtersPtrPtr, filter.filters.length);
       }
     case OrGroup():
       if (filter.filters.length == 1) {
-        return _buildFilter(alloc, filter.filters[0]);
+        return _buildFilter(filter.filters[0], pointers);
       } else {
-        final filters = alloc<Pointer<CFilter>>(filter.filters.length);
+        final filtersPtrPtr = malloc<Pointer<CFilter>>(filter.filters.length);
+        pointers.add(filtersPtrPtr);
         for (var i = 0; i < filter.filters.length; i++) {
-          filters[i] = _buildFilter(alloc, filter.filters[i]);
+          filtersPtrPtr.setPtrAt(i, _buildFilter(filter.filters[i], pointers));
         }
-        return IsarCore.b.isar_filter_or(filters, filter.filters.length);
+        return IsarCore.b.isar_filter_or(filtersPtrPtr, filter.filters.length);
       }
     case NotGroup():
-      return IsarCore.b.isar_filter_not(_buildFilter(alloc, filter.filter));
+      return IsarCore.b.isar_filter_not(_buildFilter(filter.filter, pointers));
     case ObjectFilter():
       return IsarCore.b.isar_filter_nested(
         filter.property,
-        _buildFilter(alloc, filter.filter),
+        _buildFilter(filter.filter, pointers),
       );
   }
 }
@@ -138,14 +140,14 @@ Pointer<CFilter> _buildFilter(Allocator alloc, Filter filter) {
 Pointer<CIsarValue> _isarValue(Object? value) {
   if (value == null) {
     return nullptr;
+  } else if (value is double) {
+    return IsarCore.b.isar_value_real(value);
   } else if (value is int) {
     return IsarCore.b.isar_value_integer(value);
   } else if (value is String) {
-    return IsarCore.b.isar_value_string(IsarCore.toNativeString(value));
+    return IsarCore.b.isar_value_string(IsarCore._toNativeString(value));
   } else if (value is bool) {
     return IsarCore.b.isar_value_bool(value);
-  } else if (value is double) {
-    return IsarCore.b.isar_value_real(value);
   } else if (value is DateTime) {
     return IsarCore.b.isar_value_integer(value.toUtc().microsecondsSinceEpoch);
   } else {

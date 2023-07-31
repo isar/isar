@@ -181,3 +181,37 @@ fn dart_fast_hash(value: &str) -> i64 {
 
     hash as i64
 }
+
+#[cfg(not(target_arch = "wasm32"))]
+type IsarI64 = i64;
+
+#[cfg(not(target_arch = "wasm32"))]
+#[inline]
+pub(crate) fn i64_to_isar(value: i64) -> IsarI64 {
+    value
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[inline]
+pub(crate) fn isar_to_i64(value: IsarI64) -> i64 {
+    value
+}
+
+#[cfg(target_arch = "wasm32")]
+type IsarI64 = f64;
+
+#[cfg(target_arch = "wasm32")]
+#[inline]
+pub(crate) fn i64_to_isar(value: i64) -> IsarI64 {
+    value as f64
+}
+
+#[cfg(target_arch = "wasm32")]
+#[inline]
+pub(crate) fn isar_to_i64(value: IsarI64) -> i64 {
+    if value.is_finite() {
+        value as i64
+    } else {
+        i64::MIN
+    }
+}

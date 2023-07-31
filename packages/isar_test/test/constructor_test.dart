@@ -86,8 +86,8 @@ void main() {
   group('Constructor', () {
     late Isar isar;
 
-    setUp(() {
-      isar = openTempIsar([
+    setUp(() async {
+      isar = await openTempIsar([
         EmptyConstructorModelSchema,
         NamedConstructorModelSchema,
         PositionalConstructorModelSchema,

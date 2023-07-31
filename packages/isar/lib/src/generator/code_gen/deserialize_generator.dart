@@ -142,11 +142,10 @@ String _deserialize({
       } else {
         return '''
         {
-          final value = IsarCore.readByte(reader, $index);
-          if (value == $_nullByte) {
+          if (IsarCore.readNull(reader, $index)) {
             ${transform(defaultValue)}
           } else {
-            ${transform('value')}
+            ${transform('IsarCore.readByte(reader, $index)')}
           }
         }''';
       }

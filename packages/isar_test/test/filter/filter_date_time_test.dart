@@ -39,8 +39,8 @@ void main() {
     late DateTimeModel obj4;
     late DateTimeModel objNull;
 
-    setUp(() {
-      isar = openTempIsar([DateTimeModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([DateTimeModelSchema]);
       col = isar.dateTimeModels;
 
       obj1 = DateTimeModel(1, local(2010));

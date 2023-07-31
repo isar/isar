@@ -10,8 +10,8 @@ void main() {
   group('Query property', () {
     late Isar isar;
 
-    setUp(() {
-      isar = openTempIsar([
+    setUp(() async {
+      isar = await openTempIsar([
         BoolModelSchema,
         ByteModelSchema,
         ShortModelSchema,

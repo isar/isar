@@ -1,9 +1,7 @@
 use intmap::IntMap;
 use parking_lot::RwLock;
-use std::sync::{
-    atomic::{AtomicU64, Ordering},
-    Arc,
-};
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
 
 static WATCHER_ID: AtomicU64 = AtomicU64::new(0);
 

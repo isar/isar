@@ -23,8 +23,8 @@ void main() {
   group('Freezed', () {
     late Isar isar;
 
-    setUp(() {
-      isar = openTempIsar([PersonSchema]);
+    setUp(() async {
+      isar = await openTempIsar([PersonSchema]);
     });
 
     isarTest('get put', () {

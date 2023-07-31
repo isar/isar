@@ -26,7 +26,6 @@ part 'isar_analyzer.dart';
 part 'isar_type.dart';
 part 'object_info.dart';
 
-const _nullByte = 0;
 const _nullInt = -2147483648;
 const _nullLong = -9223372036854775808;
 

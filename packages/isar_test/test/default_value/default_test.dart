@@ -76,14 +76,14 @@ class DefaultListModel {
 
 void main() {
   group('Default value', () {
-    isarTest('scalar', () {
+    isarTest('scalar', web: false, () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar1.emptyModels.put(emptyObj));
       final isarName = isar1.name;
       isar1.close();
 
-      final isar2 = openTempIsar([DefaultModelSchema], name: isarName);
+      final isar2 = await openTempIsar([DefaultModelSchema], name: isarName);
       final obj = isar2.defaultModels.get(0)!;
       expect(obj.boolValue, true);
       expect(obj.byteValue, 55);
@@ -95,14 +95,14 @@ void main() {
       expect(obj.embeddedValue, const MyEmbedded('abc'));
     });
 
-    isarTest('scalar property', () {
+    isarTest('scalar property', web: false, () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
       isar1.close();
 
-      final isar2 = openTempIsar([DefaultModelSchema], name: isarName);
+      final isar2 = await openTempIsar([DefaultModelSchema], name: isarName);
       expect(
         isar2.defaultModels.where().boolValueProperty().findFirst(),
         true,
@@ -137,14 +137,15 @@ void main() {
       );
     });
 
-    isarTest('list', () {
+    isarTest('list', web: false, () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
       isar1.close();
 
-      final isar2 = openTempIsar([DefaultListModelSchema], name: isarName);
+      final isar2 =
+          await openTempIsar([DefaultListModelSchema], name: isarName);
       final obj = isar2.defaultListModels.get(0)!;
       expect(obj.boolValue, [true, false]);
       expect(obj.byteValue, [1, 3]);
@@ -156,14 +157,15 @@ void main() {
       expect(obj.embeddedValue, [null, const MyEmbedded('test')]);
     });
 
-    isarTest('list property', () {
+    isarTest('list property', web: false, () async {
       final emptyObj = EmptyModel(0);
-      final isar1 = openTempIsar([EmptyModelSchema]);
+      final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar1.emptyModels.put(emptyObj));
       final isarName = isar1.name;
       isar1.close();
 
-      final isar2 = openTempIsar([DefaultListModelSchema], name: isarName);
+      final isar2 =
+          await openTempIsar([DefaultListModelSchema], name: isarName);
       expect(
         isar2.defaultListModels.where().boolValueProperty().findFirst(),
         [true, false],

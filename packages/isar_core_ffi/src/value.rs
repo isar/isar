@@ -1,5 +1,6 @@
 use std::ptr;
 
+use crate::{i64_to_isar, isar_to_i64, IsarI64};
 use isar_core::core::value::IsarValue;
 
 #[no_mangle]
@@ -8,7 +9,8 @@ pub unsafe extern "C" fn isar_value_bool(value: bool) -> *const IsarValue {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_value_integer(value: i64) -> *const IsarValue {
+pub unsafe extern "C" fn isar_value_integer(value: IsarI64) -> *const IsarValue {
+    let value = isar_to_i64(value);
     Box::into_raw(Box::new(IsarValue::Integer(value)))
 }
 
@@ -23,17 +25,23 @@ pub unsafe extern "C" fn isar_value_string(value: *mut String) -> *const IsarVal
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_value_get_bool(value: *const IsarValue) -> bool {
-    value.as_ref().map(|v| v.bool()).flatten().unwrap_or(false)
+pub unsafe extern "C" fn isar_value_get_bool(value: *const IsarValue) -> u8 {
+    let value = value.as_ref().map(|v| v.bool()).flatten().unwrap_or(false);
+    if value {
+        1
+    } else {
+        0
+    }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_value_get_integer(value: *const IsarValue) -> i64 {
-    value
+pub unsafe extern "C" fn isar_value_get_integer(value: *const IsarValue) -> IsarI64 {
+    let value = value
         .as_ref()
         .map(|v| v.i64())
         .flatten()
-        .unwrap_or(i64::MIN)
+        .unwrap_or(i64::MIN);
+    i64_to_isar(value)
 }
 
 #[no_mangle]

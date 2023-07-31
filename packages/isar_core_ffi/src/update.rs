@@ -1,4 +1,4 @@
-use crate::{CIsarInstance, CIsarQuery, CIsarTxn, CIsarUpdate};
+use crate::{isar_to_i64, CIsarInstance, CIsarQuery, CIsarTxn, CIsarUpdate, IsarI64};
 use isar_core::core::error::IsarError;
 use isar_core::core::instance::IsarInstance;
 use isar_core::core::value::IsarValue;
@@ -8,10 +8,11 @@ pub unsafe extern "C" fn isar_update(
     isar: &'static CIsarInstance,
     txn: &CIsarTxn,
     collection_index: u16,
-    id: i64,
+    id: IsarI64,
     update: *mut CIsarUpdate,
     updated: *mut bool,
 ) -> u8 {
+    let id = isar_to_i64(id);
     let update = Box::from_raw(update);
     isar_try! {
         match (isar, txn) {
@@ -33,21 +34,13 @@ pub unsafe extern "C" fn isar_query_update(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
     query: &'static CIsarQuery,
-    offset: i64,
-    limit: i64,
+    offset: u32,
+    limit: u32,
     update: *mut CIsarUpdate,
     updated: *mut u32,
 ) -> u8 {
-    let offset = if offset < 0 {
-        None
-    } else {
-        Some(offset.clamp(0, u32::MAX as i64) as u32)
-    };
-    let limit = if limit < 0 {
-        None
-    } else {
-        Some(limit.clamp(0, u32::MAX as i64) as u32)
-    };
+    let offset = if offset == 0 { None } else { Some(offset) };
+    let limit = if limit == 0 { None } else { Some(limit) };
 
     let update = Box::from_raw(update);
 

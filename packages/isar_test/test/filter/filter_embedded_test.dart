@@ -90,8 +90,8 @@ void main() {
     late Model obj5;
     late Model obj6;
 
-    setUp(() {
-      isar = openTempIsar([ModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ModelSchema]);
 
       obj1 = Model(
         id: 1,

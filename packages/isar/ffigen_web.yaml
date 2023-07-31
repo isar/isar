@@ -1,0 +1,32 @@
+name: IsarCoreBindings
+output: "lib/src/web/bindings.dart"
+ffi-native:
+headers:
+  entry-points:
+    - "isar-dart.h"
+  include-directives:
+    - "**isar-dart.h"
+compiler-opts:
+  - "-Wno-nullability-completeness"
+
+structs:
+  dependency-only: opaque
+  include:
+    - CIsarInstance
+    - CIsarTxn
+    - CIsarWriter
+    - CIsarReader
+    - CIsarQueryBuilder
+    - CIsarQuery
+    - CIsarCursor
+    - IsarValue
+  rename:
+    "^(?!C)(.*)": "C$1"
+
+unions:
+  dependency-only: opaque
+  include:
+    - "isar*"
+
+preamble: |
+  // ignore_for_file: camel_case_types, non_constant_identifier_names

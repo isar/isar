@@ -7,8 +7,8 @@ import 'package:test/test.dart';
 
 part 'update_test.g.dart';
 
-@collection
 @CopyWith()
+@collection
 class Model {
   Model({
     required this.id,
@@ -47,7 +47,6 @@ class Model {
   final DateTime dateProp;
 
   @override
-  // ignore: hash_and_equals, avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) =>
       other is Model &&
       other.id == id &&
@@ -67,8 +66,8 @@ void main() {
     late Isar isar;
     late Model model;
 
-    setUp(() {
-      isar = openTempIsar([ModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ModelSchema]);
 
       model = Model(
         id: 12,

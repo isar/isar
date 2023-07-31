@@ -58,8 +58,8 @@ class Embedded2 {
 }
 
 void main() {
-  isarTest('Add field', () {
-    final isar1 = openTempIsar([Col1Schema]);
+  isarTest('Add field', web: false, () async {
+    final isar1 = await openTempIsar([Col1Schema]);
     final isarName = isar1.name;
     isar1.write((isar) {
       return isar.col1s.putAll([
@@ -69,7 +69,7 @@ void main() {
     });
     expect(isar1.close(), true);
 
-    final isar2 = openTempIsar([Col2Schema], name: isarName);
+    final isar2 = await openTempIsar([Col2Schema], name: isarName);
     isar2.col2s.verify([
       Col2(1, Embedded2(null, 'value1')),
       Col2(2, Embedded2(null, 'value2')),
@@ -87,7 +87,7 @@ void main() {
     ]);
     expect(isar2.close(), true);
 
-    final isar3 = openTempIsar([Col1Schema], name: isarName);
+    final isar3 = await openTempIsar([Col1Schema], name: isarName);
     isar3.col1s.verify([
       Col1(1, Embedded1('value4')),
       Col1(2, Embedded1('value2')),
@@ -97,7 +97,7 @@ void main() {
   });
 
   /*isarTest('Remove field', () async {
-    final isar1 = await openTempIsar([Col2Schema]);
+    final isar1 = await await openTempIsar([Col2Schema]);
     await isar1.write(() {
       return isar1.col2s.putAll([
         Col2(1, 'value1', ['hi']),
@@ -106,7 +106,7 @@ void main() {
     });
     expect(await isar1.close(), true);
 
-    final isar2 = await openTempIsar([Col1Schema], name: isar1.name);
+    final isar2 = await await openTempIsar([Col1Schema], name: isar1.name);
     await expect(isar2.col1s.where(), [
       Col1(1, 'value1'),
       Col1(2, 'value2'),

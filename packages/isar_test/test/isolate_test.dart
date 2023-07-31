@@ -1,3 +1,4 @@
+@TestOn('vm')
 import 'dart:isolate';
 
 import 'package:isar/isar.dart';
@@ -33,14 +34,14 @@ final TestModel _obj3 = TestModel()
 void main() {
   isarTest('Isolate test', () async {
     final name = getRandomName();
-    final isar = openTempIsar([TestModelSchema], name: name);
+    final isar = await openTempIsar([TestModelSchema], name: name);
 
     isar.write((isar) {
       isar.testModels.putAll([_obj1, _obj2]);
     });
 
-    await Isolate.run(() {
-      prepareTest();
+    await Isolate.run(() async {
+      await prepareTest();
 
       final isar = Isar.get(schemas: [TestModelSchema], name: name);
 

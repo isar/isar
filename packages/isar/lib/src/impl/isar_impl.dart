@@ -67,11 +67,11 @@ class _IsarImpl extends Isar {
       return instance;
     }
 
-    final namePtr = IsarCore.toNativeString(name);
-    final directoryPtr = IsarCore.toNativeString(directory);
-    final schemaPtr = IsarCore.toNativeString(schemaJson);
+    final namePtr = IsarCore._toNativeString(name);
+    final directoryPtr = IsarCore._toNativeString(directory);
+    final schemaPtr = IsarCore._toNativeString(schemaJson);
     final encryptionKeyPtr = encryptionKey != null
-        ? IsarCore.toNativeString(encryptionKey)
+        ? IsarCore._toNativeString(encryptionKey)
         : nullptr;
 
     final isarPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarInstance>>();
@@ -92,7 +92,7 @@ class _IsarImpl extends Isar {
         .checkNoError();
 
     final converters = schemas.map((e) => e.converter).toList();
-    return _IsarImpl._(instanceId, isarPtrPtr.value, converters);
+    return _IsarImpl._(instanceId, isarPtrPtr.ptrValue, converters);
   }
 
   // ignore: sort_constructors_first
@@ -101,7 +101,7 @@ class _IsarImpl extends Isar {
     required List<IsarObjectConverter<dynamic, dynamic>> converters,
     String? libraryPath,
   }) {
-    IsarCore._attach(libraryPath);
+    IsarCore._initialize(libraryPath);
     var ptr = IsarCore.b.isar_get_instance(instanceId, false);
     if (ptr.isNull) {
       ptr = IsarCore.b.isar_get_instance(instanceId, true);
@@ -157,13 +157,13 @@ class _IsarImpl extends Isar {
   @override
   late final String name = () {
     final length = IsarCore.b.isar_get_name(getPtr(), IsarCore.stringPtrPtr);
-    return utf8.decode(IsarCore.stringPtr.asTypedList(length));
+    return utf8.decode(IsarCore.stringPtr.asU8List(length));
   }();
 
   @override
   late final String directory = () {
     final length = IsarCore.b.isar_get_dir(getPtr(), IsarCore.stringPtrPtr);
-    return utf8.decode(IsarCore.stringPtr.asTypedList(length));
+    return utf8.decode(IsarCore.stringPtr.asU8List(length));
   }();
 
   @pragma('vm:prefer-inline')
@@ -216,7 +216,7 @@ class _IsarImpl extends Isar {
     final txnPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarTxn>>();
     IsarCore.b.isar_txn_begin(ptr, txnPtrPtr, write).checkNoError();
     try {
-      _txnPtr = txnPtrPtr.value;
+      _txnPtr = txnPtrPtr.ptrValue;
       _txnWrite = write;
       final result = callback(this);
       IsarCore.b.isar_txn_commit(ptr, _txnPtr!).checkNoError();
@@ -261,12 +261,16 @@ class _IsarImpl extends Isar {
     T Function(Isar isar, P param) callback, {
     String? debugName,
   }) {
+    if (IsarCore.kIsWeb) {
+      throw UnsupportedError('Watchers are not supported on the web');
+    }
+
     _checkNotInTxn();
 
     final instanceId = this.instanceId;
     final libraryPath = IsarCore._libraryPath;
     final converters = this.converters;
-    return _IsolatePool.runIsolate(
+    return scheduleIsolate(
       () => _isarAsync(
         instanceId,
         libraryPath,
@@ -275,7 +279,7 @@ class _IsarImpl extends Isar {
         param,
         callback,
       ),
-      debugName ?? 'Isar async read',
+      debugName: debugName ?? 'Isar async read',
     );
   }
 
@@ -285,12 +289,16 @@ class _IsarImpl extends Isar {
     T Function(Isar isar, P param) callback, {
     String? debugName,
   }) async {
+    if (IsarCore.kIsWeb) {
+      throw UnsupportedError('Watchers are not supported on the web');
+    }
+
     _checkNotInTxn();
 
     final instanceId = this.instanceId;
     final libraryPath = IsarCore._libraryPath;
     final converters = this.converters.toList();
-    return _IsolatePool.runIsolate(
+    return scheduleIsolate(
       () {
         return _isarAsync(
           instanceId,
@@ -301,7 +309,7 @@ class _IsarImpl extends Isar {
           callback,
         );
       },
-      debugName ?? 'Isar async write',
+      debugName: debugName ?? 'Isar async write',
     );
   }
 
@@ -316,7 +324,7 @@ class _IsarImpl extends Isar {
 
   @override
   void copyToFile(String path) {
-    final string = IsarCore.toNativeString(path);
+    final string = IsarCore._toNativeString(path);
     IsarCore.b.isar_copy(getPtr(), string).checkNoError();
   }
 
@@ -332,7 +340,7 @@ class _IsarImpl extends Isar {
     final closed = IsarCore.b.isar_close(getPtr(), deleteFromDisk);
     _ptr = null;
     _instances.remove(instanceId);
-    return closed;
+    return closed != 0;
   }
 
   @override

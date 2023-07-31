@@ -30,8 +30,8 @@ void main() {
     late IntModel obj3;
     late IntModel objNull;
 
-    setUp(() {
-      isar = openTempIsar([IntModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([IntModelSchema]);
       col = isar.intModels;
 
       obj0 = IntModel(0, -1234);

@@ -31,13 +31,13 @@ void main() {
     late Model model2;
     late Model model3;
 
-    setUp(() {
+    setUp(() async {
       model0 = Model(0, 0);
       model1 = Model(1, 1);
       model2 = Model(2, 2);
       model3 = Model(3, 3);
 
-      isar = openTempIsar([ModelSchema]);
+      isar = await openTempIsar([ModelSchema]);
       isar.write((isar) {
         return isar.models.putAll([model0, model1, model2, model3]);
       });

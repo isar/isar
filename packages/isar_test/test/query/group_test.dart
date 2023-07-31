@@ -38,8 +38,8 @@ void main() {
     late Model simon;
     late Model bjorn;
 
-    setUp(() {
-      isar = openTempIsar([ModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([ModelSchema]);
       users = isar.models;
 
       david = Model(0, 'David', 20);

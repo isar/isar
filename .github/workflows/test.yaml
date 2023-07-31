@@ -68,36 +68,27 @@ jobs:
         run: flutter test -j 1
         working-directory: packages/isar_test
 
-  valgrind:
-    name: Valgrind
+  test_web:
+    name: Dart Web Test
     runs-on: ubuntu-latest
-    if: ${{ false }}
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
-      - name: Install valgrind and llvm
-        run: sudo apt update && sudo apt install -y valgrind libclang-dev
       - name: Build Isar Core
-        run: sh tool/build.sh
+        run: bash tool/build_wasm.sh
+      - name: Serve isar.wasm
+        run: npx --yes serve --cors &
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
-      - name: Run Valgrind
-        run: |
-          dart compile exe integration_test/all_tests.dart
-          valgrind \
-            --leak-check=full \
-            --error-exitcode=1 \
-            --show-mismatched-frees=no \
-            --show-possibly-lost=no \
-            --errors-for-leak-kinds=definite \
-            integration_test/all_tests.exe
+      - name: Run Dart Unit tests
+        run: dart test -p chrome
         working-directory: packages/isar_test
 
   coverage:
     name: Code Coverage
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
@@ -160,7 +151,7 @@ jobs:
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
       - name: Run Flutter Integration tests
-        run: flutter test integration_test/integration_test.dart --dart-define STRESS=true
+        run: flutter test integration_test.dart --dart-define STRESS=true
         working-directory: packages/isar_test
 
   integration_test_android:
@@ -189,7 +180,7 @@ jobs:
           arch: x86_64
           profile: pixel
           working-directory: packages/isar_test
-          script: flutter test integration_test/integration_test.dart --dart-define STRESS=true
+          script: flutter test integration_test.dart --dart-define STRESS=true
 
   integration_test_macos:
     name: Integration Test macOS
@@ -209,7 +200,7 @@ jobs:
       - name: Run Flutter Driver tests
         run: |
           flutter config --enable-macos-desktop 
-          flutter test -d macos integration_test/integration_test.dart --dart-define STRESS=true
+          flutter test -d macos integration_test.dart --dart-define STRESS=true
         working-directory: packages/isar_test
 
   integration_test_linux:
@@ -233,7 +224,7 @@ jobs:
       - name: Run Flutter Driver tests
         run: |
           flutter config --enable-linux-desktop 
-          flutter test -d linux integration_test/integration_test.dart --dart-define STRESS=true
+          flutter test -d linux integration_test.dart --dart-define STRESS=true
         working-directory: packages/isar_test
 
   integration_test_windows:
@@ -254,17 +245,23 @@ jobs:
       - name: Run Flutter Driver tests
         run: |
           flutter config --enable-windows-desktop 
-          flutter test -d windows integration_test/integration_test.dart --dart-define STRESS=true
+          flutter test -d windows integration_test.dart --dart-define STRESS=true
         working-directory: packages/isar_test
 
-  drive_chrome:
+  integration_test_chrome:
+    name: Integration Test Chrome
     runs-on: ubuntu-latest
-    if: ${{ false }}
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core
+        run: bash tool/build_wasm.sh
+      - name: Serve isar.wasm
+        run: npx --yes serve --cors &
       - name: Install chromedricer
-        uses: nanasess/setup-chromedriver@v1
+        uses: nanasess/setup-chromedriver@v2
       - name: Prepare chromedricer
         run: chromedriver --port=4444 &
       - name: Run Dart tests in browser
@@ -273,15 +270,23 @@ jobs:
           dart tool/generate_long_double_test.dart
           dart tool/generate_all_tests.dart
           flutter pub run build_runner build
-          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart -d web-server --browser-name chrome
+          flutter drive --driver=integration_driver.dart  --target=integration_test.dart -d web-server --browser-name chrome
         working-directory: packages/isar_test
 
-  drive_safari:
+  integration_test_safari:
+    name: Integration Test Safari
     runs-on: macos-latest
-    if: ${{ false }}
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core
+        run: |
+          brew install llvm
+          bash tool/build_wasm.sh
+      - name: Serve isar.wasm
+        run: npx --yes serve --cors &
       - name: Prepare safaridricer
         run: |
           sudo safaridriver --enable
@@ -292,15 +297,21 @@ jobs:
           dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
           dart tool/generate_all_tests.dart
-          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart -d web-server --browser-name safari
+          flutter drive --driver=integration_driver.dart --target=integration_test.dart -d web-server --browser-name safari
         working-directory: packages/isar_test
 
-  drive_firefox:
+  integration_test_firefox:
+    name: Integration Test Firefox
     runs-on: ubuntu-latest
-    if: ${{ false }}
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core
+        run: bash tool/build_wasm.sh
+      - name: Serve isar.wasm
+        run: npx --yes serve --cors &
       - name: Install geckodriver
         uses: browser-actions/setup-geckodriver@latest
       - name: Prepare geckodriver
@@ -311,5 +322,5 @@ jobs:
           dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
           dart tool/generate_all_tests.dart
-          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart -d web-server --browser-name firefox
+          flutter drive --driver=integration_driver.dart --target=integration_test.dart -d web-server --browser-name firefox
         working-directory: packages/isar_test

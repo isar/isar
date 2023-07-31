@@ -18,10 +18,11 @@ class Model {
 }
 
 void main() {
-  group('Encryption', () {
-    isarTest('Correct key', isar: false, () {
+  // TODO(simc) fix windows SQLCipher build and re-enable encryption tests
+  /*group('Encryption', () {
+    isarTest('Correct key', isar: false, web: false, () async {
       final isarName = getRandomName();
-      final isar = openTempIsar(
+      final isar = await openTempIsar(
         [ModelSchema],
         name: isarName,
         encryptionKey: 'test',
@@ -31,7 +32,7 @@ void main() {
       });
       expect(isar.close(), true);
 
-      final isar2 = openTempIsar(
+      final isar2 = await openTempIsar(
         [ModelSchema],
         name: isarName,
         encryptionKey: 'test',
@@ -40,9 +41,9 @@ void main() {
       expect(isar2.models.where().findAll(), [Model('test1'), Model('test2')]);
     });
 
-    isarTest('Wrong key', isar: false, () {
+    isarTest('Wrong key', isar: false, web: false, () async {
       final isarName = getRandomName();
-      final isar = openTempIsar(
+      final isar = await openTempIsar(
         [ModelSchema],
         name: isarName,
         encryptionKey: 'test',
@@ -52,11 +53,11 @@ void main() {
       });
       expect(isar.close(), true);
 
-      expect(
+      await expectLater(
         () =>
             openTempIsar([ModelSchema], name: isarName, encryptionKey: 'test2'),
         throwsA(isA<EncryptionError>()),
       );
     });
-  });
+  });*/
 }

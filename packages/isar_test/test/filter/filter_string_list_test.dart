@@ -50,8 +50,8 @@ void main() {
     late StringModel obj5;
     late StringModel obj6;
 
-    setUp(() {
-      isar = openTempIsar([StringModelSchema]);
+    setUp(() async {
+      isar = await openTempIsar([StringModelSchema]);
 
       obj1 = StringModel(
         id: 1,

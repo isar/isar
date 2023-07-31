@@ -24,14 +24,10 @@ final class IsarCollectionSchema extends IsarSchema {
     required super.schema,
     required super.converter,
     required this.embeddedSchemas,
-    required this.hash,
   });
 
   /// @nodoc
   final List<IsarSchema> embeddedSchemas;
-
-  /// @nodoc
-  final int hash;
 }
 
 /// @nodoc
