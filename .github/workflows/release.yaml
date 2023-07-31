@@ -96,7 +96,7 @@ jobs:
       - name: Download Binaries
         run: sh tool/download_binaries.sh
       - name: Adjust Version
-        run: sh tool/adjust_version.sh
+        run: find . -type f -exec sed -i "s/0.0.0-placeholder/${{ github.ref_name }}/g" {} +
       - name: pub.dev credentials
         run: |
           mkdir -p $HOME/.config/dart
