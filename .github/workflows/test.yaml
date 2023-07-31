@@ -133,7 +133,7 @@ jobs:
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
       - name: Run Flutter Integration tests
-        run: flutter test integration_test/integration_test.dart --dart-define STRESS=true
+        run: flutter test integration_test.dart --dart-define STRESS=true
         working-directory: packages/isar_test
 
   integration_test_android:
@@ -162,7 +162,7 @@ jobs:
           arch: x86_64
           profile: pixel
           working-directory: packages/isar_test
-          script: flutter test integration_test/integration_test.dart --dart-define STRESS=true
+          script: flutter test integration_test.dart --dart-define STRESS=true
 
   integration_test_macos:
     name: Integration Test macOS
@@ -182,7 +182,7 @@ jobs:
       - name: Run Flutter Driver tests
         run: |
           flutter config --enable-macos-desktop 
-          flutter test -d macos integration_test/integration_test.dart --dart-define STRESS=true
+          flutter test -d macos integration_test.dart --dart-define STRESS=true
         working-directory: packages/isar_test
 
   integration_test_linux:
@@ -206,7 +206,7 @@ jobs:
       - name: Run Flutter Driver tests
         run: |
           flutter config --enable-linux-desktop 
-          flutter test -d linux integration_test/integration_test.dart --dart-define STRESS=true
+          flutter test -d linux integration_test.dart --dart-define STRESS=true
         working-directory: packages/isar_test
 
   integration_test_windows:
@@ -227,7 +227,7 @@ jobs:
       - name: Run Flutter Driver tests
         run: |
           flutter config --enable-windows-desktop 
-          flutter test -d windows integration_test/integration_test.dart --dart-define STRESS=true
+          flutter test -d windows integration_test.dart --dart-define STRESS=true
         working-directory: packages/isar_test
 
   drive_chrome:
@@ -242,7 +242,7 @@ jobs:
       - name: Serve isar.wasm
         run: npx --yes serve --cors &
       - name: Install chromedricer
-        uses: nanasess/setup-chromedriver@latest
+        uses: nanasess/setup-chromedriver@2
       - name: Prepare chromedricer
         run: chromedriver --port=4444 &
       - name: Run Dart tests in browser
