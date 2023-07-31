@@ -251,7 +251,7 @@ jobs:
           dart tool/generate_long_double_test.dart
           dart tool/generate_all_tests.dart
           flutter pub run build_runner build
-          flutter drive --driver=integration_driver.dart  --target=integration.dart-d web-server --browser-name chrome
+          flutter drive --driver=integration_driver.dart  --target=integration.dart -d web-server --browser-name chrome
         working-directory: packages/isar_test
 
   drive_safari:
@@ -262,7 +262,9 @@ jobs:
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
-        run: bash tool/build_wasm.sh
+        run: |
+          brew install llvm
+          bash tool/build_wasm.sh
       - name: Serve isar.wasm
         run: npx --yes serve --cors &
       - name: Prepare safaridricer
