@@ -140,7 +140,14 @@ String _deserialize({
       if (defaultValue == '0') {
         return transform('IsarCore.readByte(reader, $index)');
       } else {
-        return transform('IsarCore.readByte(reader, $index)');
+        return '''
+        {
+          if (IsarCore.readNull(reader, $index)) {
+            ${transform(defaultValue)}
+          } else {
+            ${transform('IsarCore.readByte(reader, $index)')}
+          }
+        }''';
       }
     case PropertyType.int:
       if (defaultValue == '$_nullInt') {
