@@ -68,33 +68,6 @@ jobs:
         run: flutter test -j 1
         working-directory: packages/isar_test
 
-  valgrind:
-    name: Valgrind
-    runs-on: ubuntu-latest
-    if: ${{ false }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v2
-      - name: Prepare Build
-        uses: ./.github/actions/prepare-build
-      - name: Install valgrind and llvm
-        run: sudo apt update && sudo apt install -y valgrind libclang-dev
-      - name: Build Isar Core
-        run: sh tool/build.sh
-      - name: Prepare Tests
-        run: sh tool/prepare_tests.sh
-      - name: Run Valgrind
-        run: |
-          dart compile exe integration_test/all_tests.dart
-          valgrind \
-            --leak-check=full \
-            --error-exitcode=1 \
-            --show-mismatched-frees=no \
-            --show-possibly-lost=no \
-            --errors-for-leak-kinds=definite \
-            integration_test/all_tests.exe
-        working-directory: packages/isar_test
-
   coverage:
     name: Code Coverage
     runs-on: macos-latest
@@ -262,6 +235,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core
+        run: bash tool/build_ios.sh
+      - name: Serve isar.wasm
+        run: npx --yes serve --cors &
       - name: Install chromedricer
         uses: nanasess/setup-chromedriver@v1
       - name: Prepare chromedricer
@@ -280,6 +259,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core
+        run: bash tool/build_ios.sh
+      - name: Serve isar.wasm
+        run: npx --yes serve --cors &
       - name: Prepare safaridricer
         run: |
           sudo safaridriver --enable
@@ -298,6 +283,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core
+        run: bash tool/build_ios.sh
+      - name: Serve isar.wasm
+        run: npx --yes serve --cors &
       - name: Install geckodriver
         uses: browser-actions/setup-geckodriver@latest
       - name: Prepare geckodriver
