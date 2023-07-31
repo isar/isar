@@ -10,7 +10,7 @@ typedef Pointer<T> = int;
 class NativeType {}
 
 @pragma('dart2js:tryInline')
-Pointer<T> newPtr<T>(int addr) => addr;
+Pointer<T> ptrFromAddress<T>(int addr) => addr;
 
 extension PointerX on int {
   @pragma('dart2js:tryInline')

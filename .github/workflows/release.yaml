@@ -98,6 +98,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
       - name: pub get
         run: dart pub get
         working-directory: packages/isar
@@ -107,6 +110,9 @@ jobs:
         run: |
           mkdir -p $HOME/.config/dart
           echo '${{ secrets.PUB_JSON }}' >> $HOME/.config/dart/pub-credentials.json
+      - uses: JS-DevTools/npm-publish@v2
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
       - name: Publish isar
         run: dart pub publish --force
         working-directory: packages/isar

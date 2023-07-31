@@ -1,6 +1,5 @@
 // ignore_for_file: public_member_api_docs, non_constant_identifier_names
 
-import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:js/js.dart';
@@ -15,14 +14,6 @@ extension JSWIndowX on JSWindow {
   external JSWasm get WebAssembly;
 
   external Object fetch(String url);
-}
-
-@JS()
-@staticInterop
-class JSFetchResponse {}
-
-extension JSFetchResponseX on JSFetchResponse {
-  external ByteBuffer arrayBuffer();
 }
 
 @JS()

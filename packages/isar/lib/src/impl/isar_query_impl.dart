@@ -17,7 +17,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
   int _ptrAddress;
 
   Pointer<CIsarQuery> get _ptr {
-    final ptr = newPtr<CIsarQuery>(_ptrAddress);
+    final ptr = ptrFromAddress<CIsarQuery>(_ptrAddress);
     if (ptr.isNull) {
       throw QueryError('Query has already been closed.');
     }

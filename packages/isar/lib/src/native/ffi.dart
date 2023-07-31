@@ -8,7 +8,8 @@ export 'dart:ffi';
 export 'package:ffi/ffi.dart';
 
 @pragma('vm:prefer-inline')
-Pointer<T> newPtr<T extends NativeType>(int addr) => Pointer.fromAddress(addr);
+Pointer<T> ptrFromAddress<T extends NativeType>(int addr) =>
+    Pointer.fromAddress(addr);
 
 extension PointerPointerX<T extends NativeType> on Pointer<Pointer<T>> {
   @pragma('vm:prefer-inline')
