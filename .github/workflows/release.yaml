@@ -6,18 +6,6 @@ on:
       - "*"
 
 jobs:
-  verify_version:
-    name: Verify version matches release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dart-lang/setup-dart@v1
-      - name: Verify release version
-        run: |
-          dart pub get
-          dart tool/verify_release_version.dart ${{ github.ref_name }}
-        working-directory: packages/isar
-
   build_binaries:
     name: Build Binaries
     needs: verify_version
