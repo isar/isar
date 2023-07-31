@@ -67,11 +67,11 @@ class _IsarImpl extends Isar {
       return instance;
     }
 
-    final namePtr = IsarCore.toNativeString(name);
-    final directoryPtr = IsarCore.toNativeString(directory);
-    final schemaPtr = IsarCore.toNativeString(schemaJson);
+    final namePtr = IsarCore._toNativeString(name);
+    final directoryPtr = IsarCore._toNativeString(directory);
+    final schemaPtr = IsarCore._toNativeString(schemaJson);
     final encryptionKeyPtr = encryptionKey != null
-        ? IsarCore.toNativeString(encryptionKey)
+        ? IsarCore._toNativeString(encryptionKey)
         : nullptr;
 
     final isarPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarInstance>>();
@@ -261,7 +261,7 @@ class _IsarImpl extends Isar {
     T Function(Isar isar, P param) callback, {
     String? debugName,
   }) {
-    if (kIsWeb) {
+    if (IsarCore.kIsWeb) {
       throw UnsupportedError('Watchers are not supported on the web');
     }
 
@@ -289,7 +289,7 @@ class _IsarImpl extends Isar {
     T Function(Isar isar, P param) callback, {
     String? debugName,
   }) async {
-    if (kIsWeb) {
+    if (IsarCore.kIsWeb) {
       throw UnsupportedError('Watchers are not supported on the web');
     }
 
@@ -324,7 +324,7 @@ class _IsarImpl extends Isar {
 
   @override
   void copyToFile(String path) {
-    final string = IsarCore.toNativeString(path);
+    final string = IsarCore._toNativeString(path);
     IsarCore.b.isar_copy(getPtr(), string).checkNoError();
   }
 

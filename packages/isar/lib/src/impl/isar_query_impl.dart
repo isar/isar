@@ -209,7 +209,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
 
   @override
   Stream<void> watchLazy({bool fireImmediately = false}) {
-    if (kIsWeb) {
+    if (IsarCore.kIsWeb) {
       throw UnsupportedError('Watchers are not supported on the web');
     }
 

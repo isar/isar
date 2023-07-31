@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
 import 'package:isar/src/native/bindings.dart';
 
@@ -12,6 +13,7 @@ export 'ffi.dart';
 export 'isolate_pool.dart';
 
 FutureOr<IsarCoreBindings> initializePlatformBindings([String? libraryPath]) {
+  late IsarCoreBindings bindings;
   try {
     libraryPath ??=
         Platform.isIOS ? null : libraryPath ?? Abi.current().localName;
@@ -19,7 +21,7 @@ FutureOr<IsarCoreBindings> initializePlatformBindings([String? libraryPath]) {
     final dylib = Platform.isIOS
         ? DynamicLibrary.process()
         : DynamicLibrary.open(libraryPath!);
-    return IsarCoreBindings(dylib);
+    bindings = IsarCoreBindings(dylib);
   } catch (e) {
     throw IsarNotReadyError(
       'Could not initialize IsarCore library for processor architecture '
@@ -30,17 +32,19 @@ FutureOr<IsarCoreBindings> initializePlatformBindings([String? libraryPath]) {
     );
   }
 
-  //final coreVersion = isar_version().cast<Utf8>().toDartString();
-  /*if (coreVersion != Isar.version && coreVersion != 'debug') {
+  final coreVersion = bindings.isar_version().cast<Utf8>().toDartString();
+  if (coreVersion != Isar.version && coreVersion != 'debug') {
     throw IsarNotReadyError(
       'Incorrect Isar Core version: Required ${Isar.version} found '
       '$coreVersion. Make sure to use the latest isar_flutter_libs. If you '
       'have a Dart only project, make sure that old Isar Core binaries are '
       'deleted.',
     );
-  }*/
+  }
 
-  //isar_connect_dart_api(NativeApi.postCObject.cast());
+  bindings.isar_connect_dart_api(NativeApi.postCObject.cast());
+
+  return bindings;
 }
 
 extension on Abi {

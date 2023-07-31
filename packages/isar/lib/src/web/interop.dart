@@ -30,7 +30,7 @@ extension JSFetchResponseX on JSFetchResponse {
 class JSWasm {}
 
 extension JSWasmX on JSWasm {
-  external Object instantiateStreaming(JSAny source, dynamic importObject);
+  external Object instantiateStreaming(Object source, dynamic importObject);
 }
 
 @JS()

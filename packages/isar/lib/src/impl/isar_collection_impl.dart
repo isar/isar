@@ -217,7 +217,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
     return isar.getWriteTxn(consume: true, (isarPtr, txnPtr) {
       final txnPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarTxn>>();
       txnPtrPtr.ptrValue = txnPtr;
-      final nativeString = IsarCore.toNativeString(json);
+      final nativeString = IsarCore._toNativeString(json);
       IsarCore.b
           .isar_import_json(
             isarPtr,
@@ -241,7 +241,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
 
   @override
   Stream<void> watchLazy({bool fireImmediately = false}) {
-    if (kIsWeb) {
+    if (IsarCore.kIsWeb) {
       throw UnsupportedError('Watchers are not supported on the web');
     }
 
@@ -265,7 +265,6 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
         port.close();
       },
     );
-
     if (fireImmediately) {
       controller.add(null);
     }
@@ -282,7 +281,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
 
   @override
   Stream<void> watchObjectLazy(ID id, {bool fireImmediately = false}) {
-    if (kIsWeb) {
+    if (IsarCore.kIsWeb) {
       throw UnsupportedError('Watchers are not supported on the web');
     }
 

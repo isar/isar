@@ -21,6 +21,10 @@ abstract class Isar {
   /// The current Isar version.
   static const String version = '4.0.0-dev.3';
 
+  /// Use this value for the `directory` parameter to create an in-memory
+  /// database.
+  static const String sqliteInMemory = '';
+
   /// Initialize Isar manually. This is required if you target web.
   ///
   /// On native platforms you can provide a custom path to the Isar Core
@@ -46,6 +50,9 @@ abstract class Isar {
   /// You have to provide a list of all collection [schemas] that you want to
   /// use in this instance as well as a [directory] where the database file
   /// should be stored.
+  ///
+  /// Use [Isar.sqliteInMemory] as the directory to create an in-memory
+  /// database.
   ///
   /// You can optionally provide a [name] for this instance. This is needed if
   /// you want to open multiple instances.
