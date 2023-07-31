@@ -68,6 +68,24 @@ jobs:
         run: flutter test -j 1
         working-directory: packages/isar_test
 
+  test_web:
+    name: Dart Web Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core
+        run: bash tool/build_wasm.sh
+      - name: Serve isar.wasm
+        run: npx --yes serve --cors &
+      - name: Prepare Tests
+        run: sh tool/prepare_tests.sh
+      - name: Run Dart Unit tests
+        run: dart test -p chrome
+        working-directory: packages/isar_test
+
   coverage:
     name: Code Coverage
     runs-on: ubuntu-latest

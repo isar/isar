@@ -30,10 +30,3 @@ dev_dependencies:
   ffigen: ^8.0.2
   test: any
   very_good_analysis: ^5.0.0+1
-
-platforms:
-  android:
-  ios:
-  linux:
-  macos:
-  windows:

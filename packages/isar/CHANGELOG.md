@@ -25,6 +25,7 @@ Changed transactions API:
 
 ### Enhancements
 
+- Web support is back!!!
 - Encrypted databases
 - String ids
 - Fetching multiple properties simultaneously

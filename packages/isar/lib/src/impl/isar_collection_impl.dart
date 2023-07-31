@@ -39,14 +39,13 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
           )
           .checkNoError();
 
+      OBJ? object;
       final readerPtr = readerPtrPtr.ptrValue;
       if (!readerPtr.isNull) {
-        final object = converter.deserialize(readerPtr);
+        object = converter.deserialize(readerPtr);
         IsarCore.b.isar_read_free(readerPtr);
-        return object;
-      } else {
-        return null;
       }
+      return object;
     });
   }
 

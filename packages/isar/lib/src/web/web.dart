@@ -5,6 +5,7 @@ import 'dart:html';
 import 'dart:js_util';
 import 'dart:typed_data';
 
+import 'package:isar/isar.dart';
 import 'package:isar/src/web/interop.dart';
 
 export 'bindings.dart';
@@ -15,11 +16,13 @@ Future<R> scheduleIsolate<R>(R Function() callback, {String? debugName}) async {
   throw UnimplementedError();
 }
 
-FutureOr<IsarCoreBindings> initializePlatformBindings(
-    [String? libraryPath]) async {
+FutureOr<IsarCoreBindings> initializePlatformBindings([
+  String? libraryPath,
+]) async {
+  final url = libraryPath ?? 'https://unpkg.com/isar@${Isar.version}/isar.wasm';
   final w = window as JSWindow;
   final promise = w.WebAssembly.instantiateStreaming(
-    w.fetch(libraryPath!),
+    w.fetch(url),
     jsify({'env': <String, String>{}}),
   );
   final wasm = await promiseToFuture<JSWasmModule>(promise);

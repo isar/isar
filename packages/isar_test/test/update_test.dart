@@ -1,14 +1,14 @@
 // ignore_for_file: avoid_redundant_argument_values
 
-import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
 
 part 'update_test.g.dart';
 
+const _default = Object();
+
 @collection
-@CopyWith()
 class Model {
   Model({
     required this.id,
@@ -47,7 +47,6 @@ class Model {
   final DateTime dateProp;
 
   @override
-  // ignore: hash_and_equals, avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) =>
       other is Model &&
       other.id == id &&
@@ -60,6 +59,39 @@ class Model {
       other.stringProp == stringProp &&
       other.nullableStringProp == nullableStringProp &&
       other.dateProp == dateProp;
+
+  Model copyWith({
+    Object boolProp = _default,
+    Object? nullableBoolProp = _default,
+    Object byteProp = _default,
+    Object shortProp = _default,
+    Object longProp = _default,
+    Object floatProp = _default,
+    Object doubleProp = _default,
+    Object stringProp = _default,
+    Object? nullableStringProp = _default,
+    Object dateProp = _default,
+  }) {
+    return Model(
+      id: id,
+      boolProp: boolProp == _default ? this.boolProp : boolProp as bool,
+      nullableBoolProp: nullableBoolProp == _default
+          ? this.nullableBoolProp
+          : nullableBoolProp as bool?,
+      byteProp: byteProp == _default ? this.byteProp : byteProp as byte,
+      shortProp: shortProp == _default ? this.shortProp : shortProp as short,
+      longProp: longProp == _default ? this.longProp : longProp as int,
+      floatProp: floatProp == _default ? this.floatProp : floatProp as float,
+      doubleProp:
+          doubleProp == _default ? this.doubleProp : doubleProp as double,
+      stringProp:
+          stringProp == _default ? this.stringProp : stringProp as String,
+      nullableStringProp: nullableStringProp == _default
+          ? this.nullableStringProp
+          : nullableStringProp as String?,
+      dateProp: dateProp == _default ? this.dateProp : dateProp as DateTime,
+    );
+  }
 }
 
 void main() {
