@@ -54,7 +54,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
-      - name: Set env
+      - name: Set Isar Version
         run: echo "ISAR_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
       - name: Build binary
         run: bash tool/${{ matrix.script }}
@@ -104,8 +104,12 @@ jobs:
       - name: pub get
         run: dart pub get
         working-directory: packages/isar
+      - name: Set Isar Version
+        run: echo "ISAR_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
       - name: Download Binaries
         run: sh tool/download_binaries.sh
+      - name: Adjust Version
+        run: sh tool/adjust_version.sh
       - name: pub.dev credentials
         run: |
           mkdir -p $HOME/.config/dart
