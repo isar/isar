@@ -242,7 +242,7 @@ jobs:
       - name: Serve isar.wasm
         run: npx --yes serve --cors &
       - name: Install chromedricer
-        uses: nanasess/setup-chromedriver@v1
+        uses: nanasess/setup-chromedriver@latest
       - name: Prepare chromedricer
         run: chromedriver --port=4444 &
       - name: Run Dart tests in browser
