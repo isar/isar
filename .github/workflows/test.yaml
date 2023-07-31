@@ -238,7 +238,7 @@ jobs:
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
-        run: bash tool/build_ios.sh
+        run: bash tool/build_wasm.sh
       - name: Serve isar.wasm
         run: npx --yes serve --cors &
       - name: Install chromedricer
@@ -262,7 +262,7 @@ jobs:
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
-        run: bash tool/build_ios.sh
+        run: bash tool/build_wasm.sh
       - name: Serve isar.wasm
         run: npx --yes serve --cors &
       - name: Prepare safaridricer
@@ -286,7 +286,7 @@ jobs:
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
-        run: bash tool/build_ios.sh
+        run: bash tool/build_wasm.sh
       - name: Serve isar.wasm
         run: npx --yes serve --cors &
       - name: Install geckodriver
