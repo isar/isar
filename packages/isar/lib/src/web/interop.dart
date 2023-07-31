@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, non_constant_identifier_names
 
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:js/js.dart';
@@ -29,7 +30,7 @@ extension JSFetchResponseX on JSFetchResponse {
 class JSWasm {}
 
 extension JSWasmX on JSWasm {
-  external Object instantiate(ByteBuffer source, dynamic importObject);
+  external Object instantiateStreaming(JSAny source, dynamic importObject);
 }
 
 @JS()

@@ -24,9 +24,9 @@ abstract class Isar {
   /// Initialize Isar manually. This is required if you target web.
   ///
   /// On native platforms you can provide a custom path to the Isar Core
-  /// library.
-  static FutureOr<void> initialize({String? libraryPath}) {
-    return IsarCore._initialize(libraryPath);
+  /// [library].
+  static FutureOr<void> initialize([String? library]) {
+    return IsarCore._initialize(library);
   }
 
   /// Get an already opened Isar instance by its name.

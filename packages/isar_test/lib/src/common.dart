@@ -9,6 +9,9 @@ import 'package:test/test.dart';
 // ignore: implementation_imports
 import 'package:test_api/src/backend/invoker.dart';
 
+export 'package:isar_test/src/init_native.dart'
+    if (dart.library.html) 'package:isar_test/src/init_web.dart';
+
 final testErrors = <String>[];
 int testCount = 0;
 

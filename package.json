@@ -1,0 +1,7 @@
+{
+  "name": "isar",
+  "version": "1.0.0",
+  "files": [
+    "isar.wasm"
+  ]
+}

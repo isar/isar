@@ -18,17 +18,11 @@ Future<R> scheduleIsolate<R>(R Function() callback, {String? debugName}) async {
 FutureOr<IsarCoreBindings> initializePlatformBindings(
     [String? libraryPath]) async {
   final w = window as JSWindow;
-  // download wasm as Uint8List
-  final response = await window.fetch('http://localhost:9000/isar.wasm');
-  final bytes = await response.arrayBuffer();
-  ;
-  final promise = w.WebAssembly.instantiate(
-      bytes as ByteBuffer,
-      jsify(
-        {'env': {}},
-      ));
+  final promise = w.WebAssembly.instantiateStreaming(
+    w.fetch(libraryPath!),
+    jsify({'env': <String, String>{}}),
+  );
   final wasm = await promiseToFuture<JSWasmModule>(promise);
-  window.console.log(wasm);
   return wasm.instance.exports;
 }
 

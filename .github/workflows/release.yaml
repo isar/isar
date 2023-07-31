@@ -46,6 +46,9 @@ jobs:
           - os: windows-latest
             artifact_name: isar_windows_x64.dll
             script: build_windows.sh x64
+          - os: ubuntu-latest
+            artifact_name: isar.wasm
+            script: build_wasm.sh
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3

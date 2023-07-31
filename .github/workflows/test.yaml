@@ -273,7 +273,7 @@ jobs:
           dart tool/generate_long_double_test.dart
           dart tool/generate_all_tests.dart
           flutter pub run build_runner build
-          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart -d web-server --browser-name chrome
+          flutter drive --driver=integration_driver.dart  --target=integration.dart-d web-server --browser-name chrome
         working-directory: packages/isar_test
 
   drive_safari:
@@ -292,12 +292,11 @@ jobs:
           dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
           dart tool/generate_all_tests.dart
-          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart -d web-server --browser-name safari
+          flutter drive --driver=integration_driver.dart --target=integration.dart -d web-server --browser-name safari
         working-directory: packages/isar_test
 
   drive_firefox:
     runs-on: ubuntu-latest
-    if: ${{ false }}
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
@@ -311,5 +310,5 @@ jobs:
           dart tool/generate_long_double_test.dart
           flutter pub run build_runner build
           dart tool/generate_all_tests.dart
-          flutter drive --driver=isar_driver.dart --target=isar_driver_target.dart -d web-server --browser-name firefox
+          flutter drive --driver=integration_driver.dart --target=integration.dart -d web-server --browser-name firefox
         working-directory: packages/isar_test
