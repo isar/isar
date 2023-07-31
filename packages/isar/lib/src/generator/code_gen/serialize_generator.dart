@@ -69,8 +69,7 @@ String _writeProperty({
         return 'IsarCore.writeBool($writer, $index, $value$enumGetter);';
       }
     case PropertyType.byte:
-      final orNull = nullable ? '?? $_nullByte' : '';
-      return 'IsarCore.writeByte($writer, $index, $value$enumGetter $orNull);';
+      return 'IsarCore.writeByte($writer, $index, $value$enumGetter);';
     case PropertyType.int:
       final orNull = nullable ? '?? $_nullInt' : '';
       return 'IsarCore.writeInt($writer, $index, $value$enumGetter $orNull);';
