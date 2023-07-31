@@ -230,7 +230,8 @@ jobs:
           flutter test -d windows integration_test.dart --dart-define STRESS=true
         working-directory: packages/isar_test
 
-  drive_chrome:
+  integration_test_chrome:
+    name: Integration Test Chrome
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -254,7 +255,8 @@ jobs:
           flutter drive --driver=integration_driver.dart  --target=integration_test.dart -d web-server --browser-name chrome
         working-directory: packages/isar_test
 
-  drive_safari:
+  integration_test_safari:
+    name: Integration Test Safari
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -280,7 +282,8 @@ jobs:
           flutter drive --driver=integration_driver.dart --target=integration_test.dart -d web-server --browser-name safari
         working-directory: packages/isar_test
 
-  drive_firefox:
+  integration_test_firefox:
+    name: Integration Test Firefox
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
