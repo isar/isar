@@ -259,7 +259,6 @@ jobs:
 
   drive_chrome:
     runs-on: ubuntu-latest
-    if: ${{ false }}
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
@@ -278,7 +277,6 @@ jobs:
 
   drive_safari:
     runs-on: macos-latest
-    if: ${{ false }}
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
