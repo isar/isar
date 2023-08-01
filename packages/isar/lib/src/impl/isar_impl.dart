@@ -99,9 +99,9 @@ class _IsarImpl extends Isar {
   factory _IsarImpl.get({
     required int instanceId,
     required List<IsarObjectConverter<dynamic, dynamic>> converters,
-    String? libraryPath,
+    String? library,
   }) {
-    IsarCore._initialize(libraryPath);
+    IsarCore._initialize(library: library);
     var ptr = IsarCore.b.isar_get_instance(instanceId, false);
     if (ptr.isNull) {
       ptr = IsarCore.b.isar_get_instance(instanceId, true);
@@ -268,12 +268,12 @@ class _IsarImpl extends Isar {
     _checkNotInTxn();
 
     final instanceId = this.instanceId;
-    final libraryPath = IsarCore._libraryPath;
+    final library = IsarCore._library;
     final converters = this.converters;
     return scheduleIsolate(
       () => _isarAsync(
         instanceId,
-        libraryPath,
+        library,
         converters,
         false,
         param,
@@ -296,13 +296,13 @@ class _IsarImpl extends Isar {
     _checkNotInTxn();
 
     final instanceId = this.instanceId;
-    final libraryPath = IsarCore._libraryPath;
+    final library = IsarCore._library;
     final converters = this.converters.toList();
     return scheduleIsolate(
       () {
         return _isarAsync(
           instanceId,
-          libraryPath,
+          library,
           converters,
           true,
           param,
@@ -354,7 +354,7 @@ class _IsarImpl extends Isar {
 
 T _isarAsync<T, P>(
   int instanceId,
-  String? libraryPath,
+  String? library,
   List<IsarObjectConverter<dynamic, dynamic>> converters,
   bool write,
   P param,
@@ -363,7 +363,7 @@ T _isarAsync<T, P>(
   final isar = _IsarImpl.get(
     instanceId: instanceId,
     converters: converters,
-    libraryPath: libraryPath,
+    library: library,
   );
   try {
     if (write) {

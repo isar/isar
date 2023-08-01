@@ -30,7 +30,7 @@ abstract class Isar {
   /// On native platforms you can provide a custom path to the Isar Core
   /// [library].
   static FutureOr<void> initialize([String? library]) {
-    return IsarCore._initialize(library);
+    return IsarCore._initialize(library: library, explicit: true);
   }
 
   /// Get an already opened Isar instance by its name.

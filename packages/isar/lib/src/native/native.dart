@@ -12,15 +12,14 @@ export 'bindings.dart';
 export 'ffi.dart';
 export 'isolate_pool.dart';
 
-FutureOr<IsarCoreBindings> initializePlatformBindings([String? libraryPath]) {
+FutureOr<IsarCoreBindings> initializePlatformBindings([String? library]) {
   late IsarCoreBindings bindings;
   try {
-    libraryPath ??=
-        Platform.isIOS ? null : libraryPath ?? Abi.current().localName;
+    library ??= Platform.isIOS ? null : library ?? Abi.current().localName;
 
     final dylib = Platform.isIOS
         ? DynamicLibrary.process()
-        : DynamicLibrary.open(libraryPath!);
+        : DynamicLibrary.open(library!);
     bindings = IsarCoreBindings(dylib);
   } catch (e) {
     throw IsarNotReadyError(

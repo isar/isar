@@ -6,7 +6,7 @@ abstract final class IsarCore {
   static const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
 
   static var _initialized = false;
-  static String? _libraryPath;
+  static String? _library;
 
   static late final IsarCoreBindings b;
 
@@ -25,21 +25,29 @@ abstract final class IsarCore {
   static Pointer<Uint16> _nativeStringPtr = nullptr;
   static int _nativeStringPtrLength = 0;
 
-  static FutureOr<void> _initialize([String? libraryPath]) {
+  static FutureOr<void> _initialize({
+    String? library,
+    bool explicit = false,
+  }) {
     if (_initialized) {
       return null;
     }
 
-    final result = initializePlatformBindings(libraryPath);
+    if (kIsWeb && !explicit) {
+      throw IsarNotReadyError('On web you have to call Isar.initialize() '
+          'manually before using Isar.');
+    }
+
+    final result = initializePlatformBindings(library);
     if (result is Future) {
       return (result as Future<IsarCoreBindings>).then((bindings) {
         b = bindings;
-        _libraryPath = libraryPath;
+        _library = library;
         _initialized = true;
       });
     } else {
       b = result;
-      _libraryPath = libraryPath;
+      _library = library;
       _initialized = true;
     }
   }

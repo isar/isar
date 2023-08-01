@@ -3,7 +3,7 @@
 import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
-import 'interop.dart';
+import 'package:isar/src/web/interop.dart';
 
 typedef Pointer<T> = int;
 
@@ -12,37 +12,39 @@ class NativeType {}
 @pragma('dart2js:tryInline')
 Pointer<T> ptrFromAddress<T>(int addr) => addr;
 
+late final JSIsar b = IsarCore.b as JSIsar;
+
 extension PointerX on int {
   @pragma('dart2js:tryInline')
   Pointer<T> cast<T>() => this;
 
   @pragma('dart2js:tryInline')
-  Pointer<void> get ptrValue => IsarCore.b.u32Heap[address ~/ 4];
+  Pointer<void> get ptrValue => b.u32Heap[address ~/ 4];
 
   @pragma('dart2js:tryInline')
-  set ptrValue(Pointer<void> ptr) => IsarCore.b.u32Heap[address ~/ 4] = ptr;
+  set ptrValue(Pointer<void> ptr) => b.u32Heap[address ~/ 4] = ptr;
 
   @pragma('dart2js:tryInline')
   void setPtrAt(int index, Pointer<void> ptr) {
-    IsarCore.b.u32Heap[address ~/ 4 + index] = ptr;
+    b.u32Heap[address ~/ 4 + index] = ptr;
   }
 
   @pragma('dart2js:tryInline')
-  bool get boolValue => IsarCore.b.u8Heap[address] != 0;
+  bool get boolValue => b.u8Heap[address] != 0;
 
   @pragma('dart2js:tryInline')
-  int get u32Value => IsarCore.b.u32Heap[address ~/ 4];
+  int get u32Value => b.u32Heap[address ~/ 4];
 
   @pragma('dart2js:tryInline')
   int get address => this;
 
   @pragma('dart2js:tryInline')
   Uint8List asU8List(int length) =>
-      IsarCore.b.u8Heap.buffer.asUint8List(address, length);
+      b.u8Heap.buffer.asUint8List(address, length);
 
   @pragma('dart2js:tryInline')
   Uint16List asU16List(int length) =>
-      IsarCore.b.u16Heap.buffer.asUint16List(address, length);
+      b.u16Heap.buffer.asUint16List(address, length);
 }
 
 const nullptr = 0;
@@ -92,10 +94,10 @@ const _sizes = {
 };
 
 Pointer<T> malloc<T>([int length = 1]) {
-  final addr = IsarCore.b.malloc(length * _sizes[T]!);
+  final addr = b.malloc(length * _sizes[T]!);
   return addr;
 }
 
 void free(Pointer<void> ptr) {
-  IsarCore.b.free(ptr.address);
+  b.free(ptr.address);
 }

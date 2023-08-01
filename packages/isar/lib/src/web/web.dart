@@ -17,9 +17,9 @@ Future<R> scheduleIsolate<R>(R Function() callback, {String? debugName}) async {
 }
 
 FutureOr<IsarCoreBindings> initializePlatformBindings([
-  String? libraryPath,
+  String? library,
 ]) async {
-  final url = libraryPath ?? 'https://unpkg.com/isar@${Isar.version}/isar.wasm';
+  final url = library ?? 'https://unpkg.com/isar@${Isar.version}/isar.wasm';
   final w = window as JSWindow;
   final promise = w.WebAssembly.instantiateStreaming(
     w.fetch(url),

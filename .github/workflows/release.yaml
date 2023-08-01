@@ -88,9 +88,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18"
-      - name: pub get
-        run: dart pub get
-        working-directory: packages/isar
       - name: Set Isar Version
         run: echo "ISAR_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
       - name: Download Binaries
