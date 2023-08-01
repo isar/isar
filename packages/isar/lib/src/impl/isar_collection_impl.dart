@@ -403,12 +403,11 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
 }
 
 @pragma('vm:prefer-inline')
+@pragma('dart2js:tryInline')
 int _idToInt<OBJ>(OBJ id) {
   if (id is int) {
     return id;
-  } else if (id is String) {
-    return Isar.fastHash(id);
   } else {
-    throw UnsupportedError('Unsupported id type. This should never happen.');
+    return Isar.fastHash(id as String);
   }
 }

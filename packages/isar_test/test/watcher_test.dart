@@ -87,6 +87,18 @@ void main() {
 
         await listener.done();
       });
+
+      isarTest('fireImmediately', () async {
+        final listener = Listener<void>(
+          isar.values.watchLazy(fireImmediately: true),
+        );
+
+        await listener.next;
+        isar.write((isar) => isar.values.put(obj1));
+        await listener.next;
+
+        await listener.done();
+      });
     });
 
     group('Object', () {
@@ -146,6 +158,24 @@ void main() {
 
         isar.write((isar) => isar.values.deleteAll([2, 3]));
         expect(await listener.next, null);
+
+        await listenerLazy.done();
+        await listener.done();
+      });
+
+      isarTest('fireImmediately', () async {
+        final listenerLazy = Listener<void>(
+          isar.values.watchObjectLazy(1, fireImmediately: true),
+        );
+        final listener = Listener<Value?>(
+          isar.values.watchObject(1, fireImmediately: true),
+        );
+
+        await listenerLazy.next;
+        expect(await listener.next, null);
+        isar.write((isar) => isar.values.put(obj1));
+        await listenerLazy.next;
+        expect(await listener.next, obj1);
 
         await listenerLazy.done();
         await listener.done();
@@ -236,6 +266,30 @@ void main() {
           await listenerLazy.next;
           expect(await listener.next, <dynamic>[]);
         }
+
+        await listenerLazy.done();
+        await listener.done();
+      });
+
+      isarTest('fireImmediately', () async {
+        final listenerLazy = Listener(
+          isar.values
+              .where()
+              .valueEqualTo('Hello')
+              .watchLazy(fireImmediately: true),
+        );
+        final listener = Listener(
+          isar.values
+              .where()
+              .valueEqualTo('Hello')
+              .watch(fireImmediately: true),
+        );
+
+        await listenerLazy.next;
+        expect(await listener.next, isEmpty);
+        isar.write((isar) => isar.values.put(obj1));
+        await listenerLazy.next;
+        expect(await listener.next, [obj1]);
 
         await listenerLazy.done();
         await listener.done();

@@ -32,7 +32,7 @@ class _CounterAppState extends State<CounterApp> {
     // Open Isar instance
     _isar = Isar.open(
       schemas: [CountSchema],
-      directory: '',
+      directory: Isar.sqliteInMemory,
       engine: IsarEngine.sqlite,
     );
     super.initState();

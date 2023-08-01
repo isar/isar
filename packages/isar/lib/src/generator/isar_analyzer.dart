@@ -250,9 +250,11 @@ class _IsarAnalyzer {
       }
     }
 
-    final nullable = dartType.nullabilitySuffix != NullabilitySuffix.none;
+    final nullable = dartType.nullabilitySuffix != NullabilitySuffix.none ||
+        dartType is DynamicType;
     final elementNullable = type.isList
-        ? dartType.scalarType.nullabilitySuffix != NullabilitySuffix.none
+        ? dartType.scalarType.nullabilitySuffix != NullabilitySuffix.none ||
+            dartType.scalarType is DynamicType
         : null;
     if (isId) {
       if (type != PropertyType.long && type != PropertyType.string) {

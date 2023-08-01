@@ -38,9 +38,9 @@ class NullableModel {
 
   final String? stringValue;
 
-  final MyEmbedded? embeddedValue;
-
   final MyEnum? enumValue;
+
+  final MyEmbedded? embeddedValue;
 }
 
 @Name('Col')
@@ -58,6 +58,8 @@ class NullableListModel {
     this.stringValue,
     this.embeddedValue,
     this.enumValue,
+    this.jsonValue,
+    this.jsonObjectValue,
   );
 
   final int id;
@@ -78,9 +80,13 @@ class NullableListModel {
 
   final List<String>? stringValue;
 
+  final List<MyEnum>? enumValue;
+
   final List<MyEmbedded>? embeddedValue;
 
-  final List<MyEnum>? enumValue;
+  final List<dynamic>? jsonValue;
+
+  final Map<String, dynamic>? jsonObjectValue;
 }
 
 void main() {
@@ -113,42 +119,16 @@ void main() {
       isar1.close();
 
       final isar2 = await openTempIsar([NullableModelSchema], name: isarName);
-      expect(
-        isar2.nullableModels.where().boolValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableModels.where().shortValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableModels.where().intValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableModels.where().floatValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableModels.where().doubleValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableModels.where().dateTimeValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableModels.where().stringValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableModels.where().embeddedValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableModels.where().enumValueProperty().findFirst(),
-        null,
-      );
+      final col = isar2.nullableModels;
+      expect(col.where().boolValueProperty().findFirst(), null);
+      expect(col.where().shortValueProperty().findFirst(), null);
+      expect(col.where().intValueProperty().findFirst(), null);
+      expect(col.where().floatValueProperty().findFirst(), null);
+      expect(col.where().doubleValueProperty().findFirst(), null);
+      expect(col.where().dateTimeValueProperty().findFirst(), null);
+      expect(col.where().stringValueProperty().findFirst(), null);
+      expect(col.where().embeddedValueProperty().findFirst(), null);
+      expect(col.where().enumValueProperty().findFirst(), null);
     });
 
     isarTest('list', web: false, () async {
@@ -170,6 +150,8 @@ void main() {
       expect(obj.stringValue, null);
       expect(obj.embeddedValue, null);
       expect(obj.enumValue, null);
+      expect(obj.jsonValue, null);
+      expect(obj.jsonObjectValue, null);
     });
 
     isarTest('list property', web: false, () async {
@@ -181,42 +163,18 @@ void main() {
 
       final isar2 =
           await openTempIsar([NullableListModelSchema], name: isarName);
-      expect(
-        isar2.nullableListModels.where().boolValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableListModels.where().shortValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableListModels.where().intValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableListModels.where().floatValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableListModels.where().doubleValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableListModels.where().dateTimeValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableListModels.where().stringValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableListModels.where().embeddedValueProperty().findFirst(),
-        null,
-      );
-      expect(
-        isar2.nullableListModels.where().enumValueProperty().findFirst(),
-        null,
-      );
+      final col = isar2.nullableListModels;
+      expect(col.where().boolValueProperty().findFirst(), null);
+      expect(col.where().shortValueProperty().findFirst(), null);
+      expect(col.where().intValueProperty().findFirst(), null);
+      expect(col.where().floatValueProperty().findFirst(), null);
+      expect(col.where().doubleValueProperty().findFirst(), null);
+      expect(col.where().dateTimeValueProperty().findFirst(), null);
+      expect(col.where().stringValueProperty().findFirst(), null);
+      expect(col.where().embeddedValueProperty().findFirst(), null);
+      expect(col.where().enumValueProperty().findFirst(), null);
+      expect(col.where().jsonValueProperty().findFirst(), null);
+      expect(col.where().jsonObjectValueProperty().findFirst(), null);
     });
   });
 }

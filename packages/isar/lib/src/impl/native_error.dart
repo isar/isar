@@ -2,6 +2,7 @@ part of isar;
 
 extension on int {
   @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
   void checkNoError() {
     if (this != 0) {
       throwError();

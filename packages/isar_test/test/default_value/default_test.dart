@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_positional_boolean_parameters
+
 import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
@@ -18,7 +20,9 @@ class DefaultModel {
     this.floatValue = 5.2,
     this.doubleValue = 10.10,
     this.stringValue = 'hello',
+    this.enumValue = MyEnum.value2,
     this.embeddedValue = const MyEmbedded('abc'),
+    this.jsonValue = const {'a': 1, 'b': '2'},
   ]);
 
   final int id;
@@ -37,7 +41,11 @@ class DefaultModel {
 
   final String stringValue;
 
+  final MyEnum enumValue;
+
   final MyEmbedded embeddedValue;
+
+  final dynamic jsonValue;
 }
 
 @Name('Col')
@@ -52,7 +60,10 @@ class DefaultListModel {
     this.floatValue = const [5.5, null],
     this.doubleValue = const [null, 10.10],
     this.stringValue = const ['abc', null, 'def'],
+    this.enumValue = const [MyEnum.value1, null, MyEnum.value2],
     this.embeddedValue = const [null, MyEmbedded('test')],
+    this.jsonValue = const [null, 'a', 33, true],
+    this.jsonObjectValue = const {'a': 1, 'b': '2'},
   ]);
 
   final int id;
@@ -71,7 +82,13 @@ class DefaultListModel {
 
   final List<String?> stringValue;
 
+  final List<MyEnum?> enumValue;
+
   final List<MyEmbedded?> embeddedValue;
+
+  final List<dynamic> jsonValue;
+
+  final Map<String, dynamic> jsonObjectValue;
 }
 
 void main() {
@@ -92,7 +109,9 @@ void main() {
       expect(obj.floatValue, 5.2);
       expect(obj.doubleValue, 10.10);
       expect(obj.stringValue, 'hello');
+      expect(obj.enumValue, MyEnum.value2);
       expect(obj.embeddedValue, const MyEmbedded('abc'));
+      expect(obj.jsonValue, const {'a': 1, 'b': '2'});
     });
 
     isarTest('scalar property', web: false, () async {
@@ -103,37 +122,22 @@ void main() {
       isar1.close();
 
       final isar2 = await openTempIsar([DefaultModelSchema], name: isarName);
+      final col = isar2.defaultModels;
+      expect(col.where().boolValueProperty().findFirst(), true);
+      expect(col.where().byteValueProperty().findFirst(), 55);
+      expect(col.where().shortValueProperty().findFirst(), 123);
+      expect(col.where().intValueProperty().findFirst(), 1234);
+      expect(col.where().floatValueProperty().findFirst(), 5.2);
+      expect(col.where().doubleValueProperty().findFirst(), 10.10);
+      expect(col.where().stringValueProperty().findFirst(), 'hello');
+      expect(col.where().enumValueProperty().findFirst(), MyEnum.value2);
       expect(
-        isar2.defaultModels.where().boolValueProperty().findFirst(),
-        true,
-      );
-      expect(
-        isar2.defaultModels.where().byteValueProperty().findFirst(),
-        55,
-      );
-      expect(
-        isar2.defaultModels.where().shortValueProperty().findFirst(),
-        123,
-      );
-      expect(
-        isar2.defaultModels.where().intValueProperty().findFirst(),
-        1234,
-      );
-      expect(
-        isar2.defaultModels.where().floatValueProperty().findFirst(),
-        5.2,
-      );
-      expect(
-        isar2.defaultModels.where().doubleValueProperty().findFirst(),
-        10.10,
-      );
-      expect(
-        isar2.defaultModels.where().stringValueProperty().findFirst(),
-        'hello',
-      );
-      expect(
-        isar2.defaultModels.where().embeddedValueProperty().findFirst(),
+        col.where().embeddedValueProperty().findFirst(),
         const MyEmbedded('abc'),
+      );
+      expect(
+        col.where().jsonValueProperty().findFirst(),
+        const {'a': 1, 'b': '2'},
       );
     });
 
@@ -154,7 +158,10 @@ void main() {
       expect(obj.floatValue, [5.5, null]);
       expect(obj.doubleValue, [null, 10.10]);
       expect(obj.stringValue, ['abc', null, 'def']);
+      expect(obj.enumValue, [MyEnum.value1, null, MyEnum.value2]);
       expect(obj.embeddedValue, [null, const MyEmbedded('test')]);
+      expect(obj.jsonValue, [null, 'a', 33, true]);
+      expect(obj.jsonObjectValue, {'a': 1, 'b': '2'});
     });
 
     isarTest('list property', web: false, () async {
@@ -166,37 +173,32 @@ void main() {
 
       final isar2 =
           await openTempIsar([DefaultListModelSchema], name: isarName);
+      final col = isar2.defaultListModels;
+      expect(col.where().boolValueProperty().findFirst(), [true, false]);
+      expect(col.where().byteValueProperty().findFirst(), [1, 3]);
+      expect(col.where().shortValueProperty().findFirst(), [null, 23, 34]);
+      expect(col.where().intValueProperty().findFirst(), [123, 234, null]);
+      expect(col.where().floatValueProperty().findFirst(), [5.5, null]);
+      expect(col.where().doubleValueProperty().findFirst(), [null, 10.10]);
       expect(
-        isar2.defaultListModels.where().boolValueProperty().findFirst(),
-        [true, false],
-      );
-      expect(
-        isar2.defaultListModels.where().byteValueProperty().findFirst(),
-        [1, 3],
-      );
-      expect(
-        isar2.defaultListModels.where().shortValueProperty().findFirst(),
-        [null, 23, 34],
-      );
-      expect(
-        isar2.defaultListModels.where().intValueProperty().findFirst(),
-        [123, 234, null],
-      );
-      expect(
-        isar2.defaultListModels.where().floatValueProperty().findFirst(),
-        [5.5, null],
-      );
-      expect(
-        isar2.defaultListModels.where().doubleValueProperty().findFirst(),
-        [null, 10.10],
-      );
-      expect(
-        isar2.defaultListModels.where().stringValueProperty().findFirst(),
+        col.where().stringValueProperty().findFirst(),
         ['abc', null, 'def'],
       );
       expect(
-        isar2.defaultListModels.where().embeddedValueProperty().findFirst(),
+        col.where().enumValueProperty().findFirst(),
+        [MyEnum.value1, null, MyEnum.value2],
+      );
+      expect(
+        col.where().embeddedValueProperty().findFirst(),
         [null, const MyEmbedded('test')],
+      );
+      expect(
+        col.where().jsonValueProperty().findFirst(),
+        [null, 'a', 33, true],
+      );
+      expect(
+        col.where().jsonObjectValueProperty().findFirst(),
+        {'a': 1, 'b': '2'},
       );
     });
   });

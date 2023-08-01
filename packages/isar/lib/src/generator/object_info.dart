@@ -112,14 +112,17 @@ class PropertyInfo {
         } else if (typeClassName == 'Map') {
           return 'Map<String, dynamic>';
         } else {
-          return typeClassName;
+          return 'dynamic';
         }
     }
   }
 
-  String get scalarDartType => type.isList
-      ? '$scalarDartTypeNotNull${elementNullable! ? '?' : ''}'
-      : '$scalarDartTypeNotNull${nullable ? '?' : ''}';
+  String get scalarDartType {
+    final sNN = scalarDartTypeNotNull;
+    return type.isList
+        ? '$sNN${elementNullable! && typeClassName != 'dynamic' ? '?' : ''}'
+        : '$sNN${nullable && typeClassName != 'dynamic' ? '?' : ''}';
+  }
 
   String get dartType => type.isList
       ? 'List<$scalarDartType>${nullable ? '?' : ''}'

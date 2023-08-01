@@ -11,12 +11,23 @@ class Model {
   final int id;
 }
 
+@collection
+class StringModel {
+  StringModel(this.id);
+
+  final String id;
+}
+
 void main() {
   group('Auto increment', () {
     late Isar isar;
 
     setUp(() async {
-      isar = await openTempIsar([ModelSchema]);
+      isar = await openTempIsar([ModelSchema, StringModelSchema]);
+    });
+
+    isarTest('String ids not supported', () {
+      expect(() => isar.stringModels.autoIncrement(), throwsUnsupportedError);
     });
 
     isarTest('increases', () {

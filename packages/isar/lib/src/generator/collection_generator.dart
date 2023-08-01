@@ -28,6 +28,7 @@ class _IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
     return '''
       // coverage:ignore-file
       // ignore_for_file: ${_ignoreLints.join(', ')}
+      // ignore_for_file: type=lint
 
       extension Get${object.dartName}Collection on Isar {
         IsarCollection<$idType, ${object.dartName}> get ${object.accessor} => this.collection();
@@ -69,6 +70,7 @@ class _IsarEmbeddedGenerator extends GeneratorForAnnotation<Embedded> {
     return '''
       // coverage:ignore-file
       // ignore_for_file: ${_ignoreLints.join(', ')}
+      // ignore_for_file: type=lint
 
       ${_generateSchema(object)}
 
