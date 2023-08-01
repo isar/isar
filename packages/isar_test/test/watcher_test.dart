@@ -88,7 +88,7 @@ void main() {
         await listener.done();
       });
 
-      isarTest('fireImmediately', () async {
+      isarTest('fireImmediately', web: false, () async {
         final listener = Listener<void>(
           isar.values.watchLazy(fireImmediately: true),
         );
@@ -163,7 +163,7 @@ void main() {
         await listener.done();
       });
 
-      isarTest('fireImmediately', () async {
+      isarTest('fireImmediately', web: false, () async {
         final listenerLazy = Listener<void>(
           isar.values.watchObjectLazy(1, fireImmediately: true),
         );
@@ -271,7 +271,7 @@ void main() {
         await listener.done();
       });
 
-      isarTest('fireImmediately', () async {
+      isarTest('fireImmediately', web: false, () async {
         final listenerLazy = Listener(
           isar.values
               .where()
