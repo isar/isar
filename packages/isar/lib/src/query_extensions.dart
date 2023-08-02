@@ -163,14 +163,15 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QOperations> {
   }
 
   /// {@macro query_find_first}
-  R? findFirst() => _withQuery((q) => q.findFirst());
+  R? findFirst({int? offset}) => _withQuery((q) => q.findFirst(offset: offset));
 
   /// {@macro query_find_all}
   List<R> findAll({int? offset, int? limit}) =>
       _withQuery((q) => q.findAll(offset: offset, limit: limit));
 
   /// {@macro query_delete_first}
-  bool deleteFirst() => _withQuery((q) => q.deleteFirst());
+  bool deleteFirst({int? offset}) =>
+      _withQuery((q) => q.deleteFirst(offset: offset));
 
   /// {@macro query_delete_all}
   int deleteAll({int? offset, int? limit}) =>
@@ -180,10 +181,16 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QOperations> {
   List<Map<String, dynamic>> exportJson({int? offset, int? limit}) =>
       _withQuery((q) => q.exportJson(offset: offset, limit: limit));
 
-  Stream<List<R>> watch({bool fireImmediately = false}) {
+  Stream<List<R>> watch({
+    bool fireImmediately = false,
+    int? offset,
+    int? limit,
+  }) {
     final q = build();
     final controller = StreamController<List<R>>();
-    q.watch(fireImmediately: fireImmediately).listen(
+    q
+        .watch(fireImmediately: fireImmediately, offset: offset, limit: limit)
+        .listen(
       controller.add,
       onError: controller.addError,
       onDone: () {
@@ -206,7 +213,8 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QOperations> {
     }
   }
 
-  Future<R?> findFirstAsync() => _withQueryAsync((q) => q.findFirstAsync());
+  Future<R?> findFirstAsync({int? offset}) =>
+      _withQueryAsync((q) => q.findFirstAsync(offset: offset));
 
   Future<List<R>> findAllAsync({int? offset, int? limit}) =>
       _withQueryAsync((q) => q.findAllAsync(offset: offset, limit: limit));

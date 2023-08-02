@@ -10,7 +10,7 @@ abstract class IsarQuery<T> {
 
   /// Find the first object that matches this query or `null` if no object
   /// matches.
-  T? findFirst() => findAll(limit: 1).firstOrNull;
+  T? findFirst({int? offset}) => findAll(offset: offset, limit: 1).firstOrNull;
 
   /// Find all objects that match this query.
   List<T> findAll({int? offset, int? limit});
@@ -24,7 +24,7 @@ abstract class IsarQuery<T> {
 
   /// Delete the first object that matches this query. Returns whether an object
   /// has been deleted.
-  bool deleteFirst() => deleteAll(limit: 1) > 0;
+  bool deleteFirst({int? offset}) => deleteAll(offset: offset, limit: 1) > 0;
 
   /// Delete all objects that match this query. Returns the number of deleted
   /// objects.

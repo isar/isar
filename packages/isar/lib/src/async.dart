@@ -11,7 +11,8 @@ extension CollectionAsync<ID, OBJ> on IsarCollection<ID, OBJ> {
 }
 
 extension QueryAsync<T> on IsarQuery<T> {
-  Future<T?> findFirstAsync() => isar.readAsync((isar) => findFirst());
+  Future<T?> findFirstAsync({int? offset}) =>
+      isar.readAsync((isar) => findFirst(offset: offset));
 
   Future<List<T>> findAllAsync({int? offset, int? limit}) =>
       isar.readAsync((isar) => findAll(offset: offset, limit: limit));
