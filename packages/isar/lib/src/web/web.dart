@@ -30,7 +30,7 @@ FutureOr<IsarCoreBindings> initializePlatformBindings([
 
 typedef IsarCoreBindings = JSIsar;
 
-class ReceivePort extends Stream<void> {
+class ReceivePort extends Stream<dynamic> {
   final sendPort = SendPort();
 
   @override
@@ -50,6 +50,10 @@ class ReceivePort extends Stream<void> {
 
 class SendPort {
   int get nativePort => 0;
+
+  void send(dynamic message) {
+    throw UnimplementedError();
+  }
 }
 
 int platformFastHash(String str) {

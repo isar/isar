@@ -88,6 +88,13 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18"
+      - name: Wait for tests to succeed
+        uses: lewagon/wait-on-check-action@v1.3.1
+        with:
+          ref: ${{ github.ref }}
+          running-workflow-name: "Publish"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
       - name: Set Isar Version
         run: echo "ISAR_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
       - name: Download Binaries
