@@ -35,7 +35,7 @@ Future<Isar> openTempIsar(
   final isar = Isar.open(
     schemas: schemas,
     name: name ?? getRandomName(),
-    directory: directory ?? testTempPath ?? '',
+    directory: directory ?? testTempPath ?? 'none',
     engine: isSQLite ? IsarEngine.sqlite : IsarEngine.isar,
     maxSizeMiB: maxSizeMiB,
     encryptionKey: encryptionKey,

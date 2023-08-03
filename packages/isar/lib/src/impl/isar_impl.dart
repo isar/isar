@@ -37,8 +37,9 @@ class _IsarImpl extends Isar {
     required int? maxSizeMiB,
     required String? encryptionKey,
     required CompactCondition? compactOnLaunch,
+    String? library,
   }) {
-    IsarCore._initialize();
+    IsarCore._initialize(library: library);
 
     if (engine == IsarEngine.isar) {
       if (encryptionKey != null) {
@@ -130,6 +131,56 @@ class _IsarImpl extends Isar {
       instanceId: instanceId,
       converters: converters,
     );
+  }
+
+  static Future<Isar> openAsync({
+    required List<IsarCollectionSchema> schemas,
+    required String directory,
+    String name = Isar.defaultName,
+    IsarEngine engine = IsarEngine.isar,
+    int? maxSizeMiB = Isar.defaultMaxSizeMiB,
+    String? encryptionKey,
+    CompactCondition? compactOnLaunch,
+  }) async {
+    final library = IsarCore._library;
+
+    final receivePort = ReceivePort();
+    final sendPort = receivePort.sendPort;
+    unawaited(
+      scheduleIsolate(
+        () async {
+          try {
+            final isar = _IsarImpl.open(
+              schemas: schemas,
+              directory: directory,
+              name: name,
+              engine: engine,
+              maxSizeMiB: maxSizeMiB,
+              encryptionKey: encryptionKey,
+              compactOnLaunch: compactOnLaunch,
+              library: library,
+            );
+
+            final receivePort = ReceivePort();
+            sendPort.send(receivePort.sendPort);
+            await receivePort.first;
+            isar.close();
+          } catch (e) {
+            sendPort.send(e);
+          }
+        },
+        debugName: 'Isar open async',
+      ),
+    );
+
+    final response = await receivePort.first;
+    if (response is SendPort) {
+      final isar = Isar.get(schemas: schemas, name: name);
+      response.send(null);
+      return isar;
+    } else {
+      throw response as Object;
+    }
   }
 
   static _IsarImpl instance(int instanceId) {

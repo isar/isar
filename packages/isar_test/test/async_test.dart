@@ -13,6 +13,10 @@ class Model {
   final int id;
 
   final String value;
+
+  @override
+  bool operator ==(other) =>
+      other is Model && id == other.id && value == other.value;
 }
 
 void main() async {
@@ -23,8 +27,7 @@ void main() async {
       isar = await openTempIsar([ModelSchema]);
     });
 
-    // TODO enable once native assets are supported
-    /*isarTest('Open', () async {
+    isarTest('Open', () async {
       final isarName = isar.name;
       final isarDir = isar.directory;
 
@@ -33,23 +36,16 @@ void main() async {
       });
       expect(isar.close(), true);
 
-      if (isSQLite) {
-        isar = await Isar.openSQLiteAsync(
-          schemas: [ModelSchema],
-          name: isarName,
-          directory: isarDir,
-        );
-      } else {
-        isar = await Isar.openAsync(
-          schemas: [ModelSchema],
-          name: isarName,
-          directory: isarDir,
-        );
-      }
+      final isar2 = await Isar.openAsync(
+        schemas: [ModelSchema],
+        name: isarName,
+        directory: isarDir,
+        engine: isSQLite ? IsarEngine.sqlite : IsarEngine.isar,
+      );
 
-      expect(isar.models.get(2), const Model(1, 'abc'));
-      expect(isar.close(), true);
-    });*/
+      expect(isar2.models.get(1), const Model(1, 'abc'));
+      expect(isar2.close(), true);
+    });
 
     isarTest('Bulk insert', () async {
       final futures = List.generate(100, (index) {

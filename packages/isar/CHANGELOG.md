@@ -1,4 +1,4 @@
-## 4.0.0-dev.6
+## 4.0.0-dev.7
 
 ⚠️ ISAR V4 IS NOT READY FOR PRODUCTION USE ⚠️
 

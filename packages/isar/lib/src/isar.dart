@@ -106,22 +106,16 @@ abstract class Isar {
     String? encryptionKey,
     CompactCondition? compactOnLaunch,
     bool inspector = true,
-  }) async {
-    await scheduleIsolate(
-      () {
-        Isar.open(
-          schemas: schemas,
-          directory: directory,
-          name: name,
-          engine: engine,
-          maxSizeMiB: maxSizeMiB,
-          compactOnLaunch: compactOnLaunch,
-          inspector: inspector,
-        );
-      },
-      debugName: 'Isar open async',
+  }) {
+    return _IsarImpl.openAsync(
+      schemas: schemas,
+      directory: directory,
+      name: name,
+      engine: engine,
+      maxSizeMiB: maxSizeMiB,
+      encryptionKey: encryptionKey,
+      compactOnLaunch: compactOnLaunch,
     );
-    return Isar.get(schemas: schemas, name: name);
   }
 
   /// Name of the instance.
