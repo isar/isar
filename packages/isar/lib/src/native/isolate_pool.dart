@@ -7,7 +7,10 @@ final _maxIsolates = Abi.current() == Abi.androidArm ? 4 : 12;
 int _activeIsolates = 0;
 final _waiting = <Completer<void>>[];
 
-Future<R> scheduleIsolate<R>(R Function() callback, {String? debugName}) async {
+Future<R> scheduleIsolate<R>(
+  FutureOr<R> Function() callback, {
+  String? debugName,
+}) async {
   if (_activeIsolates >= _maxIsolates) {
     final completer = Completer<void>();
     _waiting.add(completer);

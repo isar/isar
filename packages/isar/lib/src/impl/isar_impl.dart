@@ -146,37 +146,36 @@ class _IsarImpl extends Isar {
 
     final receivePort = ReceivePort();
     final sendPort = receivePort.sendPort;
-    unawaited(
-      scheduleIsolate(
-        () async {
-          try {
-            final isar = _IsarImpl.open(
-              schemas: schemas,
-              directory: directory,
-              name: name,
-              engine: engine,
-              maxSizeMiB: maxSizeMiB,
-              encryptionKey: encryptionKey,
-              compactOnLaunch: compactOnLaunch,
-              library: library,
-            );
+    final isolate = scheduleIsolate(
+      () async {
+        try {
+          final isar = _IsarImpl.open(
+            schemas: schemas,
+            directory: directory,
+            name: name,
+            engine: engine,
+            maxSizeMiB: maxSizeMiB,
+            encryptionKey: encryptionKey,
+            compactOnLaunch: compactOnLaunch,
+            library: library,
+          );
 
-            final receivePort = ReceivePort();
-            sendPort.send(receivePort.sendPort);
-            await receivePort.first;
-            isar.close();
-          } catch (e) {
-            sendPort.send(e);
-          }
-        },
-        debugName: 'Isar open async',
-      ),
+          final receivePort = ReceivePort();
+          sendPort.send(receivePort.sendPort);
+          await receivePort.first;
+          isar.close();
+        } catch (e) {
+          sendPort.send(e);
+        }
+      },
+      debugName: 'Isar open async',
     );
 
     final response = await receivePort.first;
     if (response is SendPort) {
       final isar = Isar.get(schemas: schemas, name: name);
       response.send(null);
+      await isolate;
       return isar;
     } else {
       throw response as Object;
