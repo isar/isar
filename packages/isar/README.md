@@ -16,7 +16,7 @@
     <img src="https://img.shields.io/codecov/c/github/isar/isar?logo=codecov&logoColor=fff&labelColor=333940">
   </a>
   <a href="https://t.me/isardb">
-    <img src="https://img.shields.io/static/v1?label=join&message=isardb&labelColor=333940&logo=telegram&logoColor=white&color=229ED9">
+    <img src="https://img.shields.io/static/v1?label=join&message=Isar%20%26%20Hive&labelColor=333940&logo=telegram&logoColor=white&color=229ED9">
   </a>
   <a href="https://twitter.com/simcdev">
     <img src="https://img.shields.io/twitter/follow/simcdev?style=social">

@@ -109,5 +109,35 @@ String _generateUpdate(ObjectInfo oi) {
 
     _${oi.dartName}QueryUpdate get updateAll => _${oi.dartName}QueryUpdateImpl(this);
   }
+
+  class _${oi.dartName}QueryBuilderUpdateImpl implements _${oi.dartName}QueryUpdate {
+    const _${oi.dartName}QueryBuilderUpdateImpl(this.query, {this.limit});
+
+    final QueryBuilder<${oi.dartName}, ${oi.dartName}, QOperations> query;
+    final int? limit;
+
+    @override
+    int call({
+      ${updateProperties.map((p) => 'Object? ${p.dartName} = ignore,').join('\n')}
+    }) {
+      final q = query.build();
+      try {
+        return q.updateProperties(
+          limit: limit, 
+          {
+            ${updateProperties.map((p) => 'if (${p.dartName} != ignore) ${p.index}: ${p.dartName} as ${p.scalarDartTypeNotNull}?,').join('\n')}
+          }
+        );
+      } finally {
+        q.close();
+      }
+    }
+  }
+
+  extension ${oi.dartName}QueryBuilderUpdate on QueryBuilder<${oi.dartName}, ${oi.dartName}, QOperations> {
+    _${oi.dartName}QueryUpdate get updateFirst => _${oi.dartName}QueryBuilderUpdateImpl(this, limit: 1);
+
+    _${oi.dartName}QueryUpdate get updateAll => _${oi.dartName}QueryBuilderUpdateImpl(this);
+  }
   ''';
 }

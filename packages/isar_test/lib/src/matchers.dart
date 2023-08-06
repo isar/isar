@@ -16,6 +16,10 @@ Matcher throwsIsarError([String? contains]) {
   return throwsA(isIsarError(contains));
 }
 
+Matcher throwsWriteTxnError() {
+  return throwsA(isA<WriteTxnRequiredError>());
+}
+
 bool doubleListEquals(List<double?>? l1, List<double?>? l2) {
   if (l1?.length != l2?.length) {
     return false;
