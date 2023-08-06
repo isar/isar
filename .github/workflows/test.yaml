@@ -162,7 +162,7 @@ jobs:
       - name: Start simulator
         uses: futureware-tech/simulator-action@v2
         with:
-          model: iPhone 13
+          model: iPhone 14
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
