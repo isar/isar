@@ -12,15 +12,11 @@ use itertools::Itertools;
 pub fn perform_migration(txn: &SQLiteTxn, schemas: &[IsarSchema]) -> Result<()> {
     txn.guard(|| {
         let sqlite = txn.get_sqlite(true)?;
-        let table_names = sqlite
-            .get_table_names()?
-            .iter()
-            .map(|s| s.to_lowercase())
-            .collect_vec();
+        let table_names = sqlite.get_table_names()?;
 
         for collection in schemas {
             if !collection.embedded {
-                if table_names.contains(&collection.name.to_lowercase()) {
+                if table_names.contains(&collection.name) {
                     update_table(sqlite, collection)?;
                 } else {
                     let sql = create_table_sql(collection);
@@ -34,10 +30,7 @@ pub fn perform_migration(txn: &SQLiteTxn, schemas: &[IsarSchema]) -> Result<()> 
         }
 
         for table in table_names {
-            if !schemas
-                .iter()
-                .any(|c| c.name.to_lowercase() == table && !c.embedded)
-            {
+            if !schemas.iter().any(|c| c.name == table && !c.embedded) {
                 let sql = format!("DROP TABLE {}", table);
                 sqlite.prepare(&sql)?.step()?;
             }
@@ -87,7 +80,7 @@ fn update_table(sqlite: &SQLite3, collection: &IsarSchema) -> Result<()> {
     let (add_properties, drop_properties, add_indexes, drop_indexes) =
         collection.find_changes(&existing_schema);
 
-    for (index, _) in drop_indexes {
+    for index in drop_indexes {
         let sql = drop_index_sql(&collection.name, &index);
         sqlite.prepare(&sql)?.step()?;
     }

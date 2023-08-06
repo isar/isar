@@ -2,7 +2,7 @@ use super::isar_serializer::IsarSerializer;
 use super::mdbx::db::Db;
 use super::native_collection::NativeCollection;
 use super::native_txn::{NativeTxn, TxnCursor};
-use super::{IdToBytes, MAX_OBJ_SIZE};
+use super::MAX_OBJ_SIZE;
 use crate::core::error::{IsarError, Result};
 use crate::core::insert::IsarInsert;
 use ouroboros::self_referencing;

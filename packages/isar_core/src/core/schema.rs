@@ -57,7 +57,7 @@ impl IsarSchema {
         Vec<&'_ PropertySchema>,
         Vec<String>,
         Vec<&'_ IndexSchema>,
-        Vec<(String, bool)>,
+        Vec<String>,
     ) {
         let mut add_properties = Vec::new();
         let mut drop_properties = Vec::new();
@@ -69,7 +69,7 @@ impl IsarSchema {
                 let prop = self
                     .properties
                     .iter()
-                    .find(|p| name_equal(p.name.as_deref(), old_prop_name));
+                    .find(|p| p.name.as_deref() == Some(old_prop_name));
                 if let Some(prop) = prop {
                     if prop.data_type != old_prop.data_type
                         || prop.collection != old_prop.collection
@@ -88,7 +88,7 @@ impl IsarSchema {
                 let does_not_exist = !old_collection
                     .properties
                     .iter()
-                    .any(|p| name_equal(p.name.as_deref(), prop_name));
+                    .any(|p| p.name.as_deref() == Some(prop_name));
                 if does_not_exist {
                     add_properties.push(prop);
                 }
@@ -96,21 +96,19 @@ impl IsarSchema {
         }
 
         for old_index in &old_collection.indexes {
-            let index = self
-                .indexes
-                .iter()
-                .find(|i| name_equal(Some(&i.name), &old_index.name));
+            let index = self.indexes.iter().find(|i| &i.name == &old_index.name);
             if let Some(index) = index {
                 let property_dropped = index.properties.iter().any(|p| drop_properties.contains(p));
                 if index.unique != old_index.unique
                     || &index.properties != &old_index.properties
+                    || index.hash != old_index.hash
                     || property_dropped
                 {
                     add_indexes.push(index);
-                    drop_indexes.push((old_index.name.clone(), old_index.unique));
+                    drop_indexes.push(old_index.name.clone());
                 }
             } else {
-                drop_indexes.push((old_index.name.clone(), old_index.unique));
+                drop_indexes.push(old_index.name.clone());
             }
         }
 
@@ -118,7 +116,7 @@ impl IsarSchema {
             let does_not_exist = !old_collection
                 .indexes
                 .iter()
-                .any(|old_index| name_equal(Some(&index.name), &old_index.name));
+                .any(|old_index| &index.name == &old_index.name);
             if does_not_exist {
                 add_indexes.push(index);
             }
@@ -137,7 +135,7 @@ impl IsarSchema {
         let verify_target_col_exists = |col: &str, embedded: bool| -> Result<()> {
             if !collections
                 .iter()
-                .any(|c| name_equal(Some(&c.name), &col) && c.embedded == embedded)
+                .any(|c| &c.name == &col && c.embedded == embedded)
             {
                 return schema_error("Target collection does not exist.");
             }
@@ -165,15 +163,12 @@ impl IsarSchema {
             }
         }
 
-        let unique_properties = self
-            .properties
-            .iter()
-            .unique_by(|i| i.name.as_deref().unwrap_or_default().to_lowercase());
+        let unique_properties = self.properties.iter().unique();
         if unique_properties.count() != self.properties.len() {
             return schema_error("Duplicate property name")?;
         }
 
-        let unique_indexes = self.indexes.iter().unique_by(|i| i.name.to_lowercase());
+        let unique_indexes = self.indexes.iter().unique();
         if unique_indexes.count() != self.indexes.len() {
             return schema_error("Duplicate index name");
         }
@@ -187,7 +182,7 @@ impl IsarSchema {
                 let property = self
                     .properties
                     .iter()
-                    .find(|p| name_equal(p.name.as_deref(), &index_property));
+                    .find(|p| p.name.as_deref() == Some(&index_property));
                 if property.is_none() {
                     return schema_error("Index property does not exist");
                 }
@@ -271,8 +266,4 @@ impl IndexSchema {
             hash,
         }
     }
-}
-
-pub fn name_equal(name: Option<&str>, other: &str) -> bool {
-    name.map(|n| n.to_lowercase()) == Some(other.to_lowercase())
 }

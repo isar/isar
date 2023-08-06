@@ -95,8 +95,7 @@ impl IndexKey {
             if value.is_empty() {
                 self.bytes.push(1);
             } else {
-                self.bytes
-                    .extend_from_slice(value.to_lowercase().as_bytes());
+                self.bytes.extend_from_slice(value.as_bytes());
             }
         } else {
             self.contains_null = true;

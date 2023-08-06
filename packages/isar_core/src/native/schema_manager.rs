@@ -144,7 +144,7 @@ fn migrate_collection(
     let (add_properties, drop_properties, add_indexes, drop_indexes) =
         schema.find_changes(&existing_schema);
 
-    for (index, unique) in &drop_indexes {
+    for index in &drop_indexes {
         let index_db = open_index_db(txn, &schema.name, index)?;
         txn.drop_db(index_db)?;
     }
