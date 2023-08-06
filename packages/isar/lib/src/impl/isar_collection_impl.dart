@@ -402,8 +402,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
   }
 }
 
-@pragma('vm:prefer-inline')
-@pragma('dart2js:tryInline')
+@tryInline
 int _idToInt<OBJ>(OBJ id) {
   if (id is int) {
     return id;

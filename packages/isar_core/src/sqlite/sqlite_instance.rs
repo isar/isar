@@ -465,7 +465,7 @@ impl IsarInstance for SQLiteInstance {
 
     fn watch_query(&self, query: &Self::Query, callback: WatcherCallback) -> Result<WatchHandle> {
         let collection = self.get_collection(query.collection_index)?;
-        let handle = collection.watchers.watch_query(query.clone(), callback);
+        let handle = collection.watchers.watch_query(query, callback);
         Ok(handle)
     }
 

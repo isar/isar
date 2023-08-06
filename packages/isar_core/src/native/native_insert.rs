@@ -22,13 +22,8 @@ impl TxnWithCursor {
 
     fn put(&mut self, collection: &NativeCollection, id: i64, bytes: &[u8]) -> Result<()> {
         self.with_mut(|this| {
-            this.txn.guard(|| {
-                if let Some((_, old_bytes)) = this.cursor.move_to(&id.to_id_bytes())? {
-                    collection.prepare_delete(this.txn, id, old_bytes)?;
-                }
-                collection.prepare_put(this.txn, id, bytes)?;
-                this.cursor.put(&id.to_id_bytes(), bytes)
-            })
+            this.txn
+                .guard(|| collection.put(this.txn, this.cursor, id, bytes))
         })
     }
 

@@ -30,6 +30,8 @@ FutureOr<IsarCoreBindings> initializePlatformBindings([
 
 typedef IsarCoreBindings = JSIsar;
 
+const tryInline = pragma('dart2js:tryInline');
+
 class ReceivePort extends Stream<dynamic> {
   final sendPort = SendPort();
 

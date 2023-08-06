@@ -71,7 +71,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
       throw ArgumentError('Limit must be greater than 0.');
     }
 
-    return isar.getTxn((isarPtr, txnPtr) {
+    return isar.getWriteTxn((isarPtr, txnPtr) {
       final updatePtr = IsarCore.b.isar_update_new();
       for (final propertyId in changes.keys) {
         final value = _isarValue(changes[propertyId]);
@@ -90,7 +90,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
           )
           .checkNoError();
 
-      return IsarCore.countPtr.u32Value;
+      return (IsarCore.countPtr.u32Value, txnPtr);
     });
   }
 
@@ -100,7 +100,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
       throw ArgumentError('Limit must be greater than 0.');
     }
 
-    return isar.getTxn((isarPtr, txnPtr) {
+    return isar.getWriteTxn((isarPtr, txnPtr) {
       IsarCore.b
           .isar_query_delete(
             isarPtr,
@@ -111,7 +111,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
             IsarCore.countPtr,
           )
           .checkNoError();
-      return IsarCore.countPtr.u32Value;
+      return (IsarCore.countPtr.u32Value, txnPtr);
     });
   }
 

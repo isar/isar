@@ -31,6 +31,22 @@ pub(crate) fn create_table_sql(collection: &IsarSchema) -> String {
     )
 }
 
+pub(crate) fn add_column_sql(collection: &IsarSchema, property: &PropertySchema) -> String {
+    format!(
+        "ALTER TABLE {} ADD COLUMN {} {}",
+        collection.name,
+        property.name.as_ref().unwrap(),
+        data_type_sql(property)
+    )
+}
+
+pub(crate) fn drop_column_sql(collection: &IsarSchema, property_name: &str) -> String {
+    format!(
+        "ALTER TABLE {} DROP COLUMN {}",
+        collection.name, property_name
+    )
+}
+
 pub(crate) fn create_index_sql(table_name: &str, index: &IndexSchema) -> String {
     let index_name = format!("{}_{}", table_name, index.name);
     format!(
@@ -41,6 +57,10 @@ pub(crate) fn create_index_sql(table_name: &str, index: &IndexSchema) -> String 
         table_name,
         index.properties.join(", ")
     )
+}
+
+pub(crate) fn drop_index_sql(table_name: &str, index_name: &str) -> String {
+    format!("DROP INDEX {}_{}", table_name, index_name)
 }
 
 pub(crate) fn select_properties_sql(collection: &SQLiteCollection) -> String {

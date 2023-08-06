@@ -32,7 +32,6 @@ macro_rules! isar_try {
 pub const fn error_code(err: &IsarError) -> Option<u8> {
     let code = match err {
         IsarError::PathError {} => ERROR_PATH,
-        IsarError::UniqueViolated {} => ERROR_UNIQUE_VIOLATED,
         IsarError::WriteTxnRequired {} => ERROR_WRITE_TXN_REQUIRED,
         IsarError::VersionError {} => ERROR_VERSION,
         IsarError::ObjectLimitReached {} => ERROR_OBJECT_LIMIT_REACHED,
@@ -45,13 +44,12 @@ pub const fn error_code(err: &IsarError) -> Option<u8> {
 }
 
 pub const ERROR_PATH: u8 = 1;
-pub const ERROR_UNIQUE_VIOLATED: u8 = 2;
-pub const ERROR_WRITE_TXN_REQUIRED: u8 = 3;
-pub const ERROR_VERSION: u8 = 4;
-pub const ERROR_OBJECT_LIMIT_REACHED: u8 = 5;
-pub const ERROR_INSTANCE_MISMATCH: u8 = 6;
-pub const ERROR_ENCRYPTION: u8 = 7;
-pub const ERROR_DB_FULL: u8 = 8;
+pub const ERROR_WRITE_TXN_REQUIRED: u8 = 2;
+pub const ERROR_VERSION: u8 = 3;
+pub const ERROR_OBJECT_LIMIT_REACHED: u8 = 4;
+pub const ERROR_INSTANCE_MISMATCH: u8 = 5;
+pub const ERROR_ENCRYPTION: u8 = 6;
+pub const ERROR_DB_FULL: u8 = 7;
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_get_error(value: *mut *const u8) -> u32 {

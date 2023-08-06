@@ -3,24 +3,34 @@ use xxhash_rust::xxh3::xxh3_64;
 #[derive(Clone, Eq, PartialEq)]
 pub struct IndexKey {
     bytes: Vec<u8>,
+    contains_null: bool,
 }
 
 impl IndexKey {
     pub(crate) const MAX_INDEX_SIZE: usize = 1024;
 
     pub fn min() -> Self {
-        IndexKey { bytes: vec![] }
+        IndexKey {
+            bytes: vec![],
+            contains_null: false,
+        }
     }
 
     pub fn max() -> Self {
-        let mut key = IndexKey { bytes: vec![] };
+        let mut key = IndexKey {
+            bytes: vec![],
+            contains_null: false,
+        };
         key.add_long(i64::MAX);
         key
     }
 
     pub fn with_buffer(mut buffer: Vec<u8>) -> Self {
         buffer.clear();
-        IndexKey { bytes: buffer }
+        IndexKey {
+            bytes: buffer,
+            contains_null: false,
+        }
     }
 
     pub fn add_bool(&mut self, value: Option<bool>) {
@@ -28,6 +38,7 @@ impl IndexKey {
             self.bytes.push(if value { 2 } else { 1 });
         } else {
             self.bytes.push(0);
+            self.contains_null = true;
         }
     }
 
@@ -39,12 +50,14 @@ impl IndexKey {
         let unsigned = value as u32;
         let bytes: [u8; 4] = (unsigned ^ 1 << 31).to_be_bytes();
         self.bytes.extend_from_slice(&bytes);
+        self.contains_null |= value == i32::MIN;
     }
 
     pub fn add_long(&mut self, value: i64) {
         let unsigned = value as u64;
         let bytes = (unsigned ^ 1 << 63).to_be_bytes().to_vec();
         self.bytes.extend_from_slice(&bytes);
+        self.contains_null |= value == i64::MIN;
     }
 
     pub fn add_float(&mut self, value: f32) {
@@ -56,6 +69,7 @@ impl IndexKey {
             };
             bits.to_be_bytes()
         } else {
+            self.contains_null = true;
             [0; 4]
         };
         self.bytes.extend_from_slice(&bytes);
@@ -70,6 +84,7 @@ impl IndexKey {
             };
             bits.to_be_bytes()
         } else {
+            self.contains_null = true;
             [0; 8]
         };
         self.bytes.extend_from_slice(&bytes);
@@ -84,17 +99,18 @@ impl IndexKey {
                     .extend_from_slice(value.to_lowercase().as_bytes());
             }
         } else {
+            self.contains_null = true;
             self.bytes.push(0);
         }
     }
 
-    pub fn finish(mut self) -> Vec<u8> {
+    pub fn finish(mut self) -> (Vec<u8>, bool) {
         if self.bytes.len() > IndexKey::MAX_INDEX_SIZE {
             let hash = xxh3_64(&self.bytes);
             self.bytes.truncate(IndexKey::MAX_INDEX_SIZE - 8);
             self.bytes.extend_from_slice(&hash.to_be_bytes());
         }
-        self.bytes
+        (self.bytes, self.contains_null)
     }
 
     pub fn hash(&self) -> u64 {

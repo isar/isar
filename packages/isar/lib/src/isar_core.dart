@@ -78,56 +78,47 @@ abstract final class IsarCore {
     return b.isar_string(_nativeStringPtr, str.length);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static int readId(Pointer<CIsarReader> reader) {
     return b.isar_read_id(reader);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static bool readNull(Pointer<CIsarReader> reader, int index) {
     return b.isar_read_null(reader, index) != 0;
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static bool readBool(Pointer<CIsarReader> reader, int index) {
     return b.isar_read_bool(reader, index) != 0;
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static int readByte(Pointer<CIsarReader> reader, int index) {
     return b.isar_read_byte(reader, index);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static int readInt(Pointer<CIsarReader> reader, int index) {
     return b.isar_read_int(reader, index);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static double readFloat(Pointer<CIsarReader> reader, int index) {
     return b.isar_read_float(reader, index);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static int readLong(Pointer<CIsarReader> reader, int index) {
     return b.isar_read_long(reader, index);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static double readDouble(Pointer<CIsarReader> reader, int index) {
     return b.isar_read_double(reader, index);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static String? readString(Pointer<CIsarReader> reader, int index) {
     final length = b.isar_read_string(reader, index, stringPtrPtr, boolPtr);
     if (stringPtr.isNull) {
@@ -142,8 +133,7 @@ abstract final class IsarCore {
     }
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static Pointer<CIsarReader> readObject(
     Pointer<CIsarReader> reader,
     int index,
@@ -151,8 +141,7 @@ abstract final class IsarCore {
     return b.isar_read_object(reader, index);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static int readList(
     Pointer<CIsarReader> reader,
     int index,
@@ -161,50 +150,42 @@ abstract final class IsarCore {
     return b.isar_read_list(reader, index, listReader);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static void freeReader(Pointer<CIsarReader> reader) {
     b.isar_read_free(reader);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static void writeNull(Pointer<CIsarWriter> writer, int index) {
     b.isar_write_null(writer, index);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static void writeBool(Pointer<CIsarWriter> writer, int index, bool value) {
     b.isar_write_bool(writer, index, value);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static void writeByte(Pointer<CIsarWriter> writer, int index, int value) {
     b.isar_write_byte(writer, index, value);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static void writeInt(Pointer<CIsarWriter> writer, int index, int value) {
     b.isar_write_int(writer, index, value);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static void writeFloat(Pointer<CIsarWriter> writer, int index, double value) {
     b.isar_write_float(writer, index, value);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static void writeLong(Pointer<CIsarWriter> writer, int index, int value) {
     b.isar_write_long(writer, index, value);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static void writeDouble(
     Pointer<CIsarWriter> writer,
     int index,
@@ -213,8 +194,7 @@ abstract final class IsarCore {
     b.isar_write_double(writer, index, value);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static void writeString(
     Pointer<CIsarWriter> writer,
     int index,
@@ -224,8 +204,7 @@ abstract final class IsarCore {
     b.isar_write_string(writer, index, valuePtr);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static Pointer<CIsarWriter> beginObject(
     Pointer<CIsarWriter> writer,
     int index,
@@ -233,8 +212,7 @@ abstract final class IsarCore {
     return b.isar_write_object(writer, index);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static void endObject(
     Pointer<CIsarWriter> writer,
     Pointer<CIsarWriter> objectWriter,
@@ -242,8 +220,7 @@ abstract final class IsarCore {
     b.isar_write_object_end(writer, objectWriter);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static Pointer<CIsarWriter> beginList(
     Pointer<CIsarWriter> writer,
     int index,
@@ -252,8 +229,7 @@ abstract final class IsarCore {
     return b.isar_write_list(writer, index, length);
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   static void endList(
     Pointer<CIsarWriter> writer,
     Pointer<CIsarWriter> listWriter,
@@ -263,6 +239,6 @@ abstract final class IsarCore {
 }
 
 extension PointerX on Pointer<void> {
-  @pragma('vm:prefer-inline')
+  @tryInline
   bool get isNull => address == 0;
 }

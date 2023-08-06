@@ -83,7 +83,7 @@ impl NativeTxn {
         let cursor = self.get_cursor(unnamed_db)?;
 
         let names = cursor
-            .iter_between(IndexKey::min(), IndexKey::max(), false, false)?
+            .iter()?
             .map(|(key, _)| String::from_utf8(key.to_vec()).unwrap())
             .collect();
         Ok(names)
@@ -115,6 +115,15 @@ pub(crate) struct TxnCursor<'txn> {
 }
 
 impl<'txn> TxnCursor<'txn> {
+    pub fn iter(self) -> Result<CursorIterator<'txn, Self>> {
+        self.iter_between(
+            IndexKey::min().finish().0,
+            IndexKey::max().finish().0,
+            false,
+            false,
+        )
+    }
+
     pub fn iter_between_ids(
         self,
         start_id: i64,
@@ -134,19 +143,12 @@ impl<'txn> TxnCursor<'txn> {
 
     pub fn iter_between(
         self,
-        start_key: IndexKey,
-        end_key: IndexKey,
+        start_key: Vec<u8>,
+        end_key: Vec<u8>,
         duplicates: bool,
         skip_duplicates: bool,
     ) -> Result<CursorIterator<'txn, Self>> {
-        CursorIterator::new(
-            self,
-            start_key.finish(),
-            end_key.finish(),
-            false,
-            duplicates,
-            skip_duplicates,
-        )
+        CursorIterator::new(self, start_key, end_key, false, duplicates, skip_duplicates)
     }
 }
 

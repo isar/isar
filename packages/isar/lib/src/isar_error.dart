@@ -20,14 +20,6 @@ class PathError extends IsarError {
       'for example because it is a file.';
 }
 
-class UniqueViolationError extends IsarError {
-  @override
-  String get name => 'UniqueViolationError';
-
-  @override
-  String get message => 'A unique index constraint was violated.';
-}
-
 class WriteTxnRequiredError extends IsarError {
   @override
   String get name => 'WriteTxnRequiredError';

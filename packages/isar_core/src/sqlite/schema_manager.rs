@@ -1,4 +1,7 @@
-use super::sql::{create_index_sql, create_table_sql, data_type_sql, sql_data_type};
+use super::sql::{
+    add_column_sql, create_index_sql, create_table_sql, drop_column_sql, drop_index_sql,
+    sql_data_type,
+};
 use super::sqlite3::SQLite3;
 use super::sqlite_txn::SQLiteTxn;
 use crate::core::error::{IsarError, Result};
@@ -85,22 +88,17 @@ fn update_table(sqlite: &SQLite3, collection: &IsarSchema) -> Result<()> {
         collection.find_changes(&existing_schema);
 
     for (index, _) in drop_indexes {
-        let sql = format!("DROP INDEX {}_{}", collection.name, index);
+        let sql = drop_index_sql(&collection.name, &index);
         sqlite.prepare(&sql)?.step()?;
     }
 
     for property in &drop_properties {
-        let sql = format!("ALTER TABLE {} DROP COLUMN {}", collection.name, property);
+        let sql = drop_column_sql(collection, property);
         sqlite.prepare(&sql)?.step()?;
     }
 
     for property in &add_properties {
-        let sql = format!(
-            "ALTER TABLE {} ADD COLUMN {} {}",
-            collection.name,
-            property.name.as_ref().unwrap(),
-            data_type_sql(property)
-        );
+        let sql = add_column_sql(collection, property);
         sqlite.prepare(&sql)?.step()?;
     }
 

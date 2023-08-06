@@ -2,7 +2,7 @@ use super::isar_deserializer::IsarDeserializer;
 use super::isar_serializer::IsarSerializer;
 use super::mdbx::db::Db;
 use super::native_index::NativeIndex;
-use super::native_txn::NativeTxn;
+use super::native_txn::{NativeTxn, TxnCursor};
 use super::query::Query;
 use super::{BytesToId, IdToBytes};
 use crate::core::data_type::DataType;
@@ -89,7 +89,7 @@ impl NativeCollection {
         self.auto_increment.fetch_add(1, atomic::Ordering::AcqRel)
     }
 
-    pub fn update_auto_increment(&self, id: i64) {
+    fn update_auto_increment(&self, id: i64) {
         self.auto_increment
             .fetch_max(id + 1, atomic::Ordering::AcqRel);
     }
@@ -117,40 +117,78 @@ impl NativeCollection {
         Ok(size)
     }
 
-    pub fn prepare_put(&self, txn: &NativeTxn, id: i64, bytes: &[u8]) -> Result<()> {
+    pub(crate) fn put<'a>(
+        &self,
+        txn: &'a NativeTxn,
+        cursor: &mut TxnCursor<'a>,
+        id: i64,
+        bytes: &[u8],
+    ) -> Result<()> {
         let mut change_set = txn.get_change_set();
+        let id_bytes = id.to_id_bytes();
+
+        // we only fetch the previous object if there are query watchers or indexes
+        if !self.indexes.is_empty() || self.watchers.has_query_watchers() {
+            if let Some((_, bytes)) = cursor.move_to(&id_bytes)? {
+                let object = IsarDeserializer::from_bytes(&bytes);
+                // register old object change
+                change_set.register_change(&self.watchers, id, &object);
+
+                if !self.indexes.is_empty() {
+                    let mut buffer = txn.take_buffer();
+                    // delete old object indexes
+                    for index in &self.indexes {
+                        buffer = index.delete_for_object(txn, id, object, buffer)?;
+                    }
+                    txn.put_buffer(buffer);
+                }
+            }
+        }
 
         let object = IsarDeserializer::from_bytes(&bytes);
+        // register new object change
         change_set.register_change(&self.watchers, id, &object);
 
         if !self.indexes.is_empty() {
             let mut buffer = txn.take_buffer();
+
+            // create new object indexes
             for index in &self.indexes {
-                buffer = index.create_for_object(txn, id, object, buffer)?;
+                buffer = index.create_for_object(txn, id, object, buffer, |id| {
+                    self.delete(txn, id)?;
+                    Ok(())
+                })?;
             }
+
             txn.put_buffer(buffer);
         }
 
         self.update_auto_increment(id);
-
-        Ok(())
+        cursor.put(&id_bytes, bytes)
     }
 
-    pub fn prepare_delete(&self, txn: &NativeTxn, id: i64, bytes: &[u8]) -> Result<()> {
+    pub fn delete<'a>(&self, txn: &'a NativeTxn, id: i64) -> Result<bool> {
+        let mut cursor = txn.get_cursor(self.get_db()?)?;
         let mut change_set = txn.get_change_set();
+        let id_bytes = id.to_id_bytes();
 
-        let object = IsarDeserializer::from_bytes(&bytes);
-        change_set.register_change(&self.watchers, id, &object);
+        if let Some((_, bytes)) = cursor.move_to(&id_bytes)? {
+            let object = IsarDeserializer::from_bytes(&bytes);
+            change_set.register_change(&self.watchers, id, &object);
 
-        if !self.indexes.is_empty() {
-            let mut buffer = txn.take_buffer();
-            for index in &self.indexes {
-                buffer = index.delete_for_object(txn, id, object, buffer)?;
+            if !self.indexes.is_empty() {
+                let mut buffer = txn.take_buffer();
+                for index in &self.indexes {
+                    buffer = index.delete_for_object(txn, id, object, buffer)?;
+                }
+                txn.put_buffer(buffer);
             }
-            txn.put_buffer(buffer);
-        }
 
-        Ok(())
+            cursor.delete_current()?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
     }
 
     pub fn update(
@@ -161,8 +199,8 @@ impl NativeCollection {
     ) -> Result<bool> {
         let mut cursor = txn.get_cursor(self.get_db()?)?;
 
-        let key = id.to_id_bytes();
-        if let Some((_, old_object)) = cursor.move_to(&key)? {
+        let id_bytes = id.to_id_bytes();
+        if let Some((_, old_object)) = cursor.move_to(&id_bytes)? {
             let mut buffer = txn.take_buffer();
             buffer.extend_from_slice(&old_object);
             let mut new_object = IsarSerializer::new(buffer, 0, self.static_size);
@@ -172,12 +210,9 @@ impl NativeCollection {
             }
 
             let buffer = new_object.finish();
-            cursor.put(&key, &buffer)?;
-
-            self.prepare_delete(txn, id, old_object)?;
-            self.prepare_put(txn, id, &buffer)?;
-
+            self.put(txn, &mut cursor, id, &buffer)?;
             txn.put_buffer(buffer);
+
             Ok(true)
         } else {
             Ok(false)
@@ -220,19 +255,6 @@ impl NativeCollection {
             Ok(())
         } else {
             return Err(IsarError::IllegalArgument {});
-        }
-    }
-
-    pub fn delete(&self, txn: &NativeTxn, id: i64) -> Result<bool> {
-        let mut cursor = txn.get_cursor(self.get_db()?)?;
-
-        let key = id.to_id_bytes();
-        if let Some((_, bytes)) = cursor.move_to(&key)? {
-            self.prepare_delete(txn, id, bytes)?;
-            cursor.delete_current()?;
-            Ok(true)
-        } else {
-            Ok(false)
         }
     }
 

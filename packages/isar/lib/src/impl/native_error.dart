@@ -1,8 +1,7 @@
 part of isar;
 
 extension on int {
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   void checkNoError() {
     if (this != 0) {
       throwError();
@@ -13,8 +12,6 @@ extension on int {
     switch (this) {
       case ERROR_PATH:
         throw PathError();
-      case ERROR_UNIQUE_VIOLATED:
-        throw UniqueViolationError();
       case ERROR_WRITE_TXN_REQUIRED:
         throw WriteTxnRequiredError();
       case ERROR_VERSION:

@@ -1965,19 +1965,17 @@ final class CWatchHandle extends ffi.Opaque {}
 
 const int ERROR_PATH = 1;
 
-const int ERROR_UNIQUE_VIOLATED = 2;
+const int ERROR_WRITE_TXN_REQUIRED = 2;
 
-const int ERROR_WRITE_TXN_REQUIRED = 3;
+const int ERROR_VERSION = 3;
 
-const int ERROR_VERSION = 4;
+const int ERROR_OBJECT_LIMIT_REACHED = 4;
 
-const int ERROR_OBJECT_LIMIT_REACHED = 5;
+const int ERROR_INSTANCE_MISMATCH = 5;
 
-const int ERROR_INSTANCE_MISMATCH = 6;
+const int ERROR_ENCRYPTION = 6;
 
-const int ERROR_ENCRYPTION = 7;
-
-const int ERROR_DB_FULL = 8;
+const int ERROR_DB_FULL = 7;
 
 const int AGGREGATION_COUNT = 0;
 

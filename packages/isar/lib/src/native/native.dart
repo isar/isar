@@ -46,6 +46,8 @@ FutureOr<IsarCoreBindings> initializePlatformBindings([String? library]) {
   return bindings;
 }
 
+const tryInline = pragma('vm:prefer-inline');
+
 extension on Abi {
   String get localName {
     switch (Abi.current()) {

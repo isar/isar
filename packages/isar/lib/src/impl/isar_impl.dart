@@ -194,8 +194,7 @@ class _IsarImpl extends Isar {
     return instance;
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   Pointer<CIsarInstance> getPtr() {
     final ptr = _ptr;
     if (ptr == null) {
@@ -217,8 +216,7 @@ class _IsarImpl extends Isar {
     return utf8.decode(IsarCore.stringPtr.asU8List(length));
   }();
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   T getTxn<T>(
     T Function(
       Pointer<CIsarInstance> isarPtr,
@@ -233,8 +231,7 @@ class _IsarImpl extends Isar {
     }
   }
 
-  @pragma('vm:prefer-inline')
-  @pragma('dart2js:tryInline')
+  @tryInline
   T getWriteTxn<T>(
     (T, Pointer<CIsarTxn>?) Function(
       Pointer<CIsarInstance> isarPtr,

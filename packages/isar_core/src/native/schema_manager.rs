@@ -1,4 +1,3 @@
-use super::index_key::IndexKey;
 use super::mdbx::db::Db;
 use super::mdbx::env::Env;
 use super::native_collection::{NativeCollection, NativeProperty};
@@ -90,7 +89,7 @@ pub fn perform_migration(
 fn get_schemas(txn: &NativeTxn, info_db: Db) -> Result<Vec<IsarSchema>> {
     let info_cursor = txn.get_cursor(info_db)?;
     let mut schemas = vec![];
-    for (_, bytes) in info_cursor.iter_between(IndexKey::min(), IndexKey::max(), false, false)? {
+    for (_, bytes) in info_cursor.iter()? {
         let col =
             serde_json::from_slice::<IsarSchema>(bytes).map_err(|_| IsarError::SchemaError {
                 message: "Could not deserialize existing schema.".to_string(),
@@ -113,21 +112,16 @@ fn open_info_db(txn: &NativeTxn) -> Result<Db> {
     txn.open_db("_info", false, false)
 }
 
-fn open_index_db(
-    txn: &NativeTxn,
-    col_name: &str,
-    index_name: &str,
-    index_unique: bool,
-) -> Result<Db> {
+fn open_index_db(txn: &NativeTxn, col_name: &str, index_name: &str) -> Result<Db> {
     let db_name = format!("_{}_{}", col_name, index_name);
-    txn.open_db(&db_name, false, !index_unique)
+    txn.open_db(&db_name, false, true)
 }
 
 fn delete_collection(txn: &NativeTxn, info_db: Db, schema: &IsarSchema) -> Result<()> {
     let db = txn.open_db(&schema.name, true, false)?;
     txn.drop_db(db)?;
     for index in &schema.indexes {
-        let index_db = open_index_db(txn, &schema.name, &index.name, index.unique)?;
+        let index_db = open_index_db(txn, &schema.name, &index.name)?;
         txn.drop_db(index_db)?;
     }
 
@@ -151,7 +145,7 @@ fn migrate_collection(
         schema.find_changes(&existing_schema);
 
     for (index, unique) in &drop_indexes {
-        let index_db = open_index_db(txn, &schema.name, index, *unique)?;
+        let index_db = open_index_db(txn, &schema.name, index)?;
         txn.drop_db(index_db)?;
     }
 

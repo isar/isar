@@ -10,9 +10,6 @@ pub enum IsarError {
     ))]
     PathError {},
 
-    #[snafu(display("Unique index violated."))]
-    UniqueViolated {},
-
     #[snafu(display("Write transaction required."))]
     WriteTxnRequired {},
 

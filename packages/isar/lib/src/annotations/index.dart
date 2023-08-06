@@ -22,8 +22,8 @@ class Index {
   final List<String> composite;
 
   /// A unique index ensures the index does not contain any duplicate values.
-  /// Any attempt to insert or update data into the unique index that causes a
-  /// duplicate will result in an error.
+  /// If you attempt to insert a value that conflicts with the unique index,
+  /// the old object is deleted.
   final bool unique;
 
   /// Stores the hash of the value(s) in the index. This saves space and

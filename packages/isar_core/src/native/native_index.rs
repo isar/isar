@@ -5,7 +5,7 @@ use super::native_collection::NativeProperty;
 use super::native_txn::NativeTxn;
 use super::IdToBytes;
 use crate::core::data_type::DataType;
-use crate::core::error::{IsarError, Result};
+use crate::core::error::Result;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct NativeIndex {
@@ -33,7 +33,7 @@ impl NativeIndex {
         }
     }
 
-    fn create_key(&self, object: IsarDeserializer, buffer: Vec<u8>) -> Vec<u8> {
+    fn create_key(&self, object: IsarDeserializer, buffer: Vec<u8>) -> (Vec<u8>, bool) {
         let mut key = IndexKey::with_buffer(buffer);
         for property in &self.properties {
             match property.data_type {
@@ -50,28 +50,32 @@ impl NativeIndex {
 
         if self.hash {
             let hash = key.hash();
-            let mut buffer = key.finish();
+            let (mut buffer, contains_null) = key.finish();
             buffer.clear();
             buffer.extend_from_slice(&hash.to_be_bytes());
-            buffer
+            (buffer, contains_null)
         } else {
             key.finish()
         }
     }
 
-    pub fn create_for_object(
+    pub fn create_for_object<F>(
         &self,
         txn: &NativeTxn,
         id: i64,
         object: IsarDeserializer,
         buffer: Vec<u8>,
-    ) -> Result<Vec<u8>> {
+        mut delete: F,
+    ) -> Result<Vec<u8>>
+    where
+        F: FnMut(i64) -> Result<()>,
+    {
         let mut cursor = txn.get_cursor(self.db)?;
-        let key = self.create_key(object, buffer);
+        let (key, contains_null) = self.create_key(object, buffer);
 
-        if self.unique {
+        if self.unique && !contains_null {
             if cursor.move_to(&key)?.is_some() {
-                return Err(IsarError::UniqueViolated {});
+                delete(id)?;
             }
         }
         cursor.put(&key, &id.to_id_bytes())?;
@@ -87,13 +91,8 @@ impl NativeIndex {
         buffer: Vec<u8>,
     ) -> Result<Vec<u8>> {
         let mut cursor = txn.get_cursor(self.db)?;
-        let key = self.create_key(object, buffer);
-        let has_entry = if self.unique {
-            cursor.move_to(&key)?.is_some()
-        } else {
-            cursor.move_to_key_val(&key, &id.to_id_bytes())?.is_some()
-        };
-        if has_entry {
+        let key = self.create_key(object, buffer).0;
+        if cursor.move_to_key_val(&key, &id.to_id_bytes())?.is_some() {
             cursor.delete_current()?;
         }
         Ok(key)
