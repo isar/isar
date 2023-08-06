@@ -1,4 +1,4 @@
-## 4.0.0-dev.7
+## 4.0.0-dev.8
 
 ⚠️ ISAR V4 IS NOT READY FOR PRODUCTION USE ⚠️
 
@@ -21,6 +21,7 @@ Changed transactions API:
 - Enums no longer need to be annotated with `@enumerated` instead there is a new `@enumValue` annotation to specify the value property of an enum
 - Where clauses have been removed in favor of automatic index handling
 - Isar links have been removed in favor of embedded objects
+- Indexes have been simplified
 - The Android minimum SDK version is now 23
 
 ### Enhancements
