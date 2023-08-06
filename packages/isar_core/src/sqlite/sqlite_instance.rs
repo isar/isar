@@ -1,9 +1,10 @@
 use super::schema_manager::perform_migration;
-use super::sql::{select_properties_sql, sql_fn_filter_json, FN_FILTER_JSON_NAME};
+use super::sql::{sql_fn_filter_json, FN_FILTER_JSON_NAME};
 use super::sqlite3::SQLite3;
 use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
+use super::sqlite_cursor::SQLiteCursor;
 use super::sqlite_insert::SQLiteInsert;
-use super::sqlite_query::{SQLiteCursor, SQLiteQuery};
+use super::sqlite_query::{SQLiteQuery, SQLiteQueryCursor};
 use super::sqlite_query_builder::SQLiteQueryBuilder;
 use super::sqlite_reader::SQLiteReader;
 use super::sqlite_txn::SQLiteTxn;
@@ -18,7 +19,6 @@ use intmap::IntMap;
 use itertools::Itertools;
 use parking_lot::lock_api::RawMutex;
 use parking_lot::Mutex;
-use std::borrow::Cow;
 use std::cell::Cell;
 use std::fs::remove_file;
 use std::path::PathBuf;
@@ -158,13 +158,17 @@ impl IsarInstance for SQLiteInstance {
 
     type Reader<'a> = SQLiteReader<'a>;
 
+    type Cursor<'a> = SQLiteCursor<'a>
+    where
+        Self: 'a;
+
     type Insert<'a> = SQLiteInsert<'a>;
 
     type QueryBuilder<'a> = SQLiteQueryBuilder<'a>;
 
     type Query = SQLiteQuery;
 
-    type Cursor<'a> = SQLiteCursor<'a>
+    type QueryCursor<'a> = SQLiteQueryCursor<'a>
     where
         Self: 'a;
 
@@ -292,31 +296,9 @@ impl IsarInstance for SQLiteInstance {
         }
     }
 
-    fn get<'a>(
-        &'a self,
-        txn: &'a Self::Txn,
-        collection_index: u16,
-        id: i64,
-    ) -> Result<Option<Self::Reader<'a>>> {
+    fn cursor<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16) -> Result<Self::Cursor<'a>> {
         let collection = self.get_collection(collection_index)?;
-
-        let sql = format!(
-            "SELECT {} FROM {} WHERE {} = {}",
-            select_properties_sql(collection),
-            collection.name,
-            SQLiteProperty::ID_NAME,
-            id
-        );
-        let mut stmt = txn.get_sqlite(false)?.prepare(&sql)?;
-        if stmt.step()? {
-            Ok(Some(SQLiteReader::new(
-                Cow::Owned(stmt),
-                collection,
-                &self.info.collections,
-            )))
-        } else {
-            Ok(None)
-        }
+        SQLiteCursor::new(txn, collection, &self.info.collections)
     }
 
     fn insert<'a>(
@@ -402,7 +384,7 @@ impl IsarInstance for SQLiteInstance {
         query: &'a Self::Query,
         offset: Option<u32>,
         limit: Option<u32>,
-    ) -> Result<Self::Cursor<'_>> {
+    ) -> Result<Self::QueryCursor<'_>> {
         query.cursor(txn, &self.info.collections, offset, limit)
     }
 

@@ -1,4 +1,4 @@
-use super::cursor::IsarCursor;
+use super::cursor::{IsarCursor, IsarQueryCursor};
 use super::de::IsarJsonImportVisitor;
 use super::error::{IsarError, Result};
 use super::insert::IsarInsert;
@@ -24,6 +24,10 @@ pub trait IsarInstance: Sized {
     where
         Self: 'a;
 
+    type Cursor<'a>: IsarCursor<Reader<'a> = Self::Reader<'a>>
+    where
+        Self: 'a;
+
     type Insert<'a>: IsarInsert<'a, Txn = Self::Txn>
     where
         Self: 'a;
@@ -34,7 +38,7 @@ pub trait IsarInstance: Sized {
 
     type Query;
 
-    type Cursor<'a>: IsarCursor<Reader<'a> = Self::Reader<'a>>
+    type QueryCursor<'a>: IsarQueryCursor<Reader<'a> = Self::Reader<'a>>
     where
         Self: 'a;
 
@@ -64,12 +68,7 @@ pub trait IsarInstance: Sized {
 
     fn auto_increment(&self, collection_index: u16) -> i64;
 
-    fn get<'a>(
-        &'a self,
-        txn: &'a Self::Txn,
-        collection_index: u16,
-        id: i64,
-    ) -> Result<Option<Self::Reader<'a>>>;
+    fn cursor<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16) -> Result<Self::Cursor<'a>>;
 
     fn insert(&self, txn: Self::Txn, collection_index: u16, count: u32)
         -> Result<Self::Insert<'_>>;
@@ -103,7 +102,7 @@ pub trait IsarInstance: Sized {
         query: &'a Self::Query,
         offset: Option<u32>,
         limit: Option<u32>,
-    ) -> Result<Self::Cursor<'_>>;
+    ) -> Result<Self::QueryCursor<'_>>;
 
     fn query_aggregate(
         &self,

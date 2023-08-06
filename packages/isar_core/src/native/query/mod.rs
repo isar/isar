@@ -6,7 +6,7 @@ use super::isar_deserializer::IsarDeserializer;
 use super::native_collection::{NativeCollection, NativeProperty};
 use super::native_reader::NativeReader;
 use super::native_txn::NativeTxn;
-use crate::core::cursor::IsarCursor;
+use crate::core::cursor::IsarQueryCursor;
 use crate::core::error::Result;
 use crate::core::instance::Aggregation;
 use crate::core::query_builder::Sort;
@@ -28,7 +28,7 @@ pub(crate) enum QueryIndex {
 }
 
 #[derive(Clone)]
-pub struct Query {
+pub struct NativeQuery {
     pub(crate) instance_id: u32,
     pub(crate) collection_index: u16,
     pub(self) indexes: Vec<QueryIndex>,
@@ -37,7 +37,7 @@ pub struct Query {
     pub(self) distinct: Vec<(NativeProperty, bool)>,
 }
 
-impl Query {
+impl NativeQuery {
     pub(crate) fn new(
         instance_id: u32,
         collection_index: u16,
@@ -62,7 +62,7 @@ impl Query {
         all_collections: &'a [NativeCollection],
         offset: Option<u32>,
         limit: Option<u32>,
-    ) -> QueryCursor<'_> {
+    ) -> NativeQueryCursor<'_> {
         let collection = &all_collections[self.collection_index as usize];
         let iterator = QueryIterator::new(
             txn,
@@ -72,7 +72,7 @@ impl Query {
             offset.unwrap_or(0),
             limit.unwrap_or(u32::MAX),
         );
-        QueryCursor::new(iterator, collection, all_collections)
+        NativeQueryCursor::new(iterator, collection, all_collections)
     }
 
     pub(crate) fn aggregate(
@@ -150,7 +150,7 @@ impl Query {
     }
 }
 
-impl QueryMatches for Query {
+impl QueryMatches for NativeQuery {
     type Object<'a> = IsarDeserializer<'a>;
 
     fn matches<'a>(&self, id: i64, object: &IsarDeserializer<'a>) -> bool {
@@ -158,13 +158,13 @@ impl QueryMatches for Query {
     }
 }
 
-pub struct QueryCursor<'a> {
+pub struct NativeQueryCursor<'a> {
     iterator: QueryIterator<'a>,
     collection: &'a NativeCollection,
     all_collections: &'a [NativeCollection],
 }
 
-impl<'a> QueryCursor<'a> {
+impl<'a> NativeQueryCursor<'a> {
     pub(crate) fn new(
         iterator: QueryIterator<'a>,
         collection: &'a NativeCollection,
@@ -178,7 +178,7 @@ impl<'a> QueryCursor<'a> {
     }
 }
 
-impl<'a> IsarCursor for QueryCursor<'a> {
+impl<'a> IsarQueryCursor for NativeQueryCursor<'a> {
     type Reader<'b> = NativeReader<'b> where Self: 'b;
 
     #[inline]

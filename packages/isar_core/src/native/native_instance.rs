@@ -1,13 +1,12 @@
-use super::isar_deserializer::IsarDeserializer;
 use super::mdbx::env::Env;
 use super::native_collection::NativeCollection;
+use super::native_cursor::NativeCursor;
 use super::native_insert::NativeInsert;
 use super::native_query_builder::NativeQueryBuilder;
 use super::native_reader::NativeReader;
 use super::native_txn::NativeTxn;
-use super::query::{Query, QueryCursor};
+use super::query::{NativeQuery, NativeQueryCursor};
 use super::schema_manager::perform_migration;
-use super::IdToBytes;
 use crate::core::error::{IsarError, Result};
 use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
 use crate::core::schema::IsarSchema;
@@ -39,6 +38,10 @@ impl IsarInstance for NativeInstance {
     where
         Self: 'a;
 
+    type Cursor<'a> = NativeCursor<'a>
+        where
+            Self: 'a;
+
     type Insert<'a> = NativeInsert<'a>
     where
         Self: 'a;
@@ -47,9 +50,9 @@ impl IsarInstance for NativeInstance {
     where
         Self: 'a;
 
-    type Query = Query;
+    type Query = NativeQuery;
 
-    type Cursor<'a> = QueryCursor<'a>
+    type QueryCursor<'a> = NativeQueryCursor<'a>
     where
         Self: 'a;
 
@@ -127,22 +130,10 @@ impl IsarInstance for NativeInstance {
         }
     }
 
-    fn get<'a>(
-        &'a self,
-        txn: &'a Self::Txn,
-        collection_index: u16,
-        id: i64,
-    ) -> Result<Option<Self::Reader<'a>>> {
+    fn cursor<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16) -> Result<Self::Cursor<'a>> {
         self.verify_instance_id(txn.instance_id)?;
         let collection = self.get_collection(collection_index)?;
-        let mut cursor = txn.get_cursor(collection.get_db()?)?;
-        let result = if let Some((_, bytes)) = cursor.move_to(&id.to_id_bytes())? {
-            let object = IsarDeserializer::from_bytes(bytes);
-            Some(NativeReader::new(id, object, collection, &self.collections))
-        } else {
-            None
-        };
-        Ok(result)
+        NativeCursor::new(txn, collection, &self.collections)
     }
 
     fn insert<'a>(
@@ -213,7 +204,7 @@ impl IsarInstance for NativeInstance {
         query: &'a Self::Query,
         offset: Option<u32>,
         limit: Option<u32>,
-    ) -> Result<Self::Cursor<'a>> {
+    ) -> Result<Self::QueryCursor<'a>> {
         self.verify_instance_id(txn.instance_id)?;
         self.verify_instance_id(query.instance_id)?;
         let result = query.cursor(txn, &self.collections, offset, limit);

@@ -19,7 +19,7 @@ abstract class IsarCollection<ID, OBJ> {
 
   /// Get a single object by its [id]. Returns `null` if the object does not
   /// exist.
-  OBJ? get(ID id);
+  OBJ? get(ID id) => getAll([id]).firstOrNull;
 
   /// Get a list of objects by their [ids]. Objects in the list are `null`
   /// if they don't exist.

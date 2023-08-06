@@ -33,7 +33,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
     }
 
     return isar.getTxn((isarPtr, txnPtr) {
-      final cursorPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarCursor>>();
+      final cursorPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarQueryCursor>>();
       IsarCore.b
           .isar_query_cursor(
             isarPtr,
@@ -49,13 +49,11 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
       Pointer<CIsarReader> readerPtr = nullptr;
       final values = <E>[];
       while (true) {
-        readerPtr = IsarCore.b.isar_cursor_next(cursorPtr, readerPtr);
+        readerPtr = IsarCore.b.isar_query_cursor_next(cursorPtr, readerPtr);
         if (readerPtr.isNull) break;
         values.add(deserialize(readerPtr));
       }
-
-      IsarCore.b.isar_read_free(readerPtr);
-      IsarCore.b.isar_cursor_free(cursorPtr);
+      IsarCore.b.isar_query_cursor_free(cursorPtr, readerPtr);
       return values;
     });
   }

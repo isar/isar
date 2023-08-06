@@ -2,6 +2,7 @@ mod schema_manager;
 mod sql;
 mod sqlite3;
 pub mod sqlite_collection;
+mod sqlite_cursor;
 mod sqlite_insert;
 pub mod sqlite_instance;
 pub mod sqlite_query;

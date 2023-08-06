@@ -5,7 +5,7 @@ use super::sqlite3::SQLiteStatement;
 use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
 use super::sqlite_reader::SQLiteReader;
 use super::sqlite_txn::SQLiteTxn;
-use crate::core::cursor::IsarCursor;
+use crate::core::cursor::IsarQueryCursor;
 use crate::core::data_type::DataType;
 use crate::core::error::Result;
 use crate::core::filter::JsonCondition;
@@ -49,7 +49,7 @@ impl SQLiteQuery {
         all_collections: &'a [SQLiteCollection],
         offset: Option<u32>,
         limit: Option<u32>,
-    ) -> Result<SQLiteCursor<'a>> {
+    ) -> Result<SQLiteQueryCursor<'a>> {
         let collection = &all_collections[self.collection_index as usize];
         let sql = format!(
             "SELECT {} FROM {} {} {}",
@@ -61,7 +61,7 @@ impl SQLiteQuery {
         let mut stmt = txn.get_sqlite(false)?.prepare(&sql)?;
         Self::bind_params(&mut stmt, &self.params, 0)?;
 
-        Ok(SQLiteCursor {
+        Ok(SQLiteQueryCursor {
             stmt,
             collection,
             all_collections,
@@ -223,13 +223,13 @@ impl QueryMatches for SQLiteQuery {
     }
 }
 
-pub struct SQLiteCursor<'a> {
+pub struct SQLiteQueryCursor<'a> {
     stmt: SQLiteStatement<'a>,
     collection: &'a SQLiteCollection,
     all_collections: &'a [SQLiteCollection],
 }
 
-impl<'a> IsarCursor for SQLiteCursor<'a> {
+impl<'a> IsarQueryCursor for SQLiteQueryCursor<'a> {
     type Reader<'b> = SQLiteReader<'b> where Self: 'b;
 
     fn next(&mut self) -> Option<Self::Reader<'_>> {

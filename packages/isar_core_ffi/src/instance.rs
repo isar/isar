@@ -1,5 +1,5 @@
 use crate::{
-    dart_fast_hash, i64_to_isar, isar_to_i64, CIsarInstance, CIsarReader, CIsarTxn, IsarI64,
+    dart_fast_hash, i64_to_isar, isar_to_i64, CIsarCursor, CIsarInstance, CIsarTxn, IsarI64,
 };
 use isar_core::core::error::IsarError;
 use isar_core::core::instance::{CompactCondition, IsarInstance};
@@ -199,31 +199,27 @@ pub unsafe extern "C" fn isar_auto_increment(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_get(
+pub unsafe extern "C" fn isar_cursor(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
     collection_index: u16,
-    id: IsarI64,
-    reader: *mut *const CIsarReader,
+    cursor: *mut *const CIsarCursor,
 ) -> u8 {
-    let id = isar_to_i64(id);
     isar_try! {
-        let new_reader = match (isar, txn) {
+        let new_cursor = match (isar, txn) {
             #[cfg(feature = "native")]
-            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => isar
-                .get(txn, collection_index, id)?
-                .map(|r| CIsarReader::Native(r)),
+            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => {
+                let cursor = isar.cursor(txn, collection_index)?;
+                CIsarCursor::Native(cursor)
+            }
             #[cfg(feature = "sqlite")]
-            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn)) => isar
-                .get(txn, collection_index, id)?
-                .map(|r| CIsarReader::SQLite(r)),
+            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn)) => {
+                let cursor = isar.cursor(txn, collection_index)?;
+                CIsarCursor::SQLite(cursor)
+            }
             _ => return Err(IsarError::IllegalArgument {}),
         };
-        if let Some(new_reader) = new_reader {
-            *reader = Box::into_raw(Box::new(new_reader));
-        } else {
-            *reader = ptr::null();
-        }
+        *cursor = Box::into_raw(Box::new(new_cursor));
     }
 }
 

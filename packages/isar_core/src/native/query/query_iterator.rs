@@ -2,7 +2,7 @@ use super::index_iterator::IndexIterator;
 use super::sorted_query_iterator::SortedQueryIterator;
 use super::unsorted_distinct_query_iterator::UnsortedDistinctQueryIterator;
 use super::unsorted_query_iterator::UnsortedQueryIterator;
-use super::Query;
+use super::NativeQuery;
 use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::native_collection::NativeCollection;
 use crate::native::native_txn::NativeTxn;
@@ -17,7 +17,7 @@ impl<'a> QueryIterator<'a> {
     pub fn new(
         txn: &'a NativeTxn,
         collection: &'a NativeCollection,
-        query: &'a Query,
+        query: &'a NativeQuery,
         ignore_sort: bool,
         offset: u32,
         limit: u32,

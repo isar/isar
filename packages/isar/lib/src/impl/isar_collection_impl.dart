@@ -25,54 +25,25 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
   }
 
   @override
-  OBJ? get(ID id) {
-    return isar.getTxn((isarPtr, txnPtr) {
-      final readerPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarReader>>();
-
-      IsarCore.b
-          .isar_get(
-            isarPtr,
-            txnPtr,
-            collectionIndex,
-            _idToInt(id),
-            readerPtrPtr,
-          )
-          .checkNoError();
-
-      OBJ? object;
-      final readerPtr = readerPtrPtr.ptrValue;
-      if (!readerPtr.isNull) {
-        object = converter.deserialize(readerPtr);
-        IsarCore.b.isar_read_free(readerPtr);
-      }
-      return object;
-    });
-  }
-
-  @override
   List<OBJ?> getAll(List<ID> ids) {
     final objects = List<OBJ?>.filled(ids.length, null, growable: true);
     return isar.getTxn((isarPtr, txnPtr) {
-      final readerPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarReader>>();
+      final cursorPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarCursor>>();
 
+      IsarCore.b
+          .isar_cursor(isarPtr, txnPtr, collectionIndex, cursorPtrPtr)
+          .checkNoError();
+
+      final cursorPtr = cursorPtrPtr.ptrValue;
+      Pointer<CIsarReader> readerPtr = nullptr;
       for (var i = 0; i < ids.length; i++) {
-        IsarCore.b
-            .isar_get(
-              isarPtr,
-              txnPtr,
-              collectionIndex,
-              _idToInt(ids[i]),
-              readerPtrPtr,
-            )
-            .checkNoError();
-
-        final readerPtr = readerPtrPtr.ptrValue;
+        final id = _idToInt(ids[i]);
+        readerPtr = IsarCore.b.isar_cursor_next(cursorPtr, id, readerPtr);
         if (!readerPtr.isNull) {
           objects[i] = converter.deserialize(readerPtr);
-          IsarCore.b.isar_read_free(readerPtr);
         }
       }
-
+      IsarCore.b.isar_cursor_free(cursorPtr, readerPtr);
       return objects;
     });
   }

@@ -36,17 +36,36 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-      ffi.Pointer<CIsarReader> Function(ffi.Pointer<CIsarCursor>,
+      ffi.Pointer<CIsarReader> Function(ffi.Pointer<CIsarCursor>, IsarI64,
           ffi.Pointer<CIsarReader>)>(symbol: 'isar_cursor_next')
   external ffi.Pointer<CIsarReader> isar_cursor_next(
     ffi.Pointer<CIsarCursor> cursor,
+    int id,
     ffi.Pointer<CIsarReader> old_reader,
   );
 
-  @ffi.Native<ffi.Void Function(ffi.Pointer<CIsarCursor>)>(
-      symbol: 'isar_cursor_free')
+  @ffi.Native<
+      ffi.Void Function(ffi.Pointer<CIsarCursor>,
+          ffi.Pointer<CIsarReader>)>(symbol: 'isar_cursor_free')
   external void isar_cursor_free(
     ffi.Pointer<CIsarCursor> cursor,
+    ffi.Pointer<CIsarReader> reader,
+  );
+
+  @ffi.Native<
+      ffi.Pointer<CIsarReader> Function(ffi.Pointer<CIsarQueryCursor>,
+          ffi.Pointer<CIsarReader>)>(symbol: 'isar_query_cursor_next')
+  external ffi.Pointer<CIsarReader> isar_query_cursor_next(
+    ffi.Pointer<CIsarQueryCursor> cursor,
+    ffi.Pointer<CIsarReader> old_reader,
+  );
+
+  @ffi.Native<
+      ffi.Void Function(ffi.Pointer<CIsarQueryCursor>,
+          ffi.Pointer<CIsarReader>)>(symbol: 'isar_query_cursor_free')
+  external void isar_query_cursor_free(
+    ffi.Pointer<CIsarQueryCursor> cursor,
+    ffi.Pointer<CIsarReader> reader,
   );
 
   @ffi.Native<ffi.Void Function(DartPostCObjectFnType)>(
@@ -309,14 +328,12 @@ extension IsarBindingsX on JSIsar {
           ffi.Pointer<CIsarInstance>,
           ffi.Pointer<CIsarTxn>,
           ffi.Uint16,
-          IsarI64,
-          ffi.Pointer<ffi.Pointer<CIsarReader>>)>(symbol: 'isar_get')
-  external int isar_get(
+          ffi.Pointer<ffi.Pointer<CIsarCursor>>)>(symbol: 'isar_cursor')
+  external int isar_cursor(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
     int collection_index,
-    int id,
-    ffi.Pointer<ffi.Pointer<CIsarReader>> reader,
+    ffi.Pointer<ffi.Pointer<CIsarCursor>> cursor,
   );
 
   @ffi.Native<
@@ -445,14 +462,14 @@ extension IsarBindingsX on JSIsar {
           ffi.Pointer<CIsarInstance>,
           ffi.Pointer<CIsarTxn>,
           ffi.Pointer<CIsarQuery>,
-          ffi.Pointer<ffi.Pointer<CIsarCursor>>,
+          ffi.Pointer<ffi.Pointer<CIsarQueryCursor>>,
           ffi.Uint32,
           ffi.Uint32)>(symbol: 'isar_query_cursor')
   external int isar_query_cursor(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
     ffi.Pointer<CIsarQuery> query,
-    ffi.Pointer<ffi.Pointer<CIsarCursor>> cursor,
+    ffi.Pointer<ffi.Pointer<CIsarQueryCursor>> cursor,
     int offset,
     int limit,
   );
@@ -888,6 +905,10 @@ final class CIsarValue extends ffi.Opaque {}
 
 final class CString extends ffi.Opaque {}
 
+typedef IsarI64 = ffi.Int64;
+
+final class CIsarQueryCursor extends ffi.Opaque {}
+
 typedef DartPostCObjectFnType = ffi.Pointer<
     ffi.NativeFunction<
         ffi.Int8 Function(
@@ -897,8 +918,6 @@ typedef DartPort = ffi.Int64;
 final class CDartCObject extends ffi.Opaque {}
 
 final class CFilter extends ffi.Opaque {}
-
-typedef IsarI64 = ffi.Int64;
 
 final class CIsarUpdate extends ffi.Opaque {}
 

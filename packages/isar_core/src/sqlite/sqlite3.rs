@@ -331,6 +331,17 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
         }
     }
 
+    pub fn reset(&mut self) -> Result<()> {
+        unsafe {
+            let r = ffi::sqlite3_reset(self.stmt);
+            if r == ffi::SQLITE_OK {
+                Ok(())
+            } else {
+                Err(sqlite_err(self.sqlite.db, r))
+            }
+        }
+    }
+
     pub fn is_null(&self, col: u32) -> bool {
         unsafe { ffi::sqlite3_column_type(self.stmt, col as i32) == ffi::SQLITE_NULL }
     }

@@ -82,6 +82,11 @@ type NQuery = <NativeInstance as IsarInstance>::Query;
 #[cfg(feature = "sqlite")]
 type SQuery = <SQLiteInstance as IsarInstance>::Query;
 
+#[cfg(feature = "native")]
+type NQueryCursor<'a> = <NativeInstance as IsarInstance>::QueryCursor<'a>;
+#[cfg(feature = "sqlite")]
+type SQueryCursor<'a> = <SQLiteInstance as IsarInstance>::QueryCursor<'a>;
+
 pub enum CIsarInstance {
     #[cfg(feature = "native")]
     Native(NInstance),
@@ -94,6 +99,13 @@ pub enum CIsarTxn {
     Native(NTxn),
     #[cfg(feature = "sqlite")]
     SQLite(STxn),
+}
+
+pub enum CIsarCursor<'a> {
+    #[cfg(feature = "native")]
+    Native(NCursor<'a>),
+    #[cfg(feature = "sqlite")]
+    SQLite(SCursor<'a>),
 }
 
 pub enum CIsarWriter<'a> {
@@ -140,11 +152,11 @@ pub enum CIsarQuery {
     SQLite(SQuery),
 }
 
-pub enum CIsarCursor<'a> {
+pub enum CIsarQueryCursor<'a> {
     #[cfg(feature = "native")]
-    Native(NCursor<'a>),
+    Native(NQueryCursor<'a>),
     #[cfg(feature = "sqlite")]
-    SQLite(SCursor<'a>),
+    SQLite(SQueryCursor<'a>),
 }
 
 #[no_mangle]

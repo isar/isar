@@ -1,4 +1,4 @@
-use crate::{CIsarCursor, CIsarInstance, CIsarQuery, CIsarQueryBuilder, CIsarTxn};
+use crate::{CIsarInstance, CIsarQuery, CIsarQueryBuilder, CIsarQueryCursor, CIsarTxn};
 use isar_core::core::error::IsarError;
 use isar_core::core::filter::Filter;
 use isar_core::core::instance::{Aggregation, IsarInstance};
@@ -93,7 +93,7 @@ pub unsafe extern "C" fn isar_query_cursor(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
     query: &'static CIsarQuery,
-    cursor: *mut *const CIsarCursor,
+    cursor: *mut *const CIsarQueryCursor,
     offset: u32,
     limit: u32,
 ) -> u8 {
@@ -105,12 +105,12 @@ pub unsafe extern "C" fn isar_query_cursor(
             #[cfg(feature = "native")]
             (CIsarInstance::Native(isar), CIsarTxn::Native(txn), CIsarQuery::Native(query)) => {
                 let cursor = isar.query_cursor(txn, query, offset, limit)?;
-                CIsarCursor::Native(cursor)
+                CIsarQueryCursor::Native(cursor)
             }
             #[cfg(feature = "sqlite")]
             (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn), CIsarQuery::SQLite(query)) => {
                 let cursor = isar.query_cursor(txn, query, offset, limit)?;
-                CIsarCursor::SQLite(cursor)
+                CIsarQueryCursor::SQLite(cursor)
             }
             _ => return Err(IsarError::IllegalArgument {}),
         };

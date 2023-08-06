@@ -3,7 +3,7 @@ use super::isar_serializer::IsarSerializer;
 use super::mdbx::db::Db;
 use super::native_index::NativeIndex;
 use super::native_txn::{NativeTxn, TxnCursor};
-use super::query::Query;
+use super::query::NativeQuery;
 use super::{BytesToId, IdToBytes};
 use crate::core::data_type::DataType;
 use crate::core::error::{IsarError, Result};
@@ -36,7 +36,7 @@ pub struct NativeCollection {
     pub(crate) properties: Vec<(String, NativeProperty)>,
     pub(crate) indexes: Vec<NativeIndex>,
     pub(crate) static_size: u32,
-    pub(crate) watchers: Arc<CollectionWatchers<Query>>,
+    pub(crate) watchers: Arc<CollectionWatchers<NativeQuery>>,
     auto_increment: AtomicI64,
     db: Option<Db>,
 }
