@@ -169,12 +169,12 @@ impl NativeCollection {
 
     pub fn delete<'a>(&self, txn: &'a NativeTxn, id: i64) -> Result<bool> {
         let mut cursor = txn.get_cursor(self.get_db()?)?;
-        let mut change_set = txn.get_change_set();
+        //let mut change_set = txn.get_change_set();
         let id_bytes = id.to_id_bytes();
 
         if let Some((_, bytes)) = cursor.move_to(&id_bytes)? {
             let object = IsarDeserializer::from_bytes(&bytes);
-            change_set.register_change(&self.watchers, id, &object);
+            //change_set.register_change(&self.watchers, id, &object);
 
             if !self.indexes.is_empty() {
                 let mut buffer = txn.take_buffer();

@@ -3,7 +3,7 @@ use super::isar_deserializer::IsarDeserializer;
 use super::mdbx::db::Db;
 use super::native_collection::NativeProperty;
 use super::native_txn::NativeTxn;
-use super::IdToBytes;
+use super::{BytesToId, IdToBytes};
 use crate::core::data_type::DataType;
 use crate::core::error::Result;
 
@@ -74,8 +74,8 @@ impl NativeIndex {
         let (key, contains_null) = self.create_key(object, buffer);
 
         if self.unique && !contains_null {
-            if cursor.move_to(&key)?.is_some() {
-                delete(id)?;
+            if let Some((_, id_bytes)) = cursor.move_to(&key)? {
+                delete(id_bytes.to_id())?;
             }
         }
         cursor.put(&key, &id.to_id_bytes())?;

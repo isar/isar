@@ -47,6 +47,16 @@ jobs:
       - name: Lint
         run: flutter analyze
 
+  test_core:
+    name: Core Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Run Rust Unit tests
+        run: cargo test
+
   test:
     name: Dart Test
     strategy:
@@ -111,14 +121,26 @@ jobs:
         run: |
           flutter test --coverage ../isar_test/test --coverage-path lcov_isar_test.info
         working-directory: packages/isar
+      - name: Collect isar_core Coverage
+        run: |
+          cargo install cargo-tarpaulin
+          cargo tarpaulin -o Lcov --exclude-files "packages/isar_core_ffi/*"
+        working-directory: packages/isar
       - name: Upload isar Coverage
         uses: codecov/codecov-action@v3
         with:
           files: packages/isar/lcov_isar.info
+          flags: isar
       - name: Upload isar_test Coverage
         uses: codecov/codecov-action@v3
         with:
           files: packages/isar/lcov_isar_test.info
+          flags: isar
+      - name: Upload isar_core Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: lcov.info
+          flags: core
 
   test_generator:
     name: Generator Test
@@ -134,7 +156,7 @@ jobs:
 
   integration_test_ios:
     name: Integration Test iOS
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v3
       - name: Start simulator
