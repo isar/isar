@@ -7,5 +7,5 @@ class Model {
   late int id;
 
   @Index(composite: ['myProp'])
-  String? str;
+  int? value;
 }

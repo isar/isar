@@ -7,5 +7,5 @@ class Model {
   late int id;
 
   @Index(composite: ['id'])
-  String? str;
+  int? str;
 }

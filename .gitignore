@@ -68,3 +68,4 @@ local.properties
 # Coverage
 *.info
 *.profraw
+*.json

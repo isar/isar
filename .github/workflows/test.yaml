@@ -113,9 +113,9 @@ jobs:
           flutter pub add json_annotation
           flutter pub add isar_test --path ../isar_test
         working-directory: packages/isar
-      - name: Collect isar Coverage
+      - name: Collect generator Coverage
         run: |
-          dart test --coverage lcov_isar.info
+          dart test --coverage coverage
         working-directory: packages/isar
       - name: Collect isar_test Coverage
         run: |
@@ -126,11 +126,11 @@ jobs:
           cargo install cargo-tarpaulin
           cargo tarpaulin -o Lcov --exclude-files "packages/isar_core_ffi/*"
         working-directory: packages/isar
-      - name: Upload isar Coverage
+      - name: Upload generator Coverage
         uses: codecov/codecov-action@v3
         with:
-          files: packages/isar/lcov_isar.info
-          flags: isar
+          directory: packages/isar/coverage
+          flags: generator
       - name: Upload isar_test Coverage
         uses: codecov/codecov-action@v3
         with:
