@@ -3,7 +3,7 @@ use super::{data_type::DataType, error::IsarError};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Hash, Debug)]
+#[derive(Serialize, Deserialize, Clone, Hash, Debug, PartialEq, Eq)]
 pub struct IsarSchema {
     pub name: String,
     #[serde(rename = "idName", skip_serializing)]
@@ -163,12 +163,12 @@ impl IsarSchema {
             }
         }
 
-        let unique_properties = self.properties.iter().unique();
+        let unique_properties = self.properties.iter().unique_by(|p| &p.name);
         if unique_properties.count() != self.properties.len() {
             return schema_error("Duplicate property name")?;
         }
 
-        let unique_indexes = self.indexes.iter().unique();
+        let unique_indexes = self.indexes.iter().unique_by(|i| &i.name);
         if unique_indexes.count() != self.indexes.len() {
             return schema_error("Duplicate index name");
         }
@@ -265,5 +265,308 @@ impl IndexSchema {
             unique,
             hash,
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_verify_checks_name() {
+        let schema = IsarSchema::new("test", None, Vec::new(), Vec::new(), false);
+        assert!(schema.verify(&[]).is_ok());
+
+        let schema = IsarSchema::new("_test", None, Vec::new(), Vec::new(), false);
+        assert!(schema.verify(&[]).is_err());
+
+        let schema = IsarSchema::new("sqlite_test", None, Vec::new(), Vec::new(), false);
+        assert!(schema.verify(&[]).is_err());
+
+        let schema = IsarSchema::new("", None, Vec::new(), Vec::new(), false);
+        assert!(schema.verify(&[]).is_err());
+    }
+
+    #[test]
+    fn test_verify_checks_index_names() {
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            Vec::new(),
+            vec![IndexSchema::new("test", vec!["test"], false, false)],
+            true,
+        );
+        assert!(schema.verify(&[]).is_err());
+    }
+
+    #[test]
+    fn test_verify_checks_property_name_is_unique() {
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![
+                PropertySchema::new("test", DataType::Int, None),
+                PropertySchema::new("test2", DataType::Int, None),
+                PropertySchema::new("test", DataType::String, None),
+            ],
+            Vec::new(),
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+    }
+
+    #[test]
+    fn test_verify_rejects_index_name_is_unique() {
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new("prop1", DataType::Int, None)],
+            vec![
+                IndexSchema::new("test", vec!["prop1"], false, false),
+                IndexSchema::new("test2", vec!["prop1"], false, false),
+                IndexSchema::new("test", vec!["prop1"], false, false),
+            ],
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+    }
+
+    #[test]
+    fn test_verify_object_property_has_target() {
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new("prop1", DataType::Object, None)],
+            Vec::new(),
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+    }
+
+    #[test]
+    fn test_verify_checks_object_property_has_valid_target() {
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new(
+                "prop1",
+                DataType::Object,
+                Some("test2"),
+            )],
+            Vec::new(),
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new("prop1", DataType::Object, Some("test"))],
+            Vec::new(),
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new(
+                "prop1",
+                DataType::ObjectList,
+                Some("test2"),
+            )],
+            Vec::new(),
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new(
+                "prop1",
+                DataType::ObjectList,
+                Some("test"),
+            )],
+            Vec::new(),
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+    }
+
+    #[test]
+    fn test_verify_checks_non_object_property_has_no_target() {
+        let schema1 = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new("prop1", DataType::Int, Some("test2"))],
+            Vec::new(),
+            false,
+        );
+        let schema2 = IsarSchema::new("test2", None, vec![], Vec::new(), false);
+        assert!(schema1.verify(&[schema2]).is_err());
+    }
+
+    #[test]
+    fn test_verify_checks_index_properties_not_empty() {
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new("prop1", DataType::Int, None)],
+            vec![IndexSchema::new("index", vec![], false, false)],
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+    }
+
+    #[test]
+    fn test_verify_checks_index_properties_exist() {
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new("prop1", DataType::Int, None)],
+            vec![IndexSchema::new(
+                "index",
+                vec!["prop1", "prop2"],
+                false,
+                false,
+            )],
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+    }
+
+    #[test]
+    fn test_verify_checks_index_properties_are_not_float() {
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new("prop1", DataType::Float, None)],
+            vec![IndexSchema::new("index", vec!["prop1"], false, false)],
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new("prop1", DataType::Double, None)],
+            vec![IndexSchema::new("index", vec!["prop1"], false, false)],
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new("prop1", DataType::FloatList, None)],
+            vec![IndexSchema::new("index", vec!["prop1"], false, false)],
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new("prop1", DataType::DoubleList, None)],
+            vec![IndexSchema::new("index", vec!["prop1"], false, false)],
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+    }
+
+    #[test]
+    fn test_verify_checks_index_properties_are_not_object() {
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new(
+                "prop1",
+                DataType::Object,
+                Some("test2"),
+            )],
+            vec![IndexSchema::new("index", vec!["prop1"], false, false)],
+            false,
+        );
+        let schema2 = IsarSchema::new("test2", None, vec![], vec![], true);
+        assert!(schema.verify(&[schema2]).is_err());
+    }
+
+    #[test]
+    fn test_verify_checks_index_properties_are_not_json() {
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new("prop1", DataType::Json, None)],
+            vec![IndexSchema::new("index", vec!["prop1"], false, false)],
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+    }
+
+    #[test]
+    fn test_verify_checks_index_properties_are_not_list() {
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![PropertySchema::new("prop1", DataType::IntList, None)],
+            vec![IndexSchema::new("index", vec!["prop1"], false, false)],
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+    }
+
+    #[test]
+    fn test_verify_checks_index_properties_are_not_string_if_not_last() {
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![
+                PropertySchema::new("prop1", DataType::Int, None),
+                PropertySchema::new("prop2", DataType::String, None),
+            ],
+            vec![IndexSchema::new(
+                "index",
+                vec!["prop2", "prop1"],
+                false,
+                false,
+            )],
+            false,
+        );
+        assert!(schema.verify(&[]).is_err());
+
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![
+                PropertySchema::new("prop1", DataType::Int, None),
+                PropertySchema::new("prop2", DataType::String, None),
+            ],
+            vec![IndexSchema::new(
+                "index",
+                vec!["prop1", "prop2"],
+                false,
+                false,
+            )],
+            false,
+        );
+        assert!(schema.verify(&[]).is_ok());
+
+        let schema = IsarSchema::new(
+            "test",
+            None,
+            vec![
+                PropertySchema::new("prop1", DataType::Int, None),
+                PropertySchema::new("prop2", DataType::String, None),
+            ],
+            vec![IndexSchema::new(
+                "index",
+                vec!["prop2", "prop1"],
+                false,
+                true,
+            )],
+            false,
+        );
+        assert!(schema.verify(&[]).is_ok());
     }
 }
