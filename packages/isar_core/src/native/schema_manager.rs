@@ -11,7 +11,7 @@ use std::sync::Arc;
 
 const ISAR_FILE_VERSION: u8 = 3;
 
-pub fn perform_migration(
+pub(crate) fn perform_migration(
     instance_id: u32,
     env: &Arc<Env>,
     mut schemas: Vec<IsarSchema>,

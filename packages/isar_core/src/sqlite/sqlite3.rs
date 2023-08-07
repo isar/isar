@@ -5,6 +5,8 @@ use std::cell::Cell;
 use std::ffi::{c_char, c_int, c_void, CStr, CString};
 use std::{ptr, slice};
 
+use super::sql::{sql_fn_filter_json, FN_FILTER_JSON_NAME};
+
 pub(crate) struct SQLite3 {
     db: *mut ffi::sqlite3,
     free_update_hook: Cell<Option<unsafe extern "C" fn(*mut std::os::raw::c_void)>>,
@@ -55,6 +57,7 @@ impl SQLite3 {
             sqlite3_busy_timeout(self.db, 5000);
         }
         self.prepare("PRAGMA case_sensitive_like = true")?.step()?;
+        self.create_function(FN_FILTER_JSON_NAME, 2, sql_fn_filter_json)?;
         Ok(())
     }
 
@@ -129,7 +132,7 @@ impl SQLite3 {
         unsafe { ffi::sqlite3_changes(self.db) }
     }
 
-    pub fn create_function<F>(&mut self, name: &str, args: u32, func: F) -> Result<()>
+    pub fn create_function<F>(&self, name: &str, args: u32, func: F) -> Result<()>
     where
         F: FnMut(&mut SQLiteFnContext<'_>) -> Result<()> + Send + 'static,
     {
@@ -226,7 +229,7 @@ unsafe extern "C" fn free_boxed_value<T>(p: *mut c_void) {
     drop(Box::from_raw(p.cast::<T>()));
 }
 
-pub struct SQLiteFnContext<'a> {
+pub(crate) struct SQLiteFnContext<'a> {
     ctx: *mut ffi::sqlite3_context,
     args: &'a [*mut ffi::sqlite3_value],
 }
@@ -312,7 +315,7 @@ impl<'a> SQLiteFnContext<'a> {
     }
 }
 
-pub struct SQLiteStatement<'sqlite> {
+pub(crate) struct SQLiteStatement<'sqlite> {
     stmt: *mut ffi::sqlite3_stmt,
     sqlite: &'sqlite SQLite3,
 }

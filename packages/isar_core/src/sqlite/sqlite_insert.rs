@@ -58,7 +58,7 @@ pub struct SQLiteInsert<'a> {
 }
 
 impl<'a> SQLiteInsert<'a> {
-    pub fn new(
+    pub(crate) fn new(
         txn: SQLiteTxn,
         collection: &'a SQLiteCollection,
         all_collections: &'a Vec<SQLiteCollection>,

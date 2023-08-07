@@ -5,7 +5,7 @@ use std::str::from_utf8_unchecked;
 use xxhash_rust::xxh3::xxh3_64_with_seed;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
-pub struct IsarDeserializer<'a> {
+pub(crate) struct IsarDeserializer<'a> {
     pub bytes: &'a [u8],
     static_size: u32,
 }

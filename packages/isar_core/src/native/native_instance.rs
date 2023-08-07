@@ -2,11 +2,11 @@ use super::mdbx::env::Env;
 use super::native_collection::NativeCollection;
 use super::native_cursor::NativeCursor;
 use super::native_insert::NativeInsert;
+use super::native_open::{get_isar_path, open_native};
 use super::native_query_builder::NativeQueryBuilder;
 use super::native_reader::NativeReader;
 use super::native_txn::NativeTxn;
 use super::query::{NativeQuery, NativeQueryCursor};
-use super::schema_manager::perform_migration;
 use crate::core::error::{IsarError, Result};
 use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
 use crate::core::schema::IsarSchema;
@@ -14,8 +14,7 @@ use crate::core::value::IsarValue;
 use crate::core::watcher::{WatchHandle, WatcherCallback};
 use intmap::IntMap;
 use parking_lot::Mutex;
-use std::fs::{self, remove_file};
-use std::path::PathBuf;
+use std::fs::remove_file;
 use std::sync::{Arc, LazyLock};
 
 static INSTANCES: LazyLock<Mutex<IntMap<Arc<NativeInstance>>>> =
@@ -27,6 +26,40 @@ pub struct NativeInstance {
     instance_id: u32,
     collections: Vec<NativeCollection>,
     env: Arc<Env>,
+}
+
+impl NativeInstance {
+    pub(crate) fn new(
+        name: &str,
+        dir: &str,
+        instance_id: u32,
+        collections: Vec<NativeCollection>,
+        env: Arc<Env>,
+    ) -> Self {
+        Self {
+            name: name.to_string(),
+            dir: dir.to_string(),
+            instance_id,
+            collections,
+            env,
+        }
+    }
+
+    pub(crate) fn verify_instance_id(&self, instance_id: u32) -> Result<()> {
+        if self.instance_id != instance_id {
+            Err(IsarError::InstanceMismatch {})
+        } else {
+            Ok(())
+        }
+    }
+
+    fn get_collection(&self, collection_index: u16) -> Result<&NativeCollection> {
+        if let Some(collection) = self.collections.get(collection_index as usize) {
+            Ok(collection)
+        } else {
+            Err(IsarError::IllegalArgument {})
+        }
+    }
 }
 
 impl IsarInstance for NativeInstance {
@@ -93,7 +126,7 @@ impl IsarInstance for NativeInstance {
         if let Some(instance) = lock.get(instance_id as u64) {
             Ok(instance.clone())
         } else {
-            let new_instance = Self::open_internal(
+            let new_instance = open_native(
                 name,
                 dir,
                 instance_id,
@@ -156,20 +189,21 @@ impl IsarInstance for NativeInstance {
     ) -> Result<bool> {
         self.verify_instance_id(txn.instance_id)?;
         let collection = self.get_collection(collection_index)?;
-        txn.guard(|| collection.update(txn, id, updates))
+        let mut cursor = collection.get_cursor(txn)?;
+        txn.guard(|| collection.update(txn, &mut txn.get_change_set(), &mut cursor, id, updates))
     }
 
     fn delete<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16, id: i64) -> Result<bool> {
         self.verify_instance_id(txn.instance_id)?;
         let collection = self.get_collection(collection_index)?;
-        txn.guard(|| collection.delete(txn, id))
+        let mut cursor = collection.get_cursor(txn)?;
+        txn.guard(|| collection.delete(txn, &mut txn.get_change_set(), &mut cursor, id))
     }
 
     fn count(&self, txn: &Self::Txn, collection_index: u16) -> Result<u32> {
         self.verify_instance_id(txn.instance_id)?;
         let collection = self.get_collection(collection_index)?;
-        let (count, _) = txn.stat(collection.get_db()?)?;
-        Ok(count as u32)
+        collection.count(txn)
     }
 
     fn clear(&self, txn: &Self::Txn, collection_index: u16) -> Result<()> {
@@ -311,7 +345,7 @@ impl IsarInstance for NativeInstance {
                 lock.remove(instance.instance_id as u64);
 
                 if delete {
-                    let mut path = Self::get_isar_path(&instance.name, &instance.dir);
+                    let mut path = get_isar_path(&instance.name, &instance.dir);
                     drop(instance);
                     let _ = remove_file(&path);
                     path.push_str(".lock");
@@ -321,120 +355,5 @@ impl IsarInstance for NativeInstance {
             }
         }
         false
-    }
-}
-
-impl NativeInstance {
-    pub(crate) fn verify_instance_id(&self, instance_id: u32) -> Result<()> {
-        if self.instance_id != instance_id {
-            Err(IsarError::InstanceMismatch {})
-        } else {
-            Ok(())
-        }
-    }
-
-    fn get_isar_path(name: &str, dir: &str) -> String {
-        let mut file_name = name.to_string();
-        file_name.push_str(".isar");
-
-        let mut path_buf = PathBuf::from(dir);
-        path_buf.push(file_name);
-        path_buf.as_path().to_str().unwrap().to_string()
-    }
-
-    fn open_internal(
-        name: &str,
-        dir: &str,
-        instance_id: u32,
-        schemas: Vec<IsarSchema>,
-        max_size_mib: u32,
-        compact_condition: Option<CompactCondition>,
-    ) -> Result<Self> {
-        let isar_file = Self::get_isar_path(name, dir);
-
-        let compact_schemas = if compact_condition.is_some() {
-            Some(schemas.clone())
-        } else {
-            None
-        };
-
-        // _info + collections + indexes + 1 (to delete old dbs)
-        let db_count = schemas
-            .iter()
-            .filter(|c| !c.embedded)
-            .map(|c| c.indexes.len() as u32 + 1)
-            .sum::<u32>()
-            + 2;
-        let env = Env::create(&isar_file, db_count, max_size_mib)?;
-        let collections = perform_migration(instance_id, &env, schemas)?;
-
-        let instance = NativeInstance {
-            env,
-            name: name.to_string(),
-            dir: dir.to_string(),
-            collections,
-            instance_id,
-        };
-
-        if let Some(compact_condition) = compact_condition {
-            let instance = instance.compact(compact_condition)?;
-            if let Some(instance) = instance {
-                Ok(instance)
-            } else {
-                Self::open_internal(
-                    name,
-                    dir,
-                    instance_id,
-                    compact_schemas.unwrap(),
-                    max_size_mib,
-                    None,
-                )
-            }
-        } else {
-            Ok(instance)
-        }
-    }
-
-    fn compact(self, compact_condition: CompactCondition) -> Result<Option<Self>> {
-        let txn = self.begin_txn(false)?;
-        let mut instance_size = 0;
-        for collection_index in 0..self.collections.len() {
-            instance_size += self.get_size(&txn, collection_index as u16, true)?;
-        }
-        txn.abort();
-
-        let isar_file = Self::get_isar_path(&self.name, &self.dir);
-        let file_size = fs::metadata(&isar_file)
-            .map_err(|_| IsarError::PathError {})?
-            .len();
-
-        let compact_bytes = file_size.saturating_sub(instance_size);
-        let compact_ratio = if instance_size == 0 {
-            f64::INFINITY
-        } else {
-            (file_size as f64) / (instance_size as f64)
-        };
-        let should_compact = file_size >= compact_condition.min_file_size as u64
-            && compact_bytes >= compact_condition.min_bytes as u64
-            && compact_ratio >= compact_condition.min_ratio as f64;
-
-        if should_compact {
-            let compact_file = format!("{}.compact", &isar_file);
-            self.env.copy(&compact_file)?;
-            drop(self);
-
-            let _ = fs::rename(&compact_file, &isar_file);
-            Ok(None)
-        } else {
-            Ok(Some(self))
-        }
-    }
-
-    fn get_collection(&self, collection_index: u16) -> Result<&NativeCollection> {
-        if let Some(collection) = self.collections.get(collection_index as usize) {
-            Ok(collection)
-        } else {
-            Err(IsarError::IllegalArgument {})
-        }
     }
 }

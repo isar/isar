@@ -8,7 +8,7 @@ use crate::core::data_type::DataType;
 use crate::core::error::Result;
 
 #[derive(Clone, Eq, PartialEq)]
-pub struct NativeIndex {
+pub(crate) struct NativeIndex {
     pub name: String,
     pub properties: Vec<NativeProperty>,
     pub unique: bool,

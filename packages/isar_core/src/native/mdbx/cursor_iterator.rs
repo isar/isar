@@ -2,7 +2,7 @@ use super::{compare_keys, cursor::Cursor, KeyVal};
 use crate::core::error::Result;
 use std::cmp::Ordering;
 
-pub struct CursorIterator<'txn, C: AsMut<Cursor<'txn>>> {
+pub(crate) struct CursorIterator<'txn, C: AsMut<Cursor<'txn>>> {
     cursor: C,
     lower_key: Vec<u8>,
     upper_key: Vec<u8>,

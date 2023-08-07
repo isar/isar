@@ -3,7 +3,7 @@ use crate::core::data_type::DataType;
 use byteorder::{ByteOrder, LittleEndian};
 use std::cell::Cell;
 
-pub struct IsarSerializer {
+pub(crate) struct IsarSerializer {
     buffer: Cell<Vec<u8>>,
     offset: u32,
     static_size: u32,
@@ -1178,7 +1178,7 @@ mod tests {
                 concat!(
                     [21, 0, 0],
                     [32, 0, 0, 0],
-                    [21, 0, 0],   // First nested
+                    [21, 0, 0], // First nested
                     [32, 0, 0], // Second nested
                     [8, 0, 0, 0],
                     [75, 0, 0], // First dynamic
@@ -1190,7 +1190,7 @@ mod tests {
                         [13, 0, 0],
                         [1],
                         [255],
-                        [13, 0, 0],   // Nested nested
+                        [13, 0, 0], // Nested nested
                         [35, 0, 0], // Nested dynamic
                         [255],
                         NULL_FLOAT.to_le_bytes(),

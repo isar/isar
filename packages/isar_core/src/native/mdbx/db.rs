@@ -6,16 +6,12 @@ use std::mem::size_of;
 use std::ptr;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
-pub struct Db {
+pub(crate) struct Db {
     pub(crate) dbi: mdbx_sys::MDBX_dbi,
     pub dup: bool,
 }
 
 impl Db {
-    pub fn runtime_id(&self) -> u64 {
-        self.dbi as u64
-    }
-
     pub fn open(txn: &Txn, name: Option<&str>, int_key: bool, dup: bool) -> Result<Self> {
         let mut flags = mdbx_sys::MDBX_CREATE;
         if int_key {

@@ -202,7 +202,7 @@ pub struct NativeObjectWriter<'a> {
 }
 
 impl<'a> NativeObjectWriter<'a> {
-    pub fn new(
+    pub(crate) fn new(
         collection: &'a NativeCollection,
         all_collections: &'a [NativeCollection],
         object: IsarSerializer,
@@ -257,7 +257,7 @@ pub struct NativeListWriter<'a> {
 }
 
 impl<'a> NativeListWriter<'a> {
-    pub fn new(
+    pub(crate) fn new(
         element_type: DataType,
         embedded_collection_index: Option<u16>,
         all_collections: &'a [NativeCollection],

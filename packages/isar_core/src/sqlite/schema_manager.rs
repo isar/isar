@@ -9,7 +9,7 @@ use crate::core::schema::{IndexSchema, IsarSchema, PropertySchema};
 use crate::sqlite::sqlite_collection::SQLiteProperty;
 use itertools::Itertools;
 
-pub fn perform_migration(txn: &SQLiteTxn, schemas: &[IsarSchema]) -> Result<()> {
+pub(crate) fn perform_migration(txn: &SQLiteTxn, schemas: &[IsarSchema]) -> Result<()> {
     txn.guard(|| {
         let sqlite = txn.get_sqlite(true)?;
         let table_names = sqlite.get_table_names()?;

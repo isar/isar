@@ -7,6 +7,7 @@ mod native_cursor;
 mod native_index;
 mod native_insert;
 pub mod native_instance;
+mod native_open;
 mod native_query_builder;
 mod native_reader;
 mod native_txn;

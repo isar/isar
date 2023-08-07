@@ -50,7 +50,7 @@ impl Drop for WatchHandle {
     }
 }
 
-pub trait QueryMatches: Clone {
+pub(crate) trait QueryMatches: Clone {
     type Object<'a>;
 
     fn matches<'a>(&self, id: i64, object: &Self::Object<'a>) -> bool;
@@ -122,7 +122,7 @@ struct RawCollectionWatchers<Q: QueryMatches> {
     query_watchers: Vec<(Q, Arc<Watcher>)>,
 }
 
-pub struct CollectionWatchers<Q: QueryMatches> {
+pub(crate) struct CollectionWatchers<Q: QueryMatches> {
     col_watchers: ArcSwap<RawCollectionWatchers<Q>>,
 }
 

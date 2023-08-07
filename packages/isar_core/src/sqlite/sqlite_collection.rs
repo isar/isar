@@ -8,7 +8,7 @@ use crate::core::error::Result;
 use crate::core::watcher::CollectionWatchers;
 
 #[derive(Debug)]
-pub struct SQLiteProperty {
+pub(crate) struct SQLiteProperty {
     pub name: String,
     pub data_type: DataType,
     // for embedded objects
@@ -27,7 +27,7 @@ impl SQLiteProperty {
     }
 }
 
-pub struct SQLiteCollection {
+pub(crate) struct SQLiteCollection {
     pub name: String,
     pub id_name: Option<String>,
     pub properties: Vec<SQLiteProperty>,
