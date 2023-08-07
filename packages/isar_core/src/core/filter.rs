@@ -55,6 +55,7 @@ pub struct JsonCondition {
     pub condition_type: ConditionType,
     pub is_list: bool,
     pub values: Vec<Option<IsarValue>>,
+    // if false, values are all lowercase
     pub case_sensitive: bool,
 }
 

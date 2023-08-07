@@ -10,10 +10,6 @@
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
-**/generated_plugin_registrant.dart
-.packages
-.pub-cache/
-.pub/
 build/
 
 # Rust related
@@ -28,13 +24,11 @@ target/
 isar-dart.h
 
 # Android related
-**/android/**/gradle-wrapper.jar
+gradle-wrapper.jar
 .gradle/
-**/android/captures/
-**/android/gradlew
-**/android/gradlew.bat
-**/android/local.properties
-**/android/**/GeneratedPluginRegistrant.java
+gradlew
+gradlew.bat
+local.properties
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
@@ -72,4 +66,6 @@ isar-dart.h
 **/.plugin_symlinks/
 
 # Coverage
-coverage/
+*.info
+*.profraw
+*.json

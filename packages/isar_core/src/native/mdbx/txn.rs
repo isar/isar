@@ -3,19 +3,14 @@ use crate::core::error::Result;
 use core::ptr;
 use std::sync::Arc;
 
-pub struct Txn {
+pub(crate) struct Txn {
     pub(crate) txn: *mut mdbx_sys::MDBX_txn,
-    pub write: bool,
     _env: Arc<Env>,
 }
 
 impl Txn {
-    pub(crate) fn new(env: Arc<Env>, txn: *mut mdbx_sys::MDBX_txn, write: bool) -> Self {
-        Txn {
-            txn,
-            write,
-            _env: env,
-        }
+    pub(crate) fn new(env: Arc<Env>, txn: *mut mdbx_sys::MDBX_txn) -> Self {
+        Txn { txn, _env: env }
     }
 
     pub fn commit(mut self) -> Result<()> {

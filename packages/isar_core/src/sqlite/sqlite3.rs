@@ -5,6 +5,8 @@ use std::cell::Cell;
 use std::ffi::{c_char, c_int, c_void, CStr, CString};
 use std::{ptr, slice};
 
+use super::sql::{sql_fn_filter_json, FN_FILTER_JSON_NAME};
+
 pub(crate) struct SQLite3 {
     db: *mut ffi::sqlite3,
     free_update_hook: Cell<Option<unsafe extern "C" fn(*mut std::os::raw::c_void)>>,
@@ -55,6 +57,7 @@ impl SQLite3 {
             sqlite3_busy_timeout(self.db, 5000);
         }
         self.prepare("PRAGMA case_sensitive_like = true")?.step()?;
+        self.create_function(FN_FILTER_JSON_NAME, 2, sql_fn_filter_json)?;
         Ok(())
     }
 
@@ -84,7 +87,7 @@ impl SQLite3 {
             let table_type = stmt.get_text(2);
             if table_type == "table" {
                 let name = stmt.get_text(1);
-                if !name.to_lowercase().starts_with("sqlite_") {
+                if !name.to_ascii_lowercase().starts_with("sqlite_") {
                     names.push(name.to_string());
                 }
             }
@@ -108,14 +111,14 @@ impl SQLite3 {
         let mut index_names_unique = vec![];
         while stmt.step()? {
             let name = stmt.get_text(1).to_string();
-            if name.to_lowercase().starts_with("sqlite_") {
+            if !name.to_ascii_lowercase().starts_with("sqlite_") {
                 let unique = stmt.get_int(2) == 1;
                 index_names_unique.push((name, unique));
             }
         }
         let mut indexes = vec![];
         for (index_name, unique) in index_names_unique {
-            let mut stmt = self.prepare(&format!("PRAGMA schema.index_xinfo({})", index_name))?;
+            let mut stmt = self.prepare(&format!("PRAGMA index_info({})", index_name))?;
             let mut cols = vec![];
             while stmt.step()? {
                 cols.push(stmt.get_text(2).to_string());
@@ -129,7 +132,7 @@ impl SQLite3 {
         unsafe { ffi::sqlite3_changes(self.db) }
     }
 
-    pub fn create_function<F>(&mut self, name: &str, args: u32, func: F) -> Result<()>
+    pub fn create_function<F>(&self, name: &str, args: u32, func: F) -> Result<()>
     where
         F: FnMut(&mut SQLiteFnContext<'_>) -> Result<()> + Send + 'static,
     {
@@ -226,7 +229,7 @@ unsafe extern "C" fn free_boxed_value<T>(p: *mut c_void) {
     drop(Box::from_raw(p.cast::<T>()));
 }
 
-pub struct SQLiteFnContext<'a> {
+pub(crate) struct SQLiteFnContext<'a> {
     ctx: *mut ffi::sqlite3_context,
     args: &'a [*mut ffi::sqlite3_value],
 }
@@ -312,7 +315,7 @@ impl<'a> SQLiteFnContext<'a> {
     }
 }
 
-pub struct SQLiteStatement<'sqlite> {
+pub(crate) struct SQLiteStatement<'sqlite> {
     stmt: *mut ffi::sqlite3_stmt,
     sqlite: &'sqlite SQLite3,
 }

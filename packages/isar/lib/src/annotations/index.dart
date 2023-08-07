@@ -11,7 +11,7 @@ class Index {
     this.name,
     this.composite = const [],
     this.unique = false,
-    this.hash = true,
+    this.hash = false,
   });
 
   /// Name of the index. By default, the names of the properties are

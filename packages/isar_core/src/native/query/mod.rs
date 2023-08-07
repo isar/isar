@@ -118,9 +118,11 @@ impl NativeQuery {
             offset.unwrap_or(0),
             limit.unwrap_or(u32::MAX),
         );
+        let change_set = &mut txn.get_change_set();
+        let mut cursor = collection.get_cursor(txn)?;
         let mut count = 0;
         for (id, _) in iterator {
-            collection.update(txn, id, updates)?;
+            collection.update(txn, change_set, &mut cursor, id, updates)?;
             count += 1;
         }
         Ok(count)
@@ -141,9 +143,11 @@ impl NativeQuery {
             offset.unwrap_or(0),
             limit.unwrap_or(u32::MAX),
         );
+        let change_set = &mut txn.get_change_set();
+        let mut cursor = collection.get_cursor(txn)?;
         let mut count = 0;
         for (id, _) in iterator {
-            collection.delete(txn, id)?;
+            collection.delete(txn, change_set, &mut cursor, id)?;
             count += 1;
         }
         Ok(count)

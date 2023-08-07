@@ -48,12 +48,11 @@ pub(crate) fn drop_column_sql(collection: &IsarSchema, property_name: &str) -> S
 }
 
 pub(crate) fn create_index_sql(table_name: &str, index: &IndexSchema) -> String {
-    let index_name = format!("{}_{}", table_name, index.name);
     format!(
         "CREATE {} INDEX {}_{} ON {} ({})",
         if index.unique { "UNIQUE" } else { "" },
-        index_name,
         table_name,
+        index.name,
         table_name,
         index.properties.join(", ")
     )
@@ -390,7 +389,7 @@ pub(crate) fn data_type_sql(property: &PropertySchema) -> Cow<str> {
 }
 
 pub(crate) fn sql_data_type(sqlite_type: &str) -> (DataType, Option<&str>) {
-    match sqlite_type.to_lowercase().as_str() {
+    match sqlite_type.to_ascii_lowercase().as_str() {
         "bool" => (DataType::Bool, None),
         "u8" => (DataType::Byte, None),
         "i32" => (DataType::Int, None),

@@ -5,10 +5,11 @@ use super::sqlite_query::SQLiteQuery;
 use super::sqlite_txn::SQLiteTxn;
 use crate::core::data_type::DataType;
 use crate::core::error::Result;
+use crate::core::schema::IndexSchema;
 use crate::core::watcher::CollectionWatchers;
 
 #[derive(Debug)]
-pub struct SQLiteProperty {
+pub(crate) struct SQLiteProperty {
     pub name: String,
     pub data_type: DataType,
     // for embedded objects
@@ -27,22 +28,31 @@ impl SQLiteProperty {
     }
 }
 
-pub struct SQLiteCollection {
+pub(crate) struct SQLiteCollection {
     pub name: String,
     pub id_name: Option<String>,
     pub properties: Vec<SQLiteProperty>,
     pub watchers: Arc<CollectionWatchers<SQLiteQuery>>,
     auto_increment: AtomicI64,
+
+    // these are only used for verification
+    pub indexes: Vec<IndexSchema>,
 }
 
 impl SQLiteCollection {
-    pub fn new(name: String, id_name: Option<String>, properties: Vec<SQLiteProperty>) -> Self {
+    pub fn new(
+        name: String,
+        id_name: Option<String>,
+        properties: Vec<SQLiteProperty>,
+        indexes: Vec<IndexSchema>,
+    ) -> Self {
         Self {
             name,
             id_name,
             properties,
             watchers: CollectionWatchers::new(),
             auto_increment: AtomicI64::new(0),
+            indexes,
         }
     }
 

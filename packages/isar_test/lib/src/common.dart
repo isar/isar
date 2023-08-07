@@ -6,7 +6,7 @@ import 'package:isar_test/src/init_native.dart'
     if (dart.library.html) 'package:isar_test/src/init_web.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart';
-// ignore: implementation_imports
+// ignore: implementation_imports, depend_on_referenced_packages
 import 'package:test_api/src/backend/invoker.dart';
 
 export 'package:isar_test/src/init_native.dart'

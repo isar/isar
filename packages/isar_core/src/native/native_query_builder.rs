@@ -17,7 +17,7 @@ pub struct NativeQueryBuilder<'a> {
 }
 
 impl<'a> NativeQueryBuilder<'a> {
-    pub fn new(
+    pub(crate) fn new(
         instance_id: u32,
         collection: &'a NativeCollection,
         all_collections: &'a [NativeCollection],

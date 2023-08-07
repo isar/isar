@@ -16,7 +16,7 @@ pub struct SQLiteQueryBuilder<'a> {
 }
 
 impl SQLiteQueryBuilder<'_> {
-    pub fn new<'a>(
+    pub(crate) fn new<'a>(
         all_collections: &'a [SQLiteCollection],
         collection_index: u16,
     ) -> SQLiteQueryBuilder<'a> {

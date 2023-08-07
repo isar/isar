@@ -55,6 +55,7 @@ class _IsarAnalyzer {
       isarName: modelClass.isarName,
       accessor: modelClass.collectionAccessor,
       properties: properties,
+      indexes: indexes,
       embeddedDartNames: _getEmbeddedDartNames(element),
     );
   }
@@ -383,7 +384,6 @@ class _IsarAnalyzer {
         final propertyName = indexProperties[i];
         final property =
             properties.where((it) => it.isarName == propertyName).firstOrNull;
-
         if (property == null) {
           _err('Property does not exist: "$propertyName".', element);
         } else if (property.isId) {
@@ -397,7 +397,7 @@ class _IsarAnalyzer {
         } else if (property.type.isList) {
           _err('List properties cannot be indexed', element);
         } else if (property.type.isString &&
-            i != properties.length - 1 &&
+            i != indexProperties.length - 1 &&
             !index.hash) {
           _err(
             'Only the last property of a non-hashed composite index can be a '

@@ -1,11 +1,12 @@
 use super::isar_serializer::IsarSerializer;
-use super::mdbx::db::Db;
 use super::native_collection::NativeCollection;
 use super::native_txn::{NativeTxn, TxnCursor};
 use super::MAX_OBJ_SIZE;
 use crate::core::error::{IsarError, Result};
 use crate::core::insert::IsarInsert;
+use crate::core::watcher::ChangeSet;
 use ouroboros::self_referencing;
+use std::cell::RefMut;
 
 #[self_referencing]
 struct TxnWithCursor {
@@ -13,17 +14,24 @@ struct TxnWithCursor {
     #[borrows(txn)]
     #[covariant]
     cursor: TxnCursor<'this>,
+    #[borrows(txn)]
+    #[covariant]
+    change_set: RefMut<'this, ChangeSet>,
 }
 
 impl TxnWithCursor {
-    fn open(txn: NativeTxn, db: Db) -> Result<Self> {
-        Self::try_new(txn, |txn| txn.get_cursor(db))
+    fn open(txn: NativeTxn, collection: &NativeCollection) -> Result<Self> {
+        Self::try_new(
+            txn,
+            |txn| collection.get_cursor(txn),
+            |txn| Ok(txn.get_change_set()),
+        )
     }
 
     fn put(&mut self, collection: &NativeCollection, id: i64, bytes: &[u8]) -> Result<()> {
-        self.with_mut(|this| {
+        self.with_mut(|mut this| {
             this.txn
-                .guard(|| collection.put(this.txn, this.cursor, id, bytes))
+                .guard(|| collection.put(this.txn, &mut this.change_set, this.cursor, id, bytes))
         })
     }
 
@@ -42,14 +50,14 @@ pub struct NativeInsert<'a> {
 }
 
 impl<'a> NativeInsert<'a> {
-    pub fn new(
+    pub(crate) fn new(
         txn: NativeTxn,
         collection: &'a NativeCollection,
         all_collections: &'a Vec<NativeCollection>,
         count: u32,
     ) -> Result<Self> {
         let buffer = txn.take_buffer();
-        let txn_cursor = TxnWithCursor::open(txn, collection.get_db()?)?;
+        let txn_cursor = TxnWithCursor::open(txn, collection)?;
         let insert = Self {
             txn_cursor,
             collection,

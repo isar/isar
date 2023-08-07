@@ -12,25 +12,25 @@ pub mod db;
 pub mod env;
 pub mod txn;
 
-pub type KeyVal<'txn> = (&'txn [u8], &'txn [u8]);
+pub(crate) type KeyVal<'txn> = (&'txn [u8], &'txn [u8]);
 
-pub const EMPTY_KEY: mdbx_sys::MDBX_val = mdbx_sys::MDBX_val {
+pub(crate) const EMPTY_KEY: mdbx_sys::MDBX_val = mdbx_sys::MDBX_val {
     iov_len: 0,
     iov_base: 0 as *mut c_void,
 };
 
-pub const EMPTY_VAL: mdbx_sys::MDBX_val = mdbx_sys::MDBX_val {
+pub(crate) const EMPTY_VAL: mdbx_sys::MDBX_val = mdbx_sys::MDBX_val {
     iov_len: 0,
     iov_base: 0 as *mut c_void,
 };
 
 #[inline]
-pub unsafe fn from_mdb_val<'a>(val: &mdbx_sys::MDBX_val) -> &'a [u8] {
+pub(crate) unsafe fn from_mdb_val<'a>(val: &mdbx_sys::MDBX_val) -> &'a [u8] {
     slice::from_raw_parts(val.iov_base as *const u8, val.iov_len as usize)
 }
 
 #[inline]
-pub unsafe fn to_mdb_val(value: &[u8]) -> mdbx_sys::MDBX_val {
+pub(crate) unsafe fn to_mdb_val(value: &[u8]) -> mdbx_sys::MDBX_val {
     mdbx_sys::MDBX_val {
         iov_len: value.len() as mdbx_sys::size_t,
         iov_base: value.as_ptr() as *mut c_void,
@@ -38,7 +38,7 @@ pub unsafe fn to_mdb_val(value: &[u8]) -> mdbx_sys::MDBX_val {
 }
 
 #[inline]
-pub fn mdbx_result(err_code: c_int) -> Result<()> {
+pub(crate) fn mdbx_result(err_code: c_int) -> Result<()> {
     match err_code {
         mdbx_sys::MDBX_SUCCESS | mdbx_sys::MDBX_RESULT_TRUE => Ok(()),
         mdbx_sys::MDBX_MAP_FULL => Err(IsarError::DbFull {}),
@@ -65,7 +65,7 @@ pub(crate) fn mdbx_error(err_code: c_int) -> IsarError {
 }
 
 #[inline]
-pub fn compare_keys(integer_key: bool, key1: &[u8], key2: &[u8]) -> Ordering {
+pub(crate) fn compare_keys(integer_key: bool, key1: &[u8], key2: &[u8]) -> Ordering {
     if integer_key {
         let key1 = LittleEndian::read_u64(key1);
         let key2 = LittleEndian::read_u64(key2);

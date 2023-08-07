@@ -6,7 +6,7 @@ use crate::native::mdbx::mdbx_result;
 use core::ptr;
 use std::marker::PhantomData;
 
-pub struct UnboundCursor {
+pub(crate) struct UnboundCursor {
     cursor: *mut mdbx_sys::MDBX_cursor,
 }
 
@@ -35,7 +35,7 @@ impl Drop for UnboundCursor {
     }
 }
 
-pub struct Cursor<'txn> {
+pub(crate) struct Cursor<'txn> {
     cursor: UnboundCursor,
     _marker: PhantomData<&'txn ()>,
 }
@@ -52,7 +52,7 @@ impl<'txn> Cursor<'txn> {
     }
 
     #[inline]
-    pub(crate) fn op_get(
+    pub(super) fn op_get(
         &mut self,
         op: mdbx_sys::MDBX_cursor_op,
         key: Option<&[u8]>,
@@ -90,26 +90,29 @@ impl<'txn> Cursor<'txn> {
         )
     }
 
-    pub(crate) fn move_to_gte(&mut self, key: &[u8]) -> Result<Option<KeyVal<'txn>>> {
+    pub fn move_to_gte(&mut self, key: &[u8]) -> Result<Option<KeyVal<'txn>>> {
         self.op_get(mdbx_sys::MDBX_cursor_op::MDBX_SET_RANGE, Some(key), None)
     }
 
+    #[allow(dead_code)]
     fn move_to_next_dup(&mut self) -> Result<Option<KeyVal<'txn>>> {
         self.op_get(mdbx_sys::MDBX_cursor_op::MDBX_NEXT_DUP, None, None)
     }
 
-    pub(crate) fn move_to_last_dup(&mut self) -> Result<Option<KeyVal<'txn>>> {
+    pub fn move_to_last_dup(&mut self) -> Result<Option<KeyVal<'txn>>> {
         self.op_get(mdbx_sys::MDBX_cursor_op::MDBX_LAST_DUP, None, None)
     }
 
-    pub(crate) fn move_to_prev_no_dup(&mut self) -> Result<Option<KeyVal<'txn>>> {
+    pub fn move_to_prev_no_dup(&mut self) -> Result<Option<KeyVal<'txn>>> {
         self.op_get(mdbx_sys::MDBX_cursor_op::MDBX_PREV_NODUP, None, None)
     }
 
+    #[allow(dead_code)]
     pub fn move_to_next(&mut self) -> Result<Option<KeyVal<'txn>>> {
         self.op_get(mdbx_sys::MDBX_cursor_op::MDBX_NEXT, None, None)
     }
 
+    #[allow(dead_code)]
     pub fn move_to_first(&mut self) -> Result<Option<KeyVal<'txn>>> {
         self.op_get(mdbx_sys::MDBX_cursor_op::MDBX_FIRST, None, None)
     }

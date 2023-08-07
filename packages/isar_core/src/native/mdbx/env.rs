@@ -6,7 +6,7 @@ use crate::core::error::{IsarError, Result};
 use core::ptr;
 use std::sync::Arc;
 
-pub struct Env {
+pub(crate) struct Env {
     env: *mut mdbx_sys::MDBX_env,
 }
 
@@ -76,7 +76,7 @@ impl Env {
                 ptr::null_mut(),
             ))?;
         }
-        Ok(Txn::new(self.clone(), txn, write))
+        Ok(Txn::new(self.clone(), txn))
     }
 
     pub fn copy(&self, path: &str) -> Result<()> {

@@ -14,7 +14,7 @@ pub struct SQLiteCursor<'a> {
 }
 
 impl<'a> SQLiteCursor<'a> {
-    pub fn new(
+    pub(crate) fn new(
         txn: &'a SQLiteTxn,
         collection: &'a SQLiteCollection,
         collections: &'a Vec<SQLiteCollection>,

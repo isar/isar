@@ -8,7 +8,7 @@ use super::{BytesToId, IdToBytes};
 use crate::core::data_type::DataType;
 use crate::core::error::{IsarError, Result};
 use crate::core::value::IsarValue;
-use crate::core::watcher::CollectionWatchers;
+use crate::core::watcher::{ChangeSet, CollectionWatchers};
 use std::sync::atomic::{self, AtomicI64};
 use std::sync::Arc;
 
@@ -29,14 +29,14 @@ impl NativeProperty {
     }
 }
 
-pub struct NativeCollection {
-    pub(crate) collection_index: u16,
-    pub(crate) name: String,
-    pub(crate) id_name: Option<String>,
-    pub(crate) properties: Vec<(String, NativeProperty)>,
-    pub(crate) indexes: Vec<NativeIndex>,
-    pub(crate) static_size: u32,
-    pub(crate) watchers: Arc<CollectionWatchers<NativeQuery>>,
+pub(crate) struct NativeCollection {
+    pub collection_index: u16,
+    pub name: String,
+    pub id_name: Option<String>,
+    pub properties: Vec<(String, NativeProperty)>,
+    pub indexes: Vec<NativeIndex>,
+    pub static_size: u32,
+    pub watchers: Arc<CollectionWatchers<NativeQuery>>,
     auto_increment: AtomicI64,
     db: Option<Db>,
 }
@@ -67,8 +67,9 @@ impl NativeCollection {
         }
     }
 
-    pub fn get_db(&self) -> Result<Db> {
-        self.db.ok_or(IsarError::UnsupportedOperation {})
+    pub fn get_cursor<'a>(&self, txn: &'a NativeTxn) -> Result<TxnCursor<'a>> {
+        let db = self.db.ok_or(IsarError::UnsupportedOperation {})?;
+        txn.get_cursor(db)
     }
 
     pub fn is_embedded(&self) -> bool {
@@ -76,7 +77,7 @@ impl NativeCollection {
     }
 
     pub fn init_auto_increment(&self, txn: &NativeTxn) -> Result<()> {
-        let mut cursor = txn.get_cursor(self.get_db()?)?;
+        let mut cursor = self.get_cursor(txn)?;
         if let Some((key, _)) = cursor.move_to_last()? {
             let next_id = key.to_id() + 1;
             self.auto_increment
@@ -106,25 +107,35 @@ impl NativeCollection {
     }
 
     pub fn get_size(&self, txn: &NativeTxn, include_indexes: bool) -> Result<u64> {
-        let mut size = txn.stat(self.get_db()?)?.1;
-
-        if include_indexes {
-            for index in &self.indexes {
-                size += index.get_size(txn)?;
+        if let Some(db) = self.db {
+            let mut size = txn.stat(db)?.1;
+            if include_indexes {
+                for index in &self.indexes {
+                    size += index.get_size(txn)?;
+                }
             }
+            Ok(size)
+        } else {
+            Ok(0)
         }
-
-        Ok(size)
     }
 
-    pub(crate) fn put<'a>(
+    pub fn count(&self, txn: &NativeTxn) -> Result<u32> {
+        if let Some(db) = self.db {
+            Ok(txn.stat(db)?.0 as u32)
+        } else {
+            Ok(0)
+        }
+    }
+
+    pub fn put<'a>(
         &self,
         txn: &'a NativeTxn,
+        change_set: &mut ChangeSet,
         cursor: &mut TxnCursor<'a>,
         id: i64,
         bytes: &[u8],
     ) -> Result<()> {
-        let mut change_set = txn.get_change_set();
         let id_bytes = id.to_id_bytes();
 
         // we only fetch the previous object if there are query watchers or indexes
@@ -155,7 +166,7 @@ impl NativeCollection {
             // create new object indexes
             for index in &self.indexes {
                 buffer = index.create_for_object(txn, id, object, buffer, |id| {
-                    self.delete(txn, id)?;
+                    self.delete(txn, change_set, cursor, id)?;
                     Ok(())
                 })?;
             }
@@ -167,12 +178,14 @@ impl NativeCollection {
         cursor.put(&id_bytes, bytes)
     }
 
-    pub fn delete<'a>(&self, txn: &'a NativeTxn, id: i64) -> Result<bool> {
-        let mut cursor = txn.get_cursor(self.get_db()?)?;
-        let mut change_set = txn.get_change_set();
-        let id_bytes = id.to_id_bytes();
-
-        if let Some((_, bytes)) = cursor.move_to(&id_bytes)? {
+    pub fn delete<'a>(
+        &self,
+        txn: &'a NativeTxn,
+        change_set: &mut ChangeSet,
+        cursor: &mut TxnCursor<'a>,
+        id: i64,
+    ) -> Result<bool> {
+        if let Some((_, bytes)) = cursor.move_to(&id.to_id_bytes())? {
             let object = IsarDeserializer::from_bytes(&bytes);
             change_set.register_change(&self.watchers, id, &object);
 
@@ -191,16 +204,15 @@ impl NativeCollection {
         }
     }
 
-    pub fn update(
+    pub fn update<'a>(
         &self,
-        txn: &NativeTxn,
+        txn: &'a NativeTxn,
+        change_set: &mut ChangeSet,
+        cursor: &mut TxnCursor<'a>,
         id: i64,
         updates: &[(u16, Option<IsarValue>)],
     ) -> Result<bool> {
-        let mut cursor = txn.get_cursor(self.get_db()?)?;
-
-        let id_bytes = id.to_id_bytes();
-        if let Some((_, old_object)) = cursor.move_to(&id_bytes)? {
+        if let Some((_, old_object)) = cursor.move_to(&id.to_id_bytes())? {
             let mut buffer = txn.take_buffer();
             buffer.extend_from_slice(&old_object);
             let mut new_object = IsarSerializer::new(buffer, 0, self.static_size);
@@ -210,7 +222,7 @@ impl NativeCollection {
             }
 
             let buffer = new_object.finish();
-            self.put(txn, &mut cursor, id, &buffer)?;
+            self.put(txn, change_set, cursor, id, &buffer)?;
             txn.put_buffer(buffer);
 
             Ok(true)
@@ -259,9 +271,10 @@ impl NativeCollection {
     }
 
     pub fn clear(&self, txn: &NativeTxn) -> Result<()> {
+        let db = self.db.ok_or(IsarError::UnsupportedOperation {})?;
         let mut change_set = txn.get_change_set();
         change_set.register_all(&self.watchers);
-        txn.clear_db(self.get_db()?)?;
+        txn.clear_db(db)?;
         for index in &self.indexes {
             index.clear(txn)?;
         }

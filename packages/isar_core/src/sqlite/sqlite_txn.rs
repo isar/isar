@@ -71,7 +71,7 @@ impl SQLiteTxn {
         self.sqlite.clear_update_hook();
     }
 
-    pub fn commit(self) -> Result<()> {
+    pub(crate) fn commit(self) -> Result<()> {
         if !self.active.get() {
             return Err(IsarError::TransactionClosed {});
         }
@@ -81,7 +81,7 @@ impl SQLiteTxn {
         Ok(())
     }
 
-    pub fn abort(&self) {
+    pub(crate) fn abort(&self) {
         if self.active.get() {
             self.sqlite.clear_update_hook();
             let stmt = self.sqlite.prepare("ROLLBACK");

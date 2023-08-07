@@ -55,7 +55,7 @@ impl<'a> IndexIterator<'a> {
             let cursor = if let Some(primary_cursor) = primary_cursor {
                 primary_cursor
             } else {
-                txn.get_cursor(collection.get_db().ok()?).ok()?
+                collection.get_cursor(txn).ok()?
             };
             let iterator = cursor.iter_between_ids(start, end, false, false).ok()?;
             Some((iterator, None))

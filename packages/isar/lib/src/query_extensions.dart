@@ -42,7 +42,7 @@ extension QueryFilterNot<OBJ, R> on QueryBuilder<OBJ, R, QFilterCondition> {
   /// resulting filters.
   ///
   /// If [items] is empty, this is a no-op.
-  QueryBuilder<OBJ, R, QAfterFilterCondition> anyOf<E, RS>(
+  QueryBuilder<OBJ, R, QAfterFilterCondition> anyOf<E>(
     Iterable<E> items,
     FilterRepeatModifier<OBJ, OBJ, E> modifier,
   ) {
@@ -62,7 +62,7 @@ extension QueryFilterNot<OBJ, R> on QueryBuilder<OBJ, R, QFilterCondition> {
   /// filters.
   ///
   /// If [items] is empty, this is a no-op.
-  QueryBuilder<OBJ, R, QAfterFilterCondition> allOf<E, RS>(
+  QueryBuilder<OBJ, R, QAfterFilterCondition> allOf<E>(
     Iterable<E> items,
     FilterRepeatModifier<OBJ, OBJ, E> modifier,
   ) {

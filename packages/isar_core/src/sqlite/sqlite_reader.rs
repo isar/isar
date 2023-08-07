@@ -13,7 +13,7 @@ pub struct SQLiteReader<'a> {
 }
 
 impl<'a> SQLiteReader<'a> {
-    pub fn new(
+    pub(crate) fn new(
         stmt: Cow<'a, SQLiteStatement<'a>>,
         collection: &'a SQLiteCollection,
         all_collections: &'a [SQLiteCollection],

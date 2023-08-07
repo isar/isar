@@ -123,9 +123,47 @@ mod tests {
     use float_next_after::NextAfter;
 
     #[test]
+    fn test_min() {
+        let index_key = IndexKey::min();
+        assert_eq!(index_key.finish(), (Vec::<u8>::new(), false));
+    }
+
+    #[test]
+    fn test_max() {
+        let index_key = IndexKey::max();
+        assert_eq!(
+            index_key.finish(),
+            (vec![255, 255, 255, 255, 255, 255, 255, 255], false)
+        );
+    }
+
+    #[test]
+    fn test_with_buffer() {
+        let bytes = vec![1, 2, 3];
+        let index_key = IndexKey::with_buffer(bytes);
+        assert_eq!(index_key.finish(), (Vec::<u8>::new(), false));
+    }
+
+    #[test]
+    fn test_add_bool() {
+        let pairs = vec![
+            (None, vec![0], true),
+            (Some(false), vec![1], false),
+            (Some(true), vec![2], false),
+        ];
+
+        for (val, bytes, contains_null) in pairs {
+            let mut index_key = IndexKey::min();
+            index_key.add_bool(val);
+            assert_eq!(index_key.finish(), (bytes, contains_null));
+        }
+    }
+
+    #[test]
     fn test_add_byte() {
         let pairs = vec![
-            //(NativeReader::NULL_BYTE, vec![123, 0]),
+            (0, vec![123, 0]),
+            (1, vec![123, 1]),
             (123, vec![123, 123]),
             (255, vec![123, 255]),
         ];
@@ -134,147 +172,183 @@ mod tests {
             let mut index_key = IndexKey::min();
             index_key.add_byte(123);
             index_key.add_byte(val);
-            assert_eq!(&index_key.bytes, &bytes);
+            assert_eq!(index_key.finish(), (bytes, false));
         }
     }
 
     #[test]
     fn test_add_int() {
         let pairs = vec![
-            (i32::MIN, vec![123, 0, 0, 0, 0]),
-            (i32::MIN + 1, vec![123, 0, 0, 0, 1]),
-            (-1, vec![123, 127, 255, 255, 255]),
-            (0, vec![123, 128, 0, 0, 0]),
-            (1, vec![123, 128, 0, 0, 1]),
-            (i32::MAX - 1, vec![123, 255, 255, 255, 254]),
-            (i32::MAX, vec![123, 255, 255, 255, 255]),
+            (i32::MIN, vec![123, 0, 0, 0, 0], true),
+            (i32::MIN + 1, vec![123, 0, 0, 0, 1], false),
+            (-1, vec![123, 127, 255, 255, 255], false),
+            (0, vec![123, 128, 0, 0, 0], false),
+            (1, vec![123, 128, 0, 0, 1], false),
+            (i32::MAX - 1, vec![123, 255, 255, 255, 254], false),
+            (i32::MAX, vec![123, 255, 255, 255, 255], false),
         ];
 
-        for (val, bytes) in pairs {
+        for (val, bytes, contains_null) in pairs {
             let mut index_key = IndexKey::min();
             index_key.add_byte(123);
             index_key.add_int(val);
-            assert_eq!(&index_key.bytes, &bytes);
+            assert_eq!(index_key.finish(), (bytes, contains_null));
         }
     }
 
     #[test]
     fn test_add_long() {
         let pairs = vec![
-            (i64::MIN, vec![123, 0, 0, 0, 0, 0, 0, 0, 0]),
-            (i64::MIN + 1, vec![123, 0, 0, 0, 0, 0, 0, 0, 1]),
-            (-1, vec![123, 127, 255, 255, 255, 255, 255, 255, 255]),
-            (0, vec![123, 128, 0, 0, 0, 0, 0, 0, 0]),
-            (1, vec![123, 128, 0, 0, 0, 0, 0, 0, 1]),
+            (i64::MIN, vec![123, 0, 0, 0, 0, 0, 0, 0, 0], true),
+            (i64::MIN + 1, vec![123, 0, 0, 0, 0, 0, 0, 0, 1], false),
+            (-1, vec![123, 127, 255, 255, 255, 255, 255, 255, 255], false),
+            (0, vec![123, 128, 0, 0, 0, 0, 0, 0, 0], false),
+            (1, vec![123, 128, 0, 0, 0, 0, 0, 0, 1], false),
             (
                 i64::MAX - 1,
                 vec![123, 255, 255, 255, 255, 255, 255, 255, 254],
+                false,
             ),
-            (i64::MAX, vec![123, 255, 255, 255, 255, 255, 255, 255, 255]),
+            (
+                i64::MAX,
+                vec![123, 255, 255, 255, 255, 255, 255, 255, 255],
+                false,
+            ),
         ];
 
-        for (val, bytes) in pairs {
+        for (val, bytes, contains_null) in pairs {
             let mut index_key = IndexKey::min();
             index_key.add_byte(123);
             index_key.add_long(val);
-            assert_eq!(&index_key.bytes, &bytes);
+            assert_eq!(index_key.finish(), (bytes, contains_null));
         }
     }
 
     #[test]
     fn test_add_float() {
         let pairs = vec![
-            (f32::NAN, vec![123, 0, 0, 0, 0]),
-            (f32::NEG_INFINITY, vec![123, 0, 127, 255, 255]),
-            (f32::MIN, vec![123, 0, 128, 0, 0]),
-            (f32::MIN.next_after(f32::MAX), vec![123, 0, 128, 0, 1]),
-            ((-0.0).next_after(f32::MIN), vec![123, 127, 255, 255, 254]),
-            (-0.0, vec![123, 127, 255, 255, 255]),
-            (0.0, vec![123, 128, 0, 0, 0]),
-            (0.0.next_after(f32::MAX), vec![123, 128, 0, 0, 1]),
-            (f32::MAX.next_after(f32::MIN), vec![123, 255, 127, 255, 254]),
-            (f32::MAX, vec![123, 255, 127, 255, 255]),
-            (f32::INFINITY, vec![123, 255, 128, 0, 0]),
+            (f32::NAN, vec![123, 0, 0, 0, 0], true),
+            (f32::NEG_INFINITY, vec![123, 0, 127, 255, 255], false),
+            (f32::MIN, vec![123, 0, 128, 0, 0], false),
+            (
+                f32::MIN.next_after(f32::MAX),
+                vec![123, 0, 128, 0, 1],
+                false,
+            ),
+            (
+                (-0.0).next_after(f32::MIN),
+                vec![123, 127, 255, 255, 254],
+                false,
+            ),
+            (-0.0, vec![123, 127, 255, 255, 255], false),
+            (0.0, vec![123, 128, 0, 0, 0], false),
+            (0.0.next_after(f32::MAX), vec![123, 128, 0, 0, 1], false),
+            (
+                f32::MAX.next_after(f32::MIN),
+                vec![123, 255, 127, 255, 254],
+                false,
+            ),
+            (f32::MAX, vec![123, 255, 127, 255, 255], false),
+            (f32::INFINITY, vec![123, 255, 128, 0, 0], false),
         ];
 
-        for (val, bytes) in pairs {
+        for (val, bytes, contains_null) in pairs {
             let mut index_key = IndexKey::min();
             index_key.add_byte(123);
             index_key.add_float(val);
-            assert_eq!(&index_key.bytes, &bytes);
+            assert_eq!(index_key.finish(), (bytes, contains_null));
         }
     }
 
     #[test]
     fn test_add_double() {
         let pairs = vec![
-            (f64::NAN, vec![123, 0, 0, 0, 0, 0, 0, 0, 0]),
+            (f64::NAN, vec![123, 0, 0, 0, 0, 0, 0, 0, 0], true),
             (
                 f64::NEG_INFINITY,
                 vec![123, 0, 15, 255, 255, 255, 255, 255, 255],
+                false,
             ),
-            (f64::MIN, vec![123, 0, 16, 0, 0, 0, 0, 0, 0]),
+            (f64::MIN, vec![123, 0, 16, 0, 0, 0, 0, 0, 0], false),
             (
                 f64::MIN.next_after(f64::MAX),
                 vec![123, 0, 16, 0, 0, 0, 0, 0, 1],
+                false,
             ),
             (
                 (-0.0).next_after(f64::MIN),
                 vec![123, 127, 255, 255, 255, 255, 255, 255, 254],
+                false,
             ),
-            (-0.0, vec![123, 127, 255, 255, 255, 255, 255, 255, 255]),
-            (0.0, vec![123, 128, 0, 0, 0, 0, 0, 0, 0]),
+            (
+                -0.0,
+                vec![123, 127, 255, 255, 255, 255, 255, 255, 255],
+                false,
+            ),
+            (0.0, vec![123, 128, 0, 0, 0, 0, 0, 0, 0], false),
             (
                 0.0.next_after(f64::MAX),
                 vec![123, 128, 0, 0, 0, 0, 0, 0, 1],
+                false,
             ),
             (
                 f64::MAX.next_after(f64::MIN),
                 vec![123, 255, 239, 255, 255, 255, 255, 255, 254],
+                false,
             ),
-            (f64::MAX, vec![123, 255, 239, 255, 255, 255, 255, 255, 255]),
-            (f64::INFINITY, vec![123, 255, 240, 0, 0, 0, 0, 0, 0]),
+            (
+                f64::MAX,
+                vec![123, 255, 239, 255, 255, 255, 255, 255, 255],
+                false,
+            ),
+            (f64::INFINITY, vec![123, 255, 240, 0, 0, 0, 0, 0, 0], false),
         ];
 
-        for (val, bytes) in pairs {
+        for (val, bytes, contains_null) in pairs {
             let mut index_key = IndexKey::min();
             index_key.add_byte(123);
             index_key.add_double(val);
-            assert_eq!(&index_key.bytes, &bytes);
+            assert_eq!(index_key.finish(), (bytes, contains_null));
         }
     }
 
     #[test]
     fn test_add_string() {
-        let long_str = (0..850).map(|_| "aB").collect::<String>();
-        let mut long_str_bytes = vec![123];
-        long_str_bytes.extend_from_slice(long_str.as_bytes());
-
-        let mut hello_bytes = vec![123];
-        hello_bytes.extend_from_slice(b"hELLO");
-
-        /*let pairs: Vec<(Option<&str>, Vec<u8>, Vec<u8>)> = vec![
-            (None, vec![123, 0], vec![123, 0]),
-            (Some(""), vec![123, 1], vec![123, 1]),
-            (
-                Some("hello"),
-                hello_bytes_lc.clone(),
-                hello_bytes_lc.clone(),
-            ),
-            (Some("hELLO"), hello_bytes.clone(), hello_bytes_lc.clone()),
-            //(Some(&long_str), long_str_bytes, long_str_lc_bytes),
+        let pairs = vec![
+            (None, vec![123, 0], true),
+            (Some(""), vec![123, 1], false),
+            (Some("a"), vec![123, 97], false),
+            (Some("abc"), vec![123, 97, 98, 99], false),
+            (Some("abcde"), vec![123, 97, 98, 99, 100, 101], false),
         ];
 
-        for (str, bytes, bytes_lc) in pairs {
+        for (val, bytes, contains_null) in pairs {
             let mut index_key = IndexKey::min();
             index_key.add_byte(123);
-            index_key.add_string(str, true);
-            assert_eq!(index_key.bytes, bytes);
+            index_key.add_string(val);
+            assert_eq!(index_key.finish(), (bytes, contains_null));
+        }
+    }
 
-            let mut index_key = IndexKey::min();
-            index_key.add_byte(123);
-            index_key.add_string(str, false);
-            assert_eq!(index_key.bytes, bytes_lc);
-        }*/
+    #[test]
+    fn test_finish() {
+        let long_str: String = (0..1030).map(|_| "I").collect::<String>();
+        let mut bytes = vec![];
+        bytes.extend_from_slice(&long_str.as_bytes()[..1016]);
+        bytes.extend_from_slice(&xxh3_64(long_str.as_bytes()).to_be_bytes());
+
+        let mut index_key = IndexKey::min();
+        index_key.add_string(Some(&long_str));
+        assert_eq!(index_key.finish(), (bytes, false));
+    }
+
+    #[test]
+    fn test_hash() {
+        let mut index_key = IndexKey::min();
+        index_key.add_byte(123);
+        index_key.add_string(Some("123"));
+
+        let bytes = vec![123, 49, 50, 51];
+        assert_eq!(index_key.hash(), xxh3_64(&bytes));
     }
 }

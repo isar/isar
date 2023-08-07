@@ -1,6 +1,7 @@
 use super::mdbx::db::Db;
 use super::mdbx::env::Env;
 use super::native_collection::{NativeCollection, NativeProperty};
+use super::native_index::NativeIndex;
 use super::native_txn::NativeTxn;
 use crate::core::error::{IsarError, Result};
 use crate::core::schema::{IsarSchema, PropertySchema};
@@ -10,7 +11,7 @@ use std::sync::Arc;
 
 const ISAR_FILE_VERSION: u8 = 3;
 
-pub fn perform_migration(
+pub(crate) fn perform_migration(
     instance_id: u32,
     env: &Arc<Env>,
     mut schemas: Vec<IsarSchema>,
@@ -58,12 +59,32 @@ pub fn perform_migration(
             None
         };
 
+        let mut indexes = vec![];
+        for index in &schema.indexes {
+            let index_db = open_index_db(&txn, &schema.name, &index.name)?;
+            let properties = index
+                .properties
+                .iter()
+                .map(|p| {
+                    properties
+                        .iter()
+                        .find(|(name, _)| name == p)
+                        .unwrap()
+                        .1
+                        .clone()
+                })
+                .collect_vec();
+            let index =
+                NativeIndex::new(&index.name, index_db, properties, index.unique, index.hash);
+            indexes.push(index);
+        }
+
         let col = NativeCollection::new(
             collections.len() as u16,
             schema.name.clone(),
             schema.id_name.clone(),
             properties,
-            vec![],
+            indexes,
             db,
         );
 

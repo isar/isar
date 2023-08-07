@@ -1,13 +1,13 @@
-use super::schema_manager::perform_migration;
-use super::sql::{sql_fn_filter_json, FN_FILTER_JSON_NAME};
 use super::sqlite3::SQLite3;
-use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
+use super::sqlite_collection::SQLiteCollection;
 use super::sqlite_cursor::SQLiteCursor;
 use super::sqlite_insert::SQLiteInsert;
+use super::sqlite_open::{close_instance, get_instance, open_instance};
 use super::sqlite_query::{SQLiteQuery, SQLiteQueryCursor};
 use super::sqlite_query_builder::SQLiteQueryBuilder;
 use super::sqlite_reader::SQLiteReader;
 use super::sqlite_txn::SQLiteTxn;
+use super::sqlite_verify::verify_sqlite;
 use crate::core::error::{IsarError, Result};
 use crate::core::filter::{ConditionType, Filter, FilterCondition};
 use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
@@ -15,35 +15,42 @@ use crate::core::query_builder::IsarQueryBuilder;
 use crate::core::schema::IsarSchema;
 use crate::core::value::IsarValue;
 use crate::core::watcher::{WatchHandle, WatcherCallback};
-use intmap::IntMap;
-use itertools::Itertools;
 use parking_lot::lock_api::RawMutex;
-use parking_lot::Mutex;
 use std::cell::Cell;
-use std::fs::remove_file;
-use std::path::PathBuf;
 use std::rc::Rc;
-use std::sync::{Arc, LazyLock};
+use std::sync::Arc;
 use std::vec;
 
-static INSTANCES: LazyLock<Mutex<IntMap<Connections>>> =
-    LazyLock::new(|| Mutex::new(IntMap::new()));
+pub(crate) struct SQLiteInstanceInfo {
+    pub(crate) instance_id: u32,
+    pub(crate) name: String,
+    pub(crate) dir: String,
+    pub(crate) path: String,
+    pub(crate) encryption_key: Option<String>,
 
-const MIB: usize = 1 << 20;
-
-struct Connections {
-    info: Arc<SQLiteInstanceInfo>,
-    sqlite: Vec<SQLite3>,
-}
-
-struct SQLiteInstanceInfo {
-    name: String,
-    dir: String,
-    path: String,
-    encryption_key: Option<String>,
-    instance_id: u32,
     collections: Vec<SQLiteCollection>,
     write_mutex: parking_lot::RawMutex,
+}
+
+impl SQLiteInstanceInfo {
+    pub(crate) fn new(
+        instance_id: u32,
+        name: &str,
+        dir: &str,
+        path: &str,
+        encryption_key: Option<&str>,
+        collections: Vec<SQLiteCollection>,
+    ) -> Self {
+        Self {
+            instance_id,
+            name: name.to_string(),
+            dir: dir.to_string(),
+            path: path.to_string(),
+            encryption_key: encryption_key.map(|s| s.to_string()),
+            collections,
+            write_mutex: RawMutex::INIT,
+        }
+    }
 }
 
 pub struct SQLiteInstance {
@@ -53,101 +60,12 @@ pub struct SQLiteInstance {
 }
 
 impl SQLiteInstance {
-    fn open(
-        instance_id: u32,
-        name: &str,
-        dir: &str,
-        schemas: Vec<IsarSchema>,
-        max_size_mib: u32,
-        encryption_key: Option<&str>,
-    ) -> Result<(SQLiteInstanceInfo, SQLite3)> {
-        let path = if !dir.is_empty() {
-            let mut path_buf = PathBuf::from(dir);
-            path_buf.push(format!("{}.sqlite", name));
-            path_buf.as_path().to_str().unwrap().to_string()
-        } else {
-            String::new()
-        };
-
-        let sqlite = Self::open_conn(&path, encryption_key)?;
-
-        let max_size = (max_size_mib as usize).saturating_mul(MIB);
-        sqlite
-            .prepare(&format!("PRAGMA mmap_size={}", max_size))?
-            .step()?;
-        sqlite.prepare("PRAGMA journal_mode=WAL")?.step()?;
-
-        let sqlite = Rc::new(sqlite);
-        let txn = SQLiteTxn::new(sqlite.clone(), true)?;
-        perform_migration(&txn, &schemas)?;
-        txn.commit()?;
-
-        let collections = Self::get_collections(&schemas);
-        {
-            let txn = SQLiteTxn::new(sqlite.clone(), false)?;
-            for collection in &collections {
-                if !collection.is_embedded() {
-                    collection.init_auto_increment(&txn)?;
-                }
-            }
-            txn.abort();
-        }
-
-        let instance_info = SQLiteInstanceInfo {
-            name: name.to_string(),
-            dir: dir.to_string(),
-            encryption_key: encryption_key.map(|k| k.to_string()),
-            instance_id,
-            path,
-            collections,
-            write_mutex: RawMutex::INIT,
-        };
-
-        let sqlite = Rc::into_inner(sqlite).unwrap();
-        Ok((instance_info, sqlite))
-    }
-
-    fn get_collections(schemas: &[IsarSchema]) -> Vec<SQLiteCollection> {
-        let mut collections = Vec::new();
-        for collection_schema in schemas {
-            let properties = collection_schema
-                .properties
-                .iter()
-                .filter_map(|p| {
-                    if let Some(name) = &p.name {
-                        let target_collection_index = p.collection.as_deref().map(|c| {
-                            let position = schemas.iter().position(|c2| c2.name == c).unwrap();
-                            position as u16
-                        });
-                        let prop = SQLiteProperty::new(name, p.data_type, target_collection_index);
-                        Some(prop)
-                    } else {
-                        None
-                    }
-                })
-                .collect_vec();
-            let collection = SQLiteCollection::new(
-                collection_schema.name.clone(),
-                collection_schema.id_name.clone(),
-                properties,
-            );
-            collections.push(collection);
-        }
-        collections
-    }
-
     fn get_collection(&self, collection_index: u16) -> Result<&SQLiteCollection> {
         if let Some(collection) = self.info.collections.get(collection_index as usize) {
             Ok(collection)
         } else {
             Err(IsarError::IllegalArgument {})
         }
-    }
-
-    fn open_conn(path: &str, encryption_key: Option<&str>) -> Result<SQLite3> {
-        let mut sqlite = SQLite3::open(path, encryption_key)?;
-        sqlite.create_function(FN_FILTER_JSON_NAME, 2, sql_fn_filter_json)?;
-        Ok(sqlite)
     }
 }
 
@@ -172,30 +90,6 @@ impl IsarInstance for SQLiteInstance {
     where
         Self: 'a;
 
-    fn get_instance(instance_id: u32) -> Option<Self::Instance> {
-        let mut lock = INSTANCES.lock();
-        if let Some(connections) = lock.get_mut(instance_id as u64) {
-            let sqlite = connections.sqlite.pop().or_else(|| {
-                Self::open_conn(
-                    &connections.info.path,
-                    connections.info.encryption_key.as_deref(),
-                )
-                .ok()
-            });
-            if let Some(sqlite) = sqlite {
-                Some(Self {
-                    info: connections.info.clone(),
-                    sqlite: Rc::new(sqlite),
-                    txn_active: Cell::new(false),
-                })
-            } else {
-                None
-            }
-        } else {
-            None
-        }
-    }
-
     fn get_name(&self) -> &str {
         &self.info.name
     }
@@ -206,6 +100,15 @@ impl IsarInstance for SQLiteInstance {
 
     fn get_collections(&self) -> impl Iterator<Item = &str> {
         self.info.collections.iter().map(|c| c.name.as_str())
+    }
+
+    fn get_instance(instance_id: u32) -> Option<Self::Instance> {
+        let (info, sqlite) = get_instance(instance_id)?;
+        Some(Self {
+            info,
+            sqlite: Rc::new(sqlite),
+            txn_active: Cell::new(false),
+        })
     }
 
     fn open_instance(
@@ -224,35 +127,16 @@ impl IsarInstance for SQLiteInstance {
             return Err(IsarError::UnsupportedOperation {});
         }
 
-        let mut lock = INSTANCES.lock();
-        if !lock.contains_key(instance_id as u64) {
-            let (info, sqlite) = Self::open(
-                instance_id,
-                name,
-                dir,
-                schemas,
-                max_size_mib,
-                encryption_key,
-            )?;
-
-            let connections = Connections {
-                info: Arc::new(info),
-                sqlite: vec![sqlite],
-            };
-            lock.insert(instance_id as u64, connections);
-        }
-
-        let connections = lock.get_mut(instance_id as u64).unwrap();
-        let sqlite = if let Some(sqlite) = connections.sqlite.pop() {
-            sqlite
-        } else {
-            Self::open_conn(
-                &connections.info.path,
-                connections.info.encryption_key.as_deref(),
-            )?
-        };
+        let (info, sqlite) = open_instance(
+            instance_id,
+            name,
+            dir,
+            schemas,
+            max_size_mib,
+            encryption_key,
+        )?;
         Ok(Self {
-            info: connections.info.clone(),
+            info,
             sqlite: Rc::new(sqlite),
             txn_active: Cell::new(false),
         })
@@ -461,36 +345,11 @@ impl IsarInstance for SQLiteInstance {
         Ok(())
     }
 
-    fn verify(&self, txn: &Self::Txn) -> Result<()> {
-        Ok(())
+    fn verify(&self, _txn: &Self::Txn) -> Result<()> {
+        verify_sqlite(&self.sqlite, &self.info.collections)
     }
 
     fn close(instance: Self::Instance, delete: bool) -> bool {
-        // Check whether all other references are gone
-        if Arc::strong_count(&instance.info) == 2 {
-            let mut lock = INSTANCES.lock();
-            // Check again to make sure there are no new references
-            if Arc::strong_count(&instance.info) == 2 {
-                lock.remove(instance.info.instance_id as u64);
-
-                if delete {
-                    let path = instance.info.path.to_string();
-                    drop(instance);
-                    let _ = remove_file(&path);
-                    let _ = remove_file(&format!("{}-wal", path));
-                    let _ = remove_file(&format!("{}-shm", path));
-                }
-                return true;
-            }
-        }
-
-        // Return connection to pool
-        if let Some(sqlite) = Rc::into_inner(instance.sqlite) {
-            let mut lock = INSTANCES.lock();
-            let connections = lock.get_mut(instance.info.instance_id as u64).unwrap();
-            connections.sqlite.push(sqlite);
-        }
-
-        false
+        close_instance(instance.info, instance.sqlite, delete)
     }
 }

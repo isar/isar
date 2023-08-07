@@ -13,12 +13,12 @@ pub struct NativeCursor<'a> {
 }
 
 impl<'a> NativeCursor<'a> {
-    pub fn new(
+    pub(crate) fn new(
         txn: &'a NativeTxn,
         collection: &'a NativeCollection,
         collections: &'a Vec<NativeCollection>,
     ) -> Result<Self> {
-        let cursor = txn.get_cursor(collection.get_db()?)?;
+        let cursor = collection.get_cursor(txn)?;
         let nc = Self {
             cursor,
             collection,
