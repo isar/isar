@@ -82,9 +82,11 @@ jobs:
     name: Publish
     needs: testlab
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v2
+      - uses: dart-lang/setup-dart@v1
       - uses: actions/setup-node@v3
         with:
           node-version: "18"
@@ -101,10 +103,6 @@ jobs:
         run: sh tool/download_binaries.sh
       - name: Adjust Version
         run: find . -type f -exec sed -i "s/0.0.0-placeholder/${{ github.ref_name }}/g" {} +
-      - name: pub.dev credentials
-        run: |
-          mkdir -p $HOME/.config/dart
-          echo '${{ secrets.PUB_JSON }}' >> $HOME/.config/dart/pub-credentials.json
       - uses: JS-DevTools/npm-publish@v2
         with:
           token: ${{ secrets.NPM_TOKEN }}
