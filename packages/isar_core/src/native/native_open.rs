@@ -53,7 +53,7 @@ pub(crate) fn open_native(
             instance_id,
             compact_schemas.unwrap(),
             max_size_mib,
-            compact_condition,
+            None,
         )
     }
 }

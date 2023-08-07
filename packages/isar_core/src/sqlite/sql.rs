@@ -48,12 +48,11 @@ pub(crate) fn drop_column_sql(collection: &IsarSchema, property_name: &str) -> S
 }
 
 pub(crate) fn create_index_sql(table_name: &str, index: &IndexSchema) -> String {
-    let index_name = format!("{}_{}", table_name, index.name);
     format!(
         "CREATE {} INDEX {}_{} ON {} ({})",
         if index.unique { "UNIQUE" } else { "" },
-        index_name,
         table_name,
+        index.name,
         table_name,
         index.properties.join(", ")
     )

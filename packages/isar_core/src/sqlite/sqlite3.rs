@@ -111,14 +111,14 @@ impl SQLite3 {
         let mut index_names_unique = vec![];
         while stmt.step()? {
             let name = stmt.get_text(1).to_string();
-            if name.to_lowercase().starts_with("sqlite_") {
+            if !name.to_lowercase().starts_with("sqlite_") {
                 let unique = stmt.get_int(2) == 1;
                 index_names_unique.push((name, unique));
             }
         }
         let mut indexes = vec![];
         for (index_name, unique) in index_names_unique {
-            let mut stmt = self.prepare(&format!("PRAGMA schema.index_xinfo({})", index_name))?;
+            let mut stmt = self.prepare(&format!("PRAGMA index_info({})", index_name))?;
             let mut cols = vec![];
             while stmt.step()? {
                 cols.push(stmt.get_text(2).to_string());

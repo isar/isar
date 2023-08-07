@@ -11,6 +11,7 @@ mod native_open;
 mod native_query_builder;
 mod native_reader;
 mod native_txn;
+mod native_verify;
 mod native_writer;
 mod query;
 mod schema_manager;

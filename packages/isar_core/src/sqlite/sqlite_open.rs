@@ -102,6 +102,7 @@ fn get_collections(schemas: &[IsarSchema]) -> Vec<SQLiteCollection> {
             collection_schema.name.clone(),
             collection_schema.id_name.clone(),
             properties,
+            collection_schema.indexes.clone(),
         );
         collections.push(collection);
     }

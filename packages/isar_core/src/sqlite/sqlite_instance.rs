@@ -7,6 +7,7 @@ use super::sqlite_query::{SQLiteQuery, SQLiteQueryCursor};
 use super::sqlite_query_builder::SQLiteQueryBuilder;
 use super::sqlite_reader::SQLiteReader;
 use super::sqlite_txn::SQLiteTxn;
+use super::sqlite_verify::verify_sqlite;
 use crate::core::error::{IsarError, Result};
 use crate::core::filter::{ConditionType, Filter, FilterCondition};
 use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
@@ -344,8 +345,8 @@ impl IsarInstance for SQLiteInstance {
         Ok(())
     }
 
-    fn verify(&self, txn: &Self::Txn) -> Result<()> {
-        Ok(())
+    fn verify(&self, _txn: &Self::Txn) -> Result<()> {
+        verify_sqlite(&self.sqlite, &self.info.collections)
     }
 
     fn close(instance: Self::Instance, delete: bool) -> bool {

@@ -10,6 +10,7 @@ mod sqlite_query;
 mod sqlite_query_builder;
 mod sqlite_reader;
 mod sqlite_txn;
+mod sqlite_verify;
 mod sqlite_writer;
 
 #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]

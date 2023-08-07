@@ -6,6 +6,7 @@ use super::native_open::{get_isar_path, open_native};
 use super::native_query_builder::NativeQueryBuilder;
 use super::native_reader::NativeReader;
 use super::native_txn::NativeTxn;
+use super::native_verify::verify_native;
 use super::query::{NativeQuery, NativeQueryCursor};
 use crate::core::error::{IsarError, Result};
 use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
@@ -314,26 +315,7 @@ impl IsarInstance for NativeInstance {
     }
 
     fn verify(&self, txn: &Self::Txn) -> Result<()> {
-        let mut db_names = vec![];
-        db_names.push("_info".to_string());
-        for col in &self.collections {
-            if !col.is_embedded() {
-                db_names.push(col.name.clone());
-                for index in &col.indexes {
-                    db_names.push(format!("_i_{}_{}", col.name, index.name));
-                }
-            }
-        }
-        let mut actual_db_names = txn.db_names()?;
-
-        db_names.sort();
-        actual_db_names.sort();
-
-        if db_names != actual_db_names {
-            Err(IsarError::DbCorrupted {})
-        } else {
-            Ok(())
-        }
+        verify_native(txn, &self.collections)
     }
 
     fn close(instance: Arc<Self>, delete: bool) -> bool {
