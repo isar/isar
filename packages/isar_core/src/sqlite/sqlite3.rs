@@ -87,7 +87,7 @@ impl SQLite3 {
             let table_type = stmt.get_text(2);
             if table_type == "table" {
                 let name = stmt.get_text(1);
-                if !name.to_lowercase().starts_with("sqlite_") {
+                if !name.to_ascii_lowercase().starts_with("sqlite_") {
                     names.push(name.to_string());
                 }
             }
@@ -111,7 +111,7 @@ impl SQLite3 {
         let mut index_names_unique = vec![];
         while stmt.step()? {
             let name = stmt.get_text(1).to_string();
-            if !name.to_lowercase().starts_with("sqlite_") {
+            if !name.to_ascii_lowercase().starts_with("sqlite_") {
                 let unique = stmt.get_int(2) == 1;
                 index_names_unique.push((name, unique));
             }

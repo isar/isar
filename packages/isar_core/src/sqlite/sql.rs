@@ -389,7 +389,7 @@ pub(crate) fn data_type_sql(property: &PropertySchema) -> Cow<str> {
 }
 
 pub(crate) fn sql_data_type(sqlite_type: &str) -> (DataType, Option<&str>) {
-    match sqlite_type.to_lowercase().as_str() {
+    match sqlite_type.to_ascii_lowercase().as_str() {
         "bool" => (DataType::Bool, None),
         "u8" => (DataType::Byte, None),
         "i32" => (DataType::Int, None),

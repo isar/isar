@@ -124,8 +124,7 @@ jobs:
       - name: Collect isar_core Coverage
         run: |
           cargo install cargo-tarpaulin
-          cargo tarpaulin -o Lcov --packages isar-core
-        working-directory: packages/isar
+          cargo tarpaulin -o Lcov
       - name: Upload generator Coverage
         uses: codecov/codecov-action@v3
         with:
