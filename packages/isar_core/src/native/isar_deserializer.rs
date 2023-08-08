@@ -153,6 +153,17 @@ impl<'a> IsarDeserializer<'a> {
         mut seed: u64,
     ) -> u64 {
         match data_type {
+            DataType::Bool => {
+                if let Some(value) = self.read_bool(offset) {
+                    if value {
+                        xxh3_64_with_seed(&[1], seed)
+                    } else {
+                        xxh3_64_with_seed(&[0], seed)
+                    }
+                } else {
+                    xxh3_64_with_seed(&[255], seed)
+                }
+            }
             DataType::Byte => xxh3_64_with_seed(&[self.read_byte(offset)], seed),
             DataType::Int => xxh3_64_with_seed(&self.read_int(offset).to_le_bytes(), seed),
             DataType::Float => {
@@ -165,7 +176,7 @@ impl<'a> IsarDeserializer<'a> {
             }
             DataType::Long => xxh3_64_with_seed(&self.read_long(offset).to_le_bytes(), seed),
             DataType::Double => {
-                let value = self.read_float(offset);
+                let value = self.read_double(offset);
                 if value.is_nan() {
                     xxh3_64_with_seed(&[0, 0, 0, 0, 0, 0, 248, 127], seed)
                 } else {
@@ -186,5 +197,453 @@ impl<'a> IsarDeserializer<'a> {
             }
             _ => seed,
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    macro_rules! concat {
+        ($($iter:expr),*) => {
+            {
+                let mut v = Vec::new();
+                $(
+                    for item in $iter {
+                        v.push(item);
+                    }
+                )*
+                v
+            }
+        }
+    }
+
+    #[test]
+    fn test_read_bool_contains_offset() {
+        let bytes = [3, 0, 0, TRUE_BOOL, FALSE_BOOL, 255];
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_bool(0), Some(true));
+        assert_eq!(deserializer.read_bool(1), Some(false));
+        assert_eq!(deserializer.read_bool(2), None);
+
+        assert_eq!(deserializer.is_null(0, DataType::Bool), false);
+        assert_eq!(deserializer.is_null(1, DataType::Bool), false);
+        assert_eq!(deserializer.is_null(2, DataType::Bool), true);
+    }
+
+    #[test]
+    fn test_read_bool_not_contains_offset() {
+        let bytes = [3, 0, 0, TRUE_BOOL, FALSE_BOOL, 255];
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_bool(3), None);
+        assert_eq!(deserializer.read_bool(4), None);
+
+        assert_eq!(deserializer.is_null(3, DataType::Bool), true);
+        assert_eq!(deserializer.is_null(4, DataType::Bool), true);
+    }
+
+    #[test]
+    fn test_read_byte_contains_offset() {
+        let bytes = [3, 0, 0, 0, 1, 255];
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_byte(0), 0);
+        assert_eq!(deserializer.read_byte(1), 1);
+        assert_eq!(deserializer.read_byte(2), 255);
+
+        assert_eq!(deserializer.is_null(0, DataType::Byte), false);
+        assert_eq!(deserializer.is_null(1, DataType::Byte), false);
+        assert_eq!(deserializer.is_null(2, DataType::Byte), false);
+    }
+
+    #[test]
+    fn test_read_byte_not_contains_offset() {
+        let bytes = [3, 0, 0, 0, 1, 255];
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_byte(3), 0);
+        assert_eq!(deserializer.read_byte(4), 0);
+
+        assert_eq!(deserializer.is_null(3, DataType::Byte), true);
+        assert_eq!(deserializer.is_null(4, DataType::Byte), true);
+    }
+
+    #[test]
+    fn test_read_int_contains_offset() {
+        let bytes = concat!(
+            [12, 0, 0],
+            i32::MIN.to_le_bytes(),
+            i32::MAX.to_le_bytes(),
+            (-5i32).to_le_bytes()
+        );
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_int(0), i32::MIN);
+        assert_eq!(deserializer.read_int(4), i32::MAX);
+        assert_eq!(deserializer.read_int(8), -5);
+
+        assert_eq!(deserializer.is_null(0, DataType::Int), true);
+        assert_eq!(deserializer.is_null(4, DataType::Int), false);
+        assert_eq!(deserializer.is_null(8, DataType::Int), false);
+    }
+
+    #[test]
+    fn test_read_int_not_contains_offset() {
+        let bytes = [3, 0, 0, 0, 1, 2];
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_int(3), i32::MIN);
+        assert_eq!(deserializer.read_int(4), i32::MIN);
+
+        assert_eq!(deserializer.is_null(3, DataType::Int), true);
+        assert_eq!(deserializer.is_null(4, DataType::Int), true);
+    }
+
+    #[test]
+    fn test_read_float_contains_offset() {
+        let bytes = concat!(
+            [12, 0, 0],
+            f32::MIN.to_le_bytes(),
+            f32::INFINITY.to_le_bytes(),
+            f32::NAN.to_le_bytes()
+        );
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_float(0), f32::MIN);
+        assert_eq!(deserializer.read_float(4), f32::INFINITY);
+        assert_eq!(deserializer.read_float(8).is_nan(), true);
+
+        assert_eq!(deserializer.is_null(0, DataType::Float), false);
+        assert_eq!(deserializer.is_null(4, DataType::Float), false);
+        assert_eq!(deserializer.is_null(8, DataType::Float), true);
+    }
+
+    #[test]
+    fn test_read_float_not_contains_offset() {
+        let bytes = [3, 0, 0, 0, 1, 2];
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_float(3).is_nan(), true);
+        assert_eq!(deserializer.read_float(4).is_nan(), true);
+
+        assert_eq!(deserializer.is_null(3, DataType::Float), true);
+        assert_eq!(deserializer.is_null(4, DataType::Float), true);
+    }
+
+    #[test]
+    fn test_read_long_contains_offset() {
+        let bytes = concat!(
+            [24, 0, 0],
+            i64::MIN.to_le_bytes(),
+            i64::MAX.to_le_bytes(),
+            (-5i64).to_le_bytes()
+        );
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_long(0), i64::MIN);
+        assert_eq!(deserializer.read_long(8), i64::MAX);
+        assert_eq!(deserializer.read_long(16), -5);
+
+        assert_eq!(deserializer.is_null(0, DataType::Long), true);
+        assert_eq!(deserializer.is_null(8, DataType::Long), false);
+        assert_eq!(deserializer.is_null(16, DataType::Long), false);
+    }
+
+    #[test]
+    fn test_read_long_not_contains_offset() {
+        let bytes = [3, 0, 0, 0, 1, 2];
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_long(3), i64::MIN);
+        assert_eq!(deserializer.read_long(4), i64::MIN);
+
+        assert_eq!(deserializer.is_null(3, DataType::Long), true);
+        assert_eq!(deserializer.is_null(4, DataType::Long), true);
+    }
+
+    #[test]
+    fn test_read_double_contains_offset() {
+        let bytes = concat!(
+            [24, 0, 0],
+            f64::MIN.to_le_bytes(),
+            f64::INFINITY.to_le_bytes(),
+            f64::NAN.to_le_bytes()
+        );
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_double(0), f64::MIN);
+        assert_eq!(deserializer.read_double(8), f64::INFINITY);
+        assert_eq!(deserializer.read_double(16).is_nan(), true);
+
+        assert_eq!(deserializer.is_null(0, DataType::Double), false);
+        assert_eq!(deserializer.is_null(8, DataType::Double), false);
+        assert_eq!(deserializer.is_null(16, DataType::Double), true);
+    }
+
+    #[test]
+    fn test_read_double_not_contains_offset() {
+        let bytes = [3, 0, 0, 0, 1, 2];
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_double(3).is_nan(), true);
+        assert_eq!(deserializer.read_double(4).is_nan(), true);
+
+        assert_eq!(deserializer.is_null(3, DataType::Double), true);
+        assert_eq!(deserializer.is_null(4, DataType::Double), true);
+    }
+
+    #[test]
+    fn test_read_dynamic_contains_offset() {
+        let bytes = concat!([6, 0, 0], [6, 0, 0, 0, 0, 0], [3, 0, 0, 4, 5, 6]);
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_dynamic(0), Some(&[4, 5, 6][..]));
+        assert_eq!(deserializer.read_dynamic(3), None);
+
+        assert_eq!(deserializer.is_null(0, DataType::ByteList), false);
+        assert_eq!(deserializer.is_null(3, DataType::ByteList), true);
+    }
+
+    #[test]
+    fn test_read_dynamic_not_contains_offset() {
+        let bytes = [3, 0, 0, 0, 1, 2];
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_dynamic(3), None);
+        assert_eq!(deserializer.is_null(3, DataType::ByteList), true);
+    }
+
+    #[test]
+    fn test_read_string_contains_offset() {
+        let bytes = concat!([6, 0, 0], [6, 0, 0, 0, 0, 0], [3, 0, 0, 97, 98, 99]);
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_string(0), Some("abc"));
+        assert_eq!(deserializer.read_string(3), None);
+
+        assert_eq!(deserializer.is_null(0, DataType::String), false);
+        assert_eq!(deserializer.is_null(3, DataType::String), true);
+    }
+
+    #[test]
+    fn test_read_string_not_contains_offset() {
+        let bytes = [3, 0, 0, 0, 1, 2];
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_string(3), None);
+        assert_eq!(deserializer.is_null(3, DataType::String), true);
+    }
+
+    #[test]
+    fn test_read_nested_contains_offset() {
+        let bytes = concat!([6, 0, 0], [6, 0, 0, 0, 0, 0], [4, 0, 0, 69, 0, 0, 0]);
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        let nested = deserializer.read_nested(0).unwrap();
+        assert_eq!(nested.read_int(0), 69);
+        assert_eq!(deserializer.read_nested(3).is_some(), false);
+
+        assert_eq!(deserializer.is_null(0, DataType::Object), false);
+        assert_eq!(deserializer.is_null(3, DataType::Object), true);
+    }
+
+    #[test]
+    fn test_read_nested_not_contains_offset() {
+        let bytes = [3, 0, 0, 0, 1, 2];
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_nested(3).is_some(), false);
+        assert_eq!(deserializer.is_null(3, DataType::Object), true);
+    }
+
+    #[test]
+    fn test_read_list_contains_offset() {
+        let bytes = concat!(
+            [9, 0, 0],
+            [9, 0, 0, 15, 0, 0, 0, 0, 0],
+            [3, 0, 0, 1, 0, 255],
+            [4, 0, 0, 111, 0, 0, 0]
+        );
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        let (nested, length) = deserializer.read_list(0, DataType::Bool).unwrap();
+        assert_eq!(length, 3);
+        assert_eq!(nested.read_bool(0), Some(true));
+        assert_eq!(nested.read_bool(1), Some(false));
+        assert_eq!(nested.read_bool(2), None);
+        assert_eq!(nested.read_bool(3), None);
+
+        let (nested, length) = deserializer.read_list(3, DataType::Int).unwrap();
+        assert_eq!(length, 1);
+        assert_eq!(nested.read_int(0), 111);
+        assert_eq!(nested.read_int(4), NULL_INT);
+
+        assert_eq!(deserializer.read_list(6, DataType::Int).is_some(), false);
+        assert_eq!(deserializer.is_null(0, DataType::BoolList), false);
+        assert_eq!(deserializer.is_null(3, DataType::IntList), false);
+        assert_eq!(deserializer.is_null(6, DataType::IntList), true);
+    }
+
+    #[test]
+    fn test_read_list_not_contains_offset() {
+        let bytes = [3, 0, 0, 0, 1, 2];
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+
+        assert_eq!(deserializer.read_list(3, DataType::Bool).is_some(), false);
+        assert_eq!(deserializer.is_null(3, DataType::BoolList), true);
+    }
+
+    #[test]
+    fn test_hash_bool_property() {
+        let bytes = [3, 0, 0, 0, 1, 7];
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+        assert_eq!(
+            deserializer.hash_property(0, DataType::Bool, false, 0),
+            xxh3_64_with_seed(&[0], 0)
+        );
+        assert_eq!(
+            deserializer.hash_property(1, DataType::Bool, false, 2),
+            xxh3_64_with_seed(&[1], 2)
+        );
+        assert_eq!(
+            deserializer.hash_property(2, DataType::Bool, true, 9),
+            xxh3_64_with_seed(&[255], 9)
+        );
+        assert_eq!(
+            deserializer.hash_property(3, DataType::Bool, true, 9),
+            xxh3_64_with_seed(&[255], 9)
+        );
+    }
+
+    #[test]
+    fn test_hash_byte_property() {
+        let bytes = [3, 0, 0, 0, 1, 5];
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+        assert_eq!(
+            deserializer.hash_property(2, DataType::Byte, false, 0),
+            xxh3_64_with_seed(&[5], 0)
+        );
+        assert_eq!(
+            deserializer.hash_property(1, DataType::Byte, false, 2),
+            xxh3_64_with_seed(&[1], 2)
+        );
+        assert_eq!(
+            deserializer.hash_property(3, DataType::Byte, true, 9),
+            xxh3_64_with_seed(&[0], 9)
+        );
+    }
+
+    #[test]
+    fn test_hash_int_property() {
+        let bytes = concat!([8, 0, 0], i32::MIN.to_le_bytes(), i32::MAX.to_le_bytes());
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+        assert_eq!(
+            deserializer.hash_property(0, DataType::Int, false, 0),
+            xxh3_64_with_seed(&i32::MIN.to_le_bytes(), 0)
+        );
+        assert_eq!(
+            deserializer.hash_property(4, DataType::Int, false, 2),
+            xxh3_64_with_seed(&i32::MAX.to_le_bytes(), 2)
+        );
+        assert_eq!(
+            deserializer.hash_property(8, DataType::Int, true, 9),
+            xxh3_64_with_seed(&i32::MIN.to_le_bytes(), 9)
+        );
+    }
+
+    #[test]
+    fn test_hash_float_property() {
+        let bytes = concat!(
+            [8, 0, 0],
+            f32::NAN.to_le_bytes(),
+            f32::INFINITY.to_le_bytes()
+        );
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+        assert_eq!(
+            deserializer.hash_property(0, DataType::Float, false, 0),
+            xxh3_64_with_seed(&[1, 0, 128, 127], 0)
+        );
+        assert_eq!(
+            deserializer.hash_property(4, DataType::Float, false, 2),
+            xxh3_64_with_seed(&f32::INFINITY.to_le_bytes(), 2)
+        );
+        assert_eq!(
+            deserializer.hash_property(8, DataType::Float, true, 9),
+            xxh3_64_with_seed(&[1, 0, 128, 127], 9)
+        );
+    }
+
+    #[test]
+    fn test_hash_long_property() {
+        let bytes = concat!([16, 0, 0], i64::MIN.to_le_bytes(), i64::MAX.to_le_bytes());
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+        assert_eq!(
+            deserializer.hash_property(0, DataType::Long, false, 0),
+            xxh3_64_with_seed(&i64::MIN.to_le_bytes(), 0)
+        );
+        assert_eq!(
+            deserializer.hash_property(8, DataType::Long, false, 2),
+            xxh3_64_with_seed(&i64::MAX.to_le_bytes(), 2)
+        );
+        assert_eq!(
+            deserializer.hash_property(16, DataType::Long, true, 9),
+            xxh3_64_with_seed(&i64::MIN.to_le_bytes(), 9)
+        );
+    }
+
+    #[test]
+    fn test_hash_double_property() {
+        let bytes = concat!(
+            [16, 0, 0],
+            f64::NAN.to_le_bytes(),
+            f64::INFINITY.to_le_bytes()
+        );
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+        assert_eq!(
+            deserializer.hash_property(0, DataType::Double, false, 0),
+            xxh3_64_with_seed(&[0, 0, 0, 0, 0, 0, 248, 127], 0)
+        );
+        assert_eq!(
+            deserializer.hash_property(8, DataType::Double, false, 2),
+            xxh3_64_with_seed(&f64::INFINITY.to_le_bytes(), 2)
+        );
+        assert_eq!(
+            deserializer.hash_property(16, DataType::Double, true, 9),
+            xxh3_64_with_seed(&[0, 0, 0, 0, 0, 0, 248, 127], 9)
+        );
+    }
+
+    #[test]
+    fn test_hash_string_property() {
+        let bytes = concat!([6, 0, 0], [6, 0, 0, 0, 0, 0], [3, 0, 0, 97, 66, 99]);
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+        assert_eq!(
+            deserializer.hash_property(0, DataType::String, true, 0),
+            xxh3_64_with_seed(b"aBc", xxh3_64_with_seed(&[1], 0))
+        );
+        assert_eq!(
+            deserializer.hash_property(0, DataType::String, false, 66),
+            xxh3_64_with_seed(b"abc", xxh3_64_with_seed(&[1], 66))
+        );
+        assert_eq!(
+            deserializer.hash_property(3, DataType::String, false, 2),
+            xxh3_64_with_seed(&[0], 2)
+        );
+    }
+
+    #[test]
+    fn test_hash_byte_list_property() {
+        let bytes = concat!([3, 0, 0], [3, 0, 0], [2, 0, 0, 1, 0]);
+        let deserializer = IsarDeserializer::from_bytes(&bytes);
+        assert_eq!(
+            deserializer.hash_property(0, DataType::ByteList, false, 212),
+            212
+        );
+        assert_eq!(
+            deserializer.hash_property(3, DataType::ByteList, false, 121),
+            121
+        );
     }
 }
