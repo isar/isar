@@ -244,7 +244,7 @@ fn condition_sql(
     let collate = if condition.case_sensitive {
         ""
     } else {
-        "COLLATE NOCASE"
+        " COLLATE NOCASE"
     };
 
     let mut values = vec![];
@@ -254,7 +254,7 @@ fn condition_sql(
             let value = condition.values.get(0)?;
             if let Some(value) = value {
                 values.push(value.clone());
-                format!("{} = ? {}", property_name, collate)
+                format!("{} = ?{}", property_name, collate)
             } else {
                 format!("{} IS NULL", property_name)
             }
@@ -263,7 +263,7 @@ fn condition_sql(
             let value = condition.values.get(0)?;
             if let Some(value) = value {
                 values.push(value.clone());
-                format!("{} > ?", property_name)
+                format!("{} > ?{}", property_name, collate)
             } else {
                 format!("{} IS NOT NULL", property_name)
             }
@@ -272,7 +272,7 @@ fn condition_sql(
             let value = condition.values.get(0)?;
             if let Some(value) = value {
                 values.push(value.clone());
-                format!("{} >= ?", property_name)
+                format!("{} >= ?{}", property_name, collate)
             } else {
                 "TRUE".to_string()
             }
@@ -281,7 +281,10 @@ fn condition_sql(
             let value = condition.values.get(0)?;
             if let Some(value) = value {
                 values.push(value.clone());
-                format!("{} < ? OR {} IS NULL", property_name, property_name)
+                format!(
+                    "{} < ?{} OR {} IS NULL",
+                    property_name, collate, property_name
+                )
             } else {
                 "FALSE".to_string()
             }
@@ -290,7 +293,10 @@ fn condition_sql(
             let value = condition.values.get(0)?;
             if let Some(value) = value {
                 values.push(value.clone());
-                format!("{} <= ? OR {} IS NULL", property_name, property_name)
+                format!(
+                    "{} <= ?{} OR {} IS NULL",
+                    property_name, collate, property_name
+                )
             } else {
                 format!("{} IS NULL", property_name)
             }
@@ -302,14 +308,17 @@ fn condition_sql(
                 if let Some(upper) = upper {
                     values.push(lower.clone());
                     values.push(upper.clone());
-                    format!("{} BETWEEN ? AND ?", property_name)
+                    format!("{} BETWEEN ?{} AND ?{}", property_name, collate, collate)
                 } else {
                     values.push(lower.clone());
-                    format!("{} >= ?", property_name)
+                    format!("{} >= ?{}", property_name, collate)
                 }
             } else if let Some(upper) = upper {
                 values.push(upper.clone());
-                format!("{} <= ? OR {} IS NULL", property_name, property_name)
+                format!(
+                    "{} <= ?{} OR {} IS NULL",
+                    property_name, collate, property_name
+                )
             } else {
                 format!("{} IS NULL", property_name)
             }
@@ -317,7 +326,7 @@ fn condition_sql(
         ConditionType::StringStartsWith => {
             if let Some(IsarValue::String(prefix)) = condition.values.get(0)? {
                 values.push(IsarValue::String(format!("{}%", escape_wildcard(prefix))));
-                format!("{} LIKE ? {} ESCAPE '\\'", property_name, collate)
+                format!("{} LIKE ? ESCAPE '\\'", property_name)
             } else {
                 "FALSE".to_string()
             }
@@ -325,7 +334,7 @@ fn condition_sql(
         ConditionType::StringEndsWith => {
             if let Some(IsarValue::String(postfix)) = condition.values.get(0)? {
                 values.push(IsarValue::String(format!("%{}", escape_wildcard(postfix))));
-                format!("{} LIKE ? {} ESCAPE '\\'", property_name, collate)
+                format!("{} LIKE ? ESCAPE '\\'", property_name)
             } else {
                 "FALSE".to_string()
             }
@@ -333,19 +342,18 @@ fn condition_sql(
         ConditionType::StringContains => {
             if let Some(IsarValue::String(needle)) = condition.values.get(0)? {
                 values.push(IsarValue::String(format!("%{}%", escape_wildcard(needle))));
-                format!("{} LIKE ? {} ESCAPE '\\'", property_name, collate)
+                format!("{} LIKE ? ESCAPE '\\'", property_name)
             } else {
                 "FALSE".to_string()
             }
         }
         ConditionType::StringMatches => {
             if let Some(IsarValue::String(wildcard)) = condition.values.get(0)? {
-                let wildcard = wildcard
-                    .replace("\\", "\\\\")
+                let wildcard = escape_wildcard(wildcard)
                     .replace("*", "%")
                     .replace("?", "_");
                 values.push(IsarValue::String(wildcard));
-                format!("{} LIKE ? {} ESCAPE '\\'", property_name, collate)
+                format!("{} LIKE ? ESCAPE '\\'", property_name)
             } else {
                 "FALSE".to_string()
             }

@@ -49,3 +49,6 @@ impl IsarValue {
         }
     }
 }
+
+#[cfg(test)]
+impl Eq for IsarValue {}

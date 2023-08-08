@@ -14,11 +14,14 @@ use crate::core::value::IsarValue;
 use crate::core::watcher::QueryMatches;
 use std::borrow::Cow;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) enum QueryParam {
     Value(IsarValue),
     JsonCondition(JsonCondition),
 }
+
+#[cfg(test)]
+impl Eq for QueryParam {}
 
 #[derive(Clone)]
 pub struct SQLiteQuery {
