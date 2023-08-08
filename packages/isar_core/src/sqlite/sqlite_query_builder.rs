@@ -114,7 +114,7 @@ impl<'a> IsarQueryBuilder for SQLiteQueryBuilder<'a> {
 mod test {
     use super::*;
     use crate::core::data_type::DataType;
-    use crate::core::filter::{ConditionType, FilterCondition};
+    use crate::core::filter::{ConditionType::*, Filter::*, FilterCondition};
     use crate::core::value::IsarValue;
     use crate::sqlite::sqlite_collection::SQLiteProperty;
 
@@ -213,9 +213,9 @@ mod test {
 
     #[test]
     fn test_filter_null() {
-        let cond: FilterCondition = FilterCondition::new(1, ConditionType::IsNull, vec![], false);
+        let cond = FilterCondition::new(1, IsNull, vec![], false);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 IS NULL");
         assert_eq!(params.is_empty(), true);
     }
@@ -223,10 +223,9 @@ mod test {
     #[test]
     fn test_filter_equal_value() {
         let value = IsarValue::Integer(123);
-        let cond: FilterCondition =
-            FilterCondition::new(1, ConditionType::Equal, vec![Some(value.clone())], true);
+        let cond = FilterCondition::new(1, Equal, vec![Some(value.clone())], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 = ?");
         assert_eq!(params, vec![QueryParam::Value(value)]);
     }
@@ -234,19 +233,18 @@ mod test {
     #[test]
     fn test_filter_equal_value_case_insensitive() {
         let value = IsarValue::Integer(123);
-        let cond: FilterCondition =
-            FilterCondition::new(1, ConditionType::Equal, vec![Some(value.clone())], false);
+        let cond = FilterCondition::new(1, Equal, vec![Some(value.clone())], false);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 = ? COLLATE NOCASE");
         assert_eq!(params, vec![QueryParam::Value(value)]);
     }
 
     #[test]
     fn test_filter_equal_null() {
-        let cond: FilterCondition = FilterCondition::new(1, ConditionType::Equal, vec![None], true);
+        let cond = FilterCondition::new(1, Equal, vec![None], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 IS NULL");
         assert_eq!(params.is_empty(), true);
     }
@@ -254,10 +252,9 @@ mod test {
     #[test]
     fn test_filter_greater_than_value() {
         let value = IsarValue::Integer(123);
-        let cond: FilterCondition =
-            FilterCondition::new(1, ConditionType::Greater, vec![Some(value.clone())], true);
+        let cond = FilterCondition::new(1, Greater, vec![Some(value.clone())], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 > ?");
         assert_eq!(params, vec![QueryParam::Value(value)]);
     }
@@ -265,20 +262,18 @@ mod test {
     #[test]
     fn test_filter_greater_than_value_case_insensitive() {
         let value = IsarValue::Integer(123);
-        let cond: FilterCondition =
-            FilterCondition::new(1, ConditionType::Greater, vec![Some(value.clone())], false);
+        let cond = FilterCondition::new(1, Greater, vec![Some(value.clone())], false);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 > ? COLLATE NOCASE");
         assert_eq!(params, vec![QueryParam::Value(value)]);
     }
 
     #[test]
     fn test_filter_greater_than_null() {
-        let cond: FilterCondition =
-            FilterCondition::new(1, ConditionType::Greater, vec![None], true);
+        let cond = FilterCondition::new(1, Greater, vec![None], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 IS NOT NULL");
         assert_eq!(params.is_empty(), true);
     }
@@ -286,14 +281,9 @@ mod test {
     #[test]
     fn test_filter_greater_or_equal_value() {
         let value = IsarValue::Integer(123);
-        let cond: FilterCondition = FilterCondition::new(
-            1,
-            ConditionType::GreaterOrEqual,
-            vec![Some(value.clone())],
-            true,
-        );
+        let cond = FilterCondition::new(1, GreaterOrEqual, vec![Some(value.clone())], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 >= ?");
         assert_eq!(params, vec![QueryParam::Value(value)]);
     }
@@ -301,24 +291,18 @@ mod test {
     #[test]
     fn test_filter_greater_or_equal_value_case_insensitive() {
         let value = IsarValue::Integer(123);
-        let cond: FilterCondition = FilterCondition::new(
-            1,
-            ConditionType::GreaterOrEqual,
-            vec![Some(value.clone())],
-            false,
-        );
+        let cond = FilterCondition::new(1, GreaterOrEqual, vec![Some(value.clone())], false);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 >= ? COLLATE NOCASE");
         assert_eq!(params, vec![QueryParam::Value(value)]);
     }
 
     #[test]
     fn test_filter_greater_or_equal_null() {
-        let cond: FilterCondition =
-            FilterCondition::new(1, ConditionType::GreaterOrEqual, vec![None], true);
+        let cond = FilterCondition::new(1, GreaterOrEqual, vec![None], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE TRUE");
         assert_eq!(params.is_empty(), true);
     }
@@ -326,10 +310,9 @@ mod test {
     #[test]
     fn test_filter_less_than_value() {
         let value = IsarValue::Integer(123);
-        let cond: FilterCondition =
-            FilterCondition::new(1, ConditionType::Less, vec![Some(value.clone())], true);
+        let cond = FilterCondition::new(1, Less, vec![Some(value.clone())], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 < ? OR prop1 IS NULL");
         assert_eq!(params, vec![QueryParam::Value(value)]);
     }
@@ -337,10 +320,9 @@ mod test {
     #[test]
     fn test_filter_less_than_value_case_insensitive() {
         let value = IsarValue::String("abc".to_string());
-        let cond: FilterCondition =
-            FilterCondition::new(1, ConditionType::Less, vec![Some(value.clone())], false);
+        let cond = FilterCondition::new(1, Less, vec![Some(value.clone())], false);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(
             sql.trim(),
             "WHERE prop1 < ? COLLATE NOCASE OR prop1 IS NULL"
@@ -350,9 +332,9 @@ mod test {
 
     #[test]
     fn test_filter_less_than_null() {
-        let cond: FilterCondition = FilterCondition::new(1, ConditionType::Less, vec![None], true);
+        let cond = FilterCondition::new(1, Less, vec![None], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE FALSE");
         assert_eq!(params.is_empty(), true);
     }
@@ -360,14 +342,9 @@ mod test {
     #[test]
     fn test_filter_less_or_equal_value() {
         let value = IsarValue::Integer(123);
-        let cond: FilterCondition = FilterCondition::new(
-            1,
-            ConditionType::LessOrEqual,
-            vec![Some(value.clone())],
-            true,
-        );
+        let cond = FilterCondition::new(1, LessOrEqual, vec![Some(value.clone())], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 <= ? OR prop1 IS NULL");
         assert_eq!(params, vec![QueryParam::Value(value)]);
     }
@@ -375,14 +352,9 @@ mod test {
     #[test]
     fn test_filter_less_or_equal_value_case_insensitive() {
         let value = IsarValue::String("abc".to_string());
-        let cond: FilterCondition = FilterCondition::new(
-            1,
-            ConditionType::LessOrEqual,
-            vec![Some(value.clone())],
-            false,
-        );
+        let cond = FilterCondition::new(1, LessOrEqual, vec![Some(value.clone())], false);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(
             sql.trim(),
             "WHERE prop1 <= ? COLLATE NOCASE OR prop1 IS NULL"
@@ -392,10 +364,9 @@ mod test {
 
     #[test]
     fn test_filter_less_or_equal_null() {
-        let cond: FilterCondition =
-            FilterCondition::new(1, ConditionType::LessOrEqual, vec![None], true);
+        let cond = FilterCondition::new(1, LessOrEqual, vec![None], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 IS NULL");
         assert_eq!(params.is_empty(), true);
     }
@@ -404,14 +375,14 @@ mod test {
     fn test_filter_between_value() {
         let value1 = IsarValue::Integer(123);
         let value2 = IsarValue::Integer(456);
-        let cond: FilterCondition = FilterCondition::new(
+        let cond = FilterCondition::new(
             1,
-            ConditionType::Between,
+            Between,
             vec![Some(value1.clone()), Some(value2.clone())],
             true,
         );
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 BETWEEN ? AND ?");
         assert_eq!(
             params,
@@ -422,14 +393,9 @@ mod test {
     #[test]
     fn test_filter_between_lower_null() {
         let value = IsarValue::Integer(456);
-        let cond: FilterCondition = FilterCondition::new(
-            1,
-            ConditionType::Between,
-            vec![None, Some(value.clone())],
-            true,
-        );
+        let cond = FilterCondition::new(1, Between, vec![None, Some(value.clone())], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 <= ? OR prop1 IS NULL");
         assert_eq!(params, vec![QueryParam::Value(value)]);
     }
@@ -437,24 +403,18 @@ mod test {
     #[test]
     fn test_filter_between_upper_null() {
         let value = IsarValue::Integer(123);
-        let cond: FilterCondition = FilterCondition::new(
-            1,
-            ConditionType::Between,
-            vec![Some(value.clone()), None],
-            true,
-        );
+        let cond = FilterCondition::new(1, Between, vec![Some(value.clone()), None], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 >= ?");
         assert_eq!(params, vec![QueryParam::Value(value)]);
     }
 
     #[test]
     fn test_filter_between_both_null() {
-        let cond: FilterCondition =
-            FilterCondition::new(1, ConditionType::Between, vec![None, None], true);
+        let cond = FilterCondition::new(1, Between, vec![None, None], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 IS NULL");
         assert_eq!(params.is_empty(), true);
     }
@@ -462,14 +422,9 @@ mod test {
     #[test]
     fn test_filter_string_starts_with() {
         let value = IsarValue::String("ab%c".to_string());
-        let cond: FilterCondition = FilterCondition::new(
-            1,
-            ConditionType::StringStartsWith,
-            vec![Some(value.clone())],
-            true,
-        );
+        let cond = FilterCondition::new(1, StringStartsWith, vec![Some(value.clone())], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 LIKE ? ESCAPE '\\'");
         assert_eq!(
             params,
@@ -480,14 +435,9 @@ mod test {
     #[test]
     fn test_filter_string_starts_with_non_string() {
         let value = IsarValue::Integer(123);
-        let cond: FilterCondition = FilterCondition::new(
-            1,
-            ConditionType::StringStartsWith,
-            vec![Some(value.clone())],
-            true,
-        );
+        let cond = FilterCondition::new(1, StringStartsWith, vec![Some(value.clone())], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE FALSE");
         assert_eq!(params.is_empty(), true);
     }
@@ -495,14 +445,9 @@ mod test {
     #[test]
     fn test_filter_string_ends_with() {
         let value = IsarValue::String("ab%c".to_string());
-        let cond: FilterCondition = FilterCondition::new(
-            1,
-            ConditionType::StringEndsWith,
-            vec![Some(value.clone())],
-            true,
-        );
+        let cond = FilterCondition::new(1, StringEndsWith, vec![Some(value.clone())], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 LIKE ? ESCAPE '\\'");
         assert_eq!(
             params,
@@ -513,14 +458,9 @@ mod test {
     #[test]
     fn test_filter_string_ends_with_non_string() {
         let value = IsarValue::Integer(123);
-        let cond: FilterCondition = FilterCondition::new(
-            1,
-            ConditionType::StringEndsWith,
-            vec![Some(value.clone())],
-            true,
-        );
+        let cond = FilterCondition::new(1, StringEndsWith, vec![Some(value.clone())], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE FALSE");
         assert_eq!(params.is_empty(), true);
     }
@@ -528,14 +468,9 @@ mod test {
     #[test]
     fn test_filter_string_contains() {
         let value = IsarValue::String("ab%c".to_string());
-        let cond: FilterCondition = FilterCondition::new(
-            1,
-            ConditionType::StringContains,
-            vec![Some(value.clone())],
-            true,
-        );
+        let cond = FilterCondition::new(1, StringContains, vec![Some(value.clone())], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 LIKE ? ESCAPE '\\'");
         assert_eq!(
             params,
@@ -546,14 +481,9 @@ mod test {
     #[test]
     fn test_filter_string_contains_non_string() {
         let value = IsarValue::Integer(123);
-        let cond: FilterCondition = FilterCondition::new(
-            1,
-            ConditionType::StringContains,
-            vec![Some(value.clone())],
-            true,
-        );
+        let cond = FilterCondition::new(1, StringContains, vec![Some(value.clone())], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE FALSE");
         assert_eq!(params.is_empty(), true);
     }
@@ -561,14 +491,9 @@ mod test {
     #[test]
     fn test_filter_string_matches() {
         let value = IsarValue::String("a?b%c*".to_string());
-        let cond: FilterCondition = FilterCondition::new(
-            1,
-            ConditionType::StringMatches,
-            vec![Some(value.clone())],
-            true,
-        );
+        let cond = FilterCondition::new(1, StringMatches, vec![Some(value.clone())], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE prop1 LIKE ? ESCAPE '\\'");
         assert_eq!(
             params,
@@ -579,23 +504,18 @@ mod test {
     #[test]
     fn test_filter_string_matches_non_string() {
         let value = IsarValue::Integer(123);
-        let cond: FilterCondition = FilterCondition::new(
-            1,
-            ConditionType::StringMatches,
-            vec![Some(value.clone())],
-            true,
-        );
+        let cond = FilterCondition::new(1, StringMatches, vec![Some(value.clone())], true);
 
-        let (sql, params) = qb_filter(Filter::Condition(cond));
+        let (sql, params) = qb_filter(Condition(cond));
         assert_eq!(sql.trim(), "WHERE FALSE");
         assert_eq!(params.is_empty(), true);
     }
 
     #[test]
     fn test_filter_and() {
-        let cond1: FilterCondition = FilterCondition::new(1, ConditionType::IsNull, vec![], true);
-        let cond2: FilterCondition = FilterCondition::new(2, ConditionType::IsNull, vec![], true);
-        let cond = Filter::And(vec![Filter::Condition(cond1), Filter::Condition(cond2)]);
+        let cond1 = FilterCondition::new(1, IsNull, vec![], true);
+        let cond2 = FilterCondition::new(2, IsNull, vec![], true);
+        let cond = And(vec![Condition(cond1), Condition(cond2)]);
 
         let (sql, params) = qb_filter(cond);
         assert_eq!(sql.trim(), "WHERE (prop1 IS NULL AND prop2 IS NULL)");
@@ -604,9 +524,9 @@ mod test {
 
     #[test]
     fn test_filter_or() {
-        let cond1: FilterCondition = FilterCondition::new(1, ConditionType::IsNull, vec![], true);
-        let cond2: FilterCondition = FilterCondition::new(2, ConditionType::IsNull, vec![], true);
-        let cond = Filter::Or(vec![Filter::Condition(cond1), Filter::Condition(cond2)]);
+        let cond1 = FilterCondition::new(1, IsNull, vec![], true);
+        let cond2 = FilterCondition::new(2, IsNull, vec![], true);
+        let cond = Or(vec![Condition(cond1), Condition(cond2)]);
 
         let (sql, params) = qb_filter(cond);
         assert_eq!(sql.trim(), "WHERE (prop1 IS NULL OR prop2 IS NULL)");
@@ -615,28 +535,28 @@ mod test {
 
     #[test]
     fn test_not() {
-        let cond1: FilterCondition = FilterCondition::new(1, ConditionType::IsNull, vec![], true);
-        let cond2: FilterCondition = FilterCondition::new(2, ConditionType::IsNull, vec![], true);
-        let cond = Filter::Or(vec![Filter::Condition(cond1), Filter::Condition(cond2)]);
+        let cond1 = FilterCondition::new(1, IsNull, vec![], true);
+        let cond2 = FilterCondition::new(2, IsNull, vec![], true);
+        let cond = Or(vec![Condition(cond1), Condition(cond2)]);
 
-        let (sql, params) = qb_filter(cond);
+        let (sql, params) = qb_filter(Not(Box::new(cond)));
         assert_eq!(sql.trim(), "WHERE NOT ((prop1 IS NULL OR prop2 IS NULL))");
         assert_eq!(params.is_empty(), true);
     }
 
     #[test]
     fn test_mixed_and_or() {
-        let cond1: FilterCondition = FilterCondition::new(0, ConditionType::IsNull, vec![], true);
-        let cond2: FilterCondition = FilterCondition::new(1, ConditionType::IsNull, vec![], true);
-        let cond3: FilterCondition = FilterCondition::new(2, ConditionType::IsNull, vec![], true);
-        let cond = Filter::And(vec![
-            Filter::Condition(cond1.clone()),
-            Filter::Or(vec![
-                Filter::Condition(cond1),
-                Filter::Condition(cond2.clone()),
-                Filter::Condition(cond3),
+        let cond1 = FilterCondition::new(0, IsNull, vec![], true);
+        let cond2 = FilterCondition::new(1, IsNull, vec![], true);
+        let cond3 = FilterCondition::new(2, IsNull, vec![], true);
+        let cond = And(vec![
+            Condition(cond1.clone()),
+            Or(vec![
+                Condition(cond1),
+                Condition(cond2.clone()),
+                Condition(cond3),
             ]),
-            Filter::Condition(cond2),
+            Condition(cond2),
         ]);
 
         let (sql, params) = qb_filter(cond);
