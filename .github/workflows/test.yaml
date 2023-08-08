@@ -120,7 +120,7 @@ jobs:
       - name: Collect isar_core Coverage
         run: |
           cargo install cargo-tarpaulin
-          cargo tarpaulin -o Lcov
+          cargo tarpaulin -o Lcov --engine llvm
       - name: Upload isar_test Coverage
         uses: codecov/codecov-action@v3
         with:
