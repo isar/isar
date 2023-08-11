@@ -19,7 +19,7 @@ FutureOr<IsarCoreBindings> initializePlatformBindings([String? library]) {
 
     final dylib = Platform.isIOS
         ? DynamicLibrary.process()
-        : DynamicLibrary.open(library!);
+        : DynamicLibrary.open(Directory.current.path + '/' + library!);
     bindings = IsarCoreBindings(dylib);
   } catch (e) {
     throw IsarNotReadyError(
