@@ -22,7 +22,7 @@ String getRandomName() {
 
 String? testTempPath;
 Future<Isar> openTempIsar(
-  List<IsarCollectionSchema> schemas, {
+  List<IsarGeneratedSchema> schemas, {
   String? name,
   String? directory,
   int maxSizeMiB = Isar.defaultMaxSizeMiB,
@@ -53,7 +53,9 @@ Future<Isar> openTempIsar(
   return isar;
 }
 
-bool get isSQLite => Invoker.current!.liveTest.test.name.endsWith('(sqlite)');
+String get _testName => Invoker.current!.liveTest.test.name;
+
+bool get isSQLite => _testName.endsWith('(sqlite)');
 
 const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
 

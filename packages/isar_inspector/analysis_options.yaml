@@ -1,9 +1,6 @@
 include: package:very_good_analysis/analysis_options.yaml
 
 analyzer:
-  exclude:
-    - "**"
-
   errors:
     cascade_invocations: ignore
     avoid_positional_boolean_parameters: ignore

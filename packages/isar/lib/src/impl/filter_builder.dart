@@ -22,8 +22,6 @@ Pointer<CFilter> _buildFilter(Filter filter, List<Pointer<void>> pointers) {
           filter.caseSensitive,
         );
       }
-    case NotEqualCondition():
-      throw UnimplementedError();
     case GreaterCondition():
       final rawValue = filter.value;
       final value = rawValue is double

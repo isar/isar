@@ -8,38 +8,39 @@ import 'package:isar_inspector/object/object_view.dart';
 
 class ObjectsListSliver extends StatelessWidget {
   const ObjectsListSliver({
-    super.key,
     required this.instance,
     required this.collection,
     required this.schemas,
     required this.objects,
     required this.onUpdate,
     required this.onDelete,
+    super.key,
   });
 
   final String instance;
   final String collection;
-  final Map<String, Schema<dynamic>> schemas;
+  final Map<String, IsarSchema> schemas;
   final List<IsarObject> objects;
   final void Function(
     String collection,
-    int id,
+    String id,
     String path,
     dynamic value,
   ) onUpdate;
-  final void Function(int id) onDelete;
+  final void Function(String id) onDelete;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final collectionSchema = schemas[collection]! as CollectionSchema;
+    final schema = schemas[collection]!;
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         childCount: objects.length,
         (BuildContext context, int index) {
           final object = objects[index];
+          final id = object.getValue(schema.idName!);
           return Card(
-            key: Key('object ${object.getValue(collectionSchema.idName)}'),
+            key: Key('object $id'),
             child: Padding(
               padding: const EdgeInsets.all(5),
               child: Stack(
@@ -68,7 +69,10 @@ class ObjectsListSliver extends StatelessWidget {
                           ),
                           tooltip: 'Copy as JSON',
                           visualDensity: VisualDensity.standard,
-                          onPressed: () => _copyObject(object),
+                          onPressed: () {
+                            final json = jsonEncode(object.data);
+                            Clipboard.setData(ClipboardData(text: json));
+                          },
                         ),
                         IconButton(
                           icon: Icon(
@@ -78,8 +82,8 @@ class ObjectsListSliver extends StatelessWidget {
                           tooltip: 'Delete',
                           visualDensity: VisualDensity.standard,
                           onPressed: () {
-                            final id = object.getValue(collectionSchema.idName);
-                            onDelete(id as int);
+                            final id = object.getValue(schema.idName!);
+                            onDelete(id as String);
                           },
                         ),
                       ],
@@ -92,14 +96,5 @@ class ObjectsListSliver extends StatelessWidget {
         },
       ),
     );
-  }
-
-  void _copyObject(IsarObject object) {
-    final json = Map.of(object.data);
-    final schema = schemas[collection]! as CollectionSchema;
-    for (final linkName in schema.links.keys) {
-      json.remove(linkName);
-    }
-    Clipboard.setData(ClipboardData(text: jsonEncode(json)));
   }
 }

@@ -11,7 +11,7 @@ class _FilterGenerator {
         'extension ${objName}QueryFilter on QueryBuilder<$objName, $objName, '
         'QFilterCondition> {';
     for (final property in object.properties) {
-      if (property.type == PropertyType.json) {
+      if (property.type == IsarType.json) {
         continue;
       }
 

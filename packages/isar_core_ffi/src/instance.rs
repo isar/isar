@@ -1,3 +1,4 @@
+use crate::dart::dart_pause_isolate;
 use crate::{
     dart_fast_hash, i64_to_isar, isar_to_i64, CIsarCursor, CIsarInstance, CIsarTxn, IsarI64,
 };
@@ -143,14 +144,22 @@ pub unsafe extern "C" fn isar_txn_begin(
     txn: *mut *const CIsarTxn,
     write: bool,
 ) -> u8 {
-    isar_try! {
-        let new_txn = match isar {
-            #[cfg(feature = "native")]
-            CIsarInstance::Native(isar) => CIsarTxn::Native(isar.begin_txn(write)?),
-            #[cfg(feature = "sqlite")]
-            CIsarInstance::SQLite(isar) => CIsarTxn::SQLite(isar.begin_txn(write)?),
-        };
-        *txn = Box::into_raw(Box::new(new_txn));
+    let mut begin_txn = || {
+        isar_try! {
+            let new_txn = match isar {
+                #[cfg(feature = "native")]
+                CIsarInstance::Native(isar) => CIsarTxn::Native(isar.begin_txn(write)?),
+                #[cfg(feature = "sqlite")]
+                CIsarInstance::SQLite(isar) => CIsarTxn::SQLite(isar.begin_txn(write)?),
+            };
+            *txn = Box::into_raw(Box::new(new_txn));
+        }
+    };
+
+    if write {
+        dart_pause_isolate(begin_txn)
+    } else {
+        begin_txn()
     }
 }
 

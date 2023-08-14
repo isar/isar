@@ -59,7 +59,7 @@ class PropertyInfo {
   final String typeClassName;
   final String? targetIsarName;
 
-  final PropertyType type;
+  final IsarType type;
   final bool isId;
   final Map<String, dynamic>? enumMap;
   final String? enumProperty;
@@ -82,31 +82,31 @@ class PropertyInfo {
     }
 
     switch (type) {
-      case PropertyType.bool:
-      case PropertyType.boolList:
+      case IsarType.bool:
+      case IsarType.boolList:
         return 'bool';
-      case PropertyType.byte:
-      case PropertyType.byteList:
-      case PropertyType.int:
-      case PropertyType.intList:
-      case PropertyType.long:
-      case PropertyType.longList:
+      case IsarType.byte:
+      case IsarType.byteList:
+      case IsarType.int:
+      case IsarType.intList:
+      case IsarType.long:
+      case IsarType.longList:
         return 'int';
-      case PropertyType.float:
-      case PropertyType.floatList:
-      case PropertyType.double:
-      case PropertyType.doubleList:
+      case IsarType.float:
+      case IsarType.floatList:
+      case IsarType.double:
+      case IsarType.doubleList:
         return 'double';
-      case PropertyType.dateTime:
-      case PropertyType.dateTimeList:
+      case IsarType.dateTime:
+      case IsarType.dateTimeList:
         return 'DateTime';
-      case PropertyType.object:
-      case PropertyType.objectList:
+      case IsarType.object:
+      case IsarType.objectList:
         return typeClassName;
-      case PropertyType.string:
-      case PropertyType.stringList:
+      case IsarType.string:
+      case IsarType.stringList:
         return 'String';
-      case PropertyType.json:
+      case IsarType.json:
         if (typeClassName == 'List') {
           return 'List<dynamic>';
         } else if (typeClassName == 'Map') {

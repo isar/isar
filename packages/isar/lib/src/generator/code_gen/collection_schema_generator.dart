@@ -1,62 +1,47 @@
 part of isar_generator;
 
 String _generateSchema(ObjectInfo object) {
-  final json = {
-    'name': object.isarName,
-    'idName': object.idProperty?.isarName,
-    if (object.isEmbedded) 'embedded': object.isEmbedded,
-    'properties': [
-      for (final prop in object.properties)
-        if (!prop.isId || prop.type != PropertyType.long)
-          {
-            'name': prop.isarName,
-            'type': prop.type.name.capitalize(),
-            if (prop.type.isObject) 'target': prop.targetIsarName,
-            if (prop.isEnum) 'enumMap': prop.enumMap,
-          }
-    ],
-    if (object.indexes.isNotEmpty)
-      'indexes': [
-        for (final index in object.indexes)
-          {
-            'name': index.name,
-            'unique': index.unique,
-            'properties': index.properties,
-            'hash': index.hash,
-          }
-      ],
-  };
-  final schemaJson = jsonEncode(json);
-
-  if (object.isEmbedded) {
+  String generatePropertySchema(PropertyInfo p) {
     return '''
-    //const ${object.dartName.decapitalize()}SchemaHash = ${Isar.fastHash(schemaJson)};
-    const ${object.dartName.capitalize()}Schema = IsarSchema(
-      schema: '$schemaJson',
-      converter: IsarObjectConverter<void, ${object.dartName}>(
-        serialize: serialize${object.dartName},
-        deserialize: deserialize${object.dartName},
-      ),
-    );''';
-  } else {
-    final embeddedSchemas = object.embeddedDartNames
-        .map((e) => '${e.capitalize()}Schema')
-        .join(',');
-    var hash = Isar.fastHash(schemaJson).toString();
-    for (final embedded in object.embeddedDartNames) {
-      hash = '($hash * 31 + ${embedded.decapitalize()}SchemaHash)';
-    }
-
-    return '''
-    const ${object.dartName.capitalize()}Schema = IsarCollectionSchema(
-      schema: '$schemaJson',
-      converter: IsarObjectConverter<${object.idProperty!.dartType}, ${object.dartName}>(
-        serialize: serialize${object.dartName},
-        deserialize: deserialize${object.dartName},
-        deserializeProperty: deserialize${object.dartName}Prop,
-      ),
-      embeddedSchemas: [$embeddedSchemas],
-      //hash: $hash,
-    );''';
+    IsarPropertySchema(
+      name: '${p.isarName}',
+      type: IsarType.${p.type.name},
+      ${p.targetIsarName != null ? "target: '${p.targetIsarName}'," : ''}
+      ${p.enumMap != null ? 'enumMap: ${jsonEncode(p.enumMap)},' : ''}
+    ),''';
   }
+
+  String generateIndexSchema(IndexInfo index) {
+    return '''
+    IsarIndexSchema(
+      name: '${index.name}',
+      properties: [${index.properties.map((e) => '"$e",').join()}],
+      unique: ${index.unique},
+      hash: ${index.hash},
+    ),''';
+  }
+
+  final embeddedSchemas =
+      object.embeddedDartNames.map((e) => '${e.capitalize()}Schema').join(',');
+  final properties = object.properties
+      .where((e) => !e.isId || e.type != IsarType.long)
+      .map(generatePropertySchema)
+      .join();
+  final indexes = object.indexes.map(generateIndexSchema).join();
+  return '''
+    const ${object.dartName.capitalize()}Schema = IsarGeneratedSchema(
+      schema: IsarSchema(
+        name: '${object.isarName}',
+        ${object.idProperty != null ? "idName: '${object.idProperty!.isarName}'," : ''}
+        embedded: ${object.isEmbedded},
+        properties: [$properties],
+        indexes: [$indexes],
+      ),
+      converter: IsarObjectConverter<${object.idProperty?.dartType ?? 'void'}, ${object.dartName}>(
+        serialize: serialize${object.dartName},
+        deserialize: deserialize${object.dartName},
+        ${!object.isEmbedded ? 'deserializeProperty: deserialize${object.dartName}Prop,' : ''}
+      ),
+      ${object.isEmbedded ? '' : 'embeddedSchemas: [$embeddedSchemas],'}
+    );''';
 }

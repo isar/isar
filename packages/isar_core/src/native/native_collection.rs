@@ -44,8 +44,8 @@ pub(crate) struct NativeCollection {
 impl NativeCollection {
     pub fn new(
         collection_index: u16,
-        name: String,
-        id_name: Option<String>,
+        name: &str,
+        id_name: Option<&str>,
         properties: Vec<(String, NativeProperty)>,
         indexes: Vec<NativeIndex>,
         db: Option<Db>,
@@ -56,8 +56,8 @@ impl NativeCollection {
             .map_or(0, |(_, p)| p.offset + p.data_type.static_size() as u32);
         Self {
             collection_index,
-            name,
-            id_name,
+            name: name.to_string(),
+            id_name: id_name.map(|s| s.to_string()),
             properties,
             indexes,
             static_size,

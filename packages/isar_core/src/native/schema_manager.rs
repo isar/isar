@@ -81,8 +81,8 @@ pub(crate) fn perform_migration(
 
         let col = NativeCollection::new(
             collections.len() as u16,
-            schema.name.clone(),
-            schema.id_name.clone(),
+            &schema.name,
+            schema.id_name.as_deref(),
             properties,
             indexes,
             db,

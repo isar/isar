@@ -7,43 +7,12 @@ import 'package:go_router/go_router.dart';
 import 'package:isar_inspector/connection_screen.dart';
 
 void main() async {
-  if (window.navigator.userAgent.toLowerCase().contains('chrome')) {
-    runApp(
-      DarkMode(
-        notifier: DarkModeNotifier(),
-        child: const App(),
-      ),
-    );
-  } else {
-    runApp(const UnsupportedBrowser());
-  }
-}
-
-class UnsupportedBrowser extends StatelessWidget {
-  const UnsupportedBrowser({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Isar Inspector',
-      theme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF9FC9FF),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      home: const Scaffold(
-        body: Center(
-          child: Text(
-            'This browser is not supported. Please use a Chrome based browser.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18),
-          ),
-        ),
-      ),
-    );
-  }
+  runApp(
+    DarkMode(
+      notifier: DarkModeNotifier(),
+      child: const App(),
+    ),
+  );
 }
 
 final _router = GoRouter(
@@ -73,8 +42,8 @@ final _router = GoRouter(
           child: Scaffold(
             body: Material(
               child: ConnectionScreen(
-                port: state.params['port']!,
-                secret: state.params['secret']!,
+                port: state.pathParameters['port']!,
+                secret: state.pathParameters['secret']!,
               ),
             ),
           ),
@@ -109,9 +78,9 @@ class App extends StatelessWidget {
 
 class DarkMode extends InheritedNotifier<DarkModeNotifier> {
   const DarkMode({
+    required super.child,
     super.key,
     super.notifier,
-    required super.child,
   });
 
   static DarkModeNotifier of(BuildContext context) {

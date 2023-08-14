@@ -36,7 +36,7 @@ class _IsarAnalyzer {
         isId,
       );
       properties.add(property);
-      if (!isId || property.type == PropertyType.string) {
+      if (!isId || property.type == IsarType.string) {
         index++;
       }
     }
@@ -182,7 +182,7 @@ class _IsarAnalyzer {
     Map<String, dynamic>? enumMap;
     String? enumPropertyName;
 
-    late final PropertyType type;
+    late final IsarType type;
     if (dartType.scalarType.element is EnumElement) {
       final enumClass = dartType.scalarType.element! as EnumElement;
       final enumElements =
@@ -195,19 +195,16 @@ class _IsarAnalyzer {
         _err('Only fields are supported for enum properties', enumProperty);
       }
 
-      final enumPropertyType = enumProperty == null
-          ? PropertyType.byte
-          : enumProperty.type.propertyType;
-      if (enumPropertyType != PropertyType.byte &&
-          enumPropertyType != PropertyType.int &&
-          enumPropertyType != PropertyType.long &&
-          enumPropertyType != PropertyType.string) {
+      final enumIsarType =
+          enumProperty == null ? IsarType.byte : enumProperty.type.propertyType;
+      if (enumIsarType != IsarType.byte &&
+          enumIsarType != IsarType.int &&
+          enumIsarType != IsarType.long &&
+          enumIsarType != IsarType.string) {
         _err('Unsupported enum property type.', enumProperty);
       }
 
-      type = dartType.isDartCoreList
-          ? enumPropertyType!.listType
-          : enumPropertyType!;
+      type = dartType.isDartCoreList ? enumIsarType!.listType : enumIsarType!;
       enumMap = {};
       for (var i = 0; i < enumElements.length; i++) {
         final element = enumElements[i];
@@ -240,7 +237,7 @@ class _IsarAnalyzer {
       if (dartType.propertyType != null) {
         type = dartType.propertyType!;
       } else if (dartType.supportsJsonConversion) {
-        type = PropertyType.json;
+        type = IsarType.json;
       } else {
         _err(
           'Unsupported type. Please add @embedded to the type or implement '
@@ -258,15 +255,15 @@ class _IsarAnalyzer {
             dartType.scalarType is DynamicType
         : null;
     if (isId) {
-      if (type != PropertyType.long && type != PropertyType.string) {
+      if (type != IsarType.long && type != IsarType.string) {
         _err('Only int and String properties can be used as id.', property);
       } else if (nullable) {
         _err('Id properties must not be nullable.', property);
       }
     }
 
-    if ((type == PropertyType.byte && nullable) ||
-        (type == PropertyType.byteList && (elementNullable ?? false))) {
+    if ((type == IsarType.byte && nullable) ||
+        (type == IsarType.byteList && (elementNullable ?? false))) {
       _err('Bytes must not be nullable.', property);
     }
 
@@ -297,7 +294,7 @@ class _IsarAnalyzer {
       index: propertyIndex,
       dartName: property.name,
       isarName: property.isarName,
-      typeClassName: type == PropertyType.json
+      typeClassName: type == IsarType.json
           ? dartType.element!.name!
           : dartType.scalarType.element!.name!,
       targetIsarName:
@@ -324,9 +321,9 @@ class _IsarAnalyzer {
         type is DynamicType) {
       return 'null';
     } else if (type.isDartCoreInt) {
-      if (type.propertyType == PropertyType.byte) {
+      if (type.propertyType == IsarType.byte) {
         return '0';
-      } else if (type.propertyType == PropertyType.int) {
+      } else if (type.propertyType == IsarType.int) {
         return '$_nullInt';
       } else {
         return '$_nullLong';
@@ -392,7 +389,7 @@ class _IsarAnalyzer {
           _err('Double properties cannot be indexed', element);
         } else if (property.type.isObject) {
           _err('Embedded object properties cannot be indexed', element);
-        } else if (property.type == PropertyType.json) {
+        } else if (property.type == IsarType.json) {
           _err('JSON properties cannot be indexed', element);
         } else if (property.type.isList) {
           _err('List properties cannot be indexed', element);

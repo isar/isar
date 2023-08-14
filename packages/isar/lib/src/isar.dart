@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_asserts_with_message
+
 part of isar;
 
 /// The Isar storage engine.
@@ -23,7 +25,7 @@ abstract class Isar {
 
   /// Use this value for the `directory` parameter to create an in-memory
   /// database.
-  static const String sqliteInMemory = '';
+  static const String sqliteInMemory = ':memory:';
 
   /// Initialize Isar manually. This is required if you target web.
   ///
@@ -38,7 +40,7 @@ abstract class Isar {
   /// This method is especially useful to get an Isar instance from an isolate.
   /// It is much faster than using [open].
   static Isar get({
-    required List<IsarCollectionSchema> schemas,
+    required List<IsarGeneratedSchema> schemas,
     String name = Isar.defaultName,
   }) {
     return _IsarImpl.getByName(name: name, schemas: schemas);
@@ -74,7 +76,7 @@ abstract class Isar {
   /// mode. In release mode the inspector is always disabled.
   /// {@endtemplate}
   static Isar open({
-    required List<IsarCollectionSchema> schemas,
+    required List<IsarGeneratedSchema> schemas,
     required String directory,
     String name = Isar.defaultName,
     IsarEngine engine = IsarEngine.isar,
@@ -83,7 +85,7 @@ abstract class Isar {
     CompactCondition? compactOnLaunch,
     bool inspector = true,
   }) {
-    return _IsarImpl.open(
+    final isar = _IsarImpl.open(
       schemas: schemas,
       directory: directory,
       name: name,
@@ -92,13 +94,23 @@ abstract class Isar {
       encryptionKey: encryptionKey,
       compactOnLaunch: compactOnLaunch,
     );
+
+    /// Tree shake the inspector for profile and release builds.
+    assert(() {
+      if (!IsarCore.kIsWeb && inspector) {
+        _IsarConnect.initialize(isar);
+      }
+      return true;
+    }());
+
+    return isar;
   }
 
   /// Open a new Isar instance asynchronously.
   ///
   /// {@macro isar_open}
   static Future<Isar> openAsync({
-    required List<IsarCollectionSchema> schemas,
+    required List<IsarGeneratedSchema> schemas,
     required String directory,
     String name = Isar.defaultName,
     IsarEngine engine = IsarEngine.isar,
@@ -106,8 +118,8 @@ abstract class Isar {
     String? encryptionKey,
     CompactCondition? compactOnLaunch,
     bool inspector = true,
-  }) {
-    return _IsarImpl.openAsync(
+  }) async {
+    final isar = await _IsarImpl.openAsync(
       schemas: schemas,
       directory: directory,
       name: name,
@@ -116,6 +128,16 @@ abstract class Isar {
       encryptionKey: encryptionKey,
       compactOnLaunch: compactOnLaunch,
     );
+
+    /// Tree shake the inspector for profile and release builds.
+    assert(() {
+      if (!IsarCore.kIsWeb && inspector) {
+        _IsarConnect.initialize(isar);
+      }
+      return true;
+    }());
+
+    return isar;
   }
 
   /// Name of the instance.
@@ -130,11 +152,24 @@ abstract class Isar {
   /// will throw an [IsarNotReadyError].
   bool get isOpen;
 
+  /// Get the schemas of all collections and embedded objects in this instance.
+  List<IsarSchema> get schemas;
+
   /// Get a collection by its type.
   ///
   /// You should use the generated extension methods instead. A collection
   /// `User` can be accessed with `isar.users`.
   IsarCollection<ID, OBJ> collection<ID, OBJ>();
+
+  /// Get a collection by its index.
+  ///
+  /// The index is the order in which the collections were defined when opening
+  /// the instance.
+  ///
+  /// It is not recommended to use this method. Use the generated extension
+  /// methods instead. A collection `User` can be accessed with `isar.users`.
+  @experimental
+  IsarCollection<ID, OBJ> collectionByIndex<ID, OBJ>(int index);
 
   /// Create a synchronous read transaction.
   ///

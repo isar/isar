@@ -39,6 +39,8 @@ dependencies:
 dependency_overrides:
   isar:
     path: ../../packages/isar
+  isar_flutter_libs:
+    path: ../../packages/isar_flutter_libs
 
 dev_dependencies:
   build_runner: ^2.4.6

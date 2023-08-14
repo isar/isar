@@ -7,7 +7,6 @@ import 'package:isar_inspector/main.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({
-    super.key,
     required this.instances,
     required this.selectedInstance,
     required this.onInstanceSelected,
@@ -15,14 +14,15 @@ class Sidebar extends StatelessWidget {
     required this.collectionInfo,
     required this.selectedCollection,
     required this.onCollectionSelected,
+    super.key,
   });
 
   final List<String> instances;
-  final String selectedInstance;
+  final String? selectedInstance;
   final void Function(String instance) onInstanceSelected;
 
-  final List<CollectionSchema<dynamic>> collections;
-  final Map<String, ConnectCollectionInfo?> collectionInfo;
+  final List<IsarSchema> collections;
+  final Map<String, ConnectCollectionInfoPayload?> collectionInfo;
   final String? selectedCollection;
   final void Function(String instance) onCollectionSelected;
 

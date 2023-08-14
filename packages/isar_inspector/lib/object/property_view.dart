@@ -5,15 +5,15 @@ import 'package:isar_inspector/object/property_value.dart';
 
 class PropertyView extends StatelessWidget {
   const PropertyView({
-    super.key,
     required this.property,
     required this.value,
     required this.isId,
     required this.isIndexed,
     required this.onUpdate,
+    super.key,
   });
 
-  final PropertySchema property;
+  final IsarPropertySchema property;
   final dynamic value;
   final bool isId;
   final bool isIndexed;
@@ -27,8 +27,9 @@ class PropertyView extends StatelessWidget {
         value is String || value is List ? '(${value.length})' : '';
     return PropertyBuilder(
       property: property.name,
+      bold: isId,
       underline: isIndexed,
-      type: isId ? 'Id' : '${property.type.typeName} $valueLength',
+      type: '${property.type.typeName} $valueLength',
       value: value is List
           ? null
           : property.type.isList
@@ -78,6 +79,8 @@ extension TypeName on IsarType {
         return 'String';
       case IsarType.object:
         return 'Object';
+      case IsarType.json:
+        return 'Json';
       case IsarType.boolList:
         return 'List<bool>';
       case IsarType.byteList:

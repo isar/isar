@@ -5,6 +5,7 @@ use super::sqlite_instance::SQLiteInstanceInfo;
 use super::sqlite_txn::SQLiteTxn;
 use crate::core::error::Result;
 use crate::core::schema::IsarSchema;
+use crate::SQLITE_MEMORY_DIR;
 use intmap::IntMap;
 use itertools::Itertools;
 use parking_lot::Mutex;
@@ -41,12 +42,12 @@ pub(crate) fn open_sqlite(
     max_size_mib: u32,
     encryption_key: Option<&str>,
 ) -> Result<(SQLiteInstanceInfo, SQLite3)> {
-    let path = if !dir.is_empty() {
+    let path = if dir == SQLITE_MEMORY_DIR {
+        format!("file:{}?mode=memory", name)
+    } else {
         let mut path_buf = PathBuf::from(dir);
         path_buf.push(format!("{}.sqlite", name));
         path_buf.as_path().to_str().unwrap().to_string()
-    } else {
-        String::new()
     };
 
     let sqlite = SQLite3::open(&path, encryption_key)?;
@@ -161,7 +162,7 @@ pub(crate) fn close_instance(
         if Arc::strong_count(&info) == 2 {
             lock.remove(info.instance_id as u64);
 
-            if delete {
+            if delete && &info.dir != SQLITE_MEMORY_DIR {
                 let path = info.path.to_string();
                 drop(sqlite);
                 let _ = remove_file(&path);

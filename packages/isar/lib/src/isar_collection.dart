@@ -10,6 +10,9 @@ abstract class IsarCollection<ID, OBJ> {
   /// The corresponding Isar instance.
   Isar get isar;
 
+  /// The schema of this collection.
+  IsarSchema get schema;
+
   /// Fetch the next auto increment id for this collection.
   ///
   /// After an app restart the auto increment counter will be set to the largest

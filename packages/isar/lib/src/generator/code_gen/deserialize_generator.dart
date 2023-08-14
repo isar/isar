@@ -114,7 +114,7 @@ String _deserialize({
   required String index,
   required bool isId,
   required String typeClassName,
-  required PropertyType type,
+  required IsarType type,
   String? elementDartType,
   required String defaultValue,
   String? elementDefaultValue,
@@ -123,7 +123,7 @@ String _deserialize({
   String Function(String value)? transformElement,
 }) {
   switch (type) {
-    case PropertyType.bool:
+    case IsarType.bool:
       if (defaultValue == 'false') {
         return transform('IsarCore.readBool(reader, $index)');
       } else {
@@ -136,7 +136,7 @@ String _deserialize({
           }
         }''';
       }
-    case PropertyType.byte:
+    case IsarType.byte:
       if (defaultValue == '0') {
         return transform('IsarCore.readByte(reader, $index)');
       } else {
@@ -149,7 +149,7 @@ String _deserialize({
           }
         }''';
       }
-    case PropertyType.int:
+    case IsarType.int:
       if (defaultValue == '$_nullInt') {
         return transform('IsarCore.readInt(reader, $index)');
       } else {
@@ -163,7 +163,7 @@ String _deserialize({
           }
         }''';
       }
-    case PropertyType.float:
+    case IsarType.float:
       if (defaultValue == 'double.nan') {
         return transform('IsarCore.readFloat(reader, $index)');
       } else {
@@ -177,7 +177,7 @@ String _deserialize({
           }
         }''';
       }
-    case PropertyType.long:
+    case IsarType.long:
       if (isId) {
         return transform('IsarCore.readId(reader)');
       } else if (defaultValue == '$_nullLong') {
@@ -193,7 +193,7 @@ String _deserialize({
           }
         }''';
       }
-    case PropertyType.dateTime:
+    case IsarType.dateTime:
       final toLocal = utc ? '' : '.toLocal()';
       return '''
         {
@@ -205,7 +205,7 @@ String _deserialize({
           }
         }''';
 
-    case PropertyType.double:
+    case IsarType.double:
       if (defaultValue == 'double.nan') {
         return transform('IsarCore.readDouble(reader, $index)');
       } else {
@@ -219,7 +219,7 @@ String _deserialize({
           }
         }''';
       }
-    case PropertyType.string:
+    case IsarType.string:
       if (defaultValue == 'null') {
         return transform('IsarCore.readString(reader, $index)');
       } else {
@@ -228,7 +228,7 @@ String _deserialize({
         );
       }
 
-    case PropertyType.object:
+    case IsarType.object:
       return '''
       {
         final objectReader = IsarCore.readObject(reader, $index);
@@ -240,15 +240,15 @@ String _deserialize({
           ${transform('embedded')}
         }
       }''';
-    case PropertyType.boolList:
-    case PropertyType.byteList:
-    case PropertyType.intList:
-    case PropertyType.floatList:
-    case PropertyType.longList:
-    case PropertyType.dateTimeList:
-    case PropertyType.doubleList:
-    case PropertyType.stringList:
-    case PropertyType.objectList:
+    case IsarType.boolList:
+    case IsarType.byteList:
+    case IsarType.intList:
+    case IsarType.floatList:
+    case IsarType.longList:
+    case IsarType.dateTimeList:
+    case IsarType.doubleList:
+    case IsarType.stringList:
+    case IsarType.objectList:
       final deser = _deserialize(
         index: 'i',
         isId: false,
@@ -275,7 +275,7 @@ String _deserialize({
           }
         }
       }''';
-    case PropertyType.json:
+    case IsarType.json:
       if (typeClassName == 'dynamic') {
         return transform(
           'isarJsonDecode(IsarCore.readString(reader, $index) '

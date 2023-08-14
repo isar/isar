@@ -5,9 +5,9 @@ import 'package:isar/isar.dart';
 class PropertyValue extends StatelessWidget {
   const PropertyValue(
     this.value, {
-    super.key,
     required this.enumMap,
     required this.type,
+    super.key,
     this.onUpdate,
   });
 
@@ -220,6 +220,7 @@ class PropertyValue extends StatelessWidget {
           ),
         );
       case IsarType.object:
+      case IsarType.json:
       case IsarType.objectList:
         throw ArgumentError('Invalid type');
     }

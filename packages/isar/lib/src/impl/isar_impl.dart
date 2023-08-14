@@ -4,13 +4,21 @@ class _IsarImpl extends Isar {
   _IsarImpl._(
     this.instanceId,
     Pointer<CIsarInstance> ptr,
-    this.converters,
+    this.generatedSchemas,
   ) : _ptr = ptr {
-    for (var i = 0; i < converters.length; i++) {
-      final converter = converters[i];
-      collections[converter.type] = converters[i].withType(
+    for (final schema in generatedSchemas) {
+      if (schema.isEmbedded) {
+        continue;
+      }
+
+      collections[schema.converter.type] = schema.converter.withType(
         <ID, OBJ>(converter) {
-          return _IsarCollectionImpl<ID, OBJ>(this, i, converter);
+          return _IsarCollectionImpl<ID, OBJ>(
+            this,
+            schema.schema,
+            collections.length,
+            converter,
+          );
         },
       );
     }
@@ -21,7 +29,7 @@ class _IsarImpl extends Isar {
   static final _instances = <int, _IsarImpl>{};
 
   final int instanceId;
-  final List<IsarObjectConverter<dynamic, dynamic>> converters;
+  final List<IsarGeneratedSchema> generatedSchemas;
   final collections = <Type, _IsarCollectionImpl<dynamic, dynamic>>{};
 
   Pointer<CIsarInstance>? _ptr;
@@ -30,7 +38,7 @@ class _IsarImpl extends Isar {
 
   // ignore: sort_constructors_first
   factory _IsarImpl.open({
-    required List<IsarCollectionSchema> schemas,
+    required List<IsarGeneratedSchema> schemas,
     required String name,
     required IsarEngine engine,
     required String directory,
@@ -43,7 +51,8 @@ class _IsarImpl extends Isar {
 
     if (engine == IsarEngine.isar) {
       if (encryptionKey != null) {
-        throw ArgumentError('Isar engine does not support encryption.');
+        throw ArgumentError('Isar engine does not support encryption. Please '
+            'set the engine to IsarEngine.sqlite.');
       }
       maxSizeMiB ??= Isar.defaultMaxSizeMiB;
     } else {
@@ -53,14 +62,12 @@ class _IsarImpl extends Isar {
       maxSizeMiB ??= 0;
     }
 
-    final embeddedSchemas = <IsarSchema>{};
-    for (final schema in schemas) {
-      for (final schema in schema.embeddedSchemas) {
-        embeddedSchemas.add(schema);
-      }
-    }
+    final allSchemas = <IsarGeneratedSchema>{
+      ...schemas,
+      ...schemas.expand((e) => e.embeddedSchemas ?? <IsarGeneratedSchema>[])
+    };
     final schemaJson =
-        '[${[...schemas, ...embeddedSchemas].map((e) => e.schema).join(',')}]';
+        jsonEncode(allSchemas.map((e) => e.schema.toJson()).toList());
 
     final instanceId = Isar.fastHash(name);
     final instance = _IsarImpl._instances[instanceId];
@@ -92,14 +99,13 @@ class _IsarImpl extends Isar {
         )
         .checkNoError();
 
-    final converters = schemas.map((e) => e.converter).toList();
-    return _IsarImpl._(instanceId, isarPtrPtr.ptrValue, converters);
+    return _IsarImpl._(instanceId, isarPtrPtr.ptrValue, allSchemas.toList());
   }
 
   // ignore: sort_constructors_first
   factory _IsarImpl.get({
     required int instanceId,
-    required List<IsarObjectConverter<dynamic, dynamic>> converters,
+    required List<IsarGeneratedSchema> schemas,
     String? library,
   }) {
     IsarCore._initialize(library: library);
@@ -112,13 +118,13 @@ class _IsarImpl extends Isar {
           'call Isar.open() before using Isar.get().');
     }
 
-    return _IsarImpl._(instanceId, ptr, converters);
+    return _IsarImpl._(instanceId, ptr, schemas);
   }
 
   // ignore: sort_constructors_first
   factory _IsarImpl.getByName({
     required String name,
-    required List<IsarCollectionSchema> schemas,
+    required List<IsarGeneratedSchema> schemas,
   }) {
     final instanceId = Isar.fastHash(name);
     final instance = _IsarImpl._instances[instanceId];
@@ -126,15 +132,14 @@ class _IsarImpl extends Isar {
       return instance;
     }
 
-    final converters = schemas.map((e) => e.converter).toList();
     return _IsarImpl.get(
       instanceId: instanceId,
-      converters: converters,
+      schemas: schemas,
     );
   }
 
   static Future<Isar> openAsync({
-    required List<IsarCollectionSchema> schemas,
+    required List<IsarGeneratedSchema> schemas,
     required String directory,
     String name = Isar.defaultName,
     IsarEngine engine = IsarEngine.isar,
@@ -178,6 +183,7 @@ class _IsarImpl extends Isar {
       await isolate;
       return isar;
     } else {
+      // ignore: only_throw_errors
       throw response as Object;
     }
   }
@@ -215,6 +221,33 @@ class _IsarImpl extends Isar {
     final length = IsarCore.b.isar_get_dir(getPtr(), IsarCore.stringPtrPtr);
     return utf8.decode(IsarCore.stringPtr.asU8List(length));
   }();
+
+  @override
+  late final List<IsarSchema> schemas =
+      generatedSchemas.map((e) => e.schema).toList();
+
+  @override
+  bool get isOpen => _ptr != null;
+
+  @override
+  IsarCollection<ID, OBJ> collection<ID, OBJ>() {
+    final collection = collections[OBJ];
+    if (collection is _IsarCollectionImpl<ID, OBJ>) {
+      return collection;
+    } else {
+      throw ArgumentError('Collection for type $OBJ not found');
+    }
+  }
+
+  @override
+  IsarCollection<ID, OBJ> collectionByIndex<ID, OBJ>(int index) {
+    final collection = collections.values.elementAt(index);
+    if (collection is _IsarCollectionImpl<ID, OBJ>) {
+      return collection;
+    } else {
+      throw ArgumentError('Invalid type parameters for collection');
+    }
+  }
 
   @tryInline
   T getTxn<T>(
@@ -283,19 +316,6 @@ class _IsarImpl extends Isar {
   }
 
   @override
-  bool get isOpen => _ptr != null;
-
-  @override
-  IsarCollection<ID, OBJ> collection<ID, OBJ>() {
-    final collection = collections[OBJ];
-    if (collection is _IsarCollectionImpl<ID, OBJ>) {
-      return collection;
-    } else {
-      throw ArgumentError('Collection for type $OBJ not found');
-    }
-  }
-
-  @override
   T read<T>(T Function(Isar isar) callback) {
     return _txn(callback, write: false);
   }
@@ -317,17 +337,17 @@ class _IsarImpl extends Isar {
 
     _checkNotInTxn();
 
-    final instanceId = this.instanceId;
+    final instance = instanceId;
     final library = IsarCore._library;
-    final converters = this.converters;
+    final schemas = generatedSchemas;
     return scheduleIsolate(
       () => _isarAsync(
-        instanceId,
-        library,
-        converters,
-        false,
-        param,
-        callback,
+        instanceId: instance,
+        schemas: schemas,
+        write: false,
+        param: param,
+        callback: callback,
+        library: library,
       ),
       debugName: debugName ?? 'Isar async read',
     );
@@ -345,18 +365,18 @@ class _IsarImpl extends Isar {
 
     _checkNotInTxn();
 
-    final instanceId = this.instanceId;
+    final instance = instanceId;
     final library = IsarCore._library;
-    final converters = this.converters.toList();
+    final schemas = generatedSchemas.toList();
     return scheduleIsolate(
       () {
         return _isarAsync(
-          instanceId,
-          library,
-          converters,
-          true,
-          param,
-          callback,
+          instanceId: instance,
+          schemas: schemas,
+          write: true,
+          param: param,
+          callback: callback,
+          library: library,
         );
       },
       debugName: debugName ?? 'Isar async write',
@@ -402,17 +422,17 @@ class _IsarImpl extends Isar {
   }
 }
 
-T _isarAsync<T, P>(
-  int instanceId,
+T _isarAsync<T, P>({
+  required int instanceId,
+  required List<IsarGeneratedSchema> schemas,
+  required bool write,
+  required P param,
+  required T Function(Isar isar, P param) callback,
   String? library,
-  List<IsarObjectConverter<dynamic, dynamic>> converters,
-  bool write,
-  P param,
-  T Function(Isar isar, P param) callback,
-) {
+}) {
   final isar = _IsarImpl.get(
     instanceId: instanceId,
-    converters: converters,
+    schemas: schemas,
     library: library,
   );
   try {

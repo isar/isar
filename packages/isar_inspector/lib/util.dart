@@ -1,16 +1,17 @@
 import 'package:isar/isar.dart';
 
-extension CollectionSchemaX on CollectionSchema<dynamic> {
-  PropertySchema propertyOrId(String name) {
+extension CollectionInfoX on IsarSchema {
+  int propertyIndex(String name) {
     if (name == idName) {
-      return PropertySchema(id: 0, name: name, type: IsarType.long);
+      return 0;
     } else {
-      return property(name);
+      return properties.indexWhere((p) => p.name == name) + 1;
     }
   }
 
-  List<PropertySchema> get idAndProperties => [
-        PropertySchema(id: 0, name: idName, type: IsarType.long),
-        ...properties.values,
+  List<IsarPropertySchema> get idAndProperties => [
+        if (!this.embedded && !properties.any((e) => e.name == idName))
+          IsarPropertySchema(name: idName!, type: IsarType.long),
+        ...properties,
       ];
 }
