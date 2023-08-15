@@ -17,7 +17,7 @@ class EmbeddedPropertyView extends StatelessWidget {
   final IsarPropertySchema property;
   final Map<String, IsarSchema> schemas;
   final IsarObject object;
-  final void Function(String? id, String path, dynamic value) onUpdate;
+  final void Function(dynamic id, String path, dynamic value) onUpdate;
 
   @override
   Widget build(BuildContext context) {

@@ -90,7 +90,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
                   _selectInstance(instance);
                 });
               },
-              collections: schemas,
+              schemas: schemas,
               collectionInfo: widget.client.collectionInfo,
               selectedCollection: selectedCollection,
               onCollectionSelected: (collection) {

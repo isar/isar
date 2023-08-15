@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:html';
 import 'dart:math';
 
 import 'package:clickup_fading_scroll/clickup_fading_scroll.dart';
@@ -47,6 +48,7 @@ class _CollectionAreaState extends State<CollectionArea> {
   var filter = FilterGroup(true, []);
   late var sortProperty = widget.schema.idName!;
   var sortAsc = true;
+
   var objects = <IsarObject>[];
   var objectsCount = 0;
 
@@ -69,10 +71,10 @@ class _CollectionAreaState extends State<CollectionArea> {
     final query = ConnectQueryPayload(
       instance: widget.instance,
       collection: widget.collection,
-      //filter: filter,
+      filter: filter.toIsarFilter(),
       offset: page * objectsPerPage,
       limit: (page + 1) * objectsPerPage,
-      sortProperty: widget.schema.propertyIndex(sortProperty),
+      sortProperty: widget.schema.getPropertyIndex(sortProperty),
       sortAsc: sortAsc,
     );
     final result = await widget.client.executeQuery(query);
@@ -89,10 +91,6 @@ class _CollectionAreaState extends State<CollectionArea> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    print([
-      for (final p in widget.schema.idAndProperties)
-        if (!p.type.isObject && !p.type.isList) p.name
-    ]);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -213,7 +211,7 @@ class _CollectionAreaState extends State<CollectionArea> {
     );
   }
 
-  void _onUpdate(String collection, String id, String path, dynamic value) {
+  void _onUpdate(String collection, dynamic id, String path, dynamic value) {
     final edit = ConnectEditPayload(
       instance: widget.instance,
       collection: collection,
@@ -224,17 +222,22 @@ class _CollectionAreaState extends State<CollectionArea> {
     widget.client.editProperty(edit);
   }
 
-  void _onDelete(String id) {
+  void _onDelete(dynamic id) {
     final query = ConnectQueryPayload(
       instance: widget.instance,
       collection: widget.collection,
-      filter: EqualCondition(property: 0, value: id),
+      filter: EqualCondition(
+        property: widget.schema.getPropertyIndex(widget.schema.idName!),
+        value: id,
+      ),
     );
     widget.client.deleteQuery(query);
   }
 
   Future<void> _onCreate() async {
-    final randomId = Random().nextInt(100000000);
+    final randInt = Random().nextInt(100000000);
+    final idIndex = widget.schema.getPropertyIndex(widget.schema.idName!);
+    final randomId = idIndex == 0 ? randInt : '$randInt';
     final p = ConnectObjectsPayload(
       instance: widget.instance,
       collection: widget.collection,
@@ -242,19 +245,19 @@ class _CollectionAreaState extends State<CollectionArea> {
         {widget.schema.idName!: randomId}
       ],
     );
-    await widget.client.importJson(p);
-    if (!mounted) return;
 
     setState(() {
+      page = 0;
       filter = FilterGroup(true, [
         FilterCondition(
-          property: 0,
+          property: idIndex,
           type: FilterType.equalTo,
           value1: randomId,
         )
       ]);
     });
-    await _runQuery();
+    await widget.client.importJson(p);
+    _runQuery();
   }
 
   Future<void> _onImport() async {
@@ -282,19 +285,19 @@ class _CollectionAreaState extends State<CollectionArea> {
   }
 
   void _onDeleteAll() {
-    /*final query = ConnectQueryPayload(
+    final query = ConnectQueryPayload(
       instance: widget.instance,
       collection: widget.collection,
-      filter: filter,
+      filter: filter.toIsarFilter(),
     );
-    widget.client.deleteQuery(query);*/
+    widget.client.deleteQuery(query);
   }
 
   Future<void> _onDownload() async {
-    /*final query = ConnectQueryPayload(
+    final query = ConnectQueryPayload(
       instance: widget.instance,
       collection: widget.collection,
-      filter: filter,
+      filter: filter.toIsarFilter(),
     );
     final data = await widget.client.exportJson(query);
     try {
@@ -307,6 +310,6 @@ class _CollectionAreaState extends State<CollectionArea> {
       document.body!.append(anchor);
       anchor.click();
       anchor.remove();
-    } catch (_) {}*/
+    } catch (_) {}
   }
 }

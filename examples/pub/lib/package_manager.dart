@@ -20,7 +20,6 @@ class PackageManager {
         .build();
 
     await for (final results in query.watch(fireImmediately: true)) {
-      print('watch');
       if (results.isNotEmpty) {
         yield results.first;
       }
@@ -32,7 +31,6 @@ class PackageManager {
         isar.packages.where().nameEqualTo(name).sortByPublishedDesc().build();
 
     await for (final results in query.watch(fireImmediately: true)) {
-      print('watch version');
       if (results.isNotEmpty) {
         yield results;
       }
@@ -48,7 +46,6 @@ class PackageManager {
         .build();
 
     await for (final results in query.watch(fireImmediately: true)) {
-      print('watch latest version');
       if (results.isNotEmpty) {
         yield results.first;
       }
@@ -57,7 +54,6 @@ class PackageManager {
 
   Stream<String?> watchPreReleaseVersion(String name) async* {
     await for (final _ in isar.packages.watchLazy(fireImmediately: true)) {
-      print('watchPreReleaseVersion');
       final latestDate = await isar.packages
           .where()
           .nameEqualTo(name)
@@ -198,10 +194,6 @@ class PackageManager {
         .flutterFavoriteEqualTo(true)
         .distinctByName()
         .nameProperty()
-        .watch(fireImmediately: true)
-        .map((event) {
-      print('fav');
-      return event;
-    });
+        .watch(fireImmediately: true);
   }
 }

@@ -18,7 +18,7 @@ class QueryFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final property = schema.properties[condition.property];
+    final property = schema.getPropertyByIndex(condition.property);
 
     final theme = Theme.of(context);
     return Container(
@@ -49,7 +49,7 @@ class QueryFilter extends StatelessWidget {
                   onChanged(
                     FilterCondition(
                       type: FilterType.equalTo,
-                      property: schema.propertyIndex(name),
+                      property: schema.getPropertyIndex(name),
                     ),
                   );
                 },
@@ -82,8 +82,7 @@ class QueryFilter extends StatelessWidget {
             ),
             if (condition.type.valueCount > 0) ...[
               const SizedBox(width: 20),
-              SizedBox(
-                width: 100,
+              IntrinsicWidth(
                 child: PropertyValue(
                   condition.value1,
                   type: property.type,
@@ -103,8 +102,7 @@ class QueryFilter extends StatelessWidget {
             ],
             if (condition.type.valueCount == 2) ...[
               const SizedBox(width: 20),
-              SizedBox(
-                width: 100,
+              IntrinsicWidth(
                 child: PropertyValue(
                   condition.value2,
                   type: property.type,

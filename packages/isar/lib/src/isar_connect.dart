@@ -189,9 +189,14 @@ abstract class _IsarConnect {
     final keys = cEdit.path.split('.');
 
     final colIndex = isar.schemas.indexWhere((e) => e.name == cEdit.collection);
+    final colSchema = isar.schemas[colIndex];
+    final idIndex = colSchema.getPropertyIndex(colSchema.idName!);
     final query =
         isar.collectionByIndex<dynamic, dynamic>(colIndex).buildQuery<dynamic>(
-              filter: EqualCondition(property: 0, value: cEdit.id),
+              filter: EqualCondition(
+                property: idIndex == -1 ? 0 : idIndex,
+                value: cEdit.id,
+              ),
             );
 
     final objects = query.exportJson();

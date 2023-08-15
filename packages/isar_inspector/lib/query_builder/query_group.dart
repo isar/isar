@@ -2,13 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_inspector/query_builder/query_filter.dart';
 
-sealed class FilterOperation {}
+sealed class FilterOperation {
+  Filter? toIsarFilter();
+}
 
 class FilterGroup extends FilterOperation {
   FilterGroup(this.and, this.filters);
 
   final bool and;
   final List<FilterOperation> filters;
+
+  Filter? toIsarFilter() {
+    if (filters.isEmpty) return null;
+    final isarFilters =
+        filters.map((e) => e.toIsarFilter()).whereType<Filter>().toList();
+    return and ? AndGroup(isarFilters) : OrGroup(isarFilters);
+  }
 }
 
 class FilterCondition extends FilterOperation {
@@ -21,8 +30,33 @@ class FilterCondition extends FilterOperation {
 
   final int property;
   final FilterType type;
-  final dynamic value1;
-  final dynamic value2;
+  final Object? value1;
+  final Object? value2;
+
+  Filter toIsarFilter() {
+    return switch (type) {
+      FilterType.equalTo => EqualCondition(property: property, value: value1),
+      FilterType.greaterThan =>
+        GreaterCondition(property: property, value: value1),
+      FilterType.lessThan => LessCondition(property: property, value: value1),
+      FilterType.between =>
+        BetweenCondition(property: property, lower: value1, upper: value2),
+      FilterType.startsWith =>
+        StartsWithCondition(property: property, value: value1 as String),
+      FilterType.endsWith =>
+        EndsWithCondition(property: property, value: value1 as String),
+      FilterType.contains =>
+        ContainsCondition(property: property, value: value1 as String),
+      FilterType.matches =>
+        MatchesCondition(property: property, wildcard: value1 as String),
+      FilterType.isNull => IsNullCondition(property: property),
+      FilterType.isNotNull => NotGroup(IsNullCondition(property: property)),
+      FilterType.elementIsNull =>
+        EqualCondition(property: property, value: null),
+      FilterType.elementIsNotNull =>
+        GreaterCondition(property: property, value: null)
+    };
+  }
 }
 
 class QueryGroup extends StatelessWidget {
@@ -109,6 +143,7 @@ class QueryGroup extends StatelessWidget {
                     ],
                     GroupFilterButton(
                       level: level,
+                      schema: schema,
                       onAdd: (newFilter) => _performUpdate(add: newFilter),
                     ),
                     const SizedBox(height: 10),
@@ -213,11 +248,13 @@ class _Guideline extends StatelessWidget {
 class GroupFilterButton extends StatelessWidget {
   const GroupFilterButton({
     required this.level,
+    required this.schema,
     required this.onAdd,
     super.key,
   });
 
   final int level;
+  final IsarSchema schema;
   final void Function(FilterOperation filter) onAdd;
 
   @override
@@ -245,9 +282,8 @@ class GroupFilterButton extends StatelessWidget {
           onPressed: () {
             onAdd(
               FilterCondition(
-                property: 0,
-                type: FilterType.greaterThan,
-                value1: 0,
+                property: schema.getPropertyIndex(schema.idName!),
+                type: FilterType.isNotNull,
               ),
             );
           },

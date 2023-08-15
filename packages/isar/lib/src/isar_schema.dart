@@ -38,6 +38,29 @@ class IsarSchema {
       'indexes': indexes.map((e) => e.toJson()).toList(),
     };
   }
+
+  int getPropertyIndex(String property) {
+    for (var i = 0; i < properties.length; i++) {
+      if (properties[i].name == property) {
+        return i + 1;
+      }
+    }
+    if (idName == property) {
+      return 0;
+    }
+    throw ArgumentError('Property $property not found in schema $name');
+  }
+
+  IsarPropertySchema getPropertyByIndex(int index) {
+    if (index == 0) {
+      return IsarPropertySchema(
+        name: idName!,
+        type: IsarType.long,
+      );
+    } else {
+      return properties[index - 1];
+    }
+  }
 }
 
 class IsarPropertySchema {
@@ -140,6 +163,14 @@ extension IsarTypeX on IsarType {
       this == IsarType.floatList ||
       this == IsarType.double ||
       this == IsarType.doubleList;
+
+  bool get isInt =>
+      this == IsarType.int ||
+      this == IsarType.int ||
+      this == IsarType.long ||
+      this == IsarType.longList;
+
+  bool get isNum => isFloat || isInt;
 
   bool get isDate => this == IsarType.dateTime || this == IsarType.dateTimeList;
 

@@ -10,7 +10,7 @@ class Sidebar extends StatelessWidget {
     required this.instances,
     required this.selectedInstance,
     required this.onInstanceSelected,
-    required this.collections,
+    required this.schemas,
     required this.collectionInfo,
     required this.selectedCollection,
     required this.onCollectionSelected,
@@ -21,7 +21,7 @@ class Sidebar extends StatelessWidget {
   final String? selectedInstance;
   final void Function(String instance) onInstanceSelected;
 
-  final List<IsarSchema> collections;
+  final List<IsarSchema> schemas;
   final Map<String, ConnectCollectionInfoPayload?> collectionInfo;
   final String? selectedCollection;
   final void Function(String instance) onCollectionSelected;
@@ -83,7 +83,7 @@ class Sidebar extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: CollectionsList(
-                collections: collections,
+                collections: schemas.where((e) => !e.embedded).toList(),
                 collectionInfo: collectionInfo,
                 selectedCollection: selectedCollection,
                 onSelected: onCollectionSelected,

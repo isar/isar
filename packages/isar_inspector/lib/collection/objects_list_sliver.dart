@@ -23,7 +23,7 @@ class ObjectsListSliver extends StatelessWidget {
   final List<IsarObject> objects;
   final void Function(
     String collection,
-    String id,
+    dynamic id,
     String path,
     dynamic value,
   ) onUpdate;

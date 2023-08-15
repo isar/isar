@@ -123,35 +123,35 @@ class ConnectQueryPayload {
   }
 
   static Filter _filterFromJson(Map<String, dynamic> json) {
-    final prop = json['property'] as int;
+    final prop = json['property'] as int?;
     final val = json['value'] ?? json['wildcard'];
     switch (json['type']) {
       case 'eq':
-        return EqualCondition(property: prop, value: val);
+        return EqualCondition(property: prop!, value: val);
       case 'gt':
-        return GreaterCondition(property: prop, value: val);
+        return GreaterCondition(property: prop!, value: val);
       case 'gte':
-        return GreaterOrEqualCondition(property: prop, value: val);
+        return GreaterOrEqualCondition(property: prop!, value: val);
       case 'lt':
-        return LessCondition(property: prop, value: val);
+        return LessCondition(property: prop!, value: val);
       case 'lte':
-        return LessOrEqualCondition(property: prop, value: val);
+        return LessOrEqualCondition(property: prop!, value: val);
       case 'between':
         return BetweenCondition(
-          property: prop,
+          property: prop!,
           lower: json['lower'],
           upper: json['upper'],
         );
       case 'startsWith':
-        return StartsWithCondition(property: prop, value: val as String);
+        return StartsWithCondition(property: prop!, value: val as String);
       case 'endsWith':
-        return EndsWithCondition(property: prop, value: val as String);
+        return EndsWithCondition(property: prop!, value: val as String);
       case 'contains':
-        return ContainsCondition(property: prop, value: val as String);
+        return ContainsCondition(property: prop!, value: val as String);
       case 'matches':
-        return MatchesCondition(property: prop, wildcard: val as String);
+        return MatchesCondition(property: prop!, wildcard: val as String);
       case 'isNull':
-        return IsNullCondition(property: prop);
+        return IsNullCondition(property: prop!);
       case 'and':
         return AndGroup(
           (json['filters'] as List)
@@ -179,31 +179,31 @@ class ConnectQueryPayload {
         return {
           'type': 'eq',
           'property': prop,
-          'value': val,
+          'value': val.toString(),
         };
       case GreaterCondition(property: final prop, value: final val):
         return {
           'type': 'gt',
           'property': prop,
-          'value': val,
+          'value': val.toString(),
         };
       case GreaterOrEqualCondition(property: final prop, value: final val):
         return {
           'type': 'gte',
           'property': prop,
-          'value': val,
+          'value': val.toString(),
         };
       case LessCondition(property: final prop, value: final val):
         return {
           'type': 'lt',
           'property': prop,
-          'value': val,
+          'value': val.toString(),
         };
       case LessOrEqualCondition(property: final prop, value: final val):
         return {
           'type': 'lte',
           'property': prop,
-          'value': val,
+          'value': val.toString(),
         };
       case BetweenCondition(
           property: final prop,
@@ -213,8 +213,8 @@ class ConnectQueryPayload {
         return {
           'type': 'between',
           'property': prop,
-          'lower': lower,
-          'upper': upper,
+          'lower': lower.toString(),
+          'upper': upper.toString(),
         };
       case StartsWithCondition(property: final prop, value: final val):
         return {
@@ -238,7 +238,7 @@ class ConnectQueryPayload {
         return {
           'type': 'matches',
           'property': prop,
-          'wildcard': wildcard,
+          'value': wildcard,
         };
       case IsNullCondition(property: final prop):
         return {
