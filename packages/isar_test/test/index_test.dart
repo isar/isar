@@ -1,3 +1,5 @@
+void main() {}
+
 /*import 'package:isar/isar.dart';
 import 'package:isar_test/src/common.dart';
 import 'package:test/test.dart';
