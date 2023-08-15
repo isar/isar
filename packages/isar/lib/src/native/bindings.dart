@@ -157,7 +157,7 @@ class IsarCoreBindings {
       void Function(ffi.Pointer<CIsarQueryCursor>, ffi.Pointer<CIsarReader>)>();
 
   void isar_connect_dart_api(
-    DartPostCObjectFnType ptr,
+    ffi.Pointer<ffi.Void> ptr,
   ) {
     return _isar_connect_dart_api(
       ptr,
@@ -165,10 +165,10 @@ class IsarCoreBindings {
   }
 
   late final _isar_connect_dart_apiPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(DartPostCObjectFnType)>>(
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
           'isar_connect_dart_api');
   late final _isar_connect_dart_api = _isar_connect_dart_apiPtr
-      .asFunction<void Function(DartPostCObjectFnType)>();
+      .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   ffi.Pointer<CFilter> isar_filter_is_null(
     int property_index,
@@ -1990,15 +1990,9 @@ typedef IsarI64 = ffi.Int64;
 
 final class CIsarQueryCursor extends ffi.Opaque {}
 
-typedef DartPostCObjectFnType = ffi.Pointer<
-    ffi.NativeFunction<
-        ffi.Int8 Function(
-            DartPort port_id, ffi.Pointer<CDartCObject> message)>>;
-typedef DartPort = ffi.Int64;
-
-final class CDartCObject extends ffi.Opaque {}
-
 final class CIsarUpdate extends ffi.Opaque {}
+
+typedef DartPort = ffi.Int64;
 
 final class CWatchHandle extends ffi.Opaque {}
 

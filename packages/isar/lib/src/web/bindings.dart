@@ -68,10 +68,10 @@ extension IsarBindingsX on JSIsar {
     ffi.Pointer<CIsarReader> reader,
   );
 
-  @ffi.Native<ffi.Void Function(DartPostCObjectFnType)>(
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Void>)>(
       symbol: 'isar_connect_dart_api')
   external void isar_connect_dart_api(
-    DartPostCObjectFnType ptr,
+    ffi.Pointer<ffi.Void> ptr,
   );
 
   @ffi.Native<ffi.Pointer<CFilter> Function(ffi.Uint16)>(
@@ -909,17 +909,11 @@ typedef IsarI64 = ffi.Int64;
 
 final class CIsarQueryCursor extends ffi.Opaque {}
 
-typedef DartPostCObjectFnType = ffi.Pointer<
-    ffi.NativeFunction<
-        ffi.Int8 Function(
-            DartPort port_id, ffi.Pointer<CDartCObject> message)>>;
-typedef DartPort = ffi.Int64;
-
-final class CDartCObject extends ffi.Opaque {}
-
 final class CFilter extends ffi.Opaque {}
 
 final class CIsarUpdate extends ffi.Opaque {}
+
+typedef DartPort = ffi.Int64;
 
 final class CWatchHandle extends ffi.Opaque {}
 

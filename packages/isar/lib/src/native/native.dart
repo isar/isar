@@ -41,7 +41,7 @@ FutureOr<IsarCoreBindings> initializePlatformBindings([String? library]) {
     );
   }
 
-  bindings.isar_connect_dart_api(NativeApi.postCObject.cast());
+  bindings.isar_connect_dart_api(NativeApi.initializeApiDLData);
 
   return bindings;
 }

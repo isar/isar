@@ -260,7 +260,7 @@ class _IsarImpl extends Isar {
     if (txnPtr != null) {
       return callback(_ptr!, txnPtr);
     } else {
-      return _txn(write: false, (isar) => callback(_ptr!, _txnPtr!));
+      return read((isar) => callback(_ptr!, _txnPtr!));
     }
   }
 
@@ -292,15 +292,33 @@ class _IsarImpl extends Isar {
     }
   }
 
-  T _txn<T>(T Function(Isar isar) callback, {required bool write}) {
+  @override
+  T read<T>(T Function(Isar isar) callback) {
     _checkNotInTxn();
 
     final ptr = getPtr();
     final txnPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarTxn>>();
-    IsarCore.b.isar_txn_begin(ptr, txnPtrPtr, write).checkNoError();
+    IsarCore.b.isar_txn_begin(ptr, txnPtrPtr, false).checkNoError();
     try {
       _txnPtr = txnPtrPtr.ptrValue;
-      _txnWrite = write;
+      _txnWrite = false;
+      return callback(this);
+    } finally {
+      IsarCore.b.isar_txn_abort(ptr, _txnPtr!);
+      _txnPtr = null;
+    }
+  }
+
+  @override
+  T write<T>(T Function(Isar isar) callback) {
+    _checkNotInTxn();
+
+    final ptr = getPtr();
+    final txnPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarTxn>>();
+    IsarCore.b.isar_txn_begin(ptr, txnPtrPtr, true).checkNoError();
+    try {
+      _txnPtr = txnPtrPtr.ptrValue;
+      _txnWrite = true;
       final result = callback(this);
       IsarCore.b.isar_txn_commit(ptr, _txnPtr!).checkNoError();
       return result;
@@ -313,16 +331,6 @@ class _IsarImpl extends Isar {
     } finally {
       _txnPtr = null;
     }
-  }
-
-  @override
-  T read<T>(T Function(Isar isar) callback) {
-    return _txn(callback, write: false);
-  }
-
-  @override
-  T write<T>(T Function(Isar isar) callback) {
-    return _txn(callback, write: true);
   }
 
   @override
