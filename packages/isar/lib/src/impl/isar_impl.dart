@@ -64,7 +64,7 @@ class _IsarImpl extends Isar {
 
     final allSchemas = <IsarGeneratedSchema>{
       ...schemas,
-      ...schemas.expand((e) => e.embeddedSchemas ?? <IsarGeneratedSchema>[])
+      ...schemas.expand((e) => e.embeddedSchemas ?? <IsarGeneratedSchema>[]),
     };
     final schemaJson =
         jsonEncode(allSchemas.map((e) => e.schema.toJson()).toList());
@@ -151,7 +151,7 @@ class _IsarImpl extends Isar {
 
     final receivePort = ReceivePort();
     final sendPort = receivePort.sendPort;
-    final isolate = scheduleIsolate(
+    final isolate = runIsolate(
       () async {
         try {
           final isar = _IsarImpl.open(
@@ -348,7 +348,7 @@ class _IsarImpl extends Isar {
     final instance = instanceId;
     final library = IsarCore._library;
     final schemas = generatedSchemas;
-    return scheduleIsolate(
+    return runIsolate(
       () => _isarAsync(
         instanceId: instance,
         schemas: schemas,
@@ -376,7 +376,7 @@ class _IsarImpl extends Isar {
     final instance = instanceId;
     final library = IsarCore._library;
     final schemas = generatedSchemas.toList();
-    return scheduleIsolate(
+    return runIsolate(
       () {
         return _isarAsync(
           instanceId: instance,

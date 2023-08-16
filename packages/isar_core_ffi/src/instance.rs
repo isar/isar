@@ -1,4 +1,3 @@
-use crate::dart::dart_pause_isolate;
 use crate::{
     dart_fast_hash, i64_to_isar, isar_to_i64, CIsarCursor, CIsarInstance, CIsarTxn, IsarI64,
 };
@@ -138,13 +137,29 @@ pub unsafe extern "C" fn isar_get_dir(isar: &'static CIsarInstance, dir: *mut *c
     value.len() as u32
 }
 
+unsafe fn _isar_txn_begin(
+    isar: &'static CIsarInstance,
+    txn: *mut *const CIsarTxn,
+    write: bool,
+) -> u8 {
+    isar_try! {
+        let new_txn = match isar {
+            #[cfg(feature = "native")]
+            CIsarInstance::Native(isar) => CIsarTxn::Native(isar.begin_txn(write)?),
+            #[cfg(feature = "sqlite")]
+            CIsarInstance::SQLite(isar) => CIsarTxn::SQLite(isar.begin_txn(write)?),
+        };
+        *txn = Box::into_raw(Box::new(new_txn));
+    }
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn isar_txn_begin(
     isar: &'static CIsarInstance,
     txn: *mut *const CIsarTxn,
     write: bool,
 ) -> u8 {
-    let mut begin_txn = || {
+    isar_pause_isolate! {
         isar_try! {
             let new_txn = match isar {
                 #[cfg(feature = "native")]
@@ -154,25 +169,21 @@ pub unsafe extern "C" fn isar_txn_begin(
             };
             *txn = Box::into_raw(Box::new(new_txn));
         }
-    };
-
-    if write {
-        dart_pause_isolate(begin_txn)
-    } else {
-        begin_txn()
     }
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_txn_commit(isar: &'static CIsarInstance, txn: *mut CIsarTxn) -> u8 {
-    isar_try! {
-        let txn = *Box::from_raw(txn);
-        match (isar, txn) {
-            #[cfg(feature = "native")]
-            (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => isar.commit_txn(txn)?,
-            #[cfg(feature = "sqlite")]
-            (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn)) => isar.commit_txn(txn)?,
-            _ => return Err(IsarError::IllegalArgument {}),
+    isar_pause_isolate! {
+        isar_try! {
+            let txn = *Box::from_raw(txn);
+            match (isar, txn) {
+                #[cfg(feature = "native")]
+                (CIsarInstance::Native(isar), CIsarTxn::Native(txn)) => isar.commit_txn(txn)?,
+                #[cfg(feature = "sqlite")]
+                (CIsarInstance::SQLite(isar), CIsarTxn::SQLite(txn)) => isar.commit_txn(txn)?,
+                _ => return Err(IsarError::IllegalArgument {}),
+            }
         }
     }
 }
@@ -351,13 +362,15 @@ pub unsafe extern "C" fn isar_import_json(
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_copy(isar: &'static CIsarInstance, path: *mut String) -> u8 {
-    isar_try! {
-        let path = *Box::from_raw(path);
-        match isar {
-            #[cfg(feature = "native")]
-            CIsarInstance::Native(isar) => isar.copy(&path)?,
-            #[cfg(feature = "sqlite")]
-            CIsarInstance::SQLite(isar) => isar.copy(&path)?,
+    isar_pause_isolate! {
+        isar_try! {
+            let path = *Box::from_raw(path);
+            match isar {
+                #[cfg(feature = "native")]
+                CIsarInstance::Native(isar) => isar.copy(&path)?,
+                #[cfg(feature = "sqlite")]
+                CIsarInstance::SQLite(isar) => isar.copy(&path)?,
+            }
         }
     }
 }
@@ -377,16 +390,18 @@ pub unsafe extern "C" fn isar_verify(isar: &'static CIsarInstance, txn: &'static
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_close(isar: *mut CIsarInstance, delete: bool) -> u8 {
-    let isar = *Box::from_raw(isar);
-    let closed = match isar {
-        #[cfg(feature = "native")]
-        CIsarInstance::Native(isar) => NativeInstance::close(isar, delete),
-        #[cfg(feature = "sqlite")]
-        CIsarInstance::SQLite(isar) => SQLiteInstance::close(isar, delete),
-    };
-    if closed {
-        1
-    } else {
-        0
+    isar_pause_isolate! {
+        let isar = *Box::from_raw(isar);
+        let closed = match isar {
+            #[cfg(feature = "native")]
+            CIsarInstance::Native(isar) => NativeInstance::close(isar, delete),
+            #[cfg(feature = "sqlite")]
+            CIsarInstance::SQLite(isar) => SQLiteInstance::close(isar, delete),
+        };
+        if closed {
+            1
+        } else {
+            0
+        }
     }
 }

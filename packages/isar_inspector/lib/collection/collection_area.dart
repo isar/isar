@@ -103,6 +103,7 @@ class _CollectionAreaState extends State<CollectionArea> {
                 slivers: [
                   SliverToBoxAdapter(
                     child: QueryGroup(
+                      key: Key('${widget.schema.name}-filter'),
                       schema: widget.schema,
                       group: filter,
                       level: 0,

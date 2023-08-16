@@ -39,9 +39,9 @@ type DartIsolate = *mut std::ffi::c_void;
 
 pub struct DartFunctions {
     pub post_integer: unsafe extern "C" fn(DartPort, i64) -> bool,
-    /*pub current_isolate: unsafe extern "C" fn() -> DartIsolate,
+    pub current_isolate: unsafe extern "C" fn() -> DartIsolate,
     pub exit_isolate: unsafe extern "C" fn(),
-    pub enter_isolate: unsafe extern "C" fn(DartIsolate),*/
+    pub enter_isolate: unsafe extern "C" fn(DartIsolate),
 }
 
 pub unsafe fn dart_post_int(port: DartPort, value: i64) {
@@ -51,16 +51,12 @@ pub unsafe fn dart_post_int(port: DartPort, value: i64) {
 }
 
 pub unsafe fn dart_pause_isolate<T, F: FnOnce() -> T>(callback: F) -> T {
-    if cfg!(target_arch = "wasm32") {
-        callback()
-    } else {
-        //let dartfn = DART_FUNCTIONS.get().unwrap();
-        //let isolate = (dartfn.current_isolate)();
-        //(dartfn.exit_isolate)();
-        let result = callback();
-        //(dartfn.enter_isolate)(isolate);
-        result
-    }
+    let dartfn = DART_FUNCTIONS.get().unwrap();
+    let isolate = (dartfn.current_isolate)();
+    (dartfn.exit_isolate)();
+    let result = callback();
+    (dartfn.enter_isolate)(isolate);
+    result
 }
 
 #[no_mangle]
@@ -73,9 +69,9 @@ pub unsafe extern "C" fn isar_connect_dart_api(ptr: *mut c_void) {
         }
         DartFunctions {
             post_integer: mem::transmute(api.lookup_fn("Dart_PostInteger")),
-            //current_isolate: mem::transmute(api.lookup_fn("Dart_CurrentIsolate")),
-            //exit_isolate: mem::transmute(api.lookup_fn("Dart_ExitIsolate")),
-            //enter_isolate: mem::transmute(api.lookup_fn("Dart_EnterIsolate")),
+            current_isolate: mem::transmute(api.lookup_fn("Dart_CurrentIsolate")),
+            exit_isolate: mem::transmute(api.lookup_fn("Dart_ExitIsolate")),
+            enter_isolate: mem::transmute(api.lookup_fn("Dart_EnterIsolate")),
         }
     };
     let _ = DART_FUNCTIONS.set(functions);

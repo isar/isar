@@ -60,7 +60,6 @@ jobs:
 
   build_inspector:
     name: Build Inspector
-    if: ${{ false }}
     needs: testlab
     runs-on: ubuntu-latest
     steps:
@@ -80,7 +79,7 @@ jobs:
 
   publish:
     name: Publish
-    needs: testlab
+    needs: build_inspector
     runs-on: ubuntu-latest
     permissions:
       id-token: write

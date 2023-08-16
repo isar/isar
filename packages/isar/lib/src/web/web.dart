@@ -90,3 +90,11 @@ int platformFastHash(String str) {
       v1 * 65536 +
       (v0 ^ (v3 >> 4));
 }
+
+@tryInline
+Future<T> runIsolate<T>(
+  FutureOr<T> Function() computation, {
+  String? debugName,
+}) async {
+  return computation();
+}

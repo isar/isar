@@ -85,6 +85,7 @@ class _EnumValue extends StatelessWidget {
       onTapDown: onUpdate == null
           ? null
           : (TapDownDetails details) async {
+              final nullValue = Object();
               final newValue = await showMenu(
                 context: context,
                 position: RelativeRect.fromLTRB(
@@ -94,9 +95,10 @@ class _EnumValue extends StatelessWidget {
                   0,
                 ),
                 items: [
-                  if (isByte)
-                    const PopupMenuItem<dynamic>(
+                  if (!isByte)
+                    PopupMenuItem(
                       child: Text('null'),
+                      value: nullValue,
                     ),
                   for (final enumName in enumMap.keys)
                     PopupMenuItem(
@@ -105,7 +107,11 @@ class _EnumValue extends StatelessWidget {
                     ),
                 ],
               );
-              onUpdate?.call(newValue);
+
+              if (newValue != null) {
+                onUpdate
+                    ?.call(!identical(newValue, nullValue) ? newValue : null);
+              }
             },
       child: Text(
         enumName,
@@ -133,6 +139,7 @@ class _BoolValue extends StatelessWidget {
       onTapDown: onUpdate == null
           ? null
           : (TapDownDetails details) async {
+              const nullValue = Object();
               final newValue = await showMenu(
                 context: context,
                 position: RelativeRect.fromLTRB(
@@ -142,8 +149,9 @@ class _BoolValue extends StatelessWidget {
                   0,
                 ),
                 items: const [
-                  PopupMenuItem<bool?>(
+                  PopupMenuItem(
                     child: Text('null'),
+                    value: nullValue,
                   ),
                   PopupMenuItem(
                     value: true,
@@ -155,7 +163,10 @@ class _BoolValue extends StatelessWidget {
                   ),
                 ],
               );
-              onUpdate?.call(newValue);
+              if (newValue != null) {
+                onUpdate
+                    ?.call(!identical(newValue, nullValue) ? newValue : null);
+              }
             },
       child: Text(
         '$value',
@@ -236,7 +247,9 @@ class _DateValue extends StatelessWidget {
                 firstDate: DateTime(1970),
                 lastDate: DateTime(2050),
               );
-              onUpdate?.call(newDate?.microsecondsSinceEpoch);
+              if (newDate != null) {
+                onUpdate?.call(newDate.microsecondsSinceEpoch);
+              }
             },
       child: Text(
         date?.toIso8601String() ?? 'null',
@@ -275,13 +288,17 @@ class _StringValueState extends State<_StringValue> {
       controller: controller,
       enabled: widget.onUpdate != null,
       onSubmitted: (value) {
-        if (value.startsWith('"')) {
-          value = value.substring(1);
+        if (value.isEmpty) {
+          widget.onUpdate?.call(null);
+        } else {
+          if (value.startsWith('"')) {
+            value = value.substring(1);
+          }
+          if (value.endsWith('"')) {
+            value = value.substring(0, value.length - 1);
+          }
+          widget.onUpdate?.call(value.replaceAll('⤵', '\n'));
         }
-        if (value.endsWith('"')) {
-          value = value.substring(0, value.length - 1);
-        }
-        widget.onUpdate?.call(value.replaceAll('⤵', '\n'));
       },
       decoration: InputDecoration.collapsed(
         hintText: 'null',
