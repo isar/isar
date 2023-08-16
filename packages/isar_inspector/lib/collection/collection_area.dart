@@ -14,27 +14,27 @@ import 'package:isar_inspector/collection/button_sort.dart';
 import 'package:isar_inspector/collection/objects_list_sliver.dart';
 import 'package:isar_inspector/connect_client.dart';
 import 'package:isar_inspector/object/isar_object.dart';
+import 'package:isar_inspector/query_builder/query_filter.dart';
 import 'package:isar_inspector/query_builder/query_group.dart';
 import 'package:isar_inspector/util.dart';
 
 const objectsPerPage = 20;
 
 class CollectionArea extends StatefulWidget {
-  const CollectionArea({
-    super.key,
+  CollectionArea({
     required this.instance,
     required this.collection,
     required this.schemas,
     required this.client,
+    super.key,
   });
 
   final String instance;
   final String collection;
-  final Map<String, Schema<dynamic>> schemas;
+  final Map<String, IsarSchema> schemas;
   final ConnectClient client;
 
-  CollectionSchema<dynamic> get collectionSchema =>
-      schemas[collection]! as CollectionSchema;
+  late final schema = schemas[collection]!;
 
   @override
   State<CollectionArea> createState() => _CollectionAreaState();
@@ -45,9 +45,10 @@ class _CollectionAreaState extends State<CollectionArea> {
   late final StreamSubscription<void> querySubscription;
 
   var page = 0;
-  var filter = const FilterGroup.and([]);
-  late var sortProperty = widget.collectionSchema.idName;
+  var filter = FilterGroup(true, []);
+  late var sortProperty = widget.schema.idName!;
   var sortAsc = true;
+
   var objects = <IsarObject>[];
   var objectsCount = 0;
 
@@ -67,24 +68,22 @@ class _CollectionAreaState extends State<CollectionArea> {
   }
 
   Future<void> _runQuery() async {
-    final query = ConnectQuery(
+    final query = ConnectQueryPayload(
       instance: widget.instance,
       collection: widget.collection,
-      filter: filter,
+      filter: filter.toIsarFilter(),
       offset: page * objectsPerPage,
       limit: (page + 1) * objectsPerPage,
-      sortProperty: sortProperty,
+      sortProperty: widget.schema.getPropertyIndex(sortProperty),
       sortAsc: sortAsc,
     );
     final result = await widget.client.executeQuery(query);
-    final objects = (result['objects']! as List)
-        .map((e) => IsarObject(e as Map<String, dynamic>))
-        .toList();
+    final objects = result.objects.map(IsarObject.new).toList();
 
     if (mounted) {
       setState(() {
         this.objects = objects;
-        objectsCount = result['count']! as int;
+        objectsCount = result.count;
       });
     }
   }
@@ -104,7 +103,8 @@ class _CollectionAreaState extends State<CollectionArea> {
                 slivers: [
                   SliverToBoxAdapter(
                     child: QueryGroup(
-                      collection: widget.collectionSchema,
+                      key: Key('${widget.schema.name}-filter'),
+                      schema: widget.schema,
                       group: filter,
                       level: 0,
                       onChanged: (group) {
@@ -148,8 +148,11 @@ class _CollectionAreaState extends State<CollectionArea> {
             Row(
               children: [
                 SortButtons(
-                  properties: widget.collectionSchema.idAndProperties,
-                  property: sortProperty,
+                  properties: [
+                    for (final p in widget.schema.idAndProperties)
+                      if (!p.type.isObject && !p.type.isList) p.name
+                  ],
+                  selectedProperty: sortProperty,
                   asc: sortAsc,
                   onChanged: (property, asc) {
                     setState(() {
@@ -209,10 +212,10 @@ class _CollectionAreaState extends State<CollectionArea> {
     );
   }
 
-  void _onUpdate(String collection, int id, String path, dynamic value) {
-    final edit = ConnectEdit(
+  void _onUpdate(dynamic id, String path, dynamic value) {
+    final edit = ConnectEditPayload(
       instance: widget.instance,
-      collection: collection,
+      collection: widget.collection,
       id: id,
       path: path,
       value: value,
@@ -220,39 +223,42 @@ class _CollectionAreaState extends State<CollectionArea> {
     widget.client.editProperty(edit);
   }
 
-  void _onDelete(int id) {
-    final query = ConnectQuery(
+  void _onDelete(dynamic id) {
+    final query = ConnectQueryPayload(
       instance: widget.instance,
       collection: widget.collection,
-      filter: FilterCondition.equalTo(
-        property: widget.collectionSchema.idName,
+      filter: EqualCondition(
+        property: widget.schema.getPropertyIndex(widget.schema.idName!),
         value: id,
       ),
     );
-    widget.client.removeQuery(query);
+    widget.client.deleteQuery(query);
   }
 
   Future<void> _onCreate() async {
-    final idName = widget.collectionSchema.idName;
-    final randomId = Random().nextInt(100000000);
-    await widget.client.importJson(
-      widget.instance,
-      widget.collection,
-      [
-        {idName: randomId}
+    final randInt = Random().nextInt(100000000);
+    final idIndex = widget.schema.getPropertyIndex(widget.schema.idName!);
+    final randomId = idIndex == 0 ? randInt : '$randInt';
+    final p = ConnectObjectsPayload(
+      instance: widget.instance,
+      collection: widget.collection,
+      objects: [
+        {widget.schema.idName!: randomId}
       ],
     );
-    if (!mounted) return;
 
     setState(() {
-      filter = FilterGroup.and([
-        FilterCondition.equalTo(
-          property: idName,
-          value: randomId,
-        ),
+      page = 0;
+      filter = FilterGroup(true, [
+        FilterCondition(
+          property: idIndex,
+          type: FilterType.equalTo,
+          value1: randomId,
+        )
       ]);
     });
-    await _runQuery();
+    await widget.client.importJson(p);
+    _runQuery();
   }
 
   Future<void> _onImport() async {
@@ -262,7 +268,12 @@ class _CollectionAreaState extends State<CollectionArea> {
       if (json is! List) {
         json = [json];
       }
-      await widget.client.importJson(widget.instance, widget.collection, json);
+      final p = ConnectObjectsPayload(
+        instance: widget.instance,
+        collection: widget.collection,
+        objects: json.cast(),
+      );
+      await widget.client.importJson(p);
     } on PlatformException {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Could not access clipboard.')),
@@ -275,19 +286,19 @@ class _CollectionAreaState extends State<CollectionArea> {
   }
 
   void _onDeleteAll() {
-    final query = ConnectQuery(
+    final query = ConnectQueryPayload(
       instance: widget.instance,
       collection: widget.collection,
-      filter: filter,
+      filter: filter.toIsarFilter(),
     );
-    widget.client.removeQuery(query);
+    widget.client.deleteQuery(query);
   }
 
   Future<void> _onDownload() async {
-    final query = ConnectQuery(
+    final query = ConnectQueryPayload(
       instance: widget.instance,
       collection: widget.collection,
-      filter: filter,
+      filter: filter.toIsarFilter(),
     );
     final data = await widget.client.exportJson(query);
     try {

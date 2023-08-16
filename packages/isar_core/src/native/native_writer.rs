@@ -13,6 +13,16 @@ pub(crate) trait WriterImpl<'a> {
 
     fn get_property(&self, index: u32) -> Option<(DataType, u32, Option<u16>)>;
 
+    #[inline]
+    fn get_offset(&self, index: u32, data_type: DataType) -> Option<u32> {
+        if let Some((property_type, offset, _)) = self.get_property(index) {
+            if property_type == data_type {
+                return Some(offset);
+            }
+        }
+        None
+    }
+
     fn get_collections(&self) -> &'a [NativeCollection];
 
     fn get_serializer(&mut self) -> &mut IsarSerializer;
@@ -41,79 +51,66 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
 
     #[inline]
     fn write_bool(&mut self, index: u32, value: bool) {
-        if let Some((data_type, offset, _)) = self.get_property(index) {
-            if data_type == DataType::Bool {
-                self.get_serializer().write_bool(offset, value);
-            }
+        if let Some(offset) = self.get_offset(index, DataType::Bool) {
+            self.get_serializer().write_bool(offset, value);
         }
     }
 
     #[inline]
     fn write_byte(&mut self, index: u32, value: u8) {
-        if let Some((data_type, offset, _)) = self.get_property(index) {
-            if data_type == DataType::Byte {
-                self.get_serializer().write_byte(offset, value);
-            }
+        if let Some(offset) = self.get_offset(index, DataType::Byte) {
+            self.get_serializer().write_byte(offset, value);
         }
     }
 
     #[inline]
     fn write_int(&mut self, index: u32, value: i32) {
-        if let Some((data_type, offset, _)) = self.get_property(index) {
-            if data_type == DataType::Int {
-                self.get_serializer().write_int(offset, value);
-            }
+        if let Some(offset) = self.get_offset(index, DataType::Int) {
+            self.get_serializer().write_int(offset, value);
         }
     }
 
     #[inline]
     fn write_float(&mut self, index: u32, value: f32) {
-        if let Some((data_type, offset, _)) = self.get_property(index) {
-            if data_type == DataType::Float {
-                self.get_serializer().write_float(offset, value);
-            }
+        if let Some(offset) = self.get_offset(index, DataType::Float) {
+            self.get_serializer().write_float(offset, value);
         }
     }
 
     #[inline]
     fn write_long(&mut self, index: u32, value: i64) {
-        if let Some((data_type, offset, _)) = self.get_property(index) {
-            if data_type == DataType::Long {
-                self.get_serializer().write_long(offset, value);
-            }
+        if let Some(offset) = self.get_offset(index, DataType::Long) {
+            self.get_serializer().write_long(offset, value);
         }
     }
 
     #[inline]
     fn write_double(&mut self, index: u32, value: f64) {
-        if let Some((data_type, offset, _)) = self.get_property(index) {
-            if data_type == DataType::Double {
-                self.get_serializer().write_double(offset, value);
-            }
+        if let Some(offset) = self.get_offset(index, DataType::Double) {
+            self.get_serializer().write_double(offset, value);
         }
     }
 
     #[inline]
     fn write_string(&mut self, index: u32, value: &str) {
-        if let Some((data_type, offset, _)) = self.get_property(index) {
-            if data_type == DataType::String || data_type == DataType::Json {
-                self.get_serializer()
-                    .write_dynamic(offset, value.as_bytes());
-            }
+        if let Some(offset) = self.get_offset(index, DataType::String) {
+            self.get_serializer()
+                .write_dynamic(offset, value.as_bytes());
         }
     }
 
     #[inline]
     fn write_json(&mut self, index: u32, value: &str) {
-        self.write_string(index, value)
+        if let Some(offset) = self.get_offset(index, DataType::Json) {
+            self.get_serializer()
+                .write_dynamic(offset, value.as_bytes());
+        }
     }
 
     #[inline]
     fn write_byte_list(&mut self, index: u32, value: &[u8]) {
-        if let Some((data_type, offset, _)) = self.get_property(index) {
-            if data_type == DataType::ByteList {
-                self.get_serializer().write_dynamic(offset, value);
-            }
+        if let Some(offset) = self.get_offset(index, DataType::ByteList) {
+            self.get_serializer().write_dynamic(offset, value);
         }
     }
 
@@ -138,7 +135,7 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
     }
 
     fn begin_list(&mut self, index: u32, length: u32) -> Option<Self::ListWriter> {
-        let (data_type, offset, embedded_collection_index) = self.get_property(index).unwrap();
+        let (data_type, offset, embedded_collection_index) = self.get_property(index)?;
         if let Some(element_type) = data_type.element_type() {
             let list = self
                 .get_serializer()
@@ -152,7 +149,7 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
             );
             Some(writer)
         } else {
-            self.get_serializer().write_null(offset, data_type);
+            self.write_null(index);
             None
         }
     }

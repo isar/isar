@@ -3,15 +3,17 @@ import 'package:google_fonts/google_fonts.dart';
 
 class PropertyBuilder extends StatefulWidget {
   const PropertyBuilder({
-    super.key,
     required this.property,
+    required this.type,
+    super.key,
+    this.bold = false,
     this.underline = false,
     this.value,
-    required this.type,
     this.children = const [],
   });
 
   final String property;
+  final bool bold;
   final bool underline;
   final Widget? value;
   final String type;
@@ -63,7 +65,7 @@ class _PropertyBuilderState extends State<PropertyBuilder> {
                   child: Text(
                     '${widget.property}:',
                     style: GoogleFonts.jetBrainsMono(
-                      fontWeight: FontWeight.w500,
+                      fontWeight: widget.bold ? FontWeight.w800 : null,
                       color: theme.colorScheme.onPrimaryContainer,
                       decoration:
                           widget.underline ? TextDecoration.underline : null,

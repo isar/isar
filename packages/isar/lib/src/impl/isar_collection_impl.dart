@@ -3,12 +3,16 @@ part of isar;
 class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
   _IsarCollectionImpl(
     this.isar,
+    this.schema,
     this.collectionIndex,
     this.converter,
   );
 
   @override
   final _IsarImpl isar;
+
+  @override
+  final IsarSchema schema;
 
   final int collectionIndex;
   final IsarObjectConverter<ID, OBJ> converter;

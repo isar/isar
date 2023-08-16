@@ -1,19 +1,26 @@
 name: counter
-publish_to: 'none'
+publish_to: "none"
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   isar: 4.0.0-dev.4
-  isar_flutter_libs: 4.0.0-dev.4
+  isar_flutter_libs: ^4.0.0-dev.9
 
 dev_dependencies:
   build_runner: any
   flutter_test:
     sdk: flutter
+  flutter_lints: ^2.0.2
+
+dependency_overrides:
+  isar:
+    path: ../../packages/isar
+  isar_flutter_libs:
+    path: ../../packages/isar_flutter_libs
 
 flutter:
   uses-material-design: true

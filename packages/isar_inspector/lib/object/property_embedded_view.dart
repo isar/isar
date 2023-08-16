@@ -7,17 +7,17 @@ import 'package:isar_inspector/object/property_value.dart';
 
 class EmbeddedPropertyView extends StatelessWidget {
   const EmbeddedPropertyView({
-    super.key,
     required this.property,
     required this.schemas,
     required this.object,
     required this.onUpdate,
+    super.key,
   });
 
-  final PropertySchema property;
-  final Map<String, Schema<dynamic>> schemas;
+  final IsarPropertySchema property;
+  final Map<String, IsarSchema> schemas;
   final IsarObject object;
-  final void Function(int? id, String path, dynamic value) onUpdate;
+  final void Function(String path, dynamic value) onUpdate;
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +33,7 @@ class EmbeddedPropertyView extends StatelessWidget {
               schemaName: property.target!,
               schemas: schemas,
               object: child,
-              onUpdate: (_, id, path, value) {
-                onUpdate(id, path, value);
-              },
+              onUpdate: onUpdate,
             ),
         ],
       );
@@ -58,8 +56,8 @@ class EmbeddedPropertyView extends StatelessWidget {
                     schemaName: property.target!,
                     schemas: schemas,
                     object: children[i]!,
-                    onUpdate: (_, id, path, value) {
-                      onUpdate(id, '$i.$path', value);
+                    onUpdate: (path, value) {
+                      onUpdate('$i.$path', value);
                     },
                   ),
               ],

@@ -8,21 +8,31 @@ part of 'main.dart';
 
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, invalid_use_of_protected_member, lines_longer_than_80_chars, constant_identifier_names, avoid_js_rounded_ints, no_leading_underscores_for_local_identifiers, require_trailing_commas, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_in_if_null_operators, library_private_types_in_public_api, prefer_const_constructors
+// ignore_for_file: type=lint
 
 extension GetCountCollection on Isar {
   IsarCollection<int, Count> get counts => this.collection();
 }
 
-const CountSchema = IsarCollectionSchema(
-  schema:
-      '{"name":"Count","idName":"id","properties":[{"name":"step","type":"Long"}]}',
+const CountSchema = IsarGeneratedSchema(
+  schema: IsarSchema(
+    name: "Count",
+    idName: "id",
+    embedded: false,
+    properties: [
+      IsarPropertySchema(
+        name: "step",
+        type: IsarType.long,
+      ),
+    ],
+    indexes: [],
+  ),
   converter: IsarObjectConverter<int, Count>(
     serialize: serializeCount,
     deserialize: deserializeCount,
     deserializeProperty: deserializeCountProp,
   ),
   embeddedSchemas: [],
-  //hash: -1400256463350660186,
 );
 
 @isarProtected
@@ -137,6 +147,34 @@ extension CountQueryUpdate on IsarQuery<Count> {
   _CountQueryUpdate get updateFirst => _CountQueryUpdateImpl(this, limit: 1);
 
   _CountQueryUpdate get updateAll => _CountQueryUpdateImpl(this);
+}
+
+class _CountQueryBuilderUpdateImpl implements _CountQueryUpdate {
+  const _CountQueryBuilderUpdateImpl(this.query, {this.limit});
+
+  final QueryBuilder<Count, Count, QOperations> query;
+  final int? limit;
+
+  @override
+  int call({
+    Object? step = ignore,
+  }) {
+    final q = query.build();
+    try {
+      return q.updateProperties(limit: limit, {
+        if (step != ignore) 1: step as int?,
+      });
+    } finally {
+      q.close();
+    }
+  }
+}
+
+extension CountQueryBuilderUpdate on QueryBuilder<Count, Count, QOperations> {
+  _CountQueryUpdate get updateFirst =>
+      _CountQueryBuilderUpdateImpl(this, limit: 1);
+
+  _CountQueryUpdate get updateAll => _CountQueryBuilderUpdateImpl(this);
 }
 
 extension CountQueryFilter on QueryBuilder<Count, Count, QFilterCondition> {

@@ -7,7 +7,7 @@ String _generateQueryObjects(ObjectInfo oi) {
       'extension ${oi.dartName}QueryObject on QueryBuilder<${oi.dartName}, '
       '${oi.dartName}, QFilterCondition> {';
   for (final property in oi.properties) {
-    if (property.type != PropertyType.object) {
+    if (property.type != IsarType.object) {
       continue;
     }
     final name = property.dartName.decapitalize();

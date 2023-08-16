@@ -13,8 +13,8 @@ class CollectionsList extends StatelessWidget {
     required this.onSelected,
   });
 
-  final List<CollectionSchema<dynamic>> collections;
-  final Map<String, ConnectCollectionInfo?> collectionInfo;
+  final List<IsarSchema> collections;
+  final Map<String, ConnectCollectionInfoPayload?> collectionInfo;
   final String? selectedCollection;
   final void Function(String collection) onSelected;
 

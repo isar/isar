@@ -5,6 +5,7 @@
 .DS_Store
 .vscode/
 .idea
+*.iml
 
 # Dart related
 .dart_tool/

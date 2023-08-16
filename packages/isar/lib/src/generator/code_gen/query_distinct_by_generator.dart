@@ -4,7 +4,7 @@ String _generateDistinctBy(ObjectInfo oi) {
   var code = '''
   extension ${oi.dartName}QueryWhereDistinct on QueryBuilder<${oi.dartName}, ${oi.dartName}, QDistinct> {''';
   for (final property in oi.properties.where((e) => !e.isId)) {
-    if (property.type == PropertyType.string) {
+    if (property.type == IsarType.string) {
       code += '''
         QueryBuilder<${oi.dartName}, ${oi.dartName}, QAfterDistinct>distinctBy${property.dartName.capitalize()}({bool caseSensitive = true}) {
           return QueryBuilder.apply(this, (query) {

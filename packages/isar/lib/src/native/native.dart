@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
 import 'package:isar/isar.dart';
@@ -10,7 +11,6 @@ export 'dart:isolate';
 
 export 'bindings.dart';
 export 'ffi.dart';
-export 'isolate_pool.dart';
 
 FutureOr<IsarCoreBindings> initializePlatformBindings([String? library]) {
   late IsarCoreBindings bindings;
@@ -41,7 +41,7 @@ FutureOr<IsarCoreBindings> initializePlatformBindings([String? library]) {
     );
   }
 
-  bindings.isar_connect_dart_api(NativeApi.postCObject.cast());
+  bindings.isar_connect_dart_api(NativeApi.initializeApiDLData);
 
   return bindings;
 }
@@ -91,4 +91,12 @@ int platformFastHash(String string) {
   }
 
   return hash;
+}
+
+@tryInline
+Future<T> runIsolate<T>(
+  FutureOr<T> Function() computation, {
+  String? debugName,
+}) {
+  return Isolate.run(computation, debugName: debugName);
 }

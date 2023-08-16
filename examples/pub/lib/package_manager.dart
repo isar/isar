@@ -79,11 +79,8 @@ class PackageManager {
     String? version,
   }) async {
     final newPackageVersions = await repository.getPackageVersions(name);
-    final latestExistingDate = await isar.packages
-        .where()
-        .nameEqualTo(name)
-        .publishedProperty()
-        .maxAsync();
+    final latestExistingDate =
+        isar.packages.where().nameEqualTo(name).publishedProperty().max();
     final versionsToAdd = newPackageVersions
         .where(
           (e) =>
@@ -92,11 +89,11 @@ class PackageManager {
         )
         .toList();
 
-    final currentLatest = await isar.packages
+    final currentLatest = isar.packages
         .where()
         .nameEqualTo(name)
         .isLatestEqualTo(true)
-        .findFirstAsync();
+        .findFirst();
     final newLatestVersion =
         newPackageVersions.firstWhere((e) => e.isLatest).version;
     if (currentLatest != null && currentLatest.version != newLatestVersion) {
@@ -111,7 +108,7 @@ class PackageManager {
           .copyWithMetrics(metrics);
       versionsToAdd.add(package);
     }
-    await isar.writeAsync((isar) {
+    isar.write((isar) {
       isar.packages.putAll(versionsToAdd);
     });
   }

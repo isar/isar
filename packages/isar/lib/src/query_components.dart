@@ -37,33 +37,6 @@ final class EqualCondition extends Filter {
   final bool caseSensitive;
 }
 
-/// Filter checking for inequality.
-final class NotEqualCondition extends Filter {
-  /// Filters the results to only include objects where the property does not
-  /// equal [value].
-  ///
-  /// For lists, at least one of the values in the list has to match.
-  const NotEqualCondition({
-    required this.property,
-    required this.value,
-    this.epsilon = Filter.epsilon,
-    this.caseSensitive = true,
-  });
-
-  /// Index of the property that should be matched.
-  final int property;
-
-  /// The value to match against.
-  final Object? value;
-
-  /// The maximum difference between two floating point numbers to be
-  /// considered equal.
-  final double epsilon;
-
-  /// Should Strings be case sensitive?
-  final bool caseSensitive;
-}
-
 /// Filter matching values greater than the bound.
 final class GreaterCondition extends Filter {
   /// Filters the results to only include objects where the property is greater

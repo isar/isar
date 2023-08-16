@@ -33,8 +33,7 @@ String getBinaryPath() {
     Abi.macosArm64 => path.join(
         rootDir,
         'target',
-        'aarch64-apple-darwin',
-        'release',
+        'debug',
         binaryName,
       ),
     Abi.macosX64 => path.join(

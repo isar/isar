@@ -1,14 +1,14 @@
 part of isar_generator;
 
 const _updateableTypes = [
-  PropertyType.bool,
-  PropertyType.byte,
-  PropertyType.int,
-  PropertyType.long,
-  PropertyType.float,
-  PropertyType.double,
-  PropertyType.dateTime,
-  PropertyType.string,
+  IsarType.bool,
+  IsarType.byte,
+  IsarType.int,
+  IsarType.long,
+  IsarType.float,
+  IsarType.double,
+  IsarType.dateTime,
+  IsarType.string,
 ];
 
 String _generateUpdate(ObjectInfo oi) {

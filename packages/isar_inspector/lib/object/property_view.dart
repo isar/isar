@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_inspector/object/property_builder.dart';
 import 'package:isar_inspector/object/property_value.dart';
+import 'package:isar_inspector/util.dart';
 
 class PropertyView extends StatelessWidget {
   const PropertyView({
-    super.key,
     required this.property,
     required this.value,
     required this.isId,
     required this.isIndexed,
     required this.onUpdate,
+    super.key,
   });
 
-  final PropertySchema property;
+  final IsarPropertySchema property;
   final dynamic value;
   final bool isId;
   final bool isIndexed;
@@ -27,8 +28,9 @@ class PropertyView extends StatelessWidget {
         value is String || value is List ? '(${value.length})' : '';
     return PropertyBuilder(
       property: property.name,
+      bold: isId,
       underline: isIndexed,
-      type: isId ? 'Id' : '${property.type.typeName} $valueLength',
+      type: '${property.type.typeName} $valueLength',
       value: value is List
           ? null
           : property.type.isList
@@ -54,48 +56,5 @@ class PropertyView extends StatelessWidget {
             ),
       ],
     );
-  }
-}
-
-extension TypeName on IsarType {
-  String get typeName {
-    switch (this) {
-      case IsarType.bool:
-        return 'bool';
-      case IsarType.byte:
-        return 'byte';
-      case IsarType.int:
-        return 'short';
-      case IsarType.long:
-        return 'int';
-      case IsarType.float:
-        return 'float';
-      case IsarType.double:
-        return 'double';
-      case IsarType.dateTime:
-        return 'DateTime';
-      case IsarType.string:
-        return 'String';
-      case IsarType.object:
-        return 'Object';
-      case IsarType.boolList:
-        return 'List<bool>';
-      case IsarType.byteList:
-        return 'List<byte>';
-      case IsarType.intList:
-        return 'List<short>';
-      case IsarType.longList:
-        return 'List<int>';
-      case IsarType.floatList:
-        return 'List<float>';
-      case IsarType.doubleList:
-        return 'List<double>';
-      case IsarType.dateTimeList:
-        return 'List<DateTime>';
-      case IsarType.stringList:
-        return 'List<String>';
-      case IsarType.objectList:
-        return 'List<Object>';
-    }
   }
 }

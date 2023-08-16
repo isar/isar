@@ -3,10 +3,10 @@ import 'package:isar_inspector/collection/collection_area.dart';
 
 class PrevNextButtons extends StatelessWidget {
   const PrevNextButtons({
-    super.key,
     required this.page,
     required this.count,
     required this.onChanged,
+    super.key,
   });
 
   final int page;

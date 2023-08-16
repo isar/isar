@@ -10,7 +10,7 @@ class InstanceSelector extends StatefulWidget {
   });
 
   final List<String> instances;
-  final String selectedInstance;
+  final String? selectedInstance;
   final void Function(String instance) onSelected;
 
   @override
@@ -77,20 +77,21 @@ class _InstanceSelectorState extends State<InstanceSelector>
                 ),
               ),
             ),
-            SelectedInstanceButton(
-              instance: widget.selectedInstance,
-              hasMultiple: widget.instances.length > 1,
-              color: _animation.status != AnimationStatus.dismissed
-                  ? Colors.blue
-                  : null,
-              onTap: () {
-                if (_controller.status == AnimationStatus.completed) {
-                  _controller.reverse();
-                } else {
-                  _controller.forward();
-                }
-              },
-            ),
+            if (widget.selectedInstance != null)
+              SelectedInstanceButton(
+                instance: widget.selectedInstance!,
+                hasMultiple: widget.instances.length > 1,
+                color: _animation.status != AnimationStatus.dismissed
+                    ? Colors.blue
+                    : null,
+                onTap: () {
+                  if (_controller.status == AnimationStatus.completed) {
+                    _controller.reverse();
+                  } else {
+                    _controller.forward();
+                  }
+                },
+              ),
           ],
         ),
       ],

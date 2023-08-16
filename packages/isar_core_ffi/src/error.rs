@@ -62,3 +62,14 @@ pub unsafe extern "C" fn isar_get_error(value: *mut *const u8) -> u32 {
         }
     })
 }
+
+#[macro_export]
+macro_rules! isar_pause_isolate {
+    { $($token:tt)* } => {{
+        if cfg!(target_arch = "wasm32") {
+            {$($token)*}
+        } else {
+            crate::dart::dart_pause_isolate(|| {$($token)*})
+        }
+    }}
+}

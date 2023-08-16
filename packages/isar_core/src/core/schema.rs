@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, Hash, Debug, PartialEq, Eq)]
 pub struct IsarSchema {
     pub name: String,
-    #[serde(rename = "idName", skip_serializing)]
+    #[serde(rename = "idName", skip_serializing, default)]
     pub id_name: Option<String>,
     #[serde(default)]
     pub embedded: bool,
@@ -132,16 +132,6 @@ impl IsarSchema {
             return schema_error("Embedded objects must not have indexes.");
         }
 
-        let verify_target_col_exists = |col: &str, embedded: bool| -> Result<()> {
-            if !collections
-                .iter()
-                .any(|c| &c.name == &col && c.embedded == embedded)
-            {
-                return schema_error("Target collection does not exist.");
-            }
-            Ok(())
-        };
-
         for property in &self.properties {
             if let Some(name) = &property.name {
                 verify_name(name)?;
@@ -150,7 +140,12 @@ impl IsarSchema {
             if property.data_type == DataType::Object || property.data_type == DataType::ObjectList
             {
                 if let Some(target_col) = &property.collection {
-                    verify_target_col_exists(target_col, true)?;
+                    if !collections
+                        .iter()
+                        .any(|c| &c.name == target_col && c.embedded == true)
+                    {
+                        return schema_error("Target collection does not exist.");
+                    }
                 } else {
                     return schema_error("Object property must have a target collection.");
                 }
