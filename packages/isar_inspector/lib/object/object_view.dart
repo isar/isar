@@ -12,24 +12,16 @@ class ObjectView extends StatelessWidget {
     required this.object,
     required this.onUpdate,
     super.key,
-    this.root = false,
   });
 
-  final bool root;
   final String schemaName;
   final Map<String, IsarSchema> schemas;
   final IsarObject object;
-  final void Function(
-    String collection,
-    dynamic id,
-    String path,
-    dynamic value,
-  ) onUpdate;
+  final void Function(String path, dynamic value) onUpdate;
 
   @override
   Widget build(BuildContext context) {
     final schema = schemas[schemaName]!;
-    final idValue = !schema.embedded ? object.getValue(schema.idName!) : null;
     return Column(
       children: [
         for (final property in schema.idAndProperties)
@@ -42,7 +34,7 @@ class ObjectView extends StatelessWidget {
                 (index) => index.properties.any((p) => p == property.name),
               ),
               onUpdate: (value) {
-                onUpdate(schemaName, idValue, property.name, value);
+                onUpdate(property.name, value);
               },
             )
           else
@@ -50,8 +42,8 @@ class ObjectView extends StatelessWidget {
               property: property,
               schemas: schemas,
               object: object,
-              onUpdate: (_, path, value) {
-                onUpdate(schemaName, idValue, '${property.name}.$path', value);
+              onUpdate: (path, value) {
+                onUpdate('${property.name}.$path', value);
               },
             ),
       ],

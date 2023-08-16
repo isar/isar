@@ -24,7 +24,7 @@ class Sidebar extends StatelessWidget {
   final List<IsarSchema> schemas;
   final Map<String, ConnectCollectionInfoPayload?> collectionInfo;
   final String? selectedCollection;
-  final void Function(String instance) onCollectionSelected;
+  final void Function(String collection) onCollectionSelected;
 
   @override
   Widget build(BuildContext context) {

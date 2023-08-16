@@ -21,13 +21,8 @@ class ObjectsListSliver extends StatelessWidget {
   final String collection;
   final Map<String, IsarSchema> schemas;
   final List<IsarObject> objects;
-  final void Function(
-    String collection,
-    dynamic id,
-    String path,
-    dynamic value,
-  ) onUpdate;
-  final void Function(String id) onDelete;
+  final void Function(dynamic id, String path, dynamic value) onUpdate;
+  final void Function(dynamic id) onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +46,7 @@ class ObjectsListSliver extends StatelessWidget {
                       schemaName: collection,
                       schemas: schemas,
                       object: object,
-                      root: true,
-                      onUpdate: (collection, id, path, value) {
-                        onUpdate(collection, id!, path, value);
-                      },
+                      onUpdate: (path, value) => onUpdate(id, path, value),
                     ),
                   ),
                   Positioned(
@@ -81,10 +73,7 @@ class ObjectsListSliver extends StatelessWidget {
                           ),
                           tooltip: 'Delete',
                           visualDensity: VisualDensity.standard,
-                          onPressed: () {
-                            final id = object.getValue(schema.idName!);
-                            onDelete(id as String);
-                          },
+                          onPressed: () => onDelete(id),
                         ),
                       ],
                     ),

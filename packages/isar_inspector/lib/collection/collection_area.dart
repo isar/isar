@@ -211,10 +211,10 @@ class _CollectionAreaState extends State<CollectionArea> {
     );
   }
 
-  void _onUpdate(String collection, dynamic id, String path, dynamic value) {
+  void _onUpdate(dynamic id, String path, dynamic value) {
     final edit = ConnectEditPayload(
       instance: widget.instance,
-      collection: collection,
+      collection: widget.collection,
       id: id,
       path: path,
       value: value,
