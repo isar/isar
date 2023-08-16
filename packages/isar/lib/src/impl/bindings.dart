@@ -415,9 +415,9 @@ class IsarCoreBindings {
   }
 
   late final _isar_filter_notPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Pointer<CFilter> Function(
-              ffi.Pointer<CFilter>)>>('isar_filter_not');
+          ffi
+          .NativeFunction<ffi.Pointer<CFilter> Function(ffi.Pointer<CFilter>)>>(
+      'isar_filter_not');
   late final _isar_filter_not = _isar_filter_notPtr
       .asFunction<ffi.Pointer<CFilter> Function(ffi.Pointer<CFilter>)>(
           isLeaf: true);
