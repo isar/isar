@@ -2,7 +2,7 @@ part of isar_generator;
 
 const TypeChecker _dateTimeChecker = TypeChecker.fromRuntime(DateTime);
 
-extension DartTypeX on DartType {
+extension on DartType {
   bool get isDartCoreDateTime =>
       element != null && _dateTimeChecker.isExactly(element!);
 

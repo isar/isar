@@ -100,8 +100,8 @@ int platformFastHash(String string) {
 /// @nodoc
 @tryInline
 Future<T> runIsolate<T>(
-  FutureOr<T> Function() computation, {
-  String? debugName,
-}) {
+  String debugName,
+  FutureOr<T> Function() computation,
+) {
   return Isolate.run(computation, debugName: debugName);
 }

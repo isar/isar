@@ -43,6 +43,7 @@ jobs:
         working-directory: packages/isar_test
       - name: Lint
         run: flutter analyze
+        working-directory: packages
 
   test_core:
     name: Core Test

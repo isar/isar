@@ -11,10 +11,6 @@ export 'bindings.dart';
 export 'ffi.dart';
 export 'interop.dart';
 
-Future<R> scheduleIsolate<R>(R Function() callback, {String? debugName}) async {
-  throw UnimplementedError();
-}
-
 FutureOr<IsarCoreBindings> initializePlatformBindings([
   String? library,
 ]) async {
@@ -93,8 +89,8 @@ int platformFastHash(String str) {
 
 @tryInline
 Future<T> runIsolate<T>(
-  FutureOr<T> Function() computation, {
-  String? debugName,
-}) async {
+  String debugName,
+  FutureOr<T> Function() computation,
+) async {
   return computation();
 }

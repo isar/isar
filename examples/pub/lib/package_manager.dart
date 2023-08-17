@@ -155,7 +155,11 @@ class PackageManager {
   }
 
   Future<void> loadPackageAssets(String name, String version) {
-    return compute(loadAssets, PackageAndVersion(name, version));
+    return compute(
+      loadAssets,
+      PackageAndVersion(name, version),
+      debugLabel: 'load $name assets',
+    );
   }
 
   Future<List<String>> search(String query, int page, {bool online = true}) {

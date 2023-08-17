@@ -152,6 +152,7 @@ class _IsarImpl extends Isar {
     final receivePort = ReceivePort();
     final sendPort = receivePort.sendPort;
     final isolate = runIsolate(
+      'Isar open async',
       () async {
         try {
           final isar = _IsarImpl.open(
@@ -173,7 +174,6 @@ class _IsarImpl extends Isar {
           sendPort.send(e);
         }
       },
-      debugName: 'Isar open async',
     );
 
     final response = await receivePort.first;
@@ -349,6 +349,7 @@ class _IsarImpl extends Isar {
     final library = IsarCore._library;
     final schemas = generatedSchemas;
     return runIsolate(
+      debugName ?? 'Isar async read',
       () => _isarAsync(
         instanceId: instance,
         schemas: schemas,
@@ -357,7 +358,6 @@ class _IsarImpl extends Isar {
         callback: callback,
         library: library,
       ),
-      debugName: debugName ?? 'Isar async read',
     );
   }
 
@@ -377,6 +377,7 @@ class _IsarImpl extends Isar {
     final library = IsarCore._library;
     final schemas = generatedSchemas.toList();
     return runIsolate(
+      debugName ?? 'Isar async write',
       () {
         return _isarAsync(
           instanceId: instance,
@@ -387,7 +388,6 @@ class _IsarImpl extends Isar {
           library: library,
         );
       },
-      debugName: debugName ?? 'Isar async write',
     );
   }
 
