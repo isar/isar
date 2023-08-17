@@ -77,7 +77,7 @@ class ObjectsListSliver extends StatelessWidget {
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

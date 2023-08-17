@@ -28,15 +28,15 @@ class PropertyValue extends StatelessWidget {
     }
 
     if (type.isBool) {
-      return _BoolValue(value: value, onUpdate: onUpdate);
+      return _BoolValue(value: value as bool?, onUpdate: onUpdate);
     } else if (type.isNum) {
-      return _NumValue(value: value, onUpdate: onUpdate);
+      return _NumValue(value: value as num?, onUpdate: onUpdate);
     } else if (type.isDate) {
-      return _DateValue(value: value, onUpdate: onUpdate);
+      return _DateValue(value: value as int?, onUpdate: onUpdate);
     } else if (type.isString) {
-      return _StringValue(value: value, onUpdate: onUpdate);
+      return _StringValue(value: value as String?, onUpdate: onUpdate);
     } else {
-      return NullValue();
+      return const NullValue();
     }
   }
 }
@@ -97,8 +97,8 @@ class _EnumValue extends StatelessWidget {
                 items: [
                   if (!isByte)
                     PopupMenuItem(
-                      child: Text('null'),
                       value: nullValue,
+                      child: const Text('null'),
                     ),
                   for (final enumName in enumMap.keys)
                     PopupMenuItem(
@@ -150,8 +150,8 @@ class _BoolValue extends StatelessWidget {
                 ),
                 items: const [
                   PopupMenuItem(
-                    child: Text('null'),
                     value: nullValue,
+                    child: Text('null'),
                   ),
                   PopupMenuItem(
                     value: true,
@@ -234,9 +234,8 @@ class _DateValue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final date = value != null
-        ? DateTime.fromMicrosecondsSinceEpoch(value as int)
-        : null;
+    final date =
+        value != null ? DateTime.fromMicrosecondsSinceEpoch(value!) : null;
     return GestureDetector(
       onTap: onUpdate == null
           ? null

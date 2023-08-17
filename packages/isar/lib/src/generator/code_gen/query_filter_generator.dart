@@ -69,7 +69,8 @@ class _FilterGenerator {
 
   String value(String name, PropertyInfo p) {
     if (p.enumProperty != null) {
-      return '$name${p.elementNullable ?? p.nullable ? '?' : ''}.${p.enumProperty}';
+      final nullable = p.elementNullable ?? p.nullable;
+      return '$name${nullable ? '?' : ''}.${p.enumProperty}';
     } else {
       return name;
     }

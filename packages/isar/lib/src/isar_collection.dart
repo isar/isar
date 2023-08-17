@@ -20,12 +20,16 @@ abstract class IsarCollection<ID, OBJ> {
   /// to 1.
   int autoIncrement();
 
+  /// {@template collection_get}
   /// Get a single object by its [id]. Returns `null` if the object does not
   /// exist.
+  /// {@endtemplate}
   OBJ? get(ID id) => getAll([id]).firstOrNull;
 
+  /// {@template collection_get_all}
   /// Get a list of objects by their [ids]. Objects in the list are `null`
   /// if they don't exist.
+  /// {@endtemplate}
   List<OBJ?> getAll(List<ID> ids);
 
   /// Insert or update the [object].
@@ -111,4 +115,17 @@ abstract class IsarCollection<ID, OBJ> {
     List<DistinctProperty>? distinctBy,
     List<int>? properties,
   });
+}
+
+/// Asychronous extensions for [IsarCollection].
+extension CollectionAsync<ID, OBJ> on IsarCollection<ID, OBJ> {
+  /// {@macro collection_get}
+  Future<OBJ?> getAsync(ID id) {
+    return isar.readAsync((isar) => isar.collection<ID, OBJ>().get(id));
+  }
+
+  /// {@macro collection_get_all}
+  Future<List<OBJ?>> getAllAsync(List<ID> ids) {
+    return isar.readAsync((isar) => isar.collection<ID, OBJ>().getAll(ids));
+  }
 }

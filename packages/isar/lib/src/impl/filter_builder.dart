@@ -140,6 +140,7 @@ Pointer<CIsarValue> _isarValue(Object? value) {
     return nullptr;
   } else if (value is double) {
     return IsarCore.b.isar_value_real(value);
+    // ignore: avoid_double_and_int_checks
   } else if (value is int) {
     return IsarCore.b.isar_value_integer(value);
   } else if (value is String) {

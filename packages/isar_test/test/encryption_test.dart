@@ -1,8 +1,6 @@
 // ignore_for_file: hash_and_equals
 
 import 'package:isar/isar.dart';
-import 'package:isar_test/isar_test.dart';
-import 'package:test/test.dart';
 
 part 'encryption_test.g.dart';
 
@@ -18,7 +16,7 @@ class Model {
 }
 
 void main() {
-  // TODO(simc) fix windows SQLCipher build and re-enable encryption tests
+  // fix windows SQLCipher build and re-enable encryption tests
   /*group('Encryption', () {
     isarTest('Correct key', isar: false, web: false, () async {
       final isarName = getRandomName();

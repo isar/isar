@@ -1,6 +1,11 @@
 part of isar;
 
+/// The schema of a collection in Isar.
+///
+/// This class represents the structure of a collection. This includes the
+/// collection name, the properties and indexes.
 class IsarSchema {
+  /// @nodoc
   const IsarSchema({
     required this.name,
     this.idName,
@@ -9,6 +14,7 @@ class IsarSchema {
     required this.indexes,
   });
 
+  /// @nodoc
   factory IsarSchema.fromJson(Map<String, dynamic> json) {
     return IsarSchema(
       name: json['name'] as String,
@@ -23,12 +29,23 @@ class IsarSchema {
     );
   }
 
+  /// The name of the collection.
   final String name;
+
+  /// The name of the id property. Only String id properties are defined
+  /// in [properties].
   final String? idName;
+
+  /// Whether this collection is embedded in another object.
   final bool embedded;
+
+  /// The properties of this collection.
   final List<IsarPropertySchema> properties;
+
+  /// The indexes of this collection.
   final List<IsarIndexSchema> indexes;
 
+  /// @nodoc
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -39,6 +56,7 @@ class IsarSchema {
     };
   }
 
+  /// Get the index of a property in this schema.
   int getPropertyIndex(String property) {
     for (var i = 0; i < properties.length; i++) {
       if (properties[i].name == property) {
@@ -51,6 +69,7 @@ class IsarSchema {
     throw ArgumentError('Property $property not found in schema $name');
   }
 
+  /// Get the property schema by its index.
   IsarPropertySchema getPropertyByIndex(int index) {
     if (index == 0) {
       return IsarPropertySchema(
@@ -63,7 +82,9 @@ class IsarSchema {
   }
 }
 
+/// The schema of a property in Isar.
 class IsarPropertySchema {
+  /// @nodoc
   const IsarPropertySchema({
     required this.name,
     required this.type,
@@ -71,6 +92,7 @@ class IsarPropertySchema {
     this.enumMap,
   });
 
+  /// @nodoc
   factory IsarPropertySchema.fromJson(Map<String, dynamic> json) {
     return IsarPropertySchema(
       name: json['name'] as String,
@@ -82,11 +104,20 @@ class IsarPropertySchema {
     );
   }
 
+  /// The name of the property.
   final String name;
+
+  /// The type of the property.
   final IsarType type;
+
+  /// If this property contains object(s), this is the name of the embedded
+  /// collection.
   final String? target;
+
+  /// If this property is an enum, this map contains the enum values.
   final Map<String, dynamic>? enumMap;
 
+  /// @nodoc
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -97,7 +128,9 @@ class IsarPropertySchema {
   }
 }
 
+/// The schema of an index in Isar.
 class IsarIndexSchema {
+  /// @nodoc
   const IsarIndexSchema({
     required this.name,
     required this.properties,
@@ -105,6 +138,7 @@ class IsarIndexSchema {
     required this.hash,
   });
 
+  /// @nodoc
   factory IsarIndexSchema.fromJson(Map<String, dynamic> json) {
     return IsarIndexSchema(
       name: json['name'] as String,
@@ -114,11 +148,19 @@ class IsarIndexSchema {
     );
   }
 
+  /// The name of the index.
   final String name;
+
+  /// The properties of the index.
   final List<String> properties;
+
+  /// Whether this index is unique.
   final bool unique;
+
+  /// Whether this index should be hashed.
   final bool hash;
 
+  /// @nodoc
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -129,55 +171,103 @@ class IsarIndexSchema {
   }
 }
 
+/// Supported Isar property types.
 enum IsarType {
+  /// boolean (1 byte)
   bool('Bool'),
+
+  /// unsigned 8 bit integer (1 byte)
   byte('Byte'),
+
+  /// signed 32 bit integer (4 bytes)
   int('Int'),
+
+  /// 32 bit floating point (4 bytes)
   float('Float'),
+
+  /// signed 64 bit integer (8 bytes)
   long('Long'),
+
+  /// 64 bit floating point (8 bytes)
   double('Double'),
+
+  /// date and time stored in UTC (8 bytes)
   dateTime('DateTime'),
+
+  /// string (6 + length bytes)
   string('String'),
+
+  /// embedded object (6 + size bytes)
   object('Object'),
+
+  /// json (6 + length bytes)
   json('Json'),
+
+  /// list of booleans (6 + length bytes)
   boolList('BoolList'),
+
+  /// list of unsigned 8 bit integers (6 + length bytes)
   byteList('ByteList'),
+
+  /// list of signed 32 bit integers (6 + length * 4 bytes)
   intList('IntList'),
+
+  /// list of 32 bit floating points (6 + length * 4 bytes)
   floatList('FloatList'),
+
+  /// list of signed 64 bit integers (6 + length * 8 bytes)
   longList('LongList'),
+
+  /// list of 64 bit floating points (6 + length * 8 bytes)
   doubleList('DoubleList'),
+
+  /// list of dates and times stored in UTC (6 + length * 8 bytes)
   dateTimeList('DateTimeList'),
+
+  /// list of strings (6 + length * (6 + length) bytes)
   stringList('StringList'),
+
+  /// list of embedded objects (6 + length * (6 + size) bytes)
   objectList('ObjectList');
 
   const IsarType(this.coreName);
 
+  /// @nodoc
   final String coreName;
 }
 
+/// @nodoc
 extension IsarTypeX on IsarType {
+  /// @nodoc
   bool get isBool => this == IsarType.bool || this == IsarType.boolList;
 
+  /// @nodoc
   bool get isFloat =>
       this == IsarType.float ||
       this == IsarType.floatList ||
       this == IsarType.double ||
       this == IsarType.doubleList;
 
+  /// @nodoc
   bool get isInt =>
       this == IsarType.int ||
       this == IsarType.int ||
       this == IsarType.long ||
       this == IsarType.longList;
 
+  /// @nodoc
   bool get isNum => isFloat || isInt;
 
+  /// @nodoc
   bool get isDate => this == IsarType.dateTime || this == IsarType.dateTimeList;
 
+  /// @nodoc
   bool get isString => this == IsarType.string || this == IsarType.stringList;
 
+  /// @nodoc
   bool get isObject => this == IsarType.object || this == IsarType.objectList;
 
+  /// @nodoc
   bool get isList => scalarType != this;
 
   /// @nodoc

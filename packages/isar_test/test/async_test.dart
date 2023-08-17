@@ -1,4 +1,5 @@
 @TestOn('vm')
+library;
 
 import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';

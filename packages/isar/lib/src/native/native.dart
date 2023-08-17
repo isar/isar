@@ -12,6 +12,7 @@ export 'dart:isolate';
 export 'bindings.dart';
 export 'ffi.dart';
 
+/// @nodoc
 FutureOr<IsarCoreBindings> initializePlatformBindings([String? library]) {
   late IsarCoreBindings bindings;
   try {
@@ -46,6 +47,7 @@ FutureOr<IsarCoreBindings> initializePlatformBindings([String? library]) {
   return bindings;
 }
 
+/// @nodoc
 const tryInline = pragma('vm:prefer-inline');
 
 extension on Abi {
@@ -78,7 +80,9 @@ extension on Abi {
   }
 }
 
+/// @nodoc
 int platformFastHash(String string) {
+  // ignore: avoid_js_rounded_ints
   var hash = 0xcbf29ce484222325;
 
   var i = 0;
@@ -93,6 +97,7 @@ int platformFastHash(String string) {
   return hash;
 }
 
+/// @nodoc
 @tryInline
 Future<T> runIsolate<T>(
   FutureOr<T> Function() computation, {

@@ -2,7 +2,7 @@ import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
 
-part 'is_empty_is_not_empty_test.g.dart';
+part 'is_empty_test.g.dart';
 
 @collection
 class Model {
@@ -68,49 +68,6 @@ void main() {
 
       isar.write((isar) => isar.models.put(Model(0, null)));
       expect(isar.models.where().isEmpty(), false);
-    });
-
-    isarTest('.isNotEmpty()', () {
-      expect(isar.models.where().isNotEmpty(), true);
-      expect(
-        isar.models.where().valueStartsWith('model').isNotEmpty(),
-        true,
-      );
-      expect(
-        isar.models.where().valueEqualTo('model 1').isNotEmpty(),
-        true,
-      );
-      expect(
-        isar.models.where().valueStartsWith('non existing').isNotEmpty(),
-        false,
-      );
-      expect(
-        isar.models
-            .where()
-            .valueStartsWith('model 1')
-            .and()
-            .valueEqualTo('model 2')
-            .isNotEmpty(),
-        false,
-      );
-      expect(
-        isar.models
-            .where()
-            .valueEqualTo('model 1')
-            .or()
-            .valueEqualTo('model 2')
-            .isNotEmpty(),
-        true,
-      );
-
-      isar.write((isar) => isar.models.where().deleteAll(limit: 99));
-      expect(isar.models.where().isNotEmpty(), true);
-
-      isar.write((isar) => isar.models.where().deleteAll());
-      expect(isar.models.where().isNotEmpty(), false);
-
-      isar.write((isar) => isar.models.put(Model(0, null)));
-      expect(isar.models.where().isNotEmpty(), true);
     });
   });
 }

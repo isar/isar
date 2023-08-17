@@ -12,6 +12,7 @@ class NativeType {}
 @tryInline
 Pointer<T> ptrFromAddress<T>(int addr) => addr;
 
+// ignore: unnecessary_late
 late final JSIsar b = IsarCore.b as JSIsar;
 
 extension PointerX on int {
@@ -50,6 +51,7 @@ extension PointerX on int {
 const nullptr = 0;
 
 class Native<T> {
+  // ignore: avoid_unused_constructor_parameters
   const Native({String? symbol});
 }
 

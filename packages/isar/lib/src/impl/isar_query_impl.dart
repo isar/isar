@@ -19,7 +19,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
   Pointer<CIsarQuery> get _ptr {
     final ptr = ptrFromAddress<CIsarQuery>(_ptrAddress);
     if (ptr.isNull) {
-      throw QueryError('Query has already been closed.');
+      throw StateError('Query has already been closed.');
     }
     return ptr;
   }
@@ -124,7 +124,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
           IsarCore.b.isar_read_to_json(reader, bufferPtrPtr, bufferSizePtr);
       final bufferPtr = bufferPtrPtr.ptrValue;
       if (bufferPtr == nullptr) {
-        throw QueryError('Error while exporting JSON.');
+        throw StateError('Error while exporting JSON.');
       } else {
         final jsonBytes = bufferPtr.asU8List(jsonSize);
         return jsonDecode(utf8.decode(jsonBytes)) as Map<String, dynamic>;

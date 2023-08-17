@@ -56,7 +56,7 @@ void main() {
     isar2.write((isar) {
       return isar.col2s.putAll([
         Col2(1, 'value3', ['hi']),
-        Col2(3, 'value4', [])
+        Col2(3, 'value4', []),
       ]);
     });
     expect(isar2.col2s.where().findAll(), [

@@ -2,6 +2,7 @@
 
 part of isar;
 
+/// @nodoc
 abstract final class IsarCore {
   static const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
 
@@ -238,6 +239,7 @@ abstract final class IsarCore {
   }
 }
 
+/// @nodoc
 extension PointerX on Pointer<void> {
   @tryInline
   bool get isNull => address == 0;

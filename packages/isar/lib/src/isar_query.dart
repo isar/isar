@@ -8,11 +8,15 @@ abstract class IsarQuery<T> {
   /// The corresponding Isar instance.
   Isar get isar;
 
+  /// {@template query_find_first}
   /// Find the first object that matches this query or `null` if no object
   /// matches.
+  /// {@endtemplate}
   T? findFirst({int? offset}) => findAll(offset: offset, limit: 1).firstOrNull;
 
+  /// {@template query_find_all}
   /// Find all objects that match this query.
+  /// {@endtemplate}
   List<T> findAll({int? offset, int? limit});
 
   /// This is a low level method to update objects.
@@ -22,34 +26,31 @@ abstract class IsarQuery<T> {
   @protected
   int updateProperties(Map<int, dynamic> changes, {int? offset, int? limit});
 
+  /// {@template query_delete_first}
   /// Delete the first object that matches this query. Returns whether an object
   /// has been deleted.
+  /// {@endtemplate}
   bool deleteFirst({int? offset}) => deleteAll(offset: offset, limit: 1) > 0;
 
+  /// {@template query_delete_all}
   /// Delete all objects that match this query. Returns the number of deleted
   /// objects.
+  /// {@endtemplate}
   int deleteAll({int? offset, int? limit});
 
-  /// Count how many objects match this query.
-  ///
-  /// This operation is much faster than using `findAll().length`.
+  /// {@macro aggregation_min}
   int count() => aggregate(Aggregation.count) ?? 0;
 
-  /// Returns `true` if there are no objects that match this query.
-  ///
-  /// This operation is faster than using `count() == 0`.
+  /// {@macro aggregation_is_empty}
   bool isEmpty() => aggregate(Aggregation.isEmpty) ?? true;
-
-  /// Returns `true` if there are objects that match this query.
-  ///
-  /// This operation is faster than using `count() > 0`.
-  bool isNotEmpty() => !isEmpty();
 
   /// @nodoc
   @protected
   R? aggregate<R>(Aggregation op);
 
+  /// {@template query_export_json}
   /// Export the results of this query as json.
+  /// {@endtemplate}
   List<Map<String, dynamic>> exportJson({int? offset, int? limit});
 
   /// {@template query_watch}
@@ -79,21 +80,42 @@ abstract class IsarQuery<T> {
 /// @nodoc
 @protected
 enum Aggregation {
-  /// Counts all values.
+  /// {@template aggregation_count}
+  /// Count how many objects match the query.
+  ///
+  /// This operation is much faster than using `findAll().length`.
+  /// {@endtemplate}
   count,
 
-  /// Returns `true` if the query has no results.
+  /// {@template aggregation_is_empty}
+  /// Yields `true` if there are no objects that match the query.
+  ///
+  /// This operation is faster than using `count() == 0`.
+  /// {@endtemplate}
   isEmpty,
 
-  /// Finds the smallest value.
+  /// {@template aggregation_min}
+  /// Finds the smallest value matching the query. Null values are considered
+  /// smaller than all other values.
+  ///
+  /// Yields null if there are no objects that match the query.
+  /// {@endtemplate}
   min,
 
-  /// Finds the largest value.
+  /// {@template aggregation_max}
+  /// Finds the largest value matching the query.
+  ///
+  /// Yields null if there are no objects that match the query.
+  /// {@endtemplate}
   max,
 
-  /// Calculates the sum of all values.
+  /// {@template aggregation_sum}
+  /// Calculates the sum of all values. This only works for numeric values.
+  /// {@endtemplate}
   sum,
 
-  /// Calculates the average of all values.
+  /// {@template aggregation_average}
+  /// Calculates the average of all values. This only works for numeric values.
+  /// {@endtemplate}
   average,
 }

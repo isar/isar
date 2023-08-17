@@ -12,6 +12,7 @@ class FilterGroup extends FilterOperation {
   final bool and;
   final List<FilterOperation> filters;
 
+  @override
   Filter? toIsarFilter() {
     if (filters.isEmpty) return null;
     final isarFilters =
@@ -33,6 +34,7 @@ class FilterCondition extends FilterOperation {
   final Object? value1;
   final Object? value2;
 
+  @override
   Filter toIsarFilter() {
     return switch (type) {
       FilterType.equalTo => EqualCondition(property: property, value: value1),
@@ -42,13 +44,13 @@ class FilterCondition extends FilterOperation {
       FilterType.between =>
         BetweenCondition(property: property, lower: value1, upper: value2),
       FilterType.startsWith =>
-        StartsWithCondition(property: property, value: value1 as String),
+        StartsWithCondition(property: property, value: value1! as String),
       FilterType.endsWith =>
-        EndsWithCondition(property: property, value: value1 as String),
+        EndsWithCondition(property: property, value: value1! as String),
       FilterType.contains =>
-        ContainsCondition(property: property, value: value1 as String),
+        ContainsCondition(property: property, value: value1! as String),
       FilterType.matches =>
-        MatchesCondition(property: property, wildcard: value1 as String),
+        MatchesCondition(property: property, wildcard: value1! as String),
       FilterType.isNull => IsNullCondition(property: property),
       FilterType.isNotNull => NotGroup(IsNullCondition(property: property)),
       FilterType.elementIsNull =>

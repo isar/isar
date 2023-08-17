@@ -1,4 +1,5 @@
 @TestOn('vm')
+library;
 
 import 'dart:io';
 
@@ -108,7 +109,7 @@ void main() {
 
       expect(copiedDbFile2.lengthSync(), greaterThan(0));
       expect(copiedDbFile2.lengthSync(), lessThan(copiedDbFile1.lengthSync()));
-      copiedDbFile2.delete();
+      copiedDbFile2.deleteSync();
     });
 
     isarTest('Copies should be the same size', () async {
@@ -126,7 +127,7 @@ void main() {
       isar.copyToFile(copiedDbFile2.path);
 
       expect(copiedDbFile1.lengthSync(), copiedDbFile2.lengthSync());
-      copiedDbFile2.delete();
+      copiedDbFile2.deleteSync();
 
       final isarCopy = await openTempIsar(
         [ModelSchema],
@@ -143,7 +144,7 @@ void main() {
       isarCopy.copyToFile(copiedDbFile3.path);
 
       expect(copiedDbFile3.lengthSync(), copiedDbFile1.lengthSync());
-      copiedDbFile3.delete();
+      copiedDbFile3.deleteSync();
     });
   });
 }

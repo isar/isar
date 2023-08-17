@@ -292,7 +292,7 @@ void main() {
       expect(isar.boolModels.where().listProperty().findAll(), [
         [true, false, true],
         <bool>[],
-        [true]
+        [true],
       ]);
 
       expect(isar.boolModels.where().nListProperty().findAll(), [
@@ -318,7 +318,7 @@ void main() {
         [
           Uint8List.fromList([0, 10, 255]),
           Uint8List.fromList([]),
-          Uint8List.fromList([3])
+          Uint8List.fromList([3]),
         ],
       );
 
@@ -327,7 +327,7 @@ void main() {
         [
           null,
           Uint8List.fromList([1, 2, 3, 4, 5]),
-          null
+          null,
         ],
       );
     });
@@ -403,7 +403,7 @@ void main() {
           [
             [-5.5, 70.7, 999.999],
             <double>[],
-            [0.0]
+            [0.0],
           ],
         ),
         true,
@@ -415,7 +415,7 @@ void main() {
           [
             [1919191],
             null,
-            [-1919191]
+            [-1919191],
           ],
         ),
         true,
@@ -438,13 +438,13 @@ void main() {
       expect(isar.doubleModels.where().listProperty().findAll(), [
         [-5.5, 70.7, 999.999],
         <double>[],
-        [0.0]
+        [0.0],
       ]);
 
       expect(isar.doubleModels.where().nListProperty().findAll(), [
         [1919191.1919191],
         null,
-        [double.maxFinite]
+        [double.maxFinite],
       ]);
     });
 
@@ -464,7 +464,7 @@ void main() {
       expect(isar.dateTimeModels.where().listProperty().findAll(), [
         [DateTime(2019), DateTime(2020)],
         [DateTime(2020)],
-        <DateTime>[]
+        <DateTime>[],
       ]);
 
       expect(isar.dateTimeModels.where().nListProperty().findAll(), [
@@ -490,7 +490,7 @@ void main() {
         [
           ['Just', 'a', 'test'],
           <String>[],
-          ['']
+          [''],
         ],
       );
 
@@ -499,7 +499,7 @@ void main() {
         [
           null,
           null,
-          ['HELLO']
+          ['HELLO'],
         ],
       );
     });
@@ -522,7 +522,7 @@ void main() {
         [
           <EmbeddedModel>[],
           [EmbeddedModel('abc'), EmbeddedModel('def')],
-          [EmbeddedModel()]
+          [EmbeddedModel()],
         ],
       );
 
@@ -531,7 +531,7 @@ void main() {
         [
           [EmbeddedModel('abc'), EmbeddedModel('def')],
           null,
-          [EmbeddedModel()]
+          [EmbeddedModel()],
         ],
       );
     });
@@ -552,7 +552,7 @@ void main() {
         [
           [TestEnum.option2],
           [TestEnum.option1],
-          <TestEnum>[]
+          <TestEnum>[],
         ],
       );
 
@@ -561,7 +561,7 @@ void main() {
         [
           [TestEnum.option2, TestEnum.option3],
           null,
-          null
+          null,
         ],
       );
     });

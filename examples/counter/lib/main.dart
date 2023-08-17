@@ -62,7 +62,7 @@ class _CounterAppState extends State<CounterApp> {
       title: 'Isar Counter',
       theme: theme,
       home: Scaffold(
-        appBar: AppBar(title: Text('Isar Counter')),
+        appBar: AppBar(title: const Text('Isar Counter')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

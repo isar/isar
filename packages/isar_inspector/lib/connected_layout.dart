@@ -7,7 +7,7 @@ import 'package:isar_inspector/connect_client.dart';
 import 'package:isar_inspector/sidebar.dart';
 
 class ConnectedLayout extends StatefulWidget {
-  ConnectedLayout({
+  const ConnectedLayout({
     required this.client,
     required this.instances,
     super.key,
@@ -112,7 +112,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
                   for (final schema in schemas) schema.name: schema,
                 },
               ),
-            )
+            ),
         ],
       ),
     );

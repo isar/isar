@@ -120,7 +120,7 @@ void main() {
               null,
               NModel(
                 EModel('hello'),
-              )
+              ),
             ],
             ['test1', 'test2', 'test3'],
           ),

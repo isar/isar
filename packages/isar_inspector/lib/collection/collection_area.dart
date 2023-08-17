@@ -150,7 +150,7 @@ class _CollectionAreaState extends State<CollectionArea> {
                 SortButtons(
                   properties: [
                     for (final p in widget.schema.idAndProperties)
-                      if (!p.type.isObject && !p.type.isList) p.name
+                      if (!p.type.isObject && !p.type.isList) p.name,
                   ],
                   selectedProperty: sortProperty,
                   asc: sortAsc,
@@ -203,11 +203,11 @@ class _CollectionAreaState extends State<CollectionArea> {
                       onPressed: _onDeleteAll,
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -243,7 +243,7 @@ class _CollectionAreaState extends State<CollectionArea> {
       instance: widget.instance,
       collection: widget.collection,
       objects: [
-        {widget.schema.idName!: randomId}
+        {widget.schema.idName!: randomId},
       ],
     );
 
@@ -254,14 +254,15 @@ class _CollectionAreaState extends State<CollectionArea> {
           property: idIndex,
           type: FilterType.equalTo,
           value1: randomId,
-        )
+        ),
       ]);
     });
     await widget.client.importJson(p);
-    _runQuery();
+    await _runQuery();
   }
 
   Future<void> _onImport() async {
+    final messenger = ScaffoldMessenger.of(context);
     try {
       final jsonStr = await Clipboard.getData(Clipboard.kTextPlain);
       var json = jsonDecode(jsonStr!.text!);
@@ -275,11 +276,11 @@ class _CollectionAreaState extends State<CollectionArea> {
       );
       await widget.client.importJson(p);
     } on PlatformException {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(content: Text('Could not access clipboard.')),
       );
     } on FormatException {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(content: Text('Invalid JSON in clipboard.')),
       );
     }

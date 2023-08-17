@@ -73,7 +73,7 @@ class Sidebar extends StatelessWidget {
                           : Icons.light_mode_rounded,
                     ),
                     onPressed: DarkMode.of(context).toggle,
-                  )
+                  ),
                 ],
               ),
             ),

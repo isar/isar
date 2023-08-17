@@ -9,3 +9,4 @@ analyzer:
     avoid_positional_boolean_parameters: ignore
     parameter_assignments: ignore
     use_string_in_part_of_directives: ignore
+    always_put_required_named_parameters_first: ignore

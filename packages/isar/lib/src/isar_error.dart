@@ -1,8 +1,11 @@
 part of isar;
 
+/// Superclass of all Isar errors.
 sealed class IsarError extends Error {
+  /// Name of the error.
   String get name;
 
+  /// Error message.
   String get message;
 
   @override
@@ -11,6 +14,7 @@ sealed class IsarError extends Error {
   }
 }
 
+/// Invalid or protected path error.
 class PathError extends IsarError {
   @override
   final name = 'PathError';
@@ -20,6 +24,7 @@ class PathError extends IsarError {
       'for example because it is a file.';
 }
 
+/// An active write transaction is required for this operation.
 class WriteTxnRequiredError extends IsarError {
   @override
   String get name => 'WriteTxnRequiredError';
@@ -28,6 +33,7 @@ class WriteTxnRequiredError extends IsarError {
   String get message => 'This operation requires an active write transaction.';
 }
 
+/// Database file is incompatible with this version of Isar.
 class VersionError extends IsarError {
   @override
   String get name => 'VersionError';
@@ -37,6 +43,7 @@ class VersionError extends IsarError {
       'version of Isar. Please check if you need to migrate the database.';
 }
 
+/// The object is too large to be stored in Isar.
 class ObjectLimitReachedError extends IsarError {
   @override
   String get name => 'ObjectLimitReachedError';
@@ -47,6 +54,7 @@ class ObjectLimitReachedError extends IsarError {
       'than 16MB.';
 }
 
+/// Invalid Isar instance.
 class InstanceMismatchError extends IsarError {
   @override
   String get name => 'InstanceMismatchError';
@@ -57,6 +65,8 @@ class InstanceMismatchError extends IsarError {
       'from a different Isar instance.';
 }
 
+/// Something went wrong during encryption/decryption. Most likely the
+/// encryption key is wrong.
 class EncryptionError extends IsarError {
   @override
   String get name => 'EncryptionError';
@@ -67,6 +77,7 @@ class EncryptionError extends IsarError {
       'corrupted.';
 }
 
+/// The database is full.
 class DatabaseFullError extends IsarError {
   @override
   final name = 'DatabaseFullError';
@@ -78,6 +89,7 @@ class DatabaseFullError extends IsarError {
       'specifying a CompactCondition when opening Isar.';
 }
 
+/// Isar has not been initialized correctly.
 class IsarNotReadyError extends IsarError {
   /// @nodoc
   @protected
@@ -90,18 +102,7 @@ class IsarNotReadyError extends IsarError {
   final String message;
 }
 
-class QueryError extends IsarError {
-  /// @nodoc
-  @protected
-  QueryError(this.message);
-
-  @override
-  String get name => 'QueryError';
-
-  @override
-  final String message;
-}
-
+/// Unknown error returned by the database engine.
 class DatabaseError extends IsarError {
   /// @nodoc
   @protected

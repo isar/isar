@@ -1,4 +1,6 @@
 @TestOn('vm')
+library;
+
 import 'dart:isolate';
 
 import 'package:isar/isar.dart';

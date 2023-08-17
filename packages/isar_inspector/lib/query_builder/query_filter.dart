@@ -215,37 +215,4 @@ extension on IsarPropertySchema {
         return [];
     }
   }
-
-  dynamic get defaultEditingValue {
-    if (enumMap != null) {
-      return enumMap!.values.first;
-    }
-    switch (type) {
-      case IsarType.bool:
-      case IsarType.boolList:
-        return false;
-      case IsarType.byte:
-      case IsarType.byteList:
-      case IsarType.int:
-      case IsarType.intList:
-      case IsarType.long:
-      case IsarType.longList:
-        return 0;
-      case IsarType.float:
-      case IsarType.floatList:
-      case IsarType.double:
-      case IsarType.doubleList:
-        return 0.0;
-      case IsarType.dateTime:
-      case IsarType.dateTimeList:
-        return DateTime.now().microsecondsSinceEpoch;
-      case IsarType.string:
-      case IsarType.stringList:
-        return '';
-      case IsarType.object:
-      case IsarType.objectList:
-      case IsarType.json:
-        return null;
-    }
-  }
 }

@@ -16,10 +16,10 @@ extension on ClassElement {
     final allAccessors = [
       ...accessors.map((e) => e.variable),
       if (collectionAnnotation?.inheritance ?? embeddedAnnotation!.inheritance)
-        for (InterfaceType supertype in allSupertypes) ...[
+        for (final supertype in allSupertypes) ...[
           if (!supertype.isDartCoreObject)
-            ...supertype.accessors.map((e) => e.variable)
-        ]
+            ...supertype.accessors.map((e) => e.variable),
+        ],
     ];
 
     final usableAccessors = allAccessors.where(

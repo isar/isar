@@ -18,8 +18,8 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^2.3.6
   google_fonts: ^5.1.0
-  isar: 4.0.0-dev.0
-  isar_flutter_libs: 4.0.0-dev.0
+  isar: 4.0.0-dev.10
+  isar_flutter_libs: 4.0.0-dev.10
   json_annotation: ^4.8.1
   markdown: ^7.1.1
   pub_semver: ^2.1.4
@@ -35,12 +35,6 @@ dependencies:
   flutter_html: ^3.0.0-beta.2
   flutter_html_svg: ^3.0.0-beta.2
   path_provider: ^2.0.15
-
-dependency_overrides:
-  isar:
-    path: ../../packages/isar
-  isar_flutter_libs:
-    path: ../../packages/isar_flutter_libs
 
 dev_dependencies:
   build_runner: ^2.4.6

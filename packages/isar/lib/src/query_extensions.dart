@@ -8,7 +8,7 @@ typedef FilterRepeatModifier<OBJ, R, E>
   E element,
 );
 
-/// Extension for QueryBuilders.
+/// Logical operators for query builders.
 extension QueryFilterAndOr<OBJ, R> on QueryBuilder<OBJ, R, QFilterOperator> {
   /// Intersection of two filter conditions.
   QueryBuilder<OBJ, R, QFilterCondition> and() {
@@ -27,8 +27,14 @@ extension QueryFilterAndOr<OBJ, R> on QueryBuilder<OBJ, R, QFilterOperator> {
   }
 }
 
-/// Extension for QueryBuilders.
-extension QueryFilterNot<OBJ, R> on QueryBuilder<OBJ, R, QFilterCondition> {
+/// Filter groups, logical not, anyOf, and allOf modifiers for query builders.
+extension QueryFilterNotAnyAll<OBJ, R>
+    on QueryBuilder<OBJ, R, QFilterCondition> {
+  /// Group filter conditions.
+  QueryBuilder<OBJ, R, QAfterFilterCondition> group(FilterQuery<OBJ> q) {
+    return QueryBuilder.apply(this, (query) => query.group(q));
+  }
+
   /// Complement the next filter condition or group.
   QueryBuilder<OBJ, R, QFilterCondition> not() {
     return QueryBuilder.apply(
@@ -78,22 +84,13 @@ extension QueryFilterNot<OBJ, R> on QueryBuilder<OBJ, R, QFilterCondition> {
   }
 }
 
-/// Extension for QueryBuilders.
-extension QueryFilterNoGroups<OBJ, R>
-    on QueryBuilder<OBJ, R, QFilterCondition> {
-  /// Group filter conditions.
-  QueryBuilder<OBJ, R, QAfterFilterCondition> group(FilterQuery<OBJ> q) {
-    return QueryBuilder.apply(this, (query) => query.group(q));
-  }
-}
-
 /// @nodoc
 @protected
 typedef QueryOption<OBJ, S, RS> = QueryBuilder<OBJ, OBJ, RS> Function(
   QueryBuilder<OBJ, OBJ, S> q,
 );
 
-/// Extension for QueryBuilders.
+/// Optional query modifier.
 extension QueryModifier<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
   /// Only apply a part of the query if `enabled` is true.
   QueryBuilder<OBJ, OBJ, RS> optional<RS>(
@@ -108,47 +105,88 @@ extension QueryModifier<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
   }
 }
 
-extension QueryNumAggregation<T extends num?> on IsarQuery<T?> {
-  T? min() => aggregate(Aggregation.min);
+/// Asynchronous operations for queries.
+extension QueryAsync<T> on IsarQuery<T> {
+  /// {@macro query_find_first}
+  Future<T?> findFirstAsync({int? offset}) =>
+      isar.readAsync((isar) => findFirst(offset: offset));
 
-  Future<T?> minAsync() => aggregateAsync(Aggregation.min);
+  /// {@macro query_find_all}
+  Future<List<T>> findAllAsync({int? offset, int? limit}) =>
+      isar.readAsync((isar) => findAll(offset: offset, limit: limit));
 
-  T? max() => aggregate(Aggregation.max);
+  /// {@macro aggregation_count}
+  Future<int> countAsync() => isar.readAsync((isar) => count());
 
-  Future<T?> maxAsync() => aggregateAsync(Aggregation.max);
+  /// {@macro aggregation_is_empty}
+  Future<bool> isEmptyAsync() => isar.readAsync((isar) => isEmpty());
 
-  double average() => aggregate(Aggregation.average) ?? double.nan;
-
-  Future<double> averageAsync() => aggregateAsync<double>(Aggregation.average)
-      .then((value) => value ?? double.nan);
-
-  T sum() => aggregate(Aggregation.sum)!;
-
-  Future<T> sumAsync() =>
-      aggregateAsync<T>(Aggregation.sum).then((value) => value!);
+  /// @nodoc
+  @protected
+  Future<R?> aggregateAsync<R>(Aggregation op) =>
+      isar.readAsync((isar) => aggregate(op));
 }
 
+/// Aggregation operations for number queries.
+extension QueryNumAggregation<T extends num?> on IsarQuery<T?> {
+  /// {@macro aggregation_min}
+  T? min() => aggregate(Aggregation.min);
+
+  /// {@macro aggregation_min}
+  Future<T?> minAsync() => aggregateAsync(Aggregation.min);
+
+  /// {@macro aggregation_max}
+  T? max() => aggregate(Aggregation.max);
+
+  /// {@macro aggregation_max}
+  Future<T?> maxAsync() => aggregateAsync(Aggregation.max);
+
+  /// {@macro aggregation_sum}
+  T sum() => aggregate(Aggregation.sum)!;
+
+  /// {@macro aggregation_sum}
+  Future<T> sumAsync() =>
+      aggregateAsync<T>(Aggregation.sum).then((value) => value!);
+
+  /// {@macro aggregation_average}
+  double average() => aggregate(Aggregation.average) ?? double.nan;
+
+  /// {@macro aggregation_average}
+  Future<double> averageAsync() => aggregateAsync<double>(Aggregation.average)
+      .then((value) => value ?? double.nan);
+}
+
+/// Aggregation operations for date queries.
 extension QueryDateAggregation<T extends DateTime?> on IsarQuery<T> {
+  /// {@macro aggregation_min}
   DateTime? min() => aggregate(Aggregation.min);
 
+  /// {@macro aggregation_min}
   Future<DateTime?> minAsync() => aggregateAsync(Aggregation.min);
 
+  /// {@macro aggregation_max}
   DateTime? max() => aggregate(Aggregation.max);
 
+  /// {@macro aggregation_max}
   Future<DateTime?> maxAsync() => aggregateAsync(Aggregation.max);
 }
 
+/// Aggregation operations for string queries.
 extension QueryStringAggregation<T extends String?> on IsarQuery<T?> {
+  /// {@macro aggregation_min}
   T? min() => aggregate(Aggregation.min);
 
+  /// {@macro aggregation_min}
   Future<T?> minAsync() => aggregateAsync(Aggregation.min);
 
+  /// {@macro aggregation_max}
   T? max() => aggregate(Aggregation.max);
 
+  /// {@macro aggregation_max}
   Future<T?> maxAsync() => aggregateAsync(Aggregation.max);
 }
 
-/// Extension for QueryBuilders
+/// Operations for query builders.
 extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QOperations> {
   /// Create a query from this query builder.
   IsarQuery<R> build() => _query.build();
@@ -165,9 +203,17 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QOperations> {
   /// {@macro query_find_first}
   R? findFirst({int? offset}) => _withQuery((q) => q.findFirst(offset: offset));
 
+  /// {@macro query_find_first}
+  Future<R?> findFirstAsync({int? offset}) =>
+      _withQueryAsync((q) => q.findFirstAsync(offset: offset));
+
   /// {@macro query_find_all}
   List<R> findAll({int? offset, int? limit}) =>
       _withQuery((q) => q.findAll(offset: offset, limit: limit));
+
+  /// {@macro query_find_all}
+  Future<List<R>> findAllAsync({int? offset, int? limit}) =>
+      _withQueryAsync((q) => q.findAllAsync(offset: offset, limit: limit));
 
   /// {@macro query_delete_first}
   bool deleteFirst({int? offset}) =>
@@ -177,10 +223,23 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QOperations> {
   int deleteAll({int? offset, int? limit}) =>
       _withQuery((q) => q.deleteAll(offset: offset, limit: limit));
 
-  /// {@macro query_find_all}
+  /// {@macro aggregation_count}
+  int count() => _withQuery((q) => q.count());
+
+  /// {@macro aggregation_count}
+  Future<int> countAsync() => _withQueryAsync((q) => q.countAsync());
+
+  /// {@macro aggregation_is_empty}
+  bool isEmpty() => _withQuery((q) => q.isEmpty());
+
+  /// {@macro aggregation_is_empty}
+  Future<bool> isEmptyAsync() => _withQueryAsync((q) => q.isEmptyAsync());
+
+  /// {@macro query_export_json}
   List<Map<String, dynamic>> exportJson({int? offset, int? limit}) =>
       _withQuery((q) => q.exportJson(offset: offset, limit: limit));
 
+  /// {@macro query_watch}
   Stream<List<R>> watch({
     bool fireImmediately = false,
     int? offset,
@@ -201,6 +260,7 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QOperations> {
     return controller.stream;
   }
 
+  /// {@macro query_watch_lazy}
   Stream<void> watchLazy({bool fireImmediately = false}) =>
       _withQuery((q) => q.watchLazy(fireImmediately: fireImmediately));
 
@@ -212,30 +272,9 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QOperations> {
       q.close();
     }
   }
-
-  Future<R?> findFirstAsync({int? offset}) =>
-      _withQueryAsync((q) => q.findFirstAsync(offset: offset));
-
-  Future<List<R>> findAllAsync({int? offset, int? limit}) =>
-      _withQueryAsync((q) => q.findAllAsync(offset: offset, limit: limit));
 }
 
-extension QueryExecuteAggregation<OBJ, T>
-    on QueryBuilder<OBJ, T?, QOperations> {
-  int count() => _withQuery((q) => q.count());
-
-  bool isEmpty() => _withQuery((q) => q.isEmpty());
-
-  bool isNotEmpty() => _withQuery((q) => q.isNotEmpty());
-
-  Future<int> countAsync() => _withQueryAsync((q) => q.countAsync());
-
-  Future<bool> isEmptyAsync() => _withQueryAsync((q) => q.isEmptyAsync());
-
-  Future<bool> isNotEmptyAsync() => _withQueryAsync((q) => q.isNotEmptyAsync());
-}
-
-/// Extension for QueryBuilders
+/// Aggregation operations for number query builders.
 extension QueryExecuteNumAggregation<OBJ, T extends num>
     on QueryBuilder<OBJ, T?, QAfterProperty> {
   /// {@macro aggregation_min}
@@ -250,16 +289,20 @@ extension QueryExecuteNumAggregation<OBJ, T extends num>
   /// {@macro aggregation_sum}
   T sum() => _withQuery((q) => q.sum());
 
+  /// {@macro aggregation_min}
   Future<T?> minAsync() => _withQueryAsync((q) => q.minAsync());
 
+  /// {@macro aggregation_max}
   Future<T?> maxAsync() => _withQueryAsync((q) => q.maxAsync());
 
+  /// {@macro aggregation_average}
   Future<double> averageAsync() => _withQueryAsync((q) => q.averageAsync());
 
+  /// {@macro aggregation_sum}
   Future<T> sumAsync() => _withQueryAsync((q) => q.sumAsync());
 }
 
-/// Extension for QueryBuilders
+/// Aggregation operations for date query builders.
 extension QueryExecuteDateAggregation<OBJ>
     on QueryBuilder<OBJ, DateTime?, QAfterProperty> {
   /// {@macro aggregation_min}
@@ -268,19 +311,25 @@ extension QueryExecuteDateAggregation<OBJ>
   /// {@macro aggregation_max}
   DateTime? max() => _withQuery((q) => q.max());
 
+  /// {@macro aggregation_min}
   Future<DateTime?> minAsync() => _withQueryAsync((q) => q.minAsync());
 
   /// {@macro aggregation_max}
   Future<DateTime?> maxAsync() => _withQueryAsync((q) => q.maxAsync());
 }
 
+/// Aggregation operations for string query builders.
 extension QueryExecuteStringAggregation<OBJ>
     on QueryBuilder<OBJ, String?, QAfterProperty> {
+  /// {@macro aggregation_min}
   String? min() => _withQuery((q) => q.min());
 
+  /// {@macro aggregation_max}
   String? max() => _withQuery((q) => q.max());
 
+  /// {@macro aggregation_min}
   Future<String?> minAsync() => _withQueryAsync((q) => q.minAsync());
 
+  /// {@macro aggregation_max}
   Future<String?> maxAsync() => _withQueryAsync((q) => q.maxAsync());
 }

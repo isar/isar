@@ -1,3 +1,4 @@
+/// Extremely fast, easy to use, and fully async NoSQL database for Flutter.
 library isar;
 
 import 'dart:async';
@@ -21,7 +22,6 @@ part 'src/annotations/name.dart';
 part 'src/annotations/type.dart';
 part 'src/annotations/utc.dart';
 
-part 'src/async.dart';
 part 'src/compact_condition.dart';
 
 part 'src/impl/filter_builder.dart';

@@ -1,5 +1,3 @@
-// ignore_for_file: public_member_api_docs
-
 part of isar_generator;
 
 const TypeChecker _dateTimeChecker = TypeChecker.fromRuntime(DateTime);

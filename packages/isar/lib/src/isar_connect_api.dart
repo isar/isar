@@ -275,7 +275,7 @@ class ConnectQueryPayload {
           SortProperty(
             property: sortProperty!,
             sort: sortAsc == true ? Sort.asc : Sort.desc,
-          )
+          ),
       ],
     );
   }

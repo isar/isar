@@ -102,7 +102,7 @@ void main() {
       expect(sizeB2, greaterThanOrEqualTo(sizeB1));
     });
 
-    // TODO enable when indexes are implemented
+    // enable when indexes are implemented
     /*isarTest('includeIndexes should change size', () {
       isar.write((isar) => isar.modelAs.putAll([objA0, objA1, objA3]));
 

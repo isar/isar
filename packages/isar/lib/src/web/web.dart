@@ -59,15 +59,15 @@ class SendPort {
 }
 
 int platformFastHash(String str) {
-  var i = 0,
-      t0 = 0,
-      v0 = 0x2325,
-      t1 = 0,
-      v1 = 0x8422,
-      t2 = 0,
-      v2 = 0x9ce4,
-      t3 = 0,
-      v3 = 0xcbf2;
+  var i = 0;
+  var t0 = 0;
+  var v0 = 0x2325;
+  var t1 = 0;
+  var v1 = 0x8422;
+  var t2 = 0;
+  var v2 = 0x9ce4;
+  var t3 = 0;
+  var v3 = 0xcbf2;
 
   while (i < str.length) {
     v0 ^= str.codeUnitAt(i++);

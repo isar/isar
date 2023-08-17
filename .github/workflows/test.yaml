@@ -24,19 +24,16 @@ jobs:
   lint:
     name: Check lints
     runs-on: ubuntu-latest
-    if: ${{ false }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ secrets.FLUTTER_VERSION }}
-      - run: flutter pub get
+      - run: dart pub get
         working-directory: packages/isar
       - run: flutter pub get
         working-directory: packages/isar_flutter_libs
-      - run: flutter pub get
-        working-directory: packages/isar_generator
       - run: flutter pub get
         working-directory: packages/isar_inspector
       - run: |
