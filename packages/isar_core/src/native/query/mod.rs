@@ -7,7 +7,6 @@ use super::native_collection::{NativeCollection, NativeProperty};
 use super::native_reader::NativeReader;
 use super::native_txn::NativeTxn;
 use crate::core::cursor::IsarQueryCursor;
-use crate::core::error::Result;
 use crate::core::instance::Aggregation;
 use crate::core::query_builder::Sort;
 use crate::core::value::IsarValue;
@@ -102,14 +101,13 @@ impl NativeQuery {
         }
     }
 
-    pub(crate) fn update(
+    pub(crate) fn get_matching_ids(
         &self,
         txn: &NativeTxn,
         collection: &NativeCollection,
         offset: Option<u32>,
         limit: Option<u32>,
-        updates: &[(u16, Option<IsarValue>)],
-    ) -> Result<u32> {
+    ) -> Vec<i64> {
         let iterator = QueryIterator::new(
             txn,
             collection,
@@ -118,39 +116,7 @@ impl NativeQuery {
             offset.unwrap_or(0),
             limit.unwrap_or(u32::MAX),
         );
-        let change_set = &mut txn.get_change_set();
-        let mut cursor = collection.get_cursor(txn)?;
-        let mut count = 0;
-        for (id, _) in iterator {
-            collection.update(txn, change_set, &mut cursor, id, updates)?;
-            count += 1;
-        }
-        Ok(count)
-    }
-
-    pub(crate) fn delete(
-        &self,
-        txn: &NativeTxn,
-        collection: &NativeCollection,
-        offset: Option<u32>,
-        limit: Option<u32>,
-    ) -> Result<u32> {
-        let iterator = QueryIterator::new(
-            txn,
-            collection,
-            self,
-            false,
-            offset.unwrap_or(0),
-            limit.unwrap_or(u32::MAX),
-        );
-        let change_set = &mut txn.get_change_set();
-        let mut cursor = collection.get_cursor(txn)?;
-        let mut count = 0;
-        for (id, _) in iterator {
-            collection.delete(txn, change_set, &mut cursor, id)?;
-            count += 1;
-        }
-        Ok(count)
+        iterator.map(|(id, _)| id).collect()
     }
 }
 

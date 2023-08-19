@@ -270,7 +270,16 @@ impl IsarInstance for NativeInstance {
         self.verify_instance_id(txn.instance_id)?;
         self.verify_instance_id(query.instance_id)?;
         let collection = self.get_collection(query.collection_index)?;
-        txn.guard(|| query.update(txn, collection, offset, limit, updates))
+        let ids = query.get_matching_ids(txn, collection, offset, limit);
+
+        txn.guard(|| {
+            let change_set = &mut txn.get_change_set();
+            let mut cursor = collection.get_cursor(txn)?;
+            for id in &ids {
+                collection.update(txn, change_set, &mut cursor, *id, updates)?;
+            }
+            Ok(ids.len() as u32)
+        })
     }
 
     fn query_delete(
@@ -283,7 +292,16 @@ impl IsarInstance for NativeInstance {
         self.verify_instance_id(txn.instance_id)?;
         self.verify_instance_id(query.instance_id)?;
         let collection = self.get_collection(query.collection_index)?;
-        txn.guard(|| query.delete(txn, collection, offset, limit))
+        let ids = query.get_matching_ids(txn, collection, offset, limit);
+
+        txn.guard(|| {
+            let change_set = &mut txn.get_change_set();
+            let mut cursor = collection.get_cursor(txn)?;
+            for id in &ids {
+                collection.delete(txn, change_set, &mut cursor, *id)?;
+            }
+            Ok(ids.len() as u32)
+        })
     }
 
     fn watch(&self, collection_index: u16, callback: WatcherCallback) -> Result<WatchHandle> {
