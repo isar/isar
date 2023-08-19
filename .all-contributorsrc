@@ -200,6 +200,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "oscarpalomar",
+      "name": "Oscar Palomar",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13899772?v=4",
+      "profile": "https://github.com/oscarpalomar",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorTemplate": "<a href=\"https://github.com/<%= contributor.login %>\"><img src=\"<%= contributor.avatar_url %>\" width=\"<%= options.imageSize %>px;\" alt=\"\"/><br /><sub><b><%= contributor.name %></b></sub></a>",
@@ -210,5 +219,6 @@
   "repoType": "github",
   "repoHost": "https://github.com",
   "skipCi": true,
-  "commitConvention": "angular"
+  "commitConvention": "angular",
+  "commitType": "docs"
 }
