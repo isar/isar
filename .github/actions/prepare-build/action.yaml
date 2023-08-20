@@ -15,10 +15,16 @@ runs:
       with:
         version: "11.0"
         directory: ${{ runner.temp }}/llvm
+    - name: Install Perl
+      if: runner.os == 'Windows'
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        distribution: strawberry
     - name: Set Windows environment variables
       if: runner.os == 'Windows'
       shell: bash
       run: |
+        echo which perl
         echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
         echo "OPENSSL_SRC_PERL=C:/Strawberry/perl/bin/perl" >> $env:GITHUB_ENV
     # See https://github.com/godot-rust/godot-rust/pull/920
