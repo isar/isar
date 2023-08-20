@@ -21,10 +21,12 @@ runs:
       with:
         distribution: strawberry
         perl-version: "5.32"
-    - name: Set LIBCLANG_PATH
+    - name: Set Windows environment variables
       if: runner.os == 'Windows'
-      shell: bash
-      run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
+      shell: pwsh
+      run: |
+        echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
+        echo "OPENSSL_SRC_PERL=C:/Strawberry/perl/bin/perl" >> $env:GITHUB_ENV
     # See https://github.com/godot-rust/godot-rust/pull/920
     - name: "Workaround Android NDK due to Rust bug"
       if: runner.os == 'Linux' || runner.os == 'macOS'
