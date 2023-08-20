@@ -102,6 +102,10 @@ jobs:
         run: sh tool/download_binaries.sh
       - name: Adjust Version
         run: find . -type f -exec sed -i "s/0.0.0-placeholder/${{ github.ref_name }}/g" {} +
+      - name: pub.dev credentials
+        run: |
+          mkdir -p $HOME/.config/dart
+          echo '${{ secrets.PUB_JSON }}' >> $HOME/.config/dart/pub-credentials.json
       - uses: JS-DevTools/npm-publish@v2
         with:
           token: ${{ secrets.NPM_TOKEN }}
