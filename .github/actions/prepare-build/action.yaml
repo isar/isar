@@ -20,6 +20,7 @@ runs:
       uses: shogo82148/actions-setup-perl@v1
       with:
         distribution: strawberry
+        version: "5.32"
     - name: Set Windows environment variables
       if: runner.os == 'Windows'
       shell: bash
