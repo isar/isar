@@ -1,11 +1,5 @@
 export IPHONEOS_DEPLOYMENT_TARGET=11.0
 
-echo open ssl dirs
-echo $OPENSSL_DIR
-echo $OPENSSL_LIB_DIR
-echo $OPENSSL_INCLUDE_DIR
-echo done
-
 rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
 cargo build --target aarch64-apple-ios --features sqlcipher --release
 cargo build --target aarch64-apple-ios-sim --features sqlcipher --release
