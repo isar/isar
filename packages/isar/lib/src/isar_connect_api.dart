@@ -123,35 +123,35 @@ class ConnectQueryPayload {
   }
 
   static Filter _filterFromJson(Map<String, dynamic> json) {
-    final prop = json['property'] as int?;
-    final val = json['value'] ?? json['wildcard'];
+    final property = json['property'] as int?;
+    final value = json['value'] ?? json['wildcard'];
     switch (json['type']) {
       case 'eq':
-        return EqualCondition(property: prop!, value: val);
+        return EqualCondition(property: property!, value: value);
       case 'gt':
-        return GreaterCondition(property: prop!, value: val);
+        return GreaterCondition(property: property!, value: value);
       case 'gte':
-        return GreaterOrEqualCondition(property: prop!, value: val);
+        return GreaterOrEqualCondition(property: property!, value: value);
       case 'lt':
-        return LessCondition(property: prop!, value: val);
+        return LessCondition(property: property!, value: value);
       case 'lte':
-        return LessOrEqualCondition(property: prop!, value: val);
+        return LessOrEqualCondition(property: property!, value: value);
       case 'between':
         return BetweenCondition(
-          property: prop!,
+          property: property!,
           lower: json['lower'],
           upper: json['upper'],
         );
       case 'startsWith':
-        return StartsWithCondition(property: prop!, value: val as String);
+        return StartsWithCondition(property: property!, value: value as String);
       case 'endsWith':
-        return EndsWithCondition(property: prop!, value: val as String);
+        return EndsWithCondition(property: property!, value: value as String);
       case 'contains':
-        return ContainsCondition(property: prop!, value: val as String);
+        return ContainsCondition(property: property!, value: value as String);
       case 'matches':
-        return MatchesCondition(property: prop!, wildcard: val as String);
+        return MatchesCondition(property: property!, wildcard: value as String);
       case 'isNull':
-        return IsNullCondition(property: prop!);
+        return IsNullCondition(property: property!);
       case 'and':
         return AndGroup(
           (json['filters'] as List)
@@ -175,91 +175,43 @@ class ConnectQueryPayload {
 
   static Map<String, dynamic> _filterToJson(Filter filter) {
     switch (filter) {
-      case EqualCondition(property: final prop, value: final val):
-        return {
-          'type': 'eq',
-          'property': prop,
-          'value': val.toString(),
-        };
-      case GreaterCondition(property: final prop, value: final val):
-        return {
-          'type': 'gt',
-          'property': prop,
-          'value': val.toString(),
-        };
-      case GreaterOrEqualCondition(property: final prop, value: final val):
-        return {
-          'type': 'gte',
-          'property': prop,
-          'value': val.toString(),
-        };
-      case LessCondition(property: final prop, value: final val):
-        return {
-          'type': 'lt',
-          'property': prop,
-          'value': val.toString(),
-        };
-      case LessOrEqualCondition(property: final prop, value: final val):
-        return {
-          'type': 'lte',
-          'property': prop,
-          'value': val.toString(),
-        };
+      case EqualCondition(:final property, :final value):
+        return {'type': 'eq', 'property': property, 'value': value};
+      case GreaterCondition(:final property, :final value):
+        return {'type': 'gt', 'property': property, 'value': value};
+      case GreaterOrEqualCondition(:final property, :final value):
+        return {'type': 'gte', 'property': property, 'value': value};
+      case LessCondition(:final property, :final value):
+        return {'type': 'lt', 'property': property, 'value': value};
+      case LessOrEqualCondition(:final property, :final value):
+        return {'type': 'lte', 'property': property, 'value': value};
       case BetweenCondition(
-          property: final prop,
+          property: final property,
           lower: final lower,
           upper: final upper,
         ):
         return {
           'type': 'between',
-          'property': prop,
-          'lower': lower.toString(),
-          'upper': upper.toString(),
+          'property': property,
+          'lower': lower,
+          'upper': upper,
         };
-      case StartsWithCondition(property: final prop, value: final val):
-        return {
-          'type': 'startsWith',
-          'property': prop,
-          'value': val,
-        };
-      case EndsWithCondition(property: final prop, value: final val):
-        return {
-          'type': 'endsWith',
-          'property': prop,
-          'value': val,
-        };
-      case ContainsCondition(property: final prop, value: final val):
-        return {
-          'type': 'contains',
-          'property': prop,
-          'value': val,
-        };
-      case MatchesCondition(property: final prop, wildcard: final wildcard):
-        return {
-          'type': 'matches',
-          'property': prop,
-          'value': wildcard,
-        };
-      case IsNullCondition(property: final prop):
-        return {
-          'type': 'isNull',
-          'property': prop,
-        };
+      case StartsWithCondition(:final property, :final value):
+        return {'type': 'startsWith', 'property': property, 'value': value};
+      case EndsWithCondition(:final property, :final value):
+        return {'type': 'endsWith', 'property': property, 'value': value};
+      case ContainsCondition(:final property, :final value):
+        return {'type': 'contains', 'property': property, 'value': value};
+      case MatchesCondition(property: final property, wildcard: final wildcard):
+        return {'type': 'matches', 'property': property, 'value': wildcard};
+      case IsNullCondition(property: final property):
+        return {'type': 'isNull', 'property': property};
       case AndGroup(filters: final filters):
-        return {
-          'type': 'and',
-          'filters': filters.map(_filterToJson).toList(),
-        };
+        return {'type': 'and', 'filters': filters.map(_filterToJson).toList()};
       case OrGroup(filters: final filters):
-        return {
-          'type': 'or',
-          'filters': filters.map(_filterToJson).toList(),
-        };
+        return {'type': 'or', 'filters': filters.map(_filterToJson).toList()};
       case NotGroup(filter: final filter):
-        return {
-          'type': 'not',
-          'filter': _filterToJson(filter),
-        };
+        return {'type': 'not', 'filter': _filterToJson(filter)};
       case ObjectFilter():
         throw UnimplementedError();
     }
