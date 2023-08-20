@@ -19,12 +19,12 @@ runs:
       if: runner.os == 'Windows'
       shell: bash
       run: echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
-    - name: Install OpenSSL
+    - name: Install Perl
       if: runner.os == 'Windows'
-      shell: bash
-      run: |
-        choco install openssl
-        echo "OPENSSL_DIR=C:\Program Files\OpenSSL" >>$GITHUB_ENV
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        perl-version: "5.32"
+        distribution: strawberry-perl
     # See https://github.com/godot-rust/godot-rust/pull/920
     - name: "Workaround Android NDK due to Rust bug"
       if: runner.os == 'Linux' || runner.os == 'macOS'
