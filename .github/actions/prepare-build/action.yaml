@@ -15,11 +15,6 @@ runs:
       with:
         version: "11.0"
         directory: ${{ runner.temp }}/llvm
-    - name: Install Perl
-      if: runner.os == 'Windows'
-      uses: shogo82148/actions-setup-perl@v1
-      with:
-        distribution: strawberry
     - name: Set Windows environment variables
       if: runner.os == 'Windows'
       shell: bash
