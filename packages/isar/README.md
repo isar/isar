@@ -69,6 +69,7 @@ Holy smokes you're here! Let's get started on using the coolest Flutter database
 dependencies:
   isar: 4.0.0
   isar_flutter_libs: 4.0.0 # contains Isar Core
+  path_provider: 2.1.0
 
 dev_dependencies:
   build_runner: any
