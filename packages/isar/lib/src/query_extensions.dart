@@ -47,19 +47,25 @@ extension QueryFilterNotAnyAll<OBJ, R>
   /// OR. So an object will be included if it matches at least one of the
   /// resulting filters.
   ///
-  /// If [items] is empty, this is a no-op.
+  /// If [items] is empty, this condition will match nothing.
   QueryBuilder<OBJ, R, QAfterFilterCondition> anyOf<E>(
     Iterable<E> items,
     FilterRepeatModifier<OBJ, OBJ, E> modifier,
   ) {
     return QueryBuilder.apply(this, (query) {
-      return query.group((q) {
-        var q2 = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>._(q._query);
-        for (final e in items) {
-          q2 = modifier(q2.or(), e);
-        }
-        return q2;
-      });
+      if (items.isEmpty) {
+        return query.addFilterCondition(
+          const BetweenCondition(property: 0, lower: 1, upper: 0),
+        );
+      } else {
+        return query.group((q) {
+          var q2 = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>._(q._query);
+          for (final e in items) {
+            q2 = modifier(q2.or(), e);
+          }
+          return q2;
+        });
+      }
     });
   }
 
@@ -67,19 +73,25 @@ extension QueryFilterNotAnyAll<OBJ, R>
   /// AND. So an object will be included if it matches all of the resulting
   /// filters.
   ///
-  /// If [items] is empty, this is a no-op.
+  /// If [items] is empty, this condition will match everything.
   QueryBuilder<OBJ, R, QAfterFilterCondition> allOf<E>(
     Iterable<E> items,
     FilterRepeatModifier<OBJ, OBJ, E> modifier,
   ) {
     return QueryBuilder.apply(this, (query) {
-      return query.group((q) {
-        var q2 = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>._(q._query);
-        for (final e in items) {
-          q2 = modifier(q2.and(), e);
-        }
-        return q2;
-      });
+      if (items.isEmpty) {
+        return query.addFilterCondition(
+          const GreaterOrEqualCondition(property: 0, value: null),
+        );
+      } else {
+        return query.group((q) {
+          var q2 = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>._(q._query);
+          for (final e in items) {
+            q2 = modifier(q2.and(), e);
+          }
+          return q2;
+        });
+      }
     });
   }
 }

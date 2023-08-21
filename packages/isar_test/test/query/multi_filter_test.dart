@@ -43,63 +43,13 @@ void main() {
       });
     });
 
-    group('where anyOf', () {
-      isarTest('zero elements', () {
-        final q = isar.models.where().anyOf(
-          <int>[],
-          (q, int element) => q.valueEqualTo(element),
-        );
-        expect(q.findAll(), [model0, model1, model2, model3]);
-      });
-
-      isarTest('one matching element', () {
-        final q = isar.models.where().anyOf(
-          [2],
-          (q, int element) => q.valueEqualTo(element),
-        );
-        expect(q.findAll(), [model2]);
-      });
-
-      isarTest('two matching elements', () {
-        final q = isar.models.where().anyOf(
-          [0, 2],
-          (q, int element) => q.valueEqualTo(element),
-        );
-        expect(q.findAll(), [model0, model2]);
-      });
-
-      isarTest('one non-matching element', () {
-        final q = isar.models.where().anyOf(
-          [5],
-          (q, int element) => q.valueEqualTo(element),
-        );
-        expect(q.findAll(), isEmpty);
-      });
-
-      isarTest('one matching and one non-matching elements', () {
-        final q = isar.models.where().anyOf(
-          [7, 3],
-          (q, int element) => q.valueEqualTo(element),
-        );
-        expect(q.findAll(), [model3]);
-      });
-
-      isarTest('one non-matching element', () {
-        final q = isar.models.where().anyOf(
-          [5],
-          (q, int element) => q.valueEqualTo(element),
-        );
-        expect(q.findAll(), isEmpty);
-      });
-    });
-
     group('filter anyOf', () {
       isarTest('zero elements', () {
         final q = isar.models.where().anyOf(
           <int>[],
           (q, int element) => q.valueEqualTo(element),
         );
-        expect(q.findAll(), [model0, model1, model2, model3]);
+        expect(q.findAll(), isEmpty);
 
         final notQ = isar.models.where().not().anyOf(
           <int>[],
@@ -191,7 +141,7 @@ void main() {
           <int>[],
           (q, int element) => q.valueEqualTo(element),
         );
-        expect(notQ.findAll(), [model0, model1, model2, model3]);
+        expect(notQ.findAll(), isEmpty);
       });
 
       isarTest('one matching element', () {
