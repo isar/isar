@@ -338,7 +338,7 @@ Let's add indexes to the shoe collection:
 
 ```dart
 @collection
-class Shoe with IsarObject {
+class Shoe {
   Id? id;
 
   @Index()
