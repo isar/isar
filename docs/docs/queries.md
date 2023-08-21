@@ -155,8 +155,8 @@ Sometimes it is necessary to build a query based on some conditions or for diffe
 | Modifier              | Description                                                                                                                                     |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `.optional(cond, qb)` | Extends the query only if the `condition` is `true`. This can be used almost anywhere in a query for example to conditionally sort or limit it. |
-| `.anyOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **or**.                                                  |
-| `.allOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **and**.                                                 |
+| `.anyOf(list, qb)`    | Extends the query for each value in `list` and combines the conditions using logical **or**.                                                  |
+| `.allOf(list, qb)`    | Extends the query for each value in `list` and combines the conditions using logical **and**.                                                 |
 
 In this example, we build a method that can find shoes with an optional filter:
 
