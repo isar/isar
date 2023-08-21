@@ -1,0 +1,2 @@
+ignore:
+  - "packages/isar_core_ffi"
