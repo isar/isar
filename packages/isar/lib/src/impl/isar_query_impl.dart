@@ -134,7 +134,8 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
     try {
       return _findAll(deserialize, offset: offset, limit: limit);
     } finally {
-      IsarCore.b.isar_buffer_free(bufferPtrPtr.value, bufferSizePtr.value);
+      IsarCore.b
+          .isar_buffer_free(bufferPtrPtr.ptrValue, bufferSizePtr.u32Value);
       free(bufferPtrPtr);
       free(bufferSizePtr);
     }
