@@ -92,10 +92,6 @@ impl<'a> IsarWriter<'a> for SQLiteInsert<'a> {
         let _ = self.with_stmt(|stmt| stmt.bind_text(col, value));
     }
 
-    fn write_json(&mut self, index: u32, value: &str) {
-        self.write_string(index, value)
-    }
-
     fn write_byte_list(&mut self, index: u32, value: &[u8]) {
         let col = self.property_index(index);
         let _ = self.with_stmt(|stmt| stmt.bind_blob(col, value));
@@ -241,10 +237,6 @@ impl<'a> IsarWriter<'a> for SQLiteObjectWriter<'a> {
             self.map
                 .insert(property.name.clone(), Value::String(value.to_string()));
         }
-    }
-
-    fn write_json(&mut self, index: u32, value: &str) {
-        self.write_string(index, value)
     }
 
     fn write_byte_list(&mut self, index: u32, value: &[u8]) {
@@ -404,10 +396,6 @@ impl<'a> IsarWriter<'a> for SQLiteListWriter<'a> {
         if index < self.list.len() {
             self.list[index] = Value::String(value.to_string());
         }
-    }
-
-    fn write_json(&mut self, index: u32, value: &str) {
-        self.write_string(index, value)
     }
 
     fn write_byte_list(&mut self, _index: u32, _value: &[u8]) {}

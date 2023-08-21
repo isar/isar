@@ -34,8 +34,6 @@ pub trait IsarReader {
 
     fn read_string(&self, index: u32) -> Option<&str>;
 
-    fn read_json(&self, index: u32) -> &str;
-
     fn read_blob(&self, index: u32) -> Option<Cow<'_, [u8]>>;
 
     fn read_object(&self, index: u32) -> Option<Self::ObjectReader<'_>>;

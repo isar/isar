@@ -1,6 +1,4 @@
-void main() {}
-
-/*import 'package:isar/isar.dart';
+import 'package:isar/isar.dart';
 import 'package:isar_test/src/common.dart';
 import 'package:test/test.dart';
 
@@ -15,10 +13,9 @@ class UniqueModel {
   @Index(unique: true)
   final String? value;
 
-  operator ==(other) =>
+  @override
+  bool operator ==(other) =>
       other is UniqueModel && id == other.id && value == other.value;
-
-  toString() => 'UniqueModel{id: $id, value: $value}';
 }
 
 void main() {
@@ -54,6 +51,16 @@ void main() {
         UniqueModel(id: 5, value: 'a'),
       ]);
     });
+
+    isarTest('unique nulls do not override each other', () {
+      isar.write((isar) {
+        isar.uniqueModels.putAll([UniqueModel(id: 1), UniqueModel(id: 2)]);
+      });
+
+      expect(
+        isar.uniqueModels.where().findAll(),
+        [UniqueModel(id: 1), UniqueModel(id: 2)],
+      );
+    });
   });
 }
-*/

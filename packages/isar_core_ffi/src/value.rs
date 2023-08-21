@@ -1,7 +1,6 @@
-use std::ptr;
-
 use crate::{i64_to_isar, isar_to_i64, IsarI64};
 use isar_core::core::value::IsarValue;
+use std::ptr;
 
 #[no_mangle]
 pub unsafe extern "C" fn isar_value_bool(value: bool) -> *const IsarValue {

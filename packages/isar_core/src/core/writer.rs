@@ -25,8 +25,6 @@ pub trait IsarWriter<'a> {
 
     fn write_string(&mut self, index: u32, value: &str);
 
-    fn write_json(&mut self, index: u32, value: &str);
-
     fn write_byte_list(&mut self, index: u32, value: &[u8]);
 
     fn begin_object(&mut self, index: u32) -> Option<Self::ObjectWriter>;

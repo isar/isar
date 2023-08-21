@@ -126,18 +126,13 @@ impl<'a> IsarReader for NativeReader<'a> {
 
     #[inline]
     fn read_string(&self, index: u32) -> Option<&str> {
-        let offset = self.get_offset(index, DataType::String)?;
-        self.object.read_string(offset)
-    }
+        let property = self.collection.get_property(index as u16)?;
 
-    #[inline]
-    fn read_json(&self, index: u32) -> &str {
-        if let Some(offset) = self.get_offset(index, DataType::Json) {
-            if let Some(str) = self.object.read_string(offset) {
-                return str;
-            }
+        if property.data_type == DataType::String || property.data_type == DataType::Json {
+            self.object.read_string(property.offset)
+        } else {
+            None
         }
-        "null"
     }
 
     #[inline]
@@ -275,14 +270,6 @@ impl<'a> IsarReader for NativeListReader<'a> {
                 .read_string(index * DataType::String.static_size() as u32)
         } else {
             None
-        }
-    }
-
-    fn read_json(&self, index: u32) -> &str {
-        if self.data_type == DataType::Json {
-            self.read_string(index).unwrap_or("null")
-        } else {
-            "null"
         }
     }
 

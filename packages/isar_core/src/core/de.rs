@@ -176,7 +176,7 @@ impl<'a, 'de: 'a, W: IsarWriter<'a>, F: Fn(&str) -> i64> Visitor<'de>
                     DataType::Json => {
                         let value = map.next_value::<Option<&RawValue>>()?;
                         if let Some(value) = value {
-                            self.writer.write_json(index as u32, value.get());
+                            self.writer.write_string(index as u32, value.get());
                         }
                     }
                     DataType::Object => {

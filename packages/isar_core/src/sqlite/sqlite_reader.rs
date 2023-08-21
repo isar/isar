@@ -101,10 +101,6 @@ impl<'a> IsarReader for SQLiteReader<'a> {
         }
     }
 
-    fn read_json(&self, index: u32) -> &str {
-        self.read_string(index).unwrap_or("null")
-    }
-
     fn read_blob(&self, index: u32) -> Option<Cow<[u8]>> {
         if self.is_null(index) {
             None
@@ -243,10 +239,6 @@ impl<'a> IsarReader for SQLiteObjectReader<'a> {
         None
     }
 
-    fn read_json(&self, index: u32) -> &str {
-        self.read_string(index).unwrap_or("null")
-    }
-
     fn read_blob(&self, index: u32) -> Option<Cow<'a, [u8]>> {
         if let Some(property) = self.collection.get_property(index as u16) {
             if let Some(Value::String(val)) = self.object.get(&property.name) {
@@ -367,10 +359,6 @@ impl<'a> IsarReader for SQLiteListReader<'a> {
         } else {
             None
         }
-    }
-
-    fn read_json(&self, index: u32) -> &str {
-        self.read_string(index).unwrap_or("null")
     }
 
     fn read_blob(&self, _index: u32) -> Option<Cow<'a, [u8]>> {

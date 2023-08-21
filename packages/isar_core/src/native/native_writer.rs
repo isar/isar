@@ -93,17 +93,10 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
 
     #[inline]
     fn write_string(&mut self, index: u32, value: &str) {
-        if let Some(offset) = self.get_offset(index, DataType::String) {
-            self.get_serializer()
-                .write_dynamic(offset, value.as_bytes());
-        }
-    }
-
-    #[inline]
-    fn write_json(&mut self, index: u32, value: &str) {
-        if let Some(offset) = self.get_offset(index, DataType::Json) {
-            self.get_serializer()
-                .write_dynamic(offset, value.as_bytes());
+        if let Some((data_type, index, _)) = self.get_property(index) {
+            if data_type == DataType::String || data_type == DataType::Json {
+                self.get_serializer().write_dynamic(index, value.as_bytes());
+            }
         }
     }
 

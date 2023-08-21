@@ -66,11 +66,12 @@ impl<'a, R: IsarReader> Serialize for IsarObjectSerialize<'a, R> {
                     }
                 }
                 DataType::Json => {
-                    let value = self.reader.read_json(index as u32);
-                    let value = serde_json::from_str::<Value>(value);
-                    if let Ok(value) = value {
-                        if value != Value::Null {
-                            ser.serialize_entry(name, &value)?;
+                    if let Some(value) = self.reader.read_string(index as u32) {
+                        let value = serde_json::from_str::<Value>(value);
+                        if let Ok(value) = value {
+                            if value != Value::Null {
+                                ser.serialize_entry(name, &value)?;
+                            }
                         }
                     }
                 }
@@ -177,7 +178,7 @@ impl<'a, R: IsarReader> Serialize for IsarListSerialize<'a, R> {
                     }
                 }
             }
-            DataType::String => {
+            DataType::String | DataType::Json => {
                 for i in 0..self.length {
                     if let Some(value) = self.reader.read_string(i) {
                         ser.serialize_element(&value)?;
@@ -191,21 +192,6 @@ impl<'a, R: IsarReader> Serialize for IsarListSerialize<'a, R> {
                     if let Some(object) = self.reader.read_object(i) {
                         let reader = IsarObjectSerialize::new(&object);
                         ser.serialize_element(&reader)?;
-                    } else {
-                        ser.serialize_element(&Value::Null)?;
-                    }
-                }
-            }
-            DataType::Json => {
-                for i in 0..self.length {
-                    let value = self.reader.read_json(i);
-                    let value = serde_json::from_str::<Value>(value);
-                    if let Ok(value) = value {
-                        if value != Value::Null {
-                            ser.serialize_element(&value)?;
-                        } else {
-                            ser.serialize_element(&Value::Null)?;
-                        }
                     } else {
                         ser.serialize_element(&Value::Null)?;
                     }
