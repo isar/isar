@@ -169,29 +169,6 @@ pub unsafe extern "C" fn isar_write_string(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn isar_write_json(
-    writer: &'static mut CIsarWriter,
-    index: u32,
-    value: *mut String,
-) {
-    let value = *Box::from_raw(value);
-    match writer {
-        #[cfg(feature = "native")]
-        CIsarWriter::Native(writer) => writer.write_string(index, &value),
-        #[cfg(feature = "native")]
-        CIsarWriter::NativeObject(writer) => writer.write_string(index, &value),
-        #[cfg(feature = "native")]
-        CIsarWriter::NativeList(writer) => writer.write_string(index, &value),
-        #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLite(writer) => writer.write_string(index, &value),
-        #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteObject(writer) => writer.write_string(index, &value),
-        #[cfg(feature = "sqlite")]
-        CIsarWriter::SQLiteList(writer) => writer.write_string(index, &value),
-    }
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn isar_write_byte_list(
     writer: &'static mut CIsarWriter,
     index: u32,

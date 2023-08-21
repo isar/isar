@@ -16,12 +16,6 @@ extension IsarBindingsX on JSIsar {
     int length,
   );
 
-  @ffi.Native<ffi.Void Function(ffi.Pointer<CString>)>(
-      symbol: 'isar_string_free')
-  external void isar_string_free(
-    ffi.Pointer<CString> value,
-  );
-
   @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Uint8>, ffi.Uint32)>(
       symbol: 'isar_buffer_free')
   external void isar_buffer_free(
@@ -829,15 +823,6 @@ extension IsarBindingsX on JSIsar {
       ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32,
           ffi.Pointer<CString>)>(symbol: 'isar_write_string')
   external void isar_write_string(
-    ffi.Pointer<CIsarWriter> writer,
-    int index,
-    ffi.Pointer<CString> value,
-  );
-
-  @ffi.Native<
-      ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32,
-          ffi.Pointer<CString>)>(symbol: 'isar_write_json')
-  external void isar_write_json(
     ffi.Pointer<CIsarWriter> writer,
     int index,
     ffi.Pointer<CString> value,

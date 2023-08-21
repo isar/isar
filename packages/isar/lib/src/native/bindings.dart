@@ -38,20 +38,6 @@ class IsarCoreBindings {
   late final _isar_string = _isar_stringPtr.asFunction<
       ffi.Pointer<CString> Function(ffi.Pointer<ffi.Uint16>, int)>();
 
-  void isar_string_free(
-    ffi.Pointer<CString> value,
-  ) {
-    return _isar_string_free(
-      value,
-    );
-  }
-
-  late final _isar_string_freePtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<CString>)>>(
-          'isar_string_free');
-  late final _isar_string_free =
-      _isar_string_freePtr.asFunction<void Function(ffi.Pointer<CString>)>();
-
   void isar_buffer_free(
     ffi.Pointer<ffi.Uint8> value,
     int capacity,
@@ -1846,26 +1832,6 @@ class IsarCoreBindings {
           ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32,
               ffi.Pointer<CString>)>>('isar_write_string');
   late final _isar_write_string = _isar_write_stringPtr.asFunction<
-      void Function(
-          ffi.Pointer<CIsarWriter>, int, ffi.Pointer<CString>)>(isLeaf: true);
-
-  void isar_write_json(
-    ffi.Pointer<CIsarWriter> writer,
-    int index,
-    ffi.Pointer<CString> value,
-  ) {
-    return _isar_write_json(
-      writer,
-      index,
-      value,
-    );
-  }
-
-  late final _isar_write_jsonPtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32,
-              ffi.Pointer<CString>)>>('isar_write_json');
-  late final _isar_write_json = _isar_write_jsonPtr.asFunction<
       void Function(
           ffi.Pointer<CIsarWriter>, int, ffi.Pointer<CString>)>(isLeaf: true);
 
