@@ -891,6 +891,7 @@ final class CIsarValue extends ffi.Opaque {}
 final class CString extends ffi.Opaque {}
 
 typedef IsarI64 = ffi.Int64;
+typedef DartIsarI64 = int;
 
 final class CIsarQueryCursor extends ffi.Opaque {}
 
@@ -899,6 +900,7 @@ final class CFilter extends ffi.Opaque {}
 final class CIsarUpdate extends ffi.Opaque {}
 
 typedef DartPort = ffi.Int64;
+typedef DartDartPort = int;
 
 final class CWatchHandle extends ffi.Opaque {}
 
