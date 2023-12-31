@@ -110,6 +110,7 @@ jobs:
         run: |
           flutter pub add json_annotation
           flutter pub add isar_test --path ../isar_test
+          flutter pub add override:file:7.0.0
         working-directory: packages/isar
       - name: Collect isar_test Coverage
         run: |
