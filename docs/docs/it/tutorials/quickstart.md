@@ -44,12 +44,6 @@ Esegui il seguente comando per avviare `build_runner`:
 dart run build_runner build
 ```
 
-Se stai usando Flutter, usa quanto segue:
-
-```
-flutter pub run build_runner build
-```
-
 ## 4. Apri l'istanza Isar
 
 Apri una nuova istanza Isar e passa tutti i tuoi schemi di raccolte. Facoltativamente, puoi specificare un nome di istanza e una directory.
