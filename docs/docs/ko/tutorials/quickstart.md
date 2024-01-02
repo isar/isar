@@ -44,12 +44,6 @@ Id는 컬렉션에서 개체를 고유하게 식별하고 나중에 개체를 �
 dart run build_runner build
 ```
 
-플러터를 사용하고 있다면, 다음 명령을 사용합니다.
-
-```
-flutter pub run build_runner build
-```
-
 ## 4. Isar 인스턴스 열기
 
 새 Isar 인스턴스를 열고 모든 컬렉션 스키마를 전달합니다. 선택적으로 인스턴스 이름과 디렉토리를 지정할 수도 있습니다.
