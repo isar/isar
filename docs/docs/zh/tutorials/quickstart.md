@@ -44,12 +44,6 @@ Id 唯一指向了 Collection 中的对象，之后我们可通过 Id 来查询�
 dart run build_runner build
 ```
 
-倘若你的项目用到了 Flutter，可用下方命令来代替：
-
-```
-flutter pub run build_runner build
-```
-
 ## 4. 创建一个 Isar 实例
 
 创建一个新的 Isar 实例，并将你想保存到 Isar 的所有 collection 的 schema（它在上一步由 Isar Generator 根据你定义的 collection 自动生成） 作为参数传入。你还可以指定实例的名称以及它所存储数据的文件路径。
