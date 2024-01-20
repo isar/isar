@@ -92,7 +92,7 @@ Are you a visual learner? Check out these videos to get started with Isar:
 </div>
 <br>
 <div class="video-block">
-  <iframe max-width=100% height=auto src="https://www.youtube.com/embed/videoseries?list=PLKKf8l1ne4_hMBtRykh9GCC4MMyteUTyf" title="Isar Database" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <iframe max-width=100% height=auto src="https://www.youtube.com/embed/videoseries?si=1Yod6q4vKV9jifuj&amp;list=PLKKf8l1ne4_jcOLfnDey75NJsI7KAi8Wx" title="Isar Database" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 <br>
 <div class="video-block">
