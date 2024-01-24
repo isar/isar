@@ -44,12 +44,6 @@ Führe den folgenden Befehl aus, um den `build_runner` zu starten:
 dart run build_runner build
 ```
 
-Wenn du Flutter verwendest:
-
-```
-flutter pub run build_runner build
-```
-
 ## 4. Isar-Instanz öffnen
 
 Öffne eine neue Isar-Instanz und übergebe alle Collection-Schemata. Optional kannst du einen Instanznamen und ein Verzeichnis angeben.

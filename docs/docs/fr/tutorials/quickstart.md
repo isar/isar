@@ -44,12 +44,6 @@ Exécutez la commande suivante pour démarrer le `build_runner`:
 dart run build_runner build
 ```
 
-Si vous utilisez Flutter:
-
-```sh
-flutter pub run build_runner build
-```
-
 ## 4. Ouverture l'instance Isar
 
 Ouvrez une nouvelle instance d'Isar et passez tous vos schémas de collection. En option, vous pouvez spécifier un nom d'instance et un dossier.

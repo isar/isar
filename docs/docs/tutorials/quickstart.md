@@ -46,12 +46,6 @@ Execute the following command to start the `build_runner`:
 dart run build_runner build
 ```
 
-If you are using Flutter, use the following:
-
-```
-flutter pub run build_runner build
-```
-
 ## 4. Open Isar instance
 
 Open a new Isar instance and pass all of your collection schemas. Optionally you can specify an instance name and directory.

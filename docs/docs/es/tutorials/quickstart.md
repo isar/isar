@@ -44,12 +44,6 @@ Ejecuta el siguiente comando para iniciar el `build_runner`:
 dart run build_runner build
 ```
 
-Si estás usando Flutter, puedes usar el siguiente:
-
-```
-flutter pub run build_runner build
-```
-
 ## 4. Abre una instancia Isar
 
 Abre una nueva instalcia Isar y pásale todos los esquemas de tu colección. Opcionalmente puedes especificar un nombre para la instancia y un directorio.
