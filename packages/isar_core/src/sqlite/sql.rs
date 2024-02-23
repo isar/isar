@@ -326,7 +326,10 @@ fn condition_sql(
         ConditionType::StringStartsWith => {
             if let Some(IsarValue::String(prefix)) = condition.values.get(0)? {
                 values.push(IsarValue::String(format!("{}%", escape_wildcard(prefix))));
-                format!("{} LIKE ? ESCAPE '\\'", property_name)
+                match condition.case_sensitive {
+                    true => format!("{} LIKE ? ESCAPE '\\'", property_name),
+                    false => format!("LOWER({}) LIKE LOWER(?) ESCAPE '\\'", property_name),
+                }
             } else {
                 "FALSE".to_string()
             }
@@ -334,7 +337,10 @@ fn condition_sql(
         ConditionType::StringEndsWith => {
             if let Some(IsarValue::String(postfix)) = condition.values.get(0)? {
                 values.push(IsarValue::String(format!("%{}", escape_wildcard(postfix))));
-                format!("{} LIKE ? ESCAPE '\\'", property_name)
+                match condition.case_sensitive {
+                    true => format!("{} LIKE ? ESCAPE '\\'", property_name),
+                    false => format!("LOWER({}) LIKE LOWER(?) ESCAPE '\\'", property_name),
+                }
             } else {
                 "FALSE".to_string()
             }
@@ -342,7 +348,10 @@ fn condition_sql(
         ConditionType::StringContains => {
             if let Some(IsarValue::String(needle)) = condition.values.get(0)? {
                 values.push(IsarValue::String(format!("%{}%", escape_wildcard(needle))));
-                format!("{} LIKE ? ESCAPE '\\'", property_name)
+                match condition.case_sensitive {
+                    true => format!("{} LIKE ? ESCAPE '\\'", property_name),
+                    false => format!("LOWER({}) LIKE LOWER(?) ESCAPE '\\'", property_name),
+                }
             } else {
                 "FALSE".to_string()
             }
@@ -353,7 +362,10 @@ fn condition_sql(
                     .replace("*", "%")
                     .replace("?", "_");
                 values.push(IsarValue::String(wildcard));
-                format!("{} LIKE ? ESCAPE '\\'", property_name)
+                match condition.case_sensitive {
+                    true => format!("{} LIKE ? ESCAPE '\\'", property_name),
+                    false => format!("LOWER({}) LIKE LOWER(?) ESCAPE '\\'", property_name),
+                }
             } else {
                 "FALSE".to_string()
             }
