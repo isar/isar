@@ -414,6 +414,12 @@ class _IsarImpl extends Isar {
   }
 
   @override
+  void changeEncryptionKey(String encryptionKey) {
+    final string = IsarCore._toNativeString(encryptionKey);
+    IsarCore.b.isar_change_encryption_key(getPtr(), string);
+  }
+
+  @override
   bool close({bool deleteFromDisk = false}) {
     final closed = IsarCore.b.isar_close(getPtr(), deleteFromDisk);
     _ptr = null;
