@@ -644,6 +644,24 @@ class IsarCoreBindings {
       int Function(
           ffi.Pointer<CIsarInstance>, ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>();
 
+  int isar_change_encryption_key(
+    ffi.Pointer<CIsarInstance> isar,
+    ffi.Pointer<CString> encryption_key,
+  ) {
+    return _isar_change_encryption_key(
+      isar,
+      encryption_key,
+    );
+  }
+
+  late final _isar_change_encryption_keyPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Uint8 Function(ffi.Pointer<CIsarInstance>,
+              ffi.Pointer<CString>)>>('isar_change_encryption_key');
+  late final _isar_change_encryption_key =
+      _isar_change_encryption_keyPtr.asFunction<
+          int Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CString>)>();
+
   int isar_txn_begin(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<ffi.Pointer<CIsarTxn>> txn,

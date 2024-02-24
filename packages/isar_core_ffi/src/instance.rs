@@ -137,6 +137,27 @@ pub unsafe extern "C" fn isar_get_dir(isar: &'static CIsarInstance, dir: *mut *c
     value.len() as u32
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn isar_change_encryption_key(
+    isar: &'static CIsarInstance,
+    encryption_key: *mut String,
+) -> u8 {
+    let encryption_key = if encryption_key.is_null() {
+        None
+    } else {
+        Some(*Box::from_raw(encryption_key))
+    };
+
+    isar_try! {
+        match isar {
+            #[cfg(feature = "native")]
+            CIsarInstance::Native(isar) => isar.change_encryption_key(encryption_key.as_deref())?,
+            #[cfg(feature = "sqlite")]
+            CIsarInstance::SQLite(isar) => isar.change_encryption_key(encryption_key.as_deref())?,
+        }
+    }
+}
+
 unsafe fn _isar_txn_begin(
     isar: &'static CIsarInstance,
     txn: *mut *const CIsarTxn,
