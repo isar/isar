@@ -14,7 +14,7 @@ class IntModel {
 
   @override
   // ignore: hash_and_equals
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other is IntModel) {
       return other.id == id && other.value == value;
     } else {
@@ -31,7 +31,7 @@ class StringModel {
 
   @override
   // ignore: hash_and_equals
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other is StringModel) {
       return other.id == id;
     } else {
