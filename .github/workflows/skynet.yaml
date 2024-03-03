@@ -1,0 +1,25 @@
+name: Triggers remote jenkins
+
+on:
+  push:
+    branches:
+      - main
+      - v3
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  trigger_remote:
+    name: Trigger remote jenkins instance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke trigger
+        run: |
+          curl -s 'https://isar-community.dev/git/notifyCommit?url=https://github.com/isar-community/isar.git&token=a641b59c61c22effd6dd258f8e713c7b'
