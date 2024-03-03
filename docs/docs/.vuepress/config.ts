@@ -179,15 +179,15 @@ function getSidebar({ locale, tutorials, concepts, recipes, sampleApps, chnagelo
         },
         {
             text: sampleApps,
-            link: "https://github.com/isar/isar/tree/main/examples",
+            link: "https://github.com/isar-community/isar/tree/main/examples",
         },
         {
             text: chnagelog,
-            link: "https://github.com/isar/isar/blob/main/packages/isar/CHANGELOG.md",
+            link: "https://github.com/isar-community/isar/blob/main/packages/isar/CHANGELOG.md",
         },
         {
             text: contributors,
-            link: "https://github.com/isar/isar#contributors-",
+            link: "https://github.com/isar-community/isar#contributors-",
         },
     ]
 }
