@@ -8,6 +8,7 @@ const _updateableTypes = [
   IsarType.float,
   IsarType.double,
   IsarType.dateTime,
+  IsarType.duration,
   IsarType.string,
 ];
 
