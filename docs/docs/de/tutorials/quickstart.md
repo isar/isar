@@ -25,7 +25,7 @@ part 'user.g.dart';
 
 @collection
 class User {
-  late int id; // Für auto-increment kannst du auch id = null zuweisen 
+  late int id;
 
   String? name;
 
@@ -56,14 +56,14 @@ Alle grundlegenden CRUD-Operationen sind über die `IsarCollection` verfügbar .
 ```dart
 final newUser = User()..name = 'Jane Doe'..age = 36;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   newUser.id = isar.users.autoIncrement();
   await isar.users.put(newUser); // Einfügen & akualisieren
 });
 
 final existingUser = await isar.users.get(newUser.id); // Erhalten
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.users.delete(existingUser.id!); // Löschen
 });
 ```
