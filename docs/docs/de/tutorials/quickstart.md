@@ -13,8 +13,7 @@ Dieser Schnellstart wird wenig um den heißen Brei herumreden und direkt mit dem
 Bevor es losgeht, müssen wir ein paar Pakete zur `pubspec.yaml` hinzufügen. Damit es schneller geht lassen wir pub das für uns erledigen.
 
 ```bash
-flutter pub add isar isar_flutter_libs
-flutter pub add -d isar_generator build_runner
+dart pub add isar:^4.0.0-dev.15 isar_flutter_libs:^4.0.0-dev.15 --hosted-url=https://isar-community.dev
 ```
 
 ## 2. Klassen annotieren
@@ -26,7 +25,7 @@ part 'user.g.dart';
 
 @collection
 class User {
-  Id id = Isar.autoIncrement; // Für auto-increment kannst du auch id = null zuweisen 
+  late int id; // Für auto-increment kannst du auch id = null zuweisen 
 
   String? name;
 
@@ -36,21 +35,7 @@ class User {
 
 IDs identifizieren Objekte in einer Collection eindeutig und erlauben es dir, sie später wiederzufinden.
 
-## 3. Code-Generator ausführen
-
-Führe den folgenden Befehl aus, um den `build_runner` zu starten:
-
-```
-dart run build_runner build
-```
-
-Wenn du Flutter verwendest:
-
-```
-flutter pub run build_runner build
-```
-
-## 4. Isar-Instanz öffnen
+## 3. Isar-Instanz öffnen
 
 Öffne eine neue Isar-Instanz und übergebe alle Collection-Schemata. Optional kannst du einen Instanznamen und ein Verzeichnis angeben.
 
@@ -62,7 +47,7 @@ final isar = await Isar.open(
 );
 ```
 
-## 5. Schreiben und lesen
+## 4. Schreiben und lesen
 
 Wenn deine Instanz geöffnet ist, hast du Zugriff auf die Collections.
 
@@ -72,6 +57,7 @@ Alle grundlegenden CRUD-Operationen sind über die `IsarCollection` verfügbar .
 final newUser = User()..name = 'Jane Doe'..age = 36;
 
 await isar.writeTxn(() async {
+  newUser.id = isar.users.autoIncrement();
   await isar.users.put(newUser); // Einfügen & akualisieren
 });
 
