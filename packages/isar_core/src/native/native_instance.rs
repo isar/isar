@@ -141,6 +141,10 @@ impl IsarInstance for NativeInstance {
         }
     }
 
+    fn change_encryption_key(&self, encryption_key: Option<&str>) -> Result<()> {
+        Err(IsarError::UnsupportedOperation {})
+    }
+
     fn begin_txn(&self, write: bool) -> Result<Self::Txn> {
         NativeTxn::new(self.instance_id, &self.env, write)
     }

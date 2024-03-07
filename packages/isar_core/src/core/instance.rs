@@ -60,6 +60,8 @@ pub trait IsarInstance: Sized {
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self::Instance>;
 
+    fn change_encryption_key(&self, encryption_key: Option<&str>) -> Result<()>;
+
     fn begin_txn(&self, write: bool) -> Result<Self::Txn>;
 
     fn commit_txn(&self, txn: Self::Txn) -> Result<()>;
