@@ -13,8 +13,7 @@ Vamos a ser cortos en palabras para ir inmediatamente al código en esta guía d
 Antes de empezar la parte divertida, necesitamos agregar algunos paquetes al `pubspec.yaml`. Podemos usar pub para hacer el trabajo pesado por nosotros.
 
 ```bash
-flutter pub add isar isar_flutter_libs
-flutter pub add -d isar_generator build_runner
+dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --hosted-url=https://isar-community.dev
 ```
 
 ## 2. Anota las clases
@@ -44,12 +43,6 @@ Ejecuta el siguiente comando para iniciar el `build_runner`:
 dart run build_runner build
 ```
 
-Si estás usando Flutter, puedes usar el siguiente:
-
-```
-flutter pub run build_runner build
-```
-
 ## 4. Abre una instancia Isar
 
 Abre una nueva instalcia Isar y pásale todos los esquemas de tu colección. Opcionalmente puedes especificar un nombre para la instancia y un directorio.
@@ -71,13 +64,14 @@ Todas las operaciones CRUD básicas están disponibles a través del `IsarCollec
 ```dart
 final newUser = User()..name = 'Jane Doe'..age = 36;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
+  newUser.id = isar.users.autoIncrement();
   await isar.users.put(newUser); // insert & update
 });
 
 final existingUser = await isar.users.get(newUser.id); // get
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.users.delete(existingUser.id!); // delete
 });
 ```

@@ -13,8 +13,7 @@ title: 快速开始
 在开始之前，我们需要在 `pubspec.yaml` 文件中添加若干依赖，可以运行以下命令帮助我们完成：
 
 ```bash
-flutter pub add isar isar_flutter_libs
-flutter pub add -d isar_generator build_runner
+dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --hosted-url=https://isar-community.dev
 ```
 
 ## 2. 给类添加注解
@@ -44,12 +43,6 @@ Id 唯一指向了 Collection 中的对象，之后我们可通过 Id 来查询�
 dart run build_runner build
 ```
 
-倘若你的项目用到了 Flutter，可用下方命令来代替：
-
-```
-flutter pub run build_runner build
-```
-
 ## 4. 创建一个 Isar 实例
 
 创建一个新的 Isar 实例，并将你想保存到 Isar 的所有 collection 的 schema（它在上一步由 Isar Generator 根据你定义的 collection 自动生成） 作为参数传入。你还可以指定实例的名称以及它所存储数据的文件路径。
@@ -71,13 +64,14 @@ final isar = await Isar.open(
 ```dart
 final newUser = User()..name = 'Jane Doe'..age = 36;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
+  newUser.id = isar.users.autoIncrement();
   await isar.users.put(newUser); // 将新用户数据写入到 Isar
 });
 
 final existingUser = await isar.users.get(newUser.id); // 通过 Id 读取用户数据
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.users.delete(existingUser.id!); // 通过 Id 删除指定用户
 });
 ```
