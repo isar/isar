@@ -10,7 +10,7 @@ if [ "$ISAR_VERSION" == "" ]; then
   echo "Define ISAR_VERSION to specify which release to publish.sh"
   exit 1
 fi
-find . -type f -exec sed -i "s/0.0.0-placeholder/$ISAR_VERSION/g" {} +
+find packages -type f -exec sed -i "s/0.0.0-placeholder/$ISAR_VERSION/g" {} +
 pushd packages/isar
 dart pub get
 popd
