@@ -24,7 +24,7 @@ title: 全文检索
 
 ```dart
 class Message {
-  Id? id;
+  late int id;
 
   late String content;
 
@@ -67,7 +67,7 @@ Isar.splitWords('The quick (“brown”) fox can’t jump 32.3 feet, right?');
 
 ```dart
 class Post {
-  Id? id;
+  late int id;
 
   late String title;
 
@@ -95,7 +95,7 @@ final posts = await isar.posts
 
 ```dart
 class Post {
-    Id? id;
+    late int id;
 
     late String title;
 

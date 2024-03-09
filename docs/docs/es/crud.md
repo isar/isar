@@ -47,7 +47,7 @@ Para los ejemplos siguientes, asumimos que tenemos una colección `Recipe` defin
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 
@@ -114,7 +114,7 @@ final favouires = await recipes.filter()
 Finalmente es momento de modificar los datos en nuestra colección! Para crear, actualizar o eliminar objectos, usa las respectivas operaciones juntas en una transacción de escritura:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final recipe = await recipes.get(123)
 
   recipe.isFavorite = false;
@@ -134,11 +134,12 @@ Si el campo id es `null` o `Isar.autoIncrement`, Isar usará un id auto incremen
 
 ```dart
 final pancakes = Recipe()
+  ..id = isar.recipes.autoIncrement()
   ..name = 'Pancakes'
   ..lastCooked = DateTime.now()
   ..isFavorite = true;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await recipes.put(pancakes);
 })
 ```
@@ -148,7 +149,7 @@ Isar asignará automáticamente el id al objeto si el campo id es no-final.
 Insertar múltiples objetos de una sola vez es muy fácil:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await recipes.putAll([pancakes, pizza]);
 })
 ```
@@ -160,7 +161,7 @@ Crear y actualizar objetos funcionan ambos con `collection.put(object)`. Si el i
 Entonces si queremos quitar los pancakes de los favoritos, podemos hacer los siguiente:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   pancakes.isFavorite = false;
   await recipes.put(recipe);
 });
@@ -171,7 +172,7 @@ await isar.writeTxn(() async {
 Quieres eliminar un objeto en Isar? Usa `collection.delete(id)`. El método delete retorna verdadero si el objeto con el id especificado fue encontrado y eliminado. Por ejemplo, si quieres eliminar el objeto con el id `123`, puedes hacer:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final success = await recipes.delete(123);
   print('Recipe deleted: $success');
 });
@@ -180,7 +181,7 @@ await isar.writeTxn(() async {
 De manera similar a get y put, también existe una operación para eliminar múltiples objetos de una vez que retorna la cantidad de objetos eliminados:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final count = await recipes.deleteAll([1, 2, 3]);
   print('We deleted $count recipes');
 });
@@ -189,7 +190,7 @@ await isar.writeTxn(() async {
 Si no conoces los ids de los objetos que quieres eliminar, puedes utilizar una consulta:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final count = await recipes.filter()
     .isFavoriteEqualTo(false)
     .deleteAll();

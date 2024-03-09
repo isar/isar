@@ -15,7 +15,7 @@ Par exemple, cette collection `Product` est entièrement non ordonnée.
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -50,7 +50,7 @@ Pour améliorer les performances de cette requête, nous indexons la propriété
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -110,7 +110,7 @@ Un index unique garantit que l'index ne contient pas de valeurs en double. Il pe
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true)
   late String username;
@@ -147,7 +147,7 @@ Il n'est parfois pas préférable d'envoyer une erreur si une contrainte unique 
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true, replace: true)
   late String username;
@@ -206,7 +206,7 @@ Tous les index sur les propriétés `String` et `List<String>` sont sensibles à
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   @Index(caseSensitive: false)
   late String name;
@@ -255,7 +255,7 @@ Il est probablement préférable de commencer par un exemple. Nous créons une c
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -320,7 +320,7 @@ Les applications pratiques des index à entrées multiples comprennent l'indexat
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String description;
 

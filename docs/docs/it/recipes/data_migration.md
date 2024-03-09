@@ -18,7 +18,7 @@ Versione 1:
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -30,7 +30,7 @@ Versione 2:
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   late String name;
 

@@ -25,7 +25,7 @@ Usaremos el modelo siguiente para los ejemplos:
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   int? size;
 
@@ -198,7 +198,7 @@ Incluso se puede construir consultas sobre listas:
 
 ```dart
 class Tweet {
-  Id? id;
+  late int id;
 
   String? text;
 
@@ -235,7 +235,7 @@ Los objetos embebidos son una de las funcionalidades más útiles de Isar. Se pu
 ```dart
 @collection
 class Car {
-  Id? id;
+  late int id;
 
   Brand? brand;
 }
@@ -280,14 +280,14 @@ Ten en cuenta que las consultas sobre enlaces pueden ser costosas ya que Isar ne
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -339,7 +339,7 @@ Agreguemos ídices a nuestra colección shoe:
 ```dart
 @collection
 class Shoe with IsarObject {
-  Id? id;
+  late int id;
 
   @Index()
   Id? size;

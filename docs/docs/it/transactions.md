@@ -14,10 +14,10 @@ Le transazioni (in particolare le transazioni di scrittura) hanno un costo e dov
 
 Le transazioni possono essere sincrone o asincrone. Nelle transazioni sincrone è possibile utilizzare solo operazioni sincrone. Nelle transazioni asincrone, solo operazioni asincrone.
 
-|              | Read         | Read & Write       |
-|--------------|--------------|--------------------|
-| Synchronous  | `.txnSync()` | `.writeTxnSync()`  |
-| Asynchronous | `.txn()`     | `.writeTxn()`      |
+|              | Read           | Read & Write       |
+|--------------|----------------|--------------------|
+| Synchronous  | `.read()`      | `.write()`         |
+| Asynchronous | `.readAsync()` | `.writeAsync()`    |
 
 
 ### Transazioni di lettura
@@ -41,13 +41,13 @@ Quando un'operazione di database ha esito negativo, la transazione viene interro
 ```dart
 @collection
 class Contact {
-  Id? id;
+  late int id;
 
   String? name;
 }
 
 // GOOD
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   for (var contact in getContacts()) {
     await isar.contacts.put(contact);
   }
@@ -55,7 +55,7 @@ await isar.writeTxn(() async {
 
 // BAD: move loop inside transaction
 for (var contact in getContacts()) {
-  await isar.writeTxn(() async {
+  await isar.writeAsync((isar) async {
     await isar.contacts.put(contact);
   });
 }

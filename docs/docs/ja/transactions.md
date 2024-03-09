@@ -16,8 +16,8 @@ Isarにおいて、トランザクションは複数のデータベース操作�
 
 |              | Read         | Read & Write       |
 |--------------|--------------|--------------------|
-| 同期  | `.txnSync()` | `.writeTxnSync()`  |
-| 非同期 | `.txn()`     | `.writeTxn()`      |
+| 同期  | `.read()`      | `.write()`       |
+| 非同期 | `.readAsync()` | `.writeAsync()`  |
 
 
 ### 読み取りトランザクション
@@ -41,13 +41,13 @@ Isarにおいて、トランザクションは複数のデータベース操作�
 ```dart
 @collection
 class Contact {
-  Id? id;
+  late int id;
 
   String? name;
 }
 
 // GOOD
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   for (var contact in getContacts()) {
     await isar.contacts.put(contact);
   }
@@ -55,7 +55,7 @@ await isar.writeTxn(() async {
 
 // BAD: トランザクションの中にforループを移動させましょう。
 for (var contact in getContacts()) {
-  await isar.writeTxn(() async {
+  await isar.writeAsync((isar) async {
     await isar.contacts.put(contact);
   });
 }
