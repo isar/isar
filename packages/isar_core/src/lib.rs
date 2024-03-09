@@ -1,6 +1,5 @@
 #![allow(clippy::new_without_default)]
 #![feature(float_next_up_down)]
-#![feature(return_position_impl_trait_in_trait)]
 #![feature(lazy_cell)]
 
 #[cfg(not(target_endian = "little"))]
