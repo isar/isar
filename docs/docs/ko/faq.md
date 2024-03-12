@@ -38,4 +38,4 @@ Isar는 모바일용 데이터베이스 중 가장 빠르기 때문에 대부분
 
 ### 문서가 잘못됐네요 / 오타가 있어요.
 
-이런, 죄송해요. [이슈 열기](https://github.com/isar/isar/issues/new/choose) 또는 PR 을 통해서 고쳐주세요. 💪.
+이런, 죄송해요. [이슈 열기](https://github.com/isar-community/isar/issues/new/choose) 또는 PR 을 통해서 고쳐주세요. 💪.

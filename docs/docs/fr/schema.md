@@ -17,7 +17,7 @@ Le code suivant est un exemple d'une collection simple qui définit une table `U
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -78,7 +78,7 @@ Isar persiste tous les champs publics d'une classe de collection. En annotant un
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -99,7 +99,7 @@ class User {
 
 @Collection(ignore: {'profilePicture'})
 class Member extends User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -155,7 +155,7 @@ Voici un exemple de collection contenant les types décrit ci-dessus:
 ```dart
 @collection
 class TestCollection {
-  Id? id;
+  late int id;
 
   late byte byteValue;
 
@@ -216,7 +216,7 @@ Voici un exemple pour chaque stratégie:
 ```dart
 @collection
 class EnumCollection {
-  Id? id;
+  late int id;
 
   @enumerated // Même chose que EnumType.ordinal
   late TestEnum byteIndex; // Ne peut pas être nulle
@@ -254,7 +254,7 @@ Il est souvent utile d'avoir des objets imbriqués dans votre modèle de collect
 ```dart
 @collection
 class Email {
-  Id? id;
+  late int id;
 
   String? title;
 

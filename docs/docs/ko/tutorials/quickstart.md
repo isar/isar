@@ -13,8 +13,7 @@ title: 빠른 시작
 재미있는 부분을 보기 전에 `pubspec.yaml` 에 몇 개의 패키지를 추가해야 합니다. 우리는 펍을 이용해서 힘든 일을 쉽게 할 수 있습니다.
 
 ```bash
-flutter pub add isar isar_flutter_libs
-flutter pub add -d isar_generator build_runner
+dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --hosted-url=https://isar-community.dev
 ```
 
 ## 2. 클래스에 주석 추가(어노테이션)
@@ -44,12 +43,6 @@ Id는 컬렉션에서 개체를 고유하게 식별하고 나중에 개체를 �
 dart run build_runner build
 ```
 
-플러터를 사용하고 있다면, 다음 명령을 사용합니다.
-
-```
-flutter pub run build_runner build
-```
-
 ## 4. Isar 인스턴스 열기
 
 새 Isar 인스턴스를 열고 모든 컬렉션 스키마를 전달합니다. 선택적으로 인스턴스 이름과 디렉토리를 지정할 수도 있습니다.
@@ -71,13 +64,14 @@ final isar = await Isar.open(
 ```dart
 final newUser = User()..name = 'Jane Doe'..age = 36;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
+  newUser.id = isar.users.autoIncrement();
   await isar.users.put(newUser); // 삽입 & 업데이트
 });
 
 final existingUser = await isar.users.get(newUser.id); // 가져오기
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.users.delete(existingUser.id!); // 삭제
 });
 ```

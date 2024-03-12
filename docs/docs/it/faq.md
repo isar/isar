@@ -38,4 +38,4 @@ Un po', sì. Isar aumenterà la dimensione del download della tua app di circa 1
 
 ### La documentazione non è corretta / c'è un errore di battitura.
 
-Oh no, mi dispiace. Per favore [apri un problema](https://github.com/isar/isar/issues/new/choose) o, ancora meglio, un PR per risolverlo 💪.
+Oh no, mi dispiace. Per favore [apri un problema](https://github.com/isar-community/isar/issues/new/choose) o, ancora meglio, un PR per risolverlo 💪.

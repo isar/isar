@@ -2,6 +2,8 @@
 title: Enlaces
 ---
 
+> ⚠️ Links are currently not supported in Isar v4
+
 # Enlaces
 
 Los enlaces permiten establecer relaciones entre objetos, como ser el autor de un comentario (User). Con los enlaces de Isar, se pueden modelar relaciones `1:1`, `1:n`, y `n:n`. Usar enlaces es menos ergonómico que usar objetos embebidos y se deberían usar los últimos siempre que sea posible.
@@ -23,14 +25,14 @@ En las plataformas no web, los enlaces se cargan automáticamente cuando los usa
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -49,7 +51,7 @@ final linda = Student()
   ..name = 'Linda'
   ..teacher.value = mathTeacher;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.students.put(linda);
   await isar.teachers.put(mathTeacher);
   await linda.teacher.save();
@@ -91,7 +93,7 @@ Internamente ambos `IsarLink` y `IsarLinks` se representan de la misma forma. Po
 ```dart
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -113,7 +115,7 @@ print(linda.teachers); // {Teacher('Math')}
 
 linda.teachers.add(biologyTeacher);
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await linda.teachers.save();
 });
 

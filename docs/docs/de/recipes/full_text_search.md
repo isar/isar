@@ -24,7 +24,7 @@ Bauen wir den grundlegendsten Volltext-Index:
 
 ```dart
 class Message {
-  Id? id;
+  late int id;
 
   late String content;
 
@@ -67,7 +67,7 @@ Das ist kinderleicht! Wir können unseren Index so ändern, dass er auch Präfix
 
 ```dart
 class Post {
-  Id? id;
+  late int id;
 
   late String title;
 
@@ -95,7 +95,7 @@ Klar! Wir werden einen Trick verwenden, um `.endsWith()` verwenden zu können:
 
 ```dart
 class Post {
-    Id? id;
+    late int id;
 
     late String title;
 

@@ -25,7 +25,7 @@ We'll use the following model for the examples below:
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   int? size;
 
@@ -198,7 +198,7 @@ Even lists can be queried:
 
 ```dart
 class Tweet {
-  Id? id;
+  late int id;
 
   String? text;
 
@@ -235,7 +235,7 @@ Embedded objects are one of Isar's most useful features. They can be queried ver
 ```dart
 @collection
 class Car {
-  Id? id;
+  late int id;
 
   Brand? brand;
 }
@@ -280,14 +280,14 @@ Keep in mind that link queries can be expensive because Isar needs to look up li
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -339,7 +339,7 @@ Let's add indexes to the shoe collection:
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   @Index()
   Id? size;

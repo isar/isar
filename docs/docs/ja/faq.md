@@ -38,4 +38,4 @@ Isarは、モバイル向けデータベースの中では最速クラスなの�
 
 ### ドキュメントの内容が間違ってるよ / タイポ見つけた
 
-すみません、失礼致しました。 [issueを開く](https://github.com/isar/isar/issues/new/choose)か、もしくは、プルリクエストをして修正して頂けると助かります💪
+すみません、失礼致しました。 [issueを開く](https://github.com/isar-community/isar/issues/new/choose)か、もしくは、プルリクエストをして修正して頂けると助かります💪

@@ -17,7 +17,7 @@ Il codice seguente è un esempio di una raccolta semplice che definisce una tabe
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -78,7 +78,7 @@ Isar mantiene tutti i campi pubblici di una classe di raccolta. Annotando una pr
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -99,7 +99,7 @@ class User {
 
 @Collection(ignore: {'profilePicture'})
 class Member extends User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -155,7 +155,7 @@ Ecco una raccolta di esempio contenente tutti i tipi di cui sopra:
 ```dart
 @collection
 class TestCollection {
-  Id? id;
+  late int id;
 
   late byte byteValue;
 
@@ -216,7 +216,7 @@ Diamo un'occhiata a un esempio per ciascuna strategia.
 ```dart
 @collection
 class EnumCollection {
-  Id? id;
+  late int id;
 
   @enumerated // same as EnumType.ordinal
   late TestEnum byteIndex; // cannot be nullable
@@ -254,7 +254,7 @@ Spesso è utile avere oggetti nidificati nel modello di raccolta. Non c'è limit
 ```dart
 @collection
 class Email {
-  Id? id;
+  late int id;
 
   String? title;
 

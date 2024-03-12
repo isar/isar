@@ -24,7 +24,7 @@ You can easily search text using filters. There are various string operations fo
 
 ```dart
 class Message {
-  Id? id;
+  late int id;
 
   late String content;
 
@@ -67,7 +67,7 @@ Isar.splitWords('The quick (“brown”) fox can’t jump 32.3 feet, right?');
 
 ```dart
 class Post {
-  Id? id;
+  late int id;
 
   late String title;
 
@@ -95,7 +95,7 @@ Sure thing! We will use a trick to achieve `.endsWith()` matching:
 
 ```dart
 class Post {
-    Id? id;
+    late int id;
 
     late String title;
 

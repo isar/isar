@@ -14,8 +14,7 @@ title: クイックスタート
 Isarを使用する前に、いくつかのパッケージを `pubspec.yaml` に追加する必要があります。pubを使用する事で、面倒な作業を簡単に済ませることが出来ます。
 
 ```bash
-flutter pub add isar isar_flutter_libs
-flutter pub add -d isar_generator build_runner
+dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --hosted-url=https://isar-community.dev
 ```
 
 ## 2. クラスの注釈(アノテーション)
@@ -45,12 +44,6 @@ idはコレクション内のオブジェクトを一意に識別して、後で
 dart run build_runner build
 ```
 
-Flutterを使用している場合は、代わりに次のコマンドを使用してください:
-
-```
-flutter pub run build_runner build
-```
-
 ## 4. Isarインスタンスを開く
 
 新規のIsarインスタンスを開き、コレクションのスキーマを渡します。必要に応じて、インスタンス名とディレクトリを指定することができます。
@@ -72,13 +65,14 @@ Isarインスタンスを開いたら, コレクションを利用すること�
 ```dart
 final newUser = User()..name = 'Jane Doe'..age = 36;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
+  newUser.id = isar.users.autoIncrement();
   await isar.users.put(newUser); // 挿入と更新
 });
 
 final existingUser = await isar.users.get(newUser.id); // 取得
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.users.delete(existingUser.id!); // 削除
 });
 ```

@@ -18,7 +18,7 @@ title: インデックス
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -53,7 +53,7 @@ final expensiveProducts = await isar.products.filter()
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -113,7 +113,7 @@ final cheapestFast = await isar.products.where()
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true)
   late String username;
@@ -150,7 +150,7 @@ print(await isar.user.where().findAll());
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true, replace: true)
   late String username;
@@ -209,7 +209,7 @@ await isar.user.where().findAll(); // -> [{id: 1, username: 'user1' age: 30}]
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   @Index(caseSensitive: false)
   late String name;
@@ -258,7 +258,7 @@ Valueインデックスは既定の型であり、StringやListを保持しな�
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -323,7 +323,7 @@ IndexType.valueを使ってListのインデックスを作成すると、Isarは
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String description;
 

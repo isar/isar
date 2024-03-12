@@ -38,4 +38,4 @@ Un poco, sí. Isar incrementará el tamaño de descarga de tu aplicaicón alrede
 
 ### La documentación es incorrecta / hay un error de ortografía.
 
-Oh no, lo siento. Por favor [apunta el problema](https://github.com/isar/isar/issues/new/choose) o, mejor aún, un PR para solucionarlo! 💪.
+Oh no, lo siento. Por favor [apunta el problema](https://github.com/isar-community/isar/issues/new/choose) o, mejor aún, un PR para solucionarlo! 💪.

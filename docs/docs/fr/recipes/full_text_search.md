@@ -24,7 +24,7 @@ Créons l'index plein texte le plus basique:
 
 ```dart
 class Message {
-  Id? id;
+  late int id;
 
   late String content;
 
@@ -67,7 +67,7 @@ C'est simple et facile! Nous pouvons également modifier notre index pour suppor
 
 ```dart
 class Post {
-  Id? id;
+  late int id;
 
   late String title;
 
@@ -95,7 +95,7 @@ Bien sûr! Nous allons utiliser une astuce pour réaliser la comparaison `.endsW
 
 ```dart
 class Post {
-    Id? id;
+    late int id;
 
     late String title;
 

@@ -284,6 +284,14 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
+          ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CString>)>(
+      symbol: 'isar_change_encryption_key')
+  external int isar_change_encryption_key(
+    ffi.Pointer<CIsarInstance> isar,
+    ffi.Pointer<CString> encryption_key,
+  );
+
+  @ffi.Native<
       ffi.Uint8 Function(
           ffi.Pointer<CIsarInstance>,
           ffi.Pointer<ffi.Pointer<CIsarTxn>>,

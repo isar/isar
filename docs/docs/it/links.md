@@ -2,6 +2,8 @@
 title: Collegamenti
 ---
 
+> ⚠️ Links are currently not supported in Isar v4
+
 # Collegamenti
 
 I collegamenti consentono di esprimere relazioni tra oggetti, come l'autore di un commento (Utente). Puoi modellare le relazioni `1:1`, `1:n` e `n:n` con i collegamenti Isar. L'uso dei collegamenti è meno ergonomico rispetto all'utilizzo di oggetti incorporati e dovresti utilizzare oggetti incorporati quando possibile.
@@ -23,14 +25,14 @@ Per i target non web, i link vengono caricati automaticamente quando li usi per 
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -49,7 +51,7 @@ final linda = Student()
   ..name = 'Linda'
   ..teacher.value = mathTeacher;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.students.put(linda);
   await isar.teachers.put(mathTeacher);
   await linda.teacher.save();
@@ -91,7 +93,7 @@ Internamente sia "IsarLink" che "IsarLinks" sono rappresentati allo stesso modo.
 ```dart
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -113,7 +115,7 @@ print(linda.teachers); // {Teacher('Math')}
 
 linda.teachers.add(biologyTeacher);
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await linda.teachers.save();
 });
 

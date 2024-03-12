@@ -37,6 +37,8 @@ jobs:
             artifact_name: isar.wasm
             script: build_wasm.sh
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
       - name: Prepare Build

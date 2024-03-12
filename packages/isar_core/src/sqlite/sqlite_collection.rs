@@ -17,7 +17,7 @@ pub(crate) struct SQLiteProperty {
 }
 
 impl SQLiteProperty {
-    pub const ID_NAME: &str = "_rowid_";
+    pub const ID_NAME: &'static str = "_rowid_";
 
     pub fn new(name: &str, data_type: DataType, collection_index: Option<u16>) -> Self {
         SQLiteProperty {

@@ -52,6 +52,13 @@ impl SQLite3 {
         Ok(())
     }
 
+    pub fn rekey(&self, encryption_key: &str) -> Result<()> {
+        let sql = format!("PRAGMA rekey = \"{encryption_key}\"");
+        self.prepare(&sql)?.step()?;
+        self.prepare("SELECT count(*) FROM sqlite_master")?.step()?; // check if key is correct
+        Ok(())
+    }
+
     fn initialize(&self) -> Result<()> {
         unsafe {
             sqlite3_busy_timeout(self.db, 5000);

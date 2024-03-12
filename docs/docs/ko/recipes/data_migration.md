@@ -19,7 +19,7 @@ Isar 는 컬렉션, 속성, 인덱스를 추가하거나 삭제하면 데이터�
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -32,7 +32,7 @@ class User {
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   late String name;
 

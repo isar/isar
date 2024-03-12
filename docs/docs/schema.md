@@ -17,7 +17,7 @@ The following code is an example of a simple collection that defines a `User` ta
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -78,7 +78,7 @@ Isar persists all public fields of a collection class. By annotating a property 
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -99,7 +99,7 @@ class User {
 
 @Collection(ignore: {'profilePicture'})
 class Member extends User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -155,7 +155,7 @@ Here is an example collection containing all of the above types:
 ```dart
 @collection
 class TestCollection {
-  Id? id;
+  late int id;
 
   late byte byteValue;
 
@@ -216,7 +216,7 @@ Let's check out an example for each strategy.
 ```dart
 @collection
 class EnumCollection {
-  Id? id;
+  late int id;
 
   @enumerated // same as EnumType.ordinal
   late TestEnum byteIndex; // cannot be nullable
@@ -254,7 +254,7 @@ It's often helpful to have nested objects in your collection model. There is no 
 ```dart
 @collection
 class Email {
-  Id? id;
+  late int id;
 
   String? title;
 

@@ -47,7 +47,7 @@ final isar = await Isar.open(
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 
@@ -114,7 +114,7 @@ final favouires = await recipes.filter()
 いよいよコレクションを書き換えるときがやってきました！ オブジェクトを作成、更新、削除するには、それぞれの操作をWriteトランザクション内でラップして使用します:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final recipe = await recipes.get(123)
 
   recipe.isFavorite = false;
@@ -136,11 +136,12 @@ Isar の `put()` メソッドは、そのオブジェクトが既にコレクシ
 
 ```dart
 final pancakes = Recipe()
+  ..id = isar.recipes.autoIncrement()
   ..name = 'Pancakes'
   ..lastCooked = DateTime.now()
   ..isFavorite = true;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await recipes.put(pancakes);
 })
 ```
@@ -150,7 +151,7 @@ Isarは `id` フィールドがfinalでは無い場合、オブジェクトに�
 複数のオブジェクトを一度に挿入することも簡単です。
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await recipes.putAll([pancakes, pizza]);
 })
 ```
@@ -162,7 +163,7 @@ await isar.writeTxn(() async {
 つまり、pancakesをunfavoriteにしたい場合は、以下のようになります:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   pancakes.isFavorite = false;
   await recipes.put(recipe);
 });
@@ -173,7 +174,7 @@ await isar.writeTxn(() async {
 オブジェクトを削除したい場合は、`collection.delete(id)`を使用してください. delete メソッドは、指定された id を持つオブジェクトを見つけて、それを削除したかどうかを返します。例えば、id が `123` のオブジェクトを削除したい場合、以下のようになります。
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final success = await recipes.delete(123);
   print('Recipe deleted: $success');
 });
@@ -182,7 +183,7 @@ await isar.writeTxn(() async {
 getやputと同様に、削除されたオブジェクトの数を返す一括削除命令も存在します：
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final count = await recipes.deleteAll([1, 2, 3]);
   print('We deleted $count recipes');
 });
@@ -191,7 +192,7 @@ await isar.writeTxn(() async {
 削除したいオブジェクトのidが分からない場合は、クエリを使用することができます:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final count = await recipes.filter()
     .isFavoriteEqualTo(false)
     .deleteAll();

@@ -25,7 +25,7 @@ Filter 通过特定条件表达式来匹配 Collection 中每一个待查询对�
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   int? size;
 
@@ -198,7 +198,7 @@ final shoes2 = await isar.shoes.filter()
 
 ```dart
 class Tweet {
-  Id? id;
+  late int id;
 
   String? text;
 
@@ -235,7 +235,7 @@ final flutterTweets = await isar.tweets.filter()
 ```dart
 @collection
 class Car {
-  Id? id;
+  late int id;
 
   Brand? brand;
 }
@@ -280,14 +280,14 @@ final germanCars = await isar.cars.filter()
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -339,7 +339,7 @@ Where 子句很强大，但是用对可能有点困难。
 ```dart
 @collection
 class Shoe with IsarObject {
-  Id? id;
+  late int id;
 
   @Index()
   Id? size;

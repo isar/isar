@@ -25,7 +25,7 @@ title: 쿼리
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   int? size;
 
@@ -201,7 +201,7 @@ final shoes2 = await isar.shoes.filter()
 
 ```dart
 class Tweet {
-  Id? id;
+  late int id;
 
   String? text;
 
@@ -238,7 +238,7 @@ final flutterTweets = await isar.tweets.filter()
 ```dart
 @collection
 class Car {
-  Id? id;
+  late int id;
 
   Brand? brand;
 }
@@ -283,14 +283,14 @@ Isar 는 링크된 객체를 조회해야 하므로 링크 쿼리의 비용은 �
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -342,7 +342,7 @@ filter 와 달리 where 절은 쿼리 조건을 검사하기 위해서 스키마
 ```dart
 @collection
 class Shoe with IsarObject {
-  Id? id;
+  late int id;
 
   @Index()
   Id? size;

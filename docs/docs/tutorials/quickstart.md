@@ -13,8 +13,7 @@ We're going to be short on words and quick on code in this quickstart.
 Before the fun begins, we need to add a few packages to the `pubspec.yaml`. We can use pub to do the heavy lifting for us.
 
 ```bash
-flutter pub add isar isar_flutter_libs path_provider
-flutter pub add -d isar_generator build_runner
+dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --hosted-url=https://isar-community.dev
 ```
 
 ## 2. Annotate classes
@@ -28,7 +27,7 @@ part 'user.g.dart';
 
 @collection
 class User {
-  Id id = Isar.autoIncrement; // you can also use id = null to auto increment
+  late int id;
 
   String? name;
 
@@ -44,12 +43,6 @@ Execute the following command to start the `build_runner`:
 
 ```
 dart run build_runner build
-```
-
-If you are using Flutter, use the following:
-
-```
-flutter pub run build_runner build
 ```
 
 ## 4. Open Isar instance
@@ -73,13 +66,14 @@ All basic CRUD operations are available via the `IsarCollection`.
 ```dart
 final newUser = User()..name = 'Jane Doe'..age = 36;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
+  newUser.id = isar.users.autoIncrement();
   await isar.users.put(newUser); // insert & update
 });
 
 final existingUser = await isar.users.get(newUser.id); // get
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.users.delete(existingUser.id!); // delete
 });
 ```

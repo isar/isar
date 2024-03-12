@@ -15,7 +15,7 @@ title: 인덱스
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -50,7 +50,7 @@ final expensiveProducts = await isar.products.filter()
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -110,7 +110,7 @@ final cheapestFast = await isar.products.where()
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true)
   late String username;
@@ -147,7 +147,7 @@ print(await isar.user.where().findAll());
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true, replace: true)
   late String username;
@@ -206,7 +206,7 @@ All indexes on `String` and `List<String>` properties are case-sensitive by defa
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   @Index(caseSensitive: false)
   late String name;
@@ -255,7 +255,7 @@ It's probably best to start with an example. We create a person collection and d
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -320,7 +320,7 @@ Practical applications for multi-entry indexes include indexing a list of tags o
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String description;
 

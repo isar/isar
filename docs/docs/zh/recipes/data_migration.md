@@ -19,7 +19,7 @@ title: 数据迁移
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -32,7 +32,7 @@ class User {
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   late String name;
 

@@ -142,6 +142,17 @@ impl IsarInstance for SQLiteInstance {
         })
     }
 
+    fn change_encryption_key(&self, encryption_key: Option<&str>) -> Result<()> {
+        if !cfg!(feature = "sqlcipher") {
+            return Err(IsarError::UnsupportedOperation {});
+        }
+
+        match encryption_key {
+            Some(encryption_key) => self.sqlite.rekey(encryption_key),
+            None => unimplemented!("database decryption"),
+        }
+    }
+
     fn begin_txn(&self, write: bool) -> Result<SQLiteTxn> {
         if write {
             self.info.write_mutex.lock();

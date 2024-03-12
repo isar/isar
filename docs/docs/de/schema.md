@@ -17,7 +17,7 @@ Der folgende Code ist ein Beispiel einer simplen Collection, welche eine `User`-
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -78,7 +78,7 @@ Isar stell sicher, dass alle öffentlichen Felder einer Collecion-Klasse erhalte
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -99,7 +99,7 @@ class User {
 
 @Collection(ignore: {'profilePicture'})
 class Member extends User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -155,7 +155,7 @@ Hier ist eine Beispiel-Collection, welche alle der eben genannten Typen enthält
 ```dart
 @collection
 class TestCollection {
-  Id? id;
+  late int id;
 
   late byte byteValue;
 
@@ -216,7 +216,7 @@ Schauen wir uns ein Beispiel für jede Strategie an.
 ```dart
 @collection
 class EnumCollection {
-  Id? id;
+  late int id;
 
   @enumerated // entspricht EnumType.ordinal
   late TestEnum byteIndex; // ist nicht Null-bar
@@ -254,7 +254,7 @@ Es ist oft hilfreich verschachtelte Objekte in deinem Collection-Modell zu haben
 ```dart
 @collection
 class Email {
-  Id? id;
+  late int id;
 
   String? title;
 

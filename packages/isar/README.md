@@ -9,7 +9,7 @@
   <a href="https://pub.dev/packages/isar">
     <img src="https://img.shields.io/pub/v/isar?label=pub.dev&labelColor=333940&logo=dart">
   </a>
-  <a href="https://github.com/isar/isar/actions/workflows/test.yaml">
+  <a href="https://github.com/isar-community/isar/actions/workflows/test.yaml">
     <img src="https://img.shields.io/github/actions/workflow/status/isar/isar/test.yaml?branch=main&label=tests&labelColor=333940&logo=github">
   </a>
   <a href="https://app.codecov.io/gh/isar/isar">
@@ -26,8 +26,8 @@
 <p align="center">
   <a href="https://isar.dev">Quickstart</a> •
   <a href="https://isar.dev/schema">Documentation</a> •
-  <a href="https://github.com/isar/isar/tree/main/examples/">Sample Apps</a> •
-  <a href="https://github.com/isar/isar/discussions">Support & Ideas</a> •
+  <a href="https://github.com/isar-community/isar/tree/main/examples/">Sample Apps</a> •
+  <a href="https://github.com/isar-community/isar/discussions">Support & Ideas</a> •
   <a href="https://pub.dev/packages/isar">Pub.dev</a>
 </p>
 
@@ -200,7 +200,7 @@ Benchmarks only give a rough idea of the performance of a database but as you ca
 | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/benchmarks/update.png" width="100%" /> | <img src="https://raw.githubusercontent.com/isar/isar/main/.github/assets/benchmarks/size.png" width="100%" />  |
 
-If you are interested in more benchmarks or want to check how Isar performs on your device you can run the [benchmarks](https://github.com/isar/isar_benchmark) yourself.
+If you are interested in more benchmarks or want to check how Isar performs on your device you can run the [benchmarks](https://github.com/isar-community/isar_benchmark) yourself.
 
 ## Unit tests
 
