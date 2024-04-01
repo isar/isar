@@ -1,40 +1,67 @@
-name: Docs
+name: Unified Deploy Docs
 
 on:
   push:
     branches:
       - main
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+      - v3
 
 jobs:
-  build_docs:
-    name: Build and deploy Docs
+  deploy:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: write
+      id-token: write
+      pages: write
     steps:
-      - uses: actions/checkout@v3
-      - name: Build
-        working-directory: docs
-        run: |
-          npm install
-          npm run build
-          touch docs/.vuepress/dist/.nojekyll
-      - name: Setup Pages
-        uses: actions/configure-pages@v2
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+      - name: Checkout v3 branch
+        uses: actions/checkout@v4
         with:
-          path: docs/docs/.vuepress/dist
+          ref: "v3"
+          path: "v3"
+
+      - name: Build v3 docs
+        run: |
+          cd v3/docs
+          sed -i'.bak' "s|base:.*|base: '/v3/',|" docs/.vuepress/config.ts
+          sed -i 's|text: "vx.x"|text: "v3.x"|' docs/.vuepress/config.ts  
+          npm ci
+          npm run build
+          mv ./docs/.vuepress/dist ../../v3-docs
+
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: "main"
+          path: "main"
+
+      - name: Build main docs
+        run: |
+          cd main/docs
+          sed -i'.bak' "s|base:.*|base: '/',|" docs/.vuepress/config.ts
+          sed -i 's|text: "vx.x"|text: "v4.x"|' docs/.vuepress/config.ts  
+          npm ci
+          npm run build
+          mv ./docs/.vuepress/dist ../../main-docs
+
+      - name: Prepare deployment directory
+        run: |
+          mkdir deploy
+          mv main-docs/* deploy/
+          mkdir deploy/v3
+          mv v3-docs/* deploy/v3/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: deploy
+
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4

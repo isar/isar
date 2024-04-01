@@ -43,10 +43,11 @@ for (const locale of locales) {
 export default defineUserConfig({
     locales: vueLocales,
     bundler: viteBundler({}),
+    base: '/',
     theme: defaultTheme({
         logo: "/isar.svg",
-        repo: "isar/isar",
-        docsRepo: "isar/isar",
+        repo: "isar-community/isar",
+        docsRepo: "isar-community/isar",
         docsDir: "docs/docs",
         contributors: true,
         locales: themeLocales,
@@ -64,11 +65,11 @@ export default defineUserConfig({
                 link: "https://t.me/isardb",
             },
             {
-                text: "4.x",
+                text: "vx.x",
                 children: [
                     {
                         text: "v4.x",
-                        link: "https://isar-community.dev/",
+                        link: "https://isar-community.dev",
                     },
                     {
                         text: "v3.x",
