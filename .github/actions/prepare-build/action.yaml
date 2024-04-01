@@ -3,24 +3,22 @@ description: "Prepares the build for Isar Core"
 runs:
   using: "composite"
   steps:
-    - name: Install latest Rust nightly
-      uses: actions-rs/toolchain@v1
+    - name: Install latest Rust Nightly
+      uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: nightly
-        override: true
         components: rustfmt, clippy
-    - name: Install LLVM and Clang
-      if: runner.os == 'Windows'
-      uses: KyleMayes/install-llvm-action@v1
-      with:
-        version: "11.0"
-        directory: ${{ runner.temp }}/llvm
     - name: Install Perl
       if: runner.os == 'Windows'
       uses: shogo82148/actions-setup-perl@v1
       with:
         distribution: strawberry
         perl-version: "5.32"
+    - name: Install make with Chocolatey
+      if: runner.os == 'Windows'
+      shell: bash
+      run: |
+        choco install make
     - name: Set Windows environment variables
       if: runner.os == 'Windows'
       shell: pwsh

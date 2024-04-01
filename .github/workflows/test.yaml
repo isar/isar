@@ -17,7 +17,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ secrets.FLUTTER_VERSION }}
+          flutter-version: ${{ vars.FLUTTER_VERSION_V4 }}
       - name: Check formatting
         run: dart format -o none . --set-exit-if-changed
 
@@ -29,7 +29,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ secrets.FLUTTER_VERSION }}
+          flutter-version: ${{ vars.FLUTTER_VERSION_V4 }}
       - run: dart pub get
         working-directory: packages/isar
       - run: flutter pub get
@@ -66,6 +66,8 @@ jobs:
       - run: echo "$OSTYPE"
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION_V4 }}
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
@@ -82,6 +84,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION_V4 }}
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
@@ -100,6 +104,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION_V4 }}
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
@@ -118,8 +124,8 @@ jobs:
         working-directory: packages/isar
       - name: Collect isar_core Coverage
         run: |
-          cargo install cargo-tarpaulin
-          cargo tarpaulin -o Lcov --engine llvm
+          cargo install cargo-tarpaulin --version 0.24.0 --force
+          cargo tarpaulin -o Json -v
       - name: Upload isar_test Coverage
         uses: codecov/codecov-action@v3
         with:
@@ -137,6 +143,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION_V4 }}
       - name: Run Generator Unit tests
         run: |
           dart pub get
@@ -145,14 +153,16 @@ jobs:
 
   integration_test_ios:
     name: Integration Test iOS
-    runs-on: macos-13
+    runs-on: macos-12
     steps:
       - uses: actions/checkout@v3
       - name: Start simulator
-        uses: futureware-tech/simulator-action@v2
+        uses: futureware-tech/simulator-action@v3
         with:
-          model: iPhone 14
+          model: iPhone 13
       - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION_V4 }}
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
@@ -175,6 +185,8 @@ jobs:
           java-version: "11"
           distribution: "zulu"
       - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION_V4 }}
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
@@ -199,6 +211,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION_V4 }}
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
@@ -210,7 +224,7 @@ jobs:
         run: sh tool/prepare_tests.sh
       - name: Run Flutter Driver tests
         run: |
-          flutter config --enable-macos-desktop 
+          flutter config --enable-macos-desktop
           flutter test -d macos integration_test.dart --dart-define STRESS=true
         working-directory: packages/isar_test
 
@@ -221,6 +235,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION_V4 }}
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Install Linux requirements
@@ -235,7 +251,7 @@ jobs:
         run: sh tool/prepare_tests.sh
       - name: Run Flutter Driver tests
         run: |
-          flutter config --enable-linux-desktop 
+          flutter config --enable-linux-desktop
           flutter test -d linux integration_test.dart --dart-define STRESS=true
         working-directory: packages/isar_test
 
@@ -246,6 +262,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION_V4 }}
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
@@ -256,7 +274,7 @@ jobs:
         run: sh tool/prepare_tests.sh
       - name: Run Flutter Driver tests
         run: |
-          flutter config --enable-windows-desktop 
+          flutter config --enable-windows-desktop
           flutter test -d windows integration_test.dart --dart-define STRESS=true
         working-directory: packages/isar_test
 
@@ -266,6 +284,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION_V4 }}
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
@@ -291,6 +311,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION_V4 }}
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
@@ -318,6 +340,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION_V4 }}
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core

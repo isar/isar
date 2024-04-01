@@ -54,7 +54,8 @@ const LIBMDBX_TAG: &str = "v0.12.9";
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
-    env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "11.0");
+    env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "12.0");
+    env::set_var("RUST_BACKTRACE", "full");
 
     let is_android = env::var("CARGO_CFG_TARGET_OS").unwrap() == "android";
 
