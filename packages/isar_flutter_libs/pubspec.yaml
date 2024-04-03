@@ -3,7 +3,7 @@ description: Isar Core binaries for the Isar Database. Needs to be included for 
 version: 0.0.0-placeholder
 repository: https://github.com/isar-community/isar
 homepage: https://isar.dev
-publish_to: https://isar-community.dev/
+publish_to: https://pub.isar-community.dev/
 
 environment:
   sdk: ">=3.1.0 <4.0.0"
@@ -14,7 +14,7 @@ dependencies:
     sdk: flutter
   isar: 
     version: 0.0.0-placeholder
-    hosted: https://isar-community.dev/
+    hosted: https://pub.isar-community.dev/
 
 flutter:
   plugin:
