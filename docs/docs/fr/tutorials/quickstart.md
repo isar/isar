@@ -13,7 +13,7 @@ Nous allons être brefs en mots et rapides en code dans ce démarrage rapide.
 Avant de débuter, nous devons ajouter quelques dépendances au fichier `pubspec.yaml`. Nous pouvons utiliser la commande `pub` pour faire le gros du travail à notre place.
 
 ```bash
-dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --hosted-url=https://isar-community.dev
+dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --hosted-url=https://pub.isar-community.dev
 ```
 
 ## 2. Annotation de classes

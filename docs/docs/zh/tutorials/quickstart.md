@@ -13,7 +13,7 @@ title: 快速开始
 在开始之前，我们需要在 `pubspec.yaml` 文件中添加若干依赖，可以运行以下命令帮助我们完成：
 
 ```bash
-dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --hosted-url=https://isar-community.dev
+dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --hosted-url=https://pub.isar-community.dev
 ```
 
 ## 2. 给类添加注解

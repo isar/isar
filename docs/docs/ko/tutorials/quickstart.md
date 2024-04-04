@@ -13,7 +13,7 @@ title: 빠른 시작
 재미있는 부분을 보기 전에 `pubspec.yaml` 에 몇 개의 패키지를 추가해야 합니다. 우리는 펍을 이용해서 힘든 일을 쉽게 할 수 있습니다.
 
 ```bash
-dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --hosted-url=https://isar-community.dev
+dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --hosted-url=https://pub.isar-community.dev
 ```
 
 ## 2. 클래스에 주석 추가(어노테이션)

@@ -5,7 +5,7 @@ repository: https://github.com/isar-community/isar/tree/main/packages/isar
 homepage: https://github.com/isar-community/isar
 issue_tracker: https://github.com/isar-community/isar/issues
 documentation: https://isar.dev
-publish_to: https://isar-community.dev/
+publish_to: https://pub.isar-community.dev/
 funding:
   - https://github.com/sponsors/simc/
 topics:

@@ -13,7 +13,7 @@ Seremos curtos em palavras e rápidos em código neste início rápido.
 Antes que a diversão comece, precisamos adicionar alguns pacotes ao `pubspec.yaml`. Podemos usar o pub para fazer o trabalho complexo para nós.
 
 ```bash
-dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --hosted-url=https://isar-community.dev
+dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --hosted-url=https://pub.isar-community.dev
 ```
 
 ## 2. Anotar classes
