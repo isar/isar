@@ -14,7 +14,8 @@ export 'interop.dart';
 FutureOr<IsarCoreBindings> initializePlatformBindings([
   String? library,
 ]) async {
-  final url = library ?? 'https://unpkg.com/isar@${Isar.version}/isar.wasm';
+  final url = library ??
+      'https://binaries.isar-community.dev/${Isar.version}/isar.wasm';
   final w = window as JSWindow;
   final promise = w.WebAssembly.instantiateStreaming(
     w.fetch(url),
