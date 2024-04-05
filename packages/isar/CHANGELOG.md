@@ -1,3 +1,13 @@
+## 4.0.2
+
+### Breaking
+
+Sorry, but we had to shift package hosting to https://pub.isar-community.dev
+
+### Fixes
+
+Web should be working again now.
+
 ## 4.0.1
 
 Adapted quickstart guide to get started with version 4
