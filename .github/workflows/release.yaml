@@ -79,6 +79,41 @@ jobs:
           target-folder: ${{ github.ref_name }}
           clean: false
 
+  upload_to_repo:
+    needs: build_binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: binaries/
+      - name: List contents of downloaded artifacts
+        run: |
+          echo "Listing contents of all downloaded artifacts..."
+          ls -Rlh binaries/
+          echo "Listing complete."
+      - name: Setup Git and clone target repository
+        run: |
+          git config --global user.email "vicente.russo@gmail.com"
+          git config --global user.name "GitHub Actions"
+          git clone https://github.com/isar-community/binaries repo
+          cd repo
+          git checkout main || git checkout -b main
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+      - name: Copy binaries to repository and push
+        run: |
+          cd repo
+          ISAR_VERSION=$(echo "${{ github.ref_name }}" | sed 's/refs\/tags\///')
+          echo "Deploying binaries to version: $ISAR_VERSION"
+          mkdir -p "$ISAR_VERSION"
+          cp ../binaries/**/* "$ISAR_VERSION"
+          git add .
+          git commit -m "Deploy binaries for version $ISAR_VERSION" || echo "No changes to commit"
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/isar-community/binaries.git main
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+
   publish:
     name: Publish
     needs: build_inspector
