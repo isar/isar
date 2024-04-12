@@ -21,11 +21,13 @@ dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --host
 Anote suas coleções de classes com `@collection` e escolha um campo 'Id'.
 
 ```dart
+import 'package:isar/isar.dart';
+
 part 'user.g.dart';
 
 @collection
 class User {
-  Id id = Isar.autoIncrement; // você também pode attribuir id = null para incrementar automaticamente
+  late int id;
 
   String? name;
 
@@ -49,8 +51,8 @@ Abra uma nova instância Isar e passe todos os seus esquemas de coleção. Opcio
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [UserSchema],
+final isar = await Isar.openAsync(
+  schemas: [UserSchema],
   directory: dir.path,
 );
 ```
@@ -62,18 +64,22 @@ Depois que sua instância estiver aberta, você poderá começar a usar as cole�
 Todas as operações básicas de CRUD estão disponíveis via `IsarCollection`.
 
 ```dart
-final newUser = User()..name = 'Jane Doe'..age = 36;
+final newUser = User()
+  ..id = isar!.users.autoIncrement()
+  ..name = 'Jane Doe'
+  ..age = 36;
 
-await isar.writeAsync((isar) async {
-  newUser.id = isar.users.autoIncrement();
-  await isar.users.put(newUser); // inserir & atualizar
+await isar!.writeAsync((isar) {
+  return isar.users.put(newUser); // inserir & atualizar
 });
 
-final existingUser = await isar.users.get(newUser.id); // get
+final existingUser = isar!.users.get(newUser.id); // ler
 
-await isar.writeAsync((isar) async {
-  await isar.users.delete(existingUser.id!); // delete
-});
+if (existingUser != null) {
+  await isar!.writeAsync((isar) {
+    return isar.users.delete(existingUser.id); // apagar
+  });
+}
 ```
 
 ## Outros recursos

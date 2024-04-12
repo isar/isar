@@ -21,11 +21,13 @@ dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --host
 컬렉션 클래스에 `@collection` 으로 주석을 달고 `Id` 필드를 선택합니다.
 
 ```dart
-part 'email.g.dart';
+import 'package:isar/isar.dart';
+
+part 'user.g.dart';
 
 @collection
 class User {
-  Id id = Isar.autoIncrement; // id = null 을 사용해도 자동 증분할 수 있습니다.
+  late int id;
 
   String? name;
 
@@ -49,7 +51,7 @@ dart run build_runner build
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
+final isar = await Isar.openAsync(
   [EmailSchema],
   directory: dir.path,
 );
@@ -62,18 +64,22 @@ final isar = await Isar.open(
 모든 기본적인 CRUD 작업은 `IsarCollection` 을 통해서 이루어집니다.
 
 ```dart
-final newUser = User()..name = 'Jane Doe'..age = 36;
+final newUser = User()
+  ..id = isar!.users.autoIncrement()
+  ..name = 'Jane Doe'
+  ..age = 36;
 
-await isar.writeAsync((isar) async {
-  newUser.id = isar.users.autoIncrement();
-  await isar.users.put(newUser); // 삽입 & 업데이트
+await isar!.writeAsync((isar) {
+  return isar.users.put(newUser); // 삽입 & 업데이트
 });
 
-final existingUser = await isar.users.get(newUser.id); // 가져오기
+final existingUser = isar!.users.get(newUser.id); // 가져오기
 
-await isar.writeAsync((isar) async {
-  await isar.users.delete(existingUser.id!); // 삭제
-});
+if (existingUser != null) {
+  await isar!.writeAsync((isar) {
+    return isar.users.delete(existingUser.id); // 삭제
+  });
+}
 ```
 
 ## 다른 자료들

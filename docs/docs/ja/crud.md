@@ -14,7 +14,7 @@ Isarインスタンスで使用したいすべてのスキーマを指定しま�
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
+final isar = await Isar.openAsync(
   [ContactSchema],
   directory: dir.path,
 );
@@ -65,24 +65,18 @@ class Recipe {
 final recipes = isar.recipes;
 ```
 
-簡単ですよね？ コレクションアクセサを使いたくない場合は、`collection()` メソッドを使うこともできます:
-
-```dart
-final recipes = isar.collection<Recipe>();
-```
-
 ### idを用いたオブジェクトの取得
 
 まだコレクションにデータはありませんが、あるものと仮定して、 `123` という ID の架空のオブジェクトを取得してみましょう。
 
 ```dart
-final recipe = await recipes.get(123);
+final recipe = await isar.recipes.getAsync(123);
 ```
 
-`get()` はオブジェクトを含む `Future` を返しますが、オブジェクトが存在しない場合は `null` を返します。 Isar のすべての操作はデフォルトでは非同期ですが、ほとんどの操作には同期処理も対応しています:
+`getAsync()` はオブジェクトを含む `Future` を返しますが、オブジェクトが存在しない場合は `null` を返します。 Isar のすべての操作はデフォルトでは非同期ですが、ほとんどの操作には同期処理も対応しています:
 
 ```dart
-final recipe = recipes.getSync(123);
+final recipe = recipes.get(123);
 ```
 
 :::warning
@@ -92,7 +86,7 @@ UIアイソレートでは、非同期バージョンのメソッドをデフォ
 複数のオブジェクトを一度に取得したい場合は、 `getAll()` または `getAllSync()` を使用してください：
 
 ```dart
-final recipe = await recipes.getAll([1, 2]);
+final recipe = await isar.recipes.getAll([1, 2]);
 ```
 
 ### オブジェクトのクエリ
@@ -100,9 +94,9 @@ final recipe = await recipes.getAll([1, 2]);
 IDでオブジェクトを取得する代わりに、 `.where()` と `.filter()` を使って特定の条件に一致するオブジェクトのリストを取得することもできます:
 
 ```dart
-final allRecipes = await recipes.where().findAll();
+final allRecipes = await isar.recipes.where().findAll();
 
-final favouires = await recipes.filter()
+final favouires = await isar.recipes.filter()
   .isFavoriteEqualTo(true)
   .findAll();
 ```
@@ -115,12 +109,12 @@ final favouires = await recipes.filter()
 
 ```dart
 await isar.writeAsync((isar) async {
-  final recipe = await recipes.get(123)
+  final recipe = await isar.recipes.getAsync(123)
 
   recipe.isFavorite = false;
-  await recipes.put(recipe); // 更新操作の実行
+  await isar.recipes.put(recipe); // 更新操作の実行
 
-  await recipes.delete(123); // 削除操作の実行
+  await isar.recipes.delete(123); // 削除操作の実行
 });
 ```
 
@@ -142,7 +136,7 @@ final pancakes = Recipe()
   ..isFavorite = true;
 
 await isar.writeAsync((isar) async {
-  await recipes.put(pancakes);
+  await isar.recipes.put(pancakes);
 })
 ```
 
@@ -152,7 +146,7 @@ Isarは `id` フィールドがfinalでは無い場合、オブジェクトに�
 
 ```dart
 await isar.writeAsync((isar) async {
-  await recipes.putAll([pancakes, pizza]);
+  await isar.recipes.putAll([pancakes, pizza]);
 })
 ```
 
@@ -165,7 +159,7 @@ await isar.writeAsync((isar) async {
 ```dart
 await isar.writeAsync((isar) async {
   pancakes.isFavorite = false;
-  await recipes.put(recipe);
+  await isar.recipes.put(recipe);
 });
 ```
 
@@ -175,7 +169,7 @@ await isar.writeAsync((isar) async {
 
 ```dart
 await isar.writeAsync((isar) async {
-  final success = await recipes.delete(123);
+  final success = await isar.recipes.delete(123);
   print('Recipe deleted: $success');
 });
 ```
@@ -184,7 +178,7 @@ getやputと同様に、削除されたオブジェクトの数を返す一括�
 
 ```dart
 await isar.writeAsync((isar) async {
-  final count = await recipes.deleteAll([1, 2, 3]);
+  final count = await isar.recipes.deleteAll([1, 2, 3]);
   print('We deleted $count recipes');
 });
 ```
@@ -193,7 +187,7 @@ await isar.writeAsync((isar) async {
 
 ```dart
 await isar.writeAsync((isar) async {
-  final count = await recipes.filter()
+  final count = await isar.recipes.filter()
     .isFavoriteEqualTo(false)
     .deleteAll();
   print('We deleted $count recipes');

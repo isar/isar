@@ -14,8 +14,8 @@ Gib alle Schemas an, die du mit der Isar-Instanz verwenden möchtest. Wenn du me
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [RecipeSchema],
+final isar = await Isar.openAsync(
+  schemas: [RecipeSchema],
   directory: dir.path,
 );
 ```
@@ -63,24 +63,18 @@ Alle deine Collections befinden sich in der Isar Instanz. Erhalte die Recipes-Co
 final recipes = isar.recipes;
 ```
 
-Das war einfach! Wenn du keine Collection-Accessors verwenden möchtest, ist alternativ die `collection()`-Methode verfügbar:
-
-```dart
-final recipes = isar.collection<Recipe>();
-```
-
 ### Objekt abrufen (per ID)
 
 Wir haben noch keine Daten in der Collection, aber wir nehmen an, dass bereits ein Objekt mit der ID `123` existiert.
 
 ```dart
-final recipe = await recipes.get(123);
+final recipe = await isar.recipes.getAsync(123);
 ```
 
-Die `get()`-Methode gibt ein `Future` zurück, das entweder das Objekt enthält, oder `null`, wenn die ID nicht existiert. Alle Isar-Operationen sind standardmäßig asynchron, auch wenn die meisten ein synchrones Gegenstück haben:
+Die `getAsync()`-Methode gibt ein `Future` zurück, das entweder das Objekt enthält, oder `null`, wenn die ID nicht existiert. Alle Isar-Operationen sind standardmäßig asynchron, auch wenn die meisten ein synchrones Gegenstück haben:
 
 ```dart
-final recipe = recipes.getSync(123);
+final recipe = recipes.get(123);
 ```
 
 :::warning
@@ -90,7 +84,7 @@ Normalerweise solltest du die asynchrone Version der Methoden in deinem UI-Isola
 Wenn du mehrere Objekte auf einmal abrufen möchtest, kannst du `getAll()` oder `getAllSync()` verwenden:
 
 ```dart
-final recipe = await recipes.getAll([1, 2]);
+final recipe = await isar.recipes.getAll([1, 2]);
 ```
 
 ### Abfragen von Objekten
@@ -98,9 +92,9 @@ final recipe = await recipes.getAll([1, 2]);
 Anstatt Objekte über die ID zu erhalten, kannst du mittels `.where()` und `.filter()` auch eine Liste von Objekten abfragen, die bestimmten Bedingungen entsprechen:
 
 ```dart
-final allRecipes = await recipes.where().findAll();
+final allRecipes = await isar.recipes.where().findAll();
 
-final favourites = await recipes.filter()
+final favourites = await isar.recipes.filter()
   .isFavoriteEqualTo(true)
   .findAll();
 ```
@@ -113,12 +107,12 @@ Jetzt ist es endlich an der Zeit, unsere Collection zu verändern! Um Objekte zu
 
 ```dart
 await isar.writeAsync((isar) async {
-  final recipe = await recipes.get(123)
+  final recipe = await isar.recipes.getAsync(123)
 
   recipe.isFavorite = false;
-  await recipes.put(recipe); // Aktualisierungsoperationen
+  await isar.recipes.put(recipe); // Aktualisierungsoperationen
 
-  await recipes.delete(123); // oder Löschoperationen durchführen
+  await isar.recipes.delete(123); // oder Löschoperationen durchführen
 });
 ```
 
@@ -138,7 +132,7 @@ final pancakes = Recipe()
   ..isFavorite = true;
 
 await isar.writeAsync((isar) async {
-  await recipes.put(pancakes);
+  await isar.recipes.put(pancakes);
 })
 ```
 
@@ -148,7 +142,7 @@ Das Erstellen von mehreren Objekten auf einmal ist genauso einfach:
 
 ```dart
 await isar.writeAsync((isar) async {
-  await recipes.putAll([pancakes, pizza]);
+  await isar.recipes.putAll([pancakes, pizza]);
 })
 ```
 
@@ -161,7 +155,7 @@ Wenn wir also Pfannkuchen nicht mehr mögen, können wir Folgendes tun:
 ```dart
 await isar.writeAsync((isar) async {
   pancakes.isFavorite = false;
-  await recipes.put(recipe);
+  await isar.recipes.put(recipe);
 });
 ```
 
@@ -171,7 +165,7 @@ Willst du ein Objekt in Isar loswerden? Verwende `collection.delete(id)`. Die de
 
 ```dart
 await isar.writeAsync((isar) async {
-  final success = await recipes.delete(123);
+  final success = await isar.recipes.delete(123);
   print('Recipe deleted: $success');
 });
 ```
@@ -180,7 +174,7 @@ await isar.writeAsync((isar) async {
 
 ```dart
 await isar.writeAsync((isar) async {
-  final count = await recipes.deleteAll([1, 2, 3]);
+  final count = await isar.recipes.deleteAll([1, 2, 3]);
   print('We deleted $count recipes');
 });
 ```
@@ -189,7 +183,7 @@ Wenn du die IDs der zu löschenden Objekte nicht kennst ist es auch möglich ein
 
 ```dart
 await isar.writeAsync((isar) async {
-  final count = await recipes.filter()
+  final count = await isar.recipes.filter()
     .isFavoriteEqualTo(false)
     .deleteAll();
   print('We deleted $count recipes');

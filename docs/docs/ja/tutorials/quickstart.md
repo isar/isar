@@ -22,11 +22,13 @@ dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --host
 あなたの使用するコレクションクラスに `@collection` でアノテーションを付け、`Id` フィールドを設定します。
 
 ```dart
+import 'package:isar/isar.dart';
+
 part 'user.g.dart';
 
 @collection
 class User {
-  Id id = Isar.autoIncrement; // id = nullでも自動インクリメントされます。
+  late int id;
 
   String? name;
 
@@ -50,8 +52,8 @@ dart run build_runner build
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [UserSchema],
+final isar = await Isar.openAsync(
+  schemas: [UserSchema],
   directory: dir.path,
 );
 ```
@@ -63,18 +65,22 @@ Isarインスタンスを開いたら, コレクションを利用すること�
 基本的なCRUD操作は、全て `IsarCollection` を介して行う事が出来ます。
 
 ```dart
-final newUser = User()..name = 'Jane Doe'..age = 36;
+final newUser = User()
+  ..id = isar!.users.autoIncrement()
+  ..name = 'Jane Doe'
+  ..age = 36;
 
-await isar.writeAsync((isar) async {
-  newUser.id = isar.users.autoIncrement();
-  await isar.users.put(newUser); // 挿入と更新
+await isar!.writeAsync((isar) {
+  return isar.users.put(newUser); // 挿入と更新
 });
 
-final existingUser = await isar.users.get(newUser.id); // 取得
+final existingUser = isar!.users.get(newUser.id); // 取得
 
-await isar.writeAsync((isar) async {
-  await isar.users.delete(existingUser.id!); // 削除
-});
+if (existingUser != null) {
+  await isar!.writeAsync((isar) {
+    return isar.users.delete(existingUser.id); // 削除
+  });
+}
 ```
 
 ## その他の資料

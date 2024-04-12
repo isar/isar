@@ -14,8 +14,8 @@ title: بنائیں، پڑھیں، اپ ڈیٹ کریں، حذف کریں
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [RecipeSchema],
+final isar = await Isar.openAsync(
+  schemas: [RecipeSchema],
   directory: dir.path,
 );
 ```
@@ -65,23 +65,21 @@ class Recipe {
 ```dart
 final recipes = isar.recipes;
 ```
-یہ آسان تھا! اگر آپ کلیکشن ایکسیسرز استعمال نہیں کرنا چاہتے تو آپ `کلیکشن()` طریقہ بھی استعمال کر سکتے ہیں:
-
-```dart
-final recipes = isar.collection<Recipe>();
-```
 
 ### کوئی چیز حاصل کریں (بذریعہ ID)
 
 ہمارے پاس ابھی تک ڈیٹا جمع نہیں ہے لیکن آئیے دکھاوا کرتے ہیں کہ ہم ایسا کرتے ہیں تاکہ ہم 123 آئی ڈی کے ذریعے ایک خیالی چیز حاصل کر سکیں۔
-```dart
-final recipe = await isar.recipes.get(123);
-```
-`گیٹ()` کسی بھی چیز کے ساتھ `فیوچر` لوٹاتا ہے یا `نل` اگر یہ موجود نہیں ہے۔ ایزار کے تمام آپریشنز بطور ڈیفالٹ غیر مطابقت پذیر ہوتے ہیں، اور ان میں سے اکثر کا ہم وقتی ہم منصب ہوتا ہے:
 
 ```dart
-final recipe = isar.recipes.getSync(123);
+final recipe = await isar.recipes.getAsync(123);
 ```
+
+`getAsync()` کسی بھی چیز کے ساتھ فیوچر لوٹاتا ہے یا نل اگر یہ موجود نہیں ہے۔ ایزار کے تمام آپریشنز بطور ڈیفالٹ غیر مطابقت پذیر ہوتے ہیں، اور ان میں سے اکثر کا ہم وقتی ہم منصب ہوتا ہے:
+
+```dart
+final recipe = isar.recipes.get(123);
+```
+
 :::warning
 آپ کو اپنے یوآئی الگ تھلگ میں طریقوں کے غیر مطابقت پذیر ورژن پر ڈیفالٹ کرنا چاہئے۔ چونکہ ایزار بہت تیز ہے، یہ اکثر مطابقت پذیر ورژن استعمال کرنے کے لئے قابل قبول ہے.
 :::
@@ -112,7 +110,7 @@ final favouires = await isar.recipes.filter()
 
 ```dart
 await isar.writeAsync((isar) async {
-  final recipe = await isar.recipes.get(123)
+  final recipe = await isar.recipes.getAsync(123)
 
   recipe.isFavorite = false;
   await isar.recipes.put(recipe); // perform update operations

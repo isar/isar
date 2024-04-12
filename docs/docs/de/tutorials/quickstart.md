@@ -21,6 +21,8 @@ dart pub add isar:^0.0.0-placeholder isar_flutter_libs:^0.0.0-placeholder --host
 Annotiere deine Collection-Klassen mit `@collection` und wähle ein `Id`-Feld.
 
 ```dart
+import 'package:isar/isar.dart';
+
 part 'user.g.dart';
 
 @collection
@@ -49,8 +51,8 @@ dart run build_runner build
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [UserSchema],
+final isar = await Isar.openAsync(
+  schemas: [UserSchema],
   directory: dir.path,
 );
 ```
@@ -62,18 +64,22 @@ Wenn deine Instanz geöffnet ist, hast du Zugriff auf die Collections.
 Alle grundlegenden CRUD-Operationen sind über die `IsarCollection` verfügbar .
 
 ```dart
-final newUser = User()..name = 'Jane Doe'..age = 36;
+final newUser = User()
+  ..id = isar!.users.autoIncrement()
+  ..name = 'Jane Doe'
+  ..age = 36;
 
-await isar.writeAsync((isar) async {
-  newUser.id = isar.users.autoIncrement();
-  await isar.users.put(newUser); // Einfügen & akualisieren
+await isar!.writeAsync((isar) {
+  return isar.users.put(newUser); // Einfügen & akualisieren
 });
 
-final existingUser = await isar.users.get(newUser.id); // Erhalten
+final existingUser = isar!.users.get(newUser.id); // Erhalten
 
-await isar.writeAsync((isar) async {
-  await isar.users.delete(existingUser.id!); // Löschen
-});
+if (existingUser != null) {
+  await isar!.writeAsync((isar) {
+    return isar.users.delete(existingUser.id); // Löschen
+  });
+}
 ```
 
 ## Weitere Ressourcen

@@ -14,8 +14,8 @@ Provide all the schemas you want to use with the Isar instance. If you open mult
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [RecipeSchema],
+final isar = await Isar.openAsync(
+  schemas: [RecipeSchema],
   directory: dir.path,
 );
 ```
@@ -66,24 +66,18 @@ All your collections live in the Isar instance. You can get the recipes collecti
 final recipes = isar.recipes;
 ```
 
-That was easy! If you don't want to use collection accessors, you can also use the `collection()` method:
-
-```dart
-final recipes = isar.collection<Recipe>();
-```
-
 ### Get an object (by id)
 
 We don't have data in the collection yet but let's pretend we do so we can get an imaginary object by the id `123`
 
 ```dart
-final recipe = await isar.recipes.get(123);
+final recipe = await isar.recipes.getAsync(123);
 ```
 
-`get()` returns a `Future` with either the object or `null` if it does not exist. All Isar operations are asynchronous by default, and most of them have a synchronous counterpart:
+`getAsync()` returns a `Future` with either the object or `null` if it does not exist. All Isar operations are asynchronous by default, and most of them have a synchronous counterpart:
 
 ```dart
-final recipe = isar.recipes.getSync(123);
+final recipe = isar.recipes.get(123);
 ```
 
 :::warning
@@ -108,7 +102,7 @@ final favorites = await isar.recipes.filter()
   .findAll();
 ```
 
-➡️ Learn more: [Queries](queries)
+➡️ Learn more: [Queries](queries.md)
 
 ## Modifying the database
 
@@ -116,7 +110,7 @@ It's finally time to modify our collection! To create, update, or delete objects
 
 ```dart
 await isar.writeAsync((isar) async {
-  final recipe = await isar.recipes.get(123)
+  final recipe = await isar.recipes.getAsync(123)
 
   recipe.isFavorite = false;
   await isar.recipes.put(recipe); // perform update operations
@@ -125,7 +119,7 @@ await isar.writeAsync((isar) async {
 });
 ```
 
-➡️ Learn more: [Transactions](transactions)
+➡️ Learn more: [Transactions](transactions.md)
 
 ### Insert object
 

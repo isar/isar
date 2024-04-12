@@ -14,8 +14,8 @@ title: 增删改查
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [RecipeSchema],
+final isar = await Isar.openAsync(
+  schemas: [RecipeSchema],
   directory: dir.path,
 );
 ```
@@ -65,24 +65,18 @@ class Recipe {
 final recipes = isar.recipes;
 ```
 
-就这么简单！如果你不想用 Collection 的访问名（这里即 recipes），也可以调用 `collection()` 方法：
-
-```dart
-final recipes = isar.collection<Recipe>();
-```
-
 ### 通过 Id 来获取数据对象
 
 我们的 Collection 中还没有数据。但是假设已有数据，我们可以通过以下代码来访问 Id 为 `123` 的菜单。
 
 ```dart
-final recipe = await isar.recipes.get(123);
+final recipe = await isar.recipes.getAsync(123);
 ```
 
-`get()` 返回一个包含对象的 `Future`，如果对象不存在，则返回 `null`。 默认情况下 Isar 所有的操作均为异步，而大部分操作也有其对应的同步处理方法，如：
+`getAsync()` 返回一个包含对象的 `Future`，如果对象不存在，则返回 `null`。 默认情况下 Isar 所有的操作均为异步，而大部分操作也有其对应的同步处理方法，如：
 
 ```dart
-final recipe = isar.recipes.getSync(123);
+final recipe = isar.recipes.get(123);
 ```
 
 :::tip
@@ -115,7 +109,7 @@ final favouires = await isar.recipes.filter()
 
 ```dart
 await isar.writeAsync((isar) async {
-  final recipe = await isar.recipes.get(123)
+  final recipe = await isar.recipes.getAsync(123)
 
   recipe.isFavorite = false;
   await isar.recipes.put(recipe); // 修改数据
