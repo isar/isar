@@ -17,8 +17,7 @@ impl Txn {
         let result =
             unsafe { mdbx_result(mdbx_sys::mdbx_txn_commit_ex(self.txn, ptr::null_mut())) };
         self.txn = ptr::null_mut();
-        result?;
-        Ok(())
+        result
     }
 
     pub fn abort(self) {}

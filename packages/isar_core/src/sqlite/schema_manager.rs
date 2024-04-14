@@ -77,25 +77,24 @@ fn read_col_schema(sqlite: &SQLite3, name: &str) -> Result<IsarSchema> {
 
 fn update_table(sqlite: &SQLite3, collection: &IsarSchema) -> Result<()> {
     let existing_schema = read_col_schema(sqlite, &collection.name)?;
-    let (add_properties, drop_properties, add_indexes, drop_indexes) =
-        collection.find_changes(&existing_schema);
+    let changes = collection.find_changes(&existing_schema);
 
-    for index in drop_indexes {
+    for index in changes.dropped_index_names {
         let sql = drop_index_sql(&collection.name, &index);
         sqlite.prepare(&sql)?.step()?;
     }
 
-    for property in &drop_properties {
+    for property in &changes.dropped_property_names {
         let sql = drop_column_sql(collection, property);
         sqlite.prepare(&sql)?.step()?;
     }
 
-    for property in &add_properties {
+    for property in changes.added_properties {
         let sql = add_column_sql(collection, property);
         sqlite.prepare(&sql)?.step()?;
     }
 
-    for index in &add_indexes {
+    for index in changes.added_indexes {
         let sql = create_index_sql(&collection.name, index);
         sqlite.prepare(&sql)?.step()?;
     }

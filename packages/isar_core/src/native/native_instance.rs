@@ -2,7 +2,6 @@ use super::mdbx::env::Env;
 use super::native_collection::NativeCollection;
 use super::native_cursor::NativeCursor;
 use super::native_insert::NativeInsert;
-use super::native_open::{get_isar_path, open_native};
 use super::native_query_builder::NativeQueryBuilder;
 use super::native_reader::NativeReader;
 use super::native_txn::NativeTxn;
@@ -16,6 +15,7 @@ use crate::core::watcher::{WatchHandle, WatcherCallback};
 use intmap::IntMap;
 use parking_lot::Mutex;
 use std::fs::remove_file;
+use std::path::PathBuf;
 use std::sync::{Arc, LazyLock};
 
 static INSTANCES: LazyLock<Mutex<IntMap<Arc<NativeInstance>>>> =
@@ -60,6 +60,15 @@ impl NativeInstance {
         } else {
             Err(IsarError::IllegalArgument {})
         }
+    }
+
+    pub(crate) fn build_file_path(name: &str, dir: &str) -> String {
+        let mut file_name = name.to_string();
+        file_name.push_str(".isar");
+
+        let mut path_buf = PathBuf::from(dir);
+        path_buf.push(file_name);
+        path_buf.as_path().to_str().unwrap().to_string()
     }
 }
 
@@ -127,7 +136,7 @@ impl IsarInstance for NativeInstance {
         if let Some(instance) = lock.get(instance_id as u64) {
             Ok(instance.clone())
         } else {
-            let new_instance = open_native(
+            let new_instance = Self::open(
                 name,
                 dir,
                 instance_id,
@@ -349,7 +358,7 @@ impl IsarInstance for NativeInstance {
                 lock.remove(instance.instance_id as u64);
 
                 if delete {
-                    let mut path = get_isar_path(&instance.name, &instance.dir);
+                    let mut path = Self::build_file_path(&instance.name, &instance.dir);
                     drop(instance);
                     let _ = remove_file(&path);
                     path.push_str(".lock");

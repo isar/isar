@@ -17,6 +17,14 @@ pub struct IsarSchema {
     pub(crate) version: u8,
 }
 
+#[derive(Default)]
+pub struct SchemaChanges<'a> {
+    pub added_properties: Vec<&'a PropertySchema>,
+    pub dropped_property_names: Vec<String>,
+    pub added_indexes: Vec<&'a IndexSchema>,
+    pub dropped_index_names: Vec<String>,
+}
+
 impl IsarSchema {
     pub fn new(
         name: &str,
@@ -50,19 +58,8 @@ impl IsarSchema {
         Ok(())
     }
 
-    pub fn find_changes(
-        &self,
-        old_collection: &IsarSchema,
-    ) -> (
-        Vec<&'_ PropertySchema>,
-        Vec<String>,
-        Vec<&'_ IndexSchema>,
-        Vec<String>,
-    ) {
-        let mut add_properties = Vec::new();
-        let mut drop_properties = Vec::new();
-        let mut add_indexes = Vec::new();
-        let mut drop_indexes = Vec::new();
+    pub fn find_changes(&self, old_collection: &IsarSchema) -> SchemaChanges {
+        let mut changes = SchemaChanges::default();
 
         for old_prop in &old_collection.properties {
             if let Some(old_prop_name) = old_prop.name.as_deref() {
@@ -74,11 +71,13 @@ impl IsarSchema {
                     if prop.data_type != old_prop.data_type
                         || prop.collection != old_prop.collection
                     {
-                        add_properties.push(prop);
-                        drop_properties.push(prop.name.as_ref().unwrap().clone());
+                        changes.added_properties.push(prop);
+                        changes
+                            .dropped_property_names
+                            .push(prop.name.as_ref().unwrap().clone());
                     }
                 } else if let Some(old_prop_name) = &old_prop.name {
-                    drop_properties.push(old_prop_name.clone());
+                    changes.dropped_property_names.push(old_prop_name.clone());
                 }
             }
         }
@@ -90,7 +89,7 @@ impl IsarSchema {
                     .iter()
                     .any(|p| p.name.as_deref() == Some(prop_name));
                 if does_not_exist {
-                    add_properties.push(prop);
+                    changes.added_properties.push(prop);
                 }
             }
         }
@@ -98,17 +97,20 @@ impl IsarSchema {
         for old_index in &old_collection.indexes {
             let index = self.indexes.iter().find(|i| &i.name == &old_index.name);
             if let Some(index) = index {
-                let property_dropped = index.properties.iter().any(|p| drop_properties.contains(p));
+                let property_dropped = index
+                    .properties
+                    .iter()
+                    .any(|p| changes.dropped_property_names.contains(p));
                 if index.unique != old_index.unique
                     || &index.properties != &old_index.properties
                     || index.hash != old_index.hash
                     || property_dropped
                 {
-                    add_indexes.push(index);
-                    drop_indexes.push(old_index.name.clone());
+                    changes.added_indexes.push(index);
+                    changes.dropped_index_names.push(old_index.name.clone());
                 }
             } else {
-                drop_indexes.push(old_index.name.clone());
+                changes.dropped_index_names.push(old_index.name.clone());
             }
         }
 
@@ -118,11 +120,11 @@ impl IsarSchema {
                 .iter()
                 .any(|old_index| &index.name == &old_index.name);
             if does_not_exist {
-                add_indexes.push(index);
+                changes.added_indexes.push(index);
             }
         }
 
-        (add_properties, drop_properties, add_indexes, drop_indexes)
+        changes
     }
 
     fn verify(&self, collections: &[IsarSchema]) -> Result<()> {

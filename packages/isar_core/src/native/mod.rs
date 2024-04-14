@@ -7,14 +7,14 @@ mod native_cursor;
 mod native_index;
 mod native_insert;
 pub mod native_instance;
-mod native_open;
 mod native_query_builder;
 mod native_reader;
 mod native_txn;
 mod native_verify;
 mod native_writer;
 mod query;
-mod schema_manager;
+mod schema;
+mod native_instance_open;
 
 pub(crate) const FALSE_BOOL: u8 = 0;
 pub(crate) const TRUE_BOOL: u8 = 1;
