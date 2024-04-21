@@ -1,5 +1,5 @@
 use super::{FALSE_BOOL, NULL_BOOL, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG, TRUE_BOOL};
-use crate::core::data_type::DataType;
+use crate::core::{data_type::DataType, error::Result};
 use byteorder::{ByteOrder, LittleEndian};
 use std::cell::Cell;
 
@@ -22,7 +22,7 @@ impl IsarSerializer {
         }
     }
 
-    pub fn new_with_buffer(mut buffer: Vec<u8>, offset: u32, static_size: u32) -> Self {
+    pub fn with_buffer(mut buffer: Vec<u8>, offset: u32, static_size: u32) -> Self {
         let min_buffer_size = (offset + static_size + HEADER_SIZE) as usize;
         if min_buffer_size > buffer.len() {
             buffer.resize(min_buffer_size, 0);
@@ -133,86 +133,66 @@ impl IsarSerializer {
         self.write(dynamic_offset + HEADER_SIZE, value);
     }
 
-    pub fn write_bool_or_null_list(&mut self, offset: u32, value: &[Option<bool>]) {
-        let value: Vec<_> = value
-            .iter()
-            .map(|b| match b {
-                Some(true) => TRUE_BOOL,
-                Some(false) => FALSE_BOOL,
-                None => NULL_BOOL,
-            })
-            .collect();
+    pub fn write_list<P>(&mut self, offset: u32, data_type: DataType, length: usize, p: P)
+    where
+        P: Fn(&mut Self, u32, usize) -> (),
+    {
+        let mut nested = self.begin_nested(offset, length as u32 * data_type.static_size() as u32);
 
-        self.write_dynamic(offset, &value);
+        for i in 0..length {
+            let nested_offset = i as u32 * data_type.static_size() as u32;
+
+            p(&mut nested, nested_offset, i as usize);
+        }
+
+        self.end_nested(nested);
     }
 
-    pub fn write_int_or_null_list(&mut self, offset: u32, value: &[Option<i32>]) {
-        let value: Vec<_> = value
-            .iter()
-            .flat_map(|i| match i {
-                Some(i) => i.to_le_bytes(),
-                None => NULL_INT.to_le_bytes(),
-            })
-            .collect();
+    pub fn try_write_list<P>(
+        &mut self,
+        offset: u32,
+        data_type: DataType,
+        length: usize,
+        p: P,
+    ) -> Result<()>
+    where
+        P: Fn(&mut Self, u32, usize) -> Result<()>,
+    {
+        let mut nested = self.begin_nested(offset, length as u32 * data_type.static_size() as u32);
 
-        self.write_dynamic(offset, &value)
+        for i in 0..length {
+            let nested_offset = i as u32 * data_type.static_size() as u32;
+
+            p(&mut nested, nested_offset, i as usize)?;
+        }
+
+        self.end_nested(nested);
+        Ok(())
     }
 
-    pub fn write_long_or_null_list(&mut self, offset: u32, value: &[Option<i64>]) {
-        let value: Vec<_> = value
-            .iter()
-            .flat_map(|i| match i {
-                Some(i) => i.to_le_bytes(),
-                None => NULL_LONG.to_le_bytes(),
-            })
-            .collect();
+    pub fn write_value_or_null_list<T, P>(
+        &mut self,
+        offset: u32,
+        data_type: DataType,
+        values: &[Option<T>],
+        p: P,
+    ) where
+        P: Fn(&mut Self, u32, &T) -> (),
+    {
+        let mut nested =
+            self.begin_nested(offset, values.len() as u32 * data_type.static_size() as u32);
 
-        self.write_dynamic(offset, &value);
-    }
-
-    pub fn write_float_or_null_list(&mut self, offset: u32, value: &[Option<f32>]) {
-        let value: Vec<_> = value
-            .iter()
-            .flat_map(|f| match f {
-                Some(f) => f.to_le_bytes(),
-                None => NULL_FLOAT.to_le_bytes(),
-            })
-            .collect();
-
-        self.write_dynamic(offset, &value);
-    }
-
-    pub fn write_double_or_null_list(&mut self, offset: u32, value: &[Option<f64>]) {
-        let value: Vec<_> = value
-            .iter()
-            .flat_map(|f| match f {
-                Some(f) => f.to_le_bytes(),
-                None => NULL_DOUBLE.to_le_bytes(),
-            })
-            .collect();
-
-        self.write_dynamic(offset, &value);
-    }
-
-    pub fn write_string_or_null_list(&mut self, offset: u32, value: &[Option<&str>]) {
-        let mut nested_writer = self.begin_nested(
-            offset,
-            DataType::StringList.static_size() as u32 * value.len() as u32,
-        );
-
-        for (i, value) in value.iter().enumerate() {
-            let offset = (i * DataType::String.static_size() as usize) as u32;
+        for (i, value) in values.iter().enumerate() {
+            let nested_offset = i as u32 * data_type.static_size() as u32;
 
             match value {
-                Some(value) => nested_writer.write_dynamic(offset, value.as_bytes()),
-                None => nested_writer.write_null(offset, DataType::String),
+                Some(value) => p(&mut nested, nested_offset, value),
+                None => nested.write_null(nested_offset, data_type),
             };
         }
 
-        self.end_nested(nested_writer);
+        self.end_nested(nested);
     }
-
-    pub fn write_object_or_null_list(&mut self, offset: u32) {}
 
     pub fn update_dynamic(&mut self, offset: u32, value: &[u8]) {
         let existing_dynamic_offset = self.read_u24(offset);
@@ -231,7 +211,7 @@ impl IsarSerializer {
     pub fn begin_nested(&mut self, offset: u32, static_size: u32) -> Self {
         let nested_offset = self.buffer.get_mut().len() as u32;
         self.write_u24_static_checked(offset, nested_offset - self.offset);
-        Self::new_with_buffer(self.buffer.take(), nested_offset, static_size)
+        Self::with_buffer(self.buffer.take(), nested_offset, static_size)
     }
 
     pub fn end_nested(&mut self, writer: Self) {

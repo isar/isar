@@ -5,8 +5,7 @@ use crate::{
         schema::{IsarSchema, PropertySchema},
     },
     native::{
-        isar_serializer::IsarSerializer, native_txn::NativeTxn,
-        schema::versioned_isar_schema::VersionedIsarSchema,
+        isar_serializer::IsarSerializer, mdbx::db::Db, native_txn::NativeTxn, schema::{schema_manager::SchemaManager, versioned_isar_schema::VersionedIsarSchema}
     },
 };
 
@@ -14,7 +13,8 @@ use super::{v2_isar_object::V2IsarObject, v2_isar_schema::V2IsarSchema};
 
 pub fn migrate_v2_to_v3(
     txn: &NativeTxn,
-    v2_schema: V2IsarSchema,
+    info_db: Db,
+    v2_schema: &V2IsarSchema,
     schemas: &[VersionedIsarSchema],
 ) -> Result<IsarSchema> {
     // Drop all links
@@ -48,6 +48,8 @@ pub fn migrate_v2_to_v3(
 
         cursor.put(key, &v3_object.finish())?;
     }
+
+    SchemaManager::save_schema(txn, info_db, &v3_schema)?;
 
     Ok(v3_schema)
 }
@@ -89,12 +91,12 @@ fn migrate_v2_object_to_v3(
 
                 let nested_schema_properties =
                     get_object_property_target_collection_properties(property, schemas)?;
-                let static_size: u32 = nested_schema_properties
+                let nested_static_size: u32 = nested_schema_properties
                     .iter()
                     .map(|property| property.data_type.static_size() as u32)
                     .sum();
 
-                let mut nested_v3_object = v3_object.begin_nested(offset, static_size);
+                let mut nested_v3_object = v3_object.begin_nested(offset, nested_static_size);
                 migrate_v2_object_to_v3(
                     nested_schema_properties,
                     &nested_v2_object,
@@ -104,32 +106,67 @@ fn migrate_v2_object_to_v3(
                 v3_object.end_nested(nested_v3_object);
             }
             DataType::BoolList => match v2_object.read_bool_list(offset as usize) {
-                Some(value) => v3_object.write_bool_or_null_list(offset, &value),
+                Some(values) => v3_object.write_value_or_null_list(
+                    offset,
+                    DataType::BoolList,
+                    &values,
+                    |writer, offset, &value| writer.write_bool(offset, value),
+                ),
                 None => v3_object.write_null(offset, DataType::BoolList),
             },
             DataType::ByteList => match v2_object.read_byte_list(offset as usize) {
-                Some(value) => v3_object.write_dynamic(offset, value),
-                None => v3_object.write_null(offset, DataType::ByteList),
+                Some(values) => v3_object.write_list(
+                    offset,
+                    DataType::ByteList,
+                    values.len(),
+                    |writer, offset, index| writer.write_byte(offset, values[index]),
+                ),
+                None => v3_object.write_null(offset, DataType::BoolList),
             },
             DataType::IntList => match v2_object.read_int_or_null_list(offset as usize) {
-                Some(value) => v3_object.write_int_or_null_list(offset, &value),
-                None => v3_object.write_null(offset, DataType::IntList),
+                Some(values) => v3_object.write_value_or_null_list(
+                    offset,
+                    DataType::IntList,
+                    &values,
+                    |writer, offset, &value| writer.write_int(offset, value),
+                ),
+                None => v3_object.write_null(offset, DataType::BoolList),
             },
             DataType::LongList => match v2_object.read_long_or_null_list(offset as usize) {
-                Some(value) => v3_object.write_long_or_null_list(offset, &value),
-                None => v3_object.write_null(offset, DataType::LongList),
+                Some(values) => v3_object.write_value_or_null_list(
+                    offset,
+                    DataType::LongList,
+                    &values,
+                    |writer, offset, &value| writer.write_long(offset, value),
+                ),
+                None => v3_object.write_null(offset, DataType::BoolList),
             },
             DataType::FloatList => match v2_object.read_float_or_null_list(offset as usize) {
-                Some(value) => v3_object.write_float_or_null_list(offset, &value),
-                None => v3_object.write_null(offset, DataType::FloatList),
+                Some(values) => v3_object.write_value_or_null_list(
+                    offset,
+                    DataType::FloatList,
+                    &values,
+                    |writer, offset, &value| writer.write_float(offset, value),
+                ),
+                None => v3_object.write_null(offset, DataType::BoolList),
             },
             DataType::DoubleList => match v2_object.read_double_or_null_list(offset as usize) {
-                Some(value) => v3_object.write_double_or_null_list(offset, &value),
-                None => v3_object.write_null(offset, DataType::DoubleList),
+                Some(values) => v3_object.write_value_or_null_list(
+                    offset,
+                    DataType::DoubleList,
+                    &values,
+                    |writer, offset, &value| writer.write_double(offset, value),
+                ),
+                None => v3_object.write_null(offset, DataType::BoolList),
             },
             DataType::StringList => match v2_object.read_string_list(offset as usize) {
-                Some(value) => v3_object.write_string_or_null_list(offset, &value),
-                None => v3_object.write_null(offset, DataType::StringList),
+                Some(values) => v3_object.write_value_or_null_list(
+                    offset,
+                    DataType::StringList,
+                    &values,
+                    |writer, offset, &value| writer.write_dynamic(offset, value.as_bytes()),
+                ),
+                None => v3_object.write_null(offset, DataType::BoolList),
             },
             DataType::ObjectList => {
                 let nested_v2_objects = match v2_object.read_object_list(offset as usize) {
@@ -142,12 +179,36 @@ fn migrate_v2_object_to_v3(
 
                 let nested_schema_properties =
                     get_object_property_target_collection_properties(property, schemas)?;
-                let static_size: u32 = nested_schema_properties
+                let nested_static_size: u32 = nested_schema_properties
                     .iter()
                     .map(|property| property.data_type.static_size() as u32)
                     .sum();
 
-                todo!("Figure out how to write object list")
+                v3_object.try_write_list(
+                    offset,
+                    DataType::ObjectList,
+                    nested_v2_objects.len(),
+                    |writer, offset, index| {
+                        let nested_v2_object = match nested_v2_objects[index] {
+                            Some(object) => object,
+                            None => {
+                                writer.write_null(offset, DataType::ObjectList);
+                                return Ok(());
+                            }
+                        };
+
+                        let mut nested = writer.begin_nested(offset, nested_static_size);
+                        migrate_v2_object_to_v3(
+                            nested_schema_properties,
+                            &nested_v2_object,
+                            &mut nested,
+                            schemas,
+                        )?;
+                        writer.end_nested(nested);
+
+                        Ok(())
+                    },
+                )?;
             }
             data_type => {
                 return Err(IsarError::SchemaError {
@@ -162,7 +223,7 @@ fn migrate_v2_object_to_v3(
         offset += property.data_type.static_size() as u32;
     }
 
-    todo!()
+    Ok(())
 }
 
 fn get_object_property_target_collection_properties<'a>(

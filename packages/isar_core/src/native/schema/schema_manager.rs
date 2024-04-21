@@ -8,6 +8,7 @@ use crate::native::native_txn::NativeTxn;
 use std::borrow::Cow;
 use std::sync::Arc;
 
+use super::v2::v2_migration::migrate_v2_to_v3;
 use super::versioned_isar_schema::VersionedIsarSchema;
 
 const ISAR_FILE_VERSION: u8 = 3;
@@ -22,7 +23,7 @@ impl SchemaManager {
     ) -> Result<Vec<NativeCollection>> {
         let txn = NativeTxn::new(instance_id, env, true)?;
         let info_db = Self::open_info_db(&txn)?;
-        let existing_schemas = Self::get_schemas(&txn, info_db)?;
+        let existing_schemas = Self::get_migrated_schemas(&txn, info_db)?;
         txn.commit()?;
 
         let schema_names: Vec<_> = schemas.iter().map(|s| s.name.to_owned()).collect();
@@ -150,18 +151,35 @@ impl SchemaManager {
         }
     }
 
-    fn get_schemas(txn: &NativeTxn, info_db: Db) -> Result<Vec<IsarSchema>> {
-        txn.get_cursor(info_db)?
-            .iter()?
-            .map(|(_, bytes)| serde_json::from_slice(bytes))
-            .collect::<serde_json::Result<Vec<_>>>()
-            .map_err(|_| IsarError::SchemaError {
-                message: "Could not deserialize existing schema.".to_string(),
-            })
-    }
 
     fn get_versioned_schemas(txn: &NativeTxn, info_db: Db) -> Result<Vec<VersionedIsarSchema>> {
-        todo!()
+        txn.get_cursor(info_db)?
+            .iter()?
+            .map(|(key, bytes)| {
+                let name =
+                    String::from_utf8(key.to_owned()).map_err(|_| IsarError::SchemaError {
+                        message: "Could not parse schema name".to_owned(),
+                    })?;
+                VersionedIsarSchema::try_from_bytes(&name, bytes)
+            })
+            .collect()
+    }
+
+    fn get_migrated_schemas(txn: &NativeTxn, info_db: Db) -> Result<Vec<IsarSchema>> {
+        let versioned_schemas = Self::get_versioned_schemas(txn, info_db)?;
+
+        let mut migrated_schemas = Vec::with_capacity(versioned_schemas.len());
+        for versioned_schema in &versioned_schemas {
+            let migrated_schema = match versioned_schema {
+                    VersionedIsarSchema::V2(v2_schema) => {
+                        migrate_v2_to_v3(txn, info_db, &v2_schema, &versioned_schemas)?
+                    }
+                    VersionedIsarSchema::V3(v3_schema) => v3_schema.clone(),
+            };
+            migrated_schemas.push(migrated_schema);
+        }
+
+        Ok(migrated_schemas)
     }
 
     pub fn open_index_db(txn: &NativeTxn, collection_name: &str, index_name: &str) -> Result<Db> {
@@ -231,7 +249,7 @@ impl SchemaManager {
         Ok(merged_properties)
     }
 
-    fn save_schema(txn: &NativeTxn, info_db: Db, schema: &IsarSchema) -> Result<()> {
+    pub fn save_schema(txn: &NativeTxn, info_db: Db, schema: &IsarSchema) -> Result<()> {
         let bytes = serde_json::to_vec(schema).map_err(|_| IsarError::SchemaError {
             message: "Could not serialize schema".to_string(),
         })?;
