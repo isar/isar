@@ -8,6 +8,8 @@ use crate::native::native_txn::NativeTxn;
 use std::borrow::Cow;
 use std::sync::Arc;
 
+use super::versioned_isar_schema::VersionedIsarSchema;
+
 const ISAR_FILE_VERSION: u8 = 3;
 
 pub(crate) struct SchemaManager;
@@ -158,7 +160,11 @@ impl SchemaManager {
             })
     }
 
-    fn open_index_db(txn: &NativeTxn, collection_name: &str, index_name: &str) -> Result<Db> {
+    fn get_versioned_schemas(txn: &NativeTxn, info_db: Db) -> Result<Vec<VersionedIsarSchema>> {
+        todo!()
+    }
+
+    pub fn open_index_db(txn: &NativeTxn, collection_name: &str, index_name: &str) -> Result<Db> {
         let db_name = format!("_{collection_name}_{index_name}");
         txn.open_db(&db_name, false, true)
     }

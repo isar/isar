@@ -63,7 +63,7 @@ impl<'a> NativeInsert<'a> {
             collection,
             all_collections,
             remaining: count,
-            object: IsarSerializer::new(buffer, 0, collection.static_size),
+            object: IsarSerializer::new_with_buffer(buffer, 0, collection.static_size),
         };
         Ok(insert)
     }
@@ -82,7 +82,7 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
 
             self.remaining -= 1;
             buffer.clear();
-            self.object = IsarSerializer::new(buffer, 0, self.collection.static_size);
+            self.object = IsarSerializer::new_with_buffer(buffer, 0, self.collection.static_size);
             Ok(())
         } else {
             Err(IsarError::UnsupportedOperation {})

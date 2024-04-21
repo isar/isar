@@ -41,7 +41,7 @@ pub enum IsarError {
     #[snafu(display("Id not found."))]
     IdNotFound {},
 
-    #[snafu(display("Unknown propery."))]
+    #[snafu(display("Unknown property."))]
     UnknownProperty {},
 
     #[snafu(display("Transaction already active."))]
@@ -69,6 +69,13 @@ pub enum IsarError {
     #[snafu(display("DbError ({}): {}", code, message))]
     DbError {
         code: i32,
+        message: String,
+    },
+
+    #[snafu(display("Unsupported schema ({}) version ({:?}: {}.", name, version, message))]
+    UnsupportedSchemaVersion {
+        name: String,
+        version: Option<u8>,
         message: String,
     },
 }

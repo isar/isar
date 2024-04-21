@@ -215,7 +215,7 @@ impl NativeCollection {
         if let Some((_, old_object)) = cursor.move_to(&id.to_id_bytes())? {
             let mut buffer = txn.take_buffer();
             buffer.extend_from_slice(&old_object);
-            let mut new_object = IsarSerializer::new(buffer, 0, self.static_size);
+            let mut new_object = IsarSerializer::new_with_buffer(buffer, 0, self.static_size);
 
             for (property_index, value) in updates {
                 self.write_value(&mut new_object, *property_index as u16, value.as_ref())?;
