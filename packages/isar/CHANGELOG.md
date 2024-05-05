@@ -1,3 +1,9 @@
+## 4.0.3
+
+### Fixes
+
+Apple privacy manifest was added.
+
 ## 4.0.2
 
 ### Breaking
