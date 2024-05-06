@@ -62,7 +62,7 @@ jobs:
 
   build_inspector:
     name: Build Inspector
-    needs: testlab
+    needs: build_binaries
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
