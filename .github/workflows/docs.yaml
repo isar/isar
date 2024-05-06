@@ -26,6 +26,7 @@ jobs:
       - name: Build v3 docs
         run: |
           cd v3/docs
+          tool/replace-versions.sh
           sed -i'.bak' "s|base:.*|base: '/v3/',|" docs/.vuepress/config.ts
           sed -i 's|text: "vx.x"|text: "v3.x"|' docs/.vuepress/config.ts  
           npm ci
@@ -41,6 +42,7 @@ jobs:
       - name: Build main docs
         run: |
           cd main/docs
+          tool/replace-versions.sh
           sed -i'.bak' "s|base:.*|base: '/',|" docs/.vuepress/config.ts
           sed -i 's|text: "vx.x"|text: "v4.x"|' docs/.vuepress/config.ts  
           npm ci
