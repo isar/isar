@@ -26,6 +26,8 @@ jobs:
       - name: Build v3 docs
         run: |
           cd v3
+          git fetch --unshallow
+          git fetch --tags
           tool/replace-versions.sh
           cd docs
           sed -i'.bak' "s|base:.*|base: '/v3/',|" docs/.vuepress/config.ts
@@ -43,6 +45,8 @@ jobs:
       - name: Build main docs
         run: |
           cd main
+          git fetch --unshallow
+          git fetch --tags
           tool/replace-versions.sh
           cd docs
           sed -i'.bak' "s|base:.*|base: '/',|" docs/.vuepress/config.ts
