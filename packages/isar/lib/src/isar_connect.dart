@@ -67,7 +67,7 @@ abstract class _IsarConnect {
         path = path.substring(0, path.length - 1);
       }
       final url =
-          ' https://isar-community.dev/inspector/${Isar.version}/#/$port$path ';
+          ' https://inspect.isar-community.dev/${Isar.version}/#/$port$path ';
       String line(String text, String fill) {
         final fillCount = url.length - text.length;
         final left = List.filled(fillCount ~/ 2, fill);
