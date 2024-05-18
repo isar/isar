@@ -141,7 +141,7 @@ impl IsarInstance for NativeInstance {
         }
     }
 
-    fn change_encryption_key(&self, encryption_key: Option<&str>) -> Result<()> {
+    fn change_encryption_key(&self, _encryption_key: Option<&str>) -> Result<()> {
         Err(IsarError::UnsupportedOperation {})
     }
 
