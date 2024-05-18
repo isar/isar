@@ -2,7 +2,7 @@
 
 import 'dart:async';
 import 'package:web/web.dart' as web;
-import 'dart:js_util';
+import 'dart:js_interop';
 
 import 'package:isar/isar.dart';
 import 'package:isar/src/web/interop.dart';
@@ -18,9 +18,9 @@ FutureOr<IsarCoreBindings> initializePlatformBindings([
   final w = web.window as JSWindow;
   final promise = w.WebAssembly.instantiateStreaming(
     w.fetch(url),
-    jsify({'env': <String, String>{}}),
-  );
-  final wasm = await promiseToFuture<JSWasmModule>(promise);
+    {'env': <String, String>{}}.jsify(),
+  ) as JSPromise;
+  final wasm = (await promise.toDart) as JSWasmModule;
   return wasm.instance.exports;
 }
 
