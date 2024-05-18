@@ -141,13 +141,13 @@ jobs:
 
   integration_test_ios:
     name: Integration Test iOS
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - name: Start simulator
         uses: futureware-tech/simulator-action@v2
         with:
-          model: iPhone 14
+          model: iPhone 15
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
