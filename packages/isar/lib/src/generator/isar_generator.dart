@@ -8,6 +8,7 @@ import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:isar/isar.dart';
+import 'package:isar/src/generator/reserved_names.dart';
 import 'package:source_gen/source_gen.dart';
 
 part 'code_gen/collection_schema_generator.dart';
