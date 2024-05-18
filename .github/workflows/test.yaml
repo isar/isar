@@ -55,7 +55,7 @@ jobs:
     name: Dart Test
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-14, macos-13, ubuntu-latest, windows-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -191,7 +191,11 @@ jobs:
 
   integration_test_macos:
     name: Integration Test macOS
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [macos-14, macos-13] # arm64 and x64
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
