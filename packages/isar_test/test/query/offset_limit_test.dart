@@ -13,7 +13,6 @@ class Model {
   final String value;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is Model && other.id == id && other.value == value;
 }

@@ -25,7 +25,6 @@ class Model {
   final List<String?>? strings;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is Model &&

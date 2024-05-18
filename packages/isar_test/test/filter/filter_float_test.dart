@@ -13,7 +13,6 @@ class FloatModel {
   float? field = 0;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is FloatModel && id == other.id && doubleEquals(field, other.field);
 }

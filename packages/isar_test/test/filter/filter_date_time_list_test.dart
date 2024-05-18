@@ -13,7 +13,6 @@ class DateTimeModel {
   final List<DateTime?>? list;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is DateTimeModel &&
       id == other.id &&

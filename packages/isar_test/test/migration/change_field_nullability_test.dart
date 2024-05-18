@@ -14,7 +14,6 @@ class Col1 {
   String? value;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is Col1 && id == other.id && value == other.value;
 }
@@ -29,7 +28,6 @@ class Col2 {
   late String value;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is Col2 && id == other.id && value == other.value;
 }
