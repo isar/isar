@@ -182,7 +182,7 @@ class _IsarAnalyzer {
     Map<String, dynamic>? enumMap;
     String? enumPropertyName;
 
-    if (reservedSQLiteNames.contains(property.name.toUpperCase())) {
+    if (_reservedSQLiteNames.contains(property.name.toUpperCase())) {
       _err(
         '${property.name.toUpperCase()} is a reserved keyword and may not be '
         'used as property name',

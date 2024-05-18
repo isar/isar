@@ -1,4 +1,6 @@
-const Set<String> reservedSQLiteNames = {
+part of isar_generator;
+
+const Set<String> _reservedSQLiteNames = {
   // taken from https://sqlite.org/lang_keywords.html
   'ABORT',
   'ACTION',
@@ -146,5 +148,5 @@ const Set<String> reservedSQLiteNames = {
   'WHERE',
   'WINDOW',
   'WITH',
-  'WITHOUT'
+  'WITHOUT',
 };

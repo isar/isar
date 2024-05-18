@@ -8,7 +8,6 @@ import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:isar/isar.dart';
-import 'package:isar/src/generator/reserved_names.dart';
 import 'package:source_gen/source_gen.dart';
 
 part 'code_gen/collection_schema_generator.dart';
@@ -26,6 +25,7 @@ part 'helper.dart';
 part 'isar_analyzer.dart';
 part 'isar_type.dart';
 part 'object_info.dart';
+part 'reserved_names.dart';
 
 const _nullInt = -2147483648;
 const _nullLong = -9223372036854775808;
