@@ -16,5 +16,11 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^2.0.2
 
+dependency_overrides:
+  isar:
+    path: ../../packages/isar
+  isar_flutter_libs:
+    path: ../../packages/isar_flutter_libs
+
 flutter:
   uses-material-design: true
