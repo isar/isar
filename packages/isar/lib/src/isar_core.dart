@@ -4,7 +4,7 @@ part of isar;
 
 /// @nodoc
 abstract final class IsarCore {
-  static const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
+  static const bool kIsWeb = bool.fromEnvironment('dart.library.js_interop');
 
   static var _initialized = false;
   static String? _library;

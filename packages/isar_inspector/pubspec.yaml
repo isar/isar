@@ -19,6 +19,7 @@ dependencies:
   isar:
     path: ../isar
   vm_service: ^11.9.0
+  web: ^0.5.1
   web_socket_channel: ^2.4.0
 
 dev_dependencies:

@@ -3,14 +3,14 @@ import 'dart:math';
 
 import 'package:isar/isar.dart';
 import 'package:isar_test/src/init_native.dart'
-    if (dart.library.html) 'package:isar_test/src/init_web.dart';
+    if (dart.library.js_interop) 'package:isar_test/src/init_web.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 // ignore: implementation_imports, depend_on_referenced_packages
 import 'package:test_api/src/backend/invoker.dart';
 
 export 'package:isar_test/src/init_native.dart'
-    if (dart.library.html) 'package:isar_test/src/init_web.dart';
+    if (dart.library.js_interop) 'package:isar_test/src/init_web.dart';
 
 final testErrors = <String>[];
 int testCount = 0;
@@ -57,7 +57,7 @@ String get _testName => Invoker.current!.liveTest.test.name;
 
 bool get isSQLite => _testName.endsWith('(sqlite)');
 
-const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
+const bool kIsWeb = bool.fromEnvironment('dart.library.js_interop');
 
 @isTestGroup
 void isarTest(

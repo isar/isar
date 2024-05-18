@@ -2,7 +2,7 @@
 
 import 'dart:typed_data';
 
-import 'package:js/js.dart';
+import 'dart:js_interop';
 
 @JS()
 @staticInterop

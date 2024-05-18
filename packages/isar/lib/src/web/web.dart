@@ -1,7 +1,7 @@
 // ignore_for_file: public_member_api_docs
 
 import 'dart:async';
-import 'dart:html';
+import 'package:web/web.dart' as web;
 import 'dart:js_util';
 
 import 'package:isar/isar.dart';
@@ -15,7 +15,7 @@ FutureOr<IsarCoreBindings> initializePlatformBindings([
   String? library,
 ]) async {
   final url = library ?? 'https://unpkg.com/isar@${Isar.version}/isar.wasm';
-  final w = window as JSWindow;
+  final w = web.window as JSWindow;
   final promise = w.WebAssembly.instantiateStreaming(
     w.fetch(url),
     jsify({'env': <String, String>{}}),
