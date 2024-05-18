@@ -16,8 +16,6 @@ jobs:
       - uses: actions/checkout@v3
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ secrets.FLUTTER_VERSION }}
       - name: Check formatting
         run: dart format -o none . --set-exit-if-changed
 
@@ -28,8 +26,6 @@ jobs:
       - uses: actions/checkout@v3
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ secrets.FLUTTER_VERSION }}
       - run: dart pub get
         working-directory: packages/isar
       - run: flutter pub get
