@@ -287,6 +287,11 @@ abstract class Isar {
   @visibleForTesting
   void verify();
 
+  /// Changes the encryption key for an encrypted database.
+  /// Only supported on engines with encryption encryption support,
+  /// and for databases that are already encrypted.
+  void changeEncryptionKey(String encryptionKey);
+
   /// FNV-1a 64bit hash algorithm optimized for Dart Strings
   static int fastHash(String string) {
     return platformFastHash(string);
