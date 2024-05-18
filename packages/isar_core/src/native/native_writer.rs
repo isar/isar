@@ -38,7 +38,7 @@ impl<'a, T: WriterImpl<'a>> IsarWriter<'a> for T {
     }
 
     #[inline]
-    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> + 'a {
+    fn properties(&self) -> impl Iterator<Item = (&str, DataType)> {
         self.properties()
     }
 
