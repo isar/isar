@@ -17,8 +17,7 @@ runs:
     - name: Install make with Chocolatey
       if: runner.os == 'Windows'
       shell: bash
-      run: |
-        choco install make
+      run: choco install make
     - name: Set Windows environment variables
       if: runner.os == 'Windows'
       shell: pwsh

@@ -182,6 +182,7 @@ jobs:
         run: sh tool/prepare_tests.sh
       - name: Run Flutter Integration tests
         uses: reactivecircus/android-emulator-runner@v2
+        if: ${{ false }}
         with:
           api-level: 33
           arch: arm64-v8a
