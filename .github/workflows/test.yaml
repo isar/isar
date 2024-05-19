@@ -184,7 +184,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 33
-          arch: x86_64
+          arch: arm64-v8a
           profile: pixel
           working-directory: packages/isar_test
           script: flutter test integration_test.dart --dart-define STRESS=true
