@@ -17,7 +17,7 @@ El código siguiente es un ejemplo de una colección simple que define una table
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -78,7 +78,7 @@ Isar almacena todos los campos públicos de una clase que defina una colección.
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -99,7 +99,7 @@ class User {
 
 @Collection(ignore: {'profilePicture'})
 class Member extends User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -155,7 +155,7 @@ El siguiente es un ejemplo de una colección que contiene todos los tipos de dat
 ```dart
 @collection
 class TestCollection {
-  Id? id;
+  late int id;
 
   late byte byteValue;
 
@@ -216,7 +216,7 @@ Veamos un ejemplo para cada estrategia.
 ```dart
 @collection
 class EnumCollection {
-  Id? id;
+  late int id;
 
   @enumerated // same as EnumType.ordinal
   late TestEnum byteIndex; // cannot be nullable
@@ -254,7 +254,7 @@ Con frecuencia es útil tener objetos anidados en tus colecciones. No hay límit
 ```dart
 @collection
 class Email {
-  Id? id;
+  late int id;
 
   String? title;
 

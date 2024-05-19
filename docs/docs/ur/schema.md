@@ -17,7 +17,7 @@ title: اسکیما
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -78,7 +78,7 @@ Isar persists all public fields of a collection class. By annotating a property 
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -99,7 +99,7 @@ class User {
 
 @Collection(ignore: {'profilePicture'})
 class Member extends User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -149,7 +149,7 @@ Here is an example collection containing all of the above types:
 ```dart
 @collection
 class TestCollection {
-  Id? id;
+  late int id;
 
   late byte byteValue;
 
@@ -210,7 +210,7 @@ Isar does not store timezone information of your dates. Instead, it converts `Da
 ```dart
 @collection
 class EnumCollection {
-  Id? id;
+  late int id;
 
   @enumerated // same as EnumType.ordinal
   late TestEnum byteIndex; // cannot be nullable
@@ -248,7 +248,7 @@ enum TestEnum {
 ```dart
 @collection
 class Email {
-  Id? id;
+  late int id;
 
   String? title;
 

@@ -2,6 +2,8 @@
 title: Liens
 ---
 
+> ⚠️ Links are currently not supported in Isar v4
+
 # Liens
 
 Les liens nous permettent d'exprimer des relations entre objets, comme l'auteur d'un commentaire (`User`). Nous pouvons modéliser des relations `1:1`, `1:n`, et `n:n` avec les liens Isar. L'utilisation de liens est moins ergonomique que l'utilisation d'objets embarqués. Il est donc préférable d'utiliser des objets embarqués lorsque possible.
@@ -23,14 +25,14 @@ Pour les plateformes autres que web, les liens sont chargés automatiquement lor
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -49,7 +51,7 @@ final linda = Student()
   ..name = 'Linda'
   ..teacher.value = mathTeacher;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.students.put(linda);
   await isar.teachers.put(mathTeacher);
   await linda.teacher.save();
@@ -91,7 +93,7 @@ La représentation interne de `IsarLink` et `IsarLinks` est la même. Nous pouvo
 ```dart
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -113,7 +115,7 @@ print(linda.teachers); // {Teacher('Math')}
 
 linda.teachers.add(biologyTeacher);
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await linda.teachers.save();
 });
 

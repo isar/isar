@@ -17,7 +17,7 @@ Isar コレクションを定義するには、Class を `@collection` または
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -78,7 +78,7 @@ Isar は、コレクションクラスのすべての public フィールドを�
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -99,7 +99,7 @@ class User {
 
 @Collection(ignore: {'profilePicture'})
 class Member extends User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -155,7 +155,7 @@ Isar は以下のデータ型に対応しています:
 ```dart
 @collection
 class TestCollection {
-  Id? id;
+  late int id;
 
   late byte byteValue;
 
@@ -218,7 +218,7 @@ Isar では他の型と同様に、列挙型を保存し使用することがで
 ```dart
 @collection
 class EnumCollection {
-  Id? id;
+  late int id;
 
   @enumerated // EnumType.ordinalと同様
   late TestEnum byteIndex; // null 許容には出来ない
@@ -256,7 +256,7 @@ enum TestEnum {
 ```dart
 @collection
 class Email {
-  Id? id;
+  late int id;
 
   String? title;
 

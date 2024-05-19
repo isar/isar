@@ -24,7 +24,7 @@ Creamos el índice full-text más básico:
 
 ```dart
 class Message {
-  Id? id;
+  late int id;
 
   late String content;
 
@@ -67,7 +67,7 @@ Pan comido! Podemos cambiar nuestro índice para soportar también coincidencia 
 
 ```dart
 class Post {
-  Id? id;
+  late int id;
 
   late String title;
 
@@ -95,7 +95,7 @@ Por supuesto! Usaremos un truco para conseguir la coincidencia `.endsWith()`:
 
 ```dart
 class Post {
-    Id? id;
+    late int id;
 
     late String title;
 

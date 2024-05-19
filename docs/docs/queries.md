@@ -25,7 +25,7 @@ We'll use the following model for the examples below:
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   int? size;
 
@@ -198,7 +198,7 @@ Even lists can be queried:
 
 ```dart
 class Tweet {
-  Id? id;
+  late int id;
 
   String? text;
 
@@ -235,7 +235,7 @@ Embedded objects are one of Isar's most useful features. They can be queried ver
 ```dart
 @collection
 class Car {
-  Id? id;
+  late int id;
 
   Brand? brand;
 }
@@ -271,7 +271,7 @@ final germanCars = await isar.cars.filter()
 
 ### Links
 
-If your model contains [links or backlinks](links) you can filter your query based on the linked objects or the number of linked objects.
+If your model contains [links or backlinks](links.md) you can filter your query based on the linked objects or the number of linked objects.
 
 :::warning
 Keep in mind that link queries can be expensive because Isar needs to look up linked objects. Consider using embedded objects instead.
@@ -280,14 +280,14 @@ Keep in mind that link queries can be expensive because Isar needs to look up li
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -326,7 +326,7 @@ Where clauses are a very powerful tool, but it can be a little challenging to ge
 
 In contrast to filters where clauses use the indexes you defined in the schema to check the query conditions. Querying an index is a lot faster than filtering each record individually.
 
-➡️ Learn more: [Indexes](indexes)
+➡️ Learn more: [Indexes](indexes.md)
 
 :::tip
 As a basic rule, you should always try to reduce the records as much as possible using where clauses and do the remaining filtering using filters.
@@ -339,7 +339,7 @@ Let's add indexes to the shoe collection:
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   @Index()
   Id? size;

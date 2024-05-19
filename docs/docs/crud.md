@@ -14,8 +14,8 @@ Provide all the schemas you want to use with the Isar instance. If you open mult
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [RecipeSchema],
+final isar = await Isar.openAsync(
+  schemas: [RecipeSchema],
   directory: dir.path,
 );
 ```
@@ -48,7 +48,7 @@ For the examples below, we assume that we have a collection `Recipe` defined as 
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 
@@ -66,24 +66,18 @@ All your collections live in the Isar instance. You can get the recipes collecti
 final recipes = isar.recipes;
 ```
 
-That was easy! If you don't want to use collection accessors, you can also use the `collection()` method:
-
-```dart
-final recipes = isar.collection<Recipe>();
-```
-
 ### Get an object (by id)
 
 We don't have data in the collection yet but let's pretend we do so we can get an imaginary object by the id `123`
 
 ```dart
-final recipe = await isar.recipes.get(123);
+final recipe = await isar.recipes.getAsync(123);
 ```
 
-`get()` returns a `Future` with either the object or `null` if it does not exist. All Isar operations are asynchronous by default, and most of them have a synchronous counterpart:
+`getAsync()` returns a `Future` with either the object or `null` if it does not exist. All Isar operations are asynchronous by default, and most of them have a synchronous counterpart:
 
 ```dart
-final recipe = isar.recipes.getSync(123);
+final recipe = isar.recipes.get(123);
 ```
 
 :::warning
@@ -108,15 +102,15 @@ final favorites = await isar.recipes.filter()
   .findAll();
 ```
 
-➡️ Learn more: [Queries](queries)
+➡️ Learn more: [Queries](queries.md)
 
 ## Modifying the database
 
 It's finally time to modify our collection! To create, update, or delete objects, use the respective operations wrapped in a write transaction:
 
 ```dart
-await isar.writeTxn(() async {
-  final recipe = await isar.recipes.get(123)
+await isar.writeAsync((isar) async {
+  final recipe = await isar.recipes.getAsync(123)
 
   recipe.isFavorite = false;
   await isar.recipes.put(recipe); // perform update operations
@@ -125,7 +119,7 @@ await isar.writeTxn(() async {
 });
 ```
 
-➡️ Learn more: [Transactions](transactions)
+➡️ Learn more: [Transactions](transactions.md)
 
 ### Insert object
 
@@ -135,11 +129,12 @@ If the id field is `null` or `Isar.autoIncrement`, Isar will use an auto-increme
 
 ```dart
 final pancakes = Recipe()
+  ..id = isar.recipes.autoIncrement()
   ..name = 'Pancakes'
   ..lastCooked = DateTime.now()
   ..isFavorite = true;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.recipes.put(pancakes);
 })
 ```
@@ -149,7 +144,7 @@ Isar will automatically assign the id to the object if the `id` field is non-fin
 Inserting multiple objects at once is just as easy:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.recipes.putAll([pancakes, pizza]);
 })
 ```
@@ -161,7 +156,7 @@ Both creating and updating works with `collection.put(object)`. If the id is `nu
 So if we want to unfavorite our pancakes, we can do the following:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   pancakes.isFavorite = false;
   await isar.recipes.put(pancakes);
 });
@@ -172,7 +167,7 @@ await isar.writeTxn(() async {
 Want to get rid of an object in Isar? Use `collection.delete(id)`. The delete method returns whether an object with the specified id was found and deleted. If you want to delete the object with id `123`, for example, you can do:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final success = await isar.recipes.delete(123);
   print('Recipe deleted: $success');
 });
@@ -181,7 +176,7 @@ await isar.writeTxn(() async {
 Similarly to get and put, there is also a bulk delete operation that returns the number of deleted objects:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final count = await isar.recipes.deleteAll([1, 2, 3]);
   print('We deleted $count recipes');
 });
@@ -190,7 +185,7 @@ await isar.writeTxn(() async {
 If you don't know the ids of the objects you want to delete, you can use a query:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final count = await isar.recipes.filter()
     .isFavoriteEqualTo(false)
     .deleteAll();

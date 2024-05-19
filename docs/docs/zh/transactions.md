@@ -16,8 +16,8 @@ title: 事务
 
 |      | 读取         | 读写              |
 | ---- | ------------ | ----------------- |
-| 同步 | `.txnSync()` | `.writeTxnSync()` |
-| 异步 | `.txn()`     | `.writeTxn()`     |
+| 同步 | `.read()`      | `.write()`      |
+| 异步 | `.readAsync()` | `.writeAsync()` |
 
 ### 读取事务
 
@@ -40,13 +40,13 @@ title: 事务
 ```dart
 @collection
 class Contact {
-  Id? id;
+  late int id;
 
   String? name;
 }
 
 // 良好
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   for (var contact in getContacts()) {
     await isar.contacts.put(contact);
   }
@@ -54,7 +54,7 @@ await isar.writeTxn(() async {
 
 // 不好：要将循环放到事务里面
 for (var contact in getContacts()) {
-  await isar.writeTxn(() async {
+  await isar.writeAsync((isar) async {
     await isar.contacts.put(contact);
   });
 }

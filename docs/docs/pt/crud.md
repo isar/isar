@@ -14,8 +14,8 @@ Forneça todos os esquemas que deseja usar com a instância Isar. Se você abrir
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [RecipeSchema],
+final isar = await Isar.openAsync(
+  schemas: [RecipeSchema],
   directory: dir.path,
 );
 ```
@@ -47,7 +47,7 @@ Para os exemplos abaixo, assumimos que temos uma coleção `Recipe` definida da 
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 
@@ -65,24 +65,18 @@ Todas as suas coleções residem na instância Isar. Você pode obter a coleçã
 final recipes = isar.recipes;
 ```
 
-Essa foi fácil! Se você não quiser usar acessadores de coleção, você também pode usar o método `collection()`:
-
-```dart
-final recipes = isar.collection<Recipe>();
-```
-
 ### Obter um objeto (por id)
 
 Ainda não temos dados na coleção, mas vamos fingir que temos para que possamos obter um objeto imaginário pelo id `123`
 
 ```dart
-final recipe = await isar.recipes.get(123);
+final recipe = await isar.recipes.getAsync(123);
 ```
 
-`get()` retorna um `Future` com o objeto ou `null` se não existir. Todas as operações Isar são assíncronas por padrão e a maioria delas tem uma contrapartida síncrona:
+`getAsync()` retorna um `Future` com o objeto ou `null` se não existir. Todas as operações Isar são assíncronas por padrão e a maioria delas tem uma contrapartida síncrona:
 
 ```dart
-final recipe = isar.recipes.getSync(123);
+final recipe = isar.recipes.get(123);
 ```
 
 :::warning
@@ -114,8 +108,8 @@ final favouires = await isar.recipes.filter()
 Finalmente chegou a hora de modificar nossa coleção! Para criar, atualizar ou excluir objetos, use as respectivas operações envolvidas em uma transação de gravação:
 
 ```dart
-await isar.writeTxn(() async {
-  final recipe = await isar.recipes.get(123)
+await isar.writeAsync((isar) async {
+  final recipe = await isar.recipes.getAsync(123)
 
   recipe.isFavorite = false;
   await isar.recipes.put(recipe); // realizar operações de atualização
@@ -134,11 +128,12 @@ Se o campo id for `null` ou `Isar.autoIncrement`, Isar usará um id de increment
 
 ```dart
 final pancakes = Recipe()
+  ..id = isar.recipes.autoIncrement()
   ..name = 'Pancakes'
   ..lastCooked = DateTime.now()
   ..isFavorite = true;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.recipes.put(pancakes);
 })
 ```
@@ -148,7 +143,7 @@ Isar atribuirá automaticamente o id ao objeto se o campo `id` não for final.
 Inserir vários objetos de uma só vez é extremamente fácil:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.recipes.putAll([pancakes, pizza]);
 })
 ```
@@ -160,7 +155,7 @@ Tanto a criação quanto a atualização funcionam com `collection.put(object)`.
 Então, se quisermos desfavoritar nossas panquecas, podemos fazer o seguinte:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   pancakes.isFavorite = false;
   await isar.recipes.put(recipe);
 });
@@ -171,7 +166,7 @@ await isar.writeTxn(() async {
 Quer se livrar de um objeto em Isar? Use `collection.delete(id)`. O método delete retorna se um objeto com o id especificado foi encontrado e excluído. Se você quiser excluir o objeto com id `123`, por exemplo, você pode fazer:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final success = await isar.recipes.delete(123);
   print('Receita apagada: $success');
 });
@@ -180,7 +175,7 @@ await isar.writeTxn(() async {
 Da mesma forma para obter e colocar, também há uma operação de exclusão em massa que retorna o número de objetos excluídos:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final count = await isar.recipes.deleteAll([1, 2, 3]);
   print('Apagamos $count receitas');
 });
@@ -189,7 +184,7 @@ await isar.writeTxn(() async {
 Se você não souber os ids dos objetos que deseja excluir, poderá usar uma consulta:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final count = await isar.recipes.filter()
     .isFavoriteEqualTo(false)
     .deleteAll();
