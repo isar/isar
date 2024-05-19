@@ -192,8 +192,8 @@ jobs:
         uses: emulator-wtf/run-tests@v0
         with:
           api-token: ${{ secrets.EW_API_TOKEN }}
-          app: packages/isar_test/android/build/app/outputs/apk/debug/app-debug.apk
-          test: packages/isar_test/android/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+          app: packages/isar_test/build/app/outputs/apk/debug/app-debug.apk
+          test: packages/isar_test/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 
   integration_test_macos:
     name: Integration Test macOS
