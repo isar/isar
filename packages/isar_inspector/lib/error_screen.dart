@@ -1,5 +1,5 @@
 // ignore: avoid_web_libraries_in_flutter
-import 'dart:html';
+import 'package:web/web.dart' as web;
 
 import 'package:flutter/material.dart';
 
@@ -20,7 +20,7 @@ class ErrorScreen extends StatelessWidget {
           const Text('Please make sure your Isar instance is running.'),
           const SizedBox(height: 40),
           ElevatedButton(
-            onPressed: window.location.reload,
+            onPressed: web.window.location.reload,
             child: const Text('Retry Connection'),
           ),
         ],
