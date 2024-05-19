@@ -180,20 +180,6 @@ jobs:
           mv libisar_android_x64.so packages/isar_flutter_libs/android/src/main/jniLibs/x86_64/libisar.so
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
-      - name: Build dummy APK
-        run: flutter build apk integration_test.dart
-        working-directory: packages/isar_test
-      - name: Build APKs
-        run: |
-          ./gradlew app:assembleAndroidTest
-          ./gradlew app:assembleDebug -Ptarget=integration_test.dart
-        working-directory: packages/isar_test/android
-      - name: Run tests
-        uses: emulator-wtf/run-tests@v0
-        with:
-          api-token: ${{ secrets.EW_API_TOKEN }}
-          app: packages/isar_test/build/app/outputs/apk/debug/app-debug.apk
-          test: packages/isar_test/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 
   integration_test_macos:
     name: Integration Test macOS
