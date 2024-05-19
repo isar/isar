@@ -22,7 +22,6 @@ class StringModel {
   final List<String?>? nullableStringsNullable;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is StringModel &&

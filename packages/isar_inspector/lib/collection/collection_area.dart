@@ -168,7 +168,7 @@ class _CollectionAreaState extends State<CollectionArea> {
                     IconButton(
                       icon: Icon(
                         Icons.add_rounded,
-                        color: theme.colorScheme.onBackground,
+                        color: theme.colorScheme.onSurface,
                       ),
                       iconSize: 26,
                       tooltip: 'Create Object',
@@ -178,7 +178,7 @@ class _CollectionAreaState extends State<CollectionArea> {
                     IconButton(
                       icon: Icon(
                         Icons.paste_rounded,
-                        color: theme.colorScheme.onBackground,
+                        color: theme.colorScheme.onSurface,
                       ),
                       iconSize: 20,
                       tooltip: 'Import JSON from clipboard',
@@ -188,7 +188,7 @@ class _CollectionAreaState extends State<CollectionArea> {
                     IconButton(
                       icon: Icon(
                         Icons.download_rounded,
-                        color: theme.colorScheme.onBackground,
+                        color: theme.colorScheme.onSurface,
                       ),
                       tooltip: 'Download All',
                       onPressed: _onDownload,
@@ -197,7 +197,7 @@ class _CollectionAreaState extends State<CollectionArea> {
                     IconButton(
                       icon: Icon(
                         Icons.delete_forever_rounded,
-                        color: theme.colorScheme.onBackground,
+                        color: theme.colorScheme.onSurface,
                       ),
                       tooltip: 'Delete All',
                       onPressed: _onDeleteAll,

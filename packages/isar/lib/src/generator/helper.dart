@@ -14,10 +14,12 @@ extension on ClassElement {
     final ignoreFields =
         collectionAnnotation?.ignore ?? embeddedAnnotation!.ignore;
     final allAccessors = [
+      // ignore: deprecated_member_use
       ...accessors.map((e) => e.variable),
       if (collectionAnnotation?.inheritance ?? embeddedAnnotation!.inheritance)
         for (final supertype in allSupertypes) ...[
           if (!supertype.isDartCoreObject)
+            // ignore: deprecated_member_use
             ...supertype.accessors.map((e) => e.variable),
         ],
     ];

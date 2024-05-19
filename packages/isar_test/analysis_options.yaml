@@ -10,3 +10,4 @@ analyzer:
     avoid_equals_and_hash_code_on_mutable_classes: ignore
     hash_and_equals: ignore
     type_annotate_public_apis: ignore
+    non_nullable_equals_parameter: ignore

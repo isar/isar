@@ -13,7 +13,6 @@ class IdModel {
   int id = Random().nextInt(99999);
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is IdModel && other.id == id;
   }

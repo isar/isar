@@ -13,7 +13,6 @@ class DateTimeModel {
   DateTime? field;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is DateTimeModel &&
       id == other.id &&

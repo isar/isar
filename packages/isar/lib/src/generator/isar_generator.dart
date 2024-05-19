@@ -25,6 +25,7 @@ part 'helper.dart';
 part 'isar_analyzer.dart';
 part 'isar_type.dart';
 part 'object_info.dart';
+part 'reserved_names.dart';
 
 const _nullInt = -2147483648;
 const _nullLong = -9223372036854775808;

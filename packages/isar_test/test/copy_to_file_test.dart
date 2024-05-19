@@ -19,7 +19,6 @@ class Model {
   List<int> buffer = List.filled(16000, 42);
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is Model &&

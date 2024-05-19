@@ -13,7 +13,6 @@ class IntModel {
   short? field = 0;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is IntModel && id == other.id && other.field == field;
   }

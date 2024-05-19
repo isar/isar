@@ -90,7 +90,6 @@ class EnumModel {
   final StringEnum stringEnum;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is EnumModel &&
       other.ordinalEnum == ordinalEnum &&

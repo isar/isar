@@ -12,7 +12,6 @@ class EmptyConstructorModel {
   late String name;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(dynamic other) {
     return other is EmptyConstructorModel && other.name == name;
   }
@@ -26,7 +25,6 @@ class NamedConstructorModel {
   final String name;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(dynamic other) {
     return other is NamedConstructorModel && other.name == name;
   }
@@ -40,7 +38,6 @@ class PositionalConstructorModel {
   final String name;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(dynamic other) {
     return other is PositionalConstructorModel && other.name == name;
   }
@@ -56,7 +53,6 @@ class OptionalConstructorModel {
   int? value2;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(dynamic other) {
     return other is OptionalConstructorModel &&
         other.name == name &&
@@ -74,7 +70,6 @@ class PositionalNamedConstructorModel {
   final String value2;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(dynamic other) {
     return other is PositionalNamedConstructorModel &&
         other.name == name &&

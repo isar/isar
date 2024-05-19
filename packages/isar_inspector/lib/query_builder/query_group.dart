@@ -268,7 +268,7 @@ class GroupFilterButton extends StatelessWidget {
           icon: const Icon(Icons.workspaces_rounded),
           label: const Text('Add Group'),
           style: ButtonStyle(
-            elevation: MaterialStateProperty.all(level + 1),
+            elevation: WidgetStateProperty.all(level + 1),
           ),
           onPressed: () {
             onAdd(FilterGroup(true, []));
@@ -279,7 +279,7 @@ class GroupFilterButton extends StatelessWidget {
           icon: const Icon(Icons.filter_alt_rounded),
           label: const Text('Add Filter'),
           style: ButtonStyle(
-            elevation: MaterialStateProperty.all(level + 1),
+            elevation: WidgetStateProperty.all(level + 1),
           ),
           onPressed: () {
             onAdd(

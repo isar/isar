@@ -21,7 +21,6 @@ class StringModel {
   List<String>? stringList;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is StringModel &&
       string == other.string &&

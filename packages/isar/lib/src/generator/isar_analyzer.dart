@@ -182,6 +182,14 @@ class _IsarAnalyzer {
     Map<String, dynamic>? enumMap;
     String? enumPropertyName;
 
+    if (_reservedSQLiteNames.contains(property.name.toUpperCase())) {
+      _err(
+        '${property.name.toUpperCase()} is a reserved keyword and may not be '
+        'used as property name',
+        property,
+      );
+    }
+
     late final IsarType type;
     if (dartType.scalarType.element is EnumElement) {
       final enumClass = dartType.scalarType.element! as EnumElement;
