@@ -46,9 +46,3 @@ else
   cargo build --target aarch64-linux-android --features sqlcipher-vendored --release
   mv "target/aarch64-linux-android/release/libisar.so" "libisar_android_arm64.so"
 fi
-
-
-
-
-
-
