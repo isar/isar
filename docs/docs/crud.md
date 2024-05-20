@@ -119,7 +119,7 @@ await isar.writeAsync((isar) async {
 });
 ```
 
-➡️ Learn more: [Transactions](transactions.md)
+➡️ Learn more: [Transactions](transactions)
 
 ### Insert object
 
