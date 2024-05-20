@@ -326,7 +326,7 @@ Where clauses are a very powerful tool, but it can be a little challenging to ge
 
 In contrast to filters where clauses use the indexes you defined in the schema to check the query conditions. Querying an index is a lot faster than filtering each record individually.
 
-➡️ Learn more: [Indexes](indexes.md)
+➡️ Learn more: [Indexes](indexes)
 
 :::tip
 As a basic rule, you should always try to reduce the records as much as possible using where clauses and do the remaining filtering using filters.
