@@ -102,7 +102,7 @@ final favorites = await isar.recipes.filter()
   .findAll();
 ```
 
-➡️ Learn more: [Queries](queries.md)
+➡️ Learn more: [Queries](queries)
 
 ## Modifying the database
 
