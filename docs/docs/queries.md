@@ -271,7 +271,7 @@ final germanCars = await isar.cars.filter()
 
 ### Links
 
-If your model contains [links or backlinks](links.md) you can filter your query based on the linked objects or the number of linked objects.
+If your model contains [links or backlinks](links) you can filter your query based on the linked objects or the number of linked objects.
 
 :::warning
 Keep in mind that link queries can be expensive because Isar needs to look up linked objects. Consider using embedded objects instead.
