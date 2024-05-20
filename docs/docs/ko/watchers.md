@@ -91,12 +91,12 @@ awaited isar.users.put(User()..name = 'Antonia');
 // 출력: Users with A are: [User(name: Albert), User(name: Antonia)]
 ```
 
-:::주의
+:::warning
 오프셋과 제한 또는 별개의 쿼리를 사용하는 경우에, Isar 는 객체가 쿼리의 바깥에 있지만, 필터와 일치하는 경우에도 알림을 받습니다.
 :::
 
 `watchObject()` 처럼 `watchLazy()` 를 사용하여 쿼리 결과가 변경될 때 알림을 받을 수 있지만 결과를 가져오지는 않습니다.
 
-:::위험
+:::danger
 모든 변경 사항에 대해서 쿼리를 다시 실행하는 것은 매우 비효율적입니다. 대신 게으른 컬렉션 감시자를 사용하는 것이 가장 좋습니다.
 :::
