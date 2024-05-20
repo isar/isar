@@ -2,6 +2,8 @@
 title: リンク
 ---
 
+> ⚠️ Links are currently not supported in Isar v4
+
 # リンク
 
 リンクは、例えばコメントの作成者(User)のようなオブジェクト間の関係を表現することができ、 `1:1`、`1:n`、`n:n`の関係を IsarLinkで表現することができます。リンクの使用は、埋め込みオブジェクトの使用よりも人間工学的に劣るので、可能な限り埋め込みオブジェクトを使用するようにしましょう。
@@ -23,14 +25,14 @@ Web 以外の対象ついては、リンクは初めて使用する際に自動�
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -49,7 +51,7 @@ final linda = Student()
   ..name = 'Linda'
   ..teacher.value = mathTeacher;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.students.put(linda);
   await isar.teachers.put(mathTeacher);
   await linda.teacher.save();
@@ -91,7 +93,7 @@ isar.writeTxnSync(() {
 ```dart
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -114,7 +116,7 @@ print(linda.teachers); // {Teacher('Math')}
 
 linda.teachers.add(biologyTeacher);
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await linda.teachers.save();
 });
 

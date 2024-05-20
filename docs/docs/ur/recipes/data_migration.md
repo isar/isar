@@ -20,7 +20,7 @@ Version 1:
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -32,7 +32,7 @@ Version 2:
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -51,8 +51,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() async {
   final dir = await getApplicationDocumentsDirectory();
   
-  final isar = await Isar.open(
-    [UserSchema],
+  final isar = await Isar.openAsync(
+    schemas: [UserSchema],
     directory: dir.path,
   );
 

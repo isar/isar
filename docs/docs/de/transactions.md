@@ -14,10 +14,10 @@ Transaktionen (besonders Schreib-Transaktionen) sind sehr teuer. Du solltest imm
 
 Transaktionen können entweder synchron oder asynchron sein. In synchronen Transaktionen kannst du nur synchrone Operationen verwenden. In asynchronen Transaktionen sind nur asynchrone Operationen möglich.
 
-|           | Lesen        | Lesen & Schreiben |
-| --------- | ------------ | ----------------- |
-| Synchron  | `.txnSync()` | `.writeTxnSync()` |
-| Asynchron | `.txn()`     | `.writeTxn()`     |
+|           | Lesen          | Lesen & Schreiben |
+| --------- | -------------- | ----------------- |
+| Synchron  | `.read()`      | `.write()`        |
+| Asynchron | `.readAsync()` | `.writeAsync()`   |
 
 ### Lese-Transaktionen
 
@@ -40,13 +40,13 @@ Wenn eine Datenbankoperation fehlschlägt, wird die Transaktion abgeborchen und 
 ```dart
 @collection
 class Contact {
-  Id? id;
+  late int id;
 
   String? name;
 }
 
 // GUT
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   for (var contact in getContacts()) {
     await isar.contacts.put(contact);
   }
@@ -54,7 +54,7 @@ await isar.writeTxn(() async {
 
 // SCHLECHT: Bewege die Schleife in die Transaktion
 for (var contact in getContacts()) {
-  await isar.writeTxn(() async {
+  await isar.writeAsync((isar) async {
     await isar.contacts.put(contact);
   });
 }

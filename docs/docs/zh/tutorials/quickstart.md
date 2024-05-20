@@ -22,11 +22,13 @@ flutter pub add -d isar_generator build_runner
 用 `@collection` 给你的 Collection 类添加注解，并指定一个 `Id` 字段。
 
 ```dart
+import 'package:isar/isar.dart';
+
 part 'user.g.dart';
 
 @collection
 class User {
-  Id id = Isar.autoIncrement; // 你也可以用 id = null 来表示 id 是自增的
+  late int id;
 
   String? name;
 
@@ -44,20 +46,14 @@ Id 唯一指向了 Collection 中的对象，之后我们可通过 Id 来查询�
 dart run build_runner build
 ```
 
-倘若你的项目用到了 Flutter，可用下方命令来代替：
-
-```
-flutter pub run build_runner build
-```
-
 ## 4. 创建一个 Isar 实例
 
 创建一个新的 Isar 实例，并将你想保存到 Isar 的所有 collection 的 schema（它在上一步由 Isar Generator 根据你定义的 collection 自动生成） 作为参数传入。你还可以指定实例的名称以及它所存储数据的文件路径。
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [UserSchema],
+final isar = await Isar.openAsync(
+  schemas: [UserSchema],
   directory: dir.path,
 );
 ```
@@ -69,17 +65,22 @@ final isar = await Isar.open(
 可以通过 `IsarCollection` 来调用所有 CRUD 方法。
 
 ```dart
-final newUser = User()..name = 'Jane Doe'..age = 36;
+final newUser = User()
+  ..id = isar!.users.autoIncrement()
+  ..name = 'Jane Doe'
+  ..age = 36;
 
-await isar.writeTxn(() async {
-  await isar.users.put(newUser); // 将新用户数据写入到 Isar
+await isar!.writeAsync((isar) {
+  return isar.users.put(newUser); // 将新用户数据写入到 Isar
 });
 
-final existingUser = await isar.users.get(newUser.id); // 通过 Id 读取用户数据
+final existingUser = isar!.users.get(newUser.id); // 通过 Id 读取用户数据
 
-await isar.writeTxn(() async {
-  await isar.users.delete(existingUser.id!); // 通过 Id 删除指定用户
-});
+if (existingUser != null) {
+  await isar!.writeAsync((isar) {
+    return isar.users.delete(existingUser.id); // 通过 Id 删除指定用户
+  });
+}
 ```
 
 ## 其他资源

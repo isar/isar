@@ -15,7 +15,7 @@ Zum Beispiel ist diese `Product`-Collection komplett unsortiert.
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -50,7 +50,7 @@ Um die Leistung dieser Abfrage zu verbessern, indizieren wir die Eigenschaft `pr
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -110,7 +110,7 @@ Ein eindeutiger Index stellt sicher, dass der Index keine doppelten Werte enthä
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true)
   late String username;
@@ -147,7 +147,7 @@ Manchmal ist es nicht von Vorteil einen Fehler zu verursachen, wenn eine Eindeut
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true, replace: true)
   late String username;
@@ -206,7 +206,7 @@ Alle Indizes auf `String`- und `List<String>`-Eigenschaften beachten standardmä
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   @Index(caseSensitive: false)
   late String name;
@@ -255,7 +255,7 @@ Es ist vermutlich am besten mit einem Beispiel zu starten. Wir erstellen eine Pe
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -320,7 +320,7 @@ Zu sinnvollen Anwendungen für Mehrfach-Indizes zählen das Indizieren einer Lis
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String description;
 

@@ -25,7 +25,7 @@ Nous utiliserons le modèle suivant pour les exemples ci-dessous:
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   int? size;
 
@@ -198,7 +198,7 @@ Même les listes peuvent être utilisées dans les requêtes:
 
 ```dart
 class Tweet {
-  Id? id;
+  late int id;
 
   String? text;
 
@@ -235,7 +235,7 @@ Les objets embarqués sont l'une des fonctionnalités les plus utiles d'Isar. Il
 ```dart
 @collection
 class Car {
-  Id? id;
+  late int id;
 
   Brand? brand;
 }
@@ -280,14 +280,14 @@ Gardez en tête que les requêtes de liens peuvent être coûteuses, car Isar do
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -339,7 +339,7 @@ Ajoutons des index à la collection `Shoe`:
 ```dart
 @collection
 class Shoe with IsarObject {
-  Id? id;
+  late int id;
 
   @Index()
   Id? size;

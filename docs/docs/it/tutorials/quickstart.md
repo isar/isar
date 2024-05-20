@@ -22,11 +22,13 @@ flutter pub add -d isar_generator build_runner
 Annota le tue classi collection con `@collection` e scegli un campo `Id`.
 
 ```dart
+import 'package:isar/isar.dart';
+
 part 'user.g.dart';
 
 @collection
 class User {
-  Id id = Isar.autoIncrement; // puoi anche usare id = null per incrementare automaticamente
+  late int id;
 
   String? name;
 
@@ -44,20 +46,14 @@ Esegui il seguente comando per avviare `build_runner`:
 dart run build_runner build
 ```
 
-Se stai usando Flutter, usa quanto segue:
-
-```
-flutter pub run build_runner build
-```
-
 ## 4. Apri l'istanza Isar
 
 Apri una nuova istanza Isar e passa tutti i tuoi schemi di raccolte. Facoltativamente, puoi specificare un nome di istanza e una directory.
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [UserSchema],
+final isar = await Isar.openAsync(
+  schemas: [UserSchema],
   directory: dir.path,
 );
 ```
@@ -69,17 +65,22 @@ Una volta aperta l'istanza, puoi iniziare a utilizzare le raccolte.
 Tutte le operazioni CRUD di base sono disponibili tramite "IsarCollection".
 
 ```dart
-final newUser = User()..name = 'Jane Doe'..age = 36;
+final newUser = User()
+  ..id = isar!.users.autoIncrement()
+  ..name = 'Jane Doe'
+  ..age = 36;
 
-await isar.writeTxn(() async {
-  await isar.users.put(newUser); // insert & update
+await isar!.writeAsync((isar) {
+  return isar.users.put(newUser); // insert & update
 });
 
-final existingUser = await isar.users.get(newUser.id); // get
+final existingUser = isar!.users.get(newUser.id); // get
 
-await isar.writeTxn(() async {
-  await isar.users.delete(existingUser.id!); // delete
-});
+if (existingUser != null) {
+  await isar!.writeAsync((isar) {
+    return isar.users.delete(existingUser.id); // delete
+  });
+}
 ```
 
 ## Altre risorse

@@ -14,10 +14,10 @@ Transactions (especially write transactions) do have a cost, and you should alwa
 
 Transactions can either be synchronous or asynchronous. In synchronous transactions, you may only use synchronous operations. In asynchronous transactions, only async operations.
 
-|              | Read         | Read & Write      |
-| ------------ | ------------ | ----------------- |
-| Synchronous  | `.txnSync()` | `.writeTxnSync()` |
-| Asynchronous | `.txn()`     | `.writeTxn()`     |
+|              | Read           | Read & Write    |
+| ------------ | -------------- | --------------- |
+| Synchronous  | `.read()`      | `.write()`      |
+| Asynchronous | `.readAsync()` | `.writeAsync()` |
 
 ### Read transactions
 
@@ -40,13 +40,13 @@ When a database operation fails, the transaction is aborted and must no longer b
 ```dart
 @collection
 class Contact {
-  Id? id;
+  late int id;
 
   String? name;
 }
 
 // GOOD
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   for (var contact in getContacts()) {
     await isar.contacts.put(contact);
   }
@@ -54,7 +54,7 @@ await isar.writeTxn(() async {
 
 // BAD: move loop inside transaction
 for (var contact in getContacts()) {
-  await isar.writeTxn(() async {
+  await isar.writeAsync((isar) async {
     await isar.contacts.put(contact);
   });
 }

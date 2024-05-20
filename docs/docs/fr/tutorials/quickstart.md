@@ -22,11 +22,13 @@ flutter pub add -d isar_generator build_runner
 Annotez vos classes de collection avec `@collection` et choisissez un champ `Id`.
 
 ```dart
+import 'package:isar/isar.dart';
+
 part 'user.g.dart';
 
 @collection
 class User {
-  Id id = Isar.autoIncrement; // Vous pouvez aussi utiliser id = null pour l'auto incrémentation
+  late int id;
 
   String? name;
 
@@ -44,20 +46,14 @@ Exécutez la commande suivante pour démarrer le `build_runner`:
 dart run build_runner build
 ```
 
-Si vous utilisez Flutter:
-
-```sh
-flutter pub run build_runner build
-```
-
 ## 4. Ouverture l'instance Isar
 
 Ouvrez une nouvelle instance d'Isar et passez tous vos schémas de collection. En option, vous pouvez spécifier un nom d'instance et un dossier.
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [UserSchema],
+final isar = await Isar.openAsync(
+  schemas: [UserSchema],
   directory: dir.path,
 );
 ```
@@ -69,17 +65,22 @@ Une fois que votre instance est ouverte, vous pouvez commencer à utiliser les c
 Toutes les opérations CRUD de base sont disponibles via `IsarCollection`.
 
 ```dart
-final newUser = User()..name = 'Jane Doe'..age = 36;
+final newUser = User()
+  ..id = isar!.users.autoIncrement()
+  ..name = 'Jane Doe'
+  ..age = 36;
 
-await isar.writeTxn(() async {
-  await isar.users.put(newUser); // Insertion & modification
+await isar!.writeAsync((isar) {
+  return isar.users.put(newUser); // Insertion & modification
 });
 
-final existingUser = await isar.users.get(newUser.id); // Obtention
+final existingUser = isar!.users.get(newUser.id); // Obtention
 
-await isar.writeTxn(() async {
-  await isar.users.delete(existingUser.id!); // Suppression
-});
+if (existingUser != null) {
+  await isar!.writeAsync((isar) {
+    return isar.users.delete(existingUser.id); // Suppression
+  });
+}
 ```
 
 ## Autre ressources
