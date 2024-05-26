@@ -11,6 +11,7 @@ import 'package:isar/isar.dart';
 import 'package:source_gen/source_gen.dart';
 
 part 'code_gen/collection_schema_generator.dart';
+part 'code_gen/schema_property_mapper_generator.dart';
 part 'code_gen/deserialize_generator.dart';
 part 'code_gen/enum_maps_generator.dart';
 part 'code_gen/query_distinct_by_generator.dart';
@@ -33,8 +34,8 @@ const _nullLong = -9223372036854775808;
 /// Generates the isar code for the annotated classes.
 Builder getIsarGenerator(BuilderOptions options) => SharedPartBuilder(
       [
-        _IsarCollectionGenerator(),
-        _IsarEmbeddedGenerator(),
+        _IsarCollectionGenerator(options.config),
+        _IsarEmbeddedGenerator(options.config),
       ],
       'isar_generator',
     );
