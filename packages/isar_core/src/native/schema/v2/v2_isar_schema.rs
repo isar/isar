@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::core::schema::{IndexSchema, IsarSchema, PropertySchema};
+use crate::{
+    core::schema::{IndexSchema, IsarSchema, PropertySchema},
+    native::schema::schema_manager::ISAR_FILE_VERSION,
+};
 
 #[derive(Serialize, Deserialize)]
 pub struct V2IsarSchema {
@@ -31,7 +34,7 @@ impl V2IsarSchema {
             embedded: self.embedded,
             properties: self.properties.clone(),
             indexes,
-            version: self.version,
+            version: ISAR_FILE_VERSION,
         }
     }
 }

@@ -1,0 +1,17 @@
+name: isar_v3_db_generator
+description: A sample command-line application.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.4.1
+
+# Add regular dependencies here.
+dependencies:
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+
+dev_dependencies:
+  analyzer: ^5.0.0
+  build_runner: 2.4.11
+  isar_generator: ^3.1.0+1

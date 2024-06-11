@@ -40,3 +40,7 @@ dependency_overrides:
     path: ../isar
   isar_flutter_libs:
     path: ../isar_flutter_libs
+
+flutter:
+  assets:
+    - assets/isar_v3_db.isar

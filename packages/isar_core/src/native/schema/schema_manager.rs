@@ -11,7 +11,7 @@ use std::sync::Arc;
 use super::v2::v2_migration::migrate_v2_to_v3;
 use super::versioned_isar_schema::VersionedIsarSchema;
 
-const ISAR_FILE_VERSION: u8 = 3;
+pub(crate) const ISAR_FILE_VERSION: u8 = 3;
 
 pub(crate) struct SchemaManager;
 

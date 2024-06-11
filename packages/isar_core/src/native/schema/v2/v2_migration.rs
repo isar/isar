@@ -5,7 +5,10 @@ use crate::{
         schema::{IsarSchema, PropertySchema},
     },
     native::{
-        isar_serializer::IsarSerializer, mdbx::db::Db, native_txn::NativeTxn, schema::{schema_manager::SchemaManager, versioned_isar_schema::VersionedIsarSchema}
+        isar_serializer::IsarSerializer,
+        mdbx::db::Db,
+        native_txn::NativeTxn,
+        schema::{schema_manager::SchemaManager, versioned_isar_schema::VersionedIsarSchema},
     },
 };
 
@@ -40,16 +43,19 @@ pub fn migrate_v2_to_v3(
 
     let db = txn.open_db(&v2_schema.name, true, false)?;
     let mut cursor = txn.get_cursor(db)?;
+
     while let Some((key, bytes)) = cursor.move_to_next()? {
+        let key = key.to_owned();
         let v2_object = V2IsarObject::from_bytes(bytes);
         let mut v3_object = IsarSerializer::new(0, static_size);
 
         migrate_v2_object_to_v3(&v2_schema.properties, &v2_object, &mut v3_object, schemas)?;
-
-        cursor.put(key, &v3_object.finish())?;
+        cursor.put(&key, &v3_object.finish())?;
     }
 
     SchemaManager::save_schema(txn, info_db, &v3_schema)?;
+
+    // TODO: Create indexes
 
     Ok(v3_schema)
 }
@@ -60,31 +66,38 @@ fn migrate_v2_object_to_v3(
     v3_object: &mut IsarSerializer,
     schemas: &[VersionedIsarSchema],
 ) -> Result<()> {
-    let mut offset = 0u32;
+    // v2 objects needs to have header size in offset, not v3
+    // v2 and v3 have different types for offsets, so 2 numbers
+    // instead of having to cast everywhere.
+    let mut read_offset = 2usize;
+    let mut write_offset = 0u32;
+
     for property in properties {
         match property.data_type {
             DataType::Bool => {
-                match v2_object.read_bool(offset as usize) {
-                    Some(value) => v3_object.write_bool(offset, value),
-                    None => v3_object.write_null(offset, DataType::Bool),
+                match v2_object.read_bool(read_offset) {
+                    Some(value) => v3_object.write_bool(write_offset, value),
+                    None => v3_object.write_null(write_offset, DataType::Bool),
                 };
             }
-            DataType::Byte => v3_object.write_byte(offset, v2_object.read_byte(offset as usize)),
-            DataType::Int => v3_object.write_int(offset, v2_object.read_int(offset as usize)),
-            DataType::Long => v3_object.write_long(offset, v2_object.read_long(offset as usize)),
-            DataType::Float => v3_object.write_float(offset, v2_object.read_float(offset as usize)),
-            DataType::Double => {
-                v3_object.write_double(offset, v2_object.read_double(offset as usize))
+            DataType::Byte => v3_object.write_byte(write_offset, v2_object.read_byte(read_offset)),
+            DataType::Int => v3_object.write_int(write_offset, v2_object.read_int(read_offset)),
+            DataType::Long => v3_object.write_long(write_offset, v2_object.read_long(read_offset)),
+            DataType::Float => {
+                v3_object.write_float(write_offset, v2_object.read_float(read_offset))
             }
-            DataType::String => match v2_object.read_string(offset as usize) {
-                Some(value) => v3_object.write_dynamic(offset, value.as_bytes()),
-                None => v3_object.write_null(offset, DataType::String),
+            DataType::Double => {
+                v3_object.write_double(write_offset, v2_object.read_double(read_offset))
+            }
+            DataType::String => match v2_object.read_string(read_offset) {
+                Some(value) => v3_object.write_dynamic(write_offset, value.as_bytes()),
+                None => v3_object.write_null(write_offset, DataType::String),
             },
             DataType::Object => {
-                let nested_v2_object = match v2_object.read_object(offset as usize) {
+                let nested_v2_object = match v2_object.read_object(read_offset) {
                     Some(object) => object,
                     None => {
-                        v3_object.write_null(offset, DataType::Object);
+                        v3_object.write_null(write_offset, DataType::Object);
                         continue;
                     }
                 };
@@ -96,7 +109,7 @@ fn migrate_v2_object_to_v3(
                     .map(|property| property.data_type.static_size() as u32)
                     .sum();
 
-                let mut nested_v3_object = v3_object.begin_nested(offset, nested_static_size);
+                let mut nested_v3_object = v3_object.begin_nested(write_offset, nested_static_size);
                 migrate_v2_object_to_v3(
                     nested_schema_properties,
                     &nested_v2_object,
@@ -105,74 +118,74 @@ fn migrate_v2_object_to_v3(
                 )?;
                 v3_object.end_nested(nested_v3_object);
             }
-            DataType::BoolList => match v2_object.read_bool_list(offset as usize) {
+            DataType::BoolList => match v2_object.read_bool_list(read_offset) {
                 Some(values) => v3_object.write_value_or_null_list(
-                    offset,
-                    DataType::BoolList,
+                    write_offset,
+                    DataType::Bool,
                     &values,
                     |writer, offset, &value| writer.write_bool(offset, value),
                 ),
-                None => v3_object.write_null(offset, DataType::BoolList),
+                None => v3_object.write_null(write_offset, DataType::BoolList),
             },
-            DataType::ByteList => match v2_object.read_byte_list(offset as usize) {
+            DataType::ByteList => match v2_object.read_byte_list(read_offset) {
                 Some(values) => v3_object.write_list(
-                    offset,
-                    DataType::ByteList,
+                    write_offset,
+                    DataType::Byte,
                     values.len(),
                     |writer, offset, index| writer.write_byte(offset, values[index]),
                 ),
-                None => v3_object.write_null(offset, DataType::BoolList),
+                None => v3_object.write_null(write_offset, DataType::BoolList),
             },
-            DataType::IntList => match v2_object.read_int_or_null_list(offset as usize) {
+            DataType::IntList => match v2_object.read_int_or_null_list(read_offset) {
                 Some(values) => v3_object.write_value_or_null_list(
-                    offset,
-                    DataType::IntList,
+                    write_offset,
+                    DataType::Int,
                     &values,
                     |writer, offset, &value| writer.write_int(offset, value),
                 ),
-                None => v3_object.write_null(offset, DataType::BoolList),
+                None => v3_object.write_null(write_offset, DataType::BoolList),
             },
-            DataType::LongList => match v2_object.read_long_or_null_list(offset as usize) {
+            DataType::LongList => match v2_object.read_long_or_null_list(read_offset) {
                 Some(values) => v3_object.write_value_or_null_list(
-                    offset,
-                    DataType::LongList,
+                    write_offset,
+                    DataType::Long,
                     &values,
                     |writer, offset, &value| writer.write_long(offset, value),
                 ),
-                None => v3_object.write_null(offset, DataType::BoolList),
+                None => v3_object.write_null(write_offset, DataType::BoolList),
             },
-            DataType::FloatList => match v2_object.read_float_or_null_list(offset as usize) {
+            DataType::FloatList => match v2_object.read_float_or_null_list(read_offset) {
                 Some(values) => v3_object.write_value_or_null_list(
-                    offset,
-                    DataType::FloatList,
+                    write_offset,
+                    DataType::Float,
                     &values,
                     |writer, offset, &value| writer.write_float(offset, value),
                 ),
-                None => v3_object.write_null(offset, DataType::BoolList),
+                None => v3_object.write_null(write_offset, DataType::BoolList),
             },
-            DataType::DoubleList => match v2_object.read_double_or_null_list(offset as usize) {
+            DataType::DoubleList => match v2_object.read_double_or_null_list(read_offset) {
                 Some(values) => v3_object.write_value_or_null_list(
-                    offset,
-                    DataType::DoubleList,
+                    write_offset,
+                    DataType::Double,
                     &values,
                     |writer, offset, &value| writer.write_double(offset, value),
                 ),
-                None => v3_object.write_null(offset, DataType::BoolList),
+                None => v3_object.write_null(write_offset, DataType::BoolList),
             },
-            DataType::StringList => match v2_object.read_string_list(offset as usize) {
+            DataType::StringList => match v2_object.read_string_list(read_offset) {
                 Some(values) => v3_object.write_value_or_null_list(
-                    offset,
-                    DataType::StringList,
+                    write_offset,
+                    DataType::String,
                     &values,
                     |writer, offset, &value| writer.write_dynamic(offset, value.as_bytes()),
                 ),
-                None => v3_object.write_null(offset, DataType::BoolList),
+                None => v3_object.write_null(write_offset, DataType::BoolList),
             },
             DataType::ObjectList => {
-                let nested_v2_objects = match v2_object.read_object_list(offset as usize) {
+                let nested_v2_objects = match v2_object.read_object_list(read_offset) {
                     Some(objects) => objects,
                     None => {
-                        v3_object.write_null(offset, DataType::ObjectList);
+                        v3_object.write_null(write_offset, DataType::ObjectList);
                         continue;
                     }
                 };
@@ -185,14 +198,14 @@ fn migrate_v2_object_to_v3(
                     .sum();
 
                 v3_object.try_write_list(
-                    offset,
-                    DataType::ObjectList,
+                    write_offset,
+                    DataType::Object,
                     nested_v2_objects.len(),
                     |writer, offset, index| {
                         let nested_v2_object = match nested_v2_objects[index] {
                             Some(object) => object,
                             None => {
-                                writer.write_null(offset, DataType::ObjectList);
+                                writer.write_null(offset, DataType::Object);
                                 return Ok(());
                             }
                         };
@@ -220,7 +233,9 @@ fn migrate_v2_object_to_v3(
             }
         }
 
-        offset += property.data_type.static_size() as u32;
+        let property_static_size = property.data_type.static_size();
+        read_offset += property_static_size as usize;
+        write_offset += property_static_size as u32;
     }
 
     Ok(())

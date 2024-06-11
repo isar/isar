@@ -173,21 +173,23 @@ impl IsarSerializer {
     pub fn write_value_or_null_list<T, P>(
         &mut self,
         offset: u32,
-        data_type: DataType,
+        element_data_type: DataType,
         values: &[Option<T>],
         p: P,
     ) where
         P: Fn(&mut Self, u32, &T) -> (),
     {
-        let mut nested =
-            self.begin_nested(offset, values.len() as u32 * data_type.static_size() as u32);
+        let mut nested = self.begin_nested(
+            offset,
+            values.len() as u32 * element_data_type.static_size() as u32,
+        );
 
         for (i, value) in values.iter().enumerate() {
-            let nested_offset = i as u32 * data_type.static_size() as u32;
+            let nested_offset = i as u32 * element_data_type.static_size() as u32;
 
             match value {
                 Some(value) => p(&mut nested, nested_offset, value),
-                None => nested.write_null(nested_offset, data_type),
+                None => nested.write_null(nested_offset, element_data_type),
             };
         }
 
