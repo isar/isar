@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:isar/isar.dart';
 import 'package:isar_v3_db_generator/collections/collection_a.dart';
 import 'package:isar_v3_db_generator/seeders/collection_a_seeder.dart';
@@ -7,7 +9,7 @@ Future<void> main(List<String> arguments) async {
 
   final isar = await Isar.open(
     [CollectionASchema],
-    directory: ".",
+    directory: File(Platform.script.path).parent.parent.path,
     name: "isar_v3_db",
   );
 
