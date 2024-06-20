@@ -292,7 +292,7 @@ class Person {
 | 24  | Simon  | 4   |
 | 30  | Audrey | 7   |
 
-The generated composite index contains all persons sorted by their age their name.
+The generated composite index contains all persons sorted by their age and their name.
 
 Composite indexes are great if you want to create efficient queries sorted by multiple properties. They also enable advanced where clauses with multiple properties:
 
