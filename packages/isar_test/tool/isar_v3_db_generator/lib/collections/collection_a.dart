@@ -4,7 +4,7 @@ part 'collection_a.g.dart';
 
 @collection
 class CollectionA {
-  Id id = Isar.autoIncrement;
+  Id id;
 
   bool boolField;
   bool? nBoolField;
@@ -68,6 +68,7 @@ class CollectionA {
   List<String?>? nStringNList;
 
   CollectionA({
+    required this.id,
     required this.boolField,
     required this.nBoolField,
     required this.byteField,

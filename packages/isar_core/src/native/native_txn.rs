@@ -62,8 +62,14 @@ impl NativeTxn {
         result
     }
 
-    pub(crate) fn open_db(&self, name: &str, int_key: bool, dup: bool) -> Result<Db> {
-        Db::open(&self.txn, Some(name), int_key, dup)
+    pub(crate) fn open_db(
+        &self,
+        name: &str,
+        int_key: bool,
+        dup: bool,
+        int_dup: bool,
+    ) -> Result<Db> {
+        Db::open(&self.txn, Some(name), int_key, dup, int_dup)
     }
 
     pub(crate) fn clear_db(&self, db: Db) -> Result<()> {
@@ -79,7 +85,7 @@ impl NativeTxn {
     }
 
     pub(crate) fn db_names(&self) -> Result<Vec<String>> {
-        let unnamed_db = Db::open(&self.txn, None, false, false)?;
+        let unnamed_db = Db::open(&self.txn, None, false, false, false)?;
         let cursor = self.get_cursor(unnamed_db)?;
 
         let names = cursor

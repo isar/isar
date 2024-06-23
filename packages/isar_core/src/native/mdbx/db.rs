@@ -12,13 +12,17 @@ pub(crate) struct Db {
 }
 
 impl Db {
-    pub fn open(txn: &Txn, name: Option<&str>, int_key: bool, dup: bool) -> Result<Self> {
+    pub fn open(txn: &Txn, name: Option<&str>, int_key: bool, dup: bool, int_dup: bool) -> Result<Self> {
         let mut flags = mdbx_sys::MDBX_CREATE;
         if int_key {
             flags |= mdbx_sys::MDBX_INTEGERKEY;
         }
         if dup {
             flags |= mdbx_sys::MDBX_DUPSORT;
+
+            if int_dup {
+                flags |= mdbx_sys::MDBX_INTEGERDUP | mdbx_sys::MDBX_DUPFIXED;
+            }
         }
 
         let mut dbi: mdbx_sys::MDBX_dbi = 0;

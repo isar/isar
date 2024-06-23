@@ -1,6 +1,181 @@
 import 'package:isar/isar.dart';
-import 'package:isar_v3_db_generator/collections/collection_a.dart';
+import 'package:isar_test/isar_test.dart';
 
+part 'collection_a.g.dart';
+
+// This code is exactly the same as the one that is used to
+// generate the Isar v3 database file.
+// We use it here in order to generate the exact same objects,
+// and make sure every data is the same after migration.
+
+@collection
+class CollectionA {
+  @Id()
+  int id;
+
+  bool boolField;
+  bool? nBoolField;
+
+  byte byteField;
+
+  short shortField;
+  short? nShortField;
+
+  int intField;
+  int? nIntField;
+
+  float floatField;
+  float? nFloatField;
+
+  double doubleField;
+  double? nDoubleField;
+
+  DateTime dateField;
+  DateTime? nDateField;
+
+  String stringField;
+  String? nStringField;
+
+  List<bool> boolList;
+  List<bool>? boolNList;
+  List<bool?> nBoolList;
+  List<bool?>? nBoolNList;
+
+  List<byte> byteList;
+  List<byte>? byteNList;
+
+  List<short> shortList;
+  List<short>? shortNList;
+  List<short?> nShortList;
+  List<short?>? nShortNList;
+
+  List<int> intList;
+  List<int>? intNList;
+  List<int?> nIntList;
+  List<int?>? nIntNList;
+
+  List<float> floatList;
+  List<float>? floatNList;
+  List<float?> nFloatList;
+  List<float?>? nFloatNList;
+
+  List<double> doubleList;
+  List<double>? doubleNList;
+  List<double?> nDoubleList;
+  List<double?>? nDoubleNList;
+
+  List<DateTime> dateList;
+  List<DateTime>? dateNList;
+  List<DateTime?> nDateList;
+  List<DateTime?>? nDateNList;
+
+  List<String> stringList;
+  List<String>? stringNList;
+  List<String?> nStringList;
+  List<String?>? nStringNList;
+
+  CollectionA({
+    required this.id,
+    required this.boolField,
+    required this.nBoolField,
+    required this.byteField,
+    required this.shortField,
+    required this.nShortField,
+    required this.intField,
+    required this.nIntField,
+    required this.floatField,
+    required this.nFloatField,
+    required this.doubleField,
+    required this.nDoubleField,
+    required this.dateField,
+    required this.nDateField,
+    required this.stringField,
+    required this.nStringField,
+    required this.boolList,
+    required this.boolNList,
+    required this.nBoolList,
+    required this.nBoolNList,
+    required this.byteList,
+    required this.byteNList,
+    required this.shortList,
+    required this.shortNList,
+    required this.nShortList,
+    required this.nShortNList,
+    required this.intList,
+    required this.intNList,
+    required this.nIntList,
+    required this.nIntNList,
+    required this.floatList,
+    required this.floatNList,
+    required this.nFloatList,
+    required this.nFloatNList,
+    required this.doubleList,
+    required this.doubleNList,
+    required this.nDoubleList,
+    required this.nDoubleNList,
+    required this.dateList,
+    required this.dateNList,
+    required this.nDateList,
+    required this.nDateNList,
+    required this.stringList,
+    required this.stringNList,
+    required this.nStringList,
+    required this.nStringNList,
+  });
+
+  @override
+  bool operator ==(Object other) {
+    return other is CollectionA &&
+        other.id == id &&
+        other.boolField == boolField &&
+        other.nBoolField == nBoolField &&
+        other.byteField == byteField &&
+        other.shortField == shortField &&
+        other.nShortField == nShortField &&
+        other.intField == intField &&
+        other.nIntField == nIntField &&
+        doubleEquals(other.floatField, floatField) &&
+        doubleEquals(other.nFloatField, nFloatField) &&
+        doubleEquals(other.doubleField, doubleField) &&
+        doubleEquals(other.nDoubleField, nDoubleField) &&
+        other.dateField == dateField &&
+        other.nDateField == nDateField &&
+        other.stringField == stringField &&
+        other.nStringField == nStringField &&
+        listEquals(other.boolList, boolList) &&
+        listEquals(other.boolNList, boolNList) &&
+        listEquals(other.nBoolList, nBoolList) &&
+        listEquals(other.nBoolNList, nBoolNList) &&
+        listEquals(other.byteList, byteList) &&
+        listEquals(other.byteNList, byteNList) &&
+        listEquals(other.shortList, shortList) &&
+        listEquals(other.shortNList, shortNList) &&
+        listEquals(other.nShortList, nShortList) &&
+        listEquals(other.nShortNList, nShortNList) &&
+        listEquals(other.intList, intList) &&
+        listEquals(other.intNList, intNList) &&
+        listEquals(other.nIntList, nIntList) &&
+        listEquals(other.nIntNList, nIntNList) &&
+        doubleListEquals(other.floatList, floatList) &&
+        doubleListEquals(other.floatNList, floatNList) &&
+        doubleListEquals(other.nFloatList, nFloatList) &&
+        doubleListEquals(other.nFloatNList, nFloatNList) &&
+        doubleListEquals(other.doubleList, doubleList) &&
+        doubleListEquals(other.doubleNList, doubleNList) &&
+        doubleListEquals(other.nDoubleList, nDoubleList) &&
+        doubleListEquals(other.nDoubleNList, nDoubleNList) &&
+        listEquals(other.dateList, dateList) &&
+        listEquals(other.dateNList, dateNList) &&
+        listEquals(other.nDateList, nDateList) &&
+        listEquals(other.nDateNList, nDateNList) &&
+        listEquals(other.stringList, stringList) &&
+        listEquals(other.stringNList, stringNList) &&
+        listEquals(other.nStringList, nStringList) &&
+        listEquals(other.nStringNList, nStringNList);
+  }
+}
+
+// CollectionA
 const _boolValues = [false, true];
 const _byteValues = [0, 1, 100, 254, 255];
 const _shortValues = [-1147483647, 123, -100, 0, 1, 1117483647];
@@ -31,15 +206,7 @@ final _stringValues = [
   r'abcdefghijklmnopqrstuvwxyz0123456789+-/|\~!@#\$%^&*(){}',
 ];
 
-Future<void> seedCollectionA(Isar isar) async {
-  final objects = _generateObjects();
-
-  await isar.writeTxn(() async {
-    await isar.collectionAs.putAll(objects);
-  });
-}
-
-List<CollectionA> _generateObjects() {
+List<CollectionA> generateCollectionAObjects() {
   final objects = <CollectionA>[];
 
   int objectIndex = 0;
@@ -195,7 +362,7 @@ List<T?> _getListNValues<T>(List<T> values, int objectIndex) {
       if ((i * multi) % (values.length + 1) == 0)
         null
       else
-        values[(i * multi) % values.length]
+        values[(i * multi) % values.length],
   ];
 }
 
@@ -212,6 +379,6 @@ List<T?>? _getNListNValues<T>(List<T> values, int objectIndex) {
       if ((i * multi) % (values.length + 1) == 0)
         null
       else
-        values[(i * multi) % values.length]
+        values[(i * multi) % values.length],
   ];
 }

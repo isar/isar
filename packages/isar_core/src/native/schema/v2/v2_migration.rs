@@ -20,28 +20,41 @@ pub fn migrate_v2_to_v3(
     v2_schema: &V2IsarSchema,
     schemas: &[VersionedIsarSchema],
 ) -> Result<IsarSchema> {
+    let v3_schema = v2_schema.to_v3_schema();
+    let db = txn.open_db(&v2_schema.name, true, false, false)?;
+
+    if v3_schema.embedded {
+        // Embedded schema is not directly linked to any databases.
+        // The embedded objects will be converted when their parent collections are converted.
+        SchemaManager::save_schema(txn, info_db, &v3_schema)?;
+        txn.drop_db(db)?;
+        return Ok(v3_schema);
+    }
+
     // Drop all links
     for link in &v2_schema.links {
         let db_name = format!("_l_{}_{}", v2_schema.name, link.name);
-        let db = txn.open_db(&db_name, true, true)?;
+        let db = txn.open_db(&db_name, true, true, true)?;
+        txn.drop_db(db)?;
+
+        let db_name = format!("_b_{}_{}", v2_schema.name, link.name);
+        let db = txn.open_db(&db_name, true, true, true)?;
         txn.drop_db(db)?;
     }
 
     // Drop all indexes
     for index in &v2_schema.indexes {
         let db_name = format!("_i_{}_{}", v2_schema.name, index.name);
-        let db = txn.open_db(&db_name, false, !index.unique)?;
+        let db = txn.open_db(&db_name, false, !index.unique, false)?;
         txn.drop_db(db)?;
     }
 
-    let v3_schema = v2_schema.to_v3_schema();
     let static_size: u32 = v3_schema
         .properties
         .iter()
         .map(|property| property.data_type.static_size() as u32)
         .sum();
 
-    let db = txn.open_db(&v2_schema.name, true, false)?;
     let mut cursor = txn.get_cursor(db)?;
 
     while let Some((key, bytes)) = cursor.move_to_next()? {
@@ -93,31 +106,27 @@ fn migrate_v2_object_to_v3(
                 Some(value) => v3_object.write_dynamic(write_offset, value.as_bytes()),
                 None => v3_object.write_null(write_offset, DataType::String),
             },
-            DataType::Object => {
-                let nested_v2_object = match v2_object.read_object(read_offset) {
-                    Some(object) => object,
-                    None => {
-                        v3_object.write_null(write_offset, DataType::Object);
-                        continue;
-                    }
-                };
+            DataType::Object => match v2_object.read_object(read_offset) {
+                None => v3_object.write_null(write_offset, DataType::Object),
+                Some(nested_v2_object) => {
+                    let nested_schema_properties =
+                        get_object_property_target_collection_properties(property, schemas)?;
+                    let nested_static_size: u32 = nested_schema_properties
+                        .iter()
+                        .map(|property| property.data_type.static_size() as u32)
+                        .sum();
 
-                let nested_schema_properties =
-                    get_object_property_target_collection_properties(property, schemas)?;
-                let nested_static_size: u32 = nested_schema_properties
-                    .iter()
-                    .map(|property| property.data_type.static_size() as u32)
-                    .sum();
-
-                let mut nested_v3_object = v3_object.begin_nested(write_offset, nested_static_size);
-                migrate_v2_object_to_v3(
-                    nested_schema_properties,
-                    &nested_v2_object,
-                    &mut nested_v3_object,
-                    schemas,
-                )?;
-                v3_object.end_nested(nested_v3_object);
-            }
+                    let mut nested_v3_object =
+                        v3_object.begin_nested(write_offset, nested_static_size);
+                    migrate_v2_object_to_v3(
+                        nested_schema_properties,
+                        &nested_v2_object,
+                        &mut nested_v3_object,
+                        schemas,
+                    )?;
+                    v3_object.end_nested(nested_v3_object);
+                }
+            },
             DataType::BoolList => match v2_object.read_bool_list(read_offset) {
                 Some(values) => v3_object.write_value_or_null_list(
                     write_offset,
@@ -181,48 +190,43 @@ fn migrate_v2_object_to_v3(
                 ),
                 None => v3_object.write_null(write_offset, DataType::BoolList),
             },
-            DataType::ObjectList => {
-                let nested_v2_objects = match v2_object.read_object_list(read_offset) {
-                    Some(objects) => objects,
-                    None => {
-                        v3_object.write_null(write_offset, DataType::ObjectList);
-                        continue;
-                    }
-                };
+            DataType::ObjectList => match v2_object.read_object_list(read_offset) {
+                None => v3_object.write_null(write_offset, DataType::ObjectList),
+                Some(nested_v2_objects) => {
+                    let nested_schema_properties =
+                        get_object_property_target_collection_properties(property, schemas)?;
+                    let nested_static_size: u32 = nested_schema_properties
+                        .iter()
+                        .map(|property| property.data_type.static_size() as u32)
+                        .sum();
 
-                let nested_schema_properties =
-                    get_object_property_target_collection_properties(property, schemas)?;
-                let nested_static_size: u32 = nested_schema_properties
-                    .iter()
-                    .map(|property| property.data_type.static_size() as u32)
-                    .sum();
+                    v3_object.try_write_list(
+                        write_offset,
+                        DataType::Object,
+                        nested_v2_objects.len(),
+                        |writer, offset, index| {
+                            let nested_v2_object = match nested_v2_objects[index] {
+                                Some(object) => object,
+                                None => {
+                                    writer.write_null(offset, DataType::Object);
+                                    return Ok(());
+                                }
+                            };
 
-                v3_object.try_write_list(
-                    write_offset,
-                    DataType::Object,
-                    nested_v2_objects.len(),
-                    |writer, offset, index| {
-                        let nested_v2_object = match nested_v2_objects[index] {
-                            Some(object) => object,
-                            None => {
-                                writer.write_null(offset, DataType::Object);
-                                return Ok(());
-                            }
-                        };
+                            let mut nested = writer.begin_nested(offset, nested_static_size);
+                            migrate_v2_object_to_v3(
+                                nested_schema_properties,
+                                &nested_v2_object,
+                                &mut nested,
+                                schemas,
+                            )?;
+                            writer.end_nested(nested);
 
-                        let mut nested = writer.begin_nested(offset, nested_static_size);
-                        migrate_v2_object_to_v3(
-                            nested_schema_properties,
-                            &nested_v2_object,
-                            &mut nested,
-                            schemas,
-                        )?;
-                        writer.end_nested(nested);
-
-                        Ok(())
-                    },
-                )?;
-            }
+                            Ok(())
+                        },
+                    )?;
+                }
+            },
             data_type => {
                 return Err(IsarError::SchemaError {
                     message: format!(

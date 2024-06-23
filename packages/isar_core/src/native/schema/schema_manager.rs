@@ -7,6 +7,7 @@ use crate::native::native_index::NativeIndex;
 use crate::native::native_txn::NativeTxn;
 use std::borrow::Cow;
 use std::sync::Arc;
+use std::time::Instant;
 
 use super::v2::v2_migration::migrate_v2_to_v3;
 use super::versioned_isar_schema::VersionedIsarSchema;
@@ -89,7 +90,7 @@ impl SchemaManager {
 
         let db = match schema.embedded {
             true => None,
-            false => Some(txn.open_db(&schema.name, true, false)?),
+            false => Some(txn.open_db(&schema.name, true, false, false)?),
         };
 
         let mut indexes = Vec::with_capacity(schema.indexes.len());
@@ -130,7 +131,7 @@ impl SchemaManager {
     }
 
     fn open_info_db(txn: &NativeTxn) -> Result<Db> {
-        txn.open_db("_info", false, false)
+        txn.open_db("_info", false, false, false)
     }
 
     fn find_schema(
@@ -151,7 +152,6 @@ impl SchemaManager {
         }
     }
 
-
     fn get_versioned_schemas(txn: &NativeTxn, info_db: Db) -> Result<Vec<VersionedIsarSchema>> {
         txn.get_cursor(info_db)?
             .iter()?
@@ -171,10 +171,10 @@ impl SchemaManager {
         let mut migrated_schemas = Vec::with_capacity(versioned_schemas.len());
         for versioned_schema in &versioned_schemas {
             let migrated_schema = match versioned_schema {
-                    VersionedIsarSchema::V2(v2_schema) => {
-                        migrate_v2_to_v3(txn, info_db, &v2_schema, &versioned_schemas)?
-                    }
-                    VersionedIsarSchema::V3(v3_schema) => v3_schema.clone(),
+                VersionedIsarSchema::V2(v2_schema) => {
+                    migrate_v2_to_v3(txn, info_db, &v2_schema, &versioned_schemas)?
+                }
+                VersionedIsarSchema::V3(v3_schema) => v3_schema.clone(),
             };
             migrated_schemas.push(migrated_schema);
         }
@@ -184,7 +184,7 @@ impl SchemaManager {
 
     pub fn open_index_db(txn: &NativeTxn, collection_name: &str, index_name: &str) -> Result<Db> {
         let db_name = format!("_{collection_name}_{index_name}");
-        txn.open_db(&db_name, false, true)
+        txn.open_db(&db_name, false, true, false)
     }
 
     fn build_properties(
@@ -258,7 +258,7 @@ impl SchemaManager {
     }
 
     fn delete_collection(txn: &NativeTxn, info_db: Db, schema: &IsarSchema) -> Result<()> {
-        let db = txn.open_db(&schema.name, true, false)?;
+        let db = txn.open_db(&schema.name, true, false, false)?;
         txn.drop_db(db)?;
 
         for index in &schema.indexes {

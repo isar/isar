@@ -7,7 +7,13 @@ import 'package:path/path.dart' as path;
 /// `assets` folder.
 Future<void> main() async {
   print('Starting v3 database file generation');
-  await Process.run('dart', [getGeneratorPath()]);
+  final process = await Process.start('dart', [getGeneratorPath()]);
+
+  await Future.wait([
+    stdout.addStream(process.stdout),
+    stderr.addStream(process.stderr),
+  ]);
+
   print('Done generating v3 database file');
 
   print('Copying v3 database file');
