@@ -14,6 +14,9 @@ void main() {
   group('v3 to v4 migration', () {
     late final Isar isar;
 
+    late final List<CollectionA> collectionAObjects;
+    late final List<CollectionB> collectionBObjects;
+
     setUpAll(() async {
       TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -29,6 +32,9 @@ void main() {
         closeAutomatically: false,
         maxSizeMiB: 4096,
       );
+
+      collectionAObjects = generateCollectionAObjects();
+      collectionBObjects = generateCollectionBObjects();
     });
 
     isarTest(
@@ -45,11 +51,10 @@ void main() {
       sqlite: false,
       web: false,
       () async {
-        final generatedObjects = generateCollectionAObjects();
         final databaseObjects = await isar.collectionAs.where().findAllAsync();
 
-        expect(databaseObjects.length, generatedObjects.length);
-        expect(databaseObjects, generatedObjects);
+        expect(databaseObjects.length, collectionAObjects.length);
+        expect(databaseObjects, collectionAObjects);
       },
     );
 
@@ -58,11 +63,10 @@ void main() {
       sqlite: false,
       web: false,
       () async {
-        final generatedObjects = generateCollectionBObjects();
         final databaseObjects = await isar.collectionBs.where().findAllAsync();
 
-        expect(databaseObjects.length, generatedObjects.length);
-        expect(databaseObjects, generatedObjects);
+        expect(databaseObjects.length, collectionBObjects.length);
+        expect(databaseObjects, collectionBObjects);
       },
     );
   });

@@ -6,6 +6,9 @@ part 'collection_b.g.dart';
 class CollectionB {
   Id id;
 
+  @Index()
+  int duplicatedId;
+
   String? fieldA;
 
   EmbeddedA embeddedA;
@@ -19,6 +22,7 @@ class CollectionB {
 
   CollectionB({
     required this.id,
+    required this.duplicatedId,
     required this.fieldA,
     required this.embeddedA,
     required this.nEmbeddedA,

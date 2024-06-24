@@ -99,6 +99,7 @@ List<CollectionA> _generateObjects() {
                   objects.add(
                     CollectionA(
                       id: objectIndex + 1,
+                      duplicatedId: objectIndex + 1,
                       boolField: boolValue,
                       nBoolField: nBoolValue,
                       byteField: byteValue,

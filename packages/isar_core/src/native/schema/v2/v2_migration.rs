@@ -60,15 +60,18 @@ pub fn migrate_v2_to_v3(
     while let Some((key, bytes)) = cursor.move_to_next()? {
         let key = key.to_owned();
         let v2_object = V2IsarObject::from_bytes(bytes);
-        let mut v3_object = IsarSerializer::new(0, static_size);
+
+        let buffer = txn.take_buffer();
+        let mut v3_object = IsarSerializer::with_buffer(buffer, 0, static_size);
 
         migrate_v2_object_to_v3(&v2_schema.properties, &v2_object, &mut v3_object, schemas)?;
-        cursor.put(&key, &v3_object.finish())?;
+
+        let bytes = v3_object.finish();
+        cursor.put(&key, &bytes)?;
+        txn.put_buffer(bytes);
     }
 
     SchemaManager::save_schema(txn, info_db, &v3_schema)?;
-
-    // TODO: Create indexes
 
     Ok(v3_schema)
 }

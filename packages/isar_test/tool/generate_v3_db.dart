@@ -7,7 +7,10 @@ import 'package:path/path.dart' as path;
 /// `assets` folder.
 Future<void> main() async {
   print('Starting v3 database file generation');
-  final process = await Process.start('dart', [getGeneratorPath()]);
+
+  await runBuildRunner();
+
+  final process = await Process.start('dart', [getGeneratorExecutionPath()]);
 
   await Future.wait([
     stdout.addStream(process.stdout),
@@ -26,7 +29,28 @@ Future<void> main() async {
   print('Done copying v3 database file');
 }
 
-String getGeneratorPath() {
+Future<void> runBuildRunner() async {
+  final buildRunnerProcess = await Process.start(
+    'dart',
+    ['run', 'build_runner', 'build', '-d'],
+    workingDirectory: getGeneratorProjectPath(),
+  );
+  await Future.wait([
+    stdout.addStream(buildRunnerProcess.stdout),
+    stderr.addStream(buildRunnerProcess.stderr),
+  ]);
+}
+
+String getGeneratorProjectPath() {
+  final currentScript = File(Platform.script.path);
+
+  return path.join(
+    currentScript.parent.path,
+    'isar_v3_db_generator',
+  );
+}
+
+String getGeneratorExecutionPath() {
   final currentScript = File(Platform.script.path);
 
   return path.join(

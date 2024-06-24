@@ -6,6 +6,9 @@ part 'collection_a.g.dart';
 class CollectionA {
   Id id;
 
+  @Index()
+  int duplicatedId;
+
   bool boolField;
   bool? nBoolField;
 
@@ -26,7 +29,10 @@ class CollectionA {
   DateTime dateField;
   DateTime? nDateField;
 
+  @Index()
   String stringField;
+
+  @Index(type: IndexType.hash)
   String? nStringField;
 
   List<bool> boolList;
@@ -69,6 +75,7 @@ class CollectionA {
 
   CollectionA({
     required this.id,
+    required this.duplicatedId,
     required this.boolField,
     required this.nBoolField,
     required this.byteField,

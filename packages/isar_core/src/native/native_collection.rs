@@ -266,7 +266,7 @@ impl NativeCollection {
             }
             Ok(())
         } else {
-            return Err(IsarError::IllegalArgument {});
+            Err(IsarError::IllegalArgument {})
         }
     }
 
@@ -278,6 +278,31 @@ impl NativeCollection {
         for index in &self.indexes {
             index.clear(txn)?;
         }
+        Ok(())
+    }
+
+    pub fn rebuild_indexes(&self, txn: &NativeTxn) -> Result<()> {
+        let db = self.db.ok_or(IsarError::UnsupportedOperation {})?;
+
+        for index in &self.indexes {
+            index.clear(txn)?;
+        }
+
+        let mut cursor = txn.get_cursor(db)?;
+        while let Some((id_bytes, bytes)) = cursor.move_to_next()? {
+            let object = IsarDeserializer::from_bytes(bytes);
+            let id = id_bytes.to_id();
+
+            for index in &self.indexes {
+                let buffer = index.create_for_object(txn, id, object, txn.take_buffer(), |_| {
+                    // Ignore delete callback since we are only re-building the index,
+                    // and not adding a new entry for a new object.
+                    Ok(())
+                })?;
+                txn.put_buffer(buffer);
+            }
+        }
+
         Ok(())
     }
 }

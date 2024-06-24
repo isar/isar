@@ -13,6 +13,9 @@ class CollectionA {
   @Id()
   int id;
 
+  // @Index()
+  int duplicatedId;
+
   bool boolField;
   bool? nBoolField;
 
@@ -33,7 +36,10 @@ class CollectionA {
   DateTime dateField;
   DateTime? nDateField;
 
+  @Index()
   String stringField;
+
+  @Index(hash: true)
   String? nStringField;
 
   List<bool> boolList;
@@ -76,6 +82,7 @@ class CollectionA {
 
   CollectionA({
     required this.id,
+    required this.duplicatedId,
     required this.boolField,
     required this.nBoolField,
     required this.byteField,
@@ -127,6 +134,7 @@ class CollectionA {
   bool operator ==(Object other) {
     return other is CollectionA &&
         other.id == id &&
+        other.duplicatedId == duplicatedId &&
         other.boolField == boolField &&
         other.nBoolField == nBoolField &&
         other.byteField == byteField &&
@@ -266,6 +274,7 @@ List<CollectionA> generateCollectionAObjects() {
                   objects.add(
                     CollectionA(
                       id: objectIndex + 1,
+                      duplicatedId: objectIndex + 1,
                       boolField: boolValue,
                       nBoolField: nBoolValue,
                       byteField: byteValue,

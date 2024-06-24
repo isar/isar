@@ -107,6 +107,7 @@ List<CollectionB> _generateObjects() {
     objects.add(
       CollectionB(
         id: objectIndex + 1,
+        duplicatedId: objectIndex + 1,
         fieldA: fieldAValue,
         embeddedA: embeddedAValue,
         nEmbeddedA: nEmbeddedAValue,

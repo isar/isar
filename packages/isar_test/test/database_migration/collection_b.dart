@@ -13,6 +13,9 @@ class CollectionB {
   @Id()
   int id;
 
+  @Index()
+  int duplicatedId;
+
   String? fieldA;
 
   EmbeddedA embeddedA;
@@ -24,6 +27,7 @@ class CollectionB {
 
   CollectionB({
     required this.id,
+    required this.duplicatedId,
     required this.fieldA,
     required this.embeddedA,
     required this.nEmbeddedA,
@@ -188,6 +192,7 @@ List<CollectionB> generateCollectionBObjects() {
     objects.add(
       CollectionB(
         id: objectIndex + 1,
+        duplicatedId: objectIndex + 1,
         fieldA: fieldAValue,
         embeddedA: embeddedAValue,
         nEmbeddedA: nEmbeddedAValue,

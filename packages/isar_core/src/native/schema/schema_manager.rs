@@ -7,7 +7,6 @@ use crate::native::native_index::NativeIndex;
 use crate::native::native_txn::NativeTxn;
 use std::borrow::Cow;
 use std::sync::Arc;
-use std::time::Instant;
 
 use super::v2::v2_migration::migrate_v2_to_v3;
 use super::versioned_isar_schema::VersionedIsarSchema;
@@ -24,7 +23,7 @@ impl SchemaManager {
     ) -> Result<Vec<NativeCollection>> {
         let txn = NativeTxn::new(instance_id, env, true)?;
         let info_db = Self::open_info_db(&txn)?;
-        let existing_schemas = Self::get_migrated_schemas(&txn, info_db)?;
+        let (existing_schemas, any_schema_migrated) = Self::get_migrated_schemas(&txn, info_db)?;
         txn.commit()?;
 
         let schema_names: Vec<_> = schemas.iter().map(|s| s.name.to_owned()).collect();
@@ -47,6 +46,15 @@ impl SchemaManager {
             })
             .map(|existing_schema| Self::delete_collection(&txn, info_db, &existing_schema))
             .collect::<Result<_>>()?;
+
+        if any_schema_migrated {
+            for collection in &collections {
+                if !collection.is_embedded() {
+                    collection.rebuild_indexes(&txn)?;
+                }
+            }
+        }
+
         txn.commit()?;
 
         Ok(collections)
@@ -165,13 +173,15 @@ impl SchemaManager {
             .collect()
     }
 
-    fn get_migrated_schemas(txn: &NativeTxn, info_db: Db) -> Result<Vec<IsarSchema>> {
+    fn get_migrated_schemas(txn: &NativeTxn, info_db: Db) -> Result<(Vec<IsarSchema>, bool)> {
         let versioned_schemas = Self::get_versioned_schemas(txn, info_db)?;
+        let mut any_migrated = false;
 
         let mut migrated_schemas = Vec::with_capacity(versioned_schemas.len());
         for versioned_schema in &versioned_schemas {
             let migrated_schema = match versioned_schema {
                 VersionedIsarSchema::V2(v2_schema) => {
+                    any_migrated = true;
                     migrate_v2_to_v3(txn, info_db, &v2_schema, &versioned_schemas)?
                 }
                 VersionedIsarSchema::V3(v3_schema) => v3_schema.clone(),
@@ -179,7 +189,7 @@ impl SchemaManager {
             migrated_schemas.push(migrated_schema);
         }
 
-        Ok(migrated_schemas)
+        Ok((migrated_schemas, any_migrated))
     }
 
     pub fn open_index_db(txn: &NativeTxn, collection_name: &str, index_name: &str) -> Result<Db> {
