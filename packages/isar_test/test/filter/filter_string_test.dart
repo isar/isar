@@ -13,7 +13,6 @@ class StringModel {
   String? field;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is StringModel && field == other.field;
 

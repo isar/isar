@@ -20,7 +20,6 @@ class Model {
   }
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) {
     // ignore: test_types_in_equals
     return other is Model && name == other.name && age == other.age;

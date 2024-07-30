@@ -14,7 +14,6 @@ class Model1 {
   String? value;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is Model1 && id == other.id && value == other.value;
 }
@@ -29,7 +28,6 @@ class Model2 {
   String? value;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is Model2 && id == other.id && value == other.value;
 }

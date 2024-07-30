@@ -13,7 +13,6 @@ class ByteModel {
   byte field;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is ByteModel && other.id == id && other.field == field;
   }

@@ -194,6 +194,9 @@ enum IsarType {
   /// date and time stored in UTC (8 bytes)
   dateTime('DateTime'),
 
+  /// duration
+  duration('Duration'),
+
   /// string (6 + length bytes)
   string('String'),
 
@@ -224,6 +227,9 @@ enum IsarType {
   /// list of dates and times stored in UTC (6 + length * 8 bytes)
   dateTimeList('DateTimeList'),
 
+  /// list of durations
+  durationList('DurationList'),
+
   /// list of strings (6 + length * (6 + length) bytes)
   stringList('StringList'),
 
@@ -253,7 +259,9 @@ extension IsarTypeX on IsarType {
       this == IsarType.int ||
       this == IsarType.int ||
       this == IsarType.long ||
-      this == IsarType.longList;
+      this == IsarType.longList ||
+      this == IsarType.duration ||
+      this == IsarType.durationList;
 
   /// @nodoc
   bool get isNum => isFloat || isInt;
@@ -287,6 +295,8 @@ extension IsarTypeX on IsarType {
         return IsarType.double;
       case IsarType.dateTimeList:
         return IsarType.dateTime;
+      case IsarType.durationList:
+        return IsarType.duration;
       case IsarType.stringList:
         return IsarType.string;
       case IsarType.objectList:
@@ -314,6 +324,8 @@ extension IsarTypeX on IsarType {
         return IsarType.doubleList;
       case IsarType.dateTime:
         return IsarType.dateTimeList;
+      case IsarType.duration:
+        return IsarType.durationList;
       case IsarType.string:
         return IsarType.stringList;
       case IsarType.object:

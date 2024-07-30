@@ -14,7 +14,6 @@ class Value {
   String? value;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is Value && id == other.id && value == other.value;
 }

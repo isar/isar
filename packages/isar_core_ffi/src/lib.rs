@@ -1,5 +1,4 @@
 #![allow(clippy::missing_safety_doc)]
-#![feature(local_key_cell_methods)]
 #![feature(vec_into_raw_parts)]
 
 use core::slice;

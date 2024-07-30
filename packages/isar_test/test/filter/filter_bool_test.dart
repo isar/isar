@@ -15,7 +15,6 @@ class BoolModel {
   bool? field;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is BoolModel && other.id == id && other.field == field;
   }

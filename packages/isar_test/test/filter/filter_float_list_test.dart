@@ -13,7 +13,6 @@ class FloatModel {
   List<float?>? list;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is FloatModel &&
       id == other.id &&

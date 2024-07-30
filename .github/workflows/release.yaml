@@ -12,13 +12,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: macos-latest
             artifact_name: libisar_android_arm64.so
             script: build_android.sh
-          - os: ubuntu-latest
+          - os: macos-latest
             artifact_name: libisar_android_armv7.so
             script: build_android.sh armv7
-          - os: ubuntu-latest
+          - os: macos-latest
             artifact_name: libisar_android_x64.so
             script: build_android.sh x64
           - os: macos-latest
@@ -38,7 +38,7 @@ jobs:
             script: build_wasm.sh
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Set Isar Version
@@ -63,7 +63,7 @@ jobs:
     needs: testlab
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: Build
         run: flutter build web --base-href /${{ github.ref_name }}/ --no-tree-shake-icons
@@ -84,7 +84,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - uses: actions/setup-node@v3
         with:

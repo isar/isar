@@ -1,4 +1,4 @@
-export IPHONEOS_DEPLOYMENT_TARGET=11.0
+export IPHONEOS_DEPLOYMENT_TARGET=12.0
 
 rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
 cargo build --target aarch64-apple-ios --features sqlcipher --release

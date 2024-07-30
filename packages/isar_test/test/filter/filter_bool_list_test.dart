@@ -13,7 +13,6 @@ class BoolModel {
   final List<bool?>? list;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is BoolModel && other.id == id && listEquals(list, other.list);
   }

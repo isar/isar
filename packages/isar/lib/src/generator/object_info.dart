@@ -100,6 +100,9 @@ class PropertyInfo {
       case IsarType.dateTime:
       case IsarType.dateTimeList:
         return 'DateTime';
+      case IsarType.duration:
+      case IsarType.durationList:
+        return 'Duration';
       case IsarType.object:
       case IsarType.objectList:
         return typeClassName;

@@ -3,9 +3,9 @@ on: workflow_call
 jobs:
   firebase_testlab_android:
     name: Firebase Testlab Android
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build

@@ -127,7 +127,6 @@ class EmbeddedModel {
   String? value;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       other is EmbeddedModel && other.value == value;
 }

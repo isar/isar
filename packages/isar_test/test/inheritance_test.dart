@@ -46,7 +46,6 @@ class InheritingModel extends BaseModel {
   }
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is InheritingModel &&
@@ -79,7 +78,6 @@ class NonInheritingModel extends BaseModel {
   }
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is NonInheritingModel &&

@@ -13,7 +13,6 @@ class ByteModel {
   final List<byte>? list;
 
   @override
-  // ignore: hash_and_equals
   bool operator ==(Object other) {
     return other is ByteModel && other.id == id && listEquals(list, other.list);
   }

@@ -252,11 +252,11 @@ impl<'a> SQLiteFnContext<'a> {
     }
 
     pub fn get_str(&self, index: usize) -> &'static str {
-        unsafe {
-            let text = ffi::sqlite3_value_text(self.args[index]);
-            let num = ffi::sqlite3_value_bytes(self.args[index]);
-            let bytes = std::slice::from_raw_parts(text as *const u8, num as usize);
-            std::str::from_utf8_unchecked(bytes)
+        let bytes = self.get_blob(index);
+        if let Ok(str) = std::str::from_utf8(bytes) {
+            str
+        } else {
+            ""
         }
     }
 
@@ -264,7 +264,11 @@ impl<'a> SQLiteFnContext<'a> {
         unsafe {
             let blob = ffi::sqlite3_value_blob(self.args[index]);
             let num = ffi::sqlite3_value_bytes(self.args[index]);
-            std::slice::from_raw_parts(blob as *const u8, num as usize)
+            if num > 0 {
+                std::slice::from_raw_parts(blob as *const u8, num as usize)
+            } else {
+                &[]
+            }
         }
     }
 
@@ -370,19 +374,22 @@ impl<'sqlite> SQLiteStatement<'sqlite> {
 
     pub fn get_text(&self, col: u32) -> &str {
         let bytes = self.get_blob(col);
-        if bytes.len() > 0 {
-            if let Ok(str) = std::str::from_utf8(bytes) {
-                return str;
-            }
+        if let Ok(str) = std::str::from_utf8(bytes) {
+            str
+        } else {
+            ""
         }
-        ""
     }
 
     pub fn get_blob(&self, col: u32) -> &[u8] {
         unsafe {
             let blob = ffi::sqlite3_column_blob(self.stmt, col as i32);
             let num = ffi::sqlite3_column_bytes(self.stmt, col as i32);
-            std::slice::from_raw_parts(blob as *const u8, num as usize)
+            if num > 0 {
+                std::slice::from_raw_parts(blob as *const u8, num as usize)
+            } else {
+                &[]
+            }
         }
     }
 

@@ -176,11 +176,13 @@ extension on IsarPropertySchema {
       case IsarType.long:
       case IsarType.double:
       case IsarType.dateTime:
+      case IsarType.duration:
       case IsarType.intList:
       case IsarType.floatList:
       case IsarType.longList:
       case IsarType.doubleList:
       case IsarType.dateTimeList:
+      case IsarType.durationList:
         return [
           FilterType.equalTo,
           FilterType.greaterThan,

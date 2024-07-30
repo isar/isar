@@ -13,11 +13,9 @@ jobs:
     name: Check formatting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ secrets.FLUTTER_VERSION }}
       - name: Check formatting
         run: dart format -o none . --set-exit-if-changed
 
@@ -25,11 +23,9 @@ jobs:
     name: Check lints
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ secrets.FLUTTER_VERSION }}
       - run: dart pub get
         working-directory: packages/isar
       - run: flutter pub get
@@ -49,7 +45,7 @@ jobs:
     name: Core Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Run Rust Unit tests
@@ -59,12 +55,12 @@ jobs:
     name: Dart Test
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-14, macos-13, ubuntu-latest, windows-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
       - run: echo "$OSTYPE"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
@@ -80,7 +76,7 @@ jobs:
     name: Dart Web Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
@@ -98,7 +94,7 @@ jobs:
     name: Code Coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
@@ -135,7 +131,7 @@ jobs:
     name: Generator Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: Run Generator Unit tests
         run: |
@@ -145,13 +141,13 @@ jobs:
 
   integration_test_ios:
     name: Integration Test iOS
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Start simulator
         uses: futureware-tech/simulator-action@v2
         with:
-          model: iPhone 14
+          model: iPhone 15
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
@@ -169,10 +165,10 @@ jobs:
     name: Integration Test Android
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-java@v3
         with:
-          java-version: "11"
+          java-version: "17"
           distribution: "zulu"
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
@@ -184,20 +180,16 @@ jobs:
           mv libisar_android_x64.so packages/isar_flutter_libs/android/src/main/jniLibs/x86_64/libisar.so
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
-      - name: Run Flutter Integration tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 29
-          arch: x86_64
-          profile: pixel
-          working-directory: packages/isar_test
-          script: flutter test integration_test.dart --dart-define STRESS=true
 
   integration_test_macos:
     name: Integration Test macOS
-    runs-on: macos-13
+    strategy:
+      matrix:
+        os: [macos-14, macos-13] # arm64 and x64
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
@@ -219,7 +211,7 @@ jobs:
     if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
@@ -244,7 +236,7 @@ jobs:
     runs-on: windows-2019
     if: ${{ false }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
@@ -264,7 +256,7 @@ jobs:
     name: Integration Test Chrome
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
@@ -289,7 +281,7 @@ jobs:
     name: Integration Test Safari
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
@@ -316,7 +308,7 @@ jobs:
     name: Integration Test Firefox
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
