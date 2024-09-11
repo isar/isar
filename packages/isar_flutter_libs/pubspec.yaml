@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  isar: 0.0.0-placeholder
+  isar: 4.0.0-dev.14
 
 flutter:
   plugin:
