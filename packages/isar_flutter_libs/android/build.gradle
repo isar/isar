@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
+        classpath 'com.android.tools.build:gradle:8.3.1'
     }
 }
 
@@ -26,7 +26,7 @@ android {
         namespace 'dev.isar.isar_flutter_libs'
     }
     
-    compileSdkVersion 30
+    compileSdkVersion 34
 
     defaultConfig {
         minSdkVersion 23
