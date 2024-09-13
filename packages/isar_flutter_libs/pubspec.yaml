@@ -11,11 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  isar:
-    git:
-      url: https://github.com/pmathulan/isar_db.git
-      path: packages/isar
-      ref: isar_flutter_libs_dev
+  isar: 0.0.0-placeholder
 
 flutter:
   plugin:
