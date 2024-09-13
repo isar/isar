@@ -3,6 +3,7 @@ description: Isar Core binaries for the Isar Database. Needs to be included for 
 version: 4.0.0-dev.14
 repository: https://github.com/isar/isar
 homepage: https://isar.dev
+publish_to: "none"
 
 environment:
   sdk: ">=3.1.0 <4.0.0"
