@@ -41,7 +41,6 @@ jobs:
             --project isar-community \
             --type instrumentation \
             --timeout 5m \
-            --device model=griffin,version=24  \
             --device model=starqlteue,version=26 \
             --device model=cheetah,version=33 \
             --device model=shiba,version=34 \
