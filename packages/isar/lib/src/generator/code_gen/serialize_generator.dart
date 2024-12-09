@@ -86,8 +86,8 @@ String _writeProperty({
       return 'IsarCore.writeLong($writer, $index, $converted);';
     case IsarType.duration:
       final converted = nullable
-          ? '$value$enumGetter?.inMicroseconds ?? $_nullLong'
-          : '$value$enumGetter?.inMicroseconds';
+          ? '$value$enumGetter?.inMilliseconds ?? $_nullLong'
+          : '$value$enumGetter?.inMilliseconds';
       return 'IsarCore.writeLong($writer, $index, $converted);';
     case IsarType.double:
       final orNull = nullable ? '?? double.nan' : '';
