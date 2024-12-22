@@ -5,6 +5,7 @@
 .DS_Store
 .vscode/
 .idea
+*.iml
 
 # Dart related
 .dart_tool/
@@ -69,6 +70,6 @@ isar-dart.h
 **/macos/Flutter/GeneratedPluginRegistrant.swift
 **/ephemeral
 **/.plugin_symlinks/
-
+/examples/test_gradle_8
 # Coverage
 coverage/

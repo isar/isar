@@ -1,17 +1,18 @@
 name: isar_flutter_libs
 description: Isar Core binaries for the Isar Database. Needs to be included for Flutter apps.
-version: 3.1.0+1
+version: 3.1.0+2
 repository: https://github.com/isar/isar
 homepage: https://isar.dev
 
 environment:
-  sdk: ">=2.17.0 <3.0.0"
-  flutter: ">=3.0.0"
+  sdk: ">=3.1.0 <4.0.0"
+  flutter: ">=3.3.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  isar: 3.1.0+1
+  isar:
+    path: ../isar
 
 flutter:
   plugin:
@@ -27,3 +28,4 @@ flutter:
         pluginClass: IsarFlutterLibsPlugin
       windows:
         pluginClass: IsarFlutterLibsPlugin
+      web:

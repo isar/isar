@@ -2181,7 +2181,7 @@ class IsarCoreBindings {
       .asFunction<void Function(ffi.Pointer<CWatchHandle>)>();
 }
 
-class CObject extends ffi.Struct {
+base class CObject extends ffi.Struct {
   @ffi.Int64()
   external int id;
 
@@ -2191,36 +2191,36 @@ class CObject extends ffi.Struct {
   external int buffer_length;
 }
 
-class CObjectSet extends ffi.Struct {
+base class CObjectSet extends ffi.Struct {
   external ffi.Pointer<CObject> objects;
 
   @ffi.Uint32()
   external int length;
 }
 
-class CIsarCollection extends ffi.Opaque {}
+base class CIsarCollection extends ffi.Opaque {}
 
-class CIsarTxn extends ffi.Opaque {}
+base class CIsarTxn extends ffi.Opaque {}
 
-class CIndexKey extends ffi.Opaque {}
+base class CIndexKey extends ffi.Opaque {}
 
 typedef DartPostCObjectFnType = ffi.Pointer<
     ffi.NativeFunction<ffi.Int8 Function(DartPort, ffi.Pointer<CDartCObject>)>>;
 typedef DartPort = ffi.Int64;
 
-class CDartCObject extends ffi.Opaque {}
+base class CDartCObject extends ffi.Opaque {}
 
-class CFilter extends ffi.Opaque {}
+base class CFilter extends ffi.Opaque {}
 
-class CIsarInstance extends ffi.Opaque {}
+base class CIsarInstance extends ffi.Opaque {}
 
-class CQueryBuilder extends ffi.Opaque {}
+base class CQueryBuilder extends ffi.Opaque {}
 
-class CQuery extends ffi.Opaque {}
+base class CQuery extends ffi.Opaque {}
 
-class CAggregationResult extends ffi.Opaque {}
+base class CAggregationResult extends ffi.Opaque {}
 
-class CWatchHandle extends ffi.Opaque {}
+base class CWatchHandle extends ffi.Opaque {}
 
 const int IsarIndex_MAX_STRING_INDEX_SIZE = 1024;
 

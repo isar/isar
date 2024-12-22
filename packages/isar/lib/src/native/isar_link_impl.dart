@@ -12,12 +12,10 @@ import 'package:isar/src/native/txn.dart';
 
 mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   @override
-  IsarCollectionImpl<dynamic> get sourceCollection =>
-      super.sourceCollection as IsarCollectionImpl;
+  IsarCollectionImpl<dynamic> get sourceCollection => super.sourceCollection as IsarCollectionImpl;
 
   @override
-  IsarCollectionImpl<OBJ> get targetCollection =>
-      super.targetCollection as IsarCollectionImpl<OBJ>;
+  IsarCollectionImpl<OBJ> get targetCollection => super.targetCollection as IsarCollectionImpl<OBJ>;
 
   late final int linkId = sourceCollection.schema.link(linkName).id;
 
@@ -114,8 +112,16 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   }
 }
 
-class IsarLinkImpl<OBJ> extends IsarLinkCommon<OBJ>
-    with IsarLinkBaseMixin<OBJ> {}
+class IsarLinkImpl<OBJ> extends IsarLinkCommon<OBJ> with IsarLinkBaseMixin<OBJ> {}
 
-class IsarLinksImpl<OBJ> extends IsarLinksCommon<OBJ>
-    with IsarLinkBaseMixin<OBJ> {}
+class IsarLinksImpl<OBJ> extends IsarLinksCommon<OBJ> with IsarLinkBaseMixin<OBJ> {
+  @override
+  Future<int> count() {
+    return filter().count();
+  }
+
+  @override
+  int countSync() {
+    return filter().countSync();
+  }
+}

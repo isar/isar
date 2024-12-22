@@ -7,7 +7,7 @@ const bool _kIsWeb = identical(0, 0.0);
 
 /// @nodoc
 abstract class IsarLinksCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
-    with IsarLinks<OBJ>, SetMixin<OBJ> {
+    with IsarLinksMixin<OBJ>, SetMixin<OBJ> {
   final _objects = <Id, OBJ>{};
 
   /// @nodoc

@@ -51,6 +51,10 @@ abstract class IsarLinkBase<OBJ> {
   );
 }
 
+mixin IsarLinkMixin<OBJ> implements IsarLink<OBJ> {
+  // Burada metodlar ya soyut bırakılır ya da varsayılan implementasyonlar sağlanır.
+}
+
 /// Establishes a 1:1 relationship with the same or another collection. The
 /// target collection is specified by the generic type argument.
 abstract class IsarLink<OBJ> implements IsarLinkBase<OBJ> {
@@ -65,6 +69,10 @@ abstract class IsarLink<OBJ> implements IsarLinkBase<OBJ> {
   set value(OBJ? obj);
 }
 
+mixin IsarLinksMixin<OBJ> implements IsarLinks<OBJ> {
+// Burada metodlar ya soyut bırakılır ya da varsayılan implementasyonlar sağlanır.
+}
+
 /// Establishes a 1:n relationship with the same or another collection. The
 /// target collection is specified by the generic type argument.
 abstract class IsarLinks<OBJ> implements IsarLinkBase<OBJ>, Set<OBJ> {
@@ -77,6 +85,7 @@ abstract class IsarLinks<OBJ> implements IsarLinkBase<OBJ>, Set<OBJ> {
 
   @override
   void loadSync({bool overrideChanges = true});
+
 
   /// {@template links_update}
   /// Creates and removes the specified links in the database.

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pub_app/models/asset.dart';
 import 'package:pub_app/models/package.dart';
 import 'package:pub_app/repository.dart';
@@ -16,9 +17,12 @@ class PackageAndVersion {
 }
 
 Future<void> loadAssets(PackageAndVersion p) async {
+  final dir = await getApplicationDocumentsDirectory();
+
   final isar = Isar.openSync(
     [PackageSchema, AssetSchema],
     inspector: false,
+    directory: dir.path,
   );
 
   Asset? readme;
@@ -40,8 +44,7 @@ Future<void> loadAssets(PackageAndVersion p) async {
           kind: AssetKind.readme,
           content: content,
         );
-      } else if (changelog == null &&
-          entry.name.toLowerCase() == 'changelog.md') {
+      } else if (changelog == null && entry.name.toLowerCase() == 'changelog.md') {
         final content = await entry.contents.transform(utf8.decoder).join();
         changelog = Asset(
           package: p.package,

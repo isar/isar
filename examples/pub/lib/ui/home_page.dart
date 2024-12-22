@@ -84,14 +84,14 @@ class Favorites extends ConsumerWidget {
         children: [
           Text(
             'Flutter Favorites',
-            style: theme.textTheme.headline3!.copyWith(
+            style: theme.textTheme.titleLarge!.copyWith(
               color: theme.colorScheme.primary,
             ),
           ),
           Text(
             'Some of the packages that demonstrate the highest levels '
             'of quality, selected by the Flutter Ecosystem Committee',
-            style: theme.textTheme.subtitle1,
+            style: theme.textTheme.bodyMedium,
           ),
           if (favoriteNames != null) ...[
             const SizedBox(height: 15),
@@ -132,7 +132,7 @@ class PackageCard extends ConsumerWidget {
               children: [
                 Text(
                   name,
-                  style: theme.textTheme.headline5!.copyWith(
+                  style: theme.textTheme.titleMedium!.copyWith(
                     color: theme.colorScheme.onPrimaryContainer,
                   ),
                 ),
@@ -140,7 +140,7 @@ class PackageCard extends ConsumerWidget {
                   const SizedBox(height: 5),
                   Text(
                     package!.description!.trim(),
-                    style: theme.textTheme.bodyText2,
+                    style: theme.textTheme.bodySmall,
                   ),
                 ],
                 if (package?.publisher != null) ...[

@@ -18,8 +18,7 @@ class Publisher extends StatelessWidget {
         const SizedBox(width: 2),
         Text(
           publisher,
-          style: theme.textTheme.subtitle2!
-              .copyWith(color: theme.colorScheme.primary),
+          style: theme.textTheme.bodyLarge!.copyWith(color: theme.colorScheme.primary),
         ),
       ],
     );

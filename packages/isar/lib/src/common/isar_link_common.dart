@@ -4,8 +4,7 @@ import 'package:isar/src/common/isar_link_base_impl.dart';
 const bool _kIsWeb = identical(0, 0.0);
 
 /// @nodoc
-abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ>
-    with IsarLink<OBJ> {
+abstract class IsarLinkCommon<OBJ> extends IsarLinkBaseImpl<OBJ> with IsarLinkMixin<OBJ> {
   OBJ? _value;
 
   @override

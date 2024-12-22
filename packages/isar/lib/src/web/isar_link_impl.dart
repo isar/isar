@@ -10,22 +10,17 @@ import 'package:isar/src/web/isar_web.dart';
 
 mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
   @override
-  IsarCollectionImpl<dynamic> get sourceCollection =>
-      super.sourceCollection as IsarCollectionImpl;
+  IsarCollectionImpl<dynamic> get sourceCollection => super.sourceCollection as IsarCollectionImpl;
 
   @override
-  IsarCollectionImpl<OBJ> get targetCollection =>
-      super.targetCollection as IsarCollectionImpl<OBJ>;
+  IsarCollectionImpl<OBJ> get targetCollection => super.targetCollection as IsarCollectionImpl<OBJ>;
 
   @override
   late final Id Function(OBJ) getId = targetCollection.schema.getId;
 
-  late final String? backlinkLinkName =
-      sourceCollection.schema.link(linkName).linkName;
+  late final String? backlinkLinkName = sourceCollection.schema.link(linkName).linkName;
 
-  late final IsarLinkJs jsLink = backlinkLinkName != null
-      ? targetCollection.native.getLink(backlinkLinkName!)
-      : sourceCollection.native.getLink(linkName);
+  late final IsarLinkJs jsLink = backlinkLinkName != null ? targetCollection.native.getLink(backlinkLinkName!) : sourceCollection.native.getLink(linkName);
 
   @override
   Future<void> update({
@@ -53,9 +48,7 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
       if (reset) {
         await jsLink.clear(txn, containingId, backlink).wait<dynamic>();
       }
-      return jsLink
-          .update(txn, backlink, containingId, linkIds, unlinkIds)
-          .wait();
+      return jsLink.update(txn, backlink, containingId, linkIds, unlinkIds).wait();
     });
   }
 
@@ -68,8 +61,16 @@ mixin IsarLinkBaseMixin<OBJ> on IsarLinkBaseImpl<OBJ> {
       unsupportedOnWeb();
 }
 
-class IsarLinkImpl<OBJ> extends IsarLinkCommon<OBJ>
-    with IsarLinkBaseMixin<OBJ> {}
+class IsarLinkImpl<OBJ> extends IsarLinkCommon<OBJ> with IsarLinkBaseMixin<OBJ> {}
 
-class IsarLinksImpl<OBJ> extends IsarLinksCommon<OBJ>
-    with IsarLinkBaseMixin<OBJ> {}
+class IsarLinksImpl<OBJ> extends IsarLinksCommon<OBJ> with IsarLinkBaseMixin<OBJ> {
+  @override
+  Future<int> count() {
+    return filter().count();
+  }
+
+  @override
+  int countSync() {
+    return filter().countSync();
+  }
+}

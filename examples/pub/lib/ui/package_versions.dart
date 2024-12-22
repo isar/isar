@@ -31,7 +31,7 @@ class PackageVersions extends ConsumerWidget {
                   children: [
                     Text(
                       version.version,
-                      style: theme.textTheme.headline5!.copyWith(
+                      style: theme.textTheme.titleMedium!.copyWith(
                         color: theme.colorScheme.primary,
                       ),
                     ),

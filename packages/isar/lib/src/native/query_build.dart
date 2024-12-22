@@ -87,10 +87,8 @@ Query<T> buildNativeQuery<T>(
   if (property == null) {
     deserialize = (col as IsarCollectionImpl<T>).deserializeObjects;
   } else {
-    propertyId =
-        property != col.schema.idName ? col.schema.property(property).id : null;
-    deserialize =
-        (CObjectSet cObjSet) => col.deserializeProperty(cObjSet, propertyId);
+    propertyId = property != col.schema.idName ? col.schema.property(property).id : null;
+    deserialize = (CObjectSet cObjSet) => col.deserializeProperty(cObjSet, propertyId);
   }
 
   final queryPtr = IC.isar_qb_build(qbPtr);
@@ -259,10 +257,7 @@ Pointer<CFilter>? _buildFilterGroup(
   FilterGroup group,
   Allocator alloc,
 ) {
-  final builtConditions = group.filters
-      .map((FilterOperation op) => _buildFilter(col, embeddedCol, op, alloc))
-      .where((Pointer<CFilter>? it) => it != null)
-      .toList();
+  final builtConditions = group.filters.map((FilterOperation op) => _buildFilter(col, embeddedCol, op, alloc)).where((Pointer<CFilter>? it) => it != null).toList();
 
   if (builtConditions.isEmpty) {
     return null;
@@ -299,8 +294,7 @@ Pointer<CFilter>? _buildLink(
   Allocator alloc,
 ) {
   final linkSchema = col.schema.link(link.linkName);
-  final linkTargetCol =
-      col.isar.getCollectionByNameInternal(linkSchema.target)!;
+  final linkTargetCol = col.isar.getCollectionByNameInternal(linkSchema.target)!;
   final linkId = col.schema.link(link.linkName).id;
 
   final filterPtrPtr = alloc<Pointer<CFilter>>();
@@ -422,9 +416,7 @@ Pointer<CFilter> _buildCondition(
   FilterCondition condition,
   Allocator alloc,
 ) {
-  final property = condition.property != col.schema.idName
-      ? (embeddedCol ?? col.schema).property(condition.property)
-      : null;
+  final property = condition.property != col.schema.idName ? (embeddedCol ?? col.schema).property(condition.property) : null;
 
   final value1 = _prepareValue(
     condition.value1,
@@ -1009,6 +1001,8 @@ void _buildConditionStringOp({
           ),
         );
         break;
+      default:
+        throw IsarError("conditionType (${conditionType}) is not defined");
     }
   } else {
     throw IsarError('Unsupported type for condition');

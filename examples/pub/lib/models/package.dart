@@ -86,8 +86,7 @@ class Package {
           documentation: p.pubspec.documentation,
           description: p.pubspec.description,
           dependencies: Dependency.fromDependencies(p.pubspec.dependencies),
-          devDependencies:
-              Dependency.fromDependencies(p.pubspec.devDependencies),
+          devDependencies: Dependency.fromDependencies(p.pubspec.devDependencies),
           published: p.published,
         ),
       );
@@ -96,11 +95,42 @@ class Package {
     return versions;
   }
 
+  copyWith({
+    points,
+    likes,
+    popularity,
+    publisher,
+    dart,
+    flutter,
+    flutterFavorite,
+    license,
+    osiLicense,
+    platforms,
+    bool? isLatest,
+  }) {
+    return Package(
+      points: points ?? this.points,
+      likes: likes ?? this.likes,
+      popularity: popularity ?? this.popularity,
+      publisher: publisher ?? this.publisher,
+      dart: dart ?? this.dart,
+      flutter: flutter ?? this.flutter,
+      flutterFavorite: flutterFavorite ?? this.flutterFavorite,
+      license: license ?? this.license,
+      osiLicense: osiLicense ?? this.osiLicense,
+      platforms: platforms ?? this.platforms,
+      name: name,
+      version: version,
+      isLatest: isLatest ?? this.isLatest,
+      dependencies: dependencies,
+      devDependencies: devDependencies,
+      published: published,
+    );
+  }
+
   Package copyWithMetrics(ApiPackageMetrics metrics) {
-    final publishers =
-        metrics.tags.where((t) => t.startsWith('publisher:')).toList();
-    final publisher =
-        publishers.isNotEmpty ? publishers.first.substring(10) : null;
+    final publishers = metrics.tags.where((t) => t.startsWith('publisher:')).toList();
+    final publisher = publishers.isNotEmpty ? publishers.first.substring(10) : null;
     return copyWith(
       points: metrics.grantedPoints,
       likes: metrics.likeCount,
@@ -111,10 +141,7 @@ class Package {
       flutterFavorite: metrics.tags.contains('is:flutter-favorite'),
       license: metrics.tags
           .firstWhere(
-            (e) =>
-                e.startsWith('license:') &&
-                e != 'license:osi-approved' &&
-                e != 'license:fsf-libre',
+            (e) => e.startsWith('license:') && e != 'license:osi-approved' && e != 'license:fsf-libre',
             orElse: () => 'license:unknown',
           )
           .substring(8)
@@ -122,13 +149,11 @@ class Package {
       osiLicense: metrics.tags.contains('license:osi-approved'),
       platforms: [
         if (metrics.tags.contains('platform:web')) SupportedPlatform.web,
-        if (metrics.tags.contains('platform:android'))
-          SupportedPlatform.android,
+        if (metrics.tags.contains('platform:android')) SupportedPlatform.android,
         if (metrics.tags.contains('platform:ios')) SupportedPlatform.ios,
         if (metrics.tags.contains('platform:linux')) SupportedPlatform.linux,
         if (metrics.tags.contains('platform:macos')) SupportedPlatform.macos,
-        if (metrics.tags.contains('platform:windows'))
-          SupportedPlatform.windows,
+        if (metrics.tags.contains('platform:windows')) SupportedPlatform.windows,
       ],
     );
   }
@@ -148,8 +173,7 @@ class Dependency {
     final dependencies = <Dependency>[];
     for (final package in dependenciesMap.keys) {
       final dep = dependenciesMap[package]!;
-      final constraint =
-          dep is HostedReference ? dep.versionConstraint.toString() : 'unknown';
+      final constraint = dep is HostedReference ? dep.versionConstraint.toString() : 'unknown';
       dependencies.add(
         Dependency(
           name: package,
