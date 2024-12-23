@@ -1,7 +1,8 @@
 #!/bin/bash
 
-version=`dart packages/isar/tool/get_version.dart`
-github="https://github.com/isar/isar/releases/download/${version}"
+#version=`dart packages/isar/tool/get_version.dart`
+#github="https://github.com/isar/isar/releases/download/${version}"
+github="https://github.com/isar/isar/releases/download/3.1.0%2B1"
 
 
 curl "${github}/libisar_android_arm64.so" -o packages/isar_flutter_libs/android/src/main/jniLibs/arm64-v8a/libisar.so --create-dirs -L -f

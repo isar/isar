@@ -25,6 +25,7 @@ target/
 *.dll
 *.zip
 *.xcframework/
+!packages/isar_flutter_libs/ios/isar.xcframework/
 isar-dart.h
 
 # Android related
