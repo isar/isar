@@ -66,11 +66,24 @@ Holy smokes you're here! Let's get started on using the coolest Flutter database
 isar_version: &isar_version 3.1.0 # define the version to be used
 
 dependencies:
-  isar: *isar_version
-  isar_flutter_libs: *isar_version # contains Isar Core
+  isar:
+    git:
+      url: https://github.com/onguc/isar.git
+      path: packages/isar
+      ref: isar_3.1.0+2
+  isar_flutter_libs: # contains Isar Core
+    git:
+      url: https://github.com/onguc/isar.git
+      path: packages/isar_flutter_libs
+      ref: isar_3.1.0+2
+
 
 dev_dependencies:
-  isar_generator: *isar_version
+  isar_generator:
+    git:
+      url: https://github.com/onguc/isar.git
+      path: packages/isar_generator
+      ref: isar_3.1.0+2
   build_runner: any
 ```
 
