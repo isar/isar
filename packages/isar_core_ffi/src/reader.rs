@@ -1,8 +1,8 @@
-use crate::{i64_to_isar, CIsarReader, IsarI64};
+use crate::{CIsarReader, IsarI64, i64_to_isar};
 use isar_core::core::reader::IsarReader;
 use std::{ptr, vec};
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_read_id(reader: &'static CIsarReader) -> IsarI64 {
     let id = match reader {
         #[cfg(feature = "native")]
@@ -19,7 +19,7 @@ pub unsafe extern "C" fn isar_read_id(reader: &'static CIsarReader) -> IsarI64 {
     i64_to_isar(id)
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_read_null(reader: &'static CIsarReader, index: u32) -> u8 {
     let is_null = match reader {
         #[cfg(feature = "native")]
@@ -33,14 +33,10 @@ pub unsafe extern "C" fn isar_read_null(reader: &'static CIsarReader, index: u32
         #[cfg(feature = "sqlite")]
         CIsarReader::SQLiteList(reader) => reader.is_null(index),
     };
-    if is_null {
-        1
-    } else {
-        0
-    }
+    if is_null { 1 } else { 0 }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_read_bool(reader: &'static CIsarReader, index: u32) -> u8 {
     let value = match reader {
         #[cfg(feature = "native")]
@@ -54,14 +50,10 @@ pub unsafe extern "C" fn isar_read_bool(reader: &'static CIsarReader, index: u32
         #[cfg(feature = "sqlite")]
         CIsarReader::SQLiteList(reader) => reader.read_bool(index),
     };
-    if value.unwrap_or(false) {
-        1
-    } else {
-        0
-    }
+    if value.unwrap_or(false) { 1 } else { 0 }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_read_byte(reader: &'static CIsarReader, index: u32) -> u8 {
     match reader {
         #[cfg(feature = "native")]
@@ -77,7 +69,7 @@ pub unsafe extern "C" fn isar_read_byte(reader: &'static CIsarReader, index: u32
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_read_int(reader: &'static CIsarReader, index: u32) -> i32 {
     match reader {
         #[cfg(feature = "native")]
@@ -93,7 +85,7 @@ pub unsafe extern "C" fn isar_read_int(reader: &'static CIsarReader, index: u32)
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_read_float(reader: &'static CIsarReader, index: u32) -> f32 {
     match reader {
         #[cfg(feature = "native")]
@@ -109,7 +101,7 @@ pub unsafe extern "C" fn isar_read_float(reader: &'static CIsarReader, index: u3
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_read_long(reader: &'static CIsarReader, index: u32) -> IsarI64 {
     let value = match reader {
         #[cfg(feature = "native")]
@@ -126,7 +118,7 @@ pub unsafe extern "C" fn isar_read_long(reader: &'static CIsarReader, index: u32
     i64_to_isar(value)
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_read_double(reader: &'static CIsarReader, index: u32) -> f64 {
     match reader {
         #[cfg(feature = "native")]
@@ -142,7 +134,7 @@ pub unsafe extern "C" fn isar_read_double(reader: &'static CIsarReader, index: u
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_read_string(
     reader: &'static CIsarReader,
     index: u32,
@@ -173,7 +165,7 @@ pub unsafe extern "C" fn isar_read_string(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_read_object(
     reader: &'static CIsarReader,
     index: u32,
@@ -205,7 +197,7 @@ pub unsafe extern "C" fn isar_read_object(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_read_list(
     reader: &'static CIsarReader,
     index: u32,
@@ -242,7 +234,7 @@ pub unsafe extern "C" fn isar_read_list(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_read_to_json(
     reader: &'static CIsarReader,
     buffer: *mut *mut u8,
@@ -274,7 +266,7 @@ pub unsafe extern "C" fn isar_read_to_json(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_read_free(reader: *const CIsarReader) {
     if !reader.is_null() {
         drop(Box::from_raw(reader as *mut CIsarReader));

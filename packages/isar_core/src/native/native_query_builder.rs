@@ -5,7 +5,6 @@ use crate::core::data_type::DataType;
 use crate::core::filter::{ConditionType, Filter, FilterCondition};
 use crate::core::query_builder::{IsarQueryBuilder, Sort};
 use crate::core::value::IsarValue;
-use std::hint::black_box;
 
 pub struct NativeQueryBuilder<'a> {
     instance_id: u32,
@@ -58,14 +57,14 @@ impl<'a> IsarQueryBuilder for NativeQueryBuilder<'a> {
             .map(|f| filter_to_native(&f, self.collection, self.all_collections))
             .unwrap_or(NativeFilter::stat(true));
 
-        black_box(NativeQuery::new(
+        NativeQuery::new(
             self.instance_id,
             self.collection.collection_index,
             vec![QueryIndex::Primary(i64::MIN, i64::MAX)],
             filter,
             self.sort,
             self.distinct,
-        ))
+        )
     }
 }
 

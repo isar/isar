@@ -8,7 +8,7 @@ pub(crate) struct UnsortedDistinctQueryIterator<'a> {
     iterator: IndexIterator<'a>,
     filter: &'a NativeFilter,
     properties: &'a [(NativeProperty, bool)],
-    hashes: IntMap<()>,
+    hashes: IntMap<u64, ()>,
     skip: u32,
     take: u32,
 }

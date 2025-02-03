@@ -10,4 +10,4 @@ doctest = false
 [build-dependencies]
 cmake = "0.1"
 cc = "1.0"
-bindgen = { version = "0.66", default-features = false, features = ["runtime"] }
+bindgen = { version = "0.71", default-features = false, features = ["runtime"] }

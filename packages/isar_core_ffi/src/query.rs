@@ -6,7 +6,7 @@ use isar_core::core::query_builder::{IsarQueryBuilder, Sort};
 use isar_core::core::value::IsarValue;
 use std::ptr;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_query_new(
     isar: &'static CIsarInstance,
     collection_index: u16,
@@ -23,7 +23,7 @@ pub unsafe extern "C" fn isar_query_new(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_query_set_filter(
     builder: &'static mut CIsarQueryBuilder,
     filter: *mut Filter,
@@ -37,7 +37,7 @@ pub unsafe extern "C" fn isar_query_set_filter(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_query_add_sort(
     builder: &'static mut CIsarQueryBuilder,
     property_index: u16,
@@ -57,7 +57,7 @@ pub unsafe extern "C" fn isar_query_add_sort(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_query_add_distinct(
     builder: &'static mut CIsarQueryBuilder,
     property_index: u16,
@@ -71,7 +71,7 @@ pub unsafe extern "C" fn isar_query_add_distinct(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_query_build(builder: *mut CIsarQueryBuilder) -> *mut CIsarQuery {
     let builder = *Box::from_raw(builder);
     match builder {
@@ -88,7 +88,7 @@ pub unsafe extern "C" fn isar_query_build(builder: *mut CIsarQueryBuilder) -> *m
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_query_cursor(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
@@ -125,7 +125,7 @@ pub const AGGREGATION_MAX: u8 = 3;
 pub const AGGREGATION_SUM: u8 = 4;
 pub const AGGREGATION_AVERAGE: u8 = 5;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_query_aggregate(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
@@ -166,7 +166,7 @@ pub unsafe extern "C" fn isar_query_aggregate(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_query_delete(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
@@ -193,7 +193,7 @@ pub unsafe extern "C" fn isar_query_delete(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_query_free(query: *mut CIsarQuery) {
     if !query.is_null() {
         drop(Box::from_raw(query));

@@ -1,4 +1,3 @@
-use super::sqlite3::SQLite3;
 use super::sqlite_collection::SQLiteCollection;
 use super::sqlite_cursor::SQLiteCursor;
 use super::sqlite_insert::SQLiteInsert;
@@ -8,6 +7,7 @@ use super::sqlite_query_builder::SQLiteQueryBuilder;
 use super::sqlite_reader::SQLiteReader;
 use super::sqlite_txn::SQLiteTxn;
 use super::sqlite_verify::verify_sqlite;
+use super::sqlite3::SQLite3;
 use crate::core::error::{IsarError, Result};
 use crate::core::filter::{ConditionType, Filter, FilterCondition};
 use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
@@ -76,7 +76,8 @@ impl IsarInstance for SQLiteInstance {
 
     type Reader<'a> = SQLiteReader<'a>;
 
-    type Cursor<'a> = SQLiteCursor<'a>
+    type Cursor<'a>
+        = SQLiteCursor<'a>
     where
         Self: 'a;
 
@@ -86,7 +87,8 @@ impl IsarInstance for SQLiteInstance {
 
     type Query = SQLiteQuery;
 
-    type QueryCursor<'a> = SQLiteQueryCursor<'a>
+    type QueryCursor<'a>
+        = SQLiteQueryCursor<'a>
     where
         Self: 'a;
 
@@ -279,7 +281,7 @@ impl IsarInstance for SQLiteInstance {
         query: &'a Self::Query,
         offset: Option<u32>,
         limit: Option<u32>,
-    ) -> Result<Self::QueryCursor<'_>> {
+    ) -> Result<Self::QueryCursor<'a>> {
         query.cursor(txn, &self.info.collections, offset, limit)
     }
 

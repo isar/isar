@@ -51,7 +51,7 @@ pub const ERROR_INSTANCE_MISMATCH: u8 = 5;
 pub const ERROR_ENCRYPTION: u8 = 6;
 pub const ERROR_DB_FULL: u8 = 7;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_get_error(value: *mut *const u8) -> u32 {
     ERROR.with_borrow(|e| {
         if let Some(msg) = e.as_ref() {

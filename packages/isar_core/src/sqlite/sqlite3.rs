@@ -2,10 +2,10 @@ use crate::core::error::{IsarError, Result};
 use ffi::sqlite3_busy_timeout;
 use libsqlite3_sys as ffi;
 use std::cell::Cell;
-use std::ffi::{c_char, c_int, c_void, CStr, CString};
+use std::ffi::{CStr, CString, c_char, c_int, c_void};
 use std::{ptr, slice};
 
-use super::sql::{sql_fn_filter_json, FN_FILTER_JSON_NAME};
+use super::sql::{FN_FILTER_JSON_NAME, sql_fn_filter_json};
 
 pub(crate) struct SQLite3 {
     db: *mut ffi::sqlite3,
@@ -152,17 +152,19 @@ impl SQLite3 {
         {
             let mut fn_ctx = SQLiteFnContext {
                 ctx,
-                args: slice::from_raw_parts(argv, argc as usize),
+                args: unsafe { slice::from_raw_parts(argv, argc as usize) },
             };
-            let boxed_f = ffi::sqlite3_user_data(ctx).cast::<F>();
-            let result = (*boxed_f)(&mut fn_ctx);
+            let boxed_f = unsafe { ffi::sqlite3_user_data(ctx).cast::<F>() };
+            let result = unsafe { (*boxed_f)(&mut fn_ctx) };
             if let Err(err) = result {
                 let err_str = err.to_string();
-                ffi::sqlite3_result_error(
-                    ctx,
-                    err_str.as_ptr() as *const c_char,
-                    err_str.len() as i32,
-                );
+                unsafe {
+                    ffi::sqlite3_result_error(
+                        ctx,
+                        err_str.as_ptr() as *const c_char,
+                        err_str.len() as i32,
+                    )
+                };
             }
         }
 
@@ -203,7 +205,7 @@ impl SQLite3 {
             F: FnMut(i64) -> (),
         {
             let boxed_f = func.cast::<F>();
-            (*boxed_f)(id);
+            unsafe { (*boxed_f)(id) };
         }
 
         self.clear_update_hook();
@@ -233,7 +235,7 @@ impl Drop for SQLite3 {
 }
 
 unsafe extern "C" fn free_boxed_value<T>(p: *mut c_void) {
-    drop(Box::from_raw(p.cast::<T>()));
+    unsafe { drop(Box::from_raw(p.cast::<T>())) };
 }
 
 pub(crate) struct SQLiteFnContext<'a> {

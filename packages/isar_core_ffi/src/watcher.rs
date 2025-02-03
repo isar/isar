@@ -3,7 +3,7 @@ use isar_core::core::{error::IsarError, instance::IsarInstance, watcher::WatchHa
 use crate::dart::{dart_post_int, DartPort};
 use crate::{CIsarInstance, CIsarQuery};
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_watch_collection(
     isar: &'static CIsarInstance,
     collection_index: u16,
@@ -24,7 +24,7 @@ pub unsafe extern "C" fn isar_watch_collection(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_watch_object(
     isar: &'static CIsarInstance,
     collection_index: u16,
@@ -46,7 +46,7 @@ pub unsafe extern "C" fn isar_watch_object(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_watch_query(
     isar: &'static CIsarInstance,
     query: &CIsarQuery,
@@ -72,7 +72,7 @@ pub unsafe extern "C" fn isar_watch_query(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_stop_watching(handle: *mut WatchHandle) {
     Box::from_raw(handle).stop();
 }

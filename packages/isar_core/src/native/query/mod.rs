@@ -61,7 +61,7 @@ impl NativeQuery {
         all_collections: &'a [NativeCollection],
         offset: Option<u32>,
         limit: Option<u32>,
-    ) -> NativeQueryCursor<'_> {
+    ) -> NativeQueryCursor<'a> {
         let collection = &all_collections[self.collection_index as usize];
         let iterator = QueryIterator::new(
             txn,
@@ -149,7 +149,10 @@ impl<'a> NativeQueryCursor<'a> {
 }
 
 impl<'a> IsarQueryCursor for NativeQueryCursor<'a> {
-    type Reader<'b> = NativeReader<'b> where Self: 'b;
+    type Reader<'b>
+        = NativeReader<'b>
+    where
+        Self: 'b;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Reader<'_>> {

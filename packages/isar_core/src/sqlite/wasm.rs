@@ -1,18 +1,18 @@
-use libsqlite3_sys::{sqlite3_file, sqlite3_vfs, sqlite3_vfs_register, SQLITE_IOERR};
+use libsqlite3_sys::{SQLITE_IOERR, sqlite3_file, sqlite3_vfs, sqlite3_vfs_register};
 use std::os::raw::{c_char, c_int, c_void};
 use std::ptr::null_mut;
 
-extern "C" {
-    /*pub fn js_log(ptr: *const u8);
+/*extern "C" {
+    pub fn js_log(ptr: *const u8);
 
     pub fn xSleep(_arg1: *mut sqlite3_vfs, microseconds: c_int) -> c_int;
 
     pub fn xRandomness(_arg1: *mut sqlite3_vfs, nByte: c_int, zByte: *mut c_char) -> c_int;
 
-    pub fn xCurrentTime(_arg1: *mut sqlite3_vfs, pTime: *mut f64) -> c_int;*/
-}
+    pub fn xCurrentTime(_arg1: *mut sqlite3_vfs, pTime: *mut f64) -> c_int;
+}*/
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn sqlite3_os_init() -> c_int {
     let vfs = sqlite3_vfs {
         iVersion: 1,
@@ -67,7 +67,7 @@ const ALIGN: usize = max(
     max(std::mem::size_of::<usize>(), std::mem::align_of::<usize>()),
 );
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn malloc(size: usize) -> *mut u8 {
     let layout = match std::alloc::Layout::from_size_align(size + ALIGN, ALIGN) {
         Ok(layout) => layout,
@@ -83,7 +83,7 @@ pub unsafe extern "C" fn malloc(size: usize) -> *mut u8 {
     ptr.offset(ALIGN as isize)
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn free(ptr: *mut u8) {
     let ptr = ptr.offset(-(ALIGN as isize));
     let size = *(ptr as *mut usize);
@@ -92,7 +92,7 @@ pub unsafe extern "C" fn free(ptr: *mut u8) {
     std::alloc::dealloc(ptr, layout);
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn realloc(ptr: *mut u8, new_size: usize) -> *mut u8 {
     let ptr = ptr.offset(-(ALIGN as isize));
     let size = *(ptr as *mut usize);
@@ -107,7 +107,7 @@ pub unsafe extern "C" fn realloc(ptr: *mut u8, new_size: usize) -> *mut u8 {
     ptr.offset(ALIGN as isize)
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn wasm_vfs_open(
     _arg1: *mut sqlite3_vfs,
     _zName: *const c_char,
@@ -118,7 +118,7 @@ unsafe extern "C" fn wasm_vfs_open(
     SQLITE_IOERR
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn wasm_vfs_delete(
     _arg1: *mut sqlite3_vfs,
     _zName: *const c_char,
@@ -127,7 +127,7 @@ unsafe extern "C" fn wasm_vfs_delete(
     SQLITE_IOERR
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn wasm_vfs_access(
     _arg1: *mut sqlite3_vfs,
     _zName: *const c_char,
@@ -137,7 +137,7 @@ unsafe extern "C" fn wasm_vfs_access(
     SQLITE_IOERR
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn wasm_vfs_fullpathname(
     _arg1: *mut sqlite3_vfs,
     _zName: *const c_char,
@@ -147,7 +147,7 @@ unsafe extern "C" fn wasm_vfs_fullpathname(
     SQLITE_IOERR
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn wasm_vfs_dlopen(
     _arg1: *mut sqlite3_vfs,
     _zFilename: *const c_char,
@@ -155,7 +155,7 @@ unsafe extern "C" fn wasm_vfs_dlopen(
     null_mut()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn wasm_vfs_dlerror(
     _arg1: *mut sqlite3_vfs,
     _nByte: c_int,
@@ -164,7 +164,7 @@ unsafe extern "C" fn wasm_vfs_dlerror(
     // no-op
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn wasm_vfs_dlsym(
     _arg1: *mut sqlite3_vfs,
     _arg2: *mut c_void,
@@ -173,7 +173,7 @@ unsafe extern "C" fn wasm_vfs_dlsym(
     None
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn wasm_vfs_dlclose(_arg1: *mut sqlite3_vfs, _arg2: *mut c_void) {
     // no-op
 }
