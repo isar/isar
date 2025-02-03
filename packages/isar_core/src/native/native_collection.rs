@@ -9,8 +9,8 @@ use crate::core::data_type::DataType;
 use crate::core::error::{IsarError, Result};
 use crate::core::value::IsarValue;
 use crate::core::watcher::{ChangeSet, CollectionWatchers};
-use std::sync::atomic::{self, AtomicI64};
 use std::sync::Arc;
+use std::sync::atomic::{self, AtomicI64};
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct NativeProperty {
