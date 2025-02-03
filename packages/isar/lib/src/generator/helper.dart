@@ -15,12 +15,12 @@ extension on ClassElement {
         collectionAnnotation?.ignore ?? embeddedAnnotation!.ignore;
     final allAccessors = [
       // ignore: deprecated_member_use
-      ...accessors.map((e) => e.variable),
+      ...accessors.map((e) => e.variable2!),
       if (collectionAnnotation?.inheritance ?? embeddedAnnotation!.inheritance)
         for (final supertype in allSupertypes) ...[
           if (!supertype.isDartCoreObject)
             // ignore: deprecated_member_use
-            ...supertype.accessors.map((e) => e.variable),
+            ...supertype.accessors.map((e) => e.variable2!),
         ],
     ];
 

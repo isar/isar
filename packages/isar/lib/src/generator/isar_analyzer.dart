@@ -138,7 +138,7 @@ class _IsarAnalyzer {
     if (properties.map((e) => e.isarName).toSet().length != properties.length) {
       _err(
         'Two or more properties have the same name.',
-        constructor.enclosingElement,
+        constructor.enclosingElement3,
       );
     }
 
