@@ -52,6 +52,7 @@ class SendPort {
   }
 }
 
+// based on https://github.com/tjwebb/fnv-plus
 int platformFastHash(String str) {
   var i = 0;
   var t0 = 0;

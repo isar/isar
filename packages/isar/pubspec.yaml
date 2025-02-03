@@ -15,7 +15,7 @@ topics:
   - storage
 
 environment:
-  sdk: ">=3.1.0 <4.0.0"
+  sdk: ">=3.4.0 <4.0.0"
 
 dependencies:
   analyzer: ">=6.5.0 <8.0.0"

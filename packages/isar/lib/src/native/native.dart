@@ -80,18 +80,23 @@ extension on Abi {
   }
 }
 
-/// @nodoc
 int platformFastHash(String string) {
   // ignore: avoid_js_rounded_ints
-  var hash = 0xcbf29ce484222325;
+  const fnvOffsetBasis = 0xcbf29ce484222325;
+  const fnvPrime = 0x00000100000001B3;
 
-  var i = 0;
-  while (i < string.length) {
-    final codeUnit = string.codeUnitAt(i++);
-    hash ^= codeUnit >> 8;
-    hash *= 0x100000001b3;
+  var hash = fnvOffsetBasis;
+
+  for (var i = 0; i < string.length; i++) {
+    final codeUnit = string.codeUnitAt(i);
+
+    // Process lower byte first (FNV-1a is little-endian)
     hash ^= codeUnit & 0xFF;
-    hash *= 0x100000001b3;
+    hash *= fnvPrime;
+
+    // Process upper byte if it's part of the UTF-16 representation
+    hash ^= codeUnit >> 8;
+    hash *= fnvPrime;
   }
 
   return hash;
