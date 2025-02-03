@@ -94,8 +94,12 @@
 //! ## Endianness
 //! All multi-byte values are stored in little-endian format.
 
-use super::{FALSE_BOOL, NULL_BOOL, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG, TRUE_BOOL};
+use super::{
+    FALSE_BOOL, MAX_OBJ_SIZE, NULL_BOOL, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG, TRUE_BOOL,
+};
 use crate::core::data_type::DataType;
+use crate::core::error::{IsarError, Result};
+use crate::core::value::IsarValue;
 use byteorder::{ByteOrder, LittleEndian};
 use std::cell::Cell;
 
@@ -241,8 +245,42 @@ impl IsarSerializer {
         self.buffer.replace(writer.buffer.take());
     }
 
-    pub fn finish(&self) -> Vec<u8> {
-        self.buffer.take()
+    pub fn write_value(
+        &mut self,
+        offset: u32,
+        value: Option<&IsarValue>,
+        data_type: DataType,
+    ) -> bool {
+        match (value, data_type) {
+            (None, _) => self.write_null(offset, data_type),
+            (Some(IsarValue::Bool(value)), DataType::Bool) => self.write_bool(offset, *value),
+            (Some(IsarValue::Integer(value)), DataType::Byte) => {
+                self.write_byte(offset, *value as u8)
+            }
+            (Some(IsarValue::Integer(value)), DataType::Int) => {
+                self.write_int(offset, *value as i32)
+            }
+            (Some(IsarValue::Integer(value)), DataType::Long) => self.write_long(offset, *value),
+            (Some(IsarValue::Real(value)), DataType::Float) => {
+                self.write_float(offset, *value as f32)
+            }
+            (Some(IsarValue::Real(value)), DataType::Double) => self.write_double(offset, *value),
+            (Some(IsarValue::String(value)), DataType::String)
+            | (Some(IsarValue::String(value)), DataType::Json) => {
+                self.update_dynamic(offset, value.as_bytes())
+            }
+            _ => return false,
+        }
+        true
+    }
+
+    pub fn finish(&self) -> Result<Vec<u8>> {
+        let buffer = self.buffer.take();
+        if buffer.len() < MAX_OBJ_SIZE {
+            Ok(buffer)
+        } else {
+            Err(IsarError::ObjectLimitReached {})
+        }
     }
 }
 
@@ -276,14 +314,14 @@ mod tests {
         fn test_write_single_null_bool() {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 1);
             serializer.write_null(0, DataType::Bool);
-            assert_eq!(serializer.finish(), vec![1, 0, 0, 255]);
+            assert_eq!(serializer.finish().unwrap(), vec![1, 0, 0, 255]);
         }
 
         #[test]
         fn test_write_single_null_byte() {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 1);
             serializer.write_null(0, DataType::Byte);
-            assert_eq!(serializer.finish(), vec![1, 0, 0, 0]);
+            assert_eq!(serializer.finish().unwrap(), vec![1, 0, 0, 0]);
         }
 
         #[test]
@@ -291,7 +329,7 @@ mod tests {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 4);
             serializer.write_null(0, DataType::Int);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!([4, 0, 0], NULL_INT.to_le_bytes())
             );
         }
@@ -301,7 +339,7 @@ mod tests {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 4);
             serializer.write_null(0, DataType::Float);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!([4, 0, 0], NULL_FLOAT.to_le_bytes())
             );
         }
@@ -311,7 +349,7 @@ mod tests {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 8);
             serializer.write_null(0, DataType::Long);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!([8, 0, 0], NULL_LONG.to_le_bytes())
             );
         }
@@ -321,7 +359,7 @@ mod tests {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 8);
             serializer.write_null(0, DataType::Double);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!([8, 0, 0], NULL_DOUBLE.to_le_bytes())
             );
         }
@@ -342,7 +380,7 @@ mod tests {
             ] {
                 let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
                 serializer.write_null(0, dynamic_data_type);
-                assert_eq!(serializer.finish(), vec![3, 0, 0, 0, 0, 0]);
+                assert_eq!(serializer.finish().unwrap(), vec![3, 0, 0, 0, 0, 0]);
             }
         }
 
@@ -350,11 +388,11 @@ mod tests {
         fn test_write_single_bool() {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 1);
             serializer.write_bool(0, false);
-            assert_eq!(serializer.finish(), vec![1, 0, 0, 0]);
+            assert_eq!(serializer.finish().unwrap(), vec![1, 0, 0, 0]);
 
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 1);
             serializer.write_bool(0, true);
-            assert_eq!(serializer.finish(), vec![1, 0, 0, 1]);
+            assert_eq!(serializer.finish().unwrap(), vec![1, 0, 0, 1]);
         }
 
         #[test]
@@ -362,7 +400,10 @@ mod tests {
             for value in [0, 1, 42, 254, 255] {
                 let mut serializer = IsarSerializer::new(Vec::new(), 0, 1);
                 serializer.write_byte(0, value);
-                assert_eq!(serializer.finish(), concat!([1, 0, 0], value.to_le_bytes()));
+                assert_eq!(
+                    serializer.finish().unwrap(),
+                    concat!([1, 0, 0], value.to_le_bytes())
+                );
             }
         }
 
@@ -371,7 +412,10 @@ mod tests {
             for value in [0, 1, i32::MIN, i32::MAX, i32::MAX - 1] {
                 let mut serializer = IsarSerializer::new(Vec::new(), 0, 4);
                 serializer.write_int(0, value);
-                assert_eq!(serializer.finish(), concat!([4, 0, 0], value.to_le_bytes()));
+                assert_eq!(
+                    serializer.finish().unwrap(),
+                    concat!([4, 0, 0], value.to_le_bytes())
+                );
             }
         }
 
@@ -389,7 +433,10 @@ mod tests {
             ] {
                 let mut serializer = IsarSerializer::new(Vec::new(), 0, 4);
                 serializer.write_float(0, value);
-                assert_eq!(serializer.finish(), concat!([4, 0, 0], value.to_le_bytes()));
+                assert_eq!(
+                    serializer.finish().unwrap(),
+                    concat!([4, 0, 0], value.to_le_bytes())
+                );
             }
         }
 
@@ -398,7 +445,10 @@ mod tests {
             for value in [0, -1, 1, i64::MIN, i64::MIN + 1, i64::MAX, i64::MAX - 1] {
                 let mut serializer = IsarSerializer::new(Vec::new(), 0, 8);
                 serializer.write_long(0, value);
-                assert_eq!(serializer.finish(), concat!([8, 0, 0], value.to_le_bytes()));
+                assert_eq!(
+                    serializer.finish().unwrap(),
+                    concat!([8, 0, 0], value.to_le_bytes())
+                );
             }
         }
 
@@ -415,7 +465,10 @@ mod tests {
             ] {
                 let mut serializer = IsarSerializer::new(Vec::new(), 0, 8);
                 serializer.write_double(0, value);
-                assert_eq!(serializer.finish(), concat!([8, 0, 0], value.to_le_bytes()));
+                assert_eq!(
+                    serializer.finish().unwrap(),
+                    concat!([8, 0, 0], value.to_le_bytes())
+                );
             }
         }
 
@@ -424,21 +477,21 @@ mod tests {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
             serializer.write_dynamic(0, "foo".as_bytes());
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!([3, 0, 0], [3, 0, 0], [3, 0, 0, b'f', b'o', b'o'])
             );
 
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
             serializer.write_dynamic(0, "".as_bytes());
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!([3, 0, 0], [3, 0, 0], [0, 0, 0])
             );
 
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
             serializer.write_dynamic(0, LOREM.as_bytes());
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [3, 0, 0],
                     [3, 0, 0],
@@ -450,14 +503,14 @@ mod tests {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
             serializer.write_dynamic(0, &[1, 2, 3, 4, 5, 6, 7, 8, 9]);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!([3, 0, 0], [3, 0, 0], [9, 0, 0], [1, 2, 3, 4, 5, 6, 7, 8, 9])
             );
 
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 3);
             serializer.write_dynamic(0, &vec![0; 2000]);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [3, 0, 0],
                     [3, 0, 0],
@@ -470,7 +523,7 @@ mod tests {
             let bytes = vec![5; 0xffffff];
             serializer.write_dynamic(0, &bytes);
 
-            let finished = serializer.finish();
+            let finished = serializer.finish().unwrap();
             let expected = concat!([3, 0, 0], [3, 0, 0], [255, 255, 255], bytes);
 
             assert_eq!(finished.len(), expected.len());
@@ -488,13 +541,13 @@ mod tests {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 2);
             serializer.write_null(0, DataType::Bool);
             serializer.write_null(1, DataType::Bool);
-            assert_eq!(serializer.finish(), vec![2, 0, 0, 255, 255]);
+            assert_eq!(serializer.finish().unwrap(), vec![2, 0, 0, 255, 255]);
 
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 10);
             for offset in 0..10 {
                 serializer.write_null(offset, DataType::Bool);
             }
-            assert_eq!(serializer.finish(), concat!([10, 0, 0], [255; 10]));
+            assert_eq!(serializer.finish().unwrap(), concat!([10, 0, 0], [255; 10]));
         }
 
         #[test]
@@ -502,13 +555,13 @@ mod tests {
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 2);
             serializer.write_null(0, DataType::Byte);
             serializer.write_null(1, DataType::Byte);
-            assert_eq!(serializer.finish(), vec![2, 0, 0, 0, 0]);
+            assert_eq!(serializer.finish().unwrap(), vec![2, 0, 0, 0, 0]);
 
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 10);
             for offset in 0..10 {
                 serializer.write_null(offset, DataType::Byte);
             }
-            assert_eq!(serializer.finish(), concat!([10, 0, 0], [0; 10]));
+            assert_eq!(serializer.finish().unwrap(), concat!([10, 0, 0], [0; 10]));
         }
 
         #[test]
@@ -517,7 +570,7 @@ mod tests {
             serializer.write_null(0, DataType::Int);
             serializer.write_null(4, DataType::Int);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!([8, 0, 0], NULL_INT.to_le_bytes(), NULL_INT.to_le_bytes())
             );
 
@@ -526,7 +579,7 @@ mod tests {
                 serializer.write_null(offset * 4, DataType::Int);
             }
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [4 * 10, 0, 0],
                     NULL_INT.to_le_bytes(),
@@ -549,7 +602,7 @@ mod tests {
             serializer.write_null(0, DataType::Float);
             serializer.write_null(4, DataType::Float);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [8, 0, 0],
                     NULL_FLOAT.to_le_bytes(),
@@ -562,7 +615,7 @@ mod tests {
                 serializer.write_null(offset * 4, DataType::Float);
             }
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [4 * 10, 0, 0],
                     NULL_FLOAT.to_le_bytes(),
@@ -585,7 +638,7 @@ mod tests {
             serializer.write_null(0, DataType::Long);
             serializer.write_null(8, DataType::Long);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!([16, 0, 0], NULL_LONG.to_le_bytes(), NULL_LONG.to_le_bytes())
             );
 
@@ -594,7 +647,7 @@ mod tests {
                 serializer.write_null(offset * 8, DataType::Long);
             }
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [8 * 10, 0, 0],
                     NULL_LONG.to_le_bytes(),
@@ -617,7 +670,7 @@ mod tests {
             serializer.write_null(0, DataType::Double);
             serializer.write_null(8, DataType::Double);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [16, 0, 0],
                     NULL_DOUBLE.to_le_bytes(),
@@ -630,7 +683,7 @@ mod tests {
                 serializer.write_null(offset * 8, DataType::Double);
             }
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [8 * 10, 0, 0],
                     NULL_DOUBLE.to_le_bytes(),
@@ -670,7 +723,7 @@ mod tests {
                         expected.extend(vec![0; 3]);
                     }
 
-                    assert_eq!(serializer.finish(), expected);
+                    assert_eq!(serializer.finish().unwrap(), expected);
                 }
             }
         }
@@ -681,7 +734,10 @@ mod tests {
             serializer.write_null(0, DataType::Bool);
             serializer.write_bool(1, false);
             serializer.write_bool(2, true);
-            assert_eq!(serializer.finish(), concat!([3, 0, 0], [255, 0, 1]));
+            assert_eq!(
+                serializer.finish().unwrap(),
+                concat!([3, 0, 0], [255, 0, 1])
+            );
 
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 6);
             serializer.write_bool(0, false);
@@ -691,7 +747,7 @@ mod tests {
             serializer.write_bool(4, true);
             serializer.write_bool(5, false);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!([6, 0, 0], [0, 0, 255, 1, 1, 0])
             );
         }
@@ -702,7 +758,10 @@ mod tests {
             serializer.write_byte(0, 0);
             serializer.write_byte(1, 10);
             serializer.write_byte(2, 42);
-            assert_eq!(serializer.finish(), concat!([3, 0, 0], [0, 10, 0x2a]));
+            assert_eq!(
+                serializer.finish().unwrap(),
+                concat!([3, 0, 0], [0, 10, 0x2a])
+            );
 
             let mut serializer = IsarSerializer::new(Vec::new(), 0, 5);
             serializer.write_byte(0, 0);
@@ -711,7 +770,7 @@ mod tests {
             serializer.write_byte(3, 254);
             serializer.write_byte(4, 255);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!([5, 0, 0], [0, 10, 0x2a, 0xfe, 255])
             );
         }
@@ -723,7 +782,7 @@ mod tests {
             serializer.write_int(4, -20);
             serializer.write_int(8, 42);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [12, 0, 0],
                     0i32.to_le_bytes(),
@@ -739,7 +798,7 @@ mod tests {
             serializer.write_int(12, i32::MAX - 1);
             serializer.write_int(16, i32::MAX);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [20, 0, 0],
                     i32::MIN.to_le_bytes(),
@@ -758,7 +817,7 @@ mod tests {
             serializer.write_float(4, -20f32);
             serializer.write_float(8, 42f32);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [12, 0, 0],
                     0f32.to_le_bytes(),
@@ -774,7 +833,7 @@ mod tests {
             serializer.write_float(12, 100.49);
             serializer.write_float(16, f32::MAX);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [20, 0, 0],
                     f32::MIN.to_le_bytes(),
@@ -793,7 +852,7 @@ mod tests {
             serializer.write_long(8, -20);
             serializer.write_long(16, 42);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [24, 0, 0],
                     0i64.to_le_bytes(),
@@ -809,7 +868,7 @@ mod tests {
             serializer.write_long(24, 100);
             serializer.write_long(32, i64::MAX);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [40, 0, 0],
                     i64::MIN.to_le_bytes(),
@@ -828,7 +887,7 @@ mod tests {
             serializer.write_double(8, -20.0);
             serializer.write_double(16, 42.0);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [24, 0, 0],
                     0f64.to_le_bytes(),
@@ -844,7 +903,7 @@ mod tests {
             serializer.write_double(24, 100.49);
             serializer.write_double(32, f64::MAX);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [40, 0, 0],
                     f64::MIN.to_le_bytes(),
@@ -862,7 +921,7 @@ mod tests {
             serializer.write_dynamic(0, "foo".as_bytes());
             serializer.write_dynamic(3, "bar".as_bytes());
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [6, 0, 0],
                     [6, 0, 0],
@@ -876,7 +935,7 @@ mod tests {
             serializer.write_dynamic(0, &[]);
             serializer.write_dynamic(3, &[]);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!([6, 0, 0], [6, 0, 0], [9, 0, 0], [0, 0, 0], [0, 0, 0])
             );
 
@@ -886,7 +945,7 @@ mod tests {
             serializer.write_dynamic(6, LOREM[200..300].as_bytes());
             serializer.write_dynamic(9, LOREM[300..].as_bytes());
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [12, 0, 0],
                     [12, 0, 0],
@@ -915,7 +974,7 @@ mod tests {
             serializer.write_dynamic(9, &[1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
             serializer.write_dynamic(12, &[0, 255, 255, 255, 42]);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [15, 0, 0],
                     [15, 0, 0],
@@ -942,7 +1001,7 @@ mod tests {
             serializer.write_dynamic(6, &[3; 30]);
 
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [9, 0, 0],
                     [9, 0, 0],
@@ -969,7 +1028,7 @@ mod tests {
             serializer.write_null(1, DataType::Int);
             serializer.write_null(5, DataType::String);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [8, 0, 0],
                     NULL_BOOL.to_le_bytes(),
@@ -986,7 +1045,7 @@ mod tests {
             serializer.write_null(13, DataType::Double);
             serializer.write_null(21, DataType::Bool);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [22, 0, 0],
                     NULL_BOOL.to_le_bytes(),
@@ -1009,7 +1068,7 @@ mod tests {
             serializer.write_double(10, 0.123456789);
             serializer.write_byte(18, 100);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [19, 0, 0],
                     [1],
@@ -1030,7 +1089,7 @@ mod tests {
             serializer.write_null(29, DataType::Byte);
             serializer.write_null(30, DataType::Byte);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat![
                     [31, 0, 0],
                     i64::MAX.to_le_bytes(),
@@ -1057,7 +1116,7 @@ mod tests {
             serializer.write_null(24, DataType::ByteList);
             serializer.write_byte(27, 42);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [28, 0, 0],
                     65535i32.to_le_bytes(),
@@ -1082,7 +1141,7 @@ mod tests {
             serializer.write_dynamic(11, &[]);
             serializer.write_null(14, DataType::Int);
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [18, 0, 0],
                     [18, 0, 0],
@@ -1112,7 +1171,7 @@ mod tests {
             serializer.end_nested(nested_serializer);
 
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [3, 0, 0],
                     [3, 0, 0],
@@ -1145,7 +1204,7 @@ mod tests {
             serializer.end_nested(nested_serializer);
 
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [14, 0, 0],
                     32i32.to_le_bytes(),
@@ -1194,7 +1253,7 @@ mod tests {
             serializer.end_nested(nested_serializer);
 
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [16, 0, 0],
                     [16, 0, 0], // First dynamic
@@ -1270,7 +1329,7 @@ mod tests {
             serializer.write_byte(20, 20);
 
             assert_eq!(
-                serializer.finish(),
+                serializer.finish().unwrap(),
                 concat!(
                     [21, 0, 0],
                     [32, 0, 0, 0],

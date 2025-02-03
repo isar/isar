@@ -258,7 +258,7 @@ mod tests {
     ) -> IsarDeserializer<'static> {
         let mut serializer = IsarSerializer::new(Vec::new(), 0, static_size);
         write_fn(&mut serializer);
-        let bytes = serializer.finish().leak();
+        let bytes = serializer.finish().unwrap().leak();
         IsarDeserializer::from_bytes(bytes)
     }
 
