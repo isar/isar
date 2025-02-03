@@ -60,7 +60,7 @@ class Model {
         boolProp: boolProp ?? this.boolProp,
         nullableBoolProp: nullableBoolProp == 0
             ? this.nullableBoolProp
-            : nullableBoolProp as bool,
+            : nullableBoolProp as bool?,
         byteProp: byteProp ?? this.byteProp,
         shortProp: shortProp ?? this.shortProp,
         longProp: longProp ?? this.longProp,
