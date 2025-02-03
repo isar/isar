@@ -1,3 +1,99 @@
+//! # Isar Binary Format Documentation
+//!
+//! The Isar binary format is a compact binary serialization format designed for efficient storage and
+//! retrieval of structured data. It consists of a header followed by static and dynamic sections.
+//!
+//! ## Format Overview
+//!
+//! ```text
+//! +------------------------+
+//! |   Static Size (3B)    |  <- Header: size of static section
+//! +------------------------+ <- Base position for all offsets
+//! |                       |
+//! |    Static Section     |  <- Fixed-size primitive values
+//! |                       |
+//! +------------------------+
+//! |                       |
+//! |    Dynamic Section    |  <- Variable-length data
+//! |                       |
+//! +------------------------+
+//! ```
+//!
+//! ## Header and Static Section
+//!
+//! The format begins with a 3-byte header indicating the size of the static section.
+//! After the header, the static section contains:
+//! - Fixed-size primitive values (bool, byte, int, float, long, double)
+//! - Offsets to dynamic data (3 bytes each)
+//!
+//! All offsets in the format are relative to the position after the header (start of static section).
+//!
+//! ### Primitive Types and Their Sizes
+//! - Bool: 1 byte (0 = false, 1 = true, 255 = null)
+//! - Byte: 1 byte (0 = null)
+//! - Int: 4 bytes (0x80000000 = null)
+//! - Float: 4 bytes (NaN with specific bit pattern = null)
+//! - Long: 8 bytes (0x8000000000000000 = null)
+//! - Double: 8 bytes (NaN with specific bit pattern = null)
+//!
+//! ## Dynamic Section
+//!
+//! The dynamic section follows the static section and contains variable-length data:
+//! - Strings (UTF-8 encoded)
+//! - Lists (of any type)
+//! - Objects (nested Isar objects)
+//!
+//! Each dynamic value is referenced by a 3-byte offset stored in the static section.
+//! These offsets are relative to the position after the header.
+//! The format for dynamic values is:
+//!
+//! ```text
+//! +------------------------+
+//! |    Length (3 bytes)   |  <- Length of the data
+//! +------------------------+
+//! |                       |
+//! |         Data          |  <- Actual data bytes
+//! |                       |
+//! +------------------------+
+//! ```
+//!
+//! ### Dynamic Data Types
+//! - String: UTF-8 encoded bytes
+//! - Lists: Length followed by contiguous elements
+//! - Objects: Nested Isar format (recursive)
+//!
+//! ### Null Values for Dynamic Types
+//! - A zero offset (0x000000) in the static section indicates null
+//!
+//! ## Nested Objects
+//!
+//! Nested objects follow the same format recursively:
+//! ```text
+//! +------------------------+
+//! |   Static Size (3B)    |  <- Header
+//! +------------------------+ <- New base position for offsets
+//! |    Static Section     |
+//! +------------------------+
+//! |    Dynamic Section    |
+//! +------------------------+
+//! ```
+//! Each nested object establishes a new base position for offsets after its header.
+//!
+//! ## Example Layout
+//! ```text
+//! [Static Size: 3 bytes]     <- Header
+//! +------------------------+ <- Base position (offset 0)
+//! [Int: 4 bytes]             <- Offset 0
+//! [String offset: 3 bytes]   <- Offset 4
+//! [Bool: 1 byte]             <- Offset 7
+//! +------------------------+
+//! [Dynamic string length: 3 bytes]
+//! [String data: N bytes]
+//! ```
+//!
+//! ## Endianness
+//! All multi-byte values are stored in little-endian format.
+
 use super::{FALSE_BOOL, NULL_BOOL, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG, TRUE_BOOL};
 use crate::core::data_type::DataType;
 use byteorder::{ByteOrder, LittleEndian};

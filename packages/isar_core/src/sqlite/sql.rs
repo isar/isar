@@ -1,9 +1,10 @@
-use super::sqlite3::{SQLite3, SQLiteFnContext};
 use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
-use super::sqlite_query::QueryParam;
+use super::sqlite_query::{JsonCondition, QueryParam};
+use super::sqlite3::{SQLite3, SQLiteFnContext};
 use crate::core::data_type::DataType;
 use crate::core::error::Result;
-use crate::core::filter::{ConditionType, Filter, FilterCondition, JsonCondition};
+use crate::core::filter::{ConditionType, Filter, FilterCondition};
+use crate::core::filter_json::matches_json;
 use crate::core::schema::{IndexSchema, IsarSchema, PropertySchema};
 use crate::core::value::IsarValue;
 use itertools::Itertools;
@@ -164,24 +165,30 @@ fn filter_sql_path(
                 let first_path_part = path.remove(0);
                 path.push(property_name.to_string());
                 let sql = format!("{}({}, ?)", FN_FILTER_JSON_NAME, first_path_part);
-                let condition = JsonCondition::new(
+                let condition = JsonCondition {
                     path,
-                    condition.condition_type,
-                    is_list,
-                    condition.values,
-                    condition.case_sensitive,
-                );
+                    condition_type: condition.condition_type,
+                    values: condition.values,
+                    case_sensitive: condition.case_sensitive,
+                };
                 (sql, vec![QueryParam::JsonCondition(condition)])
             } else if is_list {
-                let sql = format!("{}({}, ?)", FN_FILTER_JSON_NAME, property_name);
-                let condition = JsonCondition::new(
-                    vec![],
-                    condition.condition_type,
-                    true,
-                    condition.values,
-                    condition.case_sensitive,
-                );
-                (sql, vec![QueryParam::JsonCondition(condition)])
+                if condition.condition_type == ConditionType::IsNull {
+                    let sql = format!("{} IS NULL", property_name);
+                    return (sql, vec![]);
+                } else {
+                    let sql = format!(
+                        "({} IS NOT NULL AND {}({}, ?))",
+                        property_name, FN_FILTER_JSON_NAME, property_name
+                    );
+                    let condition = JsonCondition {
+                        path: vec![],
+                        condition_type: condition.condition_type,
+                        values: condition.values,
+                        case_sensitive: condition.case_sensitive,
+                    };
+                    (sql, vec![QueryParam::JsonCondition(condition)])
+                }
             } else {
                 condition_sql(collection, &condition).unwrap_or(("FALSE".to_string(), vec![]))
             }
@@ -438,14 +445,29 @@ pub(crate) fn sql_data_type(sqlite_type: &str) -> (DataType, Option<&str>) {
 pub(crate) const FN_FILTER_JSON_NAME: &str = "isar_filter_json";
 pub(crate) const FN_FILTER_JSON_COND_PTR_TYPE: &[u8] = b"json_condition_ptr\0";
 pub(crate) fn sql_fn_filter_json(ctx: &mut SQLiteFnContext) -> Result<()> {
-    let json = ctx.get_str(0);
+    let json = if let Some(json) = ctx.get_auxdata::<Value>(0) {
+        Cow::Borrowed(json)
+    } else {
+        let json_str = ctx.get_str(0);
+        let json = serde_json::from_str::<Value>(json_str).unwrap_or(Value::Null);
+        Cow::Owned(Box::new(json))
+    };
 
-    let value = serde_json::from_str::<Value>(json).unwrap_or(Value::Null);
     let condition = ctx.get_object::<JsonCondition>(1, FN_FILTER_JSON_COND_PTR_TYPE);
 
     if let Some(condition) = condition {
-        let result = condition.matches(value);
+        let result = matches_json(
+            &json,
+            condition.condition_type,
+            &condition.path,
+            &condition.values,
+            condition.case_sensitive,
+        );
         ctx.set_int_result(if result { 1 } else { 0 });
+    }
+
+    if let Cow::Owned(mut json) = json {
+        ctx.set_auxdata(0, json.take());
     }
 
     Ok(())

@@ -77,7 +77,18 @@ fn filter_to_native(
         Filter::Condition(condition) => {
             condition_to_native(condition, collection).unwrap_or(NativeFilter::stat(false))
         }
-        Filter::Json(_) => todo!(),
+        Filter::Json(json) => {
+            if let Some(property) = collection.get_property(json.property_index) {
+                return NativeFilter::json(
+                    property,
+                    json.path.clone(),
+                    json.condition_type,
+                    json.values.clone(),
+                    json.case_sensitive,
+                );
+            }
+            NativeFilter::stat(false)
+        }
         Filter::Nested(nested) => {
             if let Some(property) = collection.get_property(nested.property_index) {
                 if let Some(embedded_collection_index) = property.embedded_collection_index {

@@ -3,7 +3,7 @@ use crate::core::value::IsarValue;
 #[derive(PartialEq, Clone, Debug)]
 pub enum Filter {
     Condition(FilterCondition),
-    Json(JsonCondition),
+    Json(FilterJson),
     Nested(FilterNested),
     And(Vec<Filter>),
     Or(Vec<Filter>),
@@ -50,20 +50,20 @@ impl FilterCondition {
 }
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct JsonCondition {
+pub struct FilterJson {
+    pub property_index: u16,
     pub path: Vec<String>,
     pub condition_type: ConditionType,
-    pub is_list: bool,
     pub values: Vec<Option<IsarValue>>,
     // if false, values are all lowercase
     pub case_sensitive: bool,
 }
 
-impl JsonCondition {
+impl FilterJson {
     pub fn new(
+        property_index: u16,
         path: Vec<String>,
         condition_type: ConditionType,
-        is_list: bool,
         values: Vec<Option<IsarValue>>,
         case_sensitive: bool,
     ) -> Self {
@@ -84,9 +84,9 @@ impl JsonCondition {
                 .collect()
         };
         Self {
+            property_index,
             path,
             condition_type,
-            is_list,
             values,
             case_sensitive,
         }

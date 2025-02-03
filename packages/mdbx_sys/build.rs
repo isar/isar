@@ -56,8 +56,6 @@ fn main() {
     env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "12.0");
     env::set_var("RUST_BACKTRACE", "full");
 
-    let is_android = env::var("CARGO_CFG_TARGET_OS").unwrap() == "android";
-
     let _ = fs::remove_dir_all("libmdbx");
     fs::create_dir("libmdbx").unwrap();
 
@@ -82,23 +80,6 @@ fn main() {
 
     let mut mdbx = PathBuf::from(&env::var("CARGO_MANIFEST_DIR").unwrap());
     mdbx.push("libmdbx");
-
-    /*let core_path = mdbx.join("mdbx.c");
-    let mut core = fs::read_to_string(core_path.as_path()).unwrap();
-    core = core.replace("!CharToOemBuffA(buf, buf, size)", "false");
-    if is_android {
-        core = core.replace(
-            "memset(ior, -1, sizeof(osal_ioring_t))",
-            "memset(ior, 0, sizeof(osal_ioring_t))",
-        );
-        core = core.replace("unlikely(linux_kernel_version < 0x04000000)", "false");
-        core = core.replace(
-            "assert(linux_kernel_version >= 0x03060000);",
-            "if (linux_kernel_version >= 0x03060000) return MDBX_SUCCESS;
-            __fallthrough",
-        );
-    }
-    fs::write(core_path.as_path(), core).unwrap();*/
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 

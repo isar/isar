@@ -1,6 +1,6 @@
 use super::{data_type::DataType, reader::IsarReader};
-use serde::ser::{SerializeMap, SerializeSeq};
 use serde::Serialize;
+use serde::ser::{SerializeMap, SerializeSeq};
 use serde_json::Value;
 
 pub(super) struct IsarObjectSerialize<'a, R: IsarReader> {

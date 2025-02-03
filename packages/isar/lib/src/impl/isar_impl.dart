@@ -180,6 +180,7 @@ class _IsarImpl extends Isar {
       await isolate;
       return isar;
     } else {
+      // ignore: only_throw_errors
       throw response as Object;
     }
   }

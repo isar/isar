@@ -281,6 +281,11 @@ impl<'a> SQLiteFnContext<'a> {
         unsafe { ptr.cast::<Box<T>>().as_ref() }
     }
 
+    pub fn get_auxdata<T>(&self, index: usize) -> Option<&'a Box<T>> {
+        let ptr = unsafe { ffi::sqlite3_get_auxdata(self.ctx, index as i32) };
+        unsafe { ptr.cast::<Box<T>>().as_ref() }
+    }
+
     pub fn set_int_result(&mut self, value: i64) {
         unsafe {
             ffi::sqlite3_result_int64(self.ctx, value);
@@ -325,6 +330,18 @@ impl<'a> SQLiteFnContext<'a> {
                 Some(free_boxed_value::<T>),
             );
         }
+    }
+
+    pub fn set_auxdata<T>(&mut self, index: usize, value: T) {
+        let ptr = Box::into_raw(Box::new(value));
+        unsafe {
+            ffi::sqlite3_set_auxdata(
+                self.ctx,
+                index as i32,
+                ptr as *mut c_void,
+                Some(free_boxed_value::<T>),
+            )
+        };
     }
 }
 
