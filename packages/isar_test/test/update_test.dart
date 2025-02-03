@@ -58,7 +58,7 @@ class Model {
       Model(
         id: id ?? this.id,
         boolProp: boolProp ?? this.boolProp,
-        nullableBoolProp: nullableBoolProp == 1
+        nullableBoolProp: nullableBoolProp == 0
             ? this.nullableBoolProp
             : nullableBoolProp as bool,
         byteProp: byteProp ?? this.byteProp,
@@ -67,7 +67,7 @@ class Model {
         floatProp: floatProp ?? this.floatProp,
         doubleProp: doubleProp ?? this.doubleProp,
         stringProp: stringProp ?? this.stringProp,
-        nullableStringProp: nullableStringProp == 1
+        nullableStringProp: nullableStringProp == 0
             ? this.nullableStringProp
             : nullableStringProp as String?,
         dateProp: dateProp ?? this.dateProp,

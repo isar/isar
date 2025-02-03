@@ -26,16 +26,6 @@ class _IsarImpl extends Isar {
     _instances[instanceId] = this;
   }
 
-  static final _instances = <int, _IsarImpl>{};
-
-  final int instanceId;
-  final List<IsarGeneratedSchema> generatedSchemas;
-  final collections = <Type, _IsarCollectionImpl<dynamic, dynamic>>{};
-
-  Pointer<CIsarInstance>? _ptr;
-  Pointer<CIsarTxn>? _txnPtr;
-  bool _txnWrite = false;
-
   factory _IsarImpl.open({
     required List<IsarGeneratedSchema> schemas,
     required String name,
@@ -134,6 +124,16 @@ class _IsarImpl extends Isar {
       schemas: schemas,
     );
   }
+
+  static final _instances = <int, _IsarImpl>{};
+
+  final int instanceId;
+  final List<IsarGeneratedSchema> generatedSchemas;
+  final collections = <Type, _IsarCollectionImpl<dynamic, dynamic>>{};
+
+  Pointer<CIsarInstance>? _ptr;
+  Pointer<CIsarTxn>? _txnPtr;
+  bool _txnWrite = false;
 
   static Future<Isar> openAsync({
     required List<IsarGeneratedSchema> schemas,
