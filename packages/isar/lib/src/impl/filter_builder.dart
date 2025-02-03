@@ -1,4 +1,4 @@
-part of isar;
+part of '../../isar.dart';
 
 Pointer<CFilter> _buildFilter(Filter filter, List<Pointer<void>> pointers) {
   switch (filter) {

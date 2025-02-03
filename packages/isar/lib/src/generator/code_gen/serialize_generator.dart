@@ -1,7 +1,4 @@
-// ignore_for_file: use_string_buffers
-// ignore_for_file: always_put_required_named_parameters_first
-
-part of isar_generator;
+part of '../isar_generator.dart';
 
 String _generateSerialize(ObjectInfo object) {
   var code = '''
@@ -84,11 +81,6 @@ String _writeProperty({
           ? '$value$enumGetter?.toUtc().microsecondsSinceEpoch ?? $_nullLong'
           : '$value$enumGetter.toUtc().microsecondsSinceEpoch';
       return 'IsarCore.writeLong($writer, $index, $converted);';
-    case IsarType.duration:
-      final converted = nullable
-          ? '$value$enumGetter?.inMicroseconds ?? $_nullLong'
-          : '$value$enumGetter?.inMicroseconds';
-      return 'IsarCore.writeLong($writer, $index, $converted);';
     case IsarType.double:
       final orNull = nullable ? '?? double.nan' : '';
       return 'IsarCore.writeDouble($writer, $index, $value$enumGetter$orNull);';
@@ -133,7 +125,6 @@ String _writeProperty({
     case IsarType.floatList:
     case IsarType.longList:
     case IsarType.dateTimeList:
-    case IsarType.durationList:
     case IsarType.doubleList:
     case IsarType.stringList:
     case IsarType.objectList:

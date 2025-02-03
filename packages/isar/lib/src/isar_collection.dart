@@ -1,4 +1,4 @@
-part of isar;
+part of '../isar.dart';
 
 /// Use `IsarCollection` instances to find, query, and create new objects of a
 /// given type in Isar.

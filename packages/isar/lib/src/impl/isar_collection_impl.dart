@@ -1,4 +1,4 @@
-part of isar;
+part of '../../isar.dart';
 
 class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
   _IsarCollectionImpl(

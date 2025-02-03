@@ -1,6 +1,6 @@
 // ignore_for_file: camel_case_types
 
-part of isar;
+part of '../../isar.dart';
 
 /// Type to mark an [int] property or List as 8-bit sized.
 ///

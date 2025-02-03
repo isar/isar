@@ -1,4 +1,4 @@
-part of isar;
+part of '../../isar.dart';
 
 class _IsarQueryImpl<T> extends IsarQuery<T> {
   _IsarQueryImpl({

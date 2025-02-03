@@ -1,6 +1,4 @@
-// ignore_for_file: prefer_asserts_with_message
-
-part of isar;
+part of '../isar.dart';
 
 /// The Isar storage engine.
 enum IsarEngine {
@@ -96,12 +94,15 @@ abstract class Isar {
     );
 
     /// Tree shake the inspector for profile and release builds.
-    assert(() {
-      if (!IsarCore.kIsWeb && inspector) {
-        _IsarConnect.initialize(isar);
-      }
-      return true;
-    }());
+    assert(
+      () {
+        if (!IsarCore.kIsWeb && inspector) {
+          _IsarConnect.initialize(isar);
+        }
+        return true;
+      }(),
+      'Never happens',
+    );
 
     return isar;
   }
@@ -130,12 +131,15 @@ abstract class Isar {
     );
 
     /// Tree shake the inspector for profile and release builds.
-    assert(() {
-      if (!IsarCore.kIsWeb && inspector) {
-        _IsarConnect.initialize(isar);
-      }
-      return true;
-    }());
+    assert(
+      () {
+        if (!IsarCore.kIsWeb && inspector) {
+          _IsarConnect.initialize(isar);
+        }
+        return true;
+      }(),
+      'Never happens',
+    );
 
     return isar;
   }

@@ -1,4 +1,4 @@
-part of isar_generator;
+part of 'isar_generator.dart';
 
 const Set<String> _reservedSQLiteNames = {
   // taken from https://sqlite.org/lang_keywords.html

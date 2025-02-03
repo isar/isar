@@ -1,4 +1,4 @@
-part of isar;
+part of '../../isar.dart';
 
 class _IsarImpl extends Isar {
   _IsarImpl._(
@@ -36,7 +36,6 @@ class _IsarImpl extends Isar {
   Pointer<CIsarTxn>? _txnPtr;
   bool _txnWrite = false;
 
-  // ignore: sort_constructors_first
   factory _IsarImpl.open({
     required List<IsarGeneratedSchema> schemas,
     required String name,
@@ -102,7 +101,6 @@ class _IsarImpl extends Isar {
     return _IsarImpl._(instanceId, isarPtrPtr.ptrValue, allSchemas.toList());
   }
 
-  // ignore: sort_constructors_first
   factory _IsarImpl.get({
     required int instanceId,
     required List<IsarGeneratedSchema> schemas,
@@ -121,7 +119,6 @@ class _IsarImpl extends Isar {
     return _IsarImpl._(instanceId, ptr, schemas);
   }
 
-  // ignore: sort_constructors_first
   factory _IsarImpl.getByName({
     required String name,
     required List<IsarGeneratedSchema> schemas,
@@ -183,7 +180,6 @@ class _IsarImpl extends Isar {
       await isolate;
       return isar;
     } else {
-      // ignore: only_throw_errors
       throw response as Object;
     }
   }

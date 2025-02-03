@@ -1,4 +1,4 @@
-part of isar;
+part of '../../isar.dart';
 
 /// Annotation to specify how an enum property should be serialized.
 const enumValue = EnumValue();

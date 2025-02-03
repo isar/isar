@@ -1,5 +1,3 @@
-// ignore_for_file: public_member_api_docs, non_constant_identifier_names
-
 import 'dart:typed_data';
 
 import 'package:js/js.dart';
@@ -11,6 +9,7 @@ class JSWindow {}
 extension JSWIndowX on JSWindow {
   external JSIsar get isar;
 
+  // ignore: non_constant_identifier_names
   external JSWasm get WebAssembly;
 
   external Object fetch(String url);

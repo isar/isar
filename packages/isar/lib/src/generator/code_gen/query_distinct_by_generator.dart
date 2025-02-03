@@ -1,4 +1,4 @@
-part of isar_generator;
+part of '../isar_generator.dart';
 
 String _generateDistinctBy(ObjectInfo oi) {
   var code = '''

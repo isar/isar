@@ -1,4 +1,4 @@
-part of isar;
+part of '../isar.dart';
 
 /// Superclass of all Isar errors.
 sealed class IsarError extends Error {

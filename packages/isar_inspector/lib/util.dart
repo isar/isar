@@ -37,8 +37,6 @@ extension TypeName on IsarType {
         return 'double';
       case IsarType.dateTime:
         return 'DateTime';
-      case IsarType.duration:
-        return 'Duration';
       case IsarType.string:
         return 'String';
       case IsarType.object:
@@ -59,8 +57,6 @@ extension TypeName on IsarType {
         return 'List<double>';
       case IsarType.dateTimeList:
         return 'List<DateTime>';
-      case IsarType.durationList:
-        return 'List<Duration>';
       case IsarType.stringList:
         return 'List<String>';
       case IsarType.objectList:

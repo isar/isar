@@ -24,7 +24,8 @@ class QueryFilter extends StatelessWidget {
     return Container(
       height: 60,
       decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+        border:
+            Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.5)),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(
@@ -176,13 +177,11 @@ extension on IsarPropertySchema {
       case IsarType.long:
       case IsarType.double:
       case IsarType.dateTime:
-      case IsarType.duration:
       case IsarType.intList:
       case IsarType.floatList:
       case IsarType.longList:
       case IsarType.doubleList:
       case IsarType.dateTimeList:
-      case IsarType.durationList:
         return [
           FilterType.equalTo,
           FilterType.greaterThan,

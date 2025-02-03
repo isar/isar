@@ -1,4 +1,4 @@
-part of isar;
+part of '../../isar.dart';
 
 /// Annotate properties to build an index.
 const index = Index();

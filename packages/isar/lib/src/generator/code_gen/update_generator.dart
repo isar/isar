@@ -1,4 +1,4 @@
-part of isar_generator;
+part of '../isar_generator.dart';
 
 const _updateableTypes = [
   IsarType.bool,
@@ -8,7 +8,6 @@ const _updateableTypes = [
   IsarType.float,
   IsarType.double,
   IsarType.dateTime,
-  IsarType.duration,
   IsarType.string,
 ];
 

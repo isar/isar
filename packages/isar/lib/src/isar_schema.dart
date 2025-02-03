@@ -1,4 +1,4 @@
-part of isar;
+part of '../isar.dart';
 
 /// The schema of a collection in Isar.
 ///
@@ -194,9 +194,6 @@ enum IsarType {
   /// date and time stored in UTC (8 bytes)
   dateTime('DateTime'),
 
-  /// duration
-  duration('Duration'),
-
   /// string (6 + length bytes)
   string('String'),
 
@@ -227,9 +224,6 @@ enum IsarType {
   /// list of dates and times stored in UTC (6 + length * 8 bytes)
   dateTimeList('DateTimeList'),
 
-  /// list of durations
-  durationList('DurationList'),
-
   /// list of strings (6 + length * (6 + length) bytes)
   stringList('StringList'),
 
@@ -259,9 +253,7 @@ extension IsarTypeX on IsarType {
       this == IsarType.int ||
       this == IsarType.int ||
       this == IsarType.long ||
-      this == IsarType.longList ||
-      this == IsarType.duration ||
-      this == IsarType.durationList;
+      this == IsarType.longList;
 
   /// @nodoc
   bool get isNum => isFloat || isInt;
@@ -281,29 +273,35 @@ extension IsarTypeX on IsarType {
   /// @nodoc
   IsarType get scalarType {
     switch (this) {
+      case IsarType.bool:
       case IsarType.boolList:
         return IsarType.bool;
+      case IsarType.byte:
       case IsarType.byteList:
         return IsarType.byte;
+      case IsarType.int:
       case IsarType.intList:
         return IsarType.int;
+      case IsarType.float:
       case IsarType.floatList:
         return IsarType.float;
+      case IsarType.long:
       case IsarType.longList:
         return IsarType.long;
+      case IsarType.double:
       case IsarType.doubleList:
         return IsarType.double;
+      case IsarType.dateTime:
       case IsarType.dateTimeList:
         return IsarType.dateTime;
-      case IsarType.durationList:
-        return IsarType.duration;
+      case IsarType.string:
       case IsarType.stringList:
         return IsarType.string;
+      case IsarType.object:
       case IsarType.objectList:
         return IsarType.object;
-      // ignore: no_default_cases
-      default:
-        return this;
+      case IsarType.json:
+        return IsarType.json;
     }
   }
 
@@ -311,28 +309,34 @@ extension IsarTypeX on IsarType {
   IsarType get listType {
     switch (this) {
       case IsarType.bool:
+      case IsarType.boolList:
         return IsarType.boolList;
       case IsarType.byte:
+      case IsarType.byteList:
         return IsarType.byteList;
       case IsarType.int:
+      case IsarType.intList:
         return IsarType.intList;
       case IsarType.float:
+      case IsarType.floatList:
         return IsarType.floatList;
       case IsarType.long:
+      case IsarType.longList:
         return IsarType.longList;
       case IsarType.double:
+      case IsarType.doubleList:
         return IsarType.doubleList;
       case IsarType.dateTime:
+      case IsarType.dateTimeList:
         return IsarType.dateTimeList;
-      case IsarType.duration:
-        return IsarType.durationList;
       case IsarType.string:
+      case IsarType.stringList:
         return IsarType.stringList;
       case IsarType.object:
+      case IsarType.objectList:
         return IsarType.objectList;
-      // ignore: no_default_cases
-      default:
-        return this;
+      case IsarType.json:
+        return IsarType.json;
     }
   }
 }

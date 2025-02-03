@@ -1,4 +1,4 @@
-part of isar;
+part of '../../isar.dart';
 
 /// Annotation to nest objects of this type in collections.
 const embedded = Embedded();

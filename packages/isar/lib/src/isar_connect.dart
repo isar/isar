@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_print
 
-part of isar;
+part of '../isar.dart';
 
 abstract class _IsarConnect {
   static const _handlers = {
@@ -16,7 +16,6 @@ abstract class _IsarConnect {
   static final _instances = <String, Isar>{};
   static var _initialized = false;
 
-  // ignore: cancel_subscriptions
   static final _querySubscription = <StreamSubscription<void>>[];
   static final _collectionSubscriptions = <StreamSubscription<void>>[];
 

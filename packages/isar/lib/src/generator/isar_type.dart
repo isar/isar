@@ -1,4 +1,4 @@
-part of isar_generator;
+part of 'isar_generator.dart';
 
 const TypeChecker _dateTimeChecker = TypeChecker.fromRuntime(DateTime);
 const TypeChecker _durationChecker = TypeChecker.fromRuntime(Duration);
@@ -31,8 +31,6 @@ extension on DartType {
       return IsarType.string;
     } else if (isDartCoreDateTime) {
       return IsarType.dateTime;
-    } else if (isDartCoreDuration) {
-      return IsarType.duration;
     } else if (element!.embeddedAnnotation != null) {
       return IsarType.object;
     } else if (this is DynamicType) {
@@ -60,31 +58,7 @@ extension on DartType {
     }
 
     if (isDartCoreList) {
-      switch (scalarType._primitiveIsarType) {
-        case IsarType.bool:
-          return IsarType.boolList;
-        case IsarType.byte:
-          return IsarType.byteList;
-        case IsarType.int:
-          return IsarType.intList;
-        case IsarType.float:
-          return IsarType.floatList;
-        case IsarType.long:
-          return IsarType.longList;
-        case IsarType.double:
-          return IsarType.doubleList;
-        case IsarType.dateTime:
-          return IsarType.dateTimeList;
-        case IsarType.string:
-          return IsarType.stringList;
-        case IsarType.object:
-          return IsarType.objectList;
-        case IsarType.json:
-          return IsarType.json;
-        // ignore: no_default_cases
-        default:
-          return null;
-      }
+      return scalarType._primitiveIsarType?.listType;
     } else if (isDartCoreMap) {
       final keyType = (this as ParameterizedType).typeArguments[0];
       final valueType = (this as ParameterizedType).typeArguments[1];

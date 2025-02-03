@@ -1,4 +1,4 @@
-part of isar;
+part of '../../isar.dart';
 
 /// Annotation to create an Isar collection.
 const collection = Collection();

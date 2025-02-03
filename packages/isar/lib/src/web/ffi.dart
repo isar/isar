@@ -1,5 +1,3 @@
-// ignore_for_file: public_member_api_docs
-
 import 'dart:typed_data';
 
 import 'package:isar/isar.dart';
@@ -12,8 +10,7 @@ class NativeType {}
 @tryInline
 Pointer<T> ptrFromAddress<T>(int addr) => addr;
 
-// ignore: unnecessary_late
-late final JSIsar b = IsarCore.b as JSIsar;
+final JSIsar b = IsarCore.b as JSIsar;
 
 extension PointerX on int {
   @tryInline
