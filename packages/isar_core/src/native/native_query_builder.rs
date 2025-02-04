@@ -706,6 +706,34 @@ mod tests {
     }
 
     #[test]
+    fn test_lower_id() {
+        assert_eq!(lower_id(None, true), Some(i64::MIN));
+        assert_eq!(lower_id(Some(&IsarValue::Integer(5)), true), Some(5));
+        assert_eq!(
+            lower_id(Some(&IsarValue::Integer(i64::MIN)), true),
+            Some(i64::MIN)
+        );
+
+        // Non-inclusive tests
+        assert_eq!(lower_id(Some(&IsarValue::Integer(5)), false), Some(6));
+        assert_eq!(lower_id(Some(&IsarValue::Integer(i64::MAX)), false), None);
+    }
+
+    #[test]
+    fn test_upper_id() {
+        assert_eq!(upper_id(None, true), Some(i64::MIN));
+        assert_eq!(upper_id(Some(&IsarValue::Integer(5)), true), Some(5));
+        assert_eq!(
+            upper_id(Some(&IsarValue::Integer(i64::MAX)), true),
+            Some(i64::MAX)
+        );
+
+        // Non-inclusive tests
+        assert_eq!(upper_id(Some(&IsarValue::Integer(5)), false), Some(4));
+        assert_eq!(upper_id(Some(&IsarValue::Integer(i64::MIN)), false), None);
+    }
+
+    #[test]
     fn test_get_max() {
         // Test with no property (id case)
         assert_eq!(get_max(None), Some(IsarValue::Integer(i64::MAX)));

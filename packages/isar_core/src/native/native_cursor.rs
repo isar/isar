@@ -1,8 +1,8 @@
+use super::IdToBytes;
 use super::isar_deserializer::IsarDeserializer;
 use super::native_collection::NativeCollection;
 use super::native_reader::NativeReader;
 use super::native_txn::{NativeTxn, TxnCursor};
-use super::IdToBytes;
 use crate::core::cursor::IsarCursor;
 use crate::core::error::Result;
 
@@ -29,7 +29,10 @@ impl<'a> NativeCursor<'a> {
 }
 
 impl<'a> IsarCursor for NativeCursor<'a> {
-    type Reader<'b> = NativeReader<'b> where Self: 'b;
+    type Reader<'b>
+        = NativeReader<'b>
+    where
+        Self: 'b;
 
     #[inline]
     fn next(&mut self, id: i64) -> Option<Self::Reader<'_>> {

@@ -219,7 +219,7 @@ impl NativeCollection {
 
             for (property_index, value) in updates {
                 if let Some(p) = self.get_property(*property_index) {
-                    if !new_object.write_value(p.offset, value.as_ref(), p.data_type) {
+                    if !new_object.update_value(p.offset, value.as_ref(), p.data_type) {
                         return Err(IsarError::IllegalArgument {});
                     }
                 } else {
