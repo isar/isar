@@ -5,7 +5,7 @@ use std::cell::Cell;
 use std::ffi::{CStr, CString, c_char, c_int, c_void};
 use std::{ptr, slice};
 
-use super::sql::{FN_FILTER_JSON_NAME, sql_fn_filter_json};
+use super::sql_filter::{FN_FILTER_JSON_NAME, sql_fn_filter_json};
 
 pub(crate) struct SQLite3 {
     db: *mut ffi::sqlite3,

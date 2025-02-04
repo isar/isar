@@ -9,7 +9,7 @@ use super::sqlite_txn::SQLiteTxn;
 use super::sqlite_verify::verify_sqlite;
 use super::sqlite3::SQLite3;
 use crate::core::error::{IsarError, Result};
-use crate::core::filter::{ConditionType, Filter, FilterCondition};
+use crate::core::filter::{ConditionType, Filter};
 use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
 use crate::core::query_builder::IsarQueryBuilder;
 use crate::core::schema::IsarSchema;
@@ -218,12 +218,12 @@ impl IsarInstance for SQLiteInstance {
         updates: &[(u16, Option<IsarValue>)],
     ) -> Result<bool> {
         let mut qb = self.query(collection_index)?;
-        qb.set_filter(Filter::Condition(FilterCondition::new(
+        qb.set_filter(Filter::new_condition(
             0,
             ConditionType::Equal,
             vec![Some(IsarValue::Integer(id))],
             false,
-        )));
+        ));
         let q = qb.build();
         let count = self.query_update(txn, &q, None, None, updates)?;
         Ok(count > 0)
@@ -231,12 +231,12 @@ impl IsarInstance for SQLiteInstance {
 
     fn delete<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16, id: i64) -> Result<bool> {
         let mut qb = self.query(collection_index)?;
-        qb.set_filter(Filter::Condition(FilterCondition::new(
+        qb.set_filter(Filter::new_condition(
             0,
             ConditionType::Equal,
             vec![Some(IsarValue::Integer(id))],
             false,
-        )));
+        ));
         let q = qb.build();
         let count = self.query_delete(txn, &q, None, None)?;
         Ok(count > 0)

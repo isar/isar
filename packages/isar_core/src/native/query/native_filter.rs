@@ -172,9 +172,9 @@ impl NativeFilter {
         string_filter_create!(Matches, property, value, case_sensitive)
     }
 
-    pub fn nested(property: &NativeProperty, filter: NativeFilter) -> NativeFilter {
+    pub fn embedded(property: &NativeProperty, filter: NativeFilter) -> NativeFilter {
         let filter = if property.data_type == DataType::Object {
-            Filter::Nested(NestedCond {
+            Filter::Embedded(EmbeddedCond {
                 offset: property.offset,
                 filter: Box::new(filter.0),
             })
@@ -276,7 +276,7 @@ enum Filter {
     AnyStringContains(AnyStringContainsCond),
     AnyStringMatches(AnyStringMatchesCond),
 
-    Nested(NestedCond),
+    Embedded(EmbeddedCond),
     Json(JsonCond),
     And(AndCond),
     Or(OrCond),
@@ -537,12 +537,12 @@ string_filter!(StringContains);
 string_filter!(StringMatches);
 
 #[derive(Clone, Debug)]
-struct NestedCond {
+struct EmbeddedCond {
     offset: u32,
     filter: Box<Filter>,
 }
 
-impl Condition for NestedCond {
+impl Condition for EmbeddedCond {
     fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
         if let Some(object) = object.read_nested(self.offset) {
             self.filter.evaluate(i64::MIN, object)

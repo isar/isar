@@ -4,10 +4,58 @@ use crate::core::value::IsarValue;
 pub enum Filter {
     Condition(FilterCondition),
     Json(FilterJson),
-    Nested(FilterNested),
+    Embedded(FilterEmbedded),
     And(Vec<Filter>),
     Or(Vec<Filter>),
     Not(Box<Filter>),
+}
+
+impl Filter {
+    pub fn new_condition(
+        property_index: u16,
+        condition_type: ConditionType,
+        values: Vec<Option<IsarValue>>,
+        case_sensitive: bool,
+    ) -> Self {
+        Filter::Condition(FilterCondition::new(
+            property_index,
+            condition_type,
+            values,
+            case_sensitive,
+        ))
+    }
+
+    pub fn new_json(
+        property_index: u16,
+        path: Vec<String>,
+        condition_type: ConditionType,
+        values: Vec<Option<IsarValue>>,
+        case_sensitive: bool,
+    ) -> Self {
+        Filter::Json(FilterJson::new(
+            property_index,
+            path,
+            condition_type,
+            values,
+            case_sensitive,
+        ))
+    }
+
+    pub fn new_embedded(property_index: u16, filter: Filter) -> Self {
+        Filter::Embedded(FilterEmbedded::new(property_index, filter))
+    }
+
+    pub fn new_and(filters: Vec<Filter>) -> Self {
+        Filter::And(filters)
+    }
+
+    pub fn new_or(filters: Vec<Filter>) -> Self {
+        Filter::Or(filters)
+    }
+
+    pub fn new_not(filter: Filter) -> Self {
+        Filter::Not(Box::new(filter))
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -34,7 +82,7 @@ pub struct FilterCondition {
 }
 
 impl FilterCondition {
-    pub const fn new(
+    fn new(
         property_index: u16,
         condition_type: ConditionType,
         values: Vec<Option<IsarValue>>,
@@ -60,7 +108,7 @@ pub struct FilterJson {
 }
 
 impl FilterJson {
-    pub fn new(
+    fn new(
         property_index: u16,
         path: Vec<String>,
         condition_type: ConditionType,
@@ -94,14 +142,14 @@ impl FilterJson {
 }
 
 #[derive(PartialEq, Clone, Debug)]
-pub struct FilterNested {
+pub struct FilterEmbedded {
     pub property_index: u16,
     pub filter: Box<Filter>,
 }
 
-impl FilterNested {
-    pub fn new(property_index: u16, filter: Filter) -> Self {
-        FilterNested {
+impl FilterEmbedded {
+    fn new(property_index: u16, filter: Filter) -> Self {
+        FilterEmbedded {
             property_index,
             filter: Box::new(filter),
         }

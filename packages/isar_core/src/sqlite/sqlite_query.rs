@@ -1,6 +1,5 @@
-use super::sql::{
-    FN_FILTER_JSON_COND_PTR_TYPE, offset_limit_sql, select_properties_sql, update_properties_sql,
-};
+use super::sql::{offset_limit_sql, select_properties_sql, update_properties_sql};
+use super::sql_filter::FN_FILTER_JSON_COND_PTR_TYPE;
 use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
 use super::sqlite_reader::SQLiteReader;
 use super::sqlite_txn::SQLiteTxn;

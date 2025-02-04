@@ -35,7 +35,8 @@ void main() {
         encryptionKey: 'test',
         closeAutomatically: false,
       );
-      expect(isar2.models.where().findAll(), [Model('test1'), Model('test2')]);
+      expect(isar2.models.where().sortByName().findAll(),
+          [Model('test1'), Model('test2')]);
     });
 
     isarTest('Wrong key', isar: false, web: false, () async {
@@ -80,7 +81,8 @@ void main() {
       isar2.changeEncryptionKey('key2');
       expect(isar2.models.where().findAll(), [Model('test1')]);
       isar2.write((isar) => isar.models.put(Model('test2')));
-      expect(isar2.models.where().findAll(), [Model('test1'), Model('test2')]);
+      expect(isar2.models.where().sortByName().findAll(),
+          [Model('test1'), Model('test2')]);
       expect(isar2.close(), true);
 
       // Using the old key (should throw)
@@ -98,7 +100,8 @@ void main() {
         name: isarName,
         encryptionKey: 'key2',
       );
-      expect(isar3.models.where().findAll(), [Model('test1'), Model('test2')]);
+      expect(isar3.models.where().sortByName().findAll(),
+          [Model('test1'), Model('test2')]);
 
       isar3.write((isar) => isar.models.put(Model('test3')));
       isar3.changeEncryptionKey('key3');
@@ -109,7 +112,8 @@ void main() {
       isar3.changeEncryptionKey('key1');
       isar3.write((isar) => isar.models.put(Model('test6')));
 
-      expect(isar3.models.where().findAll(), [Model('test5'), Model('test6')]);
+      expect(isar3.models.where().sortByName().findAll(),
+          [Model('test5'), Model('test6')]);
       expect(isar3.close(), true);
 
       for (final oldKey in ['key2', 'key3', 'key4']) {
@@ -129,7 +133,8 @@ void main() {
         name: isarName,
         encryptionKey: 'key1',
       );
-      expect(isar4.models.where().findAll(), [Model('test5'), Model('test6')]);
+      expect(isar4.models.where().sortByName().findAll(),
+          [Model('test5'), Model('test6')]);
       expect(isar4.close(), true);
     });
   });

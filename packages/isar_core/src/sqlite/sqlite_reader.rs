@@ -1,7 +1,7 @@
-use super::sqlite3::SQLiteStatement;
 use super::sqlite_collection::SQLiteCollection;
+use super::sqlite3::SQLiteStatement;
 use crate::core::{data_type::DataType, reader::IsarReader};
-use base64::{engine::general_purpose, Engine as _};
+use base64::{Engine as _, engine::general_purpose};
 use serde_json::{Map, Value};
 use std::borrow::Cow;
 use std::iter::empty;
@@ -27,9 +27,15 @@ impl<'a> SQLiteReader<'a> {
 }
 
 impl<'a> IsarReader for SQLiteReader<'a> {
-    type ObjectReader<'b> = SQLiteObjectReader<'b> where 'a: 'b;
+    type ObjectReader<'b>
+        = SQLiteObjectReader<'b>
+    where
+        'a: 'b;
 
-    type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
+    type ListReader<'b>
+        = SQLiteListReader<'b>
+    where
+        'a: 'b;
 
     fn id_name(&self) -> Option<&str> {
         self.collection.id_name.as_deref()
@@ -152,9 +158,15 @@ pub struct SQLiteObjectReader<'a> {
 }
 
 impl<'a> IsarReader for SQLiteObjectReader<'a> {
-    type ObjectReader<'b> = SQLiteObjectReader<'b> where 'a: 'b;
+    type ObjectReader<'b>
+        = SQLiteObjectReader<'b>
+    where
+        'a: 'b;
 
-    type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
+    type ListReader<'b>
+        = SQLiteListReader<'b>
+    where
+        'a: 'b;
 
     fn id_name(&self) -> Option<&str> {
         None
@@ -288,9 +300,15 @@ pub struct SQLiteListReader<'a> {
 }
 
 impl<'a> IsarReader for SQLiteListReader<'a> {
-    type ObjectReader<'b> = SQLiteObjectReader<'b> where 'a: 'b;
+    type ObjectReader<'b>
+        = SQLiteObjectReader<'b>
+    where
+        'a: 'b;
 
-    type ListReader<'b> = SQLiteListReader<'b> where 'a: 'b;
+    type ListReader<'b>
+        = SQLiteListReader<'b>
+    where
+        'a: 'b;
 
     fn id_name(&self) -> Option<&str> {
         None

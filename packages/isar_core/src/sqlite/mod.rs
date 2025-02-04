@@ -1,5 +1,6 @@
 mod schema_manager;
 mod sql;
+mod sql_filter;
 mod sqlite3;
 mod sqlite_collection;
 mod sqlite_cursor;

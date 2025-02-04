@@ -89,13 +89,13 @@ fn filter_to_native(
             }
             NativeFilter::stat(false)
         }
-        Filter::Nested(nested) => {
-            if let Some(property) = collection.get_property(nested.property_index) {
+        Filter::Embedded(embedded) => {
+            if let Some(property) = collection.get_property(embedded.property_index) {
                 if let Some(embedded_collection_index) = property.embedded_collection_index {
                     let embedded_collection = &all_collections[embedded_collection_index as usize];
                     let filter =
-                        filter_to_native(&nested.filter, embedded_collection, all_collections);
-                    return NativeFilter::nested(property, filter);
+                        filter_to_native(&embedded.filter, embedded_collection, all_collections);
+                    return NativeFilter::embedded(property, filter);
                 }
             }
             NativeFilter::stat(false)
