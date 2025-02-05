@@ -11,37 +11,34 @@ export 'bindings.dart';
 export 'ffi.dart';
 export 'interop.dart';
 
+void _jsError(int ptr) {
+  final buffer = (IsarCore.b as JSIsar).u8Heap;
+  var strLen = 0;
+  var i = ptr;
+  while (buffer[i] != 0) {
+    strLen++;
+    i++;
+  }
+  final str = utf8.decode(buffer.sublist(ptr, ptr + strLen));
+  print('jsError: $str');
+  throw str;
+}
+
 FutureOr<JSIsar> initializePlatformBindings([
   String? library,
 ]) async {
   print('initializePlatformBindings');
   final url = library ?? 'https://unpkg.com/isar@${Isar.version}/isar.wasm';
 
-  late JSIsar isar;
-  void jsError(int ptr) {
-    final buffer = isar.u8Heap;
-    var strLen = 0;
-    var i = ptr;
-    while (buffer[i] != 0) {
-      strLen++;
-      i++;
-    }
-    final str = utf8.decode(buffer.sublist(ptr, ptr + strLen));
-    print('jsError: $str');
-    throw str;
-  }
+  final env = JSObject()..['js_error'] = _jsError.toJS;
+  final import = JSObject()..['env'] = env;
 
-  final env = JSObject();
-  env['js_error'] = jsError.toJS;
-  final import = JSObject();
-  import['env'] = env;
-
-  final promise =
-      WebAssembly.instantiateStreaming(window.fetch(url.toJS), import);
+  final promise = WebAssembly.instantiateStreaming(
+    window.fetch(url.toJS),
+    import,
+  );
   final wasm = await promise.toDart;
-  isar = wasm.instance.exports as JSIsar;
-
-  return isar;
+  return wasm.instance.exports as JSIsar;
 }
 
 typedef IsarCoreBindings = JSIsar;

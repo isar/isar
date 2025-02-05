@@ -19,7 +19,7 @@ target/
 *.so
 *.dylib
 *.dll
-*.wasm
+#*.wasm
 *.zip
 *.xcframework/
 isar-dart.h
