@@ -2,16 +2,6 @@ use libsqlite3_sys::{SQLITE_IOERR, sqlite3_file, sqlite3_vfs, sqlite3_vfs_regist
 use std::os::raw::{c_char, c_int, c_void};
 use std::ptr::null_mut;
 
-/*extern "C" {
-    pub fn js_log(ptr: *const u8);
-
-    pub fn xSleep(_arg1: *mut sqlite3_vfs, microseconds: c_int) -> c_int;
-
-    pub fn xRandomness(_arg1: *mut sqlite3_vfs, nByte: c_int, zByte: *mut c_char) -> c_int;
-
-    pub fn xCurrentTime(_arg1: *mut sqlite3_vfs, pTime: *mut f64) -> c_int;
-}*/
-
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn sqlite3_os_init() -> c_int {
     let vfs = sqlite3_vfs {
@@ -29,9 +19,9 @@ pub unsafe extern "C" fn sqlite3_os_init() -> c_int {
         xDlError: Some(wasm_vfs_dlerror),
         xDlSym: Some(wasm_vfs_dlsym),
         xDlClose: Some(wasm_vfs_dlclose),
-        xRandomness: Some(xRandomness),
-        xSleep: Some(xSleep),
-        xCurrentTime: Some(xCurrentTime),
+        xRandomness: Some(wasm_vfs_randomness),
+        xSleep: None,
+        xCurrentTime: None,
         xGetLastError: None,
         xCurrentTimeInt64: None,
         xSetSystemCall: None,
@@ -40,22 +30,6 @@ pub unsafe extern "C" fn sqlite3_os_init() -> c_int {
     };
 
     sqlite3_vfs_register(Box::leak(Box::new(vfs)), 1)
-}
-
-pub unsafe extern "C" fn xSleep(_arg1: *mut sqlite3_vfs, microseconds: c_int) -> c_int {
-    0
-}
-
-pub unsafe extern "C" fn xRandomness(
-    _arg1: *mut sqlite3_vfs,
-    nByte: c_int,
-    zByte: *mut c_char,
-) -> c_int {
-    0
-}
-
-pub unsafe extern "C" fn xCurrentTime(_arg1: *mut sqlite3_vfs, pTime: *mut f64) -> c_int {
-    0
 }
 
 const fn max(a: usize, b: usize) -> usize {
@@ -176,4 +150,13 @@ unsafe extern "C" fn wasm_vfs_dlsym(
 #[unsafe(no_mangle)]
 unsafe extern "C" fn wasm_vfs_dlclose(_arg1: *mut sqlite3_vfs, _arg2: *mut c_void) {
     // no-op
+}
+
+#[unsafe(no_mangle)]
+unsafe extern "C" fn wasm_vfs_randomness(
+    _arg1: *mut sqlite3_vfs,
+    nByte: c_int,
+    zByte: *mut c_char,
+) -> c_int {
+    0
 }
