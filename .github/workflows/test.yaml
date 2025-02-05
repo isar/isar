@@ -82,16 +82,12 @@ jobs:
         uses: ./.github/actions/prepare-build
       - name: Build Isar Core
         run: bash tool/build_wasm.sh
-      - name: wasm map
-        run: |
-          cargo install cargo-wasm2map
-          cargo wasm2map isar.wasm
       - name: Serve isar.wasm
         run: npx --yes serve --cors &
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
       - name: Run Dart Unit tests
-        run: dart test -p chrome -r expanded --js-trace
+        run: dart test -p chrome
         working-directory: packages/isar_test
 
   coverage:
