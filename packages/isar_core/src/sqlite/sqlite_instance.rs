@@ -21,6 +21,9 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::vec;
 
+#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+use super::wasm;
+
 pub(crate) struct SQLiteInstanceInfo {
     pub(crate) instance_id: u32,
     pub(crate) name: String,
@@ -122,6 +125,9 @@ impl IsarInstance for SQLiteInstance {
         encryption_key: Option<&str>,
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self> {
+        #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+        wasm::set_wasm_panic_hook();
+
         if compact_condition.is_some() {
             return Err(IsarError::IllegalArgument {});
         }
@@ -137,6 +143,8 @@ impl IsarInstance for SQLiteInstance {
             max_size_mib,
             encryption_key,
         )?;
+
+        panic!("THIS IS A test");
         Ok(Self {
             info,
             sqlite: Rc::new(sqlite),

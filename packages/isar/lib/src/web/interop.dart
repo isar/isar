@@ -63,6 +63,6 @@ class JsMemory {}
 
 @JS()
 @staticInterop
-extension on JsMemory {
+extension MemoryBuffer on JsMemory {
   external ByteBuffer get buffer;
 }
