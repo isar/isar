@@ -20,8 +20,8 @@ pub unsafe extern "C" fn sqlite3_os_init() -> c_int {
         xDlSym: Some(wasm_vfs_dlsym),
         xDlClose: Some(wasm_vfs_dlclose),
         xRandomness: Some(wasm_vfs_randomness),
-        xSleep: None,
-        xCurrentTime: None,
+        xSleep: Some(wasm_vfs_sleep),
+        xCurrentTime: Some(wasm_vfs_currenttime),
         xGetLastError: None,
         xCurrentTimeInt64: None,
         xSetSystemCall: None,
@@ -153,10 +153,20 @@ unsafe extern "C" fn wasm_vfs_dlclose(_arg1: *mut sqlite3_vfs, _arg2: *mut c_voi
 }
 
 #[unsafe(no_mangle)]
+pub unsafe extern "C" fn wasm_vfs_sleep(_arg1: *mut sqlite3_vfs, microseconds: c_int) -> c_int {
+    0
+}
+
+#[unsafe(no_mangle)]
 unsafe extern "C" fn wasm_vfs_randomness(
     _arg1: *mut sqlite3_vfs,
     nByte: c_int,
     zByte: *mut c_char,
 ) -> c_int {
+    0
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn wasm_vfs_currenttime(_arg1: *mut sqlite3_vfs, pTime: *mut f64) -> c_int {
     0
 }
