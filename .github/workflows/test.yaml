@@ -78,6 +78,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Build Isar Core
+        run: bash tool/build_wasm.sh
+      - name: wasm map
+        run: |
+          cargo install cargo-wasm2map
+          wasm2map isar.wasm
       - name: Serve isar.wasm
         run: npx --yes serve --cors &
       - name: Prepare Tests
