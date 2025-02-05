@@ -258,6 +258,8 @@ jobs:
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
+      - name: Install clang
+        run: brew install llvm
       - name: Build Isar Core
         run: bash tool/build_wasm.sh
       - name: Serve isar.wasm
