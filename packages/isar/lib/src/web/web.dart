@@ -32,7 +32,8 @@ FutureOr<IsarCoreBindings> initializePlatformBindings([
               i++;
             }
             final str = utf8.decode(memory.sublist(ptr, ptr + strLen));
-            print(str);
+            // ignore: avoid_print
+            throw str;
           }),
         },
       },

@@ -144,7 +144,6 @@ impl IsarInstance for SQLiteInstance {
             encryption_key,
         )?;
 
-        panic!("THIS IS A test");
         Ok(Self {
             info,
             sqlite: Rc::new(sqlite),
