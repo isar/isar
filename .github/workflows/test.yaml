@@ -252,7 +252,7 @@ jobs:
 
   integration_test_chrome:
     name: Integration Test Chrome
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
