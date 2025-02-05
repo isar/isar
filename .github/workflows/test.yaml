@@ -87,7 +87,7 @@ jobs:
       - name: Prepare Tests
         run: sh tool/prepare_tests.sh
       - name: Run Dart Unit tests
-        run: dart test -p chrome
+        run: dart test -p chrome --r expanded
         working-directory: packages/isar_test
 
   coverage:
