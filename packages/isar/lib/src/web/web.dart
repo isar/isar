@@ -20,14 +20,13 @@ void _jsError(int ptr) {
     i++;
   }
   final str = utf8.decode(buffer.sublist(ptr, ptr + strLen));
-  print('jsError: $str');
-  throw str;
+  // ignore: avoid_print
+  print(str);
 }
 
 FutureOr<JSIsar> initializePlatformBindings([
   String? library,
 ]) async {
-  print('initializePlatformBindings');
   final url = library ?? 'https://unpkg.com/isar@${Isar.version}/isar.wasm';
 
   final env = JSObject()..['js_error'] = _jsError.toJS;
