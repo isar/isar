@@ -85,7 +85,7 @@ jobs:
       - name: wasm map
         run: |
           cargo install cargo-wasm2map
-          wasm2map isar.wasm
+          cargo wasm2map isar.wasm
       - name: Serve isar.wasm
         run: npx --yes serve --cors &
       - name: Prepare Tests
