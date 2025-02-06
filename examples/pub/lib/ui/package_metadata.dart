@@ -32,12 +32,12 @@ class PackageHeader extends ConsumerWidget {
               timeago.format(package.published),
               style: theme.textTheme.titleSmall,
             ),
-            if (package.publisher != null) ...[
+            if (package.metrics?.publisher != null) ...[
               Text(
                 ' • ',
                 style: theme.textTheme.titleSmall,
               ),
-              Publisher(package.publisher!),
+              Publisher(package.metrics!.publisher!),
             ],
           ],
         ),
@@ -68,10 +68,11 @@ class Platforms extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final platforms = package.platforms?.map((e) => e.name).toList()?..sort();
+    final platforms = package.metrics?.platforms.map((e) => e.name).toList()
+      ?..sort();
     final sdks = [
-      if (package.dart == true) 'DART',
-      if (package.flutter == true) 'FLUTTER'
+      if (package.metrics?.dart == true) 'DART',
+      if (package.metrics?.flutter == true) 'FLUTTER'
     ];
     return Wrap(
       spacing: 5,
@@ -127,23 +128,22 @@ class Scores extends ConsumerWidget {
     final latestVersion = ref.watch(latestVersionPod(package.name)).valueOrNull;
     final preReleaseVersion =
         ref.watch(preReleaseVersionPod(package.name)).valueOrNull;
-
+    final metrics = package.metrics;
     final widgets = <Widget>[
-      if (package.likes != null)
+      if (metrics != null) ...[
         ScoreItem(
-          stat: package.likes.toString(),
+          stat: package.metrics!.likes.toString(),
           title: 'LIKES',
         ),
-      if (package.points != null)
         ScoreItem(
-          stat: package.points.toString(),
+          stat: metrics.points.toString(),
           title: 'PUB POINTS',
         ),
-      if (package.popularity != null)
         ScoreItem(
-          stat: '${(package.popularity! * 100).round()}%',
-          title: 'POPULARITY',
+          stat: metrics.downloadCount30Days.toString(),
+          title: 'DOWNLOADS',
         ),
+      ],
       if (latestVersion != null &&
           (latestVersion != package.version || alwaysShowLatest))
         ScoreItem(

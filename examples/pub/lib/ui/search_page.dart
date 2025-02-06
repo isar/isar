@@ -144,9 +144,9 @@ class SearchResult extends ConsumerWidget {
                     alwaysShowLatest: true,
                   ),
                 ],
-                if (package?.platforms?.isEmpty == false ||
-                    package?.flutter == true ||
-                    package?.dart == true) ...[
+                if (package?.metrics?.platforms.isNotEmpty == true ||
+                    package?.metrics?.dart == true ||
+                    package?.metrics?.flutter == true) ...[
                   const SizedBox(height: 12),
                   Platforms(package: package!, compact: true),
                 ]

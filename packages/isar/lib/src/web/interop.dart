@@ -16,3 +16,7 @@ extension type JSIsar(JSObject _) implements JSObject {
 
   external void free(int ptrAddress);
 }
+
+extension type JSIsarWeb(JSObject _) implements JSObject {
+  external JSPromise<JSIsar> initIsarWeb(String wasmUrl, String vfsType);
+}

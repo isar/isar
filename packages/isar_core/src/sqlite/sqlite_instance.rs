@@ -125,9 +125,6 @@ impl IsarInstance for SQLiteInstance {
         encryption_key: Option<&str>,
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self> {
-        #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
-        wasm::set_wasm_panic_hook();
-
         if compact_condition.is_some() {
             return Err(IsarError::IllegalArgument {});
         }

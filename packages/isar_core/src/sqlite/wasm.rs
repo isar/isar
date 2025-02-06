@@ -3,26 +3,6 @@ use std::os::raw::{c_char, c_int, c_void};
 use std::panic;
 use std::ptr::null_mut;
 
-unsafe extern "C" {
-    pub fn js_error(ptr: *const u8);
-}
-
-#[inline]
-pub(crate) fn set_wasm_panic_hook() {
-    use std::sync::Once;
-    static SET_HOOK: Once = Once::new();
-    SET_HOOK.call_once(|| {
-        panic::set_hook(Box::new(hook_impl));
-    });
-}
-
-fn hook_impl(info: &panic::PanicInfo) {
-    let mut msg = info.to_string();
-    unsafe {
-        js_error(msg.as_ptr() as *const u8);
-    }
-}
-
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn sqlite3_os_init() -> c_int {
     let vfs = sqlite3_vfs {

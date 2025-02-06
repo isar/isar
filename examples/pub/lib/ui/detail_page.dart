@@ -24,7 +24,7 @@ class DetailPage extends ConsumerWidget {
         ref.watch(freshPackagePod(PackageNameVersion(name, version)));
     return Scaffold(
       appBar: PubAppBar(
-        favorite: package.valueOrNull?.flutterFavorite ?? false,
+        favorite: package.valueOrNull?.metrics?.flutterFavorite ?? false,
       ),
       body: SingleChildScrollView(
         child: package.map(

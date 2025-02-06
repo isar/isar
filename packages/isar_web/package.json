@@ -1,0 +1,17 @@
+{
+  "name": "isar",
+  "version": "0.0.0-placeholder",
+  "files": [
+
+    "isar.wasm"
+  ],
+  "scripts": {
+    "build": "tsup --onSuccess \"cp wasm/isar_bg.wasm dist/isar.wasm\"" 
+  },
+  "devDependencies": {
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3",
+    "@types/node": "^22.10.2",
+    "wa-sqlite": "github:rhashimoto/wa-sqlite#v1.0.5"
+  }
+}

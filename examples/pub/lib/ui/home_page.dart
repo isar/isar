@@ -143,9 +143,9 @@ class PackageCard extends ConsumerWidget {
                     style: theme.textTheme.bodyMedium,
                   ),
                 ],
-                if (package?.publisher != null) ...[
+                if (package?.metrics?.publisher != null) ...[
                   const SizedBox(height: 5),
-                  Publisher(package!.publisher!),
+                  Publisher(package!.metrics!.publisher!),
                 ],
               ],
             ),

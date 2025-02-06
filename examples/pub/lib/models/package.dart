@@ -19,16 +19,7 @@ class Package {
     required this.dependencies,
     required this.devDependencies,
     required this.published,
-    this.points,
-    this.likes,
-    this.popularity,
-    this.publisher,
-    this.dart,
-    this.flutter,
-    this.flutterFavorite,
-    this.license,
-    this.osiLicense,
-    this.platforms,
+    this.metrics,
   });
 
   String get id => '$name$version';
@@ -51,25 +42,7 @@ class Package {
 
   final DateTime published;
 
-  final short? points;
-
-  final short? likes;
-
-  final float? popularity;
-
-  final String? publisher;
-
-  final bool? dart;
-
-  final bool? flutter;
-
-  final bool? flutterFavorite;
-
-  final String? license;
-
-  final bool? osiLicense;
-
-  final List<SupportedPlatform>? platforms;
+  final Metrics? metrics;
 
   static List<Package> fromApiPackage(ApiPackage package) {
     final latestVersion = package.latest.version;
@@ -100,36 +73,74 @@ class Package {
     final publisher =
         publishers.isNotEmpty ? publishers.first.substring(10) : null;
     return copyWith(
-      points: metrics.grantedPoints,
-      likes: metrics.likeCount,
-      popularity: metrics.popularityScore,
-      publisher: publisher,
-      dart: metrics.tags.contains('sdk:dart'),
-      flutter: metrics.tags.contains('sdk:flutter'),
-      flutterFavorite: metrics.tags.contains('is:flutter-favorite'),
-      license: metrics.tags
-          .firstWhere(
-            (e) =>
-                e.startsWith('license:') &&
-                e != 'license:osi-approved' &&
-                e != 'license:fsf-libre',
-            orElse: () => 'license:unknown',
-          )
-          .substring(8)
-          .toUpperCase(),
-      osiLicense: metrics.tags.contains('license:osi-approved'),
-      platforms: [
-        if (metrics.tags.contains('platform:web')) SupportedPlatform.web,
-        if (metrics.tags.contains('platform:android'))
-          SupportedPlatform.android,
-        if (metrics.tags.contains('platform:ios')) SupportedPlatform.ios,
-        if (metrics.tags.contains('platform:linux')) SupportedPlatform.linux,
-        if (metrics.tags.contains('platform:macos')) SupportedPlatform.macos,
-        if (metrics.tags.contains('platform:windows'))
-          SupportedPlatform.windows,
-      ],
+      metrics: Metrics(
+        points: metrics.grantedPoints,
+        likes: metrics.likeCount,
+        downloadCount30Days: metrics.downloadCount30Days,
+        publisher: publisher,
+        dart: metrics.tags.contains('sdk:dart'),
+        flutter: metrics.tags.contains('sdk:flutter'),
+        flutterFavorite: metrics.tags.contains('is:flutter-favorite'),
+        license: metrics.tags
+            .firstWhere(
+              (e) =>
+                  e.startsWith('license:') &&
+                  e != 'license:osi-approved' &&
+                  e != 'license:fsf-libre',
+              orElse: () => 'license:unknown',
+            )
+            .substring(8)
+            .toUpperCase(),
+        osiLicense: metrics.tags.contains('license:osi-approved'),
+        platforms: [
+          if (metrics.tags.contains('platform:web')) SupportedPlatform.web,
+          if (metrics.tags.contains('platform:android'))
+            SupportedPlatform.android,
+          if (metrics.tags.contains('platform:ios')) SupportedPlatform.ios,
+          if (metrics.tags.contains('platform:linux')) SupportedPlatform.linux,
+          if (metrics.tags.contains('platform:macos')) SupportedPlatform.macos,
+          if (metrics.tags.contains('platform:windows'))
+            SupportedPlatform.windows,
+        ],
+      ),
     );
   }
+}
+
+@embedded
+class Metrics {
+  Metrics({
+    required this.points,
+    required this.likes,
+    required this.downloadCount30Days,
+    required this.publisher,
+    required this.dart,
+    required this.flutter,
+    required this.flutterFavorite,
+    required this.license,
+    required this.osiLicense,
+    required this.platforms,
+  });
+
+  final short points;
+
+  final short likes;
+
+  final int downloadCount30Days;
+
+  final String? publisher;
+
+  final bool dart;
+
+  final bool flutter;
+
+  final bool flutterFavorite;
+
+  final String license;
+
+  final bool osiLicense;
+
+  final List<SupportedPlatform> platforms;
 }
 
 @embedded

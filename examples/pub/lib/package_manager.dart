@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:pub_app/asset_loader.dart';
@@ -18,23 +20,31 @@ class PackageManager {
         .optional(version == null, (q) => q.isLatestEqualTo(true))
         .optional(version != null, (q) => q.versionEqualTo(version!))
         .build();
+    final package = await query.findFirstAsync();
+    if (package != null) {
+      yield package;
+    }
 
-    await for (final results in query.watch(fireImmediately: true)) {
+    /*await for (final results in query.watch(fireImmediately: true)) {
       if (results.isNotEmpty) {
         yield results.first;
       }
-    }
+    }*/
   }
 
   Stream<List<Package>> watchPackageVersions(String name) async* {
     final query =
         isar.packages.where().nameEqualTo(name).sortByPublishedDesc().build();
+    final packages = await query.findAllAsync();
+    if (packages.isNotEmpty) {
+      yield packages;
+    }
 
-    await for (final results in query.watch(fireImmediately: true)) {
+    /*await for (final results in query.watch(fireImmediately: true)) {
       if (results.isNotEmpty) {
         yield results;
       }
-    }
+    }*/
   }
 
   Stream<String> watchLatestVersion(String name) async* {
@@ -45,15 +55,20 @@ class PackageManager {
         .versionProperty()
         .build();
 
-    await for (final results in query.watch(fireImmediately: true)) {
+    final version = await query.findFirstAsync();
+    if (version != null) {
+      yield version;
+    }
+
+    /*await for (final results in query.watch(fireImmediately: true)) {
       if (results.isNotEmpty) {
         yield results.first;
       }
-    }
+    }*/
   }
 
   Stream<String?> watchPreReleaseVersion(String name) async* {
-    await for (final _ in isar.packages.watchLazy(fireImmediately: true)) {
+    /*await for (final _ in isar.packages.watchLazy(fireImmediately: true)) {
       final latestDate = await isar.packages
           .where()
           .nameEqualTo(name)
@@ -70,7 +85,7 @@ class PackageManager {
             .versionProperty()
             .findFirstAsync();
       }
-    }
+    }*/
   }
 
   Future<void> loadPackage(
@@ -123,7 +138,7 @@ class PackageManager {
         .versionEqualTo(version)
         .build();
 
-    final existing = await query.findAllAsync();
+    /*final existing = await query.findAllAsync();
     if (existing.isNotEmpty) {
       yield {
         for (final asset in existing) asset.kind: asset.content,
@@ -151,7 +166,7 @@ class PackageManager {
           for (final asset in results) asset.kind: asset.content,
         };
       }
-    }
+    }*/
   }
 
   Future<void> loadPackageAssets(String name, String version) {
@@ -162,7 +177,15 @@ class PackageManager {
     );
   }
 
-  Future<List<String>> search(String query, int page, {bool online = true}) {
+  Future<List<String>> search(String query, int page,
+      {bool online = true}) async {
+    final s = Stopwatch()..start();
+    await compute((_) async {
+      await Future.delayed(const Duration(milliseconds: 1));
+    }, null);
+
+    print('Search Isolate time: ${s.elapsedMilliseconds}');
+
     if (online) {
       return repository.search(query, page + 1);
     } else {
@@ -171,7 +194,6 @@ class PackageManager {
           .nameContains(query, caseSensitive: false)
           .or()
           .descriptionContains(query, caseSensitive: false)
-          .sortByLikesDesc()
           .distinctByName()
           .nameProperty()
           .findAllAsync(offset: page * 10, limit: 10);
@@ -192,12 +214,18 @@ class PackageManager {
     }
   }
 
-  Stream<List<String>> watchFavoriteNames() {
-    return isar.packages
+  Stream<List<String>> watchFavoriteNames() async* {
+    final query = isar.packages
         .where()
-        .flutterFavoriteEqualTo(true)
+        .metrics((q) => q.flutterFavoriteEqualTo(true))
         .distinctByName()
         .nameProperty()
-        .watch(fireImmediately: true);
+        .build();
+    final packages = await query.findAllAsync();
+    if (packages.isNotEmpty) {
+      yield packages;
+    }
+
+    //return query.watch(fireImmediately: true);
   }
 }

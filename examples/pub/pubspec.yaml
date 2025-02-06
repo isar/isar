@@ -12,14 +12,14 @@ dependencies:
   clickup_fading_scroll:
     git:
       url: https://github.com/clickup/clickup_fading_scroll.git
-  copy_with_extension: ^5.0.3
+  copy_with_extension: ^6.0.1
   dio: ^5.3.0
   flutter:
     sdk: flutter
   flutter_riverpod: ^2.3.6
-  google_fonts: ^5.1.0
-  isar: 4.0.0-dev.10
-  isar_flutter_libs: 4.0.0-dev.10
+  google_fonts: ^6.2.1
+  isar: any
+  isar_flutter_libs: any
   json_annotation: ^4.8.1
   markdown: ^7.1.1
   pub_semver: ^2.1.4
@@ -27,10 +27,10 @@ dependencies:
   pubspec_parse: ^1.2.3
   riverpod: ^2.3.6
   shimmer: ^3.0.0
-  tar: ^0.5.6
+  tar: ^2.0.0
   timeago: ^3.5.0
   url_launcher: ^6.1.12
-  go_router: ^10.0.0
+  go_router: ^14.7.2
   flutter_svg: ^2.0.7
   flutter_html: ^3.0.0-beta.2
   flutter_html_svg: ^3.0.0-beta.2
@@ -38,9 +38,15 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.4.6
-  copy_with_extension_gen: ^5.0.3
+  copy_with_extension_gen: ^6.0.0
   json_serializable: ^6.7.1
-  flutter_lints: ^2.0.2
+  flutter_lints: ^5.0.0
+
+dependency_overrides:
+  isar:
+    path: ../../packages/isar
+  isar_flutter_libs:
+    path: ../../packages/isar_flutter_libs
 
 flutter:
   uses-material-design: true
