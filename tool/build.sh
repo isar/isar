@@ -18,5 +18,5 @@ then
         cargo build --target aarch64-apple-darwin --features sqlcipher  --release
     fi
 else
-    cargo build --target x86_64-pc-windows-msvc
+    cargo build --target x86_64-pc-windows-msvc --features sqlcipher-vendored  --release
 fi

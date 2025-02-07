@@ -128,7 +128,9 @@ extension CollectionAsync<ID, OBJ> on IsarCollection<ID, OBJ> {
   }
 
   Future<int> getSizeAsync({bool includeIndexes = false}) {
-    return isar.readAsync((isar) =>
-        isar.collection<ID, OBJ>().getSize(includeIndexes: includeIndexes));
+    return isar.readAsync(
+      (isar) =>
+          isar.collection<ID, OBJ>().getSize(includeIndexes: includeIndexes),
+    );
   }
 }

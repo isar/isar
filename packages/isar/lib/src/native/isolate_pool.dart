@@ -96,6 +96,7 @@ class IsolateWorker {
           completer.completeError(message.$2!, message.$3);
         }
       } else {
+        // ignore: avoid_print
         print('Unknown message: $message');
       }
     }
