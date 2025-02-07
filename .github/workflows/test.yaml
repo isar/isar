@@ -55,7 +55,7 @@ jobs:
     name: Dart Test
     strategy:
       matrix:
-        os: [macos-14, macos-13, ubuntu-latest, windows-2025]
+        os: [macos-14, macos-13, ubuntu-latest, windows-latest]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
