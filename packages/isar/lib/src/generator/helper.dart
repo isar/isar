@@ -13,15 +13,17 @@ extension on ClassElement {
   List<PropertyInducingElement> get allAccessors {
     final ignoreFields =
         collectionAnnotation?.ignore ?? embeddedAnnotation!.ignore;
-    final allAccessors = [
-      ...accessors.map((e) => e.variable2!),
+    final allAccessorsMap = {
       if (collectionAnnotation?.inheritance ?? embeddedAnnotation!.inheritance)
-        for (final supertype in allSupertypes) ...[
+        for (final supertype in allSupertypes) ...{
           if (!supertype.isDartCoreObject)
-            ...supertype.accessors.map((e) => e.variable2!),
-        ],
-    ];
-
+            for (final accessor in supertype.accessors)
+              accessor.variable2!.name: accessor.variable2!,
+        },
+      for (final accessor in accessors)
+        accessor.variable2!.name: accessor.variable2!,
+    };
+    final allAccessors = allAccessorsMap.values.toList();
     final usableAccessors = allAccessors.where(
       (e) =>
           e.isPublic &&

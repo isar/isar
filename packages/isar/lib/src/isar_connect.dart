@@ -128,7 +128,8 @@ abstract class _IsarConnect {
       }
 
       final collection = isar.collectionByIndex<dynamic, dynamic>(i);
-      final sub = collection.watchLazy(fireImmediately: true).listen((_) {
+      sendCollectionInfo(collection);
+      final sub = collection.watch().listen((_) {
         sendCollectionInfo(collection);
       });
       _collectionSubscriptions.add(sub);
@@ -146,7 +147,7 @@ abstract class _IsarConnect {
     final query = cQuery.toQuery(isar);
 
     _querySubscription.add(
-      query.watchLazy().listen((_) {
+      query.watch().listen((_) {
         postEvent(ConnectEvent.queryChanged.event, {});
       }),
     );

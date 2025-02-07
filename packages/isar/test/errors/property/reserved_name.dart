@@ -8,5 +8,6 @@ class Model {
 
   String? prop1;
 
-  String? unique;
+  @Name('unique')
+  String? prop2;
 }

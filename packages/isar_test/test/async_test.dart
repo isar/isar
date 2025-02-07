@@ -49,7 +49,7 @@ void main() async {
     });
 
     isarTest('Bulk insert', () async {
-      final futures = List.generate(100, (index) {
+      final futures = List.generate(100, (index) async {
         return isar.writeAsyncWith(index, (isar, index) {
           isar.models.putAll([
             Model(index * 100 + 1, 'value1'),

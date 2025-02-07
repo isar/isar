@@ -214,7 +214,7 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
   }
 
   @override
-  Stream<void> watchLazy({bool fireImmediately = false}) {
+  Stream<void> watch() {
     if (IsarCore.kIsWeb) {
       throw UnsupportedError('Watchers are not supported on the web');
     }
@@ -239,22 +239,13 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
         port.close();
       },
     );
-    if (fireImmediately) {
-      controller.add(null);
-    }
 
     controller.addStream(port);
     return controller.stream;
   }
 
   @override
-  Stream<OBJ?> watchObject(ID id, {bool fireImmediately = false}) {
-    return watchObjectLazy(id, fireImmediately: fireImmediately)
-        .asyncMap((event) => getAsync(id));
-  }
-
-  @override
-  Stream<void> watchObjectLazy(ID id, {bool fireImmediately = false}) {
+  Stream<void> watchObject(ID id) {
     if (IsarCore.kIsWeb) {
       throw UnsupportedError('Watchers are not supported on the web');
     }
@@ -280,10 +271,6 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
         port.close();
       },
     );
-
-    if (fireImmediately) {
-      controller.add(null);
-    }
 
     controller.addStream(port);
     return controller.stream;

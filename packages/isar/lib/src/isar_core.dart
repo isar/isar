@@ -9,6 +9,8 @@ abstract final class IsarCore {
 
   static late final IsarCoreBindings b;
 
+  static const IsarCorePlatform platform = IsarCorePlatformImpl();
+
   static Pointer<Pointer<NativeType>> ptrPtr = malloc<Pointer<NativeType>>();
   static Pointer<Uint32> countPtr = malloc<Uint32>();
   static Pointer<Bool> boolPtr = malloc<Bool>();
@@ -37,7 +39,7 @@ abstract final class IsarCore {
           'manually before using Isar.');
     }
 
-    final result = initializePlatformBindings(library);
+    final result = platform.initializeBindings(library);
     if (result is Future) {
       return (result as Future<IsarCoreBindings>).then((bindings) {
         b = bindings;
@@ -241,4 +243,23 @@ abstract final class IsarCore {
 extension PointerX on Pointer<void> {
   @tryInline
   bool get isNull => address == 0;
+}
+
+typedef IsolatePoolSetup = FutureOr<dynamic> Function(
+  Future<dynamic> Function(Isar isar) callback,
+);
+
+abstract class IsarCorePlatform {
+  FutureOr<IsarCoreBindings> initializeBindings([String? library]);
+
+  int fastHash(String string);
+
+  void startIsolatePool(Isar isar, int workerCount, IsolatePoolSetup setup);
+
+  void disposeIsolatePool(Isar isar);
+
+  Future<T> runIsolate<T>(
+    FutureOr<T> Function(Isar? isar) computation, {
+    Isar? isar,
+  });
 }
