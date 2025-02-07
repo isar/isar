@@ -122,7 +122,7 @@ class IsolateWorker {
             sp.send((null, e, stack));
           }
         } else {
-          Isolate.exit();
+          return;
         }
       }
     });

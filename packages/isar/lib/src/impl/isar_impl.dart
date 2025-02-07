@@ -397,8 +397,8 @@ class _IsarImpl extends Isar {
   }
 
   @override
-  bool close({bool deleteFromDisk = false}) {
-    IsarCore.platform.disposeIsolatePool(this);
+  Future<bool> close({bool deleteFromDisk = false}) async {
+    await IsarCore.platform.disposeIsolatePool(this);
     final closed = IsarCore.b.isar_close(getPtr(), deleteFromDisk);
     _ptr = null;
     _instances.remove(instanceId);

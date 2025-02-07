@@ -57,10 +57,10 @@ void main() {
         isar.testModels.put(_obj3);
       });
 
-      assert(!isar.close(), 'Instance was closed incorrectly');
+      assert(!(await isar.close()), 'Instance was closed incorrectly');
     });
 
     expect(isar.testModels.where().findAll(), [_obj1, _obj3]);
-    expect(isar.close(deleteFromDisk: true), true);
+    expect(await isar.close(deleteFromDisk: true), true);
   });
 }

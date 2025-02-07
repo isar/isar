@@ -27,7 +27,7 @@ void main() {
       isar.write((isar) {
         isar.models.putAll([Model('test1'), Model('test2')]);
       });
-      expect(isar.close(), true);
+      expect(await isar.close(), true);
 
       final isar2 = await openTempIsar(
         [ModelSchema],
@@ -49,7 +49,7 @@ void main() {
       isar.write((isar) {
         isar.models.put(Model('test'));
       });
-      expect(isar.close(), true);
+      expect(await isar.close(), true);
 
       await expectLater(
         () => openTempIsar(
@@ -69,7 +69,7 @@ void main() {
         encryptionKey: 'key1',
       );
       isar1.write((isar) => isar.models.put(Model('test1')));
-      expect(isar1.close(), true);
+      expect(await isar1.close(), true);
 
       final isar2 = await openTempIsar(
         [ModelSchema],
@@ -83,7 +83,7 @@ void main() {
       isar2.write((isar) => isar.models.put(Model('test2')));
       expect(isar2.models.where().sortByName().findAll(),
           [Model('test1'), Model('test2')]);
-      expect(isar2.close(), true);
+      expect(await isar2.close(), true);
 
       // Using the old key (should throw)
       await expectLater(
@@ -114,7 +114,7 @@ void main() {
 
       expect(isar3.models.where().sortByName().findAll(),
           [Model('test5'), Model('test6')]);
-      expect(isar3.close(), true);
+      expect(await isar3.close(), true);
 
       for (final oldKey in ['key2', 'key3', 'key4']) {
         // Using the old key (should throw)
@@ -135,7 +135,7 @@ void main() {
       );
       expect(isar4.models.where().sortByName().findAll(),
           [Model('test5'), Model('test6')]);
-      expect(isar4.close(), true);
+      expect(await isar4.close(), true);
     });
   });
 }

@@ -112,7 +112,9 @@ class IsarCorePlatformImpl implements IsarCorePlatform {
   void startIsolatePool(Isar isar, int workerCount, IsolatePoolSetup setup) {}
 
   @override
-  void disposeIsolatePool(Isar isar) {}
+  Future<void> disposeIsolatePool(Isar isar) {
+    return Future.value();
+  }
 
   /// @nodoc
   @tryInline

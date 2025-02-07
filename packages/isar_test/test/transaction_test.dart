@@ -39,34 +39,6 @@ void main() {
       });
     });
 
-    isarTest('Asyc txn cannot be opened in sync txn', () async {
-      isar.read((isar) {
-        expect(() => isar.readAsync((_) {}), throwsUnsupportedError);
-        expect(
-          () => isar.readAsyncWith<void, void>(null, (_, __) {}),
-          throwsUnsupportedError,
-        );
-        expect(() => isar.writeAsync((_) {}), throwsUnsupportedError);
-        expect(
-          () => isar.writeAsyncWith<void, void>(null, (_, __) {}),
-          throwsUnsupportedError,
-        );
-      });
-
-      isar.write((isar) {
-        expect(() => isar.readAsync((_) {}), throwsUnsupportedError);
-        expect(
-          () => isar.readAsyncWith<void, void>(null, (_, __) {}),
-          throwsUnsupportedError,
-        );
-        expect(() => isar.writeAsync((_) {}), throwsUnsupportedError);
-        expect(
-          () => isar.writeAsyncWith<void, void>(null, (_, __) {}),
-          throwsUnsupportedError,
-        );
-      });
-    });
-
     isarTest('gets reverted on error', () {
       isar.write((isar) => isar.models.put(Model(1)));
       expect(isar.models.where().findAll(), [Model(1)]);

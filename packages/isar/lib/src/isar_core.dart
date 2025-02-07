@@ -256,7 +256,7 @@ abstract class IsarCorePlatform {
 
   void startIsolatePool(Isar isar, int workerCount, IsolatePoolSetup setup);
 
-  void disposeIsolatePool(Isar isar);
+  Future<void> disposeIsolatePool(Isar isar);
 
   Future<T> runIsolate<T>(
     FutureOr<T> Function(Isar? isar) computation, {

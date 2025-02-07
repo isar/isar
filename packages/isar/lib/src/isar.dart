@@ -268,12 +268,15 @@ abstract class Isar {
 
   /// Releases an Isar instance.
   ///
+  /// If this instance uses Isolate workers, their work will be completed then
+  /// they will be terminated.
+  ///
   /// If this is the only isolate that holds a reference to this instance, the
   /// Isar instance will be closed. [deleteFromDisk] additionally removes all
   /// database files if enabled.
   ///
   /// Returns whether the instance was actually closed.
-  bool close({bool deleteFromDisk = false});
+  Future<bool> close({bool deleteFromDisk = false});
 
   /// Verifies the integrity of the database. This method is not intended to be
   /// used by end users and should only be used by Isar tests. Never call this

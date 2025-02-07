@@ -67,7 +67,7 @@ void main() {
         Col1(2, Embedded1('value2')),
       ]);
     });
-    expect(isar1.close(), true);
+    expect(await isar1.close(), true);
 
     final isar2 = await openTempIsar([Col2Schema], name: isarName);
     isar2.col2s.verify([
@@ -85,7 +85,7 @@ void main() {
       Col2(2, Embedded2(null, 'value2')),
       Col2(3, Embedded2(3, 'value5')),
     ]);
-    expect(isar2.close(), true);
+    expect(await isar2.close(), true);
 
     final isar3 = await openTempIsar([Col1Schema], name: isarName);
     isar3.col1s.verify([
@@ -93,7 +93,7 @@ void main() {
       Col1(2, Embedded1('value2')),
       Col1(3, Embedded1('value5')),
     ]);
-    expect(isar3.close(), true);
+    expect(await isar3.close(), true);
   });
 
   /*isarTest('Remove field', () async {

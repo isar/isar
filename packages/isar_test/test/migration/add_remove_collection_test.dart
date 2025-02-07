@@ -42,7 +42,7 @@ void main() {
       return isar.model1s.putAll([obj1A, obj1B]);
     });
     isar1.model1s.verify([obj1A, obj1B]);
-    expect(isar1.close(), true);
+    expect(await isar1.close(), true);
 
     final isar2 =
         await openTempIsar([Model1Schema, Model2Schema], name: isarName);
@@ -68,11 +68,11 @@ void main() {
     });
     isar1.model1s.verify([obj1A, obj1B]);
     isar1.model2s.verify([obj2A, obj2B]);
-    expect(isar1.close(), true);
+    expect(await isar1.close(), true);
 
     final isar2 = await openTempIsar([Model1Schema], name: isarName);
     isar2.model1s.verify([obj1A, obj1B]);
-    expect(isar2.close(), true);
+    expect(await isar2.close(), true);
 
     final isar3 =
         await openTempIsar([Model1Schema, Model2Schema], name: isarName);

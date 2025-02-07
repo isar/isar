@@ -39,14 +39,14 @@ void main() {
     isar1.write((isar) {
       return isar1.col1s.putAll([Col1(1, 'a'), Col1(2, null)]);
     });
-    expect(isar1.close(), true);
+    expect(await isar1.close(), true);
 
     final isar2 = await openTempIsar([Col2Schema], name: isarName);
     expect(isar2.col2s.where().findAll(), [Col2(1, 'a'), Col2(2, '')]);
     isar2.write((isar) {
       return isar2.col2s.put(Col2(1, 'c'));
     });
-    expect(isar2.close(), true);
+    expect(await isar2.close(), true);
 
     final isar3 = await openTempIsar([Col1Schema], name: isarName);
     expect(isar3.col1s.where().findAll(), [Col1(1, 'c'), Col1(2, null)]);

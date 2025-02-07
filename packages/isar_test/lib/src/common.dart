@@ -29,6 +29,7 @@ Future<Isar> openTempIsar(
   String? encryptionKey,
   CompactCondition? compactOnLaunch,
   bool closeAutomatically = true,
+  int workerCount = 3,
 }) async {
   await prepareTest();
 
@@ -40,12 +41,13 @@ Future<Isar> openTempIsar(
     maxSizeMiB: maxSizeMiB,
     encryptionKey: encryptionKey,
     compactOnLaunch: compactOnLaunch,
+    workerCount: workerCount,
   );
 
   if (closeAutomatically) {
     addTearDown(() async {
       if (isar.isOpen) {
-        isar.close(deleteFromDisk: true);
+        await isar.close(deleteFromDisk: true);
       }
     });
   }

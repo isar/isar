@@ -117,9 +117,9 @@ class IsarCorePlatformImpl implements IsarCorePlatform {
   }
 
   @override
-  void disposeIsolatePool(Isar isar) {
+  Future<void> disposeIsolatePool(Isar isar) async {
     final pool = pools[isar];
-    pool?.dispose();
+    await pool?.dispose();
   }
 
   /// @nodoc

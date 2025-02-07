@@ -59,7 +59,7 @@ void main() {
       isar.write((isar) {
         isar.models.put(Model(isar.models.autoIncrement()));
       });
-      expect(isar.close(), true);
+      expect(await isar.close(), true);
 
       isar = await openTempIsar([ModelSchema], name: isarName);
       expect(isar.models.autoIncrement(), 3);
