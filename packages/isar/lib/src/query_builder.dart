@@ -1,4 +1,4 @@
-part of isar;
+part of '../isar.dart';
 
 /// @nodoc
 @protected
@@ -106,13 +106,11 @@ class _QueryBuilder<OBJ> {
 
   /// @nodoc
   _QueryBuilder<OBJ> group(FilterQuery<OBJ> q) {
-    // ignore: prefer_const_constructors
     final qb = q(QueryBuilder._(_QueryBuilder()));
     final filter = qb._query.filter;
     if (filter != null) {
       return addFilterCondition(filter);
     } else {
-      // ignore: avoid_returning_this
       return this;
     }
   }
@@ -122,7 +120,6 @@ class _QueryBuilder<OBJ> {
     FilterQuery<E> q,
     int property,
   ) {
-    // ignore: prefer_const_constructors
     final qb = q(QueryBuilder._(_QueryBuilder()));
     final filter = qb._query.filter;
     if (filter != null) {
@@ -130,7 +127,6 @@ class _QueryBuilder<OBJ> {
         ObjectFilter(property: property, filter: filter),
       );
     } else {
-      // ignore: avoid_returning_this
       return this;
     }
   }

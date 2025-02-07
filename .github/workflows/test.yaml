@@ -55,7 +55,7 @@ jobs:
     name: Dart Test
     strategy:
       matrix:
-        os: [macos-14, macos-13, ubuntu-latest, windows-latest]
+        os: [macos-14, macos-13, ubuntu-latest, windows-2025]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -145,9 +145,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Start simulator
-        uses: futureware-tech/simulator-action@v2
-        with:
-          model: iPhone 15
+        uses: futureware-tech/simulator-action@v4
       - uses: subosito/flutter-action@v2
       - name: Prepare Build
         uses: ./.github/actions/prepare-build

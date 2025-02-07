@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_print
 
-part of isar;
+part of '../isar.dart';
 
 abstract class _IsarConnect {
   static const _handlers = {
@@ -16,7 +16,6 @@ abstract class _IsarConnect {
   static final _instances = <String, Isar>{};
   static var _initialized = false;
 
-  // ignore: cancel_subscriptions
   static final _querySubscription = <StreamSubscription<void>>[];
   static final _collectionSubscriptions = <StreamSubscription<void>>[];
 
@@ -129,7 +128,8 @@ abstract class _IsarConnect {
       }
 
       final collection = isar.collectionByIndex<dynamic, dynamic>(i);
-      final sub = collection.watchLazy(fireImmediately: true).listen((_) {
+      sendCollectionInfo(collection);
+      final sub = collection.watch().listen((_) {
         sendCollectionInfo(collection);
       });
       _collectionSubscriptions.add(sub);
@@ -147,7 +147,7 @@ abstract class _IsarConnect {
     final query = cQuery.toQuery(isar);
 
     _querySubscription.add(
-      query.watchLazy().listen((_) {
+      query.watch().listen((_) {
         postEvent(ConnectEvent.queryChanged.event, {});
       }),
     );

@@ -1,4 +1,4 @@
-use std::ffi::{c_char, c_int, c_void, CStr};
+use std::ffi::{CStr, c_char, c_int, c_void};
 use std::mem;
 use std::sync::OnceLock;
 
@@ -59,7 +59,7 @@ pub unsafe fn dart_pause_isolate<T, F: FnOnce() -> T>(callback: F) -> T {
     result
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_connect_dart_api(ptr: *mut c_void) {
     let functions = unsafe {
         let api = ptr as *const DartApi;

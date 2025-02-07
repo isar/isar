@@ -1,4 +1,4 @@
-part of isar;
+part of '../isar.dart';
 
 /// Use `IsarCollection` instances to find, query, and create new objects of a
 /// given type in Isar.
@@ -85,20 +85,14 @@ abstract class IsarCollection<ID, OBJ> {
 
   /// Watch the collection for changes.
   ///
-  /// If [fireImmediately] is `true`, an event will be fired immediately.
-  Stream<void> watchLazy({bool fireImmediately = false});
-
-  /// Watch the object with [id] for changes. If a change occurs, the new object
-  /// will be returned in the stream.
-  ///
-  /// Objects that don't exist (yet) can also be watched. If [fireImmediately]
-  /// is `true`, the object will be sent to the consumer immediately.
-  Stream<OBJ?> watchObject(ID id, {bool fireImmediately = false});
+  /// The stream will emit a null value when the collection is changed.
+  Stream<void> watch();
 
   /// Watch the object with [id] for changes.
   ///
-  /// If [fireImmediately] is `true`, an event will be fired immediately.
-  Stream<void> watchObjectLazy(ID id, {bool fireImmediately = false});
+  /// The stream will emit a null value when the object is created, changed or
+  /// deleted.
+  Stream<void> watchObject(ID id);
 
   /// Build a query dynamically for example to build a custom query language.
   ///
@@ -127,5 +121,16 @@ extension CollectionAsync<ID, OBJ> on IsarCollection<ID, OBJ> {
   /// {@macro collection_get_all}
   Future<List<OBJ?>> getAllAsync(List<ID> ids) {
     return isar.readAsync((isar) => isar.collection<ID, OBJ>().getAll(ids));
+  }
+
+  Future<int> countAsync() {
+    return isar.readAsync((isar) => isar.collection<ID, OBJ>().count());
+  }
+
+  Future<int> getSizeAsync({bool includeIndexes = false}) {
+    return isar.readAsync(
+      (isar) =>
+          isar.collection<ID, OBJ>().getSize(includeIndexes: includeIndexes),
+    );
   }
 }

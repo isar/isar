@@ -1,4 +1,4 @@
-part of isar;
+part of '../isar.dart';
 
 /// @nodoc
 @protected
@@ -133,6 +133,9 @@ extension QueryAsync<T> on IsarQuery<T> {
   /// {@macro aggregation_is_empty}
   Future<bool> isEmptyAsync() => isar.readAsync((isar) => isEmpty());
 
+  /// {@macro aggregation_is_not_empty}
+  Future<bool> isNotEmptyAsync() => isar.readAsync((isar) => isNotEmpty());
+
   /// @nodoc
   @protected
   Future<R?> aggregateAsync<R>(Aggregation op) =>
@@ -247,34 +250,18 @@ extension QueryExecute<OBJ, R> on QueryBuilder<OBJ, R, QOperations> {
   /// {@macro aggregation_is_empty}
   Future<bool> isEmptyAsync() => _withQueryAsync((q) => q.isEmptyAsync());
 
+  /// {@macro aggregation_is_not_empty}
+  bool isNotEmpty() => _withQuery((q) => q.isNotEmpty());
+
+  /// {@macro aggregation_is_not_empty}
+  Future<bool> isNotEmptyAsync() => _withQueryAsync((q) => q.isNotEmptyAsync());
+
   /// {@macro query_export_json}
   List<Map<String, dynamic>> exportJson({int? offset, int? limit}) =>
       _withQuery((q) => q.exportJson(offset: offset, limit: limit));
 
   /// {@macro query_watch}
-  Stream<List<R>> watch({
-    bool fireImmediately = false,
-    int? offset,
-    int? limit,
-  }) {
-    final q = build();
-    final controller = StreamController<List<R>>();
-    q
-        .watch(fireImmediately: fireImmediately, offset: offset, limit: limit)
-        .listen(
-      controller.add,
-      onError: controller.addError,
-      onDone: () {
-        controller.close();
-        q.close();
-      },
-    );
-    return controller.stream;
-  }
-
-  /// {@macro query_watch_lazy}
-  Stream<void> watchLazy({bool fireImmediately = false}) =>
-      _withQuery((q) => q.watchLazy(fireImmediately: fireImmediately));
+  Stream<void> watch() => _withQuery((q) => q.watch());
 
   Future<T> _withQueryAsync<T>(Future<T> Function(IsarQuery<R> q) f) async {
     final q = build();

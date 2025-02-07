@@ -1,4 +1,4 @@
-part of isar_generator;
+part of '../isar_generator.dart';
 
 class _FilterGenerator {
   _FilterGenerator(this.object) : objName = object.dartName;

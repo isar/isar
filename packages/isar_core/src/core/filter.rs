@@ -3,11 +3,59 @@ use crate::core::value::IsarValue;
 #[derive(PartialEq, Clone, Debug)]
 pub enum Filter {
     Condition(FilterCondition),
-    Json(JsonCondition),
-    Nested(FilterNested),
+    Json(FilterJson),
+    Embedded(FilterEmbedded),
     And(Vec<Filter>),
     Or(Vec<Filter>),
     Not(Box<Filter>),
+}
+
+impl Filter {
+    pub fn new_condition(
+        property_index: u16,
+        condition_type: ConditionType,
+        values: Vec<Option<IsarValue>>,
+        case_sensitive: bool,
+    ) -> Self {
+        Filter::Condition(FilterCondition::new(
+            property_index,
+            condition_type,
+            values,
+            case_sensitive,
+        ))
+    }
+
+    pub fn new_json(
+        property_index: u16,
+        path: Vec<String>,
+        condition_type: ConditionType,
+        values: Vec<Option<IsarValue>>,
+        case_sensitive: bool,
+    ) -> Self {
+        Filter::Json(FilterJson::new(
+            property_index,
+            path,
+            condition_type,
+            values,
+            case_sensitive,
+        ))
+    }
+
+    pub fn new_embedded(property_index: u16, filter: Filter) -> Self {
+        Filter::Embedded(FilterEmbedded::new(property_index, filter))
+    }
+
+    pub fn new_and(filters: Vec<Filter>) -> Self {
+        Filter::And(filters)
+    }
+
+    pub fn new_or(filters: Vec<Filter>) -> Self {
+        Filter::Or(filters)
+    }
+
+    pub fn new_not(filter: Filter) -> Self {
+        Filter::Not(Box::new(filter))
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -34,7 +82,7 @@ pub struct FilterCondition {
 }
 
 impl FilterCondition {
-    pub const fn new(
+    fn new(
         property_index: u16,
         condition_type: ConditionType,
         values: Vec<Option<IsarValue>>,
@@ -50,20 +98,20 @@ impl FilterCondition {
 }
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct JsonCondition {
+pub struct FilterJson {
+    pub property_index: u16,
     pub path: Vec<String>,
     pub condition_type: ConditionType,
-    pub is_list: bool,
     pub values: Vec<Option<IsarValue>>,
     // if false, values are all lowercase
     pub case_sensitive: bool,
 }
 
-impl JsonCondition {
-    pub fn new(
+impl FilterJson {
+    fn new(
+        property_index: u16,
         path: Vec<String>,
         condition_type: ConditionType,
-        is_list: bool,
         values: Vec<Option<IsarValue>>,
         case_sensitive: bool,
     ) -> Self {
@@ -84,9 +132,9 @@ impl JsonCondition {
                 .collect()
         };
         Self {
+            property_index,
             path,
             condition_type,
-            is_list,
             values,
             case_sensitive,
         }
@@ -94,14 +142,14 @@ impl JsonCondition {
 }
 
 #[derive(PartialEq, Clone, Debug)]
-pub struct FilterNested {
+pub struct FilterEmbedded {
     pub property_index: u16,
     pub filter: Box<Filter>,
 }
 
-impl FilterNested {
-    pub fn new(property_index: u16, filter: Filter) -> Self {
-        FilterNested {
+impl FilterEmbedded {
+    fn new(property_index: u16, filter: Filter) -> Self {
+        FilterEmbedded {
             property_index,
             filter: Box::new(filter),
         }

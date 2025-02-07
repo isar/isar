@@ -3,7 +3,7 @@ use isar_core::core::error::IsarError;
 use isar_core::core::instance::IsarInstance;
 use isar_core::core::value::IsarValue;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_update(
     isar: &'static CIsarInstance,
     txn: &CIsarTxn,
@@ -29,7 +29,7 @@ pub unsafe extern "C" fn isar_update(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_query_update(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
@@ -59,12 +59,12 @@ pub unsafe extern "C" fn isar_query_update(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_update_new() -> *mut CIsarUpdate {
     Box::into_raw(Box::new(CIsarUpdate(Vec::new())))
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_update_add_value(
     update: &'static mut CIsarUpdate,
     property_index: u16,

@@ -1,10 +1,14 @@
 use crate::core::data_type::DataType;
 use crate::core::fast_wild_match::fast_wild_match;
+use crate::core::filter::ConditionType;
+use crate::core::filter_json::matches_json;
+use crate::core::value::IsarValue;
 use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::native_collection::NativeProperty;
 use enum_dispatch::enum_dispatch;
 use itertools::Itertools;
 use paste::paste;
+use serde_json::Value;
 
 #[macro_export]
 macro_rules! primitive_create {
@@ -168,9 +172,9 @@ impl NativeFilter {
         string_filter_create!(Matches, property, value, case_sensitive)
     }
 
-    pub fn nested(property: &NativeProperty, filter: NativeFilter) -> NativeFilter {
+    pub fn embedded(property: &NativeProperty, filter: NativeFilter) -> NativeFilter {
         let filter = if property.data_type == DataType::Object {
-            Filter::Nested(NestedCond {
+            Filter::Embedded(EmbeddedCond {
                 offset: property.offset,
                 filter: Box::new(filter.0),
             })
@@ -180,16 +184,49 @@ impl NativeFilter {
         NativeFilter(filter)
     }
 
-    pub fn and(filters: Vec<NativeFilter>) -> NativeFilter {
-        let filters = filters.into_iter().map(|f| f.0).collect_vec();
-        let filter_cond = Filter::And(AndCond { filters });
-        NativeFilter(filter_cond)
+    pub fn json(
+        property: &NativeProperty,
+        path: Vec<String>,
+        condition_type: ConditionType,
+        values: Vec<Option<IsarValue>>,
+        case_sensitive: bool,
+    ) -> NativeFilter {
+        let filter = if property.data_type == DataType::Json {
+            Filter::Json(JsonCond {
+                offset: property.offset,
+                path,
+                condition_type,
+                values,
+                case_sensitive,
+            })
+        } else {
+            Filter::Static(StaticCond { value: false })
+        };
+        NativeFilter(filter)
     }
 
-    pub fn or(filters: Vec<NativeFilter>) -> NativeFilter {
-        let filters = filters.into_iter().map(|f| f.0).collect_vec();
-        let filter_cond = Filter::Or(OrCond { filters });
-        NativeFilter(filter_cond)
+    pub fn and(mut filters: Vec<NativeFilter>) -> NativeFilter {
+        if filters.is_empty() {
+            NativeFilter::stat(true)
+        } else if filters.len() == 1 {
+            filters.remove(0)
+        } else {
+            let filters = filters.into_iter().map(|f| f.0).collect_vec();
+            let filter_cond = Filter::And(AndCond { filters });
+            NativeFilter(filter_cond)
+        }
+    }
+
+    pub fn or(mut filters: Vec<NativeFilter>) -> NativeFilter {
+        if filters.is_empty() {
+            NativeFilter::stat(false)
+        } else if filters.len() == 1 {
+            filters.remove(0)
+        } else {
+            let filters = filters.into_iter().map(|f| f.0).collect_vec();
+            let filter_cond = Filter::Or(OrCond { filters });
+            NativeFilter(filter_cond)
+        }
     }
 
     pub fn not(filter: NativeFilter) -> NativeFilter {
@@ -239,7 +276,8 @@ enum Filter {
     AnyStringContains(AnyStringContainsCond),
     AnyStringMatches(AnyStringMatchesCond),
 
-    Nested(NestedCond),
+    Embedded(EmbeddedCond),
+    Json(JsonCond),
     And(AndCond),
     Or(OrCond),
     Not(NotCond),
@@ -499,15 +537,45 @@ string_filter!(StringContains);
 string_filter!(StringMatches);
 
 #[derive(Clone, Debug)]
-struct NestedCond {
+struct EmbeddedCond {
     offset: u32,
     filter: Box<Filter>,
 }
 
-impl Condition for NestedCond {
+impl Condition for EmbeddedCond {
     fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
         if let Some(object) = object.read_nested(self.offset) {
             self.filter.evaluate(i64::MIN, object)
+        } else {
+            false
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+struct JsonCond {
+    offset: u32,
+    path: Vec<String>,
+    condition_type: ConditionType,
+    values: Vec<Option<IsarValue>>,
+    case_sensitive: bool,
+}
+
+impl Condition for JsonCond {
+    fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
+        if let Some(string) = object.read_string(self.offset) {
+            let json = serde_json::from_str::<Value>(string);
+            if let Ok(json) = json {
+                matches_json(
+                    &json,
+                    self.condition_type,
+                    &self.path,
+                    &self.values,
+                    self.case_sensitive,
+                )
+            } else {
+                false
+            }
         } else {
             false
         }

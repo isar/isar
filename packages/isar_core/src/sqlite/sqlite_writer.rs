@@ -1,7 +1,7 @@
 use super::sqlite_collection::SQLiteCollection;
 use super::sqlite_insert::SQLiteInsert;
 use crate::core::{data_type::DataType, writer::IsarWriter};
-use base64::{engine::general_purpose, Engine};
+use base64::{Engine, engine::general_purpose};
 use serde_json::{Map, Number, Value};
 use std::iter::empty;
 

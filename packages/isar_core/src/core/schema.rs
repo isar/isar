@@ -265,303 +265,408 @@ impl IndexSchema {
 
 #[cfg(test)]
 mod test {
+    use std::vec;
+
     use super::*;
 
-    #[test]
-    fn test_verify_checks_name() {
-        let schema = IsarSchema::new("test", None, Vec::new(), Vec::new(), false);
-        assert!(schema.verify(&[]).is_ok());
-
-        let schema = IsarSchema::new("_test", None, Vec::new(), Vec::new(), false);
-        assert!(schema.verify(&[]).is_err());
-
-        let schema = IsarSchema::new("sqlite_test", None, Vec::new(), Vec::new(), false);
-        assert!(schema.verify(&[]).is_err());
-
-        let schema = IsarSchema::new("", None, Vec::new(), Vec::new(), false);
-        assert!(schema.verify(&[]).is_err());
+    fn props_schema(props: Vec<PropertySchema>) -> IsarSchema {
+        index_schema(props, vec![])
     }
 
-    #[test]
-    fn test_verify_checks_index_names() {
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            Vec::new(),
-            vec![IndexSchema::new("test", vec!["test"], false, false)],
-            true,
-        );
-        assert!(schema.verify(&[]).is_err());
+    fn index_schema(props: Vec<PropertySchema>, indexes: Vec<IndexSchema>) -> IsarSchema {
+        IsarSchema::new("test", None, props, indexes, false)
     }
 
-    #[test]
-    fn test_verify_checks_property_name_is_unique() {
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![
+    mod name_validation {
+        use super::*;
+
+        #[test]
+        fn test_valid_collection_name() {
+            let schema = props_schema(Vec::new());
+            assert!(schema.verify(&[]).is_ok());
+        }
+
+        #[test]
+        fn test_invalid_collection_names() {
+            let invalid_names = vec![
+                "sqlite_test_table",
+                "_hidden",
+                "",
+                "sqlite_sequence",
+                "_internal",
+            ];
+
+            for name in invalid_names {
+                let schema = IsarSchema::new(name, None, vec![], vec![], false);
+                assert!(
+                    schema.verify(&[]).is_err(),
+                    "Name '{}' should be invalid",
+                    name
+                );
+            }
+        }
+    }
+
+    mod embedded_objects {
+        use super::*;
+
+        #[test]
+        fn test_embedded_objects_cannot_have_indexes() {
+            let schema = IsarSchema::new(
+                "test",
+                None,
+                vec![PropertySchema::new("prop1", DataType::Int, None)],
+                vec![IndexSchema::new("index", vec!["prop1"], false, false)],
+                true, // embedded
+            );
+            assert!(schema.verify(&[]).is_err());
+        }
+
+        #[test]
+        fn test_object_list_property_validation() {
+            let embedded = IsarSchema::new("embedded", None, vec![], vec![], true);
+
+            // Valid: target is an embedded collection
+            let schema = props_schema(vec![PropertySchema::new(
+                "prop1",
+                DataType::ObjectList,
+                Some("embedded"),
+            )]);
+            assert!(schema.verify(&[embedded.clone()]).is_ok());
+
+            // Invalid: target is not embedded
+            let non_embedded = IsarSchema::new("target", None, vec![], vec![], false);
+            let schema = props_schema(vec![PropertySchema::new(
+                "prop1",
+                DataType::ObjectList,
+                Some("target"),
+            )]);
+            assert!(schema.verify(&[non_embedded]).is_err());
+
+            // Invalid: target doesn't exist
+            let schema = props_schema(vec![PropertySchema::new(
+                "prop1",
+                DataType::ObjectList,
+                Some("nonexistent"),
+            )]);
+            assert!(schema.verify(&[embedded]).is_err());
+        }
+    }
+
+    mod property_validation {
+        use super::*;
+
+        #[test]
+        fn test_duplicate_property_names() {
+            let schema = props_schema(vec![
                 PropertySchema::new("test", DataType::Int, None),
                 PropertySchema::new("test2", DataType::Int, None),
                 PropertySchema::new("test", DataType::String, None),
-            ],
-            Vec::new(),
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
-    }
+            ]);
+            assert!(schema.verify(&[]).is_err());
+        }
 
-    #[test]
-    fn test_verify_rejects_index_name_is_unique() {
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new("prop1", DataType::Int, None)],
-            vec![
-                IndexSchema::new("test", vec!["prop1"], false, false),
-                IndexSchema::new("test2", vec!["prop1"], false, false),
-                IndexSchema::new("test", vec!["prop1"], false, false),
-            ],
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
-    }
+        #[test]
+        fn test_object_property_target_validation() {
+            let schema = props_schema(vec![PropertySchema::new("prop1", DataType::Object, None)]);
+            assert!(
+                schema.verify(&[]).is_err(),
+                "Object property must have target"
+            );
 
-    #[test]
-    fn test_verify_object_property_has_target() {
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new("prop1", DataType::Object, None)],
-            Vec::new(),
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
-    }
-
-    #[test]
-    fn test_verify_checks_object_property_has_valid_target() {
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new(
+            let schema = props_schema(vec![PropertySchema::new(
                 "prop1",
-                DataType::Object,
+                DataType::Int,
                 Some("test2"),
-            )],
-            Vec::new(),
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
-
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new("prop1", DataType::Object, Some("test"))],
-            Vec::new(),
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
-
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new(
-                "prop1",
-                DataType::ObjectList,
-                Some("test2"),
-            )],
-            Vec::new(),
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
-
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new(
-                "prop1",
-                DataType::ObjectList,
-                Some("test"),
-            )],
-            Vec::new(),
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
+            )]);
+            assert!(
+                schema.verify(&[]).is_err(),
+                "Non-object property must not have target"
+            );
+        }
     }
 
-    #[test]
-    fn test_verify_checks_non_object_property_has_no_target() {
-        let schema1 = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new("prop1", DataType::Int, Some("test2"))],
-            Vec::new(),
-            false,
-        );
-        let schema2 = IsarSchema::new("test2", None, vec![], Vec::new(), false);
-        assert!(schema1.verify(&[schema2]).is_err());
+    mod index_validation {
+        use super::*;
+
+        #[test]
+        fn test_composite_index_validation() {
+            let schema = index_schema(
+                vec![
+                    PropertySchema::new("int1", DataType::Int, None),
+                    PropertySchema::new("bool1", DataType::Bool, None),
+                    PropertySchema::new("str1", DataType::String, None),
+                ],
+                vec![
+                    // Valid: string at end of non-hashed index
+                    IndexSchema::new("index1", vec!["int1", "bool1", "str1"], false, false),
+                    // Valid: hashed index with any property order
+                    IndexSchema::new("index2", vec!["int1", "str1", "bool1"], false, true),
+                ],
+            );
+            assert!(schema.verify(&[]).is_ok());
+        }
+
+        #[test]
+        fn test_string_property_position() {
+            let schema = index_schema(
+                vec![
+                    PropertySchema::new("int1", DataType::Int, None),
+                    PropertySchema::new("str1", DataType::String, None),
+                ],
+                vec![
+                    // Invalid: string not at end in non-hashed index
+                    IndexSchema::new("index", vec!["str1", "int1"], false, false),
+                ],
+            );
+            assert!(schema.verify(&[]).is_err());
+        }
+
+        #[test]
+        fn test_hashed_index_with_multiple_strings() {
+            let schema = index_schema(
+                vec![
+                    PropertySchema::new("str1", DataType::String, None),
+                    PropertySchema::new("str2", DataType::String, None),
+                    PropertySchema::new("str3", DataType::String, None),
+                ],
+                vec![IndexSchema::new(
+                    "index",
+                    vec!["str1", "str2", "str3"],
+                    false,
+                    true, // hashed
+                )],
+            );
+            assert!(schema.verify(&[]).is_ok());
+        }
+
+        #[test]
+        fn test_unique_index_validation() {
+            let schema = index_schema(
+                vec![
+                    PropertySchema::new("prop1", DataType::Int, None),
+                    PropertySchema::new("prop2", DataType::String, None),
+                ],
+                vec![
+                    IndexSchema::new("index1", vec!["prop1"], true, false),
+                    IndexSchema::new("index2", vec!["prop1", "prop2"], true, false),
+                ],
+            );
+            assert!(schema.verify(&[]).is_ok());
+        }
+
+        #[test]
+        fn test_duplicate_index_names() {
+            let schema = index_schema(
+                vec![PropertySchema::new("prop1", DataType::Int, None)],
+                vec![
+                    IndexSchema::new("index", vec!["prop1"], false, false),
+                    IndexSchema::new("index", vec!["prop1"], true, false),
+                ],
+            );
+            assert!(schema.verify(&[]).is_err());
+        }
     }
 
-    #[test]
-    fn test_verify_checks_index_properties_not_empty() {
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new("prop1", DataType::Int, None)],
-            vec![IndexSchema::new("index", vec![], false, false)],
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
-    }
+    mod schema_changes {
+        use super::*;
 
-    #[test]
-    fn test_verify_checks_index_properties_exist() {
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new("prop1", DataType::Int, None)],
-            vec![IndexSchema::new(
-                "index",
-                vec!["prop1", "prop2"],
-                false,
-                false,
-            )],
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
-    }
+        #[test]
+        fn test_no_changes() {
+            let old_schema = index_schema(
+                vec![
+                    PropertySchema::new("prop1", DataType::Int, None),
+                    PropertySchema::new("prop2", DataType::String, None),
+                ],
+                vec![IndexSchema::new("index1", vec!["prop1"], false, false)],
+            );
 
-    #[test]
-    fn test_verify_checks_index_properties_are_not_float() {
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new("prop1", DataType::Float, None)],
-            vec![IndexSchema::new("index", vec!["prop1"], false, false)],
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
+            let new_schema = old_schema.clone();
+            let (add_props, drop_props, add_indexes, drop_indexes) =
+                new_schema.find_changes(&old_schema);
 
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new("prop1", DataType::Double, None)],
-            vec![IndexSchema::new("index", vec!["prop1"], false, false)],
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
+            assert!(add_props.is_empty());
+            assert!(drop_props.is_empty());
+            assert!(add_indexes.is_empty());
+            assert!(drop_indexes.is_empty());
+        }
 
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new("prop1", DataType::FloatList, None)],
-            vec![IndexSchema::new("index", vec!["prop1"], false, false)],
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
+        #[test]
+        fn test_add_property() {
+            let prop1 = PropertySchema::new("prop1", DataType::Int, None);
+            let prop2 = PropertySchema::new("prop2", DataType::String, None);
+            let old_schema = props_schema(vec![prop1.clone()]);
+            let new_schema = props_schema(vec![prop1.clone(), prop2.clone()]);
 
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new("prop1", DataType::DoubleList, None)],
-            vec![IndexSchema::new("index", vec!["prop1"], false, false)],
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
-    }
+            let (add_props, drop_props, add_indexes, drop_indexes) =
+                new_schema.find_changes(&old_schema);
 
-    #[test]
-    fn test_verify_checks_index_properties_are_not_object() {
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new(
-                "prop1",
-                DataType::Object,
-                Some("test2"),
-            )],
-            vec![IndexSchema::new("index", vec!["prop1"], false, false)],
-            false,
-        );
-        let schema2 = IsarSchema::new("test2", None, vec![], vec![], true);
-        assert!(schema.verify(&[schema2]).is_err());
-    }
+            assert_eq!(add_props, vec![&prop2]);
+            assert!(drop_props.is_empty());
+            assert!(add_indexes.is_empty());
+            assert!(drop_indexes.is_empty());
+        }
 
-    #[test]
-    fn test_verify_checks_index_properties_are_not_json() {
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new("prop1", DataType::Json, None)],
-            vec![IndexSchema::new("index", vec!["prop1"], false, false)],
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
-    }
+        #[test]
+        fn test_remove_property() {
+            let prop1 = PropertySchema::new("prop1", DataType::Int, None);
+            let prop2 = PropertySchema::new("prop2", DataType::String, None);
+            let old_schema = props_schema(vec![prop1.clone(), prop2.clone()]);
+            let new_schema = props_schema(vec![prop1.clone()]);
 
-    #[test]
-    fn test_verify_checks_index_properties_are_not_list() {
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![PropertySchema::new("prop1", DataType::IntList, None)],
-            vec![IndexSchema::new("index", vec!["prop1"], false, false)],
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
-    }
+            let (add_props, drop_props, add_indexes, drop_indexes) =
+                new_schema.find_changes(&old_schema);
 
-    #[test]
-    fn test_verify_checks_index_properties_are_not_string_if_not_last() {
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![
-                PropertySchema::new("prop1", DataType::Int, None),
-                PropertySchema::new("prop2", DataType::String, None),
-            ],
-            vec![IndexSchema::new(
-                "index",
-                vec!["prop2", "prop1"],
-                false,
-                false,
-            )],
-            false,
-        );
-        assert!(schema.verify(&[]).is_err());
+            assert!(add_props.is_empty());
+            assert_eq!(drop_props, vec!["prop2"]);
+            assert!(add_indexes.is_empty());
+            assert!(drop_indexes.is_empty());
+        }
 
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![
-                PropertySchema::new("prop1", DataType::Int, None),
-                PropertySchema::new("prop2", DataType::String, None),
-            ],
-            vec![IndexSchema::new(
-                "index",
-                vec!["prop1", "prop2"],
-                false,
-                false,
-            )],
-            false,
-        );
-        assert!(schema.verify(&[]).is_ok());
+        #[test]
+        fn test_change_property_type() {
+            let prop1 = PropertySchema::new("prop1", DataType::Int, None);
+            let prop2 = PropertySchema::new("prop2", DataType::String, None);
+            let old_schema = props_schema(vec![prop1.clone()]);
+            let new_schema = props_schema(vec![prop2.clone()]);
 
-        let schema = IsarSchema::new(
-            "test",
-            None,
-            vec![
-                PropertySchema::new("prop1", DataType::Int, None),
-                PropertySchema::new("prop2", DataType::String, None),
-            ],
-            vec![IndexSchema::new(
-                "index",
-                vec!["prop2", "prop1"],
-                false,
-                true,
-            )],
-            false,
-        );
-        assert!(schema.verify(&[]).is_ok());
+            let (add_props, drop_props, add_indexes, drop_indexes) =
+                new_schema.find_changes(&old_schema);
+
+            assert_eq!(add_props, vec![&prop2]);
+            assert_eq!(drop_props, vec!["prop1"]);
+            assert!(add_indexes.is_empty());
+            assert!(drop_indexes.is_empty());
+            assert!(drop_indexes.is_empty());
+        }
+
+        #[test]
+        fn test_change_object_property_target() {
+            let old_prop = PropertySchema::new("prop1", DataType::Object, Some("embedded"));
+            let old_schema = props_schema(vec![old_prop.clone()]);
+
+            let new_prop = PropertySchema::new("prop1", DataType::Object, Some("embedded2"));
+            let new_schema = props_schema(vec![new_prop.clone()]);
+
+            let (add_props, drop_props, add_indexes, drop_indexes) =
+                new_schema.find_changes(&old_schema);
+
+            assert_eq!(add_props, vec![&new_prop]);
+            assert_eq!(drop_props, vec!["prop1"]);
+            assert!(add_indexes.is_empty());
+            assert!(drop_indexes.is_empty());
+        }
+
+        #[test]
+        fn test_add_index() {
+            let prop = PropertySchema::new("prop1", DataType::Int, None);
+            let index = IndexSchema::new("index1", vec!["prop1"], false, false);
+            let old_schema = props_schema(vec![prop.clone()]);
+            let new_schema = index_schema(vec![prop.clone()], vec![index.clone()]);
+
+            let (add_props, drop_props, add_indexes, drop_indexes) =
+                new_schema.find_changes(&old_schema);
+
+            assert!(add_props.is_empty());
+            assert!(drop_props.is_empty());
+            assert_eq!(add_indexes, vec![&index]);
+            assert!(drop_indexes.is_empty());
+        }
+
+        #[test]
+        fn test_remove_index() {
+            let prop = PropertySchema::new("prop1", DataType::Int, None);
+            let index = IndexSchema::new("index1", vec!["prop1"], false, false);
+            let old_schema = index_schema(vec![prop.clone()], vec![index.clone()]);
+            let new_schema = props_schema(vec![prop.clone()]);
+
+            let (add_props, drop_props, add_indexes, drop_indexes) =
+                new_schema.find_changes(&old_schema);
+
+            assert!(add_props.is_empty());
+            assert!(drop_props.is_empty());
+            assert!(add_indexes.is_empty());
+            assert_eq!(drop_indexes, vec!["index1"]);
+        }
+
+        #[test]
+        fn test_change_index_properties() {
+            let prop1 = PropertySchema::new("prop1", DataType::Int, None);
+            let prop2 = PropertySchema::new("prop2", DataType::Int, None);
+            let old_index = IndexSchema::new("index1", vec!["prop1"], false, false);
+            let old_schema =
+                index_schema(vec![prop1.clone(), prop2.clone()], vec![old_index.clone()]);
+
+            let new_index = IndexSchema::new("index1", vec!["prop1", "prop2"], false, false);
+            let new_schema =
+                index_schema(vec![prop1.clone(), prop2.clone()], vec![new_index.clone()]);
+
+            let (add_props, drop_props, add_indexes, drop_indexes) =
+                new_schema.find_changes(&old_schema);
+
+            assert!(add_props.is_empty());
+            assert!(drop_props.is_empty());
+            assert_eq!(add_indexes, vec![&new_index]);
+            assert_eq!(drop_indexes, vec!["index1"]);
+        }
+
+        #[test]
+        fn test_change_index_uniqueness() {
+            let prop = PropertySchema::new("prop1", DataType::Int, None);
+            let old_index = IndexSchema::new("index1", vec!["prop1"], false, false);
+            let old_schema = index_schema(vec![prop.clone()], vec![old_index.clone()]);
+
+            let new_index = IndexSchema::new("index1", vec!["prop1"], true, false);
+            let new_schema = index_schema(vec![prop.clone()], vec![new_index.clone()]);
+
+            let (add_props, drop_props, add_indexes, drop_indexes) =
+                new_schema.find_changes(&old_schema);
+
+            assert!(add_props.is_empty());
+            assert!(drop_props.is_empty());
+            assert_eq!(add_indexes, vec![&new_index]);
+            assert_eq!(drop_indexes, vec!["index1"]);
+        }
+
+        #[test]
+        fn test_change_index_hash() {
+            let prop = PropertySchema::new("prop1", DataType::String, None);
+            let old_index = IndexSchema::new("index1", vec!["prop1"], false, false);
+            let old_schema = index_schema(vec![prop.clone()], vec![old_index.clone()]);
+
+            let new_index = IndexSchema::new("index1", vec!["prop1"], false, true);
+            let new_schema = index_schema(vec![prop.clone()], vec![new_index.clone()]);
+
+            let (add_props, drop_props, add_indexes, drop_indexes) =
+                new_schema.find_changes(&old_schema);
+
+            assert!(add_props.is_empty());
+            assert!(drop_props.is_empty());
+            assert_eq!(add_indexes, vec![&new_index]);
+            assert_eq!(drop_indexes, vec!["index1"]);
+        }
+
+        #[test]
+        fn test_drop_index_when_property_changed() {
+            let prop1 = PropertySchema::new("prop1", DataType::Int, None);
+            let prop2 = PropertySchema::new("prop2", DataType::Int, None);
+            let old_index = IndexSchema::new("index1", vec!["prop1"], false, false);
+            let old_schema =
+                index_schema(vec![prop1.clone(), prop2.clone()], vec![old_index.clone()]);
+
+            let new_prop1 = PropertySchema::new("prop1", DataType::String, None);
+            let new_schema = index_schema(
+                vec![new_prop1.clone(), prop2.clone()],
+                vec![old_index.clone()],
+            );
+
+            let (add_props, drop_props, add_indexes, drop_indexes) =
+                new_schema.find_changes(&old_schema);
+
+            assert_eq!(add_props, vec![&new_prop1]);
+            assert_eq!(drop_props, vec!["prop1"]);
+            assert_eq!(add_indexes, vec![&old_index]);
+            assert_eq!(drop_indexes, vec!["index1"]);
+        }
     }
 }

@@ -1,13 +1,9 @@
-// ignore_for_file: avoid_redundant_argument_values
-
-import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:isar/isar.dart';
 import 'package:isar_test/isar_test.dart';
 import 'package:test/test.dart';
 
 part 'update_test.g.dart';
 
-@CopyWith()
 @collection
 class Model {
   Model({
@@ -45,6 +41,37 @@ class Model {
   final String? nullableStringProp;
 
   final DateTime dateProp;
+
+  Model copyWith({
+    int? id,
+    bool? boolProp,
+    dynamic nullableBoolProp = 0,
+    byte? byteProp,
+    short? shortProp,
+    int? longProp,
+    float? floatProp,
+    double? doubleProp,
+    String? stringProp,
+    dynamic nullableStringProp = 0,
+    DateTime? dateProp,
+  }) =>
+      Model(
+        id: id ?? this.id,
+        boolProp: boolProp ?? this.boolProp,
+        nullableBoolProp: nullableBoolProp == 0
+            ? this.nullableBoolProp
+            : nullableBoolProp as bool?,
+        byteProp: byteProp ?? this.byteProp,
+        shortProp: shortProp ?? this.shortProp,
+        longProp: longProp ?? this.longProp,
+        floatProp: floatProp ?? this.floatProp,
+        doubleProp: doubleProp ?? this.doubleProp,
+        stringProp: stringProp ?? this.stringProp,
+        nullableStringProp: nullableStringProp == 0
+            ? this.nullableStringProp
+            : nullableStringProp as String?,
+        dateProp: dateProp ?? this.dateProp,
+      );
 
   @override
   bool operator ==(Object other) =>

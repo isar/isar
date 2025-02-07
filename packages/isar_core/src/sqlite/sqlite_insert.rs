@@ -1,7 +1,7 @@
 use super::sql::insert_sql;
-use super::sqlite3::SQLiteStatement;
 use super::sqlite_collection::SQLiteCollection;
 use super::sqlite_txn::SQLiteTxn;
+use super::sqlite3::SQLiteStatement;
 use crate::core::error::{IsarError, Result};
 use crate::core::insert::IsarInsert;
 use ouroboros::self_referencing;

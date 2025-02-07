@@ -1,4 +1,4 @@
-part of isar_generator;
+part of 'isar_generator.dart';
 
 const TypeChecker _collectionChecker = TypeChecker.fromRuntime(Collection);
 const TypeChecker _embeddedChecker = TypeChecker.fromRuntime(Embedded);
@@ -13,17 +13,17 @@ extension on ClassElement {
   List<PropertyInducingElement> get allAccessors {
     final ignoreFields =
         collectionAnnotation?.ignore ?? embeddedAnnotation!.ignore;
-    final allAccessors = [
-      // ignore: deprecated_member_use
-      ...accessors.map((e) => e.variable),
+    final allAccessorsMap = {
       if (collectionAnnotation?.inheritance ?? embeddedAnnotation!.inheritance)
-        for (final supertype in allSupertypes) ...[
+        for (final supertype in allSupertypes) ...{
           if (!supertype.isDartCoreObject)
-            // ignore: deprecated_member_use
-            ...supertype.accessors.map((e) => e.variable),
-        ],
-    ];
-
+            for (final accessor in supertype.accessors)
+              accessor.variable2!.name: accessor.variable2!,
+        },
+      for (final accessor in accessors)
+        accessor.variable2!.name: accessor.variable2!,
+    };
+    final allAccessors = allAccessorsMap.values.toList();
     final usableAccessors = allAccessors.where(
       (e) =>
           e.isPublic &&

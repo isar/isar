@@ -1,4 +1,4 @@
-part of isar;
+part of '../../isar.dart';
 
 class _IsarImpl extends Isar {
   _IsarImpl._(
@@ -26,17 +26,6 @@ class _IsarImpl extends Isar {
     _instances[instanceId] = this;
   }
 
-  static final _instances = <int, _IsarImpl>{};
-
-  final int instanceId;
-  final List<IsarGeneratedSchema> generatedSchemas;
-  final collections = <Type, _IsarCollectionImpl<dynamic, dynamic>>{};
-
-  Pointer<CIsarInstance>? _ptr;
-  Pointer<CIsarTxn>? _txnPtr;
-  bool _txnWrite = false;
-
-  // ignore: sort_constructors_first
   factory _IsarImpl.open({
     required List<IsarGeneratedSchema> schemas,
     required String name,
@@ -45,9 +34,16 @@ class _IsarImpl extends Isar {
     required int? maxSizeMiB,
     required String? encryptionKey,
     required CompactCondition? compactOnLaunch,
+    required int? workerCount,
     String? library,
   }) {
     IsarCore._initialize(library: library);
+
+    final instanceId = Isar.fastHash(name);
+    final instance = _IsarImpl._instances[instanceId];
+    if (instance != null) {
+      return instance;
+    }
 
     if (engine == IsarEngine.isar) {
       if (encryptionKey != null) {
@@ -65,15 +61,9 @@ class _IsarImpl extends Isar {
     final allSchemas = <IsarGeneratedSchema>{
       ...schemas,
       ...schemas.expand((e) => e.embeddedSchemas ?? <IsarGeneratedSchema>[]),
-    };
+    }.toList();
     final schemaJson =
         jsonEncode(allSchemas.map((e) => e.schema.toJson()).toList());
-
-    final instanceId = Isar.fastHash(name);
-    final instance = _IsarImpl._instances[instanceId];
-    if (instance != null) {
-      return instance;
-    }
 
     final namePtr = IsarCore._toNativeString(name);
     final directoryPtr = IsarCore._toNativeString(directory);
@@ -99,16 +89,26 @@ class _IsarImpl extends Isar {
         )
         .checkNoError();
 
-    return _IsarImpl._(instanceId, isarPtrPtr.ptrValue, allSchemas.toList());
+    final isar = _IsarImpl._(instanceId, isarPtrPtr.ptrValue, allSchemas);
+    if (workerCount != null) {
+      isar._initializeIsolatePool(workerCount);
+    }
+
+    return isar;
   }
 
-  // ignore: sort_constructors_first
   factory _IsarImpl.get({
     required int instanceId,
     required List<IsarGeneratedSchema> schemas,
     String? library,
   }) {
     IsarCore._initialize(library: library);
+
+    final instance = _IsarImpl._instances[instanceId];
+    if (instance != null) {
+      return instance;
+    }
+
     var ptr = IsarCore.b.isar_get_instance(instanceId, false);
     if (ptr.isNull) {
       ptr = IsarCore.b.isar_get_instance(instanceId, true);
@@ -121,7 +121,6 @@ class _IsarImpl extends Isar {
     return _IsarImpl._(instanceId, ptr, schemas);
   }
 
-  // ignore: sort_constructors_first
   factory _IsarImpl.getByName({
     required String name,
     required List<IsarGeneratedSchema> schemas,
@@ -138,6 +137,16 @@ class _IsarImpl extends Isar {
     );
   }
 
+  static final _instances = <int, _IsarImpl>{};
+
+  final int instanceId;
+  final List<IsarGeneratedSchema> generatedSchemas;
+  final collections = <Type, _IsarCollectionImpl<dynamic, dynamic>>{};
+
+  Pointer<CIsarInstance>? _ptr;
+  Pointer<CIsarTxn>? _txnPtr;
+  bool _txnWrite = false;
+
   static Future<Isar> openAsync({
     required List<IsarGeneratedSchema> schemas,
     required String directory,
@@ -146,46 +155,64 @@ class _IsarImpl extends Isar {
     int? maxSizeMiB = Isar.defaultMaxSizeMiB,
     String? encryptionKey,
     CompactCondition? compactOnLaunch,
+    int workerCount = 3,
   }) async {
     final library = IsarCore._library;
 
-    final receivePort = ReceivePort();
-    final sendPort = receivePort.sendPort;
-    final isolate = runIsolate(
-      'Isar open async',
-      () async {
-        try {
-          final isar = _IsarImpl.open(
-            schemas: schemas,
-            directory: directory,
-            name: name,
-            engine: engine,
-            maxSizeMiB: maxSizeMiB,
-            encryptionKey: encryptionKey,
-            compactOnLaunch: compactOnLaunch,
-            library: library,
-          );
+    final (instanceId, instanceAddress) = await IsarCore.platform.runIsolate(
+      (_) {
+        final isar = _IsarImpl.open(
+          schemas: schemas,
+          directory: directory,
+          name: name,
+          engine: engine,
+          maxSizeMiB: maxSizeMiB,
+          encryptionKey: encryptionKey,
+          compactOnLaunch: compactOnLaunch,
+          // don't stat an isolate pool in the isolate
+          workerCount: null,
+          library: library,
+        );
 
-          final receivePort = ReceivePort();
-          sendPort.send(receivePort.sendPort);
-          await receivePort.first;
-          isar.close();
-        } catch (e) {
-          sendPort.send(e);
-        }
+        // we do not close the instance here because we want to keep it alive
+        // we do however free the native resources
+        final instanceAddress = isar.getPtr().address;
+        IsarCore._free();
+        return (isar.instanceId, instanceAddress);
       },
     );
 
-    final response = await receivePort.first;
-    if (response is SendPort) {
-      final isar = Isar.get(schemas: schemas, name: name);
-      response.send(null);
-      await isolate;
+    try {
+      final isar = _IsarImpl.get(instanceId: instanceId, schemas: schemas);
+      isar._initializeIsolatePool(workerCount);
       return isar;
-    } else {
-      // ignore: only_throw_errors
-      throw response as Object;
+    } finally {
+      // Close the reference from the isolate
+      final ptr = ptrFromAddress<CIsarInstance>(instanceAddress);
+      final closed = IsarCore.b.isar_close(ptr, false);
+      assert(closed == 0, 'Instance should not have been closed.');
     }
+  }
+
+  void _initializeIsolatePool(int workerCount) {
+    final id = instanceId;
+    final schemas = generatedSchemas;
+    final library = IsarCore._library;
+    final args = (id, schemas, library);
+    IsarCore.platform.startIsolatePool(this, workerCount, (callback) async {
+      final (id, schemas, library) = args;
+      final isar = _IsarImpl.get(
+        instanceId: id,
+        schemas: schemas,
+        library: library,
+      );
+      try {
+        return await callback(isar);
+      } finally {
+        await isar.close();
+        IsarCore._free();
+      }
+    });
   }
 
   static _IsarImpl instance(int instanceId) {
@@ -334,60 +361,10 @@ class _IsarImpl extends Isar {
   }
 
   @override
-  Future<T> readAsyncWith<T, P>(
-    P param,
-    T Function(Isar isar, P param) callback, {
-    String? debugName,
-  }) {
-    if (IsarCore.kIsWeb) {
-      throw UnsupportedError('Watchers are not supported on the web');
-    }
-
-    _checkNotInTxn();
-
-    final instance = instanceId;
-    final library = IsarCore._library;
-    final schemas = generatedSchemas;
-    return runIsolate(
-      debugName ?? 'Isar async read',
-      () => _isarAsync(
-        instanceId: instance,
-        schemas: schemas,
-        write: false,
-        param: param,
-        callback: callback,
-        library: library,
-      ),
-    );
-  }
-
-  @override
-  Future<T> writeAsyncWith<T, P>(
-    P param,
-    T Function(Isar isar, P param) callback, {
-    String? debugName,
-  }) async {
-    if (IsarCore.kIsWeb) {
-      throw UnsupportedError('Watchers are not supported on the web');
-    }
-
-    _checkNotInTxn();
-
-    final instance = instanceId;
-    final library = IsarCore._library;
-    final schemas = generatedSchemas.toList();
-    return runIsolate(
-      debugName ?? 'Isar async write',
-      () {
-        return _isarAsync(
-          instanceId: instance,
-          schemas: schemas,
-          write: true,
-          param: param,
-          callback: callback,
-          library: library,
-        );
-      },
+  Future<T> asyncWith<T, P>(P param, T Function(Isar isar, P param) callback) {
+    return IsarCore.platform.runIsolate(
+      isar: this,
+      (isar) => callback(isar!, param),
     );
   }
 
@@ -420,7 +397,8 @@ class _IsarImpl extends Isar {
   }
 
   @override
-  bool close({bool deleteFromDisk = false}) {
+  Future<bool> close({bool deleteFromDisk = false}) async {
+    await IsarCore.platform.disposeIsolatePool(this);
     final closed = IsarCore.b.isar_close(getPtr(), deleteFromDisk);
     _ptr = null;
     _instances.remove(instanceId);
@@ -433,30 +411,5 @@ class _IsarImpl extends Isar {
       (isarPtr, txnPtr) =>
           IsarCore.b.isar_verify(isarPtr, txnPtr).checkNoError(),
     );
-  }
-}
-
-T _isarAsync<T, P>({
-  required int instanceId,
-  required List<IsarGeneratedSchema> schemas,
-  required bool write,
-  required P param,
-  required T Function(Isar isar, P param) callback,
-  String? library,
-}) {
-  final isar = _IsarImpl.get(
-    instanceId: instanceId,
-    schemas: schemas,
-    library: library,
-  );
-  try {
-    if (write) {
-      return isar.write((isar) => callback(isar, param));
-    } else {
-      return isar.read((isar) => callback(isar, param));
-    }
-  } finally {
-    isar.close();
-    IsarCore._free();
   }
 }

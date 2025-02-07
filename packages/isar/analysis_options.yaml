@@ -10,3 +10,6 @@ analyzer:
     parameter_assignments: ignore
     use_string_in_part_of_directives: ignore
     always_put_required_named_parameters_first: ignore
+    public_member_api_docs: ignore
+    use_string_buffers: ignore
+    join_return_with_assignment: ignore

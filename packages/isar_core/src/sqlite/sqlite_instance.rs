@@ -1,4 +1,3 @@
-use super::sqlite3::SQLite3;
 use super::sqlite_collection::SQLiteCollection;
 use super::sqlite_cursor::SQLiteCursor;
 use super::sqlite_insert::SQLiteInsert;
@@ -8,8 +7,9 @@ use super::sqlite_query_builder::SQLiteQueryBuilder;
 use super::sqlite_reader::SQLiteReader;
 use super::sqlite_txn::SQLiteTxn;
 use super::sqlite_verify::verify_sqlite;
+use super::sqlite3::SQLite3;
 use crate::core::error::{IsarError, Result};
-use crate::core::filter::{ConditionType, Filter, FilterCondition};
+use crate::core::filter::{ConditionType, Filter};
 use crate::core::instance::{Aggregation, CompactCondition, IsarInstance};
 use crate::core::query_builder::IsarQueryBuilder;
 use crate::core::schema::IsarSchema;
@@ -20,6 +20,9 @@ use std::cell::Cell;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::vec;
+
+#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+use super::wasm;
 
 pub(crate) struct SQLiteInstanceInfo {
     pub(crate) instance_id: u32,
@@ -76,7 +79,8 @@ impl IsarInstance for SQLiteInstance {
 
     type Reader<'a> = SQLiteReader<'a>;
 
-    type Cursor<'a> = SQLiteCursor<'a>
+    type Cursor<'a>
+        = SQLiteCursor<'a>
     where
         Self: 'a;
 
@@ -86,7 +90,8 @@ impl IsarInstance for SQLiteInstance {
 
     type Query = SQLiteQuery;
 
-    type QueryCursor<'a> = SQLiteQueryCursor<'a>
+    type QueryCursor<'a>
+        = SQLiteQueryCursor<'a>
     where
         Self: 'a;
 
@@ -120,6 +125,9 @@ impl IsarInstance for SQLiteInstance {
         encryption_key: Option<&str>,
         compact_condition: Option<CompactCondition>,
     ) -> Result<Self> {
+        #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+        wasm::set_wasm_panic_hook();
+
         if compact_condition.is_some() {
             return Err(IsarError::IllegalArgument {});
         }
@@ -135,6 +143,7 @@ impl IsarInstance for SQLiteInstance {
             max_size_mib,
             encryption_key,
         )?;
+
         Ok(Self {
             info,
             sqlite: Rc::new(sqlite),
@@ -216,12 +225,12 @@ impl IsarInstance for SQLiteInstance {
         updates: &[(u16, Option<IsarValue>)],
     ) -> Result<bool> {
         let mut qb = self.query(collection_index)?;
-        qb.set_filter(Filter::Condition(FilterCondition::new(
+        qb.set_filter(Filter::new_condition(
             0,
             ConditionType::Equal,
             vec![Some(IsarValue::Integer(id))],
             false,
-        )));
+        ));
         let q = qb.build();
         let count = self.query_update(txn, &q, None, None, updates)?;
         Ok(count > 0)
@@ -229,12 +238,12 @@ impl IsarInstance for SQLiteInstance {
 
     fn delete<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16, id: i64) -> Result<bool> {
         let mut qb = self.query(collection_index)?;
-        qb.set_filter(Filter::Condition(FilterCondition::new(
+        qb.set_filter(Filter::new_condition(
             0,
             ConditionType::Equal,
             vec![Some(IsarValue::Integer(id))],
             false,
-        )));
+        ));
         let q = qb.build();
         let count = self.query_delete(txn, &q, None, None)?;
         Ok(count > 0)
@@ -279,7 +288,7 @@ impl IsarInstance for SQLiteInstance {
         query: &'a Self::Query,
         offset: Option<u32>,
         limit: Option<u32>,
-    ) -> Result<Self::QueryCursor<'_>> {
+    ) -> Result<Self::QueryCursor<'a>> {
         query.cursor(txn, &self.info.collections, offset, limit)
     }
 

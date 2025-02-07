@@ -1,14 +1,13 @@
-use super::sql::{
-    offset_limit_sql, select_properties_sql, update_properties_sql, FN_FILTER_JSON_COND_PTR_TYPE,
-};
-use super::sqlite3::SQLiteStatement;
+use super::sql::{offset_limit_sql, select_properties_sql, update_properties_sql};
+use super::sql_filter::FN_FILTER_JSON_COND_PTR_TYPE;
 use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
 use super::sqlite_reader::SQLiteReader;
 use super::sqlite_txn::SQLiteTxn;
+use super::sqlite3::SQLiteStatement;
 use crate::core::cursor::IsarQueryCursor;
 use crate::core::data_type::DataType;
 use crate::core::error::Result;
-use crate::core::filter::JsonCondition;
+use crate::core::filter::ConditionType;
 use crate::core::instance::Aggregation;
 use crate::core::value::IsarValue;
 use crate::core::watcher::QueryMatches;
@@ -18,6 +17,14 @@ use std::borrow::Cow;
 pub(crate) enum QueryParam {
     Value(IsarValue),
     JsonCondition(JsonCondition),
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct JsonCondition {
+    pub path: Vec<String>,
+    pub condition_type: ConditionType,
+    pub values: Vec<Option<IsarValue>>,
+    pub case_sensitive: bool,
 }
 
 #[cfg(test)]
@@ -233,7 +240,10 @@ pub struct SQLiteQueryCursor<'a> {
 }
 
 impl<'a> IsarQueryCursor for SQLiteQueryCursor<'a> {
-    type Reader<'b> = SQLiteReader<'b> where Self: 'b;
+    type Reader<'b>
+        = SQLiteReader<'b>
+    where
+        Self: 'b;
 
     fn next(&mut self) -> Option<Self::Reader<'_>> {
         let has_next = self.stmt.step().ok()?;

@@ -9,8 +9,8 @@ use crate::core::data_type::DataType;
 use crate::core::error::{IsarError, Result};
 use crate::core::value::IsarValue;
 use crate::core::watcher::{ChangeSet, CollectionWatchers};
-use std::sync::atomic::{self, AtomicI64};
 use std::sync::Arc;
+use std::sync::atomic::{self, AtomicI64};
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct NativeProperty {
@@ -146,12 +146,12 @@ impl NativeCollection {
                 change_set.register_change(&self.watchers, id, &object);
 
                 if !self.indexes.is_empty() {
-                    let mut buffer = txn.take_buffer();
+                    let mut buffer = txn.request_buffer();
                     // delete old object indexes
                     for index in &self.indexes {
                         buffer = index.delete_for_object(txn, id, object, buffer)?;
                     }
-                    txn.put_buffer(buffer);
+                    txn.recycle_buffer(buffer);
                 }
             }
         }
@@ -161,7 +161,7 @@ impl NativeCollection {
         change_set.register_change(&self.watchers, id, &object);
 
         if !self.indexes.is_empty() {
-            let mut buffer = txn.take_buffer();
+            let mut buffer = txn.request_buffer();
 
             // create new object indexes
             for index in &self.indexes {
@@ -171,7 +171,7 @@ impl NativeCollection {
                 })?;
             }
 
-            txn.put_buffer(buffer);
+            txn.recycle_buffer(buffer);
         }
 
         self.update_auto_increment(id);
@@ -190,11 +190,11 @@ impl NativeCollection {
             change_set.register_change(&self.watchers, id, &object);
 
             if !self.indexes.is_empty() {
-                let mut buffer = txn.take_buffer();
+                let mut buffer = txn.request_buffer();
                 for index in &self.indexes {
                     buffer = index.delete_for_object(txn, id, object, buffer)?;
                 }
-                txn.put_buffer(buffer);
+                txn.recycle_buffer(buffer);
             }
 
             cursor.delete_current()?;
@@ -213,60 +213,27 @@ impl NativeCollection {
         updates: &[(u16, Option<IsarValue>)],
     ) -> Result<bool> {
         if let Some((_, old_object)) = cursor.move_to(&id.to_id_bytes())? {
-            let mut buffer = txn.take_buffer();
+            let mut buffer = txn.request_buffer();
             buffer.extend_from_slice(&old_object);
             let mut new_object = IsarSerializer::new(buffer, 0, self.static_size);
 
             for (property_index, value) in updates {
-                self.write_value(&mut new_object, *property_index as u16, value.as_ref())?;
+                if let Some(p) = self.get_property(*property_index) {
+                    if !new_object.update_value(p.offset, value.as_ref(), p.data_type) {
+                        return Err(IsarError::IllegalArgument {});
+                    }
+                } else {
+                    return Err(IsarError::IllegalArgument {});
+                }
             }
 
-            let buffer = new_object.finish();
+            let buffer = new_object.finish()?;
             self.put(txn, change_set, cursor, id, &buffer)?;
-            txn.put_buffer(buffer);
+            txn.recycle_buffer(buffer);
 
             Ok(true)
         } else {
             Ok(false)
-        }
-    }
-
-    fn write_value(
-        &self,
-        object: &mut IsarSerializer,
-        property_index: u16,
-        value: Option<&IsarValue>,
-    ) -> Result<()> {
-        if let Some(p) = self.get_property(property_index) {
-            match (value, p.data_type) {
-                (None, _) => object.write_null(p.offset, p.data_type),
-                (Some(IsarValue::Bool(value)), DataType::Bool) => {
-                    object.write_bool(p.offset, *value)
-                }
-                (Some(IsarValue::Integer(value)), DataType::Byte) => {
-                    object.write_byte(p.offset, *value as u8)
-                }
-                (Some(IsarValue::Integer(value)), DataType::Int) => {
-                    object.write_int(p.offset, *value as i32)
-                }
-                (Some(IsarValue::Integer(value)), DataType::Long) => {
-                    object.write_long(p.offset, *value)
-                }
-                (Some(IsarValue::Real(value)), DataType::Float) => {
-                    object.write_float(p.offset, *value as f32)
-                }
-                (Some(IsarValue::Real(value)), DataType::Double) => {
-                    object.write_double(p.offset, *value)
-                }
-                (Some(IsarValue::String(value)), DataType::String)
-                | (Some(IsarValue::String(value)), DataType::Json) => {
-                    object.update_dynamic(p.offset, value.as_bytes())
-                }
-                _ => return Err(IsarError::IllegalArgument {}),
-            }
-            Ok(())
-        } else {
-            return Err(IsarError::IllegalArgument {});
         }
     }
 

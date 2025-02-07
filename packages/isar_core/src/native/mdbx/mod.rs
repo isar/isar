@@ -4,7 +4,7 @@ use crate::core::error::{IsarError, Result};
 use byteorder::{ByteOrder, LittleEndian};
 use core::slice;
 use std::cmp::{self, Ordering};
-use std::ffi::{c_int, c_void, CStr};
+use std::ffi::{CStr, c_int, c_void};
 
 pub mod cursor;
 pub mod cursor_iterator;
@@ -26,7 +26,7 @@ pub(crate) const EMPTY_VAL: mdbx_sys::MDBX_val = mdbx_sys::MDBX_val {
 
 #[inline]
 pub(crate) unsafe fn from_mdb_val<'a>(val: &mdbx_sys::MDBX_val) -> &'a [u8] {
-    slice::from_raw_parts(val.iov_base as *const u8, val.iov_len as usize)
+    unsafe { slice::from_raw_parts(val.iov_base as *const u8, val.iov_len as usize) }
 }
 
 #[inline]
@@ -107,7 +107,7 @@ pub(crate) mod osal {
 #[cfg(not(target_os = "windows"))]
 pub(crate) mod osal {
     use super::*;
-    use std::ffi::{c_char, CString};
+    use std::ffi::{CString, c_char};
 
     pub fn str_to_os(str: &str) -> Result<CString> {
         CString::new(str.as_bytes()).map_err(|_| IsarError::IllegalString {})

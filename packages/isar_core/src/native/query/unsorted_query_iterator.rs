@@ -4,7 +4,7 @@ use intmap::IntMap;
 
 pub(crate) struct UnsortedQueryIterator<'a> {
     iterator: IndexIterator<'a>,
-    returned_ids: Option<IntMap<()>>,
+    returned_ids: Option<IntMap<u64, ()>>,
     filter: &'a NativeFilter,
     skip: u32,
     take: u32,

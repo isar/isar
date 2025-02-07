@@ -1,12 +1,12 @@
-use super::query_iterator::QueryIterator;
 use crate::core::data_type::DataType;
 use crate::core::value::IsarValue;
+use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::native_collection::NativeProperty;
 use crate::native::{NULL_INT, NULL_LONG};
 use std::cmp::Ordering;
 
 pub(crate) fn aggregate_sum_average<'a>(
-    iterator: QueryIterator<'a>,
+    iterator: impl Iterator<Item = (i64, IsarDeserializer<'a>)>,
     property: Option<&NativeProperty>,
     aggregate_sum: bool,
 ) -> Option<IsarValue> {
@@ -106,7 +106,7 @@ pub(crate) fn aggregate_sum_average<'a>(
 }
 
 pub(crate) fn aggregate_min_max<'a>(
-    iterator: QueryIterator<'a>,
+    iterator: impl Iterator<Item = (i64, IsarDeserializer<'a>)>,
     property: Option<&NativeProperty>,
     aggregate_min: bool,
 ) -> Option<IsarValue> {
@@ -244,5 +244,201 @@ pub(crate) fn aggregate_min_max<'a>(
         } else {
             None
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::native::isar_serializer::IsarSerializer;
+
+    fn create_deserializer(
+        static_size: u32,
+        write_fn: impl FnOnce(&mut IsarSerializer),
+    ) -> IsarDeserializer<'static> {
+        let mut serializer = IsarSerializer::new(Vec::new(), 0, static_size);
+        write_fn(&mut serializer);
+        let bytes = serializer.finish().unwrap().leak();
+        IsarDeserializer::from_bytes(bytes)
+    }
+
+    fn create_property(data_type: DataType) -> NativeProperty {
+        NativeProperty {
+            data_type,
+            offset: 0,
+            embedded_collection_index: None,
+        }
+    }
+
+    #[test]
+    fn test_aggregate_sum_average_byte() {
+        let property = create_property(DataType::Byte);
+
+        // Test sum
+        let deserializer = create_deserializer(1, |s| s.write_byte(0, 5));
+        let iterator = vec![(0, deserializer)];
+        assert_eq!(
+            aggregate_sum_average(iterator.into_iter(), Some(&property), true),
+            Some(IsarValue::Integer(5))
+        );
+
+        // Test average
+        let deserializer1 = create_deserializer(1, |s| s.write_byte(0, 10));
+        let deserializer2 = create_deserializer(1, |s| s.write_byte(0, 20));
+        let iterator = vec![(0, deserializer1), (0, deserializer2)];
+        assert_eq!(
+            aggregate_sum_average(iterator.into_iter(), Some(&property), false),
+            Some(IsarValue::Real(15.0))
+        );
+    }
+
+    #[test]
+    fn test_aggregate_sum_average_int() {
+        let property = create_property(DataType::Int);
+
+        // Test sum with nulls
+        let deserializer1 = create_deserializer(4, |s| s.write_int(0, 100));
+        let deserializer2 = create_deserializer(4, |s| s.write_null(0, DataType::Int));
+        let deserializer3 = create_deserializer(4, |s| s.write_int(0, 50));
+        let iterator = vec![(0, deserializer1), (0, deserializer2), (0, deserializer3)];
+        assert_eq!(
+            aggregate_sum_average(iterator.into_iter(), Some(&property), true),
+            Some(IsarValue::Integer(150))
+        );
+
+        // Test average with nulls
+        let deserializer1 = create_deserializer(4, |s| s.write_int(0, -10));
+        let deserializer2 = create_deserializer(4, |s| s.write_null(0, DataType::Int));
+        let deserializer3 = create_deserializer(4, |s| s.write_int(0, 20));
+        let iterator = vec![(0, deserializer1), (0, deserializer2), (0, deserializer3)];
+        assert_eq!(
+            aggregate_sum_average(iterator.into_iter(), Some(&property), false),
+            Some(IsarValue::Real(5.0))
+        );
+    }
+
+    #[test]
+    fn test_aggregate_sum_average_float() {
+        let property = create_property(DataType::Float);
+
+        // Test sum with NaN
+        let deserializer1 = create_deserializer(4, |s| s.write_float(0, 1.5));
+        let deserializer2 = create_deserializer(4, |s| s.write_float(0, f32::NAN));
+        let deserializer3 = create_deserializer(4, |s| s.write_float(0, 2.5));
+        let iterator = vec![(0, deserializer1), (0, deserializer2), (0, deserializer3)];
+        assert_eq!(
+            aggregate_sum_average(iterator.into_iter(), Some(&property), true),
+            Some(IsarValue::Real(4.0))
+        );
+
+        // Test average with empty iterator
+        let iterator = Vec::<(i64, IsarDeserializer)>::new();
+        let result = aggregate_sum_average(iterator.into_iter(), Some(&property), false);
+        assert!(result.unwrap().real().unwrap().is_nan());
+    }
+
+    #[test]
+    fn test_aggregate_min_max_int() {
+        let property = create_property(DataType::Int);
+
+        // Test min with nulls
+        let deserializer1 = create_deserializer(4, |s| s.write_int(0, 100));
+        let deserializer2 = create_deserializer(4, |s| s.write_null(0, DataType::Int));
+        let deserializer3 = create_deserializer(4, |s| s.write_int(0, 50));
+        let iterator = vec![(0, deserializer1), (0, deserializer2), (0, deserializer3)];
+        assert_eq!(
+            aggregate_min_max(iterator.into_iter(), Some(&property), true),
+            Some(IsarValue::Integer(50))
+        );
+
+        // Test max with nulls
+        let deserializer1 = create_deserializer(4, |s| s.write_int(0, -10));
+        let deserializer2 = create_deserializer(4, |s| s.write_null(0, DataType::Int));
+        let deserializer3 = create_deserializer(4, |s| s.write_int(0, 20));
+        let iterator = vec![(0, deserializer1), (0, deserializer2), (0, deserializer3)];
+        assert_eq!(
+            aggregate_min_max(iterator.into_iter(), Some(&property), false),
+            Some(IsarValue::Integer(20))
+        );
+    }
+
+    #[test]
+    fn test_aggregate_min_max_string() {
+        let property = create_property(DataType::String);
+
+        // Test min with nulls
+        let deserializer1 = create_deserializer(3, |s| s.write_dynamic(0, b"banana"));
+        let deserializer2 = create_deserializer(3, |s| s.write_null(0, DataType::String));
+        let deserializer3 = create_deserializer(3, |s| s.write_dynamic(0, b"apple"));
+        let iterator = vec![(0, deserializer1), (0, deserializer2), (0, deserializer3)];
+        assert_eq!(
+            aggregate_min_max(iterator.into_iter(), Some(&property), true),
+            Some(IsarValue::String("apple".to_string()))
+        );
+
+        // Test max with nulls
+        let deserializer1 = create_deserializer(3, |s| s.write_dynamic(0, b"cat"));
+        let deserializer2 = create_deserializer(3, |s| s.write_null(0, DataType::String));
+        let deserializer3 = create_deserializer(3, |s| s.write_dynamic(0, b"dog"));
+        let iterator = vec![(0, deserializer1), (0, deserializer2), (0, deserializer3)];
+        assert_eq!(
+            aggregate_min_max(iterator.into_iter(), Some(&property), false),
+            Some(IsarValue::String("dog".to_string()))
+        );
+    }
+
+    #[test]
+    fn test_aggregate_min_max_empty() {
+        let property = create_property(DataType::Int);
+
+        // Test empty iterator
+        let iterator = Vec::<(i64, IsarDeserializer)>::new();
+        assert_eq!(
+            aggregate_min_max(iterator.into_iter(), Some(&property), true),
+            None
+        );
+    }
+
+    #[test]
+    fn test_aggregate_id() {
+        // Test sum of IDs
+        let iterator = vec![
+            (1, IsarDeserializer::from_bytes(&[0, 0, 0])),
+            (2, IsarDeserializer::from_bytes(&[0, 0, 0])),
+        ];
+        assert_eq!(
+            aggregate_sum_average(iterator.into_iter(), None, true),
+            Some(IsarValue::Integer(3))
+        );
+
+        // Test average of IDs
+        let iterator = vec![
+            (10, IsarDeserializer::from_bytes(&[0, 0, 0])),
+            (20, IsarDeserializer::from_bytes(&[0, 0, 0])),
+        ];
+        assert_eq!(
+            aggregate_sum_average(iterator.into_iter(), None, false),
+            Some(IsarValue::Real(15.0))
+        );
+
+        // Test min of IDs
+        let iterator = vec![
+            (100, IsarDeserializer::from_bytes(&[0, 0, 0])),
+            (50, IsarDeserializer::from_bytes(&[0, 0, 0])),
+        ];
+        assert_eq!(
+            aggregate_min_max(iterator.into_iter(), None, true),
+            Some(IsarValue::Integer(50))
+        );
+
+        // Test max of IDs
+        let iterator = vec![
+            (100, IsarDeserializer::from_bytes(&[0, 0, 0])),
+            (50, IsarDeserializer::from_bytes(&[0, 0, 0])),
+        ];
+        assert_eq!(
+            aggregate_min_max(iterator.into_iter(), None, false),
+            Some(IsarValue::Integer(100))
+        );
     }
 }

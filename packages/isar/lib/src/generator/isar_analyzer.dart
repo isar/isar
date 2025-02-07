@@ -1,6 +1,4 @@
-// ignore_for_file: use_string_buffers
-
-part of isar_generator;
+part of 'isar_generator.dart';
 
 class _IsarAnalyzer {
   ObjectInfo analyzeCollection(Element element) {
@@ -138,7 +136,7 @@ class _IsarAnalyzer {
     if (properties.map((e) => e.isarName).toSet().length != properties.length) {
       _err(
         'Two or more properties have the same name.',
-        constructor.enclosingElement,
+        constructor.enclosingElement3,
       );
     }
 
@@ -182,10 +180,10 @@ class _IsarAnalyzer {
     Map<String, dynamic>? enumMap;
     String? enumPropertyName;
 
-    if (_reservedSQLiteNames.contains(property.name.toUpperCase())) {
+    if (_reservedSQLiteNames.contains(property.isarName.toUpperCase())) {
       _err(
-        '${property.name.toUpperCase()} is a reserved keyword and may not be '
-        'used as property name',
+        '${property.isarName.toUpperCase()} is a reserved keyword '
+        'and may not be used as property name',
         property,
       );
     }

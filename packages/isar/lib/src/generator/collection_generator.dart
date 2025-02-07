@@ -1,4 +1,4 @@
-part of isar_generator;
+part of 'isar_generator.dart';
 
 const _ignoreLints = [
   'duplicate_ignore',

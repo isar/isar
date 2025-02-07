@@ -1,6 +1,4 @@
-// ignore_for_file: prefer_asserts_with_message
-
-part of isar;
+part of '../isar.dart';
 
 /// The Isar storage engine.
 enum IsarEngine {
@@ -83,6 +81,7 @@ abstract class Isar {
     int? maxSizeMiB = Isar.defaultMaxSizeMiB,
     String? encryptionKey,
     CompactCondition? compactOnLaunch,
+    int workerCount = 3,
     bool inspector = true,
   }) {
     final isar = _IsarImpl.open(
@@ -93,15 +92,19 @@ abstract class Isar {
       maxSizeMiB: maxSizeMiB,
       encryptionKey: encryptionKey,
       compactOnLaunch: compactOnLaunch,
+      workerCount: workerCount,
     );
 
     /// Tree shake the inspector for profile and release builds.
-    assert(() {
-      if (!IsarCore.kIsWeb && inspector) {
-        _IsarConnect.initialize(isar);
-      }
-      return true;
-    }());
+    assert(
+      () {
+        if (!IsarCore.kIsWeb && inspector) {
+          _IsarConnect.initialize(isar);
+        }
+        return true;
+      }(),
+      'Never happens',
+    );
 
     return isar;
   }
@@ -117,6 +120,7 @@ abstract class Isar {
     int? maxSizeMiB = Isar.defaultMaxSizeMiB,
     String? encryptionKey,
     CompactCondition? compactOnLaunch,
+    int workerCount = 3,
     bool inspector = true,
   }) async {
     final isar = await _IsarImpl.openAsync(
@@ -127,15 +131,19 @@ abstract class Isar {
       maxSizeMiB: maxSizeMiB,
       encryptionKey: encryptionKey,
       compactOnLaunch: compactOnLaunch,
+      workerCount: workerCount,
     );
 
     /// Tree shake the inspector for profile and release builds.
-    assert(() {
-      if (!IsarCore.kIsWeb && inspector) {
-        _IsarConnect.initialize(isar);
-      }
-      return true;
-    }());
+    assert(
+      () {
+        if (!IsarCore.kIsWeb && inspector) {
+          _IsarConnect.initialize(isar);
+        }
+        return true;
+      }(),
+      'Never happens',
+    );
 
     return isar;
   }
@@ -211,55 +219,38 @@ abstract class Isar {
   /// ```
   T write<T>(T Function(Isar isar) callback);
 
-  /// Create an asynchronous read transaction.
+  /// Runs the callback in an isolate and passes a parameter to it.
   ///
-  /// The code inside the callback will be executed in a separate isolate.
+  /// {@template isar_async_with}
+  /// This method is useful for performing long running operations without
+  /// blocking the main thread.
   ///
-  /// Check out the [read] method for more information.
-  Future<T> readAsync<T>(T Function(Isar isar) callback, {String? debugName}) =>
-      readAsyncWith(null, (isar, _) => callback(isar), debugName: debugName);
+  /// Be careful to only send required data to the isolate. This includes
+  /// variables captured in the callback. It is recommended to use a top-level
+  /// function as callback and pass the required data as parameter.
+  ///
+  /// Example:
+  /// ```dart
+  /// void insertManyUsers(Isar isar, List<User> users) {
+  ///   isar.write((isar) {
+  ///     isar.putAll(users);
+  ///   });
+  /// }
+  ///
+  /// await isar.asyncWith(users, insertManyUsers);
+  /// ```
+  /// {@endtemplate}
+  Future<T> asyncWith<T, P>(P param, T Function(Isar isar, P param) callback);
 
-  /// Create an asynchronous read transaction and pass a parameter to the
-  /// callback.
-  ///
-  /// The code inside the callback will be executed in a separate isolate.
-  ///
-  /// Check out the [read] method for more information.
-  Future<T> readAsyncWith<T, P>(
-    P param,
-    T Function(Isar isar, P param) callback, {
-    String? debugName,
-  });
-
-  /// Create an asynchronous read-write transaction.
-  ///
-  /// The code inside the callback will be executed in a separate isolate.
-  ///
-  /// Check out the [write] method for more information.
-  Future<T> writeAsync<T>(
-    T Function(Isar isar) callback, {
-    String? debugName,
-  }) =>
-      writeAsyncWith(null, (isar, _) => callback(isar), debugName: debugName);
-
-  /// Create an asynchronous read-write transaction and pass a parameter to the
-  /// callback.
-  ///
-  /// The code inside the callback will be executed in a separate isolate.
-  ///
-  /// Check out the [write] method for more information.
-  Future<T> writeAsyncWith<T, P>(
-    P param,
-    T Function(Isar isar, P param) callback, {
-    String? debugName,
-  });
-
+  /// {@template isar_get_size}
   /// Returns the size of all the collections in bytes.
   ///
   /// For the native Isar storage engine this method is extremely fast and
   /// independent of the number of objects in the instance.
+  /// {@endtemplate}
   int getSize({bool includeIndexes = false});
 
+  /// {@template isar_copy_to_file}
   /// Copy a compacted version of the database to the specified file.
   ///
   /// If you want to backup your database, you should always use a compacted
@@ -267,19 +258,25 @@ abstract class Isar {
   ///
   /// Do not run this method while other transactions are active to avoid
   /// unnecessary growth of the database.
+  /// {@endtemplate}
   void copyToFile(String path);
 
+  /// {@template isar_clear}
   /// Remove all data in this instance.
+  /// {@endtemplate}
   void clear();
 
   /// Releases an Isar instance.
+  ///
+  /// If this instance uses Isolate workers, their work will be completed then
+  /// they will be terminated.
   ///
   /// If this is the only isolate that holds a reference to this instance, the
   /// Isar instance will be closed. [deleteFromDisk] additionally removes all
   /// database files if enabled.
   ///
   /// Returns whether the instance was actually closed.
-  bool close({bool deleteFromDisk = false});
+  Future<bool> close({bool deleteFromDisk = false});
 
   /// Verifies the integrity of the database. This method is not intended to be
   /// used by end users and should only be used by Isar tests. Never call this
@@ -294,6 +291,95 @@ abstract class Isar {
 
   /// FNV-1a 64bit hash algorithm optimized for Dart Strings
   static int fastHash(String string) {
-    return platformFastHash(string);
+    return IsarCore.platform.fastHash(string);
+  }
+}
+
+extension IsarAsync on Isar {
+  /// Create an asynchronous read transaction.
+  ///
+  /// The code inside the callback will be executed in a separate isolate.
+  ///
+  /// Check out the [read] and [asyncWith] methods for more information.
+  Future<T> readAsync<T>(T Function(Isar isar) callback) {
+    return asyncWith(
+      null,
+      (isar, _) => isar.read((isar) => callback(isar)),
+    );
+  }
+
+  /// Create an asynchronous read transaction and pass a parameter to the
+  /// callback.
+  ///
+  /// The code inside the callback will be executed in a separate isolate.
+  ///
+  /// Check out the [read] and [asyncWith] methods for more information.
+  Future<T> readAsyncWith<T, P>(
+    P param,
+    T Function(Isar isar, P param) callback,
+  ) {
+    return asyncWith(
+      param,
+      (isar, param) => isar.read((isar) => callback(isar, param)),
+    );
+  }
+
+  /// Create an asynchronous read-write transaction.
+  ///
+  /// The code inside the callback will be executed in a separate isolate.
+  ///
+  /// Check out the [write] and [asyncWith] methods for more information.
+  Future<T> writeAsync<T>(T Function(Isar isar) callback) {
+    return asyncWith(
+      null,
+      (isar, _) => isar.write((isar) => callback(isar)),
+    );
+  }
+
+  /// Create an asynchronous read-write transaction and pass a parameter to the
+  /// callback.
+  ///
+  /// The code inside the callback will be executed in a separate isolate.
+  ///
+  /// Check out the [write] and [asyncWith] methods for more information.
+  Future<T> writeAsyncWith<T, P>(
+    P param,
+    T Function(Isar isar, P param) callback,
+  ) {
+    return asyncWith(
+      param,
+      (isar, param) => isar.write((isar) => callback(isar, param)),
+    );
+  }
+
+  /// Runs the callback in an isolate.
+  ///
+  /// {@macro isar_async_with}
+  Future<T> async<T>(T Function(Isar isar) callback) {
+    return asyncWith(null, (isar, _) => callback(isar));
+  }
+
+  /// {@macro isar_get_size}
+  Future<int> getSizeAsync({bool includeIndexes = false}) {
+    return asyncWith(
+      null,
+      (isar, _) => isar.getSize(includeIndexes: includeIndexes),
+    );
+  }
+
+  /// {@macro isar_copy_to_file}
+  Future<void> copyToFileAsync(String path) {
+    return asyncWith(
+      null,
+      (isar, _) => isar.copyToFile(path),
+    );
+  }
+
+  /// {@macro isar_clear}
+  Future<void> clearAsync() {
+    return asyncWith(
+      null,
+      (isar, _) => isar.clear(),
+    );
   }
 }

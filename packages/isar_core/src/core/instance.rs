@@ -73,7 +73,7 @@ pub trait IsarInstance: Sized {
     fn cursor<'a>(&'a self, txn: &'a Self::Txn, collection_index: u16) -> Result<Self::Cursor<'a>>;
 
     fn insert(&self, txn: Self::Txn, collection_index: u16, count: u32)
-        -> Result<Self::Insert<'_>>;
+    -> Result<Self::Insert<'_>>;
 
     fn update(
         &self,
@@ -104,7 +104,7 @@ pub trait IsarInstance: Sized {
         query: &'a Self::Query,
         offset: Option<u32>,
         limit: Option<u32>,
-    ) -> Result<Self::QueryCursor<'_>>;
+    ) -> Result<Self::QueryCursor<'a>>;
 
     fn query_aggregate(
         &self,

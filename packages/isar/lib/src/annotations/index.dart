@@ -1,12 +1,14 @@
-part of isar;
+part of '../../isar.dart';
 
+/// {@template isar_index}
 /// Annotate properties to build an index.
+/// {@endtemplate}
 const index = Index();
 
-/// Annotate properties to build an index.
+/// {@macro isar_index}
 @Target({TargetKind.field, TargetKind.getter})
 class Index {
-  /// Annotate properties to build an index.
+  /// {@macro isar_index}
   const Index({
     this.name,
     this.composite = const [],

@@ -816,29 +816,28 @@ final class CIsarQuery extends ffi.Opaque {}
 
 final class CIsarQueryBuilder extends ffi.Opaque {}
 
+final class CIsarQueryCursor extends ffi.Opaque {}
+
 final class CIsarReader extends ffi.Opaque {}
 
 final class CIsarTxn extends ffi.Opaque {}
 
+final class CIsarUpdate extends ffi.Opaque {}
+
 final class CIsarWriter extends ffi.Opaque {}
+
+final class CFilter extends ffi.Opaque {}
 
 final class CIsarValue extends ffi.Opaque {}
 
 final class CString extends ffi.Opaque {}
 
+final class CWatchHandle extends ffi.Opaque {}
+
 typedef IsarI64 = ffi.Int64;
 typedef DartIsarI64 = int;
-
-final class CIsarQueryCursor extends ffi.Opaque {}
-
-final class CFilter extends ffi.Opaque {}
-
-final class CIsarUpdate extends ffi.Opaque {}
-
 typedef DartPort = ffi.Int64;
 typedef DartDartPort = int;
-
-final class CWatchHandle extends ffi.Opaque {}
 
 const int ERROR_PATH = 1;
 

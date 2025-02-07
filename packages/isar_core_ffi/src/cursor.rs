@@ -1,8 +1,8 @@
-use crate::{isar_to_i64, CIsarCursor, CIsarQueryCursor, CIsarReader, IsarI64};
+use crate::{CIsarCursor, CIsarQueryCursor, CIsarReader, IsarI64, isar_to_i64};
 use isar_core::core::cursor::{IsarCursor, IsarQueryCursor};
 use std::ptr;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_cursor_next(
     cursor: &'static mut CIsarCursor,
     id: IsarI64,
@@ -27,7 +27,7 @@ pub unsafe extern "C" fn isar_cursor_next(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_cursor_free(cursor: *mut CIsarCursor, reader: *mut CIsarReader) {
     if !cursor.is_null() {
         drop(Box::from_raw(cursor));
@@ -37,7 +37,7 @@ pub unsafe extern "C" fn isar_cursor_free(cursor: *mut CIsarCursor, reader: *mut
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_query_cursor_next(
     cursor: &'static mut CIsarQueryCursor,
     old_reader: *mut CIsarReader,
@@ -59,7 +59,7 @@ pub unsafe extern "C" fn isar_query_cursor_next(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_query_cursor_free(
     cursor: *mut CIsarQueryCursor,
     reader: *mut CIsarReader,

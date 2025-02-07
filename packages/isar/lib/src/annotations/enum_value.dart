@@ -1,11 +1,13 @@
-part of isar;
+part of '../../isar.dart';
 
+/// {@template isar_enum_value}
 /// Annotation to specify how an enum property should be serialized.
+/// {@endtemplate}
 const enumValue = EnumValue();
 
-/// Annotation to specify how an enum property should be serialized.
+/// {@macro isar_enum_value}
 @Target({TargetKind.field, TargetKind.getter})
 class EnumValue {
-  /// Annotation to specify how an enum property should be serialized.
+  /// {@macro isar_enum_value}
   const EnumValue();
 }

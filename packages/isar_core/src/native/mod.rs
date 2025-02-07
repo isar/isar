@@ -24,7 +24,7 @@ pub(crate) const NULL_INT: i32 = i32::MIN;
 pub(crate) const NULL_LONG: i64 = i64::MIN;
 pub(crate) const NULL_FLOAT: f32 = f32::NAN;
 pub(crate) const NULL_DOUBLE: f64 = f64::NAN;
-pub(crate) const MAX_OBJ_SIZE: u32 = 2 << 24;
+pub(crate) const MAX_OBJ_SIZE: usize = 2 << 24;
 
 pub trait BytesToId {
     fn to_id(&self) -> i64;

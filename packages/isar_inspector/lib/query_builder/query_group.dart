@@ -111,7 +111,7 @@ class QueryGroup extends StatelessWidget {
                           'Click the group type to change it.',
                           style: TextStyle(
                             color: theme.colorScheme.onPrimaryContainer
-                                .withOpacity(0.5),
+                                .withValues(alpha: 0.5),
                           ),
                         ),
                       ),

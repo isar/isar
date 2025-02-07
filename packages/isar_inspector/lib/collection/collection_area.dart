@@ -1,4 +1,4 @@
-// ignore_for_file: type_annotate_public_apis, avoid_web_libraries_in_flutter
+// ignore_for_file: document_ignores, avoid_web_libraries_in_flutter, avoid_catches_without_on_clauses
 
 import 'dart:async';
 import 'dart:convert';
@@ -44,13 +44,13 @@ class _CollectionAreaState extends State<CollectionArea> {
   final controller = ScrollController();
   late final StreamSubscription<void> querySubscription;
 
-  var page = 0;
-  var filter = FilterGroup(true, []);
-  late var sortProperty = widget.schema.idName!;
-  var sortAsc = true;
+  int page = 0;
+  FilterGroup filter = FilterGroup(true, []);
+  late String sortProperty = widget.schema.idName!;
+  bool sortAsc = true;
 
-  var objects = <IsarObject>[];
-  var objectsCount = 0;
+  List<IsarObject> objects = <IsarObject>[];
+  int objectsCount = 0;
 
   @override
   void initState() {

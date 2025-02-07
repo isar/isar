@@ -45,9 +45,15 @@ impl<'a> NativeReader<'a> {
 }
 
 impl<'a> IsarReader for NativeReader<'a> {
-    type ObjectReader<'b> = NativeReader<'b> where 'a: 'b;
+    type ObjectReader<'b>
+        = NativeReader<'b>
+    where
+        'a: 'b;
 
-    type ListReader<'b> = NativeListReader<'b> where 'a: 'b;
+    type ListReader<'b>
+        = NativeListReader<'b>
+    where
+        'a: 'b;
 
     fn id_name(&self) -> Option<&str> {
         self.collection.id_name.as_deref()
@@ -181,9 +187,15 @@ pub struct NativeListReader<'a> {
 }
 
 impl<'a> IsarReader for NativeListReader<'a> {
-    type ObjectReader<'b> = NativeReader<'b> where 'a: 'b;
+    type ObjectReader<'b>
+        = NativeReader<'b>
+    where
+        'a: 'b;
 
-    type ListReader<'b> = NativeListReader<'b> where 'a: 'b;
+    type ListReader<'b>
+        = NativeListReader<'b>
+    where
+        'a: 'b;
 
     fn id_name(&self) -> Option<&str> {
         None
@@ -553,22 +565,265 @@ mod test {
         assert_eq!(reader.read_string(3), Some("d"));
     }
 
-    /*#[test]
-    fn test_reader_read_list() {
-        let col: NativeCollection = get_collection(vec![IntList, Byte, String]);
+    #[test]
+    fn test_list_reader_basics() {
+        let bytes = [6, 0, 0, 1, 0, 0, 0];
+        let list_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Bool,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+
+        assert_eq!(list_reader.id_name(), None);
+        assert_eq!(list_reader.properties().count(), 0);
+        assert_eq!(list_reader.read_id(), NULL_LONG);
+    }
+
+    #[test]
+    fn test_list_reader_bool() {
+        let bytes = [6, 0, 0, 1, 0, 0, 0];
+        let list_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Bool,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+
+        assert_eq!(list_reader.read_bool(0), Some(true));
+        assert_eq!(list_reader.read_bool(1), Some(false));
+        assert_eq!(list_reader.read_bool(2), Some(false));
+
+        // Test with wrong data type
+        let wrong_type_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Int,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+        assert_eq!(wrong_type_reader.read_bool(0), None);
+    }
+
+    #[test]
+    fn test_list_reader_byte() {
+        let bytes = [3, 0, 0, 42, 255, 0];
+        let list_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Byte,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+
+        assert_eq!(list_reader.read_byte(0), 42);
+        assert_eq!(list_reader.read_byte(1), 255);
+        assert_eq!(list_reader.read_byte(2), 0);
+
+        // Test with wrong data type
+        let wrong_type_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Int,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+        assert_eq!(wrong_type_reader.read_byte(0), 0);
+    }
+
+    #[test]
+    fn test_list_reader_int() {
         let bytes = concat!(
-            [7, 0, 0, 7, 0, 0, 55, 20, 0, 0],
-            [6, 0, 0, 7, 0, 0, 13, 0, 0, 3, 0, 0, 97, 98, 99, 2, 0, 0, 100, 101],
-            [1, 0, 0, 102]
+            [12, 0, 0],
+            42i32.to_le_bytes(),
+            (-123i32).to_le_bytes(),
+            0i32.to_le_bytes()
         );
-        let reader = NativeReader::new(0, IsarDeserializer::from_bytes(&bytes), &col1, &cols);
+        let list_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Int,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
 
-        let (list, len) = reader.read_list(1).unwrap();
-        assert_eq!(nested.read_bool(1), Some(true));
-        assert_eq!(nested.read_string(2), Some("abc"));
-        assert_eq!(nested.read_int(3), NULL_INT);
+        assert_eq!(list_reader.read_int(0), 42);
+        assert_eq!(list_reader.read_int(1), -123);
+        assert_eq!(list_reader.read_int(2), 0);
 
-        assert_eq!(reader.read_bool(2), Some(true));
-        assert_eq!(reader.read_string(3), Some("d"));
+        // Test with wrong data type
+        let wrong_type_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Long,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+        assert_eq!(wrong_type_reader.read_int(0), NULL_INT);
+    }
+
+    #[test]
+    fn test_list_reader_float() {
+        let bytes = concat!(
+            [12, 0, 0],
+            42.5f32.to_le_bytes(),
+            (-123.75f32).to_le_bytes(),
+            0f32.to_le_bytes()
+        );
+        let list_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Float,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+
+        assert_eq!(list_reader.read_float(0), 42.5);
+        assert_eq!(list_reader.read_float(1), -123.75);
+        assert_eq!(list_reader.read_float(2), 0.0);
+
+        // Test with wrong data type
+        let wrong_type_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Double,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+        assert!(wrong_type_reader.read_float(0).is_nan());
+    }
+
+    #[test]
+    fn test_list_reader_long() {
+        let bytes = concat!(
+            [24, 0, 0],
+            42i64.to_le_bytes(),
+            (-123i64).to_le_bytes(),
+            0i64.to_le_bytes()
+        );
+        let list_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Long,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+
+        assert_eq!(list_reader.read_long(0), 42);
+        assert_eq!(list_reader.read_long(1), -123);
+        assert_eq!(list_reader.read_long(2), 0);
+
+        // Test with wrong data type
+        let wrong_type_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Int,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+        assert_eq!(wrong_type_reader.read_long(0), NULL_LONG);
+    }
+
+    #[test]
+    fn test_list_reader_double() {
+        let bytes = concat!(
+            [24, 0, 0],
+            42.5f64.to_le_bytes(),
+            (-123.75f64).to_le_bytes(),
+            0f64.to_le_bytes()
+        );
+        let list_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Double,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+
+        assert_eq!(list_reader.read_double(0), 42.5);
+        assert_eq!(list_reader.read_double(1), -123.75);
+        assert_eq!(list_reader.read_double(2), 0.0);
+
+        // Test with wrong data type
+        let wrong_type_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Float,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+        assert!(wrong_type_reader.read_double(0).is_nan());
+    }
+
+    /*#[test]
+    fn test_list_reader_string() {
+        let bytes = [13, 0, 0, 3, 0, 0, 97, 98, 99, 2, 0, 0, 100, 101];
+        let list_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: String,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+
+        assert_eq!(list_reader.read_string(0), Some("abc"));
+        assert_eq!(list_reader.read_string(1), Some("de"));
+
+        // Test with wrong data type
+        let wrong_type_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Int,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+        assert_eq!(wrong_type_reader.read_string(0), None);
     }*/
+
+    #[test]
+    fn test_list_reader_blob() {
+        let list_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&[0, 0, 0]),
+            data_type: ByteList,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+
+        // Nested lists are not supported
+        assert_eq!(list_reader.read_blob(0), None);
+    }
+
+    /*#[test]
+    fn test_list_reader_object() {
+        let col2: NativeCollection = get_collection(vec![Bool, String]);
+        let bytes = concat!(
+            [20, 0, 0],
+            [4, 0, 0, 1, 4, 0, 0, 3, 0, 0, 97, 98, 99],
+            [4, 0, 0, 0, 4, 0, 0, 2, 0, 0, 100, 101]
+        );
+        let list_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Object,
+            embedded_collection_index: Some(0),
+            all_collections: &[col2],
+        };
+
+        let obj1 = list_reader.read_object(0).unwrap();
+        assert_eq!(obj1.read_bool(1), Some(true));
+        assert_eq!(obj1.read_string(2), Some("abc"));
+
+        let obj2 = list_reader.read_object(1).unwrap();
+        assert_eq!(obj2.read_bool(1), Some(false));
+        assert_eq!(obj2.read_string(2), Some("de"));
+
+        // Test with wrong data type
+        let wrong_type_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&bytes),
+            data_type: Int,
+            embedded_collection_index: Some(0),
+            all_collections: &[get_collection(vec![Bool, String])],
+        };
+        assert!(wrong_type_reader.read_object(0).is_none());
+    }*/
+
+    #[test]
+    fn test_list_reader_nested_list() {
+        let list_reader = NativeListReader {
+            list: IsarDeserializer::from_bytes(&[0, 0, 0]),
+            data_type: ByteList,
+            embedded_collection_index: None,
+            all_collections: &[],
+        };
+
+        // Nested lists are not supported
+        let result = list_reader.read_list(0);
+        assert!(result.is_none());
+    }
 }

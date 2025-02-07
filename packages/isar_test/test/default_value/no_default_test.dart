@@ -102,7 +102,7 @@ void main() {
       final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
-      isar1.close();
+      expect(await isar1.close(), true);
 
       final isar2 = await openTempIsar([NoDefaultModelSchema], name: isarName);
       final obj = isar2.noDefaultModels.get(0)!;
@@ -127,7 +127,7 @@ void main() {
       final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
-      isar1.close();
+      expect(await isar1.close(), true);
 
       final isar2 = await openTempIsar([NoDefaultModelSchema], name: isarName);
       final col = isar2.noDefaultModels;
@@ -155,7 +155,7 @@ void main() {
       final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
-      isar1.close();
+      expect(await isar1.close(), true);
 
       final isar2 =
           await openTempIsar([NoDefaultListModelSchema], name: isarName);
@@ -179,7 +179,7 @@ void main() {
       final isar1 = await openTempIsar([EmptyModelSchema]);
       isar1.write((isar) => isar.emptyModels.put(emptyObj));
       final isarName = isar1.name;
-      isar1.close();
+      expect(await isar1.close(), true);
 
       final isar2 =
           await openTempIsar([NoDefaultListModelSchema], name: isarName);

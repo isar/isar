@@ -1,7 +1,7 @@
 use arc_swap::ArcSwap;
 use intmap::IntMap;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 static WATCHER_ID: AtomicU64 = AtomicU64::new(0);
 
@@ -57,7 +57,7 @@ pub(crate) trait QueryMatches: Clone {
 }
 
 pub(crate) struct ChangeSet {
-    changes: IntMap<Arc<Watcher>>,
+    changes: IntMap<u64, Arc<Watcher>>,
 }
 
 impl ChangeSet {
@@ -118,7 +118,7 @@ impl ChangeSet {
 #[derive(Clone)]
 struct RawCollectionWatchers<Q: QueryMatches> {
     watchers: Vec<Arc<Watcher>>,
-    object_watchers: IntMap<Vec<Arc<Watcher>>>,
+    object_watchers: IntMap<u64, Vec<Arc<Watcher>>>,
     query_watchers: Vec<(Q, Arc<Watcher>)>,
 }
 

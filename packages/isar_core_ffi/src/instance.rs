@@ -1,5 +1,5 @@
 use crate::{
-    dart_fast_hash, i64_to_isar, isar_to_i64, CIsarCursor, CIsarInstance, CIsarTxn, IsarI64,
+    CIsarCursor, CIsarInstance, CIsarTxn, IsarI64, dart_fast_hash, i64_to_isar, isar_to_i64,
 };
 use isar_core::core::error::IsarError;
 use isar_core::core::instance::{CompactCondition, IsarInstance};
@@ -15,12 +15,12 @@ use isar_core::sqlite::sqlite_instance::SQLiteInstance;
 
 include!(concat!(env!("OUT_DIR"), "/version.rs"));
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_version() -> *const c_char {
     ISAR_VERSION.as_ptr() as *const c_char
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_get_instance(instance_id: u32, sqlite: bool) -> *const CIsarInstance {
     if sqlite {
         #[cfg(feature = "sqlite")]
@@ -36,7 +36,7 @@ pub unsafe extern "C" fn isar_get_instance(instance_id: u32, sqlite: bool) -> *c
     ptr::null()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_open_instance(
     isar: *mut *const CIsarInstance,
     instance_id: u32,
@@ -113,7 +113,7 @@ pub unsafe extern "C" fn isar_open_instance(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_get_name(isar: &'static CIsarInstance, name: *mut *const u8) -> u32 {
     let value = match isar {
         #[cfg(feature = "native")]
@@ -125,7 +125,7 @@ pub unsafe extern "C" fn isar_get_name(isar: &'static CIsarInstance, name: *mut 
     value.len() as u32
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_get_dir(isar: &'static CIsarInstance, dir: *mut *const u8) -> u32 {
     let value = match isar {
         #[cfg(feature = "native")]
@@ -137,7 +137,7 @@ pub unsafe extern "C" fn isar_get_dir(isar: &'static CIsarInstance, dir: *mut *c
     value.len() as u32
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_change_encryption_key(
     isar: &'static CIsarInstance,
     encryption_key: *mut String,
@@ -174,7 +174,7 @@ unsafe fn _isar_txn_begin(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_txn_begin(
     isar: &'static CIsarInstance,
     txn: *mut *const CIsarTxn,
@@ -193,7 +193,7 @@ pub unsafe extern "C" fn isar_txn_begin(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_txn_commit(isar: &'static CIsarInstance, txn: *mut CIsarTxn) -> u8 {
     isar_pause_isolate! {
         isar_try! {
@@ -209,7 +209,7 @@ pub unsafe extern "C" fn isar_txn_commit(isar: &'static CIsarInstance, txn: *mut
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_txn_abort(isar: &'static CIsarInstance, txn: *mut CIsarTxn) {
     let txn = *Box::from_raw(txn);
     match (isar, txn) {
@@ -225,7 +225,7 @@ pub unsafe extern "C" fn isar_txn_abort(isar: &'static CIsarInstance, txn: *mut 
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_auto_increment(
     isar: &'static CIsarInstance,
     collection_index: u16,
@@ -239,7 +239,7 @@ pub unsafe extern "C" fn isar_auto_increment(
     i64_to_isar(id)
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_cursor(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
@@ -264,7 +264,7 @@ pub unsafe extern "C" fn isar_cursor(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_delete(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
@@ -288,7 +288,7 @@ pub unsafe extern "C" fn isar_delete(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_count(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
@@ -311,7 +311,7 @@ pub unsafe extern "C" fn isar_count(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_clear(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
@@ -332,7 +332,7 @@ pub unsafe extern "C" fn isar_clear(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_get_size(
     isar: &'static CIsarInstance,
     txn: &'static CIsarTxn,
@@ -352,7 +352,7 @@ pub unsafe extern "C" fn isar_get_size(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_import_json(
     isar: &'static CIsarInstance,
     txn: *mut *mut CIsarTxn,
@@ -381,7 +381,7 @@ pub unsafe extern "C" fn isar_import_json(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_copy(isar: &'static CIsarInstance, path: *mut String) -> u8 {
     isar_pause_isolate! {
         isar_try! {
@@ -396,7 +396,7 @@ pub unsafe extern "C" fn isar_copy(isar: &'static CIsarInstance, path: *mut Stri
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_verify(isar: &'static CIsarInstance, txn: &'static CIsarTxn) -> u8 {
     isar_try! {
         return match (isar, txn) {
@@ -409,7 +409,7 @@ pub unsafe extern "C" fn isar_verify(isar: &'static CIsarInstance, txn: &'static
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_close(isar: *mut CIsarInstance, delete: bool) -> u8 {
     isar_pause_isolate! {
         let isar = *Box::from_raw(isar);

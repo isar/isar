@@ -1,4 +1,4 @@
-part of isar;
+part of '../../isar.dart';
 
 class _IsarQueryImpl<T> extends IsarQuery<T> {
   _IsarQueryImpl({
@@ -198,17 +198,7 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
   }
 
   @override
-  Stream<List<T>> watch({
-    bool fireImmediately = false,
-    int? offset,
-    int? limit,
-  }) {
-    return watchLazy(fireImmediately: fireImmediately)
-        .asyncMap((event) => findAllAsync(offset: offset, limit: limit));
-  }
-
-  @override
-  Stream<void> watchLazy({bool fireImmediately = false}) {
+  Stream<void> watch() {
     if (IsarCore.kIsWeb) {
       throw UnsupportedError('Watchers are not supported on the web');
     }
@@ -233,10 +223,6 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
         port.close();
       },
     );
-
-    if (fireImmediately) {
-      controller.add(null);
-    }
 
     controller.addStream(port);
     return controller.stream;

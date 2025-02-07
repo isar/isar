@@ -35,7 +35,7 @@ void main() async {
       isar.write((isar) {
         isar.models.put(const Model(1, 'abc'));
       });
-      expect(isar.close(), true);
+      expect(await isar.close(), true);
 
       final isar2 = await Isar.openAsync(
         schemas: [ModelSchema],
@@ -45,11 +45,11 @@ void main() async {
       );
 
       expect(isar2.models.get(1), const Model(1, 'abc'));
-      expect(isar2.close(), true);
+      expect(await isar2.close(), true);
     });
 
     isarTest('Bulk insert', () async {
-      final futures = List.generate(100, (index) {
+      final futures = List.generate(100, (index) async {
         return isar.writeAsyncWith(index, (isar, index) {
           isar.models.putAll([
             Model(index * 100 + 1, 'value1'),

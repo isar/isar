@@ -50,7 +50,7 @@ class PackageHeader extends ConsumerWidget {
           Text(
             package.description!.trim(),
             style: theme.textTheme.bodyMedium!.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.9),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
             ),
           ),
         ]
@@ -219,7 +219,7 @@ class ScoreItem extends StatelessWidget {
               title,
               style: theme.textTheme.labelSmall!.copyWith(
                 fontSize: 9,
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],

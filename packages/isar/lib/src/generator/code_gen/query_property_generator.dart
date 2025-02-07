@@ -1,6 +1,4 @@
-// ignore_for_file: use_string_buffers
-
-part of isar_generator;
+part of '../isar_generator.dart';
 
 String _generatePropertyQuery(ObjectInfo oi) {
   var code = '''

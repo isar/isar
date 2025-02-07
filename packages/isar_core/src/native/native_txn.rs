@@ -1,10 +1,10 @@
+use super::IdToBytes;
 use super::index_key::IndexKey;
 use super::mdbx::cursor::{Cursor, UnboundCursor};
 use super::mdbx::cursor_iterator::CursorIterator;
 use super::mdbx::db::Db;
 use super::mdbx::env::Env;
 use super::mdbx::txn::Txn;
-use super::IdToBytes;
 use crate::core::error::Result;
 use crate::core::watcher::ChangeSet;
 use std::cell::{Cell, RefCell, RefMut};
@@ -99,11 +99,11 @@ impl NativeTxn {
         self.txn.abort()
     }
 
-    pub(crate) fn take_buffer(&self) -> Vec<u8> {
+    pub(crate) fn request_buffer(&self) -> Vec<u8> {
         self.buffer.replace(None).unwrap_or_else(Vec::new)
     }
 
-    pub(crate) fn put_buffer(&self, mut buffer: Vec<u8>) {
+    pub(crate) fn recycle_buffer(&self, mut buffer: Vec<u8>) {
         buffer.clear();
         self.buffer.replace(Some(buffer));
     }

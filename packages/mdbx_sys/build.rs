@@ -49,52 +49,37 @@ impl ParseCallbacks for Callbacks {
     }
 }
 
-const LIBMDBX_REPO: &str = "https://github.com/isar/libmdbx.git";
-const LIBMDBX_TAG: &str = "v0.12.10";
+const LIBMDBX_VERSION: &str = "0.13.3";
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "12.0");
     env::set_var("RUST_BACKTRACE", "full");
 
-    let is_android = env::var("CARGO_CFG_TARGET_OS").unwrap() == "android";
-
     let _ = fs::remove_dir_all("libmdbx");
+    fs::create_dir("libmdbx").unwrap();
 
-    Command::new("git")
-        .arg("clone")
-        .arg(LIBMDBX_REPO)
-        .arg("--branch")
-        .arg(LIBMDBX_TAG)
+    // download amalgamated source
+    Command::new("curl")
+        .arg("-O")
+        .arg(format!(
+            "https://libmdbx.dqdkfa.ru/release/libmdbx-amalgamated-{}.tar.xz",
+            LIBMDBX_VERSION
+        ))
+        .current_dir("libmdbx")
         .output()
         .unwrap();
 
-    Command::new("make")
-        .arg("release-assets")
+    // unzip file
+    Command::new("tar")
+        .arg("-xf")
+        .arg(format!("libmdbx-amalgamated-{}.tar.xz", LIBMDBX_VERSION))
         .current_dir("libmdbx")
         .output()
         .unwrap();
 
     let mut mdbx = PathBuf::from(&env::var("CARGO_MANIFEST_DIR").unwrap());
     mdbx.push("libmdbx");
-    mdbx.push("dist");
-
-    let core_path = mdbx.join("mdbx.c");
-    let mut core = fs::read_to_string(core_path.as_path()).unwrap();
-    core = core.replace("!CharToOemBuffA(buf, buf, size)", "false");
-    if is_android {
-        core = core.replace(
-            "memset(ior, -1, sizeof(osal_ioring_t))",
-            "memset(ior, 0, sizeof(osal_ioring_t))",
-        );
-        core = core.replace("unlikely(linux_kernel_version < 0x04000000)", "false");
-        core = core.replace(
-            "assert(linux_kernel_version >= 0x03060000);",
-            "if (linux_kernel_version >= 0x03060000) return MDBX_SUCCESS;
-            __fallthrough",
-        );
-    }
-    fs::write(core_path.as_path(), core).unwrap();
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
@@ -103,7 +88,7 @@ fn main() {
         .allowlist_var("^(MDBX|mdbx)_.*")
         .allowlist_type("^(MDBX|mdbx)_.*")
         .allowlist_function("^(MDBX|mdbx)_.*")
-        .rustified_enum("^(MDBX_option_t|MDBX_cursor_op)")
+        .rustified_enum("^(MDBX_option|MDBX_cursor_op)")
         .size_t_is_usize(false)
         .ctypes_prefix("std::ffi")
         .parse_callbacks(Box::new(Callbacks))
@@ -154,7 +139,7 @@ fn main() {
             .define("MDBX_BUILD_SHARED_LIBRARY", "0")
             .define("MDBX_LOCK_SUFFIX", "\".lock\"")
             .define("MDBX_TXN_CHECKOWNER", "0")
-            .define("MDBX_OSX_SPEED_INSTEADOF_DURABILITY", "1")
+            .define("MDBX_APPLE_SPEED_INSTEADOF_DURABILITY", "1")
             .define("MDBX_HAVE_BUILTIN_CPU_SUPPORTS", "0")
             .define("NDEBUG", "1")
             .file(mdbx.join("mdbx.c"))

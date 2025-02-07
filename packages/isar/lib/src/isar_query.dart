@@ -1,4 +1,4 @@
-part of isar;
+part of '../isar.dart';
 
 /// Querying is how you find records that match certain conditions.
 ///
@@ -44,6 +44,9 @@ abstract class IsarQuery<T> {
   /// {@macro aggregation_is_empty}
   bool isEmpty() => aggregate(Aggregation.isEmpty) ?? true;
 
+  /// {@macro aggregation_is_not_empty}
+  bool isNotEmpty() => !isEmpty();
+
   /// @nodoc
   @protected
   R? aggregate<R>(Aggregation op);
@@ -54,24 +57,12 @@ abstract class IsarQuery<T> {
   List<Map<String, dynamic>> exportJson({int? offset, int? limit});
 
   /// {@template query_watch}
-  /// Create a watcher that yields the results of this query whenever its
-  /// results have (potentially) changed.
+  /// Watch the query for changes. When the query results potentially change,
+  /// the stream will emit a null value.
   ///
-  /// If you don't always use the results, consider using `watchLazy` and rerun
-  /// the query manually. If [fireImmediately] is `true`, the results will be
-  /// sent to the consumer immediately.
+  /// It is not guaranteed that the query results are actually changed.
   /// {@endtemplate}
-  Stream<List<T>> watch({
-    bool fireImmediately = false,
-    int? offset,
-    int? limit,
-  });
-
-  /// {@template query_watch_lazy}
-  /// Watch the query for changes. If [fireImmediately] is `true`, an event will
-  /// be fired immediately.
-  /// {@endtemplate}
-  Stream<void> watchLazy({bool fireImmediately = false});
+  Stream<void> watch();
 
   /// Release all resources associated with this query.
   void close();

@@ -37,7 +37,7 @@ class MarkdownViewer extends ConsumerWidget {
           builder: (context) {
             final code = context.element!.text;
             final codeBgColor =
-                theme.colorScheme.secondaryContainer.withOpacity(0.25);
+                theme.colorScheme.secondaryContainer.withValues(alpha: 0.25);
             if (code.contains('\n')) {
               return FadingScroll(
                 builder: (context, controller) {

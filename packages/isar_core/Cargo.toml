@@ -2,16 +2,16 @@
 name = "isar-core"
 version = "0.0.0"
 authors = ["Simon Choi"]
-edition = "2021"
+edition = "2024"
 
 [dependencies]
-itertools = "0.13"
+itertools = "0.14"
 enum_dispatch = "0.3.13"
 xxhash-rust = { version = "0.8.10", features = ["xxh3"] }
 serde =  { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["raw_value"] }
 byteorder = "1"
-intmap = "2.0"
+intmap = "3.1"
 snafu = "0.8"
 ouroboros = "0.18"
 base64 = "0.22"
@@ -20,14 +20,13 @@ parking_lot = "0.12"
 proc-macro2 = "1"
 arc-swap = "1.7"
 
-libsqlite3-sys = { git = "https://github.com/isar/rusqlite.git", branch = "wasm", features=["bundled"], optional = true  }
+libsqlite3-sys = { git = "https://github.com/isar/rusqlite.git", branch = "wasm-2", features=["bundled"], optional = true  }
 mdbx-sys = { package = "mdbx-sys", path = "../mdbx_sys", optional = true  }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 widestring = "1.0"
 
 [dev-dependencies]
-rand = "0.8.5"
 cfg-if = "1"
 float_next_after = "1"
 

@@ -1,7 +1,6 @@
 use super::isar_serializer::IsarSerializer;
 use super::native_collection::NativeCollection;
 use super::native_txn::{NativeTxn, TxnCursor};
-use super::MAX_OBJ_SIZE;
 use crate::core::error::{IsarError, Result};
 use crate::core::insert::IsarInsert;
 use crate::core::watcher::ChangeSet;
@@ -56,7 +55,7 @@ impl<'a> NativeInsert<'a> {
         all_collections: &'a Vec<NativeCollection>,
         count: u32,
     ) -> Result<Self> {
-        let buffer = txn.take_buffer();
+        let buffer = txn.request_buffer();
         let txn_cursor = TxnWithCursor::open(txn, collection)?;
         let insert = Self {
             txn_cursor,
@@ -74,10 +73,7 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
 
     fn save(&mut self, id: i64) -> Result<()> {
         if self.remaining > 0 {
-            let mut buffer = self.object.finish();
-            if buffer.len() > MAX_OBJ_SIZE as usize {
-                return Result::Err(IsarError::ObjectLimitReached {});
-            }
+            let mut buffer = self.object.finish()?;
             self.txn_cursor.put(self.collection, id, &buffer)?;
 
             self.remaining -= 1;
@@ -94,7 +90,7 @@ impl<'a> IsarInsert<'a> for NativeInsert<'a> {
             Err(IsarError::InsertIncomplete {})
         } else {
             let txn = self.txn_cursor.close();
-            txn.put_buffer(self.object.finish());
+            txn.recycle_buffer(self.object.finish()?);
             Ok(txn)
         }
     }

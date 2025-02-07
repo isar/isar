@@ -1,7 +1,4 @@
-// ignore_for_file: use_string_buffers, no_default_cases,
-// ignore_for_file: always_put_required_named_parameters_first
-
-part of isar_generator;
+part of '../isar_generator.dart';
 
 String _generateDeserialize(ObjectInfo object) {
   var code = '''
@@ -204,16 +201,6 @@ String _deserialize({
             ${transform('DateTime.fromMicrosecondsSinceEpoch(value, isUtc: true)$toLocal')}
           }
         }''';
-    case IsarType.duration:
-      return '''
-        {
-          final value = IsarCore.readLong(reader, $index);
-          if (value == $_nullLong) {
-            ${transform(defaultValue)}
-          } else {
-            ${transform('Duration(milliseconds: value)')}
-          }
-        }''';
     case IsarType.double:
       if (defaultValue == 'double.nan') {
         return transform('IsarCore.readDouble(reader, $index)');
@@ -255,7 +242,6 @@ String _deserialize({
     case IsarType.floatList:
     case IsarType.longList:
     case IsarType.dateTimeList:
-    case IsarType.durationList:
     case IsarType.doubleList:
     case IsarType.stringList:
     case IsarType.objectList:

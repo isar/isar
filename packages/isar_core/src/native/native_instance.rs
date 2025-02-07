@@ -18,7 +18,7 @@ use parking_lot::Mutex;
 use std::fs::remove_file;
 use std::sync::{Arc, LazyLock};
 
-static INSTANCES: LazyLock<Mutex<IntMap<Arc<NativeInstance>>>> =
+static INSTANCES: LazyLock<Mutex<IntMap<u64, Arc<NativeInstance>>>> =
     LazyLock::new(|| Mutex::new(IntMap::new()));
 
 pub struct NativeInstance {
@@ -68,25 +68,30 @@ impl IsarInstance for NativeInstance {
 
     type Txn = NativeTxn;
 
-    type Reader<'a> = NativeReader<'a>
+    type Reader<'a>
+        = NativeReader<'a>
     where
         Self: 'a;
 
-    type Cursor<'a> = NativeCursor<'a>
-        where
-            Self: 'a;
-
-    type Insert<'a> = NativeInsert<'a>
+    type Cursor<'a>
+        = NativeCursor<'a>
     where
         Self: 'a;
 
-    type QueryBuilder<'a> = NativeQueryBuilder<'a>
+    type Insert<'a>
+        = NativeInsert<'a>
+    where
+        Self: 'a;
+
+    type QueryBuilder<'a>
+        = NativeQueryBuilder<'a>
     where
         Self: 'a;
 
     type Query = NativeQuery;
 
-    type QueryCursor<'a> = NativeQueryCursor<'a>
+    type QueryCursor<'a>
+        = NativeQueryCursor<'a>
     where
         Self: 'a;
 

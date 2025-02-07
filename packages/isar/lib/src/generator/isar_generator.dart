@@ -1,4 +1,4 @@
-library isar_generator;
+library;
 
 import 'dart:async';
 import 'dart:convert';

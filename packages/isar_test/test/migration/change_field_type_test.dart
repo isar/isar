@@ -43,7 +43,7 @@ void main() {
     isar1.write((isar) {
       return isar.model1s.putAll([obj1A, obj1B]);
     });
-    expect(isar1.close(), true);
+    expect(await isar1.close(), true);
 
     final isar2 = await openTempIsar([Model2Schema], name: isarName);
     //final obj2A = Model2(1, null, 'OBJ1');

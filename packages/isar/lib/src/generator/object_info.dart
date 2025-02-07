@@ -1,6 +1,4 @@
-// ignore_for_file: public_member_api_docs
-
-part of isar_generator;
+part of 'isar_generator.dart';
 
 class ObjectInfo {
   const ObjectInfo({
@@ -100,9 +98,6 @@ class PropertyInfo {
       case IsarType.dateTime:
       case IsarType.dateTimeList:
         return 'DateTime';
-      case IsarType.duration:
-      case IsarType.durationList:
-        return 'Duration';
       case IsarType.object:
       case IsarType.objectList:
         return typeClassName;

@@ -1,11 +1,11 @@
 use super::schema_manager::perform_migration;
-use super::sqlite3::SQLite3;
 use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
 use super::sqlite_instance::SQLiteInstanceInfo;
 use super::sqlite_txn::SQLiteTxn;
+use super::sqlite3::SQLite3;
+use crate::SQLITE_MEMORY_DIR;
 use crate::core::error::Result;
 use crate::core::schema::IsarSchema;
-use crate::SQLITE_MEMORY_DIR;
 use intmap::IntMap;
 use itertools::Itertools;
 use parking_lot::Mutex;
@@ -14,7 +14,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
 
-static INSTANCES: LazyLock<Mutex<IntMap<Connections>>> =
+static INSTANCES: LazyLock<Mutex<IntMap<u64, Connections>>> =
     LazyLock::new(|| Mutex::new(IntMap::new()));
 
 const MIB: usize = 1 << 20;

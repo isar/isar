@@ -2,7 +2,7 @@ use crate::{isar_to_i64, CIsarWriter, IsarI64};
 use isar_core::core::writer::IsarWriter;
 use std::slice;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_write_null(writer: &'static mut CIsarWriter, index: u32) {
     match writer {
         #[cfg(feature = "native")]
@@ -20,7 +20,7 @@ pub unsafe extern "C" fn isar_write_null(writer: &'static mut CIsarWriter, index
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_write_bool(
     writer: &'static mut CIsarWriter,
     index: u32,
@@ -42,7 +42,7 @@ pub unsafe extern "C" fn isar_write_bool(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_write_byte(writer: &'static mut CIsarWriter, index: u32, value: u8) {
     match writer {
         #[cfg(feature = "native")]
@@ -60,7 +60,7 @@ pub unsafe extern "C" fn isar_write_byte(writer: &'static mut CIsarWriter, index
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_write_int(writer: &'static mut CIsarWriter, index: u32, value: i32) {
     match writer {
         #[cfg(feature = "native")]
@@ -78,7 +78,7 @@ pub unsafe extern "C" fn isar_write_int(writer: &'static mut CIsarWriter, index:
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_write_float(
     writer: &'static mut CIsarWriter,
     index: u32,
@@ -100,7 +100,7 @@ pub unsafe extern "C" fn isar_write_float(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_write_long(
     writer: &'static mut CIsarWriter,
     index: u32,
@@ -123,7 +123,7 @@ pub unsafe extern "C" fn isar_write_long(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_write_double(
     writer: &'static mut CIsarWriter,
     index: u32,
@@ -145,7 +145,7 @@ pub unsafe extern "C" fn isar_write_double(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_write_string(
     writer: &'static mut CIsarWriter,
     index: u32,
@@ -168,7 +168,7 @@ pub unsafe extern "C" fn isar_write_string(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_write_byte_list(
     writer: &'static mut CIsarWriter,
     index: u32,
@@ -192,7 +192,7 @@ pub unsafe extern "C" fn isar_write_byte_list(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_write_object(
     writer: &'static mut CIsarWriter,
     index: u32,
@@ -226,7 +226,7 @@ pub unsafe extern "C" fn isar_write_object(
     Box::into_raw(Box::new(writer))
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_write_object_end(
     writer: &'static mut CIsarWriter,
     embedded_writer: *mut CIsarWriter<'static>,
@@ -261,7 +261,7 @@ pub unsafe extern "C" fn isar_write_object_end(
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_write_list(
     writer: &'static mut CIsarWriter,
     index: u32,
@@ -289,7 +289,7 @@ pub unsafe extern "C" fn isar_write_list(
     Box::into_raw(Box::new(writer))
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_write_list_end(
     writer: &'static mut CIsarWriter,
     list_writer: *mut CIsarWriter<'static>,

@@ -34,7 +34,7 @@ impl Env {
                 mdbx_result(mdbx_sys::mdbx_env_create(&mut env))?;
                 mdbx_result(mdbx_sys::mdbx_env_set_option(
                     env,
-                    mdbx_sys::MDBX_option_t::MDBX_opt_max_db,
+                    mdbx_sys::MDBX_option::MDBX_opt_max_db,
                     max_dbs as u64,
                 ))?;
                 mdbx_result(mdbx_sys::mdbx_env_set_geometry(

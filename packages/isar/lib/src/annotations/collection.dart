@@ -1,12 +1,14 @@
-part of isar;
+part of '../../isar.dart';
 
+/// {@template isar_collection}
 /// Annotation to create an Isar collection.
+/// {@endtemplate}
 const collection = Collection();
 
-/// Annotation to create an Isar collection.
+/// {@macro isar_collection}
 @Target({TargetKind.classType})
 class Collection {
-  /// Annotation to create an Isar collection.
+  /// {@macro isar_collection}
   const Collection({
     this.inheritance = true,
     this.accessor,

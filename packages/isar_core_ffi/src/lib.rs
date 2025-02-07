@@ -1,4 +1,5 @@
 #![allow(clippy::missing_safety_doc)]
+#![allow(unsafe_op_in_unsafe_fn)]
 #![feature(vec_into_raw_parts)]
 
 use core::slice;
@@ -158,14 +159,14 @@ pub enum CIsarQueryCursor<'a> {
     SQLite(SQueryCursor<'a>),
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_string(chars: *const u16, length: u32) -> *const String {
     let chars = slice::from_raw_parts(chars, length as usize);
     let value = String::from_utf16_lossy(chars);
     Box::into_raw(Box::new(value))
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_buffer_free(value: *mut u8, capacity: u32) {
     if !value.is_null() {
         drop(Vec::from_raw_parts(value, 0, capacity as usize));

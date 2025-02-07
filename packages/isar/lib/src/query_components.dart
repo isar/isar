@@ -1,4 +1,4 @@
-part of isar;
+part of '../isar.dart';
 
 /// @nodoc
 @protected
