@@ -209,7 +209,7 @@ class _IsarImpl extends Isar {
       try {
         return await callback(isar);
       } finally {
-        isar.close();
+        await isar.close();
         IsarCore._free();
       }
     });
