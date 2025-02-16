@@ -1,9 +1,9 @@
 use super::QueryIndex;
+use crate::native::BytesToId;
 use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::mdbx::cursor_iterator::CursorIterator;
 use crate::native::native_collection::NativeCollection;
 use crate::native::native_txn::{NativeTxn, TxnCursor};
-use crate::native::BytesToId;
 
 pub(crate) struct IndexIterator<'a> {
     txn: &'a NativeTxn,
@@ -59,8 +59,13 @@ impl<'a> IndexIterator<'a> {
             };
             let iterator = cursor.iter_between_ids(start, end, false, false).ok()?;
             Some((iterator, None))
-        } else if let Some(QueryIndex::Secondary(start, end)) = next_index {
-            todo!()
+        } else if let Some(QueryIndex::Secondary(index_index, start, end)) = next_index {
+            let index = &collection.indexes[index_index];
+            let cursor = collection.get_cursor(txn).ok()?;
+            let iterator = cursor
+                .iter_between(start.finish().0, end.finish().0, false, false)
+                .ok()?;
+            Some((iterator, None))
         } else {
             None
         }

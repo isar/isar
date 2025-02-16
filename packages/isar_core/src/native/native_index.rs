@@ -1,13 +1,14 @@
 use super::index_key::IndexKey;
 use super::isar_deserializer::IsarDeserializer;
+use super::mdbx::cursor_iterator::CursorIterator;
 use super::mdbx::db::Db;
 use super::native_collection::NativeProperty;
-use super::native_txn::NativeTxn;
+use super::native_txn::{NativeTxn, TxnCursor};
 use super::{BytesToId, IdToBytes};
 use crate::core::data_type::DataType;
 use crate::core::error::Result;
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub(crate) struct NativeIndex {
     pub name: String,
     pub properties: Vec<NativeProperty>,
@@ -104,6 +105,17 @@ impl NativeIndex {
 
     pub fn clear(&self, txn: &NativeTxn) -> Result<()> {
         txn.clear_db(self.db)
+    }
+
+    pub fn iter_between<'txn, 'env>(
+        &self,
+        txn: &'txn NativeTxn,
+        lower_key: Vec<u8>,
+        upper_key: Vec<u8>,
+        skip_duplicates: bool,
+    ) -> Result<CursorIterator<'txn, TxnCursor<'txn>>> {
+        let cursor = txn.get_cursor(self.db)?;
+        cursor.iter_between(lower_key, upper_key, !self.unique, skip_duplicates)
     }
 
     /* pub fn iter_between<'txn, 'env>(

@@ -33,11 +33,8 @@ impl Filter {
         case_sensitive: bool,
     ) -> Self {
         Filter::Json(FilterJson::new(
-            property_index,
             path,
-            condition_type,
-            values,
-            case_sensitive,
+            FilterCondition::new(property_index, condition_type, values, case_sensitive),
         ))
     }
 
@@ -71,6 +68,8 @@ pub enum ConditionType {
     StringEndsWith,
     StringContains,
     StringMatches,
+    StringRegex,
+    In,
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -78,6 +77,7 @@ pub struct FilterCondition {
     pub property_index: u16,
     pub condition_type: ConditionType,
     pub values: Vec<Option<IsarValue>>,
+    // if false, values are all lowercase
     pub case_sensitive: bool,
 }
 
@@ -85,9 +85,16 @@ impl FilterCondition {
     fn new(
         property_index: u16,
         condition_type: ConditionType,
-        values: Vec<Option<IsarValue>>,
+        mut values: Vec<Option<IsarValue>>,
         case_sensitive: bool,
     ) -> Self {
+        if !case_sensitive {
+            for i in 0..values.len() {
+                if let Some(IsarValue::String(s)) = &values[i] {
+                    values[i] = Some(IsarValue::String(s.to_lowercase()));
+                }
+            }
+        }
         Self {
             property_index,
             condition_type,
@@ -99,45 +106,13 @@ impl FilterCondition {
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct FilterJson {
-    pub property_index: u16,
     pub path: Vec<String>,
-    pub condition_type: ConditionType,
-    pub values: Vec<Option<IsarValue>>,
-    // if false, values are all lowercase
-    pub case_sensitive: bool,
+    pub condition: FilterCondition,
 }
 
 impl FilterJson {
-    fn new(
-        property_index: u16,
-        path: Vec<String>,
-        condition_type: ConditionType,
-        values: Vec<Option<IsarValue>>,
-        case_sensitive: bool,
-    ) -> Self {
-        let values = if case_sensitive {
-            values
-        } else {
-            values
-                .into_iter()
-                .map(|v| {
-                    v.map(|v| {
-                        if let IsarValue::String(s) = v {
-                            IsarValue::String(s.to_lowercase())
-                        } else {
-                            v
-                        }
-                    })
-                })
-                .collect()
-        };
-        Self {
-            property_index,
-            path,
-            condition_type,
-            values,
-            case_sensitive,
-        }
+    fn new(path: Vec<String>, condition: FilterCondition) -> Self {
+        Self { path, condition }
     }
 }
 

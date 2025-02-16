@@ -1,4 +1,4 @@
-use super::index_iterator::IndexIterator;
+use super::iterator_index::IndexIterator;
 use super::native_filter::NativeFilter;
 use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::native_collection::NativeProperty;

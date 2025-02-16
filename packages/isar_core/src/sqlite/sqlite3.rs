@@ -5,7 +5,9 @@ use std::cell::Cell;
 use std::ffi::{CStr, CString, c_char, c_int, c_void};
 use std::{ptr, slice};
 
-use super::sql_filter::{FN_FILTER_JSON_NAME, sql_fn_filter_json};
+use super::sql_functions::{
+    FN_FILTER_JSON_NAME, FN_MATCHES_REGEX_NAME, sql_fn_filter_json, sql_fn_matches_regex,
+};
 
 pub(crate) struct SQLite3 {
     db: *mut ffi::sqlite3,
@@ -65,6 +67,7 @@ impl SQLite3 {
         }
         self.prepare("PRAGMA case_sensitive_like = true")?.step()?;
         self.create_function(FN_FILTER_JSON_NAME, 2, sql_fn_filter_json)?;
+        self.create_function(FN_MATCHES_REGEX_NAME, 3, sql_fn_matches_regex)?;
         Ok(())
     }
 

@@ -19,6 +19,7 @@ paste = "1"
 parking_lot = "0.12"
 proc-macro2 = "1"
 arc-swap = "1.7"
+regex = "1"
 
 libsqlite3-sys = { git = "https://github.com/isar/rusqlite.git", branch = "wasm-2", features=["bundled"], optional = true  }
 mdbx-sys = { package = "mdbx-sys", path = "../mdbx_sys", optional = true  }
