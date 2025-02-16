@@ -1,13 +1,9 @@
+use super::sql_functions::{FN_FILTER_JSON_NAME, FN_MATCHES_REGEX_NAME};
 use super::sqlite_collection::SQLiteProperty;
 use super::sqlite_query::{JsonCondition, QueryParam};
-use super::sqlite3::SQLiteFnContext;
 use crate::core::data_type::DataType;
-use crate::core::error::Result;
 use crate::core::filter::{ConditionType, Filter, FilterCondition, FilterJson};
-use crate::core::filter_json::matches_json;
 use crate::core::value::IsarValue;
-use serde_json::Value;
-use std::borrow::Cow;
 use std::vec;
 
 pub(crate) fn filter_sql<'a, G>(
@@ -36,7 +32,7 @@ where
             filter_condition(property, condition, path)
         }
         Filter::Json(json) => {
-            let property = get_property(collection_index, json.property_index);
+            let property = get_property(collection_index, json.condition.property_index);
             filter_json(property, json)
         }
         Filter::Embedded(embedded) => {
@@ -131,9 +127,9 @@ fn filter_json(property: Option<&SQLiteProperty>, json: FilterJson) -> (String, 
             let sql = format!("{}({}, ?)", property.name, FN_FILTER_JSON_NAME);
             let condition = JsonCondition {
                 path: json.path,
-                condition_type: json.condition_type,
-                values: json.values,
-                case_sensitive: json.case_sensitive,
+                condition_type: json.condition.condition_type,
+                values: json.condition.values,
+                case_sensitive: json.condition.case_sensitive,
             };
             return (sql, vec![QueryParam::JsonCondition(condition)]);
         }
@@ -151,13 +147,13 @@ fn filter_condition_type(
         " COLLATE NOCASE"
     };
 
-    let mut values = vec![];
+    let mut params = vec![];
     let sql = match condition.condition_type {
         ConditionType::IsNull => format!("{} IS NULL", property_name),
         ConditionType::Equal => {
             let value = condition.values.get(0)?;
             if let Some(value) = value {
-                values.push(value.clone());
+                params.push(QueryParam::Value(value.clone()));
                 format!("{} = ?{}", property_name, collate)
             } else {
                 format!("{} IS NULL", property_name)
@@ -166,7 +162,7 @@ fn filter_condition_type(
         ConditionType::Greater => {
             let value = condition.values.get(0)?;
             if let Some(value) = value {
-                values.push(value.clone());
+                params.push(QueryParam::Value(value.clone()));
                 format!("{} > ?{}", property_name, collate)
             } else {
                 format!("{} IS NOT NULL", property_name)
@@ -175,7 +171,7 @@ fn filter_condition_type(
         ConditionType::GreaterOrEqual => {
             let value = condition.values.get(0)?;
             if let Some(value) = value {
-                values.push(value.clone());
+                params.push(QueryParam::Value(value.clone()));
                 format!("{} >= ?{}", property_name, collate)
             } else {
                 "TRUE".to_string()
@@ -184,7 +180,7 @@ fn filter_condition_type(
         ConditionType::Less => {
             let value = condition.values.get(0)?;
             if let Some(value) = value {
-                values.push(value.clone());
+                params.push(QueryParam::Value(value.clone()));
                 format!(
                     "({} < ?{} OR {} IS NULL)",
                     property_name, collate, property_name
@@ -196,7 +192,7 @@ fn filter_condition_type(
         ConditionType::LessOrEqual => {
             let value = condition.values.get(0)?;
             if let Some(value) = value {
-                values.push(value.clone());
+                params.push(QueryParam::Value(value.clone()));
                 format!(
                     "({} <= ?{} OR {} IS NULL)",
                     property_name, collate, property_name
@@ -210,15 +206,15 @@ fn filter_condition_type(
             let upper = condition.values.get(1)?;
             if let Some(lower) = lower {
                 if let Some(upper) = upper {
-                    values.push(lower.clone());
-                    values.push(upper.clone());
+                    params.push(QueryParam::Value(lower.clone()));
+                    params.push(QueryParam::Value(upper.clone()));
                     format!("{} BETWEEN ?{} AND ?{}", property_name, collate, collate)
                 } else {
-                    values.push(lower.clone());
+                    params.push(QueryParam::Value(lower.clone()));
                     format!("{} >= ?{}", property_name, collate)
                 }
             } else if let Some(upper) = upper {
-                values.push(upper.clone());
+                params.push(QueryParam::Value(upper.clone()));
                 format!(
                     "({} <= ?{} OR {} IS NULL)",
                     property_name, collate, property_name
@@ -229,7 +225,8 @@ fn filter_condition_type(
         }
         ConditionType::StringStartsWith => {
             if let Some(IsarValue::String(prefix)) = condition.values.get(0)? {
-                values.push(IsarValue::String(format!("{}%", escape_wildcard(prefix))));
+                let value = IsarValue::String(format!("{}%", escape_wildcard(prefix)));
+                params.push(QueryParam::Value(value));
                 match condition.case_sensitive {
                     true => format!("{} LIKE ? ESCAPE '\\'", property_name),
                     false => format!("LOWER({}) LIKE LOWER(?) ESCAPE '\\'", property_name),
@@ -240,7 +237,8 @@ fn filter_condition_type(
         }
         ConditionType::StringEndsWith => {
             if let Some(IsarValue::String(postfix)) = condition.values.get(0)? {
-                values.push(IsarValue::String(format!("%{}", escape_wildcard(postfix))));
+                let value = IsarValue::String(format!("%{}", escape_wildcard(postfix)));
+                params.push(QueryParam::Value(value));
                 match condition.case_sensitive {
                     true => format!("{} LIKE ? ESCAPE '\\'", property_name),
                     false => format!("LOWER({}) LIKE LOWER(?) ESCAPE '\\'", property_name),
@@ -251,7 +249,8 @@ fn filter_condition_type(
         }
         ConditionType::StringContains => {
             if let Some(IsarValue::String(needle)) = condition.values.get(0)? {
-                values.push(IsarValue::String(format!("%{}%", escape_wildcard(needle))));
+                let value = IsarValue::String(format!("%{}%", escape_wildcard(needle)));
+                params.push(QueryParam::Value(value));
                 match condition.case_sensitive {
                     true => format!("{} LIKE ? ESCAPE '\\'", property_name),
                     false => format!("LOWER({}) LIKE LOWER(?) ESCAPE '\\'", property_name),
@@ -265,7 +264,7 @@ fn filter_condition_type(
                 let wildcard = escape_wildcard(wildcard)
                     .replace("*", "%")
                     .replace("?", "_");
-                values.push(IsarValue::String(wildcard));
+                params.push(QueryParam::Value(IsarValue::String(wildcard)));
                 match condition.case_sensitive {
                     true => format!("{} LIKE ? ESCAPE '\\'", property_name),
                     false => format!("LOWER({}) LIKE LOWER(?) ESCAPE '\\'", property_name),
@@ -274,9 +273,41 @@ fn filter_condition_type(
                 "FALSE".to_string()
             }
         }
+        ConditionType::StringRegex => {
+            let value = condition.values.get(0)?;
+            if let Some(IsarValue::String(regex)) = value {
+                params.push(QueryParam::Value(IsarValue::String(regex.clone())));
+                let case_sensitive = if condition.case_sensitive {
+                    "TRUE"
+                } else {
+                    "FALSE"
+                };
+                format!(
+                    "{}(?, {}, {})",
+                    FN_MATCHES_REGEX_NAME, case_sensitive, property_name
+                )
+            } else {
+                "FALSE".to_string()
+            }
+        }
+        ConditionType::In => {
+            if condition.values.is_empty() {
+                "FALSE".to_string()
+            } else {
+                let in_sql = "?,".repeat(condition.values.len() - 1);
+                let sql = format!("{}{} IN ({}?)", property_name, collate, in_sql);
+                for value in condition.values.iter() {
+                    if let Some(value) = value {
+                        params.push(QueryParam::Value(value.clone()));
+                    } else {
+                        params.push(QueryParam::Null);
+                    }
+                }
+                sql
+            }
+        }
     };
 
-    let params = values.into_iter().map(|v| QueryParam::Value(v)).collect();
     Some((sql, params))
 }
 
@@ -285,35 +316,4 @@ fn escape_wildcard(wildcard: &str) -> String {
         .replace("\\", "\\\\")
         .replace("%", "\\%")
         .replace("_", "\\_")
-}
-
-pub(crate) const FN_FILTER_JSON_NAME: &str = "isar_filter_json";
-pub(crate) const FN_FILTER_JSON_COND_PTR_TYPE: &[u8] = b"json_condition_ptr\0";
-pub(crate) fn sql_fn_filter_json(ctx: &mut SQLiteFnContext) -> Result<()> {
-    let json = if let Some(json) = ctx.get_auxdata::<Value>(0) {
-        Cow::Borrowed(json)
-    } else {
-        let json_str = ctx.get_str(0);
-        let json = serde_json::from_str::<Value>(json_str).unwrap_or(Value::Null);
-        Cow::Owned(Box::new(json))
-    };
-
-    let condition = ctx.get_object::<JsonCondition>(1, FN_FILTER_JSON_COND_PTR_TYPE);
-
-    if let Some(condition) = condition {
-        let result = matches_json(
-            &json,
-            condition.condition_type,
-            &condition.path,
-            &condition.values,
-            condition.case_sensitive,
-        );
-        ctx.set_int_result(if result { 1 } else { 0 });
-    }
-
-    if let Cow::Owned(mut json) = json {
-        ctx.set_auxdata(0, json.take());
-    }
-
-    Ok(())
 }

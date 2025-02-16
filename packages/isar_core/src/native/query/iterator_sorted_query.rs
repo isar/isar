@@ -1,4 +1,4 @@
-use super::index_iterator::IndexIterator;
+use super::iterator_index::IndexIterator;
 use super::native_filter::NativeFilter;
 use crate::core::data_type::DataType;
 use crate::core::query_builder::Sort;

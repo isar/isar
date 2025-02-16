@@ -6,8 +6,10 @@ use crate::core::value::IsarValue;
 use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::native_collection::NativeProperty;
 use enum_dispatch::enum_dispatch;
+use intmap::IntMap;
 use itertools::Itertools;
 use paste::paste;
+use regex::{Regex, RegexBuilder};
 use serde_json::Value;
 
 #[macro_export]
@@ -28,9 +30,9 @@ macro_rules! primitive_create {
                         $upper,
                     })
                 } else {
-                    Filter::Static(StaticCond { value: false })
+                    return None;
                 };
-                NativeFilter(filter)
+                Some(NativeFilter(filter))
             }
         }
     };
@@ -41,11 +43,7 @@ macro_rules! string_filter_create {
     ($name:ident, $property:expr, $value:expr, $case_sensitive:expr) => {
         paste! {
             {
-                let value = if $case_sensitive {
-                    $value.to_string()
-                } else {
-                    $value.to_lowercase()
-                };
+                let value = $value.to_string();
                 let filter = if $property.data_type == DataType::String {
                     Filter::[<String $name>]([<String $name Cond>] {
                         offset: $property.offset,
@@ -59,9 +57,9 @@ macro_rules! string_filter_create {
                         $case_sensitive,
                     })
                 } else {
-                    Filter::Static(StaticCond { value: false })
+                    return None;
                 };
-                NativeFilter(filter)
+                Some(NativeFilter(filter))
             }
         }
     };
@@ -88,31 +86,31 @@ impl NativeFilter {
         property: &NativeProperty,
         lower: Option<bool>,
         upper: Option<bool>,
-    ) -> NativeFilter {
+    ) -> Option<NativeFilter> {
         primitive_create!(Bool, property, lower, upper)
     }
 
-    pub fn byte(property: &NativeProperty, lower: u8, upper: u8) -> NativeFilter {
+    pub fn byte(property: &NativeProperty, lower: u8, upper: u8) -> Option<NativeFilter> {
         primitive_create!(Byte, property, lower, upper)
     }
 
-    pub fn int(property: &NativeProperty, lower: i32, upper: i32) -> NativeFilter {
+    pub fn int(property: &NativeProperty, lower: i32, upper: i32) -> Option<NativeFilter> {
         primitive_create!(Int, property, lower, upper)
     }
 
-    pub fn long(property: &NativeProperty, lower: i64, upper: i64) -> NativeFilter {
+    pub fn long(property: &NativeProperty, lower: i64, upper: i64) -> Option<NativeFilter> {
         primitive_create!(Long, property, lower, upper)
     }
 
-    pub fn float(property: &NativeProperty, lower: f32, upper: f32) -> NativeFilter {
+    pub fn float(property: &NativeProperty, lower: f32, upper: f32) -> Option<NativeFilter> {
         primitive_create!(Float, property, lower, upper)
     }
 
-    pub fn double(property: &NativeProperty, lower: f64, upper: f64) -> NativeFilter {
+    pub fn double(property: &NativeProperty, lower: f64, upper: f64) -> Option<NativeFilter> {
         primitive_create!(Double, property, lower, upper)
     }
 
-    pub fn string_to_bytes(str: Option<&str>, case_sensitive: bool) -> Option<Vec<u8>> {
+    fn string_to_bytes(str: Option<&str>, case_sensitive: bool) -> Option<Vec<u8>> {
         if case_sensitive {
             str.map(|s| s.as_bytes().to_vec())
         } else {
@@ -125,7 +123,7 @@ impl NativeFilter {
         lower: Option<&str>,
         upper: Option<&str>,
         case_sensitive: bool,
-    ) -> NativeFilter {
+    ) -> Option<NativeFilter> {
         let lower = Self::string_to_bytes(lower, case_sensitive);
         let upper = Self::string_to_bytes(upper, case_sensitive);
         let filter = if property.data_type == DataType::String {
@@ -143,16 +141,16 @@ impl NativeFilter {
                 case_sensitive,
             })
         } else {
-            Filter::Static(StaticCond { value: false })
+            return None;
         };
-        NativeFilter(filter)
+        Some(NativeFilter(filter))
     }
 
     pub fn string_ends_with(
         property: &NativeProperty,
         value: &str,
         case_sensitive: bool,
-    ) -> NativeFilter {
+    ) -> Option<NativeFilter> {
         string_filter_create!(EndsWith, property, value, case_sensitive)
     }
 
@@ -160,7 +158,7 @@ impl NativeFilter {
         property: &NativeProperty,
         value: &str,
         case_sensitive: bool,
-    ) -> NativeFilter {
+    ) -> Option<NativeFilter> {
         string_filter_create!(Contains, property, value, case_sensitive)
     }
 
@@ -168,20 +166,62 @@ impl NativeFilter {
         property: &NativeProperty,
         value: &str,
         case_sensitive: bool,
-    ) -> NativeFilter {
+    ) -> Option<NativeFilter> {
         string_filter_create!(Matches, property, value, case_sensitive)
     }
 
-    pub fn embedded(property: &NativeProperty, filter: NativeFilter) -> NativeFilter {
+    pub fn string_regex(
+        property: &NativeProperty,
+        pattern: &str,
+        case_sensitive: bool,
+    ) -> Option<NativeFilter> {
+        let mut builder = RegexBuilder::new(pattern);
+        builder.case_insensitive(!case_sensitive);
+        let filter = if property.data_type == DataType::String {
+            Filter::StringRegex(StringRegexCond {
+                offset: property.offset,
+                regex: builder.build().ok()?,
+            })
+        } else if property.data_type == DataType::StringList {
+            Filter::AnyStringRegex(AnyStringRegexCond {
+                offset: property.offset,
+                regex: builder.build().ok()?,
+            })
+        } else {
+            return None;
+        };
+        Some(NativeFilter(filter))
+    }
+
+    pub fn is_in(
+        property: &NativeProperty,
+        values: &[Option<IsarValue>],
+        case_sensitive: bool,
+    ) -> NativeFilter {
+        let mut hashes = IntMap::new();
+        for value in values {
+            let hash = IsarValue::hash(value, case_sensitive, 0);
+            hashes.insert(hash, ());
+        }
+        let filter = Filter::In(InCond {
+            offset: property.offset,
+            data_type: property.data_type,
+            case_sensitive: false,
+            hashes,
+        });
+        NativeFilter(filter)
+    }
+
+    pub fn embedded(property: &NativeProperty, filter: NativeFilter) -> Option<NativeFilter> {
         let filter = if property.data_type == DataType::Object {
             Filter::Embedded(EmbeddedCond {
                 offset: property.offset,
                 filter: Box::new(filter.0),
             })
         } else {
-            Filter::Static(StaticCond { value: false })
+            return None;
         };
-        NativeFilter(filter)
+        Some(NativeFilter(filter))
     }
 
     pub fn json(
@@ -190,19 +230,26 @@ impl NativeFilter {
         condition_type: ConditionType,
         values: Vec<Option<IsarValue>>,
         case_sensitive: bool,
-    ) -> NativeFilter {
+    ) -> Option<NativeFilter> {
         let filter = if property.data_type == DataType::Json {
+            let regex = if condition_type == ConditionType::StringRegex {
+                let pattern = values.get(0)?.as_ref()?.string()?;
+                Some(Regex::new(&pattern).ok()?)
+            } else {
+                None
+            };
             Filter::Json(JsonCond {
                 offset: property.offset,
                 path,
                 condition_type,
                 values,
                 case_sensitive,
+                regex,
             })
         } else {
-            Filter::Static(StaticCond { value: false })
+            return None;
         };
-        NativeFilter(filter)
+        Some(NativeFilter(filter))
     }
 
     pub fn and(mut filters: Vec<NativeFilter>) -> NativeFilter {
@@ -263,6 +310,7 @@ enum Filter {
     StringEndsWith(StringEndsWithCond),
     StringContains(StringContainsCond),
     StringMatches(StringMatchesCond),
+    StringRegex(StringRegexCond),
 
     AnyByteBetween(AnyByteBetweenCond),
     AnyBoolBetween(AnyBoolBetweenCond),
@@ -275,7 +323,9 @@ enum Filter {
     AnyStringEndsWith(AnyStringEndsWithCond),
     AnyStringContains(AnyStringContainsCond),
     AnyStringMatches(AnyStringMatchesCond),
+    AnyStringRegex(AnyStringRegexCond),
 
+    In(InCond),
     Embedded(EmbeddedCond),
     Json(JsonCond),
     And(AndCond),
@@ -537,6 +587,78 @@ string_filter!(StringContains);
 string_filter!(StringMatches);
 
 #[derive(Clone, Debug)]
+struct StringRegexCond {
+    offset: u32,
+    regex: Regex,
+}
+
+impl Condition for StringRegexCond {
+    fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
+        let value = object.read_string(self.offset);
+        if let Some(value) = value {
+            self.regex.is_match(value)
+        } else {
+            false
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+struct AnyStringRegexCond {
+    offset: u32,
+    regex: Regex,
+}
+
+impl Condition for AnyStringRegexCond {
+    fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
+        if let Some((list, length)) = object.read_list(self.offset, DataType::String) {
+            for i in 0..length {
+                let value = list.read_string(i * DataType::String.static_size() as u32);
+                if let Some(value) = value {
+                    if self.regex.is_match(value) {
+                        return true;
+                    }
+                }
+            }
+        }
+        false
+    }
+}
+
+#[derive(Clone, Debug)]
+struct InCond {
+    offset: u32,
+    data_type: DataType,
+    case_sensitive: bool,
+    hashes: IntMap<u64, ()>,
+}
+
+impl Condition for InCond {
+    fn evaluate(&self, _id: i64, object: IsarDeserializer) -> bool {
+        if let Some(element_type) = self.data_type.element_type() {
+            let list = object.read_list(self.offset, self.data_type);
+            if let Some((list, length)) = list {
+                for i in 0..length {
+                    let hash = list.hash_property(
+                        i * element_type.static_size() as u32,
+                        element_type,
+                        self.case_sensitive,
+                        0,
+                    );
+                    if self.hashes.contains_key(hash) {
+                        return true;
+                    }
+                }
+            }
+            false
+        } else {
+            let hash = object.hash_property(self.offset, self.data_type, self.case_sensitive, 0);
+            self.hashes.contains_key(hash)
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 struct EmbeddedCond {
     offset: u32,
     filter: Box<Filter>,
@@ -558,6 +680,7 @@ struct JsonCond {
     path: Vec<String>,
     condition_type: ConditionType,
     values: Vec<Option<IsarValue>>,
+    regex: Option<Regex>,
     case_sensitive: bool,
 }
 
@@ -571,6 +694,7 @@ impl Condition for JsonCond {
                     self.condition_type,
                     &self.path,
                     &self.values,
+                    self.regex.as_ref(),
                     self.case_sensitive,
                 )
             } else {
