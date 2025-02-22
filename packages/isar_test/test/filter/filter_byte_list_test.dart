@@ -47,10 +47,7 @@ void main() {
     });
 
     isarTest('.elementEqualTo()', () {
-      expect(
-        col.where().listElementEqualTo(0).findAll(),
-        [obj2, obj4],
-      );
+      expect(col.where().listElementEqualTo(0).findAll(), [obj2, obj4]);
       expect(col.where().listElementEqualTo(1).findAll(), [obj3]);
       expect(col.where().listElementEqualTo(55).findAll(), isEmpty);
     });
@@ -61,32 +58,39 @@ void main() {
     });
 
     isarTest('.elementGreaterThanOrEqualTo()', () {
-      expect(
-        col.where().listElementGreaterThanOrEqualTo(123).findAll(),
-        [obj1, obj2, obj3, obj4],
-      );
+      expect(col.where().listElementGreaterThanOrEqualTo(123).findAll(), [
+        obj1,
+        obj2,
+        obj3,
+        obj4,
+      ]);
     });
 
     isarTest('.elementLessThan()', () {
-      expect(
-        col.where().listElementLessThan(123).findAll(),
-        [obj2, obj3, obj4],
-      );
+      expect(col.where().listElementLessThan(123).findAll(), [
+        obj2,
+        obj3,
+        obj4,
+      ]);
       expect(col.where().listElementLessThan(0).findAll(), isEmpty);
     });
 
     isarTest('.elementLessThanOrEqualTo()', () {
-      expect(
-        col.where().listElementLessThanOrEqualTo(123).findAll(),
-        [obj1, obj2, obj3, obj4],
-      );
+      expect(col.where().listElementLessThanOrEqualTo(123).findAll(), [
+        obj1,
+        obj2,
+        obj3,
+        obj4,
+      ]);
     });
 
     isarTest('.elementBetween()', () {
-      expect(
-        col.where().listElementBetween(123, 255).findAll(),
-        [obj1, obj2, obj3, obj4],
-      );
+      expect(col.where().listElementBetween(123, 255).findAll(), [
+        obj1,
+        obj2,
+        obj3,
+        obj4,
+      ]);
       expect(col.where().listElementBetween(50, 100).findAll(), isEmpty);
     });
 

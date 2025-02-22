@@ -21,22 +21,15 @@ void main() {
       isar = await openTempIsar([ModelSchema]);
 
       isar.write(
-        (isar) => isar.models.putAll(
-          List.generate(100, (i) => Model(i, 'model $i')),
-        ),
+        (isar) =>
+            isar.models.putAll(List.generate(100, (i) => Model(i, 'model $i'))),
       );
     });
 
     isarTest('.isEmpty()', () {
       expect(isar.models.where().isEmpty(), false);
-      expect(
-        isar.models.where().valueStartsWith('model').isEmpty(),
-        false,
-      );
-      expect(
-        isar.models.where().valueEqualTo('model 1').isEmpty(),
-        false,
-      );
+      expect(isar.models.where().valueStartsWith('model').isEmpty(), false);
+      expect(isar.models.where().valueEqualTo('model 1').isEmpty(), false);
       expect(
         isar.models.where().valueStartsWith('non existing').isEmpty(),
         true,

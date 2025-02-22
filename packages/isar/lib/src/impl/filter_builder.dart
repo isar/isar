@@ -9,12 +9,8 @@ Pointer<CFilter> _buildFilter(Filter filter, List<Pointer<void>> pointers) {
       if (value is double) {
         return IsarCore.b.isar_filter_between(
           filter.property,
-          _isarValue(
-            _adjustLowerFloatBound(value, true, filter.epsilon),
-          ),
-          _isarValue(
-            _adjustUpperFloatBound(value, true, filter.epsilon),
-          ),
+          _isarValue(_adjustLowerFloatBound(value, true, filter.epsilon)),
+          _isarValue(_adjustUpperFloatBound(value, true, filter.epsilon)),
           filter.caseSensitive,
         );
       } else {
@@ -26,9 +22,10 @@ Pointer<CFilter> _buildFilter(Filter filter, List<Pointer<void>> pointers) {
       }
     case GreaterCondition():
       final rawValue = filter.value;
-      final value = rawValue is double
-          ? _adjustLowerFloatBound(rawValue, false, filter.epsilon)
-          : rawValue;
+      final value =
+          rawValue is double
+              ? _adjustLowerFloatBound(rawValue, false, filter.epsilon)
+              : rawValue;
       return IsarCore.b.isar_filter_greater(
         filter.property,
         _isarValue(value),
@@ -36,9 +33,10 @@ Pointer<CFilter> _buildFilter(Filter filter, List<Pointer<void>> pointers) {
       );
     case GreaterOrEqualCondition():
       final rawValue = filter.value;
-      final value = rawValue is double
-          ? _adjustLowerFloatBound(rawValue, true, filter.epsilon)
-          : rawValue;
+      final value =
+          rawValue is double
+              ? _adjustLowerFloatBound(rawValue, true, filter.epsilon)
+              : rawValue;
       return IsarCore.b.isar_filter_greater_or_equal(
         filter.property,
         _isarValue(value),
@@ -46,9 +44,10 @@ Pointer<CFilter> _buildFilter(Filter filter, List<Pointer<void>> pointers) {
       );
     case LessCondition():
       final rawValue = filter.value;
-      final value = rawValue is double
-          ? _adjustUpperFloatBound(rawValue, false, filter.epsilon)
-          : rawValue;
+      final value =
+          rawValue is double
+              ? _adjustUpperFloatBound(rawValue, false, filter.epsilon)
+              : rawValue;
       return IsarCore.b.isar_filter_less(
         filter.property,
         _isarValue(value),
@@ -56,9 +55,10 @@ Pointer<CFilter> _buildFilter(Filter filter, List<Pointer<void>> pointers) {
       );
     case LessOrEqualCondition():
       final rawValue = filter.value;
-      final value = rawValue is double
-          ? _adjustUpperFloatBound(rawValue, true, filter.epsilon)
-          : rawValue;
+      final value =
+          rawValue is double
+              ? _adjustUpperFloatBound(rawValue, true, filter.epsilon)
+              : rawValue;
       return IsarCore.b.isar_filter_less_or_equal(
         filter.property,
         _isarValue(value),
@@ -66,13 +66,15 @@ Pointer<CFilter> _buildFilter(Filter filter, List<Pointer<void>> pointers) {
       );
     case BetweenCondition():
       final rawLower = filter.lower;
-      final lower = rawLower is double
-          ? _adjustLowerFloatBound(rawLower, true, filter.epsilon)
-          : rawLower;
+      final lower =
+          rawLower is double
+              ? _adjustLowerFloatBound(rawLower, true, filter.epsilon)
+              : rawLower;
       final rawUpper = filter.upper;
-      final upper = rawUpper is double
-          ? _adjustUpperFloatBound(rawUpper, true, filter.epsilon)
-          : rawUpper;
+      final upper =
+          rawUpper is double
+              ? _adjustUpperFloatBound(rawUpper, true, filter.epsilon)
+              : rawUpper;
       return IsarCore.b.isar_filter_between(
         filter.property,
         _isarValue(lower),

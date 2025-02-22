@@ -65,10 +65,13 @@ void main() {
     });
 
     isarTest('.isNotNull()', () {
-      expect(
-        col.where().listIsNotNull().findAll(),
-        [objEmpty, obj1, obj2, obj3, obj4],
-      );
+      expect(col.where().listIsNotNull().findAll(), [
+        objEmpty,
+        obj1,
+        obj2,
+        obj3,
+        obj4,
+      ]);
     });
   });
 }

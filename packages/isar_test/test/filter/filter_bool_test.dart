@@ -46,10 +46,10 @@ void main() {
 
     isarTest('.equalTo()', () {
       expect(col.where().fieldEqualTo(true).findAll(), [objTrue]);
-      expect(
-        col.where().fieldEqualTo(false).findAll().toSet(),
-        {objFalse, objFalse2},
-      );
+      expect(col.where().fieldEqualTo(false).findAll().toSet(), {
+        objFalse,
+        objFalse2,
+      });
       expect(col.where().fieldEqualTo(null).findAll(), [objNull]);
     });
 
@@ -58,10 +58,11 @@ void main() {
     });
 
     isarTest('.isNotNull()', () {
-      expect(
-        col.where().fieldIsNotNull().findAll().toSet(),
-        {objFalse, objTrue, objFalse2},
-      );
+      expect(col.where().fieldIsNotNull().findAll().toSet(), {
+        objFalse,
+        objTrue,
+        objFalse2,
+      });
     });
   });
 }

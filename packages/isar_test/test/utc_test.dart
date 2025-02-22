@@ -49,10 +49,10 @@ void main() {
       });
 
       expect(col.where().dateProperty().findAll(), [date, date]);
-      expect(
-        col.where().dateUtcProperty().findAll(),
-        [date.toUtc(), date.toUtc()],
-      );
+      expect(col.where().dateUtcProperty().findAll(), [
+        date.toUtc(),
+        date.toUtc(),
+      ]);
     });
   });
 }

@@ -36,6 +36,7 @@ void main() {
       .replaceAll('float', 'double')
       .replaceAll('filter_float_test', 'filter_double_test')
       .replaceAll('floatModels', 'doubleModels');
-  File('test/filter/filter_double_list_test.dart')
-      .writeAsStringSync(doubleListTest);
+  File(
+    'test/filter/filter_double_list_test.dart',
+  ).writeAsStringSync(doubleListTest);
 }

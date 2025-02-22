@@ -45,9 +45,7 @@ void main() {
         file = File('${isar.directory}/$isarName.isar');
       }
 
-      isar.write(
-        (isar) => isar.models.putAll(List.generate(100, Model.new)),
-      );
+      isar.write((isar) => isar.models.putAll(List.generate(100, Model.new)));
     });
 
     isarTest('No compact on launch', () async {

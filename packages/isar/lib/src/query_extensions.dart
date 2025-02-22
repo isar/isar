@@ -2,28 +2,22 @@ part of '../isar.dart';
 
 /// @nodoc
 @protected
-typedef FilterRepeatModifier<OBJ, R, E>
-    = QueryBuilder<OBJ, R, QAfterFilterCondition> Function(
-  QueryBuilder<OBJ, R, QFilterCondition> q,
-  E element,
-);
+typedef FilterRepeatModifier<OBJ, R, E> =
+    QueryBuilder<OBJ, R, QAfterFilterCondition> Function(
+      QueryBuilder<OBJ, R, QFilterCondition> q,
+      E element,
+    );
 
 /// Logical operators for query builders.
 extension QueryFilterAndOr<OBJ, R> on QueryBuilder<OBJ, R, QFilterOperator> {
   /// Intersection of two filter conditions.
   QueryBuilder<OBJ, R, QFilterCondition> and() {
-    return QueryBuilder.apply(
-      this,
-      (q) => q.copyWith(filterGroupAnd: true),
-    );
+    return QueryBuilder.apply(this, (q) => q.copyWith(filterGroupAnd: true));
   }
 
   /// Union of two filter conditions.
   QueryBuilder<OBJ, R, QFilterCondition> or() {
-    return QueryBuilder.apply(
-      this,
-      (q) => q.copyWith(filterGroupAnd: false),
-    );
+    return QueryBuilder.apply(this, (q) => q.copyWith(filterGroupAnd: false));
   }
 }
 
@@ -37,10 +31,7 @@ extension QueryFilterNotAnyAll<OBJ, R>
 
   /// Complement the next filter condition or group.
   QueryBuilder<OBJ, R, QFilterCondition> not() {
-    return QueryBuilder.apply(
-      this,
-      (q) => q.copyWith(filterNot: !q.filterNot),
-    );
+    return QueryBuilder.apply(this, (q) => q.copyWith(filterNot: !q.filterNot));
   }
 
   /// Joins the results of the [modifier] for each item in [items] using logical
@@ -98,9 +89,8 @@ extension QueryFilterNotAnyAll<OBJ, R>
 
 /// @nodoc
 @protected
-typedef QueryOption<OBJ, S, RS> = QueryBuilder<OBJ, OBJ, RS> Function(
-  QueryBuilder<OBJ, OBJ, S> q,
-);
+typedef QueryOption<OBJ, S, RS> =
+    QueryBuilder<OBJ, OBJ, RS> Function(QueryBuilder<OBJ, OBJ, S> q);
 
 /// Optional query modifier.
 extension QueryModifier<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
@@ -167,8 +157,9 @@ extension QueryNumAggregation<T extends num?> on IsarQuery<T?> {
   double average() => aggregate(Aggregation.average) ?? double.nan;
 
   /// {@macro aggregation_average}
-  Future<double> averageAsync() => aggregateAsync<double>(Aggregation.average)
-      .then((value) => value ?? double.nan);
+  Future<double> averageAsync() => aggregateAsync<double>(
+    Aggregation.average,
+  ).then((value) => value ?? double.nan);
 }
 
 /// Aggregation operations for date queries.

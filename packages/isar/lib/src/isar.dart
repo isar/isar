@@ -6,7 +6,7 @@ enum IsarEngine {
   isar,
 
   /// The SQLite storage engine.
-  sqlite
+  sqlite,
 }
 
 /// An Isar database instance.
@@ -96,15 +96,12 @@ abstract class Isar {
     );
 
     /// Tree shake the inspector for profile and release builds.
-    assert(
-      () {
-        if (!IsarCore.kIsWeb && inspector) {
-          _IsarConnect.initialize(isar);
-        }
-        return true;
-      }(),
-      'Never happens',
-    );
+    assert(() {
+      if (!IsarCore.kIsWeb && inspector) {
+        _IsarConnect.initialize(isar);
+      }
+      return true;
+    }(), 'Never happens');
 
     return isar;
   }
@@ -135,15 +132,12 @@ abstract class Isar {
     );
 
     /// Tree shake the inspector for profile and release builds.
-    assert(
-      () {
-        if (!IsarCore.kIsWeb && inspector) {
-          _IsarConnect.initialize(isar);
-        }
-        return true;
-      }(),
-      'Never happens',
-    );
+    assert(() {
+      if (!IsarCore.kIsWeb && inspector) {
+        _IsarConnect.initialize(isar);
+      }
+      return true;
+    }(), 'Never happens');
 
     return isar;
   }
@@ -302,10 +296,7 @@ extension IsarAsync on Isar {
   ///
   /// Check out the [read] and [asyncWith] methods for more information.
   Future<T> readAsync<T>(T Function(Isar isar) callback) {
-    return asyncWith(
-      null,
-      (isar, _) => isar.read((isar) => callback(isar)),
-    );
+    return asyncWith(null, (isar, _) => isar.read((isar) => callback(isar)));
   }
 
   /// Create an asynchronous read transaction and pass a parameter to the
@@ -330,10 +321,7 @@ extension IsarAsync on Isar {
   ///
   /// Check out the [write] and [asyncWith] methods for more information.
   Future<T> writeAsync<T>(T Function(Isar isar) callback) {
-    return asyncWith(
-      null,
-      (isar, _) => isar.write((isar) => callback(isar)),
-    );
+    return asyncWith(null, (isar, _) => isar.write((isar) => callback(isar)));
   }
 
   /// Create an asynchronous read-write transaction and pass a parameter to the
@@ -369,17 +357,11 @@ extension IsarAsync on Isar {
 
   /// {@macro isar_copy_to_file}
   Future<void> copyToFileAsync(String path) {
-    return asyncWith(
-      null,
-      (isar, _) => isar.copyToFile(path),
-    );
+    return asyncWith(null, (isar, _) => isar.copyToFile(path));
   }
 
   /// {@macro isar_clear}
   Future<void> clearAsync() {
-    return asyncWith(
-      null,
-      (isar, _) => isar.clear(),
-    );
+    return asyncWith(null, (isar, _) => isar.clear());
   }
 }

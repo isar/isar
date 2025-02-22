@@ -22,12 +22,7 @@ class ObjectInfo {
   PropertyInfo? get idProperty => properties.where((it) => it.isId).firstOrNull;
 }
 
-enum DeserializeMode {
-  none,
-  assign,
-  positionalParam,
-  namedParam,
-}
+enum DeserializeMode { none, assign, positionalParam, namedParam }
 
 class PropertyInfo {
   PropertyInfo({
@@ -122,9 +117,10 @@ class PropertyInfo {
         : '$sNN${nullable && typeClassName != 'dynamic' ? '?' : ''}';
   }
 
-  String get dartType => type.isList
-      ? 'List<$scalarDartType>${nullable ? '?' : ''}'
-      : scalarDartType;
+  String get dartType =>
+      type.isList
+          ? 'List<$scalarDartType>${nullable ? '?' : ''}'
+          : scalarDartType;
 
   String enumMapName(ObjectInfo object) =>
       '_${object.dartName.decapitalize()}${dartName.capitalize()}';

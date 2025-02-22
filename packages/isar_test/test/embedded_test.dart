@@ -46,9 +46,7 @@ class EModel {
   bool operator ==(Object other) => other is EModel && other.value == value;
 
   Map<String, dynamic> toJson() {
-    return {
-      'value': value,
-    };
+    return {'value': value};
   }
 }
 
@@ -94,12 +92,9 @@ void main() {
       isar = await openTempIsar([ModelSchema]);
 
       allNull = Model(0, EModel('test'), null, null);
-      simple = Model(
-        1,
-        EModel('hello'),
-        NModel(EModel('abc')),
-        [NModel(EModel('test'))],
-      );
+      simple = Model(1, EModel('hello'), NModel(EModel('abc')), [
+        NModel(EModel('test')),
+      ]);
       nested = Model(
         2,
         EModel('hello'),
@@ -118,9 +113,7 @@ void main() {
                 ),
               ),
               null,
-              NModel(
-                EModel('hello'),
-              ),
+              NModel(EModel('hello')),
             ],
             ['test1', 'test2', 'test3'],
           ),
@@ -131,12 +124,10 @@ void main() {
             EModel('i am also part of a list'),
             NModel(
               EModel('even deeper'),
-              NModel(
-                null,
-                NModel(null, NModel(null, null, []), []),
-                [],
-                ['hello', 'world'],
-              ),
+              NModel(null, NModel(null, NModel(null, null, []), []), [], [
+                'hello',
+                'world',
+              ]),
               [],
             ),
             [null, null, null],
