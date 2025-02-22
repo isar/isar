@@ -49,7 +49,7 @@ impl ParseCallbacks for Callbacks {
     }
 }
 
-const LIBMDBX_VERSION: &str = "0.13.3";
+const LIBMDBX_VERSION: &str = "0.13.4";
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
