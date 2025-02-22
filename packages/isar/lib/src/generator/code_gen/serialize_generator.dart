@@ -78,10 +78,11 @@ String _writeProperty({
       final orNull = nullable ? '?? $_nullLong' : '';
       return 'IsarCore.writeLong($writer, $index, $value$enumGetter $orNull);';
     case IsarType.dateTime:
+      const toMicros = 'toUtc().microsecondsSinceEpoch';
       final converted =
           nullable
-              ? '$value$enumGetter?.toUtc().microsecondsSinceEpoch ?? $_nullLong'
-              : '$value$enumGetter.toUtc().microsecondsSinceEpoch';
+              ? '$value$enumGetter?.$toMicros ?? $_nullLong'
+              : '$value$enumGetter.$toMicros';
       return 'IsarCore.writeLong($writer, $index, $converted);';
     case IsarType.double:
       final orNull = nullable ? '?? double.nan' : '';
