@@ -31,12 +31,13 @@ class CollectionsList extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: ElevatedButton(
-            style: collection.name == selectedCollection
-                ? ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primaryContainer,
-                    foregroundColor: theme.colorScheme.onPrimaryContainer,
-                  )
-                : null,
+            style:
+                collection.name == selectedCollection
+                    ? ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primaryContainer,
+                      foregroundColor: theme.colorScheme.onPrimaryContainer,
+                    )
+                    : null,
             onPressed: () {
               onSelected(collection.name);
             },
@@ -65,16 +66,12 @@ class CollectionsList extends StatelessWidget {
                     children: [
                       Text(
                         info?.count.toString() ?? 'loading',
-                        style: const TextStyle(
-                          fontSize: 12,
-                        ),
+                        style: const TextStyle(fontSize: 12),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         _formatSize(info?.size ?? 0),
-                        style: const TextStyle(
-                          fontSize: 12,
-                        ),
+                        style: const TextStyle(fontSize: 12),
                       ),
                     ],
                   ),

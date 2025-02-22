@@ -12,10 +12,7 @@ class ErrorScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text(
-            'Disconnected',
-            style: TextStyle(fontSize: 20),
-          ),
+          const Text('Disconnected', style: TextStyle(fontSize: 20)),
           const SizedBox(height: 10),
           const Text('Please make sure your Isar instance is running.'),
           const SizedBox(height: 40),

@@ -34,17 +34,15 @@ class _PropertyBuilderState extends State<PropertyBuilder> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         InkWell(
-          onTap: widget.children.isNotEmpty
-              ? () => setState(() => _expanded = !_expanded)
-              : null,
+          onTap:
+              widget.children.isNotEmpty
+                  ? () => setState(() => _expanded = !_expanded)
+                  : null,
           customBorder: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 5,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: Row(
               children: [
                 if (widget.children.isNotEmpty) ...[
@@ -79,8 +77,9 @@ class _PropertyBuilderState extends State<PropertyBuilder> {
                   Text(
                     widget.type,
                     style: TextStyle(
-                      color: theme.colorScheme.onPrimaryContainer
-                          .withValues(alpha: 0.5),
+                      color: theme.colorScheme.onPrimaryContainer.withValues(
+                        alpha: 0.5,
+                      ),
                     ),
                   ),
               ],

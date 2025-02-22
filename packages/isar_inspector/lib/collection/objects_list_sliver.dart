@@ -29,61 +29,61 @@ class ObjectsListSliver extends StatelessWidget {
     final theme = Theme.of(context);
     final schema = schemas[collection]!;
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        childCount: objects.length,
-        (BuildContext context, int index) {
-          final object = objects[index];
-          final id = object.getValue(schema.idName!);
-          return Card(
-            key: Key('object $id'),
-            child: Padding(
-              padding: const EdgeInsets.all(5),
-              child: Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    child: ObjectView(
-                      schemaName: collection,
-                      schemas: schemas,
-                      object: object,
-                      onUpdate: (path, value) => onUpdate(id, path, value),
-                    ),
+      delegate: SliverChildBuilderDelegate(childCount: objects.length, (
+        BuildContext context,
+        int index,
+      ) {
+        final object = objects[index];
+        final id = object.getValue(schema.idName!);
+        return Card(
+          key: Key('object $id'),
+          child: Padding(
+            padding: const EdgeInsets.all(5),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  child: ObjectView(
+                    schemaName: collection,
+                    schemas: schemas,
+                    object: object,
+                    onUpdate: (path, value) => onUpdate(id, path, value),
                   ),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            Icons.copy_rounded,
-                            color: theme.colorScheme.onPrimaryContainer,
-                          ),
-                          tooltip: 'Copy as JSON',
-                          visualDensity: VisualDensity.standard,
-                          onPressed: () {
-                            final json = jsonEncode(object.data);
-                            Clipboard.setData(ClipboardData(text: json));
-                          },
+                ),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.copy_rounded,
+                          color: theme.colorScheme.onPrimaryContainer,
                         ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.delete_rounded,
-                            color: theme.colorScheme.onPrimaryContainer,
-                          ),
-                          tooltip: 'Delete',
-                          visualDensity: VisualDensity.standard,
-                          onPressed: () => onDelete(id),
+                        tooltip: 'Copy as JSON',
+                        visualDensity: VisualDensity.standard,
+                        onPressed: () {
+                          final json = jsonEncode(object.data);
+                          Clipboard.setData(ClipboardData(text: json));
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.delete_rounded,
+                          color: theme.colorScheme.onPrimaryContainer,
                         ),
-                      ],
-                    ),
+                        tooltip: 'Delete',
+                        visualDensity: VisualDensity.standard,
+                        onPressed: () => onDelete(id),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      }),
     );
   }
 }
