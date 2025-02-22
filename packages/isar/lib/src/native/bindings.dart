@@ -378,6 +378,52 @@ class IsarCoreBindings {
           ffi.Pointer<CFilter> Function(
               int, ffi.Pointer<CIsarValue>, bool)>(isLeaf: true);
 
+  ffi.Pointer<CFilter> isar_filter_string_regex(
+    int property_index,
+    ffi.Pointer<CIsarValue> value,
+    bool case_sensitive,
+  ) {
+    return _isar_filter_string_regex(
+      property_index,
+      value,
+      case_sensitive,
+    );
+  }
+
+  late final _isar_filter_string_regexPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>,
+              ffi.Bool)>>('isar_filter_string_regex');
+  late final _isar_filter_string_regex =
+      _isar_filter_string_regexPtr.asFunction<
+          ffi.Pointer<CFilter> Function(
+              int, ffi.Pointer<CIsarValue>, bool)>(isLeaf: true);
+
+  ffi.Pointer<CFilter> isar_filter_in(
+    int property_index,
+    ffi.Pointer<COption_IsarValue> values,
+    int length,
+    bool case_sensitive,
+  ) {
+    return _isar_filter_in(
+      property_index,
+      values,
+      length,
+      case_sensitive,
+    );
+  }
+
+  late final _isar_filter_inPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<CFilter> Function(
+              ffi.Uint16,
+              ffi.Pointer<COption_IsarValue>,
+              ffi.Uint32,
+              ffi.Bool)>>('isar_filter_in');
+  late final _isar_filter_in = _isar_filter_inPtr.asFunction<
+      ffi.Pointer<CFilter> Function(
+          int, ffi.Pointer<COption_IsarValue>, int, bool)>(isLeaf: true);
+
   ffi.Pointer<CFilter> isar_filter_nested(
     int property_index,
     ffi.Pointer<CFilter> filter,
@@ -1606,6 +1652,119 @@ class IsarCoreBindings {
   late final _isar_value_free = _isar_value_freePtr
       .asFunction<void Function(ffi.Pointer<CIsarValue>)>(isLeaf: true);
 
+  ffi.Pointer<COption_IsarValue> isar_values_new(
+    int length,
+  ) {
+    return _isar_values_new(
+      length,
+    );
+  }
+
+  late final _isar_values_newPtr = _lookup<
+          ffi
+          .NativeFunction<ffi.Pointer<COption_IsarValue> Function(ffi.Uint32)>>(
+      'isar_values_new');
+  late final _isar_values_new = _isar_values_newPtr
+      .asFunction<ffi.Pointer<COption_IsarValue> Function(int)>(isLeaf: true);
+
+  void isar_values_set_bool(
+    ffi.Pointer<COption_IsarValue> values,
+    int index,
+    bool value,
+  ) {
+    return _isar_values_set_bool(
+      values,
+      index,
+      value,
+    );
+  }
+
+  late final _isar_values_set_boolPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Pointer<COption_IsarValue>, ffi.Uint32,
+              ffi.Bool)>>('isar_values_set_bool');
+  late final _isar_values_set_bool = _isar_values_set_boolPtr
+      .asFunction<void Function(ffi.Pointer<COption_IsarValue>, int, bool)>(
+          isLeaf: true);
+
+  void isar_values_set_integer(
+    ffi.Pointer<COption_IsarValue> values,
+    int index,
+    int value,
+  ) {
+    return _isar_values_set_integer(
+      values,
+      index,
+      value,
+    );
+  }
+
+  late final _isar_values_set_integerPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Pointer<COption_IsarValue>, ffi.Uint32,
+              IsarI64)>>('isar_values_set_integer');
+  late final _isar_values_set_integer = _isar_values_set_integerPtr
+      .asFunction<void Function(ffi.Pointer<COption_IsarValue>, int, int)>(
+          isLeaf: true);
+
+  void isar_values_set_real(
+    ffi.Pointer<COption_IsarValue> values,
+    int index,
+    double value,
+  ) {
+    return _isar_values_set_real(
+      values,
+      index,
+      value,
+    );
+  }
+
+  late final _isar_values_set_realPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Pointer<COption_IsarValue>, ffi.Uint32,
+              ffi.Double)>>('isar_values_set_real');
+  late final _isar_values_set_real = _isar_values_set_realPtr
+      .asFunction<void Function(ffi.Pointer<COption_IsarValue>, int, double)>(
+          isLeaf: true);
+
+  void isar_values_set_string(
+    ffi.Pointer<COption_IsarValue> values,
+    int index,
+    ffi.Pointer<CString> value,
+  ) {
+    return _isar_values_set_string(
+      values,
+      index,
+      value,
+    );
+  }
+
+  late final _isar_values_set_stringPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Pointer<COption_IsarValue>, ffi.Uint32,
+              ffi.Pointer<CString>)>>('isar_values_set_string');
+  late final _isar_values_set_string = _isar_values_set_stringPtr.asFunction<
+      void Function(ffi.Pointer<COption_IsarValue>, int,
+          ffi.Pointer<CString>)>(isLeaf: true);
+
+  void isar_values_free(
+    ffi.Pointer<COption_IsarValue> values,
+    int length,
+  ) {
+    return _isar_values_free(
+      values,
+      length,
+    );
+  }
+
+  late final _isar_values_freePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Pointer<COption_IsarValue>, ffi.Uint32)>>('isar_values_free');
+  late final _isar_values_free = _isar_values_freePtr
+      .asFunction<void Function(ffi.Pointer<COption_IsarValue>, int)>(
+          isLeaf: true);
+
   int isar_watch_collection(
     ffi.Pointer<CIsarInstance> isar,
     int collection_index,
@@ -1971,6 +2130,8 @@ final class CIsarWriter extends ffi.Opaque {}
 final class CFilter extends ffi.Opaque {}
 
 final class CIsarValue extends ffi.Opaque {}
+
+final class COption_IsarValue extends ffi.Opaque {}
 
 final class CString extends ffi.Opaque {}
 

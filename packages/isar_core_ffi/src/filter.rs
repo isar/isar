@@ -212,7 +212,7 @@ pub unsafe extern "C" fn isar_filter_string_regex(
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_filter_in(
     property_index: u16,
-    values: *mut IsarValue,
+    values: *mut Option<IsarValue>,
     length: u32,
     case_sensitive: bool,
 ) -> *const Filter {

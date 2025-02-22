@@ -2,6 +2,8 @@ part of '../../isar.dart';
 
 Pointer<CFilter> _buildFilter(Filter filter, List<Pointer<void>> pointers) {
   switch (filter) {
+    case IsNullCondition():
+      return IsarCore.b.isar_filter_is_null(filter.property);
     case EqualCondition():
       final value = filter.value;
       if (value is double) {
@@ -101,8 +103,20 @@ Pointer<CFilter> _buildFilter(Filter filter, List<Pointer<void>> pointers) {
         _isarValue(filter.wildcard),
         filter.caseSensitive,
       );
-    case IsNullCondition():
-      return IsarCore.b.isar_filter_is_null(filter.property);
+    case RegexCondition():
+      return IsarCore.b.isar_filter_string_matches(
+        filter.property,
+        _isarValue(filter.regex),
+        filter.caseSensitive,
+      );
+    case IsInCondition():
+      final values = _isarValues(filter.values);
+      return IsarCore.b.isar_filter_in(
+        filter.property,
+        values,
+        filter.values.length,
+        filter.caseSensitive,
+      );
     case AndGroup():
       if (filter.filters.length == 1) {
         return _buildFilter(filter.filters[0], pointers);
@@ -152,6 +166,40 @@ Pointer<CIsarValue> _isarValue(Object? value) {
   } else {
     throw ArgumentError('Unsupported filter value type: ${value.runtimeType}');
   }
+}
+
+Pointer<COption_IsarValue> _isarValues(List<Object?> values) {
+  final valuesPtr = IsarCore.b.isar_values_new(values.length);
+  for (var i = 0; i < values.length; i++) {
+    final value = values[i];
+    switch (value) {
+      case bool():
+        IsarCore.b.isar_values_set_bool(valuesPtr, i, value);
+      case int():
+        IsarCore.b.isar_values_set_integer(valuesPtr, i, value);
+      case double():
+        IsarCore.b.isar_values_set_real(valuesPtr, i, value);
+      case String():
+        IsarCore.b.isar_values_set_string(
+          valuesPtr,
+          i,
+          IsarCore._toNativeString(value),
+        );
+      case DateTime():
+        IsarCore.b.isar_values_set_integer(
+          valuesPtr,
+          i,
+          value.toUtc().microsecondsSinceEpoch,
+        );
+      case null:
+      // do nothing
+      default:
+        throw ArgumentError(
+          'Unsupported filter value type: ${value.runtimeType}',
+        );
+    }
+  }
+  return valuesPtr;
 }
 
 double _adjustLowerFloatBound(double value, bool include, double epsilon) {
