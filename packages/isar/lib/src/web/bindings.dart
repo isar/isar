@@ -159,6 +159,25 @@ extension IsarBindingsX on JSIsar {
     bool case_sensitive,
   );
 
+  @ffi.Native<
+      ffi.Pointer<CFilter> Function(
+          ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)>()
+  external ffi.Pointer<CFilter> isar_filter_string_regex(
+    int property_index,
+    ffi.Pointer<CIsarValue> value,
+    bool case_sensitive,
+  );
+
+  @ffi.Native<
+      ffi.Pointer<CFilter> Function(
+          ffi.Uint16, ffi.Pointer<COption_IsarValue>, ffi.Uint32, ffi.Bool)>()
+  external ffi.Pointer<CFilter> isar_filter_in(
+    int property_index,
+    ffi.Pointer<COption_IsarValue> values,
+    int length,
+    bool case_sensitive,
+  );
+
   @ffi.Native<ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CFilter>)>()
   external ffi.Pointer<CFilter> isar_filter_nested(
     int property_index,
@@ -668,6 +687,51 @@ extension IsarBindingsX on JSIsar {
     ffi.Pointer<CIsarValue> value,
   );
 
+  @ffi.Native<ffi.Pointer<COption_IsarValue> Function(ffi.Uint32)>()
+  external ffi.Pointer<COption_IsarValue> isar_values_new(
+    int length,
+  );
+
+  @ffi.Native<
+      ffi.Void Function(ffi.Pointer<COption_IsarValue>, ffi.Uint32, ffi.Bool)>()
+  external void isar_values_set_bool(
+    ffi.Pointer<COption_IsarValue> values,
+    int index,
+    bool value,
+  );
+
+  @ffi.Native<
+      ffi.Void Function(ffi.Pointer<COption_IsarValue>, ffi.Uint32, IsarI64)>()
+  external void isar_values_set_integer(
+    ffi.Pointer<COption_IsarValue> values,
+    int index,
+    int value,
+  );
+
+  @ffi.Native<
+      ffi.Void Function(
+          ffi.Pointer<COption_IsarValue>, ffi.Uint32, ffi.Double)>()
+  external void isar_values_set_real(
+    ffi.Pointer<COption_IsarValue> values,
+    int index,
+    double value,
+  );
+
+  @ffi.Native<
+      ffi.Void Function(
+          ffi.Pointer<COption_IsarValue>, ffi.Uint32, ffi.Pointer<CString>)>()
+  external void isar_values_set_string(
+    ffi.Pointer<COption_IsarValue> values,
+    int index,
+    ffi.Pointer<CString> value,
+  );
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<COption_IsarValue>, ffi.Uint32)>()
+  external void isar_values_free(
+    ffi.Pointer<COption_IsarValue> values,
+    int length,
+  );
+
   @ffi.Native<
       ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Uint16, DartPort,
           ffi.Pointer<ffi.Pointer<CWatchHandle>>)>()
@@ -829,6 +893,8 @@ final class CIsarWriter extends ffi.Opaque {}
 final class CFilter extends ffi.Opaque {}
 
 final class CIsarValue extends ffi.Opaque {}
+
+final class COption_IsarValue extends ffi.Opaque {}
 
 final class CString extends ffi.Opaque {}
 
