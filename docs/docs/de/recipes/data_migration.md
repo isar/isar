@@ -2,7 +2,7 @@
 title: Migration von Daten
 ---
 
-# Migration vron Daten
+# Migration von Daten
 
 Isar migriert deine Datenbankschemas automatisch, wenn du Collections, Felder oder Indizes hinzufügst oder entfernst. Manchmal möchtest du möglicherweise auch deine Daten migrieren. Isar liefert keine eingebaute Lösung, weil das willkürliche Migrationsbeschränkungen festlegen würde. Es ist leicht eine passende Migrationslogik zu implementieren.
 
