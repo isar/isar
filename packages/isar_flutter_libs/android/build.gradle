@@ -1,34 +1,18 @@
-group 'dev.isar.isar_flutter_libs'
-version '1.0'
-
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
-    }
-}
-
-rootProject.allprojects {
+allprojects {
     repositories {
         google()
         mavenCentral()
     }
 }
 
-apply plugin: 'com.android.library'
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
 
-android {
-    if (project.android.hasProperty("namespace")) {
-        namespace 'dev.isar.isar_flutter_libs'
-    }
-    
-    compileSdkVersion 30
-
-    defaultConfig {
-        minSdkVersion 23
-    }
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
 }
