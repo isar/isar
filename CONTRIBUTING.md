@@ -181,24 +181,31 @@ test(core): add integration tests for transactions
 ### Running Tests
 
 ```bash
-# Format check
+# Run format check
 dart format -o none . --set-exit-if-changed
 
-# Lint check
+# Run lint check
 flutter analyze
 
-# Rust unit tests
+# Run Rust unit tests
 cargo test
 
-# Dart unit tests
+# Build Isar Core and run Dart unit tests
+./tool/build.sh
+./tool/prepare_tests.sh
 cd packages/isar_test
 flutter test -j 1
 
-# Web tests
+# Run web tests
+cd ../..
+./tool/build_wasm.sh
+cd packages/isar_test
 dart test -p chrome
 
-# Integration tests (platform-specific)
-flutter test integration_test.dart --dart-define STRESS=true
+# Run generator tests
+cd ../isar
+dart pub get
+dart test
 ```
 
 ### Test Organization
@@ -227,8 +234,31 @@ flutter test integration_test.dart --dart-define STRESS=true
 3. **Test thoroughly:**
 
    ```bash
-   # Run the full test suite
-   ./tool/run_all_tests.sh  # If available, or run tests manually
+   # Run format check
+   dart format -o none . --set-exit-if-changed
+
+   # Run lint check
+   flutter analyze
+
+   # Run Rust unit tests
+   cargo test
+
+   # Build Isar Core and run Dart unit tests
+   ./tool/build.sh
+   ./tool/prepare_tests.sh
+   cd packages/isar_test
+   flutter test -j 1
+
+   # Run web tests
+   cd ../..
+   ./tool/build_wasm.sh
+   cd packages/isar_test
+   dart test -p chrome
+
+   # Run generator tests
+   cd ../isar
+   dart pub get
+   dart test
    ```
 
 4. **Commit your changes:**
