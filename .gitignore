@@ -28,6 +28,7 @@ isar-dart.h
 gradle-wrapper.jar
 .gradle/
 local.properties
+.cxx/
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
