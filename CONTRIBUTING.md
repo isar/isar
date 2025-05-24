@@ -14,6 +14,16 @@ Thank you for your interest in contributing to Isar! 🎉 We appreciate your hel
 - [Issue Guidelines](#issue-guidelines)
 - [Community](#community)
 
+## 📋 Project Status
+
+**Current State**: Isar 3.x is stable and production-ready for mobile and desktop platforms.
+
+**What's Next**: We're actively working on Isar 4.0, which will bring exciting new features including full web support, enhanced performance, and additional capabilities.
+
+**Timeline**: Our lead maintainer Simon is dedicating significant effort to this major release, though development timelines depend on the complexity of features and available bandwidth. We appreciate your patience as we work to deliver a high-quality update.
+
+**How You Can Help**: Contributions, testing, and community feedback are invaluable during this development phase. Even if reviews take some time, your input helps shape the future of Isar.
+
 ## 🚀 Getting Started
 
 Before you begin:
