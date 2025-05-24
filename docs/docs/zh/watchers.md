@@ -87,7 +87,7 @@ await isar.users.put(User()..name = 'Albert');
 await isar.users.put(User()..name = 'Monika');
 // 无任何打印输出
 
-awaited isar.users.put(User()..name = 'Antonia');
+await isar.users.put(User()..name = 'Antonia');
 // 打印出：Users with A are: [User(name: Albert), User(name: Antonia)]
 ```
 
