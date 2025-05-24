@@ -306,10 +306,6 @@ Use our [feature request template](.github/ISSUE_TEMPLATE/feature_request.md) an
 - 💡 **Discussions**: [GitHub Discussions](https://github.com/isar/isar/discussions)
 - 📖 **Documentation**: [isar.dev](https://isar.dev)
 
-### Code of Conduct
-
-Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
-
 ### Recognition
 
 Contributors are recognized in our:
