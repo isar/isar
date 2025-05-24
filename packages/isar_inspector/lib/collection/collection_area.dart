@@ -2,7 +2,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html';
 import 'dart:math';
 
 import 'package:clickup_fading_scroll/clickup_fading_scroll.dart';
@@ -17,6 +16,7 @@ import 'package:isar_inspector/object/isar_object.dart';
 import 'package:isar_inspector/query_builder/query_filter.dart';
 import 'package:isar_inspector/query_builder/query_group.dart';
 import 'package:isar_inspector/util.dart';
+import 'package:web/web.dart';
 
 const objectsPerPage = 20;
 
@@ -305,11 +305,12 @@ class _CollectionAreaState extends State<CollectionArea> {
     try {
       final base64 = base64Encode(utf8.encode(jsonEncode(data)));
       final anchor =
-          AnchorElement(href: 'data:application/octet-stream;base64,$base64')
+          HTMLAnchorElement()
+            ..href = 'data:application/octet-stream;base64,$base64'
             ..target = 'blank'
             ..download = '${widget.collection}.json';
 
-      document.body!.append(anchor);
+      document.body!.appendChild(anchor);
       anchor.click();
       anchor.remove();
     } catch (_) {}
