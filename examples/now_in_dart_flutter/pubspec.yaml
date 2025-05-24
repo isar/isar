@@ -1,0 +1,41 @@
+name: now_in_dart_flutter
+description: A new Flutter project.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.18.0 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  dartz: ^0.10.1
+  dio: ^4.0.6
+  equatable: ^2.0.5
+  flash: ^2.0.3+3
+  flutter_bloc: ^8.1.1
+  flutter_svg: ^1.1.5
+  freezed_annotation: ^2.1.0
+  isar: ^3.0.0
+  isar_flutter_libs: ^3.0.0
+  url_launcher: ^6.1.5
+  webview_flutter: ^3.0.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  build_runner: ^2.2.0
+  flutter_lints: ^2.0.1
+  freezed: ^2.1.0+1
+  isar_generator: ^3.0.0
+  mocktail: ^0.3.0
+  very_good_analysis: ^3.1.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
