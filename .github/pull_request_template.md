@@ -71,7 +71,7 @@
 
 ## Screenshots/Videos
 
-<!-- Add screenshots or videos if your changes affect the UI or behavior -->
+<!-- Add screenshots or videos if your changes affect the UI, Inspector, or behavior -->
 
 ## Additional Notes
 
