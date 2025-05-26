@@ -27,9 +27,8 @@ isar-dart.h
 # Android related
 gradle-wrapper.jar
 .gradle/
-gradlew
-gradlew.bat
 local.properties
+.cxx/
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
