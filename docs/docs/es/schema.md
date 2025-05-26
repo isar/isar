@@ -202,7 +202,7 @@ Isar permite almacenar y usar enums como cualquier otro tipo de dato Isar. Sin e
 
 | EnumType    | Descripción                                                                                      |
 | ----------- | ------------------------------------------------------------------------------------------------ |
-| `ordinal`   | El índice del emun se almacena como `byte`. Esto es muy eficiente pero no permite enums nulables |
+| `ordinal`   | El índice del enum se almacena como `byte`. Esto es muy eficiente pero no permite enums nulables |
 | `ordinal32` | El índice del enum se almacena como `short` (entero de 4 bytes).                                 |
 | `name`      | El nombre del enum se almacena como `String`.                                                    |
 | `value`     | Para recuperar el valor del enum se utiliza una propiedad personalizada.                         |

@@ -40,7 +40,7 @@ jobs:
             --type instrumentation \
             --timeout 5m \
             --device model=starqlteue,version=26  \
-            --device model=shiba,version=34 \
+            --device model=shiba,version=35 \
             --app build/app/outputs/apk/debug/app-debug.apk \
             --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk
         working-directory: packages/isar_test

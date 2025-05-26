@@ -16,6 +16,18 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
+      - run: dart pub get
+        working-directory: packages/isar
+      - run: flutter pub get
+        working-directory: packages/isar_flutter_libs
+      - run: flutter pub get
+        working-directory: packages/isar_inspector
+      - run: flutter pub get
+        working-directory: packages/isar_test
+      - run: flutter pub get
+        working-directory: examples/counter
+      - run: flutter pub get
+        working-directory: examples/pub
       - name: Check formatting
         run: dart format -o none . --set-exit-if-changed
 

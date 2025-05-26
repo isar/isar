@@ -1,3 +1,6 @@
+group 'dev.isar.isar_flutter_libs'
+version '1.0'
+
 allprojects {
     repositories {
         google()
