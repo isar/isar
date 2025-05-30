@@ -16,15 +16,19 @@ const _ignoreLints = [
 ];
 
 class _IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
+  _IsarCollectionGenerator(this.config);
+
+  final Map<String, dynamic> config;
+
   @override
   Future<String> generateForAnnotatedElement(
     Element element,
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
+    final generatePropertyMapper = config['propertyMapper'] == true;
     final object = _IsarAnalyzer().analyzeCollection(element);
-    final idType =
-        object.idProperty!.type == IsarType.string ? 'String' : 'int';
+    final idType = object.idProperty!.type == IsarType.string ? 'String' : 'int';
     return '''
       // coverage:ignore-file
       // ignore_for_file: ${_ignoreLints.join(', ')}
@@ -35,6 +39,8 @@ class _IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
       }
 
       ${_generateSchema(object)}
+
+      ${generatePropertyMapper ? _generatePropertyMapper(object) : ''}
 
       ${_generateSerialize(object)}
 
@@ -60,12 +66,17 @@ class _IsarCollectionGenerator extends GeneratorForAnnotation<Collection> {
 }
 
 class _IsarEmbeddedGenerator extends GeneratorForAnnotation<Embedded> {
+  _IsarEmbeddedGenerator(this.config);
+
+  final Map<String, dynamic> config;
+
   @override
   Future<String> generateForAnnotatedElement(
     Element element,
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
+    final generatePropertyMapper = config['propertyMapper'] == true;
     final object = _IsarAnalyzer().analyzeEmbedded(element);
     return '''
       // coverage:ignore-file
@@ -73,6 +84,8 @@ class _IsarEmbeddedGenerator extends GeneratorForAnnotation<Embedded> {
       // ignore_for_file: type=lint
 
       ${_generateSchema(object)}
+
+      ${generatePropertyMapper ? _generatePropertyMapper(object) : ''}
 
       ${_generateSerialize(object)}
 
