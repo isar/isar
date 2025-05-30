@@ -1,4 +1,4 @@
-#!/bin/shuname
+#!/bin/bash
 
 arch=$(uname -m)
 
