@@ -2,6 +2,8 @@
 title: 关联
 ---
 
+> ⚠️ Links are currently not supported in Isar v4
+
 # 关联（Link）
 
 关联允许你表达对象之间的关系，比如评论的作者（即用户）。你可以使用 Isar 的关联来实现 `1:1`、`1:n` 和 `n:n` 的关系。使用关联比使用嵌套对象更不符人类工程学，因此你应该尽可能使用嵌套对象来代替关联。
@@ -23,14 +25,14 @@ title: 关联
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -49,7 +51,7 @@ final linda = Student()
   ..name = 'Linda'
   ..teacher.value = mathTeacher;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.students.put(linda);
   await isar.teachers.put(mathTeacher);
   await linda.teacher.save();
@@ -91,7 +93,7 @@ isar.writeTxnSync(() {
 ```dart
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -113,7 +115,7 @@ print(linda.teachers); // {Teacher('Math')}
 
 linda.teachers.add(biologyTeacher);
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await linda.teachers.save();
 });
 

@@ -22,11 +22,13 @@ flutter pub add -d isar_generator build_runner
 컬렉션 클래스에 `@collection` 으로 주석을 달고 `Id` 필드를 선택합니다.
 
 ```dart
-part 'email.g.dart';
+import 'package:isar/isar.dart';
+
+part 'user.g.dart';
 
 @collection
 class User {
-  Id id = Isar.autoIncrement; // id = null 을 사용해도 자동 증분할 수 있습니다.
+  late int id;
 
   String? name;
 
@@ -44,19 +46,13 @@ Id는 컬렉션에서 개체를 고유하게 식별하고 나중에 개체를 �
 dart run build_runner build
 ```
 
-플러터를 사용하고 있다면, 다음 명령을 사용합니다.
-
-```
-flutter pub run build_runner build
-```
-
 ## 4. Isar 인스턴스 열기
 
 새 Isar 인스턴스를 열고 모든 컬렉션 스키마를 전달합니다. 선택적으로 인스턴스 이름과 디렉토리를 지정할 수도 있습니다.
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
+final isar = await Isar.openAsync(
   [EmailSchema],
   directory: dir.path,
 );
@@ -69,17 +65,22 @@ final isar = await Isar.open(
 모든 기본적인 CRUD 작업은 `IsarCollection` 을 통해서 이루어집니다.
 
 ```dart
-final newUser = User()..name = 'Jane Doe'..age = 36;
+final newUser = User()
+  ..id = isar!.users.autoIncrement()
+  ..name = 'Jane Doe'
+  ..age = 36;
 
-await isar.writeTxn(() async {
-  await isar.users.put(newUser); // 삽입 & 업데이트
+await isar!.writeAsync((isar) {
+  return isar.users.put(newUser); // 삽입 & 업데이트
 });
 
-final existingUser = await isar.users.get(newUser.id); // 가져오기
+final existingUser = isar!.users.get(newUser.id); // 가져오기
 
-await isar.writeTxn(() async {
-  await isar.users.delete(existingUser.id!); // 삭제
-});
+if (existingUser != null) {
+  await isar!.writeAsync((isar) {
+    return isar.users.delete(existingUser.id); // 삭제
+  });
+}
 ```
 
 ## 다른 자료들

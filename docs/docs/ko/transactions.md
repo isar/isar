@@ -15,8 +15,8 @@ Isar 에서 트랜잭션은 단일 작업 단위 안에서 여러 데이터베�
 
 |        | 읽기         | 읽기 & 쓰기       |
 | ------ | ------------ | ----------------- |
-| 동기   | `.txnSync()` | `.writeTxnSync()` |
-| 비동기 | `.txn()`     | `.writeTxn()`     |
+| 동기   | `.read()`      | `.write()`      |
+| 비동기 | `.readAsync()` | `.writeAsync()` |
 
 ### 읽기 트랜잭션
 
@@ -39,13 +39,13 @@ Isar 에서 트랜잭션은 단일 작업 단위 안에서 여러 데이터베�
 ```dart
 @collection
 class Contact {
-  Id? id;
+  late int id;
 
   String? name;
 }
 
 // GOOD
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   for (var contact in getContacts()) {
     await isar.contacts.put(contact);
   }
@@ -53,7 +53,7 @@ await isar.writeTxn(() async {
 
 // BAD: 트랜잭션 안으로 for 루프를 이동시키세요.
 for (var contact in getContacts()) {
-  await isar.writeTxn(() async {
+  await isar.writeAsync((isar) async {
     await isar.contacts.put(contact);
   });
 }

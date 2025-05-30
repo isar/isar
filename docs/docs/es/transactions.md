@@ -14,10 +14,10 @@ Las transacciones (especialmente las de escritura) tienen un costo, y siempre de
 
 Las transacciones puede ser tanto síncronas como asíncronas. En las transacciones síncronas, sólo puedes utilizar operaciones síncronas. En las transacciones asíncronas, sólo operaciones asíncronas.
 
-|            | Lectura      | Lectura y Escritura |
-| ---------- | ------------ | ------------------- |
-| Síncronas  | `.txnSync()` | `.writeTxnSync()`   |
-| Asíncronas | `.txn()`     | `.writeTxn()`       |
+|            | Lectura        | Lectura y Escritura |
+| ---------- | -------------- | ------------------- |
+| Síncronas  | `.read()`      | `.write()`          |
+| Asíncronas | `.readAsync()` | `.writeAsync()`     |
 
 ### Transacciones de lectura
 
@@ -40,13 +40,13 @@ Cuando una operación de la base de datos falla, la transacción se aborta y ya 
 ```dart
 @collection
 class Contact {
-  Id? id;
+  late int id;
 
   String? name;
 }
 
 // GOOD
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   for (var contact in getContacts()) {
     await isar.contacts.put(contact);
   }
@@ -54,7 +54,7 @@ await isar.writeTxn(() async {
 
 // BAD: move loop inside transaction
 for (var contact in getContacts()) {
-  await isar.writeTxn(() async {
+  await isar.writeAsync((isar) async {
     await isar.contacts.put(contact);
   });
 }

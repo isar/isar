@@ -15,7 +15,7 @@ Por exemplo, esta coleção `Product` é totalmente desordenada.
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -50,7 +50,7 @@ Para melhorar o desempenho desta consulta, indexamos a propriedade `price`. Um �
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -110,7 +110,7 @@ Um índice único garante que o índice não contenha valores duplicados. Pode c
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true)
   late String username;
@@ -147,7 +147,7 @@ print(await isar.user.where().findAll());
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true, replace: true)
   late String username;
@@ -206,7 +206,7 @@ Todos os índices nas propriedades `String` e `List<String>` diferenciam maiúsc
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   @Index(caseSensitive: false)
   late String name;
@@ -255,7 +255,7 @@ Provavelmente é melhor começar com um exemplo. Criamos uma coleção de pessoa
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -320,7 +320,7 @@ As aplicações práticas para índices de várias entradas incluem a indexaçã
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String description;
 

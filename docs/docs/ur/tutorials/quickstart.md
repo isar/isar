@@ -20,13 +20,16 @@ flutter pub add -d isar_generator build_runner
 اپنی کلیکشن کلاسز کو "کلیکشن@" کے ساتھ تشریح کریں اورایک "آئی ڈی@" فیلڈ کا انتخاب کریں۔
 
 ```dart
+import 'package:isar/isar.dart';
+
 part 'user.g.dart';
 
 @collection
 class User {
-  Id id = Isar.autoIncrement;  // you can also use id = null to auto increment
+  late int id;
 
   String? name;
+
   int? age;
 }
 ```
@@ -41,20 +44,14 @@ class User {
 dart run build_runner build
 ```
 
-اگر آپ فلٹر استعمال کر رہے ہیں تو درج ذیل استعمال کریں؛
-
-```
-flutter pub run build_runner build
-```
-
 ## 4. ای زار مثال کھولیں۔
 
    ایک نیا ای زار مثال کھولیں اور اپنے تمام کلیکشن اسکیموں کو پاس کریں۔ اختیاری طور پر آپ مثال کا نام اور ڈائریکٹری بتا سکتے ہیں۔
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [UserSchema],
+final isar = await Isar.openAsync(
+  schemas: [UserSchema],
   directory: dir.path,
 );
 ```
@@ -67,19 +64,22 @@ final isar = await Isar.open(
 
 
 ```dart
-final newUser = User()..name = 'Jane Doe'..age = 36;
+final newUser = User()
+  ..id = isar!.users.autoIncrement()
+  ..name = 'Jane Doe'
+  ..age = 36;
 
-await isar.writeTxn(() async {
-  await isar.users.put(newUser);
-  داخل کریں اور تروتازہ کریں۔//
+await isar!.writeAsync((isar) {
+  return isar.users.put(newUser); // insert & update
 });
 
-final existingUser = await isar.users.get(newUser.id);
- حاصل کریں۔//
-await isar.writeTxn(() async {
-  await isar.users.delete(existingUser.id!);
-  حذف کریں//
-});
+final existingUser = isar!.users.get(newUser.id); // get
+
+if (existingUser != null) {
+  await isar!.writeAsync((isar) {
+    return isar.users.delete(existingUser.id); // delete
+  });
+}
 ```
 
 ## دیگر وسائل

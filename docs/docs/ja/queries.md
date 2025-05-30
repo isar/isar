@@ -26,7 +26,7 @@ title: クエリ
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   int? size;
 
@@ -199,7 +199,7 @@ Listにおいてもクエリが可能です:
 
 ```dart
 class Tweet {
-  Id? id;
+  late int id;
 
   String? text;
 
@@ -236,7 +236,7 @@ final flutterTweets = await isar.tweets.filter()
 ```dart
 @collection
 class Car {
-  Id? id;
+  late int id;
 
   Brand? brand;
 }
@@ -281,14 +281,14 @@ final germanCars = await isar.cars.filter()
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -340,7 +340,7 @@ where節を組み合わせるには、**論理和**しか使えません。言�
 ```dart
 @collection
 class Shoe with IsarObject {
-  Id? id;
+  late int id;
 
   @Index()
   Id? size;

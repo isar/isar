@@ -25,7 +25,7 @@ Utilizzeremo il seguente modello per gli esempi seguenti:
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   int? size;
 
@@ -199,7 +199,7 @@ Si possono interrogare anche le liste:
 
 ```dart
 class Tweet {
-  Id? id;
+  late int id;
 
   String? text;
 
@@ -236,7 +236,7 @@ Gli oggetti incorporati sono una delle funzionalità più utili di Isar. Possono
 ```dart
 @collection
 class Car {
-  Id? id;
+  late int id;
 
   Brand? brand;
 }
@@ -281,14 +281,14 @@ Tieni presente che le query di collegamento possono essere costose perché Isar 
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -340,7 +340,7 @@ Aggiungiamo gli indici alla collezione di scarpe:
 ```dart
 @collection
 class Shoe with IsarObject {
-  Id? id;
+  late int id;
 
   @Index()
   Id? size;

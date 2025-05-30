@@ -14,8 +14,8 @@ title: بنائیں، پڑھیں، اپ ڈیٹ کریں، حذف کریں
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [RecipeSchema],
+final isar = await Isar.openAsync(
+  schemas: [RecipeSchema],
   directory: dir.path,
 );
 ```
@@ -48,7 +48,7 @@ final isar = await Isar.open(
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 
@@ -65,23 +65,21 @@ class Recipe {
 ```dart
 final recipes = isar.recipes;
 ```
-یہ آسان تھا! اگر آپ کلیکشن ایکسیسرز استعمال نہیں کرنا چاہتے تو آپ `کلیکشن()` طریقہ بھی استعمال کر سکتے ہیں:
-
-```dart
-final recipes = isar.collection<Recipe>();
-```
 
 ### کوئی چیز حاصل کریں (بذریعہ ID)
 
 ہمارے پاس ابھی تک ڈیٹا جمع نہیں ہے لیکن آئیے دکھاوا کرتے ہیں کہ ہم ایسا کرتے ہیں تاکہ ہم 123 آئی ڈی کے ذریعے ایک خیالی چیز حاصل کر سکیں۔
-```dart
-final recipe = await isar.recipes.get(123);
-```
-`گیٹ()` کسی بھی چیز کے ساتھ `فیوچر` لوٹاتا ہے یا `نل` اگر یہ موجود نہیں ہے۔ ایزار کے تمام آپریشنز بطور ڈیفالٹ غیر مطابقت پذیر ہوتے ہیں، اور ان میں سے اکثر کا ہم وقتی ہم منصب ہوتا ہے:
 
 ```dart
-final recipe = isar.recipes.getSync(123);
+final recipe = await isar.recipes.getAsync(123);
 ```
+
+`getAsync()` کسی بھی چیز کے ساتھ فیوچر لوٹاتا ہے یا نل اگر یہ موجود نہیں ہے۔ ایزار کے تمام آپریشنز بطور ڈیفالٹ غیر مطابقت پذیر ہوتے ہیں، اور ان میں سے اکثر کا ہم وقتی ہم منصب ہوتا ہے:
+
+```dart
+final recipe = isar.recipes.get(123);
+```
+
 :::warning
 آپ کو اپنے یوآئی الگ تھلگ میں طریقوں کے غیر مطابقت پذیر ورژن پر ڈیفالٹ کرنا چاہئے۔ چونکہ ایزار بہت تیز ہے، یہ اکثر مطابقت پذیر ورژن استعمال کرنے کے لئے قابل قبول ہے.
 :::
@@ -111,8 +109,8 @@ final favouires = await isar.recipes.filter()
 آخر کار ہمارے کلیکشن میں ترمیم کرنے کا وقت آگیا ہے! اوبجیکٹس بنانے، اپ ڈیٹ کرنے یا حذف کرنے کے لیے، تحریری لین دین میں لپیٹے ہوئے متعلقہ آپریشنز کا استعمال کریں:
 
 ```dart
-await isar.writeTxn(() async {
-  final recipe = await isar.recipes.get(123)
+await isar.writeAsync((isar) async {
+  final recipe = await isar.recipes.getAsync(123)
 
   recipe.isFavorite = false;
   await isar.recipes.put(recipe); // perform update operations
@@ -131,11 +129,12 @@ await isar.writeTxn(() async {
 
 ```dart
 final pancakes = Recipe()
+  ..id = isar.recipes.autoIncrement()
   ..name = 'Pancakes'
   ..lastCooked = DateTime.now()
   ..isFavorite = true;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.recipes.put(pancakes);
 })
 ```
@@ -145,7 +144,7 @@ await isar.writeTxn(() async {
 ایک ساتھ متعدد اشیاء کو داخل کرنا اتنا ہی آسان ہے:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.recipes.putAll([pancakes, pizza]);
 })
 ```
@@ -157,7 +156,7 @@ await isar.writeTxn(() async {
 لہذا اگر ہم اپنے پان کیکس کو ناپسند کرنا چاہتے ہیں، تو ہم درج ذیل کام کر سکتے ہیں:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   pancakes.isFavorite = false;
   await isar.recipes.put(recipe);
 });
@@ -167,7 +166,7 @@ await isar.writeTxn(() async {
 ایزار میں کسی چیز سے چھٹکارا حاصل کرنا چاہتے ہیں؟ `کلیکشن.ڈیلیٹ(آئی ڈی)` استعمال کریں۔ حذف کرنے کا طریقہ واپس کرتا ہے کہ آیا مخصوص آئی ڈی کے ساتھ کوئی آبجیکٹ ملا اور حذف کر دیا گیا تھا۔ اگر آپ آئی ڈی `123` کے ساتھ آبجیکٹ کو حذف کرنا چاہتے ہیں، مثال کے طور پر، آپ یہ کر سکتے ہیں:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final success = await isar.recipes.delete(123);
   print('Recipe deleted: $success');
 });
@@ -176,7 +175,7 @@ await isar.writeTxn(() async {
 اسی طرح حاصل کرنے اور ڈالنے کے لئے، ایک بلک ڈیلیٹ آپریشن بھی ہے جو حذف شدہ اشیاء کی تعداد لوٹاتا ہے:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final count = await isar.recipes.deleteAll([1, 2, 3]);
   print('We deleted $count recipes');
 });
@@ -185,7 +184,7 @@ await isar.writeTxn(() async {
 اگر آپ ان اشیاء کی آئی ڈی نہیں جانتے جنہیں آپ حذف کرنا چاہتے ہیں، تو آپ ایک استفسار استعمال کر سکتے ہیں:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final count = await isar.recipes.filter()
     .isFavoriteEqualTo(false)
     .deleteAll();

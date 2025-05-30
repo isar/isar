@@ -15,7 +15,7 @@ Ad esempio, questa raccolta `Product` non è ordinata.
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -50,7 +50,7 @@ Per migliorare le prestazioni di questa query, indicizziamo la proprietà `price
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -110,7 +110,7 @@ Un indice univoco garantisce che l'indice non contenga valori duplicati. Può es
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true)
   late String username;
@@ -147,7 +147,7 @@ A volte non è preferibile generare un errore se viene violato un vincolo univoc
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true, replace: true)
   late String username;
@@ -206,7 +206,7 @@ Tutti gli indici sulle proprietà `String` e `List<String>` fanno distinzione tr
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   @Index(caseSensitive: false)
   late String name;
@@ -255,7 +255,7 @@ Probabilmente è meglio iniziare con un esempio. Creiamo una collezione di perso
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -320,7 +320,7 @@ Le applicazioni pratiche per gli indici a voci multiple includono l'indicizzazio
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String description;
 

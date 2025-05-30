@@ -14,8 +14,8 @@ Isar 인스턴스에서 사용하고 싶은 모든 스키마를 지정합니다.
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [RecipeSchema],
+final isar = await Isar.openAsync(
+  schemas: [RecipeSchema],
   directory: dir.path,
 );
 ```
@@ -48,7 +48,7 @@ Isar 에서 지정된 타입의 새로운 객체를 찾고 쿼리하고 생성�
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 
@@ -66,24 +66,18 @@ class Recipe {
 final recipes = isar.recipes;
 ```
 
-너무 쉽죠! 컬렉션 접근자를 사용하기 싫다면, `collection()` 메서드를 사용해도 됩니다.
-
-```dart
-final recipes = isar.collection<Recipe>();
-```
-
 ### 객체 얻기 (id를 이용)
 
 아직 컬렉션에 데이터가 들어있지 않지만, 아이디 `123` 의 가상의 객체가 있다고 가정하고 가져오겠습니다.
 
 ```dart
-final recipe = await isar.recipes.get(123);
+final recipe = await isar.recipes.getAsync(123);
 ```
 
-`get()` 은 객체를 `Future` 로 반환하고, 해당 객체가 존재하지 않는 경우에는 `null` 을 반환합니다. 모든 Isar 작업들은 기본적으로 비동기적으로 작동합니다. 대부분의 경우는 동기적인 방법도 가지고 있습니다.
+`getAsync()` 은 객체를 `Future` 로 반환하고, 해당 객체가 존재하지 않는 경우에는 `null` 을 반환합니다. 모든 Isar 작업들은 기본적으로 비동기적으로 작동합니다. 대부분의 경우는 동기적인 방법도 가지고 있습니다.
 
 ```dart
-final recipe = isar.recipes.getSync(123);
+final recipe = isar.recipes.get(123);
 ```
 
 :::warning
@@ -115,8 +109,8 @@ final favouires = await isar.recipes.filter()
 드디어 컬렉션을 수정할 때가 됐습니다! 객체를 생성, 갱신, 삭제하려면 쓰기 트랜잭션 안에서 각각의 작업들을 수행하세요.
 
 ```dart
-await isar.writeTxn(() async {
-  final recipe = await isar.recipes.get(123)
+await isar.writeAsync((isar) async {
+  final recipe = await isar.recipes.getAsync(123)
 
   recipe.isFavorite = false;
   await isar.recipes.put(recipe); // 갱신 작업을 수행합니다.
@@ -135,11 +129,12 @@ id 필드가 `null` 이나 `Isar.autoIncrement` 라면, Isar 는 자동 증분 �
 
 ```dart
 final pancakes = Recipe()
+  ..id = isar.recipes.autoIncrement()
   ..name = 'Pancakes'
   ..lastCooked = DateTime.now()
   ..isFavorite = true;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.recipes.put(pancakes);
 })
 ```
@@ -149,7 +144,7 @@ await isar.writeTxn(() async {
 여러 객체를 한 번에 삽입하는 것도 쉽습니다:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.recipes.putAll([pancakes, pizza]);
 })
 ```
@@ -161,7 +156,7 @@ await isar.writeTxn(() async {
 만약 팬케익에 즐겨찾기를 해제하는 경우, 이렇게 할 수 있습니다.
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   pancakes.isFavorite = false;
   await isar.recipes.put(pancakes);
 });
@@ -172,7 +167,7 @@ await isar.writeTxn(() async {
 Isar 에 있는 것을 없애고 싶나요? `collection.delete(id)` 를 사용하세요. delete 메소드는 주어진 id 를 가진 객체를 찾아서 삭제합니다. id `123` 을 가지는 객체를 삭제하는 예시 입니다:
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final success = await isar.recipes.delete(123);
   print('Recipe deleted: $success');
 });
@@ -181,7 +176,7 @@ await isar.writeTxn(() async {
 get 과 put 과 마찬가지로 delete 에도 여러개를 한꺼번에 삭제하는 방법이 있습니다. 삭제된 객체의 수를 반환합니다.
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final count = await isar.recipes.deleteAll([1, 2, 3]);
   print('We deleted $count recipes');
 });
@@ -190,7 +185,7 @@ await isar.writeTxn(() async {
 만약 삭제할 객체의 id 를 모른다면 query 를 사용할 수 있습니다.
 
 ```dart
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   final count = await isar.recipes.filter()
     .isFavoriteEqualTo(false)
     .deleteAll();

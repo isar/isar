@@ -17,7 +17,7 @@ The following code is an example of a simple collection that defines a `User` ta
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -78,7 +78,7 @@ Isar persists all public fields of a collection class. By annotating a property 
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -99,7 +99,7 @@ class User {
 
 @Collection(ignore: {'profilePicture'})
 class Member extends User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -124,7 +124,6 @@ Isar supports the following data types:
 - `float`
 - `double`
 - `DateTime`
-- `Duration`
 - `String`
 - `List<bool>`
 - `List<byte>`
@@ -133,7 +132,6 @@ Isar supports the following data types:
 - `List<float>`
 - `List<double>`
 - `List<DateTime>`
-- `List<Duration>`
 - `List<String>`
 
 Additionally, embedded objects and enums are supported. We'll cover those below.
@@ -157,7 +155,7 @@ Here is an example collection containing all of the above types:
 ```dart
 @collection
 class TestCollection {
-  Id? id;
+  late int id;
 
   late byte byteValue;
 
@@ -198,10 +196,6 @@ Isar does not store timezone information of your dates. Instead, it converts `Da
 
 `DateTime`s are stored with microsecond precision. In browsers, only millisecond precision is supported because of JavaScript limitations.
 
-## Duration
-
-Durations are stored in millisecond precision.
-
 ## Enum
 
 Isar allows storing and using enums like other Isar types. You have to choose, however, how Isar should represent the enum on the disk. Isar supports four different strategies:
@@ -222,7 +216,7 @@ Let's check out an example for each strategy.
 ```dart
 @collection
 class EnumCollection {
-  Id? id;
+  late int id;
 
   @enumerated // same as EnumType.ordinal
   late TestEnum byteIndex; // cannot be nullable
@@ -260,7 +254,7 @@ It's often helpful to have nested objects in your collection model. There is no 
 ```dart
 @collection
 class Email {
-  Id? id;
+  late int id;
 
   String? title;
 

@@ -2,6 +2,8 @@
 title: 링크
 ---
 
+> ⚠️ Links are currently not supported in Isar v4
+
 # 링크
 
 링크를 사용해서 댓글 작성자(사용자) 같은 객체 간의 관계를 나타낼 수 있습니다. Isar 링크를 사용해서 `1:1`, `1:n`, 과 `n:n` 관계를 모델링할 수 있습니다. 링크를 사용하는 것은 내장된 객체를 사용하는 것보다 인체 공학적이지 않으므로(less ergonomic), 가능하다면 임베드된 객체를 사용해야 합니다.
@@ -23,14 +25,14 @@ title: 링크
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -49,7 +51,7 @@ final linda = Student()
   ..name = 'Linda'
   ..teacher.value = mathTeacher;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.students.put(linda);
   await isar.teachers.put(mathTeacher);
   await linda.teachers.save();
@@ -91,7 +93,7 @@ isar.writeTxnSync(() {
 ```dart
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -113,7 +115,7 @@ print(linda.teachers); // {Teacher('Math')}
 
 linda.teachers.add(biologyTeacher);
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await linda.teachers.save();
 });
 

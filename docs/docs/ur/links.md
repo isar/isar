@@ -2,6 +2,8 @@
 title: لنکس
 ---
 
+> ⚠️ Links are currently not supported in Isar v4
+
 # لنکس
 
 روابط آپ کو اشیاء کے درمیان تعلقات کا اظہار کرنے کی اجازت دیتے ہیں، جیسے کہ تبصرہ کا مصنف (صارف)۔ آپ ای زار لنکس کے ساتھ `1:1`، `1:n`، اور `n:n` تعلقات کو ماڈل بنا سکتے ہیں۔ لنکس کا استعمال ایمبیڈڈ اشیاء کے استعمال سے کم ایرگونومک ہے اور جب بھی ممکن ہو آپ کو ایمبیڈڈ اشیاء کا استعمال کرنا چاہیے۔
@@ -23,14 +25,14 @@ Links are lazy, so you need to tell the `IsarLink` to load or save the `value` e
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -49,7 +51,7 @@ final linda = Student()
   ..name = 'Linda'
   ..teacher.value = mathTeacher;
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await isar.students.put(linda);
   await isar.teachers.put(mathTeacher);
   await linda.teachers.save();
@@ -91,7 +93,7 @@ Internally both `IsarLink` and `IsarLinks` are represented in the same way. We c
 ```dart
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -113,7 +115,7 @@ print(linda.teachers); // {Teacher('Math')}
 
 linda.teachers.add(biologyTeacher);
 
-await isar.writeTxn(() async {
+await isar.writeAsync((isar) async {
   await linda.teachers.save();
 });
 
