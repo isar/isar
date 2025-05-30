@@ -120,6 +120,44 @@ await isar.writeTxn(() async {
 print(linda.teachers); // {Teacher('Math'), Teacher('Biology')}
 ```
 
+**Removing and updating IsarLinks**
+
+If you want to update associations, a simple `linda.teachers.add(teacher)` of an existing teacher will not overwrite the list, so it's important to choose from one of the following.
+1. Remove the id's
+2. Reset the list and reassociate
+
+The remove ID's approach is good for when you want to pluck out and remove one by one, or do some sort of comparison.
+```dart
+await linda.teachers.removeAll([biologyTeacher.id]);
+await linda.teachers.remove(biologyTeacher.id);
+await linda.teachers.removeWhere((teacher) => teacher.id == biologyTeacher.id);
+
+await linda.teachers.save(); // Must call save() to save Links
+```
+
+The reset list and reassociate are good for when you have an entire list of new Links you want to associate, and you want to overwrite them. 
+
+```dart
+await linda.teachers.reset();
+await linda.teachers.addAll([biologyTeach, mathTeacher, literatureTeacher]);
+await linda.teachers.save(); // Must call save() to save Links
+```
+
+Important to note: All IsarLinks that you are associating must be loaded so be sure to use the ones queried from the database
+
+```dart
+update(Student updatedStudent, {List<Teachers>? argTeachers}) async {
+  // You cannot use argTeachers to associate because they are not loaded
+  final teacherIds = argTeachers.map((t) => t.id).toList();
+  final loadedTeachers = isar.teachers.getAll(teacherIds);
+  
+  await updatedStudent.teachers.reset(); // Clear associated teachers
+  await updatedStudent.teachers.addAll(loadedTeachers.nonNulls); // Add new teachers
+  await isar.students.put(updatedStudent); // Replace the old student for the updated one
+  await updatedStudent.teachers.save(); // Save the associations
+}
+```
+
 ## Backlinks
 
 I hear you ask, "What if we want to express reverse relationships?". Don't worry; we'll now introduce backlinks.
