@@ -72,88 +72,101 @@ void main() {
       });
 
       isarTest('put()', () {
-        expect(
-          isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-          [null, null, null],
-        );
+        expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+          null,
+          null,
+          null,
+        ]);
 
         isar.write((isar) {
           isar.intModels.put(intM1);
-          expect(
-            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-            [intM1, null, null],
-          );
+          expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+            intM1,
+            null,
+            null,
+          ]);
 
           isar.intModels.put(intM3);
-          expect(
-            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-            [intM1, null, intM3],
-          );
+          expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+            intM1,
+            null,
+            intM3,
+          ]);
 
           isar.intModels.put(intM2);
-          expect(
-            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-            [intM1, intM2, intM3],
-          );
+          expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+            intM1,
+            intM2,
+            intM3,
+          ]);
         });
 
-        expect(
-          isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-          [intM1, intM2, intM3],
-        );
+        expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+          intM1,
+          intM2,
+          intM3,
+        ]);
       });
 
       isarTest('getAll()', () {
-        expect(
-          isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-          [null, null, null],
-        );
+        expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+          null,
+          null,
+          null,
+        ]);
 
         isar.write((isar) {
           isar.intModels.put(intM1);
-          expect(
-            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-            [intM1, null, null],
-          );
+          expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+            intM1,
+            null,
+            null,
+          ]);
 
           isar.intModels.put(intM3);
-          expect(
-            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-            [intM1, null, intM3],
-          );
+          expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+            intM1,
+            null,
+            intM3,
+          ]);
         });
 
-        expect(
-          isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-          [intM1, null, intM3],
-        );
+        expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+          intM1,
+          null,
+          intM3,
+        ]);
       });
 
       isarTest('putAll()', () {
         isar.write((isar) {
           isar.intModels.putAll([intM1, intM3, intM1]);
-          expect(
-            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-            [intM1, null, intM3],
-          );
+          expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+            intM1,
+            null,
+            intM3,
+          ]);
 
           isar.intModels.putAll([intM2, intM2]);
-          expect(
-            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-            [intM1, intM2, intM3],
-          );
+          expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+            intM1,
+            intM2,
+            intM3,
+          ]);
 
           isar.intModels.putAll([]);
-          expect(
-            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-            [intM1, intM2, intM3],
-          );
+          expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+            intM1,
+            intM2,
+            intM3,
+          ]);
         });
 
-        expect(
-          isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-          [intM1, intM2, intM3],
-        );
+        expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+          intM1,
+          intM2,
+          intM3,
+        ]);
       });
 
       isarTest('delete()', () {
@@ -173,22 +186,25 @@ void main() {
         isar.write((isar) {
           isar.intModels.putAll([intM1, intM2, intM3]);
           expect(isar.intModels.deleteAll([intM1.id, intM3.id]), 2);
-          expect(
-            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-            [null, intM2, null],
-          );
+          expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+            null,
+            intM2,
+            null,
+          ]);
 
           expect(isar.intModels.deleteAll([intM1.id, intM2.id]), 1);
-          expect(
-            isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-            [null, null, null],
-          );
+          expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+            null,
+            null,
+            null,
+          ]);
         });
 
-        expect(
-          isar.intModels.getAll([intM1.id, intM2.id, intM3.id]),
-          [null, null, null],
-        );
+        expect(isar.intModels.getAll([intM1.id, intM2.id, intM3.id]), [
+          null,
+          null,
+          null,
+        ]);
       });
     });
 
@@ -219,66 +235,74 @@ void main() {
           expect(isar.stringModels.getAll([strM1.id, strM2.id]), [strM1, null]);
 
           isar.stringModels.put(strM2);
-          expect(
-            isar.stringModels.getAll([strM1.id, strM2.id]),
-            [strM1, strM2],
-          );
+          expect(isar.stringModels.getAll([strM1.id, strM2.id]), [
+            strM1,
+            strM2,
+          ]);
         });
 
         expect(isar.stringModels.getAll([strM1.id, strM2.id]), [strM1, strM2]);
       });
 
       isarTest('getAll()', () {
-        expect(
-          isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
-          [null, null, null],
-        );
+        expect(isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]), [
+          null,
+          null,
+          null,
+        ]);
 
         isar.write((isar) {
           isar.stringModels.put(strM1);
-          expect(
-            isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
-            [strM1, null, null],
-          );
+          expect(isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]), [
+            strM1,
+            null,
+            null,
+          ]);
 
           isar.stringModels.put(strM3);
-          expect(
-            isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
-            [strM1, null, strM3],
-          );
+          expect(isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]), [
+            strM1,
+            null,
+            strM3,
+          ]);
         });
 
-        expect(
-          isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
-          [strM1, null, strM3],
-        );
+        expect(isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]), [
+          strM1,
+          null,
+          strM3,
+        ]);
       });
 
       isarTest('putAll()', () {
         isar.write((isar) {
           isar.stringModels.putAll([strM1, strM3, strM1]);
-          expect(
-            isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
-            [strM1, null, strM3],
-          );
+          expect(isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]), [
+            strM1,
+            null,
+            strM3,
+          ]);
 
           isar.stringModels.putAll([strM2, strM2]);
-          expect(
-            isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
-            [strM1, strM2, strM3],
-          );
+          expect(isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]), [
+            strM1,
+            strM2,
+            strM3,
+          ]);
 
           isar.stringModels.putAll([]);
-          expect(
-            isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
-            [strM1, strM2, strM3],
-          );
+          expect(isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]), [
+            strM1,
+            strM2,
+            strM3,
+          ]);
         });
 
-        expect(
-          isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
-          [strM1, strM2, strM3],
-        );
+        expect(isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]), [
+          strM1,
+          strM2,
+          strM3,
+        ]);
       });
 
       isarTest('delete()', () {
@@ -298,22 +322,25 @@ void main() {
         isar.write((isar) {
           isar.stringModels.putAll([strM1, strM2, strM3]);
           expect(isar.stringModels.deleteAll([strM1.id, strM3.id]), 2);
-          expect(
-            isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
-            [null, strM2, null],
-          );
+          expect(isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]), [
+            null,
+            strM2,
+            null,
+          ]);
 
           expect(isar.stringModels.deleteAll([strM1.id, strM2.id]), 1);
-          expect(
-            isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
-            [null, null, null],
-          );
+          expect(isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]), [
+            null,
+            null,
+            null,
+          ]);
         });
 
-        expect(
-          isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]),
-          [null, null, null],
-        );
+        expect(isar.stringModels.getAll([strM1.id, strM2.id, strM3.id]), [
+          null,
+          null,
+          null,
+        ]);
       });
     });
 

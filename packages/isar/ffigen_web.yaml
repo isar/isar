@@ -7,7 +7,7 @@ headers:
   include-directives:
     - "**isar-dart.h"
 compiler-opts:
-  - "-Wno-nullability-completeness"
+  - "-Wno-nullability-completeness -I/Applications/Xcode-16.2.0.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk/usr/include/"
 
 structs:
   dependency-only: opaque

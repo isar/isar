@@ -4,11 +4,7 @@ import 'package:test/test.dart';
 
 part 'enum_test.g.dart';
 
-enum IndexEnum {
-  option1,
-  option2,
-  option3;
-}
+enum IndexEnum { option1, option2, option3 }
 
 enum ByteEnum {
   option1(1),

@@ -54,24 +54,25 @@ class Model {
     String? stringProp,
     dynamic nullableStringProp = 0,
     DateTime? dateProp,
-  }) =>
-      Model(
-        id: id ?? this.id,
-        boolProp: boolProp ?? this.boolProp,
-        nullableBoolProp: nullableBoolProp == 0
+  }) => Model(
+    id: id ?? this.id,
+    boolProp: boolProp ?? this.boolProp,
+    nullableBoolProp:
+        nullableBoolProp == 0
             ? this.nullableBoolProp
             : nullableBoolProp as bool?,
-        byteProp: byteProp ?? this.byteProp,
-        shortProp: shortProp ?? this.shortProp,
-        longProp: longProp ?? this.longProp,
-        floatProp: floatProp ?? this.floatProp,
-        doubleProp: doubleProp ?? this.doubleProp,
-        stringProp: stringProp ?? this.stringProp,
-        nullableStringProp: nullableStringProp == 0
+    byteProp: byteProp ?? this.byteProp,
+    shortProp: shortProp ?? this.shortProp,
+    longProp: longProp ?? this.longProp,
+    floatProp: floatProp ?? this.floatProp,
+    doubleProp: doubleProp ?? this.doubleProp,
+    stringProp: stringProp ?? this.stringProp,
+    nullableStringProp:
+        nullableStringProp == 0
             ? this.nullableStringProp
             : nullableStringProp as String?,
-        dateProp: dateProp ?? this.dateProp,
-      );
+    dateProp: dateProp ?? this.dateProp,
+  );
 
   @override
   bool operator ==(Object other) =>

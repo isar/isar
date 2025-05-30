@@ -62,19 +62,13 @@ void main() {
     expect(await isar1.close(), true);
 
     final isar2 = await openTempIsar([Model2Schema], name: isarName);
-    expect(isar2.model2s.where().findAll(), [
-      Model2(1, null),
-      Model2(2, null),
-    ]);
+    expect(isar2.model2s.where().findAll(), [Model2(1, null), Model2(2, null)]);
     isar2.write((isar) {
       return isar2.model2s.put(Model2(1, Embedded2('abc')));
     });
     expect(await isar2.close(), true);
 
     final isar3 = await openTempIsar([Model1Schema], name: isarName);
-    expect(isar3.model1s.where().findAll(), [
-      Model1(1, null),
-      Model1(2, null),
-    ]);
+    expect(isar3.model1s.where().findAll(), [Model1(1, null), Model1(2, null)]);
   });
 }

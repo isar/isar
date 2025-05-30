@@ -112,10 +112,7 @@ void main() {
       expect(obj.intValue, -9223372036854775808);
       expect(obj.floatValue, isNaN);
       expect(obj.doubleValue, isNaN);
-      expect(
-        obj.dateTimeValue,
-        DateTime.fromMillisecondsSinceEpoch(0),
-      );
+      expect(obj.dateTimeValue, DateTime.fromMillisecondsSinceEpoch(0));
       expect(obj.stringValue, '');
       expect(obj.enumValue, MyEnum.value1);
       expect(obj.embeddedValue, const MyEmbedded());
@@ -157,8 +154,9 @@ void main() {
       final isarName = isar1.name;
       expect(await isar1.close(), true);
 
-      final isar2 =
-          await openTempIsar([NoDefaultListModelSchema], name: isarName);
+      final isar2 = await openTempIsar([
+        NoDefaultListModelSchema,
+      ], name: isarName);
       final obj = isar2.noDefaultListModels.get(0)!;
       expect(obj.boolValue, isEmpty);
       expect(obj.byteValue, isEmpty);
@@ -181,8 +179,9 @@ void main() {
       final isarName = isar1.name;
       expect(await isar1.close(), true);
 
-      final isar2 =
-          await openTempIsar([NoDefaultListModelSchema], name: isarName);
+      final isar2 = await openTempIsar([
+        NoDefaultListModelSchema,
+      ], name: isarName);
       final col = isar2.noDefaultListModels;
       expect(col.where().boolValueProperty().findFirst(), isEmpty);
       expect(col.where().byteValueProperty().findFirst(), isEmpty);

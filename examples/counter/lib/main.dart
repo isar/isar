@@ -41,9 +41,7 @@ class _CounterAppState extends State<CounterApp> {
   void _incrementCounter() {
     // Persist counter value to database
     _isar.write((isar) async {
-      isar.counts.put(
-        Count(isar.counts.autoIncrement(), 1),
-      );
+      isar.counts.put(Count(isar.counts.autoIncrement(), 1));
     });
 
     setState(() {});
@@ -67,9 +65,7 @@ class _CounterAppState extends State<CounterApp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const Text(
-                'You have pushed the button this many times:',
-              ),
+              const Text('You have pushed the button this many times:'),
               Text('$count', style: theme.textTheme.headlineMedium),
             ],
           ),

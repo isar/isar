@@ -67,7 +67,7 @@ const tweetJson = {
       {
         'indices': [88, 97],
         'text': 'Expo2015',
-      }
+      },
     ],
     'media': [
       {
@@ -89,7 +89,7 @@ const tweetJson = {
         'type': 'photo',
         'url': 'http://t.co/yFgRfzL6DF',
         'videoInfo': null,
-      }
+      },
     ],
     'polls': null,
     'symbols': <dynamic>[],
@@ -100,7 +100,7 @@ const tweetJson = {
             'http://blog.giallozafferano.it/lacucinadikaty/cheesecake-frutta/',
         'indices': [18, 40],
         'url': 'http://t.co/S8yyMcL62d',
-      }
+      },
     ],
     'userMentions': [
       {
@@ -108,7 +108,7 @@ const tweetJson = {
         'indices': [1, 16],
         'name': 'La cucina di katy',
         'screenName': 'caterinaboagno',
-      }
+      },
     ],
   },
   'extendedEntities': {
@@ -133,7 +133,7 @@ const tweetJson = {
         'type': 'photo',
         'url': 'http://t.co/yFgRfzL6DF',
         'videoInfo': null,
-      }
+      },
     ],
     'polls': null,
     'symbols': null,

@@ -1,3 +1,5 @@
+use crate::core::data_type::DataType;
+
 mod index_key;
 mod isar_deserializer;
 mod isar_serializer;
@@ -48,6 +50,18 @@ impl IdToBytes for i64 {
     fn to_id_bytes(&self) -> [u8; 8] {
         let unsigned = *self as u64;
         (unsigned ^ 1 << 63).to_le_bytes()
+    }
+}
+
+impl DataType {
+    #[inline]
+    pub const fn static_size(&self) -> u8 {
+        match self {
+            DataType::Bool | DataType::Byte => 1,
+            DataType::Int | DataType::Float => 4,
+            DataType::Long | DataType::Double => 8,
+            _ => 3,
+        }
     }
 }
 

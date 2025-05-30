@@ -98,10 +98,10 @@ void main() {
         isar.emptyConstructorModels.putAll([obj1, obj2]);
       });
 
-      expect(
-        isar.emptyConstructorModels.where().findAll().toSet(),
-        {obj1, obj2},
-      );
+      expect(isar.emptyConstructorModels.where().findAll().toSet(), {
+        obj1,
+        obj2,
+      });
     });
 
     isarTest('NamedConstructorModel', () {
@@ -111,10 +111,10 @@ void main() {
         isar.namedConstructorModels.putAll([obj1, obj2]);
       });
 
-      expect(
-        isar.namedConstructorModels.where().findAll().toSet(),
-        {obj1, obj2},
-      );
+      expect(isar.namedConstructorModels.where().findAll().toSet(), {
+        obj1,
+        obj2,
+      });
     });
 
     isarTest('PositionalConstructorModel', () {
@@ -125,10 +125,11 @@ void main() {
         isar.positionalConstructorModels.putAll([obj1, obj2, obj3]);
       });
 
-      expect(
-        isar.positionalConstructorModels.where().findAll().toSet(),
-        {obj1, obj2, obj3},
-      );
+      expect(isar.positionalConstructorModels.where().findAll().toSet(), {
+        obj1,
+        obj2,
+        obj3,
+      });
     });
 
     isarTest('OptionalConstructorModel', () {
@@ -140,10 +141,11 @@ void main() {
         isar.optionalConstructorModels.putAll([obj1, obj2, obj3, obj4]);
       });
 
-      expect(
-        isar.optionalConstructorModels.where().findAll().toSet(),
-        {obj2, obj3, obj4},
-      );
+      expect(isar.optionalConstructorModels.where().findAll().toSet(), {
+        obj2,
+        obj3,
+        obj4,
+      });
     });
 
     isarTest('PositionalNamedConstructorModel', () {
@@ -153,10 +155,10 @@ void main() {
         isar.positionalNamedConstructorModels.putAll([obj1, obj2]);
       });
 
-      expect(
-        isar.positionalNamedConstructorModels.where().findAll().toSet(),
-        {obj1, obj2},
-      );
+      expect(isar.positionalNamedConstructorModels.where().findAll().toSet(), {
+        obj1,
+        obj2,
+      });
     });
   });
 }

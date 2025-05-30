@@ -53,17 +53,17 @@ void main() {
     });
 
     isarTest('Simple or', () {
-      expect(
-        users.where().ageEqualTo(20).or().ageEqualTo(30).findAll(),
-        [david, emma, simon],
-      );
+      expect(users.where().ageEqualTo(20).or().ageEqualTo(30).findAll(), [
+        david,
+        emma,
+        simon,
+      ]);
     });
 
     isarTest('Simple and', () {
-      expect(
-        users.where().ageEqualTo(40).and().idEqualTo(4).findAll(),
-        [bjorn],
-      );
+      expect(users.where().ageEqualTo(40).and().idEqualTo(4).findAll(), [
+        bjorn,
+      ]);
     });
 
     isarTest('Or followed by and', () {

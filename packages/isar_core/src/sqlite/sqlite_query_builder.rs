@@ -499,6 +499,93 @@ mod test {
     }
 
     #[test]
+    fn test_filter_regex_case_sensitive() {
+        let value = IsarValue::String("^abc.*$".to_string());
+        let cond = Filter::new_condition(1, StringRegex, vec![Some(value.clone())], true);
+
+        let sql = qb_filter(cond);
+        assert_sql!(
+            sql,
+            "WHERE isar_matches_regex(?, TRUE, prop1)",
+            Value(value)
+        );
+    }
+
+    #[test]
+    fn test_filter_regex_case_insensitive() {
+        let value = IsarValue::String("[0-9]+".to_string());
+        let cond = Filter::new_condition(1, StringRegex, vec![Some(value.clone())], false);
+
+        let sql = qb_filter(cond);
+        assert_sql!(
+            sql,
+            "WHERE isar_matches_regex(?, FALSE, prop1)",
+            Value(value)
+        );
+    }
+
+    #[test]
+    fn test_filter_regex_null() {
+        let cond = Filter::new_condition(1, StringRegex, vec![None], true);
+
+        let sql = qb_filter(cond);
+        assert_sql!(sql, "WHERE FALSE",);
+    }
+
+    #[test]
+    fn test_filter_regex_non_string() {
+        let value = IsarValue::Integer(123);
+        let cond = Filter::new_condition(1, StringRegex, vec![Some(value.clone())], true);
+
+        let sql = qb_filter(cond);
+        assert_sql!(sql, "WHERE FALSE",);
+    }
+
+    #[test]
+    fn test_filter_in_values() {
+        let values = vec![
+            Some(IsarValue::Integer(1)),
+            None,
+            Some(IsarValue::Integer(3)),
+        ];
+        let cond = Filter::new_condition(1, In, values, true);
+
+        let sql = qb_filter(cond);
+        assert_sql!(
+            sql,
+            "WHERE prop1 IN (?,?,?)",
+            Value(IsarValue::Integer(1)),
+            Null,
+            Value(IsarValue::Integer(3))
+        );
+    }
+
+    #[test]
+    fn test_filter_in_case_insensitive() {
+        let values = vec![
+            Some(IsarValue::String("abc".to_string())),
+            Some(IsarValue::String("def".to_string())),
+        ];
+        let cond = Filter::new_condition(1, In, values, false);
+
+        let sql = qb_filter(cond);
+        assert_sql!(
+            sql,
+            "WHERE prop1 COLLATE NOCASE IN (?,?)",
+            Value(IsarValue::String("abc".to_string())),
+            Value(IsarValue::String("def".to_string()))
+        );
+    }
+
+    #[test]
+    fn test_filter_in_empty() {
+        let cond = Filter::new_condition(1, In, vec![], true);
+
+        let sql = qb_filter(cond);
+        assert_sql!(sql, "WHERE FALSE",);
+    }
+
+    #[test]
     fn test_filter_and() {
         let cond1 = Filter::new_condition(1, IsNull, vec![], true);
         let cond2 = Filter::new_condition(2, IsNull, vec![], true);

@@ -89,9 +89,7 @@ void main() {
         strings: [null, null],
       );
 
-      isar.write(
-        (isar) => isar.models.putAll([obj1, obj2, obj3, obj4, obj5]),
-      );
+      isar.write((isar) => isar.models.putAll([obj1, obj2, obj3, obj4, obj5]));
     });
 
     isarTest('.isEmpty()', () {
@@ -102,22 +100,30 @@ void main() {
     });
 
     isarTest('.isNotEmpty()', () {
-      expect(
-        isar.models.where().boolsIsNotEmpty().findAll(),
-        [obj2, obj3, obj4, obj5],
-      );
-      expect(
-        isar.models.where().intsIsNotEmpty().findAll(),
-        [obj1, obj2, obj3, obj4],
-      );
-      expect(
-        isar.models.where().doublesIsNotEmpty().findAll(),
-        [obj1, obj2, obj3, obj4],
-      );
-      expect(
-        isar.models.where().stringsIsNotEmpty().findAll(),
-        [obj2, obj3, obj4, obj5],
-      );
+      expect(isar.models.where().boolsIsNotEmpty().findAll(), [
+        obj2,
+        obj3,
+        obj4,
+        obj5,
+      ]);
+      expect(isar.models.where().intsIsNotEmpty().findAll(), [
+        obj1,
+        obj2,
+        obj3,
+        obj4,
+      ]);
+      expect(isar.models.where().doublesIsNotEmpty().findAll(), [
+        obj1,
+        obj2,
+        obj3,
+        obj4,
+      ]);
+      expect(isar.models.where().stringsIsNotEmpty().findAll(), [
+        obj2,
+        obj3,
+        obj4,
+        obj5,
+      ]);
     });
   });
 }

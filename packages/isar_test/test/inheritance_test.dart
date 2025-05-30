@@ -145,12 +145,21 @@ void main() {
         age: 31,
       );
 
-      nonInheritingObj0 =
-          NonInheritingModel(id: 0, age: 22, nickname: 'non-obj0');
-      nonInheritingObj1 =
-          NonInheritingModel(id: 1, age: 56, nickname: 'non-obj1');
-      nonInheritingObj2 =
-          NonInheritingModel(id: 2, age: 65, nickname: 'non-obj2');
+      nonInheritingObj0 = NonInheritingModel(
+        id: 0,
+        age: 22,
+        nickname: 'non-obj0',
+      );
+      nonInheritingObj1 = NonInheritingModel(
+        id: 1,
+        age: 56,
+        nickname: 'non-obj1',
+      );
+      nonInheritingObj2 = NonInheritingModel(
+        id: 2,
+        age: 65,
+        nickname: 'non-obj2',
+      );
 
       isar.write((isar) {
         isar.inheritingModels.putAll([
@@ -232,10 +241,12 @@ void main() {
         [inheritingObj0, inheritingObj3],
       );
 
-      expect(
-        isar.inheritingModels.where().ageLessThan(40).findAll(),
-        [inheritingObj1, inheritingObj2, inheritingObj4, inheritingObj5],
-      );
+      expect(isar.inheritingModels.where().ageLessThan(40).findAll(), [
+        inheritingObj1,
+        inheritingObj2,
+        inheritingObj4,
+        inheritingObj5,
+      ]);
     });
 
     /*isarTest('Query model with inherited index', () {

@@ -31,10 +31,7 @@ const _nullInt = -2147483648;
 const _nullLong = -9223372036854775808;
 
 /// Generates the isar code for the annotated classes.
-Builder getIsarGenerator(BuilderOptions options) => SharedPartBuilder(
-      [
-        _IsarCollectionGenerator(),
-        _IsarEmbeddedGenerator(),
-      ],
-      'isar_generator',
-    );
+Builder getIsarGenerator(BuilderOptions options) => SharedPartBuilder([
+  _IsarCollectionGenerator(),
+  _IsarEmbeddedGenerator(),
+], 'isar_generator');

@@ -76,9 +76,7 @@ class ConnectClient {
     var responseFuture = vmService.callServiceExtension(
       action.method,
       isolateId: isolateId,
-      args: {
-        if (param != null) 'args': jsonEncode(param),
-      },
+      args: {if (param != null) 'args': jsonEncode(param)},
     );
     if (timeout != null) {
       responseFuture = responseFuture.timeout(timeout);
@@ -119,11 +117,7 @@ class ConnectClient {
   }
 
   Future<void> deleteQuery(ConnectQueryPayload query) async {
-    await _call(
-      ConnectAction.deleteQuery,
-      param: query,
-      timeout: kLongTimeout,
-    );
+    await _call(ConnectAction.deleteQuery, param: query, timeout: kLongTimeout);
   }
 
   Future<void> importJson(ConnectObjectsPayload objects) async {
@@ -140,11 +134,7 @@ class ConnectClient {
   }
 
   Future<void> editProperty(ConnectEditPayload edit) async {
-    await _call(
-      ConnectAction.editProperty,
-      param: edit,
-      timeout: kLongTimeout,
-    );
+    await _call(ConnectAction.editProperty, param: edit, timeout: kLongTimeout);
   }
 
   Future<void> disconnect() async {

@@ -108,9 +108,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
                 instance: selectedInstance!,
                 collection: selectedCollection!,
                 client: widget.client,
-                schemas: {
-                  for (final schema in schemas) schema.name: schema,
-                },
+                schemas: {for (final schema in schemas) schema.name: schema},
               ),
             ),
         ],

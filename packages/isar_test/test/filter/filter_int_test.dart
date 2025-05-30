@@ -52,22 +52,28 @@ void main() {
 
     isarTest('.greaterThan()', () {
       expect(col.where().fieldGreaterThan(1).findAll(), [obj2]);
-      expect(
-        col.where().fieldGreaterThan(null).findAll(),
-        [obj0, obj1, obj2, obj3],
-      );
+      expect(col.where().fieldGreaterThan(null).findAll(), [
+        obj0,
+        obj1,
+        obj2,
+        obj3,
+      ]);
       expect(col.where().fieldGreaterThan(4).findAll(), isEmpty);
     });
 
     isarTest('.greaterThanOrEqualTo()', () {
-      expect(
-        col.where().fieldGreaterThanOrEqualTo(1).findAll(),
-        [obj1, obj2, obj3],
-      );
-      expect(
-        col.where().fieldGreaterThanOrEqualTo(null).findAll(),
-        [obj0, obj1, obj2, obj3, objNull],
-      );
+      expect(col.where().fieldGreaterThanOrEqualTo(1).findAll(), [
+        obj1,
+        obj2,
+        obj3,
+      ]);
+      expect(col.where().fieldGreaterThanOrEqualTo(null).findAll(), [
+        obj0,
+        obj1,
+        obj2,
+        obj3,
+        objNull,
+      ]);
     });
 
     isarTest('.lessThan()', () {
@@ -81,10 +87,12 @@ void main() {
 
     isarTest('.between()', () {
       expect(col.where().fieldBetween(1, 2).findAll(), [obj1, obj2, obj3]);
-      expect(
-        col.where().fieldBetween(null, 1).findAll(),
-        [obj0, obj1, obj3, objNull],
-      );
+      expect(col.where().fieldBetween(null, 1).findAll(), [
+        obj0,
+        obj1,
+        obj3,
+        objNull,
+      ]);
       expect(col.where().fieldBetween(5, 6).findAll(), isEmpty);
     });
 

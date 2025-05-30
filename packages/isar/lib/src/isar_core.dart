@@ -26,17 +26,16 @@ abstract final class IsarCore {
   static Pointer<Uint16> _nativeStringPtr = nullptr;
   static int _nativeStringPtrLength = 0;
 
-  static FutureOr<void> _initialize({
-    String? library,
-    bool explicit = false,
-  }) {
+  static FutureOr<void> _initialize({String? library, bool explicit = false}) {
     if (_initialized) {
       return null;
     }
 
     if (kIsWeb && !explicit) {
-      throw IsarNotReadyError('On web you have to call Isar.initialize() '
-          'manually before using Isar.');
+      throw IsarNotReadyError(
+        'On web you have to call Isar.initialize() '
+        'manually before using Isar.',
+      );
     }
 
     final result = platform.initializeBindings(library);
@@ -245,9 +244,8 @@ extension PointerX on Pointer<void> {
   bool get isNull => address == 0;
 }
 
-typedef IsolatePoolSetup = FutureOr<dynamic> Function(
-  Future<dynamic> Function(Isar isar) callback,
-);
+typedef IsolatePoolSetup =
+    FutureOr<dynamic> Function(Future<dynamic> Function(Isar isar) callback);
 
 abstract class IsarCorePlatform {
   FutureOr<IsarCoreBindings> initializeBindings([String? library]);

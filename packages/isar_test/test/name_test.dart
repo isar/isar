@@ -39,11 +39,7 @@ void main() {
       );
 
       expect(isar.nameModels.where().exportJson(), [
-        {
-          'idN': 1,
-          'valueN': 'test',
-          'otherValueN': 'test2',
-        },
+        {'idN': 1, 'valueN': 'test', 'otherValueN': 'test2'},
       ]);
     });
   });

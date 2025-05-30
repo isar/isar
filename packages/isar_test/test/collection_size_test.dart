@@ -8,9 +8,7 @@ part 'collection_size_test.g.dart';
 
 @collection
 class ModelA {
-  ModelA({
-    required this.name,
-  });
+  ModelA({required this.name});
 
   int id = Random().nextInt(99999);
 
@@ -73,34 +71,38 @@ void main() {
       expect(isar.modelAs.getSize(includeIndexes: true), 0);
     });
 
-    isarTest('Size should increase with more entries',
-        sqlite: false, web: false, () {
-      isar.write((isar) => isar.modelAs.put(objA0));
-      final sizeA0 = isar.modelAs.getSize();
-      expect(sizeA0, greaterThan(0));
+    isarTest(
+      'Size should increase with more entries',
+      sqlite: false,
+      web: false,
+      () {
+        isar.write((isar) => isar.modelAs.put(objA0));
+        final sizeA0 = isar.modelAs.getSize();
+        expect(sizeA0, greaterThan(0));
 
-      isar.write((isar) => isar.modelAs.putAll([objA1, objA2, objA3]));
-      final sizeA1 = isar.modelAs.getSize();
-      expect(sizeA1, greaterThan(sizeA0));
+        isar.write((isar) => isar.modelAs.putAll([objA1, objA2, objA3]));
+        final sizeA1 = isar.modelAs.getSize();
+        expect(sizeA1, greaterThan(sizeA0));
 
-      isar.write((isar) => isar.modelAs.putAll([objA4, objA5]));
-      final sizeA2 = isar.modelAs.getSize();
-      expect(sizeA2, greaterThan(sizeA1));
+        isar.write((isar) => isar.modelAs.putAll([objA4, objA5]));
+        final sizeA2 = isar.modelAs.getSize();
+        expect(sizeA2, greaterThan(sizeA1));
 
-      expect(isar.modelBs.getSize(), 0);
+        expect(isar.modelBs.getSize(), 0);
 
-      isar.write((isar) => isar.modelBs.put(objB0));
-      final sizeB0 = isar.modelBs.getSize();
-      expect(sizeB0, greaterThan(0));
+        isar.write((isar) => isar.modelBs.put(objB0));
+        final sizeB0 = isar.modelBs.getSize();
+        expect(sizeB0, greaterThan(0));
 
-      isar.write((isar) => isar.modelBs.putAll([objB1, objB2, objB3]));
-      final sizeB1 = isar.modelBs.getSize();
-      expect(sizeB1, greaterThanOrEqualTo(sizeB0));
+        isar.write((isar) => isar.modelBs.putAll([objB1, objB2, objB3]));
+        final sizeB1 = isar.modelBs.getSize();
+        expect(sizeB1, greaterThanOrEqualTo(sizeB0));
 
-      isar.write((isar) => isar.modelBs.putAll([objB4, objB5]));
-      final sizeB2 = isar.modelBs.getSize();
-      expect(sizeB2, greaterThanOrEqualTo(sizeB1));
-    });
+        isar.write((isar) => isar.modelBs.putAll([objB4, objB5]));
+        final sizeB2 = isar.modelBs.getSize();
+        expect(sizeB2, greaterThanOrEqualTo(sizeB1));
+      },
+    );
 
     // enable when indexes are implemented
     /*isarTest('includeIndexes should change size', () {

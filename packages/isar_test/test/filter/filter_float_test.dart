@@ -52,29 +52,37 @@ void main() {
       expect(col.where().fieldEqualTo(2.3, epsilon: 0.2).findAll(), [obj1]);
       expect(col.where().fieldEqualTo(null).findAll(), [objNull]);
       expect(col.where().fieldEqualTo(double.infinity).findAll(), [objInf]);
-      expect(
-        col.where().fieldEqualTo(double.negativeInfinity).findAll(),
-        [objNInf],
-      );
+      expect(col.where().fieldEqualTo(double.negativeInfinity).findAll(), [
+        objNInf,
+      ]);
     });
 
     isarTest('.greaterThan()', () {
-      expect(
-        col.where().fieldGreaterThan(null).findAll(),
-        [objInf, obj1, obj2, obj3, objNInf],
-      );
-      expect(
-        col.where().fieldGreaterThan(double.negativeInfinity).findAll(),
-        [objInf, obj1, obj2, obj3],
-      );
+      expect(col.where().fieldGreaterThan(null).findAll(), [
+        objInf,
+        obj1,
+        obj2,
+        obj3,
+        objNInf,
+      ]);
+      expect(col.where().fieldGreaterThan(double.negativeInfinity).findAll(), [
+        objInf,
+        obj1,
+        obj2,
+        obj3,
+      ]);
       expect(col.where().fieldGreaterThan(2.2).findAll(), [objInf, obj3]);
     });
 
     isarTest('.greaterThanOrEqualTo()', () {
-      expect(
-        col.where().fieldGreaterThanOrEqualTo(null).findAll(),
-        [objInf, obj1, obj2, obj3, objNInf, objNull],
-      );
+      expect(col.where().fieldGreaterThanOrEqualTo(null).findAll(), [
+        objInf,
+        obj1,
+        obj2,
+        obj3,
+        objNInf,
+        objNull,
+      ]);
       expect(
         col
             .where()
@@ -82,10 +90,11 @@ void main() {
             .findAll(),
         [objInf, obj1, obj2, obj3, objNInf],
       );
-      expect(
-        col.where().fieldGreaterThanOrEqualTo(2.2).findAll(),
-        [objInf, obj1, obj3],
-      );
+      expect(col.where().fieldGreaterThanOrEqualTo(2.2).findAll(), [
+        objInf,
+        obj1,
+        obj3,
+      ]);
       expect(
         col.where().fieldGreaterThanOrEqualTo(2.3, epsilon: 0.2).findAll(),
         [objInf, obj1, obj3],
@@ -94,43 +103,42 @@ void main() {
 
     isarTest('.lessThan()', () {
       expect(col.where().fieldLessThan(null).findAll(), isEmpty);
-      expect(
-        col.where().fieldLessThan(double.negativeInfinity).findAll(),
-        [objNull],
-      );
+      expect(col.where().fieldLessThan(double.negativeInfinity).findAll(), [
+        objNull,
+      ]);
       expect(col.where().fieldLessThan(1.1).findAll(), [objNInf, objNull]);
-      expect(
-        col.where().fieldLessThan(1.2, epsilon: 0.2).findAll(),
-        [objNInf, objNull],
-      );
+      expect(col.where().fieldLessThan(1.2, epsilon: 0.2).findAll(), [
+        objNInf,
+        objNull,
+      ]);
     });
 
     isarTest('.lessThanOrEqualTo()', () {
-      expect(
-        col.where().fieldLessThanOrEqualTo(null).findAll(),
-        [objNull],
-      );
+      expect(col.where().fieldLessThanOrEqualTo(null).findAll(), [objNull]);
       expect(
         col.where().fieldLessThanOrEqualTo(double.negativeInfinity).findAll(),
         [objNInf, objNull],
       );
-      expect(
-        col.where().fieldLessThanOrEqualTo(1.1).findAll(),
-        [obj2, objNInf, objNull],
-      );
-      expect(
-        col.where().fieldLessThanOrEqualTo(1, epsilon: 0.2).findAll(),
-        [obj2, objNInf, objNull],
-      );
+      expect(col.where().fieldLessThanOrEqualTo(1.1).findAll(), [
+        obj2,
+        objNInf,
+        objNull,
+      ]);
+      expect(col.where().fieldLessThanOrEqualTo(1, epsilon: 0.2).findAll(), [
+        obj2,
+        objNInf,
+        objNull,
+      ]);
     });
 
     isarTest('.between()', () {
       expect(col.where().fieldBetween(null, null).findAll(), [objNull]);
       expect(col.where().fieldBetween(1.1, 3.3).findAll(), [obj1, obj2, obj3]);
-      expect(
-        col.where().fieldBetween(1.2, 3.2, epsilon: 0.2).findAll(),
-        [obj1, obj2, obj3],
-      );
+      expect(col.where().fieldBetween(1.2, 3.2, epsilon: 0.2).findAll(), [
+        obj1,
+        obj2,
+        obj3,
+      ]);
     });
 
     isarTest('.isNull()', () {
@@ -138,10 +146,13 @@ void main() {
     });
 
     isarTest('.isNotNull()', () {
-      expect(
-        col.where().fieldIsNotNull().findAll(),
-        [objInf, obj1, obj2, obj3, objNInf],
-      );
+      expect(col.where().fieldIsNotNull().findAll(), [
+        objInf,
+        obj1,
+        obj2,
+        obj3,
+        objNInf,
+      ]);
     });
   });
 }

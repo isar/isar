@@ -8,11 +8,7 @@ part 'filter_embedded_test.g.dart';
 
 @collection
 class Model {
-  Model({
-    required this.id,
-    required this.embeddedA,
-    required this.embeddedB,
-  });
+  Model({required this.id, required this.embeddedA, required this.embeddedB});
 
   int id;
 
@@ -37,10 +33,7 @@ class Model {
 
 @embedded
 class EmbeddedModelA {
-  const EmbeddedModelA({
-    required this.name,
-    this.embeddedB,
-  });
+  const EmbeddedModelA({required this.name, this.embeddedB});
 
   final String name;
 
@@ -111,9 +104,7 @@ void main() {
       );
       obj3 = Model(
         id: 3,
-        embeddedA: const EmbeddedModelA(
-          name: 'embedded a3',
-        ),
+        embeddedA: const EmbeddedModelA(name: 'embedded a3'),
         embeddedB: const EmbeddedModelB(name: 'embedded b3'),
       );
       obj4 = Model(
@@ -126,9 +117,7 @@ void main() {
       );
       obj5 = Model(
         id: 5,
-        embeddedA: const EmbeddedModelA(
-          name: 'embedded a5',
-        ),
+        embeddedA: const EmbeddedModelA(name: 'embedded a5'),
         embeddedB: const EmbeddedModelB(name: 'embedded b5'),
       );
       obj6 = Model(
@@ -276,28 +265,23 @@ void main() {
     });
 
     isarTest('.embeddedIsNull()', () {
-      expect(
-        isar.models.where().embeddedBIsNull().findAll(),
-        [obj2, obj6],
-      );
+      expect(isar.models.where().embeddedBIsNull().findAll(), [obj2, obj6]);
     });
 
     isarTest('.embeddedIsNotNull()', () {
-      expect(
-        isar.models.where().embeddedBIsNotNull().findAll(),
-        [obj1, obj3, obj4, obj5],
-      );
+      expect(isar.models.where().embeddedBIsNotNull().findAll(), [
+        obj1,
+        obj3,
+        obj4,
+        obj5,
+      ]);
     });
 
     isarTest('.embedded() then .embedded()', () {
       expect(
         isar.models
             .where()
-            .embeddedA(
-              (q) => q.embeddedB(
-                (q) => q.nameStartsWith('embedded'),
-              ),
-            )
+            .embeddedA((q) => q.embeddedB((q) => q.nameStartsWith('embedded')))
             .findAll(),
         [obj1, obj2, obj4, obj6],
       );
@@ -305,9 +289,7 @@ void main() {
         isar.models
             .where()
             .embeddedA(
-              (q) => q.embeddedB(
-                (q) => q.nameEqualTo('embedded a1 b1'),
-              ),
+              (q) => q.embeddedB((q) => q.nameEqualTo('embedded a1 b1')),
             )
             .findAll(),
         [obj1],
@@ -316,9 +298,7 @@ void main() {
         isar.models
             .where()
             .embeddedA(
-              (q) => q.embeddedB(
-                (q) => q.nameEqualTo('embedded a2 b2'),
-              ),
+              (q) => q.embeddedB((q) => q.nameEqualTo('embedded a2 b2')),
             )
             .findAll(),
         [obj2],
@@ -327,9 +307,7 @@ void main() {
         isar.models
             .where()
             .embeddedA(
-              (q) => q.embeddedB(
-                (q) => q.nameEqualTo('embedded a3 b3'),
-              ),
+              (q) => q.embeddedB((q) => q.nameEqualTo('embedded a3 b3')),
             )
             .findAll(),
         isEmpty,
@@ -338,9 +316,7 @@ void main() {
         isar.models
             .where()
             .embeddedA(
-              (q) => q.embeddedB(
-                (q) => q.nameEqualTo('embedded a4 b4'),
-              ),
+              (q) => q.embeddedB((q) => q.nameEqualTo('embedded a4 b4')),
             )
             .findAll(),
         [obj4],
@@ -349,9 +325,7 @@ void main() {
         isar.models
             .where()
             .embeddedA(
-              (q) => q.embeddedB(
-                (q) => q.nameEqualTo('embedded a5 b5'),
-              ),
+              (q) => q.embeddedB((q) => q.nameEqualTo('embedded a5 b5')),
             )
             .findAll(),
         isEmpty,
@@ -360,9 +334,7 @@ void main() {
         isar.models
             .where()
             .embeddedA(
-              (q) => q.embeddedB(
-                (q) => q.nameEqualTo('embedded a6 b6'),
-              ),
+              (q) => q.embeddedB((q) => q.nameEqualTo('embedded a6 b6')),
             )
             .findAll(),
         [obj6],
@@ -370,11 +342,7 @@ void main() {
       expect(
         isar.models
             .where()
-            .embeddedA(
-              (q) => q.embeddedB(
-                (q) => q.nameEqualTo('non existing'),
-              ),
-            )
+            .embeddedA((q) => q.embeddedB((q) => q.nameEqualTo('non existing')))
             .findAll(),
         isEmpty,
       );

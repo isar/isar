@@ -1,4 +1,4 @@
-use super::{index_iterator::IndexIterator, native_filter::NativeFilter};
+use super::{iterator_index::IndexIterator, native_filter::NativeFilter};
 use crate::native::isar_deserializer::IsarDeserializer;
 use intmap::IntMap;
 

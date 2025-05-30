@@ -350,34 +350,33 @@ void main() {
     });
 
     isarTest('.elementEndsWith()', () {
-      expect(
-        isar.stringModels.where().stringsElementEndsWith('1').findAll(),
-        [obj1, obj4],
-      );
-      expect(
-        isar.stringModels.where().stringsElementEndsWith('2').findAll(),
-        [obj1, obj2],
-      );
-      expect(
-        isar.stringModels.where().stringsElementEndsWith('3').findAll(),
-        [obj1, obj5],
-      );
-      expect(
-        isar.stringModels.where().stringsElementEndsWith('4').findAll(),
-        [obj2, obj5],
-      );
-      expect(
-        isar.stringModels.where().stringsElementEndsWith('5').findAll(),
-        [obj4, obj5],
-      );
-      expect(
-        isar.stringModels.where().stringsElementEndsWith('6').findAll(),
-        [obj4, obj5],
-      );
-      expect(
-        isar.stringModels.where().stringsElementEndsWith('7').findAll(),
-        [obj5],
-      );
+      expect(isar.stringModels.where().stringsElementEndsWith('1').findAll(), [
+        obj1,
+        obj4,
+      ]);
+      expect(isar.stringModels.where().stringsElementEndsWith('2').findAll(), [
+        obj1,
+        obj2,
+      ]);
+      expect(isar.stringModels.where().stringsElementEndsWith('3').findAll(), [
+        obj1,
+        obj5,
+      ]);
+      expect(isar.stringModels.where().stringsElementEndsWith('4').findAll(), [
+        obj2,
+        obj5,
+      ]);
+      expect(isar.stringModels.where().stringsElementEndsWith('5').findAll(), [
+        obj4,
+        obj5,
+      ]);
+      expect(isar.stringModels.where().stringsElementEndsWith('6').findAll(), [
+        obj4,
+        obj5,
+      ]);
+      expect(isar.stringModels.where().stringsElementEndsWith('7').findAll(), [
+        obj5,
+      ]);
       expect(
         isar.stringModels
             .where()
@@ -735,10 +734,9 @@ void main() {
     });
 
     isarTest('.elementIsEmpty()', () {
-      expect(
-        isar.stringModels.where().stringsElementIsEmpty().findAll(),
-        [obj6],
-      );
+      expect(isar.stringModels.where().stringsElementIsEmpty().findAll(), [
+        obj6,
+      ]);
 
       expect(
         isar.stringModels.where().nullableStringsElementIsEmpty().findAll(),
@@ -760,10 +758,12 @@ void main() {
     });
 
     isarTest('.elementIsNotEmpty()', () {
-      expect(
-        isar.stringModels.where().stringsElementIsNotEmpty().findAll(),
-        [obj1, obj2, obj4, obj5],
-      );
+      expect(isar.stringModels.where().stringsElementIsNotEmpty().findAll(), [
+        obj1,
+        obj2,
+        obj4,
+        obj5,
+      ]);
 
       expect(
         isar.stringModels.where().nullableStringsElementIsNotEmpty().findAll(),
@@ -785,20 +785,15 @@ void main() {
     });
 
     isarTest('.isEmpty()', () {
-      expect(
-        isar.stringModels.where().stringsIsEmpty().findAll(),
-        [obj3],
-      );
+      expect(isar.stringModels.where().stringsIsEmpty().findAll(), [obj3]);
 
-      expect(
-        isar.stringModels.where().nullableStringsIsEmpty().findAll(),
-        [obj3],
-      );
+      expect(isar.stringModels.where().nullableStringsIsEmpty().findAll(), [
+        obj3,
+      ]);
 
-      expect(
-        isar.stringModels.where().stringsNullableIsEmpty().findAll(),
-        [obj3],
-      );
+      expect(isar.stringModels.where().stringsNullableIsEmpty().findAll(), [
+        obj3,
+      ]);
 
       expect(
         isar.stringModels.where().nullableStringsNullableIsEmpty().findAll(),
@@ -807,20 +802,28 @@ void main() {
     });
 
     isarTest('.isNotEmpty()', () {
-      expect(
-        isar.stringModels.where().stringsIsNotEmpty().findAll(),
-        [obj1, obj2, obj4, obj5, obj6],
-      );
+      expect(isar.stringModels.where().stringsIsNotEmpty().findAll(), [
+        obj1,
+        obj2,
+        obj4,
+        obj5,
+        obj6,
+      ]);
 
-      expect(
-        isar.stringModels.where().nullableStringsIsNotEmpty().findAll(),
-        [obj1, obj2, obj4, obj5, obj6],
-      );
+      expect(isar.stringModels.where().nullableStringsIsNotEmpty().findAll(), [
+        obj1,
+        obj2,
+        obj4,
+        obj5,
+        obj6,
+      ]);
 
-      expect(
-        isar.stringModels.where().stringsNullableIsNotEmpty().findAll(),
-        [obj1, obj4, obj5, obj6],
-      );
+      expect(isar.stringModels.where().stringsNullableIsNotEmpty().findAll(), [
+        obj1,
+        obj4,
+        obj5,
+        obj6,
+      ]);
 
       expect(
         isar.stringModels.where().nullableStringsNullableIsNotEmpty().findAll(),
@@ -829,10 +832,9 @@ void main() {
     });
 
     isarTest('.isNull()', () {
-      expect(
-        isar.stringModels.where().stringsNullableIsNull().findAll(),
-        [obj2],
-      );
+      expect(isar.stringModels.where().stringsNullableIsNull().findAll(), [
+        obj2,
+      ]);
 
       expect(
         isar.stringModels.where().nullableStringsNullableIsNull().findAll(),
@@ -841,10 +843,13 @@ void main() {
     });
 
     isarTest('.isNotNull()', () {
-      expect(
-        isar.stringModels.where().stringsNullableIsNotNull().findAll(),
-        [obj1, obj3, obj4, obj5, obj6],
-      );
+      expect(isar.stringModels.where().stringsNullableIsNotNull().findAll(), [
+        obj1,
+        obj3,
+        obj4,
+        obj5,
+        obj6,
+      ]);
 
       expect(
         isar.stringModels.where().nullableStringsNullableIsNotNull().findAll(),

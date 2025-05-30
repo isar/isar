@@ -57,10 +57,10 @@ void main() {
         isar.uniqueModels.putAll([UniqueModel(id: 1), UniqueModel(id: 2)]);
       });
 
-      expect(
-        isar.uniqueModels.where().findAll(),
-        [UniqueModel(id: 1), UniqueModel(id: 2)],
-      );
+      expect(isar.uniqueModels.where().findAll(), [
+        UniqueModel(id: 1),
+        UniqueModel(id: 2),
+      ]);
     });
   });
 }

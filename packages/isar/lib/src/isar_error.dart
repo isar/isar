@@ -20,7 +20,8 @@ class PathError extends IsarError {
   final name = 'PathError';
 
   @override
-  final message = 'The specified path does not exist or cannot be used by Isar '
+  final message =
+      'The specified path does not exist or cannot be used by Isar '
       'for example because it is a file.';
 }
 
@@ -39,7 +40,8 @@ class VersionError extends IsarError {
   String get name => 'VersionError';
 
   @override
-  String get message => 'The database version is not compatible with this '
+  String get message =>
+      'The database version is not compatible with this '
       'version of Isar. Please check if you need to migrate the database.';
 }
 
@@ -49,7 +51,8 @@ class ObjectLimitReachedError extends IsarError {
   String get name => 'ObjectLimitReachedError';
 
   @override
-  String get message => 'The maximum size of an object was exceeded. All '
+  String get message =>
+      'The maximum size of an object was exceeded. All '
       'objects in Isar including all nested lists and objects must be smaller '
       'than 16MB.';
 }
@@ -60,7 +63,8 @@ class InstanceMismatchError extends IsarError {
   String get name => 'InstanceMismatchError';
 
   @override
-  String get message => 'Provided resources do not belong to this Isar '
+  String get message =>
+      'Provided resources do not belong to this Isar '
       'instance. This can happen when you try to use a query or transaction '
       'from a different Isar instance.';
 }
@@ -72,7 +76,8 @@ class EncryptionError extends IsarError {
   String get name => 'EncryptionError';
 
   @override
-  String get message => 'Could not encrypt/decrypt the database. Make sure '
+  String get message =>
+      'Could not encrypt/decrypt the database. Make sure '
       'that the encryption key is correct and that the database is not '
       'corrupted.';
 }

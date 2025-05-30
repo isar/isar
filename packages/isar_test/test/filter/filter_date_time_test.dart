@@ -62,45 +62,56 @@ void main() {
 
     isarTest('.greaterThan()', () {
       expect(col.where().fieldGreaterThan(local(2010)).findAll(), [obj2, obj4]);
-      expect(
-        col.where().fieldGreaterThan(null).findAll(),
-        [obj1, obj2, obj3, obj4],
-      );
+      expect(col.where().fieldGreaterThan(null).findAll(), [
+        obj1,
+        obj2,
+        obj3,
+        obj4,
+      ]);
       expect(col.where().fieldGreaterThan(local(2050)).findAll(), isEmpty);
     });
 
     isarTest('.greaterThanOrEqualTo()', () {
-      expect(
-        col.where().fieldGreaterThanOrEqualTo(local(2010)).findAll(),
-        [obj1, obj2, obj3, obj4],
-      );
-      expect(
-        col.where().fieldGreaterThanOrEqualTo(null).findAll(),
-        [obj1, obj2, obj3, obj4, objNull],
-      );
+      expect(col.where().fieldGreaterThanOrEqualTo(local(2010)).findAll(), [
+        obj1,
+        obj2,
+        obj3,
+        obj4,
+      ]);
+      expect(col.where().fieldGreaterThanOrEqualTo(null).findAll(), [
+        obj1,
+        obj2,
+        obj3,
+        obj4,
+        objNull,
+      ]);
     });
 
     isarTest('.lessThan()', () {
-      expect(
-        col.where().fieldLessThan(local(2020)).findAll(),
-        [obj1, obj3, objNull],
-      );
+      expect(col.where().fieldLessThan(local(2020)).findAll(), [
+        obj1,
+        obj3,
+        objNull,
+      ]);
       expect(col.where().fieldLessThan(null).findAll(), isEmpty);
     });
 
     isarTest('.lessThanOrEqualTo()', () {
-      expect(
-        col.where().fieldLessThanOrEqualTo(local(2020)).findAll(),
-        [obj1, obj2, obj3, objNull],
-      );
+      expect(col.where().fieldLessThanOrEqualTo(local(2020)).findAll(), [
+        obj1,
+        obj2,
+        obj3,
+        objNull,
+      ]);
       expect(col.where().fieldLessThanOrEqualTo(null).findAll(), [objNull]);
     });
 
     isarTest('.between()', () {
-      expect(
-        col.where().fieldBetween(null, local(2010)).findAll(),
-        [obj1, obj3, objNull],
-      );
+      expect(col.where().fieldBetween(null, local(2010)).findAll(), [
+        obj1,
+        obj3,
+        objNull,
+      ]);
       expect(
         col.where().fieldBetween(local(2030), local(2035)).findAll(),
         isEmpty,

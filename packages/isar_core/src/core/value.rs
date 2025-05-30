@@ -1,3 +1,5 @@
+use xxhash_rust::xxh3::xxh3_64_with_seed;
+
 #[derive(PartialEq, Clone, Debug)]
 pub enum IsarValue {
     Bool(bool),
@@ -46,6 +48,28 @@ impl IsarValue {
             Some(value.as_str())
         } else {
             None
+        }
+    }
+
+    pub fn hash(value: &Option<Self>, case_sensitive: bool, seed: u64) -> u64 {
+        match value {
+            Some(IsarValue::Bool(value)) => {
+                if *value {
+                    xxh3_64_with_seed(&[1], seed)
+                } else {
+                    xxh3_64_with_seed(&[0], seed)
+                }
+            }
+            Some(IsarValue::Integer(value)) => xxh3_64_with_seed(&value.to_le_bytes(), seed),
+            Some(IsarValue::Real(value)) => xxh3_64_with_seed(&value.to_le_bytes(), seed),
+            Some(IsarValue::String(value)) => {
+                if case_sensitive {
+                    xxh3_64_with_seed(value.as_bytes(), seed)
+                } else {
+                    xxh3_64_with_seed(value.to_lowercase().as_bytes(), seed)
+                }
+            }
+            None => xxh3_64_with_seed(&[255], seed),
         }
     }
 }

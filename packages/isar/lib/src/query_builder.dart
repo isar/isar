@@ -2,8 +2,10 @@ part of '../isar.dart';
 
 /// @nodoc
 @protected
-typedef FilterQuery<OBJ> = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>
-    Function(QueryBuilder<OBJ, OBJ, QFilterCondition> q);
+typedef FilterQuery<OBJ> =
+    QueryBuilder<OBJ, OBJ, QAfterFilterCondition> Function(
+      QueryBuilder<OBJ, OBJ, QFilterCondition> q,
+    );
 
 /// Query builders are used to create queries in a safe way.
 ///
@@ -13,7 +15,7 @@ class QueryBuilder<OBJ, R, S> {
   /// @nodoc
   @protected
   QueryBuilder(IsarCollection<dynamic, OBJ>? collection)
-      : _query = _QueryBuilder<OBJ>(collection: collection);
+    : _query = _QueryBuilder<OBJ>(collection: collection);
 
   @protected
   const QueryBuilder._(this._query);
@@ -81,10 +83,7 @@ class _QueryBuilder<OBJ> {
       } else if (filter is OrGroup) {
         newFilter = OrGroup([
           ...filter.filters.sublist(0, filter.filters.length - 1),
-          AndGroup([
-            filter.filters.last,
-            cond,
-          ]),
+          AndGroup([filter.filters.last, cond]),
         ]);
       } else {
         newFilter = AndGroup([filter, cond]);
@@ -97,11 +96,7 @@ class _QueryBuilder<OBJ> {
       }
     }
 
-    return copyWith(
-      filter: newFilter,
-      filterGroupAnd: true,
-      filterNot: false,
-    );
+    return copyWith(filter: newFilter, filterGroupAnd: true, filterNot: false);
   }
 
   /// @nodoc
@@ -116,10 +111,7 @@ class _QueryBuilder<OBJ> {
   }
 
   /// @nodoc
-  _QueryBuilder<OBJ> object<E>(
-    FilterQuery<E> q,
-    int property,
-  ) {
+  _QueryBuilder<OBJ> object<E>(FilterQuery<E> q, int property) {
     final qb = q(QueryBuilder._(_QueryBuilder()));
     final filter = qb._query.filter;
     if (filter != null) {
@@ -156,10 +148,7 @@ class _QueryBuilder<OBJ> {
     return copyWith(
       distinctByProperties: [
         ...distinctByProperties,
-        DistinctProperty(
-          property: property,
-          caseSensitive: caseSensitive,
-        ),
+        DistinctProperty(property: property, caseSensitive: caseSensitive),
       ],
     );
   }

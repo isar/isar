@@ -20,12 +20,16 @@ class IsarSchema {
       name: json['name'] as String,
       idName: json['idName'] as String?,
       embedded: json['embedded'] as bool,
-      properties: (json['properties'] as List<dynamic>)
-          .map((e) => IsarPropertySchema.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      indexes: (json['indexes'] as List<dynamic>)
-          .map((e) => IsarIndexSchema.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      properties:
+          (json['properties'] as List<dynamic>)
+              .map(
+                (e) => IsarPropertySchema.fromJson(e as Map<String, dynamic>),
+              )
+              .toList(),
+      indexes:
+          (json['indexes'] as List<dynamic>)
+              .map((e) => IsarIndexSchema.fromJson(e as Map<String, dynamic>))
+              .toList(),
     );
   }
 
@@ -72,10 +76,7 @@ class IsarSchema {
   /// Get the property schema by its index.
   IsarPropertySchema getPropertyByIndex(int index) {
     if (index == 0) {
-      return IsarPropertySchema(
-        name: idName!,
-        type: IsarType.long,
-      );
+      return IsarPropertySchema(name: idName!, type: IsarType.long);
     } else {
       return properties[index - 1];
     }

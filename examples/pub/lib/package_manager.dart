@@ -12,12 +12,13 @@ class PackageManager {
   final Repository repository;
 
   Stream<Package> watchPackage(String name, {String? version}) async* {
-    final query = isar.packages
-        .where()
-        .nameEqualTo(name)
-        .optional(version == null, (q) => q.isLatestEqualTo(true))
-        .optional(version != null, (q) => q.versionEqualTo(version!))
-        .build();
+    final query =
+        isar.packages
+            .where()
+            .nameEqualTo(name)
+            .optional(version == null, (q) => q.isLatestEqualTo(true))
+            .optional(version != null, (q) => q.versionEqualTo(version!))
+            .build();
 
     await for (final results in query.watch(fireImmediately: true)) {
       if (results.isNotEmpty) {
@@ -38,12 +39,13 @@ class PackageManager {
   }
 
   Stream<String> watchLatestVersion(String name) async* {
-    final query = isar.packages
-        .where()
-        .nameEqualTo(name)
-        .isLatestEqualTo(true)
-        .versionProperty()
-        .build();
+    final query =
+        isar.packages
+            .where()
+            .nameEqualTo(name)
+            .isLatestEqualTo(true)
+            .versionProperty()
+            .build();
 
     await for (final results in query.watch(fireImmediately: true)) {
       if (results.isNotEmpty) {
@@ -54,12 +56,13 @@ class PackageManager {
 
   Stream<String?> watchPreReleaseVersion(String name) async* {
     await for (final _ in isar.packages.watchLazy(fireImmediately: true)) {
-      final latestDate = await isar.packages
-          .where()
-          .nameEqualTo(name)
-          .isLatestEqualTo(true)
-          .publishedProperty()
-          .findFirstAsync();
+      final latestDate =
+          await isar.packages
+              .where()
+              .nameEqualTo(name)
+              .isLatestEqualTo(true)
+              .publishedProperty()
+              .findFirstAsync();
 
       if (latestDate != null) {
         yield await isar.packages
@@ -81,19 +84,21 @@ class PackageManager {
     final newPackageVersions = await repository.getPackageVersions(name);
     final latestExistingDate =
         isar.packages.where().nameEqualTo(name).publishedProperty().max();
-    final versionsToAdd = newPackageVersions
-        .where(
-          (e) =>
-              e.published.millisecondsSinceEpoch >
-              (latestExistingDate?.millisecondsSinceEpoch ?? 0),
-        )
-        .toList();
+    final versionsToAdd =
+        newPackageVersions
+            .where(
+              (e) =>
+                  e.published.millisecondsSinceEpoch >
+                  (latestExistingDate?.millisecondsSinceEpoch ?? 0),
+            )
+            .toList();
 
-    final currentLatest = isar.packages
-        .where()
-        .nameEqualTo(name)
-        .isLatestEqualTo(true)
-        .findFirst();
+    final currentLatest =
+        isar.packages
+            .where()
+            .nameEqualTo(name)
+            .isLatestEqualTo(true)
+            .findFirst();
     final newLatestVersion =
         newPackageVersions.firstWhere((e) => e.isLatest).version;
     if (currentLatest != null && currentLatest.version != newLatestVersion) {
@@ -117,23 +122,23 @@ class PackageManager {
     String name,
     String version,
   ) async* {
-    final query = isar.assets
-        .where()
-        .packageEqualTo(name)
-        .versionEqualTo(version)
-        .build();
+    final query =
+        isar.assets
+            .where()
+            .packageEqualTo(name)
+            .versionEqualTo(version)
+            .build();
 
     final existing = await query.findAllAsync();
     if (existing.isNotEmpty) {
-      yield {
-        for (final asset in existing) asset.kind: asset.content,
-      };
+      yield {for (final asset in existing) asset.kind: asset.content};
     } else {
-      final existingAnyVersion = await isar.assets
-          .where()
-          .packageEqualTo(name)
-          .sortByVersionDesc()
-          .findAllAsync();
+      final existingAnyVersion =
+          await isar.assets
+              .where()
+              .packageEqualTo(name)
+              .sortByVersionDesc()
+              .findAllAsync();
       if (existingAnyVersion.isNotEmpty) {
         final assets = <AssetKind, String>{};
         for (final asset in existingAnyVersion) {
@@ -147,9 +152,7 @@ class PackageManager {
 
     await for (final results in query.watch()) {
       if (results.isNotEmpty) {
-        yield {
-          for (final asset in results) asset.kind: asset.content,
-        };
+        yield {for (final asset in results) asset.kind: asset.content};
       }
     }
   }

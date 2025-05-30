@@ -15,7 +15,7 @@ topics:
   - storage
 
 environment:
-  sdk: ">=3.5.0 <4.0.0"
+  sdk: ">=3.7.0 <4.0.0"
 
 dependencies:
   analyzer: ">=6.5.0 <8.0.0"
@@ -27,6 +27,6 @@ dependencies:
 
 dev_dependencies:
   build_test: ^2.2.0
-  ffigen: ^16.1.0
+  ffigen: ^17.0.0
   test: any
   very_good_analysis: ^5.0.0+1

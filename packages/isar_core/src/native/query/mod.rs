@@ -1,6 +1,6 @@
 use self::aggregate::{aggregate_min_max, aggregate_sum_average};
+use self::iterator_query::QueryIterator;
 use self::native_filter::NativeFilter;
-use self::query_iterator::QueryIterator;
 use super::index_key::IndexKey;
 use super::isar_deserializer::IsarDeserializer;
 use super::native_collection::{NativeCollection, NativeProperty};
@@ -13,17 +13,21 @@ use crate::core::value::IsarValue;
 use crate::core::watcher::QueryMatches;
 
 mod aggregate;
-mod index_iterator;
+mod find_index_for_distinct;
+mod find_index_for_filter;
+mod find_index_for_sort;
+mod iterator_index;
+mod iterator_query;
+mod iterator_sorted_query;
+mod iterator_unsorted_distinct_query;
+mod iterator_unsorted_query;
 pub(crate) mod native_filter;
-mod query_iterator;
-mod sorted_query_iterator;
-mod unsorted_distinct_query_iterator;
-mod unsorted_query_iterator;
+pub(crate) mod native_filter_from_filter;
 
 #[derive(Clone)]
 pub(crate) enum QueryIndex {
     Primary(i64, i64),
-    Secondary(IndexKey, IndexKey),
+    Secondary(usize, IndexKey, IndexKey),
 }
 
 #[derive(Clone)]
