@@ -30,9 +30,9 @@ Assurez-vous de fournir les mêmes schémas que dans l'isolat principal. Sinon, 
 void main() {
   // Ouvre Isar dans l'isolat de l'interface utilisateur
   final dir = await getApplicationDocumentsDirectory();
-  
-  final isar = await Isar.open(
-    [MessageSchema],
+
+  final isar = await Isar.openAsync(
+    schemas: [MessageSchema],
     directory: dir.path,
     name: 'myInstance',
   );
@@ -56,9 +56,9 @@ void main() {
 Future createDummyMessages(int count) async {
   // Nous n'avons pas besoin du chemin du dossier ici étant donné que l'instance est déjà ouverte.
   final dir = await getApplicationDocumentsDirectory();
-  
-  final isar = await Isar.open(
-    [PostSchema],
+
+  final isar = await Isar.openAsync(
+    schemas: [PostSchema],
     directory: dir.path,
     name: 'myInstance',
   );

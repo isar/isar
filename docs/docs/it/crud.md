@@ -14,21 +14,21 @@ Fornisci tutti gli schemi che desideri utilizzare con l'istanza Isar. Se apri pi
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [ContactSchema],
+final isar = await Isar.openAsync(
+  schemas: [ContactSchema],
   directory: dir.path,
 );
 ```
 
 È possibile utilizzare la configurazione predefinita o fornire alcuni dei seguenti parametri:
 
-| Config. |  Descrizione |
-| -------| -------------|
-| `name` | Apri più istanze con nomi distinti. Per impostazione predefinita, viene utilizzato `"predefinito"`. |
-| `directory` | Il percorso di archiviazione per questa istanza. Puoi passare un percorso relativo o assoluto. Per impostazione predefinita, `NSDocumentDirectory` viene utilizzato per iOS e `getDataDirectory` per Android. Non richiesto per il web. |
-| `relaxedDurability` | Rilassa la garanzia di durata per aumentare le prestazioni di scrittura. In caso di arresto anomalo del sistema (non arresto anomalo dell'app), è possibile perdere l'ultima transazione impegnata. La corruzione non è possibile |
-| `compactOnLaunch` | Condizioni per verificare se il database deve essere compattato all'apertura dell'istanza. |
-| `inspector` | Abilita l'Inspector per le build di debug. Per le build di profili e versioni questa opzione viene ignorata. |
+| Config.             | Descrizione                                                                                                                                                                                                                             |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`              | Apri più istanze con nomi distinti. Per impostazione predefinita, viene utilizzato `"predefinito"`.                                                                                                                                     |
+| `directory`         | Il percorso di archiviazione per questa istanza. Puoi passare un percorso relativo o assoluto. Per impostazione predefinita, `NSDocumentDirectory` viene utilizzato per iOS e `getDataDirectory` per Android. Non richiesto per il web. |
+| `relaxedDurability` | Rilassa la garanzia di durata per aumentare le prestazioni di scrittura. In caso di arresto anomalo del sistema (non arresto anomalo dell'app), è possibile perdere l'ultima transazione impegnata. La corruzione non è possibile       |
+| `compactOnLaunch`   | Condizioni per verificare se il database deve essere compattato all'apertura dell'istanza.                                                                                                                                              |
+| `inspector`         | Abilita l'Inspector per le build di debug. Per le build di profili e versioni questa opzione viene ignorata.                                                                                                                            |
 
 Se un'istanza è già aperta, la chiamata a `Isar.open()` fornirà l'istanza esistente indipendentemente dai parametri specificati. È utile per usare Isar in un isolate.
 
@@ -47,7 +47,7 @@ Per gli esempi seguenti, assumiamo di avere una raccolta "Ricetta" definita come
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 

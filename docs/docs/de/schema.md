@@ -17,7 +17,7 @@ Der folgende Code ist ein Beispiel einer simplen Collection, welche eine `User`-
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -78,7 +78,7 @@ Isar stell sicher, dass alle öffentlichen Felder einer Collecion-Klasse erhalte
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -99,7 +99,7 @@ class User {
 
 @Collection(ignore: {'profilePicture'})
 class Member extends User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -155,7 +155,7 @@ Hier ist eine Beispiel-Collection, welche alle der eben genannten Typen enthält
 ```dart
 @collection
 class TestCollection {
-  Id? id;
+  late int id;
 
   late byte byteValue;
 
@@ -200,12 +200,12 @@ Isar speichert keine Zeitzoneninformationen von deinen Daten. Stattdessen wandel
 
 Isar ermöglicht es Enums wie andere Isar-Typen zu nutzen und zu speichern. Du musst aber wählen, wie Isar den Enum auf dem Datenträger abbilden soll. Isar unterstützt vier verschiedene Strategien:
 
-| Enum-Typ     | Beschreibung                                                                                                   |
-| ------------ | -------------------------------------------------------------------------------------------------------------- |
-| `ordinal`    | Der Index des Enums wird als `byte` gespeichert. Das ist sehr effizienzt, aber erlaubt keine Null-baren Enums. |
-| `ordinal32`  | Der Index des Enums wird als `short` (4-Byte-Integer) gespeichert. Erlaubt keine Null-baren Enums.             |
-| `name`       | Der Name des Enums wird als `String` gespeichert.                                                              |
-| `value`      | Eine angepasste Eigenschaft wird genutzt, um den Enum-Wert abzurufen.                                          |
+| Enum-Typ    | Beschreibung                                                                                                   |
+| ----------- | -------------------------------------------------------------------------------------------------------------- |
+| `ordinal`   | Der Index des Enums wird als `byte` gespeichert. Das ist sehr effizienzt, aber erlaubt keine Null-baren Enums. |
+| `ordinal32` | Der Index des Enums wird als `short` (4-Byte-Integer) gespeichert. Erlaubt keine Null-baren Enums.             |
+| `name`      | Der Name des Enums wird als `String` gespeichert.                                                              |
+| `value`     | Eine angepasste Eigenschaft wird genutzt, um den Enum-Wert abzurufen.                                          |
 
 :::warning
 `ordinal` und `ordinal32` basieren auf der Reihenfolge der Enum-Werte. Wenn du die Reihenfolge änderst, werden existierende Datenbanken falsche Werte zurückgeben.
@@ -216,7 +216,7 @@ Schauen wir uns ein Beispiel für jede Strategie an.
 ```dart
 @collection
 class EnumCollection {
-  Id? id;
+  late int id;
 
   @enumerated // entspricht EnumType.ordinal
   late TestEnum byteIndex; // ist nicht Null-bar
@@ -254,7 +254,7 @@ Es ist oft hilfreich verschachtelte Objekte in deinem Collection-Modell zu haben
 ```dart
 @collection
 class Email {
-  Id? id;
+  late int id;
 
   String? title;
 

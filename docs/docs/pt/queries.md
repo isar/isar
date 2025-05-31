@@ -25,7 +25,7 @@ We'll use the following model for the examples below:
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   int? size;
 
@@ -39,15 +39,15 @@ class Shoe {
 
 Depending on the type of field, there are different conditions available.
 
-| Condition | Description |
-| ----------| ------------|
-| `.equalTo(value)` | Matches values that are equal to the specified `value`. |
-| `.between(lower, upper)` | Matches values that are between `lower` and `upper`. |
-| `.greaterThan(bound)` | Matches values that are greater than `bound`. |
-| `.lessThan(bound)` | Matches values that are less than `bound`. `null` values will be included by default because `null` is considered smaller than any other value. |
-| `.isNull()` | Matches values that are `null`.|
-| `.isNotNull()` | Matches values that are not `null`.|
-| `.length()` | List, String and link length queries filter objects based on the number of elements in a list or link. |
+| Condition                | Description                                                                                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.equalTo(value)`        | Matches values that are equal to the specified `value`.                                                                                         |
+| `.between(lower, upper)` | Matches values that are between `lower` and `upper`.                                                                                            |
+| `.greaterThan(bound)`    | Matches values that are greater than `bound`.                                                                                                   |
+| `.lessThan(bound)`       | Matches values that are less than `bound`. `null` values will be included by default because `null` is considered smaller than any other value. |
+| `.isNull()`              | Matches values that are `null`.                                                                                                                 |
+| `.isNotNull()`           | Matches values that are not `null`.                                                                                                             |
+| `.length()`              | List, String and link length queries filter objects based on the number of elements in a list or link.                                          |
 
 Let's assume the database contains four shoes with sizes 39, 40, 46 and one with an un-set (`null`) size. Unless you perform sorting, the values will be returned sorted by id.
 
@@ -71,13 +71,13 @@ isar.shoes.filter()
 
 You can composite predicates using the following logical operators:
 
-| Operator   | Description |
-| ---------- | ----------- |
+| Operator   | Description                                                                          |
+| ---------- | ------------------------------------------------------------------------------------ |
 | `.and()`   | Evaluates to `true` if both left-hand and right-hand expressions evaluate to `true`. |
-| `.or()`    | Evaluates to `true` if either expression evaluates to `true`. |
-| `.xor()`   | Evaluates to `true` if exactly one expression evaluates to `true`. |
-| `.not()`   | Negates the result of the following expression. |
-| `.group()` | Group conditions and allow to specify order of evaluation. |
+| `.or()`    | Evaluates to `true` if either expression evaluates to `true`.                        |
+| `.xor()`   | Evaluates to `true` if exactly one expression evaluates to `true`.                   |
+| `.not()`   | Negates the result of the following expression.                                      |
+| `.group()` | Group conditions and allow to specify order of evaluation.                           |
 
 If you want to find all shoes in size 46, you can use the following query:
 
@@ -152,11 +152,11 @@ A [wildcard string expression](https://en.wikipedia.org/wiki/Wildcard_character)
 
 Sometimes it is necessary to build a query based on some conditions or for different values. Isar has a very powerful tool for building conditional queries:
 
-| Modifier              | Description                                          |
-| --------------------- | ---------------------------------------------------- |
+| Modifier              | Description                                                                                                                                     |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `.optional(cond, qb)` | Extends the query only if the `condition` is `true`. This can be used almost anywhere in a query for example to conditionally sort or limit it. |
-| `.anyOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **or**. |
-| `.allOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **and**. |
+| `.anyOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **or**.                                                  |
+| `.allOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **and**.                                                 |
 
 In this example, we build a method that can find shoes with an optional filter:
 
@@ -198,7 +198,7 @@ Even lists can be queried:
 
 ```dart
 class Tweet {
-  Id? id;
+  late int id;
 
   String? text;
 
@@ -235,7 +235,7 @@ Embedded objects are one of Isar's most useful features. They can be queried ver
 ```dart
 @collection
 class Car {
-  Id? id;
+  late int id;
 
   Brand? brand;
 }
@@ -280,14 +280,14 @@ Keep in mind that link queries can be expensive because Isar needs to look up li
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -309,7 +309,7 @@ final result = await isar.students.filter()
 Link filters evaluate to `true` if at least one linked object matches the conditions.
 
 Let's search for all students that have no teachers:
-  
+
 ```dart
 final result = await isar.students.filter().teachersLengthEqualTo(0).findAll();
 ```
@@ -339,7 +339,7 @@ Let's add indexes to the shoe collection:
 ```dart
 @collection
 class Shoe with IsarObject {
-  Id? id;
+  late int id;
 
   @Index()
   Id? size;

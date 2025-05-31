@@ -40,7 +40,7 @@ Wenn eine Datenbankoperation fehlschlägt, wird die Transaktion abgeborchen und 
 ```dart
 @collection
 class Contact {
-  Id? id;
+  late int id;
 
   String? name;
 }

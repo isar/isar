@@ -23,14 +23,14 @@ For non-web targets, links get loaded automatically when you use them for the fi
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -91,7 +91,7 @@ Internally both `IsarLink` and `IsarLinks` are represented in the same way. We c
 ```dart
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 

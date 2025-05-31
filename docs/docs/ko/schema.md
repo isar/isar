@@ -17,7 +17,7 @@ title: 스키마
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -79,7 +79,7 @@ Isar 는 컬렉션 클래스의 모든 public 필드를 저장합니다. 속성�
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -100,7 +100,7 @@ class User {
 
 @Collection(ignore: {'profilePicture'})
 class Member extends User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -156,7 +156,7 @@ Isar 는 아래의 데이터 타입들을 지원합니다:
 ```dart
 @collection
 class TestCollection {
-  Id? id;
+  late int id;
 
   late byte byteValue;
 
@@ -217,7 +217,7 @@ Isar는 다른 Isar 타입들 처럼 열거형을 저장하고 사용할 수 있
 ```dart
 @collection
 class EnumCollection {
-  Id? id;
+  late int id;
 
   @enumerated // EnumType.ordinal 과 같습니다.
   late TestEnum byteIndex; // 널이 될 수 없습니다.
@@ -255,7 +255,7 @@ enum TestEnum {
 ```dart
 @collection
 class Email {
-  Id? id;
+  late int id;
 
   String? title;
 

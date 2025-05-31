@@ -23,14 +23,14 @@ Per i target non web, i link vengono caricati automaticamente quando li usi per 
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -91,7 +91,7 @@ Internamente sia "IsarLink" che "IsarLinks" sono rappresentati allo stesso modo.
 ```dart
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -129,6 +129,7 @@ I backlink sono collegamenti nella direzione inversa. Ogni link ha sempre un bac
 I backlink non richiedono memoria o risorse aggiuntive; puoi aggiungerli, rimuoverli e rinominarli liberamente senza perdere dati.
 
 Vogliamo sapere quali studenti ha un insegnante specifico, quindi definiamo un backlink:
+
 ```dart
 @collection
 class Teacher {

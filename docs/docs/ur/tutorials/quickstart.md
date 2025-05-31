@@ -2,12 +2,13 @@
 title: فورا شروع کریں
 ---
 
-  # فورا شروع کریں 
+# فورا شروع کریں
 
 خوشی کی بات ہے،آپ یہاں ہیں! آئیے وہاں موجود بہترین فلٹر ڈیٹابیس کا استعمال شروع کریں۔
 ہم اس فورا شروع کرتے ہیں میں الفاظ میں مختصر اور کوڈ پر تیز ہونے جا رہے ہیں۔
 
 ## 1. انحصار شامل کریں۔
+
 تفریح کا آغاز کرنےسے پہلےہمیں "پب سپیک۔یمل" میں چند پیکجز شامل کرنے کی ضرورت ہے۔ہم اپنے لیے بھاری سامان اٹھانے کے لیے پب کا استعمال کر سکتے ہیں۔
 
 ```bash
@@ -49,12 +50,12 @@ flutter pub run build_runner build
 
 ## 4. ای زار مثال کھولیں۔
 
-   ایک نیا ای زار مثال کھولیں اور اپنے تمام کلیکشن اسکیموں کو پاس کریں۔ اختیاری طور پر آپ مثال کا نام اور ڈائریکٹری بتا سکتے ہیں۔
+ایک نیا ای زار مثال کھولیں اور اپنے تمام کلیکشن اسکیموں کو پاس کریں۔ اختیاری طور پر آپ مثال کا نام اور ڈائریکٹری بتا سکتے ہیں۔
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [UserSchema],
+final isar = await Isar.openAsync(
+  schemas: [UserSchema],
   directory: dir.path,
 );
 ```
@@ -63,8 +64,7 @@ final isar = await Isar.open(
 
 ایک بار آپ کا مثال کھلنے کے بعد، آپ مجموعے کا استعمال شروع کر سکتے ہیں۔
 
-  تمام بنیادی کرڈ آپریشنز "ای زار کلیکشن"  کے ذریعے دستیاب ہیں۔
-
+تمام بنیادی کرڈ آپریشنز "ای زار کلیکشن" کے ذریعے دستیاب ہیں۔
 
 ```dart
 final newUser = User()..name = 'Jane Doe'..age = 36;
@@ -85,6 +85,7 @@ await isar.writeTxn(() async {
 ## دیگر وسائل
 
 کیا آپ بصری سیکھنے والے ہیں؟ ای زار کے ساتھ شروع کرنے کے لیے یہ ویڈیوز دیکھیں:
+
 <div class="video-block">
   <iframe max-width=100% height=auto src="https://www.youtube.com/embed/CwC9-a9hJv4" title="Isar Database" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>

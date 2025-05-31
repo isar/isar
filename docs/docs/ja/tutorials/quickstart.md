@@ -4,14 +4,13 @@ title: クイックスタート
 
 # クイックスタート
 
-お待たせしました。さあ、最高にクールなFlutterのデータベースを使い始めましょう！
+お待たせしました。さあ、最高にクールな Flutter のデータベースを使い始めましょう！
 
 この記事では、簡潔にコードを書いていきます。
 
-
 ## 1. 依存関係を追加する
 
-Isarを使用する前に、いくつかのパッケージを `pubspec.yaml` に追加する必要があります。pubを使用する事で、面倒な作業を簡単に済ませることが出来ます。
+Isar を使用する前に、いくつかのパッケージを `pubspec.yaml` に追加する必要があります。pub を使用する事で、面倒な作業を簡単に済ませることが出来ます。
 
 ```bash
 flutter pub add isar isar_flutter_libs
@@ -35,7 +34,7 @@ class User {
 }
 ```
 
-idはコレクション内のオブジェクトを一意に識別して、後で再び見つけられるようにします。
+id はコレクション内のオブジェクトを一意に識別して、後で再び見つけられるようにします。
 
 ## 3. コード生成ツールの実行
 
@@ -45,29 +44,29 @@ idはコレクション内のオブジェクトを一意に識別して、後で
 dart run build_runner build
 ```
 
-Flutterを使用している場合は、代わりに次のコマンドを使用してください:
+Flutter を使用している場合は、代わりに次のコマンドを使用してください:
 
 ```
 flutter pub run build_runner build
 ```
 
-## 4. Isarインスタンスを開く
+## 4. Isar インスタンスを開く
 
-新規のIsarインスタンスを開き、コレクションのスキーマを渡します。必要に応じて、インスタンス名とディレクトリを指定することができます。
+新規の Isar インスタンスを開き、コレクションのスキーマを渡します。必要に応じて、インスタンス名とディレクトリを指定することができます。
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [UserSchema],
+final isar = await Isar.openAsync(
+  schemas: [UserSchema],
   directory: dir.path,
 );
 ```
 
 ## 5. 書き込みと読み込み
 
-Isarインスタンスを開いたら, コレクションを利用することができます.
+Isar インスタンスを開いたら, コレクションを利用することができます.
 
-基本的なCRUD操作は、全て `IsarCollection` を介して行う事が出来ます。
+基本的な CRUD 操作は、全て `IsarCollection` を介して行う事が出来ます。
 
 ```dart
 final newUser = User()..name = 'Jane Doe'..age = 36;
@@ -85,7 +84,8 @@ await isar.writeTxn(() async {
 
 ## その他の資料
 
-視覚的に学ぶ方が好みであれば、Isarを始めるためにこれらの動画をぜひご覧ください:
+視覚的に学ぶ方が好みであれば、Isar を始めるためにこれらの動画をぜひご覧ください:
+
 <div class="video-block">
   <iframe max-width=100% height=auto src="https://www.youtube.com/embed/CwC9-a9hJv4" title="Isar Database" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>

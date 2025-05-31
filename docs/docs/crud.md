@@ -14,8 +14,8 @@ Provide all the schemas you want to use with the Isar instance. If you open mult
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [RecipeSchema],
+final isar = await Isar.openAsync(
+  schemas: [RecipeSchema],
   directory: dir.path,
 );
 ```
@@ -48,7 +48,7 @@ For the examples below, we assume that we have a collection `Recipe` defined as 
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 

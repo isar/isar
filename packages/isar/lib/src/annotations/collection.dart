@@ -24,7 +24,7 @@ class Collection {
   /// ```dart
   /// @Collection(accessor: 'col')
   /// class MyCol {
-  ///   Id? id;
+  ///   late int id;
   /// }
   ///
   /// // access collection:

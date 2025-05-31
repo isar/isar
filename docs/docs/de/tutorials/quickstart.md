@@ -26,7 +26,7 @@ part 'user.g.dart';
 
 @collection
 class User {
-  Id id = Isar.autoIncrement; // Für auto-increment kannst du auch id = null zuweisen 
+  Id id = Isar.autoIncrement; // Für auto-increment kannst du auch id = null zuweisen
 
   String? name;
 
@@ -56,8 +56,8 @@ flutter pub run build_runner build
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [UserSchema],
+final isar = await Isar.openAsync(
+  schemas: [UserSchema],
   directory: dir.path,
 );
 ```

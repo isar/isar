@@ -25,7 +25,7 @@ title: سوالات
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   int? size;
 
@@ -39,15 +39,15 @@ class Shoe {
 
 فیلڈ کی قسم پر منحصر ہے، مختلف شرائط دستیاب ہیں۔
 
-| Condition | Description |
-| ----------| ------------|
-| `.equalTo(value)` | Matches values that are equal to the specified `value`. |
-| `.between(lower, upper)` | Matches values that are between `lower` and `upper`. |
-| `.greaterThan(bound)` | Matches values that are greater than `bound`. |
-| `.lessThan(bound)` | Matches values that are less than `bound`. `null` values will be included by default because `null` is considered smaller than any other value. |
-| `.isNull()` | Matches values that are `null`.|
-| `.isNotNull()` | Matches values that are not `null`.|
-| `.length()` | List, String and link length queries filter objects based on the number of elements in a list or link. |
+| Condition                | Description                                                                                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.equalTo(value)`        | Matches values that are equal to the specified `value`.                                                                                         |
+| `.between(lower, upper)` | Matches values that are between `lower` and `upper`.                                                                                            |
+| `.greaterThan(bound)`    | Matches values that are greater than `bound`.                                                                                                   |
+| `.lessThan(bound)`       | Matches values that are less than `bound`. `null` values will be included by default because `null` is considered smaller than any other value. |
+| `.isNull()`              | Matches values that are `null`.                                                                                                                 |
+| `.isNotNull()`           | Matches values that are not `null`.                                                                                                             |
+| `.length()`              | List, String and link length queries filter objects based on the number of elements in a list or link.                                          |
 
 Let's assume the database contains four shoes with sizes 39, 40, 46 and one with an un-set (`null`) size. Unless you perform sorting, the values will be returned sorted by id.
 
@@ -71,13 +71,13 @@ isar.shoes.filter()
 
 آپ مندرجہ ذیل منطقی آپریٹرز کا استعمال کرتے ہوئے جامع پیشن گوئی کر سکتے ہیں:
 
-| Operator   | Description |
-| ---------- | ----------- |
+| Operator   | Description                                                                          |
+| ---------- | ------------------------------------------------------------------------------------ |
 | `.and()`   | Evaluates to `true` if both left-hand and right-hand expressions evaluate to `true`. |
-| `.or()`    | Evaluates to `true` if either expression evaluates to `true`. |
-| `.xor()`   | Evaluates to `true` if exactly one expression evaluates to `true`. |
-| `.not()`   | Negates the result of the following expression. |
-| `.group()` | Group conditions and allow to specify order of evaluation. |
+| `.or()`    | Evaluates to `true` if either expression evaluates to `true`.                        |
+| `.xor()`   | Evaluates to `true` if exactly one expression evaluates to `true`.                   |
+| `.not()`   | Negates the result of the following expression.                                      |
+| `.group()` | Group conditions and allow to specify order of evaluation.                           |
 
 اگر آپ 46 سائز میں تمام جوتے تلاش کرنا چاہتے ہیں، تو آپ درج ذیل استفسار کا استعمال کر سکتے ہیں:
 
@@ -152,11 +152,11 @@ A [wildcard string expression](https://en.wikipedia.org/wiki/Wildcard_character)
 
 بعض اوقات کچھ شرائط یا مختلف اقدار کی بنیاد پر استفسار کرنا ضروری ہوتا ہے۔ aای زار مشروط سوالات کی تعمیر کے لئے ایک بہت طاقتور ٹول ہے:
 
-| Modifier              | Description                                          |
-| --------------------- | ---------------------------------------------------- |
+| Modifier              | Description                                                                                                                                     |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `.optional(cond, qb)` | Extends the query only if the `condition` is `true`. This can be used almost anywhere in a query for example to conditionally sort or limit it. |
-| `.anyOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **or**. |
-| `.allOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **and**. |
+| `.anyOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **or**.                                                  |
+| `.allOf(list, qb)`    | Extends the query for each value in `values` and combines the conditions using logical **and**.                                                 |
 
 In this example, we build a method that can find shoes with an optional filter:
 
@@ -198,7 +198,7 @@ final shoes2 = await isar.shoes.filter()
 
 ```dart
 class Tweet {
-  Id? id;
+  late int id;
 
   String? text;
 
@@ -235,7 +235,7 @@ This is equivalent to the Dart code `tweets.where((t) => t.hashtags.contains('fl
 ```dart
 @collection
 class Car {
-  Id? id;
+  late int id;
 
   Brand? brand;
 }
@@ -280,14 +280,14 @@ final germanCars = await isar.cars.filter()
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -309,7 +309,7 @@ final result = await isar.students.filter()
 Link filters evaluate to `true` if at least one linked object matches the conditions.
 
 Let's search for all students that have no teachers:
-  
+
 ```dart
 final result = await isar.students.filter().teachersLengthEqualTo(0).findAll();
 ```
@@ -339,7 +339,7 @@ final result = await isar.students.filter().teachersIsEmpty().findAll();
 ```dart
 @collection
 class Shoe with IsarObject {
-  Id? id;
+  late int id;
 
   @Index()
   Id? size;
@@ -378,6 +378,7 @@ final result = isar.shoes.where()
 جہاں شق پہلے لاگو کی جاتی ہے تاکہ فلٹر کیے جانے والے آبجیکٹ کی تعداد کو کم کیا جا سکے۔ پھر فلٹر بقیہ آبجیکٹس پر لاگو ہوتا ہے۔
 
 ## چھانٹنا
+
 You can define how the results should be sorted when executing the query using the `.sortBy()`, `.sortByDesc()`, `.thenBy()` and `.thenByDesc()` methods.
 
 انڈیکس کا استعمال کیے بغیر تمام جوتوں کو ماڈل کے نام کے مطابق صعودی ترتیب اور نزولی ترتیب میں سائز تلاش کرنے کے لیے:
@@ -485,6 +486,7 @@ final firstTenShoes = await isar.shoes.where()
 چونکہ ڈارٹ آبجیکٹ کو انسٹیٹیوٹ کرنا اکثر استفسار پر عمل کرنے کا سب سے مہنگا حصہ ہوتا ہے، اس لیے یہ ایک اچھا خیال ہے کہ آپ کو مطلوبہ اشیاء کو لوڈ کیا جائے۔
 
 ## ایگزیکیوشن آرڈر
+
 ای زار سوالات کو ہمیشہ اسی ترتیب میں انجام دیتا ہے:
 
 1. اشیاء تلاش کرنے کے لیے پرائمری یا سیکنڈری انڈیکس کو عبور کریں (جہاں شقیں لگائیں)

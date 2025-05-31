@@ -23,14 +23,14 @@ Links are lazy, so you need to tell the `IsarLink` to load or save the `value` e
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -91,7 +91,7 @@ Internally both `IsarLink` and `IsarLinks` are represented in the same way. We c
 ```dart
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
