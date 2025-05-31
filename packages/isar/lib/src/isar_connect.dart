@@ -1,7 +1,5 @@
 // ignore_for_file: avoid_print - intentional for debugging output
 
-// Printing is intentionally used for Isar Connect debugging output
-
 part of '../isar.dart';
 
 abstract class _IsarConnect {
