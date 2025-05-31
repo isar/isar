@@ -10,6 +10,7 @@ class NativeType {}
 @tryInline
 Pointer<T> ptrFromAddress<T>(int addr) => addr;
 
+// ignore: invalid_runtime_check_with_js_interop_types - This is web-specific FFI code, cast is intentional.
 final JSIsar b = IsarCore.b as JSIsar;
 
 extension PointerX on int {

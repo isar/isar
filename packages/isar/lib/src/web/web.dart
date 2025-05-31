@@ -57,10 +57,11 @@ class IsarCorePlatformImpl implements IsarCorePlatform {
       import,
     );
     final wasm = await promise.toDart;
-    return wasm.instance.exports as JSIsar;
+    return wasm.instance.exports as IsarCoreBindings;
   }
 
   void _jsError(int ptr) {
+    // ignore: invalid_runtime_check_with_js_interop_types - This is web-specific FFI code, cast is intentional.
     final buffer = (IsarCore.b as JSIsar).u8Heap;
     var strLen = 0;
     var i = ptr;
