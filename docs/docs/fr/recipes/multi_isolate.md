@@ -32,7 +32,7 @@ void main() {
   final dir = await getApplicationDocumentsDirectory();
 
   final isar = await Isar.openAsync(
-    [MessageSchema],
+    schemas: [MessageSchema],
     directory: dir.path,
     name: 'myInstance',
   );
@@ -58,7 +58,7 @@ Future createDummyMessages(int count) async {
   final dir = await getApplicationDocumentsDirectory();
 
   final isar = await Isar.openAsync(
-    [PostSchema],
+    schemas: [PostSchema],
     directory: dir.path,
     name: 'myInstance',
   );

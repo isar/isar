@@ -59,7 +59,7 @@ Open a new Isar instance and pass all of your collection schemas. Optionally you
 ```dart
 final dir = await getApplicationDocumentsDirectory();
 final isar = await Isar.openAsync(
-  [UserSchema],
+  schemas: [UserSchema],
   directory: dir.path,
 );
 ```

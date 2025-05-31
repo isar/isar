@@ -15,7 +15,7 @@ title: بنائیں، پڑھیں، اپ ڈیٹ کریں، حذف کریں
 ```dart
 final dir = await getApplicationDocumentsDirectory();
 final isar = await Isar.openAsync(
-  [RecipeSchema],
+  schemas: [RecipeSchema],
   directory: dir.path,
 );
 ```

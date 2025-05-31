@@ -15,7 +15,7 @@ Fornisci tutti gli schemi che desideri utilizzare con l'istanza Isar. Se apri pi
 ```dart
 final dir = await getApplicationDocumentsDirectory();
 final isar = await Isar.openAsync(
-  [ContactSchema],
+  schemas: [ContactSchema],
   directory: dir.path,
 );
 ```

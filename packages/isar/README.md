@@ -117,7 +117,7 @@ enum Status {
 ```dart
 final dir = await getApplicationDocumentsDirectory();
 final isar = await Isar.openAsync(
-  [EmailSchema],
+  schemas: [EmailSchema],
   directory: dir.path,
 );
 ```

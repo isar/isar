@@ -55,7 +55,7 @@ flutter pub run build_runner build
 ```dart
 final dir = await getApplicationDocumentsDirectory();
 final isar = await Isar.openAsync(
-  [UserSchema],
+  schemas: [UserSchema],
   directory: dir.path,
 );
 ```
