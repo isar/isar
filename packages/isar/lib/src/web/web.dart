@@ -45,7 +45,7 @@ class IsarCorePlatformImpl implements IsarCorePlatform {
   const IsarCorePlatformImpl();
 
   @override
-  // ignore: invalid_runtime_check_with_js_interop_types
+  // ignore: invalid_runtime_check_with_js_interop_types, invalid_override
   FutureOr<IsarCoreBindings> initializeBindings([String? library]) async {
     final url = library ?? 'https://unpkg.com/isar@${Isar.version}/isar.wasm';
 
