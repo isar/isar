@@ -141,9 +141,7 @@ Pointer<CIsarValue> _isarValue(Object? value) {
   } else if (value is double) {
     return IsarCore.b.isar_value_real(value);
   } else if (value is int) {
-    // ignore: avoid_double_and_int_checks
-    // We explicitly need to check for int type here after checking double
-    // to handle numerical values correctly in the filter system
+    // ignore: avoid_double_and_int_checks - need explicit int check after double
     return IsarCore.b.isar_value_integer(value);
   } else if (value is String) {
     return IsarCore.b.isar_value_string(IsarCore._toNativeString(value));

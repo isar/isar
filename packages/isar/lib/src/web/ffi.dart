@@ -48,8 +48,7 @@ extension PointerX on int {
 const nullptr = 0;
 
 class Native<T> {
-  // ignore: avoid_unused_constructor_parameters
-  // Symbol parameter used by native code generation
+  // ignore: avoid_unused_constructor_parameters - used by native generation
   const Native({String? symbol});
 }
 

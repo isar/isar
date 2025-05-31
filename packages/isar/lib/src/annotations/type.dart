@@ -1,5 +1,4 @@
-// ignore_for_file: camel_case_types
-// Intentional lowercase type aliases
+// ignore_for_file: camel_case_types - intentional lowercase type aliases
 
 part of '../../isar.dart';
 

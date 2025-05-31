@@ -89,8 +89,7 @@ class IsarCorePlatformImpl implements IsarCorePlatform {
 
   @override
   int fastHash(String string) {
-    // ignore: avoid_js_rounded_ints
-    // FNV constants are intentionally large integers for hash calculation
+    // ignore: avoid_js_rounded_ints - FNV constants for hash calculation
     const fnvOffsetBasis = 0xcbf29ce484222325;
     const fnvPrime = 0x00000100000001B3;
 
