@@ -14,7 +14,7 @@ Provee todos los esquemas que quieras usar con la instancia Isar. Si abres múlt
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
+final isar = await Isar.openAsync(
   [ContactSchema],
   directory: dir.path,
 );

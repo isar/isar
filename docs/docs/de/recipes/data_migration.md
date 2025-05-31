@@ -51,7 +51,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() async {
   final dir = await getApplicationDocumentsDirectory();
 
-  final isar = await Isar.open(
+  final isar = await Isar.openAsync(
     [UserSchema],
     directory: dir.path,
   );

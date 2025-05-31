@@ -14,7 +14,7 @@ Isar 인스턴스에서 사용하고 싶은 모든 스키마를 지정합니다.
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
+final isar = await Isar.openAsync(
   [RecipeSchema],
   directory: dir.path,
 );

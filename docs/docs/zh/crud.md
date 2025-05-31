@@ -14,7 +14,7 @@ title: 增删改查
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
+final isar = await Isar.openAsync(
   [RecipeSchema],
   directory: dir.path,
 );

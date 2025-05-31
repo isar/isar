@@ -30,8 +30,8 @@ Make sure to provide the same schemas as in the main isolate. Otherwise, you wil
 void main() {
   // Open Isar in the UI isolate
   final dir = await getApplicationDocumentsDirectory();
-  
-  final isar = await Isar.open(
+
+  final isar = await Isar.openAsync(
     [MessageSchema],
     directory: dir.path,
     name: 'myInstance',
@@ -56,8 +56,8 @@ void main() {
 Future createDummyMessages(int count) async {
   // we don't need the path here because the instance is already open
   final dir = await getApplicationDocumentsDirectory();
-  
-  final isar = await Isar.open(
+
+  final isar = await Isar.openAsync(
     [PostSchema],
     directory: dir.path,
     name: 'myInstance',

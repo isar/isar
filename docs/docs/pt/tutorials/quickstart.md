@@ -56,7 +56,7 @@ Abra uma nova instância Isar e passe todos os seus esquemas de coleção. Opcio
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
+final isar = await Isar.openAsync(
   [UserSchema],
   directory: dir.path,
 );
@@ -85,6 +85,7 @@ await isar.writeTxn(() async {
 ## Outros recursos
 
 Você é um aprendiz visual? Confira estes vídeos para começar com Isar:
+
 <div class="video-block">
   <iframe max-width=100% height=auto src="https://www.youtube.com/embed/CwC9-a9hJv4" title="Isar Database" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>

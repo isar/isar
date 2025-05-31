@@ -14,7 +14,7 @@ Provide all the schemas you want to use with the Isar instance. If you open mult
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
+final isar = await Isar.openAsync(
   [RecipeSchema],
   directory: dir.path,
 );

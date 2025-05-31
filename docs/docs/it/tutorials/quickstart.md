@@ -56,7 +56,7 @@ Apri una nuova istanza Isar e passa tutti i tuoi schemi di raccolte. Facoltativa
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
+final isar = await Isar.openAsync(
   [UserSchema],
   directory: dir.path,
 );
@@ -85,6 +85,7 @@ await isar.writeTxn(() async {
 ## Altre risorse
 
 Sei uno studente visivo? Guarda questi video per iniziare con Isar:
+
 <div class="video-block">
   <iframe max-width=100% height=auto src="https://www.youtube.com/embed/CwC9-a9hJv4" title="Isar Database" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>

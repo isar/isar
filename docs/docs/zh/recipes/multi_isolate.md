@@ -30,8 +30,8 @@ Isar 事务即使在单 isolate 环境中也是并行运行的。但有些情况
 void main() {
   // 在 UI isolate 中创建 Isar 实例
   final dir = await getApplicationDocumentsDirectory();
-  
-  final isar = await Isar.open(
+
+  final isar = await Isar.openAsync(
     [MessageSchema],
     directory: dir.path,
     name: 'myInstance',
@@ -56,8 +56,8 @@ void main() {
 Future createDummyMessages(int count) async {
   // 我们没必要在此指定路径，因为它已经被创建好了
   final dir = await getApplicationDocumentsDirectory();
-  
-  final isar = await Isar.open(
+
+  final isar = await Isar.openAsync(
     [PostSchema],
     directory: dir.path,
     name: 'myInstance',
