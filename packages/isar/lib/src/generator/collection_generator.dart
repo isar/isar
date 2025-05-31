@@ -1,3 +1,8 @@
+// Allow the use of deprecated members during the transition period.
+// TODO(sergiyvoloshyn): Remove these ignores once the code is updated.
+// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use_from_same_package
+
 part of 'isar_generator.dart';
 
 const _ignoreLints = [

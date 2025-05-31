@@ -10,6 +10,7 @@ class NativeType {}
 @tryInline
 Pointer<T> ptrFromAddress<T>(int addr) => addr;
 
+// ignore: invalid_runtime_check_with_js_interop_types - This is web-specific FFI code, cast is intentional.
 final JSIsar b = IsarCore.b as JSIsar;
 
 extension PointerX on int {
@@ -48,7 +49,7 @@ extension PointerX on int {
 const nullptr = 0;
 
 class Native<T> {
-  // ignore: avoid_unused_constructor_parameters
+  // ignore: avoid_unused_constructor_parameters - used by native generation
   const Native({String? symbol});
 }
 
@@ -78,7 +79,7 @@ class Opaque {}
 
 class NativeFunction<T> {}
 
-const _sizes = {
+const Map<Type, int> _sizes = {
   int: 4, // pointer
   Void: 0,
   Bool: 1,
