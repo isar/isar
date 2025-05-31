@@ -20,7 +20,7 @@ dependencies:
   isar_flutter_libs:
     path: ../isar_flutter_libs
   json_annotation: ^4.8.1
-  meta: ^1.9.1
+  meta: ^1.16.0
   path: ^1.8.3
   path_provider: ^2.0.15
   test: any

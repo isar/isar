@@ -21,7 +21,7 @@ dependencies:
   analyzer: ">=6.5.0 <8.0.0"
   build: ^2.4.1
   ffi: ">=2.0.0 <3.0.0"
-  meta: ^1.11.0
+  meta: ^1.16.0
   source_gen: ^2.0.0
   web: ^1.1.0
 
