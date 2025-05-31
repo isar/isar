@@ -45,7 +45,7 @@ class IsarCorePlatformImpl implements IsarCorePlatform {
   const IsarCorePlatformImpl();
 
   @override
-  // ignore: invalid_override
+  // ignore: invalid_runtime_check_with_js_interop_types
   FutureOr<IsarCoreBindings> initializeBindings([String? library]) async {
     final url = library ?? 'https://unpkg.com/isar@${Isar.version}/isar.wasm';
 
@@ -70,6 +70,7 @@ class IsarCorePlatformImpl implements IsarCorePlatform {
     }
     final str = utf8.decode(buffer.sublist(ptr, ptr + strLen));
     // ignore: avoid_print
+    // Debug output for WebAssembly errors
     print(str);
   }
 

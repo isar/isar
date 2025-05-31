@@ -49,6 +49,7 @@ const nullptr = 0;
 
 class Native<T> {
   // ignore: avoid_unused_constructor_parameters
+  // Symbol parameter used by native code generation
   const Native({String? symbol});
 }
 
@@ -78,7 +79,7 @@ class Opaque {}
 
 class NativeFunction<T> {}
 
-const _sizes = {
+const Map<Type, int> _sizes = {
   int: 4, // pointer
   Void: 0,
   Bool: 1,

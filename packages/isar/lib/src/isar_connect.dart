@@ -1,9 +1,11 @@
 // ignore_for_file: avoid_print
+// Printing is intentionally used for Isar Connect debugging output
 
 part of '../isar.dart';
 
 abstract class _IsarConnect {
-  static const _handlers = {
+  static const Map<ConnectAction,
+      Future<dynamic> Function(Map<String, dynamic>)> _handlers = {
     ConnectAction.listInstances: _listInstances,
     ConnectAction.getSchemas: _getSchemas,
     ConnectAction.watchInstance: _watchInstance,
@@ -41,7 +43,7 @@ abstract class _IsarConnect {
               : <String, dynamic>{};
           final result = <String, dynamic>{'result': await handler.value(args)};
           return ServiceExtensionResponse.result(jsonEncode(result));
-        } catch (e) {
+        } on Exception catch (e) {
           return ServiceExtensionResponse.error(
             ServiceExtensionResponse.extensionError,
             e.toString(),
