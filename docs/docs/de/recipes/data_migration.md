@@ -15,10 +15,11 @@ Du kannst auch jeder Collection seine eigene Version zuweisen und sie individuel
 Stell dir vor, wie haben eine Benutzer-Collection mit einem Feld Geburtstag. In Version 2 unserer App benötigen wir ein zusätzliches Feld Geburtsjahr um Benutzer anhand des Alters abzufragen.
 
 Version 1:
+
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -27,10 +28,11 @@ class User {
 ```
 
 Version 2:
+
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -48,7 +50,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   final dir = await getApplicationDocumentsDirectory();
-  
+
   final isar = await Isar.open(
     [UserSchema],
     directory: dir.path,

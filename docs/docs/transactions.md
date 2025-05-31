@@ -40,7 +40,7 @@ When a database operation fails, the transaction is aborted and must no longer b
 ```dart
 @collection
 class Contact {
-  Id? id;
+  late int id;
 
   String? name;
 }

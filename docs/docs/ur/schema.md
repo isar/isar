@@ -17,7 +17,7 @@ title: اسکیما
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -31,11 +31,11 @@ class User {
 
 مجموعہ کو حسب ضرورت بنانے کے لیے چند اختیاری پیرامیٹرز ہیں:
 
-| Config        | Description                                                                                                      |
-| ------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `inheritance` | کنٹرول کریں کہ آیا پیرنٹ کلاسز اور مکسین کے فیلڈز کو اسر میں محفوظ کیا جائے گا۔ بطور ڈیفالٹ فعال۔                  |
+| Config        | Description                                                                                                          |
+| ------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `inheritance` | کنٹرول کریں کہ آیا پیرنٹ کلاسز اور مکسین کے فیلڈز کو اسر میں محفوظ کیا جائے گا۔ بطور ڈیفالٹ فعال۔                    |
 | `accessor`    | آپ کو ڈیفالٹ کلیکشن ایکسیسر کا نام تبدیل کرنے کی اجازت دیتا ہے (مثال کے طور پر `رابطہ` مجموعہ کے لئے `ایزار.رابطہ`)۔ |
-| `ignore`      | کچھ خصوصیات کو نظر انداز کرنے کی اجازت دیتا ہے۔ یہ سپر کلاسز کے لیے بھی قابل احترام ہیں۔                                  |
+| `ignore`      | کچھ خصوصیات کو نظر انداز کرنے کی اجازت دیتا ہے۔ یہ سپر کلاسز کے لیے بھی قابل احترام ہیں۔                             |
 
 ### ای زار آئی ڈی
 
@@ -78,7 +78,7 @@ Isar persists all public fields of a collection class. By annotating a property 
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -99,7 +99,7 @@ class User {
 
 @Collection(ignore: {'profilePicture'})
 class Member extends User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -135,7 +135,7 @@ Additionally, embedded objects and enums are supported. We'll cover those below.
 بہت سے استعمال کے معاملات کے لیے، آپ کو 64 بٹ انٹیجر یا ڈبل ​​کی پوری رینج کی ضرورت نہیں ہے۔ ای ار اضافی اقسام کی حمایت کرتا ہے جو آپ کو چھوٹے نمبروں کو ذخیرہ کرتے وقت جگہ اور میموری کو بچانے کی اجازت دیتا ہے۔
 
 | Type       | Size in bytes | Range                                                   |
-| ---------- |-------------- | ------------------------------------------------------- |
+| ---------- | ------------- | ------------------------------------------------------- |
 | **byte**   | 1             | 0 to 255                                                |
 | **short**  | 4             | -2,147,483,647 to 2,147,483,647                         |
 | **int**    | 8             | -9,223,372,036,854,775,807 to 9,223,372,036,854,775,807 |
@@ -149,7 +149,7 @@ Here is an example collection containing all of the above types:
 ```dart
 @collection
 class TestCollection {
-  Id? id;
+  late int id;
 
   late byte byteValue;
 
@@ -171,9 +171,9 @@ Understanding how nullability works in Isar is essential: Number types do **NOT*
 
 | Type       | VM            |
 | ---------- | ------------- |
-| **short**  | `-2147483648` | 
+| **short**  | `-2147483648` |
 | **int**    |  `int.MIN`    |
-| **float**  | `double.NaN` |
+| **float**  | `double.NaN`  |
 | **double** |  `double.NaN` |
 
 `bool`, `String`, and `List` have a separate `null` representation.
@@ -194,8 +194,8 @@ Isar does not store timezone information of your dates. Instead, it converts `Da
 
 ایزار دیگر ایزار اقسام کی طرح اینومز کو ذخیرہ کرنے اور استعمال کرنے کی اجازت دیتا ہے۔ تاہم، آپ کو انتخاب کرنا ہوگا کہ اسر ڈسک پر موجود اینوم کی نمائندگی کیسے کرے۔ ایزار چار مختلف حکمت عملیوں کی حمایت کرتا ہے:
 
-| EnumType    | Description 
-| ----------- | -----------
+| EnumType    | Description                                                                                         |
+| ----------- | --------------------------------------------------------------------------------------------------- |
 | `ordinal`   | The index of the enum is stored as `byte`. This is very efficient but does not allow nullable enums |
 | `ordinal32` | The index of the enum is stored as `short` (4-byte integer).                                        |
 | `name`      | The enum name is stored as `String`.                                                                |
@@ -210,7 +210,7 @@ Isar does not store timezone information of your dates. Instead, it converts `Da
 ```dart
 @collection
 class EnumCollection {
-  Id? id;
+  late int id;
 
   @enumerated // same as EnumType.ordinal
   late TestEnum byteIndex; // cannot be nullable
@@ -244,11 +244,11 @@ enum TestEnum {
 ## ایمبیڈڈ اشیاء
 
 آپ کے کلیکشن ماڈل میں گھریلو اشیاء کا ہونا اکثر مددگار ہوتا ہے۔ اس کی کوئی حد نہیں ہے کہ آپ اشیاء کو کتنی گہرائی میں گھونسلا سکتے ہیں۔ تاہم، ذہن میں رکھیں کہ گہرے اندر کی چیز کو اپ ڈیٹ کرنے کے لیے پورے آبجیکٹ ٹری کو ڈیٹا بیس میں لکھنے کی ضرورت ہوگی۔
-  
+
 ```dart
 @collection
 class Email {
-  Id? id;
+  late int id;
 
   String? title;
 

@@ -47,7 +47,7 @@ final isar = await Isar.open(
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 

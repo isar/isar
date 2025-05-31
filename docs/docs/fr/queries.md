@@ -25,7 +25,7 @@ Nous utiliserons le modèle suivant pour les exemples ci-dessous:
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   int? size;
 
@@ -40,7 +40,7 @@ class Shoe {
 Selon le type de champ, il existe différentes conditions.
 
 | Condition                | Description                                                                                                                                                           |
-|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `.equalTo(value)`        | Recherche les valeurs qui sont égales à `value`.                                                                                                                      |
 | `.between(lower, upper)` | Recherche les valeurs qui se situent entre `lower` et `upper`.                                                                                                        |
 | `.greaterThan(bound)`    | Recherche les valeurs qui sont supérieures à `bound`.                                                                                                                 |
@@ -72,7 +72,7 @@ isar.shoes.filter()
 Nous pouvons composer des prédicats à l'aide des opérateurs logiques suivants:
 
 | Opérateur  | Description                                                                  |
-|------------|------------------------------------------------------------------------------|
+| ---------- | ---------------------------------------------------------------------------- |
 | `.and()`   | Évalue à `true` si les expressions de gauche et de droite évaluent à `true`. |
 | `.or()`    | Évalue à `true` si l'une des deux expressions évalue à `true`.               |
 | `.xor()`   | Évalue à `true` si exactement une expression évalue à `true`.                |
@@ -132,7 +132,7 @@ Cette requête est équivalente à `size != 46 && isUnisex != true`.
 En plus des conditions de recherche ci-dessus, les valeurs de type `String` offrent quelques conditions supplémentaires que nous pouvons utiliser. Les caractères génériques de type Regex, par exemple, permettent une plus grande flexibilité dans la recherche.
 
 | Condition            | Description                                                           |
-|----------------------|-----------------------------------------------------------------------|
+| -------------------- | --------------------------------------------------------------------- |
 | `.startsWith(value)` | Recherche les valeurs qui commencent par la valeur `value` fournie.   |
 | `.contains(value)`   | Recherche les valeurs qui contiennent la valeur `value` fournie.      |
 | `.endsWith(value)`   | Recherche les valeurs qui se terminent par la valeur `value` fournie. |
@@ -153,7 +153,7 @@ Une [expression de métacaractère](https://fr.wikipedia.org/wiki/M%C3%A9tacarac
 Il est parfois nécessaire de construire une requête basée sur certaines conditions ou pour différentes valeurs. Isar dispose d'un outil très puissant pour construire des requêtes conditionnelles:
 
 | Modificateur          | Description                                                                                                                                                                           |
-|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `.optional(cond, qb)` | Étend la requête uniquement si la `condition` est `true`. Cela peut être utilisé presque partout dans une requête, par exemple pour la trier ou la limiter de manière conditionnelle. |
 | `.anyOf(list, qb)`    | Étend la requête pour chaque valeur de `values` et combine les conditions en utilisant l’opérateur **ou**.                                                                            |
 | `.allOf(list, qb)`    | Étend la requête pour chaque valeur de `values` et combine les conditions en utilisant les **et** logiques.                                                                           |
@@ -198,7 +198,7 @@ Même les listes peuvent être utilisées dans les requêtes:
 
 ```dart
 class Tweet {
-  Id? id;
+  late int id;
 
   String? text;
 
@@ -235,7 +235,7 @@ Les objets embarqués sont l'une des fonctionnalités les plus utiles d'Isar. Il
 ```dart
 @collection
 class Car {
-  Id? id;
+  late int id;
 
   Brand? brand;
 }
@@ -280,14 +280,14 @@ Gardez en tête que les requêtes de liens peuvent être coûteuses, car Isar do
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -309,7 +309,7 @@ final result = await isar.students.filter()
 Les filtres de liens sont évalués à `true` si au moins un objet lié correspond aux conditions.
 
 Cherchons tous les élèves qui n'ont pas de professeur:
-  
+
 ```dart
 final result = await isar.students.filter().teachersLengthEqualTo(0).findAll();
 ```
@@ -339,7 +339,7 @@ Ajoutons des index à la collection `Shoe`:
 ```dart
 @collection
 class Shoe with IsarObject {
-  Id? id;
+  late int id;
 
   @Index()
   Id? size;
@@ -501,7 +501,7 @@ Isar exécute les requêtes toujours dans le même ordre :
 Dans les exemples précédents, nous avons utilisé `.findAll()` pour récupérer tous les objets correspondants. Cependant, d'autres opérations sont disponibles:
 
 | Opération        | Description                                                                                                                                                   |
-|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `.findFirst()`   | Retourne seulement le premier objet correspondant ou `null` si aucun ne correspond.                                                                           |
 | `.findAll()`     | Retourne tous les objets correspondants.                                                                                                                      |
 | `.count()`       | Compte le nombre d'objets correspondant à la requête.                                                                                                         |
@@ -530,7 +530,7 @@ L'utilisation d'une seule propriété permet de gagner du temps lors de la dés�
 Isar supporte l'agrégation des valeurs d'une requête de propriété. Les opérations d'agrégation disponibles sont les suivantes :
 
 | Opération    | Description                                                                |
-|--------------|----------------------------------------------------------------------------|
+| ------------ | -------------------------------------------------------------------------- |
 | `.min()`     | Trouve la valeur minimale ou `null` si aucune ne correspond.               |
 | `.max()`     | Trouve la valeur maximale ou `null` si aucune ne correspond.               |
 | `.sum()`     | Additionne toutes les valeurs.                                             |
@@ -547,7 +547,7 @@ Cette section n'est probablement pas pertinente pour vous. Il est déconseillé 
 Tous les exemples ci-dessus ont utilisé le `QueryBuilder` et les méthodes d'extension statiques générées. Peut-être voulez-vous créer des requêtes dynamiques ou un langage de requête personnalisé (comme l'inspecteur Isar). Dans ce cas, nous pouvons utiliser la méthode `buildQuery()` :
 
 | Paramètre       | Description                                                                                                          |
-|-----------------|----------------------------------------------------------------------------------------------------------------------|
+| --------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `whereClauses`  | Les clauses `where` de la requête.                                                                                   |
 | `whereDistinct` | Si les clauses `where` doivent retourner des valeurs distinctes (utile uniquement pour les clauses `where` uniques). |
 | `whereSort`     | L'ordre de passage des clauses `where` (utile uniquement pour les clauses `where` uniques).                          |

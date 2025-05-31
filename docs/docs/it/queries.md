@@ -25,7 +25,7 @@ Utilizzeremo il seguente modello per gli esempi seguenti:
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   int? size;
 
@@ -39,15 +39,15 @@ class Shoe {
 
 A seconda del tipo di campo, sono disponibili diverse condizioni.
 
-| Condizione | Descrizione |
-| ----------| ------------|
-| `.equalTo(value)` | Corrisponde a valori uguali al `value` specificato. |
-| `.between(lower, upper)` | Corrisponde ai valori compresi tra `lower` and `upper`. |
-| `.greaterThan(bound)` | Corrisponde a valori maggiori di `bound`. |
-| `.lessThan(bound)` | Corrisponde a valori inferiori a `bound`. I valori `null` verranno inclusi per impostazione predefinita perché `null` è considerato inferiore a qualsiasi altro valore. |
-| `.isNull()` | Corrisponde a valori `null'.|
-| `.isNotNull()` | Corrisponde a valori che non sono `null'.|
-| `.length()` | Le query su List, String e lunghezza del collegamento filtrano gli oggetti in base al numero di elementi in un elenco o in un collegamento. |
+| Condizione               | Descrizione                                                                                                                                                             |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.equalTo(value)`        | Corrisponde a valori uguali al `value` specificato.                                                                                                                     |
+| `.between(lower, upper)` | Corrisponde ai valori compresi tra `lower` and `upper`.                                                                                                                 |
+| `.greaterThan(bound)`    | Corrisponde a valori maggiori di `bound`.                                                                                                                               |
+| `.lessThan(bound)`       | Corrisponde a valori inferiori a `bound`. I valori `null` verranno inclusi per impostazione predefinita perché `null` è considerato inferiore a qualsiasi altro valore. |
+| `.isNull()`              | Corrisponde a valori `null'.                                                                                                                                            |
+| `.isNotNull()`           | Corrisponde a valori che non sono `null'.                                                                                                                               |
+| `.length()`              | Le query su List, String e lunghezza del collegamento filtrano gli oggetti in base al numero di elementi in un elenco o in un collegamento.                             |
 
 Supponiamo che il database contenga quattro scarpe con le taglie 39, 40, 46 e una con una taglia non impostata (`null`). A meno che non si esegua l'ordinamento, i valori verranno restituiti ordinati per id.
 
@@ -71,13 +71,13 @@ isar.shoes.filter()
 
 È possibile comporre predicati utilizzando i seguenti operatori logici:
 
-| Operatore   | Descrizione |
-| ---------- | ----------- |
+| Operatore  | Descrizione                                                                                                 |
+| ---------- | ----------------------------------------------------------------------------------------------------------- |
 | `.and()`   | Valuta come `true` se entrambe le espressioni della lato sinistro e della lato destro restituiscono `true`. |
-| `.or()`    | Valuta come `true` se una delle espressioni restituisce `true`. |
-| `.xor()`   | Valuta come `true` se esattamente un'espressione restituisce `true`. |
-| `.not()`   | Nega il risultato della seguente espressione. |
-| `.group()` | Raggruppa le condizioni e consente di specificare l'ordine di valutazione. |
+| `.or()`    | Valuta come `true` se una delle espressioni restituisce `true`.                                             |
+| `.xor()`   | Valuta come `true` se esattamente un'espressione restituisce `true`.                                        |
+| `.not()`   | Nega il risultato della seguente espressione.                                                               |
+| `.group()` | Raggruppa le condizioni e consente di specificare l'ordine di valutazione.                                  |
 
 Se vuoi trovare tutte le scarpe nella taglia 46, puoi utilizzare la seguente query:
 
@@ -131,11 +131,11 @@ Questa query equivale a `size != 46 && isUnisex != true`.
 
 Oltre alle condizioni di query precedenti, i valori String offrono alcune condizioni in più che puoi utilizzare. I caratteri jolly simili a Regex, ad esempio, consentono una maggiore flessibilità nella ricerca.
 
-| Condizione            | Descrizione                                                       |
-| -------------------- | ----------------------------------------------------------------- |
-| `.startsWith(value)` | Corrisponde ai valori di stringa che iniziano con il `valore` fornito.          |
-| `.contains(value)`   | Corrisponde ai valori di stringa che contengono il `valore` fornito.          |
-| `.endsWith(value)`   | Corrisponde ai valori di stringa che terminano con il `valore` fornito.         |
+| Condizione           | Descrizione                                                                    |
+| -------------------- | ------------------------------------------------------------------------------ |
+| `.startsWith(value)` | Corrisponde ai valori di stringa che iniziano con il `valore` fornito.         |
+| `.contains(value)`   | Corrisponde ai valori di stringa che contengono il `valore` fornito.           |
+| `.endsWith(value)`   | Corrisponde ai valori di stringa che terminano con il `valore` fornito.        |
 | `.matches(wildcard)` | Corrisponde ai valori di stringa che corrispondono al modello `jolly` fornito. |
 
 **Maiuscole/minuscole**
@@ -147,17 +147,17 @@ Una [espressione di stringa con caratteri jolly](https://en.wikipedia.org/wiki/W
 
 - Il carattere jolly `*` corrisponde a zero o più caratteri
 - Il carattere jolly `?` corrisponde a qualsiasi carattere.
-   Ad esempio, la stringa di caratteri jolly `"d?g"` corrisponde a `"dog"`, `"dig"` e `"dug"`, ma non a `"ding"`, `"dg"` o `" un cane"`.
+  Ad esempio, la stringa di caratteri jolly `"d?g"` corrisponde a `"dog"`, `"dig"` e `"dug"`, ma non a `"ding"`, `"dg"` o `" un cane"`.
 
 ### Modificatori di query
 
 A volte è necessario creare una query in base ad alcune condizioni o per valori diversi. Isar ha uno strumento molto potente per la creazione di query condizionali:
 
-| Modificatore              | Descrizione                                          |
-| --------------------- | ---------------------------------------------------- |
+| Modificatore          | Descrizione                                                                                                                                                           |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `.optional(cond, qb)` | Estende la query solo se la `condition` è `true`. Questo può essere utilizzato quasi ovunque in una query, ad esempio per ordinarlo o limitarlo in modo condizionale. |
-| `.anyOf(list, qb)`    | Estende la query per ogni valore in `values` e combina le condizioni utilizzando la logica **or**. |
-| `.allOf(list, qb)`    | Estende la query per ogni valore in `values` e combina le condizioni utilizzando **and** logici. |
+| `.anyOf(list, qb)`    | Estende la query per ogni valore in `values` e combina le condizioni utilizzando la logica **or**.                                                                    |
+| `.allOf(list, qb)`    | Estende la query per ogni valore in `values` e combina le condizioni utilizzando **and** logici.                                                                      |
 
 In questo esempio, costruiamo un metodo in grado di trovare scarpe con un filtro opzionale:
 
@@ -199,7 +199,7 @@ Si possono interrogare anche le liste:
 
 ```dart
 class Tweet {
-  Id? id;
+  late int id;
 
   String? text;
 
@@ -236,7 +236,7 @@ Gli oggetti incorporati sono una delle funzionalità più utili di Isar. Possono
 ```dart
 @collection
 class Car {
-  Id? id;
+  late int id;
 
   Brand? brand;
 }
@@ -281,14 +281,14 @@ Tieni presente che le query di collegamento possono essere costose perché Isar 
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -310,7 +310,7 @@ final result = await isar.students.filter()
 I filtri di collegamento restituiscono `true` se almeno un oggetto collegato soddisfa le condizioni.
 
 Cerchiamo tutti gli studenti che non hanno insegnanti:
-  
+
 ```dart
 final result = await isar.students.filter().teachersLengthEqualTo(0).findAll();
 ```
@@ -340,7 +340,7 @@ Aggiungiamo gli indici alla collezione di scarpe:
 ```dart
 @collection
 class Shoe with IsarObject {
-  Id? id;
+  late int id;
 
   @Index()
   Id? size;
@@ -501,13 +501,13 @@ Isar esegue le query sempre nello stesso ordine:
 
 Negli esempi precedenti, abbiamo usato `.findAll()` per recuperare tutti gli oggetti corrispondenti. Ci sono più operazioni disponibili, tuttavia:
 
-| Operazione        | Descrizione                                                                                                         |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `.findFirst()`   | Recupera solo il primo oggetto corrispondente o `null` se nessuno corrisponde.                                                  |
-| `.findAll()`     | Recupera tutti gli oggetti corrispondenti.                                                                                      |
-| `.count()`       | Conta quanti oggetti corrispondono alla query.                                                                             |
-| `.deleteFirst()` | Elimina il primo oggetto corrispondente dalla raccolta.                                                               |
-| `.deleteAll()`   | Elimina tutti gli oggetti corrispondenti dalla raccolta.                                                                    |
+| Operazione       | Descrizione                                                                                                                                  |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.findFirst()`   | Recupera solo il primo oggetto corrispondente o `null` se nessuno corrisponde.                                                               |
+| `.findAll()`     | Recupera tutti gli oggetti corrispondenti.                                                                                                   |
+| `.count()`       | Conta quanti oggetti corrispondono alla query.                                                                                               |
+| `.deleteFirst()` | Elimina il primo oggetto corrispondente dalla raccolta.                                                                                      |
+| `.deleteAll()`   | Elimina tutti gli oggetti corrispondenti dalla raccolta.                                                                                     |
 | `.build()`       | Compila la query per riutilizzarla in seguito. Ciò consente di risparmiare il costo per creare una query se si desidera eseguirla più volte. |
 
 ## Query sulla proprietà
@@ -530,11 +530,11 @@ L'utilizzo di una sola proprietà consente di risparmiare tempo durante la deser
 
 Isar supporta l'aggregazione dei valori di una query di proprietà. Sono disponibili le seguenti operazioni di aggregazione:
 
-| Operazione    | Descrizione                                                    |
-| ------------ | -------------------------------------------------------------- |
-| `.min()`     | Trova il valore minimo o `null` se nessuno corrisponde.             |
-| `.max()`     | Trova il valore massimo o `null` se nessuno corrisponde.             |
-| `.sum()`     | Somma tutti i valori.                                               |
+| Operazione   | Descrizione                                                        |
+| ------------ | ------------------------------------------------------------------ |
+| `.min()`     | Trova il valore minimo o `null` se nessuno corrisponde.            |
+| `.max()`     | Trova il valore massimo o `null` se nessuno corrisponde.           |
+| `.sum()`     | Somma tutti i valori.                                              |
 | `.average()` | Calcola la media di tutti i valori o 'NaN' se nessuno corrisponde. |
 
 L'utilizzo delle aggregazioni è molto più veloce rispetto alla ricerca di tutti gli oggetti corrispondenti e all'esecuzione manuale dell'aggregazione.
@@ -547,17 +547,17 @@ Questa sezione molto probabilmente non è rilevante per te. È sconsigliato util
 
 Tutti gli esempi precedenti hanno utilizzato QueryBuilder e i metodi di estensione statica generati. Forse vuoi creare query dinamiche o un linguaggio di query personalizzato (come Isar Inspector). In tal caso, puoi usare il metodo `buildQuery()`:
 
-| Parametro       | Descrizione                                                                                 |
-| --------------- | ------------------------------------------------------------------------------------------- |
-| `whereClauses`  | Le clausole where della query.                                                             |
+| Parametro       | Descrizione                                                                                     |
+| --------------- | ----------------------------------------------------------------------------------------------- |
+| `whereClauses`  | Le clausole where della query.                                                                  |
 | `whereDistinct` | Se le clausole where devono restituire valori distinti (utile solo per clausole where singole). |
-| `whereSort`     | L'ordine di scorrimento delle clausole where (utile solo per le clausole where singole).             |
-| `filter`        | Il filtro da applicare ai risultati.                                                        |
-| `sortBy`        | Un elenco di proprietà da ordinare.                                                            |
-| `distinctBy`    | Un elenco di proprietà da distinguere.                                                        |
-| `offset`        | L'offset dei risultati.                                                                  |
-| `limit`         | Il numero massimo di risultati da restituire.                                                    |
-| `property`      | Se non-null, vengono restituiti solo i valori di questa proprietà.                                 |
+| `whereSort`     | L'ordine di scorrimento delle clausole where (utile solo per le clausole where singole).        |
+| `filter`        | Il filtro da applicare ai risultati.                                                            |
+| `sortBy`        | Un elenco di proprietà da ordinare.                                                             |
+| `distinctBy`    | Un elenco di proprietà da distinguere.                                                          |
+| `offset`        | L'offset dei risultati.                                                                         |
+| `limit`         | Il numero massimo di risultati da restituire.                                                   |
+| `property`      | Se non-null, vengono restituiti solo i valori di questa proprietà.                              |
 
 Creiamo una query dinamica:
 

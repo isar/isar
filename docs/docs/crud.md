@@ -48,7 +48,7 @@ For the examples below, we assume that we have a collection `Recipe` defined as 
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 

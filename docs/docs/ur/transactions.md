@@ -14,11 +14,10 @@ title: لین دین
 
 لین دین یا تو مطابقت پذیر یا غیر مطابقت پذیر ہوسکتے ہیں۔ ہم وقت ساز لین دین میں، آپ صرف مطابقت پذیر کارروائیوں کا استعمال کر سکتے ہیں۔ غیر مطابقت پذیر لین دین میں، صرف اسینک آپریشنز۔
 
-|              | Read         | Read & Write       |
-|--------------|--------------|--------------------|
-| Synchronous  | `.txnSync()` | `.writeTxnSync()`  |
-| Asynchronous | `.txn()`     | `.writeTxn()`      |
-
+|              | Read         | Read & Write      |
+| ------------ | ------------ | ----------------- |
+| Synchronous  | `.txnSync()` | `.writeTxnSync()` |
+| Asynchronous | `.txn()`     | `.writeTxn()`     |
 
 ### لین دین پڑھیں
 
@@ -41,7 +40,7 @@ title: لین دین
 ```dart
 @collection
 class Contact {
-  Id? id;
+  late int id;
 
   String? name;
 }

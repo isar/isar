@@ -48,7 +48,7 @@ Isar 에서 지정된 타입의 새로운 객체를 찾고 쿼리하고 생성�
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 

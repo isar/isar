@@ -15,10 +15,9 @@ Les transactions (en particulier les transactions d'écriture) ont un coût, et 
 Les transactions peuvent être soit synchrones ou asynchrones. Dans les transactions synchrones, nous ne pouvons utiliser que les opérations synchrones. Dans les transactions asynchrones, uniquement les opérations asynchrones.
 
 |             | Lecture      | Lecture et écriture |
-|-------------|--------------|---------------------|
+| ----------- | ------------ | ------------------- |
 | Synchrones  | `.txnSync()` | `.writeTxnSync()`   |
 | Asynchrones | `.txn()`     | `.writeTxn()`       |
-
 
 ### Transactions de lecture
 
@@ -41,7 +40,7 @@ Lorsqu'une opération de base de données échoue, la transaction est interrompu
 ```dart
 @collection
 class Contact {
-  Id? id;
+  late int id;
 
   String? name;
 }

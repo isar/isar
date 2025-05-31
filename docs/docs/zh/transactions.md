@@ -40,7 +40,7 @@ title: 事务
 ```dart
 @collection
 class Contact {
-  Id? id;
+  late int id;
 
   String? name;
 }

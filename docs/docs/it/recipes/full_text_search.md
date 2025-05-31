@@ -24,7 +24,7 @@ Creiamo l'indice full-text più semplice:
 
 ```dart
 class Message {
-  Id? id;
+  late int id;
 
   late String content;
 
@@ -67,7 +67,7 @@ Facilissimo! Possiamo modificare il nostro indice anche per supportare la corris
 
 ```dart
 class Post {
-  Id? id;
+  late int id;
 
   late String title;
 
@@ -95,7 +95,7 @@ Sicuramente! Useremo un trucco per ottenere la corrispondenza `.endsWith()`:
 
 ```dart
 class Post {
-    Id? id;
+    late int id;
 
     late String title;
 

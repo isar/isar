@@ -22,13 +22,13 @@ final isar = await Isar.open(
 
 Você pode usar a configuração padrão ou fornecer alguns dos seguintes parâmetros:
 
-| Config |  Description |
-| -------| -------------|
-| `name` | Abra várias instâncias com nomes distintos. Por padrão, `"default"` em uso. |
-| `directory` | O local de armazenamento para esta instância. Por padrão, `NSDocumentDirectory` é usado para iOS e `getDataDirectory` para Android. Para web não é necessário. |
-| `relaxedDurability` | Diminua a garantia de durabilidade para aumentar o desempenho de gravação. Em caso de falha do sistema (não falha do aplicativo), é possível perder a última transação confirmada. A corrupção não é possível|
-| `compactOnLaunch` | Condições para verificar se o banco de dados deve ser compactado quando a instância for aberta. |
-| `inspector` |Inspetor habilitado para compilações de depuração. Para builds de perfil e versão, esta opção é ignorada. |
+| Config              | Description                                                                                                                                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`              | Abra várias instâncias com nomes distintos. Por padrão, `"default"` em uso.                                                                                                                                   |
+| `directory`         | O local de armazenamento para esta instância. Por padrão, `NSDocumentDirectory` é usado para iOS e `getDataDirectory` para Android. Para web não é necessário.                                                |
+| `relaxedDurability` | Diminua a garantia de durabilidade para aumentar o desempenho de gravação. Em caso de falha do sistema (não falha do aplicativo), é possível perder a última transação confirmada. A corrupção não é possível |
+| `compactOnLaunch`   | Condições para verificar se o banco de dados deve ser compactado quando a instância for aberta.                                                                                                               |
+| `inspector`         | Inspetor habilitado para compilações de depuração. Para builds de perfil e versão, esta opção é ignorada.                                                                                                     |
 
 Se uma instância já estiver aberta, chamar `Isar.open()` produzirá a instância existente independentemente dos parâmetros especificados. Isso é útil para usar Isar em um isolado.
 
@@ -47,7 +47,7 @@ Para os exemplos abaixo, assumimos que temos uma coleção `Recipe` definida da 
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 

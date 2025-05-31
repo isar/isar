@@ -15,10 +15,11 @@ Vous pouvez également donner à chaque collection sa propre version et les migr
 Imaginons que nous avons une collection d'utilisateurs avec un champ d'anniversaire. Dans la version 2 de notre application, nous avons besoin d'un champ supplémentaire pour l'année de naissance afin de rechercher des utilisateurs en fonction de leur âge.
 
 Version 1:
+
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -27,10 +28,11 @@ class User {
 ```
 
 Version 2:
+
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -48,7 +50,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   final dir = await getApplicationDocumentsDirectory();
-  
+
   final isar = await Isar.open(
     [UserSchema],
     directory: dir.path,

@@ -15,7 +15,7 @@ Ad esempio, questa raccolta `Product` non è ordinata.
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -26,16 +26,16 @@ class Product {
 **Dati:**
 
 | id  | nome      | prezzo |
-| --- | --------- | ----- |
-| 1   | Book      | 15    |
-| 2   | Table     | 55    |
-| 3   | Chair     | 25    |
-| 4   | Pencil    | 3     |
-| 5   | Lightbulb | 12    |
-| 6   | Carpet    | 60    |
-| 7   | Pillow    | 30    |
-| 8   | Computer  | 650   |
-| 9   | Soap      | 2     |
+| --- | --------- | ------ |
+| 1   | Book      | 15     |
+| 2   | Table     | 55     |
+| 3   | Chair     | 25     |
+| 4   | Pencil    | 3      |
+| 5   | Lightbulb | 12     |
+| 6   | Carpet    | 60     |
+| 7   | Pillow    | 30     |
+| 8   | Computer  | 650    |
+| 9   | Soap      | 2      |
 
 Una query che tenti di trovare tutti i prodotti che costano più di € 30 deve cercare in tutte e nove le righe. Questo non è un problema per nove righe, ma potrebbe diventare un problema per 100.000 righe.
 
@@ -50,7 +50,7 @@ Per migliorare le prestazioni di questa query, indicizziamo la proprietà `price
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -110,7 +110,7 @@ Un indice univoco garantisce che l'indice non contenga valori duplicati. Può es
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true)
   late String username;
@@ -147,7 +147,7 @@ A volte non è preferibile generare un errore se viene violato un vincolo univoc
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true, replace: true)
   late String username;
@@ -185,7 +185,7 @@ final user1 = User()
   ..age = 25;
 
 // user does not exist so this is the same as put()
-await isar.users.putByUsername(user1); 
+await isar.users.putByUsername(user1);
 await isar.user.where().findAll(); // -> [{id: 1, username: 'user1', age: 25}]
 
 final user2 = User()
@@ -206,7 +206,7 @@ Tutti gli indici sulle proprietà `String` e `List<String>` fanno distinzione tr
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   @Index(caseSensitive: false)
   late String name;
@@ -255,7 +255,7 @@ Probabilmente è meglio iniziare con un esempio. Creiamo una collezione di perso
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -268,16 +268,16 @@ class Person {
 
 **Dati:**
 
-| id  | nome   | età | città natale  |
-| --- | ------ | --- | --------- |
-| 1   | Daniel | 20  | Berlin    |
-| 2   | Anne   | 20  | Paris     |
-| 3   | Carl   | 24  | San Diego |
-| 4   | Simon  | 24  | Munich    |
-| 5   | David  | 20  | New York  |
-| 6   | Carl   | 24  | London    |
-| 7   | Audrey | 30  | Prague    |
-| 8   | Anne   | 24  | Paris     |
+| id  | nome   | età | città natale |
+| --- | ------ | --- | ------------ |
+| 1   | Daniel | 20  | Berlin       |
+| 2   | Anne   | 20  | Paris        |
+| 3   | Carl   | 24  | San Diego    |
+| 4   | Simon  | 24  | Munich       |
+| 5   | David  | 20  | New York     |
+| 6   | Carl   | 24  | London       |
+| 7   | Audrey | 30  | Prague       |
+| 8   | Anne   | 24  | Paris        |
 
 **Indici generati:**
 
@@ -320,7 +320,7 @@ Le applicazioni pratiche per gli indici a voci multiple includono l'indicizzazio
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String description;
 
