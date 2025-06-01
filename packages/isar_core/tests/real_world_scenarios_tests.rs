@@ -356,12 +356,11 @@ mod native_real_world_tests {
             
             let mut found_products = Vec::new();
             while let Some(reader) = cursor.next() {
-                let name = reader.read_string(1).unwrap_or_default();
+                let name = reader.read_string(1).unwrap_or_default().to_string();
                 let price = reader.read_double(3);
                 let rating = reader.read_float(9);
                 found_products.push((name, price, rating));
             }
-            drop(cursor);
             
             // Should find iPhone and Samsung Galaxy, sorted by rating
             assert_eq!(found_products.len(), 2);
@@ -694,7 +693,7 @@ mod native_real_world_tests {
             qb.set_filter(Filter::new_condition(
                 5, // departmentId
                 ConditionType::Equal,
-                vec![Some(IsarValue::Long(2))], // Engineering department
+                vec![Some(IsarValue::Integer(2))], // Engineering department
                 true,
             ));
             let query = qb.build();
@@ -702,7 +701,7 @@ mod native_real_world_tests {
             let avg_salary = instance.query_aggregate(&txn, &query, Aggregation::Average, Some(8))
                 .expect("Failed to calculate average salary");
             
-            if let Some(IsarValue::Double(avg)) = avg_salary {
+            if let Some(IsarValue::Real(avg)) = avg_salary {
                 assert!(avg > 140000.0); // Should be average of Sarah and Mike's salaries
             }
             
@@ -716,7 +715,7 @@ mod native_real_world_tests {
             let performance_filter = Filter::new_condition(
                 11, // performanceScore
                 ConditionType::GreaterOrEqual,
-                vec![Some(IsarValue::Float(4.6))],
+                vec![Some(IsarValue::Real(4.6))],
                 true,
             );
             
@@ -772,7 +771,7 @@ mod sqlite_real_world_tests {
             None,
         ).expect("Failed to open SQLite database");
 
-        let _product_ids = insert_ecommerce_test_data(&*instance, 0);
+        let _product_ids = insert_ecommerce_test_data(&instance, 0);
 
         // Test complex query with SQLite backend
         {
@@ -827,7 +826,7 @@ mod sqlite_real_world_tests {
             None,
         ).expect("Failed to open SQLite database");
 
-        let _user_ids = insert_social_user_test_data(&*instance, 0);
+        let _user_ids = insert_social_user_test_data(&instance, 0);
 
         // Test user discovery query
         {
@@ -908,7 +907,7 @@ mod cross_platform_real_world_tests {
             None,
         ).expect("Failed to open SQLite database");
 
-        let sqlite_product_ids = insert_ecommerce_test_data(&*sqlite_instance, 0);
+        let sqlite_product_ids = insert_ecommerce_test_data(&sqlite_instance, 0);
 
         // Compare results from both backends
         {
@@ -981,7 +980,7 @@ mod cross_platform_real_world_tests {
             let sqlite_avg = sqlite_instance.query_aggregate(&sqlite_txn, &sqlite_query, Aggregation::Average, Some(3))
                 .expect("Failed to execute SQLite average");
             
-            if let (Some(IsarValue::Double(native_val)), Some(IsarValue::Double(sqlite_val))) = (native_avg, sqlite_avg) {
+            if let (Some(IsarValue::Real(native_val)), Some(IsarValue::Real(sqlite_val))) = (native_avg, sqlite_avg) {
                 assert!((native_val - sqlite_val).abs() < 0.001);
             }
             
@@ -1068,7 +1067,7 @@ mod cross_platform_real_world_tests {
             posts_qb.set_filter(Filter::new_condition(
                 3, // userId property
                 ConditionType::Equal,
-                vec![Some(IsarValue::Long(user_ids[2]))],
+                vec![Some(IsarValue::Integer(user_ids[2]))],
                 true,
             ));
             let posts_query = posts_qb.build();
