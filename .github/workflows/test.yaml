@@ -117,13 +117,13 @@ jobs:
         run: ./scripts/run_e2e_tests.sh
         working-directory: packages/isar_core
       - name: Upload E2E Coverage (Ubuntu only)
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         if: matrix.os == 'ubuntu-latest'
         with:
           files: packages/isar_core/target/coverage/tarpaulin-report.xml
           flags: e2e
       - name: Upload Test Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: e2e-test-results-${{ matrix.os }}
@@ -205,12 +205,12 @@ jobs:
           cargo tarpaulin -o Lcov --engine llvm --test integration_tests
         working-directory: packages/isar_core
       - name: Upload isar_test Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: packages/isar/lcov_isar_test.info
           flags: isar
       - name: Upload isar_core Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: packages/isar_core/lcov.info
           flags: core
