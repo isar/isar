@@ -71,17 +71,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
-      - name: Show Rust toolchain info (Windows debug)
-        if: runner.os == 'Windows'
-        run: |
-          rustc --version
-          cargo --version
-          echo "Environment variables:"
-          echo "LIBCLANG_PATH=$env:LIBCLANG_PATH"
-          echo "OPENSSL_SRC_PERL=$env:OPENSSL_SRC_PERL"
-        working-directory: packages/isar_core
       - name: Run Rust Unit tests
-        run: cargo test --verbose
+        run: cargo test
         working-directory: packages/isar_core
       - name: Run Integration Tests
         run: cargo test --test integration_tests
