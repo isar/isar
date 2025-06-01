@@ -507,17 +507,17 @@ mod native_crud_tests {
             let txn = instance.begin_txn(true).expect("Failed to begin write transaction");
             let mut insert = instance.insert(txn, 0, 1).expect("Failed to create insert");
             
-            // Write comprehensive data
-            insert.write_string(0, "John Doe"); // name
-            insert.write_int(1, 30); // age
-            insert.write_long(2, 1234567890); // score
-            insert.write_float(3, 4.5); // rating
-            insert.write_double(4, 98.7654321); // precision
-            insert.write_bool(5, true); // isActive
-            insert.write_byte_list(6, &[1, 2, 3, 4]); // avatar
+            // Write comprehensive data (property indices are 1-based)
+            insert.write_string(1, "John Doe"); // name
+            insert.write_int(2, 30); // age
+            insert.write_long(3, 1234567890); // score
+            insert.write_float(4, 4.5); // rating
+            insert.write_double(5, 98.7654321); // precision
+            insert.write_bool(6, true); // isActive
+            insert.write_byte_list(7, &[1, 2, 3, 4]); // avatar
             
             // Write string list (tags)
-            let tag_writer = insert.begin_list(7, 3);
+            let tag_writer = insert.begin_list(8, 3);
             if let Some(mut tw) = tag_writer {
                 tw.write_string(0, "rust");
                 tw.write_string(1, "database");
@@ -538,19 +538,19 @@ mod native_crud_tests {
                 
                 if let Some(reader) = cursor.next(user_id) {
                     assert_eq!(reader.read_id(), user_id);
-                    assert_eq!(reader.read_string(0), Some("John Doe"));
-                    assert_eq!(reader.read_int(1), 30);
-                    assert_eq!(reader.read_long(2), 1234567890);
-                    assert_eq!(reader.read_float(3), 4.5);
-                    assert_eq!(reader.read_double(4), 98.7654321);
-                    assert_eq!(reader.read_bool(5), Some(true));
+                    assert_eq!(reader.read_string(1), Some("John Doe"));
+                    assert_eq!(reader.read_int(2), 30);
+                    assert_eq!(reader.read_long(3), 1234567890);
+                    assert_eq!(reader.read_float(4), 4.5);
+                    assert_eq!(reader.read_double(5), 98.7654321);
+                    assert_eq!(reader.read_bool(6), Some(true));
                     
-                    if let Some(blob) = reader.read_blob(6) {
+                    if let Some(blob) = reader.read_blob(7) {
                         assert_eq!(blob.as_ref(), &[1, 2, 3, 4]);
                     }
                     
                     // Read string list
-                    if let Some((list_reader, length)) = reader.read_list(7) {
+                    if let Some((list_reader, length)) = reader.read_list(8) {
                         assert_eq!(length, 3);
                         assert_eq!(list_reader.read_string(0), Some("rust"));
                         assert_eq!(list_reader.read_string(1), Some("database"));
@@ -568,11 +568,11 @@ mod native_crud_tests {
         {
             let txn = instance.begin_txn(true).expect("Failed to begin update transaction");
             
-            // Update multiple fields
+            // Update multiple fields (property indices are 1-based)
             let updates = vec![
-                (0, Some(isar_core::core::value::IsarValue::String("Jane Doe".to_string()))), // name
-                (1, Some(isar_core::core::value::IsarValue::Integer(25))), // age
-                (5, Some(isar_core::core::value::IsarValue::Bool(false))), // isActive
+                (1, Some(isar_core::core::value::IsarValue::String("Jane Doe".to_string()))), // name
+                (2, Some(isar_core::core::value::IsarValue::Integer(25))), // age
+                (6, Some(isar_core::core::value::IsarValue::Bool(false))), // isActive
             ];
             
             let updated = instance.update(&txn, 0, user_id, &updates).expect("Failed to update");
@@ -588,12 +588,12 @@ mod native_crud_tests {
                 let mut cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
                 
                 if let Some(reader) = cursor.next(user_id) {
-                    assert_eq!(reader.read_string(0), Some("Jane Doe"));
-                    assert_eq!(reader.read_int(1), 25);
-                    assert_eq!(reader.read_bool(5), Some(false));
+                    assert_eq!(reader.read_string(1), Some("Jane Doe"));
+                    assert_eq!(reader.read_int(2), 25);
+                    assert_eq!(reader.read_bool(6), Some(false));
                     // Other fields should remain unchanged
-                    assert_eq!(reader.read_long(2), 1234567890);
-                    assert_eq!(reader.read_float(3), 4.5);
+                    assert_eq!(reader.read_long(3), 1234567890);
+                    assert_eq!(reader.read_float(4), 4.5);
                 } else {
                     panic!("Failed to read updated data");
                 }
@@ -663,10 +663,11 @@ mod native_crud_tests {
                 let user_id = instance.auto_increment(0);
                 user_ids.push(user_id);
                 
-                insert.write_string(0, &format!("User {}", i + 1)); // name
-                insert.write_int(1, 20 + i as i32); // age
-                insert.write_string(2, &format!("user{}@example.com", i + 1)); // email
-                insert.write_bool(3, i % 2 == 0); // isActive
+                // Property indices are 1-based
+                insert.write_string(1, &format!("User {}", i + 1)); // name
+                insert.write_int(2, 20 + i as i32); // age
+                insert.write_string(3, &format!("user{}@example.com", i + 1)); // email
+                insert.write_bool(4, i % 2 == 0); // isActive
                 
                 insert.save(user_id).expect("Failed to save bulk data");
             }
@@ -686,8 +687,8 @@ mod native_crud_tests {
                 for (idx, &user_id) in user_ids.iter().enumerate() {
                     if let Some(reader) = cursor.next(user_id) {
                         let expected_name = format!("User {}", idx + 1);
-                        assert_eq!(reader.read_string(0), Some(expected_name.as_str()));
-                        assert_eq!(reader.read_int(1), 20 + idx as i32);
+                        assert_eq!(reader.read_string(1), Some(expected_name.as_str()));
+                        assert_eq!(reader.read_int(2), 20 + idx as i32);
                     } else {
                         panic!("Failed to read bulk inserted data for user {}", idx + 1);
                     }
@@ -737,8 +738,8 @@ mod native_crud_tests {
         {
             let txn = instance.begin_txn(true).expect("Failed to begin transaction");
             
-            // Try to update non-existent record
-            let updates = vec![(0, Some(isar_core::core::value::IsarValue::String("Test".to_string())))];
+            // Try to update non-existent record (property indices are 1-based)
+            let updates = vec![(1, Some(isar_core::core::value::IsarValue::String("Test".to_string())))];
             let updated = instance.update(&txn, 0, 999999, &updates).expect("Update operation should not fail");
             assert!(!updated, "Update should return false for non-existent record");
             
@@ -755,10 +756,11 @@ mod native_crud_tests {
             let txn = instance.begin_txn(true).expect("Failed to begin transaction");
             let mut insert = instance.insert(txn, 0, 1).expect("Failed to create insert");
             
-            insert.write_string(0, ""); // empty name
-            insert.write_int(1, 0); // zero age
-            insert.write_null(2); // null email
-            insert.write_bool(3, false); // false isActive
+            // Property indices are 1-based
+            insert.write_string(1, ""); // empty name
+            insert.write_int(2, 0); // zero age
+            insert.write_null(3); // null email
+            insert.write_bool(4, false); // false isActive
             
             insert.save(user_id).expect("Failed to save edge case data");
             let txn = insert.finish().expect("Failed to finish insert");
@@ -770,10 +772,10 @@ mod native_crud_tests {
                 let mut cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
                 
                 if let Some(reader) = cursor.next(user_id) {
-                    assert_eq!(reader.read_string(0), Some(""));
-                    assert_eq!(reader.read_int(1), 0);
-                    assert!(reader.is_null(2));
-                    assert_eq!(reader.read_bool(3), Some(false));
+                    assert_eq!(reader.read_string(1), Some(""));
+                    assert_eq!(reader.read_int(2), 0);
+                    assert!(reader.is_null(3));
+                    assert_eq!(reader.read_bool(4), Some(false));
                 } else {
                     panic!("Failed to read edge case data");
                 }
@@ -821,10 +823,11 @@ mod native_crud_tests {
             let txn = instance.begin_txn(true).expect("Failed to begin transaction");
             let mut insert = instance.insert(txn, 0, 1).expect("Failed to create insert");
             
-            insert.write_string(0, "Test User");
-            insert.write_int(1, 25);
-            insert.write_string(2, "test@example.com");
-            insert.write_bool(3, true);
+            // Property indices are 1-based
+            insert.write_string(1, "Test User");
+            insert.write_int(2, 25);
+            insert.write_string(3, "test@example.com");
+            insert.write_bool(4, true);
             
             insert.save(user_id).expect("Failed to save data");
             let txn = insert.finish().expect("Failed to finish insert");
@@ -876,13 +879,14 @@ mod sqlite_crud_tests {
             let txn = instance.begin_txn(true).expect("Failed to begin write transaction");
             let mut insert = instance.insert(txn, 0, 1).expect("Failed to create insert");
             
-            insert.write_string(0, "SQLite User");
-            insert.write_int(1, 35);
-            insert.write_long(2, 9876543210);
-            insert.write_float(3, 7.8);
-            insert.write_double(4, 123.456789);
-            insert.write_bool(5, true);
-            insert.write_byte_list(6, &[5, 6, 7, 8]);
+            // Property indices are 1-based
+            insert.write_string(1, "SQLite User");
+            insert.write_int(2, 35);
+            insert.write_long(3, 9876543210);
+            insert.write_float(4, 7.8);
+            insert.write_double(5, 123.456789);
+            insert.write_bool(6, true);
+            insert.write_byte_list(7, &[5, 6, 7, 8]);
             
             insert.save(user_id).expect("Failed to save SQLite data");
             let txn = insert.finish().expect("Failed to finish insert");
@@ -896,12 +900,12 @@ mod sqlite_crud_tests {
                 let mut cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
                 
                 if let Some(reader) = cursor.next(user_id) {
-                    assert_eq!(reader.read_string(0), Some("SQLite User"));
-                    assert_eq!(reader.read_int(1), 35);
-                    assert_eq!(reader.read_long(2), 9876543210);
-                    assert_eq!(reader.read_float(3), 7.8);
-                    assert_eq!(reader.read_double(4), 123.456789);
-                    assert_eq!(reader.read_bool(5), Some(true));
+                    assert_eq!(reader.read_string(1), Some("SQLite User"));
+                    assert_eq!(reader.read_int(2), 35);
+                    assert_eq!(reader.read_long(3), 9876543210);
+                    assert_eq!(reader.read_float(4), 7.8);
+                    assert_eq!(reader.read_double(5), 123.456789);
+                    assert_eq!(reader.read_bool(6), Some(true));
                 } else {
                     panic!("Failed to read SQLite data");
                 }
@@ -914,8 +918,8 @@ mod sqlite_crud_tests {
         {
             let txn = instance.begin_txn(true).expect("Failed to begin update transaction");
             let updates = vec![
-                (0, Some(isar_core::core::value::IsarValue::String("Updated SQLite User".to_string()))),
-                (1, Some(isar_core::core::value::IsarValue::Integer(40))),
+                (1, Some(isar_core::core::value::IsarValue::String("Updated SQLite User".to_string()))),
+                (2, Some(isar_core::core::value::IsarValue::Integer(40))),
             ];
             
             let updated = instance.update(&txn, 0, user_id, &updates).expect("Failed to update");
@@ -964,10 +968,11 @@ mod sqlite_crud_tests {
             
             for i in 0..3 {
                 let user_id = instance.auto_increment(0);
-                insert.write_string(0, &format!("SQLite User {}", i + 1));
-                insert.write_int(1, 30 + i as i32);
-                insert.write_string(2, &format!("sqlite{}@example.com", i + 1));
-                insert.write_bool(3, true);
+                // Property indices are 1-based
+                insert.write_string(1, &format!("SQLite User {}", i + 1));
+                insert.write_int(2, 30 + i as i32);
+                insert.write_string(3, &format!("sqlite{}@example.com", i + 1));
+                insert.write_bool(4, true);
                 insert.save(user_id).expect("Failed to save bulk SQLite data");
             }
             
@@ -1028,10 +1033,11 @@ mod crud_comparison_tests {
                 let user_id = instance.auto_increment(0);
                 native_ids.push(user_id);
                 
-                insert.write_string(0, name);
-                insert.write_int(1, *age);
-                insert.write_string(2, email);
-                insert.write_bool(3, *active);
+                // Property indices are 1-based
+                insert.write_string(1, name);
+                insert.write_int(2, *age);
+                insert.write_string(3, email);
+                insert.write_bool(4, *active);
                 insert.save(user_id).expect("Failed to save native data");
             }
             
@@ -1061,10 +1067,11 @@ mod crud_comparison_tests {
                 let user_id = instance.auto_increment(0);
                 sqlite_ids.push(user_id);
                 
-                insert.write_string(0, name);
-                insert.write_int(1, *age);
-                insert.write_string(2, email);
-                insert.write_bool(3, *active);
+                // Property indices are 1-based
+                insert.write_string(1, name);
+                insert.write_int(2, *age);
+                insert.write_string(3, email);
+                insert.write_bool(4, *active);
                 insert.save(user_id).expect("Failed to save SQLite data");
             }
             
