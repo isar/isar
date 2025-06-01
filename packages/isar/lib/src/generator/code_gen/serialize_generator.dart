@@ -45,11 +45,12 @@ String _writeProperty({
   required String value,
   required String? enumProperty,
 }) {
-  final enumGetter = enumProperty != null
-      ? nullable
-          ? '?.$enumProperty'
-          : '.$enumProperty'
-      : '';
+  final enumGetter =
+      enumProperty != null
+          ? nullable
+              ? '?.$enumProperty'
+              : '.$enumProperty'
+          : '';
   switch (type) {
     case IsarType.bool:
       if (nullable) {
@@ -77,9 +78,10 @@ String _writeProperty({
       final orNull = nullable ? '?? $_nullLong' : '';
       return 'IsarCore.writeLong($writer, $index, $value$enumGetter $orNull);';
     case IsarType.dateTime:
-      final converted = nullable
-          ? '$value$enumGetter?.toUtc().microsecondsSinceEpoch ?? $_nullLong'
-          : '$value$enumGetter.toUtc().microsecondsSinceEpoch';
+      final converted =
+          nullable
+              ? '$value$enumGetter?.toUtc().microsecondsSinceEpoch ?? $_nullLong'
+              : '$value$enumGetter.toUtc().microsecondsSinceEpoch';
       return 'IsarCore.writeLong($writer, $index, $converted);';
     case IsarType.double:
       final orNull = nullable ? '?? double.nan' : '';
@@ -140,15 +142,7 @@ String _writeProperty({
       code += '''
       final listWriter = IsarCore.beginList(writer, $index, list.length);
       for (var i = 0; i < list.length; i++) {
-        ${_writeProperty(
-        writer: 'listWriter',
-        index: 'i',
-        type: type.scalarType,
-        nullable: elementNullable!,
-        typeClassName: typeClassName,
-        value: 'list[i]',
-        enumProperty: enumProperty,
-      )}
+        ${_writeProperty(writer: 'listWriter', index: 'i', type: type.scalarType, nullable: elementNullable!, typeClassName: typeClassName, value: 'list[i]', enumProperty: enumProperty)}
       }
       IsarCore.endList(writer, listWriter);
       ''';

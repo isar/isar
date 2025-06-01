@@ -3,8 +3,11 @@
 part of '../isar.dart';
 
 abstract class _IsarConnect {
-  static const Map<ConnectAction,
-      Future<dynamic> Function(Map<String, dynamic>)> _handlers = {
+  static const Map<
+    ConnectAction,
+    Future<dynamic> Function(Map<String, dynamic>)
+  >
+  _handlers = {
     ConnectAction.listInstances: _listInstances,
     ConnectAction.getSchemas: _getSchemas,
     ConnectAction.watchInstance: _watchInstance,
@@ -37,9 +40,10 @@ abstract class _IsarConnect {
     for (final handler in _handlers.entries) {
       registerExtension(handler.key.method, (method, parameters) async {
         try {
-          final args = parameters.containsKey('args')
-              ? jsonDecode(parameters['args']!) as Map<String, dynamic>
-              : <String, dynamic>{};
+          final args =
+              parameters.containsKey('args')
+                  ? jsonDecode(parameters['args']!) as Map<String, dynamic>
+                  : <String, dynamic>{};
           final result = <String, dynamic>{'result': await handler.value(args)};
           return ServiceExtensionResponse.result(jsonEncode(result));
         } on Exception catch (e) {
@@ -194,13 +198,14 @@ abstract class _IsarConnect {
     final colIndex = isar.schemas.indexWhere((e) => e.name == cEdit.collection);
     final colSchema = isar.schemas[colIndex];
     final idIndex = colSchema.getPropertyIndex(colSchema.idName!);
-    final query =
-        isar.collectionByIndex<dynamic, dynamic>(colIndex).buildQuery<dynamic>(
-              filter: EqualCondition(
-                property: idIndex == -1 ? 0 : idIndex,
-                value: cEdit.id,
-              ),
-            );
+    final query = isar
+        .collectionByIndex<dynamic, dynamic>(colIndex)
+        .buildQuery<dynamic>(
+          filter: EqualCondition(
+            property: idIndex == -1 ? 0 : idIndex,
+            value: cEdit.id,
+          ),
+        );
 
     final objects = query.exportJson();
     if (objects.isNotEmpty) {
