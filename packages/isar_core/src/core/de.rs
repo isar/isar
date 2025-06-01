@@ -129,6 +129,8 @@ macro_rules! write_scalar {
         let value = $map.next_value::<Option<$type>>()?;
         if let Some(value) = value {
             $writer.$write($index as u32, value);
+        } else {
+            $writer.write_null($index as u32);
         }
     }};
 }
@@ -147,6 +149,9 @@ impl<'a, 'de: 'a, W: IsarWriter<'a>, F: Fn(&str) -> i64> Visitor<'de>
         A: MapAccess<'de>,
     {
         let mut id = None;
+
+        let mut visited_property_indexes = Vec::new();
+
         while let Some(key) = map.next_key::<Cow<'_, str>>()? {
             let prop = self
                 .writer
@@ -154,6 +159,8 @@ impl<'a, 'de: 'a, W: IsarWriter<'a>, F: Fn(&str) -> i64> Visitor<'de>
                 .enumerate()
                 .find(|(_, (n, _))| n == &key);
             if let Some((mut index, (_, data_type))) = prop {
+                visited_property_indexes.push(index);
+
                 index += 1; // Skip id
 
                 match data_type {
@@ -247,6 +254,15 @@ impl<'a, 'de: 'a, W: IsarWriter<'a>, F: Fn(&str) -> i64> Visitor<'de>
                 map.next_value::<IgnoredAny>()?;
             }
         }
+
+        for property_index in 0..self.writer.properties().count() {
+            if visited_property_indexes.contains(&property_index) {
+                continue;
+            }
+
+            self.writer.write_null((property_index + 1) as u32);
+        }
+
         Ok((id, self.writer))
     }
 }
