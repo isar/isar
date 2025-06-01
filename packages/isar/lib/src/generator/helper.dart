@@ -60,12 +60,11 @@ extension on PropertyInducingElement {
     return _indexChecker.annotationsOfExact(nonSynthetic).map((ann) {
       return Index(
         name: ann.getField('name')!.toStringValue(),
-        composite:
-            ann
-                .getField('composite')!
-                .toListValue()!
-                .map((e) => e.toStringValue()!)
-                .toList(),
+        composite: ann
+            .getField('composite')!
+            .toListValue()!
+            .map((e) => e.toStringValue()!)
+            .toList(),
         unique: ann.getField('unique')!.toBoolValue()!,
         hash: ann.getField('hash')!.toBoolValue()!,
       );
@@ -75,11 +74,10 @@ extension on PropertyInducingElement {
 
 extension on EnumElement {
   FieldElement? get enumValueProperty {
-    final annotatedProperties =
-        fields
-            .where((e) => !e.isEnumConstant)
-            .where(_enumPropertyChecker.hasAnnotationOfExact)
-            .toList();
+    final annotatedProperties = fields
+        .where((e) => !e.isEnumConstant)
+        .where(_enumPropertyChecker.hasAnnotationOfExact)
+        .toList();
     if (annotatedProperties.length > 1) {
       _err('Only one property can be annotated with @enumProperty', this);
     } else {
@@ -109,12 +107,11 @@ extension on Element {
     return Collection(
       inheritance: ann.getField('inheritance')!.toBoolValue()!,
       accessor: ann.getField('accessor')!.toStringValue(),
-      ignore:
-          ann
-              .getField('ignore')!
-              .toSetValue()!
-              .map((e) => e.toStringValue()!)
-              .toSet(),
+      ignore: ann
+          .getField('ignore')!
+          .toSetValue()!
+          .map((e) => e.toStringValue()!)
+          .toSet(),
     );
   }
 
@@ -139,12 +136,11 @@ extension on Element {
     }
     return Embedded(
       inheritance: ann.getField('inheritance')!.toBoolValue()!,
-      ignore:
-          ann
-              .getField('ignore')!
-              .toSetValue()!
-              .map((e) => e.toStringValue()!)
-              .toSet(),
+      ignore: ann
+          .getField('ignore')!
+          .toSetValue()!
+          .map((e) => e.toStringValue()!)
+          .toSet(),
     );
   }
 }

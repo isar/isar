@@ -244,8 +244,8 @@ extension PointerX on Pointer<void> {
   bool get isNull => address == 0;
 }
 
-typedef IsolatePoolSetup =
-    FutureOr<dynamic> Function(Future<dynamic> Function(Isar isar) callback);
+typedef IsolatePoolSetup = FutureOr<dynamic> Function(
+    Future<dynamic> Function(Isar isar) callback);
 
 abstract class IsarCorePlatform {
   FutureOr<IsarCoreBindings> initializeBindings([String? library]);

@@ -12,10 +12,9 @@ const List<IsarType> _updateableTypes = [
 ];
 
 String _generateUpdate(ObjectInfo oi) {
-  final updateProperties =
-      oi.properties
-          .where((p) => !p.isId && _updateableTypes.contains(p.type))
-          .toList();
+  final updateProperties = oi.properties
+      .where((p) => !p.isId && _updateableTypes.contains(p.type))
+      .toList();
 
   if (updateProperties.isEmpty) {
     return '';

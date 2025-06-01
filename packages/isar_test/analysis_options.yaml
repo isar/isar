@@ -11,3 +11,4 @@ analyzer:
     hash_and_equals: ignore
     type_annotate_public_apis: ignore
     non_nullable_equals_parameter: ignore
+    require_trailing_commas: ignore
