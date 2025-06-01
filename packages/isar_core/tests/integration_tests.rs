@@ -10,6 +10,8 @@ mod crud_operations_tests;
 mod query_tests;
 mod cross_platform_tests;
 mod error_handling_tests;
+mod data_type_coverage_tests;
+mod real_world_scenarios_tests;
 
 // Re-export common utilities for use by other test files
 pub mod common;
