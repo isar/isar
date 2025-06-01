@@ -8,11 +8,7 @@ part 'long_string_test.g.dart';
 
 @collection
 class StringModel {
-  StringModel({
-    required this.id,
-    this.string,
-    this.stringList,
-  });
+  StringModel({required this.id, this.string, this.stringList});
 
   int id;
 
@@ -58,14 +54,12 @@ void main() {
 
       expect(isar.stringModels.where().findAll(), models);
 
-      expect(
-        isar.stringModels.where().stringContains('test75').findAll(),
-        [models[75]],
-      );
-      expect(
-        isar.stringModels.where().stringMatches('*test66*').findAll(),
-        [models[66]],
-      );
+      expect(isar.stringModels.where().stringContains('test75').findAll(), [
+        models[75],
+      ]);
+      expect(isar.stringModels.where().stringMatches('*test66*').findAll(), [
+        models[66],
+      ]);
     });
 
     isarTest('List', () {

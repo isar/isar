@@ -41,10 +41,7 @@ class Sidebar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  Image.asset(
-                    'assets/logo.png',
-                    width: 40,
-                  ),
+                  Image.asset('assets/logo.png', width: 40),
                   const SizedBox(width: 15),
                   Column(
                     mainAxisSize: MainAxisSize.min,

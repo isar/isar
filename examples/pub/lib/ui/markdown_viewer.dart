@@ -8,10 +8,7 @@ import 'package:markdown/markdown.dart' as md;
 import 'package:url_launcher/url_launcher_string.dart';
 
 final _markdownHtmlPod = Provider.family<String, String>((ref, source) {
-  return md.markdownToHtml(
-    source,
-    extensionSet: md.ExtensionSet.gitHubWeb,
-  );
+  return md.markdownToHtml(source, extensionSet: md.ExtensionSet.gitHubWeb);
 });
 
 class MarkdownViewer extends ConsumerWidget {
@@ -36,8 +33,9 @@ class MarkdownViewer extends ConsumerWidget {
           tagsToExtend: {'code'},
           builder: (context) {
             final code = context.element!.text;
-            final codeBgColor =
-                theme.colorScheme.secondaryContainer.withValues(alpha: 0.25);
+            final codeBgColor = theme.colorScheme.secondaryContainer.withValues(
+              alpha: 0.25,
+            );
             if (code.contains('\n')) {
               return FadingScroll(
                 builder: (context, controller) {
@@ -78,9 +76,7 @@ class MarkdownViewer extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.only(bottom: 5),
               decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: theme.dividerColor),
-                ),
+                border: Border(bottom: BorderSide(color: theme.dividerColor)),
               ),
               child: Text(
                 context.element!.text,
@@ -96,9 +92,7 @@ class MarkdownViewer extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.only(bottom: 5),
               decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: theme.dividerColor),
-                ),
+                border: Border(bottom: BorderSide(color: theme.dividerColor)),
               ),
               child: Text(
                 context.element!.text,

@@ -35,9 +35,7 @@ void main() {
       // disable WAL for SQLite
       isar = await openTempIsar([ModelSchema], maxSizeMiB: isSQLite ? 0 : 20);
 
-      isar.write(
-        (isar) => isar.models.putAll(List.generate(100, Model.new)),
-      );
+      isar.write((isar) => isar.models.putAll(List.generate(100, Model.new)));
     });
 
     isarTest('.copyToFile() should create a new file', () {

@@ -281,7 +281,7 @@ class AndGroup extends Filter {
   ///
   /// Matches when all [filters] match.
   const AndGroup(this.filters)
-      : assert(filters.length > 0, 'And filters must not be empty');
+    : assert(filters.length > 0, 'And filters must not be empty');
 
   /// The filters of this group.
   final List<Filter> filters;
@@ -293,7 +293,7 @@ class OrGroup extends Filter {
   ///
   /// Matches when any of the [filters] matches.
   const OrGroup(this.filters)
-      : assert(filters.length > 0, 'Or filters must not be empty');
+    : assert(filters.length > 0, 'Or filters must not be empty');
 
   /// The filters of this group.
   final List<Filter> filters;
@@ -313,10 +313,7 @@ class NotGroup extends Filter {
 /// Filter condition based on an embedded object.
 class ObjectFilter extends Filter {
   /// Create a filter condition based on an embedded object.
-  const ObjectFilter({
-    required this.property,
-    required this.filter,
-  });
+  const ObjectFilter({required this.property, required this.filter});
 
   /// Index of the property containing the embedded object.
   final int property;

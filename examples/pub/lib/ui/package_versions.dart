@@ -36,14 +36,14 @@ class PackageVersions extends ConsumerWidget {
                       ),
                     ),
                     const Spacer(),
-                    Text(timeago.format(version.published))
+                    Text(timeago.format(version.published)),
                   ],
                 ),
               ),
             ),
           ),
           const Divider(),
-        ]
+        ],
       ],
     );
   }

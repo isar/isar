@@ -198,14 +198,8 @@ class SelectedInstanceButton extends StatelessWidget {
                   const Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        FontAwesomeIcons.chevronUp,
-                        size: 12,
-                      ),
-                      Icon(
-                        FontAwesomeIcons.chevronDown,
-                        size: 12,
-                      ),
+                      Icon(FontAwesomeIcons.chevronUp, size: 12),
+                      Icon(FontAwesomeIcons.chevronDown, size: 12),
                     ],
                   ),
               ],

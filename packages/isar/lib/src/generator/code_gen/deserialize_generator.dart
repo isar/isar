@@ -90,9 +90,7 @@ String _deserializeProperty(
     utc: p.utc,
     transform: (value) {
       if (p.isEnum && !p.type.isList && value != p.defaultValue) {
-        return result(
-          '${p.enumMapName(object)}[$value] ?? ${p.defaultValue}',
-        );
+        return result('${p.enumMapName(object)}[$value] ?? ${p.defaultValue}');
       } else {
         return result(value);
       }

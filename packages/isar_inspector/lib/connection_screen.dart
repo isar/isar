@@ -6,11 +6,7 @@ import 'package:isar_inspector/connected_layout.dart';
 import 'package:isar_inspector/error_screen.dart';
 
 class ConnectionScreen extends StatefulWidget {
-  const ConnectionScreen({
-    required this.port,
-    required this.secret,
-    super.key,
-  });
+  const ConnectionScreen({required this.port, required this.secret, super.key});
 
   final String port;
   final String secret;
@@ -114,8 +110,6 @@ class Loading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
+    return const Center(child: CircularProgressIndicator());
   }
 }

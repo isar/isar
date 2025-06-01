@@ -11,16 +11,16 @@ class _IsarImpl extends Isar {
         continue;
       }
 
-      collections[schema.converter.type] = schema.converter.withType(
-        <ID, OBJ>(converter) {
-          return _IsarCollectionImpl<ID, OBJ>(
-            this,
-            schema.schema,
-            collections.length,
-            converter,
-          );
-        },
-      );
+      collections[schema.converter.type] = schema.converter.withType(<ID, OBJ>(
+        converter,
+      ) {
+        return _IsarCollectionImpl<ID, OBJ>(
+          this,
+          schema.schema,
+          collections.length,
+          converter,
+        );
+      });
     }
 
     _instances[instanceId] = this;
@@ -47,8 +47,10 @@ class _IsarImpl extends Isar {
 
     if (engine == IsarEngine.isar) {
       if (encryptionKey != null) {
-        throw ArgumentError('Isar engine does not support encryption. Please '
-            'set the engine to IsarEngine.sqlite.');
+        throw ArgumentError(
+          'Isar engine does not support encryption. Please '
+          'set the engine to IsarEngine.sqlite.',
+        );
       }
       maxSizeMiB ??= Isar.defaultMaxSizeMiB;
     } else {
@@ -58,19 +60,24 @@ class _IsarImpl extends Isar {
       maxSizeMiB ??= 0;
     }
 
-    final allSchemas = <IsarGeneratedSchema>{
-      ...schemas,
-      ...schemas.expand((e) => e.embeddedSchemas ?? <IsarGeneratedSchema>[]),
-    }.toList();
-    final schemaJson =
-        jsonEncode(allSchemas.map((e) => e.schema.toJson()).toList());
+    final allSchemas =
+        <IsarGeneratedSchema>{
+          ...schemas,
+          ...schemas.expand(
+            (e) => e.embeddedSchemas ?? <IsarGeneratedSchema>[],
+          ),
+        }.toList();
+    final schemaJson = jsonEncode(
+      allSchemas.map((e) => e.schema.toJson()).toList(),
+    );
 
     final namePtr = IsarCore._toNativeString(name);
     final directoryPtr = IsarCore._toNativeString(directory);
     final schemaPtr = IsarCore._toNativeString(schemaJson);
-    final encryptionKeyPtr = encryptionKey != null
-        ? IsarCore._toNativeString(encryptionKey)
-        : nullptr;
+    final encryptionKeyPtr =
+        encryptionKey != null
+            ? IsarCore._toNativeString(encryptionKey)
+            : nullptr;
 
     final isarPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarInstance>>();
     IsarCore.b
@@ -114,8 +121,10 @@ class _IsarImpl extends Isar {
       ptr = IsarCore.b.isar_get_instance(instanceId, true);
     }
     if (ptr.isNull) {
-      throw IsarNotReadyError('Instance has not been opened yet. Make sure to '
-          'call Isar.open() before using Isar.get().');
+      throw IsarNotReadyError(
+        'Instance has not been opened yet. Make sure to '
+        'call Isar.open() before using Isar.get().',
+      );
     }
 
     return _IsarImpl._(instanceId, ptr, schemas);
@@ -131,10 +140,7 @@ class _IsarImpl extends Isar {
       return instance;
     }
 
-    return _IsarImpl.get(
-      instanceId: instanceId,
-      schemas: schemas,
-    );
+    return _IsarImpl.get(instanceId: instanceId, schemas: schemas);
   }
 
   static final _instances = <int, _IsarImpl>{};
@@ -159,28 +165,28 @@ class _IsarImpl extends Isar {
   }) async {
     final library = IsarCore._library;
 
-    final (instanceId, instanceAddress) = await IsarCore.platform.runIsolate(
-      (_) {
-        final isar = _IsarImpl.open(
-          schemas: schemas,
-          directory: directory,
-          name: name,
-          engine: engine,
-          maxSizeMiB: maxSizeMiB,
-          encryptionKey: encryptionKey,
-          compactOnLaunch: compactOnLaunch,
-          // don't stat an isolate pool in the isolate
-          workerCount: null,
-          library: library,
-        );
+    final (instanceId, instanceAddress) = await IsarCore.platform.runIsolate((
+      _,
+    ) {
+      final isar = _IsarImpl.open(
+        schemas: schemas,
+        directory: directory,
+        name: name,
+        engine: engine,
+        maxSizeMiB: maxSizeMiB,
+        encryptionKey: encryptionKey,
+        compactOnLaunch: compactOnLaunch,
+        // don't stat an isolate pool in the isolate
+        workerCount: null,
+        library: library,
+      );
 
-        // we do not close the instance here because we want to keep it alive
-        // we do however free the native resources
-        final instanceAddress = isar.getPtr().address;
-        IsarCore._free();
-        return (isar.instanceId, instanceAddress);
-      },
-    );
+      // we do not close the instance here because we want to keep it alive
+      // we do however free the native resources
+      final instanceAddress = isar.getPtr().address;
+      IsarCore._free();
+      return (isar.instanceId, instanceAddress);
+    });
 
     try {
       final isar = _IsarImpl.get(instanceId: instanceId, schemas: schemas);
@@ -278,10 +284,8 @@ class _IsarImpl extends Isar {
 
   @tryInline
   T getTxn<T>(
-    T Function(
-      Pointer<CIsarInstance> isarPtr,
-      Pointer<CIsarTxn> txnPtr,
-    ) callback,
+    T Function(Pointer<CIsarInstance> isarPtr, Pointer<CIsarTxn> txnPtr)
+    callback,
   ) {
     final txnPtr = _txnPtr;
     if (txnPtr != null) {
@@ -296,7 +300,8 @@ class _IsarImpl extends Isar {
     (T, Pointer<CIsarTxn>?) Function(
       Pointer<CIsarInstance> isarPtr,
       Pointer<CIsarTxn> txnPtr,
-    ) callback, {
+    )
+    callback, {
     bool consume = false,
   }) {
     final txnPtr = _txnPtr;

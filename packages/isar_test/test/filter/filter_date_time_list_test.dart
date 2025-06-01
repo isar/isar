@@ -60,14 +60,15 @@ void main() {
 
     group('DateTime list filter', () {
       isarTest('.elementGreaterThan()', () {
-        expect(
-          col.where().listElementGreaterThan(local(2020)).findAll(),
-          [obj1, obj2],
-        );
-        expect(
-          col.where().listElementGreaterThan(null).findAll(),
-          [obj1, obj2, obj3],
-        );
+        expect(col.where().listElementGreaterThan(local(2020)).findAll(), [
+          obj1,
+          obj2,
+        ]);
+        expect(col.where().listElementGreaterThan(null).findAll(), [
+          obj1,
+          obj2,
+          obj3,
+        ]);
       });
 
       isarTest('.elementGreaterThanOrEqualTo()', () {
@@ -75,17 +76,19 @@ void main() {
           col.where().listElementGreaterThanOrEqualTo(utc(2020)).findAll(),
           [obj1, obj2, obj3],
         );
-        expect(
-          col.where().listElementGreaterThanOrEqualTo(null).findAll(),
-          [obj1, obj2, obj3, obj5],
-        );
+        expect(col.where().listElementGreaterThanOrEqualTo(null).findAll(), [
+          obj1,
+          obj2,
+          obj3,
+          obj5,
+        ]);
       });
 
       isarTest('.elementLessThan()', () {
-        expect(
-          col.where().listElementLessThan(utc(2020)).findAll(),
-          [obj3, obj5],
-        );
+        expect(col.where().listElementLessThan(utc(2020)).findAll(), [
+          obj3,
+          obj5,
+        ]);
         expect(col.where().listElementLessThan(null).findAll(), isEmpty);
       });
 
@@ -94,21 +97,20 @@ void main() {
           col.where().listElementLessThanOrEqualTo(local(2020)).findAll(),
           [obj1, obj3, obj5],
         );
-        expect(
-          col.where().listElementLessThanOrEqualTo(null).findAll(),
-          [obj5],
-        );
+        expect(col.where().listElementLessThanOrEqualTo(null).findAll(), [
+          obj5,
+        ]);
       });
 
       isarTest('.elementBetween()', () {
-        expect(
-          col.where().listElementBetween(utc(2010), utc(2020)).findAll(),
-          [obj1, obj3],
-        );
-        expect(
-          col.where().listElementBetween(null, utc(2010)).findAll(),
-          [obj3, obj5],
-        );
+        expect(col.where().listElementBetween(utc(2010), utc(2020)).findAll(), [
+          obj1,
+          obj3,
+        ]);
+        expect(col.where().listElementBetween(null, utc(2010)).findAll(), [
+          obj3,
+          obj5,
+        ]);
       });
 
       isarTest('.elementIsNull()', () {
@@ -116,10 +118,11 @@ void main() {
       });
 
       isarTest('.elementIsNotNull()', () {
-        expect(
-          col.where().listElementIsNotNull().findAll(),
-          [obj1, obj2, obj3],
-        );
+        expect(col.where().listElementIsNotNull().findAll(), [
+          obj1,
+          obj2,
+          obj3,
+        ]);
       });
 
       isarTest('.isNull()', () {
@@ -127,10 +130,13 @@ void main() {
       });
 
       isarTest('.isNotNull()', () {
-        expect(
-          col.where().listIsNotNull().findAll(),
-          [obj1, obj2, obj3, objEmpty, obj5],
-        );
+        expect(col.where().listIsNotNull().findAll(), [
+          obj1,
+          obj2,
+          obj3,
+          objEmpty,
+          obj5,
+        ]);
       });
     });
   });

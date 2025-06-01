@@ -19,12 +19,7 @@ const CountSchema = IsarGeneratedSchema(
     name: "Count",
     idName: "id",
     embedded: false,
-    properties: [
-      IsarPropertySchema(
-        name: "step",
-        type: IsarType.long,
-      ),
-    ],
+    properties: [IsarPropertySchema(name: "step", type: IsarType.long)],
     indexes: [],
   ),
   converter: IsarObjectConverter<int, Count>(
@@ -47,10 +42,7 @@ Count deserializeCount(IsarReader reader) {
   _id = IsarCore.readId(reader);
   final int _step;
   _step = IsarCore.readLong(reader, 1);
-  final object = Count(
-    _id,
-    _step,
-  );
+  final object = Count(_id, _step);
   return object;
 }
 
@@ -67,10 +59,7 @@ dynamic deserializeCountProp(IsarReader reader, int property) {
 }
 
 sealed class _CountUpdate {
-  bool call({
-    required int id,
-    int? step,
-  });
+  bool call({required int id, int? step});
 }
 
 class _CountUpdateImpl implements _CountUpdate {
@@ -79,24 +68,17 @@ class _CountUpdateImpl implements _CountUpdate {
   final IsarCollection<int, Count> collection;
 
   @override
-  bool call({
-    required int id,
-    Object? step = ignore,
-  }) {
-    return collection.updateProperties([
-          id
-        ], {
-          if (step != ignore) 1: step as int?,
-        }) >
+  bool call({required int id, Object? step = ignore}) {
+    return collection.updateProperties(
+          [id],
+          {if (step != ignore) 1: step as int?},
+        ) >
         0;
   }
 }
 
 sealed class _CountUpdateAll {
-  int call({
-    required List<int> id,
-    int? step,
-  });
+  int call({required List<int> id, int? step});
 }
 
 class _CountUpdateAllImpl implements _CountUpdateAll {
@@ -105,10 +87,7 @@ class _CountUpdateAllImpl implements _CountUpdateAll {
   final IsarCollection<int, Count> collection;
 
   @override
-  int call({
-    required List<int> id,
-    Object? step = ignore,
-  }) {
+  int call({required List<int> id, Object? step = ignore}) {
     return collection.updateProperties(id, {
       if (step != ignore) 1: step as int?,
     });
@@ -122,9 +101,7 @@ extension CountUpdate on IsarCollection<int, Count> {
 }
 
 sealed class _CountQueryUpdate {
-  int call({
-    int? step,
-  });
+  int call({int? step});
 }
 
 class _CountQueryUpdateImpl implements _CountQueryUpdate {
@@ -134,9 +111,7 @@ class _CountQueryUpdateImpl implements _CountQueryUpdate {
   final int? limit;
 
   @override
-  int call({
-    Object? step = ignore,
-  }) {
+  int call({Object? step = ignore}) {
     return query.updateProperties(limit: limit, {
       if (step != ignore) 1: step as int?,
     });
@@ -156,9 +131,7 @@ class _CountQueryBuilderUpdateImpl implements _CountQueryUpdate {
   final int? limit;
 
   @override
-  int call({
-    Object? step = ignore,
-  }) {
+  int call({Object? step = ignore}) {
     final q = query.build();
     try {
       return q.updateProperties(limit: limit, {
@@ -178,28 +151,18 @@ extension CountQueryBuilderUpdate on QueryBuilder<Count, Count, QOperations> {
 }
 
 extension CountQueryFilter on QueryBuilder<Count, Count, QFilterCondition> {
-  QueryBuilder<Count, Count, QAfterFilterCondition> idEqualTo(
-    int value,
-  ) {
+  QueryBuilder<Count, Count, QAfterFilterCondition> idEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        EqualCondition(
-          property: 0,
-          value: value,
-        ),
+        EqualCondition(property: 0, value: value),
       );
     });
   }
 
-  QueryBuilder<Count, Count, QAfterFilterCondition> idGreaterThan(
-    int value,
-  ) {
+  QueryBuilder<Count, Count, QAfterFilterCondition> idGreaterThan(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterCondition(
-          property: 0,
-          value: value,
-        ),
+        GreaterCondition(property: 0, value: value),
       );
     });
   }
@@ -209,24 +172,14 @@ extension CountQueryFilter on QueryBuilder<Count, Count, QFilterCondition> {
   ) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterOrEqualCondition(
-          property: 0,
-          value: value,
-        ),
+        GreaterOrEqualCondition(property: 0, value: value),
       );
     });
   }
 
-  QueryBuilder<Count, Count, QAfterFilterCondition> idLessThan(
-    int value,
-  ) {
+  QueryBuilder<Count, Count, QAfterFilterCondition> idLessThan(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        LessCondition(
-          property: 0,
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(LessCondition(property: 0, value: value));
     });
   }
 
@@ -235,10 +188,7 @@ extension CountQueryFilter on QueryBuilder<Count, Count, QFilterCondition> {
   ) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessOrEqualCondition(
-          property: 0,
-          value: value,
-        ),
+        LessOrEqualCondition(property: 0, value: value),
       );
     });
   }
@@ -249,37 +199,23 @@ extension CountQueryFilter on QueryBuilder<Count, Count, QFilterCondition> {
   ) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        BetweenCondition(
-          property: 0,
-          lower: lower,
-          upper: upper,
-        ),
+        BetweenCondition(property: 0, lower: lower, upper: upper),
       );
     });
   }
 
-  QueryBuilder<Count, Count, QAfterFilterCondition> stepEqualTo(
-    int value,
-  ) {
+  QueryBuilder<Count, Count, QAfterFilterCondition> stepEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        EqualCondition(
-          property: 1,
-          value: value,
-        ),
+        EqualCondition(property: 1, value: value),
       );
     });
   }
 
-  QueryBuilder<Count, Count, QAfterFilterCondition> stepGreaterThan(
-    int value,
-  ) {
+  QueryBuilder<Count, Count, QAfterFilterCondition> stepGreaterThan(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterCondition(
-          property: 1,
-          value: value,
-        ),
+        GreaterCondition(property: 1, value: value),
       );
     });
   }
@@ -289,24 +225,14 @@ extension CountQueryFilter on QueryBuilder<Count, Count, QFilterCondition> {
   ) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        GreaterOrEqualCondition(
-          property: 1,
-          value: value,
-        ),
+        GreaterOrEqualCondition(property: 1, value: value),
       );
     });
   }
 
-  QueryBuilder<Count, Count, QAfterFilterCondition> stepLessThan(
-    int value,
-  ) {
+  QueryBuilder<Count, Count, QAfterFilterCondition> stepLessThan(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        LessCondition(
-          property: 1,
-          value: value,
-        ),
-      );
+      return query.addFilterCondition(LessCondition(property: 1, value: value));
     });
   }
 
@@ -315,10 +241,7 @@ extension CountQueryFilter on QueryBuilder<Count, Count, QFilterCondition> {
   ) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        LessOrEqualCondition(
-          property: 1,
-          value: value,
-        ),
+        LessOrEqualCondition(property: 1, value: value),
       );
     });
   }
@@ -329,11 +252,7 @@ extension CountQueryFilter on QueryBuilder<Count, Count, QFilterCondition> {
   ) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
-        BetweenCondition(
-          property: 1,
-          lower: lower,
-          upper: upper,
-        ),
+        BetweenCondition(property: 1, lower: lower, upper: upper),
       );
     });
   }

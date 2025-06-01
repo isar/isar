@@ -84,8 +84,9 @@ class Package {
           documentation: p.pubspec.documentation,
           description: p.pubspec.description,
           dependencies: Dependency.fromDependencies(p.pubspec.dependencies),
-          devDependencies:
-              Dependency.fromDependencies(p.pubspec.devDependencies),
+          devDependencies: Dependency.fromDependencies(
+            p.pubspec.devDependencies,
+          ),
           published: p.published,
         ),
       );
@@ -148,12 +149,7 @@ class Dependency {
       final dep = dependenciesMap[package]!;
       final constraint =
           dep is HostedReference ? dep.versionConstraint.toString() : 'unknown';
-      dependencies.add(
-        Dependency(
-          name: package,
-          constraint: constraint,
-        ),
-      );
+      dependencies.add(Dependency(name: package, constraint: constraint));
     }
 
     return dependencies;

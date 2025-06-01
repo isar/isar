@@ -4,7 +4,9 @@ import 'package:path/path.dart' as p;
 void main() {
   final files = Directory('test')
       .listSync(recursive: true)
-      .where((FileSystemEntity e) => e is File && e.path.endsWith('_test.dart'))
+      .where(
+        (FileSystemEntity e) => e is File && e.path.endsWith('_test.dart'),
+      )
       .map((FileSystemEntity e) => e.path)
       .toList();
 

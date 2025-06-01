@@ -135,10 +135,10 @@ void main() {
         col.where().embeddedValueProperty().findFirst(),
         const MyEmbedded('abc'),
       );
-      expect(
-        col.where().jsonValueProperty().findFirst(),
-        const {'a': 1, 'b': '2'},
-      );
+      expect(col.where().jsonValueProperty().findFirst(), const {
+        'a': 1,
+        'b': '2',
+      });
     });
 
     isarTest('list', web: false, () async {
@@ -148,8 +148,9 @@ void main() {
       final isarName = isar1.name;
       expect(await isar1.close(), true);
 
-      final isar2 =
-          await openTempIsar([DefaultListModelSchema], name: isarName);
+      final isar2 = await openTempIsar([
+        DefaultListModelSchema,
+      ], name: isarName);
       final obj = isar2.defaultListModels.get(0)!;
       expect(obj.boolValue, [true, false]);
       expect(obj.byteValue, [1, 3]);
@@ -171,8 +172,9 @@ void main() {
       final isarName = isar1.name;
       expect(await isar1.close(), true);
 
-      final isar2 =
-          await openTempIsar([DefaultListModelSchema], name: isarName);
+      final isar2 = await openTempIsar([
+        DefaultListModelSchema,
+      ], name: isarName);
       final col = isar2.defaultListModels;
       expect(col.where().boolValueProperty().findFirst(), [true, false]);
       expect(col.where().byteValueProperty().findFirst(), [1, 3]);
@@ -180,26 +182,30 @@ void main() {
       expect(col.where().intValueProperty().findFirst(), [123, 234, null]);
       expect(col.where().floatValueProperty().findFirst(), [5.5, null]);
       expect(col.where().doubleValueProperty().findFirst(), [null, 10.10]);
-      expect(
-        col.where().stringValueProperty().findFirst(),
-        ['abc', null, 'def'],
-      );
-      expect(
-        col.where().enumValueProperty().findFirst(),
-        [MyEnum.value1, null, MyEnum.value2],
-      );
-      expect(
-        col.where().embeddedValueProperty().findFirst(),
-        [null, const MyEmbedded('test')],
-      );
-      expect(
-        col.where().jsonValueProperty().findFirst(),
-        [null, 'a', 33, true],
-      );
-      expect(
-        col.where().jsonObjectValueProperty().findFirst(),
-        {'a': 1, 'b': '2'},
-      );
+      expect(col.where().stringValueProperty().findFirst(), [
+        'abc',
+        null,
+        'def',
+      ]);
+      expect(col.where().enumValueProperty().findFirst(), [
+        MyEnum.value1,
+        null,
+        MyEnum.value2,
+      ]);
+      expect(col.where().embeddedValueProperty().findFirst(), [
+        null,
+        const MyEmbedded('test'),
+      ]);
+      expect(col.where().jsonValueProperty().findFirst(), [
+        null,
+        'a',
+        33,
+        true,
+      ]);
+      expect(col.where().jsonObjectValueProperty().findFirst(), {
+        'a': 1,
+        'b': '2',
+      });
     });
   });
 }
