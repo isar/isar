@@ -6,6 +6,9 @@ members = [
     "packages/mdbx_sys"
 ]
 
+[patch.crates-io]
+cbindgen = { version = "0.71.1" }
+
 [profile.release]
 lto = true
 codegen-units = 1
