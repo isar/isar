@@ -810,7 +810,6 @@ mod native_crud_tests {
             let txn = instance.begin_txn(false).expect("Failed to begin transaction");
             let size = instance.get_size(&txn, 0, false).expect("Failed to get size");
             // Size is u64, so it's always non-negative by definition
-            assert!(size >= 0, "Size should be non-negative");
             
             let size_with_indexes = instance.get_size(&txn, 0, true).expect("Failed to get size with indexes");
             assert!(size_with_indexes >= size, "Size with indexes should be >= size without");
