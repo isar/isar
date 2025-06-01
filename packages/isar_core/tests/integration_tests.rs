@@ -809,6 +809,7 @@ mod native_crud_tests {
         {
             let txn = instance.begin_txn(false).expect("Failed to begin transaction");
             let size = instance.get_size(&txn, 0, false).expect("Failed to get size");
+            // Size is u64, so it's always non-negative by definition
             assert!(size >= 0, "Size should be non-negative");
             
             let size_with_indexes = instance.get_size(&txn, 0, true).expect("Failed to get size with indexes");
@@ -1813,7 +1814,7 @@ mod query_functionality_tests {
                 
                 let mut ages = Vec::new();
                 while let Some(reader) = cursor.next() {
-                    let age = reader.read_int(2).expect("Failed to read age");
+                    let age = reader.read_int(2);
                     ages.push(age);
                 }
                 drop(cursor);
