@@ -325,20 +325,20 @@ mod native_real_world_tests {
 
         let _product_ids = insert_ecommerce_test_data(&*instance, 0);
 
-        // Scenario 1: Find products in price range with high ratings
+        // Scenario 1: Complex product filtering (price range + rating threshold)
         {
             let mut qb = instance.query(0).expect("Failed to create query builder");
             
-            // Price between $500 and $1500 AND rating >= 4.5
+            // Filter: price between 500-1500 AND rating >= 4.5
             let price_filter = Filter::new_condition(
-                3, // price property
+                3, // price property index
                 ConditionType::Between,
                 vec![Some(IsarValue::Real(500.0)), Some(IsarValue::Real(1500.0))],
                 true,
             );
             
             let rating_filter = Filter::new_condition(
-                9, // rating property
+                9, // rating property index
                 ConditionType::GreaterOrEqual,
                 vec![Some(IsarValue::Real(4.5))],
                 true,
@@ -361,6 +361,7 @@ mod native_real_world_tests {
                 let rating = reader.read_float(9);
                 found_products.push((name, price, rating));
             }
+            drop(cursor);
             
             // Should find iPhone and Samsung Galaxy, sorted by rating
             assert_eq!(found_products.len(), 2);
@@ -411,7 +412,7 @@ mod native_real_world_tests {
                 if let Some(attrs) = reader.read_string(13) {
                     // In real app, would parse JSON and check attributes
                     if attrs.contains("Apple") || attrs.contains("M3") || attrs.contains("iPhone") {
-                        let name = reader.read_string(1).unwrap_or_default();
+                        let name = reader.read_string(1).unwrap_or_default().to_string();
                         let price = reader.read_double(3);
                         apple_products.push((current_id, name, price));
                     }
@@ -478,7 +479,7 @@ mod native_real_world_tests {
             
             let mut influencers = Vec::new();
             while let Some(reader) = cursor.next() {
-                let username = reader.read_string(1).unwrap_or_default();
+                let username = reader.read_string(1).unwrap_or_default().to_string();
                 let followers = reader.read_int(9);
                 let verified = reader.read_bool(7).unwrap_or(false);
                 influencers.push((username, followers, verified));
@@ -503,7 +504,7 @@ mod native_real_world_tests {
             let mut current_id = 1i64;
             
             while let Some(reader) = cursor.next(current_id) {
-                let username = reader.read_string(1).unwrap_or_default();
+                let username = reader.read_string(1).unwrap_or_default().to_string();
                 let followers = reader.read_int(9) as f64;
                 let posts = reader.read_int(11) as f64;
                 
@@ -549,8 +550,8 @@ mod native_real_world_tests {
                         // Check location JSON for USA (in real app, would parse JSON)
                         if let Some(location) = reader.read_string(18) {
                             if location.contains("USA") {
-                                let username = reader.read_string(1).unwrap_or_default();
-                                tech_users_in_usa.push(username.to_string());
+                                let username = reader.read_string(1).unwrap_or_default().to_string();
+                                tech_users_in_usa.push(username);
                             }
                         }
                     }
@@ -730,9 +731,9 @@ mod native_real_world_tests {
             
             let mut high_performers = Vec::new();
             while let Some(reader) = cursor.next() {
-                let emp_id = reader.read_string(1).unwrap_or_default();
+                let emp_id = reader.read_string(1).unwrap_or_default().to_string();
                 let score = reader.read_float(11);
-                let title = reader.read_string(7).unwrap_or_default();
+                let title = reader.read_string(7).unwrap_or_default().to_string();
                 high_performers.push((emp_id, score, title));
             }
             drop(cursor);
@@ -850,7 +851,7 @@ mod sqlite_real_world_tests {
             
             let mut public_users = Vec::new();
             while let Some(reader) = cursor.next() {
-                let username = reader.read_string(1).unwrap_or_default();
+                let username = reader.read_string(1).unwrap_or_default().to_string();
                 let followers = reader.read_int(9);
                 public_users.push((username, followers));
             }
@@ -894,7 +895,7 @@ mod cross_platform_real_world_tests {
             None,
         ).expect("Failed to open native database");
 
-        let native_product_ids = insert_ecommerce_test_data(&*native_instance, 0);
+        let _native_product_ids = insert_ecommerce_test_data(&*native_instance, 0);
 
         // Test with SQLite backend
         let sqlite_instance = SQLiteInstance::open_instance(
@@ -907,7 +908,7 @@ mod cross_platform_real_world_tests {
             None,
         ).expect("Failed to open SQLite database");
 
-        let sqlite_product_ids = insert_ecommerce_test_data(&sqlite_instance, 0);
+        let _sqlite_product_ids = insert_ecommerce_test_data(&sqlite_instance, 0);
 
         // Compare results from both backends
         {
@@ -922,7 +923,7 @@ mod cross_platform_real_world_tests {
             
             let mut native_products = Vec::new();
             while let Some(reader) = native_cursor.next() {
-                let name = reader.read_string(1).unwrap_or_default();
+                let name = reader.read_string(1).unwrap_or_default().to_string();
                 let price = reader.read_double(3);
                 native_products.push((name, price));
             }
@@ -939,7 +940,7 @@ mod cross_platform_real_world_tests {
             
             let mut sqlite_products = Vec::new();
             while let Some(reader) = sqlite_cursor.next() {
-                let name = reader.read_string(1).unwrap_or_default();
+                let name = reader.read_string(1).unwrap_or_default().to_string();
                 let price = reader.read_double(3);
                 sqlite_products.push((name, price));
             }
@@ -1056,9 +1057,9 @@ mod cross_platform_real_world_tests {
             let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
             
             // Get user details first
-            let user_cursor = instance.cursor(&txn, 0).expect("Failed to get user cursor");
+            let mut user_cursor = instance.cursor(&txn, 0).expect("Failed to get user cursor");
             let user_reader = user_cursor.next(user_ids[2]).expect("Failed to read user");
-            let username = user_reader.read_string(1).unwrap_or_default();
+            let username = user_reader.read_string(1).unwrap_or_default().to_string();
             let verified = user_reader.read_bool(7).unwrap_or(false);
             drop(user_cursor);
             
@@ -1077,8 +1078,8 @@ mod cross_platform_real_world_tests {
             
             let mut user_posts = Vec::new();
             while let Some(reader) = posts_cursor.next() {
-                let title = reader.read_string(1).unwrap_or_default();
-                let content = reader.read_string(2).unwrap_or_default();
+                let title = reader.read_string(1).unwrap_or_default().to_string();
+                let content = reader.read_string(2).unwrap_or_default().to_string();
                 user_posts.push((title, content));
             }
             drop(posts_cursor);
