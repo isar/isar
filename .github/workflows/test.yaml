@@ -358,7 +358,9 @@ jobs:
       - name: Serve isar.wasm
         run: npx --yes serve --cors &
       - name: Install geckodriver
-        uses: browser-actions/setup-geckodriver@latest
+        uses: browser-actions/setup-geckodriver@v1.3.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Prepare geckodriver
         run: geckodriver --port=4444 &
       - name: Run Dart tests in browser
