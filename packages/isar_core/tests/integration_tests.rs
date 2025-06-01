@@ -1097,3 +1097,997 @@ mod crud_comparison_tests {
 // 4. Performance regression detection tools
 //
 // Integration tests should focus on correctness, not timing. 
+
+#[cfg(test)]
+mod query_functionality_tests {
+    use super::*;
+    use isar_core::core::filter::*;
+    use isar_core::core::value::IsarValue;
+    use isar_core::core::instance::Aggregation;
+    use isar_core::core::query_builder::{IsarQueryBuilder, Sort};
+    use isar_core::core::cursor::IsarQueryCursor;
+    use isar_core::core::writer::IsarWriter;
+    use isar_core::core::insert::IsarInsert;
+    use isar_core::core::reader::IsarReader;
+
+    /// Create a test schema with varied data types for comprehensive query testing
+    fn create_query_test_schema() -> IsarSchema {
+        let properties = vec![
+            PropertySchema::new("name", DataType::String, None),
+            PropertySchema::new("age", DataType::Int, None),
+            PropertySchema::new("score", DataType::Long, None),
+            PropertySchema::new("rating", DataType::Float, None),
+            PropertySchema::new("salary", DataType::Double, None),
+            PropertySchema::new("isActive", DataType::Bool, None),
+            PropertySchema::new("tags", DataType::StringList, None),
+            PropertySchema::new("numbers", DataType::IntList, None),
+        ];
+        
+        let indexes = vec![
+            IndexSchema::new("name_index", vec!["name"], false, false),
+            IndexSchema::new("age_index", vec!["age"], false, false),
+            IndexSchema::new("score_index", vec!["score"], false, false),
+            IndexSchema::new("rating_index", vec!["rating"], false, false),
+            IndexSchema::new("compound_index", vec!["age", "score"], false, false),
+        ];
+        
+        IsarSchema::new("QueryTest", Some("id"), properties, indexes, false)
+    }
+
+    /// Insert test data for query testing - simplified version for basic data only
+    fn insert_basic_query_test_data<T: IsarInstance>(instance: &T, collection_index: u16) -> Vec<i64> {
+        let mut ids = Vec::new();
+        
+        let test_data = vec![
+            ("Alice", 25, 1000i64, 4.5f32, 50000.0, true),
+            ("Bob", 30, 1500, 3.8, 60000.0, false),
+            ("Charlie", 35, 2000, 4.9, 70000.0, true),
+            ("Diana", 28, 1200, 4.2, 55000.0, true),
+            ("Eve", 32, 1800, 3.5, 65000.0, false),
+        ];
+
+        let txn = instance.begin_txn(true).expect("Failed to begin transaction");
+        let mut insert = instance.insert(txn, collection_index, test_data.len() as u32)
+            .expect("Failed to create insert");
+
+        for (name, age, score, rating, salary, is_active) in test_data {
+            let id = instance.auto_increment(collection_index);
+            ids.push(id);
+            
+            // Write data with 1-based property indices
+            insert.write_string(1, name);
+            insert.write_int(2, age);
+            insert.write_long(3, score);
+            insert.write_float(4, rating);
+            insert.write_double(5, salary);
+            insert.write_bool(6, is_active);
+            
+            insert.save(id).expect("Failed to save test data");
+        }
+        
+        let txn = insert.finish().expect("Failed to finish insert");
+        instance.commit_txn(txn).expect("Failed to commit transaction");
+        
+        ids
+    }
+
+    #[cfg(test)]
+    #[cfg(feature = "native")]
+    mod native_query_tests {
+        use super::*;
+
+        /// Test basic filter operations
+        #[test]
+        fn test_native_basic_filters() {
+            let temp_dir = create_test_dir();
+            let db_dir = temp_dir.path().to_str().unwrap();
+            
+            let schemas = vec![create_query_test_schema()];
+            let instance_result = NativeInstance::open_instance(
+                1000,
+                "query_filter_db",
+                db_dir,
+                schemas,
+                1024,
+                None,
+                None,
+            ).expect("Failed to open database");
+            
+            // Dereference the Arc to get the underlying instance
+            let instance = &*instance_result;
+            let _ids = insert_basic_query_test_data(instance, 0);
+
+            // Test equal filter
+            {
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.set_filter(Filter::new_condition(
+                    1, // name property (1-based index)
+                    ConditionType::Equal,
+                    vec![Some(IsarValue::String("Alice".to_string()))],
+                    true,
+                ));
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let count = instance.query_aggregate(&txn, &query, Aggregation::Count, None)
+                    .expect("Failed to execute count");
+                assert_eq!(count, Some(IsarValue::Integer(1)));
+                instance.abort_txn(txn);
+            }
+
+            // Test greater than filter
+            {
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.set_filter(Filter::new_condition(
+                    2, // age property
+                    ConditionType::Greater,
+                    vec![Some(IsarValue::Integer(30))],
+                    true,
+                ));
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let count = instance.query_aggregate(&txn, &query, Aggregation::Count, None)
+                    .expect("Failed to execute count");
+                assert_eq!(count, Some(IsarValue::Integer(2))); // Charlie and Eve
+                instance.abort_txn(txn);
+            }
+
+            // Test between filter
+            {
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.set_filter(Filter::new_condition(
+                    3, // score property
+                    ConditionType::Between,
+                    vec![Some(IsarValue::Integer(1200)), Some(IsarValue::Integer(1600))],
+                    true,
+                ));
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let count = instance.query_aggregate(&txn, &query, Aggregation::Count, None)
+                    .expect("Failed to execute count");
+                assert_eq!(count, Some(IsarValue::Integer(2))); // Bob and Diana
+                instance.abort_txn(txn);
+            }
+
+            // Test string contains filter
+            {
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.set_filter(Filter::new_condition(
+                    1, // name property
+                    ConditionType::StringContains,
+                    vec![Some(IsarValue::String("i".to_string()))],
+                    true,
+                ));
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let count = instance.query_aggregate(&txn, &query, Aggregation::Count, None)
+                    .expect("Failed to execute count");
+                assert_eq!(count, Some(IsarValue::Integer(3))); // Alice, Charlie, Diana
+                instance.abort_txn(txn);
+            }
+
+            let closed = NativeInstance::close(instance_result, false);
+            assert!(closed);
+        }
+
+        /// Test compound filters with AND/OR operations
+        #[test]
+        fn test_native_compound_filters() {
+            let temp_dir = create_test_dir();
+            let db_dir = temp_dir.path().to_str().unwrap();
+            
+            let schemas = vec![create_query_test_schema()];
+            let instance_result = NativeInstance::open_instance(
+                1001,
+                "compound_filter_db",
+                db_dir,
+                schemas,
+                1024,
+                None,
+                None,
+            ).expect("Failed to open database");
+            
+            let instance = &*instance_result;
+            let _ids = insert_basic_query_test_data(instance, 0);
+
+            // Test AND filter: age > 25 AND isActive = true
+            {
+                let age_filter = Filter::new_condition(
+                    2, // age property
+                    ConditionType::Greater,
+                    vec![Some(IsarValue::Integer(25))],
+                    true,
+                );
+                let active_filter = Filter::new_condition(
+                    6, // isActive property
+                    ConditionType::Equal,
+                    vec![Some(IsarValue::Bool(true))],
+                    true,
+                );
+                let and_filter = Filter::new_and(vec![age_filter, active_filter]);
+
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.set_filter(and_filter);
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let count = instance.query_aggregate(&txn, &query, Aggregation::Count, None)
+                    .expect("Failed to execute count");
+                assert_eq!(count, Some(IsarValue::Integer(2))); // Charlie and Diana
+                instance.abort_txn(txn);
+            }
+
+            // Test OR filter: age < 30 OR score > 1500
+            {
+                let age_filter = Filter::new_condition(
+                    2, // age property
+                    ConditionType::Less,
+                    vec![Some(IsarValue::Integer(30))],
+                    true,
+                );
+                let score_filter = Filter::new_condition(
+                    3, // score property
+                    ConditionType::Greater,
+                    vec![Some(IsarValue::Integer(1500))],
+                    true,
+                );
+                let or_filter = Filter::new_or(vec![age_filter, score_filter]);
+
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.set_filter(or_filter);
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let count = instance.query_aggregate(&txn, &query, Aggregation::Count, None)
+                    .expect("Failed to execute count");
+                assert_eq!(count, Some(IsarValue::Integer(4))); // Alice, Diana, Charlie, Eve
+                instance.abort_txn(txn);
+            }
+
+            let closed = NativeInstance::close(instance_result, false);
+            assert!(closed);
+        }
+
+        /// Test sorting operations
+        #[test]
+        fn test_native_sorting() {
+            let temp_dir = create_test_dir();
+            let db_dir = temp_dir.path().to_str().unwrap();
+            
+            let schemas = vec![create_query_test_schema()];
+            let instance_result = NativeInstance::open_instance(
+                1002,
+                "sorting_db",
+                db_dir,
+                schemas,
+                1024,
+                None,
+                None,
+            ).expect("Failed to open database");
+            
+            let instance = &*instance_result;
+            let _ids = insert_basic_query_test_data(instance, 0);
+
+            // Test sort by age ascending
+            {
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.add_sort(2, Sort::Asc, true); // age property
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let mut cursor = instance.query_cursor(&txn, &query, None, None)
+                    .expect("Failed to create query cursor");
+                
+                let mut ages = Vec::new();
+                while let Some(reader) = cursor.next() {
+                    let age = reader.read_int(2);
+                    ages.push(age);
+                }
+                drop(cursor);
+                
+                assert_eq!(ages, vec![25, 28, 30, 32, 35]); // Alice, Diana, Bob, Eve, Charlie
+                instance.abort_txn(txn);
+            }
+
+            // Test sort by score descending
+            {
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.add_sort(3, Sort::Desc, true); // score property
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let mut cursor = instance.query_cursor(&txn, &query, None, None)
+                    .expect("Failed to create query cursor");
+                
+                let mut scores = Vec::new();
+                while let Some(reader) = cursor.next() {
+                    let score = reader.read_long(3);
+                    scores.push(score);
+                }
+                drop(cursor);
+                
+                assert_eq!(scores, vec![2000, 1800, 1500, 1200, 1000]); // Charlie, Eve, Bob, Diana, Alice
+                instance.abort_txn(txn);
+            }
+
+            let closed = NativeInstance::close(instance_result, false);
+            assert!(closed);
+        }
+
+        /// Test aggregation operations
+        #[test]
+        fn test_native_aggregations() {
+            let temp_dir = create_test_dir();
+            let db_dir = temp_dir.path().to_str().unwrap();
+            
+            let schemas = vec![create_query_test_schema()];
+            let instance_result = NativeInstance::open_instance(
+                1003,
+                "aggregation_db",
+                db_dir,
+                schemas,
+                1024,
+                None,
+                None,
+            ).expect("Failed to open database");
+            
+            let instance = &*instance_result;
+            let _ids = insert_basic_query_test_data(instance, 0);
+
+            let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+            let qb = instance.query(0).expect("Failed to create query builder");
+            let query = qb.build();
+
+            // Test count
+            let count = instance.query_aggregate(&txn, &query, Aggregation::Count, None)
+                .expect("Failed to execute count");
+            assert_eq!(count, Some(IsarValue::Integer(5)));
+
+            // Test min age
+            let min_age = instance.query_aggregate(&txn, &query, Aggregation::Min, Some(2))
+                .expect("Failed to execute min");
+            assert_eq!(min_age, Some(IsarValue::Integer(25)));
+
+            // Test max age
+            let max_age = instance.query_aggregate(&txn, &query, Aggregation::Max, Some(2))
+                .expect("Failed to execute max");
+            assert_eq!(max_age, Some(IsarValue::Integer(35)));
+
+            // Test sum of scores
+            let sum_scores = instance.query_aggregate(&txn, &query, Aggregation::Sum, Some(3))
+                .expect("Failed to execute sum");
+            assert_eq!(sum_scores, Some(IsarValue::Integer(7500))); // 1000+1500+2000+1200+1800
+
+            // Test average of ages
+            let avg_age = instance.query_aggregate(&txn, &query, Aggregation::Average, Some(2))
+                .expect("Failed to execute average");
+            if let Some(IsarValue::Real(avg)) = avg_age {
+                assert!((avg - 30.0).abs() < 0.01); // (25+30+35+28+32)/5 = 30
+            } else {
+                panic!("Expected Real value for average");
+            }
+
+            instance.abort_txn(txn);
+            let closed = NativeInstance::close(instance_result, false);
+            assert!(closed);
+        }
+
+        /// Test limit and offset operations
+        #[test]
+        fn test_native_limit_offset() {
+            let temp_dir = create_test_dir();
+            let db_dir = temp_dir.path().to_str().unwrap();
+            
+            let schemas = vec![create_query_test_schema()];
+            let instance_result = NativeInstance::open_instance(
+                1004,
+                "limit_offset_db",
+                db_dir,
+                schemas,
+                1024,
+                None,
+                None,
+            ).expect("Failed to open database");
+            
+            let instance = &*instance_result;
+            let _ids = insert_basic_query_test_data(instance, 0);
+
+            // Test limit
+            {
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.add_sort(2, Sort::Asc, true); // Sort by age
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let mut cursor = instance.query_cursor(&txn, &query, None, Some(3))
+                    .expect("Failed to create query cursor");
+                
+                let mut count = 0;
+                while cursor.next().is_some() {
+                    count += 1;
+                }
+                drop(cursor);
+                
+                assert_eq!(count, 3);
+                instance.abort_txn(txn);
+            }
+
+            // Test offset
+            {
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.add_sort(2, Sort::Asc, true); // Sort by age
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let mut cursor = instance.query_cursor(&txn, &query, Some(2), None)
+                    .expect("Failed to create query cursor");
+                
+                let mut ages = Vec::new();
+                while let Some(reader) = cursor.next() {
+                    let age = reader.read_int(2);
+                    ages.push(age);
+                }
+                drop(cursor);
+                
+                assert_eq!(ages, vec![30, 32, 35]); // Bob, Eve, Charlie (skipping Alice, Diana)
+                instance.abort_txn(txn);
+            }
+
+            // Test offset and limit together
+            {
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.add_sort(2, Sort::Asc, true); // Sort by age
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let mut cursor = instance.query_cursor(&txn, &query, Some(1), Some(2))
+                    .expect("Failed to create query cursor");
+                
+                let mut ages = Vec::new();
+                while let Some(reader) = cursor.next() {
+                    let age = reader.read_int(2);
+                    ages.push(age);
+                }
+                drop(cursor);
+                
+                assert_eq!(ages, vec![28, 30]); // Diana, Bob (skip Alice, limit 2)
+                instance.abort_txn(txn);
+            }
+
+            let closed = NativeInstance::close(instance_result, false);
+            assert!(closed);
+        }
+
+        /// Test distinct operations
+        #[test]
+        fn test_native_distinct() {
+            let temp_dir = create_test_dir();
+            let db_dir = temp_dir.path().to_str().unwrap();
+            
+            let schemas = vec![create_query_test_schema()];
+            let instance_result = NativeInstance::open_instance(
+                1005,
+                "distinct_db",
+                db_dir,
+                schemas,
+                1024,
+                None,
+                None,
+            ).expect("Failed to open database");
+            
+            let instance = &*instance_result;
+            
+            // Insert data with some duplicate values
+            let txn = instance.begin_txn(true).expect("Failed to begin transaction");
+            let mut insert = instance.insert(txn, 0, 6)
+                .expect("Failed to create insert");
+
+            let test_data = vec![
+                ("Alice", 25), ("Bob", 30), ("Charlie", 25), 
+                ("Diana", 30), ("Eve", 35), ("Frank", 25)
+            ];
+
+            for (i, (name, age)) in test_data.iter().enumerate() {
+                let id = instance.auto_increment(0);
+                insert.write_string(1, name);
+                insert.write_int(2, *age);
+                insert.write_long(3, 1000 + i as i64 * 100);
+                insert.write_float(4, 4.0);
+                insert.write_double(5, 50000.0);
+                insert.write_bool(6, true);
+                insert.save(id).expect("Failed to save test data");
+            }
+            
+            let txn = insert.finish().expect("Failed to finish insert");
+            instance.commit_txn(txn).expect("Failed to commit transaction");
+
+            // Test distinct by age
+            {
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.add_distinct(2, true); // age property
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let mut cursor = instance.query_cursor(&txn, &query, None, None)
+                    .expect("Failed to create query cursor");
+                
+                let mut distinct_ages = std::collections::HashSet::new();
+                while let Some(reader) = cursor.next() {
+                    let age = reader.read_int(2);
+                    distinct_ages.insert(age);
+                }
+                drop(cursor);
+                
+                assert_eq!(distinct_ages.len(), 3); // 25, 30, 35
+                assert!(distinct_ages.contains(&25));
+                assert!(distinct_ages.contains(&30));
+                assert!(distinct_ages.contains(&35));
+                
+                instance.abort_txn(txn);
+            }
+
+            let closed = NativeInstance::close(instance_result, false);
+            assert!(closed);
+        }
+
+        /// Test complex queries combining filters, sorting, and limits
+        #[test]
+        fn test_native_complex_queries() {
+            let temp_dir = create_test_dir();
+            let db_dir = temp_dir.path().to_str().unwrap();
+            
+            let schemas = vec![create_query_test_schema()];
+            let instance_result = NativeInstance::open_instance(
+                1006,
+                "complex_query_db",
+                db_dir,
+                schemas,
+                1024,
+                None,
+                None,
+            ).expect("Failed to open database");
+            
+            let instance = &*instance_result;
+            let _ids = insert_basic_query_test_data(instance, 0);
+
+            // Complex query: age >= 28 AND isActive = true, sorted by score descending, limit 2
+            {
+                let age_filter = Filter::new_condition(
+                    2, // age property
+                    ConditionType::GreaterOrEqual,
+                    vec![Some(IsarValue::Integer(28))],
+                    true,
+                );
+                let active_filter = Filter::new_condition(
+                    6, // isActive property
+                    ConditionType::Equal,
+                    vec![Some(IsarValue::Bool(true))],
+                    true,
+                );
+                let combined_filter = Filter::new_and(vec![age_filter, active_filter]);
+
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.set_filter(combined_filter);
+                qb.add_sort(3, Sort::Desc, true);
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let mut cursor = instance.query_cursor(&txn, &query, None, Some(2))
+                    .expect("Failed to create query cursor");
+                
+                let mut results = Vec::new();
+                while let Some(reader) = cursor.next() {
+                    let name = reader.read_string(1).unwrap_or("").to_string();
+                    let score = reader.read_long(3);
+                    results.push((name, score));
+                }
+                drop(cursor);
+                
+                assert_eq!(results.len(), 2);
+                assert_eq!(results[0], ("Charlie".to_string(), 2000)); // Highest score, active, age 35
+                assert_eq!(results[1], ("Diana".to_string(), 1200)); // Second result, active, age 28
+                
+                instance.abort_txn(txn);
+            }
+
+            let closed = NativeInstance::close(instance_result, false);
+            assert!(closed);
+        }
+    }
+
+    #[cfg(test)]
+    #[cfg(feature = "sqlite")]
+    mod sqlite_query_tests {
+        use super::*;
+
+        /// Test basic filter operations on SQLite backend
+        #[test]
+        fn test_sqlite_basic_filters() {
+            let temp_dir = create_test_dir();
+            let db_dir = temp_dir.path().to_str().unwrap();
+            
+            let schemas = vec![create_query_test_schema()];
+            let instance = SQLiteInstance::open_instance(
+                2000,
+                "sqlite_query_filter_db",
+                db_dir,
+                schemas,
+                1024,
+                None,
+                None,
+            ).expect("Failed to open SQLite database");
+            
+            let _ids = insert_basic_query_test_data(&instance, 0);
+
+            // Test equal filter
+            {
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.set_filter(Filter::new_condition(
+                    1, // name property
+                    ConditionType::Equal,
+                    vec![Some(IsarValue::String("Alice".to_string()))],
+                    true,
+                ));
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let count = instance.query_aggregate(&txn, &query, Aggregation::Count, None)
+                    .expect("Failed to execute count");
+                assert_eq!(count, Some(IsarValue::Integer(1)));
+                instance.abort_txn(txn);
+            }
+
+            let closed = SQLiteInstance::close(instance, false);
+            assert!(closed);
+        }
+
+        /// Test aggregation operations on SQLite backend
+        #[test]
+        fn test_sqlite_aggregations() {
+            let temp_dir = create_test_dir();
+            let db_dir = temp_dir.path().to_str().unwrap();
+            
+            let schemas = vec![create_query_test_schema()];
+            let instance = SQLiteInstance::open_instance(
+                2001,
+                "sqlite_aggregation_db",
+                db_dir,
+                schemas,
+                1024,
+                None,
+                None,
+            ).expect("Failed to open SQLite database");
+            
+            let _ids = insert_basic_query_test_data(&instance, 0);
+
+            let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+            let qb = instance.query(0).expect("Failed to create query builder");
+            let query = qb.build();
+
+            // Test count
+            let count = instance.query_aggregate(&txn, &query, Aggregation::Count, None)
+                .expect("Failed to execute count");
+            assert_eq!(count, Some(IsarValue::Integer(5)));
+
+            // Test min age
+            let min_age = instance.query_aggregate(&txn, &query, Aggregation::Min, Some(2))
+                .expect("Failed to execute min");
+            assert_eq!(min_age, Some(IsarValue::Integer(25)));
+
+            instance.abort_txn(txn);
+            let closed = SQLiteInstance::close(instance, false);
+            assert!(closed);
+        }
+
+        /// Test sorting and limiting on SQLite backend
+        #[test]
+        fn test_sqlite_sorting_limiting() {
+            let temp_dir = create_test_dir();
+            let db_dir = temp_dir.path().to_str().unwrap();
+            
+            let schemas = vec![create_query_test_schema()];
+            let instance = SQLiteInstance::open_instance(
+                2002,
+                "sqlite_sort_limit_db",
+                db_dir,
+                schemas,
+                1024,
+                None,
+                None,
+            ).expect("Failed to open SQLite database");
+            
+            let _ids = insert_basic_query_test_data(&instance, 0);
+
+            // Test sort by age ascending with limit
+            {
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.add_sort(2, Sort::Desc, true); // Sort by age desc
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                let mut cursor = instance.query_cursor(&txn, &query, None, Some(2))
+                    .expect("Failed to create query cursor");
+                
+                let mut ages = Vec::new();
+                while let Some(reader) = cursor.next() {
+                    let age = reader.read_int(2).expect("Failed to read age");
+                    ages.push(age);
+                }
+                drop(cursor);
+                
+                assert_eq!(ages.len(), 2);
+                assert!(ages[0] >= ages[1]); // Descending order
+                
+                instance.abort_txn(txn);
+            }
+
+            let closed = SQLiteInstance::close(instance, false);
+            assert!(closed);
+        }
+    }
+
+    #[cfg(test)]
+    #[cfg(all(feature = "native", feature = "sqlite"))]
+    mod cross_backend_query_tests {
+        use super::*;
+
+        /// Test query result consistency between Native and SQLite backends
+        #[test]
+        fn test_query_result_consistency() {
+            let temp_dir = create_test_dir();
+            let db_dir = temp_dir.path().to_str().unwrap();
+            
+            let schemas = vec![create_query_test_schema()];
+            
+            // Setup Native instance
+            let native_instance = NativeInstance::open_instance(
+                3000,
+                "native_consistency_db",
+                db_dir,
+                schemas.clone(),
+                1024,
+                None,
+                None,
+            ).expect("Failed to open Native database");
+            let native_instance_ref = &*native_instance;
+            
+            // Setup SQLite instance
+            let sqlite_temp_dir = create_test_dir();
+            let sqlite_db_dir = sqlite_temp_dir.path().to_str().unwrap();
+            let sqlite_instance = SQLiteInstance::open_instance(
+                3001,
+                "sqlite_consistency_db",
+                sqlite_db_dir,
+                schemas,
+                1024,
+                None,
+                None,
+            ).expect("Failed to open SQLite database");
+            
+            // Insert same data in both
+            let _native_ids = insert_basic_query_test_data(native_instance_ref, 0);
+            let _sqlite_ids = insert_basic_query_test_data(&sqlite_instance, 0);
+
+            // Test count consistency
+            {
+                let native_qb = native_instance_ref.query(0).expect("Failed to create native query");
+                let native_query = native_qb.build();
+                
+                let sqlite_qb = sqlite_instance.query(0).expect("Failed to create sqlite query");
+                let sqlite_query = sqlite_qb.build();
+                
+                let native_txn = native_instance_ref.begin_txn(false).expect("Failed to begin native txn");
+                let sqlite_txn = sqlite_instance.begin_txn(false).expect("Failed to begin sqlite txn");
+                
+                let native_count = native_instance_ref.query_aggregate(&native_txn, &native_query, Aggregation::Count, None)
+                    .expect("Failed to execute native count");
+                let sqlite_count = sqlite_instance.query_aggregate(&sqlite_txn, &sqlite_query, Aggregation::Count, None)
+                    .expect("Failed to execute sqlite count");
+                
+                assert_eq!(native_count, sqlite_count);
+                assert_eq!(native_count, Some(IsarValue::Integer(5)));
+                
+                native_instance_ref.abort_txn(native_txn);
+                sqlite_instance.abort_txn(sqlite_txn);
+            }
+
+            // Test filter consistency
+            {
+                let age_filter = Filter::new_condition(
+                    2, // age property
+                    ConditionType::Greater,
+                    vec![Some(IsarValue::Integer(30))],
+                    true,
+                );
+
+                let mut native_qb = native_instance_ref.query(0).expect("Failed to create native query");
+                native_qb.set_filter(age_filter.clone());
+                let native_query = native_qb.build();
+                
+                let mut sqlite_qb = sqlite_instance.query(0).expect("Failed to create sqlite query");
+                sqlite_qb.set_filter(age_filter);
+                let sqlite_query = sqlite_qb.build();
+                
+                let native_txn = native_instance_ref.begin_txn(false).expect("Failed to begin native txn");
+                let sqlite_txn = sqlite_instance.begin_txn(false).expect("Failed to begin sqlite txn");
+                
+                let native_count = native_instance_ref.query_aggregate(&native_txn, &native_query, Aggregation::Count, None)
+                    .expect("Failed to execute native count");
+                let sqlite_count = sqlite_instance.query_aggregate(&sqlite_txn, &sqlite_query, Aggregation::Count, None)
+                    .expect("Failed to execute sqlite count");
+                
+                assert_eq!(native_count, sqlite_count);
+                assert_eq!(native_count, Some(IsarValue::Integer(2))); // Charlie and Eve
+                
+                native_instance_ref.abort_txn(native_txn);
+                sqlite_instance.abort_txn(sqlite_txn);
+            }
+
+            // Test aggregation consistency
+            {
+                let native_qb = native_instance_ref.query(0).expect("Failed to create native query");
+                let native_query = native_qb.build();
+                
+                let sqlite_qb = sqlite_instance.query(0).expect("Failed to create sqlite query");
+                let sqlite_query = sqlite_qb.build();
+                
+                let native_txn = native_instance_ref.begin_txn(false).expect("Failed to begin native txn");
+                let sqlite_txn = sqlite_instance.begin_txn(false).expect("Failed to begin sqlite txn");
+                
+                let native_min = native_instance_ref.query_aggregate(&native_txn, &native_query, Aggregation::Min, Some(2))
+                    .expect("Failed to execute native min");
+                let sqlite_min = sqlite_instance.query_aggregate(&sqlite_txn, &sqlite_query, Aggregation::Min, Some(2))
+                    .expect("Failed to execute sqlite min");
+                
+                let native_max = native_instance_ref.query_aggregate(&native_txn, &native_query, Aggregation::Max, Some(2))
+                    .expect("Failed to execute native max");
+                let sqlite_max = sqlite_instance.query_aggregate(&sqlite_txn, &sqlite_query, Aggregation::Max, Some(2))
+                    .expect("Failed to execute sqlite max");
+                
+                assert_eq!(native_min, sqlite_min);
+                assert_eq!(native_max, sqlite_max);
+                assert_eq!(native_min, Some(IsarValue::Integer(25)));
+                assert_eq!(native_max, Some(IsarValue::Integer(35)));
+                
+                native_instance_ref.abort_txn(native_txn);
+                sqlite_instance.abort_txn(sqlite_txn);
+            }
+
+            let native_closed = NativeInstance::close(native_instance, false);
+            let sqlite_closed = SQLiteInstance::close(sqlite_instance, false);
+            assert!(native_closed);
+            assert!(sqlite_closed);
+        }
+    }
+
+    #[cfg(test)]
+    mod query_error_tests {
+        use super::*;
+
+        /// Test query error scenarios and edge cases
+        #[test]
+        #[cfg(feature = "native")]
+        fn test_query_error_scenarios() {
+            let temp_dir = create_test_dir();
+            let db_dir = temp_dir.path().to_str().unwrap();
+            
+            let schemas = vec![create_query_test_schema()];
+            let instance_result = NativeInstance::open_instance(
+                4000,
+                "error_test_db",
+                db_dir,
+                schemas,
+                1024,
+                None,
+                None,
+            ).expect("Failed to open database");
+            
+            let instance = &*instance_result;
+
+            // Test query on non-existent collection
+            let result = instance.query(999);
+            assert!(result.is_err());
+
+            // Test aggregation on non-existent property
+            let qb = instance.query(0).expect("Failed to create query builder");
+            let query = qb.build();
+            let txn = instance.begin_txn(false).expect("Failed to begin transaction");
+            
+            let result = instance.query_aggregate(&txn, &query, Aggregation::Min, Some(999));
+            // This might succeed but return None, or fail - either is acceptable
+            let _ = result;
+            
+            instance.abort_txn(txn);
+            let closed = NativeInstance::close(instance_result, false);
+            assert!(closed);
+        }
+
+        /// Test performance with larger datasets
+        #[test]
+        #[cfg(feature = "native")]
+        fn test_query_performance_large_dataset() {
+            let temp_dir = create_test_dir();
+            let db_dir = temp_dir.path().to_str().unwrap();
+            
+            let schemas = vec![create_query_test_schema()];
+            let instance_result = NativeInstance::open_instance(
+                4001,
+                "performance_test_db",
+                db_dir,
+                schemas,
+                1024,
+                None,
+                None,
+            ).expect("Failed to open database");
+            
+            let instance = &*instance_result;
+
+            // Insert larger dataset
+            let txn = instance.begin_txn(true).expect("Failed to begin transaction");
+            let mut insert = instance.insert(txn, 0, 100)
+                .expect("Failed to create insert");
+
+            for i in 0..100 {
+                let id = instance.auto_increment(0);
+                insert.write_string(1, &format!("User{}", i));
+                insert.write_int(2, 20 + (i % 50) as i32); // Ages 20-69
+                insert.write_long(3, 1000 + i as i64 * 10);
+                insert.write_float(4, 3.0 + (i % 5) as f32 * 0.5);
+                insert.write_double(5, 40000.0 + i as f64 * 1000.0);
+                insert.write_bool(6, i % 2 == 0);
+                insert.save(id).expect("Failed to save test data");
+            }
+            
+            let txn = insert.finish().expect("Failed to finish insert");
+            instance.commit_txn(txn).expect("Failed to commit transaction");
+
+            // Test complex query on large dataset
+            {
+                let age_filter = Filter::new_condition(
+                    2, // age property
+                    ConditionType::Between,
+                    vec![Some(IsarValue::Integer(30)), Some(IsarValue::Integer(50))],
+                    true,
+                );
+                let active_filter = Filter::new_condition(
+                    6, // isActive property
+                    ConditionType::Equal,
+                    vec![Some(IsarValue::Bool(true))],
+                    true,
+                );
+                let combined_filter = Filter::new_and(vec![age_filter, active_filter]);
+
+                let mut qb = instance.query(0).expect("Failed to create query builder");
+                qb.set_filter(combined_filter);
+                qb.add_sort(3, Sort::Desc, true);
+                let query = qb.build();
+                
+                let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
+                
+                // Test aggregation performance
+                let count = instance.query_aggregate(&txn, &query, Aggregation::Count, None)
+                    .expect("Failed to execute count");
+                assert!(count.is_some());
+                
+                // Test query cursor performance
+                let mut cursor = instance.query_cursor(&txn, &query, None, Some(10))
+                    .expect("Failed to create query cursor");
+                
+                let mut result_count = 0;
+                while cursor.next().is_some() {
+                    result_count += 1;
+                }
+                drop(cursor);
+                
+                assert!(result_count <= 10);
+                instance.abort_txn(txn);
+            }
+
+            let closed = NativeInstance::close(instance_result, false);
+            assert!(closed);
+        }
+    }
+} 
