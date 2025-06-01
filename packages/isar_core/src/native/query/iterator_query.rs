@@ -1,8 +1,8 @@
-use super::index_iterator::IndexIterator;
-use super::sorted_query_iterator::SortedQueryIterator;
-use super::unsorted_distinct_query_iterator::UnsortedDistinctQueryIterator;
-use super::unsorted_query_iterator::UnsortedQueryIterator;
 use super::NativeQuery;
+use super::iterator_index::IndexIterator;
+use super::iterator_sorted_query::SortedQueryIterator;
+use super::iterator_unsorted_distinct_query::UnsortedDistinctQueryIterator;
+use super::iterator_unsorted_query::UnsortedQueryIterator;
 use crate::native::isar_deserializer::IsarDeserializer;
 use crate::native::native_collection::NativeCollection;
 use crate::native::native_txn::NativeTxn;

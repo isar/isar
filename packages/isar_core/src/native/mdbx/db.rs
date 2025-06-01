@@ -5,7 +5,7 @@ use std::ffi::CString;
 use std::mem::size_of;
 use std::ptr;
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub(crate) struct Db {
     pub(crate) dbi: mdbx_sys::MDBX_dbi,
     pub dup: bool,
@@ -39,6 +39,10 @@ impl Db {
         }
 
         Ok(Self { dbi, dup })
+    }
+
+    pub fn mock() -> Self {
+        Self { dbi: 0, dup: false }
     }
 
     pub fn stat(&self, txn: &Txn) -> Result<(u64, u64)> {

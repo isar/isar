@@ -1,5 +1,7 @@
+use regex::Regex;
+
 use super::sql::{offset_limit_sql, select_properties_sql, update_properties_sql};
-use super::sql_filter::FN_FILTER_JSON_COND_PTR_TYPE;
+use super::sql_functions::FN_FILTER_JSON_COND_PTR_TYPE;
 use super::sqlite_collection::{SQLiteCollection, SQLiteProperty};
 use super::sqlite_reader::SQLiteReader;
 use super::sqlite_txn::SQLiteTxn;
@@ -15,6 +17,7 @@ use std::borrow::Cow;
 
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) enum QueryParam {
+    Null,
     Value(IsarValue),
     JsonCondition(JsonCondition),
 }
@@ -209,6 +212,7 @@ impl SQLiteQuery {
         for (i, params) in params.iter().enumerate() {
             let col = (i + offset) as u32;
             match params {
+                QueryParam::Null => stmt.bind_null(col)?,
                 QueryParam::Value(IsarValue::Bool(value)) => {
                     let value = if *value { 1 } else { 0 };
                     stmt.bind_int(col, value)?;

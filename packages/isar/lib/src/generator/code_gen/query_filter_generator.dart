@@ -31,6 +31,7 @@ class _FilterGenerator {
           code += generateGreater(property);
           code += generateLess(property);
           code += generateBetween(property);
+          code += generateIsIn(property);
         }
       }
 
@@ -39,6 +40,7 @@ class _FilterGenerator {
         code += generateStringEndsWith(property);
         code += generateStringContains(property);
         code += generateStringMatches(property);
+        code += generateStringRegex(property);
         code += generateStringIsEmpty(property);
         code += generateStringIsNotEmpty(property);
       }
@@ -290,6 +292,21 @@ class _FilterGenerator {
     }''';
   }
 
+  String generateStringRegex(PropertyInfo p) {
+    return '''
+    ${mPrefix(p)}Regex(String regex, {bool caseSensitive = true}) {
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(
+          RegexCondition(
+            property: ${p.index},
+            regex: regex,
+            caseSensitive: caseSensitive,
+          ),
+        );
+      });
+    }''';
+  }
+
   String generateStringIsEmpty(PropertyInfo p) {
     return '''
     ${mPrefix(p)}IsEmpty() {
@@ -343,6 +360,24 @@ class _FilterGenerator {
       return QueryBuilder.apply(this, (query) {
         return query.addFilterCondition(
           const GreaterOrEqualCondition(property: ${p.index}, value: null),
+        );
+      });
+    }''';
+  }
+
+  String generateIsIn(PropertyInfo p) {
+    final optionalParams = optional([
+      if (p.type.isString && !p.isEnum) 'bool caseSensitive = true',
+    ]);
+    return '''
+    ${mPrefix(p)}IsIn(List<${p.scalarDartType}> values, $optionalParams) {
+      return QueryBuilder.apply(this, (query) {
+        return query.addFilterCondition(
+          IsInCondition(
+            property: ${p.index},
+            values: values,
+            ${p.type.isString && !p.isEnum ? 'caseSensitive: caseSensitive,' : ''}
+          ),
         );
       });
     }''';

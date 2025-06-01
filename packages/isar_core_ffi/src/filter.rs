@@ -194,6 +194,38 @@ pub unsafe extern "C" fn isar_filter_string_matches(
 }
 
 #[unsafe(no_mangle)]
+pub unsafe extern "C" fn isar_filter_string_regex(
+    property_index: u16,
+    value: *mut IsarValue,
+    case_sensitive: bool,
+) -> *const Filter {
+    let value = *Box::from_raw(value);
+    let filter = Filter::new_condition(
+        property_index,
+        ConditionType::StringRegex,
+        vec![Some(value)],
+        case_sensitive,
+    );
+    Box::into_raw(Box::new(filter))
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn isar_filter_in(
+    property_index: u16,
+    values: *mut Option<IsarValue>,
+    length: u32,
+    case_sensitive: bool,
+) -> *const Filter {
+    let values = Vec::from_raw_parts(
+        values as *mut Option<IsarValue>,
+        length as usize,
+        length as usize,
+    );
+    let filter = Filter::new_condition(property_index, ConditionType::In, values, case_sensitive);
+    Box::into_raw(Box::new(filter))
+}
+
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn isar_filter_nested(
     property_index: u16,
     filter: *mut Filter,
