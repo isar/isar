@@ -10,15 +10,6 @@ sealed class Filter {
   static const epsilon = 0.00001;
 }
 
-/// Filter matching values that are `null`.
-final class IsNullCondition extends Filter {
-  /// Filters the results to only include objects where the property is null.
-  const IsNullCondition({required this.property});
-
-  /// Index of the property that should be null.
-  final int property;
-}
-
 /// Filter checking for equality.
 final class EqualCondition extends Filter {
   /// Filters the results to only include objects where the property equals
@@ -42,7 +33,7 @@ final class EqualCondition extends Filter {
   /// considered equal.
   final double epsilon;
 
-  /// Should the condition be case sensitive?
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -69,7 +60,7 @@ final class GreaterCondition extends Filter {
   /// considered equal.
   final double epsilon;
 
-  /// Should the condition be case sensitive?
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -96,7 +87,7 @@ final class GreaterOrEqualCondition extends Filter {
   /// considered equal.
   final double epsilon;
 
-  /// Should the condition be case sensitive?
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -123,7 +114,7 @@ final class LessCondition extends Filter {
   /// considered equal.
   final double epsilon;
 
-  /// Should the condition be case sensitive?
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -150,7 +141,7 @@ final class LessOrEqualCondition extends Filter {
   /// considered equal.
   final double epsilon;
 
-  /// Should the condition be case sensitive?
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -181,7 +172,7 @@ final class BetweenCondition extends Filter {
   /// considered equal.
   final double epsilon;
 
-  /// Should the condition be case sensitive?
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -204,7 +195,7 @@ final class StartsWithCondition extends Filter {
   /// The prefix to match against.
   final String value;
 
-  /// Should the condition be case sensitive?
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -227,7 +218,7 @@ final class EndsWithCondition extends Filter {
   /// The suffix to match against.
   final String value;
 
-  /// Should the condition be case sensitive?
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -249,7 +240,7 @@ final class ContainsCondition extends Filter {
   /// The String to match against.
   final String value;
 
-  /// Should the condition be case sensitive?
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
@@ -271,48 +262,17 @@ final class MatchesCondition extends Filter {
   /// The wildcard to match against.
   final String wildcard;
 
-  /// Should matching be case sensitive?
+  /// Should Strings be case sensitive?
   final bool caseSensitive;
 }
 
-/// Filter matching values that match the regex.
-final class RegexCondition extends Filter {
-  /// Filters the results to only include objects where the property matches
-  /// the [regex].
-  const RegexCondition({
-    required this.property,
-    required this.regex,
-    this.caseSensitive = true,
-  });
+/// Filter matching values that are `null`.
+final class IsNullCondition extends Filter {
+  /// Filters the results to only include objects where the property is null.
+  const IsNullCondition({required this.property});
 
-  /// Index of the property that should be matched.
+  /// Index of the property that should be null.
   final int property;
-
-  /// The regex to match against.
-  final String regex;
-
-  /// Should matching be case sensitive?
-  final bool caseSensitive;
-}
-
-/// Filter matching values that are in the given list.
-final class IsInCondition extends Filter {
-  /// Filters the results to only include objects where the property is in the
-  /// given list of [values].
-  const IsInCondition({
-    required this.property,
-    required this.values,
-    this.caseSensitive = true,
-  });
-
-  /// Index of the property that should be in the list.
-  final int property;
-
-  /// The list of values that the property should be in.
-  final List<Object?> values;
-
-  /// Should the condition be case sensitive?
-  final bool caseSensitive;
 }
 
 /// Logical AND.
@@ -321,7 +281,7 @@ class AndGroup extends Filter {
   ///
   /// Matches when all [filters] match.
   const AndGroup(this.filters)
-    : assert(filters.length > 0, 'And filters must not be empty');
+      : assert(filters.length > 0, 'And filters must not be empty');
 
   /// The filters of this group.
   final List<Filter> filters;
@@ -333,7 +293,7 @@ class OrGroup extends Filter {
   ///
   /// Matches when any of the [filters] matches.
   const OrGroup(this.filters)
-    : assert(filters.length > 0, 'Or filters must not be empty');
+      : assert(filters.length > 0, 'Or filters must not be empty');
 
   /// The filters of this group.
   final List<Filter> filters;
@@ -353,7 +313,10 @@ class NotGroup extends Filter {
 /// Filter condition based on an embedded object.
 class ObjectFilter extends Filter {
   /// Create a filter condition based on an embedded object.
-  const ObjectFilter({required this.property, required this.filter});
+  const ObjectFilter({
+    required this.property,
+    required this.filter,
+  });
 
   /// Index of the property containing the embedded object.
   final int property;
