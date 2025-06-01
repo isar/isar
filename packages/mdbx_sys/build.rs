@@ -56,16 +56,15 @@ fn main() {
     env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "12.0");
     env::set_var("RUST_BACKTRACE", "full");
 
-    let cargo_manifest_dir = PathBuf::from(&env::var("CARGO_MANIFEST_DIR").unwrap());
-    let mut mdbx = cargo_manifest_dir.clone();
+    let mut mdbx = PathBuf::from(&env::var("CARGO_MANIFEST_DIR").unwrap());
     mdbx.push("libmdbx");
 
     // Check if mdbx.h already exists - if so, skip download/extraction
     if !mdbx.join("mdbx.h").exists() {
-        println!("mdbx.h not found at {:?}, downloading libmdbx...", mdbx.join("mdbx.h"));
+        println!("mdbx.h not found, downloading libmdbx...");
         
-        let _ = fs::remove_dir_all(&mdbx);
-        fs::create_dir(&mdbx).unwrap();
+        let _ = fs::remove_dir_all("libmdbx");
+        fs::create_dir("libmdbx").unwrap();
 
         // download amalgamated source
         let curl_result = Command::new("curl")
@@ -75,7 +74,7 @@ fn main() {
                 "https://libmdbx.dqdkfa.ru/release/libmdbx-amalgamated-{}.tar.xz",
                 LIBMDBX_VERSION
             ))
-            .current_dir(&mdbx)
+            .current_dir("libmdbx")
             .output();
 
         if let Err(e) = curl_result {
@@ -90,8 +89,6 @@ fn main() {
                    String::from_utf8_lossy(&curl_output.stderr));
         }
 
-        println!("Downloaded libmdbx archive successfully");
-
         // unzip file with strip-components to flatten directory structure
         let tar_result = if cfg!(windows) {
             // On Windows, try different approaches
@@ -99,7 +96,7 @@ fn main() {
             cmd.arg("-xf")
                .arg(format!("libmdbx-amalgamated-{}.tar.xz", LIBMDBX_VERSION))
                .arg("--strip-components=1")
-               .current_dir(&mdbx);
+               .current_dir("libmdbx");
             
             let output = cmd.output();
             if output.is_err() {
@@ -108,7 +105,7 @@ fn main() {
                 Command::new("tar")
                     .arg("-xf")
                     .arg(format!("libmdbx-amalgamated-{}.tar.xz", LIBMDBX_VERSION))
-                    .current_dir(&mdbx)
+                    .current_dir("libmdbx")
                     .output()
             } else {
                 output
@@ -118,7 +115,7 @@ fn main() {
                 .arg("-xf")
                 .arg(format!("libmdbx-amalgamated-{}.tar.xz", LIBMDBX_VERSION))
                 .arg("--strip-components=1")
-                .current_dir(&mdbx)
+                .current_dir("libmdbx")
                 .output()
         };
 
@@ -129,10 +126,10 @@ fn main() {
         let tar_output = tar_result.unwrap();
         if !tar_output.status.success() {
             println!("tar with strip-components failed, trying to move files manually...");
-            println!("tar stderr: {}", String::from_utf8_lossy(&tar_output.stderr));
             
             // Look for extracted directory and move files
-            if let Ok(entries) = fs::read_dir(&mdbx) {
+            let libmdbx_dir = PathBuf::from("libmdbx");
+            if let Ok(entries) = fs::read_dir(&libmdbx_dir) {
                 for entry in entries {
                     if let Ok(entry) = entry {
                         let path = entry.path();
@@ -144,11 +141,9 @@ fn main() {
                                     if let Ok(sub_entry) = sub_entry {
                                         let src = sub_entry.path();
                                         let filename = src.file_name().unwrap();
-                                        let dst = mdbx.join(filename);
+                                        let dst = libmdbx_dir.join(filename);
                                         if let Err(e) = fs::rename(&src, &dst) {
                                             println!("Failed to move {:?} to {:?}: {}", src, dst, e);
-                                        } else {
-                                            println!("Moved {:?} to {:?}", src, dst);
                                         }
                                     }
                                 }
@@ -160,28 +155,15 @@ fn main() {
                     }
                 }
             }
-        } else {
-            println!("Extracted libmdbx archive successfully");
         }
     } else {
-        println!("mdbx.h already exists at {:?}, skipping download", mdbx.join("mdbx.h"));
+        println!("mdbx.h already exists, skipping download");
     }
 
     // Verify mdbx.h exists before proceeding
     if !mdbx.join("mdbx.h").exists() {
-        // List contents of libmdbx directory for debugging
-        println!("Listing contents of {:?}:", mdbx);
-        if let Ok(entries) = fs::read_dir(&mdbx) {
-            for entry in entries {
-                if let Ok(entry) = entry {
-                    println!("  - {:?}", entry.path());
-                }
-            }
-        }
         panic!("mdbx.h still not found at {}. Check if libmdbx was properly downloaded and extracted.", mdbx.join("mdbx.h").display());
     }
-
-    println!("Found mdbx.h at {:?}, proceeding with build", mdbx.join("mdbx.h"));
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
