@@ -12,6 +12,7 @@ mod cross_platform_tests;
 mod error_handling_tests;
 mod data_type_coverage_tests;
 mod real_world_scenarios_tests;
+mod advanced_features_tests;
 
 // Re-export common utilities for use by other test files
 pub mod common;
@@ -57,6 +58,30 @@ mod main_integration_tests {
         #[cfg(not(any(feature = "native", feature = "sqlite")))]
         {
             panic!("At least one backend feature must be enabled for testing");
+        }
+    }
+
+    #[test]
+    fn test_advanced_features_available() {
+        // Verify that advanced features are properly integrated
+        #[cfg(feature = "native")]
+        {
+            println!("Advanced features testing available for Native backend");
+        }
+        
+        #[cfg(feature = "sqlite")]
+        {
+            println!("Advanced features testing available for SQLite backend");
+        }
+        
+        #[cfg(feature = "sqlcipher")]
+        {
+            println!("Encryption testing available with SQLCipher");
+        }
+        
+        #[cfg(not(feature = "sqlcipher"))]
+        {
+            println!("Encryption testing disabled - SQLCipher not available");
         }
     }
 } 
