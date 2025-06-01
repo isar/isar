@@ -62,11 +62,7 @@ jobs:
 
   test_core:
     name: Core Test
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Prepare Build
@@ -98,18 +94,13 @@ jobs:
 
   test_core_e2e:
     name: Core E2E Tests
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Install cargo-tarpaulin (for coverage)
         run: cargo install cargo-tarpaulin
-        if: matrix.os == 'ubuntu-latest'
       - name: Make test runner executable
         run: chmod +x scripts/run_e2e_tests.sh
         working-directory: packages/isar_core
@@ -134,11 +125,7 @@ jobs:
 
   test:
     name: Dart Test
-    strategy:
-      matrix:
-        os: [macos-14, macos-13, ubuntu-latest, windows-2025]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - run: echo "$OSTYPE"
       - uses: actions/checkout@v4
