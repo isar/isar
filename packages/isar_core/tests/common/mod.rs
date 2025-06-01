@@ -35,6 +35,11 @@ pub fn error_handling_id(offset: u32) -> u32 {
     1500 + offset
 }
 
+/// Get instance IDs for data type coverage tests (1600-1899)
+pub fn data_type_coverage_id(offset: u32) -> u32 {
+    1600 + offset
+}
+
 /// Test helper to create a temporary directory for database files
 pub fn create_test_dir() -> TempDir {
     tempfile::tempdir().expect("Failed to create temp directory")
