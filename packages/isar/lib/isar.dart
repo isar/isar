@@ -45,12 +45,12 @@ part 'src/query_extensions.dart';
 
 /// @nodoc
 @protected
-const isarProtected = protected;
+const Object isarProtected = protected;
 
 /// @nodoc
 @protected
-const isarJsonEncode = jsonEncode;
+const String Function(Object?) isarJsonEncode = jsonEncode;
 
 /// @nodoc
 @protected
-const isarJsonDecode = jsonDecode;
+const dynamic Function(String) isarJsonDecode = jsonDecode;

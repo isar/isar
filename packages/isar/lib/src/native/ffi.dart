@@ -42,5 +42,5 @@ extension PointerUint32X on Pointer<Uint32> {
   int get u32Value => value;
 }
 
-const malloc = ffi.malloc;
-final free = ffi.malloc.free;
+const Allocator malloc = ffi.malloc;
+final void Function(Pointer<NativeType>) free = ffi.malloc.free;

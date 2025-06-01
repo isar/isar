@@ -1,5 +1,5 @@
 ---
-title:  کثیر الگ تھلگ استعمال
+title: کثیر الگ تھلگ استعمال
 ---
 
 # کثیر الگ تھلگ استعمال
@@ -31,8 +31,8 @@ void main() {
   // Open Isar in the UI isolate
   final dir = await getApplicationDocumentsDirectory();
 
-  final isar = await Isar.open(
-    [MessageSchema],
+  final isar = await Isar.openAsync(
+    schemas: [MessageSchema],
     directory: dir.path,
     name: 'myInstance',
   );
@@ -57,8 +57,8 @@ Future createDummyMessages(int count) async {
   // we don't need the path here because the instance is already open
   final dir = await getApplicationDocumentsDirectory();
 
-  final isar = await Isar.open(
-    [PostSchema],
+  final isar = await Isar.openAsync(
+    schemas: [PostSchema],
     directory: dir.path,
     name: 'myInstance',
   );

@@ -17,7 +17,7 @@ title: Schema
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -78,7 +78,7 @@ Isar 会保存 Collection 类中所有的公开属性。如下例子所示，给
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -99,7 +99,7 @@ class User {
 
 @Collection(ignore: {'profilePicture'})
 class Member extends User {
-  Id? id;
+  late int id;
 
   String? firstName;
 
@@ -155,7 +155,7 @@ Isar 支持以下数据类型：
 ```dart
 @collection
 class TestCollection {
-  Id? id;
+  late int id;
 
   late byte byteValue;
 
@@ -216,7 +216,7 @@ Isar 不会保存日期类型数据中的时区信息。相反，它会在存储
 ```dart
 @collection
 class EnumCollection {
-  Id? id;
+  late int id;
 
   @enumerated // 等价于 EnumType.ordinal
   late TestEnum byteIndex; // 不能为空值
@@ -254,7 +254,7 @@ enum TestEnum {
 ```dart
 @collection
 class Email {
-  Id? id;
+  late int id;
 
   String? title;
 

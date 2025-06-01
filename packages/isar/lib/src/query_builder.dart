@@ -26,7 +26,7 @@ class QueryBuilder<OBJ, R, S> {
   @protected
   static QueryBuilder<OBJ, R, S> apply<OBJ, R, S>(
     QueryBuilder<OBJ, dynamic, dynamic> qb,
-    // ignore: library_private_types_in_public_api
+    // ignore: library_private_types_in_public_api - internal type for query ops
     _QueryBuilder<OBJ> Function(_QueryBuilder<OBJ> query) transform,
   ) {
     return QueryBuilder._(transform(qb._query));

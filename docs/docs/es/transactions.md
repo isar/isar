@@ -40,7 +40,7 @@ Cuando una operación de la base de datos falla, la transacción se aborta y ya 
 ```dart
 @collection
 class Contact {
-  Id? id;
+  late int id;
 
   String? name;
 }

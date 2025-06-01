@@ -31,8 +31,8 @@ void main() {
   // Isar im UI-Isolate öffnen
   final dir = await getApplicationDocumentsDirectory();
 
-  final isar = await Isar.open(
-    [MessageSchema],
+  final isar = await Isar.openAsync(
+    schemas: [MessageSchema],
     directory: dir.path,
     name: 'myInstance',
   );
@@ -56,9 +56,9 @@ void main() {
 Future createDummyMessages(int count) async {
   // Wir benötigen hier keinen Pfad, weil die Instanz schon offen ist
   final dir = await getApplicationDocumentsDirectory();
-  
-  final isar = await Isar.open(
-    [PostSchema],
+
+  final isar = await Isar.openAsync(
+    schemas: [PostSchema],
     directory: dir.path,
     name: 'myInstance',
   );

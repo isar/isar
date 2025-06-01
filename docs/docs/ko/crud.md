@@ -14,8 +14,8 @@ Isar 인스턴스에서 사용하고 싶은 모든 스키마를 지정합니다.
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [RecipeSchema],
+final isar = await Isar.openAsync(
+  schemas: [RecipeSchema],
   directory: dir.path,
 );
 ```
@@ -48,7 +48,7 @@ Isar 에서 지정된 타입의 새로운 객체를 찾고 쿼리하고 생성�
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 

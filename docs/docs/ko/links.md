@@ -23,14 +23,14 @@ title: 링크
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -91,7 +91,7 @@ isar.writeTxnSync(() {
 ```dart
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 

@@ -14,8 +14,8 @@ Fournissez tous les schémas que vous souhaitez utiliser avec l'instance Isar. S
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [ContactSchema],
+final isar = await Isar.openAsync(
+  schemas: [RecipeSchema],
   directory: dir.path,
 );
 ```
@@ -23,7 +23,7 @@ final isar = await Isar.open(
 Nous pouvons utiliser la configuration par défaut ou fournir certains des paramètres suivants:
 
 | Config              | Description                                                                                                                                                                                                                              |
-|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`              | Ouvrez plusieurs instances avec des noms distincts. Par défaut, `"default"` est utilisé.                                                                                                                                                 |
 | `directory`         | L'emplacement de stockage de cette instance. Nous pouvons passer un chemin relatif ou absolu. Par défaut, `NSDocumentDirectory` est utilisé pour iOS et `getDataDirectory` pour Android. Non requis pour Web.                            |
 | `relaxedDurability` | Assouplit la garantie de durabilité pour augmenter les performances d'écriture. En cas de crash du système (pas de crash de l'application), il est possible de perdre la dernière transaction validée. La corruption n'est pas possible. |
@@ -47,7 +47,7 @@ Pour les exemples ci-dessous, nous supposons que nous avons une collection `Reci
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 
@@ -64,6 +64,7 @@ Toutes nos collections vivent dans l'instance Isar. Nous pouvons obtenir la coll
 ```dart
 final recipes = isar.recipes;
 ```
+
 N'oubliez pas d'importer les méthodes d'extension afin d'accéder à la collection depuis l'instance isar.
 
 C'était facile! Si vous ne voulez pas utiliser les accesseurs de collection, vous pouvez aussi utiliser la méthode `collection()`:

@@ -96,7 +96,7 @@ class IsolateWorker {
           completer.completeError(message.$2!, message.$3);
         }
       } else {
-        // ignore: avoid_print
+        // ignore: avoid_print - debug output for unexpected isolate messages
         print('Unknown message: $message');
       }
     }
@@ -119,7 +119,7 @@ class IsolateWorker {
           try {
             final result = msg(isar);
             sp.send((result, null, null));
-          } catch (e, stack) {
+          } on Exception catch (e, stack) {
             sp.send((null, e, stack));
           }
         } else {

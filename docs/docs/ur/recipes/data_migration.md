@@ -1,5 +1,4 @@
 ---
-
 title: ڈیٹا مائیگریشن
 ---
 
@@ -9,7 +8,6 @@ title: ڈیٹا مائیگریشن
 
 ہم اس مثال میں پورے ڈیٹا بیس کے لیے ایک ہی ورژن استعمال کرنا چاہتے ہیں۔ ہم موجودہ ورژن کو ذخیرہ کرنے کے لیے مشترکہ ترجیحات کا استعمال کرتے ہیں اور اس کا موازنہ اس ورژن سے کرتے ہیں جس میں ہم منتقل ہونا چاہتے ہیں۔ اگر ورژن مماثل نہیں ہیں، تو ہم ڈیٹا کو منتقل کرتے ہیں اور ورژن کو اپ ڈیٹ کرتے ہیں۔
 
-
 ::: warning
 آپ ہر مجموعہ کو اس کا اپنا ورژن بھی دے سکتے ہیں اور انہیں انفرادی طور پر منتقل کر سکتے ہیں۔
 :::
@@ -17,10 +15,11 @@ title: ڈیٹا مائیگریشن
 تصور کریں کہ ہمارے پاس سالگرہ والے فیلڈ کے ساتھ صارف کا مجموعہ ہے۔ ہماری ایپ کے ورژن 2 میں، ہمیں عمر کی بنیاد پر صارفین سے استفسار کرنے کے لیے ایک اضافی پیدائشی سال کی فیلڈ کی ضرورت ہے۔
 
 Version 1:
+
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -29,10 +28,11 @@ class User {
 ```
 
 Version 2:
+
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -50,8 +50,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   final dir = await getApplicationDocumentsDirectory();
-  
-  final isar = await Isar.open(
+
+  final isar = await Isar.openAsync(
     [UserSchema],
     directory: dir.path,
   );

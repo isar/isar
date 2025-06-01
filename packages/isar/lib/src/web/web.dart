@@ -45,7 +45,7 @@ class IsarCorePlatformImpl implements IsarCorePlatform {
   const IsarCorePlatformImpl();
 
   @override
-  // ignore: invalid_override
+  // ignore: invalid_runtime_check_with_js_interop_types, invalid_override - web platform specific
   FutureOr<IsarCoreBindings> initializeBindings([String? library]) async {
     final url = library ?? 'https://unpkg.com/isar@${Isar.version}/isar.wasm';
 
@@ -57,10 +57,11 @@ class IsarCorePlatformImpl implements IsarCorePlatform {
       import,
     );
     final wasm = await promise.toDart;
-    return wasm.instance.exports as JSIsar;
+    return wasm.instance.exports as IsarCoreBindings;
   }
 
   void _jsError(int ptr) {
+    // ignore: invalid_runtime_check_with_js_interop_types - This is web-specific FFI code, cast is intentional.
     final buffer = (IsarCore.b as JSIsar).u8Heap;
     var strLen = 0;
     var i = ptr;
@@ -69,7 +70,7 @@ class IsarCorePlatformImpl implements IsarCorePlatform {
       i++;
     }
     final str = utf8.decode(buffer.sublist(ptr, ptr + strLen));
-    // ignore: avoid_print
+    // ignore: avoid_print - debug output for WebAssembly errors
     print(str);
   }
 

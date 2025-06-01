@@ -15,7 +15,7 @@ For example, this `Product` collection is entirely unordered.
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -50,7 +50,7 @@ final expensiveProducts = await isar.products.filter()
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -110,7 +110,7 @@ The `.anyX()` where clause tells Isar to use an index just for sorting. You can 
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true)
   late String username;
@@ -147,7 +147,7 @@ print(await isar.user.where().findAll());
 ```dart
 @collection
 class User {
-  Id? id;
+  late int id;
 
   @Index(unique: true, replace: true)
   late String username;
@@ -185,7 +185,7 @@ final user1 = User()
   ..age = 25;
 
 // user does not exist so this is the same as put()
-await isar.users.putByUsername(user1); 
+await isar.users.putByUsername(user1);
 await isar.user.where().findAll(); // -> [{id: 1, username: 'user1', age: 25}]
 
 final user2 = User()
@@ -206,7 +206,7 @@ All indexes on `String` and `List<String>` properties are case-sensitive by defa
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   @Index(caseSensitive: false)
   late String name;
@@ -255,7 +255,7 @@ Use `IndexType.hashElements` for `List<String>` where you need `elementEqualTo` 
 ```dart
 @collection
 class Person {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -320,7 +320,7 @@ If you index a list using `IndexType.value`, Isar خود بخود ملٹی ان�
 ```dart
 @collection
 class Product {
-  Id? id;
+  late int id;
 
   late String description;
 

@@ -22,7 +22,7 @@ void main() {
             {'a|${file.path}': content.join('\n')},
             reader: await PackageAssetReader.currentIsolate(),
           );
-        } catch (e) {
+        } on Exception catch (e) {
           error = e.toString();
         }
 

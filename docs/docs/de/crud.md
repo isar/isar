@@ -14,8 +14,8 @@ Gib alle Schemas an, die du mit der Isar-Instanz verwenden möchtest. Wenn du me
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [RecipeSchema],
+final isar = await Isar.openAsync(
+  schemas: [RecipeSchema],
   directory: dir.path,
 );
 ```
@@ -45,7 +45,7 @@ Den folgenden Beispielen liegt die Collection `Recipe` zugrunde, die wie folgt d
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 

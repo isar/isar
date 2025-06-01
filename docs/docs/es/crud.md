@@ -14,8 +14,8 @@ Provee todos los esquemas que quieras usar con la instancia Isar. Si abres múlt
 
 ```dart
 final dir = await getApplicationDocumentsDirectory();
-final isar = await Isar.open(
-  [ContactSchema],
+final isar = await Isar.openAsync(
+  schemas: [ContactSchema],
   directory: dir.path,
 );
 ```
@@ -47,7 +47,7 @@ Para los ejemplos siguientes, asumimos que tenemos una colección `Recipe` defin
 ```dart
 @collection
 class Recipe {
-  Id? id;
+  late int id;
 
   String? name;
 

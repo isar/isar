@@ -26,7 +26,7 @@ Wir benutzen das folgende Modell für die Beispiele weiter unten:
 ```dart
 @collection
 class Shoe {
-  Id? id;
+  late int id;
 
   int? size;
 
@@ -143,7 +143,7 @@ Zusätzlich zu den vorher genannten Abfragebedingungen, bieten String-Werte ein 
 Alle String-Operationen haben eine optionale `caseSensitive`-Eigenschaft, die standardmäßig `true` ist.
 
 **Platzhalter**  
-Der [Ausdruck eines Platzhalter-Strings](https://de.wikipedia.org/wiki/Wildcard_(Informatik)) ist ein String, der normale Zeichen mit zwei speziellen Platzhalter-Zeichen verwendet:
+Der [Ausdruck eines Platzhalter-Strings](<https://de.wikipedia.org/wiki/Wildcard_(Informatik)>) ist ein String, der normale Zeichen mit zwei speziellen Platzhalter-Zeichen verwendet:
 
 - Der `*` Platzhalter trifft auf keines oder mehr von jedem Zeichen zu.
 - Der `?` Platzhalter trifft auf jedes Einzelzeichen zu.  
@@ -199,7 +199,7 @@ Abfragen können sogar auf Listen gestellt werden:
 
 ```dart
 class Tweet {
-  Id? id;
+  late int id;
 
   String? text;
 
@@ -236,7 +236,7 @@ Eingebettete Objekte sind eines von Isars nützlichsten Features. Sie können se
 ```dart
 @collection
 class Car {
-  Id? id;
+  late int id;
 
   Brand? brand;
 }
@@ -281,14 +281,14 @@ Beachte, dass Link-Abfragen teuer sein können, weil Isar die verlinkten Objekte
 ```dart
 @collection
 class Teacher {
-  Id? id;
+  late int id;
 
   late String subject;
 }
 
 @collection
 class Student {
-  Id? id;
+  late int id;
 
   late String name;
 
@@ -340,7 +340,7 @@ Lass uns Indizes zu der Schuh-Collection hinzufügen:
 ```dart
 @collection
 class Shoe with IsarObject {
-  Id? id;
+  late int id;
 
   @Index()
   Id? size;

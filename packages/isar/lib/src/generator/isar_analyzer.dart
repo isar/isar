@@ -1,3 +1,7 @@
+// Allow the use of deprecated members during the transition period.
+// TODO(sergiyvoloshyn): Remove this ignore once the code is updated.
+// ignore_for_file: deprecated_member_use
+
 part of 'isar_generator.dart';
 
 class _IsarAnalyzer {
