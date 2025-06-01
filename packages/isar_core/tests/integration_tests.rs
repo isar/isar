@@ -6,7 +6,7 @@
 use tempfile::TempDir;
 use isar_core::core::schema::*;
 use isar_core::core::data_type::DataType;
-use isar_core::core::instance::{IsarInstance, CompactCondition};
+use isar_core::core::instance::IsarInstance;
 
 #[cfg(feature = "native")]
 use isar_core::native::native_instance::NativeInstance;
@@ -22,108 +22,41 @@ fn create_test_dir() -> TempDir {
 /// Create a test schema for User collection
 fn create_user_schema() -> IsarSchema {
     let properties = vec![
-        PropertySchema {
-            name: Some("name".to_string()),
-            data_type: DataType::String,
-            collection: None,
-        },
-        PropertySchema {
-            name: Some("age".to_string()),
-            data_type: DataType::Int,
-            collection: None,
-        },
-        PropertySchema {
-            name: Some("email".to_string()),
-            data_type: DataType::String,
-            collection: None,
-        },
-        PropertySchema {
-            name: Some("isActive".to_string()),
-            data_type: DataType::Bool,
-            collection: None,
-        },
+        PropertySchema::new("name", DataType::String, None),
+        PropertySchema::new("age", DataType::Int, None),
+        PropertySchema::new("email", DataType::String, None),
+        PropertySchema::new("isActive", DataType::Bool, None),
     ];
     
     let indexes = vec![
-        IndexSchema {
-            name: "name_index".to_string(),
-            properties: vec!["name".to_string()],
-            unique: false,
-            hash: false,
-        },
-        IndexSchema {
-            name: "email_index".to_string(),
-            properties: vec!["email".to_string()],
-            unique: true,
-            hash: false,
-        },
+        IndexSchema::new("name_index", vec!["name"], false, false),
+        IndexSchema::new("email_index", vec!["email"], true, false), // unique
     ];
     
-    IsarSchema {
-        name: "User".to_string(),
-        id_name: Some("id".to_string()),
-        properties,
-        indexes,
-        embedded: false,
-        version: 0,
-    }
+    IsarSchema::new("User", Some("id"), properties, indexes, false)
 }
 
 /// Create a test schema for Post collection with relationships
 fn create_post_schema() -> IsarSchema {
     let properties = vec![
-        PropertySchema {
-            name: Some("title".to_string()),
-            data_type: DataType::String,
-            collection: None,
-        },
-        PropertySchema {
-            name: Some("content".to_string()),
-            data_type: DataType::String,
-            collection: None,
-        },
-        PropertySchema {
-            name: Some("userId".to_string()),
-            data_type: DataType::Long,
-            collection: None,
-        },
-        PropertySchema {
-            name: Some("tags".to_string()),
-            data_type: DataType::StringList,
-            collection: None,
-        },
+        PropertySchema::new("title", DataType::String, None),
+        PropertySchema::new("content", DataType::String, None),
+        PropertySchema::new("userId", DataType::Long, None),
+        PropertySchema::new("tags", DataType::StringList, None),
     ];
     
     let indexes = vec![
-        IndexSchema {
-            name: "title_index".to_string(),
-            properties: vec!["title".to_string()],
-            unique: false,
-            hash: false,
-        },
-        IndexSchema {
-            name: "user_index".to_string(),
-            properties: vec!["userId".to_string()],
-            unique: false,
-            hash: false,
-        },
+        IndexSchema::new("title_index", vec!["title"], false, false),
+        IndexSchema::new("user_index", vec!["userId"], false, false),
     ];
     
-    IsarSchema {
-        name: "Post".to_string(),
-        id_name: Some("id".to_string()),
-        properties,
-        indexes,
-        embedded: false,
-        version: 0,
-    }
+    IsarSchema::new("Post", Some("id"), properties, indexes, false)
 }
 
 #[cfg(test)]
 #[cfg(feature = "native")]
 mod native_backend_tests {
     use super::*;
-    use std::sync::Arc;
 
     /// Test complete CRUD operations on native backend
     #[test]
@@ -148,10 +81,11 @@ mod native_backend_tests {
             let txn = instance.begin_txn(true).expect("Failed to begin transaction");
             
             // Test basic operations through cursor
-            let mut cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
-            
-            // Insert operation would be done through cursor or insert API
-            // The actual API may differ from what we expect here
+            {
+                let _cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
+                // Insert operation would be done through cursor or insert API
+                // The actual API may differ from what we expect here
+            } // cursor dropped here
             
             instance.commit_txn(txn).expect("Failed to commit transaction");
         }
@@ -161,7 +95,9 @@ mod native_backend_tests {
             let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
             
             // Test query operations through cursor
-            let _cursor = instance.cursor(&txn, 0).expect("Failed to get read cursor");
+            {
+                let _cursor = instance.cursor(&txn, 0).expect("Failed to get read cursor");
+            } // cursor dropped here
             
             instance.abort_txn(txn);
         }
@@ -192,7 +128,9 @@ mod native_backend_tests {
         // Test basic operations with initial schema
         {
             let txn = instance.begin_txn(true).expect("Failed to begin transaction");
-            let _cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
+            {
+                let _cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
+            } // cursor dropped here
             instance.commit_txn(txn).expect("Failed to commit");
         }
         
@@ -214,8 +152,10 @@ mod native_backend_tests {
         // Verify both collections are available
         {
             let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
-            let _user_cursor = instance.cursor(&txn, 0).expect("Failed to get user cursor");
-            let _post_cursor = instance.cursor(&txn, 1).expect("Failed to get post cursor");
+            {
+                let _user_cursor = instance.cursor(&txn, 0).expect("Failed to get user cursor");
+                let _post_cursor = instance.cursor(&txn, 1).expect("Failed to get post cursor");
+            } // cursors dropped here
             instance.abort_txn(txn);
         }
         
@@ -245,16 +185,22 @@ mod native_backend_tests {
         let txn2 = instance.begin_txn(false).expect("Failed to begin read txn 2");
         
         // Both should be able to read
-        let _cursor1 = instance.cursor(&txn1, 0).expect("Cursor failed in txn1");
-        let _cursor2 = instance.cursor(&txn2, 0).expect("Cursor failed in txn2");
+        {
+            let _cursor1 = instance.cursor(&txn1, 0).expect("Cursor failed in txn1");
+            let _cursor2 = instance.cursor(&txn2, 0).expect("Cursor failed in txn2");
+        } // cursors dropped here
         
         instance.abort_txn(txn1);
         instance.abort_txn(txn2);
         
         // Test write transaction
-        let write_txn = instance.begin_txn(true).expect("Failed to begin write txn");
-        let _write_cursor = instance.cursor(&write_txn, 0).expect("Write cursor failed");
-        instance.commit_txn(write_txn).expect("Failed to commit write txn");
+        {
+            let write_txn = instance.begin_txn(true).expect("Failed to begin write txn");
+            {
+                let _write_cursor = instance.cursor(&write_txn, 0).expect("Write cursor failed");
+            } // cursor dropped here
+            instance.commit_txn(write_txn).expect("Failed to commit write txn");
+        }
         
         let closed = NativeInstance::close(instance, false);
         assert!(closed, "Failed to close database");
@@ -313,14 +259,18 @@ mod sqlite_backend_tests {
         // Test basic operations
         {
             let txn = instance.begin_txn(true).expect("Failed to begin transaction");
-            let _cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
+            {
+                let _cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
+            } // cursor dropped here
             instance.commit_txn(txn).expect("Failed to commit SQLite transaction");
         }
         
         // Test read operations
         {
             let txn = instance.begin_txn(false).expect("Failed to begin read transaction");
-            let _cursor = instance.cursor(&txn, 0).expect("Failed to get read cursor");
+            {
+                let _cursor = instance.cursor(&txn, 0).expect("Failed to get read cursor");
+            } // cursor dropped here
             instance.abort_txn(txn);
         }
     }
@@ -345,11 +295,13 @@ mod sqlite_backend_tests {
         // Test operations with complex schema
         {
             let txn = instance.begin_txn(true).expect("Failed to begin transaction");
-            let _cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
-            
-            // Test auto increment
-            let auto_id = instance.auto_increment(0);
-            assert!(auto_id >= 0, "Auto increment should be non-negative");
+            {
+                let _cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
+                
+                // Test auto increment
+                let auto_id = instance.auto_increment(0);
+                assert!(auto_id >= 0, "Auto increment should be non-negative");
+            } // cursor dropped here
             
             instance.commit_txn(txn).expect("Failed to commit transaction");
         }
@@ -380,9 +332,13 @@ mod cross_platform_tests {
                 None,
             ).expect("Failed to open native database");
             
-            let txn = instance.begin_txn(true).expect("Failed to begin transaction");
-            let _cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
-            instance.commit_txn(txn).expect("Failed to commit");
+            {
+                let txn = instance.begin_txn(true).expect("Failed to begin transaction");
+                {
+                    let _cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
+                } // cursor dropped here
+                instance.commit_txn(txn).expect("Failed to commit");
+            }
             let closed = NativeInstance::close(instance, false);
             assert!(closed, "Failed to close native database");
         }
@@ -399,9 +355,13 @@ mod cross_platform_tests {
                 None,
             ).expect("Failed to open SQLite database");
             
-            let txn = instance.begin_txn(true).expect("Failed to begin transaction");
-            let _cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
-            instance.commit_txn(txn).expect("Failed to commit");
+            {
+                let txn = instance.begin_txn(true).expect("Failed to begin transaction");
+                {
+                    let _cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
+                } // cursor dropped here
+                instance.commit_txn(txn).expect("Failed to commit");
+            }
         }
     }
 }
@@ -431,8 +391,10 @@ mod error_handling_tests {
         // Test invalid collection index
         {
             let txn = instance.begin_txn(false).expect("Failed to begin transaction");
-            let result = instance.cursor(&txn, 999); // Invalid collection index
-            assert!(result.is_err(), "Expected error for invalid collection index");
+            {
+                let result = instance.cursor(&txn, 999); // Invalid collection index
+                assert!(result.is_err(), "Expected error for invalid collection index");
+            } // result dropped here
             instance.abort_txn(txn);
         }
         
@@ -472,11 +434,12 @@ mod error_handling_tests {
         // Test read transaction isolation
         {
             let read_txn = instance.begin_txn(false).expect("Failed to begin read transaction");
-            let _cursor = instance.cursor(&read_txn, 0).expect("Failed to get cursor");
-            
-            // Start another read transaction
             let read_txn2 = instance.begin_txn(false).expect("Failed to begin second read transaction");
-            let _cursor2 = instance.cursor(&read_txn2, 0).expect("Failed to get second cursor");
+            
+            {
+                let _cursor = instance.cursor(&read_txn, 0).expect("Failed to get cursor");
+                let _cursor2 = instance.cursor(&read_txn2, 0).expect("Failed to get second cursor");
+            } // cursors dropped here
             
             instance.abort_txn(read_txn);
             instance.abort_txn(read_txn2);
@@ -527,6 +490,7 @@ mod performance_tests {
             let txn = instance.begin_txn(false).expect("Failed to begin transaction");
             for _ in 0..ITERATIONS {
                 let _cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
+                // cursor automatically dropped at end of scope
             }
             instance.abort_txn(txn);
         }
