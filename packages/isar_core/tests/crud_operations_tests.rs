@@ -1,7 +1,8 @@
 //! CRUD Operations Integration Tests
 //! 
-//! Comprehensive tests for Create, Read, Update, Delete operations
+//! Tests for Create, Read, Update, Delete operations across backends
 
+#[path = "common/mod.rs"]
 mod common;
 
 use common::*;

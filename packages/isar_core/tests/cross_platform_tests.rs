@@ -1,7 +1,8 @@
 //! Cross-Platform Integration Tests
 //! 
-//! Tests for compatibility and consistency between different backends
+//! Tests to ensure consistency between different backend implementations
 
+#[path = "common/mod.rs"]
 mod common;
 
 use common::*;

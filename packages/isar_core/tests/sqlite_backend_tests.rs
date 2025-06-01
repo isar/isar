@@ -2,6 +2,7 @@
 //! 
 //! Tests specific to the SQLite backend implementation
 
+#[path = "common/mod.rs"]
 mod common;
 
 use common::*;

@@ -1,7 +1,8 @@
-//! Query Functionality Integration Tests
+//! Query Integration Tests
 //! 
-//! Tests for filtering, sorting, aggregation, and complex query operations
+//! Tests for query operations, filtering, sorting, and advanced queries
 
+#[path = "common/mod.rs"]
 mod common;
 
 use common::*;

@@ -2,6 +2,7 @@
 //! 
 //! Tests for error scenarios, edge cases, and recovery behavior
 
+#[path = "common/mod.rs"]
 mod common;
 
 use common::*;

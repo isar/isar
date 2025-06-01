@@ -2,7 +2,10 @@
 //! 
 //! Tests specific to the native backend implementation
 
-use crate::common::*;
+#[path = "common/mod.rs"]
+mod common;
+
+use common::*;
 use isar_core::core::instance::IsarInstance;
 
 #[cfg(feature = "native")]
