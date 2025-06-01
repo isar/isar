@@ -75,13 +75,13 @@ final preReleaseVersionPod = StreamProvider.family<String?, String>((
 
 final assetsPod =
     StreamProvider.family<Map<AssetKind, String>, PackageNameVersion>((
-      ref,
-      package,
-    ) async* {
-      final manager = await ref.watch(packageManagerPod.future);
-      unawaited(manager.loadPackageAssets(package.name, package.version!));
-      yield* manager.watchPackageAssets(package.name, package.version!);
-    });
+  ref,
+  package,
+) async* {
+  final manager = await ref.watch(packageManagerPod.future);
+  unawaited(manager.loadPackageAssets(package.name, package.version!));
+  yield* manager.watchPackageAssets(package.name, package.version!);
+});
 
 class PackageNameVersion {
   const PackageNameVersion(this.name, [this.version]);

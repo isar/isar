@@ -34,10 +34,9 @@ class _PropertyBuilderState extends State<PropertyBuilder> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         InkWell(
-          onTap:
-              widget.children.isNotEmpty
-                  ? () => setState(() => _expanded = !_expanded)
-                  : null,
+          onTap: widget.children.isNotEmpty
+              ? () => setState(() => _expanded = !_expanded)
+              : null,
           customBorder: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),

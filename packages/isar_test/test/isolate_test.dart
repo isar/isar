@@ -22,18 +22,15 @@ class TestModel {
   }
 }
 
-final TestModel _obj1 =
-    TestModel()
-      ..id = 1
-      ..value = 'Model 1';
-final TestModel _obj2 =
-    TestModel()
-      ..id = 2
-      ..value = 'Model 2';
-final TestModel _obj3 =
-    TestModel()
-      ..id = 3
-      ..value = 'Model 3';
+final TestModel _obj1 = TestModel()
+  ..id = 1
+  ..value = 'Model 1';
+final TestModel _obj2 = TestModel()
+  ..id = 2
+  ..value = 'Model 2';
+final TestModel _obj3 = TestModel()
+  ..id = 3
+  ..value = 'Model 3';
 
 void main() {
   isarTest('Isolate test', () async {

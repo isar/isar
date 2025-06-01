@@ -31,13 +31,12 @@ class CollectionsList extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: ElevatedButton(
-            style:
-                collection.name == selectedCollection
-                    ? ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primaryContainer,
-                      foregroundColor: theme.colorScheme.onPrimaryContainer,
-                    )
-                    : null,
+            style: collection.name == selectedCollection
+                ? ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primaryContainer,
+                    foregroundColor: theme.colorScheme.onPrimaryContainer,
+                  )
+                : null,
             onPressed: () {
               onSelected(collection.name);
             },

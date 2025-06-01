@@ -71,53 +71,49 @@ class _EnumValue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enumName =
-        enumMap.entries
-            .firstWhere(
-              (e) => e.value == value,
-              orElse: () {
-                if (isByte) {
-                  return enumMap.entries.first;
-                } else {
-                  return const MapEntry('null', null);
-                }
-              },
-            )
-            .key;
+    final enumName = enumMap.entries.firstWhere(
+      (e) => e.value == value,
+      orElse: () {
+        if (isByte) {
+          return enumMap.entries.first;
+        } else {
+          return const MapEntry('null', null);
+        }
+      },
+    ).key;
     return GestureDetector(
-      onTapDown:
-          onUpdate == null
-              ? null
-              : (TapDownDetails details) async {
-                final nullValue = Object();
-                final newValue = await showMenu(
-                  context: context,
-                  position: RelativeRect.fromLTRB(
-                    details.globalPosition.dx,
-                    details.globalPosition.dy,
-                    100000,
-                    0,
-                  ),
-                  items: [
-                    if (!isByte)
-                      PopupMenuItem(
-                        value: nullValue,
-                        child: const Text('null'),
-                      ),
-                    for (final enumName in enumMap.keys)
-                      PopupMenuItem(
-                        value: enumMap[enumName],
-                        child: Text(enumName),
-                      ),
-                  ],
-                );
+      onTapDown: onUpdate == null
+          ? null
+          : (TapDownDetails details) async {
+              final nullValue = Object();
+              final newValue = await showMenu(
+                context: context,
+                position: RelativeRect.fromLTRB(
+                  details.globalPosition.dx,
+                  details.globalPosition.dy,
+                  100000,
+                  0,
+                ),
+                items: [
+                  if (!isByte)
+                    PopupMenuItem(
+                      value: nullValue,
+                      child: const Text('null'),
+                    ),
+                  for (final enumName in enumMap.keys)
+                    PopupMenuItem(
+                      value: enumMap[enumName],
+                      child: Text(enumName),
+                    ),
+                ],
+              );
 
-                if (newValue != null) {
-                  onUpdate?.call(
-                    !identical(newValue, nullValue) ? newValue : null,
-                  );
-                }
-              },
+              if (newValue != null) {
+                onUpdate?.call(
+                  !identical(newValue, nullValue) ? newValue : null,
+                );
+              }
+            },
       child: Text(
         enumName,
         style: GoogleFonts.jetBrainsMono(
@@ -138,31 +134,30 @@ class _BoolValue extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown:
-          onUpdate == null
-              ? null
-              : (TapDownDetails details) async {
-                const nullValue = Object();
-                final newValue = await showMenu(
-                  context: context,
-                  position: RelativeRect.fromLTRB(
-                    details.globalPosition.dx,
-                    details.globalPosition.dy,
-                    100000,
-                    0,
-                  ),
-                  items: const [
-                    PopupMenuItem(value: nullValue, child: Text('null')),
-                    PopupMenuItem(value: true, child: Text('true')),
-                    PopupMenuItem(value: false, child: Text('false')),
-                  ],
+      onTapDown: onUpdate == null
+          ? null
+          : (TapDownDetails details) async {
+              const nullValue = Object();
+              final newValue = await showMenu(
+                context: context,
+                position: RelativeRect.fromLTRB(
+                  details.globalPosition.dx,
+                  details.globalPosition.dy,
+                  100000,
+                  0,
+                ),
+                items: const [
+                  PopupMenuItem(value: nullValue, child: Text('null')),
+                  PopupMenuItem(value: true, child: Text('true')),
+                  PopupMenuItem(value: false, child: Text('false')),
+                ],
+              );
+              if (newValue != null) {
+                onUpdate?.call(
+                  !identical(newValue, nullValue) ? newValue : null,
                 );
-                if (newValue != null) {
-                  onUpdate?.call(
-                    !identical(newValue, nullValue) ? newValue : null,
-                  );
-                }
-              },
+              }
+            },
       child: Text(
         '$value',
         style: GoogleFonts.jetBrainsMono(
@@ -226,20 +221,19 @@ class _DateValue extends StatelessWidget {
     final date =
         value != null ? DateTime.fromMicrosecondsSinceEpoch(value!) : null;
     return GestureDetector(
-      onTap:
-          onUpdate == null
-              ? null
-              : () async {
-                final newDate = await showDatePicker(
-                  context: context,
-                  initialDate: date ?? DateTime.now(),
-                  firstDate: DateTime(1970),
-                  lastDate: DateTime(2050),
-                );
-                if (newDate != null) {
-                  onUpdate?.call(newDate.microsecondsSinceEpoch);
-                }
-              },
+      onTap: onUpdate == null
+          ? null
+          : () async {
+              final newDate = await showDatePicker(
+                context: context,
+                initialDate: date ?? DateTime.now(),
+                firstDate: DateTime(1970),
+                lastDate: DateTime(2050),
+              );
+              if (newDate != null) {
+                onUpdate?.call(newDate.microsecondsSinceEpoch);
+              }
+            },
       child: Text(
         date?.toIso8601String() ?? 'null',
         style: GoogleFonts.jetBrainsMono(
@@ -263,10 +257,9 @@ class _StringValue extends StatefulWidget {
 
 class _StringValueState extends State<_StringValue> {
   late final controller = TextEditingController(
-    text:
-        widget.value != null
-            ? '"${widget.value.toString().replaceAll('\n', '⤵')}"'
-            : '',
+    text: widget.value != null
+        ? '"${widget.value.toString().replaceAll('\n', '⤵')}"'
+        : '',
   );
 
   @override

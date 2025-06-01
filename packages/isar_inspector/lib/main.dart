@@ -58,10 +58,9 @@ class App extends StatelessWidget {
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF9FC9FF),
-          brightness:
-              DarkMode.of(context).darkMode
-                  ? Brightness.dark
-                  : Brightness.light,
+          brightness: DarkMode.of(context).darkMode
+              ? Brightness.dark
+              : Brightness.light,
         ),
         useMaterial3: true,
       ),

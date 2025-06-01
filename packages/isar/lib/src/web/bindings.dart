@@ -9,8 +9,7 @@ import 'package:isar/src/web/interop.dart';
 
 extension IsarBindingsX on JSIsar {
   @ffi.Native<
-    ffi.Pointer<CString> Function(ffi.Pointer<ffi.Uint16>, ffi.Uint32)
-  >()
+      ffi.Pointer<CString> Function(ffi.Pointer<ffi.Uint16>, ffi.Uint32)>()
   external ffi.Pointer<CString> isar_string(
     ffi.Pointer<ffi.Uint16> chars,
     int length,
@@ -23,12 +22,11 @@ extension IsarBindingsX on JSIsar {
   external int isar_get_error(ffi.Pointer<ffi.Pointer<ffi.Uint8>> value);
 
   @ffi.Native<
-    ffi.Pointer<CIsarReader> Function(
-      ffi.Pointer<CIsarCursor>,
-      IsarI64,
-      ffi.Pointer<CIsarReader>,
-    )
-  >()
+      ffi.Pointer<CIsarReader> Function(
+        ffi.Pointer<CIsarCursor>,
+        IsarI64,
+        ffi.Pointer<CIsarReader>,
+      )>()
   external ffi.Pointer<CIsarReader> isar_cursor_next(
     ffi.Pointer<CIsarCursor> cursor,
     int id,
@@ -36,27 +34,25 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<CIsarCursor>, ffi.Pointer<CIsarReader>)
-  >()
+      ffi.Void Function(ffi.Pointer<CIsarCursor>, ffi.Pointer<CIsarReader>)>()
   external void isar_cursor_free(
     ffi.Pointer<CIsarCursor> cursor,
     ffi.Pointer<CIsarReader> reader,
   );
 
   @ffi.Native<
-    ffi.Pointer<CIsarReader> Function(
-      ffi.Pointer<CIsarQueryCursor>,
-      ffi.Pointer<CIsarReader>,
-    )
-  >()
+      ffi.Pointer<CIsarReader> Function(
+        ffi.Pointer<CIsarQueryCursor>,
+        ffi.Pointer<CIsarReader>,
+      )>()
   external ffi.Pointer<CIsarReader> isar_query_cursor_next(
     ffi.Pointer<CIsarQueryCursor> cursor,
     ffi.Pointer<CIsarReader> old_reader,
   );
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<CIsarQueryCursor>, ffi.Pointer<CIsarReader>)
-  >()
+      ffi.Void Function(
+          ffi.Pointer<CIsarQueryCursor>, ffi.Pointer<CIsarReader>)>()
   external void isar_query_cursor_free(
     ffi.Pointer<CIsarQueryCursor> cursor,
     ffi.Pointer<CIsarReader> reader,
@@ -69,8 +65,8 @@ extension IsarBindingsX on JSIsar {
   external ffi.Pointer<CFilter> isar_filter_is_null(int property_index);
 
   @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)
-  >()
+      ffi.Pointer<CFilter> Function(
+          ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)>()
   external ffi.Pointer<CFilter> isar_filter_equal(
     int property_index,
     ffi.Pointer<CIsarValue> value,
@@ -78,8 +74,8 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)
-  >()
+      ffi.Pointer<CFilter> Function(
+          ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)>()
   external ffi.Pointer<CFilter> isar_filter_greater(
     int property_index,
     ffi.Pointer<CIsarValue> value,
@@ -87,8 +83,8 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)
-  >()
+      ffi.Pointer<CFilter> Function(
+          ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)>()
   external ffi.Pointer<CFilter> isar_filter_greater_or_equal(
     int property_index,
     ffi.Pointer<CIsarValue> value,
@@ -96,8 +92,8 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)
-  >()
+      ffi.Pointer<CFilter> Function(
+          ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)>()
   external ffi.Pointer<CFilter> isar_filter_less(
     int property_index,
     ffi.Pointer<CIsarValue> value,
@@ -105,8 +101,8 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)
-  >()
+      ffi.Pointer<CFilter> Function(
+          ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)>()
   external ffi.Pointer<CFilter> isar_filter_less_or_equal(
     int property_index,
     ffi.Pointer<CIsarValue> value,
@@ -114,13 +110,12 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CFilter> Function(
-      ffi.Uint16,
-      ffi.Pointer<CIsarValue>,
-      ffi.Pointer<CIsarValue>,
-      ffi.Bool,
-    )
-  >()
+      ffi.Pointer<CFilter> Function(
+        ffi.Uint16,
+        ffi.Pointer<CIsarValue>,
+        ffi.Pointer<CIsarValue>,
+        ffi.Bool,
+      )>()
   external ffi.Pointer<CFilter> isar_filter_between(
     int property_index,
     ffi.Pointer<CIsarValue> lower,
@@ -129,8 +124,8 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)
-  >()
+      ffi.Pointer<CFilter> Function(
+          ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)>()
   external ffi.Pointer<CFilter> isar_filter_string_starts_with(
     int property_index,
     ffi.Pointer<CIsarValue> value,
@@ -138,8 +133,8 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)
-  >()
+      ffi.Pointer<CFilter> Function(
+          ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)>()
   external ffi.Pointer<CFilter> isar_filter_string_ends_with(
     int property_index,
     ffi.Pointer<CIsarValue> value,
@@ -147,8 +142,8 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)
-  >()
+      ffi.Pointer<CFilter> Function(
+          ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)>()
   external ffi.Pointer<CFilter> isar_filter_string_contains(
     int property_index,
     ffi.Pointer<CIsarValue> value,
@@ -156,8 +151,8 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)
-  >()
+      ffi.Pointer<CFilter> Function(
+          ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)>()
   external ffi.Pointer<CFilter> isar_filter_string_matches(
     int property_index,
     ffi.Pointer<CIsarValue> value,
@@ -165,8 +160,8 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)
-  >()
+      ffi.Pointer<CFilter> Function(
+          ffi.Uint16, ffi.Pointer<CIsarValue>, ffi.Bool)>()
   external ffi.Pointer<CFilter> isar_filter_string_regex(
     int property_index,
     ffi.Pointer<CIsarValue> value,
@@ -174,13 +169,12 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CFilter> Function(
-      ffi.Uint16,
-      ffi.Pointer<COption_IsarValue>,
-      ffi.Uint32,
-      ffi.Bool,
-    )
-  >()
+      ffi.Pointer<CFilter> Function(
+        ffi.Uint16,
+        ffi.Pointer<COption_IsarValue>,
+        ffi.Uint32,
+        ffi.Bool,
+      )>()
   external ffi.Pointer<CFilter> isar_filter_in(
     int property_index,
     ffi.Pointer<COption_IsarValue> values,
@@ -195,16 +189,16 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Pointer<ffi.Pointer<CFilter>>, ffi.Uint32)
-  >()
+      ffi.Pointer<CFilter> Function(
+          ffi.Pointer<ffi.Pointer<CFilter>>, ffi.Uint32)>()
   external ffi.Pointer<CFilter> isar_filter_and(
     ffi.Pointer<ffi.Pointer<CFilter>> filters,
     int lenght,
   );
 
   @ffi.Native<
-    ffi.Pointer<CFilter> Function(ffi.Pointer<ffi.Pointer<CFilter>>, ffi.Uint32)
-  >()
+      ffi.Pointer<CFilter> Function(
+          ffi.Pointer<ffi.Pointer<CFilter>>, ffi.Uint32)>()
   external ffi.Pointer<CFilter> isar_filter_or(
     ffi.Pointer<ffi.Pointer<CFilter>> filters,
     int lenght,
@@ -214,14 +208,13 @@ extension IsarBindingsX on JSIsar {
   external ffi.Pointer<CFilter> isar_filter_not(ffi.Pointer<CFilter> filter);
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<CIsarTxn>,
-      ffi.Uint16,
-      ffi.Uint32,
-      ffi.Pointer<ffi.Pointer<CIsarWriter>>,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarTxn>,
+        ffi.Uint16,
+        ffi.Uint32,
+        ffi.Pointer<ffi.Pointer<CIsarWriter>>,
+      )>()
   external int isar_insert(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
@@ -234,11 +227,10 @@ extension IsarBindingsX on JSIsar {
   external int isar_insert_save(ffi.Pointer<CIsarWriter> insert, int id);
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarWriter>,
-      ffi.Pointer<ffi.Pointer<CIsarTxn>>,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarWriter>,
+        ffi.Pointer<ffi.Pointer<CIsarTxn>>,
+      )>()
   external int isar_insert_finish(
     ffi.Pointer<CIsarWriter> insert,
     ffi.Pointer<ffi.Pointer<CIsarTxn>> txn,
@@ -257,20 +249,19 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<ffi.Pointer<CIsarInstance>>,
-      ffi.Uint32,
-      ffi.Pointer<CString>,
-      ffi.Pointer<CString>,
-      ffi.Bool,
-      ffi.Pointer<CString>,
-      ffi.Uint32,
-      ffi.Pointer<CString>,
-      ffi.Uint32,
-      ffi.Uint32,
-      ffi.Float,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<ffi.Pointer<CIsarInstance>>,
+        ffi.Uint32,
+        ffi.Pointer<CString>,
+        ffi.Pointer<CString>,
+        ffi.Bool,
+        ffi.Pointer<CString>,
+        ffi.Uint32,
+        ffi.Pointer<CString>,
+        ffi.Uint32,
+        ffi.Uint32,
+        ffi.Float,
+      )>()
   external int isar_open_instance(
     ffi.Pointer<ffi.Pointer<CIsarInstance>> isar,
     int instance_id,
@@ -286,42 +277,38 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint32 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
-    )
-  >()
+      ffi.Uint32 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
+      )>()
   external int isar_get_name(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<ffi.Pointer<ffi.Uint8>> name,
   );
 
   @ffi.Native<
-    ffi.Uint32 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
-    )
-  >()
+      ffi.Uint32 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
+      )>()
   external int isar_get_dir(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<ffi.Pointer<ffi.Uint8>> dir,
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CString>)
-  >()
+      ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CString>)>()
   external int isar_change_encryption_key(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CString> encryption_key,
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<ffi.Pointer<CIsarTxn>>,
-      ffi.Bool,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<ffi.Pointer<CIsarTxn>>,
+        ffi.Bool,
+      )>()
   external int isar_txn_begin(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<ffi.Pointer<CIsarTxn>> txn,
@@ -329,16 +316,14 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>)
-  >()
+      ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>)>()
   external int isar_txn_commit(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
   );
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>)
-  >()
+      ffi.Void Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>)>()
   external void isar_txn_abort(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
@@ -351,13 +336,12 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<CIsarTxn>,
-      ffi.Uint16,
-      ffi.Pointer<ffi.Pointer<CIsarCursor>>,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarTxn>,
+        ffi.Uint16,
+        ffi.Pointer<ffi.Pointer<CIsarCursor>>,
+      )>()
   external int isar_cursor(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
@@ -366,14 +350,13 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<CIsarTxn>,
-      ffi.Uint16,
-      IsarI64,
-      ffi.Pointer<ffi.Bool>,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarTxn>,
+        ffi.Uint16,
+        IsarI64,
+        ffi.Pointer<ffi.Bool>,
+      )>()
   external int isar_delete(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
@@ -383,13 +366,12 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<CIsarTxn>,
-      ffi.Uint16,
-      ffi.Pointer<ffi.Uint32>,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarTxn>,
+        ffi.Uint16,
+        ffi.Pointer<ffi.Uint32>,
+      )>()
   external int isar_count(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
@@ -398,12 +380,11 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<CIsarTxn>,
-      ffi.Uint16,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarTxn>,
+        ffi.Uint16,
+      )>()
   external int isar_clear(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
@@ -411,13 +392,12 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint32 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<CIsarTxn>,
-      ffi.Uint16,
-      ffi.Bool,
-    )
-  >()
+      ffi.Uint32 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarTxn>,
+        ffi.Uint16,
+        ffi.Bool,
+      )>()
   external int isar_get_size(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
@@ -426,14 +406,13 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<ffi.Pointer<CIsarTxn>>,
-      ffi.Uint16,
-      ffi.Pointer<CString>,
-      ffi.Pointer<ffi.Uint32>,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<ffi.Pointer<CIsarTxn>>,
+        ffi.Uint16,
+        ffi.Pointer<CString>,
+        ffi.Pointer<ffi.Uint32>,
+      )>()
   external int isar_import_json(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<ffi.Pointer<CIsarTxn>> txn,
@@ -443,16 +422,14 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CString>)
-  >()
+      ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CString>)>()
   external int isar_copy(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CString> path,
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>)
-  >()
+      ffi.Uint8 Function(ffi.Pointer<CIsarInstance>, ffi.Pointer<CIsarTxn>)>()
   external int isar_verify(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
@@ -462,12 +439,11 @@ extension IsarBindingsX on JSIsar {
   external int isar_close(ffi.Pointer<CIsarInstance> isar, bool delete_);
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Uint16,
-      ffi.Pointer<ffi.Pointer<CIsarQueryBuilder>>,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Uint16,
+        ffi.Pointer<ffi.Pointer<CIsarQueryBuilder>>,
+      )>()
   external int isar_query_new(
     ffi.Pointer<CIsarInstance> isar,
     int collection_index,
@@ -475,21 +451,19 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<CIsarQueryBuilder>, ffi.Pointer<CFilter>)
-  >()
+      ffi.Void Function(ffi.Pointer<CIsarQueryBuilder>, ffi.Pointer<CFilter>)>()
   external void isar_query_set_filter(
     ffi.Pointer<CIsarQueryBuilder> builder,
     ffi.Pointer<CFilter> filter,
   );
 
   @ffi.Native<
-    ffi.Void Function(
-      ffi.Pointer<CIsarQueryBuilder>,
-      ffi.Uint16,
-      ffi.Bool,
-      ffi.Bool,
-    )
-  >()
+      ffi.Void Function(
+        ffi.Pointer<CIsarQueryBuilder>,
+        ffi.Uint16,
+        ffi.Bool,
+        ffi.Bool,
+      )>()
   external void isar_query_add_sort(
     ffi.Pointer<CIsarQueryBuilder> builder,
     int property_index,
@@ -498,8 +472,7 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<CIsarQueryBuilder>, ffi.Uint16, ffi.Bool)
-  >()
+      ffi.Void Function(ffi.Pointer<CIsarQueryBuilder>, ffi.Uint16, ffi.Bool)>()
   external void isar_query_add_distinct(
     ffi.Pointer<CIsarQueryBuilder> builder,
     int property_index,
@@ -507,22 +480,20 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CIsarQuery> Function(ffi.Pointer<CIsarQueryBuilder>)
-  >()
+      ffi.Pointer<CIsarQuery> Function(ffi.Pointer<CIsarQueryBuilder>)>()
   external ffi.Pointer<CIsarQuery> isar_query_build(
     ffi.Pointer<CIsarQueryBuilder> builder,
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<CIsarTxn>,
-      ffi.Pointer<CIsarQuery>,
-      ffi.Pointer<ffi.Pointer<CIsarQueryCursor>>,
-      ffi.Uint32,
-      ffi.Uint32,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarTxn>,
+        ffi.Pointer<CIsarQuery>,
+        ffi.Pointer<ffi.Pointer<CIsarQueryCursor>>,
+        ffi.Uint32,
+        ffi.Uint32,
+      )>()
   external int isar_query_cursor(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
@@ -533,15 +504,14 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<CIsarTxn>,
-      ffi.Pointer<CIsarQuery>,
-      ffi.Uint8,
-      ffi.Uint16,
-      ffi.Pointer<ffi.Pointer<CIsarValue>>,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarTxn>,
+        ffi.Pointer<CIsarQuery>,
+        ffi.Uint8,
+        ffi.Uint16,
+        ffi.Pointer<ffi.Pointer<CIsarValue>>,
+      )>()
   external int isar_query_aggregate(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
@@ -552,15 +522,14 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<CIsarTxn>,
-      ffi.Pointer<CIsarQuery>,
-      ffi.Uint32,
-      ffi.Uint32,
-      ffi.Pointer<ffi.Uint32>,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarTxn>,
+        ffi.Pointer<CIsarQuery>,
+        ffi.Uint32,
+        ffi.Uint32,
+        ffi.Pointer<ffi.Uint32>,
+      )>()
   external int isar_query_delete(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
@@ -598,13 +567,12 @@ extension IsarBindingsX on JSIsar {
   external double isar_read_double(ffi.Pointer<CIsarReader> reader, int index);
 
   @ffi.Native<
-    ffi.Uint32 Function(
-      ffi.Pointer<CIsarReader>,
-      ffi.Uint32,
-      ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
-      ffi.Pointer<ffi.Bool>,
-    )
-  >()
+      ffi.Uint32 Function(
+        ffi.Pointer<CIsarReader>,
+        ffi.Uint32,
+        ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
+        ffi.Pointer<ffi.Bool>,
+      )>()
   external int isar_read_string(
     ffi.Pointer<CIsarReader> reader,
     int index,
@@ -613,20 +581,18 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CIsarReader> Function(ffi.Pointer<CIsarReader>, ffi.Uint32)
-  >()
+      ffi.Pointer<CIsarReader> Function(ffi.Pointer<CIsarReader>, ffi.Uint32)>()
   external ffi.Pointer<CIsarReader> isar_read_object(
     ffi.Pointer<CIsarReader> reader,
     int index,
   );
 
   @ffi.Native<
-    ffi.Uint32 Function(
-      ffi.Pointer<CIsarReader>,
-      ffi.Uint32,
-      ffi.Pointer<ffi.Pointer<CIsarReader>>,
-    )
-  >()
+      ffi.Uint32 Function(
+        ffi.Pointer<CIsarReader>,
+        ffi.Uint32,
+        ffi.Pointer<ffi.Pointer<CIsarReader>>,
+      )>()
   external int isar_read_list(
     ffi.Pointer<CIsarReader> reader,
     int index,
@@ -634,12 +600,11 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint32 Function(
-      ffi.Pointer<CIsarReader>,
-      ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
-      ffi.Pointer<ffi.Uint32>,
-    )
-  >()
+      ffi.Uint32 Function(
+        ffi.Pointer<CIsarReader>,
+        ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
+        ffi.Pointer<ffi.Uint32>,
+      )>()
   external int isar_read_to_json(
     ffi.Pointer<CIsarReader> reader,
     ffi.Pointer<ffi.Pointer<ffi.Uint8>> buffer,
@@ -650,15 +615,14 @@ extension IsarBindingsX on JSIsar {
   external void isar_read_free(ffi.Pointer<CIsarReader> reader);
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<CIsarTxn>,
-      ffi.Uint16,
-      IsarI64,
-      ffi.Pointer<CIsarUpdate>,
-      ffi.Pointer<ffi.Bool>,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarTxn>,
+        ffi.Uint16,
+        IsarI64,
+        ffi.Pointer<CIsarUpdate>,
+        ffi.Pointer<ffi.Bool>,
+      )>()
   external int isar_update(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
@@ -669,16 +633,15 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<CIsarTxn>,
-      ffi.Pointer<CIsarQuery>,
-      ffi.Uint32,
-      ffi.Uint32,
-      ffi.Pointer<CIsarUpdate>,
-      ffi.Pointer<ffi.Uint32>,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarTxn>,
+        ffi.Pointer<CIsarQuery>,
+        ffi.Uint32,
+        ffi.Uint32,
+        ffi.Pointer<CIsarUpdate>,
+        ffi.Pointer<ffi.Uint32>,
+      )>()
   external int isar_query_update(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarTxn> txn,
@@ -693,12 +656,11 @@ extension IsarBindingsX on JSIsar {
   external ffi.Pointer<CIsarUpdate> isar_update_new();
 
   @ffi.Native<
-    ffi.Void Function(
-      ffi.Pointer<CIsarUpdate>,
-      ffi.Uint16,
-      ffi.Pointer<CIsarValue>,
-    )
-  >()
+      ffi.Void Function(
+        ffi.Pointer<CIsarUpdate>,
+        ffi.Uint16,
+        ffi.Pointer<CIsarValue>,
+      )>()
   external void isar_update_add_value(
     ffi.Pointer<CIsarUpdate> update,
     int property_index,
@@ -729,11 +691,10 @@ extension IsarBindingsX on JSIsar {
   external double isar_value_get_real(ffi.Pointer<CIsarValue> value);
 
   @ffi.Native<
-    ffi.Uint32 Function(
-      ffi.Pointer<CIsarValue>,
-      ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
-    )
-  >()
+      ffi.Uint32 Function(
+        ffi.Pointer<CIsarValue>,
+        ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
+      )>()
   external int isar_value_get_string(
     ffi.Pointer<CIsarValue> value,
     ffi.Pointer<ffi.Pointer<ffi.Uint8>> str,
@@ -746,8 +707,7 @@ extension IsarBindingsX on JSIsar {
   external ffi.Pointer<COption_IsarValue> isar_values_new(int length);
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<COption_IsarValue>, ffi.Uint32, ffi.Bool)
-  >()
+      ffi.Void Function(ffi.Pointer<COption_IsarValue>, ffi.Uint32, ffi.Bool)>()
   external void isar_values_set_bool(
     ffi.Pointer<COption_IsarValue> values,
     int index,
@@ -755,8 +715,7 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<COption_IsarValue>, ffi.Uint32, IsarI64)
-  >()
+      ffi.Void Function(ffi.Pointer<COption_IsarValue>, ffi.Uint32, IsarI64)>()
   external void isar_values_set_integer(
     ffi.Pointer<COption_IsarValue> values,
     int index,
@@ -764,8 +723,8 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<COption_IsarValue>, ffi.Uint32, ffi.Double)
-  >()
+      ffi.Void Function(
+          ffi.Pointer<COption_IsarValue>, ffi.Uint32, ffi.Double)>()
   external void isar_values_set_real(
     ffi.Pointer<COption_IsarValue> values,
     int index,
@@ -773,12 +732,11 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Void Function(
-      ffi.Pointer<COption_IsarValue>,
-      ffi.Uint32,
-      ffi.Pointer<CString>,
-    )
-  >()
+      ffi.Void Function(
+        ffi.Pointer<COption_IsarValue>,
+        ffi.Uint32,
+        ffi.Pointer<CString>,
+      )>()
   external void isar_values_set_string(
     ffi.Pointer<COption_IsarValue> values,
     int index,
@@ -792,13 +750,12 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Uint16,
-      DartPort,
-      ffi.Pointer<ffi.Pointer<CWatchHandle>>,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Uint16,
+        DartPort,
+        ffi.Pointer<ffi.Pointer<CWatchHandle>>,
+      )>()
   external int isar_watch_collection(
     ffi.Pointer<CIsarInstance> isar,
     int collection_index,
@@ -807,14 +764,13 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Uint16,
-      ffi.Int64,
-      DartPort,
-      ffi.Pointer<ffi.Pointer<CWatchHandle>>,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Uint16,
+        ffi.Int64,
+        DartPort,
+        ffi.Pointer<ffi.Pointer<CWatchHandle>>,
+      )>()
   external int isar_watch_object(
     ffi.Pointer<CIsarInstance> isar,
     int collection_index,
@@ -824,13 +780,12 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Uint8 Function(
-      ffi.Pointer<CIsarInstance>,
-      ffi.Pointer<CIsarQuery>,
-      DartPort,
-      ffi.Pointer<ffi.Pointer<CWatchHandle>>,
-    )
-  >()
+      ffi.Uint8 Function(
+        ffi.Pointer<CIsarInstance>,
+        ffi.Pointer<CIsarQuery>,
+        DartPort,
+        ffi.Pointer<ffi.Pointer<CWatchHandle>>,
+      )>()
   external int isar_watch_query(
     ffi.Pointer<CIsarInstance> isar,
     ffi.Pointer<CIsarQuery> query,
@@ -845,8 +800,7 @@ extension IsarBindingsX on JSIsar {
   external void isar_write_null(ffi.Pointer<CIsarWriter> writer, int index);
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32, ffi.Bool)
-  >()
+      ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32, ffi.Bool)>()
   external void isar_write_bool(
     ffi.Pointer<CIsarWriter> writer,
     int index,
@@ -854,8 +808,7 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32, ffi.Uint8)
-  >()
+      ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32, ffi.Uint8)>()
   external void isar_write_byte(
     ffi.Pointer<CIsarWriter> writer,
     int index,
@@ -863,8 +816,7 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32, ffi.Int32)
-  >()
+      ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32, ffi.Int32)>()
   external void isar_write_int(
     ffi.Pointer<CIsarWriter> writer,
     int index,
@@ -872,8 +824,7 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32, ffi.Float)
-  >()
+      ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32, ffi.Float)>()
   external void isar_write_float(
     ffi.Pointer<CIsarWriter> writer,
     int index,
@@ -881,8 +832,7 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32, IsarI64)
-  >()
+      ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32, IsarI64)>()
   external void isar_write_long(
     ffi.Pointer<CIsarWriter> writer,
     int index,
@@ -890,8 +840,7 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32, ffi.Double)
-  >()
+      ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Uint32, ffi.Double)>()
   external void isar_write_double(
     ffi.Pointer<CIsarWriter> writer,
     int index,
@@ -899,12 +848,11 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Void Function(
-      ffi.Pointer<CIsarWriter>,
-      ffi.Uint32,
-      ffi.Pointer<CString>,
-    )
-  >()
+      ffi.Void Function(
+        ffi.Pointer<CIsarWriter>,
+        ffi.Uint32,
+        ffi.Pointer<CString>,
+      )>()
   external void isar_write_string(
     ffi.Pointer<CIsarWriter> writer,
     int index,
@@ -912,13 +860,12 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Void Function(
-      ffi.Pointer<CIsarWriter>,
-      ffi.Uint32,
-      ffi.Pointer<ffi.Uint8>,
-      ffi.Uint32,
-    )
-  >()
+      ffi.Void Function(
+        ffi.Pointer<CIsarWriter>,
+        ffi.Uint32,
+        ffi.Pointer<ffi.Uint8>,
+        ffi.Uint32,
+      )>()
   external void isar_write_byte_list(
     ffi.Pointer<CIsarWriter> writer,
     int index,
@@ -927,28 +874,25 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Pointer<CIsarWriter> Function(ffi.Pointer<CIsarWriter>, ffi.Uint32)
-  >()
+      ffi.Pointer<CIsarWriter> Function(ffi.Pointer<CIsarWriter>, ffi.Uint32)>()
   external ffi.Pointer<CIsarWriter> isar_write_object(
     ffi.Pointer<CIsarWriter> writer,
     int index,
   );
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Pointer<CIsarWriter>)
-  >()
+      ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Pointer<CIsarWriter>)>()
   external void isar_write_object_end(
     ffi.Pointer<CIsarWriter> writer,
     ffi.Pointer<CIsarWriter> embedded_writer,
   );
 
   @ffi.Native<
-    ffi.Pointer<CIsarWriter> Function(
-      ffi.Pointer<CIsarWriter>,
-      ffi.Uint32,
-      ffi.Uint32,
-    )
-  >()
+      ffi.Pointer<CIsarWriter> Function(
+        ffi.Pointer<CIsarWriter>,
+        ffi.Uint32,
+        ffi.Uint32,
+      )>()
   external ffi.Pointer<CIsarWriter> isar_write_list(
     ffi.Pointer<CIsarWriter> writer,
     int index,
@@ -956,8 +900,7 @@ extension IsarBindingsX on JSIsar {
   );
 
   @ffi.Native<
-    ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Pointer<CIsarWriter>)
-  >()
+      ffi.Void Function(ffi.Pointer<CIsarWriter>, ffi.Pointer<CIsarWriter>)>()
   external void isar_write_list_end(
     ffi.Pointer<CIsarWriter> writer,
     ffi.Pointer<CIsarWriter> list_writer,

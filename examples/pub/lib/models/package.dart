@@ -108,17 +108,16 @@ class Package {
       dart: metrics.tags.contains('sdk:dart'),
       flutter: metrics.tags.contains('sdk:flutter'),
       flutterFavorite: metrics.tags.contains('is:flutter-favorite'),
-      license:
-          metrics.tags
-              .firstWhere(
-                (e) =>
-                    e.startsWith('license:') &&
-                    e != 'license:osi-approved' &&
-                    e != 'license:fsf-libre',
-                orElse: () => 'license:unknown',
-              )
-              .substring(8)
-              .toUpperCase(),
+      license: metrics.tags
+          .firstWhere(
+            (e) =>
+                e.startsWith('license:') &&
+                e != 'license:osi-approved' &&
+                e != 'license:fsf-libre',
+            orElse: () => 'license:unknown',
+          )
+          .substring(8)
+          .toUpperCase(),
       osiLicense: metrics.tags.contains('license:osi-approved'),
       platforms: [
         if (metrics.tags.contains('platform:web')) SupportedPlatform.web,

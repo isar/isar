@@ -42,8 +42,8 @@ class DetailPage extends ConsumerWidget {
           error: (err) {
             return Center(child: Text('Error: $err'));
           },
-          loading:
-              (loading) => const Center(child: CircularProgressIndicator()),
+          loading: (loading) =>
+              const Center(child: CircularProgressIndicator()),
         ),
       ),
     );

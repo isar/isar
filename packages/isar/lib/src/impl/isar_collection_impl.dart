@@ -346,26 +346,20 @@ class _IsarCollectionImpl<ID, OBJ> extends IsarCollection<ID, OBJ> {
         final property1 = properties![0];
         final property2 = properties[1];
         final deserializeProp = converter.deserializeProperty!;
-        deserialize =
-            (reader) =>
-                (
-                      deserializeProp(reader, property1),
-                      deserializeProp(reader, property2),
-                    )
-                    as R;
+        deserialize = (reader) => (
+              deserializeProp(reader, property1),
+              deserializeProp(reader, property2),
+            ) as R;
       case 3:
         final property1 = properties![0];
         final property2 = properties[1];
         final property3 = properties[2];
         final deserializeProp = converter.deserializeProperty!;
-        deserialize =
-            (reader) =>
-                (
-                      deserializeProp(reader, property1),
-                      deserializeProp(reader, property2),
-                      deserializeProp(reader, property3),
-                    )
-                    as R;
+        deserialize = (reader) => (
+              deserializeProp(reader, property1),
+              deserializeProp(reader, property2),
+              deserializeProp(reader, property3),
+            ) as R;
     }
 
     final queryPtr = IsarCore.b.isar_query_build(builderPtr);
