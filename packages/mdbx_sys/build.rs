@@ -68,7 +68,6 @@ fn main() {
 
         // download amalgamated source
         let curl_result = Command::new("curl")
-            .arg("-L")  // Follow redirects
             .arg("-O")
             .arg(format!(
                 "https://libmdbx.dqdkfa.ru/release/libmdbx-amalgamated-{}.tar.xz",
@@ -89,35 +88,12 @@ fn main() {
                    String::from_utf8_lossy(&curl_output.stderr));
         }
 
-        // unzip file with strip-components to flatten directory structure
-        let tar_result = if cfg!(windows) {
-            // On Windows, try different approaches
-            let mut cmd = Command::new("tar");
-            cmd.arg("-xf")
-               .arg(format!("libmdbx-amalgamated-{}.tar.xz", LIBMDBX_VERSION))
-               .arg("--strip-components=1")
-               .current_dir("libmdbx");
-            
-            let output = cmd.output();
-            if output.is_err() {
-                // Fallback: extract normally then move files
-                println!("tar with strip-components failed, trying alternative approach...");
-                Command::new("tar")
-                    .arg("-xf")
-                    .arg(format!("libmdbx-amalgamated-{}.tar.xz", LIBMDBX_VERSION))
-                    .current_dir("libmdbx")
-                    .output()
-            } else {
-                output
-            }
-        } else {
-            Command::new("tar")
-                .arg("-xf")
-                .arg(format!("libmdbx-amalgamated-{}.tar.xz", LIBMDBX_VERSION))
-                .arg("--strip-components=1")
-                .current_dir("libmdbx")
-                .output()
-        };
+        // unzip file
+        let tar_result = Command::new("tar")
+            .arg("-xf")
+            .arg(format!("libmdbx-amalgamated-{}.tar.xz", LIBMDBX_VERSION))
+            .current_dir("libmdbx")
+            .output();
 
         if let Err(e) = tar_result {
             panic!("Failed to run tar: {}. Make sure tar is installed and available in PATH.", e);
@@ -125,36 +101,10 @@ fn main() {
 
         let tar_output = tar_result.unwrap();
         if !tar_output.status.success() {
-            println!("tar with strip-components failed, trying to move files manually...");
-            
-            // Look for extracted directory and move files
-            let libmdbx_dir = PathBuf::from("libmdbx");
-            if let Ok(entries) = fs::read_dir(&libmdbx_dir) {
-                for entry in entries {
-                    if let Ok(entry) = entry {
-                        let path = entry.path();
-                        if path.is_dir() && path.file_name().unwrap().to_string_lossy().starts_with("libmdbx") {
-                            println!("Found extracted directory: {:?}", path);
-                            // Move files from subdirectory to libmdbx root
-                            if let Ok(sub_entries) = fs::read_dir(&path) {
-                                for sub_entry in sub_entries {
-                                    if let Ok(sub_entry) = sub_entry {
-                                        let src = sub_entry.path();
-                                        let filename = src.file_name().unwrap();
-                                        let dst = libmdbx_dir.join(filename);
-                                        if let Err(e) = fs::rename(&src, &dst) {
-                                            println!("Failed to move {:?} to {:?}: {}", src, dst, e);
-                                        }
-                                    }
-                                }
-                            }
-                            // Remove empty extracted directory
-                            let _ = fs::remove_dir_all(&path);
-                            break;
-                        }
-                    }
-                }
-            }
+            panic!("tar failed with status: {}\nstdout: {}\nstderr: {}", 
+                   tar_output.status, 
+                   String::from_utf8_lossy(&tar_output.stdout),
+                   String::from_utf8_lossy(&tar_output.stderr));
         }
     } else {
         println!("mdbx.h already exists, skipping download");

@@ -22,48 +22,19 @@ runs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        # Ensure curl and tar are available (usually pre-installed on GitHub runners)
-        Write-Host "=== Checking tool availability ==="
-        try { 
-          $curlVersion = curl --version
-          Write-Host "✓ curl available: $($curlVersion[0])"
-        } catch { 
-          Write-Host "✗ curl not available: $_"
-          # Install curl as fallback
-          choco install curl -y
-        }
-
-        try { 
-          $tarVersion = tar --version
-          Write-Host "✓ tar available: $($tarVersion[0])"
-        } catch { 
-          Write-Host "✗ tar not available: $_"
-          # tar should be available on Windows 10+, but install as fallback
-          if (!(Get-Command tar -ErrorAction SilentlyContinue)) {
-            Write-Host "Installing tar via choco..."
-            choco install gnu-tar -y
-          }
-        }
-
-        # Test curl with a simple request
-        Write-Host "=== Testing curl functionality ==="
-        try {
-          curl -I -L --connect-timeout 10 "https://www.google.com" | Select-Object -First 1
-          Write-Host "✓ curl network test passed"
-        } catch {
-          Write-Host "✗ curl network test failed: $_"
-        }
+        # Ensure curl and tar are available (usually pre-installed but ensure they work)
+        Write-Host "Checking curl availability:"
+        curl --version
+        Write-Host "Checking tar availability:"
+        tar --version
+        # Install 7zip as fallback for tar
+        choco install 7zip -y
     - name: Set Windows environment variables
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
         echo "LIBCLANG_PATH=$((gcm clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
-        echo "OPENSSL_SRC_PERL=$((gcm perl).source)" >> $env:GITHUB_ENV
-        # Add additional debugging info
-        Write-Host "=== Environment Setup ==="
-        Write-Host "LIBCLANG_PATH: $((gcm clang).source -replace "clang.exe")"
-        Write-Host "OPENSSL_SRC_PERL: $((gcm perl).source)"
-        Write-Host "Current PATH: $env:PATH"
+        echo "OPENSSL_SRC_PERL=C:/Strawberry/perl/bin/perl" >> $env:GITHUB_ENV
     # See https://github.com/godot-rust/godot-rust/pull/920
     - name: "Workaround Android NDK due to Rust bug"
       if: runner.os == 'Linux' || runner.os == 'macOS'
