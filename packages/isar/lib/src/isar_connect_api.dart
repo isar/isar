@@ -69,7 +69,9 @@ class ConnectSchemasPayload {
   final List<IsarSchema> schemas;
 
   Map<String, dynamic> toJson() {
-    return {'schemas': schemas.map((e) => e.toJson()).toList()};
+    return {
+      'schemas': schemas.map((e) => e.toJson()).toList(),
+    };
   }
 }
 
@@ -88,10 +90,9 @@ class ConnectQueryPayload {
     return ConnectQueryPayload(
       instance: json['instance'] as String,
       collection: json['collection'] as String,
-      filter:
-          json['filter'] != null
-              ? _filterFromJson(json['filter'] as Map<String, dynamic>)
-              : null,
+      filter: json['filter'] != null
+          ? _filterFromJson(json['filter'] as Map<String, dynamic>)
+          : null,
       offset: json['offset'] as int?,
       limit: json['limit'] as int?,
       sortProperty: json['sortProperty'] as int?,
@@ -122,83 +123,33 @@ class ConnectQueryPayload {
   static Filter _filterFromJson(Map<String, dynamic> json) {
     final property = json['property'] as int?;
     final value = json['value'] ?? json['wildcard'];
-    final caseSensitive = json['caseSensitive'] as bool?;
     switch (json['type']) {
-      case 'isNull':
-        return IsNullCondition(property: property!);
       case 'eq':
-        return EqualCondition(
-          property: property!,
-          value: value,
-          caseSensitive: caseSensitive!,
-        );
+        return EqualCondition(property: property!, value: value);
       case 'gt':
-        return GreaterCondition(
-          property: property!,
-          value: value,
-          caseSensitive: caseSensitive!,
-        );
+        return GreaterCondition(property: property!, value: value);
       case 'gte':
-        return GreaterOrEqualCondition(
-          property: property!,
-          value: value,
-          caseSensitive: caseSensitive!,
-        );
+        return GreaterOrEqualCondition(property: property!, value: value);
       case 'lt':
-        return LessCondition(
-          property: property!,
-          value: value,
-          caseSensitive: caseSensitive!,
-        );
+        return LessCondition(property: property!, value: value);
       case 'lte':
-        return LessOrEqualCondition(
-          property: property!,
-          value: value,
-          caseSensitive: caseSensitive!,
-        );
+        return LessOrEqualCondition(property: property!, value: value);
       case 'between':
         return BetweenCondition(
           property: property!,
           lower: json['lower'],
           upper: json['upper'],
-          caseSensitive: caseSensitive!,
         );
       case 'startsWith':
-        return StartsWithCondition(
-          property: property!,
-          value: value as String,
-          caseSensitive: caseSensitive!,
-        );
+        return StartsWithCondition(property: property!, value: value as String);
       case 'endsWith':
-        return EndsWithCondition(
-          property: property!,
-          value: value as String,
-          caseSensitive: caseSensitive!,
-        );
+        return EndsWithCondition(property: property!, value: value as String);
       case 'contains':
-        return ContainsCondition(
-          property: property!,
-          value: value as String,
-          caseSensitive: caseSensitive!,
-        );
+        return ContainsCondition(property: property!, value: value as String);
       case 'matches':
-        return MatchesCondition(
-          property: property!,
-          wildcard: value as String,
-          caseSensitive: caseSensitive!,
-        );
-      case 'regex':
-        return RegexCondition(
-          property: property!,
-          regex: value as String,
-          caseSensitive: caseSensitive!,
-        );
-      case 'isIn':
-        return IsInCondition(
-          property: property!,
-          values: value as List,
-          caseSensitive: caseSensitive!,
-        );
+        return MatchesCondition(property: property!, wildcard: value as String);
+      case 'isNull':
+        return IsNullCondition(property: property!);
       case 'and':
         return AndGroup(
           (json['filters'] as List)
@@ -222,126 +173,37 @@ class ConnectQueryPayload {
 
   static Map<String, dynamic> _filterToJson(Filter filter) {
     switch (filter) {
-      case IsNullCondition(property: final property):
-        return {'type': 'isNull', 'property': property};
-      case EqualCondition(:final property, :final value, :final caseSensitive):
-        return {
-          'type': 'eq',
-          'property': property,
-          'value': value,
-          'caseSensitive': caseSensitive,
-        };
-      case GreaterCondition(
-        :final property,
-        :final value,
-        :final caseSensitive,
-      ):
-        return {
-          'type': 'gt',
-          'property': property,
-          'value': value,
-          'caseSensitive': caseSensitive,
-        };
-      case GreaterOrEqualCondition(
-        :final property,
-        :final value,
-        :final caseSensitive,
-      ):
-        return {
-          'type': 'gte',
-          'property': property,
-          'value': value,
-          'caseSensitive': caseSensitive,
-        };
-      case LessCondition(:final property, :final value, :final caseSensitive):
-        return {
-          'type': 'lt',
-          'property': property,
-          'value': value,
-          'caseSensitive': caseSensitive,
-        };
-      case LessOrEqualCondition(
-        :final property,
-        :final value,
-        :final caseSensitive,
-      ):
-        return {
-          'type': 'lte',
-          'property': property,
-          'value': value,
-          'caseSensitive': caseSensitive,
-        };
+      case EqualCondition(:final property, :final value):
+        return {'type': 'eq', 'property': property, 'value': value};
+      case GreaterCondition(:final property, :final value):
+        return {'type': 'gt', 'property': property, 'value': value};
+      case GreaterOrEqualCondition(:final property, :final value):
+        return {'type': 'gte', 'property': property, 'value': value};
+      case LessCondition(:final property, :final value):
+        return {'type': 'lt', 'property': property, 'value': value};
+      case LessOrEqualCondition(:final property, :final value):
+        return {'type': 'lte', 'property': property, 'value': value};
       case BetweenCondition(
-        property: final property,
-        lower: final lower,
-        upper: final upper,
-        caseSensitive: final caseSensitive,
-      ):
+          property: final property,
+          lower: final lower,
+          upper: final upper,
+        ):
         return {
           'type': 'between',
           'property': property,
           'lower': lower,
           'upper': upper,
-          'caseSensitive': caseSensitive,
         };
-      case StartsWithCondition(
-        :final property,
-        :final value,
-        :final caseSensitive,
-      ):
-        return {
-          'type': 'startsWith',
-          'property': property,
-          'value': value,
-          'caseSensitive': caseSensitive,
-        };
-      case EndsWithCondition(
-        :final property,
-        :final value,
-        :final caseSensitive,
-      ):
-        return {
-          'type': 'endsWith',
-          'property': property,
-          'value': value,
-          'caseSensitive': caseSensitive,
-        };
-      case ContainsCondition(
-        :final property,
-        :final value,
-        :final caseSensitive,
-      ):
-        return {
-          'type': 'contains',
-          'property': property,
-          'value': value,
-          'caseSensitive': caseSensitive,
-        };
-      case MatchesCondition(
-        :final property,
-        :final wildcard,
-        :final caseSensitive,
-      ):
-        return {
-          'type': 'matches',
-          'property': property,
-          'value': wildcard,
-          'caseSensitive': caseSensitive,
-        };
-      case RegexCondition(:final property, :final regex, :final caseSensitive):
-        return {
-          'type': 'regex',
-          'property': property,
-          'value': regex,
-          'caseSensitive': caseSensitive,
-        };
-      case IsInCondition(:final property, :final values, :final caseSensitive):
-        return {
-          'type': 'isIn',
-          'property': property,
-          'values': values,
-          'caseSensitive': caseSensitive,
-        };
+      case StartsWithCondition(:final property, :final value):
+        return {'type': 'startsWith', 'property': property, 'value': value};
+      case EndsWithCondition(:final property, :final value):
+        return {'type': 'endsWith', 'property': property, 'value': value};
+      case ContainsCondition(:final property, :final value):
+        return {'type': 'contains', 'property': property, 'value': value};
+      case MatchesCondition(property: final property, wildcard: final wildcard):
+        return {'type': 'matches', 'property': property, 'value': wildcard};
+      case IsNullCondition(property: final property):
+        return {'type': 'isNull', 'property': property};
       case AndGroup(filters: final filters):
         return {'type': 'and', 'filters': filters.map(_filterToJson).toList()};
       case OrGroup(filters: final filters):
