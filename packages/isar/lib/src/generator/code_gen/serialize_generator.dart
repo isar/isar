@@ -45,12 +45,11 @@ String _writeProperty({
   required String value,
   required String? enumProperty,
 }) {
-  final enumGetter =
-      enumProperty != null
-          ? nullable
-              ? '?.$enumProperty'
-              : '.$enumProperty'
-          : '';
+  final enumGetter = enumProperty != null
+      ? nullable
+          ? '?.$enumProperty'
+          : '.$enumProperty'
+      : '';
   switch (type) {
     case IsarType.bool:
       if (nullable) {
@@ -79,10 +78,9 @@ String _writeProperty({
       return 'IsarCore.writeLong($writer, $index, $value$enumGetter $orNull);';
     case IsarType.dateTime:
       const toMicros = 'toUtc().microsecondsSinceEpoch';
-      final converted =
-          nullable
-              ? '$value$enumGetter?.$toMicros ?? $_nullLong'
-              : '$value$enumGetter.$toMicros';
+      final converted = nullable
+          ? '$value$enumGetter?.$toMicros ?? $_nullLong'
+          : '$value$enumGetter.$toMicros';
       return 'IsarCore.writeLong($writer, $index, $converted);';
     case IsarType.double:
       final orNull = nullable ? '?? double.nan' : '';

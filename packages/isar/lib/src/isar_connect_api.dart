@@ -88,10 +88,9 @@ class ConnectQueryPayload {
     return ConnectQueryPayload(
       instance: json['instance'] as String,
       collection: json['collection'] as String,
-      filter:
-          json['filter'] != null
-              ? _filterFromJson(json['filter'] as Map<String, dynamic>)
-              : null,
+      filter: json['filter'] != null
+          ? _filterFromJson(json['filter'] as Map<String, dynamic>)
+          : null,
       offset: json['offset'] as int?,
       limit: json['limit'] as int?,
       sortProperty: json['sortProperty'] as int?,
@@ -232,10 +231,10 @@ class ConnectQueryPayload {
           'caseSensitive': caseSensitive,
         };
       case GreaterCondition(
-        :final property,
-        :final value,
-        :final caseSensitive,
-      ):
+          :final property,
+          :final value,
+          :final caseSensitive,
+        ):
         return {
           'type': 'gt',
           'property': property,
@@ -243,10 +242,10 @@ class ConnectQueryPayload {
           'caseSensitive': caseSensitive,
         };
       case GreaterOrEqualCondition(
-        :final property,
-        :final value,
-        :final caseSensitive,
-      ):
+          :final property,
+          :final value,
+          :final caseSensitive,
+        ):
         return {
           'type': 'gte',
           'property': property,
@@ -261,10 +260,10 @@ class ConnectQueryPayload {
           'caseSensitive': caseSensitive,
         };
       case LessOrEqualCondition(
-        :final property,
-        :final value,
-        :final caseSensitive,
-      ):
+          :final property,
+          :final value,
+          :final caseSensitive,
+        ):
         return {
           'type': 'lte',
           'property': property,
@@ -272,11 +271,11 @@ class ConnectQueryPayload {
           'caseSensitive': caseSensitive,
         };
       case BetweenCondition(
-        property: final property,
-        lower: final lower,
-        upper: final upper,
-        caseSensitive: final caseSensitive,
-      ):
+          property: final property,
+          lower: final lower,
+          upper: final upper,
+          caseSensitive: final caseSensitive,
+        ):
         return {
           'type': 'between',
           'property': property,
@@ -285,10 +284,10 @@ class ConnectQueryPayload {
           'caseSensitive': caseSensitive,
         };
       case StartsWithCondition(
-        :final property,
-        :final value,
-        :final caseSensitive,
-      ):
+          :final property,
+          :final value,
+          :final caseSensitive,
+        ):
         return {
           'type': 'startsWith',
           'property': property,
@@ -296,10 +295,10 @@ class ConnectQueryPayload {
           'caseSensitive': caseSensitive,
         };
       case EndsWithCondition(
-        :final property,
-        :final value,
-        :final caseSensitive,
-      ):
+          :final property,
+          :final value,
+          :final caseSensitive,
+        ):
         return {
           'type': 'endsWith',
           'property': property,
@@ -307,10 +306,10 @@ class ConnectQueryPayload {
           'caseSensitive': caseSensitive,
         };
       case ContainsCondition(
-        :final property,
-        :final value,
-        :final caseSensitive,
-      ):
+          :final property,
+          :final value,
+          :final caseSensitive,
+        ):
         return {
           'type': 'contains',
           'property': property,
@@ -318,10 +317,10 @@ class ConnectQueryPayload {
           'caseSensitive': caseSensitive,
         };
       case MatchesCondition(
-        :final property,
-        :final wildcard,
-        :final caseSensitive,
-      ):
+          :final property,
+          :final wildcard,
+          :final caseSensitive,
+        ):
         return {
           'type': 'matches',
           'property': property,
