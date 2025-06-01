@@ -18,6 +18,17 @@ runs:
       if: runner.os == 'Windows'
       shell: bash
       run: choco install make
+    - name: Install curl and tar for Windows
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # Ensure curl and tar are available (usually pre-installed but ensure they work)
+        Write-Host "Checking curl availability:"
+        curl --version
+        Write-Host "Checking tar availability:"
+        tar --version
+        # Install 7zip as fallback for tar
+        choco install 7zip -y
     - name: Set Windows environment variables
       if: runner.os == 'Windows'
       shell: pwsh
