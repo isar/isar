@@ -80,21 +80,6 @@ jobs:
           echo "LIBCLANG_PATH=$env:LIBCLANG_PATH"
           echo "OPENSSL_SRC_PERL=$env:OPENSSL_SRC_PERL"
         working-directory: packages/isar_core
-      - name: Debug mdbx_sys on Windows
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          Write-Host "=== Checking mdbx_sys directory structure ==="
-          Get-ChildItem packages/mdbx_sys -Recurse | Select-Object FullName
-          Write-Host "=== Checking if mdbx.h exists ==="
-          if (Test-Path "packages/mdbx_sys/libmdbx/mdbx.h") {
-            Write-Host "✓ mdbx.h exists"
-          } else {
-            Write-Host "✗ mdbx.h missing"
-          }
-          Write-Host "=== Testing curl and tar commands ==="
-          try { curl --version } catch { Write-Host "curl failed: $_" }
-          try { tar --version } catch { Write-Host "tar failed: $_" }
       - name: Run Rust Unit tests
         run: cargo test --verbose
         working-directory: packages/isar_core
