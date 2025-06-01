@@ -387,7 +387,7 @@ mod native_real_world_tests {
             
             let count = instance.query_aggregate(&txn, &query, Aggregation::Count, None)
                 .expect("Failed to execute count");
-            assert_eq!(count, Some(IsarValue::Integer(2))); // iPhone and Samsung
+            assert_eq!(count, Some(IsarValue::Integer(2))); // iPhone and Samsung in category 1
             
             // Average price in category 1
             let avg_price = instance.query_aggregate(&txn, &query, Aggregation::Average, Some(3))
@@ -409,12 +409,14 @@ mod native_real_world_tests {
             
             // Manually iterate to check complex conditions (JSON parsing would be app-level)
             while let Some(reader) = cursor.next(current_id) {
+                // Check brand ID (Apple products have brandId = 1) or JSON attributes
+                let brand_id = reader.read_long(5); // brandId property
                 if let Some(attrs) = reader.read_string(13) {
-                    // In real app, would parse JSON and check attributes
-                    if attrs.contains("Apple") || attrs.contains("M3") || attrs.contains("iPhone") {
+                    // Check for Apple brand ID or Apple-specific features in JSON
+                    if brand_id == 1 || attrs.contains("A17") || attrs.contains("M3") {
                         let name = reader.read_string(1).unwrap_or_default().to_string();
                         let price = reader.read_double(3);
-                        apple_products.push((current_id, name, price));
+                        apple_products.push((current_id, name.clone(), price));
                     }
                 }
                 current_id += 1;
@@ -801,7 +803,7 @@ mod sqlite_real_world_tests {
             
             let count = instance.query_aggregate(&txn, &query, Aggregation::Count, None)
                 .expect("Failed to execute count");
-            assert_eq!(count, Some(IsarValue::Integer(4))); // All products meet criteria
+            assert_eq!(count, Some(IsarValue::Integer(3))); // iPhone (50), Samsung (75), Sony (120) have stock > 30
             
             instance.abort_txn(txn);
         }
