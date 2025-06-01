@@ -56,64 +56,30 @@ fn main() {
     env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "12.0");
     env::set_var("RUST_BACKTRACE", "full");
 
+    let _ = fs::remove_dir_all("libmdbx");
+    fs::create_dir("libmdbx").unwrap();
+
+    // download amalgamated source
+    Command::new("curl")
+        .arg("-O")
+        .arg(format!(
+            "https://libmdbx.dqdkfa.ru/release/libmdbx-amalgamated-{}.tar.xz",
+            LIBMDBX_VERSION
+        ))
+        .current_dir("libmdbx")
+        .output()
+        .unwrap();
+
+    // unzip file
+    Command::new("tar")
+        .arg("-xf")
+        .arg(format!("libmdbx-amalgamated-{}.tar.xz", LIBMDBX_VERSION))
+        .current_dir("libmdbx")
+        .output()
+        .unwrap();
+
     let mut mdbx = PathBuf::from(&env::var("CARGO_MANIFEST_DIR").unwrap());
     mdbx.push("libmdbx");
-
-    // Check if mdbx.h already exists - if so, skip download/extraction
-    if !mdbx.join("mdbx.h").exists() {
-        println!("mdbx.h not found, downloading libmdbx...");
-        
-        let _ = fs::remove_dir_all("libmdbx");
-        fs::create_dir("libmdbx").unwrap();
-
-        // download amalgamated source
-        let curl_result = Command::new("curl")
-            .arg("-O")
-            .arg(format!(
-                "https://libmdbx.dqdkfa.ru/release/libmdbx-amalgamated-{}.tar.xz",
-                LIBMDBX_VERSION
-            ))
-            .current_dir("libmdbx")
-            .output();
-
-        if let Err(e) = curl_result {
-            panic!("Failed to run curl: {}. Make sure curl is installed and available in PATH.", e);
-        }
-
-        let curl_output = curl_result.unwrap();
-        if !curl_output.status.success() {
-            panic!("curl failed with status: {}\nstdout: {}\nstderr: {}", 
-                   curl_output.status, 
-                   String::from_utf8_lossy(&curl_output.stdout),
-                   String::from_utf8_lossy(&curl_output.stderr));
-        }
-
-        // unzip file
-        let tar_result = Command::new("tar")
-            .arg("-xf")
-            .arg(format!("libmdbx-amalgamated-{}.tar.xz", LIBMDBX_VERSION))
-            .current_dir("libmdbx")
-            .output();
-
-        if let Err(e) = tar_result {
-            panic!("Failed to run tar: {}. Make sure tar is installed and available in PATH.", e);
-        }
-
-        let tar_output = tar_result.unwrap();
-        if !tar_output.status.success() {
-            panic!("tar failed with status: {}\nstdout: {}\nstderr: {}", 
-                   tar_output.status, 
-                   String::from_utf8_lossy(&tar_output.stdout),
-                   String::from_utf8_lossy(&tar_output.stderr));
-        }
-    } else {
-        println!("mdbx.h already exists, skipping download");
-    }
-
-    // Verify mdbx.h exists before proceeding
-    if !mdbx.join("mdbx.h").exists() {
-        panic!("mdbx.h still not found at {}. Check if libmdbx was properly downloaded and extracted.", mdbx.join("mdbx.h").display());
-    }
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
