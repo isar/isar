@@ -27,16 +27,16 @@ mod main_integration_tests {
         
         // Test schema creation
         let user_schema = create_user_schema();
-        assert_eq!(user_schema.name(), "User");
+        assert_eq!(user_schema.name, "User");
         
         let post_schema = create_post_schema();
-        assert_eq!(post_schema.name(), "Post");
+        assert_eq!(post_schema.name, "Post");
         
         let comprehensive_schema = create_comprehensive_schema();
-        assert_eq!(comprehensive_schema.name(), "Comprehensive");
+        assert_eq!(comprehensive_schema.name, "Comprehensive");
         
         let query_schema = create_query_test_schema();
-        assert_eq!(query_schema.name(), "QueryTest");
+        assert_eq!(query_schema.name, "QueryTest");
     }
 
     #[test]
