@@ -67,9 +67,7 @@ class _CounterAppState extends State<CounterApp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const Text(
-                'You have pushed the button this many times:',
-              ),
+              const Text('You have pushed the button this many times:'),
               Text('$count', style: theme.textTheme.headlineMedium),
             ],
           ),

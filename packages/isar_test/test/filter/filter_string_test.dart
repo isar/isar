@@ -69,62 +69,47 @@ void main() {
 
     group('.equalTo()', () {
       isarTest('case sensitive', () {
-        expect(
-          isar.stringModels.where().fieldEqualTo('string 2').findAll(),
-          [obj2],
-        );
-        expect(
-          isar.stringModels.where().fieldEqualTo(null).findAll(),
-          [objNull],
-        );
+        expect(isar.stringModels.where().fieldEqualTo('string 2').findAll(), [
+          obj2,
+        ]);
+        expect(isar.stringModels.where().fieldEqualTo(null).findAll(), [
+          objNull,
+        ]);
         expect(
           isar.stringModels.where().fieldEqualTo('string 6').findAll(),
           isEmpty,
         );
-        expect(
-          isar.stringModels.where().fieldEqualTo('').findAll(),
-          [objEmpty],
-        );
+        expect(isar.stringModels.where().fieldEqualTo('').findAll(), [
+          objEmpty,
+        ]);
       });
 
       isarTest('case insensitive', () {
         expect(
           isar.stringModels
               .where()
-              .fieldEqualTo(
-                'STRING 2',
-                caseSensitive: false,
-              )
+              .fieldEqualTo('STRING 2', caseSensitive: false)
               .findAll(),
           [obj2],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldEqualTo(
-                null,
-                caseSensitive: false,
-              )
+              .fieldEqualTo(null, caseSensitive: false)
               .findAll(),
           [objNull],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldEqualTo(
-                'strINg 6',
-                caseSensitive: false,
-              )
+              .fieldEqualTo('strINg 6', caseSensitive: false)
               .findAll(),
           isEmpty,
         );
         expect(
           isar.stringModels
               .where()
-              .fieldEqualTo(
-                '',
-                caseSensitive: false,
-              )
+              .fieldEqualTo('', caseSensitive: false)
               .findAll(),
           [objEmpty],
         );
@@ -132,26 +117,34 @@ void main() {
     });
 
     isarTest('.isNull()', () {
-      expect(
-        isar.stringModels.where().fieldIsNull().findAll(),
-        [objNull],
-      );
+      expect(isar.stringModels.where().fieldIsNull().findAll(), [objNull]);
     });
 
     group('.startsWith()', () {
       isarTest('case sensitive', () {
-        expect(
-          isar.stringModels.where().fieldStartsWith('string').findAll(),
-          [obj1, obj2, obj3, obj4, obj5, obj6],
-        );
-        expect(
-          isar.stringModels.where().fieldStartsWith('').findAll(),
-          [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
-        );
-        expect(
-          isar.stringModels.where().fieldStartsWith('S').findAll(),
-          [obj7, obj8],
-        );
+        expect(isar.stringModels.where().fieldStartsWith('string').findAll(), [
+          obj1,
+          obj2,
+          obj3,
+          obj4,
+          obj5,
+          obj6,
+        ]);
+        expect(isar.stringModels.where().fieldStartsWith('').findAll(), [
+          objEmpty,
+          obj1,
+          obj2,
+          obj3,
+          obj4,
+          obj5,
+          obj6,
+          obj7,
+          obj8,
+        ]);
+        expect(isar.stringModels.where().fieldStartsWith('S').findAll(), [
+          obj7,
+          obj8,
+        ]);
         expect(
           isar.stringModels.where().fieldStartsWith('A').findAll(),
           isEmpty,
@@ -162,50 +155,35 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldStartsWith(
-                'string',
-                caseSensitive: false,
-              )
+              .fieldStartsWith('string', caseSensitive: false)
               .findAll(),
           [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldStartsWith(
-                'STRinG',
-                caseSensitive: false,
-              )
+              .fieldStartsWith('STRinG', caseSensitive: false)
               .findAll(),
           [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldStartsWith(
-                '',
-                caseSensitive: false,
-              )
+              .fieldStartsWith('', caseSensitive: false)
               .findAll(),
           [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldStartsWith(
-                'S',
-                caseSensitive: false,
-              )
+              .fieldStartsWith('S', caseSensitive: false)
               .findAll(),
           [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldStartsWith(
-                'A',
-                caseSensitive: false,
-              )
+              .fieldStartsWith('A', caseSensitive: false)
               .findAll(),
           isEmpty,
         );
@@ -214,14 +192,21 @@ void main() {
 
     group('.endsWith()', () {
       isarTest('case sensitive', () {
-        expect(
-          isar.stringModels.where().fieldEndsWith('5').findAll(),
-          [obj5, obj6],
-        );
-        expect(
-          isar.stringModels.where().fieldEndsWith('').findAll(),
-          [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
-        );
+        expect(isar.stringModels.where().fieldEndsWith('5').findAll(), [
+          obj5,
+          obj6,
+        ]);
+        expect(isar.stringModels.where().fieldEndsWith('').findAll(), [
+          objEmpty,
+          obj1,
+          obj2,
+          obj3,
+          obj4,
+          obj5,
+          obj6,
+          obj7,
+          obj8,
+        ]);
         expect(isar.stringModels.where().fieldEndsWith('8').findAll(), [obj8]);
         expect(isar.stringModels.where().fieldEndsWith('9').findAll(), isEmpty);
       });
@@ -230,50 +215,35 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldEndsWith(
-                '5',
-                caseSensitive: false,
-              )
+              .fieldEndsWith('5', caseSensitive: false)
               .findAll(),
           [obj5, obj6],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldEndsWith(
-                '',
-                caseSensitive: false,
-              )
+              .fieldEndsWith('', caseSensitive: false)
               .findAll(),
           [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldEndsWith(
-                '8',
-                caseSensitive: false,
-              )
+              .fieldEndsWith('8', caseSensitive: false)
               .findAll(),
           [obj8],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldEndsWith(
-                'NG 3',
-                caseSensitive: false,
-              )
+              .fieldEndsWith('NG 3', caseSensitive: false)
               .findAll(),
           [obj3],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldEndsWith(
-                '9',
-                caseSensitive: false,
-              )
+              .fieldEndsWith('9', caseSensitive: false)
               .findAll(),
           isEmpty,
         );
@@ -282,14 +252,25 @@ void main() {
 
     group('.contains()', () {
       isarTest('case sensitive', () {
-        expect(
-          isar.stringModels.where().fieldContains('ing').findAll(),
-          [obj1, obj2, obj3, obj4, obj5, obj6],
-        );
-        expect(
-          isar.stringModels.where().fieldContains('').findAll(),
-          [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
-        );
+        expect(isar.stringModels.where().fieldContains('ing').findAll(), [
+          obj1,
+          obj2,
+          obj3,
+          obj4,
+          obj5,
+          obj6,
+        ]);
+        expect(isar.stringModels.where().fieldContains('').findAll(), [
+          objEmpty,
+          obj1,
+          obj2,
+          obj3,
+          obj4,
+          obj5,
+          obj6,
+          obj7,
+          obj8,
+        ]);
         expect(isar.stringModels.where().fieldContains('x').findAll(), isEmpty);
       });
 
@@ -297,40 +278,28 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldContains(
-                'ing',
-                caseSensitive: false,
-              )
+              .fieldContains('ing', caseSensitive: false)
               .findAll(),
           [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldContains(
-                'INg',
-                caseSensitive: false,
-              )
+              .fieldContains('INg', caseSensitive: false)
               .findAll(),
           [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldContains(
-                '',
-                caseSensitive: false,
-              )
+              .fieldContains('', caseSensitive: false)
               .findAll(),
           [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldContains(
-                'x',
-                caseSensitive: false,
-              )
+              .fieldContains('x', caseSensitive: false)
               .findAll(),
           isEmpty,
         );
@@ -374,10 +343,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldGreaterThan(
-                'string 0',
-                caseSensitive: false,
-              )
+              .fieldGreaterThan('string 0', caseSensitive: false)
               .findAll(),
           [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
         );
@@ -385,10 +351,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldGreaterThan(
-                'string 1',
-                caseSensitive: false,
-              )
+              .fieldGreaterThan('string 1', caseSensitive: false)
               .findAll(),
           [obj2, obj3, obj4, obj5, obj6, obj7, obj8],
         );
@@ -396,10 +359,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldGreaterThan(
-                'STRING 2',
-                caseSensitive: false,
-              )
+              .fieldGreaterThan('STRING 2', caseSensitive: false)
               .findAll(),
           [obj3, obj4, obj5, obj6, obj7, obj8],
         );
@@ -407,10 +367,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldGreaterThan(
-                'string 3',
-                caseSensitive: false,
-              )
+              .fieldGreaterThan('string 3', caseSensitive: false)
               .findAll(),
           [obj4, obj5, obj6, obj7, obj8],
         );
@@ -418,10 +375,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldGreaterThan(
-                'strIng 4',
-                caseSensitive: false,
-              )
+              .fieldGreaterThan('strIng 4', caseSensitive: false)
               .findAll(),
           [obj5, obj6, obj7, obj8],
         );
@@ -429,10 +383,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldGreaterThan(
-                'string 5',
-                caseSensitive: false,
-              )
+              .fieldGreaterThan('string 5', caseSensitive: false)
               .findAll(),
           [obj7, obj8],
         );
@@ -440,10 +391,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldGreaterThan(
-                'string 8',
-                caseSensitive: false,
-              )
+              .fieldGreaterThan('string 8', caseSensitive: false)
               .findAll(),
           isEmpty,
         );
@@ -452,50 +400,77 @@ void main() {
 
     group('.lessThan()', () {
       isarTest('case sensitive', () {
-        expect(
-          isar.stringModels.where().fieldLessThan('string 0').findAll(),
-          [objEmpty, obj7, obj8, objNull],
-        );
+        expect(isar.stringModels.where().fieldLessThan('string 0').findAll(), [
+          objEmpty,
+          obj7,
+          obj8,
+          objNull,
+        ]);
 
-        expect(
-          isar.stringModels.where().fieldLessThan('string 1').findAll(),
-          [objEmpty, obj7, obj8, objNull],
-        );
+        expect(isar.stringModels.where().fieldLessThan('string 1').findAll(), [
+          objEmpty,
+          obj7,
+          obj8,
+          objNull,
+        ]);
 
-        expect(
-          isar.stringModels.where().fieldLessThan('string 2').findAll(),
-          [objEmpty, obj1, obj7, obj8, objNull],
-        );
+        expect(isar.stringModels.where().fieldLessThan('string 2').findAll(), [
+          objEmpty,
+          obj1,
+          obj7,
+          obj8,
+          objNull,
+        ]);
 
-        expect(
-          isar.stringModels.where().fieldLessThan('string 3').findAll(),
-          [objEmpty, obj1, obj2, obj7, obj8, objNull],
-        );
+        expect(isar.stringModels.where().fieldLessThan('string 3').findAll(), [
+          objEmpty,
+          obj1,
+          obj2,
+          obj7,
+          obj8,
+          objNull,
+        ]);
 
-        expect(
-          isar.stringModels.where().fieldLessThan('string 4').findAll(),
-          [objEmpty, obj1, obj2, obj3, obj7, obj8, objNull],
-        );
+        expect(isar.stringModels.where().fieldLessThan('string 4').findAll(), [
+          objEmpty,
+          obj1,
+          obj2,
+          obj3,
+          obj7,
+          obj8,
+          objNull,
+        ]);
 
-        expect(
-          isar.stringModels.where().fieldLessThan('string 5').findAll(),
-          [objEmpty, obj1, obj2, obj3, obj4, obj7, obj8, objNull],
-        );
+        expect(isar.stringModels.where().fieldLessThan('string 5').findAll(), [
+          objEmpty,
+          obj1,
+          obj2,
+          obj3,
+          obj4,
+          obj7,
+          obj8,
+          objNull,
+        ]);
 
-        expect(
-          isar.stringModels.where().fieldLessThan('string 6').findAll(),
-          [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8, objNull],
-        );
+        expect(isar.stringModels.where().fieldLessThan('string 6').findAll(), [
+          objEmpty,
+          obj1,
+          obj2,
+          obj3,
+          obj4,
+          obj5,
+          obj6,
+          obj7,
+          obj8,
+          objNull,
+        ]);
       });
 
       isarTest('case insensitive', () {
         expect(
           isar.stringModels
               .where()
-              .fieldLessThan(
-                'string 0',
-                caseSensitive: false,
-              )
+              .fieldLessThan('string 0', caseSensitive: false)
               .findAll(),
           [objEmpty, objNull],
         );
@@ -503,10 +478,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldLessThan(
-                'strIng 1',
-                caseSensitive: false,
-              )
+              .fieldLessThan('strIng 1', caseSensitive: false)
               .findAll(),
           [objEmpty, objNull],
         );
@@ -514,10 +486,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldLessThan(
-                'string 2',
-                caseSensitive: false,
-              )
+              .fieldLessThan('string 2', caseSensitive: false)
               .findAll(),
           [objEmpty, obj1, objNull],
         );
@@ -525,10 +494,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldLessThan(
-                'STRing 3',
-                caseSensitive: false,
-              )
+              .fieldLessThan('STRing 3', caseSensitive: false)
               .findAll(),
           [objEmpty, obj1, obj2, objNull],
         );
@@ -536,10 +502,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldLessThan(
-                'string 4',
-                caseSensitive: false,
-              )
+              .fieldLessThan('string 4', caseSensitive: false)
               .findAll(),
           [objEmpty, obj1, obj2, obj3, objNull],
         );
@@ -547,10 +510,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldLessThan(
-                'STRING 5',
-                caseSensitive: false,
-              )
+              .fieldLessThan('STRING 5', caseSensitive: false)
               .findAll(),
           [objEmpty, obj1, obj2, obj3, obj4, objNull],
         );
@@ -558,10 +518,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldLessThan(
-                'string 6',
-                caseSensitive: false,
-              )
+              .fieldLessThan('string 6', caseSensitive: false)
               .findAll(),
           [objEmpty, obj1, obj2, obj3, obj4, obj5, obj6, objNull],
         );
@@ -573,10 +530,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldBetween(
-                'string 2',
-                'string 4',
-              )
+              .fieldBetween('string 2', 'string 4')
               .findAll(),
           [obj2, obj3, obj4],
         );
@@ -591,11 +545,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldBetween(
-                'string 2',
-                'string 4',
-                caseSensitive: false,
-              )
+              .fieldBetween('string 2', 'string 4', caseSensitive: false)
               .findAll(),
           [obj2, obj3, obj4],
         );
@@ -603,11 +553,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldBetween(
-                '',
-                'string 2',
-                caseSensitive: false,
-              )
+              .fieldBetween('', 'string 2', caseSensitive: false)
               .findAll(),
           [objEmpty, obj1, obj2],
         );
@@ -615,11 +561,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldBetween(
-                'STriNg 5',
-                'string 7',
-                caseSensitive: false,
-              )
+              .fieldBetween('STriNg 5', 'string 7', caseSensitive: false)
               .findAll(),
           [obj5, obj6, obj7],
         );
@@ -628,18 +570,23 @@ void main() {
 
     group('.matches()', () {
       isarTest('case sensitive', () {
-        expect(
-          isar.stringModels.where().fieldMatches('*ng 5').findAll(),
-          [obj5, obj6],
-        );
-        expect(
-          isar.stringModels.where().fieldMatches('????????').findAll(),
-          [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
-        );
-        expect(
-          isar.stringModels.where().fieldMatches('').findAll(),
-          [objEmpty],
-        );
+        expect(isar.stringModels.where().fieldMatches('*ng 5').findAll(), [
+          obj5,
+          obj6,
+        ]);
+        expect(isar.stringModels.where().fieldMatches('????????').findAll(), [
+          obj1,
+          obj2,
+          obj3,
+          obj4,
+          obj5,
+          obj6,
+          obj7,
+          obj8,
+        ]);
+        expect(isar.stringModels.where().fieldMatches('').findAll(), [
+          objEmpty,
+        ]);
 
         expect(
           isar.stringModels.where().fieldMatches('*4?').findAll(),
@@ -651,30 +598,21 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldMatches(
-                '*NG 5',
-                caseSensitive: false,
-              )
+              .fieldMatches('*NG 5', caseSensitive: false)
               .findAll(),
           [obj5, obj6],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldMatches(
-                '????????',
-                caseSensitive: false,
-              )
+              .fieldMatches('????????', caseSensitive: false)
               .findAll(),
           [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
         );
         expect(
           isar.stringModels
               .where()
-              .fieldMatches(
-                '',
-                caseSensitive: false,
-              )
+              .fieldMatches('', caseSensitive: false)
               .findAll(),
           [objEmpty],
         );
@@ -682,10 +620,7 @@ void main() {
         expect(
           isar.stringModels
               .where()
-              .fieldMatches(
-                '*4?',
-                caseSensitive: false,
-              )
+              .fieldMatches('*4?', caseSensitive: false)
               .findAll(),
           isEmpty,
         );
@@ -693,17 +628,20 @@ void main() {
     });
 
     isarTest('.isEmpty()', () {
-      expect(
-        isar.stringModels.where().fieldIsEmpty().findAll(),
-        [objEmpty],
-      );
+      expect(isar.stringModels.where().fieldIsEmpty().findAll(), [objEmpty]);
     });
 
     isarTest('.isNotEmpty()', () {
-      expect(
-        isar.stringModels.where().fieldIsNotEmpty().findAll(),
-        [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
-      );
+      expect(isar.stringModels.where().fieldIsNotEmpty().findAll(), [
+        obj1,
+        obj2,
+        obj3,
+        obj4,
+        obj5,
+        obj6,
+        obj7,
+        obj8,
+      ]);
     });
   });
 }

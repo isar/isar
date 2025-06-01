@@ -26,6 +26,9 @@ dependencies:
 dev_dependencies:
   flutter_lints: ^6.0.0
 
+dependency_overrides:
+  dart_style: ^3.0.1
+
 flutter:
   uses-material-design: true
 

@@ -80,10 +80,7 @@ void main() {
         () => col.where().updateFirst(value: 'test'),
         throwsWriteTxnError(),
       );
-      expect(
-        () => col.where().updateAll(value: 'test'),
-        throwsWriteTxnError(),
-      );
+      expect(() => col.where().updateAll(value: 'test'), throwsWriteTxnError());
     });
   });
 }

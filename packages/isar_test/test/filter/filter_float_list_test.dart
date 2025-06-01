@@ -58,10 +58,9 @@ void main() {
     });
 
     isarTest('.elementGreaterThanOrEqualTo()', () {
-      expect(
-        col.where().listElementGreaterThanOrEqualTo(3.3).findAll(),
-        [obj1],
-      );
+      expect(col.where().listElementGreaterThanOrEqualTo(3.3).findAll(), [
+        obj1,
+      ]);
       expect(
         col
             .where()
@@ -69,10 +68,11 @@ void main() {
             .findAll(),
         [obj1],
       );
-      expect(
-        col.where().listElementGreaterThanOrEqualTo(null).findAll(),
-        [obj1, obj2, obj3],
-      );
+      expect(col.where().listElementGreaterThanOrEqualTo(null).findAll(), [
+        obj1,
+        obj2,
+        obj3,
+      ]);
     });
 
     isarTest('.elementLessThan()', () {
@@ -81,31 +81,33 @@ void main() {
     });
 
     isarTest('.elementLessThanOrEqualTo()', () {
-      expect(
-        col.where().listElementLessThanOrEqualTo(1.1).findAll(),
-        [obj1, obj2, obj3],
-      );
+      expect(col.where().listElementLessThanOrEqualTo(1.1).findAll(), [
+        obj1,
+        obj2,
+        obj3,
+      ]);
       expect(
         col.where().listElementLessThanOrEqualTo(1, epsilon: 0.2).findAll(),
         [obj1, obj2, obj3],
       );
-      expect(
-        col.where().listElementLessThanOrEqualTo(null).findAll(),
-        [obj2, obj3],
-      );
+      expect(col.where().listElementLessThanOrEqualTo(null).findAll(), [
+        obj2,
+        obj3,
+      ]);
     });
 
     isarTest('.anyBetween()', () {
       expect(col.where().listElementBetween(1, 5).findAll(), [obj1]);
-      expect(
-        col.where().listElementBetween(null, 1.1).findAll(),
-        [obj1, obj2, obj3],
-      );
+      expect(col.where().listElementBetween(null, 1.1).findAll(), [
+        obj1,
+        obj2,
+        obj3,
+      ]);
       expect(col.where().listElementBetween(5, 10).findAll(), isEmpty);
-      expect(
-        col.where().listElementBetween(null, null).findAll(),
-        [obj2, obj3],
-      );
+      expect(col.where().listElementBetween(null, null).findAll(), [
+        obj2,
+        obj3,
+      ]);
     });
 
     isarTest('.elementIsNull()', () {
@@ -121,10 +123,12 @@ void main() {
     });
 
     isarTest('.isNotNull()', () {
-      expect(
-        col.where().listIsNotNull().findAll(),
-        [objEmpty, obj1, obj2, obj3],
-      );
+      expect(col.where().listIsNotNull().findAll(), [
+        objEmpty,
+        obj1,
+        obj2,
+        obj3,
+      ]);
     });
   });
 }

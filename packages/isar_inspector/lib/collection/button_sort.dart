@@ -26,10 +26,7 @@ class SortButtons extends StatelessWidget {
               isDense: true,
               items: [
                 for (final property in properties)
-                  DropdownMenuItem(
-                    value: property,
-                    child: Text(property),
-                  ),
+                  DropdownMenuItem(value: property, child: Text(property)),
               ],
               value: selectedProperty,
               onChanged: (value) {

@@ -109,8 +109,9 @@ class _EnumValue extends StatelessWidget {
               );
 
               if (newValue != null) {
-                onUpdate
-                    ?.call(!identical(newValue, nullValue) ? newValue : null);
+                onUpdate?.call(
+                  !identical(newValue, nullValue) ? newValue : null,
+                );
               }
             },
       child: Text(
@@ -125,10 +126,7 @@ class _EnumValue extends StatelessWidget {
 }
 
 class _BoolValue extends StatelessWidget {
-  const _BoolValue({
-    required this.value,
-    this.onUpdate,
-  });
+  const _BoolValue({required this.value, this.onUpdate});
 
   final bool? value;
   final void Function(dynamic newValue)? onUpdate;
@@ -149,23 +147,15 @@ class _BoolValue extends StatelessWidget {
                   0,
                 ),
                 items: const [
-                  PopupMenuItem(
-                    value: nullValue,
-                    child: Text('null'),
-                  ),
-                  PopupMenuItem(
-                    value: true,
-                    child: Text('true'),
-                  ),
-                  PopupMenuItem(
-                    value: false,
-                    child: Text('false'),
-                  ),
+                  PopupMenuItem(value: nullValue, child: Text('null')),
+                  PopupMenuItem(value: true, child: Text('true')),
+                  PopupMenuItem(value: false, child: Text('false')),
                 ],
               );
               if (newValue != null) {
-                onUpdate
-                    ?.call(!identical(newValue, nullValue) ? newValue : null);
+                onUpdate?.call(
+                  !identical(newValue, nullValue) ? newValue : null,
+                );
               }
             },
       child: Text(
@@ -180,10 +170,7 @@ class _BoolValue extends StatelessWidget {
 }
 
 class _NumValue extends StatefulWidget {
-  const _NumValue({
-    required this.value,
-    this.onUpdate,
-  });
+  const _NumValue({required this.value, this.onUpdate});
 
   final num? value;
   final void Function(dynamic newValue)? onUpdate;
@@ -224,10 +211,7 @@ class _NumValueState extends State<_NumValue> {
 }
 
 class _DateValue extends StatelessWidget {
-  const _DateValue({
-    required this.value,
-    this.onUpdate,
-  });
+  const _DateValue({required this.value, this.onUpdate});
 
   final int? value;
   final void Function(dynamic newValue)? onUpdate;
@@ -262,10 +246,7 @@ class _DateValue extends StatelessWidget {
 }
 
 class _StringValue extends StatefulWidget {
-  const _StringValue({
-    required this.value,
-    this.onUpdate,
-  });
+  const _StringValue({required this.value, this.onUpdate});
 
   final String? value;
   final void Function(dynamic newValue)? onUpdate;

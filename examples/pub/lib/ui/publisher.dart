@@ -11,15 +11,13 @@ class Publisher extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(
-          Icons.verified_outlined,
-          size: 16,
-        ),
+        const Icon(Icons.verified_outlined, size: 16),
         const SizedBox(width: 2),
         Text(
           publisher,
-          style: theme.textTheme.titleSmall!
-              .copyWith(color: theme.colorScheme.primary),
+          style: theme.textTheme.titleSmall!.copyWith(
+            color: theme.colorScheme.primary,
+          ),
         ),
       ],
     );

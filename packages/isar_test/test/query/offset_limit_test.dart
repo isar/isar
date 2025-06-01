@@ -60,10 +60,13 @@ void main() {
     });
 
     isarTest('big limit', () {
-      expect(
-        col.where().findAll(limit: 999999),
-        [objA, objA2, objB, objC, objC2],
-      );
+      expect(col.where().findAll(limit: 999999), [
+        objA,
+        objA2,
+        objB,
+        objC,
+        objC2,
+      ]);
     });
 
     isarTest('limit', () {

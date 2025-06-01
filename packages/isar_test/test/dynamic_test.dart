@@ -52,12 +52,7 @@ void main() {
     });
 
     isarTest('int', () {
-      final obj1 = Model(
-        id: 1,
-        value: 1,
-        list: [1, null, 2],
-        map: {'a': 1},
-      );
+      final obj1 = Model(id: 1, value: 1, list: [1, null, 2], map: {'a': 1});
 
       isar.write((isar) => isar.models.put(obj1));
       expect(isar.models.get(1), obj1);

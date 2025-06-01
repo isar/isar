@@ -90,8 +90,9 @@ void main() {
 
     group('Query', () {
       isarTest('.put()', web: false, () async {
-        final listener =
-            Listener(isar.values.where().valueEqualTo('Hello').watch());
+        final listener = Listener(
+          isar.values.where().valueEqualTo('Hello').watch(),
+        );
 
         isar.write((isar) => isar.values.put(obj1));
         await listener.next;
@@ -105,8 +106,9 @@ void main() {
       });
 
       isarTest('.putAll()', web: false, () async {
-        final listener =
-            Listener(isar.values.where().valueContains('H').watch());
+        final listener = Listener(
+          isar.values.where().valueContains('H').watch(),
+        );
 
         isar.write((isar) => isar.values.putAll([obj1, obj2]));
         await listener.next;
@@ -122,8 +124,9 @@ void main() {
       isarTest('.delete()', web: false, () async {
         isar.write((isar) => isar.values.putAll([obj1, obj2, obj3]));
 
-        final listener =
-            Listener(isar.values.where().valueEqualTo('Hello').watch());
+        final listener = Listener(
+          isar.values.where().valueEqualTo('Hello').watch(),
+        );
 
         isar.write((isar) => isar.values.delete(1));
         await listener.next;
@@ -139,8 +142,9 @@ void main() {
       isarTest('.deleteAll()', web: false, () async {
         isar.write((isar) => isar.values.putAll([obj1, obj2, obj3]));
 
-        final listener =
-            Listener(isar.values.where().valueContains('H').watch());
+        final listener = Listener(
+          isar.values.where().valueContains('H').watch(),
+        );
 
         isar.write((isar) => isar.values.deleteAll([1, 2]));
         await listener.next;

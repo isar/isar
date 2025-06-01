@@ -27,17 +27,11 @@ void main() {
 
     isarTest('id property', () {
       isar.write(
-        (isar) => isar.boolModels.putAll([
-          BoolModel(0),
-          BoolModel(1),
-          BoolModel(2),
-        ]),
+        (isar) =>
+            isar.boolModels.putAll([BoolModel(0), BoolModel(1), BoolModel(2)]),
       );
 
-      expect(
-        isar.boolModels.where().idProperty().findAll(),
-        [0, 1, 2],
-      );
+      expect(isar.boolModels.where().idProperty().findAll(), [0, 1, 2]);
     });
 
     isarTest('bool property', () {
@@ -53,15 +47,17 @@ void main() {
         ]),
       );
 
-      expect(
-        isar.boolModels.where().valueProperty().findAll(),
-        [true, false, true],
-      );
+      expect(isar.boolModels.where().valueProperty().findAll(), [
+        true,
+        false,
+        true,
+      ]);
 
-      expect(
-        isar.boolModels.where().nValueProperty().findAll(),
-        [false, true, null],
-      );
+      expect(isar.boolModels.where().nValueProperty().findAll(), [
+        false,
+        true,
+        null,
+      ]);
     });
 
     isarTest('byte property', () {
@@ -73,10 +69,7 @@ void main() {
         ]),
       );
 
-      expect(
-        isar.byteModels.where().valueProperty().findAll(),
-        [5, 123, 0],
-      );
+      expect(isar.byteModels.where().valueProperty().findAll(), [5, 123, 0]);
     });
 
     isarTest('short property', () {
@@ -92,15 +85,17 @@ void main() {
         ]),
       );
 
-      expect(
-        isar.shortModels.where().valueProperty().findAll(),
-        [1234, 444, 321321],
-      );
+      expect(isar.shortModels.where().valueProperty().findAll(), [
+        1234,
+        444,
+        321321,
+      ]);
 
-      expect(
-        isar.shortModels.where().nValueProperty().findAll(),
-        [55, null, 1],
-      );
+      expect(isar.shortModels.where().nValueProperty().findAll(), [
+        55,
+        null,
+        1,
+      ]);
     });
 
     isarTest('int property', () {
@@ -116,15 +111,17 @@ void main() {
         ]),
       );
 
-      expect(
-        isar.intModels.where().valueProperty().findAll(),
-        [-5, -9999, 9999],
-      );
+      expect(isar.intModels.where().valueProperty().findAll(), [
+        -5,
+        -9999,
+        9999,
+      ]);
 
-      expect(
-        isar.intModels.where().nValueProperty().findAll(),
-        [-99999, 0, null],
-      );
+      expect(isar.intModels.where().nValueProperty().findAll(), [
+        -99999,
+        0,
+        null,
+      ]);
     });
 
     isarTest('float property', () {
@@ -141,18 +138,20 @@ void main() {
       );
 
       expect(
-        listEquals(
-          isar.floatModels.where().valueProperty().findAll(),
-          [-5.5, 70.7, double.nan],
-        ),
+        listEquals(isar.floatModels.where().valueProperty().findAll(), [
+          -5.5,
+          70.7,
+          double.nan,
+        ]),
         true,
       );
 
       expect(
-        listEquals(
-          isar.floatModels.where().nValueProperty().findAll(),
-          [double.infinity, null, double.negativeInfinity],
-        ),
+        listEquals(isar.floatModels.where().nValueProperty().findAll(), [
+          double.infinity,
+          null,
+          double.negativeInfinity,
+        ]),
         true,
       );
     });
@@ -171,17 +170,19 @@ void main() {
       );
 
       expect(
-        listEquals(
-          isar.doubleModels.where().valueProperty().findAll(),
-          [-5.5, 70.7, double.nan],
-        ),
+        listEquals(isar.doubleModels.where().valueProperty().findAll(), [
+          -5.5,
+          70.7,
+          double.nan,
+        ]),
         true,
       );
 
-      expect(
-        isar.doubleModels.where().nValueProperty().findAll(),
-        [double.infinity, null, double.negativeInfinity],
-      );
+      expect(isar.doubleModels.where().nValueProperty().findAll(), [
+        double.infinity,
+        null,
+        double.negativeInfinity,
+      ]);
     });
 
     isarTest('DateTime property', () {
@@ -195,15 +196,17 @@ void main() {
         ]),
       );
 
-      expect(
-        isar.dateTimeModels.where().valueProperty().findAll(),
-        [DateTime(2022), DateTime(2020), DateTime(1999)],
-      );
+      expect(isar.dateTimeModels.where().valueProperty().findAll(), [
+        DateTime(2022),
+        DateTime(2020),
+        DateTime(1999),
+      ]);
 
-      expect(
-        isar.dateTimeModels.where().nValueProperty().findAll(),
-        [null, DateTime(2010), null],
-      );
+      expect(isar.dateTimeModels.where().nValueProperty().findAll(), [
+        null,
+        DateTime(2010),
+        null,
+      ]);
     });
 
     isarTest('String property', () {
@@ -219,15 +222,17 @@ void main() {
         ]),
       );
 
-      expect(
-        isar.stringModels.where().valueProperty().findAll(),
-        ['Just', 'a', 'test'],
-      );
+      expect(isar.stringModels.where().valueProperty().findAll(), [
+        'Just',
+        'a',
+        'test',
+      ]);
 
-      expect(
-        isar.stringModels.where().nValueProperty().findAll(),
-        ['A', null, 'Z'],
-      );
+      expect(isar.stringModels.where().nValueProperty().findAll(), [
+        'A',
+        null,
+        'Z',
+      ]);
     });
 
     isarTest('Object property', () {
@@ -243,15 +248,17 @@ void main() {
         ]),
       );
 
-      expect(
-        isar.objectModels.where().valueProperty().findAll(),
-        [EmbeddedModel('E1'), EmbeddedModel('E2'), EmbeddedModel('E3')],
-      );
+      expect(isar.objectModels.where().valueProperty().findAll(), [
+        EmbeddedModel('E1'),
+        EmbeddedModel('E2'),
+        EmbeddedModel('E3'),
+      ]);
 
-      expect(
-        isar.objectModels.where().nValueProperty().findAll(),
-        [EmbeddedModel('XXX'), EmbeddedModel('YYY'), null],
-      );
+      expect(isar.objectModels.where().nValueProperty().findAll(), [
+        EmbeddedModel('XXX'),
+        EmbeddedModel('YYY'),
+        null,
+      ]);
     });
 
     isarTest('Enum property', () {
@@ -265,15 +272,17 @@ void main() {
         ]),
       );
 
-      expect(
-        isar.enumModels.where().valueProperty().findAll(),
-        [TestEnum.option2, TestEnum.option3, TestEnum.option2],
-      );
+      expect(isar.enumModels.where().valueProperty().findAll(), [
+        TestEnum.option2,
+        TestEnum.option3,
+        TestEnum.option2,
+      ]);
 
-      expect(
-        isar.enumModels.where().nValueProperty().findAll(),
-        [null, TestEnum.option3, null],
-      );
+      expect(isar.enumModels.where().nValueProperty().findAll(), [
+        null,
+        TestEnum.option3,
+        null,
+      ]);
     });
 
     isarTest('bool list property', () {
@@ -313,23 +322,17 @@ void main() {
         ]),
       );
 
-      expect(
-        isar.byteModels.where().listProperty().findAll(),
-        [
-          Uint8List.fromList([0, 10, 255]),
-          Uint8List.fromList([]),
-          Uint8List.fromList([3]),
-        ],
-      );
+      expect(isar.byteModels.where().listProperty().findAll(), [
+        Uint8List.fromList([0, 10, 255]),
+        Uint8List.fromList([]),
+        Uint8List.fromList([3]),
+      ]);
 
-      expect(
-        isar.byteModels.where().nListProperty().findAll(),
-        [
-          null,
-          Uint8List.fromList([1, 2, 3, 4, 5]),
-          null,
-        ],
-      );
+      expect(isar.byteModels.where().nListProperty().findAll(), [
+        null,
+        Uint8List.fromList([1, 2, 3, 4, 5]),
+        null,
+      ]);
     });
 
     isarTest('short list property', () {
@@ -398,26 +401,20 @@ void main() {
       );
 
       expect(
-        listEquals(
-          isar.floatModels.where().listProperty().findAll(),
-          [
-            [-5.5, 70.7, 999.999],
-            <double>[],
-            [0.0],
-          ],
-        ),
+        listEquals(isar.floatModels.where().listProperty().findAll(), [
+          [-5.5, 70.7, 999.999],
+          <double>[],
+          [0.0],
+        ]),
         true,
       );
 
       expect(
-        listEquals(
-          isar.floatModels.where().nListProperty().findAll(),
-          [
-            [1919191],
-            null,
-            [-1919191],
-          ],
-        ),
+        listEquals(isar.floatModels.where().nListProperty().findAll(), [
+          [1919191],
+          null,
+          [-1919191],
+        ]),
         true,
       );
     });
@@ -485,23 +482,17 @@ void main() {
         ]),
       );
 
-      expect(
-        isar.stringModels.where().listProperty().findAll(),
-        [
-          ['Just', 'a', 'test'],
-          <String>[],
-          [''],
-        ],
-      );
+      expect(isar.stringModels.where().listProperty().findAll(), [
+        ['Just', 'a', 'test'],
+        <String>[],
+        [''],
+      ]);
 
-      expect(
-        isar.stringModels.where().nListProperty().findAll(),
-        [
-          null,
-          null,
-          ['HELLO'],
-        ],
-      );
+      expect(isar.stringModels.where().nListProperty().findAll(), [
+        null,
+        null,
+        ['HELLO'],
+      ]);
     });
 
     isarTest('Object list property', () {
@@ -517,23 +508,17 @@ void main() {
         ]),
       );
 
-      expect(
-        isar.objectModels.where().listProperty().findAll(),
-        [
-          <EmbeddedModel>[],
-          [EmbeddedModel('abc'), EmbeddedModel('def')],
-          [EmbeddedModel()],
-        ],
-      );
+      expect(isar.objectModels.where().listProperty().findAll(), [
+        <EmbeddedModel>[],
+        [EmbeddedModel('abc'), EmbeddedModel('def')],
+        [EmbeddedModel()],
+      ]);
 
-      expect(
-        isar.objectModels.where().nListProperty().findAll(),
-        [
-          [EmbeddedModel('abc'), EmbeddedModel('def')],
-          null,
-          [EmbeddedModel()],
-        ],
-      );
+      expect(isar.objectModels.where().nListProperty().findAll(), [
+        [EmbeddedModel('abc'), EmbeddedModel('def')],
+        null,
+        [EmbeddedModel()],
+      ]);
     });
 
     isarTest('Enum list property', () {
@@ -547,23 +532,17 @@ void main() {
         ]),
       );
 
-      expect(
-        isar.enumModels.where().listProperty().findAll(),
-        [
-          [TestEnum.option2],
-          [TestEnum.option1],
-          <TestEnum>[],
-        ],
-      );
+      expect(isar.enumModels.where().listProperty().findAll(), [
+        [TestEnum.option2],
+        [TestEnum.option1],
+        <TestEnum>[],
+      ]);
 
-      expect(
-        isar.enumModels.where().nListProperty().findAll(),
-        [
-          [TestEnum.option2, TestEnum.option3],
-          null,
-          null,
-        ],
-      );
+      expect(isar.enumModels.where().nListProperty().findAll(), [
+        [TestEnum.option2, TestEnum.option3],
+        null,
+        null,
+      ]);
     });
   });
 }

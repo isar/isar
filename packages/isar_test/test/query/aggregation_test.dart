@@ -14,11 +14,7 @@ void main() {
         col = isar.intModels;
 
         isar.write(
-          (isar) => col.putAll([
-            IntModel(-5),
-            IntModel(0),
-            IntModel(10),
-          ]),
+          (isar) => col.putAll([IntModel(-5), IntModel(0), IntModel(10)]),
         );
       });
 
@@ -84,10 +80,7 @@ void main() {
       isarTest('average', () {
         expect(col.where().valueProperty().average(), 8.0 / 3);
         expect(col.where().valueEqualTo(2).valueProperty().average(), 2);
-        expect(
-          col.where().valueEqualTo(25).valueProperty().average(),
-          isNaN,
-        );
+        expect(col.where().valueEqualTo(25).valueProperty().average(), isNaN);
       });
     });
 
