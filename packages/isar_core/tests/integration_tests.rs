@@ -450,58 +450,11 @@ mod error_handling_tests {
     }
 }
 
-#[cfg(test)]
-mod performance_tests {
-    use super::*;
-    use std::time::Instant;
-
-    /// Basic performance test
-    #[test]
-    #[cfg(feature = "native")]
-    fn test_basic_performance() {
-        let temp_dir = create_test_dir();
-        let db_dir = temp_dir.path().to_str().unwrap();
-        
-        let schemas = vec![create_user_schema()];
-        let instance = NativeInstance::open_instance(
-            12,
-            "perf_db",
-            db_dir,
-            schemas,
-            1024,
-            None,
-            None,
-        ).expect("Failed to open database");
-        
-        const ITERATIONS: usize = 1000;
-        
-        // Benchmark transaction creation
-        let start = Instant::now();
-        for _ in 0..ITERATIONS {
-            let txn = instance.begin_txn(false).expect("Failed to begin transaction");
-            instance.abort_txn(txn);
-        }
-        let txn_duration = start.elapsed();
-        println!("Transaction creation for {} iterations took: {:?}", ITERATIONS, txn_duration);
-        
-        // Benchmark cursor creation
-        let start = Instant::now();
-        {
-            let txn = instance.begin_txn(false).expect("Failed to begin transaction");
-            for _ in 0..ITERATIONS {
-                let _cursor = instance.cursor(&txn, 0).expect("Failed to get cursor");
-                // cursor automatically dropped at end of scope
-            }
-            instance.abort_txn(txn);
-        }
-        let cursor_duration = start.elapsed();
-        println!("Cursor creation for {} iterations took: {:?}", ITERATIONS, cursor_duration);
-        
-        let closed = NativeInstance::close(instance, false);
-        assert!(closed, "Failed to close database");
-        
-        // Assert reasonable performance (adjust thresholds as needed)
-        assert!(txn_duration.as_millis() < 5000, "Transaction performance degraded: {:?}", txn_duration);
-        assert!(cursor_duration.as_millis() < 5000, "Cursor performance degraded: {:?}", cursor_duration);
-    }
-} 
+// Note: Performance testing is intentionally not included in integration tests.
+// Performance should be measured using:
+// 1. Dedicated benchmark suites (e.g., criterion.rs)
+// 2. Separate performance CI pipelines with consistent hardware
+// 3. Realistic workloads and statistical analysis
+// 4. Performance regression detection tools
+//
+// Integration tests should focus on correctness, not timing. 

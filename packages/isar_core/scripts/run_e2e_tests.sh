@@ -68,21 +68,12 @@ print_header "Testing Error Scenarios"
 cargo test --test integration_tests error_handling_tests
 print_success "Error handling tests completed"
 
-# 6. Run performance benchmarks (if criterion is available)
-print_header "Running Performance Benchmarks"
-if cargo bench --version >/dev/null 2>&1; then
-    cargo test --test integration_tests performance_tests -- --nocapture
-    print_success "Performance tests completed"
-else
-    print_warning "Criterion not available, skipping benchmarks"
-fi
-
-# 7. Run tests with different optimization levels
+# 6. Run tests with different optimization levels
 print_header "Testing with Release Mode"
 cargo test --release --test integration_tests
 print_success "Release mode tests completed"
 
-# 8. Memory leak detection (if valgrind is available)
+# 7. Memory leak detection (if valgrind is available)
 print_header "Memory Leak Detection"
 if command -v valgrind >/dev/null 2>&1; then
     print_warning "Running valgrind memory leak detection (this may take a while)..."
@@ -100,7 +91,7 @@ else
     print_warning "Valgrind not available, skipping memory leak detection"
 fi
 
-# 9. Generate test coverage report
+# 8. Generate test coverage report
 print_header "Generating Test Coverage Report"
 if command -v cargo-tarpaulin >/dev/null 2>&1; then
     cargo tarpaulin --out Html --output-dir target/coverage --test integration_tests
@@ -109,7 +100,7 @@ else
     print_warning "cargo-tarpaulin not available, skipping coverage report"
 fi
 
-# 10. Run fuzz tests (if cargo-fuzz is available)
+# 9. Run fuzz tests (if cargo-fuzz is available)
 print_header "Fuzz Testing"
 if command -v cargo-fuzz >/dev/null 2>&1; then
     if [ -d "fuzz" ]; then
@@ -133,7 +124,6 @@ echo "├── Native Backend: ✅"
 echo "├── SQLite Backend: ✅"
 echo "├── Cross-Platform: ✅"
 echo "├── Error Handling: ✅"
-echo "├── Performance: ✅"
 echo "└── Release Mode: ✅"
 echo ""
 echo "Optional Tests:"

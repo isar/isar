@@ -123,20 +123,6 @@ fn test_corruption_recovery() {
 }
 ```
 
-### 5. **Performance Tests** (`performance_tests`)
-
-Benchmarks critical operations:
-
-```rust
-#[test]
-fn benchmark_basic_operations() {
-    // Benchmarks core operations
-    // - Bulk insert performance
-    // - Query execution time
-    // - Performance regression detection
-}
-```
-
 ## 🚀 **Running E2E Tests**
 
 ### **Quick Start**
@@ -175,9 +161,6 @@ cargo test --test integration_tests cross_platform_tests
 
 # Error handling
 cargo test --test integration_tests error_handling_tests
-
-# Performance benchmarks
-cargo test --test integration_tests performance_tests -- --nocapture
 ```
 
 #### **4. Release Mode Testing**
@@ -209,6 +192,20 @@ cargo install cargo-tarpaulin
 # Generate coverage report
 cargo tarpaulin --out Html --output-dir target/coverage --test integration_tests
 open target/coverage/tarpaulin-report.html
+```
+
+#### **Performance Testing**
+
+Performance testing is handled separately from integration tests:
+
+```bash
+# Use criterion for benchmarks
+cargo install cargo-criterion
+cargo bench
+
+# Or use dedicated performance testing tools
+cargo install cargo-profiler
+cargo profiler callgrind --test integration_tests
 ```
 
 #### **Fuzz Testing**
