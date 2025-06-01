@@ -3,6 +3,14 @@ name = "isar-core"
 version = "0.0.0"
 authors = ["Simon Choi"]
 edition = "2024"
+license = "Apache-2.0"
+homepage = "https://isar.dev"
+repository = "https://github.com/isar/isar"
+description = "Native database for Flutter"
+
+[lib]
+name = "isar_core"
+crate-type = ["cdylib", "staticlib", "rlib"]
 
 [dependencies]
 itertools = "0.14"
@@ -19,6 +27,7 @@ paste = "1"
 parking_lot = "0.12"
 proc-macro2 = "1"
 arc-swap = "1.7"
+regex = "1"
 
 libsqlite3-sys = { git = "https://github.com/isar/rusqlite.git", branch = "wasm-2", features=["bundled"], optional = true  }
 mdbx-sys = { package = "mdbx-sys", path = "../mdbx_sys", optional = true  }
@@ -29,10 +38,9 @@ widestring = "1.0"
 [dev-dependencies]
 cfg-if = "1"
 float_next_after = "1"
-
-[dev-dependencies.serde_json]
-version = "*"
-features = ["float_roundtrip"]
+tempfile = "3.10"
+criterion = { version = "0.5", features = ["html_reports"] }
+serde_json = { version = "*", features = ["float_roundtrip"] }
 
 [features]
 default = ["native", "sqlite"]

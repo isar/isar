@@ -162,7 +162,7 @@ fn migrate_collection(
         return Err(IsarError::VersionError {});
     }
 
-    let (add_properties, drop_properties, add_indexes, drop_indexes) =
+    let (add_properties, drop_properties, _add_indexes, drop_indexes) =
         schema.find_changes(&existing_schema);
 
     for index in &drop_indexes {

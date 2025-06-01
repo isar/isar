@@ -59,7 +59,7 @@ impl<'a> IndexIterator<'a> {
             };
             let iterator = cursor.iter_between_ids(start, end, false, false).ok()?;
             Some((iterator, None))
-        } else if let Some(QueryIndex::Secondary(start, end)) = next_index {
+        } else if let Some(QueryIndex::Secondary(_start, _end)) = next_index {
             todo!()
         } else {
             None
