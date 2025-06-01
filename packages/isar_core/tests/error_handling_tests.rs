@@ -106,7 +106,7 @@ mod tests {
         
         let schemas = vec![create_user_schema()];
         let instance = NativeInstance::open_instance(
-            12,
+            20,
             "invalid_data_db",
             db_dir,
             schemas,
