@@ -62,13 +62,75 @@ jobs:
 
   test_core:
     name: Core Test
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - name: Prepare Build
         uses: ./.github/actions/prepare-build
       - name: Run Rust Unit tests
         run: cargo test
+        working-directory: packages/isar_core
+      - name: Run Integration Tests
+        run: cargo test --test integration_tests
+        working-directory: packages/isar_core
+      - name: Run Native Backend Tests
+        run: cargo test --features native --test integration_tests native_backend_tests
+        working-directory: packages/isar_core
+      - name: Run SQLite Backend Tests
+        run: cargo test --features sqlite --test integration_tests sqlite_backend_tests
+        working-directory: packages/isar_core
+      - name: Run Cross-Platform Tests
+        run: cargo test --test integration_tests cross_platform_tests
+        working-directory: packages/isar_core
+      - name: Run Error Handling Tests
+        run: cargo test --test integration_tests error_handling_tests
+        working-directory: packages/isar_core
+      - name: Run Performance Tests
+        run: cargo test --test integration_tests performance_tests -- --nocapture
+        working-directory: packages/isar_core
+      - name: Run Release Mode Tests
+        run: cargo test --release --test integration_tests
+        working-directory: packages/isar_core
+
+  test_core_e2e:
+    name: Core E2E Tests
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare Build
+        uses: ./.github/actions/prepare-build
+      - name: Install cargo-tarpaulin (for coverage)
+        run: cargo install cargo-tarpaulin
+        if: matrix.os == 'ubuntu-latest'
+      - name: Make test runner executable
+        run: chmod +x scripts/run_e2e_tests.sh
+        working-directory: packages/isar_core
+      - name: Run Comprehensive E2E Tests
+        run: ./scripts/run_e2e_tests.sh
+        working-directory: packages/isar_core
+      - name: Upload E2E Coverage (Ubuntu only)
+        uses: codecov/codecov-action@v3
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          files: packages/isar_core/target/coverage/tarpaulin-report.xml
+          flags: e2e
+      - name: Upload Test Artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: e2e-test-results-${{ matrix.os }}
+          path: |
+            packages/isar_core/target/coverage/
+            packages/isar_core/valgrind_output.log
+          retention-days: 7
 
   test:
     name: Dart Test
@@ -140,7 +202,8 @@ jobs:
       - name: Collect isar_core Coverage
         run: |
           cargo install cargo-tarpaulin
-          cargo tarpaulin -o Lcov --engine llvm
+          cargo tarpaulin -o Lcov --engine llvm --test integration_tests
+        working-directory: packages/isar_core
       - name: Upload isar_test Coverage
         uses: codecov/codecov-action@v3
         with:
@@ -149,7 +212,7 @@ jobs:
       - name: Upload isar_core Coverage
         uses: codecov/codecov-action@v3
         with:
-          files: lcov.info
+          files: packages/isar_core/lcov.info
           flags: core
 
   test_generator:
