@@ -25,7 +25,7 @@ mod tests {
         // Test database creation and opening
         let schemas = vec![create_user_schema(), create_post_schema()];
         let instance = NativeInstance::open_instance(
-            1,              // instance_id
+            native_backend_id(0),  // Use range-based helper
             "test_db",      // name
             db_dir,         // dir
             schemas,        // schemas
@@ -74,7 +74,7 @@ mod tests {
         // Open with initial schema
         let initial_schemas = vec![create_user_schema()];
         let instance = NativeInstance::open_instance(
-            2,
+            native_backend_id(1),  // Use range-based helper
             "migration_db",
             db_dir,
             initial_schemas,
@@ -98,7 +98,7 @@ mod tests {
         // Reopen with updated schema (add Post collection)
         let updated_schemas = vec![create_user_schema(), create_post_schema()];
         let instance = NativeInstance::open_instance(
-            3,
+            native_backend_id(2),  // Use range-based helper
             "migration_db",
             db_dir,
             updated_schemas,
@@ -129,7 +129,7 @@ mod tests {
         
         let schemas = vec![create_user_schema()];
         let instance = NativeInstance::open_instance(
-            4,
+            native_backend_id(3),  // Use range-based helper
             "concurrent_db",
             db_dir,
             schemas,
@@ -172,7 +172,7 @@ mod tests {
         
         let schemas = vec![create_user_schema()];
         let instance = NativeInstance::open_instance(
-            5,
+            native_backend_id(4),  // Use range-based helper
             "auto_increment_db",
             db_dir,
             schemas,

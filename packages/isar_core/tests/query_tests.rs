@@ -72,7 +72,7 @@ mod native_query_tests {
         
         let schemas = vec![create_query_test_schema()];
         let instance_result = NativeInstance::open_instance(
-            1000,
+            query_tests_id(0),
             "query_filter_db",
             db_dir,
             schemas,
@@ -133,7 +133,7 @@ mod native_query_tests {
         
         let schemas = vec![create_query_test_schema()];
         let instance_result = NativeInstance::open_instance(
-            1002,
+            query_tests_id(1),
             "sorting_db",
             db_dir,
             schemas,
@@ -178,7 +178,7 @@ mod native_query_tests {
         
         let schemas = vec![create_query_test_schema()];
         let instance_result = NativeInstance::open_instance(
-            1003,
+            query_tests_id(2),
             "aggregation_db",
             db_dir,
             schemas,
@@ -228,7 +228,7 @@ mod sqlite_query_tests {
         
         let schemas = vec![create_query_test_schema()];
         let instance = SQLiteInstance::open_instance(
-            2000,
+            query_tests_id(3),
             "sqlite_query_filter_db",
             db_dir,
             schemas,
@@ -277,7 +277,7 @@ mod cross_backend_query_tests {
         
         // Setup Native instance
         let native_instance = NativeInstance::open_instance(
-            3000,
+            query_tests_id(4),
             "native_consistency_db",
             db_dir,
             schemas.clone(),
@@ -291,7 +291,7 @@ mod cross_backend_query_tests {
         let sqlite_temp_dir = create_test_dir();
         let sqlite_db_dir = sqlite_temp_dir.path().to_str().unwrap();
         let sqlite_instance = SQLiteInstance::open_instance(
-            3001,
+            query_tests_id(5),
             "sqlite_consistency_db",
             sqlite_db_dir,
             schemas,

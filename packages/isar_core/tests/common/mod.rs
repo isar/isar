@@ -2,6 +2,39 @@ use tempfile::TempDir;
 use isar_core::core::schema::*;
 use isar_core::core::data_type::DataType;
 
+/// Helper functions to get unique instance ID ranges for different test files
+/// This prevents conflicts between test files while keeping IDs predictable
+
+/// Get instance IDs for native backend tests (1000-1099)
+pub fn native_backend_id(offset: u32) -> u32 {
+    1000 + offset
+}
+
+/// Get instance IDs for SQLite backend tests (1100-1199)  
+pub fn sqlite_backend_id(offset: u32) -> u32 {
+    1100 + offset
+}
+
+/// Get instance IDs for CRUD tests (1200-1299)
+pub fn crud_tests_id(offset: u32) -> u32 {
+    1200 + offset
+}
+
+/// Get instance IDs for query tests (1300-1399)
+pub fn query_tests_id(offset: u32) -> u32 {
+    1300 + offset
+}
+
+/// Get instance IDs for cross-platform tests (1400-1499)
+pub fn cross_platform_id(offset: u32) -> u32 {
+    1400 + offset
+}
+
+/// Get instance IDs for error handling tests (1500-1599)
+pub fn error_handling_id(offset: u32) -> u32 {
+    1500 + offset
+}
+
 /// Test helper to create a temporary directory for database files
 pub fn create_test_dir() -> TempDir {
     tempfile::tempdir().expect("Failed to create temp directory")

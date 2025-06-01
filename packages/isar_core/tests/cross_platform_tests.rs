@@ -29,7 +29,7 @@ mod tests {
         // Test native backend
         {
             let instance = NativeInstance::open_instance(
-                8,
+                cross_platform_id(0),
                 "compat_native",
                 db_dir,
                 schemas.clone(),
@@ -52,7 +52,7 @@ mod tests {
         // Test SQLite backend with same schema
         {
             let instance = SQLiteInstance::open_instance(
-                9,
+                cross_platform_id(1),
                 "compat_sqlite",
                 db_dir,
                 schemas,
@@ -84,7 +84,7 @@ mod tests {
         // Test with Native backend
         {
             let instance = NativeInstance::open_instance(
-                10,
+                cross_platform_id(2),
                 "schema_compat_native",
                 db_dir,
                 schemas.clone(),
@@ -103,7 +103,7 @@ mod tests {
             let sqlite_db_dir = sqlite_temp_dir.path().to_str().unwrap();
             
             let instance = SQLiteInstance::open_instance(
-                11,
+                cross_platform_id(3),
                 "schema_compat_sqlite",
                 sqlite_db_dir,
                 schemas,
@@ -128,7 +128,7 @@ mod tests {
         // Test auto-increment behavior in Native
         let native_ids = {
             let instance = NativeInstance::open_instance(
-                12,
+                cross_platform_id(4),
                 "auto_inc_native",
                 db_dir,
                 schemas.clone(),
@@ -153,7 +153,7 @@ mod tests {
             let sqlite_db_dir = sqlite_temp_dir.path().to_str().unwrap();
             
             let instance = SQLiteInstance::open_instance(
-                13,
+                cross_platform_id(5),
                 "auto_inc_sqlite",
                 sqlite_db_dir,
                 schemas,

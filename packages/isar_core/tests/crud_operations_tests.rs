@@ -64,7 +64,7 @@ mod native_crud_tests {
         
         let schemas = vec![create_comprehensive_schema()];
         let instance = NativeInstance::open_instance(
-            100,
+            crud_tests_id(0),
             "crud_test_db",
             db_dir,
             schemas,
@@ -173,7 +173,7 @@ mod native_crud_tests {
         
         let schemas = vec![create_user_schema()];
         let instance = NativeInstance::open_instance(
-            101,
+            crud_tests_id(1),
             "bulk_test_db",
             db_dir,
             schemas,
@@ -225,7 +225,7 @@ mod sqlite_crud_tests {
         
         let schemas = vec![create_comprehensive_schema()];
         let instance = SQLiteInstance::open_instance(
-            200,
+            crud_tests_id(2),
             "sqlite_crud_test_db",
             db_dir,
             schemas,

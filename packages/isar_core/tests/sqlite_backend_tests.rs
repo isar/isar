@@ -24,7 +24,7 @@ mod tests {
         
         let schemas = vec![create_user_schema()];
         let instance = SQLiteInstance::open_instance(
-            6,
+            sqlite_backend_id(0),
             "test_sqlite_db",
             db_dir,
             schemas,
@@ -60,7 +60,7 @@ mod tests {
         
         let schemas = vec![create_post_schema()];
         let instance = SQLiteInstance::open_instance(
-            7,
+            sqlite_backend_id(1),
             "sqlite_features_db",
             db_dir,
             schemas,

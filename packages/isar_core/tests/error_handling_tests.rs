@@ -27,7 +27,7 @@ mod tests {
         
         let schemas = vec![create_user_schema()];
         let instance = NativeInstance::open_instance(
-            10,
+            error_handling_id(0),
             "error_db",
             db_dir,
             schemas,
@@ -70,7 +70,7 @@ mod tests {
         
         let schemas = vec![create_user_schema()];
         let instance = NativeInstance::open_instance(
-            11,
+            error_handling_id(1),
             "isolation_db",
             db_dir,
             schemas,
@@ -106,7 +106,7 @@ mod tests {
         
         let schemas = vec![create_user_schema()];
         let instance = NativeInstance::open_instance(
-            20,
+            error_handling_id(2),
             "invalid_data_db",
             db_dir,
             schemas,
@@ -146,7 +146,7 @@ mod tests {
         
         // Test with very small max size
         let instance = NativeInstance::open_instance(
-            13,
+            error_handling_id(3),
             "constraints_db",
             db_dir,
             schemas,
@@ -177,7 +177,7 @@ mod tests {
         
         let schemas = vec![create_user_schema()];
         let instance = NativeInstance::open_instance(
-            14,
+            error_handling_id(4),
             "concurrent_errors_db",
             db_dir,
             schemas,
@@ -219,7 +219,7 @@ mod tests {
         
         let schemas = vec![create_user_schema()];
         let instance = SQLiteInstance::open_instance(
-            15,
+            error_handling_id(5),
             "sqlite_error_db",
             db_dir,
             schemas,
@@ -254,7 +254,7 @@ mod tests {
         // Create and use a database normally
         {
             let instance = NativeInstance::open_instance(
-                16,
+                error_handling_id(6),
                 "corruption_test_db",
                 db_dir,
                 schemas.clone(),
@@ -279,7 +279,7 @@ mod tests {
         // Try to reopen the same database (should work)
         {
             let instance = NativeInstance::open_instance(
-                17,
+                error_handling_id(7),
                 "corruption_test_db",
                 db_dir,
                 schemas,
