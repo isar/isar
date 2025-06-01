@@ -358,7 +358,7 @@ jobs:
       - name: Serve isar.wasm
         run: npx --yes serve --cors &
       - name: Install geckodriver
-        uses: browser-actions/setup-geckodriver@v1.3.0
+        uses: browser-actions/setup-geckodriver@latest
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Prepare geckodriver
