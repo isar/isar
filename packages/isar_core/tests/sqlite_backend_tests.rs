@@ -77,7 +77,7 @@ mod tests {
                 
                 // Test auto increment
                 let auto_id = instance.auto_increment(0);
-                assert!(auto_id >= 0, "Auto increment should be non-negative");
+                assert!(auto_id > 0, "Auto increment should be positive");
             } // cursor dropped here
             
             instance.commit_txn(txn).expect("Failed to commit transaction");

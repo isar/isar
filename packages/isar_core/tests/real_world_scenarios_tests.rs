@@ -424,7 +424,7 @@ mod native_real_world_tests {
             }
             drop(cursor);
             
-            assert!(apple_products.len() >= 2); // iPhone and MacBook
+            assert_eq!(apple_products.len(), 2); // Exactly iPhone and MacBook
             instance.abort_txn(txn);
         }
 
@@ -521,8 +521,7 @@ mod native_real_world_tests {
             // Sort by engagement ratio
             engagement_data.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
             
-            assert!(engagement_data.len() >= 3);
-            // Users with lower follower counts should have higher engagement ratios
+            assert_eq!(engagement_data.len(), 3); // Exact count based on test data (john_doe, alice_smith, tech_guru)
             
             instance.abort_txn(txn);
         }
@@ -705,7 +704,7 @@ mod native_real_world_tests {
                 .expect("Failed to calculate average salary");
             
             if let Some(IsarValue::Real(avg)) = avg_salary {
-                assert!(avg > 140000.0); // Should be average of Sarah and Mike's salaries
+                assert!((avg - 150000.0).abs() < 0.01); // Exact average of Sarah (180k) and Mike (120k)
             }
             
             instance.abort_txn(txn);
@@ -740,7 +739,7 @@ mod native_real_world_tests {
             }
             drop(cursor);
             
-            assert!(high_performers.len() >= 3);
+            assert_eq!(high_performers.len(), 3); // Exact count of high performers (John: 4.9, Sarah: 4.7, Mike: 4.6)
             assert_eq!(high_performers[0].0, "EMP001"); // CEO should have highest score
             
             instance.abort_txn(txn);
@@ -859,7 +858,7 @@ mod sqlite_real_world_tests {
             }
             drop(cursor);
             
-            assert!(public_users.len() >= 2); // Should find public users
+            assert_eq!(public_users.len(), 3); // Exact count of public users based on test data
             
             instance.abort_txn(txn);
         }
