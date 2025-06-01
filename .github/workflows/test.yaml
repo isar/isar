@@ -125,7 +125,11 @@ jobs:
 
   test:
     name: Dart Test
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [macos-14, macos-13, ubuntu-latest, windows-2025]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
     steps:
       - run: echo "$OSTYPE"
       - uses: actions/checkout@v4
