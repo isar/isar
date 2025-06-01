@@ -117,9 +117,10 @@ class PropertyInfo {
         : '$sNN${nullable && typeClassName != 'dynamic' ? '?' : ''}';
   }
 
-  String get dartType => type.isList
-      ? 'List<$scalarDartType>${nullable ? '?' : ''}'
-      : scalarDartType;
+  String get dartType =>
+      type.isList
+          ? 'List<$scalarDartType>${nullable ? '?' : ''}'
+          : scalarDartType;
 
   String enumMapName(ObjectInfo object) =>
       '_${object.dartName.decapitalize()}${dartName.capitalize()}';
