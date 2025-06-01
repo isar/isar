@@ -60,12 +60,13 @@ class _IsarImpl extends Isar {
       maxSizeMiB ??= 0;
     }
 
-    final allSchemas = <IsarGeneratedSchema>{
-      ...schemas,
-      ...schemas.expand(
-        (e) => e.embeddedSchemas ?? <IsarGeneratedSchema>[],
-      ),
-    }.toList();
+    final allSchemas =
+        <IsarGeneratedSchema>{
+          ...schemas,
+          ...schemas.expand(
+            (e) => e.embeddedSchemas ?? <IsarGeneratedSchema>[],
+          ),
+        }.toList();
     final schemaJson = jsonEncode(
       allSchemas.map((e) => e.schema.toJson()).toList(),
     );
@@ -73,9 +74,10 @@ class _IsarImpl extends Isar {
     final namePtr = IsarCore._toNativeString(name);
     final directoryPtr = IsarCore._toNativeString(directory);
     final schemaPtr = IsarCore._toNativeString(schemaJson);
-    final encryptionKeyPtr = encryptionKey != null
-        ? IsarCore._toNativeString(encryptionKey)
-        : nullptr;
+    final encryptionKeyPtr =
+        encryptionKey != null
+            ? IsarCore._toNativeString(encryptionKey)
+            : nullptr;
 
     final isarPtrPtr = IsarCore.ptrPtr.cast<Pointer<CIsarInstance>>();
     IsarCore.b
@@ -283,7 +285,7 @@ class _IsarImpl extends Isar {
   @tryInline
   T getTxn<T>(
     T Function(Pointer<CIsarInstance> isarPtr, Pointer<CIsarTxn> txnPtr)
-        callback,
+    callback,
   ) {
     final txnPtr = _txnPtr;
     if (txnPtr != null) {
@@ -298,7 +300,8 @@ class _IsarImpl extends Isar {
     (T, Pointer<CIsarTxn>?) Function(
       Pointer<CIsarInstance> isarPtr,
       Pointer<CIsarTxn> txnPtr,
-    ) callback, {
+    )
+    callback, {
     bool consume = false,
   }) {
     final txnPtr = _txnPtr;

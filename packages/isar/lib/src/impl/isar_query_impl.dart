@@ -6,10 +6,10 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
     required int ptrAddress,
     required Deserialize<T> deserialize,
     List<int>? properties,
-  })  : _instanceId = instanceId,
-        _ptrAddress = ptrAddress,
-        _properties = properties,
-        _deserialize = deserialize;
+  }) : _instanceId = instanceId,
+       _ptrAddress = ptrAddress,
+       _properties = properties,
+       _deserialize = deserialize;
 
   final int _instanceId;
   final List<int>? _properties;
@@ -182,9 +182,10 @@ class _IsarQueryImpl<T> extends IsarQuery<T> {
           return IsarCore.b.isar_value_get_integer(valuePtr) as R;
         } else if (DateTime.now() is R) {
           return DateTime.fromMillisecondsSinceEpoch(
-            IsarCore.b.isar_value_get_integer(valuePtr),
-            isUtc: true,
-          ).toLocal() as R;
+                IsarCore.b.isar_value_get_integer(valuePtr),
+                isUtc: true,
+              ).toLocal()
+              as R;
         } else if ('' is R) {
           final length = IsarCore.b.isar_value_get_string(
             valuePtr,

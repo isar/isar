@@ -2,11 +2,11 @@ part of '../isar.dart';
 
 /// @nodoc
 @protected
-typedef FilterRepeatModifier<OBJ, R, E>
-    = QueryBuilder<OBJ, R, QAfterFilterCondition> Function(
-  QueryBuilder<OBJ, R, QFilterCondition> q,
-  E element,
-);
+typedef FilterRepeatModifier<OBJ, R, E> =
+    QueryBuilder<OBJ, R, QAfterFilterCondition> Function(
+      QueryBuilder<OBJ, R, QFilterCondition> q,
+      E element,
+    );
 
 /// Logical operators for query builders.
 extension QueryFilterAndOr<OBJ, R> on QueryBuilder<OBJ, R, QFilterOperator> {
@@ -89,8 +89,8 @@ extension QueryFilterNotAnyAll<OBJ, R>
 
 /// @nodoc
 @protected
-typedef QueryOption<OBJ, S, RS> = QueryBuilder<OBJ, OBJ, RS> Function(
-    QueryBuilder<OBJ, OBJ, S> q);
+typedef QueryOption<OBJ, S, RS> =
+    QueryBuilder<OBJ, OBJ, RS> Function(QueryBuilder<OBJ, OBJ, S> q);
 
 /// Optional query modifier.
 extension QueryModifier<OBJ, S> on QueryBuilder<OBJ, OBJ, S> {
@@ -158,8 +158,8 @@ extension QueryNumAggregation<T extends num?> on IsarQuery<T?> {
 
   /// {@macro aggregation_average}
   Future<double> averageAsync() => aggregateAsync<double>(
-        Aggregation.average,
-      ).then((value) => value ?? double.nan);
+    Aggregation.average,
+  ).then((value) => value ?? double.nan);
 }
 
 /// Aggregation operations for date queries.

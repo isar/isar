@@ -2,10 +2,10 @@ part of '../isar.dart';
 
 /// @nodoc
 @protected
-typedef FilterQuery<OBJ> = QueryBuilder<OBJ, OBJ, QAfterFilterCondition>
-    Function(
-  QueryBuilder<OBJ, OBJ, QFilterCondition> q,
-);
+typedef FilterQuery<OBJ> =
+    QueryBuilder<OBJ, OBJ, QAfterFilterCondition> Function(
+      QueryBuilder<OBJ, OBJ, QFilterCondition> q,
+    );
 
 /// Query builders are used to create queries in a safe way.
 ///
@@ -15,7 +15,7 @@ class QueryBuilder<OBJ, R, S> {
   /// @nodoc
   @protected
   QueryBuilder(IsarCollection<dynamic, OBJ>? collection)
-      : _query = _QueryBuilder<OBJ>(collection: collection);
+    : _query = _QueryBuilder<OBJ>(collection: collection);
 
   @protected
   const QueryBuilder._(this._query);

@@ -9,10 +9,10 @@ part of '../isar.dart';
 class CompactCondition {
   /// Compaction will happen if all of the specified conditions are true.
   const CompactCondition({this.minFileSize, this.minBytes, this.minRatio})
-      : assert(
-          minFileSize != null || minBytes != null || minRatio != null,
-          'At least one condition needs to be specified.',
-        );
+    : assert(
+        minFileSize != null || minBytes != null || minRatio != null,
+        'At least one condition needs to be specified.',
+      );
 
   /// The minimum size in bytes of the database file to trigger compaction. It
   /// is highly  discouraged to trigger compaction solely on this condition.
