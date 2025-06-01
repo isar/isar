@@ -20,16 +20,14 @@ class IsarSchema {
       name: json['name'] as String,
       idName: json['idName'] as String?,
       embedded: json['embedded'] as bool,
-      properties:
-          (json['properties'] as List<dynamic>)
-              .map(
-                (e) => IsarPropertySchema.fromJson(e as Map<String, dynamic>),
-              )
-              .toList(),
-      indexes:
-          (json['indexes'] as List<dynamic>)
-              .map((e) => IsarIndexSchema.fromJson(e as Map<String, dynamic>))
-              .toList(),
+      properties: (json['properties'] as List<dynamic>)
+          .map(
+            (e) => IsarPropertySchema.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
+      indexes: (json['indexes'] as List<dynamic>)
+          .map((e) => IsarIndexSchema.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
