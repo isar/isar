@@ -251,15 +251,3 @@ impl NativeCollection {
 
 unsafe impl Send for NativeCollection {}
 unsafe impl Sync for NativeCollection {}
-
-impl DataType {
-    #[inline]
-    pub const fn static_size(&self) -> u8 {
-        match self {
-            DataType::Bool | DataType::Byte => 1,
-            DataType::Int | DataType::Float => 4,
-            DataType::Long | DataType::Double => 8,
-            _ => 3,
-        }
-    }
-}

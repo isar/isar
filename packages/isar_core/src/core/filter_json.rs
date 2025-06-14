@@ -1,6 +1,8 @@
 use super::fast_wild_match::fast_wild_match;
 use super::filter::ConditionType;
 use super::value::IsarValue;
+use intmap::IntMap;
+use regex::Regex;
 use serde_json::Value;
 
 pub fn matches_json(
@@ -8,6 +10,7 @@ pub fn matches_json(
     condition_type: ConditionType,
     path: &[String],
     values: &[Option<IsarValue>],
+    regex: Option<&Regex>,
     case_sensitive: bool,
 ) -> bool {
     let value = extract_value(&json, &path);
@@ -43,6 +46,8 @@ pub fn matches_json(
             ConditionType::StringMatches => {
                 string_matches(value, values.get(0).unwrap_or(&None), case_sensitive)
             }
+            ConditionType::StringRegex => string_regex(value, regex),
+            ConditionType::In => in_condition(value, values, case_sensitive),
         }
     } else {
         false
@@ -278,6 +283,45 @@ fn string_matches(value: &Value, cond_value: &Option<IsarValue>, case_sensitive:
         (Value::Array(value), cond_value) => value
             .iter()
             .any(|value| string_matches(value, cond_value, case_sensitive)),
+        _ => false,
+    }
+}
+
+fn string_regex(value: &Value, regex: Option<&Regex>) -> bool {
+    match (value, regex) {
+        (Value::String(value), Some(regex)) => regex.is_match(value),
+        (Value::Array(value), Some(regex)) => {
+            value.iter().any(|value| string_regex(value, Some(regex)))
+        }
+        _ => false,
+    }
+}
+
+fn in_condition(value: &Value, values: &[Option<IsarValue>], case_sensitive: bool) -> bool {
+    match value {
+        Value::Null => values.contains(&None),
+        Value::Bool(value) => values.contains(&Some(IsarValue::Bool(*value))),
+        Value::Number(value) => {
+            values.contains(&value.as_i64().map(|value| IsarValue::Integer(value)))
+        }
+        Value::String(value) => values.contains(&Some(IsarValue::String(value.to_lowercase()))),
+        Value::Array(value) => {
+            let mut hashes = IntMap::new();
+            for value in value {
+                let value = match value {
+                    Value::Null => None,
+                    Value::Bool(value) => Some(IsarValue::Bool(*value)),
+                    Value::Number(value) => value.as_i64().map(|value| IsarValue::Integer(value)),
+                    Value::String(value) => Some(IsarValue::String(value.to_lowercase())),
+                    _ => continue,
+                };
+                let hash = IsarValue::hash(&value, case_sensitive, 0);
+                hashes.insert(hash, ());
+            }
+            values
+                .iter()
+                .any(|value| hashes.contains_key(IsarValue::hash(value, case_sensitive, 0)))
+        }
         _ => false,
     }
 }

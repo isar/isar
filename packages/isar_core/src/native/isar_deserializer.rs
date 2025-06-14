@@ -1,8 +1,7 @@
 use super::{FALSE_BOOL, NULL_DOUBLE, NULL_FLOAT, NULL_INT, NULL_LONG, TRUE_BOOL};
-use crate::core::data_type::DataType;
+use crate::core::{data_type::DataType, value::IsarValue};
 use byteorder::{ByteOrder, LittleEndian};
 use std::str::from_utf8_unchecked;
-use xxhash_rust::xxh3::xxh3_64_with_seed;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub(crate) struct IsarDeserializer<'a> {
@@ -145,63 +144,80 @@ impl<'a> IsarDeserializer<'a> {
         Some((nested, length))
     }
 
+    pub fn read_value(&self, offset: u32, data_type: DataType) -> Option<IsarValue> {
+        match data_type {
+            DataType::Bool => {
+                if let Some(value) = self.read_bool(offset) {
+                    Some(IsarValue::Bool(value))
+                } else {
+                    None
+                }
+            }
+            DataType::Byte => {
+                if self.contains_offset(offset) {
+                    Some(IsarValue::Integer(self.read_byte(offset) as i64))
+                } else {
+                    None
+                }
+            }
+            DataType::Int => {
+                let value = self.read_int(offset);
+                if value == NULL_INT {
+                    None
+                } else {
+                    Some(IsarValue::Integer(value as i64))
+                }
+            }
+            DataType::Float => {
+                let value = self.read_float(offset);
+                if value.is_nan() {
+                    None
+                } else {
+                    Some(IsarValue::Real(value as f64))
+                }
+            }
+            DataType::Long => {
+                let value = self.read_long(offset);
+                if value == NULL_LONG {
+                    None
+                } else {
+                    Some(IsarValue::Integer(value))
+                }
+            }
+            DataType::Double => {
+                let value = self.read_double(offset);
+                if value.is_nan() {
+                    None
+                } else {
+                    Some(IsarValue::Real(value))
+                }
+            }
+            DataType::String => {
+                if let Some(str) = self.read_string(offset) {
+                    Some(IsarValue::String(str.to_string()))
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        }
+    }
+
     pub fn hash_property(
         &self,
         offset: u32,
         data_type: DataType,
         case_sensitive: bool,
-        mut seed: u64,
+        seed: u64,
     ) -> u64 {
-        match data_type {
-            DataType::Bool => {
-                if let Some(value) = self.read_bool(offset) {
-                    if value {
-                        xxh3_64_with_seed(&[1], seed)
-                    } else {
-                        xxh3_64_with_seed(&[0], seed)
-                    }
-                } else {
-                    xxh3_64_with_seed(&[255], seed)
-                }
-            }
-            DataType::Byte => xxh3_64_with_seed(&[self.read_byte(offset)], seed),
-            DataType::Int => xxh3_64_with_seed(&self.read_int(offset).to_le_bytes(), seed),
-            DataType::Float => {
-                let value = self.read_float(offset);
-                if value.is_nan() {
-                    xxh3_64_with_seed(&[1, 0, 128, 127], seed)
-                } else {
-                    xxh3_64_with_seed(&value.to_le_bytes(), seed)
-                }
-            }
-            DataType::Long => xxh3_64_with_seed(&self.read_long(offset).to_le_bytes(), seed),
-            DataType::Double => {
-                let value = self.read_double(offset);
-                if value.is_nan() {
-                    xxh3_64_with_seed(&[0, 0, 0, 0, 0, 0, 248, 127], seed)
-                } else {
-                    xxh3_64_with_seed(&value.to_le_bytes(), seed)
-                }
-            }
-            DataType::String => {
-                if let Some(str) = self.read_string(offset) {
-                    seed = xxh3_64_with_seed(&[1], seed);
-                    if case_sensitive {
-                        xxh3_64_with_seed(str.as_bytes(), seed)
-                    } else {
-                        xxh3_64_with_seed(str.to_lowercase().as_bytes(), seed)
-                    }
-                } else {
-                    xxh3_64_with_seed(&[0], seed)
-                }
-            }
-            _ => seed,
-        }
+        IsarValue::hash(&self.read_value(offset, data_type), case_sensitive, seed)
     }
 }
 
 #[cfg(test)]
 mod test {
+    use xxhash_rust::xxh3::xxh3_64_with_seed;
+
     use super::*;
 
     macro_rules! concat {
@@ -523,15 +539,15 @@ mod test {
         let deserializer = IsarDeserializer::from_bytes(&bytes);
         assert_eq!(
             deserializer.hash_property(2, DataType::Byte, false, 0),
-            xxh3_64_with_seed(&[5], 0)
+            xxh3_64_with_seed(&(5 as i64).to_le_bytes(), 0)
         );
         assert_eq!(
             deserializer.hash_property(1, DataType::Byte, false, 2),
-            xxh3_64_with_seed(&[1], 2)
+            xxh3_64_with_seed(&(1 as i64).to_le_bytes(), 2)
         );
         assert_eq!(
             deserializer.hash_property(3, DataType::Byte, true, 9),
-            xxh3_64_with_seed(&[0], 9)
+            xxh3_64_with_seed(&[255], 9)
         );
     }
 
@@ -541,15 +557,15 @@ mod test {
         let deserializer = IsarDeserializer::from_bytes(&bytes);
         assert_eq!(
             deserializer.hash_property(0, DataType::Int, false, 0),
-            xxh3_64_with_seed(&i32::MIN.to_le_bytes(), 0)
+            xxh3_64_with_seed(&[255], 0)
         );
         assert_eq!(
             deserializer.hash_property(4, DataType::Int, false, 2),
-            xxh3_64_with_seed(&i32::MAX.to_le_bytes(), 2)
+            xxh3_64_with_seed(&(i32::MAX as i64).to_le_bytes(), 2)
         );
         assert_eq!(
             deserializer.hash_property(8, DataType::Int, true, 9),
-            xxh3_64_with_seed(&i32::MIN.to_le_bytes(), 9)
+            xxh3_64_with_seed(&[255], 9)
         );
     }
 
@@ -563,15 +579,15 @@ mod test {
         let deserializer = IsarDeserializer::from_bytes(&bytes);
         assert_eq!(
             deserializer.hash_property(0, DataType::Float, false, 0),
-            xxh3_64_with_seed(&[1, 0, 128, 127], 0)
+            xxh3_64_with_seed(&[255], 0)
         );
         assert_eq!(
             deserializer.hash_property(4, DataType::Float, false, 2),
-            xxh3_64_with_seed(&f32::INFINITY.to_le_bytes(), 2)
+            xxh3_64_with_seed(&f64::INFINITY.to_le_bytes(), 2)
         );
         assert_eq!(
             deserializer.hash_property(8, DataType::Float, true, 9),
-            xxh3_64_with_seed(&[1, 0, 128, 127], 9)
+            xxh3_64_with_seed(&[255], 9)
         );
     }
 
@@ -581,7 +597,7 @@ mod test {
         let deserializer = IsarDeserializer::from_bytes(&bytes);
         assert_eq!(
             deserializer.hash_property(0, DataType::Long, false, 0),
-            xxh3_64_with_seed(&i64::MIN.to_le_bytes(), 0)
+            xxh3_64_with_seed(&[255], 0)
         );
         assert_eq!(
             deserializer.hash_property(8, DataType::Long, false, 2),
@@ -589,7 +605,7 @@ mod test {
         );
         assert_eq!(
             deserializer.hash_property(16, DataType::Long, true, 9),
-            xxh3_64_with_seed(&i64::MIN.to_le_bytes(), 9)
+            xxh3_64_with_seed(&[255], 9)
         );
     }
 
@@ -603,7 +619,7 @@ mod test {
         let deserializer = IsarDeserializer::from_bytes(&bytes);
         assert_eq!(
             deserializer.hash_property(0, DataType::Double, false, 0),
-            xxh3_64_with_seed(&[0, 0, 0, 0, 0, 0, 248, 127], 0)
+            xxh3_64_with_seed(&[255], 0)
         );
         assert_eq!(
             deserializer.hash_property(8, DataType::Double, false, 2),
@@ -611,7 +627,7 @@ mod test {
         );
         assert_eq!(
             deserializer.hash_property(16, DataType::Double, true, 9),
-            xxh3_64_with_seed(&[0, 0, 0, 0, 0, 0, 248, 127], 9)
+            xxh3_64_with_seed(&[255], 9)
         );
     }
 
@@ -621,15 +637,15 @@ mod test {
         let deserializer = IsarDeserializer::from_bytes(&bytes);
         assert_eq!(
             deserializer.hash_property(0, DataType::String, true, 0),
-            xxh3_64_with_seed(b"aBc", xxh3_64_with_seed(&[1], 0))
+            xxh3_64_with_seed(b"aBc", 0)
         );
         assert_eq!(
             deserializer.hash_property(0, DataType::String, false, 66),
-            xxh3_64_with_seed(b"abc", xxh3_64_with_seed(&[1], 66))
+            xxh3_64_with_seed(b"abc", 66)
         );
         assert_eq!(
             deserializer.hash_property(3, DataType::String, false, 2),
-            xxh3_64_with_seed(&[0], 2)
+            xxh3_64_with_seed(&[255], 2)
         );
     }
 
@@ -639,11 +655,7 @@ mod test {
         let deserializer = IsarDeserializer::from_bytes(&bytes);
         assert_eq!(
             deserializer.hash_property(0, DataType::ByteList, false, 212),
-            212
-        );
-        assert_eq!(
-            deserializer.hash_property(3, DataType::ByteList, false, 121),
-            121
+            xxh3_64_with_seed(&[255], 212)
         );
     }
 }

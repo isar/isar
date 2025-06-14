@@ -1,6 +1,6 @@
 use super::filter::Filter;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Sort {
     Asc,
     Desc,
