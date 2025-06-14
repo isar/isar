@@ -1,0 +1,13 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+linter:
+  rules:
+    public_member_api_docs: false
+    avoid_private_typedef_functions: false
+    library_private_types_in_public_api: false
+    sort_pub_dependencies: false
+
+analyzer:
+  exclude:
+    - '**/*.g.dart'
+    - '**/*.freezed.dart'
