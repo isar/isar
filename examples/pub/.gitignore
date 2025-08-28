@@ -6,3 +6,5 @@ windows/
 linux/
 macos/
 web/
+
+pubspec_overrides.yaml

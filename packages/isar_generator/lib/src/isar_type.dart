@@ -27,9 +27,9 @@ extension DartTypeX on DartType {
       }
     } else if (isDartCoreString) {
       return IsarType.string;
-    } else if (_isDateTime(element2!)) {
+    } else if (_isDateTime(element!)) {
       return IsarType.dateTime;
-    } else if (element2!.embeddedAnnotation != null) {
+    } else if (element!.embeddedAnnotation != null) {
       return IsarType.object;
     }
 

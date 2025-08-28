@@ -26,11 +26,11 @@ extension ClassElementX on ClassElement {
     final ignoreFields =
         collectionAnnotation?.ignore ?? embeddedAnnotation!.ignore;
     return [
-      ...accessors.mapNotNull((e) => e.variable),
+      ...accessors.mapNotNull((e) => e.variable2),
       if (collectionAnnotation?.inheritance ?? embeddedAnnotation!.inheritance)
         for (InterfaceType supertype in allSupertypes) ...[
           if (!supertype.isDartCoreObject)
-            ...supertype.accessors.mapNotNull((e) => e.variable)
+            ...supertype.accessors.mapNotNull((e) => e.variable2)
         ]
     ]
         .where(
@@ -50,9 +50,9 @@ extension ClassElementX on ClassElement {
 }
 
 extension PropertyElementX on PropertyInducingElement {
-  bool get isLink => type.element2!.name == 'IsarLink';
+  bool get isLink => type.element!.name == 'IsarLink';
 
-  bool get isLinks => type.element2!.name == 'IsarLinks';
+  bool get isLinks => type.element!.name == 'IsarLinks';
 
   Enumerated? get enumeratedAnnotation {
     final ann = _enumeratedChecker.firstAnnotationOfExact(nonSynthetic);

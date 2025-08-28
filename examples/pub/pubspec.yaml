@@ -14,7 +14,7 @@ dependencies:
   clickup_fading_scroll:
     git:
       url: https://github.com/clickup/clickup_fading_scroll.git
-  copy_with_extension: ^4.0.3
+  copy_with_extension: ^6.0.0
   dio: ^4.0.0
   flutter:
     sdk: flutter
@@ -39,7 +39,7 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.0.0
-  copy_with_extension_gen: ^4.0.3
+  copy_with_extension_gen: ^6.0.0
   isar_generator: *isar_version
   json_serializable: ^6.3.0
   flutter_lints: ^2.0.1
