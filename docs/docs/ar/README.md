@@ -3,7 +3,7 @@ home: true
 title: الصفحة الرئيسية
 heroImage: /isar.svg
 actions:
-  - text: هيا بنا نبدأ!
+  - text: هيــا بنا نبدأ!
     link: /tutorials/quickstart.html
     type: primary
 features:
