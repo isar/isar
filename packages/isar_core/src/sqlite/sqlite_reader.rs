@@ -107,7 +107,7 @@ impl<'a> IsarReader for SQLiteReader<'a> {
         }
     }
 
-    fn read_blob(&self, index: u32) -> Option<Cow<[u8]>> {
+    fn read_blob(&self, index: u32) -> Option<Cow<'_, [u8]>> {
         if self.is_null(index) {
             None
         } else {

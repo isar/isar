@@ -1,6 +1,5 @@
 #![allow(clippy::missing_safety_doc)]
 #![allow(unsafe_op_in_unsafe_fn)]
-#![feature(vec_into_raw_parts)]
 
 use core::slice;
 use isar_core::core::cursor::IsarCursor;

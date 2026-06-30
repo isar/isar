@@ -68,7 +68,7 @@ impl SQLite3 {
         Ok(())
     }
 
-    pub fn prepare(&self, sql: &str) -> Result<SQLiteStatement> {
+    pub fn prepare(&self, sql: &str) -> Result<SQLiteStatement<'_>> {
         let mut stmt: *mut ffi::sqlite3_stmt = ptr::null_mut();
         let mut c_tail = ptr::null();
         unsafe {
