@@ -59,8 +59,18 @@ impl<'a> IndexIterator<'a> {
             };
             let iterator = cursor.iter_between_ids(start, end, false, false).ok()?;
             Some((iterator, None))
-        } else if let Some(QueryIndex::Secondary(start, end)) = next_index {
-            todo!()
+        } else if let Some(QueryIndex::Secondary(index_index, start, end)) = next_index {
+            let index = collection.indexes.get(index_index as usize)?;
+            let cursor = txn.get_cursor(index.db).ok()?;
+            let primary_cursor = if let Some(primary_cursor) = primary_cursor {
+                primary_cursor
+            } else {
+                collection.get_cursor(txn).ok()?
+            };
+            let iterator = cursor
+                .iter_between(start.finish().0, end.finish().0, !index.unique, false)
+                .ok()?;
+            Some((iterator, Some(primary_cursor)))
         } else {
             None
         }

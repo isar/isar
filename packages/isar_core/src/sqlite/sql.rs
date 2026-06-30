@@ -136,7 +136,7 @@ pub(crate) fn offset_limit_sql(offset: Option<u32>, limit: Option<u32>) -> Strin
     sql
 }
 
-pub(crate) fn data_type_sql(property: &PropertySchema) -> Cow<str> {
+pub(crate) fn data_type_sql(property: &PropertySchema) -> Cow<'_, str> {
     match property.data_type {
         DataType::Bool => Cow::Borrowed("bool"),
         DataType::Byte => Cow::Borrowed("u8"),

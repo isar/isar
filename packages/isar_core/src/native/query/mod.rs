@@ -23,7 +23,8 @@ mod unsorted_query_iterator;
 #[derive(Clone)]
 pub(crate) enum QueryIndex {
     Primary(i64, i64),
-    Secondary(IndexKey, IndexKey),
+    #[allow(dead_code)]
+    Secondary(u16, IndexKey, IndexKey),
 }
 
 #[derive(Clone)]

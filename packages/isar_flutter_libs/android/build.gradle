@@ -31,4 +31,6 @@ android {
     defaultConfig {
         minSdkVersion 23
     }
+    namespace "com.donhoots.isar_flutter_libs"
+
 }

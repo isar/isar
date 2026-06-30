@@ -13,7 +13,7 @@ pub(crate) struct NativeIndex {
     pub properties: Vec<NativeProperty>,
     pub unique: bool,
     pub hash: bool,
-    db: Db,
+    pub(crate) db: Db,
 }
 
 impl NativeIndex {

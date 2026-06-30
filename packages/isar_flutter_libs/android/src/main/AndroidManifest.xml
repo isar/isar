@@ -1,4 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="dev.isar.isar_flutter_libs">
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="false"
+        android:label="isar_flutter_libs"
+        android:icon="@mipmap/ic_launcher"
+        tools:node="replace">
+    </application>
+
 </manifest>
